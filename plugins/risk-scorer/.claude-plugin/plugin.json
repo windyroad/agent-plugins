@@ -1,0 +1,5 @@
+{
+  "name": "risk-scorer",
+  "version": "0.1.0",
+  "description": "Pipeline risk scoring, commit/push/release gates for Claude Code"
+}

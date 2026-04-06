@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      { "hooks": [{ "type": "command", "command": "hooks/architect-detect.sh" }] }
+    ],
+    "PreToolUse": [
+      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "hooks/architect-enforce-edit.sh" }] },
+      { "matcher": "ExitPlanMode", "hooks": [{ "type": "command", "command": "hooks/architect-plan-enforce.sh" }] }
+    ],
+    "PostToolUse": [
+      { "matcher": "Agent", "hooks": [{ "type": "command", "command": "hooks/architect-mark-reviewed.sh" }] },
+      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "hooks/architect-refresh-hash.sh" }] }
+    ],
+    "Stop": [
+      { "hooks": [{ "type": "command", "command": "hooks/architect-reset-marker.sh" }] }
+    ]
+  }
+}

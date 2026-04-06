@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      { "hooks": [{ "type": "command", "command": "hooks/tdd-inject.sh" }] }
+    ],
+    "PreToolUse": [
+      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "hooks/tdd-enforce-edit.sh" }] }
+    ],
+    "PostToolUse": [
+      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "hooks/tdd-post-write.sh" }] }
+    ],
+    "Stop": [
+      { "hooks": [{ "type": "command", "command": "hooks/tdd-reset.sh" }] }
+    ]
+  }
+}

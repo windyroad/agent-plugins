@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      { "hooks": [{ "type": "command", "command": "hooks/jtbd-eval.sh" }] }
+    ],
+    "PreToolUse": [
+      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "hooks/jtbd-enforce-edit.sh" }] }
+    ],
+    "PostToolUse": [
+      { "matcher": "Agent", "hooks": [{ "type": "command", "command": "hooks/jtbd-mark-reviewed.sh" }] }
+    ],
+    "Stop": [
+      { "hooks": [{ "type": "command", "command": "hooks/jtbd-reset-marker.sh" }] }
+    ]
+  }
+}

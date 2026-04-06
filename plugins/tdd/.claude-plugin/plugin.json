@@ -1,0 +1,5 @@
+{
+  "name": "tdd",
+  "version": "0.1.0",
+  "description": "TDD state machine enforcement (IDLE/RED/GREEN/BLOCKED) for Claude Code"
+}

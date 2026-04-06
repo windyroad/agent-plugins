@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      { "hooks": [{ "type": "command", "command": "hooks/voice-tone-eval.sh" }] }
+    ],
+    "PreToolUse": [
+      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "hooks/voice-tone-enforce-edit.sh" }] }
+    ],
+    "PostToolUse": [
+      { "matcher": "Agent", "hooks": [{ "type": "command", "command": "hooks/voice-tone-mark-reviewed.sh" }] }
+    ],
+    "Stop": [
+      { "hooks": [{ "type": "command", "command": "hooks/voice-tone-reset-marker.sh" }] }
+    ]
+  }
+}

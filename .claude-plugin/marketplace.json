@@ -1,0 +1,58 @@
+{
+  "marketplace": {
+    "name": "windyroad-plugins",
+    "description": "Shared Claude Code plugins for Windy Road projects"
+  },
+  "plugins": [
+    {
+      "name": "architect",
+      "description": "Architecture decision enforcement",
+      "source": "./plugins/architect"
+    },
+    {
+      "name": "risk-scorer",
+      "description": "Pipeline risk scoring, commit/push/release gates",
+      "source": "./plugins/risk-scorer"
+    },
+    {
+      "name": "voice-tone",
+      "description": "Voice and tone enforcement",
+      "source": "./plugins/voice-tone"
+    },
+    {
+      "name": "style-guide",
+      "description": "Style guide enforcement",
+      "source": "./plugins/style-guide"
+    },
+    {
+      "name": "jtbd",
+      "description": "Jobs-to-be-done enforcement",
+      "source": "./plugins/jtbd"
+    },
+    {
+      "name": "problem",
+      "description": "ITIL-aligned problem management",
+      "source": "./plugins/problem"
+    },
+    {
+      "name": "retrospective",
+      "description": "Session retrospective reminders and plan review",
+      "source": "./plugins/retrospective"
+    },
+    {
+      "name": "c4",
+      "description": "C4 architecture diagram generation and validation",
+      "source": "./plugins/c4"
+    },
+    {
+      "name": "wardley",
+      "description": "Wardley Map generation",
+      "source": "./plugins/wardley"
+    },
+    {
+      "name": "tdd",
+      "description": "TDD state machine enforcement (IDLE/RED/GREEN/BLOCKED)",
+      "source": "./plugins/tdd"
+    }
+  ]
+}
