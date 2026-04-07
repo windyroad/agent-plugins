@@ -27,8 +27,8 @@ else
   if ls src/**/*.tsx src/**/*.jsx src/**/*.css src/**/*.html 2>/dev/null | head -1 | grep -q .; then
     cat <<'HOOK_OUTPUT'
 NOTE: This project has UI files but no docs/STYLE-GUIDE.md.
-If the user's task involves styling or UI components, consider asking whether
-they'd like to create a style guide by delegating to wr-style-guide:agent.
+If the user's task involves editing CSS or UI components, the edit will be blocked
+until a style guide exists. Run /wr-style-guide:create to generate one.
 HOOK_OUTPUT
   fi
 fi

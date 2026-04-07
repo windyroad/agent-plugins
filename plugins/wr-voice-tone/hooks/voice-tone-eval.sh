@@ -27,8 +27,8 @@ else
   if ls src/**/*.tsx src/**/*.jsx src/**/*.html 2>/dev/null | head -1 | grep -q .; then
     cat <<'HOOK_OUTPUT'
 NOTE: This project has UI files but no docs/VOICE-AND-TONE.md.
-If the user's task involves user-facing copy, consider asking whether they'd like
-to create a voice and tone guide by delegating to wr-voice-tone:agent.
+If the user's task involves editing user-facing copy, the edit will be blocked
+until a voice and tone guide exists. Run /wr-voice-tone:create to generate one.
 HOOK_OUTPUT
   fi
 fi

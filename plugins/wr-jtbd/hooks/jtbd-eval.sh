@@ -28,8 +28,8 @@ else
   if ls src/**/*.tsx src/**/*.jsx src/**/*.html 2>/dev/null | head -1 | grep -q .; then
     cat <<'HOOK_OUTPUT'
 NOTE: This project has UI files but no docs/JOBS_TO_BE_DONE.md.
-If the user's task involves user-facing features, consider asking whether
-they'd like to create a JTBD document by delegating to wr-jtbd:agent.
+If the user's task involves editing UI files, the edit will be blocked
+until a JTBD document exists. Run /wr-jtbd:create to generate one.
 HOOK_OUTPUT
   fi
 fi
