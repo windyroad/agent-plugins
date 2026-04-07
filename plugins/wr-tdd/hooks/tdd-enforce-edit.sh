@@ -6,11 +6,6 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/lib/tdd-gate.sh"
 
-# Skip if no test script configured
-if ! tdd_has_test_script; then
-  exit 0
-fi
-
 INPUT=$(cat)
 
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty') || true
@@ -20,17 +15,22 @@ if [ -z "$FILE_PATH" ]; then
   exit 0
 fi
 
-if [ -z "$SESSION_ID" ]; then
-  # Fail-closed: cannot check state without session ID
-  tdd_deny_json "BLOCKED: Could not determine session ID. TDD gate is fail-closed."
+# Classify first, then check test script (only impl files need gating)
+FILE_TYPE=$(tdd_classify_file "$FILE_PATH")
+if [ "$FILE_TYPE" != "impl" ]; then
   exit 0
 fi
 
-# Classify the file
-FILE_TYPE=$(tdd_classify_file "$FILE_PATH")
+# If no test script configured, block and direct to create skill
+if ! tdd_has_test_script; then
+  BASENAME=$(basename "$FILE_PATH")
+  tdd_deny_json "BLOCKED: Cannot edit '${BASENAME}' because no test script is configured in package.json. Run /wr-tdd:create to set up a test framework for this project. TDD enforcement requires a working test runner before implementation code can be written."
+  exit 0
+fi
 
-# Test and exempt files are always allowed
-if [ "$FILE_TYPE" != "impl" ]; then
+if [ -z "$SESSION_ID" ]; then
+  # Fail-closed: cannot check state without session ID
+  tdd_deny_json "BLOCKED: Could not determine session ID. TDD gate is fail-closed."
   exit 0
 fi
 

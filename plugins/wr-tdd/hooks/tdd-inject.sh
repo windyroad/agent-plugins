@@ -6,13 +6,24 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/lib/tdd-gate.sh"
 
-# Skip if no test script configured
-if ! tdd_has_test_script; then
-  exit 0
-fi
-
 INPUT=$(cat)
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty') || true
+
+# If no test script configured, inject setup instructions
+if ! tdd_has_test_script; then
+  cat <<'HOOK_OUTPUT'
+INSTRUCTION: MANDATORY TDD ENFORCEMENT. YOU MUST FOLLOW THIS.
+
+This project has NO test script configured in package.json. Implementation file
+edits (.ts, .tsx, .js, .jsx) are BLOCKED until testing is set up.
+
+If the user's task involves writing or editing implementation code, you MUST
+run /wr-tdd:create first to configure a test framework for this project.
+
+Test files, config files, docs, and styles are still writable.
+HOOK_OUTPUT
+  exit 0
+fi
 
 STATE="IDLE"
 if [ -n "$SESSION_ID" ]; then
