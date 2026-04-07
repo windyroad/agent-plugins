@@ -16,7 +16,7 @@ if [ -z "$SESSION_ID" ]; then
 fi
 
 case "$SUBAGENT" in
-  *voice-and-tone-lead*)
+  *voice-and-tone-lead*|*wr-voice-tone*)
     VERDICT_FILE="/tmp/voice-tone-verdict"
     VERDICT=""
     if [ -f "$VERDICT_FILE" ]; then

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Voice & Tone - UserPromptSubmit hook
 # Detects VOICE-AND-TONE.md in the project and injects delegation instruction.
-# Mirrors: a11y-team-eval.sh
+# If the file doesn't exist, instructs Claude to create it via the agent.
 
 if [ -f "docs/VOICE-AND-TONE.md" ]; then
   cat <<'HOOK_OUTPUT'
@@ -13,8 +13,8 @@ before editing any user-facing copy in HTML, JSX, template, or component files.
 This is proactive. Do not wait for the user to ask.
 
 REQUIRED ACTIONS:
-1. Use the Agent tool to delegate to voice-and-tone-lead
-   (subagent_type: "voice-and-tone-lead")
+1. Use the Agent tool to delegate to wr-voice-tone:agent
+   (subagent_type: "wr-voice-tone:agent")
 2. The voice-and-tone-lead will review proposed copy against docs/VOICE-AND-TONE.md
 3. Do NOT write or edit copy without voice-and-tone-lead review FIRST
 4. Do NOT skip this step even if you think you can handle it yourself
@@ -22,4 +22,13 @@ REQUIRED ACTIONS:
 SCOPE: User-facing files (.html, .jsx, .tsx, .vue, .svelte, .ejs, .hbs).
 Does NOT apply to: .css files, .ts/.js backend files, config files.
 HOOK_OUTPUT
+else
+  # Check if this is a web project (has UI files)
+  if ls src/**/*.tsx src/**/*.jsx src/**/*.html 2>/dev/null | head -1 | grep -q .; then
+    cat <<'HOOK_OUTPUT'
+NOTE: This project has UI files but no docs/VOICE-AND-TONE.md.
+If the user's task involves user-facing copy, consider asking whether they'd like
+to create a voice and tone guide by delegating to wr-voice-tone:agent.
+HOOK_OUTPUT
+  fi
 fi

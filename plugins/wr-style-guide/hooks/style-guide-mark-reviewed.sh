@@ -16,7 +16,7 @@ if [ -z "$SESSION_ID" ]; then
 fi
 
 case "$SUBAGENT" in
-  *style-guide-lead*)
+  *style-guide-lead*|*wr-style-guide*)
     VERDICT_FILE="/tmp/style-guide-verdict"
     VERDICT=""
     if [ -f "$VERDICT_FILE" ]; then

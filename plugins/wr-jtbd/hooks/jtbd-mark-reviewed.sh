@@ -16,7 +16,7 @@ if [ -z "$SESSION_ID" ]; then
 fi
 
 case "$SUBAGENT" in
-  *jtbd-lead*)
+  *jtbd-lead*|*wr-jtbd*)
     # Check for edit review verdict
     VERDICT_FILE="/tmp/jtbd-verdict"
     VERDICT=""

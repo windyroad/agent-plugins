@@ -52,5 +52,5 @@ if check_review_gate "$SESSION_ID" "jtbd" "docs/jtbd"; then
 fi
 
 BASENAME=$(basename "$FILE_PATH")
-review_gate_deny "BLOCKED: Cannot edit '${BASENAME}' without JTBD review. You MUST first delegate to jtbd-lead using the Agent tool (subagent_type: 'jtbd-lead'). ${REVIEW_GATE_REASON}"
+review_gate_deny "BLOCKED: Cannot edit '${BASENAME}' without JTBD review. You MUST first delegate to wr-jtbd:agent using the Agent tool (subagent_type: 'wr-jtbd:agent'). ${REVIEW_GATE_REASON}"
 exit 0

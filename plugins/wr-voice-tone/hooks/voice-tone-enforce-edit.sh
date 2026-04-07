@@ -35,6 +35,11 @@ if [ -z "$FILE_PATH" ]; then
   exit 0
 fi
 
+# Skip if no policy file exists (plugin loaded but not yet configured)
+if [ ! -f "docs/VOICE-AND-TONE.md" ]; then
+  exit 0
+fi
+
 # Gate copy-bearing files
 case "$FILE_PATH" in
   *.html|*.jsx|*.tsx|*.vue|*.svelte|*.ejs|*.hbs) ;;
@@ -47,5 +52,5 @@ if check_review_gate "$SESSION_ID" "voice-tone" "docs/VOICE-AND-TONE.md"; then
 fi
 
 BASENAME=$(basename "$FILE_PATH")
-review_gate_deny "BLOCKED: Cannot edit '${BASENAME}' without voice & tone review. You MUST first delegate to voice-and-tone-lead using the Agent tool (subagent_type: 'voice-and-tone-lead'). ${REVIEW_GATE_REASON}"
+review_gate_deny "BLOCKED: Cannot edit '${BASENAME}' without voice & tone review. You MUST first delegate to wr-voice-tone:agent using the Agent tool (subagent_type: 'wr-voice-tone:agent'). ${REVIEW_GATE_REASON}"
 exit 0

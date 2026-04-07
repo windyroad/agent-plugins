@@ -20,8 +20,8 @@ if [ -z "$FILE_PATH" ]; then
   exit 0
 fi
 
-# Only check if the architect agent exists
-if [ ! -f ".claude/agents/architect.md" ]; then
+# Only gate if the project has architecture decisions
+if [ ! -d "docs/decisions" ]; then
   exit 0
 fi
 
@@ -65,7 +65,7 @@ cat <<EOF
   "hookSpecificOutput": {
     "hookEventName": "PreToolUse",
     "permissionDecision": "deny",
-    "permissionDecisionReason": "BLOCKED: Cannot edit '${BASENAME}' without architecture review. You MUST first delegate to architect using the Agent tool (subagent_type: 'architect'). The architect will review against existing decisions in docs/decisions/ and flag if a new decision should be documented. After the review completes, this file will be unblocked automatically."
+    "permissionDecisionReason": "BLOCKED: Cannot edit '${BASENAME}' without architecture review. You MUST first delegate to wr-architect:agent using the Agent tool (subagent_type: 'wr-architect:agent'). The architect will review against existing decisions in docs/decisions/ and flag if a new decision should be documented. After the review completes, this file will be unblocked automatically."
   }
 }
 EOF

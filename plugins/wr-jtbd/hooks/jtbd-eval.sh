@@ -1,6 +1,7 @@
 #!/bin/bash
 # JTBD - UserPromptSubmit hook
 # Detects JOBS_TO_BE_DONE.md in the project and injects delegation instruction.
+# If the file doesn't exist, instructs Claude to create it via the agent.
 
 if [ -f "docs/JOBS_TO_BE_DONE.md" ]; then
   cat <<'HOOK_OUTPUT'
@@ -12,8 +13,8 @@ before editing any user-facing UI file (.html, .jsx, .tsx, .vue, .svelte, .ejs, 
 This is proactive. Do not wait for the user to ask.
 
 REQUIRED ACTIONS:
-1. Use the Agent tool to delegate to jtbd-lead
-   (subagent_type: "jtbd-lead")
+1. Use the Agent tool to delegate to wr-jtbd:agent
+   (subagent_type: "wr-jtbd:agent")
 2. The jtbd-lead will review proposed changes against docs/JOBS_TO_BE_DONE.md
    and PRODUCT_DISCOVERY.md persona definitions
 3. Do NOT write or edit UI code without jtbd-lead review FIRST
@@ -22,4 +23,13 @@ REQUIRED ACTIONS:
 SCOPE: User-facing files (.html, .jsx, .tsx, .vue, .svelte, .ejs, .hbs).
 Does NOT apply to: .css files, .ts/.js backend files, config files.
 HOOK_OUTPUT
+else
+  # Check if this is a web project (has UI files)
+  if ls src/**/*.tsx src/**/*.jsx src/**/*.html 2>/dev/null | head -1 | grep -q .; then
+    cat <<'HOOK_OUTPUT'
+NOTE: This project has UI files but no docs/JOBS_TO_BE_DONE.md.
+If the user's task involves user-facing features, consider asking whether
+they'd like to create a JTBD document by delegating to wr-jtbd:agent.
+HOOK_OUTPUT
+  fi
 fi
