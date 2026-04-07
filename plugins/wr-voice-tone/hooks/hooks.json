@@ -1,16 +1,16 @@
 {
   "hooks": {
     "UserPromptSubmit": [
-      { "hooks": [{ "type": "command", "command": "hooks/voice-tone-eval.sh" }] }
+      { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/voice-tone-eval.sh" }] }
     ],
     "PreToolUse": [
-      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "hooks/voice-tone-enforce-edit.sh" }] }
+      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/voice-tone-enforce-edit.sh" }] }
     ],
     "PostToolUse": [
-      { "matcher": "Agent", "hooks": [{ "type": "command", "command": "hooks/voice-tone-mark-reviewed.sh" }] }
+      { "matcher": "Agent", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/voice-tone-mark-reviewed.sh" }] }
     ],
     "Stop": [
-      { "hooks": [{ "type": "command", "command": "hooks/voice-tone-reset-marker.sh" }] }
+      { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/voice-tone-reset-marker.sh" }] }
     ]
   }
 }
