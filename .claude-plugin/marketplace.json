@@ -1,7 +1,9 @@
 {
-  "marketplace": {
-    "name": "windyroad-plugins",
-    "description": "Shared Claude Code plugins for Windy Road projects"
+  "name": "windyroad-plugins",
+  "description": "Shared Claude Code plugins for Windy Road projects",
+  "owner": {
+    "name": "Windy Road",
+    "email": "tom@windyroad.com.au"
   },
   "plugins": [
     {
