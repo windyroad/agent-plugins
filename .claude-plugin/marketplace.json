@@ -7,54 +7,54 @@
   },
   "plugins": [
     {
-      "name": "architect",
+      "name": "wr-architect",
       "description": "Architecture decision enforcement",
-      "source": "./plugins/architect"
+      "source": "./plugins/wr-architect"
     },
     {
-      "name": "risk-scorer",
+      "name": "wr-risk-scorer",
       "description": "Pipeline risk scoring, commit/push/release gates",
-      "source": "./plugins/risk-scorer"
+      "source": "./plugins/wr-risk-scorer"
     },
     {
-      "name": "voice-tone",
+      "name": "wr-voice-tone",
       "description": "Voice and tone enforcement",
-      "source": "./plugins/voice-tone"
+      "source": "./plugins/wr-voice-tone"
     },
     {
-      "name": "style-guide",
+      "name": "wr-style-guide",
       "description": "Style guide enforcement",
-      "source": "./plugins/style-guide"
+      "source": "./plugins/wr-style-guide"
     },
     {
-      "name": "jtbd",
+      "name": "wr-jtbd",
       "description": "Jobs-to-be-done enforcement",
-      "source": "./plugins/jtbd"
+      "source": "./plugins/wr-jtbd"
     },
     {
-      "name": "problem",
+      "name": "wr-problem",
       "description": "ITIL-aligned problem management",
-      "source": "./plugins/problem"
+      "source": "./plugins/wr-problem"
     },
     {
-      "name": "retrospective",
+      "name": "wr-retrospective",
       "description": "Session retrospective reminders and plan review",
-      "source": "./plugins/retrospective"
+      "source": "./plugins/wr-retrospective"
     },
     {
-      "name": "c4",
+      "name": "wr-c4",
       "description": "C4 architecture diagram generation and validation",
-      "source": "./plugins/c4"
+      "source": "./plugins/wr-c4"
     },
     {
-      "name": "wardley",
+      "name": "wr-wardley",
       "description": "Wardley Map generation",
-      "source": "./plugins/wardley"
+      "source": "./plugins/wr-wardley"
     },
     {
-      "name": "tdd",
+      "name": "wr-tdd",
       "description": "TDD state machine enforcement (IDLE/RED/GREEN/BLOCKED)",
-      "source": "./plugins/tdd"
+      "source": "./plugins/wr-tdd"
     }
   ]
 }

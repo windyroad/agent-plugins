@@ -1,0 +1,5 @@
+{
+  "name": "wr-c4",
+  "version": "0.1.0",
+  "description": "C4 architecture diagram generation and validation for Claude Code"
+}

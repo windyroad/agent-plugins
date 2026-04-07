@@ -1,0 +1,7 @@
+{
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [{ "type": "command", "command": "bin/check-deps.sh wr-problem wr-risk-scorer" }] }
+    ]
+  }
+}

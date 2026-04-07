@@ -1,0 +1,13 @@
+{
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [{ "type": "command", "command": "bin/check-deps.sh wr-retrospective wr-problem wr-risk-scorer" }] }
+    ],
+    "PreToolUse": [
+      { "matcher": "ExitPlanMode", "hooks": [{ "type": "command", "command": "hooks/review-plan-enforce.sh" }] }
+    ],
+    "Stop": [
+      { "hooks": [{ "type": "command", "command": "hooks/retrospective-reminder.sh" }] }
+    ]
+  }
+}
