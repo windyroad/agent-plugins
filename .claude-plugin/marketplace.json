@@ -1,8 +1,8 @@
 {
   "name": "windyroad-plugins",
-  "description": "Shared Claude Code plugins for Windy Road projects",
+  "description": "Claude Code plugins for architecture governance, risk management, TDD, and delivery quality by Windy Road Technology",
   "owner": {
-    "name": "Windy Road",
+    "name": "Windy Road Technology",
     "email": "tom@windyroad.com.au"
   },
   "plugins": [
