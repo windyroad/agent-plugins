@@ -36,6 +36,8 @@ export function run(cmd, label) {
 }
 
 export function checkPrerequisites() {
+  if (_dryRun) return;
+
   try {
     execSync("claude --version", { stdio: "pipe" });
   } catch {
