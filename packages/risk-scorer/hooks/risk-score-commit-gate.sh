@@ -57,7 +57,7 @@ fi
 
 # Gate check: existence, TTL, drift, threshold
 if ! check_risk_gate "$SESSION_ID" "commit"; then
-    risk_gate_deny "Commit blocked: ${RISK_GATE_REASON} To proceed: (1) stage files with git add, (2) delegate to risk-scorer-pipeline (subagent_type: 'risk-scorer-pipeline') to assess cumulative pipeline risk. If the commit is risk-neutral or risk-reducing, the scorer will create a bypass marker."
+    risk_gate_deny "Commit blocked: ${RISK_GATE_REASON} To proceed: (1) stage files with git add, (2) delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') to assess cumulative pipeline risk. If the commit is risk-neutral or risk-reducing, the scorer will create a bypass marker."
     exit 0
 fi
 

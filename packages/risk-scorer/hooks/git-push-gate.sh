@@ -47,7 +47,7 @@ if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm run push:watch(\s|$)'; then
         fi
         PUSH_SCORE_FILE="${RDIR}/push"
         if [ ! -f "$PUSH_SCORE_FILE" ]; then
-            risk_gate_deny "Push blocked: No push risk score found. Delegate to risk-scorer-pipeline (subagent_type: 'risk-scorer-pipeline') to assess cumulative pipeline risk."
+            risk_gate_deny "Push blocked: No push risk score found. Delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') to assess cumulative pipeline risk."
             exit 0
         fi
         PUSH_NOW=$(date +%s)
@@ -65,7 +65,7 @@ if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm run push:watch(\s|$)'; then
         fi
         PUSH_DENIED=$(python3 -c "print('yes' if float('${PUSH_SCORE}') >= 5 else 'no')" 2>/dev/null || echo "no")
         if [ "$PUSH_DENIED" = "yes" ]; then
-            risk_gate_deny "Push blocked: Push risk score ${PUSH_SCORE}/25 (Medium or above). To proceed: (1) release first via \`npm run release:watch\`, (2) split the push, or (3) add risk-reducing measures. If risk-neutral or risk-reducing, delegate to risk-scorer-pipeline (subagent_type: 'risk-scorer-pipeline') — it will create a bypass marker."
+            risk_gate_deny "Push blocked: Push risk score ${PUSH_SCORE}/25 (Medium or above). To proceed: (1) release first via \`npm run release:watch\`, (2) split the push, or (3) add risk-reducing measures. If risk-neutral or risk-reducing, delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') — it will create a bypass marker."
             exit 0
         fi
     fi
@@ -101,7 +101,7 @@ if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm run release:watch(\s|$)'; the
             exit 0
         fi
         if ! check_risk_gate "$SESSION_ID" "release"; then
-            risk_gate_deny "Release blocked: ${RISK_GATE_REASON}. To proceed: (1) split the release, (2) add risk-reducing measures, or (3) for a LIVE INCIDENT, delegate to risk-scorer-pipeline (subagent_type: 'risk-scorer-pipeline') with incident context for an incident bypass."
+            risk_gate_deny "Release blocked: ${RISK_GATE_REASON}. To proceed: (1) split the release, (2) add risk-reducing measures, or (3) for a LIVE INCIDENT, delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') with incident context for an incident bypass."
             exit 0
         fi
     fi
