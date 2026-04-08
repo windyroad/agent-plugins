@@ -13,6 +13,7 @@
     "@changesets/cli": "^2.29.0"
   },
   "scripts": {
-    "release": "changeset publish"
+    "release": "changeset publish",
+    "push:watch": "git push && gh run watch --exit-status"
   }
 }

@@ -4,7 +4,7 @@
 # risk-scorer agents. This is the ONLY place score files are written —
 # agents output structured markers, this hook writes the files.
 #
-# Handles: risk-scorer-pipeline, risk-scorer-plan, risk-scorer-wip, risk-scorer-policy
+# Handles: wr-risk-scorer:pipeline, wr-risk-scorer:plan, wr-risk-scorer:wip, wr-risk-scorer:policy
 # Replaces: risk-policy-mark-reviewed.sh (which had fragile P001 backup parsing)
 
 set -euo pipefail
@@ -34,7 +34,7 @@ RDIR=$(_risk_dir "$SESSION_ID")
 # ---------------------------------------------------------------------------
 # Pipeline scorer: write commit/push/release scores + bypass markers
 # ---------------------------------------------------------------------------
-if echo "$SUBAGENT" | grep -qE 'risk-scorer-pipeline'; then
+if echo "$SUBAGENT" | grep -qE 'risk-scorer.pipeline'; then
   # Parse RISK_SCORES: commit=N push=N release=N
   SCORES_LINE=$(echo "$AGENT_OUTPUT" | grep -E '^RISK_SCORES:' | tail -1) || true
   if [ -n "$SCORES_LINE" ]; then
@@ -79,7 +79,7 @@ fi
 # ---------------------------------------------------------------------------
 # Plan scorer: write plan-reviewed marker on PASS
 # ---------------------------------------------------------------------------
-if echo "$SUBAGENT" | grep -qE 'risk-scorer-plan'; then
+if echo "$SUBAGENT" | grep -qE 'risk-scorer.plan'; then
   VERDICT_LINE=$(echo "$AGENT_OUTPUT" | grep -E '^RISK_VERDICT:' | tail -1) || true
   VERDICT=$(echo "$VERDICT_LINE" | sed 's/^RISK_VERDICT:[[:space:]]*//' | tr -d '[:space:]')
   case "$VERDICT" in
@@ -98,7 +98,7 @@ fi
 # ---------------------------------------------------------------------------
 # WIP scorer: write wip-reviewed marker (unblocks next edit)
 # ---------------------------------------------------------------------------
-if echo "$SUBAGENT" | grep -qE 'risk-scorer-wip'; then
+if echo "$SUBAGENT" | grep -qE 'risk-scorer.wip'; then
   # WIP assessment was done — unblock next edit regardless of CONTINUE/PAUSE
   # (PAUSE is advisory guidance to the user, not a hard gate)
   touch "${RDIR}/wip-reviewed"
@@ -107,7 +107,7 @@ fi
 # ---------------------------------------------------------------------------
 # Policy scorer: write policy-reviewed marker on PASS
 # ---------------------------------------------------------------------------
-if echo "$SUBAGENT" | grep -qE 'risk-scorer-policy'; then
+if echo "$SUBAGENT" | grep -qE 'risk-scorer.policy'; then
   VERDICT_LINE=$(echo "$AGENT_OUTPUT" | grep -E '^RISK_VERDICT:' | tail -1) || true
   VERDICT=$(echo "$VERDICT_LINE" | sed 's/^RISK_VERDICT:[[:space:]]*//' | tr -d '[:space:]')
   case "$VERDICT" in
