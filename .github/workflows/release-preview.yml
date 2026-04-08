@@ -1,44 +1,71 @@
 name: Release Preview
 
+# Triggered after the Release workflow completes. The Release workflow uses
+# GITHUB_TOKEN to create/update the "Version Packages" PR, which doesn't
+# trigger pull_request events. Using workflow_run sidesteps this limitation.
 on:
-  pull_request:
-    branches: [main]
-    types: [opened, synchronize]
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
 
 permissions:
   contents: read
   pull-requests: write
   id-token: write
+  actions: read
 
 jobs:
   preview:
     name: Publish Preview
-    # Only run on the changesets "Version Packages" PR
-    if: github.head_ref == 'changeset-release/main'
+    # Only run when the Release workflow succeeded and a Version Packages PR exists
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
+      - name: Find Version Packages PR
+        id: find-pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pulls } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:changeset-release/main`,
+              base: 'main',
+              state: 'open',
+            });
+            if (pulls.length === 0) {
+              core.info('No Version Packages PR found — skipping preview');
+              return;
+            }
+            core.setOutput('pr_number', pulls[0].number);
+            core.setOutput('found', 'true');
+
       - uses: actions/checkout@v4
+        if: steps.find-pr.outputs.found == 'true'
+        with:
+          ref: changeset-release/main
 
       - uses: actions/setup-node@v4
+        if: steps.find-pr.outputs.found == 'true'
         with:
           node-version: 20
           cache: npm
           registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
+        if: steps.find-pr.outputs.found == 'true'
         run: npm ci || npm install
 
       - name: Publish preview packages
+        if: steps.find-pr.outputs.found == 'true'
         id: preview
         run: |
-          # Publish all packages with a preview tag
           PUBLISHED=""
           for pkg in packages/*/package.json; do
             dir=$(dirname "$pkg")
             name=$(node -e "console.log(JSON.parse(require('fs').readFileSync('$pkg','utf8')).name)")
             version=$(node -e "console.log(JSON.parse(require('fs').readFileSync('$pkg','utf8')).version)")
 
-            # Skip shared (no package.json with name) and already-published versions
             [ -z "$name" ] && continue
 
             echo "Publishing $name@$version with tag preview..."
@@ -53,16 +80,18 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Smoke test preview install
+        if: steps.find-pr.outputs.found == 'true'
         run: |
-          # Verify the meta-installer preview is installable
           npm info @windyroad/agent-plugins@preview version 2>/dev/null && \
             echo "Preview package available on npm" || \
             echo "Preview package not yet available (first publish)"
 
       - name: Comment on PR
+        if: steps.find-pr.outputs.found == 'true'
         uses: actions/github-script@v7
         with:
           script: |
+            const prNumber = ${{ steps.find-pr.outputs.pr_number }};
             const published = `${{ steps.preview.outputs.published }}`;
             const body = [
               '## Release Preview',
@@ -88,11 +117,10 @@ jobs:
               '*Merge this PR to publish these versions to `latest`.*',
             ].join('\n');
 
-            // Find existing preview comment to update
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.issue.number,
+              issue_number: prNumber,
             });
             const existing = comments.find(c =>
               c.user.type === 'Bot' && c.body.includes('## Release Preview')
@@ -109,7 +137,7 @@ jobs:
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                issue_number: context.issue.number,
+                issue_number: prNumber,
                 body,
               });
             }
