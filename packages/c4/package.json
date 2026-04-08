@@ -1,0 +1,28 @@
+{
+  "name": "@windyroad/c4",
+  "version": "0.1.0",
+  "description": "C4 architecture diagram generation and validation",
+  "bin": {
+    "windyroad-c4": "./bin/install.mjs"
+  },
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/windyroad/agent-plugins.git",
+    "directory": "packages/c4"
+  },
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "ai-agent",
+    "ai-coding"
+  ],
+  "files": [
+    "bin/",
+    "agents/",
+    "hooks/",
+    "skills/",
+    ".claude-plugin/"
+  ]
+}

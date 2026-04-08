@@ -1,0 +1,26 @@
+{
+  "name": "@windyroad/agent-plugins",
+  "version": "0.1.0",
+  "description": "One-command installer for all Windy Road AI agent plugins and skills",
+  "bin": {
+    "windyroad-agent-plugins": "./bin/install.mjs"
+  },
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/windyroad/agent-plugins.git",
+    "directory": "packages/agent-plugins"
+  },
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "ai-agent",
+    "ai-coding",
+    "codex",
+    "copilot"
+  ],
+  "files": [
+    "bin/"
+  ]
+}

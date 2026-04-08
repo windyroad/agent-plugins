@@ -1,0 +1,28 @@
+{
+  "name": "@windyroad/retrospective",
+  "version": "0.1.0",
+  "description": "Session retrospectives that update briefings and create problem tickets",
+  "bin": {
+    "windyroad-retrospective": "./bin/install.mjs"
+  },
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/windyroad/agent-plugins.git",
+    "directory": "packages/retrospective"
+  },
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "ai-agent",
+    "ai-coding"
+  ],
+  "files": [
+    "bin/",
+    "agents/",
+    "hooks/",
+    "skills/",
+    ".claude-plugin/"
+  ]
+}

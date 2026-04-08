@@ -1,0 +1,28 @@
+{
+  "name": "@windyroad/style-guide",
+  "version": "0.1.0",
+  "description": "Style guide enforcement for CSS and UI components",
+  "bin": {
+    "windyroad-style-guide": "./bin/install.mjs"
+  },
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/windyroad/agent-plugins.git",
+    "directory": "packages/style-guide"
+  },
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "ai-agent",
+    "ai-coding"
+  ],
+  "files": [
+    "bin/",
+    "agents/",
+    "hooks/",
+    "skills/",
+    ".claude-plugin/"
+  ]
+}

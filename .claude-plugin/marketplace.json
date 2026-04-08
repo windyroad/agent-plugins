@@ -1,6 +1,6 @@
 {
   "name": "windyroad",
-  "description": "Claude Code plugins for architecture governance, risk management, TDD, and delivery quality by Windy Road Technology",
+  "description": "AI agent plugins for architecture governance, risk management, TDD, and delivery quality by Windy Road Technology",
   "owner": {
     "name": "Windy Road Technology",
     "email": "tom@windyroad.com.au"
@@ -9,52 +9,52 @@
     {
       "name": "wr-architect",
       "description": "Architecture decision enforcement",
-      "source": "./plugins/wr-architect"
+      "source": "./packages/architect"
     },
     {
       "name": "wr-risk-scorer",
       "description": "Pipeline risk scoring, commit/push/release gates",
-      "source": "./plugins/wr-risk-scorer"
+      "source": "./packages/risk-scorer"
     },
     {
       "name": "wr-voice-tone",
       "description": "Voice and tone enforcement",
-      "source": "./plugins/wr-voice-tone"
+      "source": "./packages/voice-tone"
     },
     {
       "name": "wr-style-guide",
       "description": "Style guide enforcement",
-      "source": "./plugins/wr-style-guide"
+      "source": "./packages/style-guide"
     },
     {
       "name": "wr-jtbd",
       "description": "Jobs-to-be-done enforcement",
-      "source": "./plugins/wr-jtbd"
+      "source": "./packages/jtbd"
     },
     {
       "name": "wr-problem",
       "description": "ITIL-aligned problem management",
-      "source": "./plugins/wr-problem"
+      "source": "./packages/problem"
     },
     {
       "name": "wr-retrospective",
       "description": "Session retrospective reminders and plan review",
-      "source": "./plugins/wr-retrospective"
+      "source": "./packages/retrospective"
     },
     {
       "name": "wr-c4",
       "description": "C4 architecture diagram generation and validation",
-      "source": "./plugins/wr-c4"
+      "source": "./packages/c4"
     },
     {
       "name": "wr-wardley",
       "description": "Wardley Map generation",
-      "source": "./plugins/wr-wardley"
+      "source": "./packages/wardley"
     },
     {
       "name": "wr-tdd",
       "description": "TDD state machine enforcement (IDLE/RED/GREEN/BLOCKED)",
-      "source": "./plugins/wr-tdd"
+      "source": "./packages/tdd"
     }
   ]
 }

@@ -1,0 +1,28 @@
+{
+  "name": "@windyroad/risk-scorer",
+  "version": "0.1.0",
+  "description": "Pipeline risk scoring, commit/push gates, and secret leak detection",
+  "bin": {
+    "windyroad-risk-scorer": "./bin/install.mjs"
+  },
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/windyroad/agent-plugins.git",
+    "directory": "packages/risk-scorer"
+  },
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "ai-agent",
+    "ai-coding"
+  ],
+  "files": [
+    "bin/",
+    "agents/",
+    "hooks/",
+    "skills/",
+    ".claude-plugin/"
+  ]
+}

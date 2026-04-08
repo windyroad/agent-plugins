@@ -1,0 +1,28 @@
+{
+  "name": "@windyroad/jtbd",
+  "version": "0.1.0",
+  "description": "Jobs-to-be-done enforcement for UI changes",
+  "bin": {
+    "windyroad-jtbd": "./bin/install.mjs"
+  },
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/windyroad/agent-plugins.git",
+    "directory": "packages/jtbd"
+  },
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "ai-agent",
+    "ai-coding"
+  ],
+  "files": [
+    "bin/",
+    "agents/",
+    "hooks/",
+    "skills/",
+    ".claude-plugin/"
+  ]
+}

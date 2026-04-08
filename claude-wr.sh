@@ -7,17 +7,17 @@
 #          ./claude-wr.sh -p "list skills"
 #          ./claude-wr.sh --model sonnet
 
-PLUGIN_DIR="$(cd "$(dirname "$0")/plugins" && pwd)"
+PKG_DIR="$(cd "$(dirname "$0")/packages" && pwd)"
 
 exec claude \
-  --plugin-dir "$PLUGIN_DIR/wr-architect" \
-  --plugin-dir "$PLUGIN_DIR/wr-risk-scorer" \
-  --plugin-dir "$PLUGIN_DIR/wr-voice-tone" \
-  --plugin-dir "$PLUGIN_DIR/wr-style-guide" \
-  --plugin-dir "$PLUGIN_DIR/wr-jtbd" \
-  --plugin-dir "$PLUGIN_DIR/wr-tdd" \
-  --plugin-dir "$PLUGIN_DIR/wr-retrospective" \
-  --plugin-dir "$PLUGIN_DIR/wr-problem" \
-  --plugin-dir "$PLUGIN_DIR/wr-c4" \
-  --plugin-dir "$PLUGIN_DIR/wr-wardley" \
+  --plugin-dir "$PKG_DIR/architect" \
+  --plugin-dir "$PKG_DIR/risk-scorer" \
+  --plugin-dir "$PKG_DIR/voice-tone" \
+  --plugin-dir "$PKG_DIR/style-guide" \
+  --plugin-dir "$PKG_DIR/jtbd" \
+  --plugin-dir "$PKG_DIR/tdd" \
+  --plugin-dir "$PKG_DIR/retrospective" \
+  --plugin-dir "$PKG_DIR/problem" \
+  --plugin-dir "$PKG_DIR/c4" \
+  --plugin-dir "$PKG_DIR/wardley" \
   "$@"

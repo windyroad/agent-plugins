@@ -1,0 +1,28 @@
+{
+  "name": "@windyroad/problem",
+  "version": "0.1.0",
+  "description": "ITIL-aligned problem management with WSJF prioritisation",
+  "bin": {
+    "windyroad-problem": "./bin/install.mjs"
+  },
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/windyroad/agent-plugins.git",
+    "directory": "packages/problem"
+  },
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "ai-agent",
+    "ai-coding"
+  ],
+  "files": [
+    "bin/",
+    "agents/",
+    "hooks/",
+    "skills/",
+    ".claude-plugin/"
+  ]
+}
