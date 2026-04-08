@@ -1,5 +1,5 @@
 ---
-name: create
+name: wr:tdd
 description: Set up a test framework for the project. Examines the codebase, recommends a test runner, configures package.json, and creates an example test.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 ---

@@ -1,5 +1,5 @@
 ---
-name: create
+name: wr:voice-tone
 description: Create or update the project's docs/VOICE-AND-TONE.md by examining existing content and asking the user about brand voice, audience, and tone preferences.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 ---

@@ -1,5 +1,5 @@
 ---
-name: manage
+name: wr:problem
 description: Create or update a problem ticket per PROBLEM-MANAGEMENT.md. Supports creating new problems, updating root cause analysis, transitioning status, and closing problems.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 ---
