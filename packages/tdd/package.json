@@ -23,6 +23,7 @@
     "agents/",
     "hooks/",
     "skills/",
-    ".claude-plugin/"
+    ".claude-plugin/",
+    "lib/"
   ]
 }

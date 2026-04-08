@@ -4,7 +4,7 @@ import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const utils = await import(resolve(__dirname, "../../shared/install-utils.mjs"));
+const utils = await import(resolve(__dirname, "../lib/install-utils.mjs"));
 
 const PLUGIN = "wr-style-guide";
 const DEPS = [];

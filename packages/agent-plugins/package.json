@@ -21,6 +21,7 @@
     "copilot"
   ],
   "files": [
-    "bin/"
+    "bin/",
+    "lib/"
   ]
 }
