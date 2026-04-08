@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  quality-gates:
+    name: Quality Gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Validate marketplace manifest
+        run: |
+          node -e "
+            const m = JSON.parse(require('fs').readFileSync('.claude-plugin/marketplace.json', 'utf8'));
+            const pkgs = require('fs').readdirSync('packages').filter(d =>
+              d !== 'shared' && d !== 'agent-plugins' &&
+              require('fs').existsSync('packages/' + d + '/.claude-plugin/plugin.json')
+            );
+            const sources = m.plugins.map(p => p.source.replace('./packages/', ''));
+            const missing = pkgs.filter(p => !sources.includes(p));
+            if (missing.length) { console.error('Marketplace missing:', missing); process.exit(1); }
+            console.log('Marketplace manifest OK:', m.plugins.length, 'plugins');
+          "
+
+      - name: Validate all packages have required files
+        run: |
+          for pkg in packages/*/; do
+            name=$(basename "$pkg")
+            [ "$name" = "shared" ] && continue
+            [ "$name" = "agent-plugins" ] && continue
+
+            if [ ! -f "$pkg/.claude-plugin/plugin.json" ]; then
+              echo "FAIL: $name missing .claude-plugin/plugin.json"
+              exit 1
+            fi
+            if [ ! -f "$pkg/package.json" ]; then
+              echo "FAIL: $name missing package.json"
+              exit 1
+            fi
+            if [ ! -f "$pkg/bin/install.mjs" ]; then
+              echo "FAIL: $name missing bin/install.mjs"
+              exit 1
+            fi
+            echo "OK: $name"
+          done
+
+      - name: Validate package.json fields
+        run: |
+          for pkg in packages/*/package.json; do
+            node -e "
+              const p = JSON.parse(require('fs').readFileSync('$pkg', 'utf8'));
+              const errors = [];
+              if (!p.name?.startsWith('@windyroad/')) errors.push('name must start with @windyroad/');
+              if (!p.version) errors.push('missing version');
+              if (!p.description) errors.push('missing description');
+              if (!p.bin) errors.push('missing bin');
+              if (!p.repository) errors.push('missing repository');
+              if (errors.length) { console.error('$pkg:', errors.join(', ')); process.exit(1); }
+              console.log('OK:', p.name, p.version);
+            "
+          done
+
+      - name: Dry-run meta-installer
+        run: node packages/agent-plugins/bin/install.mjs --dry-run
+
+      - name: Dry-run per-plugin installers
+        run: |
+          for pkg in packages/*/bin/install.mjs; do
+            name=$(basename "$(dirname "$(dirname "$pkg")")")
+            [ "$name" = "agent-plugins" ] && continue
+            echo "--- $name ---"
+            node "$pkg" --dry-run
+          done

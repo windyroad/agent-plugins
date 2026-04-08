@@ -7,6 +7,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/windyroad/windyroad-agent-plugins.git"
+    "url": "https://github.com/windyroad/agent-plugins.git"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.29.0"
+  },
+  "scripts": {
+    "release": "changeset publish"
   }
 }
