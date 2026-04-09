@@ -1,5 +1,5 @@
 ---
-status: "proposed"
+status: "superseded"
 date: 2026-04-08
 decision-makers: [Tom Howard]
 consulted: [Claude Code plugin docs, skills package docs, anthropics/claude-code#35641]
@@ -8,6 +8,9 @@ reassessment-date: 2026-07-08
 ---
 
 # Unified Install Experience via npm Package
+
+> **Superseded by [ADR-003: Marketplace-Only Distribution](003-marketplace-only-distribution.proposed.md)**
+> The Claude Code bug (anthropics/claude-code#35641) that motivated the dual-install workaround has been fixed. Marketplace plugins now register skills in autocomplete. The `npx skills add` step is no longer needed.
 
 ## Context and Problem Statement
 

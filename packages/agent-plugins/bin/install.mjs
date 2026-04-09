@@ -105,27 +105,24 @@ function parseArgs(argv) {
 }
 
 function doInstall(plugins) {
-  console.log("\nInstalling Windy Road AI agent plugins and skills...\n");
+  console.log("\nInstalling Windy Road AI agent plugins...\n");
 
-  console.log("[1/3] Adding marketplace...");
+  console.log("[1/2] Adding marketplace...");
   utils.addMarketplace();
 
-  console.log(`\n[2/3] Installing plugins (${plugins.length})...`);
+  console.log(`\n[2/2] Installing plugins (${plugins.length})...`);
   let installed = 0;
   for (const plugin of plugins) {
     if (utils.installPlugin(plugin)) installed++;
   }
   console.log(`  ${installed}/${plugins.length} plugins installed.`);
 
-  console.log("\n[3/3] Installing skills...");
-  utils.installSkills();
-
   console.log(`
 Done! Restart Claude Code to activate all plugins.
 
 Installed:
-  - ${installed} plugins (agents + hooks)
-  - Skills (type /wr: to see them in autocomplete)
+  - ${installed} plugins (agents, hooks, and skills)
+  - Type /wr: to see skills in autocomplete
 
 To update:    npx @windyroad/agent-plugins --update
 To uninstall: npx @windyroad/agent-plugins --uninstall
@@ -133,23 +130,20 @@ To uninstall: npx @windyroad/agent-plugins --uninstall
 }
 
 function doUpdate(plugins) {
-  console.log("\nUpdating Windy Road AI agent plugins and skills...\n");
+  console.log("\nUpdating Windy Road AI agent plugins...\n");
 
-  console.log("[1/3] Updating marketplace...");
+  console.log("[1/2] Updating marketplace...");
   utils.run(
     `claude plugin marketplace update ${utils.MARKETPLACE_NAME}`,
     `Marketplace: ${utils.MARKETPLACE_NAME}`
   );
 
-  console.log(`\n[2/3] Updating plugins (${plugins.length})...`);
+  console.log(`\n[2/2] Updating plugins (${plugins.length})...`);
   let updated = 0;
   for (const plugin of plugins) {
     if (utils.updatePlugin(plugin)) updated++;
   }
   console.log(`  ${updated}/${plugins.length} plugins updated.`);
-
-  console.log("\n[3/3] Updating skills...");
-  utils.updateSkills();
 
   console.log("\nDone! Restart Claude Code to apply updates.\n");
 }
@@ -160,8 +154,6 @@ function doUninstall(plugins) {
   for (const plugin of plugins) {
     utils.uninstallPlugin(plugin);
   }
-
-  utils.removeSkills();
 
   console.log("\nDone. Restart Claude Code to apply changes.\n");
 }

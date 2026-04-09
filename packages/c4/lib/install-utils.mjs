@@ -46,15 +46,6 @@ export function checkPrerequisites() {
     );
     process.exit(1);
   }
-
-  try {
-    execSync("npx --version", { stdio: "pipe" });
-  } catch {
-    console.error(
-      "Error: 'npx' not found. Install Node.js first:\n  https://nodejs.org\n"
-    );
-    process.exit(1);
-  }
 }
 
 export function addMarketplace() {
@@ -79,33 +70,14 @@ export function uninstallPlugin(pluginName) {
   return run(`claude plugin uninstall ${pluginName}`, `Removing ${pluginName}`);
 }
 
-export function installSkills() {
-  return run(
-    `npx -y skills add --yes --all ${MARKETPLACE_REPO}`,
-    "Skills (via skills package)"
-  );
-}
-
-export function updateSkills() {
-  return run("npx -y skills update", "Skills update");
-}
-
-export function removeSkills() {
-  return run(
-    `npx -y skills remove --yes --all ${MARKETPLACE_REPO}`,
-    "Removing skills"
-  );
-}
-
 /**
- * Install a single package: marketplace add + plugin install + skills.
+ * Install a single package: marketplace add + plugin install.
  */
 export function installPackage(pluginName, { deps = [] } = {}) {
   console.log(`\nInstalling @windyroad/${pluginName.replace("wr-", "")}...\n`);
 
   addMarketplace();
   installPlugin(pluginName);
-  installSkills();
 
   if (deps.length > 0) {
     console.log(`\nNote: This plugin works best with:`);
@@ -130,7 +102,6 @@ export function updatePackage(pluginName) {
     "Updating marketplace"
   );
   updatePlugin(pluginName);
-  updateSkills();
 
   console.log("\nDone! Restart Claude Code to apply updates.\n");
 }
@@ -144,9 +115,6 @@ export function uninstallPackage(pluginName) {
   uninstallPlugin(pluginName);
 
   console.log("\nDone. Restart Claude Code to apply changes.\n");
-  console.log("Note: Skills are shared across packages. Run");
-  console.log("  npx @windyroad/agent-plugins --uninstall");
-  console.log("to remove all skills.\n");
 }
 
 /**

@@ -5,37 +5,3 @@ node_modules/
 
 # Runtime artifacts (created by risk-scorer hooks)
 .risk-reports/
-
-# Skills package install artifacts (created by npx skills add)
-.agents/
-skills/
-skills-lock.json
-.adal/
-.augment/
-.bob/
-.claude/skills/
-.codebuddy/
-.commandcode/
-.continue/
-.cortex/
-.crush/
-.factory/
-.goose/
-.iflow/
-.junie/
-.kilocode/
-.kiro/
-.kode/
-.mcpjam/
-.mux/
-.neovate/
-.openhands/
-.pi/
-.pochi/
-.qoder/
-.qwen/
-.roo/
-.trae/
-.vibe/
-.windsurf/
-.zencoder/
