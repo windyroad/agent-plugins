@@ -21,7 +21,7 @@ check_risk_gate() {
 
   # 1. Score file must exist (fail-closed)
   if [ ! -f "$SCORE_FILE" ]; then
-    RISK_GATE_REASON="No ${ACTION} risk score found. The risk-scorer agent must run first. It runs automatically on each prompt."
+    RISK_GATE_REASON="No ${ACTION} risk score found. Delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') to assess cumulative pipeline risk."
     return 1
   fi
 
@@ -30,7 +30,7 @@ check_risk_gate() {
   local SCORE_TIME=$(_mtime "$SCORE_FILE")
   local AGE=$(( NOW - SCORE_TIME ))
   if [ "$AGE" -ge "$TTL_SECONDS" ]; then
-    RISK_GATE_REASON="Risk score expired (${AGE}s old, TTL ${TTL_SECONDS}s). Stage all files with git add first, then submit a new prompt — the scorer runs automatically. Then call git commit in that response."
+    RISK_GATE_REASON="Risk score expired (${AGE}s old, TTL ${TTL_SECONDS}s). Delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') to rescore."
     return 1
   fi
 

@@ -14,6 +14,6 @@
   },
   "scripts": {
     "release": "changeset publish",
-    "push:watch": "git push && gh run watch --exit-status"
+    "push:watch": "git push 2>&1 && RUN_ID=$(gh run list --limit 1 --json databaseId --jq '.[0].databaseId') && gh run watch \"$RUN_ID\" --exit-status"
   }
 }
