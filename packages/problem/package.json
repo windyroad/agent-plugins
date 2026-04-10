@@ -1,6 +1,6 @@
 {
   "name": "@windyroad/problem",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "ITIL-aligned problem management with WSJF prioritisation",
   "bin": {
     "windyroad-problem": "./bin/install.mjs"
