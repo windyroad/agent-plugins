@@ -60,6 +60,7 @@ jobs:
         if: steps.find-pr.outputs.found == 'true'
         id: preview
         run: |
+          RUN_NUMBER="${{ github.run_number }}"
           PUBLISHED=""
           for pkg in packages/*/package.json; do
             dir=$(dirname "$pkg")
@@ -68,9 +69,18 @@ jobs:
 
             [ -z "$name" ] && continue
 
-            echo "Publishing $name@$version with tag preview..."
+            # Append pre-release suffix to avoid colliding with the real release version
+            preview_version="${version}-preview.${RUN_NUMBER}"
+            node -e "
+              const fs = require('fs');
+              const pkg = JSON.parse(fs.readFileSync('$pkg','utf8'));
+              pkg.version = '${preview_version}';
+              fs.writeFileSync('$pkg', JSON.stringify(pkg, null, 2) + '\n');
+            "
+
+            echo "Publishing $name@$preview_version with tag preview..."
             (cd "$dir" && npm publish --tag preview --provenance --access public 2>&1) || true
-            PUBLISHED="$PUBLISHED\n- \`$name@$version\` → \`npm install $name@preview\`"
+            PUBLISHED="$PUBLISHED\n- \`$name@$preview_version\` -> \`npx $name@preview\`"
           done
 
           echo "published<<EOF" >> "$GITHUB_OUTPUT"
