@@ -3,9 +3,6 @@
     "SessionStart": [
       { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/bin/check-deps.sh wr-retrospective wr-problem wr-risk-scorer" }] }
     ],
-    "PreToolUse": [
-      { "matcher": "ExitPlanMode", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/review-plan-enforce.sh" }] }
-    ],
     "Stop": [
       { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/retrospective-reminder.sh" }] }
     ]
