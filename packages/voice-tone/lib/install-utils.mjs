@@ -55,9 +55,9 @@ export function addMarketplace() {
   );
 }
 
-export function installPlugin(pluginName) {
+export function installPlugin(pluginName, { scope = "project" } = {}) {
   return run(
-    `claude plugin install ${pluginName}@${MARKETPLACE_NAME}`,
+    `claude plugin install ${pluginName}@${MARKETPLACE_NAME} --scope ${scope}`,
     pluginName
   );
 }
@@ -73,11 +73,11 @@ export function uninstallPlugin(pluginName) {
 /**
  * Install a single package: marketplace add + plugin install.
  */
-export function installPackage(pluginName, { deps = [] } = {}) {
-  console.log(`\nInstalling @windyroad/${pluginName.replace("wr-", "")}...\n`);
+export function installPackage(pluginName, { deps = [], scope = "project" } = {}) {
+  console.log(`\nInstalling @windyroad/${pluginName.replace("wr-", "")} (${scope} scope)...\n`);
 
   addMarketplace();
-  installPlugin(pluginName);
+  installPlugin(pluginName, { scope });
 
   if (deps.length > 0) {
     console.log(`\nNote: This plugin works best with:`);
@@ -122,10 +122,22 @@ export function uninstallPackage(pluginName) {
  */
 export function parseStandardArgs(argv) {
   const args = argv.slice(2);
-  return {
+  const flags = {
     help: args.includes("--help") || args.includes("-h"),
     uninstall: args.includes("--uninstall"),
     update: args.includes("--update"),
     dryRun: args.includes("--dry-run"),
+    scope: "project",
   };
+  const scopeIdx = args.indexOf("--scope");
+  if (scopeIdx !== -1 && args[scopeIdx + 1]) {
+    const val = args[scopeIdx + 1];
+    if (["project", "user", "local"].includes(val)) {
+      flags.scope = val;
+    } else {
+      console.error("--scope requires: project, user, or local");
+      process.exit(1);
+    }
+  }
+  return flags;
 }

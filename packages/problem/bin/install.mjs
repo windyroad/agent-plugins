@@ -20,6 +20,7 @@ ITIL-aligned problem management with WSJF prioritisation
 Options:
   --update     Update this plugin and its skills
   --uninstall  Remove this plugin
+  --scope      Installation scope: project (default) or user
   --dry-run    Show what would be done without executing
   --help, -h   Show this help
 `);
@@ -38,5 +39,5 @@ if (flags.uninstall) {
 } else if (flags.update) {
   utils.updatePackage(PLUGIN);
 } else {
-  utils.installPackage(PLUGIN, { deps: DEPS });
+  utils.installPackage(PLUGIN, { deps: DEPS, scope: flags.scope });
 }

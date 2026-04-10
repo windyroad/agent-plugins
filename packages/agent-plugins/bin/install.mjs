@@ -22,16 +22,17 @@ const PLUGINS = [
 const HELP = `
 Usage: npx @windyroad/agent-plugins [options]
 
-Install, update, or uninstall all Windy Road AI agent plugins and skills.
+Install, update, or uninstall all Windy Road AI agent plugins.
 
 Commands:
-  (default)         Install all plugins and skills
-  --update          Update marketplace and reinstall all plugins and skills
-  --uninstall       Remove all plugins and skills
+  (default)         Install all plugins (project scope)
+  --update          Update marketplace and reinstall all plugins
+  --uninstall       Remove all plugins
 
 Options:
   --plugin <names>  Install only specific plugins (space-separated)
                     e.g. --plugin architect tdd risk-scorer
+  --scope <scope>   Installation scope: project (default) or user
   --dry-run         Show what would be done without executing
   --help, -h        Show this help
 
@@ -54,6 +55,7 @@ function parseArgs(argv) {
     update: false,
     dryRun: false,
     plugins: null,
+    scope: "project",
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -70,6 +72,14 @@ function parseArgs(argv) {
         break;
       case "--dry-run":
         flags.dryRun = true;
+        break;
+      case "--scope":
+        i++;
+        if (!args[i] || !["project", "user", "local"].includes(args[i])) {
+          console.error("--scope requires: project, user, or local");
+          process.exit(1);
+        }
+        flags.scope = args[i];
         break;
       case "--plugin":
       case "--plugins": {
@@ -104,8 +114,8 @@ function parseArgs(argv) {
   return flags;
 }
 
-function doInstall(plugins) {
-  console.log("\nInstalling Windy Road AI agent plugins...\n");
+function doInstall(plugins, { scope = "project" } = {}) {
+  console.log(`\nInstalling Windy Road AI agent plugins (${scope} scope)...\n`);
 
   console.log("[1/2] Adding marketplace...");
   utils.addMarketplace();
@@ -113,7 +123,7 @@ function doInstall(plugins) {
   console.log(`\n[2/2] Installing plugins (${plugins.length})...`);
   let installed = 0;
   for (const plugin of plugins) {
-    if (utils.installPlugin(plugin)) installed++;
+    if (utils.installPlugin(plugin, { scope })) installed++;
   }
   console.log(`  ${installed}/${plugins.length} plugins installed.`);
 
@@ -179,5 +189,5 @@ if (flags.uninstall) {
 } else if (flags.update) {
   doUpdate(plugins);
 } else {
-  doInstall(plugins);
+  doInstall(plugins, { scope: flags.scope });
 }
