@@ -18,7 +18,7 @@ This project has NO test script configured in package.json. Implementation file
 edits (.ts, .tsx, .js, .jsx) are BLOCKED until testing is set up.
 
 If the user's task involves writing or editing implementation code, you MUST
-run /wr-tdd:create first to configure a test framework for this project.
+run /wr-tdd:setup-tests first to configure a test framework for this project.
 
 Test files, config files, docs, and styles are still writable.
 HOOK_OUTPUT

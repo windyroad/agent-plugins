@@ -1,5 +1,5 @@
 ---
-name: wr:c4-check
+name: check
 description: Check whether C4 architecture diagrams are up to date with source code
 allowed-tools: Bash(node *)
 ---

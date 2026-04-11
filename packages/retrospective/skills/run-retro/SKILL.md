@@ -1,5 +1,5 @@
 ---
-name: wr:retrospective
+name: run-retro
 description: Run a session retrospective. Updates docs/BRIEFING.md with learnings and creates problem tickets for failures and friction.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Skill
 ---

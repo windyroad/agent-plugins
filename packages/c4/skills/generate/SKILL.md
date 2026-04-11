@@ -1,5 +1,5 @@
 ---
-name: wr:c4
+name: generate
 description: Regenerate C4 architecture diagrams (C3 component + C4 code views) from source code
 allowed-tools: Bash(node *)
 ---

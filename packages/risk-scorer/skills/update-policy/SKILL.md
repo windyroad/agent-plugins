@@ -1,5 +1,5 @@
 ---
-name: wr:risk-policy
+name: update-policy
 description: Create or update the project's RISK-POLICY.md per ISO 31000 and the risk-scorer agent. Examines the project to derive business-specific impact levels.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Agent
 ---

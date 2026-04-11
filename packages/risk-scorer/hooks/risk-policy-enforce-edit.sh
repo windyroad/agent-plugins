@@ -35,7 +35,7 @@ cat <<'EOF'
   "hookSpecificOutput": {
     "hookEventName": "PreToolUse",
     "permissionDecision": "deny",
-    "permissionDecisionReason": "BLOCKED: Cannot edit RISK-POLICY.md directly. Run the /risk-policy skill first -- it enforces ISO 31000 compliance (reads the risk-scorer contract, discovers project context, checks for incidents, validates with you, and smoke-tests the result). Use the Skill tool with skill: \"risk-policy\"."
+    "permissionDecisionReason": "BLOCKED: Cannot edit RISK-POLICY.md directly. Run /wr-risk-scorer:update-policy first -- it enforces ISO 31000 compliance (reads the risk-scorer contract, discovers project context, checks for incidents, validates with you, and smoke-tests the result). Use the Skill tool with skill: \"wr-risk-scorer:update-policy\"."
   }
 }
 EOF

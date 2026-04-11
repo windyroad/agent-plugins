@@ -23,7 +23,7 @@ npx @windyroad/architect
 npx @windyroad/c4
 ```
 
-Restart Claude Code after installing. Type `/wr:` to see all available skills.
+Restart Claude Code after installing. Type `/wr-` to see all available skills.
 
 ## Packages
 
@@ -33,28 +33,28 @@ These plugins enforce review workflows via hooks. They block edits to relevant f
 
 | Package | Plugin | Agent | Skills | What it enforces |
 |---------|--------|-------|--------|-----------------|
-| `@windyroad/architect` | wr-architect | `wr-architect:agent` | `/wr:adr` | Architecture decisions reviewed before code changes |
-| `@windyroad/risk-scorer` | wr-risk-scorer | `wr-risk-scorer:agent` + 4 variants | `/wr:risk-policy` | Pipeline risk scoring, commit/push gates, secret leak detection |
-| `@windyroad/voice-tone` | wr-voice-tone | `wr-voice-tone:agent` | `/wr:voice-tone` | User-facing copy reviewed against voice and tone guide |
-| `@windyroad/style-guide` | wr-style-guide | `wr-style-guide:agent` | `/wr:style-guide` | CSS and UI components reviewed against style guide |
-| `@windyroad/jtbd` | wr-jtbd | `wr-jtbd:agent` | `/wr:jtbd` | UI changes reviewed against jobs-to-be-done document |
-| `@windyroad/tdd` | wr-tdd | | `/wr:tdd` | Red-Green-Refactor TDD cycle enforced for implementation code |
+| `@windyroad/architect` | wr-architect | `wr-architect:agent` | `/wr-architect:create-adr` | Architecture decisions reviewed before code changes |
+| `@windyroad/risk-scorer` | wr-risk-scorer | `wr-risk-scorer:agent` + 4 variants | `/wr-risk-scorer:update-policy` | Pipeline risk scoring, commit/push gates, secret leak detection |
+| `@windyroad/voice-tone` | wr-voice-tone | `wr-voice-tone:agent` | `/wr-voice-tone:update-guide` | User-facing copy reviewed against voice and tone guide |
+| `@windyroad/style-guide` | wr-style-guide | `wr-style-guide:agent` | `/wr-style-guide:update-guide` | CSS and UI components reviewed against style guide |
+| `@windyroad/jtbd` | wr-jtbd | `wr-jtbd:agent` | `/wr-jtbd:update-guide` | UI changes reviewed against jobs-to-be-done document |
+| `@windyroad/tdd` | wr-tdd | | `/wr-tdd:setup-tests` | Red-Green-Refactor TDD cycle enforced for implementation code |
 
-When a policy file is missing (e.g., no `docs/VOICE-AND-TONE.md`), the hooks block edits and direct you to the create skill to generate one.
+When a policy file is missing (e.g., no `docs/VOICE-AND-TONE.md`), the hooks block edits and direct you to the update-guide skill to generate one.
 
 ### Process Tools
 
 | Package | Plugin | Skills | What it does |
 |---------|--------|--------|-------------|
-| `@windyroad/problem` | wr-problem | `/wr:problem` | ITIL-aligned problem management with WSJF prioritisation |
-| `@windyroad/retrospective` | wr-retrospective | `/wr:retrospective` | Session retrospectives that update briefings and create problem tickets |
+| `@windyroad/problem` | wr-problem | `/wr-problem:update-ticket` | ITIL-aligned problem management with WSJF prioritisation |
+| `@windyroad/retrospective` | wr-retrospective | `/wr-retrospective:run-retro` | Session retrospectives that update briefings and create problem tickets |
 
 ### Diagram Generation
 
 | Package | Plugin | Skills | What it does |
 |---------|--------|--------|-------------|
-| `@windyroad/c4` | wr-c4 | `/wr:c4`, `/wr:c4-check` | C4 architecture diagram generation and validation |
-| `@windyroad/wardley` | wr-wardley | `/wr:wardley` | Wardley Map generation |
+| `@windyroad/c4` | wr-c4 | `/wr-c4:generate`, `/wr-c4:check` | C4 architecture diagram generation and validation |
+| `@windyroad/wardley` | wr-wardley | `/wr-wardley:generate` | Wardley Map generation |
 
 ## Dependencies
 
