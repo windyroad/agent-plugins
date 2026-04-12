@@ -7,7 +7,8 @@
       { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/tdd-enforce-edit.sh" }] }
     ],
     "PostToolUse": [
-      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/tdd-post-write.sh" }] }
+      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/tdd-post-write.sh" }] },
+      { "matcher": "Skill", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/tdd-setup-marker.sh" }] }
     ],
     "Stop": [
       { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/tdd-reset.sh" }] }

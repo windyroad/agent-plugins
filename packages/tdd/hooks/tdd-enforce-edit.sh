@@ -21,10 +21,14 @@ if [ "$FILE_TYPE" != "impl" ]; then
   exit 0
 fi
 
-# If no test script configured, block and direct to create skill
+# If no test script configured, check if setup skill is running
 if ! tdd_has_test_script; then
+  # Allow edits if the setup skill is actively running (chicken-and-egg bypass)
+  if [ -n "$SESSION_ID" ] && [ -f "/tmp/tdd-setup-active-${SESSION_ID}" ]; then
+    exit 0
+  fi
   BASENAME=$(basename "$FILE_PATH")
-  tdd_deny_json "BLOCKED: Cannot edit '${BASENAME}' because no test script is configured in package.json. Run /wr-tdd:create to set up a test framework for this project. TDD enforcement requires a working test runner before implementation code can be written."
+  tdd_deny_json "BLOCKED: Cannot edit '${BASENAME}' because no test script is configured in package.json. Run /wr-tdd:setup-tests to set up a test framework for this project. TDD enforcement requires a working test runner before implementation code can be written."
   exit 0
 fi
 
