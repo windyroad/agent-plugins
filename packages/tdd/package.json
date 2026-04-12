@@ -1,6 +1,6 @@
 {
   "name": "@windyroad/tdd",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "TDD state machine enforcement (Red-Green-Refactor cycle)",
   "bin": {
     "windyroad-tdd": "./bin/install.mjs"

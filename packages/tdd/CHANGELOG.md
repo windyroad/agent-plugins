@@ -1,5 +1,11 @@
 # @windyroad/tdd
 
+## 0.1.3
+
+### Patch Changes
+
+- adbd9e6: Fix TDD setup skill chicken-and-egg problem: allow edits during test setup by checking a PostToolUse:Skill marker, and fix skill name reference from wr-tdd:create to wr-tdd:setup-tests
+
 ## 0.1.2
 
 ### Patch Changes
