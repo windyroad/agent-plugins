@@ -158,6 +158,7 @@ tdd_cleanup() {
   rm -f "$(_tdd_state_file "$SESSION_ID")"
   rm -f "$(_tdd_test_files_file "$SESSION_ID")"
   rm -f "$(_tdd_test_stdout_file "$SESSION_ID")"
+  rm -f "/tmp/tdd-setup-active-${SESSION_ID}"
 }
 
 # --- Deny Helper ---
