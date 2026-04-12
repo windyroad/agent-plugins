@@ -27,8 +27,8 @@ tdd_classify_file() {
 
   # Exempt files (not gated)
   case "$FILE_PATH" in
-    # Config files
-    *.config.*|*.json|*.yml|*.yaml) echo "exempt"; return ;;
+    # Config and setup files (test infrastructure)
+    *.config.*|*.setup.*|*.json|*.yml|*.yaml) echo "exempt"; return ;;
     # Module configs (*.mjs, *.cjs are config when at root or named as config)
     *.mjs|*.cjs) echo "exempt"; return ;;
     # Styles
