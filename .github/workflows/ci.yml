@@ -87,3 +87,6 @@ jobs:
             echo "--- $name ---"
             node "$pkg" --dry-run
           done
+
+      - name: Run hook tests
+        run: npm test

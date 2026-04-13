@@ -10,9 +10,13 @@
     "url": "https://github.com/windyroad/agent-plugins.git"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.29.0"
+    "@changesets/cli": "^2.29.0",
+    "bats": "^1.13.0",
+    "bats-assert": "^2.2.4",
+    "bats-support": "^0.3.0"
   },
   "scripts": {
+    "test": "bats --recursive packages/*/hooks/test/",
     "release": "changeset publish",
     "push:watch": "git push 2>&1 && RUN_ID=$(gh run list --limit 1 --json databaseId --jq '.[0].databaseId') && gh run watch \"$RUN_ID\" --exit-status"
   }
