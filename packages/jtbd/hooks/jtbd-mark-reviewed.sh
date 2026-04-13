@@ -28,7 +28,7 @@ case "$SUBAGENT" in
     case "$VERDICT" in
       PASS)
         touch "/tmp/jtbd-reviewed-${SESSION_ID}"
-        store_review_hash "$SESSION_ID" "jtbd" "docs/jtbd"
+        store_review_hash "$SESSION_ID" "jtbd" "docs/JOBS_TO_BE_DONE.md"
         ;;
       FAIL)
         # Do NOT create marker — review found issues
@@ -36,7 +36,7 @@ case "$SUBAGENT" in
       *)
         # No verdict file — backward compat, allow with marker
         touch "/tmp/jtbd-reviewed-${SESSION_ID}"
-        store_review_hash "$SESSION_ID" "jtbd" "docs/jtbd"
+        store_review_hash "$SESSION_ID" "jtbd" "docs/JOBS_TO_BE_DONE.md"
         ;;
     esac
 
