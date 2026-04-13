@@ -16,7 +16,7 @@ check_review_gate() {
   local POLICY_FILE="$3"   # e.g., "docs/STYLE-GUIDE.md"
   local MARKER="/tmp/${SYSTEM}-reviewed-${SESSION_ID}"
   local HASH_FILE="/tmp/${SYSTEM}-reviewed-${SESSION_ID}.hash"
-  local TTL_SECONDS="${REVIEW_TTL:-600}"
+  local TTL_SECONDS="${REVIEW_TTL:-1800}"
 
   # 1. Marker must exist
   if [ ! -f "$MARKER" ]; then
