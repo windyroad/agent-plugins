@@ -17,16 +17,8 @@ SESSION_ID=$(_get_session_id)
 
 MARKER="$(_risk_dir "$SESSION_ID")/wip-reviewed"
 
-case "$TOOL_NAME" in
-  Edit|Write)
-    FILE_PATH=$(_get_file_path)
-    [ -n "$FILE_PATH" ] || exit 0
-
-    if ! _is_doc_file "$FILE_PATH"; then
-        rm -f "$MARKER"
-    fi
-    ;;
-  # Agent case handled by risk-score-mark.sh
-esac
+# WIP marker persists after assessment — allows multiple edits.
+# Cleared on session end by risk-score-reset.sh (Stop hook).
+# Agent case (marker creation) handled by risk-score-mark.sh.
 
 exit 0
