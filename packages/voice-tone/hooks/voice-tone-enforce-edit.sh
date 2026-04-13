@@ -45,7 +45,7 @@ BASENAME=$(basename "$FILE_PATH")
 
 # If no policy file exists, block and direct to create skill
 if [ ! -f "docs/VOICE-AND-TONE.md" ]; then
-  review_gate_deny "BLOCKED: Cannot edit '${BASENAME}' because docs/VOICE-AND-TONE.md does not exist. Run /wr-voice-tone:create to generate a voice and tone guide for this project, then delegate to wr-voice-tone:agent for review."
+  review_gate_deny "BLOCKED: Cannot edit '${BASENAME}' because docs/VOICE-AND-TONE.md does not exist. Run /wr-voice-tone:update-guide to generate a voice and tone guide for this project, then delegate to wr-voice-tone:agent for review."
   exit 0
 fi
 

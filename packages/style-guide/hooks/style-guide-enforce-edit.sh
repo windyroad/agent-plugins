@@ -45,7 +45,7 @@ BASENAME=$(basename "$FILE_PATH")
 
 # If no policy file exists, block and direct to create skill
 if [ ! -f "docs/STYLE-GUIDE.md" ]; then
-  review_gate_deny "BLOCKED: Cannot edit '${BASENAME}' because docs/STYLE-GUIDE.md does not exist. Run /wr-style-guide:create to generate a style guide for this project, then delegate to wr-style-guide:agent for review."
+  review_gate_deny "BLOCKED: Cannot edit '${BASENAME}' because docs/STYLE-GUIDE.md does not exist. Run /wr-style-guide:update-guide to generate a style guide for this project, then delegate to wr-style-guide:agent for review."
   exit 0
 fi
 

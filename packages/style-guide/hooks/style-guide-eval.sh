@@ -28,7 +28,7 @@ else
     cat <<'HOOK_OUTPUT'
 NOTE: This project has UI files but no docs/STYLE-GUIDE.md.
 If the user's task involves editing CSS or UI components, the edit will be blocked
-until a style guide exists. Run /wr-style-guide:create to generate one.
+until a style guide exists. Run /wr-style-guide:update-guide to generate one.
 HOOK_OUTPUT
   fi
 fi

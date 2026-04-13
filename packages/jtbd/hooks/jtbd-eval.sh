@@ -29,7 +29,7 @@ else
     cat <<'HOOK_OUTPUT'
 NOTE: This project has UI files but no docs/JOBS_TO_BE_DONE.md.
 If the user's task involves editing UI files, the edit will be blocked
-until a JTBD document exists. Run /wr-jtbd:create to generate one.
+until a JTBD document exists. Run /wr-jtbd:update-guide to generate one.
 HOOK_OUTPUT
   fi
 fi

@@ -45,7 +45,7 @@ BASENAME=$(basename "$FILE_PATH")
 
 # If no JTBD doc exists, block and direct to create skill
 if [ ! -f "docs/JOBS_TO_BE_DONE.md" ]; then
-  review_gate_deny "BLOCKED: Cannot edit '${BASENAME}' because docs/JOBS_TO_BE_DONE.md does not exist. Run /wr-jtbd:create to generate a JTBD document for this project, then delegate to wr-jtbd:agent for review."
+  review_gate_deny "BLOCKED: Cannot edit '${BASENAME}' because docs/JOBS_TO_BE_DONE.md does not exist. Run /wr-jtbd:update-guide to generate a JTBD document for this project, then delegate to wr-jtbd:agent for review."
   exit 0
 fi
 

@@ -28,7 +28,7 @@ else
     cat <<'HOOK_OUTPUT'
 NOTE: This project has UI files but no docs/VOICE-AND-TONE.md.
 If the user's task involves editing user-facing copy, the edit will be blocked
-until a voice and tone guide exists. Run /wr-voice-tone:create to generate one.
+until a voice and tone guide exists. Run /wr-voice-tone:update-guide to generate one.
 HOOK_OUTPUT
   fi
 fi
