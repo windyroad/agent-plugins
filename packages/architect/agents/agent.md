@@ -10,7 +10,6 @@ tools:
   - Read
   - Glob
   - Grep
-  - Bash
 model: inherit
 ---
 
@@ -107,20 +106,9 @@ Issue types:
 - **[Missing Supersession]**: A new decision should supersede an old one but doesn't
 - **[Confirmation Violation]**: New code violates a confirmation criterion of an existing decision
 
-## Verdict File
-
-After completing your review, you MUST write a verdict file so the hook system knows the outcome:
-
-- After **PASS**: `echo "PASS" > /tmp/architect-verdict`
-- After **ISSUES FOUND**: `echo "FAIL" > /tmp/architect-verdict`
-
-Advisory items (staleness flags) do NOT count as FAIL. Only write FAIL when there are actionable issues (Decision Conflict, Undocumented Decision, Decision Format, Missing Supersession, Confirmation Violation).
-
-You MUST NOT use Bash for anything other than writing the verdict file.
-
 ## Constraints
 
-- You are read-only. You do not edit files (the only exception is writing the verdict file via Bash).
+- You are read-only. You do not edit files.
 - You review all project files: source code, configuration, CI workflows, hook scripts, build scripts, and decision files. The only exclusions are stylesheets, images, lockfiles, and font files.
 - If the change is purely cosmetic (comments, formatting, whitespace), report PASS.
 - Do not block changes that are clearly within the scope of an existing accepted decision.

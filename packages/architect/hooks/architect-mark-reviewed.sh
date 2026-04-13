@@ -1,17 +1,19 @@
 #!/bin/bash
 # Architecture - PostToolUse hook for Agent tool
 # Creates a session marker when architect has been consulted.
+# Parses verdict from agent output text (session-safe, no temp files).
 # This marker unlocks the architect-enforce-edit.sh PreToolUse block.
-# Mirrors: voice-tone-mark-reviewed.sh
 
-# Source shared portable helpers (_mtime, _hashcmd)
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/lib/gate-helpers.sh"
 
-INPUT=$(cat)
+_parse_input
 
-SUBAGENT=$(echo "$INPUT" | jq -r '.tool_input.subagent_type // empty') || true
-SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty') || true
+TOOL_NAME=$(_get_tool_name)
+[ "$TOOL_NAME" = "Agent" ] || exit 0
+
+SUBAGENT=$(_get_subagent_type)
+SESSION_ID=$(_get_session_id)
 
 if [ -z "$SESSION_ID" ]; then
   exit 0
@@ -19,25 +21,24 @@ fi
 
 case "$SUBAGENT" in
   *architect*)
-    # Check verdict file from architect agent
-    VERDICT_FILE="/tmp/architect-verdict"
+    # Parse verdict from agent output text (no temp file needed)
+    AGENT_OUTPUT=$(_get_tool_output)
     VERDICT=""
-    if [ -f "$VERDICT_FILE" ]; then
-      VERDICT=$(cat "$VERDICT_FILE")
-      rm -f "$VERDICT_FILE"
+    if echo "$AGENT_OUTPUT" | grep -q "Architecture Review: PASS"; then
+      VERDICT="PASS"
+    elif echo "$AGENT_OUTPUT" | grep -q "ISSUES FOUND"; then
+      VERDICT="FAIL"
     fi
 
     case "$VERDICT" in
       PASS)
-        # Architect explicitly passed, create marker
         touch "/tmp/architect-reviewed-${SESSION_ID}"
         ;;
       FAIL)
-        # Architect found issues, do NOT create marker
+        # Do NOT create marker — review found issues
         ;;
       *)
-        # No verdict file (agent error or old agent version)
-        # Allow with warning to avoid permanent lockout
+        # Could not parse verdict — allow with marker to avoid lockout
         touch "/tmp/architect-reviewed-${SESSION_ID}"
         ;;
     esac
@@ -52,6 +53,8 @@ case "$SUBAGENT" in
       echo "$HASH" > "/tmp/architect-reviewed-${SESSION_ID}.hash"
     fi
 
+    # Plan review marker
+    touch "/tmp/architect-plan-reviewed-${SESSION_ID}"
     ;;
 esac
 
