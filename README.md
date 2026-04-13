@@ -1,83 +1,108 @@
 # Windy Road Agent Plugins
 
-AI agent plugins for architecture governance, risk management, TDD enforcement, and delivery quality by [Windy Road Technology](https://windyroad.com.au).
+**Governance guardrails for AI coding agents.** Architecture reviews, risk scoring, TDD enforcement, and delivery quality gates that run automatically inside [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
 
-## Install
+Built by [Windy Road Technology](https://windyroad.com.au).
 
-Install everything with one command:
+## The Problem
+
+AI coding agents are fast. Sometimes too fast. They skip architecture reviews, introduce risk without assessment, ignore your design system, and write implementation before tests. The same governance that keeps human teams shipping safely gets bypassed when an agent writes code.
+
+These plugins bring that governance back -- automatically. They hook into Claude Code's plugin system and enforce your team's standards on every edit, commit, and push. No manual checks. No hoping the agent remembers.
+
+## Quick Start
+
+Install all plugins with one command:
 
 ```bash
 npx @windyroad/agent-plugins
 ```
 
-Or install only what you need:
+Restart Claude Code. That's it. The plugins activate automatically based on what they find in your project.
+
+**Install only what you need:**
 
 ```bash
 npx @windyroad/agent-plugins --plugin architect tdd risk-scorer
 ```
 
-Or install individual packages directly:
+**Or install a single plugin directly:**
 
 ```bash
 npx @windyroad/architect
-npx @windyroad/c4
 ```
 
-Restart Claude Code after installing. Type `/wr-` to see all available skills.
+> Plugins install to your project by default (not globally), so they won't affect your other projects. Pass `--scope user` to install globally.
 
-## Packages
+After installing, type `/wr-` in Claude Code to see all available skills.
+
+## How It Works
+
+Each plugin uses Claude Code's hook system to intercept actions at the right moment:
+
+1. **Detect** -- A `UserPromptSubmit` hook scans for relevant project files (e.g., `docs/decisions/` for architect, `RISK-POLICY.md` for risk-scorer)
+2. **Gate** -- A `PreToolUse` hook blocks edits to relevant files until the review agent has been consulted
+3. **Review** -- The agent reviews the proposed change against your project's policy documents
+4. **Unlock** -- A `PostToolUse` hook marks the review as complete, allowing edits to proceed
+
+Policy files are generated for you. When a plugin detects that its policy file is missing, it blocks edits and directs you to the setup skill (e.g., `/wr-voice-tone:update-guide`).
+
+## Plugins
 
 ### Governance and Quality Gates
 
-These plugins enforce review workflows via hooks. They block edits to relevant files until the appropriate review agent has been consulted.
+These plugins enforce review workflows. They block edits to relevant files until the appropriate review agent has been consulted.
 
-| Package | Plugin | Agent | Skills | What it enforces |
-|---------|--------|-------|--------|-----------------|
-| `@windyroad/architect` | wr-architect | `wr-architect:agent` | `/wr-architect:create-adr` | Architecture decisions reviewed before code changes |
-| `@windyroad/risk-scorer` | wr-risk-scorer | `wr-risk-scorer:agent` + 4 variants | `/wr-risk-scorer:update-policy` | Pipeline risk scoring, commit/push gates, secret leak detection |
-| `@windyroad/voice-tone` | wr-voice-tone | `wr-voice-tone:agent` | `/wr-voice-tone:update-guide` | User-facing copy reviewed against voice and tone guide |
-| `@windyroad/style-guide` | wr-style-guide | `wr-style-guide:agent` | `/wr-style-guide:update-guide` | CSS and UI components reviewed against style guide |
-| `@windyroad/jtbd` | wr-jtbd | `wr-jtbd:agent` | `/wr-jtbd:update-guide` | UI changes reviewed against jobs-to-be-done document |
-| `@windyroad/tdd` | wr-tdd | | `/wr-tdd:setup-tests` | Red-Green-Refactor TDD cycle enforced for implementation code |
-
-When a policy file is missing (e.g., no `docs/VOICE-AND-TONE.md`), the hooks block edits and direct you to the update-guide skill to generate one.
+| Package | What it enforces |
+|---------|-----------------|
+| [`@windyroad/architect`](packages/architect/) | Architecture decisions reviewed before code changes |
+| [`@windyroad/risk-scorer`](packages/risk-scorer/) | Pipeline risk scoring, commit/push gates, secret leak detection |
+| [`@windyroad/tdd`](packages/tdd/) | Red-Green-Refactor TDD cycle for implementation code |
+| [`@windyroad/voice-tone`](packages/voice-tone/) | User-facing copy reviewed against voice and tone guide |
+| [`@windyroad/style-guide`](packages/style-guide/) | CSS and UI components reviewed against style guide |
+| [`@windyroad/jtbd`](packages/jtbd/) | UI changes reviewed against jobs-to-be-done document |
 
 ### Process Tools
 
-| Package | Plugin | Skills | What it does |
-|---------|--------|--------|-------------|
-| `@windyroad/problem` | wr-problem | `/wr-problem:update-ticket` | ITIL-aligned problem management with WSJF prioritisation |
-| `@windyroad/retrospective` | wr-retrospective | `/wr-retrospective:run-retro` | Session retrospectives that update briefings and create problem tickets |
+| Package | What it does |
+|---------|-------------|
+| [`@windyroad/problem`](packages/problem/) | ITIL-aligned problem management with WSJF prioritisation |
+| [`@windyroad/retrospective`](packages/retrospective/) | Session retrospectives that update briefings and create problem tickets |
 
 ### Diagram Generation
 
-| Package | Plugin | Skills | What it does |
-|---------|--------|--------|-------------|
-| `@windyroad/c4` | wr-c4 | `/wr-c4:generate`, `/wr-c4:check` | C4 architecture diagram generation and validation |
-| `@windyroad/wardley` | wr-wardley | `/wr-wardley:generate` | Wardley Map generation |
+| Package | What it does |
+|---------|-------------|
+| [`@windyroad/c4`](packages/c4/) | C4 architecture diagram generation and validation |
+| [`@windyroad/wardley`](packages/wardley/) | Wardley Map generation from source code analysis |
 
-## Dependencies
+### Meta-Installer
 
-Some plugins depend on others:
+| Package | What it does |
+|---------|-------------|
+| [`@windyroad/agent-plugins`](packages/agent-plugins/) | One-command installer for all plugins |
 
-- **@windyroad/problem** requires: @windyroad/risk-scorer
-- **@windyroad/retrospective** requires: @windyroad/problem, @windyroad/risk-scorer
+## Dependencies Between Plugins
+
+Most plugins are standalone. Two have dependencies:
+
+```
+@windyroad/retrospective
+  └── @windyroad/problem
+        └── @windyroad/risk-scorer
+```
 
 The installer warns if dependencies are missing.
 
-## Updating
+## Updating and Uninstalling
 
 ```bash
 # Update everything
 npx @windyroad/agent-plugins --update
 
-# Update a single package
+# Update a single plugin
 npx @windyroad/architect --update
-```
 
-## Uninstalling
-
-```bash
 # Remove everything
 npx @windyroad/agent-plugins --uninstall
 
@@ -87,7 +112,7 @@ npx @windyroad/architect --uninstall
 
 ## Development
 
-For plugin development, use `--plugin-dir` to load directly from source:
+For plugin development, load directly from source with `--plugin-dir`:
 
 ```bash
 claude --plugin-dir ~/Projects/windyroad-agent-plugins/packages/architect
@@ -99,22 +124,44 @@ Or load all plugins at once:
 ./claude-wr.sh
 ```
 
-Changes take effect on session restart (no install/update needed).
+Changes take effect on session restart -- no install or update step needed.
+
+### Running Tests
+
+Hook tests use [BATS](https://github.com/bats-core/bats-core) (Bash Automated Testing System):
+
+```bash
+npm test
+```
+
+### Releasing
+
+This monorepo uses [Changesets](https://github.com/changesets/changesets) for versioning:
+
+```bash
+npx changeset        # Create a changeset
+npm run release      # Publish to npm
+npm run push:watch   # Push and watch CI
+```
 
 ## Monorepo Structure
 
 ```
 packages/
-  agent-plugins/    @windyroad/agent-plugins (meta-installer)
-  architect/        @windyroad/architect
-  risk-scorer/      @windyroad/risk-scorer
-  tdd/              @windyroad/tdd
-  voice-tone/       @windyroad/voice-tone
-  style-guide/      @windyroad/style-guide
-  jtbd/             @windyroad/jtbd
-  problem/          @windyroad/problem
-  retrospective/    @windyroad/retrospective
-  c4/               @windyroad/c4
-  wardley/          @windyroad/wardley
-  shared/           Shared install utilities
+  agent-plugins/    Meta-installer for all plugins
+  architect/        Architecture decision enforcement
+  risk-scorer/      Pipeline risk scoring and gates
+  tdd/              TDD state machine enforcement
+  voice-tone/       Voice and tone review
+  style-guide/      Style guide review
+  jtbd/             Jobs-to-be-done review
+  problem/          Problem management
+  retrospective/    Session retrospectives
+  c4/               C4 diagram generation
+  wardley/          Wardley Map generation
+  shared/           Shared install utilities (internal)
 ```
+
+## Licence
+
+[MIT](LICENSE)
