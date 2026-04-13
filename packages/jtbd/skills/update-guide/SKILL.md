@@ -1,5 +1,5 @@
 ---
-name: update-guide
+name: wr-jtbd:update-guide
 description: Create or update the project's docs/JOBS_TO_BE_DONE.md by examining existing features and asking the user about user jobs, personas, and desired outcomes.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 ---

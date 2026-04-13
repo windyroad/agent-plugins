@@ -1,5 +1,5 @@
 ---
-name: generate
+name: wr-wardley:generate
 description: Generate or update the project's Wardley Map by analyzing the codebase. Produces an OWM source file, SVG, and PNG.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---

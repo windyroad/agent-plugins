@@ -1,5 +1,5 @@
 ---
-name: create-adr
+name: wr-architect:create-adr
 description: Create a new Architecture Decision Record (MADR 4.0) in docs/decisions/. Examines existing decisions, asks about the problem and options, and writes a properly formatted ADR.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 ---

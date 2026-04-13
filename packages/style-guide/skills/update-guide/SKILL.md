@@ -1,5 +1,5 @@
 ---
-name: update-guide
+name: wr-style-guide:update-guide
 description: Create or update the project's docs/STYLE-GUIDE.md by examining existing CSS, components, and design patterns, then asking the user about style preferences.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 ---
