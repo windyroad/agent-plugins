@@ -37,9 +37,9 @@ Run the interactive setup skill:
 /wr-connect:setup
 ```
 
-This walks you through:
-1. Creating a Discord bot
-2. Configuring environment variables (bot token, channel ID, session name)
+This is an interactive walkthrough that guides you through:
+1. Creating a Discord bot (`wr-connect`)
+2. Storing credentials (`.env` file, 1Password, or shell profile)
 3. Installing the Discord channel plugin
 4. Configuring the security allowlist
 
