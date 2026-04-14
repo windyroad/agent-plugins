@@ -110,7 +110,16 @@ fi
 
 # Match gh pr merge. Should go via npm run release:watch instead.
 if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*gh pr merge(\s|$)'; then
-    risk_gate_deny "Use \`npm run release:watch\` instead of \`gh pr merge\`. It merges the release PR, watches the publish pipeline, and surfaces the production URL when live -- or tells you what failed and how to fix it."
+    # Check if the project has a release:watch script
+    if [ -f "package.json" ] && python3 -c "
+import json, sys
+pkg = json.load(open('package.json'))
+sys.exit(0 if 'release:watch' in pkg.get('scripts', {}) else 1)
+" 2>/dev/null; then
+        risk_gate_deny "Use \`npm run release:watch\` instead of \`gh pr merge\`. It merges the release PR, watches the publish pipeline, and surfaces the production URL when live -- or tells you what failed and how to fix it."
+    else
+        risk_gate_deny "Direct \`gh pr merge\` is blocked (no release:watch script found). Create a release:watch npm script that: (1) finds and merges the release PR with \`gh pr merge\`, (2) waits for the CI workflow with \`gh run list\`, and (3) watches it with \`gh run watch --exit-status\`. Then run \`npm run release:watch\` to release."
+    fi
     exit 0
 fi
 
