@@ -1,5 +1,12 @@
 # @windyroad/risk-scorer
 
+## 0.1.4
+
+### Patch Changes
+
+- 7ee97ba: Add README.md to every package and rewrite the root README with better engagement, problem statement, and project-scoped install documentation.
+- eb47a86: Improve git-push-gate hook to detect missing release:watch script and guide the agent to create one instead of directing to a non-existent command.
+
 ## 0.1.3
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @windyroad/wardley
 
+## 0.1.3
+
+### Patch Changes
+
+- 7ee97ba: Add README.md to every package and rewrite the root README with better engagement, problem statement, and project-scoped install documentation.
+
 ## 0.1.2
 
 ### Patch Changes
