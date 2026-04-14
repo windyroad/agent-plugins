@@ -55,6 +55,11 @@
       "name": "wr-tdd",
       "description": "TDD state machine enforcement (IDLE/RED/GREEN/BLOCKED)",
       "source": "./packages/tdd"
+    },
+    {
+      "name": "wr-connect",
+      "description": "Connect Claude Code sessions across repos via Discord (experimental)",
+      "source": "./packages/connect"
     }
   ]
 }

@@ -17,6 +17,7 @@ const PLUGINS = [
   "wr-problem",
   "wr-c4",
   "wr-wardley",
+  "wr-connect",
 ];
 
 const HELP = `
@@ -38,7 +39,7 @@ Options:
 
 Available plugins:
   architect, risk-scorer, voice-tone, style-guide, jtbd,
-  tdd, problem, retrospective, c4, wardley
+  tdd, problem, retrospective, c4, wardley, connect
 
 Examples:
   npx @windyroad/agent-plugins

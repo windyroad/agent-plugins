@@ -1,0 +1,31 @@
+{
+  "name": "@windyroad/connect",
+  "version": "0.1.0",
+  "description": "Connect Claude Code sessions across repos via Discord (experimental)",
+  "bin": {
+    "windyroad-connect": "./bin/install.mjs"
+  },
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/windyroad/agent-plugins.git",
+    "directory": "packages/connect"
+  },
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "ai-agent",
+    "ai-coding",
+    "cross-repo",
+    "discord",
+    "collaboration"
+  ],
+  "files": [
+    "bin/",
+    "hooks/",
+    "skills/",
+    ".claude-plugin/",
+    "lib/"
+  ]
+}

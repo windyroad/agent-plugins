@@ -1,6 +1,6 @@
 #!/bin/bash
 # JTBD - PreToolUse enforcement hook
-# BLOCKS Edit/Write to UI files until jtbd-lead is consulted.
+# BLOCKS Edit/Write to project files until jtbd-lead is consulted.
 # Uses shared review-gate.sh for TTL, drift detection, and fail-closed.
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -35,13 +35,35 @@ if [ -z "$FILE_PATH" ]; then
   exit 0
 fi
 
-# Gate UI component and route files
-case "$FILE_PATH" in
-  *.html|*.jsx|*.tsx|*.vue|*.svelte|*.ejs|*.hbs) ;;
-  *) exit 0 ;;
-esac
-
 BASENAME=$(basename "$FILE_PATH")
+
+# Exclude non-JTBD files (matches architect gate exclusions)
+case "$FILE_PATH" in
+  *.css|*.scss|*.sass|*.less)
+    exit 0 ;;
+  *.png|*.jpg|*.jpeg|*.gif|*.svg|*.ico|*.webp)
+    exit 0 ;;
+  *.woff|*.woff2|*.ttf|*.eot)
+    exit 0 ;;
+  *package-lock.json|*yarn.lock|*pnpm-lock.yaml)
+    exit 0 ;;
+  *.map)
+    exit 0 ;;
+  *.changeset/*.md|*/.changeset/*.md)
+    exit 0 ;;
+  */MEMORY.md|*/.claude/projects/*/memory/*)
+    exit 0 ;;
+  */.claude/plans/*.md|*.claude/plans/*.md)
+    exit 0 ;;
+  */RISK-POLICY.md)
+    exit 0 ;;
+  */.risk-reports/*)
+    exit 0 ;;
+  */docs/BRIEFING.md|docs/BRIEFING.md)
+    exit 0 ;;
+  */docs/problems/*.md|docs/problems/*.md)
+    exit 0 ;;
+esac
 
 # If no JTBD doc exists, block and direct to create skill
 if [ ! -f "docs/JOBS_TO_BE_DONE.md" ]; then

@@ -1,0 +1,5 @@
+{
+  "name": "wr-connect",
+  "version": "0.1.0",
+  "description": "Connect Claude Code sessions across repos via Discord (experimental)"
+}
