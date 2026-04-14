@@ -1,6 +1,6 @@
 ---
 name: wr-connect:setup
-description: Set up cross-repo collaboration via Discord. Interactive walkthrough with explicit opt-out before any configuration.
+description: Set up cross-repo collaboration via Discord. Step-by-step interactive walkthrough with explicit opt-out before any configuration.
 allowed-tools: Read, Bash, Glob, Grep, AskUserQuestion
 ---
 
@@ -12,225 +12,290 @@ allowed-tools: Read, Bash, Glob, Grep, AskUserQuestion
 This skill configures Discord as a collaboration channel so Claude Code sessions
 across different repos can communicate with zero idle token cost.
 
-**This is an interactive walkthrough.** Use AskUserQuestion at each step to confirm
-progress and gather details. Do NOT skip ahead — wait for the user at each checkpoint.
+**CRITICAL: Walk the user through ONE action at a time.** Never give a list of
+multiple actions and ask "done?" at the end. After EACH action, pause with
+AskUserQuestion (or plain prompt if unavailable) and wait for confirmation before
+giving the next instruction. If any step has sub-steps, treat each sub-step as
+its own checkpoint.
 
-**Important:** Each repo should have its own Discord bot so sessions are
-distinguishable in Discord. The bot name defaults to the org/repo from git remote.
+**Each repo should have its own Discord bot** so sessions are distinguishable
+in Discord. The bot name defaults to the org/repo from git remote.
 
-## Steps
+## Walkthrough
 
-### 1. Explain and opt-in
+### Stage 1: Opt-in
 
 Tell the user:
 
 > This plugin connects your Claude Code sessions across repos so they can
-> collaborate. For example, if Session A discovers a bug in a package from repo-b,
-> it can notify Session B (which is working on repo-b) without Session B polling or
-> wasting tokens. Sessions can hand off findings, ask questions, share context, or
-> coordinate work.
+> collaborate. Sessions can hand off findings, ask questions, share context,
+> or coordinate work — all via a shared Discord channel with zero idle token cost.
 >
 > Each repo gets its own Discord bot (so you can tell sessions apart in Discord).
-> You will need:
-> - A Discord account
-> - A Discord server with a channel for agent collaboration
-> - A few minutes to create a bot in the Discord Developer Portal
+> You will need a Discord account, a Discord server, and a few minutes to create
+> a bot in the Discord Developer Portal.
 
-Use AskUserQuestion:
-- "Would you like to proceed with setting up cross-repo collaboration via Discord?"
-- Options: "Yes, let's set it up" / "No, skip for now"
+**Checkpoint 1a:** Would you like to proceed?
+- yes → continue to Stage 2
+- no → stop and tell the user: "Setup skipped. Run `/wr-connect:setup` any time to start."
 
-If no:
-> Setup skipped. The connect plugin is inactive until configured.
-> Run `/wr-connect:setup` any time to start again.
+### Stage 2: Bot name
 
-Stop — do not proceed.
-
-### 2. Detect bot name
-
-Detect the org/repo from git remote to suggest a bot name:
-
+Detect the bot name from git remote:
 ```bash
 git remote get-url origin 2>/dev/null | sed 's|.*github.com[:/]||;s|\.git$||' | tr '/' '-'
 ```
 
-If no remote is found, use the directory name as a fallback.
+If no remote, use the directory name.
 
-Use AskUserQuestion:
-- "What should the Discord bot be called? This name will appear in Discord when this session sends messages."
-- Options: "<detected-name>" (e.g., "windyroad-agent-plugins") / "I want a different name"
+**Checkpoint 2a:** Confirm the bot name.
+> Detected bot name: `<detected-name>`. This is how the bot will appear in Discord.
+- Use this name → continue
+- Different name → ask what they want, then confirm and continue
 
-### 3. Check for existing Discord server
+### Stage 3: Discord server
 
-Use AskUserQuestion:
-- "Do you already have a Discord server for agent collaboration, or do you need to create one?"
-- Options: "I have a server" / "I need to create one"
+**Checkpoint 3a:** Do you have a Discord server for agent collaboration?
+- yes → continue to Stage 4
+- no → go to Stage 3b
 
-If they need to create one, guide them:
-1. Open Discord and click the **+** button in the server list
-2. Choose **Create My Own** > **For me and my friends**
-3. Name it something like `dev-agents`
-4. Create a private channel (e.g., `#agent-collab`)
+**Stage 3b: Create server** (only if needed)
 
-### 4. Create a Discord bot
+One action at a time:
 
-Tell the user to go to https://discord.com/developers/applications:
+**Checkpoint 3b.1:** Open Discord.
+> Open the Discord desktop or web app.
 
-**Instructions:**
-1. Click **New Application** — name it `<detected-bot-name>` from step 2
-2. Go to **Bot** in the sidebar. Give the bot the same username.
-3. Under **Token**, click **Reset Token** and copy the token (shown once).
-4. Under **Privileged Gateway Intents**, enable:
-   - **Message Content Intent** (to read message text)
-5. Go to **OAuth2 > URL Generator**:
-   - Scopes: `bot`
-   - Bot permissions: `View Channels`, `Send Messages`, `Send Messages in Threads`,
-     `Read Message History`, `Attach Files`, `Add Reactions`
-   - Integration type: **Guild Install**
-6. Copy the generated URL, open it in a browser, and add the bot to your server
+Wait for confirmation.
 
-Use AskUserQuestion:
-- "Have you created the bot and copied the token?"
-- Options: "Yes, I have the token" / "I need help with a step"
+**Checkpoint 3b.2:** Create the server.
+> Click the **+** button in the server list on the left.
 
-If they need help, ask which step is unclear.
+Wait for confirmation.
 
-### 5. Configure the Discord plugin with the token
+**Checkpoint 3b.3:** Choose type.
+> Choose **Create My Own** > **For me and my friends**.
 
-Tell the user to run the following command. **Do NOT paste the token yourself** —
-the user should type it directly to avoid the token appearing in conversation history:
+Wait for confirmation.
 
-> Run this command, replacing `<token>` with the bot token you copied:
+**Checkpoint 3b.4:** Name it.
+> Name it something like `dev-agents` or whatever you prefer.
+
+Wait for confirmation. Then continue to Stage 4.
+
+### Stage 4: Create the Discord application
+
+One action at a time. After each instruction, wait for confirmation.
+
+**Checkpoint 4a:** Open Developer Portal.
+> Go to https://discord.com/developers/applications in your browser.
+
+Wait for confirmation.
+
+**Checkpoint 4b:** Create application.
+> Click **New Application**. Name it `<detected-bot-name>`. Accept the terms and click **Create**.
+
+Wait for confirmation.
+
+**Checkpoint 4c:** Open the Bot section.
+> In the left sidebar, click **Bot**.
+
+Wait for confirmation.
+
+**Checkpoint 4d:** Set the bot username.
+> Set the bot's username to `<detected-bot-name>` (same as the application name).
+> Save changes.
+
+Wait for confirmation.
+
+**Checkpoint 4e:** Reset and copy the token.
+> Scroll up to the **Token** section. Click **Reset Token** and confirm.
+> Copy the token that appears — **it's only shown once**. Save it somewhere safe
+> for the next step.
+
+Wait for confirmation.
+
+**Checkpoint 4f:** Enable Message Content Intent.
+> Scroll down to **Privileged Gateway Intents**. Enable **Message Content Intent**.
+> Save changes.
+
+Wait for confirmation.
+
+### Stage 5: Invite the bot
+
+**Checkpoint 5a:** Open OAuth2 URL Generator.
+> In the left sidebar, click **OAuth2** > **URL Generator**.
+
+Wait for confirmation.
+
+**Checkpoint 5b:** Select scopes.
+> Under **Scopes**, check `bot`.
+
+Wait for confirmation.
+
+**Checkpoint 5c:** Select bot permissions.
+> Under **Bot Permissions**, check: `View Channels`, `Send Messages`,
+> `Send Messages in Threads`, `Read Message History`, `Attach Files`, `Add Reactions`.
+
+Wait for confirmation.
+
+**Checkpoint 5d:** Set integration type.
+> Set **Integration Type** to **Guild Install**.
+
+Wait for confirmation.
+
+**Checkpoint 5e:** Copy the URL.
+> Scroll down and copy the **Generated URL** at the bottom.
+
+Wait for confirmation.
+
+**Checkpoint 5f:** Invite the bot.
+> Paste the URL into your browser. Select your server. Click **Authorize**.
+
+Wait for confirmation. The bot should now appear in your server's member list.
+
+### Stage 6: Configure the token
+
+**Checkpoint 6a:** Run /discord:configure.
+
+Tell the user:
+> Now register the token with the Discord plugin. Run this command,
+> replacing `<token>` with the bot token you copied:
 > ```
 > /discord:configure <token>
 > ```
-> This saves the token securely at `~/.claude/channels/discord/.env`.
+> **Do NOT paste the token in chat** — type it directly into the slash command.
 
-Use AskUserQuestion:
-- "Have you run `/discord:configure` with your token?"
-- Options: "Yes, token is configured" / "I need help"
+Wait for confirmation.
 
-### 6. Restart with channels active
+### Stage 7: Restart with --channels
+
+**Checkpoint 7a:** Restart.
 
 Tell the user:
-
-> You need to restart Claude Code with the channels flag to connect to Discord:
+> Exit this Claude Code session and restart with the channels flag:
 > ```
 > claude --channels plugin:discord@claude-plugins-official
 > ```
-> The Discord plugin won't connect without this flag.
+> The Discord plugin won't connect without this flag. The SessionStart hook
+> will confirm when it's active.
 
-Use AskUserQuestion:
-- "Have you restarted with `--channels`? (If we're in a new session, just confirm)"
-- Options: "Yes, restarted" / "Not yet — I'll do it after setup"
+Wait for confirmation (or note that the remaining stages must be done in the
+restarted session).
 
-If not yet, note that steps 7-9 must be done in the restarted session.
+### Stage 8: Pair via DM
 
-### 7. Pair via DM
+One action at a time.
+
+**Checkpoint 8a:** DM the bot.
+> Open Discord. In your server's member list (or server icon dropdown),
+> click on your bot. Send it any DM (e.g., "hello").
+
+Wait for confirmation.
+
+**Checkpoint 8b:** Get the pairing code.
+> The bot should reply with a 6-character pairing code. If it doesn't respond,
+> the `--channels` flag might not be active — double-check the restart.
+
+Wait for confirmation with the code.
+
+**Checkpoint 8c:** Approve the pairing.
 
 Tell the user:
-
-> Open Discord and send a DM to your bot. The bot will reply with a 6-character
-> pairing code. Then run:
+> Run this in Claude Code, replacing `<code>` with the 6-character code:
 > ```
 > /discord:access pair <code>
 > ```
-> This adds your Discord user ID to the allowlist.
 
-Use AskUserQuestion:
-- "Have you paired successfully?"
-- Options: "Yes, I'm paired" / "The bot didn't respond" / "I need help"
+Wait for confirmation. Once paired, the bot will send a "you're in" message.
 
-If the bot didn't respond:
-- Check that the session is running with `--channels`
-- Check that the token was saved correctly (`/discord:configure` with no args shows status)
+### Stage 9: Lock down access
 
-### 8. Lock down access
+**Checkpoint 9a:** Add more people?
+> Is there anyone else who needs to reach this session via Discord?
+- yes → tell them to DM the bot, then approve each with `/discord:access pair <code>`
+- no → continue
+
+**Checkpoint 9b:** Lock to allowlist.
 
 Tell the user:
-
-> Now let's lock down access so only you can reach this session via Discord.
 > Switch from `pairing` mode (which lets anyone trigger pairing codes) to
 > `allowlist` mode:
 > ```
 > /discord:access policy allowlist
 > ```
 
-Use AskUserQuestion:
-- "Have you locked down to allowlist policy?"
-- Options: "Yes, locked down" / "I want to add more people first"
+Wait for confirmation.
 
-If they want to add more people, guide them:
-> Have them DM the bot to get a pairing code, then approve with
-> `/discord:access pair <code>`. Once everyone's in, run
-> `/discord:access policy allowlist` to lock it.
+### Stage 10: Guild channel (optional)
 
-### 9. Set up guild channel (optional)
+**Checkpoint 10a:** Want a guild channel?
+> For multi-agent collaboration, add a shared Discord channel that all
+> sessions can see.
+- yes → continue to 10b
+- no → skip to Stage 11
+
+**Checkpoint 10b:** Enable Developer Mode.
+> In Discord: **User Settings** > **Advanced** > enable **Developer Mode**.
+
+Wait for confirmation.
+
+**Checkpoint 10c:** Copy channel ID.
+> Right-click the channel you want to use and click **Copy Channel ID**.
+
+Wait for confirmation.
+
+**Checkpoint 10d:** Add the channel.
 
 Tell the user:
-
-> For multi-agent collaboration, you'll want a shared guild channel that all
-> sessions can see. Get the channel ID by right-clicking the channel in Discord
-> (with Developer Mode enabled) and clicking **Copy Channel ID**.
->
-> Then run:
+> Run this, replacing `<channel-id>` with what you copied:
 > ```
 > /discord:access group add <channel-id>
 > ```
-> Use `--no-mention` if you want the bot to see all messages (not just @mentions).
+> Add `--no-mention` if you want the bot to see all messages (not just @mentions).
 
-Use AskUserQuestion:
-- "Would you like to set up a guild channel now?"
-- Options: "Yes, I have the channel ID" / "No, DMs are enough for now"
+Wait for confirmation.
 
-If yes, guide them through the command.
+### Stage 11: Session name (optional)
 
-### 10. Configure session name (optional)
+**Checkpoint 11a:** Set session name.
 
-The session name is used by the `/wr-connect:send` skill to identify this session
-in messages. Detect from git remote:
-
+The session name identifies this session in messages. Check if it's already set:
 ```bash
-git remote get-url origin 2>/dev/null | sed 's|.*github.com[:/]||;s|\.git$||'
+echo "${WR_CONNECT_SESSION_NAME:-not set}"
 ```
 
-If a `.env.tpl` exists in the project, check if `WR_CONNECT_SESSION_NAME` is defined.
-If not, suggest adding it:
-
+If not set, tell the user to add it to their `.env` or shell profile:
 ```
-WR_CONNECT_SESSION_NAME={{ op://Private/wr-connect/session_name }}
+WR_CONNECT_SESSION_NAME=<org/repo>
 ```
 
-Or for projects without 1Password, the session name can be set directly:
-```bash
-export WR_CONNECT_SESSION_NAME="<org/repo>"
-```
+Wait for confirmation. (Not critical — the send skill falls back to git remote.)
 
-### 11. Test the setup
+### Stage 12: Test
 
-Use AskUserQuestion:
-- "Would you like to send a test message to verify everything works?"
-- Options: "Yes, send a test" / "No, I'll test later"
+**Checkpoint 12a:** Send a test message?
+- yes → use the Discord reply tool to send a test message to the channel,
+  or tell the user to DM the bot
+- no → skip
 
-If yes and a guild channel is set up, use the reply tool to send a message to
-the guild channel. If DM only, tell the user to DM the bot and check if it arrives.
-
-### 12. Explain collaboration behaviour
+### Stage 13: Summary
 
 Tell the user:
 
-> Setup complete! Here's how collaboration works:
+> Setup complete! Summary:
 >
-> - **Each repo has its own bot** — so you can see which session sent a message.
-> - **Multiple sessions and humans** can share the same guild channel.
-> - Use `@session-name` in messages to direct them at a specific session
->   (e.g. `/wr-connect:send @repo-b please fix Widget.parse()`).
-> - Messages without `@` are broadcast — all sessions see them.
-> - Each session reads everything for context but only responds when the message
->   is relevant to its work.
-> - Agents can react to messages for lightweight acknowledgement.
+> - Bot: `<bot-name>` created and added to your server
+> - Token: saved via `/discord:configure`
+> - Access: locked to allowlist (only you can reach this session)
+> - Guild channel: `<configured or skipped>`
 >
-> To set up another repo, install the wr-connect plugin there and run
-> `/wr-connect:setup` — it will create a new bot for that repo.
+> How collaboration works:
+> - Each repo has its own bot — you can see which session sent a message.
+> - Use `@session-name` to direct messages at a specific session.
+> - Messages without `@` are broadcast.
+> - Each session reads everything for context but only responds when relevant.
+> - Always prefix your Discord replies with `**<session-name>:**` so others
+>   can tell who you are.
 
 $ARGUMENTS
