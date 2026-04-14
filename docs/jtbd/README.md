@@ -1,0 +1,36 @@
+# Jobs To Be Done (JTBD) Index
+
+## Solo Developer
+
+Developer using AI coding agents for personal or small-team projects.
+
+[Persona definition](solo-developer/persona.md)
+
+### Proposed
+
+| ID | Job | File |
+|----|-----|------|
+| JTBD-001 | Enforce Governance Without Slowing Down | [JTBD-001-enforce-governance.proposed.md](solo-developer/JTBD-001-enforce-governance.proposed.md) |
+| JTBD-002 | Ship AI-Assisted Code with Confidence | [JTBD-002-ship-with-confidence.proposed.md](solo-developer/JTBD-002-ship-with-confidence.proposed.md) |
+| JTBD-003 | Compose Only the Guardrails I Need | [JTBD-003-compose-guardrails.proposed.md](solo-developer/JTBD-003-compose-guardrails.proposed.md) |
+| JTBD-004 | Connect Agents Across Repos to Collaborate | [JTBD-004-connect-agents.proposed.md](solo-developer/JTBD-004-connect-agents.proposed.md) |
+
+## Tech Lead / Consultant
+
+Tech lead or consultant responsible for code quality and governance across teams.
+
+[Persona definition](tech-lead/persona.md)
+
+*No jobs defined yet. Jobs 001 and 002 also serve this persona.*
+
+## Plugin Developer / Contributor
+
+Developer building new plugins or contributing to the suite.
+
+[Persona definition](plugin-developer/persona.md)
+
+### Proposed
+
+| ID | Job | File |
+|----|-----|------|
+| JTBD-101 | Extend the Suite with New Plugins | [JTBD-101-extend-suite.proposed.md](plugin-developer/JTBD-101-extend-suite.proposed.md) |

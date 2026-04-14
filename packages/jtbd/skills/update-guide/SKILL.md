@@ -1,21 +1,24 @@
 ---
 name: wr-jtbd:update-guide
-description: Create or update the project's docs/JOBS_TO_BE_DONE.md by examining existing features and asking the user about user jobs, personas, and desired outcomes.
+description: Create or update the project's docs/jtbd/ directory with per-persona directories and individual job files. Migrates from docs/JOBS_TO_BE_DONE.md if present.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 ---
 
 # Jobs To Be Done Document Generator
 
-Create or update `docs/JOBS_TO_BE_DONE.md` tailored to this project's users and their goals. The jtbd-lead agent reads this file to review UI changes against user jobs.
+Create or update `docs/jtbd/` with per-persona directories and individual job files.
+The wr-jtbd:agent reads these files to review changes against user jobs.
 
-## What belongs in docs/JOBS_TO_BE_DONE.md
+## Directory Structure
 
-- **User personas**: Who uses this product and what characterises them
-- **Jobs**: What users are trying to accomplish (functional, emotional, social)
-- **Job stories**: "When [situation], I want to [motivation], so I can [expected outcome]"
-- **Desired outcomes**: Measurable results users want from each job
-- **Current solutions**: How users currently accomplish these jobs (competitors, workarounds)
-- **Last reviewed date**: When the document was last reviewed or updated
+```
+docs/jtbd/
+  README.md                              # Index — tables of personas and jobs by status
+  <persona-name>/
+    persona.md                           # Persona definition
+    JTBD-NNN-<kebab-title>.proposed.md   # Proposed job
+    JTBD-NNN-<kebab-title>.validated.md  # Validated job
+```
 
 ## Steps
 
@@ -36,61 +39,138 @@ Examine the project to understand what it does and who uses it.
 - Look for onboarding flows, dashboards, settings, or admin areas
 - Check for different user roles (admin, member, viewer, etc.)
 
-**Discover existing JTBD artefacts**:
-- User stories in issues or project boards
-- Persona documents
-- User research notes or interview transcripts
-- Analytics configuration (what events are tracked?)
+### 2. Check for existing JTBD artefacts
 
-### 2. Check for existing document
+Check in order of preference:
 
-If `docs/JOBS_TO_BE_DONE.md` already exists, read it. Identify:
-- Whether jobs still match the current feature set
-- Whether personas still reflect the actual user base
-- Whether the last reviewed date is stale (> 2 weeks)
+1. `docs/jtbd/README.md` — directory structure already exists. Read and update.
+2. `docs/JOBS_TO_BE_DONE.md` — legacy single file. Offer to migrate to directory structure.
+3. Neither — fresh creation.
 
-### 3. Draft the JTBD document
+If migrating from `docs/JOBS_TO_BE_DONE.md`, extract existing personas and jobs and
+convert them into the directory structure. Ask the user before proceeding.
 
-Based on project discovery, draft sections covering:
+### 3. Draft personas
 
-**Personas** (2-4):
-For each persona, describe: who they are, what characterises them, what they care about, and what frustrates them. Ground these in the actual product, not generic archetypes.
+For each persona (2-4), create a file at `docs/jtbd/<persona-name>/persona.md`:
 
-**Jobs** (3-8):
-For each job:
-- A job statement: "Help [persona] [accomplish goal] when [situation]"
-- Whether it's functional, emotional, or social
-- Priority (must-have, important, nice-to-have)
+```markdown
+---
+name: <persona-name>
+description: <one-line description>
+---
 
-**Job Stories** (1-2 per job):
-"When [situation], I want to [motivation], so I can [expected outcome]"
+# <Persona Display Name>
 
-**Desired Outcomes** (per job):
-What does success look like? How would the user measure it?
+## Who
+<who this persona is>
 
-**Current Solutions**:
-How do users currently accomplish these jobs without (or with competitors to) this product?
+## Context Constraints
+<bullet list of constraints relevant to using this product>
 
-### 4. Confirm with the user
+## Pain Points
+<bullet list of frustrations this product addresses>
+```
 
-You MUST use the AskUserQuestion tool to collect user confirmation.
+Use kebab-case for the directory name (e.g., `solo-developer`, `tech-lead`).
 
-Present:
-1. The drafted personas and ask if they're accurate
-2. The jobs identified and ask if they cover the core value proposition
-3. The job stories and ask if the situations and motivations ring true
-4. Whether any user segments or jobs are missing
+### 4. Confirm personas with the user
 
-### 5. Write docs/JOBS_TO_BE_DONE.md
+Use AskUserQuestion to present the drafted personas and ask:
+- Are these the right personas?
+- Any missing user segments?
+- Any constraints or pain points to add?
 
-Write the document including:
-- A header with "Last reviewed" date (today's date)
-- All sections from step 3, refined based on user feedback from step 4
-- A note that the wr-jtbd:agent reads this file to review UI changes against user jobs
+### 5. Draft jobs
 
-If updating rather than creating:
-- Preserve existing content the user hasn't asked to change
-- Show the user a diff of what changed
-- Update the "Last reviewed" date
+For each job (3-8 per persona), create a file at
+`docs/jtbd/<persona-name>/JTBD-NNN-<kebab-title>.proposed.md`:
+
+```markdown
+---
+status: proposed
+job-id: <kebab-case-id>
+persona: <persona-name>
+date-created: YYYY-MM-DD
+screens:
+  - <route or screen path, if applicable>
+---
+
+# JTBD-NNN: <Title>
+
+## Job Statement
+When [situation], I want to [motivation], so I can [expected outcome].
+
+## Desired Outcomes
+<bullet list of measurable outcomes>
+
+## Persona Constraints
+<relevant constraints from persona definition>
+
+## Current Solutions
+<how users currently accomplish this without the product>
+```
+
+**ID ranges** — assign non-overlapping ranges per persona:
+- First persona: 001-099
+- Second persona: 100-199
+- Third persona: 200-299
+
+**Status** — new jobs start as `proposed`. They become `validated` when confirmed
+by user research or production use. To validate: rename the file from
+`.proposed.md` to `.validated.md` and update the status field.
+
+### 6. Confirm jobs with the user
+
+Use AskUserQuestion to present the drafted jobs and ask:
+- Do these jobs cover the core value proposition?
+- Do the job statements ring true?
+- Any missing jobs or user flows?
+
+### 7. Generate README.md index
+
+Write `docs/jtbd/README.md` with tables grouping jobs by persona and status:
+
+```markdown
+# Jobs To Be Done (JTBD) Index
+
+## <Persona Name>
+
+<one-line description>
+
+[Persona definition](<persona-name>/persona.md)
+
+### Validated
+
+| ID | Job | File |
+|----|-----|------|
+| JTBD-NNN | <title> | [JTBD-NNN-<title>.validated.md](<path>) |
+
+### Proposed
+
+| ID | Job | File |
+|----|-----|------|
+| JTBD-NNN | <title> | [JTBD-NNN-<title>.proposed.md](<path>) |
+```
+
+### 8. Handle legacy file
+
+If `docs/JOBS_TO_BE_DONE.md` exists, replace its content with a pointer:
+
+```markdown
+# Jobs To Be Done
+
+Job definitions have been migrated to individual files in `docs/jtbd/`.
+Each persona has its own directory with a persona definition and individual
+job files. See `docs/jtbd/README.md` for the full index.
+```
+
+### 9. Summary
+
+Report what was created:
+- Number of personas and their names
+- Number of jobs and their IDs
+- Files created/updated
+- Whether migration from legacy file was performed
 
 $ARGUMENTS
