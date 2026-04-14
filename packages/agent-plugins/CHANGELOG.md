@@ -1,5 +1,11 @@
 # @windyroad/agent-plugins
 
+## 0.1.4
+
+### Patch Changes
+
+- 93527a5: Add connect plugin for cross-repo collaboration between Claude Code sessions via Discord (experimental)
+
 ## 0.1.3
 
 ### Patch Changes
