@@ -43,7 +43,7 @@ check_risk_gate() {
     local CURRENT_HASH
     CURRENT_HASH=$("$_RISK_GATE_DIR/pipeline-state.sh" --hash-inputs 2>/dev/null | _hashcmd | cut -d' ' -f1)
     if [ "$STORED_HASH" != "$CURRENT_HASH" ]; then
-      RISK_GATE_REASON="Pipeline state drift: git diff changed between scoring and ${ACTION}. The hash is computed at prompt submit time. If you staged files (git add) after the prompt, re-submit: stage all files first, then submit a new prompt, then commit in that response."
+      RISK_GATE_REASON="Pipeline state drift: working tree changed since the last ${ACTION} risk assessment. Delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') to rescore against the current state."
       return 1
     fi
   fi
@@ -63,7 +63,7 @@ print('yes' if score >= 5 else 'no')
 " 2>/dev/null || echo "no")
 
   if [ "$DENIED" = "yes" ]; then
-    RISK_GATE_REASON="${ACTION} risk score ${SCORE}/25 (Medium or above). Reduce changes or address outstanding risk first, then re-run the risk-scorer agent."
+    RISK_GATE_REASON="${ACTION} risk score ${SCORE}/25 (Medium or above). To proceed: (1) split the ${ACTION}, (2) add risk-reducing measures, or (3) for a LIVE INCIDENT, delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') with incident context for an incident bypass."
     return 1
   fi
 

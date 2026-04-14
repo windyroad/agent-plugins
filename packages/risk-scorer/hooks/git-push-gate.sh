@@ -108,7 +108,7 @@ if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm run release:watch(\s|$)'; the
             exit 0
         fi
         if ! check_risk_gate "$SESSION_ID" "release"; then
-            risk_gate_deny "Release blocked: ${RISK_GATE_REASON}. To proceed: (1) split the release, (2) add risk-reducing measures, or (3) for a LIVE INCIDENT, delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') with incident context for an incident bypass."
+            risk_gate_deny "Release blocked: ${RISK_GATE_REASON}"
             exit 0
         fi
     fi
