@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.1.5
+
+### Patch Changes
+
+- b12e7c0: Fix misleading error messages in release gate: drift now clearly instructs "re-run risk-scorer", score-too-high retains "split/reduce/incident" guidance inline. Remove generic suffix in git-push-gate that conflated the two cases.
+
 ## 0.1.4
 
 ### Patch Changes
