@@ -1,5 +1,11 @@
 # @windyroad/connect
 
+## 0.3.1
+
+### Patch Changes
+
+- c65757b: Break setup skill into fine-grained checkpoints — one action per question instead of multi-step chunks. Agent now pauses after every instruction to confirm.
+
 ## 0.3.0
 
 ### Minor Changes
