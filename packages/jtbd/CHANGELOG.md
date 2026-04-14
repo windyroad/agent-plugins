@@ -1,5 +1,11 @@
 # @windyroad/jtbd
 
+## 0.3.0
+
+### Minor Changes
+
+- 2b39c9e: Migrate JTBD plugin to docs/jtbd/ directory structure with per-persona directories and individual job files (ADR-008). Backward compatible with docs/JOBS_TO_BE_DONE.md.
+
 ## 0.2.1
 
 ### Patch Changes
