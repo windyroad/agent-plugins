@@ -50,6 +50,15 @@ file_is_excluded() {
   file_is_excluded 'RISK-POLICY.md'
 }
 
+@test "enforce: excludes JOBS_TO_BE_DONE.md (P002 chicken-and-egg fix)" {
+  # Must have a case pattern that exempts the policy file itself
+  grep -q 'JOBS_TO_BE_DONE.md)' "$HOOK"
+}
+
+@test "enforce: excludes PRODUCT_DISCOVERY.md" {
+  file_is_excluded 'PRODUCT_DISCOVERY.md'
+}
+
 @test "enforce: does NOT have UI-only case guard" {
   # The old guard matched only UI extensions then exited for everything else.
   # The new hook should NOT exit 0 for all non-UI files.

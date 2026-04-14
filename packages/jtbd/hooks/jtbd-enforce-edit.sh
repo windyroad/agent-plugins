@@ -63,6 +63,10 @@ case "$FILE_PATH" in
     exit 0 ;;
   */docs/problems/*.md|docs/problems/*.md)
     exit 0 ;;
+  */docs/JOBS_TO_BE_DONE.md|docs/JOBS_TO_BE_DONE.md)
+    exit 0 ;;
+  */docs/PRODUCT_DISCOVERY.md|docs/PRODUCT_DISCOVERY.md)
+    exit 0 ;;
 esac
 
 # If no JTBD doc exists, block and direct to create skill
