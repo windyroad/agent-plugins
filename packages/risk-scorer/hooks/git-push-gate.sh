@@ -72,12 +72,19 @@ if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm run push:watch(\s|$)'; then
     exit 0
 fi
 
+# Block `changeset version` — versioning is done by the release pipeline,
+# not locally. Creating changesets (`npx changeset`) is fine.
+if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*(npx changeset|npm run changeset)\s+version(\s|$)'; then
+    risk_gate_deny "Do not run \`changeset version\` locally. The release pipeline handles versioning automatically. To release: (1) push your changes with \`npm run push:watch\`, (2) the pipeline creates a release PR via changesets, (3) merge the release PR to publish. If you need to create a changeset, use \`npx changeset\` (without \`version\`)."
+    exit 0
+fi
+
 # Gate changeset creation on release risk score (fail-closed).
 # Changesets feed directly into releases, so gate on the release score.
 if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*(npx changeset|npm run changeset)(\s|$)'; then
     if [ -n "$SESSION_ID" ]; then
         if ! check_risk_gate "$SESSION_ID" "release"; then
-            risk_gate_deny "Changeset blocked: ${RISK_GATE_REASON}"
+            risk_gate_deny "Changeset blocked: ${RISK_GATE_REASON}. To create a changeset, the release risk score must be within appetite. Delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') to assess."
             exit 0
         fi
     fi
