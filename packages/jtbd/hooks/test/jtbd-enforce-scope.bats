@@ -1,18 +1,35 @@
 #!/usr/bin/env bats
 
 # Tests for jtbd-enforce-edit.sh — verifies broadened scope with exclusions
+# Mix of grep-based pattern tests and functional execution tests.
 
 setup() {
   SCRIPT_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
   HOOK="$SCRIPT_DIR/jtbd-enforce-edit.sh"
+  ORIG_DIR="$PWD"
+  TEST_DIR=$(mktemp -d)
+  cd "$TEST_DIR"
 }
 
-# Helper: check if a file extension is in the exclusion list by grepping the hook
+teardown() {
+  cd "$ORIG_DIR"
+  rm -rf "$TEST_DIR"
+}
+
+# Helper: check if a pattern is in the exclusion list by grepping the hook
 file_is_excluded() {
   local pattern="$1"
-  # The hook should have a case statement that exits 0 for excluded files
   grep -q "$pattern" "$HOOK"
 }
+
+# Helper: run the hook with a mock JSON input for a given file path
+run_hook_with_file() {
+  local file_path="$1"
+  local json="{\"tool_input\":{\"file_path\":\"${file_path}\"},\"session_id\":\"test-session-$$\"}"
+  echo "$json" | bash "$HOOK"
+}
+
+# --- Pattern-based exclusion tests (grep) ---
 
 @test "enforce: excludes CSS files" {
   file_is_excluded '\.css'
@@ -50,17 +67,48 @@ file_is_excluded() {
   file_is_excluded 'RISK-POLICY.md'
 }
 
-@test "enforce: excludes JOBS_TO_BE_DONE.md (P002 chicken-and-egg fix)" {
-  # Must have a case pattern that exempts the policy file itself
-  grep -q 'JOBS_TO_BE_DONE.md)' "$HOOK"
-}
-
-@test "enforce: excludes PRODUCT_DISCOVERY.md" {
-  file_is_excluded 'PRODUCT_DISCOVERY.md'
-}
-
 @test "enforce: does NOT have UI-only case guard" {
-  # The old guard matched only UI extensions then exited for everything else.
-  # The new hook should NOT exit 0 for all non-UI files.
   ! grep -q '\*) exit 0 ;;' "$HOOK"
+}
+
+# --- Functional tests (execute hook with mock JSON) ---
+
+@test "functional: exempts docs/jtbd/ files" {
+  run run_hook_with_file "docs/jtbd/solo-developer/persona.md"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"BLOCKED"* ]]
+}
+
+@test "functional: exempts docs/jtbd/ job files" {
+  run run_hook_with_file "docs/jtbd/solo-developer/JTBD-001-governance.proposed.md"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"BLOCKED"* ]]
+}
+
+@test "functional: exempts docs/jtbd/README.md" {
+  run run_hook_with_file "docs/jtbd/README.md"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"BLOCKED"* ]]
+}
+
+@test "functional: exempts docs/JOBS_TO_BE_DONE.md (backward compat)" {
+  run run_hook_with_file "docs/JOBS_TO_BE_DONE.md"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"BLOCKED"* ]]
+}
+
+@test "functional: blocks src/index.ts when no JTBD docs exist" {
+  run run_hook_with_file "src/index.ts"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"BLOCKED"* ]]
+  [[ "$output" == *"wr-jtbd:update-guide"* ]]
+}
+
+@test "functional: blocks src/index.ts when docs/jtbd exists (needs review)" {
+  mkdir -p docs/jtbd
+  echo "# Index" > docs/jtbd/README.md
+  run run_hook_with_file "src/index.ts"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"BLOCKED"* ]]
+  [[ "$output" == *"wr-jtbd:agent"* ]]
 }

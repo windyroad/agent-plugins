@@ -1,6 +1,7 @@
 #!/bin/bash
 # JTBD - PreToolUse enforcement hook
 # BLOCKS Edit/Write to project files until jtbd-lead is consulted.
+# Supports both docs/jtbd/ directory (preferred) and docs/JOBS_TO_BE_DONE.md (legacy).
 # Uses shared review-gate.sh for TTL, drift detection, and fail-closed.
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -63,20 +64,30 @@ case "$FILE_PATH" in
     exit 0 ;;
   */docs/problems/*.md|docs/problems/*.md)
     exit 0 ;;
+  */docs/jtbd/*|docs/jtbd/*)
+    exit 0 ;;
   */docs/JOBS_TO_BE_DONE.md|docs/JOBS_TO_BE_DONE.md)
     exit 0 ;;
   */docs/PRODUCT_DISCOVERY.md|docs/PRODUCT_DISCOVERY.md)
     exit 0 ;;
 esac
 
-# If no JTBD doc exists, block and direct to create skill
-if [ ! -f "docs/JOBS_TO_BE_DONE.md" ]; then
-  review_gate_deny "BLOCKED: Cannot edit '${BASENAME}' because docs/JOBS_TO_BE_DONE.md does not exist. Run /wr-jtbd:update-guide to generate a JTBD document for this project, then delegate to wr-jtbd:agent for review."
+# Determine JTBD path — prefer directory, fall back to single file
+JTBD_PATH=""
+if [ -d "docs/jtbd" ]; then
+  JTBD_PATH="docs/jtbd"
+elif [ -f "docs/JOBS_TO_BE_DONE.md" ]; then
+  JTBD_PATH="docs/JOBS_TO_BE_DONE.md"
+fi
+
+# If no JTBD docs exist, block and direct to create skill
+if [ -z "$JTBD_PATH" ]; then
+  review_gate_deny "BLOCKED: Cannot edit '${BASENAME}' because no JTBD documentation exists. Run /wr-jtbd:update-guide to generate JTBD docs for this project, then delegate to wr-jtbd:agent for review."
   exit 0
 fi
 
 # Check gate with TTL + drift detection
-if check_review_gate "$SESSION_ID" "jtbd" "docs/JOBS_TO_BE_DONE.md"; then
+if check_review_gate "$SESSION_ID" "jtbd" "$JTBD_PATH"; then
   exit 0
 fi
 

@@ -38,9 +38,25 @@ teardown() {
   [[ "$output" == *"MANDATORY JTBD CHECK"* ]]
 }
 
+@test "eval: injects enforcement when docs/jtbd/README.md exists" {
+  mkdir -p docs/jtbd
+  echo "# Index" > docs/jtbd/README.md
+  run bash "$HOOK"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"MANDATORY JTBD CHECK"* ]]
+}
+
+@test "eval: prefers docs/jtbd/ over docs/JOBS_TO_BE_DONE.md when both exist" {
+  mkdir -p docs/jtbd
+  echo "# Index" > docs/jtbd/README.md
+  echo "# Jobs" > docs/JOBS_TO_BE_DONE.md
+  run bash "$HOOK"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"docs/jtbd"* ]]
+}
+
 @test "eval: does not reference UI-only scoping in output" {
   run bash "$HOOK"
   [ "$status" -eq 0 ]
-  # Should not contain the old UI-only messaging
   [[ "$output" != *"UI files"* ]]
 }

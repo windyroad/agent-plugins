@@ -1,13 +1,16 @@
 ---
-status: "proposed"
+status: "superseded"
 date: 2026-04-14
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent]
 informed: [Windy Road plugin users]
 reassessment-date: 2026-07-14
+superseded-by: [008-jtbd-directory-structure]
 ---
 
 # JTBD Project-Wide Enforcement
+
+> **Superseded by [ADR-008](008-jtbd-directory-structure.proposed.md)**. The project-wide enforcement scope from this decision is preserved in ADR-008. The change is to the JTBD document structure (single file to directory).
 
 ## Context and Problem Statement
 
