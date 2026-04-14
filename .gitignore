@@ -5,3 +5,4 @@ node_modules/
 
 # Runtime artifacts (created by risk-scorer hooks)
 .risk-reports/
+.env

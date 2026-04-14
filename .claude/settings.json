@@ -9,6 +9,8 @@
     "wr-retrospective@windyroad": true,
     "wr-problem@windyroad": true,
     "wr-c4@windyroad": true,
-    "wr-wardley@windyroad": true
+    "wr-wardley@windyroad": true,
+    "wr-connect@windyroad": true,
+    "discord@claude-plugins-official": true
   }
 }
