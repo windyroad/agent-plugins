@@ -1,9 +1,10 @@
 #!/bin/bash
 # TDD Gate - shared library for TDD enforcement hooks.
 # Sourced by tdd-inject.sh, tdd-enforce-edit.sh, tdd-post-write.sh, tdd-reset.sh.
-# Provides: tdd_classify_file, tdd_read_state, tdd_write_state, tdd_run_tests,
-#           tdd_add_test_file, tdd_get_test_files, tdd_cleanup, tdd_has_test_script,
-#           tdd_deny_json
+# Provides: tdd_classify_file, tdd_read_state, tdd_write_state, tdd_run_test_file,
+#           tdd_add_test_file, tdd_get_test_files, tdd_find_test_for_impl,
+#           tdd_read_state_for_impl, tdd_get_all_states, tdd_cleanup,
+#           tdd_has_test_script, tdd_deny_json
 
 # --- Configuration ---
 TDD_TEST_CMD="${TDD_TEST_CMD:-npm test --}"
@@ -58,17 +59,28 @@ tdd_classify_file() {
   echo "exempt"
 }
 
-# --- State Management ---
-# Marker files use session ID to isolate concurrent sessions
-_tdd_state_file() { echo "/tmp/tdd-state-${1}"; }
+# --- State Management (per-test-file) ---
+# State is stored per test file in a session-scoped directory.
+# Each test file gets its own state: IDLE, RED, GREEN, or BLOCKED.
+
+_tdd_state_dir() { echo "/tmp/tdd-state-${1}"; }
 _tdd_test_files_file() { echo "/tmp/tdd-test-files-${1}"; }
 _tdd_test_stdout_file() { echo "/tmp/tdd-test-stdout-${1}"; }
 
-# Read current state. Returns: IDLE, RED, GREEN, or BLOCKED
+# Encode a file path for use as a filename (replace / with __)
+_tdd_encode_path() {
+  echo "$1" | sed 's|/|__|g'
+}
+
+# Read state for a specific test file. Returns: IDLE, RED, GREEN, or BLOCKED
 tdd_read_state() {
   local SESSION_ID="$1"
-  local STATE_FILE
-  STATE_FILE=$(_tdd_state_file "$SESSION_ID")
+  local TEST_FILE="$2"
+  local STATE_DIR
+  STATE_DIR=$(_tdd_state_dir "$SESSION_ID")
+  local ENCODED
+  ENCODED=$(_tdd_encode_path "$TEST_FILE")
+  local STATE_FILE="${STATE_DIR}/${ENCODED}"
   if [ -f "$STATE_FILE" ]; then
     cat "$STATE_FILE"
   else
@@ -76,13 +88,17 @@ tdd_read_state() {
   fi
 }
 
-# Write state
+# Write state for a specific test file
 tdd_write_state() {
   local SESSION_ID="$1"
-  local NEW_STATE="$2"
-  local STATE_FILE
-  STATE_FILE=$(_tdd_state_file "$SESSION_ID")
-  echo "$NEW_STATE" > "$STATE_FILE"
+  local TEST_FILE="$2"
+  local NEW_STATE="$3"
+  local STATE_DIR
+  STATE_DIR=$(_tdd_state_dir "$SESSION_ID")
+  mkdir -p "$STATE_DIR"
+  local ENCODED
+  ENCODED=$(_tdd_encode_path "$TEST_FILE")
+  echo "$NEW_STATE" > "${STATE_DIR}/${ENCODED}"
 }
 
 # Track test files touched this session
@@ -108,31 +124,133 @@ tdd_get_test_files() {
   fi
 }
 
-# --- Test Runner ---
-# Runs tests for the session's tracked test files.
-# Returns: 0=pass, 1=fail, 124=timeout, other=error
-# Saves stdout to marker file for debugging.
-tdd_run_tests() {
+# --- Impl-to-Test Association ---
+# Given an implementation file, find its associated test file from tracked tests.
+# Convention: Hero.tsx ↔ Hero.test.tsx or Hero.spec.tsx (same dir or __tests__/)
+# Returns the first matching tracked test file, or empty string if none.
+tdd_find_test_for_impl() {
   local SESSION_ID="$1"
-  local STDOUT_FILE
-  STDOUT_FILE=$(_tdd_test_stdout_file "$SESSION_ID")
+  local IMPL_PATH="$2"
+  local DIR BASENAME STEM EXT
+  DIR=$(dirname "$IMPL_PATH")
+  BASENAME=$(basename "$IMPL_PATH")
+
+  # Strip extension to get stem (e.g., "Hero" from "Hero.tsx")
+  # Handle .ts, .tsx, .js, .jsx
+  case "$BASENAME" in
+    *.tsx) STEM="${BASENAME%.tsx}"; EXT="tsx" ;;
+    *.ts)  STEM="${BASENAME%.ts}";  EXT="ts" ;;
+    *.jsx) STEM="${BASENAME%.jsx}"; EXT="jsx" ;;
+    *.js)  STEM="${BASENAME%.js}";  EXT="js" ;;
+    *)     STEM="$BASENAME";       EXT="" ;;
+  esac
+
   local TEST_FILES
   TEST_FILES=$(tdd_get_test_files "$SESSION_ID")
-
   if [ -z "$TEST_FILES" ]; then
-    echo "No test files tracked" > "$STDOUT_FILE"
-    return 0  # No tests to run = pass (no-op)
+    echo ""
+    return
   fi
 
-  # Build argument list from tracked test files
-  local ARGS=""
-  while IFS= read -r f; do
-    ARGS="$ARGS $f"
+  # Check tracked test files for a match
+  # Priority: exact match in tracked files (any convention)
+  while IFS= read -r tracked; do
+    local tracked_dir tracked_base
+    tracked_dir=$(dirname "$tracked")
+    tracked_base=$(basename "$tracked")
+
+    # Same directory: Hero.test.tsx, Hero.spec.tsx, etc.
+    if [ "$tracked_dir" = "$DIR" ]; then
+      case "$tracked_base" in
+        "${STEM}.test."*|"${STEM}.spec."*) echo "$tracked"; return ;;
+      esac
+    fi
+
+    # __tests__ subdirectory: src/__tests__/Hero.test.tsx for src/Hero.tsx
+    if [ "$tracked_dir" = "${DIR}/__tests__" ]; then
+      case "$tracked_base" in
+        "${STEM}.test."*|"${STEM}.spec."*) echo "$tracked"; return ;;
+      esac
+    fi
+
+    # Parent __tests__: src/__tests__/Hero.test.tsx for src/components/Hero.tsx
+    # (only if dir contains __tests__)
+    case "$tracked" in
+      */__tests__/*)
+        case "$tracked_base" in
+          "${STEM}.test."*|"${STEM}.spec."*) echo "$tracked"; return ;;
+        esac
+        ;;
+    esac
   done <<< "$TEST_FILES"
 
-  # Run with timeout
+  # No tracked test found
+  echo ""
+}
+
+# Suggest a test file path for an impl file using naming convention.
+# Used for user-facing messages (e.g., "write src/Hero.test.tsx first").
+tdd_suggest_test_path() {
+  local IMPL_PATH="$1"
+  local DIR BASENAME STEM EXT
+  DIR=$(dirname "$IMPL_PATH")
+  BASENAME=$(basename "$IMPL_PATH")
+  case "$BASENAME" in
+    *.tsx) STEM="${BASENAME%.tsx}"; EXT="tsx" ;;
+    *.ts)  STEM="${BASENAME%.ts}";  EXT="ts" ;;
+    *.jsx) STEM="${BASENAME%.jsx}"; EXT="jsx" ;;
+    *.js)  STEM="${BASENAME%.js}";  EXT="js" ;;
+    *)     echo ""; return ;;
+  esac
+  echo "${DIR}/${STEM}.test.${EXT}"
+}
+
+# Read state for an implementation file by looking up its associated test
+tdd_read_state_for_impl() {
+  local SESSION_ID="$1"
+  local IMPL_PATH="$2"
+  local TEST_FILE
+  TEST_FILE=$(tdd_find_test_for_impl "$SESSION_ID" "$IMPL_PATH")
+  if [ -z "$TEST_FILE" ]; then
+    echo "IDLE"
+    return
+  fi
+  tdd_read_state "$SESSION_ID" "$TEST_FILE"
+}
+
+# Get all tracked test files with their states (format: "path:STATE" per line)
+tdd_get_all_states() {
+  local SESSION_ID="$1"
+  local TEST_FILES
+  TEST_FILES=$(tdd_get_test_files "$SESSION_ID")
+  if [ -z "$TEST_FILES" ]; then
+    return
+  fi
+  while IFS= read -r test_file; do
+    local state
+    state=$(tdd_read_state "$SESSION_ID" "$test_file")
+    echo "${test_file}:${state}"
+  done <<< "$TEST_FILES"
+}
+
+# --- Test Runner ---
+# Runs a single test file.
+# Returns: 0=pass, 1=fail, 124=timeout, other=error
+# Saves stdout to marker file for debugging.
+tdd_run_test_file() {
+  local SESSION_ID="$1"
+  local TEST_FILE="$2"
+  local STDOUT_FILE
+  STDOUT_FILE=$(_tdd_test_stdout_file "$SESSION_ID")
+
+  if [ -z "$TEST_FILE" ]; then
+    echo "No test file specified" > "$STDOUT_FILE"
+    return 0
+  fi
+
+  # Run with timeout — only the specified test file
   local EXIT_CODE
-  timeout "$TDD_TEST_TIMEOUT" bash -c "$TDD_TEST_CMD $ARGS" > "$STDOUT_FILE" 2>&1
+  timeout "$TDD_TEST_TIMEOUT" bash -c "$TDD_TEST_CMD $TEST_FILE" > "$STDOUT_FILE" 2>&1
   EXIT_CODE=$?
 
   return $EXIT_CODE
@@ -155,7 +273,9 @@ tdd_has_test_script() {
 # --- Cleanup ---
 tdd_cleanup() {
   local SESSION_ID="$1"
-  rm -f "$(_tdd_state_file "$SESSION_ID")"
+  local STATE_DIR
+  STATE_DIR=$(_tdd_state_dir "$SESSION_ID")
+  rm -rf "$STATE_DIR"
   rm -f "$(_tdd_test_files_file "$SESSION_ID")"
   rm -f "$(_tdd_test_stdout_file "$SESSION_ID")"
   rm -f "/tmp/tdd-setup-active-${SESSION_ID}"

@@ -1,6 +1,6 @@
 #!/bin/bash
 # TDD - PostToolUse hook (Edit|Write)
-# Runs tests after file writes and transitions state.
+# Runs only the relevant test after file writes and transitions per-file state.
 # Emits additionalContext with the current TDD state.
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -28,45 +28,49 @@ if [ "$FILE_TYPE" = "exempt" ]; then
   exit 0
 fi
 
-# Track test files
+# Determine which test file to run
+TEST_FILE=""
+
 if [ "$FILE_TYPE" = "test" ]; then
+  # Written a test file — track it and run it
   tdd_add_test_file "$SESSION_ID" "$FILE_PATH"
+  TEST_FILE="$FILE_PATH"
+elif [ "$FILE_TYPE" = "impl" ]; then
+  # Written an impl file — find and run its associated test
+  TEST_FILE=$(tdd_find_test_for_impl "$SESSION_ID" "$FILE_PATH")
 fi
 
-# Run tests
-tdd_run_tests "$SESSION_ID"
+# If no test file to run, nothing to do
+if [ -z "$TEST_FILE" ]; then
+  exit 0
+fi
+
+# Run only the relevant test file
+tdd_run_test_file "$SESSION_ID" "$TEST_FILE"
 TEST_EXIT=$?
 
-# Read current state
-OLD_STATE=$(tdd_read_state "$SESSION_ID")
+# Read current state for this specific test file
+OLD_STATE=$(tdd_read_state "$SESSION_ID" "$TEST_FILE")
 
-# Transition state based on file type + test result
+# Transition state based on test result
+# Only timeout (124) → BLOCKED. All other failures → RED.
 NEW_STATE="$OLD_STATE"
 
 if [ $TEST_EXIT -eq 0 ]; then
   # Tests pass
   NEW_STATE="GREEN"
-elif [ $TEST_EXIT -eq 1 ]; then
-  # Tests fail
-  case "$FILE_TYPE" in
-    test)
-      NEW_STATE="RED"
-      ;;
-    impl)
-      case "$OLD_STATE" in
-        RED) NEW_STATE="RED" ;;    # still working
-        GREEN) NEW_STATE="RED" ;;  # broke something
-        *) NEW_STATE="RED" ;;
-      esac
-      ;;
-  esac
-else
-  # Timeout (124) or other error
+elif [ $TEST_EXIT -eq 124 ]; then
+  # Timeout — genuinely broken setup
   NEW_STATE="BLOCKED"
+else
+  # Tests fail (exit code 1, 2, or any other non-zero)
+  # This includes import errors, syntax errors, assertion failures.
+  # All of these are RED — the user should write impl to fix them.
+  NEW_STATE="RED"
 fi
 
-# Write new state
-tdd_write_state "$SESSION_ID" "$NEW_STATE"
+# Write new state for this specific test file
+tdd_write_state "$SESSION_ID" "$TEST_FILE" "$NEW_STATE"
 
 # Read last test output for context
 STDOUT_FILE="/tmp/tdd-test-stdout-${SESSION_ID}"
@@ -85,7 +89,8 @@ fi
 
 cat <<EOF
 TDD STATE UPDATE: ${TRANSITION}
-Current state: ${NEW_STATE}
+Test file: ${TEST_FILE}
+State: ${NEW_STATE}
 File written: ${FILE_PATH} (${FILE_TYPE})
 Test result: exit code ${TEST_EXIT}
 EOF
@@ -99,15 +104,15 @@ fi
 case "$NEW_STATE" in
   RED)
     echo ""
-    echo "ACTION: Tests are failing. Write implementation code to make them pass."
+    echo "ACTION: Tests are failing for ${TEST_FILE}. Write implementation code to make them pass."
     ;;
   GREEN)
     echo ""
-    echo "ACTION: Tests are passing. You may refactor or write a new failing test for the next behavior."
+    echo "ACTION: Tests are passing for ${TEST_FILE}. You may refactor or write a new failing test for the next behavior."
     ;;
   BLOCKED)
     echo ""
-    echo "ACTION: Test runner error (exit code ${TEST_EXIT}). Fix the test setup before continuing."
+    echo "ACTION: Test runner timed out for ${TEST_FILE} (exit code ${TEST_EXIT}). Fix the test setup before continuing."
     ;;
 esac
 

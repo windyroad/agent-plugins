@@ -1,7 +1,8 @@
 #!/bin/bash
 # TDD - PreToolUse enforcement hook (Edit|Write)
-# Blocks implementation file edits unless state is RED or GREEN.
+# Blocks implementation file edits unless the associated test's state is RED or GREEN.
 # Test files and exempt files are always allowed.
+# Per-file state: a failing Countdown test does NOT block editing Hero.
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/lib/tdd-gate.sh"
@@ -38,25 +39,26 @@ if [ -z "$SESSION_ID" ]; then
   exit 0
 fi
 
-# Check state for implementation files
-STATE=$(tdd_read_state "$SESSION_ID")
+# Check state for THIS implementation file's associated test
+STATE=$(tdd_read_state_for_impl "$SESSION_ID" "$FILE_PATH")
 BASENAME=$(basename "$FILE_PATH")
+SUGGESTED_TEST=$(tdd_suggest_test_path "$FILE_PATH")
 
 case "$STATE" in
   RED|GREEN)
-    # Allowed: agent is in the TDD cycle
+    # Allowed: this file's test is in the TDD cycle
     exit 0
     ;;
   IDLE)
-    tdd_deny_json "BLOCKED: Cannot edit '${BASENAME}' -- no tests written yet. TDD state is IDLE. You MUST write a failing test first (*.test.ts or *.spec.ts) before editing implementation files. The test should describe the behavior you want to implement."
+    tdd_deny_json "BLOCKED: Cannot edit '${BASENAME}' -- no tests written for this file yet. TDD state is IDLE. Write a failing test first (e.g., ${SUGGESTED_TEST}) before editing this implementation file."
     exit 0
     ;;
   BLOCKED)
-    tdd_deny_json "BLOCKED: Cannot edit '${BASENAME}' -- test runner is in error state. TDD state is BLOCKED. Fix the test setup first (check test configuration, fix syntax errors in test files, or verify the test command works)."
+    tdd_deny_json "BLOCKED: Cannot edit '${BASENAME}' -- its test runner timed out. TDD state is BLOCKED. Fix the test setup for this file before continuing."
     exit 0
     ;;
   *)
-    tdd_deny_json "BLOCKED: Cannot edit '${BASENAME}' -- unknown TDD state '${STATE}'. Write a failing test first."
+    tdd_deny_json "BLOCKED: Cannot edit '${BASENAME}' -- unknown TDD state '${STATE}'. Write a failing test first (e.g., ${SUGGESTED_TEST})."
     exit 0
     ;;
 esac
