@@ -1,5 +1,11 @@
 # @windyroad/jtbd
 
+## 0.2.1
+
+### Patch Changes
+
+- e6a916a: Fix chicken-and-egg bug where JTBD enforce hook blocked creation of docs/JOBS_TO_BE_DONE.md itself (P002)
+
 ## 0.2.0
 
 ### Minor Changes
