@@ -1,5 +1,11 @@
 # @windyroad/jtbd
 
+## 0.2.0
+
+### Minor Changes
+
+- 93527a5: Broaden JTBD enforcement to all project files, not just web UI files. JTBD is a product-level concern that applies to any project type.
+
 ## 0.1.3
 
 ### Patch Changes
