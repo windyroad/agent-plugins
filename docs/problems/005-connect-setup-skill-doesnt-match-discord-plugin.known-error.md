@@ -1,6 +1,6 @@
 # Problem 005: Connect Setup Skill Doesn't Match Discord Plugin Flow
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-14
 **Priority**: 12 (High) — Impact: Significant (4) x Likelihood: Almost Certain (5) on first setup
 
@@ -50,8 +50,15 @@ Rewrite the setup skill to:
 
 - [x] Confirm root cause — setup skill doesn't match Discord plugin flow
 - [x] Read Discord plugin README for correct flow
-- [ ] Rewrite setup skill to integrate with Discord plugin
+- [x] Rewrite setup skill to integrate with Discord plugin
 - [ ] Test end-to-end setup flow in a clean project
+- [ ] Release and verify fix
+
+## Fix Released
+
+Setup skill rewritten to use `/discord:configure`, `--channels`, DM pairing,
+`/discord:access pair`, allowlist lockdown, and guild channel setup. Each repo
+gets its own bot named after org/repo. Awaiting release and verification.
 
 ## Related
 

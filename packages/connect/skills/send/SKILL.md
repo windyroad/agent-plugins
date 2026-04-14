@@ -1,34 +1,49 @@
 ---
 name: wr-connect:send
-description: Send a message to other Claude Code sessions via Discord.
-allowed-tools: Bash, AskUserQuestion
+description: Send a message to other Claude Code sessions via the Discord channel.
+allowed-tools: Bash, AskUserQuestion, mcp__plugin_discord_discord__reply, mcp__plugin_discord_discord__react, mcp__plugin_discord_discord__fetch_messages
 ---
 
 # Send Message
 
-Send a message from this session to other Claude Code sessions listening on the
-configured Discord channel.
+Send a message from this session to other Claude Code sessions on the shared
+Discord channel. Uses the Discord plugin's reply tool directly.
+
+## Prerequisites
+
+The Discord channel plugin must be active (`--channels plugin:discord@claude-plugins-official`).
+If not set up, run `/wr-connect:setup` first.
 
 ## Instructions
 
-### 1. Check environment variables
+### 1. Determine the channel
 
-Verify these environment variables are set:
-- `WR_CONNECT_BOT_TOKEN`
-- `WR_CONNECT_CHANNEL_ID`
-- `WR_CONNECT_SESSION_NAME`
+Check if `WR_CONNECT_CHANNEL_ID` is set:
 
 ```bash
-[ -n "$WR_CONNECT_BOT_TOKEN" ] && [ -n "$WR_CONNECT_CHANNEL_ID" ] && [ -n "$WR_CONNECT_SESSION_NAME" ] && echo "OK" || echo "MISSING"
+echo "${WR_CONNECT_CHANNEL_ID:-NOT SET}"
 ```
 
-If any are missing, tell the user:
+If not set, use `fetch_messages` to find the active guild channel, or ask the user
+which channel to send to via AskUserQuestion.
 
-> wr-connect is not configured. Run `/wr-connect:setup` first.
+### 2. Determine session name
 
-Then stop.
+Check if `WR_CONNECT_SESSION_NAME` is set:
 
-### 2. Get the message
+```bash
+echo "${WR_CONNECT_SESSION_NAME:-}"
+```
+
+If not set, detect from git remote:
+
+```bash
+git remote get-url origin 2>/dev/null | sed 's|.*github.com[:/]||;s|\.git$||'
+```
+
+If neither works, use the current directory name.
+
+### 3. Get the message
 
 The message to send is provided via `$ARGUMENTS`.
 
@@ -37,34 +52,22 @@ If `$ARGUMENTS` is empty, use AskUserQuestion to ask:
 > What message would you like to send to the other session(s)?
 > To direct your message to a specific session, start with @session-name.
 
-### 3. Send the message
+### 4. Send the message
 
-Format the message as: `[wr-connect] from: <SESSION_NAME> | <message>`
+Format the message as: `**<session-name>:** <message>`
 
-**@mentions:** If the user's message starts with `@<name>`, preserve it as-is in the
-message body. This tells the target session to prioritise the message. Messages
-without an `@` are treated as broadcast to all listening sessions.
+Use the Discord plugin's `reply` tool to send it to the channel:
 
-Send via the Discord API:
-
-```bash
-curl -s -o /tmp/wr-connect-response.json -w "%{http_code}" \
-  -X POST "https://discord.com/api/v10/channels/${WR_CONNECT_CHANNEL_ID}/messages" \
-  -H "Authorization: Bot ${WR_CONNECT_BOT_TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d "{\"content\": \"[wr-connect] from: ${WR_CONNECT_SESSION_NAME} | <MESSAGE>\"}"
+```
+reply(chat_id: "<channel-id>", text: "**<session-name>:** <message>")
 ```
 
-Replace `<MESSAGE>` with the actual message content. Escape any double quotes in the
-message before inserting into the JSON payload.
+**@mentions:** If the user's message starts with `@<name>`, preserve it in the
+message body. This tells the target session to prioritise the message.
 
-### 4. Report result
+### 5. Report result
 
-Check the HTTP status code returned by curl:
-- **200** or **201**: Message sent successfully. Report the formatted message to the user.
-- **429**: Rate limited. Tell the user to wait a moment and try again.
-- **401** or **403**: Authentication failed. Tell the user to check their bot token.
-- **Other**: Report the status code and response body for debugging.
+Confirm the message was sent and show the formatted text.
 
 ## Examples
 
@@ -74,16 +77,16 @@ Check the HTTP status code returned by curl:
 ```
 Sends:
 ```
-[wr-connect] from: repo-a | BUG: Widget.parse() throws on null input at line 47
+**windyroad/agent-plugins:** BUG: Widget.parse() throws on null input at line 47
 ```
 
 **Directed (specific session):**
 ```
-/wr-connect:send @repo-b BUG: Widget.parse() throws on null input at line 47
+/wr-connect:send @bbstats please fix Widget.parse()
 ```
 Sends:
 ```
-[wr-connect] from: repo-a | @repo-b BUG: Widget.parse() throws on null input at line 47
+**windyroad/agent-plugins:** @bbstats please fix Widget.parse()
 ```
 
 $ARGUMENTS

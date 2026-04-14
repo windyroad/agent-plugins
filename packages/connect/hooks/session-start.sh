@@ -1,18 +1,28 @@
 #!/bin/bash
 # wr-connect - SessionStart hook
-# Warns if env vars are configured but --channels is not active.
+# Outputs collaboration primer when Discord channel is active.
 # Always exits 0 (warns, never blocks).
 
-# If bot token is not set, plugin is inactive — exit silently
-if [ -z "${WR_CONNECT_BOT_TOKEN:-}" ]; then
+# Check if the Discord plugin is configured (token saved)
+DISCORD_ENV="$HOME/.claude/channels/discord/.env"
+if [ ! -f "$DISCORD_ENV" ]; then
+  # Discord plugin not configured — plugin is inactive, exit silently
   exit 0
 fi
 
-# If --channels is active, output collaboration primer
+# Check if --channels is active
 # NOTE: CLAUDE_CHANNELS is the expected env var when --channels is active.
 # This may change in future Claude Code versions; update if needed.
 if [ -n "${CLAUDE_CHANNELS:-}" ]; then
-  SESSION_NAME="${WR_CONNECT_SESSION_NAME:-unnamed}"
+  # Detect session name from env var or git remote
+  SESSION_NAME="${WR_CONNECT_SESSION_NAME:-}"
+  if [ -z "$SESSION_NAME" ]; then
+    SESSION_NAME=$(git remote get-url origin 2>/dev/null | sed 's|.*github.com[:/]||;s|\.git$||' || echo "")
+  fi
+  if [ -z "$SESSION_NAME" ]; then
+    SESSION_NAME=$(basename "$PWD")
+  fi
+
   cat <<PRIMER
 wr-connect: Collaboration channel active. Your session name is "${SESSION_NAME}".
 
@@ -30,13 +40,14 @@ SENDING:
 - Use /wr-connect:send to message the channel.
 - Use @<session-name> to direct a message to a specific session.
 - Be concise — other sessions will read your messages too.
+- Always prefix your replies with **${SESSION_NAME}:** so others know who sent it.
 PRIMER
   exit 0
 fi
 
-# Env vars set but --channels not active — warn
+# Discord configured but --channels not active — warn
 cat <<'EOF'
-wr-connect: Environment configured but --channels is not active.
+wr-connect: Discord is configured but --channels is not active.
 To enable cross-repo collaboration, restart with:
   claude --channels plugin:discord@claude-plugins-official
 EOF
