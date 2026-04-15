@@ -67,8 +67,11 @@ run_hook_with_file() {
   file_is_excluded 'RISK-POLICY.md'
 }
 
-@test "enforce: does NOT have UI-only case guard" {
-  ! grep -q '\*) exit 0 ;;' "$HOOK"
+@test "enforce: does NOT have UI-only extension filter (ADR-007/008)" {
+  # ADR-007/008 removed web-UI-only scoping. The hook must not filter
+  # by UI file extension. NOTE: `*) exit 0 ;;` is a legitimate pattern
+  # for the project-root check (P004) — see jtbd-project-root.bats.
+  ! grep -qE '\.html\||tsx\|jsx\|html\|vue\|svelte' "$HOOK"
 }
 
 # --- Functional tests (execute hook with mock JSON) ---
