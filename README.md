@@ -66,7 +66,7 @@ These plugins enforce review workflows. They block edits to relevant files until
 
 | Package | What it does |
 |---------|-------------|
-| [`@windyroad/problem`](packages/problem/) | ITIL-aligned problem management with WSJF prioritisation |
+| [`@windyroad/itil`](packages/itil/) | ITIL-aligned IT service management (problem management with WSJF prioritisation) |
 | [`@windyroad/retrospective`](packages/retrospective/) | Session retrospectives that update briefings and create problem tickets |
 
 ### Diagram Generation
@@ -88,7 +88,7 @@ Most plugins are standalone. Two have dependencies:
 
 ```
 @windyroad/retrospective
-  └── @windyroad/problem
+  └── @windyroad/itil
         └── @windyroad/risk-scorer
 ```
 

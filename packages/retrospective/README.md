@@ -12,7 +12,7 @@ The retrospective plugin:
 
 - **Reminds** you to run a retro when a session ends
 - **Updates** `docs/BRIEFING.md` with session learnings so future sessions start with context
-- **Creates problem tickets** (via [`@windyroad/problem`](../problem/)) for failures and friction encountered during the session
+- **Creates problem tickets** (via [`@windyroad/itil`](../itil/)) for failures and friction encountered during the session
 
 ## Install
 
@@ -22,7 +22,7 @@ npx @windyroad/retrospective
 
 Restart Claude Code after installing.
 
-> **Requires:** [`@windyroad/problem`](../problem/) and [`@windyroad/risk-scorer`](../risk-scorer/). The installer warns if they're missing.
+> **Requires:** [`@windyroad/itil`](../itil/) and [`@windyroad/risk-scorer`](../risk-scorer/). The installer warns if they're missing.
 
 ## Usage
 
@@ -40,7 +40,7 @@ The plugin also triggers a reminder via a `Stop` hook when a session ends natura
 
 | Hook | Trigger | What it does |
 |------|---------|-------------|
-| `check-deps.sh` | Session start | Verifies that `wr-problem` and `wr-risk-scorer` are installed |
+| `check-deps.sh` | Session start | Verifies that `wr-itil` and `wr-risk-scorer` are installed |
 | `retrospective-reminder.sh` | Session end | Reminds you to run a retrospective |
 
 ## Updating and Uninstalling

@@ -6,14 +6,14 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const utils = await import(resolve(__dirname, "../lib/install-utils.mjs"));
 
-const PLUGIN = "wr-problem";
+const PLUGIN = "wr-itil";
 const DEPS = ["wr-risk-scorer"];
 
 const flags = utils.parseStandardArgs(process.argv);
 
 if (flags.help) {
   console.log(`
-Usage: npx @windyroad/problem [options]
+Usage: npx @windyroad/itil [options]
 
 ITIL-aligned problem management with WSJF prioritisation
 

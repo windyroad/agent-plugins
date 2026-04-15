@@ -1,6 +1,6 @@
-# @windyroad/problem
+# @windyroad/itil
 
-**ITIL-aligned problem management for Claude Code.** Track recurring incidents, perform root cause analysis, and prioritise fixes using WSJF -- all inside your coding sessions.
+**ITIL-aligned IT service management for Claude Code.** Track recurring incidents, perform root cause analysis, and prioritise fixes using WSJF -- all inside your coding sessions.
 
 Part of [Windy Road Agent Plugins](../../README.md).
 
@@ -15,22 +15,26 @@ Bugs recur. Incidents repeat. Without a problem management process, you fix symp
 
 Problem tickets live in `docs/problems/` as markdown files -- version-controlled and always accessible.
 
+Room is reserved for peer ITIL skills (incident, change) under the same plugin as they are added.
+
 ## Install
 
 ```bash
-npx @windyroad/problem
+npx @windyroad/itil
 ```
 
 Restart Claude Code after installing.
 
 > **Requires:** [`@windyroad/risk-scorer`](../risk-scorer/). The installer warns if it's missing.
+>
+> **Renamed from `@windyroad/problem`** — see [ADR-010](../../docs/decisions/010-rename-wr-problem-to-wr-itil.proposed.md). If you had the old package installed, uninstall it (`npx @windyroad/problem --uninstall`) before installing `@windyroad/itil`.
 
 ## Usage
 
 **Create or update a problem ticket:**
 
 ```
-/wr-problem:update-ticket
+/wr-itil:manage-problem
 ```
 
 This supports:
@@ -49,8 +53,8 @@ This supports:
 ## Updating and Uninstalling
 
 ```bash
-npx @windyroad/problem --update
-npx @windyroad/problem --uninstall
+npx @windyroad/itil --update
+npx @windyroad/itil --uninstall
 ```
 
 ## Licence

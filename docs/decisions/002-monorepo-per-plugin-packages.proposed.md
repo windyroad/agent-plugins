@@ -26,7 +26,7 @@ Each plugin is already architecturally independent (own agent, own hooks, own sk
 - **User choice**: Different teams need different subsets. Architecture + TDD is a common combo; voice-tone + style-guide is another. Users should compose what they need.
 - **Standalone value**: C4, Wardley, and the meta-installer are useful outside the governance context.
 - **Cohesion**: Some plugins have skills that belong together (architect + adr skill, risk-scorer + risk-policy skill). These should ship as one unit.
-- **Dependency management**: wr-problem depends on wr-risk-scorer; wr-retrospective depends on both. Per-package installs must handle this.
+- **Dependency management**: wr-itil depends on wr-risk-scorer; wr-retrospective depends on both. Per-package installs must handle this.
 - **Maintainability**: All plugins share conventions, hook patterns, and the shared `check-deps.sh` library. A single repo is easier to maintain than 11 separate repos.
 - **Release coordination**: The marketplace and skills must stay in sync. A monorepo with npm workspaces gives atomic commits across all packages.
 
@@ -92,10 +92,10 @@ agent-plugins/
 │   │   ├── agents/
 │   │   ├── hooks/
 │   │   └── skills/wr:jtbd/SKILL.md
-│   ├── problem/                  @windyroad/problem
+│   ├── itil/                     @windyroad/itil
 │   │   ├── package.json
 │   │   ├── hooks/
-│   │   └── skills/wr:problem/SKILL.md
+│   │   └── skills/manage-problem/SKILL.md
 │   ├── retrospective/            @windyroad/retrospective
 │   │   ├── package.json
 │   │   ├── hooks/
@@ -121,8 +121,8 @@ agent-plugins/
   ├── @windyroad/voice-tone       (standalone)
   ├── @windyroad/style-guide      (standalone)
   ├── @windyroad/jtbd             (standalone)
-  ├── @windyroad/problem          (requires: @windyroad/risk-scorer)
-  ├── @windyroad/retrospective    (requires: @windyroad/problem, @windyroad/risk-scorer)
+  ├── @windyroad/itil             (requires: @windyroad/risk-scorer)
+  ├── @windyroad/retrospective    (requires: @windyroad/itil, @windyroad/risk-scorer)
   ├── @windyroad/c4               (standalone)
   └── @windyroad/wardley          (standalone)
 ```
@@ -181,7 +181,7 @@ Each per-plugin package would have its own bin script that:
 - `npx @windyroad/agent-plugins` still installs everything (backward compatible with ADR-001)
 - `npx @windyroad/agent-plugins --plugin architect tdd` installs only those two
 - `npx @windyroad/c4` installs C4 skills without any governance hooks
-- Installing `@windyroad/problem` warns that `@windyroad/risk-scorer` is required
+- Installing `@windyroad/itil` warns that `@windyroad/risk-scorer` is required
 - The marketplace still works: `claude plugin install wr-architect@windyroad`
 - Skills autocomplete works for individually installed packages
 

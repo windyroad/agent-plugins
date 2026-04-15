@@ -32,9 +32,9 @@
       "source": "./packages/jtbd"
     },
     {
-      "name": "wr-problem",
-      "description": "ITIL-aligned problem management",
-      "source": "./packages/problem"
+      "name": "wr-itil",
+      "description": "ITIL-aligned IT service management (problem, incident, change)",
+      "source": "./packages/itil"
     },
     {
       "name": "wr-retrospective",

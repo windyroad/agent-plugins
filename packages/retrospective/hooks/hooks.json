@@ -1,7 +1,7 @@
 {
   "hooks": {
     "SessionStart": [
-      { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/bin/check-deps.sh wr-retrospective wr-problem wr-risk-scorer" }] }
+      { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/bin/check-deps.sh wr-retrospective wr-itil wr-risk-scorer" }] }
     ],
     "Stop": [
       { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/retrospective-reminder.sh" }] }

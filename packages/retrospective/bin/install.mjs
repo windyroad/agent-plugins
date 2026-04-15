@@ -7,7 +7,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const utils = await import(resolve(__dirname, "../lib/install-utils.mjs"));
 
 const PLUGIN = "wr-retrospective";
-const DEPS = ["wr-problem", "wr-risk-scorer"];
+const DEPS = ["wr-itil", "wr-risk-scorer"];
 
 const flags = utils.parseStandardArgs(process.argv);
 

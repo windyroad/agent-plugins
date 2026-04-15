@@ -14,7 +14,7 @@ const PLUGINS = [
   "wr-jtbd",
   "wr-tdd",
   "wr-retrospective",
-  "wr-problem",
+  "wr-itil",
   "wr-c4",
   "wr-wardley",
   "wr-connect",
@@ -39,7 +39,7 @@ Options:
 
 Available plugins:
   architect, risk-scorer, voice-tone, style-guide, jtbd,
-  tdd, problem, retrospective, c4, wardley, connect
+  tdd, itil, retrospective, c4, wardley, connect
 
 Examples:
   npx @windyroad/agent-plugins

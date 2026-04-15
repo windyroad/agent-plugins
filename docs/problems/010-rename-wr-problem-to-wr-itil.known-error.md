@@ -1,6 +1,6 @@
 # Problem 010: Rename wr-problem to wr-itil
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-15
 **Priority**: 3 (Low) — Impact: Minor (2) x Likelihood: Possible (3)
 
@@ -67,13 +67,15 @@ Files to change (after ADR is approved):
 
 ### Investigation Tasks
 
-- [ ] Write ADR for the rename (next available: ADR-009)
+- [x] Write ADR for the rename — **ADR-010** (`docs/decisions/010-rename-wr-problem-to-wr-itil.proposed.md`)
 - [ ] List all references to `wr-problem` / `@windyroad/problem` / `update-ticket`
-- [ ] Plan migration path (deprecate old package or just rename?)
+- [ ] Plan migration path (deprecate old package or just rename?) — covered in ADR-010
 - [ ] Implement after ADR approval
 
 ## Related
 
-- Similar rename precedent: `cross-repo-signal → connect` (ADR-006)
+- ADR-010 — the decision record for this rename
+- ADR-006 — rename precedent (`cross-repo-signal → connect`)
+- ADR-002 — package inventory to update as part of the rename
 - `packages/problem/` — plugin to rename
 - `packages/retrospective/` — depends on `@windyroad/problem`

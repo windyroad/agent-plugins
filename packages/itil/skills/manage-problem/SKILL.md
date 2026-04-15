@@ -1,6 +1,6 @@
 ---
-name: wr-problem:update-ticket
-description: Create or update a problem ticket per PROBLEM-MANAGEMENT.md. Supports creating new problems, updating root cause analysis, transitioning status, and closing problems.
+name: wr-itil:manage-problem
+description: Create, update, or transition a problem ticket using an ITIL-aligned problem management workflow with WSJF prioritisation. Supports creating new problems, updating root cause analysis, transitioning status, and closing problems.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 ---
 
