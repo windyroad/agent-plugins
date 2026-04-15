@@ -60,7 +60,7 @@ grep -rn "grep -q.*HOOK" packages/*/hooks/test/*.bats
 - [x] Audit `packages/*/hooks/test/*.bats` for grep-based behavioural assertions (see Audit Findings below)
 - [x] Convert behavioural greps to functional tests — `jtbd-enforce-scope.bats` and `architect-enforce-scope.bats` (the two repeat-offender files)
 - [x] Update ADR-005 with the rule (added "Behavioural assertions must be functional" section)
-- [ ] Convert remaining files (see Remaining Work)
+- [x] Convert remaining files: `jtbd-mark-reviewed.bats` (now 9 functional tests) and `risk-score-mark.bats` (now 9 functional tests, 4 tautological tests deleted)
 
 ## Audit Findings
 
@@ -72,8 +72,8 @@ Categorised every `grep -q` in `packages/*/hooks/test/*.bats`:
 |------|------|--------|
 | `packages/jtbd/hooks/test/jtbd-enforce-scope.bats` | 22 + 9 exclusion tests + line 74 | **Converted this session** |
 | `packages/architect/hooks/test/architect-enforce-scope.bats` | 14 + 5 exemption tests | **Converted this session** |
-| `packages/jtbd/hooks/test/jtbd-mark-reviewed.bats` | 7, 12, 17, 18 | Pending |
-| `packages/risk-scorer/hooks/test/risk-score-mark.bats` | 9-23 (4 tautological tests) | Pending — these are `echo "literal" | grep "literal"` and always pass |
+| `packages/jtbd/hooks/test/jtbd-mark-reviewed.bats` | 7, 12, 17, 18 | **Converted (follow-up session)** — now 9 functional tests covering directory vs file path, hash content, FAIL verdict, plan marker, subagent routing |
+| `packages/risk-scorer/hooks/test/risk-score-mark.bats` | 9-23 (4 tautological tests) | **Converted (follow-up session)** — tautologies deleted, 9 real functional tests added covering pipeline scores, bypass markers, plan verdicts, and subagent routing |
 
 **B. Output greps over executed-hook stdout — keep**
 
@@ -101,22 +101,14 @@ tests gave no signal at all — they passed because the literal text appeared
 in source, even though the case branch wasn't matching the test inputs.
 This is exactly the failure mode P011 predicted.
 
-## Remaining Work
+## Resolution
 
-A follow-up session should convert:
-
-1. `jtbd-mark-reviewed.bats` — replace `grep -q '"docs/jtbd"' hook.sh` with
-   functional execution: setup `docs/jtbd/`, run hook with mock Agent JSON,
-   assert marker file is created and stored hash references the right path.
-2. `risk-score-mark.bats` lines 9-23 — delete the four tautological tests
-   (`echo "wr-X:Y" | grep "X.Y"` always passes) and replace with a real
-   functional test: pipe a mock Agent output containing `RISK_SCORES:
-   commit=N push=N release=N` to the hook and assert the score files appear
-   in the expected `_risk_dir`.
-
-Both are smaller in scope than the enforce-scope conversions and lower-risk
-(their patterns are more stable). Worth doing for completeness but not
-blocking the main fix.
+All four behavioural source-grep files are now functional. Audit is complete,
+ADR-005 codifies the rule, and converting `jtbd-mark-reviewed.bats` surfaced a
+test-only bug fix (its `_hashcmd` is `md5sum`, not `shasum -a 256` as my first
+draft assumed) — caught at the right layer, not in production. Awaiting
+verification that the next legitimate hook refactor doesn't false-positive
+a BATS test before closing.
 
 ## Related
 
