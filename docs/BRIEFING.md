@@ -14,6 +14,8 @@
 - **Discord plugin setup**: Use `/discord:configure <token>` to save the bot token (stored at `~/.claude/channels/discord/.env`). Restart with `--channels plugin:discord@claude-plugins-official` to connect. Pair via DM, then lock down with `/discord:access policy allowlist`.
 - **Each repo should have its own Discord bot** for wr-connect. Name it after the org/repo so sessions are distinguishable in Discord. One shared bot = all sessions look identical.
 - **`.env` may be a 1Password FIFO** (named pipe). Never `cat >` to it. Use `.env.tpl` with `op://` references and `op inject -i .env.tpl -o .env` instead.
+- **Plugin renames need 4 coordinated steps**: (1) rename in repo + push + release, (2) `claude plugin marketplace update windyroad` to refresh the cache, (3) edit `.claude/settings.json` directly to swap the enabled key (`claude plugin uninstall` refuses project-scope installs), (4) restart Claude Code. Then `npm deprecate "<old-pkg>@>=0.0.0" "<msg>"` — bare `*` returns 404; needs an explicit version range.
+- **1Password "Developer Environments"** (UI feature) are NOT accessible via `op` CLI (no `op env get`). To read a value into a script, fall back to a vault item or a project `.env` that already has it. Voder env vars include `NPM_AUTH_TOKEN` available in `bbstats/.env`.
 
 ## What Will Surprise You
 
