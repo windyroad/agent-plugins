@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.1.6
+
+### Patch Changes
+
+- ec16630: Add project-root check to all enforce hooks (P004). Absolute file paths outside the current project (e.g., ~/.claude/channels/discord/access.json) are no longer gated — gates now only fire on files within the project root.
+
 ## 0.1.5
 
 ### Patch Changes

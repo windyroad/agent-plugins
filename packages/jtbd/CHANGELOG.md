@@ -1,5 +1,11 @@
 # @windyroad/jtbd
 
+## 0.3.1
+
+### Patch Changes
+
+- ec16630: Add project-root check to all enforce hooks (P004). Absolute file paths outside the current project (e.g., ~/.claude/channels/discord/access.json) are no longer gated — gates now only fire on files within the project root.
+
 ## 0.3.0
 
 ### Minor Changes

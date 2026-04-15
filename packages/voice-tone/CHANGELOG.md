@@ -1,5 +1,11 @@
 # @windyroad/voice-tone
 
+## 0.1.4
+
+### Patch Changes
+
+- ec16630: Add project-root check to all enforce hooks (P004). Absolute file paths outside the current project (e.g., ~/.claude/channels/discord/access.json) are no longer gated — gates now only fire on files within the project root.
+
 ## 0.1.3
 
 ### Patch Changes
