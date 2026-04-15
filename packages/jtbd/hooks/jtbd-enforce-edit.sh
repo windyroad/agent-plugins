@@ -36,6 +36,17 @@ if [ -z "$FILE_PATH" ]; then
   exit 0
 fi
 
+# P004: Only gate files inside the project root. Absolute paths outside
+# $PWD (e.g., ~/.claude/channels/*) are not project files.
+case "$FILE_PATH" in
+  /*)
+    case "$FILE_PATH" in
+      "$PWD"/*) ;;
+      *) exit 0 ;;
+    esac
+    ;;
+esac
+
 BASENAME=$(basename "$FILE_PATH")
 
 # Exclude non-JTBD files (matches architect gate exclusions)

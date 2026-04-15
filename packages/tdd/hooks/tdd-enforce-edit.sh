@@ -16,6 +16,16 @@ if [ -z "$FILE_PATH" ]; then
   exit 0
 fi
 
+# P004: Only gate files inside the project root.
+case "$FILE_PATH" in
+  /*)
+    case "$FILE_PATH" in
+      "$PWD"/*) ;;
+      *) exit 0 ;;
+    esac
+    ;;
+esac
+
 # Classify first, then check test script (only impl files need gating)
 FILE_TYPE=$(tdd_classify_file "$FILE_PATH")
 if [ "$FILE_TYPE" != "impl" ]; then

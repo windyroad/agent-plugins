@@ -18,6 +18,16 @@ if [ -z "$SESSION_ID" ] || [ -z "$FILE_PATH" ]; then
   exit 0
 fi
 
+# P004: Only gate files inside the project root.
+case "$FILE_PATH" in
+  /*)
+    case "$FILE_PATH" in
+      "$PWD"/*) ;;
+      *) exit 0 ;;
+    esac
+    ;;
+esac
+
 # Only gate RISK-POLICY.md
 BASENAME=$(basename "$FILE_PATH")
 if [ "$BASENAME" != "RISK-POLICY.md" ]; then

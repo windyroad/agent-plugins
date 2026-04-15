@@ -35,6 +35,16 @@ if [ -z "$FILE_PATH" ]; then
   exit 0
 fi
 
+# P004: Only gate files inside the project root.
+case "$FILE_PATH" in
+  /*)
+    case "$FILE_PATH" in
+      "$PWD"/*) ;;
+      *) exit 0 ;;
+    esac
+    ;;
+esac
+
 # Gate all UI source files (CSS and component files)
 case "$FILE_PATH" in
   *.css|*.html|*.jsx|*.tsx|*.vue|*.svelte|*.ejs|*.hbs) ;;
