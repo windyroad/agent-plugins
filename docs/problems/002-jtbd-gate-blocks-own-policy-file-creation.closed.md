@@ -1,6 +1,6 @@
 # Problem 002: JTBD Gate Blocks Creation of Its Own Policy File
 
-**Status**: Known Error
+**Status**: Closed
 **Reported**: 2026-04-14
 **Priority**: 12 (High) — Impact: Significant (4) x Likelihood: Almost Certain (5) when first installing
 
@@ -43,7 +43,7 @@ Voice-tone and style-guide have the same `! -f` pattern (line 47 in both enforce
 - [x] Check if voice-tone and style-guide have the same bug (not affected due to UI-only scope)
 - [x] Add exemption for the policy file itself
 - [x] Create reproduction test (`jtbd-enforce-scope.bats` tests 10-11)
-- [ ] Release and verify fix in production
+- [x] Release and verify fix in production — released in @windyroad/jtbd@0.2.1, verified 2026-04-15 by deleting JTBD docs and confirming the JTBD gate no longer blocks recreation (only the architect gate fired, tracked separately as P009)
 
 ## Fix Strategy
 
