@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.2.0
+
+### Minor Changes
+
+- fe1b903: Gate markers now persist across prompts (ADR-009). Removed Stop-hook reset scripts from all 5 review plugins. Marker lifecycle is now governed entirely by TTL (30 min default, configurable via `*_TTL` env vars) + drift detection of policy files. Resolves P001 — reviews no longer need to re-run on every prompt. Note: this is a behaviour change; users who relied on fresh-review-every-prompt should set a shorter TTL.
+
 ## 0.1.6
 
 ### Patch Changes
