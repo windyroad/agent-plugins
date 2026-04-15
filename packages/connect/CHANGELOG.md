@@ -1,5 +1,11 @@
 # @windyroad/connect
 
+## 0.3.2
+
+### Patch Changes
+
+- 05e9e2a: Setup skill now requires AskUserQuestion tool (no plain-prompt fallback). If the tool is unavailable, the skill stops and asks the user to restart Claude Code.
+
 ## 0.3.1
 
 ### Patch Changes
