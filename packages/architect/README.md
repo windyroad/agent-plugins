@@ -44,7 +44,6 @@ This walks you through creating an ADR in [MADR 4.0](https://adr.github.io/madr/
 | `architect-plan-enforce.sh` | ExitPlanMode | Ensures plans are reviewed before execution |
 | `architect-mark-reviewed.sh` | Agent completes | Marks the review as done (TTL: 1800s) |
 | `architect-refresh-hash.sh` | After edit | Refreshes the content hash so the next edit triggers a fresh review |
-| `architect-reset-marker.sh` | Session end | Cleans up review markers |
 
 ## Agent
 

@@ -8,9 +8,6 @@
     ],
     "PostToolUse": [
       { "matcher": "Agent", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/jtbd-mark-reviewed.sh" }] }
-    ],
-    "Stop": [
-      { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/jtbd-reset-marker.sh" }] }
     ]
   }
 }

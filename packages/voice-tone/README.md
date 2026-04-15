@@ -39,8 +39,7 @@ This examines your existing content and asks about your brand voice, target audi
 |------|---------|-------------|
 | `voice-tone-eval.sh` | Every prompt | Evaluates whether the task involves user-facing copy |
 | `voice-tone-enforce-edit.sh` | Edit or Write | Blocks edits until the voice-tone agent has reviewed |
-| `voice-tone-mark-reviewed.sh` | Agent completes | Marks the review as done |
-| `voice-tone-reset-marker.sh` | Session end | Cleans up review markers |
+| `voice-tone-mark-reviewed.sh` | Agent completes | Marks the review as done (TTL: 1800s) |
 
 ## Agent
 

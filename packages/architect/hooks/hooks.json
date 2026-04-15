@@ -10,9 +10,6 @@
     "PostToolUse": [
       { "matcher": "Agent", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-mark-reviewed.sh" }] },
       { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-refresh-hash.sh" }] }
-    ],
-    "Stop": [
-      { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-reset-marker.sh" }] }
     ]
   }
 }

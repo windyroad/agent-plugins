@@ -8,9 +8,6 @@
     ],
     "PostToolUse": [
       { "matcher": "Agent", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/style-guide-mark-reviewed.sh" }] }
-    ],
-    "Stop": [
-      { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/style-guide-reset-marker.sh" }] }
     ]
   }
 }

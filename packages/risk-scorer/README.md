@@ -49,8 +49,6 @@ This creates a `RISK-POLICY.md` tailored to your project, defining impact levels
 | `wip-risk-mark.sh` | After edit | Records WIP risk assessment |
 | `risk-score-mark.sh` | Agent completes | Marks risk review as done |
 | `risk-hash-refresh.sh` | After Bash | Refreshes content hashes |
-| `risk-score-reset.sh` | Session end | Cleans up risk markers |
-| `risk-policy-reset-marker.sh` | Session end | Cleans up policy markers |
 
 ## Agents
 

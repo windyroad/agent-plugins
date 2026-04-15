@@ -39,8 +39,7 @@ This examines your existing features and asks about your user jobs, personas, an
 |------|---------|-------------|
 | `jtbd-eval.sh` | Every prompt | Evaluates whether the task involves user-facing UI |
 | `jtbd-enforce-edit.sh` | Edit or Write | Blocks edits until the JTBD agent has reviewed |
-| `jtbd-mark-reviewed.sh` | Agent completes | Marks the review as done |
-| `jtbd-reset-marker.sh` | Session end | Cleans up review markers |
+| `jtbd-mark-reviewed.sh` | Agent completes | Marks the review as done (TTL: 1800s) |
 
 ## Agent
 

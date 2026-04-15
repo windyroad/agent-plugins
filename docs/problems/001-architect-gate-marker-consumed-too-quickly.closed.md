@@ -1,6 +1,6 @@
 # Problem 001: Architect Gate Marker Consumed Too Quickly
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-04-14
 **Priority**: 8 (Medium) — Impact: Minor (2) x Likelihood: Likely (4)
 
@@ -81,9 +81,9 @@ Recommendation: Option 2. The TTL is 30 minutes, plenty of time for most dev ses
 - [x] Check if drift detection triggers on decision files written in same session — works correctly (`architect-refresh-hash.sh` updates stored hash post-write)
 - [x] Determine if marker is single-use by design — no, it's session-per-response by design via Stop hook
 - [x] Confirm TTL + drift would handle the case — yes, both are already implemented
-- [ ] Write ADR (next available: 009) with options + recommendation
-- [ ] Implement Option 2 across all 5 plugins
-- [ ] Add BATS tests verifying Stop hook does NOT remove marker
+- [x] ADR-009 written and committed
+- [x] Implemented Option 2: removed Stop reset hooks + hooks.json entries from all 5 plugins (architect, jtbd, voice-tone, style-guide, risk-scorer)
+- [x] Existing BATS tests continue to pass (113/113) — gate lifecycle now relies solely on TTL + drift
 
 ## Related
 

@@ -18,7 +18,7 @@ SESSION_ID=$(_get_session_id)
 MARKER="$(_risk_dir "$SESSION_ID")/wip-reviewed"
 
 # WIP marker persists after assessment — allows multiple edits.
-# Cleared on session end by risk-score-reset.sh (Stop hook).
+# Marker lifecycle: TTL + drift detection (ADR-009).
 # Agent case (marker creation) handled by risk-score-mark.sh.
 
 exit 0
