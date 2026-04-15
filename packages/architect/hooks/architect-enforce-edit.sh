@@ -53,6 +53,17 @@ case "$FILE_PATH" in
     exit 0 ;;
   */docs/problems/*.md|docs/problems/*.md)
     exit 0 ;;
+  # Peer-plugin policy files — governed by their own plugin's enforce hook, not architect (P009)
+  */docs/JOBS_TO_BE_DONE.md|docs/JOBS_TO_BE_DONE.md)
+    exit 0 ;;
+  */docs/PRODUCT_DISCOVERY.md|docs/PRODUCT_DISCOVERY.md)
+    exit 0 ;;
+  */docs/jtbd/*|docs/jtbd/*)
+    exit 0 ;;
+  */docs/VOICE-AND-TONE.md|docs/VOICE-AND-TONE.md)
+    exit 0 ;;
+  */docs/STYLE-GUIDE.md|docs/STYLE-GUIDE.md)
+    exit 0 ;;
 esac
 
 # Check gate

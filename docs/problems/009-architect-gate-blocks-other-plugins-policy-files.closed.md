@@ -1,6 +1,6 @@
 # Problem 009: Architect Gate Blocks Other Plugins' Policy Files
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-04-15
 **Priority**: 6 (Medium) — Impact: Minor (2) x Likelihood: Likely (4)
 
@@ -45,8 +45,20 @@ Add exclusions for:
 ### Investigation Tasks
 
 - [x] Confirm root cause — architect exclusion list doesn't cover peer plugin docs
-- [ ] Add exclusions for all peer plugin policy files
-- [ ] Add BATS tests
+- [x] Add exclusions for all peer plugin policy files
+- [x] Add BATS tests — `packages/architect/hooks/test/architect-enforce-scope.bats`
+- [x] Fix implemented in 2026-04-15
+
+## Fix
+
+Added peer-plugin policy file exclusions to `architect-enforce-edit.sh` case block:
+- `docs/JOBS_TO_BE_DONE.md`
+- `docs/PRODUCT_DISCOVERY.md`
+- `docs/jtbd/*`
+- `docs/VOICE-AND-TONE.md`
+- `docs/STYLE-GUIDE.md`
+
+5 BATS tests added to verify each exclusion is present. All 104 tests pass.
 
 ## Related
 

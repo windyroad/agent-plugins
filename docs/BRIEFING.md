@@ -22,5 +22,5 @@
 - **The marketplace resolves from the remote GitHub repo**, not the local working tree. You cannot install a new plugin until changes are pushed and `claude plugin marketplace update windyroad` pulls the latest.
 - **The risk-scorer PostToolUse hook uses regex dot** (`.`) not literal characters to match agent names. This was a deliberate fix — don't "correct" it back to dashes.
 - **The `skills` npm package installs to 45 AI tools** (Codex, Cursor, Cline, etc.), not just Claude Code. If cross-tool distribution is ever needed again, that's the mechanism.
-- **Plugin installs stack** — `claude plugin install` adds a new copy each time instead of replacing. Results in 6x duplicate entries in `plugin list`. Uninstall first to avoid duplication.
+- **`claude plugin list` shows installs across all projects, not just the current one.** If you see N entries for a plugin, they are N different project-scope installs (correct per ADR-004), not duplicates. Check `~/.claude/plugins/installed_plugins.json` for the `projectPath` of each entry.
 - **Edit gates block files outside the project** (e.g., `~/.claude/channels/discord/access.json`). Use bash to write non-project config files when gates are active.

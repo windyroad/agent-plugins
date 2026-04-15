@@ -1,6 +1,6 @@
 # Problem 003: Plugin Installs Stack Instead of Replacing
 
-**Status**: Open
+**Status**: Closed (not a bug)
 **Reported**: 2026-04-14
 **Priority**: 6 (Medium) — Impact: Minor (2) x Likelihood: Almost Certain (5)
 
@@ -27,15 +27,24 @@ Uninstall the plugin before reinstalling: `claude plugin uninstall <name>` then 
 
 ## Root Cause Analysis
 
-### Preliminary Hypothesis
+### Confirmed: Not a bug
 
-This may be a Claude Code platform issue (not our plugin code). The `claude plugin install` command may not check for existing installations before adding. Alternatively, our installer (`install-utils.mjs`) may need to uninstall before installing.
+Investigation (2026-04-15) found the 6 entries in `claude plugin list` correspond to **6 different projects**, each with its own `--scope project` install:
+
+- `/Users/tomhoward/Projects/windyroad-claude-plugin`
+- `/Users/tomhoward/Projects/windyroad`
+- `/Users/tomhoward/Projects/addressr`
+- `/Users/tomhoward/Projects/addressr-mcp`
+- `/Users/tomhoward/Projects/addressr-react`
+- `/Users/tomhoward/Projects/bbstats`
+
+This is correct behaviour per ADR-004 (project-scoped plugin install). `claude plugin list` lists all installs across all projects, not just the current project — arguably a display UX issue, but not duplication and not a hook-overhead problem (only the current project's hooks fire).
 
 ### Investigation Tasks
 
-- [ ] Confirm whether this is a Claude Code platform bug or our installer's responsibility
-- [ ] Check if `claude plugin install` has an `--update` or `--replace` flag
-- [ ] Update installer to uninstall before installing if needed
+- [x] Confirmed root cause — `installed_plugins.json` shows distinct `projectPath` per entry
+- [x] Checked install flags — no `--update`/`--replace`, but none needed
+- [x] Concluded: not a bug; ADR-004 working as intended
 
 ## Related
 
