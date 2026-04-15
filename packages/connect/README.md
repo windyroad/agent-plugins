@@ -3,7 +3,7 @@
 > **⚠ BLOCKED (as of 2026-04-15)** — Setup is not currently usable in Claude Code 2.1.108.
 > The `--channels` flag removes the `AskUserQuestion`, `EnterPlanMode`, and `ExitPlanMode`
 > tools that the interactive setup skill depends on. Tracked upstream at
-> [anthropics/claude-code#48216](https://github.com/anthropics/claude-code/issues/48216)
+> [anthropics/claude-code#42292](https://github.com/anthropics/claude-code/issues/42292)
 > and internally at
 > [P008](../../docs/problems/008-askuserquestion-unavailable-with-channels.open.md).
 > Do not attempt setup until this is resolved. The plugin's runtime (sending/receiving

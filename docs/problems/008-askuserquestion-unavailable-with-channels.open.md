@@ -50,4 +50,8 @@ Possible causes (not yet investigated):
 - `packages/connect/skills/setup/SKILL.md` — currently refuses to run without AskUserQuestion
 - ADR-006 — connect plugin decision
 - P007 — related platform limitation (Discord plugin doesn't deliver reactions)
-- Upstream issue: https://github.com/anthropics/claude-code/issues/48216
+- Upstream issue (canonical): https://github.com/anthropics/claude-code/issues/42292
+- Related upstream issues:
+  - https://github.com/anthropics/claude-code/issues/41787 (suggests per-prompt gating instead of global suppression)
+  - https://github.com/anthropics/claude-code/issues/40644 (AskUserQuestion specifically)
+- Our duplicate (closed): https://github.com/anthropics/claude-code/issues/48216
