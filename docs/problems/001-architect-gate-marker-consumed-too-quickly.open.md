@@ -27,17 +27,63 @@ Batch all Write/Edit calls together after a single architect review. If the mark
 
 ## Root Cause Analysis
 
-### Preliminary Hypothesis
+### Confirmed Root Cause (2026-04-15)
 
-The marker file at `/tmp/architect-reviewed-${SESSION_ID}` is likely being consumed (deleted) by the PostToolUse hook after the first successful edit, or the TTL (default 1800s) is not being refreshed correctly between rapid sequential edits. The `check_architect_gate` function in `packages/architect/hooks/lib/architect-gate.sh` does `touch "$MARKER"` to slide the TTL window, but the drift detection (`find docs/decisions ... | _hashcmd`) may be invalidating the marker if any decision file was written as part of the same batch.
+The **Stop hook** (`packages/architect/hooks/architect-reset-marker.sh`) removes the marker at the end of every assistant response:
+
+```bash
+rm -f "/tmp/architect-reviewed-${SESSION_ID}"
+rm -f "/tmp/architect-reviewed-${SESSION_ID}.hash"
+```
+
+Claude Code's `Stop` event fires when the assistant finishes responding. So every new user prompt requires a fresh architect review — even when no architectural context has changed.
+
+The same pattern exists in **all 5 review plugins**:
+- `architect/hooks/architect-reset-marker.sh`
+- `jtbd/hooks/jtbd-reset.sh`
+- `voice-tone/hooks/voice-tone-reset-marker.sh`
+- `style-guide/hooks/style-guide-reset-marker.sh`
+- `risk-scorer/hooks/...-reset.sh`
+
+The user-facing symptom ("multiple re-reviews per prompt turn") is slightly inaccurate — it's actually "re-review every prompt (every assistant response)". Still painful in the same way.
+
+### The conflict
+
+The gate library (`architect-gate.sh::check_architect_gate`) already implements TTL + drift detection:
+
+- **TTL**: 30 min (`ARCHITECT_TTL=1800`), sliding window (`touch "$MARKER"` on each check)
+- **Drift detection**: hash of `docs/decisions/*.md`; mismatch invalidates marker
+
+These two controls are sufficient to determine when re-review is genuinely needed:
+- TTL expiry → obvious stale review
+- Drift (decisions changed) → needs re-review for new context
+- Neither → review is still valid
+
+The Stop reset hook **overrides** this design, forcing re-review on every turn regardless of TTL or drift.
+
+This conflicts with JTBD-001's documented outcome: *"Reviews complete in under 60 seconds so they don't break flow."* Re-reviewing on every prompt routinely blows past 60s.
+
+### Fix Strategy (requires ADR)
+
+**Proposed: remove the Stop reset hooks across all 5 plugins.** Rely on TTL + drift detection (and per-plugin drift-tracked files like `docs/jtbd/`, `docs/VOICE-AND-TONE.md`, etc.).
+
+Because this change affects 5 plugins and is a meaningful behaviour shift, it needs an ADR. Options to document:
+
+1. **Always reset on Stop** (status quo) — safest, most overhead
+2. **TTL + drift only** (no Stop reset) — lowest friction, relies on drift detection being comprehensive
+3. **Hybrid** — reset some marker types (e.g., ephemeral verdicts) but keep the long-lived review markers
+
+Recommendation: Option 2. The TTL is 30 minutes, plenty of time for most dev sessions. Drift detection already catches the actual invalidation condition (policy files changed).
 
 ### Investigation Tasks
 
-- [ ] Investigate whether the PostToolUse hook (`architect-refresh-hash.sh`) is deleting the marker
-- [ ] Check if drift detection triggers on decision files written in the same session
-- [ ] Determine if the marker is single-use by design or if this is a bug
-- [ ] Create reproduction test
-- [ ] Create INVEST story for permanent fix
+- [x] Investigate whether PostToolUse hook deletes marker — no, only Stop hook does
+- [x] Check if drift detection triggers on decision files written in same session — works correctly (`architect-refresh-hash.sh` updates stored hash post-write)
+- [x] Determine if marker is single-use by design — no, it's session-per-response by design via Stop hook
+- [x] Confirm TTL + drift would handle the case — yes, both are already implemented
+- [ ] Write ADR (next available: 009) with options + recommendation
+- [ ] Implement Option 2 across all 5 plugins
+- [ ] Add BATS tests verifying Stop hook does NOT remove marker
 
 ## Related
 
