@@ -1,5 +1,11 @@
 # @windyroad/connect
 
+## 0.3.3
+
+### Patch Changes
+
+- a0ecdf3: Add BLOCKED notice to README — setup skill is currently unusable due to upstream claude-code#48216 removing AskUserQuestion/EnterPlanMode/ExitPlanMode from `--channels` sessions. Runtime (send/receive) still works; only guided setup is affected.
+
 ## 0.3.2
 
 ### Patch Changes
