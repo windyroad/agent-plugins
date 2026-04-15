@@ -1,5 +1,11 @@
 # @windyroad/connect
 
+## 0.3.4
+
+### Patch Changes
+
+- 24597ed: Update BLOCKED notice to link to canonical upstream issue #42292 (our filing #48216 was a duplicate).
+
 ## 0.3.3
 
 ### Patch Changes
