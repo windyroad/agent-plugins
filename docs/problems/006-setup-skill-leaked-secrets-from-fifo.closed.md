@@ -1,6 +1,6 @@
 # Problem 006: Setup Skill Leaked Secrets by Reading 1Password FIFO
 
-**Status**: Open
+**Status**: Closed (documented guidance only; no enforceable code fix)
 **Reported**: 2026-04-14
 **Priority**: 10 (High) — Impact: Severe (5) x Likelihood: Unlikely (2)
 
@@ -31,18 +31,30 @@ Never `cat`, `head`, `tail`, or `Read` a `.env` file without first checking if i
 
 The agent ran `cat .env` without checking the file type. The `.env` was a named pipe (FIFO) created by 1Password's desktop app "Environments" feature. Reading a FIFO consumes its content and serves all resolved secrets, not template references.
 
-### Fix Strategy
+### Fix Strategy — REJECTED
 
-1. Add a safety check to the setup skill: `[ -p .env ] && echo "WARNING: .env is a 1Password FIFO — do not read it"` before any file operations on `.env`
-2. Consider adding a general rule to CLAUDE.md: "Never read `.env` files without checking `[ -p .env ]` first"
-3. The `.env.tpl` approach (committed template with `op://` refs, `op inject` to produce `.env`) avoids the FIFO entirely
+Initial strategy proposed in-plugin mitigations (FIFO check in setup skill; secret-leak-gate detection of FIFO reads). On review these were rejected:
+
+1. **Setup-skill FIFO check**: narrowly scoped — only fires in one skill, doesn't prevent the agent from `cat`ing any other `.env` FIFO anywhere.
+2. **secret-leak-gate FIFO detection**: architecturally messy — the gate operates on Edit/Write, not Read/Bash output. Intercepting reads would require a fundamentally different hook.
+3. **CLAUDE.md rule**: only effective for users who install the rule; many don't.
+
+The root cause is a general agent-behaviour concern (be careful with `.env` files that may be FIFOs), not something our plugin suite can enforce in code for the whole ecosystem.
+
+### Resolution
+
+Documented in `docs/BRIEFING.md`:
+
+> `.env` may be a 1Password FIFO (named pipe). Never `cat >` to it. Use `.env.tpl` with `op://` references and `op inject -i .env.tpl -o .env` instead.
+
+Closing as **accepted behaviour** — agents working in this repo will read the briefing and be aware. Users of the plugins downstream need to be aware through their own practices. We have no mechanism to enforce this globally.
 
 ### Investigation Tasks
 
 - [x] Confirm root cause — agent read FIFO without checking type
-- [ ] Add FIFO detection to the setup skill
-- [ ] Add FIFO warning to CLAUDE.md or BRIEFING.md
-- [ ] Consider adding FIFO detection to the secret-leak-gate hook
+- [x] Rejected in-plugin mitigations as too narrow / architecturally unfit
+- [x] Documented in BRIEFING.md
+- [x] Closed as "not solvable in our code"
 
 ## Related
 
