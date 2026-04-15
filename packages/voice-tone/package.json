@@ -1,6 +1,6 @@
 {
   "name": "@windyroad/voice-tone",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Voice and tone enforcement for user-facing copy",
   "bin": {
     "windyroad-voice-tone": "./bin/install.mjs"
