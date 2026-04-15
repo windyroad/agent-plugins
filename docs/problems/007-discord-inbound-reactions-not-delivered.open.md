@@ -18,6 +18,10 @@ When a user reacts to a bot message in Discord with an emoji, the reaction event
 
 Users must send a text message instead of reacting. No lightweight acknowledgement mechanism available.
 
+## Status: Parked pending upstream (2026-04-15)
+
+Blocker is in the Discord channel plugin (or deeper in the MCP channel protocol), not our code. Reactions aren't forwarded as channel events. Reopen when the connect plugin becomes a higher priority or when upstream adds reaction-event support. Investigation (which layer is responsible) is still pending — worth ~1h when revisited.
+
 ## Impact Assessment
 
 - **Who is affected**: All users of wr-connect / Discord channel plugin

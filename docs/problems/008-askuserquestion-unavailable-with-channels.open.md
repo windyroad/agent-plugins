@@ -22,6 +22,10 @@ Tested:
 
 Run setup in a session without `--channels` (steps 1-7), then restart with `--channels` for pairing (stages 8+). Setup skill's Stage 7 already documents the restart — but the user then loses AskUserQuestion for stages 8-13.
 
+## Status: Parked pending upstream (2026-04-15)
+
+Blocker is in Claude Code's `--channels` flag, not our code. Upstream issues filed (see Related). Reopen when upstream moves or when the connect plugin becomes a higher priority than other work. A local fallback (plain-prompt path when AskUserQuestion is unavailable) is possible but deferred until then — the two-session workaround is usable.
+
 ## Impact Assessment
 
 - **Who is affected**: Every wr-connect user running the setup skill
