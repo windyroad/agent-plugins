@@ -13,10 +13,15 @@ This skill configures Discord as a collaboration channel so Claude Code sessions
 across different repos can communicate with zero idle token cost.
 
 **CRITICAL: Walk the user through ONE action at a time.** Never give a list of
-multiple actions and ask "done?" at the end. After EACH action, pause with
-AskUserQuestion (or plain prompt if unavailable) and wait for confirmation before
-giving the next instruction. If any step has sub-steps, treat each sub-step as
-its own checkpoint.
+multiple actions and ask "done?" at the end. After EACH action, pause with the
+AskUserQuestion tool (this is mandatory — do NOT fall back to plain prompts)
+and wait for confirmation before giving the next instruction. If any step has
+sub-steps, treat each sub-step as its own checkpoint.
+
+**If AskUserQuestion is not available** (MCP server disconnected), stop the
+skill and tell the user to restart Claude Code so the tool is available. Do
+NOT continue with plain-text prompts — the checkpointed flow depends on
+structured questions.
 
 **Each repo should have its own Discord bot** so sessions are distinguishable
 in Discord. The bot name defaults to the org/repo from git remote.
