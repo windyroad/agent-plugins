@@ -1,8 +1,8 @@
 # Problem 011: Grep-based BATS tests produce false positives on legitimate refactors
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-15
-**Priority**: 4 (Low) — Impact: Minor (2) x Likelihood: Likely (4)
+**Priority**: 8 (Medium) — Impact: Minor (2) x Likelihood: Likely (4)
 
 ## Description
 
@@ -57,9 +57,66 @@ grep -rn "grep -q.*HOOK" packages/*/hooks/test/*.bats
 ### Investigation Tasks
 
 - [x] Identify root cause (this session)
-- [ ] Audit `packages/*/hooks/test/*.bats` for grep-based behavioural assertions
-- [ ] Convert behavioural greps to functional tests
-- [ ] Update ADR-005 with the rule
+- [x] Audit `packages/*/hooks/test/*.bats` for grep-based behavioural assertions (see Audit Findings below)
+- [x] Convert behavioural greps to functional tests — `jtbd-enforce-scope.bats` and `architect-enforce-scope.bats` (the two repeat-offender files)
+- [x] Update ADR-005 with the rule (added "Behavioural assertions must be functional" section)
+- [ ] Convert remaining files (see Remaining Work)
+
+## Audit Findings
+
+Categorised every `grep -q` in `packages/*/hooks/test/*.bats`:
+
+**A. Behavioural source-greps — must convert (the P011 problem)**
+
+| File | Lines | Status |
+|------|------|--------|
+| `packages/jtbd/hooks/test/jtbd-enforce-scope.bats` | 22 + 9 exclusion tests + line 74 | **Converted this session** |
+| `packages/architect/hooks/test/architect-enforce-scope.bats` | 14 + 5 exemption tests | **Converted this session** |
+| `packages/jtbd/hooks/test/jtbd-mark-reviewed.bats` | 7, 12, 17, 18 | Pending |
+| `packages/risk-scorer/hooks/test/risk-score-mark.bats` | 9-23 (4 tautological tests) | Pending — these are `echo "literal" | grep "literal"` and always pass |
+
+**B. Output greps over executed-hook stdout — keep**
+
+These run the hook and grep its output. They are functional, not source-grep:
+- `packages/architect/hooks/test/architect-mark-reviewed.bats:7,12,17`
+- `packages/tdd/hooks/test/tdd-gate.bats:251,252,269`
+
+**C. Structural config-file checks — keep (permitted exception per ADR-005)**
+
+These assert the absence/presence of a hook registration in `hooks.json`:
+- `packages/architect/hooks/test/architect-no-stop-hook.bats:12`
+- `packages/jtbd/hooks/test/jtbd-no-stop-hook.bats:10`
+- `packages/risk-scorer/hooks/test/risk-scorer-no-stop-hook.bats:10`
+- `packages/style-guide/hooks/test/style-guide-no-stop-hook.bats:10`
+- `packages/voice-tone/hooks/test/voice-tone-no-stop-hook.bats:10`
+
+## Bonus Finding (this session)
+
+Converting the jtbd exclusion tests to functional tests immediately surfaced
+**three real bugs** in the hook's exclusion patterns: `*/MEMORY.md`,
+`*/.risk-reports/*`, and `*/RISK-POLICY.md` only match when the path has
+a leading directory component. Root-level paths fall through. In practice
+Claude Code passes absolute paths so the patterns work, but the source-grep
+tests gave no signal at all — they passed because the literal text appeared
+in source, even though the case branch wasn't matching the test inputs.
+This is exactly the failure mode P011 predicted.
+
+## Remaining Work
+
+A follow-up session should convert:
+
+1. `jtbd-mark-reviewed.bats` — replace `grep -q '"docs/jtbd"' hook.sh` with
+   functional execution: setup `docs/jtbd/`, run hook with mock Agent JSON,
+   assert marker file is created and stored hash references the right path.
+2. `risk-score-mark.bats` lines 9-23 — delete the four tautological tests
+   (`echo "wr-X:Y" | grep "X.Y"` always passes) and replace with a real
+   functional test: pipe a mock Agent output containing `RISK_SCORES:
+   commit=N push=N release=N` to the hook and assert the score files appear
+   in the expected `_risk_dir`.
+
+Both are smaller in scope than the enforce-scope conversions and lower-risk
+(their patterns are more stable). Worth doing for completeness but not
+blocking the main fix.
 
 ## Related
 

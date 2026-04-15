@@ -2,7 +2,7 @@
 
 **Status**: Known Error
 **Reported**: 2026-04-14
-**Priority**: 12 (High) — Impact: Significant (4) x Likelihood: Almost Certain (5) on first setup
+**Priority**: 20 (Very High) — Impact: Significant (4) x Likelihood: Almost Certain (5) on first setup
 
 ## Description
 

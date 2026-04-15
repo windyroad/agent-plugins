@@ -1,8 +1,9 @@
 # Problem 010: Rename wr-problem to wr-itil
 
-**Status**: Known Error
+**Status**: Closed
 **Reported**: 2026-04-15
-**Priority**: 3 (Low) — Impact: Minor (2) x Likelihood: Possible (3)
+**Closed**: 2026-04-15
+**Priority**: 6 (Medium) — Impact: Minor (2) x Likelihood: Possible (3)
 
 ## Description
 
@@ -68,9 +69,16 @@ Files to change (after ADR is approved):
 ### Investigation Tasks
 
 - [x] Write ADR for the rename — **ADR-010** (`docs/decisions/010-rename-wr-problem-to-wr-itil.proposed.md`)
-- [ ] List all references to `wr-problem` / `@windyroad/problem` / `update-ticket`
-- [ ] Plan migration path (deprecate old package or just rename?) — covered in ADR-010
-- [ ] Implement after ADR approval
+- [x] List all references to `wr-problem` / `@windyroad/problem` / `update-ticket`
+- [x] Plan migration path (deprecate old package or just rename?) — covered in ADR-010
+- [x] Implement after ADR approval — commit `6eeef94`
+
+## Fix Released
+
+Rename implemented in commit `6eeef94` (refactor: rename @windyroad/problem to
+@windyroad/itil). Released via changeset (`rename-problem-to-itil.md`), versioned
+in commit `852ea39`, merged via PR #18 (`624c70c`). Verified in this session by
+successful invocation of `/wr-itil:manage-problem` against the new plugin name.
 
 ## Related
 

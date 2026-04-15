@@ -1,7 +1,10 @@
 #!/usr/bin/env bats
 
-# Tests for jtbd-enforce-edit.sh — verifies broadened scope with exclusions
-# Mix of grep-based pattern tests and functional execution tests.
+# Tests for jtbd-enforce-edit.sh — verifies broadened scope with exclusions.
+# All tests are functional: they execute the hook with mock JSON input
+# and assert on exit status and BLOCKED output. Source-grep assertions
+# were removed (P011) — they over-specified the implementation and
+# false-positived on legitimate refactors.
 
 setup() {
   SCRIPT_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
@@ -16,12 +19,6 @@ teardown() {
   rm -rf "$TEST_DIR"
 }
 
-# Helper: check if a pattern is in the exclusion list by grepping the hook
-file_is_excluded() {
-  local pattern="$1"
-  grep -q "$pattern" "$HOOK"
-}
-
 # Helper: run the hook with a mock JSON input for a given file path
 run_hook_with_file() {
   local file_path="$1"
@@ -29,49 +26,75 @@ run_hook_with_file() {
   echo "$json" | bash "$HOOK"
 }
 
-# --- Pattern-based exclusion tests (grep) ---
+# Helper: assert the hook exits 0 and does NOT emit BLOCKED for the given path
+assert_path_allowed() {
+  local file_path="$1"
+  run run_hook_with_file "$file_path"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"BLOCKED"* ]]
+}
+
+# Helper: assert the hook BLOCKS the given path
+assert_path_blocked() {
+  local file_path="$1"
+  run run_hook_with_file "$file_path"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"BLOCKED"* ]]
+}
+
+# --- Exclusion tests (functional) ---
+
+# Claude Code passes absolute file paths in tool_input.file_path, so tests
+# use $PWD-prefixed paths to match the real shape (after the P004 root check).
 
 @test "enforce: excludes CSS files" {
-  file_is_excluded '\.css'
+  assert_path_allowed "$PWD/src/styles.css"
 }
 
 @test "enforce: excludes image files" {
-  file_is_excluded '\.png'
+  assert_path_allowed "$PWD/public/logo.png"
 }
 
 @test "enforce: excludes font files" {
-  file_is_excluded '\.woff'
+  assert_path_allowed "$PWD/public/fonts/regular.woff"
 }
 
 @test "enforce: excludes lockfiles" {
-  file_is_excluded 'package-lock.json'
+  assert_path_allowed "$PWD/package-lock.json"
 }
 
 @test "enforce: excludes changeset files" {
-  file_is_excluded '\.changeset'
+  assert_path_allowed "$PWD/.changeset/some-change.md"
 }
 
 @test "enforce: excludes memory files" {
-  file_is_excluded 'MEMORY.md'
+  assert_path_allowed "$PWD/MEMORY.md"
 }
 
 @test "enforce: excludes plan files" {
-  file_is_excluded '\.claude/plans'
+  assert_path_allowed "$PWD/.claude/plans/2026-01-01-plan.md"
 }
 
 @test "enforce: excludes risk reports" {
-  file_is_excluded '\.risk-reports'
+  assert_path_allowed "$PWD/.risk-reports/2026-01-01.md"
 }
 
 @test "enforce: excludes RISK-POLICY.md" {
-  file_is_excluded 'RISK-POLICY.md'
+  assert_path_allowed "$PWD/RISK-POLICY.md"
 }
 
-@test "enforce: does NOT have UI-only extension filter (ADR-007/008)" {
-  # ADR-007/008 removed web-UI-only scoping. The hook must not filter
-  # by UI file extension. NOTE: `*) exit 0 ;;` is a legitimate pattern
-  # for the project-root check (P004) — see jtbd-project-root.bats.
-  ! grep -qE '\.html\||tsx\|jsx\|html\|vue\|svelte' "$HOOK"
+@test "enforce: does NOT exempt by UI-only extension (ADR-007/008)" {
+  # ADR-007/008 broadened scope: the hook must gate UI files like any
+  # other source file, not silently allow them.
+  assert_path_blocked "$PWD/src/Component.tsx"
+}
+
+@test "enforce: does NOT exempt .html files (ADR-007/008)" {
+  assert_path_blocked "$PWD/public/index.html"
+}
+
+@test "enforce: does NOT exempt .vue files (ADR-007/008)" {
+  assert_path_blocked "$PWD/src/App.vue"
 }
 
 # --- Functional tests (execute hook with mock JSON) ---

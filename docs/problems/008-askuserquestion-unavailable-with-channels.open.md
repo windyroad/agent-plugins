@@ -2,7 +2,7 @@
 
 **Status**: Open
 **Reported**: 2026-04-15
-**Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Almost Certain (5) when using connect plugin
+**Priority**: 15 (High) — Impact: Moderate (3) x Likelihood: Almost Certain (5) when using connect plugin
 
 ## Description
 

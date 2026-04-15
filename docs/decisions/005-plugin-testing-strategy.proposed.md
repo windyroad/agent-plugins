@@ -86,6 +86,49 @@ packages/shared/test/*.bats            # shared helper tests (if any)
 - Fixtures go in `hooks/test/fixtures/` (sample JSON inputs, mock package.json files)
 - Use `setup()` and `teardown()` for temp file cleanup
 
+### Behavioural assertions must be functional, not source-grep (P011)
+
+Tests for hook **behaviour** (does this file path get blocked? does this
+exclusion apply?) MUST execute the hook with mock JSON input and assert
+on exit status and output text. They must NOT grep the hook's source
+file for expected patterns.
+
+Source-grep assertions over-specify the implementation. They pass when
+the literal pattern appears in source — even if the surrounding code
+no longer applies it — and they false-positive on legitimate refactors
+that change the pattern's text without changing behaviour. P011
+documents two such regressions in `jtbd-enforce-scope.bats`; converting
+the suite to functional tests immediately surfaced three real bugs in
+the hook's exclusion patterns that the source-greps had missed.
+
+**Permitted exceptions** (structural, not behavioural):
+
+- `hooks.json` content checks (e.g., `! grep -q '"Stop"' hooks.json`) —
+  asserting the absence/presence of a hook registration in a config
+  file is a contract assertion, not a behavioural one.
+- File-existence / file-removed checks (e.g.,
+  `architect-reset-marker.sh has been removed`).
+
+**Functional pattern**:
+
+```bash
+run_hook_with_file() {
+  local file_path="$1"
+  local json="{\"tool_input\":{\"file_path\":\"${file_path}\"},\"session_id\":\"test-$$\"}"
+  echo "$json" | bash "$HOOK"
+}
+
+@test "enforce: excludes lockfiles" {
+  run run_hook_with_file "$PWD/package-lock.json"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"BLOCKED"* ]]
+}
+```
+
+Use `$PWD`-prefixed paths so the test data matches the absolute
+`file_path` that Claude Code passes in real invocations (and so the
+P004 project-root check resolves correctly).
+
 ## Consequences
 
 ### Good
