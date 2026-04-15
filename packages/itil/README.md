@@ -6,16 +6,25 @@ Part of [Windy Road Agent Plugins](../../README.md).
 
 ## What It Does
 
-Bugs recur. Incidents repeat. Without a problem management process, you fix symptoms instead of causes. This plugin brings lightweight ITIL problem management to your AI coding workflow:
+Bugs recur. Incidents repeat. Without a disciplined process, you fix symptoms instead of causes — or worse, jump to conclusions during a live outage. This plugin brings lightweight ITIL service management to your AI coding workflow:
+
+**Problem management** — track underlying causes and prioritise fixes:
 
 - **Create problem tickets** when incidents or failures surface during a session
 - **Track root cause analysis** as investigation progresses
 - **Transition status** through a structured lifecycle: Open, Known Error, Closed
 - **Prioritise** using Weighted Shortest Job First (WSJF) to focus on the highest-value fixes
 
-Problem tickets live in `docs/problems/` as markdown files -- version-controlled and always accessible.
+**Incident management** — restore service fast with an audit trail:
 
-Room is reserved for peer ITIL skills (incident, change) under the same plugin as they are added.
+- **Declare incidents** when production is actively broken
+- **Evidence-first discipline** — hypotheses must cite evidence before any mitigation
+- **Reversible mitigations first** — rollback, feature flag, restart, route away
+- **Automatic handoff** to problem management once service is restored
+
+Tickets live in `docs/problems/` and `docs/incidents/` as markdown files — version-controlled and always accessible.
+
+Room is reserved for peer ITIL skills (change, continual improvement) under the same plugin as they are added.
 
 ## Install
 
@@ -31,18 +40,23 @@ Restart Claude Code after installing.
 
 ## Usage
 
-**Create or update a problem ticket:**
+**Manage a problem ticket:**
 
 ```
 /wr-itil:manage-problem
 ```
 
-This supports:
+Supports creating new problems, updating root cause analysis, transitioning status (Open → Known Error → Closed), and closing problems with resolution details.
 
-- Creating new problems from an incident or observed failure
-- Updating root cause analysis with investigation findings
-- Transitioning status (Open -> Known Error -> Closed)
-- Closing problems with resolution details
+**Manage an incident:**
+
+```
+/wr-itil:manage-incident
+```
+
+Supports declaring new incidents, recording evidence-first observations and hypotheses, logging mitigation attempts, transitioning lifecycle (Investigating → Mitigating → Restored → Closed), and automatically handing off to `manage-problem` when service is restored.
+
+See [ADR-011](../../docs/decisions/011-manage-incident-skill.proposed.md) for the incident-vs-problem split and [JTBD-201](../../docs/jtbd/tech-lead/JTBD-201-restore-service-fast.proposed.md) for the job this serves.
 
 ## How It Works
 

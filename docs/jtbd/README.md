@@ -21,7 +21,13 @@ Tech lead or consultant responsible for code quality and governance across teams
 
 [Persona definition](tech-lead/persona.md)
 
-*No jobs defined yet. Jobs 001 and 002 also serve this persona.*
+Jobs 001 and 002 also serve this persona.
+
+### Proposed
+
+| ID | Job | File |
+|----|-----|------|
+| JTBD-201 | Restore Service Fast with an Audit Trail | [JTBD-201-restore-service-fast.proposed.md](tech-lead/JTBD-201-restore-service-fast.proposed.md) |
 
 ## Plugin Developer / Contributor
 

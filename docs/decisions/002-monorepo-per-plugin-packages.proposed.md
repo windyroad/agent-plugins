@@ -95,7 +95,9 @@ agent-plugins/
 │   ├── itil/                     @windyroad/itil
 │   │   ├── package.json
 │   │   ├── hooks/
-│   │   └── skills/manage-problem/SKILL.md
+│   │   └── skills/
+│   │       ├── manage-problem/SKILL.md
+│   │       └── manage-incident/SKILL.md
 │   ├── retrospective/            @windyroad/retrospective
 │   │   ├── package.json
 │   │   ├── hooks/

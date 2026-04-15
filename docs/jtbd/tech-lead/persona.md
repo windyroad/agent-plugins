@@ -13,7 +13,7 @@ Responsible for code quality and governance across teams or client engagements. 
 
 - Needs consistent standards across multiple projects and team members
 - May install the full suite and configure policy files
-- Uses retrospectives and problem management for continuous improvement
+- Uses retrospectives, problem management, and incident management for continuous improvement
 
 ## Pain Points
 
