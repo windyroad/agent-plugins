@@ -2,7 +2,7 @@
 
 **Status**: Open
 **Reported**: 2026-04-16
-**Priority**: 12 (High) — Impact: Significant (4) x Likelihood: Likely (3)
+**Priority**: 16 (High) — Impact: Significant (4) x Likelihood: Likely (4)
 
 ## Description
 

@@ -54,6 +54,10 @@ The `manage-problem` and `manage-incident` skills had a "Do not commit" instruct
 
 Replaced by fix. Skills now instruct the primary agent to score and commit after each operation.
 
+## Fix Released
+
+Deployed in `@windyroad/itil` v0.3.2 (commit `0806242`). `manage-problem` and `manage-incident` SKILL.md files updated to score and commit after each operation. Awaiting user verification that governance skills now commit automatically.
+
 ## Related
 
 - `packages/itil/skills/manage-problem/SKILL.md` line ~280 — "Do not commit" instruction
