@@ -52,6 +52,7 @@ ADR-005 was written when skills were thin and skill count was 1. The plugin suit
   - HTML review UI (`eval-viewer/generate_review.py`, `--static` for headless/CI)
   - Guidance: "make skill descriptions a little bit 'pushy'" (undertriggering); "keep SKILL.md under 500 lines"; "subjective skills are better evaluated qualitatively — don't force assertions"
 - [ ] Add "Option: adopt Anthropic skill-creator eval harness" to the ADR so MADR's minimum-two-options rule is met with a stronger comparison (architect note).
+- [ ] Design how centralised `~/.claude/skill-reports/<plugin>/` data (P034) feeds into eval cases — real-world skill outputs as ground-truth for improvement iterations across all plugins (architect, jtbd, itil, risk-scorer, voice-tone, style-guide, tdd, c4, wardley)
 - [ ] Check P011's source-grep ban compatibility: a grader-subagent dual-run is functional/behavioural, not source-grep, so it is compatible with ADR-005's P011 clause (architect note).
 - [ ] When resolving P012, flag ADR-005 with `[Reassessment Triggered]` — its own reassessment criterion ("If Claude Code adds a way to test agent behavior programmatically") is arguably now met by this upstream evidence (architect note).
 
@@ -63,3 +64,4 @@ ADR-005 was written when skills were thin and skill count was 1. The plugin suit
 - JTBD-101 (`docs/jtbd/plugin-developer/JTBD-101-extend-suite.proposed.md`) — plugin authors need a clear pattern
 - JTBD-201 (`docs/jtbd/tech-lead/JTBD-201-restore-service-fast.proposed.md`) — auditability constraint
 - Anthropic official `skill-creator` eval harness — https://github.com/anthropics/claude-plugins-official/blob/main/plugins/skill-creator/skills/skill-creator/SKILL.md (substantial prior art for testing SKILL.md documents)
+- P034 (`docs/problems/034-centralise-risk-reports-for-cross-project-skill-improvement.open.md`) — centralised `~/.claude/skill-reports/<plugin>/` storage providing real-world output data as eval inputs for the skill-creator improvement cycle across all plugins (not just risk-scorer)

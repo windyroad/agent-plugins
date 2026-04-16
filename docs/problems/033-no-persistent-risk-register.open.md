@@ -52,3 +52,4 @@ The risk-scorer plugin was designed for pipeline risk (per-change scoring at com
 - `.risk-reports/` — ephemeral per-change assessments
 - `docs/problems/` — ITIL problem management (similar directory-of-files pattern the user wants to reuse)
 - `packages/risk-scorer/` — current risk scoring plugin; may host the register management
+- P034 (`docs/problems/034-centralise-risk-reports-for-cross-project-skill-improvement.open.md`) — centralising ephemeral `.risk-reports/` to `~/.claude/`; may share the same centralised storage infrastructure
