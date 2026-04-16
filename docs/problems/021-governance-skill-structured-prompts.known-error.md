@@ -65,7 +65,7 @@ User manually dismisses the prompt. Friction, not harm.
 
 **Cross-cutting (decide the pattern once):**
 
-- [ ] **Draft companion ADR: "Structured user interaction — AskUserQuestion + plan-mode for governance-skill decisions."** Architect flagged this as cross-cutting (risk-scorer, manage-problem, P020 on-demand assessment skills, ADR-011 manage-incident, future remediation flows). The ADR must state: every governance-skill branch point with ≥2 mutually exclusive options MUST use `AskUserQuestion`; free-text "(a)/(b)/(c)" prose is a defect. Plan mode is required when the decision produces a multi-step remediation.
+- [x] **Drafted ADR-013**: `docs/decisions/013-structured-user-interaction-for-governance-decisions.proposed.md`. Covers 6 rules: AskUserQuestion mandatory at branch points, agents stay pure, skills own interaction, plan mode for multi-step remediations, policy-authorised silence, non-interactive fail-safe. Architect-reviewed and PASS.
 - [x] Architect-preferred split (Option B) confirmed by source: scoring agents are already pure (`tools: [Read, Glob]`, structured output only). The calling skill (or primary agent) must own `AskUserQuestion` + plan mode. No tool-grant expansion needed on scorer agents.
 - [ ] Define the machine-readable remediation/options marker format. Candidate: `RISK_REMEDIATIONS:` block with `id | description | effort (S/M/L) | risk_delta (-N) | files_touched` columns. Reusable beyond risk-scorer for any skill returning structured options.
 - [ ] Establish a review gate that catches prose decision prompts before release — architect checklist, skill linter, or BATS pattern asserting `AskUserQuestion` use at branch points.
