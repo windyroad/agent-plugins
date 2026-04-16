@@ -1,5 +1,16 @@
 # @windyroad/problem
 
+## 0.3.3
+
+### Patch Changes
+
+- 83b8be7: fix(manage-problem): add Parked lifecycle status and README.md fast-path cache (closes P027)
+
+  - Adds `.parked.md` suffix and Parked status to problem lifecycle table
+  - `problem work` checks README.md freshness before triggering full 18-file re-scan
+  - Step 9e writes/overwrites `docs/problems/README.md` after every full re-rank
+  - Parked problems excluded from WSJF ranking; shown in separate Parked table
+
 ## 0.3.2
 
 ### Patch Changes
