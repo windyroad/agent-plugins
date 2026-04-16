@@ -1,17 +1,20 @@
 # Problem Backlog
 
-> Last reviewed: 2026-04-16 (updated post-P027 release)
+> Last reviewed: 2026-04-16 (full re-rank; P005 parked; P030 added; P021 effort/WSJF added)
 > Run `/wr-itil:manage-problem review` to refresh.
 
 ## WSJF Rankings
 
 | WSJF | ID | Title | Severity | Status | Effort |
 |------|-----|-------|----------|--------|--------|
-| 32.0 | P020 | No on-demand assessment skills | 16 High | Known Error | S |
-| 4.5 | P028 | Governance skills should auto-release and auto-install | 9 Med | Open | M |
-| 4.5 | P029 | Edit gate overhead disproportionate for governance docs | 9 Med | Open | M |
+| 12.0 | P021 | Governance skill structured prompts | 12 High | Known Error | M |
+| 10.0 | P030 | manage-problem verification prompts lack fix summary | 10 High | Open | S |
+| 8.0 | P020 | No on-demand assessment skills | 16 High | Known Error | L |
+| 8.0 | P011 | Grep-based BATS tests fragile | 8 Med | Known Error | M |
 | 4.5 | P016 | manage-problem should split multi-concern tickets | 9 Med | Open | M |
 | 4.5 | P017 | create-adr should split multi-decision records | 9 Med | Open | M |
+| 4.5 | P028 | Governance skills should auto-release and auto-install | 9 Med | Open | M |
+| 4.5 | P029 | Edit gate overhead disproportionate for governance docs | 9 Med | Open | M |
 | 4.0 | P018 | TDD enforce BDD + Example Mapping principles | 16 High | Open | L |
 | 4.0 | P022 | Agents must not fabricate time estimates | 16 High | Open | L |
 | 4.0 | P024 | Risk-scorer WIP flag uncommitted completed work | 8 Med | Open | M |
@@ -32,5 +35,6 @@
 
 | ID | Title | Reason | Parked since |
 |----|-------|--------|-------------|
+| P005 | Connect setup skill doesn't match Discord plugin | Upstream: same --channels bug as P007/P008 — all connect work suspended | 2026-04-16 |
 | P007 | Discord inbound reactions not delivered | Upstream: Discord channel plugin doesn't forward reaction events | 2026-04-16 |
 | P008 | AskUserQuestion unavailable with --channels | Upstream: Anthropic `--channels` flag removes AskUserQuestion | 2026-04-16 |

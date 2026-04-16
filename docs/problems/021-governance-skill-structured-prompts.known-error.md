@@ -3,6 +3,8 @@
 **Status**: Known Error
 **Reported**: 2026-04-16 (generalised 2026-04-16 from risk-scorer-only to cross-skill pattern)
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
+**Effort**: M
+**WSJF**: 12.0 — (12 × 2.0) / 2
 
 ## Description
 
