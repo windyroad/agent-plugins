@@ -59,10 +59,15 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "SKILL.md describes checking README.md freshness before full re-scan" {
-  # The work fast-path: if README.md is newer than all problem files,
-  # skip the 18-file re-scan and read the cached table directly.
-  # Proxy: SKILL.md mentions -newer (the find flag used for mtime comparison).
-  run grep -q "\-newer" "$SKILL_FILE"
+@test "SKILL.md describes checking README.md freshness using git history, not mtime" {
+  # P031: The mtime-based `find -newer` check is broken in git worktrees
+  # because all files receive the same mtime at checkout time.
+  # The cache-freshness check must use git log to compare commits, not
+  # filesystem timestamps.
+  # Positive: SKILL.md uses git log for cache freshness.
+  run grep -q "git log.*README\.md" "$SKILL_FILE"
   [ "$status" -eq 0 ]
+  # Negative: SKILL.md must NOT use find -newer for cache freshness.
+  run grep -q "\-newer" "$SKILL_FILE"
+  [ "$status" -ne 0 ]
 }

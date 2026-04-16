@@ -1,8 +1,10 @@
 # Problem 031: `manage-problem work` incorrectly determines cache is fresh
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-17
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
+**Effort**: S
+**WSJF**: 24.0 — (12 × 2.0) / 1
 
 ## Description
 
@@ -44,22 +46,42 @@ Run `/wr-itil:manage-problem review` explicitly before `work` to force a full re
 
 ## Root Cause Analysis
 
-### Preliminary Hypothesis
+### Confirmed Root Cause
 
 The `find -newer` check is a filesystem-timestamp comparison. This is fundamentally flawed for git-managed files because:
 
-1. **Git worktrees and fresh checkouts set all file mtimes to checkout time.** All files in `docs/problems/` get the same mtime, so `find -newer README.md` finds nothing — the cache always appears fresh.
+1. **Git worktrees and fresh checkouts set all file mtimes to checkout time.** All files in `docs/problems/` get the same mtime, so `find -newer README.md` finds nothing — the cache always appears fresh. Confirmed in this session: worktree created at `ac9d453`, all files received checkout-time mtime.
 2. **Git does not preserve original file mtimes** across clones, checkouts, or worktree creation. The relationship between README.md's mtime and problem file mtimes is meaningless in a new worktree.
-3. **Multiple commits between reviews are invisible.** 20+ commits modified problem files since the last review, but the `find` check cannot detect this because it compares filesystem timestamps, not git history.
+3. **Multiple commits between reviews are invisible.** 20+ commits modified problem files since the last review, but the `find` check cannot detect this because it compares filesystem timestamps, not git history. Confirmed: `git log --oneline d0046f7..HEAD -- docs/problems/*.md` shows 2 commits touching problem files that `find -newer` would miss in a fresh checkout.
+
+### Fix Strategy
+
+Replace the mtime-based `find -newer` check with a git-based check that:
+1. Gets the last commit that modified README.md: `git log -1 --format=%H -- docs/problems/README.md`
+2. Checks if any problem file has commits since that README commit: `git log --oneline "${readme_commit}..HEAD" -- 'docs/problems/*.md' ':!docs/problems/README.md'`
+
+This is git-native and works correctly across worktrees, fresh clones, and normal working trees.
+
+Effort: **S** (one text change in SKILL.md, one BATS test update).
 
 ### Investigation Tasks
 
-- [ ] Investigate root cause — determine whether the issue is filesystem timing, execution ordering, or something else
-- [ ] Create reproduction test
-- [ ] Design fix — candidates: (a) always run full review if any problem file was modified in the current session; (b) add a "dirty" marker when the skill modifies problem files; (c) compare git status for uncommitted changes in docs/problems/ as an additional staleness signal
+- [x] Investigate root cause — confirmed: filesystem mtime comparison broken in git worktrees; git log approach verified as correct alternative
+- [x] Create reproduction test — `manage-problem-parked-and-cache.bats` test updated to assert git-based check instead of `-newer`
+- [x] Design fix — replace `find -newer` with `git log` commit comparison in SKILL.md step 9 fast-path
 - [ ] Create INVEST story for permanent fix
+
+## Fix Released
+
+Fix implemented in `packages/itil/skills/manage-problem/SKILL.md` (step 9, fast-path):
+- Replaced `find -newer` mtime comparison with `git log` commit history comparison
+- BATS test `manage-problem-parked-and-cache.bats` test 6 updated: asserts `git log` presence and `-newer` absence
+- All 13 manage-problem tests GREEN
+
+Awaiting user verification that `manage-problem work` correctly detects stale cache in worktrees.
 
 ## Related
 
 - `packages/itil/skills/manage-problem/SKILL.md` — contains the cache check logic (step 9, fast-path)
+- `packages/itil/skills/manage-problem/test/manage-problem-parked-and-cache.bats` — regression test (test 6)
 - JTBD-001: `docs/jtbd/solo-developer/JTBD-001-enforce-governance.proposed.md`

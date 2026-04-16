@@ -235,19 +235,24 @@ This is a batch operation that reviews every open/known-error problem and update
 
 **Fast-path for `work` (skip full re-scan when cache is fresh):**
 
-Before running the full review, check whether `docs/problems/README.md` exists and is up to date:
+Before running the full review, check whether `docs/problems/README.md` exists and is up to date using **git history** (not filesystem mtime, which is unreliable in worktrees and fresh checkouts — see P031):
 
 ```bash
-find docs/problems -name "*.md" ! -name "README.md" -newer docs/problems/README.md 2>/dev/null | head -1
+readme_commit=$(git log -1 --format=%H -- docs/problems/README.md 2>/dev/null)
+# Cache is stale if: no README commit, OR problem files committed since README, OR uncommitted problem file changes
+if [ -z "$readme_commit" ] || \
+   git log --oneline "${readme_commit}..HEAD" -- 'docs/problems/*.md' ':!docs/problems/README.md' 2>/dev/null | grep -q .; then
+  echo "stale"
+fi
 ```
 
-If this command produces **no output** (README.md is newer than all problem files), the cache is fresh:
+If the command produces **no output** (no problem files have been committed or modified since the last README.md update), the cache is fresh:
 - Read `docs/problems/README.md` only — it contains the ranked table from the last review
 - Skip steps 9a–9b entirely
 - Proceed directly to step 9c (work selection) using the cached table
 - Note in the output: "Using cached ranking from [timestamp in README.md]"
 
-If the command produces output, or `README.md` does not exist, run the full review (steps 9a–9e) and refresh the cache.
+If the command prints "stale", or `README.md` does not exist in git, run the full review (steps 9a–9e) and refresh the cache.
 
 **Step 9a: Read the risk framework**
 

@@ -2,7 +2,9 @@
 
 **Status**: Known Error
 **Reported**: 2026-04-16
-**Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Likely (3)
+**Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Possible (3)
+**Effort**: S
+**WSJF**: 18.0 — (9 × 2.0) / 1
 
 ## Description
 
@@ -70,6 +72,14 @@ Effort: **S** (two one-line text changes in shell scripts).
 - [x] Check whether `docs/problems/*.md` actually needs architect or JTBD review — No, already exempted in PreToolUse gates
 - [x] Update scope text in `architect-detect.sh` and `jtbd-eval.sh` to match PreToolUse exemptions
 - [x] Check whether a governance-mode env var is needed — No, path-based scope text update is sufficient and consistent with existing PreToolUse pattern
+
+## Fix Released
+
+Deployed in commit `ac9d453` (2026-04-17):
+- `packages/architect/hooks/architect-detect.sh` — UserPromptSubmit scope text updated to exclude governance docs (`docs/problems/*.md`, `docs/BRIEFING.md`, `RISK-POLICY.md`, `.risk-reports/`, `.changeset/*.md`, memory files, plan files)
+- `packages/jtbd/hooks/jtbd-eval.sh` — same scope text update
+
+Awaiting user verification that architect and JTBD hooks no longer fire for governance doc edits.
 
 ## Related
 

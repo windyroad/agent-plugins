@@ -2,7 +2,9 @@
 
 **Status**: Open
 **Reported**: 2026-04-16
-**Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Likely (3)
+**Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Possible (3)
+**Effort**: M
+**WSJF**: 4.5 — (9 × 1.0) / 2
 
 ## Description
 
