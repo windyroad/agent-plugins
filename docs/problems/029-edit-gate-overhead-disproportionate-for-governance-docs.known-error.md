@@ -1,6 +1,6 @@
 # Problem 029: Edit gate overhead disproportionate for governance documentation changes
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-16
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Likely (3)
 
@@ -37,23 +37,39 @@ Approve the architect and JTBD delegations even for trivial edits (they typicall
 
 ## Root Cause Analysis
 
-### Preliminary Hypothesis
+### Confirmed Root Cause
 
-1. **Hooks use a blanket pattern match** on file paths — `docs/decisions/` and all project files trigger the architect check regardless of whether the change is architectural or documentation-only.
-2. **No change-type signal** — the hooks cannot distinguish "closing a problem ticket" from "adding a new dependency". Both look like file edits.
-3. **No governance-mode exemption** — there is no concept of "this edit is the output of an approved governance skill" that would suppress the overhead gates.
+The overhead comes from **two different hook layers** with mismatched scope:
 
-Potential fix directions:
-- Exempt `docs/problems/*.md` and `docs/decisions/*.md` from the architect/JTBD pre-edit hooks (governance files have their own skill-driven process)
-- Add a marker/env var that active governance skills can set to suppress overhead gates for their own outputs
-- Configure the hooks to skip delegation when the change is a documentation-only edit (no `.ts/.js/.sh` files touched)
+**Layer 1 — `PreToolUse` edit gates (already fixed):**
+Both `architect-enforce-edit.sh` (line 65-66) and `jtbd-enforce-edit.sh` (line 76-77) already exempt `docs/problems/*.md` via `exit 0`. Edits to problem files are NOT blocked at the tool-use level.
+
+**Layer 2 — `UserPromptSubmit` prompt injection (the actual problem):**
+Both `architect-detect.sh` and `jtbd-eval.sh` inject mandatory delegation instructions into EVERY user prompt. The scope exclusion text says:
+- Architect: "Does NOT apply to: CSS/SCSS files, image assets, lockfiles, font files."
+- JTBD: "Does NOT apply to: CSS, images, fonts, lockfiles, changesets, memory files, plan files."
+
+Neither mentions `docs/problems/*.md`, `docs/BRIEFING.md`, `RISK-POLICY.md`, or other governance docs. So the LLM reads the injected instruction and dutifully delegates to architect + JTBD before every governance doc edit — even though the PreToolUse gate would allow the edit without delegation.
+
+**The disconnect:** PreToolUse exempts governance docs; UserPromptSubmit does not. The LLM follows the broader UserPromptSubmit instruction, creating unnecessary agent calls that find no issues.
+
+### Fix Strategy
+
+Update the scope exclusion text in both `UserPromptSubmit` hooks to match the `PreToolUse` exemptions:
+
+1. `packages/architect/hooks/architect-detect.sh` — add governance docs to the "Does NOT apply to" line
+2. `packages/jtbd/hooks/jtbd-eval.sh` — add governance docs to the "Does NOT apply to" line
+
+Files to match the PreToolUse exemptions: `docs/problems/*.md`, `docs/BRIEFING.md`, `RISK-POLICY.md`, `.risk-reports/`, `.changeset/*.md`, memory files, plan files.
+
+Effort: **S** (two one-line text changes in shell scripts).
 
 ### Investigation Tasks
 
-- [ ] Audit which hook(s) fire on `docs/problems/` edits — identify whether it's the architect hook, JTBD hook, WIP hook, or all of them
-- [ ] Check whether `docs/problems/*.md` actually needs architect or JTBD review — expected answer: No, problem files are the output of an approved governance skill and carry no architectural risk
-- [ ] Prototype exemption: add `docs/problems/` and `docs/decisions/` to the architect/JTBD hook blocklist and test that governance skill operations complete without gates firing
-- [ ] Check whether a governance-mode env var (set by manage-problem, cleared on exit) is a cleaner mechanism than a path-based exemption
+- [x] Audit which hook(s) fire on `docs/problems/` edits — both UserPromptSubmit hooks inject mandatory instructions; PreToolUse hooks already exempt
+- [x] Check whether `docs/problems/*.md` actually needs architect or JTBD review — No, already exempted in PreToolUse gates
+- [ ] Update scope text in `architect-detect.sh` and `jtbd-eval.sh` to match PreToolUse exemptions
+- [x] Check whether a governance-mode env var is needed — No, path-based scope text update is sufficient and consistent with existing PreToolUse pattern
 
 ## Related
 
