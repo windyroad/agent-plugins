@@ -28,7 +28,6 @@
 |----|-------|-------------|
 | P020 | No on-demand assessment skills | v0.3.2 |
 | P021 | Governance skill structured prompts | v0.3.2 |
-| P027 | manage-problem work re-scans all problems | v0.3.3 |
 
 ## Parked
 

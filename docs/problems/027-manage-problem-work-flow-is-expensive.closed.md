@@ -1,6 +1,6 @@
 # Problem 027: `manage-problem work` re-scans all problems on every invocation
 
-**Status**: Known Error
+**Status**: Closed
 **Reported**: 2026-04-16
 **Priority**: 15 (High) — Impact: Significant (4) x Likelihood: Almost Certain (5)
 **Effort**: M
