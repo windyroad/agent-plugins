@@ -62,8 +62,11 @@ export function installPlugin(pluginName, { scope = "project" } = {}) {
   );
 }
 
-export function updatePlugin(pluginName) {
-  return run(`claude plugin update ${pluginName}`, pluginName);
+export function updatePlugin(pluginName, { scope = "project" } = {}) {
+  return run(
+    `claude plugin update "${pluginName}@${MARKETPLACE_NAME}" --scope ${scope}`,
+    pluginName
+  );
 }
 
 export function uninstallPlugin(pluginName) {
@@ -94,14 +97,14 @@ export function installPackage(pluginName, { deps = [], scope = "project" } = {}
 /**
  * Update a single package.
  */
-export function updatePackage(pluginName) {
+export function updatePackage(pluginName, { scope = "project" } = {}) {
   console.log(`\nUpdating @windyroad/${pluginName.replace("wr-", "")}...\n`);
 
   run(
     `claude plugin marketplace update ${MARKETPLACE_NAME}`,
     "Updating marketplace"
   );
-  updatePlugin(pluginName);
+  updatePlugin(pluginName, { scope });
 
   console.log("\nDone! Restart Claude Code to apply updates.\n");
 }

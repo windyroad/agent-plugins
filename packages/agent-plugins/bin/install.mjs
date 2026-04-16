@@ -140,7 +140,7 @@ To uninstall: npx @windyroad/agent-plugins --uninstall
 `);
 }
 
-function doUpdate(plugins) {
+function doUpdate(plugins, { scope = "project" } = {}) {
   console.log("\nUpdating Windy Road AI agent plugins...\n");
 
   console.log("[1/2] Updating marketplace...");
@@ -152,7 +152,7 @@ function doUpdate(plugins) {
   console.log(`\n[2/2] Updating plugins (${plugins.length})...`);
   let updated = 0;
   for (const plugin of plugins) {
-    if (utils.updatePlugin(plugin)) updated++;
+    if (utils.updatePlugin(plugin, { scope })) updated++;
   }
   console.log(`  ${updated}/${plugins.length} plugins updated.`);
 
@@ -188,7 +188,7 @@ const plugins = flags.plugins ?? PLUGINS;
 if (flags.uninstall) {
   doUninstall(plugins);
 } else if (flags.update) {
-  doUpdate(plugins);
+  doUpdate(plugins, { scope: flags.scope });
 } else {
   doInstall(plugins, { scope: flags.scope });
 }

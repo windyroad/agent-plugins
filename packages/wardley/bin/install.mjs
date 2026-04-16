@@ -37,7 +37,7 @@ utils.checkPrerequisites();
 if (flags.uninstall) {
   utils.uninstallPackage(PLUGIN);
 } else if (flags.update) {
-  utils.updatePackage(PLUGIN);
+  utils.updatePackage(PLUGIN, { scope: flags.scope });
 } else {
   utils.installPackage(PLUGIN, { deps: DEPS, scope: flags.scope });
 }
