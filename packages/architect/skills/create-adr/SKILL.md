@@ -32,6 +32,28 @@ Ask the user:
 
 If the user has already provided this context in the conversation (e.g., as arguments), use what they've given and only ask about what's missing.
 
+### 2b. Decision-boundary analysis (multi-decision check)
+
+Before writing the ADR file, perform a decision-boundary analysis on the gathered context to prevent conflated ADRs that block independent status transitions and weaken auditability (P017).
+
+**Self-check**: Read the context gathered in step 2. Answer: "How many distinct decisions are present? If each could be independently accepted, rejected, or superseded without affecting the others, they are distinct."
+
+- **Single decision** (one coherent question with one chosen option): proceed directly to step 3.
+- **Multiple decisions** (two or more distinct questions, different components, or different decision drivers that do not share the same trade-off): present a split prompt.
+
+**Split prompt** — use `AskUserQuestion`:
+- `header: "Multi-decision input"`
+- `multiSelect: false`
+- Options:
+  1. `Split into separate ADRs (Recommended)` — description: "Create one ADR per distinct decision, with consecutive IDs. Each ADR can be accepted, rejected, or superseded independently."
+  2. `Keep as a single ADR` — description: "Create one ADR covering all decisions. Use this only if the decisions are so tightly coupled that they cannot be made independently."
+
+**Non-interactive fallback**: When `AskUserQuestion` is unavailable (e.g., non-interactive/AFK mode), automatically split into separate ADRs with consecutive IDs and note the auto-split in output. Do not block creation.
+
+**Split implementation**: When splitting, assign consecutive IDs. Cross-reference each ADR in the other's Related section or as a linked decision in the consequences.
+
+**Scope**: Scoped to new ADR creation only (steps 2–5). Does not apply to supersession handling (step 6), where the scope of the new decision is already known and bounded.
+
 ### 3. Determine sequence number and filename
 
 - Next number = highest existing decision number + 1 (or 001 if none exist)

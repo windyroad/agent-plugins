@@ -1,8 +1,10 @@
 # Problem 017: `create-adr` skill does not flag or split multi-decision inputs
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-16
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Possible (3)
+**Effort**: M
+**WSJF**: 4.5 — (9 × 2.0) / 2 → now known-error
 
 ## Description
 
@@ -42,11 +44,26 @@ Rely on the user to spot the conflation and request a split after the fact. Same
 
 ### Investigation Tasks
 
-- [ ] Decide whether the fix is a per-skill step or a shared helper used by both `create-adr` and `manage-problem`. A shared helper implies a new pattern — architect noted this might warrant its own ADR covering both P016 and P017 fixes.
-- [ ] Design the decision-boundary heuristic. Candidates mirror P016: (a) LLM self-check listing distinct decisions; (b) structural signal — if the input names multiple components, subsystems, or conflicting trade-offs, force the split prompt; (c) post-draft heuristic — count distinct "Decision" or "Context" blocks
-- [ ] Decide automatic vs AskUserQuestion-gated split (tension with P014 "capture should interrupt flow minimally")
-- [ ] Update `packages/architect/skills/create-adr/SKILL.md` with the new step
-- [ ] Add a test case with a deliberately multi-decision input to exercise the split behaviour
+- [x] Decide whether the fix is a per-skill step or a shared helper — chose per-skill (same as P016); shared abstraction deferred until a second data point confirms the pattern
+- [x] Design the decision-boundary heuristic — chose Option (a): LLM self-check counting distinct decisions; if each could be independently accepted/rejected/superseded, they are distinct
+- [x] Decide automatic vs AskUserQuestion-gated split — gated by AskUserQuestion per ADR-013 Rule 1, with auto-split fallback for non-interactive mode per ADR-013 Rule 6
+- [x] Update `packages/architect/skills/create-adr/SKILL.md` with the new step — added as step 2b between gather-context and determine-sequence; scoped to new ADR creation only, not supersession
+- [x] Add a test case — `packages/architect/skills/create-adr/test/create-adr-decision-boundary.bats` (4 structural tests, all GREEN)
+
+### Fix Strategy
+
+LLM self-check after Step 2 (gather context), before Step 3 (determine sequence/filename). Self-check counts distinct decisions. Single decision → proceed to step 3. Multiple decisions → `AskUserQuestion` with options: "Split into separate ADRs" or "Keep as single ADR." Non-interactive fallback: auto-split with consecutive IDs.
+
+## Fix Released
+
+Implemented in `packages/architect/skills/create-adr/SKILL.md` (2026-04-17):
+- Added Step 2b (decision-boundary analysis) between gather-context and determine-sequence
+- LLM self-check counting distinct decisions; AskUserQuestion for split decision per ADR-013
+- Auto-split fallback for non-interactive mode per ADR-013 Rule 6
+- Scoped to new ADR creation only (not supersession handling)
+- Structural test `create-adr-decision-boundary.bats` (4 tests, all GREEN)
+
+Awaiting user verification that new ADR creation offers a split when multi-decision inputs are provided.
 
 ## Related
 
