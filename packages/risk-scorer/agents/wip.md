@@ -45,15 +45,25 @@ Always provide the cumulative risk picture:
 - [specific guidance based on current pipeline state]
 ```
 
-If cumulative risk is **within appetite** (< 5): provide the assessment and say "Continue." The verdict is CONTINUE.
+### Below-Appetite Rule (ADR-013 Rule 5)
 
-If cumulative risk **exceeds appetite** (>= 5): provide specific risk-reducing suggestions:
-- "Commit your current changes to move WIP forward"
-- "Write tests for [risk item from report]" — name the specific risk and test file
-- "The release report flags [X] — address it before adding more changes"
-- "Push your commits to get CI feedback"
+If cumulative risk is **within appetite** (< 5): provide the assessment table and verdict only. Do NOT emit advisory prose, recommendations, or suggestions. The verdict is `RISK_VERDICT: CONTINUE`.
 
-The verdict is PAUSE. This blocks the next edit until the risk is addressed.
+### Above-Appetite Remediations
+
+If cumulative risk **exceeds appetite** (>= 5): provide the assessment table, then emit a structured `RISK_REMEDIATIONS:` block with specific risk-reducing actions:
+
+```
+RISK_REMEDIATIONS:
+- R1 | Commit current changes to move WIP forward | <uncommitted files>
+- R2 | Write tests for <risk item from report> | <test file to create/extend>
+- R3 | Address release report risk <X> before adding more changes | <affected files>
+- R4 | Push commits to get CI feedback | N/A
+```
+
+Do NOT emit free-text suggestions as prose. The structured block is the only output for above-appetite guidance.
+
+The verdict is `RISK_VERDICT: PAUSE`. This blocks the next edit until the risk is addressed.
 
 ## Control Discovery
 

@@ -73,11 +73,13 @@ User manually dismisses the prompt. Friction, not harm.
 **Risk-scorer-specific:**
 
 - [x] Inspected risk-scorer agent prompts (`pipeline.md`, `wip.md`, `plan.md`). All are `tools: [Read, Glob]` and emit structured `RISK_SCORES`/`RISK_VERDICT`/`RISK_BYPASS` blocks. No "Your call:" or accept-or-remediate prose in the agent templates. The prose originates in the primary agent's unguided interpretation of scorer output.
-- [ ] Add a conditional: when cumulative residual ≤ appetite, emit only the score + verdict (`RISK_VERDICT: below-appetite`) and a terse proceed line. Omit the "Your call:" decision prompt.
-- [ ] Distinguish three output states explicitly: (a) below appetite → proceed silently; (b) above appetite → structured remediation; (c) at appetite exactly → surface a note but do not prompt (per policy framing "proceed without intervention" covers 3-4).
+- [x] Added "Below-Appetite Output Rule" to `pipeline.md`: when all scores ≤ appetite, emit ONLY the report structure + RISK_SCORES + RISK_BYPASS. No advisory prose, no suggestions, no "Your call:". References ADR-013 Rule 5.
+- [x] Added "Above-Appetite Remediations" to `pipeline.md`: replaced "Suggested Actions" + "Downstream Back-Pressure" with structured `RISK_REMEDIATIONS:` block. Machine-readable format for future P020 wrapping skill.
+- [x] Applied same pattern to `wip.md`: below-appetite = assessment table + CONTINUE only; above-appetite = structured `RISK_REMEDIATIONS:` block + PAUSE.
+- [x] Applied same pattern to `plan.md`: PASS = no advisory prose; FAIL = structured `RISK_REMEDIATIONS:` block. Added ADR-013 Rule 5 reference.
 - [x] Checked wip.md and plan.md — same pattern. All three scorer modes are output-only (`RISK_VERDICT: CONTINUE|PAUSE|PASS|FAIL`). No decision prompts in any scorer agent.
-- [ ] Update `RISK_SCORES:` / `RISK_VERDICT:` / `RISK_BYPASS:` marker contract (if needed) so the commit-gate hook distinguishes silent-pass from bypass-reducing from above-appetite-needs-remediation.
-- [ ] Decide where plan-mode entry and `AskUserQuestion` prompting live. If in a skill: `/wr-risk-scorer:assess-release` (P020) would own the orchestration. If in a hook: the commit-gate/push-gate hooks would need to branch on above/below appetite.
+- [ ] Update `RISK_SCORES:` / `RISK_VERDICT:` / `RISK_BYPASS:` marker contract (if needed) so the commit-gate hook distinguishes silent-pass from bypass-reducing from above-appetite-needs-remediation. (Deferred to P020 — hook parser for `RISK_REMEDIATIONS:` not needed until a wrapping skill exists.)
+- [x] Decided: plan-mode entry and `AskUserQuestion` live in the calling skill per ADR-013 Rule 3. P020 (`/wr-risk-scorer:assess-release`) will own the orchestration. Hooks stay as-is (gate logic only).
 
 **manage-problem-specific:**
 

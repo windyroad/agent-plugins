@@ -98,18 +98,35 @@ Assess whether each action is risk-reducing, risk-neutral, or risk-increasing. I
 
 For live incidents (outage, security, information disclosure), include `RISK_BYPASS: incident`.
 
-## Downstream Back-Pressure
+## Below-Appetite Output Rule (ADR-013 Rule 5)
 
-- **Commit**: If adding this commit would push the push queue risk >= 5, warn.
-- **Push**: If pushing would push the release queue risk >= 5, warn.
+When ALL cumulative scores are within appetite (≤ 4 per RISK-POLICY.md), your output MUST contain ONLY:
+1. The Pipeline Risk Report structure (layers, risk items, summary table)
+2. `RISK_SCORES: commit=N push=N release=N`
+3. `RISK_BYPASS: reducing` (if applicable)
+
+Do NOT emit: "Suggested Actions", "Your call:", advisory warnings, back-pressure notes, or any prose that implies the user needs to make a decision. Policy-authorised releases proceed silently.
+
+## Above-Appetite Remediations
+
+When ANY cumulative score exceeds appetite (> 4), emit a structured `RISK_REMEDIATIONS:` block after the `RISK_SCORES:` line. This gives the calling skill machine-readable input for structured decision prompts.
+
+Format:
+```
+RISK_REMEDIATIONS:
+- R1 | <description of remediation> | <files affected>
+- R2 | <description of remediation> | <files affected>
+```
+
+Include downstream back-pressure in the remediation list:
+- **Commit**: If adding this commit would push the push queue risk >= 5, include a remediation to split the commit.
+- **Push**: If pushing would push the release queue risk >= 5, include a remediation to release first.
+
+Do NOT emit free-text "Your call:" or "consider splitting" prose. The structured `RISK_REMEDIATIONS:` block is the only output for above-appetite guidance.
 
 ## Confidential Information Disclosure
 
 Check diffs for business metrics (revenue, user counts, pricing, traffic volumes). Flag as a standalone risk if found.
-
-## Suggested Actions
-
-If any cumulative risk >= 5, suggest specific actions referencing which layer is driving the risk.
 
 ## Report History
 
