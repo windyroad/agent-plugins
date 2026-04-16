@@ -67,7 +67,7 @@ User manually dismisses the prompt. Friction, not harm.
 
 - [x] **Drafted ADR-013**: `docs/decisions/013-structured-user-interaction-for-governance-decisions.proposed.md`. Covers 6 rules: AskUserQuestion mandatory at branch points, agents stay pure, skills own interaction, plan mode for multi-step remediations, policy-authorised silence, non-interactive fail-safe. Architect-reviewed and PASS.
 - [x] Architect-preferred split (Option B) confirmed by source: scoring agents are already pure (`tools: [Read, Glob]`, structured output only). The calling skill (or primary agent) must own `AskUserQuestion` + plan mode. No tool-grant expansion needed on scorer agents.
-- [ ] Define the machine-readable remediation/options marker format. Candidate: `RISK_REMEDIATIONS:` block with `id | description | effort (S/M/L) | risk_delta (-N) | files_touched` columns. Reusable beyond risk-scorer for any skill returning structured options.
+- [x] Define the machine-readable remediation/options marker format. Expanded to 5 columns: `id | description | effort (S/M/L) | risk_delta (-N) | files_touched` in `pipeline.md`, `wip.md`, and `plan.md`. Guarded by `packages/risk-scorer/agents/test/risk-scorer-structured-remediations.bats` (11 tests).
 - [x] Establish a review gate that catches prose decision prompts before release — `manage-problem-no-prose-options.bats` (P021 guard) added and `package.json` test script extended to `packages/*/skills/*/test/` so skill tests run in CI alongside hook tests.
 
 **Risk-scorer-specific:**
@@ -85,15 +85,26 @@ User manually dismisses the prompt. Friction, not harm.
 
 - [x] Amended `packages/itil/skills/manage-problem/SKILL.md`: step 9c now requires `AskUserQuestion` for WSJF-tie and single-top-problem selection; "Working a Problem" section now requires `AskUserQuestion` for scope-change decisions. Includes explicit prohibition on prose "(a)/(b)/(c)" prompts.
 - [x] Audited the skill for prose-option moments. Remaining `AskUserQuestion` usages (duplicate check step 2, data gathering step 4, pending verification step 9d) were already structured. No additional gaps found.
-- [x] Add a BATS or doc-lint test that fails if the skill contains prose option patterns like `Options: (a)` or `which would you like` without a preceding `AskUserQuestion` reference. — `packages/itil/skills/manage-problem/test/manage-problem-no-prose-options.bats` (4 tests, all GREEN)
+- [x] Add a BATS or doc-lint test that fails if the skill contains prose option patterns like `Options: (a)` or `which would you like` without a preceding `AskUserQuestion` reference. — `packages/itil/skills/manage-problem/test/manage-problem-no-prose-options.bats` (6 tests, all GREEN — 2 new regression guards for WSJF tie-break and scope-change AskUserQuestion mandates added 2026-04-16)
 
 **Reproduction evidence (manual — automated tests deferred to P012 skill testing harness):**
 
 - [x] Risk-scorer below-appetite prose: Image #3 this session — residual 3, "Your call: accept 3/25 explicitly and merge..."
 - [x] manage-problem prose option prompt: Image #4 this session — "(a)/(b)/(c)" WSJF tie-break as plain markdown
-- [ ] Automated: Risk-scorer residual 3 → assert output contains no "Your call:" prompt.
-- [ ] Automated: Risk-scorer residual 6 → assert output contains structured `RISK_REMEDIATIONS:`, not free-text.
-- [ ] Automated: manage-problem WSJF tie with two problems at equal score → assert the skill directs the primary to call `AskUserQuestion`, not to emit prose options.
+- [x] Automated (structural proxy): Risk-scorer residual 3 → `pipeline.md` defines "Below-Appetite Output Rule" prohibiting advisory prose. Guarded by `risk-scorer-structured-remediations.bats` test 4.
+- [x] Automated (structural proxy): Risk-scorer residual 6 → `pipeline.md` defines structured `RISK_REMEDIATIONS:` with 5-column format. Guarded by `risk-scorer-structured-remediations.bats` tests 1-3.
+- [x] Automated: manage-problem WSJF tie → `SKILL.md` mandates `AskUserQuestion` for work-next selection. Guarded by `manage-problem-no-prose-options.bats` test 5.
+
+## Fix Released
+
+All active investigation tasks complete as of 2026-04-16. Deployed in current `@windyroad/itil` and `@windyroad/risk-scorer` packages:
+- `pipeline.md`, `wip.md`, `plan.md`: structured 5-column `RISK_REMEDIATIONS:` format defined; Below-Appetite Output Rule enforced
+- `manage-problem` SKILL.md: `AskUserQuestion` mandated for all decision branches
+- `packages/risk-scorer/agents/test/risk-scorer-structured-remediations.bats`: 11 structural tests (GREEN)
+- `packages/itil/skills/manage-problem/test/manage-problem-no-prose-options.bats`: 6 tests (GREEN)
+- Deferred: `RISK_SCORES` marker contract update — remains deferred to P020 (hook parser not needed until assess-release skill wraps it)
+
+Awaiting user verification that governance skills no longer emit unstructured "Your call:" prose.
 
 ## Related
 

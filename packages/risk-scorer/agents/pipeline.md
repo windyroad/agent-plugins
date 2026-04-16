@@ -111,12 +111,16 @@ Do NOT emit: "Suggested Actions", "Your call:", advisory warnings, back-pressure
 
 When ANY cumulative score exceeds appetite (> 4), emit a structured `RISK_REMEDIATIONS:` block after the `RISK_SCORES:` line. This gives the calling skill machine-readable input for structured decision prompts.
 
-Format:
+Format (5 columns — machine-readable for structured AskUserQuestion prompts in calling skills):
 ```
 RISK_REMEDIATIONS:
-- R1 | <description of remediation> | <files affected>
-- R2 | <description of remediation> | <files affected>
+- R1 | <description of remediation> | <effort S/M/L> | <risk_delta -N> | <files affected>
+- R2 | <description of remediation> | <effort S/M/L> | <risk_delta -N> | <files affected>
 ```
+
+Column definitions:
+- **effort**: estimated size of the remediation — S (< 1h, single file), M (1-4h, few files), L (> 4h, multiple files)
+- **risk_delta**: estimated reduction in residual risk if this remediation is applied (e.g., `-3` means risk drops by 3 points)
 
 Include downstream back-pressure in the remediation list:
 - **Commit**: If adding this commit would push the push queue risk >= 5, include a remediation to split the commit.

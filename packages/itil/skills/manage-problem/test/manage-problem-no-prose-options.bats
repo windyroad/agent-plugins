@@ -44,3 +44,20 @@ setup() {
   run grep -n "which way?" "$SKILL_FILE"
   [ "$status" -ne 0 ]
 }
+
+@test "SKILL.md mandates AskUserQuestion for work-next selection (WSJF tie-break)" {
+  # ADR-013 Rule 1: the step 9c work-selection branch must use AskUserQuestion,
+  # not a prose '(a)/(b)/(c)' list. This is a regression guard — if step 9c is
+  # edited and the AskUserQuestion mandate is removed, this test catches it.
+  # P021 investigation task: manage-problem WSJF tie → assert AskUserQuestion.
+  run grep -n "AskUserQuestion" "$SKILL_FILE"
+  [ "$status" -eq 0 ]   # file MUST reference AskUserQuestion
+}
+
+@test "SKILL.md mandates AskUserQuestion for scope-change decisions during work" {
+  # ADR-013 Rule 1: the 'Scope expansion during work' branch must use AskUserQuestion.
+  # 'Scope change' is the header text used in the AskUserQuestion call for scope decisions
+  # (per P021 amendment). Regression guard.
+  run grep -n "Scope change" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}

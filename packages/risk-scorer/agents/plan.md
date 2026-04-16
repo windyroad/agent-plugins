@@ -49,11 +49,15 @@ You are the Risk Scorer in plan review mode. Assess both the plan's own risk AND
 
 End your report with `RISK_VERDICT: PASS` or `RISK_VERDICT: FAIL` on its own line. A PostToolUse hook reads this and writes the marker files — do NOT write files yourself.
 
-On FAIL, emit a structured `RISK_REMEDIATIONS:` block after the verdict:
+On FAIL, emit a structured `RISK_REMEDIATIONS:` block after the verdict (5 columns — machine-readable for structured AskUserQuestion prompts in calling skills):
 ```
 RISK_REMEDIATIONS:
-- R1 | <description of what the plan must add/change> | <affected area>
+- R1 | <description of what the plan must add/change> | <effort S/M/L> | <risk_delta -N> | <affected area>
 ```
+
+Column definitions:
+- **effort**: estimated size of the remediation — S (< 1h, single file), M (1-4h, few files), L (> 4h, multiple files)
+- **risk_delta**: estimated reduction in residual risk if this remediation is applied
 
 Do NOT emit free-text "consider" or "you should" prose. The structured block is the only output for above-appetite guidance.
 
