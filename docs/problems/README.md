@@ -8,7 +8,6 @@
 | WSJF | ID | Title | Severity | Status | Effort |
 |------|-----|-------|----------|--------|--------|
 | 12.0 | P021 | Governance skill structured prompts | 12 High | Known Error | M |
-| 10.0 | P030 | manage-problem verification prompts lack fix summary | 10 High | Open | S |
 | 8.0 | P020 | No on-demand assessment skills | 16 High | Known Error | L |
 | 8.0 | P011 | Grep-based BATS tests fragile | 8 Med | Known Error | M |
 | 4.5 | P016 | manage-problem should split multi-concern tickets | 9 Med | Open | M |

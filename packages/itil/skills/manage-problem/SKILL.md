@@ -304,7 +304,7 @@ Highlight:
 
 **Step 9d: Check for pending verifications**
 
-For each known-error that has a `## Fix Released` section, use `AskUserQuestion` to ask the user if the fix has been verified in production. If the user confirms, close the problem (`git mv` to `.closed.md`, update Status). If the user says no or is unsure, leave it as known-error.
+For each known-error that has a `## Fix Released` section, use `AskUserQuestion` to ask the user if the fix has been verified in production. The question MUST include a fix summary extracted from the `## Fix Released` section — include the first sentence (or first bullet list) of that section in the question body or as the option description, so the user can answer without reading the full problem file. Do not ask with only the problem ID + title + version. If the user confirms, close the problem (`git mv` to `.closed.md`, update Status). If the user says no or is unsure, leave it as known-error.
 
 **Step 9e: Update files and refresh README.md cache**
 

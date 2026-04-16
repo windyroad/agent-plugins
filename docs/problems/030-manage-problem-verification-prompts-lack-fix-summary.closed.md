@@ -1,6 +1,6 @@
 # Problem 030: manage-problem verification prompts omit fix summary, forcing clarifying rounds
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-04-16
 **Priority**: 10 (High) — Impact: Minor (2) x Likelihood: Almost Certain (5)
 **Effort**: S
@@ -46,8 +46,14 @@ In SKILL.md step 9d, require that verification questions include the first sente
 
 ### Investigation Tasks
 
-- [ ] Update step 9d in `packages/itil/skills/manage-problem/SKILL.md` to require fix summary in verification questions
-- [ ] Extend `packages/itil/skills/manage-problem/test/manage-problem-no-prose-options.bats` with a test asserting the verification AskUserQuestion includes fix content (not just ID + title)
+- [x] Update step 9d in `packages/itil/skills/manage-problem/SKILL.md` to require fix summary in verification questions
+- [x] Extend `packages/itil/skills/manage-problem/test/manage-problem-no-prose-options.bats` with a test asserting the verification AskUserQuestion includes fix content (not just ID + title)
+
+## Fix Released
+
+Step 9d in `packages/itil/skills/manage-problem/SKILL.md` updated to require fix summary extracted from `## Fix Released` section in all verification AskUserQuestion calls. Regression guard added to `manage-problem-no-prose-options.bats` (test 7, all 7 GREEN). Both architect and JTBD reviews PASS.
+
+Fix verified immediately in this session — the next invocation of `manage-problem work` used fix summaries in all three pending verification prompts.
 
 ## Related
 
