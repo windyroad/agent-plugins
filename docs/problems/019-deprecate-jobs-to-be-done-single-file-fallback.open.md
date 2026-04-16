@@ -3,6 +3,8 @@
 **Status**: Open
 **Reported**: 2026-04-16
 **Priority**: 6 (Medium) — Impact: Moderate (3) x Likelihood: Possible (2)
+**Effort**: L — 3 ADR edits, 1 hook, 4 BATS files, 1 SKILL.md, 1 file delete (re-sized after architect review 2026-04-16; was S)
+**WSJF**: 1.5 — (6 × 1.0) / 4
 
 ## Description
 
@@ -38,12 +40,20 @@ ADR-008 was drafted when a legacy single-file `JOBS_TO_BE_DONE.md` existed in bb
 ### Investigation Tasks
 
 - [ ] Inventory: which projects currently in use have `docs/JOBS_TO_BE_DONE.md` without also having `docs/jtbd/`? If the answer is "none", removal is free.
-- [ ] Amend ADR-008 (architect guidance): remove the backward-compatibility clause from Decision Drivers, from Option 1, from the Plugin Changes section (eval/enforce/mark-reviewed/agent fallbacks), and from the Confirmation bullets. Add to Consequences (Bad): "Projects on the legacy single-file layout must run `/wr-jtbd:update-guide` before upgrading."
-- [ ] Decide amendment vs. supersession. Since ADR-008 is `.proposed`, a direct amendment is appropriate (no historical record to preserve).
-- [ ] Update `wr-jtbd:update-guide` documentation to make explicit that it IS the migration path, and position it as a prerequisite for upgrading to any post-deprecation plugin version.
+- [ ] Amend ADR-008 in place (it is `.proposed`, no supersession required). Rather than silently mutating Option 1, **add a new "Option 3: Directory-only, no fallback"** as the chosen option and retain Option 1 (with backward compatibility) in Considered Options as the alternative now being rejected — preserves the rationale chain. Update the `date` field. Remove the backward-compat clause from Decision Drivers, from Plugin Changes (eval/enforce/mark-reviewed/agent fallbacks), and from Confirmation.
+- [ ] In ADR-008 add an explicit carve-out: "The `wr-jtbd:update-guide` skill is the sole component permitted to read `docs/JOBS_TO_BE_DONE.md`, and only for one-shot migration into `docs/jtbd/`." Future cleanup passes must not strip this read path from the skill.
+- [ ] In ADR-008 Consequences (Bad) add disposition policy: "Once migrated, the legacy file should be deleted (git history is the archive)."
+- [ ] Update ADR-008 Confirmation to: "BATS tests assert single canonical path `docs/jtbd/`; legacy single-file is not consulted by runtime hooks."
+- [ ] Update the supersession note in ADR-007 (`docs/decisions/007-jtbd-project-wide-enforcement.superseded.md`) to explicitly state that the single-file artifact name is no longer canonical (format change, not just structure change).
+- [ ] Update ADR-005 (`docs/decisions/005-plugin-testing-strategy.proposed.md` line 138) — rephrase the `docs/jtbd` vs `docs/JOBS_TO_BE_DONE.md` example or note that legacy support has been removed.
+- [ ] Remove the `docs/JOBS_TO_BE_DONE.md` exemption from `packages/architect/hooks/architect-enforce-edit.sh` (lines 67-69) and delete its case in `packages/architect/hooks/test/architect-enforce-scope.bats`.
+- [ ] Remove or invert dual-path assertions in `packages/jtbd/hooks/test/jtbd-eval.bats`, `jtbd-mark-reviewed.bats`, `jtbd-enforce-scope.bats` — assert single canonical path only; negative tests where appropriate.
+- [ ] Update `packages/jtbd/skills/update-guide/SKILL.md` to make explicit that it IS the migration path, and is the ONLY component allowed to read `docs/JOBS_TO_BE_DONE.md` (for migration only). Position as prerequisite for upgrading to any post-deprecation plugin version.
 - [ ] Update P018 to drop the "(or `docs/JOBS_TO_BE_DONE.md` for legacy projects)" carve-out from the quadruplet invariant and CI validation task.
 - [ ] Strip dual-path logic from `wr-jtbd` agent and any eval/enforce/mark-reviewed/agent fallbacks in packaged plugins.
+- [ ] Delete this repo's own stub `docs/JOBS_TO_BE_DONE.md` (confirmed by jtbd-lead to be a 5-line stub redirect with no unique content).
 - [ ] Add a release note / changelog entry calling out the breaking change for any external adopter still on the single-file layout.
+- [ ] Re-run architect review after the above scope changes are in the ticket; proceed to implementation only after APPROVED.
 
 ## Related
 

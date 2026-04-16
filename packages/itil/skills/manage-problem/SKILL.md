@@ -83,6 +83,12 @@ What "work" means depends on the problem's status:
 3. Include the problem doc closure in the fix commit (`git mv` to `.closed.md`, update Status)
 4. Push, create changeset, release per the lean release principle
 
+**Scope expansion during work:** If investigation or architect review reveals that the problem's scope has grown significantly (e.g., effort re-sized from S to L, additional files discovered), use `AskUserQuestion` before continuing:
+- Option 1: `Continue with expanded scope` — keep working this problem at its new size
+- Option 2: `Update problem and re-rank` — save findings to the problem file, re-score WSJF, and re-run the work selection to let the user pick from the updated queue
+- Option 3: `Pick a different problem` — park this one and work something else
+- Use `header: "Scope change"` and `multiSelect: false`
+
 **In both cases:** After completing work on one problem, run `problem work` again to pick up the next highest-WSJF problem. Keep going until the user says stop or no more problems are actionable.
 
 ## Steps
@@ -239,7 +245,7 @@ Read `RISK-POLICY.md` to get the current impact levels (1-5), likelihood levels 
     - Update the Status field to "Known Error"
     - This happens automatically — do not ask the user
 
-**Step 9c: Present summary**
+**Step 9c: Present summary and select problem to work**
 
 After reviewing all problems, present a WSJF-ranked table:
 
@@ -252,6 +258,18 @@ Highlight:
 - Problems that may be stale (reported > 2 weeks ago with no investigation progress)
 - Problems that have been fixed but not closed (check git history for fix commits)
 - Known errors with a `## Fix Released` section (pending user verification)
+
+**When the operation is `work` (not just `review`), select the problem to work using `AskUserQuestion`:**
+
+- If one problem has a strictly higher WSJF than all others, present it as the recommended option:
+  - Option 1: `Work P<NNN>: <title> (Recommended)` — with description showing WSJF score and status
+  - Option 2: `Pick a different problem` — let the user name a specific ID
+- If two or more problems tie for the highest WSJF, present the tied problems as options:
+  - One option per tied problem: `Work P<NNN>: <title>` — with description showing WSJF and a one-line rationale for why this one
+  - Final option: `Pick a different problem`
+- Use `header: "Next problem"` and `multiSelect: false`
+
+**Never present the selection as prose "(a)/(b)/(c)" or "which would you like?"** — always use `AskUserQuestion` so the decision is structured and auditable.
 
 **Step 9d: Check for pending verifications**
 
