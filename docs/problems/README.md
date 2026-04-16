@@ -10,7 +10,6 @@
 | 32.0 | P020 | No on-demand assessment skills | 16 High | Known Error | S |
 | 4.5 | P028 | Governance skills should auto-release and auto-install | 9 Med | Open | M |
 | 4.5 | P029 | Edit gate overhead disproportionate for governance docs | 9 Med | Open | M |
-| 6.0 | P013 | TDD `.feature` file classifier | 12 High | Open | M |
 | 4.5 | P016 | manage-problem should split multi-concern tickets | 9 Med | Open | M |
 | 4.5 | P017 | create-adr should split multi-decision records | 9 Med | Open | M |
 | 4.0 | P018 | TDD enforce BDD + Example Mapping principles | 16 High | Open | L |

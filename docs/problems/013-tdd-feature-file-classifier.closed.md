@@ -1,6 +1,6 @@
 # Problem 013: TDD plugin does not recognise `.feature` files as tests
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-04-16
 **Priority**: 12 (High) — Impact: Significant (4) x Likelihood: Possible (3)
 
@@ -36,10 +36,19 @@ Create a companion `<name>.test.js` file importing the step definitions or a fun
 
 ### Investigation Tasks
 
-- [ ] Decide scope: classifier-only fix (recognise `.feature` as test), or also extend pair-detection to handle `features/X.feature` ↔ `features/step_definitions/X.steps.js`
-- [ ] Prototype classifier extension (small, reversible change)
-- [ ] Create reproduction test under `packages/tdd/test/`
-- [ ] Verify against addressr P005 scenario (does removing the fake wrapper now work?)
+- [x] Decide scope: classifier-only fix (recognise `.feature` as test), or also extend pair-detection to handle `features/X.feature` ↔ `features/step_definitions/X.steps.js` — **both implemented**
+- [x] Prototype classifier extension — `*.feature` added to test case in `tdd_classify_file()`
+- [x] Create reproduction tests under `packages/tdd/hooks/test/tdd-gate.bats` — 4 new tests (all GREEN)
+- [ ] Verify against addressr P005 scenario (does removing the fake wrapper now work?) — deferred to user verification
+
+## Fix Released
+
+Implemented 2026-04-16 in `packages/tdd/hooks/lib/tdd-gate.sh`:
+- `tdd_classify_file()`: added `*.feature` to test case — Cucumber `.feature` files now transition TDD state from IDLE to RED
+- `tdd_find_test_for_impl()`: added Cucumber pair-detection — step definitions in `step_definitions/` associate with the matching `.feature` in the parent `features/` directory; compound suffix `.steps.*` stripped before stem matching
+- `packages/tdd/hooks/test/tdd-gate.bats`: 4 new regression tests (40/40 GREEN)
+
+Awaiting user verification that BDD/Cucumber users no longer need fake `*.test.js` wrappers.
 
 ## Related
 

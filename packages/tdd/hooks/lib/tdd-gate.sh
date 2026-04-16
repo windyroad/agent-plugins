@@ -21,6 +21,7 @@ tdd_classify_file() {
   case "$BASENAME" in
     *.test.ts|*.test.tsx|*.test.js|*.test.jsx) echo "test"; return ;;
     *.spec.ts|*.spec.tsx|*.spec.js|*.spec.jsx) echo "test"; return ;;
+    *.feature) echo "test"; return ;;
   esac
   case "$FILE_PATH" in
     */__tests__/*) echo "test"; return ;;
@@ -136,13 +137,17 @@ tdd_find_test_for_impl() {
   BASENAME=$(basename "$IMPL_PATH")
 
   # Strip extension to get stem (e.g., "Hero" from "Hero.tsx")
-  # Handle .ts, .tsx, .js, .jsx
+  # Handle .ts, .tsx, .js, .jsx, and Cucumber step definitions (.steps.js, .steps.ts, etc.)
   case "$BASENAME" in
     *.tsx) STEM="${BASENAME%.tsx}"; EXT="tsx" ;;
     *.ts)  STEM="${BASENAME%.ts}";  EXT="ts" ;;
     *.jsx) STEM="${BASENAME%.jsx}"; EXT="jsx" ;;
     *.js)  STEM="${BASENAME%.js}";  EXT="js" ;;
     *)     STEM="$BASENAME";       EXT="" ;;
+  esac
+  # Strip compound step-definition suffixes (e.g. "checkout.steps" -> "checkout")
+  case "$STEM" in
+    *.steps) STEM="${STEM%.steps}" ;;
   esac
 
   local TEST_FILES
@@ -180,6 +185,18 @@ tdd_find_test_for_impl() {
         case "$tracked_base" in
           "${STEM}.test."*|"${STEM}.spec."*) echo "$tracked"; return ;;
         esac
+        ;;
+    esac
+
+    # Cucumber: features/step_definitions/foo.steps.js → features/foo.feature
+    # If this impl is inside a step_definitions/ directory, look in the parent for a .feature file
+    case "$DIR" in
+      */step_definitions)
+        local feature_dir
+        feature_dir=$(dirname "$DIR")
+        if [ "$tracked_dir" = "$feature_dir" ] && [ "$tracked_base" = "${STEM}.feature" ]; then
+          echo "$tracked"; return
+        fi
         ;;
     esac
   done <<< "$TEST_FILES"
