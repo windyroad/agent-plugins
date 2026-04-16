@@ -150,6 +150,28 @@ Do NOT ask for fields that can be inferred:
 - **Symptoms**: Infer from description if possible
 - **Workaround**: Default to "None identified yet." unless obvious from context
 
+### 4b. For new problems: Concern-boundary analysis (multi-concern check)
+
+Before writing the problem file, perform a concern-boundary analysis on the gathered description to prevent conflated tickets that make WSJF scoring meaningless (P016).
+
+**Self-check**: Read the description and root cause information gathered in step 4. Answer: "How many distinct root causes are present? If fixed independently, how many separate fix paths exist?"
+
+- **Single concern** (one root cause, one fix path): proceed directly to step 5.
+- **Multiple concerns** (two or more distinct root causes, different components, or if the architect review flagged this needs its own ADR): present a split prompt.
+
+**Split prompt** — use `AskUserQuestion`:
+- `header: "Multi-concern problem"`
+- `multiSelect: false`
+- Options:
+  1. `Split into separate problems (Recommended)` — description: "Create one problem ticket per distinct concern, with consecutive IDs. Each ticket gets its own priority, WSJF score, and fix path."
+  2. `Keep as a single problem` — description: "Create one ticket covering all concerns. Use this only if the concerns are so tightly coupled that they cannot be fixed independently."
+
+**Non-interactive fallback**: When `AskUserQuestion` is unavailable (e.g., non-interactive/AFK mode), automatically split into separate problems and note the auto-split in output. Do not block creation.
+
+**Split implementation**: When splitting, assign consecutive IDs (e.g., if next ID is 035, create P035 and P036). Create each problem file independently. Cross-reference each ticket in the other's "Related" section.
+
+**Scope**: This step applies only to **new problem creation** (steps 2–5). It does NOT apply to updates, status transitions, or reviews of existing tickets.
+
 ### 5. For new problems: Write the problem file
 
 **File path**: `docs/problems/<NNN>-<kebab-case-title>.open.md`
