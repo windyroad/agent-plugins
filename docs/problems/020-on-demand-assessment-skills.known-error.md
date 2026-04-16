@@ -1,10 +1,10 @@
 # Problem 020: No user-invocable skills for on-demand governance assessments
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-16
 **Priority**: 16 (High) — Impact: Significant (4) x Likelihood: Likely (4)
 **Effort**: L
-**WSJF**: 4.0 — (16 × 1.0) / 4
+**WSJF**: 8.0 — (16 × 2.0) / 4
 
 ## Description
 
@@ -54,24 +54,51 @@ The governance plugins were built hook-first. The assumption was that assessment
 
 ### Investigation Tasks
 
-- [ ] Inventory every assessment mode across `wr-risk-scorer`, `wr-architect`, `wr-jtbd`. For each, decide whether an on-demand skill wrapper is valuable (likely yes for: risk-scorer pipeline/wip/plan, architect review, jtbd review) or redundant with the setup skill (likely no for policy/adr-authoring).
-- [ ] Design skill naming. Candidates: `/wr-risk-scorer:assess` (mode picker) vs one per mode (`:assess-release`, `:assess-wip`, `:assess-plan`). Consistency with `wr-itil:manage-<noun>` pattern.
-- [ ] Decide: does an on-demand assessment satisfy the hook's gate marker (ADR-009), or is it advisory-only? Architect flagged this as the key ADR-interaction question.
-- [ ] Define the context-gathering pattern. Each mode has different inputs (release queue vs staged diff vs plan file vs wip edits). The skill must either auto-detect or prompt via AskUserQuestion.
-- [ ] Reference ADR-011 as the skill-wrapping precedent. Draft companion ADR if the interaction with ADR-009 gate markers is non-trivial.
-- [ ] Consider whether this should be one cross-plugin skill (`/wr:assess` mode picker) or per-plugin skills. Per-plugin is more discoverable; cross-plugin is more composable.
-- [ ] Add skill-creator-style eval harness (see P012) for whichever assessment skills ship — their outputs are deterministic enough to grade.
+- [x] Inventory every assessment mode across `wr-risk-scorer`, `wr-architect`, `wr-jtbd`. For each, decide whether an on-demand skill wrapper is valuable (likely yes for: risk-scorer pipeline/wip/plan, architect review, jtbd review) or redundant with the setup skill (likely no for policy/adr-authoring).
+- [x] Design skill naming. Candidates: `/wr-risk-scorer:assess` (mode picker) vs one per mode (`:assess-release`, `:assess-wip`, `:assess-plan`). Consistency with `wr-itil:manage-<noun>` pattern. **Outcome**: per-mode skills chosen; `assess-<artifact>` for quantitative scoring, `review-<artifact>` for qualitative compliance.
+- [x] Decide: does an on-demand assessment satisfy the hook's gate marker (ADR-009), or is it advisory-only? **Outcome**: `assess-release` pre-satisfies the gate — PostToolUse hook writes bypass marker after pipeline subagent runs. `assess-wip` is advisory only (no bypass marker). Documented in ADR-015.
+- [x] Define the context-gathering pattern. **Outcome**: each skill auto-detects from git state (`git log`, `git diff --cached`, changesets dir); AskUserQuestion fallback if ambiguous.
+- [x] Reference ADR-011 as the skill-wrapping precedent. Draft companion ADR. **Outcome**: ADR-015 written and committed.
+- [x] Consider whether this should be one cross-plugin skill or per-plugin skills. **Outcome**: per-plugin chosen (Option A in ADR-015) — more discoverable, independent cadence, consistent with precedent.
+- [ ] Add skill-creator-style eval harness (see P012) for assessment skills — deferred to P012.
+
+### Fix Strategy
+
+Implement four SKILL.md files per ADR-015 scope table:
+
+| Skill | Package | Subagent |
+|-------|---------|---------|
+| `assess-release` | `packages/risk-scorer/skills/assess-release/SKILL.md` | `wr-risk-scorer:pipeline` |
+| `assess-wip` | `packages/risk-scorer/skills/assess-wip/SKILL.md` | `wr-risk-scorer:wip` |
+| `review-design` | `packages/architect/skills/review-design/SKILL.md` | `wr-architect:agent` |
+| `review-jobs` | `packages/jtbd/skills/review-jobs/SKILL.md` | `wr-jtbd:agent` |
+
+Also update ADR-002 package inventory to list the new skills.
+
+## Fix Released
+
+All four SKILL.md files implemented and committed (2026-04-16):
+- `packages/risk-scorer/skills/assess-release/SKILL.md` — delegates to `wr-risk-scorer:pipeline`; gate-marker aware; AskUserQuestion for ambiguous scope
+- `packages/risk-scorer/skills/assess-wip/SKILL.md` — delegates to `wr-risk-scorer:wip`; advisory only
+- `packages/architect/skills/review-design/SKILL.md` — delegates to `wr-architect:agent`; AskUserQuestion for violations
+- `packages/jtbd/skills/review-jobs/SKILL.md` — delegates to `wr-jtbd:agent`; AskUserQuestion for gaps/breaks
+- ADR-002 package inventory updated with all new skills
+- ADR-015 written (design decision documenting the pattern)
+- JTBD-005, JTBD-202, JTBD-101, tech-lead persona updated
+
+Awaiting user verification that skills are invocable and produce useful output.
 
 ## Related
 
+- ADR-015: `docs/decisions/015-on-demand-assessment-skills.proposed.md` — the ADR that governs this fix
 - Precedent: ADR-011 (`docs/decisions/011-manage-incident-skill.proposed.md`) — skill-wrapping pattern coordinating tools/agents
 - Gate interaction: ADR-009 (`docs/decisions/009-gate-marker-lifecycle.proposed.md`) — on-demand assessment vs hook-gate satisfaction question
 - Sibling-pattern reference: `wr-itil` plugin (both `update-policy` setup skill and `manage-problem`/`manage-incident` assessment-style skills)
 - `packages/risk-scorer/` — existing agent modes: `agent`, `wip`, `pipeline`, `plan`, `policy`
 - `packages/architect/` — existing agent + `create-adr` setup skill
 - `packages/jtbd/` — existing agent + `update-guide` setup skill
-- JTBD-001: `docs/jtbd/solo-developer/JTBD-001-enforce-governance.proposed.md`
-- JTBD-003: `docs/jtbd/solo-developer/JTBD-003-compose-guardrails.proposed.md` (if present — else `docs/jtbd/README.md` entry)
+- JTBD-005: `docs/jtbd/solo-developer/JTBD-005-assess-on-demand.proposed.md`
+- JTBD-202: `docs/jtbd/tech-lead/JTBD-202-pre-flight-governance-check.proposed.md`
 - JTBD-101: `docs/jtbd/plugin-developer/JTBD-101-extend-suite.proposed.md`
 - Tech-lead persona: `docs/jtbd/tech-lead/persona.md`
-- Tension: P014 `docs/problems/014-aside-capture-for-problems.open.md` — any new skill must also be cheap to invoke mid-task, or it won't get used
+- P012: `docs/problems/012-skill-testing-harness.open.md` — eval harness deferred here
