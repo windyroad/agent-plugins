@@ -16,6 +16,9 @@
 - **`.env` may be a 1Password FIFO** (named pipe). Never `cat >` to it. Use `.env.tpl` with `op://` references and `op inject -i .env.tpl -o .env` instead.
 - **Plugin renames need 4 coordinated steps**: (1) rename in repo + push + release, (2) `claude plugin marketplace update windyroad` to refresh the cache, (3) edit `.claude/settings.json` directly to swap the enabled key (`claude plugin uninstall` refuses project-scope installs), (4) restart Claude Code. Then `npm deprecate "<old-pkg>@>=0.0.0" "<msg>"` — bare `*` returns 404; needs an explicit version range.
 - **1Password "Developer Environments"** (UI feature) are NOT accessible via `op` CLI (no `op env get`). To read a value into a script, fall back to a vault item or a project `.env` that already has it. Voder env vars include `NPM_AUTH_TOKEN` available in `bbstats/.env`.
+- **All ADRs in `docs/decisions/` are still `.proposed.md`** — none ratified. Amendments are cheap: prefer amending over superseding. When a P-problem intersects a proposed ADR, revise the ADR rather than adding a compatibility clause.
+- **Risk-scorer agents are tool-restricted to `Read + Glob`** — no `AskUserQuestion`, no `EnterPlanMode`. Sub-agents invoked via Task also cannot enter plan mode on the parent's behalf. Any "scorer asks the user" design must split scorer/orchestrator concerns: scorer emits structured markers, calling skill/primary owns the interaction. See P021.
+- **ADR-002 plugin dependency graph lists `@windyroad/tdd` as standalone.** Cross-plugin features (e.g. P018 JTBD traceability, P017 shared concern-splitting helper) must update the graph explicitly; don't silently add deps.
 
 ## What Will Surprise You
 
@@ -26,3 +29,5 @@
 - **The `skills` npm package installs to 45 AI tools** (Codex, Cursor, Cline, etc.), not just Claude Code. If cross-tool distribution is ever needed again, that's the mechanism.
 - **`claude plugin list` shows installs across all projects, not just the current one.** If you see N entries for a plugin, they are N different project-scope installs (correct per ADR-004), not duplicates. Check `~/.claude/plugins/installed_plugins.json` for the `projectPath` of each entry.
 - **Edit gates block files outside the project** (e.g., `~/.claude/channels/discord/access.json`). Use bash to write non-project config files when gates are active.
+- **Write tool fails with "File has not been read yet" after `git mv`.** Renaming a file mid-session invalidates the Read-tracking on the new path. Must `Read` the renamed file before `Write` or `Edit`.
+- **Anthropic's official `skill-creator` skill ships a mature eval harness** (evals.json + dual-run with-skill/baseline + grader subagent + aggregate_benchmark + HTML viewer). Directly applicable to testing our SKILL.md documents. See P012 for how it maps to the skill-testing-harness decision.
