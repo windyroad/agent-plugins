@@ -1,8 +1,11 @@
 # Problem 032: Agent output references opaque problem/ADR IDs without human-readable titles
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-04-17
+**Closed**: 2026-04-17
 **Priority**: 15 (High) — Impact: Moderate (3) x Likelihood: Almost certain (5)
+**Effort**: S
+**WSJF**: 15.0 — (15 × 1.0) / 1
 
 ## Description
 
@@ -41,20 +44,37 @@ User mentally maps IDs to titles from memory, or opens the referenced file each 
 
 ## Root Cause Analysis
 
-### Preliminary Hypothesis
+### Confirmed Root Cause
 
-No agent prompt or skill instruction requires IDs to be accompanied by their title. Agents naturally emit the shortest reference ("P029") because:
+No agent prompt or skill instruction required IDs to be accompanied by their title. Agents naturally emit the shortest reference ("P029") because:
 
-1. **No output formatting rule.** No ADR, CLAUDE.md rule, or skill instruction says "always include the title when referencing a problem or ADR by ID."
+1. **No output formatting rule.** No skill instruction said "always include the title when referencing a problem or ADR by ID."
 2. **Agents read the ID from filenames.** Problem files are named `029-edit-gate-overhead-...known-error.md` — the agent sees the ID but the title is inside the file, requiring a separate extraction step.
 3. **Abbreviation is the LLM default.** LLMs prefer brevity; bare IDs are shorter than "P029 (Edit gate overhead for governance docs)".
 
 ### Investigation Tasks
 
-- [ ] Investigate root cause — confirm whether this is purely a prompt instruction gap or if there's a structural issue (agents don't have titles loaded when emitting IDs)
-- [ ] Design fix — candidates: (a) add a cross-cutting output rule to CLAUDE.md or a shared agent instruction; (b) require each skill/agent that emits IDs to include titles in its output template; (c) standardise a "P029: Edit gate overhead" format in all problem file H1 headings so agents naturally include the title when quoting the heading
-- [ ] Create reproduction test
-- [ ] Create INVEST story for permanent fix
+- [x] Investigate root cause — confirmed: purely a prompt instruction gap
+- [x] Design fix — chose option (b): add "## Output Formatting" section to each skill/agent that emits IDs
+- [x] Create reproduction test — BATS doc-lint tests for manage-problem, architect agent, jtbd agent
+- [x] Implement fix
+
+## Fix
+
+Added an `## Output Formatting` section to the 5 primary ID-emitting instruction files:
+
+1. `packages/itil/skills/manage-problem/SKILL.md`
+2. `packages/architect/agents/agent.md`
+3. `packages/architect/skills/review-design/SKILL.md`
+4. `packages/jtbd/agents/agent.md`
+5. `packages/jtbd/skills/review-jobs/SKILL.md`
+
+Each section instructs the agent: "When referencing problem, ADR, or JTBD IDs in prose output, always include the human-readable title on first mention."
+
+BATS regression tests added:
+- `packages/itil/skills/manage-problem/test/manage-problem-output-formatting.bats`
+- `packages/architect/agents/test/architect-output-formatting.bats`
+- `packages/jtbd/agents/test/jtbd-output-formatting.bats`
 
 ## Related
 

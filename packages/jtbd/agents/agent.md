@@ -45,6 +45,10 @@ All review criteria come from the JTBD documentation. Read the docs first and ap
 - If the change involves API interactions, do the actions align with the job's expected flow?
 - Are new actions documented in the relevant job's action list?
 
+## Output Formatting
+
+When referencing JTBD IDs, problem IDs (P<NNN>), or ADR IDs in prose output, always include the human-readable title on first mention. Use the format `JTBD-001 (Enforce Governance Without Slowing Down)`, not bare `JTBD-001`.
+
 ## How to Report
 
 If the change aligns with documented jobs:

@@ -8,6 +8,10 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 
 Create, update, or transition problem tickets following an ITIL-aligned problem management process. This skill is the authoritative definition of the problem management workflow — no separate process document is needed.
 
+## Output Formatting
+
+When referencing problem IDs, ADR IDs, or JTBD IDs in prose output, always include the human-readable title on first mention. Use the format `P029 (Edit gate overhead for governance docs)`, not bare `P029`. Tables with separate ID and Title columns are fine as-is.
+
 ## Operations
 
 - **Create**: `problem <title or description>` — creates a new open problem

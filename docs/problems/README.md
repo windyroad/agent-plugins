@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-04-17 (full re-rank; P031 known error + fix released; P029 fix released; label corrections)
+> Last reviewed: 2026-04-17 (P032 fixed and closed; pending verifications unchanged)
 > Run `/wr-itil:manage-problem review` to refresh.
 
 ## WSJF Rankings
@@ -30,7 +30,7 @@
 | P020 | No on-demand assessment skills | v0.3.2 |
 | P021 | Governance skill structured prompts | v0.3.2 |
 | P029 | Edit gate overhead for governance docs | commit ac9d453 |
-| P031 | Stale cache detection in manage-problem work | this session |
+| P031 | Stale cache detection in manage-problem work | commit 824cb2c |
 
 ## Parked
 

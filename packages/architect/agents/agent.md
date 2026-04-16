@@ -81,6 +81,10 @@ When a change includes a new or modified decision file in `docs/decisions/`:
 - Does it include reassessment criteria?
 - If it supersedes another decision, is the old decision properly updated?
 
+## Output Formatting
+
+When referencing decision IDs (ADR-<NNN>), problem IDs (P<NNN>), or JTBD IDs in prose output, always include the human-readable title on first mention. Use the format `ADR-013 (Skill manifest in package.json)`, not bare `ADR-013`.
+
 ## How to Report
 
 If the change is compliant and no new decision is needed:

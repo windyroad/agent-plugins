@@ -17,6 +17,10 @@ This skill is **read-only**. It does not commit, push, or modify files.
 - When proposing a structural change: get a review before editing architecture-bearing files
 - Any time the hook gate is not convenient: e.g., planning mode, exploratory spikes
 
+## Output Formatting
+
+When referencing decision IDs (ADR-<NNN>), problem IDs (P<NNN>), or JTBD IDs in prose output, always include the human-readable title on first mention. Use the format `ADR-013 (Skill manifest in package.json)`, not bare `ADR-013`.
+
 ## Steps
 
 ### 1. Parse arguments
