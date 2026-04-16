@@ -1,6 +1,6 @@
 # Problem 025: --update flag fails for project-scoped plugins
 
-**Status**: Known Error
+**Status**: Closed
 **Reported**: 2026-04-16
 **Priority**: 15 (High) — Impact: Moderate (3) x Likelihood: Almost Certain (5)
 **Effort**: S
