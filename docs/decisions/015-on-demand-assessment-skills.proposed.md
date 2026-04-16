@@ -131,15 +131,15 @@ All decision branch points (e.g., above-appetite risk) use `AskUserQuestion` per
 
 ## Confirmation
 
-- [ ] `packages/risk-scorer/skills/assess-release/SKILL.md` created; skill delegates to `wr-risk-scorer:pipeline` via the Skill tool
-- [ ] `packages/risk-scorer/skills/assess-wip/SKILL.md` created; skill delegates to `wr-risk-scorer:wip` via the Skill tool
-- [ ] `packages/architect/skills/review-design/SKILL.md` created; skill delegates to `wr-architect:agent` via the Skill tool
-- [ ] `packages/jtbd/skills/review-jobs/SKILL.md` created; skill delegates to `wr-jtbd:agent` via the Skill tool
-- [ ] No skill contains `touch`, `echo`, or `mkdir` instructions targeting `$TMPDIR/claude-risk-*` directly
-- [ ] All four skills declare `allowed-tools: Read, Glob, Grep, AskUserQuestion, Skill` (at minimum)
-- [ ] ADR-002 package inventory updated to list all new skills under architect, risk-scorer, and jtbd entries
-- [ ] `docs/jtbd/README.md` includes JTBD-005 and JTBD-202 ✓ (done)
-- [ ] JTBD-005, JTBD-202, updated tech-lead persona, updated JTBD-101 are committed ✓ (done)
+- [x] `packages/risk-scorer/skills/assess-release/SKILL.md` created; skill delegates to `wr-risk-scorer:pipeline` via the Skill tool
+- [x] `packages/risk-scorer/skills/assess-wip/SKILL.md` created; skill delegates to `wr-risk-scorer:wip` via the Skill tool
+- [x] `packages/architect/skills/review-design/SKILL.md` created; skill delegates to `wr-architect:agent` via the Skill tool
+- [x] `packages/jtbd/skills/review-jobs/SKILL.md` created; skill delegates to `wr-jtbd:agent` via the Skill tool
+- [x] No skill contains `touch`, `echo`, or `mkdir` instructions targeting `$TMPDIR/claude-risk-*` directly
+- [x] All four skills declare `allowed-tools: Read, Glob, Grep, AskUserQuestion, Skill` (at minimum; also Bash for git context-gathering)
+- [x] ADR-002 package inventory updated to list all new skills under architect, risk-scorer, and jtbd entries
+- [x] `docs/jtbd/README.md` includes JTBD-005 and JTBD-202 ✓ (done)
+- [x] JTBD-005, JTBD-202, updated tech-lead persona, updated JTBD-101 are committed ✓ (done)
 
 ## Related
 
