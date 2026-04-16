@@ -85,7 +85,7 @@ User manually dismisses the prompt. Friction, not harm.
 
 - [x] Amended `packages/itil/skills/manage-problem/SKILL.md`: step 9c now requires `AskUserQuestion` for WSJF-tie and single-top-problem selection; "Working a Problem" section now requires `AskUserQuestion` for scope-change decisions. Includes explicit prohibition on prose "(a)/(b)/(c)" prompts.
 - [x] Audited the skill for prose-option moments. Remaining `AskUserQuestion` usages (duplicate check step 2, data gathering step 4, pending verification step 9d) were already structured. No additional gaps found.
-- [ ] Add a BATS or doc-lint test that fails if the skill contains prose option patterns like `Options: (a)` or `which would you like` without a preceding `AskUserQuestion` reference.
+- [x] Add a BATS or doc-lint test that fails if the skill contains prose option patterns like `Options: (a)` or `which would you like` without a preceding `AskUserQuestion` reference. — `packages/itil/skills/manage-problem/test/manage-problem-no-prose-options.bats` (4 tests, all GREEN)
 
 **Reproduction evidence (manual — automated tests deferred to P012 skill testing harness):**
 
