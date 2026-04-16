@@ -55,6 +55,15 @@ Two root causes:
 - [x] Update `SKILL.md` to describe the fast-path cache read in the `work` operation and Parked exclusion in step 9b
 - [x] Add BATS tests asserting Parked status, `.parked.md` suffix, WSJF exclusion, README.md cache write and freshness check — `packages/itil/skills/manage-problem/test/manage-problem-parked-and-cache.bats` (6 tests, all GREEN)
 
+## Fix Released
+
+Deployed in v0.3.3 (`@windyroad/itil@0.3.3`). Awaiting user verification.
+
+- Parked lifecycle status (`.parked.md` suffix) added to SKILL.md
+- P007 and P008 transitioned to `.parked.md`
+- `docs/problems/README.md` fast-path cache implemented — freshness check before full re-scan
+- 6 BATS tests (all GREEN) in `packages/itil/skills/manage-problem/test/manage-problem-parked-and-cache.bats`
+
 ## Related
 
 - `packages/itil/skills/manage-problem/SKILL.md` — primary target (lifecycle table + work step)
