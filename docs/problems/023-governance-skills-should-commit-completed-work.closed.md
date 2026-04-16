@@ -1,6 +1,6 @@
 # Problem 023: Governance skills should commit completed work, not defer to user
 
-**Status**: Known Error
+**Status**: Closed
 **Reported**: 2026-04-16
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 
