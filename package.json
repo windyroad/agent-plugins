@@ -16,7 +16,7 @@
     "bats-support": "^0.3.0"
   },
   "scripts": {
-    "test": "bats --recursive packages/*/hooks/test/",
+    "test": "bats --recursive packages/*/hooks/test/ packages/*/skills/*/test/",
     "release": "changeset publish",
     "release:watch": "bash scripts/release-watch.sh",
     "push:watch": "git push 2>&1 && RUN_ID=$(gh run list --limit 1 --json databaseId --jq '.[0].databaseId') && gh run watch \"$RUN_ID\" --exit-status"
