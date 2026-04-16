@@ -1,6 +1,6 @@
 # Problem 007: Discord Inbound Reactions Not Delivered
 
-**Status**: Open
+**Status**: Parked
 **Reported**: 2026-04-14
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 

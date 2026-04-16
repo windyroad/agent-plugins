@@ -1,6 +1,6 @@
 # Problem 027: `manage-problem work` re-scans all problems on every invocation
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-16
 **Priority**: 15 (High) — Impact: Significant (4) x Likelihood: Almost Certain (5)
 **Effort**: M
@@ -49,21 +49,11 @@ Two root causes:
 
 ### Investigation Tasks
 
-- [ ] Add "Parked" as a first-class lifecycle status to `packages/itil/skills/manage-problem/SKILL.md`:
-  - File suffix: `.parked.md`
-  - Entry criteria: upstream blocker identified, or user explicitly suspends; transition documented with reason and expected resolution trigger
-  - Review behaviour: parked problems are read but excluded from WSJF ranking and work selection; displayed in a separate "Parked" table section
-  - Exit criteria: user explicitly un-parks, or the upstream blocker resolves
-  - `git mv` to/from `.parked.md` (not to `.open.md` directly — preserve the parked history)
-- [ ] Transition P007 and P008 to `.parked.md` status as the first users of the new status
-- [ ] Implement `docs/problems/BACKLOG.md` cache:
-  - Written by the review step (step 9e) after every full re-rank, containing the WSJF table in machine-readable form with a `reviewed:` timestamp
-  - `problem work` checks whether any `docs/problems/*.md` file has a newer mtime than `BACKLOG.md`; if not, reads `BACKLOG.md` only (1 file, not 18+)
-  - `problem review` always re-scans (its purpose is to refresh the cache)
-  - Cache invalidation: any problem file write (create, update, transition) invalidates the cache (mtime comparison)
-- [ ] Update `SKILL.md` to describe the cache read-path in the `work` operation
-- [ ] Add a BATS test asserting `BACKLOG.md` is written after `problem review` runs (structural check, not LLM test)
-- [ ] Re-run architect review after fix scope is confirmed (ADR-010 lifecycle table change may need noting)
+- [x] Add "Parked" as a first-class lifecycle status to `packages/itil/skills/manage-problem/SKILL.md` — `.parked.md` suffix, excluded from WSJF ranking, shown in separate Parked table, `git mv` transitions documented
+- [x] Transition P007 and P008 to `.parked.md` — Status fields updated; both had existing `## Status: Parked pending upstream` sections confirming the transition
+- [x] Implement `docs/problems/README.md` cache (chosen over BACKLOG.md — conventional directory index, no new concept): written by review step 9e after full re-rank; `problem work` checks `find docs/problems -name "*.md" ! -name "README.md" -newer docs/problems/README.md` before triggering full review
+- [x] Update `SKILL.md` to describe the fast-path cache read in the `work` operation and Parked exclusion in step 9b
+- [x] Add BATS tests asserting Parked status, `.parked.md` suffix, WSJF exclusion, README.md cache write and freshness check — `packages/itil/skills/manage-problem/test/manage-problem-parked-and-cache.bats` (6 tests, all GREEN)
 
 ## Related
 

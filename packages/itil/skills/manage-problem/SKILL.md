@@ -28,7 +28,15 @@ Create, update, or transition problem tickets following an ITIL-aligned problem 
 |--------|-----------|---------|----------------|
 | **Open** | `.open.md` | Reported, under investigation | New problem identified |
 | **Known Error** | `.known-error.md` | Root cause confirmed, fix path clear | Root cause documented, reproduction test exists, workaround in place |
+| **Parked** | `.parked.md` | Blocked on upstream or suspended by user decision | Upstream blocker identified, or user explicitly suspends; reason and un-park trigger documented |
 | **Closed** | `.closed.md` | Fix verified in production | Fix released AND user explicitly confirms it works |
+
+**Parked problems** are excluded from WSJF ranking and work selection. They are listed separately in review output so users can see them without them polluting the backlog. To park a problem:
+1. `git mv docs/problems/<NNN>-<title>.<current>.md docs/problems/<NNN>-<title>.parked.md`
+2. Update the Status field to "Parked"
+3. Add a `## Parked` section with: reason for parking, expected trigger to un-park, date parked
+
+To un-park: `git mv` back to `.open.md` (or `.known-error.md` if root cause is confirmed), update Status, remove `## Parked` section.
 
 **Test-driven resolution:** When root cause is identified, create a failing test that reproduces the problem. Skip/disable the test if a feature-disabling workaround is applied. Re-enable the test when the permanent fix is implemented — the test passing confirms resolution.
 
@@ -225,11 +233,29 @@ Read all `.open.md` and `.known-error.md` files in `docs/problems/`. Extract ID,
 
 This is a batch operation that reviews every open/known-error problem and updates it.
 
+**Fast-path for `work` (skip full re-scan when cache is fresh):**
+
+Before running the full review, check whether `docs/problems/README.md` exists and is up to date:
+
+```bash
+find docs/problems -name "*.md" ! -name "README.md" -newer docs/problems/README.md 2>/dev/null | head -1
+```
+
+If this command produces **no output** (README.md is newer than all problem files), the cache is fresh:
+- Read `docs/problems/README.md` only — it contains the ranked table from the last review
+- Skip steps 9a–9b entirely
+- Proceed directly to step 9c (work selection) using the cached table
+- Note in the output: "Using cached ranking from [timestamp in README.md]"
+
+If the command produces output, or `README.md` does not exist, run the full review (steps 9a–9e) and refresh the cache.
+
 **Step 9a: Read the risk framework**
 
 Read `RISK-POLICY.md` to get the current impact levels (1-5), likelihood levels (1-5), risk matrix, and label bands. These are the authoritative definitions — do not use outdated scales.
 
-**Step 9b: For each open/known-error problem:**
+**Step 9b: For each open/known-error problem (skip `.parked.md` files entirely):**
+
+Parked problems are excluded from WSJF ranking — do not read, score, or update them in this step. They are shown in a separate section in step 9c.
 
 1. Read the problem file
 2. Read the codebase context — check if the problem's root cause has been investigated, if there are related fixes in git history, or if the problem is stale
@@ -247,10 +273,15 @@ Read `RISK-POLICY.md` to get the current impact levels (1-5), likelihood levels 
 
 **Step 9c: Present summary and select problem to work**
 
-After reviewing all problems, present a WSJF-ranked table:
+After reviewing all problems, present a WSJF-ranked table for open/known-error problems:
 
 | WSJF | ID | Title | Severity | Status | Effort | Notes |
 |------|-----|-------|----------|--------|--------|-------|
+
+Then present a separate **Parked** section listing `.parked.md` files (no ranking):
+
+| ID | Title | Reason | Parked since |
+|----|-------|--------|-------------|
 
 Highlight:
 - Problems whose priority changed (↑ or ↓)
@@ -275,10 +306,33 @@ Highlight:
 
 For each known-error that has a `## Fix Released` section, use `AskUserQuestion` to ask the user if the fix has been verified in production. If the user confirms, close the problem (`git mv` to `.closed.md`, update Status). If the user says no or is unsure, leave it as known-error.
 
-**Step 9e: Update files**
+**Step 9e: Update files and refresh README.md cache**
 
-Edit each problem file where the priority changed. Then commit the updated files per ADR-014:
-1. `git add` the changed problem files
+Edit each problem file where the priority changed. Then write/overwrite `docs/problems/README.md` with the current ranked table so future `work` invocations can skip the full re-scan:
+
+```markdown
+# Problem Backlog
+
+> Last reviewed: <ISO timestamp>
+> Run `/wr-itil:manage-problem review` to refresh.
+
+## WSJF Rankings
+
+| WSJF | ID | Title | Severity | Status | Effort |
+|------|-----|-------|----------|--------|--------|
+| <score> | P<NNN> | <title> | <severity> | <status> | <effort> |
+...
+
+## Parked
+
+| ID | Title | Reason | Parked since |
+|----|-------|--------|-------------|
+| P<NNN> | <title> | <reason> | <date> |
+...
+```
+
+Then commit all changed files per ADR-014:
+1. `git add` the changed problem files and `docs/problems/README.md`
 2. Delegate to `wr-risk-scorer:pipeline` to assess and create a bypass marker
 3. `git commit -m "docs(problems): review — re-rank priorities"`
 If `AskUserQuestion` is unavailable and risk is above appetite, skip the commit and report the uncommitted state.
