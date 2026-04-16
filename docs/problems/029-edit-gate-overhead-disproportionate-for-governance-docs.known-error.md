@@ -68,7 +68,7 @@ Effort: **S** (two one-line text changes in shell scripts).
 
 - [x] Audit which hook(s) fire on `docs/problems/` edits — both UserPromptSubmit hooks inject mandatory instructions; PreToolUse hooks already exempt
 - [x] Check whether `docs/problems/*.md` actually needs architect or JTBD review — No, already exempted in PreToolUse gates
-- [ ] Update scope text in `architect-detect.sh` and `jtbd-eval.sh` to match PreToolUse exemptions
+- [x] Update scope text in `architect-detect.sh` and `jtbd-eval.sh` to match PreToolUse exemptions
 - [x] Check whether a governance-mode env var is needed — No, path-based scope text update is sufficient and consistent with existing PreToolUse pattern
 
 ## Related
