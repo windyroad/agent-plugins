@@ -1,5 +1,11 @@
 # @windyroad/tdd
 
+## 0.2.2
+
+### Patch Changes
+
+- 8a15336: Fix `--update` flag failing with "Plugin not found" (P025). The `updatePlugin` command was missing the `@windyroad` marketplace suffix and `--scope project`, causing all `npx @windyroad/<pkg> --update` invocations to fail. The correct command is now used: `claude plugin update "<name>@windyroad" --scope project`.
+
 ## 0.2.1
 
 ### Patch Changes
