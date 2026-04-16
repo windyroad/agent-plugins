@@ -74,6 +74,10 @@ Compare with `installPlugin` which correctly uses:
 
 Single file change; no hook or agent changes needed.
 
+## Fix Released
+
+Deployed in commit `9a468ec`. Fix applied to all 13 `install-utils.mjs` copies (shared + 12 per-package `lib/`) and all 12 `bin/install.mjs` entry points. Awaiting user verification that `npx @windyroad/<pkg> --update` works correctly.
+
 ## Related
 
 - `packages/shared/install-utils.mjs` — `updatePlugin` function (~line 65), `updatePackage` (~line 97)
