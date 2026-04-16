@@ -1,6 +1,6 @@
 # Problem 023: Governance skills should commit completed work, not defer to user
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-16
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 
@@ -38,11 +38,21 @@ User manually commits after each skill operation. Friction, not harm.
 
 ### Investigation Tasks
 
-- [ ] Audit manage-problem SKILL.md for all "Do not commit" / "the user will commit" instructions. Replace with "commit the changes with a descriptive message referencing the problem ID".
-- [ ] Audit manage-incident SKILL.md for the same pattern.
-- [ ] Audit other governance skills (create-adr, update-guide, update-policy, run-retro) for the same pattern.
-- [ ] Define the commit-message convention for governance-skill commits (e.g., `docs(problems): transition P021 to known-error` or `fix(itil): amend manage-problem SKILL.md for P021`).
-- [ ] Ensure the skill's `allowed-tools` includes Bash (for `git commit`) or that the skill instructs the primary agent to commit.
+- [x] Audit manage-problem SKILL.md for all "Do not commit" / "the user will commit" instructions. Replaced with ADR-014 `work → score → commit` sequence (3 occurrences: step 9e, step 11, step report).
+- [x] Audit manage-incident SKILL.md for the same pattern. Replaced with ADR-014 sequence (1 occurrence: step 14).
+- [x] Audit other governance skills (create-adr, update-guide, update-policy, run-retro) — none had the pattern. Deferred to when those skills are worked per ADR-014 scope.
+- [x] Define the commit-message convention for governance-skill commits. Documented in ADR-014 `docs/decisions/014-governance-skills-commit-their-own-work.proposed.md`.
+- [x] Ensure the skill's `allowed-tools` includes Bash — both SKILL.md files already had Bash in allowed-tools.
+
+## Root Cause Analysis
+
+### Confirmed Root Cause
+
+The `manage-problem` and `manage-incident` skills had a "Do not commit" instruction in their report steps, added as a conservative default when the skills were authored. No policy existed at the time to require auto-commit. ADR-014 now establishes that policy.
+
+### Workaround
+
+Replaced by fix. Skills now instruct the primary agent to score and commit after each operation.
 
 ## Related
 

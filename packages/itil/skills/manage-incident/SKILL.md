@@ -260,6 +260,14 @@ After any operation, report:
 - For restore: the linked problem ID (or "No Problem" note)
 - Any quality-check warnings
 
-Do not commit. The user will commit when ready.
+Commit the completed work per ADR-014 (governance skills commit their own work):
+1. `git add` all created/modified files for this operation
+2. Delegate to `wr-risk-scorer:pipeline` (subagent_type: `wr-risk-scorer:pipeline`) to assess the staged changes and create a bypass marker
+3. `git commit -m "<message>"` using the convention for the operation type:
+   - New incident: `docs(incidents): open I<NNN> <title>`
+   - Incident mitigated: `docs(incidents): I<NNN> mitigated — <mitigation summary>`
+   - Incident restored: `docs(incidents): I<NNN> restored — <action>`
+   - Incident closed: `docs(incidents): close I<NNN>`
+4. If risk is above appetite: use `AskUserQuestion` to ask whether to commit anyway, remediate first, or park the work. If `AskUserQuestion` is unavailable, skip the commit and report the uncommitted state clearly.
 
 $ARGUMENTS

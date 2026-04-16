@@ -277,7 +277,11 @@ For each known-error that has a `## Fix Released` section, use `AskUserQuestion`
 
 **Step 9e: Update files**
 
-Edit each problem file where the priority changed. Do not commit — the user will commit when ready.
+Edit each problem file where the priority changed. Then commit the updated files per ADR-014:
+1. `git add` the changed problem files
+2. Delegate to `wr-risk-scorer:pipeline` to assess and create a bypass marker
+3. `git commit -m "docs(problems): review — re-rank priorities"`
+If `AskUserQuestion` is unavailable and risk is above appetite, skip the commit and report the uncommitted state.
 
 ### 10. Quality checks
 
@@ -300,6 +304,15 @@ After any operation, report:
 - The current status
 - Any quality check warnings
 
-Do not commit. The user will commit when ready.
+Commit the completed work per ADR-014 (governance skills commit their own work):
+1. `git add` all created/modified files for this operation
+2. Delegate to `wr-risk-scorer:pipeline` (subagent_type: `wr-risk-scorer:pipeline`) to assess the staged changes and create a bypass marker
+3. `git commit -m "<message>"` using the convention for the operation type:
+   - New problem: `docs(problems): open P<NNN> <title>`
+   - Known Error transition: `docs(problems): P<NNN> known error — <root cause summary>`
+   - Problem closed: `docs(problems): close P<NNN> <title>`
+   - Review/re-rank: `docs(problems): review — re-rank priorities`
+   - Fix implemented: `fix(<scope>): <description> (closes P<NNN>)` — include problem file changes in the same commit
+4. If risk is above appetite: use `AskUserQuestion` to ask whether to commit anyway, remediate first, or park the work. If `AskUserQuestion` is unavailable, skip the commit and report the uncommitted state clearly.
 
 $ARGUMENTS
