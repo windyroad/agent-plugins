@@ -42,6 +42,18 @@ ADR-005 was written when skills were thin and skill count was 1. The plugin suit
 - [ ] Decide: formalise `packages/{plugin}/skills/<name>/test/*.bats` as the skill-test location
 - [ ] Decide: if logic needs to be testable beyond the bash fragments, extract to `packages/{plugin}/lib/` shell libraries (noting this conflicts with ADR-011's rejection of shared-lib extraction as premature)
 - [ ] Create reproduction test (a SKILL.md contract assertion that fails today due to no harness)
+- [ ] **Evaluate adopting Anthropic's `skill-creator` eval harness pattern** (https://github.com/anthropics/claude-plugins-official/blob/main/plugins/skill-creator/skills/skill-creator/SKILL.md). Materially expands the option space beyond bash-fragment execution + mocked handoff. Key elements to consider adopting:
+  - `evals/evals.json` — prompts with `assertions` array, one eval case per scenario
+  - `eval_metadata.json` per case, `grading.json` with load-bearing fields `text` / `passed` / `evidence` (viewer depends on these)
+  - `scripts/aggregate_benchmark` → `benchmark.json` / `benchmark.md` with pass_rate, time, tokens, mean±stddev, delta
+  - Dual-run pattern: spawn with-skill AND baseline (without-skill) subagents in the same turn; snapshot `old_skill` when improving. Captures differential value of the skill, not just absolute pass.
+  - Workspace layout: `<skill>-workspace/iteration-N/eval-<name>/{with_skill,without_skill,old_skill}/outputs/`
+  - Grader + analyzer subagents (`agents/grader.md`, `agents/analyzer.md`)
+  - HTML review UI (`eval-viewer/generate_review.py`, `--static` for headless/CI)
+  - Guidance: "make skill descriptions a little bit 'pushy'" (undertriggering); "keep SKILL.md under 500 lines"; "subjective skills are better evaluated qualitatively — don't force assertions"
+- [ ] Add "Option: adopt Anthropic skill-creator eval harness" to the ADR so MADR's minimum-two-options rule is met with a stronger comparison (architect note).
+- [ ] Check P011's source-grep ban compatibility: a grader-subagent dual-run is functional/behavioural, not source-grep, so it is compatible with ADR-005's P011 clause (architect note).
+- [ ] When resolving P012, flag ADR-005 with `[Reassessment Triggered]` — its own reassessment criterion ("If Claude Code adds a way to test agent behavior programmatically") is arguably now met by this upstream evidence (architect note).
 
 ## Related
 
@@ -50,3 +62,4 @@ ADR-005 was written when skills were thin and skill count was 1. The plugin suit
 - ADR-010 (`docs/decisions/010-rename-wr-problem-to-wr-itil.proposed.md`) — signals more skills coming, making this decision time-bound
 - JTBD-101 (`docs/jtbd/plugin-developer/JTBD-101-extend-suite.proposed.md`) — plugin authors need a clear pattern
 - JTBD-201 (`docs/jtbd/tech-lead/JTBD-201-restore-service-fast.proposed.md`) — auditability constraint
+- Anthropic official `skill-creator` eval harness — https://github.com/anthropics/claude-plugins-official/blob/main/plugins/skill-creator/skills/skill-creator/SKILL.md (substantial prior art for testing SKILL.md documents)
