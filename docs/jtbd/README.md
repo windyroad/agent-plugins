@@ -14,6 +14,7 @@ Developer using AI coding agents for personal or small-team projects.
 | JTBD-002 | Ship AI-Assisted Code with Confidence | [JTBD-002-ship-with-confidence.proposed.md](solo-developer/JTBD-002-ship-with-confidence.proposed.md) |
 | JTBD-003 | Compose Only the Guardrails I Need | [JTBD-003-compose-guardrails.proposed.md](solo-developer/JTBD-003-compose-guardrails.proposed.md) |
 | JTBD-004 | Connect Agents Across Repos to Collaborate | [JTBD-004-connect-agents.proposed.md](solo-developer/JTBD-004-connect-agents.proposed.md) |
+| JTBD-005 | Invoke Governance Assessments On Demand | [JTBD-005-assess-on-demand.proposed.md](solo-developer/JTBD-005-assess-on-demand.proposed.md) |
 
 ## Tech Lead / Consultant
 
@@ -28,6 +29,7 @@ Jobs 001 and 002 also serve this persona.
 | ID | Job | File |
 |----|-----|------|
 | JTBD-201 | Restore Service Fast with an Audit Trail | [JTBD-201-restore-service-fast.proposed.md](tech-lead/JTBD-201-restore-service-fast.proposed.md) |
+| JTBD-202 | Run Pre-Flight Governance Checks Before Release or Handover | [JTBD-202-pre-flight-governance-check.proposed.md](tech-lead/JTBD-202-pre-flight-governance-check.proposed.md) |
 
 ## Plugin Developer / Contributor
 

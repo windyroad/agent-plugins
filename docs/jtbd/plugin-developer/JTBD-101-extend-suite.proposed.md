@@ -17,6 +17,7 @@ When I'm building a new plugin, I want to follow a clear template and have CI va
 - CI validates required files, package fields, installer dry-runs, and hook tests
 - Changesets handle versioning; the pipeline handles publishing
 - ADRs document structural decisions so contributors understand the "why"
+- Plugins that expose assessment agents also expose corresponding user-invocable assessment skills — the capability is discoverable via `/` autocomplete, not just accessible via hooks or manual Task-tool invocations
 
 ## Persona Constraints
 
