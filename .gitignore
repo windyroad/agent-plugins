@@ -6,3 +6,6 @@ node_modules/
 # Runtime artifacts (created by risk-scorer hooks)
 .risk-reports/
 .env
+
+# Skill eval workspaces (test-infrastructure scratch output per skill-creator)
+*-workspace/

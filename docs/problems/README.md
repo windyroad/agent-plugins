@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-04-17 (P032 fixed and closed; pending verifications unchanged)
+> Last reviewed: 2026-04-17 (P026 Fix Released; P033/P016/P017 rankings refreshed)
 > Run `/wr-itil:manage-problem review` to refresh.
 
 ## WSJF Rankings
@@ -11,26 +11,32 @@
 | 18.0 | P029 | Edit gate overhead for governance docs | 9 Med | Known Error | S |
 | 12.0 | P021 | Governance skill structured prompts | 12 High | Known Error | M |
 | 8.0 | P020 | No on-demand assessment skills | 16 High | Known Error | L |
-| 4.5 | P016 | manage-problem should split multi-concern tickets | 9 Med | Open | M |
-| 4.5 | P017 | create-adr should split multi-decision records | 9 Med | Open | M |
+| 4.5 | P016 | manage-problem should split multi-concern tickets | 9 Med | Known Error | M |
+| 4.5 | P017 | create-adr should split multi-decision records | 9 Med | Known Error | M |
 | 4.5 | P028 | Governance skills should auto-release and auto-install | 9 Med | Open | M |
+| 4.5 | P033 | No persistent risk register for ISO 31000 / ISO 27001 | 9 Med | Known Error | L |
 | 4.0 | P018 | TDD enforce BDD + Example Mapping principles | 16 High | Open | L |
 | 4.0 | P022 | Agents must not fabricate time estimates | 16 High | Open | L |
-| 4.0 | P024 | Risk-scorer WIP flag uncommitted completed work | 8 Med | Open | M |
-| 4.0 | P026 | install-utils duplicated across packages | 16 High | Open | L |
+| 4.0 | P024 | Risk-scorer WIP flag uncommitted completed work | 8 Med | Known Error | L |
 | 3.0 | P014 | No lightweight aside invocation for governance skills | 12 High | Open | L |
 | 2.25 | P015 | TDD vague Gherkin outcome steps | 9 Med | Open | L |
 | 1.5 | P012 | Skill testing harness scope undefined | 6 Med | Open | L |
 | 1.5 | P019 | Deprecate single-file JTBD fallback | 6 Med | Open | L |
+| 1.5 | P034 | Centralise risk reports for cross-project skill improvement | 6 Med | Open | L |
 
 ## Known Errors (Fix Released — pending verification)
 
 | ID | Title | Released in |
 |----|-------|-------------|
+| P016 | manage-problem should split multi-concern tickets | 2026-04-17 |
+| P017 | create-adr should split multi-decision records | 2026-04-17 |
 | P020 | No on-demand assessment skills | v0.3.2 |
 | P021 | Governance skill structured prompts | v0.3.2 |
+| P024 | Risk-scorer WIP flag uncommitted completed work | 2026-04-17 |
+| P026 | install-utils duplicated across packages | 2026-04-17 |
 | P029 | Edit gate overhead for governance docs | commit ac9d453 |
 | P031 | Stale cache detection in manage-problem work | commit 824cb2c |
+| P033 | No persistent risk register for ISO 31000 / ISO 27001 | 2026-04-17 |
 
 ## Parked
 

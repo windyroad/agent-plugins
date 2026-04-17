@@ -1,0 +1,45 @@
+{
+  "skill_name": "wr-itil:work-problems",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "work through my problems while I'm away — I'll be AFK for a bit so just grind through whatever you can",
+      "expected_output": "Works highest-WSJF problems in sequence, reports progress per iteration, outputs ALL_DONE when nothing is left",
+      "files": [],
+      "expectations": [
+        "Output includes a progress line for each iteration with problem ID and title",
+        "Output includes a final summary table with Completed and Skipped sections",
+        "Output ends with the ALL_DONE sentinel",
+        "Problems are worked in WSJF priority order (highest first)",
+        "Problems needing user verification (Fix Released) are skipped with reason",
+        "Each iteration reports how many problems remain"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "grind the problem backlog for me — do as many as you can without asking me anything",
+      "expected_output": "Same loop behavior but triggered by different phrasing. Should still work WSJF-ordered, skip interactive decisions, report progress.",
+      "files": [],
+      "expectations": [
+        "Skill triggers correctly from casual 'grind the backlog' phrasing",
+        "Does not use AskUserQuestion during execution",
+        "Commits work automatically when risk is within appetite",
+        "Handles scope expansion conservatively (saves findings, moves to next problem)",
+        "Stops when no more actionable problems remain"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I need to step out — can you work through the open problems? Start with the highest priority ones. Don't wait for me on anything, just make the best call you can.",
+      "expected_output": "Runs review if cache is stale, then loops through problems. Demonstrates the review-first-then-work pattern and handles edge cases.",
+      "files": [],
+      "expectations": [
+        "Runs a review or uses cached rankings before starting work",
+        "Known Errors are preferred over Open problems when WSJF is tied",
+        "If a problem is attempted twice without progress, it is skipped as stuck",
+        "Git conflicts cause the loop to stop with a clear report",
+        "Final output includes Remaining Backlog section showing what's left"
+      ]
+    }
+  ]
+}
