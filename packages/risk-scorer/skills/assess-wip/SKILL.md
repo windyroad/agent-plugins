@@ -53,9 +53,18 @@ Wait for the subagent to complete.
 
 ### 4. Present results
 
-Present the WIP risk nudge to the user. The wip subagent provides guidance and recommendations, not a formal gate score. Highlight:
-- The highest-risk files or change patterns identified
-- Any recommendations to reduce risk before committing
-- Whether a full pipeline assessment (`assess-release`) is recommended before committing
+Present the WIP risk nudge to the user. The wip subagent provides guidance and recommendations, not a formal gate score.
+
+**Check `RISK_VERDICT` from the subagent output and handle each case distinctly:**
+
+- **`RISK_VERDICT: CONTINUE`**: changes are in-progress and within risk appetite. Highlight the highest-risk files or change patterns; note whether a full pipeline assessment (`assess-release`) is recommended before committing.
+
+- **`RISK_VERDICT: PAUSE`**: risk exceeds appetite. Prominently surface the `RISK_REMEDIATIONS:` block. Explain each remediation clearly. Do NOT suggest committing until remediations are addressed.
+
+- **`RISK_VERDICT: COMMIT`** (ADR-016): the uncommitted diff consists entirely of completed governance work (problem fixes, SKILL.md updates, closed problem transitions) and risk is within appetite. Present a prominent commit-now suggestion:
+  > "The uncommitted changes look like completed governance work. Commit now to reduce WIP and feed the pipeline."
+  > *Reason: `<RISK_COMMIT_REASON from subagent>`*
+  
+  Use `AskUserQuestion` to offer: "Commit completed governance work now?" — Yes (user confirms and runs `git commit`) or "Not yet" (user defers).
 
 $ARGUMENTS
