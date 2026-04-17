@@ -76,6 +76,9 @@ jobs:
             "
           done
 
+      - name: Check install-utils.mjs copies in sync (P026)
+        run: npm run check:install-utils
+
       - name: Dry-run meta-installer
         run: node packages/agent-plugins/bin/install.mjs --dry-run
 
