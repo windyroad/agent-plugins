@@ -51,7 +51,15 @@ If cumulative risk is **within appetite** (< 5): provide the assessment table an
 
 ### Above-Appetite Remediations
 
-If cumulative risk **exceeds appetite** (>= 5): provide the assessment table, then emit a structured `RISK_REMEDIATIONS:` block with specific risk-reducing actions:
+If cumulative risk **exceeds appetite** (>= 5), the verbal verdict is **PAUSE**
+(the wip-mode equivalent of STOP).
+
+**Do NOT emit** "Proceed", "Continue", "OK to edit", "You may commit", or any
+similar nudge language when cumulative risk exceeds appetite. The only
+sanctioned above-appetite output is the WIP Risk Assessment table and the
+structured `RISK_REMEDIATIONS:` block defined below.
+
+Provide the assessment table, then emit a structured `RISK_REMEDIATIONS:` block with specific risk-reducing actions:
 
 Format (5 columns — machine-readable for structured AskUserQuestion prompts in calling skills):
 ```

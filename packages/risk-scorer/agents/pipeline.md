@@ -109,7 +109,18 @@ Do NOT emit: "Suggested Actions", "Your call:", advisory warnings, back-pressure
 
 ## Above-Appetite Remediations
 
-When ANY cumulative score exceeds appetite (> 4), emit a structured `RISK_REMEDIATIONS:` block after the `RISK_SCORES:` line. This gives the calling skill machine-readable input for structured decision prompts.
+When ANY cumulative score exceeds appetite (> 4), the verbal verdict is **STOP**.
+The scorer is not the primary decision-maker — the hook gate will block the
+action — but the scorer's verdict must match the structured score so the agent
+does not waste tool calls acting on an ambiguous nudge.
+
+**Do NOT emit** "Proceed", "Proceed with release", "Continue", "You may ship",
+"OK to commit/push/release", or any similar nudge language when cumulative risk
+exceeds appetite. The only sanctioned above-appetite output is the Risk Report
+structure, `RISK_SCORES: ...`, and the structured `RISK_REMEDIATIONS:` block
+defined below.
+
+Emit a structured `RISK_REMEDIATIONS:` block after the `RISK_SCORES:` line. This gives the calling skill machine-readable input for structured decision prompts.
 
 Format (5 columns — machine-readable for structured AskUserQuestion prompts in calling skills):
 ```
