@@ -61,3 +61,14 @@ setup() {
   run grep -n "Scope change" "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }
+
+@test "SKILL.md step 9d requires fix summary extracted from Fix Released in AskUserQuestion (P030)" {
+  # P030: verification prompts must include a one-line fix summary extracted from the
+  # '## Fix Released' section so the user can answer without a clarifying round-trip.
+  # This checks that step 9d explicitly instructs including fix content in the question,
+  # not just detecting Fix Released to decide which problems need verification.
+  # The fix must add wording like "extract" or "include" + "Fix Released" + "summary"
+  # (or "question") within step 9d. A generic "Fix Released" mention is insufficient.
+  run grep -n "fix summary\|Fix Released.*question\|Fix Released.*summary\|extract.*Fix Released\|include.*Fix Released\|summary.*Fix Released" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}

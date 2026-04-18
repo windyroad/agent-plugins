@@ -70,6 +70,32 @@ Do NOT emit free-text suggestions as prose. The structured block is the only out
 
 The verdict is `RISK_VERDICT: PAUSE`. This blocks the next edit until the risk is addressed.
 
+### Completed-Work Detection (RISK_VERDICT: COMMIT)
+
+After assessing the risk profile, check whether uncommitted changes represent **completed governance work** that should be committed immediately to reduce WIP pipeline risk (ADR-016).
+
+**Governance-artefact detection heuristic**: Check `git status --short` and `git diff HEAD --name-only`. If ALL uncommitted files fall within these paths:
+- `docs/problems/*.md`
+- `packages/*/skills/**/*.md`
+- `packages/*/skills/**/*.bats`
+- `docs/decisions/*.md`
+
+AND cumulative risk is **within appetite** (≤ 4), AND at least one completion signal is present:
+- A problem file diff contains "Fix Released" or a status transition keyword (`.known-error.md`, `.closed.md`)
+- A SKILL.md was modified alongside a problem file update
+
+→ Emit `RISK_VERDICT: COMMIT` instead of `RISK_VERDICT: CONTINUE`.
+
+**Appetite gate**: If cumulative risk exceeds appetite, emit `RISK_VERDICT: PAUSE` regardless of governance artefact status — PAUSE takes precedence over COMMIT.
+
+**False-positive safeguard**: If ANY uncommitted file is outside governance artefact paths (e.g., `.ts`, `.js`, `.sh`, `.mjs`, `package.json`), do NOT emit COMMIT — the diff is mixed WIP and the heuristic cannot safely distinguish completed from in-progress work. Emit CONTINUE or PAUSE normally.
+
+**Format when COMMIT is emitted**:
+```
+RISK_VERDICT: COMMIT
+RISK_COMMIT_REASON: <one-line description of the completed governance work detected>
+```
+
 ## Control Discovery
 
 For each control claimed to reduce risk, name the specific test file/scenario. If you cannot name it, it provides 0 reduction.

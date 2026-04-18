@@ -15,6 +15,7 @@ Developer using AI coding agents for personal or small-team projects.
 | JTBD-003 | Compose Only the Guardrails I Need | [JTBD-003-compose-guardrails.proposed.md](solo-developer/JTBD-003-compose-guardrails.proposed.md) |
 | JTBD-004 | Connect Agents Across Repos to Collaborate | [JTBD-004-connect-agents.proposed.md](solo-developer/JTBD-004-connect-agents.proposed.md) |
 | JTBD-005 | Invoke Governance Assessments On Demand | [JTBD-005-assess-on-demand.proposed.md](solo-developer/JTBD-005-assess-on-demand.proposed.md) |
+| JTBD-006 | Progress the Backlog While I'm Away | [JTBD-006-work-backlog-afk.proposed.md](solo-developer/JTBD-006-work-backlog-afk.proposed.md) |
 
 ## Tech Lead / Consultant
 

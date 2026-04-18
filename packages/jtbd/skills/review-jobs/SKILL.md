@@ -17,6 +17,10 @@ This skill is **read-only**. It does not commit, push, or modify files.
 - After a significant capability change: check whether existing jobs are still served
 - Any time the hook gate is not convenient: planning mode, spike work, design review
 
+## Output Formatting
+
+When referencing JTBD IDs, problem IDs (P<NNN>), or ADR IDs in prose output, always include the human-readable title on first mention. Use the format `JTBD-001 (Enforce Governance Without Slowing Down)`, not bare `JTBD-001`.
+
 ## Steps
 
 ### 1. Parse arguments

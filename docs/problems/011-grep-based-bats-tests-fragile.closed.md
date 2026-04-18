@@ -1,6 +1,6 @@
 # Problem 011: Grep-based BATS tests produce false positives on legitimate refactors
 
-**Status**: Known Error
+**Status**: Closed
 **Reported**: 2026-04-15
 **Priority**: 8 (Medium) — Impact: Minor (2) x Likelihood: Likely (4)
 
@@ -100,6 +100,12 @@ Claude Code passes absolute paths so the patterns work, but the source-grep
 tests gave no signal at all — they passed because the literal text appeared
 in source, even though the case branch wasn't matching the test inputs.
 This is exactly the failure mode P011 predicted.
+
+## Fix Released
+
+All four behavioural source-grep files converted to functional tests. A live audit on 2026-04-16 confirmed zero remaining `grep`-over-source assertions in any `packages/*/hooks/test/*.bats` file. Remaining greps are all Category B (output greps over executed hook stdout) or Category C (structural `hooks.json` checks) — both permitted per ADR-005. Root cause structurally eliminated; no false-positive BATS failures can occur from a hook refactor.
+
+Verified by inspection 2026-04-16 — P011 closed.
 
 ## Resolution
 

@@ -8,6 +8,10 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 
 Create, update, or transition problem tickets following an ITIL-aligned problem management process. This skill is the authoritative definition of the problem management workflow — no separate process document is needed.
 
+## Output Formatting
+
+When referencing problem IDs, ADR IDs, or JTBD IDs in prose output, always include the human-readable title on first mention. Use the format `P029 (Edit gate overhead for governance docs)`, not bare `P029`. Tables with separate ID and Title columns are fine as-is.
+
 ## Operations
 
 - **Create**: `problem <title or description>` — creates a new open problem
@@ -146,6 +150,28 @@ Do NOT ask for fields that can be inferred:
 - **Symptoms**: Infer from description if possible
 - **Workaround**: Default to "None identified yet." unless obvious from context
 
+### 4b. For new problems: Concern-boundary analysis (multi-concern check)
+
+Before writing the problem file, perform a concern-boundary analysis on the gathered description to prevent conflated tickets that make WSJF scoring meaningless (P016).
+
+**Self-check**: Read the description and root cause information gathered in step 4. Answer: "How many distinct root causes are present? If fixed independently, how many separate fix paths exist?"
+
+- **Single concern** (one root cause, one fix path): proceed directly to step 5.
+- **Multiple concerns** (two or more distinct root causes, different components, or if the architect review flagged this needs its own ADR): present a split prompt.
+
+**Split prompt** — use `AskUserQuestion`:
+- `header: "Multi-concern problem"`
+- `multiSelect: false`
+- Options:
+  1. `Split into separate problems (Recommended)` — description: "Create one problem ticket per distinct concern, with consecutive IDs. Each ticket gets its own priority, WSJF score, and fix path."
+  2. `Keep as a single problem` — description: "Create one ticket covering all concerns. Use this only if the concerns are so tightly coupled that they cannot be fixed independently."
+
+**Non-interactive fallback**: When `AskUserQuestion` is unavailable (e.g., non-interactive/AFK mode), automatically split into separate problems and note the auto-split in output. Do not block creation.
+
+**Split implementation**: When splitting, assign consecutive IDs (e.g., if next ID is 035, create P035 and P036). Create each problem file independently. Cross-reference each ticket in the other's "Related" section.
+
+**Scope**: This step applies only to **new problem creation** (steps 2–5). It does NOT apply to updates, status transitions, or reviews of existing tickets.
+
 ### 5. For new problems: Write the problem file
 
 **File path**: `docs/problems/<NNN>-<kebab-case-title>.open.md`
@@ -235,19 +261,24 @@ This is a batch operation that reviews every open/known-error problem and update
 
 **Fast-path for `work` (skip full re-scan when cache is fresh):**
 
-Before running the full review, check whether `docs/problems/README.md` exists and is up to date:
+Before running the full review, check whether `docs/problems/README.md` exists and is up to date using **git history** (not filesystem mtime, which is unreliable in worktrees and fresh checkouts — see P031):
 
 ```bash
-find docs/problems -name "*.md" ! -name "README.md" -newer docs/problems/README.md 2>/dev/null | head -1
+readme_commit=$(git log -1 --format=%H -- docs/problems/README.md 2>/dev/null)
+# Cache is stale if: no README commit, OR problem files committed since README, OR uncommitted problem file changes
+if [ -z "$readme_commit" ] || \
+   git log --oneline "${readme_commit}..HEAD" -- 'docs/problems/*.md' ':!docs/problems/README.md' 2>/dev/null | grep -q .; then
+  echo "stale"
+fi
 ```
 
-If this command produces **no output** (README.md is newer than all problem files), the cache is fresh:
+If the command produces **no output** (no problem files have been committed or modified since the last README.md update), the cache is fresh:
 - Read `docs/problems/README.md` only — it contains the ranked table from the last review
 - Skip steps 9a–9b entirely
 - Proceed directly to step 9c (work selection) using the cached table
 - Note in the output: "Using cached ranking from [timestamp in README.md]"
 
-If the command produces output, or `README.md` does not exist, run the full review (steps 9a–9e) and refresh the cache.
+If the command prints "stale", or `README.md` does not exist in git, run the full review (steps 9a–9e) and refresh the cache.
 
 **Step 9a: Read the risk framework**
 
@@ -304,7 +335,7 @@ Highlight:
 
 **Step 9d: Check for pending verifications**
 
-For each known-error that has a `## Fix Released` section, use `AskUserQuestion` to ask the user if the fix has been verified in production. If the user confirms, close the problem (`git mv` to `.closed.md`, update Status). If the user says no or is unsure, leave it as known-error.
+For each known-error that has a `## Fix Released` section, use `AskUserQuestion` to ask the user if the fix has been verified in production. The question MUST include a fix summary extracted from the `## Fix Released` section — include the first sentence (or first bullet list) of that section in the question body or as the option description, so the user can answer without reading the full problem file. Do not ask with only the problem ID + title + version. If the user confirms, close the problem (`git mv` to `.closed.md`, update Status). If the user says no or is unsure, leave it as known-error.
 
 **Step 9e: Update files and refresh README.md cache**
 
@@ -333,9 +364,12 @@ Edit each problem file where the priority changed. Then write/overwrite `docs/pr
 
 Then commit all changed files per ADR-014:
 1. `git add` the changed problem files and `docs/problems/README.md`
-2. Delegate to `wr-risk-scorer:pipeline` to assess and create a bypass marker
+2. Satisfy the commit gate — two paths are valid (either produces a bypass marker):
+   - **Primary**: delegate to the `wr-risk-scorer:pipeline` subagent-type via the Agent tool
+   - **Fallback**: if the `wr-risk-scorer:pipeline` subagent-type is not available in the current tool set (e.g., this skill is itself running inside a spawned subagent), invoke the `/wr-risk-scorer:assess-release` skill via the Skill tool. Per ADR-015 it wraps the same pipeline subagent and produces an equivalent bypass marker via the `PostToolUse:Agent` hook. Do not silently skip the gate because the primary path is unavailable — the fallback exists specifically to close this gap (see P035).
 3. `git commit -m "docs(problems): review — re-rank priorities"`
-If `AskUserQuestion` is unavailable and risk is above appetite, skip the commit and report the uncommitted state.
+
+If `AskUserQuestion` is unavailable and risk is above appetite, skip the commit and report the uncommitted state (ADR-013 Rule 6 fail-safe). This applies only to the risk-above-appetite branch, not to the delegation-unavailable case above.
 
 ### 10. Quality checks
 
@@ -360,13 +394,15 @@ After any operation, report:
 
 Commit the completed work per ADR-014 (governance skills commit their own work):
 1. `git add` all created/modified files for this operation
-2. Delegate to `wr-risk-scorer:pipeline` (subagent_type: `wr-risk-scorer:pipeline`) to assess the staged changes and create a bypass marker
+2. Satisfy the commit gate — two paths are valid (either produces a bypass marker):
+   - **Primary**: delegate to the `wr-risk-scorer:pipeline` subagent-type via the Agent tool (subagent_type: `wr-risk-scorer:pipeline`)
+   - **Fallback**: if the `wr-risk-scorer:pipeline` subagent-type is not available in the current tool set (e.g., this skill is itself running inside a spawned subagent), invoke the `/wr-risk-scorer:assess-release` skill via the Skill tool. Per ADR-015 it wraps the same pipeline subagent and the `PostToolUse:Agent` hook writes an equivalent bypass marker. Do not silently skip the gate because the primary path is unavailable — the fallback exists specifically to close this gap (see P035).
 3. `git commit -m "<message>"` using the convention for the operation type:
    - New problem: `docs(problems): open P<NNN> <title>`
    - Known Error transition: `docs(problems): P<NNN> known error — <root cause summary>`
    - Problem closed: `docs(problems): close P<NNN> <title>`
    - Review/re-rank: `docs(problems): review — re-rank priorities`
    - Fix implemented: `fix(<scope>): <description> (closes P<NNN>)` — include problem file changes in the same commit
-4. If risk is above appetite: use `AskUserQuestion` to ask whether to commit anyway, remediate first, or park the work. If `AskUserQuestion` is unavailable, skip the commit and report the uncommitted state clearly.
+4. If risk is above appetite: use `AskUserQuestion` to ask whether to commit anyway, remediate first, or park the work. If `AskUserQuestion` is unavailable, skip the commit and report the uncommitted state clearly (ADR-013 Rule 6 fail-safe). This applies only to the risk-above-appetite branch, not to the delegation-unavailable case above.
 
 $ARGUMENTS

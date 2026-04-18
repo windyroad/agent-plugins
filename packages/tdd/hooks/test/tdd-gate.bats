@@ -13,6 +13,32 @@ teardown() {
   rm -f "/tmp/tdd-setup-active-${TEST_SESSION}"
 }
 
+# --- tdd_classify_file: Cucumber .feature files ---
+
+@test "classify_file: .feature file is test" {
+  result=$(tdd_classify_file "features/checkout.feature")
+  [ "$result" = "test" ]
+}
+
+@test "classify_file: nested .feature file is test" {
+  result=$(tdd_classify_file "src/features/login.feature")
+  [ "$result" = "test" ]
+}
+
+# --- tdd_find_test_for_impl: Cucumber step_definitions pairing ---
+
+@test "find_test_for_impl: step definitions associate with .feature file" {
+  tdd_add_test_file "$TEST_SESSION" "features/checkout.feature"
+  result=$(tdd_find_test_for_impl "$TEST_SESSION" "features/step_definitions/checkout.steps.js")
+  [ "$result" = "features/checkout.feature" ]
+}
+
+@test "find_test_for_impl: step definitions with .steps.ts associate with .feature file" {
+  tdd_add_test_file "$TEST_SESSION" "features/login.feature"
+  result=$(tdd_find_test_for_impl "$TEST_SESSION" "features/step_definitions/login.steps.ts")
+  [ "$result" = "features/login.feature" ]
+}
+
 # --- tdd_classify_file ---
 
 @test "classify_file: .test.ts is test" {

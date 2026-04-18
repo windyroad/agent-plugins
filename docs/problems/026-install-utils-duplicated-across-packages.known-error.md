@@ -1,10 +1,10 @@
 # Problem 026: install-utils.mjs duplicated across all packages
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-16
 **Priority**: 16 (High) — Impact: Significant (4) x Likelihood: Likely (4)
-**Effort**: L
-**WSJF**: 4.0 — (16 × 1.0) / 4
+**Effort**: S (fix implemented)
+**WSJF**: n/a (fix released, pending verification)
 
 ## Description
 
@@ -40,8 +40,8 @@ Each package is published as a self-contained npm package with its own `bin/` an
 
 - [x] Identify the divergence pattern (P025 — risk scorer caught it)
 - [x] Confirm all 12 lib copies are identical to shared (verified via `diff` during P025 fix)
-- [ ] Evaluate consolidation options (see Fix Strategy)
-- [ ] Create INVEST story for permanent fix
+- [x] Evaluate consolidation options (see Fix Strategy)
+- [x] Implement fix: Option B (sync script) + Option C (CI drift check)
 
 ### Fix Strategy Options
 
@@ -65,8 +65,21 @@ Pros: lightweight, no restructuring. Cons: doesn't eliminate the need to edit 13
 
 **Recommended**: Option B (build step) with Option C (CI guard) as belt-and-suspenders. Option A is cleaner architecturally but risks runtime path issues for end users.
 
+## Fix Released
+
+Implemented 2026-04-17 (this session):
+
+- **Sync script** (Option B): `scripts/sync-install-utils.sh` copies `packages/shared/install-utils.mjs` into every `packages/*/lib/install-utils.mjs`. Exposed as `npm run sync:install-utils`. Run after editing the shared source and before committing.
+- **CI drift check** (Option C): `packages/shared/test/sync-install-utils.bats` fails the build if any lib/ copy has diverged from shared. An explicit "Check install-utils.mjs copies in sync (P026)" step was added to `.github/workflows/ci.yml` that invokes `npm run check:install-utils` before the meta-installer dry-run.
+- **`check:install-utils` npm script** exposes the drift check with an actionable remediation hint (`Run: bash scripts/sync-install-utils.sh`).
+- **BATS test coverage**: 5 tests in `packages/shared/test/sync-install-utils.bats` — verifies canonical source exists, script is executable, at least one copy exists, no drift currently, and that `--check` correctly flags intentional divergence (tested in a temp workspace so the repo is untouched).
+
+Pending user verification in production: commit lands, CI passes, next edit to `packages/shared/install-utils.mjs` is caught by the drift check if lib/ copies are not synced.
+
 ## Related
 
 - `packages/shared/install-utils.mjs` — canonical source
 - `packages/*/lib/install-utils.mjs` — 12 copies (architect, risk-scorer, c4, jtbd, itil, retrospective, style-guide, tdd, voice-tone, wardley, connect, agent-plugins)
+- `scripts/sync-install-utils.sh` — sync script (fix)
+- `packages/shared/test/sync-install-utils.bats` — drift check (CI guard)
 - P025: `docs/problems/025-update-flag-fails-at-project-scope.known-error.md` — triggered discovery of this problem (risk scorer caught divergence during P025 fix)

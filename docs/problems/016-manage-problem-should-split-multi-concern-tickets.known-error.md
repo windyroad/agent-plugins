@@ -1,8 +1,10 @@
 # Problem 016: `manage-problem` skill does not flag or split multi-concern tickets
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-16
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Possible (3)
+**Effort**: M
+**WSJF**: 4.5 — (9 × 2.0) / 4 → now known-error
 
 ## Description
 
@@ -47,11 +49,25 @@ Contributing factors:
 
 ### Investigation Tasks
 
-- [ ] Design a concern-boundary-analysis step. Candidates: (a) LLM self-check before step 5 — "list the distinct root causes; if >1, propose a split"; (b) structural rule — if architect response contains the phrase "own ADR" or "separate decision", force the AskUserQuestion split prompt; (c) post-write heuristic — count `Root Cause` blocks or `### Investigation Tasks` subheadings
-- [ ] Decide whether the split is automatic or gated by AskUserQuestion. Automatic risks over-splitting; gated adds friction (tension with P014 "capture should interrupt flow minimally")
-- [ ] Update `packages/itil/skills/manage-problem/SKILL.md` with the new step
-- [ ] Add a test case exercising the split behaviour with a conflated input like the one that produced P013
+- [x] Design a concern-boundary-analysis step — chose Option (a): LLM self-check before step 5 counting distinct root causes; single concern proceeds, multi-concern triggers AskUserQuestion split prompt (per ADR-013)
+- [x] Decide whether the split is automatic or gated by AskUserQuestion — gated by AskUserQuestion (per ADR-013 Rule 1) with auto-split fallback for non-interactive mode (per ADR-013 Rule 6)
+- [x] Update `packages/itil/skills/manage-problem/SKILL.md` with the new step — added as step 4b between gather-info and write-file; scoped to new problem creation only
+- [x] Add a test case exercising the split behaviour — `packages/itil/skills/manage-problem/test/manage-problem-concern-boundary.bats` (4 structural tests, all GREEN)
 - [ ] Consider whether the same rule applies to `manage-incident` (probably yes — incidents can also conflate)
+
+### Fix Strategy
+
+LLM self-check after Step 4 (gather info), before Step 5 (write file). Self-check counts distinct root causes. Single concern → proceed to step 5. Multiple concerns → `AskUserQuestion` with options: "Split into separate problems" or "Keep as single problem." Non-interactive fallback: auto-split with consecutive IDs and cross-reference in Related sections.
+
+## Fix Released
+
+Implemented in `packages/itil/skills/manage-problem/SKILL.md` (2026-04-17):
+- Added Step 4b (concern-boundary analysis) between gather-info and write-file
+- LLM self-check counting distinct root causes; AskUserQuestion for split decision per ADR-013
+- Auto-split fallback for non-interactive mode per ADR-013 Rule 6
+- Structural test `manage-problem-concern-boundary.bats` (4 tests, all GREEN)
+
+Awaiting user verification that new problem creation offers a split when multi-concern descriptions are provided.
 
 ## Related
 

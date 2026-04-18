@@ -22,7 +22,10 @@ REQUIRED ACTIONS:
 4. Do NOT skip this step even if you think you can handle it yourself
 
 SCOPE: All project files.
-Does NOT apply to: CSS, images, fonts, lockfiles, changesets, memory files, plan files.
+Does NOT apply to: CSS, images, fonts, lockfiles, changesets, memory files,
+plan files, docs/problems/ (problem tickets), docs/BRIEFING.md,
+RISK-POLICY.md, .risk-reports/, docs/jtbd/, docs/JOBS_TO_BE_DONE.md,
+docs/PRODUCT_DISCOVERY.md, docs/VOICE-AND-TONE.md, docs/STYLE-GUIDE.md.
 HOOK_OUTPUT
 elif [ -f "docs/JOBS_TO_BE_DONE.md" ]; then
   cat <<'HOOK_OUTPUT'
@@ -42,7 +45,10 @@ REQUIRED ACTIONS:
 4. Do NOT skip this step even if you think you can handle it yourself
 
 SCOPE: All project files.
-Does NOT apply to: CSS, images, fonts, lockfiles, changesets, memory files, plan files.
+Does NOT apply to: CSS, images, fonts, lockfiles, changesets, memory files,
+plan files, docs/problems/ (problem tickets), docs/BRIEFING.md,
+RISK-POLICY.md, .risk-reports/, docs/jtbd/, docs/JOBS_TO_BE_DONE.md,
+docs/PRODUCT_DISCOVERY.md, docs/VOICE-AND-TONE.md, docs/STYLE-GUIDE.md.
 HOOK_OUTPUT
 else
   cat <<'HOOK_OUTPUT'

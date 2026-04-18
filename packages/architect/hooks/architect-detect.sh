@@ -35,7 +35,11 @@ REQUIRED ACTIONS:
 
 SCOPE: All project files including source code, configs, CI, hooks,
 scripts, and decisions.
-Does NOT apply to: CSS/SCSS files, image assets, lockfiles, font files.
+Does NOT apply to: CSS/SCSS files, image assets, lockfiles, font files,
+docs/problems/ (problem tickets), docs/BRIEFING.md, RISK-POLICY.md,
+.risk-reports/, .changeset/, memory files, plan files, docs/jtbd/,
+docs/JOBS_TO_BE_DONE.md, docs/PRODUCT_DISCOVERY.md, docs/VOICE-AND-TONE.md,
+docs/STYLE-GUIDE.md.
 HOOK_OUTPUT
 else
   cat <<'HOOK_OUTPUT'

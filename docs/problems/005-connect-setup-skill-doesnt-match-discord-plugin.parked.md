@@ -1,6 +1,6 @@
 # Problem 005: Connect Setup Skill Doesn't Match Discord Plugin Flow
 
-**Status**: Known Error
+**Status**: Parked
 **Reported**: 2026-04-14
 **Priority**: 20 (Very High) — Impact: Significant (4) x Likelihood: Almost Certain (5) on first setup
 
@@ -59,6 +59,12 @@ Rewrite the setup skill to:
 Setup skill rewritten to use `/discord:configure`, `--channels`, DM pairing,
 `/discord:access pair`, allowlist lockdown, and guild channel setup. Each repo
 gets its own bot named after org/repo. Awaiting release and verification.
+
+## Parked
+
+**Reason**: Upstream Claude Code bug — `--channels` flag removes `AskUserQuestion` (P008). All connect plugin work is suspended until the upstream bug is resolved.
+**Un-park trigger**: P008 resolved upstream (Anthropic fixes `--channels` to preserve `AskUserQuestion`).
+**Parked**: 2026-04-16
 
 ## Related
 
