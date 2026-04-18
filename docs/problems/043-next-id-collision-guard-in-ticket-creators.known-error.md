@@ -1,10 +1,22 @@
 # Problem 043: Next-ID collision guard missing in ticket-creator skills
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-18
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Possible (3)
 **Effort**: M (one or two SKILL.md changes + bats test + small commit)
-**WSJF**: 4.5 (9 × 1.0 / 2)
+**WSJF**: 9.0 (9 × 2.0 / 2)
+
+## Fix Released
+
+Released in `@windyroad/itil@0.4.3` and `@windyroad/architect@0.3.2`
+(commit `359ec7c`, release tag merged 2026-04-18). Both `manage-problem`
+step 3 and `create-adr` step 3 now compute `max(local, origin) + 1` with
+`git ls-tree origin/main` lookup.
+
+Awaiting user verification: create a problem ticket or ADR while origin
+has advanced (parallel session, CI commit, etc.) and confirm the
+ticket-creator skill renumbers to avoid the collision and logs the
+renumber decision.
 
 ## Description
 
