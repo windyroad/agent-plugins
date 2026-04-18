@@ -8,6 +8,7 @@
 > Updated 2026-04-18: P041 fix released (@windyroad/itil@0.4.1, commit 87c2ecf); P040 fix released (@windyroad/itil@0.4.2, commit 9c6019e). Both awaiting user verification.
 > Updated 2026-04-18: P028 → Known Error after investigation (ADR-018 partially covers via Step 6.5 for AFK orchestrator; non-AFK governance flows still need ADR-014 amendment or new ADR; auto-install split recommended).
 > Updated 2026-04-18: P043 fix released (@windyroad/itil@0.4.3 + @windyroad/architect@0.3.2, commit 359ec7c). Manage-problem and create-adr now compute next ID as max(local, origin) + 1.
+> Added 2026-04-18 without full re-review: P044 (run-retro does not recommend new skills when it should). Run `/wr-itil:manage-problem review` to refresh rankings.
 
 ## WSJF Rankings
 
@@ -20,6 +21,7 @@
 | 4.5 | P016 | manage-problem should split multi-concern tickets | 9 Med | Known Error | M |
 | 4.5 | P017 | create-adr should split multi-decision records | 9 Med | Known Error | M |
 | 4.5 | P028 | Governance skills should auto-release and auto-install | 9 Med | Known Error | M |
+| 4.0 | P044 | run-retro does not recommend new skills when it should | 8 Med | Open | M |
 | 4.5 | P033 | No persistent risk register for ISO 31000 / ISO 27001 | 9 Med | Known Error | L |
 | 8.0 | P041 | work-problems does not enforce release cadence | 16 High | Known Error | L |
 | 6.0 | P040 | work-problems does not fetch origin before starting | 12 High | Known Error | L |
