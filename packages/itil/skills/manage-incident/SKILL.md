@@ -262,12 +262,38 @@ After any operation, report:
 
 Commit the completed work per ADR-014 (governance skills commit their own work):
 1. `git add` all created/modified files for this operation
-2. Delegate to `wr-risk-scorer:pipeline` (subagent_type: `wr-risk-scorer:pipeline`) to assess the staged changes and create a bypass marker
+2. Delegate to `wr-risk-scorer:pipeline` (subagent_type: `wr-risk-scorer:pipeline`) to assess the staged changes and create a bypass marker. If the subagent type is not available in the current tool set (e.g. this skill is running inside a spawned subagent), invoke `/wr-risk-scorer:assess-release` via the Skill tool instead — per ADR-015 it wraps the same pipeline subagent.
 3. `git commit -m "<message>"` using the convention for the operation type:
    - New incident: `docs(incidents): open I<NNN> <title>`
    - Incident mitigated: `docs(incidents): I<NNN> mitigated — <mitigation summary>`
    - Incident restored: `docs(incidents): I<NNN> restored — <action>`
    - Incident closed: `docs(incidents): close I<NNN>`
 4. If risk is above appetite: use `AskUserQuestion` to ask whether to commit anyway, remediate first, or park the work. If `AskUserQuestion` is unavailable, skip the commit and report the uncommitted state clearly.
+
+### 15. Auto-release when changesets are queued (ADR-020)
+
+**Skip this step if the skill is running inside an AFK orchestrator.** Orchestrators handle release cadence themselves per ADR-018 (Step 6.5). When in doubt, defer to the orchestrator by skipping this step.
+
+Otherwise, after the commit in step 14 lands, drain the release queue so the fix actually lands on npm without requiring manual user action.
+
+**Mechanism — delegate, do not re-implement scoring (per ADR-015):**
+
+1. Invoke the release scorer. Two paths are valid:
+   - **Primary**: delegate to subagent type `wr-risk-scorer:pipeline` via the Agent tool.
+   - **Fallback**: if that subagent type is not available, invoke skill `/wr-risk-scorer:assess-release` via the Skill tool. The skill wraps the same pipeline subagent.
+2. Read the returned `RISK_SCORES: commit=X push=Y release=Z` line.
+3. **Drain condition**: if `push` and `release` are both within appetite (≤ 4/25, "Low" band per `RISK-POLICY.md`), AND `.changeset/` is non-empty, proceed to the drain action. Otherwise, skip the drain and report the unreleased state.
+
+**Drain action (non-interactive, policy-authorised per ADR-013 Rule 6):**
+
+1. Run `npm run push:watch` (push + wait for CI to pass).
+2. If `.changeset/` remains non-empty after push (i.e. a release PR is pending), run `npm run release:watch` (merge the release PR + wait for npm publish).
+3. Report the release: "Released <package>@<version>. Fix is now live on npm."
+
+**Failure handling**: If `release:watch` fails (CI failure, publish failure), stop and report the failure clearly. Do not retry non-interactively — the user must intervene.
+
+**Above-appetite branch**: If push/release risk is above appetite, skip the drain and report: "Release skipped — risk above appetite. Run `npm run push:watch` and `npm run release:watch` manually when ready."
+
+`push:watch` and `release:watch` are policy-authorised actions when residual risk is within appetite per RISK-POLICY.md, so no `AskUserQuestion` is required for the drain itself (ADR-013 Rule 6).
 
 $ARGUMENTS
