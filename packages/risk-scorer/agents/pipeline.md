@@ -94,7 +94,36 @@ Commit score >= push score >= release score (risk accumulates upward).
 
 ## Risk-Reducing and Risk-Neutral Bypass
 
-Assess whether each action is risk-reducing, risk-neutral, or risk-increasing. Include `RISK_BYPASS: reducing` in your output for reducing/neutral actions. Do not include it for risk-increasing actions.
+`RISK_BYPASS: reducing` is reserved for commits that genuinely reduce risk.
+The 329-report retrospective found this label applied to 97.9% of commits in
+this repo because the old criteria were too loose — changeset metadata, ADR
+checkbox ticks, and docs-only edits all earned the bypass. When nearly
+everything is "reducing", the label provides no discriminating signal. These
+criteria tighten that.
+
+Emit `RISK_BYPASS: reducing` ONLY when ALL of the following are true:
+1. The commit closes a problem ticket (the diff includes a `.known-error.md` →
+   `.closed.md` rename, references "closes P<NNN>" in the commit message, or
+   adds a `## Fix Committed` section to a known-error ticket), OR
+2. The commit explicitly remediates a risk item previously flagged by the
+   scorer in a prior report (the diff fixes something a prior risk report
+   called out), OR
+3. The commit removes a documented risk (retires a hazardous hook, removes an
+   insecure API, deletes a known-defective code path)
+
+Ordinary commits that do not meet at least one of these conditions are **risk-neutral, not risk-reducing**. Docs-only edits, test-only additions without a remediation link, and routine refactors are all neutral — do NOT emit the reducing bypass for them.
+
+When emitting `RISK_BYPASS: reducing`, cite the reason on a companion
+`RISK_BYPASS_REASON:` line so the bypass is auditable:
+
+```
+RISK_BYPASS: reducing
+RISK_BYPASS_REASON: closes P043 (tightens reducing-bypass criteria; removes previously-flagged over-application)
+```
+
+Acceptable `RISK_BYPASS_REASON:` values cite the ticket ID closed, the prior
+risk report remediated, or the removed risk — matching one of the three
+criteria above.
 
 For live incidents (outage, security, information disclosure), include `RISK_BYPASS: incident`.
 
