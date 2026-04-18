@@ -12,6 +12,7 @@
 > Updated 2026-04-19: P028 split on architect review — auto-install concern moved to P045 (deferred, blocked on Claude Code in-session plugin reload). Narrowed P028 (non-AFK auto-release) fix implemented under ADR-020 and awaiting release.
 > Updated 2026-04-19: P044 → Known Error after review; fix implemented (run-retro Step 2/4b/5 extended for skill candidates + bats test); awaiting release.
 > Updated 2026-04-19: P042 → Known Error after review; fix implemented under ADR-021 (Changesets `version` script hook + sync-plugin-manifests.mjs + CI guard + bats test); awaiting release.
+> Added 2026-04-19 without full re-review: P046 (wr-architect agent misses performance implications — captured upstream from addressr P024). Run `/wr-itil:manage-problem review` to refresh rankings.
 
 ## WSJF Rankings
 
@@ -39,6 +40,7 @@
 | 1.5 | P019 | Deprecate single-file JTBD fallback | 6 Med | Open | L |
 | 1.5 | P034 | Centralise risk reports for cross-project skill improvement | 6 Med | Open | L |
 | 1.5 | P045 | Auto plugin install after governance release (deferred) | 6 Med | Open | L |
+| 2.0 | P046 | wr-architect agent misses performance implications on high-traffic endpoints | 8 Med | Open | L |
 
 ## Known Errors (Fix Released — pending verification)
 
