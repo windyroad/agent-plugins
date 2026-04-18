@@ -1,5 +1,5 @@
 {
   "name": "wr-architect",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Architecture decision enforcement for Claude Code"
 }
