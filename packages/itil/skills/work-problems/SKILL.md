@@ -14,6 +14,28 @@ The user is AFK during this process, so every decision point that would normally
 
 Each iteration is one cycle of: scan backlog, pick highest-WSJF problem, work it, report result. The loop continues until a stop condition is met.
 
+### Step 0: Preflight (per ADR-019)
+
+Before opening the work loop, reconcile local state with origin so the orchestrator does not iterate against a stale backlog or create tickets with IDs that collide with parallel sessions (P040).
+
+**Mechanism:**
+
+1. Run `git fetch origin`.
+2. Compare local `HEAD` with `origin/<base>` (default `main`; otherwise the branch the user is on).
+3. Branch on the divergence shape:
+
+| Local vs origin | Action |
+|---|---|
+| HEAD at or ahead of origin/<base> | Proceed to Step 1 |
+| origin/<base> ahead, local has no unpushed commits (pure fast-forward) | Run `git pull --ff-only` non-interactively. Log the count of pulled commits in the AFK iteration log. Proceed to Step 1. |
+| origin/<base> ahead, local has unpushed commits (non-fast-forward) | STOP the loop. Report the divergence with `git log --oneline HEAD..origin/<base>` and `git log --oneline origin/<base>..HEAD`. Do NOT attempt to rebase or merge non-interactively — that is a judgment call the persona forbids in AFK mode. |
+
+**Network failure**: if `git fetch origin` returns a network error, stop and report. Default behaviour is fail-closed — the user can retry when network is restored.
+
+**Non-interactive authorisation**: per ADR-013 Rule 6, `git fetch origin` and `git pull --ff-only` are policy-authorised actions (no semantic merge, no destructive overwrite). `git pull --rebase`, `git merge`, and any operation that resolves conflicts are NOT policy-authorised — they require user input.
+
+**Cross-cutting**: this rule applies to every AFK orchestrator skill. The next-ID collision guard (ADR-019 confirmation criterion 2) belongs in the ticket-creator skills (`manage-problem` and `wr-architect:create-adr`), not here — see the related problem ticket for that work.
+
 ### Step 1: Scan the backlog
 
 Read `docs/problems/README.md` if it exists and is fresh (check via git history — see manage-problem step 9 for the cache freshness check). If stale or missing, scan all `.open.md` and `.known-error.md` files in `docs/problems/`, extract their WSJF scores, and rank them.
@@ -134,6 +156,7 @@ When `AskUserQuestion` is unavailable or the user is AFK, the skill (and the del
 | Commit when risk within appetite | Auto-commit (manage-problem step 9e fallback) |
 | Commit when risk above appetite | Skip commit, report uncommitted state |
 | Pipeline risk at appetite (push or release >= 4/25) | Drain release queue (`push:watch` then `release:watch`) before next iteration — per ADR-018 (Step 6.5) |
+| Origin diverged before start | Pull `--ff-only` if trivial; stop with report (`git log HEAD..origin/<base>` and reverse) if non-fast-forward — per ADR-019 (Step 0) |
 | Fix verification needed | Skip problem, add to "needs verification" list |
 
 ## Edge Cases

@@ -141,12 +141,18 @@ starting. Operator vigilance is the workaround until the fix ships.
       lines 17–24)
 - [x] Architect review (ALIGNMENT — ADR-019 required as prerequisite,
       distinct from ADR-018)
-- [ ] Author ADR-019
-- [ ] Decide whether the numbering-collision guard belongs in
-      `work-problems` or `manage-problem` (currently the latter creates
-      tickets)
-- [ ] Create reproduction test (after ADR lands)
-- [ ] Implement the SKILL.md change
+- [x] Author ADR-019 (2026-04-18, commit a530912)
+- [x] Decide whether the numbering-collision guard belongs in
+      `work-problems` or `manage-problem` — decided: manage-problem
+      (architect confirmed; split into separate ticket)
+- [x] Create reproduction test
+      (`packages/itil/skills/work-problems/test/work-problems-preflight.bats`,
+      7 assertions covering ADR-019 confirmation criteria)
+- [x] Implement the SKILL.md change (Step 0 added before Step 1;
+      Non-Interactive Decision Making table updated with origin-divergence
+      row)
+- [ ] User verification: run an AFK loop with origin diverged and confirm
+      the preflight either pulls (trivial) or stops (non-fast-forward)
 - [ ] Create INVEST story for permanent fix (covers ADR + SKILL + tests)
 
 ## Related
