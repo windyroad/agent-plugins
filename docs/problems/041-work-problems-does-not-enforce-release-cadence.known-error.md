@@ -163,12 +163,21 @@ the workaround until the fix ships.
       scorer report (confirmed via SKILL.md source read, 2026-04-18)
 - [x] Architect review (ALIGNMENT — ADR-018 required as prerequisite)
 - [x] JTBD review (PASS — advances JTBD-006)
-- [ ] Author ADR-018
-- [ ] Determine whether `release:watch` can run non-interactively on
-      failure paths (and how to surface the failure in the AFK summary)
-- [ ] Create reproduction bats test (after ADR lands)
-- [ ] Implement the SKILL.md change
-- [ ] Create INVEST story for permanent fix (covers ADR + SKILL + tests)
+- [x] Author ADR-018 (2026-04-18, commit a530912)
+- [x] Determine whether `release:watch` can run non-interactively on
+      failure paths — decided: stop the loop and report, no retry
+      (codified in Step 6.5)
+- [x] Create reproduction bats test
+      (`packages/itil/skills/work-problems/test/work-problems-release-cadence.bats`,
+      7 assertions covering ADR-018 confirmation criteria)
+- [x] Implement the SKILL.md change (Step 6.5 added between Step 6 and
+      Step 7; Non-Interactive Decision Making table updated with
+      pipeline-risk-at-appetite row)
+- [ ] Create INVEST story for permanent fix — N/A (Step 6.5 IS the fix;
+      no further breakdown needed)
+- [ ] User verification: run an AFK loop that accumulates >= 1 patch
+      changeset and confirm the orchestrator drains the queue before
+      starting the next iteration
 
 ## Related
 

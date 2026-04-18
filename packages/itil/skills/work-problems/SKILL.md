@@ -96,6 +96,28 @@ Format as a brief status line, not a wall of text. The user will read these when
 [Iteration 3] Skipped P016 (Multi-concern ticket splitting) — fix released, awaiting user verification. Worked P024 (Risk scorer WIP flag) — implemented fix, closed. 6 problems remain.
 ```
 
+### Step 6.5: Release-cadence check (per ADR-018)
+
+After the iteration's commit lands but before starting the next iteration, check whether the unreleased queue would push pipeline risk to or above appetite. If so, drain the queue before continuing. This prevents silent accumulation of unreleased changesets across AFK iterations (P041).
+
+**Mechanism — delegate, do not re-implement scoring:**
+
+1. Invoke the risk scorer to score cumulative pipeline state. Two paths are valid (per ADR-015):
+   - **Primary**: delegate to subagent type `wr-risk-scorer:pipeline` via the Agent tool.
+   - **Fallback**: if that subagent type is not available, invoke skill `/wr-risk-scorer:assess-release` via the Skill tool. The skill wraps the same pipeline subagent.
+2. Read the returned `RISK_SCORES: commit=X push=Y release=Z` line.
+3. **Threshold**: if `push` or `release` is at or above appetite (4/25, "Low" band per `RISK-POLICY.md`), drain the queue.
+
+**Drain action (non-interactive, policy-authorised per ADR-013 Rule 6):**
+
+1. Run `npm run push:watch` (push + wait for CI to pass).
+2. If `.changeset/` is non-empty after push, run `npm run release:watch` (merge the release PR + wait for npm publish).
+3. Resume the loop only after the release lands on npm.
+
+**Failure handling**: If `release:watch` fails (CI failure, publish failure), stop the loop and report the failure in the AFK summary. Do not retry non-interactively — the user must intervene.
+
+`push:watch` and `release:watch` are policy-authorised actions when residual risk is within appetite per RISK-POLICY.md, so no `AskUserQuestion` is required for the drain itself (ADR-013 Rule 6).
+
 ### Step 7: Loop
 
 Go back to step 1. The backlog may have changed — new problems may have been created during fixes, priorities may have shifted, and the README.md cache will be stale.
@@ -111,6 +133,7 @@ When `AskUserQuestion` is unavailable or the user is AFK, the skill (and the del
 | Scope expansion during work | Update problem file, re-score WSJF, move to next problem instead of continuing |
 | Commit when risk within appetite | Auto-commit (manage-problem step 9e fallback) |
 | Commit when risk above appetite | Skip commit, report uncommitted state |
+| Pipeline risk at appetite (push or release >= 4/25) | Drain release queue (`push:watch` then `release:watch`) before next iteration — per ADR-018 (Step 6.5) |
 | Fix verification needed | Skip problem, add to "needs verification" list |
 
 ## Edge Cases
