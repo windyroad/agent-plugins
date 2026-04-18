@@ -19,6 +19,8 @@
 - **All ADRs in `docs/decisions/` are still `.proposed.md`** — none ratified. Amendments are cheap: prefer amending over superseding. When a P-problem intersects a proposed ADR, revise the ADR rather than adding a compatibility clause.
 - **Risk-scorer agents are tool-restricted to `Read + Glob`** — no `AskUserQuestion`, no `EnterPlanMode`. Sub-agents invoked via Task also cannot enter plan mode on the parent's behalf. Any "scorer asks the user" design must split scorer/orchestrator concerns: scorer emits structured markers, calling skill/primary owns the interaction. See P021.
 - **ADR-002 plugin dependency graph lists `@windyroad/tdd` as standalone.** Cross-plugin features (e.g. P018 JTBD traceability, P017 shared concern-splitting helper) must update the graph explicitly; don't silently add deps.
+- **Parallel Claude sessions can create P-ticket numbering collisions.** Before running `/wr-itil:work-problems` or opening new tickets, `git fetch origin` and check the highest P-number on `origin/main`. If origin has advanced past your last-known state, either pull or renumber new tickets to avoid conflicts on push. The work-problems skill itself does NOT fetch or check origin.
+- **`/wr-itil:work-problems` does not enforce release cadence.** The AFK loop will keep stacking commits and changesets even after commit risk hits appetite (4/25). Stop the loop manually and release (`npm run release:watch`) when 3 patch changesets accumulate in `.changeset/`, or when commit/push risk enters the Low band (3-4).
 
 ## What Will Surprise You
 
