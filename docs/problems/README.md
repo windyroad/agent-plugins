@@ -4,7 +4,8 @@
 > Added 2026-04-18 without full re-review: P040 (from session retrospective). Run `/wr-itil:manage-problem review` to refresh rankings.
 > Updated 2026-04-18: P041 → Known Error after architect review (ADR-018 prerequisite identified; effort re-sized M → L; WSJF unchanged at 8.0).
 > Updated 2026-04-18: P040 → Known Error after architect review (ADR-019 prerequisite identified — distinct from ADR-018; effort re-sized M → L; WSJF unchanged at 6.0).
-> Added 2026-04-18 without full re-review: P042 (changesets does not sync plugin manifest version). Run `/wr-itil:manage-problem review` to refresh rankings.
+> Added 2026-04-18 without full re-review: P042 (changesets does not sync plugin manifest version), P043 (next-ID collision guard split from P040). Run `/wr-itil:manage-problem review` to refresh rankings.
+> Updated 2026-04-18: P041 fix released (@windyroad/itil@0.4.1, commit 87c2ecf); P040 fix released (@windyroad/itil@0.4.2, commit 9c6019e). Both awaiting user verification.
 
 ## WSJF Rankings
 
@@ -21,6 +22,7 @@
 | 8.0 | P041 | work-problems does not enforce release cadence | 16 High | Known Error | L |
 | 6.0 | P040 | work-problems does not fetch origin before starting | 12 High | Known Error | L |
 | 4.0 | P042 | changesets does not sync plugin manifest version | 16 High | Open | L |
+| 4.5 | P043 | Next-ID collision guard in ticket-creator skills | 9 Med | Open | M |
 | 4.0 | P018 | TDD enforce BDD + Example Mapping principles | 16 High | Open | L |
 | 4.0 | P022 | Agents must not fabricate time estimates | 16 High | Open | L |
 | 4.0 | P024 | Risk-scorer WIP flag uncommitted completed work | 8 Med | Known Error | L |
@@ -44,6 +46,7 @@
 | P031 | Stale cache detection in manage-problem work | commit 824cb2c |
 | P033 | No persistent risk register for ISO 31000 / ISO 27001 | 2026-04-17 |
 | P041 | work-problems does not enforce release cadence | @windyroad/itil@0.4.1 (commit 87c2ecf) |
+| P040 | work-problems does not fetch origin before starting | @windyroad/itil@0.4.2 (commit 9c6019e) |
 
 ## Parked
 

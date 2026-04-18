@@ -6,6 +6,21 @@
 **Effort**: L (architect requires ADR-019 prerequisite before SKILL.md change ships)
 **WSJF**: 6.0 (12 × 2.0 / 4)
 
+## Fix Released
+
+Released in `@windyroad/itil@0.4.2` (commit `9c6019e`, release tag merged
+2026-04-18). Step 0 (Preflight) now appears in
+`packages/itil/skills/work-problems/SKILL.md`.
+
+The next-ID collision guard (ADR-019 confirmation criterion 2) is split
+into a separate problem ticket targeting `manage-problem` per architect
+guidance — `work-problems` does not create tickets, so the guard does not
+belong there. See P043.
+
+Awaiting user verification: run an AFK loop with `origin/main` advanced
+by another session and confirm the orchestrator either pulls (trivial
+case) or stops with a divergence report (non-fast-forward case).
+
 ## Description
 
 The `wr-itil:work-problems` AFK orchestrator does not run `git fetch origin` or
