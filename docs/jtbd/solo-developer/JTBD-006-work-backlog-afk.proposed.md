@@ -19,6 +19,9 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 - When I return, I can see a clear summary of what was worked, what was skipped, and what remains
 - Problems requiring my judgment (verification, scope decisions, ambiguous investigation) are queued for my return, not guessed at
 - Git commits happen automatically when risk is within appetite; uncommitted work is reported transparently when risk is above appetite
+- Between iterations, the loop drains push/release queues when unreleased risk would reach appetite, so risk never silently accumulates across AFK iterations (see ADR-018)
+- Before each iteration, the loop reconciles with `origin/<base>`; trivial fast-forward divergence pulls non-interactively, non-fast-forward divergence halts the loop with a clear report (see ADR-019)
+- Next-ID assignment is verified against `origin/<base>` before any new ticket (problem, ADR, JTBD) is created, preventing collisions with parallel sessions (see ADR-019)
 - The loop stops gracefully when nothing actionable remains, or when it hits a blocker like a git conflict
 
 ## Persona Constraints
