@@ -74,6 +74,11 @@ For each control claimed to reduce risk:
 2. Name the specific test file/scenario or hook
 3. If you cannot name it, it provides 0 reduction
 
+**Monitoring is not a control.** Monitoring, alerting, dashboards, and any other post-release detection activity MUST NOT be credited as a control in a plan's residual risk. Post-release detection does NOT reduce pre-release risk — it only shortens the time to notice a failure after it has already reached users. A genuine control exercises the failure scenario before the
+plan's changes ship: a test, a CI gate, a feature flag, a preview verification,
+an architect review. Monitoring MUST NOT appear in a Controls list and MUST NOT
+reduce any inherent risk score.
+
 ## User-Stated Preconditions Check
 
 Before crediting any control, check for **user-stated preconditions** — conditions

@@ -155,6 +155,13 @@ Do not rely on a static list. For each control claimed to reduce risk, you MUST:
 3. Ask: "Would this control catch this failure before reaching the user?"
 4. **Name the control**: "Tests pass" is not a control. Name the specific test file and scenario. If you cannot name it, it provides 0 reduction.
 
+**Monitoring is not a control.** Monitoring, alerting, dashboards, and any other post-release detection activity MUST NOT be credited as a control that reduces residual risk. Post-release detection does NOT reduce pre-release risk — it only shortens the time to notice a failure after it has already reached users. A genuine control exercises the failure
+scenario BEFORE the change ships: a test, a CI gate, a feature flag, a preview
+verification, an architect review, an installer dry-run. Monitoring and rollback
+readiness may be listed separately as "post-release follow-ups" outside the
+residual risk computation, but MUST NOT appear in a Controls list and MUST NOT
+reduce any inherent risk score.
+
 ## User-Stated Preconditions Check
 
 A technical control list never substitutes for an explicit user warning. Before

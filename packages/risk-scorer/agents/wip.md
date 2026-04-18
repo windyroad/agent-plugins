@@ -108,6 +108,11 @@ RISK_COMMIT_REASON: <one-line description of the completed governance work detec
 
 For each control claimed to reduce risk, name the specific test file/scenario. If you cannot name it, it provides 0 reduction.
 
+**Monitoring is not a control.** Monitoring, alerting, dashboards, and any other post-release detection activity MUST NOT be credited or reduce residual risk. Post-release detection does NOT reduce pre-release risk — it only shortens the time to notice a failure after it has already reached users.
+A genuine control exercises the failure scenario before the change ships: a
+test, a CI gate, a feature flag, a preview verification. Monitoring MUST NOT
+appear in a Controls list and MUST NOT reduce any inherent risk score.
+
 ## User-Stated Preconditions Check
 
 Before crediting any control, check for **user-stated preconditions** — conditions
