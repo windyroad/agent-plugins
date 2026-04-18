@@ -1,10 +1,10 @@
 # Problem 042: Changesets does not sync plugin manifest version
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-18
 **Priority**: 16 (High) — Impact: Significant (4) x Likelihood: Likely (4)
 **Effort**: L (sync mechanism design + ADR + implementation + CI guard)
-**WSJF**: 4.0 (16 × 1.0 / 4)
+**WSJF**: 8.0 (16 × 2.0 / 4)  — transitioned 2026-04-19 after fix strategy selected
 
 ## Description
 
@@ -134,13 +134,33 @@ strategy is chosen, the choice itself should be captured in a new ADR
       verified 2026-04-18 via `.github/workflows/release.yml` and
       `npm run release` script inspection
 - [x] Apply immediate corrective fix — done in commit 51eec23
-- [ ] Author the new ADR ("Plugin manifest version sync mechanism")
-      comparing the four fix strategies above
-- [ ] Implement the chosen sync mechanism
-- [ ] Add a CI guard that fails the release if any
-      `packages/*/.claude-plugin/plugin.json` `version` does not match
-      the corresponding `package.json` (regression-prevention test)
-- [ ] Document the sync mechanism in CONTRIBUTING.md or the release runbook
+- [x] Author the new ADR — ADR-021 chosen Option 4 (Changesets `version`
+      script hook) with Option 1 (pre-publish workflow step) documented
+      as the fallback
+- [x] Implement the chosen sync mechanism — `scripts/sync-plugin-manifests.mjs`
+      (Node, cross-platform, with `--check` mode) wired into the root
+      `package.json` `version` script so the Changesets action picks it
+      up automatically when producing the "Version Packages" PR
+- [x] Add a CI guard — `.github/workflows/ci.yml` now runs
+      `npm run check:plugin-manifests` on every PR and push to main;
+      `packages/shared/test/plugin-manifest-sync.bats` covers the
+      check/sync/drift-detection behaviour (7 assertions, all passing)
+- [ ] Document the sync mechanism in CONTRIBUTING.md or the release
+      runbook — deferred; the ADR-021 Confirmation section and the
+      inline script header provide the reference documentation for now
+
+## Fix Released
+
+Fix implemented on 2026-04-19 under ADR-021:
+
+- `scripts/sync-plugin-manifests.mjs` — Node script walking `packages/*/package.json` and copying `version` into the sibling `.claude-plugin/plugin.json`. Supports `--check` mode.
+- Root `package.json` wiring: `scripts.version = "changeset version && node scripts/sync-plugin-manifests.mjs"` — the Changesets action extension point. Plus `sync:plugin-manifests` and `check:plugin-manifests` for manual / CI use.
+- `.github/workflows/ci.yml` — new step runs `npm run check:plugin-manifests` on every PR and push to main, failing the build if any manifest has drifted.
+- `packages/shared/test/plugin-manifest-sync.bats` — 7-assertion drift-guard test covering script presence, current-tree OK, drift detection, sync mutation, skip-without-manifest, and npm-script wiring.
+
+Released in: _pending release cadence check (this iteration)_.
+
+Awaiting user verification that the next Changesets "Version Packages" PR includes a coordinated `packages/*/.claude-plugin/plugin.json` version bump alongside the `packages/*/package.json` bump, and that CI fails if drift is introduced manually.
 
 ## Related
 

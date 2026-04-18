@@ -79,6 +79,9 @@ jobs:
       - name: Check install-utils.mjs copies in sync (P026)
         run: npm run check:install-utils
 
+      - name: Check plugin manifest versions in sync with package.json (P042, ADR-021)
+        run: npm run check:plugin-manifests
+
       - name: Dry-run meta-installer
         run: node packages/agent-plugins/bin/install.mjs --dry-run
 
