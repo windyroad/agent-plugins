@@ -15,6 +15,7 @@
 > Added 2026-04-19 without full re-review: P046 (wr-architect agent misses performance implications — captured upstream from addressr P024). Run `/wr-itil:manage-problem review` to refresh rankings.
 > Added 2026-04-19 without full re-review: P047 (WSJF effort buckets coarse + not re-rated at lifecycle transitions — session observation after P028/P044/P042 shipped). Run `/wr-itil:manage-problem review` to refresh rankings.
 > Added 2026-04-19 without full re-review: P048 (manage-problem does not surface Fix Released tickets as verification candidates — session observation: 6 Fix Released fixes exercised this session with no closure progress). Run `/wr-itil:manage-problem review` to refresh rankings.
+> Added 2026-04-19 without full re-review: P049 (Known Error status overloaded with Fix Released sub-state — 16/16 current Known Errors are empirically Fix Released; suggests introducing an explicit status). Run `/wr-itil:manage-problem review` to refresh rankings.
 
 ## WSJF Rankings
 
@@ -45,6 +46,7 @@
 | 2.0 | P046 | wr-architect agent misses performance implications on high-traffic endpoints | 8 Med | Open | L |
 | 3.0 | P047 | WSJF effort buckets are coarse and not re-rated at lifecycle transitions | 6 Med | Open | M |
 | 4.0 | P048 | manage-problem does not surface Fix Released tickets as verification candidates | 8 Med | Open | M |
+| 4.0 | P049 | Known Error status overloaded — "fix released, awaiting verification" deserves its own status | 8 Med | Open | M |
 
 ## Known Errors (Fix Released — pending verification)
 
