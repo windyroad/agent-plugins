@@ -1,5 +1,59 @@
 # @windyroad/risk-scorer
 
+## 0.3.4
+
+### Patch Changes
+
+- 0370c4e: Risk scorer emits explicit STOP verdict above appetite.
+
+  - `pipeline.md`, `wip.md`, `plan.md`: Above-Appetite sections now contain an
+    explicit STOP / PAUSE / FAIL directive and forbid "Proceed", "Continue",
+    "You may ship", and similar nudge language when cumulative risk exceeds
+    appetite. The only sanctioned above-appetite output is the Risk Report +
+    `RISK_SCORES:` + structured `RISK_REMEDIATIONS:` block — matching the
+    symmetrical Below-Appetite Output Rule (ADR-013 Rule 5)
+  - Doc-lint guard `risk-scorer-above-appetite-stop.bats` prevents regression
+    across all three scoring modes
+  - Previously, the scorer could contradict itself (structured output: high
+    risk; verbal verdict: proceed with release), causing the agent to attempt
+    gated actions and waste tool calls when the hook gate correctly blocked them
+
+- 0edec54: Risk scorer refuses to credit monitoring as a control.
+
+  - `pipeline.md`, `wip.md`, `plan.md`: Control Discovery now contains an
+    explicit "Monitoring is not a control" rule. Monitoring, alerting,
+    dashboards, "watch for elevated errors", and "be ready to rollback"
+    MUST NOT be credited or reduce residual risk. Post-release detection
+    shortens time-to-notice; it does not reduce pre-release risk.
+  - Doc-lint guard `risk-scorer-monitoring-not-a-control.bats` (6 assertions)
+    prevents regression across all three scoring modes.
+  - Previously, 329-report corpus analysis showed scorers crediting
+    monitoring as a control, producing false-confidence residual risk
+    scores on releases with genuine pre-release risk gaps.
+
+- 16be06f: Risk scorer now honours user-stated preconditions.
+
+  - `pipeline.md`, `wip.md`, and `plan.md`: new **User-Stated Preconditions Check** section requires the scorer to inspect recent conversation, problem tickets, commits, and changesets for user-stated conditional-delivery warnings ("A is only safe if B ships alongside")
+  - Unmet preconditions surface as standalone Risk items with inherent risk >= Medium (>= 5), routing into the existing above-appetite `RISK_REMEDIATIONS:` flow rather than being buried in prose or ignored because the diff's technical risk scored Low
+  - Doc-lint guard test `risk-scorer-user-stated-preconditions.bats` prevents regression across all three scoring modes
+
+- 6abd0ee: Tighten `RISK_BYPASS: reducing` criteria to restore discriminating power.
+
+  - `pipeline.md`: reducing bypass now requires one of (1) ticket closure,
+    (2) remediation of a previously-flagged risk, or (3) removal of a
+    documented risk. Ordinary docs-only edits, test-only additions without
+    a remediation link, and routine refactors are now risk-neutral and do
+    NOT earn the bypass label.
+  - Added companion `RISK_BYPASS_REASON:` line — every reducing bypass must
+    cite the ticket closed, prior report remediated, or removed risk. This
+    makes the bypass auditable.
+  - Doc-lint guard `risk-scorer-reducing-bypass-criteria.bats` prevents
+    regression.
+  - Background: 329-report retrospective across 6 projects showed the
+    previous loose criteria applied `reducing` to 97.9% of commits in this
+    repo and 79.6% across consumer projects, rendering the label
+    meaningless. Only 2 of 96 reports omitted it.
+
 ## 0.3.3
 
 ### Patch Changes
