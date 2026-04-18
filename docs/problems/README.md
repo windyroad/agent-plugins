@@ -43,6 +43,7 @@
 | P029 | Edit gate overhead for governance docs | commit ac9d453 |
 | P031 | Stale cache detection in manage-problem work | commit 824cb2c |
 | P033 | No persistent risk register for ISO 31000 / ISO 27001 | 2026-04-17 |
+| P041 | work-problems does not enforce release cadence | @windyroad/itil@0.4.1 (commit 87c2ecf) |
 
 ## Parked
 

@@ -6,6 +6,15 @@
 **Effort**: L (architect requires ADR-018 prerequisite before SKILL.md change ships)
 **WSJF**: 8.0 (16 × 2.0 / 4)
 
+## Fix Released
+
+Released in `@windyroad/itil@0.4.1` (commit `87c2ecf`, release tag merged
+2026-04-18). Step 6.5 now appears in `packages/itil/skills/work-problems/SKILL.md`.
+
+Awaiting user verification: run an AFK loop that accumulates >= 1 patch
+changeset and confirm the orchestrator drains the queue (push:watch +
+release:watch) before starting the next iteration.
+
 ## Description
 
 The `wr-itil:work-problems` AFK orchestrator keeps iterating through problems
