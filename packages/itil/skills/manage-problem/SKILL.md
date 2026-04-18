@@ -364,9 +364,12 @@ Edit each problem file where the priority changed. Then write/overwrite `docs/pr
 
 Then commit all changed files per ADR-014:
 1. `git add` the changed problem files and `docs/problems/README.md`
-2. Delegate to `wr-risk-scorer:pipeline` to assess and create a bypass marker
+2. Satisfy the commit gate — two paths are valid (either produces a bypass marker):
+   - **Primary**: delegate to the `wr-risk-scorer:pipeline` subagent-type via the Agent tool
+   - **Fallback**: if the `wr-risk-scorer:pipeline` subagent-type is not available in the current tool set (e.g., this skill is itself running inside a spawned subagent), invoke the `/wr-risk-scorer:assess-release` skill via the Skill tool. Per ADR-015 it wraps the same pipeline subagent and produces an equivalent bypass marker via the `PostToolUse:Agent` hook. Do not silently skip the gate because the primary path is unavailable — the fallback exists specifically to close this gap (see P035).
 3. `git commit -m "docs(problems): review — re-rank priorities"`
-If `AskUserQuestion` is unavailable and risk is above appetite, skip the commit and report the uncommitted state.
+
+If `AskUserQuestion` is unavailable and risk is above appetite, skip the commit and report the uncommitted state (ADR-013 Rule 6 fail-safe). This applies only to the risk-above-appetite branch, not to the delegation-unavailable case above.
 
 ### 10. Quality checks
 
@@ -391,13 +394,15 @@ After any operation, report:
 
 Commit the completed work per ADR-014 (governance skills commit their own work):
 1. `git add` all created/modified files for this operation
-2. Delegate to `wr-risk-scorer:pipeline` (subagent_type: `wr-risk-scorer:pipeline`) to assess the staged changes and create a bypass marker
+2. Satisfy the commit gate — two paths are valid (either produces a bypass marker):
+   - **Primary**: delegate to the `wr-risk-scorer:pipeline` subagent-type via the Agent tool (subagent_type: `wr-risk-scorer:pipeline`)
+   - **Fallback**: if the `wr-risk-scorer:pipeline` subagent-type is not available in the current tool set (e.g., this skill is itself running inside a spawned subagent), invoke the `/wr-risk-scorer:assess-release` skill via the Skill tool. Per ADR-015 it wraps the same pipeline subagent and the `PostToolUse:Agent` hook writes an equivalent bypass marker. Do not silently skip the gate because the primary path is unavailable — the fallback exists specifically to close this gap (see P035).
 3. `git commit -m "<message>"` using the convention for the operation type:
    - New problem: `docs(problems): open P<NNN> <title>`
    - Known Error transition: `docs(problems): P<NNN> known error — <root cause summary>`
    - Problem closed: `docs(problems): close P<NNN> <title>`
    - Review/re-rank: `docs(problems): review — re-rank priorities`
    - Fix implemented: `fix(<scope>): <description> (closes P<NNN>)` — include problem file changes in the same commit
-4. If risk is above appetite: use `AskUserQuestion` to ask whether to commit anyway, remediate first, or park the work. If `AskUserQuestion` is unavailable, skip the commit and report the uncommitted state clearly.
+4. If risk is above appetite: use `AskUserQuestion` to ask whether to commit anyway, remediate first, or park the work. If `AskUserQuestion` is unavailable, skip the commit and report the uncommitted state clearly (ADR-013 Rule 6 fail-safe). This applies only to the risk-above-appetite branch, not to the delegation-unavailable case above.
 
 $ARGUMENTS
