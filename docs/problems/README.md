@@ -10,6 +10,7 @@
 > Updated 2026-04-18: P043 fix released (@windyroad/itil@0.4.3 + @windyroad/architect@0.3.2, commit 359ec7c). Manage-problem and create-adr now compute next ID as max(local, origin) + 1.
 > Added 2026-04-18 without full re-review: P044 (run-retro does not recommend new skills when it should). Run `/wr-itil:manage-problem review` to refresh rankings.
 > Updated 2026-04-19: P028 split on architect review — auto-install concern moved to P045 (deferred, blocked on Claude Code in-session plugin reload). Narrowed P028 (non-AFK auto-release) fix implemented under ADR-020 and awaiting release.
+> Updated 2026-04-19: P044 → Known Error after review; fix implemented (run-retro Step 2/4b/5 extended for skill candidates + bats test); awaiting release.
 
 ## WSJF Rankings
 
@@ -22,7 +23,7 @@
 | 4.5 | P016 | manage-problem should split multi-concern tickets | 9 Med | Known Error | M |
 | 4.5 | P017 | create-adr should split multi-decision records | 9 Med | Known Error | M |
 | 9.0 | P028 | Governance skills should auto-release (non-AFK) | 9 Med | Known Error | M |
-| 4.0 | P044 | run-retro does not recommend new skills when it should | 8 Med | Open | M |
+| 8.0 | P044 | run-retro does not recommend new skills when it should | 8 Med | Known Error | M |
 | 4.5 | P033 | No persistent risk register for ISO 31000 / ISO 27001 | 9 Med | Known Error | L |
 | 8.0 | P041 | work-problems does not enforce release cadence | 16 High | Known Error | L |
 | 6.0 | P040 | work-problems does not fetch origin before starting | 12 High | Known Error | L |
@@ -55,6 +56,7 @@
 | P040 | work-problems does not fetch origin before starting | @windyroad/itil@0.4.2 (commit 9c6019e) |
 | P043 | Next-ID collision guard in ticket-creator skills | @windyroad/itil@0.4.3 + @windyroad/architect@0.3.2 (commit 359ec7c) |
 | P028 | Governance skills should auto-release (non-AFK) | pending — ADR-020 |
+| P044 | run-retro does not recommend new skills when it should | pending — @windyroad/retrospective |
 
 ## Parked
 

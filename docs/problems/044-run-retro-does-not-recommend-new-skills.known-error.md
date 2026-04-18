@@ -1,10 +1,10 @@
 # Problem 044: run-retro does not recommend new skills when it should
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-18
 **Priority**: 8 (Med) — Impact: Minor (2) x Likelihood: Likely (4)
 **Effort**: M
-**WSJF**: 4.0 (8 × 1.0 / 2)
+**WSJF**: 8.0 (8 × 2.0 / 2)  — transitioned 2026-04-19 after root cause confirmed and fix strategy documented
 
 ## Description
 
@@ -100,29 +100,40 @@ of valid outputs is missing one category (skill recommendations).
 4. **Add a bats test** asserting the SKILL.md mentions the skill-
    recommendation branch.
 
-### Open questions for next session
+### Decisions resolved (2026-04-19)
 
-- Does Claude Code have a built-in skill-scaffolding mechanism the
-  retrospective skill should invoke, or do we need to build one?
-- Should the skill recommendation include suggested name, scope, and
-  triggers, or just flag the candidate?
-- Is there overlap with P012 (skill testing harness scope undefined)?
+- **Skill scaffolding**: deferred to a future scaffolding flow. The retrospective skill **records candidates only** — suggested name, scope, triggers, prior uses — so a future scaffolder (or the user) can pick them up. This keeps P044 additive and reversible; architect confirmed scaffolding would warrant its own ADR when it lands.
+- **Candidate record content**: the recommendation includes suggested skill name (kebab-case, plugin-namespaced), scope sentence, example triggers, and prior uses from the session. The extra content is near-zero cost to include and makes the candidate actionable later.
+- **P012 overlap**: no hard dependency. The fix notes that once skill scaffolding lands, it should produce harness-ready tests, but P044 does not block on P012.
+- **ADR requirement**: none. The change is additive to Step 2/4/5 content only (new reflection category, new output branch, new summary slot); it does not change commit sequencing, so ADR-014 is unaffected. `run-retro` remains out of ADR-014 scope until a future ADR brings it in.
+- **ADR-013 compliance**: Step 4b uses `AskUserQuestion` with three structured options and a non-interactive fallback (flagged — not actioned). Architect review flagged that prose `(a)/(b)/(c)` enumeration in the skill output would violate ADR-013; implementation uses AskUserQuestion option descriptions only.
 
 ### Investigation Tasks
 
 - [x] Confirm the gap (run-retro SKILL.md has no skill-recommendation
       branch — verified 2026-04-18)
-- [ ] Check whether other plugin marketplaces have a pattern for
-      "skill-from-friction" recommendations that we can adopt
-- [ ] Decide whether skill scaffolding is in scope for this fix, or
-      whether the recommendation just files a problem-ticket-style
-      "candidate skill" record for later
-- [ ] Architect review: does this fit ADR-014 / the lean release
-      principle? Does adding a new branch to run-retro require an ADR?
-- [ ] Implement the SKILL.md changes
-- [ ] Add bats test
-- [ ] Update P012 (skill testing harness) to note that any new
-      skill-scaffolding flow should produce harness-ready tests
+- [x] Check whether other plugin marketplaces have a pattern for
+      "skill-from-friction" recommendations — none found in-project;
+      the candidate-record approach mirrors the problem-ticket record
+      pattern which is the closest available precedent.
+- [x] Decide whether skill scaffolding is in scope — no; candidates
+      are recorded only, scaffolding is a future concern.
+- [x] Architect review — pass; no new ADR needed.
+- [x] Implement the SKILL.md changes.
+- [x] Add bats test (`packages/retrospective/skills/run-retro/test/run-retro-skill-candidates.bats` — 10 assertions).
+- [ ] Update P012 (skill testing harness) to note that any future
+      skill-scaffolding flow should produce harness-ready tests —
+      deferred to P012's own fix commit.
+
+## Fix Released
+
+Fix implemented on 2026-04-19:
+- `packages/retrospective/skills/run-retro/SKILL.md` — added skill-candidate reflection category to Step 2, added Step 4b (Recommend new skills) using `AskUserQuestion` per ADR-013 Rule 1, added Skill Candidates slot to Step 5 summary.
+- `packages/retrospective/skills/run-retro/test/run-retro-skill-candidates.bats` — 10-assertion doc-lint test covering Step 2 category, Step 4b branch, ADR-013 compliance (AskUserQuestion + absence of prose option prompts), Rule 6 fallback, and Step 5 summary slot.
+
+Released in: _pending release cadence check (this iteration)_.
+
+Awaiting user verification that `/wr-retrospective:run-retro` now recommends skills for recurring workflows observed in session.
 
 ## Related
 
