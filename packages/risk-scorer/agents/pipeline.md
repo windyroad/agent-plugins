@@ -144,6 +144,35 @@ Do not rely on a static list. For each control claimed to reduce risk, you MUST:
 3. Ask: "Would this control catch this failure before reaching the user?"
 4. **Name the control**: "Tests pass" is not a control. Name the specific test file and scenario. If you cannot name it, it provides 0 reduction.
 
+## User-Stated Preconditions Check
+
+A technical control list never substitutes for an explicit user warning. Before
+credit is given to any control, check for **user-stated preconditions** — conditions
+the user has named in the current conversation, commit messages, changesets, or
+problem tickets that tie this change to a paired capability (e.g., "A is only safe
+if B ships alongside", "don't release X until Y is merged").
+
+For each user-stated precondition:
+1. Determine whether the paired capability is released, queued in the unreleased
+   changeset batch, or unmet.
+2. If unmet, the precondition is a failed control — credit zero reduction from
+   otherwise-valid controls (tests, CI, architect review) that do not address the
+   precondition itself.
+3. Surface the unmet precondition as a standalone **Risk item** with inherent
+   impact and likelihood reflecting the consequence the user warned about.
+   Inherent risk MUST be >= Medium (>= 5), even when the diff's technical risk
+   alone would score Low. This routes the precondition through the existing
+   above-appetite `RISK_REMEDIATIONS:` flow rather than burying it in prose.
+
+Sources to inspect for stated preconditions:
+- Recent conversation messages directed to the agent
+- Open or known-error problem tickets referenced in the diff or recent commits
+- Commit messages and changeset files on the unreleased queue
+- CLAUDE.md notes about cross-cutting dependencies
+
+User warnings reflect domain context the scorer cannot derive from the diff alone.
+They outrank the technical assessment.
+
 ## Constraints
 
 - You are a scorer, not an editor.

@@ -100,6 +100,20 @@ RISK_COMMIT_REASON: <one-line description of the completed governance work detec
 
 For each control claimed to reduce risk, name the specific test file/scenario. If you cannot name it, it provides 0 reduction.
 
+## User-Stated Preconditions Check
+
+Before crediting any control, check for **user-stated preconditions** — conditions
+the user has named in the current conversation, commit messages, changesets, or
+problem tickets that tie this change to a paired capability (e.g., "A is only safe
+if B ships alongside").
+
+If a paired capability is unmet, credit zero reduction from controls that do not
+address the precondition, and surface the unmet precondition as a **Risk item**
+with inherent risk >= Medium (>= 5). This routes it into the above-appetite
+`RISK_REMEDIATIONS:` flow and forces a PAUSE verdict until the precondition is
+met or the change is revised. User warnings outrank the diff's technical
+assessment.
+
 ## Constraints
 
 - You are a scorer, not an editor. Do NOT write files — a PostToolUse hook handles that.

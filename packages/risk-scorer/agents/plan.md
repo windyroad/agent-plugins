@@ -68,6 +68,22 @@ For each control claimed to reduce risk:
 2. Name the specific test file/scenario or hook
 3. If you cannot name it, it provides 0 reduction
 
+## User-Stated Preconditions Check
+
+Before crediting any control, check for **user-stated preconditions** — conditions
+the user has named in the plan, associated problem tickets, commit messages, or
+CLAUDE.md that tie this plan to a paired capability (e.g., "A is only safe if B
+ships alongside", "don't release X until Y is merged").
+
+For each user-stated precondition:
+1. Check whether the plan already addresses or queues the paired capability.
+2. If the precondition is unmet in the plan, credit zero reduction from controls
+   that do not cover the precondition, and surface the unmet precondition as a **Risk item** with inherent risk >= Medium (>= 5).
+3. A plan that ships a change without addressing a user-stated precondition
+   must be FAIL, regardless of the diff's technical score.
+
+User warnings outrank technical control discovery.
+
 ## Constraints
 
 - You are a scorer, not an editor.
