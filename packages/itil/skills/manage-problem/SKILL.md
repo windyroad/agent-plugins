@@ -130,11 +130,23 @@ Before creating, search existing problems for similar issues. The user may not k
 
 ### 3. For new problems: Assign the next ID
 
-Scan `docs/problems/` for existing files. Extract the highest numeric ID and increment by 1. Zero-pad to 3 digits.
+Compute the next ID as the **max of the local and origin highest IDs**, plus one, zero-padded to 3 digits. Comparing against `origin/<base>` is required by ADR-019 (confirmation criterion 2): without it, parallel sessions can mint the same ID for different problems and force a destructive surgical rebase on push (P040 incident).
 
 ```bash
-ls docs/problems/*.md 2>/dev/null | sed 's/.*\///' | grep -oE '^[0-9]+' | sort -n | tail -1
+# Local-max ID
+local_max=$(ls docs/problems/*.md 2>/dev/null | sed 's/.*\///' | grep -oE '^[0-9]+' | sort -n | tail -1)
+
+# Origin-max ID — `git ls-tree origin/<base>` reads remote-tracking ref
+# without requiring a fetch in this step (Step 0 preflight is the place
+# where the fetch happens). Default base is `main`; if the user is on
+# another branch, swap accordingly.
+origin_max=$(git ls-tree origin/main docs/problems/ 2>/dev/null | grep -oE '[0-9]{3}' | sort -n | tail -1)
+
+# Take the max of the two and increment.
+next=$(printf '%03d' $(( $(echo -e "${local_max:-0}\n${origin_max:-0}" | sort -n | tail -1) + 1 )))
 ```
+
+If the local choice would have collided with an origin ticket created since the last fetch, the `git ls-tree origin/<base>` lookup catches it here and the renumber is automatic. Log the renumber decision in the operation report (e.g. "Bumped next ID from 042 → 043 to avoid collision with origin").
 
 ### 4. For new problems: Gather information
 

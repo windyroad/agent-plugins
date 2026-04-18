@@ -56,9 +56,26 @@ Before writing the ADR file, perform a decision-boundary analysis on the gathere
 
 ### 3. Determine sequence number and filename
 
-- Next number = highest existing decision number + 1 (or 001 if none exist)
+- Next number = **max of the local and origin highest decision numbers**, plus 1 (or 001 if none exist).
 - Filename: `NNN-decision-title-in-kebab-case.proposed.md`
 - Pad the number to 3 digits (001, 002, ... 010, 011, etc.)
+
+**Why compare against origin?** Per ADR-019 confirmation criterion 2, ticket-creator skills MUST re-check next-number assignment against `git ls-tree origin/<base>` before assigning. Without it, parallel sessions can mint the same ADR number for different decisions, causing a destructive surgical rebase on push (this was the failure mode that motivated ADR-019 itself).
+
+```bash
+# Local-max number
+local_max=$(ls docs/decisions/*.md 2>/dev/null | sed 's/.*\///' | grep -oE '^[0-9]+' | sort -n | tail -1)
+
+# Origin-max number — reads remote-tracking ref; no fetch needed here
+# because `wr-architect:agent` upstream callers (e.g. work-problems) run
+# the Step 0 preflight that does the fetch.
+origin_max=$(git ls-tree origin/main docs/decisions/ 2>/dev/null | grep -oE '[0-9]{3}' | sort -n | tail -1)
+
+# Take the max of the two and increment.
+next=$(printf '%03d' $(( $(echo -e "${local_max:-0}\n${origin_max:-0}" | sort -n | tail -1) + 1 )))
+```
+
+If the local choice would have collided with an origin ADR created since the last fetch, the `git ls-tree origin/<base>` lookup catches it here and the renumber is automatic. Log the renumber in the user-facing report (e.g. "Bumped next ADR number from 020 → 021 to avoid collision with origin").
 
 ### 4. Write the ADR
 
