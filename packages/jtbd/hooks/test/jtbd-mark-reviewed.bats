@@ -70,28 +70,24 @@ run_hook() {
   [ "$HASH_README_ONLY" = "$HASH_README_CHANGED" ]
 }
 
-# --- Path support: docs/JOBS_TO_BE_DONE.md fallback (legacy) ---
+# --- Path support: docs/jtbd/ is the sole canonical layout (ADR-008 Option 3, P019) ---
 
-@test "uses docs/JOBS_TO_BE_DONE.md when docs/jtbd does not exist" {
+@test "does NOT store a review hash when only legacy docs/JOBS_TO_BE_DONE.md exists (P019)" {
+  # Legacy single-file layout — the mark-reviewed hook must exit early
+  # without storing a hash, because the enforce hook cannot gate the
+  # project until it runs /wr-jtbd:update-guide to migrate to docs/jtbd/.
   mkdir -p docs
   echo "# Jobs" > docs/JOBS_TO_BE_DONE.md
   echo "PASS" > "$VERDICT_FILE"
 
   run_hook "wr-jtbd:agent"
 
-  [ -f "$MARKER" ]
-  [ -f "$HASH_FILE" ]
-  [ "$(cat "$HASH_FILE")" != "missing" ]
-
-  # Hash should match the file's content hash. _hashcmd in
-  # gate-helpers.sh prefers md5sum, falls back to md5 -r, then shasum.
-  EXPECTED=$(cat docs/JOBS_TO_BE_DONE.md \
-             | (md5sum 2>/dev/null || md5 -r 2>/dev/null || shasum 2>/dev/null) \
-             | cut -d' ' -f1)
-  [ "$(cat "$HASH_FILE")" = "$EXPECTED" ]
+  # No marker, no hash file — the gate is inactive on legacy-layout projects.
+  [ ! -f "$MARKER" ]
+  [ ! -f "$HASH_FILE" ]
 }
 
-@test "prefers docs/jtbd over docs/JOBS_TO_BE_DONE.md when both exist" {
+@test "hashes docs/jtbd/ when both layouts coexist (legacy single-file is ignored, P019)" {
   mkdir -p docs/jtbd
   echo "# job" > docs/jtbd/job.md
   echo "# legacy jobs" > docs/JOBS_TO_BE_DONE.md
@@ -99,7 +95,8 @@ run_hook() {
 
   run_hook "wr-jtbd:agent"
 
-  # The directory-derived hash must NOT equal the standalone-file hash.
+  # The directory-derived hash must NOT equal the standalone-file hash —
+  # proves the hook did not consult the legacy file.
   DIR_HASH="$(cat "$HASH_FILE")"
   FILE_HASH=$(cat docs/JOBS_TO_BE_DONE.md \
               | (md5sum 2>/dev/null || md5 -r 2>/dev/null || shasum 2>/dev/null) \

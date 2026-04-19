@@ -1,9 +1,8 @@
 ---
 name: agent
 description: Jobs To Be Done reviewer. Use before editing any project file.
-  Reads docs/jtbd/ (or docs/JOBS_TO_BE_DONE.md) and reviews proposed changes
-  against documented jobs, persona constraints, and screen mappings. Reports alignment
-  or gaps.
+  Reads docs/jtbd/ and reviews proposed changes against documented jobs,
+  persona constraints, and screen mappings. Reports alignment or gaps.
 tools:
   - Read
   - Glob

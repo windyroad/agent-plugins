@@ -117,10 +117,16 @@ assert_path_blocked() {
   [[ "$output" != *"BLOCKED"* ]]
 }
 
-@test "functional: exempts docs/JOBS_TO_BE_DONE.md (backward compat)" {
+@test "functional: docs/JOBS_TO_BE_DONE.md is NOT an exempt governance artefact (ADR-008 Option 3, P019)" {
+  # Legacy single-file path is no longer a recognised governance artefact.
+  # When docs/jtbd/ exists the gate should fire against edits to the
+  # legacy file (it is not exempt). When docs/jtbd/ does not exist the
+  # gate blocks with an update-guide suggestion (covered separately).
+  mkdir -p docs/jtbd
+  echo "# Index" > docs/jtbd/README.md
   run run_hook_with_file "docs/JOBS_TO_BE_DONE.md"
   [ "$status" -eq 0 ]
-  [[ "$output" != *"BLOCKED"* ]]
+  [[ "$output" == *"BLOCKED"* ]]
 }
 
 @test "functional: blocks src/index.ts when no JTBD docs exist" {

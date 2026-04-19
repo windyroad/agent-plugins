@@ -1,7 +1,8 @@
 #!/bin/bash
 # JTBD - PostToolUse hook for Agent tool
 # Creates session markers when jtbd-lead has been consulted with PASS verdict.
-# Supports both docs/jtbd/ directory (preferred) and docs/JOBS_TO_BE_DONE.md (legacy).
+# Canonical layout is docs/jtbd/ only (ADR-008, Option 3 chosen 2026-04-20).
+# Legacy docs/JOBS_TO_BE_DONE.md is NOT consulted at runtime.
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/lib/review-gate.sh"
@@ -15,11 +16,13 @@ if [ -z "$SESSION_ID" ]; then
   exit 0
 fi
 
-# Determine JTBD path — prefer directory, fall back to single file
-JTBD_PATH="docs/JOBS_TO_BE_DONE.md"
-if [ -d "docs/jtbd" ]; then
-  JTBD_PATH="docs/jtbd"
+# Canonical JTBD path — directory only (ADR-008 Option 3). If the
+# directory doesn't exist the marker is not stored; the gate will
+# surface a "run update-guide" recommendation on the next edit.
+if [ ! -d "docs/jtbd" ]; then
+  exit 0
 fi
+JTBD_PATH="docs/jtbd"
 
 case "$SUBAGENT" in
   *jtbd-lead*|*wr-jtbd*)

@@ -10,7 +10,7 @@ superseded-by: [008-jtbd-directory-structure]
 
 # JTBD Project-Wide Enforcement
 
-> **Superseded by [ADR-008](008-jtbd-directory-structure.proposed.md)**. The project-wide enforcement scope from this decision is preserved in ADR-008. The change is to the JTBD document structure (single file to directory).
+> **Superseded by [ADR-008](008-jtbd-directory-structure.proposed.md)**. The project-wide enforcement scope from this decision is preserved in ADR-008. The change is to the JTBD document structure AND the document artefact itself: ADR-008 (Option 3 chosen 2026-04-20 per P019) makes `docs/jtbd/` the sole canonical layout. The legacy single-file `docs/JOBS_TO_BE_DONE.md` artefact name referenced throughout this ADR is no longer recognised at runtime by any hook, agent, or skill — with the single carve-out that `wr-jtbd:update-guide` may read it for one-shot migration. Format change, not just structure change.
 
 ## Context and Problem Statement
 

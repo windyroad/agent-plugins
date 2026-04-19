@@ -1,6 +1,6 @@
 # Problem 019: Deprecate single-file `docs/JOBS_TO_BE_DONE.md` fallback
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-16
 **Priority**: 6 (Medium) — Impact: Moderate (3) x Likelihood: Possible (2)
 **Effort**: L — 3 ADR edits, 1 hook, 4 BATS files, 1 SKILL.md, 1 file delete (re-sized after architect review 2026-04-16; was S)
@@ -65,9 +65,13 @@ ADR-008 was drafted when a legacy single-file `JOBS_TO_BE_DONE.md` existed in bb
 - [ ] Add a release note / changelog entry calling out the breaking change for any external adopter still on the single-file layout.
 - [ ] Re-run architect review after the above scope changes are in the ticket; proceed to implementation only after APPROVED.
 
+## Fix Released
+
+Fixed in AFK iter 3 of 2026-04-20 session (@windyroad/jtbd minor bump + @windyroad/architect patch, pending release). ADR-008 amended with Option 3 "Directory-only, no fallback" as the chosen option (Option 1 retained with dated rejection to preserve the rationale chain). All listed implementation surfaces updated in one commit: jtbd-eval / jtbd-enforce-edit / jtbd-mark-reviewed hooks strip fallback; architect-enforce-edit / architect-detect hooks drop legacy-file exemption; 4 bats tests inverted to assert single-path behaviour (all 38 affected tests green); update-guide SKILL.md documents the migration carve-out with a do-not-strip directive; wr-jtbd agent description references only docs/jtbd/; ADR-007 supersession note extended; ADR-005 line 138 rephrased; P018 carve-outs dropped; this repo's own 5-line stub deleted. A changeset captures the breaking change for external adopters. Awaiting user verification that (1) a project still on the legacy layout sees the gate block with an update-guide recommendation instead of silently enforcing against the single file, and (2) `/wr-jtbd:update-guide` still successfully reads `docs/JOBS_TO_BE_DONE.md` as the migration source.
+
 ## Related
 
-- ADR-008 (proposed): `docs/decisions/008-jtbd-directory-structure.proposed.md` — target for the amendment
+- ADR-008 (proposed): `docs/decisions/008-jtbd-directory-structure.proposed.md` — amended
 - Related problem: `docs/problems/018-tdd-enforce-bdd-example-mapping-principles.open.md` — simplified significantly once this lands
 - `wr-jtbd:update-guide` skill — canonical migration path
 - Memory note: `project_jtbd_migration.md` — records that bbstats is the reference implementation of the directory-based layout

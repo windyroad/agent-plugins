@@ -41,8 +41,14 @@ assert_path_allowed() {
   [[ "$output" != *"BLOCKED"* ]]
 }
 
-@test "architect: exempts JTBD policy file (P009)" {
-  assert_path_allowed "$PWD/docs/JOBS_TO_BE_DONE.md"
+@test "architect: does NOT exempt legacy docs/JOBS_TO_BE_DONE.md (ADR-008 Option 3, P019)" {
+  # Legacy single-file path is no longer a recognised peer-plugin policy
+  # artefact — ADR-008 Option 3 removes it from runtime consideration.
+  # The architect gate treats it as ordinary content and applies its
+  # normal review rules.
+  run run_hook_with_file "$PWD/docs/JOBS_TO_BE_DONE.md"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"BLOCKED"* ]]
 }
 
 @test "architect: exempts JTBD directory file (P009)" {

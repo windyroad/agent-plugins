@@ -65,8 +65,6 @@ case "$FILE_PATH" in
   */docs/problems/*.md|docs/problems/*.md)
     exit 0 ;;
   # Peer-plugin policy files — governed by their own plugin's enforce hook, not architect (P009)
-  */docs/JOBS_TO_BE_DONE.md|docs/JOBS_TO_BE_DONE.md)
-    exit 0 ;;
   */docs/PRODUCT_DISCOVERY.md|docs/PRODUCT_DISCOVERY.md)
     exit 0 ;;
   */docs/jtbd/*|docs/jtbd/*)

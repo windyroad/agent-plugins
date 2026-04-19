@@ -135,7 +135,7 @@ P004 project-root check resolves correctly).
 
 - Catches pattern matching bugs (grep dashes vs colons) before release
 - Catches missing files (gate-helpers.sh) via import errors in test
-- Catches hash path mismatches (JTBD docs/jtbd vs docs/JOBS_TO_BE_DONE.md)
+- Catches hash path mismatches (JTBD canonical path `docs/jtbd/` per ADR-008 Option 3; legacy `docs/JOBS_TO_BE_DONE.md` is no longer consulted at runtime)
 - Tests run in CI; bugs blocked before merge
 - bats-core is lightweight, no compile step, pure bash
 

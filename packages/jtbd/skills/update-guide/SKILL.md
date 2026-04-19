@@ -50,6 +50,14 @@ Check in order of preference:
 If migrating from `docs/JOBS_TO_BE_DONE.md`, extract existing personas and jobs and
 convert them into the directory structure. Ask the user before proceeding.
 
+**Migration carve-out (ADR-008 Option 3 chosen 2026-04-20, P019)**: this skill is the
+**sole component** in the plugin suite permitted to read `docs/JOBS_TO_BE_DONE.md`.
+Every other component (eval hook, enforce hook, mark-reviewed hook, wr-jtbd:agent,
+CI validation) reads only `docs/jtbd/`. Do NOT strip this read path from this skill
+during future cleanup — it is the one-shot migration bridge for legacy projects. The
+Reassessment Criteria in ADR-008 list the sunset trigger (no legacy-layout projects
+remaining).
+
 ### 3. Draft personas
 
 For each persona (2-4), create a file at `docs/jtbd/<persona-name>/persona.md`:
@@ -155,7 +163,10 @@ Write `docs/jtbd/README.md` with tables grouping jobs by persona and status:
 
 ### 8. Handle legacy file
 
-If `docs/JOBS_TO_BE_DONE.md` exists, replace its content with a pointer:
+If `docs/JOBS_TO_BE_DONE.md` exists, after successfully migrating its content
+into the directory layout, recommend deleting it (git history is the archive,
+per ADR-008 Option 3 Consequences). If the user prefers to keep a stub for
+external links, offer to replace its content with a pointer:
 
 ```markdown
 # Jobs To Be Done
@@ -163,7 +174,14 @@ If `docs/JOBS_TO_BE_DONE.md` exists, replace its content with a pointer:
 Job definitions have been migrated to individual files in `docs/jtbd/`.
 Each persona has its own directory with a persona definition and individual
 job files. See `docs/jtbd/README.md` for the full index.
+
+This file is no longer consulted by the `@windyroad/jtbd` plugin at runtime
+(ADR-008 Option 3). It is retained only for external links.
 ```
+
+Default recommendation: delete the file once migration is confirmed. The
+repository's own `docs/JOBS_TO_BE_DONE.md` stub was deleted in the same
+commit that accepted ADR-008 Option 3 (P019).
 
 ### 9. Summary
 

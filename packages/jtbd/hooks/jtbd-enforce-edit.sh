@@ -1,7 +1,10 @@
 #!/bin/bash
 # JTBD - PreToolUse enforcement hook
 # BLOCKS Edit/Write to project files until jtbd-lead is consulted.
-# Supports both docs/jtbd/ directory (preferred) and docs/JOBS_TO_BE_DONE.md (legacy).
+# Canonical layout is docs/jtbd/ only (ADR-008, Option 3 chosen 2026-04-20).
+# Projects still on legacy single-file docs/JOBS_TO_BE_DONE.md must run
+# /wr-jtbd:update-guide to migrate — the gate is inactive until the
+# directory layout exists.
 # Uses shared review-gate.sh for TTL, drift detection, and fail-closed.
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -77,18 +80,16 @@ case "$FILE_PATH" in
     exit 0 ;;
   */docs/jtbd/*|docs/jtbd/*)
     exit 0 ;;
-  */docs/JOBS_TO_BE_DONE.md|docs/JOBS_TO_BE_DONE.md)
-    exit 0 ;;
   */docs/PRODUCT_DISCOVERY.md|docs/PRODUCT_DISCOVERY.md)
     exit 0 ;;
 esac
 
-# Determine JTBD path — prefer directory, fall back to single file
+# Determine JTBD path — canonical directory layout only (ADR-008 Option 3).
+# Legacy docs/JOBS_TO_BE_DONE.md is NOT consulted at runtime; the gate is
+# inactive on projects that have not run /wr-jtbd:update-guide.
 JTBD_PATH=""
 if [ -d "docs/jtbd" ]; then
   JTBD_PATH="docs/jtbd"
-elif [ -f "docs/JOBS_TO_BE_DONE.md" ]; then
-  JTBD_PATH="docs/JOBS_TO_BE_DONE.md"
 fi
 
 # If no JTBD docs exist, block and direct to create skill
