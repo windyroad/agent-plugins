@@ -161,8 +161,9 @@ Apply any feedback by editing the file.
 
 If the user mentions this decision replaces an existing one:
 1. Add `supersedes: [NNN-old-decision-title]` to the new decision's frontmatter
-2. Rename the old decision file from `.accepted.md` (or `.proposed.md`) to `.superseded.md`
+2. Rename the old decision file from `.accepted.md` (or `.proposed.md`) to `.superseded.md` using `git mv`
 3. Update the old decision's frontmatter status to `superseded`
 4. Add a "Superseded by" section to the old decision referencing the new one
+5. **Re-stage the renamed file explicitly after the `Edit` tool runs**: `git add docs/decisions/<NNN>-<title>.superseded.md`. `git mv` stages only the rename — the subsequent frontmatter and "Superseded by" edits must be added again before commit, or they leak into the next commit (P057 staging trap).
 
 $ARGUMENTS

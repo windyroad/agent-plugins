@@ -271,8 +271,12 @@ Pre-flight checks before allowing transition:
 
 If any check fails, report which checks failed and ask the user to address them before transitioning.
 
+> **Staging trap (P057).** `git mv` stages only the rename — it does NOT pick up subsequent `Edit`-tool content changes. After the `Edit` tool modifies the renamed file (Status field, `## Fix Released` section, etc.), re-stage it explicitly: `git add <new>`. Without the explicit re-stage, the transition commit captures the rename-only change and the content edit leaks into the next commit, corrupting the audit trail. This rule applies to every `git mv` block below (Open → Known Error, Known Error → Verification Pending, Verification Pending → Closed) and to the supersession rename in `create-adr` Step 6.
+
 ```bash
 git mv docs/problems/<NNN>-<title>.open.md docs/problems/<NNN>-<title>.known-error.md
+# ... use the Edit tool to update the Status field ...
+git add docs/problems/<NNN>-<title>.known-error.md
 ```
 
 Update the "Status" field in the file to "Known Error".
@@ -283,11 +287,15 @@ When the fix for a Known Error ships, transition the ticket in a single commit:
 
 ```bash
 git mv docs/problems/<NNN>-<title>.known-error.md docs/problems/<NNN>-<title>.verifying.md
+# ... use the Edit tool to update Status and add the `## Fix Released` section ...
+git add docs/problems/<NNN>-<title>.verifying.md
 ```
 
 Then edit the file:
 - Update the "Status" field to "Verification Pending"
 - Add a `## Fix Released` section with: release marker (version, commit SHA, or date), one-sentence fix summary, "Awaiting user verification" line, and any exercise evidence from the releasing session.
+
+Re-stage the `.verifying.md` file explicitly after the `Edit` tool runs (P057). The second `git add` above is NOT redundant — `git mv` alone stages only the rename, not the subsequent content edit.
 
 Both the `git mv` and the file edits belong in the same commit as the fix implementation per ADR-014 (governance skills commit their own work). The `.verifying.md` suffix signals to every downstream consumer (work-problems classifier, review step 9d, README rendering) that the remaining work is user-side verification — no file-body scan needed.
 
@@ -297,9 +305,11 @@ Only the user can make this call. When they explicitly confirm the fix works in 
 
 ```bash
 git mv docs/problems/<NNN>-<title>.verifying.md docs/problems/<NNN>-<title>.closed.md
+# ... use the Edit tool to update the Status field to "Closed" ...
+git add docs/problems/<NNN>-<title>.closed.md
 ```
 
-Update the "Status" field to "Closed". Reference the problem ID in the closure commit message (e.g., "Closes P008"). Step 9d's verification prompt is the structured path that fires this transition during `manage-problem review`.
+Update the "Status" field to "Closed". Reference the problem ID in the closure commit message (e.g., "Closes P008"). Step 9d's verification prompt is the structured path that fires this transition during `manage-problem review`. Re-stage the `.closed.md` file explicitly after the Edit (P057 staging trap).
 
 ### 8. For list: Show summary
 
@@ -462,7 +472,7 @@ After any operation, report:
 - Any quality check warnings
 
 Commit the completed work per ADR-014 (governance skills commit their own work):
-1. `git add` all created/modified files for this operation
+1. `git add` all created/modified files for this operation — **including any file renamed via `git mv` that was then modified by the `Edit` tool** (P057 staging trap — `git mv` alone stages only the rename, not the subsequent content edit). `git add -u` is a safe catch-all for tracked modifications.
 2. Satisfy the commit gate — two paths are valid (either produces a bypass marker):
    - **Primary**: delegate to the `wr-risk-scorer:pipeline` subagent-type via the Agent tool (subagent_type: `wr-risk-scorer:pipeline`)
    - **Fallback**: if the `wr-risk-scorer:pipeline` subagent-type is not available in the current tool set (e.g., this skill is itself running inside a spawned subagent), invoke the `/wr-risk-scorer:assess-release` skill via the Skill tool. Per ADR-015 it wraps the same pipeline subagent and the `PostToolUse:Agent` hook writes an equivalent bypass marker. Do not silently skip the gate because the primary path is unavailable — the fallback exists specifically to close this gap (see P035).

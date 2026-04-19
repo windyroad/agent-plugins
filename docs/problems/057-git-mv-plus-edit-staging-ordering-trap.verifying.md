@@ -1,6 +1,6 @@
 # Problem 057: `git mv` + Edit + `git add` staging-ordering trap drops content edits from the commit
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-20
 **Priority**: 6 (Medium) — Impact: Minor (2) x Likelihood: Possible (3)
 **Effort**: S — clarifying note in one SKILL.md step + light bats coverage
@@ -69,10 +69,14 @@ Longer-term: `manage-problem`'s Step 11 commit convention could include a remind
 ### Investigation Tasks
 
 - [x] Reproduce: observed 2026-04-19 iter 1 (P054 verifying.md rename without content edit landed in 45e9c71).
-- [ ] Amend `manage-problem` SKILL.md Step 7: one-line re-stage reminder per transition arrow.
-- [ ] Amend `create-adr` SKILL.md Step 6: same reminder for supersession renames.
-- [ ] Add bats doc-lint assertion: `git mv` lines in both SKILL.md files are followed by explicit `git add` guidance.
-- [ ] Consider whether Step 11 commit convention should add an explicit `git add -u` recommendation as a safety net. Follow-up, not blocking.
+- [x] Amend `manage-problem` SKILL.md Step 7: re-stage reminder block at the top of the transition section plus explicit `git add` lines in all three transition code blocks (Open → Known Error, Known Error → Verification Pending, Verification Pending → Closed).
+- [x] Amend `create-adr` SKILL.md Step 6: re-stage reminder on the supersession rename.
+- [x] Add bats doc-lint assertion: `manage-problem-git-mv-restage-reminder.bats` and `create-adr-rename-restage-reminder.bats` assert the SKILL.md files document the re-stage contract and cite P057.
+- [x] Step 11 commit convention extended with `git add -u` safety-net recommendation.
+
+## Fix Released
+
+Fixed in AFK iter 1 of 2026-04-20 session (@windyroad/itil@0.7.2 + @windyroad/architect@0.4.1, pending release). The manage-problem and create-adr SKILL.md files now (1) warn at the top of the transition section that `git mv` stages only the rename, (2) include an explicit `git add <new>` line in every rename code block, and (3) cite P057 as the incident that motivated the guidance. Two new bats files guard the contract. Step 11 of manage-problem recommends `git add -u` as a safety-net. The fix was exercised in this same commit — the rename of P057 to `.verifying.md` uses the newly-documented re-stage pattern. Awaiting user verification that the next governance transition commit (Open → Verifying, Known Error → Verifying, supersession) in a future session captures both the rename AND the content edit in one commit.
 
 ## Related
 
