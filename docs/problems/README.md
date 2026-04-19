@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-04-19 (P047 shipped: XL effort bucket + effort re-rate pre-flight in `manage-problem`; 5 L-bucket tickets re-rated L → XL in the same pass).
+> Last reviewed: 2026-04-19 (AFK iter 2 — P050 shipped: run-retro generalised from skill-only to 12 codification shapes; iter 1 shipped P047: XL effort bucket + effort re-rate pre-flight).
 > Run `/wr-itil:manage-problem review` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -12,6 +12,7 @@
 | 9.0 | P028 | Governance skills should auto-release (non-AFK) | 9 Med | Known Error | M |
 | 8.0 | P020 | No on-demand assessment skills | 16 High | Known Error | L |
 | 8.0 | P044 | run-retro does not recommend new skills when it should | 8 Med | Known Error | M |
+| 8.0 | P050 | run-retro does not recommend new agents, hooks, or other codifiable outputs (generalises P044) | 8 Med | Known Error | M |
 | 6.0 | P047 | WSJF effort buckets coarse and not re-rated at lifecycle transitions | 6 Med | Known Error | M |
 | 4.5 | P016 | manage-problem should split multi-concern tickets | 9 Med | Known Error | M |
 | 4.5 | P017 | create-adr should split multi-decision records | 9 Med | Known Error | M |
@@ -19,7 +20,6 @@
 | 4.0 | P024 | Risk-scorer WIP flag uncommitted completed work | 8 Med | Known Error | L |
 | 4.0 | P048 | manage-problem does not surface Fix Released tickets as verification candidates | 8 Med | Open | M |
 | 4.0 | P049 | Known Error status overloaded — "fix released, awaiting verification" deserves its own status | 8 Med | Open | M |
-| 4.0 | P050 | run-retro does not recommend new agents, hooks, or other codifiable outputs (generalises P044) | 8 Med | Open | M |
 | 4.0 | P051 | run-retro does not recommend improvements to existing skills, agents, hooks, or other codifiables | 8 Med | Open | M |
 | 2.25 | P015 | TDD vague Gherkin outcome steps | 9 Med | Open | L |
 | 2.0 | P018 | TDD enforce BDD + Example Mapping principles | 16 High | Open | XL ↑ |
@@ -47,7 +47,8 @@ Legend: ↑ = effort bucket re-rated upward in this review (P047 closure, 2026-0
 | P028 | Governance skills should auto-release (non-AFK) | @windyroad/itil@0.4.4 (commit 6510b29) — AFK loop skips this path per ADR-020; user verification needed in a non-AFK skill invocation after plugin re-install |
 | P044 | run-retro does not recommend new skills when it should | @windyroad/retrospective@0.1.6 (commit 6510b29) — local plugin cache still at 0.1.5 until re-install, so this session couldn't exercise the fix; user verification needed after plugin re-install |
 | P035 | manage-problem commit-gate no subagent delegation fallback | pending user verification — fallback path never fired this session (primary `wr-risk-scorer:pipeline` subagent was always available) |
-| P047 | WSJF effort buckets coarse and not re-rated at lifecycle transitions | 2026-04-19 (AFK iteration commit pending) — next `manage-problem review` or `work-problems` iteration exercises the new XL bucket and the step 7 / step 9b re-rate language; user verification needed at that point |
+| P047 | WSJF effort buckets coarse and not re-rated at lifecycle transitions | 2026-04-19 (AFK iter 1 commit 5c677cc) — next `manage-problem review` or `work-problems` iteration exercises the new XL bucket and the step 7 / step 9b re-rate language; user verification needed at that point |
+| P050 | run-retro generalises codification branch from skill-only to 12 shapes | 2026-04-19 (AFK iter 2 commit pending) — next `/wr-retrospective:run-retro` invocation should present the generalised Step 2 prompt and the flat shape-prefixed Step 4b `AskUserQuestion`; user verification needed at that point. P051 (improvement axis) deferred to follow-on iteration. |
 
 ## Closed
 

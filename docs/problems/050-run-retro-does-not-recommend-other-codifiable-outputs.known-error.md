@@ -1,10 +1,10 @@
 # Problem 050: run-retro does not recommend new agents, hooks, or other codifiable outputs (generalises P044)
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-19
 **Priority**: 8 (Medium) — Impact: Minor (2) x Likelihood: Likely (4)
-**Effort**: M
-**WSJF**: 4.0 — (8 × 1.0) / 2
+**Effort**: M — supersede P044's Step 2 / Step 4b / Step 5 blocks in run-retro SKILL.md; add parallel bats file; update the existing P044 bats file for compat (estimate confirmed accurate for the scope shipped)
+**WSJF**: 8.0 — (8 × 2.0) / 2 → now known-error; transitioned 2026-04-19 after root cause confirmed, fix implemented, and bats guards added
 
 ## Description
 
@@ -119,3 +119,48 @@ Candidates 1 + 2 + 3 are complementary. Candidate 4 is the test discipline.
 - Codification-skill routing targets: `/wr-architect:create-adr`, `/wr-jtbd:update-guide`, `/wr-voice-tone:update-guide`, `/wr-style-guide:update-guide`, `/wr-risk-scorer:update-policy`, `/wr-itil:manage-problem`.
 - ADR-013: `docs/decisions/013-structured-user-interaction-for-governance-decisions.proposed.md` — Rule 1 (AskUserQuestion) + Rule 6 (non-interactive fallback) apply to the generalised Step 4b.
 - ADR-014: `docs/decisions/014-governance-skills-commit-their-own-work.proposed.md` — retrospective skill remains out of scope; any retro-driven changes are committed by the user or by the invoked dedicated skill.
+
+## Fix Released
+
+Shipped in commit pending (this iteration's `fix(retrospective): run-retro generalises codification branch (closes P050)` commit). Changes to `packages/retrospective/skills/run-retro/SKILL.md`:
+
+1. **Step 2 generalised** from "what recurring workflow would be better as a skill?" to "what recurring pattern would be better codified?" with a **shape sub-list** naming 12 shapes (skill, agent, hook, settings entry, shell/Node script, CI step, ADR, JTBD, guide, problem ticket, test fixture, memory) and per-shape best-fit guidance. "Skill" is retained as one worked example within the shape list so P044 muscle memory survives (architect advisory).
+2. **Step 4b superseded** from "Recommend new skills" to "Recommend new codifications". The single `AskUserQuestion` uses a flat list of 13 shape-prefixed options (`Skill — create stub`, `Agent — create stub`, ..., `ADR — invoke create-adr`, ..., `Skip — not codify-worthy`) satisfying ADR-013 Rule 1 as one structured interaction. Dedicated codification skills are routed to rather than duplicated (`/wr-architect:create-adr`, `/wr-jtbd:update-guide`, `/wr-voice-tone:update-guide`, `/wr-style-guide:update-guide`, `/wr-risk-scorer:update-policy`, `/wr-itil:manage-problem`). Fallback to a two-question flow is documented for Claude Code versions where option-count limits bite.
+3. **Step 4b non-interactive fallback (ADR-013 Rule 6)** generalised: records each candidate as `flagged — not actioned (non-interactive)` with the identified Shape in the Step 5 summary. No scaffolding or routing fires without user confirmation. Matches P044's existing fallback shape.
+4. **Step 5 summary** uses a unified "Codification Candidates" table with `Shape | Suggested name | Scope | Triggers | Decision` columns. The per-shape rows make batchable edits visible and let the session audit trail distinguish routed-to-dedicated-skill vs stub-recorded vs skipped vs flagged. Empty-table-omit rule retained.
+5. **Backward compatibility**: legacy `run-retro-skill-candidates.bats` assertions updated in place to accept either P044 phrasing or P050 phrasing — both the "Skill candidate" header and the "Codification candidate" header satisfy the ADR-013 Rule 1 structure; both the "### Skill Candidates" slot and the "### Codification Candidates" table satisfy the audit-trail requirement. "Skill" remains a worked example in Step 2's shape list so Step-2 compatibility survives.
+6. **New parallel bats test** `run-retro-codification-candidates.bats` — 9 assertions covering: generalised Step 2 category, ≥3 shapes beyond skills, multi-shape Step 4b options, flat shape-prefixed AskUserQuestion, ADR routing to `wr-architect:create-adr`, JTBD routing to `wr-jtbd:update-guide`, non-interactive Rule 6 fallback, Codification Candidates table with Shape column, skill-as-worked-example backward compat. All GREEN.
+7. **Combined test coverage** — `run-retro-skill-candidates.bats` (9 assertions, 4 updated, all GREEN) + `run-retro-codification-candidates.bats` (9 assertions, all GREEN) = 18 assertions guarding the generalised run-retro contract with both P044 and P050 regression coverage.
+
+Awaiting user verification: next `wr-retrospective:run-retro` invocation should:
+- Reflect the generalised Step 2 prompt (shape-aware, not skill-only).
+- Present the flat shape-prefixed `AskUserQuestion` for Step 4b when any codification candidate surfaces.
+- Route ADR / JTBD / guide candidates to the dedicated skills rather than re-implementing intake.
+- Emit a "Codification Candidates" table in Step 5 (when non-empty).
+
+## Follow-on
+
+- **P051** (improvement-axis sibling): deferred to a later iteration per architect review (P050 alone delivers a coherent shipped increment). When P051 lands, it will add improvement-shaped options (e.g. `Skill improvement — stub edit`, `ADR — supersede / amend`) to the same Step 4b AskUserQuestion, and an "Improvement Candidates" sub-section (or a `Kind: improve` column) to the Step 5 summary table. The shape taxonomy established here is the base for P051's extension.
+
+## Related
+
+- `packages/retrospective/skills/run-retro/SKILL.md` — primary fix target.
+- `packages/retrospective/skills/run-retro/test/run-retro-codification-candidates.bats` — new P050 regression test (9 assertions).
+- `packages/retrospective/skills/run-retro/test/run-retro-skill-candidates.bats` — updated in place for compat (4 assertions touched; all still GREEN).
+- P044: `docs/problems/044-run-retro-does-not-recommend-new-skills.known-error.md` — predecessor; P050 supersedes its prose while preserving the skill-shape path as a worked example.
+- P051: `docs/problems/051-run-retro-does-not-recommend-improvements-to-existing-codifiables.open.md` — improvement-axis sibling; deferred to follow-on iteration.
+- ADR-013: `docs/decisions/013-structured-user-interaction-for-governance-decisions.proposed.md` — Rule 1 (single AskUserQuestion) and Rule 6 (non-interactive fallback) both preserved.
+- ADR-014: `docs/decisions/014-governance-skills-commit-their-own-work.proposed.md` — run-retro remains out of ADR-014's scope; any retro-driven changes are committed by the user or by an invoked dedicated skill (unchanged).
+- P046: `docs/problems/046-architect-agent-misses-performance-implications.open.md` — an agent-shaped recommendation P050 lets run-retro surface naturally now.
+
+### Investigation Tasks
+
+- [x] Architect review (PASS — no ADR required; supersede P044's prose; single AskUserQuestion with shape-prefixed labels; flat Codification Candidates table).
+- [x] JTBD review (PASS — serves JTBD-101 "Extend the Suite" and JTBD-006 "Progress the Backlog While I'm Away").
+- [x] Enumerate the shape list with examples per shape (12 shapes named in Step 2, each with a 1-2 sentence example).
+- [x] Decide routing semantics: stub vs invoke dedicated skill. Stubs: skill / agent / hook / settings / script / CI / test / memory. Invocations: ADR / JTBD / Guide / Problem. Documented in Step 4b's option descriptions.
+- [x] Decide AskUserQuestion shape: single flat call with shape-prefixed labels (architect decision); two-question fallback documented.
+- [x] Draft SKILL.md edits preserving P044's Skill Candidates path as a worked example.
+- [x] Add bats tests for the generalised surface (9 new assertions + 4 updated compat assertions; all GREEN).
+- [x] Decide relationship to P051 (deferred; P050 alone is a coherent shipped increment).
+- [x] Cross-reference P046 — agent-shaped recommendation that P050 now lets run-retro surface.

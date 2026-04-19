@@ -23,11 +23,13 @@ setup() {
   [ "$output" = "---" ]
 }
 
-@test "SKILL.md Step 2 includes the skill-candidate reflection category (P044)" {
-  # P044 fix: Step 2 must prompt for recurring workflows that would be better as skills.
-  # Regression guard: if Step 2 is rewritten and the skill-candidate prompt is dropped,
-  # this test fails.
-  run grep -n "recurring workflow.*better as a skill\|would be better as a skill" "$SKILL_FILE"
+@test "SKILL.md Step 2 includes the skill-candidate reflection category (P044, updated by P050)" {
+  # P044 fix: Step 2 must prompt for recurring workflows that would be better
+  # as skills. P050 generalises this to a codification category, with "skill"
+  # retained as one worked example within the shape list. This test accepts
+  # either the original P044 phrasing OR the P050 generalised phrasing that
+  # still names "skill" as a shape.
+  run grep -in "recurring workflow.*better as a skill\|would be better as a skill\|recurring pattern.*better codified\|\*\*Skill\*\* — " "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }
 
@@ -46,20 +48,26 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "SKILL.md Step 4b header matches ADR-013 structured-interaction pattern" {
-  # Header: "Skill candidate" identifies the AskUserQuestion call site and is what
-  # other tests / review tooling can grep for.
-  run grep -n "Skill candidate" "$SKILL_FILE"
+@test "SKILL.md Step 4b header matches ADR-013 structured-interaction pattern (P044, updated by P050)" {
+  # P044 used "Skill candidate" as the AskUserQuestion header. P050 generalises
+  # to "Codification candidate" with "Skill" as one shape option. Accept either —
+  # both preserve the ADR-013 Rule 1 structured-interaction shape.
+  run grep -in "Skill candidate\|Codification candidate" "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }
 
-@test "SKILL.md Step 4b names the three structured options (P044)" {
-  # The three decision options must be explicit: create, track, skip.
-  run grep -n "Create a new skill" "$SKILL_FILE"
+@test "SKILL.md Step 4b names the structured options for skill-shaped candidates (P044, updated by P050)" {
+  # P044 required three specific option labels (Create a new skill / Track as a
+  # problem / Skip — not skill-worthy). P050 generalises: the skill shape now
+  # appears as a row in the flat shape-prefixed option list ("Skill — create
+  # stub"). The "track as problem" path becomes the explicit "Problem" row.
+  # Skip path becomes "Skip — not codify-worthy". This test accepts either
+  # pattern so the P044 regression guard survives P050's generalisation.
+  run grep -in "Create a new skill\|Skill — create stub\|Skill - create stub" "$SKILL_FILE"
   [ "$status" -eq 0 ]
-  run grep -n "Track as a problem ticket" "$SKILL_FILE"
+  run grep -in "Track as a problem ticket\|Problem — invoke manage-problem\|Problem - invoke manage-problem" "$SKILL_FILE"
   [ "$status" -eq 0 ]
-  run grep -n "Skip — not skill-worthy\|Skip - not skill-worthy" "$SKILL_FILE"
+  run grep -in "Skip — not skill-worthy\|Skip - not skill-worthy\|Skip — not codify-worthy\|Skip - not codify-worthy" "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }
 
@@ -70,11 +78,13 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "SKILL.md Step 5 summary template has a Skill Candidates slot (P044)" {
+@test "SKILL.md Step 5 summary template has a Skill / Codification Candidates slot (P044, updated by P050)" {
   # P044 fix: the summary template must include a Skill Candidates section so
   # recommendations are visible in the session audit alongside BRIEFING changes
-  # and problem tickets.
-  run grep -n "### Skill Candidates" "$SKILL_FILE"
+  # and problem tickets. P050 generalises this to a unified "Codification
+  # Candidates" table with a Shape column; skill-shaped candidates still appear
+  # (as Shape: skill rows). Accept either heading.
+  run grep -n "### Skill Candidates\|### Codification Candidates" "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }
 
