@@ -49,6 +49,18 @@ None of these scale; all depend on user recall of which fix paths have been obse
 - **Severity**: Minor — problems sit in limbo rather than Closed; no functional breakage, no user-visible defect. The cost is cognitive and administrative, not operational.
 - **Analytics**: session 2026-04-19 observation: 6 Fix Released tickets exercised and visibly working; 0 closed. Backlog's Fix Released table has 12 entries spanning 3+ weeks.
 
+### 2026-04-19 AFK loop (iter 1–2) — further evidence
+
+The follow-on AFK loop iter 1 (P047 commit) and iter 2 (P050 commit) produced a textbook case of this ticket's failure mode:
+
+- **P028 (governance auto-release)** had strong in-session evidence by end of iter 2 — the loop's final `npm run push:watch` → `npm run release:watch` drain fired the Release workflow (run `24619715995`), which auto-created release PR #31 via `changesets/action`, then `release:watch` merged PR #31 (commit `b401c7b`), triggering Version-or-Publish (run `24619740990`), which published `@windyroad/itil@0.4.5` + `@windyroad/retrospective@0.2.0` to npm. End-to-end ADR-020 auto-release verified.
+- The AFK loop's `ALL_DONE` summary explicitly named P028 as a "close candidate next time you prompt for verification sweep" — i.e. the assistant SAW the evidence but did not surface it as an auto-close recommendation because the loop's detection surface treats verification candidates as user-initiated lookups.
+- User then prompted "you should be closing P028 if you have observed verification", following which the assistant transitioned P028 → `.closed.md` with a cited Closure Evidence section (run IDs, PR #, merge SHA, published versions).
+
+Direct evidence for this ticket: the assistant had the observation, the user had to separately prompt for the close action. P048's candidate fixes (1 always fire step 9d; 3 record exercise observations; 4 surface "likely verified" in review output) would have closed this loop automatically at `ALL_DONE` time without the user prompt.
+
+See sibling P053 (`work-problems does not surface outstanding design questions at stop`) — both tickets share the "surface at stop" pattern and likely land together or with a shared detection surface.
+
 ## Root Cause Analysis
 
 ### Structural: verification discovery is pull-only, not push

@@ -20,6 +20,7 @@
 | 4.0 | P048 | manage-problem does not surface Fix Released tickets as verification candidates | 8 Med | Open | M |
 | 4.0 | P049 | Known Error status overloaded — "fix released, awaiting verification" deserves its own status | 8 Med | Open | M |
 | 4.0 | P051 | run-retro does not recommend improvements to existing skills, agents, hooks, or other codifiables | 8 Med | Open | M |
+| 4.0 | P053 | work-problems does not surface outstanding design questions at stop-condition #2 | 8 Med | Open | M |
 | 2.25 | P015 | TDD vague Gherkin outcome steps | 9 Med | Open | L |
 | 2.0 | P018 | TDD enforce BDD + Example Mapping principles | 16 High | Open | XL ↑ |
 | 2.0 | P022 | Agents must not fabricate time estimates | 16 High | Open | XL ↑ |
