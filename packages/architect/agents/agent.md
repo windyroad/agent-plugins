@@ -62,6 +62,31 @@ Flag when a proposed change represents an undocumented decision:
 - **New script**: Does this introduce a new workflow step?
 - **Structural change**: Does this reorganize code in a way that affects how the team works?
 
+### Runtime-Path Performance Review (per ADR-023)
+
+When a proposed change touches any of the following runtime-path surfaces, you MUST perform a per-request performance review in addition to the ADR-conformance review:
+
+**Trigger categories:**
+
+- **HTTP cache directives** — changes to `cache-control`, `etag`, `last-modified`, or other cache/revalidation headers on any endpoint.
+- **Rate limiting, throttling, or request quotas** — changes to limiter configuration, quota budgets, or per-user/per-IP throttle rules.
+- **Response content size or compression** — changes to payload shape, compression settings, or content negotiation that affect bytes-on-the-wire per request.
+- **Per-request handler behaviour** — any edit to a request handler whose change alters wall-clock latency, CPU cost, or I/O per request (not purely refactor).
+- **New endpoints with non-trivial traffic profile** — an endpoint is non-trivial if it is invoked from client code paths documented in the project's JTBD or README, OR named in an ADR as a "runtime-path" surface.
+
+**When the trigger fires, your review MUST report:**
+
+1. **Per-request cost delta** — estimated CPU, memory, and network delta per request in concrete units (ms, bytes, KB/s). Do not emit qualitative phrases.
+2. **Request-frequency estimate** — how often the endpoint is invoked: typically `requests/user-session × sessions/day` (or equivalent aggregate). You MUST cite the source of the estimate as one of: a specific ADR, a specific JTBD, a telemetry link, or the literal string "no data — worst-case assumption".
+3. **Product — aggregate load delta** — multiply per-request cost delta by request-frequency estimate. Report the aggregate (e.g. ms-seconds per day, bytes per hour). This is the quantity that matters for the verdict, not the per-request number alone.
+4. **Verdict against any in-scope performance-budget ADR** — scan `docs/decisions/` for files named `performance-budget-*`. If a budget applies to the endpoint or subsystem being changed, compare the aggregate load delta against the budget's limits and report PASS / FLAG. If no performance-budget ADR covers the endpoint, report "no performance budget in scope; recommend creating one or explicitly accepting ungoverned risk."
+
+**Qualitative-claim ban:** You MUST NOT emit qualitative phrases like "load is negligible", "microseconds only", "no measurable impact", "minimal cost", or equivalent hedged wording without attaching the concrete numeric backing described in steps 1-3 above. A quantified estimate that is honestly "worst-case assumption, no data" is acceptable; a qualitative claim without numbers is not.
+
+**Performance-budget ADR template:** ADR-023 embeds a copy-paste template downstream projects place at `docs/decisions/<NNN>-performance-budget-<scope>.proposed.md`. When flagging a missing budget, point the user at ADR-023's Decision Outcome for the template.
+
+**When the trigger does NOT fire**, skip this review — performance review is scoped to runtime-path changes to keep review cost proportionate.
+
 ### When NOT to flag
 
 Do NOT flag:

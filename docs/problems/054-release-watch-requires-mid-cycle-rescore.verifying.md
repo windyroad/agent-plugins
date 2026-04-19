@@ -1,10 +1,14 @@
 # Problem 054: release:watch requires a mid-cycle pipeline rescoring after push — 3-step release dance
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-19
 **Priority**: 8 (Medium) — Impact: Minor (2) x Likelihood: Likely (4)
 **Effort**: S
 **WSJF**: 8.0 — (8 × 1.0) / 1
+
+## Fix Released
+
+Fix shipped in AFK iter 1 (2026-04-19, pending commit). Root cause: `packages/risk-scorer/hooks/lib/pipeline-state.sh --hash-inputs` used `git diff origin/main --stat` as the drift input, which shrinks to empty after a policy-authorised push advances `origin/main`. Replaced with a tree-based hash built from `git stash create` (conceptual HEAD + index + working tree), making the drift hash invariant across both `git commit` and `git push`. Candidate 4 also applied: `scripts/release-watch.sh` header now documents the post-push stability contract. Reproduction tests in `packages/risk-scorer/hooks/test/pipeline-state-hash.bats` (8 tests). Released via `@windyroad/risk-scorer` patch bump. Awaiting user verification — next AFK iteration that runs `push:watch` followed by `release:watch` should not require a mid-cycle `wr-risk-scorer:pipeline` delegation (baseline: 4/4 iterations this session required it; target: 0/4).
 
 ## Description
 

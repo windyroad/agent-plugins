@@ -1,10 +1,14 @@
 # Problem 046: wr-architect:agent misses per-request performance / load implications on high-traffic endpoints
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-19
 **Priority**: 8 (Medium) — Impact: Minor (2) x Likelihood: Likely (4)
 **Effort**: L (agent prompt + potential sub-agent design + performance-budget ADR surface)
 **WSJF**: 2.0 — (8 × 1.0) / 4
+
+## Fix Released
+
+Fix shipped in AFK iter 2 (2026-04-19, pending commit). Implemented ADR-023 (wr-architect agent performance review scope): amended `packages/architect/agents/agent.md` with a "Runtime-Path Performance Review" section that fires on cache/throttle/rate-limit/per-request-handler changes, requires quantified per-request cost delta × request-frequency estimate (with cited source), bans qualitative-only claims, and reports a verdict against any in-scope performance-budget ADR. Added 9-test regression bats file `packages/architect/agents/test/architect-performance-review.bats` satisfying ADR-023 Confirmation criterion 2. Bonus: `npm test` now covers `packages/*/agents/test/` — 54 previously-uncollected agent tests now run in CI (331/331 pass). Released via `@windyroad/architect` minor bump. Awaiting user verification — next architect review of a cache-directive or rate-limit change on a high-traffic endpoint (addressr P018 replay) should produce a quantified load-delta report rather than "load is negligible".
 
 ## Description
 
