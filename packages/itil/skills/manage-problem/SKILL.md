@@ -153,7 +153,13 @@ local_max=$(ls docs/problems/*.md 2>/dev/null | sed 's/.*\///' | grep -oE '^[0-9
 # without requiring a fetch in this step (Step 0 preflight is the place
 # where the fetch happens). Default base is `main`; if the user is on
 # another branch, swap accordingly.
-origin_max=$(git ls-tree origin/main docs/problems/ 2>/dev/null | grep -oE '[0-9]{3}' | sort -n | tail -1)
+#
+# `--name-only` is required (P056): without it, each ls-tree line is
+# `<mode> <type> <sha>\t<path>` and the 40-char blob SHA can contain
+# three-digit runs that `grep -oE '[0-9]{3}'` false-matches (observed
+# `origin_max=997` on 2026-04-20 opening P055). `sed` strips the path
+# prefix so the anchored `grep -oE '^[0-9]+'` only picks up filename IDs.
+origin_max=$(git ls-tree --name-only origin/main docs/problems/ 2>/dev/null | sed 's|^docs/problems/||' | grep -oE '^[0-9]+' | sort -n | tail -1)
 
 # Take the max of the two and increment.
 next=$(printf '%03d' $(( $(echo -e "${local_max:-0}\n${origin_max:-0}" | sort -n | tail -1) + 1 )))

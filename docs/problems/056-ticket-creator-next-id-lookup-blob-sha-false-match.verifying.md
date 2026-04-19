@@ -1,6 +1,6 @@
 # Problem 056: Ticket-creator next-ID lookup greps blob SHAs, producing wrong `origin_max` values
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-20
 **Priority**: 4 (Low) — Impact: Minor (2) x Likelihood: Unlikely (2)
 **Effort**: S — one-line fix in two SKILL.md files + bats regression
@@ -62,10 +62,14 @@ origin_max=$(git ls-tree --name-only origin/main docs/problems/ 2>/dev/null | se
 ### Investigation Tasks
 
 - [x] Reproduce: observed 2026-04-20 opening P055, `origin_max=997` from a blob SHA.
-- [ ] Apply the `--name-only` + `sed` fix to both SKILL.md files in one commit.
-- [ ] Add bats doc-lint tests asserting both skills' Step 3 bash uses `--name-only` (grep assertion).
-- [ ] Verify the fix does not regress the P043 collision-guard behaviour — both `local_max` and `origin_max` should still resolve to filename prefixes, and the increment logic is unchanged.
+- [x] Apply the `--name-only` + `sed` fix to both SKILL.md files in one commit.
+- [x] Add bats doc-lint tests asserting both skills' Step 3 bash uses `--name-only` (grep assertion).
+- [x] Verify the fix does not regress the P043 collision-guard behaviour — both `local_max` and `origin_max` still resolve to filename prefixes and the increment logic is unchanged. Sanity-checked end-to-end: `origin_max=057` (problems) and `origin_max=029` (decisions), matching the real tips.
 - [ ] Consider extracting the next-ID computation into a shared helper in `packages/shared/lib/` so future ticket-creator skills don't repeat the pattern. Follow-up, not blocking.
+
+## Fix Released
+
+Fixed in AFK iter 2 of 2026-04-20 session (@windyroad/itil@0.7.2 + @windyroad/architect@0.4.1, pending release). Both SKILL.md Step 3 bash snippets now use `git ls-tree --name-only origin/main <path>` + `sed` path-strip + anchored `^[0-9]+` regex. Two new bats doc-lint tests (4 assertions each, 8 total) assert the presence of `--name-only` and the absence of the buggy bare pattern. Sanity-checked in the same commit: the corrected pipeline returns `origin_max=057` (problems) and `origin_max=029` (decisions), matching the actual tips. Before the fix, the manage-problem pipeline returned `origin_max=997` from a blob SHA on 2026-04-20. Awaiting user verification at the next `manage-problem` (new ticket) or `create-adr` (new ADR) invocation in a session where `origin` has non-trivial git history — the computed next-ID should match `local_max + 1` without the visual sanity-check workaround.
 
 ## Related
 
