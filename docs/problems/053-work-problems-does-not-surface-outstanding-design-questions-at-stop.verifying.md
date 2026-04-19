@@ -32,6 +32,10 @@ Architecture + JTBD reviews: both PASS. No new ADR required — within-skill ext
 
 Awaiting user verification: next stop-condition #2 event in an AFK loop should emit an `### Outstanding Design Questions` table in the summary listing user-answerable skipped tickets with their questions + context.
 
+### Exercise evidence (post-release, same session)
+
+- **2026-04-19 AFK loop iter 4 `ALL_DONE` summary**: Step 2.5 fired end-to-end on its own invocation. The loop hit stop-condition #2 after completing P051 / P053 / P049+migration / P048 and finding that all remaining Open tickets (P015, P018, P022, P046, P014, P019, P045, P012, P034) needed architect-design or user-answerable input. The final summary emitted the `### Outstanding Design Questions` table listing 5 user-answerable questions (P048 candidates 2/3/5, P019 direction, P015 vague-Gherkin spec, P022 grounded-estimate policy, P046 high-traffic predicate) with Ticket / Question / Context columns in the exact format specified by the fix. Non-interactive path per ADR-013 Rule 6 (JTBD-006 persona default) — no AskUserQuestion fired; the table is the record the user reads on return. The Skipped table's new `Skip-reason category` column populated correctly (`architect-design` for the XL tickets; `user-answerable (direction)` for P019). End-to-end verification of the P053 fix on its own invocation.
+
 ## Description
 
 `wr-itil:work-problems` stop condition #2 fires when "all remaining problems require interactive input". The skill today emits `ALL_DONE` with a summary table of what was worked, skipped, and remaining — but does NOT surface the specific design questions that caused each remaining ticket to be skipped.
