@@ -3,8 +3,14 @@
 **Status**: Open
 **Reported**: 2026-04-17
 **Priority**: 16 (High) — Impact: Significant (4) x Likelihood: Likely (4)
-**Effort**: XL — diagnose-before-implement subagent template + hypothesis-verification gate + ADR extending 013/014/016 + cross-skill rollout (work-problems, manage-incident, others)
+**Effort**: XL — shared diagnose-before-implement subagent template + per-skill hypothesis-verification gate + ADR extending 013/014/016 + cross-skill rollout (work-problems, manage-incident, others)
 **WSJF**: 2.0 — (16 × 1.0) / 8
+
+## Direction decision (2026-04-20, user — AFK loop stop-condition #2)
+
+**Fix location**: **Both — shared template, skill-owned gate**. Build a reusable `diagnose-first` subagent template (extending ADR-013/014/016) that exposes the hypothesis+evidence+failing-test primitive. Each orchestrator skill (manage-problem, manage-incident, auto-release, feature-implementation flows) owns WHEN to invoke it. Shared reuse + per-skill autonomy.
+
+Implication: the ADR draft can now fix (a) the shared subagent's prompt contract, (b) the hypothesis-verification output format, (c) guidance for skill authors on where to invoke it. Cross-skill rollout is staged per skill (manage-problem and manage-incident first, feature flows later).
 
 ## Description
 

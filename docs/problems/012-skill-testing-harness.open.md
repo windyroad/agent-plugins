@@ -3,8 +3,14 @@
 **Status**: Open
 **Reported**: 2026-04-16
 **Priority**: 6 (Medium) — Impact: Moderate (3) x Likelihood: Possible (2)
-**Effort**: XL — ADR-005 amendment or new ADR for skill testing strategy, per-skill test framework decisions, retrofit of existing skills across the entire suite (itil, retrospective, architect, risk-scorer, jtbd, voice-tone, style-guide, tdd, connect) (L → XL 2026-04-19 per P047: scope explicitly "undefined", suite-wide, new ADR required)
+**Effort**: XL — new companion ADR for skill testing strategy, per-skill test framework decisions, retrofit of existing skills across the entire suite (itil, retrospective, architect, risk-scorer, jtbd, voice-tone, style-guide, tdd, connect) (L → XL 2026-04-19 per P047: scope explicitly "undefined", suite-wide, new ADR required)
 **WSJF**: 0.75 — (6 × 1.0) / 8
+
+## Direction decision (2026-04-20, user — AFK loop stop-condition #2)
+
+**ADR scope**: **New companion ADR**, not an ADR-005 amendment. Skills differ enough from hooks (LLM-interpreted prose vs executable bash) that the testing strategy deserves its own decision record (contract testing, golden outputs, skill-specific harness semantics). Mint the next free ADR ID at draft time.
+
+Implication: Investigation Task "amend ADR-005 vs new companion ADR" is resolved. The companion ADR can be drafted as the next AFK iteration, with ADR-005 left as the hook-testing contract.
 
 ## Description
 

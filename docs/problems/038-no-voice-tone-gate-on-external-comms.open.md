@@ -3,8 +3,14 @@
 **Status**: Open
 **Reported**: 2026-04-17
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
-**Effort**: XL — multi-surface PreToolUse hook (gh, npm, RapidAPI, marketplace) + voice profile integration + ADR for new enforcement surface + regression fixtures; cross-plugin with voice-tone
+**Effort**: XL — multi-surface PreToolUse hook (gh, npm, RapidAPI, marketplace) + pre-flight rewrite skill + voice profile integration + ADR for new enforcement surface + regression fixtures; cross-plugin with voice-tone
 **WSJF**: 1.5 — (12 × 1.0) / 8
+
+## Direction decision (2026-04-20, user — AFK loop stop-condition #2)
+
+**Enforcement surface**: **Both — hook + skill**. PreToolUse hook intercepts `gh issue comment`, `gh pr create`, `gh pr comment`, `npm publish` (with README diff), and RapidAPI/marketplace update calls, firing the gate deterministically. A companion skill provides the rewrite logic (strip AI-tell patterns, apply the voice profile, run age/context check on target issues). The hook invokes the skill before allowing the tool call.
+
+Implication: new ADR needed (extending ADR-009 gate-marker lifecycle and ADR-015 on-demand assessment). Scope: (1) external-comms surface inventory, (2) hook design with gate-marker pattern, (3) rewrite skill with voice profile integration, (4) regression fixtures from historical "FFS" outputs, (5) per-package cross-plugin coordination with `@windyroad/voice-tone`.
 
 ## Description
 

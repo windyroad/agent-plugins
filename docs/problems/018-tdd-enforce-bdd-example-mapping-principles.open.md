@@ -3,8 +3,18 @@
 **Status**: Open
 **Reported**: 2026-04-16
 **Priority**: 16 (High) — Impact: Significant (4) x Likelihood: Likely (4)
-**Effort**: XL — new ADR (docs/decisions/012-test-content-quality-review.proposed.md), ADR-002 dependency-graph update (tdd → jtbd soft dep), per-framework invariant mapping (Jest/Vitest/Mocha/Bats/pytest/Go/Gherkin), gate + agent enforcement surfaces (L → XL 2026-04-19 per P047: multi-day, cross-package, new ADR required)
+**Effort**: XL — new ADR (docs/decisions/NNN-test-content-quality-review.proposed.md, ID to be minted at creation per P022 renumber rule), ADR-002 dependency-graph update if any (tdd → jtbd soft dep), per-framework invariant mapping (Jest/Vitest/Mocha/Bats/pytest/Go/Gherkin), gate + agent enforcement surfaces (L → XL 2026-04-19 per P047: multi-day, cross-package, new ADR required)
 **WSJF**: 2.0 — (16 × 1.0) / 8
+
+## Direction decisions (2026-04-20, user — AFK loop stop-condition #2)
+
+Shared with P015 (both bound to the same ADR candidate):
+
+**Enforcement level**: **Both — gate + advisory agent**. Deterministic gate catches obvious concreteness/traceability violations (blocking). Specialist agent reviews subtler shape issues (advisory). P018 owns the framework-agnostic quadruplet invariant; P015 is the Cucumber-specific adapter.
+
+**Plugin home**: **Extend `@windyroad/tdd`**. No new plugin. Cross-plugin soft dep on `@windyroad/jtbd` stays advisory (reads `docs/jtbd/` per ADR-008 Option 3 — no legacy-file fallback since P019 landed).
+
+Implication: ADR-002 graph stays as-is (no new plugin). The candidate ADR can be drafted with both decisions fixed. Investigation Task "Decide relationship to P015" is resolved: P018 is the framework-agnostic rule; P015 is the Cucumber-specific adapter (no supersession).
 
 ## Description
 

@@ -3,8 +3,16 @@
 **Status**: Open
 **Reported**: 2026-04-16
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Possible (3)
-**Effort**: L — ADR + heuristic design + reproduction fixtures (scope contained within the `@windyroad/tdd` plugin per Investigation Tasks)
+**Effort**: L — ADR + heuristic design + reproduction fixtures (scope contained within the `@windyroad/tdd` plugin per direction decision below)
 **WSJF**: 2.25 — (9 × 1.0) / 4
+
+## Direction decisions (2026-04-20, user — AFK loop stop-condition #2)
+
+**Enforcement level**: **Both — gate + advisory agent**. Deterministic TDD gate catches obvious vague-Then and missing-concrete-example patterns (blocking). A specialist agent reviews subtler shape issues as advisory output. P015 is the Cucumber-specific reference case; P018 owns the framework-agnostic rule.
+
+**Plugin home**: **Extend `@windyroad/tdd`**. No new plugin, no ADR-002 graph change — the content-quality review couples to the existing TDD lifecycle.
+
+Implication: the candidate ADR (`docs/decisions/NNN-test-content-quality-review.proposed.md`, ID to be minted at creation time — see P022 renumber rule) can be drafted with both decisions fixed. Scope: gate + advisory agent, both inside `@windyroad/tdd`.
 
 ## Description
 

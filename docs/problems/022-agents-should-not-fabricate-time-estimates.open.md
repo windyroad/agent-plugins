@@ -3,8 +3,14 @@
 **Status**: Open
 **Reported**: 2026-04-16
 **Priority**: 16 (High) — Impact: Significant (4) x Likelihood: Likely (4)
-**Effort**: XL — new cross-cutting ADR (docs/decisions/014-agent-output-grounding.proposed.md), audit of every agent prompt across the suite (risk-scorer, manage-problem, architect, plan-risk-guidance), WSJF effort-bucket semantics rework, grounding-citation convention (L → XL 2026-04-19 per P047: multi-day, cross-package, new ADR required)
+**Effort**: XL — new cross-cutting ADR (ID to be minted by `create-adr` at draft time — next free ID is ≥030 as of 2026-04-20; the previously-penciled `014-agent-output-grounding` collides with the accepted ADR-014 governance-commit decision), audit of every agent prompt across the suite (risk-scorer, manage-problem, architect, plan-risk-guidance), WSJF effort-bucket semantics rework, grounding-citation convention (L → XL 2026-04-19 per P047: multi-day, cross-package, new ADR required)
 **WSJF**: 2.0 — (16 × 1.0) / 8
+
+## Direction decision (2026-04-20, user — AFK loop stop-condition #2)
+
+**ADR numbering**: **Assign next free ADR number** at draft time (not the collided `014-agent-output-grounding` name). `create-adr` Step 3 mints the next available ID (currently ≥030, with `max(local, origin)+1` per P056 fix). Title-kebab remains `agent-output-grounding`. This is a new cross-cutting decision, not an extension or supersession of existing ADR-014 (governance commit) or ADR-016 (WIP verdict).
+
+Implication: the ADR draft can proceed at the next AFK iteration with no numbering ambiguity. Candidate path: `docs/decisions/<next>-agent-output-grounding.proposed.md` where `<next>` is computed fresh.
 
 ## Description
 

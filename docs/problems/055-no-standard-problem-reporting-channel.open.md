@@ -3,9 +3,19 @@
 **Status**: Open
 **Reported**: 2026-04-19
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Possible (3)
-**Effort**: XL — repo intake scaffolding (.github/ISSUE_TEMPLATE/, CONTRIBUTING.md, SUPPORT.md, SECURITY.md) + cross-project reusable pattern (likely a new skill or plugin) + new ADR for the pattern's contract
+**Effort**: L — repo intake scaffolding (.github/ISSUE_TEMPLATE/, CONTRIBUTING.md, SUPPORT.md, SECURITY.md) + new skill in `@windyroad/itil` for downstream → upstream reporting (re-sized from XL 2026-04-20 after B's surface decision collapsed into an existing plugin — no new ADR needed)
 
-**WSJF**: 1.125 — (9 × 1.0) / 8
+**WSJF**: 2.25 — (9 × 1.0) / 4
+
+## Direction decision (2026-04-20, user — AFK loop stop-condition #2)
+
+**Reusable pattern surface** (part B): **New skill in `@windyroad/itil`**. A `/wr-itil:report-upstream` skill drafts a bug report targeting the upstream repo via `gh issue create`, reusing the ITIL plugin's problem-ticket conventions for structure, reproduction evidence, and severity tagging. No new plugin, no ADR-002 graph change.
+
+(User note 2026-04-20: "this has been asked and answered previously" — if there is a prior record of this decision anywhere in the ticket history or session memory, it corroborates this choice; if not, this direction decision is the authoritative source.)
+
+**Part A** (repo intake scaffolding for `@windyroad/agent-plugins` itself): proceeds in any case — `.github/ISSUE_TEMPLATE/`, `CONTRIBUTING.md`, `SUPPORT.md`, `SECURITY.md`.
+
+Implication: effort drops from XL to L. No new plugin, no new ADR (the skill follows existing itil conventions). Next AFK iteration can: (1) scaffold the intake files in this repo, (2) add the `report-upstream` skill to `packages/itil/skills/report-upstream/SKILL.md` with a bats doc-lint test, (3) release both together.
 
 ## Description
 

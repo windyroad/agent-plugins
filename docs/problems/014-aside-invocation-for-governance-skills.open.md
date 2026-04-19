@@ -3,8 +3,20 @@
 **Status**: Open
 **Reported**: 2026-04-16
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
-**Effort**: XL — likely new ADR (aside-invocation pattern for governance skills), cross-package coordination (itil + retrospective + architect), per-skill stub template design, intake-flow split (L → XL 2026-04-19 per P047: multi-day, cross-package, new ADR likely)
-**WSJF**: 1.5 — (12 × 1.0) / 8
+**Effort**: L — governance skills delegate aside-type work to background subagents (no new pattern, no new ADR, no new skill). Per-skill convention update + example wiring in manage-problem / run-retro / create-adr. (Re-sized down from XL 2026-04-20 per user direction below.)
+**WSJF**: 3.0 — (12 × 1.0) / 4
+
+## Direction decision (2026-04-20, user — AFK loop stop-condition #2)
+
+**Pattern shape**: **Governance skills should use background agents for aside-type work** (user quote). Instead of a new structured-prompt convention, a new "aside" subagent type, or a new wrapping skill, the existing subagent machinery is used with `run_in_background: true`. Each governance skill (manage-problem, run-retro, create-adr) invokes a background subagent to do the full intake against a compact aside payload — the main turn keeps working on its original task while the subagent files the stub.
+
+Implication:
+- No new ADR needed (existing Agent tool + subagent types suffice).
+- Effort re-sized from XL (ADR + cross-package pattern) to L (per-skill convention + examples).
+- Investigation Tasks simplify: no new pattern design, no new subagent-type definition, no new skill surface. Scope is a documented convention in each of manage-problem, run-retro, and create-adr SKILL.md that shows how to receive an aside as a background-subagent task with a compact prompt and return a structured "filed" confirmation.
+- Next AFK iteration: add the convention to the three SKILL.md files + an example invocation, and update the orchestrator skills (work-problems, run-retro) that might notice aside-worthy material mid-loop.
+
+This replaces the previous "new pattern + ADR" framing entirely.
 
 ## Description
 

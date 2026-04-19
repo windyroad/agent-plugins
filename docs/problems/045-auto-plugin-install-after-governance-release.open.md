@@ -6,6 +6,14 @@
 **Effort**: L
 **WSJF**: 1.5 — (6 × 1.0) / 4
 
+## Direction decision (2026-04-20, user — AFK loop stop-condition #2)
+
+**Install mechanism**: **Deferred install on next session start**. After release lands on npm, queue the install rather than restarting the active session. Claude Code picks up the new plugin code on next session start. This avoids destabilising in-progress sessions (including AFK loops that are mid-iteration).
+
+Implication: the fix needs (1) a queue mechanism (e.g., a file under `~/.claude/plugins/pending-install/` or similar) that the auto-release step writes to, (2) a startup check that runs `claude plugin install` for queued packages before the first turn, (3) a user-facing log/status so the user knows the current session is still on the old code and the next session will have the fix. The option to auto-restart the active session is **explicitly rejected**.
+
+Open sub-questions (not blocking, can be resolved at implementation time): does Claude Code expose a session-start hook? If not, does `claude plugin install` on first terminal interaction suffice? These are implementation details for the ADR draft, not direction questions.
+
 ## Description
 
 Split from P028 on 2026-04-19. P028 was originally scoped to cover both auto-release and auto-install. This ticket tracks the **auto-install** concern only; the auto-release concern stays in P028 and is being implemented under ADR-020.

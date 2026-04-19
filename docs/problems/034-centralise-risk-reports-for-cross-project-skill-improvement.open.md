@@ -3,8 +3,23 @@
 **Status**: Open
 **Reported**: 2026-04-17
 **Priority**: 6 (Medium) — Impact: Moderate (3) x Likelihood: Unlikely (2)
-**Effort**: XL — cross-project storage pattern (`~/.claude/skill-reports/<plugin-name>/`), skill-improvement feedback loop design for 8+ plugins (architect, jtbd, itil, voice-tone, style-guide, tdd, wardley, c4), new ADR (L → XL 2026-04-19 per P047: cross-project, cross-plugin, new ADR required)
+**Effort**: XL — home-dir storage pattern under `~/.risk-reports/` (or similar), skill-improvement feedback loop design for 8+ plugins (architect, jtbd, itil, voice-tone, style-guide, tdd, wardley, c4), new ADR (L → XL 2026-04-19 per P047: cross-project, cross-plugin, new ADR required)
 **WSJF**: 0.75 — (6 × 1.0) / 8
+
+## Direction decision (2026-04-20, user — AFK loop stop-condition #2)
+
+**Storage location**: **Home directory, `~/.risk-reports/` or similar**. Per-user central store, not per-project, not external service, not git-synced to a central repo. Keeps the data on the user's machine (no third-party confidentiality exposure per RISK-POLICY.md), aggregates across every project the user touches, and avoids the overhead of wiring a sync step into every project's release pipeline.
+
+Implication: the ADR draft narrows to:
+- Exact path: `~/.risk-reports/<project-slug>/<YYYY-MM-DD-HH-MM-SS>.md` (or similar — path shape TBD during drafting).
+- Write mechanism: `wr-risk-scorer:pipeline` subagent and/or `/wr-risk-scorer:assess-release` skill writes a copy to the central store alongside (or instead of) the local `.risk-reports/` copy.
+- Read mechanism: a new `/wr-risk-scorer:review-history` skill (or similar) queries the central store to surface patterns for skill improvement.
+- No external service. No cross-machine sync. Local-first.
+
+**Options rejected**:
+- Per-project `.risk-reports/` synced to a central git repo (`windyroad/risk-reports`) — rejected: adds sync plumbing, couples projects to a specific upstream, confidentiality review required for anything that touches an org-level repo.
+- External service (Grafana/Datadog/custom) — rejected: third-party dependency, confidentiality exposure.
+- Local-only, defer cross-project aggregation — rejected: the user wants the aggregation.
 
 ## Description
 

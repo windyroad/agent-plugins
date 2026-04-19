@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-04-20 (AFK iter 1 review — three new tickets filed since prior review: P055 (problem-reporting channel), P056 (next-ID blob-SHA false match), P057 (git mv + Edit staging trap). P046 transitioned to Verification Pending after runtime-path performance review fix released (commit b2f1646). P054 transitioned to Verification Pending after stable drift hash fix released (commit 45e9c71). P036 and P037 newly transitioned to Verification Pending (commits c5f8039, 6e7c2e4). Missing WSJF lines added for P015, P038, P039.
+> Last reviewed: 2026-04-20 (AFK iter 3 close — P057, P056, P019 all shipped and in Verification Pending. @windyroad/itil@0.7.2, @windyroad/architect@0.4.1, @windyroad/jtbd@0.6.0 released. Stop-condition #2 fired; user answered 10 design questions interactively — each remaining open ticket now carries a `## Direction decision (2026-04-20)` section so the next AFK loop can proceed without re-asking. P014 re-sized from XL → L (background-subagent convention replaces new ADR). P055 re-sized from XL → L (skill-in-itil replaces new plugin + ADR).
 > Run `/wr-itil:manage-problem review` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -9,17 +9,14 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 
 | WSJF | ID | Title | Severity | Status | Effort |
 |------|-----|-------|----------|--------|--------|
-| 6.0 | P057 | git mv + Edit + git add staging-ordering trap drops content edits | 6 Med | Open | S |
-| 4.0 | P056 | Ticket-creator next-ID lookup greps blob SHAs producing wrong origin_max | 4 Low | Open | S |
+| 3.0 | P014 | No lightweight aside invocation for governance skills (background-subagent convention per 2026-04-20 direction) | 12 High | Open | L |
 | 2.25 | P015 | TDD enforcement does not flag vague Gherkin outcome steps | 9 Med | Open | L |
+| 2.25 | P055 | No standard problem-reporting channel for plugin users (new skill in @windyroad/itil per 2026-04-20 direction) | 9 Med | Open | L |
 | 2.0 | P018 | TDD enforce BDD + Example Mapping principles | 16 High | Open | XL |
 | 2.0 | P022 | Agents must not fabricate time estimates | 16 High | Open | XL |
 | 2.0 | P039 | Autonomous loops conflate diagnose with implement | 16 High | Open | XL |
-| 1.5 | P014 | No lightweight aside invocation for governance skills | 12 High | Open | XL |
-| 1.5 | P019 | Deprecate single-file JTBD fallback | 6 Med | Open | L |
 | 1.5 | P038 | No voice-and-tone gate on external communications | 12 High | Open | XL |
-| 1.5 | P045 | Auto plugin install after governance release (deferred) | 6 Med | Open | L |
-| 1.125 | P055 | No standard problem-reporting channel for plugin users | 9 Med | Open | XL |
+| 1.5 | P045 | Auto plugin install after governance release (deferred install on next session start per 2026-04-20 direction) | 6 Med | Open | L |
 | 0.75 | P012 | Skill testing harness scope undefined | 6 Med | Open | XL |
 | 0.75 | P034 | Centralise risk reports for cross-project skill improvement | 6 Med | Open | XL |
 
@@ -48,6 +45,9 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P046 | wr-architect agent misses runtime-path performance implications | commit b2f1646 | no (1 day) |
 | P037 | jtbd-reviewer returns bare verdict without reason | commit 6e7c2e4 | no (1 day) |
 | P036 | work-problems commit-gate: inter-iteration verification | commit c5f8039 | no (1 day) |
+| P057 | git mv + Edit + git add staging-ordering trap drops content edits | @windyroad/itil@0.7.2 + @windyroad/architect@0.4.1 (commit 3bf2074) | no (0 days) |
+| P056 | Ticket-creator next-ID lookup greps blob SHAs producing wrong origin_max | @windyroad/itil@0.7.2 + @windyroad/architect@0.4.1 (commit f9bfa56) | no (0 days) |
+| P019 | Deprecate single-file JTBD fallback (ADR-008 Option 3) | @windyroad/jtbd@0.6.0 (commit 6dd6a77) — breaking change | no (0 days) |
 
 ## Closed
 
