@@ -6,6 +6,17 @@
 **Effort**: M
 **WSJF**: 4.0 — (8 × 1.0) / 2
 
+## Pacing decision (2026-04-19, user)
+
+**Resolved**: land in the **next AFK loop**. User explicitly accepted the second rewrite of run-retro's Step 2 / 4b / 5 blocks within a short window. Rationale: the P050 shape taxonomy is still fresh and extending it is cheaper than reloading the design later.
+
+Next loop's implementer should:
+- Extend P050's single-`AskUserQuestion` shape list with improvement-axis options (`Skill improvement — stub edit`, `Agent improvement — stub edit`, `Hook improvement — stub edit`, `ADR — supersede / amend` routing to `/wr-architect:create-adr`, `Guide edit — route to update-guide / update-policy`, `Problem ticket edit — route to /wr-itil:manage-problem <NNN>` update flow, etc.). Keep all creation-axis options from P050 intact.
+- Add a Step 2 reflection category for improvements (criteria: (a) flaw is reproducible / specific, (b) fix is a bounded edit to an existing file, (c) no new concept is being invented).
+- Update the Step 5 "Codification Candidates" table to include a `Kind` column with values `create` / `improve`.
+- Reuse P016 / P017 concern-boundary splitting when an improvement candidate touches multiple unrelated concerns.
+- Extend `run-retro-codification-candidates.bats` with ≥2 improvement-shaped assertions.
+
 ## Description
 
 P044 and P050 both framed run-retro's codification branch around **creating new** outputs — new skills (P044), new agents / hooks / scripts / etc. (P050). Missing from both: the **improvement-shaped** reflection category.
