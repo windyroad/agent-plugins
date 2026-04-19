@@ -86,11 +86,27 @@ If the code serves a user type not described by the existing persona:
 
 These are FAIL verdicts — the JTBD documentation must be updated before the code can proceed.
 
-## Verdict
+## Output Contract (P037)
 
-After completing your review, write your verdict to `/tmp/jtbd-verdict`:
+Your response has two communication channels. Both are required; neither replaces the other.
+
+**1. Inline response (primary, user-facing, REQUIRED in every response):**
+
+Every response MUST begin with one of the four verdict templates from "How to Report" above — `JTBD Review: PASS`, `JTBD Review: ISSUES FOUND`, `JTBD Review: JOB UPDATE NEEDED`, or `JTBD Review: PERSONA UPDATE NEEDED`. The inline verdict is the authoritative primary channel — it is what the caller reads and acts on.
+
+- On **PASS**: include the aligned job ID, a brief alignment summary, and the persona-fit confirmation (which constraints were checked).
+- On **ISSUES FOUND / JOB UPDATE NEEDED / PERSONA UPDATE NEEDED**: include actionable remediation guidance — the specific file + line, the issue, the affected job (or "no matching job"), and the fix (what would need to change for the review to pass).
+
+You MUST NOT emit a bare verdict without body. "FAIL" alone, "ISSUES FOUND" alone, or a list of reviewed files without a verdict line are all forbidden output shapes. If there are no issues, emit PASS with alignment summary; if there are issues, emit ISSUES FOUND with at least one concrete remediation item. Every response must contain enough inline detail that the caller can act without a re-query.
+
+**2. Verdict marker file (internal signal, REQUIRED to coordinate with hooks):**
+
+After emitting your inline response, write your verdict to `/tmp/jtbd-verdict`. This file is consumed by the `jtbd-mark-reviewed.sh` PostToolUse hook to gate subsequent edits. It is NOT a substitute for the inline response:
+
 - `printf 'PASS' > /tmp/jtbd-verdict` — change aligns with documented jobs and persona
 - `printf 'FAIL' > /tmp/jtbd-verdict` — misalignment, job gap, or persona gap detected
+
+The inline verdict and the marker file MUST agree. If inline says PASS, the file says PASS; if inline says ISSUES FOUND / JOB UPDATE NEEDED / PERSONA UPDATE NEEDED, the file says FAIL.
 
 ## Constraints
 

@@ -1,8 +1,14 @@
 # Problem 037: JTBD reviewer sometimes returns a bare verdict without remediation reason
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-17
 **Priority**: 6 (Med) — Impact: Moderate (3) x Likelihood: Possible (2)
+**Effort**: S
+**WSJF**: 6.0 — (6 × 1.0) / 1
+
+## Fix Released
+
+Fix shipped in AFK iter 3 (2026-04-19, pending commit). Root cause: the `wr-jtbd:agent` prompt treated the `/tmp/jtbd-verdict` marker file as the authoritative verdict surface, so the agent could write the file and emit only a file list or a bare `"FAIL"` inline, leaving the caller without actionable guidance. Reframed the agent's output contract into two required channels (inline primary, file internal signal), with explicit prohibitions on bare verdicts and a MUST-agree rule between the two. Added 7-test doc-lint bats file `packages/jtbd/agents/test/jtbd-verdict-contract.bats`. Released via `@windyroad/jtbd` patch bump. Awaiting user verification — next `wr-jtbd:agent` delegation via the Agent tool should produce a structured inline verdict with remediation guidance on FAIL without requiring a re-query.
 
 ## Description
 
