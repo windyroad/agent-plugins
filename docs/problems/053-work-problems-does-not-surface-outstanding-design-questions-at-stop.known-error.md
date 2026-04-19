@@ -1,10 +1,36 @@
 # Problem 053: work-problems does not surface outstanding design questions at stop-condition #2
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-19
 **Priority**: 8 (Medium) — Impact: Minor (2) x Likelihood: Likely (4)
 **Effort**: M
-**WSJF**: 4.0 — (8 × 1.0) / 2
+**WSJF**: 8.0 — (8 × 2.0) / 2
+
+## Fix Released
+
+Shipped 2026-04-19 (AFK iter 4) — `packages/itil/skills/work-problems/SKILL.md` extended to surface outstanding design questions at stop-condition #2 before emitting `ALL_DONE`:
+
+- **Step 2**: stop-condition #2 now routes to a new Step 2.5 before `ALL_DONE`. Stop-conditions #1 and #3 keep the direct-emit behaviour.
+- **Step 2.5 (new)**: extracts user-answerable questions from skipped tickets, branches on interactivity per ADR-013. Interactive → single `AskUserQuestion` call (cap 4 per Anthropic tool docs). Non-interactive / AFK → emit `### Outstanding Design Questions` table in post-stop summary (Rule 6 fail-safe).
+- **Step 4 classifier**: skip-reason taxonomy (`user-answerable` / `architect-design` / `upstream-blocked`) added as a dedicated column; classifier rows now tag each Skip action with a category so Step 2.5 can deterministically select the user-answerable subset. Added two new classifier rows for "outstanding user-answerable design question" (surface at stop) and "needs architect design judgment" (pre-triggerable in `--deep-stop` mode).
+- **Output Format**: the Final Summary template gains an `### Outstanding Design Questions` section (Ticket / Question / Context columns), emitted only when stop-condition #2 fires AND at least one skipped ticket has a user-answerable skip-reason. Table is omitted otherwise.
+- **Non-Interactive Decision Making table**: new row documents the stop-condition #2 default (emit table, do not call AskUserQuestion) per JTBD-006 persona constraint.
+
+Tests — `packages/itil/skills/work-problems/test/work-problems-stop-condition-questions.bats` (new, 7 assertions, RED→GREEN this iteration):
+
+- SKILL.md exists (P053 precondition).
+- Stop-condition #2 has a pre-terminal question-surfacing step.
+- 4-question `AskUserQuestion` cap cited (per Anthropic tool docs + ADR-013).
+- Classifier records the user-answerable / architect-design / upstream-blocked skip-reason taxonomy.
+- Non-interactive fallback emits Outstanding Design Questions table (Rule 6).
+- ADR-013 Rule 6 cited in the stop-condition block.
+- Output Format template includes the Outstanding Design Questions section.
+
+Full project test surface: 253 tests, 0 failures (was 246/0; +7 from this iteration).
+
+Architecture + JTBD reviews: both PASS. No new ADR required — within-skill extension that layers on ADR-013 Rules 1 (interactive batching) + 6 (non-interactive table fallback) and does not conflict with ADR-018 (release cadence, distinct Step 6.5 surface). Architect recommendation on the mode branch followed: AskUserQuestion when interactive, Outstanding Design Questions table when AFK. JTBD-006 alignment: the table path is the default for this skill since the persona is AFK by definition. JTBD-001: no 60-second-norm violation (stop-summary is per-loop, not per-edit). ADR-005 Permitted Exception covers the structural bats assertions, mirroring work-problems-preflight.bats and work-problems-release-cadence.bats.
+
+Awaiting user verification: next stop-condition #2 event in an AFK loop should emit an `### Outstanding Design Questions` table in the summary listing user-answerable skipped tickets with their questions + context.
 
 ## Description
 

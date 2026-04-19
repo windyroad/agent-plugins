@@ -53,7 +53,24 @@ Stop the loop and report a summary if any of these are true:
 2. **All remaining problems require interactive input** — e.g., they all need user verification (known-errors with `## Fix Released`), or their scope expanded beyond what's safe to auto-resolve
 3. **All remaining problems are blocked** — investigation hit a dead end, or the fix requires changes outside the project
 
-When stopping, output a summary table of what was worked and what remains, then output exactly:
+When stop-condition #2 fires, do not jump straight to `ALL_DONE` — run Step 2.5 first to surface the outstanding questions.
+
+For stop-conditions #1 and #3 (no questions to ask), skip Step 2.5 and emit the summary + `ALL_DONE` directly.
+
+### Step 2.5: Surface outstanding design questions (P053, fires only for stop-condition #2)
+
+The skipped tickets that triggered stop-condition #2 frequently carry **user-answerable design questions** (naming, direction, pacing, scope) whose answers would unblock the next AFK loop. The information the user needs to answer is fully known at stop time, so there is no cost to surfacing the questions before the terminal `ALL_DONE` emit.
+
+**1. Extract the question set.** For every skipped ticket whose classifier skip-reason is `user-answerable` (see Step 4's taxonomy), extract its outstanding question(s) from the ticket body — typically from a "Pacing decision", "Naming decision", or outstanding "Investigation Tasks" section. Cap at 4 questions per `AskUserQuestion` call per Anthropic's tool documentation.
+
+**2. Branch on interactivity per ADR-013 Rule 1 / Rule 6.**
+
+- **Interactive invocation** (AskUserQuestion is available AND the loop was not started in AFK mode): batch the questions into one `AskUserQuestion` call (or more, if >4 questions, issued sequentially). Header: `"Outstanding design questions"`. For each question, set the prompt from the extracted text and the options from the ticket's candidate fixes or option list. Write each answer back to the corresponding ticket file so the next AFK loop does not re-ask.
+- **Non-interactive / AFK invocation** (default for this skill per JTBD-006 — the persona is AFK): do NOT call `AskUserQuestion`. Instead emit an `### Outstanding Design Questions` section in the post-stop summary listing each question with its Ticket ID, the question text, and one-line context. The user answers on return.
+
+This branch is the Rule 6 fail-safe applied to stop-condition #2: Rule 1 says route governance decisions through `AskUserQuestion`; Rule 6 says fall back to a structured summary when the tool is unavailable or the user is away. JTBD-006's persona constraint ("autonomously work without needing interactive input") makes the non-interactive path the default for this skill — AskUserQuestion is the exception, not the rule.
+
+**3. Emit the final summary + `ALL_DONE`.** The summary includes the Outstanding Design Questions table when any user-answerable questions were surfaced (see Output Format).
 
 ```
 ALL_DONE
@@ -72,16 +89,27 @@ Select the problem with the highest WSJF score. If there's a tie, prefer:
 
 Read the problem file and apply these deterministic rules:
 
-| Problem state | Action |
-|---|---|
-| Known Error with `## Fix Released` | **Skip** — needs user verification |
-| Known Error with fix strategy documented | **Work it** — implement the fix |
-| Known Error without fix strategy | **Work it** — produce a fix strategy, then implement |
-| Open problem with preliminary hypothesis or investigation notes | **Work it** — continue the investigation |
-| Open problem with no leads (empty Root Cause Analysis) | **Work it** — read the relevant code, form a hypothesis, document findings |
-| Problem previously attempted twice without progress in this session | **Skip** — mark as stuck, needs interactive attention |
+| Problem state | Action | Skip-reason category |
+|---|---|---|
+| Known Error with `## Fix Released` | **Skip** — needs user verification | user-answerable (verification) |
+| Known Error with fix strategy documented | **Work it** — implement the fix | — |
+| Known Error without fix strategy | **Work it** — produce a fix strategy, then implement | — |
+| Open problem with preliminary hypothesis or investigation notes | **Work it** — continue the investigation | — |
+| Open problem with no leads (empty Root Cause Analysis) | **Work it** — read the relevant code, form a hypothesis, document findings | — |
+| Problem previously attempted twice without progress in this session | **Skip** — mark as stuck, needs interactive attention | user-answerable (direction) |
+| Open problem with outstanding user-answerable design question (naming, direction, pacing, scope) | **Skip** — surface the question at stop (Step 2.5) | user-answerable (design) |
+| Open problem needing architect design judgment (new-ADR-level question) | **Skip** — note the architect-design blocker; Step 2.5 may elevate via a pre-triggered architect call in `--deep-stop` mode | architect-design |
+| Open problem blocked on upstream dependency or Claude Code capability gap | **Skip** — record the upstream-blocked reason | upstream-blocked |
 
 The default is to work the problem. Only skip when the rule explicitly says so. This is an AFK loop — forward progress matters more than avoiding dead ends, because dead ends are cheap (findings are saved) and interactive input is expensive (user is absent).
+
+**Skip-reason taxonomy.** Every skipped ticket is tagged with one of three categories so Step 2.5 can select which ones to surface as questions:
+
+- **user-answerable** — the user can answer directly (verification, naming, direction, pacing, scope). Step 2.5 surfaces these as questions (interactive) or in the Outstanding Design Questions table (non-interactive / AFK).
+- **architect-design** — requires architect judgment first; may escalate to a new ADR. Step 2.5 can optionally pre-trigger the architect agent in `--deep-stop` mode to produce a concrete user-answerable question. Otherwise noted as "pending architect review".
+- **upstream-blocked** — external dependency, Claude Code capability gap, or waiting on third-party fix. Truly terminal for this loop — no user question would change anything. Report the blocker and move on.
+
+Record the category alongside the skip reason in the iteration report so Step 2.5 can read the categories deterministically.
 
 **Time-box each problem** to avoid runaway investigation: the delegated `manage-problem` skill's internal logic decides scope. If investigation reveals the scope has grown (e.g., effort was estimated S but turns out to be L or XL), save findings to the problem file, update the WSJF score, and move to the next problem. Never sink unbounded effort into one problem during AFK mode.
 
@@ -158,6 +186,7 @@ When `AskUserQuestion` is unavailable or the user is AFK, the skill (and the del
 | Pipeline risk at appetite (push or release >= 4/25) | Drain release queue (`push:watch` then `release:watch`) before next iteration — per ADR-018 (Step 6.5) |
 | Origin diverged before start | Pull `--ff-only` if trivial; stop with report (`git log HEAD..origin/<base>` and reverse) if non-fast-forward — per ADR-019 (Step 0) |
 | Fix verification needed | Skip problem, add to "needs verification" list |
+| Stop-condition #2 with user-answerable skip-reasons | Emit Outstanding Design Questions table in summary (do NOT call AskUserQuestion). The persona is AFK by definition — per JTBD-006 and ADR-013 Rule 6 — so the table is the default. Interactive invocations may batch up to 4 questions through AskUserQuestion instead — per ADR-013 Rule 1 (Step 2.5). |
 
 ## Edge Cases
 
@@ -183,9 +212,18 @@ The skill should produce a final summary when the loop ends:
 | 2 | P021 (Structured prompts) | Investigated root cause | Transitioned to Known Error |
 
 ### Skipped
-| Problem | Reason |
-|---------|--------|
-| P016 (Multi-concern splitting) | Awaiting user verification |
+| Problem | Skip-reason category | Reason |
+|---------|---------------------|--------|
+| P016 (Multi-concern splitting) | user-answerable (verification) | Awaiting user verification |
+
+### Outstanding Design Questions
+
+(Emitted only when stop-condition #2 fires AND at least one skipped ticket has a `user-answerable (design/direction/pacing/scope)` skip-reason. Populated by Step 2.5 in non-interactive / AFK mode per ADR-013 Rule 6.)
+
+| Ticket | Question | Context |
+|--------|----------|---------|
+| P049 (Known Error overloaded) | What should the new status be called, and what file suffix? | Decide so the rename/migration commit can land unambiguously. |
+| P051 (run-retro improvement axis) | Ship in this AFK loop or next? | P050 is still fresh; rewriting Step 2/4b/5 twice in one session may churn. |
 
 ### Remaining Backlog
 | WSJF | Problem | Status |
@@ -194,3 +232,5 @@ The skill should produce a final summary when the loop ends:
 
 ALL_DONE
 ```
+
+When every skipped ticket is in the `upstream-blocked` category (stop-condition #3) or there are no skipped tickets (stop-condition #1), omit the Outstanding Design Questions section entirely rather than rendering an empty heading.
