@@ -30,7 +30,9 @@ Consider the work done in this session and identify:
 
 **What recurring pattern did I (or the assistant) observe that would be better codified?** — a pattern that (a) was invoked multiple times in one session or across sessions, (b) has a deterministic action order or a clear invariant, and (c) is reusable beyond one project. These are **codification candidates** and route through Step 4b below. Do not treat them as problem tickets unless the user explicitly picks that routing option.
 
-For each codification candidate, also identify the **best shape** for the codification. The Windy Road suite supports many shapes — pick the one that fits the pattern, not the one you happened to learn first:
+**What existing skill, agent, hook, ADR, guide, or other codifiable showed a flaw, gap, or friction this session that a targeted edit would fix?** — the **improvement axis** of the codification surface. Criteria: (a) the flaw is reproducible and specific, (b) the fix is a bounded edit to an existing file, (c) no new concept is being invented. Improvement observations flow through the same Step 4b `AskUserQuestion` call as creation candidates, but their options name the improvement shape (e.g. `Skill — improvement stub`, `ADR — supersede or amend`) and the resulting Step 5 row records `Kind: improve` rather than `Kind: create`. An improvement that touches multiple unrelated concerns must be split using the P016 / P017 concern-boundary pattern before routing. If a single output accumulates ≥ 3 improvements in one session, prefer a single coordinating problem ticket over N separate tickets.
+
+For each codification candidate, also identify the **Kind** (`create` for a new output, `improve` for a targeted edit to an existing output) and the **best shape** for the codification. The Windy Road suite supports many shapes — pick the one that fits the pattern, not the one you happened to learn first:
 
 - **Skill** — deterministic multi-step sequence the user invokes by name (e.g. `wr-itil:ship-fix`). Worked example: `fetch origin → check changesets → score risk → commit → push → release → sync manifest → mark Fix Released`.
 - **Agent** — bounded investigation or review the main agent should delegate to (e.g. a performance-specialist the architect calls in for runtime-path changes). Place under `packages/<plugin>/agents/`.
@@ -75,12 +77,14 @@ For each item identified in "What was harder than it should have been", "What fa
 
 ### 4b. Recommend new codifications
 
-For each **codification candidate** identified in Step 2, route the decision through a single `AskUserQuestion` call. This is the ADR-013 Rule 1 structured-interaction pattern — do not present the choices as prose enumeration in the skill output. The shape identified in Step 2 determines which option rows the user picks from; every shape routes through the same `AskUserQuestion` so the decision stays one structured interaction (architect decision: flat shape-prefixed options, not a two-step type-then-action flow).
+For each **codification candidate** identified in Step 2, route the decision through a single `AskUserQuestion` call. This is the ADR-013 Rule 1 structured-interaction pattern — do not present the choices as prose enumeration in the skill output. The shape and Kind identified in Step 2 determine which option rows the user picks from; every shape and Kind routes through the same `AskUserQuestion` so the decision stays one structured interaction (architect decision: flat shape-prefixed options, not a two-step type-then-action or Kind-then-shape flow).
 
 For each candidate, invoke `AskUserQuestion` with:
 - `header: "Codification candidate"`
 - `multiSelect: false`
-- Options (a flat list; each option names the shape up front so the decision is auditable):
+- Options (a flat list; each option names the shape and Kind up front so the decision is auditable):
+
+  **Creation axis (Kind: create)** — new outputs:
   1. `Skill — create stub` — description: "Record a stub candidate (suggested name, scope, triggers, prior uses) for a future scaffolding flow. Skill scaffolding itself is out of scope for this retrospective."
   2. `Agent — create stub` — description: "Record a stub candidate for a new agent (suggested name, scope, trigger conditions, delegating skill). Place under `packages/<plugin>/agents/` when scaffolded."
   3. `Hook — create stub` — description: "Record a stub candidate for a new hook (event: PreToolUse / PostToolUse / UserPromptSubmit; trigger; action summary)."
@@ -93,24 +97,47 @@ For each candidate, invoke `AskUserQuestion` with:
   10. `Problem — invoke manage-problem` — description: "Delegate to `/wr-itil:manage-problem` so the candidate is WSJF-ranked against other backlog items. Routing skill, not a stub."
   11. `Test fixture — create stub` — description: "Record a candidate bats / unit-test fixture for the recurring failure pattern."
   12. `Memory — propose note` — description: "Record a proposed memory note (per-user or per-project) for a short user-habit observation that isn't a codifiable sequence."
-  13. `Skip — not codify-worthy` — description: "Neither stub nor route. The observation is too small, too ambiguous, or a one-off learning that belongs in BRIEFING.md."
 
-If the option count is impractical for a single `AskUserQuestion` payload in a given Claude Code version, fall back to a two-question flow: (1) `"Which shape fits?"` with the shape list, (2) `"What action?"` with `Create stub / Invoke dedicated skill / Skip` — but prefer the single call when the surface allows it.
+  **Improvement axis (Kind: improve)** — targeted edits to existing outputs (P051):
+  13. `Skill — improvement stub` — description: "Record a proposed targeted edit to an existing skill's SKILL.md (file path, observed flaw, evidence, edit summary). Use when an existing skill has a bounded, reproducible gap."
+  14. `Agent — improvement stub` — description: "Record a proposed targeted edit to an existing agent file (path, observed flaw, edit summary)."
+  15. `Hook — improvement stub` — description: "Record a proposed targeted edit to an existing hook script or `.claude/settings.json` wiring."
+  16. `ADR — supersede or amend` — description: "Delegate to `/wr-architect:create-adr` with a `supersedes ADR-N` hint so the new ADR explicitly replaces or amends the outdated one. Routing skill, not a stub."
+  17. `Guide — improvement edit` — description: "Delegate to `/wr-voice-tone:update-guide`, `/wr-style-guide:update-guide`, `/wr-jtbd:update-guide`, or `/wr-risk-scorer:update-policy` for a targeted edit to an existing guide (voice / style / JTBD / risk policy)."
+  18. `Problem — edit existing ticket` — description: "Delegate to `/wr-itil:manage-problem <NNN>` update flow to amend an existing open or known-error ticket with new observations from this session."
+
+  **Default:**
+  19. `Skip — not codify-worthy` — description: "Neither stub nor route. The observation is too small, too ambiguous, or a one-off learning that belongs in BRIEFING.md."
+
+If a single output has accumulated ≥ 3 improvement candidates in one session, prefer offering a single coordinating ticket (`Problem — invoke manage-problem` with an "apply N improvements to X" scope) over recording N separate improvement stubs — this reduces ticket churn and keeps the affected output's improvement queue coherent.
+
+If an improvement candidate touches multiple unrelated concerns, apply the P016 / P017 concern-boundary split before routing: re-run the `AskUserQuestion` once per concern, each with its own shape + Kind selection. This mirrors the concern-boundary analysis used when creating new problem tickets.
+
+If the option count is impractical for a single `AskUserQuestion` payload in a given Claude Code version, fall back to a two-question flow: (1) `"Which shape fits?"` with the shape list, (2) `"Create, improve, or skip?"` with `Create stub / Improvement stub / Invoke dedicated skill / Skip` — but prefer the single call when the surface allows it.
 
 When the user chooses any of the **Create stub** shapes (skill / agent / hook / settings / script / CI / test / memory), record a candidate entry in the Step 5 summary under "Codification Candidates" with:
+- **Kind** — `create`
 - **Shape** — which codification type (skill, agent, hook, etc.)
 - **Suggested name** — for skills: `wr-<plugin>:<action>`; for agents: `<plugin>:<name>`; for hooks: `<event>:<trigger>`; for scripts: `scripts/<name>.<ext>`; etc.
 - **Scope** — one sentence on what the codification does and when it should fire
 - **Triggers** — example user prompts or events that should invoke it
 - **Prior uses** — 2-3 observed invocations from this session
 
-When the user chooses any of the **Invoke <dedicated skill>** routes (ADR / JTBD / Guide / Problem), delegate to the named skill with a context hand-off describing the candidate. Record the routing decision in the Step 5 summary under "Codification Candidates" with Shape = the routing target and a `routed to <skill>` marker.
+When the user chooses any of the **Improvement stub** shapes (skill / agent / hook), record a candidate entry in the Step 5 summary under "Codification Candidates" with:
+- **Kind** — `improve`
+- **Shape** — which existing codifiable is being edited (skill, agent, hook)
+- **Target file** — the existing file path (e.g. `packages/itil/skills/manage-problem/SKILL.md`)
+- **Observed flaw** — one-sentence description of the gap, friction, or defect
+- **Edit summary** — one-sentence description of the proposed targeted edit
+- **Evidence** — 1-3 observations from this session showing the flaw
+
+When the user chooses any of the **Invoke <dedicated skill>** routes (ADR create / JTBD / Guide / Problem) OR the improvement routing options (ADR supersede or amend / Guide improvement edit / Problem edit existing ticket), delegate to the named skill with a context hand-off describing the candidate. Record the routing decision in the Step 5 summary under "Codification Candidates" with Kind (`create` or `improve`), Shape = the routing target, and a `routed to <skill>` marker. For `ADR — supersede or amend`, include the `supersedes ADR-N` hint in the hand-off so create-adr produces the correct MADR header.
 
 When the user chooses **Skip**, record the candidate in the Step 5 summary under "Codification Candidates" with a `skipped` marker so the pattern is still visible in the session audit trail.
 
-**Non-interactive fallback (per ADR-013 Rule 6):** if `AskUserQuestion` is unavailable, record each candidate in the Step 5 summary under "Codification Candidates" with a `flagged — not actioned (non-interactive)` marker, noting the identified Shape. Do not create stubs, route to dedicated skills, or scaffold. The user can review the flags and decide when they return.
+**Non-interactive fallback (per ADR-013 Rule 6):** if `AskUserQuestion` is unavailable, record each candidate in the Step 5 summary under "Codification Candidates" with a `flagged — not actioned (non-interactive)` marker, noting the identified Kind alongside Shape (e.g. `Kind: improve, Shape: skill, flagged — not actioned (non-interactive)`). Do not create stubs, route to dedicated skills, or scaffold. The user can review the flags and decide when they return. Improvement candidates flagged this way retain the Target file and Observed flaw fields so the user has enough to act on without re-deriving the context.
 
-**Backward compatibility**: "Skill" is retained as one shape among many so existing P044 muscle memory and `run-retro-skill-candidates.bats` continue to hold. Use the singular shape name in the summary (e.g. `Shape: skill`) so legacy greps still match.
+**Backward compatibility**: "Skill" is retained as one shape among many so existing P044 muscle memory and `run-retro-skill-candidates.bats` continue to hold. Use the singular shape name in the summary (e.g. `Shape: skill`) so legacy greps still match. Improvement-axis rows use the same singular shape names (`Shape: skill, Kind: improve`) so the Shape column stays consistent across both axes.
 
 ### 5. Summary
 
@@ -129,15 +156,18 @@ Present a summary to the user:
 
 ### Codification Candidates
 
-| Shape | Suggested name | Scope | Triggers | Decision |
-|-------|---------------|-------|----------|----------|
-| skill | [suggested name] | [scope] | [examples] | created stub / routed to <skill> / skipped / flagged (non-interactive) |
-| agent | ... | ... | ... | ... |
-| hook  | ... | ... | ... | ... |
+| Kind | Shape | Suggested name / Target file | Scope / Flaw | Triggers / Evidence | Decision |
+|------|-------|-----------------------------|--------------|----------------------|----------|
+| create  | skill | [suggested name] | [scope] | [examples] | created stub / routed to <skill> / skipped / flagged (non-interactive) |
+| create  | agent | ... | ... | ... | ... |
+| improve | skill | [target file path] | [observed flaw] | [1-3 session observations] | improvement stub / routed to <skill> / skipped / flagged (non-interactive) |
+| improve | hook  | ... | ... | ... | ... |
 
 ### No Action Needed
 - [learnings that were already captured]
 ```
+
+The `Kind` column takes values `create` or `improve` — the create / improve axis defined in Step 2 and Step 4b. Creation rows use the `Suggested name` / `Scope` / `Triggers` field semantics; improvement rows reuse the same columns with `Target file` / `Observed flaw` / `Evidence` semantics (per the stub-recording guidance in Step 4b). The decision column carries the same vocabulary for both Kinds, with `improvement stub` replacing `created stub` for Kind=improve rows.
 
 If the "Codification Candidates" table has no rows, omit it rather than rendering an empty header. The legacy "Skill Candidates" heading is preserved as a worked-example row in the Shape column so downstream tooling that grepped for "Skill Candidates" continues to find skill-shaped entries within the unified table.
 

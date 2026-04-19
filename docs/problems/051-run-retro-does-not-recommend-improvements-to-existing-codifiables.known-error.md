@@ -1,10 +1,36 @@
 # Problem 051: run-retro does not recommend improvements to existing skills, agents, hooks, or other codifiables
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-19
 **Priority**: 8 (Medium) — Impact: Minor (2) x Likelihood: Likely (4)
 **Effort**: M
-**WSJF**: 4.0 — (8 × 1.0) / 2
+**WSJF**: 8.0 — (8 × 2.0) / 2
+
+## Fix Released
+
+Shipped 2026-04-19 (AFK iter 3) — `packages/retrospective/skills/run-retro/SKILL.md` extended with the P051 improvement axis:
+
+- **Step 2**: added an improvement-shaped reflection category ("What existing skill, agent, hook, ADR, guide, or other codifiable showed a flaw, gap, or friction this session that a targeted edit would fix?") with the (a) reproducible (b) bounded edit (c) no new concept criteria.
+- **Step 4b**: extended the single flat `AskUserQuestion` option list with six improvement-axis options — `Skill — improvement stub`, `Agent — improvement stub`, `Hook — improvement stub`, `ADR — supersede or amend`, `Guide — improvement edit`, `Problem — edit existing ticket`. Kept P050's 12 creation-axis options intact; total now 19 options. Kept the single-call preference; extended the two-question fallback to include "Create, improve, or skip?".
+- **Step 4b**: added P016/P017 concern-boundary splitting for multi-concern improvements; added the `≥ 3 improvements per output → coordinating ticket` discipline.
+- **Step 4b stub recording**: split into two rubrics — creation rubric (Kind/Shape/Suggested name/Scope/Triggers/Prior uses) and improvement rubric (Kind/Shape/Target file/Observed flaw/Edit summary/Evidence).
+- **Non-interactive fallback**: records `Kind:` alongside `Shape:` (e.g. `Kind: improve, Shape: skill, flagged — not actioned (non-interactive)`), and improvement flags retain Target file + Observed flaw so the user has context on return.
+- **Step 5 summary table**: added a `Kind` column taking `create`/`improve`; the decision column gains an `improvement stub` marker for Kind=improve rows.
+- **Backward compatibility**: singular shape names used across both axes so legacy `Shape: skill` greps still match.
+
+Tests — `packages/retrospective/skills/run-retro/test/run-retro-codification-candidates.bats` extended with five P051-specific structural assertions (RED then GREEN this iteration):
+
+- Step 2 includes an improvement reflection category for existing codifiables.
+- Step 4b names improvement-shaped options for multiple shapes (≥ 3 shape-prefixed improvement rows).
+- Step 4b routes improvement-axis ADR candidates to create-adr with `supersede or amend` hint.
+- Step 5 summary distinguishes create from improve via a Kind column.
+- Step 4b non-interactive fallback covers improvement candidates (records Kind alongside Shape).
+
+Full run-retro test surface now 24 tests (9 P050 + 5 P051 + 10 P044), all passing. Full project test surface: 246 tests, 0 failures.
+
+Architecture + JTBD reviews: both PASS. No new ADR required — within-skill extension on top of ADR-013 (Rules 1 + 6). Option count 19 is within the single-call preference; two-question fallback already documented in line 100 covers the escape hatch. ADR-014 explicitly scopes run-retro out for commit behaviour; unchanged in this iteration. ADR-005 Permitted Exception covers the bats structural assertions. JTBD alignment: JTBD-001 (routing reduces triage overhead), JTBD-006 (single AskUserQuestion preserved for AFK safety), JTBD-101 (parallel naming mirrors P050 so contributors see one consistent pattern).
+
+Awaiting user verification: next `/wr-retrospective:run-retro` invocation should exercise the generalised Step 2 (creation + improvement categories), the 19-option flat `AskUserQuestion` at Step 4b, and the Kind column in Step 5 summary.
 
 ## Pacing decision (2026-04-19, user)
 
