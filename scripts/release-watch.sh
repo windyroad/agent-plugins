@@ -3,6 +3,18 @@
 # Merges the open changeset release PR, watches the Release workflow,
 # and reports which packages were published. On failure: shows what
 # failed and prompts for a fix.
+#
+# Contract with the release gate (per ADR-015, ADR-018, ADR-020):
+#   Callers MUST have an in-session release risk score for this session
+#   (produced by wr-risk-scorer:pipeline). Running this script immediately
+#   after `npm run push:watch` within the same session is supported — the
+#   pipeline-state hash is stable across a policy-authorised git push, so
+#   the score produced pre-push remains valid post-push (P054). No
+#   mid-cycle rescore delegation is required.
+#
+#   If the gate still reports drift after a push (e.g. new uncommitted
+#   edits arrived, TTL expired, or a new changeset was added), delegate
+#   to wr-risk-scorer:pipeline to rescore against the current state.
 
 set -euo pipefail
 

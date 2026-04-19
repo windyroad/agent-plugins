@@ -33,25 +33,41 @@ for arg in "$@"; do
 done
 
 # --- Fast hash inputs mode: output only metadata for drift detection hash ---
-# NOTE: Do NOT include `git status --porcelain` (changes on staging) or
-# `git rev-parse HEAD` (changes on commit). Both cause false drift detection.
-# Use diff --stat which reflects actual content changes only.
+# Tree-based hash — stable across BOTH commit and push operations (P054).
+# Captures the conceptual "HEAD + index + working tree" state by asking git
+# to build a tree object that reflects what a commit of the current state
+# would contain. This makes the hash invariant over:
+#   - git commit (content moves from index to HEAD; tree SHA is identical)
+#   - git push  (HEAD is unchanged locally; tree SHA is identical)
+# The previous approach hashed `git diff origin/main --stat`, which shrinks
+# to empty after a push advances origin/main, producing spurious drift
+# denials on npm run release:watch even though the commits being released
+# were the same ones already scored.
 if [ "$SHOW_HASH_INPUTS" = true ]; then
-    # Single stable diff: all local changes (staged + committed) vs remote.
-    # This is stable across commit and push operations — content moves between
-    # pipeline stages (staged → committed → pushed) without changing the hash.
-    # Previous approach used git diff HEAD + git diff origin/main..HEAD which
-    # broke on every commit because content shifted between the two diffs.
-    # Exclude docs/governance paths from hash — they cannot affect the running application
+    # Exclude docs/governance paths — they cannot affect the running application.
     EXCL=$(_doc_exclusions)
-    if git rev-parse --verify origin/main >/dev/null 2>&1; then
-        eval "git diff origin/main --stat -- $EXCL" 2>/dev/null || true
-    elif git rev-parse --verify origin/master >/dev/null 2>&1; then
-        eval "git diff origin/master --stat -- $EXCL" 2>/dev/null || true
+    # git stash create writes a commit object (tree + parents) representing
+    # index + working tree, without touching HEAD, the index, or any refs.
+    # Returns empty when there is nothing to stash (clean tree).
+    STASH_COMMIT=$(git stash create 2>/dev/null || true)
+    if [ -n "$STASH_COMMIT" ]; then
+        CONCEPTUAL_TREE=$(git rev-parse "${STASH_COMMIT}^{tree}" 2>/dev/null || echo "")
     else
-        eval "git diff HEAD --stat -- $EXCL" 2>/dev/null || true
+        CONCEPTUAL_TREE=$(git rev-parse HEAD^{tree} 2>/dev/null || echo "")
     fi
-    # Changeset count (affects release/changeset risk)
+    if [ -n "$CONCEPTUAL_TREE" ]; then
+        # Diff against the empty tree to enumerate every file in the
+        # conceptual tree with its blob SHA (shown as "added"). git diff
+        # supports `:!` pathspec exclusions where `git ls-tree` does not,
+        # so this is the path that honours the doc exclusions above.
+        # Same-content trees produce identical output regardless of which
+        # ref points at them, which is what gives push stability.
+        # 4b825dc642cb6eb9a060e54bf8d69288fbee4904 is git's well-known empty-tree SHA.
+        eval "git diff --raw 4b825dc642cb6eb9a060e54bf8d69288fbee4904 $CONCEPTUAL_TREE -- $EXCL" 2>/dev/null || true
+    fi
+    # Changeset count (affects release/changeset risk — tracked separately
+    # because .changeset/ is in the doc-exclusions list and therefore not
+    # reflected in the tree listing above).
     if [ -d ".changeset" ]; then
         find .changeset -name '*.md' -not -name 'README.md' 2>/dev/null | wc -l | tr -d ' '
     fi
