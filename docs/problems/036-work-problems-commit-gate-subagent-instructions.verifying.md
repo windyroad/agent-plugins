@@ -1,9 +1,15 @@
 # Problem 036: work-problems orchestrator does not verify commit-landing between iterations
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-17
-**Updated**: 2026-04-17 (rescoped after P035 fix)
+**Updated**: 2026-04-17 (rescoped after P035 fix); 2026-04-19 (fix released)
 **Priority**: 4 (Low) — Impact: Minor (2) x Likelihood: Unlikely (2)
+**Effort**: S
+**WSJF**: 4.0 — (4 × 1.0) / 1
+
+## Fix Released
+
+Fix shipped in AFK iter 4 (2026-04-19, pending commit). Added Step 6.75 "Inter-iteration verification (P036)" to `packages/itil/skills/work-problems/SKILL.md`: after the release-cadence step and before the loop, the orchestrator runs `git status --porcelain` and classifies the result as clean (proceed), dirty-for-known-reason (carry forward in next iteration context), or dirty-for-unknown-reason (halt the loop with divergence report). Non-interactive default recorded in the decision table. Recovery attempt is explicitly out of scope per ADR-013 Rule 6 — the check surfaces the bug, the user decides. Added 6-test doc-lint bats file `packages/itil/skills/work-problems/test/work-problems-inter-iteration-verify.bats`. Released via `@windyroad/itil` patch bump. Awaiting user verification — next AFK loop that lands a subagent-internal commit failure should halt with a structured divergence report instead of silently continuing.
 
 ## Description
 
