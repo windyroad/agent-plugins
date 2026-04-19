@@ -21,19 +21,22 @@ When referencing problem IDs, ADR IDs, or JTBD IDs in prose output, always inclu
 - **Work**: `problem work` — runs a review first, then begins working the highest-WSJF problem
 - **Review**: `problem review` — re-assess all open problems: update priorities per RISK-POLICY.md, estimate effort, calculate WSJF, and update files
 
-**Closing problems:** Problems are closed ONLY after the user verifies the fix in production — not when the fix is committed or released. The workflow:
-1. When the fix is released: add a `## Fix Released` section to the known-error file (e.g., `Deployed in v0.26.X. Awaiting user verification.`). Keep the file as `.known-error.md`.
-2. When the user explicitly confirms ("it's fixed", "verified", "working"): `git mv` to `.closed.md`, update the Status field, and reference the problem in the commit message (e.g., "Closes P008").
+**Closing problems:** Problems are closed ONLY after the user verifies the fix in production — not when the fix is committed or released. The workflow (per ADR-022):
+1. When the fix is released: `git mv` the file from `.known-error.md` to `.verifying.md`, update the Status field to "Verification Pending", AND add a `## Fix Released` section (e.g., `Deployed in v0.26.X. Awaiting user verification.`). All three edits land in the same commit per ADR-014.
+2. When the user explicitly confirms ("it's fixed", "verified", "working"): `git mv` from `.verifying.md` to `.closed.md`, update the Status field to "Closed", and reference the problem in the commit message (e.g., "Closes P008").
 3. Never assume the fix works — always wait for explicit user confirmation before closing.
+
+The `.verifying.md` suffix distinguishes "fix released, awaiting user verification" from "root cause confirmed, fix not yet implemented" (the Known Error meaning pre-release). See ADR-022 for rationale.
 
 ## Problem Lifecycle
 
 | Status | File suffix | Meaning | Entry criteria |
 |--------|-----------|---------|----------------|
 | **Open** | `.open.md` | Reported, under investigation | New problem identified |
-| **Known Error** | `.known-error.md` | Root cause confirmed, fix path clear | Root cause documented, reproduction test exists, workaround in place |
+| **Known Error** | `.known-error.md` | Root cause confirmed, fix path clear, **fix NOT yet released** | Root cause documented, reproduction test exists, workaround in place |
+| **Verification Pending** | `.verifying.md` | Fix released, awaiting user verification (ADR-022) | Fix shipped; `## Fix Released` section written; user action remaining |
 | **Parked** | `.parked.md` | Blocked on upstream or suspended by user decision | Upstream blocker identified, or user explicitly suspends; reason and un-park trigger documented |
-| **Closed** | `.closed.md` | Fix verified in production | Fix released AND user explicitly confirms it works |
+| **Closed** | `.closed.md` | Fix verified in production | User explicitly confirms the released fix works |
 
 **Parked problems** are excluded from WSJF ranking and work selection. They are listed separately in review output so users can see them without them polluting the backlog. To park a problem:
 1. `git mv docs/problems/<NNN>-<title>.<current>.md docs/problems/<NNN>-<title>.parked.md`
@@ -41,6 +44,8 @@ When referencing problem IDs, ADR IDs, or JTBD IDs in prose output, always inclu
 3. Add a `## Parked` section with: reason for parking, expected trigger to un-park, date parked
 
 To un-park: `git mv` back to `.open.md` (or `.known-error.md` if root cause is confirmed), update Status, remove `## Parked` section.
+
+**Verification Pending problems** are also excluded from WSJF ranking — their remaining work is user-side verification, not dev effort. They appear in a dedicated "Verification Queue" section in review output so the user can see what's waiting on them without mixing with dev-work ranking. See step 9c for the queue layout.
 
 **Test-driven resolution:** When root cause is identified, create a failing test that reproduces the problem. Skip/disable the test if a feature-disabling workaround is applied. Re-enable the test when the permanent fix is implemented — the test passing confirms resolution.
 
@@ -58,6 +63,10 @@ Problems are ranked using Weighted Shortest Job First (WSJF):
 |--------|-----------|
 | Known Error | 2.0 |
 | Open | 1.0 |
+| Verification Pending | 0 (excluded) |
+| Parked | 0 (excluded) |
+
+`Verification Pending` and `Parked` tickets are excluded from the main dev-work ranking per ADR-022 (verification) and the Parked policy above. `Verification Pending` remaining work is user-side confirmation, not dev effort, so mixing it into the dev-work queue would distort WSJF. Both are surfaced in dedicated sections (see step 9c) — not in the ranked table.
 
 **Effort** (estimated fix size — smaller effort = higher priority):
 
@@ -251,6 +260,8 @@ Apply the update — this could be:
 
 **Open → Known Error** (rename file, update content):
 
+Known Error means "root cause confirmed, fix path clear, fix NOT yet released" (per ADR-022). Releasing the fix is a separate Known Error → Verification Pending transition — do NOT stay on `.known-error.md` after the fix ships.
+
 Pre-flight checks before allowing transition:
 - [ ] Root cause is documented (not just "Preliminary Hypothesis")
 - [ ] At least one investigation task is checked off
@@ -266,7 +277,29 @@ git mv docs/problems/<NNN>-<title>.open.md docs/problems/<NNN>-<title>.known-err
 
 Update the "Status" field in the file to "Known Error".
 
-**Closing** requires user verification in production — see "Closing problems" above. When the fix is released, add a `## Fix Released` section but keep as `.known-error.md`. Only close when the user confirms.
+**Known Error → Verification Pending** (fix released, per ADR-022):
+
+When the fix for a Known Error ships, transition the ticket in a single commit:
+
+```bash
+git mv docs/problems/<NNN>-<title>.known-error.md docs/problems/<NNN>-<title>.verifying.md
+```
+
+Then edit the file:
+- Update the "Status" field to "Verification Pending"
+- Add a `## Fix Released` section with: release marker (version, commit SHA, or date), one-sentence fix summary, "Awaiting user verification" line, and any exercise evidence from the releasing session.
+
+Both the `git mv` and the file edits belong in the same commit as the fix implementation per ADR-014 (governance skills commit their own work). The `.verifying.md` suffix signals to every downstream consumer (work-problems classifier, review step 9d, README rendering) that the remaining work is user-side verification — no file-body scan needed.
+
+**Verification Pending → Closed** (user confirms):
+
+Only the user can make this call. When they explicitly confirm the fix works in production:
+
+```bash
+git mv docs/problems/<NNN>-<title>.verifying.md docs/problems/<NNN>-<title>.closed.md
+```
+
+Update the "Status" field to "Closed". Reference the problem ID in the closure commit message (e.g., "Closes P008"). Step 9d's verification prompt is the structured path that fires this transition during `manage-problem review`.
 
 ### 8. For list: Show summary
 
@@ -301,9 +334,9 @@ If the command prints "stale", or `README.md` does not exist in git, run the ful
 
 Read `RISK-POLICY.md` to get the current impact levels (1-5), likelihood levels (1-5), risk matrix, and label bands. These are the authoritative definitions — do not use outdated scales.
 
-**Step 9b: For each open/known-error problem (skip `.parked.md` files entirely):**
+**Step 9b: For each open/known-error problem (skip `.parked.md` and `.verifying.md` files entirely):**
 
-Parked problems are excluded from WSJF ranking — do not read, score, or update them in this step. They are shown in a separate section in step 9c.
+Parked problems and Verification Pending problems are excluded from WSJF ranking — do not read, score, or update them in this step. Parked tickets are shown in a dedicated Parked section in step 9c; Verification Pending tickets are shown in a dedicated Verification Queue section in step 9c (ranked by release age, not WSJF — per ADR-022).
 
 1. Read the problem file
 2. Read the codebase context — check if the problem's root cause has been investigated, if there are related fixes in git history, or if the problem is stale
@@ -321,10 +354,15 @@ Parked problems are excluded from WSJF ranking — do not read, score, or update
 
 **Step 9c: Present summary and select problem to work**
 
-After reviewing all problems, present a WSJF-ranked table for open/known-error problems:
+After reviewing all problems, present a WSJF-ranked table for open/known-error problems (the main dev-work queue):
 
 | WSJF | ID | Title | Severity | Status | Effort | Notes |
 |------|-----|-------|----------|--------|--------|-------|
+
+Then present a separate **Verification Queue** section for `.verifying.md` files (per ADR-022 — ranked by release age, oldest first; no WSJF because the multiplier is 0):
+
+| ID | Title | Released | Fix summary |
+|----|-------|----------|-------------|
 
 Then present a separate **Parked** section listing `.parked.md` files (no ranking):
 
@@ -336,7 +374,7 @@ Highlight:
 - Problems that were auto-transitioned to known-error
 - Problems that may be stale (reported > 2 weeks ago with no investigation progress)
 - Problems that have been fixed but not closed (check git history for fix commits)
-- Known errors with a `## Fix Released` section (pending user verification)
+- Verification Pending tickets whose fix has been exercised repeatedly without regression (P048 detection layer — candidate for closure verification)
 
 **When the operation is `work` (not just `review`), select the problem to work using `AskUserQuestion`:**
 
@@ -352,7 +390,7 @@ Highlight:
 
 **Step 9d: Check for pending verifications**
 
-For each known-error that has a `## Fix Released` section, use `AskUserQuestion` to ask the user if the fix has been verified in production. The question MUST include a fix summary extracted from the `## Fix Released` section — include the first sentence (or first bullet list) of that section in the question body or as the option description, so the user can answer without reading the full problem file. Do not ask with only the problem ID + title + version. If the user confirms, close the problem (`git mv` to `.closed.md`, update Status). If the user says no or is unsure, leave it as known-error.
+Target `docs/problems/*.verifying.md` via glob — do NOT scan `.known-error.md` bodies for a `## Fix Released` section (per ADR-022, Verification Pending is a first-class status, not a substring marker). For each `.verifying.md` file, use `AskUserQuestion` to ask the user if the fix has been verified in production. The question MUST include a fix summary extracted from the `## Fix Released` section — include the first sentence (or first bullet list) of that section in the question body or as the option description, so the user can answer without reading the full problem file. Do not ask with only the problem ID + title + version. If the user confirms, close the problem (`git mv` from `.verifying.md` to `.closed.md`, update Status). If the user says no or is unsure, leave it as Verification Pending.
 
 **Step 9e: Update files and refresh README.md cache**
 
@@ -369,6 +407,15 @@ Edit each problem file where the priority changed. Then write/overwrite `docs/pr
 | WSJF | ID | Title | Severity | Status | Effort |
 |------|-----|-------|----------|--------|--------|
 | <score> | P<NNN> | <title> | <severity> | <status> | <effort> |
+...
+
+## Verification Queue
+
+Fix released, awaiting user verification (driven off `docs/problems/*.verifying.md` via glob — per ADR-022). Ranked by release age, oldest first:
+
+| ID | Title | Released | Fix summary |
+|----|-------|----------|-------------|
+| P<NNN> | <title> | <release marker> | <one-sentence fix summary> |
 ...
 
 ## Parked
@@ -417,9 +464,10 @@ Commit the completed work per ADR-014 (governance skills commit their own work):
 3. `git commit -m "<message>"` using the convention for the operation type:
    - New problem: `docs(problems): open P<NNN> <title>`
    - Known Error transition: `docs(problems): P<NNN> known error — <root cause summary>`
+   - Verification Pending transition: usually folded into the `fix(<scope>): ... (closes P<NNN>)` commit that ships the fix — the `git mv` to `.verifying.md` and the `## Fix Released` section land together. If transitioning without a fix commit, use `docs(problems): P<NNN> verification pending — <release marker>`.
    - Problem closed: `docs(problems): close P<NNN> <title>`
    - Review/re-rank: `docs(problems): review — re-rank priorities`
-   - Fix implemented: `fix(<scope>): <description> (closes P<NNN>)` — include problem file changes in the same commit
+   - Fix implemented: `fix(<scope>): <description> (closes P<NNN>)` — include problem file changes (rename to `.verifying.md` + `## Fix Released` section) in the same commit per ADR-022
 4. If risk is above appetite: use `AskUserQuestion` to ask whether to commit anyway, remediate first, or park the work. If `AskUserQuestion` is unavailable, skip the commit and report the uncommitted state clearly (ADR-013 Rule 6 fail-safe). This applies only to the risk-above-appetite branch, not to the delegation-unavailable case above.
 
 ### 12. Auto-release when changesets are queued (ADR-020)

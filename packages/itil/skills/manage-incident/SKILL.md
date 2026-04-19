@@ -210,7 +210,7 @@ linked_id=<extracted from Linked Problem section>
 linked_file=$(ls docs/problems/${linked_id}-*.md 2>/dev/null | head -1)
 ```
 
-- If `linked_file` ends with `.known-error.md` or `.closed.md` → close is allowed
+- If `linked_file` ends with `.known-error.md`, `.verifying.md`, or `.closed.md` → close is allowed (per ADR-022: `.verifying.md` means root cause is confirmed AND fix has been released, which satisfies the "Restored → Closed" handoff at least as well as Known Error did under the old contract)
 - If `linked_file` ends with `.open.md` → close is blocked; report "Linked problem ${linked_id} is still Open. Transition it to Known Error first, or update the Linked Problem reference."
 - If no linked problem and the file has a **No Problem** section → close is allowed
 

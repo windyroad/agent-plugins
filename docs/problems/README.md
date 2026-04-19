@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-04-19 (AFK iter 4 — P053 shipped: work-problems stop-condition #2 now emits `### Outstanding Design Questions` table before `ALL_DONE` in AFK mode; interactive mode batches via AskUserQuestion per ADR-013; skip-reason taxonomy added to classifier; 7 new P053 structural tests RED→GREEN; 253/253 project tests pass. Iter 3: P051; iter 2: P050; iter 1: P047).
+> Last reviewed: 2026-04-19 (AFK iter 5 — P049 SKILL.md contract shipped: manage-problem + work-problems + manage-incident SKILL.md and README template now document the Verification Pending `.verifying.md` status per ADR-022; WSJF multiplier 0 excludes verification work from dev ranking; 11 new P049 structural tests RED→GREEN; 264/264 project tests pass. Iter 4: P053; iter 3: P051; iter 2: P050; iter 1: P047. Migration of 16 existing `.known-error.md` Fix-Released tickets to `.verifying.md` deferred to next commit in this session per ADR-022).
 > Run `/wr-itil:manage-problem review` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -20,7 +20,6 @@
 | 4.5 | P033 | No persistent risk register for ISO 31000 / ISO 27001 | 9 Med | Known Error | L |
 | 4.0 | P024 | Risk-scorer WIP flag uncommitted completed work | 8 Med | Known Error | L |
 | 4.0 | P048 | manage-problem does not surface Fix Released tickets as verification candidates | 8 Med | Open | M |
-| 4.0 | P049 | Known Error status overloaded — "fix released, awaiting verification" deserves its own status | 8 Med | Open | M |
 | 2.25 | P015 | TDD vague Gherkin outcome steps | 9 Med | Open | L |
 | 2.0 | P018 | TDD enforce BDD + Example Mapping principles | 16 High | Open | XL ↑ |
 | 2.0 | P022 | Agents must not fabricate time estimates | 16 High | Open | XL ↑ |
@@ -33,7 +32,9 @@
 
 Legend: ↑ = effort bucket re-rated upward in this review (P047 closure, 2026-04-19).
 
-## Known Errors (Fix Released — pending user verification)
+## Verification Queue
+
+Fix released, awaiting user verification (driven off `docs/problems/*.verifying.md` via glob per ADR-022 — currently hand-maintained here while the 16-file migration from `.known-error.md` is pending in a follow-up commit).
 
 | ID | Title | Released in |
 |----|-------|-------------|
@@ -49,7 +50,8 @@ Legend: ↑ = effort bucket re-rated upward in this review (P047 closure, 2026-0
 | P047 | WSJF effort buckets coarse and not re-rated at lifecycle transitions | 2026-04-19 (AFK iter 1 commit 5c677cc) — next `manage-problem review` or `work-problems` iteration exercises the new XL bucket and the step 7 / step 9b re-rate language; user verification needed at that point |
 | P050 | run-retro generalises codification branch from skill-only to 12 shapes | 2026-04-19 (AFK iter 2 commit pending) — next `/wr-retrospective:run-retro` invocation should present the generalised Step 2 prompt and the flat shape-prefixed Step 4b `AskUserQuestion`; user verification needed at that point. |
 | P051 | run-retro extended with improvement axis (6 improvement-shaped options + Kind column + concern-boundary splitting) | 2026-04-19 (AFK iter 3, commit 4a107a3) — next `/wr-retrospective:run-retro` invocation should present Step 2's improvement reflection category, a 19-option flat `AskUserQuestion` at Step 4b (12 create + 6 improve + 1 skip), and a Kind column in the Step 5 Codification Candidates table. User verification needed at that point. |
-| P053 | work-problems surfaces outstanding design questions at stop-condition #2 (Step 2.5 + skip-reason taxonomy + Outstanding Design Questions table in AFK summary) | 2026-04-19 (AFK iter 4, pending commit) — next AFK loop that hits stop-condition #2 with ≥1 user-answerable skipped ticket should emit an `### Outstanding Design Questions` table in the final summary. User verification needed at that point. |
+| P053 | work-problems surfaces outstanding design questions at stop-condition #2 (Step 2.5 + skip-reason taxonomy + Outstanding Design Questions table in AFK summary) | 2026-04-19 (AFK iter 4, commit a0600d9) — next AFK loop that hits stop-condition #2 with ≥1 user-answerable skipped ticket should emit an `### Outstanding Design Questions` table in the final summary. User verification needed at that point. |
+| P049 | Verification Pending `.verifying.md` status — SKILL.md contract half (manage-problem / work-problems / manage-incident + README template) per ADR-022; migration of 16 existing `.known-error.md` Fix-Released tickets deferred to next commit | 2026-04-19 (AFK iter 5, pending commit) — next `manage-problem review` invocation should present a dedicated Verification Queue section and target `.verifying.md` via glob in step 9d. User verification needed at that point. |
 
 ## Closed
 

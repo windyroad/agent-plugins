@@ -1,10 +1,52 @@
 # Problem 049: Known Error status is overloaded — "fix released, awaiting verification" deserves its own explicit status
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-19
 **Priority**: 8 (Medium) — Impact: Minor (2) x Likelihood: Likely (4)
-**Effort**: M
-**WSJF**: 4.0 — (8 × 1.0) / 2
+**Effort**: M (re-rated L for the full scope including migration; see iter 5 plan)
+**WSJF**: 0 (excluded from dev-work ranking — per ADR-022)
+
+## Fix Released
+
+Shipped 2026-04-19 (AFK iter 5, this commit) — the SKILL.md documentation contract half of ADR-022. Migration of existing `.known-error.md` files follows in a separate commit per ADR-022 Scope.
+
+- **`packages/itil/skills/manage-problem/SKILL.md`**:
+  - Lifecycle table gains a `Verification Pending | .verifying.md | Fix released, awaiting user verification (ADR-022)` row between Known Error and Parked.
+  - WSJF multiplier table gains `Verification Pending | 0 (excluded)` and `Parked | 0 (excluded)` rows with rationale (user-side work should not mix into dev-work ranking).
+  - Closing-problems section rewritten: fix-release transition is Known Error → Verification Pending (`git mv` to `.verifying.md` + Status field update + `## Fix Released` section, all one commit per ADR-014). Closed is the user-confirmed Verification Pending → Closed transition.
+  - Step 7 adds explicit "Known Error → Verification Pending" and "Verification Pending → Closed" transition blocks with git mv commands.
+  - Step 9b explicitly skips `.verifying.md` and `.parked.md` files in WSJF loop.
+  - Step 9c presents a dedicated "Verification Queue" section (ranked by release age, oldest first) parallel to the main dev-work ranking.
+  - Step 9d targets `docs/problems/*.verifying.md` via glob; closure transitions `git mv` from `.verifying.md` to `.closed.md`.
+  - Step 9e README template gains a "Verification Queue" section alongside WSJF Rankings, Parked.
+  - Commit-convention list documents the Verification Pending transition.
+- **`packages/itil/skills/work-problems/SKILL.md`**:
+  - Step 1 backlog scan excludes `.verifying.md` (per ADR-022).
+  - Step 4 classifier row "Known Error with `## Fix Released` → Skip" replaced with "`.verifying.md` → Skip" (suffix-based, no file-body scan).
+- **`packages/itil/skills/manage-incident/SKILL.md`**:
+  - Step 9 linked-problem close gating accepts `.verifying.md` alongside `.known-error.md` and `.closed.md` (ADR-022: Verification Pending is strictly stronger than Known Error for the Restored → Closed handoff because the fix has actually shipped).
+- **`docs/problems/README.md`**:
+  - Former "Known Errors (Fix Released — pending verification)" shadow table replaced with a "Verification Queue" section citing ADR-022.
+
+Tests — `packages/itil/skills/manage-problem/test/manage-problem-verification-pending.bats` (new, 11 assertions, RED→GREEN this iteration):
+
+- ADR-022 exists; three SKILL.md files exist (preconditions).
+- Lifecycle table carries Verification Pending + `.verifying.md`.
+- WSJF multiplier table documents the exclusion.
+- Known Error → Verification Pending transition documented.
+- Review step 9 targets `.verifying.md` via glob.
+- Review step 9 has a Verification Queue section.
+- SKILL.md cites ADR-022.
+- work-problems and manage-incident reference `.verifying.md`.
+- README.md template has a Verification Queue section.
+
+Full project test surface: 264 tests, 0 failures (was 253/0; +11 from this iteration).
+
+**What's deferred** (separate follow-up commit in this session, per ADR-022 Scope): migration of the 16 existing `.known-error.md` files that carry `## Fix Released` sections → `.verifying.md`. Each rename preserves git history via rename detection. Status field flipped from "Known Error" to "Verification Pending" in each. That commit will also update `docs/problems/README.md`'s Verification Queue table to cite the file glob rather than the hand-maintained list.
+
+Architecture + JTBD reviews: both PASS. ADR-022 fully pre-approves this scope (architect advisory). No new ADR needed. ADR-022 itself stays `.proposed.md` until end-to-end validation over the next few session cycles (architect recommendation). ADR-005 Permitted Exception covers the structural bats tests. JTBD-001 / JTBD-006 / JTBD-101 / JTBD-201 all aligned.
+
+Awaiting user verification: next `manage-problem review` invocation should present a dedicated Verification Queue section; any fix that lands should transition the ticket from `.known-error.md` to `.verifying.md`; `manage-incident` close should accept `.verifying.md` linked-problem states.
 
 ## Description
 

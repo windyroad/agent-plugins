@@ -43,6 +43,7 @@ Read `docs/problems/README.md` if it exists and is fresh (check via git history 
 Exclude:
 - `.closed.md` files (done)
 - `.parked.md` files (blocked on upstream)
+- `.verifying.md` files (Verification Pending — fix released, awaiting user verification per ADR-022; surfaced in the Verification Queue section, never in dev-work ranking)
 - Problems with no WSJF score (need a review first — run `/wr-itil:manage-problem review` as the first iteration if scores are missing)
 
 ### Step 2: Check stop conditions
@@ -91,8 +92,8 @@ Read the problem file and apply these deterministic rules:
 
 | Problem state | Action | Skip-reason category |
 |---|---|---|
-| Known Error with `## Fix Released` | **Skip** — needs user verification | user-answerable (verification) |
-| Known Error with fix strategy documented | **Work it** — implement the fix | — |
+| `.verifying.md` (Verification Pending, per ADR-022) | **Skip** — fix released, awaiting user verification | user-answerable (verification) |
+| Known Error with fix strategy documented | **Work it** — implement the fix (on release, transition to `.verifying.md` per ADR-022) | — |
 | Known Error without fix strategy | **Work it** — produce a fix strategy, then implement | — |
 | Open problem with preliminary hypothesis or investigation notes | **Work it** — continue the investigation | — |
 | Open problem with no leads (empty Root Cause Analysis) | **Work it** — read the relevant code, form a hypothesis, document findings | — |
