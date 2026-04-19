@@ -18,6 +18,7 @@
 > Added 2026-04-19 without full re-review: P049 (Known Error status overloaded with Fix Released sub-state — 16/16 current Known Errors are empirically Fix Released; suggests introducing an explicit status). Run `/wr-itil:manage-problem review` to refresh rankings.
 > Added 2026-04-19 without full re-review: P050 (run-retro does not recommend new agents/hooks/other codifiable outputs — generalises P044 from skills-only to the full codification surface). Run `/wr-itil:manage-problem review` to refresh rankings.
 > Added 2026-04-19 without full re-review: P051 (run-retro does not recommend improvements to existing codifiables — 4/5 session-driven tickets this session were improvement-shaped). Run `/wr-itil:manage-problem review` to refresh rankings.
+> Added 2026-04-19: P052 → Known Error in same session. ADR-021's first production exercise (Release run 24618590442) shipped a drifted Version PR because release.yml didn't pass `version: npm run version` to changesets/action. Fix implemented (release.yml + ADR-021 Confirmation + bats regression guard); awaiting Version PR re-run.
 
 ## WSJF Rankings
 
@@ -51,6 +52,7 @@
 | 4.0 | P049 | Known Error status overloaded — "fix released, awaiting verification" deserves its own status | 8 Med | Open | M |
 | 4.0 | P050 | run-retro does not recommend new agents, hooks, or other codifiable outputs (generalises P044) | 8 Med | Open | M |
 | 4.0 | P051 | run-retro does not recommend improvements to existing skills, agents, hooks, or other codifiables | 8 Med | Open | M |
+| 24.0 | P052 | ADR-021 release.yml missing `version:` input — first production exercise shipped drifted PR | 12 High | Known Error | S |
 
 ## Known Errors (Fix Released — pending verification)
 
@@ -71,6 +73,7 @@
 | P028 | Governance skills should auto-release (non-AFK) | pending — ADR-020 |
 | P044 | run-retro does not recommend new skills when it should | pending — @windyroad/retrospective |
 | P042 | changesets does not sync plugin manifest version | pending — ADR-021 (repo-level script + CI guard) |
+| P052 | ADR-021 release.yml missing version input | pending — this commit's re-push + release re-run |
 
 ## Parked
 

@@ -101,3 +101,13 @@ setup() {
   run grep -n "check:plugin-manifests" "$REPO_ROOT/package.json"
   [ "$status" -eq 0 ]
 }
+
+@test "sync-plugin-manifests: release.yml passes 'version: npm run version' to changesets/action (P052)" {
+  # ADR-021 Confirmation criterion 1 (revised 2026-04-19 after P052):
+  # changesets/action@v1's version input defaults to invoking `changeset version`
+  # directly, bypassing the npm run version hook. Without the explicit input,
+  # ADR-021's sync script never fires during the release workflow. Regression
+  # guard.
+  run grep -n "version: npm run version" "$REPO_ROOT/.github/workflows/release.yml"
+  [ "$status" -eq 0 ]
+}

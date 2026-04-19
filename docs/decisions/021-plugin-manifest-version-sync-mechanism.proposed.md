@@ -5,6 +5,7 @@ decision-makers: [tomhoward]
 consulted: [wr-architect:agent]
 informed: [Windy Road plugin users]
 reassessment-date: 2026-10-19
+revised: 2026-04-19  # P052 — release.yml `version:` input added; Confirmation strengthened
 ---
 
 # Plugin manifest version sync mechanism
@@ -92,11 +93,13 @@ Compliance is verified by:
 1. **Source review**:
    - `scripts/sync-plugin-manifests.mjs` exists and supports `--check`.
    - Root `package.json` `scripts.version` runs `changeset version` then the sync script.
+   - **`.github/workflows/release.yml` passes `version: npm run version` to `changesets/action@v1`** (added 2026-04-19 after P052). Without this explicit input, the action defaults to invoking `changeset version` directly and bypasses the `npm run version` hook entirely — observed on ADR-021's first production exercise (Release run 24618590442), which produced a Version PR with drifted plugin.json files.
    - `.github/workflows/ci.yml` runs `npm run check:plugin-manifests`.
 2. **Test**: `packages/shared/test/plugin-manifest-sync.bats` asserts:
    - `--check` returns OK on the current working tree.
    - `--check` returns non-zero with a `DIVERGED:` line when any manifest is out of sync with its sibling `package.json`.
-3. **Behavioural**: after this ADR ships, the next Changesets "Version Packages" PR includes both `packages/*/package.json` and `packages/*/.claude-plugin/plugin.json` updates in a single diff. Verifiable by inspecting the PR diff.
+   - **`.github/workflows/release.yml` contains the explicit `version: npm run version` input** (added after P052). Regression guard against silently dropping the input.
+3. **Behavioural**: the first Changesets "Version Packages" PR produced after this ADR ships MUST include both `packages/*/package.json` AND `packages/*/.claude-plugin/plugin.json` updates in a single diff. Verifiable by `gh pr diff <N>` on the Version PR. If only `package.json` + `CHANGELOG.md` appear and `plugin.json` is absent, the wiring is broken — P052 is the canonical evidence of this failure mode and its resolution.
 
 ## Reassessment Criteria
 
@@ -113,6 +116,7 @@ Revisit this decision if:
 - ADR-014: `docs/decisions/014-governance-skills-commit-their-own-work.proposed.md` — lean release principle (undermined by drift)
 - ADR-018: `docs/decisions/018-inter-iteration-release-cadence-for-afk-loops.proposed.md` — inter-iteration release cadence (meaningless if manifests drift)
 - P042: `docs/problems/042-changesets-does-not-sync-plugin-manifest-version.known-error.md` — the problem ticket this ADR resolves
+- P052: `docs/problems/052-adr-021-release-yml-missing-version-input.open.md` — first-production-exercise drift; drove the 2026-04-19 revision adding the explicit `version: npm run version` input and the corresponding Confirmation / bats criteria
 - P028: `docs/problems/028-governance-skills-should-auto-release-and-install.known-error.md` — auto-release flow (meaningless if marketplace serves stale manifests)
 - Commit 51eec23 — the one-off corrective sync that brought all 11 manifests current as of 2026-04-18
 - `packages/shared/test/sync-install-utils.bats` — precedent for the drift-guard test pattern
