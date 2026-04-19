@@ -3,6 +3,8 @@
 **Status**: Open
 **Reported**: 2026-04-17
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
+**Effort**: XL — multi-surface PreToolUse hook (gh, npm, RapidAPI, marketplace) + voice profile integration + ADR for new enforcement surface + regression fixtures; cross-plugin with voice-tone
+**WSJF**: 1.5 — (12 × 1.0) / 8
 
 ## Description
 

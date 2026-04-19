@@ -3,6 +3,8 @@
 **Status**: Open
 **Reported**: 2026-04-17
 **Priority**: 16 (High) — Impact: Significant (4) x Likelihood: Likely (4)
+**Effort**: XL — diagnose-before-implement subagent template + hypothesis-verification gate + ADR extending 013/014/016 + cross-skill rollout (work-problems, manage-incident, others)
+**WSJF**: 2.0 — (16 × 1.0) / 8
 
 ## Description
 

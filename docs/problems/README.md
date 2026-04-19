@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-04-19 (AFK iter 6 + run-retro — P048 minimal-scope fix shipped; new P054 filed for the `release:watch` mid-cycle-rescore friction observed twice this session. 269/269 project tests pass. Iter 5: P049 contract + migration; iter 4: P053; iter 3: P051; iter 2: P050; iter 1: P047).
+> Last reviewed: 2026-04-20 (AFK iter 1 review — three new tickets filed since prior review: P055 (problem-reporting channel), P056 (next-ID blob-SHA false match), P057 (git mv + Edit staging trap). P046 transitioned to Verification Pending after runtime-path performance review fix released (commit b2f1646). P054 transitioned to Verification Pending after stable drift hash fix released (commit 45e9c71). P036 and P037 newly transitioned to Verification Pending (commits c5f8039, 6e7c2e4). Missing WSJF lines added for P015, P038, P039.
 > Run `/wr-itil:manage-problem review` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -9,38 +9,45 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 
 | WSJF | ID | Title | Severity | Status | Effort |
 |------|-----|-------|----------|--------|--------|
-| 8.0 | P054 | release:watch requires a mid-cycle pipeline rescoring after push | 8 Med | Open | S |
-| 2.25 | P015 | TDD vague Gherkin outcome steps | 9 Med | Open | L |
+| 6.0 | P057 | git mv + Edit + git add staging-ordering trap drops content edits | 6 Med | Open | S |
+| 4.0 | P056 | Ticket-creator next-ID lookup greps blob SHAs producing wrong origin_max | 4 Low | Open | S |
+| 2.25 | P015 | TDD enforcement does not flag vague Gherkin outcome steps | 9 Med | Open | L |
 | 2.0 | P018 | TDD enforce BDD + Example Mapping principles | 16 High | Open | XL |
 | 2.0 | P022 | Agents must not fabricate time estimates | 16 High | Open | XL |
-| 2.0 | P046 | wr-architect agent misses performance implications on high-traffic endpoints | 8 Med | Open | L |
+| 2.0 | P039 | Autonomous loops conflate diagnose with implement | 16 High | Open | XL |
 | 1.5 | P014 | No lightweight aside invocation for governance skills | 12 High | Open | XL |
 | 1.5 | P019 | Deprecate single-file JTBD fallback | 6 Med | Open | L |
+| 1.5 | P038 | No voice-and-tone gate on external communications | 12 High | Open | XL |
 | 1.5 | P045 | Auto plugin install after governance release (deferred) | 6 Med | Open | L |
+| 1.125 | P055 | No standard problem-reporting channel for plugin users | 9 Med | Open | XL |
 | 0.75 | P012 | Skill testing harness scope undefined | 6 Med | Open | XL |
 | 0.75 | P034 | Centralise risk reports for cross-project skill improvement | 6 Med | Open | XL |
 
 ## Verification Queue
 
-Fix released, awaiting user verification (driven off `docs/problems/*.verifying.md` via glob per ADR-022). Ranked by release age, oldest first:
+Fix released, awaiting user verification (driven off `docs/problems/*.verifying.md` via glob per ADR-022). Ranked by release age, oldest first. `Likely verified?` column marks tickets ≥14 days old (P048 Candidate 4 default).
 
-| ID | Title | Released in |
-|----|-------|-------------|
-| P016 | manage-problem should split multi-concern tickets | 2026-04-17 |
-| P017 | create-adr should split multi-decision records | 2026-04-17 |
-| P024 | Risk-scorer WIP flag uncommitted completed work | 2026-04-17 |
-| P033 | No persistent risk register for ISO 31000 / ISO 27001 | 2026-04-17 |
-| P020 | No on-demand assessment skills | v0.3.2 |
-| P021 | Governance skill structured prompts | v0.3.2 |
-| P029 | Edit gate overhead for governance docs | commit ac9d453 |
-| P035 | manage-problem commit-gate no subagent delegation fallback | pending user verification — fallback path never fired this session (primary `wr-risk-scorer:pipeline` subagent was always available) |
-| P044 | run-retro does not recommend new skills when it should | @windyroad/retrospective@0.1.6 (commit 6510b29) — local plugin cache still at 0.1.5 until re-install, so earlier session couldn't exercise the fix; user verification needed after plugin re-install |
-| P047 | WSJF effort buckets coarse and not re-rated at lifecycle transitions | 2026-04-19 (AFK iter 1 commit 5c677cc) — next `manage-problem review` or `work-problems` iteration exercises the new XL bucket and the step 7 / step 9b re-rate language; user verification needed at that point |
-| P050 | run-retro generalises codification branch from skill-only to 12 shapes | 2026-04-19 (AFK iter 2, @windyroad/retrospective@0.2.0, merge commit b401c7b) — next `/wr-retrospective:run-retro` invocation should present the generalised Step 2 prompt and the flat shape-prefixed Step 4b `AskUserQuestion`; user verification needed at that point. |
-| P051 | run-retro extended with improvement axis (6 improvement-shaped options + Kind column + concern-boundary splitting) | 2026-04-19 (AFK iter 3, @windyroad/retrospective@0.3.0, commit 4a107a3) — next `/wr-retrospective:run-retro` invocation should present Step 2's improvement reflection category, a 19-option flat `AskUserQuestion` at Step 4b (12 create + 6 improve + 1 skip), and a Kind column in the Step 5 Codification Candidates table. User verification needed at that point. |
-| P053 | work-problems surfaces outstanding design questions at stop-condition #2 | 2026-04-19 (AFK iter 4, @windyroad/itil@0.5.0, commit a0600d9) — next AFK loop that hits stop-condition #2 with ≥1 user-answerable skipped ticket should emit an `### Outstanding Design Questions` table in the final summary. User verification needed at that point. |
-| P049 | Verification Pending `.verifying.md` status — SKILL.md contract + migration of 13 existing `.known-error.md` Fix-Released tickets per ADR-022 | 2026-04-19 (AFK iter 5, @windyroad/itil@0.6.0, commit 5b9aa96) — next `manage-problem review` invocation should present a dedicated Verification Queue section and target `.verifying.md` via glob in step 9d. User verification needed at that point. |
-| P048 | manage-problem Verification Queue detection: fast-path fires step 9d; `Likely verified?` column with 14-day release-age default (candidates 1 + 4 minimal scope) | 2026-04-19 (AFK iter 6, pending commit) — next `manage-problem review` should show the `Likely verified?` column in the Verification Queue and fire step 9d even on fast-path. User verification needed at that point. Candidates 2/3/5 deferred pending ADR-scope decision. |
+| ID | Title | Released | Likely verified? |
+|----|-------|----------|------------------|
+| P016 | manage-problem should split multi-concern tickets | 2026-04-17 | no (3 days) |
+| P017 | create-adr should split multi-decision records | 2026-04-17 | no (3 days) |
+| P024 | Risk-scorer WIP flag uncommitted completed work | 2026-04-17 | no (3 days) |
+| P033 | No persistent risk register for ISO 31000 / ISO 27001 | 2026-04-17 | no (3 days) |
+| P029 | Edit gate overhead for governance docs | 2026-04-17 (ac9d453) | no (3 days) |
+| P020 | No on-demand assessment skills | v0.3.2 | no (age unknown — pre-v0.3.2 release date) |
+| P021 | Governance skill structured prompts | v0.3.2 | no (age unknown) |
+| P035 | manage-problem commit-gate no subagent delegation fallback | pending — fallback path never fired this session (primary subagent always available) | no (not yet released to npm — user-verifiable only after a session exercises the fallback) |
+| P044 | run-retro does not recommend new skills when it should | @windyroad/retrospective@0.1.6 (commit 6510b29) | no (1 day) |
+| P047 | WSJF effort buckets coarse and not re-rated at lifecycle transitions | 2026-04-19 (AFK iter 1 commit 5c677cc) | no (1 day) |
+| P050 | run-retro generalises codification branch from skill-only to 12 shapes | @windyroad/retrospective@0.2.0 (b401c7b) | no (1 day) |
+| P051 | run-retro extended with improvement axis (12 create + 6 improve shapes) | @windyroad/retrospective@0.3.0 (4a107a3) | no (1 day) |
+| P053 | work-problems surfaces outstanding design questions at stop-condition #2 | @windyroad/itil@0.5.0 (a0600d9) | no (1 day) |
+| P049 | Verification Pending `.verifying.md` status — SKILL.md contract + migration | @windyroad/itil@0.6.0 (5b9aa96) | no (1 day) |
+| P048 | manage-problem Verification Queue detection: fast-path 9d + `Likely verified?` column | 2026-04-19 (pending commit) | no (1 day) |
+| P054 | release:watch requires stable drift hash across push | commit 45e9c71 | no (1 day) |
+| P046 | wr-architect agent misses runtime-path performance implications | commit b2f1646 | no (1 day) |
+| P037 | jtbd-reviewer returns bare verdict without reason | commit 6e7c2e4 | no (1 day) |
+| P036 | work-problems commit-gate: inter-iteration verification | commit c5f8039 | no (1 day) |
 
 ## Closed
 
