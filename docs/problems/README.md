@@ -9,7 +9,6 @@
 |------|-----|-------|----------|--------|--------|
 | 18.0 | P029 | Edit gate overhead for governance docs | 9 Med | Known Error | S |
 | 12.0 | P021 | Governance skill structured prompts | 12 High | Known Error | M |
-| 9.0 | P028 | Governance skills should auto-release (non-AFK) | 9 Med | Known Error | M |
 | 8.0 | P020 | No on-demand assessment skills | 16 High | Known Error | L |
 | 8.0 | P044 | run-retro does not recommend new skills when it should | 8 Med | Known Error | M |
 | 8.0 | P050 | run-retro does not recommend new agents, hooks, or other codifiable outputs (generalises P044) | 8 Med | Known Error | M |
@@ -44,7 +43,6 @@ Legend: ↑ = effort bucket re-rated upward in this review (P047 closure, 2026-0
 | P024 | Risk-scorer WIP flag uncommitted completed work | 2026-04-17 |
 | P029 | Edit gate overhead for governance docs | commit ac9d453 |
 | P033 | No persistent risk register for ISO 31000 / ISO 27001 | 2026-04-17 |
-| P028 | Governance skills should auto-release (non-AFK) | @windyroad/itil@0.4.4 (commit 6510b29) — AFK loop skips this path per ADR-020; user verification needed in a non-AFK skill invocation after plugin re-install |
 | P044 | run-retro does not recommend new skills when it should | @windyroad/retrospective@0.1.6 (commit 6510b29) — local plugin cache still at 0.1.5 until re-install, so this session couldn't exercise the fix; user verification needed after plugin re-install |
 | P035 | manage-problem commit-gate no subagent delegation fallback | pending user verification — fallback path never fired this session (primary `wr-risk-scorer:pipeline` subagent was always available) |
 | P047 | WSJF effort buckets coarse and not re-rated at lifecycle transitions | 2026-04-19 (AFK iter 1 commit 5c677cc) — next `manage-problem review` or `work-problems` iteration exercises the new XL bucket and the step 7 / step 9b re-rate language; user verification needed at that point |
@@ -63,6 +61,7 @@ Recently closed this session (2026-04-19, against direct in-session evidence):
 | P042 | changesets does not sync plugin manifest version | End-to-end validated in the 2026-04-19 release (PR #30 contained paired plugin.json entries after P052 fix) |
 | P043 | Next-ID collision guard in ticket-creator skills | `max(local, origin)+1` used for 10 new IDs this session (8 problems + 2 ADRs) |
 | P052 | ADR-021 release.yml missing `version:` input | End-to-end validated in the 2026-04-19 release; paired with P042's closure |
+| P028 | Governance skills should auto-release (non-AFK) | Verified end-to-end in the 2026-04-19 AFK loop iter 2: push of `f0de540` triggered Release workflow → PR #31 auto-created with version bumps and plugin.json manifest syncs → `release:watch` merged and published both `@windyroad/itil@0.4.5` and `@windyroad/retrospective@0.2.0` to npm (run `24619740990`, merge commit `b401c7b`). No manual intervention within the AFK loop. |
 
 ## Parked
 

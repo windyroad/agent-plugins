@@ -85,14 +85,16 @@ Candidates 1 + 3 + 4 + 5 form a minimum viable fix. Candidate 2 is a standalone 
 - **P047** (WSJF effort buckets coarse and not re-rated) — sibling "skill's static model doesn't track reality" ticket. P049 is the same theme at the status-dimension level: the data model is coarser than the actual lifecycle.
 - **P030** (closed) — fixed the verification prompt content. P049 fixes the discovery surface P030's prompt fires from.
 
-### Naming discussion (to be decided in the fix's ADR)
+### Naming decision (2026-04-19, user)
 
-- "Verification Pending" — clear intent, slightly verbose.
-- "Fix Released" — matches the current section header; user-recognisable; risk of confusion with the informal phrase.
-- "Awaiting Verification" — clearer about who is blocked (the user).
-- "Staged for Closure" — emphasises that closure is the next transition.
+**Resolved**: status name = `Verification Pending`; file suffix = `.verifying.md`.
 
-File suffix options: `.verifying.md`, `.pending-verification.md`, `.fix-released.md`, `.awaiting-verification.md`. Prefer concise suffix that still round-trips through `ls` output cleanly.
+Rationale captured during the AFK loop wrap-up: clear intent, concise suffix, round-trips cleanly through `ls`. The ADR that lands with the fix should cite this decision rather than re-open the naming discussion.
+
+Rejected options (for posterity):
+- "Fix Released" (.fix-released.md) — matches current informal phrase but risks confusion with the body-section marker.
+- "Awaiting Verification" (.awaiting-verification.md) — longer suffix without clear win over `.verifying.md`.
+- "Staged for Closure" — too indirect about what's pending.
 
 ### Investigation Tasks
 

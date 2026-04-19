@@ -6,6 +6,16 @@
 **Effort**: L — 3 ADR edits, 1 hook, 4 BATS files, 1 SKILL.md, 1 file delete (re-sized after architect review 2026-04-16; was S)
 **WSJF**: 1.5 — (6 × 1.0) / 4
 
+## Direction decision (2026-04-19, user)
+
+**Resolved**: **remove the fallback now**. Amend ADR-008 to mandate `docs/jtbd/` with no backward-compat clause. Projects on the legacy single-file layout must run `/wr-jtbd:update-guide` to migrate.
+
+Implication: this ticket is now ready to implement (not a won't-fix). The next AFK loop or interactive session can draft the ADR-008 amendment and wire the removal through the listed surfaces (3 ADR edits, 1 hook, 4 BATS files, 1 SKILL.md, 1 file delete). Downstream unblocks: P018 quadruplet traceability simplifies; `wr-jtbd:update-guide` skill and `wr-jtbd` agent drop the dual-path resolution logic.
+
+Rejected options (for posterity):
+- Keep fallback as advisory with a sunset date — would have sustained the dual-format complication in P018 and tooling.
+- Leave alone — not chosen; user wants the simplification.
+
 ## Description
 
 ADR-008 specifies `docs/jtbd/` (directory with per-persona subfolders + per-job files) as the canonical JTBD structure, with a backward-compatibility clause accepting the legacy single-file `docs/JOBS_TO_BE_DONE.md`. The fallback was included because the ADR migrated an existing convention. Since ADR-008 is still `.proposed.md` (not ratified), and downstream work (P018 quadruplet traceability, `wr-jtbd:update-guide` skill) is complicated by the dual-format requirement, this problem proposes amending ADR-008 to remove the fallback.

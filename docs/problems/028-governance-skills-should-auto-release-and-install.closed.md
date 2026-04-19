@@ -1,10 +1,24 @@
 # Problem 028: Governance skills should auto-release after completing fixes
 
-**Status**: Known Error
+**Status**: Closed
 **Reported**: 2026-04-16
+**Closed**: 2026-04-19 — verified end-to-end during the 2026-04-19 AFK loop
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Possible (3)
 **Effort**: M
-**WSJF**: 9.0 — (9 × 2.0) / 2
+**WSJF**: n/a (Closed)
+
+## Closure Evidence (2026-04-19 AFK loop, iter 2)
+
+Auto-release fired end-to-end during this AFK loop without manual intervention:
+
+1. **Iter 2 push** (commit `f0de540`) triggered the Release workflow (run `24619715995`).
+2. **Release workflow** ran `changesets/action` which created release PR #31 on branch `changeset-release/main` with the version bumps (`@windyroad/itil@0.4.5`, `@windyroad/retrospective@0.2.0`) and plugin.json manifest syncs (P042's hook fired in the version step).
+3. **`npm run release:watch`** merged PR #31 (commit `b401c7b`), and the Version-or-Publish workflow (`24619740990`) then published both packages to npm. Tag `@windyroad/itil@0.4.5` was pushed by the workflow.
+4. No manual `claude plugin install` required within the AFK loop itself (that's the auto-install half, tracked as P045 and blocked on upstream Claude Code in-session plugin reload).
+
+The whole release path fired from a single `npm run push:watch` → `npm run release:watch` drain per ADR-018's release-cadence pattern, with no interactive prompts. This is the behaviour ADR-020 mandated; the fix is verified in production.
+
+Closed with user's explicit confirmation on reviewing the AFK loop summary (2026-04-19).
 
 > **Scope note (2026-04-19)**: The original ticket covered both auto-release and auto-install. On architect review, the two concerns were split. Auto-install is now tracked in P045 (deferred pending Claude Code in-session plugin reload). This ticket is narrowed to **auto-release for non-AFK governance flows**, which is ready to fix via ADR-020.
 
