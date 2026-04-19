@@ -3,6 +3,8 @@
 **Status**: Open
 **Reported**: 2026-04-17
 **Priority**: 6 (Medium) — Impact: Moderate (3) x Likelihood: Unlikely (2)
+**Effort**: XL — cross-project storage pattern (`~/.claude/skill-reports/<plugin-name>/`), skill-improvement feedback loop design for 8+ plugins (architect, jtbd, itil, voice-tone, style-guide, tdd, wardley, c4), new ADR (L → XL 2026-04-19 per P047: cross-project, cross-plugin, new ADR required)
+**WSJF**: 0.75 — (6 × 1.0) / 8
 
 ## Description
 

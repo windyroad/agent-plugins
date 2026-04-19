@@ -1,10 +1,10 @@
 # Problem 047: WSJF effort buckets are coarse and not re-rated at lifecycle transitions
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-19
 **Priority**: 6 (Medium) — Impact: Minor (2) x Likelihood: Possible (3)
-**Effort**: M
-**WSJF**: 3.0 — (6 × 1.0) / 2
+**Effort**: M — SKILL.md additive edits + bats doc-lint test + in-session audit of 8 L-bucket tickets (estimate confirmed accurate for the scope shipped)
+**WSJF**: 6.0 — (6 × 2.0) / 2 → now known-error; transitioned 2026-04-19 after root cause confirmed, fix implemented, and bats guard added
 
 ## Description
 
@@ -61,12 +61,12 @@ Candidates 1–3 are complementary, not alternatives. Candidate 4 is nice-to-hav
 
 ### Investigation Tasks
 
-- [ ] Architect review on the bucket-granularity change: does adding XL need an ADR (it changes the WSJF math surface of the documented skill)? Expected verdict: additive bucket extension is within `manage-problem` scope; ADR not strictly required but welcome.
-- [ ] Audit existing L-bucket problems (P018, P022, P014, P033, P045, P012, P019, P034) for XL-vs-L classification and update WSJF accordingly when XL lands.
-- [ ] Draft SKILL.md edits for step 7 pre-flight and step 9b explicit re-rate. Include the failure mode in the pre-flight checklist so reviewers have a concrete question to answer.
-- [ ] Add bats test asserting the updated pre-flight checklist includes effort re-rate (mirrors P030 test pattern: grep for the specific phrase in SKILL.md).
-- [ ] Consider whether XL should propagate into `manage-incident` (which also uses severity but explicitly rejects WSJF effort scoring per ADR-011). Likely no change needed — keep scope to `manage-problem`.
-- [ ] Cross-reference with P022 to keep "fabricated estimates" (P022) and "bucket granularity + re-rating" (P047) aligned.
+- [x] Architect review on the bucket-granularity change: does adding XL need an ADR (it changes the WSJF math surface of the documented skill)? Expected verdict: additive bucket extension is within `manage-problem` scope; ADR not strictly required but welcome. **Confirmed 2026-04-19 — no ADR required; the change is additive within `manage-problem`'s documented WSJF mechanic.**
+- [x] Audit existing L-bucket problems (P018, P022, P014, P033, P045, P012, P019, P034) for XL-vs-L classification and update WSJF accordingly when XL lands. **Done 2026-04-19 — 5 re-rated L → XL (P018, P022, P014, P012, P034); 2 stay L with recorded reasons (P019 within-plugin migration, P045 blocked on upstream); 1 skipped (P033 already Known Error / Fix Released).**
+- [x] Draft SKILL.md edits for step 7 pre-flight and step 9b explicit re-rate. Include the failure mode in the pre-flight checklist so reviewers have a concrete question to answer.
+- [x] Add bats test asserting the updated pre-flight checklist includes effort re-rate (mirrors P030 test pattern: grep for the specific phrase in SKILL.md). **`manage-problem-effort-buckets.bats` — 4 assertions, all GREEN.**
+- [x] Consider whether XL should propagate into `manage-incident` (which also uses severity but explicitly rejects WSJF effort scoring per ADR-011). Likely no change needed — keep scope to `manage-problem`. **Confirmed — XL stays scoped to `manage-problem`; ADR-011 boundary respected.**
+- [x] Cross-reference with P022 to keep "fabricated estimates" (P022) and "bucket granularity + re-rating" (P047) aligned. **P047 ships static-bucket granularity + re-rating; P022 will later add actuals-grounded bucket selection on top (its own ADR).**
 
 ## Related
 
@@ -77,3 +77,44 @@ Candidates 1–3 are complementary, not alternatives. Candidate 4 is nice-to-hav
 - `packages/itil/skills/manage-problem/SKILL.md` — the fix target (steps 4, 7, 9b; Effort table).
 - ADR-011: `docs/decisions/011-manage-incident-skill.proposed.md` — rejects WSJF effort for incidents; informs scope boundary of P047.
 - Session evidence: this session's `[Iteration 1–3]` reports in the AFK run that preceded this ticket showed three L-bucket problems with identical WSJF (4.0) all declining to be worked, proving the granularity gap at the top end.
+
+## Fix Released
+
+Shipped in commit pending (this iteration's `fix(itil): manage-problem WSJF adds XL bucket + re-rate pre-flight (closes P047)` commit). Changes:
+
+1. **XL bucket added** to the Effort table in `packages/itil/skills/manage-problem/SKILL.md` with divisor 8 (multi-day or cross-package work, migration, new ADR required).
+2. **Step 7 Open → Known Error pre-flight** gains an explicit effort re-rate checklist item: "Effort bucket reviewed against the now-documented fix strategy; if the bucket changed since creation, update the Effort / WSJF lines and note the reason".
+3. **Step 9b step 7** reworded from "Estimate Effort" to "Re-estimate Effort (S / M / L / XL) ... note the reason in a short parenthetical".
+4. **Example + live-estimate note** added after the effort table so readers see XL in context and understand effort is a live estimate, not a set-once label.
+5. **L-bucket audit** completed for the 8 candidates in the investigation tasks:
+   - Reclassified L → XL: P018 (BDD/Example Mapping, new ADR + cross-framework + cross-plugin), P022 (fabricated time estimates, cross-cutting ADR + whole-suite audit), P014 (aside invocation, cross-package coordination + new ADR), P012 (skill testing harness, scope explicitly "undefined" + whole-suite retrofit), P034 (centralise risk reports, cross-plugin pattern).
+   - Unchanged L: P019 (deprecate single-file JTBD — re-sized S → L at creation with a specific file-list justification; within-plugin), P045 (auto plugin install — blocked on upstream, not cross-package today).
+   - Skipped P033 (already Known Error with Fix Released; effort re-rate belongs to next review).
+6. **`work-problems` SKILL.md** updated per architect advisory to reference "S to L or XL" in the scope-creep example paragraphs (non-normative consistency fix).
+7. **bats doc-lint test** `manage-problem-effort-buckets.bats` (4 assertions) guards the SKILL.md contract: XL row exists with divisor 8, XL description names its scope, step 7 includes the re-rate item, step 9b uses "Re-estimate Effort" + "note the reason" phrasing.
+
+Awaiting user verification: in a subsequent `manage-problem review` or `work-problems` AFK iteration, the new ranking should:
+- Show P018, P022, P014, P012, P034 with WSJF re-computed against /8.
+- Surface any Open/Known Error tickets that should have been re-rated during this iteration but weren't (false negatives).
+- Exercise the step 7 pre-flight item the next time any Open problem transitions to Known Error.
+
+## Related
+
+- `packages/itil/skills/manage-problem/SKILL.md` — primary fix target (Effort table, step 7 pre-flight, step 9b re-estimate).
+- `packages/itil/skills/manage-problem/test/manage-problem-effort-buckets.bats` — new regression test.
+- `packages/itil/skills/work-problems/SKILL.md` — non-normative example text updated.
+- `docs/problems/README.md` — ranking table refreshed with re-rated XL entries.
+- P018, P022, P014, P012, P034: re-rated L → XL in this iteration.
+- P019, P045: re-rated at same time, kept as L with recorded justifications.
+- P022: `docs/problems/022-agents-should-not-fabricate-time-estimates.open.md` — sibling ticket (grounded-estimate rule); P047 is the bucket-granularity + re-rating remediation, P022 is the broader grounding principle. Land P022 after its own ADR to add actuals-grounded bucket selection on top of P047's static buckets.
+- ADR-011: `docs/decisions/011-manage-incident-skill.proposed.md` — confirmed boundary: XL does NOT propagate to `manage-incident` (incidents reject WSJF effort scoring by design).
+
+### Investigation Tasks
+
+- [x] Architect review on the bucket-granularity change (PASS — additive, no ADR required; advisory notes applied).
+- [x] JTBD review (PASS — serves JTBD-006 "Progress the Backlog While I'm Away" and JTBD-101 "Extend the Suite").
+- [x] Audit existing L-bucket problems for XL reclassification (8 audited, 5 reclassified, 2 unchanged with recorded reasons, 1 skipped — P033 Known Error).
+- [x] Draft SKILL.md edits for step 7 pre-flight and step 9b explicit re-rate.
+- [x] Add bats test asserting the SKILL.md contract (4 assertions, all GREEN).
+- [x] Cross-reference with P022 (actuals-grounding is orthogonal; integrate when P022 lands).
+- [x] Confirm XL does not propagate to `manage-incident` (ADR-011 boundary).

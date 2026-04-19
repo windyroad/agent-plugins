@@ -3,6 +3,8 @@
 **Status**: Open
 **Reported**: 2026-04-16
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
+**Effort**: XL — likely new ADR (aside-invocation pattern for governance skills), cross-package coordination (itil + retrospective + architect), per-skill stub template design, intake-flow split (L → XL 2026-04-19 per P047: multi-day, cross-package, new ADR likely)
+**WSJF**: 1.5 — (12 × 1.0) / 8
 
 ## Description
 

@@ -65,7 +65,8 @@ Problems are ranked using Weighted Shortest Job First (WSJF):
 |--------|---------|-------------|
 | S | 1 | < 1 hour, single file, quick fix |
 | M | 2 | 1-4 hours, few files, moderate change |
-| L | 4 | > 4 hours, multiple files, significant change |
+| L | 4 | 4 hours – 1 day, multiple files, significant change within a single plugin |
+| XL | 8 | > 1 day, multi-day or cross-package work (multiple plugins, migration, new ADR required) |
 
 **Example**: A Known Error with severity 8 (Impact 4 × Likelihood 2) and Small effort:
 WSJF = (8 × 2.0) / 1 = **16.0** — do this first.
@@ -73,7 +74,10 @@ WSJF = (8 × 2.0) / 1 = **16.0** — do this first.
 An Open problem with severity 6 (Impact 3 × Likelihood 2) and Large effort:
 WSJF = (6 × 1.0) / 4 = **1.5** — lower priority despite medium severity.
 
-When estimating effort, read the problem's root cause analysis and fix strategy. If effort is unknown, default to M (2).
+An Open problem with severity 8 (Impact 2 × Likelihood 4) and Extra-Large effort (multi-day, cross-package):
+WSJF = (8 × 1.0) / 8 = **1.0** — defer until severity climbs or scope shrinks.
+
+When estimating effort, read the problem's root cause analysis and fix strategy. If effort is unknown, default to M (2). Effort is a **live estimate**, not a set-once label: re-rate it when root cause is confirmed, when architect review narrows or expands scope, and during each `manage-problem review`. A note capturing the reason for any bucket change makes the ranking audit-able (see steps 7 and 9b).
 
 ## Working a Problem
 
@@ -252,6 +256,7 @@ Pre-flight checks before allowing transition:
 - [ ] At least one investigation task is checked off
 - [ ] A reproduction test exists or is referenced
 - [ ] A workaround is documented (even if "feature disabled")
+- [ ] Effort bucket re-rated against the now-documented fix strategy; if the bucket changed since creation, update the Effort / WSJF lines and note the reason (P047 — creation-time estimates drift as scope clarifies)
 
 If any check fails, report which checks failed and ask the user to address them before transitioning.
 
@@ -306,7 +311,7 @@ Parked problems are excluded from WSJF ranking — do not read, score, or update
 4. **Re-assess Likelihood** (1-5) using the likelihood levels from RISK-POLICY.md. Ask: "Given the current codebase, how likely is this to affect the user?"
 5. **Calculate Severity** = Impact × Likelihood
 6. **Look up Label** from the risk matrix label bands
-7. **Estimate Effort** (S/M/L) by reading the root cause analysis and fix strategy. Consider: how many files, how complex, does it need planning?
+7. **Re-estimate Effort** (S / M / L / XL) by reading the root cause analysis and fix strategy. Consider: how many files, how complex, does it need planning, is it cross-package or migration-heavy (XL territory)? If the bucket has changed since last review, update the Effort line in the problem file and note the reason in a short parenthetical (e.g. "L → XL — architect review added ADR + migration script"). P047.
 8. **Calculate WSJF** = (Severity × Status Multiplier) / Effort Divisor
 9. **Update the Priority line** in the problem file if the score changed
 10. **Auto-transition to Known Error**: If an open problem has confirmed root cause AND a workaround documented (even "feature disabled"), automatically transition it to known-error:

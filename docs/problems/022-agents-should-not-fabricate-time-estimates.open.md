@@ -3,6 +3,8 @@
 **Status**: Open
 **Reported**: 2026-04-16
 **Priority**: 16 (High) — Impact: Significant (4) x Likelihood: Likely (4)
+**Effort**: XL — new cross-cutting ADR (docs/decisions/014-agent-output-grounding.proposed.md), audit of every agent prompt across the suite (risk-scorer, manage-problem, architect, plan-risk-guidance), WSJF effort-bucket semantics rework, grounding-citation convention (L → XL 2026-04-19 per P047: multi-day, cross-package, new ADR required)
+**WSJF**: 2.0 — (16 × 1.0) / 8
 
 ## Description
 
