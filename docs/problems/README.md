@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-04-19 (AFK iter 6 — P048 minimal-scope fix shipped: fast-path step 9d always fires; Verification Queue gains `Likely verified?` column with 14-day release-age default. Candidates 2/3/5 deferred pending architect ADR-scope decision. 5 new P048 tests RED→GREEN; 269/269 project tests pass. Iter 5: P049 contract + migration (retrospective/itil merged); iter 4: P053; iter 3: P051; iter 2: P050; iter 1: P047).
+> Last reviewed: 2026-04-19 (AFK iter 6 + run-retro — P048 minimal-scope fix shipped; new P054 filed for the `release:watch` mid-cycle-rescore friction observed twice this session. 269/269 project tests pass. Iter 5: P049 contract + migration; iter 4: P053; iter 3: P051; iter 2: P050; iter 1: P047).
 > Run `/wr-itil:manage-problem review` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -9,6 +9,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 
 | WSJF | ID | Title | Severity | Status | Effort |
 |------|-----|-------|----------|--------|--------|
+| 8.0 | P054 | release:watch requires a mid-cycle pipeline rescoring after push | 8 Med | Open | S |
 | 2.25 | P015 | TDD vague Gherkin outcome steps | 9 Med | Open | L |
 | 2.0 | P018 | TDD enforce BDD + Example Mapping principles | 16 High | Open | XL |
 | 2.0 | P022 | Agents must not fabricate time estimates | 16 High | Open | XL |
