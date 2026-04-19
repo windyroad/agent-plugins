@@ -1,6 +1,6 @@
 # Problem 042: Changesets does not sync plugin manifest version
 
-**Status**: Known Error
+**Status**: Closed
 **Reported**: 2026-04-18
 **Priority**: 16 (High) — Impact: Significant (4) x Likelihood: Likely (4)
 **Effort**: L (sync mechanism design + ADR + implementation + CI guard)

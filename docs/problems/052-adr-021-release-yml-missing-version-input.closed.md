@@ -1,6 +1,6 @@
 # Problem 052: ADR-021 release.yml missing `version: npm run version` input — first production exercise shipped drifted PR
 
-**Status**: Known Error
+**Status**: Closed
 **Reported**: 2026-04-19
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: S

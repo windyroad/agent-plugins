@@ -1,60 +1,37 @@
 # Problem Backlog
 
-> Last reviewed: 2026-04-17 (P026 Fix Released; P033/P016/P017 rankings refreshed)
-> Added 2026-04-18 without full re-review: P040 (from session retrospective). Run `/wr-itil:manage-problem review` to refresh rankings.
-> Updated 2026-04-18: P041 → Known Error after architect review (ADR-018 prerequisite identified; effort re-sized M → L; WSJF unchanged at 8.0).
-> Updated 2026-04-18: P040 → Known Error after architect review (ADR-019 prerequisite identified — distinct from ADR-018; effort re-sized M → L; WSJF unchanged at 6.0).
-> Added 2026-04-18 without full re-review: P042 (changesets does not sync plugin manifest version), P043 (next-ID collision guard split from P040). Run `/wr-itil:manage-problem review` to refresh rankings.
-> Updated 2026-04-18: P041 fix released (@windyroad/itil@0.4.1, commit 87c2ecf); P040 fix released (@windyroad/itil@0.4.2, commit 9c6019e). Both awaiting user verification.
-> Updated 2026-04-18: P028 → Known Error after investigation (ADR-018 partially covers via Step 6.5 for AFK orchestrator; non-AFK governance flows still need ADR-014 amendment or new ADR; auto-install split recommended).
-> Updated 2026-04-18: P043 fix released (@windyroad/itil@0.4.3 + @windyroad/architect@0.3.2, commit 359ec7c). Manage-problem and create-adr now compute next ID as max(local, origin) + 1.
-> Added 2026-04-18 without full re-review: P044 (run-retro does not recommend new skills when it should). Run `/wr-itil:manage-problem review` to refresh rankings.
-> Updated 2026-04-19: P028 split on architect review — auto-install concern moved to P045 (deferred, blocked on Claude Code in-session plugin reload). Narrowed P028 (non-AFK auto-release) fix implemented under ADR-020 and awaiting release.
-> Updated 2026-04-19: P044 → Known Error after review; fix implemented (run-retro Step 2/4b/5 extended for skill candidates + bats test); awaiting release.
-> Updated 2026-04-19: P042 → Known Error after review; fix implemented under ADR-021 (Changesets `version` script hook + sync-plugin-manifests.mjs + CI guard + bats test); awaiting release.
-> Added 2026-04-19 without full re-review: P046 (wr-architect agent misses performance implications — captured upstream from addressr P024). Run `/wr-itil:manage-problem review` to refresh rankings.
-> Added 2026-04-19 without full re-review: P047 (WSJF effort buckets coarse + not re-rated at lifecycle transitions — session observation after P028/P044/P042 shipped). Run `/wr-itil:manage-problem review` to refresh rankings.
-> Added 2026-04-19 without full re-review: P048 (manage-problem does not surface Fix Released tickets as verification candidates — session observation: 6 Fix Released fixes exercised this session with no closure progress). Run `/wr-itil:manage-problem review` to refresh rankings.
-> Added 2026-04-19 without full re-review: P049 (Known Error status overloaded with Fix Released sub-state — 16/16 current Known Errors are empirically Fix Released; suggests introducing an explicit status). Run `/wr-itil:manage-problem review` to refresh rankings.
-> Added 2026-04-19 without full re-review: P050 (run-retro does not recommend new agents/hooks/other codifiable outputs — generalises P044 from skills-only to the full codification surface). Run `/wr-itil:manage-problem review` to refresh rankings.
-> Added 2026-04-19 without full re-review: P051 (run-retro does not recommend improvements to existing codifiables — 4/5 session-driven tickets this session were improvement-shaped). Run `/wr-itil:manage-problem review` to refresh rankings.
-> Added 2026-04-19: P052 → Known Error in same session. ADR-021's first production exercise (Release run 24618590442) shipped a drifted Version PR because release.yml didn't pass `version: npm run version` to changesets/action. Fix implemented (release.yml + ADR-021 Confirmation + bats regression guard); awaiting Version PR re-run.
+> Last reviewed: 2026-04-19 (batch-close pass after session: 7 Fix Released tickets closed against session evidence — P026, P031, P040, P041, P042, P043, P052).
+> Run `/wr-itil:manage-problem review` to refresh WSJF rankings.
 
 ## WSJF Rankings
 
 | WSJF | ID | Title | Severity | Status | Effort |
 |------|-----|-------|----------|--------|--------|
-| 24.0 | P031 | Stale cache detection in manage-problem work | 12 High | Known Error | S |
 | 18.0 | P029 | Edit gate overhead for governance docs | 9 Med | Known Error | S |
 | 12.0 | P021 | Governance skill structured prompts | 12 High | Known Error | M |
 | 8.0 | P020 | No on-demand assessment skills | 16 High | Known Error | L |
-| 4.5 | P016 | manage-problem should split multi-concern tickets | 9 Med | Known Error | M |
-| 4.5 | P017 | create-adr should split multi-decision records | 9 Med | Known Error | M |
 | 9.0 | P028 | Governance skills should auto-release (non-AFK) | 9 Med | Known Error | M |
 | 8.0 | P044 | run-retro does not recommend new skills when it should | 8 Med | Known Error | M |
+| 4.5 | P016 | manage-problem should split multi-concern tickets | 9 Med | Known Error | M |
+| 4.5 | P017 | create-adr should split multi-decision records | 9 Med | Known Error | M |
 | 4.5 | P033 | No persistent risk register for ISO 31000 / ISO 27001 | 9 Med | Known Error | L |
-| 8.0 | P041 | work-problems does not enforce release cadence | 16 High | Known Error | L |
-| 6.0 | P040 | work-problems does not fetch origin before starting | 12 High | Known Error | L |
-| 8.0 | P042 | changesets does not sync plugin manifest version | 16 High | Known Error | L |
-| 9.0 | P043 | Next-ID collision guard in ticket-creator skills | 9 Med | Known Error | M |
+| 4.0 | P024 | Risk-scorer WIP flag uncommitted completed work | 8 Med | Known Error | L |
 | 4.0 | P018 | TDD enforce BDD + Example Mapping principles | 16 High | Open | L |
 | 4.0 | P022 | Agents must not fabricate time estimates | 16 High | Open | L |
-| 4.0 | P024 | Risk-scorer WIP flag uncommitted completed work | 8 Med | Known Error | L |
-| 3.0 | P014 | No lightweight aside invocation for governance skills | 12 High | Open | L |
-| 2.25 | P015 | TDD vague Gherkin outcome steps | 9 Med | Open | L |
-| 1.5 | P012 | Skill testing harness scope undefined | 6 Med | Open | L |
-| 1.5 | P019 | Deprecate single-file JTBD fallback | 6 Med | Open | L |
-| 1.5 | P034 | Centralise risk reports for cross-project skill improvement | 6 Med | Open | L |
-| 1.5 | P045 | Auto plugin install after governance release (deferred) | 6 Med | Open | L |
-| 2.0 | P046 | wr-architect agent misses performance implications on high-traffic endpoints | 8 Med | Open | L |
-| 3.0 | P047 | WSJF effort buckets are coarse and not re-rated at lifecycle transitions | 6 Med | Open | M |
 | 4.0 | P048 | manage-problem does not surface Fix Released tickets as verification candidates | 8 Med | Open | M |
 | 4.0 | P049 | Known Error status overloaded — "fix released, awaiting verification" deserves its own status | 8 Med | Open | M |
 | 4.0 | P050 | run-retro does not recommend new agents, hooks, or other codifiable outputs (generalises P044) | 8 Med | Open | M |
 | 4.0 | P051 | run-retro does not recommend improvements to existing skills, agents, hooks, or other codifiables | 8 Med | Open | M |
-| 24.0 | P052 | ADR-021 release.yml missing `version:` input — first production exercise shipped drifted PR | 12 High | Known Error | S |
+| 3.0 | P014 | No lightweight aside invocation for governance skills | 12 High | Open | L |
+| 3.0 | P047 | WSJF effort buckets are coarse and not re-rated at lifecycle transitions | 6 Med | Open | M |
+| 2.25 | P015 | TDD vague Gherkin outcome steps | 9 Med | Open | L |
+| 2.0 | P046 | wr-architect agent misses performance implications on high-traffic endpoints | 8 Med | Open | L |
+| 1.5 | P012 | Skill testing harness scope undefined | 6 Med | Open | L |
+| 1.5 | P019 | Deprecate single-file JTBD fallback | 6 Med | Open | L |
+| 1.5 | P034 | Centralise risk reports for cross-project skill improvement | 6 Med | Open | L |
+| 1.5 | P045 | Auto plugin install after governance release (deferred) | 6 Med | Open | L |
 
-## Known Errors (Fix Released — pending verification)
+## Known Errors (Fix Released — pending user verification)
 
 | ID | Title | Released in |
 |----|-------|-------------|
@@ -63,17 +40,25 @@
 | P020 | No on-demand assessment skills | v0.3.2 |
 | P021 | Governance skill structured prompts | v0.3.2 |
 | P024 | Risk-scorer WIP flag uncommitted completed work | 2026-04-17 |
-| P026 | install-utils duplicated across packages | 2026-04-17 |
 | P029 | Edit gate overhead for governance docs | commit ac9d453 |
-| P031 | Stale cache detection in manage-problem work | commit 824cb2c |
 | P033 | No persistent risk register for ISO 31000 / ISO 27001 | 2026-04-17 |
-| P041 | work-problems does not enforce release cadence | @windyroad/itil@0.4.1 (commit 87c2ecf) |
-| P040 | work-problems does not fetch origin before starting | @windyroad/itil@0.4.2 (commit 9c6019e) |
-| P043 | Next-ID collision guard in ticket-creator skills | @windyroad/itil@0.4.3 + @windyroad/architect@0.3.2 (commit 359ec7c) |
-| P028 | Governance skills should auto-release (non-AFK) | pending — ADR-020 |
-| P044 | run-retro does not recommend new skills when it should | pending — @windyroad/retrospective |
-| P042 | changesets does not sync plugin manifest version | pending — ADR-021 (repo-level script + CI guard) |
-| P052 | ADR-021 release.yml missing version input | pending — this commit's re-push + release re-run |
+| P028 | Governance skills should auto-release (non-AFK) | @windyroad/itil@0.4.4 (commit 6510b29) — AFK loop skips this path per ADR-020; user verification needed in a non-AFK skill invocation after plugin re-install |
+| P044 | run-retro does not recommend new skills when it should | @windyroad/retrospective@0.1.6 (commit 6510b29) — local plugin cache still at 0.1.5 until re-install, so this session couldn't exercise the fix; user verification needed after plugin re-install |
+| P035 | manage-problem commit-gate no subagent delegation fallback | pending user verification — fallback path never fired this session (primary `wr-risk-scorer:pipeline` subagent was always available) |
+
+## Closed
+
+Recently closed this session (2026-04-19, against direct in-session evidence):
+
+| ID | Title | Closed via |
+|----|-------|-----------|
+| P026 | install-utils duplicated across packages | CI `check:install-utils` passed on every push this session |
+| P031 | Stale cache detection in manage-problem work | Returned correct output at AFK loop start and after subsequent commits |
+| P040 | work-problems does not fetch origin before starting | `git fetch origin` ran at AFK loop start per orchestrator spec |
+| P041 | work-problems does not enforce release cadence | `assess-release` ran after each iteration with correct scores |
+| P042 | changesets does not sync plugin manifest version | End-to-end validated in the 2026-04-19 release (PR #30 contained paired plugin.json entries after P052 fix) |
+| P043 | Next-ID collision guard in ticket-creator skills | `max(local, origin)+1` used for 10 new IDs this session (8 problems + 2 ADRs) |
+| P052 | ADR-021 release.yml missing `version:` input | End-to-end validated in the 2026-04-19 release; paired with P042's closure |
 
 ## Parked
 

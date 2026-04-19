@@ -1,6 +1,6 @@
 # Problem 026: install-utils.mjs duplicated across all packages
 
-**Status**: Known Error
+**Status**: Closed
 **Reported**: 2026-04-16
 **Priority**: 16 (High) — Impact: Significant (4) x Likelihood: Likely (4)
 **Effort**: S (fix implemented)

@@ -1,6 +1,6 @@
 # Problem 040: work-problems does not fetch origin before starting
 
-**Status**: Known Error
+**Status**: Closed
 **Reported**: 2026-04-18
 **Priority**: 12 (High) — Impact: Significant (4) x Likelihood: Possible (3)
 **Effort**: L (architect requires ADR-019 prerequisite before SKILL.md change ships)

@@ -1,6 +1,6 @@
 # Problem 043: Next-ID collision guard missing in ticket-creator skills
 
-**Status**: Known Error
+**Status**: Closed
 **Reported**: 2026-04-18
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Possible (3)
 **Effort**: M (one or two SKILL.md changes + bats test + small commit)

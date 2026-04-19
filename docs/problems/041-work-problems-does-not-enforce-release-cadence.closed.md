@@ -1,6 +1,6 @@
 # Problem 041: work-problems does not enforce release cadence
 
-**Status**: Known Error
+**Status**: Closed
 **Reported**: 2026-04-18
 **Priority**: 16 (High) — Impact: Significant (4) x Likelihood: Likely (4)
 **Effort**: L (architect requires ADR-018 prerequisite before SKILL.md change ships)

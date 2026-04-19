@@ -1,6 +1,6 @@
 # Problem 031: `manage-problem work` incorrectly determines cache is fresh
 
-**Status**: Known Error
+**Status**: Closed
 **Reported**: 2026-04-17
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: S
