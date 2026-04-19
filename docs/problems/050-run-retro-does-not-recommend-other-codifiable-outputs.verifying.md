@@ -1,6 +1,6 @@
 # Problem 050: run-retro does not recommend new agents, hooks, or other codifiable outputs (generalises P044)
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-04-19
 **Priority**: 8 (Medium) — Impact: Minor (2) x Likelihood: Likely (4)
 **Effort**: M — supersede P044's Step 2 / Step 4b / Step 5 blocks in run-retro SKILL.md; add parallel bats file; update the existing P044 bats file for compat (estimate confirmed accurate for the scope shipped)

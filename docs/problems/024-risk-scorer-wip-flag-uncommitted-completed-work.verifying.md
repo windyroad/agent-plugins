@@ -1,6 +1,6 @@
 # Problem 024: Risk-scorer WIP mode should flag uncommitted completed work and encourage commits
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-04-16
 **Priority**: 8 (Medium) — Impact: Minor (2) x Likelihood: Likely (4)
 **Effort**: L — wip.md + assess-wip SKILL.md + ADR + BATS tests (re-sized from M after architect review)

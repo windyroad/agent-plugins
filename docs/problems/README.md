@@ -1,57 +1,45 @@
 # Problem Backlog
 
-> Last reviewed: 2026-04-19 (AFK iter 5 — P049 SKILL.md contract shipped: manage-problem + work-problems + manage-incident SKILL.md and README template now document the Verification Pending `.verifying.md` status per ADR-022; WSJF multiplier 0 excludes verification work from dev ranking; 11 new P049 structural tests RED→GREEN; 264/264 project tests pass. Iter 4: P053; iter 3: P051; iter 2: P050; iter 1: P047. Migration of 16 existing `.known-error.md` Fix-Released tickets to `.verifying.md` deferred to next commit in this session per ADR-022).
+> Last reviewed: 2026-04-19 (AFK iter 5 follow-up commit — ADR-022 migration: 13 existing `.known-error.md` Fix-Released tickets renamed to `.verifying.md` and Status field flipped to "Verification Pending" via `git mv` so rename history is preserved. The prior commit (4e93bcf) shipped the SKILL.md contract. Iter 4: P053; iter 3: P051; iter 2: P050; iter 1: P047).
 > Run `/wr-itil:manage-problem review` to refresh WSJF rankings.
 
 ## WSJF Rankings
 
+Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) and Parked (`.parked.md`, multiplier 0) tickets are excluded per ADR-022 — surfaced in their own sections below.
+
 | WSJF | ID | Title | Severity | Status | Effort |
 |------|-----|-------|----------|--------|--------|
-| 18.0 | P029 | Edit gate overhead for governance docs | 9 Med | Known Error | S |
-| 12.0 | P021 | Governance skill structured prompts | 12 High | Known Error | M |
-| 8.0 | P020 | No on-demand assessment skills | 16 High | Known Error | L |
-| 8.0 | P044 | run-retro does not recommend new skills when it should | 8 Med | Known Error | M |
-| 8.0 | P050 | run-retro does not recommend new agents, hooks, or other codifiable outputs (generalises P044) | 8 Med | Known Error | M |
-| 8.0 | P051 | run-retro does not recommend improvements to existing skills, agents, hooks, or other codifiables | 8 Med | Known Error | M |
-| 8.0 | P053 | work-problems does not surface outstanding design questions at stop-condition #2 | 8 Med | Known Error | M |
-| 6.0 | P047 | WSJF effort buckets coarse and not re-rated at lifecycle transitions | 6 Med | Known Error | M |
-| 4.5 | P016 | manage-problem should split multi-concern tickets | 9 Med | Known Error | M |
-| 4.5 | P017 | create-adr should split multi-decision records | 9 Med | Known Error | M |
-| 4.5 | P033 | No persistent risk register for ISO 31000 / ISO 27001 | 9 Med | Known Error | L |
-| 4.0 | P024 | Risk-scorer WIP flag uncommitted completed work | 8 Med | Known Error | L |
 | 4.0 | P048 | manage-problem does not surface Fix Released tickets as verification candidates | 8 Med | Open | M |
 | 2.25 | P015 | TDD vague Gherkin outcome steps | 9 Med | Open | L |
-| 2.0 | P018 | TDD enforce BDD + Example Mapping principles | 16 High | Open | XL ↑ |
-| 2.0 | P022 | Agents must not fabricate time estimates | 16 High | Open | XL ↑ |
+| 2.0 | P018 | TDD enforce BDD + Example Mapping principles | 16 High | Open | XL |
+| 2.0 | P022 | Agents must not fabricate time estimates | 16 High | Open | XL |
 | 2.0 | P046 | wr-architect agent misses performance implications on high-traffic endpoints | 8 Med | Open | L |
-| 1.5 | P014 | No lightweight aside invocation for governance skills | 12 High | Open | XL ↑ |
+| 1.5 | P014 | No lightweight aside invocation for governance skills | 12 High | Open | XL |
 | 1.5 | P019 | Deprecate single-file JTBD fallback | 6 Med | Open | L |
 | 1.5 | P045 | Auto plugin install after governance release (deferred) | 6 Med | Open | L |
-| 0.75 | P012 | Skill testing harness scope undefined | 6 Med | Open | XL ↑ |
-| 0.75 | P034 | Centralise risk reports for cross-project skill improvement | 6 Med | Open | XL ↑ |
-
-Legend: ↑ = effort bucket re-rated upward in this review (P047 closure, 2026-04-19).
+| 0.75 | P012 | Skill testing harness scope undefined | 6 Med | Open | XL |
+| 0.75 | P034 | Centralise risk reports for cross-project skill improvement | 6 Med | Open | XL |
 
 ## Verification Queue
 
-Fix released, awaiting user verification (driven off `docs/problems/*.verifying.md` via glob per ADR-022 — currently hand-maintained here while the 16-file migration from `.known-error.md` is pending in a follow-up commit).
+Fix released, awaiting user verification (driven off `docs/problems/*.verifying.md` via glob per ADR-022). Ranked by release age, oldest first:
 
 | ID | Title | Released in |
 |----|-------|-------------|
 | P016 | manage-problem should split multi-concern tickets | 2026-04-17 |
 | P017 | create-adr should split multi-decision records | 2026-04-17 |
+| P024 | Risk-scorer WIP flag uncommitted completed work | 2026-04-17 |
+| P033 | No persistent risk register for ISO 31000 / ISO 27001 | 2026-04-17 |
 | P020 | No on-demand assessment skills | v0.3.2 |
 | P021 | Governance skill structured prompts | v0.3.2 |
-| P024 | Risk-scorer WIP flag uncommitted completed work | 2026-04-17 |
 | P029 | Edit gate overhead for governance docs | commit ac9d453 |
-| P033 | No persistent risk register for ISO 31000 / ISO 27001 | 2026-04-17 |
-| P044 | run-retro does not recommend new skills when it should | @windyroad/retrospective@0.1.6 (commit 6510b29) — local plugin cache still at 0.1.5 until re-install, so this session couldn't exercise the fix; user verification needed after plugin re-install |
 | P035 | manage-problem commit-gate no subagent delegation fallback | pending user verification — fallback path never fired this session (primary `wr-risk-scorer:pipeline` subagent was always available) |
+| P044 | run-retro does not recommend new skills when it should | @windyroad/retrospective@0.1.6 (commit 6510b29) — local plugin cache still at 0.1.5 until re-install, so earlier session couldn't exercise the fix; user verification needed after plugin re-install |
 | P047 | WSJF effort buckets coarse and not re-rated at lifecycle transitions | 2026-04-19 (AFK iter 1 commit 5c677cc) — next `manage-problem review` or `work-problems` iteration exercises the new XL bucket and the step 7 / step 9b re-rate language; user verification needed at that point |
-| P050 | run-retro generalises codification branch from skill-only to 12 shapes | 2026-04-19 (AFK iter 2 commit pending) — next `/wr-retrospective:run-retro` invocation should present the generalised Step 2 prompt and the flat shape-prefixed Step 4b `AskUserQuestion`; user verification needed at that point. |
-| P051 | run-retro extended with improvement axis (6 improvement-shaped options + Kind column + concern-boundary splitting) | 2026-04-19 (AFK iter 3, commit 4a107a3) — next `/wr-retrospective:run-retro` invocation should present Step 2's improvement reflection category, a 19-option flat `AskUserQuestion` at Step 4b (12 create + 6 improve + 1 skip), and a Kind column in the Step 5 Codification Candidates table. User verification needed at that point. |
-| P053 | work-problems surfaces outstanding design questions at stop-condition #2 (Step 2.5 + skip-reason taxonomy + Outstanding Design Questions table in AFK summary) | 2026-04-19 (AFK iter 4, commit a0600d9) — next AFK loop that hits stop-condition #2 with ≥1 user-answerable skipped ticket should emit an `### Outstanding Design Questions` table in the final summary. User verification needed at that point. |
-| P049 | Verification Pending `.verifying.md` status — SKILL.md contract half (manage-problem / work-problems / manage-incident + README template) per ADR-022; migration of 16 existing `.known-error.md` Fix-Released tickets deferred to next commit | 2026-04-19 (AFK iter 5, pending commit) — next `manage-problem review` invocation should present a dedicated Verification Queue section and target `.verifying.md` via glob in step 9d. User verification needed at that point. |
+| P050 | run-retro generalises codification branch from skill-only to 12 shapes | 2026-04-19 (AFK iter 2, @windyroad/retrospective@0.2.0, merge commit b401c7b) — next `/wr-retrospective:run-retro` invocation should present the generalised Step 2 prompt and the flat shape-prefixed Step 4b `AskUserQuestion`; user verification needed at that point. |
+| P051 | run-retro extended with improvement axis (6 improvement-shaped options + Kind column + concern-boundary splitting) | 2026-04-19 (AFK iter 3, @windyroad/retrospective@0.3.0, commit 4a107a3) — next `/wr-retrospective:run-retro` invocation should present Step 2's improvement reflection category, a 19-option flat `AskUserQuestion` at Step 4b (12 create + 6 improve + 1 skip), and a Kind column in the Step 5 Codification Candidates table. User verification needed at that point. |
+| P053 | work-problems surfaces outstanding design questions at stop-condition #2 | 2026-04-19 (AFK iter 4, @windyroad/itil@0.5.0, commit a0600d9) — next AFK loop that hits stop-condition #2 with ≥1 user-answerable skipped ticket should emit an `### Outstanding Design Questions` table in the final summary. User verification needed at that point. |
+| P049 | Verification Pending `.verifying.md` status — SKILL.md contract + migration of 13 existing `.known-error.md` Fix-Released tickets (this commit) per ADR-022 | 2026-04-19 (AFK iter 5, commit 4e93bcf + this follow-up) — next `manage-problem review` invocation should present a dedicated Verification Queue section and target `.verifying.md` via glob in step 9d. User verification needed at that point. |
 
 ## Closed
 

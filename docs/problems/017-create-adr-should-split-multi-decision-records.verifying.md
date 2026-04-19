@@ -1,6 +1,6 @@
 # Problem 017: `create-adr` skill does not flag or split multi-decision inputs
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-04-16
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Possible (3)
 **Effort**: M

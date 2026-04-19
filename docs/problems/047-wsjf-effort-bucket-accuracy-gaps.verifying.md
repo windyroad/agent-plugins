@@ -1,6 +1,6 @@
 # Problem 047: WSJF effort buckets are coarse and not re-rated at lifecycle transitions
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-04-19
 **Priority**: 6 (Medium) — Impact: Minor (2) x Likelihood: Possible (3)
 **Effort**: M — SKILL.md additive edits + bats doc-lint test + in-session audit of 8 L-bucket tickets (estimate confirmed accurate for the scope shipped)

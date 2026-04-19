@@ -1,6 +1,6 @@
 # Problem 035: manage-problem commit gate has no fallback when subagent delegation is unavailable
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-04-17
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Possible (3)
 **Effort**: S

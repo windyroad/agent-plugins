@@ -1,6 +1,6 @@
 # Problem 033: No persistent risk register for ISO 31000 / ISO 27001 compliance
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-04-17
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Possible (3)
 **Effort**: L

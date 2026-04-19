@@ -1,6 +1,6 @@
 # Problem 044: run-retro does not recommend new skills when it should
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-04-18
 **Priority**: 8 (Med) — Impact: Minor (2) x Likelihood: Likely (4)
 **Effort**: M

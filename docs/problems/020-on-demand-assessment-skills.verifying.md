@@ -1,6 +1,6 @@
 # Problem 020: No user-invocable skills for on-demand governance assessments
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-04-16
 **Priority**: 16 (High) — Impact: Significant (4) x Likelihood: Likely (4)
 **Effort**: L
