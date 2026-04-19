@@ -325,7 +325,8 @@ fi
 If the command produces **no output** (no problem files have been committed or modified since the last README.md update), the cache is fresh:
 - Read `docs/problems/README.md` only — it contains the ranked table from the last review
 - Skip steps 9a–9b entirely
-- Proceed directly to step 9c (work selection) using the cached table
+- Proceed to step 9c (work selection) using the cached table
+- **Step 9d always fires even on the fast-path cache hit** (P048 Candidate 1): the verification prompt surface must not depend on whether the cache is fresh — pending verifications accumulate across sessions and the user expects the prompts to appear on every `review`. Skipping 9d alongside 9a–9b would suppress verification prompts whenever the cache is fresh, which is exactly when the user is most likely to verify.
 - Note in the output: "Using cached ranking from [timestamp in README.md]"
 
 If the command prints "stale", or `README.md` does not exist in git, run the full review (steps 9a–9e) and refresh the cache.
@@ -359,10 +360,14 @@ After reviewing all problems, present a WSJF-ranked table for open/known-error p
 | WSJF | ID | Title | Severity | Status | Effort | Notes |
 |------|-----|-------|----------|--------|--------|-------|
 
-Then present a separate **Verification Queue** section for `.verifying.md` files (per ADR-022 — ranked by release age, oldest first; no WSJF because the multiplier is 0):
+Then present a separate **Verification Queue** section for `.verifying.md` files (per ADR-022 — ranked by release age, oldest first; no WSJF because the multiplier is 0). Highlight each ticket whose release age is **≥ 14 days** (the within-skill default per P048 Candidate 4 — tunable; if it needs cross-skill consistency later, promote to policy) with a `likely verified` marker in the final column. This makes the Verification Queue not just a list but a ranked view of which verifications are most likely ready to close:
 
-| ID | Title | Released | Fix summary |
-|----|-------|----------|-------------|
+| ID | Title | Released | Fix summary | Likely verified? |
+|----|-------|----------|-------------|------------------|
+
+The `Likely verified?` column takes values:
+- `yes (N days)` — release age ≥ 14 days; the user is unlikely to revert a landed fix after this long. Surface these first in step 9d's verification prompt so the user can batch-close them.
+- `no (N days)` — release age < 14 days; may still be in validation. Fire step 9d for these too, but without the highlight.
 
 Then present a separate **Parked** section listing `.parked.md` files (no ranking):
 

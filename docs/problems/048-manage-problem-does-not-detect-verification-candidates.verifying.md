@@ -1,10 +1,37 @@
 # Problem 048: manage-problem does not surface Fix Released problems as verification candidates when the fix path has been exercised
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-19
 **Priority**: 8 (Medium) — Impact: Minor (2) x Likelihood: Likely (4)
-**Effort**: M
-**WSJF**: 4.0 — (8 × 1.0) / 2
+**Effort**: M (minimal-scope fix shipped; candidates 2, 3, 5 deferred)
+**WSJF**: 0 (excluded from dev-work ranking — per ADR-022)
+
+## Fix Released
+
+Shipped 2026-04-19 (AFK iter 6) — minimal-scope P048 fix landing candidates 1 and 4 only. Candidates 2 (standalone `verify-fixes` op), 3 (exercise observation records), and 5 (AFK-mode hook) are deferred pending the architect ADR-scope decision called out in this ticket's investigation tasks.
+
+- **packages/itil/skills/manage-problem/SKILL.md Step 9 fast-path**: Explicit wording added that step 9d fires even on the fast-path cache hit. Prevents the regression where verification prompts were implicitly skipped whenever the cache was fresh — which is exactly when the user is most likely to verify (Candidate 1).
+- **packages/itil/skills/manage-problem/SKILL.md Step 9c Verification Queue**: New `Likely verified?` column with `yes (N days)` / `no (N days)` values based on release age ≥ 14 days (Candidate 4). 14-day threshold documented as a within-skill default (tunable; architect review confirmed it is not RISK-POLICY-level yet). Highlighted tickets are surfaced first in step 9d's verification prompt so the user can batch-close long-standing verifications.
+
+Tests — `packages/itil/skills/manage-problem/test/manage-problem-verification-detection.bats` (new, 5 assertions, RED→GREEN this iteration):
+
+- SKILL.md exists.
+- Fast-path explicitly fires step 9d on cache hit (Candidate 1).
+- Step 9c Verification Queue highlights release-age candidates (Candidate 4).
+- 14-day default threshold documented.
+- SKILL.md cites P048.
+
+Full project test surface: 269 tests, 0 failures (+5 P048 tests; was 264/0 after P049 iter 5).
+
+**What's deferred** (requires architect ADR-scope decision before implementing):
+
+- **Candidate 3: exercise observation records**. Adds a new "Exercised: <date> — <context>" bullet list to the `## Fix Released` section of every `.verifying.md` ticket. Each orchestrator invocation that touches the fix path appends an observation. Over time the evidence accumulates and step 9d's prompt can quote it. This is a new file-level state dimension — architect flagged it as "could be new-ADR-level" per the ticket's investigation tasks. Needs a deliberate ADR before implementing.
+- **Candidate 2: standalone `verify-fixes` sub-operation**. User-visible entry point for a batch verification sweep (`/wr-itil:manage-problem verify-fixes`). Architecturally simple but adds a new CLI surface; hold until the detection layer is richer (post-Candidate 3).
+- **Candidate 5: AFK-mode orchestrator hook**. Pairs with Candidate 3 — the hook fires when an AFK loop exercises a fix path and records an observation. Needs Candidate 3's format first.
+
+Architect + JTBD reviews: both PASS. No new ADR required for this minimal scope (within-skill extension of ADR-022's Verification Queue pattern). ADR-022 explicitly names P048's detection layer as "out of scope for ADR-022, implemented separately" (ADR-022 line 78), which is what this iteration honours — the minimal subset implementable without new design. ADR-005 Permitted Exception covers the structural bats tests.
+
+Awaiting user verification: next `manage-problem review` invocation (either fast-path or full) should present a Verification Queue with the `Likely verified?` column, and step 9d should fire prompts for all `.verifying.md` tickets regardless of whether the cache was fresh.
 
 ## Description
 
