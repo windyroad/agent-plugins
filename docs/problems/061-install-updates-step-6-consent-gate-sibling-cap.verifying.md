@@ -1,6 +1,6 @@
 # Problem 061: `install-updates` Step 6 consent-gate contract violates the AskUserQuestion 4-option cap when sibling count > 3
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-20
 **Priority**: 4 (Low) — Impact: Minor (2) x Likelihood: Unlikely (2)
 **Effort**: S — edit `.claude/skills/install-updates/SKILL.md` Step 6 to document a grouping fall-back when siblings > 3
@@ -69,6 +69,19 @@ No ADR change needed; this is a Step 6 clarification within ADR-030's existing C
 - [ ] Decide whether the grouping wording matches what operators should do. The suggested wording preserves the core choice (everywhere / current-only / dry-run / custom) and maps cleanly to the 4-option cap.
 - [ ] Apply the Step 6 amendment.
 - [ ] Optional: add bats doc-lint regression asserting the grouping language is present.
+
+## Fix Released
+
+Shipped 2026-04-20 (AFK iter 6 iter 6, commit pending).
+
+- `.claude/skills/install-updates/SKILL.md` Step 6 — amended to describe two shapes. For sibling count ≤ 3 the original contract applies (one option per sibling + dry-run). For sibling count > 3 a grouping fallback kicks in: exactly 4 options (`All <N> projects (Recommended)` / `Current project only` / `Dry-run — show the plan but don't install` / auto-provided `Other — provide custom text`). Per architect advisory, the full sibling list is named in the question body text (the 4-option cap applies to options, not question description), preserving ADR-030's "list every sibling project" consent requirement.
+- `.claude/skills/install-updates/test/install-updates-consent-gate-sibling-cap.bats` — NEW. 6 doc-lint structural assertions (Permitted Exception per ADR-005) verifying: fallback block presence with P061 reference, maxItems cap citation, all 4 option labels, sibling enumeration in question body, original contract preserved for ≤ 3, and the "either shape satisfies ADR-030" rationale.
+
+Architect review PASSED (no ADR amendment needed — ADR-030's Confirmation criteria still met by either shape; ADR-013 Rule 1 maxItems cap is a tool-level constraint that the fallback correctly accommodates). JTBD review PASSED (JTBD-003 Compose Only the Guardrails I Need; solo-developer plugin-version drift pain point).
+
+Repo-local skill per ADR-030; no npm changeset. Fix lives entirely in `.claude/skills/install-updates/` plus its `test/` sibling.
+
+Awaiting user verification: next `/install-updates` invocation in a workspace with > 3 sibling windyroad projects (this repo qualifies — 5 siblings per the 2026-04-20 observation) should fire the grouping fallback with 4 options + the full sibling list named in the question body.
 
 ## Related
 

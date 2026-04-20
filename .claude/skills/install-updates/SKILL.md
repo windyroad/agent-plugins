@@ -94,13 +94,25 @@ These projects will have a dormant JTBD gate after the wr-jtbd install lands. Th
 
 ### 6. Consent gate (mandatory per ADR-030)
 
-Invoke `AskUserQuestion` with **one question, multiSelect=true**:
+Invoke `AskUserQuestion` with **one question, multiSelect=true**.
+
+**Sibling count ≤ 3** — original contract applies:
 
 - `header: "Install targets"`
 - `question: "Which projects should receive the updated plugins? Detected siblings below. Current project is always included."`
 - Options: one per detected sibling name, plus a `"Dry-run — show the plan but don't install"` option.
 
-The user can pick any subset (or dry-run). Never install without explicit consent for a sibling.
+**Sibling count > 3 — grouping fallback (P061)**. `AskUserQuestion` caps `maxItems` at 4; "one option per sibling + dry-run" exceeds the cap when siblings > 3. Fall back to bucketed options, and **name every detected sibling in the question body text** (the cap applies to options, not to the question description, so the full list is still presented to the user per ADR-030's "list every sibling project" consent requirement):
+
+- `header: "Install targets"`
+- `question: "Which projects should receive the updated plugins? Detected siblings: <comma-separated list>. Current project is always included. Pick a bucket below or use Other to name a custom subset."`
+- Options (exactly 4):
+  1. `All <N> projects (Recommended)` — install across current + every detected sibling.
+  2. `Current project only` — skip all siblings.
+  3. `Dry-run — show the plan but don't install` — preserves the dry-run affordance required by ADR-030.
+  4. The auto-provided `Other — provide custom text` affordance covers custom subsets. Encourage the user to name siblings inline (e.g. "addressr, bbstats"); the skill parses the free text against the detected set.
+
+Either shape (≤ 3 or > 3 fallback) satisfies the ADR-030 Confirmation consent gate (first action; lists all detected siblings; dry-run present; user retains subset authority). The user can pick any subset (or dry-run). Never install without explicit consent for a sibling.
 
 ### 6.5. Auto-migrate ADR-documented stale entries (P059)
 
