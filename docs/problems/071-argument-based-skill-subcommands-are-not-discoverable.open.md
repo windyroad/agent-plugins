@@ -102,8 +102,21 @@ Applying the rule to `manage-problem`:
 - [ ] Sweep `docs/` for cross-references that mention old argument forms and update them post-split.
 - [ ] Update this project's codification candidate for the pre-AFK pinning pattern (session retro 2026-04-20) to use `/wr-itil:pin-afk-direction` instead of `/wr-itil:manage-problem pre-afk`. Already noted in the user's feedback memory; this ticket captures the broader rule.
 
+## Decision record
+
+**ADR-010 (amended 2026-04-21, P071 amendment)** — new "Skill Granularity" section codifies "one skill per distinct user intent". Argument-subcommands permitted only for data parameters (IDs, paths, URLs). Word-arguments that act as verbs (`list`, `work`, `review`, `close`, etc.) must be split into separate skills. **Deprecation window**: until next major version bump of each affected plugin. **Forwarder shape**: thin-router — original skill's subcommand routes re-invoke the new named skill via the Skill tool AND emit a one-line systemMessage deprecation notice. Bats doc-lint assertion with `deprecated-arguments: true` frontmatter allowlist during the deprecation window.
+
+This ticket (P071) remains **Open** as the implementation tracker. Closes when:
+- Every `@windyroad/*` plugin's argumented skills (audit identified: `manage-problem`, `manage-incident`, possibly `update-guide` variants) have been split into named sibling skills.
+- Thin-router forwarders land on the original skill's subcommand routes with the one-line systemMessage.
+- Each affected SKILL.md carries the `deprecated-arguments: true` frontmatter flag.
+- Bats doc-lint assertion lands per ADR-010's amended Confirmation section.
+- Plugin manifests list the new skill names.
+
 ## Related
 
+- **ADR-010 (amended 2026-04-21)** — decision record for this ticket. Closes the design question; P071 tracks execution.
+- **ADR-032** (Governance skill invocation patterns) — pre-committed to the same rule; the capture-* sibling pattern IS the canonical application of "one skill per distinct user intent".
 - **P044** — run-retro does not recommend new skills; sibling pattern. The skill-creation axis this ticket protects.
 - **P050** — run-retro does not recommend other codifiable outputs; same retro-codification family.
 - **P051** — run-retro does not recommend improvements to existing codifiables. Tangential — improvement rather than creation.

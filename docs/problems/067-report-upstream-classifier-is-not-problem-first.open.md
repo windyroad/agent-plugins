@@ -121,8 +121,21 @@ Option 3 (rejected): **Always use the problem-shape default, ignore upstream tem
 - [ ] Architect review on whether this is an ADR amendment or a new ADR. Precedent: ADR-022 replaced part of the problem lifecycle language from an earlier ADR — same pattern applies here for steps 3 and 5.
 - [ ] Add a note to `packages/itil/skills/report-upstream/SKILL.md` references section pointing at P067 (and P066) as the problem-first reform.
 
+## Decision record
+
+**ADR-033** (Report-upstream classifier is problem-first — supersedes ADR-024 Steps 3 + 5) — drafted 2026-04-21. Partial-supersession pattern per ADR-022 precedent. New preference order: problem-first classifier tokens (problem / issue / concern / defect / gap / scoped-npm references) primary; bug / feature / question demoted to backward-compat fallbacks for upstreams that haven't adopted problem-first templates yet. Problem-shaped structured default body (Description → Symptoms → Workaround → Affected plugin → Frequency → Environment → Evidence → Cross-reference) replaces ADR-024's bug-shaped default; bug/feature/question bodies retained for fallback use. Template-discovery preference extends to `problem-report.yml` + `problem.yml` before the existing bug/feature/question candidates.
+
+ADR-024 gains an `## Amendments` section near the top pointing at ADR-033 with the specific step numbers carved out. ADR-024 stays `.proposed.md` — not renamed.
+
+This ticket (P067) remains **Open** as the execution tracker. Closes when:
+- `packages/itil/skills/report-upstream/SKILL.md` Step 3 and Step 5 rewritten per ADR-033.
+- Template-discovery preference order updated.
+- `packages/itil/skills/report-upstream/test/report-upstream-contract.bats` extended with the new preference-order + problem-shaped-body assertions.
+- Cross-references to ADR-033 land in SKILL.md's Related section.
+
 ## Related
 
+- **ADR-033** (Report-upstream classifier is problem-first) — decision record for this ticket. Closes the design question.
 - **P055** — parent; Part B shipped `/wr-itil:report-upstream` with the bug/feature/question shape.
 - **P066** — sibling; this repo's intake templates adopt problem-first. Must ship first (or alongside) so the skill's preference order matches the shape this project ships.
 - **P063** — manage-problem does not trigger report-upstream; related wiring gap.

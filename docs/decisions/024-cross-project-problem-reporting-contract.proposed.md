@@ -9,6 +9,10 @@ reassessment-date: 2026-07-20
 
 # Cross-project problem-reporting contract — `report-upstream` skill in `@windyroad/itil`
 
+## Amendments
+
+- **2026-04-21** — Decision Outcome Steps 3 and 5 superseded by [ADR-033](./033-report-upstream-classifier-problem-first.proposed.md) (Report-upstream classifier is problem-first). The classifier's preference order and the structured default body shape are now governed by ADR-033. The rest of ADR-024's Decision Outcome (Steps 1, 2, 4, 6, 7, 8), all Consequences, all Confirmation clauses, and the `## Reported Upstream` appendage contract remain in force. ADR-033 follows ADR-022's precedent for partial-lifecycle-language supersession.
+
 ## Context and Problem Statement
 
 Every downstream project (addressr, bbstats, any consumer of `@windyroad/*` or other npm packages) that notices a defect in an upstream dependency has to invent its own "report a problem to a dependency" workflow. The agent can call `gh issue create` against an upstream repo, but there is no Windy Road plugin, skill, or convention that scaffolds the flow. In practice, upstream issues are opened as free-form prose, the local `docs/problems/<NNN>` ticket is not cross-referenced back into the upstream record, and the audit trail is one-way (downstream knows the upstream was contacted; upstream has no structured link back to the downstream context).

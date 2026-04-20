@@ -65,8 +65,20 @@ For AFK loops specifically, a session-restart side effect is less disruptive bec
 - [ ] Evaluate whether `claude plugin install` can be called with a flag that defers session-reload until next natural restart (would make interactive auto-install safe).
 - [ ] Spike: scripted install + session restart from inside a skill — measure end-to-end behaviour in an AFK loop.
 
+## Decision record
+
+**ADR-034** (Auto-install on next session start — SessionStart hook + per-project consent gate) — drafted 2026-04-21. SessionStart hook in `packages/itil/hooks/session-start-update-check.sh` detects outdated `@windyroad/*` plugins. Consent marker per project at `.claude/.auto-install-consent` (preserves ADR-004 isolation). Absent consent → systemMessage only (ADR-013 Rule 6 fail-safe). Present consent → background-capture `/install-updates` via ADR-032 pattern (ADR-013 Rule 5 policy-authorised). AFK-launched sessions defer the check (ADR-032 + ADR-018 + ADR-019 carve-out mirrored). Consent granted interactively at the end of a successful `/install-updates` run.
+
+This ticket (P045) remains **Open** as the execution tracker. Closes when:
+- `packages/itil/hooks/session-start-update-check.sh` ships with `@windyroad/itil`.
+- `.claude/skills/install-updates/SKILL.md` gains the consent-grant AskUserQuestion step at the end of its flow.
+- Consent marker file format landed + bats coverage.
+- AFK-launch detection envvar convention standardised (coordination with ADR-019 execution ticket).
+- Plugin manifest for `@windyroad/itil` declares the SessionStart hook.
+
 ## Related
 
+- **ADR-034** (Auto-install on next session start) — decision record for this ticket. Closes the design question.
 - P028: `docs/problems/028-governance-skills-should-auto-release-and-install.known-error.md` — parent; auto-release concern stays there and is fixed by ADR-020
 - ADR-014: `docs/decisions/014-governance-skills-commit-their-own-work.proposed.md` — lean release principle (commit layer)
 - ADR-018: `docs/decisions/018-inter-iteration-release-cadence-for-afk-loops.proposed.md` — AFK release cadence (push/release layer)

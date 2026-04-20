@@ -1,13 +1,18 @@
 ---
 status: "proposed"
 date: 2026-04-15
+amended-date: 2026-04-21
 decision-makers: [Tom Howard]
-consulted: [wr-architect:agent]
+consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: [Windy Road plugin users]
 reassessment-date: 2027-04-15
 ---
 
 # Rename `wr-problem` Plugin to `wr-itil`
+
+## Amendments
+
+- **2026-04-21 (P071 amendment)** — Adds the "Skill Granularity" section below codifying "one skill per distinct user intent". Argument-subcommands (like `/wr-itil:manage-problem list`, `... work`, `... review`, `... <NNN> known-error`) are the anti-pattern P071 identifies — they do not surface in Claude Code autocomplete, forcing users to reverse-engineer SKILL.md Operations tables or hold the subcommand vocabulary in working memory. The amendment codifies separate skills as the expected shape for distinct user intents, with argument parameters permitted only for data (IDs, paths, URLs). Deprecation-window policy for existing argumented skills included. Scope of this amendment extends ADR-010's naming-pattern authority from "skill-file level" to "skill-granularity level"; no supersession (ADR-010 stays `.proposed.md`). ADR-011 (manage-incident) inherits the amendment via its ADR-010 citation; ADR-032 (invocation patterns) pre-committed to the same rule at line 29.
 
 ## Context and Problem Statement
 
@@ -97,6 +102,41 @@ No shim package: the `cross-repo-signal → connect` precedent is clean, and the
 
 This rename signals **room for expansion**, not commitment to it. Additional ITIL skills (incident, change) are not in scope here. If a second skill is added, reuse the `/wr-itil:<verb>-<object>` naming pattern (`manage-problem`, `manage-incident`, `manage-change`).
 
+## Skill Granularity (added by P071 amendment, 2026-04-21)
+
+### Rule: one skill per distinct user intent
+
+Each distinct user intent is its own named skill under `/wr-<plugin>:<verb>-<object>`. Argument-subcommands (words that act as verbs, like `list`, `work`, `review`, `close`, `known-error`) are the anti-pattern P071 identifies — they do not surface in Claude Code's `/<plugin>:` autocomplete, forcing users to reverse-engineer SKILL.md Operations tables to discover sub-operations. Users report three-memory-loads per invocation (remember the host skill, the subcommand name, and the argument type); new adopters cannot discover sub-operations without reading SKILL.md.
+
+**Permitted argument shapes**:
+
+- **Data parameters** — IDs, paths, URLs, numbers. Example: `/wr-itil:manage-problem 072` (where `072` is a problem ID, data not verb). These are parameters to a single user intent, not distinct user intents.
+- **Forbidden shapes**: verbs or named sub-operations as free-text arguments. Example anti-pattern: `/wr-itil:manage-problem list` → should be `/wr-itil:list-problems` as its own skill.
+
+### Split test
+
+Apply before introducing any argument-style routing in a new or amended SKILL.md:
+
+1. Does the argument represent a distinct user intent (the user is asking for a different *action* rather than passing *data*)? If yes, split into a separate skill.
+2. Does the argument substitute for a verb (`list`, `create`, `update`, `close`, `review`, etc.)? If yes, split.
+3. Is the argument a data parameter (ID, path, URL, free-form text that parameterises a single action)? If yes, keep as an argument.
+
+### Deprecation window for existing argumented skills
+
+Existing skills (currently `/wr-itil:manage-problem`, `/wr-itil:manage-incident`, possibly `/wr-<plugin>:update-guide` for voice-tone / style-guide / jtbd / risk-scorer) have argumented subcommands that must be split per this rule. The deprecation policy:
+
+- **Until next major version bump of the affected plugin** — original argumented skill retains its subcommand routes as **thin-router forwarders**. Each forwarder:
+  - Invokes the new named skill via the Skill tool (not via re-prompting the user).
+  - Emits a one-line systemMessage deprecation notice: `"/wr-<plugin>:<old> <arg>" is deprecated; use "/wr-<plugin>:<new>" directly. This forwarder will be removed in <plugin>'s next major version.`
+  - Preserves all existing behaviour; no functional regression during the window.
+- **At major version bump** — forwarders removed; old argumented forms hard-fail with the redirect message as their final emission.
+
+Data-parameter arguments (non-verb) are NOT affected by the deprecation — they stay as-is on the split skills.
+
+### Implementation tracked under P071
+
+Execution of the split audit and forwarder authoring tracks under P071 as the implementation ticket. The ADR authorises the rule; P071 does the plugin-by-plugin work.
+
 ## Migration Path for Users
 
 - Any user who installed `wr-problem` via the marketplace will silently stop receiving updates after this rename.
@@ -136,14 +176,30 @@ This rename signals **room for expansion**, not commitment to it. Additional ITI
 - [ ] `npm deprecate @windyroad/problem` executed for any previously published versions
 - [ ] Changesets: `@windyroad/itil` new package, `@windyroad/retrospective` minor bump, release notes call out migration
 
+### Skill Granularity Confirmation (added by P071 amendment)
+
+- [ ] Bats doc-lint across every `@windyroad/*` plugin that asserts: for each SKILL.md's Operations table, every argument is either a data-parameter (matches `<NNN>`, `<path>`, `<url>`, `<ID>` or similar placeholder) OR the row explicitly carries a `DEPRECATED (forwarder; removed in v<N>.0.0)` marker. Word-arguments that act as verbs without the forwarder marker fail the assertion. The forwarder allowlist is the deprecation-window escape hatch from the Consequences section above.
+- [ ] Each SKILL.md file whose Operations table contains a forwarder row carries a `deprecated-arguments: true` frontmatter flag so tooling can distinguish actively-deprecated skills from clean-split skills.
+- [ ] P071 implementation commits audit every `@windyroad/*` skill and list the new skill names in `.claude-plugin/plugin.json` manifests; bats doc-lint for each new skill follows the existing per-skill test pattern.
+
 ## Reassessment Criteria
 
 - **Expansion confirmed**: if a second ITIL skill (incident, change, or similar) is added within 12 months, the `wr-itil` framing was right — no action.
 - **No expansion**: if no peer ITIL skill is added within 12 months, the rename may have been premature. Reassess whether `wr-itil` is still the best framing or whether a narrower name (reverting to `wr-problem`) or broader name (`wr-ops`) would be clearer.
 - **External adoption signals**: if users ask for non-ITIL process tooling (post-mortems, OKR tracking) that naturally would live here, reconsider the `itil` framing.
 
+## Reassessment Criteria (P071 amendment additions)
+
+- A second legitimate verb-as-argument use case emerges that CANNOT cleanly split into its own skill (e.g. a verb that is fundamentally a parameter choice, not a user intent). Signal: revisit the split test.
+- The deprecation-window forwarder pattern proves confusing or systematically wrong. Signal: revisit the window length or the forwarder shape (thin router vs hard-fail redirect).
+
 ## Related
 
 - P010 (`docs/problems/010-rename-wr-problem-to-wr-itil.open.md`) — the problem this ADR resolves
 - ADR-002 (monorepo structure) — package inventory needs updating as part of this change
 - ADR-006 (connect plugin) — rename precedent (`cross-repo-signal → connect`)
+- **P071** (argument-based skill subcommands not discoverable) — drives the 2026-04-21 amendment
+- **ADR-011** (manage-incident skill) — inherits this amendment via its ADR-010 citation
+- **ADR-032** (governance-skill invocation patterns) — pre-commits to this rule at line 29; sibling-skill pattern of foreground + `capture-*` background is the canonical application
+- **ADR-028** (External-comms gate) — amendment-in-place precedent this amendment follows
+- `feedback_skill_subcommand_discoverability.md` — user memory that motivated this amendment
