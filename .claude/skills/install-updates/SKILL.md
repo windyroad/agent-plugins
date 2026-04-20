@@ -38,7 +38,7 @@ Per the session's BRIEFING: "The marketplace resolves from the remote GitHub rep
 
 ```bash
 CURRENT_PROJECT=$(basename "$PWD")
-CURRENT_PLUGINS=$(grep -oE '"wr-[a-z-]+@windyroad"' .claude/settings.json 2>/dev/null \
+CURRENT_PLUGINS=$(grep -oE '"wr-[a-z0-9-]+@windyroad"' .claude/settings.json 2>/dev/null \
   | sed 's/"//g; s/@windyroad//' | sort -u)
 ```
 
@@ -55,7 +55,7 @@ for d in ../*/; do
   # Skip directories without a .claude/settings.json.
   [ -f "$d.claude/settings.json" ] || continue
   # Skip directories with no windyroad plugins enabled.
-  if grep -qE '"wr-[a-z-]+@windyroad"' "$d.claude/settings.json" 2>/dev/null; then
+  if grep -qE '"wr-[a-z0-9-]+@windyroad"' "$d.claude/settings.json" 2>/dev/null; then
     SIBLINGS+=("$name")
   fi
 done

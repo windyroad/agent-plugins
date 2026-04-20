@@ -1,10 +1,22 @@
 # Problem 058: `install-updates` SKILL.md under-reports plugins whose names contain digits (regex `[a-z-]+` skips `wr-c4`)
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-20
 **Priority**: 4 (Low) — Impact: Minor (2) x Likelihood: Unlikely (2)
 **Effort**: S — one-line regex fix in two places + bats regression test
-**WSJF**: 4.0 — (4 × 1.0) / 1
+**WSJF**: 0 (Verification Pending — see ADR-022)
+
+## Fix Released
+
+Released in working tree 2026-04-20 (AFK iter 1, P058 worked). Changes:
+
+- `.claude/skills/install-updates/SKILL.md` Step 2 (line 41) and Step 3 (line 58): regex `[a-z-]+` → `[a-z0-9-]+`. Now matches `wr-c4@windyroad` and any future digit-bearing plugin name.
+- `.claude/skills/install-updates/test/install-updates-regex-matches-digits.bats`: NEW. 4 bats assertions — doc-lint guard, negative-regression guard, behavioural fixture-grep against `wr-c4`/`wr-itil`/`wr-jtbd`. First bats test under a repo-local skill per ADR-030's "bats tests optional" clause.
+- `package.json` line 19: bats `--recursive` glob extended with `.claude/skills/*/test/`. Architect-flagged in same review (the prior glob silently skipped repo-local skill tests — same defect class as P058 itself, ironically). Realises ADR-030 Decision Outcome point 6 wiring.
+
+Exercise evidence: `npm test` ran 363 assertions, all pass. Tests 360–363 are the new P058 bats checks.
+
+Awaiting user verification: confirm next `/install-updates` invocation lists `wr-c4@windyroad` in current/sibling-project discovery (e.g. `bbstats`, `addressr-react`, `addressr`, `windyroad`).
 
 ## Description
 
