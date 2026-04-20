@@ -1,6 +1,6 @@
 # Problem 066: Intake templates split bug / feature instead of a problem-first template — misaligned with ITIL problem management
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-20
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: S — replace `.github/ISSUE_TEMPLATE/bug-report.yml` and `feature-request.yml` with a single `problem-report.yml` (or reshape existing fields around problem-report structure), update `config.yml` chooser copy, and adjust labels. One-to-three file edits.
@@ -97,8 +97,25 @@ Two options considered:
 - [ ] Add a bats doc-lint test asserting the templates are problem-centric (problem-report.yml exists; no bug-report.yml or feature-request.yml; config.yml doesn't enumerate "bugs and features only").
 - [ ] Cross-reference P067 in this ticket's Related section — the upstream classification fix should land alongside (or shortly after) this one so the pattern stays coherent.
 
+## Fix Released
+
+Shipped 2026-04-20 (AFK iter 6, commit pending). Intake surface now problem-first:
+
+- `.github/ISSUE_TEMPLATE/problem-report.yml` — NEW. Fields mirror the manage-problem ticket shape: Description, Symptoms, Workaround, Affected plugin (dropdown), Frequency, Environment, Evidence, Additional context. Title prefix `[problem]`, labels `problem` + `needs-triage`.
+- `.github/ISSUE_TEMPLATE/bug-report.yml` — REMOVED.
+- `.github/ISSUE_TEMPLATE/feature-request.yml` — REMOVED.
+- `.github/ISSUE_TEMPLATE/config.yml` — chooser copy updated to describe the tracker as a problem-management surface; Discussions + Security Advisories contact links preserved.
+- `SUPPORT.md` — "Bug reports" + "Feature requests" sections replaced with a single "Report a problem" section.
+- `CONTRIBUTING.md` — "Bugs and feature requests" opener replaced with "Problems".
+- `packages/shared/test/intake-templates.bats` — NEW. 11 structural doc-lint assertions (Permitted Exception per ADR-005) verifying problem-first shape, template presence/absence, retained Discussions/Security contact links, and corresponding SUPPORT/CONTRIBUTING copy.
+
+Architect review PASSED (ADR-024 Scope explicitly carves intake scaffolding out of the "requires its own ADR" rule; ADR-005 permits structural doc-lint). JTBD review PASSED aligned with JTBD-001, JTBD-101, JTBD-201; flagged the adjacent gap that no persona models the external reporter — captured as follow-up ticket P072.
+
+Awaiting user verification: open https://github.com/windyroad/agent-plugins/issues/new/choose and confirm the single "Report a problem" template renders with the expected fields and no bug/feature options remain.
+
 ## Related
 
+- **P072** — follow-up; JTBD persona gap for external reporters surfaced during this ticket's review.
 - **P055** — parent; Part A shipped the misaligned templates (commit `e36cf84`). This ticket corrects Part A's shape.
 - **P065** — scaffold-intake skill; the template source this ticket corrects becomes the skill's seed. Update the seed reference after this ticket ships.
 - **P067** — sibling; `/wr-itil:report-upstream` classifier should follow the problem-first discipline as well.

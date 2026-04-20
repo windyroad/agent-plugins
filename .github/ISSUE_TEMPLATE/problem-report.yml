@@ -1,0 +1,102 @@
+name: Report a problem
+description: Report a problem with a windyroad plugin. You do not need to pre-classify it as a bug or feature -- triage decides.
+title: "[problem] "
+labels: ["problem", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem. This project practises ITIL problem management -- you describe what you observed, and triage decides whether the root cause is a defect, a missing capability, a documentation gap, or something else. You do not need to choose in advance.
+
+        For security vulnerabilities, **do not file here** -- use [GitHub Security Advisories](https://github.com/windyroad/agent-plugins/security/advisories/new) instead. For usage questions, use [Discussions](https://github.com/windyroad/agent-plugins/discussions).
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What is happening? What did you expect instead? Describe the observation, not the fix.
+      placeholder: |
+        e.g. "When I run /wr-itil:manage-problem in a fresh project, the skill reports no problems even though docs/problems/ has open tickets. I expected it to list them."
+    validations:
+      required: true
+
+  - type: textarea
+    id: symptoms
+    attributes:
+      label: Symptoms
+      description: Observable behaviour -- error messages, hook output, transcript snippets, screenshots. Redact secrets.
+      placeholder: |
+        - Command returns exit code 1
+        - Hook prints "project root not found"
+        - ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Workaround
+      description: Anything you tried that got you unstuck, even if temporary. "None found" is a valid answer.
+      placeholder: |
+        Retried after restarting Claude Code -- same result. No workaround found.
+
+  - type: dropdown
+    id: affected-plugin
+    attributes:
+      label: Affected plugin or component
+      description: Which plugin is involved? Pick "multiple" or "unsure" if unclear -- triage will re-scope.
+      options:
+        - "@windyroad/agent-plugins (umbrella installer)"
+        - "@windyroad/architect"
+        - "@windyroad/c4"
+        - "@windyroad/connect"
+        - "@windyroad/itil"
+        - "@windyroad/jtbd"
+        - "@windyroad/retrospective"
+        - "@windyroad/risk-scorer"
+        - "@windyroad/style-guide"
+        - "@windyroad/tdd"
+        - "@windyroad/voice-tone"
+        - "@windyroad/wardley"
+        - "multiple plugins"
+        - "unsure"
+    validations:
+      required: true
+
+  - type: input
+    id: frequency
+    attributes:
+      label: Frequency
+      description: How often does this happen? (every time, intermittently, once, ...)
+      placeholder: "e.g. every time I run the skill"
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Plugin version (`claude plugin list`), Claude Code version (`claude --version`), and operating system.
+      placeholder: |
+        - Plugin: @windyroad/itil@0.7.2
+        - Claude Code: 1.x.x
+        - OS: macOS 15.2
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Minimal reproduction steps, transcript links, screenshots, or related prior discussions. Feeds the investigation tasks triage will open.
+      placeholder: |
+        1. Run `npx @windyroad/itil`
+        2. Open Claude Code
+        3. Type `/wr-itil:manage-problem list`
+        4. Observe empty output despite docs/problems/*.open.md files existing
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Anything else relevant -- related tickets, prior art, a hypothesis you already formed.

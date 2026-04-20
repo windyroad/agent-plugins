@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-04-20 (AFK iter 3 close — P057, P056, P019 all shipped and in Verification Pending. @windyroad/itil@0.7.2, @windyroad/architect@0.4.1, @windyroad/jtbd@0.6.0 released. Stop-condition #2 fired; user answered 10 design questions interactively — each remaining open ticket now carries a `## Direction decision (2026-04-20)` section so the next AFK loop can proceed without re-asking. P014 re-sized from XL → L (background-subagent convention replaces new ADR). P055 re-sized from XL → L (skill-in-itil replaces new plugin + ADR).
+> Last reviewed: 2026-04-20 (AFK iter 6 close — P066 intake reform shipped and transitioned to Verification Pending; follow-up P072 opened for the JTBD persona gap surfaced during review. 21 open tickets ranked; P063 / P066 (now verifying) previously tied for top. Direction pins from iter 3 still hold on P014, P055 (closed this session), P063, P064, P065, P067. New tickets P058 and P059 also now in Verification Queue.
 > Run `/wr-itil:manage-problem review` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -9,9 +9,20 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 
 | WSJF | ID | Title | Severity | Status | Effort |
 |------|-----|-------|----------|--------|--------|
+| 9.0 | P063 | manage-problem does not trigger report-upstream when root cause is external | 9 Med | Open | S |
+| 6.0 | P065 | No skill scaffolds intake files in downstream projects | 12 High | Open | M |
+| 6.0 | P068 | run-retro does not close `.verifying.md` tickets observed verified in-session | 12 High | Open | M |
+| 6.0 | P070 | report-upstream does not check for existing upstream issues before filing | 12 High | Open | M |
+| 6.0 | P071 | Argument-based skill subcommands are not discoverable in Claude Code autocomplete | 12 High | Open | M |
+| 4.5 | P067 | report-upstream classifier is not problem-first | 9 Med | Open | M |
+| 4.0 | P060 | `push:watch` does not anchor on HEAD sha | 4 Low | Open | S |
+| 4.0 | P061 | install-updates Step 6 consent-gate violates AskUserQuestion 4-option cap when siblings > 3 | 4 Low | Open | S |
+| 4.0 | P062 | manage-problem does not refresh README.md on single-ticket transitions | 4 Low | Open | S |
+| 3.75 | P069 | docs/problems/ flat layout is unskimmable — migrate to per-state subdirectories | 15 High | Open | L |
 | 3.0 | P014 | No lightweight aside invocation for governance skills (background-subagent convention per 2026-04-20 direction) | 12 High | Open | L |
+| 3.0 | P064 | No risk-scoring gate on external communications | 12 High | Open | L |
 | 2.25 | P015 | TDD enforcement does not flag vague Gherkin outcome steps | 9 Med | Open | L |
-| 2.25 | P055 | No standard problem-reporting channel for plugin users (new skill in @windyroad/itil per 2026-04-20 direction) | 9 Med | Open | L |
+| 2.25 | P072 | No persona in docs/jtbd/ models the external repo reporter | 9 Med | Open | M |
 | 2.0 | P018 | TDD enforce BDD + Example Mapping principles | 16 High | Open | XL |
 | 2.0 | P022 | Agents must not fabricate time estimates | 16 High | Open | XL |
 | 2.0 | P039 | Autonomous loops conflate diagnose with implement | 16 High | Open | XL |
@@ -33,7 +44,7 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P029 | Edit gate overhead for governance docs | 2026-04-17 (ac9d453) | no (3 days) |
 | P020 | No on-demand assessment skills | v0.3.2 | no (age unknown — pre-v0.3.2 release date) |
 | P021 | Governance skill structured prompts | v0.3.2 | no (age unknown) |
-| P035 | manage-problem commit-gate no subagent delegation fallback | pending — fallback path never fired this session (primary subagent always available) | no (not yet released to npm — user-verifiable only after a session exercises the fallback) |
+| P035 | manage-problem commit-gate no subagent delegation fallback | pending — fallback path never fired this session | no (not yet released to npm — user-verifiable only after a session exercises the fallback) |
 | P044 | run-retro does not recommend new skills when it should | @windyroad/retrospective@0.1.6 (commit 6510b29) | no (1 day) |
 | P047 | WSJF effort buckets coarse and not re-rated at lifecycle transitions | 2026-04-19 (AFK iter 1 commit 5c677cc) | no (1 day) |
 | P050 | run-retro generalises codification branch from skill-only to 12 shapes | @windyroad/retrospective@0.2.0 (b401c7b) | no (1 day) |
@@ -48,10 +59,13 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P057 | git mv + Edit + git add staging-ordering trap drops content edits | @windyroad/itil@0.7.2 + @windyroad/architect@0.4.1 (commit 3bf2074) | no (0 days) |
 | P056 | Ticket-creator next-ID lookup greps blob SHAs producing wrong origin_max | @windyroad/itil@0.7.2 + @windyroad/architect@0.4.1 (commit f9bfa56) | no (0 days) |
 | P019 | Deprecate single-file JTBD fallback (ADR-008 Option 3) | @windyroad/jtbd@0.6.0 (commit 6dd6a77) — breaking change | no (0 days) |
+| P058 | install-updates regex misses digit-bearing plugin names | commit 3798be8 | no (0 days) |
+| P059 | install-updates no plugin rename handling | commit 3261d81 | no (0 days) |
+| P066 | Intake templates problem-first (bug-report + feature-request replaced by problem-report) | commit pending (AFK iter 6) | no (0 days) |
 
 ## Closed
 
-Recently closed this session (2026-04-19, against direct in-session evidence):
+Recently closed this session (2026-04-19/20, against direct in-session evidence):
 
 | ID | Title | Closed via |
 |----|-------|-----------|
@@ -63,6 +77,7 @@ Recently closed this session (2026-04-19, against direct in-session evidence):
 | P043 | Next-ID collision guard in ticket-creator skills | `max(local, origin)+1` used for 10 new IDs this session (8 problems + 2 ADRs) |
 | P052 | ADR-021 release.yml missing `version:` input | End-to-end validated in the 2026-04-19 release; paired with P042's closure |
 | P028 | Governance skills should auto-release (non-AFK) | Verified end-to-end in the 2026-04-19 AFK loop iter 2: push of `f0de540` triggered Release workflow → PR #31 auto-created with version bumps and plugin.json manifest syncs → `release:watch` merged and published both `@windyroad/itil@0.4.5` and `@windyroad/retrospective@0.2.0` to npm (run `24619740990`, merge commit `b401c7b`). No manual intervention within the AFK loop. |
+| P055 | No standard problem-reporting channel for plugin users | Closed 2026-04-20 (commit 038c3de). Part A (OSS intake scaffolding) + Part B (`/wr-itil:report-upstream` skill) both shipped; @windyroad/itil@0.8.0 released to npm. |
 
 ## Parked
 

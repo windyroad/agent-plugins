@@ -4,7 +4,7 @@ Thanks for your interest in `@windyroad/agent-plugins`. This guide covers how to
 
 ## Before you start
 
-- **Bugs and feature requests**: open an issue first using the templates under `.github/ISSUE_TEMPLATE/`. Drive-by PRs without an issue are harder to merge because the problem framing is missing.
+- **Problems**: open an issue first using the **Report a problem** template under `.github/ISSUE_TEMPLATE/`. You do not need to pre-classify it as a bug or a feature -- this project practises ITIL problem management, so triage decides the category. Drive-by PRs without an issue are harder to merge because the problem framing is missing.
 - **Security vulnerabilities**: do not open a public issue. See [SECURITY.md](SECURITY.md).
 - **Usage questions**: use [Discussions](https://github.com/windyroad/agent-plugins/discussions), not issues.
 
