@@ -14,6 +14,10 @@ Implication: the fix needs (1) a queue mechanism (e.g., a file under `~/.claude/
 
 Open sub-questions (not blocking, can be resolved at implementation time): does Claude Code expose a session-start hook? If not, does `claude plugin install` on first terminal interaction suffice? These are implementation details for the ADR draft, not direction questions.
 
+## Interim stopgap (2026-04-20, ADR-030)
+
+Until the automated queue + startup-check is built, a user-invoked **repo-local skill** `.claude/skills/install-updates/` serves as the manual stopgap. `/install-updates` refreshes the marketplace cache, detects which `@windyroad/*` plugins are enabled in the current project + each sibling project, and re-installs them with `--scope project` after a consent-gated `AskUserQuestion` listing detected siblings. ADR-030 documents the repo-local-skill pattern used here. The stopgap does NOT close P045 — it narrows the remaining scope to the automated queue.
+
 ## Description
 
 Split from P028 on 2026-04-19. P028 was originally scoped to cover both auto-release and auto-install. This ticket tracks the **auto-install** concern only; the auto-release concern stays in P028 and is being implemented under ADR-020.

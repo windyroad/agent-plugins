@@ -48,7 +48,7 @@ The bug fix eliminates the only reason for dual distribution. Keeping the skills
 - Installer is simpler — two steps instead of three
 - No dependency on the `skills` npm package
 - No duplicate skill entries in autocomplete
-- No `.agents/`, `.claude/skills/`, or other symlink directories created in the project
+- No `.agents/` or `.claude/skills/` symlinks created by the installer (hand-authored repo-local skills governed by ADR-030 remain permitted)
 - Cleaner `.gitignore` (most entries were for skills package artifacts)
 
 ### Neutral
@@ -64,7 +64,7 @@ The bug fix eliminates the only reason for dual distribution. Keeping the skills
 
 - Running `npx @windyroad/agent-plugins` installs all 10 plugins
 - After install, `/wr:` autocomplete shows all skills (from marketplace, not skills package)
-- No `.agents/`, `.claude/skills/`, or `skills-lock.json` created in the project
+- No `.agents/` or `skills-lock.json` created in the project; no installer-created entries under `.claude/skills/` (hand-authored repo-local skills are permitted and governed by ADR-030)
 - `claude plugin list` shows all 10 plugins (single entry each, not duplicated)
 
 ## Pros and Cons of the Options
