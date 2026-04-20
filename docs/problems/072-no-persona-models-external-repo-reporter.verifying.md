@@ -1,6 +1,6 @@
 # Problem 072: No persona in docs/jtbd/ models the external reporter who files against this repo
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-20
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Possible (3)
 **Effort**: M — new persona directory under `docs/jtbd/external-reporter/` (or equivalent name) with `persona.md` and at least one job file (`JTBD-301-file-a-problem-without-pre-classifying.proposed.md` or similar). May extend existing `plugin-developer` or `tech-lead` personas instead. Cross-reference from P055 / P065 / P066 / P067 tickets.
@@ -72,6 +72,18 @@ Two candidate shapes — user direction required to pick one:
 - [ ] Update `docs/jtbd/README.md` persona index
 - [ ] Cross-reference P055, P065, P066, P067 Related sections to cite the new persona/job
 - [ ] Add a bats doc-lint assertion that the persona directory exists and the README index lists it
+
+## Fix Released
+
+Shipped 2026-04-20 (commit pending). User direction captured interactively: persona name `plugin-user`; job ID series JTBD-301+ (new 300-bucket; standard one-persona-per-100-bucket continuation).
+
+- `docs/jtbd/plugin-user/persona.md` — NEW. Models the developer who has installed a `@windyroad/*` plugin and encountered a problem. Constraint set: low context on repo internals, high context on their own failure mode, reporting is incidental to their primary work, may file via an AI agent. Pain points: forced pre-classification, missing intake surfaces, unclear security-disclosure channel, unacknowledged reports, duplicate rejection, cross-plugin ambiguity.
+- `docs/jtbd/plugin-user/JTBD-301-report-problem-without-pre-classifying.proposed.md` — NEW. Job statement: "When I hit a problem with a windyroad plugin I installed, I want to describe what I observed in one place without deciding in advance whether it's a bug, a feature gap, or a documentation issue, so I can submit a useful report and get back to my own work." Desired outcomes cover single problem-first template, problem-ticket field parity, declared security channel, Discussions routing for usage questions, scaffolded intake in every adopter, predictable acknowledgement + audit trail, dedup before filing.
+- `docs/jtbd/README.md` — persona index extended with a new "Plugin User" section + the JTBD-301 row.
+
+Future intake-adjacent tickets (P065, P067, P070, any successor) can cite JTBD-301 directly instead of relying on the maintainer-side JTBD-001 / JTBD-101 / JTBD-201 by proxy. The persona also anchors the "reporter may be filing via an AI agent" constraint that the current three personas don't capture.
+
+Awaiting user verification: next JTBD-review invocation on an intake-adjacent ticket should cite JTBD-301 as the primary job served; the review agent should no longer return "PERSONA UPDATE NEEDED" on those tickets.
 
 ## Related
 

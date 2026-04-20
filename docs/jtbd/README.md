@@ -43,3 +43,15 @@ Developer building new plugins or contributing to the suite.
 | ID | Job | File |
 |----|-----|------|
 | JTBD-101 | Extend the Suite with New Plugins | [JTBD-101-extend-suite.proposed.md](plugin-developer/JTBD-101-extend-suite.proposed.md) |
+
+## Plugin User
+
+Developer using an installed windyroad plugin who encountered a problem and wants to report it. Low context on repo internals; high context on their own failure mode. Reporting is incidental to their primary work.
+
+[Persona definition](plugin-user/persona.md)
+
+### Proposed
+
+| ID | Job | File |
+|----|-----|------|
+| JTBD-301 | Report a Problem Without Pre-Classifying It | [JTBD-301-report-problem-without-pre-classifying.proposed.md](plugin-user/JTBD-301-report-problem-without-pre-classifying.proposed.md) |

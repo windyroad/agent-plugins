@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-04-20 (AFK iter 6 close — P066 + P063 + P068 + P062 + P060 + P061 all shipped and in Verification Pending; @windyroad/itil@0.9.0 and @windyroad/retrospective@0.4.0 both published to npm. P065 re-rated M → L; follow-up P072 (JTBD persona gap) and P073 (changeset authoring not covered by P038/P064 voice+risk gates) opened. 17 open tickets ranked. Direction pins still hold on P014, P064, P065, P067.
+> Last reviewed: 2026-04-20 (post-AFK interactive — P066 + P063 + P068 + P062 + P060 + P061 + P072 all shipped and in Verification Pending; P072 shipped the plugin-user persona + JTBD-301 after interactive user direction. @windyroad/itil@0.9.0 and @windyroad/retrospective@0.4.0 published to npm. P065 re-rated M → L; P073 (changeset gate surface extension) opened. 16 open tickets ranked. Direction pins still hold on P014, P064, P065, P067.
 > Run `/wr-itil:manage-problem review` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -18,7 +18,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3.0 | P064 | No risk-scoring gate on external communications | 12 High | Open | L |
 | 3.0 | P065 | No skill scaffolds intake files in downstream projects (re-rated M → L per architect direction) | 12 High | Open | L |
 | 2.25 | P015 | TDD enforcement does not flag vague Gherkin outcome steps | 9 Med | Open | L |
-| 2.25 | P072 | No persona in docs/jtbd/ models the external repo reporter | 9 Med | Open | M |
 | 2.0 | P018 | TDD enforce BDD + Example Mapping principles | 16 High | Open | XL |
 | 2.0 | P022 | Agents must not fabricate time estimates | 16 High | Open | XL |
 | 2.0 | P039 | Autonomous loops conflate diagnose with implement | 16 High | Open | XL |
@@ -62,7 +61,8 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P068 | run-retro Verification-close housekeeping (Step 4a) | @windyroad/retrospective@0.4.0 (commit c268327) | no (0 days) |
 | P062 | manage-problem README refresh on transitions (Step 7 + Step 11) | @windyroad/itil@0.9.0 (commit 7e19eab) | no (0 days) |
 | P060 | push:watch anchors on HEAD sha + loops all runs + propagates exit code | commit 4b3d20e (AFK iter 6 iter 5 — repo-internal root script) | no (0 days) |
-| P061 | install-updates Step 6 grouping fallback for siblings > 3 | commit pending (AFK iter 6 iter 6 — repo-local skill) | no (0 days) |
+| P061 | install-updates Step 6 grouping fallback for siblings > 3 | commit b6ba3bd (AFK iter 6 iter 6 — repo-local skill) | no (0 days) |
+| P072 | plugin-user persona + JTBD-301 ship; closes external-reporter JTBD gap | commit pending (post-AFK interactive) | no (0 days) |
 
 ## Closed
 
