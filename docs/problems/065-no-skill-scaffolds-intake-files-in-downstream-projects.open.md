@@ -72,6 +72,22 @@ Skill contract (draft):
   3. For each missing file, emit a templated version with per-project substitutions. Use `AskUserQuestion` in interactive mode to confirm each file or batch; in AFK mode default to scaffolding missing files (per JTBD-006 — agent must not trust itself to make judgement calls, but "scaffold a missing standard file" is within policy-authorised scope).
   4. For each present file, report "already exists" and offer `--force` diff-and-replace behaviour. Never silently overwrite.
   5. Write the files. Commit per ADR-014 (work → score via wr-risk-scorer:pipeline → commit). Commit message: `docs: scaffold OSS intake (ISSUE_TEMPLATE, SECURITY, SUPPORT, CONTRIBUTING)`.
+
+### Trigger surfaces — layered (user direction 2026-04-20)
+
+Manual invocation alone is insufficient; discoverability is the problem this ticket exists to solve. Three trigger surfaces are in scope, layered so that a softer prompt fires weeks before the hard stop:
+
+1. **First `/wr-itil:manage-problem` or `/wr-itil:work-problems` invocation in a project whose intake is missing** — one-shot `AskUserQuestion` prompt ("This project has no intake surface — scaffold now?"). Tracked via a one-time marker (e.g. `docs/problems/.intake-scaffold-declined` or a frontmatter flag on `docs/problems/README.md`) so the prompt does not fire every session. Matches the ADR-009 gate-marker lifecycle precedent. Non-interactive (AFK) branch: silently note the pending-scaffold in the orchestrator's report, do NOT auto-scaffold without user opt-in (JTBD-006).
+
+2. **Pre-publish PreToolUse gate** on `npm publish` (and on `gh pr merge` against a changesets release PR). Hard stop if the six intake files are missing. New hook: `packages/itil/hooks/pre-publish-intake-gate.sh`. Parallel architecture to `packages/risk-scorer/hooks/git-push-gate.sh` (currently intercepts `gh pr merge` to route to `release:watch`). Emits a deny-plus-delegate response pointing at `/wr-itil:scaffold-intake`. Override path: `BYPASS_INTAKE_GATE=1 npm publish` for documented exceptions (e.g. pre-GA internal packages).
+
+3. **CI check** (optional, belt-and-braces) — a GitHub Action in `.github/workflows/intake-check.yml` that fails the release PR if intake files are missing. Only useful for repos with CI; redundant with (2) for local publishes but valuable for catch-before-merge signalling. Treated as scaffold-time output of `/wr-itil:scaffold-intake --ci` rather than hand-authored, so downstream adopters get the workflow for free.
+
+**Recommended ship order**: (1) and (2) together — (1) catches every adopter including non-publishing internal projects; (2) is the hard stop at the actual boundary where external reporters start hitting the intake. (3) ships as an optional add-on via a flag, not by default.
+
+**Main tradeoff** (pre-publish gate cost): `@windyroad/itil` gains a PreToolUse hook on `npm publish`, which is another hook surface that can misfire and needs an override path. Accepted — the pattern is already established (risk-scorer's git-push-gate, P038's voice-tone gate, P064's risk-scoring gate on external comms), and the whole point of P065 is ecosystem-wide intake coverage. If adopters find the gate too aggressive, the override env var is the escape hatch; architect review decides whether to expose a soft-warn mode as an intermediate tier.
+
+**Pre-publish trigger rationale**: publish is when external reporters actually start hitting the intake — before publish, nobody can file an issue against the package because it isn't available. It is also the moment a project becomes a potential upstream target for downstream `/wr-itil:report-upstream` invocations (per ADR-024). Gating exactly here means the intake surface exists no later than the moment it is needed.
 - Templates:
   - Seeded from this repo's versions (commit `e36cf84`) with substitution tokens for project name, plugin list, security-contact path, and any plugin-specific fields.
   - Ship as skill-local template files under `packages/itil/skills/scaffold-intake/templates/*.yml.tmpl`, `*.md.tmpl`.
@@ -86,7 +102,10 @@ Skill contract (draft):
 - [ ] Decide whether a new ADR is needed or an extension of ADR-024's scope. Architect review.
 - [ ] Enumerate template files and their substitution tokens. Start from `e36cf84` versions; abstract the repo-specific strings.
 - [ ] Design the interactive and AFK flows; decide default-on vs. prompt-always behaviour per JTBD-006.
-- [ ] Decide whether `manage-problem` / `work-problems` get a one-shot "scaffold intake missing?" prompt on first run in a new project.
+- [ ] Implement trigger surface (1): one-shot `AskUserQuestion` prompt from `manage-problem` / `work-problems` when the host project's intake is missing. Decide the marker-file location (`docs/problems/.intake-scaffold-declined` candidate) and the AFK non-interactive behaviour (report-but-don't-auto-scaffold).
+- [ ] Implement trigger surface (2): `packages/itil/hooks/pre-publish-intake-gate.sh` PreToolUse hook on `npm publish` and on `gh pr merge` of changesets release PRs. Deny-plus-delegate response pointing at `/wr-itil:scaffold-intake`. `BYPASS_INTAKE_GATE=1` override env var for documented exceptions.
+- [ ] Decide whether trigger surface (3) — the optional CI check — ships in v1 or is deferred to a follow-up. `/wr-itil:scaffold-intake --ci` flag emits `.github/workflows/intake-check.yml` so adopters with CI get it free.
+- [ ] Architect review on the three-layer trigger design and the override path. Precedent: risk-scorer's git-push-gate, P038 voice-tone gate, P064 risk-scoring gate on external comms — all PreToolUse gates with override paths.
 - [ ] Build a fixture-based bats test exercising a mock empty downstream repo, asserting all six files are scaffolded with correct substitutions.
 - [ ] Add an idempotency test: re-running the skill on a scaffolded project reports "already present" and does not overwrite.
 - [ ] Cross-reference the new skill from `packages/itil/skills/manage-problem/SKILL.md` (section on how projects are set up) and from ADR-024 (reciprocal-scaffolding note).
