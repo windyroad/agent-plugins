@@ -359,6 +359,24 @@ git add docs/problems/<NNN>-<title>.closed.md
 
 Update the "Status" field to "Closed". Reference the problem ID in the closure commit message (e.g., "Closes P008"). Step 9d's verification prompt is the structured path that fires this transition during `manage-problem review`. Re-stage the `.closed.md` file explicitly after the Edit (P057 staging trap).
 
+#### README.md refresh on every transition (P062)
+
+Every Step 7 status transition (Open → Known Error, Known Error → Verification Pending, Verification Pending → Closed, Parked — regardless of source or destination suffix) regenerates `docs/problems/README.md` and stages it in the same commit so the dev-work table, Verification Queue, Parked section, and "Last reviewed" line never lag the on-disk ticket inventory. Without this step, README.md accumulates staleness between `review` invocations; the next `work` fast-path check correctly detects the lag and forces a full rescan (self-healing but wasteful), and any human browsing the file between transitions sees outdated rankings.
+
+The refresh uses the same rendering rules as Step 9e (glob `docs/problems/*.open.md` / `*.known-error.md` / `*.verifying.md` / `*.parked.md`; rank open/known-error by WSJF; list verifyings in the Verification Queue ordered by release age; list parkeds in the Parked section) but skips the full re-scoring pass — existing WSJF values on the ticket files are trusted. The refresh is a render, not a re-rank.
+
+**Mechanism:**
+
+1. After renaming + Editing + `git add`-ing the transitioned ticket file (per the staging-trap rule above), regenerate `docs/problems/README.md` in-place reflecting the new filename set and the transitioned ticket's new Status.
+2. `git add docs/problems/README.md` — stage the refreshed README with the same commit as the transition.
+3. Update the "Last reviewed" line's parenthetical to name the transition (e.g. `P<NNN> <status> — <one-line fix summary>`) so the next session's fast-path check has a human-readable audit marker alongside the git-history staleness test.
+
+**Scope**: fires for every Step 7 rename. Applies equally to:
+- Standalone transition commits (e.g. `docs(problems): P<NNN> known error — <summary>`).
+- **Folded-fix commits** where the `.verifying.md` transition rides with the fix implementation commit (e.g. `fix(<scope>): <description> (closes P<NNN>)` — per Step 11's convention for Known Error → Verification Pending). In both cases the refreshed README.md joins the same commit as the rename + content edit; never split across commits.
+
+**Fast-path interaction**: the Step 9 fast-path freshness check (`git log -1 --format=%H -- docs/problems/README.md` followed by `git log --oneline "${readme_commit}..HEAD" -- 'docs/problems/*.md'`) remains the authoritative staleness test. When this refresh fires on every transition, that check should return empty on any subsequent invocation — the cache stays fresh by construction. If the check still reports "stale", something skipped the refresh (bug) and the slow-path is the correct recovery.
+
 ### 8. For list: Show summary
 
 Read all `.open.md` and `.known-error.md` files in `docs/problems/`. Extract ID, title, priority, and status. Sort by priority (highest first). Display as a markdown table.
@@ -520,7 +538,7 @@ After any operation, report:
 - Any quality check warnings
 
 Commit the completed work per ADR-014 (governance skills commit their own work):
-1. `git add` all created/modified files for this operation — **including any file renamed via `git mv` that was then modified by the `Edit` tool** (P057 staging trap — `git mv` alone stages only the rename, not the subsequent content edit). `git add -u` is a safe catch-all for tracked modifications.
+1. `git add` all created/modified files for this operation — **including any file renamed via `git mv` that was then modified by the `Edit` tool** (P057 staging trap — `git mv` alone stages only the rename, not the subsequent content edit). `git add -u` is a safe catch-all for tracked modifications. **For any Step 7 status transition** (Open → Known Error, Known Error → Verification Pending, Verification Pending → Closed, or Parked) — including folded-fix commits where the `.verifying.md` transition rides with a `fix(<scope>): ...` commit — the stage list MUST include `docs/problems/README.md` refreshed per Step 7's "README.md refresh on every transition" block (P062). Skipping the refresh leaks staleness to the next session's fast-path.
 2. Satisfy the commit gate — two paths are valid (either produces a bypass marker):
    - **Primary**: delegate to the `wr-risk-scorer:pipeline` subagent-type via the Agent tool (subagent_type: `wr-risk-scorer:pipeline`)
    - **Fallback**: if the `wr-risk-scorer:pipeline` subagent-type is not available in the current tool set (e.g., this skill is itself running inside a spawned subagent), invoke the `/wr-risk-scorer:assess-release` skill via the Skill tool. Per ADR-015 it wraps the same pipeline subagent and the `PostToolUse:Agent` hook writes an equivalent bypass marker. Do not silently skip the gate because the primary path is unavailable — the fallback exists specifically to close this gap (see P035).

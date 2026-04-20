@@ -1,6 +1,6 @@
 # Problem 062: `manage-problem` does not refresh `docs/problems/README.md` on single-ticket transitions; fast-path cache goes stale silently
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-20
 **Priority**: 4 (Low) — Impact: Minor (2) x Likelihood: Unlikely (2)
 **Effort**: S — edit `packages/itil/skills/manage-problem/SKILL.md` Step 7 / Step 11 to include a README.md refresh in the transition commit
@@ -63,6 +63,20 @@ Prefer (a). It keeps README.md current with zero extra commits. The cost is one 
 - [ ] Decide between shapes (a) and (b). Lean (a) per above.
 - [ ] Apply the Step 7 + Step 11 amendment.
 - [ ] Optional: bats doc-lint regression.
+
+## Fix Released
+
+Shipped 2026-04-20 (AFK iter 6 iter 4, commit pending). `manage-problem` SKILL.md now refreshes `docs/problems/README.md` on every Step 7 status transition and stages it in the same commit (shape (a) — cheap incremental refresh, per the ticket).
+
+- `packages/itil/skills/manage-problem/SKILL.md` Step 7 gains a new "README.md refresh on every transition (P062)" subsection (after the Verification Pending → Closed block, before Step 8). The block describes the mechanism (regenerate in-place reflecting new filename set + Status; `git add` alongside the ticket rename; update the Last reviewed line), covers all four transition scopes (Open → KE, KE → VP, VP → Closed, Parked), explicitly covers folded-fix commits (where the `.verifying.md` transition rides with a `fix(<scope>): ...` commit), and explains the fast-path interaction (cache stays fresh by construction).
+- `packages/itil/skills/manage-problem/SKILL.md` Step 11 commit convention now requires `docs/problems/README.md` in the stage list for every Step 7 transition, including folded-fix commits.
+- `packages/itil/skills/manage-problem/test/manage-problem-readme-refresh-on-transition.bats` — NEW. 9 structural doc-lint assertions (Permitted Exception per ADR-005) covering refresh block presence, all four transition scopes, folded-fix coverage, "render not re-rank" wording, same-commit staging, Step 11 requirement, Step 11-to-Step-7 cross-reference, fast-path interaction, and Last reviewed line update.
+
+The refresh is a render (uses existing WSJF values trusted from ticket files), not a re-rank (no full re-scoring pass — that remains Step 9's job). This distinguishes the on-transition refresh from the `review` operation's full rescan.
+
+Architect review PASSED (no new ADR needed; aligns with ADR-014 commit ordering and ADR-022 Verification Queue; strengthens ADR-022 Confirmation by keeping the README in sync between reviews). JTBD review PASSED (primary: JTBD-201 audit trail; secondary: JTBD-202, JTBD-001).
+
+Awaiting user verification: next `manage-problem` status transition (outside a `review` invocation) should include `docs/problems/README.md` in the transition commit's stage list, with the refreshed file reflecting the new ticket state. The subsequent session's fast-path freshness check should report "fresh" (no stale-cache rescan) on the next `work` invocation.
 
 ## Related
 
