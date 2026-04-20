@@ -6,6 +6,18 @@
 **Effort**: L — bulk `git mv` of ~69 existing tickets into per-state subdirectories, update path references across 4+ SKILL.md files (manage-problem, work-problems, report-upstream, run-retro) and their bats tests, update README.md generation, draft an ADR for the directory contract change. Cross-plugin reach but single-repo migration. Architect review may bump to XL if the migration script and the ADR turn out to be more involved than expected.
 **WSJF**: 3.75 — (15 × 1.0) / 4 — High severity / ecosystem-wide navigation friction; the migration lift keeps the WSJF below smaller fixes.
 
+## Direction decision (2026-04-20, user — AFK pre-flight via AskUserQuestion)
+
+**Filename suffix**: **drop** the `.<state>.md` suffix. The directory path is the single source of truth for state. Filename is `<NNN>-<title>.md`. Every transition is a single `git mv` between directories — no suffix rename. The Status field in the ticket body frontmatter remains as a human-readable indicator, but machine-readable state comes from `$(basename $(dirname <path>))`.
+
+**Defaults AFK can apply without further user input**:
+- New ADR drafts as `docs/decisions/NNN-problem-ticket-directory-layout.proposed.md` (next free number; `/wr-architect:create-adr` handles allocation per ADR-019).
+- Subdirectory names (kebab-case): `open`, `known-error`, `verifying`, `closed`, `parked`.
+- Single-commit migration (bulk `git mv` + all SKILL.md updates + bats test updates + README.md generation update) so no intermediate state has mixed paths.
+- `docs/problems/README.md` stays at the top level — it's the aggregation view.
+- Update the `git ls-tree` pipeline in `manage-problem` / `create-adr` next-ID lookups to use `-r` (recursive) so subdirectory files are discovered.
+- Ship ordering: land this **after** P062, P063, P066–P068 (SKILL.md edits these tickets require touch the same files); doing P069 last avoids a rebase storm.
+
 ## Description
 
 `docs/problems/` is currently a **flat directory of 69 Markdown files** plus a `README.md`. The filename encodes state via a suffix (`.open.md`, `.known-error.md`, `.verifying.md`, `.parked.md`, `.closed.md`). For skimmability this works up to ~20 tickets; beyond that, visual scan of `ls docs/problems/` returns a wall of filenames intermixed by state, requiring the reader to parse suffixes on every line to find, for example, the active dev-work queue.
