@@ -3,8 +3,8 @@
 **Status**: Open
 **Reported**: 2026-04-20
 **Priority**: 15 (High) — Impact: Moderate (3) x Likelihood: Certain (5)
-**Effort**: L — bulk `git mv` of ~69 existing tickets into per-state subdirectories, update path references across 4+ SKILL.md files (manage-problem, work-problems, report-upstream, run-retro) and their bats tests, update README.md generation, draft an ADR for the directory contract change. Cross-plugin reach but single-repo migration. Architect review may bump to XL if the migration script and the ADR turn out to be more involved than expected.
-**WSJF**: 3.75 — (15 × 1.0) / 4 — High severity / ecosystem-wide navigation friction; the migration lift keeps the WSJF below smaller fixes.
+**Effort**: XL (re-rated from L 2026-04-20 post-architect review on auto-migration addition) — bulk `git mv` of ~72 existing tickets (this repo) + update path references across 5+ SKILL.md files (manage-problem, work-problems, manage-incident, report-upstream, run-retro) and their ~30 bats tests + update README.md generation + draft ADR-031 (done — ADR-031 `proposed`) + in-place amendments to ADR-022, ADR-016, ADR-024, `packages/risk-scorer/agents/wip.md` + hook-exemption glob updates in architect-enforce-edit.sh + jtbd-enforce-edit.sh + **auto-migration logic shipped inside `manage-problem` AND `work-problems` for adopter repos** (per-project on first-run, ADR-017-style shared routine candidate, with ADR-027 Step 0 collision to resolve + ADR-014 commit-gate treatment to resolve + novel "plugin-driven repo migration" pattern question). Cross-plugin reach + multi-ADR amendment + novel distribution pattern = XL territory.
+**WSJF**: 1.875 — (15 × 1.0) / 8 — re-rated from 3.75 at 2026-04-20 after scope expansion (auto-migration + architect-raised execution-time questions). High severity / ecosystem-wide navigation friction remains unchanged; the migration lift + architectural open questions justify the XL bucket.
 
 ## Direction decision (2026-04-20, user — AFK pre-flight via AskUserQuestion)
 
@@ -142,9 +142,20 @@ The tricky part is keeping everything machine-readable through the transition. M
 
 ## Decision record
 
-**ADR-031** (Problem-ticket directory layout — per-state subdirectories under `docs/problems/`) — drafted 2026-04-20 post-AFK interactive. Captures: per-state subdirectory layout (`open/`, `known-error/`, `verifying/`, `parked/`, `closed/`); filename `.state.md` suffix dropped (authoritative encoding moves to directory path, in-file `Status:` becomes fallback); hook exemption glob update to `docs/problems/*/*.md`; next-ID discovery contract moves to recursive `git ls-tree -r`; hard-cut migration with no compatibility window; ADR-022 + ADR-016 + ADR-024 + `packages/risk-scorer/agents/wip.md` amendments in the execution commit.
+**ADR-031** (Problem-ticket directory layout — per-state subdirectories under `docs/problems/`) — drafted 2026-04-20 post-AFK interactive. Captures: per-state subdirectory layout (`open/`, `known-error/`, `verifying/`, `parked/`, `closed/`); filename `.state.md` suffix dropped (authoritative encoding moves to directory path, in-file `Status:` becomes fallback); hook exemption glob update to `docs/problems/*/*.md`; next-ID discovery contract moves to recursive `git ls-tree -r`; hard-cut migration in this monorepo; **auto-migration on first-run in adopter repos** (both `manage-problem` AND `work-problems` must detect flat layout and migrate before layout-dependent logic); ADR-022 + ADR-016 + ADR-024 + `packages/risk-scorer/agents/wip.md` amendments in the execution commit.
 
-This ticket (P069) is the **execution tracker** for ADR-031; the migration lands in a follow-up commit that flips ADR-031 from `proposed` → `accepted` and ships the ~72 ticket renames + SKILL.md glob updates + hook-script updates + bats fixture updates + ADR amendments together.
+This ticket (P069) is the **execution tracker** for ADR-031. Before the migration ships, four execution-time questions (surfaced by architect review of the auto-migration scope) must be resolved:
+
+1. **Step numbering under ADR-027** — auto-migration cannot sit AT Step 0 because ADR-027 already claims Step 0 in both SKILL.md files for subagent auto-delegation. Resolution options: (a) migration is the subagent's first substantive step inside the skill body; (b) pre-delegation PreToolUse hook that fires before ADR-027 handoff; (c) dedicated Bash PreToolUse hook in `.claude/settings.json`. Lean: (a). Needs architect sign-off.
+2. **Shared migration routine distribution** — identical logic in both skills; candidate for ADR-017 shared-code-sync pattern (canonical source in `packages/shared/`, synced into each skill's `lib/`). Needs architect sign-off.
+3. **Commit-gate treatment (ADR-014 interaction)** — migration commit is pure file-rename with zero semantic content. Options: (a) normal `work → score → commit` (overhead on every adopter first-run); (b) bypass via explicit marker (`RISK_BYPASS: adr-031-migration`); (c) pre-approve the commit category structurally in ADR-014. Lean: (b).
+4. **"Published skill mutates adopter repo on first-run" — novel distribution pattern** — no precedent in the suite. Options: (a) one-off with a Reassessment Criterion for when to standardise; (b) companion ADR upfront that standardises "plugin-driven repo migrations". Lean: (a) YAGNI.
+
+Also still in scope: the **false-zero defect in `work-problems`** on adopter repos — Step 1 (Scan the backlog) enumerates ticket files BEFORE any delegation to `manage-problem`. On a flat-layout adopter repo that glob returns zero matches, stop-condition #1 fires, and the orchestrator exits silently — never reaching manage-problem. This is why auto-migration MUST run in work-problems too, at its own Step 0 / pre-delegation point. Not a separate concern; just calling it out because "first-call-wins via manage-problem" was the naive (wrong) framing.
+
+The migration itself lands in a follow-up commit that flips ADR-031 `proposed` → `accepted` and ships: ~72 ticket renames (this repo) + SKILL.md glob updates across 5 skills + hook-script updates (2 hooks) + bats fixture audit across ~30 tests + ADR-022 + ADR-016 + ADR-024 amendments + `packages/risk-scorer/agents/wip.md` update + the auto-migration logic itself (shared between `manage-problem` and `work-problems`).
+
+Effort after scope expansion: **XL** (was L before the auto-migration addition; the distributed migration logic + ADR-017 sync setup + two fixture-based bats tests push effort past L). WSJF re-rates: `(15 × 1.0) / 8 = 1.875`, from 3.75 pre-expansion.
 
 ## Related
 

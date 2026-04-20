@@ -111,9 +111,33 @@ This ADR is landed as the **decision record** in isolation; the migration itself
 8. Amend ADR-016 (`docs/decisions/016-wip-verdict-commit-for-completed-governance-work.proposed.md`) and `packages/risk-scorer/agents/wip.md` to use `docs/problems/**/*.md` (recursive glob) for governance-artefact detection.
 9. Amend ADR-024 (`docs/decisions/024-cross-project-problem-reporting-contract.proposed.md`) — reference path `docs/problems/<NNN>-<title>.<status>.md` updated to `docs/problems/<status>/<NNN>-<title>.md`.
 
-### Backward compatibility
+### Backward compatibility — adopter repos auto-migrate on first-run
 
-**Hard cut, no compatibility window.** No external consumers of this repo's `docs/problems/` layout are known; Windy Road owns every downstream adopter (addressr, bbstats, any future) and can coordinate the migration end-to-end in one commit. External reporters use the `.github/ISSUE_TEMPLATE/problem-report.yml` intake (P066) — that path is unchanged.
+**Hard cut in this monorepo. Auto-migration in adopter repos.**
+
+No external consumers of this repo's `docs/problems/` layout are known; Windy Road owns every downstream adopter (addressr, bbstats, any future) and can coordinate the migration end-to-end. The Windy Road monorepo itself migrates in one commit per the "Migration plan" above. **BUT** adopter repos that install `@windyroad/itil` do NOT get migrated by that commit — they still have their own `docs/problems/` in the flat-layout shape from the prior `@windyroad/itil` version. If the skills simply update their globs to `docs/problems/<state>/*.md`, adopter repos see empty enumerations on every subsequent invocation (silent "nothing to do"), which is a user-visible defect.
+
+**Contract**: `manage-problem` AND `work-problems` MUST detect flat-layout presence on invocation and auto-migrate the adopter's `docs/problems/` before executing any layout-dependent logic. The migration is a pure `mkdir` + `git mv` + commit sequence; fully reversible via `git revert`; no external-comms, no secrets, no destructive overwrite. Auto-migration runs even in AFK / non-interactive mode per ADR-013 Rule 6, applying the ADR-019 precedent (pure-rename + pure-mkdir actions are policy-authorised).
+
+**Detection**: any match of `compgen -G 'docs/problems/*.<state>.md'` (for state in open / known-error / verifying / parked / closed) indicates a non-migrated or partially-migrated adopter repo. The detector is partial-migration safe — it fires whenever any flat-layout file remains, regardless of whether other files are already in subdirs. Subsequent invocations after full migration find zero flat files and skip.
+
+**Commit message**: `docs(problems): auto-migrate to per-state subdirectory layout (ADR-031)`. Standalone commit (not folded into other work) so adopters can audit / revert in isolation.
+
+**Why both skills (not just manage-problem)**: `work-problems` Step 1 (Scan the backlog) enumerates ticket files BEFORE delegating any iteration to `manage-problem`. On a flat-layout adopter repo, that Step 1 glob returns zero matches, stop-condition #1 fires, and the orchestrator exits with a false "nothing to do" signal — never reaching the `manage-problem` iteration that would have triggered migration. First-call-wins reasoning is incorrect here; both skills must run the migration.
+
+**Open execution-time questions (P069 must resolve these before the migration ships)**:
+
+1. **Step numbering under ADR-027** — ADR-027 already claims Step 0 in both SKILL.md files for subagent auto-delegation. Auto-migration cannot sit AT Step 0 as stated earlier. Options for the execution commit: (a) migration becomes the subagent's first substantive action (Step 1 of the subagent-executed body); (b) migration runs in a pre-delegation PreToolUse hook that fires before the ADR-027 subagent handoff; (c) dedicated migration hook on `.claude/settings.json` Bash PreToolUse matching any `manage-problem` or `work-problems` invocation. Lean: (a) — lowest surface area, simplest contract. Architect review required at execution time.
+
+2. **Shared migration routine distribution** — the migration logic is identical in `manage-problem` and `work-problems`. ADR-017 (Shared code sync pattern) is the existing template for `lib/install-utils.mjs`-style duplication within this monorepo. The migration routine is a candidate for the same pattern, with a canonical source in `packages/shared/` synced into each skill's `lib/`. Architect review required at execution time.
+
+3. **Commit-gate treatment (ADR-014 interaction)** — the migration commit is pure file-rename with zero semantic content. Options: (a) run the normal `work → score → commit` cycle (overhead on first-run in every adopter); (b) migration commits bypass the commit gate via an explicit marker (e.g. `RISK_BYPASS: adr-031-migration`); (c) pre-approve the commit category structurally in ADR-014. Lean: (b) — the bypass marker keeps the commit-gate's audit-trail while avoiding the full risk-score overhead.
+
+4. **Novel distribution pattern** — "published skill mutates adopter repo on first-run" has no precedent in this suite. ADR-017 handles shared code inside the monorepo; marketplace ADRs handle skill distribution. The execution commit should either (a) treat this as a one-off with a Reassessment Criterion that captures when to standardise if a second such migration emerges, or (b) introduce a companion ADR that standardises "plugin-driven repo migrations" upfront. Lean: (a) — YAGNI until a second case emerges.
+
+These open questions block the migration execution commit, not this ADR draft. ADR-031 records the decision and names the questions; P069 (execution ticket) will drive them to resolution with architect + user input before the migration ships.
+
+External reporters use the `.github/ISSUE_TEMPLATE/problem-report.yml` intake (P066) — that path is unchanged.
 
 ### Updates to other ADRs (in-scope for the ADR-031 landing commit)
 
@@ -146,6 +170,8 @@ This ADR is landed as the **decision record** in isolation; the migration itself
 
 ## Confirmation
 
+### Confirmation (this repo, post-migration execution)
+
 A set of structural doc-lint bats assertions validates the migration is complete:
 
 - `docs/problems/open/` and `/known-error/` and `/verifying/` and `/parked/` and `/closed/` all exist as directories.
@@ -157,6 +183,20 @@ A set of structural doc-lint bats assertions validates the migration is complete
 - ADR-016 / ADR-022 / ADR-024 references match the new paths.
 - `packages/risk-scorer/agents/wip.md` governance-artefact path list uses the recursive `docs/problems/**/*.md` glob.
 - `npm test` green (current 428 + N new doc-lint assertions added by this ADR and the migration).
+
+### Confirmation (downstream adopter repos, post-first-run)
+
+After the first invocation of `manage-problem` OR `work-problems` in an adopter repo that previously carried the flat layout:
+
+- Five state subdirectories exist under the adopter's `docs/problems/`.
+- Zero files remain at `docs/problems/*.<state>.md`; every ticket lives at `docs/problems/<state>/NNN-<slug>.md`.
+- The migration commit (message `docs(problems): auto-migrate to per-state subdirectory layout (ADR-031)`) is the most recent addition to the adopter's git history at the point the skill was invoked.
+- Subsequent skill invocations find no flat-layout files and skip migration silently.
+- Partial-migration safe: if a prior run was interrupted, re-invocation completes the migration by moving only the still-flat files.
+
+### Confirmation (bats fixtures)
+
+- `packages/itil/skills/manage-problem/test/manage-problem-auto-migrate.bats` (new, at execution time) — fixture test simulating an adopter repo's flat `docs/problems/`; asserts first invocation migrates and subsequent invocations are no-ops. Same shape for `packages/itil/skills/work-problems/test/work-problems-auto-migrate.bats`.
 
 ## Reassessment Criteria
 
