@@ -3,8 +3,8 @@
 **Status**: Open
 **Reported**: 2026-04-20
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
-**Effort**: M — inventory all skills with argumented subcommands across all `@windyroad/*` plugins, split each distinct user intent into its own named skill, leave a thin forwarder path on the original skill for backward compatibility during a deprecation window, update the primary SKILL.md Operations tables, ADR-010 naming convention, and the bats doc-lint tests. Mechanical but touches 6–10 SKILL.md files across 3–4 plugins.
-**WSJF**: 6.0 — (12 × 1.0) / 2 — High-severity discoverability friction on every subcommanded invocation; moderate split-and-forwarder effort.
+**Effort**: M — audit complete (2026-04-21 AFK iter 2): scope is confined to `@windyroad/itil` plugin (2 offenders, `manage-problem` + `manage-incident`). ~10 split-candidate skill files to create + 2 forwarder contracts to add. M effort confirmed despite tighter plugin-count (1 plugin vs the initial 3-4 estimate) because each new skill carries its own SKILL.md, bats assertions, and plugin-manifest entry; phased landing across multiple AFK iterations is the right pacing.
+**WSJF**: 6.0 — (12 × 1.0) / 2 — High-severity discoverability friction on every subcommanded invocation; moderate split-and-forwarder effort. Scope narrowed post-audit; re-rate stays at M because per-skill work (SKILL.md + bats + manifest) dominates the plugin-count axis.
 
 ## Description
 
@@ -76,6 +76,86 @@ Applying the rule to `manage-problem`:
 | `/wr-itil:manage-problem <NNN> known-error` | `/wr-itil:transition-problem <NNN> known-error` (or `/wr-itil:resolve-problem <NNN>`) | Distinct user intent: "advance this ticket's lifecycle". |
 | (proposed P068 retro) `/wr-itil:manage-problem pre-afk` | `/wr-itil:pin-afk-direction` | Distinct user intent: "pin direction decisions before AFK". |
 
+### Audit findings (2026-04-21, AFK iter 2)
+
+Surveyed every SKILL.md file across `@windyroad/*` plugins for subcommand-style word arguments. Scope: 20 skill files across 12 plugins. Methodology: `grep` on each file's Step 1 argument-parsing block and on any `<NNN> <verb>` patterns in the Operations table. Each skill classified under one of three buckets: `distinct intent → split`, `data parameter → keep`, or `single-purpose → no subcommand`.
+
+**Bucket A — Distinct-intent subcommands that must split (offenders):**
+
+| Skill | Word-argument subcommands | Data parameters (keep) | Audit verdict |
+|-------|---------------------------|------------------------|---------------|
+| `/wr-itil:manage-problem` | `list` / `work` / `review` / `<NNN> known-error` (verb) / `<NNN> close` (verb) | `<NNN>` (bare — data param) | Primary offender. 3 distinct user intents hidden behind word-args + 2 verb-form transitions. |
+| `/wr-itil:manage-incident` | `list` / `<NNN> mitigate` (verb) / `<NNN> restored` (verb) / `<NNN> close` (verb) / `<NNN> link P<MMM>` (verb) | `I<NNN>` or bare number (data param) | Second offender. 1 list-word + 4 verb-form transitions. |
+
+**Bucket B — Data-parameter-only skills (no split required):**
+
+| Skill | Argument shape | Audit verdict |
+|-------|---------------|---------------|
+| `/wr-architect:review-design` | Free-text review scope | Data parameter (scope string). Keep. |
+| `/wr-itil:report-upstream` | `<NNN>` ticket ID | Data parameter. Keep. |
+| `/wr-itil:work-problems` | Free-text pick-hint (AFK-loop invocation prompt) | Data parameter. Keep. Note: name plural on purpose — distinct from the future `/wr-itil:work-problem` singular split target. |
+
+**Bucket C — Single-purpose skills (no argument routing):**
+
+| Skill | Shape | Audit verdict |
+|-------|-------|---------------|
+| `/wr-architect:create-adr` | No subcommand routing | Single-purpose; keep. |
+| `/wr-retrospective:run-retro` | No subcommand routing | Single-purpose; keep. (References `manage-problem <NNN> close` as a delegation target but does not host that subcommand itself.) |
+| `/wr-jtbd:update-guide` | No subcommand routing | Single-purpose; keep. |
+| `/wr-voice-tone:update-guide` | No subcommand routing | Single-purpose; keep. |
+| `/wr-style-guide:update-guide` | No subcommand routing | Single-purpose; keep. |
+| `/wr-risk-scorer:update-policy` | No subcommand routing | Single-purpose; keep. |
+| `/wr-risk-scorer:assess-wip` | No subcommand routing | Single-purpose; keep. |
+| `/wr-risk-scorer:assess-release` | No subcommand routing | Single-purpose; keep. |
+| `/wr-jtbd:review-jobs` | No subcommand routing | Single-purpose; keep. |
+| `/wr-architect:review-design` | (See Bucket B — free-text data param) | — |
+| `/wr-c4:generate`, `/wr-c4:check`, `/wr-wardley:generate` | No subcommand routing | Single-purpose; keep. |
+| `/wr-connect:setup`, `/wr-connect:send` | No subcommand routing | Single-purpose; keep. |
+| `/wr-tdd:setup-tests` | No subcommand routing | Single-purpose; keep. |
+| `/windyroad:discord:configure`, `/windyroad:discord:access` | No subcommand routing | Single-purpose; keep. |
+| `/wr-itil:manage-problem` (create branch) | (Primary offender — see Bucket A) | — |
+
+**Scope narrowing**: the split work is bounded to the **`@windyroad/itil` plugin only**. `manage-problem` and `manage-incident` are the full offender list. Plugin-count estimate in the original ticket's Effort line ("3–4 plugins") is over-estimated; actual is **1 plugin**. Effort re-estimate: **M → S** (single-plugin mechanical). Updated in the ticket header below.
+
+### Split proposal (2026-04-21, AFK iter 2)
+
+Per ADR-010 amendment, `<verb>-<object>` convention:
+
+**`/wr-itil:manage-problem` splits:**
+
+| Current invocation | New skill | Data parameter shape after split |
+|--------------------|-----------|----------------------------------|
+| `/wr-itil:manage-problem list` | `/wr-itil:list-problems` | none |
+| `/wr-itil:manage-problem work` (interactive pick-highest) | `/wr-itil:work-problem` (singular) | none. Distinct from plural `/wr-itil:work-problems` AFK orchestrator — both names kept; user accepts the naming coexistence per out-of-scope note in the Description. |
+| `/wr-itil:manage-problem review` | `/wr-itil:review-problems` | none |
+| `/wr-itil:manage-problem <NNN>` (update) | `/wr-itil:manage-problem <NNN>` (unchanged — data parameter) | `<NNN>` |
+| `/wr-itil:manage-problem <NNN> known-error` | `/wr-itil:transition-problem <NNN> known-error` | `<NNN> <status>` (where `<status>` ∈ {known-error, verifying, close}) |
+| `/wr-itil:manage-problem <NNN> close` | `/wr-itil:transition-problem <NNN> close` | (see above) |
+| `/wr-itil:manage-problem` (no args — create new) | `/wr-itil:manage-problem` (unchanged — primary entry) | none |
+
+**`/wr-itil:manage-incident` splits:**
+
+| Current invocation | New skill | Data parameter shape after split |
+|--------------------|-----------|----------------------------------|
+| `/wr-itil:manage-incident list` | `/wr-itil:list-incidents` | none |
+| `/wr-itil:manage-incident <I> mitigate <action>` | `/wr-itil:mitigate-incident <I> <action>` | `<I> <action>` |
+| `/wr-itil:manage-incident <I> restored` | `/wr-itil:restore-incident <I>` | `<I>` |
+| `/wr-itil:manage-incident <I> close` | `/wr-itil:close-incident <I>` | `<I>` |
+| `/wr-itil:manage-incident <I> link P<M>` | `/wr-itil:link-incident <I> P<M>` | `<I> <P>` |
+| `/wr-itil:manage-incident <I>` (update) | `/wr-itil:manage-incident <I>` (unchanged — data parameter) | `<I>` |
+| `/wr-itil:manage-incident` (no args — declare new) | `/wr-itil:manage-incident` (unchanged — primary entry) | none |
+
+**Forwarder contract (per ADR-010 amended)**: the original skills (`manage-problem`, `manage-incident`) retain the subcommand routes as **thin routers** that re-invoke the new named skill via the Skill tool AND emit a one-line systemMessage deprecation notice ("This form will be removed in a future major version; use `/wr-itil:<new-skill>` instead"). `deprecated-arguments: true` frontmatter flag lands on both manage-* skills. Deprecation window: until the next major version bump of `@windyroad/itil` per the ADR-010 amendment.
+
+**Phased landing plan** (out of scope for this iteration — one slice per AFK iteration):
+
+1. `list-problems` split + forwarder + bats assertions. Smallest delta (list is a pure read-only query).
+2. `review-problems` split. Slightly larger — review includes WSJF re-ranking logic.
+3. `work-problem` split (singular). Largest of the `manage-problem` set — covers the full "pick + run" flow that the `work-problems` orchestrator currently delegates into.
+4. `transition-problem` split — covers all status transitions.
+5. `list-incidents` split.
+6. `mitigate-incident` / `restore-incident` / `close-incident` / `link-incident` splits (bundle or serialise as iteration pacing allows).
+
 ### Candidate fix
 
 1. **Audit every SKILL.md** across all `@windyroad/*` plugins for argumented subcommands. Build an inventory: skill name × subcommand list × suggested split.
@@ -93,8 +173,8 @@ Applying the rule to `manage-problem`:
 
 ### Investigation Tasks
 
-- [ ] Audit all SKILL.md files across `@windyroad/*` plugins for subcommand-style arguments. List them. Classify each as `distinct intent → split` vs `data parameter → keep` vs `verb variation → keep`.
-- [ ] For each split candidate, propose the new skill name using `/<plugin>:<verb>-<object>`.
+- [x] Audit all SKILL.md files across `@windyroad/*` plugins for subcommand-style arguments. List them. Classify each as `distinct intent → split` vs `data parameter → keep` vs `verb variation → keep`. **Completed 2026-04-21 (AFK iter 2).** Findings in the "Audit findings" section below.
+- [x] For each split candidate, propose the new skill name using `/<plugin>:<verb>-<object>`. **Completed 2026-04-21 (AFK iter 2).** See "Split proposal" below.
 - [ ] Architect review on the split names and on whether the deprecation window is 1 release, 2 minor releases, or policy-tied.
 - [ ] Draft the ADR update (or sibling to ADR-010) codifying "one skill per distinct user intent".
 - [ ] Decide whether forwarders are thin routers (re-invoke via Skill tool) or hard-fail with a redirect message (stricter). Lean: thin routers for the deprecation window.
