@@ -1,0 +1,182 @@
+---
+status: "proposed"
+date: 2026-04-20
+decision-makers: [Tom Howard]
+consulted: [wr-architect:agent, wr-jtbd:agent]
+informed: [Windy Road plugin users, addressr maintainer, bbstats maintainer]
+reassessment-date: 2026-07-20
+---
+
+# Problem-ticket directory layout — per-state subdirectories under `docs/problems/`
+
+## Context and Problem Statement
+
+`docs/problems/` holds every problem ticket in a single flat directory with state encoded as a filename suffix (`.open.md`, `.known-error.md`, `.verifying.md`, `.parked.md`, `.closed.md`). As of 2026-04-20 that directory contains ~72 files. Queue size is growing, and maintainers browsing the tree see every state interleaved — the Open queue is visually adjacent to the Closed archive. Grepping for "what's in flight right now" requires filename-suffix filtering (`docs/problems/*.open.md`).
+
+Downstream consumers (manage-problem, work-problems, manage-incident, report-upstream, run-retro, wip governance-artefact detection, architect/jtbd edit-gate hook exemptions) all enumerate tickets via the same flat-glob contract. The contract is uniform but the resulting layout is unskimmable — P069 captures the friction.
+
+Migrating to **per-state subdirectories** keeps the lifecycle semantics (states remain the same, transitions are still the authoritative state signal) while giving the directory tree an at-a-glance queue view: `docs/problems/open/` shows the dev-work queue, `docs/problems/verifying/` shows what's awaiting user verification, `docs/problems/closed/` archives the shipped history.
+
+## Decision Drivers
+
+- **Skimmability** — the tree should reflect the lifecycle structure it already has, not bury it behind filename suffixes.
+- **No semantic change** — the five lifecycle states (Open, Known Error, Verification Pending, Parked, Closed) and their transition rules (per ADR-022) are unchanged. Only the encoding of "which state is this ticket in" moves from filename suffix to directory path.
+- **Authoritative state signal** — one location for the state answer. Filename suffix AND subdirectory AND the "Status" field in the file body is three-way redundancy with drift risk. The subdirectory becomes authoritative; filename drops the suffix; the in-file Status field becomes a human-readable fallback.
+- **Glob updates are mechanical** — every downstream consumer enumerates via glob. A global `docs/problems/*.<state>.md` → `docs/problems/<state>/*.md` swap is a mechanical migration.
+- **Own every adopter** — no external consumers of this repo's `docs/problems/` layout exist today; migration can be a hard cut without a backward-compatibility window.
+
+## Considered Options
+
+1. **Per-state subdirectories (Recommended)** — `docs/problems/<state>/NNN-<slug>.md`. State encoded by directory; filename suffix dropped.
+2. **Per-year subdirectories** — `docs/problems/2026/NNN-<slug>.<state>.md`. Chronological archive; easier long-term pruning; loses at-a-glance "what's queued right now".
+3. **Flat layout with index files per state** — keep flat filenames; add `docs/problems/OPEN.md`, `VERIFYING.md` etc. indexes. Minimal migration; does not fix the directory-tree skimmability problem itself.
+4. **Per-severity or per-plugin subdirectories** — groups tickets by owning package or by severity. Breaks cross-plugin tickets; state still needs a secondary encoding.
+
+## Decision Outcome
+
+**Chosen option: 1 — per-state subdirectories.**
+
+User-pinned direction 2026-04-20 (interactive AskUserQuestion). Matches the existing filename-suffix discipline: the transition mechanics (ADR-022) already know how to move tickets between states; the migration extends that to move between directories rather than flip suffixes.
+
+### Layout
+
+```
+docs/problems/
+├── README.md              (canonical rendered index — WSJF queue, Verification Queue, Parked, Closed)
+├── open/
+│   └── NNN-<slug>.md
+├── known-error/
+│   └── NNN-<slug>.md
+├── verifying/
+│   └── NNN-<slug>.md
+├── parked/
+│   └── NNN-<slug>.md
+└── closed/
+    └── NNN-<slug>.md
+```
+
+Each ticket lives as `docs/problems/<state>/NNN-<slug>.md`. The `.state.md` filename suffix is **dropped** once the state is encoded by the directory — the previous three-way redundancy collapses to one authoritative source (directory path), one in-file fallback (`Status:` field in the body), and no redundant filename encoding.
+
+### Transition mechanics
+
+ADR-022's existing transition machinery is preserved; the only change is the `git mv` destination. The staging-trap rule (P057) applies unchanged:
+
+```bash
+# Example — Open → Known Error transition
+git mv docs/problems/open/NNN-<slug>.md docs/problems/known-error/NNN-<slug>.md
+# ... Edit tool updates the Status field + any other content ...
+git add docs/problems/known-error/NNN-<slug>.md
+```
+
+Same for the other transitions (KE → Verifying, Verifying → Closed, any → Parked, Parked → any). The cross-directory `git mv` is still a pure rename from git's perspective.
+
+### Hook exemption glob contract
+
+`packages/architect/hooks/architect-enforce-edit.sh` and `packages/jtbd/hooks/jtbd-enforce-edit.sh` both exempt problem-ticket edits from the architect / jtbd edit-gate via a shell glob on the `CLAUDE_FILE_PATH`. Under the current (flat) layout the exemption uses `docs/problems/*.md`. Shell `*` does NOT cross `/`, so under the new layout that pattern matches zero ticket files and every problem-ticket edit becomes gated — an unintended regression.
+
+The exemption pattern MUST become `docs/problems/*/*.md` (and `*/docs/problems/*/*.md` for the path-prefix variant the hooks match against). This is explicitly in scope for the ADR-031 landing commit. The ADR should NOT land without this hook update because the subsequent commit that migrates the ticket files would immediately hit blocked-edit errors from its own transition bookkeeping.
+
+### Next-ID discovery contract
+
+The ID-allocation contract becomes recursive enumeration across subdirs. The current flat `ls docs/problems/*.md` pattern returns zero matches after the migration (ticket files live one level deeper). Every skill or script that allocates a new problem ID must use a recursive listing:
+
+```bash
+# Local next-ID lookup — recursive across subdirs
+local_max=$(find docs/problems -mindepth 2 -maxdepth 2 -name '*.md' | sed 's|.*/||' | grep -oE '^[0-9]+' | sort -n | tail -1)
+
+# Origin next-ID lookup — `git ls-tree -r` recurses (matches the --name-only P056 guard)
+origin_max=$(git ls-tree --name-only -r origin/main docs/problems/ | sed 's|.*/||' | grep -oE '^[0-9]+' | sort -n | tail -1)
+```
+
+This contract change is called out explicitly rather than hidden inside the SKILL.md updates, because any new ID-allocating skill (e.g. `/wr-architect:create-adr` or future governance skills) must adopt the recursive pattern. P056 (ticket-creator next-ID blob-SHA false-match) shipped the `--name-only` guard; P069 adds the `-r` recursion requirement.
+
+### Migration plan (implementation scope — tracked by P069 for execution)
+
+This ADR is landed as the **decision record** in isolation; the migration itself (moving ~72 ticket files, amending ADR-022 / ADR-016 / ADR-024, updating SKILL.md globs and bats tests and hook scripts) is large enough to warrant its own dedicated commit. P069 is the driver ticket for that implementation work, and when it lands, ADR-031 transitions from `proposed` to `accepted` in the same commit.
+
+1. Create the five subdirectories under `docs/problems/`.
+2. `git mv` every existing ticket into the correct subdirectory, dropping the `.state.md` suffix from each filename (so `docs/problems/012-skill-testing-harness.open.md` becomes `docs/problems/open/012-skill-testing-harness.md`).
+3. Update SKILL.md glob patterns across:
+   - `packages/itil/skills/manage-problem/SKILL.md` (Step 7 transition globs, Step 9 fast-path stale check, Step 9d Verification Pending glob, Step 11 commit-message conventions — ~4 globs to update)
+   - `packages/itil/skills/work-problems/SKILL.md` (classifier table matches on filename-suffix, upstream-blocked path glob, stop-condition globs)
+   - `packages/itil/skills/manage-incident/SKILL.md` (incident-to-problem handoff glob)
+   - `packages/itil/skills/report-upstream/SKILL.md` (local-ticket discovery glob)
+   - `packages/retrospective/skills/run-retro/SKILL.md` (Step 4a Verification-close glob `docs/problems/*.verifying.md` → `docs/problems/verifying/*.md`)
+4. Update hook exemption globs in:
+   - `packages/architect/hooks/architect-enforce-edit.sh` — `docs/problems/*.md` → `docs/problems/*/*.md`.
+   - `packages/jtbd/hooks/jtbd-enforce-edit.sh` — same update.
+5. Update bats test fixtures and glob assertions across `packages/itil/skills/*/test/*.bats` and `packages/retrospective/skills/*/test/*.bats`. **Tests that assert a literal `docs/problems/*.open.md` path and find zero matches fail silently** (the glob returns nothing → assertions against empty-set become trivially true) — the migration audit must convert every such test to the new pattern and re-run the suite to confirm non-zero match counts where the intent is "this glob MUST match at least one file".
+6. Update `docs/problems/README.md` rendering rules to read from the subdirectories rather than filename suffixes. Render targets are unchanged (WSJF queue, Verification Queue, Parked, Closed sections).
+7. Amend ADR-022 (`docs/decisions/022-problem-lifecycle-verification-pending-status.proposed.md`) in the same commit to reflect the filename-suffix → directory-path shift. See "Updates to other ADRs" below.
+8. Amend ADR-016 (`docs/decisions/016-wip-verdict-commit-for-completed-governance-work.proposed.md`) and `packages/risk-scorer/agents/wip.md` to use `docs/problems/**/*.md` (recursive glob) for governance-artefact detection.
+9. Amend ADR-024 (`docs/decisions/024-cross-project-problem-reporting-contract.proposed.md`) — reference path `docs/problems/<NNN>-<title>.<status>.md` updated to `docs/problems/<status>/<NNN>-<title>.md`.
+
+### Backward compatibility
+
+**Hard cut, no compatibility window.** No external consumers of this repo's `docs/problems/` layout are known; Windy Road owns every downstream adopter (addressr, bbstats, any future) and can coordinate the migration end-to-end in one commit. External reporters use the `.github/ISSUE_TEMPLATE/problem-report.yml` intake (P066) — that path is unchanged.
+
+### Updates to other ADRs (in-scope for the ADR-031 landing commit)
+
+- **ADR-022** — amend in place (still `proposed`, no shipped code references depending on the filename-suffix encoding that don't also update under this ADR). Rationale: the Verification Pending *lifecycle* (the decision) is orthogonal to the suffix-vs-directory *encoding* (the implementation detail). The lifecycle survives unchanged; only the encoding moves. ADR-022's Decision Outcome paragraph, Confirmation items 2 and 3 (both cite `.verifying.md` globs), and the Consequences → Neutral bullet about `.parked.md` symmetry each need a one-line edit. Add a "See also ADR-031" cross-reference. No supersession marker.
+- **ADR-016** (WIP verdict commit) — governance-artefact detection path list updates from `docs/problems/*.md` to `docs/problems/**/*.md`. Same update mirrored in `packages/risk-scorer/agents/wip.md`.
+- **ADR-024** (cross-project problem-reporting contract) — reference path updates from `docs/problems/<NNN>-<title>.<status>.md` to `docs/problems/<status>/<NNN>-<title>.md`.
+- **ADR-014** (governance skills commit their own work) — no change. Commit-message conventions unchanged; the rename in transition commits is now a cross-directory `git mv` instead of a same-directory one. Semantic content unchanged.
+
+## Consequences
+
+### Good
+
+- `ls docs/problems/` shows the lifecycle states, not an alphabetical wall of ticket files.
+- `ls docs/problems/open/` is the literal dev-work queue — queue depth is visible as directory size.
+- `ls docs/problems/verifying/` is the Verification Queue — same for Parked and Closed.
+- Glob patterns become shorter and more intuitive: `docs/problems/open/*.md` vs `docs/problems/*.open.md`.
+- Filename suffix redundancy eliminated — one authoritative encoding (directory) plus one human-readable fallback (in-file `Status:` field).
+
+### Bad
+
+- One-shot migration touches ~72 ticket files + ~10 SKILL.md files + 2 hook scripts + ~30 bats fixtures. The landing commit is large.
+- Silent test failure risk (bats glob asserting a pattern that no longer matches returns empty-set, which is truthy against most assertion shapes) — the migration must audit every test and re-run the suite with explicit "this pattern must match at least one file" assertions where applicable.
+- Any offline work-in-progress ticket file a contributor has in their tree mid-migration gets rename-conflicted on rebase. Contributors need to rebase or re-create their ticket after the migration commit lands.
+
+### Neutral
+
+- `git log --follow` handles cross-directory renames cleanly; ticket history survives.
+- The `git log`-based freshness check (manage-problem Step 9 fast-path, per P031) is path-agnostic and continues to work unchanged after the migration — it checks commit timestamps, not file paths.
+- The P062 on-transition README refresh rule (manage-problem Step 7) is unchanged in semantics; the rename now spans directories but the README regeneration logic stays the same.
+
+## Confirmation
+
+A set of structural doc-lint bats assertions validates the migration is complete:
+
+- `docs/problems/open/` and `/known-error/` and `/verifying/` and `/parked/` and `/closed/` all exist as directories.
+- Zero files at `docs/problems/*.open.md` / `*.known-error.md` / `*.verifying.md` / `*.parked.md` / `*.closed.md` (the old encoding is fully migrated).
+- Every `.md` file under `docs/problems/<state>/` has a filename matching `^[0-9]{3}-[a-z0-9-]+\.md$` (no `.state.md` suffix).
+- Every problem-ticket file's in-body `Status:` field matches its containing directory name (case-insensitive, `known-error` ↔ `Known Error`).
+- Every SKILL.md that enumerates problem tickets uses the new glob pattern; no bare `docs/problems/*.<state>.md` references remain in `packages/*/skills/*/SKILL.md`.
+- Hook exemption globs in `packages/architect/hooks/architect-enforce-edit.sh` and `packages/jtbd/hooks/jtbd-enforce-edit.sh` cover `docs/problems/*/*.md`.
+- ADR-016 / ADR-022 / ADR-024 references match the new paths.
+- `packages/risk-scorer/agents/wip.md` governance-artefact path list uses the recursive `docs/problems/**/*.md` glob.
+- `npm test` green (current 428 + N new doc-lint assertions added by this ADR and the migration).
+
+## Reassessment Criteria
+
+Revisit this decision if:
+
+- Ticket count per subdir exceeds ~50 — a second-level grouping (year, plugin, severity) may become warranted.
+- External consumers of `docs/problems/` appear that require the flat layout or the filename-suffix encoding (unlikely; ADR-024 is the main candidate, and its reference path moves with this ADR).
+- The lifecycle gains a sixth state, in which case both the directory structure and the transition mechanics need the new state added.
+- The migration proves lossier than expected — e.g. if `git log --follow` handling degrades under the rename volume, or if silent bats-glob failures slip through despite the Confirmation checks.
+
+## Related
+
+- **P069** — the driver ticket. Direction pin 2026-04-20: migrate last (after smaller fixes), per-state subdirs.
+- **P056** — ticket-creator next-ID `--name-only` fix. Paired with this ADR's `-r` recursion requirement.
+- **P057** — `git mv + Edit + git add` staging trap. Applies unchanged to cross-directory renames.
+- **P062** — on-transition README refresh rule. Applies unchanged; rename now spans directories.
+- **ADR-022** — Verification Pending lifecycle. Amended in place by this ADR's landing commit.
+- **ADR-016** — WIP verdict commit. Governance-artefact detection path list updated.
+- **ADR-024** — cross-project problem-reporting contract. Reference path updated.
+- **ADR-014** — governance skills commit their own work. No change.
+- `docs/jtbd/tech-lead/JTBD-201-restore-service-fast.proposed.md` — audit-trail outcome; the directory-tree layout makes the trail visible at a glance.
+- `docs/jtbd/solo-developer/JTBD-001-enforce-governance.proposed.md` — "without slowing down" is served by the clearer queue visibility.
+- `docs/jtbd/plugin-user/JTBD-301-report-problem-without-pre-classifying.proposed.md` — the plugin-user persona doesn't directly consume `docs/problems/` (that's maintainer-facing), but the cleaner queue makes maintainer responses faster, improving JTBD-301's "predictable acknowledgement" outcome.

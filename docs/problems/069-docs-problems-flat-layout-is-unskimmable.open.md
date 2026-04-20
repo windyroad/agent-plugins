@@ -140,8 +140,15 @@ The tricky part is keeping everything machine-readable through the transition. M
 - [ ] Update architecture-agent + JTBD-agent exemption rules if any reference `docs/problems/<NNN>-*.md` paths literally. The current hook exemption (`docs/problems/ (problem tickets)`) is directory-scoped so the exemption still holds — but the hook scripts themselves should be audited.
 - [ ] Ensure that this ticket does not inadvertently ship alongside P048 / P049 / P068 changes that depend on the old paths; architect review sequences the work.
 
+## Decision record
+
+**ADR-031** (Problem-ticket directory layout — per-state subdirectories under `docs/problems/`) — drafted 2026-04-20 post-AFK interactive. Captures: per-state subdirectory layout (`open/`, `known-error/`, `verifying/`, `parked/`, `closed/`); filename `.state.md` suffix dropped (authoritative encoding moves to directory path, in-file `Status:` becomes fallback); hook exemption glob update to `docs/problems/*/*.md`; next-ID discovery contract moves to recursive `git ls-tree -r`; hard-cut migration with no compatibility window; ADR-022 + ADR-016 + ADR-024 + `packages/risk-scorer/agents/wip.md` amendments in the execution commit.
+
+This ticket (P069) is the **execution tracker** for ADR-031; the migration lands in a follow-up commit that flips ADR-031 from `proposed` → `accepted` and ships the ~72 ticket renames + SKILL.md glob updates + hook-script updates + bats fixture updates + ADR amendments together.
+
 ## Related
 
+- **ADR-031** — decision record for this migration (new; drafted 2026-04-20).
 - **ADR-022** (problem lifecycle Verification Pending) — the lifecycle authority whose shape this ticket promotes from filename suffix to directory.
 - **P048** (manage-problem does not detect verification candidates) — path-reference overlap; cross-check during migration.
 - **P049** (Known Error status overloaded with Fix Released substate, ADR-022) — same file-path surface.
