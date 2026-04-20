@@ -115,6 +115,7 @@ Chosen option: **"Discover + fall through to structured default, skill lives in 
 - The skill's template-discovery step makes one API call to the upstream repo per invocation. Network-bound; acceptable for a manually-invoked skill.
 - The security-path halt-and-surface branch is interactive (requires `AskUserQuestion` for the no-`SECURITY.md` case). In AFK mode, the skill must fall through to "save the drafted report and halt the orchestrator" rather than auto-route — AFK orchestrators should never auto-report a security-classified ticket.
 - Cross-reference back-writes modify `docs/problems/<NNN>.<status>.md` files, which are excluded from pipeline risk hash per the doc exclusions rule. Reporting is a docs-only local operation from the risk-scorer's perspective.
+- Voice-tone gate per ADR-028 fires on the skill's `gh issue create` (Step 5) and `gh api .../security-advisories` (Step 6) calls. The skill should treat the transient deny-plus-delegate as expected and proceed on the retry; the voice-tone agent reviews only the prose body, not structural template fields.
 
 ### Bad
 

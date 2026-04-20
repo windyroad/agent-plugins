@@ -104,7 +104,9 @@ agent-plugins/
 │   │   ├── hooks/
 │   │   └── skills/
 │   │       ├── manage-problem/SKILL.md
-│   │       └── manage-incident/SKILL.md
+│   │       ├── manage-incident/SKILL.md
+│   │       ├── work-problems/SKILL.md
+│   │       └── report-upstream/SKILL.md
 │   ├── retrospective/            @windyroad/retrospective
 │   │   ├── package.json
 │   │   ├── hooks/

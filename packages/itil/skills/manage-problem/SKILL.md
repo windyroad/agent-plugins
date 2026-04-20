@@ -47,6 +47,8 @@ To un-park: `git mv` back to `.open.md` (or `.known-error.md` if root cause is c
 
 **Verification Pending problems** are also excluded from WSJF ranking — their remaining work is user-side verification, not dev effort. They appear in a dedicated "Verification Queue" section in review output so the user can see what's waiting on them without mixing with dev-work ranking. See step 9c for the queue layout.
 
+**Allowed optional appendages**: a problem ticket file may carry a `## Reported Upstream` section appended after the standard sections. This is written by the `/wr-itil:report-upstream` skill (per ADR-024 Confirmation criterion 3a) and records the upstream issue or advisory URL, the matched template, and the disclosure path. The presence or absence of this section does not affect WSJF ranking or status transitions.
+
 **Test-driven resolution:** When root cause is identified, create a failing test that reproduces the problem. Skip/disable the test if a feature-disabling workaround is applied. Re-enable the test when the permanent fix is implemented — the test passing confirms resolution.
 
 ## WSJF Prioritisation
