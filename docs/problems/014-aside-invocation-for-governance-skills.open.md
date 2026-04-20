@@ -6,7 +6,21 @@
 **Effort**: XL — re-sized up from L 2026-04-20 (AFK iter 2 architect review): ADR-027 conflict requires a new/amended/superseding ADR plus 4 SKILL.md edits, regardless of which reconciliation option the user picks. See "Architect-detected conflict" section below. (Earlier L sizing assumed no ADR-level conflict; re-sized down from original XL when the new-pattern + new-ADR scope was dropped via user direction; now re-sized back up by the architect-flagged ADR-027 collision.)
 **WSJF**: 1.5 — (12 × 1.0) / 8
 
-## Architect-detected conflict (2026-04-20 AFK iter 2 — needs user reconciliation)
+## Decision record
+
+**ADR-032** (Governance skill invocation patterns — foreground + background with deferred-question resumption) — drafted 2026-04-21 post-user-direction. Supersedes ADR-027. Pattern taxonomy: **foreground synchronous** (existing skills, no Step 0), **background capture** (NEW `capture-*` siblings), **foreground edit-gate** (unchanged), **foreground commit-gate** (unchanged). The "log Y, keep working on X" promise delivered via three new skills: `/wr-itil:capture-problem`, `/wr-retrospective:capture-retro`, `/wr-architect:capture-adr`. AskUserQuestion branches in background skills defer via a persistent pending-questions artefact in `docs/problems/open/`; a new UserPromptSubmit hook (`packages/itil/hooks/pending-questions-surface.sh`) surfaces them to the main agent on next pause. AFK orchestrator iterations stay synchronous per ADR-018 / ADR-019 carve-out.
+
+This ticket (P014) remains Open as the **execution tracker** for ADR-032's implementation. Closes when:
+- ADR-027 has been renamed to `.superseded.md` (done in the ADR-032 landing commit).
+- Three new SKILL.md files exist at `packages/itil/skills/capture-problem/SKILL.md`, `packages/retrospective/skills/capture-retro/SKILL.md`, `packages/architect/skills/capture-adr/SKILL.md`.
+- Existing `manage-problem` / `create-adr` / `run-retro` / `manage-incident` SKILL.md files have their Step-0 subagent-delegation language removed.
+- `packages/itil/hooks/pending-questions-surface.sh` ships.
+- Bats coverage per ADR-032's Confirmation section lands.
+- Plugin manifests (`.claude-plugin/plugin.json` for itil, retrospective, architect) list the new skills.
+
+The three reconciliation options below (supersede / coexist / reject) are resolved: **Option 1 chosen** — supersede ADR-027. The new ADR (ADR-032) takes user's 2026-04-21 direction further than Option 1 originally contemplated — it's not just "background-subagent model" but a pattern taxonomy that keeps foreground synchronous skills intact for full-intake flows AND adds background `capture-*` siblings for aside captures.
+
+## Architect-detected conflict (2026-04-20 AFK iter 2 — resolved 2026-04-21 per ADR-032)
 
 **Status: BLOCKED on user decision.** During AFK iter 2, the architect review for the proposed P014 edits flagged a direct conflict with **ADR-027 (Governance skill auto-delegation, 2026-04-20)** — accepted the same day as the direction decision below, addressing the same SKILL.md files (manage-problem, create-adr, run-retro, work-problems' per-iteration call) but with a fundamentally different execution model.
 

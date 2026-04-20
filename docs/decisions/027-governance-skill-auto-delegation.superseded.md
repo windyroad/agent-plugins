@@ -1,13 +1,21 @@
 ---
-status: "proposed"
+status: "superseded"
 date: 2026-04-20
+superseded-date: 2026-04-21
 decision-makers: [tomhoward]
 consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: [Windy Road plugin users, addressr maintainer, bbstats maintainer]
 reassessment-date: 2026-07-20
+superseded-by: [032-governance-skill-invocation-patterns]
 ---
 
 # Governance skill auto-delegation — Step 0 delegates skill workflow to a subagent
+
+> **SUPERSEDED by [ADR-032](./032-governance-skill-invocation-patterns.proposed.md) on 2026-04-21.**
+>
+> ADR-032 replaces the synchronous-Step-0-for-every-governance-skill mandate with a pattern taxonomy: foreground synchronous (existing skills, no Step 0), background capture (new sibling `capture-*` skills), foreground edit-gate / commit-gate (unchanged hook-delegated reviewers). The "log Y, keep working on X" promise from P014 is delivered via the new `/wr-itil:capture-problem`, `/wr-retrospective:capture-retro`, `/wr-architect:capture-adr` skills running in background. Existing `manage-problem`, `create-adr`, `run-retro`, `manage-incident` SKILL.md files lose the Step-0 subagent-delegation language and execute Steps 1-N in main-agent context again.
+>
+> This file is preserved for audit-trail integrity; the decision it records is no longer in force. Read ADR-032 for the current contract.
 
 ## Context and Problem Statement
 

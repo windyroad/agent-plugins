@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-04-20 (post-AFK interactive — P066 + P063 + P068 + P062 + P060 + P061 + P072 all shipped and in Verification Pending. @windyroad/itil@0.9.0 and @windyroad/retrospective@0.4.0 published. P065 re-rated M → L; P069 re-rated L → XL after auto-migration scope (ADR-031 drafted; P069 tracks execution with 4 architect-raised open questions); P073 + P074 opened (changeset gate surface + run-retro pipeline-instability scan — both concrete run-retro gaps surfaced this session). 17 open tickets ranked. Direction pins still hold on P014, P064, P065, P067.
+> Last reviewed: 2026-04-21 — ADR-028 amended 2026-04-21 to the combined external-comms gate (covers P038 + P064 + P073). ADR-032 drafted 2026-04-21 supersedes ADR-027 (closes P014 design; P014 tracks execution with 3 new capture-* skills + 1 hook to ship). All open tickets now carry pinned direction OR a Decision record pointing at the relevant ADR. 17 open tickets ranked.
 > Run `/wr-itil:manage-problem review` to refresh WSJF rankings.
 
 ## WSJF Rankings
