@@ -1,10 +1,30 @@
 # Problem 059: `install-updates` has no awareness of plugin renames, leaves stale entries in sibling `.claude/settings.json`
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-20
 **Priority**: 6 (Medium) — Impact: Minor (2) x Likelihood: Possible (3)
 **Effort**: L — rename-mapping table + detection logic + auto-migration (no second consent) + regression tests + ADR-030 Confirmation amendment narrowing the cross-project consent rule
-**WSJF**: 1.5 — (6 × 1.0) / 4
+**WSJF**: 0 (Verification Pending — see ADR-022)
+
+## Fix Released
+
+Released in working tree 2026-04-20 (AFK iter 5). Changes:
+
+- NEW `.claude/skills/install-updates/rename-mapping.json` — source of truth; initial entry `wr-problem` → `wr-itil` per ADR-010 with forward-compat `skill-action: replace` field.
+- EDIT `.claude/skills/install-updates/SKILL.md`:
+  - Step 2: rename-mapping detection on `CURRENT_PLUGINS` (record `STALE_CURRENT`).
+  - Step 3: per-sibling rename-mapping detection (record `STALE_SIBLING`).
+  - NEW Step 6.5: auto-migrate ADR-documented stale entries within already-confirmed siblings (install new + remove stale settings.json key, no second AskUserQuestion).
+  - Step 8: Auto-migrated stale entries report section, with explicit "No rename migrations applied this run" fallback per ADR-030 transparency contract.
+  - References section: P059 + ADR-030 amendment cross-reference.
+- NEW `.claude/skills/install-updates/test/install-updates-rename-detection.bats` — 8 doc-lint structural assertions (Permitted Exception per ADR-005).
+- EDIT `docs/decisions/030-repo-local-skills-for-workflow-tooling.proposed.md` Confirmation: rename-mapping carve-out bullet (architect-flagged Q4 phrasing — explicitly names settings.json mutation as authorised). Reassessment Criteria: silent-rename-migration-surprise + second-consumer-of-rename-mapping triggers added.
+
+Exercise evidence: `npm test` ran 380 assertions (was 372 — 8 new from rename-detection.bats). All pass. Direct bats run on the new file confirms all 8 green.
+
+Architect review PASS (4 advisory items all addressed in the implementation). JTBD review PASS.
+
+Awaiting user verification: confirm next `/install-updates` invocation in `addressr-mcp` (or any sibling with stale `wr-problem@windyroad`) auto-migrates the entry to `wr-itil` and surfaces it in the "Auto-migrated stale entries" section of the final report.
 
 ## Direction decision (2026-04-20, user — retro stop)
 

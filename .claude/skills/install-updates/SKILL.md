@@ -44,6 +44,8 @@ CURRENT_PLUGINS=$(grep -oE '"wr-[a-z0-9-]+@windyroad"' .claude/settings.json 2>/
 
 Save `CURRENT_PLUGINS` — the set of plugin names (without the `@windyroad` suffix) enabled in `.claude/settings.json`.
 
+**Rename-mapping detection (P059)**: load `.claude/skills/install-updates/rename-mapping.json` and compare each enabled name in `CURRENT_PLUGINS` against the `renames[].from` column. For each match, record a `STALE_CURRENT` entry with the `from` name, `to` name, `adr` reference, and `since` date. These entries are migrated automatically in Step 6.5 within already-confirmed siblings — the current project is always confirmed, so its stale entries always migrate. The mapping table is the source of truth for ADR-documented renames; non-mapped plugins (manual user choices) are NOT considered stale.
+
 ### 3. Discover sibling projects
 
 ```bash
@@ -62,6 +64,8 @@ done
 ```
 
 `SIBLINGS` is the set of sibling directory names (not full paths) that have at least one windyroad plugin enabled.
+
+**Per-sibling rename-mapping detection (P059)**: for each detected sibling, scan its `.claude/settings.json` for enabled-plugin keys whose short-name matches `renames[].from` in `rename-mapping.json`. Record a `STALE_SIBLING` entry per match. These are migrated automatically in Step 6.5 — but only for siblings the user confirms in Step 6's consent gate. Siblings the user excludes from the install plan are NOT migrated.
 
 ### 4. Determine which plugins have new npm versions
 
@@ -98,6 +102,36 @@ Invoke `AskUserQuestion` with **one question, multiSelect=true**:
 
 The user can pick any subset (or dry-run). Never install without explicit consent for a sibling.
 
+### 6.5. Auto-migrate ADR-documented stale entries (P059)
+
+For each `STALE_CURRENT` and `STALE_SIBLING` entry whose target sibling is in the user-confirmed install plan from Step 6 (the current project is always confirmed):
+
+1. Install the canonical (`to`) plugin in the target's project scope:
+   ```bash
+   (cd "$TARGET_DIR" && claude plugin install "wr-${TO}@windyroad" --scope project)
+   ```
+2. Remove the stale (`from`) key from `$TARGET_DIR/.claude/settings.json`:
+   ```bash
+   # Direct settings.json mutation — `claude plugin uninstall` refuses
+   # project-scope per BRIEFING line 17. The mutation is authorised
+   # by the ADR-030 Confirmation amendment (P059): ADR-documented
+   # rename migrations within already-confirmed siblings MAY install
+   # the new plugin AND remove the stale key without a second consent
+   # gate.
+   node -e '
+     const fs = require("fs"), path = require("path");
+     const f = process.argv[1];
+     const j = JSON.parse(fs.readFileSync(f, "utf8"));
+     if (j.enabledPlugins) delete j.enabledPlugins["'"wr-${FROM}@windyroad"'"];
+     fs.writeFileSync(f, JSON.stringify(j, null, 2) + "\n");
+   ' "$TARGET_DIR/.claude/settings.json"
+   ```
+3. Record the migration in a `MIGRATED` array for the Step 8 report: `<target> <from> → <to> (per <adr>)`.
+
+If a `STALE_*` entry's target is NOT confirmed in Step 6 (user excluded the sibling from the install plan), skip the migration for that target. Excluded siblings keep their stale enabled-plugin keys; the user can re-run with that sibling included to migrate them.
+
+The ADR-documented rename + sibling-set consent together constitute the authorisation for direct settings.json mutation. Non-ADR-documented stale entries (e.g. plugins the user uninstalled manually) are NOT in `rename-mapping.json` and are NOT auto-migrated by this step.
+
 ### 7. Install
 
 For each confirmed project (current + user-confirmed siblings):
@@ -124,6 +158,19 @@ Print a markdown table:
 | <project> | wr-architect | 0.4.0 | 0.4.1 | ✓ installed |
 | ...
 ```
+
+Then an **Auto-migrated stale entries (ADR-documented renames)** section listing each entry from the `MIGRATED` array, or — if no migrations applied — explicitly stating "No rename migrations applied this run." (per the ADR-030 Confirmation amendment transparency contract). Format:
+
+```
+### Auto-migrated stale entries (ADR-documented renames)
+
+| Project | From | To | ADR |
+|---------|------|----|----|
+| <project> | wr-problem | wr-itil | ADR-010 |
+| ... | ... | ... | ... |
+```
+
+The mapping table source: `.claude/skills/install-updates/rename-mapping.json`.
 
 Then a **Legacy JTBD layouts** section if any were flagged in Step 5:
 
@@ -175,4 +222,5 @@ If `AskUserQuestion` is unavailable (e.g. running inside a subagent that lacks t
 - **ADR-008 Option 3** — legacy JTBD-layout breaking change; drives Step 5.
 - **ADR-013 Rule 6** — non-interactive fallback pattern.
 - **P045** — auto plugin install after governance release. This skill is the manual stopgap until P045's automated queue lands.
+- **P059 / ADR-010 / ADR-030 amendment** — rename-mapping table at `.claude/skills/install-updates/rename-mapping.json` is consumed by Step 2/3 detection and Step 6.5 auto-migration. Direct settings.json mutation for ADR-documented rename migrations within already-confirmed siblings is authorised by the ADR-030 Confirmation amendment.
 - **BRIEFING.md** — marketplace resolution from remote repo, version-string staleness, `plugin install` vs `plugin update` distinction.
