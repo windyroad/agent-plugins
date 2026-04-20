@@ -186,6 +186,6 @@ P004 project-root check resolves correctly).
 
 ## Reassessment Criteria
 
-- **Agent testing capability**: If Claude Code adds a way to test agent behavior programmatically (mock sessions), consider adding agent integration tests.
+- **Agent testing capability** **[Reassessment Triggered 2026-04-21 per ADR-037]**: If Claude Code adds a way to test agent behavior programmatically (mock sessions), consider adding agent integration tests. As of 2026-04-21, Anthropic's upstream `skill-creator` harness meets a subset of this criterion (dual-run with-skill/without-skill grader subagent pattern). ADR-037 evaluates the harness and defers adoption with named reassessment triggers of its own. This ADR-005 Reassessment Criterion remains OPEN — the trigger flag marks that the landscape has shifted since ADR-005 was authored; ADR-005's Considered Options and Confirmation sections should be re-read on the next natural review to decide whether ADR-005 itself needs amendment or supersession.
 - **Plugin count grows**: If the suite grows beyond 15 plugins, consider whether test infrastructure needs tooling (test runner scripts, parallel execution).
 - **CI run time**: If bats tests exceed 60 seconds, consider splitting into per-package test jobs.

@@ -64,8 +64,20 @@ ADR-005 was written when skills were thin and skill count was 1. The plugin suit
 - [ ] Check P011's source-grep ban compatibility: a grader-subagent dual-run is functional/behavioural, not source-grep, so it is compatible with ADR-005's P011 clause (architect note).
 - [ ] When resolving P012, flag ADR-005 with `[Reassessment Triggered]` — its own reassessment criterion ("If Claude Code adds a way to test agent behavior programmatically") is arguably now met by this upstream evidence (architect note).
 
+## Decision record
+
+**ADR-037** (Skill testing strategy — contract-assertion bats companion to ADR-005) — drafted 2026-04-21. Companion ADR per the pinned direction; does NOT supersede ADR-005. SKILL.md framed as a **contract document** (parallel to `hooks.json` in ADR-005). Contract-assertions on SKILL.md structural invariants (sections, cited ADRs, `allowed-tools` content, marker strings verbatim) are the sanctioned pattern. P011 source-grep ban preserved via the contract-vs-behavioural distinction. Anthropic's `skill-creator` eval harness evaluated as a first-class considered option and deferred with 7 named reassessment triggers. ADR-005 flagged `[Reassessment Triggered]` per this ticket's investigation task. Shared helper library at `packages/shared/test/skill-test-helpers.bash` via ADR-017 sync pattern. Retrofit tracked here.
+
+This ticket (P012) remains **Open** as the execution tracker. Closes when:
+- `packages/shared/test/skill-test-helpers.bash` lands with the baseline helper library.
+- Every `@windyroad/*` skill has at least one `<skill>-contract.bats` (phased retrofit; ~10-15 new files across ~8 plugins).
+- `packages/shared/test/skill-contract-coverage.bats` enforces coverage (with allowlist during Phase 1; allowlist removed at Phase 2).
+- ADR-017 drift check for the helper library runs in CI.
+- `@jtbd` / `@problem` traceability annotations land per ADR-025 inheritance.
+
 ## Related
 
+- **ADR-037** — decision record for this ticket. Closes the design question.
 - ADR-005 (`docs/decisions/005-plugin-testing-strategy.proposed.md`) — testing strategy to extend or amend
 - ADR-011 (`docs/decisions/011-manage-incident-skill.proposed.md`) — adopted Option A-lite as a holding pattern pending this problem's resolution
 - ADR-010 (`docs/decisions/010-rename-wr-problem-to-wr-itil.proposed.md`) — signals more skills coming, making this decision time-bound
