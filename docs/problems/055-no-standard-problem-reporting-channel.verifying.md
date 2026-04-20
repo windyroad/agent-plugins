@@ -1,11 +1,11 @@
 # Problem 055: No standard problem-reporting channel for plugin users, and no reusable pattern for downstream projects to report upstream
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-19
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Possible (3)
-**Effort**: L — Part A (intake scaffolding) **shipped 2026-04-20 AFK iter 3**; Part B (`/wr-itil:report-upstream` skill per ADR-024) remains. Effective remaining effort M (one new skill in existing plugin + bats test, ADR-024 already drafted). Re-rate WSJF accordingly.
+**Effort**: L — Part A (intake scaffolding) shipped 2026-04-20 AFK iter 3; Part B (`/wr-itil:report-upstream` skill per ADR-024) shipped 2026-04-20 in `@windyroad/itil@0.8.0` (commit 8788489).
 
-**WSJF**: 4.5 — (9 × 1.0) / 2 — Part B remaining as M effort with ADR-024 already governing the contract.
+**WSJF**: 0 — Verification Pending tickets are excluded from the main dev-work ranking per ADR-022. Remaining work is user-side verification, not dev effort.
 
 ## Part A shipped (2026-04-20, AFK iter 3)
 
@@ -152,3 +152,25 @@ Neither (A) nor (B) has ever been scoped in this project. The repo's scaffolding
 - **ADR-015** (On-demand assessment skills) — precedent for a new skill's contract shape.
 - Upstream survey targets: `anthropics/claude-code`, `modelcontextprotocol/servers`, `changesets/changesets`, `vercel/next.js` for `.github/ISSUE_TEMPLATE/` reference shapes.
 - Addressr session-memory note (user's local) — one confirmed downstream workaround instance for (B).
+
+## Fix Released
+
+Both halves of P055 are now live:
+
+- **Part A (repo intake scaffolding)** — shipped 2026-04-20 in commit `e36cf84` (`docs: add OSS intake scaffolding — issue templates, SECURITY, SUPPORT, CONTRIBUTING`). The six files documented above (`.github/ISSUE_TEMPLATE/config.yml`, `.github/ISSUE_TEMPLATE/bug-report.yml`, `.github/ISSUE_TEMPLATE/feature-request.yml`, `SECURITY.md`, `SUPPORT.md`, `CONTRIBUTING.md`) are present at repo root / under `.github/`.
+- **Part B (`/wr-itil:report-upstream` skill per ADR-024)** — shipped 2026-04-20 in commit `8788489` (`feat(itil): add /wr-itil:report-upstream skill (P055 Part B, ADR-024)`), released as `@windyroad/itil@0.8.0` via the changeset release PR (merge commit `80841fd`). The 8-step contract from ADR-024 Decision Outcome is implemented in `packages/itil/skills/report-upstream/SKILL.md`; a 9-assertion doc-lint bats test (`packages/itil/skills/report-upstream/test/report-upstream-contract.bats`) guards the ADR-024 Confirmation criterion 2 checks plus the architect-required ADR-027 Step-0 deferral, ADR-028 voice-tone gate, and three-distinct-AFK-branches documentation. All 9 tests PASS as of this transition.
+
+ADR-024 Confirmation cross-reference checks (criterion 3) are satisfied:
+
+- `packages/itil/skills/manage-problem/SKILL.md` names the optional `## Reported Upstream` section as an allowed appendage (confirmed at line 50).
+- `docs/decisions/002-monorepo-per-plugin-packages.proposed.md`'s `itil/` inventory lists `report-upstream` (confirmed at lines 102 / 109).
+- `packages/itil/package.json` does not enumerate individual skills, so the "if" clause of criterion 3 does not apply.
+
+Awaiting user verification. Candidate verification paths per ADR-024 criterion 4 (behavioural replay):
+
+- Install `@windyroad/itil@0.8.0` into a downstream project (addressr or bbstats) and invoke `/wr-itil:report-upstream` against a real upstream with and without `.github/ISSUE_TEMPLATE/`.
+- Confirm the `## Reported Upstream` section is back-written into the local ticket and the `## Related` section gains a `Reported upstream: <URL>` line.
+- Confirm the upstream issue body carries the `Cross-reference: <downstream URL>` line.
+- For the security path: confirm `gh api .../security-advisories` routing when upstream declares GitHub Security Advisories in `SECURITY.md`, and the `AskUserQuestion` halt-and-surface when upstream has no `SECURITY.md`.
+
+Criterion 6 (downstream adoption by addressr or bbstats within 3 months) is advisory/non-blocking per ADR-024 and is not required to close this ticket.
