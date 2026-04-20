@@ -75,6 +75,49 @@ For each item identified in "What was harder than it should have been", "What fa
 - If yes: update it with new evidence from this session
 - If no: create a new problem ticket
 
+### 4a. Verification-close housekeeping (P068)
+
+Problems whose fix shipped but whose closure is still pending (`docs/problems/*.verifying.md` per ADR-022) accumulate across sessions. When this session's activity exercised a pending fix successfully, run-retro surfaces the evidence so the user can close on observed fact rather than by calendar age (P048's `Likely verified` heuristic) or deferred user review (manage-problem Step 9d's baseline user-initiated path). This step extends those paths with **session-context evidence**; the close decision remains the user's.
+
+**Ownership boundary**: run-retro surfaces evidence and asks; `/wr-itil:manage-problem` Step 7 Verification Pending → Closed transition (rename + Status edit + P057 re-stage + ADR-014 commit per ADR-022) is invoked via the Skill tool to perform the actual file rename and commit. run-retro does **not** rename, edit the Status field, or commit — those remain `manage-problem`'s responsibility. ADR-014 lists run-retro as out of scope for its own commits; the delegated manage-problem call commits per ADR-014 + ADR-022 and that boundary is preserved.
+
+**Steps:**
+
+1. **Glob**: enumerate `docs/problems/*.verifying.md` (the driven-by-filename surface per ADR-022).
+
+2. **Read the `## Fix Released` section** of each file and extract the fix-summary keyword set: release marker (version, commit SHA, or date), affected source path(s), new test file path(s), and any named skill / hook / gate the fix exercises.
+
+3. **Evidence scan** against the session's in-context activity. For each ticket, collect specific citations (tool invocation, timestamp or position in the session, and the observable outcome). Accepted evidence classes:
+   - **Test invocations** that ran the fix's test file or a superset and returned zero (e.g. `npx bats packages/itil/skills/manage-problem/test/manage-problem-external-root-cause-detection.bats` — 14/14 passed at session position N).
+   - **Commits** whose diff covered the fix's source path (cite the commit SHA and path).
+   - **Skill invocations** that rely on the fix (e.g. `manage-problem` using P056's corrected next-ID lookup; cite the invocation and the observable that the fix contract held — "ID 072 computed without origin_max blob-SHA false-match").
+   - **Hook firings** on gate paths the fix established (cite the tool call that triggered the hook and the hook's observed behaviour).
+   - **Release cycles** (`push:watch` / `release:watch`) that shipped a commit dependent on the fix (cite the workflow run ID and exit status).
+
+4. **Categorise** each `.verifying.md` ticket into one of three buckets:
+   - **Exercised successfully in-session** — at least one citation from step 3. Record the ticket as a close-candidate. Citations MUST be specific (tool invocation + observable outcome), not bare counts — per ADR-026 grounding. If no specific citation can be produced, the ticket does NOT go in this bucket regardless of how often the fix's area was touched.
+   - **Not exercised in-session** — no citation collected. Leave as Verification Pending; nothing surfaces for this ticket.
+   - **Exercised with regression** — the fix's contract observably failed (test red, hook misfired, skill produced incorrect output). This is a distinct problem, not a closure candidate. Flag it in the retro report as a new problem ticket (route via Step 4) with the regression evidence, and leave the `.verifying.md` file alone.
+
+5. **Prompt the user (interactive path per ADR-013 Rule 1)** — for each close-candidate use `AskUserQuestion`:
+   - `header: "Close verified ticket?"`
+   - `multiSelect: false`
+   - Question body MUST include the fix summary AND the specific citations collected in step 3 (not just ticket ID + title). The prompt is self-contained so the user can decide without reading the full ticket file.
+   - Options:
+     1. `Close P<NNN>` — description: "Delegate to /wr-itil:manage-problem for Verification Pending → Closed transition. manage-problem renames, updates Status, and commits per ADR-014 + ADR-022."
+     2. `Leave as Verification Pending` — description: "Evidence noted but not yet sufficient to close. Ticket stays in the Verification Queue."
+     3. `Flag for manual review` — description: "The evidence is ambiguous or contested; defer to a dedicated manage-problem review session."
+
+6. **For each `Close P<NNN>` confirmation**, invoke the Skill tool with `wr-itil:manage-problem` and arguments like `<NNN> close — verified in-session via <citation summary>`. manage-problem performs the `git mv` .verifying.md → .closed.md, updates the Status field, re-stages per P057, and commits with message `docs(problems): close P<NNN> <title>` per ADR-014. The commit message should reference the retro session in its body.
+
+7. **Non-interactive / AFK fallback (per ADR-013 Rule 6)**: when `AskUserQuestion` is unavailable (autonomous retro, batch session-wrap), do NOT auto-close and do NOT delegate to manage-problem. Instead, write a "Verification Candidates" section into the retro report (Step 5 summary) listing each close-candidate with its ticket ID, fix summary, and the specific citations collected in step 3. The user reviews on return and can run `/wr-itil:manage-problem <NNN> close` per ticket, or run `/wr-itil:manage-problem review` to fire Step 9d's baseline verification prompt. This deferral is explicit per the user's documented preference (feedback_verify_from_own_observation.md memory): surface evidence from the agent's own in-session observations, but the close decision remains user-confirmed per ADR-022.
+
+**ADR-027 compatibility note**: when ADR-027's Step-0 auto-delegation lands on run-retro (run-retro is named in ADR-027's Scope as in-scope but has no Step 0 today), the evidence scan in step 3 becomes load-bearing on main-agent session context that a delegated subagent does not automatically inherit. The SKILL.md contract for that migration: either (a) run Step 4a in the main-agent context BEFORE Step-0 delegation to the subagent, or (b) have the Step-0 delegation prompt include an explicit session-activity summary (tool invocations, commits, skill calls observed in main-agent context) so the subagent has citable evidence. Option (a) is preferred because it keeps the evidence scan as close as possible to the observed activity; option (b) is the fallback if the subagent boundary must be crossed first.
+
+**Interaction with other surfaces**:
+- **manage-problem Step 9d** (baseline user-initiated verification review per P048) still fires on `/wr-itil:manage-problem review` — it is the age-based heuristic path. Step 4a here is the evidence-based session-wrap path. The two compose: a ticket that is both "≥ 14 days old" (Step 9d highlight) AND "exercised successfully this session" (Step 4a candidate) should be surfaced in both paths independently; closing via either path moves the ticket to `.closed.md` and de-lists it from both queues.
+- **Skipped in this step**: `.verifying.md` tickets for fixes that ship in the currently-running session (e.g. P066, P063 just transitioned to `.verifying.md` this session) — a session cannot verify its own fix beyond "bats passed at commit time"; subsequent-session exercise is the meaningful signal. Treat same-session verifyings as "not exercised in-session" for closure purposes unless a later-session exercise path is in the citation list.
+
 ### 4b. Recommend new codifications
 
 For each **codification candidate** identified in Step 2, route the decision through a single `AskUserQuestion` call. This is the ADR-013 Rule 1 structured-interaction pattern — do not present the choices as prose enumeration in the skill output. The shape and Kind identified in Step 2 determine which option rows the user picks from; every shape and Kind routes through the same `AskUserQuestion` so the decision stays one structured interaction (architect decision: flat shape-prefixed options, not a two-step type-then-action or Kind-then-shape flow).
@@ -153,6 +196,14 @@ Present a summary to the user:
 
 ### Problems Created/Updated
 - [problem ticket]: [summary]
+
+### Verification Candidates
+
+(Emitted only when Step 4a found `.verifying.md` tickets with specific in-session citations. Omit this section entirely when no candidates were found — or when the interactive path closed them all during Step 4a. Populated in non-interactive / AFK mode per ADR-013 Rule 6 — the user closes on return.)
+
+| Ticket | Fix summary | In-session citations | Decision |
+|--------|-------------|----------------------|----------|
+| P<NNN> | <one-sentence fix summary> | <specific invocations + observable outcomes> | closed via manage-problem / left Verification Pending / flagged for manual review / flagged (non-interactive) |
 
 ### Codification Candidates
 

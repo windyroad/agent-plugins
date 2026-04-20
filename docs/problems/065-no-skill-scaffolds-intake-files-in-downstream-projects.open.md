@@ -3,8 +3,8 @@
 **Status**: Open
 **Reported**: 2026-04-20
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
-**Effort**: M — new `/wr-itil:scaffold-intake` skill in `@windyroad/itil` that writes the six intake files (config.yml, bug-report.yml, feature-request.yml, SECURITY.md, SUPPORT.md, CONTRIBUTING.md), templated from the versions this repo ships, with per-project substitutions (project name, plugin list, contact paths) and idempotent re-run behaviour. Includes a bats fixture test exercising a mock downstream repo.
-**WSJF**: 6.0 — (12 × 1.0) / 2 — High-severity ecosystem gap, moderate effort; above P064 (3.0) but below P063 (9.0) in the dev-work queue.
+**Effort**: L (re-rated from M at AFK iter 6 iter 3 triage; P047) — new `/wr-itil:scaffold-intake` skill in `@windyroad/itil` PLUS a PreToolUse hook (`packages/itil/hooks/pre-publish-intake-gate.sh`), PLUS first-run trigger wiring in `manage-problem` and `work-problems`, PLUS a new ADR (pinned: "own ADR, not extension of ADR-024"), PLUS problem-first template seeds updated from the corrected shape P066 shipped, PLUS fixture-based bats tests for scaffold + idempotency + gate. Originally scoped as M (skill + templates only); the layered-trigger direction pin and the new-ADR decision push effort into L territory. Templates can now seed from `.github/ISSUE_TEMPLATE/problem-report.yml` (shipped in AFK iter 6 iter 1) rather than the old bug/feature pair.
+**WSJF**: 3.0 — (12 × 1.0) / 4 — re-rated at AFK iter 6 iter 3 (effort M → L per the above). Drops below the 4.0-6.0 tier; now ranks alongside P014 / P064 in the dev-work queue. Landing P066 first (now shipped) unblocks the template seed decision so next attempt can proceed without waiting.
 
 ## Direction decision (2026-04-20, user — AFK pre-flight via AskUserQuestion)
 

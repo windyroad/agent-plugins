@@ -1,6 +1,6 @@
 # Problem 068: run-retro does not close .verifying.md tickets that have been observed as verified in the session
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-20
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: M — add a "Verification-close housekeeping" step to `packages/retrospective/skills/run-retro/SKILL.md` that scans `docs/problems/*.verifying.md` against the session's observed evidence, calls out which are verified in-session, and transitions them to `.closed.md` (ADR-022 Verification Pending → Closed). Includes bats doc-lint test assertions and cross-reference to `manage-problem` Step 9d.
@@ -86,6 +86,25 @@ Alternative shape considered: put the housekeeping in `manage-problem` review st
 - [ ] Architect review on whether this belongs in run-retro or warrants a new sibling skill `/wr-itil:verification-close` (or `/wr-retrospective:close-verified`). Lean: run-retro, because session-context is already there.
 - [ ] Exercise end-to-end: run run-retro at the end of a session where at least one `.verifying.md` fix was exercised; confirm the evidence appears in the retro report and the close flow fires.
 
+## Fix Released
+
+Shipped 2026-04-20 (AFK iter 6 iter 3 commit pending). run-retro gains a new Step 4a "Verification-close housekeeping" placed between Step 4 (problem tickets) and Step 4b (codification candidates):
+
+- `packages/retrospective/skills/run-retro/SKILL.md` — new Step 4a (7 substeps):
+  1. Glob `docs/problems/*.verifying.md` per ADR-022.
+  2. Read each file's `## Fix Released` section to extract fix-summary keywords (release marker, source paths, test paths, named skill/hook/gate).
+  3. Scan session's in-context activity for specific citations (tool invocation + timestamp/position + observable outcome) — ADR-026 grounding discipline.
+  4. Categorise into three buckets: exercised successfully (close-candidate), not exercised, exercised with regression.
+  5. Interactive path (ADR-013 Rule 1): AskUserQuestion with fix summary AND citations inline; three options (Close / Leave Verification Pending / Flag for manual review).
+  6. Close delegation: Skill tool invokes `/wr-itil:manage-problem <NNN> close — verified in-session via <citation summary>` — manage-problem Step 7 performs the `.verifying.md` → `.closed.md` rename + Status edit + P057 re-stage + ADR-014 commit. run-retro does NOT rename, edit Status, or commit — the ownership boundary stays at the itil plugin.
+  7. Non-interactive / AFK fallback (ADR-013 Rule 6): surface evidence in a new "Verification Candidates" section of the retro report; do NOT auto-close.
+- `packages/retrospective/skills/run-retro/SKILL.md` — Step 5 summary gains a "Verification Candidates" section (4-column table: Ticket, Fix summary, In-session citations, Decision) emitted only when Step 4a collected candidates.
+- `packages/retrospective/skills/run-retro/test/run-retro-verification-close-housekeeping.bats` — NEW. 14 structural doc-lint assertions (Permitted Exception per ADR-005) covering the glob, delegation boundary, three evidence buckets, ADR-026 grounding, AskUserQuestion contract, three options, AFK fallback, ADR-027 compatibility note, feedback memory citation, Step 9d interaction, same-session-verifying skip, Verification Candidates section, and the negative assertion that ADR-018 is not miscited as the retrospective contract ADR.
+
+Architect review PASSED after resolving 6 issues flagged in the first pass (ADR-018 miscite, cross-plugin state-machine ownership, ADR-027 compatibility, ADR-026 grounding, ADR-014 scope, ADR-013 Rule 6 fail-safe). JTBD review PASSED (aligned with JTBD-001, JTBD-201, JTBD-006; no persona gap). Full bats suite: 419/419 pass (was 405; +14 from the new doc-lint bats). No regressions.
+
+Awaiting user verification: next `/wr-retrospective:run-retro` invocation should surface a "Verification Candidates" section for any `.verifying.md` tickets whose fixes were exercised successfully during the session, and the close-candidate prompt (or AFK report section) should show citations (tool invocation + observable outcome) rather than bare counts.
+
 ## Related
 
 - **P044** — run-retro does not recommend new skills; sibling retro-enhancement ticket (.verifying.md).
@@ -94,8 +113,10 @@ Alternative shape considered: put the housekeeping in `manage-problem` review st
 - **P048** — manage-problem does not detect verification candidates; the age-based heuristic. This ticket is the evidence-based counterpart — the two should compose (both feed the verification-close prompt).
 - **P049** — Verification Pending lifecycle (ADR-022); the lifecycle this housekeeping walks the ticket through.
 - `feedback_verify_from_own_observation.md` (user memory) — user's explicit preference for in-session verification over deferring everything.
-- **ADR-018** — retrospective ADR; governs the run-retro contract.
-- **ADR-022** — Verification Pending lifecycle; authoritative on the `.verifying.md` → `.closed.md` transition.
+- **ADR-018** — inter-iteration release cadence for AFK loops (note: this is NOT a retrospective contract ADR — the earlier framing in this ticket was incorrect per architect review 2026-04-20).
+- **ADR-022** — Verification Pending lifecycle; authoritative on the `.verifying.md` → `.closed.md` transition. run-retro does NOT own this transition — it delegates to `/wr-itil:manage-problem` Step 7 so the ownership boundary stays at the itil plugin.
+- **ADR-026** — Agent output grounding; the evidence scan in Step 4a requires specific citations, not bare counts.
+- **ADR-027** — Governance skill auto-delegation; run-retro is named in-scope but not yet wired. The Step 4a evidence scan is load-bearing on main-agent session context — compatibility notes are embedded in the SKILL.md change.
 - **ADR-013** — structured user interaction; Rule 1 governs the AskUserQuestion with evidence inline.
 - **ADR-014** — governance skills commit their own work; the close commit follows the standard ordering.
 - `packages/retrospective/skills/run-retro/SKILL.md` — the 174-line skill that this ticket extends.
