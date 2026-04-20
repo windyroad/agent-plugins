@@ -6,6 +6,14 @@
 **Effort**: S — one conditional prompt step in `packages/itil/skills/manage-problem/SKILL.md` (Open → Known Error transition, or when parking with `upstream-blocked` reason), plus a bats doc-lint assertion.
 **WSJF**: 9.0 — (9 × 1.0) / 1 — small, high-leverage wiring fix; unblocks the real-world path for P055's shipped `/wr-itil:report-upstream` skill.
 
+## Direction decision (2026-04-20, user — AFK pre-flight)
+
+**Defaults AFK can apply without further user input**:
+- Detection granularity: **strict**. Require an explicit external-root-cause marker (`upstream`, `third-party`, `external`, `vendor`, or a scoped-npm-package name pattern `@[\w-]+/[\w-]+` in the Root Cause Analysis section). Avoids false-positive prompt fatigue.
+- Insertion points: Step 7 Open → Known Error transition (primary) AND the parking path when reason is `upstream-blocked` (secondary). Both fire.
+- Non-interactive (AFK) branch: append a pending-upstream-report line to `## Related` noting the detected external dependency; do NOT auto-invoke `/wr-itil:report-upstream`. Consistent with ADR-024's Consequences (security-path halt) and JTBD-006.
+- No new ADR needed — this is a `manage-problem` SKILL.md scope change; ADR-024 already governs the invoked skill's contract.
+
 ## Description
 
 `@windyroad/itil@0.8.0` ships `/wr-itil:report-upstream` (P055 Part B, ADR-024). The skill's contract is solid and tested, but `manage-problem` is a **passive consumer** of the output, not an active caller: `packages/itil/skills/manage-problem/SKILL.md` only acknowledges the `## Reported Upstream` appendage at line 50 ("written by the `/wr-itil:report-upstream` skill"). Nothing in the "Working a Problem" flow detects "root cause points to an upstream defect" and prompts the user to invoke `/wr-itil:report-upstream`.

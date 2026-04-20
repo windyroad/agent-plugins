@@ -6,6 +6,18 @@
 **Effort**: M — update `packages/itil/skills/report-upstream/SKILL.md` Step 3 (classification heuristic) and Step 5 (structured default body), plus the 9-assertion bats doc-lint test. Likely a sibling-ADR note or an update to ADR-024's Decision Outcome steps 3 and 5 to reflect the problem-first framing.
 **WSJF**: 4.5 — (9 × 1.0) / 2 — Mid-priority; should ship after P066 (which establishes the problem-first shape) so the skill's new default matches the intake shape this repo ships.
 
+## Direction decision (2026-04-20, user — AFK pre-flight via AskUserQuestion)
+
+**ADR path**: draft a **sibling ADR** that supersedes only ADR-024 Decision Outcome Steps 3 + 5. Matches the ADR-022 precedent for lifecycle-language supersession; cleaner audit trail than amending ADR-024 in place. Candidate title: "Report-upstream classifier is problem-first (supersedes ADR-024 Steps 3 + 5)".
+
+**Ship ordering**: P066 (intake templates problem-first in this repo) lands before P067. Rationale: P067's preference order expects `problem-report.yml` in upstream `.github/ISSUE_TEMPLATE/` — this repo becomes the reference shape, so its templates must be problem-first first.
+
+**Defaults AFK can apply without further user input**:
+- Upstream template preference order: `problem-report.yml` → `problem.yml` → `problem-report.md` → `problem.md` → `bug-report.yml` → `bug.yml` → `bug-report.md` → `bug.md` → `feature-request.yml` → `feature.yml` → `feature-request.md` → `question.yml` → `question.md` → structured default.
+- Structured default sections: `## Description` → `## Symptoms` → `## Workaround` → `## Impact` → `## Environment` → `## Cross-reference`.
+- Classification heuristic widens to include problem / issue / concern / defect / gap markers in addition to bug / feature / question for backward compatibility with upstream ecosystem norms.
+- Bats test assertions: add problem-first preference assertion; add problem-shaped default assertion; keep ecosystem-compatibility assertions for the bug/feature/question fallback.
+
 ## Description
 
 `/wr-itil:report-upstream` (P055 Part B, shipped in `@windyroad/itil@0.8.0`, per ADR-024) currently follows a bug/feature/question mental model:

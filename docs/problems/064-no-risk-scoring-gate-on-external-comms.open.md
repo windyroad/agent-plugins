@@ -6,6 +6,14 @@
 **Effort**: L — new PreToolUse hook surface covering `gh issue create`, `gh issue comment`, `gh pr create`, `gh pr comment`, `gh api .../security-advisories`, `gh api .../comments`, `npm publish` (with README diff), plus leak-pattern rules and integration with `wr-risk-scorer` subagent. Likely needs its own ADR (sibling to the ADR-028 voice-tone-gate ADR) or an extension of ADR-028's surface list.
 **WSJF**: 3.0 — (12 × 1.0) / 4 — High-severity leak risk, moderate effort; ranks behind the smaller trigger-wiring gap (P063) but ahead of most medium-WSJF items.
 
+## Direction decision (2026-04-20, user — AFK pre-flight via AskUserQuestion)
+
+**Placement**: extend `wr-risk-scorer`. The gate lives as a new hook (`packages/risk-scorer/hooks/external-comms-gate.sh`) and a new subagent type `wr-risk-scorer:external-comms` (or an extension of `wr-risk-scorer:pipeline` with an external-comms scoring layer — architect call at implementation time). Keeps scoring in one plugin, avoids a new package publish and an ADR-002 graph update. Sibling ADR to ADR-028 governs the surface list, scoring path, and override.
+
+**Override path**: `BYPASS_RISK_GATE=1` env var pattern consistent with `packages/risk-scorer/hooks/git-push-gate.sh`. Documented in the sibling ADR.
+
+**Ship ordering**: P064 can ship in parallel with P038 (voice-tone gate on external comms) — they share the surface inventory but evaluate different content. Architect review decides whether the two hooks compose in one `PreToolUse:Bash` entry or remain separate.
+
 ## Description
 
 The `wr-risk-scorer` plugin governs risk on **inbound** pipeline changes — commit, push, release — via `packages/risk-scorer/hooks/git-push-gate.sh` and the `wr-risk-scorer:pipeline` / `assess-release` scoring paths. There is **no equivalent gate on outbound prose** produced for external surfaces:

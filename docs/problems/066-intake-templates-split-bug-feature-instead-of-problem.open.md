@@ -6,6 +6,17 @@
 **Effort**: S — replace `.github/ISSUE_TEMPLATE/bug-report.yml` and `feature-request.yml` with a single `problem-report.yml` (or reshape existing fields around problem-report structure), update `config.yml` chooser copy, and adjust labels. One-to-three file edits.
 **WSJF**: 12.0 — (12 × 1.0) / 1 — Small effort, high-severity intake misalignment. Ranks alongside P063 at the top of the dev-work queue.
 
+## Direction decision (2026-04-20, user — AFK pre-flight)
+
+**Ship order**: P066 lands **first** across the problem-first reform (before P067). Rationale: this repo's templates become the reference shape that P067's skill preference order targets; P067 depends on P066's shape being in place.
+
+**Defaults AFK can apply without further user input**:
+- Replace `bug-report.yml` + `feature-request.yml` outright (not thin forwarders). New file: `.github/ISSUE_TEMPLATE/problem-report.yml` with fields mirroring the manage-problem ticket structure.
+- Title prefix: `[problem]`. Labels: `problem`, `needs-triage`.
+- Update `config.yml` chooser copy — remove "bugs and feature requests only" phrasing; point at "Report a problem" as the primary path. Keep Discussions + Security Advisories contact links.
+- Update `SUPPORT.md` + `CONTRIBUTING.md` to reference "Report a problem" rather than bug/feature.
+- No new ADR needed for P066 itself — the shape change rides under the ADR-024 amendment that P067 ships (sibling ADR per that ticket's decision).
+
 ## Description
 
 The intake templates shipped in commit `e36cf84` (P055 Part A) are structured as `bug-report.yml` + `feature-request.yml` — forcing every reporter to pre-classify the report as bug OR feature. This is backwards for an ITIL-aligned project: ITIL problem management treats an inbound report as a **problem** whose cause, symptoms, workaround, and eventual fix strategy are surfaced by the triage process, not pre-decided by the reporter. A reporter often does not know whether a misbehaviour is a defect (bug) or a missing capability (feature), and asking them to choose adds friction and produces mis-classified reports that downstream triage has to re-bucket anyway.

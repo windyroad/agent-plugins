@@ -1,11 +1,16 @@
 # Problem 055: No standard problem-reporting channel for plugin users, and no reusable pattern for downstream projects to report upstream
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-19
+**Closed**: 2026-04-20
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Possible (3)
 **Effort**: L — Part A (intake scaffolding) shipped 2026-04-20 AFK iter 3; Part B (`/wr-itil:report-upstream` skill per ADR-024) shipped 2026-04-20 in `@windyroad/itil@0.8.0` (commit 8788489).
 
-**WSJF**: 0 — Verification Pending tickets are excluded from the main dev-work ranking per ADR-022. Remaining work is user-side verification, not dev effort.
+**WSJF**: 0 — Closed.
+
+## Closed (2026-04-20)
+
+User direction via AskUserQuestion pre-AFK: close P055 because the original scope shipped. Corrections to the shape (intake template problem-first framing, skill classifier problem-first framing) are tracked separately as P066 and P067; scaffolding for downstream projects is tracked as P065; trigger wiring between manage-problem and report-upstream is tracked as P063; the risk-scoring gate on external comms is tracked as P064. These follow-ups do NOT rollback P055's shipped work — they extend and correct it.
 
 ## Part A shipped (2026-04-20, AFK iter 3)
 

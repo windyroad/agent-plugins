@@ -6,6 +6,19 @@
 **Effort**: M — new `/wr-itil:scaffold-intake` skill in `@windyroad/itil` that writes the six intake files (config.yml, bug-report.yml, feature-request.yml, SECURITY.md, SUPPORT.md, CONTRIBUTING.md), templated from the versions this repo ships, with per-project substitutions (project name, plugin list, contact paths) and idempotent re-run behaviour. Includes a bats fixture test exercising a mock downstream repo.
 **WSJF**: 6.0 — (12 × 1.0) / 2 — High-severity ecosystem gap, moderate effort; above P064 (3.0) but below P063 (9.0) in the dev-work queue.
 
+## Direction decision (2026-04-20, user — AFK pre-flight via AskUserQuestion)
+
+**ADR path**: draft an **own ADR** (new, not an extension of ADR-024). Scope is distinct from ADR-024's report-upstream contract — this covers a new skill + three trigger surfaces including the new pre-publish PreToolUse gate pattern. Candidate title: "Scaffold downstream OSS intake (skill + layered triggers)".
+
+**Placement**: skill lives in `@windyroad/itil` (no new plugin). Matches the precedent set by P055 Part B (`/wr-itil:report-upstream`) — intake-scaffolding and upstream-reporting live in the same plugin because they are two ends of the same intake-shape discipline.
+
+**Trigger layering** (per earlier user direction 2026-04-20): surfaces (1) first-run prompt + (2) pre-publish PreToolUse gate ship together; (3) optional CI check is deferred.
+
+**Defaults AFK can apply without further user input**:
+- Marker file for trigger surface (1): `docs/problems/.intake-scaffold-declined` (sibling to the `README.md` cache).
+- Override for trigger surface (2): `BYPASS_INTAKE_GATE=1 npm publish`.
+- Template shape: problem-first (per P066); AFK waits for P066 to land before finalising templates so the seed reflects the corrected shape.
+
 ## Description
 
 `/wr-itil:report-upstream` (P055 Part B, `@windyroad/itil@0.8.0`) discovers upstream `.github/ISSUE_TEMPLATE/*` and `SECURITY.md` via `gh api` and targets them when a downstream agent files a report. The skill falls through to a structured default when the upstream has no templates, but the whole ecosystem works better when every project in the chain actually ships intake files — otherwise every report is a structured-default "default and hope the maintainer figures out the intent" prose blob, and security reports have no declared channel.
