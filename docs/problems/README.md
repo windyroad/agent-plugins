@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-04-20 (AFK iter 6 close — P066 intake reform shipped and transitioned to Verification Pending; follow-up P072 opened for the JTBD persona gap surfaced during review. 21 open tickets ranked; P063 / P066 (now verifying) previously tied for top. Direction pins from iter 3 still hold on P014, P055 (closed this session), P063, P064, P065, P067. New tickets P058 and P059 also now in Verification Queue.
+> Last reviewed: 2026-04-20 (AFK iter 6 close — P066 intake reform + P063 trigger-surface wiring both shipped and transitioned to Verification Pending; follow-up P072 opened for the JTBD persona gap surfaced during P066 review. 20 open tickets ranked; P063 now verifying. Direction pins from iter 3 still hold on P014, P064, P065, P067. New tickets P058, P059, P063, P066 all now in Verification Queue.
 > Run `/wr-itil:manage-problem review` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -9,7 +9,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 
 | WSJF | ID | Title | Severity | Status | Effort |
 |------|-----|-------|----------|--------|--------|
-| 9.0 | P063 | manage-problem does not trigger report-upstream when root cause is external | 9 Med | Open | S |
 | 6.0 | P065 | No skill scaffolds intake files in downstream projects | 12 High | Open | M |
 | 6.0 | P068 | run-retro does not close `.verifying.md` tickets observed verified in-session | 12 High | Open | M |
 | 6.0 | P070 | report-upstream does not check for existing upstream issues before filing | 12 High | Open | M |
@@ -61,7 +60,8 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P019 | Deprecate single-file JTBD fallback (ADR-008 Option 3) | @windyroad/jtbd@0.6.0 (commit 6dd6a77) — breaking change | no (0 days) |
 | P058 | install-updates regex misses digit-bearing plugin names | commit 3798be8 | no (0 days) |
 | P059 | install-updates no plugin rename handling | commit 3261d81 | no (0 days) |
-| P066 | Intake templates problem-first (bug-report + feature-request replaced by problem-report) | commit pending (AFK iter 6) | no (0 days) |
+| P066 | Intake templates problem-first (bug-report + feature-request replaced by problem-report) | commit ed36f69 (AFK iter 6 iter 1) | no (0 days) |
+| P063 | manage-problem trigger-surface wired to /wr-itil:report-upstream | commit pending (AFK iter 6 iter 2) | no (0 days) |
 
 ## Closed
 

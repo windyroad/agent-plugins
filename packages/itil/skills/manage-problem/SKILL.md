@@ -39,9 +39,10 @@ The `.verifying.md` suffix distinguishes "fix released, awaiting user verificati
 | **Closed** | `.closed.md` | Fix verified in production | User explicitly confirms the released fix works |
 
 **Parked problems** are excluded from WSJF ranking and work selection. They are listed separately in review output so users can see them without them polluting the backlog. To park a problem:
-1. `git mv docs/problems/<NNN>-<title>.<current>.md docs/problems/<NNN>-<title>.parked.md`
-2. Update the Status field to "Parked"
-3. Add a `## Parked` section with: reason for parking, expected trigger to un-park, date parked
+1. **If the park reason is `upstream-blocked`**, run the external-root-cause detection block at Step 7 first (see "External-root-cause detection (P063)"). Park without recording the upstream dependency in `## Related` would be the canonical audit-trail gap this block closes.
+2. `git mv docs/problems/<NNN>-<title>.<current>.md docs/problems/<NNN>-<title>.parked.md`
+3. Update the Status field to "Parked"
+4. Add a `## Parked` section with: reason for parking, expected trigger to un-park, date parked
 
 To un-park: `git mv` back to `.open.md` (or `.known-error.md` if root cause is confirmed), update Status, remove `## Parked` section.
 
@@ -278,6 +279,45 @@ Pre-flight checks before allowing transition:
 - [ ] Effort bucket re-rated against the now-documented fix strategy; if the bucket changed since creation, update the Effort / WSJF lines and note the reason (P047 — creation-time estimates drift as scope clarifies)
 
 If any check fails, report which checks failed and ask the user to address them before transitioning.
+
+#### External-root-cause detection (P063)
+
+Before renaming the file, scan the ticket's Root Cause Analysis section for external-root-cause markers. The same detection fires when parking a ticket with the `upstream-blocked` reason (see the Parked lifecycle entry at the top of this skill — it routes back to this block).
+
+**Strict detection tokens** (any of the following within the Root Cause Analysis section counts as a hit):
+
+- Literal label words: `upstream`, `third-party`, `external`, `vendor`.
+- Scoped npm package pattern: `@[\w-]+/[\w-]+` (e.g. `@anthropic/claude-code`, `@windyroad/itil`).
+
+Bash heuristic:
+
+```bash
+if grep -iE '\b(upstream|third-party|external|vendor)\b|@[[:alnum:]_-]+/[[:alnum:]_-]+' "$problem_file"; then
+  external_root_cause_detected=1
+fi
+```
+
+Detection is intentionally **strict** (explicit label or scoped-npm package only) to avoid prompt fatigue (P063 Direction decision). A passing reference to a bare package name (`gh`, `npm`) does NOT trigger the prompt.
+
+**Already-noted check** — before firing the prompt, grep the ticket for the stable marker `- **Upstream report pending** —` (written by option 2 / the AFK fallback below) or `- **Reported Upstream:**` / a `## Reported Upstream` section (written by `/wr-itil:report-upstream` Step 7 back-write per ADR-024 Confirmation criterion 3a). If any of those are already present, skip the prompt — the detection has already fired on a prior run.
+
+**If the detection fires and nothing has been noted yet**, use `AskUserQuestion`:
+
+- `header: "External root cause detected"`
+- `multiSelect: false`
+- Options:
+  1. `Invoke /wr-itil:report-upstream now` — halt the transition; the skill runs (it writes the `## Reported Upstream` appendage per ADR-024 Confirmation criterion 3a); the transition resumes afterwards.
+  2. `Defer and note in ticket` — append a pending-upstream-report line to the ticket's `## Related` section using the stable marker `- **Upstream report pending** — external dependency identified; invoke /wr-itil:report-upstream when ready`. The marker wording is fixed so subsequent runs (and the work-problems `upstream-blocked` skip path) can detect "already noted" without re-firing.
+  3. `Not actually upstream` — proceed without invocation; append the same marker with text `- **Upstream report pending** — false positive; detection misfire` so the prompt does not re-fire on later reviews.
+
+**Non-interactive (AFK) branch** (per ADR-013 Rule 6): when `AskUserQuestion` is unavailable, default to option 2 — append the pending-upstream-report line with the stable `- **Upstream report pending** —` marker. Do NOT auto-invoke `/wr-itil:report-upstream`; its Step 6 security-path branch is interactive and would halt the orchestrator anyway (per ADR-024 Consequences). The appended line lets the user see the deferred action when they return.
+
+**Scope**: this detection block fires at two points —
+
+- **Open → Known Error transition** (this step, primary insertion point).
+- **Parking path with `upstream-blocked` reason** — the parking workflow runs the same detection before `git mv` to `.parked.md`. Parking an upstream-blocked ticket without having noted (or reported) the upstream dependency is the canonical audit-trail gap this block closes.
+
+The work-problems orchestrator's `upstream-blocked` skip path (see `packages/itil/skills/work-problems/SKILL.md` classifier table) runs the AFK fallback before skipping, so ticket bodies accumulate the marker even when the orchestrator never invokes `manage-problem` on them.
 
 > **Staging trap (P057).** `git mv` stages only the rename — it does NOT pick up subsequent `Edit`-tool content changes. After the `Edit` tool modifies the renamed file (Status field, `## Fix Released` section, etc.), re-stage it explicitly: `git add <new>`. Without the explicit re-stage, the transition commit captures the rename-only change and the content edit leaks into the next commit, corrupting the audit trail. This rule applies to every `git mv` block below (Open → Known Error, Known Error → Verification Pending, Verification Pending → Closed) and to the supersession rename in `create-adr` Step 6.
 

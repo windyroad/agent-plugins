@@ -1,6 +1,6 @@
 # Problem 063: manage-problem does not trigger /wr-itil:report-upstream when root cause is external
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-20
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Possible (3)
 **Effort**: S — one conditional prompt step in `packages/itil/skills/manage-problem/SKILL.md` (Open → Known Error transition, or when parking with `upstream-blocked` reason), plus a bats doc-lint assertion.
@@ -85,6 +85,18 @@ Add a detection step in `manage-problem` at two natural junctures:
 - [ ] Add a bats doc-lint test asserting the prompt wording + the three `AskUserQuestion` options + the AFK non-interactive fallback are all documented.
 - [ ] Update ADR-024 Reassessment Criteria to include "trigger surface implemented" as a milestone (optional — the ADR already covers the skill's contract; the trigger is a `manage-problem` scope change).
 - [ ] Exercise end-to-end: open a ticket with an obviously-upstream root cause, run `manage-problem` Open → Known Error, verify the prompt fires and option (a) cleanly invokes `/wr-itil:report-upstream`.
+
+## Fix Released
+
+Shipped 2026-04-20 (AFK iter 6 commit pending). The trigger surface from `manage-problem` to `/wr-itil:report-upstream` is now wired per the pinned direction:
+
+- `packages/itil/skills/manage-problem/SKILL.md` — Step 7 (Open → Known Error transition) gains a new **External-root-cause detection** block. Strict detection tokens: explicit label `upstream` / `third-party` / `external` / `vendor`, or scoped-npm pattern `@[\w-]+/[\w-]+`. Three AskUserQuestion options (invoke / defer+note / not actually upstream). AFK fallback appends a stable marker `- **Upstream report pending** — external dependency identified; invoke /wr-itil:report-upstream when ready` to `## Related` without auto-invoking the skill (its Step 6 security-path is interactive, per ADR-024 Consequences). Already-noted grep check prevents duplicate firing. Parked lifecycle entry cross-references the detection block for `upstream-blocked` park reason.
+- `packages/itil/skills/work-problems/SKILL.md` — `upstream-blocked` skip-row and taxonomy entry both run the manage-problem AFK fallback before skipping. Non-Interactive Decision Making table gains a row describing the detection + append-marker behaviour. Marker wording is verbatim-identical across both skills.
+- `packages/itil/skills/manage-problem/test/manage-problem-external-root-cause-detection.bats` — NEW. 14 structural doc-lint assertions (Permitted Exception per ADR-005) covering: detection tokens, scoped-npm pattern, three AskUserQuestion options, stable marker wording (verbatim), AFK fallback, already-noted check, both insertion points, Parked cross-reference, ADR-024 + ADR-013 Rule 6 references, and cross-file marker consistency.
+
+Architect review PASSED (no new ADR needed; aligns with ADR-024, ADR-013, ADR-022). JTBD review PASSED (aligned with JTBD-001, JTBD-101, JTBD-201 + JTBD-006 for AFK). Full bats suite: 405 assertions pass (was 391; +14 from the new file). No regressions.
+
+Awaiting user verification: the next time manage-problem transitions a ticket whose Root Cause Analysis mentions `upstream` / `third-party` / `external` / `vendor` or a scoped-npm package, the three-option prompt should fire (or the AFK fallback should append the pending-upstream-report line).
 
 ## Related
 

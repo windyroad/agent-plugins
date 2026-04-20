@@ -100,7 +100,7 @@ Read the problem file and apply these deterministic rules:
 | Problem previously attempted twice without progress in this session | **Skip** — mark as stuck, needs interactive attention | user-answerable (direction) |
 | Open problem with outstanding user-answerable design question (naming, direction, pacing, scope) | **Skip** — surface the question at stop (Step 2.5) | user-answerable (design) |
 | Open problem needing architect design judgment (new-ADR-level question) | **Skip** — note the architect-design blocker; Step 2.5 may elevate via a pre-triggered architect call in `--deep-stop` mode | architect-design |
-| Open problem blocked on upstream dependency or Claude Code capability gap | **Skip** — record the upstream-blocked reason | upstream-blocked |
+| Open problem blocked on upstream dependency or Claude Code capability gap | **Skip** — but first append the pending-upstream-report marker to the ticket's `## Related` section (see P063 — run the manage-problem SKILL.md external-root-cause detection AFK fallback before skipping). The marker wording is fixed: `- **Upstream report pending** — external dependency identified; invoke /wr-itil:report-upstream when ready`. Use the already-noted check to avoid duplicates. | upstream-blocked |
 
 The default is to work the problem. Only skip when the rule explicitly says so. This is an AFK loop — forward progress matters more than avoiding dead ends, because dead ends are cheap (findings are saved) and interactive input is expensive (user is absent).
 
@@ -108,7 +108,7 @@ The default is to work the problem. Only skip when the rule explicitly says so. 
 
 - **user-answerable** — the user can answer directly (verification, naming, direction, pacing, scope). Step 2.5 surfaces these as questions (interactive) or in the Outstanding Design Questions table (non-interactive / AFK).
 - **architect-design** — requires architect judgment first; may escalate to a new ADR. Step 2.5 can optionally pre-trigger the architect agent in `--deep-stop` mode to produce a concrete user-answerable question. Otherwise noted as "pending architect review".
-- **upstream-blocked** — external dependency, Claude Code capability gap, or waiting on third-party fix. Truly terminal for this loop — no user question would change anything. Report the blocker and move on.
+- **upstream-blocked** — external dependency, Claude Code capability gap, or waiting on third-party fix. Truly terminal for this loop — no user question would change anything. Report the blocker and move on. **Before skipping, run the manage-problem external-root-cause detection AFK fallback** (per P063): grep the ticket for the stable marker `- **Upstream report pending** —` or `- **Reported Upstream:**` / a `## Reported Upstream` section; if none is present, append `- **Upstream report pending** — external dependency identified; invoke /wr-itil:report-upstream when ready` to the ticket's `## Related` section. This preserves the outbound audit trail across AFK iterations so the user can see the deferred action on return.
 
 Record the category alongside the skip reason in the iteration report so Step 2.5 can read the categories deterministically.
 
@@ -208,6 +208,7 @@ When `AskUserQuestion` is unavailable or the user is AFK, the skill (and the del
 | Fix verification needed | Skip problem, add to "needs verification" list |
 | Stop-condition #2 with user-answerable skip-reasons | Emit Outstanding Design Questions table in summary (do NOT call AskUserQuestion). The persona is AFK by definition — per JTBD-006 and ADR-013 Rule 6 — so the table is the default. Interactive invocations may batch up to 4 questions through AskUserQuestion instead — per ADR-013 Rule 1 (Step 2.5). |
 | Unexpected dirty state between iterations | Halt the loop. Report the `git status --porcelain` output, the last iteration's reported outcome, and the divergence — per P036 (Step 6.75). Do NOT attempt non-interactive recovery. |
+| External root cause detected at Open → Known Error, or at park with `upstream-blocked` reason | Append the stable `- **Upstream report pending** — external dependency identified; invoke /wr-itil:report-upstream when ready` marker to the ticket's `## Related` section; do NOT auto-invoke `/wr-itil:report-upstream` (Step 6 security-path branch is interactive — per ADR-024 Consequences). Use the already-noted grep check to avoid duplicate lines. Per P063 + ADR-013 Rule 6. |
 
 ## Edge Cases
 
