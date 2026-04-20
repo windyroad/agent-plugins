@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-04-20 (post-AFK interactive — P066 + P063 + P068 + P062 + P060 + P061 + P072 all shipped and in Verification Pending; P072 shipped plugin-user persona + JTBD-301. @windyroad/itil@0.9.0 and @windyroad/retrospective@0.4.0 published. P065 re-rated M → L; P069 re-rated L → XL after auto-migration scope add (ADR-031 drafted; P069 tracks execution with 4 architect-raised open questions); P073 opened. 16 open tickets ranked. Direction pins still hold on P014, P064, P065, P067.
+> Last reviewed: 2026-04-20 (post-AFK interactive — P066 + P063 + P068 + P062 + P060 + P061 + P072 all shipped and in Verification Pending. @windyroad/itil@0.9.0 and @windyroad/retrospective@0.4.0 published. P065 re-rated M → L; P069 re-rated L → XL after auto-migration scope (ADR-031 drafted; P069 tracks execution with 4 architect-raised open questions); P073 + P074 opened (changeset gate surface + run-retro pipeline-instability scan — both concrete run-retro gaps surfaced this session). 17 open tickets ranked. Direction pins still hold on P014, P064, P065, P067.
 > Run `/wr-itil:manage-problem review` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -12,6 +12,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6.0 | P070 | report-upstream does not check for existing upstream issues before filing | 12 High | Open | M |
 | 6.0 | P071 | Argument-based skill subcommands are not discoverable in Claude Code autocomplete | 12 High | Open | M |
 | 6.0 | P073 | No voice-tone or risk gate on changeset authoring (surface extension for P038 + P064) | 12 High | Open | M |
+| 6.0 | P074 | run-retro does not notice pipeline instability and record corresponding problem tickets | 12 High | Open | M |
 | 4.5 | P067 | report-upstream classifier is not problem-first | 9 Med | Open | M |
 | 3.0 | P014 | No lightweight aside invocation for governance skills (background-subagent convention per 2026-04-20 direction) | 12 High | Open | L |
 | 3.0 | P064 | No risk-scoring gate on external communications | 12 High | Open | L |
