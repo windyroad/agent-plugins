@@ -1,6 +1,6 @@
 # Problem 060: `push:watch` does not anchor on HEAD sha; may report success on the wrong (prior-sha) workflow
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-20
 **Priority**: 4 (Low) — Impact: Minor (2) x Likelihood: Unlikely (2)
 **Effort**: S — one-line change to `package.json` `push:watch` script + bats doc-lint assertion
@@ -86,6 +86,23 @@ Alternative: keep `--limit 1` behaviour but constrain by sha — `gh run list --
 - [ ] Apply the one-line change to `package.json`.
 - [ ] Optional: add bats doc-lint regression test.
 - [ ] Verify next AFK loop's push:watch anchors correctly.
+
+## Fix Released
+
+Shipped 2026-04-20 (AFK iter 6 iter 5, commit pending).
+
+- `package.json` — `push:watch` script replaced with:
+
+  ```
+  git push 2>&1 && sleep 5 && for id in $(gh run list --commit=$(git rev-parse HEAD) --branch main --json databaseId --jq '.[].databaseId'); do gh run watch "$id" --exit-status || exit $?; done
+  ```
+
+  Anchors on HEAD sha (eliminates the `--limit 1` race where prior-sha workflow success was reported). Iterates over all runs for the pushed commit (so all 3 workflows — ci.yml / release.yml / release-preview.yml — are watched). Propagates exit code from any failing run via `|| exit $?` so ADR-018/ADR-020's release-drain gate sees real CI outcomes. The 5s sleep gives GitHub Actions time to enumerate runs for the new sha.
+- `packages/shared/test/push-watch-anchoring.bats` — NEW. 6 doc-lint structural assertions (Permitted Exception per ADR-005) regression-guarding the anchoring pattern, the exit-code propagation, and the P060 `--limit 1` antipattern.
+
+Architect review PASSED with one critical advisory (exit-code propagation) which was incorporated as `|| exit $?`. JTBD review PASSED (primary JTBD-006: audit trail across AFK iterations; secondary JTBD-002 and JTBD-201).
+
+Awaiting user verification: next `npm run push:watch` invocation — the watched runs should have sha matching `git rev-parse HEAD`, all 3 workflows should be watched, and any failing workflow should cause non-zero exit.
 
 ## Related
 

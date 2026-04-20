@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-04-20 (AFK iter 6 close — P066 + P063 + P068 + P062 all shipped and in Verification Pending; P065 re-rated M → L (effort expanded under architect review of the layered-trigger direction — new ADR + hook + skill + fixture tests); follow-up P072 opened for the JTBD persona gap surfaced during P066. 18 open tickets ranked. Direction pins from iter 3 still hold on P014, P064, P065, P067. This commit is the first one dogfooding the P062 on-transition refresh.
+> Last reviewed: 2026-04-20 (AFK iter 6 close — P066 + P063 + P068 + P062 + P060 all shipped and in Verification Pending; P065 re-rated M → L; follow-up P072 opened for the JTBD persona gap. 17 open tickets ranked. Direction pins still hold on P014, P064, P065, P067.
 > Run `/wr-itil:manage-problem review` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -12,7 +12,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6.0 | P070 | report-upstream does not check for existing upstream issues before filing | 12 High | Open | M |
 | 6.0 | P071 | Argument-based skill subcommands are not discoverable in Claude Code autocomplete | 12 High | Open | M |
 | 4.5 | P067 | report-upstream classifier is not problem-first | 9 Med | Open | M |
-| 4.0 | P060 | `push:watch` does not anchor on HEAD sha | 4 Low | Open | S |
 | 4.0 | P061 | install-updates Step 6 consent-gate violates AskUserQuestion 4-option cap when siblings > 3 | 4 Low | Open | S |
 | 3.75 | P069 | docs/problems/ flat layout is unskimmable — migrate to per-state subdirectories | 15 High | Open | L |
 | 3.0 | P014 | No lightweight aside invocation for governance skills (background-subagent convention per 2026-04-20 direction) | 12 High | Open | L |
@@ -61,7 +60,8 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P066 | Intake templates problem-first (bug-report + feature-request replaced by problem-report) | commit ed36f69 (AFK iter 6 iter 1) | no (0 days) |
 | P063 | manage-problem trigger-surface wired to /wr-itil:report-upstream | commit 6ee6adc (AFK iter 6 iter 2) | no (0 days) |
 | P068 | run-retro Verification-close housekeeping (Step 4a) | commit c268327 (AFK iter 6 iter 3) | no (0 days) |
-| P062 | manage-problem README refresh on transitions (Step 7 + Step 11) | commit pending (AFK iter 6 iter 4) | no (0 days) |
+| P062 | manage-problem README refresh on transitions (Step 7 + Step 11) | commit 7e19eab (AFK iter 6 iter 4) | no (0 days) |
+| P060 | push:watch anchors on HEAD sha + loops all runs + propagates exit code | commit pending (AFK iter 6 iter 5) | no (0 days) |
 
 ## Closed
 
