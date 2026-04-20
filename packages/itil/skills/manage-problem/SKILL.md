@@ -1,7 +1,8 @@
 ---
 name: wr-itil:manage-problem
 description: Create, update, or transition a problem ticket using an ITIL-aligned problem management workflow with WSJF prioritisation. Supports creating new problems, updating root cause analysis, transitioning status, and closing problems.
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Skill
+deprecated-arguments: true
 ---
 
 # Problem Management Skill
@@ -125,10 +126,24 @@ What "work" means depends on the problem's status:
 
 Determine the operation from `$ARGUMENTS`:
 - If arguments start with a number (e.g., "011"), this is an update or transition
-- If arguments contain "list", show a summary of all open problems
+- If arguments contain "list", **delegate to `/wr-itil:list-problems`** via the Skill tool. See "Deprecated-argument forwarders" below.
 - If arguments contain "work", run a **review** first (step 9), then begin working the highest-WSJF problem
 - If arguments contain "review", run the review (step 9) only
 - Otherwise, this is a new problem creation
+
+#### Deprecated-argument forwarders (ADR-010 amended + P071)
+
+Per ADR-010's amended Skill Granularity section, word-argument subcommands that name distinct user intents are being split into their own named skills. During the deprecation window, this skill's Step 1 parser retains the legacy argument routes as **thin-router forwarders** that re-invoke the new named skill via the Skill tool AND emit a one-line systemMessage with the canonical deprecation notice so the user learns the new invocation shape.
+
+**Forwarder for `list`** (P071 split slice 1 — new skill `/wr-itil:list-problems`):
+
+When `$ARGUMENTS` contains the word `list` as a top-level argument (not inside a ticket body edit), delegate to `/wr-itil:list-problems` via the Skill tool and emit this systemMessage verbatim:
+
+> `/wr-itil:manage-problem list is deprecated; use /wr-itil:list-problems directly. This forwarder will be removed in @windyroad/itil's next major version.`
+
+The forwarder does NOT re-implement the list logic locally — it invokes the Skill tool with `wr-itil:list-problems` and returns the new skill's output verbatim. Duplicating the logic would harden the deprecation window into a permanent fork.
+
+Forwarders for `work`, `review`, `<NNN> known-error`, and `<NNN> close` land in subsequent P071 phased-landing slices (see P071 ticket's "Split proposal" section for the full plan). Until those slices land, the corresponding Step-2+ branches continue to execute inline.
 
 ### 2. For new problems: Check for duplicates FIRST
 
