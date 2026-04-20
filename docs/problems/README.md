@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-04-21 — ADR-028 amended 2026-04-21 to the combined external-comms gate (covers P038 + P064 + P073). ADR-032 drafted 2026-04-21 supersedes ADR-027 (closes P014 design; P014 tracks execution with 3 new capture-* skills + 1 hook to ship). All open tickets now carry pinned direction OR a Decision record pointing at the relevant ADR. 17 open tickets ranked.
+> Last reviewed: 2026-04-21 — Major ADR sprint: ADR-028 amended (combined external-comms gate; closes P038 + P064 + P073 design). ADR-031 drafted (problem-ticket directory layout; P069 tracks execution). ADR-032 supersedes ADR-027 (governance skill invocation patterns; closes P014 design). ADR-033 drafted (report-upstream classifier problem-first; partial supersession of ADR-024 Steps 3+5; closes P067 design). ADR-034 drafted (auto-install on next session start; closes P045 design). ADR-010 amended (skill-split naming / deprecation-window; closes P071 design). ADR-035 drafted (centralised review reports at `~/.claude/review-reports/`; closes P034 design). ADR-036 drafted (scaffold downstream OSS intake; closes P065 design). Every open dev-work ticket now carries a Decision record pointing at the relevant ADR; each stays Open as execution tracker. 17 open tickets ranked.
 > Run `/wr-itil:manage-problem review` to refresh WSJF rankings.
 
 ## WSJF Rankings

@@ -125,8 +125,20 @@ Manual invocation alone is insufficient; discoverability is the problem this tic
 - [ ] Update ADR-002's `itil/` inventory to include the new skill.
 - [ ] Update `CONTRIBUTING.md` of this repo and of the itil package README to point new adopters at the scaffolding command.
 
+## Decision record
+
+**ADR-036** (Scaffold downstream OSS intake — skill + layered triggers) — drafted 2026-04-21. New `/wr-itil:scaffold-intake` skill in `@windyroad/itil`. Foreground-synchronous per ADR-032 (scaffolding is stateful interactive repo modification, not an aside capture). Layered triggers: (1) first-run prompt from `manage-problem` / `work-problems` via AskUserQuestion, marker-suppressed at `.claude/.intake-scaffold-done` / `.claude/.intake-scaffold-declined` per ADR-009; (2) pre-publish PreToolUse gate on `npm publish` + `gh pr merge` on changeset release PRs, `INTAKE_BYPASS=1` override (renamed from `BYPASS_INTAKE_GATE` per architect consistency advisory); (3) optional CI check via `--ci` flag (deferred to v2 follow-up). Templates seeded from this repo's P066-corrected intake set. Mustache-style substitution for project name / plugin list / contact paths. Idempotent; `--force` for opt-in overwrite. AFK fail-safe for first-run: silent note in orchestrator iteration report; no auto-scaffold.
+
+This ticket (P065) remains **Open** as the execution tracker. Closes when:
+- `packages/itil/skills/scaffold-intake/SKILL.md` + templates land.
+- `packages/itil/hooks/pre-publish-intake-gate.sh` ships.
+- Trigger 1 wiring lands in `manage-problem` + `work-problems` SKILL.md files.
+- Plugin manifest declares the new skill + hook.
+- Bats coverage per ADR-036 Confirmation section (contract + fixture + secrets-absent + gate + first-run-prompt tests).
+
 ## Related
 
+- **ADR-036** (Scaffold downstream OSS intake) — decision record for this ticket.
 - **P055** — parent ticket; Part A shipped intake files for THIS repo but did not scaffold for downstreams. This ticket closes that ecosystem gap.
 - **P063** — manage-problem does not trigger `/wr-itil:report-upstream` when root cause is external. Adjacent wiring gap; both are "trigger surfaces missing" for shipped capabilities.
 - **P064** — no risk-scoring gate on external comms. Sibling external-surface ticket.

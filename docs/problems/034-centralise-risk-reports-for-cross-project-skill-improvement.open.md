@@ -74,8 +74,21 @@ The `.risk-reports/` storage was designed for session-scoped context injection (
 - [ ] Evaluate whether Anthropic's `skill-creator` eval harness (P012) can consume these reports as eval inputs
 - [ ] Consider privacy: `~/.claude/` is user-global; ensure no project-specific secrets leak into report filenames or content
 
+## Decision record
+
+**ADR-035** (Centralised review reports for cross-project skill improvement — JSONL at `~/.claude/review-reports/`) — drafted 2026-04-21. Architect advisory correction: store name renamed from P034's tentative `~/.risk-reports/` to `~/.claude/review-reports/` (cross-plugin framing, not risk-scorer-exclusive). JSONL schema locked in Decision Outcome. Report-writing mandatory for every invocation of all `@windyroad/*` reviewer agents (architect, jtbd, voice-tone, risk-scorer, style-guide). New `/wr-risk-scorer:review-history` on-demand skill reads the aggregated store; run-retro P051 improvement-axis integrates consuming patterns. Per-project opt-out marker `.claude/.review-reports-opt-out`; AFK first-run defers opt-in via ADR-032 pending-questions artefact. Reviewer-agent report lines inherit P037 reason/evidence contract and ADR-026 grounded-claim discipline.
+
+This ticket (P034) remains **Open** as the execution tracker. Closes when:
+- Per-agent amendments land (each reviewer agent's doc carries the report-writing clause).
+- `packages/shared/review-reports-schema.json` (JSON Schema draft) lands.
+- `/wr-risk-scorer:review-history` skill lands.
+- run-retro Step 2 prompt extension citing review-history lands.
+- Bats coverage: schema conformance, opt-out marker honour, secret redaction sentinel test.
+- Retention + size cap enforcement in review-history invocation pass.
+
 ## Related
 
+- **ADR-035** (Centralised review reports) — decision record for this ticket.
 - P033 (`docs/problems/033-no-persistent-risk-register.open.md`) — persistent risk register (standing risks vs ephemeral reports); centralised storage may host both
 - P012 (`docs/problems/012-skill-testing-harness.open.md`) — skill testing/eval harness; centralised reports are a data source for skill improvement evals
 - `packages/risk-scorer/hooks/risk-score-mark.sh` — the only place reports are written; needs modification
