@@ -32,9 +32,9 @@ Same defect class as P054 (release:watch drift hash stability) — both are "scr
 After `push:watch` returns, verify the HEAD-sha's workflows completed:
 
 ```bash
-gh run list --head-sha=$(git rev-parse HEAD) --json name,status,conclusion
+gh run list --commit=$(git rev-parse HEAD) --json name,status,conclusion
 # Or watch the new-sha runs explicitly:
-for RUN_ID in $(gh run list --head-sha=$(git rev-parse HEAD) --json databaseId --jq '.[].databaseId'); do
+for RUN_ID in $(gh run list --commit=$(git rev-parse HEAD) --json databaseId --jq '.[].databaseId'); do
   gh run watch "$RUN_ID" --exit-status
 done
 ```
@@ -58,7 +58,7 @@ done
 
 `gh run list --limit 1` orders by `createdAt` descending. The most-recently-CREATED run is usually (but not always) for the most-recent commit. When an older workflow is still starting up or in flight at `git push` time, the "most recent" run can still be an older sha's workflow.
 
-`gh run list` supports `--head-sha` but this script does not use it. Passing `--head-sha=$(git rev-parse HEAD)` after push would constrain the result set to runs for the pushed commit.
+`gh run list` supports `--head-sha` but this script does not use it. Passing `--commit=$(git rev-parse HEAD)` after push would constrain the result set to runs for the pushed commit.
 
 There is also a multi-workflow issue: the repo has 3 workflows that fire on push (`ci.yml`, `release.yml`, `release-preview.yml`). `--limit 1` picks just one of them; the script watches one while the other(s) continue. For "CI green before drain", all three should have completed.
 
@@ -67,17 +67,17 @@ There is also a multi-workflow issue: the repo has 3 workflows that fire on push
 Replace the single-run watch with a loop over HEAD-sha runs:
 
 ```json
-"push:watch": "git push 2>&1 && sleep 5 && for id in $(gh run list --head-sha=$(git rev-parse HEAD) --branch main --json databaseId --jq '.[].databaseId'); do gh run watch \"$id\" --exit-status; done"
+"push:watch": "git push 2>&1 && sleep 5 && for id in $(gh run list --commit=$(git rev-parse HEAD) --branch main --json databaseId --jq '.[].databaseId'); do gh run watch \"$id\" --exit-status; done"
 ```
 
 The `sleep 5` gives GitHub Actions a moment to enumerate the new sha's runs (they are not instantly listable after `git push`). Tunable if 5s is wrong in practice.
 
-Alternative: keep `--limit 1` behaviour but constrain by sha — `gh run list --head-sha=$(git rev-parse HEAD) --limit 1`. This would still only watch one workflow, but at least it would be one of the correct sha's workflows.
+Alternative: keep `--limit 1` behaviour but constrain by sha — `gh run list --commit=$(git rev-parse HEAD) --limit 1`. This would still only watch one workflow, but at least it would be one of the correct sha's workflows.
 
 ### Affected files
 
 - `package.json` — one-line change to the `push:watch` script.
-- `packages/shared/test/push-watch-anchoring.bats` (NEW, optional) — doc-lint bats assertion that the `push:watch` script contains `--head-sha=$(git rev-parse HEAD)` so the anchoring doesn't regress.
+- `packages/shared/test/push-watch-anchoring.bats` (NEW, optional) — doc-lint bats assertion that the `push:watch` script contains `--commit=$(git rev-parse HEAD)` so the anchoring doesn't regress.
 
 ### Investigation Tasks
 
