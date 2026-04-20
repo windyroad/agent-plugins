@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a question (GitHub Discussions)
+    url: https://github.com/windyroad/agent-plugins/discussions
+    about: For usage help, configuration questions, and pattern advice. Issue tracker is for bugs and feature requests only.
+  - name: Report a security vulnerability
+    url: https://github.com/windyroad/agent-plugins/security/advisories/new
+    about: Use GitHub Security Advisories for private disclosure. Do not file a public issue. See SECURITY.md.

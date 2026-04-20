@@ -3,9 +3,26 @@
 **Status**: Open
 **Reported**: 2026-04-19
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Possible (3)
-**Effort**: L — repo intake scaffolding (.github/ISSUE_TEMPLATE/, CONTRIBUTING.md, SUPPORT.md, SECURITY.md) + new skill in `@windyroad/itil` for downstream → upstream reporting (re-sized from XL 2026-04-20 after B's surface decision collapsed into an existing plugin — no new ADR needed)
+**Effort**: L — Part A (intake scaffolding) **shipped 2026-04-20 AFK iter 3**; Part B (`/wr-itil:report-upstream` skill per ADR-024) remains. Effective remaining effort M (one new skill in existing plugin + bats test, ADR-024 already drafted). Re-rate WSJF accordingly.
 
-**WSJF**: 2.25 — (9 × 1.0) / 4
+**WSJF**: 4.5 — (9 × 1.0) / 2 — Part B remaining as M effort with ADR-024 already governing the contract.
+
+## Part A shipped (2026-04-20, AFK iter 3)
+
+Six new repo intake files landed in commit `<TBD>`:
+
+- `.github/ISSUE_TEMPLATE/config.yml` — Discussions + Security Advisories contact links; blank issues disabled.
+- `.github/ISSUE_TEMPLATE/bug-report.yml` — structured bug report (plugin, version, Claude Code version, OS, repro, expected, actual).
+- `.github/ISSUE_TEMPLATE/feature-request.yml` — structured feature request (scope, target plugin, problem, proposed solution, alternatives).
+- `SECURITY.md` — GitHub Security Advisories disclosure path; in-scope/out-of-scope; 90-day timeline; credit policy.
+- `SUPPORT.md` — routing matrix (Discussions for questions, Issues for bugs, Security Advisories for vulnerabilities, per-plugin READMEs for plugin-specific behaviour).
+- `CONTRIBUTING.md` — repo layout pointer to ADR-002 + ADR-030; npm test workflow per ADR-005; PR + changeset flow with ADR-021 manifest-sync gate; ADR + problem-ticket process pointers; governance-skill commit pattern per ADR-014.
+
+Architect + JTBD reviews PASS. ADR-024 (Cross-project problem-reporting contract) explicitly scopes Part A as out-of-its-own-scope and "ships without its own ADR".
+
+Part B remaining work: implement `packages/itil/skills/report-upstream/SKILL.md` against ADR-024's contract, plus a bats fixture-based test exercising mock upstream repos with and without templates. Estimated M effort given ADR-024 already governs the design.
+
+
 
 ## Direction decision (2026-04-20, user — AFK loop stop-condition #2)
 
