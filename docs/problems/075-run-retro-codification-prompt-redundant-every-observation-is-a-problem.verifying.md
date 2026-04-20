@@ -1,9 +1,21 @@
 # Problem 075: run-retro's codification-candidate prompt asks "X or Y or create a problem ticket" — the answer is always "create a problem ticket first"
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-21
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Possible (3)
-**Effort**: M — `packages/retrospective/skills/run-retro/SKILL.md` Step 4b rework. Collapse the 19-option AskUserQuestion into a two-stage flow: (1) **every** observation first becomes a problem ticket via `/wr-itil:manage-problem`; (2) the codification decision (skill / agent / hook / settings / script / CI / ADR / JTBD / guide / test fixture / memory) is recorded as the **proposed fix strategy** on the problem ticket, not as an alternative to ticketing. Removes the "Problem — invoke manage-problem" option from the creation axis; preserves the improvement-axis routing. Bats doc-lint updates; P044 / P050 / P051 existing coverage retuned.
+**Effort**: M — `packages/retrospective/skills/run-retro/SKILL.md` Step 4b rework. Collapse the 19-option AskUserQuestion into a two-stage flow: (1) **every** observation first becomes a problem ticket via `/wr-itil:manage-problem`; (2) the codification decision (skill / agent / hook / settings / script / CI / ADR / JTBD / guide / test fixture / memory) is recorded as the **proposed fix strategy** on the problem ticket, not as an alternative to ticketing. Removes the ticket-this-or-pick-another-shape option from the creation axis; preserves the improvement-axis routing. Bats doc-lint updates; P044 / P050 / P051 existing coverage retuned.
+
+## Fix Released
+
+Shipped in `@windyroad/retrospective` (next minor bump — changeset `.changeset/p075-run-retro-ticket-first-codification.md`; pending release). `packages/retrospective/skills/run-retro/SKILL.md` Step 4b rewritten as a two-stage flow per the architect-approved plan:
+
+- Stage 1 mechanically tickets every codify-worthy observation (delegates to `/wr-itil:manage-problem` — or `/wr-itil:capture-problem` once the ADR-032 background sibling ships). Applies P016 concern-boundary split before ticketing. Fires regardless of interactive/AFK mode.
+- Stage 2 per-ticket `AskUserQuestion` with `header: "Proposed fix"` and four options: `Skill — create stub` / `Skill — improvement stub` / `Other codification shape` (free-text Fix Strategy capture per architect Q4 lean (b) — not cascading AskUserQuestion batches) / `Self-contained work — no codification stub` (with the Rule 6 audit note that protects P044's recommend-skills intent from leaking). Records a `## Fix Strategy` section on the ticket.
+- AFK branch defers Stage 2 via the ADR-032 deferred-question artefact; Stage 1 ticketing still fires.
+
+14 new structural doc-lint assertions at `packages/retrospective/skills/run-retro/test/run-retro-ticket-first-flow.bats` enforce the two-stage contract (Stage 1 / Stage 2 headings, Stage 1 delegation, no ticketing AskUserQuestion in Stage 1, Proposed-fix header, 4-option cap, Option 4 rename + Rule 6 audit note, Option 3 free-text capture, `## Fix Strategy` section, ADR-032 citation, deferred-question contract, P016 concern-boundary split, Rule 6 fallback, legacy 19-option regression guard). Existing `run-retro-skill-candidates.bats` test updated to accept either the P044 / P050 legacy strings or the P075 reframed equivalents so the P044 regression guard survives the reframing. ADR-032 Confirmation amended with the foreground-spawns-N-background-fanout case.
+
+Full bats suite green (454/454). Awaiting user verification.
 
 ## Description
 

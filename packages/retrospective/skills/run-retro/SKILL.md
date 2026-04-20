@@ -43,14 +43,15 @@ For each codification candidate, also identify the **Kind** (`create` for a new 
 - **ADR** — architectural decision worth recording. Route to `/wr-architect:create-adr`.
 - **JTBD** — job-to-be-done record for a persona. Route to `/wr-jtbd:update-guide`.
 - **Guide** — voice, style, or risk policy edit. Route to `/wr-voice-tone:update-guide`, `/wr-style-guide:update-guide`, or `/wr-risk-scorer:update-policy`.
-- **Problem ticket** — diagnostic, project-specific friction (the default for flaws). Route to `/wr-itil:manage-problem`.
 - **Test fixture** — regression test for a recurring failure pattern (bats fixture, unit test). Best fit when the observation is "this kept breaking the same way".
 - **Memory** — per-user or per-project memory note in `~/.claude/.../memory/`. Best fit for short, user-habit observations that aren't a codifiable sequence (e.g. "I always forget to run `npm run verify` before pushing").
+
+**Note (P075)**: the shape list enumerates **codification outputs** — not ticketing. Every codifiable observation becomes a problem ticket in Step 4b Stage 1 regardless of shape. The shape choice is recorded as the ticket's proposed fix strategy (Stage 2), not as an alternative to ticketing. The legacy `Problem ticket` shape row has been removed; it represented a foregone decision (every observation is ticket-worthy) that is now mechanical in Stage 1.
 
 If no shape fits — the observation is a one-off learning, not a repeating pattern — it belongs in BRIEFING.md (Step 3), not Step 4b.
 
 Counter-examples (what does **not** become a codification candidate):
-- "The commit gate rejected my work twice because X was misconfigured" — diagnostic, project-specific → **problem ticket** shape (route via Step 4b).
+- "The commit gate rejected my work twice because X was misconfigured" — diagnostic, project-specific. Still flows through Step 4b Stage 1 ticketing; the fix strategy (Stage 2) is captured as free-text under `Other codification shape` (e.g. hook tweak, script adjustment).
 - "I always forget to run `npm run verify` before pushing" — short, user-habit rather than codifiable sequence → **memory** shape or **BRIEFING.md** note.
 
 ### 3. Update BRIEFING.md
@@ -118,69 +119,79 @@ Problems whose fix shipped but whose closure is still pending (`docs/problems/*.
 - **manage-problem Step 9d** (baseline user-initiated verification review per P048) still fires on `/wr-itil:manage-problem review` — it is the age-based heuristic path. Step 4a here is the evidence-based session-wrap path. The two compose: a ticket that is both "≥ 14 days old" (Step 9d highlight) AND "exercised successfully this session" (Step 4a candidate) should be surfaced in both paths independently; closing via either path moves the ticket to `.closed.md` and de-lists it from both queues.
 - **Skipped in this step**: `.verifying.md` tickets for fixes that ship in the currently-running session (e.g. P066, P063 just transitioned to `.verifying.md` this session) — a session cannot verify its own fix beyond "bats passed at commit time"; subsequent-session exercise is the meaningful signal. Treat same-session verifyings as "not exercised in-session" for closure purposes unless a later-session exercise path is in the citation list.
 
-### 4b. Recommend new codifications
+### 4b. Two-stage codification — ticket first, fix strategy second (P075)
 
-For each **codification candidate** identified in Step 2, route the decision through a single `AskUserQuestion` call. This is the ADR-013 Rule 1 structured-interaction pattern — do not present the choices as prose enumeration in the skill output. The shape and Kind identified in Step 2 determine which option rows the user picks from; every shape and Kind routes through the same `AskUserQuestion` so the decision stays one structured interaction (architect decision: flat shape-prefixed options, not a two-step type-then-action or Kind-then-shape flow).
+Every codification candidate identified in Step 2 flows through a **two-stage flow**. Stage 1 is mechanical — every candidate becomes a problem ticket; ticketing is not a user decision. Stage 2 is a per-ticket `AskUserQuestion` recording the **proposed fix strategy** as the codification shape.
 
-For each candidate, invoke `AskUserQuestion` with:
-- `header: "Codification candidate"`
+**User rationale (P075)**: the legacy 19-option flat list presented a ticket-this-or-pick-another-shape choice as one option among many, but in practice the ticketing axis has a foregone answer — every codify-worthy observation is also problem-worthy. Re-asking the ticketing question is redundant. Flipping the flow collapses the redundant decision: ticket first (mechanical), fix strategy second (user-interactive).
+
+**Skill candidate / Codification candidate backward compatibility**: the legacy `Skill candidate` and `Codification candidate` AskUserQuestion headers are superseded by Stage 2's `Proposed fix` header. The P044 / P050 / P051 enforcement intents are preserved — they now ride in Stage 2 Options 1–3 on a per-ticket basis rather than as one option among many for a single batch prompt.
+
+#### Stage 1: Ticket every codify-worthy observation (mechanical — no user decision)
+
+For every codifiable observation identified in Step 2:
+
+1. **Apply P016 concern-boundary analysis**: if the observation covers multiple independent concerns, split into N observations before ticketing. One ticket per concern.
+2. **Invoke `/wr-itil:manage-problem`** via the Skill tool to create a problem ticket. The observation text becomes the ticket Description; the retro narrative populates the Root Cause Analysis; the `## Related` section cites this retro run. (Once the ADR-032 `capture-*` background sibling ships for manage-problem, Stage 1 can delegate to `/wr-itil:capture-problem` instead so ticketing runs out of the foreground turn; same contract, different invocation mode.)
+
+**ADR-032 note**: Stage 1 is a legitimate **foreground-spawns-N-background fanout** pattern — run-retro's foreground context spawns one background capture invocation per observation (when the background sibling exists). ADR-032's Confirmation section must carry this case; cite `ADR-032` (`docs/decisions/032-governance-skill-invocation-patterns.proposed.md`) explicitly when the background path lands.
+
+**Ownership boundary** (same as Step 4a): run-retro surfaces the observation and delegates ticket creation to `/wr-itil:manage-problem`. The delegated skill renames, edits, and commits per ADR-014. run-retro does not commit its own work.
+
+**Non-interactive / AFK branch**: Stage 1 fires regardless — ticketing is mechanical and does not require user input. If the delegated skill itself is unavailable (e.g. the Skill tool is gated out of the current context), record the observation in the retro summary's "Tickets Deferred" section so the user can ticket on return. Do NOT skip recording the observation.
+
+#### Stage 2: Record proposed fix strategy on each ticket (user-interactive — per ticket)
+
+For each ticket created in Stage 1, invoke `AskUserQuestion` to record the proposed codification shape as the fix strategy. This is a per-ticket interaction — the fix-shape judgement is ticket-specific, not a single batch decision.
+
+For each ticket:
+- `header: "Proposed fix"`
 - `multiSelect: false`
-- Options (a flat list; each option names the shape and Kind up front so the decision is auditable):
+- Options (exactly four top-level per ADR-013 Rule 1 cap; architect Q4 lean (b): free-text capture for multi-shape cases, not cascading AskUserQuestion batches — cascading fan-outs are the P061 anti-pattern):
+  1. `Skill — create stub` — description: "Record a stub for a new skill (suggested name, scope, triggers, prior uses) on the ticket's `## Fix Strategy` section. Skill scaffolding itself remains out of scope for the retrospective."
+  2. `Skill — improvement stub` — description: "Record a targeted edit to an existing skill's SKILL.md (target file, observed flaw, edit summary) on the ticket's `## Fix Strategy` section."
+  3. `Other codification shape` — description: "Capture the fix shape as **free-text** on the ticket's `## Fix Strategy` section. Covers agent / hook / settings / script / CI / ADR / JTBD / guide / test fixture / memory / internal code change. Include the shape name, suggested stub details, and routing target where applicable (e.g. `/wr-architect:create-adr` for ADR; `/wr-jtbd:update-guide` for JTBD; `/wr-voice-tone:update-guide` for voice)."
+  4. `Self-contained work — no codification stub` — description: "The ticket is a bounded one-shot edit with no recurring-pattern signal. **Rule 6 audit note**: this option is valid only when the observation is a bounded one-shot edit with no recurring-pattern signal. It is NOT a silent-skip escape hatch — if any recurring-pattern signal is present, pick Option 1/2/3 instead so P044's recommend-skills intent is preserved."
 
-  **Creation axis (Kind: create)** — new outputs:
-  1. `Skill — create stub` — description: "Record a stub candidate (suggested name, scope, triggers, prior uses) for a future scaffolding flow. Skill scaffolding itself is out of scope for this retrospective."
-  2. `Agent — create stub` — description: "Record a stub candidate for a new agent (suggested name, scope, trigger conditions, delegating skill). Place under `packages/<plugin>/agents/` when scaffolded."
-  3. `Hook — create stub` — description: "Record a stub candidate for a new hook (event: PreToolUse / PostToolUse / UserPromptSubmit; trigger; action summary)."
-  4. `Settings — propose entry` — description: "Record a proposed `.claude/settings.json` entry (allowlist / env / hook wiring) for later review."
-  5. `Script — create stub` — description: "Record a stub `scripts/*.sh` or `scripts/*.mjs` candidate (shebang + TODO + scope)."
-  6. `CI — propose step` — description: "Record a proposed `.github/workflows/ci.yml` insertion."
-  7. `ADR — invoke create-adr` — description: "Delegate to `/wr-architect:create-adr` so the decision is captured with proper MADR structure. Routing skill, not a stub."
-  8. `JTBD — invoke update-guide` — description: "Delegate to `/wr-jtbd:update-guide` to add or amend a job-to-be-done record. Routing skill, not a stub."
-  9. `Guide — invoke update-guide / update-policy` — description: "Delegate to `/wr-voice-tone:update-guide`, `/wr-style-guide:update-guide`, or `/wr-risk-scorer:update-policy` depending on the guide touched."
-  10. `Problem — invoke manage-problem` — description: "Delegate to `/wr-itil:manage-problem` so the candidate is WSJF-ranked against other backlog items. Routing skill, not a stub."
-  11. `Test fixture — create stub` — description: "Record a candidate bats / unit-test fixture for the recurring failure pattern."
-  12. `Memory — propose note` — description: "Record a proposed memory note (per-user or per-project) for a short user-habit observation that isn't a codifiable sequence."
+**Recording**: append a `## Fix Strategy` section to the ticket (or edit the existing section if present). The section records the chosen Option, the shape, and the stub fields (for Options 1–2 the stub template; for Option 3 the free-text fix shape; for Option 4 the bounded-one-shot reason). The fix strategy lives on the ticket — not in the retro summary — so it travels with the problem through its lifecycle.
 
-  **Improvement axis (Kind: improve)** — targeted edits to existing outputs (P051):
-  13. `Skill — improvement stub` — description: "Record a proposed targeted edit to an existing skill's SKILL.md (file path, observed flaw, evidence, edit summary). Use when an existing skill has a bounded, reproducible gap."
-  14. `Agent — improvement stub` — description: "Record a proposed targeted edit to an existing agent file (path, observed flaw, edit summary)."
-  15. `Hook — improvement stub` — description: "Record a proposed targeted edit to an existing hook script or `.claude/settings.json` wiring."
-  16. `ADR — supersede or amend` — description: "Delegate to `/wr-architect:create-adr` with a `supersedes ADR-N` hint so the new ADR explicitly replaces or amends the outdated one. Routing skill, not a stub."
-  17. `Guide — improvement edit` — description: "Delegate to `/wr-voice-tone:update-guide`, `/wr-style-guide:update-guide`, `/wr-jtbd:update-guide`, or `/wr-risk-scorer:update-policy` for a targeted edit to an existing guide (voice / style / JTBD / risk policy)."
-  18. `Problem — edit existing ticket` — description: "Delegate to `/wr-itil:manage-problem <NNN>` update flow to amend an existing open or known-error ticket with new observations from this session."
+**Non-interactive / AFK branch (ADR-013 Rule 6 + ADR-032 deferred-question contract)**: When `AskUserQuestion` is unavailable, Stage 2 defers via the ADR-032 **deferred-question artefact** — each ticket gets a pending-question entry asking for the proposed fix strategy; the main agent surfaces the questions on the next interactive session. Stage 2 does NOT fabricate a fix-strategy choice in AFK mode; the ticket lives without a `## Fix Strategy` section until the user answers. ADR-032's FIFO concurrency handling applies: N pending questions (one per Stage 1 ticket) queue in serial order.
 
-  **Default:**
-  19. `Skip — not codify-worthy` — description: "Neither stub nor route. The observation is too small, too ambiguous, or a one-off learning that belongs in BRIEFING.md."
+#### Stub templates by Option
 
-If a single output has accumulated ≥ 3 improvement candidates in one session, prefer offering a single coordinating ticket (`Problem — invoke manage-problem` with an "apply N improvements to X" scope) over recording N separate improvement stubs — this reduces ticket churn and keeps the affected output's improvement queue coherent.
+When Stage 2 selects Option 1 (`Skill — create stub`), write the following into the ticket's `## Fix Strategy` section:
 
-If an improvement candidate touches multiple unrelated concerns, apply the P016 / P017 concern-boundary split before routing: re-run the `AskUserQuestion` once per concern, each with its own shape + Kind selection. This mirrors the concern-boundary analysis used when creating new problem tickets.
-
-If the option count is impractical for a single `AskUserQuestion` payload in a given Claude Code version, fall back to a two-question flow: (1) `"Which shape fits?"` with the shape list, (2) `"Create, improve, or skip?"` with `Create stub / Improvement stub / Invoke dedicated skill / Skip` — but prefer the single call when the surface allows it.
-
-When the user chooses any of the **Create stub** shapes (skill / agent / hook / settings / script / CI / test / memory), record a candidate entry in the Step 5 summary under "Codification Candidates" with:
 - **Kind** — `create`
-- **Shape** — which codification type (skill, agent, hook, etc.)
-- **Suggested name** — for skills: `wr-<plugin>:<action>`; for agents: `<plugin>:<name>`; for hooks: `<event>:<trigger>`; for scripts: `scripts/<name>.<ext>`; etc.
-- **Scope** — one sentence on what the codification does and when it should fire
-- **Triggers** — example user prompts or events that should invoke it
-- **Prior uses** — 2-3 observed invocations from this session
+- **Shape** — `skill`
+- **Suggested name** — `wr-<plugin>:<verb>-<object>` per ADR-010 amended skill-granularity rule.
+- **Scope** — one sentence on what the skill does and when it should fire.
+- **Triggers** — 2-3 example user prompts or events.
+- **Prior uses** — 2-3 observed invocations from this session.
 
-When the user chooses any of the **Improvement stub** shapes (skill / agent / hook), record a candidate entry in the Step 5 summary under "Codification Candidates" with:
+When Stage 2 selects Option 2 (`Skill — improvement stub`), write:
+
 - **Kind** — `improve`
-- **Shape** — which existing codifiable is being edited (skill, agent, hook)
-- **Target file** — the existing file path (e.g. `packages/itil/skills/manage-problem/SKILL.md`)
-- **Observed flaw** — one-sentence description of the gap, friction, or defect
-- **Edit summary** — one-sentence description of the proposed targeted edit
-- **Evidence** — 1-3 observations from this session showing the flaw
+- **Shape** — `skill`
+- **Target file** — existing SKILL.md path (e.g. `packages/itil/skills/manage-problem/SKILL.md`).
+- **Observed flaw** — one sentence.
+- **Edit summary** — one sentence describing the targeted edit.
+- **Evidence** — 1-3 session observations showing the flaw.
 
-When the user chooses any of the **Invoke <dedicated skill>** routes (ADR create / JTBD / Guide / Problem) OR the improvement routing options (ADR supersede or amend / Guide improvement edit / Problem edit existing ticket), delegate to the named skill with a context hand-off describing the candidate. Record the routing decision in the Step 5 summary under "Codification Candidates" with Kind (`create` or `improve`), Shape = the routing target, and a `routed to <skill>` marker. For `ADR — supersede or amend`, include the `supersedes ADR-N` hint in the hand-off so create-adr produces the correct MADR header.
+When Stage 2 selects Option 3 (`Other codification shape`), write free-text on the ticket's `## Fix Strategy` section including: the codification shape (agent / hook / settings / script / CI / ADR / JTBD / guide / test fixture / memory / internal code), a suggested stub (`Suggested name:` / `Target file:` / `Event + trigger:` as fits the shape), the routing target skill (`/wr-architect:create-adr`, `/wr-jtbd:update-guide`, `/wr-voice-tone:update-guide`, `/wr-style-guide:update-guide`, `/wr-risk-scorer:update-policy`), and 1-3 session observations. Free-text capture keeps the ADR-013 Rule 1 4-option cap intact without cascading follow-up batches (architect Q4 lean (b); P061 anti-pattern avoided).
 
-When the user chooses **Skip**, record the candidate in the Step 5 summary under "Codification Candidates" with a `skipped` marker so the pattern is still visible in the session audit trail.
+When Stage 2 selects Option 4 (`Self-contained work — no codification stub`), write a single-line note: "Self-contained work — bounded one-shot edit, no recurring-pattern signal observed this session." The `## Fix Strategy` section records the Option 4 choice so future sessions know codification was considered and deferred with cause.
 
-**Non-interactive fallback (per ADR-013 Rule 6):** if `AskUserQuestion` is unavailable, record each candidate in the Step 5 summary under "Codification Candidates" with a `flagged — not actioned (non-interactive)` marker, noting the identified Kind alongside Shape (e.g. `Kind: improve, Shape: skill, flagged — not actioned (non-interactive)`). Do not create stubs, route to dedicated skills, or scaffold. The user can review the flags and decide when they return. Improvement candidates flagged this way retain the Target file and Observed flaw fields so the user has enough to act on without re-deriving the context.
+#### Interaction with P044 / P050 / P051 / P068 / P074
 
-**Backward compatibility**: "Skill" is retained as one shape among many so existing P044 muscle memory and `run-retro-skill-candidates.bats` continue to hold. Use the singular shape name in the summary (e.g. `Shape: skill`) so legacy greps still match. Improvement-axis rows use the same singular shape names (`Shape: skill, Kind: improve`) so the Shape column stays consistent across both axes.
+- **P044** (recommend new skills) — Stage 2 Option 1 (`Skill — create stub`) carries P044's enforcement intent. P044's AFK recommend-skills semantics migrate to the deferred-question fallback (Stage 2 defers per ticket in AFK).
+- **P050** (recommend other codifiables) — Stage 2 Option 3 (`Other codification shape`) carries P050's shape-generalisation into free-text capture.
+- **P051** (improvement axis) — Stage 2 Option 2 (`Skill — improvement stub`) carries P051's improvement axis for skill shape; non-skill improvements ride in Option 3's free-text capture with an explicit `improve` marker.
+- **P068** (verification-close housekeeping) — unaffected. Step 4a stays as-is, independent of Step 4b's restructure.
+- **P074** (pipeline-instability scan) — when P074 ships its Step 2b, detected instability signals feed Stage 1 as additional ticket sources. The ticket-first flow is the natural common funnel P074's RCA identifies.
+
+#### Coordinating-ticket rule
+
+If a single target output accumulates ≥ 3 improvement observations in one session, Stage 1 should create **one coordinating ticket** scoped as "apply N improvements to <target>" rather than N separate tickets. Stage 2 on that ticket picks Option 2 (for skill-shape targets) or Option 3 with the coordinating-ticket free-text. This reduces ticket churn and keeps the affected output's improvement queue coherent.
 
 ### 5. Summary
 

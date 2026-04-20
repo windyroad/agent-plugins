@@ -56,18 +56,30 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "SKILL.md Step 4b names the structured options for skill-shaped candidates (P044, updated by P050)" {
-  # P044 required three specific option labels (Create a new skill / Track as a
-  # problem / Skip — not skill-worthy). P050 generalises: the skill shape now
-  # appears as a row in the flat shape-prefixed option list ("Skill — create
-  # stub"). The "track as problem" path becomes the explicit "Problem" row.
-  # Skip path becomes "Skip — not codify-worthy". This test accepts either
-  # pattern so the P044 regression guard survives P050's generalisation.
+@test "SKILL.md Step 4b names the structured options for skill-shaped candidates (P044, updated by P050, reframed by P075)" {
+  # P044 required three specific option labels (Create a new skill / Track as
+  # a problem / Skip — not skill-worthy). P050 generalised to "Skill — create
+  # stub". P075 reframes Step 4b as a two-stage flow: Stage 1 tickets
+  # mechanically (the former "Track as a problem" decision disappears
+  # because ticketing is no longer a user choice); Stage 2 asks the
+  # fix-strategy question with four options. P044's recommend-new-skills
+  # intent now rides in Stage 2 Option 1 (`Skill — create stub`). The
+  # former "Skip — not skill-worthy / not codify-worthy" path becomes
+  # Stage 2 Option 4 (`Self-contained work — no codification stub`) with a
+  # Rule 6 audit note preventing silent-skip. Accept all three forms across
+  # the P044 / P050 / P075 lineage.
   run grep -in "Create a new skill\|Skill — create stub\|Skill - create stub" "$SKILL_FILE"
   [ "$status" -eq 0 ]
-  run grep -in "Track as a problem ticket\|Problem — invoke manage-problem\|Problem - invoke manage-problem" "$SKILL_FILE"
+  # Stage 1 ticketing delegation is mechanical post-P075; assert the
+  # delegation path is named in SKILL.md so the P044 "Track as a problem
+  # ticket" enforcement intent still has a visible home.
+  run grep -in "Track as a problem ticket\|Problem — invoke manage-problem\|/wr-itil:manage-problem\|/wr-itil:capture-problem" "$SKILL_FILE"
   [ "$status" -eq 0 ]
-  run grep -in "Skip — not skill-worthy\|Skip - not skill-worthy\|Skip — not codify-worthy\|Skip - not codify-worthy" "$SKILL_FILE"
+  # The skip-equivalent path. P075 renamed this to "Self-contained work" so
+  # P044's escape-hatch pain pattern does not leak; keep the legacy strings
+  # in the regex for backward compatibility across the P044 / P050 / P075
+  # lineage.
+  run grep -in "Skip — not skill-worthy\|Skip - not skill-worthy\|Skip — not codify-worthy\|Skip - not codify-worthy\|Self-contained work — no codification stub\|Self-contained work - no codification stub" "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }
 

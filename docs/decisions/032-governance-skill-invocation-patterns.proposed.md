@@ -194,6 +194,10 @@ A set of structural doc-lint bats assertions validates the ADR's implementation:
 - `packages/itil/hooks/pending-questions-surface.sh` UserPromptSubmit hook exists; detects `docs/problems/open/*-pending-background-skill-questions-*.md` (or ADR-031-post-migration equivalent path); injects systemMessage with detected artefact IDs + titles in ascending creation-date order.
 - `.claude-plugin/plugin.json` entries for `@windyroad/itil`, `@windyroad/retrospective`, `@windyroad/architect` list the new skills.
 
+### Foreground-spawns-N-background fanout (P075 amendment)
+
+`run-retro` Step 4b Stage 1 (ticket every codify-worthy observation) is a **foreground-spawns-N-background-fanout** case: the foreground `run-retro` turn spawns one background capture invocation (`/wr-itil:capture-problem`) per codifiable observation. This is a legitimate extension of the foreground-spawns-single-background pattern already named in this ADR — no semantic change, only arity. The FIFO concurrency paragraph already covers the resulting deferred-question ordering: N Stage-2 pending-question artefacts (one per Stage 1 ticket) queue in serial creation-date order and surface FIFO via the UserPromptSubmit hook. When `/wr-itil:capture-problem` does not yet exist in the suite, `run-retro` Step 4b Stage 1 falls back to synchronous `/wr-itil:manage-problem` invocations; the fanout semantics remain the same, only the background/foreground mode changes. P075 tracks the `run-retro` execution; the ADR-032 contract itself covers the case via this amendment.
+
 ### Bats structural tests
 
 - `packages/itil/skills/capture-problem/test/capture-problem-contract.bats`, `packages/retrospective/skills/capture-retro/test/capture-retro-contract.bats`, `packages/architect/skills/capture-adr/test/capture-adr-contract.bats` — each asserts: SKILL.md present; Context section cites the background pattern; Rule 6 audit section present; deferred-question-resumption contract cited; ADR-032 referenced.

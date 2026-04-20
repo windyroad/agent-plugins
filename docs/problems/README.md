@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-04-21 — Major ADR sprint: ADR-028 amended (combined external-comms gate; closes P038 + P064 + P073 design). ADR-031 drafted (problem-ticket directory layout; P069 tracks execution). ADR-032 supersedes ADR-027 (governance skill invocation patterns; closes P014 design). ADR-033 drafted (report-upstream classifier problem-first; partial supersession of ADR-024 Steps 3+5; closes P067 design). ADR-034 drafted (auto-install on next session start; closes P045 design). ADR-010 amended (skill-split naming / deprecation-window; closes P071 design). ADR-035 drafted (centralised review reports at `~/.claude/review-reports/`; closes P034 design). ADR-036 drafted (scaffold downstream OSS intake; closes P065 design). Every open dev-work ticket now carries a Decision record pointing at the relevant ADR; each stays Open as execution tracker. 17 open tickets ranked.
+> Last reviewed: 2026-04-21 — P075 shipped (run-retro Step 4b rewritten as two-stage ticket-first flow; ADR-032 Confirmation amended with foreground-spawns-N-background-fanout case). Major ADR sprint: ADR-028 amended (combined external-comms gate; closes P038 + P064 + P073 design). ADR-031 drafted (problem-ticket directory layout; P069 tracks execution). ADR-032 supersedes ADR-027 (governance skill invocation patterns; closes P014 design). ADR-033 drafted (report-upstream classifier problem-first; partial supersession of ADR-024 Steps 3+5; closes P067 design). ADR-034 drafted (auto-install on next session start; closes P045 design). ADR-010 amended (skill-split naming / deprecation-window; closes P071 design). ADR-035 drafted (centralised review reports at `~/.claude/review-reports/`; closes P034 design). ADR-036 drafted (scaffold downstream OSS intake; closes P065 design). ADR-037 drafted (skill testing strategy; closes P012 design). Every open dev-work ticket now carries a Decision record pointing at the relevant ADR; each stays Open as execution tracker. 16 open tickets ranked.
 > Run `/wr-itil:manage-problem review` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -13,7 +13,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6.0 | P071 | Argument-based skill subcommands are not discoverable in Claude Code autocomplete | 12 High | Open | M |
 | 6.0 | P073 | No voice-tone or risk gate on changeset authoring (surface extension for P038 + P064) | 12 High | Open | M |
 | 6.0 | P074 | run-retro does not notice pipeline instability and record corresponding problem tickets | 12 High | Open | M |
-| 4.5 | P075 | run-retro codification prompt redundant — every observation is a problem ticket first | 9 Med | Open | M |
 | 4.5 | P067 | report-upstream classifier is not problem-first | 9 Med | Open | M |
 | 3.0 | P014 | No lightweight aside invocation for governance skills (background-subagent convention per 2026-04-20 direction) | 12 High | Open | L |
 | 3.0 | P064 | No risk-scoring gate on external communications | 12 High | Open | L |
@@ -65,6 +64,7 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P060 | push:watch anchors on HEAD sha + loops all runs + propagates exit code | commit 4b3d20e (AFK iter 6 iter 5 — repo-internal root script) | no (0 days) |
 | P061 | install-updates Step 6 grouping fallback for siblings > 3 | commit b6ba3bd (AFK iter 6 iter 6 — repo-local skill) | no (0 days) |
 | P072 | plugin-user persona + JTBD-301 ship; closes external-reporter JTBD gap | commit pending (post-AFK interactive) | no (0 days) |
+| P075 | run-retro Step 4b ticket-first two-stage flow (19-option → 4-option per ticket) | commit pending (this AFK iter) | no (0 days) |
 
 ## Closed
 
