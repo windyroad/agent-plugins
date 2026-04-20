@@ -3,8 +3,38 @@
 **Status**: Open
 **Reported**: 2026-04-16
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
-**Effort**: L — governance skills delegate aside-type work to background subagents (no new pattern, no new ADR, no new skill). Per-skill convention update + example wiring in manage-problem / run-retro / create-adr. (Re-sized down from XL 2026-04-20 per user direction below.)
-**WSJF**: 3.0 — (12 × 1.0) / 4
+**Effort**: XL — re-sized up from L 2026-04-20 (AFK iter 2 architect review): ADR-027 conflict requires a new/amended/superseding ADR plus 4 SKILL.md edits, regardless of which reconciliation option the user picks. See "Architect-detected conflict" section below. (Earlier L sizing assumed no ADR-level conflict; re-sized down from original XL when the new-pattern + new-ADR scope was dropped via user direction; now re-sized back up by the architect-flagged ADR-027 collision.)
+**WSJF**: 1.5 — (12 × 1.0) / 8
+
+## Architect-detected conflict (2026-04-20 AFK iter 2 — needs user reconciliation)
+
+**Status: BLOCKED on user decision.** During AFK iter 2, the architect review for the proposed P014 edits flagged a direct conflict with **ADR-027 (Governance skill auto-delegation, 2026-04-20)** — accepted the same day as the direction decision below, addressing the same SKILL.md files (manage-problem, create-adr, run-retro, work-problems' per-iteration call) but with a fundamentally different execution model.
+
+| Aspect | ADR-027 (existing) | P014 direction (proposed) |
+|---|---|---|
+| Invocation entry path | Main agent → skill's own Step 0 spawns subagent | External orchestrator/in-flight task → background subagent → skill |
+| Execution model | **Synchronous** — main agent waits for subagent's final report, returns it verbatim | **Asynchronous** — `run_in_background: true`, notification on completion |
+| Mandatory? | Yes — "Do NOT execute steps 1-N of this SKILL.md in main-agent context under any circumstance" | Optional convention for orchestrator-side aside captures |
+| ADR | ADR-027 (proposed, 2026-04-20) | None — direction said "no new ADR needed" |
+| Source files affected | All in-scope SKILL.md (Step 0 mandatory) | Same SKILL.md (additive section near top) + orchestrator pointers |
+
+The 2026-04-20 P014 direction (below) appears to have been written **without cross-referencing ADR-027 of the same date**. Three reconciliation options the user must pick from:
+
+1. **Supersede ADR-027** with a new ADR adopting the background-subagent model. Rename ADR-027 to `.superseded.md`. Re-author P014's three governance-skill SKILL.md sections under the new model. Removes synchronous Step-0 across the suite.
+2. **Coexist additively** — write P014's new sections so they explicitly reference ADR-027 and clarify disjoint paths ("ADR-027: main-agent → skill internal Step-0 subagent, synchronous; P014: external orchestrator → background subagent invocation, asynchronous"). Ordering: ADR-027's Step 0 stays first; the new "Background-subagent invocation" section follows. File a new ADR documenting the cross-skill convention so the SKILL.md text can cite an ADR ID rather than "the P014 direction".
+3. **Reject P014 as subsumed by ADR-027** — close P014 as resolved. ADR-027's synchronous delegation already removes the "main-turn-consumed" pain (the subagent does the heavy intake; the main agent only sees the final report). The aside-vs-blocking distinction may not matter in practice if the subagent's intake is fast enough.
+
+Additional architect concerns (apply to options 1 and 2 — reject option resolves them by elision):
+
+- **Rule 6 mis-citation**: the proposed convention text says ADR-013 Rule 6 "covers any AskUserQuestion gaps so the subagent does not block". Rule 6 actually says fail-safe = block/defer, not silently proceed. Each governance skill's actual Rule-6 coverage at each `AskUserQuestion` branch must be audited before the convention can claim "won't block".
+- **Nesting depth**: an orchestrator → background-subagent → skill-Step-0-subagent chain is 3 levels (the max ADR-027 calls "routinely expected"). Adding a 4th level of nesting is a reassessment trigger for ADR-027.
+- **Audit-trail gap**: a background subagent's filed artefact is not surfaced in the orchestrator's iteration summary. JTBD-201 audit-trail promise weakens unless the orchestrator-pointer text mandates that each background-spawn is logged in the iteration summary.
+
+**Effort re-rate**: L → XL — three reconciliation options, each requiring a new or amended ADR plus the 4 SKILL.md edits. Even option 3 (reject) requires a P014 closure note, ADR-027's cross-reference, and an explicit decision audit trail. The original L estimate assumed no ADR-level conflict.
+
+**WSJF re-rate**: was 3.0 (12 × 1.0 / 4); now **1.5** (12 × 1.0 / 8) given XL effort. Drops below P015 (2.25) and P055 (2.25) in the queue but remains higher than the 1.5-tier siblings due to severity.
+
+**Next iteration**: skip P014 with skip-reason `architect-design`. The Outstanding Design Questions table at stop-time should surface: "P014 — which reconciliation option (supersede ADR-027, coexist additively, or reject as subsumed)?"
 
 ## Direction decision (2026-04-20, user — AFK loop stop-condition #2)
 
