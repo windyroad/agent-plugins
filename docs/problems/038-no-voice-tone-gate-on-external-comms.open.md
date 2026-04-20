@@ -56,8 +56,15 @@ The user manually reviews every external-comms output before publishing and rewr
 - [ ] Create a reproduction test (feed a known-AI-voice draft, assert the gate rewrites or blocks it)
 - [ ] Create INVEST story for permanent fix
 
+## Decision record
+
+**ADR-028 (amended 2026-04-21)** — "External-comms gate — voice-tone + risk/leak evaluators on shared PreToolUse surface" — records the decision for this ticket AND P064 (risk/leak) AND P073 (changeset authoring). Combined ADR per user direction: one gate shape, two evaluators, ADR-017 duplicate-script distribution so each of `@windyroad/voice-tone` and `@windyroad/risk-scorer` remains independently installable. Composite marker scheme (`evaluator_set` in the key) handles partial-install scenarios. Voice-tone advisory-only when `docs/VOICE-AND-TONE.md` absent; risk advisory-only when `RISK-POLICY.md` absent. This ticket (P038) remains Open as the execution tracker for the voice-tone evaluator half (agent prompt amendment + bats tests + per-package synced hook copy).
+
 ## Related
 
+- **ADR-028** (amended 2026-04-21) — decision record for this ticket; closes the design question. Implementation tracks under this ticket.
+- **P064** — sibling "risk/leak" half of the combined gate; same ADR-028.
+- **P073** — changeset authoring surface; same ADR-028 (surface list now includes `.changeset/*.md`).
 - [JTBD-001](../jtbd/solo-developer/JTBD-001-enforce-governance.proposed.md) — "Every edit to a project file is reviewed against relevant policy before it lands" generalises to external-comms policy enforcement
 - [ADR-009](../decisions/009-gate-marker-lifecycle.proposed.md) — gate marker patterns apply if this becomes a hook
 - [ADR-015](../decisions/015-on-demand-assessment-skills.proposed.md) — on-demand assessment pattern informs the gate design

@@ -77,8 +77,13 @@ No new standalone ADR is proposed — this extends the surface inventories that 
 - [ ] Decide whether the changeset-authoring gate runs independently of the P038/P064 shared infrastructure (simple regex-based check now) or waits for the shared hook surface to land (coherent check later). Lean: wait — the shared evaluator is the right home.
 - [ ] Consider whether `npx changeset add` should also fire an advisory; the interactive prompt can't be intercepted but the invocation can.
 
+## Decision record
+
+**ADR-028 (amended 2026-04-21)** — "External-comms gate — voice-tone + risk/leak evaluators on shared PreToolUse surface". The amendment adds `PreToolUse:Write` and `PreToolUse:Edit` on paths matching `.changeset/*.md` to the shared hook's surface regex list, alongside the other newly-added surfaces (`gh issue create`, `gh api .../security-advisories`, `gh api .../comments`, `npm publish` README-diff). No separate ADR for this ticket — surface-inventory extension under ADR-028's combined gate. This ticket (P073) remains Open as the execution tracker; closes when the amended hook ships with the new surface in both per-package synced copies and the associated bats assertions pass for `.changeset/*.md` fixtures.
+
 ## Related
 
+- **ADR-028** (amended 2026-04-21) — decision record for this ticket; closes the design question.
 - **P038** (No voice-and-tone gate on external communications) — primary host ticket; this ticket's fix lives inside P038's surface inventory extension.
 - **P064** (No risk-scoring gate on external communications) — sibling host; same extension shape.
 - **P055** / **ADR-024** — cross-project problem reporting; adjacent "external comms need gates" pattern.
