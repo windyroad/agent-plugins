@@ -65,3 +65,4 @@ The user manually reviews every external-comms output before publishing and rewr
 - `packages/voice-tone/skills/update-guide/SKILL.md` — existing skill scope
 - `/Users/tomhoward/.claude/usage-data/report.html` — insights report identifying the pattern (2026-03-17 to 2026-04-16, 1,464 messages across 86 sessions)
 - P034 — centralise risk reports (shares cross-project analytics-driven pattern)
+- **P073** — No voice-tone or risk gate on changeset authoring. Surface-inventory extension: include `PreToolUse:Write` on `.changeset/*.md` when the shared hook surface lands here. The changeset body populates CHANGELOG.md, the Release PR body, the GitHub Release page, and the published npm tarball — gating at `npm publish` (the current P038 surface row) is too late because the CHANGELOG.md has already been committed to main by then. Add `.changeset/*.md` to the hook's write-path patterns alongside the existing gh / npm publish entries.
