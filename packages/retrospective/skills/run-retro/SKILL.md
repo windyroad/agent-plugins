@@ -54,6 +54,52 @@ Counter-examples (what does **not** become a codification candidate):
 - "The commit gate rejected my work twice because X was misconfigured" — diagnostic, project-specific. Still flows through Step 4b Stage 1 ticketing; the fix strategy (Stage 2) is captured as free-text under `Other codification shape` (e.g. hook tweak, script adjustment).
 - "I always forget to run `npm run verify` before pushing" — short, user-habit rather than codifiable sequence → **memory** shape or **BRIEFING.md** note.
 
+### 2b. Pipeline-instability scan (P074)
+
+Step 2's reflection prompts are framed around the product-code work the session was trying to do. They under-report **pipeline-level instability** — bugs, regressions, or friction in the tools the session itself relied on (hooks, skills, subagent protocols, release scripts, TTL / marker contracts). Agents read the prompts and list "what I was trying to build" instead of "what was in the way of building it". Step 2b is a dedicated evidence-scan step that recovers those observations before Step 4's ticketing flow fires, so pipeline friction reaches the WSJF queue instead of accumulating off-ledger across sessions.
+
+The shape mirrors P068's Step 4a Verification-close housekeeping: glob / evidence-scan / categorise / dedup / prompt. The ownership boundary is the same — run-retro surfaces the detection and delegates ticket creation to `/wr-itil:manage-problem` via the Skill tool; run-retro does not rename, edit, or commit problem-ticket files on its own (per ADR-014).
+
+**Ownership boundary**: run-retro surfaces the detection and its specific citations; `/wr-itil:manage-problem` creates or updates the ticket and commits per ADR-014. run-retro does not write `.open.md` files directly — it delegates through the ticketing skill so the audit trail, WSJF scoring, and concern-boundary analysis all apply consistently. This matches Step 4a's boundary to manage-problem Step 7 and Step 4b Stage 1's boundary to manage-problem creation.
+
+**Signal categories** — each detection is tagged with the primary category. A detection may match multiple categories; pick the one whose fix path is most concrete.
+
+1. **Hook-protocol friction** — gate-marker TTL expiries mid-work (e.g. architect-hook 1800s TTL per ADR-009 expiring while drafting a long file), marker-vs-file deadlocks (a gate demands PASS before a Write; the agent refuses to PASS on a file that doesn't exist yet), hook-exemption scope gaps, hooks firing on paths they shouldn't, hooks silently skipping paths they should.
+2. **Skill-contract violations** — skill steps that collide (e.g. ADR-027 Step 0 colliding with ADR-031 auto-migration Step 0), skills that return empty on paths they should handle (e.g. work-problems false-zero-bail on flat-layout adopter repos), skills whose AskUserQuestion options exceed the 4-option cap (per P061), skills that silently swallow error states the contract says should halt.
+3. **Release-path instability** — `push:watch` / `release:watch` misbehaviour (P054, P060 class — reporting success on a stale SHA's workflow run), changeset authoring defects (P073), release-PR body issues, npm publish failing on metadata mismatch.
+4. **Subagent-delegation friction** — architect / jtbd / risk-scorer / style-guide / voice-tone agents returning `DEFERRED` or `ISSUES FOUND` that block progress, PASS markers failing to write, agent prompts timing out, agent outputs missing the specific citations ADR-026 requires.
+5. **Repeat-work friction** — the same workaround applied ≥ 3 times in one session (each application is signal; the third triggers a ticket candidate). Includes: the same `git add` re-stage after `git mv` (P057), the same marker-refresh pattern after an agent returns DEFERRED, the same hook-bypass incantation.
+6. **Session-wrap silent drops** — cases where run-retro itself under-reports (the meta case this step fixes). Detect by comparing the set of `## Fix Released` updates in this session against the set of observations in the retro summary; a `.verifying.md` rename without a matching retro entry is suspect.
+
+**Steps:**
+
+1. **Glob / scan**: walk session history for signal matches from each category above. Candidate patterns to search:
+   - Hook TTL expiry → log lines containing `review expired (Ns old, TTL Ms)`, `marker refresh`, `PreToolUse hook blocking error`.
+   - Marker-vs-file deadlock → sequences where a Write was blocked, an agent was invoked for the marker, and the agent returned `DEFERRED` or similar non-PASS.
+   - `push:watch` / `release:watch` failures → non-zero exits on those scripts, or observable SHA-mismatch in `gh run list` output.
+   - Subagent DEFERRED / ISSUES FOUND that blocked progress → agent outputs matching those markers.
+   - Repeat workaround → the same `Bash` command pattern appearing ≥ 3 times with the same outcome.
+
+2. **Evidence-scan grounding (ADR-026)**: every detected signal MUST carry specific citations — the tool invocation (command or agent call), a session position marker (turn number, timestamp, or commit SHA), and the observable outcome (exit status, error message, marker content). Bare "pipeline was flaky this session" does not qualify. An example acceptable citation: *"architect hook TTL expired at turn N while drafting `docs/decisions/031-…proposed.md` (log line `review expired (1814s old, TTL 1800s)`), forcing a marker-refresh round-trip"*. If no specific citation can be produced, the detection is NOT logged — false positives are worse than silent drops here because each false positive produces a ticket.
+
+3. **Categorise**: tag each detection with its primary category from the six above.
+
+4. **Dedup against existing tickets**: for each detection, search `docs/problems/*.open.md` and `docs/problems/*.known-error.md` for tickets whose description or symptoms match the detection's category + signal pattern. If a matching ticket exists: route the detection through Step 4 as an **update** (append new evidence to the existing ticket's `## Symptoms` or `## Root Cause Analysis` section via the manage-problem update path). If no match: route as a **new ticket** with the detection's category, citations, and a suggested title. The matching heuristic is category + signal-pattern keyword overlap — LLM-based dup classification (as discussed in P070) is not required here; local-ticket dedup runs against a small enough corpus that keyword overlap on the category + primary signal word is acceptable.
+
+5. **Interactive path (ADR-013 Rule 1)**: for each detection, invoke `AskUserQuestion` with the detection summary + specific citations inline so the user can decide without reading session logs. Options (exactly four, per ADR-013 Rule 1 cap):
+   1. `Create new ticket` — description: "Delegate to /wr-itil:manage-problem to create a problem ticket with the detection's category, citations, and suggested title."
+   2. `Append to P<NNN>` — description: "An existing ticket covers this signal; delegate to /wr-itil:manage-problem to append new evidence to its Root Cause Analysis section."
+   3. `Record in retro report only (not ticket-worthy)` — description: "The detection is session-local friction that does not warrant a persistent ticket; record it in the Pipeline Instability section of the retro summary only."
+   4. `Skip — false positive` — description: "The evidence-scan matched on a false positive; the observed behaviour was correct. Do not record."
+
+6. **Non-interactive / AFK fallback (ADR-013 Rule 6)**: when `AskUserQuestion` is unavailable (autonomous retro, batch session-wrap), do NOT auto-create tickets — record each detection in the retro summary's new **Pipeline Instability** section with its category, citations, and dedup status (`new` or `matches P<NNN>`). The user reviews on return and runs `/wr-itil:manage-problem` per accepted detection. Same trust-boundary shape as Step 4a's AFK deferral: surface the evidence, defer the decision. This matches the user's documented preference (feedback_verify_from_own_observation.md memory): surface observations from the agent's own in-session activity, but ticket-creation decisions remain user-confirmed.
+
+**Interaction with other surfaces:**
+
+- **Step 4a (Verification-close housekeeping, P068)** — same evidence-scan shape applied to a different surface. Both share the glob / scan / categorise / specific-citation / interactive-or-AFK pattern. Step 4a scans for successful exercise of `.verifying.md` fixes; Step 2b scans for tool-level friction. They fire independently and produce independent retro-summary sections.
+- **Step 4 (problem-ticket creation)** — Step 2b feeds Step 4. A detection surfaced in Step 2b that the user accepts becomes a Step 4 creation or update via the manage-problem delegation. Step 4b's Stage 1 two-stage codification flow (P075) applies to pipeline-instability tickets the same way it applies to Step 2 reflection tickets — the detection IS the codify-worthy observation.
+- **ADR-027 compatibility note**: when ADR-027's Step-0 auto-delegation lands on run-retro, Step 2b's evidence scan is load-bearing on main-agent session context that a delegated subagent does not automatically inherit. The migration path mirrors Step 4a's: either (a) run Step 2b in the main-agent context BEFORE Step-0 delegation to the subagent, or (b) include an explicit session-activity summary (tool invocations, commits, skill calls observed in main-agent context) in the Step-0 delegation prompt. Option (a) is preferred to keep the evidence scan close to the observed activity.
+
 ### 3. Update BRIEFING.md
 
 Edit `docs/BRIEFING.md`:
@@ -215,6 +261,14 @@ Present a summary to the user:
 | Ticket | Fix summary | In-session citations | Decision |
 |--------|-------------|----------------------|----------|
 | P<NNN> | <one-sentence fix summary> | <specific invocations + observable outcomes> | closed via manage-problem / left Verification Pending / flagged for manual review / flagged (non-interactive) |
+
+### Pipeline Instability
+
+(Emitted only when Step 2b detected pipeline-level friction with specific citations. Omit this section entirely when no detections were made — or when the interactive path ticketed or dismissed them all during Step 2b. Populated in non-interactive / AFK mode per ADR-013 Rule 6 — the user reviews on return and tickets via `/wr-itil:manage-problem` per accepted detection.)
+
+| Signal | Category | Citations | Decision |
+|--------|----------|-----------|----------|
+| <one-line signal summary> | Hook-protocol friction / Skill-contract violations / Release-path instability / Subagent-delegation friction / Repeat-work friction / Session-wrap silent drops | <specific invocations + session-position markers + observable outcomes> | new ticket via manage-problem / appended to P<NNN> / recorded in retro only / skipped (false positive) / flagged (non-interactive) |
 
 ### Codification Candidates
 

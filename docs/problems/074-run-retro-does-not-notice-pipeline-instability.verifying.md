@@ -1,9 +1,21 @@
 # Problem 074: run-retro does not notice pipeline instability and record corresponding problem tickets
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-20
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
-**Effort**: M — extend `packages/retrospective/skills/run-retro/SKILL.md` with a new step (between Step 2 reflection and Step 4 problem-ticket creation) that scans session activity for pipeline-instability signals and routes each detected instability through Step 4 as an auto-populated problem-ticket candidate. Includes bats doc-lint assertions for the detection categories, the signal heuristics, and the auto-population contract. Cross-reference to P068's Step 4a Verification-close pattern (same-shape evidence-scan step).
+**Effort**: M — extend `packages/retrospective/skills/run-retro/SKILL.md` with a new step (between Step 2 reflection and Step 4 problem-ticket creation) that scans session activity for pipeline-instability signals and routes each detected instability through Step 4 as an auto-populated problem-ticket candidate. Includes bats doc-lint assertions for the detection categories, the signal heuristics, and the auto-population contract. Cross-reference to P068's Step 4a Verification-close pattern (same-shape evidence-scan step). Effort held at M on implementation (2026-04-21, iter 4 AFK): SKILL.md edit (~90 new lines) + one new bats test file (12 assertions), no new ADR, no cross-package migration.
+**WSJF**: 0 — Verification Pending (excluded from ranking per ADR-022 / SKILL.md WSJF table).
+
+## Fix Released
+
+Shipped in the commit that renames this file to `.verifying.md` (AFK iter 4, 2026-04-21). Awaiting release to `@windyroad/retrospective@0.6.0` via the orchestrator's release queue.
+
+- **SKILL.md edit**: added Step 2b `Pipeline-instability scan (P074)` between the existing Step 2 (reflection) and Step 3 (BRIEFING.md update), placed before Step 4 (ticket creation) so detections feed the ticketing flow. Six signal categories enumerated (hook-protocol friction / skill-contract violations / release-path instability / subagent-delegation friction / repeat-work friction / session-wrap silent drops). Each detection requires specific-citation grounding per ADR-026 (tool invocation + session position + observable outcome). Four-option AskUserQuestion (Create new ticket / Append to P<NNN> / Record in retro report only / Skip — false positive) per ADR-013 Rule 1; AFK fallback records in a new Pipeline Instability section of the retro summary per ADR-013 Rule 6. Ownership boundary matches Step 4a: run-retro surfaces, manage-problem commits.
+- **Step 5 summary**: added a `### Pipeline Instability` section with the four-column table `| Signal | Category | Citations | Decision |` so AFK runs have a structured record of detections.
+- **Bats test**: `packages/retrospective/skills/run-retro/test/run-retro-pipeline-instability-scan.bats` — 12 assertions covering step header, six-category enumeration, ADR-026 grounding, AskUserQuestion contract, AFK fallback, manage-problem delegation, dedup against existing tickets, ADR-027 compat note, section placement (between Step 2 and Step 4), Step 5 summary integration, table schema, and P068 shape cross-reference.
+- **Verification evidence**: `npx bats packages/retrospective/skills/run-retro/test/` — 64/64 pass (52 pre-existing + 12 new). No changes to `.ts/.tsx/.js/.jsx` so TDD red-green not required beyond the doc-lint shape ADR-005 permits.
+
+Awaiting user verification.
 
 ## Description
 
