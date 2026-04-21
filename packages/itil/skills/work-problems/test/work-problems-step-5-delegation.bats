@@ -17,8 +17,10 @@
 #
 # @problem P084
 # @problem P077
+# @problem P086
 # @jtbd JTBD-006
 # @jtbd JTBD-001
+# @jtbd JTBD-101
 #
 # Cross-reference:
 #   P084 (iteration worker has no Agent tool) — driver for the subprocess swap
@@ -164,5 +166,50 @@ setup() {
   # Intended behaviour, but must be explicitly documented to prevent future
   # contributors from wiring cross-process marker sharing.
   run grep -niE "CLAUDE_SESSION_ID|session.?id isolation|session-id isolation|marker.{0,40}isolated|subprocess.{0,40}SESSION_ID" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "SKILL.md Step 5 iteration prompt names /wr-retrospective:run-retro (P086 retro-on-exit)" {
+  # P086 (2026-04-21): iteration subprocesses exit without running retro, so
+  # per-iteration friction, hook misbehaviour, repeat-workaround patterns, and
+  # pipeline-instability observations evaporate on exit. The iteration prompt
+  # body MUST name /wr-retrospective:run-retro as a closing step so the retro
+  # skill's Step 2b pipeline-instability scan fires inside the subprocess's
+  # full tool-call history. Retro commits its own work per ADR-014; orchestrator
+  # picks up retro-created tickets on the next Step 1 scan naturally.
+  run grep -nE "/wr-retrospective:run-retro" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "SKILL.md Step 5 orders retro BEFORE ITERATION_SUMMARY emission (P086)" {
+  # The retro-on-exit clause must fire BEFORE the ITERATION_SUMMARY block so
+  # any tickets retro creates ride into either the iteration's own commit or
+  # a retro-owned follow-up commit — and the orchestrator sees them on the
+  # next Step 1 scan. Emitting ITERATION_SUMMARY first and running retro after
+  # would leave retro tickets uncommitted when the subprocess exits.
+  #
+  # The assertion: the first mention of "run-retro" must appear BEFORE a
+  # phrase that explicitly names the ordering (e.g. "before emitting
+  # ITERATION_SUMMARY" or similar).
+  run grep -niE "before.{0,40}emit.{0,40}ITERATION_SUMMARY|before.{0,20}ITERATION_SUMMARY.{0,40}(emission|emit)|prior to.{0,40}ITERATION_SUMMARY" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "SKILL.md Step 5 names retro as non-blocking closing step (P086)" {
+  # Retro findings MUST NOT block ITERATION_SUMMARY emission — if retro fails
+  # or surfaces findings, the iteration still returns to the orchestrator with
+  # a summary. Otherwise a flaky retro run could silently halt the AFK loop.
+  # The SKILL.md prompt body must state that the subprocess proceeds to
+  # ITERATION_SUMMARY regardless of retro findings.
+  run grep -niE "do not block on retro|regardless of retro|retro.{0,40}non-blocking|proceed.{0,40}regardless.{0,40}retro|non-blocking.{0,40}retro" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "SKILL.md Step 5 cites ADR-014 for retro commit ownership (P086)" {
+  # Retro-created tickets ride into the iteration's commit OR a retro follow-up
+  # commit per run-retro's ADR-014 contract. The iteration prompt body must
+  # name ADR-014 so contributors do not accidentally wire iteration-side commit
+  # of retro artefacts — retro owns its own commits.
+  run grep -nE "ADR-014" "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }

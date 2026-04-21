@@ -1,7 +1,8 @@
 # Problem 086: AFK iteration subprocess does not run retro before returning — per-iteration lessons learnt are lost when the subprocess exits
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-21 (AFK iter-7, during iter 4 — user observation mid-loop)
+**Fix Released**: 2026-04-21 — iteration prompt body in `packages/itil/skills/work-problems/SKILL.md` Step 5 gains a closing step (step 4) naming `/wr-retrospective:run-retro` before `ITERATION_SUMMARY` emission; ADR-032's subprocess-boundary variant amended with a matching "Retro-on-exit (P086 amendment)" clause under the Pattern contract block; 4 doc-lint bats assertions added to `work-problems-step-5-delegation.bats` (P086); Non-Interactive Decision table gains a retro-at-iteration-end row; @windyroad/itil minor bump. Verification path: user runs the next AFK loop post-restart and confirms (a) iteration subprocesses invoke `/wr-retrospective:run-retro` before returning, (b) any retro-created tickets appear on the backlog on the next Step 1 scan, (c) retro failures do not halt the AFK loop (iteration still emits `ITERATION_SUMMARY`).
 **Priority**: 16 (High) — Impact: High (4) x Likelihood: Almost Certain (4)
 **Effort**: M — requires (1) extending the iteration prompt in `packages/itil/skills/work-problems/SKILL.md` Step 5 to invoke `/wr-retrospective:run-retro` before emitting `ITERATION_SUMMARY`, OR (2) a new per-iteration retro contract that collects the subprocess's tool-call history + observed friction and emits structured findings the orchestrator parses alongside the summary; (3) decide what retro scope is: full run-retro or a lightweight iteration-retro; (4) handle the case where retro itself produces new tickets (orchestrator should pick them up on next Step 1 scan naturally).
 **WSJF**: 8.0 — (16 × 1.0) / 2 — High severity (every AFK iteration silently discards observations; compounds across the backlog); moderate effort.

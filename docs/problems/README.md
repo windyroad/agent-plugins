@@ -68,6 +68,7 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P075 | run-retro Step 4b ticket-first two-stage flow (19-option → 4-option per ticket) | commit pending (this AFK iter) | no (0 days) |
 | P077 | work-problems Step 5 delegates iterations via the Agent tool (`subagent_type: general-purpose`); ADR-032 amended with AFK iteration-isolation wrapper sub-pattern | commit pending (this AFK iter) | no (0 days) |
 | P084 | work-problems iteration worker has no Agent tool — `claude -p` subprocess dispatch closes the tool-surface gap (ADR-032 subprocess-boundary sub-pattern) | @windyroad/itil@0.13.0 (commit 260768f) + @windyroad/itil@0.14.0 (commit 7670ffb, cost logging) | no (0 days) |
+| P086 | AFK iteration subprocess runs `/wr-retrospective:run-retro` before emitting `ITERATION_SUMMARY` (ADR-032 subprocess-boundary retro-on-exit clause) | commit pending (this AFK iter 7 iter 5) | no (0 days) |
 
 ## Closed
 
