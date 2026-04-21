@@ -6,7 +6,18 @@
 **Effort**: M — S → M after user direction 2026-04-20 reshaped the dedup mechanism. Now requires: (1) LLM-based semantic dup detection (not keyword search), (2) new "maintainer annoyance" risk evaluator composing with P064's external-comms risk gate, (3) risk-within-appetite gate on the auto-comment action. Likely shares infrastructure with P064 — architect review at implementation may push to L if the risk-scorer extension is cross-cutting.
 **WSJF**: 6.0 — (12 × 1.0) / 2 — Effort re-estimated from S to M after direction pin. Still High severity (duplicate / spammy upstream comments are the most externally-visible failure mode of the skill). Ranks alongside P065 and P068; below P066 / P063 at the top of the queue.
 
-## Direction decision (2026-04-20, user — via AskUserQuestion)
+## Direction decision (2026-04-21, user — interactive AskUserQuestion post-AFK-iter-7)
+
+**Dedup mechanism**: **gh search + LLM semantic match** (two-stage).
+
+1. **gh search stage** — query `gh issue list --repo <upstream> --state all --search "<keywords>"` with keywords from the proposed report's title. Returns candidate issues. Cheap pre-filter.
+2. **LLM semantic match stage** — evaluate each gh-search candidate's title + body against the proposed report body. Returns match / no-match / partial-match with matching issue URL.
+
+**User note**: *"not sure it needs to be a architect or subagent"* — LLM semantic match does NOT require delegating to `wr-architect:agent`. Lean toward an **inline LLM check** inside the skill's own session (no subagent dispatch) for simplicity; only promote to a dedicated `wr-itil:dedup-check` subagent if architect review flags context-isolation concerns at implementation time. Full `wr-architect:agent` review is overkill for this scope.
+
+Supersedes the 2026-04-20 direction below (which proposed a broader dedup subagent). The gh-search pre-filter trims the LLM's input scope to ~5-10 candidate issues instead of the upstream's full issue list, making the inline LLM check affordable.
+
+## Direction decision (2026-04-20, user — via AskUserQuestion) — superseded by 2026-04-21 above
 
 **Own re-run detection (local ticket already has `## Reported Upstream`)**: do NOT default to auto-commenting. Instead:
 

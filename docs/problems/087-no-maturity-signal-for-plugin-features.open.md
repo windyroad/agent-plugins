@@ -83,6 +83,23 @@ An ADR defining the taxonomy should probably pin:
 
 Thresholds tunable per plugin surface (e.g. AFK orchestrators accumulate invocations fast but ADRs accumulate slowly).
 
+## Direction decision (2026-04-21, user — interactive AskUserQuestion)
+
+**User question**: *"can we use /insights?"*
+
+**Answer** (per `claude-code-guide` delegation 2026-04-21): `/insights` IS a Claude Code built-in slash command (documented at `code.claude.com/docs/en/commands.md` line 53 — *"Generate a report analyzing your Claude Code sessions, including project areas, interaction patterns, and friction points"*), BUT it does **not** report per-skill invocation counts. The docs are silent on per-skill breakdown, invocation counts by skill, and JSON/CSV export. `/insights` provides session-level friction-type data (Wrong Approach / Buggy Code / etc.) — a valuable but orthogonal signal to the "how many times has skill X been invoked" question.
+
+**Direction**: combined approach leveraging `/insights` for what it gives plus a complementary mechanism for what it doesn't:
+
+1. **`/insights` as session-friction signal** — use the existing command's output directly. Plugin authors can cite `/insights` output in their README ("this plugin surfaces in friction reports X% of sessions"). Zero new infrastructure; ships today.
+2. **Session-transcript parser for invocation counts** — a new `/wr-itil:usage-report` (or `/wr-itil:skill-metrics`) skill parses `~/.claude/projects/*/sessions/*.jsonl` for `Skill` / `Agent` / `Bash npm run ...` tool invocations grouped by skill. Retrospective. Host-local. Output: per-skill counts over a windowed timeframe, sortable.
+3. **Commit-history heuristic** — per-plugin composite: days-since-first-release, commits touching the plugin's files in last N weeks, resolved problem tickets citing the plugin, breaking-change-free window. Deterministic from git.
+4. **Explicit maturity badge on each plugin README** — its value is **derived** from (1) + (2) + (3), NOT author self-report. ADR defines promotion criteria mapping the objective signals to bands (Experimental / Alpha / Beta / Stable / Deprecated).
+
+**Not needed short-term**: opt-in telemetry hook (option 4 from RCA). Session-transcript parsing (item 2 above) is retrospective AND forward-looking — it reads the same jsonl files a telemetry hook would write to. No need to write to a second store.
+
+**Follow-up for upstream**: open a `/feedback` or GitHub issue on `anthropics/claude-code` requesting per-skill invocation analytics either inside `/insights` output or as a machine-readable export from session JSONL. If that ships, item 2's custom parser becomes redundant. Tracked here as an investigation task; doesn't block P087's in-repo implementation path.
+
 ## Related
 
 - **JTBD-003** (Compose Only the Guardrails I Need) — composing safely requires maturity signal.

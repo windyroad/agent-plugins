@@ -6,7 +6,24 @@
 **Effort**: XL (re-rated from L 2026-04-20 post-architect review on auto-migration addition) — bulk `git mv` of ~72 existing tickets (this repo) + update path references across 5+ SKILL.md files (manage-problem, work-problems, manage-incident, report-upstream, run-retro) and their ~30 bats tests + update README.md generation + draft ADR-031 (done — ADR-031 `proposed`) + in-place amendments to ADR-022, ADR-016, ADR-024, `packages/risk-scorer/agents/wip.md` + hook-exemption glob updates in architect-enforce-edit.sh + jtbd-enforce-edit.sh + **auto-migration logic shipped inside `manage-problem` AND `work-problems` for adopter repos** (per-project on first-run, ADR-017-style shared routine candidate, with ADR-027 Step 0 collision to resolve + ADR-014 commit-gate treatment to resolve + novel "plugin-driven repo migration" pattern question). Cross-plugin reach + multi-ADR amendment + novel distribution pattern = XL territory.
 **WSJF**: 1.875 — (15 × 1.0) / 8 — re-rated from 3.75 at 2026-04-20 after scope expansion (auto-migration + architect-raised execution-time questions). High severity / ecosystem-wide navigation friction remains unchanged; the migration lift + architectural open questions justify the XL bucket.
 
-## Direction decision (2026-04-20, user — AFK pre-flight via AskUserQuestion)
+## Direction decision (2026-04-21, user — interactive AskUserQuestion post-AFK-iter-7)
+
+**Migration trigger**: **detect-and-migrate inside the problem README.md refresh step** (P062's Step 7 "README.md refresh on every transition" block in `manage-problem` SKILL.md). Every Step 7 transition already regenerates `docs/problems/README.md`; extend that block to also:
+
+1. Detect flat-layout (any `docs/problems/*.<state>.md` files at the top level rather than inside per-state subdirs).
+2. If detected: run the bulk `git mv` migration as part of the same Step 7 commit. Migration is a render-side concern, not a separate opt-in step.
+
+**Why this shape beats the install-updates-based migration**:
+- Migration fires naturally on first transition per adopter repo (no separate invocation to remember).
+- Same-commit atomicity: README.md refresh + migration land together, no intermediate mixed-state commit.
+- No dedicated migration skill needed; `/wr-itil:manage-problem` already owns the README refresh surface.
+- Adopter repos that never transition tickets in the AFK loop wait until the next manual transition — acceptable because the flat layout is still functional, just unskimmable.
+
+Supersedes the 2026-04-20 direction below (which proposed auto-migration inside manage-problem AND work-problems independently). This shape centralises the migration in the README-refresh block, eliminating the dual-location risk.
+
+**User note**: *"when we are updating the problem README.md, can't we detect then and migrate if detected?"* — exact framing of the chosen direction.
+
+## Direction decision (2026-04-20, user — AFK pre-flight via AskUserQuestion) — superseded by 2026-04-21 above
 
 **Filename suffix**: **drop** the `.<state>.md` suffix. The directory path is the single source of truth for state. Filename is `<NNN>-<title>.md`. Every transition is a single `git mv` between directories — no suffix rename. The Status field in the ticket body frontmatter remains as a human-readable indicator, but machine-readable state comes from `$(basename $(dirname <path>))`.
 

@@ -7,6 +7,17 @@
 
 **WSJF**: 6.0 — (12 × 1.0) / 2 — High severity (recurring trust erosion on every unmissed correction); moderate effort. Sits in the current top-of-queue tier alongside P070 / P071 / P074.
 
+## Direction decision (2026-04-21, user — interactive AskUserQuestion post-AFK-iter-7)
+
+**Enforcement mechanism**: **Hook + CLAUDE.md combined** (defence in depth).
+
+- **PostToolUse hook** on the assistant-output surface (or `UserPromptSubmit` / `Stop` hook depending on which event gives a clean correction-pattern match window) detects strong-signal correction patterns — profanity, all-caps imperatives ("DO NOT", "STOP"), exasperation markers ("FFS"), direct-contradiction phrasing ("no", "wrong", "that's not right") — and injects a systemMessage reminding the assistant to offer `/wr-itil:capture-problem` before continuing. This is the mechanical enforcement layer; catches every instance deterministically.
+- **CLAUDE.md mandatory rule** lists the correction patterns as mandatory-capture triggers, with a short rationale ("when the user corrects with a strong negative-affect signal, offer a ticket — the underlying pattern is almost always class-of-behaviour, not one-off"). This is the pre-generation guidance layer; reduces the rate at which the hook has to fire by shifting reasoning upstream.
+
+**Why combined, not just hook or just CLAUDE.md**: same reasoning as P085's fix shape — hook-only leaves a window where the assistant doesn't understand *why* it's being reminded; CLAUDE.md-only has the same failure mode that memory guidance already demonstrates (pattern recurs despite guidance). Combined is the architecture that architect + risk-scorer already use elsewhere in this repo.
+
+**Composition opportunity**: P085 (prose-ask enforcement gap) proposes the same hook architecture. The two tickets should share the hook file and marker pattern rather than ship separate hooks. ADR amendment at implementation time to pin the shared-hook contract.
+
 ## Description
 
 When the user delivers correction with a strong negative-affect signal — swearing, all-caps imperatives, direct contradiction, exasperation — the assistant currently **acknowledges verbally and moves on**. There is no convention, hook, or memory that triggers the assistant to offer capturing a problem ticket for the underlying behavioural gap. The correction becomes a verbal transaction, fades with session context, and the same class of friction recurs next session.
