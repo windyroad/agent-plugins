@@ -153,8 +153,8 @@ Per ADR-010 amendment, `<verb>-<object>` convention:
 2. **[shipped 2026-04-21 AFK iter 2, commit d8ab4c5, @windyroad/itil@0.11.0]** `review-problems` split. Slightly larger — review includes WSJF re-ranking logic, auto-transition path, Verification Queue prompt (ADR-022), and the README cache write.
 3. **[shipped 2026-04-21 AFK iter 3, this commit]** `work-problem` split (singular). The "pick highest-WSJF ticket + dispatch to `/wr-itil:manage-problem <NNN>`" flow. Thin-router discipline: selection lives here; execution delegates to the full manage-problem workflow (no fork). Forwarder + 19-assertion bats contract cover the singular-vs-plural naming distinction (work-problem vs work-problems AFK orchestrator) to prevent name-collision regression.
 4. `transition-problem` split — covers all status transitions.
-5. `list-incidents` split.
-6. `mitigate-incident` / `restore-incident` / `close-incident` / `link-incident` splits (bundle or serialise as iteration pacing allows).
+5. **[blocked 2026-04-21 AFK iter 6 — see P084]** `list-incidents` split. Attempt halted when AFK iteration worker discovered its tool surface lacks the Agent/Task tool, so the architect + JTBD PreToolUse edit gates could not be satisfied (markers are only set by Agent-tool PostToolUse hook). Worker conducted the architect + JTBD review verdicts inline (PASS on both — design mirrors slice 1 verbatim; no new ADR or JTBD entry required) but could not persist markers or Write any gate-covered file. P084 tracks the fix for the worker-tool-surface gap. This slice resumes once P084 ships.
+6. `mitigate-incident` / `restore-incident` / `close-incident` / `link-incident` splits (bundle or serialise as iteration pacing allows). Also blocked on P084.
 
 ### Candidate fix
 
