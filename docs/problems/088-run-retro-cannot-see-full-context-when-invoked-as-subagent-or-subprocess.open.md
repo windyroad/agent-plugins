@@ -6,6 +6,40 @@
 **Effort**: L — requires (a) an ADR (or ADR-032 amendment) defining the retro-context-layer taxonomy (what each retro-invocation surface can see vs cannot), (b) a mechanism for combining per-iteration + session-level retro views (likely a retro-findings artefact that subprocesses emit and the orchestrator aggregates), (c) extending run-retro's SKILL.md to handle multiple invocation surfaces (per-iteration, orchestrator-at-ALL_DONE, user-parent-session-ad-hoc), (d) potentially extending run-retro with a session-log parser so it can reach back into `~/.claude/projects/*/sessions/*.jsonl` for cross-iteration context when invoked from a limited-context surface.
 **WSJF**: 3.0 — (12 × 1.0) / 4 — High severity (retro findings are the primary feedback loop for the whole suite's improvement; partial coverage means patterns go uncaught across sessions); L effort because it touches run-retro SKILL.md + ADR-032 + work-problems SKILL.md + likely a new per-iteration retro-artefact contract.
 
+## Direction decision (2026-04-21, user — post-AFK-iter-7 interactive, verbatim)
+
+User clarification (verbatim): *"Previously, I suggested that it would be handy for run-retro to be done in a background agent, that's what I realised won't work properly without some context shenanigans. In terms of work-problems, I do want each iteration to run-retro within the claude -p call. That retro will be naturally bounded to its iteration"*.
+
+**What DOES work** (keep as-is):
+
+1. **run-retro inside the AFK `/wr-itil:work-problems` iteration subprocess** (P086's shipped implementation in `@windyroad/itil@0.16.0`). Retro is naturally bounded to the iteration's own scope. The subprocess's tool-call history — what the iteration did, what friction it observed — is exactly the right granularity for a per-iteration retro. Iteration-scoped retro is the correct pattern for AFK loops. **P086 is NOT superseded.** Keep shipping.
+
+2. **Direct user invocation of `/wr-retrospective:run-retro`** in the user's own parent session when they want a session-level retro. Parent session has full interactive context naturally. This is how the user ran retros at the end of AFK-iter-6 and this session. **Works today.** Keep.
+
+**What DOESN'T work** (the gap this ticket captures):
+
+3. **run-retro as a BACKGROUND AGENT** via ADR-032's `/wr-retrospective:capture-retro` sibling (background-capture pattern; `Agent(run_in_background: true)`). The user previously suggested this as a convenience for "log Y, keep working on X" flows. **On reflection, it doesn't work without context shenanigans** — background subagents have isolated context at spawn and don't see the parent's tool-call history. A background retro would have to either:
+
+   - Snapshot the parent's relevant context into the subagent's prompt at spawn time (explicit context-marshalling — "shenanigans" per user direction).
+   - Parse session logs (`~/.claude/projects/*/*.jsonl`) post-hoc to reconstruct context — also shenanigans.
+   - Produce a retro scoped to whatever the subagent itself can see at spawn, which is essentially empty.
+
+   None of these are acceptable. The `capture-retro` sibling in ADR-032 doesn't ship cleanly.
+
+**Implications for ADR-032**:
+
+- **ADR-032's `capture-retro` sibling pattern** (one of the three capture-* skills defined in the ADR) needs to be **deferred or removed** from ADR-032's in-scope list. Retro specifically does NOT fit the background-capture shape the way `capture-problem` and `capture-adr` do. Those two have inputs that are self-contained (the problem observation; the architectural decision) — the subagent can run from the aside payload alone. Retro's input is the entire session's tool-call history; there's no self-contained aside payload that stands in for it.
+
+- Other capture-* siblings (`capture-problem`, `capture-adr`) are NOT affected by this direction — they have self-contained aside-payload inputs and the background pattern works for them.
+
+**What needs to happen**:
+
+a. **ADR-032 amendment** — remove `/wr-retrospective:capture-retro` from the three-sibling in-scope list, or mark it as "deferred pending resolution of the context-marshalling problem". The `capture-problem` and `capture-adr` siblings remain.
+
+b. **run-retro SKILL.md contract clause** — add a "Never invoke as a background agent" clause (explicit anti-pattern note). Foreground `/wr-retrospective:run-retro` remains the only supported invocation. `claude -p` subprocess invocation (as used in AFK iterations per P086) remains supported because the subprocess itself has the iteration's context naturally.
+
+c. **Update P086** — add a note that P086's approach (retro inside subprocess) is correct and distinct from the background-agent scope this ticket addresses. No supersession; no revert.
+
 ## Description
 
 User observation 2026-04-21 (verbatim): *"I just realised run-retro cannot be done as an subagent, because it won't have the context"*.
