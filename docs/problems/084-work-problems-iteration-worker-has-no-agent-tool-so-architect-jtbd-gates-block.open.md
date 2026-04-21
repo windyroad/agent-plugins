@@ -52,13 +52,24 @@ The three-layer gate architecture (PreToolUse deny by default → Agent-tool Pos
 
 The worker's surface (as observed this session): Bash, Edit, Glob, Grep, Read, Write, ToolSearch, ScheduleWakeup, Skill — plus deferred tools findable via ToolSearch. Agent/Task does not appear in the deferred list either (confirmed via `select:Agent` and `select:Task` searches returning "No matching deferred tools found").
 
-### Three candidate fixes
+### Evidence update (2026-04-21, post-initial-diagnosis)
 
-1. **Add Agent tool to the worker's allowed surface.** The cleanest — subagent can spawn sub-subagents, architect/jtbd PostToolUse hook fires, markers set, edits unblock. Risk: nested-subagent resource cost and reasoning-chain depth.
-2. **Extend the PostToolUse marker hook to also fire on Skill-tool invocations of `wr-architect:review-design` / `wr-jtbd:review-jobs`.** The skills already do the right work (reading diff, constructing prompt, delegating); the hook could parse the Skill tool's output for the same "Architecture Review: PASS" / "ISSUES FOUND" verdict the current hook looks for. Risk: skill-level review may be shallower than subagent review; verdicts in free-text output may be harder to parse reliably.
-3. **Add a "worker-issued inline review" mode** that the worker can call via a thin skill (`/wr-governance:mark-reviewed`) which takes a PASS/FAIL verdict and writes the marker directly. Risk: bypass path that could be abused; needs audit-trail discipline.
+Three independent evidence sources confirm this is a hard platform restriction, not a configurable tool-surface gap:
 
-Recommended: (1) + (3). (1) is the right long-term fix; (3) is the AFK fast path that doesn't spawn more subagents. (2) risks verdict-parsing brittleness.
+1. **ToolSearch probe (general-purpose subagent).** `select:Agent,Task` returns "No matching deferred tools found". Keyword search `"agent subagent task"` surfaces `TaskStop` (background-Bash control) but no `Agent` or `Task` dispatch tool. Agent is absent from both top-level and deferred surfaces.
+2. **Claude Code docs.** `https://code.claude.com/docs/en/subagents.md` states verbatim: *"Subagents cannot spawn other subagents, so `Agent(agent_type)` has no effect in subagent definitions."* And separately: *"If your workflow requires nested delegation, use Skills or chain subagents from the main conversation."* The `Task` tool was renamed to `Agent` in 2.1.63; both names are aliases for the same restricted capability.
+3. **Empirical call attempt (general-purpose subagent, no ToolSearch prefetch).** Direct invocation of `Agent` returns the literal runtime error: *"No such tool available: Agent. Agent is not available inside subagents. Complete the task with the tools provided and return findings to the orchestrator."*
+
+### Candidate fixes (evidence-updated 2026-04-21)
+
+1. ~~**Add Agent tool to the worker's allowed surface.**~~ **CONFIRMED IMPOSSIBLE.** Subagents cannot spawn subagents at the platform level — no custom `subagent_type` or tool-surface declaration can lift this restriction. Listed here only to document the ruled-out path and prevent re-proposal.
+2. **Extend the PostToolUse marker hook to also fire on Skill-tool invocations of `/wr-architect:review-design` / `/wr-jtbd:review-jobs`.** The skills already do the right work (reading diff, constructing prompt, delegating); the hook could parse the Skill tool's output for the same "Architecture Review: PASS" / "ISSUES FOUND" verdict the current hook looks for. Risk: skill-level review may be shallower than subagent review; verdicts in free-text output may be harder to parse reliably. **Still blocked by the same restriction internally** — today's review skills delegate to `wr-architect:agent` / `wr-jtbd:agent` via the Agent tool, which the worker cannot call. Fix (2) would only work if the review skills ALSO had an in-worker inline path that produced the verdict without the Agent hop — which collapses Fix (2) into Fix (3).
+3. **Add a thin `/wr-governance:mark-reviewed <gate> <verdict> <justification>` skill** that writes the marker directly given a verdict the worker produced inline (worker reads diff, produces PASS/FAIL verdict in its own turn, calls the skill to persist the marker). Risk: bypass path that could be abused; needs audit-trail discipline (the skill records gate, verdict, justification, and worker-identity into an append-only log). **LEAD CANDIDATE post-evidence-update.**
+4. **Chain-from-orchestrator pattern (NEW candidate, per Claude Code docs' "chain subagents from the main conversation" guidance).** The orchestrator (main session) runs architect + JTBD review for each iteration BEFORE spawning the iteration worker, sets the markers via its own Agent tool, then dispatches the worker with the markers already live. Pros: preserves the existing Agent-tool-backed review depth; no hook or skill additions needed. Cons: orchestrator has no preview of the diff the worker will produce, so the review is either scope-level (ticket's intended change) rather than diff-level (actual lines changed), or the orchestrator must loop (dispatch → worker stages diff → worker returns for orchestrator review → orchestrator re-spawns worker to commit). The loop variant doubles the per-iteration turn count.
+
+**Revised recommendation:** Fix (3) standalone as the primary path. Fix (4)-loop-variant as fallback if the audit-trail discipline of Fix (3) proves unworkable. Fix (1) is impossible; Fix (2) collapses into Fix (3).
+
+Architect review required on Fix (3)'s shape: (a) which gates does `/wr-governance:mark-reviewed` cover — just architect + JTBD, or also risk-scorer, voice-tone, style-guide, a11y? (b) what's the audit-trail shape — append-only log file, git-committed, session-scoped? (c) how does Fix (3) compose with the existing `/wr-architect:review-design` + `/wr-jtbd:review-jobs` skills — replace, augment, or be orthogonal? An ADR amendment to ADR-032 (AFK iteration-isolation wrapper sub-pattern) captures the worker-tool-surface contract.
 
 ## Related
 
@@ -71,11 +82,14 @@ Recommended: (1) + (3). (1) is the right long-term fix; (3) is the AFK fast path
 - `packages/jtbd/hooks/jtbd-enforce-edit.sh` + `packages/jtbd/hooks/lib/review-gate.sh` — sibling gate code.
 - `packages/architect/skills/review-design/SKILL.md` + `packages/jtbd/skills/review-jobs/SKILL.md` — the on-demand review skills that currently cannot set the marker.
 - **JTBD-006** (Work the backlog AFK) — the persona outcome this ticket directly degrades.
+- **Claude Code docs — subagents reference**: `https://code.claude.com/docs/en/subagents.md` lines 318 + 694 document the hard platform restriction ("Subagents cannot spawn other subagents"). Canonical tool name is `Agent`; `Task` is a legacy alias. Evidence source for the Candidate fixes evidence-update above.
 
 ### Investigation Tasks
 
-- [ ] Confirm the worker's tool-surface limitation by reproducing in a fresh AFK iteration with a different skill (e.g. work-problem singular) against a non-docs/problems path.
-- [ ] Decide between fixes (1), (2), (3) or combination — architect review on the fix.
-- [ ] Design the marker mechanism for the chosen fix (Skill-tool hook extension vs thin skill vs Agent-tool in worker surface).
-- [ ] Implement + bats contract assertions.
-- [ ] Amend ADR-032's AFK iteration-isolation wrapper sub-pattern with the worker-tool-surface contract.
+- [x] Confirm the worker's tool-surface limitation by reproducing with a fresh general-purpose subagent probe. **Confirmed 2026-04-21 via three-source evidence (ToolSearch absence + Claude Code docs + empirical Agent-tool invocation returning `No such tool available: Agent. Agent is not available inside subagents.`).** See Evidence update section above.
+- [x] Rule out Fix (1) (Agent in worker surface). **Confirmed impossible** — platform-level restriction, no custom subagent_type can lift it.
+- [ ] Architect review on Fix (3)'s shape: (a) gate coverage scope, (b) audit-trail shape, (c) composition with existing review skills. May require a new ADR or an ADR-032 amendment.
+- [ ] Design the `/wr-governance:mark-reviewed` skill — SKILL.md contract + marker-write mechanism + audit-log record shape.
+- [ ] Implement Fix (3) + behavioural bats contract assertions (per `feedback_behavioural_tests.md`: spawn a probe subagent, have it invoke the skill with a PASS verdict, assert the marker file exists at the expected path and a subsequent Write on a gate-covered path succeeds).
+- [ ] Amend ADR-032's AFK iteration-isolation wrapper sub-pattern with the worker-tool-surface contract (explicit: "subagents cannot spawn subagents; verdict-producing path is Skill-tool-based only").
+- [ ] If Fix (3) proves unworkable in architect review, pivot to Fix (4) (chain-from-orchestrator) with the loop-variant's per-iteration turn cost accepted.
