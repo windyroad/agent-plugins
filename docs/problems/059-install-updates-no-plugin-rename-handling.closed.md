@@ -1,6 +1,6 @@
 # Problem 059: `install-updates` has no awareness of plugin renames, leaves stale entries in sibling `.claude/settings.json`
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-20
 **Priority**: 6 (Medium) — Impact: Minor (2) x Likelihood: Possible (3)
 **Effort**: L — rename-mapping table + detection logic + auto-migration (no second consent) + regression tests + ADR-030 Confirmation amendment narrowing the cross-project consent rule

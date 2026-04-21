@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-04-21 AFK iter 7 — **P076 transitioned to Verification Pending**: WSJF transitive-effort rule now lives inline in `/wr-itil:manage-problem`'s WSJF Prioritisation section. New `### Transitive dependencies (P076)` subsection defines `Effort_transitive = max(marginal, max{ Blocked_by upstreams })` with carve-outs for `.closed.md` / `.verifying.md` / `.parked.md` upstreams (contribute 0), `**Composes with**` non-propagation, cycle-bundling with shared WSJF as computed artefact, a worked example (P073 S + Blocked by P038 XL → transitive XL → WSJF 1.5), and a concrete re-rate message format `P<NNN>: Effort <OLD> → <NEW> (transitive via <UPSTREAM>)`. Step 9b.1 (manage-problem) and mirrored Step 2.5 (review-problems) topologically walk the graph. New `## Dependencies` section added to the Step 5 problem-ticket template. Bats contract: 21 new assertions on `manage-problem-transitive-dependencies.bats` (15 structural + 6 behavioural fixture-based) + 3 new assertions on `review-problems-contract.bats`. Full itil sweep: 340/340 green. `@windyroad/itil` minor bump queued. Prior context (iter 7 iter 1): P067 classifier problem-first per ADR-033. Prior context (iter 6): P084 transitioned to Verification Pending; subprocess dispatch variant of ADR-032 now supersedes P077 Agent-tool variant on the Step 5 surface. 13 open tickets ranked.
+> Last reviewed: 2026-04-22 session — **P029 + P059 closed** (verified in-session via run-retro Step 4a) + **P091 + P092 opened** (startup context consumption; install-updates Step 4 npm-name ambiguity). README reflects these four deltas; a full WSJF re-rank of the older open-ticket set is pending the next `/wr-itil:review-problems`. Prior context: 2026-04-21 AFK iter 7 — **P076 transitioned to Verification Pending**: WSJF transitive-effort rule now lives inline in `/wr-itil:manage-problem`'s WSJF Prioritisation section. New `### Transitive dependencies (P076)` subsection defines `Effort_transitive = max(marginal, max{ Blocked_by upstreams })` with carve-outs for `.closed.md` / `.verifying.md` / `.parked.md` upstreams (contribute 0), `**Composes with**` non-propagation, cycle-bundling with shared WSJF as computed artefact, a worked example (P073 S + Blocked by P038 XL → transitive XL → WSJF 1.5), and a concrete re-rate message format `P<NNN>: Effort <OLD> → <NEW> (transitive via <UPSTREAM>)`. Step 9b.1 (manage-problem) and mirrored Step 2.5 (review-problems) topologically walk the graph. New `## Dependencies` section added to the Step 5 problem-ticket template. Bats contract: 21 new assertions on `manage-problem-transitive-dependencies.bats` (15 structural + 6 behavioural fixture-based) + 3 new assertions on `review-problems-contract.bats`. Full itil sweep: 340/340 green. `@windyroad/itil` minor bump queued. Prior context (iter 7 iter 1): P067 classifier problem-first per ADR-033. Prior context (iter 6): P084 transitioned to Verification Pending; subprocess dispatch variant of ADR-032 now supersedes P077 Agent-tool variant on the Step 5 surface. 13 open tickets ranked.
 > Run `/wr-itil:manage-problem review` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -9,6 +9,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 
 | WSJF | ID | Title | Severity | Status | Effort |
 |------|-----|-------|----------|--------|--------|
+| 15.0 | P092 | install-updates Step 4 `<plugin-short-name>` placeholder is ambiguous about the `wr-` prefix | 15 High | Open | S |
 | 6.0 | P070 | report-upstream does not check for existing upstream issues before filing | 12 High | Open | M |
 | 6.0 | P071 | Argument-based skill subcommands are not discoverable in Claude Code autocomplete | 12 High | Open | M |
 | 6.0 | P074 | run-retro does not notice pipeline instability and record corresponding problem tickets | 12 High | Open | M |
@@ -16,6 +17,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3.0 | P014 | No lightweight aside invocation for governance skills (background-subagent convention per 2026-04-20 direction) | 12 High | Open | L |
 | 3.0 | P064 | No risk-scoring gate on external communications | 12 High | Open | L |
 | 3.0 | P065 | No skill scaffolds intake files in downstream projects (re-rated M → L per architect direction) | 12 High | Open | L |
+| 3.75 | P091 | Plugin + hook stack consumes substantial context at session startup | 15 High | Open | L |
 | 2.25 | P015 | TDD enforcement does not flag vague Gherkin outcome steps | 9 Med | Open | L |
 | 2.0 | P018 | TDD enforce BDD + Example Mapping principles | 16 High | Open | XL |
 | 2.0 | P022 | Agents must not fabricate time estimates | 16 High | Open | XL |
@@ -36,7 +38,6 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P017 | create-adr should split multi-decision records | 2026-04-17 | no (3 days) |
 | P024 | Risk-scorer WIP flag uncommitted completed work | 2026-04-17 | no (3 days) |
 | P033 | No persistent risk register for ISO 31000 / ISO 27001 | 2026-04-17 | no (3 days) |
-| P029 | Edit gate overhead for governance docs | 2026-04-17 (ac9d453) | no (3 days) |
 | P020 | No on-demand assessment skills | v0.3.2 | no (age unknown — pre-v0.3.2 release date) |
 | P021 | Governance skill structured prompts | v0.3.2 | no (age unknown) |
 | P035 | manage-problem commit-gate no subagent delegation fallback | pending — fallback path never fired this session | no (not yet released to npm — user-verifiable only after a session exercises the fallback) |
@@ -55,7 +56,6 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P056 | Ticket-creator next-ID lookup greps blob SHAs producing wrong origin_max | @windyroad/itil@0.7.2 + @windyroad/architect@0.4.1 (commit f9bfa56) | no (0 days) |
 | P019 | Deprecate single-file JTBD fallback (ADR-008 Option 3) | @windyroad/jtbd@0.6.0 (commit 6dd6a77) — breaking change | no (0 days) |
 | P058 | install-updates regex misses digit-bearing plugin names | commit 3798be8 | no (0 days) |
-| P059 | install-updates no plugin rename handling | commit 3261d81 | no (0 days) |
 | P066 | Intake templates problem-first (bug-report + feature-request replaced by problem-report) | commit ed36f69 (AFK iter 6 iter 1) | no (0 days) |
 | P063 | manage-problem trigger-surface wired to /wr-itil:report-upstream | @windyroad/itil@0.9.0 (commit 6ee6adc) | no (0 days) |
 | P068 | run-retro Verification-close housekeeping (Step 4a) | @windyroad/retrospective@0.4.0 (commit c268327) | no (0 days) |
@@ -85,6 +85,8 @@ Recently closed this session (2026-04-19/20, against direct in-session evidence)
 | P052 | ADR-021 release.yml missing `version:` input | End-to-end validated in the 2026-04-19 release; paired with P042's closure |
 | P028 | Governance skills should auto-release (non-AFK) | Verified end-to-end in the 2026-04-19 AFK loop iter 2: push of `f0de540` triggered Release workflow → PR #31 auto-created with version bumps and plugin.json manifest syncs → `release:watch` merged and published both `@windyroad/itil@0.4.5` and `@windyroad/retrospective@0.2.0` to npm (run `24619740990`, merge commit `b401c7b`). No manual intervention within the AFK loop. |
 | P055 | No standard problem-reporting channel for plugin users | Closed 2026-04-20 (commit 038c3de). Part A (OSS intake scaffolding) + Part B (`/wr-itil:report-upstream` skill) both shipped; @windyroad/itil@0.8.0 released to npm. |
+| P029 | Edit gate overhead for governance docs | Closed 2026-04-22 (run-retro Step 4a). Every UserPromptSubmit hook message this session carried the governance-docs exclusion line (docs/problems/, docs/BRIEFING.md, RISK-POLICY.md, .changeset/); edits to docs/problems/091-*.open.md, docs/problems/092-*.open.md, and docs/BRIEFING.md all proceeded without demanding architect/JTBD review. Fix contract (ac9d453, 2026-04-17) held end-to-end. |
+| P059 | install-updates no plugin rename handling | Closed 2026-04-22 (run-retro Step 4a). This session's `/install-updates` Read rename-mapping.json, scanned all 6 projects for enabled keys matching `renames[].from` (zero stale — no sibling has `wr-problem`), and emitted the transparency line "No rename migrations applied this run." per the ADR-030 Confirmation amendment. |
 
 ## Parked
 
