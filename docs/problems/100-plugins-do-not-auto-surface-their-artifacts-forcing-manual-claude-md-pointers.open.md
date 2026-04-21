@@ -106,3 +106,30 @@ Six plugins got the ADR-038 pattern right: advertise, once per session, with a t
 - **P044, P050, P088 (run-retro quality)** — adjacent run-retro quality tickets. Different surfaces; composes with this one on the same SKILL.md only incidentally.
 - **ADR-038** — progressive disclosure + once-per-session budget for UserPromptSubmit governance prose. This ticket extends the pattern to artifact-announcement UserPromptSubmit hooks. Amendment vs sibling decided at implementation time.
 - **ADR-017 / ADR-028** — canonical+sync distribution pattern. The new hooks in `wr-retrospective` and `wr-itil` likely reuse `session-marker.sh` from ADR-038's distribution, so the canonical+sync scaffold applies.
+
+## Design Update (2026-04-22)
+
+User-directed design shape captured via `AskUserQuestion` pre-work prior to kicking off `/wr-itil:work-problems`. Supersedes the Fix Strategy above where they conflict.
+
+**Mechanism** — SessionStart hook if Claude Code supports one; UserPromptSubmit once-per-session (ADR-038) as fallback. Implementation starts by confirming SessionStart hook existence.
+
+**Output shape — user correction to the prior "pointer-only" framing** — *"a short header + pointer to docs/BRIEFING.md is NOT progressive disclosure as that would be all or nothing."* True progressive disclosure for BRIEFING is tiered:
+
+1. **Split `docs/BRIEFING.md` → `docs/briefing/<topic>.md` directory** — per-topic files, each naturally bounded in length.
+2. **Maintain `docs/briefing/README.md`** — index + per-file summaries.
+3. **Session-start injection** — summary-of-the-summary (the critical points only) + pointer to the README. The README then points down into individual files on demand. Tiered, not all-or-nothing.
+
+**run-retro workflow addition** — user proposed: *"Maybe the retro should also ask how helpful each point was."* Helpfulness rating during retrospective drives curation — promote critical points into the roll-up, demote or archive stale ones. Scope decision (keep in P100 vs split) deferred to implementation.
+
+**Sequencing with P099** — ship P100's tiered structure first. P099 (BRIEFING unbounded growth) becomes lower priority or is effectively subsumed, since per-topic files are naturally bounded and the README roll-up stays curated via the helpfulness loop.
+
+**Scope unchanged** — BRIEFING surface only. `docs/problems/README.md` / `wr-itil` remains on-demand.
+
+### Revised investigation tasks (supersede the prior list where they overlap)
+
+- [ ] Confirm whether Claude Code supports a SessionStart hook. If yes, that is the injection surface; if no, fall back to UserPromptSubmit once-per-session.
+- [ ] Design the BRIEFING dir partitioning scheme (topic boundaries, per-file shape, README roll-up format, critical-points extraction rule).
+- [ ] Design the run-retro helpfulness-rating mechanism (in-retro prompt shape; storage; effect on README roll-up). Decide whether to keep in P100 or split into a sibling ticket.
+- [ ] Migration plan for existing `docs/BRIEFING.md` content in adopter projects (one-time split; run-retro gains a "first-time migration" branch).
+- [ ] Architect review at implementation time — likely ADR sibling to ADR-038 (directory migration + helpfulness feedback loop + SessionStart-or-UserPromptSubmit hook is structural, not an amendment).
+- [ ] Effort re-rating candidate: M → L given the directory migration + README maintenance + hook + SKILL changes. Let `/wr-itil:review-problems` handle the recalculation rather than stamping it here.
