@@ -1,6 +1,6 @@
 ---
 name: wr-itil:report-upstream
-description: Report a local problem ticket as a structured issue against an upstream repository, with bidirectional cross-references and SECURITY.md-aware routing for security-classified tickets. Implements the contract in ADR-024.
+description: Report a local problem ticket as a structured issue against an upstream repository, with bidirectional cross-references and SECURITY.md-aware routing for security-classified tickets. Implements the contract in ADR-024, with ADR-033 governing problem-first classifier + default body shape.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 ---
 
@@ -9,6 +9,8 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 File a local `docs/problems/<NNN>` ticket as an issue (or private security advisory) against an upstream repository. Discover upstream issue templates, fall through to a structured default when none exist, route security-classified tickets via the upstream's `SECURITY.md`, and back-write a cross-reference into the local ticket.
 
 This skill implements the contract documented in [ADR-024](../../../docs/decisions/024-cross-project-problem-reporting-contract.proposed.md) (Cross-project problem-reporting contract). All step numbering below maps 1:1 to ADR-024 Decision Outcome.
+
+[ADR-033](../../../docs/decisions/033-report-upstream-classifier-problem-first.proposed.md) (Report-upstream classifier is problem-first) partially supersedes ADR-024 Decision Outcome **Steps 3 and 5 only** — the classifier is problem-first with best-fit backward-compat fallback (per Step 3 below), and the structured default body is problem-shaped (per Step 5 below). ADR-024 Steps 1, 2, 4, 6, 7, 8 and all Consequences / Confirmation clauses remain in force unchanged.
 
 ## Invocation
 
@@ -77,18 +79,28 @@ For each `.yml` template found, fetch the file via `gh api repos/<owner>/<repo>/
 
 ### 3. Classify the local ticket and pick the best-matching template
 
-Heuristic:
-- Local ticket title contains `bug`, `defect`, `crash`, `error`, `fails to`, `broken`, `regression` → classify as `bug`.
-- Local ticket title contains `feature`, `add`, `support for`, `would be nice`, `enhancement` → classify as `feature`.
-- Local ticket title is a question → classify as `question`.
-- The CLI `--classification` argument overrides the heuristic.
+This step is governed by [ADR-033](../../../docs/decisions/033-report-upstream-classifier-problem-first.proposed.md) (Report-upstream classifier is problem-first), which partially supersedes ADR-024 Decision Outcome Step 3. Classification is **problem-first with best-fit backward-compat fallback** — upstream repos that have adopted the problem-first intake shape (per `@windyroad/itil`) are targeted first; older repos that still ship bug/feature/question templates are served via a fallback.
 
-Pick the upstream template whose `name:` (or filename) most closely matches the classification:
-- For `bug`: prefer `bug-report.yml`, `bug.yml`, `bug-report.md`, `bug.md`.
-- For `feature`: prefer `feature-request.yml`, `feature.yml`, `feature-request.md`.
-- For `question`: prefer `question.yml`, `question.md`. If absent, the upstream's `config.yml` likely routes questions elsewhere (Discussions); halt and surface the routing target.
+**Preference order** (first match wins):
 
-Log the matched template name in the Step 7 back-write. If no template matches the classification, fall through to the structured default in Step 5.
+1. **`problem` shape (primary)** — any of the tokens `problem`, `issue`, `concern`, `defect`, `gap` appear in the local ticket title or body; or the body contains a scoped-npm package reference (`@scope/name`); or the body contains any of `root cause`, `reproduction`, `workaround`. This is the default for tickets authored via `/wr-itil:manage-problem`.
+2. **`bug` shape (backward-compat fallback)** — no primary tokens match, and the prose is defect-like (contains `broken`, `fails`, `error`, `bug`, `regression`, or a specific observed-vs-expected contrast). Produces a bug-shaped body only when the upstream has no `problem-report.yml`.
+3. **`feature` shape (backward-compat fallback)** — no primary tokens match, and the prose is proposal-like (contains `would be nice`, `enhancement`, `feature request`, `could we`, `wish`).
+4. **`question` shape (backward-compat fallback)** — trailing fallback when the prose is a genuine question (ends in `?`, contains `how do I`, `is there a way`).
+
+The CLI `--classification` argument overrides the heuristic. The security-path check in Step 4 fires **before** this classifier — security-classified tickets bypass the classifier entirely.
+
+**Template-discovery preference order** (extends ADR-024 Step 1; search the upstream `.github/ISSUE_TEMPLATE/` directory in this order, first match wins):
+
+1. `problem-report.yml` — preferred; the Windy-Road problem-first shape.
+2. `problem.yml` — alternate naming for problem-shaped templates.
+3. `problem-report.md` / `problem.md` — legacy markdown variants of the problem-shaped template.
+4. `bug-report.yml` / `bug.yml` / `bug-report.md` / `bug.md` — if primary classifier picked `bug` shape OR no problem template exists and fallback is `bug`.
+5. `feature-request.yml` / `feature.yml` / `feature-request.md` — `feature` shape fallback.
+6. `question.yml` / `question.md` — `question` shape fallback. If absent, the upstream's `config.yml` likely routes questions elsewhere (Discussions); halt and surface the routing target.
+7. Structured default body per Step 5 below — if no template matches.
+
+Log the matched template name (or `structured default`) in the Step 7 back-write. If no template matches the classification, fall through to the structured default in Step 5.
 
 ### 4. Security-path routing check
 
@@ -102,19 +114,72 @@ If security-classified, route to Step 6. Otherwise, route to Step 5 (public-issu
 
 ### 5. Public-issue path
 
-If the upstream had a matching template (Step 3), fill its required fields from the local ticket:
+This step is governed by [ADR-033](../../../docs/decisions/033-report-upstream-classifier-problem-first.proposed.md) (Report-upstream classifier is problem-first), which partially supersedes ADR-024 Decision Outcome Step 5. The primary structured default body is **problem-shaped** and mirrors the `/wr-itil:manage-problem` ticket shape; the bug-shaped / feature-shaped / question-shaped bodies are retained as fallback-only templates for the backward-compat branches of the Step 3 classifier.
+
+If the upstream had a matching template (Step 3), fill its required fields from the local ticket. Field-mapping table for the problem-first case (problem-report.yml template):
 
 | Upstream template field (typical) | Local ticket source |
 |---|---|
-| `plugin` / `package` / `module` | Inferred from upstream repo name or local ticket's "Affected plugin" section |
+| `plugin` / `package` / `module` | Inferred from upstream repo name or local ticket's "Affected plugin / component" |
 | `version` | Local ticket's environment notes; or `npm view <pkg> version` for the latest if ambiguous |
 | `claude-code-version` | `claude --version` if the report originates from a Claude Code session |
 | `os` | Local ticket's environment notes; or `uname -srm` of the reporting host |
-| `reproduction` | Local ticket's `## Symptoms` section |
-| `expected` | Local ticket's "expected behaviour" line under `## Description` |
-| `actual` | Local ticket's "actual behaviour" line under `## Description` |
+| `description` | Local ticket's `## Description` section |
+| `symptoms` | Local ticket's `## Symptoms` section |
+| `workaround` | Local ticket's `## Workaround` section (or "None identified yet.") |
+| `frequency` | Local ticket's `## Impact Assessment` Frequency line |
+| `evidence` | Commit SHAs, test output, transcript excerpts from Investigation Tasks |
 
-If no template matches, emit the **structured default** body:
+For upstream repos whose matched template is `bug-report.yml` / `feature-request.yml` / `question.yml` (Step 3 backward-compat fallback), the skill fills the corresponding field set: `reproduction` ← `## Symptoms`; `expected` / `actual` ← observed-vs-expected contrast lines under `## Description`; `proposal` (for features) ← `## Description`.
+
+#### Structured default body — problem-shaped (primary, per ADR-033)
+
+Use this body when the Step 3 classifier picked `problem` shape AND the upstream has no `problem-report.yml` / `problem.yml` / `problem-report.md` / `problem.md`:
+
+```markdown
+## Description
+
+<one-paragraph synthesis of the local ticket's Description>
+
+## Symptoms
+
+<bullet list from local ticket's Symptoms>
+
+## Workaround
+
+<from local ticket's Workaround section; "None identified yet." if absent>
+
+## Affected plugin / component
+
+<inferred from the local ticket's Impact Assessment or inferred from context>
+
+## Frequency
+
+<from the local ticket's Impact Assessment "Frequency" line>
+
+## Environment
+
+- Package: <inferred from upstream repo>
+- Version: <detected via npm ls or local ticket's notes>
+- Claude Code version: <claude --version>
+- OS: <uname -srm>
+
+## Evidence
+
+<commit SHAs, test output, transcript excerpts — drawn from the local ticket's Investigation Tasks>
+
+## Cross-reference
+
+Reported from <downstream-repo-url>/<local-ticket-relative-path>
+
+This issue is tracked locally as P<NNN> in the downstream project's `docs/problems/` directory.
+```
+
+The body MUST include the `## Cross-reference` section so Step 7's back-write contract works (the downstream ticket's `## Reported Upstream` section records the upstream URL; the upstream issue body records the downstream reference).
+
+#### Structured default body — bug-shaped (fallback-only)
+
+Use this body only when the Step 3 classifier picked `bug` shape as backward-compat fallback (no primary `problem` tokens matched) AND the upstream has no matching template:
 
 ```markdown
 ## Summary
@@ -139,6 +204,50 @@ If no template matches, emit the **structured default** body:
 - Version: <detected via npm ls or local ticket's notes>
 - Claude Code version: <claude --version>
 - OS: <uname -srm>
+
+## Cross-reference
+
+Reported from <downstream-repo-url>/<local-ticket-relative-path>
+
+This issue is tracked locally as P<NNN> in the downstream project's `docs/problems/` directory.
+```
+
+#### Structured default body — feature-shaped (fallback-only)
+
+Use this body only when the Step 3 classifier picked `feature` shape as backward-compat fallback AND the upstream has no matching template:
+
+```markdown
+## Proposal
+
+<one-paragraph synthesis of the local ticket's Description>
+
+## Motivation
+
+<why this matters, from local ticket's Impact Assessment>
+
+## Alternatives considered
+
+<from local ticket's Root Cause Analysis or Candidate fix options>
+
+## Cross-reference
+
+Reported from <downstream-repo-url>/<local-ticket-relative-path>
+
+This issue is tracked locally as P<NNN> in the downstream project's `docs/problems/` directory.
+```
+
+#### Structured default body — question-shaped (fallback-only)
+
+Use this body only when the Step 3 classifier picked `question` shape as backward-compat fallback AND the upstream has no matching template (and no `config.yml` re-routing to Discussions):
+
+```markdown
+## Question
+
+<the question itself, from the local ticket's title or Description>
+
+## Context
+
+<what prompted the question, from local ticket's Description or Symptoms>
 
 ## Cross-reference
 
@@ -236,13 +345,16 @@ Three distinct AFK branches per the architect review of ADR-024 + ADR-013 Rule 6
 
 ## References
 
-- [ADR-024](../../../docs/decisions/024-cross-project-problem-reporting-contract.proposed.md) — primary contract this skill implements.
+- [ADR-024](../../../docs/decisions/024-cross-project-problem-reporting-contract.proposed.md) — primary contract this skill implements. Steps 1, 2, 4, 6, 7, 8 and all Consequences remain authoritative.
+- [ADR-033](../../../docs/decisions/033-report-upstream-classifier-problem-first.proposed.md) — partially supersedes ADR-024 Decision Outcome Steps 3 + 5; governs the problem-first classifier and problem-shaped structured default body.
 - [ADR-027](../../../docs/decisions/027-governance-skill-auto-delegation.proposed.md) — Step-0 deferral rationale (held for reassessment).
 - [ADR-028](../../../docs/decisions/028-voice-tone-gate-external-comms.proposed.md) — voice-tone gate on `gh issue create` and `gh api .../security-advisories`.
 - [ADR-013](../../../docs/decisions/013-structured-user-interaction-for-governance-decisions.proposed.md) — interaction policy; Rule 1 governs Step 6 missing-SECURITY.md `AskUserQuestion`; Rule 6 governs the commit-gate AFK branch.
 - [ADR-014](../../../docs/decisions/014-governance-skills-commit-their-own-work.proposed.md) — work → score → commit ordering.
 - [ADR-015](../../../docs/decisions/015-on-demand-assessment-skills.proposed.md) — fallback path for `wr-risk-scorer:assess-release`.
 - [P055](../../../docs/problems/055-no-standard-problem-reporting-channel.open.md) — upstream problem ticket (Part B).
+- **P066** — intake templates in this repo adopted the problem-first shape (must ship before P067 so the skill's preference order matches the reference shape).
+- **P067** — driver ticket for the problem-first classifier reform implemented via ADR-033.
 - `packages/itil/skills/manage-problem/SKILL.md` — names the optional `## Reported Upstream` section as an allowed appendage to a problem ticket.
 
 $ARGUMENTS

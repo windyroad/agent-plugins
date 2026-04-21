@@ -1,7 +1,8 @@
 # Problem 067: /wr-itil:report-upstream classifier is not problem-first — picks bug / feature / question and emits a bug-shaped default
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-20
+**Fix Released**: 2026-04-21 (ADR-033 drafted; SKILL.md Steps 3 + 5 rewritten; bats contract test extended to 15 assertions; `@windyroad/itil` minor bump changeset queued).
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Possible (3)
 **Effort**: M — update `packages/itil/skills/report-upstream/SKILL.md` Step 3 (classification heuristic) and Step 5 (structured default body), plus the 9-assertion bats doc-lint test. Likely a sibling-ADR note or an update to ADR-024's Decision Outcome steps 3 and 5 to reflect the problem-first framing.
 **WSJF**: 4.5 — (9 × 1.0) / 2 — Mid-priority; should ship after P066 (which establishes the problem-first shape) so the skill's new default matches the intake shape this repo ships.
@@ -132,6 +133,24 @@ This ticket (P067) remains **Open** as the execution tracker. Closes when:
 - Template-discovery preference order updated.
 - `packages/itil/skills/report-upstream/test/report-upstream-contract.bats` extended with the new preference-order + problem-shaped-body assertions.
 - Cross-references to ADR-033 land in SKILL.md's Related section.
+
+## Fix Released
+
+- **2026-04-21** — `packages/itil/skills/report-upstream/SKILL.md` Step 3 rewritten as problem-first classifier with best-fit backward-compat fallback (preference order: problem → bug → feature → question). Classifier tokens widened to include problem / issue / concern / defect / gap / scoped-npm references / `root cause` / `reproduction` / `workaround`.
+- **2026-04-21** — Step 5 structured default body rewritten to problem shape: Description → Symptoms → Workaround → Affected plugin / component → Frequency → Environment → Evidence → Cross-reference. Bug / feature / question bodies retained as fallback-only templates.
+- **2026-04-21** — Template-discovery preference order extended: `problem-report.yml` / `problem.yml` / `problem-report.md` / `problem.md` searched before `bug-report.yml` / `feature-request.yml` / `question.yml` candidates.
+- **2026-04-21** — `packages/itil/skills/report-upstream/test/report-upstream-contract.bats` extended from 9 to 15 assertions with problem-first checks: ADR-033 cross-reference, classifier-token coverage, template-preference ordering, problem-shaped section order for the structured default, and backward-compat fallback retention.
+- **2026-04-21** — SKILL.md References section cites ADR-033 alongside ADR-024; cross-references added at the top of Step 3 and Step 5 so the authority is visible inline.
+- **ADR-033** — drafted at `docs/decisions/033-report-upstream-classifier-problem-first.proposed.md` (partial supersession of ADR-024 Steps 3 + 5; status: proposed). ADR-024 already carries the `## Amendments` back-pointer (2026-04-21).
+- **Changeset** — `@windyroad/itil` minor bump queued at `.changeset/p067-report-upstream-problem-first.md`; ships with the next release cut.
+
+## Verification
+
+Ticket transitions to Closed when:
+
+- [ ] The `@windyroad/itil` minor-bumped release ships via Changesets (post-merge automation).
+- [ ] A downstream `/wr-itil:report-upstream` invocation on a problem-first local ticket (e.g. a real P<NNN>) emits a problem-shaped structured default body against an upstream with no template — verifying the runtime path matches the SKILL.md prose.
+- [ ] A downstream `/wr-itil:report-upstream` invocation against an upstream with `problem-report.yml` selects that template in preference to `bug-report.yml`.
 
 ## Related
 

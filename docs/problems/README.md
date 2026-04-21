@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-04-21 AFK iter 6 — **P084 transitioned to Verification Pending**: `claude -p` subprocess dispatch for `/wr-itil:work-problems` Step 5 shipped in `@windyroad/itil@0.13.0` (commit 260768f, dispatch swap) + `@windyroad/itil@0.14.0` (commit 7670ffb, per-iteration cost logging). Subprocess-boundary variant of ADR-032 AFK iteration-isolation wrapper now supersedes the P077 Agent-tool variant on the Step 5 surface because Agent-spawned subagents cannot themselves invoke Agent (hard platform restriction — three-source evidence in P084). This AFK iteration itself runs under the shipped `claude -p` dispatch, constituting in-session evidence the fix is live. Prior context (iter 2): P071 slice 2 shipped (`/wr-itil:review-problems` split from `/wr-itil:manage-problem review`; list-problems was slice 1 in @windyroad/itil@0.10.0). P077 shipped; P075 shipped (run-retro Step 4b two-stage ticket-first flow). Major ADR sprint: ADR-028 amended; ADR-031/033/034/035/036/037 drafted; ADR-010/032 amended; ADR-027 superseded. 15 open tickets ranked.
+> Last reviewed: 2026-04-21 AFK iter 7 — **P067 transitioned to Verification Pending**: `/wr-itil:report-upstream` classifier now problem-first per ADR-033 (partial supersession of ADR-024 Steps 3 + 5). Step 3 rewritten with preference order problem → bug → feature → question and widened classifier tokens (problem / issue / concern / defect / gap / scoped-npm refs / root cause / reproduction / workaround). Step 5 structured default now problem-shaped (Description → Symptoms → Workaround → Affected plugin → Frequency → Environment → Evidence → Cross-reference); bug/feature/question bodies retained as fallback-only. Template-discovery preference extended to search `problem-report.yml` / `problem.yml` / `problem-report.md` / `problem.md` before bug/feature/question candidates. Bats contract extended 9 → 15 assertions (full suite: 658/658 green). `@windyroad/itil` minor bump queued. Prior context (iter 6): P084 transitioned to Verification Pending; subprocess dispatch variant of ADR-032 now supersedes P077 Agent-tool variant on the Step 5 surface. Prior context (iter 2): P071 slice 2 shipped; P077 + P075 shipped; ADR-028 amended; ADR-031/033/034/035/036/037 drafted; ADR-010/032 amended; ADR-027 superseded. 14 open tickets ranked.
 > Run `/wr-itil:manage-problem review` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -13,7 +13,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6.0 | P071 | Argument-based skill subcommands are not discoverable in Claude Code autocomplete | 12 High | Open | M |
 | 6.0 | P074 | run-retro does not notice pipeline instability and record corresponding problem tickets | 12 High | Open | M |
 | 6.0 | P078 | Assistant does not offer problem ticket on strong-signal user correction | 12 High | Open | M |
-| 4.5 | P067 | report-upstream classifier is not problem-first | 9 Med | Open | M |
 | 4.5 | P076 | WSJF scoring does not model transitive dependencies (methodology gap) | 9 Med | Open | M |
 | 3.0 | P014 | No lightweight aside invocation for governance skills (background-subagent convention per 2026-04-20 direction) | 12 High | Open | L |
 | 3.0 | P064 | No risk-scoring gate on external communications | 12 High | Open | L |
@@ -69,6 +68,7 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P077 | work-problems Step 5 delegates iterations via the Agent tool (`subagent_type: general-purpose`); ADR-032 amended with AFK iteration-isolation wrapper sub-pattern | commit pending (this AFK iter) | no (0 days) |
 | P084 | work-problems iteration worker has no Agent tool — `claude -p` subprocess dispatch closes the tool-surface gap (ADR-032 subprocess-boundary sub-pattern) | @windyroad/itil@0.13.0 (commit 260768f) + @windyroad/itil@0.14.0 (commit 7670ffb, cost logging) | no (0 days) |
 | P086 | AFK iteration subprocess runs `/wr-retrospective:run-retro` before emitting `ITERATION_SUMMARY` (ADR-032 subprocess-boundary retro-on-exit clause) | commit pending (this AFK iter 7 iter 5) | no (0 days) |
+| P067 | /wr-itil:report-upstream classifier is problem-first (ADR-033 partial supersession of ADR-024 Steps 3 + 5) | commit pending (this AFK iter 7) | no (0 days) |
 
 ## Closed
 

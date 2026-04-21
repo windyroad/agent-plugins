@@ -73,3 +73,88 @@ setup() {
   run grep -F 'AFK behaviour summary' "$SKILL_MD"
   [ "$status" -eq 0 ]
 }
+
+# ─── ADR-033 problem-first classifier contract (P067) ──────────────────────────
+#
+# ADR-033 partially supersedes ADR-024 Decision Outcome Steps 3 + 5 with a
+# problem-first classifier and a problem-shaped structured default body. The
+# following assertions pin the SKILL.md to ADR-033's Confirmation clauses
+# (lines 157-164 of the ADR).
+
+@test "report-upstream: SKILL.md cross-references ADR-033 (ADR-033 Confirmation)" {
+  run grep -F 'ADR-033' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "report-upstream: SKILL.md Step 3 classifier lists problem-first tokens (ADR-033 Step 3)" {
+  # Primary classifier tokens per ADR-033: problem / issue / concern / defect / gap.
+  # All five must appear in the SKILL.md classifier narrative.
+  for token in problem issue concern defect gap; do
+    run grep -iE "\`${token}\`|\"${token}\"|'${token}'|${token} shape|${token}," "$SKILL_MD"
+    [ "$status" -eq 0 ] || {
+      echo "missing classifier token: $token"
+      return 1
+    }
+  done
+}
+
+@test "report-upstream: SKILL.md template-discovery cites problem-report.yml first (ADR-033 Step 3)" {
+  # Preference order: problem-report.yml / problem.yml BEFORE bug-report.yml.
+  run grep -n 'problem-report.yml' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  problem_line=$(grep -n 'problem-report.yml' "$SKILL_MD" | head -1 | cut -d: -f1)
+  bug_line=$(grep -n 'bug-report.yml' "$SKILL_MD" | head -1 | cut -d: -f1)
+  [ -n "$problem_line" ] && [ -n "$bug_line" ]
+  [ "$problem_line" -lt "$bug_line" ]
+}
+
+@test "report-upstream: SKILL.md retains bug/feature/question fallbacks (ADR-033 Step 3 backward compat)" {
+  # Backward-compat fallbacks must still be documented for upstreams that
+  # have not adopted problem-first templates.
+  run grep -F 'bug-report.yml' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'feature-request.yml' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'question.yml' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "report-upstream: SKILL.md structured default uses problem-shaped section order (ADR-033 Step 5)" {
+  # Problem-shaped default body per ADR-033: Description -> Symptoms ->
+  # Workaround -> Affected plugin / component -> Frequency -> Environment
+  # -> Evidence -> Cross-reference. Assert section order in the primary
+  # default block.
+  desc_line=$(grep -n '^## Description$' "$SKILL_MD" | head -1 | cut -d: -f1)
+  symptoms_line=$(grep -n '^## Symptoms$' "$SKILL_MD" | head -1 | cut -d: -f1)
+  workaround_line=$(grep -n '^## Workaround$' "$SKILL_MD" | head -1 | cut -d: -f1)
+  affected_line=$(grep -nE '^## Affected plugin' "$SKILL_MD" | head -1 | cut -d: -f1)
+  freq_line=$(grep -n '^## Frequency$' "$SKILL_MD" | head -1 | cut -d: -f1)
+  env_line=$(grep -n '^## Environment$' "$SKILL_MD" | head -1 | cut -d: -f1)
+  evidence_line=$(grep -n '^## Evidence$' "$SKILL_MD" | head -1 | cut -d: -f1)
+  xref_line=$(grep -n '^## Cross-reference$' "$SKILL_MD" | head -1 | cut -d: -f1)
+
+  [ -n "$desc_line" ] || { echo "missing ## Description"; return 1; }
+  [ -n "$symptoms_line" ] || { echo "missing ## Symptoms"; return 1; }
+  [ -n "$workaround_line" ] || { echo "missing ## Workaround"; return 1; }
+  [ -n "$affected_line" ] || { echo "missing ## Affected plugin / component"; return 1; }
+  [ -n "$freq_line" ] || { echo "missing ## Frequency"; return 1; }
+  [ -n "$env_line" ] || { echo "missing ## Environment"; return 1; }
+  [ -n "$evidence_line" ] || { echo "missing ## Evidence"; return 1; }
+  [ -n "$xref_line" ] || { echo "missing ## Cross-reference"; return 1; }
+
+  [ "$desc_line" -lt "$symptoms_line" ]
+  [ "$symptoms_line" -lt "$workaround_line" ]
+  [ "$workaround_line" -lt "$affected_line" ]
+  [ "$affected_line" -lt "$freq_line" ]
+  [ "$freq_line" -lt "$env_line" ]
+  [ "$env_line" -lt "$evidence_line" ]
+  [ "$evidence_line" -lt "$xref_line" ]
+}
+
+@test "report-upstream: SKILL.md cites ADR-033 as authority for Steps 3 + 5 (ADR-033 Confirmation)" {
+  # ADR-033 must be cited near the Step 3 / Step 5 headings, not only in the
+  # References section, so future maintainers see the authority inline.
+  run grep -niE 'adr-033|033.*problem-first' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  [ "${#lines[@]}" -ge 2 ]
+}

@@ -1,0 +1,5 @@
+---
+"@windyroad/itil": minor
+---
+
+P067 — `/wr-itil:report-upstream` classifier is now problem-first per ADR-033. The Step 3 classifier picks `problem` shape as primary (tokens: problem / issue / concern / defect / gap / scoped-npm reference / root cause / reproduction / workaround) and demotes bug / feature / question to backward-compat fallback shapes. The Step 5 structured default body is problem-shaped (Description / Symptoms / Workaround / Affected plugin / Frequency / Environment / Evidence / Cross-reference); bug-shaped / feature-shaped / question-shaped bodies are retained as fallback-only templates for the corresponding backward-compat branches. Template-discovery preference order now searches `problem-report.yml` / `problem.yml` / `problem-report.md` / `problem.md` before bug / feature / question template candidates. ADR-033 partially supersedes ADR-024 Decision Outcome Steps 3 and 5; ADR-024 Steps 1, 2, 4, 6, 7, 8 and all Consequences remain in force. Ships after P066's intake-template reform (2026-04-20) so the skill's preference order matches the reference intake shape this repo now ships.
