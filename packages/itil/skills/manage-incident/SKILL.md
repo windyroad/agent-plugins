@@ -73,7 +73,8 @@ Severity uses the Impact × Likelihood matrix from `RISK-POLICY.md`, interpreted
 Determine the operation from `$ARGUMENTS`:
 
 - If arguments start with "list" → **delegate to `/wr-itil:list-incidents`** via the Skill tool. See "Deprecated-argument forwarders" below.
-- If arguments start with `I<NNN>` or a bare number → this is an update, mitigate, restore, close, or link
+- If arguments match `<I###> mitigate <action>` → **delegate to `/wr-itil:mitigate-incident <I###> <action>`** via the Skill tool. See "Deprecated-argument forwarders" below.
+- If arguments start with `I<NNN>` or a bare number → this is an update, restore, close, or link
 - Otherwise → declare a new incident
 
 #### Deprecated-argument forwarders (ADR-010 amended + P071)
@@ -87,6 +88,14 @@ When `$ARGUMENTS` contains the word `list` as a top-level argument (not inside a
 > `/wr-itil:manage-incident list is deprecated; use /wr-itil:list-incidents directly. This forwarder will be removed in @windyroad/itil's next major version.`
 
 The forwarder does NOT re-implement the list logic locally — it invokes the Skill tool with `wr-itil:list-incidents` and returns the new skill's output verbatim. Duplicating the scan logic would harden the deprecation window into a permanent fork.
+
+**Forwarder for `<I###> mitigate <action>`** (P071 split slice 6a — new skill `/wr-itil:mitigate-incident`):
+
+When `$ARGUMENTS` matches the shape `<I###> mitigate <action>` (an incident ID followed by the literal word `mitigate` followed by a free-text action), delegate to `/wr-itil:mitigate-incident <I###> <action>` via the Skill tool and emit this systemMessage verbatim:
+
+> `/wr-itil:manage-incident <I###> mitigate <action> is deprecated; use /wr-itil:mitigate-incident <I###> <action> directly. This forwarder will be removed in @windyroad/itil's next major version.`
+
+The forwarder does NOT re-implement the mitigation logic locally — it invokes the Skill tool with `wr-itil:mitigate-incident`, passes `<I###> <action>` through as the data parameters, and returns the new skill's output verbatim. Duplicating the rename + evidence-gate + timeline-append logic would harden the deprecation window into a permanent fork. The data-parameter shape `<I###> <action>` is permitted under ADR-010 amended — only the verb word `mitigate` is being split out.
 
 ### 2. For new incidents: Check for duplicates FIRST
 
@@ -171,15 +180,11 @@ ls docs/incidents/<I###>-*.md 2>/dev/null
 
 Append new observations, hypotheses, or timeline entries. **Every hypothesis must cite evidence.** If the user proposes a hypothesis without evidence, ask via `AskUserQuestion` what evidence supports it before writing.
 
-### 7. For mitigate: Record and transition to mitigating
+### 7. For mitigate: delegate to `/wr-itil:mitigate-incident` (P071 split slice 6a)
 
-When the first mitigation attempt is made:
+The `mitigate` subcommand is now hosted by the `/wr-itil:mitigate-incident` skill. This step exists as a thin-router forwarder — the Step 1 parser recognises the `<I###> mitigate <action>` shape and delegates via the Skill tool. This body is intentionally empty of implementation logic; the canonical documentation of the rename, Status update, evidence-gate pre-flight, and Mitigation attempts append lives in `/wr-itil:mitigate-incident`.
 
-1. `git mv docs/incidents/<I###>-<title>.investigating.md docs/incidents/<I###>-<title>.mitigating.md`
-2. Update the **Status** field to "Mitigating"
-3. Append to **Mitigation attempts**: `[<timestamp> UTC] <action> → <outcome>` (outcome may be "pending verification" initially; update once the verification signal is known)
-
-Pre-flight check before first mitigation: the file must contain at least one hypothesis with cited evidence. If not, block the transition and ask the user what evidence supports the chosen action.
+Do not re-implement the rename or the evidence gate here — delegate. See "Deprecated-argument forwarders" under Step 1 for the canonical systemMessage.
 
 ### 8. For restore: Transition and hand off to manage-problem
 
