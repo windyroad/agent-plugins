@@ -149,8 +149,8 @@ Per ADR-010 amendment, `<verb>-<object>` convention:
 
 **Phased landing plan** (out of scope for this iteration — one slice per AFK iteration):
 
-1. `list-problems` split + forwarder + bats assertions. Smallest delta (list is a pure read-only query).
-2. `review-problems` split. Slightly larger — review includes WSJF re-ranking logic.
+1. **[shipped 2026-04-21, commit 412443f, @windyroad/itil@0.10.0]** `list-problems` split + forwarder + bats assertions. Smallest delta (list is a pure read-only query).
+2. **[shipped 2026-04-21 AFK iter 2, this commit]** `review-problems` split. Slightly larger — review includes WSJF re-ranking logic, auto-transition path, Verification Queue prompt (ADR-022), and the README cache write.
 3. `work-problem` split (singular). Largest of the `manage-problem` set — covers the full "pick + run" flow that the `work-problems` orchestrator currently delegates into.
 4. `transition-problem` split — covers all status transitions.
 5. `list-incidents` split.

@@ -128,7 +128,7 @@ Determine the operation from `$ARGUMENTS`:
 - If arguments start with a number (e.g., "011"), this is an update or transition
 - If arguments contain "list", **delegate to `/wr-itil:list-problems`** via the Skill tool. See "Deprecated-argument forwarders" below.
 - If arguments contain "work", run a **review** first (step 9), then begin working the highest-WSJF problem
-- If arguments contain "review", run the review (step 9) only
+- If arguments contain "review", **delegate to `/wr-itil:review-problems`** via the Skill tool. See "Deprecated-argument forwarders" below.
 - Otherwise, this is a new problem creation
 
 #### Deprecated-argument forwarders (ADR-010 amended + P071)
@@ -143,7 +143,15 @@ When `$ARGUMENTS` contains the word `list` as a top-level argument (not inside a
 
 The forwarder does NOT re-implement the list logic locally — it invokes the Skill tool with `wr-itil:list-problems` and returns the new skill's output verbatim. Duplicating the logic would harden the deprecation window into a permanent fork.
 
-Forwarders for `work`, `review`, `<NNN> known-error`, and `<NNN> close` land in subsequent P071 phased-landing slices (see P071 ticket's "Split proposal" section for the full plan). Until those slices land, the corresponding Step-2+ branches continue to execute inline.
+**Forwarder for `review`** (P071 split slice 2 — new skill `/wr-itil:review-problems`):
+
+When `$ARGUMENTS` contains the word `review` as a top-level argument (not inside a ticket body edit), delegate to `/wr-itil:review-problems` via the Skill tool and emit this systemMessage verbatim:
+
+> `/wr-itil:manage-problem review is deprecated; use /wr-itil:review-problems directly. This forwarder will be removed in @windyroad/itil's next major version.`
+
+The forwarder does NOT re-implement the review logic locally — it invokes the Skill tool with `wr-itil:review-problems` and returns the new skill's output verbatim. Duplicating the Step 9 re-scoring / auto-transition / verification-prompt / README-refresh stack would harden the deprecation window into a permanent fork.
+
+Forwarders for `work`, `<NNN> known-error`, and `<NNN> close` land in subsequent P071 phased-landing slices (see P071 ticket's "Split proposal" section for the full plan). Until those slices land, the corresponding Step-2+ branches continue to execute inline.
 
 ### 2. For new problems: Check for duplicates FIRST
 
