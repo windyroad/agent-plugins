@@ -127,7 +127,7 @@ What "work" means depends on the problem's status:
 Determine the operation from `$ARGUMENTS`:
 - If arguments start with a number (e.g., "011"), this is an update or transition
 - If arguments contain "list", **delegate to `/wr-itil:list-problems`** via the Skill tool. See "Deprecated-argument forwarders" below.
-- If arguments contain "work", run a **review** first (step 9), then begin working the highest-WSJF problem
+- If arguments contain "work", **delegate to `/wr-itil:work-problem`** via the Skill tool. See "Deprecated-argument forwarders" below.
 - If arguments contain "review", **delegate to `/wr-itil:review-problems`** via the Skill tool. See "Deprecated-argument forwarders" below.
 - Otherwise, this is a new problem creation
 
@@ -151,7 +151,15 @@ When `$ARGUMENTS` contains the word `review` as a top-level argument (not inside
 
 The forwarder does NOT re-implement the review logic locally — it invokes the Skill tool with `wr-itil:review-problems` and returns the new skill's output verbatim. Duplicating the Step 9 re-scoring / auto-transition / verification-prompt / README-refresh stack would harden the deprecation window into a permanent fork.
 
-Forwarders for `work`, `<NNN> known-error`, and `<NNN> close` land in subsequent P071 phased-landing slices (see P071 ticket's "Split proposal" section for the full plan). Until those slices land, the corresponding Step-2+ branches continue to execute inline.
+**Forwarder for `work`** (P071 split slice 3 — new skill `/wr-itil:work-problem`, singular):
+
+When `$ARGUMENTS` contains the word `work` as a top-level argument (not inside a ticket body edit), delegate to `/wr-itil:work-problem` via the Skill tool and emit this systemMessage verbatim:
+
+> `/wr-itil:manage-problem work is deprecated; use /wr-itil:work-problem directly. This forwarder will be removed in @windyroad/itil's next major version.`
+
+The forwarder does NOT re-implement the selection logic locally — it invokes the Skill tool with `wr-itil:work-problem` and returns the new skill's output verbatim. Duplicating the freshness-check / AskUserQuestion selection / delegate-to-`manage-problem <NNN>` stack would harden the deprecation window into a permanent fork. Note the singular/plural distinction: the forwarder targets `/wr-itil:work-problem` (singular, one ticket per invocation), NOT `/wr-itil:work-problems` (plural AFK orchestrator). The two names coexist intentionally per P071.
+
+Forwarders for `<NNN> known-error` and `<NNN> close` land in subsequent P071 phased-landing slices (see P071 ticket's "Split proposal" section for the full plan). Until those slices land, the corresponding Step-2+ branches continue to execute inline.
 
 ### 2. For new problems: Check for duplicates FIRST
 
