@@ -175,3 +175,33 @@ setup() {
   run grep -inE "If arguments start with|If arguments contain" "$SKILL_FILE"
   [ "$status" -ne 0 ]
 }
+
+@test "SKILL.md has a dependency-graph-traversal pass for transitive effort (P076)" {
+  # P076: review-problems is the executor for the WSJF transitive-effort
+  # rule. Step 2 assigns marginal effort; a second pass must walk
+  # `## Dependencies` edges and propagate effort per the canonical rule
+  # in /wr-itil:manage-problem's WSJF Prioritisation section. Without
+  # this pass, the marginal-only ranking mis-ranks dependent tickets
+  # above their blockers (the exact failure P076 documents).
+  run grep -inE "transitive[[:space:]]?effort|graph traversal|propagate.*effort|dependency[[:space:]-]?graph" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "SKILL.md transitive-effort pass cites P076 and the canonical rule location (traceability)" {
+  # Audit trail: the Step 2.5 block must cite P076 (motivation) and
+  # point to /wr-itil:manage-problem's WSJF section as the canonical
+  # definition — duplication would fork the contract.
+  run grep -n "P076" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  run grep -inE "manage-problem.*WSJF|WSJF.*manage-problem|canonical" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "SKILL.md transitive re-rate message format matches the canonical shape (P076)" {
+  # Architect correction 4: the re-rate message must be greppable and
+  # consistent across skills. Shape: `P<NNN>: Effort <OLD> → <NEW>
+  # (transitive via <UPSTREAM>)`. review-problems emits this in step 3's
+  # summary output so downstream audit tools can grep the review log.
+  run grep -inE "Effort.*→.*transitive via|transitive via.*P[0-9]" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}

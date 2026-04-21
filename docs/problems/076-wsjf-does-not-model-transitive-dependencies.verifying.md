@@ -1,6 +1,6 @@
 # Problem 076: WSJF scoring in manage-problem does not model transitive dependencies
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-21
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Possible (3)
 **Effort**: M — amend `packages/itil/skills/manage-problem/SKILL.md` WSJF Prioritisation section to define the transitive-dependency rule: a dependent ticket's effort is the max of (own marginal effort, transitive closure of upstream dependencies' efforts). Add a worked example. Amend Step 9b (review re-assess) to walk the dependency graph and propagate effort up. Add bats doc-lint assertions for the new rule. Cross-cutting with review behaviour; no new ADR strictly required because the WSJF section is the canonical location — but a short sibling ADR (or ADR-014-adjacent amendment) is a candidate if the dependency-graph mechanics need wider coverage across the skill suite.
@@ -153,6 +153,21 @@ One-time pass on `docs/problems/*.open.md` + `*.known-error.md` to add `## Depen
 - [ ] Audit pass on current backlog: identify implicit dependencies, add `## Dependencies` sections.
   - Initial implicit-dep observations (to verify during the audit): P070 blocks-on P064; P073 blocks-on P038 + P064; P071 phase-landing slices have internal serial deps (work-problem depends on review-problems).
 - [ ] Exercise end-to-end: run `manage-problem review`; confirm the transitive re-rate fires on P073; confirm WSJF matches P038 by construction.
+
+## Fix Released
+
+Released in `@windyroad/itil` (next minor bump after 0.16.0 — this commit). One-sentence summary: the WSJF Prioritisation section now defines a transitive-effort rule driven off `## Dependencies` `**Blocked by**` edges; the review pass (Step 2.5 in `review-problems`, Step 9b.1 in `manage-problem`) topologically walks the graph, propagates effort, writes an `<!-- transitive: <bucket> via <UPSTREAM> -->` audit comment, and reports each re-rate as `P<NNN>: Effort <OLD> → <NEW> (transitive via <UPSTREAM>)`. Carve-outs: `.closed.md` / `.verifying.md` / `.parked.md` upstreams contribute 0; `**Composes with**` does not propagate; cycles bundle with shared WSJF as a computed artefact.
+
+**Investigation tasks status**:
+- [x] Draft the `## Dependencies` template addition for new problem creation (Step 5).
+- [x] Draft the WSJF Prioritisation transitive-dependency subsection.
+- [x] Draft the Step 9b graph-traversal pseudocode.
+- [x] Architect review: Q1-Q4 answered in this session (Q1 bare IDs; Q2 SKILL.md-first with reassessment-criteria note; Q3 deferred as follow-up; Q4 deferred to next review run — no transition-time re-walk).
+- [x] Add bats doc-lint assertions per ADR-037 pattern — plus 6 behavioural fixture tests exercising the closure algorithm directly.
+- [ ] **DEFERRED (follow-up ticket)**: Audit pass on current backlog — add `## Dependencies` sections to P070, P073, P071 phased-landing slices, P038 / P064 mutual-composition. Per architect guidance, audit is a separate commit to keep this one focused on the mechanism.
+- [ ] **DEFERRED (user-verification)**: Exercise end-to-end on the live backlog; confirm the transitive re-rate fires on P073; confirm WSJF matches P038 by construction.
+
+Awaiting user verification. Review the Transitive dependencies subsection in `packages/itil/skills/manage-problem/SKILL.md`, the Step 2.5 graph traversal in `packages/itil/skills/review-problems/SKILL.md`, and run `/wr-itil:review-problems` on a backlog that contains at least one `## Dependencies` relationship to observe the re-rate fire.
 
 ## Related
 

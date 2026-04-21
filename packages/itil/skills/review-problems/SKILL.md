@@ -49,6 +49,18 @@ For each `docs/problems/*.open.md` and `docs/problems/*.known-error.md` file (sk
     - Re-stage explicitly per the P057 staging trap: `git add <new-path>` after the Edit.
     - This happens automatically — do not ask the user. The transition's fix-strategy is documented; only the shipping is outstanding.
 
+### 2.5. Dependency-graph traversal — propagate transitive effort (P076)
+
+After Step 2 assigns each ticket its **marginal** effort, run a second pass that walks the `## Dependencies` graph and propagates effort up per the transitive-dependency rule defined in `/wr-itil:manage-problem`'s WSJF Prioritisation section (the canonical location). This is a deterministic re-rate — no `AskUserQuestion` required.
+
+1. **Build the graph**: for each `.open.md` / `.known-error.md` ticket, parse the `## Dependencies` section. Record `**Blocked by**` edges (bare IDs) into an adjacency map. Ignore `**Composes with**` (does not propagate) and `**Blocks**` (derivable from inverse).
+2. **Classify upstream status**: upstreams in `.closed.md`, `.verifying.md`, or `.parked.md` contribute **0** to the closure (architect carve-out per P076). Upstreams in `.open.md` or `.known-error.md` contribute their own transitive effort.
+3. **Topologically sort** and compute `Effort_transitive = max(marginal, max{ upstream transitive })`. Cycle-bundle members all receive the bundle's effort = `max{ marginal | members }`.
+4. **Update Effort and WSJF lines** when the transitive effort differs from the marginal. Add a `<!-- transitive: <bucket> via <UPSTREAM> -->` HTML comment on the Effort line so the next review can distinguish a manually-set marginal from a propagated transitive.
+5. **Report each re-rate** in the review summary using the concrete format `P<NNN>: Effort <OLD> → <NEW> (transitive via <UPSTREAM>)`, e.g. `P073: Effort S → XL (transitive via P038)`. Cycle bundles surface a shared line: `Bundle [P038, P064]: effort XL (cycle), WSJF 3.0 (shared)`.
+
+Re-read the WSJF Prioritisation → "Transitive dependencies (P076)" subsection in `packages/itil/skills/manage-problem/SKILL.md` if unsure — that is the canonical rule definition.
+
 ### 3. Present the refreshed ranking
 
 After re-scoring, present three sections matching the README.md format (same rendering used by `/wr-itil:list-problems` and by the README cache — Step 5 writes the same layout):

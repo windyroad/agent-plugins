@@ -92,6 +92,46 @@ WSJF = (8 × 1.0) / 8 = **1.0** — defer until severity climbs or scope shrinks
 
 When estimating effort, read the problem's root cause analysis and fix strategy. If effort is unknown, default to M (2). Effort is a **live estimate**, not a set-once label: re-rate it when root cause is confirmed, when architect review narrows or expands scope, and during each `manage-problem review`. A note capturing the reason for any bucket change makes the ranking audit-able (see steps 7 and 9b).
 
+### Transitive dependencies (P076)
+
+> **Serves**: JTBD-001 (enforce governance without slowing down — queue must not lie), JTBD-006 (progress the backlog while I'm away — AFK orchestrator iterates top-down on a trustworthy rank), JTBD-201 (restore service fast with an audit trail — ranking decisions must be defensible post-hoc).
+
+Effort is scored per-ticket as a **marginal** estimate (the work this ticket adds on top of its upstream dependencies). When a ticket has upstream dependencies — other tickets that must close first before this one can reach "done" — the ticket's effective effort for WSJF purposes is the **transitive closure** of its marginal effort plus all blocking upstreams, not the marginal alone.
+
+**Rule**:
+
+```
+Effort(T)_transitive = max(
+  Effort(T)_marginal,
+  max{ Effort(U)_transitive | U ∈ Blocked_by(T) }
+)
+
+WSJF(T) = (Severity(T) × StatusMultiplier(T)) / Effort(T)_transitive
+```
+
+A dependent ticket cannot reach its "done" state without the upstream work happening first. Scoring the dependent at its marginal-only effort lies about what it costs to deliver — the **queue** would rank it higher than its blocker even though the blocker's work is strictly contained within it.
+
+**Dependency signal**: drive the closure from the ticket's `## Dependencies` section (see the Step 5 template). Only `**Blocked by**` entries propagate effort; `**Composes with**` does NOT propagate — compositional overlap shares surface but neither side strictly blocks.
+
+**Upstream status carve-out**: an upstream ticket in `.closed.md`, `.verifying.md`, or `.parked.md` contributes **0** to the transitive closure. Closed upstream work is done; verifying upstream work is user-side (not dev effort and excluded from dev ranking per the WSJF multiplier table); parked upstream work is suspended (excluded from ranking until un-parked). Without this carve-out, a ticket blocked by a closed ticket would inherit XL forever.
+
+**Cycle handling**: when two or more tickets mutually block each other (e.g., shared gate-surface tickets that each list the other under `**Blocked by**`), treat the strongly-connected component as a **bundle**. The bundle's effective effort is `max{ marginal | members }`. All bundle members surface the same WSJF in review output — the shared WSJF is a **computed artefact** of the rendering, not written as a field into individual ticket files. Bundle members retain their individual Status suffixes and individual ticket files (ADR-022 suffix-based lifecycle).
+
+**Re-rate on upstream status change**: when a dependency transitions to `.closed.md` / `.verifying.md` / `.parked.md`, the dependent ticket's transitive closure shrinks and the effort drops accordingly. Step 9b catches this automatically — no transition-time graph re-walk is required.
+
+**Worked example**: P073 has marginal effort S (one surface-row add). P073 is blocked by P038 (XL). Then:
+
+```
+Effort(P073)_transitive = max(S=1, Effort(P038)_transitive) = max(1, 8) = 8
+WSJF(P073) = (Severity(P073) × 1.0) / 8 = 12 / 8 = 1.5
+```
+
+P073's WSJF matches P038's by construction — P073 cannot out-rank the ticket whose work is strictly contained within it. Contrast with the marginal-only (incorrect) computation: `12 / 2 = 6.0`, which would mis-rank P073 as "top of queue" despite being blocked.
+
+**Determinism**: the rule is deterministic from the graph — no `AskUserQuestion` branch is required when Step 9b re-rates a ticket. The re-rate fires silently and is logged in the review output per the Step 9b re-rate message format.
+
+**Reassessment criteria**: this rule lives inline in manage-problem's SKILL.md (following ADR-022's precedent for inline WSJF additions). If a second skill (e.g., manage-incident or a future cross-plugin `work-backlog` orchestrator) adopts the `## Dependencies` section and the transitive-effort rule, extract to a sibling ADR at that point — wider adoption justifies the ADR cost that today's single-skill scope does not.
+
 ## Working a Problem
 
 What "work" means depends on the problem's status:
@@ -286,9 +326,27 @@ Before writing the problem file, perform a concern-boundary analysis on the gath
 - [ ] Create reproduction test
 - [ ] Create INVEST story for permanent fix
 
+## Dependencies
+
+- **Blocks**: <tickets that can't close until this one does — bare IDs, comma-separated; leave empty if none>
+- **Blocked by**: <tickets that must close first — bare IDs, comma-separated; drives the transitive-effort rule; leave empty if none>
+- **Composes with**: <tickets whose work overlaps but neither blocks the other — does NOT propagate effort; leave empty if none>
+
 ## Related
 
 <links to related files, problems, ADRs>
+```
+
+The `## Dependencies` section uses **bare ticket IDs** (`P038`, not `[P038](./038-...)` link syntax) — review output renders to links on demand. An empty row is valid and explicit: `- **Blocked by**: (none)` reads better than omitting the row. The transitive-effort rule in the WSJF Prioritisation section consumes this section at review time.
+
+**Concrete example** (for P073 referencing two upstreams):
+
+```markdown
+## Dependencies
+
+- **Blocks**: (none)
+- **Blocked by**: P038, P064
+- **Composes with**: (none)
 ```
 
 ### 6. For updates: Edit the existing file
@@ -468,6 +526,27 @@ Parked problems and Verification Pending problems are excluded from WSJF ranking
     - `git mv docs/problems/<NNN>-<title>.open.md docs/problems/<NNN>-<title>.known-error.md`
     - Update the Status field to "Known Error"
     - This happens automatically — do not ask the user
+
+**Step 9b.1: Dependency-graph traversal — propagate transitive effort (P076)**
+
+After every `.open.md` / `.known-error.md` ticket has a marginal effort, run a **second pass** that walks the dependency graph and propagates effort up per the transitive-dependency rule (see the WSJF Prioritisation section's "Transitive dependencies" subsection). This is a deterministic re-rate — no `AskUserQuestion` required.
+
+1. **Build the graph**: for each `.open.md` / `.known-error.md` ticket, parse the `## Dependencies` section. Record `Blocked by` edges (bare IDs) into an adjacency map. Ignore `Composes with` (does not propagate) and `Blocks` (derivable from inverse).
+2. **Classify upstream status**: for each upstream ID referenced in any `Blocked by` edge, resolve the file suffix. Upstreams in `.closed.md`, `.verifying.md`, or `.parked.md` contribute **0** to the closure per the carve-out. Upstreams in `.open.md` or `.known-error.md` contribute their own transitive effort.
+3. **Topologically sort** the open/known-error subgraph so upstream tickets are scored before their dependents. If a cycle is detected (two or more tickets mutually `Blocked by` each other), treat the strongly-connected component as a **bundle** with effort = `max{ marginal | members }`.
+4. **Compute transitive effort** for each ticket in topological order using `Effort_transitive = max(marginal, max{ upstream transitive })`. Cycle-bundle members all receive the bundle's effort.
+5. **Update Effort and WSJF lines**: if a ticket's transitive effort differs from its marginal, edit the Effort line to the transitive bucket (S → M / L / XL as needed), recompute WSJF, and update the Priority and WSJF lines. Write a short audit trail in a `<!-- transitive: <bucket> via <UPSTREAM> -->` HTML comment on the Effort line so the next review can distinguish a manually-set marginal from a propagated transitive.
+6. **Report each re-rate** in the review summary using the concrete format:
+
+   ```
+   P<NNN>: Effort <OLD> → <NEW> (transitive via <UPSTREAM>)
+   ```
+
+   Example: `P073: Effort S → XL (transitive via P038)`. The shape is fixed so downstream audit tools can grep it deterministically.
+
+7. **Cycle-bundle output**: for cycle bundles, surface a shared WSJF line covering all members, e.g. `Bundle [P038, P064]: effort XL (cycle), WSJF 3.0 (shared)`. The shared WSJF is a computed artefact of the review rendering — do NOT write a shared-bundle field into the individual ticket files.
+
+The re-rate pass is part of Step 9b's output — a re-rate row appears in the step 9c ranked table with the transitive effort (not the marginal). Hide the marginal from the main table but preserve it in the ticket's HTML-comment audit trail so a future review knows where the propagation came from.
 
 **Step 9c: Present summary and select problem to work**
 

@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-04-21 AFK iter 7 — **P067 transitioned to Verification Pending**: `/wr-itil:report-upstream` classifier now problem-first per ADR-033 (partial supersession of ADR-024 Steps 3 + 5). Step 3 rewritten with preference order problem → bug → feature → question and widened classifier tokens (problem / issue / concern / defect / gap / scoped-npm refs / root cause / reproduction / workaround). Step 5 structured default now problem-shaped (Description → Symptoms → Workaround → Affected plugin → Frequency → Environment → Evidence → Cross-reference); bug/feature/question bodies retained as fallback-only. Template-discovery preference extended to search `problem-report.yml` / `problem.yml` / `problem-report.md` / `problem.md` before bug/feature/question candidates. Bats contract extended 9 → 15 assertions (full suite: 658/658 green). `@windyroad/itil` minor bump queued. Prior context (iter 6): P084 transitioned to Verification Pending; subprocess dispatch variant of ADR-032 now supersedes P077 Agent-tool variant on the Step 5 surface. Prior context (iter 2): P071 slice 2 shipped; P077 + P075 shipped; ADR-028 amended; ADR-031/033/034/035/036/037 drafted; ADR-010/032 amended; ADR-027 superseded. 14 open tickets ranked.
+> Last reviewed: 2026-04-21 AFK iter 7 — **P076 transitioned to Verification Pending**: WSJF transitive-effort rule now lives inline in `/wr-itil:manage-problem`'s WSJF Prioritisation section. New `### Transitive dependencies (P076)` subsection defines `Effort_transitive = max(marginal, max{ Blocked_by upstreams })` with carve-outs for `.closed.md` / `.verifying.md` / `.parked.md` upstreams (contribute 0), `**Composes with**` non-propagation, cycle-bundling with shared WSJF as computed artefact, a worked example (P073 S + Blocked by P038 XL → transitive XL → WSJF 1.5), and a concrete re-rate message format `P<NNN>: Effort <OLD> → <NEW> (transitive via <UPSTREAM>)`. Step 9b.1 (manage-problem) and mirrored Step 2.5 (review-problems) topologically walk the graph. New `## Dependencies` section added to the Step 5 problem-ticket template. Bats contract: 21 new assertions on `manage-problem-transitive-dependencies.bats` (15 structural + 6 behavioural fixture-based) + 3 new assertions on `review-problems-contract.bats`. Full itil sweep: 340/340 green. `@windyroad/itil` minor bump queued. Prior context (iter 7 iter 1): P067 classifier problem-first per ADR-033. Prior context (iter 6): P084 transitioned to Verification Pending; subprocess dispatch variant of ADR-032 now supersedes P077 Agent-tool variant on the Step 5 surface. 13 open tickets ranked.
 > Run `/wr-itil:manage-problem review` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -13,7 +13,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6.0 | P071 | Argument-based skill subcommands are not discoverable in Claude Code autocomplete | 12 High | Open | M |
 | 6.0 | P074 | run-retro does not notice pipeline instability and record corresponding problem tickets | 12 High | Open | M |
 | 6.0 | P078 | Assistant does not offer problem ticket on strong-signal user correction | 12 High | Open | M |
-| 4.5 | P076 | WSJF scoring does not model transitive dependencies (methodology gap) | 9 Med | Open | M |
 | 3.0 | P014 | No lightweight aside invocation for governance skills (background-subagent convention per 2026-04-20 direction) | 12 High | Open | L |
 | 3.0 | P064 | No risk-scoring gate on external communications | 12 High | Open | L |
 | 3.0 | P065 | No skill scaffolds intake files in downstream projects (re-rated M → L per architect direction) | 12 High | Open | L |
@@ -69,6 +68,7 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P084 | work-problems iteration worker has no Agent tool — `claude -p` subprocess dispatch closes the tool-surface gap (ADR-032 subprocess-boundary sub-pattern) | @windyroad/itil@0.13.0 (commit 260768f) + @windyroad/itil@0.14.0 (commit 7670ffb, cost logging) | no (0 days) |
 | P086 | AFK iteration subprocess runs `/wr-retrospective:run-retro` before emitting `ITERATION_SUMMARY` (ADR-032 subprocess-boundary retro-on-exit clause) | commit pending (this AFK iter 7 iter 5) | no (0 days) |
 | P067 | /wr-itil:report-upstream classifier is problem-first (ADR-033 partial supersession of ADR-024 Steps 3 + 5) | commit pending (this AFK iter 7) | no (0 days) |
+| P076 | WSJF scoring models transitive dependencies (methodology gap — rule now inline in manage-problem SKILL.md + Step 2.5 traversal in review-problems) | commit pending (this AFK iter 7 iter 2) | no (0 days) |
 
 ## Closed
 
