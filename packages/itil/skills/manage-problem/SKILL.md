@@ -125,7 +125,8 @@ What "work" means depends on the problem's status:
 ### 1. Parse the request
 
 Determine the operation from `$ARGUMENTS`:
-- If arguments start with a number (e.g., "011"), this is an update or transition
+- If arguments start with a number (e.g., "011") **followed by a status word** (`known-error`, `verifying`, or `close`), **delegate to `/wr-itil:transition-problem`** via the Skill tool. See "Deprecated-argument forwarders" below.
+- If arguments start with a bare number (e.g., "011" with no status word after it), this is an update flow — handled inline by the ticket-body edit steps (Step 6).
 - If arguments contain "list", **delegate to `/wr-itil:list-problems`** via the Skill tool. See "Deprecated-argument forwarders" below.
 - If arguments contain "work", **delegate to `/wr-itil:work-problem`** via the Skill tool. See "Deprecated-argument forwarders" below.
 - If arguments contain "review", **delegate to `/wr-itil:review-problems`** via the Skill tool. See "Deprecated-argument forwarders" below.
@@ -159,7 +160,15 @@ When `$ARGUMENTS` contains the word `work` as a top-level argument (not inside a
 
 The forwarder does NOT re-implement the selection logic locally — it invokes the Skill tool with `wr-itil:work-problem` and returns the new skill's output verbatim. Duplicating the freshness-check / AskUserQuestion selection / delegate-to-`manage-problem <NNN>` stack would harden the deprecation window into a permanent fork. Note the singular/plural distinction: the forwarder targets `/wr-itil:work-problem` (singular, one ticket per invocation), NOT `/wr-itil:work-problems` (plural AFK orchestrator). The two names coexist intentionally per P071.
 
-Forwarders for `<NNN> known-error` and `<NNN> close` land in subsequent P071 phased-landing slices (see P071 ticket's "Split proposal" section for the full plan). Until those slices land, the corresponding Step-2+ branches continue to execute inline.
+**Forwarder for `<NNN> <status>` transitions** (P071 split slice 4 — new skill `/wr-itil:transition-problem`):
+
+When `$ARGUMENTS` starts with a three-digit ticket ID followed by a status word (`known-error`, `verifying`, or `close`), delegate to `/wr-itil:transition-problem` via the Skill tool and emit the canonical deprecation notice verbatim, naming the specific argument form the user supplied:
+
+> `/wr-itil:manage-problem <NNN> <status> is deprecated; use /wr-itil:transition-problem <NNN> <status> directly. This forwarder will be removed in @windyroad/itil's next major version.`
+
+The parser must distinguish a **bare `<NNN>`** (update flow — handled inline by Step 6) from a **`<NNN> <status>` pair** (transition — delegated). The status-word tokens that trigger the transition forwarder are fixed: `known-error`, `verifying`, `close`. Any other suffix after `<NNN>` routes to the inline update flow per Step 6. This preserves the two legitimate shapes the original subcommand carried while splitting the transition intent out cleanly.
+
+The forwarder does NOT re-implement the Step 7 transition logic locally — it invokes the Skill tool with `wr-itil:transition-problem` and returns the new skill's output verbatim. Duplicating the pre-flight-checks / P063-external-root-cause-detection / P057-staging-trap / P062-README-refresh stack would harden the deprecation window into a permanent fork. The delegated `/wr-itil:transition-problem` skill then re-invokes `/wr-itil:manage-problem <NNN> <status>` to run the authoritative Step 7 block — but routed through the clean-split skill's data-parameter contract, not the deprecated subcommand path. Lifecycle completeness (known-error + verifying + close) is covered per ADR-022's three-status mandate.
 
 ### 2. For new problems: Check for duplicates FIRST
 
