@@ -1,6 +1,6 @@
 # Problem 056: Ticket-creator next-ID lookup greps blob SHAs, producing wrong `origin_max` values
 
-**Status**: Verification Pending
+**Status**: Closed — verified in AFK-iter-7 session 2026-04-21 (4+ clean next-ID computations for P085/P086/P087/P088; sequence 085→086→087→088 with no blob-SHA false-match)
 **Reported**: 2026-04-20
 **Priority**: 4 (Low) — Impact: Minor (2) x Likelihood: Unlikely (2)
 **Effort**: S — one-line fix in two SKILL.md files + bats regression

@@ -1,6 +1,6 @@
 # Problem 075: run-retro's codification-candidate prompt asks "X or Y or create a problem ticket" — the answer is always "create a problem ticket first"
 
-**Status**: Verification Pending
+**Status**: Closed — verified in post-AFK-iter-7 retrospective 2026-04-21 (Step 4b two-stage flow fires: Stage 1 mechanical ticket creation for codification candidates, Stage 2 per-ticket fix-strategy AskUserQuestion)
 **Reported**: 2026-04-21
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Possible (3)
 **Effort**: M — `packages/retrospective/skills/run-retro/SKILL.md` Step 4b rework. Collapse the 19-option AskUserQuestion into a two-stage flow: (1) **every** observation first becomes a problem ticket via `/wr-itil:manage-problem`; (2) the codification decision (skill / agent / hook / settings / script / CI / ADR / JTBD / guide / test fixture / memory) is recorded as the **proposed fix strategy** on the problem ticket, not as an alternative to ticketing. Removes the ticket-this-or-pick-another-shape option from the creation axis; preserves the improvement-axis routing. Bats doc-lint updates; P044 / P050 / P051 existing coverage retuned.

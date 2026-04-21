@@ -1,6 +1,6 @@
 # Problem 062: `manage-problem` does not refresh `docs/problems/README.md` on single-ticket transitions; fast-path cache goes stale silently
 
-**Status**: Verification Pending
+**Status**: Closed — verified in AFK-iter-7 session 2026-04-21 (README refreshed atomically on 4 transitions: iter 1 P084 .open→.verifying; iter 5 P086; iter 6 P067; iter 7 P076)
 **Reported**: 2026-04-20
 **Priority**: 4 (Low) — Impact: Minor (2) x Likelihood: Unlikely (2)
 **Effort**: S — edit `packages/itil/skills/manage-problem/SKILL.md` Step 7 / Step 11 to include a README.md refresh in the transition commit
