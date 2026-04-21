@@ -74,7 +74,10 @@ Determine the operation from `$ARGUMENTS`:
 
 - If arguments start with "list" → **delegate to `/wr-itil:list-incidents`** via the Skill tool. See "Deprecated-argument forwarders" below.
 - If arguments match `<I###> mitigate <action>` → **delegate to `/wr-itil:mitigate-incident <I###> <action>`** via the Skill tool. See "Deprecated-argument forwarders" below.
-- If arguments start with `I<NNN>` or a bare number → this is an update, restore, close, or link
+- If arguments match `<I###> restored` → **delegate to `/wr-itil:restore-incident <I###>`** via the Skill tool. See "Deprecated-argument forwarders" below.
+- If arguments match `<I###> close` → **delegate to `/wr-itil:close-incident <I###>`** via the Skill tool. See "Deprecated-argument forwarders" below.
+- If arguments match `<I###> link P<MMM>` → **delegate to `/wr-itil:link-incident <I###> P<MMM>`** via the Skill tool. See "Deprecated-argument forwarders" below.
+- If arguments start with `I<NNN>` or a bare number → this is an update
 - Otherwise → declare a new incident
 
 #### Deprecated-argument forwarders (ADR-010 amended + P071)
@@ -96,6 +99,30 @@ When `$ARGUMENTS` matches the shape `<I###> mitigate <action>` (an incident ID f
 > `/wr-itil:manage-incident <I###> mitigate <action> is deprecated; use /wr-itil:mitigate-incident <I###> <action> directly. This forwarder will be removed in @windyroad/itil's next major version.`
 
 The forwarder does NOT re-implement the mitigation logic locally — it invokes the Skill tool with `wr-itil:mitigate-incident`, passes `<I###> <action>` through as the data parameters, and returns the new skill's output verbatim. Duplicating the rename + evidence-gate + timeline-append logic would harden the deprecation window into a permanent fork. The data-parameter shape `<I###> <action>` is permitted under ADR-010 amended — only the verb word `mitigate` is being split out.
+
+**Forwarder for `<I###> restored`** (P071 split slice 6b — new skill `/wr-itil:restore-incident`):
+
+When `$ARGUMENTS` matches the shape `<I###> restored` (an incident ID followed by the literal word `restored`), delegate to `/wr-itil:restore-incident <I###>` via the Skill tool and emit this systemMessage verbatim:
+
+> `/wr-itil:manage-incident <I###> restored is deprecated; use /wr-itil:restore-incident <I###> directly. This forwarder will be removed in @windyroad/itil's next major version.`
+
+The forwarder does NOT re-implement the restore logic locally — it invokes the Skill tool with `wr-itil:restore-incident`, passes `<I###>` through as the data parameter, and returns the new skill's output verbatim. Duplicating the rename + verification-signal prompt + manage-problem handoff logic would harden the deprecation window into a permanent fork.
+
+**Forwarder for `<I###> close`** (P071 split slice 6c — new skill `/wr-itil:close-incident`):
+
+When `$ARGUMENTS` matches the shape `<I###> close` (an incident ID followed by the literal word `close`), delegate to `/wr-itil:close-incident <I###>` via the Skill tool and emit this systemMessage verbatim:
+
+> `/wr-itil:manage-incident <I###> close is deprecated; use /wr-itil:close-incident <I###> directly. This forwarder will be removed in @windyroad/itil's next major version.`
+
+The forwarder does NOT re-implement the close logic locally — it invokes the Skill tool with `wr-itil:close-incident`, passes `<I###>` through as the data parameter, and returns the new skill's output verbatim. Duplicating the linked-problem gate + rename logic would harden the deprecation window into a permanent fork.
+
+**Forwarder for `<I###> link P<MMM>`** (P071 split slice 6d — new skill `/wr-itil:link-incident`):
+
+When `$ARGUMENTS` matches the shape `<I###> link P<MMM>` (an incident ID followed by the literal word `link` followed by a problem ID), delegate to `/wr-itil:link-incident <I###> P<MMM>` via the Skill tool and emit this systemMessage verbatim:
+
+> `/wr-itil:manage-incident <I###> link P<MMM> is deprecated; use /wr-itil:link-incident <I###> P<MMM> directly. This forwarder will be removed in @windyroad/itil's next major version.`
+
+The forwarder does NOT re-implement the link logic locally — it invokes the Skill tool with `wr-itil:link-incident`, passes `<I###> P<MMM>` through as the data parameters, and returns the new skill's output verbatim. Duplicating the problem-file-lookup + Linked Problem section write logic would harden the deprecation window into a permanent fork. The data-parameter shape `<I###> P<MMM>` is permitted under ADR-010 amended — only the verb word `link` is being split out.
 
 ### 2. For new incidents: Check for duplicates FIRST
 
@@ -186,69 +213,27 @@ The `mitigate` subcommand is now hosted by the `/wr-itil:mitigate-incident` skil
 
 Do not re-implement the rename or the evidence gate here — delegate. See "Deprecated-argument forwarders" under Step 1 for the canonical systemMessage.
 
-### 8. For restore: Transition and hand off to manage-problem
+### 8. For restore: delegate to `/wr-itil:restore-incident` (P071 split slice 6b)
 
-Pre-flight checks before restore:
+The `restored` subcommand is now hosted by the `/wr-itil:restore-incident` skill. This step exists as a thin-router forwarder — the Step 1 parser recognises the `<I###> restored` shape and delegates via the Skill tool. This body is intentionally empty of implementation logic; the canonical documentation of the pre-flight checks, rename, Status update, Timeline append, and manage-problem handoff lives in `/wr-itil:restore-incident`.
 
-- [ ] At least one mitigation attempt is recorded with outcome
-- [ ] A verification signal is captured (e.g., "error rate back to baseline per Datadog", "user reports normal", "synthetic probe passing")
+Do not re-implement the rename or the problem handoff here — delegate. See "Deprecated-argument forwarders" under Step 1 for the canonical systemMessage.
 
-If checks pass:
+### 9. For close: delegate to `/wr-itil:close-incident` (P071 split slice 6c)
 
-1. `git mv docs/incidents/<I###>-<title>.mitigating.md docs/incidents/<I###>-<title>.restored.md`
-2. Update the **Status** field to "Restored"
-3. Append to **Timeline**: `[<timestamp> UTC] Service restored — <verification signal>`
+The `close` subcommand is now hosted by the `/wr-itil:close-incident` skill. This step exists as a thin-router forwarder — the Step 1 parser recognises the `<I###> close` shape and delegates via the Skill tool. This body is intentionally empty of implementation logic; the canonical documentation of the Linked-Problem gate (accepting `.known-error.md`, `.verifying.md`, and `.closed.md`), the No Problem bypass, and the rename lives in `/wr-itil:close-incident`.
 
-Then perform the **handoff to problem management**:
-
-1. Ask via `AskUserQuestion`: "Service restored. Should I create or update a problem record for the root cause? (a) yes — recommended, (b) no — document why (trivial/one-off)"
-2. If yes, construct a handoff payload:
-   - Incident ID and title
-   - Timeline summary
-   - Top-ranked hypothesis + cited evidence
-   - Mitigation applied + verification signal
-3. Invoke `wr-itil:manage-problem` via the `Skill` tool with the payload as arguments. The problem skill's existing dedupe flow handles new-vs-update.
-4. Capture the returned `P<NNN>` and write a **Linked Problem** section into the incident file:
-   ```markdown
-   ## Linked Problem
-   P<NNN> (<title>) — <status>
-   ```
-5. If the user chose "no", write a **No Problem** section with the justification and skip the handoff:
-   ```markdown
-   ## No Problem
-   <reason — e.g. "one-off cosmic-bit-flip; not reproducible">
-   ```
-
-### 9. For close: Gate on linked problem status
-
-The close operation checks the linked problem's file suffix:
-
-```bash
-linked_id=<extracted from Linked Problem section>
-linked_file=$(ls docs/problems/${linked_id}-*.md 2>/dev/null | head -1)
-```
-
-- If `linked_file` ends with `.known-error.md`, `.verifying.md`, or `.closed.md` → close is allowed (per ADR-022: `.verifying.md` means root cause is confirmed AND fix has been released, which satisfies the "Restored → Closed" handoff at least as well as Known Error did under the old contract)
-- If `linked_file` ends with `.open.md` → close is blocked; report "Linked problem ${linked_id} is still Open. Transition it to Known Error first, or update the Linked Problem reference."
-- If no linked problem and the file has a **No Problem** section → close is allowed
-
-On close:
-
-1. `git mv docs/incidents/<I###>-<title>.restored.md docs/incidents/<I###>-<title>.closed.md`
-2. Update the **Status** field to "Closed"
-3. Append to **Timeline**: `[<timestamp> UTC] Incident closed`
+Do not re-implement the close gate or the rename here — delegate. See "Deprecated-argument forwarders" under Step 1 for the canonical systemMessage.
 
 ### 10. For list: Show active incidents
 
 Read all `.investigating.md`, `.mitigating.md`, and `.restored.md` files in `docs/incidents/`. Extract ID, title, severity, and status. Sort by severity (highest first). Display as a markdown table.
 
-### 11. For link: Attach a problem
+### 11. For link: delegate to `/wr-itil:link-incident` (P071 split slice 6d)
 
-When the user runs `incident <I###> link P<MMM>`:
+The `link` subcommand is now hosted by the `/wr-itil:link-incident` skill. This step exists as a thin-router forwarder — the Step 1 parser recognises the `<I###> link P<MMM>` shape and delegates via the Skill tool. This body is intentionally empty of implementation logic; the canonical documentation of the problem-file lookup and the `## Linked Problem` section write (including the retroactive-link-from-No-Problem case) lives in `/wr-itil:link-incident`.
 
-1. Verify `docs/problems/P<MMM>-*.md` exists
-2. Read or add the **Linked Problem** section with `P<MMM> (<title>) — <status>`
-3. Report the link
+Do not re-implement the link logic here — delegate. See "Deprecated-argument forwarders" under Step 1 for the canonical systemMessage.
 
 ### 12. Edge cases
 
