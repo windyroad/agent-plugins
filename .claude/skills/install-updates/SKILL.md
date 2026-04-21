@@ -74,16 +74,18 @@ Dormant JTBD gate after wr-jtbd install lands. Flagged in the final report.
 
 ### 6. Consent gate (mandatory per ADR-030)
 
-Invoke `AskUserQuestion` with one question, `multiSelect=true`. **Name every detected sibling in the question body** regardless of options count (ADR-030's "list every sibling" requirement).
+Invoke `AskUserQuestion` with one question, `multiSelect=true`.
 
-- **Siblings ≤ 3** — one option per sibling plus `"Dry-run — show the plan but don't install"`.
-- **Siblings > 3** (P061 `maxItems=4` fallback) — four bucketed options:
-  1. `All <N> projects (Recommended)`
-  2. `Current project only`
-  3. `Dry-run — show the plan but don't install`
-  4. The auto-provided `Other — provide custom text` covers custom subsets.
+**Sibling count ≤ 3** — original contract applies: one option per sibling plus `"Dry-run — show the plan but don't install"`.
 
-Either shape satisfies ADR-030 Confirmation. Never install without explicit consent for a sibling.
+**Sibling count > 3 — grouping fallback (P061)**. `AskUserQuestion` caps `maxItems` at 4; fall back to bucketed options, and **name every detected sibling in the question body text** (the cap applies to options, not to the question description, so the full list is still presented per ADR-030's "list every sibling" requirement):
+
+1. `All <N> projects (Recommended)`
+2. `Current project only`
+3. `Dry-run — show the plan but don't install`
+4. The auto-provided `Other — provide custom text` covers custom subsets.
+
+Either shape (≤ 3 or > 3 fallback) satisfies the ADR-030 Confirmation consent gate. Never install without explicit consent for a sibling.
 
 ### 6.5. Auto-migrate ADR-documented stale entries (P059)
 
