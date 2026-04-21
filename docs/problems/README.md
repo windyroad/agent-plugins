@@ -12,6 +12,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6.0 | P070 | report-upstream does not check for existing upstream issues before filing | 12 High | Open | M |
 | 6.0 | P071 | Argument-based skill subcommands are not discoverable in Claude Code autocomplete | 12 High | Open | M |
 | 6.0 | P074 | run-retro does not notice pipeline instability and record corresponding problem tickets | 12 High | Open | M |
+| 6.0 | P078 | Assistant does not offer problem ticket on strong-signal user correction | 12 High | Open | M |
 | 8.0 | P077 | work-problems Step 5 does not delegate to subagent — context pressure accumulates in main orchestrator turn | 16 High | Open | M |
 | 4.5 | P067 | report-upstream classifier is not problem-first | 9 Med | Open | M |
 | 4.5 | P076 | WSJF scoring does not model transitive dependencies (methodology gap) | 9 Med | Open | M |
