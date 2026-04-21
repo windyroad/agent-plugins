@@ -12,19 +12,28 @@
 
 Released 2026-04-22 in the same commit as the Known Error → Verification Pending transition. Awaiting user verification.
 
-In-repo portions of the fix:
+### Amendment 2026-04-22 (same day, during verification)
 
-- **Created `CLAUDE.md` at repo root** (24 lines) — progressive-disclosure pointer file. Points to `docs/decisions/`, `docs/jtbd/`, `RISK-POLICY.md`, `docs/problems/README.md`, `docs/BRIEFING.md`, `docs/STYLE-GUIDE.md`, `docs/VOICE-AND-TONE.md`, `docs/PRODUCT_DISCOVERY.md`. Explicitly notes this is a plugin-dev project (not web UI) so accessibility-first global guidance does not apply. Includes the Windy Road positioning statement ("promote Windy Road's service offering... NOT internal project utilities") migrated from the deleted `project_state.md` memory.
-- **Split `.claude/skills/install-updates/SKILL.md`** (238 lines / 13.5KB → 149 lines / 6.8KB) — runtime steps remain; moved rationale, ADR-030 Confirmation amendment detail, consent-gate shape explanation, edge cases, scope exclusions, and full ADR cross-references to sibling `REFERENCE.md` (93 lines / 6.8KB). SKILL.md references REFERENCE.md anchors on demand. Reference implementation of the progressive-disclosure pattern P097 is expected to generalise (see `docs/BRIEFING.md` "What You Need to Know" entry 2026-04-22 for the pattern contract).
-- **Deleted stale memory files**: `project_state.md` (12 days old — listed renamed skill names like `/wr:problem`, `/wr:adr`; most content duplicated filesystem/git state which auto-memory rules exclude) and `project_jtbd_migration.md` (7 days old — migration complete: `docs/jtbd/` exists in this repo). Updated `MEMORY.md` index.
-- **Added BRIEFING note** documenting the SKILL+REFERENCE progressive-disclosure pattern as an implementation example, with a pointer to the P097 ADR that should formally codify it.
+Two user observations forced a revision of the original CLAUDE.md shape:
+
+1. **Discovery-path correction** — prior to this commit, `docs/BRIEFING.md` was NOT eagerly loaded at session start. `~/CLAUDE.md` didn't reference it, no UserPromptSubmit hook broadcast it, and only run-retro's Step 1 read it. The "Read first each session" directive I added to the project CLAUDE.md *created* a new eager-load path rather than surfacing an existing one — the opposite of what a progressive-disclosure fix should do. Composes with P099 (BRIEFING bloat) and P100 (plugins should auto-surface their artifacts).
+2. **Most CLAUDE.md pointers were workarounds** — 5 of the 7 pointers I added (docs/decisions/, docs/jtbd/, RISK-POLICY.md, docs/STYLE-GUIDE.md, docs/VOICE-AND-TONE.md) are redundant with existing plugin UserPromptSubmit hooks (`wr-architect:architect-detect.sh`, `wr-jtbd:jtbd-eval.sh`, `wr-risk-scorer` gates, `wr-style-guide:style-guide-eval.sh`, `wr-voice-tone:voice-tone-eval.sh`). The user's direction (verbatim): *"we shouldn't have to add these things to CLAUDE.md. It should be automatic."* The remaining two (docs/problems/README.md, docs/BRIEFING.md) are the real gap — the former is contextual (user-confirmed out-of-scope for automatic surfacing), the latter is P100's scope.
+
+**Revised in-repo state** (after the amendment commit):
+
+- **`CLAUDE.md` at repo root** trimmed to project positioning only (4 lines): plugin-dev not web UI framing + Windy Road positioning statement migrated from the deleted `project_state.md` memory. All pointer bullets and non-negotiable-conventions bullets removed — they were redundant with existing plugin hooks, memory, or ticket bodies. The file's remaining purpose: counter the global `~/CLAUDE.md` accessibility preamble and preserve the business-context positioning.
+- **`.claude/skills/install-updates/SKILL.md` split** (238 → 149 lines / 13.5KB → 6.8KB) with sibling `REFERENCE.md` — unchanged from the initial commit. Reference implementation of the progressive-disclosure SKILL.md pattern P097 is expected to generalise.
+- **Stale memory files deleted**: `project_state.md` + `project_jtbd_migration.md`. `MEMORY.md` index reduced 9 → 7 entries. Unchanged.
+- **BRIEFING note** documenting the SKILL+REFERENCE pattern — unchanged.
 
 Out-of-repo portion (user action remaining):
 
 - **`~/CLAUDE.md`** (98 lines / 1540 tokens, loads every session) — not edited. The file has `<!-- accessibility-agents: start/end -->` markers suggesting plugin-managed content; trimming may be clobbered on next install. See the Follow-up section below for recommended user action.
 
 **Verification**:
-- Project `CLAUDE.md` should load at session start on next fresh session and replace/supplement the global file.
+- Project `CLAUDE.md` at repo root is 4 lines of project positioning only; no pointer list; no "read first" directive.
+- `docs/BRIEFING.md` should NOT be auto-loaded at session start (pending P100's automatic-surfacing fix).
+- `docs/decisions/`, `docs/jtbd/`, `RISK-POLICY.md`, `docs/STYLE-GUIDE.md`, `docs/VOICE-AND-TONE.md` remain discoverable via their existing plugin UserPromptSubmit hooks — no regression from the pointer removal.
 - `/install-updates` should still run without error; REFERENCE.md loads only when SKILL.md pointers invite it.
 - The two deleted memory files should not reappear; `MEMORY.md` index shows 7 remaining entries.
 
