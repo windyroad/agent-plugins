@@ -3,8 +3,8 @@
 **Status**: Open
 **Reported**: 2026-04-20
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
-**Effort**: M — extend the P038 voice-tone gate surface inventory + the P064 risk-scoring gate surface inventory to include `PreToolUse:Write` on `.changeset/*.md`. Shared hook with existing gh-issue / gh-pr / npm-publish surfaces; the content evaluator (voice-tone classifier, risk leak-pattern rules) is reused unchanged. One new surface row per ticket, plus documentation of the changeset-authoring gate in ADR-028 (voice-tone) and the P064 sibling ADR when those are drafted.
-**WSJF**: 6.0 — (12 × 1.0) / 2 — High severity; moderate effort. Shares the surface-inventory extension with P038 + P064 so partial sequencing is cheap: if P038 or P064 lands first, adding the `.changeset/*.md` row is a one-line change.
+**Effort**: XL — M → XL 2026-04-21 per **transitive-dependency re-rate** (see P076). P073 cannot reach "done" without P038 (voice-tone gate, XL) AND P064 (risk gate, L) being done first — P073 is a surface extension of both. Marginal P073-only work (adding `.changeset/*.md` as a surface row) is S, but the transitive closure dominates: P038 (XL) + P064 (L) + P073 marginal (S) bundles into XL. Re-review this effort line when P038 or P064 lands — at that point P073 drops back to S or M with the upstream work no longer in-scope.
+**WSJF**: 1.5 — (12 × 1.0) / 8 — Bounded by transitive dependency on P038 (XL, WSJF 1.5). Severity stays at 12 (High) — P073's value is unchanged; only its "to-done" effort changes. A dependent ticket's WSJF cannot exceed its lowest-WSJF upstream dependency's WSJF because the dependent's "done" state requires all upstream work to be done first (P076 principle). M → XL re-rate + 6.0 → 1.5 WSJF re-rate landed together 2026-04-21 per P076 filing.
 
 ## Description
 

@@ -11,9 +11,9 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 |------|-----|-------|----------|--------|--------|
 | 6.0 | P070 | report-upstream does not check for existing upstream issues before filing | 12 High | Open | M |
 | 6.0 | P071 | Argument-based skill subcommands are not discoverable in Claude Code autocomplete | 12 High | Open | M |
-| 6.0 | P073 | No voice-tone or risk gate on changeset authoring (surface extension for P038 + P064) | 12 High | Open | M |
 | 6.0 | P074 | run-retro does not notice pipeline instability and record corresponding problem tickets | 12 High | Open | M |
 | 4.5 | P067 | report-upstream classifier is not problem-first | 9 Med | Open | M |
+| 4.5 | P076 | WSJF scoring does not model transitive dependencies (methodology gap) | 9 Med | Open | M |
 | 3.0 | P014 | No lightweight aside invocation for governance skills (background-subagent convention per 2026-04-20 direction) | 12 High | Open | L |
 | 3.0 | P064 | No risk-scoring gate on external communications | 12 High | Open | L |
 | 3.0 | P065 | No skill scaffolds intake files in downstream projects (re-rated M → L per architect direction) | 12 High | Open | L |
