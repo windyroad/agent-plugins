@@ -65,11 +65,59 @@ Three independent evidence sources confirm this is a hard platform restriction, 
 1. ~~**Add Agent tool to the worker's allowed surface.**~~ **CONFIRMED IMPOSSIBLE.** Subagents cannot spawn subagents at the platform level — no custom `subagent_type` or tool-surface declaration can lift this restriction. Listed here only to document the ruled-out path and prevent re-proposal.
 2. **Extend the PostToolUse marker hook to also fire on Skill-tool invocations of `/wr-architect:review-design` / `/wr-jtbd:review-jobs`.** The skills already do the right work (reading diff, constructing prompt, delegating); the hook could parse the Skill tool's output for the same "Architecture Review: PASS" / "ISSUES FOUND" verdict the current hook looks for. Risk: skill-level review may be shallower than subagent review; verdicts in free-text output may be harder to parse reliably. **Still blocked by the same restriction internally** — today's review skills delegate to `wr-architect:agent` / `wr-jtbd:agent` via the Agent tool, which the worker cannot call. Fix (2) would only work if the review skills ALSO had an in-worker inline path that produced the verdict without the Agent hop — which collapses Fix (2) into Fix (3).
 3. **Add a thin `/wr-governance:mark-reviewed <gate> <verdict> <justification>` skill** that writes the marker directly given a verdict the worker produced inline (worker reads diff, produces PASS/FAIL verdict in its own turn, calls the skill to persist the marker). Risk: bypass path that could be abused; needs audit-trail discipline (the skill records gate, verdict, justification, and worker-identity into an append-only log). **LEAD CANDIDATE post-evidence-update.**
-4. **Chain-from-orchestrator pattern (NEW candidate, per Claude Code docs' "chain subagents from the main conversation" guidance).** The orchestrator (main session) runs architect + JTBD review for each iteration BEFORE spawning the iteration worker, sets the markers via its own Agent tool, then dispatches the worker with the markers already live. Pros: preserves the existing Agent-tool-backed review depth; no hook or skill additions needed. Cons: orchestrator has no preview of the diff the worker will produce, so the review is either scope-level (ticket's intended change) rather than diff-level (actual lines changed), or the orchestrator must loop (dispatch → worker stages diff → worker returns for orchestrator review → orchestrator re-spawns worker to commit). The loop variant doubles the per-iteration turn count.
+4. **Chain-from-orchestrator pattern (NEW candidate, per Claude Code docs' "chain subagents from the main conversation" guidance).** The orchestrator (main session) runs architect + JTBD review for each iteration BEFORE spawning the iteration worker, sets the markers via its own Agent tool, then dispatches the worker with the markers already live. Pros: preserves the existing Agent-tool-backed review depth; no hook or skill additions needed. Cons: orchestrator has no preview of the diff the worker will produce, so the review is either scope-level (ticket's intended change) rather than diff-level (actual lines changed), or the orchestrator must loop (dispatch → worker stages diff → worker returns for orchestrator review → orchestrator re-spawns worker to commit). The loop variant doubles the per-iteration turn count. **Context-cost regression**: Fix (4) runs architect + JTBD subagents in the orchestrator's main turn, so each iteration adds ~4K tokens of review output to main context — re-introducing the exact context-burn problem P077 solved.
 
-**Revised recommendation:** Fix (3) standalone as the primary path. Fix (4)-loop-variant as fallback if the audit-trail discipline of Fix (3) proves unworkable. Fix (1) is impossible; Fix (2) collapses into Fix (3).
+5. **`claude -p` subprocess per iteration (NEW candidate, 2026-04-21 evidence-update iter 2).** The orchestrator shells out via Bash to a fresh `claude -p` (headless print-mode) invocation per iteration instead of spawning a subagent via the Agent tool. The subprocess is a full main Claude Code session — it HAS the Agent tool in its surface, so architect/JTBD/risk-scorer reviews run via the normal subagent path and the gate markers are set natively. Orchestrator reads stdout (the `ITERATION_SUMMARY` block); context isolation is preserved by the process boundary.
 
-Architect review required on Fix (3)'s shape: (a) which gates does `/wr-governance:mark-reviewed` cover — just architect + JTBD, or also risk-scorer, voice-tone, style-guide, a11y? (b) what's the audit-trail shape — append-only log file, git-committed, session-scoped? (c) how does Fix (3) compose with the existing `/wr-architect:review-design` + `/wr-jtbd:review-jobs` skills — replace, augment, or be orthogonal? An ADR amendment to ADR-032 (AFK iteration-isolation wrapper sub-pattern) captures the worker-tool-surface contract.
+   **Pros:**
+   - **Closes P084 natively** rather than working around it. The tool-surface gap disappears entirely.
+   - **Preserves review depth** — full architect + JTBD subagent review per normal path (not inline verdict reasoning). Aligns with ADR-015's on-demand-assessment model.
+   - **ADR-014 PASS** — subprocess commits from its own session; commit gate operates inside the subprocess's session with Agent available.
+   - **No new skill required** (no `/wr-governance:mark-reviewed`).
+
+   **Cons / architect-flagged issues (wr-architect:agent review 2026-04-21):**
+   - **ADR-032 amendment mandatory.** ADR-032 line 91 explicitly names "Agent-tool dispatch" as the AFK iteration-isolation wrapper mechanism. A subprocess variant is either a sibling sub-pattern or a new ADR — it cannot ship without being pinned down in the decision record.
+   - **ADR-013 Rule 6 audit scope is large.** `claude -p` is a non-interactive context; every AskUserQuestion branch reachable from inside the subprocess (including transitive branches in manage-problem, architect review, JTBD review, risk-scorer, voice-tone) must be pre-audited as either (a) policy-authorisable or (b) deferrable via the pending-questions artefact contract. Otherwise iterations silently halt on a Rule 6 fail-safe inside the subprocess and the orchestrator only sees a partial summary. Fix (3) has the same requirement with a much smaller surface (only the inline verdict-producing skill needs auditing).
+   - **Token cost envelope needs quantifying.** Architect's honest worst-case: ~10–20K tokens of system-prompt + SKILL.md re-expansion per iteration on the subprocess side (no prompt-cache carry across subprocesses). Main-context cost remains ~0 (just the stdout parse), but a 30-iteration loop compounds to 300–600K subprocess-side tokens. Trade: cheaper main context vs more total tokens. Must be measured before committing.
+   - **Hook session-id isolation must be documented.** `architect-mark-reviewed.sh` uses `$CLAUDE_SESSION_ID`; the subprocess has a distinct SESSION_ID from the orchestrator, so markers set inside the subprocess are isolated to that subprocess. That's the correct behaviour but must be explicitly documented in the amendment to prevent future contributors from wiring marker-sharing.
+   - **Post-subprocess state re-read by the orchestrator.** ADR-018 Step 6.5 drain trigger must rely on `ITERATION_SUMMARY.commit_sha` rather than session-state continuity, because the subprocess's commit is invisible to the main orchestrator until main re-reads the working tree. Current contract does use the summary field, so PASS — but must be stated in the amendment.
+   - **Reversibility cost** — changing the orchestrator's dispatch mechanism is an amendment-level change; rolling back is harder than removing a skill.
+
+### Empirical verification of Fix (5) (probes ran 2026-04-21 afternoon)
+
+Four probes, total cost $0.94, all passed:
+
+**Probe 1** — basic invocation: `claude -p "Output PROBE_1_OK" --output-format json --max-budget-usd 1.00` → succeeded. Duration 2.8s; cost $0.25; cache-creation 40K tokens (baseline: system prompt + CLAUDE.md + plugins + memory loading).
+
+**Probe 2** — Agent tool in subprocess surface: `claude -p` invoked with instruction to call Agent(general-purpose) for a trivial echo → returned `AGENT_AVAILABLE: INNER_PROBE_OK`. Subprocess successfully spawned sub-subagent via Agent tool. Cost $0.23; note: cache-read 65K tokens — **prompt cache DOES reuse across `claude -p` invocations in the same Bash session**, meaningfully reducing per-iteration cost below the architect's 10–20K re-expansion worst-case after the first invocation.
+
+**Probe 3** — PostToolUse hook integration: `claude -p` invoked to call `wr-architect:agent` via Agent tool, then check for the marker file → returned `AGENT_INVOCATION: success`, `AGENT_VERDICT_LINE: Architecture Review: PASS`, `MARKER_FOUND_ARCHITECT: yes` at `/tmp/architect-reviewed-326a474f-12ed-45f6-bb85-f4f91fb66630` matching the subprocess's own `session_id`. Both architect and JTBD marker files observed. Cost $0.32.
+
+**Probe 4** — permission mode: `claude -p --permission-mode bypassPermissions` allowed Bash without prompts. Cost $0.14.
+
+### Revised recommendation (evidence-update iter 2, 2026-04-21 afternoon)
+
+**Fix (5) `claude -p` subprocess is the LEAD** after empirical verification. All four architect concerns that looked blocking at review time resolve to non-blockers under probe evidence:
+
+| Architect concern | Empirical status | Blocker? |
+|---|---|---|
+| ADR-032 amendment needed | True — amendment required; ADRs are updatable | No |
+| ADR-013 Rule 6 audit scope | Pre-existing AFK requirement; every skill on the AFK path must already satisfy Rule 6 regardless of dispatch mechanism | No |
+| Token cost envelope | Cache reuse observed at 65K read / 15K creation on probe 2; cappable via `--max-budget-usd`; user direction — wasted tokens aren't wasted if used | No |
+| Hook session-id isolation | Confirmed: subprocess markers use subprocess SESSION_ID (as desired) | Documentation only |
+| Post-subprocess state re-read | Already works via `ITERATION_SUMMARY.commit_sha` | No |
+| Reversibility | Dispatch-line swap; trivial rollback | No |
+| Rate-limit / subscription quota | Not verified; user direction — not treating as a blocker | No |
+
+**Dispatch-flag set for Step 5**: `claude -p --permission-mode bypassPermissions --output-format json --max-budget-usd <cap>` with the iteration prompt on stdin or as a positional argument.
+
+**Ranking:**
+- **Fix (5) `claude -p` subprocess** — LEAD. Closes P084 natively; preserves full architect/JTBD review depth via normal Agent-tool path in the subprocess.
+- **Fix (3) `/wr-governance:mark-reviewed`** — demoted to secondary / audit-trail primitive. Still useful in mixed-context governance calls where a subprocess is overkill, but no longer on the critical path for AFK iterations.
+- Fix (4) loop-variant as third-tier fallback only.
+- Fix (1) impossible; Fix (2) collapses into Fix (3).
+
+**ADR amendment scope**: ADR-032 gains a subprocess-boundary sub-pattern entry under the AFK iteration-isolation wrapper. Contract pins down (a) subprocess spawn flags, (b) `ITERATION_SUMMARY` stdout parse shape, (c) hook session-id isolation behaviour, (d) post-subprocess state re-read requirement. Rule 6 audit remains a follow-up investigation task but does not gate the shipment — the audit applies to AFK mode regardless of dispatch mechanism.
 
 ## Related
 
@@ -93,3 +141,7 @@ Architect review required on Fix (3)'s shape: (a) which gates does `/wr-governan
 - [ ] Implement Fix (3) + behavioural bats contract assertions (per `feedback_behavioural_tests.md`: spawn a probe subagent, have it invoke the skill with a PASS verdict, assert the marker file exists at the expected path and a subsequent Write on a gate-covered path succeeds).
 - [ ] Amend ADR-032's AFK iteration-isolation wrapper sub-pattern with the worker-tool-surface contract (explicit: "subagents cannot spawn subagents; verdict-producing path is Skill-tool-based only").
 - [ ] If Fix (3) proves unworkable in architect review, pivot to Fix (4) (chain-from-orchestrator) with the loop-variant's per-iteration turn cost accepted.
+- [ ] **Fix (5) track (concurrent with Fix (3) implementation):** draft ADR-032 amendment (or new ADR) for the `claude -p` subprocess sub-pattern. Amendment must pin down: (a) subprocess spawn mechanism + stdout contract for `ITERATION_SUMMARY`, (b) exit-code semantics + stderr handling + timeout, (c) hook-parity validation across the process boundary, (d) documented hook session-id isolation behaviour, (e) ADR-018 post-subprocess state re-read requirement.
+- [ ] **Fix (5) Rule 6 audit**: inventory every AskUserQuestion branch reachable from inside a `claude -p` iteration subprocess — including transitive branches in manage-problem, `/wr-architect:review-design`, `/wr-jtbd:review-jobs`, `/wr-risk-scorer:assess-release`, and any voice-tone / style-guide review skills invoked during iteration. Classify each as (a) policy-authorisable (ADR-013 Rule 5), (b) deferrable via pending-questions artefact contract (ADR-032), or (c) binding blocker (iteration must halt). If any branch is class (c), Fix (5) is not viable without upstream changes to the affected skill.
+- [ ] **Fix (5) cost envelope measurement**: instrument a single `claude -p` invocation against a representative iteration workload (e.g. P071 slice 5 dry-run) and measure actual subprocess-side token cost (system prompt expansion + SKILL.md loading + review-skill delegation). Compare to the architect's estimated 10–20K tokens/iteration to validate the envelope.
+- [ ] Once Fix (3) is in production AND the Rule 6 audit clears AND the cost envelope is within acceptable bounds: promote Fix (5) as the primary AFK iteration dispatch mechanism. Keep `/wr-governance:mark-reviewed` as an audit-trail primitive for mixed-context uses.

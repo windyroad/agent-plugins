@@ -116,21 +116,43 @@ Record the category alongside the skip reason in the iteration report so Step 2.
 
 If a problem is skipped by this step, add it to a "skipped" list with the reason and loop back to step 3 for the next one.
 
-### Step 5: Work the problem (delegate via Agent tool, per P077)
+### Step 5: Work the problem (dispatch via `claude -p` subprocess, per P084)
 
-**Delegate each iteration to a subagent via the Agent tool** — do NOT invoke `/wr-itil:manage-problem` inline via the Skill tool. Inline Skill-tool invocation expands manage-problem's SKILL.md (500+ lines) into the main orchestrator's context every iteration, accumulates across the AFK loop, and causes silent early-stop (`ALL_DONE` without a documented stop condition firing). This delegation is the AFK iteration-isolation wrapper sub-pattern under ADR-032.
+**Dispatch each iteration to a fresh `claude -p` subprocess via Bash** — do NOT spawn via the Agent tool, do NOT invoke `/wr-itil:manage-problem` inline via the Skill tool.
 
-**Agent call shape:**
+- **Skill-tool inline invocation** expands manage-problem's SKILL.md (500+ lines) into the main orchestrator's context every iteration, accumulates across the AFK loop, and causes silent early-stop (`ALL_DONE` without a documented stop condition firing). This was the original pre-P077 failure mode.
+- **Agent-tool dispatch to a `general-purpose` subagent** (the P077 amendment) works for context isolation but fails at the governance-gate layer: subagents spawned via the Agent tool do NOT have the Agent tool in their own surface (three-source evidence — ToolSearch probe, Claude Code docs at `code.claude.com/docs/en/subagents.md`, empirical runtime error `"No such tool available: Agent. Agent is not available inside subagents."`). Without Agent, the iteration worker cannot set architect + JTBD PreToolUse edit-gate markers (only settable via Agent-tool PostToolUse hook), cannot satisfy the risk-scorer commit gate, and silently halts on every gate-covered iteration. P084 diagnoses and closes this gap.
+- **`claude -p` subprocess dispatch** (this step, per P084 / ADR-032 amendment): the subprocess is a full main Claude Code session with Agent available in its own surface. Governance review runs at full depth via the normal `wr-architect:agent` / `wr-jtbd:agent` / `wr-risk-scorer:pipeline` delegation path inside the subprocess; PostToolUse marker hooks fire correctly matching the subprocess's own `$CLAUDE_SESSION_ID`; the commit gate unlocks natively. Context isolation preserved by the process boundary (each subprocess is a distinct process with its own session state; orchestrator's main context only sees the stdout). This is the AFK iteration-isolation wrapper — subprocess-boundary variant under ADR-032.
 
-- `subagent_type`: `general-purpose` — Option B pinned in P077. Iteration work is general engineering, not specialised domain expertise, and `general-purpose` has `Tools: *` so the subagent can recursively invoke architect / jtbd / risk-scorer subagents for its own gate reviews. Promotion to a typed `wr-itil:work-problems-iteration-worker` subagent remains available if a specialised constraint ever emerges; until then, typing it would just duplicate manage-problem's "always do X" preamble.
-- `description`: `Work P<NNN> (<title>)` — one iteration, identified by the highest-WSJF ticket selected in Steps 3–4.
-- `prompt` (self-contained — the subagent has no prior conversation context):
-  1. **Context**: this is one iteration of the AFK work-problems loop. The user is AFK. The orchestrator selected `P<NNN> (<title>)` as the highest-WSJF actionable ticket.
-  2. **Task**: apply the `/wr-itil:manage-problem` workflow for `work highest WSJF problem that can be progressed non-interactively as the user is AFK`. Follow manage-problem SKILL.md verbatim, including architect / jtbd / style-guide / voice-tone gate reviews and the commit gate (manage-problem Step 11).
-  3. **Constraints**: commit the completed work per ADR-014. Do NOT push, do NOT run `push:watch`, do NOT run `release:watch` — the orchestrator's Step 6.5 owns release cadence. Do NOT invoke `capture-*` background skills (AFK carve-out — ADR-032). Non-interactive defaults apply per ADR-013 Rule 6.
-  4. **Return the iteration summary** (see contract below).
+**Dispatch command shape (Bash):**
 
-**Return-summary contract.** The subagent's final message MUST end with a structured summary block the orchestrator parses without re-reading tool calls. Required fields:
+```bash
+ITERATION_PROMPT=$(cat <<'PROMPT_EOF'
+<iteration prompt body — see below>
+PROMPT_EOF
+)
+
+claude -p \
+  --permission-mode bypassPermissions \
+  --output-format json \
+  "$ITERATION_PROMPT"
+```
+
+**Flag rationale:**
+
+- `--permission-mode bypassPermissions` — handles non-interactive permission prompts. Without this, Bash/Edit/Write calls inside the subprocess halt on approval prompts (no TTY). Alternative modes (`acceptEdits`, `auto`, `dontAsk`) are acceptable if adopters need narrower permission scopes; `bypassPermissions` is the broadest and the empirically-verified path.
+- `--output-format json` — deterministic structured output. The subprocess's final agent message lands in the JSON response's `.result` field; orchestrator extracts `ITERATION_SUMMARY` from that field. Plain-text output would require fragile scraping.
+
+**No per-iteration budget cap.** The dispatch deliberately omits `--max-budget-usd`. Per user direction 2026-04-21: the natural stop condition for an AFK loop is quota exhaustion, not an arbitrary per-iteration dollar cap. A cap would halt iterations before quota is actually exhausted, wasting remaining budget. Runaway-iteration risk is bounded by quota + the orchestrator's Step 6.75 halt on unexpected dirty state + exit-code handling below.
+
+**Iteration prompt body (self-contained — the subprocess has no prior conversation context):**
+
+1. **Context**: this is one iteration of the AFK work-problems loop. The user is AFK. The orchestrator selected `P<NNN> (<title>)` as the highest-WSJF actionable ticket.
+2. **Task**: apply the `/wr-itil:manage-problem` workflow for `work highest WSJF problem that can be progressed non-interactively as the user is AFK`. Follow manage-problem SKILL.md verbatim, including architect / jtbd / style-guide / voice-tone gate reviews and the commit gate (manage-problem Step 11). Because this subprocess has the Agent tool in its own surface, the normal review-via-subagent paths work — no inline-verdict fallback needed.
+3. **Constraints**: commit the completed work per ADR-014. Do NOT push, do NOT run `push:watch`, do NOT run `release:watch` — the orchestrator's Step 6.5 owns release cadence. Do NOT invoke `capture-*` background skills (AFK carve-out — ADR-032). Do NOT use `ScheduleWakeup` under any circumstance (P083 — iteration workers must not self-reschedule). Non-interactive defaults apply per ADR-013 Rule 6.
+4. **Output**: end the final message with the `ITERATION_SUMMARY` block defined below — this is how the orchestrator consumes the iteration's result.
+
+**Return-summary contract** (unchanged from the P077 amendment — the parse shape is dispatch-mechanism-agnostic). The subprocess's final message MUST end with this structured block, extracted by the orchestrator from the JSON `.result` field:
 
 ```
 ITERATION_SUMMARY
@@ -149,14 +171,24 @@ notes: <one-line>
 
 Architect review (R2) requires the commit state fields (`committed` / `commit_sha` / `reason`) so **Step 6.75's Dirty-for-known-reason branch stays evaluable** from the summary alone. JTBD review requires `ticket_id` / `action` / `skip_reason_category` / `outstanding_questions` so Step 2.5 and the Output Format's Completed / Skipped / Outstanding Design Questions tables can be populated deterministically without the orchestrator having to re-parse ticket files.
 
-**Inter-iteration continuity.** Step 6.5 (release-cadence check) and Step 6.75 (inter-iteration verification) stay in the **main orchestrator's turn**, NOT the iteration subagent. Rationale: release-cadence and `git status --porcelain` are orchestration-level concerns; `push:watch`/`release:watch` are long-running waits that would waste iteration-subagent context; the orchestrator needs to see the summary from one iteration before deciding whether to drain before the next.
+**Exit-code semantics.** `claude -p` exits non-zero when the subprocess fails hard — subprocess crash, auth failure, unresolvable permission denial, API/quota exhaustion. The orchestrator reads the exit code BEFORE parsing `.result`:
 
-The manage-problem skill (running inside the iteration subagent) will:
+- Exit 0 → parse `ITERATION_SUMMARY` from `.result` field; proceed to Step 6.
+- Non-zero exit → halt the loop; report the exit code, stderr, and any partial `.result` in the final summary. Do NOT spawn the next iteration. The user returns to a stopped loop with a clear failure reason (e.g. "quota exhausted — resume when quota resets").
+
+**Quota as the natural stop.** The AFK loop runs until quota is exhausted or a stop-condition from Step 2 fires. There is no per-iteration dollar cap; running iterations until quota is actually exhausted maximises backlog progress per quota cycle. Quota-exhaust on a `claude -p` invocation surfaces as a non-zero exit and the orchestrator halts cleanly per the rule above.
+
+**Hook session-id isolation.** Each `claude -p` subprocess has its own `$CLAUDE_SESSION_ID`. Gate markers at `/tmp/architect-reviewed-<ID>`, `/tmp/jtbd-reviewed-<ID>`, `/tmp/risk-scorer-*-<ID>` are scoped to the subprocess's own hook interactions and never shared with the orchestrator's main-turn SESSION_ID. This is the correct behaviour — the orchestrator's main turn runs its own gate flow if it edits gated paths; the subprocess's gate flow is independent. Implementations MUST NOT wire cross-process marker sharing.
+
+**Inter-iteration continuity.** Step 6.5 (release-cadence check) and Step 6.75 (inter-iteration verification) stay in the **main orchestrator's turn**, NOT the iteration subprocess. Rationale: release-cadence and `git status --porcelain` are orchestration-level concerns; `push:watch`/`release:watch` are long-running waits that would waste iteration-subprocess context; the orchestrator needs to see the summary from one iteration before deciding whether to drain before the next. Orchestrator detects subprocess commits by reading the working tree (`git status --porcelain`) and the parsed `ITERATION_SUMMARY.commit_sha` — not session-state continuity with the subprocess.
+
+The manage-problem skill (running inside the iteration subprocess) will:
 
 - Run a review if the cache is stale.
 - Select and work the highest-WSJF problem.
 - Use its built-in non-interactive fallbacks (auto-split multi-concern problems, auto-commit when risk is within appetite).
-- Commit completed work per ADR-014 (the iteration subagent's commit — the orchestrator does NOT commit from its main turn).
+- Delegate architect / JTBD / risk-scorer reviews via the Agent tool (available in the subprocess's surface) at the depth defined in each review skill's SKILL.md.
+- Commit completed work per ADR-014 (the iteration subprocess's commit inside its own session — the orchestrator does NOT commit from its main turn).
 
 ### Step 6: Report progress
 
@@ -226,7 +258,7 @@ When `AskUserQuestion` is unavailable or the user is AFK, the skill (and the del
 
 | Decision Point | Non-Interactive Default |
 |---|---|
-| How each iteration runs (iteration delegation) | Delegate to `subagent_type: general-purpose` via the Agent tool per Step 5 — NOT inline Skill-tool invocation. This is the AFK iteration-isolation wrapper sub-pattern under ADR-032; the main orchestrator consumes the iteration subagent's return-summary contract and does not re-read the subagent's tool calls. Per P077 + ADR-032. |
+| How each iteration runs (iteration delegation) | Dispatch to a fresh `claude -p --permission-mode bypassPermissions --output-format json` subprocess via Bash per Step 5 — NOT Agent-tool dispatch (the Agent-tool-spawned subagent has no Agent in its own surface, so governance gates cannot be satisfied — P084), and NOT inline Skill-tool invocation (expands manage-problem into the orchestrator's context and burns turns — P077). The subprocess is a full main Claude Code session with Agent available, so architect / JTBD / risk-scorer reviews run at full depth; the orchestrator consumes the `ITERATION_SUMMARY` return-shape from the subprocess's JSON stdout. No per-iteration budget cap — natural stop is quota exhaustion. This is the AFK iteration-isolation wrapper — subprocess-boundary variant under ADR-032. Per P084 + P077 + ADR-032. |
 | Which problem to work | Highest WSJF, no prompt needed |
 | Multi-concern split | Auto-split (manage-problem step 4b fallback) |
 | Scope expansion during work | Update problem file, re-score WSJF, move to next problem instead of continuing |
@@ -288,7 +320,9 @@ When every skipped ticket is in the `upstream-blocked` category (stop-condition 
 
 ## Related
 
-- **P077** (`docs/problems/077-work-problems-step-5-does-not-delegate-to-subagent.verifying.md`) — driver for Step 5's Agent-tool delegation and the return-summary contract.
+- **P084** (`docs/problems/084-work-problems-iteration-worker-has-no-agent-tool-so-architect-jtbd-gates-block.open.md`) — driver for Step 5's subprocess-boundary dispatch. Supersedes P077's Agent-tool dispatch on the same Step 5 surface because Agent-tool-spawned subagents cannot themselves invoke Agent (platform restriction), which prevents governance gate markers from being set inside the iteration worker.
+- **P077** (`docs/problems/077-work-problems-step-5-does-not-delegate-to-subagent.verifying.md`) — parent amendment. Established the AFK iteration-isolation wrapper sub-pattern and the `ITERATION_SUMMARY` return contract. P084 is the refinement that swaps the spawn mechanism; the isolation intent and return contract are preserved verbatim.
+- **P083** (`docs/problems/083-work-problems-iteration-worker-prompt-does-not-forbid-schedulewakeup.open.md`) — iteration prompt body forbids `ScheduleWakeup`. Applies equally to subprocess-dispatched iterations.
 - **P036** — inter-iteration verification (Step 6.75); remains in the orchestrator's main turn.
 - **P040** — origin-fetch preflight (Step 0); unchanged.
 - **P041** — release-cadence drain (Step 6.5); remains in the orchestrator's main turn.
@@ -299,6 +333,6 @@ When every skipped ticket is in the `upstream-blocked` category (stop-condition 
 - **ADR-018** (`docs/decisions/018-release-cadence.proposed.md`) — release cadence stays in the orchestrator's main turn, not the iteration subagent.
 - **ADR-019** (`docs/decisions/019-afk-orchestrator-preflight.proposed.md`) — preflight stays in the orchestrator's main turn.
 - **ADR-022** (`docs/decisions/022-problem-verification-pending.proposed.md`) — iteration outcomes map into the return-summary's `outcome` field (`verifying` for a released fix, `known-error` for a root-cause-confirmed ticket awaiting release, etc.).
-- **ADR-032** (`docs/decisions/032-governance-skill-invocation-patterns.proposed.md`) — pattern taxonomy parent; Step 5 is the canonical AFK iteration-isolation wrapper sub-pattern per the ADR-032 amendment that lands with P077.
+- **ADR-032** (`docs/decisions/032-governance-skill-invocation-patterns.proposed.md`) — pattern taxonomy parent; Step 5 implements the AFK iteration-isolation wrapper — subprocess-boundary variant per the P084 amendment (2026-04-21), refining the P077 Agent-tool amendment. The P077 amendment remains in the ADR as the historical Agent-tool variant; the subprocess variant is the lead for new adopters.
 - **ADR-037** (`docs/decisions/037-skill-testing-strategy.proposed.md`) — doc-lint bats contract-assertion pattern used by `test/work-problems-step-5-delegation.bats`.
 - **JTBD-001**, **JTBD-006**, **JTBD-101**, **JTBD-201** — personas whose reliability expectations the iteration-isolation wrapper restores.
