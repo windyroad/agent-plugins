@@ -1,0 +1,136 @@
+# Problem 079: No inbound sync of upstream-reported problems — reports filed via the intake templates never surface in the local backlog
+
+**Status**: Open
+**Reported**: 2026-04-21
+**Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
+**Effort**: M — extend `manage-problem` review step 9a–9e with an inbound-discovery sub-step that queries each configured upstream channel (at minimum: `gh issue list` for this repo's tracker using the `problem-report.yml` template's labels / title markers), caches results in a stable on-disk file (e.g. `docs/problems/.upstream-cache.json`), honours a TTL (default 24 h, tunable), supports a `force-recheck` flag, and renders a new "Inbound Upstream Reports" section in `docs/problems/README.md`. Architect review at implementation time to decide: (a) whether this is an extension of ADR-024 (outbound contract → extended to bidirectional) or a new ADR; (b) cache-file shape (JSON vs markdown); (c) channel list (GH issues only, or also Discussions / Discord where plugin-discord is configured); (d) whether the new-report surface auto-creates local tickets or just lists the inbound reports for the maintainer to triage. May push to L if multi-channel detection needs plugin-level integration.
+
+**WSJF**: 6.0 — (12 × 1.0) / 2 — High severity (every plugin user who files a problem-report via our shipped intake templates currently gets zero maintainer visibility — the entire `P055 Part A` + `ADR-036` scaffolding ends at the reporter's keystroke); moderate effort. Ranks in the current 6.0-tier alongside P070 / P071 / P074 / P078.
+
+## Description
+
+Plugin users have two shipped reporting channels:
+- **This repo's intake templates** (`.github/ISSUE_TEMPLATE/problem-report.yml` — shipped 2026-04-20 under `P055 Part A` + `P066`). Plugin users file GitHub issues on `windyroad/agent-plugins` when they hit a problem.
+- **Downstream-scaffolded intake templates** (per `ADR-036` — `/wr-itil:scaffold-intake` drops the same `problem-report.yml` into downstream OSS projects). Those issues land on the downstream repo's tracker, not ours; inbound sync for those is out of scope for this ticket (see P080's sibling note on bidirectional updates — the downstream-tracker case composes with the bidirectional-update surface, not with this inbound-discovery gap).
+
+For the first channel (this repo), there is no mechanism that makes us aware of newly-filed reports. The maintainer must manually check `gh issue list` or the GitHub UI. Nothing in `/wr-itil:manage-problem review` (Step 9a–9e — the canonical "re-rank the backlog" operation) queries the upstream channel; the README.md cache renders only locally-sourced tickets. Result: a plugin user files a well-structured `problem-report.yml` issue and it sits invisible in `gh issue list` until the maintainer remembers to look.
+
+This breaks the end-to-end promise set up by `P055 Part A` (intake templates shipped), `ADR-024` (report-upstream contract), `ADR-036` (downstream scaffold), and the `plugin-user` persona + `JTBD-301` landed under `P072`. The reporter followed the documented path; we never close the loop.
+
+The user's direction (2026-04-21 interactive): `manage-problem review` should check the configured upstream channels for new reports. Cache the results to avoid thrashing the GitHub API, with a `force-recheck` escape and a default TTL-based auto-recheck on every review.
+
+## Symptoms
+
+- Plugin user files `problem-report.yml` issue on `windyroad/agent-plugins`. Issue sits in GitHub's tracker with no maintainer awareness.
+- Maintainer runs `/wr-itil:manage-problem review` — WSJF table re-renders but doesn't reference the new report. README.md refreshes; the inbound queue is invisible.
+- Maintainer runs `/wr-itil:work-problems` AFK — the orchestrator iterates the local backlog and never sees the upstream report; WSJF scoring ignores it entirely.
+- The triage delay between "reporter files" and "maintainer notices" can stretch days or weeks, even when the reporter's issue is higher-priority than the top of the local backlog.
+- `manage-problem review` prose claims "comprehensive WSJF re-rank" but the scope is local-only; the claim is technically true but misleading for the `JTBD-201` (tech-lead audit-trail) persona that expects end-to-end visibility.
+
+## Workaround
+
+Maintainer manually runs `gh issue list --repo windyroad/agent-plugins --label problem` before each `manage-problem review`, cross-checks against the local backlog, and creates local tickets for any unmatched upstream reports. Error-prone, slow, and doesn't scale beyond a single maintainer. Defeats the point of having an automated re-rank step.
+
+## Impact Assessment
+
+- **Who is affected**:
+  - **plugin-user persona** (`JTBD-301` — report-upstream job) — their report enters a black hole after submission. The `problem-report.yml` structured intake produces high-quality reports, and that quality is wasted if nobody discovers them promptly.
+  - **solo-developer persona** (`JTBD-001` — governance without slowing down) — maintainer must manually poll GitHub to discover new reports, which is exactly the "manually police" pain pattern `JTBD-001` is designed against.
+  - **tech-lead persona** (`JTBD-201` — audit trail) — backlog audit assumes local-backlog-completeness; inbound reports violate that assumption silently.
+  - **plugin-developer persona** (`JTBD-101` — extend the suite) — downstream plugin authors adopting the intake templates via `ADR-036` inherit the same gap for their own projects unless we document the inbound-discovery pattern explicitly.
+- **Frequency**: every upstream report. Rate-of-fire scales with plugin adoption; low now, will grow.
+- **Severity**: High. Systemic failure mode on a shipped end-to-end contract. The outbound scaffolding is in place; the inbound close-the-loop is missing.
+- **Analytics**: N/A today. Post-fix candidate metrics: (1) time-to-triage histogram (reporter-submit to maintainer-acknowledge), (2) inbound-reports count over time, (3) percentage of local tickets that originated upstream (traceability).
+
+## Root Cause Analysis
+
+### Structural
+
+`packages/itil/skills/manage-problem/SKILL.md` Step 9 ("For review: Re-assess all open problems") operates entirely on local state:
+
+- Step 9a: Read `RISK-POLICY.md` — local file.
+- Step 9b: For each open/known-error problem in `docs/problems/*.md` — local glob.
+- Step 9c: Present summary + select problem to work — derived from local files.
+- Step 9d: Check for pending verifications via `docs/problems/*.verifying.md` — local glob.
+- Step 9e: Update files and refresh `README.md` cache — local write.
+
+No step queries external channels. The `## Reported Upstream` section (per `ADR-024` Confirmation criterion 3a) records the outbound link when a ticket WAS reported upstream — but that marker is written at `/wr-itil:report-upstream` invocation time, not refreshed from the upstream side. There is no inbound pull.
+
+`/wr-itil:report-upstream` (per ADR-024) is outbound-only. P070's direction decision (2026-04-20) added dedup-before-filing via an LLM-based semantic comparator, but that comparator runs at outbound time, not inbound — it asks "does my local ticket match an existing upstream issue?" not "are there upstream issues without a matching local ticket?".
+
+`/wr-itil:work-problems` Step 1 scans `docs/problems/README.md` (or the raw local files). No inbound awareness.
+
+### Why it wasn't caught earlier
+
+`ADR-024` scoped the report-upstream contract to outbound only. Inbound was noted as out-of-scope under the reasoning that maintainers could use `gh issue list` manually. That reasoning doesn't hold up once the shipped workflow (`manage-problem review` + `work-problems` AFK) promises a comprehensive backlog view — users reasonably expect the automation to surface inbound reports alongside local tickets.
+
+`ADR-036` scoped downstream scaffolding; it assumes the reports land on the downstream repo's tracker and the downstream maintainer handles inbound triage. For this repo's reports (`windyroad/agent-plugins`), there's no analogous downstream to offload — we ARE the inbound.
+
+`P055 Part A` shipped the templates; `P066` corrected the template shape to problem-first. Neither ticket modelled the inbound-sync step because the scope was "make reporting possible" not "make reports visible".
+
+### Candidate fix
+
+**Option A: Extend `manage-problem review` with an inbound-discovery sub-step (Step 9a-minus-1, or a new Step 8.5).**
+
+The sub-step queries each configured upstream channel, caches results, and renders a new "Inbound Upstream Reports" section in `docs/problems/README.md`. Shape:
+
+1. **Channel configuration** — a small config file (e.g. `docs/problems/.upstream-channels.json`) listing `{ type: "github-issues", repo: "windyroad/agent-plugins", label: "problem", template: "problem-report.yml" }` entries. Default config checked into this repo; adopters edit to suit.
+2. **Cache file** — `docs/problems/.upstream-cache.json` storing `{ last_checked: <ISO timestamp>, reports: [...] }` per channel. TTL default 24 h.
+3. **Fetch mechanism** — `gh issue list` via Bash (or `gh api` for GH Discussions). Must handle auth failures (no GH_TOKEN), rate-limits, and empty results without crashing the review.
+4. **Force-recheck** — CLI flag pattern: `/wr-itil:manage-problem review --force-upstream-recheck` OR sibling skill `/wr-itil:review-problems --force-upstream-recheck` (P071 split). Also: expiry-based auto-recheck when cache is older than TTL.
+5. **Render** — new "## Inbound Upstream Reports" section in `README.md`, listing `{ #issue, title, author, date, matched-local-ticket? }`. Matching against local tickets uses the P070 semantic-comparator infrastructure (architect review at implementation time to decide whether this ticket hard-depends on P070 or duplicates the comparator logic).
+6. **Actionable surfacing** — for unmatched reports, either (a) auto-create local tickets using the `problem-report.yml` content as the description, OR (b) list them for the maintainer to triage via `AskUserQuestion` during the next interactive review, OR (c) both. Architect review to decide; lean direction is (b) first — auto-creation is a big policy step.
+
+Pros: single cohesive surface; leverages existing review step's cache-refresh cadence; no new skill needed.
+Cons: adds an external-dependency (GH API) to every review invocation — must fail-soft.
+
+**Option B: New sibling skill `/wr-itil:sync-upstream-reports` invoked from `manage-problem review` Step 9e.**
+
+Dedicated skill handles the inbound query; review delegates to it. More modular; matches the sibling-skill pattern from `P071` split. May be over-engineered for the current scope.
+
+**Option C: A new ADR that defines the inbound-discovery contract as a first-class primitive.**
+
+The inbound contract becomes a peer of ADR-024's outbound contract. This is the most complete solution and probably the right call given the scope touches multiple existing ADRs (ADR-024, ADR-036) and introduces a new cache + trigger surface.
+
+### Lean direction
+
+**Option C — new ADR defining the inbound contract as a peer of ADR-024's outbound contract.** Paired with Option A's concrete mechanism (review-step inbound-discovery sub-step). This matches the repo's pattern of "ADR-first for cross-cutting discipline, implementation ticket for execution". Single fix ticket (P079) for the implementation execution; the ADR drafting is called out as the first investigation task.
+
+Architect call required at implementation time to finalise ADR shape + extension-vs-new-ADR decision.
+
+### Related sub-concerns
+
+**Sub-concern 1**: the downstream channel (ADR-036-scaffolded) is OUT of scope for P079. Those reports land on the downstream repo's tracker; downstream maintainer handles inbound triage on their side. Our `manage-problem review` checks THIS repo's tracker, not every tracker we've scaffolded into.
+
+**Sub-concern 2**: bidirectional updates (the inverse flow — local ticket transitions trigger upstream comment) are the sibling concern tracked on **P080** — see the Related section. P079 closes the inbound leg; P080 closes the outbound-lifecycle leg; together they make the reporter experience end-to-end.
+
+**Sub-concern 3**: rate-limiting. `gh issue list` on a repo with many issues could be slow or rate-limited. The cache mitigates; the TTL tunes the cost. Worst case (first-run, no cache): one API call per review. Acceptable.
+
+**Sub-concern 4**: multi-channel composition. If Discord (plugin-discord) becomes a reporting channel, the channel-config shape must extend cleanly. The `{ type, ... }` discriminator in the config entry is designed for that.
+
+### Investigation Tasks
+
+- [ ] Architect review: pick Option A / B / C. ADR shape (new ADR vs ADR-024 extension). Decide auto-create-vs-list policy for unmatched reports.
+- [ ] Draft the new ADR (or ADR-024 amendment) documenting the inbound contract.
+- [ ] Design the `.upstream-channels.json` and `.upstream-cache.json` shapes.
+- [ ] Implement the inbound-discovery sub-step in `manage-problem review` (or the dedicated skill per Option B).
+- [ ] Add the "Inbound Upstream Reports" section renderer to `README.md` refresh logic (Step 9e).
+- [ ] Add `--force-upstream-recheck` flag + TTL-expiry auto-recheck.
+- [ ] Compose with P070's semantic-comparator for matched-local-ticket? detection — architect review decides dependency direction.
+- [ ] Bats doc-lint assertions for the new review sub-step (per ADR-037): cache contract, channel-config shape, force-recheck flag, renderer section presence, TTL honour.
+- [ ] End-to-end test: file a synthetic issue via `gh issue create`; run `manage-problem review`; confirm the inbound report surfaces in README.md.
+- [ ] Wire P072's `plugin-user` persona into the Related section of the new ADR — the inbound contract is where the reporter's submission becomes visible to the maintainer.
+
+## Related
+
+- **P080** (`docs/problems/080-no-bidirectional-update-of-upstream-reported-problems.open.md`) — sibling concern. Outbound-lifecycle-update leg; together P079 + P080 close the reporter-loop end-to-end.
+- **P055** (`docs/problems/055-no-standard-problem-reporting-channel.closed.md`) — shipped Part A (intake templates) + Part B (`/wr-itil:report-upstream`). This ticket (P079) closes the inbound-side gap P055 did not model.
+- **P063** (`docs/problems/063-manage-problem-does-not-trigger-report-upstream-for-external-root-cause.verifying.md`) — trigger surface for `/wr-itil:report-upstream` (outbound). Inverse direction.
+- **P066** (`docs/problems/066-intake-templates-split-bug-feature-instead-of-problem.verifying.md`) — problem-first template shape this ticket's discovery logic matches against.
+- **P067** (`docs/problems/067-report-upstream-classifier-is-not-problem-first.open.md`) — same template-shape direction; compatibility dependency.
+- **P070** (`docs/problems/070-report-upstream-does-not-check-for-existing-upstream-issues.open.md`) — outbound dedup-before-filing; shares the semantic-comparator infrastructure this ticket wants to reuse for matched-local-ticket detection.
+- **P072** (`docs/problems/072-no-persona-models-external-repo-reporter.verifying.md`) — `plugin-user` persona + `JTBD-301` that this ticket serves.
+- **ADR-024** (`docs/decisions/024-cross-project-problem-reporting-contract.proposed.md`) — outbound contract this ticket's new ADR / amendment pairs with.
+- **ADR-036** (`docs/decisions/036-scaffold-downstream-oss-intake.proposed.md`) — downstream scaffolding; defines the channel shape this ticket's inbound discovery follows.
+- **ADR-014** (`docs/decisions/014-governance-skills-commit-their-own-work.proposed.md`) — the inbound-discovery sub-step must commit its cache + README refresh per this ADR.
+- **JTBD-001**, **JTBD-101**, **JTBD-201**, **JTBD-301** — personas whose end-to-end promise this ticket restores.
