@@ -7,6 +7,18 @@
 
 **WSJF**: 6.0 — (12 × 1.0) / 2 — High severity (every commit message reaches every reader of `git log`, the PR commits tab, the GitHub release page, and the CHANGELOG — no gate today); moderate marginal effort assuming P038 / P064 land first. If P038 is still XL and unbuilt at implementation time, P082's WSJF drops to 1.5 under the transitive-dependency principle (P076). Sits alongside P038 / P064 / P073 as part of the external-comms surface-completion cluster; the cluster is more valuable when all four land together than any one in isolation.
 
+## Direction decision (2026-04-21, user — interactive AskUserQuestion post-AFK-iter-7)
+
+**Plugin ownership** (per P015/P022/P078/P085 shared-architecture decision 2026-04-21): commit-message gate is split across `@windyroad/voice-tone` (voice concern — AI-sounding output, em-dashes, hedging) and `@windyroad/risk-scorer` (content-risk concern — leaking metrics, secrets, confidentials). NOT a shared `/wr-governance:output-gate` registry.
+
+Implementation options for the dual-concern case (architect call at implementation):
+
+- **Two hooks chained** (one per plugin) — voice-tone fires first on `PreToolUse:Bash` matching `git commit`, then risk-scorer. Each owns its own verdict. Simpler; potential order-dependence.
+- **One hook in one plugin, calling the other via Agent tool** — e.g. voice-tone's hook invokes the risk-scorer pipeline subagent inline. Single invocation point; cross-plugin dependency.
+- **Unified external-comms gate per ADR-028 amended** — ADR-028 already frames external-comms (GitHub issues, PRs, changesets) as a combined voice+risk surface. Extending ADR-028 to include commit messages is the cleanest architectural path. Lean toward this — commit messages ARE external-comms (reach every reader of git log, PR commits tab, CHANGELOG, npm readme).
+
+Blocked on P038 (voice-tone gate on external comms) + P064 (risk-scoring gate on external comms) — both are the parent surface. P082 is marginal-only work on top of both. Per P076 transitive-dependency rule: if P038 or P064 have not landed, P082's WSJF drops.
+
 ## Description
 
 User direction (2026-04-21 interactive, verbatim):

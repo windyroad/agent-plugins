@@ -6,7 +6,27 @@
 **Effort**: XL — shared diagnose-before-implement subagent template + per-skill hypothesis-verification gate + ADR extending 013/014/016 + cross-skill rollout (work-problems, manage-incident, others)
 **WSJF**: 2.0 — (16 × 1.0) / 8
 
-## Direction decision (2026-04-20, user — AFK loop stop-condition #2)
+## Direction decision (2026-04-21, user — interactive AskUserQuestion post-AFK-iter-7)
+
+**Split mechanism**: **Two-phase orchestrator** — diagnose iteration → gate → implement iteration.
+
+Every AFK loop iteration splits into:
+
+1. **Diagnose-only sub-iteration**: subprocess produces a **fix-strategy artefact** (written back to the ticket's `## Fix Strategy` section) WITHOUT making any implementation edits. Output is the strategy, not the code.
+2. **Gate**: user-confirm-or-AFK-policy check on the strategy. Interactive: AskUserQuestion with strategy summary; AFK: policy check (strategy-within-appetite via risk-scorer, or deferred-question artefact per ADR-032 if judgement required).
+3. **Implement-only sub-iteration**: subprocess reads the approved strategy from the ticket's `## Fix Strategy` section, implements against it, commits.
+
+Two subprocess spawns per ticket. Doubles per-iteration cost and duration. In exchange: forces diagnosis to produce auditable artefacts instead of racing to implementation. Aligns with ADR-026 output-grounding (strategy is grounded in its artefact; implementation grounded in the strategy).
+
+**Cost implication**: per the 2026-04-21 AFK-iter-7 data, single-phase iterations cost $2-10 each. Two-phase will approximately double that to $5-20 per ticket. User direction — *"max out the token usage, they are wasted unused"* — aligns with accepting the cost for higher fidelity.
+
+**Implementation surface**: `/wr-itil:work-problems` Step 5 iteration prompt body extended with the two-phase contract. Similar extensions for `/wr-itil:manage-incident` (incident-response two-phase: mitigate-diagnose → gate → mitigate-implement). `/wr-retrospective:run-retro` keeps its single-phase shape (retro is already diagnose-first by design).
+
+**ADR shape**: extend ADR-032 (subprocess-boundary variant from P084) with a two-phase sub-pattern, OR draft a sibling ADR. Architect call at implementation time. Lean: extend ADR-032 — same spawn mechanism, same return-summary contract, just two spawns per ticket instead of one.
+
+Supersedes the 2026-04-20 "shared template, skill-owned gate" direction below (which kept single-phase iterations). Two-phase is the sharper split.
+
+## Direction decision (2026-04-20, user — AFK loop stop-condition #2) — superseded by 2026-04-21 above
 
 **Fix location**: **Both — shared template, skill-owned gate**. Build a reusable `diagnose-first` subagent template (extending ADR-013/014/016) that exposes the hypothesis+evidence+failing-test primitive. Each orchestrator skill (manage-problem, manage-incident, auto-release, feature-implementation flows) owns WHEN to invoke it. Shared reuse + per-skill autonomy.
 

@@ -6,7 +6,18 @@
 **Effort**: XL — new cross-cutting ADR (ID to be minted by `create-adr` at draft time — next free ID is ≥030 as of 2026-04-20; the previously-penciled `014-agent-output-grounding` collides with the accepted ADR-014 governance-commit decision), audit of every agent prompt across the suite (risk-scorer, manage-problem, architect, plan-risk-guidance), WSJF effort-bucket semantics rework, grounding-citation convention (L → XL 2026-04-19 per P047: multi-day, cross-package, new ADR required)
 **WSJF**: 2.0 — (16 × 1.0) / 8
 
-## Direction decision (2026-04-20, user — AFK loop stop-condition #2)
+## Direction decision (2026-04-21, user — interactive AskUserQuestion post-AFK-iter-7)
+
+**Enforcement mechanism**: **Output-filter hook + CLAUDE.md rule combined** (same shape as P078 / P085 / P082 family). 
+
+- **PostToolUse hook** on the assistant-output surface scans for unsupported time claims — hard-coded wall-clock predictions ("this will take 5 minutes", "in 3 seconds"), unjustified duration estimates, forecast language without a cited observable — and blocks with a systemMessage requiring replacement with observable-state language ("I'll monitor the output", "this runs until the test completes"). Mechanical enforcement.
+- **CLAUDE.md mandatory rule** lists the forbidden time-claim shapes, the compliant alternatives, and the rationale (time predictions are fabrication without grounded data — violates ADR-026 output-grounding). Pre-generation guidance reduces hook-fire rate.
+
+**Per-plugin ownership** (per P015/P078/P082/P085 shared-architecture decision 2026-04-21): this hook lives under `@windyroad/voice-tone` or `@windyroad/risk-scorer` — not a shared `/wr-governance:output-gate` registry. Architect review at implementation to decide which plugin owns it; lean toward `voice-tone` (time-claim fabrication is a voice concern).
+
+ADR-level coverage: the shared-ADR draft (per the 2026-04-20 direction below) is still valid — defines the time-fabrication semantics. The hook-vs-registry decision is orthogonal to the ADR's output-grounding contract.
+
+## Direction decision (2026-04-20, user — AFK loop stop-condition #2) — retained (ADR shape still applies)
 
 **ADR numbering**: **Assign next free ADR number** at draft time (not the collided `014-agent-output-grounding` name). `create-adr` Step 3 mints the next available ID (currently ≥030, with `max(local, origin)+1` per P056 fix). Title-kebab remains `agent-output-grounding`. This is a new cross-cutting decision, not an extension or supersession of existing ADR-014 (governance commit) or ADR-016 (WIP verdict).
 

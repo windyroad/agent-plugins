@@ -6,7 +6,28 @@
 **Effort**: XL — new ADR (docs/decisions/NNN-test-content-quality-review.proposed.md, ID to be minted at creation per P022 renumber rule), ADR-002 dependency-graph update if any (tdd → jtbd soft dep), per-framework invariant mapping (Jest/Vitest/Mocha/Bats/pytest/Go/Gherkin), gate + agent enforcement surfaces (L → XL 2026-04-19 per P047: multi-day, cross-package, new ADR required)
 **WSJF**: 2.0 — (16 × 1.0) / 8
 
-## Direction decisions (2026-04-20, user — AFK loop stop-condition #2)
+## Direction decision (2026-04-21, user — interactive AskUserQuestion post-AFK-iter-7)
+
+**BDD enforcement scope**: **three features, gated on BDD-opt-in** per project.
+
+Selected (multi-select):
+1. **Gherkin test-name grammar (Given/When/Then)** — enforce test names follow the Given/When/Then shape via naming regex. Catches unstructured names ("test_the_thing").
+2. **Example-mapping artefact before RED** — require a `.example-map.md` file naming the behaviour + example + rule + question before any RED test can land.
+3. **Rule/question tracking in test comments** — require every test file's header comment to link to a Rule and at least one Question from the example map.
+
+**User qualifier (verbatim)**: *"but this only applies to projects using BDD"*.
+
+**Opt-in mechanism**: the TDD plugin detects BDD-discipline at runtime and only enforces the three rules when BDD is opted in. Detection candidates:
+
+- **Explicit setting**: `.claude/settings.json` key `tdd.bdd: true` — cleanest, adopter declares intent.
+- **Heuristic**: presence of `.feature` files OR a BDD test runner (e.g. Cucumber, Behave, godog) in `package.json` / `requirements.txt` / `go.mod`.
+- **Per-file flag**: BDD rules fire only on test files tagged `@bdd` in their header comment.
+
+Lean: **explicit setting** — deterministic, adopter-controlled, no false-positive risk. Architect review at implementation can decide whether to combine with the heuristic as a fallback.
+
+Supersedes the 2026-04-20 direction below (which proposed gate + advisory agent without the BDD-opt-in qualifier). The opt-in gate protects non-BDD projects from false-positive enforcement noise.
+
+## Direction decisions (2026-04-20, user — AFK loop stop-condition #2) — superseded by 2026-04-21 above on the opt-in qualifier
 
 Shared with P015 (both bound to the same ADR candidate):
 

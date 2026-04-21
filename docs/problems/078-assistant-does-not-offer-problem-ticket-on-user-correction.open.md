@@ -16,7 +16,18 @@
 
 **Why combined, not just hook or just CLAUDE.md**: same reasoning as P085's fix shape — hook-only leaves a window where the assistant doesn't understand *why* it's being reminded; CLAUDE.md-only has the same failure mode that memory guidance already demonstrates (pattern recurs despite guidance). Combined is the architecture that architect + risk-scorer already use elsewhere in this repo.
 
-**Composition opportunity**: P085 (prose-ask enforcement gap) proposes the same hook architecture. The two tickets should share the hook file and marker pattern rather than ship separate hooks. ADR amendment at implementation time to pin the shared-hook contract.
+**Composition note (2026-04-21 user-direction update)**: P015/P082/P085/P078 all propose output-filter hooks on the assistant-output surface. User direction via AskUserQuestion post-AFK-iter-7: **one hook per concern under `/wr-<plugin>:*` scope** — NOT a shared `/wr-governance:output-gate` registry.
+
+Applied to this ticket: the correction-pattern hook lives inside `@windyroad/itil` (itil owns governance-interaction concerns; correction signal → offer `capture-problem` routes through itil's own capture-* sibling). NOT a shared hook file across plugins.
+
+Ownership mapping across the family:
+- **P078** (correction → offer ticket) → `@windyroad/itil` hook.
+- **P085** (prose-ask → block + reformat) → `@windyroad/itil` hook (governance-interaction concern).
+- **P082** (commit-message voice/risk gate) → split across `@windyroad/voice-tone` (voice concern) + `@windyroad/risk-scorer` (risk concern). Architect review at implementation to decide composition (two hooks chained, or one hook calling both).
+- **P022** (time-fabrication output filter) → `@windyroad/voice-tone` or `@windyroad/risk-scorer`; architect call.
+- **P015** (TDD vague Gherkin outcome steps) → `@windyroad/tdd` hook.
+
+Each plugin owns its own detection logic. No shared registry. Higher total hook count; cleaner ownership; consistent with ADR-002 dependency-graph discipline (plugins don't reach into each other's hook paths).
 
 ## Description
 

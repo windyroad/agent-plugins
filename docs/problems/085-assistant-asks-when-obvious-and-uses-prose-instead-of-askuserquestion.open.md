@@ -6,6 +6,18 @@
 **Effort**: M — requires one or more of: (1) hook on assistant output that detects prose-ask patterns ("Want me to...", "Should I...", "A or B?") and blocks the response with a systemMessage reminder; (2) hook on assistant output that detects consent-gate-when-obvious patterns (immediately-prior user message contains a direction/yes/act-verb AND next assistant message contains a question) and blocks; (3) CLAUDE.md-level mandatory rules promoted from memory feedback; (4) memory feedback addendum making the two rules explicit in the same file. Architect review at implementation to decide hook shape.
 **WSJF**: 8.0 — (16 × 1.0) / 2 — High severity (two explicit in-session corrections reinforcing memory guidance that already existed; pattern recurs despite the memory being read at session start); moderate effort. Sits at the current top of the queue with P084 (worker tool-surface) as the other WSJF-8 ticket.
 
+## Direction decision (2026-04-21, user — interactive AskUserQuestion post-AFK-iter-7)
+
+**Enforcement mechanism**: **Hook + CLAUDE.md rule combined** (same shape as P078 direction — composed family).
+
+**Plugin ownership** (per P015/P022/P078/P082 shared-architecture decision 2026-04-21): the prose-ask + ask-when-obvious hook lives inside `@windyroad/itil` — governance-interaction concern, same as P078. NOT a shared `/wr-governance:output-gate` registry across plugins.
+
+Implementation surface:
+- **PostToolUse hook** (on assistant-output) detects prose-ask patterns ("Want me to", "Should I", "Option A or Option B?", "(a)/(b)/(c)?") AND ask-when-obvious patterns (prior user message contains direction-pinning + current assistant response contains a question). Blocks with systemMessage requiring either (a) act-without-asking (if the decision is obvious), or (b) emit an AskUserQuestion call (if genuinely ambiguous).
+- **CLAUDE.md mandatory rule** promotes the combined memory-captured guidance (`feedback_act_on_obvious_decisions.md`) to a repo-level rule. Pre-generation guidance.
+
+Composition with P078 (correction → offer ticket): both hooks live inside `@windyroad/itil`. Implementation question at architect review: one hook file with two detection functions, or two hook files each with one. Lean: one file with a registry of detection functions — cleaner composition, shared marker pattern.
+
 ## Description
 
 Two related behavioural gaps in the same axis — the assistant asking the user when it shouldn't, or asking in the wrong shape when it should.
