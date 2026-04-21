@@ -1,6 +1,6 @@
 # Problem 084: work-problems iteration-worker has no Agent tool so architect + JTBD edit gates AND risk-scorer commit gate block all progress
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-21 (AFK iter 6, during P071 slice 5 attempt)
 **Priority**: 16 (High) — Impact: High (4) x Likelihood: Likely (4)
 **Effort**: M
@@ -145,3 +145,19 @@ Four probes, total cost $0.94, all passed:
 - [ ] **Fix (5) Rule 6 audit**: inventory every AskUserQuestion branch reachable from inside a `claude -p` iteration subprocess — including transitive branches in manage-problem, `/wr-architect:review-design`, `/wr-jtbd:review-jobs`, `/wr-risk-scorer:assess-release`, and any voice-tone / style-guide review skills invoked during iteration. Classify each as (a) policy-authorisable (ADR-013 Rule 5), (b) deferrable via pending-questions artefact contract (ADR-032), or (c) binding blocker (iteration must halt). If any branch is class (c), Fix (5) is not viable without upstream changes to the affected skill.
 - [ ] **Fix (5) cost envelope measurement**: instrument a single `claude -p` invocation against a representative iteration workload (e.g. P071 slice 5 dry-run) and measure actual subprocess-side token cost (system prompt expansion + SKILL.md loading + review-skill delegation). Compare to the architect's estimated 10–20K tokens/iteration to validate the envelope.
 - [ ] Once Fix (3) is in production AND the Rule 6 audit clears AND the cost envelope is within acceptable bounds: promote Fix (5) as the primary AFK iteration dispatch mechanism. Keep `/wr-governance:mark-reviewed` as an audit-trail primitive for mixed-context uses.
+
+## Fix Released
+
+Fix (5) `claude -p` subprocess dispatch shipped in two commits, both merged to `main` via the changesets release train:
+
+- **`@windyroad/itil@0.13.0`** — commit `260768f` — `/wr-itil:work-problems` Step 5 dispatch swap from Agent-tool subagent to `claude -p --permission-mode bypassPermissions --output-format json` subprocess. The subprocess is a full main Claude Code session with the Agent tool in its surface, so architect / JTBD / risk-scorer reviews run via the normal subagent path and PreToolUse edit-gate + risk-scorer commit-gate markers set natively inside the subprocess's own SESSION_ID. Orchestrator extracts `ITERATION_SUMMARY` from the subprocess's JSON `.result` field. ADR-032 amended with the AFK iteration-isolation wrapper — subprocess-boundary variant.
+- **`@windyroad/itil@0.14.0`** — commit `7670ffb` — follow-up that wires per-iteration cost metadata (`.total_cost_usd`, `.duration_ms`, `.usage.{input,output,cache_creation,cache_read}_tokens`) from the subprocess JSON into the orchestrator's progress lines and the ALL_DONE Session Cost section. Observability overlay only; dispatch contract unchanged.
+
+**In-session evidence**: this very AFK iteration (the one producing this transition commit) is running inside the `claude -p` subprocess dispatched by the orchestrator. The architect + JTBD + risk-scorer gate reviews earlier in this iteration ran via the Agent tool in the subprocess's own surface, confirming the fix is live end-to-end on the shipped code path.
+
+**User-verifiable checks**:
+- Run `/wr-itil:work-problems` in AFK mode against a backlog ticket that requires editing a gate-covered path (e.g. anything under `packages/` outside the exclusion list). The iteration should progress — write + commit — without silent halt on the edit gate.
+- Check `@windyroad/itil` is at ≥ 0.14.0 (`npm view @windyroad/itil version`).
+- Session Cost summary should render on ALL_DONE with measured token + cost actuals per iteration.
+
+**Awaiting user verification**. Transition to `.closed.md` after user confirms an AFK run delivered gate-covered progress without the silent halt P084 described.
