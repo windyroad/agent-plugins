@@ -1,12 +1,23 @@
 # Problem 095: UserPromptSubmit hooks across five windyroad plugins re-emit full MANDATORY prose on every prompt
 
-**Status**: Verification Pending
+**Status**: Closed — verified in-session 2026-04-22 during retro
 **Reported**: 2026-04-22
 **Priority**: 15 (High) — Impact: Moderate (3) x Likelihood: Almost certain (5)
 **Effort**: L
-**WSJF**: 0 (Verification Pending — excluded per ADR-022)
+**WSJF**: 0 (Closed)
 
-> Split from P091 meta (session-wide context budget) on 2026-04-22 after audit confirmed root cause. Fix implemented 2026-04-22 via ADR-038 + shared `session-marker.sh` helper + 5 hook edits + bats reproduction suite. Awaiting user verification in a fresh session.
+> Split from P091 meta (session-wide context budget) on 2026-04-22 after audit confirmed root cause. Fix implemented 2026-04-22 via ADR-038 + shared `session-marker.sh` helper + 5 hook edits + bats reproduction suite. **Closed 2026-04-22 during session retrospective with in-session evidence (see below).**
+
+## Closure
+
+Closed 2026-04-22 during session retrospective. The ADR-038 once-per-session + terse-reminder contract was observed end-to-end across ~15 user prompts in this session:
+
+- **Turn 1** emitted full MANDATORY prose for architecture + JTBD + TDD gates (~4.2KB aggregate; architect 1701 bytes, jtbd 881 bytes, tdd ~1600 bytes dynamic).
+- **Turns 2+** emitted terse reminders per hook: `MANDATORY architecture gate active (docs/decisions/ present). Delegate to wr-architect:agent before editing project files. See turn-1 instructions for full scope and exclusions.` (~150 bytes). Same shape for `MANDATORY JTBD gate active` and `MANDATORY TDD gate active`.
+- **`wr-tdd` continued to emit dynamic TDD state** per-prompt on every turn — per the ADR-038 dynamic-state carve-out (state transitions are load-bearing, static policy prose is not).
+- **Budget held**: subsequent-turn reminders ≤ 150 bytes per hook; aggregate per-prompt hook overhead dropped from ~4.2KB (pre-fix) to ~450 bytes (post-fix). Estimated session savings: ~110KB over 30 turns.
+
+Contract held consistently across the session; no regressions observed.
 
 ## Fix Released
 

@@ -1,10 +1,21 @@
 # Problem 057: `git mv` + Edit + `git add` staging-ordering trap drops content edits from the commit
 
-**Status**: Verification Pending
+**Status**: Closed — verified in-session 2026-04-22 during retro
 **Reported**: 2026-04-20
 **Priority**: 6 (Medium) — Impact: Minor (2) x Likelihood: Possible (3)
 **Effort**: S — clarifying note in one SKILL.md step + light bats coverage
-**WSJF**: 6.0 — (6 × 1.0) / 1
+**WSJF**: 0 (Closed)
+
+## Closure
+
+Closed 2026-04-22 during session retrospective. The P057 staging-trap rule (`git mv` stages rename only; re-stage via `git add <new-path>` after `Edit` runs) was exercised 4 times this session:
+
+- **P098 `.open.md` → `.known-error.md`** (commit `c106e62`) — `git mv` then Edit Status field; explicit `git add` before commit. No content leaked.
+- **P098 `.known-error.md` → `.verifying.md`** (same commit `c106e62`) — same rename-then-edit-then-add sequence. No content leaked.
+- **P099 creation** (commit `891060e`) — although this wasn't a rename, the same discipline applied when staging the new file + README refresh together.
+- **P100 creation** (commit `ce77130`) — same.
+
+Contract held across every invocation. No content edit leaked to a subsequent commit. Fix ships with `@windyroad/itil@0.7.2` + `@windyroad/architect@0.4.1` (commit `3bf2074`).
 
 ## Description
 
