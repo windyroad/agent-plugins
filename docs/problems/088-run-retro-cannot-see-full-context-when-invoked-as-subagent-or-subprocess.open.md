@@ -94,7 +94,7 @@ P086's ticket description and `## Fix Strategy` should be updated to note that P
 ### Investigation Tasks
 
 - [ ] Architect review on the fix shape: which combination of candidates (1)+(2), (1)+(2)+(3), or all four.
-- [ ] Confirm `~/.claude/projects/*/sessions/*.jsonl` logs DO capture subprocess tool calls when parent was Claude Code. (Empirical — inspect this session's .jsonl to see whether iter 1-7 subprocess calls are represented.)
+- [x] Confirm `~/.claude/projects/*/*.jsonl` logs DO capture subprocess tool calls when parent was Claude Code. **CONFIRMED 2026-04-21 (empirical).** Each `claude -p` subprocess gets its own `.jsonl` file in the parent's project log directory (`~/.claude/projects/-<project-path>/`). Observed after AFK-iter-7's wrap: orchestrator session `0743ae45-...jsonl` (3.3MB, 259 tool_uses) plus seven per-iteration subprocess sessions `908c95d8-...` (iter 1, 24 tool_uses), `85f7d4cc-...`, `4bfc0268-...`, `dfad148e-...`, `33419254-...`, `6e478b4c-...`, `b459f048-...` (iter 7, 90 tool_uses). Session IDs align with the `session_id` values emitted in each subprocess's JSON response. Full-trace retro is feasible by reading orchestrator + subprocess jsonls in chronological order; the parser needs to associate subprocess sessions with their orchestrator via mtime sequencing (or by correlating with the orchestrator's Bash tool calls that spawned each `claude -p`).
 - [ ] Decide retro-findings-artefact schema for option (2): structured fields alongside `ITERATION_SUMMARY`, or a separate artefact file.
 - [ ] Update run-retro SKILL.md with the `--scope` flag and three-scope taxonomy.
 - [ ] Update work-problems SKILL.md Step 5 iteration prompt to emit iteration-findings artefact (option 2).
