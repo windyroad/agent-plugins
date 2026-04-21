@@ -1,7 +1,7 @@
 ---
 name: wr-itil:work-problems
 description: Batch-work ITIL problem tickets while the user is AFK. Loops through the problem backlog by WSJF priority, delegating each problem to wr-itil:manage-problem, and stops when nothing is left to progress. Use this skill whenever the user says things like "work through my problems", "grind problems", "work the backlog", "work problems while I'm away", "process problems AFK", or any request to autonomously work through multiple problem tickets without interactive input. Also trigger when the user asks to "loop" or "batch" problem work, or says they'll be away and wants problems handled.
-allowed-tools: Skill, Bash, Glob, Grep, Read
+allowed-tools: Agent, Skill, Bash, Glob, Grep, Read
 ---
 
 # Work Problems — AFK Batch Orchestrator
@@ -116,19 +116,47 @@ Record the category alongside the skip reason in the iteration report so Step 2.
 
 If a problem is skipped by this step, add it to a "skipped" list with the reason and loop back to step 3 for the next one.
 
-### Step 5: Work the problem
+### Step 5: Work the problem (delegate via Agent tool, per P077)
 
-Invoke the manage-problem skill:
+**Delegate each iteration to a subagent via the Agent tool** — do NOT invoke `/wr-itil:manage-problem` inline via the Skill tool. Inline Skill-tool invocation expands manage-problem's SKILL.md (500+ lines) into the main orchestrator's context every iteration, accumulates across the AFK loop, and causes silent early-stop (`ALL_DONE` without a documented stop condition firing). This delegation is the AFK iteration-isolation wrapper sub-pattern under ADR-032.
+
+**Agent call shape:**
+
+- `subagent_type`: `general-purpose` — Option B pinned in P077. Iteration work is general engineering, not specialised domain expertise, and `general-purpose` has `Tools: *` so the subagent can recursively invoke architect / jtbd / risk-scorer subagents for its own gate reviews. Promotion to a typed `wr-itil:work-problems-iteration-worker` subagent remains available if a specialised constraint ever emerges; until then, typing it would just duplicate manage-problem's "always do X" preamble.
+- `description`: `Work P<NNN> (<title>)` — one iteration, identified by the highest-WSJF ticket selected in Steps 3–4.
+- `prompt` (self-contained — the subagent has no prior conversation context):
+  1. **Context**: this is one iteration of the AFK work-problems loop. The user is AFK. The orchestrator selected `P<NNN> (<title>)` as the highest-WSJF actionable ticket.
+  2. **Task**: apply the `/wr-itil:manage-problem` workflow for `work highest WSJF problem that can be progressed non-interactively as the user is AFK`. Follow manage-problem SKILL.md verbatim, including architect / jtbd / style-guide / voice-tone gate reviews and the commit gate (manage-problem Step 11).
+  3. **Constraints**: commit the completed work per ADR-014. Do NOT push, do NOT run `push:watch`, do NOT run `release:watch` — the orchestrator's Step 6.5 owns release cadence. Do NOT invoke `capture-*` background skills (AFK carve-out — ADR-032). Non-interactive defaults apply per ADR-013 Rule 6.
+  4. **Return the iteration summary** (see contract below).
+
+**Return-summary contract.** The subagent's final message MUST end with a structured summary block the orchestrator parses without re-reading tool calls. Required fields:
 
 ```
-/wr-itil:manage-problem work highest WSJF problem that can be progressed non-interactively as the user is AFK
+ITERATION_SUMMARY
+ticket_id: P<NNN>
+ticket_title: <title>
+action: worked | skipped
+outcome: closed | verifying | known-error | investigated | scope-expanded | partial-progress | skipped
+committed: true | false | skipped
+commit_sha: <sha>                                  # required when committed=true
+reason: <one-line>                                 # required when committed=false or action=skipped
+skip_reason_category: user-answerable | architect-design | upstream-blocked  # required when action=skipped
+outstanding_questions: [<one-line each>]           # optional; drives Step 2.5 when skip_reason_category=user-answerable
+remaining_backlog_count: <N>
+notes: <one-line>
 ```
 
-The manage-problem skill will:
-- Run a review if the cache is stale
-- Select and work the highest-WSJF problem
-- Use its built-in non-interactive fallbacks (auto-split multi-concern problems, auto-commit when risk is within appetite)
-- Commit completed work per ADR-014
+Architect review (R2) requires the commit state fields (`committed` / `commit_sha` / `reason`) so **Step 6.75's Dirty-for-known-reason branch stays evaluable** from the summary alone. JTBD review requires `ticket_id` / `action` / `skip_reason_category` / `outstanding_questions` so Step 2.5 and the Output Format's Completed / Skipped / Outstanding Design Questions tables can be populated deterministically without the orchestrator having to re-parse ticket files.
+
+**Inter-iteration continuity.** Step 6.5 (release-cadence check) and Step 6.75 (inter-iteration verification) stay in the **main orchestrator's turn**, NOT the iteration subagent. Rationale: release-cadence and `git status --porcelain` are orchestration-level concerns; `push:watch`/`release:watch` are long-running waits that would waste iteration-subagent context; the orchestrator needs to see the summary from one iteration before deciding whether to drain before the next.
+
+The manage-problem skill (running inside the iteration subagent) will:
+
+- Run a review if the cache is stale.
+- Select and work the highest-WSJF problem.
+- Use its built-in non-interactive fallbacks (auto-split multi-concern problems, auto-commit when risk is within appetite).
+- Commit completed work per ADR-014 (the iteration subagent's commit — the orchestrator does NOT commit from its main turn).
 
 ### Step 6: Report progress
 
@@ -198,6 +226,7 @@ When `AskUserQuestion` is unavailable or the user is AFK, the skill (and the del
 
 | Decision Point | Non-Interactive Default |
 |---|---|
+| How each iteration runs (iteration delegation) | Delegate to `subagent_type: general-purpose` via the Agent tool per Step 5 — NOT inline Skill-tool invocation. This is the AFK iteration-isolation wrapper sub-pattern under ADR-032; the main orchestrator consumes the iteration subagent's return-summary contract and does not re-read the subagent's tool calls. Per P077 + ADR-032. |
 | Which problem to work | Highest WSJF, no prompt needed |
 | Multi-concern split | Auto-split (manage-problem step 4b fallback) |
 | Scope expansion during work | Update problem file, re-score WSJF, move to next problem instead of continuing |
@@ -256,3 +285,20 @@ ALL_DONE
 ```
 
 When every skipped ticket is in the `upstream-blocked` category (stop-condition #3) or there are no skipped tickets (stop-condition #1), omit the Outstanding Design Questions section entirely rather than rendering an empty heading.
+
+## Related
+
+- **P077** (`docs/problems/077-work-problems-step-5-does-not-delegate-to-subagent.verifying.md`) — driver for Step 5's Agent-tool delegation and the return-summary contract.
+- **P036** — inter-iteration verification (Step 6.75); remains in the orchestrator's main turn.
+- **P040** — origin-fetch preflight (Step 0); unchanged.
+- **P041** — release-cadence drain (Step 6.5); remains in the orchestrator's main turn.
+- **P053** — Outstanding Design Questions surfacing at stop-condition #2 (Step 2.5); fed by the iteration subagent's `outstanding_questions` field.
+- **ADR-013** (`docs/decisions/013-structured-user-interaction-for-governance-decisions.proposed.md`) — Rule 6 non-interactive fail-safe applies to every iteration-subagent decision surface.
+- **ADR-014** (`docs/decisions/014-governance-skills-commit-their-own-work.proposed.md`) — preserved under the iteration subagent; the subagent commits its own work.
+- **ADR-015** (`docs/decisions/015-on-demand-assessment-skills.proposed.md`) — Agent-tool-vs-Skill-tool delegation precedent (Step 6.5's wording mirror).
+- **ADR-018** (`docs/decisions/018-release-cadence.proposed.md`) — release cadence stays in the orchestrator's main turn, not the iteration subagent.
+- **ADR-019** (`docs/decisions/019-afk-orchestrator-preflight.proposed.md`) — preflight stays in the orchestrator's main turn.
+- **ADR-022** (`docs/decisions/022-problem-verification-pending.proposed.md`) — iteration outcomes map into the return-summary's `outcome` field (`verifying` for a released fix, `known-error` for a root-cause-confirmed ticket awaiting release, etc.).
+- **ADR-032** (`docs/decisions/032-governance-skill-invocation-patterns.proposed.md`) — pattern taxonomy parent; Step 5 is the canonical AFK iteration-isolation wrapper sub-pattern per the ADR-032 amendment that lands with P077.
+- **ADR-037** (`docs/decisions/037-skill-testing-strategy.proposed.md`) — doc-lint bats contract-assertion pattern used by `test/work-problems-step-5-delegation.bats`.
+- **JTBD-001**, **JTBD-006**, **JTBD-101**, **JTBD-201** — personas whose reliability expectations the iteration-isolation wrapper restores.

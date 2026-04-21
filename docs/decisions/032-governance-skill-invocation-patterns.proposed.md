@@ -86,6 +86,22 @@ Background capture pattern does NOT apply inside AFK orchestrator iterations. `/
 
 Background pattern is available for USER-INITIATED (non-AFK) invocations only. A background skill launched from a foreground skill (standard `Agent` semantics) is explicitly allowed — the foreground-skill's main agent launches the background subagent and continues its own flow.
 
+### AFK iteration-isolation wrapper (P077 amendment, 2026-04-21)
+
+The AFK carve-out above says iterations "stay synchronous" and "delegate to `manage-problem` in its own foreground flow". P077 sharpens **how** that delegation happens: the AFK orchestrator's main turn MUST spawn each iteration as a **synchronous `general-purpose` subagent via the Agent tool** — not via the Skill tool (in-process expansion).
+
+This is a first-class sub-pattern under Foreground synchronous. It is distinct from the row-one "main agent invokes; skill runs; main agent consumes full output" case because the iteration subagent's SKILL.md expansion (manage-problem is 500+ lines) happens in the **subagent's** context, not the main agent's. The orchestrator consumes only a short structured return-summary — keeping main-turn context bounded across a long AFK loop.
+
+**Pattern contract:**
+
+- **Mode**: synchronous. The orchestrator awaits the subagent's final message before deciding whether to drain the release queue (Step 6.5), run the inter-iteration verification (Step 6.75), and spawn the next iteration.
+- **subagent_type**: `general-purpose`. Typed iteration-workers (Option A in P077) are rejected for now — iteration work is general engineering with no specialised preamble; the typed agent would just re-export manage-problem's content. Promotion path is preserved.
+- **Return shape**: structured summary (ticket_id, ticket_title, action, outcome, committed, commit_sha, reason, skip_reason_category, outstanding_questions, remaining_backlog_count, notes). The commit-state fields let Step 6.75's "Dirty for a known reason" branch stay evaluable from the summary alone. The skip-reason category and outstanding-questions fields let Step 2.5 (P053) populate the Outstanding Design Questions table without re-reading ticket files.
+- **Orchestration boundary**: release cadence (Step 6.5 / ADR-018), origin preflight (Step 0 / ADR-019), and inter-iteration verification (Step 6.75 / P036) stay in the orchestrator's main turn. The iteration subagent commits its own work per ADR-014 but MUST NOT run `push:watch` / `release:watch`.
+- **Not a new pattern**: this is the canonical shape of foreground-synchronous delegation with context-isolation; it slots under the existing taxonomy row rather than adding a fifth row. The AFK carve-out language above covers the "why"; this amendment covers the "how".
+
+Cross-reference: `packages/itil/skills/work-problems/SKILL.md` Step 5 is the implementing document; `packages/itil/skills/work-problems/test/work-problems-step-5-delegation.bats` is the doc-lint assertion set; P077 is the driver ticket.
+
 ### Deferred-question resumption contract
 
 When a background skill hits an `AskUserQuestion` branch:
@@ -239,6 +255,7 @@ Revisit this decision if:
 - **ADR-031** (Problem-ticket directory layout) — pending-questions artefacts live under the per-state-subdir layout (`docs/problems/open/`) post-migration; ADR-031's auto-migration Step-0 open question at lines 128-138 dissolves under this ADR (migration runs in foreground main-agent context per ADR-019 precedent).
 - **P014** (No lightweight aside invocation for governance skills) — closed at decision level by this ADR.
 - **P071** (Argument-based skill subcommands not discoverable) — reinforced: sibling-skill naming (`capture-*` alongside `manage-*` / `create-*` / `run-*`) is the explicit alternative to argument-based subcommands.
+- **P077** (work-problems Step 5 does not delegate to subagent) — driver for the AFK iteration-isolation wrapper amendment above.
 - `feedback_skill_subcommand_discoverability.md` — memory note confirms the user's preference for separate skills over arg-subcommands.
 - **JTBD-001** (Enforce Governance Without Slowing Down) — primary beneficiary.
 - **JTBD-003** (Compose Only the Guardrails I Need) — independent foreground / background skill composability.

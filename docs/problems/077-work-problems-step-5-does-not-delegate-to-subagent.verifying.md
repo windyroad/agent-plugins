@@ -1,11 +1,38 @@
 # Problem 077: work-problems Step 5 does not delegate iterations to a subagent, so context pressure accumulates in the orchestrator's main turn
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-21
+**Updated**: 2026-04-21 (fix released — Option B shipped; ADR-032 amended)
 **Priority**: 16 (High) — Impact: Significant (4) x Likelihood: Likely (4)
 **Effort**: M — Option B pinned (reuse `general-purpose` subagent — no new typed agent required, no new plugin file, no new manifest entry). Remaining work: (1) amend `packages/itil/skills/work-problems/SKILL.md` Step 5 to delegate via the Agent tool with `subagent_type: general-purpose` and a clear iteration-worker prompt, (2) update the orchestrator's result-handling to consume the subagent's returned summary rather than expecting in-process side effects, (3) preserve inter-iteration commit-gate continuity across subagent turns (decide at architect review whether Step 6.5 risk-scoring runs in the orchestrator's main turn or inside the iteration subagent), (4) bats doc-lint assertions for the delegation pattern per ADR-037 contract-assertion pattern. SKILL.md edit + summary-shape contract + bats — M bucket. Effort dropped from L to M when Option B was pinned; the subagent-registration work (which would have pushed to L) is no longer required.
 
 **WSJF**: 8.0 — (16 × 1.0) / 2 — High severity (silent orchestrator failures, root cause of today's `ALL_DONE` incident); moderate effort per Option B. Rises above the current top of the backlog (6.0 tier) because the fix is now M effort for a High severity methodology bug that every future AFK session would otherwise keep hitting.
+
+## Fix Released
+
+Shipped 2026-04-21 (AFK iter 1, this session — pending commit). Option B implemented as the AFK iteration-isolation wrapper sub-pattern under ADR-032:
+
+- **`packages/itil/skills/work-problems/SKILL.md` Step 5 rewritten**: each iteration is delegated to a `general-purpose` subagent via the Agent tool with a self-contained prompt. No more inline Skill-tool invocation of `/wr-itil:manage-problem` — the 500+ line SKILL.md expansion now happens in the subagent's context, not the main orchestrator's. Step 5 documents the Agent-call shape (subagent_type, description, prompt), the return-summary contract, and the inter-iteration continuity boundary (Steps 6.5 / 6.75 stay in the orchestrator's main turn).
+- **Return-summary contract**: the iteration subagent's final message ends with a structured `ITERATION_SUMMARY` block. Required fields: `ticket_id`, `ticket_title`, `action` (worked | skipped), `outcome` (closed | verifying | known-error | investigated | scope-expanded | partial-progress | skipped), `committed` (true | false | skipped), `commit_sha` (when committed), `reason` (when committed=false or action=skipped), `skip_reason_category` (when skipped), `outstanding_questions[]` (when user-answerable), `remaining_backlog_count`, `notes`. Architect review (R2) required the commit-state fields so Step 6.75's "Dirty for a known reason" branch stays evaluable from the summary alone. JTBD review required `ticket_id` / `action` / `skip_reason_category` / `outstanding_questions` so Step 2.5 can populate the Outstanding Design Questions table deterministically.
+- **`allowed-tools` frontmatter gains `Agent`**: pre-existing latent bug (Step 6.5 already required Agent-tool delegation). Fixed in the same edit.
+- **Non-Interactive Decision Making table**: new row documents iteration-delegation default (`general-purpose` subagent via Agent tool, not inline Skill-tool).
+- **Related section added**: cites P077, P036, P040, P041, P053, and ADR-013 / ADR-014 / ADR-015 / ADR-018 / ADR-019 / ADR-022 / ADR-032 / ADR-037. Closes the contract-to-ADR traceability gap ADR-037 requires.
+- **`docs/decisions/032-governance-skill-invocation-patterns.proposed.md` amended**: added "AFK iteration-isolation wrapper (P077 amendment, 2026-04-21)" sub-pattern under foreground synchronous. Names the Agent-tool wrapper explicitly, documents the pattern contract (synchronous mode, `general-purpose` subagent_type, return-summary shape, orchestration boundary). P077 added to Related. No supersession.
+
+Tests — `packages/itil/skills/work-problems/test/work-problems-step-5-delegation.bats` (new, 10 assertions, RED→GREEN this iteration):
+
+- SKILL.md cites P077.
+- Step 5 names the Agent tool explicitly.
+- Step 5 cites `subagent_type: general-purpose`.
+- Step 5 specifies a return-summary contract.
+- Return-summary carries commit state (`commit_sha` / `committed`) per architect R2.
+- Return-summary carries `skip_reason_category` per JTBD extension.
+- `allowed-tools` frontmatter includes `Agent`.
+- Non-Interactive Decision Making table covers iteration delegation.
+- Related section cites ADR-032 (R3 — traceability).
+- Step 6.5 / 6.75 remain in the orchestrator's main turn (continuity assertion).
+
+Awaiting user verification — the next AFK session that exercises the loop with ≥5 iterations should confirm: (a) main context does not grow with iteration count (summaries stay small), (b) `ALL_DONE` emits only when a documented stop condition fires, (c) the iteration subagent's commit state is observable via `git status --porcelain` (Step 6.75) and the returned summary agrees with it.
 
 ## Description
 
