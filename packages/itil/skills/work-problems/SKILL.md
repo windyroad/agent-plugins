@@ -171,6 +171,35 @@ notes: <one-line>
 
 Architect review (R2) requires the commit state fields (`committed` / `commit_sha` / `reason`) so **Step 6.75's Dirty-for-known-reason branch stays evaluable** from the summary alone. JTBD review requires `ticket_id` / `action` / `skip_reason_category` / `outstanding_questions` so Step 2.5 and the Output Format's Completed / Skipped / Outstanding Design Questions tables can be populated deterministically without the orchestrator having to re-parse ticket files.
 
+**Per-iteration cost metadata.** Alongside `.result`, the `claude -p --output-format json` response carries cost + usage fields in the same JSON blob. The orchestrator MUST extract these **named fields only** into per-iteration totals and session aggregates — nothing else from the JSON should be surfaced to the user or logged (PII guard: the response also carries `session_id`, `model`, `stop_reason`, and other envelope fields; the extraction is **scoped to the named fields** below so future contributors do not unconsciously broaden it).
+
+Extracted fields (explicit field list):
+
+- `.total_cost_usd` — dollar cost for the iteration.
+- `.duration_ms` — wall-clock duration of the iteration subprocess.
+- `.usage.input_tokens` — prompt tokens.
+- `.usage.output_tokens` — generated tokens.
+- `.usage.cache_creation_input_tokens` — tokens written to the prompt cache on this invocation.
+- `.usage.cache_read_input_tokens` — tokens read from the prompt cache on this invocation (cache-read is the signal for warm-cache reuse across subsequent subprocess invocations in the same Bash session; high values here indicate the iteration benefited from prior-invocation caching).
+
+Use `jq` (or an equivalent JSON parser) to extract them:
+
+```bash
+# $SUBPROCESS_OUTPUT holds the full JSON response body from claude -p.
+read -r ITER_COST ITER_DURATION_MS ITER_INPUT ITER_OUTPUT ITER_CACHE_WRITE ITER_CACHE_READ < <(
+  jq -r '[.total_cost_usd, .duration_ms, .usage.input_tokens, .usage.output_tokens, .usage.cache_creation_input_tokens, .usage.cache_read_input_tokens] | @tsv' <<<"$SUBPROCESS_OUTPUT"
+)
+# Accumulate into session totals for the ALL_DONE Session Cost section.
+SESSION_COST=$(awk "BEGIN { printf \"%.4f\", ${SESSION_COST:-0} + $ITER_COST }")
+SESSION_DURATION_MS=$(( ${SESSION_DURATION_MS:-0} + ITER_DURATION_MS ))
+SESSION_INPUT_TOKENS=$(( ${SESSION_INPUT_TOKENS:-0} + ITER_INPUT ))
+SESSION_OUTPUT_TOKENS=$(( ${SESSION_OUTPUT_TOKENS:-0} + ITER_OUTPUT ))
+SESSION_CACHE_WRITE_TOKENS=$(( ${SESSION_CACHE_WRITE_TOKENS:-0} + ITER_CACHE_WRITE ))
+SESSION_CACHE_READ_TOKENS=$(( ${SESSION_CACHE_READ_TOKENS:-0} + ITER_CACHE_READ ))
+```
+
+Do NOT extract `session_id`, `model`, `stop_reason`, `permission_denials`, `uuid`, or any other field from the JSON response. Those are subprocess-envelope fields that serve no user-visible purpose and risk leaking subprocess-internal identifiers into orchestrator output.
+
 **Exit-code semantics.** `claude -p` exits non-zero when the subprocess fails hard — subprocess crash, auth failure, unresolvable permission denial, API/quota exhaustion. The orchestrator reads the exit code BEFORE parsing `.result`:
 
 - Exit 0 → parse `ITERATION_SUMMARY` from `.result` field; proceed to Step 6.
@@ -197,14 +226,15 @@ After each iteration, report:
 - What was done (investigated, transitioned to known-error, fix implemented, etc.)
 - The outcome (success, partially progressed, skipped, scope expanded)
 - How many problems remain in the backlog
+- The iteration's cost metadata — format: `($<cost>, <duration_s>s, <total_tokens_K>K tokens)`. Cost comes from the `.total_cost_usd` field extracted in Step 5; duration from `.duration_ms`; total tokens is the sum of `.usage.input_tokens + .usage.output_tokens + .usage.cache_creation_input_tokens + .usage.cache_read_input_tokens`.
 
 Format as a brief status line, not a wall of text. The user will read these when they return.
 
 **Example:**
 ```
-[Iteration 1] Worked P029 (Edit gate overhead for governance docs) — implemented fix, closed. 8 problems remain.
-[Iteration 2] Worked P021 (Governance skill structured prompts) — investigated root cause, transitioned to known-error. 7 problems remain.
-[Iteration 3] Skipped P016 (Multi-concern ticket splitting) — fix released, awaiting user verification. Worked P024 (Risk scorer WIP flag) — implemented fix, closed. 6 problems remain.
+[Iteration 1] Worked P029 (Edit gate overhead for governance docs) — implemented fix, closed. 8 problems remain. ($0.32, 23s, 171K tokens)
+[Iteration 2] Worked P021 (Governance skill structured prompts) — investigated root cause, transitioned to known-error. 7 problems remain. ($0.85, 47s, 432K tokens)
+[Iteration 3] Skipped P016 (Multi-concern ticket splitting) — fix released, awaiting user verification. Worked P024 (Risk scorer WIP flag) — implemented fix, closed. 6 problems remain. ($1.12, 62s, 541K tokens)
 ```
 
 ### Step 6.5: Release-cadence check (per ADR-018)
@@ -313,10 +343,27 @@ The skill should produce a final summary when the loop ends:
 |------|---------|--------|
 | 9.0 | P012 (Skill testing harness) | Open |
 
+### Session Cost
+
+Extracted from each iteration subprocess's `claude -p --output-format json` response (source: measured-actual, not estimated — per ADR-026 grounding). Renders identically in interactive and AFK modes; no decision branch, so output-side only. Cache-read column surfaces the warm-cache-reuse signal observed across subsequent subprocess invocations in the same Bash session.
+
+| Metric | Value |
+|--------|-------|
+| Iterations run | 3 |
+| Successful (committed) | 2 |
+| Skipped | 1 |
+| Total cost (USD) | $2.29 |
+| Mean cost per iteration | $0.76 |
+| Total input tokens | 42 |
+| Total output tokens | 1,531 |
+| Cache-creation tokens | 78,000 |
+| Cache-read tokens (reuse) | 1,064,000 |
+| Total duration | 2m 12s |
+
 ALL_DONE
 ```
 
-When every skipped ticket is in the `upstream-blocked` category (stop-condition #3) or there are no skipped tickets (stop-condition #1), omit the Outstanding Design Questions section entirely rather than rendering an empty heading.
+When every skipped ticket is in the `upstream-blocked` category (stop-condition #3) or there are no skipped tickets (stop-condition #1), omit the Outstanding Design Questions section entirely rather than rendering an empty heading. The Session Cost section always renders when at least one iteration ran.
 
 ## Related
 
