@@ -1,5 +1,5 @@
 {
   "name": "wr-tdd",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "TDD state machine enforcement (IDLE/RED/GREEN/BLOCKED) for Claude Code"
 }
