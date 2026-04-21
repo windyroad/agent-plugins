@@ -1,12 +1,36 @@
 # Problem 095: UserPromptSubmit hooks across five windyroad plugins re-emit full MANDATORY prose on every prompt
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-04-22
 **Priority**: 15 (High) — Impact: Moderate (3) x Likelihood: Almost certain (5)
 **Effort**: L
-**WSJF**: (15 × 2.0) / 4 = **7.5**
+**WSJF**: 0 (Verification Pending — excluded per ADR-022)
 
-> Split from P091 meta (session-wide context budget) on 2026-04-22 after audit confirmed root cause. This ticket owns the concrete fix for the `UserPromptSubmit` cluster.
+> Split from P091 meta (session-wide context budget) on 2026-04-22 after audit confirmed root cause. Fix implemented 2026-04-22 via ADR-038 + shared `session-marker.sh` helper + 5 hook edits + bats reproduction suite. Awaiting user verification in a fresh session.
+
+## Fix Released
+
+Fix landed 2026-04-22 (ADR-038 "Progressive disclosure + once-per-session budget for UserPromptSubmit governance prose"; commit pending push).
+
+**What shipped:**
+- New canonical helper `packages/shared/hooks/lib/session-marker.sh` with `has_announced` + `mark_announced` functions (empty-SESSION_ID fallback: no-op).
+- Five byte-identical per-plugin copies at `packages/<plugin>/hooks/lib/session-marker.sh` (architect, jtbd, tdd, style-guide, voice-tone) distributed via `scripts/sync-session-marker.sh` per ADR-017 / ADR-028.
+- All five `UserPromptSubmit` hooks (`architect-detect.sh`, `jtbd-eval.sh`, `tdd-inject.sh`, `style-guide-eval.sh`, `voice-tone-eval.sh`) now emit the full MANDATORY block only on first-prompt-of-session and a ≤150-byte terse reminder thereafter. `tdd-inject.sh` carries the dynamic TDD state (IDLE/RED/GREEN/BLOCKED + tracked test files) on every prompt per the ADR-038 carve-out.
+- Terse reminders satisfy the four required elements: MANDATORY/REQUIRED/NON-OPTIONAL signal word + gate name + trigger artifact + `wr-<plugin>:agent` delegation affordance.
+- `npm run check:session-marker` + CI step validate drift.
+- Bats coverage: 9 unit tests for the helper, 6 drift tests, 8+7+8+7+7 per-hook behavioural tests. Full suite 735/735 green.
+
+**Exercise evidence from the releasing session:**
+- `npm test` on final implementation: 735/735 green (no regressions from the pre-change 690 baseline; 45 new tests added across 7 new bats files).
+- `bash scripts/sync-session-marker.sh --check` returns `OK: all 5 hooks/lib/session-marker.sh copies match`.
+- Direct bash invocation of each hook with first-then-second session_id shows full-block-then-terse shape; different session_ids re-emit the full block; empty session_id emits the full block and writes no marker.
+
+**Awaiting user verification:** confirmation in a fresh Claude Code session that per-turn hook preamble drops materially after turn 1 (observable via context-usage reporting / reduced compaction pressure in long sessions).
+
+**What did NOT ship (deferred to sibling tickets):**
+- PreToolUse/PostToolUse hook audit (P096) — the shared helper is ready to be reused once P096's audit completes.
+- SKILL.md runtime-steps split (P097) — a different cluster; separate ADR pending.
+- Global `~/CLAUDE.md` and local skill trimming (P098) — user/project-owned surfaces.
 
 ## Description
 

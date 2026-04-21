@@ -1,15 +1,22 @@
 #!/bin/bash
-# TDD - UserPromptSubmit hook
+# TDD - UserPromptSubmit hook (P095 / ADR-038)
 # Injects TDD instructions and per-file state into every prompt.
 # Only active when a test script is configured in package.json.
+#
+# Progressive disclosure (ADR-038) with tdd-inject carve-out: static
+# prose (STATE RULES table, WORKFLOW, IMPORTANT blocks) is gated
+# behind the once-per-session announcement marker; dynamic content
+# (current TDD state + tracked test files) emits on every prompt.
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/lib/tdd-gate.sh"
+# shellcheck source=lib/session-marker.sh
+source "$SCRIPT_DIR/lib/session-marker.sh"
 
 INPUT=$(cat)
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty') || true
 
-# If no test script configured, inject setup instructions
+# If no test script configured, inject setup instructions (unchanged by ADR-038)
 if ! tdd_has_test_script; then
   cat <<'HOOK_OUTPUT'
 INSTRUCTION: MANDATORY TDD ENFORCEMENT. YOU MUST FOLLOW THIS.
@@ -25,13 +32,13 @@ HOOK_OUTPUT
   exit 0
 fi
 
-# Collect per-file states
+# Collect per-file states (always per-prompt)
 ALL_STATES=""
 if [ -n "$SESSION_ID" ]; then
   ALL_STATES=$(tdd_get_all_states "$SESSION_ID")
 fi
 
-# Determine overall status for the header
+# Determine overall status for the header (always per-prompt)
 OVERALL="IDLE"
 if [ -n "$ALL_STATES" ]; then
   if echo "$ALL_STATES" | grep -q ":BLOCKED$"; then
@@ -43,7 +50,14 @@ if [ -n "$ALL_STATES" ]; then
   fi
 fi
 
-cat <<HOOK_OUTPUT
+if has_announced "tdd" "$SESSION_ID"; then
+  # Subsequent prompt: terse reminder + dynamic state only.
+  cat <<HOOK_OUTPUT
+MANDATORY TDD gate active (test script present). Current TDD state: **${OVERALL}**. Write failing test before implementation; .ts/.tsx/.js/.jsx edits gated per test state. See turn-1 instructions for full rules and workflow.
+HOOK_OUTPUT
+else
+  # First prompt of session: full MANDATORY block + mark announced.
+  cat <<HOOK_OUTPUT
 INSTRUCTION: MANDATORY TDD ENFORCEMENT. YOU MUST FOLLOW THIS.
 
 This project enforces Red-Green-Refactor via hooks. Your current TDD state is: **${OVERALL}**
@@ -72,7 +86,10 @@ IMPORTANT:
 - The hook runs only the relevant test after each file write (not the full suite)
 - To refactor existing code, touch the relevant test file first to enter the cycle
 HOOK_OUTPUT
+  mark_announced "tdd" "$SESSION_ID"
+fi
 
+# Dynamic tracked test files (always per-prompt, both branches)
 if [ -n "$ALL_STATES" ]; then
   echo ""
   echo "TRACKED TEST FILES THIS SESSION:"

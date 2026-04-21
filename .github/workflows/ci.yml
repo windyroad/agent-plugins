@@ -79,6 +79,9 @@ jobs:
       - name: Check install-utils.mjs copies in sync (P026)
         run: npm run check:install-utils
 
+      - name: Check session-marker.sh copies in sync (P095, ADR-038)
+        run: npm run check:session-marker
+
       - name: Check plugin manifest versions in sync with package.json (P042, ADR-021)
         run: npm run check:plugin-manifests
 

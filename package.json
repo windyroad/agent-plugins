@@ -19,6 +19,8 @@
     "test": "bats --recursive packages/*/hooks/test/ packages/*/skills/*/test/ packages/*/agents/test/ packages/shared/test/ .claude/skills/*/test/",
     "sync:install-utils": "bash scripts/sync-install-utils.sh",
     "check:install-utils": "bash scripts/sync-install-utils.sh --check",
+    "sync:session-marker": "bash scripts/sync-session-marker.sh",
+    "check:session-marker": "bash scripts/sync-session-marker.sh --check",
     "sync:plugin-manifests": "node scripts/sync-plugin-manifests.mjs",
     "check:plugin-manifests": "node scripts/sync-plugin-manifests.mjs --check",
     "version": "changeset version && node scripts/sync-plugin-manifests.mjs",

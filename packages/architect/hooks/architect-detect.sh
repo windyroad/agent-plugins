@@ -1,10 +1,28 @@
 #!/bin/bash
-# Architecture - UserPromptSubmit hook
+# Architecture - UserPromptSubmit hook (P095 / ADR-038)
 # Detects docs/decisions/ directory and injects delegation instruction.
 # The architect agent reviews changes against architectural decision records.
+#
+# Progressive disclosure (ADR-038): emit the full MANDATORY block only
+# on the first prompt of a session; subsequent prompts see a terse
+# reminder that names the gate + the delegation affordance. The
+# PreToolUse edit gate (architect-enforce-edit.sh) remains the
+# enforcement surface — the prose is a reminder, not the enforcer.
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/session-marker.sh
+source "$SCRIPT_DIR/lib/session-marker.sh"
+
+INPUT=$(cat)
+SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty' 2>/dev/null || echo "")
 
 if [ -d "docs/decisions" ]; then
-  cat <<'HOOK_OUTPUT'
+  if has_announced "architect" "$SESSION_ID"; then
+    cat <<'HOOK_OUTPUT'
+MANDATORY architecture gate active (docs/decisions/ present). Delegate to wr-architect:agent before editing project files. See turn-1 instructions for full scope and exclusions.
+HOOK_OUTPUT
+  else
+    cat <<'HOOK_OUTPUT'
 INSTRUCTION: MANDATORY ARCHITECTURE CHECK. YOU MUST FOLLOW THIS.
 DETECTED: docs/decisions/ exists in this project.
 
@@ -41,6 +59,8 @@ docs/problems/ (problem tickets), docs/BRIEFING.md, RISK-POLICY.md,
 docs/PRODUCT_DISCOVERY.md, docs/VOICE-AND-TONE.md,
 docs/STYLE-GUIDE.md.
 HOOK_OUTPUT
+    mark_announced "architect" "$SESSION_ID"
+  fi
 else
   cat <<'HOOK_OUTPUT'
 NOTE: This project has no docs/decisions/ directory.

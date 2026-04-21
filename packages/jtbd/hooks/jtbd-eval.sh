@@ -1,14 +1,26 @@
 #!/bin/bash
-# JTBD - UserPromptSubmit hook
+# JTBD - UserPromptSubmit hook (P095 / ADR-038)
 # Detects the docs/jtbd/ directory in the project and injects the
 # delegation instruction. Canonical layout is docs/jtbd/ only
-# (ADR-008, Option 3 chosen 2026-04-20). Legacy docs/JOBS_TO_BE_DONE.md
-# is NOT consulted at runtime — projects still on that layout must run
-# /wr-jtbd:update-guide to migrate. The update-guide skill is the sole
-# component permitted to read the legacy file (for one-shot migration).
+# (ADR-008, Option 3 chosen 2026-04-20).
+#
+# Progressive disclosure (ADR-038): full MANDATORY block on first
+# prompt; terse reminder on subsequent prompts in the same session.
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/session-marker.sh
+source "$SCRIPT_DIR/lib/session-marker.sh"
+
+INPUT=$(cat)
+SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty' 2>/dev/null || echo "")
 
 if [ -f "docs/jtbd/README.md" ]; then
-  cat <<'HOOK_OUTPUT'
+  if has_announced "jtbd" "$SESSION_ID"; then
+    cat <<'HOOK_OUTPUT'
+MANDATORY JTBD gate active (docs/jtbd/ present). Delegate to wr-jtbd:agent before editing project files. See turn-1 instructions for full scope and exclusions.
+HOOK_OUTPUT
+  else
+    cat <<'HOOK_OUTPUT'
 INSTRUCTION: MANDATORY JTBD CHECK. YOU MUST FOLLOW THIS.
 DETECTED: docs/jtbd/ exists in this project.
 
@@ -30,6 +42,8 @@ plan files, docs/problems/ (problem tickets), docs/BRIEFING.md,
 RISK-POLICY.md, .risk-reports/, docs/jtbd/,
 docs/PRODUCT_DISCOVERY.md, docs/VOICE-AND-TONE.md, docs/STYLE-GUIDE.md.
 HOOK_OUTPUT
+    mark_announced "jtbd" "$SESSION_ID"
+  fi
 else
   cat <<'HOOK_OUTPUT'
 NOTE: This project has no docs/jtbd/ directory. Edits to project files
