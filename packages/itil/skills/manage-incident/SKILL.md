@@ -2,6 +2,7 @@
 name: wr-itil:manage-incident
 description: Declare, triage, mitigate, and close an incident using an evidence-first workflow. Restores service first, then hands off to manage-problem for root-cause work.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Skill
+deprecated-arguments: true
 ---
 
 # Incident Management Skill
@@ -71,9 +72,21 @@ Severity uses the Impact × Likelihood matrix from `RISK-POLICY.md`, interpreted
 
 Determine the operation from `$ARGUMENTS`:
 
-- If arguments start with "list" → show active incidents summary
+- If arguments start with "list" → **delegate to `/wr-itil:list-incidents`** via the Skill tool. See "Deprecated-argument forwarders" below.
 - If arguments start with `I<NNN>` or a bare number → this is an update, mitigate, restore, close, or link
 - Otherwise → declare a new incident
+
+#### Deprecated-argument forwarders (ADR-010 amended + P071)
+
+Per ADR-010's amended Skill Granularity section, word-argument subcommands that name distinct user intents are being split into their own named skills. During the deprecation window, this skill's Step 1 parser retains the legacy argument routes as **thin-router forwarders** that re-invoke the new named skill via the Skill tool AND emit a one-line systemMessage with the canonical deprecation notice so the user learns the new invocation shape.
+
+**Forwarder for `list`** (P071 split slice 5 — new skill `/wr-itil:list-incidents`):
+
+When `$ARGUMENTS` contains the word `list` as a top-level argument (not inside an incident body edit), delegate to `/wr-itil:list-incidents` via the Skill tool and emit this systemMessage verbatim:
+
+> `/wr-itil:manage-incident list is deprecated; use /wr-itil:list-incidents directly. This forwarder will be removed in @windyroad/itil's next major version.`
+
+The forwarder does NOT re-implement the list logic locally — it invokes the Skill tool with `wr-itil:list-incidents` and returns the new skill's output verbatim. Duplicating the scan logic would harden the deprecation window into a permanent fork.
 
 ### 2. For new incidents: Check for duplicates FIRST
 
