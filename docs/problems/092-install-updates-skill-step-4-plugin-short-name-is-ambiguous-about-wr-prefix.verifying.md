@@ -1,6 +1,6 @@
 # Problem 092: `/install-updates` Step 4 `<plugin-short-name>` placeholder is ambiguous about the `wr-` prefix
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-22
 **Priority**: 15 (High) — Impact: Moderate (3) x Likelihood: Almost certain (5)
 **Effort**: S
@@ -66,8 +66,8 @@ Edit `.claude/skills/install-updates/SKILL.md` Step 4:
 ### Investigation tasks
 
 - [x] Investigate root cause (confirmed — SKILL.md Step 4 placeholder is ambiguous).
-- [ ] Create reproduction test (straightforward — invoke `npm view "@windyroad/wr-itil" version` and assert empty output with exit 0; invoke `npm view "@windyroad/itil" version` and assert non-empty output).
-- [ ] Implement fix — edit Step 4 per the fix strategy above.
+- [ ] Create reproduction test (straightforward — invoke `npm view "@windyroad/wr-itil" version` and assert empty output with exit 0; invoke `npm view "@windyroad/itil" version` and assert non-empty output). *Deferred — not blocking the SKILL.md clarity fix; a behavioural test would exercise the transformation, which this clarity edit already documents inline.*
+- [x] Implement fix — edit Step 4 per the fix strategy above. *Applied 2026-04-22 AFK iter 1 — `.claude/skills/install-updates/SKILL.md` Step 4 now uses `npm_name="@windyroad/${plugin_key#wr-}"` with worked examples, ADR-002 naming-convention pointer, and an "empty `npm view` means wrong name, not private" callout.*
 - [ ] Verify the fix in a subsequent session by re-running `/install-updates` and checking that the per-plugin npm-view results return real versions.
 
 ## Fix Strategy
@@ -83,6 +83,12 @@ Edit `.claude/skills/install-updates/SKILL.md` Step 4:
   3. User correction with npm URL `https://www.npmjs.com/package/@windyroad/itil` (public).
 
 Chosen per run-retro Step 4b Stage 2 Option 2 (`Skill — improvement stub`). The fix is a bounded edit to an existing SKILL.md — no new concept, no new plugin, no new ADR required.
+
+## Fix Released
+
+- **Released**: 2026-04-22 (AFK iter 1) — repo-local skill (ADR-030), no npm release required; fix effective next `/install-updates` invocation.
+- **Commit**: pending (this iteration).
+- **Verification**: next `/install-updates` run should query real npm names (e.g. `@windyroad/itil`) and return non-empty version strings. An empty response across all plugins means the fix regressed.
 
 ## Related
 

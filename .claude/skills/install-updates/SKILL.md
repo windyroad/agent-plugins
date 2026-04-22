@@ -54,13 +54,22 @@ done
 
 ### 4. Determine which plugins have new npm versions
 
-For each unique plugin name across current + siblings:
+For each unique plugin key (`wr-<short>`) across current + siblings — after rename-mapping resolution from Steps 2/3, always operate on the post-rename `to` value so a renamed plugin's version check queries the current package:
 
 ```bash
-npm view "@windyroad/<plugin-short-name>" version
+# Plugin/marketplace side uses the wr- prefix; the npm package omits it.
+# Strip the prefix to obtain the npm package name:
+#   plugin_key="wr-itil"      → npm_name="@windyroad/itil"
+#   plugin_key="wr-architect" → npm_name="@windyroad/architect"
+npm_name="@windyroad/${plugin_key#wr-}"
+npm view "$npm_name" version
 ```
 
-Compare against `~/.claude/plugins/cache/windyroad/wr-<plugin-short-name>/`. Re-install only when npm latest > highest cached version. `claude plugin list` version strings may be stale — compare against cache dir names.
+Naming convention (ADR-002): `wr-<short>` on the plugin/marketplace side, `@windyroad/<short>` on the npm side, same `<short>` as the source directory under `packages/`.
+
+**Empty `npm view` output with exit 0 means the package name is wrong — NOT that the package is private.** `@windyroad/*` packages are public on the npm registry (e.g. <https://www.npmjs.com/package/@windyroad/itil>). If every plugin returns empty, the skill is using the wrong naming transformation — stop and fix before concluding "nothing to install," otherwise Step 7 will silently skip real updates.
+
+Compare against `~/.claude/plugins/cache/windyroad/${plugin_key}/` (the cache directory uses the plugin key `wr-<short>`, not the npm name). Re-install only when npm latest > highest cached version. `claude plugin list` version strings may be stale — compare against cache dir names.
 
 ### 5. Flag legacy JTBD layouts (ADR-008 Option 3, P019)
 
