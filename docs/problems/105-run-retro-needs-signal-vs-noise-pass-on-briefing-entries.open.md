@@ -41,17 +41,80 @@ run-retro Step 1 (read BRIEFING) and Step 3 (write learnings) both act on the au
 
 ### Investigation Tasks
 
-- [ ] Decide the signal/noise classification shape: binary (signal / noise), ternary (signal / noise / neutral), or free-text category. User direction points at binary — "what was signal and what was noise" — but "neutral / didn't fire" may still be useful data.
-- [ ] Decide the adjustment rules: signal → promote to Critical Points roll-up (or keep if already there); noise → demote to topic file (or archive / delete if stale); what counts as "this session's entries in context" for the pass?
-- [ ] Decide who runs the classification: user (prompted during run-retro), assistant (self-reports from tool-call history about which entries were cited / paraphrased / acted on), or both.
-- [ ] Decide where the signal is persisted: per-entry front-matter in the topic file, index rows in `docs/briefing/README.md`, or a sidecar ledger (e.g., `docs/briefing/.signal-ledger.jsonl`).
+- [x] Architect review at implementation time — may warrant amending ADR-040 (Session-start briefing surface, proposed this session) to document the signal-vs-noise feedback loop as part of the curation contract rather than a separate decision. (Architect verdict 2026-04-22 AFK iter 2: amend ADR-040 inline; do NOT mint a new ADR. Three issues raised — see "Architect findings" below.)
+- [ ] Decide the signal/noise classification shape: binary (signal / noise), ternary (signal / noise / neutral), or free-text category. User direction points at binary — "what was signal and what was noise" — but "neutral / didn't fire" may still be useful data. **(Architect-recommended: binary; matches user framing. See Outstanding Design Questions Q1.)**
+- [ ] Decide the adjustment rules: signal → promote to Critical Points roll-up (or keep if already there); noise → demote to topic file (or archive / delete if stale); what counts as "this session's entries in context" for the pass? **(Architect-recommended: promote/keep/demote/archive single-retro decisions; delete gated behind two-retro-consecutive-noise OR explicit user confirmation. See Outstanding Design Questions Q3.)**
+- [ ] Decide who runs the classification: user (prompted during run-retro), assistant (self-reports from tool-call history about which entries were cited / paraphrased / acted on), or both. **(Architect-recommended: assistant pre-classifies via ADR-026 grounding — "entry cited in tool call X at turn N" = signal evidence; "no in-context citation observed this session" = noise evidence — and only prompts user on ambiguous cases per ADR-013 Rule 5 policy-authorise. See Outstanding Design Questions Q1.)**
+- [ ] Decide where the signal is persisted: per-entry front-matter in the topic file, index rows in `docs/briefing/README.md`, or a sidecar ledger (e.g., `docs/briefing/.signal-ledger.jsonl`). **(Architect-recommended (mild conviction): per-entry front-matter in topic files — localises data with the entry, survives renames, no new sidecar source-of-truth. See Outstanding Design Questions Q2.)**
 - [ ] Amend `/wr-retrospective:run-retro` SKILL.md with the new step and data-shape contract.
-- [ ] Architect review at implementation time — may warrant amending ADR-040 (Session-start briefing surface, proposed this session) to document the signal-vs-noise feedback loop as part of the curation contract rather than a separate decision.
+- [ ] Amend `docs/decisions/040-session-start-briefing-surface.proposed.md` with a new "Curation feedback contract (P105)" subsection picking the persistence format. **Pre-condition: user answers Outstanding Design Question Q2 below.**
 - [ ] Bats coverage: simulate a run-retro invocation against a briefing tree; assert classification → roll-up regeneration.
+
+### Architect findings (2026-04-22 AFK iter 2)
+
+Architect (`wr-architect:agent`) review during P105 work-iteration returned ISSUES FOUND with three blocking design questions and recommended the **investigated outcome** for this iteration. Findings reproduced here verbatim-equivalent so subsequent sessions have the full citation set.
+
+**Issue 1 — Per-entry `AskUserQuestion` fan-out is a hard ADR-013 / ADR-032 conflict.** ADR-032 line 203 explicitly names the cascading-batch fan-out as the P061 anti-pattern. With 8 Critical Points + ~20–40 entries across 6 topic files, naive per-entry prompting is a 28–48-call serial fan-out per retro. Architect proposed three viable collapsed shapes:
+  - (a) Single `AskUserQuestion` showing the agent's pre-classification of all in-context entries with `accept all` / `edit before saving` / `review individually` (4-option cap, batch-confirmable, echoes Step 3's existing Use-AskUserQuestion-to-confirm-removals pattern at run-retro SKILL.md line 122).
+  - (b) Defer the entire pass via the ADR-032 deferred-question artefact (one artefact, one pending question batch), matching how Step 2b and Step 4a defer in AFK.
+  - (c) Policy-authorise per ADR-013 Rule 5: classify silently when a clear rule applies (cited verbatim by tool-call ⇒ signal; not loaded ⇒ noise candidate); only ask on ambiguous cases.
+
+**Issue 2 — Persistence format is a load-bearing architectural choice, not a deferrable detail.** It changes the consumer surface: README rendering, run-retro's read+write contract, and any future "auto-promote when N consecutive signals" rule that ADR-040 lines 84–90 imply via its Tier-1 budget reassessment trigger. The three shapes have meaningfully different consequences:
+  - Per-entry front-matter in topic files: localises data with the entry, survives renames, no new source-of-truth — but introduces a new data convention to plain-markdown topic files.
+  - README index columns: keeps the index as the curation surface — but couples signal data to the index format and complicates topic-file moves.
+  - Sidecar JSONL (`docs/briefing/.signal-ledger.jsonl`): append-only, machine-readable, easy to compute aggregates over — but creates a third source of truth.
+
+  Architect-preferred (mild conviction): **per-entry front-matter**. Recommended landing path: amend ADR-040 inline with a "Curation feedback contract (P105)" subsection (precedent: ADR-032 carries multiple in-place amendments — P077, P084, P086, P075). Do NOT mint a sibling ADR.
+
+**Issue 3 — Step 1.5 ownership boundary + grounding + delete guard rail.** Three sub-points:
+  - Match Step 2b/Step 4a ownership-boundary phrasing: be explicit about what Step 1.5 writes directly vs. what it surfaces. Step 3 already writes briefing files (precedent); Step 1.5 should follow Step 3's pattern OR explicitly defer writes to a "Step 1.5 commit batch" so the audit trail is one commit, not N.
+  - Apply ADR-026 grounding: every signal/noise classification carries its citation (tool-call invocation that loaded/cited the entry; or "no in-context citation observed this session"). No bare classifications.
+  - Treat `delete` as a distinct decision class — promote/keep/demote/archive are reversible; delete is not. Apply ADR-013 Rule 5 only to reversible actions; gate hard-delete behind two-retro-consecutive-noise OR explicit user confirmation. Otherwise a single retro can silently nuke a learning that would have been useful three sessions later.
+
+**ADR-staleness check (architect)**: ADR-027 (Step-0 auto-delegation) is **superseded** by ADR-032; the orchestrator brief had pre-loaded "ADR-027" as relevant — the live decision is ADR-032's "Pattern taxonomy" — foreground synchronous (line 64). Step 1.5 fits the foreground-synchronous pattern; no Step-0 delegation is required.
+
+### JTBD findings (2026-04-22 AFK iter 2)
+
+JTBD review (`wr-jtbd:agent`) returned **PASS**.
+
+- Primary alignment: JTBD-001 (Enforce Governance Without Slowing Down — `docs/jtbd/solo-developer/JTBD-001-enforce-governance.proposed.md:18`); JTBD-005 (Invoke Governance Assessments On Demand — `JTBD-005:18`); JTBD-202 (Pre-Flight Governance Check — `docs/jtbd/tech-lead/JTBD-202-pre-flight-governance-check.proposed.md:19`).
+- AFK-defer fallback explicitly endorsed by JTBD-006 line 30 ("Does not trust the agent to make judgment calls") and line 20 ("Problems requiring my judgment … are queued for my return, not guessed at").
+- Soft watch-item: large deferred queue risks the "speed without sacrificing quality" outcome at JTBD-001 line 18. Implementation should cap or batch the per-entry prompts (one consolidated summary rather than N individual `AskUserQuestion` turns on return). This compounds Issue 1 — both reviewers independently flag the per-entry fan-out as the implementation risk.
+- No JTBD doc updates required to land P105; ADR-040 already names P105 as the consumer-side gap and this change closes it within existing job definitions.
+
+### Outstanding Design Questions
+
+These questions block landing Step 1.5 and the ADR-040 amendment. Two converge on the same axis (interactive shape + classification owner — Q1) so they are batched. Each is user-answerable; the architect has provided a mildly-recommended default for each.
+
+**Q1 — Interactive shape + classification owner.** Pick one:
+  - **(a) (architect-preferred) Assistant pre-classifies + single batched-confirm `AskUserQuestion`.** Assistant scans the session's in-context briefing entries, applies an ADR-026-grounded heuristic (entry cited in tool call ⇒ signal; not loaded ⇒ noise candidate; ambiguous flagged), and emits a single 4-option `AskUserQuestion` with `accept all` / `edit before saving` / `review individually` / `defer all`. Avoids the per-entry fan-out (Issue 1).
+  - **(b) Deferred-question artefact batch (ADR-032 Step 2b/4a pattern).** Same pre-classification, but the entire pass routes through the ADR-032 deferred-question artefact: one artefact carrying N pending questions surfaced on the next interactive session.
+  - **(c) Policy-authorise silent classification.** Classify silently with the ADR-026 heuristic; never prompt for the routine cases; only ask on ambiguous entries (heuristic confidence < threshold).
+  - **(d) User runs the classification interactively.** Original ticket framing — assistant lists entries, user answers per-entry. Rejected by architect (Issue 1) and by JTBD soft watch-item; included for completeness.
+
+**Q2 — Persistence format.** Pick one:
+  - **(a) (architect-preferred) Per-entry front-matter in topic files.** Each briefing entry gets a YAML front-matter-like block (or inline HTML comment) carrying its signal counter and last-classified date. Localises data with the entry; survives renames.
+  - **(b) Index columns in `docs/briefing/README.md`.** Add `Signal` and `Last classified` columns to the Topic Index table. Keeps the index as the curation surface.
+  - **(c) Sidecar JSONL: `docs/briefing/.signal-ledger.jsonl`.** Append-only ledger; entry IDs key into topic files. Easy to compute aggregates; creates a third source of truth.
+
+**Q3 — Delete guard rail.** Pick one:
+  - **(a) (architect-preferred) Two-retro-consecutive-noise lifecycle for delete.** Promote/keep/demote/archive are single-retro decisions per Q1 above; an entry classified `noise` in two consecutive retros enters a delete queue surfaced for explicit user confirmation. Avoids one-shot accidental loss of cross-session learnings.
+  - **(b) Explicit user confirmation required at delete time, single-retro.** Delete is always single-retro but ALWAYS requires a separate `AskUserQuestion` confirmation (no policy-authorise short-cut). Higher per-retro friction; lower latency for genuine stale entries.
+  - **(c) Soft delete only (archive bin).** No hard delete. Entries marked for deletion move to `docs/briefing/_archive/<topic>.md`; recoverable via git OR via manual revert. Closest to "no information loss" semantics.
+
+Once the user answers Q1–Q3, a follow-up iteration can land Step 1.5 in `packages/retrospective/skills/run-retro/SKILL.md` + the ADR-040 inline amendment + bats coverage in one commit per ADR-014 (precedent: Step 3 already writes to the briefing tree; Step 1.5 follows that pattern).
 
 ### Fix Strategy
 
-Pending investigation. Expected shape: new run-retro step ("what was signal, what was noise?") + per-entry classification + adjustment rules (promote / keep / demote / archive / delete) + persistence format + optional ADR-040 amendment.
+Investigation complete this session (2026-04-22 AFK iter 2). Implementation is gated on user resolution of Outstanding Design Questions Q1–Q3 above. Expected landing shape once Q1–Q3 are answered:
+
+1. New run-retro Step 1.5 ("Briefing signal-vs-noise pass") between Step 1 and Step 2 — content shape per Q1 answer.
+2. Persistence convention per Q2 answer — implemented as a content-shape rule in the SKILL.md and reflected in any briefing rendering tooling.
+3. Delete lifecycle per Q3 answer — codified inside Step 1.5's adjustment-rules subsection.
+4. ADR-040 inline amendment ("Curation feedback contract (P105)") naming the persistence format and the curation-feedback contract.
+5. Bats coverage simulating one retro pass against a fixture briefing tree; assert classification → roll-up regeneration.
+
+Effort remains M (single-skill change + single ADR amendment + one bats fixture). Follow-up iteration scope is bounded; no new ADR mint expected.
 
 ## Dependencies
 
