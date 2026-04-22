@@ -1,6 +1,6 @@
 # Problem 036: work-problems orchestrator does not verify commit-landing between iterations
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-17
 **Updated**: 2026-04-17 (rescoped after P035 fix); 2026-04-19 (fix released)
 **Priority**: 4 (Low) — Impact: Minor (2) x Likelihood: Unlikely (2)

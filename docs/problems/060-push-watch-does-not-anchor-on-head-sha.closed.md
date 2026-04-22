@@ -1,6 +1,6 @@
 # Problem 060: `push:watch` does not anchor on HEAD sha; may report success on the wrong (prior-sha) workflow
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-20
 **Priority**: 4 (Low) — Impact: Minor (2) x Likelihood: Unlikely (2)
 **Effort**: S — one-line change to `package.json` `push:watch` script + bats doc-lint assertion

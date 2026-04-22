@@ -1,6 +1,6 @@
 # Problem 054: release:watch requires a mid-cycle pipeline rescoring after push — 3-step release dance
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-19
 **Priority**: 8 (Medium) — Impact: Minor (2) x Likelihood: Likely (4)
 **Effort**: S

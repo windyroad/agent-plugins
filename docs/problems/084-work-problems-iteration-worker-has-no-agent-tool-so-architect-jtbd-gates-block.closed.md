@@ -1,6 +1,6 @@
 # Problem 084: work-problems iteration-worker has no Agent tool so architect + JTBD edit gates AND risk-scorer commit gate block all progress
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-21 (AFK iter 6, during P071 slice 5 attempt)
 **Priority**: 16 (High) — Impact: High (4) x Likelihood: Likely (4)
 **Effort**: M
