@@ -104,6 +104,49 @@ These questions block landing Step 1.5 and the ADR-040 amendment. Two converge o
 
 Once the user answers Q1–Q3, a follow-up iteration can land Step 1.5 in `packages/retrospective/skills/run-retro/SKILL.md` + the ADR-040 inline amendment + bats coverage in one commit per ADR-014 (precedent: Step 3 already writes to the briefing tree; Step 1.5 follows that pattern).
 
+### User answers (2026-04-22 interactive session post-iter-2)
+
+User answered all three via `AskUserQuestion` after iter 2 surfaced the questions. Direction verbatim captured; answers supersede the architect's recommendations where they diverge.
+
+**Q1 (shape + classification owner) — user chose (c) + rationale supersedes Q1 framing.** *"you, the agent are supposed to give your opinion on what was genuinely useful and what felt like noise. No point asking me. The briefing isn't for me"*. Lands as **policy-authorise silent classification** (ADR-013 Rule 5). The agent owns the classification fully; no `AskUserQuestion` at retro time. The briefing is for the agent — who knows what fired — not the user. Agent applies the ADR-026 heuristic directly: entry cited in tool call (or paraphrased in reasoning) during the session = signal; never loaded or loaded-but-unused = noise; ambiguous cases still classify but with a tentative flag the next retro resolves. Removes the entire per-entry fan-out problem (Architect Issue 1); removes the deferred-question batch (option b); removes the per-entry interactive path (option d).
+
+**Q2 (persistence format) — deferred to agent judgement.** *"you tell me"*. **Chosen: per-entry front-matter in topic files (architect-preferred, mild conviction)**. Rationale in the Q3 new scoring context (see below): score + last-classified timestamp stored with each entry localises data with the content, survives file renames and entry reorderings, keeps a single source of truth per entry. Sidecar JSONL considered and rejected — the event log is elegant for replay but creates a third source of truth and risks drift when entries are edited without ledger updates. Index columns rejected — adding signal columns to `docs/briefing/README.md` reaches into the index rendering surface and couples the classification with the README regeneration cadence, which should stay decoupled from per-entry state.
+
+**Q3 (delete guard rail) — user proposed a new shape: scoring with decay.** *"I was thinking of giving items a score, when they are genuinly useful they get a +1, when they are noise they get a -1, overtime they all get a -1"*. Supersedes Q3's three original options with a richer lifecycle:
+
+- **Per-entry score**: integer, starts at `0` when the entry is first written.
+- **Signal event**: `+1` when the agent classifies the entry as signal in a retro (entry was cited / paraphrased / acted on during the session).
+- **Noise event**: `-1` when the agent classifies the entry as noise (entry was loaded but not used OR the entry's claim was contradicted by session observations).
+- **Decay event**: `-1` per retro-cycle applied to ALL entries ("overtime they all get a -1"). Decay runs each retro regardless of per-entry classification so entries that neither fire nor are flagged as noise still drift downward. An entry that consistently fires accrues `+1` net per retro (signal + decay nets `0`, wait — actually `+1 − 1 = 0`; need to confirm semantics). Alternative: signal = `+2` to net `+1` after decay. **Open**: exact numeric values for signal/noise vs decay to achieve the intended monotonicity; initial landing can try `signal=+2, noise=-1, decay=-1` so a consistently-useful entry nets `+1/retro` and a consistently-noise entry nets `-2/retro`.
+- **Promotion / demotion / deletion thresholds** (initial proposal — revisit after first-run data): score `>= +3` = promote to Critical Points (session-start surface) candidate; `0..+2` = keep in topic file; `<= -3` = delete candidate (route to delete queue for a single batched `AskUserQuestion` confirmation per the user's "information-loss guard rail" concern). Archive bin deprecated in favour of git-history-as-archive.
+- **Advantages over two-retro-consecutive-noise**: one noise event doesn't undo a high-signal history; decay-pressure surfaces genuinely stale entries even when they're never explicitly noised; the score is a single greppable integer in front-matter.
+
+### Resolved Step 1.5 landing plan (post-user-answers)
+
+1. **Front-matter shape** (Q2): each topic file entry gets a trailing HTML comment block:
+
+   ```markdown
+   - Entry text body goes here.
+     <!-- signal-score: 2 | last-classified: 2026-04-22 | first-written: 2026-04-15 -->
+   ```
+
+   HTML comments render invisibly in markdown; `first-written` aids decay-vs-staleness debug story.
+
+2. **Agent Step 1.5 classification loop** (Q1): silent policy-authorise per ADR-013 Rule 5. Agent:
+   - Reads each topic file's entries + their current scores.
+   - Applies ADR-026-grounded classification per entry: scans the session's tool-call history + reasoning; cites the tool invocation or paraphrase that makes the entry signal / noise / decay-only.
+   - Updates each entry's score per Q3 rules (signal `+2`, noise `-1`, decay `-1`).
+   - Applies threshold adjustments (promote to Critical Points / demote / route to delete queue).
+   - Commits via ADR-014 + ADR-022 staging convention (governance-docs exclusion means no architect/JTBD gate for the retro's own writes).
+
+3. **ADR-040 amendment** (precedent: ADR-032 carries multiple in-place amendments — P077, P084, P086, P075): add a "Curation feedback contract (P105)" subsection naming the signal-score + decay + thresholds + delete-queue contract.
+
+4. **Bats coverage**: simulate one retro pass against a fixture `docs/briefing/` tree with three entries (high-signal / noise / decay-only); assert the score update + threshold → action mapping. Per ADR-037 contract-assertion pattern.
+
+5. **Delete queue surfacing**: the ONE remaining `AskUserQuestion` in the whole flow. Step 1.5's final action is a single-call `AskUserQuestion` asking the user to confirm deletion for each entry whose score dropped `<= -3`. Empty queue → skip the prompt entirely; 1–4 options when the queue has entries (ADR-013 Rule 1 cap; > 4 queues sequentially). Preserves the "information-loss guard rail" without re-introducing per-entry user prompts for the 99% of retros where nothing is eligible for deletion.
+
+This plan is now gated only on implementation, not on further design input. A subsequent iteration can land it.
+
 ### Fix Strategy
 
 Investigation complete this session (2026-04-22 AFK iter 2). Implementation is gated on user resolution of Outstanding Design Questions Q1–Q3 above. Expected landing shape once Q1–Q3 are answered:

@@ -1,6 +1,6 @@
 # Problem 102: No invocation surface creates risk register entries — `docs/risks/` stays empty after P033 scaffolding
 
-**Status**: Open
+**Status**: Verifying (fix landed 2026-04-22)
 **Reported**: 2026-04-22
 **Priority**: 15 (High) — Impact: Moderate (3) x Likelihood: Almost certain (5)
 **Effort**: M
@@ -56,7 +56,25 @@ P033's fix was lean scaffolding with deferred automation. The "populate incremen
 
 ### Fix Strategy
 
-Pending investigation. Expected shape: at least one invocation surface + initial curated risks seeded so the register is non-empty on first close.
+**Landed 2026-04-22 (iteration 3 of `/wr-itil:work-problems` AFK session).**
+
+Implemented candidate (a) from the Investigation Tasks, scoped to CREATE-only as the minimum-viable invocation surface:
+
+1. **New skill `/wr-risk-scorer:create-risk`** — `packages/risk-scorer/skills/create-risk/SKILL.md`. Modeled verbatim on `/wr-architect:create-adr` (guided creation; `AskUserQuestion` for user input; origin-max ID collision check per ADR-019; writes `docs/risks/R<NNN>-<kebab-title>.active.md`; auto-derives ID, date, and category where unambiguous; pulls impact/likelihood scales from `RISK-POLICY.md`; updates register table in `docs/risks/README.md`; commits per ADR-014 with `docs(risks): open R<NNN>` message).
+2. **Seeded R001** — `docs/risks/R001-confidential-info-leak-via-public-repo-push.active.md`. First populated risk; proves the pattern + the register is non-empty on close. Inherent 12 (High), Residual 9 (Medium), Treatment Mitigate, owner plugin-maintainer.
+3. **Register index updated** — `docs/risks/README.md` Register table gains an R001 row.
+
+### Verification
+
+- [ ] Invoke `/wr-risk-scorer:create-risk` in a real session and observe it creates a well-formed `R<NNN>-*.active.md` file.
+- [ ] Confirm the README register table stays in sync after a second risk is added.
+- [ ] Observe whether the register actually gets populated in subsequent sessions (non-empty register in 30 days is the acceptance signal).
+
+### Explicitly out of scope for this fix (follow-ups)
+
+- **Passive trigger** (candidates b/c/d from Investigation Tasks) — tracked in **P110** (opened 2026-04-22). JTBD review flagged that slash-command-only invocation partially satisfies JTBD-001 (solo-developer: Enforce Governance Without Slowing Down) because it still depends on the assistant remembering to invoke. Needs hook-driven integration in one of: risk-scorer pipeline back-channel, retro step, or CLAUDE.md workflow rule.
+- **Lifecycle transitions** (`active → accepted → retired`) — no skill yet; manual `git mv` per `docs/risks/README.md` "How to Review" suffices until the register has ~5+ entries. Follow-up ticket can be opened at that point.
+- **Additional seeded risks** (session context budget, subprocess permission denial, governance-hook stack overhead, mutation-test flakiness) — can be added via the new skill as the user encounters them; a single-seed was enough to validate the pattern and unblock P033's verification path.
 
 ## Dependencies
 

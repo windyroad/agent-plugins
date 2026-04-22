@@ -34,10 +34,9 @@ Template: `TEMPLATE.md`
 
 ## Register
 
-_(empty — this is the initial scaffolding; risks will be added as they are identified)_
-
 | ID | Title | Category | Inherent | Residual | Treatment | Owner | Review |
 |----|-------|----------|----------|----------|-----------|-------|--------|
+| [R001](R001-confidential-info-leak-via-public-repo-push.active.md) | Confidential information leak via public-repo push | infosec | 12 (High) | 9 (Medium) | Mitigate | plugin-maintainer | 2026-10-22 |
 
 ## Retired
 

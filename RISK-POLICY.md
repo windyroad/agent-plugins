@@ -1,7 +1,9 @@
 # Risk Policy — Windy Road Agent Plugins
 
 > ISO 31000-aligned risk criteria for pipeline risk scoring.
-> Last reviewed: 2026-04-08
+> Last reviewed: 2026-04-23
+
+> Reviewed quarterly and after any significant change to distribution channels, package architecture, or CI/CD infrastructure.
 
 ## Business Context
 
