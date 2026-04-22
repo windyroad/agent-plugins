@@ -79,3 +79,4 @@ Awaiting user verification that the scaffolding matches intent before populating
 - `docs/risks/TEMPLATE.md` — per-risk file template
 - `packages/risk-scorer/` — current risk scoring plugin; could host a future register-management skill
 - P034 (`docs/problems/034-centralise-risk-reports-for-cross-project-skill-improvement.open.md`) — centralising ephemeral `.risk-reports/` to `~/.claude/`; may share the same centralised storage infrastructure
+- P102 (`docs/problems/102-no-invocation-surface-for-risk-register.open.md`) — follow-up ticket captures the deferred population mechanism. Surfaced 2026-04-22 after the user observed the register had stayed empty for 5 days in Verification Pending. P033's Fix Strategy explicitly deferred the invocation surface to "future work"; P102 is that future work made concrete.
