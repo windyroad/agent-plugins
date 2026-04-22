@@ -24,7 +24,7 @@ The current implementation, when above-appetite, effectively falls to an `AskUse
 
 The orchestrator had a clear top-ranked remediation (R3 tied with R1, both at -5) but escalated to `AskUserQuestion` instead of applying it. Applying R3 non-interactively would have:
 
-1. Moved `.changeset/p100-retrospective-briefing-migration.md` to `.changeset/pending/` (out of the top-level glob the changesets CLI scans).
+1. Moved `.changeset/p100-retrospective-briefing-migration.md` to `docs/changesets-holding/` (out of the top-level glob the changesets CLI scans — and outside `.changeset/` entirely, because `changesets/action@v1` fails with ENOENT on any subdirectory under `.changeset/`).
 2. Dropped release risk below appetite (3 patches, no minor).
 3. Proceeded with drain via policy-authorized `push:watch` + `release:watch`.
 4. Resumed the AFK loop to iter 5 without user intervention.

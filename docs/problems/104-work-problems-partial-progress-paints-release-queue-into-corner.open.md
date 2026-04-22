@@ -31,12 +31,12 @@ Work-problems iterations can return any of the following outcomes per the iterat
 ## Symptoms
 
 - Iter 4's release-cadence branch has no clean exit: every drainable subset is a compromise.
-- The retrospective minor changeset has been moved to `.changeset/pending/` (out of top-level scan) as a holding pattern per P103's R3 fix. It waits indefinitely for slice 2.
+- The retrospective minor changeset has been moved to `docs/changesets-holding/` (outside `.changeset/` entirely — `changesets/action@v1` fails with ENOENT on any subdirectory under `.changeset/`) as a holding pattern per P103's R3 fix. The holding-area README documents the provisional convention. It waits indefinitely for slice 2.
 - Any future L/XL ticket that splits into slice 1 + slice 2 + slice N will reproduce the pattern.
 
 ## Workaround
 
-Manual curation of the release queue before drain. The user (or the orchestrator per P103's fix once implemented) inspects changesets, moves slice-2-dependent ones to `.changeset/pending/`, drains the remainder, and commits the holding state. Reinstates the held changesets when slice 2 lands.
+Manual curation of the release queue before drain. The user (or the orchestrator per P103's fix once implemented) inspects changesets, moves slice-2-dependent ones to `docs/changesets-holding/` (outside `.changeset/` entirely, to sidestep the `changesets/action@v1` subdirectory-ENOENT defect), drains the remainder, and commits the holding state. Reinstates the held changesets when slice 2 lands.
 
 ## Impact Assessment
 
@@ -58,7 +58,7 @@ Two interacting issues:
 
 - [ ] Audit existing `work-problems` Step 4 classifier for scope-expansion + architect-design-open cases. Add an explicit skip rule for tickets with Design Update sections listing open architect questions.
 - [ ] Amend the iteration prompt (Step 5) to constrain `partial-progress` acceptability — the worker may only return partial-progress if the partial state is individually releaseable (patch-only within a single package or docs-only). Multi-package partials that include a minor/major bump must instead return `scope-expanded` with findings documented; the orchestrator then schedules architect review across multiple iterations.
-- [ ] Consider promoting `.changeset/pending/` from this session's ad-hoc convention to an orchestrator-blessed convention, with SKILL-level guidance on when iteration workers stage pending vs active changesets.
+- [ ] Consider promoting `docs/changesets-holding/` from this session's provisional convention (documented in its own README) to an orchestrator-blessed convention, with SKILL-level guidance on when iteration workers stage pending vs active changesets. If blessed, promote to ADR (candidate ADR-039) amending ADR-018 + ADR-020's above-appetite branch.
 - [ ] Bats coverage: simulate an iteration that produces a multi-slice partial-progress output and assert the orchestrator handles it cleanly (classifies up-front; or rejects the partial; or stages to `pending/`).
 
 ### Fix Strategy
