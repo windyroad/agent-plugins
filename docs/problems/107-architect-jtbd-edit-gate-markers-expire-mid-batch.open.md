@@ -28,6 +28,7 @@ Aggregate: ~5 minutes of wall-clock + ~2000 extra output tokens per slice. Multi
 - Write tool returns `BLOCKED: Cannot edit '<file>' without architecture review` despite the agent having already reviewed earlier in the batch.
 - Orchestrator pattern: re-delegate architect + JTBD, retry the Write; sometimes unblocks, sometimes falls through to python3-via-Bash (subprocess Edit intermittent denial, documented separately in afk-subprocess.md).
 - Observed this session at 3 points during slice 2 execution.
+- **2026-04-22 ADR-041 landing session (P103+P104 fix)**: mid-landing `Edit` on `packages/itil/skills/work-problems/SKILL.md` was blocked with `BLOCKED: Cannot edit 'SKILL.md' without architecture review` (and matching `BLOCKED: Cannot edit 'SKILL.md' without JTBD review`) ~40 min after the initial architect+JTBD delegation. The landing touched 11 files (ADR-041 rewrite, 2 ADR amendments, 3 SKILL.md edits, holding-area README, 2 `.verifying.md` transitions, new P108, new bats file, changeset) — by the time the final one-line insertion hit `work-problems/SKILL.md`, the initial-review markers had expired. Resolved via parallel `wr-architect:agent` + `wr-jtbd:agent` refresh (both returned PASS in ~10s each on a minimal "reaffirm" prompt); the Edit then succeeded. Adds ~60s + ~25K tokens per expiry to the landing flow. Confirms the N ≥ 6 files pattern holds at the release-commit layer, not just slice-2-style session work.
 
 ## Workaround
 
