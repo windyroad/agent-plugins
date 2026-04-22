@@ -71,9 +71,9 @@ After the skill's `git commit` step lands, the same terminal step MUST continue 
    - Run `npm run push:watch` (push + wait for CI).
    - If `.changeset/` is non-empty after push (i.e. there is an outstanding release), run `npm run release:watch` (merge the release PR + wait for npm publish).
 5. **Failure handling** — if `release:watch` fails (CI failure, publish failure), stop and report the failure. Do not retry non-interactively.
-6. **Above-appetite branch** — if push/release risk is above appetite, skip the drain and report clearly: "Release skipped — risk above appetite. Run `npm run push:watch` and `npm run release:watch` manually when ready."
+6. **Above-appetite branch (superseded by ADR-041 2026-04-22)** — if push/release risk is above appetite (≥ 5/25), the skill MUST auto-apply scorer remediations in rank order until residual risk is within appetite, OR halt the skill per ADR-041 Rule 5 if the scorer cannot produce a convergent plan. The skill MUST NOT release above appetite under any circumstance. The skill MUST NOT call `AskUserQuestion` as a shortcut out of the auto-apply loop. See ADR-041 for the full rule set (Rules 1–7), the closed action-class enumeration (Rule 2a), the Verification Pending carve-out (Rule 2b), and the halt-on-exhaustion semantics (Rule 5). The prior "Release skipped — run manually when ready" text is retired.
 
-Scope is **per-skill**: unlike ADR-018's loop-level rule, ADR-020 fires once per governance skill invocation after that invocation's single commit. It does not iterate.
+Scope is **per-skill**: unlike ADR-018's loop-level rule, ADR-020 fires once per governance skill invocation after that invocation's single commit. It does not iterate. When ADR-041 Rule 2's auto-apply loop fires inside a non-AFK skill invocation, each auto-apply is its own commit (ADR-041 Rule 3 — no iteration wrapper to fold into).
 
 ### Non-interactive authorisation
 

@@ -1,19 +1,24 @@
 # Changesets Holding Area
 
-> **Status: provisional.** This pattern is under active investigation via **P103** and **P104**; do not rely on it surviving their resolution. P104's Investigation Tasks explicitly include "Consider promoting this session's ad-hoc convention to an orchestrator-blessed convention". If it is blessed, it will be documented in a new ADR (candidate ADR-039) that amends ADR-018 / ADR-020's above-appetite branch. Until then, this README captures the current mechanics for this repo only.
+> **Blessed by ADR-041** (2026-04-22). This is the authoritative mechanism for the `move-to-holding` remediation class — the orchestrator-supported subset of ADR-041 Rule 2a's closed action-class enumeration. See `docs/decisions/041-auto-apply-scorer-remediations-above-appetite.proposed.md` Rules 2 + 7.
 
-Changesets that are authored against landed commits but are **not yet ready to ship** because they belong to a multi-slice fix whose other slices have not yet landed. Holding them here (outside `.changeset/`) keeps the intent intact without breaking the `changesets/action@v1` Release workflow, which does not tolerate subdirectories under `.changeset/` (`ENOENT` on `.changeset/pending/changes.md` observed 2026-04-22 — the original relocation target).
+Changesets that are authored against landed commits but are **not yet ready to ship** because they belong to a multi-slice fix whose other slices have not yet landed, OR that have been auto-moved here by the orchestrator under ADR-041 Rule 2 to bring release risk within appetite. Holding them here (outside `.changeset/`) keeps the intent intact without breaking the `changesets/action@v1` Release workflow, which does not tolerate subdirectories under `.changeset/` (`ENOENT` on `.changeset/pending/changes.md` observed 2026-04-22 — the original relocation target).
 
 ## When to hold a changeset
 
-A changeset is a candidate for holding when its package bump would ship a change that makes architectural sense only as part of a larger multi-slice fix whose other slices have not yet landed — the P104 "painted into a corner" hazard. The canonical example: a `minor` bump that migrates file layout for one plugin, where the paired consumer-side hook lives in a second slice that is still pending architect decisions.
+A changeset is a candidate for holding in either of two cases:
+
+1. **Multi-slice WIP (user-authored)**: a `minor`/`major` bump that migrates file layout or introduces behaviour whose paired consumer-side hook lives in a slice still pending architect decisions — the P104 "painted into a corner" hazard.
+2. **Auto-apply under ADR-041 (orchestrator-authored)**: residual push/release risk is above appetite (≥ 5/25) and the scorer ranks `move-to-holding` as the top remediation. The orchestrator performs the move, re-scores, and proceeds per ADR-041 Rule 2.
 
 ## Process
 
 1. Author the changeset against the slice's commits normally in `.changeset/`.
-2. When the slice-1-without-slice-N hazard is recognised, `git mv .changeset/<name>.md docs/changesets-holding/<name>.md`.
-3. Reference the holding state in the parent ticket's `## Fix Strategy` or `## Design Update` section so the reinstate trigger is captured.
-4. When the blocking slices land, `git mv docs/changesets-holding/<name>.md .changeset/<name>.md` and push. The next Release workflow run picks it up.
+2. When the slice-1-without-slice-N hazard is recognised (user path) OR the orchestrator's auto-apply fires (ADR-041 path), `git mv .changeset/<name>.md docs/changesets-holding/<name>.md`.
+3. Reference the holding state:
+   - User path: in the parent ticket's `## Fix Strategy` or `## Design Update` section so the reinstate trigger is captured.
+   - Auto-apply path: the orchestrator's iteration/skill report logs the move per ADR-041 Rule 6, and this README's "Currently held" section is appended with the parent ticket reference.
+4. When the blocking slices land (user path) or the user manually decides to reinstate (auto-apply path), `git mv docs/changesets-holding/<name>.md .changeset/<name>.md` and push. The next Release workflow run picks it up. Move the entry from "Currently held" to "Recently reinstated" in this README with the reinstate date + reason.
 
 ## Currently held
 
@@ -25,9 +30,10 @@ A changeset is a candidate for holding when its package bump would ship a change
 
 ## Related
 
-- **P103 (work-problems escalates resolved release decisions)** — behavioural companion. Orchestrator should auto-apply scorer's top-ranked remediation including this holding pattern, rather than escalating to `AskUserQuestion`.
-- **P104 (partial-progress paints release queue into corner)** — structural companion. The root cause; holding is the workaround. P104's fix strategy is to constrain `partial-progress` so the holding area is rarely needed.
-- **ADR-018 (Inter-iteration release cadence for AFK loops)** — defines drain-within-appetite / skip-above-appetite branches. Holding-area pattern is a third branch not yet documented.
-- **ADR-020 (Governance auto-release for non-AFK flows)** — similar contract; same amendment candidate.
+- **ADR-041** (`docs/decisions/041-auto-apply-scorer-remediations-above-appetite.proposed.md`) — authoritative basis. Rule 7 blesses this convention; Rule 2 + Rule 2a define the `move-to-holding` action class the orchestrator auto-applies against this area; Rule 6 mandates the README audit append.
+- **P103** (closed by ADR-041) — behavioural driver: orchestrator escalated resolved release decisions instead of auto-applying.
+- **P104** (closed by ADR-041) — structural driver: partial-progress painted the release queue into a corner.
+- **ADR-018** (Inter-iteration release cadence for AFK loops) — at-or-below-appetite drain. Above-appetite governed by ADR-041.
+- **ADR-020** (Governance auto-release for non-AFK flows) — symmetric non-AFK rule. Above-appetite governed by ADR-041.
 - **JTBD-006 (Progress the Backlog While I'm Away)** — the persona-job this pattern serves.
 - **JTBD-101 (Extend the Suite with New Plugins)** — the plugin-developer pattern: preserve changeset intent across multi-slice work without breaking changesets-CLI semantics.

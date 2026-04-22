@@ -1,6 +1,6 @@
 # Problem 104: `/wr-itil:work-problems` partial-progress iteration outcome can paint the release queue into a mid-state corner — slice-1-without-slice-2 hazard
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-22
 **Priority**: 16 (High) — Impact: Major (4) x Likelihood: Likely (4)
 **Effort**: M
@@ -83,3 +83,13 @@ Bats coverage exercises the classifier skip path and the partial-progress restri
 - **P016 (manage-problem should split multi-concern tickets)** — parent pattern at ticket-creation time. P104 is the iteration-time variant: iterating an L/XL ticket in slices can itself produce multi-concern release artefacts.
 - **P100 (wr-retrospective does not auto-surface docs/BRIEFING.md)** — concrete example. Iter 4 of the 2026-04-22 session was P100 and produced the corner state documented here.
 - **ADR-018 (Release cadence)** — the contract both P103 and P104 touch; amendment candidate.
+
+## Fix Released
+
+ADR-041 (`docs/decisions/041-auto-apply-scorer-remediations-above-appetite.proposed.md`) landed 2026-04-22 as the structural fix. Rule 7 blesses the `docs/changesets-holding/` convention (promoted from provisional) — the mechanism that keeps an un-shippable slice-1 changeset outside the `.changeset/` glob without losing its authored intent. Rule 2's auto-apply loop routes slice-1-only states through `move-to-holding` (the implemented action class in ADR-041 v1); Rule 1's "never release above appetite" invariant removes the "ship what we can, leave the rest dirty" escape hatch that previously painted queues into corners.
+
+The holding-area README (`docs/changesets-holding/README.md`) has been updated to remove the "provisional" banner and cite ADR-041 as the authoritative basis. Rule 6 mandates that every auto-apply `move-to-holding` action append to the README's "Currently held" section, making the holding state auditable.
+
+Contract-assertion bats at `packages/itil/skills/work-problems/test/work-problems-above-appetite-remediation.bats` asserts the `docs/changesets-holding/` string and the Rule 7 blessing. Manual behavioural verification pending a partial-progress iteration that triggers `move-to-holding` non-interactively.
+
+Future work tracked in P108 (scorer action-class vocabulary extension) — once `revert-commit` and `feature-flag` classes implement, additional resolution paths exist for painted-into-a-corner states that `move-to-holding` alone cannot resolve (e.g., an intrinsically-risky single commit rather than a multi-changeset accumulation).

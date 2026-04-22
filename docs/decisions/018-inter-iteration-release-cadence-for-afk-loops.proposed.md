@@ -90,6 +90,12 @@ risk-scorer reports residual risk within appetite. No `AskUserQuestion` is
 required for the release itself. The fail-safe applies only when residual
 risk is above appetite or when CI/publish fails.
 
+### Amendment 2026-04-22 — Above-appetite behaviour governed by ADR-041
+
+The Mechanism above covers the at-or-below-appetite drain path (≤ 4/25). Above-appetite behaviour (push or release ≥ 5/25) is superseded by **ADR-041 (Auto-apply scorer remediations to reach within appetite — never release above)**. The orchestrator MUST auto-apply scorer remediations in rank order until residual risk is within appetite, OR halt the loop per ADR-041 Rule 5 if the scorer cannot produce a convergent plan. The orchestrator MUST NOT release above appetite under any circumstance. See `docs/decisions/041-auto-apply-scorer-remediations-above-appetite.proposed.md` for the full rule set (Rules 1–7), the closed action-class enumeration (Rule 2a), the Verification Pending carve-out (Rule 2b), and the halt-on-exhaustion semantics (Rule 5).
+
+This amendment replaces the prior implicit "skip the drain, user resolves on return" behaviour. The at-or-below-appetite drain mechanism documented above is unchanged.
+
 ## Consequences
 
 ### Good

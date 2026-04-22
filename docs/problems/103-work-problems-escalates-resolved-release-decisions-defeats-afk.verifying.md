@@ -1,6 +1,6 @@
 # Problem 103: `/wr-itil:work-problems` orchestrator escalates above-appetite release decisions already resolved by the risk scorer — defeats AFK purpose
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-22
 **Priority**: 20 (High) — Impact: Major (4) x Likelihood: Almost certain (5)
 **Effort**: M
@@ -88,3 +88,11 @@ Bats coverage: exercise the auto-apply path, the no-remediation fallback path, a
 - **ADR-013 (Structured user interaction for governance-skill decisions)** — Rule 6 non-interactive fallback applies here. This ticket surfaces a case where Rule 6 was not correctly applied.
 - **ADR-018 (Release cadence)** — Step 6.5's within-appetite drain is defined here; above-appetite path is underspecified. ADR amendment candidate.
 - Memory: `feedback_act_on_obvious_decisions.md` — captures this case's lesson in the user's memory; this ticket is the structural / repo fix.
+
+## Fix Released
+
+ADR-041 (`docs/decisions/041-auto-apply-scorer-remediations-above-appetite.proposed.md`) landed 2026-04-22 as the structural fix. Rule 1 prohibits release above appetite (removes the AskUserQuestion escalation surface); Rule 2 mandates auto-apply of scorer remediations in rank order; Rule 2a ships with `move-to-holding` implemented for ADR-041 v1 (other classes deferred to P108); Rule 5 halts the loop on exhaustion rather than falling through to user interaction.
+
+Contract-assertion bats at `packages/itil/skills/work-problems/test/work-problems-above-appetite-remediation.bats` asserts the load-bearing strings. Manual behavioural verification pending an above-appetite iteration with an eligible `move-to-holding` remediation.
+
+`work-problems` Step 6.5, `manage-problem` Step 12, and `manage-incident` Step 15 all adopt the Above-appetite branch per ADR-041. ADR-018 Step 6.5 and ADR-020 §6 cross-reference ADR-041 from the same landing commit. Holding-area convention (`docs/changesets-holding/`) promoted from provisional to blessed per Rule 7.
