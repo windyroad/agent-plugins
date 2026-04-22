@@ -1,6 +1,6 @@
 # Problem 094: `/wr-itil:manage-problem` does not refresh `docs/problems/README.md` on ticket creation
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-22
 **Priority**: 10 (High) — Impact: Minor (2) x Likelihood: Almost certain (5)
 **Effort**: S
@@ -82,3 +82,9 @@ Chosen per run-retro Step 4b Stage 2 Option 2 (`Skill — improvement stub`). Th
 - **P076** (WSJF transitive dependencies — methodology update) — if creation-path refresh lands after P076, the rendering must also respect transitive effort re-rating.
 - **P093** — sibling ticket this session about circular delegation between transition-problem and manage-problem. Distinct failure mode.
 - **ADR-014** — governance skills commit their own work; any creation / update commit that now includes a README refresh must stay a single-commit transaction per ADR-014.
+
+## Fix Released
+
+Deployed in the next `@windyroad/itil` patch release (commit to follow). `packages/itil/skills/manage-problem/SKILL.md` Step 5 now unconditionally refreshes `docs/problems/README.md` after writing a new `.open.md`; Step 6 conditionally refreshes when Priority / Effort / WSJF lines change; Step 11's `git add` language now mandates the refreshed README is staged in the same commit as the ticket creation / ranking-changing update (ADR-014 single-commit transaction preserved).
+
+Awaiting user verification: next ticket creation via `/wr-itil:manage-problem` should land `docs/problems/README.md` in the same commit as the new `.open.md` file, with the new ticket's row present in the WSJF Rankings table.

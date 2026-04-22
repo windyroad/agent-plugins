@@ -349,6 +349,18 @@ The `## Dependencies` section uses **bare ticket IDs** (`P038`, not `[P038](./03
 - **Composes with**: (none)
 ```
 
+#### README.md refresh on new ticket (P094)
+
+After writing the new `.open.md` file, regenerate `docs/problems/README.md` to insert the new ticket's row into the WSJF Rankings, and stage the refreshed README in the same commit as the new ticket. Without this refresh, new tickets are absent from the ranked table until the next `/wr-itil:review-problems` invocation or the next Step 7 transition — staleness accumulates silently on every creation-only session.
+
+**Mechanism**: use the same rendering rules as Step 7's P062 block (glob `docs/problems/*.open.md` / `*.known-error.md` / `*.verifying.md` / `*.parked.md`; rank open/known-error by WSJF; list verifyings in the Verification Queue ordered by release age; list parkeds in the Parked section). The refresh is a **render, not a re-rank** — existing WSJF values on the other ticket files are trusted per P062's established discipline. Only the new ticket's own WSJF is consumed from its freshly-written file.
+
+1. After `Write`-ing the new `.open.md` file (and, for multi-concern splits per step 4b, after all split files are written), regenerate `docs/problems/README.md` in-place reflecting the new filename set.
+2. Update the "Last reviewed" line's parenthetical to name the new ticket (e.g. `P<NNN> opened — <one-line title>`) so the next session's fast-path check has a human-readable audit marker.
+3. `git add docs/problems/README.md` — the stage list at Step 11 must include it alongside the new `.open.md` file (Step 11's `git add -u` catch-all handles tracked-file modifications; the new README render lands via this path when README.md already exists in git, and via an explicit `git add docs/problems/README.md` when it is newly created).
+
+For the multi-concern split path (step 4b), the refresh fires **once** after all split tickets are written, not per-split — a single render captures the full new set in one pass.
+
 ### 6. For updates: Edit the existing file
 
 Find the file matching the problem ID:
@@ -362,6 +374,26 @@ Apply the update — this could be:
 - Adding a "Fix Strategy" section
 - Adding "Related" links
 - Updating priority based on new information
+
+#### README.md refresh on conditional update (P094)
+
+If the update changed the ticket's **Priority**, **Effort**, or **WSJF** line, regenerate `docs/problems/README.md` to reflect the new ranking and stage it in the same commit as the update. If the update was to other sections (Root Cause Analysis, Symptoms, Related, Dependencies, etc.) and did NOT change the ranking-bearing fields, skip the refresh — the rendered table would be identical and the cost is not load-bearing.
+
+**Trigger rule**: refresh if any of these lines changed between pre-edit and post-edit:
+
+- `**Priority**: ...` (Impact × Likelihood line)
+- `**Effort**: ...`
+- `**WSJF**: ...`
+
+If the edit touched only `## Root Cause Analysis`, `## Symptoms`, `## Workaround`, `## Dependencies`, `## Related`, or other non-ranking sections, skip the refresh. A conservative check is: run a diff of the pre-edit vs post-edit file and grep for any of the three field labels above in the diff's `+` / `-` lines; if none match, skip.
+
+**Mechanism** (when the trigger fires):
+
+1. Regenerate `docs/problems/README.md` using the same render rules as Step 7's P062 block — render, not re-rank. Trust every other ticket's stored WSJF; consume only this ticket's updated WSJF from the post-edit file.
+2. Update the "Last reviewed" line's parenthetical to name the re-rated ticket (e.g. `P<NNN> re-rated — <old-WSJF> → <new-WSJF>`).
+3. `git add docs/problems/README.md` so the refresh rides the same commit as the ticket update per ADR-014.
+
+**Dependency ripple**: if this update changed the ticket's Effort, and the ticket is an upstream of other tickets (any ticket's `## Dependencies` → `**Blocked by**` list references this ID), the transitive-effort rule (P076) says dependents may need to re-rate too. The surgical render in this step does NOT re-walk the graph — that is Step 9b.1's job. If the dependency graph is known to be non-trivial, prefer `/wr-itil:review-problems` instead of a bare update; the review path handles the re-walk deterministically. The conditional refresh here is sufficient for the common case of a self-only re-rate.
 
 ### 7. For status transitions
 
@@ -657,7 +689,7 @@ After any operation, report:
 - Any quality check warnings
 
 Commit the completed work per ADR-014 (governance skills commit their own work):
-1. `git add` all created/modified files for this operation — **including any file renamed via `git mv` that was then modified by the `Edit` tool** (P057 staging trap — `git mv` alone stages only the rename, not the subsequent content edit). `git add -u` is a safe catch-all for tracked modifications. **For any Step 7 status transition** (Open → Known Error, Known Error → Verification Pending, Verification Pending → Closed, or Parked) — including folded-fix commits where the `.verifying.md` transition rides with a `fix(<scope>): ...` commit — the stage list MUST include `docs/problems/README.md` refreshed per Step 7's "README.md refresh on every transition" block (P062). Skipping the refresh leaks staleness to the next session's fast-path.
+1. `git add` all created/modified files for this operation — **including any file renamed via `git mv` that was then modified by the `Edit` tool** (P057 staging trap — `git mv` alone stages only the rename, not the subsequent content edit). `git add -u` is a safe catch-all for tracked modifications. **For any Step 7 status transition** (Open → Known Error, Known Error → Verification Pending, Verification Pending → Closed, or Parked) — including folded-fix commits where the `.verifying.md` transition rides with a `fix(<scope>): ...` commit — the stage list MUST include `docs/problems/README.md` refreshed per Step 7's "README.md refresh on every transition" block (P062). Skipping the refresh leaks staleness to the next session's fast-path. **For any Step 5 new-ticket creation** (single or multi-concern split) and for any Step 6 update that changed Priority / Effort / WSJF, the stage list MUST include `docs/problems/README.md` refreshed per the P094 blocks in those steps. Creation-path and ranking-change-update-path refreshes are treated identically to Step 7 transitions — single-commit transaction, README alongside the ticket.
 2. Satisfy the commit gate — two paths are valid (either produces a bypass marker):
    - **Primary**: delegate to the `wr-risk-scorer:pipeline` subagent-type via the Agent tool (subagent_type: `wr-risk-scorer:pipeline`)
    - **Fallback**: if the `wr-risk-scorer:pipeline` subagent-type is not available in the current tool set (e.g., this skill is itself running inside a spawned subagent), invoke the `/wr-risk-scorer:assess-release` skill via the Skill tool. Per ADR-015 it wraps the same pipeline subagent and the `PostToolUse:Agent` hook writes an equivalent bypass marker. Do not silently skip the gate because the primary path is unavailable — the fallback exists specifically to close this gap (see P035).
