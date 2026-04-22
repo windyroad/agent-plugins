@@ -7,27 +7,37 @@
 # file, updates the Status field, and refreshes docs/problems/README.md
 # in the same commit per ADR-014 + ADR-022 + P062.
 #
-# Execution is delegated to /wr-itil:manage-problem <NNN> with the
-# status argument — the Step 7 transition block on manage-problem owns
-# the pre-flight checks, the P057 staging-trap handling, the external-
-# root-cause detection (P063), the `## Fix Released` section writes,
-# and the README.md refresh. This skill is a thin-router selection
-# surface; execution stays on the authoritative workflow to avoid
-# forking the transition logic.
+# This skill is the AUTHORITATIVE executor for the user-initiated
+# transition path per P093: it hosts the Step 7 transition block inline
+# (pre-flight checks, P063 external-root-cause detection, git mv + Edit
+# + P057 re-stage, Status field edit, ## Fix Released section write for
+# the verifying destination, P062 README.md refresh, ADR-014 commit).
+# The skill does NOT delegate execution back to /wr-itil:manage-problem;
+# the deprecation-window forwarder on manage-problem routes one-way to
+# this skill and returns its output verbatim (no round-trip).
+#
+# The in-skill Step 7 block on manage-problem remains the authoritative
+# source for in-skill callers (Step 9b auto-transition, the Parked path,
+# Step 9d closure inside review). Per ADR-010 amended "Split-skill
+# execution ownership": copy, not move — the user-initiated transition
+# path owned by this skill carries an inline scoped copy of the
+# mechanic; the host skill's in-house callers keep their inline copy.
 #
 # Structural assertion — Permitted Exception to the source-grep ban
 # (ADR-005 / P011 / ADR-037 contract-assertion pattern).
 #
 # @problem P071
-# @jtbd JTBD-001 (enforce governance without slowing down — discoverable surface)
-# @jtbd JTBD-101 (extend the suite with clear patterns — one skill per distinct user intent)
+# @problem P093
+# @jtbd JTBD-001 (enforce governance without slowing down — discoverable surface + terminating contract)
+# @jtbd JTBD-101 (extend the suite with clear patterns — one skill per distinct user intent, split skills own execution)
 #
 # Cross-reference:
 #   P071: docs/problems/071-argument-based-skill-subcommands-are-not-discoverable.open.md
-#   ADR-010 amended (Skill Granularity section) — split naming + forwarder contract
+#   P093: docs/problems/093-transition-problem-and-manage-problem-circular-delegation-for-nnn-status-args.*.md
+#   ADR-010 amended (Skill Granularity section) — split naming + forwarder contract + split-skill execution ownership
 #   ADR-013 Rule 1 — structured user interaction (tie-break selection, if any)
 #   ADR-013 Rule 6 — AFK non-interactive fallback
-#   ADR-014 — governance skills commit their own work (delegated target owns commits)
+#   ADR-014 — governance skills commit their own work (this skill owns the transition commit)
 #   ADR-022 — .verifying.md suffix on release; Verification Pending distinct from Known Error
 #   ADR-037 — contract-assertion bats pattern
 #   P057 — git mv + Edit staging trap
@@ -67,11 +77,14 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "SKILL.md frontmatter allowed-tools includes Skill (delegation to manage-problem)" {
-  # Step 3 delegates the per-ticket transition execution to
-  # /wr-itil:manage-problem <NNN> <status> via the Skill tool — the
-  # authoritative Step 7 block (pre-flight + P057 + P063 + P062) must
-  # remain on manage-problem to avoid forking the transition logic.
+@test "SKILL.md frontmatter allowed-tools includes Skill (retained for orchestrator composition)" {
+  # Although this skill no longer delegates Step 7 execution to
+  # /wr-itil:manage-problem (P093 fix — inline execution), the Skill
+  # tool remains in allowed-tools so the skill can be invoked from
+  # orchestrators (e.g. /wr-itil:work-problems) and so it can invoke
+  # /wr-itil:report-upstream when P063 external-root-cause detection
+  # fires option 1. Dropping Skill from allowed-tools would break both
+  # composition paths.
   run grep -nE "^allowed-tools:.*Skill" "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }
@@ -97,15 +110,45 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "SKILL.md delegates transition execution to /wr-itil:manage-problem (anti-fork discipline)" {
-  # Per ADR-010 thin-router: the split skill owns intent selection,
-  # NOT execution. The pre-flight / staging-trap / P063 external-root-
-  # cause / README refresh stack stays on /wr-itil:manage-problem
-  # Step 7. If this skill re-implements the transition inline, the
-  # deprecation window hardens into a permanent fork.
-  run grep -inE "/wr-itil:manage-problem" "$SKILL_FILE"
+@test "SKILL.md hosts the transition execution inline (P093 — no round-trip to manage-problem)" {
+  # P093 inversion: the split skill owns BOTH intent selection AND
+  # execution. The pre-flight / P063 external-root-cause detection /
+  # staging-trap / README refresh stack is hosted inline here so a
+  # contract-literal agent invoking /wr-itil:transition-problem NNN
+  # <status> reaches a terminal state — no recursion into
+  # /wr-itil:manage-problem.
+  #
+  # "No round-trip" scope: the SKILL.md body MUST NOT contain a
+  # delegation-imperative instruction that routes Step 7 execution back
+  # to /wr-itil:manage-problem. Citations to manage-problem in the
+  # Related section or as a sibling skill reference are permitted —
+  # this assertion targets delegation-imperative language only.
+  #
+  # Per ADR-010 amended "Split-skill execution ownership": copy, not
+  # move. The Step 7 block on manage-problem stays in place for
+  # in-skill callers (Step 9b auto-transition, Parked path, Step 9d
+  # closure inside review). This skill carries a scoped inline copy for
+  # the user-initiated transition path only.
+  run grep -inE "delegate.{0,40}(to |/)?/?wr-itil:manage-problem|Skill tool.{0,40}manage-problem|manage-problem.{0,40}(via|through)? ?the Skill tool" "$SKILL_FILE"
+  [ "$status" -ne 0 ]
+}
+
+@test "SKILL.md documents the inline Step 7 execution mechanics (P093 — authoritative executor)" {
+  # Positive assertion: the skill must describe the full Step 7
+  # mechanic so a contract-literal agent has enough information to
+  # execute the transition without reading manage-problem's SKILL.md.
+  # Each mechanic is represented by at least one identifying phrase;
+  # missing any of them would leave a gap the execution path can fall
+  # through.
+  run grep -inE "pre-flight|pre.flight" "$SKILL_FILE"
   [ "$status" -eq 0 ]
-  run grep -inE "delegate.*manage-problem|Skill tool.*manage-problem|manage-problem.*Skill tool" "$SKILL_FILE"
+  run grep -inE "git mv" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  run grep -inE "git add" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  run grep -inE "Fix Released" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  run grep -inE "git commit|commit per ADR-014" "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }
 

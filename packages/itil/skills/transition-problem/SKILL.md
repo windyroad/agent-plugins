@@ -1,14 +1,16 @@
 ---
 name: wr-itil:transition-problem
-description: Advance a problem ticket's lifecycle status — Open → Known Error, Known Error → Verification Pending (verifying), Verification Pending → Closed. Renames the ticket file, updates the Status field, and refreshes docs/problems/README.md in the same commit. Delegates the execution to /wr-itil:manage-problem so the pre-flight checks, P057 staging-trap handling, P063 external-root-cause detection, and P062 README refresh stay on a single authoritative workflow. Use when the user asks to "transition", "close", "mark known-error", or "release" a specific ticket.
+description: Advance a problem ticket's lifecycle status — Open → Known Error, Known Error → Verification Pending (verifying), Verification Pending → Closed. Renames the ticket file, updates the Status field, and refreshes docs/problems/README.md in the same commit. Hosts the transition execution inline (pre-flight checks, P057 staging-trap handling, P063 external-root-cause detection, P062 README refresh, ADR-014 commit) per ADR-010 amended "Split-skill execution ownership". Use when the user asks to "transition", "close", "mark known-error", or "release" a specific ticket.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Skill
 ---
 
 # Transition Problem — Lifecycle Advance
 
-Advance a specific problem ticket along the ITIL lifecycle: Open → Known Error → Verification Pending → Closed. The skill is a **thin-router selection surface** — it identifies the ticket and the destination status, then delegates the actual transition execution to `/wr-itil:manage-problem <NNN>` (which hosts the authoritative Step 7 transition block). This preserves the single-workflow ownership of the pre-flight checks, external-root-cause detection (P063), staging-trap handling (P057), and README.md refresh (P062).
+Advance a specific problem ticket along the ITIL lifecycle: Open → Known Error → Verification Pending → Closed. The skill is the **authoritative executor** for the user-initiated transition path — it identifies the ticket and the destination status, then executes the transition inline: pre-flight checks, external-root-cause detection (P063), `git mv` + Status edit with staging re-stage (P057), `## Fix Released` section write for the `verifying` destination, README.md refresh (P062), and ADR-014 commit.
 
-This skill is phase 4 of the P071 phased-landing split of `/wr-itil:manage-problem <NNN> <status>` per ADR-010's amended Skill Granularity rule (one skill per distinct user intent). The original `/wr-itil:manage-problem <NNN> known-error` subcommand route remains as a thin-router forwarder during the deprecation window but is scheduled for removal in `@windyroad/itil`'s next major version.
+This skill is phase 4 of the P071 phased-landing split of `/wr-itil:manage-problem <NNN> <status>` per ADR-010's amended Skill Granularity rule (one skill per distinct user intent). Per ADR-010's "Split-skill execution ownership" rule (P093), the skill does **not** re-invoke `/wr-itil:manage-problem` to run Step 7 (no round-trip); the deprecation-window forwarder on manage-problem routes one-way to this skill and returns its output verbatim. The in-skill Step 7 block on manage-problem remains in place for in-skill callers (Step 9b auto-transition, Parked path, Step 9d closure inside review) — "copy, not move" per ADR-010 amended.
+
+The deprecated `/wr-itil:manage-problem <NNN> known-error` subcommand route remains as a one-way forwarder during the deprecation window but is scheduled for removal in `@windyroad/itil`'s next major version.
 
 ## Arguments
 
@@ -24,14 +26,14 @@ The `<NNN>` and `<status>` tokens are **data parameters**, not word-subcommands.
 
 **In scope:**
 - Validate that the ticket file exists and the destination status is reachable from the current status (e.g. an `.open.md` file cannot transition directly to Verification Pending — it must go through Known Error first).
-- Delegate the transition execution to `/wr-itil:manage-problem <NNN> <status>` via the Skill tool so the full Step 7 block runs (pre-flight checks, external-root-cause detection, file rename, Status field edit, staging re-stage per P057, README.md refresh per P062, commit per ADR-014).
+- Execute the transition inline: pre-flight checks, P063 external-root-cause detection (for the Open → Known Error destination), `git mv` to the new suffix, Status field edit, `## Fix Released` section write (for the Known Error → Verification Pending destination), P057 staging re-stage, P062 README.md refresh, ADR-014 commit.
 - Report the outcome (new filename, new Status, commit SHA).
 
 **Out of scope:**
-- Re-implementing the Step 7 transition logic inline. Delegation to `/wr-itil:manage-problem` is the anti-fork discipline.
 - Backlog re-ranking — that's `/wr-itil:review-problems`.
 - Ticket creation or bare-update flows — that's `/wr-itil:manage-problem` (no-args form for creation, `<NNN>` bare for update).
 - Parking a ticket — that's a distinct lifecycle move handled by `/wr-itil:manage-problem` directly (the `.parked.md` suffix has its own pre-flight path including P063 external-root-cause detection for `upstream-blocked` reasons).
+- Auto-transitions fired inside `/wr-itil:review-problems` Step 9b (Open → Known Error when root cause + workaround are documented) — those use manage-problem's in-skill Step 7 block per ADR-010 amended "Split-skill execution ownership" ("copy, not move").
 
 ## Steps
 
@@ -70,53 +72,155 @@ Check the current filename suffix and verify the destination status is reachable
 
 If the pairing is invalid, emit a clear message naming the current status, the requested destination, and the valid next step. Do not silently skip or auto-correct — invalid transitions are almost always user typos and a clear error is the cheapest recovery.
 
-### 4. Delegate the transition to `/wr-itil:manage-problem <NNN> <status>`
+### 4. Run pre-flight checks
 
-Invoke `/wr-itil:manage-problem` via the Skill tool with the `<NNN> <status>` argument shape. The delegated skill runs its Step 7 transition block, which owns:
+Destination-specific pre-flight checks gate the transition. If any check fails, report which ones and stop — do not auto-remediate.
 
-- **Pre-flight checks** — root cause documented, investigation tasks checked off, reproduction test referenced, workaround documented, effort re-rated (P047). Any missing check halts the transition with a specific error.
-- **P063 external-root-cause detection** — fires on Open → Known Error (and on the `upstream-blocked` park path). If a strict-token hit appears in the Root Cause Analysis section, the prompt routes the user to `/wr-itil:report-upstream` or defers with a stable marker. The AFK fallback (per ADR-013 Rule 6) appends the deferred-report marker automatically.
-- **Staging trap handling (P057)** — after `git mv` renames the file, the Edit tool writes the Status field and (for the `verifying` destination) the `## Fix Released` section. The re-stage (`git add <new>`) is explicit — without it the content edit leaks into the next commit and the audit trail breaks.
-- **README.md refresh (P062)** — regenerates `docs/problems/README.md` in-place on every transition so the dev-work table, Verification Queue, and Parked section never lag the on-disk ticket inventory. The refresh joins the same commit as the rename + content edit.
-- **Commit per ADR-014** — governance skills commit their own work. Transition commits use the conventions named in the delegated skill's Step 11 block.
+**Open → Known Error** (`<status>` = `known-error`) requires:
 
-**Why delegate rather than re-implement:** the Step 7 block is a policy-governed, multi-concern flow (pre-flight + P063 + P057 + P062 + ADR-014 commit). Re-hosting it on a sibling skill would fork the ownership contract and compound maintenance cost. The split skill (this file) owns the *selection* of ticket + destination; `/wr-itil:manage-problem` owns the *execution*.
+- [ ] Root cause is documented in the Root Cause Analysis section (not just "Preliminary Hypothesis")
+- [ ] At least one investigation task is checked off
+- [ ] A reproduction test exists or is referenced
+- [ ] A workaround is documented (even if "feature disabled")
+- [ ] Effort bucket re-rated against the now-documented fix strategy; if the bucket changed since creation, update the Effort / WSJF lines and note the reason (P047 — creation-time estimates drift as scope clarifies)
 
-### 5. AFK / non-interactive branch (ADR-013 Rule 6)
+**Known Error → Verification Pending** (`<status>` = `verifying`) requires:
 
-When this skill is invoked inside an AFK orchestrator (detect via `/wr-itil:work-problems` markers in the invoking prompt — phrases like "AFK", "work-problems", "batch-work", "ALL_DONE"), do NOT emit `AskUserQuestion`. The orchestrator has already selected the transition (commonly Known Error → Verification Pending as part of a release commit) and this skill runs the execution only. The P063 external-root-cause detection's AFK fallback is owned by the delegated `/wr-itil:manage-problem` Step 7 block; this skill inherits that behaviour without re-implementing it.
+- [ ] The fix has been implemented (the transition typically rides with the `fix(<scope>): ... (closes P<NNN>)` commit)
+- [ ] A release marker is available (version, commit SHA, or date) so the `## Fix Released` section can name it
 
-Interactive mode (no orchestrator markers): the skill proceeds through Steps 1–4 directly. If any pre-flight check fails inside the delegated skill, the delegation returns that error and this skill surfaces it verbatim.
+**Verification Pending → Closed** (`<status>` = `close`) requires:
 
-### 6. Report the outcome
+- [ ] The user has explicitly confirmed the fix works in production (this skill never auto-closes on inference — only on explicit user confirmation or orchestrator-supplied `close` argument)
 
-After the delegated `/wr-itil:manage-problem <NNN> <status>` completes:
+### 5. External-root-cause detection (P063 — Open → Known Error only)
 
-1. Report: ticket ID, previous Status, new Status, new filename, commit SHA.
-2. If the destination was `verifying`, name the `## Fix Released` section's release marker in the output so the user can correlate with the shipped version.
-3. **Do NOT re-commit or re-refresh** — the delegated skill already committed the change per ADR-014 and refreshed the README per P062. Re-emitting either would break the single-commit audit trail.
+Fires on the Open → Known Error transition only. Parking with the `upstream-blocked` reason reuses the same mechanism but is handled by `/wr-itil:manage-problem`'s Step 7 (this skill does not park).
+
+**Strict detection tokens** (any of the following within the Root Cause Analysis section counts as a hit):
+
+- Literal label words: `upstream`, `third-party`, `external`, `vendor`.
+- Scoped npm package pattern: `@[\w-]+/[\w-]+` (e.g. `@anthropic/claude-code`, `@windyroad/itil`).
+
+Bash heuristic:
+
+```bash
+if grep -iE '\b(upstream|third-party|external|vendor)\b|@[[:alnum:]_-]+/[[:alnum:]_-]+' "$problem_file"; then
+  external_root_cause_detected=1
+fi
+```
+
+Detection is intentionally **strict** (explicit label or scoped-npm package only) to avoid prompt fatigue (P063 Direction decision). A passing reference to a bare package name (`gh`, `npm`) does NOT trigger the prompt.
+
+**Already-noted check** — before firing the prompt, grep the ticket for the stable marker `- **Upstream report pending** —` (written by option 2 / the AFK fallback below) or `- **Reported Upstream:**` / a `## Reported Upstream` section (written by `/wr-itil:report-upstream` Step 7 back-write per ADR-024 Confirmation criterion 3a). If any of those are already present, skip the prompt — the detection has already fired on a prior run.
+
+**If the detection fires and nothing has been noted yet**, use `AskUserQuestion`:
+
+- `header: "External root cause detected"`
+- `multiSelect: false`
+- Options:
+  1. `Invoke /wr-itil:report-upstream now` — halt the transition; the skill runs (it writes the `## Reported Upstream` appendage per ADR-024 Confirmation criterion 3a); the transition resumes afterwards.
+  2. `Defer and note in ticket` — append a pending-upstream-report line to the ticket's `## Related` section using the stable marker `- **Upstream report pending** — external dependency identified; invoke /wr-itil:report-upstream when ready`. The marker wording is fixed so subsequent runs (and the work-problems `upstream-blocked` skip path) can detect "already noted" without re-firing.
+  3. `Not actually upstream` — proceed without invocation; append the same marker with text `- **Upstream report pending** — false positive; detection misfire` so the prompt does not re-fire on later reviews.
+
+**Non-interactive (AFK) branch** (per ADR-013 Rule 6): when `AskUserQuestion` is unavailable (detect via orchestrator markers in the invoking prompt — phrases like "AFK", "work-problems", "batch-work", "ALL_DONE"), default to option 2 — append the pending-upstream-report line with the stable `- **Upstream report pending** —` marker. Do NOT auto-invoke `/wr-itil:report-upstream`; its Step 6 security-path branch is interactive and would halt the orchestrator anyway (per ADR-024 Consequences).
+
+### 6. Rename the file, edit content, and re-stage (P057 staging trap)
+
+Per destination, run the rename + edit + explicit re-stage sequence. The explicit re-stage after `Edit` is mandatory — without it the content edit leaks into the next commit and the audit trail breaks.
+
+> **Staging trap (P057).** `git mv` stages only the rename — it does NOT pick up subsequent `Edit`-tool content changes. After the `Edit` tool modifies the renamed file (Status field, `## Fix Released` section, etc.), re-stage it explicitly: `git add <new>`. Without the explicit re-stage, the transition commit captures the rename-only change and the content edit leaks into the next commit, corrupting the audit trail.
+
+**Open → Known Error**:
+
+```bash
+git mv docs/problems/<NNN>-<title>.open.md docs/problems/<NNN>-<title>.known-error.md
+# ... use the Edit tool to update the Status field to "Known Error" ...
+git add docs/problems/<NNN>-<title>.known-error.md
+```
+
+**Known Error → Verification Pending** (per ADR-022, on release):
+
+```bash
+git mv docs/problems/<NNN>-<title>.known-error.md docs/problems/<NNN>-<title>.verifying.md
+# ... use the Edit tool to update Status to "Verification Pending" AND add the `## Fix Released` section ...
+git add docs/problems/<NNN>-<title>.verifying.md
+```
+
+The `## Fix Released` section contains: release marker (version, commit SHA, or date), one-sentence fix summary, "Awaiting user verification" line, and any exercise evidence from the releasing session. The `.verifying.md` suffix signals to every downstream consumer (work-problems classifier, review step 9d, README rendering) that the remaining work is user-side verification — no file-body scan needed.
+
+When this transition is folded into a `fix(<scope>): ... (closes P<NNN>)` commit (the common case), the `git mv` + `Edit` + re-stage + README refresh all join that single commit — never split across commits.
+
+**Verification Pending → Closed**:
+
+```bash
+git mv docs/problems/<NNN>-<title>.verifying.md docs/problems/<NNN>-<title>.closed.md
+# ... use the Edit tool to update the Status field to "Closed" ...
+git add docs/problems/<NNN>-<title>.closed.md
+```
+
+### 7. Refresh docs/problems/README.md (P062)
+
+Every Step 7 status transition regenerates `docs/problems/README.md` and stages it in the same commit so the dev-work table, Verification Queue, Parked section, and "Last reviewed" line never lag the on-disk ticket inventory. Without this step, README.md accumulates staleness between review invocations.
+
+The refresh uses the same rendering rules as `/wr-itil:review-problems` Step 9e (glob `docs/problems/*.open.md` / `*.known-error.md` / `*.verifying.md` / `*.parked.md`; rank open/known-error by WSJF; list verifyings in the Verification Queue ordered by release age; list parkeds in the Parked section) but skips the full re-scoring pass — existing WSJF values on the ticket files are trusted. The refresh is a render, not a re-rank.
+
+**Mechanism:**
+
+1. After renaming + Editing + `git add`-ing the transitioned ticket file (per the staging-trap rule above), regenerate `docs/problems/README.md` in-place reflecting the new filename set and the transitioned ticket's new Status.
+2. `git add docs/problems/README.md` — stage the refreshed README with the same commit as the transition.
+3. Update the "Last reviewed" line's parenthetical to name the transition (e.g. `P<NNN> <status> — <one-line fix summary>`) so the next session's fast-path check has a human-readable audit marker alongside the git-history staleness test.
+
+### 8. Commit per ADR-014
+
+Governance skills commit their own work. Transition commits include the renamed ticket file + any content edits + the refreshed `docs/problems/README.md`.
+
+**Commit gate** — satisfy via one of two paths (either produces a bypass marker):
+
+- **Primary**: delegate to subagent type `wr-risk-scorer:pipeline` via the Agent tool.
+- **Fallback**: if `wr-risk-scorer:pipeline` is not available in the current tool set (e.g. this skill is running inside a spawned subagent), invoke `/wr-risk-scorer:assess-release` via the Skill tool. Per ADR-015 it wraps the same pipeline subagent and the `PostToolUse:Agent` hook writes an equivalent bypass marker. Do not silently skip the gate because the primary path is unavailable — the fallback exists specifically to close this gap (see P035).
+
+**Commit message conventions**:
+
+- Open → Known Error transition (standalone): `docs(problems): P<NNN> known error — <root cause summary>`
+- Known Error → Verification Pending (folded with fix): `fix(<scope>): <description> (closes P<NNN>)` — per ADR-022, include the rename-to-`.verifying.md` + `## Fix Released` section in the same commit
+- Known Error → Verification Pending (standalone, no fix riding with it): `docs(problems): P<NNN> verification pending — <release marker>`
+- Verification Pending → Closed: `docs(problems): close P<NNN> <title>`
+
+If risk is above appetite and `AskUserQuestion` is available: ask whether to commit anyway, remediate first, or park the work. If `AskUserQuestion` is unavailable (AFK), skip the commit and report the uncommitted state (ADR-013 Rule 6 fail-safe). This applies only to the risk-above-appetite branch, not to the delegation-unavailable case above.
+
+### 9. Report the outcome
+
+Report: ticket ID, previous Status, new Status, new filename, commit SHA. If the destination was `verifying`, name the `## Fix Released` section's release marker so the user can correlate with the shipped version.
+
+Release draining is owned by the caller — `/wr-itil:manage-problem` Step 12 (interactive) or the `/wr-itil:work-problems` orchestrator (AFK, Step 6.5 cadence). This skill does not invoke `npm run push:watch` / `release:watch` on its own.
 
 ## Ownership boundary
 
-`transition-problem` owns:
+`transition-problem` owns (for the user-initiated transition path):
 - Argument parsing (`<NNN> <status>`).
 - Ticket-file discovery via `ls docs/problems/<NNN>-*.md`.
 - Destination-reachability validation (Open → Known Error → Verification Pending → Closed, one step at a time).
-- Delegating one transition execution to `/wr-itil:manage-problem <NNN> <status>`.
+- Pre-flight checks for the supplied destination.
+- P063 external-root-cause detection (Open → Known Error only) — including the AFK fallback that appends the stable `- **Upstream report pending** —` marker.
+- `git mv` rename + Status field edit + (for `verifying`) `## Fix Released` section write + explicit P057 re-stage.
+- `docs/problems/README.md` refresh (P062) staged alongside the transition.
+- ADR-014 commit through the risk-scorer commit gate.
 
 `transition-problem` does NOT:
-- Run the Step 7 transition block inline — delegates to `/wr-itil:manage-problem`.
-- Fire the P063 external-root-cause detection prompt directly — delegated skill owns it.
-- Refresh `docs/problems/README.md` directly — delegated skill owns the refresh per P062.
-- Commit — delegated skill commits per ADR-014.
+- Re-invoke `/wr-itil:manage-problem` to run Step 7 — the deprecation-window forwarder on manage-problem is one-way (P093 / ADR-010 amended "Split-skill execution ownership", no round-trip).
+- Re-rank the backlog — that's `/wr-itil:review-problems`.
+- Create tickets or run the bare-`<NNN>` update flow — those stay on `/wr-itil:manage-problem`.
 - Park tickets — the `.parked.md` suffix has its own path on `/wr-itil:manage-problem` (P063 AFK fallback fires there too).
+- Auto-transition inside review — Step 9b's Open → Known Error auto-transition uses manage-problem's in-skill Step 7 block ("copy, not move").
+- Drain the release queue — `push:watch` / `release:watch` are owned by the caller (`/wr-itil:manage-problem` Step 12, or the `/wr-itil:work-problems` orchestrator).
 
 ## Related
 
 - **P071** (`docs/problems/071-argument-based-skill-subcommands-are-not-discoverable.open.md`) — originating ticket. This skill is phase 4 of the P071 phased-landing plan (list-problems was phase 1; review-problems was phase 2; work-problem was phase 3).
 - **ADR-010 amended** (`docs/decisions/010-rename-wr-problem-to-wr-itil.proposed.md` — Skill Granularity section) — canonical skill-split naming + forwarder contract + `deprecated-arguments: true` frontmatter flag.
 - **ADR-013** (`docs/decisions/013-structured-user-interaction-for-governance-decisions.proposed.md`) — Rule 1 for interactive prompts; Rule 6 for the AFK non-interactive branch.
-- **ADR-014** — governance skills commit their own work. The delegated `/wr-itil:manage-problem <NNN> <status>` owns the per-transition commit; this skill does not re-commit.
+- **ADR-014** — governance skills commit their own work. This skill owns the per-transition commit (P093 — authoritative executor for the user-initiated path).
 - **ADR-022** — `.verifying.md` suffix on release; Verification Pending is a first-class status distinct from Known Error. Known Error → Verification Pending is the most common transition this skill forwards.
 - **ADR-032** — governance skill invocation patterns. `/wr-itil:work-problems` may delegate transition iterations to this skill during AFK release orchestration.
 - **ADR-037** (`docs/decisions/037-skill-testing-strategy.proposed.md`) — contract-assertion bats pattern applied to this skill.
@@ -125,7 +229,8 @@ After the delegated `/wr-itil:manage-problem <NNN> <status>` completes:
 - **P063** — external-root-cause detection at Open → Known Error and at the `upstream-blocked` park path. The delegated Step 7 block owns the prompt; this skill inherits the AFK fallback without re-implementing.
 - **JTBD-001** (`docs/jtbd/solo-developer/JTBD-001-enforce-governance.proposed.md`) — discoverable surface via `/wr-itil:` autocomplete. Users type `/wr-itil:transition-problem 042 known-error` rather than remembering the `manage-problem <NNN> known-error` subcommand.
 - **JTBD-101** (`docs/jtbd/plugin-developer/JTBD-101-extend-suite.proposed.md`) — one skill per distinct user intent.
-- `packages/itil/skills/manage-problem/SKILL.md` — hosts the thin-router forwarder for the deprecated `manage-problem <NNN> known-error` form; also the delegated execution target for each transition.
+- `packages/itil/skills/manage-problem/SKILL.md` — hosts the deprecation-window forwarder for the `manage-problem <NNN> <status>` form (one-way to this skill, no round-trip per P093). Also retains its own in-skill Step 7 block for in-skill callers (Step 9b auto-transition, Parked path, Step 9d closure) per ADR-010 amended "Split-skill execution ownership" — copy, not move.
+- **P093** (`docs/problems/093-transition-problem-and-manage-problem-circular-delegation-for-nnn-status-args.*.md`) — the circular-delegation ticket that authorised this skill's absorbing the Step 7 block inline.
 - `packages/itil/skills/review-problems/SKILL.md` — sibling refresh skill; this skill's transitions trigger the same README.md regeneration mechanism P062 codifies.
 - `packages/itil/skills/list-problems/SKILL.md` — sibling read-only display skill; same cache contract.
 - `packages/itil/skills/work-problem/SKILL.md` — sibling selection skill; delegates per-ticket execution (including transitions) through `/wr-itil:manage-problem`.

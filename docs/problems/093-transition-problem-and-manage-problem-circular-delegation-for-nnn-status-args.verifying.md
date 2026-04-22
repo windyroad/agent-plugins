@@ -1,10 +1,10 @@
 # Problem 093: `/wr-itil:transition-problem` ↔ `/wr-itil:manage-problem` circular delegation for `<NNN> <status>` args
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-22
 **Priority**: 12 (High) — Impact: Significant (4) x Likelihood: Possible (3)
 **Effort**: S
-**WSJF**: (12 × 1.0) / 1 = **12.0**
+**WSJF**: excluded from ranking (Verification Pending — ADR-022)
 
 ## Description
 
@@ -56,10 +56,11 @@ Direction (1) is cleaner — avoids a provenance channel and matches the P071 sp
 ### Investigation tasks
 
 - [x] Investigate root cause (confirmed — both SKILL.md files delegate without hosting Step 7 code).
-- [ ] Pick the fix direction (likely (1) per the P071 split intent).
-- [ ] Implement: move the Step 7 block (with pre-flight checks + P063 detection + P057 re-stage + P062 refresh + ADR-014 commit) into `/wr-itil:transition-problem` SKILL.md as an inline execution step. Update manage-problem Step 1 forwarder to just emit the deprecation notice and then invoke transition-problem (one-way — not a round trip).
-- [ ] Add a contract-assertion bats fixture: `transition-problem-no-manage-problem-roundtrip.bats` that asserts the SKILL.md body does NOT contain a "delegate back to manage-problem" instruction.
-- [ ] Verify the fix by invoking `/wr-itil:transition-problem NNN close` in a fresh session and confirming no Skill-tool re-entry.
+- [x] Pick the fix direction (Direction 1 per the P071 split intent — transition-problem hosts Step 7 inline; "copy, not move" per architect guidance so manage-problem's in-skill callers retain their inline block).
+- [x] Implement: copy the Step 7 block (pre-flight checks + P063 detection + P057 re-stage + P062 refresh + ADR-014 commit) into `/wr-itil:transition-problem` SKILL.md as inline Steps 4–9. Update manage-problem Step 1 forwarder to be one-way (no round-trip clause).
+- [x] Add contract-assertion coverage: inverted existing `transition-problem-contract.bats` test in place (architect-approved over adding a parallel `-no-manage-problem-roundtrip.bats` fixture — the split-file pattern would duplicate setup and split the audit trail). New assertion: SKILL.md body does NOT contain a delegation-imperative route back to manage-problem; positive assertion added for inline Step 7 mechanics (git mv, git add, Fix Released, commit).
+- [x] ADR-010 amendment added: "Split-skill execution ownership" sub-rule codifies "copy, not move" for future splits so the same trap does not recur.
+- [ ] Verify the fix by invoking `/wr-itil:transition-problem NNN close` in a fresh session and confirming no Skill-tool re-entry. (Deferred to user verification post-release — this is the explicit user-side confirmation step that moves the ticket Verification Pending → Closed.)
 
 ## Fix Strategy
 
@@ -74,6 +75,21 @@ Direction (1) is cleaner — avoids a provenance channel and matches the P071 sp
   3. In-session observation 2026-04-22: I recognised the cycle and broke it by executing Step 7 inline during the P029 + P059 closure path; flagged the deviation in the retro summary.
 
 Chosen per run-retro Step 4b Stage 2 Option 2 (`Skill — improvement stub`). The fix is a bounded edit to two existing SKILL.md files — no new concept, no new ADR required (though ADR-010 amended may want a one-line clarification on "split skills own their own execution" to prevent the same trap on future splits).
+
+## Fix Released
+
+Deployed in `@windyroad/itil` (session 2026-04-22, AFK iteration 2, commit pending). Awaiting user verification.
+
+**Fix summary**: `/wr-itil:transition-problem` now hosts the Step 7 transition block inline (pre-flight checks by destination, P063 external-root-cause detection with AFK fallback, `git mv` + Status edit + P057 staging re-stage, `## Fix Released` section write for `verifying`, P062 README refresh, ADR-014 commit through the risk-scorer pipeline gate). The skill no longer re-invokes `/wr-itil:manage-problem` — the round-trip clause was stripped from manage-problem's Step 1 forwarder paragraph (lines ~203-211). The in-skill Step 7 block on manage-problem stays intact for in-skill callers (Step 9b auto-transition, the Parked path, Step 9d closure) per the architect-approved "copy, not move" shape.
+
+**Exercise evidence this session**:
+- `npx bats packages/itil/skills/transition-problem/test/transition-problem-contract.bats` — 15/15 green after inversion (test 7 now asserts no round-trip; new test 8 asserts inline Step 7 mechanics are documented).
+- `npm test` — 736/736 green (full bats suite, including all manage-problem contract fixtures — the transition-forwarder, review-forwarder, work-forwarder, list-forwarder, and external-root-cause-detection fixtures all pass with the forwarder-paragraph rewrite).
+- This very commit is written through the authoritative transition-problem Step 7 block (the fix dogfoods itself): Open → Verification Pending rename + Status edit + `## Fix Released` write + P062 README refresh + ADR-014 commit.
+
+**ADR-010 amended**: "Split-skill execution ownership" sub-rule added to the Amendments section (2026-04-22). Codifies "copy, not move" for future clean-split skills so the P093 trap does not recur.
+
+**Verification path**: invoke `/wr-itil:transition-problem 093 close` (or any other ticket ID) in a fresh session. Expected behaviour: the skill reads its own SKILL.md, runs pre-flight + rename + edit + re-stage + README refresh + commit gate + commit, and emits the outcome report — without re-invoking `/wr-itil:manage-problem` via the Skill tool. A fresh session trace showing no Skill-tool call to `wr-itil:manage-problem` during the transition path confirms the fix.
 
 ## Related
 
