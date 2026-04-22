@@ -14,6 +14,56 @@ Reflect on the current session, update the project briefing, and create problem 
 
 Read `docs/briefing/README.md` — the per-topic index, Critical Points summary, and per-file hooks. Then read each topic file referenced in the Topic Index (`docs/briefing/<topic>.md`) to understand what previous sessions captured under each heading. During the P100 transition window the legacy single-file `docs/BRIEFING.md` may still exist as a stub pointer; it is read-only until P100 slice 2 retires it.
 
+### 1.5. Briefing signal-vs-noise pass (P105)
+
+After reading the briefing tree, score every entry in `docs/briefing/*.md` to decide whether it was **signal** (useful this session), **noise** (loaded but not useful), or **decay-only** (not in context at all). This pass drives the Critical Points roll-up curation that the SessionStart hook consumes.
+
+**Scoring rules** (applied per entry, per retro cycle):
+
+| Event | Delta | Trigger |
+|-------|-------|---------|
+| Signal | +2 | Entry was cited, paraphrased, or acted on during this session. |
+| Noise | -1 | Entry was loaded into context but not cited or acted on. |
+| Decay | -1 | Applied to **all** entries every retro cycle, regardless of signal/noise status. |
+
+**Grounding requirement (ADR-026)**: every classification MUST carry a specific citation — the tool invocation, reasoning paraphrase, or session position that exercised (or failed to exercise) the entry. Bare classifications are forbidden. The citation is recorded in the retro summary (Step 5) so the user can audit the agent's judgment.
+
+**Thresholds and actions**:
+
+| Score range | Action |
+|-------------|--------|
+| >= +3 | Promote to Critical Points candidate. The agent adds the entry to the Critical Points roll-up in `docs/briefing/README.md` during Step 3. |
+| 0 .. +2 | Keep in the topic file. No roll-up change. |
+| <= -3 | Route to the **delete queue**. These entries are surfaced for user confirmation in a single batched `AskUserQuestion` at the end of this step. |
+
+**Per-entry persistence format**: each briefing entry carries a trailing HTML comment block:
+
+```markdown
+- Entry text body goes here.
+  <!-- signal-score: 2 | last-classified: 2026-04-22 | first-written: 2026-04-15 -->
+```
+
+The comment block is appended to the list item (or heading) that contains the entry text. `first-written` is set when the entry is created and never changed; `last-classified` and `signal-score` are updated each retro. If an entry lacks a comment block, treat `signal-score` as `0` and set `first-written` to today.
+
+**Classification ownership (policy-authorised per ADR-013 Rule 5)**: the agent owns silent classification. No `AskUserQuestion` is fired for individual entry promotions, demotions, or keep decisions. The agent applies the ADR-026 heuristic directly: entry cited in a tool call (or paraphrased in reasoning) during the session = signal; never loaded or loaded-but-unused = noise; ambiguous cases still classify but with a tentative flag the next retro resolves.
+
+**Delete queue confirmation**: after scoring all entries, if any entries have a score <= -3:
+
+1. Present a single `AskUserQuestion` with `header: "Delete briefing entries?"` and `multiSelect: false`.
+2. The question body lists each delete candidate with its score and the ADR-026 citation that led to the noise classification.
+3. Options (up to 4 per prompt, sequential if > 4):
+   1. `Confirm all deletions` — description: "Remove all listed entries from their topic files."
+   2. `Delete selected only` — description: "The agent will present a follow-up with per-entry checkboxes."
+   3. `Keep all (defer to next retro)` — description: "Leave entries in place; scores remain unchanged."
+   4. `Review individually` — description: "Present each entry one at a time for keep/delete decision."
+4. If the queue is empty, skip the prompt entirely.
+
+If the user chooses `Delete selected only` or `Review individually`, present subsequent `AskUserQuestion` calls as needed, respecting the 4-option cap per ADR-013 Rule 1.
+
+**Tier 1 budget guard**: if promoting all score >= +3 entries would breach the 2 KB / ~10-bullet Critical Points budget (ADR-040), promote only the highest-scored entries until the budget is met and surface the remainder as a budget-overflow advisory in the retro summary.
+
+**Non-interactive / AFK fallback (ADR-013 Rule 6)**: when `AskUserQuestion` is unavailable, classify silently and defer the delete queue to the retro summary (Step 5). Do NOT auto-delete entries in AFK mode. The retro summary's "Signal-vs-Noise Pass" section lists each delete candidate with score and citation so the user can review on return. Same trust-boundary shape as Step 2b and Step 4a.
+
 ### 2. Reflect on this session
 
 Consider the work done in this session and identify:
@@ -117,7 +167,7 @@ For each accepted learning:
 After editing topic files, update `docs/briefing/README.md`:
 
 - Refresh per-file summaries in the Topic Index if the topic file's character changed.
-- Promote an entry into the Critical Points section only when it is genuinely among the highest-value rules of the session (the session-start surface is small and curated — adding there is a user-interactive decision per the helpfulness rating slice 2 will add).
+- Promote an entry into the Critical Points section when its signal-score is >= +3 (agent-driven per Step 1.5). The session-start surface is small and curated; the agent promotes the highest-scored entries first, respecting the Tier 1 budget guard. Demotion from Critical Points happens automatically when an entry's score drops below +3 after decay. The remaining user-interactive boundary is the delete queue (score <= -3), which requires explicit user confirmation.
 
 Use the AskUserQuestion tool to confirm any removals: "I would like to remove [item] from `docs/briefing/<topic>.md` because [reason]. Is this correct?"
 
@@ -258,6 +308,20 @@ Present a summary to the user:
 - Removed: [items removed with reasons]
 - Updated: [items modified]
 - README index refreshed: [per-file summaries or Critical Points changes]
+
+### Signal-vs-Noise Pass (P105)
+
+(Emitted only when Step 1.5 scored briefing entries. Always present when run-retro is invoked — the pass runs regardless of other outcomes. In non-interactive / AFK mode, the delete queue is surfaced here instead of firing `AskUserQuestion`.)
+
+| Entry | Topic file | Old score | New score | Classification | Citation |
+|-------|-----------|-----------|-----------|----------------|----------|
+| <one-line entry summary> | `docs/briefing/<topic>.md` | <old> | <new> | signal / noise / decay-only | <tool call or reasoning paraphrase> |
+
+**Critical Points changes**: list any entries promoted to or demoted from the Critical Points roll-up.
+
+**Delete queue** (only when non-empty): list each score <= -3 candidate with its score and citation. In interactive mode, note the user's decision (`confirmed / deferred / kept`). In AFK mode, label each as `deferred to next interactive session`.
+
+**Budget overflow** (only when triggered): list any score >= +3 entries that were NOT promoted because the Tier 1 budget was already met.
 
 ### Problems Created/Updated
 - [problem ticket]: [summary]

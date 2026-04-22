@@ -89,6 +89,41 @@ No tiering. Blows the context budget on every startup. Rejected per P091 / ADR-0
 
 The SessionStart hook emits only Tier 1. Breaching the Tier 1 budget is the reassessment trigger for this ADR.
 
+### Curation feedback contract (P105)
+
+The signal-vs-noise pass closes the "author-judgment curation" gap identified in the Consequences section. The contract lives in `packages/retrospective/skills/run-retro/SKILL.md` Step 1.5 and is summarised here for ADR traceability.
+
+**Per-entry persistence format**: each briefing entry carries a trailing HTML comment block:
+
+```markdown
+- Entry text body goes here.
+  <!-- signal-score: 2 | last-classified: 2026-04-22 | first-written: 2026-04-15 -->
+```
+
+`first-written` is immutable; `last-classified` and `signal-score` are updated each retro cycle.
+
+**Scoring rules** (per entry, per retro):
+
+| Event | Delta | Trigger |
+|-------|-------|---------|
+| Signal | +2 | Entry was cited, paraphrased, or acted on during the session. |
+| Noise | -1 | Entry was loaded into context but not cited or acted on. |
+| Decay | -1 | Applied to **all** entries every retro cycle, regardless of signal/noise status. |
+
+**Thresholds and actions**:
+
+| Score range | Action |
+|-------------|--------|
+| >= +3 | Promote to Critical Points candidate (agent-driven, subject to Tier 1 budget guard). |
+| 0 .. +2 | Keep in the topic file. No roll-up change. |
+| <= -3 | Route to delete queue; requires explicit user confirmation before removal. |
+
+**Delete guard rail**: entries with score <= -3 are surfaced in a single batched `AskUserQuestion` at the end of Step 1.5. The agent does NOT auto-delete in AFK mode; the queue is deferred to the retro summary. This preserves the "information-loss guard rail" — a high-signal history is not undone by one bad retro, and genuinely stale entries still surface for human decision.
+
+**AFK classification semantics**: the agent owns silent classification per ADR-013 Rule 5. No `AskUserQuestion` fires for promotions, demotions, or keep decisions. Only the delete queue (an information-loss boundary) reaches the user.
+
+**Grounding**: every classification carries an ADR-026 citation — the tool invocation, reasoning paraphrase, or session position that exercised the entry.
+
 ### Consequences
 
 - **Good**: cross-session learnings reach the agent in every adopter project at session start without hand-authored CLAUDE.md pointers. `P100` verification condition is met.
@@ -105,6 +140,8 @@ The SessionStart hook emits only Tier 1. Breaching the Tier 1 budget is the reas
 - `packages/retrospective/hooks/hooks.json` contains a `SessionStart` entry with `"matcher": "startup"` targeting the new script.
 - `docs/BRIEFING.md` is deleted.
 - `@windyroad/retrospective@0.7.0` published to npm. Adopter projects installing the new version and starting a Claude Code session see the Critical Points prose injected once at startup.
+- Topic files in `docs/briefing/*.md` carry per-entry HTML comment blocks with `signal-score`, `last-classified`, and `first-written` (P105).
+- `packages/retrospective/skills/run-retro/SKILL.md` contains Step 1.5 documenting the signal-vs-noise pass, scoring thresholds, delete-queue guard rail, and AFK fallback (P105).
 - **Reassessment trigger**: Tier 1 output exceeds 2 KB / 500 tokens. Revisit tiering rules, promote P105 curation work, or add a size-cap check to the hook script.
 - **Reassessment date**: 2026-07-22.
 

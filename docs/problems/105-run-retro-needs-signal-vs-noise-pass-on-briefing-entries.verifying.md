@@ -1,6 +1,6 @@
 # Problem 105: `/wr-retrospective:run-retro` needs a signal-vs-noise pass on briefing entries to drive session-start curation
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-22
 **Priority**: 16 (High) — Impact: Major (4) x Likelihood: Likely (4)
 **Effort**: M
@@ -170,3 +170,12 @@ Effort remains M (single-skill change + single ADR amendment + one bats fixture)
 - **P100 (`wr-retrospective` does not auto-surface `docs/BRIEFING.md`)** — parent. Slice 2 of P100 ships the SessionStart hook that reads Critical Points. P105 closes the curation-feedback gap that the hook's value depends on over time.
 - **ADR-040 (Session-start briefing surface — directory + indexed README + helpfulness curation)** — the ADR authored during P100 slice 2 names helpfulness curation in its title as a future concern; P105 is that concern made actionable.
 - **`docs/briefing/README.md`** — the Critical Points roll-up is the consumer-facing artefact this feedback loop curates.
+
+## Fix Released
+
+Deployed in `@windyroad/retrospective` via commit implementing:
+- New Step 1.5 "Briefing signal-vs-noise pass (P105)" in `packages/retrospective/skills/run-retro/SKILL.md`
+- ADR-040 inline amendment "Curation feedback contract (P105)" in `docs/decisions/040-session-start-briefing-surface.proposed.md`
+- Bats contract-assertion test `packages/retrospective/skills/run-retro/test/run-retro-signal-vs-noise.bats`
+
+Awaiting user verification.
