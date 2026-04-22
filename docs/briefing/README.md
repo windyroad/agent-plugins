@@ -12,6 +12,7 @@ The highest-value entries across the briefing — the handful of rules that save
 - **Never run `changeset version` locally.** Release via `push:watch` then `release:watch`. The git-push-gate blocks bare `git push`.
 - **AFK iteration-workers use `claude -p` subprocess dispatch**, not Agent-tool spawning. Subagents spawned via `Agent` cannot spawn further subagents; iteration-workers that need architect/JTBD/risk gates must be subprocesses.
 - **`git mv` + `Edit` + `git add` requires re-stage after the Edit** — `git mv` alone stages only the rename. Miss this and content edits leak into the next commit.
+- **The risk-score commit-gate pattern-matches Bash command TEXT** (heredoc prose containing `git commit` trips it). Get a fresh pipeline marker before bulk-writing content that discusses git commands, or write via `python3` stdin-heredoc.
 - **Progressive disclosure is the session-wide unifying pattern** for context-budget problems (ADR-038). Less info upfront + explicit affordances (agent pointers, REFERENCE.md paths); consumers expand on demand. This briefing directory is an instance of the pattern.
 
 ## Topic Index
