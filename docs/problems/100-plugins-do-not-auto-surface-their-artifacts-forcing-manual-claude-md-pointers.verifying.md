@@ -1,6 +1,6 @@
 # Problem 100: `wr-retrospective` does not auto-surface `docs/BRIEFING.md` to the agent at session start — cross-session learnings go unread in adopter projects
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-22
 **Priority**: 20 (High) — Impact: Major (4) x Likelihood: Almost certain (5)
 **Effort**: L
@@ -168,3 +168,27 @@ Chose the acceptable path: slice 1 lands without a governing ADR; slice 2 author
 - [x] Migration plan for existing `docs/BRIEFING.md` — executed (transitional stub + writer-side SKILL.md update).
 - [ ] Architect review at implementation time — slice 1 reviewed (ISSUES FOUND resolved via bundling); slice 2 ADR review pending.
 - [x] Effort re-rating — M -> L applied.
+
+
+## Fix Released
+
+Implemented 2026-04-22 in interactive slice 2 (commit pending as `fix(retrospective): ...`). Released as `@windyroad/retrospective@0.7.0`.
+
+**Slice 1 (prior — commit 5d367e9):** `docs/BRIEFING.md` → `docs/briefing/<topic>.md` tree with `docs/briefing/README.md` index (per-topic files: afk-subprocess, agent-interaction-patterns, governance-workflow, hooks-and-gates, plugin-distribution, releases-and-ci). `run-retro` SKILL.md rewritten writer-side (Steps 1, 3, 5). Architect + JTBD hooks added `docs/briefing/*` exemptions.
+
+**Slice 2 (this release):**
+
+- New hook script `packages/retrospective/hooks/session-start-briefing.sh` — reads `docs/briefing/README.md`, extracts the `## Critical Points (Session-Start Surface)` section via awk, emits as prose. Silent exit if the briefing tree is absent (no-op for adopters without a retro yet).
+- `packages/retrospective/hooks/hooks.json` gains a second `SessionStart` entry with `"matcher": "startup"` targeting the new script. The existing `check-deps.sh` entry remains matcher-less.
+- `docs/BRIEFING.md` (slice-1 migration stub) deleted per user direction ("delete it entirely").
+- `@windyroad/retrospective` bumps 0.6.0 → 0.7.0 (minor).
+- Held retrospective-minor changeset reinstated from `docs/changesets-holding/` to `.changeset/` with scope body expanded to cover slice 1 + slice 2 combined.
+- **ADR-040 (proposed)** "Session-start briefing surface — SessionStart hook over tiered directory + indexed README" authored; sibling to ADR-038; caps Tier 1 boot injection at ≤ 2 KB / ≤ 500 tokens; documents reuse vs net-new.
+- Smoke-test: running the hook script against this repo emits the full 8-bullet Critical Points roll-up as expected (~1.5 KB output — within Tier 1 budget).
+
+**Outstanding follow-ups (non-blocking for P100 closure):**
+
+- **P105 (opened 2026-04-22)** — signal-vs-noise pass in run-retro; curates Critical Points roll-up over time so it does not drift stale. Referenced in ADR-040's "Bad consequences" section as the closure path for that drift.
+- **P102 (opened 2026-04-22)** — same pattern (no invocation surface populates an expected artefact) applied to `docs/risks/`.
+
+Awaiting user verification that the SessionStart hook actually fires and injects the Critical Points prose in a fresh Claude Code session after `@windyroad/retrospective@0.7.0` is installed.

@@ -46,21 +46,21 @@ run-retro Step 1 (read BRIEFING) and Step 3 (write learnings) both act on the au
 - [ ] Decide who runs the classification: user (prompted during run-retro), assistant (self-reports from tool-call history about which entries were cited / paraphrased / acted on), or both.
 - [ ] Decide where the signal is persisted: per-entry front-matter in the topic file, index rows in `docs/briefing/README.md`, or a sidecar ledger (e.g., `docs/briefing/.signal-ledger.jsonl`).
 - [ ] Amend `/wr-retrospective:run-retro` SKILL.md with the new step and data-shape contract.
-- [ ] Architect review at implementation time — may warrant amending ADR-039 (Session-start briefing surface, proposed this session) to document the signal-vs-noise feedback loop as part of the curation contract rather than a separate decision.
+- [ ] Architect review at implementation time — may warrant amending ADR-040 (Session-start briefing surface, proposed this session) to document the signal-vs-noise feedback loop as part of the curation contract rather than a separate decision.
 - [ ] Bats coverage: simulate a run-retro invocation against a briefing tree; assert classification → roll-up regeneration.
 
 ### Fix Strategy
 
-Pending investigation. Expected shape: new run-retro step ("what was signal, what was noise?") + per-entry classification + adjustment rules (promote / keep / demote / archive / delete) + persistence format + optional ADR-039 amendment.
+Pending investigation. Expected shape: new run-retro step ("what was signal, what was noise?") + per-entry classification + adjustment rules (promote / keep / demote / archive / delete) + persistence format + optional ADR-040 amendment.
 
 ## Dependencies
 
 - **Blocks**: (none directly)
 - **Blocked by**: (none — slice 2 of P100 must land first so the consumer surface exists, but P100 slice 2 does not literally block P105; P105 can be designed in parallel)
-- **Composes with**: P100, ADR-039
+- **Composes with**: P100, ADR-040
 
 ## Related
 
 - **P100 (`wr-retrospective` does not auto-surface `docs/BRIEFING.md`)** — parent. Slice 2 of P100 ships the SessionStart hook that reads Critical Points. P105 closes the curation-feedback gap that the hook's value depends on over time.
-- **ADR-039 (Session-start briefing surface — directory + indexed README + helpfulness curation)** — the ADR authored during P100 slice 2 names helpfulness curation in its title as a future concern; P105 is that concern made actionable.
+- **ADR-040 (Session-start briefing surface — directory + indexed README + helpfulness curation)** — the ADR authored during P100 slice 2 names helpfulness curation in its title as a future concern; P105 is that concern made actionable.
 - **`docs/briefing/README.md`** — the Critical Points roll-up is the consumer-facing artefact this feedback loop curates.

@@ -17,7 +17,11 @@ A changeset is a candidate for holding when its package bump would ship a change
 
 ## Currently held
 
-- `p100-retrospective-briefing-migration.md` — `@windyroad/retrospective` **minor**. Writer-side migration to `docs/briefing/` tree. Held pending P100 slice 2 (SessionStart hook + sibling ADR + helpfulness loop + stub retirement). Reinstate when slice 2 commits land.
+*(none currently held)*
+
+## Recently reinstated
+
+- `p100-retrospective-briefing-migration.md` — `@windyroad/retrospective` **minor**. Held during P100 slice 1 pending slice 2. Reinstated 2026-04-22 when slice 2 (SessionStart hook + ADR-040 + stub retirement) landed; scope body expanded to cover slice 1 + slice 2 combined.
 
 ## Related
 
