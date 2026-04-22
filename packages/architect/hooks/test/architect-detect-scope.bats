@@ -31,6 +31,12 @@ teardown() {
   [[ "$output" == *"BRIEFING"* ]]
 }
 
+@test "detect: scope text mentions docs/briefing/ exemption (P100)" {
+  run bash "$HOOK"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"docs/briefing/"* ]]
+}
+
 @test "detect: scope text mentions RISK-POLICY exemption (P029)" {
   run bash "$HOOK"
   [ "$status" -eq 0 ]

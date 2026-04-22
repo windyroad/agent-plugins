@@ -12,7 +12,7 @@ Reflect on the current session, update the project briefing, and create problem 
 
 ### 1. Read the current briefing
 
-Read `docs/BRIEFING.md` to understand what previous sessions already captured.
+Read `docs/briefing/README.md` — the per-topic index, Critical Points summary, and per-file hooks. Then read each topic file referenced in the Topic Index (`docs/briefing/<topic>.md`) to understand what previous sessions captured under each heading. During the P100 transition window the legacy single-file `docs/BRIEFING.md` may still exist as a stub pointer; it is read-only until P100 slice 2 retires it.
 
 ### 2. Reflect on this session
 
@@ -100,19 +100,26 @@ The shape mirrors P068's Step 4a Verification-close housekeeping: glob / evidenc
 - **Step 4 (problem-ticket creation)** — Step 2b feeds Step 4. A detection surfaced in Step 2b that the user accepts becomes a Step 4 creation or update via the manage-problem delegation. Step 4b's Stage 1 two-stage codification flow (P075) applies to pipeline-instability tickets the same way it applies to Step 2 reflection tickets — the detection IS the codify-worthy observation.
 - **ADR-027 compatibility note**: when ADR-027's Step-0 auto-delegation lands on run-retro, Step 2b's evidence scan is load-bearing on main-agent session context that a delegated subagent does not automatically inherit. The migration path mirrors Step 4a's: either (a) run Step 2b in the main-agent context BEFORE Step-0 delegation to the subagent, or (b) include an explicit session-activity summary (tool invocations, commits, skill calls observed in main-agent context) in the Step-0 delegation prompt. Option (a) is preferred to keep the evidence scan close to the observed activity.
 
-### 3. Update BRIEFING.md
+### 3. Update the briefing tree
 
-Edit `docs/BRIEFING.md`:
+Edit `docs/briefing/<topic>.md` files — each topic file is per-subject (`hooks-and-gates.md`, `releases-and-ci.md`, `governance-workflow.md`, `afk-subprocess.md`, `plugin-distribution.md`, `agent-interaction-patterns.md`). Select the topic file whose scope matches the learning; if no file fits, add a new topic file under `docs/briefing/` and update `docs/briefing/README.md`'s Topic Index accordingly.
 
-- **Add** new learnings to the appropriate section ("What You Need to Know" or "What Will Surprise You")
+For each accepted learning:
+
+- **Add** new entries to the matching topic file under the right section ("What You Need to Know" or "What Will Surprise You"). If the learning spans topics, pick the file whose fix-path is most concrete and cross-reference from the other topic file.
 - **Remove** stale items that are no longer true. A learning is stale when:
   - The issue has been fixed (e.g., "CI doesn't test v2" after v2 tests are added)
   - It's now documented elsewhere (e.g., in an ADR, CLAUDE.md, or README)
   - The codebase has changed enough that it's no longer relevant
-- **Update** items where the details have changed
-- Keep the file concise — under 2000 tokens. Each item should be 1-2 lines.
+- **Update** items where the details have changed.
+- Keep each topic file naturally bounded — per-topic files replace the legacy under-2000-token budget on a single file. If a topic file grows past ~20 entries, consider splitting further.
 
-Use the AskUserQuestion tool to confirm any removals: "I'd like to remove [item] from BRIEFING.md because [reason]. Is this correct?"
+After editing topic files, update `docs/briefing/README.md`:
+
+- Refresh per-file summaries in the Topic Index if the topic file's character changed.
+- Promote an entry into the Critical Points section only when it is genuinely among the highest-value rules of the session (the session-start surface is small and curated — adding there is a user-interactive decision per the helpfulness rating slice 2 will add).
+
+Use the AskUserQuestion tool to confirm any removals: "I would like to remove [item] from `docs/briefing/<topic>.md` because [reason]. Is this correct?"
 
 ### 4. Create or update problem tickets
 
@@ -246,10 +253,11 @@ Present a summary to the user:
 ```
 ## Session Retrospective
 
-### BRIEFING.md Changes
-- Added: [items added]
+### Briefing Changes
+- Added: [items added — cite `docs/briefing/<topic>.md` per entry]
 - Removed: [items removed with reasons]
 - Updated: [items modified]
+- README index refreshed: [per-file summaries or Critical Points changes]
 
 ### Problems Created/Updated
 - [problem ticket]: [summary]

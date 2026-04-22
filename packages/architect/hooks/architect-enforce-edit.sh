@@ -62,6 +62,8 @@ case "$FILE_PATH" in
     exit 0 ;;
   */docs/BRIEFING.md|docs/BRIEFING.md)
     exit 0 ;;
+  */docs/briefing/*|docs/briefing/*)
+    exit 0 ;;
   */docs/problems/*.md|docs/problems/*.md)
     exit 0 ;;
   # Peer-plugin policy files — governed by their own plugin's enforce hook, not architect (P009)

@@ -3,8 +3,8 @@
 **Status**: Open
 **Reported**: 2026-04-22
 **Priority**: 20 (High) — Impact: Major (4) x Likelihood: Almost certain (5)
-**Effort**: M
-**WSJF**: (20 × 1.0) / 2 = **10.0**
+**Effort**: L
+**WSJF**: (20 × 1.0) / 4 = **5.0**
 
 > Identified 2026-04-22 by the user during P098 verification. My P098 project-level `CLAUDE.md` added pointers to `docs/problems/README.md` and `docs/BRIEFING.md`; the user correctly observed: *"we shouldn't have to add these things to CLAUDE.md. It should be automatic."* Follow-up clarification: *"I'm not sure if docs/problems/README.md needs to be surfaced unless we are explicitly doing stuff with problems."* — scoping the ticket narrowly to `docs/BRIEFING.md` (cross-cutting session learnings that benefit any task) while leaving `wr-itil`'s backlog on its current on-demand model (skill-invocation only) as the intended behaviour, not a gap.
 
@@ -133,3 +133,38 @@ User-directed design shape captured via `AskUserQuestion` pre-work prior to kick
 - [ ] Migration plan for existing `docs/BRIEFING.md` content in adopter projects (one-time split; run-retro gains a "first-time migration" branch).
 - [ ] Architect review at implementation time — likely ADR sibling to ADR-038 (directory migration + helpfulness feedback loop + SessionStart-or-UserPromptSubmit hook is structural, not an amendment).
 - [ ] Effort re-rating candidate: M → L given the directory migration + README maintenance + hook + SKILL changes. Let `/wr-itil:review-problems` handle the recalculation rather than stamping it here.
+
+## Slice 1 partial progress (2026-04-22 AFK iter 4)
+
+Landed in commit: **refactor(briefing): migrate docs/BRIEFING.md to docs/briefing/ tree (P100 slice 1)** (see commit sha in the closing commit message). This slice is structural migration + writer-side alignment only. The session-start discovery surface (SessionStart hook + ADR) remains in slice 2.
+
+**Slice 1 scope (shipped)**
+- `docs/briefing/` directory created with six per-topic files: `hooks-and-gates.md`, `releases-and-ci.md`, `governance-workflow.md`, `afk-subprocess.md`, `plugin-distribution.md`, `agent-interaction-patterns.md`.
+- `docs/briefing/README.md` index with per-file summaries + Critical Points section (the future SessionStart-hook surface).
+- `docs/BRIEFING.md` rewritten as a transitional stub pointing to `docs/briefing/README.md`.
+- `packages/retrospective/skills/run-retro/SKILL.md` Steps 1, 3, and 5 updated to target the new layout (JTBD review finding #1 — without this, a retro between slices would either corrupt the stub or drop learnings).
+- `packages/architect/hooks/architect-enforce-edit.sh` + `architect-detect.sh` + `architect-detect-scope.bats` extended with the `docs/briefing/` exemption (architect review finding #1 — without this, the whole new tree is gated).
+- `packages/jtbd/hooks/jtbd-enforce-edit.sh` + `jtbd-eval.sh` + `jtbd-eval-scope.bats` extended with the same exemption.
+- Three changesets: `@windyroad/architect` patch, `@windyroad/jtbd` patch, `@windyroad/retrospective` minor (writer-side layout change).
+- Effort re-rated M -> L (WSJF 10.0 -> 5.0) to reflect the remaining slice 2 scope.
+
+**Slice 2 scope (pending)**
+- SessionStart hook in `packages/retrospective/hooks/` (or UserPromptSubmit fallback) that emits the Critical Points summary + README pointer at session start.
+- Sibling ADR to ADR-038 covering the directory migration + helpfulness-rating loop + SessionStart injection.
+- run-retro helpfulness-rating loop during retros (drives curation of which entries reach Critical Points).
+- Retire `docs/BRIEFING.md` transitional stub.
+- (If the retrospective-reminder.sh Stop hook prose needs re-pointing to `docs/briefing/`, bundle with slice 2.)
+
+**Writer-side transition policy (JTBD finding #1 resolution)**
+Chose option (a): include the run-retro SKILL.md update in slice 1. A retro run between slice 1 and slice 2 will now write to the new per-topic files via the updated Step 3 and will not touch the transitional stub.
+
+**ADR timing (architect finding #2 resolution)**
+Chose the acceptable path: slice 1 lands without a governing ADR; slice 2 authors the sibling ADR alongside the hook + helpfulness loop. The Design Update section of this ticket holds the nascent decision drivers until slice 2's ADR draft quotes them.
+
+**Investigation tasks status after slice 1**
+- [x] Confirm SessionStart hook support — confirmed (`packages/retrospective/hooks/hooks.json` already uses one).
+- [x] Design the BRIEFING dir partitioning scheme — implemented with 6 topic files + README index + Critical Points surface.
+- [ ] Design the run-retro helpfulness-rating mechanism — deferred to slice 2.
+- [x] Migration plan for existing `docs/BRIEFING.md` — executed (transitional stub + writer-side SKILL.md update).
+- [ ] Architect review at implementation time — slice 1 reviewed (ISSUES FOUND resolved via bundling); slice 2 ADR review pending.
+- [x] Effort re-rating — M -> L applied.

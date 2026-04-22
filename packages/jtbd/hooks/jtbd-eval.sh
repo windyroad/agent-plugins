@@ -38,7 +38,7 @@ REQUIRED ACTIONS:
 
 SCOPE: All project files.
 Does NOT apply to: CSS, images, fonts, lockfiles, changesets, memory files,
-plan files, docs/problems/ (problem tickets), docs/BRIEFING.md,
+plan files, docs/problems/ (problem tickets), docs/BRIEFING.md, docs/briefing/,
 RISK-POLICY.md, .risk-reports/, docs/jtbd/,
 docs/PRODUCT_DISCOVERY.md, docs/VOICE-AND-TONE.md, docs/STYLE-GUIDE.md.
 HOOK_OUTPUT
