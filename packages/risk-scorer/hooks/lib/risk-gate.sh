@@ -17,7 +17,7 @@ check_risk_gate() {
   RDIR=$(_risk_dir "$SESSION_ID")
   local SCORE_FILE="${RDIR}/${ACTION}"
   local HASH_FILE="${RDIR}/state-hash"
-  local TTL_SECONDS="${RISK_TTL:-1800}"
+  local TTL_SECONDS="${RISK_TTL:-3600}"
 
   # 1. Score file must exist (fail-closed)
   if [ ! -f "$SCORE_FILE" ]; then

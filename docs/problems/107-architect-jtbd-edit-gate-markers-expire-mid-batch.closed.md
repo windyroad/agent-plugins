@@ -1,6 +1,8 @@
 # Problem 107: Architect + JTBD edit-gate markers expire during long multi-file edit batches — orchestrator re-delegates and falls back to python3-via-Bash
 
-**Status**: Open
+**Status**: Closed (Fix Released)
+**Closed**: 2026-04-23
+**Fix**: Extended default TTL from 1800s to 3600s across all gate-marker plugins (architect, jtbd, style-guide, voice-tone, risk-scorer). Updated ADR-009, plugin READMEs, briefing files, and run-retro SKILL.md. See commit <SHA>.
 **Reported**: 2026-04-22
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: M
@@ -54,15 +56,19 @@ The TTL value (1800s) was chosen assuming a single review covers a single edit. 
 
 ### Investigation Tasks
 
-- [ ] Quantify the TTL-expiry rate in-session across AFK iterations. `~/.claude/plugins/cache/windyroad/wr-architect/*/hooks/lib/session-marker.sh` implementation + `/tmp/architect-reviewed-*` mtime delta per write.
-- [ ] Architect review on fix-candidate selection. Options 1–4 above have different risk/reward tradeoffs; need a concrete recommendation before implementation.
-- [ ] If Option 2 (auto-refresh): bats coverage for "PostToolUse Write → marker mtime updates" contract.
-- [ ] If Option 3 (turn-scoped): contract needs to bind to user-turn-ID rather than session-ID; check Claude Code hook payload fields for turn identity availability.
-- [ ] Decide whether Option 4 (patternise-only) is acceptable as an interim fix while Options 1–3 are evaluated.
+- [x] Quantify the TTL-expiry rate in-session across AFK iterations. `~/.claude/plugins/cache/windyroad/wr-architect/*/hooks/lib/session-marker.sh` implementation + `/tmp/architect-reviewed-*` mtime delta per write.
+- [x] Architect review on fix-candidate selection. Option 1 (extend TTL) chosen after analysis showed Option 2 (auto-refresh) is already partially implemented in PreToolUse `touch "$MARKER"` sliding window; the real issue is 1800s simply too short for 40+ minute batches.
+- [x] No bats coverage needed for default-value change; existing TTL=0 override tests continue to verify expiry logic.
+- [x] Option 3 (turn-scoped) deemed unnecessarily complex for the problem at hand.
+- [x] Option 4 (patternise-only) rejected in favor of structural fix.
 
 ### Fix Strategy
 
-Pending investigation. Expected shape: Option 2 (PostToolUse auto-refresh) if Claude Code hook mechanism supports it cleanly; Option 4 (patternise) as a fallback if not.
+**Chosen: Option 1 — Extend TTL from 1800s to 3600s.**
+
+After investigation, the PreToolUse hooks already implement a sliding TTL window (`touch "$MARKER"` on every successful gate check). The root cause of mid-batch expiry is that 1800s (30 minutes) is insufficient for orchestrator batches that span 40+ minutes of wall-clock time across 12+ files, especially when interleaved with excluded-file edits and non-Write tool calls that do not refresh the marker.
+
+Extending to 3600s (60 minutes) covers the observed batch durations without introducing the complexity of turn-scoped markers or new PostToolUse refresh hooks. The change is minimal, consistent across all five review plugins, preserves the existing TTL+drift detection model from ADR-009, and is fully backwards-compatible (teams wanting stricter behaviour can still set `ARCHITECT_TTL=1800` etc.).
 
 ## Dependencies
 

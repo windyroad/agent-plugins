@@ -53,7 +53,7 @@ if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm run push:watch(\s|$)'; then
         PUSH_NOW=$(date +%s)
         PUSH_SCORE_TIME=$(_mtime "$PUSH_SCORE_FILE")
         PUSH_AGE=$(( PUSH_NOW - PUSH_SCORE_TIME ))
-        PUSH_TTL="${RISK_TTL:-1800}"
+        PUSH_TTL="${RISK_TTL:-3600}"
         if [ "$PUSH_AGE" -ge "$PUSH_TTL" ]; then
             risk_gate_deny "Push blocked: Push risk score expired (${PUSH_AGE}s old, TTL ${PUSH_TTL}s). Delegate to risk-scorer to rescore."
             exit 0

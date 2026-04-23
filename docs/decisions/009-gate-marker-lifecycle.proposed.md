@@ -21,7 +21,7 @@ Claude Code's `Stop` event fires when the assistant finishes responding. As a co
 
 At the same time, the shared gate library already implements two other controls that together can determine when re-review is actually needed:
 
-- **TTL**: 30 minutes (`ARCHITECT_TTL=1800`, etc.), sliding window on each check via `touch "$MARKER"`
+- **TTL**: 60 minutes (`ARCHITECT_TTL=3600`, etc.), sliding window on each check via `touch "$MARKER"`
 - **Drift detection**: hash of the plugin's policy files (`docs/decisions/*.md`, `docs/jtbd/**/*.md`, etc.); mismatch invalidates the marker
 
 The Stop-hook reset **overrides** these controls, forcing re-review even when TTL is fresh and no drift has occurred. This directly conflicts with JTBD-001's documented desired outcome: *"Reviews complete in under 60 seconds so they don't break flow."* In practice, every prompt turn with any file edit routinely triggers a fresh 30–60s review.
@@ -44,7 +44,7 @@ Every new prompt requires a fresh review. Safest (no chance of stale approvals p
 
 ### Option 2: TTL + drift only
 
-Remove the Stop-hook reset from all 5 review plugins. Rely on the gate library's TTL (30 min) + drift detection to invalidate markers when they are actually stale.
+Remove the Stop-hook reset from all 5 review plugins. Rely on the gate library's TTL (60 min) + drift detection to invalidate markers when they are actually stale.
 
 ### Option 3: Hybrid — reset ephemeral markers, keep review markers
 
@@ -65,7 +65,7 @@ Remove the Stop-hook reset across all 5 review plugins. The TTL (30 min default)
 
 Neither condition is inherently tied to end-of-response. A long assistant response with no relevant changes shouldn't invalidate a just-completed review.
 
-TTL remains configurable per-plugin via existing envvars (`ARCHITECT_TTL`, `RISK_TTL`, etc.), default 1800s (30 minutes).
+TTL remains configurable per-plugin via existing envvars (`ARCHITECT_TTL`, `RISK_TTL`, etc.), default 3600s (60 minutes). Extended from 1800s via P107 to cover long multi-file edit batches.
 
 ## Plugin Scope
 
@@ -85,7 +85,7 @@ The Stop hook registration in each `hooks.json` should be removed alongside the 
 
 ### Good
 
-- Reviews persist across prompts within a 30-minute window, matching developer flow
+- Reviews persist across prompts within a 60-minute window, matching developer flow
 - JTBD-001 "reviews complete in under 60s" outcome becomes achievable for multi-prompt sessions
 - Fewer tokens consumed on repetitive re-reviews
 - Consistent lifecycle across the 5 plugins
@@ -97,7 +97,7 @@ The Stop hook registration in each `hooks.json` should be removed alongside the 
 
 ### Bad
 
-- **Stale-marker risk**: if the agent does something within a 30-min window that *should* trigger re-review but doesn't change policy files (e.g., the agent's own context evolves in ways not captured by file hashes), the previous review remains valid. Mitigated by drift detection covering the canonical policy files.
+- **Stale-marker risk**: if the agent does something within a 60-min window that *should* trigger re-review but doesn't change policy files (e.g., the agent's own context evolves in ways not captured by file hashes), the previous review remains valid. Mitigated by drift detection covering the canonical policy files.
 - **Backward compatibility**: existing users upgrade to new behaviour on the next plugin release. Those relying on "fresh review every prompt" will notice. Change log / release notes must call this out.
 - **Debugging**: if a stale marker does produce a false pass, diagnosis is harder than with Stop reset (need to examine marker mtime + hash).
 
@@ -108,7 +108,7 @@ The Stop hook registration in each `hooks.json` should be removed alongside the 
 - [ ] `grep -rn "reset-marker\|-reset\.sh" packages/` returns only TDD and test references
 - [ ] BATS tests verify that: marker persists when no drift occurs, marker is invalidated by policy file change (existing drift tests), marker expires after TTL (existing TTL tests)
 - [ ] Existing BATS tests for each plugin's gate continue to pass (113/113 baseline)
-- [ ] `ARCHITECT_TTL` and equivalents default to 1800s and are documented in the plugin READMEs
+- [x] `ARCHITECT_TTL` and equivalents default to 3600s and are documented in the plugin READMEs (changed via P107)
 
 ## Pros and Cons of the Options
 

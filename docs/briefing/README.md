@@ -7,7 +7,7 @@ Cross-session learnings captured via `/wr-retrospective:run-retro`. Split into p
 The highest-value entries across the briefing — the handful of rules that save the most wasted turns. A future SessionStart hook (P100 slice 2) surfaces this list at session start so the agent sees them without reading the full tree.
 
 - **Risk appetite is Low (4).** Changes scoring Medium (5+) need explicit acknowledgement. See `RISK-POLICY.md`.
-- **Four edit gates fire on every edit** (architect, JTBD, WIP risk, TDD). Each requires its own agent delegation; markers have a ~1800s TTL and WILL expire mid-session. Plan for the re-review cycle.
+- **Four edit gates fire on every edit** (architect, JTBD, WIP risk, TDD). Each requires its own agent delegation; markers have a ~3600s TTL and may expire mid-session on very long batches. Plan for the re-review cycle.
 - **Plugin hooks run from the marketplace cache, not from source.** Editing a hook file does not change hook behaviour until push + `claude plugin marketplace update` + reinstall + restart.
 - **Never run `changeset version` locally.** Release via `push:watch` then `release:watch`. The git-push-gate blocks bare `git push`.
 - **AFK iteration-workers use `claude -p` subprocess dispatch**, not Agent-tool spawning. Subagents spawned via `Agent` cannot spawn further subagents; iteration-workers that need architect/JTBD/risk gates must be subprocesses.

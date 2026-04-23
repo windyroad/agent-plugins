@@ -42,7 +42,7 @@ This walks you through creating an ADR in [MADR 4.0](https://adr.github.io/madr/
 | `architect-detect.sh` | Every prompt | Checks for `docs/decisions/` and injects the review instruction |
 | `architect-enforce-edit.sh` | Edit or Write | Blocks the edit if the architect hasn't reviewed yet |
 | `architect-plan-enforce.sh` | ExitPlanMode | Ensures plans are reviewed before execution |
-| `architect-mark-reviewed.sh` | Agent completes | Marks the review as done (TTL: 1800s) |
+| `architect-mark-reviewed.sh` | Agent completes | Marks the review as done (TTL: 3600s) |
 | `architect-refresh-hash.sh` | After edit | Refreshes the content hash so the next edit triggers a fresh review |
 
 ## Agent

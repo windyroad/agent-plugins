@@ -12,7 +12,7 @@ source "$_ARCHITECT_GATE_DIR/gate-helpers.sh"
 check_architect_gate() {
   local SESSION_ID="$1"
   local MARKER="/tmp/architect-reviewed-${SESSION_ID}"
-  local TTL_SECONDS="${ARCHITECT_TTL:-1800}"
+  local TTL_SECONDS="${ARCHITECT_TTL:-3600}"
 
   if [ -n "$SESSION_ID" ] && [ -f "$MARKER" ]; then
     local NOW=$(date +%s)

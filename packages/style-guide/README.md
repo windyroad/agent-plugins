@@ -39,7 +39,7 @@ This examines your existing CSS, components, and design patterns, then asks abou
 |------|---------|-------------|
 | `style-guide-eval.sh` | Every prompt | Evaluates whether the task involves visual styling |
 | `style-guide-enforce-edit.sh` | Edit or Write | Blocks edits until the style-guide agent has reviewed |
-| `style-guide-mark-reviewed.sh` | Agent completes | Marks the review as done (TTL: 1800s) |
+| `style-guide-mark-reviewed.sh` | Agent completes | Marks the review as done (TTL: 3600s) |
 
 ## Agent
 
