@@ -120,9 +120,13 @@ Skip migration for siblings the user excluded from the install plan. Non-ADR-doc
 
 ### 7. Install
 
+Uninstall first to force a fresh download — `claude plugin install` silently no-ops when the plugin is already installed, so updates never land (P106 / BRIEFING "Plugin Distribution").
+
 ```bash
 for plugin in $PLUGINS_TO_UPDATE; do
-  (cd "$TARGET_DIR" && claude plugin install "wr-$plugin@windyroad" --scope project)
+  (cd "$TARGET_DIR" && \
+    claude plugin uninstall "wr-$plugin@windyroad" --scope project && \
+    claude plugin install "wr-$plugin@windyroad" --scope project)
 done
 ```
 

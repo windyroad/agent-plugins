@@ -34,7 +34,7 @@ The `rename-mapping.json` table in this directory is the source of truth for ADR
 2. The target sibling is in the user-confirmed install plan from Step 6 (current project is always confirmed).
 3. ADR-030 Confirmation amendment authorises direct settings.json mutation under these two conditions without a second consent gate.
 
-`claude plugin uninstall` refuses project-scope (BRIEFING line 17), so direct Node.js mutation is the only mechanism available.
+`claude plugin uninstall --scope project` works and is the supported refresh path. The working refresh pattern for project-scoped plugins is `uninstall + install` (P106 / BRIEFING "Plugin Distribution").
 
 Non-ADR-documented stale entries (manual user choices, plugins no longer in use) are NOT in `rename-mapping.json` and are NOT auto-migrated. User handles those manually.
 
