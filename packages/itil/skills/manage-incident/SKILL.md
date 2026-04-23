@@ -295,17 +295,16 @@ Otherwise, after the commit in step 14 lands, drain the release queue so the fix
 
 **Failure handling**: If `release:watch` fails (CI failure, publish failure), stop and report the failure clearly. Do not retry non-interactively — the user must intervene.
 
-**Above-appetite branch (per ADR-041)**: If push or release risk is above appetite (≥ 5/25), the skill MUST auto-apply scorer remediations in rank order until residual risk converges within appetite, OR halt the skill per ADR-041 Rule 5 if the scorer cannot produce a convergent plan. **The skill MUST NOT release above appetite under any circumstance.** The skill MUST NOT call `AskUserQuestion` as a shortcut out of the auto-apply loop.
+**Above-appetite branch (per ADR-042)**: If push or release risk is above appetite (≥ 5/25), the skill MUST auto-apply scorer remediations incrementally until residual risk converges within appetite, OR halt the skill per ADR-042 Rule 5 if the scorer cannot produce a convergent plan. **The skill MUST NOT release above appetite under any circumstance.** The skill MUST NOT call `AskUserQuestion` as a shortcut out of the auto-apply loop.
 
-**Auto-apply mechanism (ADR-041 Rule 2):**
+**Auto-apply mechanism (ADR-042 Rule 2):**
 
 1. Parse the scorer's `RISK_REMEDIATIONS:` block.
-2. Rank by largest absolute `risk_delta` → smaller effort (S < M < L) → lower remediation ID.
-3. Classify each remediation's `description` against ADR-041 Rule 2a's closed action-class enumeration. **Today's orchestrator-supported class (ADR-041 v1)**: `move-to-holding` only. Other classes (`revert-commit`, `amend-commit`, `feature-flag`, `rollback-to-tag`) are deferred to P108 and route to Rule 5 halt.
-4. **Verification Pending carve-out (ADR-041 Rule 2b)**: skip remediations that target a commit attached to a `.verifying.md` ticket.
-5. Apply the top-ranked eligible remediation. Each auto-apply is its own commit (ADR-041 Rule 3 — non-AFK has no iteration wrapper to amend into); each commit goes through architect + JTBD + risk-scorer gates per ADR-014.
-6. Re-score via the same delegation path as step 1 above.
-7. **Loop**: within appetite → drain per the Drain action above. Still above → next remediation. Exhausted or unsupported class → Rule 5 halt.
+2. Read the descriptions. Decide what to do. The agent MAY follow a scorer suggestion, adapt it, or do something else entirely. There is no requirement to rank all suggestions upfront or iterate through them in order.
+3. **Verification Pending carve-out (ADR-042 Rule 2b)**: skip remediations that target a commit attached to a `.verifying.md` ticket.
+4. Apply the chosen action using standard primitives (git, Edit, Bash). Each auto-apply is its own commit (ADR-042 Rule 3 — non-AFK has no iteration wrapper to amend into); each commit goes through architect + JTBD + risk-scorer gates per ADR-014.
+5. Re-score via the same delegation path as step 1 above.
+6. **Loop**: within appetite → drain per the Drain action above. Still above → continue working to reduce risk. The agent reads the new remediations and decides what to do next. Loop. Exhausted → Rule 5 halt.
 
 **Rule 5 halt (non-AFK mode)**: halt the skill. Emit the terminal report naming the final `RISK_SCORES:`, the Auto-apply trail, any Verification Pending ticket IDs implicated, and a one-line scorer-gap note. The user resolves interactively.
 
