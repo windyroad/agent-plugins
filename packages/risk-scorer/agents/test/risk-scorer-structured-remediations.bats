@@ -100,22 +100,22 @@ setup() {
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
-# P108: action_class column (6th column in RISK_REMEDIATIONS schema)
+# P108: scorer writes prose descriptions; agent decides (ADR-042 Rule 2a)
 # ──────────────────────────────────────────────────────────────────────────────
 
-@test "pipeline.md RISK_REMEDIATIONS format includes action_class column" {
-  # P108 scorer-contract extension: orchestrator reads action_class directly
-  # instead of parsing free-form description.
+@test "pipeline.md RISK_REMEDIATIONS format has no action_class column" {
+  # ADR-042 Rule 2a: no structured action_class column. The agent reads
+  # the description and decides.
   run grep -q "action_class" "$PIPELINE"
-  [ "$status" -eq 0 ]
+  [ "$status" -ne 0 ]
 }
 
-@test "wip.md RISK_REMEDIATIONS format includes action_class column" {
+@test "wip.md RISK_REMEDIATIONS format has no action_class column" {
   run grep -q "action_class" "$WIP"
-  [ "$status" -eq 0 ]
+  [ "$status" -ne 0 ]
 }
 
-@test "plan.md RISK_REMEDIATIONS format includes action_class column" {
+@test "plan.md RISK_REMEDIATIONS format has no action_class column" {
   run grep -q "action_class" "$PLAN"
-  [ "$status" -eq 0 ]
+  [ "$status" -ne 0 ]
 }

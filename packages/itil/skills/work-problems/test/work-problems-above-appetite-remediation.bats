@@ -122,19 +122,17 @@ setup() {
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
-# P108: scorer-contract extension — action_class column + revert-commit executor
+# P108: agent reads prose descriptions; no action_class column
 # ──────────────────────────────────────────────────────────────────────────────
 
-@test "SKILL.md reads action_class directly from RISK_REMEDIATIONS (P108)" {
-  # The orchestrator MUST read the structured action_class column rather than
-  # parsing free-form description. Absent this, classification is ambiguous.
+@test "SKILL.md has no action_class column reference (P108 — agent decides from prose)" {
+  # ADR-042 Rule 2a: no structured action_class column.
   run grep -n "action_class" "$SKILL_FILE"
-  [ "$status" -eq 0 ]
+  [ "$status" -ne 0 ]
 }
 
-@test "SKILL.md includes revert-commit executor (P108 slice 2)" {
-  # P108 extends the open vocabulary beyond move-to-holding.
-  # The orchestrator must have executor prose for git revert semantics.
+@test "SKILL.md includes revert-commit example (P108)" {
+  # The orchestrator may choose to revert a commit based on scorer prose.
   run grep -n "git revert" "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }

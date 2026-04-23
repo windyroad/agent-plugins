@@ -724,24 +724,23 @@ Otherwise, after the commit in step 11 lands, drain the release queue so the fix
 
 **Failure handling**: If `release:watch` fails (CI failure, publish failure), stop and report the failure clearly. Do not retry non-interactively — the user must intervene.
 
-**Above-appetite branch (per ADR-042)**: If push or release risk is above appetite (≥ 5/25), the skill MUST auto-apply scorer remediations in rank order until residual risk converges within appetite, OR halt the skill per ADR-042 Rule 5 if the scorer cannot produce a convergent plan. **The skill MUST NOT release above appetite under any circumstance.** The skill MUST NOT call `AskUserQuestion` as a shortcut out of the auto-apply loop.
+**Above-appetite branch (per ADR-042)**: If push or release risk is above appetite (≥ 5/25), the skill MUST auto-apply scorer remediations incrementally until residual risk converges within appetite, OR halt the skill per ADR-042 Rule 5 if the scorer cannot produce a convergent plan. **The skill MUST NOT release above appetite under any circumstance.** The skill MUST NOT call `AskUserQuestion` as a shortcut out of the auto-apply loop.
 
 **Auto-apply mechanism (ADR-042 Rule 2):**
 
-1. Parse the scorer's `RISK_REMEDIATIONS:` block. Expected shape per ADR-015 / ADR-042 Rule 2a (6 columns):
+1. Parse the scorer's `RISK_REMEDIATIONS:` block. Expected shape per ADR-015 / ADR-042 Rule 2a (5 columns):
    ```
    RISK_REMEDIATIONS:
-   - R1 | <description> | <effort S/M/L> | <risk_delta -N> | <files affected> | <action_class>
+   - R1 | <description> | <effort S/M/L> | <risk_delta -N> | <files affected>
    - R2 | ...
    ```
-2. Rank by largest absolute `risk_delta` → smaller effort (S < M < L) → lower remediation ID.
-3. Read the `action_class` column directly for each remediation. **Orchestrator-supported classes (ADR-042 v2 — P108 slice 2 landed)**: `move-to-holding`, `revert-commit`. Deferred classes (`amend-commit`, `feature-flag`, `rollback-to-tag`) route to Rule 5 halt.
-4. **Verification Pending carve-out (ADR-042 Rule 2b)**: skip remediations that target a commit attached to a `.verifying.md` ticket. Do NOT auto-revert VP commits.
-5. Apply the top-ranked eligible remediation:
+2. Read the descriptions. Decide what to do. The agent MAY follow a scorer suggestion, adapt it, or do something else entirely. There is no requirement to rank all suggestions upfront or iterate through them in order.
+3. **Verification Pending carve-out (ADR-042 Rule 2b)**: skip remediations that target a commit attached to a `.verifying.md` ticket. Do NOT auto-revert VP commits.
+4. Apply the chosen action using standard primitives (git, Edit, Bash). Example actions:
    - `move-to-holding`: `git mv .changeset/<name>.md docs/changesets-holding/<name>.md` + append to holding-area README "Currently held" per ADR-042 Rule 6. Since the non-AFK skill has no iteration wrapper to amend into, each auto-apply is its own commit (ADR-042 Rule 3). Each commit goes through the standard ADR-014 commit flow — architect + JTBD + risk-scorer gates.
-   - `revert-commit`: `git revert --no-edit <sha>`. The scorer MUST supply the target commit SHA in the `description` column. Before executing, verify the SHA is NOT attached to a `.verifying.md` ticket (Rule 2b carve-out). After revert, commit the revert as a standalone auto-apply commit (no amend folding in non-AFK mode). If `git revert` produces merge conflicts, route to Rule 5 halt with the conflict detail.
-6. Re-score via the same delegation path as step 1 above.
-7. **Loop**: re-score within appetite → drain per the Drain action above. Re-score still above → goto step 3 with remaining remediations. Exhausted or unsupported class → Rule 5 halt.
+   - `revert-commit`: `git revert --no-edit <sha>`. The scorer SHOULD supply the target commit SHA in the `description` column. Before executing, verify the SHA is NOT attached to a `.verifying.md` ticket (Rule 2b carve-out). After revert, commit the revert as a standalone auto-apply commit (no amend folding in non-AFK mode). If `git revert` produces merge conflicts, route to Rule 5 halt with the conflict detail.
+5. Re-score via the same delegation path as step 1 above.
+6. **Loop**: re-score within appetite → drain per the Drain action above. Re-score still above → continue working to reduce risk. The agent reads the new remediations and decides what to do next. Loop. Exhausted or unsupported class → Rule 5 halt.
 
 **Rule 5 halt (non-AFK mode)**: halt the skill. Emit the terminal report naming:
 - The final `RISK_SCORES:` line

@@ -149,19 +149,19 @@ exceeds appetite. The only sanctioned above-appetite output is the Risk Report
 structure, `RISK_SCORES: ...`, and the structured `RISK_REMEDIATIONS:` block
 defined below.
 
-Emit a structured `RISK_REMEDIATIONS:` block after the `RISK_SCORES:` line. This gives the calling skill machine-readable input for structured decision prompts.
+Emit a structured `RISK_REMEDIATIONS:` block after the `RISK_SCORES:` line. This gives the calling skill machine-readable input.
 
-Format (6 columns — machine-readable for structured AskUserQuestion prompts in calling skills):
+Format (5 columns):
 ```
 RISK_REMEDIATIONS:
-- R1 | <description of remediation> | <effort S/M/L> | <risk_delta -N> | <files affected> | <action_class>
-- R2 | <description of remediation> | <effort S/M/L> | <risk_delta -N> | <files affected> | <action_class>
+- R1 | <description of remediation> | <effort S/M/L> | <risk_delta -N> | <files affected>
+- R2 | <description of remediation> | <effort S/M/L> | <risk_delta -N> | <files affected>
 ```
 
 Column definitions:
 - **effort**: estimated size of the remediation — S (< 1h, single file), M (1-4h, few files), L (> 4h, multiple files)
 - **risk_delta**: estimated reduction in residual risk if this remediation is applied (e.g., `-3` means risk drops by 3 points)
-- **action_class**: one of the open vocabulary defined in ADR-042 Rule 2a — `move-to-holding`, `revert-commit`, `amend-commit`, `feature-flag`, `rollback-to-tag`. The orchestrator reads this column directly to route to the appropriate executor; free-form descriptions are human-readable only.
+- **description**: free-form prose. The agent reads this and decides what to do. No structured action_class column.
 
 Include downstream back-pressure in the remediation list:
 - **Commit**: If adding this commit would push the push queue risk >= 5, include a remediation to split the commit.

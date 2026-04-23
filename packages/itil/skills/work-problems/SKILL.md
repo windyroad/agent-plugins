@@ -269,25 +269,24 @@ After the iteration's commit lands but before starting the next iteration, check
 
 **Auto-apply loop (ADR-042 Rule 2):**
 
-1. Parse the scorer's `RISK_REMEDIATIONS:` block. Expected shape per ADR-015 / ADR-042 Rule 2a (6 columns):
+1. Parse the scorer's `RISK_REMEDIATIONS:` block. Expected shape per ADR-015 / ADR-042 Rule 2a (5 columns):
    ```
    RISK_REMEDIATIONS:
-   - R1 | <description> | <effort S/M/L> | <risk_delta -N> | <files affected> | <action_class>
+   - R1 | <description> | <effort S/M/L> | <risk_delta -N> | <files affected>
    - R2 | ...
    ```
-2. Rank remediations by: largest absolute `risk_delta` first; tie-break by smaller effort (S < M < L); tie-break further by lower remediation ID (R1 before R2).
-3. Read the `action_class` column directly for each remediation. **Orchestrator-supported classes (ADR-042 v2 — P108 slice 2 landed)**: `move-to-holding`, `revert-commit`. Deferred classes (`amend-commit`, `feature-flag`, `rollback-to-tag`) route to Rule 5 halt.
-4. **Verification Pending carve-out (ADR-042 Rule 2b)**: if a remediation targets a commit attached to a `.verifying.md` ticket, skip it and continue ranking. Do NOT auto-revert VP commits. If VP carve-out leaves no eligible remediations, route to Rule 5 halt naming the VP ticket(s).
-5. Apply the top-ranked eligible remediation:
+2. Read the descriptions. Decide what to do. The agent MAY follow a scorer suggestion, adapt it, or do something else entirely. There is no requirement to rank all suggestions upfront or iterate through them in order.
+3. **Verification Pending carve-out (ADR-042 Rule 2b)**: if a remediation targets a commit attached to a `.verifying.md` ticket, do NOT auto-revert it. Skip that suggestion and decide on the next one.
+4. Apply the chosen action using standard primitives (git, Edit, Bash). Example actions the agent might take:
    - `move-to-holding`: `git mv .changeset/<name>.md docs/changesets-holding/<name>.md`. Append the entry to `docs/changesets-holding/README.md` under "Currently held" per ADR-042 Rule 6. Amend the iteration's commit to fold the move (per ADR-042 Rule 3 amend-based folding — preserves ADR-032 one-commit-per-iteration invariant).
-   - `revert-commit`: `git revert --no-edit <sha>`. The scorer MUST supply the target commit SHA in the `description` column (e.g., "Revert commit 9a1f96c that introduced the risky gate"). Before executing, verify the SHA is NOT attached to a `.verifying.md` ticket (Rule 2b carve-out already filters these, but double-check if the scorer missed the annotation). After revert, amend the iteration's commit to fold the revert. If `git revert` produces merge conflicts, route to Rule 5 halt with the conflict detail — do not attempt non-interactive conflict resolution.
-6. Re-invoke the risk scorer (same delegation path as step 1 above — subagent preferred, skill fallback). Read the new `RISK_SCORES:` line.
-7. **Loop classification**:
+   - `revert-commit`: `git revert --no-edit <sha>`. The scorer SHOULD supply the target commit SHA in the `description` column (e.g., "Revert commit 9a1f96c that introduced the risky gate"). Before executing, verify the SHA is NOT attached to a `.verifying.md` ticket (Rule 2b carve-out). After revert, amend the iteration's commit to fold the revert. If `git revert` produces merge conflicts, route to Rule 5 halt with the conflict detail — do not attempt non-interactive conflict resolution.
+5. Re-invoke the risk scorer (same delegation path as step 1 above — subagent preferred, skill fallback). Read the new `RISK_SCORES:` line.
+6. **Loop classification**:
    - **Re-score within appetite (≤ 4/25)** — proceed to Drain action above. Done with the above-appetite branch.
-   - **Re-score still above appetite (≥ 5/25)** — goto step 3 with the remaining ranked remediations.
-   - **No remediations remain** or **no remaining remediation classifies into Rule 2a enumeration** — Rule 5 halt.
+   - **Re-score still above appetite (≥ 5/25)** — continue working to reduce risk. The agent reads the new remediations and decides what to do next. Loop.
+   - **No remediations remain** or **the agent has exhausted its own ideas** — Rule 5 halt.
 
-**Governance gates per auto-apply (ADR-042 Rule 3):** each auto-apply that requires a commit (the amend in step 5 above) goes through the standard ADR-014 commit flow — architect review, JTBD review, risk-scorer gate. A gate rejection falls through to Rule 5 halt. The scorer's ranking does NOT bypass gates.
+**Governance gates per auto-apply (ADR-042 Rule 3):** each auto-apply that requires a commit (the amend in step 4 above) goes through the standard ADR-014 commit flow — architect review, JTBD review, risk-scorer gate. A gate rejection falls through to Rule 5 halt. The scorer's suggestions do NOT bypass gates.
 
 **Rule 5 halt (exhaustion):** when the auto-apply loop exhausts without convergence, or any gate/operation fails, halt the loop. Do NOT proceed to Step 6.75. Do NOT spawn the next iteration. Emit the iteration summary with:
 
@@ -338,7 +337,7 @@ When `AskUserQuestion` is unavailable or the user is AFK, the skill (and the del
 | Commit when risk within appetite | Auto-commit (manage-problem step 9e fallback) |
 | Commit when risk above appetite | Skip commit, report uncommitted state |
 | Pipeline risk at appetite (push or release = 4/25) | Drain release queue (`push:watch` then `release:watch`) before next iteration — per ADR-018 (Step 6.5) |
-| Pipeline risk above appetite (push or release >= 5/25) | Auto-apply scorer remediations in rank order (ADR-042 Rule 2) under the open action-class vocabulary (Rule 2a). Today: `move-to-holding` supported; other classes deferred to P108. Re-score after each apply; drain when within appetite. **Never release above appetite** (ADR-042 Rule 1) — no AskUserQuestion shortcut. Halt the loop with `outcome: halted-above-appetite` if the loop exhausts without convergence (ADR-042 Rule 5). Verification Pending commits excluded from auto-revert (Rule 2b). Per ADR-042 (Step 6.5 Above-appetite branch). |
+| Pipeline risk above appetite (push or release >= 5/25) | Auto-apply scorer remediations incrementally (ADR-042 Rule 2). The agent reads suggestions and decides what to do. Re-score after each apply; drain when within appetite. **Never release above appetite** (ADR-042 Rule 1) — no AskUserQuestion shortcut. Halt the loop with `outcome: halted-above-appetite` if the loop exhausts without convergence (ADR-042 Rule 5). Verification Pending commits excluded from auto-revert (Rule 2b). Per ADR-042 (Step 6.5 Above-appetite branch). |
 | Origin diverged before start | Pull `--ff-only` if trivial; stop with report (`git log HEAD..origin/<base>` and reverse) if non-fast-forward — per ADR-019 (Step 0) |
 | Fix verification needed | Skip problem, add to "needs verification" list |
 | Stop-condition #2 with user-answerable skip-reasons | Emit Outstanding Design Questions table in summary (do NOT call AskUserQuestion). The persona is AFK by definition — per JTBD-006 and ADR-013 Rule 6 — so the table is the default. Interactive invocations may batch up to 4 questions through AskUserQuestion instead — per ADR-013 Rule 1 (Step 2.5). |
