@@ -61,18 +61,19 @@ structured `RISK_REMEDIATIONS:` block defined below.
 
 Provide the assessment table, then emit a structured `RISK_REMEDIATIONS:` block with specific risk-reducing actions:
 
-Format (5 columns — machine-readable for structured AskUserQuestion prompts in calling skills):
+Format (6 columns — machine-readable for structured AskUserQuestion prompts in calling skills):
 ```
 RISK_REMEDIATIONS:
-- R1 | Commit current changes to move WIP forward | S | -2 | <uncommitted files>
-- R2 | Write tests for <risk item from report> | M | -3 | <test file to create/extend>
-- R3 | Address release report risk <X> before adding more changes | M | -4 | <affected files>
-- R4 | Push commits to get CI feedback | S | -1 | N/A
+- R1 | Commit current changes to move WIP forward | S | -2 | <uncommitted files> | <action_class>
+- R2 | Write tests for <risk item from report> | M | -3 | <test file to create/extend> | <action_class>
+- R3 | Address release report risk <X> before adding more changes | M | -4 | <affected files> | <action_class>
+- R4 | Push commits to get CI feedback | S | -1 | N/A | amend-commit
 ```
 
 Column definitions:
 - **effort**: estimated size of the remediation — S (< 1h, single file), M (1-4h, few files), L (> 4h, multiple files)
 - **risk_delta**: estimated reduction in residual risk if this remediation is applied (e.g., `-3` means risk drops by 3 points)
+- **action_class**: one of the open vocabulary defined in ADR-042 Rule 2a — `move-to-holding`, `revert-commit`, `amend-commit`, `feature-flag`, `rollback-to-tag`. The orchestrator reads this column directly to route to the appropriate executor.
 
 Do NOT emit free-text suggestions as prose. The structured block is the only output for above-appetite guidance.
 

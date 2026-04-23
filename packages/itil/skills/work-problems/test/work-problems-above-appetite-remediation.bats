@@ -1,19 +1,19 @@
 #!/usr/bin/env bats
 # Doc-lint guard: work-problems SKILL.md must include the above-appetite
-# auto-apply + halt-on-exhaustion branch per ADR-041.
+# auto-apply + halt-on-exhaustion branch per ADR-042.
 #
 # Structural assertion — Permitted Exception to the source-grep ban (ADR-005 / P011).
 # These assertions are load-bearing-string checks on the skill specification
 # document. Per P081, structural tests are placeholders for behavioural tests
 # against P012's skill-testing harness; until that harness lands, these
-# assertions are the confirmation mechanism called out in ADR-041 Confirmation
+# assertions are the confirmation mechanism called out in ADR-042 Confirmation
 # criterion 2.
 #
 # Cross-reference:
 #   P103 (work-problems escalates resolved release decisions — defeats AFK)
 #   P104 (partial-progress paints release queue into corner)
 #   P108 (scorer remediation action-class vocabulary — deferred work)
-#   ADR-041 (auto-apply scorer remediations — never release above appetite)
+#   ADR-042 (auto-apply scorer remediations — open vocabulary — never release above appetite)
 #   ADR-037 (skill testing strategy — contract-assertion pattern)
 #   @jtbd JTBD-006 (Progress the Backlog While I'm Away)
 
@@ -26,9 +26,9 @@ setup() {
   [ -f "$SKILL_FILE" ]
 }
 
-@test "SKILL.md cites ADR-041 (above-appetite auto-apply)" {
-  # ADR-041 Confirmation criterion 1: source review names the ADR.
-  run grep -n "ADR-041" "$SKILL_FILE"
+@test "SKILL.md cites ADR-042 (above-appetite auto-apply)" {
+  # ADR-042 Confirmation criterion 1: source review names the ADR.
+  run grep -n "ADR-042" "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }
 
@@ -53,7 +53,7 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "SKILL.md names the closed action-class enumeration (Rule 2a)" {
+@test "SKILL.md names the open action-class vocabulary (Rule 2a)" {
   # "move-to-holding" is the single supported class today; later P108 extends.
   # The string must appear so the enumeration is greppable.
   run grep -n "move-to-holding" "$SKILL_FILE"
@@ -118,5 +118,23 @@ setup() {
   # Rule 6 emits an Auto-apply trail subsection in the iteration summary. If
   # the phrase is missing, audit trail is not wired through.
   run grep -niE "Auto-apply trail|audit trail" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+# ──────────────────────────────────────────────────────────────────────────────
+# P108: scorer-contract extension — action_class column + revert-commit executor
+# ──────────────────────────────────────────────────────────────────────────────
+
+@test "SKILL.md reads action_class directly from RISK_REMEDIATIONS (P108)" {
+  # The orchestrator MUST read the structured action_class column rather than
+  # parsing free-form description. Absent this, classification is ambiguous.
+  run grep -n "action_class" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "SKILL.md includes revert-commit executor (P108 slice 2)" {
+  # P108 extends the open vocabulary beyond move-to-holding.
+  # The orchestrator must have executor prose for git revert semantics.
+  run grep -n "git revert" "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }

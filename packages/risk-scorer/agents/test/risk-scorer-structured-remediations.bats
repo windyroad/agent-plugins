@@ -98,3 +98,24 @@ setup() {
   run grep -q "risk_delta" "$PLAN"
   [ "$status" -eq 0 ]
 }
+
+# ──────────────────────────────────────────────────────────────────────────────
+# P108: action_class column (6th column in RISK_REMEDIATIONS schema)
+# ──────────────────────────────────────────────────────────────────────────────
+
+@test "pipeline.md RISK_REMEDIATIONS format includes action_class column" {
+  # P108 scorer-contract extension: orchestrator reads action_class directly
+  # instead of parsing free-form description.
+  run grep -q "action_class" "$PIPELINE"
+  [ "$status" -eq 0 ]
+}
+
+@test "wip.md RISK_REMEDIATIONS format includes action_class column" {
+  run grep -q "action_class" "$WIP"
+  [ "$status" -eq 0 ]
+}
+
+@test "plan.md RISK_REMEDIATIONS format includes action_class column" {
+  run grep -q "action_class" "$PLAN"
+  [ "$status" -eq 0 ]
+}

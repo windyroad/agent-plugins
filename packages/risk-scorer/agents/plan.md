@@ -55,15 +55,16 @@ not policy-authorised — the only sanctioned FAIL output is the Plan Risk Repor
 the `RISK_VERDICT: FAIL` marker, and the structured `RISK_REMEDIATIONS:` block
 defined below.
 
-Emit a structured `RISK_REMEDIATIONS:` block after the verdict (5 columns — machine-readable for structured AskUserQuestion prompts in calling skills):
+Emit a structured `RISK_REMEDIATIONS:` block after the verdict (6 columns — machine-readable for structured AskUserQuestion prompts in calling skills):
 ```
 RISK_REMEDIATIONS:
-- R1 | <description of what the plan must add/change> | <effort S/M/L> | <risk_delta -N> | <affected area>
+- R1 | <description of what the plan must add/change> | <effort S/M/L> | <risk_delta -N> | <affected area> | <action_class>
 ```
 
 Column definitions:
 - **effort**: estimated size of the remediation — S (< 1h, single file), M (1-4h, few files), L (> 4h, multiple files)
 - **risk_delta**: estimated reduction in residual risk if this remediation is applied
+- **action_class**: one of the open vocabulary defined in ADR-042 Rule 2a — `move-to-holding`, `revert-commit`, `amend-commit`, `feature-flag`, `rollback-to-tag`. The orchestrator reads this column directly to route to the appropriate executor.
 
 Do NOT emit free-text "consider" or "you should" prose. The structured block is the only output for above-appetite guidance.
 

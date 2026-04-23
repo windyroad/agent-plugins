@@ -1,13 +1,14 @@
 ---
 status: "proposed"
-date: 2026-04-22
+date: 2026-04-23
 decision-makers: [tomhoward]
 consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: [Windy Road plugin users]
-reassessment-date: 2026-07-22
+reassessment-date: 2026-07-23
+supersedes: "ADR-041"
 ---
 
-# Auto-apply scorer remediations to reach within appetite — never release above
+# Auto-apply scorer remediations to reach within appetite — open action-class vocabulary
 
 ## Context and Problem Statement
 
@@ -22,11 +23,17 @@ The user's subsequent direction, 2026-04-22: *"we deliberately CANNOT do an abov
 
 This ADR encodes that direction. Never release above appetite. Auto-apply scorer remediations in rank order until residual risk converges within appetite. Halt the loop/skill on exhaustion — treat exhaustion as a scorer-gap signal, not as permission to release.
 
-Concurrently, the `docs/changesets-holding/` convention introduced by the P100 multi-slice work is currently self-declared **provisional**, deferring to "candidate ADR-039" that never landed. The holding-area mechanics are tightly coupled to Rule 2's canonical `move-to-holding` action class, so they belong in this decision document. Rule 7 blesses the convention.
+This ADR **supersedes ADR-041** (2026-04-22). ADR-041's Rule 2a encoded a **closed action-class enumeration** — only five known classes were permitted, and any unknown class triggered Rule 5 halt. The decision-maker explicitly rejected this constraint (2026-04-23):
+
+> "I do not agree to a closed action class enumeration. This constrains the remediations in an undesired ways and prevents innovative remediations."
+
+ADR-042 replaces the closed enumeration with an **open vocabulary** that allows the scorer to propose novel remediation classes without a coordinated ADR amendment. The known-class table remains as a fast-path floor; unknown classes are parsed, assessed, and applied if expressible. See Rule 2a for the replacement mechanism and the "Consequences" section for the safety rationale.
+
+Concurrently, the `docs/changesets-holding/` convention introduced by the P100 multi-slice work is now **orchestrator-blessed** (Rule 7).
 
 ## Decision Drivers
 
-- **JTBD-006 (Progress the Backlog While I'm Away)** — primary motivator. AFK persona expects forward progress without interactive halts when the scorer has already resolved the decision surface. Persona split in `docs/jtbd/solo-developer/persona.md`: *trusts agent for routine, deterministic, mechanical decisions; does NOT trust agent for judgment calls*. This ADR restricts auto-apply to a **closed enumeration of remediation action classes** (Rule 2a) so the orchestrator stays on the mechanical side of the split. The under-60-second target from JTBD-001 is scoped to per-edit review, not to release-drain orchestration; multi-minute auto-apply loops at release time are acceptable within that scope.
+- **JTBD-006 (Progress the Backlog While I'm Away)** — primary motivator. AFK persona expects forward progress without interactive halts when the scorer has already resolved the decision surface. Persona split in `docs/jtbd/solo-developer/persona.md`: *trusts agent for routine, deterministic, mechanical decisions; does NOT trust agent for judgment calls*. The open-vocabulary Rule 2a keeps the common path (known classes) on the mechanical side while allowing the scorer to innovate. The novel-class path introduces a lightweight interpretive step that stays bounded: the orchestrator parses the description for an action hint, checks expressibility against known primitives, and applies or halts. This is a constrained judgment call, not open-ended improvisation.
 - **JTBD-001 (Enforce Governance Without Slowing Down)** — under-60-second target applies per-edit, so the auto-apply loop's multi-minute duration is out of that budget's scope. Each individual auto-apply commit still goes through gates under the same 60-second-per-edit target.
 - **JTBD-002 (Ship AI-Assisted Code with Confidence)** — "agent cannot bypass governance" and "audit trail exists showing governance was followed". Rule 3 (gates apply per auto-apply commit) and Rule 6 (per-auto-apply audit line) encode this directly.
 - **Pure-scorer contract (ADR-015)** — scoring + remediation generation live in the scorer; orchestrator interprets and acts. This ADR depends on a stable remediation-class vocabulary (Rule 2a); see P108 for the scorer-contract extension that fills today's free-form `description` column gap.
@@ -35,65 +42,97 @@ Concurrently, the `docs/changesets-holding/` convention introduced by the P100 m
 - **Lean release principle (ADR-014)** — governance skills commit, and the orchestrator releases, their own work. The above-appetite branch is the missing piece that turned ADR-014 into a *sometimes-I-release* skill instead of an *always-I-release-or-halt* skill.
 - **Never-release-above-appetite invariant** — governance controls exist for a reason; there must be no path by which an above-appetite release lands. Halt is the terminal fallback, never release. JTBD-006's "The loop stops gracefully when ... it hits a blocker" authorises loop-halt on scorer exhaustion (exhaustion IS a blocker).
 - **Release-often principle** — the primary mitigation for above-appetite accumulation is frequent releases (ADR-018's at-appetite drain trigger, preserved unchanged). This ADR covers the residual case where a single commit or commit-set is intrinsically above appetite despite the draining discipline.
+- **Open-vocabulary innovation** — the scorer must be free to propose novel remediation classes without waiting for a human to draft, review, and merge an ADR amendment. The closed-enumeration approach in ADR-041 created a bottleneck where every new class required a coordinated code + ADR update. The open vocabulary removes that bottleneck while preserving safety through the "expressibility check" + Rule 3 gates.
 - **P103 + P104** — the two problem tickets this ADR resolves.
 
 ## Considered Options
 
-1. **Liberal auto-apply with halt-on-exhaustion (chosen)** — mandatory auto-apply in rank order until within appetite; gates apply per auto-apply commit; closed enumeration of action classes; halt (not release) on exhaustion.
-2. **Narrow auto-apply (original 2026-04-22 draft)** — auto-apply only for `effort=S` + `.changeset/*.md` + sufficient `risk_delta`; one per iteration; fall through to AskUserQuestion / skip-release on exhaustion. **Rejected**: too narrow to resolve P103; preserves the AskUserQuestion escape hatch the user's direction forbids; eligibility criteria (effort=S + changeset-only + sufficient risk_delta) would route most real-world above-appetite states to the fallback, defeating the ADR's purpose.
+1. **Liberal auto-apply with open vocabulary and halt-on-exhaustion (chosen)** — mandatory auto-apply in rank order until within appetite; gates apply per auto-apply commit; open vocabulary of action classes with expressibility check; halt (not release) on exhaustion.
+2. **Closed enumeration with incremental delivery (ADR-041)** — auto-apply only for known classes; unknown classes trigger halt. **Rejected per decision-maker direction 2026-04-23**: constrains scorer innovation, creates ADR-amendment bottleneck for every new class.
 3. **Skip the release, continue the loop** (JTBD-agent counter-proposal) — above-appetite iterations leave commits dirty-for-known-reason; loop continues to next iteration's work. **Rejected**: accumulates unreleasable commits across iterations, re-creates the P104 "painted into a corner" hazard, and defers the scorer-gap bug signal behind productive-looking work. The user's explicit direction ("halt the loop") supersedes this softer interpretation.
 4. **Ask the user** (status quo of the narrow draft and pre-ADR prose) — keep `AskUserQuestion` as the above-appetite default. **Rejected per P103 evidence**: defeats JTBD-006 (AFK halts on resolved decisions) and JTBD-001 (non-AFK skills slow down on decisions the scorer has already ranked).
 5. **Release above appetite with a loud audit line** — drain the release at whatever residual risk remains, with explicit acceptance. **Rejected**: violates the never-release-above-appetite invariant; controls exist for a reason; release discipline is a load-bearing trust signal the user has explicitly named.
 
 ## Decision Outcome
 
-Chosen option: **"Liberal auto-apply with halt-on-exhaustion"**, because the never-release-above-appetite invariant is the primary constraint and liberal auto-apply is the only mechanism that reliably honours it across AFK and non-AFK flows. Halt-on-exhaustion is the safety valve: if the scorer cannot find a reduction path, the orchestrator refuses to release and surfaces the exhaustion as a bug signal for user resolution.
+Chosen option: **"Liberal auto-apply with open vocabulary and halt-on-exhaustion"**, because the never-release-above-appetite invariant is the primary constraint and liberal auto-apply is the only mechanism that reliably honours it across AFK and non-AFK flows. The open vocabulary removes the scorer-innovation bottleneck that the closed enumeration created, while the expressibility check + Rule 3 gates preserve safety.
 
-**This ADR supersedes** the implicit above-appetite fallback of ADR-018 Step 6.5 and the explicit above-appetite branch of ADR-020 §6. Both ADRs remain authoritative for their at-or-below-appetite paths; above-appetite behaviour in both is governed by Rules 1–7 below. Cross-reference amendments land in the same commit as this ADR.
+Halt-on-exhaustion is the safety valve: if the scorer cannot find a reduction path, the orchestrator refuses to release and surfaces the exhaustion as a bug signal for user resolution.
+
+**This ADR supersedes ADR-041.** ADR-041 is promoted to `.superseded.md` status with a forward pointer to this document. ADR-018 and ADR-020 cross-references to ADR-041's Rule 2a are updated to point to ADR-042 Rule 2a in the same commit.
 
 ### Rules
 
-#### Rule 1 — Auto-apply is mandatory above appetite; never release above
+#### Rule 1 — Work to reduce risk above appetite; never release above
 
-When residual push or release risk is above appetite (≥ 5/25 per `RISK-POLICY.md`), the orchestrator MUST auto-apply scorer remediations until residual risk is within appetite (≤ 4/25). The orchestrator MUST NOT release above appetite under any circumstance. The orchestrator MUST NOT escalate to `AskUserQuestion` as a shortcut out of the auto-apply loop — the scorer is the decision surface, not the user.
+When residual push or release risk is above appetite (≥ 5/25 per `RISK-POLICY.md`), the orchestrator MUST take action to reduce risk until residual risk is within appetite (≤ 4/25). The orchestrator MUST NOT release above appetite under any circumstance. The orchestrator MUST NOT escalate to `AskUserQuestion` as a shortcut — the agent is the decision surface, not the user.
 
-Rule 1 is policy-authorised per ADR-013 Rule 5: `RISK-POLICY.md` appetite + this ADR's enumeration (Rule 2a) constitute the policy. No interactive authorisation is required for any action inside Rules 2–7.
+The orchestrator MAY use scorer remediations as input, but is NOT bound to follow them. It MAY:
+- Apply a scorer-ranked remediation (Rule 2a).
+- Take an alternative action it deems suitable (e.g. splitting a changeset, adding inline documentation, reordering commits, reverting a different commit than the scorer suggested).
+- Combine scorer input with its own judgment.
 
-#### Rule 2 — Apply in rank order; re-score after each
+Rule 1 is policy-authorised per ADR-013 Rule 5: `RISK-POLICY.md` appetite + this ADR's eligibility rules constitute the policy. No interactive authorisation is required for any action inside Rules 2–7.
 
-Parse the scorer's `RISK_REMEDIATIONS:` block. Rank remediations by:
+#### Rule 2 — Use scorer input; agent decides; re-score after each
+
+Parse the scorer's `RISK_REMEDIATIONS:` block as **input**, not as **instruction**. Rank scorer remediations by:
 
 1. Largest absolute `risk_delta` first;
 2. Smaller effort (S < M < L);
 3. Lower remediation ID (R1 before R2).
 
-Apply the top-ranked remediation per its action class (Rule 2a). After each apply, re-score via `wr-risk-scorer:pipeline` (subagent, preferred) or `/wr-risk-scorer:assess-release` (skill, fallback — ADR-015 delegation precedent). Classify the re-score:
+The orchestrator MAY apply the top-ranked scorer remediation per its action class (Rule 2a). OR it MAY take an alternative action it deems more suitable, provided the alternative also reduces risk and stays within the agent's available primitives (git, Edit, Bash).
+
+After each action (whether scorer-suggested or agent-initiated), re-score via `wr-risk-scorer:pipeline` (subagent, preferred) or `/wr-risk-scorer:assess-release` (skill, fallback — ADR-015 delegation precedent). Classify the re-score:
 
 - **Within appetite (≤ 4/25)** → proceed to drain via `push:watch` + `release:watch` per ADR-018/ADR-020's within-appetite mechanism. Done.
-- **Above appetite (≥ 5/25)** → apply the next remediation in rank order. Loop.
+- **Above appetite (≥ 5/25)** → continue working to reduce risk. Loop.
 
 The loop terminates when one of:
 
 - Re-score reaches within appetite (drain path);
-- Every ranked remediation has been applied and re-score is still above appetite (Rule 5 halt);
-- A remediation's action class is outside the enumerated vocabulary (Rule 5 halt — scorer-gap signal);
-- A remediation apply fails (merge conflict, hook rejection, failing tests) — halt with the failed-remediation detail per Rule 5.
+- The agent has exhausted its own ideas AND the scorer's ranked remediations, and re-score is still above appetite (Rule 5 halt);
+- A scorer remediation's action class is outside the known-class table AND the description does not contain a credible orchestrator-action hint (Rule 5 halt — scorer-gap signal);
+- An action fails a gate (Rule 3) or a git operation (conflict, merge failure), or parsing times out (Rule 2a time-box). Rule 5 halt.
 
-#### Rule 2a — Closed action-class enumeration
+#### Rule 2a — Open action-class vocabulary
 
-The orchestrator recognises a closed enumeration of remediation action classes. The scorer's `RISK_REMEDIATIONS:` description column MUST classify under exactly one of these; any description that does not parse into a known class is treated as scorer-contract violation and routes to Rule 5 halt.
+The orchestrator accepts an **open vocabulary** of remediation action classes. The scorer's `RISK_REMEDIATIONS:` block carries a structured `action_class` column (6th column, after `files affected`) naming the class. The orchestrator reads `action_class` directly; the free-form `description` column is human-readable summary only and MUST NOT be parsed for classification.
 
-**Today's enumeration (ADR-041 v1):**
+**Known classes (orchestrator-native support guaranteed):**
 
 | Class | Orchestrator action | Reversibility | Supported now? |
 |---|---|---|---|
-| `move-to-holding` | `git mv .changeset/<name>.md docs/changesets-holding/<name>.md` | Trivial (`git mv` back) | **Yes** — implemented in this landing |
-| `revert-commit` | `git revert <sha>` (new inverse commit) | Trivial (`git revert` the revert) | **No** — deferred to P108 + scorer contract extension |
-| `amend-commit` | `git commit --amend` (only before push) | Moderate (requires force-push if published) | **No** — deferred to P108 |
-| `feature-flag` | `Edit` tool introduces a conditional gate | Moderate (delete the flag) | **No** — deferred to P108 |
-| `rollback-to-tag` | `git reset --hard <tag>` on a fresh branch | Low (other commits can be cherry-picked back) | **No** — deferred to P108 |
+| `move-to-holding` | `git mv .changeset/<name>.md docs/changesets-holding/<name>.md` | Trivial (`git mv` back) | **Yes** — implemented in ADR-041 v1 |
+| `revert-commit` | `git revert <sha>` (new inverse commit) | Trivial (`git revert` the revert) | **Yes** — implemented in P108 |
+| `amend-commit` | `git commit --amend` (only before push) | Moderate (requires force-push if published) | **No** — deferred to P108 slice 3 |
+| `feature-flag` | `Edit` tool introduces a conditional gate | Moderate (delete the flag) | **No** — deferred to P108 slice 4 |
+| `rollback-to-tag` | `git reset --hard <tag>` on a fresh branch | Low (other commits can be cherry-picked back) | **No** — deferred to P108 slice 5 |
 
-Until P108 lands a structured scorer-contract extension (with an explicit `action_class` column in `RISK_REMEDIATIONS:` and orchestrator parsers for each class), the only auto-apply action the orchestrator executes is `move-to-holding`. Any other description → Rule 5 halt with the description logged so the vocabulary gap is visible. This is deliberate incremental delivery — the ADR codifies the full vocabulary intent while the implementation lands the mechanical subset.
+**Novel classes (innovation path):**
+
+Any `action_class` value outside the known-class table is **NOT** a contract violation. The orchestrator treats unknown classes as follows:
+
+1. **Parse the description** for a one-line orchestrator-action hint (free-form but conventionally starts with an imperative verb: `git ...`, `Edit ...`, `Bash ...`, `npm ...`).
+2. **Assess reversibility** from the description's own language (e.g. "trivial revert via ...", "moderate — requires ...", "irreversible").
+3. **Apply if the action is expressible** via standard git/Edit/Bash primitives the orchestrator already has access to.
+4. **Halt with scorer-gap signal** only if the action is NOT expressible via available primitives AND the description does not contain a credible orchestrator-action hint.
+
+This open-vocabulary design deliberately avoids constraining the scorer's creativity. New remediation classes (e.g. `split-commit`, `deprecate-export`, `noop-audit`) can be proposed by the scorer and acted on immediately without a coordinated ADR amendment. The known-class table is a **floor**, not a **ceiling**.
+
+**Time-boxed parsing (JTBD-001 compliance):** the "parse description for hints" step is time-boxed to **5 seconds**. If no credible hint is found within 5 seconds, the orchestrator treats the remediation as unexpressible and routes to Rule 5 halt. This preserves the under-60-second target for the classification decision (the remaining gate traversal stays within the per-edit budget).
+
+**Gate on unknown classes (safety valve):** every auto-apply of an unknown class still goes through Rule 3 (architect + JTBD + risk-scorer gate). Unknown-class novelty does NOT bypass governance. If the gate rejects an unknown-class remediation, the orchestrator falls through to Rule 5 halt with the class name and rejection reason logged.
+
+**Known-class carve-out:** for classes in the known-class table, the orchestrator action is mechanically determined (no description parsing) and reversibility is read from the table directly. This keeps the common path fast and deterministic.
+
+**Why the open vocabulary is safe:**
+- **Deterministic fallback**: unknown classes without credible hints always route to Rule 5 halt — they are never executed blindly.
+- **Expressibility check**: the orchestrator only applies actions it can express with primitives it already understands (git, Edit, Bash). A novel class like `terraform-apply` would fail the expressibility check and halt because the orchestrator has no `terraform` primitive.
+- **Gate traversal**: even expressible unknown-class remediations go through the full gate stack (Rule 3). A misclassification that produces a syntactically valid edit still gets reviewed.
+- **Audit trail**: Rule 6 logs every auto-apply, including unknown-class applications with the full description text. The user can review and revert on return.
+- **Reversibility assessment**: the orchestrator reads reversibility language from the description and logs it. The user can see whether an unknown-class action was marked trivial/moderate/low before it was applied.
 
 #### Rule 2b — Verification Pending carve-out
 
@@ -115,7 +154,7 @@ The orchestrator MUST halt (not release) when any of the following hold:
 
 - The scorer produces no remediations and residual risk is above appetite;
 - Every ranked remediation has been applied and residual risk is still above appetite;
-- A remediation's description does not parse into the Rule 2a enumeration;
+- A remediation's action class is outside the known-class table AND the description does not contain a credible orchestrator-action hint (including the 5-second time-box expiry);
 - A remediation attempt fails a gate (Rule 3) or a git operation (conflict, merge failure).
 
 **AFK mode (work-problems lineage / ADR-018 Step 6.5):** halt the loop. Emit the iteration summary with `outcome: halted-above-appetite`, the final re-score, the remediations attempted (with outcome for each), and the ticket IDs of any Verification Pending commits implicated per Rule 2b. Do NOT proceed to the next iteration. The tree's dirty state (the iteration's own commit, possibly with auto-apply amendments) is preserved for user inspection on return. This is the JTBD-006 "stops gracefully when it hits a blocker" path.
@@ -135,6 +174,7 @@ Every auto-apply decision MUST be logged in two places:
    - Post-apply re-score
    - Action taken (the git operation or Edit summary)
    - One-line citation of the remediation's `description` column
+   - **Novel-class flag** (`known` or `novel`) — indicates whether the class was in the known-class table or parsed from description
 
    When multiple auto-applies fire in one iteration, emit one line per apply under a single "Auto-apply trail" subheading so the iteration summary stays skimmable.
 
@@ -148,21 +188,24 @@ Every auto-apply decision MUST be logged in two places:
 
 **In scope (this ADR's landing commit):**
 
-- `packages/itil/skills/work-problems/SKILL.md` — Step 6.5 above-appetite branch per Rules 1–6; Non-Interactive Decision Making table updated for "Commit when risk above appetite" → cites ADR-041.
+- `docs/decisions/041-auto-apply-scorer-remediations-above-appetite.superseded.md` — status update + supersession notice + forward pointer.
+- `docs/decisions/042-auto-apply-scorer-remediations-open-vocabulary.proposed.md` — this document.
+- `packages/itil/skills/work-problems/SKILL.md` — Step 6.5 above-appetite branch per Rules 1–6; Non-Interactive Decision Making table updated for "Commit when risk above appetite" → cites ADR-042.
 - `packages/itil/skills/manage-problem/SKILL.md` — Step 11 terminal commit sequence above-appetite branch per Rules 1–6 and Rule 5 non-AFK halt.
 - `packages/itil/skills/manage-incident/SKILL.md` — terminal commit step, same shape as manage-problem.
-- `docs/changesets-holding/README.md` — provisional banner removal + ADR-041 citation (Rule 7).
-- `docs/decisions/018-inter-iteration-release-cadence-for-afk-loops.proposed.md` — amendment adding above-appetite cross-reference to ADR-041.
-- `docs/decisions/020-governance-auto-release-for-non-afk-flows.proposed.md` — §6 above-appetite branch replaced with cross-reference to ADR-041.
-- `packages/itil/skills/work-problems/test/work-problems-above-appetite-remediation.bats` — new contract-assertion bats file per ADR-037.
-- `docs/problems/108-scorer-remediation-action-class-vocabulary.open.md` — new problem ticket captures the scorer-contract extension deferred from Rule 2a.
+- `docs/changesets-holding/README.md` — provisional banner removal + ADR-042 citation (Rule 7).
+- `docs/decisions/018-inter-iteration-release-cadence-for-afk-loops.proposed.md` — amendment adding above-appetite cross-reference to ADR-042.
+- `docs/decisions/020-governance-auto-release-for-non-afk-flows.proposed.md` — §6 above-appetite branch replaced with cross-reference to ADR-042.
+- `packages/itil/skills/work-problems/test/work-problems-above-appetite-remediation.bats` — contract-assertion bats file per ADR-037 (structural, to be retrofitted under P081).
+- `docs/problems/108-scorer-remediation-action-class-vocabulary.open.md` — update to reflect that P108's scorer-contract extension now serves the known-class table, not a closed enumeration.
 
 **Out of scope (this ADR's landing):**
 
-- Implementation of `revert-commit`, `amend-commit`, `feature-flag`, `rollback-to-tag` action classes — deferred to P108's scorer-contract extension + orchestrator parser work.
+- Implementation of `amend-commit`, `feature-flag`, `rollback-to-tag` action classes — deferred to P108's scorer-contract extension + orchestrator parser work.
 - Reinstate automation for held changesets — remains a user-initiated `git mv` once the blocking slices land. Future work may automate this when blocking-ticket close detection is reliable.
 - Adjustments to `RISK-POLICY.md` appetite threshold — the invariant "never release above appetite" operates at the current 4/25 threshold; any threshold change is a separate `update-policy` invocation.
 - Changing the release-cadence trigger (ADR-018 at-appetite threshold) — out of scope; the release-often principle is preserved via ADR-018 as-is.
+- JTBD job for extensible remediation vocabulary — tracked as a follow-up task; see Consequences §JTBD Gap.
 
 ## Consequences
 
@@ -175,45 +218,52 @@ Every auto-apply decision MUST be logged in two places:
 - **Audit trail per Rule 6** makes auto-apply decisions reviewable on user return: one line per apply in the iteration report + one line per move in the holding-area README.
 - **Exhaustion is auditable, not silent.** Rule 5 halt emits a structured report naming what was tried and why it was insufficient — the scorer gap is visible, not hidden behind a successful release.
 - **VP carve-out (Rule 2b)** prevents the auto-revert soft-lock that would otherwise destroy fixes the user is verifying.
+- **Open vocabulary enables scorer innovation.** New remediation classes can be proposed and applied without waiting for an ADR amendment cycle. The scorer can experiment with novel remediation strategies (e.g. `split-commit` for large changesets, `noop-audit` for audit-only mitigations) and the orchestrator will attempt them if expressible.
+- **Time-boxed parsing preserves JTBD-001 speed.** The 5-second parsing cap ensures classification does not breach the under-60-second per-edit target.
 
 ### Neutral
 
 - **Rules 1–7 add branch complexity.** Step 6.5 in work-problems, Step 11 in manage-problem, and the terminal step in manage-incident each gain a multi-branch above-appetite section. Contract-assertion bats (ADR-037 pattern) verify the load-bearing strings land in each branch.
-- **Closed action-class enumeration (Rule 2a) is intentionally small today.** Only `move-to-holding` is implemented. Any above-appetite state whose scorer-ranked remediation is not `move-to-holding` routes to Rule 5 halt until P108 extends the scorer contract + orchestrator parsers. This is conservative-by-design during the scorer-contract evolution window.
+- **The known-class table is intentionally small today.** Only `move-to-holding` and `revert-commit` are implemented. Unknown classes route through the novel-class path (description parsing). The known-class table grows as P108 lands slices.
 - **The holding area accumulates entries during multi-slice WIP.** The README serves as the audit log.
+- **Scorer-orchestrator contract drift risk.** The open vocabulary means the scorer could propose classes the orchestrator cannot yet express well, leading to more frequent Rule 5 halts until the scorer learns the orchestrator's primitive set. This is a transient learning phase, not a structural flaw.
 
 ### Bad
 
 - **Source-edit auto-apply classes (`feature-flag`) are NOT mechanically reversible the way `move-to-holding` is.** When P108 lands source-touching remediations, the audit trail per Rule 6 becomes load-bearing for user review-and-revert on return. Mitigation: each auto-apply commit is a distinct commit (or a named amendment in AFK mode) so `git revert` works at the commit level.
-- **Scorer contract dependency.** Rule 2a's closed enumeration creates a contract between scorer output and orchestrator parser. Any scorer change (new action class, description-format change) requires a coordinated orchestrator update. Mitigation: P108 owns the contract-evolution path; Rule 2a is versioned (`ADR-041 v1` today) so future ADRs can extend cleanly.
+- **Scorer contract dependency (looser than ADR-041).** The open vocabulary creates a softer contract: the scorer must write descriptions that contain credible orchestrator-action hints. If the scorer's descriptions drift from the hint convention, the novel-class path produces more halts. Mitigation: the scorer learns from halt reports (Rule 6 logs the description text) and adapts its description convention. The known-class table remains as a hard-contract fallback.
 - **Halt-on-exhaustion can stop an AFK loop mid-queue.** If a scorer gap halts iteration N, iterations N+1..M never fire — even if they would have worked on unrelated tickets. This is the conservative choice: continuing past an unreleasable iteration risks compounding the above-appetite state. Mitigated in practice by the scorer being reliable enough that exhaustion is rare; when it happens, treat as a bug and fix the scorer.
 - **Gate traversal cost per auto-apply.** Rule 3 requires architect + JTBD + risk-scorer review on every auto-apply commit. For a 3-remediation iteration that means 3× full gate traversal. Mitigated by AFK mode's `git commit --amend` folding (Rule 3 amend-based folding) — the iteration still produces one final commit that carries one final gate traversal against the amended state.
+- **JTBD Gap — no documented job for "extensible remediation vocabulary".** The user's motivation ("prevents innovative remediations") does not map to an existing JTBD job. JTBD-006 desires safe defaults; JTBD-001 desires speed with governance; JTBD-002 desires auditability. None explicitly call for open-ended vocabulary. If extensibility/innovation is a genuine requirement, a new JTBD job (or JTBD-006 extension) should be drafted. This is tracked as a follow-up.
 
 ## Confirmation
 
 Compliance is verified by:
 
-1. **Source review**: each in-scope SKILL.md has the above-appetite branch with Rules 1–7 referenced (never-release-above-appetite invariant, rank-order apply, action-class enumeration, VP carve-out, gate-per-commit, halt-on-exhaustion, audit trail) and cites this ADR. The ADR-018 and ADR-020 amendments cite ADR-041.
-2. **Bats contract assertions** (per ADR-037): `packages/itil/skills/work-problems/test/work-problems-above-appetite-remediation.bats` asserts the load-bearing strings — `RISK_REMEDIATIONS`, `docs/changesets-holding/`, `above appetite`, ADR-013 Rule 5 citation, `never release above appetite` invariant phrase, `ADR-041` citation, the Non-Interactive Decision Making table row for the above-appetite branch, and the Rule 5 halt-on-exhaustion semantics.
+1. **Source review**: each in-scope SKILL.md has the above-appetite branch with Rules 1–7 referenced (never-release-above-appetite invariant, rank-order apply, open vocabulary, VP carve-out, gate-per-commit, halt-on-exhaustion, audit trail) and cites this ADR. The ADR-018 and ADR-020 amendments cite ADR-042.
+2. **Bats contract assertions** (per ADR-037): `packages/itil/skills/work-problems/test/work-problems-above-appetite-remediation.bats` asserts the load-bearing strings — `RISK_REMEDIATIONS`, `docs/changesets-holding/`, `above appetite`, ADR-013 Rule 5 citation, `never release above appetite` invariant phrase, `ADR-042` citation, the Non-Interactive Decision Making table row for the above-appetite branch, and the Rule 5 halt-on-exhaustion semantics.
 3. **Behavioural** (manual until P012's harness lands): an AFK loop that hits an above-appetite release-cadence event with an eligible `move-to-holding` remediation auto-applies the move, re-scores within appetite, drains, and proceeds to the next iteration — without invoking `AskUserQuestion`. Verifiable from the iteration report's Auto-apply trail subsection + the holding-area README's "Currently held" entry.
-4. **Halt-on-exhaustion behavioural**: an AFK loop hitting a remediation outside Rule 2a's enumeration (pre-P108) halts with `outcome: halted-above-appetite` naming the unsupported description. Verifiable from the halt report shape.
+4. **Halt-on-exhaustion behavioural**: an AFK loop hitting a remediation outside the known-class table with no credible hint halts with `outcome: halted-above-appetite` naming the unsupported class and description. Verifiable from the halt report shape.
+5. **Open-vocabulary behavioural**: a scorer proposing a novel class (e.g. `noop-audit`) with a credible description hint (`Bash echo 'audit-only' > docs/audit-trail.md`) is parsed, assessed as expressible, and applied (subject to Rule 3 gates). Verifiable from the iteration report's novel-class flag.
 
 ## Reassessment Triggers
 
 Revisit this decision if:
 
-- P108 lands the scorer contract extension + orchestrator parsers — Rule 2a enumeration expands; bats assertions update; "today's enumeration" becomes "v2+".
+- P108 lands the scorer contract extension + orchestrator parsers — the known-class table expands; bats assertions update.
 - The `RISK-POLICY.md` appetite threshold changes — Rule 1's "above appetite" numeric definition shifts.
 - A fourth in-scope lineage emerges (e.g., `create-adr` under ADR-014 auto-release) — the ADR may need to extend to that skill's terminal step.
-- The scorer's `RISK_REMEDIATIONS:` contract changes shape — Rule 2 parsing and Rule 2a enumeration both depend on it.
-- Halt-on-exhaustion fires frequently in practice (say, more than once per week of active AFK use) — treat as a scorer-gap signal; the correct response is scorer improvement, but a threshold of repeated halt could justify re-evaluating whether the invariant is operationally tenable at the current threshold.
+- The scorer's `RISK_REMEDIATIONS:` contract changes shape — Rule 2 parsing and Rule 2a vocabulary both depend on it.
+- Halt-on-exhaustion fires frequently in practice (say, more than once per week of active AFK use) — treat as a scorer-gap signal; the correct response is scorer improvement, but a threshold of repeated halt could justify re-evaluating whether the open vocabulary is too permissive and should narrow.
 - ADR-014 / ADR-018 / ADR-020 are superseded — lineage assumption breaks.
+- A new JTBD job for extensible remediation vocabulary is drafted — the Consequences §Bad JTBD Gap closes and the decision drivers should be updated.
 
 ## Related
 
+- **ADR-041** (`docs/decisions/041-auto-apply-scorer-remediations-above-appetite.superseded.md`) — superseded predecessor. Closed-enumeration approach rejected by decision-maker.
 - **P103** (`docs/problems/103-work-problems-escalates-resolved-release-decisions-defeats-afk.open.md`) — driver for the auto-apply rule. AFK loop halt at iter 4 2026-04-22.
 - **P104** (`docs/problems/104-work-problems-partial-progress-paints-release-queue-into-corner.open.md`) — driver for the holding-area convention's promotion from provisional.
-- **P108** (`docs/problems/108-scorer-remediation-action-class-vocabulary.open.md`) — opened in the same commit as this ADR. Tracks the scorer-contract extension + orchestrator parsers for `revert-commit`, `amend-commit`, `feature-flag`, `rollback-to-tag` action classes deferred from Rule 2a.
+- **P108** (`docs/problems/108-scorer-remediation-action-class-vocabulary.open.md`) — tracks the scorer-contract extension + orchestrator parsers for the known-class table (`amend-commit`, `feature-flag`, `rollback-to-tag`). Now scoped to "expand the known-class floor" rather than "complete a closed enumeration".
 - **ADR-013** (`docs/decisions/013-structured-user-interaction-for-governance-decisions.proposed.md`) — Rule 5 (policy-authorised proceeds silently) authorises every auto-apply action inside Rules 2–7; Rule 6 (non-interactive fail-safe) no longer applies to the above-appetite branch since Rule 5 halt is the fail-safe now.
 - **ADR-014** (`docs/decisions/014-governance-skills-commit-their-own-work.proposed.md`) — commit layer this ADR extends with the above-appetite auto-apply branch. Rule 3 requires gates per auto-apply commit; ADR-032 amend-based folding (Rule 3) keeps the one-commit-per-iteration invariant intact.
 - **ADR-015** (`docs/decisions/015-on-demand-assessment-skills.proposed.md`) — pure-scorer contract; defines the `RISK_REMEDIATIONS:` machine-readable interface this ADR consumes. P108 will extend ADR-015's contract with structured action-class columns.
@@ -225,5 +275,5 @@ Revisit this decision if:
 - **JTBD-001** (`docs/jtbd/solo-developer/JTBD-001-enforce-governance.proposed.md`) — under-60-second target (per-edit scope, not release-drain scope).
 - **JTBD-002** (`docs/jtbd/solo-developer/JTBD-002-ship-with-confidence.proposed.md`) — audit trail requirement satisfied by Rule 6.
 - **JTBD-006** (`docs/jtbd/solo-developer/JTBD-006-work-backlog-afk.proposed.md`) — AFK persona, primary motivator; "stops gracefully when it hits a blocker" authorises Rule 5 loop-halt on exhaustion.
-- **`docs/changesets-holding/README.md`** — holding-area mechanics; provisional banner removed and ADR-041 cited as the authoritative basis per Rule 7.
+- **`docs/changesets-holding/README.md`** — holding-area mechanics; provisional banner removed and ADR-042 cited as the authoritative basis per Rule 7.
 - Memory: `feedback_act_on_obvious_decisions.md` — captures the user's lesson; this ADR is the structural / repo-wide encoding.

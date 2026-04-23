@@ -129,6 +129,29 @@ Each assessment skill auto-detects context from git state:
 
 All decision branch points (e.g., above-appetite risk) use `AskUserQuestion` per ADR-013 Rule 1. Assessment skills are read-only — they do not commit files (per ADR-014, assessment skills that produce no file changes are exempt from the commit obligation).
 
+## Scorer Output Contract: `RISK_REMEDIATIONS:` Schema
+
+The scorer's structured `RISK_REMEDIATIONS:` block is the machine-readable interface between scorer and orchestrator. It MUST be emitted by all three scoring modes (pipeline, wip, plan) when cumulative risk exceeds appetite.
+
+### Schema (6 columns)
+
+```
+RISK_REMEDIATIONS:
+- R1 | <description> | <effort S/M/L> | <risk_delta -N> | <files affected> | <action_class>
+```
+
+| Column | Purpose |
+|--------|---------|
+| `description` | Human-readable summary of the remediation |
+| `effort` | Estimated size — S (< 1h), M (1-4h), L (> 4h) |
+| `risk_delta` | Estimated score reduction (e.g., `-3`) |
+| `files affected` | Files or areas touched |
+| `action_class` | Known-class table per ADR-042 Rule 2a — `move-to-holding`, `revert-commit`, `amend-commit`, `feature-flag`, `rollback-to-tag`. Novel classes outside the table are parsed for expressibility; see ADR-042 Rule 2a "Novel classes (innovation path)". |
+
+The `action_class` column was added in P108 (scorer-contract extension, 2026-04-23). Prior to P108, the orchestrator parsed free-form `description` to classify remediations, which was ambiguous. The structured column lets the orchestrator route directly to the appropriate executor without NLP heuristics.
+
+**Backwards compatibility**: scorer agents that emit the old 5-column format are still consumed by orchestrators, but any remediation without an `action_class` is treated as unclassifiable and routes to ADR-042 Rule 5 halt. All scorer agent prompts (`pipeline.md`, `wip.md`, `plan.md`) were updated to the 6-column format in the same commit as this ADR amendment.
+
 ## Confirmation
 
 - [x] `packages/risk-scorer/skills/assess-release/SKILL.md` created; skill delegates to `wr-risk-scorer:pipeline` via the Skill tool

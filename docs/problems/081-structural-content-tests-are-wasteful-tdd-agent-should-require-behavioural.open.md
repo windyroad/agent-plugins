@@ -165,3 +165,26 @@ No direction pinned yet — architect review at implementation is required becau
 This ticket was authored after the user flagged the pattern during manage-problem slice-4 halt recovery (2026-04-21 session). The slice-4 bats files I committed as the halt recovery ARE the kind of structural-grep tests this ticket identifies as wasteful — they're dogfood examples of the problem. When Layer A + Layer B ship, those files become the first retrofit candidates.
 
 The user's frustration ("these are wasteful, not real tests") was a strong-signal correction. Per `P078` (assistant-offers-problem-ticket-on-user-correction) direction, that signal maps directly to this ticket's creation. `P078`'s implementation — when it ships — should surface this pattern automatically the next time a structural-grep bats file passes through Write/Edit without a paired behavioural test.
+
+## Fresh Evidence (2026-04-23)
+
+`packages/retrospective/skills/run-retro/test/run-retro-signal-vs-noise.bats` (P105) is a pristine example of the anti-pattern: 15 `@test` blocks, every assertion is `run grep -F` or `run grep -n` against `SKILL_MD`. It asserts presence of prose strings ("Signal | +2", "Noise | -1", "delete queue", "ADR-026") but says nothing about whether Claude, when prompted with the skill, actually performs a signal-vs-noise pass, scores entries correctly, or gates deletions behind AskUserQuestion. The test passes on misleading phrasing and fails on semantics-preserving compression — exactly the failure mode predicted in the Symptoms section.
+
+This is not isolated to this project. The user reports similar structural-test proliferation in `../bbstats`.
+
+## Alternative Framework Direction
+
+Anthropic's `skill-creator` evaluation framework (https://github.com/anthropics/skills/blob/main/skills/skill-creator/SKILL.md) provides a behavioural-first testing pattern that is directly applicable:
+
+- **Parallel A/B subagent runs** (`with_skill/` vs `without_skill/` vs `old_skill/`) — exercises the skill's actual behaviour by spawning real Claude sessions against realistic prompts, then comparing outputs.
+- **Quantitative assertions** on objectively verifiable results — pass rates, timing, token deltas — surfaced in `evals/evals.json` and aggregated into `benchmark.json` / `benchmark.md`.
+- **Human-in-the-loop eval viewer** for subjective/behavioural assessment where quantitative assertions are insufficient.
+- **Grading subagent** produces structured `grading.json` with `text`, `passed`, and `evidence` fields.
+
+For this project's skill-testing needs, the Anthropic pattern suggests:
+1. **Eval prompts** that exercise the skill end-to-end (e.g. "run a retrospective on this briefing state" for `run-retro`).
+2. **Assertions on tool-call sequences** — did the skill invoke Write, Edit, Bash, Skill, Agent in the expected order?
+3. **Assertions on artefact state** — did the skill produce the expected file changes, README updates, or problem transitions?
+4. **Baseline comparison** — old skill vs new skill on the same prompt, measuring regression/progression.
+
+This is Layer B's concrete shape. The TDD agent should reference this framework when proposing behavioural alternatives to structural tests.
