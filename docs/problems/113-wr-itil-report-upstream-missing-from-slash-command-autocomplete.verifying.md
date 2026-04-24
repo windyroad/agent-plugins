@@ -109,7 +109,40 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Skill, Agen
 
 ## Fix Released
 
-Fix landed 2026-04-24 in `packages/itil/skills/report-upstream/SKILL.md` line 4: added `Skill, Agent` to `allowed-tools`. Ships in the next `@windyroad/itil` patch release (changeset `.changeset/p113-report-upstream-allowed-tools.md`). Verification path: after `/install-updates` in a new session, type `/wr-itil:report` in the TUI and confirm `/wr-itil:report-upstream` appears in autocomplete. If autocomplete still omits it, the allowed-tools hypothesis is wrong and the ticket reopens for upstream escalation.
+Fix landed 2026-04-24 in `packages/itil/skills/report-upstream/SKILL.md` line 4: added `Skill, Agent` to `allowed-tools`. Shipped in `@windyroad/itil@0.18.1`. Changeset `.changeset/p113-report-upstream-allowed-tools.md` (drained).
+
+### Post-release verification result: the declared-vs-used hypothesis was WRONG
+
+User installed `@windyroad/itil@0.18.1` across all 6 projects via `/install-updates`, restarted Claude Code, and re-tested. Screenshot (2026-04-24): typing `/wr-itil:report` in the TUI still surfaces only `/wr-itil:work-problems` — `/wr-itil:report-upstream` is still absent from autocomplete. The Skill+Agent allowed-tools addition is a real semantic bug-fix (skill body invoked both undeclared tools) but it does NOT cause the autocomplete gap. **Hypothesis rejected.**
+
+### Actual root cause (confirmed 2026-04-24)
+
+`~/.claude/plugins/installed_plugins.json` had **two `wr-itil@windyroad` entries** for this project tree:
+
+1. **Stale 0.1.0** pinned to `/Users/tomhoward/Projects/windyroad-claude-plugin/.claude/worktrees/upbeat-keller` — installed 2026-04-18 when `wr-itil` was at version 0.1.0. `0.1.0`'s skills directory only ever contained three skills (`manage-incident`, `manage-problem`, `work-problems`) — `report-upstream` was first added in 0.8.0, so it was NEVER in 0.1.0. This install was never cleaned up when the worktree was abandoned or when `/install-updates` ran (the skill walks `../*/` siblings and does not descend into worktrees under the current project).
+2. **Current 0.18.1** pinned to the project root — installed today.
+
+The git worktree itself (`.claude/worktrees/upbeat-keller` on branch `claude/upbeat-keller`, last commit `a36a084` from 2026-04-18) has its own `.claude/settings.json` listing `wr-itil@windyroad: true`. Claude Code treats the worktree as a distinct project scope, so the 0.1.0 install stayed registered and enabled even after the outer project installed 0.18.1.
+
+**`claude plugin list` confirmed the collision**: seven rows for `wr-itil@windyroad` — one at Version 0.1.0 (first), six at 0.18.1. The TUI autocomplete reads the first matching entry for the current project's scope and, because 0.1.0 ships only 3 skills, `report-upstream` is silently absent. The agent-side skill enumerator walks differently (union across versions) and surfaces all 13 — which is why `Skill(skill: "wr-itil:report-upstream")` works from the agent side even when the TUI dropdown is blind.
+
+### Cleanup applied (per-machine, 2026-04-24)
+
+Executed `(cd .claude/worktrees/upbeat-keller && claude plugin uninstall wr-itil@windyroad --scope project)`. This dropped the stale 0.1.0 row from `installed_plugins.json` (verified: `grep wr-itil@windyroad` now shows only the six 0.18.1 entries) and removed `wr-itil@windyroad: true` from the worktree's `.claude/settings.json`.
+
+The shipped `Skill, Agent` frontmatter change is still a correct semantic improvement for the skill. It is kept. No revert.
+
+### Systemic follow-up
+
+A per-machine cleanup is not a repeatable fix for other adopters. The gap is in `/install-updates` — Step 3's sibling-discovery loop (`for d in ../*/`) does not descend into `.claude/worktrees/*` inside the current project, so worktree-pinned stale installs stay invisible. Tracked as **P115** (docs/problems/115-*.open.md): "install-updates does not detect stale plugin installs pinned to git worktrees under the current project".
+
+### Verification path (post-cleanup)
+
+1. User restarts Claude Code.
+2. In the TUI, type `/wr-itil:report`.
+3. Confirm `/wr-itil:report-upstream` now appears in autocomplete.
+
+If it appears, the stale-install RCA is confirmed and this ticket closes. If it still does not appear, a further hypothesis is needed (possibly Claude Code client caching, a separate TUI filter, or an upstream issue) — ticket reopens.
 
 ## Dependencies
 
