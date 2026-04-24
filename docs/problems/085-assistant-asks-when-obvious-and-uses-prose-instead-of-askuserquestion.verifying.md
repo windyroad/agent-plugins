@@ -1,6 +1,6 @@
 # Problem 085: Assistant asks for input when the next step is obvious, AND uses prose asks instead of AskUserQuestion when input is actually needed
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-21 (AFK iter 6 post-loop, during P084 evidence-update discussion)
 **Priority**: 16 (High) — Impact: High (4) x Likelihood: Almost Certain (4)
 **Effort**: M — requires one or more of: (1) hook on assistant output that detects prose-ask patterns ("Want me to...", "Should I...", "A or B?") and blocks the response with a systemMessage reminder; (2) hook on assistant output that detects consent-gate-when-obvious patterns (immediately-prior user message contains a direction/yes/act-verb AND next assistant message contains a question) and blocks; (3) CLAUDE.md-level mandatory rules promoted from memory feedback; (4) memory feedback addendum making the two rules explicit in the same file. Architect review at implementation to decide hook shape.
@@ -99,3 +99,30 @@ Recommended: (1) + (2). Hook-based enforcement is the only mechanism that has re
 - [ ] Consider composition with P082 (commit-message voice/risk gate) and P083 (subagent-prompt forbid-list) — all three are assistant-output-validators at different surfaces.
 - [ ] Implement + behavioural bats contract assertions per `feedback_behavioural_tests.md`: simulate assistant output containing a prose ask, assert the hook fires / blocks / auto-wraps; simulate an obvious-decision scenario, assert the hook does NOT fire.
 - [ ] Update `feedback_act_on_obvious_decisions.md` with the prose-ask addendum (short-term) regardless of the structural fix timeline.
+
+## Fix Released
+
+**Release**: 2026-04-24 (AFK iter, `@windyroad/itil` minor bump).
+
+**Implementation**: Hook + CLAUDE.md rule combined, exactly as the 2026-04-21 Direction decision pinned. Architect re-review 2026-04-24 returned GO-with-advisory:
+- Event binding corrected from ticket's originally-speculated `PostToolUse` (does not fire on pure assistant text) to `UserPromptSubmit` + `Stop` (the two Claude Code events where assistant-output validation is viable). The UserPromptSubmit half is preventive (terse MANDATORY reminder when the user's incoming prompt pins a direction); the Stop half is post-hoc (reads `transcript_path`, scans the last assistant turn for canonical prose-ask phrasings, emits `stopReason` nudge when one is found and no `AskUserQuestion` tool_use call is present).
+- Hook file layout: two entry scripts (one per event type) sharing a single detector registry — `packages/itil/hooks/lib/detectors.sh`. Matches the ticket's "one file with a registry of detection functions" lean.
+- Plugin ownership: `@windyroad/itil`, per the shared-architecture decision referenced in Direction.
+
+**Files shipped**:
+- `packages/itil/hooks/itil-assistant-output-gate.sh` — UserPromptSubmit hook, direction-pin detection, once-per-session full block, terse reminder thereafter (ADR-038).
+- `packages/itil/hooks/itil-assistant-output-review.sh` — Stop hook, prose-ask scan, `stopReason` nudge emission.
+- `packages/itil/hooks/lib/detectors.sh` — canonical phrasing list (prose-ask patterns + direction-pin patterns).
+- `packages/itil/hooks/lib/session-marker.sh` — byte-identical sync from `packages/shared/hooks/lib/session-marker.sh` per ADR-017.
+- `packages/itil/hooks/hooks.json` — UserPromptSubmit + Stop entries registered.
+- `scripts/sync-session-marker.sh` — `itil` added to `CONSUMERS`.
+- `CLAUDE.md` (repo root) — 2–4 line MANDATORY pointer promoting the memory rule to repo-level, pointing at the detector file for the full phrasing list (ADR-038 progressive disclosure).
+- `.changeset/wr-itil-p085-assistant-output-gate.md` — minor bump.
+
+**Tests**: 22 new behavioural bats assertions under `packages/itil/hooks/test/` per `feedback_behavioural_tests.md` / P081 — simulate JSONL transcripts on stdin, assert hook fires/does-not-fire under matching/clean scenarios. No structural grep-for-string tests.
+
+**Verification path (on return)**: session after next release, user pins a direction (e.g. "yes, proceed") — UserPromptSubmit hook injects the MANDATORY reminder. If assistant still emits a prose-ask, Stop hook `stopReason` appears in the next turn's context. If neither hook fires on a known direction-pin / prose-ask exchange, re-open.
+
+**Follow-up advisory** (architect, not blocking): the P078 + P085 + P082 cluster introduces a new architectural primitive — "assistant-output gate on UserPromptSubmit/Stop" — distinct from the existing "file-edit gate on PreToolUse". A future ADR should codify the primitive + the per-plugin ownership rule. Not drafted this iter; follow-up ticket candidate.
+
+**Related fixes landed together in this commit**: none. Single-ticket commit per ADR-014.

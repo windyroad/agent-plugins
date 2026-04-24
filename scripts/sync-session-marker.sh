@@ -32,7 +32,7 @@ fi
 # Consumer plugins that carry UserPromptSubmit hooks gated by the
 # session-announcement marker. Each gets a byte-identical copy at
 # packages/<plugin>/hooks/lib/session-marker.sh.
-CONSUMERS=(architect jtbd tdd style-guide voice-tone)
+CONSUMERS=(architect jtbd tdd style-guide voice-tone itil)
 
 DIVERGED=0
 SYNCED=0

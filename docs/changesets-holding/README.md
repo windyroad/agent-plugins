@@ -22,7 +22,7 @@ A changeset is a candidate for holding in either of two cases:
 
 ## Currently held
 
-*(none currently held)*
+- `wr-itil-p085-assistant-output-gate.md` — `@windyroad/itil` **minor**. Held 2026-04-24 by `/wr-itil:work-problems` AFK auto-apply under ADR-042 Rule 2 when cumulative push/release residual hit 6/25 (above 4/25 appetite) after P085's UserPromptSubmit + Stop detector pair commit. Parent ticket: P085 (`.verifying.md`). Intent: dogfood the detector on main until false-positive rate is observed before user-facing release — Rule 2b carve-out preserved (fix commit 6cdd14d unchanged; only release cadence deferred). Reinstate trigger: user signals comfort with detector or scorer downgrades residual below appetite after dogfood observation.
 
 ## Recently reinstated
 
