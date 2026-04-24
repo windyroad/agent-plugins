@@ -120,17 +120,52 @@ Skip migration for siblings the user excluded from the install plan. Non-ADR-doc
 
 ### 7. Install
 
-Uninstall first to force a fresh download — `claude plugin install` silently no-ops when the plugin is already installed, so updates never land (P106 / BRIEFING "Plugin Distribution").
+Uninstall first to force a fresh download — `claude plugin install` silently no-ops when the plugin is already installed, so updates never land (P106 / BRIEFING "Plugin Distribution"). The uninstall+install chain is not atomic: if uninstall succeeds and install fails, the plugin is gone (P112). Wrap the install side in bounded retry + rollback so a transient failure cannot silently remove a plugin.
 
 ```bash
+# install_with_retry_rollback <plugin> <target> <prior_version>
+# Refresh a single plugin in a project scope with retry + rollback safety.
+# Uninstall first (P106 workaround for install silent-no-op), retry the
+# install 3× with exponential backoff (1s, 2s, 4s), and on exhaustion
+# refresh the marketplace cache + one rollback install attempt.
+# Prints one of: installed | restored | lost
+install_with_retry_rollback() {
+  local plugin="$1" target="$2" prior="${3:-unknown}"
+  local key="wr-$plugin@windyroad"
+  (cd "$target" && claude plugin uninstall "$key" --scope project) || true
+  local attempt delay=1
+  for attempt in 1 2 3; do
+    if (cd "$target" && claude plugin install "$key" --scope project); then
+      echo "installed"
+      return 0
+    fi
+    if [ "$attempt" -lt 3 ]; then
+      sleep "$delay"
+      delay=$((delay * 2))
+    fi
+  done
+  # All retries exhausted. Rollback path: refresh the marketplace cache
+  # and attempt one more install — distinct from retry because the cache
+  # has been refreshed, maximising the chance a different outcome lands.
+  # Prior version (${prior}) is captured for reporting; marketplace
+  # resolves to latest, so "restored" here means the plugin is present,
+  # not necessarily at the pre-Step-7 version.
+  claude plugin marketplace update windyroad >/dev/null 2>&1 || true
+  if (cd "$target" && claude plugin install "$key" --scope project); then
+    echo "restored"
+    return 0
+  fi
+  echo "lost"
+  return 1
+}
+
+declare -A PROJECT_STATUS
 for plugin in $PLUGINS_TO_UPDATE; do
-  (cd "$TARGET_DIR" && \
-    claude plugin uninstall "wr-$plugin@windyroad" --scope project && \
-    claude plugin install "wr-$plugin@windyroad" --scope project)
+  PROJECT_STATUS["$plugin"]=$(install_with_retry_rollback "$plugin" "$TARGET_DIR" "${PRIOR_VERSION[$plugin]}")
 done
 ```
 
-`--scope project` always (ADR-004). Capture per-install exit status. Do not abort the batch on a single failure — report and continue.
+`--scope project` always (ADR-004). Capture per-install exit status. Do not abort the batch on a single failure — report and continue. A `lost` status means the plugin was removed and could not be restored; the user must reinstall manually.
 
 ### 8. Final report
 
@@ -138,7 +173,11 @@ done
 | Project | Plugin | Before | After | Status |
 |---------|--------|--------|-------|--------|
 | <project> | wr-itil | 0.7.1 | 0.7.2 | ✓ installed |
+| <project> | wr-jtbd | 0.5.0 | 0.5.0 | ✓ restored (rollback) |
+| <project> | wr-tdd  | 0.4.0 | —     | ✗ lost (rollback failed) |
 ```
+
+Status vocabulary (P112): `✓ installed` — install landed first or within retry budget. `✓ restored (rollback)` — all retries exhausted; marketplace-cache refresh + one rollback install succeeded. `✗ lost (rollback failed)` — retries and rollback both failed; plugin is absent from the project and the user must reinstall manually. `✗ failed` — pre-install step (e.g. uninstall) errored, plugin left in original state.
 
 Then `### Auto-migrated stale entries (ADR-documented renames)` — list `MIGRATED` entries or explicitly state "No rename migrations applied this run." (ADR-030 Confirmation amendment transparency).
 

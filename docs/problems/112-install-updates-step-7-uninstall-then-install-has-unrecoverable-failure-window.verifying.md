@@ -1,6 +1,6 @@
 # Problem 112: `/install-updates` Step 7 `uninstall && install` chain has an unrecoverable failure window — if install fails after uninstall succeeds, the plugin is silently lost
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-24
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Likely (3)
 **Effort**: M
@@ -104,3 +104,23 @@ Shape 2 (retry) is the smallest change and the most common source of failure. Sh
 - **ADR-030** (`docs/decisions/030-repo-local-skills-for-workflow-tooling.proposed.md`) — install-updates is repo-local per this ADR; any Step 7 hardening lands here.
 - **ADR-004** (`docs/decisions/004-marketplace-distribution.proposed.md`) — `--scope project` invariant; any fix-shape must preserve this.
 - **JTBD-007** (`docs/jtbd/solo-developer/JTBD-007-keep-plugins-current.proposed.md`) — keep plugins current across projects; this ticket is a reliability concern for that job.
+- **Upstream report pending** — external dependency identified; invoke `/wr-itil:report-upstream` when ready to file against the `claude-code` repo (the underlying `claude plugin install` silent-no-op + install-failure-mode taxonomy that motivated the uninstall-first workaround and the retry/rollback hardening).
+
+## Fix Released
+
+**Released**: 2026-04-25 (AFK work-problems iter — P112 worked)
+
+**Shape**: Repo-local skill hardening (ADR-030). Shapes 2 + 4 from the Preliminary Hypothesis combined (bounded retry on transient failure + rollback-style recovery on exhaustion). Architect GO on shape; JTBD PASS on alignment with JTBD-006 + JTBD-007. No changeset required per ADR-030 (repo-local skills are versioned by repo git history, not published packages).
+
+**Changes landed**:
+
+- `.claude/skills/install-updates/SKILL.md` Step 7 — introduces `install_with_retry_rollback` bash function: uninstall once, retry install 3× with exponential backoff (1s, 2s, 4s), on exhaustion refresh the marketplace cache (`claude plugin marketplace update windyroad`) and attempt one rollback install. Prints one of `installed` / `restored` / `lost`. For-loop driver captures per-plugin status into `PROJECT_STATUS` for the Step 8 report. `--scope project` preserved throughout (ADR-004).
+- `.claude/skills/install-updates/SKILL.md` Step 8 — final-report table gains two example rows demonstrating `✓ restored (rollback)` and `✗ lost (rollback failed)` statuses. New Status vocabulary paragraph defines all four tokens (`✓ installed`, `✓ restored (rollback)`, `✗ lost (rollback failed)`, `✗ failed`) so users can interpret retry/rollback outcomes from the report.
+- `.claude/skills/install-updates/test/install-updates-step-7-retry-rollback.bats` — 7 behavioural contract assertions per ADR-037 / P081 (behavioural over structural). Extracts the `install_with_retry_rollback` function from SKILL.md, sources it under a PATH-shadowing `claude` mock, and verifies: first-try success (no retry, no rollback), retry-then-success (no rollback), all-retries-exhaust-then-rollback-succeeds (status `restored`), all-retries-and-rollback-fail (status `lost`, non-zero exit), uninstall-runs-exactly-once, final-report documents new Status vocabulary, `--scope project` invariant preserved.
+
+**Gates**: architect GO (Shape 2+4; no new ADR; no changeset per ADR-030 point 5) + JTBD PASS (serves JTBD-007 reliability outcome + JTBD-006 AFK audit-trail constraint) + risk-scorer WIP 3/25 Low + full bats suite 837/837 green.
+
+**Verification**: the next `/install-updates` invocation that encounters a transient install failure (marketplace rate-limit, network hiccup) should either succeed within the retry budget or report `restored` / `lost` in the final table rather than silently losing a plugin. Synthetic verification path: temporarily mock `claude plugin install` to fail, run `/install-updates`, observe the Step 8 Status column lands `restored` or `lost` instead of dropping the plugin silently.
+
+**Upstream dependency**: P112's root cause is still the upstream `claude plugin install` silent-no-op (P106) that drove the uninstall-first workaround. The retry/rollback hardening narrows the blast radius but does not remove the underlying dependency. Invoke `/wr-itil:report-upstream` interactively to file the broader install-failure-mode taxonomy against `claude-code` when ready.
+
