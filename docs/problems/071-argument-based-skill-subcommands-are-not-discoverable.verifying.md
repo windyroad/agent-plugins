@@ -1,6 +1,6 @@
 # Problem 071: Argument-based skill subcommands are not discoverable in Claude Code autocomplete
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-20
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: M — audit complete (2026-04-21 AFK iter 2): scope is confined to `@windyroad/itil` plugin (2 offenders, `manage-problem` + `manage-incident`). ~10 split-candidate skill files to create + 2 forwarder contracts to add. M effort confirmed despite tighter plugin-count (1 plugin vs the initial 3-4 estimate) because each new skill carries its own SKILL.md, bats assertions, and plugin-manifest entry; phased landing across multiple AFK iterations is the right pacing.
@@ -216,3 +216,43 @@ This ticket (P071) remains **Open** as the implementation tracker. Closes when:
 - `~/.claude/projects/-Users-tomhoward-Projects-windyroad-claude-plugin/memory/feedback_skill_subcommand_discoverability.md` — user feedback memory capturing the principle.
 - **JTBD-001** (Enforce Governance Without Slowing Down) — discoverability is the "without slowing down" axis at the skill-invocation surface.
 - **JTBD-101** (Extend the Suite with Clear Patterns) — "clear patterns" includes the skill-invocation shape users see.
+
+## Fix Released
+
+Transitioned Open → Verification Pending 2026-04-25 (AFK iter) per ADR-022. All six phased-landing slices shipped; the `@windyroad/itil` plugin is the only plugin affected (audit confirmed 2026-04-21 AFK iter 2). The phased-landing plan in the Description's "Split proposal" section is complete.
+
+**Shipped slices (9 new skills + 9 forwarders across 2 host skills):**
+
+| Slice | New skill | Ships in | Commit | Contract bats | Forwarder bats |
+|-------|-----------|----------|--------|---------------|----------------|
+| 1 | `/wr-itil:list-problems` | @windyroad/itil@0.10.0 | `412443f` | `list-problems/test/list-problems-contract.bats` | `manage-problem/test/manage-problem-list-forwarder.bats` |
+| 2 | `/wr-itil:review-problems` | @windyroad/itil@0.11.0 | `d8ab4c5` | `review-problems/test/review-problems-contract.bats` | `manage-problem/test/manage-problem-review-forwarder.bats` |
+| 3 | `/wr-itil:work-problem` (singular) | @windyroad/itil@0.12.0 | `ffa85a7` | `work-problem/test/work-problem-contract.bats` | `manage-problem/test/manage-problem-work-forwarder.bats` |
+| 4 | `/wr-itil:transition-problem` | @windyroad/itil@0.14.0 | `91da109` | `transition-problem/test/transition-problem-contract.bats` | `manage-problem/test/manage-problem-transition-forwarder.bats` |
+| 5 | `/wr-itil:list-incidents` | @windyroad/itil@0.15.0 | `38756a8` | `list-incidents/test/list-incidents-contract.bats` | `manage-incident/test/manage-incident-list-forwarder.bats` |
+| 6a | `/wr-itil:mitigate-incident` | @windyroad/itil@0.16.0 | `248edad` | `mitigate-incident/test/mitigate-incident-contract.bats` | `manage-incident/test/manage-incident-mitigate-forwarder.bats` |
+| 6b | `/wr-itil:restore-incident` | @windyroad/itil@0.17.0 (bundle) | `4a25a60` | `restore-incident/test/restore-incident-contract.bats` | `manage-incident/test/manage-incident-restore-forwarder.bats` |
+| 6c | `/wr-itil:close-incident` | @windyroad/itil@0.17.0 (bundle) | `4a25a60` | `close-incident/test/close-incident-contract.bats` | `manage-incident/test/manage-incident-close-forwarder.bats` |
+| 6d | `/wr-itil:link-incident` | @windyroad/itil@0.17.0 (bundle) | `4a25a60` | `link-incident/test/link-incident-contract.bats` | `manage-incident/test/manage-incident-link-forwarder.bats` |
+
+**Host-skill contract state:**
+
+- `packages/itil/skills/manage-problem/SKILL.md` carries `deprecated-arguments: true` frontmatter and Step 1 parser recognises four deprecated word-argument shapes (`list`, `review`, `work`, `<NNN> <status>`) as thin-router forwarders, each emitting the canonical deprecation systemMessage before delegating via the Skill tool.
+- `packages/itil/skills/manage-incident/SKILL.md` carries `deprecated-arguments: true` frontmatter and Step 1 parser recognises five deprecated word-argument shapes (`list`, `<I###> mitigate <action>`, `<I###> restored`, `<I###> close`, `<I###> link P<MMM>`) as thin-router forwarders.
+- Data parameters (`<NNN>` bare for update; `<I###>` bare for incident update; primary create-entry with no args) remain unchanged on both host skills.
+
+**ADR state:**
+
+- ADR-010's P071 amendment (2026-04-21) added the "Skill Granularity" section codifying "one skill per distinct user intent", the Confirmation items covering bats doc-lint assertion + `deprecated-arguments: true` frontmatter, and the Reassessment Criteria additions.
+
+**Audit completeness:**
+
+- Every other `@windyroad/*` skill was audited 2026-04-21 AFK iter 2 (Description § Audit findings). Bucket B (data-parameter-only) skills stay as-is; Bucket C (single-purpose) skills never had subcommand routing. No hidden offenders remain.
+
+**Verification path for user:**
+
+1. In the TUI autocomplete, type `/wr-itil:` — the picker should list `list-problems`, `work-problem`, `review-problems`, `transition-problem`, `list-incidents`, `mitigate-incident`, `restore-incident`, `close-incident`, `link-incident` alongside the two host `manage-*` skills.
+2. Invoke any legacy form (e.g. `/wr-itil:manage-problem list`) and confirm the deprecation systemMessage fires and the delegated skill runs.
+3. If discoverability or forwarder contract regressed, reopen this ticket.
+
+Deprecation window runs until the next major bump of `@windyroad/itil` per ADR-010 amended.
