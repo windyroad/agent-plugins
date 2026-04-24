@@ -158,13 +158,15 @@ PROMPT_EOF
 claude -p \
   --permission-mode bypassPermissions \
   --output-format json \
-  "$ITERATION_PROMPT"
+  "$ITERATION_PROMPT" \
+  < /dev/null
 ```
 
 **Flag rationale:**
 
 - `--permission-mode bypassPermissions` — handles non-interactive permission prompts. Without this, Bash/Edit/Write calls inside the subprocess halt on approval prompts (no TTY). Alternative modes (`acceptEdits`, `auto`, `dontAsk`) are acceptable if adopters need narrower permission scopes; `bypassPermissions` is the broadest and the empirically-verified path.
 - `--output-format json` — deterministic structured output. The subprocess's final agent message lands in the JSON response's `.result` field; orchestrator extracts `ITERATION_SUMMARY` from that field. Plain-text output would require fragile scraping.
+- `< /dev/null` — explicit stdin-closed redirect (P089 Gap 1). Without this, `claude -p` waits up to 3s for stdin data in non-TTY contexts and then prints `Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: < /dev/null to skip, or wait longer.` to stderr. The warning is on stderr — if the caller separates stderr and stdout streams, the warning is harmless. But the orchestrator captures via `2>&1` (required because the CLI emits progress prose on stderr that must not interleave between JSON responses when multiple invocations chain). Under the `2>&1` merge the stderr warning prefixes the stdout JSON and breaks `jq` / `json.load` / `JSON.parse` extraction at "line 1, column 1: Expecting value". The redirect suppresses the warning at source. First observed AFK-iter-7 iter 1 (2026-04-21); workaround is the Anthropic CLI help's own suggestion.
 
 **No per-iteration budget cap.** The dispatch deliberately omits `--max-budget-usd`. Per user direction 2026-04-21: the natural stop condition for an AFK loop is quota exhaustion, not an arbitrary per-iteration dollar cap. A cap would halt iterations before quota is actually exhausted, wasting remaining budget. Runaway-iteration risk is bounded by quota + the orchestrator's Step 6.75 halt on unexpected dirty state + exit-code handling below.
 
@@ -223,6 +225,13 @@ SESSION_CACHE_READ_TOKENS=$(( ${SESSION_CACHE_READ_TOKENS:-0} + ITER_CACHE_READ 
 ```
 
 Do NOT extract `session_id`, `model`, `stop_reason`, `permission_denials`, `uuid`, or any other field from the JSON response. Those are subprocess-envelope fields that serve no user-visible purpose and risk leaking subprocess-internal identifiers into orchestrator output.
+
+**Authority hierarchy (P089 Gap 2).** `total_cost_usd` and `usage.*` do NOT have the same reliability envelope — treat them accordingly when aggregating:
+
+- `.total_cost_usd` is **authoritative for dollar cost** — cumulative across the subprocess's entire lifetime by contract. Use it as the sole source of truth for the Session Cost "Total cost (USD)" column and any cost-based stop condition.
+- `.usage.*` token fields are **best-effort approximate** — the Anthropic CLI returns the final API response envelope, which is per-turn by construction. When the subprocess exits on a normal final turn the fields accumulate real usage; when the subprocess exits via a background-task completion-notification ack (a closing turn that only acknowledges a backgrounded task finished), the fields reflect ONLY that final ack turn and undercount dramatically. Detectable anomaly shape: the subprocess reports a final-turn-sized usage (handful of input tokens, hundreds of output tokens) alongside a wall-clock duration from the Bash wrapper's own timer that is orders of magnitude larger than the JSON's `duration_ms` field — the cumulative dollar cost still matches real spend, so the mismatch is self-evident on inspection.
+
+Aggregation rule: sum `.total_cost_usd` into the session total and trust it; sum `.usage.*` into the session totals for cache-reuse ratio reasoning but label them best-effort in the Session Cost table. This asymmetry is correct-by-CLI-contract (cost is a session cumulative; usage is a per-response envelope); the orchestrator documents the asymmetry so adopters do not silently under-count tokens. First observed AFK-iter-7 iter 5 (2026-04-21): 1071s wall-clock / 60+ tool-use subprocess returned `duration_ms: 8546, num_turns: 1, usage.* ≈ 137K tokens, total_cost_usd: 6.08` — cost cumulative and correct, tokens reflecting only the final ack turn.
 
 **Exit-code semantics.** `claude -p` exits non-zero when the subprocess fails hard — subprocess crash, auth failure, unresolvable permission denial, API/quota exhaustion. The orchestrator reads the exit code BEFORE parsing `.result`:
 
@@ -414,6 +423,8 @@ The skill should produce a final summary when the loop ends:
 
 Extracted from each iteration subprocess's `claude -p --output-format json` response (source: measured-actual, not estimated — per ADR-026 grounding). Renders identically in interactive and AFK modes; no decision branch, so output-side only. Cache-read column surfaces the warm-cache-reuse signal observed across subsequent subprocess invocations in the same Bash session.
 
+**Authority note (per P089 Gap 2 — see Step 5 Authority hierarchy):** the "Total cost (USD)" column is authoritative (CLI reports `.total_cost_usd` as a session cumulative). The token columns are **best-effort** — they accumulate each iteration's `.usage.*` response fields, which reflect only the final-turn API envelope and can undercount when a subprocess exits via a background-task completion-notification ack. Cost-based reasoning trusts the cost column; token-based reasoning (cache-reuse ratios, cost-envelope calibration) reads the token columns with that caveat in mind.
+
 | Metric | Value |
 |--------|-------|
 | Iterations run | 3 |
@@ -434,6 +445,7 @@ When every skipped ticket is in the `upstream-blocked` category (stop-condition 
 
 ## Related
 
+- **P089** (`docs/problems/089-work-problems-step-5-dispatch-robustness-stdin-warning-and-cost-metadata-edge-case.verifying.md`) — driver for Step 5's `< /dev/null` dispatch redirect and the Per-iteration cost metadata "Authority hierarchy" paragraph. Gap 1: stdin warning contaminated stderr-merged JSON captures; closed by adding `< /dev/null` to the canonical dispatch command. Gap 2: `.usage.*` undercounts when subprocess exits via a background-task completion ack while `.total_cost_usd` stays cumulative-authoritative; closed by documenting the authority hierarchy in Step 5 and the Session Cost output section so adopters trust cost and label token totals best-effort.
 - **P086** (`docs/problems/086-afk-iteration-subprocess-does-not-run-retro-before-returning.verifying.md`) — driver for Step 5's retro-on-exit clause. Iteration subprocesses exit without running retro, so per-iteration friction (hook misbehaviour, repeat-workaround patterns, pipeline instability) evaporates on exit. Fix: iteration prompt body names `/wr-retrospective:run-retro` as a closing step before `ITERATION_SUMMARY` emission; retro runs inside the subprocess so Step 2b pipeline-instability scan has the full tool-call history; run-retro commits its own work per ADR-014; orchestrator picks up retro-created tickets on the next Step 1 scan.
 - **P084** (`docs/problems/084-work-problems-iteration-worker-has-no-agent-tool-so-architect-jtbd-gates-block.open.md`) — driver for Step 5's subprocess-boundary dispatch. Supersedes P077's Agent-tool dispatch on the same Step 5 surface because Agent-tool-spawned subagents cannot themselves invoke Agent (platform restriction), which prevents governance gate markers from being set inside the iteration worker.
 - **P077** (`docs/problems/077-work-problems-step-5-does-not-delegate-to-subagent.verifying.md`) — parent amendment. Established the AFK iteration-isolation wrapper sub-pattern and the `ITERATION_SUMMARY` return contract. P084 is the refinement that swaps the spawn mechanism; the isolation intent and return contract are preserved verbatim.

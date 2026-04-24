@@ -1,6 +1,6 @@
 # Problem 089: work-problems Step 5 dispatch has two robustness gaps — stdin warning pollutes JSON output, and cost metadata undercounts when subprocess exits via background-task-notification ack
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-21 (post-AFK-iter-7 retrospective Step 2b)
 **Priority**: 6 (Medium) — Impact: Minor (2) x Likelihood: Almost Certain (3)
 **Effort**: S — two bounded edits to `packages/itil/skills/work-problems/SKILL.md` Step 5 dispatch block + one new bats assertion per fix. Marginal cost; both improvements on the same target (coordinating-ticket rule per `/wr-retrospective:run-retro` SKILL.md).
@@ -118,8 +118,25 @@ The shipped Step 5 dispatch shape (ADR-032 subprocess-boundary amendment, P084) 
 
 ### Investigation Tasks
 
-- [ ] Gap 1 fix: add `< /dev/null` to the SKILL.md Step 5 dispatch example.
-- [ ] Gap 1 bats: assert SKILL.md's dispatch block contains `< /dev/null`.
-- [ ] Gap 2 fix: update the Per-iteration cost metadata block in SKILL.md noting `total_cost_usd` is authoritative and `usage.*` is best-effort when `num_turns == 1` with subprocess-resume anomaly.
-- [ ] Gap 2 bats: assert SKILL.md notes the authority hierarchy (total_cost_usd > usage.*).
-- [ ] Changeset: @windyroad/itil patch bump (not minor — two small robustness fixes within the already-shipped 0.14.0 dispatch + metadata block).
+- [x] Gap 1 fix: add `< /dev/null` to the SKILL.md Step 5 dispatch example.
+- [x] Gap 1 bats: assert SKILL.md's dispatch block contains `< /dev/null`.
+- [x] Gap 2 fix: update the Per-iteration cost metadata block in SKILL.md noting `total_cost_usd` is authoritative and `usage.*` is best-effort when `num_turns == 1` with subprocess-resume anomaly.
+- [x] Gap 2 bats: assert SKILL.md notes the authority hierarchy (total_cost_usd > usage.*).
+- [x] Changeset: @windyroad/itil patch bump (not minor — two small robustness fixes within the already-shipped 0.14.0 dispatch + metadata block).
+
+## Fix Released
+
+- **Released**: pending — this AFK iteration's commit; release cadence owned by the orchestrator's Step 6.5.
+- **Target**: `@windyroad/itil` patch bump (changeset `.changeset/wr-itil-p089-step-5-stdin-redirect.md`).
+- **Gap 1** (SKILL.md Step 5 dispatch block): added `< /dev/null` as the last line of the canonical `claude -p` dispatch command, plus Flag rationale prose stating the warning is emitted to stderr and becomes a stdout problem only under `2>&1` capture — so adopters who separate streams know they don't need the redirect.
+- **Gap 2** (SKILL.md Step 5 Per-iteration cost metadata block + Session Cost output section): added the "Authority hierarchy" paragraph naming `.total_cost_usd` as cumulative-authoritative and `.usage.*` as best-effort (may reflect only the final-turn ack under background-task-notification exit). Detection criterion stated descriptively (final-turn-sized usage alongside `duration_ms` orders of magnitude smaller than wall-clock) per architect option-b — keeps `num_turns` off the extracted field deny-list. Session Cost output section gained an inline Authority note so adopters see the caveat at the point of rendering.
+- **Tests**: `packages/itil/skills/work-problems/test/work-problems-step-5-delegation.bats` — 6 new assertions covering both gaps (dispatch redirect, stderr prose, total_cost_usd authoritative, usage.* best-effort, Session Cost best-effort tokens, P089 Related citation). All 30 tests in the file pass; full `npm test` suite stays green.
+- **Governance**: architect + JTBD reviews approved Option C (both gaps in one ticket, no ADR amendment, no report-upstream); ADR-032 subprocess-boundary variant is the parent pattern and already scopes these refinements. No ADR-026 amendment — the Authority paragraph satisfies ADR-026's grounding discipline rather than straining it.
+
+### Verification Steps
+
+1. Open `packages/itil/skills/work-problems/SKILL.md` and confirm the Step 5 dispatch code block ends with `< /dev/null` and the Flag rationale block explains the stderr / `2>&1` merge interaction.
+2. Confirm the Per-iteration cost metadata block has an **Authority hierarchy (P089 Gap 2)** paragraph naming `total_cost_usd` as authoritative and `usage.*` as best-effort under the early-ack anomaly.
+3. Confirm the Output Format Session Cost section has an **Authority note** paragraph linking back to Step 5's Authority hierarchy.
+4. Run `npx bats packages/itil/skills/work-problems/test/work-problems-step-5-delegation.bats` — 30 tests pass.
+5. Next AFK-iter run: confirm iter 1's JSON parses cleanly without ad-hoc regex workaround; confirm Session Cost table renders both the authoritative cost total and the best-effort-labelled token totals.

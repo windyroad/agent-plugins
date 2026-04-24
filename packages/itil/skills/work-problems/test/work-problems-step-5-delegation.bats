@@ -245,3 +245,89 @@ setup() {
   run grep -nE "ScheduleWakeup.{0,120}P083|P083.{0,120}ScheduleWakeup" "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }
+
+# @problem P089
+# @jtbd JTBD-006
+#
+# STRUCTURAL: tests the SKILL.md content contract per ADR-037's Permitted
+# Exception (doc-lint contract assertion against the contract document
+# itself). Behavioural alternative would require spawning a real `claude -p`
+# subprocess from a non-TTY context, observing that the JSON response parses
+# cleanly, and asserting `jq` does not error on a stderr-merged capture —
+# that harness sits outside the skill layer and depends on the Anthropic
+# CLI binary. Contract assertion is the named permitted pattern.
+@test "SKILL.md Step 5 dispatch command redirects stdin (< /dev/null) to suppress stdin warning (P089 Gap 1)" {
+  # P089 Gap 1 (2026-04-21, AFK-iter-7 iter 1): the shipped dispatch command
+  # without an explicit stdin redirect causes `claude -p` to emit
+  # `Warning: no stdin data received in 3s, proceeding without it...` to
+  # stderr after a 3s wait. When the orchestrator captures the subprocess
+  # with `2>&1` (required for structured parse), that warning prepends to
+  # stdout and corrupts `jq` / `json.load` / `JSON.parse` extraction of
+  # `.result` and cost metadata. The `claude -p` CLI help explicitly
+  # suggests `< /dev/null` as the workaround. Regression guard ensures the
+  # redirect stays in the canonical dispatch block adopters copy.
+  run grep -nE '< /dev/null|< ?/dev/null' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "SKILL.md Step 5 explains stdin warning is on stderr (becomes stdout problem under 2>&1 capture)" {
+  # Architect advisory (2026-04-22): the prose around the `< /dev/null`
+  # redirect must state that the warning is emitted to stderr (not stdout)
+  # so adopters who capture stderr separately understand they do not need
+  # the redirect. This prevents cargo-culting the redirect in environments
+  # where stdout and stderr are consumed independently.
+  run grep -niE "stderr.{0,120}(2>&1|merge|capture)|warning.{0,60}stderr|stderr.{0,60}warning" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+# @problem P089
+# @jtbd JTBD-006
+#
+# STRUCTURAL: same Permitted Exception rationale — behavioural alternative
+# would require a subprocess that internally spawns a background task,
+# receives its completion notification, and returns a final-turn ack;
+# the observation is a runtime contract of the Anthropic CLI and harness
+# instrumentation sits outside the skill layer.
+@test "SKILL.md Per-iteration cost metadata block names total_cost_usd as authoritative (P089 Gap 2)" {
+  # P089 Gap 2 (2026-04-21, AFK-iter-7 iter 5): subprocess ran 1071s wall-clock
+  # with 60+ tool uses; JSON returned `duration_ms: 8546, num_turns: 1,
+  # usage.* = ~137K tokens, total_cost_usd: 6.08`. Cost was cumulative-
+  # authoritative; usage.* reflected only the final-turn ack after a
+  # background-task completion notification. The SKILL.md must name the
+  # authority hierarchy explicitly so Session Cost consumers treat
+  # total_cost_usd as the trusted dollar signal and usage.* as best-effort
+  # approximate.
+  run grep -niE "total_cost_usd.{0,80}authoritative|authoritative.{0,80}total_cost_usd|total_cost_usd.{0,40}cumulative" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "SKILL.md Per-iteration cost metadata block flags usage.* as best-effort under early-ack anomaly (P089 Gap 2)" {
+  # The asymmetry between cumulative total_cost_usd and per-turn usage.*
+  # must be documented so contributors do not assume summing usage fields
+  # yields a total-tokens number matching real cost. Detection criterion
+  # (1-turn-short + duration_ms << wall-clock) is stated descriptively per
+  # architect option-b (keeps num_turns off the extracted field list).
+  run grep -niE "usage\\.\\*.{0,120}(best.?effort|approximate|final.?turn|under.?count|partial)|best.?effort.{0,120}usage|final.?turn.{0,120}usage" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "SKILL.md Session Cost output section notes tokens are best-effort under the early-ack anomaly (P089 Gap 2)" {
+  # The Session Cost table renders to the user on every ALL_DONE. If token
+  # columns silently undercount when a subprocess exits via background-task
+  # ack, the user's cost envelope is wrong without any caveat. The output
+  # section must carry a short note that the token totals are best-effort
+  # while total-cost is authoritative — this is the observability contract
+  # visible to the end user, not just an internal implementation detail.
+  # The note can live inline in the table footer or in the prose around
+  # the table.
+  run grep -niE "tokens.{0,120}(best.?effort|approximate|undercount|may reflect)|total.?cost.{0,120}authoritative" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "SKILL.md Related section cites P089 (Step 5 dispatch robustness)" {
+  # P089 documents the two gaps fixed by the < /dev/null redirect and the
+  # authority hierarchy paragraph. The Related section must cite it so the
+  # contract document remains self-documenting.
+  run grep -nE "P089" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
