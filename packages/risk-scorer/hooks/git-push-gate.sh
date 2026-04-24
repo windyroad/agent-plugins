@@ -32,7 +32,7 @@ if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*git push(\s|$)'; then
     exit 0
 fi
 
-# Gate push:watch on push risk score
+# Gate push:watch on push risk score (inherits three-band TTL via check_risk_gate — P090)
 if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm run push:watch(\s|$)'; then
     if [ -n "$SESSION_ID" ]; then
         RDIR=$(_risk_dir "$SESSION_ID")
@@ -45,27 +45,12 @@ if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm run push:watch(\s|$)'; then
         if [ -f "${RDIR}/clean" ]; then
             exit 0
         fi
-        PUSH_SCORE_FILE="${RDIR}/push"
-        if [ ! -f "$PUSH_SCORE_FILE" ]; then
-            risk_gate_deny "Push blocked: No push risk score found. Delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') to assess cumulative pipeline risk."
-            exit 0
-        fi
-        PUSH_NOW=$(date +%s)
-        PUSH_SCORE_TIME=$(_mtime "$PUSH_SCORE_FILE")
-        PUSH_AGE=$(( PUSH_NOW - PUSH_SCORE_TIME ))
-        PUSH_TTL="${RISK_TTL:-3600}"
-        if [ "$PUSH_AGE" -ge "$PUSH_TTL" ]; then
-            risk_gate_deny "Push blocked: Push risk score expired (${PUSH_AGE}s old, TTL ${PUSH_TTL}s). Delegate to risk-scorer to rescore."
-            exit 0
-        fi
-        PUSH_SCORE=$(cat "$PUSH_SCORE_FILE" 2>/dev/null || echo "")
-        if ! echo "$PUSH_SCORE" | grep -qE '^[0-9]+(\.[0-9]+)?$'; then
-            risk_gate_deny "Push blocked: Push risk score is not yet available (scoring in progress). Wait a moment and retry."
-            exit 0
-        fi
-        PUSH_DENIED=$(python3 -c "print('yes' if float('${PUSH_SCORE}') >= 5 else 'no')" 2>/dev/null || echo "no")
-        if [ "$PUSH_DENIED" = "yes" ]; then
-            risk_gate_deny "Push blocked: Push risk score ${PUSH_SCORE}/25 (Medium or above). To proceed: (1) release first via \`npm run release:watch\`, (2) split the push, or (3) add risk-reducing measures. If risk-neutral or risk-reducing, delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') — it will create a bypass marker."
+        if ! check_risk_gate "$SESSION_ID" "push"; then
+            if [ "$RISK_GATE_CATEGORY" = "threshold" ]; then
+                risk_gate_deny "Push blocked: Push risk score ${RISK_GATE_SCORE}/25 (Medium or above). To proceed: (1) release first via \`npm run release:watch\`, (2) split the push, or (3) add risk-reducing measures. If risk-neutral or risk-reducing, delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') — it will create a bypass marker."
+            else
+                risk_gate_deny "Push blocked: ${RISK_GATE_REASON}"
+            fi
             exit 0
         fi
     fi

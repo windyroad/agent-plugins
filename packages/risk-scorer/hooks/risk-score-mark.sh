@@ -42,9 +42,13 @@ if echo "$SUBAGENT" | grep -qE 'risk-scorer.pipeline'; then
     PUSH=$(echo "$SCORES_LINE" | grep -oE 'push=[0-9]+' | cut -d= -f2) || true
     RELEASE=$(echo "$SCORES_LINE" | grep -oE 'release=[0-9]+' | cut -d= -f2) || true
 
-    [ -n "$COMMIT" ] && printf '%s' "$COMMIT" > "${RDIR}/commit"
-    [ -n "$PUSH" ] && printf '%s' "$PUSH" > "${RDIR}/push"
-    [ -n "$RELEASE" ] && printf '%s' "$RELEASE" > "${RDIR}/release"
+    # Birth markers (<action>-born) capture the scorer-run timestamp. Band B
+    # of the three-band TTL policy (P090) uses them to enforce a 2×TTL
+    # hard-cap on sliding-window extension, so an unchanged-but-idle tree
+    # cannot ride a single score indefinitely.
+    [ -n "$COMMIT" ] && { printf '%s' "$COMMIT" > "${RDIR}/commit"; touch "${RDIR}/commit-born"; }
+    [ -n "$PUSH" ] && { printf '%s' "$PUSH" > "${RDIR}/push"; touch "${RDIR}/push-born"; }
+    [ -n "$RELEASE" ] && { printf '%s' "$RELEASE" > "${RDIR}/release"; touch "${RDIR}/release-born"; }
   fi
 
   # Parse RISK_BYPASS: reducing|incident

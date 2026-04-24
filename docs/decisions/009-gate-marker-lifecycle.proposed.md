@@ -67,6 +67,16 @@ Neither condition is inherently tied to end-of-response. A long assistant respon
 
 TTL remains configurable per-plugin via existing envvars (`ARCHITECT_TTL`, `RISK_TTL`, etc.), default 3600s (60 minutes). Extended from 1800s via P107 to cover long multi-file edit batches.
 
+### Three-band TTL refinement (P090, risk-scorer only)
+
+The TTL primitive is interpreted inside `packages/risk-scorer/hooks/lib/risk-gate.sh` as a three-band policy:
+
+- **Band A** — age < TTL/2 → pass silently.
+- **Band B** — TTL/2 ≤ age < TTL → consult the pipeline state-hash. If the hash is invariant since the scorer ran, pass and slide the marker forward via `touch`; if the hash drifted, halt with the existing drift message. Bounded by a 2×TTL hard-cap from the scorer-run birth time stored in `<action>-born` so an unchanged-but-idle tree cannot ride a single score indefinitely.
+- **Band C** — age ≥ TTL → halt unconditionally (stale-session guard; explicit rescore required).
+
+This preserves stale-session protection while eliminating round-trips when the scoring input is invariant. Currently scoped to the risk-scorer; the architect/JTBD/voice-tone/style-guide markers remain on the binary TTL model until a future amendment decides whether symmetric adoption is warranted.
+
 ## Plugin Scope
 
 Hooks to remove (one per plugin):

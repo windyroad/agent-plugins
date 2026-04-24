@@ -1,6 +1,6 @@
 # Problem 090: risk-scorer commit-gate bypass-marker TTL (1800s) expires mid-session, forcing a manual rescore round-trip on every long-flow commit
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-22 (user-initiated — elevating from BRIEFING line 61 candidate to ticketed problem after P089/P087 session citations)
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Likely (3)
 **Effort**: M — amend `packages/risk-scorer/hooks/risk-score-commit-gate.sh` (and the sibling push-gate / release-gate hooks if they share TTL mechanics) to implement a **three-band TTL policy** instead of the current binary "fresh / expired" check: (a) < 15 min → pass silently; (b) 15-30 min → auto-invoke `wr-risk-scorer:pipeline` inline and either pass-if-unchanged or halt-and-report-if-changed; (c) > 30 min → halt with the existing "delegate to risk-scorer" message. Bats contract assertion for each band. Architect review on the auto-rescore-in-band semantics (may need an ADR note under ADR-009's marker-TTL lifecycle or ADR-015's on-demand-assessment contract).
@@ -83,8 +83,45 @@ Recommended: **three-band policy as the forward-compatible step**; the pure stat
 
 ### Investigation Tasks
 
-- [ ] Architect review on the three-band policy vs the stateful-recency alternative (ADR-009 amendment scope).
-- [ ] Decide whether the three-band policy also applies to the architect/JTBD PreToolUse markers (symmetric fix) or stays risk-scorer-only.
-- [ ] Implement `packages/risk-scorer/hooks/risk-score-commit-gate.sh` three-band logic. Same for sibling push/release gates if they share TTL.
-- [ ] Bats contract assertions for each of the three bands (fresh / auto-rescore / halt).
-- [ ] Changeset: @windyroad/risk-scorer minor bump.
+- [x] Architect review on the three-band policy vs the stateful-recency alternative (ADR-009 amendment scope).
+- [x] Decide whether the three-band policy also applies to the architect/JTBD PreToolUse markers (symmetric fix) or stays risk-scorer-only.
+- [x] Implement `packages/risk-scorer/hooks/risk-score-commit-gate.sh` three-band logic. Same for sibling push/release gates if they share TTL.
+- [x] Bats contract assertions for each of the three bands (fresh / auto-rescore / halt).
+- [x] Changeset: @windyroad/risk-scorer minor bump.
+
+## Fix Released
+
+**Date**: 2026-04-25 (AFK iter)
+**Changeset**: `.changeset/wr-risk-scorer-p090-three-band-ttl.md` — `@windyroad/risk-scorer` **patch** bump (architect verdict: transparent false-positive reduction, not a new envelope).
+
+### Fix Strategy
+
+Three-band TTL inside `check_risk_gate` (`packages/risk-scorer/hooks/lib/risk-gate.sh`), mechanical-only — **no LLM invocation in Band B**:
+
+- **Band A** (age < TTL/2) → pass silently (unchanged).
+- **Band B** (TTL/2 ≤ age < TTL) → if the pipeline state-hash is invariant since the scorer ran, pass and slide the marker forward via `touch`. Bounded by a 2×TTL hard-cap from the scorer-run birth time (new `<action>-born` sibling) so an unchanged-but-idle tree cannot ride a single score indefinitely. Drift still halts with today's message.
+- **Band C** (age ≥ TTL) → halt with today's expired message (unchanged).
+
+Architect picked Option (c) mechanical hash-compare over Option (a) systemMessage-rescore because (a) still costs one agent turn per mid-session commit — which is the friction the ticket targets. Ticket's ADR-013 Rule 6 citation dropped: with Option (c) no decision is being re-made, so Rule 6 is not engaged.
+
+### Scope of Change
+
+- `packages/risk-scorer/hooks/lib/risk-gate.sh` — three-band logic + `RISK_GATE_CATEGORY` / `RISK_GATE_SCORE` exports for caller message customisation.
+- `packages/risk-scorer/hooks/git-push-gate.sh` — push-gate refactored to call `check_risk_gate "push"` (was inline binary TTL) per architect advisory; push-specific threshold guidance preserved via `RISK_GATE_CATEGORY=threshold` branch. Release-gate and changeset-gate already call `check_risk_gate` and inherit the band logic transparently.
+- `packages/risk-scorer/hooks/risk-score-mark.sh` — scorer writes `{commit,push,release}-born` siblings on every pipeline-scorer run (hard-cap anchor).
+- `packages/risk-scorer/hooks/test/risk-gate.bats` — 9 new behavioural bats per P081 (Band A / B / C behaviour, hash-invariant slide, hash-mismatch drift, hard-cap denial, three category-export assertions). All 20 existing + new tests green; full suite 846/846 green.
+- `docs/decisions/009-gate-marker-lifecycle.proposed.md` — "Three-band TTL refinement (P090, risk-scorer only)" footnote appended inside existing Decision Outcome section (architect: footnote sufficient, no separate ADR).
+
+### Out of Scope
+
+- **Architect/JTBD/voice-tone/style-guide markers** — architect deferred symmetric adoption to a future amendment. Ticket Investigation Tasks line 87 is resolved as "stays risk-scorer-only for now".
+- **P111** (subprocess-tool-calls do not refresh parent gate markers) — architect confirmed P090 (temporal model of marker validity) and P111 (scoping model, parent vs subprocess) are orthogonal. P090 does not preempt P111's design space; P111 remains open at WSJF 6.0.
+
+### Audience Served
+
+- **JTBD-001** (Enforce Governance Without Slowing Down) — primary. Band B invariant-pass eliminates the 2-3 turn rescore round-trip on stale-but-unchanged trees, directly serving the "reviews complete in under 60s / don't break flow" outcome.
+- **JTBD-006** (Progress the Backlog While I'm Away) — secondary. AFK subprocess inter-iteration commits benefit from fewer Band-B halts, reducing token spend across long loops.
+
+### Verification Path
+
+Exercise a long-flow session with ≥ 30 minutes between commits on an unchanged working tree. Current behaviour halts at the TTL boundary; new behaviour passes silently in Band B with hash invariance and re-halts at 2×TTL absolute age if the tree stays unchanged that long.

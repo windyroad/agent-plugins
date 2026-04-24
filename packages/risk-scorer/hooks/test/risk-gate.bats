@@ -105,3 +105,117 @@ assert_gate_allows() {
   [[ "$output" == *"deny"* ]]
   [[ "$output" == *"Test reason"* ]]
 }
+
+# ---------------------------------------------------------------------------
+# Three-band TTL policy (P090)
+# Band A: age < TTL/2 → pass silently, no slide
+# Band B: TTL/2 <= age < TTL → consult state-hash; if invariant, pass + slide
+#         the marker forward (touch score file) bounded by 2*TTL hard cap
+#         from the scorer-run birth time (<action>-born); if drifted, halt
+# Band C: age >= TTL → halt with existing "expired" message
+# ---------------------------------------------------------------------------
+
+# Helper: backdate file mtime by N seconds (portable between macOS and Linux)
+_backdate() {
+  local file="$1" seconds="$2"
+  local stamp
+  stamp=$(date -v-${seconds}S +%Y%m%d%H%M.%S 2>/dev/null \
+       || date -d "${seconds} seconds ago" +%Y%m%d%H%M.%S 2>/dev/null)
+  touch -t "$stamp" "$file"
+}
+
+# Helper: write a matching state-hash for the current working tree
+_write_matching_hash() {
+  local target="$1"
+  local hash
+  hash=$("$HOOKS_DIR/lib/pipeline-state.sh" --hash-inputs 2>/dev/null | _hashcmd | cut -d' ' -f1)
+  echo "$hash" > "$target"
+}
+
+@test "Band A (age < TTL/2): passes, does NOT slide the marker" {
+  printf '3' > "$SCORE_FILE"
+  touch "$SCORE_FILE"
+  rm -f "$HASH_FILE"
+  BEFORE_MTIME=$(_mtime "$SCORE_FILE")
+  sleep 1
+  assert_gate_allows "$TEST_SESSION" "commit"
+  AFTER_MTIME=$(_mtime "$SCORE_FILE")
+  [ "$BEFORE_MTIME" = "$AFTER_MTIME" ]
+}
+
+@test "Band B (TTL/2 <= age < TTL) with hash invariant: passes AND slides marker forward" {
+  printf '3' > "$SCORE_FILE"
+  _backdate "$SCORE_FILE" 3
+  _write_matching_hash "$HASH_FILE"
+  touch "${SCORE_FILE}-born"
+  BEFORE_MTIME=$(_mtime "$SCORE_FILE")
+  assert_gate_allows "$TEST_SESSION" "commit"
+  AFTER_MTIME=$(_mtime "$SCORE_FILE")
+  [ "$AFTER_MTIME" -gt "$BEFORE_MTIME" ]
+}
+
+@test "Band B with no hash file: passes but does NOT slide (no invariance proof)" {
+  printf '3' > "$SCORE_FILE"
+  _backdate "$SCORE_FILE" 3
+  rm -f "$HASH_FILE"
+  BEFORE_MTIME=$(_mtime "$SCORE_FILE")
+  sleep 1
+  assert_gate_allows "$TEST_SESSION" "commit"
+  AFTER_MTIME=$(_mtime "$SCORE_FILE")
+  [ "$BEFORE_MTIME" = "$AFTER_MTIME" ]
+}
+
+@test "Band B with hash mismatch: denies with drift (no slide)" {
+  printf '3' > "$SCORE_FILE"
+  _backdate "$SCORE_FILE" 3
+  echo "staleold" > "$HASH_FILE"
+  touch "${SCORE_FILE}-born"
+  BEFORE_MTIME=$(_mtime "$SCORE_FILE")
+  assert_gate_denies "$TEST_SESSION" "commit" "drift"
+  AFTER_MTIME=$(_mtime "$SCORE_FILE")
+  [ "$BEFORE_MTIME" = "$AFTER_MTIME" ]
+}
+
+@test "Band B with hard-cap exceeded (born-age >= 2*TTL): denies even if hash invariant" {
+  printf '3' > "$SCORE_FILE"
+  _backdate "$SCORE_FILE" 3
+  _write_matching_hash "$HASH_FILE"
+  touch "${SCORE_FILE}-born"
+  _backdate "${SCORE_FILE}-born" 12
+  assert_gate_denies "$TEST_SESSION" "commit" "expired"
+}
+
+@test "Band C (age >= TTL): denies regardless of hash invariance" {
+  printf '3' > "$SCORE_FILE"
+  _backdate "$SCORE_FILE" 10
+  _write_matching_hash "$HASH_FILE"
+  touch "${SCORE_FILE}-born"
+  assert_gate_denies "$TEST_SESSION" "commit" "expired"
+}
+
+@test "Band B denial exports RISK_GATE_CATEGORY=drift on hash mismatch" {
+  printf '3' > "$SCORE_FILE"
+  _backdate "$SCORE_FILE" 3
+  echo "staleold" > "$HASH_FILE"
+  RISK_GATE_CATEGORY=""
+  ! check_risk_gate "$TEST_SESSION" "commit"
+  [ "$RISK_GATE_CATEGORY" = "drift" ]
+}
+
+@test "Band C denial exports RISK_GATE_CATEGORY=expired" {
+  printf '3' > "$SCORE_FILE"
+  _backdate "$SCORE_FILE" 10
+  RISK_GATE_CATEGORY=""
+  ! check_risk_gate "$TEST_SESSION" "commit"
+  [ "$RISK_GATE_CATEGORY" = "expired" ]
+}
+
+@test "Threshold denial exports RISK_GATE_CATEGORY=threshold and RISK_GATE_SCORE" {
+  printf '7' > "$SCORE_FILE"
+  touch "$SCORE_FILE"
+  RISK_GATE_CATEGORY=""
+  RISK_GATE_SCORE=""
+  ! check_risk_gate "$TEST_SESSION" "commit"
+  [ "$RISK_GATE_CATEGORY" = "threshold" ]
+  [ "$RISK_GATE_SCORE" = "7" ]
+}
