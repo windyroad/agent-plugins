@@ -1,10 +1,10 @@
 # Problem 116: `push:watch` preflight does not count local-only commits before batch-push — CI regressions in intermediate commits stay invisible
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-24
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Likely (3)
-**Effort**: S (preflight in `scripts/push-watch.*` + warning + bats contract-assertion)
-**WSJF**: (9 × 1.0) / 1 = **9.0**
+**Effort**: S (preflight in `scripts/push-watch.sh` + warning + bats contract-assertion)
+**WSJF**: 0 (Verification Pending — excluded from dev ranking per ADR-022)
 
 > Surfaced during P113's release cycle via run-retro Step 2b pipeline-instability scan (P074 class). My P113 fix commit `b2424c8` pushed to origin; CI failed on tests 699/700/701 in `risk-scorer-structured-remediations.bats`. Those tests had actually regressed two days earlier in commit `64f6d3f` — a commit that lived only locally on `main` alongside four other intermediate commits (`2be1bfa`, `ee316ba`, `ce5cfb6`, `71441f7`, `3cfb479`). None of the intermediate commits had ever been pushed to origin individually, so origin CI had never run against them. My P113 push batched all six commits in one push event; GitHub Actions fires CI only on the pushed-tip SHA, not on every reachable commit. The regression took the blame against my (innocent) P113 commit; `gh run list --branch main` showed CI runs only for the `6b76d13` merge and my `b2424c8` push — a five-commit gap where regressions could hide. This hazard compounds each unpushed commit. The current `push:watch` script does not warn.
 
@@ -47,12 +47,12 @@ GitHub Actions' own behaviour (CI fires on the push event against the tip SHA; n
 ### Investigation Tasks
 
 - [x] Confirm the hazard mechanism on this machine (P113 investigation — done; `gh run list --branch main` output shows the five-commit invisibility gap).
-- [ ] Read `scripts/push-watch.*` (or wherever `npm run push:watch` dispatches) to confirm current behaviour has no preflight. Architect decision needed on the preflight contract shape.
-- [ ] Decide the preflight contract: (a) warn-and-proceed (minimal friction), (b) warn-and-prompt (ADR-013 Rule 1 AskUserQuestion offering "push all" / "push one at a time" / "abort + rebase"), (c) warn-and-block-above-threshold (hard stop at N ≥ 5 to force per-commit cadence on long accumulation), (d) diagnostic-only (`npm run push:watch -- --diagnose` subcommand that reports without acting). Architect Q1.
-- [ ] Decide the threshold + messaging. `N = 2` is the cheapest signal but may over-warn; `N = 3` is more tolerant of routine batching. Architect Q2.
-- [ ] AFK compatibility: `work-problems` AFK orchestrator invokes `push:watch` per iteration; the preflight must not block AFK loops. Either: (a) preflight auto-proceeds in AFK (detected via non-interactive marker), or (b) preflight is skipped entirely when the orchestrator marker is present. Architect Q3.
-- [ ] Add a bats contract-assertion that a simulated N ≥ 2 local-commit state triggers the preflight warning (RED first, then implement, then GREEN per TDD).
-- [ ] Update REFERENCE / briefing docs.
+- [x] Read `scripts/push-watch.*` (or wherever `npm run push:watch` dispatches) to confirm current behaviour has no preflight. Architect decision needed on the preflight contract shape. — Previously inline in `package.json` `push:watch`; extracted to `scripts/push-watch.sh` per architect Q1 verdict.
+- [x] Decide the preflight contract. **Architect verdict (session 2026-04-24): (a) warn-and-proceed.** Rationale: `push:watch` runs as a shell script with no TTY in the AFK drain path; ADR-013 Rule 6 mandates non-interactive fail-safe and Rule 5 says policy-authorised actions proceed silently. A hard-block contract would violate ADR-018's drain guarantee. Single-path warn-to-stderr preserves the contract and surfaces the hazard to interactive users who can Ctrl-C.
+- [x] Decide the threshold + messaging. **Architect verdict (session 2026-04-24): N = 2.** Rationale: hazard is strictly-increasing in N; one invisible-to-CI commit (N=2) is exactly the P113 failure mode. Warning is stderr prose, zero blocking cost, so over-warning carries no operational cost — only signal value.
+- [x] AFK compatibility. **Architect verdict (session 2026-04-24): single-path warn-and-proceed answers Q3 by construction.** The preflight never blocks, so there is no AFK vs interactive fork to take. ADR-019 preflight semantics are loop-start concerns; ADR-018/ADR-020's push:watch is a drain concern.
+- [x] Add a bats contract-assertion that a simulated N ≥ 2 local-commit state triggers the preflight warning (RED first, then implement, then GREEN per TDD). — `packages/shared/test/push-watch-preflight.bats` (10 assertions, all green). `packages/shared/test/push-watch-anchoring.bats` retargeted at the extracted script (P060 anchoring contract preserved).
+- [ ] Update REFERENCE / briefing docs. — briefing/releases-and-ci.md already carries the "Local commit accumulation between pushes masks CI regressions on intermediate commits" entry from P113's retrospective; REFERENCE update deferred until a second session observes the preflight firing in practice.
 
 ### Reproduction test
 
@@ -100,3 +100,19 @@ fi
 ## Fix Strategy (Stage 2 placeholder)
 
 Stage 2 fix-strategy recording is pending user AskUserQuestion per run-retro Step 4b Stage 2. Candidate shape: Option 3 (Other codification shape — script improvement to `scripts/push-watch.*` + `package.json` wiring). Will be updated after the AskUserQuestion.
+
+## Fix Released
+
+Shipped in the same commit as this status transition (session 2026-04-24, AFK `/wr-itil:work-problems` iteration). Awaiting user verification.
+
+**Changes:**
+- `scripts/push-watch.sh` (new) — extracted the `push:watch` command body out of `package.json` and added the preflight block: counts `git rev-list --count @{push}..HEAD` (falling back to `origin/main..HEAD` when `@{push}` is undefined) and prints a stderr WARNING naming the hazard when the count is ≥ 2. Preserves the P060 anchoring contract (`--commit=$(git rev-parse HEAD)`, `|| exit $?`, `--branch main`, per-run exit-code propagation).
+- `package.json` — `push:watch` now delegates to `bash scripts/push-watch.sh`.
+- `packages/shared/test/push-watch-preflight.bats` (new) — 10 contract-assertions on the preflight surface, including the warn-and-proceed guarantee (push line must appear after the preflight block in source order so a future "exit on threshold" rewrite fails the test).
+- `packages/shared/test/push-watch-anchoring.bats` — retargeted at `scripts/push-watch.sh` so the P060 anchoring contract is tested at the new location.
+
+**ADR citations**: ADR-013 (Rule 5 policy-authorised silent proceed + Rule 6 non-interactive fail-safe), ADR-018 (inter-iteration release cadence), ADR-020 (governance auto-release for non-AFK flows), ADR-037 (contract-assertion skill testing — extended to shell-script packaging files), ADR-005 (plugin testing strategy — Permitted Exceptions for structural assertions).
+
+**JTBD citations**: JTBD-002 (Ship AI-Assisted Code with Confidence — primary; CI signal now surfaces the regressing commit, not the innocent tip), JTBD-006 (Progress the Backlog While I'm Away — secondary; AFK orchestrators accumulate multi-commit batches and the warning becomes a post-hoc pointer in the push log).
+
+**Verification in production**: the user's next `npm run push:watch` invocation with ≥ 2 local-only commits on the branch should print the WARNING block to stderr and proceed with the push. Exit code behaviour and P060 anchoring should remain unchanged. All 18 bats assertions across the two push-watch test files are green in-session (`npm test` summary: 790 ok / 0 not_ok).

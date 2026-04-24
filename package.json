@@ -26,6 +26,6 @@
     "version": "changeset version && node scripts/sync-plugin-manifests.mjs",
     "release": "changeset publish",
     "release:watch": "bash scripts/release-watch.sh",
-    "push:watch": "git push 2>&1 && sleep 5 && for id in $(gh run list --commit=$(git rev-parse HEAD) --branch main --json databaseId --jq '.[].databaseId'); do gh run watch \"$id\" --exit-status || exit $?; done"
+    "push:watch": "bash scripts/push-watch.sh"
   }
 }
