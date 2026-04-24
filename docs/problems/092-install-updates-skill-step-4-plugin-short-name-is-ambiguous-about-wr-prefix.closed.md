@@ -1,7 +1,8 @@
 # Problem 092: `/install-updates` Step 4 `<plugin-short-name>` placeholder is ambiguous about the `wr-` prefix
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-22
+**Closed**: 2026-04-24 — verified in-session via run-retro Step 4a. This session's `/install-updates` run applied `npm_name="@windyroad/${plugin_key#wr-}"` to all 11 windyroad plugin keys (architect, c4, connect, itil, jtbd, retrospective, risk-scorer, style-guide, tdd, voice-tone, wardley); `npm view` returned valid version for every one (no empty-version false-negative). Only `wr-itil` flagged as needing update (0.18.0 → 0.18.1); 10 plugins correctly reported as up-to-date. Transformation contract held end-to-end.
 **Priority**: 15 (High) — Impact: Moderate (3) x Likelihood: Almost certain (5)
 **Effort**: S
 **WSJF**: (15 × 1.0) / 1 = **15.0**

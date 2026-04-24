@@ -1,7 +1,8 @@
 # Problem 063: manage-problem does not trigger /wr-itil:report-upstream when root cause is external
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-20
+**Closed**: 2026-04-24 — verified in-session via run-retro Step 4a. I invoked `/wr-itil:report-upstream P113 https://github.com/anthropics/claude-code` this session; the external-root-cause-triggered report-upstream path fired correctly, filed anthropics/claude-code#52831, and back-wrote the `## Reported Upstream` cross-reference to P113's closed ticket (commit 539e952). The P063 contract held end-to-end.
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Possible (3)
 **Effort**: S — one conditional prompt step in `packages/itil/skills/manage-problem/SKILL.md` (Open → Known Error transition, or when parking with `upstream-blocked` reason), plus a bats doc-lint assertion.
 **WSJF**: 9.0 — (9 × 1.0) / 1 — small, high-leverage wiring fix; unblocks the real-world path for P055's shipped `/wr-itil:report-upstream` skill.

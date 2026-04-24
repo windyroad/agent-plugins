@@ -1,7 +1,8 @@
 # Problem 094: `/wr-itil:manage-problem` does not refresh `docs/problems/README.md` on ticket creation
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-22
+**Closed**: 2026-04-24 — verified in-session via run-retro Step 4a. Every manage-problem invocation this session rode the README-refresh contract correctly: commit 2be1bfa (P113 open) included the ticket + docs/problems/README.md; commit e14040b (P115 open + P113 RCA update) included both; commits 245e09c (P113 closure), 25e06e5 (P114 closure), and 539e952 (P113 upstream back-write) all kept README in-sync with the ticket file set. ADR-014 single-commit-transaction rule held across 5 manage-problem-class commits.
 **Priority**: 10 (High) — Impact: Minor (2) x Likelihood: Almost certain (5)
 **Effort**: S
 **WSJF**: (10 × 1.0) / 1 = **10.0**

@@ -1,8 +1,9 @@
 # Problem 067: /wr-itil:report-upstream classifier is not problem-first — picks bug / feature / question and emits a bug-shaped default
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-20
 **Fix Released**: 2026-04-21 (ADR-033 drafted; SKILL.md Steps 3 + 5 rewritten; bats contract test extended to 15 assertions; `@windyroad/itil` minor bump changeset queued).
+**Closed**: 2026-04-24 — verified in-session via run-retro Step 4a. For P113 the ADR-033 classifier matched primary-problem tokens (`problem`, `root cause`, `workaround`, `reproduction`, scoped-npm `@windyroad/itil`); template discovery on `anthropics/claude-code` fell through to `bug_report.yml` (backward-compat fallback per ADR-033 since upstream has no `problem-report.yml`). Filed issue body (anthropics/claude-code#52831) uses structured problem-shape content under the bug template — exactly the ADR-033 mixed-primary-and-fallback path.
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Possible (3)
 **Effort**: M — update `packages/itil/skills/report-upstream/SKILL.md` Step 3 (classification heuristic) and Step 5 (structured default body), plus the 9-assertion bats doc-lint test. Likely a sibling-ADR note or an update to ADR-024's Decision Outcome steps 3 and 5 to reflect the problem-first framing.
 **WSJF**: 4.5 — (9 × 1.0) / 2 — Mid-priority; should ship after P066 (which establishes the problem-first shape) so the skill's new default matches the intake shape this repo ships.
