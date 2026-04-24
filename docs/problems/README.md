@@ -15,8 +15,10 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6.0 | P071 | Argument-based skill subcommands are not discoverable in Claude Code autocomplete | 12 High | Open | M |
 | 6.0 | P074 | run-retro does not notice pipeline instability and record corresponding problem tickets | 12 High | Open | M |
 | 6.0 | P078 | Assistant does not offer problem ticket on strong-signal user correction | 12 High | Open | M |
+| 6.0 | P111 | Agent/Task subprocess tool calls do not refresh parent session's gate markers — TTL inflation is a symptom-treatment, not the fix | 12 High | Open | M |
 | 5.0 | P108 | Scorer remediation action-class vocabulary — scorer writes prose; agent decides (ADR-042 Rule 2a) | 15 High | Open | S |
 | 4.5 | P109 | `/wr-itil:work-problems` preflight Step 0 does not detect prior-session partial-work state (untracked ADRs, `.afk-run-state/iter-*.json` 429, stale worktrees) | 9 Med | Open | M |
+| 4.5 | P112 | `/install-updates` Step 7 `uninstall && install` chain has an unrecoverable failure window — plugin silently lost if install fails after uninstall succeeds | 9 Med | Open | M |
 | 3.75 | P099 | `docs/BRIEFING.md` grows unbounded via run-retro appends — violates progressive disclosure | 15 High | Open | L |
 | 3.0 | P101 | `wr-retrospective` has no context-usage analysis — opaque where session tokens are consumed; no guidance on what to trim | 12 High | Open | L |
 | 3.0 | P014 | No lightweight aside invocation for governance skills (background-subagent convention per 2026-04-20 direction) | 12 High | Open | L |

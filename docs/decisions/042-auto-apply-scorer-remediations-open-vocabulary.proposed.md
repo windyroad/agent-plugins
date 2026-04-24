@@ -33,17 +33,32 @@ Concurrently, the `docs/changesets-holding/` convention introduced by the P100 m
 
 ## Decision Drivers
 
-- **JTBD-006 (Progress the Backlog While I'm Away)** — primary motivator. AFK persona expects forward progress without interactive halts when the scorer has already resolved the decision surface. Persona split in `docs/jtbd/solo-developer/persona.md`: *trusts agent for routine, deterministic, mechanical decisions; does NOT trust agent for judgment calls*. The open-vocabulary Rule 2a lets the agent decide what to do, like any other decision in the workflow. The scorer suggests; the agent reads, understands, and acts. No bounded parsing, no expressibility check, no pre-built handlers.
+- **JTBD-006 (Progress the Backlog While I'm Away)** — primary motivator. AFK persona expects forward progress without interactive halts when the scorer has already resolved the decision surface. Persona split in `docs/jtbd/solo-developer/persona.md`: *trusts agent for routine, deterministic, mechanical decisions; does NOT trust agent for judgment calls*. The open-vocabulary Rule 2a lets the agent decide what to do, like any other decision in the workflow. The scorer suggests; the agent reads prose and decides; no intermediate parser, no lookup table. Rule 5 halt-on-exhaustion is the JTBD-006 *"stops gracefully when ... it hits a blocker"* path — judgment calls the agent cannot mechanically execute route there, not to `AskUserQuestion`.
 - **JTBD-001 (Enforce Governance Without Slowing Down)** — under-60-second target applies per-edit, so the auto-apply loop's multi-minute duration is out of that budget's scope. Each individual auto-apply commit still goes through gates under the same 60-second-per-edit target.
 - **JTBD-002 (Ship AI-Assisted Code with Confidence)** — "agent cannot bypass governance" and "audit trail exists showing governance was followed". Rule 3 (gates apply per auto-apply commit) and Rule 6 (per-auto-apply audit line) encode this directly.
-- **Pure-scorer contract (ADR-015)** — scoring + remediation generation live in the scorer; orchestrator interprets and acts. This ADR depends on a stable remediation-class vocabulary (Rule 2a); see P108 for the scorer-contract extension that fills today's free-form `description` column gap.
+- **Pure-scorer contract (ADR-015)** — scoring + remediation generation live in the scorer; orchestrator interprets and acts. ADR-015's `RISK_REMEDIATIONS:` schema is stable at the column level (5 columns with free-form `description`); the `description` column's content vocabulary is deliberately open during the Innovation Window (see below). See P108 for tracking of recurring patterns that may later warrant promotion to structured columns.
 - **ADR-013 Rule 5 (policy-authorised silent proceed)** — `RISK-POLICY.md` appetite + this ADR's eligibility rules constitute the policy authorising auto-apply actions; no `AskUserQuestion` is required for any action governed by Rules 1–7.
 - **Symmetry across modes (ADR-018 ↔ ADR-020)** — AFK and non-AFK governance flows share the same above-appetite behaviour. This ADR supersedes ADR-018 Step 6.5's implicit above-appetite fallback and ADR-020 §6's "release skipped" branch.
 - **Lean release principle (ADR-014)** — governance skills commit, and the orchestrator releases, their own work. The above-appetite branch is the missing piece that turned ADR-014 into a *sometimes-I-release* skill instead of an *always-I-release-or-halt* skill.
 - **Never-release-above-appetite invariant** — governance controls exist for a reason; there must be no path by which an above-appetite release lands. Halt is the terminal fallback, never release. JTBD-006's "The loop stops gracefully when ... it hits a blocker" authorises loop-halt on scorer exhaustion (exhaustion IS a blocker).
 - **Release-often principle** — the primary mitigation for above-appetite accumulation is frequent releases (ADR-018's at-appetite drain trigger, preserved unchanged). This ADR covers the residual case where a single commit or commit-set is intrinsically above appetite despite the draining discipline.
-- **Open-vocabulary innovation** — the scorer must be free to propose novel remediation classes without waiting for a human to draft, review, and merge an ADR amendment. The closed-enumeration approach in ADR-041 created a bottleneck where every new class required a coordinated code + ADR update. The open vocabulary removes that bottleneck while preserving safety through the "expressibility check" + Rule 3 gates.
+- **Open-vocabulary innovation** — the scorer must be free to propose novel remediation classes without waiting for a human to draft, review, and merge an ADR amendment. The closed-enumeration approach in ADR-041 created a bottleneck where every new class required a coordinated code + ADR update. The open vocabulary removes that bottleneck; safety is preserved by Rule 3 (gates per auto-apply commit) and Rule 5 (halt rather than release when the agent cannot act).
 - **P103 + P104** — the two problem tickets this ADR resolves.
+
+## Innovation Window
+
+Innovation and standardisation are two ends of a spectrum. Closing the vocabulary too early foreclosed scorer experimentation (ADR-041's bottleneck). Closing it too late leaves the orchestrator-scorer interface under-specified indefinitely. ADR-042 chooses a deliberate *Innovation Window* where the vocabulary is open and the agent decides from prose, so recurring patterns can emerge from real scorer output before any of them are promoted to structured columns.
+
+During the window:
+
+- The `description` column of `RISK_REMEDIATIONS:` is free-form. The scorer may propose anything that advances the reduce-risk-to-appetite goal.
+- The agent reads each description and decides what to do. Standard primitives only (git, Edit, Bash). No pre-built executors.
+- Rule 3 gates every auto-apply; Rule 5 halts on exhaustion. Safety is enforced at the commit layer, not at the vocabulary layer.
+- The JTBD Gap documented in Consequences §Bad is **deliberate**, not an oversight. Capturing a JTBD for "extensible remediation vocabulary" now would itself foreclose innovation on what that job looks like.
+
+The window closes when scorer behaviour stabilises enough to codify recurring patterns — see the Reassessment Triggers section for the concrete signal. At that point a superseding ADR promotes recurring patterns to structured columns alongside the free-form `description`, and either (a) a JTBD for extensible-remediation-vocabulary ships with the superseding ADR if still needed, or (b) the JTBD is explicitly closed as not-required because the promoted patterns are narrow enough to not need one.
+
+This is not ADR-042 revision 2. The outcome (open vocabulary, agent decides) does not change during the window. This section documents *why* the open vocabulary is the right shape during the window, so future readers of ADR-042 see the rationale without having to infer it.
 
 ## Considered Options
 
@@ -55,7 +70,7 @@ Concurrently, the `docs/changesets-holding/` convention introduced by the P100 m
 
 ## Decision Outcome
 
-Chosen option: **"Liberal auto-apply with open vocabulary and halt-on-exhaustion"**, because the never-release-above-appetite invariant is the primary constraint and liberal auto-apply is the only mechanism that reliably honours it across AFK and non-AFK flows. The open vocabulary removes the scorer-innovation bottleneck that the closed enumeration created, while the expressibility check + Rule 3 gates preserve safety.
+Chosen option: **"Liberal auto-apply with open vocabulary and halt-on-exhaustion"**, because the never-release-above-appetite invariant is the primary constraint and liberal auto-apply is the only mechanism that reliably honours it across AFK and non-AFK flows. The open vocabulary removes the scorer-innovation bottleneck that the closed enumeration created; Rule 3 gates every auto-apply commit and Rule 5 halts rather than releasing when the agent cannot act, so safety is preserved at the commit layer.
 
 Halt-on-exhaustion is the safety valve: if the scorer cannot find a reduction path, the orchestrator refuses to release and surfaces the exhaustion as a bug signal for user resolution.
 
@@ -194,7 +209,7 @@ Every auto-apply decision MUST be logged in two places:
 - **Audit trail per Rule 6** makes auto-apply decisions reviewable on user return: one line per apply in the iteration report + one line per move in the holding-area README.
 - **Exhaustion is auditable, not silent.** Rule 5 halt emits a structured report naming what was tried and why it was insufficient — the scorer gap is visible, not hidden behind a successful release.
 - **VP carve-out (Rule 2b)** prevents the auto-revert soft-lock that would otherwise destroy fixes the user is verifying.
-- **Open vocabulary enables scorer innovation.** New remediation classes can be proposed and applied without waiting for an ADR amendment cycle. The scorer can experiment with novel remediation strategies (e.g. `split-commit` for large changesets, `noop-audit` for audit-only mitigations) and the orchestrator will attempt them if expressible.
+- **Open vocabulary enables scorer innovation.** New remediation strategies can be proposed and applied without waiting for an ADR amendment cycle. The scorer can experiment with novel strategies (e.g. `split-commit` for large changesets, `noop-audit` for audit-only mitigations) and the agent will read each description and decide what to do.
 - **Incremental decision-making preserves JTJT-001 speed.** The agent decides what to do next without pre-planning all actions, so each step stays within the under-60-second per-edit target.
 
 ### Neutral
@@ -210,7 +225,7 @@ Every auto-apply decision MUST be logged in two places:
 - **Scorer contract dependency.** The scorer must write clear descriptions so the agent can decide. If the scorer's descriptions are vague, the agent may halt unnecessarily. Mitigation: the scorer learns from halt reports (Rule 6 logs the description text) and adapts its descriptions. The agent's judgment is the fallback.
 - **Halt-on-exhaustion can stop an AFK loop mid-queue.** If a scorer gap halts iteration N, iterations N+1..M never fire — even if they would have worked on unrelated tickets. This is the conservative choice: continuing past an unreleasable iteration risks compounding the above-appetite state. Mitigated in practice by the scorer being reliable enough that exhaustion is rare; when it happens, treat as a bug and fix the scorer.
 - **Gate traversal cost per auto-apply.** Rule 3 requires architect + JTBD + risk-scorer review on every auto-apply commit. For a 3-remediation iteration that means 3× full gate traversal. Mitigated by AFK mode's `git commit --amend` folding (Rule 3 amend-based folding) — the iteration still produces one final commit that carries one final gate traversal against the amended state.
-- **JTBD Gap — no documented job for "extensible remediation vocabulary".** The user's motivation ("prevents innovative remediations") does not map to an existing JTBD job. JTBD-006 desires safe defaults; JTBD-001 desires speed with governance; JTBD-002 desires auditability. None explicitly call for open-ended vocabulary. If extensibility/innovation is a genuine requirement, a new JTBD job (or JTBD-006 extension) should be drafted. This is tracked as a follow-up.
+- **JTBD Gap — no documented job for "extensible remediation vocabulary".** The user's motivation ("prevents innovative remediations") does not map to an existing JTBD job. JTBD-006 desires safe defaults; JTBD-001 desires speed with governance; JTBD-002 desires auditability. None explicitly call for open-ended vocabulary. **This gap is deliberate during the Innovation Window** (see above). Closing the gap prematurely would re-create the ADR-041 bottleneck — a standardised job description would itself foreclose innovation on what the job looks like. When the Innovation Window closes and a superseding ADR lands, a JTBD job for extensible-remediation-vocabulary either ships with it (if still needed after recurring patterns are promoted to columns) or is explicitly closed as not-required (if the promoted patterns are narrow enough to not need one).
 
 ## Confirmation
 
@@ -226,6 +241,7 @@ Compliance is verified by:
 
 Revisit this decision if:
 
+- **Scorer behaviour stabilises — Innovation Window close signal.** Recurring remediation patterns observed in production (cite Rule 6 audit-trail evidence) suggest the `description` column could be promoted to structured columns. Concrete signal: ≥ 3 iterations where the agent applied effectively-identical actions from effectively-identical descriptions, suggesting a pattern worth codifying. At that point, draft a superseding ADR that adds structured columns alongside the free-form `description`, and decide whether a JTBD for extensible-remediation-vocabulary rides the supersession or is closed as not-required.
 - P108 lands the scorer contract vocabulary — the scorer's descriptions become more actionable over time; bats assertions update.
 - The `RISK-POLICY.md` appetite threshold changes — Rule 1's "above appetite" numeric definition shifts.
 - A fourth in-scope lineage emerges (e.g., `create-adr` under ADR-014 auto-release) — the ADR may need to extend to that skill's terminal step.
