@@ -19,6 +19,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 5.0 | P108 | Scorer remediation action-class vocabulary — scorer writes prose; agent decides (ADR-042 Rule 2a) | 15 High | Open | S |
 | 4.5 | P109 | `/wr-itil:work-problems` preflight Step 0 does not detect prior-session partial-work state (untracked ADRs, `.afk-run-state/iter-*.json` 429, stale worktrees) | 9 Med | Open | M |
 | 4.5 | P112 | `/install-updates` Step 7 `uninstall && install` chain has an unrecoverable failure window — plugin silently lost if install fails after uninstall succeeds | 9 Med | Open | M |
+| 4.5 | P113 | `/wr-itil:report-upstream` installed and enabled but missing from Claude Code slash-command autocomplete | 9 Med | Open | M |
 | 3.75 | P099 | `docs/BRIEFING.md` grows unbounded via run-retro appends — violates progressive disclosure | 15 High | Open | L |
 | 3.0 | P101 | `wr-retrospective` has no context-usage analysis — opaque where session tokens are consumed; no guidance on what to trim | 12 High | Open | L |
 | 3.0 | P014 | No lightweight aside invocation for governance skills (background-subagent convention per 2026-04-20 direction) | 12 High | Open | L |
