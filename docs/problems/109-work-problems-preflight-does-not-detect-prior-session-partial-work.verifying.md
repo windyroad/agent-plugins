@@ -1,6 +1,6 @@
 # Problem 109: `/wr-itil:work-problems` preflight Step 0 does not detect prior-session partial-work state (untracked ADRs, `.afk-run-state/iter-*.json` with 429/error statuses, existing `.claude/worktrees/*` branches)
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-22
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Likely (3)
 **Effort**: M
@@ -111,3 +111,22 @@ Step 0 was scoped for the single "did origin move under us" failure mode (P040).
 - **P040** (`docs/problems/040-work-problems-does-not-fetch-origin-before-starting.closed.md`) — driver for the current Step 0 origin-fetch; precedent for extending Step 0.
 - **P107** (`docs/problems/107-architect-jtbd-edit-gate-markers-expire-mid-batch.open.md`) — adjacent "session continuity" concern at the edit-gate layer.
 - **JTBD-006** (`docs/jtbd/solo-developer/JTBD-006-work-backlog-afk.proposed.md`) — "progress continues without me being present" implies Step 0 should know session continuity, not delegate to on-the-fly reasoning.
+
+## Fix Released
+
+**Released**: 2026-04-25 (AFK work-problems iter — P109 worked)
+
+**Shape**: Skill extension + ADR extension (within reassessment window; no new ADR).
+
+**Changes landed**:
+
+- `packages/itil/skills/work-problems/SKILL.md` Step 0 — session-continuity detection subsection added after the fetch/divergence check. Enumerates five signals (untracked `docs/decisions/*.proposed.md`, untracked `docs/problems/*.md`, `.afk-run-state/iter-*.json` with `is_error: true` or `api_error_status >= 400`, stale `.claude/worktrees/*` + `git worktree list` entries on `claude/*` branches, uncommitted modifications to SKILL.md / source / ADR files). Routes interactive via `AskUserQuestion` with 4 options (resume / discard / leave-and-lower-priority / halt); routes AFK via halt-with-report per ADR-013 Rule 6. Detection only — worktree mutation is out of scope.
+- `packages/itil/skills/work-problems/SKILL.md` Non-Interactive Decision Making table — new row covering the session-continuity dirty-state branch.
+- `packages/itil/skills/work-problems/SKILL.md` Related — P109 cross-reference added.
+- `docs/decisions/019-afk-orchestrator-preflight.proposed.md` Mechanism — extension describing the detection pass; within 2026-07-18 reassessment window (no new ADR). Confirmation criterion 5 added pointing at the new bats.
+- `packages/itil/skills/work-problems/test/work-problems-preflight-session-continuity.bats` — 16 contract-assertion bats per ADR-037 asserting the five signals are enumerated, routing cites ADR-013 Rule 6, interactive branch names the 4 option categories, and the decision-matrix row is present.
+- `.changeset/wr-itil-p109-preflight-session-continuity.md` — minor bump for `@windyroad/itil` (new orchestrator-loop behaviour).
+
+**Gates**: architect + JTBD reviews approved the fix shape before implementation (halt-with-report for AFK; extend ADR-019 rather than create a new ADR; minor changeset bump).
+
+**Verification**: on the next AFK session that restarts after a quota (429) / error / user-cancel with partial work in the working tree, Step 0 should enumerate the signal set in a structured Prior-Session State report and halt the loop (non-interactive) or present the 4-option `AskUserQuestion` prompt (interactive), rather than silently proceeding into Step 1.

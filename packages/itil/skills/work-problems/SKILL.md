@@ -36,6 +36,29 @@ Before opening the work loop, reconcile local state with origin so the orchestra
 
 **Cross-cutting**: this rule applies to every AFK orchestrator skill. The next-ID collision guard (ADR-019 confirmation criterion 2) belongs in the ticket-creator skills (`manage-problem` and `wr-architect:create-adr`), not here — see the related problem ticket for that work.
 
+#### Session-continuity detection pass (per P109)
+
+After the fetch/divergence check, Step 0 MUST run a session-continuity detection pass. The divergence check handles "did origin move under us"; this pass handles the distinct failure mode "did the prior session leave partial work that changes what iter 1 should do". A prior AFK subprocess can exit mid-ticket (quota 429, user-cancel, subprocess crash) and leave observable state in the working tree that the orchestrator must classify before opening the work loop.
+
+**Signals to enumerate** (each maps to one `git status --porcelain` / filesystem / `git worktree` probe):
+
+| Signal | Detection |
+|---|---|
+| Untracked `docs/decisions/*.proposed.md` | `git status --porcelain docs/decisions/` filtered for `??` entries ending `.proposed.md` — drafted but unlanded ADRs from a prior iter. |
+| Untracked `docs/problems/*.md` | `git status --porcelain docs/problems/` filtered for `??` entries ending `.md` — drafted but unlanded problem tickets. |
+| `.afk-run-state/iter-*.json` error markers | Files under `.afk-run-state/` containing `"is_error": true` OR `"api_error_status" >= 400` — prior iteration hit quota or API error; its work is likely partial. Success files (`"is_error": false`) are ignored. Contract source: ADR-032 subprocess artefact. |
+| Stale `.claude/worktrees/*` dirs + matching `claude/*` branches | `git worktree list` filtered on `claude/*` branches adjacent to `.claude/worktrees/*` directories — prior subagent worktrees that were not cleaned up. Detection only — mutation (cleanup) is out of scope and requires a separate ADR. |
+| Uncommitted modifications to SKILL.md / source / ADR files | `git status --porcelain` filtered for `M ` / ` M` entries on `packages/*/skills/*/SKILL.md`, `packages/*/hooks/*`, `docs/decisions/*.proposed.md`, or other source paths the prior session was mid-authoring. |
+
+**Classification**: when any signal is present, build a structured Prior-Session State report listing each hit (signal category, path, one-line summary). An empty signal set means clean pass-through to Step 1.
+
+**Routing on interactive-vs-AFK (per ADR-013 Rule 1 / Rule 6):**
+
+- **Interactive** (`AskUserQuestion` is available AND the loop was not started in AFK mode): prompt the user with the Prior-Session State report and four options — **Resume the prior work** (land the drafted files as iter 1), **Discard the draft** and restart from scratch, **Leave-and-lower-priority** (skip the dirty paths and work the next backlog item that doesn't touch them), **Halt the loop** (too much dirty state to proceed non-interactively). Route the chosen branch before opening Step 1.
+- **Non-interactive / AFK** (default for this skill per JTBD-006): do NOT call `AskUserQuestion`. Halt the loop with the structured Prior-Session State report in the AFK summary. Per ADR-013 Rule 6 fail-safe: ambiguous session-continuity state requires user input; non-interactive recovery would mask the bug this check is meant to surface. This matches Step 6.75's "dirty for unknown reason → halt" stance at the Step 0 layer — the orchestrator does not silently proceed past partial work.
+
+Step 6.75 treats a Step-0-resolved-with-user-confirmation state as `dirty-for-known-reason`: if the interactive branch's Resume option landed the drafted ADR as iter 1, the iter's commit clears the dirty state and the rest of the loop proceeds normally.
+
 ### Step 1: Scan the backlog
 
 Read `docs/problems/README.md` if it exists and is fresh (check via git history — see manage-problem step 9 for the cache freshness check). If stale or missing, scan all `.open.md` and `.known-error.md` files in `docs/problems/`, extract their WSJF scores, and rank them.
@@ -339,6 +362,7 @@ When `AskUserQuestion` is unavailable or the user is AFK, the skill (and the del
 | Pipeline risk at appetite (push or release = 4/25) | Drain release queue (`push:watch` then `release:watch`) before next iteration — per ADR-018 (Step 6.5) |
 | Pipeline risk above appetite (push or release >= 5/25) | Auto-apply scorer remediations incrementally (ADR-042 Rule 2). The agent reads suggestions and decides what to do. Re-score after each apply; drain when within appetite. **Never release above appetite** (ADR-042 Rule 1) — no AskUserQuestion shortcut. Halt the loop with `outcome: halted-above-appetite` if the loop exhausts without convergence (ADR-042 Rule 5). Verification Pending commits excluded from auto-revert (Rule 2b). Per ADR-042 (Step 6.5 Above-appetite branch). |
 | Origin diverged before start | Pull `--ff-only` if trivial; stop with report (`git log HEAD..origin/<base>` and reverse) if non-fast-forward — per ADR-019 (Step 0) |
+| Prior-session partial work detected at start (session-continuity dirty: untracked `docs/decisions/*.proposed.md` / `docs/problems/*.md`, `.afk-run-state/iter-*.json` with `is_error: true` or `api_error_status >= 400`, stale `.claude/worktrees/*`, uncommitted SKILL.md/source/ADR edits) | Halt the loop with a structured Prior-Session State report in the AFK summary. Do NOT attempt non-interactive resume. Interactive invocations prompt via `AskUserQuestion` with 4 options (resume / discard / leave-and-lower-priority / halt). Per P109 + ADR-013 Rule 6 (Step 0 session-continuity detection pass). |
 | Fix verification needed | Skip problem, add to "needs verification" list |
 | Stop-condition #2 with user-answerable skip-reasons | Emit Outstanding Design Questions table in summary (do NOT call AskUserQuestion). The persona is AFK by definition — per JTBD-006 and ADR-013 Rule 6 — so the table is the default. Interactive invocations may batch up to 4 questions through AskUserQuestion instead — per ADR-013 Rule 1 (Step 2.5). |
 | Unexpected dirty state between iterations | Halt the loop. Report the `git status --porcelain` output, the last iteration's reported outcome, and the divergence — per P036 (Step 6.75). Do NOT attempt non-interactive recovery. |
@@ -416,6 +440,7 @@ When every skipped ticket is in the `upstream-blocked` category (stop-condition 
 - **P083** (`docs/problems/083-work-problems-iteration-worker-prompt-does-not-forbid-schedulewakeup.open.md`) — iteration prompt body forbids `ScheduleWakeup`. Applies equally to subprocess-dispatched iterations.
 - **P036** — inter-iteration verification (Step 6.75); remains in the orchestrator's main turn.
 - **P040** — origin-fetch preflight (Step 0); unchanged.
+- **P109** — session-continuity detection pass added to Step 0 after the fetch/divergence check. Enumerates five signals (untracked `docs/decisions/*.proposed.md`, untracked `docs/problems/*.md`, `.afk-run-state/iter-*.json` error markers, stale `.claude/worktrees/*` dirs, uncommitted SKILL.md/source/ADR edits). Routes interactive via `AskUserQuestion` with 4 options, AFK via halt-with-report per ADR-013 Rule 6.
 - **P041** — release-cadence drain (Step 6.5); remains in the orchestrator's main turn.
 - **P053** — Outstanding Design Questions surfacing at stop-condition #2 (Step 2.5); fed by the iteration subagent's `outstanding_questions` field.
 - **ADR-013** (`docs/decisions/013-structured-user-interaction-for-governance-decisions.proposed.md`) — Rule 6 non-interactive fail-safe applies to every iteration-subagent decision surface.

@@ -88,6 +88,20 @@ reconcile diverged work.
   `git ls-tree origin/<base> docs/problems/` (or the equivalent for ADRs/
   JTBD). If the local choice would collide with an ID created on origin
   since the last fetch, renumber.
+- **Session-continuity detection pass** (extension per P109, 2026-04-25):
+  after the fetch/divergence check, the orchestrator MUST enumerate
+  prior-session partial-work signals in the working tree — untracked
+  `docs/decisions/*.proposed.md`, untracked `docs/problems/*.md`,
+  `.afk-run-state/iter-*.json` with `"is_error": true` or
+  `"api_error_status" >= 400`, stale `.claude/worktrees/*` dirs +
+  `git worktree list` entries on `claude/*` branches, and uncommitted
+  modifications to SKILL.md / source / ADR files. When any signal is
+  present, build a structured Prior-Session State report. Route per
+  ADR-013 Rule 1 (interactive `AskUserQuestion` with 4 options: resume /
+  discard / leave-and-lower-priority / halt) or Rule 6 (non-interactive /
+  AFK halt-with-report). Detection only — worktree cleanup (mutation) is
+  out of scope and would require a separate ADR. This extension is
+  within the 2026-07-18 reassessment window; no new ADR is created.
 - Scope is **cross-cutting**: applies to any AFK orchestrator skill, not
   just `/wr-itil:work-problems`. Orchestrator skills MUST cite ADR-019 in
   their SKILL.md.
@@ -146,6 +160,12 @@ Compliance is verified by:
 4. **Behavioural**: simulate a diverged origin (temp git repo with extra
    commits on origin/main); verify the orchestrator either pulls (trivial
    case) or stops with a divergence report (non-fast-forward case).
+5. **Contract-assertion bats** (P109 extension): a bats file asserts
+   SKILL.md Step 0 enumerates the five session-continuity signals (per
+   the Mechanism section), cites P109, cites ADR-013 Rule 6 for the AFK
+   halt branch, names the four interactive-branch options, and carries a
+   Non-Interactive Decision Making table row for the new branch. See
+   `packages/itil/skills/work-problems/test/work-problems-preflight-session-continuity.bats`.
 
 ## Pros and Cons of the Options
 
