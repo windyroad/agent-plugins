@@ -1,10 +1,11 @@
 # Problem 114: `risk-scorer-structured-remediations.bats` bare-word `action_class` grep collides with "No structured action_class column" prose
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-24
+**Closed**: 2026-04-24
 **Priority**: 6 (Med) — Impact: Moderate (3) x Likelihood: Likely (2)
 **Effort**: S (three test-assertion edits in one bats file)
-**WSJF**: 0 (excluded from ranking per ADR-022 — Verification Pending)
+**WSJF**: 0 (closed)
 
 > Identified 2026-04-24 while releasing the P113 fix. `npm run push:watch` landed commits `2be1bfa..b2424c8` on `origin/main` in one push; CI on the tip commit (b2424c8) failed three assertions in `packages/risk-scorer/agents/test/risk-scorer-structured-remediations.bats` that had actually regressed two commits earlier in `64f6d3f` (2026-04-23). Because `64f6d3f` and the intermediate commits were never pushed individually, origin CI had never seen the regression until today's push.
 
@@ -101,6 +102,10 @@ The tightened regex anchors to a markdown-table column-header row (`^\|`) and re
 ## Fix Released
 
 Fix landed 2026-04-24 in the same commit as this ticket transition — `packages/risk-scorer/agents/test/risk-scorer-structured-remediations.bats` lines 109, 114, 119 now use the column-header regex. Verification path: CI run on the fix commit should show tests 699/700/701 as `ok`. Once green, release PR #64 is merge-eligible and P113's release also unblocks.
+
+### Closed 2026-04-24
+
+Verified in-session: CI Quality Gates → Run hook tests has been green on every commit since the fix landed — `97c976e` (the fix itself), `38a0f7e` (version bump), `8f6e89e` (release PR merge), `e14040b` (P113 RCA update + P115 open), `245e09c` (P113 closure). Release PR #64 "Version Packages" auto-merged; `@windyroad/itil@0.18.1` published to npm. Tests 699/700/701 flipped from `not ok` to `ok` as predicted.
 
 ## Dependencies
 
