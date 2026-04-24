@@ -213,3 +213,35 @@ setup() {
   run grep -nE "ADR-014" "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }
+
+# @problem P083
+# @jtbd JTBD-006
+# @jtbd JTBD-001
+# @jtbd JTBD-101
+# @jtbd JTBD-201
+#
+# STRUCTURAL: tests the SKILL.md content contract per ADR-037's Permitted
+# Exception (doc-lint contract assertion against the contract document itself)
+# — same rationale already covered by the file-header block above. Behavioural
+# alternative would require simulating a `claude -p` iteration subprocess with
+# a large task and observing tool-call traces for absence of ScheduleWakeup;
+# that harness is not yet available at the skill layer (see P081 retrofit path).
+@test "SKILL.md Step 5 iteration prompt forbids ScheduleWakeup (P083 — synchronous-handoff contract)" {
+  # P083 (2026-04-21): AFK iter 5 observed an iteration worker call ScheduleWakeup
+  # mid-task, abandoning the synchronous-handoff contract (no ITERATION_SUMMARY
+  # returned; uncommitted work left in tree; Step 6.75 halted the loop on
+  # dirty-for-unknown-reason). The Step 5 iteration prompt body MUST explicitly
+  # forbid ScheduleWakeup so LLM-driven workers do not reach for time-deferring
+  # primitives — iteration workers are synchronous by contract (ADR-032 AFK
+  # iteration-isolation wrapper). Regression guard for the 260768f clause.
+  run grep -niE "Do NOT use .?ScheduleWakeup|ScheduleWakeup.{0,80}(must not|not.{0,10}self-reschedule)|not.{0,10}self-reschedule" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "SKILL.md Step 5 ScheduleWakeup forbidding clause cites P083" {
+  # The forbidding clause must cite P083 inline so the contract document is
+  # self-documenting — a future contributor removing the clause reads the
+  # P083 reference and understands why it exists before deleting it.
+  run grep -nE "ScheduleWakeup.{0,120}P083|P083.{0,120}ScheduleWakeup" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}

@@ -1,6 +1,6 @@
 # Problem 083: work-problems Step 5 iteration-worker prompt does not forbid ScheduleWakeup / time-deferring primitives — subagent can abandon synchronous-completion contract
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-21
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: S — single-file edit to `packages/itil/skills/work-problems/SKILL.md` Step 5 prompt template: add an explicit "Do NOT call `ScheduleWakeup`, `CronCreate`, or any tool that defers completion past the current turn — the iteration worker is synchronous; it must either complete the work and return `ITERATION_SUMMARY`, OR return a well-formed `action: skipped` summary" constraint. Plus a bats assertion (behavioural per P081 direction) that greps the Step 5 prompt for the forbidding language. Small + bounded + clear edit — S.
@@ -131,3 +131,23 @@ If Option B (tool restriction via Agent-tool parameters) is available in Claude 
 - `packages/itil/skills/work-problems/test/work-problems-step-5-delegation.bats` — target of the new assertion.
 - `.claude/scheduled_tasks.lock` — artefact that signals the bug; cleanup / gitignore candidate.
 - **JTBD-001**, **JTBD-006**, **JTBD-101**, **JTBD-201** — personas this fix serves, mirror-for-mirror with P077's ticket body.
+
+## Fix Released
+
+Deployed in `@windyroad/itil@0.13.0` via commit `260768f` (`fix(itil): P084 — work-problems Step 5 dispatches via claude -p subprocess`). The SKILL.md Step 5 prompt template's Constraints block at line 152 now carries the clause:
+
+> Do NOT use `ScheduleWakeup` under any circumstance (P083 — iteration workers must not self-reschedule).
+
+The forbidding clause landed alongside the P084 subprocess-dispatch rewrite because both changes target the same Step 5 prompt template and the P084 commit was the nearest open-path vehicle. The release provenance appears in `packages/itil/CHANGELOG.md` line 262 (0.13.0 entry — the Minor Changes bullet lists 260768f). Subsequent patch releases have carried the clause untouched.
+
+Regression guard added in the same commit that transitions this ticket: `packages/itil/skills/work-problems/test/work-problems-step-5-delegation.bats` now contains two bats contract assertions — one for the forbidding clause's presence and one for the inline P083 citation — so removal of the clause in any future edit fails CI. STRUCTURAL doc-lint pattern per ADR-037's Permitted Exception (same rationale as the file's other 22 assertions on the Step 5 prompt template).
+
+Awaiting user verification. Verification procedure: run an AFK `/wr-itil:work-problems` loop with at least one gate-covered iteration, confirm no `.claude/scheduled_tasks.lock` artefact appears and each iteration returns a well-formed `ITERATION_SUMMARY`. Additionally confirm `bats packages/itil/skills/work-problems/test/work-problems-step-5-delegation.bats` passes the two new assertions (tests 23 and 24).
+
+**Sub-concerns deferred to follow-up tickets** (not blocking verification):
+
+- `.claude/scheduled_tasks.lock` `.gitignore` / cleanup handling — open as a sibling ticket if the concern re-surfaces.
+- Step 6.75 halt-message diagnostic for lock-file presence — open as a sibling ticket if the concern re-surfaces.
+- ADR-032 amendment to promote the forbidding clause to a canonical "AFK iteration-worker prompt constraint" so downstream pattern adopters inherit it — open as a sibling ticket when the next plugin adopts the iteration-isolation pattern.
+
+These three items were listed in the Investigation Tasks at ticket creation; the primary defence (the prompt clause + regression guard) is sufficient to close the main concern. The sub-concerns can be opened independently without re-opening this ticket.
