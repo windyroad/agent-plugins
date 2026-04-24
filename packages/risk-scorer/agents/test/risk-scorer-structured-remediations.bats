@@ -105,17 +105,19 @@ setup() {
 
 @test "pipeline.md RISK_REMEDIATIONS format has no action_class column" {
   # ADR-042 Rule 2a: no structured action_class column. The agent reads
-  # the description and decides.
-  run grep -q "action_class" "$PIPELINE"
+  # the description and decides. Match only markdown-table column-header
+  # rows so prose mentions of "action_class" (e.g. "No structured
+  # action_class column.") do not trip the assertion (P114).
+  run grep -qE '^\| *action_class\b' "$PIPELINE"
   [ "$status" -ne 0 ]
 }
 
 @test "wip.md RISK_REMEDIATIONS format has no action_class column" {
-  run grep -q "action_class" "$WIP"
+  run grep -qE '^\| *action_class\b' "$WIP"
   [ "$status" -ne 0 ]
 }
 
 @test "plan.md RISK_REMEDIATIONS format has no action_class column" {
-  run grep -q "action_class" "$PLAN"
+  run grep -qE '^\| *action_class\b' "$PLAN"
   [ "$status" -ne 0 ]
 }
