@@ -1,7 +1,8 @@
 # Problem 110: Risk register has no passive trigger — `/wr-risk-scorer:create-risk` alone partially satisfies JTBD-001
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-22
+**Fix Released**: 2026-04-25 (pending release)
 **Priority**: 8 (Medium) — Impact: Minor (2) x Likelihood: Likely (4)
 **Effort**: M
 **WSJF**: (8 × 1.0) / 2 = **4.0**
@@ -67,3 +68,43 @@ Pending investigation. Expected shape: pick one of (b)/(c)/(d) after 30 days of 
 - **JTBD-005 (Invoke Governance Assessments On Demand)** — already served by P102's slash command.
 - **ADR-026 (Risk-scorer grounding)** — may need amendment if Investigation Task (b) lands.
 - **ADR-038 (Progressive disclosure via hook-injected prose)** — the pattern that candidate (d) would follow.
+
+## Fix Released
+
+**Date**: 2026-04-25
+**Release**: pending (changeset `.changeset/wr-risk-scorer-p110-passive-trigger.md`, wr-risk-scorer minor bump)
+
+### Scope landed
+
+Candidate (b) — pipeline back-channel — shipped. The `wr-risk-scorer:pipeline` agent now emits a structured `RISK_REGISTER_HINT:` block alongside its existing `RISK_SCORES:` / `RISK_REMEDIATIONS:` outputs whenever a register-worthy risk shape is identified. The calling orchestrator consumes the hint post-remediation-loop and invokes `/wr-risk-scorer:create-risk` with pre-filled context. This is the passive trigger that closes the JTBD-001 gap P102 left open.
+
+### Why (b) was chosen over (c) and (d)
+
+Architect gate verdict (2026-04-25):
+
+- **(b) shipped** — the pipeline agent is hook-fired on every commit/push/release gate, so a hint emitted from it inherits the passivity JTBD-001 requires ("no manual step is needed to trigger reviews — they happen on every edit"). It directly addresses the JTBD-001 failure mode by routing the risk data the scorer already computes into the register contract, instead of depending on the assistant remembering to invoke create-risk.
+- **(c) deferred** — retro-step is genuinely additive (session-scope catch for non-pipeline observations like plan-mode findings or AFK session observations), but piling a second surface change on top of (b) would widen the M-iteration blast radius unnecessarily. Tracked as a follow-up ticket.
+- **(d) rejected** — a CLAUDE.md UserPromptSubmit hook recreates the same "agent skips step" failure mode JTBD-001 identifies as a pain point. ADR-038 progressive-disclosure would also make implementation cost non-trivial (session-marker sync, drift tests, CI step). Not worth the cost for a trigger that fails JTBD-001's own test.
+
+### Surface area
+
+- `packages/risk-scorer/agents/pipeline.md` — new "Risk Register Hand-Off (Passive Trigger)" section defining the RISK_REGISTER_HINT: contract, trigger conditions (above-appetite-residual / confidentiality-disclosure / user-stated-precondition), reason-tag vocabulary, post-loop consumption semantics, silence guarantee.
+- `packages/risk-scorer/agents/test/risk-scorer-register-hint.bats` — doc-lint guard for the new contract (8 assertions; Permitted Exception per ADR-005/P011).
+- `docs/decisions/015-on-demand-assessment-skills.proposed.md` — new "Scorer Output Contract: RISK_REGISTER_HINT: Companion Line (P110)" section + two Confirmation bullets.
+
+### Verification
+
+- All 52 risk-scorer agent bats tests pass, including the 8 new RISK_REGISTER_HINT assertions.
+- Full repo bats suite: 854 tests, zero failures.
+- No ADR-026 amendment required — reason-tags are an enumerated vocabulary, not quantitative estimates.
+- No ADR-042 Rule 2a conflict — hint is a post-loop sibling output, not a within-loop remediation.
+
+### Follow-ups (not blocking closure)
+
+- File a follow-up ticket for candidate (c) retro-step — session-scope catch for observations outside pipeline gates (plan mode, AFK findings, mid-session reflections).
+- Observe over 30 days whether the pipeline hint alone produces register population that matches pipeline-computed risk events.
+
+### Open questions for user review
+
+- Should the downstream `assess-release` / `assess-wip` skills be extended to parse `RISK_REGISTER_HINT:` and offer to invoke `/wr-risk-scorer:create-risk` directly (closing the loop end-to-end), or should consumption stay at the orchestrator / assistant level for now?
+- Does the three-tag enumerated vocabulary cover the expected register-worthy shapes, or should we add a fourth tag (e.g. `control-drift` — a previously-claimed control no longer exercises its failure scenario) before release?

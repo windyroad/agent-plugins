@@ -169,6 +169,47 @@ Include downstream back-pressure in the remediation list:
 
 Do NOT emit free-text "Your call:" or "consider splitting" prose. The structured `RISK_REMEDIATIONS:` block is the only output for above-appetite guidance.
 
+## Risk Register Hand-Off (Passive Trigger)
+
+When a pipeline run identifies a **register-worthy risk shape**, emit a structured `RISK_REGISTER_HINT:` block so the calling orchestrator can hand the finding off to `/wr-risk-scorer:create-risk` with pre-filled context. This is the passive trigger for the standing-risk register (`docs/risks/`) — it routes findings the pipeline already computes into the register without relying on the assistant remembering to invoke the create-risk skill (P110 / JTBD-001).
+
+### Trigger conditions (emit a hint when ANY fire)
+
+1. **Above-appetite residual** — any cumulative residual score exceeds appetite (> 4 per `RISK-POLICY.md`). A risk that breaches appetite on this change is a standing-risk candidate, not just a one-off remediation target.
+2. **Confidentiality disclosure** — the Confidential Information Disclosure check (below) flagged business metrics (revenue, user counts, pricing, client names, traffic volumes) in the diff. Confidentiality leaks are standing-risk-shaped even after the immediate remediation.
+3. **User-stated precondition** — the User-Stated Preconditions Check (below) flagged an unmet paired capability as a standalone Risk item. Unmet preconditions are standing-risk-shaped because the dependency gap persists until the paired capability ships.
+
+### Format (bulleted-list shape, multi-hint capable)
+
+A single pipeline run MAY surface more than one register-worthy shape (e.g. both an above-appetite residual AND a confidentiality leak). Emit one bullet per triggered condition:
+
+```
+RISK_REGISTER_HINT:
+- above-appetite-residual | <one-line prefill describing the risk>
+- confidentiality-disclosure | <one-line prefill citing what was flagged>
+- user-stated-precondition | <one-line prefill citing the unmet precondition>
+```
+
+### Reason-tag vocabulary (enumerated — reserved)
+
+The first column is one of exactly three reserved tags. Do NOT invent new tags; open new tickets to extend the vocabulary.
+
+| Tag | Meaning | Source section in this prompt |
+|---|---|---|
+| `above-appetite-residual` | Cumulative residual score > appetite | Above-Appetite Remediations |
+| `confidentiality-disclosure` | Business metric or client detail flagged in diff | Confidential Information Disclosure |
+| `user-stated-precondition` | Paired capability unmet; standalone Risk item | User-Stated Preconditions Check |
+
+The second column is free-form prose — a one-line prefill the orchestrator can pass to `/wr-risk-scorer:create-risk` as the initial risk title and description.
+
+### Consumption semantics (post-loop)
+
+The hint is consumed by the calling orchestrator **after** the ADR-042 auto-apply remediation loop converges (risk returns within appetite) or halts (Rule 5 exhaustion / user-aborted). Do NOT expect the hint to be consumed interleaved with remediation execution — if a remediation reduces the residual back within appetite, the above-appetite hint should still be recorded because the risk is standing even if this change is no longer in breach. The orchestrator decides whether to invoke `/wr-risk-scorer:create-risk` with the prefill or to defer to the user.
+
+### Silence guarantee (when no trigger fires)
+
+Do NOT emit `RISK_REGISTER_HINT:` when all cumulative scores are within appetite AND no confidentiality disclosure AND no user-stated-precondition fired. The hint is additive to the existing Below-Appetite Output Rule — a silent pass MUST remain silent. Do not emit an empty `RISK_REGISTER_HINT:` header with no bullets either — omit the block entirely.
+
 ## Confidential Information Disclosure
 
 Check diffs for business metrics (revenue, user counts, pricing, traffic volumes). Flag as a standalone risk if found.

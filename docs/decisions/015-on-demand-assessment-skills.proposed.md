@@ -149,6 +149,36 @@ RISK_REMEDIATIONS:
 
 The agent reads the `description` column and decides what to do. There is no structured `action_class` column (ADR-042 Rule 2a).
 
+## Scorer Output Contract: `RISK_REGISTER_HINT:` Companion Line (P110)
+
+The scorer's structured `RISK_REGISTER_HINT:` block is the passive-trigger channel that routes register-worthy pipeline findings into the standing-risk register (`docs/risks/`). It is additive — emitted alongside (not instead of) `RISK_SCORES:`, `RISK_REMEDIATIONS:`, and `RISK_BYPASS:`. Currently defined for the `pipeline` scoring mode only; `wip` and `plan` may gain their own hints in a follow-up if a register-worthy shape surfaces in those modes.
+
+### Shape (bulleted-list, multi-hint capable)
+
+```
+RISK_REGISTER_HINT:
+- <reason-tag> | <one-line prefill>
+```
+
+| Column | Purpose |
+|--------|---------|
+| `reason-tag` | One of three reserved tags: `above-appetite-residual`, `confidentiality-disclosure`, `user-stated-precondition`. Closed vocabulary — extending requires a new ticket. |
+| `prefill` | Free-form one-line description the orchestrator passes to `/wr-risk-scorer:create-risk` as initial risk title/description. |
+
+### Consumption timing (post-loop)
+
+The hint is consumed by the orchestrator **after** the ADR-042 Rule 2a auto-apply remediation loop converges or halts — not interleaved. A remediation that reduces residual back within appetite does NOT retract the hint; the risk is standing even if this change is no longer in breach. This separation preserves ADR-042 Rule 2a's within-loop decision semantics: the loop sees only `RISK_REMEDIATIONS:` descriptions and decides what to apply; the register hint is a sibling output that sits outside the loop's decision surface.
+
+### Silence semantics
+
+No hint is emitted when all cumulative scores are within appetite AND no confidentiality-disclosure or user-stated-precondition item fires. This extends the Below-Appetite Output Rule (ADR-013 Rule 5) — a silent policy-authorised pass remains silent across all structured blocks, including the hint.
+
+### Problem and JTBD trace
+
+- P110 — parent ticket; closes the passive-trigger gap that P102's MVP slash command left open.
+- JTBD-001 (Enforce Governance Without Slowing Down) — the "no manual step is needed to trigger reviews" desired outcome; the pipeline agent is passively invoked, so the hint inherits that passivity.
+- JTBD-005 (Invoke Governance Assessments On Demand) — composed with the hint via pre-filled `/wr-risk-scorer:create-risk` invocation.
+
 ## Confirmation
 
 - [x] `packages/risk-scorer/skills/assess-release/SKILL.md` created; skill delegates to `wr-risk-scorer:pipeline` via the Skill tool
@@ -160,6 +190,8 @@ The agent reads the `description` column and decides what to do. There is no str
 - [x] ADR-002 package inventory updated to list all new skills under architect, risk-scorer, and jtbd entries
 - [x] `docs/jtbd/README.md` includes JTBD-005 and JTBD-202 ✓ (done)
 - [x] JTBD-005, JTBD-202, updated tech-lead persona, updated JTBD-101 are committed ✓ (done)
+- [x] `packages/risk-scorer/agents/pipeline.md` defines a `RISK_REGISTER_HINT:` block with the three reserved reason tags (`above-appetite-residual`, `confidentiality-disclosure`, `user-stated-precondition`), post-loop consumption semantics, and the silence-when-no-trigger-fires rule (P110)
+- [x] `packages/risk-scorer/agents/test/risk-scorer-register-hint.bats` guards the contract (P110)
 
 ## Related
 
