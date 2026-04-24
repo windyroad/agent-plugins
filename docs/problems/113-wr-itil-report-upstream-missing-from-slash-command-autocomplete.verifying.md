@@ -1,10 +1,10 @@
 # Problem 113: `/wr-itil:report-upstream` is installed and enabled but does not appear in Claude Code slash-command autocomplete
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-24
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Likely (3)
-**Effort**: M
-**WSJF**: (9 × 1.0) / 2 = **4.5**
+**Effort**: S (single-line frontmatter edit)
+**WSJF**: 0 (excluded from ranking per ADR-022 — Verification Pending)
 
 > Identified 2026-04-24 during a session where the user wanted to invoke `/wr-itil:report-upstream` and it was not discoverable. Typed `/report` — only `/insights` / `/teleport` / `/remote-env` appeared (none of which are wr- plugin skills). Typed `/wr-itil:report` — only `/wr-itil:work-problems` appeared (fuzzy match on "r" / "po"). The direct-prefix match `/wr-itil:report-upstream` was absent from the dropdown both times. The skill file exists at the expected path and the plugin is enabled — the skill is silently missing from the enumerator that feeds autocomplete.
 
@@ -48,34 +48,68 @@ P071 (Argument-based skill subcommands are not discoverable) describes a differe
 
 ## Root Cause Analysis
 
-### Preliminary Hypothesis
+### Confirmed root cause (2026-04-24 investigation)
 
-Three candidate root causes, ranked by how cheap they are to confirm:
+`packages/itil/skills/report-upstream/SKILL.md` declares `allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion` — missing two tools the skill body actually invokes:
 
-1. **SKILL.md name-field collision or prefix conflict.** Some internal enumerator may deduplicate or filter by a name-prefix heuristic. If `/wr-itil:report-upstream`'s `name:` frontmatter or file path collides with a Claude Code built-in or a hook-reserved prefix, the enumerator may skip it. Quick to confirm: compare the SKILL.md frontmatter field-by-field against a sibling that DOES appear (e.g. `/wr-itil:manage-problem`). The user's in-session `head -20` comparison showed identical shape, so this is lower-likelihood than hypothesis 2.
-2. **Plugin manifest enumeration gap.** `@windyroad/itil`'s `package.json` / `plugin.json` may not list `report-upstream` in whatever skills-exported array Claude Code reads, OR the enumerator may require a specific field (e.g. `slashCommand`, `displayName`) that `report-upstream`'s manifest entry lacks. The plugin.json inspected this session contained only `name`, `version`, `description` — no skills-array visible at all, so either (a) Claude Code auto-enumerates the `skills/` subdir (in which case why is this one skipped) or (b) there's a skills manifest elsewhere (`marketplace.json`?) with per-skill entries that need explicit authoring. Most likely root cause.
-3. **Autocomplete filter heuristic.** Claude Code may have an undocumented filter that hides skills matching some criterion (e.g. allowed-tools list includes a restricted tool, skill name contains a reserved substring like "upstream" treated as a network-call signal). Would be Claude-Code-side, not fixable in this repo; if so, this ticket's resolution is "report to Anthropic" and park. Low-likelihood but must be ruled out.
+- **Missing `Agent`** — line 330 invokes `wr-risk-scorer:pipeline` subagent (requires the `Agent` tool).
+- **Missing `Skill`** — line 330 falls back to `/wr-risk-scorer:assess-release` skill per ADR-015 (requires the `Skill` tool).
+
+Cross-skill comparison of `allowed-tools` across all 13 itil skills establishes the pattern: every AskUserQuestion-declaring itil skill that does multi-skill orchestration also declares `Skill`. `report-upstream` is the **only** AskUserQuestion-declaring itil skill that omits `Skill` — and the only one failing autocomplete. This is an improbable coincidence.
+
+**Candidate mechanism (to confirm post-release)**: Claude Code's TUI slash-command autocomplete appears to validate declared-vs-used tools in skill frontmatter and silently drop skills whose bodies invoke tools not declared in `allowed-tools`, while still registering the skill for agent-side `Skill()` invocation (which bypasses autocomplete). The server-side enumerator (which populates the agent's available-skills list) is more lenient; the TUI client enumerator is stricter.
+
+This explains every observation in the ticket:
+- Agent-side `Skill(skill: "wr-itil:report-upstream")` works → server enumerator registered the skill
+- TUI autocomplete omits it → client enumerator filtered it out on declared-vs-used mismatch
+- Sibling skills work → they declare all tools they invoke
+- No plugin.json skills array, no marketplace manifest gap → path-based enumeration works for siblings, so the gap is not in enumeration, it is in post-enumeration validation
+
+### Hypotheses ruled out
+
+- **Hypothesis 1** (frontmatter name collision / prefix conflict) — ruled out. `od -c` byte dump confirms identical frontmatter shape to `manage-problem`; both parse as valid YAML with the same three keys (`name`, `description`, `allowed-tools`); no invisible / control / non-ASCII characters in frontmatter.
+- **Hypothesis 2** (plugin manifest enumeration gap) — ruled out. `packages/itil/.claude-plugin/plugin.json` has no `skills` array for ANY skill, yet 12/13 siblings enumerate correctly. Path-based enumeration (`skills/<name>/SKILL.md`) is what Claude Code uses.
+- **Hypothesis 3** (Claude-Code-side filter) — **partially confirmed**. A filter exists (allowed-tools completeness), but it is not opaque or "undocumented" in the sense originally feared — it is a reasonable sanity check. The fix is in this repo, not upstream. Parking-with-upstream-report is NOT required.
 
 ### Investigation Tasks
 
-- [ ] Diff the SKILL.md frontmatter of `report-upstream` vs a working sibling (e.g. `manage-problem`) — any single-field difference. Byte-level diff of the frontmatter block.
-- [ ] Locate the `@windyroad/itil` marketplace / plugin manifest that lists skills (check `marketplace.json`, `plugin.json`, any `skills` array). Confirm whether `report-upstream` is registered or absent.
-- [ ] If manifest is absent, confirm the enumerator is path-based (`skills/<name>/SKILL.md`) — compare with other working plugins' manifests to establish the expected shape.
-- [ ] Test via clean install: uninstall + reinstall `wr-itil` in a fresh project and observe whether `/wr-itil:report-upstream` autocompletes. Isolates per-session caching from per-install registration.
-- [ ] If manifest is the root cause, patch the manifest AND add a per-plugin bats / CI check that every `skills/<NAME>/SKILL.md` has a corresponding manifest entry (prevents regression on future new skills).
-- [ ] If the root cause is Claude-Code-side filter, open an upstream report via `/wr-itil:report-upstream` itself (ironically, via the workaround invocation) and park this ticket with the upstream reference.
+- [x] Diff the SKILL.md frontmatter of `report-upstream` vs a working sibling (`manage-problem`) — byte-level diff done; identical shape; ruled out Hypothesis 1.
+- [x] Locate the `@windyroad/itil` plugin manifest — confirmed no skills array exists for any skill; path-based enumeration; ruled out Hypothesis 2.
+- [x] Tabulate `allowed-tools` across all 13 itil skills — identified `report-upstream` as the sole outlier among AskUserQuestion-declaring skills.
+- [x] Cross-reference with skill body usage — confirmed line 330 invokes both `Agent` (subagent) and `Skill` (fallback) without declaration.
+- [ ] Verify the fix resolves autocomplete (post-release, user verification).
+- [ ] (Follow-up, advisory) consider a lint rule + ADR enforcing "every tool invoked in SKILL.md body must appear in `allowed-tools`" to prevent recurrence across `@windyroad/*` plugins.
+
+### Reproduction test
+
+Not added. A structural bats check that greps for `Skill, Agent` in `report-upstream/SKILL.md` would be a structural test per P081 ("wasteful and not real tests"). The behavioural test — "when user types `/wr-itil:report` in the TUI, autocomplete shows `report-upstream`" — is not reachable from the test harness; verification is via user observation in the next session after `@windyroad/itil` ships.
 
 ### Fix Strategy
 
-**Shape**: investigate-then-fix. Root cause unconfirmed; the three hypotheses above imply three very different fixes (SKILL.md edit, plugin manifest edit, or upstream report + park). Do not commit to a fix shape before the diff/manifest inspection.
+**Shape**: one-line frontmatter edit. **Target file**: `packages/itil/skills/report-upstream/SKILL.md` line 4.
 
-**Target file (likely)**: `packages/itil/.claude-plugin/plugin.json` or a sibling marketplace manifest if one exists.
+**Before**:
+```
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
+```
 
-**Evidence**:
+**After**:
+```
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Skill, Agent
+```
+
+**Evidence supporting this specific fix**:
 - 2026-04-24 observation: `/wr-itil:report` autocomplete returns only `/wr-itil:work-problems` (screenshot evidence in session history).
 - SKILL.md presence confirmed: `~/.claude/plugins/cache/windyroad/wr-itil/0.18.0/skills/report-upstream/SKILL.md` — 360 lines, 21KB, valid YAML frontmatter.
 - Plugin enabled: `.claude/settings.json` contains `"wr-itil@windyroad"` in `enabledPlugins`.
 - Sibling skills from the same plugin version register correctly — rules out plugin-wide registration failure.
+- allowed-tools cross-skill tabulation: every AskUserQuestion-declaring itil skill declares `Skill`; `report-upstream` is the sole exception.
+- Architect review (2026-04-24): PASS — fix aligns with ADR-015 fallback pattern; no ADR conflict; advisory follow-up ADR optional if fix works.
+- JTBD review (2026-04-24): PASS — serves JTBD-001 (enforce governance without slowing down) and JTBD-301 (report without pre-classifying); discovery-friction removal, no behaviour change.
+
+## Fix Released
+
+Fix landed 2026-04-24 in `packages/itil/skills/report-upstream/SKILL.md` line 4: added `Skill, Agent` to `allowed-tools`. Ships in the next `@windyroad/itil` patch release (changeset `.changeset/p113-report-upstream-allowed-tools.md`). Verification path: after `/install-updates` in a new session, type `/wr-itil:report` in the TUI and confirm `/wr-itil:report-upstream` appears in autocomplete. If autocomplete still omits it, the allowed-tools hypothesis is wrong and the ticket reopens for upstream escalation.
 
 ## Dependencies
 

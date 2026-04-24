@@ -1,7 +1,7 @@
 ---
 name: wr-itil:report-upstream
 description: Report a local problem ticket as a structured issue against an upstream repository, with bidirectional cross-references and SECURITY.md-aware routing for security-classified tickets. Implements the contract in ADR-024, with ADR-033 governing problem-first classifier + default body shape.
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Skill, Agent
 ---
 
 # Report Upstream — Cross-Project Problem-Reporting Skill
