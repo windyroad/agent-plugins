@@ -1,10 +1,11 @@
 # Problem 113: `/wr-itil:report-upstream` is installed and enabled but does not appear in Claude Code slash-command autocomplete
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-24
+**Closed**: 2026-04-24
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Likely (3)
-**Effort**: S (single-line frontmatter edit)
-**WSJF**: 0 (excluded from ranking per ADR-022 — Verification Pending)
+**Effort**: S (single-line frontmatter edit for the semantic fix; per-machine worktree cleanup for the actual RCA)
+**WSJF**: 0 (closed)
 
 > Identified 2026-04-24 during a session where the user wanted to invoke `/wr-itil:report-upstream` and it was not discoverable. Typed `/report` — only `/insights` / `/teleport` / `/remote-env` appeared (none of which are wr- plugin skills). Typed `/wr-itil:report` — only `/wr-itil:work-problems` appeared (fuzzy match on "r" / "po"). The direct-prefix match `/wr-itil:report-upstream` was absent from the dropdown both times. The skill file exists at the expected path and the plugin is enabled — the skill is silently missing from the enumerator that feeds autocomplete.
 
@@ -142,7 +143,13 @@ A per-machine cleanup is not a repeatable fix for other adopters. The gap is in 
 2. In the TUI, type `/wr-itil:report`.
 3. Confirm `/wr-itil:report-upstream` now appears in autocomplete.
 
-If it appears, the stale-install RCA is confirmed and this ticket closes. If it still does not appear, a further hypothesis is needed (possibly Claude Code client caching, a separate TUI filter, or an upstream issue) — ticket reopens.
+### Closed 2026-04-24
+
+User restarted + re-tested; screenshot confirms `/wr-itil:report-upstream` is the top match when typing `/wr-itil:repor` (alongside `/wr-itil:work-problems` and `/wr-itil:work-problem` as secondary fuzzy matches). User explicitly confirmed: "fixed!". Stale-install RCA confirmed. Abandoned `.claude/worktrees/upbeat-keller` also removed via `git worktree remove --force` + `git branch -d claude/upbeat-keller`.
+
+The shipped `allowed-tools` addition (`Skill, Agent`) in `@windyroad/itil@0.18.1` is retained — still a correct semantic improvement (skill body invokes both tools; they should be declared).
+
+Systemic follow-up tracked in **P115** (install-updates worktree-awareness).
 
 ## Dependencies
 
