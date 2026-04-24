@@ -45,7 +45,6 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 |----|-------|----------|------------------|
 | P103 | `/wr-itil:work-problems` orchestrator escalates above-appetite release decisions already resolved by the risk scorer — defeats AFK purpose | 2026-04-22 (ADR-041 landing — auto-apply + never-release-above-appetite invariant) | no (fresh) |
 | P104 | `/wr-itil:work-problems` partial-progress iteration outcome can paint the release queue into a mid-state corner — slice-1-without-slice-2 hazard | 2026-04-22 (ADR-041 landing — Rule 7 blesses docs/changesets-holding/) | no (fresh) |
-| P100 | `wr-retrospective` does not auto-surface `docs/BRIEFING.md` to the agent at session start | 2026-04-22 (slice 2: SessionStart hook + ADR-040 + stub delete, @windyroad/retrospective 0.7.0) | no (fresh) |
 | P094 | manage-problem does not refresh README.md on ticket creation | 2026-04-22 (AFK iter 3) | no (fresh) |
 | P093 | transition-problem ↔ manage-problem circular delegation for `<NNN> <status>` args | 2026-04-22 (AFK iter 2) | no (fresh) |
 | P092 | install-updates Step 4 `<plugin-short-name>` placeholder is ambiguous about the `wr-` prefix | 2026-04-22 (AFK iter 1) | no (fresh) |

@@ -1,6 +1,6 @@
 # Problem 100: `wr-retrospective` does not auto-surface `docs/BRIEFING.md` to the agent at session start — cross-session learnings go unread in adopter projects
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-22
 **Priority**: 20 (High) — Impact: Major (4) x Likelihood: Almost certain (5)
 **Effort**: L
