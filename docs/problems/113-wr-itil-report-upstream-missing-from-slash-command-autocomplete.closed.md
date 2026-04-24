@@ -164,3 +164,13 @@ Systemic follow-up tracked in **P115** (install-updates worktree-awareness).
 - **ADR-033** (`docs/decisions/033-report-upstream-classifier-problem-first.proposed.md`) — partially supersedes ADR-024 Steps 3 and 5; same skill affected.
 - **P067** (`docs/problems/067-report-upstream-classifier-is-not-problem-first.verifying.md`) — recent successful fix to `report-upstream`; the Fix Released commit proves the skill file was being updated correctly. Suggests the registration gap is a newer regression or a long-standing dormant issue only surfaced when a user tried to discover the skill by prefix.
 - **JTBD-001** (`docs/jtbd/solo-developer/JTBD-001-enforce-governance.proposed.md`) — under-60-second per-edit target. The discovery workaround (type full name) doesn't exceed that; the discovery FAIL does break the "without slowing down" half.
+- **Reported upstream**: https://github.com/anthropics/claude-code/issues/52831 (2026-04-24)
+
+## Reported Upstream
+
+- **URL**: https://github.com/anthropics/claude-code/issues/52831
+- **Reported**: 2026-04-24
+- **Template used**: bug_report.yml (anthropics/claude-code ships bug/feature/docs/model_behavior templates; no `problem-report.yml` — Step 3 fell through to backward-compat `bug` shape per ADR-033)
+- **Disclosure path**: public issue (not security-classified; no SECURITY.md check gate tripped)
+- **Cross-reference confirmed**: yes — upstream issue body contains the "Reported from https://github.com/windyroad/agent-plugins ... tracked locally as P113" cross-reference per ADR-024 Step 5 structured default contract
+- **Scope**: combined report covering (a) abandoned-worktree installs persisting in `installed_plugins.json`, (b) TUI-vs-agent skill enumerator asymmetry that silently shadows newer installs when a stale duplicate exists. References adjacent upstream issues #43763, #52218, #47077, #51008, #41828, #49669 so maintainers see the registry-staleness family.
