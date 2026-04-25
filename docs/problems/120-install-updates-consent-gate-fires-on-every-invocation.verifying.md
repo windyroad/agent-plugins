@@ -1,10 +1,28 @@
 # Problem 120: `/install-updates` consent gate fires on every invocation despite the answer being invariably "all confirmed siblings"
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-25
+**Fix Released**: 2026-04-25 (AFK iter; repo-local skill per ADR-030 — no changeset)
 **Priority**: 10 (High) — Impact: Minor (2) x Likelihood: Almost Certain (5)
 **Effort**: S
-**WSJF**: (10 × 1.0) / 1 = **10.0**
+**WSJF**: 0 (Verification Pending — multiplier 0 per ADR-022)
+
+## Fix Released
+
+Shape A landed (architect APPROVED-WITH-AMENDMENTS verdict converged + JTBD PASS + style-guide PASS + voice-tone PASS):
+
+- `.claude/skills/install-updates/SKILL.md` Step 6 split into 6a (cache check), 6b/6c (gate fire on cache miss), 6d (cache write at end of successful run). Cache-hit path skips the gate entirely per ADR-013 Rule 5 (policy-authorised silent proceed); cache-miss-with-stale-cache fires the gate with previous answer surfaced as `(Recommended)`. Two escape hatches preserve dry-run access: `INSTALL_UPDATES_RECONFIRM=1` envvar or `rm .claude/.install-updates-consent`. ADR-034 cited as parallel-pattern precedent (`.claude/.auto-install-consent`).
+- `.claude/skills/install-updates/REFERENCE.md` — new "Consent cache (P120)" section documenting cache file shape (JSON `{"scope":[...],"cached_at":"<ISO>"}`), set-equality match rule, invalidation rules (sibling-set change invalidates; plugin-list change does not; no time expiry), Rule 5 governance, ADR-034 parallel pattern, escape hatches, Step 6.5 still runs on cache-hit.
+- `.gitignore` — adds `.claude/.install-updates-consent` AND `.claude/.auto-install-consent` (sibling for ADR-034 when its hook lands).
+- `.claude/skills/install-updates/test/install-updates-consent-cache.bats` — NEW; 15 doc-lint contract assertions per ADR-037 Permitted Exception (cache file path, gate-on-cache language, sibling-set-change invalidation, cache-write language, ADR-034 citation, Rule 5 citation, escape hatches, set-equality rule, Step 6.5 runs on cache-hit). 15/15 green.
+- `docs/decisions/030-repo-local-skills-for-workflow-tooling.proposed.md` — Confirmation criterion amendment "Consent cache carve-out (P120, 2026-04-25 amendment)" specifying set-equality match, dry-run override path, Step 6.5 still runs on cache-hit.
+- `docs/decisions/034-auto-install-on-next-session-start.proposed.md` — sibling-marker coexistence note added under Consequences › Bad clarifying that the two consent markers (`.claude/.auto-install-consent` for ADR-034, `.claude/.install-updates-consent` for P120) are independent.
+
+Architect verdict required corrections applied: Rule 5 (not Rule 6) citation throughout SKILL.md / REFERENCE.md / ticket Related section; dry-run override via `INSTALL_UPDATES_RECONFIRM=1` envvar OR cache-file deletion; Step 6.5 still runs on cache-hit; set-equality match rule explicit; sibling-marker coexistence note in ADR-034.
+
+Verification path: next interactive `/install-updates` invocation in this workspace where the sibling set has been answered before. **Expected**: gate skipped; install proceeds with the cached scope; cache file written at end. Sibling-set change between invocations should re-prompt with previous answer surfaced.
+
+Repo-local skill per ADR-030 — effective on next `/install-updates` invocation; no changeset, no plugin republish required.
 
 > Surfaced 2026-04-25 by direct user correction at the end of an AFK `/wr-itil:work-problems` loop that triggered `/install-updates`: *"the install-updates skill wastes time asking me to confirm. Yes it should install in all 6 projects. Don't ask me again"*. The strong-signal correction (P078 trigger) is durable behaviour evidence — every prior `/install-updates` invocation in this workspace has answered the consent gate with `All N projects (Recommended)`. The gate has zero decision content; it is a productivity tax on every release.
 
@@ -105,7 +123,7 @@ No new ADR required if Shape A is chosen — this is an ADR-030 Confirmation ame
 - **P078** (`docs/problems/078-assistant-does-not-offer-problem-ticket-on-user-correction.verifying.md`) — the trigger that surfaced this ticket. The user's correction language ("wastes time", "Don't ask me again") matched the strong-signal vocabulary; this ticket is the captured-on-correction outcome.
 - **ADR-030** (`docs/decisions/030-repo-local-skills.proposed.md`) — Confirmation criterion that defines the consent gate. This ticket's fix amends Confirmation to describe the cache-hit exemption.
 - **ADR-034** (auto-install on next session start) — already specifies `.claude/.auto-install-consent` for the SessionStart surface. Architectural precedent for this ticket's `.claude/.install-updates-consent`.
-- **ADR-013 Rule 6** — non-interactive fallback. The cache-hit path is a Rule 6 cousin: when the answer is already known, the structured prompt is bypassed in favour of acting on the cached decision.
+- **ADR-013 Rule 5** — policy-authorised silent proceed. Architect verdict 2026-04-25 (this iteration): cache-hit is a Rule 5 case, NOT Rule 6. Rule 5 explicitly authorises silent proceed when a stable user authorisation is on file; the cached on-disk consent IS the policy authorisation. Rule 6 governs cases where AskUserQuestion is unavailable, which is unrelated.
 - `.claude/skills/install-updates/SKILL.md` Step 6 — the gate this ticket modifies.
 - `.claude/skills/install-updates/REFERENCE.md` — rationale doc; may need a sibling section on the cache contract.
 - **JTBD-001** (Enforce Governance Without Slowing Down) — primary fit. "Without slowing down" fails when every release-loop ends with a redundant consent prompt.
