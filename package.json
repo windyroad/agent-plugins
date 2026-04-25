@@ -16,7 +16,7 @@
     "bats-support": "^0.3.0"
   },
   "scripts": {
-    "test": "bats --recursive packages/*/hooks/test/ packages/*/skills/*/test/ packages/*/agents/test/ packages/shared/test/ .claude/skills/*/test/",
+    "test": "bats --recursive packages/*/hooks/test/ packages/*/skills/*/test/ packages/*/agents/test/ packages/*/scripts/test/ packages/shared/test/ .claude/skills/*/test/",
     "sync:install-utils": "bash scripts/sync-install-utils.sh",
     "check:install-utils": "bash scripts/sync-install-utils.sh --check",
     "sync:session-marker": "bash scripts/sync-session-marker.sh",

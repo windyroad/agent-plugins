@@ -128,6 +128,27 @@ When `AskUserQuestion` is unavailable (non-interactive context, `--channels` fla
 - If risk is within appetite: proceed to commit silently
 - If risk is above appetite: skip the commit, clearly report "Commit skipped — risk above appetite and user confirmation unavailable. Stage and commit manually when ready."
 
+### Reconciliation as preflight robustness layer (P118, 2026-04-25)
+
+The single-commit-transaction discipline above (Step 11 in manage-problem; Step 7 in transition-problem) covers **per-operation** README staging — the new ticket file + the refreshed README ride the same commit. P094 (refresh-on-create) and P062 (refresh-on-transition) both ship and hold their per-session evidence.
+
+But per-operation enforcement cannot retroactively fix drift introduced by **prior sessions**. If any past session committed a ticket change without staging the README refresh (the Step 11 / Step 7 staging contract was skipped — bug, conflict resolution dropped a file, partial-progress hand-off, etc.), the next session inherits a stale README that no per-operation contract can detect or correct in isolation. P118 captured this drift class with direct evidence: 2026-04-24 the README listed 10 open tickets missing from WSJF Rankings + 2 verifying-as-Open + stale Verification Queue rows, all accumulated despite P094 and P062 both Closed.
+
+The Reconciliation contract closes that gap as a **robustness layer** ON TOP of P094 + P062, not a supersession of either:
+
+1. **`packages/itil/scripts/reconcile-readme.sh`** — a diagnose-only mechanical drift detector (read-only; does NOT mutate the README). Reads `docs/problems/<NNN>-*.<status>.md` files, parses the README's WSJF Rankings + Verification Queue + Closed tables, and emits one structured row per drift entry to stdout (≤150 bytes per ADR-038 progressive-disclosure budget). Exit 0 = clean, 1 = drift detected, 2 = parse error.
+2. **`/wr-itil:reconcile-readme`** — agent-applied-edits skill that wraps the script. Step 4 applies row-level Edit operations that **preserve narrative** (the long "Last reviewed" prose paragraph, the Closed-section closure-via free text). Full README regeneration is forbidden — narrative content is human-curated session memory.
+3. **Preflight invocation surfaces**:
+   - `/wr-itil:manage-problem` Step 0 — invoke the script (cheap mechanical check); halt-with-directive on drift; do NOT auto-apply (edit application lives in the dedicated skill).
+   - `/wr-itil:work-problems` Step 0 — invoke the script after the session-continuity pass; auto-apply via the skill in AFK mode (per ADR-013 Rule 6 non-interactive fail-safe) so the orchestrator's Step 3 ranking reads ground truth.
+   - Direct user invocation of `/wr-itil:reconcile-readme` when drift is spotted manually.
+4. **Excluded surfaces**:
+   - `/wr-itil:transition-problem` does NOT invoke the script — P062 already covers transition-time refresh inside the same commit; redundant preflight there would pay the cost on every transition.
+
+The reconciled README rides a dedicated `chore(problems): reconcile README ...` commit per ADR-014's commit-message convention table. It is distinct from any contract-landing or ticket-transition commit so the data correction is attributable to its own SHA.
+
+This sub-rule is amended within ADR-014's existing reassessment window (2026-10-16) — no new ADR.
+
 ## Confirmation
 
 - [ ] `packages/itil/skills/manage-problem/SKILL.md` contains no "Do not commit" instruction

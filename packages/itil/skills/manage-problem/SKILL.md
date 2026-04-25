@@ -162,6 +162,23 @@ What "work" means depends on the problem's status:
 
 ## Steps
 
+### 0. README reconciliation preflight (P118)
+
+Before parsing the request, run the diagnose-only reconciliation check. The contract here catches **cross-session drift** that per-operation refresh paths (P094 refresh-on-create + P062 refresh-on-transition) cannot retroactively see — if any past session committed a ticket change without staging the README refresh, the next manage-problem invocation reads a stale README that lies about what is open / verifying / closed.
+
+```bash
+bash packages/itil/scripts/reconcile-readme.sh docs/problems
+```
+
+Exit-code routing:
+- **Exit 0 (clean)**: continue to Step 1.
+- **Exit 1 (drift detected)**: structured diff lines printed to stdout, one per drift entry (≤150 bytes per ADR-038 progressive-disclosure budget). **Halt this invocation** with a directive to invoke `/wr-itil:reconcile-readme` (interactive mode) or auto-route through the same skill in non-interactive mode (per ADR-013 Rule 6, AFK orchestrator). The reconciliation must complete and commit before this manage-problem invocation proceeds — proceeding into ticket creation / update / transition with a stale README would re-encode the drift into the post-operation refresh and propagate the lie.
+- **Exit 2 (parse error)**: README missing or malformed. Halt with the parse-error message; this needs investigation, not mechanical reconciliation. AFK orchestrators halt-with-report per ADR-013 Rule 6.
+
+This is a **preflight CHECK only** — manage-problem does NOT itself apply edits. The edit application lives in `/wr-itil:reconcile-readme`'s Step 4 with narrative preservation. Per architect verdict on P118 (Q3): manage-problem and work-problems Step 0 invoke the script (cheap mechanical check); transition-problem does NOT (P062 already covers transition-time refresh inside the same commit, redundant preflight there would pay the cost on every transition).
+
+This step is a robustness layer ON TOP of P094 + P062, not a supersession of either — both per-operation contracts remain in force at Step 5 (creation refresh) and Step 7 (transition refresh).
+
 ### 1. Parse the request
 
 Determine the operation from `$ARGUMENTS`:

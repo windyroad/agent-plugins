@@ -59,6 +59,21 @@ After the fetch/divergence check, Step 0 MUST run a session-continuity detection
 
 Step 6.75 treats a Step-0-resolved-with-user-confirmation state as `dirty-for-known-reason`: if the interactive branch's Resume option landed the drafted ADR as iter 1, the iter's commit clears the dirty state and the rest of the loop proceeds normally.
 
+#### README reconciliation preflight (per P118)
+
+After the session-continuity detection pass, Step 0 MUST run the diagnose-only README reconciliation check. The orchestrator reads `docs/problems/README.md`'s WSJF Rankings table to pick the highest-WSJF actionable ticket (Step 3); if that table lies about which tickets are open vs verifying vs closed, the orchestrator burns iterations on no-op tickets — exactly the failure class P118 captures (a prior session committed a ticket transition without staging the README refresh, and no subsequent session systematically reconciled).
+
+```bash
+bash packages/itil/scripts/reconcile-readme.sh docs/problems
+```
+
+Exit-code routing:
+- **Exit 0 (clean)**: continue to Step 1.
+- **Exit 1 (drift detected)**: structured diff lines printed to stdout, one per drift entry (≤150 bytes per ADR-038 progressive-disclosure budget). Per ADR-013 Rule 6 (non-interactive AFK fail-safe), invoke `/wr-itil:reconcile-readme` to apply the corrections + commit a `chore(problems): reconcile README ...` commit, then proceed to Step 1. The reconciled README is the orchestrator's source of truth for Step 3 ranking — a stale read at Step 1 would propagate the lie into the iteration's selection.
+- **Exit 2 (parse error)**: README missing or malformed. Halt the loop with the parse-error message and the structured Prior-Session State report — this is a deeper repair that needs investigation, not mechanical reconciliation.
+
+This is a robustness layer ON TOP of P094 + P062, not a supersession — both per-operation contracts remain in force inside each iteration's manage-problem / transition-problem invocation.
+
 ### Step 1: Scan the backlog
 
 Read `docs/problems/README.md` if it exists and is fresh (check via git history — see manage-problem step 9 for the cache freshness check). If stale or missing, scan all `.open.md` and `.known-error.md` files in `docs/problems/`, extract their WSJF scores, and rank them.
