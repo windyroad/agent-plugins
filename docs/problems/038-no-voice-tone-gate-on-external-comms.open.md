@@ -56,6 +56,10 @@ The user manually reviews every external-comms output before publishing and rewr
 - [ ] Create a reproduction test (feed a known-AI-voice draft, assert the gate rewrites or blocks it)
 - [ ] Create INVEST story for permanent fix
 
+## Confirming evidence — 2026-04-25 #52831 retrospective
+
+Concrete instance of the gap: agent posted a substantive comment to anthropics/claude-code#52831 via `gh issue comment` with no PreToolUse gate firing. User asked retrospectively whether voice-and-tone review had run; it had not. Retrospective `wr-voice-tone:agent` invocation returned `FAIL — guide gap` because `docs/VOICE-AND-TONE.md` does not exist in this monorepo (the publishing repo doesn't dogfood the guide it ships — the "advisory-only when absent" branch from line 12-13 of this ticket fired in practice). Comment was defensible against generic norms, but every control intended to govern outbound public copy was bypassed. Confirms: (a) the latch from this ticket is not yet in place for `gh issue comment`; (b) the dogfooding gap (no `docs/VOICE-AND-TONE.md` here) makes this the first project that will hit the auto-create-on-missing pathway when the gate lands; (c) the existing review-gate auto-create-on-missing pattern (which works for file-edit gates per `voice-tone-enforce-edit.sh` line 57-60) should be reused for the outbound-comm gate too — same UX contract.
+
 ## Decision record
 
 **ADR-028 (amended 2026-04-21)** — "External-comms gate — voice-tone + risk/leak evaluators on shared PreToolUse surface" — records the decision for this ticket AND P064 (risk/leak) AND P073 (changeset authoring). Combined ADR per user direction: one gate shape, two evaluators, ADR-017 duplicate-script distribution so each of `@windyroad/voice-tone` and `@windyroad/risk-scorer` remains independently installable. Composite marker scheme (`evaluator_set` in the key) handles partial-install scenarios. Voice-tone advisory-only when `docs/VOICE-AND-TONE.md` absent; risk advisory-only when `RISK-POLICY.md` absent. This ticket (P038) remains Open as the execution tracker for the voice-tone evaluator half (agent prompt amendment + bats tests + per-package synced hook copy).

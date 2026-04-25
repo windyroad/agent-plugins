@@ -106,6 +106,10 @@ The gate should be architecturally **parallel to P038's voice-tone hook**, shari
 - [ ] Update `/wr-itil:report-upstream` SKILL.md's "Voice-tone gate interaction" section (currently only ADR-028) to document both gates composing on the same surface.
 - [ ] Coordinate with P038's implementation so both gates ship together (sharing the surface inventory and the hook scaffolding), or in consecutive iterations.
 
+## Confirming evidence — 2026-04-25 #52831 retrospective
+
+Concrete instance of the gap: agent posted a substantive comment to anthropics/claude-code#52831 via `gh issue comment` with no PreToolUse gate firing. Retrospective `wr-risk-scorer:wip` invocation cleared at residual 3 (Low) — within appetite — but explicitly noted that RISK-POLICY.md "is policy-silent on outbound public communication to third-party repositories" and scored by analogy to the Confidential Information section (lines 19-28). Confirms: (a) the gate from this ticket is not yet in place for `gh issue comment`; (b) the rubric extension from the Investigation Tasks above ("RISK-POLICY.md ... extend with credential / prod-URL / embargoed-product rules") needs to land alongside the gate so the scorer has authoritative criteria, not analogical fallback; (c) the cleared-by-analogy outcome is the lucky case — a comment that touched no confidential markers — and shouldn't be read as evidence the gap is benign.
+
 ## Decision record
 
 **ADR-028 (amended 2026-04-21)** — "External-comms gate — voice-tone + risk/leak evaluators on shared PreToolUse surface". User direction collapsed the sibling-ADR path into a combined ADR-028; this ticket's risk/leak evaluator ships as the `wr-risk-scorer:external-comms` subagent (new type, not an extension of `:pipeline`), paired with `/wr-risk-scorer:assess-external-comms` on-demand skill per ADR-015. Hook distributed via ADR-017 duplicate-script pattern (canonical in `packages/shared/hooks/`; synced copy in `packages/risk-scorer/hooks/`). This ticket (P064) remains Open as the execution tracker for the risk evaluator half (new subagent agent file + new on-demand skill + per-package synced hook copy + bats tests).
