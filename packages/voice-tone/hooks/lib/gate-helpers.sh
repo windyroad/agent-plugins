@@ -154,6 +154,56 @@ _risk_dir() {
 }
 
 # ---------------------------------------------------------------------------
+# Subprocess-completion marker slide (P111, ADR-009 amendment)
+# ---------------------------------------------------------------------------
+
+# Slides an existing session-review marker forward on subprocess return,
+# treating subprocess wall-clock as continuous parent-session work for TTL
+# purposes. Intended for PostToolUse hooks on Agent / Bash that may have
+# been long-running subprocesses (Agent-tool delegations, `claude -p`
+# iteration subprocesses, run_in_background completions).
+#
+# Contract:
+#   - Touches the marker ONLY if it already exists. NEVER creates a marker
+#     (creating requires a real gate review with verdict parsing).
+#   - Skips the touch if tool_response.is_error == true. A failed
+#     subprocess MUST NOT extend the parent's trust window.
+#   - Fail-safe on parse error: if _HOOK_INPUT cannot be parsed, treat as
+#     error and skip the touch.
+#   - No-op when marker path is empty or marker file does not exist.
+#
+# Why this is NOT cross-process marker sharing (ADR-032 line 123 invariant):
+# the parent's PostToolUse hook touches the parent's OWN marker. The
+# subprocess's session id, marker, and gate state are never read or shared.
+# This is identical in shape to the existing PreToolUse:Edit slide; only
+# the trigger expands to subprocess return.
+#
+# Usage: slide_marker_on_subprocess_return "/tmp/architect-reviewed-${SESSION_ID}"
+slide_marker_on_subprocess_return() {
+    local MARKER="$1"
+    [ -n "$MARKER" ] || return 0
+    [ -f "$MARKER" ] || return 0
+
+    local IS_ERROR
+    IS_ERROR=$(echo "$_HOOK_INPUT" | python3 -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    tr = data.get('tool_response', {})
+    if isinstance(tr, dict):
+        print('true' if tr.get('is_error') is True else 'false')
+    else:
+        print('false')
+except Exception:
+    print('true')
+" 2>/dev/null || echo "true")
+
+    if [ "$IS_ERROR" = "false" ]; then
+        touch "$MARKER"
+    fi
+}
+
+# ---------------------------------------------------------------------------
 # Non-doc file detection for WIP gating
 # ---------------------------------------------------------------------------
 

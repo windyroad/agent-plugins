@@ -77,6 +77,31 @@ The TTL primitive is interpreted inside `packages/risk-scorer/hooks/lib/risk-gat
 
 This preserves stale-session protection while eliminating round-trips when the scoring input is invariant. Currently scoped to the risk-scorer; the architect/JTBD/voice-tone/style-guide markers remain on the binary TTL model until a future amendment decides whether symmetric adoption is warranted.
 
+### Subprocess-boundary refresh (P111, 2026-04-25)
+
+The TTL slide on `PreToolUse:Edit|Write` (the `touch "$MARKER"` in `gate-helpers.sh`) keeps a marker fresh when the parent agent runs a sequence of in-band tool calls. It does NOT keep the marker fresh when the parent delegates to a long-running subprocess: an Agent-tool subagent (matching or non-matching subagent_type), a `claude -p` iteration subprocess (the canonical AFK pattern per ADR-032 P084 amendment), or any `run_in_background: true` Agent invocation. Inside the subprocess the parent is silent — its `PreToolUse` hooks never fire. The parent's marker mtime stays frozen at the moment the parent last ran a gated tool, and a sufficiently long subprocess pushes the next post-subprocess `PreToolUse` past TTL even though the parent agent was actively orchestrating the whole time. P107 papered over this with a 1800s → 3600s TTL bump; the symptom returns at the new threshold (P111).
+
+The fix is **subprocess-completion refresh**: a new PostToolUse hook (`*-slide-marker.sh`) per plugin, registered on `Agent|Bash`, calls a shared `slide_marker_on_subprocess_return` helper that:
+
+1. Touches the parent's marker if (and only if) it already exists. NEVER creates a marker — creation requires a real gate review with verdict parsing (preserved in `*-mark-reviewed.sh`).
+2. Skips the touch when `tool_response.is_error` is `true`. A failed subprocess MUST NOT extend the parent's trust window (the gate's design intent: trust requires successful policy review, and a subprocess crash is not a successful review).
+3. Fail-safe on parse error: if the hook input cannot be parsed as JSON, treat as error and skip the touch.
+4. No-op when the marker path is empty or the marker file does not exist.
+
+**Why this is NOT cross-process marker sharing.** ADR-032 line 123 forbids contributors from "wir[ing] cross-process marker sharing" — an explicit isolation invariant for `claude -p` subprocesses. Subprocess-boundary refresh does NOT violate it: the parent's PostToolUse hook touches the parent's OWN marker. The subprocess never reads, writes, or sees the parent's marker. The subprocess's own session id, marker, and gate state remain independent. This is identical in shape to the existing `PreToolUse:Edit` slide; only the trigger expands to subprocess return.
+
+**Composition with the three-band TTL refinement (P090).** Both slides touch the same `<action>` mtime. Band B's slide is in-band (fires when the gate checks); subprocess-completion slide is on subprocess return (fires from PostToolUse). They compose orthogonally. The 2×TTL hard-cap from `<action>-born` still bounds total marker life regardless of which slide fired — the born marker is deliberately **not** slid by `risk-slide-marker.sh` for exactly this reason (an unchanged-but-idle tree riding a single score indefinitely is the failure mode the hard-cap exists to prevent).
+
+**Plugin coverage.** The five review plugins each register one slide hook:
+
+- `packages/architect/hooks/architect-slide-marker.sh` — slides `/tmp/architect-reviewed-${SESSION_ID}` and `/tmp/architect-plan-reviewed-${SESSION_ID}`.
+- `packages/jtbd/hooks/jtbd-slide-marker.sh` — slides `/tmp/jtbd-reviewed-${SESSION_ID}` and `/tmp/jtbd-plan-reviewed-${SESSION_ID}`.
+- `packages/style-guide/hooks/style-guide-slide-marker.sh` — slides `/tmp/style-guide-reviewed-${SESSION_ID}` and `/tmp/style-guide-plan-reviewed-${SESSION_ID}`.
+- `packages/voice-tone/hooks/voice-tone-slide-marker.sh` — slides `/tmp/voice-tone-reviewed-${SESSION_ID}` and `/tmp/voice-tone-plan-reviewed-${SESSION_ID}`.
+- `packages/risk-scorer/hooks/risk-slide-marker.sh` — slides the score files `${RDIR}/{commit,push,release}` only. The `*-born` markers, `state-hash`, presence-only `{plan,wip,policy}-reviewed`, and bypass markers (`{reducing,incident}-*`) are deliberately NOT slid (see file header for rationale).
+
+**Behavioural test contract.** Each plugin's `hooks/test/slide-marker-on-subprocess-return.bats` asserts the helper contract. The architect plugin additionally carries `hooks/test/architect-slide-marker.bats` as a hook-level integration test. The canonical P111 reproduction case — a marker backdated to 50 minutes (within default 60-min TTL but close) followed by a successful subprocess return — must leave the marker mtime ≈ NOW so the next `PreToolUse` check sees a fresh marker.
+
 ## Plugin Scope
 
 Hooks to remove (one per plugin):
@@ -160,5 +185,10 @@ The Stop hook registration in each `hooks.json` should be removed alongside the 
 ## Related
 
 - P001 (`docs/problems/001-architect-gate-marker-consumed-too-quickly.open.md`) — the problem this ADR resolves
+- P107 (`docs/problems/107-architect-jtbd-edit-gate-markers-expire-mid-batch.closed.md`) — the symptom-treatment that bumped TTL 1800s → 3600s; rooted by P111
+- P111 (`docs/problems/111-subprocess-tool-calls-do-not-refresh-parent-gate-markers.open.md`) — driver for the Subprocess-boundary refresh subsection above
+- P090 (`docs/problems/090-risk-scorer-commit-gate-ttl-expires-mid-session-forcing-manual-rescore.open.md`) — driver for the Three-band TTL refinement subsection
 - ADR-005 (plugin testing strategy) — BATS tests must cover the new lifecycle
+- ADR-032 (`docs/decisions/032-governance-skill-invocation-patterns.proposed.md`) — line 123 cross-process marker isolation invariant; subprocess-boundary refresh respects it (see subsection above)
 - JTBD-001 (`docs/jtbd/solo-developer/JTBD-001-enforce-governance.proposed.md`) — desired outcome driving this change
+- JTBD-006 (`docs/jtbd/solo-developer/JTBD-006-work-backlog-afk.proposed.md`) — AFK iteration reliability beneficiary of the subprocess-boundary refresh

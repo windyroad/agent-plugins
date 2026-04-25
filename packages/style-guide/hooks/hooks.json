@@ -7,7 +7,8 @@
       { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/style-guide-enforce-edit.sh" }] }
     ],
     "PostToolUse": [
-      { "matcher": "Agent", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/style-guide-mark-reviewed.sh" }] }
+      { "matcher": "Agent", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/style-guide-mark-reviewed.sh" }] },
+      { "matcher": "Agent|Bash", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/style-guide-slide-marker.sh" }] }
     ]
   }
 }
