@@ -51,6 +51,30 @@ DIRECTION_PIN_PATTERNS=(
   '\bship it\b'
 )
 
+# Correction-signal patterns — strong-affect correction signals in
+# the user's incoming prompt that should trigger an offer to capture
+# a problem ticket for the underlying behavioural pattern (P078).
+# Extracted from feedback_capture_on_correction.md and the P078 ticket
+# Root Cause Analysis "missing trigger" vocabulary.
+#
+# Case-insensitive (grep -Eqi). False-positive budget is accepted per
+# P078 Investigation Tasks (a user message quoting the vocabulary in
+# non-correction context will fire — minor over-report traded for
+# signal reliability).
+CORRECTION_SIGNAL_PATTERNS=(
+  '\bFFS\b'
+  "for f.{1,3}'?s sake"
+  '\bDO NOT\b'
+  "\bDON'T\b"
+  '\bSTOP\b'
+  "that'?s wrong"
+  "that'?s not right"
+  "you'?re not listening"
+  '\byou (always|never|keep)\b'
+  '!{2,}'
+  '\bno\b.*\bwrong\b'
+)
+
 # detect_prose_ask: scans text on stdin for canonical prose-ask
 # phrasings. Exits 0 if any pattern matches, 1 otherwise. Writes the
 # first matched phrase to stdout (for observability in the Stop hook
@@ -81,6 +105,26 @@ detect_direction_pin() {
   text=$(cat)
   local pattern
   for pattern in "${DIRECTION_PIN_PATTERNS[@]}"; do
+    if echo "$text" | grep -Eqi -- "$pattern"; then
+      echo "$pattern"
+      return 0
+    fi
+  done
+  return 1
+}
+
+# detect_correction_signal: scans text on stdin for strong-affect
+# correction signals (P078). Exits 0 if any pattern matches, 1
+# otherwise. Writes the first matched phrase to stdout for
+# observability in the hook's systemMessage.
+#
+# Usage:
+#   if echo "$prompt" | detect_correction_signal > /dev/null; then ... fi
+detect_correction_signal() {
+  local text
+  text=$(cat)
+  local pattern
+  for pattern in "${CORRECTION_SIGNAL_PATTERNS[@]}"; do
     if echo "$text" | grep -Eqi -- "$pattern"; then
       echo "$pattern"
       return 0

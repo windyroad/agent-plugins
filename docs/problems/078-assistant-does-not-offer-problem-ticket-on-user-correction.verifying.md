@@ -1,11 +1,28 @@
 # Problem 078: Assistant does not offer to capture a problem ticket when the user delivers strong-signal correction
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-21
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: M — requires one of: (1) a repo-local hook on `UserPromptSubmit` that detects strong-signal correction patterns (profanity, all-caps directives like "DO NOT", "FFS", "for f***'s sake", "stop", "no", "wrong", direct-contradiction phrasing) and injects a systemMessage reminding the assistant to offer a `capture-problem` invocation before continuing; (2) a CLAUDE.md rule that lists the correction patterns as mandatory-capture triggers; (3) a user-memory entry (`feedback_capture_on_correction.md`) that codifies the expectation. Architect review at implementation time to decide between the three shapes. Scope modest but cross-cutting because it affects every interactive session.
 
 **WSJF**: 6.0 — (12 × 1.0) / 2 — High severity (recurring trust erosion on every unmissed correction); moderate effort. Sits in the current top-of-queue tier alongside P070 / P071 / P074.
+
+## Fix Released
+
+Deployed in `@windyroad/itil@0.19.3` (next patch). Awaiting user verification.
+
+Implementation (Option A + Option C combined per Direction decision):
+
+- New `packages/itil/hooks/itil-correction-detect.sh` — `UserPromptSubmit` hook detects strong-signal correction patterns (FFS / DO NOT / DON'T / STOP / direct contradiction / `!!!` / "you always|never|keep") and injects a MANDATORY systemMessage instructing the assistant to OFFER `/wr-itil:capture-problem` (with `/wr-itil:manage-problem` as today's fallback) BEFORE addressing the operational request.
+- Pattern vocabulary added to `packages/itil/hooks/lib/detectors.sh` as `CORRECTION_SIGNAL_PATTERNS` + `detect_correction_signal()` helper, parallel to the existing `PROSE_ASK_PATTERNS` / `DIRECTION_PIN_PATTERNS` registry.
+- Hook registered in `packages/itil/hooks/hooks.json` `UserPromptSubmit` array (alongside existing `itil-assistant-output-gate.sh`).
+- Once-per-session full block + terse-reminder pattern (ADR-038 progressive disclosure); marker key `itil-correction-detect`.
+- New user-memory `feedback_capture_on_correction.md` for cross-project portability (Option C).
+- `CLAUDE.md` pointer line added — full vocabulary stays in detectors.sh per ADR-038.
+- 14 new behavioural bats tests at `packages/itil/hooks/test/itil-correction-detect.bats` (positive matches across each pattern class, negative match on conversational prompt, session-marker behaviour, terse-reminder byte-budget, capture-problem + manage-problem fallback wording).
+- All 52 itil hook tests green.
+
+**Verification path**: trigger a strong-signal correction in a fresh session post-release; assert the hook fires + the systemMessage names the matched pattern + the assistant offers ticket capture before addressing the operational request.
 
 ## Direction decision (2026-04-21, user — interactive AskUserQuestion post-AFK-iter-7)
 

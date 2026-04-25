@@ -4,7 +4,8 @@
       { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/bin/check-deps.sh wr-itil wr-risk-scorer" }] }
     ],
     "UserPromptSubmit": [
-      { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/itil-assistant-output-gate.sh" }] }
+      { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/itil-assistant-output-gate.sh" }] },
+      { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/itil-correction-detect.sh" }] }
     ],
     "PreToolUse": [
       {
