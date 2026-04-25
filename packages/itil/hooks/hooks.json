@@ -6,6 +6,12 @@
     "UserPromptSubmit": [
       { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/itil-assistant-output-gate.sh" }] }
     ],
+    "PreToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/manage-problem-enforce-create.sh" }]
+      }
+    ],
     "Stop": [
       { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/itil-assistant-output-review.sh" }] }
     ]

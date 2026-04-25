@@ -221,8 +221,17 @@ Before creating, search existing problems for similar issues. The user may not k
    - "I found existing problems that may be related: P011 (stuck saving, CLOSED), P023 (foul drawn garbled, OPEN). Would you like to: (a) Update an existing problem, (b) Create a new problem anyway, (c) Cancel?"
 5. If the user chooses to update, switch to the update flow for that problem ID
 6. If no matches found, proceed to create
+7. **After the grep completes** (whether duplicates were found or not), write the per-session create-gate marker so the `PreToolUse:Write` hook (`packages/itil/hooks/manage-problem-enforce-create.sh`, P119) allows the subsequent Write of the new `.open.md` file. The marker is `/tmp/manage-problem-grep-${SESSION_ID}` and the agent should write it via Bash:
+
+   ```bash
+   : > "/tmp/manage-problem-grep-${CLAUDE_SESSION_ID:-$(echo "${CLAUDE_HOOK_SESSION_ID:-default}")}"
+   ```
+
+   In practice the session ID is supplied by the hook payload, not as an env var — the simplest portable pattern is to ask Claude Code to run a one-line Bash that touches the marker using whatever session_id is available in the current invocation. The exact command shape depends on the runtime; the contract is that the file `/tmp/manage-problem-grep-<session-id>` exists by the time Step 5's Write fires. Per architect direction, the marker is per-session (single marker covers all new tickets for the rest of this session), enabling Step 4b multi-concern splits and same-session unrelated-ticket creation without re-running the grep.
 
 **Search strategy**: Search problem filenames AND file content. A match on the filename (kebab-case title) or the Description/Symptoms sections counts. Cast a wide net — false positives are cheap (user chooses), but false negatives mean duplicate problems.
+
+**Hook contract (P119)**: writing a `.open.md` (or any `.<status>.md`) file under `docs/problems/` without first running this Step 2 grep + marker-touch is blocked by the `manage-problem-enforce-create.sh` PreToolUse hook with a `permissionDecision: deny` directing the agent back to this skill. Agents that try to bypass the skill (e.g. mid-retrospective inline capture, post-mortem wrap-up, or any "I'll just write it directly" shortcut) will hit the deny and be redirected here. Do not work around the deny by setting the marker manually — the marker exists to record that this Step 2 ran, and a marker without a grep is the audit-trail gap P119 closes.
 
 ### 3. For new problems: Assign the next ID
 
