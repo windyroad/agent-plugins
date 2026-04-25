@@ -1,6 +1,6 @@
 # Problem 086: AFK iteration subprocess does not run retro before returning — per-iteration lessons learnt are lost when the subprocess exits
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-21 (AFK iter-7, during iter 4 — user observation mid-loop)
 **Fix Released**: 2026-04-21 — iteration prompt body in `packages/itil/skills/work-problems/SKILL.md` Step 5 gains a closing step (step 4) naming `/wr-retrospective:run-retro` before `ITERATION_SUMMARY` emission; ADR-032's subprocess-boundary variant amended with a matching "Retro-on-exit (P086 amendment)" clause under the Pattern contract block; 4 doc-lint bats assertions added to `work-problems-step-5-delegation.bats` (P086); Non-Interactive Decision table gains a retro-at-iteration-end row; @windyroad/itil@0.16.0 minor bump. Verification path: user runs the next AFK loop post-restart and confirms (a) iteration subprocesses invoke `/wr-retrospective:run-retro` before returning, (b) any retro-created tickets appear on the backlog on the next Step 1 scan, (c) retro failures do not halt the AFK loop (iteration still emits `ITERATION_SUMMARY`).
 

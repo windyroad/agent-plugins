@@ -1,6 +1,6 @@
 # Problem 077: work-problems Step 5 does not delegate iterations to a subagent, so context pressure accumulates in the orchestrator's main turn
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-21
 **Updated**: 2026-04-21 (fix released — Option B shipped; ADR-032 amended)
 **Priority**: 16 (High) — Impact: Significant (4) x Likelihood: Likely (4)
