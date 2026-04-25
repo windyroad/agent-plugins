@@ -1,10 +1,42 @@
 # Problem 118: `docs/problems/README.md` drifts from filesystem truth across sessions despite P094 (refresh-on-create) and P062 (refresh-on-transition) both Closed
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-24
+**Fix Released**: 2026-04-25 (`@windyroad/itil` patch — pending release; commit `9c50d03`)
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Likely (3)
 **Effort**: M
 **WSJF**: (9 × 1.0) / 2 = **4.5**
+
+## Fix Released
+
+**Released**: 2026-04-25 (AFK iter 5 of `/wr-itil:work-problems`; `@windyroad/itil` patch via `.changeset/wr-itil-p118-reconcile-readme.md`; contract-landing commit `9c50d03`).
+
+**Fix shape**: Shape A + minimal Shape C per architect verdict. New diagnose-only script `packages/itil/scripts/reconcile-readme.sh` reads `docs/problems/<NNN>-*.<status>.md` files, parses the README's WSJF Rankings + Verification Queue + Closed tables, and emits one structured row per drift entry to stdout (≤150 bytes per ADR-038 progressive-disclosure budget). Exit codes: 0 = clean, 1 = drift, 2 = parse error.
+
+New skill `/wr-itil:reconcile-readme` wraps the script with an agent-applied-edits pattern that preserves narrative content (the "Last reviewed" prose paragraph at the top, the per-row closure-via free text in the Closed section). Full README regeneration is forbidden — narrative is human-curated session memory.
+
+Step 0 preflight invocations:
+- `/wr-itil:manage-problem` Step 0 — invoke the script before parsing the request; halt-with-directive on drift; do NOT auto-apply.
+- `/wr-itil:work-problems` Step 0 — invoke after the session-continuity pass; auto-apply via `/wr-itil:reconcile-readme` in AFK mode (per ADR-013 Rule 6) so the orchestrator's Step 3 ranking reads ground truth.
+- `/wr-itil:transition-problem` deliberately does NOT invoke the script — P062 already covers transition-time refresh inside the same commit; redundant preflight there would pay the cost on every transition.
+
+ADR-014 amended with "Reconciliation as preflight robustness layer" sub-rule (within existing 2026-10-16 reassessment window — no new ADR). ADR-022 Confirmation criterion 3 extended with the reconciliation invariant.
+
+Tests: 16 behavioural script bats + 18 contract assertion bats for the skill. Full suite 969/969 green (was 935; +34 = +16 script + 18 contract). `package.json` test glob extended to include `packages/*/scripts/test/`.
+
+**Self-bootstrap demonstration (this commit)**: ran the new script on the live `docs/problems/README.md`; detected 12 standing drift entries; applied the corrections in this commit:
+- REMOVED from WSJF Rankings: P074 (closed on disk), P110 (verifying on disk).
+- ADDED to WSJF Rankings: P073 (WSJF 1.5), P079 (WSJF 6.0), P080 (WSJF 6.0), P081 (WSJF 3.0), P082 (WSJF 6.0), P087 (WSJF 3.0), P088 (WSJF 3.0).
+- ADDED to Verification Queue: P110 (released 2026-04-25 per linked ticket).
+- REMOVED from Verification Queue: P056 (closed on disk), P075 (closed on disk).
+
+Post-edit re-run of the script reports exit 0 (clean). Contract self-validates.
+
+**Architect verdict**: APPROVED WITH CHANGES (Shape A + minimal Shape C; skill+script split; diagnose-only script + agent-applied-edits skill; manage-problem/work-problems Step 0 preflight + transition-problem excluded; ADR-014 amendment + ADR-022 small Confirmation extension; bats per ADR-005 + ADR-037).
+
+**JTBD verdict**: PASS — JTBD-006 (Progress the Backlog While I'm Away) primary; JTBD-001 (Enforce Governance Without Slowing Down) secondary.
+
+**Awaiting user verification**. Verification path: in any subsequent session, run `bash packages/itil/scripts/reconcile-readme.sh docs/problems` against the live README and confirm exit 0 (clean). If drift accumulates again, the cause is either (a) the new Step 0 preflight didn't fire, (b) the agent skipped the auto-apply branch in AFK mode, or (c) a new drift class outside the WSJF Rankings / Verification Queue / Closed scope — investigate and reopen if any of these hold.
 
 ## Description
 
