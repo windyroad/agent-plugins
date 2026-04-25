@@ -1,6 +1,6 @@
 # Problem 070: /wr-itil:report-upstream does not check for existing upstream issues before filing
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-20
 **Priority**: 12 (High) — Impact: Significant (4) x Likelihood: Possible (3)
 **Effort**: M — S → M after user direction 2026-04-20 reshaped the dedup mechanism. Now requires: (1) LLM-based semantic dup detection (not keyword search), (2) new "maintainer annoyance" risk evaluator composing with P064's external-comms risk gate, (3) risk-within-appetite gate on the auto-comment action. Likely shares infrastructure with P064 — architect review at implementation may push to L if the risk-scorer extension is cross-cutting.
@@ -157,3 +157,19 @@ No new ADR required — this is an ADR-024 amendment because the ADR itself anti
 - **JTBD-004** (Connect Agents Across Repos to Collaborate) — primary fit; dedup is the difference between "cross-repo coordination" and "cross-repo spam".
 - **JTBD-001** (Enforce Governance Without Slowing Down) — dedup protects the user from having to police upstream duplicates.
 - **JTBD-006** — AFK persona constraint; Step 4b's halt-and-surface branch protects AFK loops from duplicate-firing.
+
+## Fix Released
+
+Released in the same commit as this transition (AFK iter 2 of `/wr-itil:work-problems`, 2026-04-25). Awaiting user verification.
+
+Fix summary:
+
+- `packages/itil/skills/report-upstream/SKILL.md` — added Step 4b (dedup check, two branches: own re-run grep + third-party `gh issue list --search` with inline LLM semantic match per Direction decision 2026-04-21); added Step 5c (comment path — `gh issue comment <n>` with cross-reference body); extended Step 7 back-write disclosure-path enumeration with `commented-on-existing-issue`; updated AFK behaviour summary table with the dedup-halt branch (interim static heuristic — halt-and-save the drafted report; auto-comment branch deferred until `wr-risk-scorer:external-comms` lands per ADR-028 line 117).
+- `docs/decisions/024-cross-project-problem-reporting-contract.proposed.md` — amendment 2026-04-25 documents Step 4b + Step 5c in the Decision Outcome step list, narrows the "Out of scope" dedup bullet to scope only the residual `update-mode` follow-up, and adds the new disclosure-path string + Confirmation criterion.
+- `packages/itil/skills/report-upstream/test/report-upstream-contract.bats` — 9 new assertions covering Step 4b presence, own-re-run language, third-party `gh issue list --search` language, inline LLM judgement (no subagent), Step 5c comment path, `commented-on-existing-issue` literal, AFK static heuristic, `## Drafted Upstream Report` save shape, AFK behaviour summary dedup-halt row.
+
+Architect verdict (2026-04-25): the maintainer-annoyance risk evaluator named in the Direction decision was DEFERRED to compose with the `wr-risk-scorer:external-comms` subagent declared in ADR-028 (per ADR-028 line 117 — third-evaluator extension point). This kept the P070 fix at Effort M and avoided cross-cutting work that would block on P064 (open, WSJF 3.0, Effort L). The AFK auto-comment branch is on an interim static heuristic (always halt-and-save) until the evaluator ships; the bundling commit when ADR-028's evaluator lands will re-wire the AFK branch to the policy-authorised gate combination.
+
+Verification path: a downstream invocation of `/wr-itil:report-upstream` should now (a) detect an existing `## Reported Upstream` section on a re-run and halt with the existing URL surfaced, (b) search the upstream's existing issues before firing `gh issue create`, and (c) in AFK mode, halt-and-save the drafted report to `## Drafted Upstream Report` rather than auto-comment.
+
+Verification queue ranking: ranked by release age, oldest first. P070 is released 2026-04-25; user may verify on next interactive session by exercising the skill against a real upstream.

@@ -158,3 +158,92 @@ setup() {
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" -ge 2 ]
 }
+
+# ─── P070 dedup contract (Step 4b + Step 5c + AFK static heuristic) ────────────
+#
+# P070 inserts a dedup check between security-path routing (Step 4) and the
+# outbound `gh` call (Steps 5 / 6). Two duplication windows close at the same
+# insertion point: own re-run (local ticket already has `## Reported Upstream`)
+# and third-party search (different reporter filed similar). Step 5c adds a
+# comment-on-existing-issue path used when the dedup branch finds a match.
+#
+# Per architect verdict on P070: the maintainer-annoyance risk evaluator is
+# deferred until ADR-028 / P064's `wr-risk-scorer:external-comms` subagent
+# ships (ADR-028 line 117 anticipates third evaluators). The interim AFK
+# branch uses a static heuristic — no subagent dispatch — that defaults to
+# halt-and-save.
+
+@test "report-upstream: SKILL.md contains a Step 4b dedup check (P070)" {
+  run grep -nE '^### 4b\.' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "report-upstream: SKILL.md Step 4b.1 detects own-re-run via ## Reported Upstream (P070)" {
+  # Own-re-run branch: grep the local ticket for an existing `## Reported
+  # Upstream` URL before firing a second upstream report.
+  run grep -nE 'Reported Upstream.*(grep|already|existing|previous)' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "report-upstream: SKILL.md Step 4b.2 third-party search uses gh issue list --search (P070)" {
+  # Third-party branch: `gh issue list --repo ... --search ...` against the
+  # upstream's existing issues. Required tokens.
+  run grep -F 'gh issue list' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  # `--` before the pattern stops grep from treating `--search` as a flag.
+  run grep -F -- '--search' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "report-upstream: SKILL.md Step 4b.2 uses inline LLM judge, not subagent dispatch (P070 Direction decision 2026-04-21)" {
+  # Direction decision pins inline LLM check inside the skill's own session.
+  # No `wr-itil:dedup-check` subagent dispatch; future promotion is a separate
+  # ADR amendment.
+  run grep -iE 'inline.*llm|inline semantic|inline.*judge|inline classification' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "report-upstream: SKILL.md contains Step 5c comment path with gh issue comment (P070)" {
+  # Step 5c: when dedup match found AND user picks "comment instead", run
+  # `gh issue comment <number>` rather than `gh issue create`.
+  run grep -nE '^### 5c\.' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'gh issue comment' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "report-upstream: SKILL.md Step 5c records commented-on-existing-issue disclosure path (P070 + ADR-024 amendment)" {
+  # ADR-024 amendment extends the disclosure-path enumeration. The literal
+  # string MUST appear in the SKILL.md so the ## Reported Upstream back-write
+  # records the new path.
+  run grep -F 'commented-on-existing-issue' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "report-upstream: SKILL.md AFK branch uses static heuristic, defers maintainer-annoyance evaluator (P070 interim per ADR-028 line 117)" {
+  # Architect verdict: maintainer-annoyance evaluator deferred. AFK branch
+  # uses a static heuristic and defaults to halt-and-save. The SKILL.md must
+  # name the deferral explicitly so future readers know why the static-heuristic
+  # path exists; once `wr-risk-scorer:external-comms` lands, this branch
+  # gets re-wired.
+  run grep -iE 'static heuristic|interim.*heuristic|heuristic.*interim' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -iE 'wr-risk-scorer:external-comms|external-comms.*evaluator' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "report-upstream: SKILL.md AFK halt-and-save writes Drafted Upstream Report section (P070 + ADR-024 Consequences)" {
+  # AFK halt branch saves the drafted report to the local ticket's
+  # `## Drafted Upstream Report` section — same pattern as the security-path
+  # halt per ADR-024 Consequences (lines 116, 123).
+  run grep -F '## Drafted Upstream Report' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "report-upstream: SKILL.md AFK behaviour summary table includes the dedup branch (P070)" {
+  # The "AFK behaviour summary" table at the bottom of the skill must list
+  # the new dedup-halt branch alongside the existing public-issue / security
+  # / above-appetite branches.
+  run grep -iE 'dedup.*halt|step 4b.*halt|halt.*dedup|halt-and-save.*dedup' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}

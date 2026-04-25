@@ -12,6 +12,8 @@ This skill implements the contract documented in [ADR-024](../../../docs/decisio
 
 [ADR-033](../../../docs/decisions/033-report-upstream-classifier-problem-first.proposed.md) (Report-upstream classifier is problem-first) partially supersedes ADR-024 Decision Outcome **Steps 3 and 5 only** — the classifier is problem-first with best-fit backward-compat fallback (per Step 3 below), and the structured default body is problem-shaped (per Step 5 below). ADR-024 Steps 1, 2, 4, 6, 7, 8 and all Consequences / Confirmation clauses remain in force unchanged.
 
+The **ADR-024 amendment of 2026-04-25 (P070)** adds Step 4b (dedup check — own re-run + third-party search via `gh issue list --search` + inline LLM semantic match) and Step 5c (comment path — `gh issue comment` with cross-reference body when dedup match found). The maintainer-annoyance risk evaluator named in the P070 Direction decision is deferred to compose with the `wr-risk-scorer:external-comms` subagent declared in ADR-028 (per ADR-028 line 117 — third-evaluator extension point); the AFK auto-comment branch is on the interim **static heuristic** described in Step 4b until that evaluator lands. See Step 4b below.
+
 ## Invocation
 
 ```
@@ -110,7 +112,108 @@ The local ticket is **security-classified** if any of:
 - The ticket body has a `## Security classification` section.
 - The CLI `--classification security` argument was passed.
 
-If security-classified, route to Step 6. Otherwise, route to Step 5 (public-issue path).
+If security-classified, route to Step 6. Otherwise, route to Step 4b (dedup check) before Step 5 (public-issue path).
+
+### 4b. Dedup check (P070)
+
+This step is governed by the [ADR-024](../../../docs/decisions/024-cross-project-problem-reporting-contract.proposed.md) 2026-04-25 amendment, which adds dedup checking to the Decision Outcome step list (P070). Two duplication windows close at the same insertion point: own re-run (4b.1) and third-party search (4b.2). Both branches share the same AskUserQuestion surface and the same AFK halt-and-save behaviour.
+
+> **Serves**: JTBD-004 (cross-repo coordination — dedup is the difference between coordination and spam), JTBD-001 (solo developer "without slowing down" — dedup protects the user from policing upstream duplicates manually), JTBD-006 (AFK persona — halt-and-surface protects loops from duplicate-firing), JTBD-101 (clear pattern — pattern ships without a duplication hole).
+
+#### 4b.1. Own re-run check
+
+Detect whether the local ticket already records a previous upstream report. The `## Reported Upstream` section is written by Step 7 (cross-reference back-write) on a successful prior invocation; its presence means the skill has already filed (or commented) for this local ticket.
+
+```bash
+LOCAL_URL=$(grep -A5 '^## Reported Upstream' "$LOCAL_TICKET" | grep -oE 'https?://[^ )]+' | head -1)
+if [ -n "$LOCAL_URL" ]; then
+  echo "Local ticket P${LOCAL_ID} already records an existing upstream report: $LOCAL_URL"
+  # Branch interactive vs AFK below.
+fi
+```
+
+**Interactive branch** — use `AskUserQuestion` per ADR-013 Rule 1:
+
+- `header: "Existing upstream report"`
+- `multiSelect: false`
+- Options:
+  1. `Halt — local ticket already records ${LOCAL_URL}` (Recommended) — abort the invocation; the existing report is current.
+  2. `Comment on the existing upstream report` — route to Step 5c with the existing URL's issue number; appropriate when new evidence has emerged since the previous report.
+  3. `File a new upstream issue anyway (override)` — explicit override after user has reviewed the existing record and judged the second filing warranted (e.g. previous report was closed without resolution and a fresh tracker is needed).
+
+**AFK / non-interactive branch** — apply the **interim static heuristic** (no subagent dispatch; the maintainer-annoyance risk evaluator is deferred per ADR-028 line 117 — see "AFK static heuristic" below). Default action: halt and save the drafted report to the local ticket's `## Drafted Upstream Report` section; do NOT auto-comment. The static heuristic remains in place until `wr-risk-scorer:external-comms` ships, at which point the AFK branch wires the gate combination (maintainer-annoyance + leak gate, both within appetite) per the ticket Direction decision (2026-04-21).
+
+#### 4b.2. Third-party search
+
+Detect whether a different reporter (or another agent in a parallel session) has already filed a similar issue against the upstream. The Direction decision (2026-04-21) pins a two-stage mechanism: a `gh issue list --search` pre-filter that trims candidates to ~5-10, followed by an **inline LLM semantic match** that judges each candidate's body against the proposed report.
+
+```bash
+# Stage 1: gh-search pre-filter on title keywords (cheap, ~500ms-2s).
+KEYWORDS=$(extract_3-5_keywords_from "$LOCAL_TICKET_TITLE + $LOCAL_TICKET_DESCRIPTION")
+MATCHES=$(gh issue list \
+  --repo "$UPSTREAM_OWNER_REPO" \
+  --state all \
+  --search "$KEYWORDS" \
+  --json number,title,state,url \
+  --limit 10)
+```
+
+For each candidate returned by Stage 1, fetch the full body and run **Stage 2 — inline LLM semantic judgement**:
+
+```bash
+# Stage 2: per-candidate body fetch + inline classification.
+for n in $(echo "$MATCHES" | jq -r '.[].number'); do
+  CANDIDATE=$(gh issue view "$n" --repo "$UPSTREAM_OWNER_REPO" --json title,body,state,url)
+  # Inline LLM judgement: read {local ticket Description + Symptoms, candidate title + body}
+  # and return one of: same-problem | different-problem | uncertain.
+  # No subagent dispatch — Direction decision 2026-04-21 pins inline classification
+  # for simplicity. Promotion to a `wr-itil:dedup-check` subagent is a future
+  # ADR amendment if architect review later flags context-isolation concerns.
+done
+```
+
+Notes on inline LLM classification:
+
+- **No subagent dispatch.** The skill's main-agent context already has the local ticket loaded (Step 1) and the candidate body in scope after `gh issue view`. The Direction decision (2026-04-21) pins inline classification to keep the dedup affordable; the gh-search pre-filter trims input to ~5-10 candidates so the inline reads stay bounded.
+- **Verdicts**: `same-problem` (route to AskUserQuestion with the matched URL); `different-problem` (skip, continue); `uncertain` (always surface to user — never auto-resolve).
+- **Heuristic for "same problem"**: same root cause described, overlapping symptoms, same affected component or scoped npm package. Different reproduction environment alone does NOT downgrade to `different-problem` — environment heterogeneity is normal.
+
+If Stage 2 produces one or more `same-problem` matches, surface them to the user in interactive mode:
+
+- `header: "Existing upstream issue may match"`
+- `multiSelect: false`
+- Options:
+  1. `Comment on #<N> (Recommended) — <title>` — one option per `same-problem` match; routes to Step 5c with that issue number.
+  2. `File a new upstream issue anyway (override)` — explicit override; user has reviewed the matches and judged them distinct.
+  3. `Cancel` — abort without filing or commenting.
+
+`uncertain` matches surface alongside `same-problem` matches with their verdict labelled, so the user can review. The skill never auto-resolves an `uncertain` verdict.
+
+**AFK / non-interactive branch** — apply the same interim static heuristic as 4b.1: halt and save the drafted report to the local ticket's `## Drafted Upstream Report` section. The third-party-match auto-comment path requires the deferred `wr-risk-scorer:external-comms` gate (maintainer-annoyance + leak), so the AFK branch must NOT auto-comment under the static heuristic.
+
+#### AFK static heuristic (interim, until `wr-risk-scorer:external-comms` ships)
+
+The Direction decision (2026-04-21) pins the AFK auto-comment branch on **two gates passing together**: the maintainer-annoyance risk evaluator AND the P064 external-comms leak gate, both within RISK-POLICY.md's commit-layer appetite (Low, ≤4/25). Neither gate exists yet — ADR-028 declares the `wr-risk-scorer:external-comms` subagent type but P064's implementation is open at WSJF 3.0 (Effort L), and the maintainer-annoyance evaluator was deferred by architect review on P070 to compose with the same subagent rather than ship as a separate evaluator (per ADR-028 line 117 — *"Third evaluator (licence-compliance, etc.) adding to the same gate — when it emerges, amend this ADR's evaluator list and the composite marker's `evaluator_set` component; no new ADR expected."*).
+
+**Static heuristic, valid until both gates ship**: in AFK mode, both 4b.1 and 4b.2 default to **halt and save the drafted report**. No auto-comment, no auto-file. The drafted report is appended to the local ticket's `## Drafted Upstream Report` section so the user can review and act manually on return. This matches JTBD-006's "does not trust the agent to make judgement calls" stance — the conservative default is the right interim behaviour.
+
+**Re-wire trigger**: when `wr-risk-scorer:external-comms` lands (ADR-028 implementation, P064 closure), amend this section to invoke both evaluators and proceed with auto-comment ONLY when both verdicts return PASS within appetite. Update the AFK behaviour summary table accordingly. Until then, the static heuristic stands.
+
+**Drafted Upstream Report save format** (used by both 4b.1 and 4b.2 AFK halts; mirrors the security-path halt pattern from Step 6 per ADR-024 Consequences lines 116, 123):
+
+```markdown
+## Drafted Upstream Report
+
+- **Drafted**: <YYYY-MM-DD>
+- **Target upstream**: <upstream-repo-url>
+- **Halt reason**: dedup match (own re-run | third-party `same-problem`) — interim static heuristic awaiting `wr-risk-scorer:external-comms` (ADR-028 / P064)
+- **Matched URL(s)**: <existing-issue-or-report-URL(s)>
+- **Drafted body**:
+
+  <the body that would have been posted as a `gh issue comment` or `gh issue create`, ready for manual copy-paste review>
+```
+
+The halt is a loop-stopping event for AFK orchestrators — same pattern as the security-path halt-and-surface branch — so the user sees the dedup match on return rather than the orchestrator silently auto-commenting.
 
 ### 5. Public-issue path
 
@@ -268,6 +371,37 @@ gh issue create \
 
 Capture the returned issue URL. The voice-tone gate per ADR-028 may delegate-and-retry; treat this as expected (see "Voice-tone gate interaction" above). Proceed to Step 7 once the issue is created.
 
+### 5c. Comment path (P070)
+
+Used when Step 4b's dedup check (own re-run or third-party search) finds a match AND the user picks the "comment instead" option. Skips `gh issue create` and posts a cross-reference comment on the existing upstream issue:
+
+```bash
+gh issue comment "${EXISTING_ISSUE_NUMBER}" \
+  --repo "${UPSTREAM_OWNER_REPO}" \
+  --body "${COMMENT_BODY}"
+```
+
+The comment body is a condensed cross-reference, not a full report restatement. Required structure:
+
+```markdown
+Seeing this from <downstream-repo-url>/<local-ticket-relative-path>.
+
+## Additional context
+
+- **Local ticket**: P<NNN> (<one-line title>)
+- **Reproduction**: <if local has a fresh repro path the existing issue lacks; otherwise omit>
+- **Environment**: <if differs materially from the existing issue; otherwise omit>
+- **Hypothesis**: <if local has a contradictory or extending root-cause hypothesis; otherwise omit>
+
+This issue is tracked locally as P<NNN> in the downstream project's `docs/problems/` directory.
+```
+
+Empty subsections are skipped — the comment should add information, not restate what the existing issue already records. If none of the four "additional context" subsections has content, the comment defaults to a one-line acknowledgement: `Seeing this from <downstream-repo-url>/<local-ticket-relative-path>. Tracked locally as P<NNN>.` This is still useful — it tells the upstream maintainer they have a downstream witness — without spamming the thread with redundant content.
+
+The voice-tone gate per ADR-028 also fires on `gh issue comment` (per the canonical hook's regex list at ADR-028 line 61); treat the deny-plus-delegate-and-retry as expected, same as Step 5.
+
+Capture the returned comment URL (gh prints `https://github.com/<owner>/<repo>/issues/<n>#issuecomment-<id>`). The Step 7 back-write records this as the cross-reference URL with disclosure path `commented-on-existing-issue`. Proceed to Step 7.
+
 ### 6. Security path
 
 Fetch the upstream's `SECURITY.md`:
@@ -318,7 +452,7 @@ After the upstream issue or advisory is created (or drafted-and-saved in the sec
    - **URL**: <upstream-issue-or-advisory-url>
    - **Reported**: <YYYY-MM-DD>
    - **Template used**: <template-name-or-"structured default">
-   - **Disclosure path**: <public issue | security advisory | drafted-and-saved (mailbox / out-of-band)>
+   - **Disclosure path**: <public issue | security advisory | drafted-and-saved (mailbox / out-of-band) | commented-on-existing-issue (Step 5c, P070)>
    - **Cross-reference confirmed**: <yes/no — true once the upstream issue body contains the local ticket reference>
    ```
 
@@ -334,19 +468,21 @@ If the cumulative pipeline risk lands above appetite and `AskUserQuestion` is un
 
 ## AFK behaviour summary
 
-Three distinct AFK branches per the architect review of ADR-024 + ADR-013 Rule 6:
+Five distinct AFK branches per the architect reviews of ADR-024, ADR-013 Rule 6, and the P070 dedup amendment:
 
 | Branch | AFK behaviour | Authority |
 |---|---|---|
 | Public-issue path (Step 5) | Proceeds. Voice-tone gate per ADR-028 may delegate-and-retry; that is the expected extra turn. | ADR-028 line 126 |
+| Dedup match — Step 4b halt (own re-run OR third-party `same-problem`) | Save drafted report to local ticket's `## Drafted Upstream Report` section. **Halt the orchestrator** — loop-stopping event. Interim static heuristic; auto-comment branch deferred until `wr-risk-scorer:external-comms` ships (ADR-028 line 117). | ADR-024 amendment 2026-04-25 (P070); Direction decision 2026-04-21 |
 | Security path with declared channel (Step 6, GitHub Advisories) | Proceeds via `gh api .../security-advisories`. | ADR-024 Decision Outcome step 6 |
 | Security path with `security@` / other / missing-SECURITY.md (Step 6) | Save drafted report to local ticket's `## Drafted Upstream Report` section. **Halt the orchestrator** — loop-stopping event. AFK orchestrators must never auto-report a security-classified ticket. | ADR-024 Consequences lines 116, 123 |
 | Above-appetite commit (Step 8) | Skip the commit, report uncommitted state. | ADR-013 Rule 6 |
 
 ## References
 
-- [ADR-024](../../../docs/decisions/024-cross-project-problem-reporting-contract.proposed.md) — primary contract this skill implements. Steps 1, 2, 4, 6, 7, 8 and all Consequences remain authoritative.
+- [ADR-024](../../../docs/decisions/024-cross-project-problem-reporting-contract.proposed.md) — primary contract this skill implements. Steps 1, 2, 4, 6, 7, 8 and all Consequences remain authoritative; the 2026-04-25 amendment adds Step 4b (dedup) + Step 5c (comment path) for P070.
 - [ADR-033](../../../docs/decisions/033-report-upstream-classifier-problem-first.proposed.md) — partially supersedes ADR-024 Decision Outcome Steps 3 + 5; governs the problem-first classifier and problem-shaped structured default body.
+- [P070](../../../docs/problems/) — driver ticket for the Step 4b dedup check + Step 5c comment path; carries the 2026-04-21 Direction decision (gh search + inline LLM, no subagent dispatch) and the AFK static-heuristic interim behaviour.
 - [ADR-027](../../../docs/decisions/027-governance-skill-auto-delegation.proposed.md) — Step-0 deferral rationale (held for reassessment).
 - [ADR-028](../../../docs/decisions/028-voice-tone-gate-external-comms.proposed.md) — voice-tone gate on `gh issue create` and `gh api .../security-advisories`.
 - [ADR-013](../../../docs/decisions/013-structured-user-interaction-for-governance-decisions.proposed.md) — interaction policy; Rule 1 governs Step 6 missing-SECURITY.md `AskUserQuestion`; Rule 6 governs the commit-gate AFK branch.
