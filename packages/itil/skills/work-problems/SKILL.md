@@ -162,7 +162,7 @@ If a problem is skipped by this step, add it to a "skipped" list with the reason
 - **Agent-tool dispatch to a `general-purpose` subagent** (the P077 amendment) works for context isolation but fails at the governance-gate layer: subagents spawned via the Agent tool do NOT have the Agent tool in their own surface (three-source evidence — ToolSearch probe, Claude Code docs at `code.claude.com/docs/en/subagents.md`, empirical runtime error `"No such tool available: Agent. Agent is not available inside subagents."`). Without Agent, the iteration worker cannot set architect + JTBD PreToolUse edit-gate markers (only settable via Agent-tool PostToolUse hook), cannot satisfy the risk-scorer commit gate, and silently halts on every gate-covered iteration. P084 diagnoses and closes this gap.
 - **`claude -p` subprocess dispatch** (this step, per P084 / ADR-032 amendment): the subprocess is a full main Claude Code session with Agent available in its own surface. Governance review runs at full depth via the normal `wr-architect:agent` / `wr-jtbd:agent` / `wr-risk-scorer:pipeline` delegation path inside the subprocess; PostToolUse marker hooks fire correctly matching the subprocess's own `$CLAUDE_SESSION_ID`; the commit gate unlocks natively. Context isolation preserved by the process boundary (each subprocess is a distinct process with its own session state; orchestrator's main context only sees the stdout). This is the AFK iteration-isolation wrapper — subprocess-boundary variant under ADR-032.
 
-**Dispatch command shape (Bash):**
+**Dispatch command shape (Bash, backgrounded with idle-timeout poll loop per P121):**
 
 ```bash
 ITERATION_PROMPT=$(cat <<'PROMPT_EOF'
@@ -170,11 +170,44 @@ ITERATION_PROMPT=$(cat <<'PROMPT_EOF'
 PROMPT_EOF
 )
 
+ITER_JSON=$(mktemp)
+DISPATCH_START_EPOCH=$(date +%s)
+IDLE_TIMEOUT_S="${WORK_PROBLEMS_IDLE_TIMEOUT_S:-3600}"
+
 claude -p \
   --permission-mode bypassPermissions \
   --output-format json \
   "$ITERATION_PROMPT" \
-  < /dev/null
+  < /dev/null \
+  > "$ITER_JSON" 2>&1 &
+ITER_PID=$!
+
+SIGTERM_SENT=0
+while kill -0 "$ITER_PID" 2>/dev/null; do
+  sleep 60
+  NOW=$(date +%s)
+  LAST_COMMIT_EPOCH=$(git log -1 --format=%at HEAD 2>/dev/null || echo "$DISPATCH_START_EPOCH")
+  # LAST_ACTIVITY_MARK = max(DISPATCH_START_EPOCH, last commit timestamp).
+  # The dispatch-start floor handles skip-iterations that produce no commit:
+  # they are bounded by IDLE_TIMEOUT_S since dispatch start, not by an
+  # arbitrarily-stale repo commit. See trade-off paragraph below.
+  if (( LAST_COMMIT_EPOCH > DISPATCH_START_EPOCH )); then
+    LAST_ACTIVITY_MARK=$LAST_COMMIT_EPOCH
+  else
+    LAST_ACTIVITY_MARK=$DISPATCH_START_EPOCH
+  fi
+  IDLE_SECONDS=$(( NOW - LAST_ACTIVITY_MARK ))
+  if (( IDLE_SECONDS > IDLE_TIMEOUT_S )) && (( SIGTERM_SENT == 0 )); then
+    kill -TERM "$ITER_PID" 2>/dev/null || true
+    SIGTERM_SENT=1
+    echo "[work-problems] iter idle ${IDLE_SECONDS}s > ${IDLE_TIMEOUT_S}s threshold — SIGTERM sent to PID $ITER_PID" >&2
+  fi
+done
+
+wait "$ITER_PID" 2>/dev/null
+ITER_EXIT=$?
+SUBPROCESS_OUTPUT=$(<"$ITER_JSON")
+rm -f "$ITER_JSON"
 ```
 
 **Flag rationale:**
@@ -184,6 +217,10 @@ claude -p \
 - `< /dev/null` — explicit stdin-closed redirect (P089 Gap 1). Without this, `claude -p` waits up to 3s for stdin data in non-TTY contexts and then prints `Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: < /dev/null to skip, or wait longer.` to stderr. The warning is on stderr — if the caller separates stderr and stdout streams, the warning is harmless. But the orchestrator captures via `2>&1` (required because the CLI emits progress prose on stderr that must not interleave between JSON responses when multiple invocations chain). Under the `2>&1` merge the stderr warning prefixes the stdout JSON and breaks `jq` / `json.load` / `JSON.parse` extraction at "line 1, column 1: Expecting value". The redirect suppresses the warning at source. First observed AFK-iter-7 iter 1 (2026-04-21); workaround is the Anthropic CLI help's own suggestion.
 
 **No per-iteration budget cap.** The dispatch deliberately omits `--max-budget-usd`. Per user direction 2026-04-21: the natural stop condition for an AFK loop is quota exhaustion, not an arbitrary per-iteration dollar cap. A cap would halt iterations before quota is actually exhausted, wasting remaining budget. Runaway-iteration risk is bounded by quota + the orchestrator's Step 6.75 halt on unexpected dirty state + exit-code handling below.
+
+**Idle-timeout SIGTERM (P121).** The poll loop above is the orchestrator-side guard against stuck iteration subprocesses — iters that complete their semantic work (commits land, retro runs, `ITERATION_SUMMARY` is emitted into the agent output stream) but then sit waiting on a hook timeout, a backgrounded subagent that never resolved, or some other CLI-level idle behaviour before exiting. Without the guard the orchestrator polls indefinitely; the JSON file stays 0 bytes (the CLI only flushes on exit) and wall-clock burns for ~$8/hour of subprocess overhead with no API turns. The 2026-04-25 P118 iter 5 evidence: 121 min wall-clock; final commit at ~100 min; manual SIGTERM at 121 min produced a clean 5649-byte JSON response with `is_error: false`, full `## Session Retrospective` section, parseable `ITERATION_SUMMARY` block, and `duration_ms: 2992935` (49.9 min — the real-work portion). SIGTERM is therefore a safe recovery primitive for this stuck-state class — empirically a clean exit-flush, not a destructive interrupt. Behavioural confirmation lives in `test/work-problems-step-5-idle-timeout-sigterm.bats` (P121 ships with this fixture as the second-source the production observation needed). The default `IDLE_TIMEOUT_S=3600` (60 min) leaves headroom for genuinely long architectural iters; the `WORK_PROBLEMS_IDLE_TIMEOUT_S` env-var overrides per-environment for adopters who run very long iters or want a tighter guard. The orchestrator's Step 6 progress line SHOULD annotate `(SIGTERM_SENT)` when the branch fires so the user can distinguish a SIGTERM-recovered iter from a normal completion (per JTBD-006 audit-trail expectation).
+
+**LAST_ACTIVITY_MARK signal trade-off.** The mark is `max(DISPATCH_START_EPOCH, last commit timestamp)`. The dispatch-start floor is intentional: skip-iterations that produce no commit (Step 4 routes a ticket to `action: skipped`) are bounded by `IDLE_TIMEOUT_S` since dispatch start, not by an arbitrarily-stale prior-commit timestamp. This protects against false-positive SIGTERM at iter T=0 when the most recent commit happens to be hours old. The trade-off is the inverse: a skip-iter that runs for `IDLE_TIMEOUT_S` (60 min default) will SIGTERM even though it never had a chance to commit. The 60-min default is well past the typical skip-iter wall-clock (a normal skip completes in seconds), so the trade-off rarely fires in practice; adopters who run unusually long skip-evaluation iters (e.g. deep architect-design probes) should raise `WORK_PROBLEMS_IDLE_TIMEOUT_S` accordingly. Alternative signals considered and rejected: `stat -f%m "$ITER_JSON"` (binary — file mtime only changes on subprocess exit, useless during the idle gap); subprocess RSS-change tracking (noisy; spikes during Agent-tool expansions confound the signal). The git-log signal is the cheapest reliable progress indicator the orchestrator already has.
 
 **Iteration prompt body (self-contained — the subprocess has no prior conversation context):**
 
@@ -460,6 +497,7 @@ When every skipped ticket is in the `upstream-blocked` category (stop-condition 
 
 ## Related
 
+- **P121** (`docs/problems/121-afk-orchestrator-should-sigterm-stuck-subprocesses-after-idle-timeout.verifying.md`) — driver for Step 5's backgrounded-poll-loop dispatch shape (replacing the prior foreground-synchronous form) and the idle-timeout SIGTERM branch. The 2026-04-25 P118 iter 5 evidence: an iteration subprocess sat idle ~70 min after its final commit, then SIGTERM produced a clean JSON exit-flush. Fix: orchestrator backgrounds the subprocess, polls every 60s, computes `LAST_ACTIVITY_MARK = max(DISPATCH_START_EPOCH, git log -1 --format=%at HEAD)`, and sends SIGTERM when `now - LAST_ACTIVITY_MARK > WORK_PROBLEMS_IDLE_TIMEOUT_S` (default 3600s = 60 min). Behavioural second-source: `test/work-problems-step-5-idle-timeout-sigterm.bats` exercises a fake `claude -p` shim that sleeps past the threshold and asserts SIGTERM, JSON exit-flush, env-var override, and within-threshold no-fire. Step 6's per-iter progress line SHOULD annotate `(SIGTERM_SENT)` when the branch fires so users can distinguish recovered iters from natural completions. ADR-032's subprocess-boundary variant amended 2026-04-26 with the backgrounded-poll-loop refinement.
 - **P089** (`docs/problems/089-work-problems-step-5-dispatch-robustness-stdin-warning-and-cost-metadata-edge-case.verifying.md`) — driver for Step 5's `< /dev/null` dispatch redirect and the Per-iteration cost metadata "Authority hierarchy" paragraph. Gap 1: stdin warning contaminated stderr-merged JSON captures; closed by adding `< /dev/null` to the canonical dispatch command. Gap 2: `.usage.*` undercounts when subprocess exits via a background-task completion ack while `.total_cost_usd` stays cumulative-authoritative; closed by documenting the authority hierarchy in Step 5 and the Session Cost output section so adopters trust cost and label token totals best-effort.
 - **P086** (`docs/problems/086-afk-iteration-subprocess-does-not-run-retro-before-returning.verifying.md`) — driver for Step 5's retro-on-exit clause. Iteration subprocesses exit without running retro, so per-iteration friction (hook misbehaviour, repeat-workaround patterns, pipeline instability) evaporates on exit. Fix: iteration prompt body names `/wr-retrospective:run-retro` as a closing step before `ITERATION_SUMMARY` emission; retro runs inside the subprocess so Step 2b pipeline-instability scan has the full tool-call history; run-retro commits its own work per ADR-014; orchestrator picks up retro-created tickets on the next Step 1 scan.
 - **P084** (`docs/problems/084-work-problems-iteration-worker-has-no-agent-tool-so-architect-jtbd-gates-block.open.md`) — driver for Step 5's subprocess-boundary dispatch. Supersedes P077's Agent-tool dispatch on the same Step 5 surface because Agent-tool-spawned subagents cannot themselves invoke Agent (platform restriction), which prevents governance gate markers from being set inside the iteration worker.
