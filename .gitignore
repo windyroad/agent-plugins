@@ -9,3 +9,7 @@ node_modules/
 
 # Skill eval workspaces (test-infrastructure scratch output per skill-creator)
 *-workspace/
+
+# Per-project consent caches — per-machine, never committed (P120 / ADR-034)
+.claude/.install-updates-consent
+.claude/.auto-install-consent

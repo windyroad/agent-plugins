@@ -83,6 +83,28 @@ Dormant JTBD gate after wr-jtbd install lands. Flagged in the final report.
 
 ### 6. Consent gate (mandatory per ADR-030)
 
+#### 6a. Cache check (P120) — skip the gate when consent is already on file
+
+Read `.claude/.install-updates-consent` (per-project, gitignored). When present, parse the JSON:
+
+```json
+{
+  "scope": ["addressr-mcp", "addressr-react", "addressr", "bbstats", "windyroad"],
+  "cached_at": "2026-04-25T13:33:05Z"
+}
+```
+
+Compute the **detected sibling set** from Step 3 (sibling project names that have one or more `wr-*@windyroad` plugins enabled). Compare to the cached `scope` array using **set equality** (same names, ignoring order; current project is implicitly in scope and is not part of the cache).
+
+- **Cache hit** (cached scope matches detected sibling set): **skip Step 6** — proceed directly to Step 6.5 with the cached scope. The user's prior explicit answer authorises the install per **ADR-013 Rule 5 (policy-authorised silent proceed)** — the cached on-disk consent IS the policy authorisation. Step 6.5 (P059 rename-mapping auto-migration) still runs against the cached sibling set.
+- **Cache miss — sibling set has changed** (a new sibling appeared, or one was removed since the cache was written): fire Step 6b/6c with the **previous answer surfaced as `(Recommended)`** in the question body so the user can re-confirm or adjust quickly.
+- **Cache miss — no cache** (first invocation in this project, or cache was deleted): fire Step 6b/6c as today.
+- **Cache silenced — `INSTALL_UPDATES_RECONFIRM=1`**: when this envvar is set on the invocation, fire Step 6b/6c regardless of cache state. Equivalent escape hatch: `rm .claude/.install-updates-consent` and re-run. Both routes restore the user's access to the dry-run option (which only surfaces inside the gate body).
+
+Cache file shape, invalidation rules, and rationale: see `REFERENCE.md` → "Consent cache (P120)". Architectural precedent: **ADR-034**'s `.claude/.auto-install-consent` per-project marker for the SessionStart auto-install surface — same per-project, gitignored, stable-answer-cache shape; the two markers are independent (presence of one does not imply the other).
+
+#### 6b/6c. Fire the consent gate (cache miss path)
+
 Invoke `AskUserQuestion` with one question, `multiSelect=true`.
 
 **Sibling count ≤ 3** — original contract applies: one option per sibling plus `"Dry-run — show the plan but don't install"`.
@@ -95,6 +117,24 @@ Invoke `AskUserQuestion` with one question, `multiSelect=true`.
 4. The auto-provided `Other — provide custom text` covers custom subsets.
 
 Either shape (≤ 3 or > 3 fallback) satisfies the ADR-030 Confirmation consent gate. Never install without explicit consent for a sibling.
+
+#### 6d. Cache write (P120) — at end of successful run
+
+After Step 7 install completes WITHOUT a `lost` status (i.e. every confirmed sibling either reached `installed` or `restored`), write `.claude/.install-updates-consent` with the install-plan scope:
+
+```bash
+python3 -c "
+import json, datetime, os
+data = {
+  'scope': sorted(['<sibling-1>', '<sibling-2>', ...]),
+  'cached_at': datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds').replace('+00:00','Z'),
+}
+os.makedirs('.claude', exist_ok=True)
+open('.claude/.install-updates-consent', 'w').write(json.dumps(data, indent=2) + chr(10))
+"
+```
+
+`Dry-run` answers do NOT write the cache (a dry-run is not a consent grant). `Current project only` writes an empty `scope` array (the empty-set is a valid stable answer). Cache is per-machine — gitignored — and is not committed.
 
 ### 6.5. Auto-migrate ADR-documented stale entries (P059)
 

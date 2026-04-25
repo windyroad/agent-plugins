@@ -38,6 +38,61 @@ The `rename-mapping.json` table in this directory is the source of truth for ADR
 
 Non-ADR-documented stale entries (manual user choices, plugins no longer in use) are NOT in `rename-mapping.json` and are NOT auto-migrated. User handles those manually.
 
+## Consent cache (P120)
+
+The Step 6 consent gate has zero decision content for steady-state solo-developer + stable-sibling-set workflows — the answer is invariably `All N projects (Recommended)` and the round-trip is friction. The cache file `.claude/.install-updates-consent` records the user's prior explicit answer so subsequent invocations can skip the gate when the answer is provably equal.
+
+### Cache file shape
+
+Per-project, gitignored, machine-local. JSON:
+
+```json
+{
+  "scope": ["addressr-mcp", "addressr-react", "addressr", "bbstats", "windyroad"],
+  "cached_at": "2026-04-25T13:33:05Z"
+}
+```
+
+- `scope` — sorted list of sibling project names confirmed in the prior consent gate. Current project is implicitly in scope (ADR-004 — the project the skill lives in is always installed); not part of the cache.
+- `cached_at` — ISO timestamp the cache was written (informational; cache invalidation is event-driven, not time-based).
+- Empty `scope: []` is valid and stable — encodes the user's prior `Current project only` answer.
+
+### Match rule
+
+The match rule is **set equality** of the cached `scope` against the detected sibling set from Step 3. Same names, ignoring order. A new sibling appearing or an existing sibling disappearing invalidates the cache (re-prompt with previous answer surfaced as `(Recommended)`).
+
+### Invalidation rules
+
+- **Sibling-set change** — invalidate. The user's prior answer is over a different question; surface it as `(Recommended)` in the re-prompt and let them confirm or adjust.
+- **Plugin-list change** (a sibling enables a new windyroad plugin) — DO NOT invalidate. The cache governs which projects to install in, not which plugins to install. Step 4 already discovers the per-plugin install plan against the post-cache sibling set.
+- **No time-based expiry**. Consent doesn't have a half-life on a stable workspace. The cache is invalidated by event (sibling-set change) or explicit user action (file deletion / `INSTALL_UPDATES_RECONFIRM=1`).
+
+### Governing rule (ADR-013 Rule 5)
+
+Cache-hit skip-gate is a Rule 5 (policy-authorised silent proceed) case, NOT Rule 6 (non-interactive fail-safe). The cached on-disk consent IS the policy authorisation — Rule 5 explicitly authorises silent proceed when a stable user authorisation is on file. Rule 6 governs cases where AskUserQuestion is unavailable; that is unrelated to the cache hit.
+
+### Architectural precedent (ADR-034)
+
+ADR-034's `.claude/.auto-install-consent` per-project marker for the SessionStart auto-install surface is the parallel pattern. The two markers are independent — presence of one does not imply the other:
+
+- `.claude/.auto-install-consent` (ADR-034) authorises the SessionStart hook to invoke `/install-updates` in the background when outdated `@windyroad/*` plugins are detected.
+- `.claude/.install-updates-consent` (P120) caches the answer to `/install-updates`'s own Step 6 sibling-set consent gate.
+
+The first authorises *whether* `/install-updates` runs at all; the second caches *which siblings* it touches when it does run.
+
+### Escape hatches (preserve dry-run access)
+
+The cache-hit path skips the gate entirely; `Dry-run` is a gate option and becomes unreachable on the steady-state path. Two equivalent escape hatches restore access:
+
+- `INSTALL_UPDATES_RECONFIRM=1 /install-updates` — envvar silences the cache for one invocation; gate fires with previous answer surfaced.
+- `rm .claude/.install-updates-consent && /install-updates` — delete the cache file; gate fires as first-run.
+
+Both routes return the user to the dry-run option; neither breaks the cache permanently (the next normal invocation re-writes the cache after a successful run).
+
+### Step 6.5 still runs on cache-hit
+
+Cache-hit skips Step 6 only. **Step 6.5 (P059 rename-mapping auto-migration)** still executes against the cached sibling set, with the same audit-trail report requirement (the "Auto-migrated stale entries" section in Step 8). The cache governs the sibling-set consent gate; it does not bypass the rename-migration audit trail.
+
 ## Consent gate shape — the P061 fallback (Step 6)
 
 ADR-030 requires that the consent gate list every detected sibling. `AskUserQuestion` caps `maxItems` at 4.
