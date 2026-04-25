@@ -6,6 +6,7 @@ Cross-session learnings about how PreToolUse/PostToolUse gates behave, when gate
 
 - **Four edit gates fire on every edit**: architect review, JTBD review, WIP risk assessment, and TDD enforcement. Each requires its own agent delegation before the edit is allowed. Plan for this overhead. JTBD was broadened to all project files (ADR-007, superseded by ADR-008).
 - **Risk-scorer agents are tool-restricted to `Read + Glob`** — no `AskUserQuestion`, no `EnterPlanMode`. Sub-agents invoked via Task also cannot enter plan mode on the parent's behalf. Any "scorer asks the user" design must split scorer/orchestrator concerns: scorer emits structured markers, calling skill/primary owns the interaction. See P021.
+- **PreToolUse:Write gate matchers on `docs/<path>/<NNN>-…<status>.md` governance paths should be suffix-agnostic** — match on path-prefix (`docs/<path>/`) + content-shape (e.g. 3-digit numeric basename `[0-9][0-9][0-9]-*`) rather than the trailing `.<status>.md` suffix. ADR-031's pending per-state subdirectory layout (`docs/problems/<state>/<NNN>-…md`) would silently disable a suffix-only matcher; a prefix + numeric-basename matcher survives the migration without code change. P119's `manage-problem-enforce-create.sh` (2026-04-25) is the reference implementation; its bats test "deny: hypothetical ADR-031 layout" pins this contract. Apply the same shape to any future `docs/decisions/`, `docs/incidents/`, or `docs/risks/` gate.
 
 ## What Will Surprise You
 
