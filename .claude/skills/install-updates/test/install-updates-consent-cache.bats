@@ -70,7 +70,7 @@ setup() {
 @test "install-updates P120: REFERENCE.md documents set-equality match rule and plugin-list-change-no-op" {
   run grep -F 'set equality' "$REFERENCE_MD"
   [ "$status" -eq 0 ]
-  run grep -F 'plugin-list change' "$REFERENCE_MD"
+  run grep -F 'Plugin-list change' "$REFERENCE_MD"
   [ "$status" -eq 0 ]
 }
 
