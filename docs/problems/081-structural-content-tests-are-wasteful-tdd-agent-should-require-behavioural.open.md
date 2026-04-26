@@ -49,6 +49,16 @@ Accept the gap. Structural tests catch SOME drift (author deleted the keyword) a
 - **Severity**: High. Systematic misalignment of test-effort with test-value. Every structural test costs author + maintainer effort while delivering substantially less coverage than a behavioural test would.
 - **Analytics**: N/A today. Post-fix candidate metrics: (1) ratio of structural-to-behavioural assertions in the shipped suite, (2) bugs caught by behavioural tests that structural tests missed, (3) TDD-agent-rejection count per week as a leading indicator of pattern adoption.
 
+## Scope clarification (2026-04-27 — user direction)
+
+The "TDD agent" in this ticket title is **literal**: a Claude Code agent definition under `packages/tdd/agents/`, NOT a hook with grep patterns. An earlier `/wr-itil:work-problems` AFK iter started building a grep-based PreToolUse hook; the user corrected: *"you can't detect the bad tests with grep — it needs to work with bats, vitest, cucumber, etc. You need an LLM to do this which is why I said 'agent'"* (P078 contradiction-signal pattern).
+
+The structural-vs-behavioural distinction is **semantic** (what does the test assert?), not **syntactic** (what tokens appear?). It must work across at minimum: bats, vitest, jest, mocha, cucumber/`.feature`, pytest. A grep-based detector would catch this project's dominant case (bats greping SKILL.md) but would miss vitest tests that read SKILL.md via `fs.readFileSync` and assert on substrings, cucumber Then-steps that reduce to source-content checks, etc. LLM judgment is the only viable detection mechanism.
+
+**Implementation plan**: see `## Implementation Plan` section below (drafted 2026-04-27 by the Plan agent). Plan covers: agent definition (`packages/tdd/agents/review-test.md`), invocation surface (recommend PostToolUse advisory + on-demand `/wr-tdd:review-test` skill — NOT PreToolUse blocking until Phase 3 retrofit completes), ADR-044 supersession of ADR-037, ADR-005 narrowing amendment (architect verdict 2026-04-27: Option B with scope adjustment), behavioural bats coverage (dogfood — no greps of agent source), per-framework exemplars in the agent prompt (bats / vitest / cucumber / pytest paired snippets), escape hatches (env var `WR_TDD_REVIEW_TEST=skip` + in-file comment `tdd-review: structural-permitted (justification: …)`), and four documented architectural trade-offs.
+
+**Composes-with note**: P081 + P130 (`/wr-itil:work-problems` orchestrator presence-aware dispatch) both pioneer the "Claude Code agent for project-internal judgment" pattern. P081 lands the agent template + invocation surface conventions that P130 can reuse.
+
 ## Root Cause Analysis
 
 ### Structural
@@ -188,3 +198,128 @@ For this project's skill-testing needs, the Anthropic pattern suggests:
 4. **Baseline comparison** — old skill vs new skill on the same prompt, measuring regression/progression.
 
 This is Layer B's concrete shape. The TDD agent should reference this framework when proposing behavioural alternatives to structural tests.
+
+## Implementation Plan
+
+> Drafted 2026-04-27 by the Plan agent during a `/wr-itil:work-problems` session, after user clarification: structural-vs-behavioural test detection requires LLM judgment (not grep) because the distinction is semantic and must work across bats / vitest / cucumber / jest / pytest / .feature files.
+
+### Plan §1 — Agent definition
+
+Create `packages/tdd/agents/review-test.md` (NEW — `agents/` directory does not yet exist in `packages/tdd/`; `package.json` already lists `agents/` in `files`, so the npm packaging is ready).
+
+Frontmatter shape (mirrors `packages/architect/agents/agent.md`):
+
+```yaml
+---
+name: review-test
+description: Classifies a test file as STRUCTURAL (asserts source content of SKILL.md / ADR / hook / agent / policy prose) or BEHAVIOURAL (exercises the target and asserts on its outputs/side-effects/tool-calls). Returns a verdict, evidence, and a behavioural-alternative suggestion. Use after a test file is added or modified, or on demand via /wr-tdd:review-test. Multi-framework: bats, vitest, jest, mocha, cucumber/.feature, pytest.
+tools: [Read, Glob, Grep]
+model: inherit
+---
+```
+
+Body sections (cap ~400 lines):
+
+1. **Role** — semantic test classifier; LLM judgment, not regex.
+2. **Inputs** — test file path(s) + optional target file (skill/hook/ADR) inferred from sibling layout.
+3. **Detection method** — read full test source; for each `@test` / `it()` / `Scenario:` / `def test_…`, identify the assertion target. STRUCTURAL when the assertion's content reduces to "source string X appears in document Y" where Y is prose (SKILL.md, ADR, RISK-POLICY.md, *.proposed.md, agent.md). BEHAVIOURAL when assertion observes target invocation outputs, exit codes, written artefacts, captured tool-calls, or final filesystem state.
+4. **Per-framework exemplars** (the prompt-training core) — paired snippets:
+   - **bats** STRUCTURAL `run grep -F "string" "$SKILL_MD"` vs BEHAVIOURAL `run bash "$HOOK" <<<"$json"; [ "$status" -eq 2 ]`.
+   - **vitest** STRUCTURAL `expect(readFileSync('SKILL.md','utf8')).toContain('Step 5')` vs BEHAVIOURAL `expect(await runSkill(input)).toMatchObject({...})`.
+   - **cucumber** Then-step that greps a doc vs Then-step asserting world.lastOutput.
+   - **pytest** `assert "Step 5" in open('SKILL.md').read()` vs `assert run_skill(args).artefact == expected`.
+   - **shell** ad-hoc `grep -q ... && echo PASS`.
+5. **Verdict shape** — JSON-in-fenced-block: `{verdict: "structural"|"behavioural"|"mixed"|"unclear", evidence: [{test_name, line, why}], suggestion: "…", harness_gap: "…"|null}`.
+6. **Escape hatch recognition** — accept tests carrying the comment `# tdd-review: structural-permitted (justification: …)` (or `// tdd-review: …`) and emit `verdict: "structural-justified"`. Surfaces the existing-bats migration path without auto-failing.
+7. **Output formatting** — ADR-013 Rule 1 interactive default; Rule 6 AFK fail-safe.
+
+### Plan §2 — Invocation surface (recommend B+C combined)
+
+Three options:
+
+- **A. PreToolUse hook routes test-file edits to the agent** — blocks Write of `*.bats` / `*.test.*` / `*.spec.*` / `*.feature` until the agent emits a non-structural verdict. Highest safety; risks blocking refactors of existing structural tests.
+- **B. PostToolUse hook scans + emits warning context** — agent runs after Write, verdict surfaces as `additionalContext`; non-blocking. Lowest friction.
+- **C. On-demand `/wr-tdd:review-test` skill** — author or pre-release explicit invocation; zero auto-trigger.
+
+**Recommend B + C combined**: PostToolUse non-blocking surfaces the verdict every time a test file lands, on-demand skill exists for batch retrofit work (Phase 3). PreToolUse blocking (A) is too coarse while ~50 existing structural bats remain in-tree. Add env-var escape hatch `WR_TDD_REVIEW_TEST=skip` for AFK loops + retrofit branches.
+
+PostToolUse hook delegates to the agent via Agent-tool invocation through a context message (matches `wr-architect:review-design` pattern). Hook detects "test file just written" and emits a context block telling the assistant to invoke `review-test` agent.
+
+### Plan §3 — ADR work (architect verdict 2026-04-27)
+
+**New ADR-044** (`docs/decisions/044-behavioural-tests-default-for-skill-testing.proposed.md`) — sections per MADR 4.0:
+
+- frontmatter: `supersedes: [037-skill-testing-strategy]`, `consulted: [wr-architect:agent]`, `reassessment-date: 2026-10-26`.
+- Context: P081 user direction; structural greps caught dominant case but missed semantically-drifted prose; ADR-037 contract-assertion default reverses.
+- Decision drivers: JTBD-001/101/201; P081; ADR-037 supersession.
+- Considered options: (1) supersede ADR-037, (2) amend ADR-037 in place, (3) status quo. Pick (1).
+- Decision outcome: behavioural-default; structural permitted only with documented justification comment + linked harness-gap ticket.
+- Behavioural exemplars across frameworks (one snippet each: bats, vitest, cucumber, pytest).
+- Documented-justification escape hatch: exact comment shape recognised by the agent.
+- Migration note: Phase 3 retrofit of ~50 existing structural bats deferred to per-skill incremental retrofits as each skill is touched.
+- Reassessment criteria: when behavioural harness primitives mature; when existing-structural-bats ratio drops below threshold.
+
+**ADR-005 amendment** — append one paragraph to "Permitted exceptions" section: *"The Permitted Exception clause excludes SKILL.md, agent.md, *.proposed.md, RISK-POLICY.md, and other prose-document content greps. See ADR-044 (Behavioural-tests-default for skill testing). Hook-script safety-construct structural greps (e.g. `set -euo pipefail` presence) remain permitted."* Do NOT supersede ADR-005 — its hook-testing authority is unaffected.
+
+### Plan §4 — Hook integration
+
+Add PostToolUse Edit|Write entry in `packages/tdd/hooks/hooks.json` pointing to a new `packages/tdd/hooks/tdd-review-test.sh`. The hook:
+
+1. Reads tool input JSON, extracts `file_path`.
+2. Returns immediately if file extension is not `.bats` / `.test.{ts,tsx,js,jsx,py,rb}` / `.spec.{…}` / `.feature` or path is outside `$PWD`.
+3. Returns immediately if `WR_TDD_REVIEW_TEST=skip` set.
+4. Returns immediately if file contains `tdd-review: structural-permitted` justification comment.
+5. Emits `additionalContext` block telling assistant to invoke `review-test` agent against changed file before continuing.
+
+Composes with existing `tdd-post-write.sh` rather than modifying it (separation of concerns: post-write owns RGR state; review-test owns kind-of-test classification).
+
+### Plan §5 — Bats coverage (dogfood — behavioural)
+
+`packages/tdd/hooks/test/tdd-review-test.bats`:
+
+- Feed JSON with `.tool_input.file_path` pointing at fixture `.bats` file → assert hook stdout contains expected `additionalContext` directive.
+- Feed JSON for non-test file → assert no output.
+- Feed JSON with `WR_TDD_REVIEW_TEST=skip` env → assert no output.
+- Feed JSON for file containing justification comment → assert no output.
+- Behavioural shape per ADR-005's `run_hook_with_file` pattern. NO greps of `tdd-review-test.sh` source. NO greps of `review-test.md` agent source.
+
+Direct agent behavioural testing (`packages/tdd/agents/test/review-test-classification.bats`) deferred — requires harness P012 / P081-Phase-2 will build.
+
+### Plan §6 — Changeset
+
+`@windyroad/tdd` — **minor bump** (0.3.1 → 0.4.0). New agent + new hook + new on-demand skill = additive feature surface, no breaking change.
+
+### Plan §7 — Critical files
+
+- `packages/tdd/agents/review-test.md` (NEW)
+- `packages/tdd/hooks/tdd-review-test.sh` (NEW)
+- `packages/tdd/hooks/hooks.json` (extend PostToolUse Edit|Write array)
+- `docs/decisions/044-behavioural-tests-default-for-skill-testing.proposed.md` (NEW)
+- `docs/decisions/005-plugin-testing-strategy.proposed.md` (one-paragraph amendment)
+- `packages/tdd/hooks/test/tdd-review-test.bats` (NEW dogfood behavioural test)
+
+Reference patterns: `packages/architect/agents/agent.md` (agent prompt shape), `packages/risk-scorer/agents/pipeline.md` (mode-specific agent precedent), `packages/tdd/hooks/tdd-post-write.sh` (PostToolUse pattern).
+
+### Plan §8 — Architectural trade-offs
+
+**Trade-off 1 — Invocation surface**: Recommend PostToolUse advisory + on-demand skill. PreToolUse blocking too coarse during retrofit window. Promote after Phase 3 completes.
+
+**Trade-off 2 — Agent dispatch**: Recommend Agent-tool delegation via context-message pattern (matches `review-design`). Direct sub-process LLM calls would need the hook to ship API credentials + handle network failures + respect rate limits — out of scope for a hook script.
+
+**Trade-off 3 — ADR shape**: Architect: supersede ADR-037 (its "SKILL.md as contract document" framing is the entire reversed premise). Amend ADR-005 with one-paragraph carve-out (its hook-testing authority is unaffected). Asymmetry is correct.
+
+**Trade-off 4 — Existing-test escape hatch**: Recommend BOTH env var (`WR_TDD_REVIEW_TEST=skip` for AFK / retrofit) AND in-file comment (`tdd-review: structural-permitted (justification: …)` for permanent permitted-structural cases). Marker files would orphan on commit and add invisible state — reject.
+
+### Implementation order
+
+1. Land ADR-044 + ADR-005 amendment first (architecture in place before code references it).
+2. Author `packages/tdd/agents/review-test.md` (agent prompt) — review against per-framework exemplars in §1.4.
+3. Author `packages/tdd/hooks/tdd-review-test.sh` + extend `hooks.json` (invocation surface).
+4. Author `packages/tdd/hooks/test/tdd-review-test.bats` behavioural fixture.
+5. Add changeset `@windyroad/tdd` minor.
+6. Commit per ADR-014 — likely 2-3 commits depending on review-skill split.
+7. Drain via Step 6.5 (push:watch + release:watch) once cumulative push/release risk converges within appetite.
+
+### Reassessment
+
+If, after Phase 1 lands, the PostToolUse-advisory surface is observed to be widely IGNORED (assistant skips invoking `review-test` on most test edits), promote to PreToolUse blocking (Option A) — but only after Phase 3 retrofit completes. Track this as P081 follow-up.
