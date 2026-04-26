@@ -1,10 +1,10 @@
 # Problem 125: P057 staging-trap recurs despite documentation — hook-level enforcement candidate
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-26
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Likely (3)
-**Effort**: M — new `PostToolUse:Bash` hook in `packages/itil/hooks/` (or shared) that detects the trap-shape sequence: a `git mv <A> <B>` stage followed by an `Edit` tool call on `<B>` followed by a `git commit` invocation that does NOT first re-`git add <B>`. On detect, fail-loud with the P057 rule citation and the literal `git add <B>` recovery command. Composes with P119's create-gate hook pattern (PreToolUse:Write surface) — this ticket's hook is the PostToolUse mirror for the rename-then-edit-then-commit sequence.
-**WSJF**: (9 × 1.0) / 2 = **4.5**
+**Effort**: M — new `PreToolUse:Bash` hook in `packages/itil/hooks/` matching `git commit` invocations (architect verdict: deterministic per-invocation `git diff` cost is bounded; preferred over `PostToolUse:Bash + session marker` per P125 Investigation Tasks lean). Detects the trap-shape: a staged rename whose `<new>` path also appears as a working-tree modification. On detect, fail-loud with the P057 rule citation and the literal `git add <B>` recovery command. Composes with P119's create-gate hook pattern (PreToolUse:Write surface) — same `packages/itil/hooks/` directory and helper-pair shape (sibling `lib/staging-detect.sh`).
+**WSJF**: (9 × 1.0) / 2 = **4.5** (excluded from dev-work ranking on transition to Verification Pending per ADR-022)
 
 > Surfaced 2026-04-26 P122 retro session: the assistant fell into the P057 staging-trap during the design-question batch — `git mv docs/problems/115-*.open.md → 115-*.parked.md` followed by `Edit` to update Status and add the Parked section, then a batch commit that produced "1 file changed, 0 insertions(+), 0 deletions(-)" with only the rename captured. Recovery required `git commit --amend` after re-staging the missed content. P057 is `.closed.md` (the documentation-fix shipped 2026-04-22) but the rule itself is human-error-prone in long batch sequences. The Critical Points section of `docs/briefing/README.md` carries the rule; the briefing's `agent-interaction-patterns.md` line 8 carries the rule with explicit observation history. Despite all this, the trap recurred. Documentation alone is not preventing it.
 
@@ -60,11 +60,11 @@ The PreToolUse variant is more deterministic (doesn't rely on session-state trac
 
 ### Investigation Tasks
 
-- [ ] Confirm the hook surface — PreToolUse:Bash on commit (deterministic, expensive) vs PostToolUse:Bash + session marker (fragile, cheap). Lean: PreToolUse — the cost of one `git diff` per commit is bounded.
-- [ ] Decide the deny-vs-warn behaviour. Lean: deny — the trap is silent enough that warnings get ignored. Deny forces explicit re-stage or `git add -u` before the commit lands.
-- [ ] Compose with `wr-itil:hooks/lib/` shared-helper directory — likely a new `lib/staging-detect.sh` exporting `detect_p057_trap()` for reuse.
-- [ ] Add behavioural bats: trap detected (fail-loud), trap recovered via re-stage (allow), no rename in batch (allow), rename without subsequent edit (allow), rename with subsequent edit AND re-stage (allow).
-- [ ] Update `docs/briefing/agent-interaction-patterns.md` line 8 to cite the new hook + name the recovery as "the hook fails the commit; run `git add <B>` and retry".
+- [x] Confirm the hook surface — PreToolUse:Bash on commit (deterministic, expensive) vs PostToolUse:Bash + session marker (fragile, cheap). Lean: PreToolUse — the cost of one `git diff` per commit is bounded. **Resolved**: PreToolUse:Bash matching `git commit` substring; two `git diff` invocations per check, ~10-50ms on this repo's working tree.
+- [x] Decide the deny-vs-warn behaviour. Lean: deny — the trap is silent enough that warnings get ignored. Deny forces explicit re-stage or `git add -u` before the commit lands. **Resolved**: deny with mechanical recovery (`git add <new>`) inline per ADR-013 Rule 1.
+- [x] Compose with `wr-itil:hooks/lib/` shared-helper directory — likely a new `lib/staging-detect.sh` exporting `detect_p057_trap()` for reuse. **Resolved**: new `packages/itil/hooks/lib/staging-detect.sh` ships with this fix; mirrors `lib/create-gate.sh` precedent (P119) for the deny + helper-pair shape.
+- [x] Add behavioural bats: trap detected (fail-loud), trap recovered via re-stage (allow), no rename in batch (allow), rename without subsequent edit (allow), rename with subsequent edit AND re-stage (allow). **Resolved**: 10 behavioural assertions in `packages/itil/hooks/test/p057-staging-trap-detect.bats` (5 trap/allow paths from the ticket spec + 5 supporting: non-Bash tool / non-commit Bash / empty JSON / deny-message contract / deny-message byte budget).
+- [x] Update `docs/briefing/agent-interaction-patterns.md` line 8 to cite the new hook + name the recovery as "the hook fails the commit; run `git add <B>` and retry". **Resolved**: line 8 now cites `packages/itil/hooks/p057-staging-trap-detect.sh` as the enforcement layer with the `git diff --staged --name-status` + `git diff --name-only` detection logic and the `git add <new>` recovery shape.
 
 ### Fix Strategy
 
@@ -81,6 +81,20 @@ The PreToolUse variant is more deterministic (doesn't rely on session-state trac
 - `.changeset/wr-itil-p125-*.md` — patch entry.
 
 **Out of scope**: extending detection to non-git-mv staging traps (e.g. add+edit-without-add). Worktree-aware detection (P115 is parked; no need). Cross-language hooks (this is a Bash + git-only concern).
+
+## Fix Released
+
+`@windyroad/itil` patch via `.changeset/wr-itil-p125-staging-trap-hook.md`. AFK iter, single commit per ADR-014.
+
+- New `packages/itil/hooks/p057-staging-trap-detect.sh` — `PreToolUse:Bash` hook matching `git commit` invocations.
+- New `packages/itil/hooks/lib/staging-detect.sh::detect_p057_trap` — shared helper running `git diff --staged --name-status` + `git diff --name-only`; if any staged rename's `<new>` path also appears in the working-tree modification list, returns 1 (caller denies); otherwise 0 (allow). Fail-open on non-git working tree, parse error, or missing index — mirrors `lib/create-gate.sh` precedent (P119).
+- New `packages/itil/hooks/test/p057-staging-trap-detect.bats` — 10 behavioural assertions per ADR-005 + P081 (5 trap/allow paths from the ticket spec; 5 supporting paths: non-Bash tool, non-commit Bash, empty JSON, deny-message contract, deny-message byte budget).
+- `packages/itil/hooks/hooks.json` — registers the new hook under `PreToolUse` with `matcher: "Bash"`.
+- `docs/briefing/agent-interaction-patterns.md` line 8 — cites the new hook as the enforcement layer with detection logic and recovery shape.
+
+Architect APPROVED-WITH-AMENDMENTS verdict applied (3 amendments: ADR-005 cited in bats header instead of ADR-037 since hooks/test/ lives under ADR-005 / fail-open contract on parse-incomplete input mirrors create-gate.sh precedent / cost discoverability ~10-50ms documented in helper docstring per ADR-023). JTBD PASS — JTBD-001 (Enforce Governance Without Slowing Down) primary fit; JTBD-006 (Progress the Backlog While I'm Away) composes (AFK iter loops are the highest-frequency offenders per the ticket evidence). Voice-tone draft suggestion applied (~245-byte recovery message; observed 348 bytes including JSON envelope, well under the 400-byte ADR-038 progressive-disclosure cap).
+
+Awaiting user verification: trigger the trap shape in any session (`git mv <A> <B>` followed by an `Edit` to `<B>` with no subsequent `git add <B>`, then `git commit`) and confirm the hook denies with the recovery line naming `<B>` and the literal `git add <B>` command. Recovery: run the surfaced `git add <B>` and retry the commit.
 
 ## Dependencies
 
