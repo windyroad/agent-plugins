@@ -143,7 +143,7 @@ If the body-shape change is judged broad enough to warrant its own ADR (touches 
 
 ## Related
 
-- **P129** (`docs/problems/129-*.open.md`, companion ticket — INBOUND version-aware assessment classification for P079's pipeline; same user direction, opposite side of the contract)
+- **P129** (`docs/problems/129-p079-inbound-assessment-pipeline-lacks-version-aware-classification.open.md`, companion ticket — INBOUND version-aware assessment classification for P079's pipeline; same user direction, opposite side of the contract; this ticket strictly blocks P129 because P129's classifier needs the Versions schema to parse reporter-version)
 - **P070** (`docs/problems/070-report-upstream-does-not-check-for-existing-upstream-issues.verifying.md`) — sibling concern on the same skill surface; existing-issue dedup gap. Both tickets want stronger contracts on what `/wr-itil:report-upstream` emits — this ticket on body shape, P070 on dedup-before-filing.
 - **P063** (`docs/problems/063-manage-problem-does-not-trigger-report-upstream-for-external-root-cause.closed.md`) — trigger surface for `/wr-itil:report-upstream`. Inverse direction — P063 governs invocation; P128 governs body shape after invocation.
 - **P064** (`docs/problems/064-no-risk-scoring-gate-on-external-comms.known-error.md`) — risk-gate that scores the comm body the Versions block extends.
