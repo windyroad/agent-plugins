@@ -1,6 +1,6 @@
 # Problem 089: work-problems Step 5 dispatch has two robustness gaps — stdin warning pollutes JSON output, and cost metadata undercounts when subprocess exits via background-task-notification ack
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-21 (post-AFK-iter-7 retrospective Step 2b)
 **Priority**: 6 (Medium) — Impact: Minor (2) x Likelihood: Almost Certain (3)
 **Effort**: S — two bounded edits to `packages/itil/skills/work-problems/SKILL.md` Step 5 dispatch block + one new bats assertion per fix. Marginal cost; both improvements on the same target (coordinating-ticket rule per `/wr-retrospective:run-retro` SKILL.md).

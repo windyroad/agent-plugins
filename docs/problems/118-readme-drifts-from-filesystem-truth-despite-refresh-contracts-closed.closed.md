@@ -1,6 +1,6 @@
 # Problem 118: `docs/problems/README.md` drifts from filesystem truth across sessions despite P094 (refresh-on-create) and P062 (refresh-on-transition) both Closed
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-24
 **Fix Released**: 2026-04-25 (`@windyroad/itil` patch — pending release; commit `9c50d03`)
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Likely (3)

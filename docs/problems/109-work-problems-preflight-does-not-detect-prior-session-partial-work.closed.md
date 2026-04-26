@@ -1,6 +1,6 @@
 # Problem 109: `/wr-itil:work-problems` preflight Step 0 does not detect prior-session partial-work state (untracked ADRs, `.afk-run-state/iter-*.json` with 429/error statuses, existing `.claude/worktrees/*` branches)
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-22
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Likely (3)
 **Effort**: M
