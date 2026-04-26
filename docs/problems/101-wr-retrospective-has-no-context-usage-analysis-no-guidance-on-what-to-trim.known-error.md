@@ -1,10 +1,12 @@
 # Problem 101: `wr-retrospective` has no context-usage analysis — opaque where session tokens are consumed; no guidance on what to trim
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-22
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
-**Effort**: L
-**WSJF**: (12 × 1.0) / 4 = **3.0**
+**Effort**: XL (re-rated 2026-04-26 — architect verdict expanded scope from L to XL: new sibling ADR-043 + amendments to ADR-026 / ADR-014 + new skill + new diagnostic script + 2 bats fixtures + Step 2c block in run-retro SKILL.md)
+**WSJF**: (12 × 2.0) / 8 = **3.0**
+
+> Status transitioned Open → Known Error 2026-04-26 — root cause confirmed, fix path clear, fix landing in this commit. ADR-043 (Progressive context-usage measurement and reporting for retrospective sessions) is the architect-verdict-resolved settlement of the Fix Strategy. Verification Pending follows the next release per ADR-022.
 
 > User direction 2026-04-22: *"context tends to bloat over time. It would be nice if the retrospective plugin could analyse where tokens are being consumed (maybe the same way that https://github.com/getagentseal/codeburn does) and suggest improvements or flag problems, either as part of the run-retro skill or as part of a new skill. I'd prefer it to be part of run-retro, but if it's really heavy and consumes lots of tokens to execute, then I don't want to do it every retro as that would be its own bloat."*
 
@@ -49,14 +51,14 @@ Manual audit on user observation. Examples this session: user noticed bloat on C
 ### Investigation tasks
 
 - [x] Confirm no existing context-usage analysis step in run-retro (2026-04-22 audit).
-- [ ] Fetch and study https://github.com/getagentseal/codeburn — understand its analysis axes (per-file, per-tool, per-turn), suggestion shapes, and whether it measures by static-source-size-count or by LLM-side reported usage.
-- [ ] Enumerate the measurement surfaces available in a Claude Code session: `claude -p --output-format json` fields, `.jsonl` log format, hook output byte counts, SKILL.md byte counts per skill invocation, memory file byte counts, framework-listing byte counts (available-skills, subagent-types, deferred-tools).
-- [ ] Decide analysis layer granularity: per-source bucket (hooks / skills / memory / briefing / ADRs / problems / MCP / framework / user-project-owned) vs per-file vs per-turn vs per-tool-call. Codeburn comparison informs the choice.
-- [ ] Decide integration surface: (a) new run-retro Step 2c (cheap analysis always runs), (b) new standalone skill `/wr-retrospective:analyze-context` (expensive analysis on demand), (c) layered — cheap in run-retro + deep on demand. User preference: (a) if cheap enough; (c) otherwise; explicitly reject "expensive always-on".
-- [ ] Design the suggestion / flagging heuristic. Candidates: top-N-largest-contributors table, delta-from-last-session (highlight growth), violation-against-policy (budget-breach detection), per-plugin attribution.
-- [ ] Decide reporting shape: inline retro summary section vs a separate `docs/retros/<date>-context-analysis.md` artefact. Inline means the retro report itself grows (self-referential bloat concern); separate means the report lives long-term and can itself bloat.
-- [ ] Architect review at design-time: does this need its own ADR? Likely yes — the measurement contract + sampling policy + report shape are all design decisions worth recording. Candidate title: "Progressive context-usage analysis for retrospective sessions."
-- [ ] JTBD review: which job does this serve? Candidates: JTBD-001 (enforce governance without slowing down — measurement catches bloat before it slows), JTBD-006 (progress the backlog while I'm away — AFK loops benefit most from shorter context turns), potentially a new JTBD for "know what's eating my context."
+- [x] Codeburn study (2026-04-26) — divergent design chosen: byte-count-on-disk + jsonl `usage` hybrid rather than codeburn's pure LLM-side approach. Documented in ADR-043 Considered Options 1-4 + Reassessment Criteria.
+- [x] Measurement-surface enumeration (2026-04-26) — settled in ADR-043 "Measurement methodology" section: `wc -c` on disk for the cheap layer (hooks / skills / briefing / decisions / problems / jtbd / project-claude-md / memory + framework-injected sentinel); `usage` aggregation from `${CLAUDE_PROJECT_DIR}/.afk-run-state/*.jsonl` or `claude -p --output-format json` for the deep layer.
+- [x] Granularity decision (2026-04-26) — per-source-bucket aggregation in the cheap layer; per-plugin decomposition + per-turn attribution in the deep layer. ADR-043 "Per-plugin attribution" section.
+- [x] Integration-surface decision (2026-04-26) — Option (c) two-layer chosen per architect verdict + user direction. Cheap layer integrated into `run-retro` Step 2c; deep layer is the new `/wr-retrospective:analyze-context` skill.
+- [x] Suggestion / flagging heuristic design (2026-04-26) — settled in ADR-043: ADR-026-grounded suggestions citing comparable-prior reclamations (P095/P099/P100) + concrete byte counts; `not estimated — no prior data` sentinel when no prior exists. Banned qualitative phrases enumerated.
+- [x] Reporting shape decision (2026-04-26) — separate `docs/retros/<date>-context-analysis.md` artefact for the deep layer; inline summary block in run-retro's retro summary for the cheap layer. Both obey progressive-disclosure conventions per ADR-038. The deep-layer artefact carries an HTML-comment `context-snapshot:` trailer (precedent: ADR-040).
+- [x] Architect review at design-time (2026-04-26, agentId aeb2fc262d343ceda) — ISSUES FOUND resolved in this commit. Verdict: Option B (sibling ADR), HTML-comment-trailer snapshot, byte-counting-on-disk + not-measured sentinels, static upper-bound frequency guard. Resolution: ADR-043 authored + ADR-026 amended (analyze-context skill added to per-agent prompt list) + ADR-014 amended (commit-message convention row added).
+- [x] JTBD review (2026-04-26, agentId adbfca919bb33bbee) — PASS. Confirmed served jobs: JTBD-001 (Enforce Governance Without Slowing Down) primary, JTBD-006 (Progress the Backlog While I'm Away) for AFK loops, JTBD-005 (Invoke Governance Assessments On Demand) for the deep skill. Architect's nominated JTBD-101 dropped (plugin-developer concern is documentation-pattern-reuse, not a job served). Plugin-developer attribution affordance (per-plugin decomposition in deep layer) and OSS-adopter silence affordance (`not measured` sentinels everywhere) flagged and addressed.
 
 ## Fix Strategy
 
@@ -82,6 +84,9 @@ Manual audit on user observation. Examples this session: user noticed bloat on C
 
 ## Related
 
+- **ADR-043** (Progressive context-usage measurement and reporting for retrospective sessions) — sibling-ADR settlement of this ticket's Fix Strategy. Authored 2026-04-26 in this commit per architect verdict (agentId aeb2fc262d343ceda).
+- **ADR-026 amendment** — `packages/retrospective/skills/analyze-context/SKILL.md` added to the "Per-agent prompt amendments" target list (lines 94–101). Amended within ADR-026's reassessment window.
+- **ADR-014 amendment** — `docs(retros): context analysis YYYY-MM-DD` row added to the Commit Message Convention table for the deep skill's output. Amended within ADR-014's reassessment window.
 - **P091** (Session-wide context budget — meta) — parent meta. This ticket subsumes P091's measurement-harness investigation task with a broader analyzer-and-suggestion shape.
 - **P095 / P097 / P098 / P099 / P100** — sibling P091 children. P101 is the proactive-detection layer; the others were reactive-remediation for specific surfaces. Once P101 ships, similar future surfaces should get caught at retro time rather than requiring human observation.
 - **P088** (run-retro cannot see full context when invoked as subagent/subprocess) — adjacent run-retro quality issue. The deep analyzer in this ticket needs to see full session context, making P088's resolution a soft prerequisite for option (b)/(c) delivery modes.

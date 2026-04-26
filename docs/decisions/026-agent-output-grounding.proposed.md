@@ -98,6 +98,7 @@ Rationale:
   - `packages/itil/skills/manage-problem/SKILL.md` — WSJF Effort bucket selection rule.
   - `packages/itil/skills/manage-incident/SKILL.md` — mitigation timing estimates.
   - `packages/retrospective/skills/run-retro/SKILL.md` — session duration and observation timing.
+  - `packages/retrospective/skills/analyze-context/SKILL.md` (P101 / ADR-043) — context-usage byte counts, top-N-offender citations, comparable-prior reclamation suggestions. Amended within ADR-026's reassessment window per the precedent of ADR-014's P118 amendment; no new ADR.
 
 - **Bats doc-lint tests** — one bats file per amended agent/skill asserting the prompt contains ADR-026's grounding rule. Structural assertion — Permitted Exception per ADR-005.
 

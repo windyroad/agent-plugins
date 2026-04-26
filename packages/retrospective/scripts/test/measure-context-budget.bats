@@ -1,0 +1,236 @@
+#!/usr/bin/env bats
+
+# @problem P101 — wr-retrospective has no context-usage analysis. ADR-043
+# (Progressive context-usage measurement and reporting for retrospective
+# sessions) introduces a read-only diagnostic script
+# `packages/retrospective/scripts/measure-context-budget.sh` as the cheap-
+# layer measurement primitive. This fixture pins the script's behavioural
+# contract.
+#
+# Contract: `measure-context-budget.sh [<project-root>]` walks the
+# session's on-disk context contributors and reports per-source bucket
+# byte totals. Default project-root is $CLAUDE_PROJECT_DIR if set, else
+# the current working directory.
+#
+# Threshold default 10240 (the 5% / 200K cheap-layer envelope per ADR-043),
+# overridable via CONTEXT_BUDGET_MAX_BYTES.
+#
+# Exit codes:
+#   0 = always (advisory only — overflow is signal, not failure)
+#   2 = parse error (project root missing or unreadable)
+#
+# Output format (one line per bucket, terse machine-readable per ADR-038
+# progressive-disclosure budget — ≤150 bytes per row):
+#   BUCKET <name> bytes=<N>
+#   BUCKET <name> not-measured reason=<reason>
+#
+# Plus one trailing diagnostic row carrying the threshold:
+#   THRESHOLD bytes=<N>
+#
+# @adr ADR-043 (Progressive context-usage measurement; this script is the
+#   measurement primitive)
+# @adr ADR-038 (Progressive disclosure — per-row byte budget)
+# @adr ADR-026 (Agent output grounding — explicit not-measured sentinels)
+# @adr ADR-013 Rule 1 / Rule 6 — interactive vs AFK
+# @adr ADR-005 (Plugin testing strategy — behavioural fixture)
+# @adr ADR-037 (Skill testing strategy — bats-contract precedent)
+# @jtbd JTBD-001 / JTBD-005 / JTBD-006
+
+setup() {
+  SCRIPTS_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
+  SCRIPT="$SCRIPTS_DIR/measure-context-budget.sh"
+  FIXTURE_DIR="$(mktemp -d)"
+}
+
+teardown() {
+  rm -rf "$FIXTURE_DIR"
+}
+
+# ── Existence + executable ──────────────────────────────────────────────────
+
+@test "measure-context-budget: script file exists at expected path" {
+  [ -f "$SCRIPT" ]
+}
+
+@test "measure-context-budget: script is executable" {
+  [ -x "$SCRIPT" ]
+}
+
+# ── Exit codes ──────────────────────────────────────────────────────────────
+
+@test "measure-context-budget: empty project root exits 0 (advisory)" {
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  [ "$status" -eq 0 ]
+}
+
+@test "measure-context-budget: missing project root exits 2 (parse error)" {
+  run bash "$SCRIPT" "/path/that/does/not/exist/zz_$$"
+  [ "$status" -eq 2 ]
+}
+
+# ── Output shape — every run emits all buckets ──────────────────────────────
+
+@test "measure-context-budget: output contains hooks bucket row" {
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q '^BUCKET hooks '
+}
+
+@test "measure-context-budget: output contains skills bucket row" {
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  echo "$output" | grep -q '^BUCKET skills '
+}
+
+@test "measure-context-budget: output contains briefing bucket row" {
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  echo "$output" | grep -q '^BUCKET briefing '
+}
+
+@test "measure-context-budget: output contains decisions bucket row" {
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  echo "$output" | grep -q '^BUCKET decisions '
+}
+
+@test "measure-context-budget: output contains problems bucket row" {
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  echo "$output" | grep -q '^BUCKET problems '
+}
+
+@test "measure-context-budget: output contains jtbd bucket row" {
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  echo "$output" | grep -q '^BUCKET jtbd '
+}
+
+@test "measure-context-budget: output contains project-claude-md bucket row" {
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  echo "$output" | grep -q '^BUCKET project-claude-md '
+}
+
+@test "measure-context-budget: output contains memory bucket row" {
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  echo "$output" | grep -q '^BUCKET memory '
+}
+
+# ── Framework-injected sentinel (ADR-026 ungrounded-field rule) ─────────────
+
+@test "measure-context-budget: framework-injected bucket emits not-measured sentinel" {
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q '^BUCKET framework-injected not-measured '
+  echo "$output" | grep -q 'reason=framework-injected-no-on-disk-source'
+}
+
+# ── Surface-absent sentinels (ADR-026 ungrounded-field rule) ────────────────
+# Empty fixture has no docs/decisions/, docs/problems/, docs/jtbd/, etc.
+
+@test "measure-context-budget: empty fixture marks decisions not-measured" {
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  echo "$output" | grep -q '^BUCKET decisions not-measured '
+}
+
+@test "measure-context-budget: empty fixture marks problems not-measured" {
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  echo "$output" | grep -q '^BUCKET problems not-measured '
+}
+
+@test "measure-context-budget: empty fixture marks jtbd not-measured" {
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  echo "$output" | grep -q '^BUCKET jtbd not-measured '
+}
+
+@test "measure-context-budget: empty fixture marks briefing not-measured" {
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  echo "$output" | grep -q '^BUCKET briefing not-measured '
+}
+
+@test "measure-context-budget: empty fixture marks project-claude-md not-measured" {
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  echo "$output" | grep -q '^BUCKET project-claude-md not-measured '
+}
+
+# ── Surface-present byte counts ─────────────────────────────────────────────
+
+@test "measure-context-budget: populated decisions bucket reports byte count" {
+  mkdir -p "$FIXTURE_DIR/docs/decisions"
+  printf '# ADR-001\nbody body body\n' > "$FIXTURE_DIR/docs/decisions/001-foo.proposed.md"
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -qE '^BUCKET decisions bytes=[0-9]+$'
+  # Sanity: byte count is non-zero
+  decisions_line=$(echo "$output" | grep '^BUCKET decisions ')
+  bytes_value="${decisions_line##*bytes=}"
+  [ "$bytes_value" -gt 0 ]
+}
+
+@test "measure-context-budget: populated problems bucket reports byte count" {
+  mkdir -p "$FIXTURE_DIR/docs/problems"
+  printf '# Problem 001\nbody\n' > "$FIXTURE_DIR/docs/problems/001-foo.open.md"
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  echo "$output" | grep -qE '^BUCKET problems bytes=[0-9]+$'
+}
+
+@test "measure-context-budget: populated briefing bucket reports byte count" {
+  mkdir -p "$FIXTURE_DIR/docs/briefing"
+  printf '# Topic\nentry\n' > "$FIXTURE_DIR/docs/briefing/foo.md"
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  echo "$output" | grep -qE '^BUCKET briefing bytes=[0-9]+$'
+}
+
+@test "measure-context-budget: project CLAUDE.md reports byte count" {
+  printf '# Project\ninstructions\n' > "$FIXTURE_DIR/CLAUDE.md"
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  echo "$output" | grep -qE '^BUCKET project-claude-md bytes=[0-9]+$'
+  claude_md_line=$(echo "$output" | grep '^BUCKET project-claude-md ')
+  bytes_value="${claude_md_line##*bytes=}"
+  [ "$bytes_value" -gt 0 ]
+}
+
+# ── Threshold ────────────────────────────────────────────────────────────────
+
+@test "measure-context-budget: trailing THRESHOLD row emitted" {
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -qE '^THRESHOLD bytes=[0-9]+$'
+}
+
+@test "measure-context-budget: default threshold is 10240" {
+  unset CONTEXT_BUDGET_MAX_BYTES
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  echo "$output" | grep -q '^THRESHOLD bytes=10240$'
+}
+
+@test "measure-context-budget: CONTEXT_BUDGET_MAX_BYTES override respected" {
+  CONTEXT_BUDGET_MAX_BYTES=42 run bash "$SCRIPT" "$FIXTURE_DIR"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q '^THRESHOLD bytes=42$'
+}
+
+# ── Per-row byte budget (ADR-038 progressive-disclosure ≤150 bytes/row) ─────
+
+@test "measure-context-budget: every row is at most 150 bytes" {
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  [ "$status" -eq 0 ]
+  while IFS= read -r line; do
+    [ "${#line}" -le 150 ]
+  done <<< "$output"
+}
+
+# ── Read-only contract — script does not mutate the project tree ────────────
+
+@test "measure-context-budget: read-only — fixture tree unchanged after run" {
+  mkdir -p "$FIXTURE_DIR/docs/decisions"
+  printf '# ADR-001\nbody\n' > "$FIXTURE_DIR/docs/decisions/001-foo.proposed.md"
+  pre_hash=$(find "$FIXTURE_DIR" -type f -exec md5 -q {} \; 2>/dev/null | sort | md5)
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  [ "$status" -eq 0 ]
+  post_hash=$(find "$FIXTURE_DIR" -type f -exec md5 -q {} \; 2>/dev/null | sort | md5)
+  [ "$pre_hash" = "$post_hash" ]
+}
+
+# ── CLAUDE_PROJECT_DIR fallback when no arg ─────────────────────────────────
+
+@test "measure-context-budget: CLAUDE_PROJECT_DIR env var respected when no arg" {
+  CLAUDE_PROJECT_DIR="$FIXTURE_DIR" run bash "$SCRIPT"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q '^BUCKET hooks '
+}

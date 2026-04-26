@@ -1,0 +1,27 @@
+---
+"@windyroad/retrospective": minor
+---
+
+P101 / ADR-043: two-layer context-usage analyzer for the retrospective plugin. Sessions now end with a per-source-bucket context-usage summary in the retro report; bloat is detected at session-time rather than after the user notices.
+
+**Cheap layer** — new Step 2c in `run-retro/SKILL.md`, placed between Step 2b (Pipeline-instability scan) and Step 3 (Update the briefing tree). Invokes a new read-only diagnostic primitive `packages/retrospective/scripts/measure-context-budget.sh` and renders a per-source-bucket table in the retro summary. Static budget proof keeps the cheap layer under ~2.5 KB output per retro (well below the 5% / 200K cheap-layer envelope). Defensive fail-open trip: if the script exits non-zero or the report exceeds the configurable `CONTEXT_BUDGET_MAX_BYTES` ceiling, Step 2c emits a one-line pointer and skips the bucket table. AFK behaviour identical to interactive (no `AskUserQuestion`).
+
+**Deep layer** — new skill `/wr-retrospective:analyze-context` at `packages/retrospective/skills/analyze-context/SKILL.md`. On-demand analyzer with richer heuristics: per-turn attribution (when `.afk-run-state/*.jsonl` accessible), per-plugin decomposition of the `hooks` and `skills` aggregate buckets, comparable-prior-grounded suggestion generation, and policy-breach detection against ADR-038 / ADR-040 / P097 budgets. Output: `docs/retros/<date>-context-analysis.md` with an HTML-comment-trailer carrying the bucket-snapshot for delta-from-prior comparison. User-invoked only; never auto-fires per ADR-013 Rule 6.
+
+**Snapshot persistence** — chosen via architect verdict over gitignored JSON or `/tmp` markers. The HTML-comment trailer pattern mirrors ADR-040's per-entry signal-score block and satisfies ADR-026's cite + persist + uncertainty rule (every snapshot is a re-readable artefact in committed history). First-retro / no-prior path emits the explicit `no prior snapshot — first measurement this project` sentinel rather than silently omitting the delta column.
+
+**Measurement methodology** — byte-counting on disk for the cheap layer (deterministic, hermetic, statically budget-bound) plus framework-injected sentinel (`not measured — framework-injected, no on-disk source`) for `available-skills` / `subagent-types` / `deferred-tools` listings that cannot be byte-counted from the project filesystem. Deep layer uses the cheap-layer baseline plus `usage` token aggregation from session logs when available.
+
+**Suggestion grounding** — the new skill is added to ADR-026's "Per-agent prompt amendments" target list. SKILL.md prose explicitly bans qualitative-only phrases (`load is negligible`, `microseconds only`, `minimal`, `small change`, `trim X to reduce bloat` without comparable prior). Every top-N offender row carries a concrete byte count + measurement-method citation; every suggestion cites a comparable prior reclamation (P095 / P099 / P100 precedents) or emits `not estimated — no prior data` per ADR-026 line 90.
+
+**ADR-014 amendment** — Commit Message Convention table gains a `docs(retros): context analysis YYYY-MM-DD` row for the deep skill's output. Amended within ADR-014's existing reassessment window per the precedent of P118's reconcile-readme amendment; no new ADR for the convention row itself.
+
+**Tests** — 28 behavioural assertions on the diagnostic script (`packages/retrospective/scripts/test/measure-context-budget.bats`); 12 doc-lint structural assertions on the run-retro Step 2c block; 18 doc-lint structural assertions on the new analyze-context SKILL.md. Full retrospective suite 157/157 green.
+
+**Composition with sibling measurement infrastructure** — `briefing` aggregate row in the cheap layer is upstream of P099's per-topic-file `check-briefing-budgets.sh` advisory (which keeps its own surface intact) and P105's per-entry signal-vs-noise pass (which keeps the entry-level grain). The three measurements are at three different granularities and compose by hierarchy without double-counting; the deep layer cites P099 and P105 outputs as evidence sources rather than re-measuring.
+
+**JTBD alignment** — JTBD-001 (Enforce Governance Without Slowing Down) primary; JTBD-006 (Progress the Backlog While I'm Away) for AFK loops where the cheap-layer summary surfaces in iteration summaries; JTBD-005 (Invoke Governance Assessments On Demand) for the deep-layer skill (textbook on-demand assessment shape per the persona guidance). JTBD review confirmed plugin-developer attribution affordance (per-plugin decomposition surfaces in the deep layer) and OSS-adopter / plugin-user silence affordance (cheap layer never errors on missing surfaces; uses `not measured` sentinels everywhere).
+
+**Architect verdict** — Option B (sibling ADR, not extension of ADR-038) chosen explicitly. ADR-038 stays scope-bounded to UserPromptSubmit governance prose; ADR-043 is the observability layer that consumes what every other progressive-disclosure ADR individually budgets. The pattern ADR-040 / P099 / ADR-043 establishes — read-only advisory script + behavioural bats fixture + ADR-tier-budget amendment — is the documented shape for any accumulator-doc surface that needs progressive-disclosure enforcement.
+
+P101 transitions Open → Known Error in this commit (root cause confirmed, fix path clear, fix landing). Verification Pending follows the next release per ADR-022. P091's "Build a measurement harness" investigation task closes as subsumed by this broader analyzer+suggestion design.

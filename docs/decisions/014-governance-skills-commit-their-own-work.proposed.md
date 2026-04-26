@@ -119,8 +119,11 @@ All in-scope skills MUST instruct the primary agent to follow this sequence when
 | Incident mitigated | `docs(incidents): I<NNN> mitigated — <mitigation summary>` | `docs(incidents): I004 mitigated — feature flag off` |
 | Incident restored | `docs(incidents): I<NNN> restored — <action>` | `docs(incidents): I004 restored — rollback v1.4.3` |
 | Incident closed | `docs(incidents): close I<NNN>` | `docs(incidents): close I004` |
+| Context analysis report (P101 / ADR-043) | `docs(retros): context analysis YYYY-MM-DD` | `docs(retros): context analysis 2026-04-26` |
 
 All commit messages must follow the conventional-commit format (`<type>(<scope>): <description>`) and reference the problem or incident ID.
+
+The `docs(retros): context analysis YYYY-MM-DD` row is amended within ADR-014's existing reassessment window (2026-10-16) — no new ADR. It carries the deep-layer `/wr-retrospective:analyze-context` skill output (`docs/retros/<date>-context-analysis.md` plus the directory's `README.md` index when newly scaffolded). Source decision: ADR-043.
 
 ### Non-Interactive Fail-Safe
 

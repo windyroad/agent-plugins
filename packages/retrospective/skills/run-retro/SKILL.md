@@ -165,6 +165,50 @@ The shape mirrors P068's Step 4a Verification-close housekeeping: glob / evidenc
 - **Step 4 (problem-ticket creation)** — Step 2b feeds Step 4. A detection surfaced in Step 2b that the user accepts becomes a Step 4 creation or update via the manage-problem delegation. Step 4b's Stage 1 two-stage codification flow (P075) applies to pipeline-instability tickets the same way it applies to Step 2 reflection tickets — the detection IS the codify-worthy observation.
 - **ADR-027 compatibility note**: when ADR-027's Step-0 auto-delegation lands on run-retro, Step 2b's evidence scan is load-bearing on main-agent session context that a delegated subagent does not automatically inherit. The migration path mirrors Step 4a's: either (a) run Step 2b in the main-agent context BEFORE Step-0 delegation to the subagent, or (b) include an explicit session-activity summary (tool invocations, commits, skill calls observed in main-agent context) in the Step-0 delegation prompt. Option (a) is preferred to keep the evidence scan close to the observed activity.
 
+### 2c. Context-usage measurement (cheap layer, P101)
+
+Per **ADR-043** (Progressive context-usage measurement and reporting for retrospective sessions), every retro emits a per-source-bucket context-usage summary so bloat is detected at session-time rather than after the user notices. The cheap layer runs unconditionally in every retro (interactive and AFK) at a static-budget-bounded ~2.5 KB output ceiling — well under the 5% / 200K cheap-layer envelope. Anything richer (per-turn attribution, per-plugin decomposition, suggestion generation) is the deep layer's responsibility, invoked by explicit user direction via `/wr-retrospective:analyze-context`.
+
+**Ownership boundary**: this step measures and surfaces; it does NOT trim, edit, or refactor any source surface. Trim decisions stay with the user (or a follow-up problem ticket via Step 4 / Step 4b). The cheap layer is a read-only observability surface, not an enforcement gate.
+
+**Steps:**
+
+1. **Invoke the diagnostic script**:
+
+   ```bash
+   bash packages/retrospective/scripts/measure-context-budget.sh "${CLAUDE_PROJECT_DIR:-.}"
+   ```
+
+   The script is read-only, exits 0 on advisory output and 2 on parse error (project root missing). It emits one row per bucket: `BUCKET <name> bytes=<N>` for measured surfaces, `BUCKET <name> not-measured reason=<reason>` for absent or framework-injected surfaces, plus a trailing `THRESHOLD bytes=<N>` row for the configurable ceiling. See `packages/retrospective/scripts/test/measure-context-budget.bats` for the exact contract.
+
+2. **Read the prior snapshot** (when present):
+
+   ```bash
+   prior_report=$(ls -1r docs/retros/*-context-analysis.md 2>/dev/null | head -1)
+   ```
+
+   If `$prior_report` is non-empty and the file contains a `<!-- context-snapshot:` HTML-comment trailer (per ADR-043's snapshot-persistence shape), parse the trailer fields for the prior bucket totals. **First-retro / no-prior path**: emit the bucket table without a delta column and label it `no prior snapshot — first measurement this project` per ADR-026's `not estimated — no prior data` sentinel. Do NOT silently omit the column — the absence is itself signal.
+
+3. **Render the cheap-layer report** as a `## Context Usage (Cheap Layer)` section in the retro summary (see Step 5). The section MUST contain:
+   - A per-bucket table (one row per script-emitted bucket, sorted by bytes descending). Columns: `Bucket | Bytes | % of total | Δ vs prior`.
+   - A top-5 offenders block when ≥ 5 buckets carry non-zero byte counts. Top-5 cites the bucket name + byte count + measurement-method (per ADR-026).
+   - A one-line affordance: `Per-plugin breakdown available in /wr-retrospective:analyze-context (deep layer).`
+   - When the deep layer's last run is older than 14 days OR a bucket's delta exceeds +20% since prior snapshot, append the one-line note: `Deep analysis recommended — invoke /wr-retrospective:analyze-context.` This is a non-blocking advisory, never a prompt.
+
+4. **Forbidden phrases (ADR-026)**: the cheap-layer report MUST NOT contain qualitative-only phrases. Banned: `load is negligible`, `microseconds only`, `minimal`, `small change`, `trim X to reduce bloat` (without comparable prior). Concrete byte counts + measurement-method citations are mandatory; ungrounded fields use the explicit `not measured — <reason>` sentinel.
+
+5. **Defensive trip (fail-open)**: if the script exits non-zero or the rendered report exceeds the `THRESHOLD bytes=<N>` ceiling at runtime, skip the bucket table and emit the one-line pointer `cheap layer disabled — invoke /wr-retrospective:analyze-context for context measurement`. Log the trip in Step 2b's Pipeline Instability section so the regression is captured as a ticket candidate per the existing flow.
+
+6. **AFK behaviour (ADR-013 Rule 6)**: identical to interactive mode. The cheap layer is silent (no `AskUserQuestion`); the bucket table + advisory line ride the retro summary. AFK orchestrators read the summary on iteration close.
+
+**Interaction with other surfaces:**
+
+- **`P099` Tier 3 advisory** (`check-briefing-budgets.sh`) — measures **per-topic-file** budget on `docs/briefing/<topic>.md`. The cheap layer aggregates this into a single `briefing` bucket row; the per-file detail is drillable via P099's existing surface. No double-counting.
+- **`P105` signal-vs-noise pass** (Step 1.5 of this skill) — measures **per-entry** signal scores on briefing entries. The cheap layer's `briefing` bucket is upstream of the per-entry signal scores; deep layer cites both as evidence sources.
+- **Step 4 / 4b — codification flow**: when the cheap layer surfaces a delta-from-prior anomaly that the user wants to investigate, the deep layer (`/wr-retrospective:analyze-context`) is the correct routing target — it produces a `docs/retros/<date>-context-analysis.md` report with per-turn attribution and suggestion generation. The cheap layer never auto-routes.
+- **`/wr-retrospective:analyze-context` (deep layer)** — invoked only by explicit user direction. Never auto-fires from this step. Deep-layer report writes the HTML-comment-trailer snapshot that subsequent runs of this step read.
+- **ADR-027 compatibility note**: same migration shape as Step 2b. The script invocation must run in main-agent context; the parsed bucket totals are the artefact a delegated subagent can consume without re-running the byte-count.
+
 ### 3. Update the briefing tree
 
 Edit `docs/briefing/<topic>.md` files — each topic file is per-subject (`hooks-and-gates.md`, `releases-and-ci.md`, `governance-workflow.md`, `afk-subprocess.md`, `plugin-distribution.md`, `agent-interaction-patterns.md`). Select the topic file whose scope matches the learning; if no file fits, add a new topic file under `docs/briefing/` and update `docs/briefing/README.md`'s Topic Index accordingly.
