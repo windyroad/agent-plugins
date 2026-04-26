@@ -12,9 +12,9 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6.0 | P123 | Blocked-user list mechanism for inbound report management — refuse future tickets from clearly-malicious reporters | 12 High | Open | M |
 | 6.0 | P082 | No voice-and-tone or content-risk-scoring gate on commit messages | 12 High | Open | M |
 | 6.0 | P064 | No risk-scoring gate on external communications | 12 High | Known Error | L |
+| 6.0 | P065 | No skill scaffolds intake files in downstream projects (re-rated M → L per architect direction) | 12 High | Known Error | L |
 | 3.0 | P101 | `wr-retrospective` has no context-usage analysis — opaque where session tokens are consumed; no guidance on what to trim | 12 High | Open | L |
 | 3.0 | P014 | No lightweight aside invocation for governance skills (background-subagent convention per 2026-04-20 direction) | 12 High | Open | L |
-| 3.0 | P065 | No skill scaffolds intake files in downstream projects (re-rated M → L per architect direction) | 12 High | Open | L |
 | 3.0 | P081 | Structural source-content tests are wasteful — TDD agent should reject them and require behavioural tests | 12 High | Open | L |
 | 3.0 | P087 | No maturity / battle-hardening signal on plugins, skills, agents, or hooks — READMEs don't tell users which features are stable vs experimental | 12 High | Open | L |
 | 3.0 | P096 | PreToolUse / PostToolUse hook injection volume across windyroad plugins — unaudited | 12 High | Open | L |

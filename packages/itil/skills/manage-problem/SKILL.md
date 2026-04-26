@@ -13,6 +13,25 @@ Create, update, or transition problem tickets following an ITIL-aligned problem 
 
 When referencing problem IDs, ADR IDs, or JTBD IDs in prose output, always include the human-readable title on first mention. Use the format `P029 (Edit gate overhead for governance docs)`, not bare `P029`. Tables with separate ID and Title columns are fine as-is.
 
+## First-run intake-scaffold pointer (P065 / ADR-036)
+
+This skill is one of the two host skills wired to surface the [`/wr-itil:scaffold-intake`](../scaffold-intake/SKILL.md) skill on first invocation in a project that has not yet adopted the OSS intake surface. The contract is documented in [ADR-036](../../../../docs/decisions/036-scaffold-downstream-oss-intake.proposed.md) (Scaffold downstream OSS intake — skill + layered triggers).
+
+**Preamble check** (run before Step 0 of any operation):
+
+1. Look for the four intake paths: `.github/ISSUE_TEMPLATE/config.yml`, `.github/ISSUE_TEMPLATE/problem-report.yml`, `SECURITY.md`, `SUPPORT.md`, `CONTRIBUTING.md`.
+2. Look for `.claude/.intake-scaffold-declined` (explicit decline marker — never re-prompt).
+3. Look for `.claude/.intake-scaffold-done` (done marker — already scaffolded).
+
+If any intake file is missing AND both markers are absent, surface the scaffold-intake skill:
+
+| Mode | Behaviour |
+|---|---|
+| **Foreground (interactive)** | Fire one-shot `AskUserQuestion` per ADR-013 Rule 1: header `"Scaffold OSS intake?"`, three options — **Scaffold now** (delegate to `/wr-itil:scaffold-intake`), **Not now (ask again next session)** (no marker; re-prompt next time), **Decline (never prompt in this project)** (write `.claude/.intake-scaffold-declined`). |
+| **AFK orchestrator (Rule 6 fail-safe)** | Do **not** fire `AskUserQuestion`. Append a one-line `"pending intake scaffold"` note to the iteration's `ITERATION_SUMMARY` notes field. Do **not** auto-scaffold — JTBD-006 forbids the agent from making this judgement call. The user catches up on next interactive session. |
+
+The preamble check is a one-shot; the `.intake-scaffold-done` and `.intake-scaffold-declined` markers (ADR-009 persistent-marker semantics) suppress re-prompts in subsequent sessions without TTL expiry.
+
 ## Operations
 
 - **Create**: `problem <title or description>` — creates a new open problem

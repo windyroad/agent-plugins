@@ -14,6 +14,24 @@ The user is AFK during this process, so every decision point that would normally
 
 Each iteration is one cycle of: scan backlog, pick highest-WSJF problem, work it, report result. The loop continues until a stop condition is met.
 
+## First-run intake-scaffold pointer (P065 / ADR-036)
+
+This skill is one of the two host skills wired to surface the [`/wr-itil:scaffold-intake`](../scaffold-intake/SKILL.md) skill on first invocation in a project that has not yet adopted the OSS intake surface. The contract is documented in [ADR-036](../../../../docs/decisions/036-scaffold-downstream-oss-intake.proposed.md) (Scaffold downstream OSS intake — skill + layered triggers).
+
+**Preamble check** (run once at session start, before Step 0 of the loop):
+
+1. Look for the four intake paths: `.github/ISSUE_TEMPLATE/config.yml`, `.github/ISSUE_TEMPLATE/problem-report.yml`, `SECURITY.md`, `SUPPORT.md`, `CONTRIBUTING.md`.
+2. Look for `.claude/.intake-scaffold-declined` (explicit decline marker — never re-prompt).
+3. Look for `.claude/.intake-scaffold-done` (done marker — already scaffolded).
+
+If any intake file is missing AND both markers are absent: this skill is **always invoked from an AFK orchestrator context** (per the skill's allowed-tools and persona). The Rule 6 fail-safe applies unconditionally:
+
+- Do **not** fire `AskUserQuestion`.
+- Do **not** auto-scaffold.
+- Append a one-line `"pending intake scaffold"` note to the iteration's `ITERATION_SUMMARY` notes field. The note is a per-iteration audit trail signal — accumulating one line per AFK iter is acceptable per ADR-036 § Bad consequences and JTBD-006 "audit trail — every action taken during AFK mode should be traceable".
+
+The user reviews the pending note on their next interactive session and runs `/wr-itil:scaffold-intake` (or `/wr-itil:manage-problem` with the foreground prompt branch) at that point. JTBD-006 forbids the agent from making this judgement call autonomously.
+
 ### Step 0: Preflight (per ADR-019)
 
 Before opening the work loop, reconcile local state with origin so the orchestrator does not iterate against a stale backlog or create tickets with IDs that collide with parallel sessions (P040).

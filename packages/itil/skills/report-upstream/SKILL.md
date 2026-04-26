@@ -36,6 +36,12 @@ This skill **does NOT** implement ADR-027's Step-0 auto-delegation pattern. Per 
 
 **Trigger to revisit**: if a second skill that reads upstream repo content lands (per ADR-024's Reassessment Criteria), reconsider whether the cross-cutting "read upstream" pattern should move into a Step-0-delegated subagent that this skill calls.
 
+## Reciprocal sibling: scaffold-intake (P065 / ADR-036)
+
+This skill files reports against an upstream's intake surface. Its reciprocal — [`/wr-itil:scaffold-intake`](../scaffold-intake/SKILL.md) — scaffolds the intake surface on a downstream project so that downstream can in turn be a target of further `report-upstream` calls. Together they close the ecosystem-level intake-shape discipline P055 partial coverage left open. Adopters who run this skill against a target without an `.github/ISSUE_TEMPLATE/` directory should be encouraged to suggest the target adopt `/wr-itil:scaffold-intake` to gain the full problem-first intake set this skill prefers (per ADR-033 Step 3 classifier).
+
+[ADR-036](../../../../docs/decisions/036-scaffold-downstream-oss-intake.proposed.md) is the design record for the reciprocal-scaffolding side; it establishes the layered triggers (first-run prompt + pre-publish gate + optional CI check) and the marker-suppressed lifecycle.
+
 ## Voice-tone gate interaction (ADR-028)
 
 The skill's `gh issue create` (Step 5) and `gh api repos/.../security-advisories` (Step 6) calls are **on the gated surface list per [ADR-028](../../../docs/decisions/028-voice-tone-gate-external-comms.proposed.md)** (Voice-tone gate on external communications). Expected behaviour during these tool calls:

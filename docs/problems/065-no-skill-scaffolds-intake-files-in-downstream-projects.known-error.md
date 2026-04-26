@@ -1,6 +1,6 @@
 # Problem 065: No skill scaffolds intake files (ISSUE_TEMPLATE, SECURITY.md, CONTRIBUTING.md, SUPPORT.md) in downstream projects
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-20
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: L (re-rated from M at AFK iter 6 iter 3 triage; P047) — new `/wr-itil:scaffold-intake` skill in `@windyroad/itil` PLUS a PreToolUse hook (`packages/itil/hooks/pre-publish-intake-gate.sh`), PLUS first-run trigger wiring in `manage-problem` and `work-problems`, PLUS a new ADR (pinned: "own ADR, not extension of ADR-024"), PLUS problem-first template seeds updated from the corrected shape P066 shipped, PLUS fixture-based bats tests for scaffold + idempotency + gate. Originally scoped as M (skill + templates only); the layered-trigger direction pin and the new-ADR decision push effort into L territory. Templates can now seed from `.github/ISSUE_TEMPLATE/problem-report.yml` (shipped in AFK iter 6 iter 1) rather than the old bug/feature pair.

@@ -15,6 +15,10 @@
       {
         "matcher": "Bash",
         "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/p057-staging-trap-detect.sh" }]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/pre-publish-intake-gate.sh" }]
       }
     ],
     "Stop": [
