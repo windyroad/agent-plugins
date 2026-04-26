@@ -1,10 +1,10 @@
 # Problem 124: `/wr-itil:manage-problem` Step 2 substep 7 session-id discovery is brittle — agent has no env var, must scrape marker filenames
 
-**Status**: Verification Pending
+**Status**: Known Error
 **Reported**: 2026-04-26
-**Priority**: 6 (Med) — Impact: Minor (2) x Likelihood: Likely (3)
-**Effort**: S — extend `packages/itil/skills/manage-problem/SKILL.md` Step 2 substep 7 with a documented session-id discovery pattern that does NOT depend on `${CLAUDE_SESSION_ID}` being in the agent's env (it is not, in main-turn or subprocess contexts). The pattern: read an existing marker filename under `/tmp/<existing-marker>-<UUID>`, extract the UUID, and use that. Reference implementation: list `/tmp/architect-plan-reviewed-*` (or any other gate marker reliably set this session) and parse the trailing UUID. New helper script in `packages/itil/hooks/lib/session-id.sh` (or extend an existing detector lib) exporting a deterministic `get_current_session_id()` function. SKILL.md Step 2 substep 7 cites the helper rather than the brittle `${CLAUDE_SESSION_ID:-default}` fallback.
-**WSJF**: (6 × 1.0) / 1 = **6.0**
+**Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4) — re-rated 2026-04-27 after regression evidence
+**Effort**: S — Phase 2 fix on top of the original P124 fix: replace `shopt -s nullglob` (bash-only — fails on zsh with `command not found`) with portable form (e.g. `for f in /tmp/<system>-announced-*; do [ -e "$f" ] || continue; ...`); fix glob-ordering from ASCII-alphabetical to mtime-sort (e.g. `ls -t /tmp/<system>-announced-* | head -1`) so the helper returns the most-recent SID, not the lexically-first one. Helper file: `packages/itil/hooks/lib/session-id.sh`. Plus matching behavioural bats per ADR-037.
+**WSJF**: (12 × 2.0) / 1 = **24.0** — flipped back from Verification Pending (multiplier 0) to Known Error (multiplier 2.0) after regression observed twice this session. Now top of dev-work queue.
 
 > Surfaced 2026-04-26 during P122 retro session: the assistant attempted to write `docs/problems/122-*.open.md` after running Step 2's grep, but the create-gate hook (P119, `/wr-itil:manage-problem` enforcement) blocked the Write because the per-session marker `/tmp/manage-problem-grep-${SESSION_ID}` did not match the hook's stdin-JSON `session_id`. The SKILL.md Step 2 substep 7 fallback is `${CLAUDE_SESSION_ID:-default}` which evaluated to `default` (env not set), but the hook reads the actual session UUID from its stdin JSON payload (`60331245-5d4e-461c-b95b-67b9a5b95c4b`). The agent had to scrape an existing `/tmp/architect-plan-reviewed-<UUID>` filename to discover the correct UUID, then re-touch the marker with the right name before retrying. Same friction would fire for any agent invoking manage-problem from a context where `CLAUDE_SESSION_ID` is not exported.
 
@@ -97,11 +97,84 @@ The SKILL.md substep 7 prose acknowledges the env var is unreliable but does not
 - **JTBD-006** (Progress the Backlog While I'm Away) — composes; AFK loops that create tickets mid-iter pay the same friction without an interactive UUID-extraction surface.
 - 2026-04-26 session evidence: P122 ticket creation blocked on the first Write attempt; UUID extracted from `/tmp/architect-plan-reviewed-60331245-5d4e-461c-b95b-67b9a5b95c4b` and re-touched as `/tmp/manage-problem-grep-60331245-5d4e-461c-b95b-67b9a5b95c4b`; second Write succeeded. Same friction did NOT recur for P123 creation in the same session because the marker persisted once set.
 
-## Fix Released
+## Fix Released (REVERTED — regression observed 2026-04-27)
 
-Awaiting user verification.
+Original fix shipped during the 2026-04-26 AFK `/wr-itil:work-problems` iteration. Status flipped Verification Pending → Known Error on 2026-04-27 after regression evidence accumulated this session — see `## Regression Evidence (2026-04-27)` below.
 
-Implemented during the 2026-04-26 AFK `/wr-itil:work-problems` iteration as commit `<pending>` (folded `fix(itil): ... (closes P124)`).
+The original Phase 1 implementation (`packages/itil/hooks/lib/session-id.sh::get_current_session_id()`) ships and is callable, but its internal mechanism is bash-only AND ASCII-glob-ordered, so it returns wrong values under zsh (the project's primary interactive shell on macOS). The Phase 2 fix (this re-opened ticket) makes the helper actually portable.
+
+## Regression Evidence (2026-04-27)
+
+Two independent observations this session:
+
+**Citation 1 — AFK iter 4 retro Step 2b (2026-04-27 ~01:22)**: The `/wr-itil:work-problems` AFK iter 4 subprocess invoked `/wr-retrospective:run-retro` per ADR-032 subprocess-boundary retro-on-exit. Retro flagged session-id.sh as a verification-regression candidate, citing two specific bugs:
+- `shopt -s nullglob` is a bash builtin; on zsh `shopt: command not found`. The helper's nullglob expansion fails, leaving the glob expression literal.
+- The fallback scrape iterates markers in ASCII-alphabetical order (default glob expansion) rather than mtime-sort. Returns the lexically-first SID, not the most-recent.
+
+The iter's `notes` field flagged this for user-decision: *"P124 helper regression — shopt-under-zsh + ASCII-alphabetical-glob bugs that defeat its stated guarantee (returns stale UUID); user must decide P124->known-error vs sibling ticket on return"*.
+
+**Citation 2 — main-turn P130 capture (2026-04-27 ~06:54)**: The orchestrator main turn invoked `/wr-itil:manage-problem` to create P130 (orchestrator presence-aware dispatch capture). At Step 2, the helper was called via `source packages/itil/hooks/lib/session-id.sh && get_current_session_id`. Output:
+
+```
+get_current_session_id:33: command not found: shopt
+marker set for sid=027d3742-91df-444a-8694-a5c324c0e5fc
+```
+
+The helper returned `027d3742-91df-444a-8694-a5c324c0e5fc` — but the orchestrator's actual session SID at the time was `c682070c-d79f-4472-85ef-3ccb0d80f6db` (verifiable via `ls -lt /tmp/architect-announced-*` showing `c682070c-...` was created at 06:48 — far more recent than `027d3742-...`'s session). The create-gate hook (P119) read `c682070c-...` from its stdin JSON `session_id` field, didn't find a matching marker, and denied the Write.
+
+Recovery required brute-forcing the marker for every recent SID:
+
+```bash
+for sid in $(ls /tmp/architect-announced-* | sed 's|.*architect-announced-||' | sort -u); do
+  touch "/tmp/manage-problem-grep-$sid"
+done
+# 81 marker files written
+```
+
+Only after this brute-force did the create-gate hook pass and the P130 ticket file Write succeed. This is the user-facing class-of-defect: the helper's stated guarantee ("returns the canonical session UUID") doesn't hold under zsh, AND the recovery path requires shell knowledge the agent shouldn't need.
+
+## Fix Strategy (Phase 2)
+
+**Target file**: `packages/itil/hooks/lib/session-id.sh::get_current_session_id()`
+
+**Two fixes** in one bounded edit:
+
+1. **Replace `shopt -s nullglob`** (bash-only) with a portable existence-check loop:
+
+   ```bash
+   # OLD (bash-only):
+   shopt -s nullglob
+   markers=(/tmp/architect-announced-*)
+
+   # NEW (portable bash + zsh + dash):
+   markers=()
+   for f in /tmp/architect-announced-*; do
+     [ -e "$f" ] || continue
+     markers+=("$f")
+   done
+   ```
+
+   On zsh, the bash-only `shopt` line errors with `command not found`; the portable form works on every POSIX shell.
+
+2. **Fix glob-ordering** from ASCII-alphabetical (default glob expansion) to mtime-sort (most-recent first):
+
+   ```bash
+   # OLD: implicit ASCII-alphabetical:
+   latest_marker="${markers[0]}"
+
+   # NEW: mtime-sort, most-recent:
+   latest_marker=$(printf '%s\n' "${markers[@]}" | xargs ls -t 2>/dev/null | head -1)
+   # OR simpler: ls -t /tmp/architect-announced-* | head -1
+   ```
+
+   The orchestrator's actual SID is whichever announce-marker was created most recently — that's the active session. ASCII-alphabetical order is unrelated to recency.
+
+**Behavioural bats** per ADR-037 (and per ADR-044 once it lands superseding ADR-037 — behavioural-default per P081):
+- Fixture: write 3 announce markers with controlled mtimes (`touch -t`) under `/tmp/<sentinel>-announced-*`. Call helper. Assert returned SID is the most-recent-mtime marker's UUID, not the ASCII-first one.
+- Fixture: run helper under zsh shebang (`#!/bin/zsh -c`). Assert no `shopt: command not found` error, helper returns valid UUID.
+- Fixture: empty marker set. Assert helper returns empty + non-zero exit (per the existing fail-closed contract).
+
+**Composes-with**: P119 (create-gate hook reads marker via the same SID; helper fix makes the gate work first-time on every session). P130 (orchestrator presence-aware dispatch — the dispatch-decision hook would consume SID via the same helper; reliable SID discovery is a soft prerequisite).
 
 **Shape delivered:**
 - `packages/itil/hooks/lib/session-id.sh` (NEW) exports `get_current_session_id()`. Logic: env-var fast path; otherwise iterate fixed system-priority list `(architect, jtbd, tdd, itil-assistant-gate, itil-correction-detect, style-guide, voice-tone)` and glob `${SESSION_MARKER_DIR:-/tmp}/<system>-announced-*`; first hit wins; returns empty + non-zero exit when exhausted. `-announced-` markers are write-once-per-session per ADR-038 and have no mtime-sliding (unlike `-reviewed-` markers per ADR-009 + P111).
