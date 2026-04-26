@@ -1,0 +1,174 @@
+#!/usr/bin/env bats
+# Tests for external-comms-gate.sh (P064 / ADR-028 amended).
+# Behavioural: the gate denies outbound prose tool calls until the
+# wr-risk-scorer:external-comms subagent has reviewed the draft and a
+# per-evaluator marker has been written. Hard-fail leak patterns deny
+# immediately without delegation.
+#
+# Note: secret-shaped strings are constructed at runtime via concatenation
+# so this test file itself does not trip the secret-leak-gate hook.
+
+setup() {
+  HOOKS_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
+  HOOK="$HOOKS_DIR/external-comms-gate.sh"
+
+  TEST_SESSION="bats-extcomms-gate-$$-${BATS_TEST_NUMBER}"
+  RDIR="${TMPDIR:-/tmp}/claude-risk-${TEST_SESSION}"
+  rm -rf "$RDIR"
+  mkdir -p "$RDIR"
+
+  # Default: assume RISK-POLICY.md is present in repo root (it is).
+  TEST_PROJECT_DIR="$(mktemp -d)"
+  printf "## Confidential Information\n- Client names\n- Revenue figures\n" \
+    > "$TEST_PROJECT_DIR/RISK-POLICY.md"
+
+  unset BYPASS_RISK_GATE
+
+  # Construct secret-shaped strings at runtime to avoid tripping the
+  # repo's own secret-leak-gate when this file is committed/edited.
+  GH_TOKEN_LIKE="g""hp""_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  AWS_KEY_LIKE="A""KIA""IOSFODNN7EXAMPLE"
+}
+
+teardown() {
+  rm -rf "$RDIR"
+  rm -rf "$TEST_PROJECT_DIR"
+  unset BYPASS_RISK_GATE
+}
+
+# ---------- Helpers ----------
+
+# Build a PreToolUse:Bash input for a given command via python so quoting is safe.
+build_bash_input() {
+  local cmd="$1"
+  python3 -c "
+import json, sys
+print(json.dumps({
+    'session_id': '$TEST_SESSION',
+    'tool_name': 'Bash',
+    'tool_input': {'command': sys.argv[1]},
+}))
+" "$cmd"
+}
+
+# Build a PreToolUse:Write input for a changeset path with body content.
+build_write_input() {
+  local file_path="$1"
+  local content="$2"
+  python3 -c "
+import json, sys
+print(json.dumps({
+    'session_id': '$TEST_SESSION',
+    'tool_name': 'Write',
+    'tool_input': {'file_path': sys.argv[1], 'content': sys.argv[2]},
+}))
+" "$file_path" "$content"
+}
+
+# Run the hook in a project dir with RISK-POLICY.md present, piping JSON via stdin.
+run_hook() {
+  local input="$1"
+  run bash -c "cd '$TEST_PROJECT_DIR' && printf '%s' \"\$1\" | '$HOOK'" _ "$input"
+}
+
+# ---------- Tests ----------
+
+@test "non-matching Bash command (ls) is allowed silently" {
+  INPUT=$(build_bash_input "ls -la")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "gh issue create with clean draft denies and prompts external-comms delegation (no marker yet)" {
+  INPUT=$(build_bash_input "gh issue create --title T --body 'we observed a build failure on Node 20'")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"permissionDecision"* ]]
+  [[ "$output" == *"deny"* ]]
+  [[ "$output" == *"wr-risk-scorer:external-comms"* ]]
+}
+
+@test "hard-fail credential pattern (GitHub token) denies immediately with leak reason" {
+  INPUT=$(build_bash_input "gh issue comment 42 --body 'token=${GH_TOKEN_LIKE}'")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"permissionDecision"* ]]
+  [[ "$output" == *"deny"* ]]
+  [[ "$output" == *"GitHub token"* ]] || [[ "$output" == *"credential"* ]]
+}
+
+@test "hard-fail credential pattern (AWS key) denies immediately" {
+  INPUT=$(build_bash_input "gh pr create --title T --body 'AWS=${AWS_KEY_LIKE}'")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"deny"* ]]
+  [[ "$output" == *"AWS"* ]] || [[ "$output" == *"credential"* ]]
+}
+
+@test "BYPASS_RISK_GATE=1 short-circuits the deny" {
+  INPUT=$(build_bash_input "gh issue create --title T --body 'we observed a build failure'")
+  run bash -c "cd '$TEST_PROJECT_DIR' && BYPASS_RISK_GATE=1 printf '%s' \"\$1\" | BYPASS_RISK_GATE=1 '$HOOK'" _ "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "marker present for matching draft+surface key allows the call" {
+  DRAFT="we observed a build failure on Node 20"
+  SURFACE="gh-issue-create"
+  KEY=$(printf '%s\n%s' "$DRAFT" "$SURFACE" | shasum -a 256 | cut -d' ' -f1)
+  touch "${RDIR}/external-comms-reviewed-${KEY}"
+
+  INPUT=$(build_bash_input "gh issue create --title T --body '$DRAFT'")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "RISK-POLICY.md absent yields advisory-only mode (permits)" {
+  rm -f "$TEST_PROJECT_DIR/RISK-POLICY.md"
+  INPUT=$(build_bash_input "gh issue create --title T --body 'we observed a failure'")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  # Must NOT deny when policy file is absent.
+  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
+  [[ "$output" != *"\"permissionDecision\":\"deny\""* ]]
+}
+
+@test "PreToolUse:Write on .changeset/*.md with revenue leak content denies" {
+  INPUT=$(build_write_input ".changeset/wr-risk-scorer-extcomms.md" "Add gate; covers Acme Corp \$2.4M ARR client.")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"deny"* ]]
+}
+
+@test "PreToolUse:Write on .changeset/*.md with clean content denies-then-delegates (no marker yet)" {
+  INPUT=$(build_write_input ".changeset/wr-risk-scorer-extcomms.md" "Add external-comms gate covering gh issue and pr surfaces.")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"deny"* ]]
+  [[ "$output" == *"wr-risk-scorer:external-comms"* ]]
+}
+
+@test "PreToolUse:Write on a non-changeset path is ignored" {
+  INPUT=$(build_write_input "src/foo.ts" "Acme Corp client revenue \$2.4M")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "gh api security-advisories triggers the gate" {
+  INPUT=$(build_bash_input "gh api repos/foo/bar/security-advisories --method POST --field summary='leak via X'")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"deny"* ]]
+  [[ "$output" == *"wr-risk-scorer:external-comms"* ]]
+}
+
+@test "npm publish triggers the gate" {
+  INPUT=$(build_bash_input "npm publish")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"deny"* ]]
+  [[ "$output" == *"wr-risk-scorer:external-comms"* ]]
+}

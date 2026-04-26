@@ -21,6 +21,8 @@
     "check:install-utils": "bash scripts/sync-install-utils.sh --check",
     "sync:session-marker": "bash scripts/sync-session-marker.sh",
     "check:session-marker": "bash scripts/sync-session-marker.sh --check",
+    "sync:external-comms-gate": "bash scripts/sync-external-comms-gate.sh",
+    "check:external-comms-gate": "bash scripts/sync-external-comms-gate.sh --check",
     "sync:plugin-manifests": "node scripts/sync-plugin-manifests.mjs",
     "check:plugin-manifests": "node scripts/sync-plugin-manifests.mjs --check",
     "version": "changeset version && node scripts/sync-plugin-manifests.mjs",

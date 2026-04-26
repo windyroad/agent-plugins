@@ -121,4 +121,24 @@ if echo "$SUBAGENT" | grep -qE 'risk-scorer.policy'; then
   esac
 fi
 
+# ---------------------------------------------------------------------------
+# External-comms reviewer (P064 / ADR-028 amended): write per-draft marker
+# keyed on sha256(draft + '\n' + surface). Subagent emits the key; this hook
+# trusts and uses it. Marker file: external-comms-reviewed-<key>.
+# ---------------------------------------------------------------------------
+if echo "$SUBAGENT" | grep -qE 'risk-scorer.external-comms'; then
+  VERDICT_LINE=$(echo "$AGENT_OUTPUT" | grep -E '^EXTERNAL_COMMS_RISK_VERDICT:' | tail -1) || true
+  KEY_LINE=$(echo "$AGENT_OUTPUT" | grep -E '^EXTERNAL_COMMS_RISK_KEY:' | tail -1) || true
+  VERDICT=$(echo "$VERDICT_LINE" | sed 's/^EXTERNAL_COMMS_RISK_VERDICT:[[:space:]]*//' | tr -d '[:space:]')
+  KEY=$(echo "$KEY_LINE" | sed 's/^EXTERNAL_COMMS_RISK_KEY:[[:space:]]*//' | tr -d '[:space:]')
+  # Validate key: 64 hex chars (sha256 output). Reject anything else.
+  if echo "$KEY" | grep -qE '^[0-9a-f]{64}$'; then
+    case "$VERDICT" in
+      PASS) touch "${RDIR}/external-comms-reviewed-${KEY}" ;;
+      FAIL) ;; # Do NOT create marker — draft must be revised
+      *) ;;    # Unknown verdict — fail closed
+    esac
+  fi
+fi
+
 exit 0

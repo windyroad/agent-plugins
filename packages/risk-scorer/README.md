@@ -13,6 +13,7 @@ The risk-scorer plugin brings ISO 31000-aligned risk management to your AI codin
 3. **Gates pushes** -- blocks `git push` for high-risk changesets (use `npm run push:watch` instead)
 4. **Detects secrets** -- scans edits for API keys, tokens, passwords, and other credentials before they're written
 5. **Reviews plans** -- scores implementation plans for risk before you start building
+6. **Gates outbound prose** -- reviews `gh issue/pr` bodies, security advisories, npm publish content, and `.changeset/*.md` drafts for confidential-information leaks before they reach external surfaces
 
 All thresholds are configurable through your project's `RISK-POLICY.md`.
 
@@ -46,13 +47,14 @@ This creates a `RISK-POLICY.md` tailored to your project, defining impact levels
 | `risk-score-commit-gate.sh` | Bash (git commit) | Blocks commits when risk exceeds threshold |
 | `risk-score-plan-enforce.sh` | ExitPlanMode | Ensures plans are risk-scored before execution |
 | `plan-risk-guidance.sh` | EnterPlanMode | Injects risk guidance into plan mode |
+| `external-comms-gate.sh` | Bash, Edit, Write | Gates outbound prose (`gh issue/pr`, `gh api .../security-advisories`, `npm publish`, `.changeset/*.md`) on confidential-information leak review |
 | `wip-risk-mark.sh` | After edit | Records WIP risk assessment |
-| `risk-score-mark.sh` | Agent completes | Marks risk review as done |
+| `risk-score-mark.sh` | Agent completes | Marks risk review as done; writes external-comms marker on `wr-risk-scorer:external-comms` PASS |
 | `risk-hash-refresh.sh` | After Bash | Refreshes content hashes |
 
 ## Agents
 
-The plugin includes five specialised agents:
+The plugin includes six specialised agents:
 
 | Agent | Purpose |
 |-------|---------|
@@ -61,6 +63,48 @@ The plugin includes five specialised agents:
 | `wr-risk-scorer:pipeline` | Scores pipeline actions (commit, push, release) |
 | `wr-risk-scorer:plan` | Reviews implementation plans for risk |
 | `wr-risk-scorer:policy` | Validates `RISK-POLICY.md` for ISO 31000 compliance |
+| `wr-risk-scorer:external-comms` | Reviews drafts of outbound prose (gh issues/PRs, advisories, npm publish, changeset bodies) for confidential-information leaks per `RISK-POLICY.md` |
+
+## On-demand assessment skills
+
+| Skill | Purpose |
+|-------|---------|
+| `/wr-risk-scorer:assess-wip` | WIP risk nudge for the current uncommitted diff |
+| `/wr-risk-scorer:assess-release` | Pipeline risk assessment for the unpushed queue (pre-satisfies the commit gate) |
+| `/wr-risk-scorer:assess-external-comms` | External-comms leak review for a draft outbound body (pre-satisfies the external-comms gate) |
+| `/wr-risk-scorer:create-risk` | Create a standing-risk register entry |
+| `/wr-risk-scorer:update-policy` | Generate or update `RISK-POLICY.md` |
+
+## External-comms gate
+
+The `external-comms-gate.sh` hook intercepts outbound prose tool calls and the
+`.changeset/*.md` author surface so confidential-information leaks are caught
+before they reach a public or vendor-private channel.
+
+Gated surfaces:
+- `gh issue create` / `gh issue comment` / `gh issue edit`
+- `gh pr create` / `gh pr comment` / `gh pr edit`
+- `gh api .../security-advisories` and `gh api .../comments`
+- `npm publish`
+- `PreToolUse:Write` and `PreToolUse:Edit` on `.changeset/*.md` (P073 — gated at author time, before the changeset body lands in CHANGELOG.md and every published npm tarball)
+
+Behaviour:
+1. A hybrid regex pre-filter (`hooks/lib/leak-detect.sh`) catches high-confidence
+   leak shapes (credentials, business-context-paired financial figures and
+   user-counts) and denies immediately with the matched class.
+2. Anything not pre-filtered is delegated to the `wr-risk-scorer:external-comms`
+   subagent for context-aware review against `RISK-POLICY.md` Confidential
+   Information classes. The PostToolUse marker hook writes a per-draft marker
+   on `EXTERNAL_COMMS_RISK_VERDICT: PASS`.
+3. If `RISK-POLICY.md` is absent, the gate runs in advisory-only mode and
+   permits the call (graceful adoption).
+
+Override: `BYPASS_RISK_GATE=1` short-circuits the gate (consistent with
+`git-push-gate.sh`). Reserved for cases the user has confirmed safe.
+
+The canonical hook lives at `packages/shared/hooks/external-comms-gate.sh` and
+is synced into each consumer plugin via `scripts/sync-external-comms-gate.sh`
+per ADR-017 (CI runs `npm run check:external-comms-gate` to detect drift).
 
 ## Updating and Uninstalling
 

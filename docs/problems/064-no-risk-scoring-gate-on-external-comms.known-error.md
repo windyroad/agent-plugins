@@ -1,10 +1,10 @@
 # Problem 064: No risk-scoring gate on external communications
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-20
 **Priority**: 12 (High) — Impact: Significant (4) x Likelihood: Possible (3)
-**Effort**: L — new PreToolUse hook surface covering `gh issue create`, `gh issue comment`, `gh pr create`, `gh pr comment`, `gh api .../security-advisories`, `gh api .../comments`, `npm publish` (with README diff), plus leak-pattern rules and integration with `wr-risk-scorer` subagent. Likely needs its own ADR (sibling to the ADR-028 voice-tone-gate ADR) or an extension of ADR-028's surface list.
-**WSJF**: 3.0 — (12 × 1.0) / 4 — High-severity leak risk, moderate effort; ranks behind the smaller trigger-wiring gap (P063) but ahead of most medium-WSJF items.
+**Effort**: L — new PreToolUse hook surface covering `gh issue create`, `gh issue comment`, `gh pr create`, `gh pr comment`, `gh api .../security-advisories`, `gh api .../comments`, `npm publish` (with README diff), plus leak-pattern rules and integration with `wr-risk-scorer` subagent. Sibling-ADR path collapsed into amended ADR-028 (2026-04-21); risk evaluator implementation per architect verdict (c) on the P064 iteration — shared canonical hook + risk-scorer per-package copy + new subagent + new on-demand skill.
+**WSJF**: 6.0 — (12 × 2.0) / 4 — Known Error multiplier post-implementation; root cause confirmed and fix committed.
 
 ## Direction decision (2026-04-20, user — AFK pre-flight via AskUserQuestion)
 
@@ -97,14 +97,29 @@ The gate should be architecturally **parallel to P038's voice-tone hook**, shari
 
 ### Investigation Tasks
 
-- [ ] Inventory external-comms surfaces (reuse P038's list; add any surfaces P038 missed — notably `gh api .../security-advisories`).
-- [ ] Draft leak-pattern rules with RISK-POLICY.md authority (confidential-business markers are already defined there; credentials and prod-URLs need rule definitions).
-- [ ] Decide gate implementation shape: PreToolUse hook only, skill only, or both (P038 chose both — likely the same answer here for consistency).
-- [ ] Decide scoring path: new subagent `wr-risk-scorer:external-comms`, or extend `wr-risk-scorer:pipeline` with an external-comms layer. Architect review.
-- [ ] Draft the ADR (sibling to ADR-028). Cross-reference ADR-015 (assessment skills), ADR-028 (voice-tone gate), ADR-024 (report-upstream contract), and RISK-POLICY.md.
-- [ ] Build regression fixtures from the 30-day insights window's "FFS" outputs that also carried leak content.
-- [ ] Update `/wr-itil:report-upstream` SKILL.md's "Voice-tone gate interaction" section (currently only ADR-028) to document both gates composing on the same surface.
-- [ ] Coordinate with P038's implementation so both gates ship together (sharing the surface inventory and the hook scaffolding), or in consecutive iterations.
+- [x] Inventory external-comms surfaces (reuse P038's list; add any surfaces P038 missed — notably `gh api .../security-advisories`). Done — surface list lives inline in the canonical hook + bats fixture.
+- [x] Draft leak-pattern rules with RISK-POLICY.md authority (confidential-business markers are already defined there; credentials and prod-URLs need rule definitions). Done — `packages/shared/hooks/lib/leak-detect.sh` carries the regex pre-filter; `wr-risk-scorer:external-comms` subagent owns the ambiguous-prose layer.
+- [x] Decide gate implementation shape: PreToolUse hook only, skill only, or both (P038 chose both — likely the same answer here for consistency). Done — both: hook (deny-plus-marker) + on-demand skill `/wr-risk-scorer:assess-external-comms` per ADR-015.
+- [x] Decide scoring path: new subagent `wr-risk-scorer:external-comms`, or extend `wr-risk-scorer:pipeline` with an external-comms layer. Architect review. Done — new subagent (`packages/risk-scorer/agents/external-comms.md`) per ADR-028 amendment line 52 + architect Q2 verdict.
+- [x] Draft the ADR (sibling to ADR-028). Cross-reference ADR-015 (assessment skills), ADR-028 (voice-tone gate), ADR-024 (report-upstream contract), and RISK-POLICY.md. Done — ADR-028 amended (2026-04-21) collapsed the sibling path; risk-evaluator half ships under that amendment without a new ADR per architect verdict.
+- [x] Build regression fixtures from the 30-day insights window's "FFS" outputs that also carried leak content. Done — `packages/risk-scorer/hooks/test/external-comms-gate.bats` (12 assertions including credential / revenue / changeset cases). Canonical-shape contract + drift coverage in `packages/shared/test/`.
+- [ ] Update `/wr-itil:report-upstream` SKILL.md's "Voice-tone gate interaction" section (currently only ADR-028) to document both gates composing on the same surface. **Deferred** — separate ticket; report-upstream cross-reference is non-blocking and the gate fires from the hook regardless of whether the skill names it.
+- [ ] Coordinate with P038's implementation so both gates ship together (sharing the surface inventory and the hook scaffolding), or in consecutive iterations. **Deferred** — P038 ships independently; the two hooks compose at the `PreToolUse:Bash` matcher level when both packages are installed. Composite-marker upgrade is owned by P038's iteration.
+
+## Fix Strategy (implemented)
+
+The risk-evaluator half of ADR-028 amended ships in this iteration. Architecture per architect verdict (c) on the P064 iteration:
+
+1. **Canonical hook** at `packages/shared/hooks/external-comms-gate.sh` + helper at `packages/shared/hooks/lib/leak-detect.sh`. Distributed via ADR-017 duplicate-script pattern (new `scripts/sync-external-comms-gate.sh` + `npm run check:external-comms-gate` CI step).
+2. **Per-package risk-scorer copy** at `packages/risk-scorer/hooks/external-comms-gate.sh` and `packages/risk-scorer/hooks/lib/leak-detect.sh` (byte-identical to canonical).
+3. **Per-evaluator marker** keyed on `sha256(draft_body + '\n' + surface)`. Composite marker (combining a future voice-tone verdict with the risk verdict) deferred until P038 lands its evaluator.
+4. **Hybrid leak detection**: regex pre-filter (`leak-detect.sh`) for credentials, business-context-paired financial figures, business-context-paired user-counts; subagent (`wr-risk-scorer:external-comms`) for ambiguous prose against `RISK-POLICY.md` Confidential Information classes.
+5. **New subagent type** `wr-risk-scorer:external-comms` (`packages/risk-scorer/agents/external-comms.md`). Emits `EXTERNAL_COMMS_RISK_VERDICT: PASS|FAIL` + `EXTERNAL_COMMS_RISK_KEY: <sha>` consumed by `risk-score-mark.sh` (extended in this iter).
+6. **New on-demand skill** `/wr-risk-scorer:assess-external-comms` per ADR-015 — pre-satisfies the marker for a draft outside a hook trigger.
+7. **Surface coverage**: `gh issue create|comment|edit`, `gh pr create|comment|edit`, `gh api .../security-advisories`, `gh api .../comments`, `npm publish`, `PreToolUse:Write|Edit on .changeset/*.md` (P073 surface — gated at author time).
+8. **Override**: `BYPASS_RISK_GATE=1` env var (consistent with `git-push-gate.sh`).
+9. **Advisory-only fallback**: when `RISK-POLICY.md` is absent, the gate permits the call with a systemMessage (graceful adoption per ADR-008 / ADR-025).
+10. **Bats coverage**: 12 assertions in `packages/risk-scorer/hooks/test/external-comms-gate.bats` (surface match, hard-fail leak deny, marker permit, BYPASS, advisory-only, changeset author, non-changeset path); 11 in `packages/shared/test/external-comms-gate-canonical.bats`; 7 in `packages/shared/test/sync-external-comms-gate.bats`.
 
 ## Confirming evidence — 2026-04-25 #52831 retrospective
 
