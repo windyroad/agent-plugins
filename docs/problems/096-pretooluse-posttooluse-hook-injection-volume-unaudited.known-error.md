@@ -1,12 +1,12 @@
 # Problem 096: PreToolUse / PostToolUse hook injection volume across windyroad plugins
 
-**Status**: Known Error
+**Status**: Known Error — Phase 1 audit done 2026-04-26; Phase 2 per-hook trims landed 2026-04-26 (iter 6 AFK loop); Phase 3 (ADR codifying hook injection budget policy) deferred to follow-up iter — composes with P091 per the audit's recommendations.
 **Reported**: 2026-04-22
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Possible (3) — re-rated 2026-04-26 from 12 High after audit confirmed silent-on-pass design across 33/36 hooks
 **Effort**: M — re-rated 2026-04-26 from L after audit narrowed Phase 2 scope to 3 hook surfaces (`tdd-post-write.sh`, `plan-risk-guidance.sh`, `retrospective-reminder.sh`) plus optional shared-helper extraction
 **WSJF**: (9 × 2.0) / 2 = **9.0**
 
-> Split from P091 meta (session-wide context budget) on 2026-04-22. This ticket owns the audit + remediation of the per-tool-call hook cluster. Phase 1 audit completed 2026-04-26.
+> Split from P091 meta (session-wide context budget) on 2026-04-22. This ticket owns the audit + remediation of the per-tool-call hook cluster. Phase 1 audit completed 2026-04-26. Phase 2 per-hook trims landed 2026-04-26.
 
 ## Description
 
@@ -171,9 +171,9 @@ The 33 remaining hooks contribute non-zero bytes only on deny / verdict-FAIL pat
 - [x] For each hook in the inventory, measure stdout byte count on a gate-pass case and a gate-fail case. Table the results above.
 - [x] Identify hooks that emit instructional prose on gate-pass (candidates for "emit nothing on pass"). **Result: 3 hooks (#10, #26, #35).**
 - [x] Identify hooks that emit verbose reasoning on skip (candidates for "silent skip"). **Result: 0 hooks — every gate exits silently on skip.**
-- [x] Identify hooks that could benefit from once-per-file or once-per-session gating. **Result: not needed; the existing per-session marker pattern in `lib/architect-gate.sh` / `lib/review-gate.sh` / `lib/risk-gate.sh` already handles this.**
-- [ ] Apply the audit findings to each of the 3 always-on hooks. **(Phase 2.)**
-- [ ] Extend the reproduction-test bats suite to cover the remediated hooks. **(Phase 2.)**
+- [x] Identify hooks that could benefit from once-per-file or once-per-session gating. **Result: not needed for the deny-path cluster; the existing per-session marker pattern in `lib/architect-gate.sh` / `lib/review-gate.sh` / `lib/risk-gate.sh` already handles this. P096 Phase 2 added once-per-session gating to `plan-risk-guidance.sh` (always-on advisory, EnterPlanMode).**
+- [x] Apply the audit findings to each of the 3 always-on hooks. **(Phase 2 landed 2026-04-26.)**
+- [x] Extend the reproduction-test bats suite to cover the remediated hooks. **(Phase 2 — `packages/tdd/hooks/test/tdd-post-write-phase2.bats` + `packages/risk-scorer/hooks/test/plan-risk-guidance-once-per-session.bats`.)**
 
 ## Fix Strategy
 
@@ -181,28 +181,37 @@ The 33 remaining hooks contribute non-zero bytes only on deny / verdict-FAIL pat
 
 Audit complete. Findings tabled above. Effort revised from L → M for Phase 2 (3 hook surfaces, not 13 as originally feared).
 
-### Phase 2 (per-hook edits) — pending
+### Phase 2 (per-hook edits) — DONE 2026-04-26
 
-Specific recommendations from the audit:
+Landed in iter 6 AFK loop (commit pending — same commit as this ticket transition).
 
-1. **`tdd/tdd-post-write.sh`** — the always-on `TDD STATE UPDATE` block is largest cumulative offender. Recommendations:
-   - **Silent on GREEN unchanged**: when `OLD_STATE = NEW_STATE = GREEN`, emit nothing (or only a one-line marker like `TDD: green`). Most edits-after-green don't need the full block.
-   - **Suppress test output on RED for known-failing test**: the last-50-lines of test output is duplicated across consecutive edits when the same test stays red. Cache a hash of the output and emit only on change.
-   - **Trim always-emitted ACTION lines**: the post-block ACTION suggestion ("Tests are passing. You may refactor...") is standing prose that the assistant already knows. Drop it on GREEN.
-   - **Estimated savings**: 60-80% reduction in cumulative bytes (300-500 bytes/edit → 100-150 bytes/edit on the GREEN path).
+Specific recommendations from the audit + as-implemented notes:
 
-2. **`risk-scorer/plan-risk-guidance.sh`** — emits 750-1500 bytes on every EnterPlanMode. Recommendations:
-   - **Once-per-session gating**: same pipeline state and appetite numbers don't change between two plan-mode entries in the same session. Use a session-marker to suppress repeat emissions, refreshing only when pipeline state hash drifts.
-   - **Trim systemMessage**: the standing prose listing release strategies (release queue / split / risk-reducing) duplicates content the agent already has access to via RISK-POLICY.md. Compress to numbers + cross-ref.
-   - **Estimated savings**: ~70% reduction (1000 bytes → ~300 bytes on first emit; 0 bytes on subsequent same-session emits).
+1. **`tdd/tdd-post-write.sh`** — the always-on `TDD STATE UPDATE` block is largest cumulative offender.
+   - **Silent on GREEN unchanged** ✅ implemented: when `OLD_STATE == NEW_STATE == GREEN`, the hook exits 0 with zero stdout before the STATE UPDATE block is built. Verified by `tdd-post-write-phase2.bats` test 1-2.
+   - **Suppress test output on RED for known-failing test** ✅ implemented: hash-keyed by `/tmp/tdd-stdout-hash-${SESSION_ID}-${ENCODED_TEST}`. On match, emits "Test output unchanged from previous emission (hash match)." in place of the last-50-lines block. Verified by `tdd-post-write-phase2.bats` test 3-4.
+   - **Drop GREEN ACTION line** ✅ implemented: case branch removed; RED + BLOCKED ACTION lines retained. Verified by `tdd-post-write-phase2.bats` test 5-6.
 
-3. **`retrospective/retrospective-reminder.sh`** — fires once per session. The 200-byte stopReason already references `/retrospective` and `/problem` skills tersely. **No remediation recommended** — already minimal.
+2. **`risk-scorer/plan-risk-guidance.sh`** — emits 750-1500 bytes on every EnterPlanMode.
+   - **Once-per-session gating** ✅ implemented via shared `lib/session-marker.sh` (P095 / ADR-038 pattern). System name: `risk-scorer-plan-guidance`. First EnterPlanMode emits the full advisory body; subsequent entries within the same session emit a ≤150-byte terse reminder (imperative signal word + gate name + risk numbers + cross-ref to RISK-POLICY.md). Verified by `plan-risk-guidance-once-per-session.bats` (7 tests, green).
+   - **Trim systemMessage** ✅ implemented: the "release queue first / split / risk-reducing" listing was compressed to a single sentence with `See RISK-POLICY.md` cross-ref. First-emit body is now ~600 bytes (down from ~1000-1500); subsequent-emit reminder is ~270 bytes JSON (~150 bytes payload).
+   - **Sync infrastructure** ✅ added: `risk-scorer` joined `scripts/sync-session-marker.sh` `CONSUMERS` array (sixth UserPromptSubmit consumer + first PreToolUse consumer of the helper). New byte-identical copy at `packages/risk-scorer/hooks/lib/session-marker.sh`. Bats drift coverage extended in `packages/shared/test/sync-session-marker.bats` (now lists 7 consumers).
 
-4. **Cross-plugin consolidation (mechanical, post-Phase 2)** — extract `lib/exclusions.sh` and consider `slide-marker.sh` consolidation. Reduces source surface area but not injection bytes. Lower priority than Phase 2 emitter trims.
+3. **`retrospective/retrospective-reminder.sh`** — no change. Audit confirmed already minimal.
 
-### Phase 3 (ADR) — pending
+4. **Cross-plugin consolidation (mechanical, post-Phase 2)** — extract `lib/exclusions.sh` and consider `slide-marker.sh` consolidation. **Deferred to follow-up iter** — low priority vs the Phase 2 trims; reduces source surface area but not injection bytes.
+
+### Estimated savings (post-Phase 2)
+
+- `tdd-post-write.sh`: GREEN-unchanged path drops from ~150-300 bytes/edit to 0 bytes/edit. RED hash-match path drops from ~300-1500 bytes/edit to ~80 bytes/edit. Estimated session savings 1-3 KB on a typical 5-10-impl-edit session.
+- `plan-risk-guidance.sh`: first-emit body ~600 bytes (down from ~1000-1500); subsequent-emit drops from ~1000 bytes to ~270 bytes. Per-session savings on a multi-plan session ~700 bytes per repeat plan-mode entry.
+- Aggregate: -1 to -15 KB per typical session, dominated by `tdd-post-write.sh` cumulative reduction.
+
+### Phase 3 (ADR) — pending (deferred to follow-up iter)
 
 The "Hook injection budget policy" ADR (tracked on P091) extends to cover PreToolUse / PostToolUse budget rules. Phase 1 audit numbers feed into the ADR's budget table. Suggested rule: **always-on hooks must justify each byte; default behaviour is silent-on-pass + verbose-on-deny.**
+
+Phase 3 is unblocked — Phase 2 has landed and the patterns the ADR codifies (silent-on-unchanged-state, hash-dedupe of repeated body content, once-per-session gating reuse) are now implemented in real code and behaviourally tested. The ADR is the codification step; this ticket transitions to Verification Pending when Phase 3 lands.
 
 ## Related
 

@@ -20,8 +20,8 @@ setup() {
   [ -x "$SYNC_SCRIPT" ]
 }
 
-@test "sync-session-marker: all five consumer copies exist" {
-  for plugin in architect jtbd tdd style-guide voice-tone; do
+@test "sync-session-marker: all consumer copies exist" {
+  for plugin in architect jtbd tdd style-guide voice-tone itil risk-scorer; do
     [ -f "$REPO_ROOT/packages/$plugin/hooks/lib/session-marker.sh" ] || {
       echo "MISSING: packages/$plugin/hooks/lib/session-marker.sh"
       return 1
@@ -46,9 +46,11 @@ setup() {
            "$tmp/packages/tdd/hooks/lib" \
            "$tmp/packages/style-guide/hooks/lib" \
            "$tmp/packages/voice-tone/hooks/lib" \
+           "$tmp/packages/itil/hooks/lib" \
+           "$tmp/packages/risk-scorer/hooks/lib" \
            "$tmp/scripts"
   cp "$SHARED_SRC" "$tmp/packages/shared/hooks/lib/session-marker.sh"
-  for plugin in architect jtbd tdd style-guide voice-tone; do
+  for plugin in architect jtbd tdd style-guide voice-tone itil risk-scorer; do
     cp "$SHARED_SRC" "$tmp/packages/$plugin/hooks/lib/session-marker.sh"
   done
   # Diverge one copy
@@ -72,9 +74,11 @@ setup() {
            "$tmp/packages/tdd/hooks/lib" \
            "$tmp/packages/style-guide/hooks/lib" \
            "$tmp/packages/voice-tone/hooks/lib" \
+           "$tmp/packages/itil/hooks/lib" \
+           "$tmp/packages/risk-scorer/hooks/lib" \
            "$tmp/scripts"
   cp "$SHARED_SRC" "$tmp/packages/shared/hooks/lib/session-marker.sh"
-  for plugin in architect jtbd tdd style-guide voice-tone; do
+  for plugin in architect jtbd tdd style-guide voice-tone itil risk-scorer; do
     cp "$SHARED_SRC" "$tmp/packages/$plugin/hooks/lib/session-marker.sh"
   done
   # Remove one copy entirely

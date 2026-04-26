@@ -29,10 +29,14 @@ if [ "${1:-}" = "--check" ]; then
   MODE="check"
 fi
 
-# Consumer plugins that carry UserPromptSubmit hooks gated by the
-# session-announcement marker. Each gets a byte-identical copy at
+# Consumer plugins that carry hooks gated by the session-announcement
+# marker. Each gets a byte-identical copy at
 # packages/<plugin>/hooks/lib/session-marker.sh.
-CONSUMERS=(architect jtbd tdd style-guide voice-tone itil)
+#
+# UserPromptSubmit consumers (P095 / ADR-038): architect, jtbd, tdd,
+# style-guide, voice-tone, itil.
+# PreToolUse consumers (P096 Phase 2): risk-scorer (plan-risk-guidance.sh).
+CONSUMERS=(architect jtbd tdd style-guide voice-tone itil risk-scorer)
 
 DIVERGED=0
 SYNCED=0

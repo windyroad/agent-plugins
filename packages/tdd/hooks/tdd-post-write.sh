@@ -72,6 +72,13 @@ fi
 # Write new state for this specific test file
 tdd_write_state "$SESSION_ID" "$TEST_FILE" "$NEW_STATE"
 
+# P096 Phase 2 — silent-on-GREEN-unchanged: when both old and new state
+# are GREEN, the assistant already knows the file passes; emit nothing.
+# Transitions and any non-GREEN state still emit the full block below.
+if [ "$OLD_STATE" = "GREEN" ] && [ "$NEW_STATE" = "GREEN" ]; then
+  exit 0
+fi
+
 # Read last test output for context
 STDOUT_FILE="/tmp/tdd-test-stdout-${SESSION_ID}"
 TEST_OUTPUT=""
@@ -95,20 +102,34 @@ File written: ${FILE_PATH} (${FILE_TYPE})
 Test result: exit code ${TEST_EXIT}
 EOF
 
+# P096 Phase 2 — dedupe RED test output: when consecutive RED edits on
+# the same test file produce identical last-50-lines output, only the
+# first emission carries the body; subsequent emissions skip the test
+# output block. Hash file is keyed by session + encoded test path.
 if [ $TEST_EXIT -ne 0 ] && [ -n "$TEST_OUTPUT" ]; then
-  echo ""
-  echo "Test output (last 50 lines):"
-  echo "$TEST_OUTPUT"
+  ENCODED_TEST=$(echo "$TEST_FILE" | sed 's|/|__|g')
+  HASH_FILE="/tmp/tdd-stdout-hash-${SESSION_ID}-${ENCODED_TEST}"
+  NEW_HASH=$(printf '%s' "$TEST_OUTPUT" | shasum 2>/dev/null | awk '{print $1}')
+  PREV_HASH=""
+  [ -f "$HASH_FILE" ] && PREV_HASH=$(cat "$HASH_FILE" 2>/dev/null)
+  if [ -n "$NEW_HASH" ] && [ "$NEW_HASH" = "$PREV_HASH" ]; then
+    echo ""
+    echo "Test output unchanged from previous emission (hash match)."
+  else
+    echo ""
+    echo "Test output (last 50 lines):"
+    echo "$TEST_OUTPUT"
+    [ -n "$NEW_HASH" ] && echo "$NEW_HASH" > "$HASH_FILE"
+  fi
 fi
 
+# P096 Phase 2 — GREEN ACTION line dropped (standing prose the assistant
+# already knows; the STATE UPDATE block above carries the transition
+# signal). RED and BLOCKED keep their actionable next-step ACTION line.
 case "$NEW_STATE" in
   RED)
     echo ""
     echo "ACTION: Tests are failing for ${TEST_FILE}. Write implementation code to make them pass."
-    ;;
-  GREEN)
-    echo ""
-    echo "ACTION: Tests are passing for ${TEST_FILE}. You may refactor or write a new failing test for the next behavior."
     ;;
   BLOCKED)
     echo ""

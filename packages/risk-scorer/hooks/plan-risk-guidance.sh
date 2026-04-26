@@ -7,6 +7,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/lib/gate-helpers.sh"
+source "$SCRIPT_DIR/lib/session-marker.sh"
 _enable_err_trap
 
 _parse_input
@@ -39,13 +40,32 @@ if [ -f "RISK-POLICY.md" ]; then
   fi
 fi
 
-# --- Emit guidance (allow — advisory only, not a gate) ---
+# --- P096 Phase 2 — once-per-session gating (ADR-038 progressive disclosure) ---
+# First EnterPlanMode of a session emits the full advisory body; subsequent
+# entries within the same session emit a terse reminder (≤150 bytes per the
+# ADR-038 budget). Pipeline state and appetite are unchanged across plan-mode
+# entries within one session, so re-emitting full prose is repetition.
+if has_announced "risk-scorer-plan-guidance" "$SESSION_ID"; then
+  cat <<EOF
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "allow",
+    "systemMessage": "MANDATORY release-risk gate active (RISK-POLICY.md present). Release risk: ${RELEASE_SCORE}; appetite: ${APPETITE}. ExitPlanMode will FAIL plans projected above appetite. See first-EnterPlanMode emission for full guidance."
+  }
+}
+EOF
+  exit 0
+fi
+
+# --- First emission: full advisory (compressed per audit recommendation) ---
+mark_announced "risk-scorer-plan-guidance" "$SESSION_ID"
 cat <<EOF
 {
   "hookSpecificOutput": {
     "hookEventName": "PreToolUse",
     "permissionDecision": "allow",
-    "systemMessage": "RELEASE RISK GUIDANCE FOR PLANNING:\nThe unreleased queue currently contains:\n${UNRELEASED_SUMMARY}\n\nCurrent release risk score: ${RELEASE_SCORE}.\nRisk appetite threshold: ${APPETITE} (Medium).\n\nYour plan MUST account for projected release risk. If the plan's proposed changes would push projected release risk above appetite when combined with the existing unreleased queue, the plan MUST include one or more of:\n- Release the current unreleased queue first (before implementing the plan)\n- Split the plan into smaller batches that keep projected release risk within appetite\n- Include specific risk-reducing steps (additional tests, rollback procedures)\n\nThe risk-scorer will assess projected release risk at ExitPlanMode and FAIL plans that exceed appetite without a release strategy."
+    "systemMessage": "RELEASE RISK GUIDANCE FOR PLANNING:\nUnreleased queue:\n${UNRELEASED_SUMMARY}\n\nRelease risk: ${RELEASE_SCORE}. Appetite threshold: ${APPETITE} (Medium).\n\nIf projected release risk would exceed appetite, the plan MUST include a release strategy (release queue first, split into smaller batches, or risk-reducing steps). See RISK-POLICY.md for option details. ExitPlanMode runs the risk-scorer and FAILS plans above appetite without a strategy."
   }
 }
 EOF

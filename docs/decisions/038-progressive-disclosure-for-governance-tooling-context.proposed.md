@@ -116,9 +116,10 @@ Compliance is verified by:
 
 1. **Source review:**
    - `packages/shared/hooks/lib/session-marker.sh` exists and exports `has_announced` + `mark_announced`.
-   - Five byte-identical copies exist at `packages/<plugin>/hooks/lib/session-marker.sh` for each of architect, jtbd, tdd, style-guide, voice-tone.
-   - Each of the five UserPromptSubmit hooks sources its local `session-marker.sh`, parses `session_id` from stdin via `jq`, and gates its MANDATORY block behind `has_announced`.
+   - Byte-identical copies exist at `packages/<plugin>/hooks/lib/session-marker.sh` for each consumer plugin: architect, jtbd, tdd, style-guide, voice-tone, itil, and (per P096 Phase 2) risk-scorer. Sync script's `CONSUMERS` array is the authoritative list.
+   - Each UserPromptSubmit hook sources its local `session-marker.sh`, parses `session_id` from stdin via `jq`, and gates its MANDATORY block behind `has_announced`.
    - `tdd-inject.sh` emits dynamic state on every prompt regardless of announcement state; only static prose is gated.
+   - **P096 Phase 2 extension** (2026-04-26): `plan-risk-guidance.sh` (PreToolUse:EnterPlanMode in `risk-scorer`) reuses the same helper to gate its advisory body once-per-session — first plan-mode entry emits the full RELEASE RISK GUIDANCE body; subsequent entries within the same session emit a ≤150-byte terse reminder. The marker-system name is `risk-scorer-plan-guidance` (distinct namespace from UserPromptSubmit-cluster systems). The marker convention (`/tmp/${SYSTEM}-announced-${SESSION_ID}`), the reminder shape (imperative + gate + trigger + cross-ref), and the ADR-017 sync distribution are unchanged from the UserPromptSubmit cluster — this is a like-for-like consumer, not a new pattern.
 2. **Sync infrastructure:**
    - `scripts/sync-session-marker.sh` exists and is executable; supports `--check` mode.
    - `package.json` has `sync:session-marker` and `check:session-marker` npm scripts.
@@ -131,6 +132,8 @@ Compliance is verified by:
    - `packages/tdd/hooks/test/tdd-inject-once-per-session.bats` — 8 behavioural tests (green), including the dynamic-state carve-out assertion.
    - `packages/style-guide/hooks/test/style-guide-eval-once-per-session.bats` — 7 behavioural tests (green).
    - `packages/voice-tone/hooks/test/voice-tone-eval-once-per-session.bats` — 7 behavioural tests (green).
+   - **P096 Phase 2** — `packages/risk-scorer/hooks/test/plan-risk-guidance-once-per-session.bats` — 7 behavioural tests (green) covering first-emit body, marker write, terse reminder shape, byte budget, distinct-session re-emit, empty-session-id fallback, and JSON validity.
+   - **P096 Phase 2** — `packages/tdd/hooks/test/tdd-post-write-phase2.bats` — 7 behavioural tests (green) covering silent-on-GREEN-unchanged, RED test-output hash dedupe, and GREEN ACTION line removal.
 4. **Performance budget (ADR-023):**
    - Subsequent-prompt reminder byte budget ≤150 per hook; bats tests assert ≤250 as testability slack.
 5. **ADR-022 transition:** P095 transitions from `.known-error.md` to `.verifying.md` in the implementation commit; `## Fix Released` section records the release marker.
