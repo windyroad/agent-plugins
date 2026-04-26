@@ -1,6 +1,6 @@
 # Problem 117: No batch-transition surface for multiple problem tickets in a single run-retro / review cycle
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-24
 **Priority**: 6 (Med) — Impact: Minor (2) x Likelihood: Likely (3)
 **Effort**: M — confirmed shape per user direction 2026-04-26: **new skill `/wr-itil:transition-problems` (plural)** that accepts a list of `<NNN> <status>` pairs and reuses the singular `/wr-itil:transition-problem` per-ticket logic in a loop, producing a single shared commit (ADR-014 batch-commit semantics). Matches the singular/plural pattern P071 established (`work-problem` vs `work-problems`).
@@ -60,11 +60,11 @@ Four candidate shapes for the fix, each with different contract surfaces:
 
 ### Investigation Tasks
 
-- [ ] Architect Q1: which shape? (comma-separated args / new batch skill / P097-inlined / documented exception)
-- [ ] Architect Q2: if shape 1, does the comma-separated form require mixed destinations (`P063:close,P076:verifying`) or is same-destination-only sufficient? Same-destination is simpler but only handles run-retro Step 4a's canonical shape (multiple closes).
-- [ ] Architect Q3: how should the bats contract-assertion verify batch safety — that P057 re-stage fires once per ticket, that P063 external-root-cause detection fires per ticket, that the commit groups them in one transaction?
-- [ ] JTBD alignment: JTBD-001 (enforce governance without slowing down) — the N× context cost DOES slow us down on long retros. JTBD-006 (progress backlog while AFK) — work-problems orchestrator batch-transitions might also benefit.
-- [ ] Implementation TBD after architect decision.
+- [x] Architect Q1: which shape? — Resolved 2026-04-26 by user direction: NEW sibling skill `/wr-itil:transition-problems` (plural). Matches P071 singular/plural split precedent.
+- [x] Architect Q2: argument shape — Resolved by 2026-04-26 architect verdict: space-separated `<NNN> <status>` pairs (no `P` prefix, no `=`/`:` separator, no CLI flags). Mixed destinations supported by construction (each pair carries its own destination).
+- [x] Architect Q3: bats contract-assertion shape — Resolved by 2026-04-26 architect verdict: `transition-problems-contract.bats` per ADR-037 canonical naming. 20 assertions covering frontmatter shape, allowed-tools, citations, inline-mechanic positives, no-Skill-tool-delegation negative, single-commit-at-end positive + no-per-pair negative, single-README-refresh-at-end, partial-failure skip-and-surface, argument-shape positive + flag-style negative, no `deprecated-arguments` flag, and a CROSS-FILE drift-detection assertion that the staging-trap `git add docs/problems/` phrase appears in BOTH this skill's SKILL.md and the singular's SKILL.md (catches drift between inline copies per ADR-010 amended "copy, not move").
+- [x] JTBD alignment: JTBD-001 primary (eliminates N×SKILL.md reload tax + ownership-boundary violation at batch closures); JTBD-006 composes (work-problems may delegate batch closures here during AFK orchestration); JTBD-101 (singular/plural split mirrors the established pattern).
+- [x] Implementation: complete. New `packages/itil/skills/transition-problems/SKILL.md`, behavioural contract bats, changeset.
 
 ### Reproduction
 
@@ -73,6 +73,16 @@ Run `/wr-retrospective:run-retro` after a multi-ticket session where ≥ 2 verif
 ### Fix Strategy
 
 Deferred pending architect decision on contract shape. Implementation effort is M regardless of shape: argument parser / new skill / inlining / doc edit all carry roughly the same implementation + test footprint.
+
+## Fix Released
+
+**Released**: 2026-04-26 (commit pending — `fix(itil): P117 batch-transition surface — new /wr-itil:transition-problems plural skill`)
+
+**Summary**: New plural sibling skill `/wr-itil:transition-problems` accepts a space-separated list of `<NNN> <status>` pairs and runs each pair's per-ticket mechanic inline (pre-flight, P063 detection, `git mv` + Edit + P057 re-stage). Refreshes `docs/problems/README.md` ONCE at the end (P062 at batch grain) and commits ALL surviving transitions in ONE commit per ADR-014 batch-grain. Partial-failure semantics: skip-and-surface (failed pairs continue; succeeded pairs commit at end; zero successes means no commit). Inline per-ticket mechanic per ADR-010 amended "copy, not move"; drift between singular and plural detected by a contract-bats assertion that asserts the `git add docs/problems/` re-stage phrase appears in both SKILL.md files.
+
+**Awaiting user verification**. Verification path: invoke `/wr-itil:transition-problems` with a multi-pair argument list (e.g. release-aged verifyings to close), confirm the single batch commit lands, README refreshes once, and per-pair outcomes are reported in the structured summary. Confirms when used in a real run-retro Step 4a / manage-problem review Step 9d batch closure where ≥ 2 verifyings are exercised — the original surface-context P117 names.
+
+**Exercise evidence in this session**: contract bats fixture (20 assertions) green; SKILL.md citations cross-checked against singular + ADR-010 amended + ADR-014 + ADR-022 + ADR-013 Rule 6 + P057 + P062 + P063 + ADR-037; sibling skill bats (transition-problem-contract + work-problems) re-run green confirming no drift introduced.
 
 ## Dependencies
 
