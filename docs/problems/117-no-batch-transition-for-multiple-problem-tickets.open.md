@@ -3,8 +3,17 @@
 **Status**: Open
 **Reported**: 2026-04-24
 **Priority**: 6 (Med) — Impact: Minor (2) x Likelihood: Likely (3)
-**Effort**: M (new skill OR argument extension + arg parser changes + bats)
+**Effort**: M — confirmed shape per user direction 2026-04-26: **new skill `/wr-itil:transition-problems` (plural)** that accepts a list of `<NNN> <status>` pairs and reuses the singular `/wr-itil:transition-problem` per-ticket logic in a loop, producing a single shared commit (ADR-014 batch-commit semantics). Matches the singular/plural pattern P071 established (`work-problem` vs `work-problems`).
 **WSJF**: (6 × 1.0) / 2 = **3.0**
+
+## User direction (2026-04-26 interactive AskUserQuestion resolution)
+
+The "architect decision pending on shape" called out in the README is now resolved: **new sibling skill `/wr-itil:transition-problems` (plural)**. Rationale: matches P071's singular/plural split-skill pattern (`work-problem` vs `work-problems`), preserves the singular skill's "one ticket per invocation" contract, and surfaces in autocomplete as a distinct command. Implementation reuses the singular skill's per-ticket logic in a loop — including pre-flight checks, P063 external-RCA detection, P057 staging-trap re-stage, P062 README refresh — and produces ONE shared commit covering all transitions per ADR-014 batch semantics.
+
+Rejected alternatives (with reason):
+- **Multi-arg on existing transition-problem**: blurs the singular's "one ticket per invocation" contract; conflicts with the singular/plural pattern other skills follow.
+- **Hook on run-retro Step 4a**: couples run-retro and transition-problem; doesn't surface as a standalone command for ad-hoc batch transitions outside retro context.
+- **Defer / won't-fix**: the SKILL.md reload cost is real and recurs every `run-retro` Step 4a session that closes multiple verifyings.
 
 > Surfaced during this session's run-retro Step 4a. User explicitly requested the ticket after observing four verification-close transitions executed inline (not via `/wr-itil:transition-problem` delegation) because per-ticket Skill invocations would each re-load the transition-problem SKILL.md context, creating N× overhead on an inherently-batchable operation.
 

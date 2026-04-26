@@ -3,9 +3,43 @@
 **Status**: Open
 **Reported**: 2026-04-21
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
-**Effort**: M — extend `manage-problem` review step 9a–9e with an inbound-discovery sub-step that queries each configured upstream channel (at minimum: `gh issue list` for this repo's tracker using the `problem-report.yml` template's labels / title markers), caches results in a stable on-disk file (e.g. `docs/problems/.upstream-cache.json`), honours a TTL (default 24 h, tunable), supports a `force-recheck` flag, and renders a new "Inbound Upstream Reports" section in `docs/problems/README.md`. Architect review at implementation time to decide: (a) whether this is an extension of ADR-024 (outbound contract → extended to bidirectional) or a new ADR; (b) cache-file shape (JSON vs markdown); (c) channel list (GH issues only, or also Discussions / Discord where plugin-discord is configured); (d) whether the new-report surface auto-creates local tickets or just lists the inbound reports for the maintainer to triage. May push to L if multi-channel detection needs plugin-level integration.
+**Effort**: L — re-rated 2026-04-26 from M after user direction resolved 4 of 7 design questions and added substantive new scope (inbound-report assessment pipeline + blocked-user-list + downstream-contract symmetry). Original M scope (gh issue list + JSON cache + README section) remains the foundation; new scope adds: (1) JTBD alignment classifier that assesses each inbound report against documented persona JTBDs OR detects a new valid JTBD for an existing persona; (2) two-axis risk assessment of each report (risk of the request itself — malicious info-extraction / backdoor / malicious code injection — AND risk of fixing the reported problem); (3) above-threshold pushback path — comment back explaining why we're declining (the comment goes through external-comms risk gate + voice-and-tone gate per P064 and P038); (4) malicious-request path — close the upstream ticket AND maintain a blocked-user list refusing future tickets from the user; (5) safe-and-valid path — create the local problem ticket AND respond on the upstream issue with details (the response also goes through risk + voice-tone gates); (6) downstream-contract symmetry — our shipped intake templates must mirror the lookup pattern that `/wr-itil:report-upstream` uses to discover upstream contracts (so downstream projects' report-upstream can find our intake correctly). Pushes effort from M (4 hours) to L (full day) and creates transitive dependencies on P064 (risk gate on external comms — required for the pushback + response paths) and P038 (voice-tone gate on external comms — required same paths). Marginal effort post-dependency-closure: still L for the assessment-pipeline + blocked-user-list infrastructure.
 
-**WSJF**: 6.0 — (12 × 1.0) / 2 — High severity (every plugin user who files a problem-report via our shipped intake templates currently gets zero maintainer visibility — the entire `P055 Part A` + `ADR-036` scaffolding ends at the reporter's keystroke); moderate effort. Ranks in the current 6.0-tier alongside P070 / P071 / P074 / P078.
+**WSJF**: 1.5 (transitive) — re-rated 2026-04-26 — `(12 × 1.0) / max(L=4, P064=L=4, P038=XL=8) = 12 / 8 = 1.5`. Marginal-only would be `(12 × 1.0) / 4 = 3.0` but P038 is unbuilt (XL) and the user direction binds the assessment-pipeline + pushback comment surface to P038/P064 infrastructure. Per the transitive-dependency rule (P076), P079's effective WSJF cannot exceed P038's. Original 6.0 rating was for the marginal scope before the assessment pipeline was added.
+
+<!-- transitive: L (marginal) → XL (transitive) via P038 -->
+
+**Effort marginal**: L (assessment-pipeline + blocked-user-list + symmetry) — the work this ticket adds on top of P064 + P038 closing.
+
+## User direction (2026-04-26 interactive AskUserQuestion resolution)
+
+Four of the original investigation questions were resolved interactively at the 2026-04-26 stop-condition #2 surface (P122 trigger):
+
+- **(a) ADR shape**: **New sibling ADR** defining the inbound-discovery contract as a peer of ADR-024's outbound contract. Author the ADR FIRST per architect framing (avoid retrofitting documentation to whatever the implementation lands).
+- **(b) Cache file shape**: **JSON** (`docs/problems/.upstream-cache.json` per existing per-project cache patterns; trivially parseable in bash + agent surfaces).
+- **(c) Channel scope**: **All three GitHub channels** — issues (`gh issue list` against problem-report.yml-labelled), discussions (`gh api repos/.../discussions`), security advisories (`gh api repos/.../security-advisories`). Plus a meta-direction: **examine how `/wr-itil:report-upstream` discovers upstream contracts** (it reads the upstream's `.github/ISSUE_TEMPLATE/`, `SECURITY.md`, etc. per ADR-024 + ADR-033). The inbound surface MUST be **symmetric** — our shipped intake templates and SECURITY.md are what downstream projects' `report-upstream` skills discover, so we need to publish in the shape they expect to find. This is a contract-symmetry concern that composes with **P065** (skill scaffolds intake files in downstream projects).
+- **(d) Auto-create vs surface-only — REPLACED with assessment pipeline**: instead of a binary choice, the user directed a **multi-step assessment pipeline**:
+  1. **JTBD alignment check** — does the report align with a documented JTBD? Or does it identify a new valid JTBD for an existing persona? (If neither, flag for review.)
+  2. **Risk assessment of the request itself** — is this a malicious info-extraction attempt? A backdoor request? A request to add malicious code? Use the existing risk-scoring framework against the inbound text.
+  3. **Risk assessment of fixing the reported problem** — what's the risk of doing the work the report asks for? (Some legitimate-looking requests might create high-risk changes.)
+  4. **Above-threshold-risk path** — push back with a comment on the upstream ticket explaining why we're declining. The pushback comment goes through the external-comms risk gate (P064) and voice-tone gate (P038).
+  5. **Clear-malicious path** — close the upstream ticket AND add the user to a **blocked-user list** (we won't accept any future tickets from them). Blocked-user enforcement gates inbound discovery itself — reports from blocked users are filtered out at discovery time.
+  6. **Safe-and-valid path** — create the local problem ticket AND respond on the upstream issue with the local ticket reference + acknowledgement. The response comment goes through external-comms risk gate (P064) and voice-tone gate (P038).
+  7. **All external comms** (pushback OR acknowledgement) require the dual gate (risk + voice-tone). No bare comment posting.
+
+This is substantively richer than the original "auto-create OR surface-only" binary. It introduces three new infrastructure pieces:
+- A **JTBD-alignment classifier** (could compose with `wr-jtbd:agent` evaluation).
+- A **dual-axis risk evaluator** (request-text risk + fix-work risk) that extends `wr-risk-scorer:external-comms` (P064) with the inbound-report axis.
+- A **blocked-user list** mechanism — new lifecycle artefact (e.g., `docs/blocked-reporters.json` or similar; needs ADR call on persistence and per-machine vs per-repo scope).
+
+## Out-of-scope-but-newly-surfaced (carve-outs from user direction)
+
+The user direction surfaced concerns that should compose with P079's fix but warrant separate ticket capture:
+
+- **P123 candidate**: **blocked-user list mechanism** — persistent block list, ADR call on per-machine vs per-repo scope, enforcement at inbound discovery time + outbound report-upstream time (do not file new reports against a project that has us blocked). Captured separately so P079 isn't a new-ADR-bundle.
+- **P065-extension**: **downstream-contract symmetry** — our intake templates + SECURITY.md must be discoverable by downstream `/wr-itil:report-upstream` invocations using the same lookup pattern we use for upstream discovery. P065 already tracks skill-scaffolds-intake-files; this extension says scaffolded files must also be **schema-compatible** with our own report-upstream's discovery logic.
+
+These carve-outs are referenced from P079's Dependencies section as `**Composes with**` — they don't strictly block P079 (the assessment pipeline can ship without the blocked-user list initially, treating "block" as an audit-log-only action), but the design surfaces overlap.
 
 ## Description
 
@@ -129,6 +163,12 @@ Architect call required at implementation time to finalise ADR shape + extension
 - [ ] Sub-concern 5: classify inbound comments by author-class (maintainer / bot / reporter). Surface bot comments — especially duplicate-detection-bot output — as a distinct comment class with its own action surface (e.g., a "👎 bot to prevent auto-close" affordance in the rendered table or an interactive prompt during review).
 - [ ] Sub-concern 6: parse comment bodies and label-event metadata for time-pressure markers (auto-close-in-N-days, stale-in-N-days, scheduled-close-on-DATE). Render a `Days until <event>` column in the Inbound Upstream Reports section. Architect call: notification surface (ScheduleWakeup vs. /loop recheck cadence vs. surface-only-during-review).
 - [ ] Sub-concern 7: detect upstream-resolution markers (linked-PR `Closes #N`, milestone:released, label:fixed, release-announcement comment shapes). Propose local lifecycle transitions for `## Reported Upstream`-linked tickets. Compose with P063 lineage so external-root-cause tickets auto-Verifying without re-investigation. Architect call: auto-advance vs. AskUserQuestion-confirm.
+
+## Dependencies
+
+- **Blocks**: P080 (bidirectional update of upstream-reported problems — depends on P079's inbound discovery + matched-local-ticket detection to know which upstream tickets to update on lifecycle transition)
+- **Blocked by**: P064 (risk-scoring gate on external comms — required for the assessment-pipeline pushback + acknowledgement comment paths), P038 (voice-and-tone gate on external comms — same paths). Without P064/P038, the assessment pipeline cannot ship the comment-back paths; only the local-ticket-creation path could ship in isolation, which would be a partial implementation.
+- **Composes with**: P065 (skill scaffolds intake files in downstream projects — extends to schema-compatibility with our own report-upstream's discovery), P063 (external-root-cause lineage — sub-concern 7's upstream-resolution-driven local lifecycle transitions ride P063's lineage marker), P070 (semantic-comparator from report-upstream's dedup branch — could be reused for matched-local-ticket detection on inbound), P122 (orchestrator stop-condition #2 routing — fix to that ticket's interactive-default branch is what surfaced these answers in the first place), P123-candidate (blocked-user list — composes with the assessment pipeline's clear-malicious branch)
 
 ## Confirming evidence — 2026-04-25 anthropics/claude-code#52831 retrospective
 

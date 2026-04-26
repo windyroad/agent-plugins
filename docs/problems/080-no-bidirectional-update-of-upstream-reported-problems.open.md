@@ -3,9 +3,19 @@
 **Status**: Open
 **Reported**: 2026-04-21
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
-**Effort**: M — extend `/wr-itil:report-upstream` (or add a sibling skill `/wr-itil:update-upstream`) to post lifecycle-transition updates to the upstream issue linked in a local ticket's `## Reported Upstream` section. Triggered from `manage-problem` transitions (Open → Known Error, Known Error → Verification Pending, Verification Pending → Closed). Each transition has a documented update template; sensitive transitions route through the external-comms risk gate (P064) to prevent noise. Architect review at implementation time to decide: (a) extend report-upstream vs new sibling skill (sibling matches P071's split direction per ADR-010 amended); (b) whether transitions auto-comment or require maintainer approval; (c) how to compose with the P064 voice-and-risk gate so comments don't spam maintainers. Likely shares the maintainer-annoyance risk evaluator from P070. M bucket; may push to L if the P064 gate composition is cross-cutting.
+**Effort**: M (marginal) — new sibling skill `/wr-itil:update-upstream` (per user direction 2026-04-26) that fires from `manage-problem`/`transition-problem` Step 7 transitions, drafts the lifecycle-update comment, runs it through the P064 risk gate + P038 voice-tone gate, and auto-posts when both gates pass within appetite. Above-appetite triggers `AskUserQuestion` (interactive) or halt-with-report (AFK).
 
-**WSJF**: 6.0 — (12 × 1.0) / 2 — High severity (every locally-reported-upstream ticket silently stops updating the reporter at transition time; the reporter sees "issue filed" but never "root cause found" / "fix released" / "closed" unless they manually poll); moderate effort. Ranks in the current 6.0-tier alongside P070 / P071 / P074 / P078 / P079.
+**WSJF**: 1.5 (transitive) — re-rated 2026-04-26 — `(12 × 1.0) / max(M=2, P079_transitive=8, P064=L=4, P038=XL=8) = 12 / 8 = 1.5`. Three transitive dependencies: P079 (this ticket needs the inbound side's matched-local-ticket detection to know which upstream issue maps to which local transition); P064 (risk gate on external comms — required for the comment-posting path); P038 (voice-tone gate — same path). Marginal scope alone would be `(12 × 1.0) / 2 = 6.0` but ships are blocked behind the 3 dependencies.
+
+<!-- transitive: M (marginal) → XL (transitive) via P038 -->
+
+## User direction (2026-04-26 interactive AskUserQuestion resolution)
+
+Two of the original three architect-design questions resolved:
+
+- **(a) Skill shape**: **New sibling `/wr-itil:update-upstream`** — matches P071's split-skill direction per ADR-010 amended. Distinct user intent (lifecycle-update vs initial-report) gets its own skill name + autocomplete surface + scoped SKILL.md.
+- **(b) Confirmation pattern**: **Risk + voice-tone gated, then auto-comment**. Every transition with a `## Reported Upstream` link fires the update; the drafted comment goes through P064 risk gate + P038 voice-tone gate. Within-appetite → comment posts automatically. Above-appetite → `AskUserQuestion` (interactive) or halt-with-report (AFK). This matches the **same dual-gate pattern P079's assessment pipeline uses for inbound comments** — the external-comms surface is unified across inbound and outbound.
+- **(c) P064 gate composition**: same as (b) — gates compose by running both before any post; failure of either blocks. Specific composition shape (gate ordering, short-circuit semantics, audit-log shape) is the architect call when implementing.
 
 ## Description
 

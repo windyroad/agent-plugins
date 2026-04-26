@@ -1,10 +1,23 @@
 # Problem 115: `/install-updates` does not detect stale plugin installs pinned to git worktrees under the current project
 
-**Status**: Open
+**Status**: Parked
 **Reported**: 2026-04-24
 **Priority**: 6 (Med) — Impact: Moderate (3) x Likelihood: Possible (2)
 **Effort**: M
-**WSJF**: (6 × 1.0) / 2 = **3.0**
+**WSJF**: 0 (parked — excluded from ranking per ADR-022 / Parked policy)
+
+## Parked
+
+**Reason**: User direction 2026-04-26: *"we don't use worktrees here"* (twice — strong signal). The 2026-04-24 P113 incident that surfaced this ticket was a one-off stale install in `.claude/worktrees/upbeat-keller`, manually cleaned up at the time. The project's actual workflow does not use git worktrees, so the systemic install-updates worktree-discovery gap does not manifest in steady-state usage here.
+
+**Trigger to un-park**: any of —
+- The project's workflow adopts git worktrees as a regular pattern (e.g., feature-branch isolation via `git worktree add`).
+- A downstream adopter of `@windyroad/itil` reports the same gap on their installation (cross-adopter signal that the systemic concern is real for users beyond this project).
+- The `claude-code worktree create` tool becomes part of this project's AFK orchestrator pattern (would re-introduce the orphaned-worktree class).
+
+**Date parked**: 2026-04-26.
+
+**Workaround captured (per-machine, ad-hoc)**: documented in this ticket's Workaround section below — `(cd .claude/worktrees/<name> && claude plugin uninstall "<plugin>@windyroad" --scope project)` plus restart. Adopters who hit this on their installation can apply the workaround without waiting for the parked fix.
 
 > Surfaced during P113 (report-upstream autocomplete missing) investigation on 2026-04-24. The shipped `Skill, Agent` frontmatter fix failed to resolve the user-facing symptom because the real RCA was a stale `wr-itil@0.1.0` install pinned to `.claude/worktrees/upbeat-keller` — an orphaned git worktree inside the current project that `/install-updates` Step 3 never scanned.
 
