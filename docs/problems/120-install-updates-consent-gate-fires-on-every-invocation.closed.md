@@ -1,6 +1,6 @@
 # Problem 120: `/install-updates` consent gate fires on every invocation despite the answer being invariably "all confirmed siblings"
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-25
 **Fix Released**: 2026-04-25 (AFK iter; repo-local skill per ADR-030 — no changeset)
 **Priority**: 10 (High) — Impact: Minor (2) x Likelihood: Almost Certain (5)
