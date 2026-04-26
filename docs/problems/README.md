@@ -14,12 +14,12 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6.0 | P064 | No risk-scoring gate on external communications | 12 High | Known Error | L |
 | 6.0 | P065 | No skill scaffolds intake files in downstream projects (re-rated M → L per architect direction) | 12 High | Known Error | L |
 | 9.0 | P127 | scaffold-intake idempotency bats fixture (test 645) fails in CI but passes locally — local-vs-CI test divergence on the same commit | 9 Med | Known Error | S |
+| 9.0 | P096 | PreToolUse / PostToolUse hook injection volume across windyroad plugins — Phase 1 audit complete | 9 Med | Known Error | M |
 | 6.0 | P126 | `/wr-itil:work-problems` failure-handling halt paths bypass Step 2.5's interactive-default routing for accumulated user-answerable design questions | 12 High | Known Error | M |
 | 3.0 | P101 | `wr-retrospective` has no context-usage analysis — opaque where session tokens are consumed; no guidance on what to trim | 12 High | Known Error | XL |
 | 3.0 | P014 | No lightweight aside invocation for governance skills (background-subagent convention per 2026-04-20 direction) | 12 High | Open | L |
 | 3.0 | P081 | Structural source-content tests are wasteful — TDD agent should reject them and require behavioural tests | 12 High | Open | L |
 | 3.0 | P087 | No maturity / battle-hardening signal on plugins, skills, agents, or hooks — READMEs don't tell users which features are stable vs experimental | 12 High | Open | L |
-| 3.0 | P096 | PreToolUse / PostToolUse hook injection volume across windyroad plugins — unaudited | 12 High | Open | L |
 | 3.0 | P097 | SKILL.md files mix runtime-necessary steps with maintainer-facing rationale, bloating every skill invocation | 12 High | Open | L |
 | 3.0 | P128 | /wr-itil:report-upstream report body lacks consolidated Versions section | 12 High | Open | L |
 | 2.25 | P015 | TDD enforcement does not flag vague Gherkin outcome steps | 9 Med | Open | L |
