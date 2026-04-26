@@ -1,7 +1,8 @@
 # Problem 126: `/wr-itil:work-problems` failure-handling halt paths bypass Step 2.5's interactive-default routing for accumulated user-answerable design questions
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-26
+**Transitioned to Known Error**: 2026-04-26 — Step 2.5b reusable surfacing routine extracted from Step 2.5; cross-references added to Step 0 (session-continuity halt + fetch-failure halt), Step 6.5 (Failure handling clause + ADR-042 Rule 5 halt), Step 6.75 (dirty-for-unknown-reason halt); architect FLAG guard added under Rule 5 separating prior-iter accumulated skips from halt-causing scorer-gap; Decisions Table row added; briefing entry added cross-referencing P122. Behavioural second-source: `packages/itil/skills/work-problems/test/work-problems-step-2-5b-cross-halt-routing.bats` (15/15 green; full work-problems suite 136/136 green). Awaiting release.
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: M — extend `packages/itil/skills/work-problems/SKILL.md` Step 6.5 failure-handling clauses (CI-failure halt, ADR-042 Rule 5 above-appetite halt, network-failure halt, git-conflict halt) AND Step 0 prior-session-state halt branch AND Step 6.75 inter-iteration verification dirty-for-unknown-reason halt branch — every halt path that fires after iters have accumulated skipped tickets — to run Step 2.5's user-answerable-skip surfacing routine before emitting the AFK summary. Plus matching contract bats per ADR-037. Plus document the principle in the SKILL.md as "halt-paths-must-route-design-questions-through-Step-2.5".
 **WSJF**: (12 × 1.0) / 2 = **6.0**
