@@ -8,6 +8,21 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Skill
 
 Reflect on the current session, update the project briefing, and create problem tickets for failures and friction.
 
+## When to use
+
+### Supported invocation surfaces
+
+- **Foreground `/wr-retrospective:run-retro`** — the canonical invocation. The user types the slash command in their parent session; the retro runs with full visibility of the session's tool-call history. This is the only invocation surface every other use case falls back to.
+- **`claude -p` subprocess invocation** — supported per **P086** (the AFK `/wr-itil:work-problems` iteration subprocess invokes run-retro before emitting `ITERATION_SUMMARY`). The subprocess has the iteration's tool-call history naturally; retro runs with iteration-bounded scope and produces correct findings for that scope. ADR-032 subprocess-boundary variant covers this surface.
+
+### Anti-pattern: Never invoke as a background agent
+
+Do **NOT** invoke run-retro via `Agent(run_in_background: true)` or any background-subagent surface (the deferred ADR-032 `capture-retro` sibling). Background subagents have isolated context at spawn — they cannot see the parent session's tool-call history, which is run-retro's primary input. A background retro would either produce empty findings, require explicit context-marshalling at spawn (the "shenanigans" the user direction rejected), or post-hoc parse session logs (out of scope today).
+
+The `/wr-retrospective:capture-retro` background sibling listed in early ADR-032 drafts is **deferred pending resolution of the context-marshalling problem** (P088, 2026-04-21 user direction: *"run-retro cannot be done as a subagent, because it won't have the context"*). The other ADR-032 background siblings (`capture-problem`, `capture-adr`) are unaffected — their inputs are self-contained aside payloads, not whole-session histories. See **ADR-032** in-scope-list amendment and **P088** ticket for the full settlement.
+
+This anti-pattern clause does NOT forbid retro inside an AFK iteration subprocess (P086) — that surface is the `claude -p` row above, not the background-agent row. Those two surfaces are distinct: `claude -p` is a fresh main Claude Code session that loads its own context naturally; `Agent(run_in_background: true)` is a subagent spawned inside an existing session whose context is isolated from the parent.
+
 ## Steps
 
 ### 1. Read the current briefing
