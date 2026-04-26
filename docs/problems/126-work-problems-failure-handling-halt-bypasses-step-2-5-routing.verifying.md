@@ -1,6 +1,6 @@
 # Problem 126: `/wr-itil:work-problems` failure-handling halt paths bypass Step 2.5's interactive-default routing for accumulated user-answerable design questions
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-04-26
 **Transitioned to Known Error**: 2026-04-26 — Step 2.5b reusable surfacing routine extracted from Step 2.5; cross-references added to Step 0 (session-continuity halt + fetch-failure halt), Step 6.5 (Failure handling clause + ADR-042 Rule 5 halt), Step 6.75 (dirty-for-unknown-reason halt); architect FLAG guard added under Rule 5 separating prior-iter accumulated skips from halt-causing scorer-gap; Decisions Table row added; briefing entry added cross-referencing P122. Behavioural second-source: `packages/itil/skills/work-problems/test/work-problems-step-2-5b-cross-halt-routing.bats` (15/15 green; full work-problems suite 136/136 green). Awaiting release.
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
@@ -84,6 +84,17 @@ The fix shape is: extract Step 2.5's surfacing routine (the AskUserQuestion-when
 - **Blocks**: any future AFK loop whose halt path fires before exhausting the backlog and accumulates ≥1 user-answerable skip.
 - **Blocked by**: (none — fix is bounded to SKILL.md prose + bats).
 - **Composes with**: P122 (verifying — established the routing at Step 2.5; this ticket extends it to remaining halt paths). P109 (closed — Step 0 session-continuity halt path). P036 (closed — Step 6.75 inter-iter verification halt path). P104 (verifying — Step 6.5 partial-progress hazard adjacent surface). P083 (verifying — iteration-worker forbids ScheduleWakeup, related contract surface).
+
+## Fix Released
+
+Released in `@windyroad/itil@0.21.1` (commit `6c46694` fix → release commit `4387824`, merge `12c24d8`):
+- Step 2.5b reusable surfacing routine extracted from Step 2.5 in `packages/itil/skills/work-problems/SKILL.md`
+- Cross-references added to Step 0 (session-continuity halt + fetch-failure halt), Step 6.5 (Failure handling clause + ADR-042 Rule 5 halt), Step 6.75 (dirty-for-unknown-reason halt)
+- Architect FLAG guard under Rule 5 separating prior-iter accumulated skips from halt-causing scorer-gap
+- Decisions Table row + briefing entry cross-referencing P122
+- Behavioural second-source `packages/itil/skills/work-problems/test/work-problems-step-2-5b-cross-halt-routing.bats` (15/15 green; full work-problems suite 136/136 green)
+
+Awaiting user verification: next AFK loop that hits a Step 6.5 / Step 0 / Step 6.75 halt with ≥1 accumulated user-answerable skip should route the questions through `AskUserQuestion` before emitting the AFK summary.
 
 ## Related
 

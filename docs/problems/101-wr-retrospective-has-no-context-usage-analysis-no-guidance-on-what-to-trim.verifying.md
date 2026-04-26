@@ -1,6 +1,6 @@
 # Problem 101: `wr-retrospective` has no context-usage analysis — opaque where session tokens are consumed; no guidance on what to trim
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-04-22
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: XL (re-rated 2026-04-26 — architect verdict expanded scope from L to XL: new sibling ADR-043 + amendments to ADR-026 / ADR-014 + new skill + new diagnostic script + 2 bats fixtures + Step 2c block in run-retro SKILL.md)
@@ -81,6 +81,17 @@ Manual audit on user observation. Examples this session: user noticed bloat on C
 - **Blocks**: (none directly; but once this ships, P091's investigation-task "Build a measurement harness" gets checked off as subsumed)
 - **Blocked by**: (none)
 - **Composes with**: P091 (parent meta — this ticket subsumes its measurement-harness task), P099 (BRIEFING bloat — analysis would flag it; report output must itself obey P099 discipline), P100 (artifact surfacing — analysis could trigger surfacing recommendations), P088 (run-retro context visibility — the deep layer needs to see the full session context, matching P088's concern)
+
+## Fix Released
+
+Released in `@windyroad/retrospective@0.10.0` (commit `75238fb` fix → release commit `4387824`, merge `12c24d8`):
+- Two-layer context-usage analyzer per ADR-043 (Progressive context-usage measurement and reporting)
+- Cheap layer: lightweight summary integrated into `run-retro` Step 2c
+- Deep layer: new `/wr-retrospective:analyze-context` skill for on-demand analysis
+- Per-surface breakdown (hooks, skills, memory, BRIEFING, MCP preamble, framework listings) + top-N offenders + actionable suggestions
+- ADR-026 amended (per-agent prompt amendments target list); ADR-014 amended (commit-message convention row for deep-skill output)
+
+Awaiting user verification: next `/wr-retrospective:run-retro` invocation should emit the Step 2c summary line; on-demand `/wr-retrospective:analyze-context` should produce the deep-layer breakdown without itself bloating beyond the 5%-of-budget soft cap.
 
 ## Related
 

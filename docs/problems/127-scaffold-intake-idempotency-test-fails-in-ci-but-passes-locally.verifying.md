@@ -1,6 +1,6 @@
 # Problem 127: scaffold-intake idempotency bats fixture (test 645) fails in CI but passes locally — local-vs-CI test divergence on the same commit
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-04-26
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Likely (3)
 **Effort**: S — narrow surface (one bats fixture in one new skill); fix is one of: (a) make `scaffold_all` produce deterministic output (strip timestamps / session-ids from the done-marker; canonicalise template substitution); (b) tighten the diff comparison in the bats fixture to ignore known-non-deterministic fields; (c) fix the `cp -R . .snapshot-1` snapshot mechanism if the snapshot itself is non-deterministic. Investigation should run the failing test in a CI-like fixture (linux + clean filesystem) to reproduce; once reproduced the fix is a 1-3 line edit to either the SKILL.md template or the bats fixture.
@@ -117,6 +117,14 @@ Signals to check: run the test in a Linux container locally to reproduce. Check 
 - **Blocks**: any release that wants CI green on main (currently CI is red on every commit since `8653541`; release pipeline still works because Release workflow runs separately and passes).
 - **Blocked by**: (none — fix is bounded; investigation is mechanical reproduction).
 - **Composes with**: P065 (Known Error — the parent feature this test was added for; fix here closes the test gap). P116 (closed — intermediate-commit invisibility; adjacent class but distinct surface). P126 (open — orchestrator failure-handling halt path; this ticket's CI failure was the halt cause that triggered P126's surfacing).
+
+## Fix Released
+
+Released in `@windyroad/itil@0.21.1` (commit `482b54a` fix → release commit `4387824`, merge `12c24d8`):
+- Snapshot directory moved outside `$TEST_DIR` so the snapshot itself isn't included in the second-pass diff
+- `packages/itil/skills/scaffold-intake/test/scaffold-intake-fixture.bats:122` test 645 idempotency assertion now stable across local + CI environments
+
+Awaiting user verification that CI workflow `Run hook tests` passes on tip commit and downstream adopters' scaffold-intake runs remain idempotent.
 
 ## Related
 

@@ -1,6 +1,6 @@
 # Problem 065: No skill scaffolds intake files (ISSUE_TEMPLATE, SECURITY.md, CONTRIBUTING.md, SUPPORT.md) in downstream projects
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-04-20
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: L (re-rated from M at AFK iter 6 iter 3 triage; P047) — new `/wr-itil:scaffold-intake` skill in `@windyroad/itil` PLUS a PreToolUse hook (`packages/itil/hooks/pre-publish-intake-gate.sh`), PLUS first-run trigger wiring in `manage-problem` and `work-problems`, PLUS a new ADR (pinned: "own ADR, not extension of ADR-024"), PLUS problem-first template seeds updated from the corrected shape P066 shipped, PLUS fixture-based bats tests for scaffold + idempotency + gate. Originally scoped as M (skill + templates only); the layered-trigger direction pin and the new-ADR decision push effort into L territory. Templates can now seed from `.github/ISSUE_TEMPLATE/problem-report.yml` (shipped in AFK iter 6 iter 1) rather than the old bug/feature pair.
@@ -135,6 +135,19 @@ This ticket (P065) remains **Open** as the execution tracker. Closes when:
 - Trigger 1 wiring lands in `manage-problem` + `work-problems` SKILL.md files.
 - Plugin manifest declares the new skill + hook.
 - Bats coverage per ADR-036 Confirmation section (contract + fixture + secrets-absent + gate + first-run-prompt tests).
+
+## Fix Released
+
+Released in `@windyroad/itil@0.21.0` (commit `8653541` fix → released by AFK iter 1 drain):
+- New `/wr-itil:scaffold-intake` skill in `@windyroad/itil` — scaffolds `.github/ISSUE_TEMPLATE/`, `SECURITY.md`, `SUPPORT.md`, `CONTRIBUTING.md` for downstream adopters
+- Pre-publish PreToolUse gate `packages/itil/hooks/pre-publish-intake-gate.sh` with `INTAKE_BYPASS=1` override
+- First-run trigger wiring in `manage-problem` and `work-problems` (marker-suppressed at `.claude/.intake-scaffold-done` / `.intake-scaffold-declined` per ADR-009)
+- ADR-036 (Scaffold downstream OSS intake — skill + layered triggers) shipped
+- Bats coverage per ADR-036 Confirmation section (contract + fixture + secrets-absent + gate tests)
+
+P127 (`.verifying.md` this batch) covers the CI-vs-local idempotency-fixture gap discovered post-release; both tickets verify together.
+
+Awaiting user verification that downstream adopters of `@windyroad/itil@0.21.0+` can successfully scaffold intake files in their projects.
 
 ## Related
 
