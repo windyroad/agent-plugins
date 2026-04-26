@@ -238,13 +238,17 @@ Before creating, search existing problems for similar issues. The user may not k
    - "I found existing problems that may be related: P011 (stuck saving, CLOSED), P023 (foul drawn garbled, OPEN). Would you like to: (a) Update an existing problem, (b) Create a new problem anyway, (c) Cancel?"
 5. If the user chooses to update, switch to the update flow for that problem ID
 6. If no matches found, proceed to create
-7. **After the grep completes** (whether duplicates were found or not), write the per-session create-gate marker so the `PreToolUse:Write` hook (`packages/itil/hooks/manage-problem-enforce-create.sh`, P119) allows the subsequent Write of the new `.open.md` file. The marker is `/tmp/manage-problem-grep-${SESSION_ID}` and the agent should write it via Bash:
+7. **After the grep completes** (whether duplicates were found or not), write the per-session create-gate marker so the `PreToolUse:Write` hook (`packages/itil/hooks/manage-problem-enforce-create.sh`, P119) allows the subsequent Write of the new `.open.md` file. The marker is `/tmp/manage-problem-grep-${SESSION_ID}` and the agent writes it via Bash by sourcing the session-id discovery helper (P124) and calling the existing `mark_step2_complete` helper:
 
    ```bash
-   : > "/tmp/manage-problem-grep-${CLAUDE_SESSION_ID:-$(echo "${CLAUDE_HOOK_SESSION_ID:-default}")}"
+   source packages/itil/hooks/lib/session-id.sh
+   source packages/itil/hooks/lib/create-gate.sh
+   sid=$(get_current_session_id) && mark_step2_complete "$sid"
    ```
 
-   In practice the session ID is supplied by the hook payload, not as an env var — the simplest portable pattern is to ask Claude Code to run a one-line Bash that touches the marker using whatever session_id is available in the current invocation. The exact command shape depends on the runtime; the contract is that the file `/tmp/manage-problem-grep-<session-id>` exists by the time Step 5's Write fires. Per architect direction, the marker is per-session (single marker covers all new tickets for the rest of this session), enabling Step 4b multi-concern splits and same-session unrelated-ticket creation without re-running the grep.
+   `get_current_session_id` (P124) returns the canonical session UUID by reading `CLAUDE_SESSION_ID` if exported, else by scraping the most-reliable per-session announce marker (`/tmp/<system>-announced-<UUID>`, set on prompt 1 of every session per ADR-038 by architect / jtbd / tdd / style-guide / voice-tone / itil-assistant-gate / itil-correction-detect hooks). It exits non-zero if no session can be discovered — the `&&` short-circuits the marker write so the agent never lands `/tmp/manage-problem-grep-` (an empty UUID would never match the hook's stdin-JSON `session_id` and would silently fail later). `mark_step2_complete` (existing helper from `create-gate.sh`) writes the marker file under the canonical path; the marker is per-session (single marker covers all new tickets for the rest of this session), enabling Step 4b multi-concern splits and same-session unrelated-ticket creation without re-running the grep.
+
+   **Why a helper instead of inline `${CLAUDE_SESSION_ID:-default}`**: the agent's process does NOT export `CLAUDE_SESSION_ID` today; the hook side reads `session_id` from its stdin JSON payload (per the Claude Code PreToolUse contract). The prior fallback wrote the marker under `default` while the hook checked the real UUID — mismatch caused the Write deny on every first ticket of a session until the agent ad-hoc scraped a UUID-bearing marker. The helper canonicalises that scrape so every agent context discovers the SID the same way. P124.
 
 **Search strategy**: Search problem filenames AND file content. A match on the filename (kebab-case title) or the Description/Symptoms sections counts. Cast a wide net — false positives are cheap (user chooses), but false negatives mean duplicate problems.
 

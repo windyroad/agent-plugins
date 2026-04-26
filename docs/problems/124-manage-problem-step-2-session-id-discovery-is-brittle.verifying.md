@@ -1,6 +1,6 @@
 # Problem 124: `/wr-itil:manage-problem` Step 2 substep 7 session-id discovery is brittle — agent has no env var, must scrape marker filenames
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-26
 **Priority**: 6 (Med) — Impact: Minor (2) x Likelihood: Likely (3)
 **Effort**: S — extend `packages/itil/skills/manage-problem/SKILL.md` Step 2 substep 7 with a documented session-id discovery pattern that does NOT depend on `${CLAUDE_SESSION_ID}` being in the agent's env (it is not, in main-turn or subprocess contexts). The pattern: read an existing marker filename under `/tmp/<existing-marker>-<UUID>`, extract the UUID, and use that. Reference implementation: list `/tmp/architect-plan-reviewed-*` (or any other gate marker reliably set this session) and parse the trailing UUID. New helper script in `packages/itil/hooks/lib/session-id.sh` (or extend an existing detector lib) exporting a deterministic `get_current_session_id()` function. SKILL.md Step 2 substep 7 cites the helper rather than the brittle `${CLAUDE_SESSION_ID:-default}` fallback.
@@ -96,3 +96,27 @@ The SKILL.md substep 7 prose acknowledges the env var is unreliable but does not
 - **JTBD-001** (Enforce Governance Without Slowing Down) — primary fit. The current friction is one round-trip per first ticket of a session.
 - **JTBD-006** (Progress the Backlog While I'm Away) — composes; AFK loops that create tickets mid-iter pay the same friction without an interactive UUID-extraction surface.
 - 2026-04-26 session evidence: P122 ticket creation blocked on the first Write attempt; UUID extracted from `/tmp/architect-plan-reviewed-60331245-5d4e-461c-b95b-67b9a5b95c4b` and re-touched as `/tmp/manage-problem-grep-60331245-5d4e-461c-b95b-67b9a5b95c4b`; second Write succeeded. Same friction did NOT recur for P123 creation in the same session because the marker persisted once set.
+
+## Fix Released
+
+Awaiting user verification.
+
+Implemented during the 2026-04-26 AFK `/wr-itil:work-problems` iteration as commit `<pending>` (folded `fix(itil): ... (closes P124)`).
+
+**Shape delivered:**
+- `packages/itil/hooks/lib/session-id.sh` (NEW) exports `get_current_session_id()`. Logic: env-var fast path; otherwise iterate fixed system-priority list `(architect, jtbd, tdd, itil-assistant-gate, itil-correction-detect, style-guide, voice-tone)` and glob `${SESSION_MARKER_DIR:-/tmp}/<system>-announced-*`; first hit wins; returns empty + non-zero exit when exhausted. `-announced-` markers are write-once-per-session per ADR-038 and have no mtime-sliding (unlike `-reviewed-` markers per ADR-009 + P111).
+- `packages/itil/hooks/test/session-id.bats` (NEW) — 6 behavioural assertions per ADR-037 + P081 (env-var fast path, env-var ignores markers, architect-marker scrape, jtbd-marker fallback, no-markers empty + non-zero, deterministic priority order). All green.
+- `packages/itil/skills/manage-problem/SKILL.md` Step 2 substep 7 rewritten to source the helper + call existing `mark_step2_complete()` from `create-gate.sh` — single source of truth for the marker-path convention. Why-the-helper-exists prose preserved inline.
+- `docs/decisions/038-progressive-disclosure-for-governance-tooling-context.proposed.md` `## Related` cross-refs the new helper as the agent-side READ companion to the ADR's hook-side WRITE helpers.
+- `.changeset/wr-itil-p124-session-id-helper.md` — patch entry for `@windyroad/itil`.
+
+**Architect refinements applied:**
+- Initial proposal globbed `/tmp/architect-plan-reviewed-*` (the `-reviewed-` markers); architect flagged this as fragile because `-reviewed-` markers `touch`-refresh on every gate check (ADR-009 sliding TTL + P111 subprocess refresh) — picking "most-recent by mtime" can return a stale session's leftover marker that was just touch-refreshed. Switched to `-announced-` markers (write-once, no mtime sliding) per ADR-038 to sidestep the issue entirely. Selection by fixed system-priority order, not mtime, makes discovery deterministic.
+- Initial proposal had SKILL.md write the marker inline with `: > "/tmp/manage-problem-grep-${sid}"`; architect flagged this duplicates the path convention already encoded in `create-gate.sh::mark_step2_complete`. Skill now sources both helpers and chains them: `sid=$(get_current_session_id) && mark_step2_complete "$sid"`. The `&&` is load-bearing — empty-SID short-circuits the marker write so no `/tmp/manage-problem-grep-` empty-tail file is ever created.
+
+**JTBD alignment confirmed:** JTBD-001 (Enforce Governance Without Slowing Down) primary fit — replaces ad-hoc UUID scraping with a documented helper, preserving create-gate enforcement (P119) while removing the undocumented friction step. JTBD-006 (Progress the Backlog While I'm Away) composes — AFK loops creating tickets mid-iter no longer hit the discovery gap.
+
+**Verification path (when the user returns):**
+1. The `/wr-itil:work-problems` iteration that ships this fix is itself an instance of the surface — if subsequent ticket creation in this session continues to succeed without the prior ad-hoc UUID-extraction step, the helper is working in the live context.
+2. Inspect a fresh session next time the AFK loop runs: the first ticket creation should complete its Step 2 marker write without the `BLOCKED: Cannot Write '<NNN>-...' under docs/problems/...` deny. The marker on disk should match an active per-session UUID (cross-check with `ls /tmp/architect-announced-*`).
+3. If the helper ever returns empty (e.g. brand-new session before any UserPromptSubmit hook has fired), the `&&` short-circuit means the marker write is skipped and the agent will hit the standard P119 deny on the next ticket Write — recoverable, not silent corruption.

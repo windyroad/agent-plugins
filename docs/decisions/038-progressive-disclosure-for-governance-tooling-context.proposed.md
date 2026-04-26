@@ -206,3 +206,4 @@ Revisit this decision if:
 - `packages/*/hooks/lib/session-marker.sh` — per-plugin synced copies.
 - `scripts/sync-session-marker.sh` — sync script.
 - `packages/style-guide/hooks/lib/review-gate.sh` — reference for the marker-path convention (`-reviewed-` sibling pattern).
+- `packages/itil/hooks/lib/session-id.sh` (P124) — agent-side READ helper that consumes the announce markers this ADR's hooks WRITE; sources the same `/tmp/${SYSTEM}-announced-${SESSION_ID}` filename convention, exits non-zero when no marker is discoverable. Itil-local rather than `packages/shared/` because today only `/wr-itil:manage-problem` Step 2 substep 7 needs agent-side SID discovery; promote to shared per ADR-017 when a second skill adopts the pattern.
