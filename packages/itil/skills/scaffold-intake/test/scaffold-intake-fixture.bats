@@ -121,15 +121,18 @@ scaffold_all() {
 
 @test "fixture: full re-application is idempotent (no diff)" {
   scaffold_all
-  # Snapshot.
-  cp -R . "$TEST_DIR/.snapshot-1"
+  # Snapshot into a sibling temp dir — NOT inside $TEST_DIR. GNU cp refuses
+  # `cp -R . dest` when dest is a child of source ("cannot copy a directory
+  # into itself"), so the test fails on Linux CI even though macOS BSD cp
+  # tolerates it. Putting the snapshot outside $TEST_DIR removes the platform
+  # divergence (P127).
+  SNAPSHOT_DIR=$(mktemp -d)
+  cp -R "$TEST_DIR/." "$SNAPSHOT_DIR"
   # Re-apply.
   scaffold_all
-  # Diff against snapshot — exclude the snapshot dir itself + any tmp.
-  run diff -ru \
-    --exclude='.snapshot-1' \
-    --exclude='.git' \
-    "$TEST_DIR/.snapshot-1" "$TEST_DIR"
+  # Diff against snapshot.
+  run diff -ru "$SNAPSHOT_DIR" "$TEST_DIR"
+  rm -rf "$SNAPSHOT_DIR"
   # diff exit 0 means no differences.
   [ "$status" -eq 0 ]
 }

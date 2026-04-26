@@ -1,6 +1,6 @@
 # Problem 127: scaffold-intake idempotency bats fixture (test 645) fails in CI but passes locally — local-vs-CI test divergence on the same commit
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-26
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Likely (3)
 **Effort**: S — narrow surface (one bats fixture in one new skill); fix is one of: (a) make `scaffold_all` produce deterministic output (strip timestamps / session-ids from the done-marker; canonicalise template substitution); (b) tighten the diff comparison in the bats fixture to ignore known-non-deterministic fields; (c) fix the `cp -R . .snapshot-1` snapshot mechanism if the snapshot itself is non-deterministic. Investigation should run the failing test in a CI-like fixture (linux + clean filesystem) to reproduce; once reproduced the fix is a 1-3 line edit to either the SKILL.md template or the bats fixture.
@@ -50,7 +50,35 @@ None today. Adopters can ignore the CI red because Release workflow is green. It
 
 ## Root Cause Analysis
 
-### Preliminary hypothesis (3 candidates — investigation needed)
+### Confirmed root cause (2026-04-26)
+
+**`cp -R . dest` refuses to copy a directory into itself on GNU coreutils** — the bats fixture's snapshot step is
+
+```bash
+cp -R . "$TEST_DIR/.snapshot-1"
+```
+
+with `$PWD == $TEST_DIR`. GNU `cp` (Linux / Ubuntu CI) detects that the destination is a child of the source and refuses with:
+
+```
+cp: cannot copy a directory, '.', into itself, '/tmp/tmp.hMtaSdq3wd/.snapshot-1'
+```
+
+(The Alpine BusyBox `cp` in the bats:latest container worded the same condition as `cp: recursion detected, omitting directory './.snapshot-1'`.) BSD `cp` on macOS APFS does NOT detect this case and silently succeeds, which is why the test passed locally on the iter 7 development machine. The non-zero exit from `cp` failed the test (bats halts on uncaptured non-zero); the test name suggested the diff was the failure but the actual failure was the snapshot step, never the diff.
+
+Reproduced 2026-04-26 in `bats/bats:latest` Docker container against the iter 7 commit content. Original three candidate hypotheses ruled out:
+
+- **Candidate 1 (non-deterministic scaffold_all output)**: ruled out — `scaffold_all` only invokes `sed` against fixed templates; the done-marker is `: > .claude/.intake-scaffold-done` (zero-byte file, no timestamp). No timestamp / session-id / hostname surfaces in any template or in the marker.
+- **Candidate 2 (cp -R snapshot non-determinism)**: closest to the actual cause — the snapshot mechanism IS the bug, but the failure mode is "GNU cp refuses self-recursion," not mtime / permission divergence. APFS-vs-ext4 case sensitivity and permission bits were not engaged.
+- **Candidate 3 (filesystem case-sensitivity)**: ruled out — file paths are fixed and identical across both invocations of `scaffold_all`; no case-divergence path is reached.
+
+### Fix applied
+
+`packages/itil/skills/scaffold-intake/test/scaffold-intake-fixture.bats:122` — snapshot now writes to a sibling `mktemp -d` directory outside `$TEST_DIR`, eliminating the source-into-itself recursion. `diff -ru` runs against the sibling snapshot; the snapshot dir is removed before the assertion runs. No production SKILL.md or template changes — production scaffold logic was already deterministic.
+
+Verification: 29/29 pass on Linux substrate (`bats/bats:latest` Alpine container) AND 29/29 pass on macOS local (BSD coreutils) AFTER the fix. Before the fix, test 21 (post-recount: was test 645 in the full suite) failed deterministically on Linux and passed on macOS.
+
+### Preliminary hypothesis (3 candidates — superseded by confirmed cause above)
 
 **Candidate 1: Non-deterministic output in scaffold_all**. The skill writes templated files (SECURITY.md, CONTRIBUTING.md, SUPPORT.md, problem-report.yml, config.yml) plus a done-marker (`.claude/.intake-scaffold-done`). If any of these embeds a timestamp, session-id, hostname, username, or randomly-ordered iteration over a hash, the second invocation produces different content from the first.
 
