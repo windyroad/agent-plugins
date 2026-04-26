@@ -86,6 +86,92 @@ The design question is whether `REFERENCE.md` lazy-loading (runtime SKILL.md sta
 
 **Phase 4 (ADR)**: codify the `[runtime]`/`[reference]`/`[deprecated]` tagging convention and the REFERENCE.md pattern.
 
+## Phase 1 Audit (2026-04-27)
+
+Phase 1 line-tag + prototype-split attempt for `packages/itil/skills/manage-problem/SKILL.md`. Outcome: **partial-progress — extraction blocked on bats coupling**. SKILL.md was NOT modified; the 116-test contract suite remains green.
+
+### Current state
+
+| Metric | At ticket open (2026-04-22) | Phase 1 measurement (2026-04-27) | Delta |
+|---|---:|---:|---:|
+| `manage-problem/SKILL.md` bytes | 55,032 | 69,180 | +14,148 (+25.7%) |
+| Lines | 699 | 804 | +105 |
+| Contract bats — `manage-problem/test/` | not tallied | 116 (green baseline) | — |
+
+The file has grown ~14KB / ~3.6k tokens since the audit four days ago — Phase 2 P096 work, P118 README reconciliation preflight, P124 session-id helper, etc. all landed prose. Pressure is increasing, not decreasing.
+
+### Bats coupling — the dominant Phase 1 finding
+
+`packages/itil/skills/manage-problem/test/` contains 116 contract assertions across 18 bats files. **80 of those assertions are `grep "<phrase>" "$SKILL_FILE"`** — explicit structural grep against SKILL.md content. The bats are spread across 14 of the 18 files (the other 4 mostly assert SKILL.md exists / has frontmatter). Per the bats file headers, every structural test is annotated as a `Permitted Exception to the source-grep ban (ADR-005 / P011)`.
+
+Every structural-grep test pins a specific phrase to SKILL.md — and SKILL.md only. None of the existing bats consult a sibling REFERENCE.md. Moving content from SKILL.md to REFERENCE.md without updating the bats produces test failures in proportion to how much `[reference]` content moves.
+
+### Section-by-section bats density
+
+Loose mapping of the SKILL.md outline against grepped phrases. **bats-locked** = at least one specific phrase from this region is asserted by a structural test; **safe candidate** = no direct assertions found.
+
+| Section | Lines | Anchors | Status |
+|---|---|---:|---|
+| Frontmatter (`deprecated-arguments: true`) | 1–6 | 1 | bats-locked |
+| Output Formatting | 12–14 | 3 | bats-locked |
+| First-run intake-scaffold pointer (P065 / ADR-036) | 17–33 | 0 | safe candidate |
+| Operations + Closing problems | 35–49 | partial | partial |
+| Problem Lifecycle table + Parked + Verification Pending | 51–73 | many | bats-locked |
+| WSJF Prioritisation core (formula + multiplier + effort tables) | 75–110 | 5 | bats-locked |
+| Transitive dependencies (P076) | 112–152 | 19 | heavily bats-locked |
+| Working a Problem (Open / Known Error / Scope expansion) | 154–181 | 3 | partial |
+| Step 0 README reconciliation preflight (P118) | 183–199 | 0 | safe candidate |
+| Step 1 Parse + 4 deprecated-argument forwarders (P071) | 201–247 | 24 | heavily bats-locked |
+| Step 2 Check duplicates | 249–274 | 2 | partial |
+| Step 3 Assign next ID (ADR-019, P056, P124) | 276–300 | 4 | bats-locked |
+| Step 4 Gather information | 302–314 | 0 | safe candidate |
+| Step 4b Concern-boundary analysis (P016) | 316–336 | 6 | bats-locked |
+| Step 5 Write file + README refresh (P094) | 338–411 | 4 | partial |
+| Step 6 Update + conditional README refresh (P094) | 413–445 | 0 | safe candidate |
+| Step 7 Status transitions + staging trap (P057) + README refresh (P062) | 447–557 | 11 | heavily bats-locked |
+| Step 8 List | 559–561 | 0 | safe candidate |
+| Step 9 Review (9a–9e + fast-path + Verification Queue + P048) | 563–717 | 12 | heavily bats-locked |
+| Step 10 Quality checks | 719–731 | 0 | safe candidate |
+| Step 11 Report (commit conventions + ADR-014) | 733–752 | 0 | safe candidate |
+| Step 12 Auto-release (ADR-020 / ADR-042) | 754–803 | 0 | safe candidate |
+
+### What can safely move to REFERENCE.md today
+
+Sum of safe-candidate sections (no bats anchors): ~17 + 17 + 13 + 33 + 3 + 13 + 20 + 50 ≈ **166 lines / ~12–15KB / ~3–3.7k tokens**. About **18–22% byte reduction** if all safe sections moved.
+
+The catch: every safe-candidate section is a **runtime procedural step** (preflight, gather info, update flow, list, quality checks, report, auto-release). Moving them to REFERENCE.md would defeat the runtime-vs-reference distinction the ticket articulates — these steps must execute on every relevant invocation, not be loaded on-demand.
+
+The genuinely-`[reference]`-tagged content (rationale paragraphs, worked examples, deprecated-forwarder explanatory prose, Reassessment Criteria narrative, "Why a helper instead of inline ..." design-decision logs) is precisely the content the bats anchor. The ≥50% reduction target the ticket sets is unreachable while structural greps stay in force.
+
+### Deferred-design questions (need user input before Phase 2)
+
+1. **Resolve the bats coupling.** Two paths, mutually exclusive at the per-skill level:
+   - **Path A — bats-update first.** Generalise every `grep "$SKILL_FILE"` to scan `SKILL.md` + `REFERENCE.md` together. Mechanical. Cements structural tests as the contract surface and runs counter to P081's user-direction-validated finding ("tests that check the source code contents are wasteful and not real tests").
+   - **Path B — resolve P081 first.** P081 (Open, WSJF 3.0, L effort) replaces structural greps with behavioural assertions. Once P081 lands the framework/stubs and the retrofit, P097 Phase 2–3 can extract `[reference]` content freely. Slower up-front but aligns with user direction, removes the structural-bats blocker for *every* skill in the project, and unblocks P097's full byte-reduction target.
+
+   Path B is the WSJF-correct choice — P081 is high-severity (every new test inherits the wrong style) and unblocks the entire SKILL.md-budget cluster. P097 Phase 2–3 should be marked `Blocked by: P081` until that resolves.
+
+2. **`[runtime]` vs `[reference]` taxonomy for ambiguous sections.** Several large blocks resist clean classification:
+   - **Deprecated-argument forwarders (Step 1)**: the forwarder dispatch IS runtime — it routes user invocations to the new skills. The repetitive prose explaining "why duplicating logic would harden the deprecation window into a permanent fork" (3× the same ~80-byte sentence) is reference. A future ADR (Phase 4) could codify a `[deprecated-runtime-with-reference-rationale]` triple-tag pattern.
+   - **Transitive dependencies subsection (P076)**: the rule + Bash heuristic are runtime (review-step consumers); the worked example, cycle-handling explanation, and Reassessment-criteria paragraph are reference. The bats grep `## Dependencies` header + `**Blocked by**` bullets, but not the worked-example prose — so this is a sub-section split rather than a whole-section move.
+   - **Step 7 transition lifecycle**: every git-mv block is runtime safety-critical (P057 staging trap fires on every transition). The "## README.md refresh on every transition (P062)" mechanism explanation is reference. But the trigger phrase `git log.*README\.md` is bats-anchored.
+
+   Phase 4's ADR needs to specify the line-tag granularity: per-section, per-paragraph, or per-sentence. Per-sentence is mechanically required for sections like Step 7 where one paragraph mixes runtime triggers with rationale.
+
+3. **REFERENCE.md discoverability budget.** The ADR-038 progressive-disclosure pattern requires the runtime SKILL.md to flag *which situations* require reading REFERENCE.md (e.g. "If the transition target is `verifying.md`, read REFERENCE.md § Verification Pending lifecycle for the staging-trap edge cases."). Each pointer adds 60–100 bytes. With ~15 estimated pointer-sites in manage-problem, that's ~1KB of pointer overhead — eating ~7% of the 12–15KB safe-candidate savings. Phase 4's ADR needs to budget this.
+
+### Phase 1 deliverable
+
+This audit IS the Phase 1 deliverable. SKILL.md was deliberately not modified — the bats coupling makes any extraction beyond the safe-candidate sections regression-positive. Updating the bats (Path A) preempts P081's user-validated direction; deferring to P081 (Path B) is the WSJF-correct sequencing.
+
+**Recommended next-step record for Phase 2**: do not start P097 Phase 2 until P081 is at least at `Known Error` with a credible behavioural-test framework prototype. Mark P097 Phase 2 as `Blocked by: P081` in the Dependencies graph so the transitive-effort rule (P076) carries the block.
+
+## Dependencies
+
+- **Blocks**: (none)
+- **Blocked by**: P081 (structural-content tests blocker for any meaningful `[reference]` extraction; identified during Phase 1 audit 2026-04-27)
+- **Composes with**: P091 (parent meta), P095 (sibling — UserPromptSubmit), P096 (sibling — PreToolUse/PostToolUse), P098 (sibling — project-owned context contributors)
+
 ## Related
 
 - **P091 (Session-wide context budget — meta)** — parent.
