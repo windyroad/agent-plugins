@@ -19,6 +19,10 @@ Implementation options for the dual-concern case (architect call at implementati
 
 Blocked on P038 (voice-tone gate on external comms) + P064 (risk-scoring gate on external comms) — both are the parent surface. P082 is marginal-only work on top of both. Per P076 transitive-dependency rule: if P038 or P064 have not landed, P082's WSJF drops.
 
+## Pacing decision (2026-04-26 user direction — post-AFK-loop /wr-retrospective:run-retro AskUserQuestion)
+
+**Wait for P038 to land first.** P064's risk-evaluator half shipped this session (commit `a0713f3`; changeset held in `docs/changesets-holding/` for dogfood per ADR-042 Rule 2). P038 is still Open. The user explicitly chose to wait rather than ship a marginal P082 now using existing risk-scorer infra alone. Rationale: P082 + P064 + P038 + P073 all compose at the `PreToolUse:Bash` matcher level once P038's voice-tone evaluator lands; shipping a marginal commit-message gate now would require a second iter to add voice-tone after P038 lands (effort double-spend) and would surface in npm releases as an incomplete feature. WSJF stays at 1.5 under the P076 transitive rule until P038 ships; AFK loops should skip P082 with `upstream-blocked` reason category citing P038 (and the README ranking should reflect WSJF 1.5 not 6.0 — re-rate at next `/wr-itil:review-problems` invocation).
+
 ## Description
 
 User direction (2026-04-21 interactive, verbatim):

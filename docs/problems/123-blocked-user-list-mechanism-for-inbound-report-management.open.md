@@ -43,6 +43,10 @@ None today. Maintainer manually closes each malicious report and burns mental cy
 
 **Acknowledged risk** of per-repo persistence: a visible, git-tracked block list is a public signal. Listed users can see they've been blocked; this could attract attention or escalation. Mitigation: the block list could record only opaque hashes (e.g., GitHub user ID hash) rather than usernames, with a private mapping file held out of the repo. ADR call at implementation time on the visibility-vs-traceability trade-off.
 
+### Visibility decision (2026-04-26 user direction — post-AFK-loop /wr-retrospective:run-retro AskUserQuestion)
+
+**Visibility shape**: **Hashed GitHub user IDs**. Store SHA-256 hashes of GitHub user IDs (numeric, stable across username changes — username changes preserve user ID). Public-but-opaque shape mitigates the public-signal concern from the Acknowledged-risk paragraph above. Un-block requires the original user ID; one-extra-step recovery is the trade-off the user accepted. Resolves the first of 4 unresolved ADR design questions named in the Investigation Tasks below. The remaining 3 (block-list shape, provenance, un-block path) stay open for ADR-time resolution; this ticket can ship as soon as those are settled.
+
 ### Investigation Tasks
 
 - [ ] ADR draft for the persistence + enforcement contract. Decisions to settle:

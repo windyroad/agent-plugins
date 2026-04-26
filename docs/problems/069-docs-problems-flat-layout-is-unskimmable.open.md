@@ -6,6 +6,17 @@
 **Effort**: XL (re-rated from L 2026-04-20 post-architect review on auto-migration addition) — bulk `git mv` of ~72 existing tickets (this repo) + update path references across 5+ SKILL.md files (manage-problem, work-problems, manage-incident, report-upstream, run-retro) and their ~30 bats tests + update README.md generation + draft ADR-031 (done — ADR-031 `proposed`) + in-place amendments to ADR-022, ADR-016, ADR-024, `packages/risk-scorer/agents/wip.md` + hook-exemption glob updates in architect-enforce-edit.sh + jtbd-enforce-edit.sh + **auto-migration logic shipped inside `manage-problem` AND `work-problems` for adopter repos** (per-project on first-run, ADR-017-style shared routine candidate, with ADR-027 Step 0 collision to resolve + ADR-014 commit-gate treatment to resolve + novel "plugin-driven repo migration" pattern question). Cross-plugin reach + multi-ADR amendment + novel distribution pattern = XL territory.
 **WSJF**: 1.875 — (15 × 1.0) / 8 — re-rated from 3.75 at 2026-04-20 after scope expansion (auto-migration + architect-raised execution-time questions). High severity / ecosystem-wide navigation friction remains unchanged; the migration lift + architectural open questions justify the XL bucket.
 
+## Priority pull-forward (2026-04-26 user direction — post-AFK-loop /wr-retrospective:run-retro AskUserQuestion)
+
+**Override WSJF math: pull P069 forward to the next AFK loop's first iter.** WSJF 1.875 (XL after the auto-migrate-adopter-repos scope add) underrates the readability friction the user is hitting visibly across every retro / manage-problem / reconcile-readme caller (`docs/problems/README.md` at 30K tokens hits the Read tool's 25K-token budget per iter 6's pipeline-instability finding). Manual priority overrides the automated ranking.
+
+**Architect re-rate effort + scope-split**: at the next AFK loop's iter-1, the architect should re-evaluate whether the scope is genuinely XL or whether it splits cleanly into:
+
+- **Slice 1**: per-state subdirs in THIS repo only (`docs/problems/{open,known-error,verifying,closed,parked}/<NNN>-...md`). Bulk `git mv` + path-reference updates across SKILL.md files + bats tests + README.md generation logic. Effort L. Independently shippable.
+- **Slice 2**: auto-migrate adopter repos (the lift that pushed effort to XL). Migration logic in the README-refresh block per the 2026-04-21 Direction decision below. Effort M-L. Ships AFTER slice 1 demonstrates the layout's value.
+
+ADR-041 partial-progress pattern blesses the slice-1-without-slice-2 shipping path with a held changeset for slice 2 if needed. WSJF re-rate at the next `/wr-itil:review-problems` invocation should reflect the slice-split: slice 1 lands at WSJF 3.75 (L effort) which matches the 3.0 tier; slice 2 stays in XL territory until slice 1 lands.
+
 ## Direction decision (2026-04-21, user — interactive AskUserQuestion post-AFK-iter-7)
 
 **Migration trigger**: **detect-and-migrate inside the problem README.md refresh step** (P062's Step 7 "README.md refresh on every transition" block in `manage-problem` SKILL.md). Every Step 7 transition already regenerates `docs/problems/README.md`; extend that block to also:
