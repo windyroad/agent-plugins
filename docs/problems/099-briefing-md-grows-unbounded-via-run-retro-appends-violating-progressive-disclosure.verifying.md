@@ -1,7 +1,8 @@
 # Problem 099: `docs/BRIEFING.md` grows unbounded via run-retro appends — violates progressive disclosure
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-22
+**Released**: 2026-04-26
 **Priority**: 15 (High) — Impact: Moderate (3) x Likelihood: Almost certain (5)
 **Effort**: L
 **WSJF**: (15 × 1.0) / 4 = **3.75**
@@ -60,11 +61,22 @@ Same eager-emission default as P095/P097/P098:
 
 - [x] Measure current BRIEFING.md (72 lines, ~20KB, ~5000 tokens — confirmed 2026-04-22)
 - [x] Read `run-retro` Step 3 and confirm the budget-and-shape targets vs actuals (confirmed 2026-04-22)
-- [ ] Design topical archive structure (candidates: `docs/briefing/hooks.md`, `docs/briefing/release-cadence.md`, `docs/briefing/afk-loops.md`, `docs/briefing/skills-and-patterns.md`, `docs/briefing/subprocess-and-workers.md`). Goal: ~5 topical files, each ≤ ~1500 tokens, each tagged so the assistant can load on demand.
-- [ ] Trim current BRIEFING.md: keep a ≤ 2000-token "recent + topic-index" file; migrate older entries to topical archives.
-- [ ] Update `run-retro` Step 3 (in `packages/retrospective/skills/run-retro/SKILL.md`): add a rotation step that fires when BRIEFING.md exceeds the byte/token budget. Rotation extracts older entries matching each topic into the corresponding `docs/briefing/<topic>.md` archive and leaves a one-line summary + pointer in BRIEFING.md.
-- [ ] Add a behavioural bats test in `packages/retrospective/skills/run-retro/test/` that asserts the budget is enforced — after a synthetic retro append, BRIEFING.md must be ≤ budget bytes or the skill reports the rotation action taken.
-- [ ] Decide whether the pattern needs a formal ADR (sibling to ADR-038 for progressive disclosure applied to accumulator-style docs) or an amendment to ADR-038. Architect review at implementation time. Lean toward amendment — ADR-038 already names "accumulator-style" as a candidate surface.
+- [x] Design topical archive structure — completed via P100 slice 1 (commit 5d367e9, 2026-04-22). Six topic files: `hooks-and-gates.md`, `releases-and-ci.md`, `governance-workflow.md`, `afk-subprocess.md`, `plugin-distribution.md`, `agent-interaction-patterns.md`.
+- [x] Trim current BRIEFING.md / migrate to topical archives — completed via P100 slice 1 (commit 5d367e9). Legacy `docs/BRIEFING.md` retired entirely via P100 slice 2 (commit 2c30de2).
+- [x] Update `run-retro` Step 3 with rotation step — completed 2026-04-26 (this slice). Step 3 gains the Tier 3 budget rotation pass with `check-briefing-budgets.sh` invocation, interactive `AskUserQuestion` (split-by-subtopic / split-by-date / trim-noise / defer per ADR-013 Rule 1), and AFK fallback to retro summary's "Topic File Rotation Candidates" section per ADR-013 Rule 6.
+- [x] Add behavioural bats test — completed 2026-04-26. `packages/retrospective/scripts/test/check-briefing-budgets.bats` covers existence + executable + empty-dir + under-threshold + over-threshold + boundary-exact + README-excluded + env-var-override + non-md-ignored + missing-dir-exit-2 + sort-stability (14 tests, all green).
+- [x] ADR shape decided — amendment to **ADR-040** (not ADR-038). ADR-040 owns the SessionStart briefing tier model; this slice promotes Tier 3 from informational to advisory enforcement. Architect confirmed 2026-04-26: amendment, not sibling. Reasoning: budget itself is unchanged, only enforcement mechanism added; ADR-040 already encodes the Reassessment-on-budget-breach pattern.
+
+## Fix Released
+
+- **Released**: 2026-04-26 — commit `<TBD>` on main
+- **Source**:
+  - `packages/retrospective/scripts/check-briefing-budgets.sh` — new advisory diagnostic
+  - `packages/retrospective/scripts/test/check-briefing-budgets.bats` — new behavioural fixture (14/14 green)
+  - `packages/retrospective/skills/run-retro/SKILL.md` — Step 3 rotation pass + Step 5 summary table
+  - `docs/decisions/040-session-start-briefing-surface.proposed.md` — Tier 3 budget amendment + Reassessment triggers + reusable-pattern note (JTBD-101)
+- **Plugin bump**: `@windyroad/retrospective` 0.7.0 → 0.8.0 (minor — Step 3 contract gains a sub-step consumers should see)
+- **Verification path**: future retro cycles invoke the script; over-budget topic files surface as rotation candidates (interactive) or in the retro summary (AFK). Boundary state observable in `docs/briefing/*.md` shrinking toward the 5 KB/topic ceiling across cycles.
 
 ## Fix Strategy
 

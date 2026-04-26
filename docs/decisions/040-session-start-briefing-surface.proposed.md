@@ -84,10 +84,12 @@ No tiering. Blows the context budget on every startup. Rejected per P091 / ADR-0
 ### Tier budget (SessionStart output)
 
 - **Tier 1 (boot injection)**: `## Critical Points (Session-Start Surface)` roll-up. **Budget: ≤ 2 KB / ≤ 500 tokens.** At the time of writing, the roll-up is 8 bullets × ~180 bytes ≈ 1.5 KB. Enforcement via retro convention — the signal-vs-noise pass (**P105**) gates growth beyond 10 bullets.
-- **Tier 2 (on demand)**: `docs/briefing/README.md` — topic index + how-to-use. ~3 KB. Agent retrieves when context requires topic navigation.
-- **Tier 3 (on demand)**: per-topic files under `docs/briefing/` — 2–5 KB each. Agent retrieves when a specific topic is relevant.
+- **Tier 2 (on demand)**: `docs/briefing/README.md` — topic index + how-to-use. ~3 KB. Agent retrieves when context requires topic navigation. Enforcement: the index stays small by construction (one row per topic file); exceeding ~5 KB triggers a Reassessment review of the topic taxonomy itself rather than auto-rotation.
+- **Tier 3 (on demand)**: per-topic files under `docs/briefing/` — **upper-bound 5 KB / topic** (5120 bytes). **Advisory enforcement (P099)** via `packages/retrospective/scripts/check-briefing-budgets.sh`, invoked by `run-retro` Step 3 as its final action. Files at or above the threshold surface as rotation candidates: interactive `AskUserQuestion` per ADR-013 Rule 1 (split-by-subtopic / split-by-date / trim-noise / defer), AFK fallback defers to retro summary's "Topic File Rotation Candidates" section per ADR-013 Rule 6. Threshold overridable via `BRIEFING_TIER3_MAX_BYTES` env var. Exit code is always 0 — overflow is signal, not failure (CI-fail-closed would block routine retros mid-session per JTBD-001).
 
-The SessionStart hook emits only Tier 1. Breaching the Tier 1 budget is the reassessment trigger for this ADR.
+The SessionStart hook emits only Tier 1. Breaching the Tier 1 budget is the reassessment trigger for this ADR. Tier 3 advisory enforcement (P099) extends the budget-discipline pattern to per-topic files; placement and shape mirror `packages/itil/scripts/reconcile-readme.sh` (advisory diagnostic + behavioural bats fixture).
+
+**Reusable pattern (JTBD-101)**: the Tier 3 advisory triplet — read-only diagnostic script + behavioural bats fixture + ADR-tier-budget enforcement clause — is the documented shape for any accumulator-doc surface that needs progressive-disclosure enforcement (risk register per P102, ADR index, problems index). Future surfaces mirror this triplet without re-deriving.
 
 ### Curation feedback contract (P105)
 
@@ -142,12 +144,20 @@ The signal-vs-noise pass closes the "author-judgment curation" gap identified in
 - `@windyroad/retrospective@0.7.0` published to npm. Adopter projects installing the new version and starting a Claude Code session see the Critical Points prose injected once at startup.
 - Topic files in `docs/briefing/*.md` carry per-entry HTML comment blocks with `signal-score`, `last-classified`, and `first-written` (P105).
 - `packages/retrospective/skills/run-retro/SKILL.md` contains Step 1.5 documenting the signal-vs-noise pass, scoring thresholds, delete-queue guard rail, and AFK fallback (P105).
-- **Reassessment trigger**: Tier 1 output exceeds 2 KB / 500 tokens. Revisit tiering rules, promote P105 curation work, or add a size-cap check to the hook script.
+- `packages/retrospective/scripts/check-briefing-budgets.sh` exists, executable, advisory-only (always exits 0), reads `docs/briefing/*.md`, emits `OVER <basename> bytes=<N> threshold=<N>` for each topic file at or above `${BRIEFING_TIER3_MAX_BYTES:-5120}` bytes, README.md excluded, output sorted by basename (P099).
+- `packages/retrospective/scripts/test/check-briefing-budgets.bats` covers existence + executable + empty-dir + under-threshold + over-threshold + boundary-exact + README-excluded + env-var-override + non-md-ignored + missing-dir-exit-2 + sort-stability (P099).
+- `packages/retrospective/skills/run-retro/SKILL.md` Step 3 contains the Tier 3 budget rotation pass with interactive `AskUserQuestion` (split-by-subtopic / split-by-date / trim-noise / defer per ADR-013 Rule 1) and AFK fallback to retro-summary "Topic File Rotation Candidates" section (P099).
+- `packages/retrospective/skills/run-retro/SKILL.md` Step 5 summary template includes the "Topic File Rotation Candidates" table (P099).
+- **Reassessment triggers**:
+  - Tier 1 output exceeds 2 KB / 500 tokens. Revisit tiering rules, promote P105 curation work, or add a size-cap check to the hook script.
+  - Tier 3: ≥ 3 topic files exceed 2× the configured ceiling (`2 × BRIEFING_TIER3_MAX_BYTES`) for ≥ 2 consecutive retro cycles without rotation. Revisit the threshold, sub-divide the taxonomy, or promote the script from advisory to fail-closed CI gate.
+  - Tier 2 (`docs/briefing/README.md`) exceeds ~5 KB. Revisit the topic taxonomy: a bloated index implies the topic granularity is wrong, not that the index needs rotation.
 - **Reassessment date**: 2026-07-22.
 
 ## More Information
 
 - **P100** — this ADR's driver; `docs/problems/100-*.verifying.md` after this slice ships.
+- **P099** — Tier 3 budget enforcement (advisory-script triplet); amends this ADR's Tier 3 clause from informational to enforced.
 - **ADR-038** — sibling pattern ADR (UserPromptSubmit governance prose).
 - **P091** — session-wide context-budget meta. This ADR is one concrete application of the progressive-disclosure pattern P091 anchors.
 - **P104** — partial-progress release-queue hazard. Slice 1 + slice 2 shipping together via this ADR is the structured response.

@@ -171,6 +171,39 @@ After editing topic files, update `docs/briefing/README.md`:
 
 Use the AskUserQuestion tool to confirm any removals: "I would like to remove [item] from `docs/briefing/<topic>.md` because [reason]. Is this correct?"
 
+#### Tier 3 budget rotation pass (P099)
+
+After all topic-file edits, Step 1.5 delete-queue persistence, and the README refresh have completed, run the per-topic-file budget pass. ADR-040 Tier 3 names a 2-5 KB / topic envelope; this pass promotes that budget from informational to advisory enforcement.
+
+**Mechanism**: invoke `packages/retrospective/scripts/check-briefing-budgets.sh` (read-only diagnostic) against `docs/briefing/`. Each line of output identifies a topic file at or above the configured threshold:
+
+```
+OVER <basename> bytes=<N> threshold=<N>
+```
+
+The script's threshold defaults to `5120` bytes (the upper bound of ADR-040's Tier 3 envelope) and is overridable via `BRIEFING_TIER3_MAX_BYTES`. Empty stdout means no files are over budget — skip the rest of this pass.
+
+**Ordering**: this pass runs as the FINAL action of Step 3, after edits + Step 1.5 delete-queue persistence + README refresh. It must observe post-edit byte counts so the deletes the user confirmed in Step 1.5 are reflected in the measurement.
+
+**Interactive path (ADR-013 Rule 1)** — for each `OVER` line, invoke `AskUserQuestion`:
+
+- `header: "Rotate over-budget topic file?"`
+- `multiSelect: false`
+- The question body MUST cite the specific byte count and threshold from the script's output (per ADR-026 grounding) plus a one-line summary of what the file currently covers, so the user can pick a rotation shape without reading the full file.
+- Options (exactly four per ADR-013 Rule 1 cap):
+  1. `Split by sub-topic` — description: "Identify a coherent sub-topic in this file and migrate its entries to a new `docs/briefing/<sub-topic>.md` archive. Update README Topic Index. The agent surfaces a proposed sub-topic boundary; the user confirms in a follow-up question if needed."
+  2. `Split by date — archive oldest` — description: "Move entries older than a chosen cutoff date to a sibling archive (e.g. `docs/briefing/<topic>-archive.md`). The agent surfaces a proposed cutoff drawn from the entry HTML comment block (`first-written` field per Step 1.5)."
+  3. `Trim noise out of band` — description: "Score-and-delete in a follow-up retro is the right shape — defer rotation, leave the file as-is, and let Step 1.5's signal-vs-noise pass shrink it across cycles. Use this when no clean split boundary exists."
+  4. `Defer — record only` — description: "Surface the over-budget state in this retro's summary; take no action this session. Picks up next retro."
+
+The four options correspond to the four common rotation shapes for accumulator docs. The user's choice is recorded in the retro summary (Step 5) under the new Topic File Rotation section.
+
+**Non-interactive / AFK fallback (ADR-013 Rule 6)** — when `AskUserQuestion` is unavailable (autonomous retro, AFK orchestrator), do NOT auto-rotate. Each `OVER` line is recorded in the retro summary's "Topic File Rotation Candidates" section with the specific byte count, threshold, and one-line file summary. The user reviews on return and re-runs `/wr-retrospective:run-retro` interactively (or applies a manual split / archive) per accepted candidate. Same trust-boundary shape as Step 1.5's delete queue — surface the evidence; defer the decision.
+
+**Why advisory, not fail-closed**: the rotation is a judgment call (which sub-topic to extract, which archive shape to use). A CI-fail-on-overflow would block routine retros mid-session, directly violating JTBD-001 ("enforce governance without slowing down"). The advisory shape mirrors ADR-038's chosen response to the analogous honour-system byte-budget problem: bats catch script-contract drift; the script itself surfaces signal at runtime without halting.
+
+**Reusable pattern note** (JTBD-101): this triplet — read-only advisory script + behavioural bats fixture + ADR-tier-budget amendment — is the documented shape for any accumulator-doc surface that needs progressive-disclosure enforcement. Future surfaces (risk register per P102, ADR index, problems index) can mirror it without re-deriving.
+
 ### 4. Create or update problem tickets
 
 For each item identified in "What was harder than it should have been", "What failed", and "What should we make easier or automate", use the `/problem` skill to:
@@ -341,6 +374,14 @@ Present a summary to the user:
 | Signal | Category | Citations | Decision |
 |--------|----------|-----------|----------|
 | <one-line signal summary> | Hook-protocol friction / Skill-contract violations / Release-path instability / Subagent-delegation friction / Repeat-work friction / Session-wrap silent drops | <specific invocations + session-position markers + observable outcomes> | new ticket via manage-problem / appended to P<NNN> / recorded in retro only / skipped (false positive) / flagged (non-interactive) |
+
+### Topic File Rotation Candidates
+
+(Emitted only when Step 3's Tier 3 budget pass surfaced topic files at or above the configured threshold via `check-briefing-budgets.sh`. Omit this section entirely when no candidates were found — or when the interactive path resolved them all during Step 3. Populated in non-interactive / AFK mode per ADR-013 Rule 6 — the user reviews on return and applies the chosen rotation shape per candidate. P099.)
+
+| Topic file | Bytes | Threshold | Proposed rotation | Decision |
+|------------|-------|-----------|-------------------|----------|
+| `docs/briefing/<topic>.md` | <N> | <N> | split-by-subtopic / split-by-date / trim-noise / defer | applied / deferred / flagged (non-interactive) |
 
 ### Codification Candidates
 
