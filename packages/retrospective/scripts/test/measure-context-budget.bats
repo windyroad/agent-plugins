@@ -220,10 +220,10 @@ teardown() {
 @test "measure-context-budget: read-only — fixture tree unchanged after run" {
   mkdir -p "$FIXTURE_DIR/docs/decisions"
   printf '# ADR-001\nbody\n' > "$FIXTURE_DIR/docs/decisions/001-foo.proposed.md"
-  pre_hash=$(find "$FIXTURE_DIR" -type f -exec md5 -q {} \; 2>/dev/null | sort | md5)
+  pre_hash=$(find "$FIXTURE_DIR" -type f -exec cksum {} \; 2>/dev/null | sort | cksum | awk '{print $1}')
   run bash "$SCRIPT" "$FIXTURE_DIR"
   [ "$status" -eq 0 ]
-  post_hash=$(find "$FIXTURE_DIR" -type f -exec md5 -q {} \; 2>/dev/null | sort | md5)
+  post_hash=$(find "$FIXTURE_DIR" -type f -exec cksum {} \; 2>/dev/null | sort | cksum | awk '{print $1}')
   [ "$pre_hash" = "$post_hash" ]
 }
 
