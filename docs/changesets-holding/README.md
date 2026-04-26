@@ -23,6 +23,7 @@ A changeset is a candidate for holding in either of two cases:
 ## Currently held
 
 - `wr-itil-p085-assistant-output-gate.md` — `@windyroad/itil` **minor**. Held 2026-04-24 by `/wr-itil:work-problems` AFK auto-apply under ADR-042 Rule 2 when cumulative push/release residual hit 6/25 (above 4/25 appetite) after P085's UserPromptSubmit + Stop detector pair commit. Parent ticket: P085 (`.verifying.md`). Intent: dogfood the detector on main until false-positive rate is observed before user-facing release — Rule 2b carve-out preserved (fix commit 6cdd14d unchanged; only release cadence deferred). Reinstate trigger: user signals comfort with detector or scorer downgrades residual below appetite after dogfood observation.
+- `wr-risk-scorer-p064-external-comms-gate.md` — `@windyroad/risk-scorer` **minor**. Held 2026-04-26 by `/wr-itil:work-problems` AFK auto-apply under ADR-042 Rule 2 when cumulative push/release residual hit 6/25 (above 4/25 appetite) after iter 6 (P088 commit). Parent ticket: P064 (`.known-error.md`). Intent: dogfood the new external-comms risk-leak gate on main until false-positive rate on legitimate gh issue/pr/api/comment + npm publish surfaces is observed before user-facing release — Rule 2b carve-out preserved (fix commit a0713f3 unchanged; only release cadence deferred). Reinstate trigger: user signals comfort with gate behaviour OR scorer downgrades residual below appetite after dogfood observation.
 
 ## Recently reinstated
 
