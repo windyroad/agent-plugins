@@ -1,5 +1,20 @@
 # @windyroad/problem
 
+## 0.20.0
+
+### Minor Changes
+
+- 17b594b: P117: new plural sibling skill `/wr-itil:transition-problems` for batch lifecycle transitions
+
+  `@windyroad/itil` gains a plural sibling to `/wr-itil:transition-problem` that batch-advances multiple tickets through the lifecycle in one invocation, mirroring the P071 singular/plural split precedent (`work-problem` vs `work-problems`).
+
+  - New skill `packages/itil/skills/transition-problems/SKILL.md` — accepts a space-separated list of `<NNN> <status>` pairs (e.g. `/wr-itil:transition-problems 063 close 067 close 092 close 094 close`). Loops the singular's per-ticket mechanic inline (pre-flight checks, P063 external-root-cause detection per pair, `git mv` + Edit + P057 re-stage per pair). Refreshes `docs/problems/README.md` ONCE at the end (P062 at batch grain — single render reflecting all surviving renames). Commits ALL surviving transitions in ONE commit per ADR-014 batch-grain unit-of-work.
+  - Partial-failure semantics: skip-and-surface — failed pairs (discovery / invalid-transition / pre-flight / git-op) are recorded and continue to the next pair; succeeded pairs commit at the end. Zero-success means no commit + failure summary. Aligned with ADR-014 "complete unit of work" applied at the batch grain and ADR-013 Rule 6's no-non-interactive-destructive-rollback rule.
+  - Inline per-ticket mechanic per ADR-010 amended "Split-skill execution ownership" — "copy, not move". The plural carries an inline scoped copy of the singular's Steps 2–6; per-pair commit (singular Step 8) is replaced by the single batch commit at the end. Three call sites now share the per-ticket mechanic via copy-not-move: singular `transition-problem`, plural `transition-problems` (this skill), and `manage-problem` in-skill Step 7.
+  - Behavioural contract bats `packages/itil/skills/transition-problems/test/transition-problems-contract.bats` — 20 assertions covering frontmatter shape, allowed-tools, citations (P117, ADR-010 amended, P057, P062, P063, ADR-022, ADR-013 Rule 6, ADR-037), inline-mechanic positive assertions (`pre-flight`, `git mv`, `git add`, `Fix Released`), no-Skill-tool-delegation negative assertion, single-commit-at-end semantics (positive + no-per-pair-commit negative), single-README-refresh-at-end, partial-failure skip-and-surface, argument shape (no `P` prefix, no `=`/`:` separator, no flag-style), no `deprecated-arguments` frontmatter (clean-split sibling), and a cross-file drift-detection assertion that the staging-trap `git add docs/problems/` phrase appears in BOTH this skill's SKILL.md and the singular's SKILL.md so the inline-copy invariant fails fast on drift.
+
+  Closes P117 → Verification Pending. Eliminates the N×SKILL.md reload tax + ownership-boundary violation that batch callers (run-retro Step 4a, manage-problem Step 9d, work-problems release-batched closures) currently face.
+
 ## 0.19.7
 
 ### Patch Changes
