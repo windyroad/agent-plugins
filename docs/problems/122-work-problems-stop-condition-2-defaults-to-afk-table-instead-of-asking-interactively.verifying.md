@@ -1,10 +1,25 @@
 # Problem 122: `/wr-itil:work-problems` stop-condition #2 defaults to the AFK Outstanding Design Questions table when AskUserQuestion is available — interactive users get no questions
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-26
 **Priority**: 15 (High) — Impact: Moderate (3) x Likelihood: Almost Certain (5)
-**Effort**: M — extend `packages/itil/skills/work-problems/SKILL.md` Step 2.5 routing so the default branch is **interactive** (call `AskUserQuestion`) when `AskUserQuestion` is in the orchestrator's tool surface AND no explicit `--non-interactive` / AFK-marker signal is set. The current "default to AFK because the skill is named work-problems" wording in Step 2.5 inverts the priority — JTBD-006 still names the AFK persona as primary, but the runtime detection should drive the branch, not the skill name. New behavioural bats covering the interactive default + AFK fallback. Compose with P103's anti-pattern (don't ask resolved-policy questions) by keeping the question scope to user-answerable design questions only — the existing skip-reason taxonomy already segregates them.
+**Effort**: M — extended `packages/itil/skills/work-problems/SKILL.md` Step 2.5 routing so the default branch calls `AskUserQuestion` when available; Outstanding Design Questions table is the AskUserQuestion-unavailable fallback. The legacy "default for this skill is non-interactive" prose was replaced with the architect-FLAG cross-skill principle ("orchestrator main turns default to AskUserQuestion when available; AFK persona served by subprocess-boundary contract under ADR-032, not by suppressing AskUserQuestion at the orchestrator layer"). Step 6.5 Decisions Table row updated to match. New behavioural bats `work-problems-step-2-5-routing.bats` (8 doc-lint contract assertions per ADR-037) pins the new contract. Cross-skill helper `lib/runtime-mode.sh` deferred per architect verdict — the iter subprocess's AFK contract is enforced at the prompt-template layer (Step 5 Constraint #3), not by stop-condition #2's branch.
 **WSJF**: (15 × 1.0) / 2 = **7.5**
+
+## Fix Released
+
+Released 2026-04-26 (interactive iter following the design-question round that exposed the bug). Pending `@windyroad/itil` patch publish via `.changeset/wr-itil-p122-step-2-5-interactive-default.md`. Changes:
+
+- `packages/itil/skills/work-problems/SKILL.md` Step 2.5 prose flipped: AskUserQuestion is the default branch; table emit is the explicit fallback when AskUserQuestion is unavailable.
+- Cross-skill principle paragraph added (architect FLAG): "orchestrator main turns default to AskUserQuestion when available; AFK persona is served by the subprocess-boundary contract under ADR-032, not by suppressing AskUserQuestion at the orchestrator layer." This makes the principle discoverable for future AFK orchestrators without requiring the shared-helper code that the original ticket scope anticipated.
+- Step 6.5 Decisions Table row for "Stop-condition #2 with user-answerable skip-reasons" rewritten to match the flipped default + cite ADR-013 Rule 1 + P122.
+- `packages/itil/skills/work-problems/test/work-problems-step-2-5-routing.bats` (NEW, 8 doc-lint contract assertions per ADR-037 Permitted Exception): SKILL.md exists; legacy "default for this skill" prose removed at Step 2.5; "Default branch" prose present; subprocess-boundary principle present; user-answerable skip-reason scoping preserved (P103 anti-pattern boundary); 4-question batching cap preserved; table-fallback-when-unavailable preserved; Decisions Table row names AskUserQuestion as default. 8/8 green; full project bats green.
+
+Verification path: invoke `/wr-itil:work-problems` interactively against a backlog with at least one user-answerable design question that triggers stop-condition #2; confirm `AskUserQuestion` fires (not the deferred Outstanding Design Questions table). Awaiting user verification on the next interactive AFK loop that hits stop-condition #2.
+
+P103 anti-pattern boundary verified preserved: AskUserQuestion still scoped to `user-answerable` skip-reasons only (test 5 pins `user-answerable` term in the SKILL.md prose); `architect-design` and `upstream-blocked` continue to skip without asking.
+
+Out-of-scope-but-noted: shared `lib/runtime-mode.sh` helper (architect verdict — deferred; iter subprocess AFK contract handled by Step 5 prompt template). Cross-skill rollout to other AFK orchestrators (none exist today; the principle prose makes future adopters discoverable).
 
 > Surfaced 2026-04-26 by direct user correction at the end of the 2026-04-25 AFK `/wr-itil:work-problems` loop's iter 3 stop. The orchestrator (Opus 4.7 main turn, with `AskUserQuestion` available in its tool surface) hit stop-condition #2 with 12 well-defined design questions across 5 skipped tickets (P079 ×6, P080 ×2, P082 ×1, P115 ×2, P117 ×1) and emitted them as a deferred Outstanding Design Questions table. The user verbatim correction: *"this was a really good example of where there are many outstanding design questions, but nothing was asked"* (P078 strong-signal token: ironic "really good example" framing + direct contradiction "nothing was asked").
 
