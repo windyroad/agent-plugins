@@ -1,6 +1,6 @@
 # Problem 135: Decision-delegation contract — agents over-apply ADR-013 Rule 1's interactive default to framework-resolved decisions; codify the framework-resolution boundary + AFK loop's batched-questions-as-deliverable + lazy-AskUserQuestion measurement
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-27
 **Priority**: 12 (High) — Impact: Significant (4) x Likelihood: Likely (3)
 **Effort**: M — bounded multi-phase plan at `/Users/tomhoward/.claude/plans/noble-cuddling-sutton.md` (5 phases, total ~16 hrs of which Phase 1+5+2+3 declarative = ~12 hrs are must-do; Phase 4 enforcement gated). M (not L) because each phase is bounded + per-phase release cadence drains risk to one phase's surface at a time per ADR-042 precedent.
@@ -109,3 +109,20 @@ The pattern is **structural** in how an agent reasons about ADR-013 Rule 1's "in
 - **JTBD-101** (`docs/jtbd/plugin-developer/JTBD-101-extend-the-suite-with-new-plugins.proposed.md`) — composes via Phase 2 SKILL.md edits that ship to adopters.
 - **JTBD-201** (`docs/jtbd/tech-lead/JTBD-201-audit-trail.proposed.md`) — composes via Step 2d lazy-count metric audit surface.
 - 2026-04-27 session evidence: 5 user corrections in one session (P130/131/132 captured + 2 in-conversation observations folded into P132); long session-end conversation crystallised the principle; Plan agent drafted the 5-phase implementation plan; risk-scorer:plan PASS at 2/4/4 after R1-R8 remediations; architect + JTBD PASS on Phase 1 scope; user approved via `/plan` workflow.
+- **Upstream report pending** — false positive; detection misfire (the `@windyroad/retrospective` and `@windyroad/itil` references are this project's own published packages — P135's Phase 2/3/5 fixes ship them, not external dependencies).
+
+## Phase status (Known Error transition — 2026-04-28)
+
+All declarative phases shipped to npm; Phase 4 enforcement is R6-gated.
+
+- **Phase 1 (Anchor)** — landed `e703656`. ADR-044 proposed + ADR-013 Rule 1 amended + P135 master ticket opened. Doc-only, no release.
+- **Phase 5 (Measurement)** — landed `5d414fc`. NEW `run-retro` Step 2d "Ask Hygiene Pass" + `packages/retrospective/scripts/check-ask-hygiene.sh` + `run-retro-step-2d-r6-auto-flag.bats` + `check-ask-hygiene.bats`. Released as `@windyroad/retrospective` minor. Reassessment Trigger automation (R6 auto-flag) landed `258ac25`.
+- **Phase 2 (Skill amendments)** — landed `fae42aa`. `run-retro` Step 1.5 / Step 3 removals / Tier 3 rotation / Step 4a / Step 4b Stage 2; `work-problems` Step 5 dispatch + Step 2.5 batch-as-default; `manage-problem` Step 9d evidence-grounded close; `transition-problem` Step 5 P063 silent-default. Released as `@windyroad/retrospective` minor + `@windyroad/itil` patch.
+- **Phase 3 (AFK loop redesign)** — landed `328f92a`. `work-problems` ITERATION_SUMMARY gains deviation-candidate shape; `.afk-run-state/outstanding-questions.jsonl` queue; mid-loop UserPromptSubmit handler does NOT abort iter; `work-problems-mid-loop-userpromptsubmit-handler.bats` + `work-problems-deviation-candidate-shape.bats`. Released as `@windyroad/itil` patch via preview-tag rollout.
+- **Phase 4 (Enforcement hook)** — **R6-GATED**. Auto-flag wired in `run-retro` Step 2d; fires when lazy count ≥2 across 3 consecutive retros. Not started; gating is intentional per the plan (ADR-040 declarative-first precedent).
+
+**Confirmation criteria status** (per ADR-044): 6 named bats files in place (`run-retro-step-2d-r6-auto-flag`, `run-retro-step-4a-recovery-path`, `check-ask-hygiene`, `manage-problem-step-9d-recovery-path`, `work-problems-mid-loop-userpromptsubmit-handler`, `work-problems-deviation-candidate-shape`) + measurable lazy-AskUserQuestion-count metric being tracked per retro + explicit deviation-candidate behavioural assertion in place.
+
+**Verification path to Closed**: observe lazy-AskUserQuestion-count metric across consecutive retros via Step 2d's trail file. If the metric trends to 0 across 3+ retros, P135 transitions Known Error → Verification Pending → Closed (declarative was sufficient — Phase 4 not required). If R6 fires (lazy count ≥2 across 3 consecutive retros), Phase 4 enforcement hook ships and P135 transitions through verification on that release.
+
+**Workaround during verification window**: `run-retro` Step 2d already surfaces lazy calls per retro; user reads the table and corrects via authentic-correction (ADR-044 category 6) if a specific call is misclassified.
