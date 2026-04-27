@@ -209,6 +209,49 @@ Per **ADR-043** (Progressive context-usage measurement and reporting for retrosp
 - **`/wr-retrospective:analyze-context` (deep layer)** — invoked only by explicit user direction. Never auto-fires from this step. Deep-layer report writes the HTML-comment-trailer snapshot that subsequent runs of this step read.
 - **ADR-027 compatibility note**: same migration shape as Step 2b. The script invocation must run in main-agent context; the parsed bucket totals are the artefact a delegated subagent can consume without re-running the byte-count.
 
+### 2d. Ask Hygiene Pass (P135 Phase 5 / ADR-044)
+
+Per **ADR-044** (Decision-Delegation Contract — framework-resolution boundary), every retro emits a per-session classification of the agent's `AskUserQuestion` calls so the **lazy-AskUserQuestion-count** regression metric is visible at session-time rather than after the user notices the friction. The pass runs unconditionally in every retro (interactive and AFK). Output is a structured table in the Step 5 retro summary; persistence is a one-shot trail file consumed by `packages/retrospective/scripts/check-ask-hygiene.sh` for cross-session trend analysis.
+
+**Ownership boundary**: this step measures and surfaces; it does NOT block, gate, or auto-correct any AskUserQuestion call. The lazy-count metric is the regression signal; correction is the user's call (via direction-setting / deviation-approval / authentic-correction per ADR-044 categories).
+
+**Steps:**
+
+1. **Enumerate AskUserQuestion calls** in the session's tool-use history. For each call, capture: the `header` field, the `question` text, the call ordinal (1..N), and the session-position marker (turn / commit / artefact reference per ADR-026 grounding).
+
+2. **Classify each call** per ADR-044's 6-class authority taxonomy:
+
+   | Classification | Definition | Lazy? |
+   |---|---|---|
+   | **direction** | New tickets / new ADRs / new SKILLs / additions to suite that were not derivable from existing framework | NO |
+   | **deviation-approval** | Existing decision found wrong under current evidence; user approves amend / supersede | NO |
+   | **override** | One-time exception to a still-valid rule (not a rule-change) | NO |
+   | **silent-framework** | No ADR / JTBD / policy / WSJF / risk-score / SKILL applies; genuine new territory | NO |
+   | **taste** | Authentic preference on novel artefact where no guide settles | NO |
+   | **correction-followup** | Clarifying a user-issued correction (P078 surface) | NO |
+   | **lazy** | Framework resolves the decision; ask is sub-contracting agent work back to user | **YES (regression metric)** |
+
+   Classification ownership is silent agent judgement (per ADR-044 mechanical-stage discipline — no AskUserQuestion-about-AskUserQuestion meta-loop). The agent applies the framework-resolution heuristic: for each call, can the framework (ADR / JTBD / policy / WSJF / SKILL contract) resolve the decision? If yes → lazy. If no AND the call falls into one of the 5 non-lazy categories → that category. Borderline cases default to lazy (conservative — prefer false-positive lazy classification over silently underreporting friction).
+
+3. **Per-call grounding (ADR-026)**: each classification MUST cite the framework artefact that resolves the decision (for lazy) OR the framework gap (for non-lazy). Bare classifications are forbidden. Citation format: `Framework: <ADR / SKILL.md path / policy reference>` for lazy; `Gap: <one-line rationale>` for non-lazy.
+
+4. **Emit the in-session table** as a `## Ask Hygiene` section in the Step 5 retro summary (see Step 5 template). Columns: `Call # | Header | Classification | Citation`. Plus a `**Lazy count: <N>**` line for cheap-script parsing, plus per-category count lines (`**Direction count: <N>**`, etc.).
+
+5. **Persist trail entry** at `docs/retros/<YYYY-MM-DD>-ask-hygiene.md` (one file per retro; date in filename for natural sort-by-date). Same structured shape as the Step 5 emit. The advisory script `packages/retrospective/scripts/check-ask-hygiene.sh` consumes these files for cross-session trend.
+
+6. **Defensive trip (fail-open)**: if classification produces ambiguous results OR the trail file write fails, skip the persistence step but ALWAYS emit the in-session table (even if classifications are flagged as `unclear`). Better to surface partial data than no data.
+
+7. **AFK behaviour (ADR-013 Rule 6 / ADR-044)**: identical to interactive mode. The pass is silent (no AskUserQuestion-about-the-classifications); the table + trail entry ride the retro summary; AFK orchestrators read the summary on iteration close.
+
+**Forbidden phrases (anti-friction)**: the in-session table MUST NOT include qualitative-only phrases on the lazy count. Banned: `lazy count is acceptable`, `within tolerance`, `improving`, `regression contained`. Concrete numbers + the trend script's TREND line are the truth surface.
+
+**Interaction with other surfaces:**
+
+- **`P099` Tier 3 advisory** (`check-briefing-budgets.sh`) and **`P101` cheap-layer measurement** (`check-context-budget.sh`) follow the same advisory-script pattern that `check-ask-hygiene.sh` adopts. Reusable triplet (script + bats + ADR-tier-policy precedent).
+- **`P132` enforcement hook** (Phase 4 of the P135 plan, gated on Phase 1-3 declarative being insufficient — R6 numeric gate: lazy count ≥2 across 3 consecutive retros after Phase 2/3 land) consumes the same lazy-count trail to decide whether to fire.
+- **`P078` capture-on-correction** is the inverse pattern; ADR-044 category 6 (`correction-followup`) is the surface where P078 catches operate. Bounded — should be rare.
+- **`/wr-retrospective:analyze-context` deep layer** — separate measurement surface (context bytes, not AskUserQuestion calls). Both share the `docs/retros/` trail directory; no double-counting because file naming differs (`<date>-ask-hygiene.md` vs `<date>-context-analysis.md`).
+
 ### 3. Update the briefing tree
 
 Edit `docs/briefing/<topic>.md` files — each topic file is per-subject (`hooks-and-gates.md`, `releases-and-ci.md`, `governance-workflow.md`, `afk-subprocess.md`, `plugin-distribution.md`, `agent-interaction-patterns.md`). Select the topic file whose scope matches the learning; if no file fits, add a new topic file under `docs/briefing/` and update `docs/briefing/README.md`'s Topic Index accordingly.
@@ -441,6 +484,21 @@ Present a summary to the user:
 | Topic file | Bytes | Threshold | Proposed rotation | Decision |
 |------------|-------|-----------|-------------------|----------|
 | `docs/briefing/<topic>.md` | <N> | <N> | split-by-subtopic / split-by-date / trim-noise / defer | applied / deferred / flagged (non-interactive) |
+
+### Ask Hygiene (P135 Phase 5 / ADR-044)
+
+(Emitted unconditionally by Step 2d. Mirrors the trail file persisted at `docs/retros/<YYYY-MM-DD>-ask-hygiene.md` for cross-session trend via `packages/retrospective/scripts/check-ask-hygiene.sh`. Lazy count is the regression metric per ADR-044 — target 0.)
+
+| Call # | Header | Classification | Citation |
+|--------|--------|----------------|----------|
+| 1 | <header> | direction \| deviation-approval \| override \| silent-framework \| taste \| correction-followup \| **lazy** | `Framework: <ADR / SKILL / policy>` for lazy; `Gap: <one-line>` for non-lazy |
+
+**Lazy count: <N>**
+**Direction count: <N>**
+**Override count: <N>**
+**Silent-framework count: <N>**
+**Taste count: <N>**
+**Correction-followup count: <N>**
 
 ### Codification Candidates
 
