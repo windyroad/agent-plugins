@@ -124,16 +124,22 @@ When `$ARGUMENTS` matches the shape `<I###> link P<MMM>` (an incident ID followe
 
 The forwarder does NOT re-implement the link logic locally — it invokes the Skill tool with `wr-itil:link-incident`, passes `<I###> P<MMM>` through as the data parameters, and returns the new skill's output verbatim. Duplicating the problem-file-lookup + Linked Problem section write logic would harden the deprecation window into a permanent fork. The data-parameter shape `<I###> P<MMM>` is permitted under ADR-010 amended — only the verb word `link` is being split out.
 
-### 2. For new incidents: Check for duplicates FIRST
+### 2. For new incidents: Check for duplicates FIRST (ADR-044 category-1 direction-setting)
 
 Before creating, search `docs/incidents/` for active (non-closed) incidents with overlapping symptoms or scope. The user may already have an incident open for this outage.
 
-1. Extract keywords from the description (e.g., "500 errors", "checkout", "login")
-2. `grep -l` the keywords across `docs/incidents/*.{investigating,mitigating,restored}.md`
-3. If matches are found, present them via `AskUserQuestion`:
-   - "I found active incidents that may be related: I003 (checkout 500s, mitigating), I007 (login slowness, investigating). Would you like to (a) update an existing incident, (b) declare a new incident anyway, or (c) cancel?"
-4. If the user chooses to update, switch to the update flow for that incident ID
-5. If no matches, proceed to create
+1. Extract keywords from the description (e.g., "500 errors", "checkout", "login").
+2. `grep -l` the keywords across `docs/incidents/*.{investigating,mitigating,restored}.md`.
+3. If matches are found, present them via `AskUserQuestion` (this is the ADR-044 **category-1 (direction-setting)** surface — only the user knows whether the new symptoms describe the same outage as an existing ticket; the framework cannot resolve semantic similarity deterministically). Construct the call as:
+   - `header: "Active incidents found"`
+   - `multiSelect: false`
+   - `question` body (plain prose, no parenthetical option-letters and no prose-ask phrasing per ADR-013 Confirmation criterion #1; the structured `options[]` below replaces both): `"I found active incidents that may be related: I003 (checkout 500s, mitigating), I007 (login slowness, investigating). Choose how to proceed:"`
+   - `options[]`:
+     1. `Update an existing incident` — description: "Switch to the update flow for the chosen incident ID; you'll name the ID in the next step."
+     2. `Declare a new incident anyway` — description: "Proceed to Step 3 (assign next ID) and treat this as a distinct event."
+     3. `Cancel` — description: "Exit without creating or modifying any incident."
+4. If the user chooses **Update an existing incident**, switch to the update flow for the user-named incident ID.
+5. If no matches, proceed to create.
 
 ### 3. For new incidents: Assign the next ID
 
@@ -146,9 +152,9 @@ next=$(printf 'I%03d' $((10#${last:-0} + 1)))
 echo "$next"
 ```
 
-### 4. For new incidents: Gather information
+### 4. For new incidents: Gather information (ADR-044 category-1 direction-setting)
 
-Use `AskUserQuestion` for anything not in `$ARGUMENTS`:
+Use `AskUserQuestion` for anything not in `$ARGUMENTS`. Incident-declaration inputs are user-knowledge that the framework cannot infer (only the user observed the symptoms / knows the scope / can rate live business impact); this is the canonical ADR-044 **category-1 (direction-setting)** surface — *"only the user knows the goals that haven't been written down yet."*
 
 - **Title**: short kebab-case-friendly description
 - **Symptoms**: what is observable (errors, latency, missing data)?
@@ -197,7 +203,7 @@ Do not ask for fields that can be inferred:
 *(none yet — added on restore transition)*
 ```
 
-### 6. For updates: Edit the existing file
+### 6. For updates: Edit the existing file (evidence gate is ADR-044 category-2 deviation-approval)
 
 Find the file by ID:
 
@@ -205,7 +211,19 @@ Find the file by ID:
 ls docs/incidents/<I###>-*.md 2>/dev/null
 ```
 
-Append new observations, hypotheses, or timeline entries. **Every hypothesis must cite evidence.** If the user proposes a hypothesis without evidence, ask via `AskUserQuestion` what evidence supports it before writing.
+Append new observations, hypotheses, or timeline entries. **Every hypothesis must cite evidence.** If the user proposes a hypothesis without evidence, fire the **3-option evidence gate** — same shape as `/wr-itil:mitigate-incident` Step 3, for cross-skill cool-headed-commitment consistency. This is the ADR-044 **category-2 (deviation-approval)** surface: ADR-011's evidence-first rule is the existing decision; "Record anyway" is the user-approved deviation in this specific case. The user is the right authority for the bypass shape.
+
+Construct the `AskUserQuestion` call as:
+
+- `header: "Evidence gate"`
+- `multiSelect: false`
+- `question` body: `"Hypothesis '<one-line summary>' has no cited evidence reference. Per ADR-011 evidence-first rule, every hypothesis must cite a log / repro / diff / metric reference. Choose how to proceed:"`
+- `options[]`:
+  1. `Add evidence now` — description: "Provide the evidence reference (log line, dashboard URL, repro steps, diff hash, etc.); the hypothesis lands with the cited evidence."
+  2. `Record anyway with audit-trail bypass` — description: "Land the hypothesis without cited evidence; agent appends `[<timestamp> UTC] Evidence-gate bypassed by user — reason: <justification>` to the incident file's `## Audit trail` section."
+  3. `Cancel` — description: "Discard the hypothesis; do not write it to the file."
+
+On option 2 (bypass), append the `Evidence-gate bypassed by user — reason: <justification>` line to the `## Audit trail` section of the incident file before writing the hypothesis. If the section does not exist, create it. The bypass-marker prose is fixed verbatim so post-incident review can locate every bypassed gate via grep.
 
 ### 7. For mitigate: delegate to `/wr-itil:mitigate-incident` (P071 split slice 6a)
 
@@ -253,7 +271,7 @@ After any operation, verify:
 - **Evidence discipline**: every Hypothesis has a cited evidence reference
 - **Linked Problem** section present and consistent (or **No Problem** with justification) once the incident reaches Restored
 
-### 14. Report
+### 14. Report (risk-above-appetite commit is ADR-044 category-3 one-time-override)
 
 After any operation, report:
 
@@ -271,7 +289,7 @@ Commit the completed work per ADR-014 (governance skills commit their own work):
    - Incident mitigated: `docs(incidents): I<NNN> mitigated — <mitigation summary>`
    - Incident restored: `docs(incidents): I<NNN> restored — <action>`
    - Incident closed: `docs(incidents): close I<NNN>`
-4. If risk is above appetite: use `AskUserQuestion` to ask whether to commit anyway, remediate first, or park the work. If `AskUserQuestion` is unavailable, skip the commit and report the uncommitted state clearly.
+4. If risk is above appetite: use `AskUserQuestion` to ask whether to commit anyway, remediate first, or park the work. This is the ADR-044 **category-3 (one-time-override)** surface — in incident-mitigation context the tech lead may need to ship a fix despite higher residual risk to restore service fast (JTBD-201); the rule (RISK-POLICY appetite) still stands but this specific case warrants an exception. The 3-option vocabulary (commit anyway / remediate / park) is the genuine category-3 surface. If `AskUserQuestion` is unavailable, skip the commit and report the uncommitted state clearly per ADR-013 Rule 6.
 
 ### 15. Auto-release when changesets are queued (ADR-020)
 
@@ -309,5 +327,23 @@ Otherwise, after the commit in step 14 lands, drain the release queue so the fix
 **Rule 5 halt (non-AFK mode)**: halt the skill. Emit the terminal report naming the final `RISK_SCORES:`, the Auto-apply trail, any Verification Pending ticket IDs implicated, and a one-line scorer-gap note. The user resolves interactively.
 
 `push:watch` and `release:watch` are policy-authorised actions when residual risk is within appetite per RISK-POLICY.md, so no `AskUserQuestion` is required for the drain itself (ADR-013 Rule 5). Auto-apply actions under Rules 2–7 are also policy-authorised per ADR-013 Rule 5.
+
+## Related
+
+- **P136** (`docs/problems/136-adr-044-alignment-audit-master.open.md`) — ADR-044 alignment audit master. This skill is the third high-ask SKILL audited under Phase 2 (after work-problem singular and mitigate-incident).
+- **ADR-044** (`docs/decisions/044-decision-delegation-contract.proposed.md`) — Decision-Delegation Contract. All four AskUserQuestion surfaces in this skill align with the 6-class authority taxonomy: Step 2 duplicate-check is **category-1 (direction-setting)**; Step 4 gather-info is **category-1 (direction-setting)**; Step 6 evidence-gate is **category-2 (deviation-approval)**; Step 14 risk-above-appetite is **category-3 (one-time-override)**.
+- **ADR-013 amended Rule 1** (`docs/decisions/013-structured-user-interaction-for-governance-decisions.proposed.md`) — structured user interaction; narrowed in P135 to defer to ADR-044 for framework-resolution boundary. All four surfaces retain `AskUserQuestion` as genuine user-authority surfaces under categories enumerated in ADR-044.
+- **ADR-013 Confirmation criterion #1** — `grep -inE "Options:.*\(a\)\|Your call:\|which would you like\|which way?"` returns zero matches. Step 2's prior prompt body violated this with `Would you like to (a) update...` phrasing; the P136 Phase 2 refactor (2026-04-28) closed the regression by lifting options into the `AskUserQuestion` `options[]` mechanism.
+- **ADR-011** (`docs/decisions/011-manage-incident-skill.proposed.md`) — incident lifecycle; evidence-first workflow; reversible-mitigation preference; Sev 4-5 lightweight path. Step 6's evidence-gate refactor (2026-04-28) extends ADR-011's evidence-first rule with the documented `Record anyway` audit-trail bypass that mitigate-incident already used (cool-headed-commitment consistency across the two incident skills).
+- **ADR-014** — governance skills commit their own work. Step 14 unchanged.
+- **ADR-015** — release scorer delegation pattern. Step 15 unchanged.
+- **ADR-018** + **ADR-020** — release cadence. Step 15 unchanged.
+- **ADR-026** — cost-source grounding. Step 6's audit-trail bypass note preserves grounding by capturing the user's justification at deviation time.
+- **ADR-042** — auto-apply scorer remediations. Step 15 above-appetite branch unchanged.
+- **P071** — skill-split origin (slice 6 — manage-incident is the host with thin-router forwarders for `list`, `mitigate`, `restored`, `close`, `link`).
+- **P081** — structural-grep retrofit; the `manage-incident-adr-044-contract.bats` companion test file carries the `tdd-review: structural-permitted` marker as the bridge until P081 Phase 2 retrofit lands.
+- **JTBD-001** (`docs/jtbd/solo-developer/JTBD-001-enforce-governance.proposed.md`) — Surface 1 refactor preserves the duplicate-check governance gate while removing the prose-ask compliance gap; Surfaces 2 + 3 + 4 retain genuine consent-gate-for-the-genuinely-direction-setting / deviation-approval / one-time-override.
+- **JTBD-101** (`docs/jtbd/plugin-developer/JTBD-101-extend-suite.proposed.md`) — Step 6 evidence-gate refactor brings manage-incident into pattern parity with mitigate-incident's slice-6a evidence-gate. Adopters get one consistent evidence-gate pattern across both incident skills.
+- **JTBD-201** (`docs/jtbd/tech-lead/JTBD-201-restore-service-fast.proposed.md`) — Step 6 explicit `Record anyway` bypass strengthens the audit-trail outcome (implicit-bypass becomes explicit-bypass-with-permanent-trail) without weakening the cool-headed-commitment outcome (`Add evidence` remains the friction-free default; bypass requires conscious second choice).
 
 $ARGUMENTS
