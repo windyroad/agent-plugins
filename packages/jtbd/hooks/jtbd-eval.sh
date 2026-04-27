@@ -41,6 +41,11 @@ Does NOT apply to: CSS, images, fonts, lockfiles, changesets, memory files,
 plan files, docs/problems/ (problem tickets), docs/BRIEFING.md, docs/briefing/,
 RISK-POLICY.md, .risk-reports/, docs/jtbd/,
 docs/PRODUCT_DISCOVERY.md, docs/VOICE-AND-TONE.md, docs/STYLE-GUIDE.md.
+NOTE: these exclusions are READ tolerance — the JTBD gate skips user
+edits to these paths. They are NOT agent write targets. Never write
+project-generated artefacts (plans, audits, scratch state) under
+.claude/ — that is user-controlled config space. Project-generated
+content belongs under docs/ or directly in problem-ticket bodies (P131).
 HOOK_OUTPUT
     mark_announced "jtbd" "$SESSION_ID"
   fi

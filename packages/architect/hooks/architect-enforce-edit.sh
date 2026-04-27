@@ -54,6 +54,9 @@ case "$FILE_PATH" in
     exit 0 ;;
   */MEMORY.md|*/.claude/projects/*/memory/*)
     exit 0 ;;
+  # READ tolerance only — gate skips user edits to .claude/plans/. NOT a write
+  # target for agents. .claude/ is user-controlled config space; agents must not
+  # write project-generated artefacts here. See P131.
   */.claude/plans/*.md|*.claude/plans/*.md)
     exit 0 ;;
   */RISK-POLICY.md)

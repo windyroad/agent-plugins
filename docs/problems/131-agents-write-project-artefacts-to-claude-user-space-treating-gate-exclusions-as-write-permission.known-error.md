@@ -1,6 +1,6 @@
 # Problem 131: Agents write project-generated artefacts under `.claude/` (user-controlled config space) — gate exclusions are read tolerance, not write permission
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-27
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Likely (3)
 **Effort**: M — likely combination of (a) project CLAUDE.md adds an explicit "never write project-generated artefacts under `.claude/`" rule, (b) a new PreToolUse:Write|Edit hook that denies writes to `.claude/` for paths the user hasn't explicitly approved, and (c) updates to wr-architect / wr-jtbd gate-exclusion documentation clarifying the exclusion semantics (read tolerance, NOT write permission). The denial hook is the load-bearing piece; CLAUDE.md + docs are the supporting layer.
@@ -59,18 +59,17 @@ Manual cleanup: `rm` the offending file from `.claude/`, move content to project
 
 ### Investigation Tasks
 
-- [ ] Audit all windyroad plugin hooks' gate-exclusion lists for `.claude/` paths. Confirm the inclusion is intentional read-tolerance and document the semantic.
-- [ ] Inventory existing project-generated content currently living under `.claude/` (if any) and propose relocation paths.
-- [ ] Decide enforcement shape:
-  - Option A: project CLAUDE.md rule only (declarative; relies on agent compliance)
-  - Option B: new PreToolUse:Write|Edit hook denying writes to `.claude/` for any path the user hasn't explicitly approved (enforcement; adds gate friction for legitimate user-side `.claude/` edits)
-  - Option C: hybrid — CLAUDE.md rule + a softer detection hook that emits a `systemMessage` warning rather than denying
+- [x] Audit all windyroad plugin hooks' gate-exclusion lists for `.claude/` paths. Confirm the inclusion is intentional read-tolerance and document the semantic. — 2026-04-28: confirmed across 6 packages (architect, jtbd, tdd, style-guide, voice-tone, risk-scorer). The `_doc_exclusions()` helper (`packages/<pkg>/hooks/lib/gate-helpers.sh`) lists `:!.claude/plans/` to exclude that path from doc-content scans; the architect/JTBD enforce-edit hooks have explicit `*/.claude/plans/*.md) exit 0` clauses. Both shapes are READ tolerance, not WRITE permission.
+- [x] Inventory existing project-generated content currently living under `.claude/` (if any) and propose relocation paths. — 2026-04-28: inventoried `.claude/` directory contents — only user-owned files remain (`settings.json`, `.install-updates-consent`, `scheduled_tasks.lock`, `skills/`, `worktrees/`). The `.claude/plans/p081-review-test-agent.md` file that triggered the user correction is already removed (relocated to `docs/problems/081-...open.md` ticket body in the original 2026-04-27 cleanup). No further relocation needed.
+- [x] Decide enforcement shape — 2026-04-28: chose **Option C (hybrid)**. Phase 1 (declarative CLAUDE.md rule) shipped this iteration; Phase 2 (enforcement hook) deferred to follow-on. This matches the ticket's stated Fix Strategy phasing. The pure-CLAUDE.md option is insufficient (relies on every agent reading and following the rule). The pure-enforcement option is too heavy as a first move (adds gate friction for legitimate user-side edits without first establishing the discipline rule). Hybrid lands the cheap declarative layer immediately and preserves the option to add hook enforcement when the rule alone proves insufficient.
 - [ ] If enforcement hook chosen: define the "user has approved" signal. Candidates:
   - Marker file pattern (e.g. `.claude/.write-approved-${PATH_HASH}`)
   - Explicit env-var override (`CLAUDE_USER_SPACE_WRITE=allow`)
   - Per-session AskUserQuestion approval (heavy; only for unfamiliar paths)
-- [ ] Update wr-architect / wr-jtbd / wr-tdd / wr-style-guide / wr-voice-tone / wr-risk-scorer gate-hook source comments to clarify: "these path patterns are excluded from THIS gate's review, NOT approved-for-agent-writes; see P131".
-- [ ] Behavioural bats coverage for the enforcement hook (across allowed shapes / denied shapes / approval-marker honoured / user-side legitimate edits not blocked).
+
+  → 2026-04-28: deferred to Phase 2 implementation iteration. Composes with ADR-009 marker conventions; the marker-file-pattern shape is the lead candidate (low friction, persistent, hashable per path).
+- [x] Update wr-architect / wr-jtbd / wr-tdd / wr-style-guide / wr-voice-tone / wr-risk-scorer gate-hook source comments to clarify: "these path patterns are excluded from THIS gate's review, NOT approved-for-agent-writes; see P131". — 2026-04-28: shipped this iteration as Phase 3 light-touch — added clarifier blocks to the two highest-leverage Turn-1 emission surfaces (`packages/architect/hooks/architect-detect.sh` + `packages/jtbd/hooks/jtbd-eval.sh`) and inline comments to the path-matching rules in the two enforce-edit hooks (`architect-enforce-edit.sh`, `jtbd-enforce-edit.sh`). The `_doc_exclusions()` helper in `gate-helpers.sh` (across 6 packages) is internal scoping and does not need the clarifier — agents do not read it.
+- [ ] Behavioural bats coverage for the enforcement hook (across allowed shapes / denied shapes / approval-marker honoured / user-side legitimate edits not blocked). — Deferred to Phase 2 implementation iteration.
 
 ### Preliminary hypothesis
 
@@ -104,6 +103,30 @@ Project-CLAUDE.md is the simplest first move; it's a declarative rule the orches
 
 **Out of scope**: relocating any pre-existing user-authored content from `.claude/` (it's user-owned and stays where the user put it). Cross-plugin coordination on what other tools might write under `.claude/` (e.g. Claude Code's own internal state) — that's upstream territory, not addressable from this project.
 
+## Fix Progress
+
+**2026-04-28 — Phase 1 (declarative) + Phase 3 (light-touch doc reframe) shipped via `/wr-itil:work-problems` AFK iteration**:
+
+- Added MANDATORY rule to project `CLAUDE.md` (windyroad-claude-plugin): "never write project-generated artefacts under `.claude/`" — declarative discipline rule alongside the existing P085/P078 MANDATORY entries. Loaded on every session start.
+- Added clarifier blocks to the Turn-1 emission text in `packages/architect/hooks/architect-detect.sh` and `packages/jtbd/hooks/jtbd-eval.sh` reframing the "Does NOT apply to" exclusion list as READ tolerance only, with explicit "agents must not write project-generated artefacts under `.claude/` (P131)" guidance. These two surfaces are the highest-leverage Turn-1 reading sites where an agent would have over-generalised the exclusion list to "approved write zones".
+- Added inline source comments to the `*/.claude/plans/*.md) exit 0 ;;` rules in `packages/architect/hooks/architect-enforce-edit.sh` and `packages/jtbd/hooks/jtbd-enforce-edit.sh` clarifying READ-tolerance semantics for future maintainers.
+- Architect (ADR review) + JTBD (persona review) confirmed the partial-fix shape is aligned with ADR-009/013/022/038 and JTBD-001/JTBD-101 respectively. No new ADR required for this iteration; an ADR formalising the user-space vs project-space distinction is recommended once Phase 2 (enforcement hook) lands.
+
+**Phase 2 (load-bearing enforcement hook) — DEFERRED to follow-on iteration**:
+
+- New `packages/itil/hooks/itil-claude-space-protection.sh` PreToolUse:Write|Edit hook denying agent writes under `.claude/`
+- Approval-marker pattern (composes with ADR-009) for user-pre-approved write zones
+- Behavioural bats coverage (allowed shapes / denied shapes / approval-marker honoured / user-side legitimate edits not blocked)
+- Plugin manifest registration
+
+This is the ticket's Status remaining at Known Error (root cause confirmed, fix path clear, partial fix shipped, load-bearing piece not yet implemented). Per ADR-022, Verifying is reserved for "fix fully shipped, awaiting validation" — Phase 2 outstanding means we are not yet at Verifying.
+
+**Phase 3 (full doc refresh + briefing topic file) — REMAINING**:
+
+- Update remaining 4 gate-hook prose surfaces (tdd, style-guide, voice-tone, risk-scorer) — these don't currently emit a "Does NOT apply to" Turn-1 instruction in the same shape, but their docstrings/SCOPE comments could carry the clarifier for parity. Lower priority than Phase 2.
+- Update `docs/briefing/hooks-and-gates.md` topic file with the user-space-vs-project-space rule.
+- Once Phase 2 lands: write a new ADR formalising the distinction.
+
 ## Dependencies
 
 - **Blocks**: (none — P131 is a discipline + enforcement gap; nothing strictly waits on it)
@@ -123,3 +146,4 @@ Project-CLAUDE.md is the simplest first move; it's a declarative rule the orches
 - **ADR-013** (`docs/decisions/013-structured-user-interaction-for-governance-decisions.proposed.md`) — Rule 1 (interactive default) + Rule 6 (non-interactive fail-safe). Phase 2's deny-with-message must respect both.
 - **ADR-038** (`docs/decisions/038-progressive-disclosure-for-governance-tooling-context.proposed.md`) — message-budget conventions for the deny prose.
 - 2026-04-27 session evidence: orchestrator wrote `.claude/plans/p081-review-test-agent.md` mid-loop after the Plan agent produced an implementation plan for P081. Reasoning: "Turn 1 instructions list `.claude/plans/*.md` in the architect/JTBD gate-exclusion list, therefore approved". User correction: "why are you storing files in .claude which require my explicit approval to write???". File removed, plan content relocated to `docs/problems/081-...open.md` ticket body inline.
+- **Upstream report pending** — external dependency identified; invoke /wr-itil:report-upstream when ready. (P063 AFK-fallback marker — "upstream territory" reference in the Out-of-scope block tripped the strict-detection regex on the 2026-04-28 Open → Known Error transition. The reference is "out-of-scope framing" — it explicitly excludes cross-plugin/Claude-Code-internal-state coordination from this ticket, not a missed dependency. User may downgrade to "false positive; detection misfire" if confirmed not actionable upstream.)
