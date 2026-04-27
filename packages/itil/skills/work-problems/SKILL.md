@@ -114,17 +114,27 @@ Stop the loop and report a summary if any of these are true:
 2. **All remaining problems require interactive input** — e.g., they all need user verification (known-errors with `## Fix Released`), or their scope expanded beyond what's safe to auto-resolve
 3. **All remaining problems are blocked** — investigation hit a dead end, or the fix requires changes outside the project
 
-When stop-condition #2 fires, do not jump straight to `ALL_DONE` — run Step 2.5 first to surface the outstanding questions.
+**Step 2.5 fires unconditionally at loop end** (P135 Phase 3 / ADR-044) — promoted from "fallback when stop-condition #2" to **default loop-end emit shape**. Anti-BUFD framing per ADR-044: the AFK loop is the empirical-discovery engine; direction-class observations + deviation-candidates accumulate from real friction across iters; loop-end batched presentation is the user-facing deliverable. Per-iter surfacing was the old (now-superseded) pattern; Phase 3 makes batch-at-loop-end the default for ALL stop conditions, not just #2.
 
-For stop-conditions #1 and #3 (no questions to ask), skip Step 2.5 and emit the summary + `ALL_DONE` directly.
+For stop-conditions #1 and #3 (no actionable problems / all blocked), Step 2.5 still runs — it reads the accumulated `outstanding_questions` queue from `.afk-run-state/outstanding-questions.jsonl` and presents the batch. Empty queue → no `AskUserQuestion` fires; non-empty queue → batched per ADR-013 Rule 1 cap (≤4 per call, sequential if >4).
 
-### Step 2.5: Surface outstanding design questions (P053, fires only for stop-condition #2)
+### Step 2.5: Surface accumulated outstanding questions at loop end (P135 Phase 3 — default emit shape)
 
-The skipped tickets that triggered stop-condition #2 frequently carry **user-answerable design questions** (naming, direction, pacing, scope) whose answers would unblock the next AFK loop. The information the user needs to answer is fully known at stop time, so there is no cost to surfacing the questions before the terminal `ALL_DONE` emit.
+Per ADR-044 framework-resolution boundary: human input is for direction-setting / deviation-approval / one-time-override / silent-framework / taste / authentic-correction (six categories). Across N iters, those observations accumulate at iter level (`ITERATION_SUMMARY.outstanding_questions`) and persist to a session-level queue file. Loop-end Step 2.5 reads, ranks, and presents the batch.
 
-**1. Run the surfacing routine.** Step 2.5 calls Step 2.5b (the reusable surfacing routine defined below) with the accumulated user-answerable skip-reason set as input. Step 2.5b extracts the questions, branches on interactivity per ADR-013 Rule 1 / Rule 6, and either calls `AskUserQuestion` or emits the Outstanding Design Questions table. Stop-condition #2 is the canonical caller of Step 2.5b — by definition the stop fired *because* one or more remaining problems require interactive input, so the gating clause "≥1 user-answerable skip" is always satisfied here.
+**1. Read the accumulated queue.** Read `.afk-run-state/outstanding-questions.jsonl` — each line is one entry per the ITERATION_SUMMARY `outstanding_questions` schema (see Step 5 Output contract). De-duplicate identical entries (same `category` + same `question` text + same `existing_decision` for deviation-approval).
 
-**2. Emit the final summary + `ALL_DONE`.** The summary includes the Outstanding Design Questions table when any user-answerable questions were surfaced via Step 2.5b's fallback branch (see Output Format). When Step 2.5b's default branch fired (`AskUserQuestion` was available), the answers have already been written back to the corresponding ticket files and the table is omitted from the summary.
+**2. Rank the entries.** Apply the ranking precedence: deviation-approval (highest) > direction > one-time-override > silent-framework > taste > correction-followup. Within each category, preserve iter-order (oldest first) so the user reads the queue in temporal sequence.
+
+**3. Branch on interactivity.**
+
+- **Default branch — call `AskUserQuestion` when available** (the orchestrator's main turn is interactive by construction; the user is presumed at the keyboard at loop end). Batch the entries into one or more `AskUserQuestion` calls per ADR-013 Rule 1 cap. Header per category: `"Outstanding direction"`, `"Approve deviation from existing decision"`, `"One-time override"`, etc. For deviation-approval entries, options are `Approve + amend ADR` / `Approve + supersede ADR` / `Approve + one-time exception` / `Reject (existing decision stands)` / `Defer (need more evidence)` — the 5-option shape matching the `proposed_shape` field. For other entries, options are extracted from the entry's `question` text or candidate fixes. Write answers back to the corresponding ticket files so the next AFK loop does not re-ask.
+
+- **Fallback branch — emit `### Outstanding Design Questions` table** when `AskUserQuestion` is unavailable (restricted permission mode, hook-disabled tool surface). The table lists each entry with its `category`, `question`, `existing_decision` / `contradicting_evidence` for deviation-approval entries, and `ticket_id`. The user answers on return.
+
+**4. Cleanup.** After all entries are resolved (whether via `AskUserQuestion` or table), truncate `.afk-run-state/outstanding-questions.jsonl` to empty. The next AFK loop starts with a clean queue.
+
+**5. Emit the final summary + `ALL_DONE`.** The summary includes the Outstanding Design Questions table when Step 2.5b's fallback branch fired (see Output Format). When Step 2.5b's default branch fired (`AskUserQuestion` was available), the answers have already been written back; the table is omitted from the summary.
 
 ```
 ALL_DONE
@@ -274,12 +284,40 @@ committed: true | false | skipped
 commit_sha: <sha>                                  # required when committed=true
 reason: <one-line>                                 # required when committed=false or action=skipped
 skip_reason_category: user-answerable | architect-design | upstream-blocked  # required when action=skipped
-outstanding_questions: [<one-line each>]           # optional; drives Step 2.5 when skip_reason_category=user-answerable
+outstanding_questions: [<entry per ADR-044 6-class taxonomy — see schema below>]  # mandatory non-empty when iter touched a direction / deviation-approval / one-time-override / silent-framework decision; otherwise empty array
 remaining_backlog_count: <N>
 notes: <one-line>
 ```
 
+**`outstanding_questions` schema (P135 Phase 3 / ADR-044)**: each entry is tagged with its category for loop-end Step 2.5 ranking. Two shapes:
+
+```
+# Standard direction / one-time-override / silent-framework / taste / correction-followup entry:
+{
+  category: "direction" | "one-time-override" | "silent-framework" | "taste" | "correction-followup"
+  question: "<one-line — the genuine human-value question this iter surfaced>"
+  context: "<one-line — the in-iter situation that surfaced it>"
+  ticket_id: "P<NNN>"  # the iter's ticket; loop-end groups by ticket
+}
+
+# Deviation-candidate entry (the anti-BUFD-for-framework-evolution shape per ADR-044):
+{
+  category: "deviation-approval"
+  existing_decision: "<ADR-NNN section / SKILL.md path:line / RISK-POLICY clause>"
+  contradicting_evidence: "<tool invocation + observable outcome per ADR-026 grounding>"
+  proposed_shape: "amend" | "supersede" | "one-time"
+  rationale: "<one-line — why current evidence contradicts the existing decision>"
+  ticket_id: "P<NNN>"
+}
+```
+
+When the iter encounters an existing decision (ADR / SKILL contract / WSJF rule / RISK-POLICY entry) that current evidence contradicts, the agent does **NOT auto-deviate**. Instead it queues a `deviation-approval` entry per the schema. Loop-end Step 2.5 presents it as `AskUserQuestion` with options matching the proposed shape: `Approve + amend ADR` / `Approve + supersede ADR` / `Approve + one-time exception` / `Reject (existing decision stands)` / `Defer (need more evidence)`. The agent never auto-deviates; never blindly follows against evidence. **Not-queueing-when-strong-contradicting-evidence-exists is a regression** per the Phase 3 bats coverage (`work-problems-deviation-candidate-shape.bats`).
+
 Architect review (R2) requires the commit state fields (`committed` / `commit_sha` / `reason`) so **Step 6.75's Dirty-for-known-reason branch stays evaluable** from the summary alone. JTBD review requires `ticket_id` / `action` / `skip_reason_category` / `outstanding_questions` so Step 2.5 and the Output Format's Completed / Skipped / Outstanding Design Questions tables can be populated deterministically without the orchestrator having to re-parse ticket files.
+
+**Between-iter aggregation (P135 Phase 3)**: orchestrator's main turn appends each iter's `outstanding_questions` entries to a session-level queue file at `.afk-run-state/outstanding-questions.jsonl` between Step 6 (report) and Step 6.5 (release-cadence check). Each line is one JSON-encoded entry per the schema above. Loop-end emit (Step 2.5) reads the queue file, de-duplicates, ranks (deviation-approval > direction > one-time-override > silent-framework > taste > correction-followup), and presents as batched `AskUserQuestion` per ADR-013 Rule 1 cap (≤4 per call, sequential if >4). Per ADR-032 pending-questions artefact precedent.
+
+**Mid-loop UserPromptSubmit handling (P135 Phase 3 / R4)**: when the orchestrator receives a user message DURING an iter (e.g. the user returns mid-loop and sends a new directive), the orchestrator MUST let the in-flight iter complete naturally to its `ITERATION_SUMMARY` emission BEFORE surfacing the new direction or the accumulated queue. Do NOT abort the iter mid-flight (no SIGTERM to the iter PID; no kill signal). The corrective for the 2026-04-27 iter-9-killed overcorrection: the user's correction was about future iter dispatch shape, not about the in-flight iter; killing wasted ~$5 + 25 min in-flight work. The handler waits for the natural exit, surfaces the queue + the new direction together, then routes per the user's response.
 
 **Per-iteration cost metadata.** Alongside `.result`, the `claude -p --output-format json` response carries cost + usage fields in the same JSON blob. The orchestrator MUST extract these **named fields only** into per-iteration totals and session aggregates — nothing else from the JSON should be surfaced to the user or logged (PII guard: the response also carries `session_id`, `model`, `stop_reason`, and other envelope fields; the extraction is **scoped to the named fields** below so future contributors do not unconsciously broaden it).
 
