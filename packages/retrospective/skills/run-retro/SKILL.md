@@ -269,9 +269,9 @@ For each accepted learning:
 After editing topic files, update `docs/briefing/README.md`:
 
 - Refresh per-file summaries in the Topic Index if the topic file's character changed.
-- Promote an entry into the Critical Points section when its signal-score is >= +3 (agent-driven per Step 1.5). The session-start surface is small and curated; the agent promotes the highest-scored entries first, respecting the Tier 1 budget guard. Demotion from Critical Points happens automatically when an entry's score drops below +3 after decay. The remaining user-interactive boundary is the delete queue (score <= -3), which requires explicit user confirmation.
+- Promote an entry into the Critical Points section when its signal-score is >= +3 (agent-driven per Step 1.5). The session-start surface is small and curated; the agent promotes the highest-scored entries first, respecting the Tier 1 budget guard. Demotion from Critical Points happens automatically when an entry's score drops below +3 after decay. The remaining user-interactive boundary is the delete queue (score <= -3), which is resolved per Step 1.5's silent-classification model — the agent applies the signal-vs-noise heuristic and removes / trims / compresses without asking, surfacing the chosen actions in the Step 5 retro summary so the user can correct via the P078 capture-on-correction surface if a removal was wrong.
 
-Use the AskUserQuestion tool to confirm any removals: "I would like to remove [item] from `docs/briefing/<topic>.md` because [reason]. Is this correct?"
+**Removals are silent (P135 / ADR-044)**: per the ADR-044 framework-resolution boundary, removals follow Step 1.5's silent-classification model — agent owns the remove / trim / compress decision; user reads the Step 5 summary and corrects via authentic-correction (ADR-044 category 6) if an entry was removed in error. Per-removal `AskUserQuestion` is sub-contracting framework-resolved decisions back to the user (lazy deferral per Step 2d Ask Hygiene Pass classification).
 
 #### Tier 3 budget rotation pass (P099)
 
@@ -287,20 +287,16 @@ The script's threshold defaults to `5120` bytes (the upper bound of ADR-040's Ti
 
 **Ordering**: this pass runs as the FINAL action of Step 3, after edits + Step 1.5 delete-queue persistence + README refresh. It must observe post-edit byte counts so the deletes the user confirmed in Step 1.5 are reflected in the measurement.
 
-**Interactive path (ADR-013 Rule 1)** — for each `OVER` line, invoke `AskUserQuestion`:
+**Silent agent-picked rotation (P135 / ADR-044)** — per the ADR-044 framework-resolution boundary, rotation is silent agent judgement applied to each `OVER` line. The agent has all the inputs needed: file mtimes (split-by-date), Step 1.5 signal scores per entry (trim-noise), header structure within the file (split-by-subtopic). No `AskUserQuestion` per file; surfacing 4 options × 6 over-budget files trains the user to pick "defer" 6 times to escape the cascade — worse than no rotation. Heuristic for picking the rotation shape:
 
-- `header: "Rotate over-budget topic file?"`
-- `multiSelect: false`
-- The question body MUST cite the specific byte count and threshold from the script's output (per ADR-026 grounding) plus a one-line summary of what the file currently covers, so the user can pick a rotation shape without reading the full file.
-- Options (exactly four per ADR-013 Rule 1 cap):
-  1. `Split by sub-topic` — description: "Identify a coherent sub-topic in this file and migrate its entries to a new `docs/briefing/<sub-topic>.md` archive. Update README Topic Index. The agent surfaces a proposed sub-topic boundary; the user confirms in a follow-up question if needed."
-  2. `Split by date — archive oldest` — description: "Move entries older than a chosen cutoff date to a sibling archive (e.g. `docs/briefing/<topic>-archive.md`). The agent surfaces a proposed cutoff drawn from the entry HTML comment block (`first-written` field per Step 1.5)."
-  3. `Trim noise out of band` — description: "Score-and-delete in a follow-up retro is the right shape — defer rotation, leave the file as-is, and let Step 1.5's signal-vs-noise pass shrink it across cycles. Use this when no clean split boundary exists."
-  4. `Defer — record only` — description: "Surface the over-budget state in this retro's summary; take no action this session. Picks up next retro."
+- If a coherent sub-topic boundary exists (a sub-section that's grown big enough to stand alone, ≥1 KB; e.g. a worked example in a topic that's grown to its own sub-section): **split-by-subtopic** — extract to `docs/briefing/<sub-topic>.md`, update README Topic Index.
+- Else if the file has clear date-stratified entries (HTML-comment `first-written` fields per Step 1.5) AND ≥30% of bytes are entries older than the median age: **split-by-date** — archive oldest entries to `docs/briefing/<topic>-archive.md`.
+- Else if Step 1.5 surfaced ≥3 noise-classified entries in this file this retro: **trim-noise** — defer rotation; let the next retro's Step 1.5 shrink the file across cycles.
+- Else: **leave-as-is** — record the OVER state in the Step 5 summary; no action this retro. Picks up next retro when more signal accumulates.
 
-The four options correspond to the four common rotation shapes for accumulator docs. The user's choice is recorded in the retro summary (Step 5) under the new Topic File Rotation section.
+Apply the chosen rotation; record the choice + rationale + per-file delta (`bytes before` → `bytes after`) in the Step 5 summary `Topic File Rotation` section. User reads the summary and corrects via authentic-correction (ADR-044 category 6) if the rotation was wrong (rotations are reversible — `git mv` the archive sibling back; restore deletions from git).
 
-**Non-interactive / AFK fallback (ADR-013 Rule 6)** — when `AskUserQuestion` is unavailable (autonomous retro, AFK orchestrator), do NOT auto-rotate. Each `OVER` line is recorded in the retro summary's "Topic File Rotation Candidates" section with the specific byte count, threshold, and one-line file summary. The user reviews on return and re-runs `/wr-retrospective:run-retro` interactively (or applies a manual split / archive) per accepted candidate. Same trust-boundary shape as Step 1.5's delete queue — surface the evidence; defer the decision.
+This is the same silent-classification model as Step 1.5 delete-queue removals (P135 lesson: removals + rotations both follow Step 1.5 ownership; per-file `AskUserQuestion` is sub-contracting framework-resolved decisions back to the user — lazy deferral per Step 2d Ask Hygiene Pass classification). AFK and interactive modes use identical behaviour — no `AskUserQuestion` differentiation needed.
 
 **Why advisory, not fail-closed**: the rotation is a judgment call (which sub-topic to extract, which archive shape to use). A CI-fail-on-overflow would block routine retros mid-session, directly violating JTBD-001 ("enforce governance without slowing down"). The advisory shape mirrors ADR-038's chosen response to the analogous honour-system byte-budget problem: bats catch script-contract drift; the script itself surfaces signal at runtime without halting.
 
@@ -338,18 +334,18 @@ Problems whose fix shipped but whose closure is still pending (`docs/problems/*.
    - **Not exercised in-session** — no citation collected. Leave as Verification Pending; nothing surfaces for this ticket.
    - **Exercised with regression** — the fix's contract observably failed (test red, hook misfired, skill produced incorrect output). This is a distinct problem, not a closure candidate. Flag it in the retro report as a new problem ticket (route via Step 4) with the regression evidence, and leave the `.verifying.md` file alone.
 
-5. **Prompt the user (interactive path per ADR-013 Rule 1)** — for each close-candidate use `AskUserQuestion`:
-   - `header: "Close verified ticket?"`
-   - `multiSelect: false`
-   - Question body MUST include the fix summary AND the specific citations collected in step 3 (not just ticket ID + title). The prompt is self-contained so the user can decide without reading the full ticket file.
-   - Options:
-     1. `Close P<NNN>` — description: "Delegate to /wr-itil:manage-problem for Verification Pending → Closed transition. manage-problem renames, updates Status, and commits per ADR-014 + ADR-022."
-     2. `Leave as Verification Pending` — description: "Evidence noted but not yet sufficient to close. Ticket stays in the Verification Queue."
-     3. `Flag for manual review` — description: "The evidence is ambiguous or contested; defer to a dedicated manage-problem review session."
+5. **Close-on-evidence (silent agent action per P135 / ADR-044)** — for each close-candidate in the "Exercised successfully in-session" bucket, the agent delegates to `/wr-itil:transition-problem <NNN> close` (per ADR-014 commit grain) WITHOUT firing `AskUserQuestion`. The framework has resolved this decision: `.verifying.md` files with specific in-session evidence (test invocation + observable outcome per ADR-026 grounding) ARE verified per ADR-022's evidence semantics. Per-candidate `AskUserQuestion` is sub-contracting the framework-resolved decision back to the user (lazy deferral per Step 2d Ask Hygiene Pass classification).
 
-6. **For each `Close P<NNN>` confirmation**, invoke the Skill tool with `wr-itil:manage-problem` and arguments like `<NNN> close — verified in-session via <citation summary>`. manage-problem performs the `git mv` .verifying.md → .closed.md, updates the Status field, re-stages per P057, and commits with message `docs(problems): close P<NNN> <title>` per ADR-014. The commit message should reference the retro session in its body.
+   The Step 5 retro summary's `## Verification Candidates` table records each close action with the citation that triggered it AND a documented recovery path (per the cross-plugin dispatch + recovery-path bats coverage in P135 Phase 2 — `run-retro-step-4a-cross-plugin-dispatch.bats` + `run-retro-step-4a-recovery-path.bats`). User reads the summary; if a close was wrong, user invokes the recovery path: `/wr-itil:transition-problem <NNN> known-error` (or equivalent) — closes are reversible. User disagreement surfaces via authentic-correction (ADR-044 category 6 / P078 capture-on-correction surface) — the agent does not need permission per-close because the recovery path is cheap and reversible.
 
-7. **Non-interactive / AFK fallback (per ADR-013 Rule 6)**: when `AskUserQuestion` is unavailable (autonomous retro, batch session-wrap), do NOT auto-close and do NOT delegate to manage-problem. Instead, write a "Verification Candidates" section into the retro report (Step 5 summary) listing each close-candidate with its ticket ID, fix summary, and the specific citations collected in step 3. The user reviews on return and can run `/wr-itil:manage-problem <NNN> close` per ticket, or run `/wr-itil:manage-problem review` to fire Step 9d's baseline verification prompt. This deferral is explicit per the user's documented preference (feedback_verify_from_own_observation.md memory): surface evidence from the agent's own in-session observations, but the close decision remains user-confirmed per ADR-022.
+6. **Recovery path (P135 R5)**: if the user disagrees with a close-on-evidence action surfaced in the Step 5 summary, the recovery path is documented inline in the summary alongside each close: `Recovery: rerun /wr-itil:transition-problem <NNN> known-error to reopen` (or the verifying-flip-back path used in the 2026-04-27 P124 regression flip-back). Recovery is a single-skill invocation; the close is fully reversible.
+
+7. **Cross-plugin dispatch contract (P135 R3)**: when delegating to `/wr-itil:transition-problem`, surface the result in the Step 5 summary:
+   - On dispatch success (transition-problem returned 0, ticket renamed + Status updated): record `closed via transition-problem` in the Decision column.
+   - On dispatch failure (transition-problem returned non-zero, ticket NOT renamed): record `dispatch-failed: <one-line>` in the Decision column. Do NOT mark closed in the summary table. Surface the failure for user attention; recovery path is "user investigates the dispatch error".
+   - On dispatch unavailable (transition-problem skill not on the plugin set in this project): record `dispatch-unavailable: ticket left as Verification Pending` in the Decision column. Graceful fallback — do not silently swallow the close-candidate.
+
+8. **Same-session verifyings excluded** (unchanged from P068 design): `.verifying.md` tickets for fixes that ship in the currently-running session (e.g. P127, P065, P126, P101 just transitioned this session) are NOT close-candidates — a session cannot verify its own fix beyond "bats passed at commit time"; subsequent-session exercise is the meaningful signal. Same-session verifyings are skipped in step 4 categorisation.
 
 **ADR-027 compatibility note**: when ADR-027's Step-0 auto-delegation lands on run-retro (run-retro is named in ADR-027's Scope as in-scope but has no Step 0 today), the evidence scan in step 3 becomes load-bearing on main-agent session context that a delegated subagent does not automatically inherit. The SKILL.md contract for that migration: either (a) run Step 4a in the main-agent context BEFORE Step-0 delegation to the subagent, or (b) have the Step-0 delegation prompt include an explicit session-activity summary (tool invocations, commits, skill calls observed in main-agent context) so the subagent has citable evidence. Option (a) is preferred because it keeps the evidence scan as close as possible to the observed activity; option (b) is the fallback if the subagent boundary must be crossed first.
 
@@ -378,22 +374,22 @@ For every codifiable observation identified in Step 2:
 
 **Non-interactive / AFK branch**: Stage 1 fires regardless — ticketing is mechanical and does not require user input. If the delegated skill itself is unavailable (e.g. the Skill tool is gated out of the current context), record the observation in the retro summary's "Tickets Deferred" section so the user can ticket on return. Do NOT skip recording the observation.
 
-#### Stage 2: Record proposed fix strategy on each ticket (user-interactive — per ticket)
+#### Stage 2: Record proposed fix strategy on each ticket (silent agent action per P135 / ADR-044)
 
-For each ticket created in Stage 1, invoke `AskUserQuestion` to record the proposed codification shape as the fix strategy. This is a per-ticket interaction — the fix-shape judgement is ticket-specific, not a single batch decision.
+For each ticket created in Stage 1, the agent picks the obvious-fit codification shape from the catalog below and writes it to the ticket's `## Fix Strategy` section WITHOUT firing `AskUserQuestion`. The framework has resolved the catalog (skill / agent / hook / settings / script / CI / ADR / JTBD / guide / test fixture / memory / internal-code); applying that catalog per observation is a mechanical decision, not a human-value question. Per-ticket `AskUserQuestion` is sub-contracting framework-resolved decisions back to the user (lazy deferral per Step 2d Ask Hygiene Pass classification).
 
-For each ticket:
-- `header: "Proposed fix"`
-- `multiSelect: false`
-- Options (exactly four top-level per ADR-013 Rule 1 cap; architect Q4 lean (b): free-text capture for multi-shape cases, not cascading AskUserQuestion batches — cascading fan-outs are the P061 anti-pattern):
-  1. `Skill — create stub` — description: "Record a stub for a new skill (suggested name, scope, triggers, prior uses) on the ticket's `## Fix Strategy` section. Skill scaffolding itself remains out of scope for the retrospective."
-  2. `Skill — improvement stub` — description: "Record a targeted edit to an existing skill's SKILL.md (target file, observed flaw, edit summary) on the ticket's `## Fix Strategy` section."
-  3. `Other codification shape` — description: "Capture the fix shape as **free-text** on the ticket's `## Fix Strategy` section. Covers agent / hook / settings / script / CI / ADR / JTBD / guide / test fixture / memory / internal code change. Include the shape name, suggested stub details, and routing target where applicable (e.g. `/wr-architect:create-adr` for ADR; `/wr-jtbd:update-guide` for JTBD; `/wr-voice-tone:update-guide` for voice)."
-  4. `Self-contained work — no codification stub` — description: "The ticket is a bounded one-shot edit with no recurring-pattern signal. **Rule 6 audit note**: this option is valid only when the observation is a bounded one-shot edit with no recurring-pattern signal. It is NOT a silent-skip escape hatch — if any recurring-pattern signal is present, pick Option 1/2/3 instead so P044's recommend-skills intent is preserved."
+The four shape choices remain (see Stub templates below for what each one writes), but the AGENT picks based on the observation's signal:
 
-**Recording**: append a `## Fix Strategy` section to the ticket (or edit the existing section if present). The section records the chosen Option, the shape, and the stub fields (for Options 1–2 the stub template; for Option 3 the free-text fix shape; for Option 4 the bounded-one-shot reason). The fix strategy lives on the ticket — not in the retro summary — so it travels with the problem through its lifecycle.
+1. **Skill — create stub** — pick when the observation describes a recurring multi-step user-invoked sequence not yet codified (e.g. "I keep doing X-then-Y-then-Z manually"). Stub names a new skill.
+2. **Skill — improvement stub** — pick when the observation is a targeted flaw in an existing SKILL.md (specific path, specific line, specific edit summary). Stub names the target file + edit.
+3. **Other codification shape** — pick when the observation fits a non-skill catalog entry (agent / hook / settings / script / CI / ADR / JTBD / guide / test fixture / memory / internal-code). Free-text captures the shape + routing target (e.g. `/wr-architect:create-adr` for ADR-shaped fixes, `/wr-jtbd:update-guide` for JTBD-shaped, `/wr-voice-tone:update-guide` for voice-shaped).
+4. **Self-contained work — no codification stub** — pick when the observation is a bounded one-shot edit with no recurring-pattern signal observed this session.
 
-**Non-interactive / AFK branch (ADR-013 Rule 6 + ADR-032 deferred-question contract)**: When `AskUserQuestion` is unavailable, Stage 2 defers via the ADR-032 **deferred-question artefact** — each ticket gets a pending-question entry asking for the proposed fix strategy; the main agent surfaces the questions on the next interactive session. Stage 2 does NOT fabricate a fix-strategy choice in AFK mode; the ticket lives without a `## Fix Strategy` section until the user answers. ADR-032's FIFO concurrency handling applies: N pending questions (one per Stage 1 ticket) queue in serial order.
+**Recording**: append a `## Fix Strategy` section to the ticket (or edit the existing section if present). Record the chosen Option, the shape, and the stub fields (per the templates below). The fix strategy lives on the ticket — not in the retro summary — so it travels with the problem through its lifecycle.
+
+**User correction surface**: if the agent picks the wrong shape, the user edits the ticket's `## Fix Strategy` section directly (no orchestrator turn-around needed) — the per-ticket correction is cheap. The Step 5 retro summary's `Codification Candidates` table records each picked shape so the user can scan all picks at once and correct any wrong ones in one editing pass.
+
+**Reversibility note**: shape choices are reversible (just re-edit the ticket); per-ticket `AskUserQuestion` is the inverse-correctness anti-pattern P132 + ADR-044 capture (high friction for low decision-irreversibility).
 
 #### Stub templates by Option
 

@@ -114,16 +114,22 @@ Detection is intentionally **strict** (explicit label or scoped-npm package only
 
 **Already-noted check** — before firing the prompt, grep the ticket for the stable marker `- **Upstream report pending** —` (written by option 2 / the AFK fallback below) or `- **Reported Upstream:**` / a `## Reported Upstream` section (written by `/wr-itil:report-upstream` Step 7 back-write per ADR-024 Confirmation criterion 3a). If any of those are already present, skip the prompt — the detection has already fired on a prior run.
 
-**If the detection fires and nothing has been noted yet**, use `AskUserQuestion`:
+**If the detection fires and nothing has been noted yet** (per ADR-044 framework-resolution boundary): the agent applies the AFK fallback default WITHOUT firing `AskUserQuestion`. Per ADR-044, this decision IS framework-resolved — the safe action is "defer and note marker", and the user can correct via authentic-correction (ADR-044 category 6) if a manual `/wr-itil:report-upstream` invocation is wanted instead. Per-transition `AskUserQuestion` for upstream-detection is sub-contracting framework-resolved decisions back to the user (lazy deferral per Step 2d Ask Hygiene Pass classification).
 
-- `header: "External root cause detected"`
-- `multiSelect: false`
-- Options:
-  1. `Invoke /wr-itil:report-upstream now` — halt the transition; the skill runs (it writes the `## Reported Upstream` appendage per ADR-024 Confirmation criterion 3a); the transition resumes afterwards.
-  2. `Defer and note in ticket` — append a pending-upstream-report line to the ticket's `## Related` section using the stable marker `- **Upstream report pending** — external dependency identified; invoke /wr-itil:report-upstream when ready`. The marker wording is fixed so subsequent runs (and the work-problems `upstream-blocked` skip path) can detect "already noted" without re-firing.
-  3. `Not actually upstream` — proceed without invocation; append the same marker with text `- **Upstream report pending** — false positive; detection misfire` so the prompt does not re-fire on later reviews.
+**Default behaviour (silent agent action, per ADR-044)**: append the pending-upstream-report line to the ticket's `## Related` section using the stable marker:
 
-**Non-interactive (AFK) branch** (per ADR-013 Rule 6): when `AskUserQuestion` is unavailable (detect via orchestrator markers in the invoking prompt — phrases like "AFK", "work-problems", "batch-work", "ALL_DONE"), default to option 2 — append the pending-upstream-report line with the stable `- **Upstream report pending** —` marker. Do NOT auto-invoke `/wr-itil:report-upstream`; its Step 6 security-path branch is interactive and would halt the orchestrator anyway (per ADR-024 Consequences).
+```
+- **Upstream report pending** — external dependency identified; invoke /wr-itil:report-upstream when ready
+```
+
+The marker wording is fixed so subsequent runs (and the work-problems `upstream-blocked` skip path) can detect "already noted" without re-firing. The transition proceeds normally after the marker is appended.
+
+**Recovery / override paths** (user-initiated, not asked-per-transition):
+
+- If the detection misfired (false positive — not actually upstream), user appends `- **Upstream report pending** — false positive; detection misfire` directly to the ticket's `## Related` section. The next detection-pass observes the marker and skips firing again.
+- If the user wants to invoke `/wr-itil:report-upstream` immediately rather than deferring, they invoke it directly (`/wr-itil:report-upstream <NNN> <upstream-repo-url>`). The skill writes the `## Reported Upstream` appendage per ADR-024.
+
+**AFK and interactive modes use identical behaviour** — the silent-default-with-recovery-path shape is the framework-resolution boundary application; there's no `AskUserQuestion`-vs-fallback differentiation.
 
 ### 6. Rename the file, edit content, and re-stage (P057 staging trap)
 
