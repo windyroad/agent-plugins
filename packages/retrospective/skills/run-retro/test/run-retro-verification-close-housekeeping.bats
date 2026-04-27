@@ -49,27 +49,45 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "run-retro: Step 4a AskUserQuestion prompt contract requires fix summary AND citations inline (ADR-013 Rule 1)" {
-  run grep -F 'ADR-013 Rule 1' "$SKILL_MD"
+@test "run-retro: Step 4a close-on-evidence dispatches to /wr-itil:transition-problem (P135 Phase 2 / ADR-044)" {
+  # Phase 2 superseded the per-candidate AskUserQuestion (Close/Leave/Flag) with
+  # close-on-evidence delegation per ADR-044. The bats now assert the new
+  # contract: Step 4a delegates to /wr-itil:transition-problem WITHOUT asking,
+  # and ADR-044 framework-resolution boundary is the rationale.
+  run grep -F '/wr-itil:transition-problem' "$SKILL_MD"
   [ "$status" -eq 0 ]
-  run grep -F 'Question body MUST include the fix summary AND the specific citations' "$SKILL_MD"
-  [ "$status" -eq 0 ]
-}
-
-@test "run-retro: Step 4a three AskUserQuestion options (Close / Leave Verification Pending / Flag for manual review)" {
-  run grep -F 'Close P<NNN>' "$SKILL_MD"
-  [ "$status" -eq 0 ]
-  run grep -F 'Leave as Verification Pending' "$SKILL_MD"
-  [ "$status" -eq 0 ]
-  run grep -F 'Flag for manual review' "$SKILL_MD"
+  run grep -F 'ADR-044' "$SKILL_MD"
   [ "$status" -eq 0 ]
 }
 
-@test "run-retro: Step 4a AFK fallback surfaces evidence in the retro report and does NOT auto-close (ADR-013 Rule 6)" {
-  run grep -F 'Non-interactive / AFK fallback (per ADR-013 Rule 6)' "$SKILL_MD"
+@test "run-retro: Step 4a close-on-evidence requires concrete in-session citation (ADR-026 grounding)" {
+  # Phase 2 preserves the evidence requirement (ADR-026); without concrete
+  # citation, the ticket stays Verification Pending (ambiguous-evidence path).
+  run grep -F 'ADR-026' "$SKILL_MD"
   [ "$status" -eq 0 ]
-  run grep -F 'do NOT auto-close' "$SKILL_MD"
+}
+
+@test "run-retro: Step 4a documents recovery path inline (P135 R5 — closes are reversible)" {
+  # Phase 2's close-on-evidence is reversible via /wr-itil:transition-problem
+  # known-error flip-back (the 2026-04-27 P124 precedent). Recovery path is
+  # documented inline alongside each close action in the Step 5 retro summary.
+  run awk '/^### 4a\./,/^### 4b\./ {print}' "$SKILL_MD"
   [ "$status" -eq 0 ]
+  [[ "$output" == *"Recovery"* ]] || [[ "$output" == *"reversible"* ]]
+}
+
+@test "run-retro: Step 4a AFK and interactive modes use identical close-on-evidence behaviour (ADR-044)" {
+  # Phase 2 collapsed the legacy AskUserQuestion-with-AFK-fallback into a
+  # single silent-close-on-evidence path. Per ADR-044 framework-resolution
+  # boundary: when the framework resolves the decision (concrete evidence
+  # per ADR-022 + ADR-026), the agent acts; per-candidate ask is lazy
+  # deferral. AFK and interactive paths are identical for this surface.
+  # Asserting the legacy "Non-interactive / AFK fallback (per ADR-013 Rule 6)"
+  # AskUserQuestion-vs-fallback split is GONE from Step 4a.
+  run awk '/^### 4a\./,/^### 4b\./ {print}' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"do NOT auto-close"* ]]
+  [[ "$output" != *"Close P<NNN>\` — description"* ]]
 }
 
 @test "run-retro: Step 4a ADR-027 compatibility note documents session-context handling" {

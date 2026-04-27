@@ -57,20 +57,26 @@ setup() {
   [ "$status" -ne 0 ]
 }
 
-@test "SKILL.md Step 4b Stage 2 uses AskUserQuestion with 'Proposed fix' header (P075)" {
-  # Stage 2 is the per-ticket fix-strategy prompt. Architect-pinned header is
-  # "Proposed fix" to distinguish from the legacy "Codification candidate" header.
-  run grep -inE "header:[[:space:]]*['\"]Proposed fix['\"]|\"Proposed fix\"" "$SKILL_FILE"
+@test "SKILL.md Step 4b Stage 2 is silent agent action per ADR-044 (no AskUserQuestion)" {
+  # P135 Phase 2 / ADR-044: Stage 2 is no longer an AskUserQuestion per ticket;
+  # the agent picks the obvious-fit shape from the catalog. The legacy
+  # 'Proposed fix' AskUserQuestion header is GONE; the new contract is
+  # silent-agent-picks-from-catalog with user-edits-ticket-if-wrong correction.
+  run awk '/^#### Stage 2:/,/^#### Stub templates by Option/ {print}' "$SKILL_FILE"
   [ "$status" -eq 0 ]
+  [[ "$output" == *"ADR-044"* ]]
+  [[ "$output" == *"silent"* ]]
+  # Negative: header line must NOT contain Proposed fix as an AskUserQuestion header
+  [[ "$output" != *"header: \"Proposed fix\""* ]]
+  [[ "$output" != *"header: 'Proposed fix'"* ]]
 }
 
-@test "SKILL.md Step 4b Stage 2 has four top-level architect-pinned options (ADR-013 Rule 1 cap)" {
-  # ADR-013 Rule 1: AskUserQuestion options capped at 4. Architect review
-  # flagged cascading follow-ups as an anti-pattern (P061 precedent); the
-  # architect lean is free-text capture on the Fix Strategy section rather
-  # than N-deep fan-out. Stage 2 must list the four architect-pinned option
-  # labels as numbered Markdown list items.
-  run grep -cE "^[[:space:]]*[0-9]+\.[[:space:]]+\`?(Skill — create stub|Skill — improvement stub|Other codification shape|Self-contained work)" "$SKILL_FILE"
+@test "SKILL.md Step 4b Stage 2 retains the four shape choices in the catalog (architect-pinned shapes preserved)" {
+  # Phase 2 removed the AskUserQuestion but preserved the four shape choices
+  # in the catalog narrative — agent now picks among them silently. The four
+  # shape labels must still be enumerated so the agent has a deterministic
+  # catalog to pick from.
+  run grep -cE "^[[:space:]]*[0-9]+\.[[:space:]]+\*\*(Skill — create stub|Skill — improvement stub|Other codification shape|Self-contained work)" "$SKILL_FILE"
   [ "$status" -eq 0 ]
   [ "$output" -ge 4 ]
 }
