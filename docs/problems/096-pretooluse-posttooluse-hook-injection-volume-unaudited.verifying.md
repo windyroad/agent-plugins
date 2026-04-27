@@ -1,12 +1,16 @@
 # Problem 096: PreToolUse / PostToolUse hook injection volume across windyroad plugins
 
-**Status**: Known Error — Phase 1 audit done 2026-04-26; Phase 2 per-hook trims landed 2026-04-26 (iter 6 AFK loop); Phase 3 (ADR codifying hook injection budget policy) deferred to follow-up iter — composes with P091 per the audit's recommendations.
+**Status**: Verification Pending — Phase 1 audit done 2026-04-26; Phase 2 per-hook trims landed 2026-04-26 (iter 6 AFK loop); Phase 3 (ADR-045 codifying hook injection budget policy for PreToolUse/PostToolUse hooks) landed 2026-04-28 (AFK iter). Awaiting user verification.
 **Reported**: 2026-04-22
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Possible (3) — re-rated 2026-04-26 from 12 High after audit confirmed silent-on-pass design across 33/36 hooks
 **Effort**: M — re-rated 2026-04-26 from L after audit narrowed Phase 2 scope to 3 hook surfaces (`tdd-post-write.sh`, `plan-risk-guidance.sh`, `retrospective-reminder.sh`) plus optional shared-helper extraction
-**WSJF**: (9 × 2.0) / 2 = **9.0**
+**WSJF**: excluded from ranking (Verification Pending multiplier 0 per ADR-022)
 
-> Split from P091 meta (session-wide context budget) on 2026-04-22. This ticket owns the audit + remediation of the per-tool-call hook cluster. Phase 1 audit completed 2026-04-26. Phase 2 per-hook trims landed 2026-04-26.
+> Split from P091 meta (session-wide context budget) on 2026-04-22. This ticket owns the audit + remediation of the per-tool-call hook cluster. Phase 1 audit completed 2026-04-26. Phase 2 per-hook trims landed 2026-04-26. Phase 3 (ADR-045) landed 2026-04-28.
+
+## Fix Released
+
+ADR-045 (Hook injection budget policy for PreToolUse and PostToolUse hooks) committed in this AFK iteration's commit (post-Phase-2 codification of the five reusable patterns: silent-on-pass default, side-effect-only silent, silent-on-unchanged-state, hash-dedupe of repeated body content, once-per-session gating reuse). Awaiting user verification — verify by reading `docs/decisions/045-hook-injection-budget-for-pre-and-post-tool-use-hooks.proposed.md` and confirming the pattern catalogue + per-band byte budget table match the as-implemented Phase 2 hooks. Released to npm by the next `/wr-itil:work-problems` Step 6.5 release drain after this commit lands.
 
 ## Description
 
@@ -207,11 +211,21 @@ Specific recommendations from the audit + as-implemented notes:
 - `plan-risk-guidance.sh`: first-emit body ~600 bytes (down from ~1000-1500); subsequent-emit drops from ~1000 bytes to ~270 bytes. Per-session savings on a multi-plan session ~700 bytes per repeat plan-mode entry.
 - Aggregate: -1 to -15 KB per typical session, dominated by `tdd-post-write.sh` cumulative reduction.
 
-### Phase 3 (ADR) — pending (deferred to follow-up iter)
+### Phase 3 (ADR) — DONE 2026-04-28
 
-The "Hook injection budget policy" ADR (tracked on P091) extends to cover PreToolUse / PostToolUse budget rules. Phase 1 audit numbers feed into the ADR's budget table. Suggested rule: **always-on hooks must justify each byte; default behaviour is silent-on-pass + verbose-on-deny.**
+[ADR-045](../decisions/045-hook-injection-budget-for-pre-and-post-tool-use-hooks.proposed.md) — "Hook injection budget policy for PreToolUse and PostToolUse hooks" — landed as a sibling to ADR-038 in this AFK iteration's commit. Architect verdict (PASS, sibling-ADR confirmed) and JTBD verdict (PASS, JTBD-001/002/003/006/101 cited) preceded the draft.
 
-Phase 3 is unblocked — Phase 2 has landed and the patterns the ADR codifies (silent-on-unchanged-state, hash-dedupe of repeated body content, once-per-session gating reuse) are now implemented in real code and behaviourally tested. The ADR is the codification step; this ticket transitions to Verification Pending when Phase 3 lands.
+The ADR codifies five reusable patterns from Phase 2 as repository-canon for future hook authors:
+
+1. **Silent-on-pass default** — PreToolUse enforcement gates emit 0 bytes on pass (33/36 audited hooks already comply).
+2. **Side-effect-only silent** — `*-mark-reviewed.sh`, `*-slide-marker.sh`, `*-refresh-hash.sh`, `*-mark.sh`, `tdd-reset.sh` write markers but emit 0 bytes.
+3. **Silent-on-unchanged-state** — `tdd-post-write.sh` GREEN-unchanged path.
+4. **Hash-dedupe of repeated body content** — `tdd-post-write.sh` RED test-output hash; ≤80 bytes hash-match acknowledgement.
+5. **Once-per-session gating for always-on advisories** — `plan-risk-guidance.sh` reuses shared `lib/session-marker.sh` from ADR-038; ≤700 bytes first-emit, ≤150 bytes terse reminder.
+
+Per-band byte budget table codifies Phase 2 measurements as policy. Bats coverage already in place from Phase 2 (`tdd-post-write-phase2.bats`, `plan-risk-guidance-once-per-session.bats`, `session-marker.bats`, `sync-session-marker.bats`).
+
+Ticket transitions to Verification Pending per ADR-022 in this same commit.
 
 ## Related
 
