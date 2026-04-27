@@ -10,16 +10,27 @@
 # Structural assertion — Permitted Exception to the source-grep ban
 # (ADR-005 / P011 / ADR-037 contract-assertion pattern).
 #
-# @problem P071
+# tdd-review: structural-permitted (justification: SKILL.md prose contract
+# assertions; behavioural skill-runtime harness pending P012 + P081 Phase 2;
+# expected to migrate to behavioural form once the harness exists. Touched
+# during P136 Phase 2 ADR-044 alignment audit per the inline plan's
+# bridge-marker rule.)
+#
+# @problem P071 (originating split)
+# @problem P136 (ADR-044 alignment audit master — Phase 2 mitigate-incident)
+# @adr ADR-044 (Decision-Delegation Contract — argument-backfill is framework-mediated; evidence-gate is cat-2 deviation-approval; risk-above-appetite commit is cat-3 one-time-override)
 # @jtbd JTBD-001 (enforce governance without slowing down — discoverable surface)
-# @jtbd JTBD-101 (extend the suite with clear patterns — one skill per distinct user intent)
-# @jtbd JTBD-201 (restore service fast with an audit trail — mitigation + evidence gate)
+# @jtbd JTBD-101 (extend the suite with clear patterns — one skill per distinct user intent; consistent argument-backfill with transition-problem / work-problem)
+# @jtbd JTBD-201 (restore service fast with an audit trail — mitigation + evidence gate; fail-fast on typos preserves "restore fast")
 #
 # Cross-reference:
 #   P071: docs/problems/071-argument-based-skill-subcommands-are-not-discoverable.open.md
+#   P136: docs/problems/136-adr-044-alignment-audit-master.open.md
 #   ADR-010 amended (Skill Granularity section) — split naming + forwarder contract
 #   ADR-011 — manage-incident skill-wrapping precedent (evidence-gate, reversible preference)
+#   ADR-013 amended Rule 1 — structured user interaction; framework-resolution narrowing per ADR-044
 #   ADR-037 — contract-assertion bats pattern
+#   ADR-044 — Decision-Delegation Contract; argument-backfill is mechanical (Surface 1); evidence-gate is cat-2 (Surface 2); risk-above-appetite is cat-3 (Surface 3)
 
 setup() {
   SKILL_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
@@ -148,5 +159,100 @@ setup() {
   # path so JTBD-001's "without slowing down" outcome holds during
   # low-severity incidents.
   run grep -inE "lightweight|low.?severity|Sev 4|Sev 5" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+# ----------------------------------------------------------------------
+# P136 Phase 2 — ADR-044 alignment audit (added 2026-04-27)
+#
+# These assertions land the framework-mediated argument-backfill contract
+# (Surface 1 — fail-fast on typo-class input; matches transition-problem
+# / work-problem precedent), and the ADR-044 cross-references on the
+# retained user-authority surfaces (Surface 2 — evidence-first gate as
+# category-2 deviation-approval; Surface 3 — risk-above-appetite commit
+# as category-3 one-time-override).
+# ----------------------------------------------------------------------
+
+@test "SKILL.md Step 1 uses fail-fast usage message for malformed args (ADR-044 Surface 1)" {
+  # Argument-backfill is typo-class signal, not a decision. Per ADR-044
+  # Framework-Mediated boundary + the suite's existing transition-problem
+  # / work-problem singular precedent, malformed input fails the contract
+  # with a usage block and exits. Re-typing the slash command is faster
+  # than the multi-turn AskUserQuestion dialogue that was here before.
+  run awk '/^### 1\./,/^### 2\./' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Usage:"* ]] || [[ "$output" == *"usage message"* ]] || [[ "$output" == *"fail-fast"* ]]
+  [[ "$output" == *"exit"* ]] || [[ "$output" == *"stop"* ]]
+}
+
+@test "SKILL.md Step 1 does NOT fire AskUserQuestion for argument backfill (regression guard)" {
+  # The lazy-deferral surface ADR-044 closed for this skill: per-call
+  # AskUserQuestion when args are missing/malformed. If it returns to
+  # Step 1, the lazy-count metric (Step 2d) will spike and the skill
+  # diverges from transition-problem / work-problem precedent.
+  run awk '/^### 1\./,/^### 2\./' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  ! echo "$output" | grep -qE "ask via .?AskUserQuestion|invoke .?AskUserQuestion"
+}
+
+@test "SKILL.md Arguments section uses fail-fast (no AskUserQuestion backfill at top of file)" {
+  # The original line 20 said "If \$ARGUMENTS is empty or malformed, ask
+  # via AskUserQuestion for the incident ID and the action." Replaced
+  # with fail-fast pointer to Step 1's usage block. This regression
+  # guard catches re-introduction at the Arguments section.
+  run awk '/^## Arguments/,/^## Reversible preference/' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  ! echo "$output" | grep -qE "ask via .?AskUserQuestion"
+}
+
+@test "SKILL.md Step 3 evidence gate cross-references ADR-044 category-2 (deviation-approval)" {
+  # Surface 2 keep: ADR-011's evidence-first rule IS the existing
+  # decision; "Record anyway" IS the user-approved deviation; user IS
+  # the right authority. The inline ADR-044 cat-2 cross-reference makes
+  # the framework-resolution boundary visible at the call site without
+  # changing behaviour.
+  run awk '/^### 3\./,/^### 4\./' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"ADR-044"* ]]
+  [[ "$output" == *"deviation-approval"* ]] || [[ "$output" == *"category 2"* ]] || [[ "$output" == *"category-2"* ]]
+}
+
+@test "SKILL.md Step 8 risk-above-appetite cross-references ADR-044 category-3 (one-time-override)" {
+  # Surface 3 keep: in incident-mitigation context the user often wants
+  # to ship despite higher risk; the rule (RISK-POLICY appetite) still
+  # stands but this specific case warrants an exception. Category-3 is
+  # the genuine surface; the cross-ref makes it visible.
+  run awk '/^### 8\./,/^### 9\./' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"ADR-044"* ]]
+  [[ "$output" == *"one-time-override"* ]] || [[ "$output" == *"category 3"* ]] || [[ "$output" == *"category-3"* ]]
+}
+
+@test "SKILL.md retains AskUserQuestion for Surface 2 evidence-gate + Surface 3 risk-above-appetite (positive guard)" {
+  # AskUserQuestion is removed from Surface 1 (Step 1 + Arguments) but
+  # MUST remain in Step 3 (evidence gate, ADR-044 cat-2) and Step 8
+  # (risk-above-appetite, ADR-044 cat-3). The frontmatter allowed-tools
+  # MUST keep AskUserQuestion. Negative-of-negative guard against
+  # accidentally over-removing.
+  run grep -nE "^allowed-tools:.*AskUserQuestion" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  # Step 3 must still contain AskUserQuestion reference (the evidence
+  # gate is the cat-2 surface).
+  run awk '/^### 3\./,/^### 4\./' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -qE "AskUserQuestion"
+  # Step 8 must still contain AskUserQuestion reference (risk-above-
+  # appetite is the cat-3 surface).
+  run awk '/^### 8\./,/^### 9\./' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -qE "AskUserQuestion"
+}
+
+@test "bats file carries the tdd-review: structural-permitted marker (P081 + P136 bridge)" {
+  # Per P136 Phase 2 inline plan: bats touched during the audit get
+  # the structural-permitted marker as the bridge until P081 Phase 2's
+  # canonical retrofit. Without the marker, future TDD agent reviews
+  # will flag the file as a P081 violation.
+  run grep -nE "tdd-review:[[:space:]]+structural-permitted" "${BATS_TEST_FILENAME}"
   [ "$status" -eq 0 ]
 }

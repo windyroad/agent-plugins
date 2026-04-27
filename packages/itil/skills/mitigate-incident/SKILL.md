@@ -17,7 +17,7 @@ This skill is the P071 phased-landing split of `/wr-itil:manage-incident <I> mit
 - `<I###>` — the incident ID (e.g. `I007` or bare `007`). Resolves to `docs/incidents/<I###>-*.{investigating,mitigating}.md`.
 - `<action>` — free-text description of the mitigation being applied (e.g. `rollback checkout service to 1.2.4`, `feature flag checkout.fast-path off`, `restart ingest worker pool`). Prefer **reversible** actions — see "Reversible preference" below.
 
-If `$ARGUMENTS` is empty or malformed, ask via `AskUserQuestion` for the incident ID and the action.
+If `$ARGUMENTS` is empty or malformed, fail-fast with a usage message and exit (per ADR-044 Framework-Mediated Surface; matches the `transition-problem` / `work-problem` precedent). Argument malformation is a typo-class signal, not a decision — the slash command is the input contract; re-typing is faster than a multi-turn `AskUserQuestion` dialogue, and the user-memory direction `feedback_act_on_obvious_decisions.md` pins this. The exact usage block is in Step 1.
 
 ## Reversible preference (ADR-011)
 
@@ -32,9 +32,11 @@ Prefer **reversible** mitigations over forward fixes:
 
 Record every attempt, successful or not. Failed mitigations are as important to the audit trail as successful ones — they narrow hypothesis space for future investigation.
 
-## Evidence-first gate (ADR-011)
+## Evidence-first gate (ADR-011; ADR-044 category-2 deviation-approval)
 
-**Pre-flight check before the first mitigation attempt**: the incident file must contain at least one hypothesis with cited evidence in the `## Hypotheses` section. If not, block the transition and ask via `AskUserQuestion`:
+**Pre-flight check before the first mitigation attempt**: the incident file must contain at least one hypothesis with cited evidence in the `## Hypotheses` section. If not, block the transition and ask via `AskUserQuestion`. This is the **ADR-044 category-2 (deviation-approval)** surface: ADR-011's evidence-first rule is the existing decision; "Record anyway" is the user-approved deviation in this specific case (the rule isn't being amended; this case is being excepted with audit trail). The user IS the right authority for the bypass shape.
+
+The 3-option prompt:
 
 > "Incident `<I###>` has no hypothesis with cited evidence. Per ADR-011, mitigation requires at least one ranked hypothesis backed by a log, repro, diff, or metric reference. (a) Add a hypothesis + evidence now and retry, (b) Record the mitigation anyway with an evidence-skipped justification (requires audit-trail note), (c) Cancel."
 
@@ -42,14 +44,24 @@ This gate is the **cool-headed commitment**: it blocks "try this and see" action
 
 ## Steps
 
-### 1. Parse arguments
+### 1. Parse arguments (fail-fast on typos — ADR-044 Surface 1)
 
 Extract `<I###>` and `<action>` from `$ARGUMENTS`. Normalise `<I###>`:
 
 - Accept `I007`, `i007`, `007`, `7` → canonicalise to `I007` (uppercase I + zero-padded 3 digits).
-- If missing, ask via `AskUserQuestion`.
+- If missing, malformed, or unrecognisable, emit the usage block below and exit. **Do not** fire `AskUserQuestion` for argument backfill — argument shape is a typo-class signal, not a decision. The framework-mediated answer per ADR-044 is fail-fast + exit; the user re-types in 1 second. Matches the `transition-problem` Step 1 + `work-problem` singular precedent for consistency across the suite (JTBD-101 — clear patterns).
 
-Extract `<action>` as everything after the incident ID. If missing or trivially short (< 8 chars), ask via `AskUserQuestion` for a descriptive action.
+Extract `<action>` as everything after the incident ID. If missing or trivially short (< 8 chars), apply the same fail-fast pattern: emit the usage block below and exit; the user re-invokes with a complete action.
+
+**Usage block** (emitted on any malformed-argument case; copy verbatim so adopters get a consistent shape):
+
+```
+Usage: /wr-itil:mitigate-incident <I###> <action>
+  <I###>    — incident ID (e.g. I007 or bare 007); must resolve to docs/incidents/<I###>-*.{investigating,mitigating}.md
+  <action>  — descriptive mitigation (8+ chars), e.g. "rollback checkout service to 1.2.4", "feature flag checkout.fast-path off", "restart ingest worker pool"
+
+Prefer reversible mitigations (see "Reversible preference" in this skill). Run /wr-itil:list-incidents to see active incidents if you don't know the ID.
+```
 
 ### 2. Locate the incident file
 
@@ -61,7 +73,7 @@ ls docs/incidents/<I###>-*.investigating.md docs/incidents/<I###>-*.mitigating.m
 - If exactly one file matches, record its current suffix (`investigating` or `mitigating`) — this drives the transition decision in Step 4.
 - If multiple files match (should not happen under the `<ID>-<title>.<status>.md` naming convention), report the ambiguity and exit.
 
-### 3. Pre-flight: evidence gate (first mitigation only)
+### 3. Pre-flight: evidence gate (first mitigation only) — ADR-044 category-2 deviation-approval
 
 If the file suffix is `.investigating.md` (i.e. this is the first mitigation), read the `## Hypotheses` section and check for at least one line containing `Evidence:` followed by a non-empty reference. The shape per ADR-011:
 
@@ -70,9 +82,9 @@ If the file suffix is `.investigating.md` (i.e. this is the first mitigation), r
 ```
 
 - If at least one hypothesis has a cited evidence reference, proceed to Step 4.
-- If no hypothesis carries evidence, invoke `AskUserQuestion` with the three-option prompt from "Evidence-first gate" above. Branch:
+- If no hypothesis carries evidence, invoke `AskUserQuestion` with the three-option prompt from "Evidence-first gate" above. This is the ADR-044 **category-2 (deviation-approval)** surface — the user is the right authority for the bypass; the gate's behaviour is preserved verbatim post-ADR-044 because deviation-approval is a kept-AskUserQuestion category in the 6-class taxonomy. Branch:
   - (a) User adds a hypothesis + evidence now — re-read the file and re-check; if satisfied, proceed. If still missing, report the gate failure and exit.
-  - (b) User records anyway — append an `## Audit trail` note to the file: `[<timestamp> UTC] Evidence-gate bypassed by user — reason: <justification>`. Then proceed to Step 4.
+  - (b) User records anyway (deviation approved) — append an `## Audit trail` note to the file: `[<timestamp> UTC] Evidence-gate bypassed by user — reason: <justification>`. Then proceed to Step 4.
   - (c) User cancels — exit without change.
 
 If the file suffix is already `.mitigating.md`, skip the gate (it only runs on the transition).
@@ -147,14 +159,14 @@ Report:
 - Any quality-check warnings.
 - A pointer: "Run `/wr-itil:manage-incident <I###> restored` when the verification signal confirms service is restored, or re-invoke `/wr-itil:mitigate-incident <I###> <next-action>` to record another mitigation attempt."
 
-### 8. Commit the completed work (ADR-014)
+### 8. Commit the completed work (ADR-014; risk-above-appetite is ADR-044 category-3 one-time-override)
 
 Per ADR-014, governance skills commit their own work.
 
 1. `git add` the renamed / modified incident file.
 2. Delegate to `wr-risk-scorer:pipeline` (subagent_type: `wr-risk-scorer:pipeline`) to assess the staged changes and create a bypass marker. If the subagent type is not available (spawned subagent surface), invoke `/wr-risk-scorer:assess-release` via the Skill tool instead — per ADR-015 it wraps the same pipeline subagent.
 3. `git commit -m "docs(incidents): I<NNN> mitigated — <action summary>"`.
-4. If risk is above appetite: use `AskUserQuestion` to ask whether to commit anyway, remediate first, or park the work. If `AskUserQuestion` is unavailable, skip the commit and report the uncommitted state clearly.
+4. If risk is above appetite: use `AskUserQuestion` to ask whether to commit anyway, remediate first, or park the work. This is the ADR-044 **category-3 (one-time-override)** surface — the rule (RISK-POLICY appetite) still stands but this specific case in incident-mitigation context often warrants an exception (the tech lead may need to ship a mitigation despite higher residual risk to restore service fast — JTBD-201). The 3-option vocabulary is the genuine category-3 surface. If `AskUserQuestion` is unavailable (rare in incident context — incident skills are interactive by definition), skip the commit and report the uncommitted state clearly per ADR-013 Rule 6.
 
 ### 9. Auto-release when changesets are queued (ADR-020)
 
@@ -194,10 +206,12 @@ If the user wants any of the above, the skill reports the appropriate sibling an
 ## Related
 
 - **P071** (`docs/problems/071-argument-based-skill-subcommands-are-not-discoverable.open.md`) — originating ticket. This skill is slice 6a of the P071 phased-landing plan.
+- **P136** (`docs/problems/136-adr-044-alignment-audit-master.open.md`) — ADR-044 alignment audit master. This skill is the second high-ask SKILL audited under Phase 2 (after work-problem singular).
 - **ADR-010 amended** (`docs/decisions/010-rename-wr-problem-to-wr-itil.proposed.md` — Skill Granularity section) — canonical skill-split naming + forwarder contract + `deprecated-arguments: true` frontmatter flag.
 - **ADR-011** (`docs/decisions/011-manage-incident-skill-wrapping.proposed.md`) — incident lifecycle file-suffix conventions (`.investigating.md` / `.mitigating.md` / `.restored.md` / `.closed.md`) + evidence-first rule + reversible-mitigation preference + Sev 4-5 lightweight path.
-- **ADR-013** Rule 1 — structured user interaction (evidence-gate prompt uses AskUserQuestion; deprecation notices use systemMessage).
-- **ADR-013** Rule 6 — policy-within-appetite non-interactive actions (release drain).
+- **ADR-013 amended Rule 1** — structured user interaction; narrowed in P135 to defer to ADR-044 for framework-resolution boundary. Surface 1 (argument-backfill) no longer fires `AskUserQuestion` (framework-mediated); Surfaces 2 + 3 retain it under ADR-044 categories 2 + 3.
+- **ADR-013** Rule 6 — policy-within-appetite non-interactive actions (release drain). Step 9 unchanged.
+- **ADR-044** (`docs/decisions/044-decision-delegation-contract.proposed.md`) — Decision-Delegation Contract. Surface 1 (argument-backfill) is framework-mediated per the ADR; Surface 2 (evidence-first gate) is category-2 (deviation-approval); Surface 3 (risk-above-appetite commit) is category-3 (one-time-override).
 - **ADR-014** — governance skills commit their own work.
 - **ADR-015** — release scorer delegation pattern.
 - **ADR-020** — auto-release when changesets are queued.
