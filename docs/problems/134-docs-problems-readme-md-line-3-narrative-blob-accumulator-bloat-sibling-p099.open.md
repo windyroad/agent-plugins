@@ -2,10 +2,10 @@
 
 **Status**: Open
 **Reported**: 2026-04-27
-**Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Likely (3)
+**Priority**: 10 (High) — Impact: Minor (2) x Likelihood: Almost certain (5) <!-- re-rated 2026-04-28 — user-surfaced + iter-2-retro-corroborated + architect-Read-failure; corrected mislabel "Likely (3)" → policy-verbatim "Almost certain (5)"; Impact dropped Moderate→Minor since RISK-POLICY Impact-3 ("npm publish disrupted") doesn't apply to internal-tooling friction -->
 **Effort**: M — likely combination of (a) `manage-problem` Step 5 P094 and Step 7 P062 README-refresh contracts to **truncate** the "Last reviewed" parenthetical to a fixed bound (e.g. 1 KB or 200 chars per session-summary fragment), (b) per-iter retro-class entries archive themselves to `docs/problems/README-history.md` (or similar archive sibling), (c) optional advisory script `packages/itil/scripts/check-problems-readme-budget.sh` mirroring P099's `check-briefing-budgets.sh` triplet (script + bats + ADR-tier-budget amendment).
 
-**WSJF**: (9 × 1.0) / 2 = **4.5**
+**WSJF**: (10 × 1.0) / 2 = **5.0**
 
 > Surfaced 2026-04-27 across multiple sessions. The "Last reviewed" line on `docs/problems/README.md` (line 3) accumulates session-summary fragments unbounded — every `manage-problem` Step 5 / Step 7 README refresh prepends a new "Prior:" segment without trimming any older segment. Current size: ~62 KB on a single line. Symptoms: breaks the Read tool at every offset/limit combination tested (file content exceeds 25K-token limit). Forces awk/grep workarounds to inspect any other section.
 
@@ -32,6 +32,9 @@ This is the **sibling pattern** of P099 (`docs/BRIEFING.md` grows unbounded via 
   - 2026-04-26 — flagged by AFK iter 5 retro Step 2b ("docs/problems/README.md exceeds Read tool 25K-token limit — sibling to P099 / candidate for extension")
   - 2026-04-26 — flagged by AFK iter 7 retro
   - 2026-04-27 — hit twice this session: (a) finding P130 row position for insertion, (b) finding P124 row position for VQ-removal during retro
+  - **2026-04-28 — user personally surfaced concern** during a `/wr-itil:work-problems` AFK loop, mid-iter-2: *"@docs/problems/README.md has a very large blob of text at the start of the file. I don't know why this is here and what value it provides. It makes the README not very readable, and I'm worried that it might be consuming token unnecessarily."* This is the first **user-facing** signal (prior hits were agent-internal Read-tool failures); the user is now reading the file and finds line 3 makes it un-skimmable.
+  - 2026-04-28 — convergent independent evidence: iter 2 (P096 Phase 3) retro Step 2b flagged the same line-3 reload thrash — *"`Read` tool refused `docs/problems/README.md` (28k–36k tokens) — required four reload attempts at decreasing limits before falling back to `Grep` for line locations + `Bash head` for prefix preview"* — and explicitly recommended *"append new evidence to P134's symptoms via `/wr-itil:manage-problem` on next interactive session"*. The iter agent and the user surfaced the same problem within minutes, independently.
+  - 2026-04-28 — architect-agent reviewing THIS very re-rate also hit a Read-tool failure: *"26.7k-token-exceeds-25k-limit error, even at offset=1, limit=5"*. Line 3 has crossed the threshold where the Read tool **cannot window-read the file at all** — this is a stronger symptom than reload-thrash. It is a hard tool failure on every offset/limit combination. Workaround paths (`awk`, `grep`, `Bash head`) are now mandatory; the Read tool is no longer usable for this file.
 - The line content is genuinely useful audit history — names recent tickets, recent transitions, recent releases, recent decisions — but the accumulation pattern means the same audit history that's useful at 5KB is useless at 62KB because no tool can read it.
 - The longer this goes, the worse it gets — every new ticket, every transition, every retro adds a new prepended fragment.
 
@@ -53,10 +56,12 @@ Cross-session: hand-edit line 3 occasionally to trim older fragments. No automat
 
 ### Investigation Tasks
 
-- [ ] Decide truncation strategy:
+- [ ] **Decide whether the line 3 narrative carries enough audit value to justify any retention at all.** *2026-04-28 user signal*: "I don't know what value it provides" — open question whether aggressive truncation (drop, not archive) is acceptable. If the line 3 audit history is NOT load-bearing for any contract (the `manage-problem` SKILL.md Step 9 fast-path freshness check uses git-commit timestamp on README.md, not its prose contents — so line 3's content is purely human-readable audit), then **Option C-aggressive** (drop with no archive on every refresh) becomes viable and simplifies Phase 1 to a one-liner: regeneration always writes the most-recent fragment ONLY, no archive sibling needed. This direction-deciding question gates the truncation-strategy choice below — answer it before picking Option A/B/C.
+- [ ] Decide truncation strategy (gated on the value-question above):
   - Option A: hard byte cap on the "Last reviewed" parenthetical (e.g. 1 KB). Older fragments overflow into archive sibling.
   - Option B: hard count cap on session-summary fragments (e.g. last 5 sessions). Older fragments overflow into archive.
   - Option C: rotate the entire "Last reviewed" line to a sibling `docs/problems/README-history.md` archive whenever a new fragment is added — keep README's line 3 to ONLY the most-recent fragment.
+  - **Option C-aggressive** *(newly viable per the value-question)*: regeneration writes the most-recent fragment only; nothing archived. Simplest fix path; load-bearing only if the value-question's answer is "the line 3 prose has no consumer".
 - [ ] Update `manage-problem` Step 5 P094 + Step 7 P062 README-refresh contracts to apply the chosen truncation.
 - [ ] Optional: create `packages/itil/scripts/check-problems-readme-budget.sh` advisory diagnostic mirroring P099's `check-briefing-budgets.sh`. Threshold default: 5120 bytes for line 3 (matches P099's tier 3 envelope).
 - [ ] Behavioural bats per ADR-005 + ADR-044 (once landed): fixture write a multi-segment line 3 → assert the truncation contract bounds it.
