@@ -18,6 +18,16 @@ Several SKILL contracts in this project explicitly distinguish **mechanical stag
 Similar mechanical-vs-interactive splits exist in:
 
 - **`run-retro` Step 1.5 signal-vs-noise pass** — *"Classification ownership (policy-authorised per ADR-013 Rule 5): the agent owns silent classification. No AskUserQuestion is fired for individual entry promotions, demotions, or keep decisions"*. Only the **delete queue** (score ≤ -3) requires user confirmation.
+
+### Two SKILL-text gaps the user surfaced 2026-04-27
+
+The user identified two **additional** mechanical-zones the SKILL.md text currently mis-classifies as ask-zones, and which inflate the over-ask count further:
+
+1. **`run-retro` Step 3 briefing REMOVALS** — current SKILL text reads *"Use the AskUserQuestion tool to confirm any removals"*. User direction 2026-04-27: *"removals shouldn't be an ask"*. The remove-on-signal-decay decision should follow the same silent-classification model as Step 1.5 — agent applies the signal-vs-noise heuristic and removes (or trims, or compresses) without asking. The SKILL contract change: `Step 3 removals → no-ask, agent owns silent removal decisions per Step 1.5 ownership rules`.
+
+2. **`run-retro` Step 3 Tier 3 topic-file ROTATION (P099)** — current SKILL text fires `AskUserQuestion` per over-budget topic file with 4 rotation-shape options (split-by-subtopic / split-by-date / trim-noise / defer). With 6 of 6 topic files currently exceeding the 5120-byte threshold, the prompt fires 6 times per retro. User observation 2026-04-27: when 6/6 trigger, the user collapses to "defer" 6 times to escape the prompt cascade — worse than no rotation at all because it trains them to ignore the prompt. The agent has all the information needed to apply rotation autonomously (file mtimes for split-by-date; signal scores from Step 1.5 for trim-noise; sub-topic boundaries for split-by-subtopic). The SKILL contract change: `Step 3 Tier 3 rotation → no-ask, agent owns silent rotation decisions and surfaces only the chosen rotation in the Step 5 retro summary`.
+
+Both fold into the same Phase 2 per-skill reinforcement work (see Fix Strategy below). The corrections add **two more concrete cases** to the inverse-P078 pattern P132 captures.
 - **`run-retro` Step 3 briefing additions** — additions are no-ask (apply Step 1.5 heuristic + write); only **removals** and **topic-file rotations** ask.
 - **`/install-updates` Step 6a cache hit** — *"skip Step 6 — proceed directly to Step 6.5 with the cached scope. The user's prior explicit answer authorises the install per ADR-013 Rule 5 (policy-authorised silent proceed)"*.
 - **`/wr-itil:work-problems` Step 6.5 drain at within-appetite** — drain is *"policy-authorised non-interactive"*; no AskUserQuestion required.
