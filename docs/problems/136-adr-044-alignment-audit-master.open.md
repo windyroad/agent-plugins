@@ -91,6 +91,92 @@ P135 Phase 2 amended only the 4 SKILLs the implementer touched. ADR-044 is proje
 - **Blocked by**: (none — Phase 1 can proceed standalone; subsequent phases sequenced per plan).
 - **Composes with**: P135 (predecessor — established ADR-044 + amended 4 SKILLs), P132 (inverse-P078 enforcement), P081 (canonical bats retrofit; P136 bridge via `tdd-review: structural-permitted` marker), P130 (orchestrator presence-aware dispatch — same family of agent-discipline gaps), P131 (user-space writes — same family).
 
+## Implementation Plan (inline — durable across sessions)
+
+> Drafted 2026-04-27 by the Plan agent during a `/plan` workflow; risk-scored PASS at 3/3/4 by `wr-risk-scorer:plan`; user-approved 2026-04-27 via `ExitPlanMode`. The plan content lives inline here (mirroring the P081 plan-inline pattern from earlier this session) so it survives any future `/plan` workflow overwriting `~/.claude/plans/noble-cuddling-sutton.md`. Resume in a fresh session by invoking `/wr-itil:work-problem 136`.
+
+### Phase 1 — Anchor (S, ~1 hr) — DONE 2026-04-27 commit `7d80211`
+
+NEW master ticket (this file) + README WSJF row insertion. Doc-only, no changeset, no release.
+
+### Phase 2 — High-ask SKILL audit (M, ~3 hrs across 3 sessions)
+
+3 SKILLs with 5+ AskUserQuestion calls — highest-friction first:
+
+1. `packages/itil/skills/work-problem/SKILL.md` (singular — 11 calls)
+2. `packages/itil/skills/mitigate-incident/SKILL.md` (8 calls)
+3. `packages/itil/skills/manage-incident/SKILL.md` (7 calls)
+
+**Per-skill loop** (3 separate sessions/commits/releases):
+
+1. Read SKILL.md against the ADR-044 framework-resolution checklist:
+   - Each `AskUserQuestion` call classified as (a) framework-resolved → lazy-deferral candidate, (b) one of 6 user-owned categories → keep, (c) ambiguous → deviation-candidate.
+2. Surface findings to user via ADR-044 deviation-approval flow. **Do NOT auto-edit.** User approves amend / keep / supersede per call via the 5-option `AskUserQuestion` (Approve+amend / Approve+supersede / Approve+one-time / Reject / Defer).
+3. Apply approved amendments; behavioural-by-default bats updated; structural-grep tests touched get `tdd-review: structural-permitted` marker per P081.
+4. Per-skill changeset: `@windyroad/itil` patch. Drain release before next skill.
+
+### Phase 3 — Medium-ask + low-ask SKILL audit (M, ~3 hrs across 4-6 sessions)
+
+26 remaining unaudited SKILLs. Same per-skill discipline as Phase 2.
+
+- 2 moderate-ask: `review-jobs` (3 calls), `analyze-context` (3 calls).
+- 24 low/zero-ask: scattered across architect, c4, connect, itil, jtbd, risk-scorer, style-guide, tdd, voice-tone, wardley packages.
+- Group truly zero-ask SKILLs (c4/check, c4/generate, list-incidents, list-problems, reconcile-readme) into a single "audited — no change needed" log entry on this ticket; no commits required for those.
+- Estimated 4-6 actual edit-bearing commits across 26 SKILLs.
+
+### Phase 4 — Hook audit (S-M, ~2 hrs)
+
+4 critical ask-emitters first (sequenced):
+
+1. `packages/itil/hooks/itil-assistant-output-gate.sh`
+2. `packages/itil/hooks/itil-assistant-output-review.sh`
+3. `packages/itil/hooks/manage-problem-enforce-create.sh`
+4. `packages/voice-tone/hooks/voice-tone-eval.sh`
+
+Per-hook: read prose for nudges that push the agent toward over-ask in framework-resolved zones; surface deviation-candidates; user approves; amend hook prose only. Per-hook commit + changeset.
+
+Remaining 65 hooks audited as a single sweep entry on this ticket (most are PreToolUse gates with no ask-prose) — bundled no-change-needed audit-log commit.
+
+### Phase 5 — Agent + ADR + JTBD + README sweep (S, ~1 hr)
+
+Lower-risk surfaces. Per-surface: cross-reference ADR-044; if no contradiction, log "audited — no change needed" on this ticket. If contradiction found in a load-bearing ADR (e.g., ADR-022 / ADR-032 / ADR-040 / ADR-042), surface as a separate ADR amendment commit (composes-with-pattern; not bundled with SKILL edits).
+
+Bundle the no-change-needed entries into a single doc-only audit-log commit closing P136.
+
+### Phase 6 — Bats retrofit (NOT in P136 scope)
+
+~248 structural-grep assertions across 141 files are P081 territory. P136 uses the `tdd-review: structural-permitted` marker as the temporary bridge for any bats touched during Phases 2-4; **P081 Phase 2 owns the canonical retrofit**. P136 cross-references P081; closing P136 does NOT require bats retrofit completion.
+
+### Architectural trade-offs (decisions for the implementer)
+
+1. **Per-surface vs bundled releases** — chose per-surface (R1 from P135, validated). Each high-ask SKILL gets its own release; sweep phases bundle no-change entries.
+2. **Eager retrofit vs deviation-candidate-only** — chose deviation-candidate-only (ADR-044 spirit). Audit produces evidence; user approves each amendment. Auto-edit would violate the contract P135 just established.
+3. **Risk-scoring per-surface vs per-phase** — chose per-surface for high-ask SKILLs (Phase 2) + 4 critical hooks (Phase 4); group low-ask SKILLs into one risk-scoring call (Phase 3 sweep).
+4. **Bats during audit vs deferred to P081** — chose deferred + marker bridge. Touching SKILLs whose bats are structural-heavy (manage-incident ~14, work-problem ~22) invalidates greps; the `tdd-review: structural-permitted` marker preserves test-green-as-safety-signal during the bridge window.
+
+### Sequencing
+
+Phase 1 (anchor) → Phase 2 (high-ask SKILLs, sequenced by ask-volume) → Phase 3 (remaining SKILLs) → Phase 4 (hooks) → Phase 5 (sweep). Phase 6 is composes-with-P081, not P136-owned.
+
+### Verification
+
+End-to-end test plan covering all 5 phases:
+
+1. **Phase 1 verification**: P136 master ticket exists; README WSJF table shows P136 row; `bash packages/itil/scripts/reconcile-readme.sh docs/problems` exits 0. ✓ DONE 2026-04-27.
+2. **Phase 2 verification per-skill**: invoke the audited skill in a real session; observe no AskUserQuestion fires in framework-resolved zones (per the per-skill amendments); per-skill bats green; @windyroad/itil patch released and visible at `npm view @windyroad/itil version`.
+3. **Phase 3 verification**: same per-skill exercise across the 26 surfaces; aggregate "audited" count on P136 reaches 26/26 (4 P135 + 22 zero-or-low-ask covered).
+4. **Phase 4 verification per-hook**: trigger each amended hook; observe no over-ask prose surfaces; per-hook bats green.
+5. **Phase 5 verification**: each agent / ADR / JTBD / README in scope is logged as "audited — no change needed" or has its amendment commit; P136 audit-log shows 100% coverage.
+6. **Cross-phase ROI metric**: Step 2d "Ask Hygiene Pass" lazy-count metric trends down across consecutive retros as Phases 2-4 land.
+7. **Anti-regression for the deviation-candidate surface**: every per-skill amendment goes through ADR-044's deviation-approval AskUserQuestion at retro end. If the user rejects an amendment, the SKILL is reverted via `git revert`.
+8. **P081 cross-reference**: any bats touched during Phases 2-4 carries the `tdd-review: structural-permitted` marker; P081 Phase 2 retrofit (separate work) eventually replaces these with behavioural form.
+
+### How to resume P136 in a fresh session
+
+Type `/wr-itil:work-problem 136` (singular). The manage-problem flow opens this ticket, reads the inline plan above, and surfaces the next-phase checklist. Phase status is tracked via the `Investigation Tasks` checklist at the top of this ticket — agent updates checkboxes as phases complete.
+
+P136 stays at WSJF 2.25 in the queue; it is **NOT picked up automatically by `/wr-itil:work-problems` AFK loop** because the per-skill audit is user-directed work that needs the deviation-approval AskUserQuestion at retro end, which only fires in the orchestrator's main turn (interactive).
+
 ## Related
 
 - **ADR-044** (`docs/decisions/044-decision-delegation-contract.proposed.md`) — the architectural anchor. Captures the 6-class authority taxonomy + framework-mediated surface enumeration + anti-BUFD-for-framework-evolution clause + R6 numeric gate Reassessment Trigger.
