@@ -12,18 +12,29 @@
 # Structural assertion — Permitted Exception to the source-grep ban
 # (ADR-005 / P011 / ADR-037 contract-assertion pattern).
 #
-# @problem P071
+# tdd-review: structural-permitted (justification: SKILL.md prose contract
+# assertions; behavioural skill-runtime harness pending P012 + P081 Phase 2;
+# expected to migrate to behavioural form once the harness exists. Touched
+# during P136 Phase 2 ADR-044 alignment audit per the inline plan's
+# bridge-marker rule.)
+#
+# @problem P071 (originating split)
+# @problem P136 (ADR-044 alignment audit master — Phase 2 work-problem singular)
+# @adr ADR-044 (Decision-Delegation Contract — framework-mediated Prioritisation surface)
 # @jtbd JTBD-001 (enforce governance without slowing down — discoverable surface)
 # @jtbd JTBD-101 (extend the suite with clear patterns — one skill per distinct user intent)
+# @jtbd JTBD-201 (audit trail — selection cites the deciding tie-break rung)
 #
 # Cross-reference:
 #   P071: docs/problems/071-argument-based-skill-subcommands-are-not-discoverable.open.md
+#   P136: docs/problems/136-adr-044-alignment-audit-master.open.md
 #   ADR-010 amended (Skill Granularity section) — split naming + forwarder contract
-#   ADR-013 Rule 1 — structured user interaction (AskUserQuestion selection prompt)
-#   ADR-013 Rule 6 — AFK non-interactive fallback
+#   ADR-013 amended Rule 1 — structured user interaction; framework-resolution narrowing per ADR-044
+#   ADR-013 Rule 6 — AFK non-interactive fallback (Step 4 scope-expansion only)
 #   ADR-014 — governance skills commit their own work (delegated target owns commits)
 #   ADR-032 — governance skill invocation patterns (plural orchestrator delegates here)
 #   ADR-037 — contract-assertion bats pattern
+#   ADR-044 — Decision-Delegation Contract; Step 2 selection is framework-mediated
 
 setup() {
   SKILL_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
@@ -202,5 +213,82 @@ setup() {
   # invoke. The cross-reference documents the pair relationship so
   # future drift to /wr-itil:work-problems doesn't orphan this skill.
   run grep -inE "P077|ADR-032" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+# ----------------------------------------------------------------------
+# P136 Phase 2 — ADR-044 alignment audit (added 2026-04-27)
+#
+# These assertions land the framework-mediated-selection contract for
+# Step 2 and the ADR-044 category-2 cross-reference for Step 4. They
+# replace the prior assertions that mandated AskUserQuestion-driven
+# selection (which was the lazy-deferral surface ADR-044 was written to
+# close).
+# ----------------------------------------------------------------------
+
+@test "SKILL.md Step 2 specifies framework-mediated selection (ADR-044 Prioritisation)" {
+  # Per ADR-044 Framework-Mediated Surface row "Prioritisation — WSJF
+  # formula + documented tie-breaks (Known Error > Open; smaller effort
+  # first; older reported date). Pick + work." Step 2 must apply the
+  # tie-break ladder mechanically rather than defer to AskUserQuestion.
+  run awk '/^### 2\./,/^### 3\./' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"framework-mediated"* ]] || [[ "$output" == *"tie-break ladder"* ]]
+  [[ "$output" == *"Known Error"* ]]
+  [[ "$output" == *"smaller"* ]]
+  [[ "$output" == *"older reported date"* ]]
+  [[ "$output" == *"ADR-044"* ]]
+}
+
+@test "SKILL.md Step 2 reports the chosen ticket + tie-break rung that decided (JTBD-201 audit-trail)" {
+  # Audit-trail outcome: the agent must cite which rung of the ladder
+  # decided the selection so the choice is reproducible from the README
+  # state at the time of the report.
+  run awk '/^### 2\./,/^### 3\./' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"report"* ]]
+  [[ "$output" == *"tie-break"* ]] || [[ "$output" == *"ladder rung"* ]]
+}
+
+@test "SKILL.md Step 2 documents user-override path via direct NNN invocation" {
+  # Selection is framework-mediated, but the user retains agency via
+  # /wr-itil:work-problem <NNN> direct invocation. Without the
+  # documented escape hatch, the user has no way to redirect except via
+  # post-hoc correction (ADR-044 category 6). The literal-form
+  # assertion guards against the substring trap where /wr-itil:work-
+  # problems (plural) accidentally satisfies a /wr-itil:work-problem
+  # substring check.
+  run awk '/^### 2\./,/^### 3\./' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"/wr-itil:work-problem <NNN>"* ]] || [[ "$output" == *"/wr-itil:work-problem <ID>"* ]] || [[ "$output" == *"\`/wr-itil:work-problem 042\`"* ]]
+}
+
+@test "SKILL.md Step 2 does NOT fire AskUserQuestion as the selection mechanism (regression guard)" {
+  # The AskUserQuestion-driven selection prompt was the lazy-deferral
+  # surface ADR-044 closed. If it returns to Step 2 the lazy-count
+  # metric (Step 2d "Ask Hygiene Pass") will spike. AskUserQuestion may
+  # appear elsewhere (Step 4 scope-expansion) but NOT inside Step 2.
+  run awk '/^### 2\./,/^### 3\./' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  ! echo "$output" | grep -qE "Selection via .?AskUserQuestion|Use .header: .Next problem"
+}
+
+@test "SKILL.md Step 4 cross-references ADR-044 category-2 (deviation-approval)" {
+  # Effort growth IS the contradicting evidence against the WSJF score
+  # that ranked this ticket at the top — it's a deviation-approval
+  # surface in the ADR-044 taxonomy. The inline cross-reference makes
+  # the framework-resolution boundary visible at the call site.
+  run awk '/^### 4\./,/^### 5\./' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"ADR-044"* ]]
+  [[ "$output" == *"deviation-approval"* ]] || [[ "$output" == *"category 2"* ]] || [[ "$output" == *"category-2"* ]]
+}
+
+@test "bats file carries the tdd-review: structural-permitted marker (P081 + P136 bridge)" {
+  # Per P136 Phase 2 inline plan: bats touched during the audit get
+  # the structural-permitted marker as the bridge until P081 Phase 2's
+  # canonical retrofit. Without the marker, future TDD agent reviews
+  # will flag the file as a P081 violation.
+  run grep -nE "tdd-review:[[:space:]]+structural-permitted" "${BATS_TEST_FILENAME}"
   [ "$status" -eq 0 ]
 }

@@ -57,7 +57,7 @@ P135 Phase 2 amended only the 4 SKILLs the implementer touched. ADR-044 is proje
 - [x] Verified counts via Explore agent (2026-04-27).
 - [x] Confirmed P135 Phase 2 already audited 4 SKILLs (run-retro / work-problems / manage-problem / transition-problem).
 - [x] Identified high-ask candidates: work-problem (11), mitigate-incident (8), manage-incident (7).
-- [ ] Phase 2: audit work-problem singular SKILL.md.
+- [x] Phase 2: audit work-problem singular SKILL.md. (2026-04-27) — 2 call sites classified: Step 2 selection = lazy-deferral (amended to framework-mediated tie-break ladder per ADR-044 Prioritisation row); Step 4 scope-expansion = keep (genuine ADR-044 category-2 deviation-approval surface; cosmetic cross-ref added for clarity). Architect + JTBD reviews PASS. Bats: 6 new + 19 existing assertions green; full itil package suite (534 tests) green. Changeset: `@windyroad/itil` patch.
 - [ ] Phase 2: audit mitigate-incident SKILL.md.
 - [ ] Phase 2: audit manage-incident SKILL.md.
 - [ ] Phase 3: audit medium-ask SKILLs (review-jobs, analyze-context).
