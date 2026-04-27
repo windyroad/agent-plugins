@@ -100,6 +100,8 @@ This is a robustness layer ON TOP of P094 + P062, not a supersession — both pe
 
 Read `docs/problems/README.md` if it exists and is fresh (check via git history — see manage-problem step 9 for the cache freshness check). If stale or missing, scan all `.open.md` and `.known-error.md` files in `docs/problems/`, extract their WSJF scores, and rank them.
 
+**README row order matches Step 3 tie-break selection (P138)**: as of P138, the README's WSJF Rankings table is rendered with the multi-key sort `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)`. The cache-fresh path can therefore read the rendered table top-to-bottom and the first row is the orchestrator's pick — no in-memory tie-break re-application needed. The slow path scan must apply the same multi-key sort. <!-- TIE-BREAK-LADDER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 -->
+
 Exclude:
 - `.closed.md` files (done)
 - `.parked.md` files (blocked on upstream)

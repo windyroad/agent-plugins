@@ -404,6 +404,8 @@ After writing the new `.open.md` file, regenerate `docs/problems/README.md` to i
 
 **Mechanism**: use the same rendering rules as Step 7's P062 block (glob `docs/problems/*.open.md` / `*.known-error.md` / `*.verifying.md` / `*.parked.md`; rank open/known-error by WSJF; list verifyings in the Verification Queue ordered by release age; list parkeds in the Parked section). The refresh is a **render, not a re-rank** — existing WSJF values on the other ticket files are trusted per P062's established discipline. Only the new ticket's own WSJF is consumed from its freshly-written file.
 
+**WSJF Rankings tie-break sort (P138)**: rows in the WSJF Rankings table are sorted by the multi-key `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)` so the rendered top-to-bottom row order matches `/wr-itil:work-problems` SKILL.md Step 3's tie-break selection 1:1. The first key (WSJF desc) sets the tier; within a tier the next three keys are the canonical tie-break ladder (Known Error before Open; smaller effort before larger; older Reported date before newer); ID asc is the deterministic final tiebreaker for full-tie cases. The table MUST include a `Reported` column so the third tie-break input is visible to README readers — without it, users cannot reconcile the rendered order against the orchestrator's selection. <!-- TIE-BREAK-LADDER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 --> Any future change to the tie-break ladder MUST update this render block, the Step 7 P062 block, the Step 9e template, AND `/wr-itil:review-problems` SKILL.md Step 3 / Step 5 — drift here re-opens P138.
+
 1. After `Write`-ing the new `.open.md` file (and, for multi-concern splits per step 4b, after all split files are written), regenerate `docs/problems/README.md` in-place reflecting the new filename set.
 2. Update the "Last reviewed" line's parenthetical to name the new ticket (e.g. `P<NNN> opened — <one-line title>`) so the next session's fast-path check has a human-readable audit marker.
 3. `git add docs/problems/README.md` — the stage list at Step 11 must include it alongside the new `.open.md` file (Step 11's `git add -u` catch-all handles tracked-file modifications; the new README render lands via this path when README.md already exists in git, and via an explicit `git add docs/problems/README.md` when it is newly created).
@@ -544,6 +546,8 @@ Every Step 7 status transition (Open → Known Error, Known Error → Verificati
 
 The refresh uses the same rendering rules as Step 9e (glob `docs/problems/*.open.md` / `*.known-error.md` / `*.verifying.md` / `*.parked.md`; rank open/known-error by WSJF; list verifyings in the Verification Queue ordered by release age; list parkeds in the Parked section) but skips the full re-scoring pass — existing WSJF values on the ticket files are trusted. The refresh is a render, not a re-rank.
 
+**WSJF Rankings tie-break sort (P138)**: rows in the WSJF Rankings table are sorted by the multi-key `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)` so the rendered top-to-bottom row order matches `/wr-itil:work-problems` SKILL.md Step 3's tie-break selection 1:1. Within each WSJF tier, rows are ordered by the canonical tie-break ladder: Known Error before Open, smaller Effort before larger, older Reported date before newer. The table MUST include a `Reported` column so the third tie-break input is visible to README readers. <!-- TIE-BREAK-LADDER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 --> Any future change to the tie-break ladder MUST update this render block, the Step 5 P094 block, the Step 9e template, AND `/wr-itil:review-problems` SKILL.md Step 3 / Step 5 — drift here re-opens P138.
+
 **Mechanism:**
 
 1. After renaming + Editing + `git add`-ing the transitioned ticket file (per the staging-trap rule above), regenerate `docs/problems/README.md` in-place reflecting the new filename set and the transitioned ticket's new Status.
@@ -631,10 +635,10 @@ The re-rate pass is part of Step 9b's output — a re-rate row appears in the st
 
 **Step 9c: Present summary and select problem to work**
 
-After reviewing all problems, present a WSJF-ranked table for open/known-error problems (the main dev-work queue):
+After reviewing all problems, present a WSJF-ranked table for open/known-error problems (the main dev-work queue). Sort rows by `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)` so row order matches `/wr-itil:work-problems` Step 3 tie-break selection 1:1 (P138):
 
-| WSJF | ID | Title | Severity | Status | Effort | Notes |
-|------|-----|-------|----------|--------|--------|-------|
+| WSJF | ID | Title | Severity | Status | Effort | Reported | Notes |
+|------|-----|-------|----------|--------|--------|----------|-------|
 
 Then present a separate **Verification Queue** section for `.verifying.md` files (per ADR-022 — ranked by release age, oldest first; no WSJF because the multiplier is 0). Highlight each ticket whose release age is **≥ 14 days** (the within-skill default per P048 Candidate 4 — tunable; if it needs cross-skill consistency later, promote to policy) with a `likely verified` marker in the final column. This makes the Verification Queue not just a list but a ranked view of which verifications are most likely ready to close:
 
@@ -677,7 +681,9 @@ When evidence is **ambiguous, contested, or absent** (no specific in-session cit
 
 **Step 9e: Update files and refresh README.md cache**
 
-Edit each problem file where the priority changed. Then write/overwrite `docs/problems/README.md` with the current ranked table so future `work` invocations can skip the full re-scan:
+Edit each problem file where the priority changed. Then write/overwrite `docs/problems/README.md` with the current ranked table so future `work` invocations can skip the full re-scan.
+
+**WSJF Rankings tie-break sort (P138)**: rows in the WSJF Rankings table are sorted by the multi-key `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)` so the rendered top-to-bottom row order matches `/wr-itil:work-problems` SKILL.md Step 3's tie-break selection 1:1. Within a WSJF tier, rows are ordered by the canonical tie-break ladder: Known Error before Open, smaller Effort before larger, older Reported date before newer. The `Reported` column MUST appear so the third tie-break input is visible to README readers. <!-- TIE-BREAK-LADDER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 --> Any future change to the tie-break ladder MUST update this template, the Step 5 P094 block, the Step 7 P062 block, AND `/wr-itil:review-problems` SKILL.md Step 3 / Step 5 — drift here re-opens P138.
 
 ```markdown
 # Problem Backlog
@@ -687,9 +693,9 @@ Edit each problem file where the priority changed. Then write/overwrite `docs/pr
 
 ## WSJF Rankings
 
-| WSJF | ID | Title | Severity | Status | Effort |
-|------|-----|-------|----------|--------|--------|
-| <score> | P<NNN> | <title> | <severity> | <status> | <effort> |
+| WSJF | ID | Title | Severity | Status | Effort | Reported |
+|------|-----|-------|----------|--------|--------|----------|
+| <score> | P<NNN> | <title> | <severity> | <status> | <effort> | <YYYY-MM-DD> |
 ...
 
 ## Verification Queue

@@ -65,11 +65,11 @@ Re-read the WSJF Prioritisation → "Transitive dependencies (P076)" subsection 
 
 After re-scoring, present three sections matching the README.md format (same rendering used by `/wr-itil:list-problems` and by the README cache — Step 5 writes the same layout):
 
-**WSJF Rankings** — dev-work queue (open + known-error), sorted by WSJF descending:
+**WSJF Rankings** — dev-work queue (open + known-error), sorted by the multi-key `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)` so rendered top-to-bottom row order matches `/wr-itil:work-problems` SKILL.md Step 3 tie-break selection 1:1 (P138). Within each WSJF tier, rows follow the canonical tie-break ladder: Known Error before Open, smaller Effort before larger, older Reported date before newer. The `Reported` column MUST appear so the third tie-break input is visible to README readers. <!-- TIE-BREAK-LADDER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 --> Any change to the tie-break ladder MUST update this rendering block, Step 5's README template, AND `/wr-itil:manage-problem` SKILL.md Step 5 P094 / Step 7 P062 / Step 9e — drift re-opens P138.
 
 ```
-| WSJF | ID | Title | Severity | Status | Effort | Notes |
-|------|-----|-------|----------|--------|--------|-------|
+| WSJF | ID | Title | Severity | Status | Effort | Reported | Notes |
+|------|-----|-------|----------|--------|--------|----------|-------|
 ```
 
 **Verification Queue** — `.verifying.md` tickets, sorted by release age (oldest first). Highlight any ticket whose release age is **≥ 14 days** with a `yes (N days)` marker in the `Likely verified?` column (within-skill default per P048 Candidate 4 — tunable; promote to cross-skill policy if needed):
@@ -119,11 +119,11 @@ Write / overwrite `docs/problems/README.md` with the refreshed ranking so future
 
 ## WSJF Rankings
 
-Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) and Parked (`.parked.md`, multiplier 0) tickets are excluded per ADR-022 — surfaced in their own sections below.
+Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) and Parked (`.parked.md`, multiplier 0) tickets are excluded per ADR-022 — surfaced in their own sections below. Rows sort by `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)` so top-to-bottom order matches `/wr-itil:work-problems` Step 3 tie-break selection 1:1 (P138). The `Reported` column MUST appear.
 
-| WSJF | ID | Title | Severity | Status | Effort |
-|------|-----|-------|----------|--------|--------|
-| <score> | P<NNN> | <title> | <severity> | <status> | <effort> |
+| WSJF | ID | Title | Severity | Status | Effort | Reported |
+|------|-----|-------|----------|--------|--------|----------|
+| <score> | P<NNN> | <title> | <severity> | <status> | <effort> | <YYYY-MM-DD> |
 ...
 
 ## Verification Queue
