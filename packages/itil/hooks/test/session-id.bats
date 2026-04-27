@@ -106,3 +106,32 @@ mark_announced() {
   [[ "$output" == *"$architect_uuid"* ]]
   [[ "$output" != *"$jtbd_uuid"* ]]
 }
+
+# --- Behavioural contract: shell portability (P124 Phase 2) ---
+#
+# The helper is sourced by `/wr-itil:manage-problem` Step 2 substep 7 from
+# whichever shell the agent runs Bash tool calls under. On macOS that is
+# zsh by default; the Phase 1 implementation used `shopt -s nullglob` (a
+# bash builtin), which under zsh errors with `shopt: command not found`
+# and lets the subshell glob expression fall through to a literal
+# unmatched-pattern string. The helper then returned a stale or wrong
+# UUID — defeating its stated guarantee. Citations: P124 ticket
+# "Regression Evidence (2026-04-27)" — main-turn P130 capture, line 119:
+# `get_current_session_id:33: command not found: shopt`.
+#
+# This test asserts the helper works identically under zsh as under bash:
+# same UUID returned, exit 0, no `shopt: command not found` error on
+# stderr.
+
+@test "zsh portability: helper returns the same UUID under zsh -c as under bash -c" {
+  if ! command -v zsh >/dev/null 2>&1; then
+    skip "zsh not available"
+  fi
+  expected_uuid="cccccccc-cccc-cccc-cccc-cccccccccccc"
+  mark_announced "architect" "$expected_uuid"
+  zsh_run=$(SESSION_MARKER_DIR="$SANDBOX_TMP" zsh -c "source '$HELPER'; get_current_session_id; echo \"EXIT:\$?\"" 2>&1)
+  [[ "$zsh_run" == *"$expected_uuid"* ]]
+  [[ "$zsh_run" == *"EXIT:0"* ]]
+  [[ "$zsh_run" != *"shopt: command not found"* ]]
+  [[ "$zsh_run" != *"command not found: shopt"* ]]
+}

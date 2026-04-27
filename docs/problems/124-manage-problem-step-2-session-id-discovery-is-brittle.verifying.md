@@ -1,10 +1,10 @@
 # Problem 124: `/wr-itil:manage-problem` Step 2 substep 7 session-id discovery is brittle — agent has no env var, must scrape marker filenames
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-04-26
-**Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4) — re-rated 2026-04-27 after regression evidence
-**Effort**: S — Phase 2 fix on top of the original P124 fix: replace `shopt -s nullglob` (bash-only — fails on zsh with `command not found`) with portable form (e.g. `for f in /tmp/<system>-announced-*; do [ -e "$f" ] || continue; ...`); fix glob-ordering from ASCII-alphabetical to mtime-sort (e.g. `ls -t /tmp/<system>-announced-* | head -1`) so the helper returns the most-recent SID, not the lexically-first one. Helper file: `packages/itil/hooks/lib/session-id.sh`. Plus matching behavioural bats per ADR-037.
-**WSJF**: (12 × 2.0) / 1 = **24.0** — flipped back from Verification Pending (multiplier 0) to Known Error (multiplier 2.0) after regression observed twice this session. Now top of dev-work queue.
+**Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4) — re-rated 2026-04-27 after regression evidence; Phase 2 fix released 2026-04-28
+**Effort**: S — Phase 2 fix on top of the original P124 fix: replace `shopt -s nullglob` (bash-only — fails on zsh with `command not found`) with portable form (`for f in /tmp/<system>-announced-*; do [ -e "$f" ] || continue; ...`). Helper file: `packages/itil/hooks/lib/session-id.sh`. Plus matching behavioural bats per ADR-037.
+**WSJF**: (12 × 0) / 1 = **0** — multiplier 0 per ADR-022 Verification Pending lifecycle; awaiting fresh-session verification.
 
 > Surfaced 2026-04-26 during P122 retro session: the assistant attempted to write `docs/problems/122-*.open.md` after running Step 2's grep, but the create-gate hook (P119, `/wr-itil:manage-problem` enforcement) blocked the Write because the per-session marker `/tmp/manage-problem-grep-${SESSION_ID}` did not match the hook's stdin-JSON `session_id`. The SKILL.md Step 2 substep 7 fallback is `${CLAUDE_SESSION_ID:-default}` which evaluated to `default` (env not set), but the hook reads the actual session UUID from its stdin JSON payload (`60331245-5d4e-461c-b95b-67b9a5b95c4b`). The agent had to scrape an existing `/tmp/architect-plan-reviewed-<UUID>` filename to discover the correct UUID, then re-touch the marker with the right name before retrying. Same friction would fire for any agent invoking manage-problem from a context where `CLAUDE_SESSION_ID` is not exported.
 
@@ -193,3 +193,27 @@ Only after this brute-force did the create-gate hook pass and the P130 ticket fi
 1. The `/wr-itil:work-problems` iteration that ships this fix is itself an instance of the surface — if subsequent ticket creation in this session continues to succeed without the prior ad-hoc UUID-extraction step, the helper is working in the live context.
 2. Inspect a fresh session next time the AFK loop runs: the first ticket creation should complete its Step 2 marker write without the `BLOCKED: Cannot Write '<NNN>-...' under docs/problems/...` deny. The marker on disk should match an active per-session UUID (cross-check with `ls /tmp/architect-announced-*`).
 3. If the helper ever returns empty (e.g. brand-new session before any UserPromptSubmit hook has fired), the `&&` short-circuit means the marker write is skipped and the agent will hit the standard P119 deny on the next ticket Write — recoverable, not silent corruption.
+
+## Fix Released (Phase 2 — 2026-04-28)
+
+Phase 2 ships in the AFK `/wr-itil:work-problems` iteration of 2026-04-28. Replaces the bash-only `shopt -s nullglob` subshell with a portable existence-check loop so the helper actually works under the agent's real shell (zsh on macOS).
+
+**Shape delivered:**
+
+- `packages/itil/hooks/lib/session-id.sh::get_current_session_id` — `shopt -s nullglob` subshell replaced with a `for f in "${marker_dir}/${system}-announced-"*; do [ -e "$f" ] || continue; marker="$f"; break; done` loop. Identical behaviour under bash, zsh, and POSIX dash. First existing match per system wins; fail-closed when no markers anywhere. The fixed marker-system priority order (architect → jtbd → tdd → itil-assistant-gate → itil-correction-detect → style-guide → voice-tone) is preserved verbatim from Phase 1.
+- `packages/itil/hooks/test/session-id.bats` — one new behavioural assertion per ADR-037 + P081: helper invoked under `zsh -c` returns the same UUID as under `bash -c`, exits 0, emits no `shopt: command not found` on stderr. Existing 6 Phase 1 assertions remain green; suite is now 7/7. Skips cleanly if `zsh` is not on PATH (CI portability).
+- `.changeset/wr-itil-p124-phase-2-zsh-portability.md` — patch entry for `@windyroad/itil`.
+- `docs/problems/124-...known-error.md → .verifying.md` (this transition) per ADR-022 Verification Pending lifecycle. README.md (P062 batch end) refresh in the same commit per ADR-014 governance.
+
+**Architect refinement (Phase 2 review):** ticket strategy named two fixes — (1) shopt-portability and (2) glob-ordering ASCII→mtime. Architect verdict (PASS, advisory) confirmed only fix (1) belongs in Phase 2; fix (2) was already superseded by Phase 1's `-announced-` marker switch + system-priority discipline (see "Architect refinements applied" Phase 1 entry above). Mtime-sort would either reintroduce the `-reviewed-` marker fragility (ADR-009 sliding TTL + P111) or, on `-announced-` markers, add complexity without changing the cross-system selection outcome. Phase 2 ships the portability fix only; the within-system glob-ordering question is intentionally not in scope.
+
+**JTBD alignment confirmed (jtbd-lead PASS):**
+- JTBD-001 (Enforce Governance Without Slowing Down) primary fit — Phase 2 closes the regression gap by making the helper actually return the canonical SID under the agent's real shell, eliminating the 81-marker brute-force recovery cost (ticket Citation 2) on first ticket creation per session. Without Phase 2, the documented Phase 1 helper silently violates the JTBD-001 "no manual step needed to trigger reviews" outcome.
+- JTBD-006 (Progress the Backlog While I'm Away) composes — AFK loops creating tickets mid-iter no longer risk wedging on Step 2 deny when the helper falls through to a wrong-UUID return.
+
+**Risk:** commit=2 push=2 release=2 (all Low, within appetite). RISK_BYPASS "reducing" — replaces previously-flagged broken portability with tested working portability.
+
+**Verification path (when the user returns):**
+1. The next AFK iteration that creates a ticket should complete Step 2 substep 7's marker write under zsh (the agent's actual shell) without the prior `command not found: shopt` stderr — verifiable by inspecting iteration logs.
+2. The helper invoked under `zsh -c` should now match the bats fixture's behaviour: returns a valid UUID from a real `-announced-` marker, exit 0, no shopt error. The new test 7 in `session-id.bats` pins this contract.
+3. If the helper ever returns empty (no markers in a brand-new session before any UserPromptSubmit hook has fired), the existing `&&` short-circuit in SKILL.md Step 2 substep 7 still prevents an empty-UUID marker write — Phase 2 doesn't change the empty-fallback contract.

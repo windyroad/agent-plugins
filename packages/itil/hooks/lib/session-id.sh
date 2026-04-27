@@ -88,15 +88,25 @@ get_current_session_id() {
     voice-tone
   )
 
-  local system marker
+  local system marker f
   for system in "${systems[@]}"; do
-    # Glob expansion: nullglob avoids the literal-pattern-on-no-match
-    # pitfall. Subshell isolates the shopt change.
-    marker=$(
-      shopt -s nullglob
-      set -- "${marker_dir}/${system}-announced-"*
-      [ "$#" -gt 0 ] && printf '%s\n' "$1"
-    )
+    # Portable existence-check loop. The previous implementation used
+    # `shopt -s nullglob` in a subshell — bash-only, errors under zsh
+    # with `command not found: shopt` and lets the glob fall through to
+    # the literal unmatched-pattern string, returning a wrong UUID.
+    # P124 Phase 2: the for-loop existence check works identically
+    # under bash, zsh, and POSIX dash. The first existing match wins
+    # (selection by fixed marker-system priority order, NOT mtime —
+    # `-announced-` markers are write-once-per-session per ADR-038
+    # so any present marker is the active SID; mtime selection would
+    # reintroduce the `-reviewed-` marker fragility ADR-009 + P111
+    # describe).
+    marker=""
+    for f in "${marker_dir}/${system}-announced-"*; do
+      [ -e "$f" ] || continue
+      marker="$f"
+      break
+    done
     if [ -n "$marker" ]; then
       # Strip the prefix to recover the trailing UUID.
       basename "$marker" | sed "s/^${system}-announced-//"
