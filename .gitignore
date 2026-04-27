@@ -13,3 +13,7 @@ node_modules/
 # Per-project consent caches — per-machine, never committed (P120 / ADR-034)
 .claude/.install-updates-consent
 .claude/.auto-install-consent
+
+# AFK runtime state — per-session, never committed (ADR-032 subprocess-boundary)
+.afk-run-state/
+.claude/scheduled_tasks.lock
