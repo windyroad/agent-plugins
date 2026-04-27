@@ -10,6 +10,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | WSJF | ID | Title | Severity | Status | Effort |
 |------|-----|-------|----------|--------|--------|
 | 24.0 | P124 | `/wr-itil:manage-problem` Step 2 substep 7 session-id discovery is brittle — Phase 2 (zsh portability + mtime-glob) re-opened after 2026-04-27 regression evidence | 12 High | Known Error | S |
+| 6.0 | P135 | Decision-delegation contract — agents over-apply ADR-013 Rule 1 to framework-resolved decisions; ADR-044 + 5-phase implementation plan (master ticket) | 12 High | Open | M |
 | 6.0 | P123 | Blocked-user list mechanism for inbound report management — refuse future tickets from clearly-malicious reporters | 12 High | Open | M |
 | 6.0 | P082 | No voice-and-tone or content-risk-scoring gate on commit messages | 12 High | Open | M |
 | 6.0 | P064 | No risk-scoring gate on external communications | 12 High | Known Error | L |

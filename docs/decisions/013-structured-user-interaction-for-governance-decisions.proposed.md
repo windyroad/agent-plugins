@@ -75,7 +75,7 @@ Accept prose prompts as a cosmetic issue.
 
 ### Rules
 
-1. **Every governance-skill branch point with two or more mutually exclusive options MUST use `AskUserQuestion`.** Free-text prose option lists (e.g., "(a)/(b)/(c)", "Your call:", "which would you like?") are a defect. Use structured options with `header`, `description`, and `multiSelect: false`.
+1. **Every governance-skill branch point with two or more mutually exclusive options MUST use `AskUserQuestion` — but only when the framework has not already resolved the decision.** Per ADR-044 (Decision-Delegation Contract), the framework (ADRs / JTBDs / RISK-POLICY / WSJF / lifecycle / SKILL contracts) is a decision-delegation contract: the user invested in writing decisions down so the agent doesn't re-ask them per-action. `AskUserQuestion` is reserved for the six human-value categories ADR-044 enumerates (direction-setting / deviation-approval / one-time-override / silent-framework / taste / authentic-correction). For framework-resolved decisions the agent acts and reports. Free-text prose option lists (e.g., "(a)/(b)/(c)", "Your call:", "which would you like?") remain a defect when an `AskUserQuestion` is warranted; use structured options with `header`, `description`, and `multiSelect: false`. See ADR-044 for the framework-resolution boundary and the deviation-approval surface.
 
 2. **Scoring/analysis agents remain pure output-only.** Their `tools:` frontmatter stays `[Read, Glob]`. They emit machine-readable verdicts (`RISK_SCORES`, `RISK_VERDICT`, etc.). They do not prompt the user.
 
