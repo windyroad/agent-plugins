@@ -17,6 +17,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 4.5 | P130 | `/wr-itil:work-problems` orchestrator defaults to subprocess dispatch even when user is observably interactive — loses real-time presence advantage | 9 Med | Open | M |
 | 4.5 | P131 | Agents write project-generated artefacts under `.claude/` (user-controlled config space) — gate exclusions are read tolerance, not write permission | 9 Med | Open | M |
 | 4.5 | P132 | Agents over-ask in interactive sessions — conflating mechanical-stages with user-interactive-stages of multi-stage skill contracts (inverse-P078) | 9 Med | Open | M |
+| 4.5 | P133 | zsh-portability gap in shell-snippet examples across SKILL.md files — bash-style word-splitting + bash-builtin variable names fail silently or noisily on zsh | 9 Med | Open | M |
 | 3.0 | P014 | No lightweight aside invocation for governance skills (background-subagent convention per 2026-04-20 direction) | 12 High | Open | L |
 | 3.0 | P081 | Structural source-content tests are wasteful — TDD agent should reject them and require behavioural tests | 12 High | Open | L |
 | 3.0 | P087 | No maturity / battle-hardening signal on plugins, skills, agents, or hooks — READMEs don't tell users which features are stable vs experimental | 12 High | Open | L |
