@@ -243,6 +243,19 @@ Per **ADR-044** (Decision-Delegation Contract — framework-resolution boundary)
 
 7. **AFK behaviour (ADR-013 Rule 6 / ADR-044)**: identical to interactive mode. The pass is silent (no AskUserQuestion-about-the-classifications); the table + trail entry ride the retro summary; AFK orchestrators read the summary on iteration close.
 
+8. **R6 numeric gate auto-flag** (P135 / ADR-044 Reassessment Trigger): after computing this retro's lazy count, invoke `packages/retrospective/scripts/check-ask-hygiene.sh` to read the cross-session trail and detect the R6 condition (lazy count remains **≥2 across 3 consecutive retros** including this one). When the gate fires, **auto-queue a deviation-candidate** in the orchestrator's `outstanding_questions` queue (per the AFK loop's Phase 3 schema in `packages/itil/skills/work-problems/SKILL.md` ITERATION_SUMMARY contract):
+   ```
+   {
+     category: "deviation-approval"
+     existing_decision: "ADR-044 Reassessment / declarative-first; P135 Phase 4 gated on R6"
+     contradicting_evidence: "<3 consecutive retros' lazy counts: e.g. 3, 2, 4 — citations to docs/retros/<date>-ask-hygiene.md per retro>"
+     proposed_shape: "amend"
+     rationale: "R6 numeric gate fired (lazy count ≥2 across 3 consecutive retros after Phase 2/3 land); declarative-first declared insufficient; Phase 4 enforcement hook now warranted per P135 plan."
+     ticket_id: "P135"
+   }
+   ```
+   The deviation-candidate surfaces at loop end (Step 2.5) with the standard 5-option `AskUserQuestion` (Approve+amend / Approve+supersede / Approve+one-time / Reject / Defer). The framework reminds itself; no manual remembering required. When this retro is invoked outside an AFK loop (interactive `/wr-retrospective:run-retro`), the same auto-queue logic surfaces the candidate via the orchestrator's main turn AskUserQuestion at retro end — same shape.
+
 **Forbidden phrases (anti-friction)**: the in-session table MUST NOT include qualitative-only phrases on the lazy count. Banned: `lazy count is acceptable`, `within tolerance`, `improving`, `regression contained`. Concrete numbers + the trend script's TREND line are the truth surface.
 
 **Interaction with other surfaces:**
