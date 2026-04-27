@@ -1,10 +1,10 @@
 # Problem 064: No risk-scoring gate on external communications
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-04-20
 **Priority**: 12 (High) — Impact: Significant (4) x Likelihood: Possible (3)
 **Effort**: L — new PreToolUse hook surface covering `gh issue create`, `gh issue comment`, `gh pr create`, `gh pr comment`, `gh api .../security-advisories`, `gh api .../comments`, `npm publish` (with README diff), plus leak-pattern rules and integration with `wr-risk-scorer` subagent. Sibling-ADR path collapsed into amended ADR-028 (2026-04-21); risk evaluator implementation per architect verdict (c) on the P064 iteration — shared canonical hook + risk-scorer per-package copy + new subagent + new on-demand skill.
-**WSJF**: 6.0 — (12 × 2.0) / 4 — Known Error multiplier post-implementation; root cause confirmed and fix committed.
+**WSJF**: 0 — Verification Pending excluded from dev-work ranking per ADR-022 (was 6.0 as Known Error).
 
 ## Direction decision (2026-04-20, user — AFK pre-flight via AskUserQuestion)
 
@@ -125,9 +125,16 @@ The risk-evaluator half of ADR-028 amended ships in this iteration. Architecture
 
 Concrete instance of the gap: agent posted a substantive comment to anthropics/claude-code#52831 via `gh issue comment` with no PreToolUse gate firing. Retrospective `wr-risk-scorer:wip` invocation cleared at residual 3 (Low) — within appetite — but explicitly noted that RISK-POLICY.md "is policy-silent on outbound public communication to third-party repositories" and scored by analogy to the Confidential Information section (lines 19-28). Confirms: (a) the gate from this ticket is not yet in place for `gh issue comment`; (b) the rubric extension from the Investigation Tasks above ("RISK-POLICY.md ... extend with credential / prod-URL / embargoed-product rules") needs to land alongside the gate so the scorer has authoritative criteria, not analogical fallback; (c) the cleared-by-analogy outcome is the lucky case — a comment that touched no confidential markers — and shouldn't be read as evidence the gap is benign.
 
+## Fix Released
+
+- **Released**: 2026-04-26 — `@windyroad/risk-scorer` minor (commit `a0713f3`, "fix(risk-scorer): P064 external-comms risk-leak gate (gh issue/pr/api, npm publish, .changeset) — known error").
+- **Summary**: PreToolUse risk-leak gate on outbound prose surfaces — confidential-information leaks halted before reaching external surfaces (gh issue/pr/api, npm publish, `.changeset/*.md`). Architect verdict (c) shape: canonical `packages/shared/hooks/external-comms-gate.sh` + per-package synced copy at `packages/risk-scorer/hooks/external-comms-gate.sh` (ADR-017 duplicate-script pattern, drift-checked in CI); new subagent type `wr-risk-scorer:external-comms` (`packages/risk-scorer/agents/external-comms.md`) emits structured `EXTERNAL_COMMS_RISK_VERDICT: PASS|FAIL` consumed by extended `risk-score-mark.sh`; new on-demand skill `/wr-risk-scorer:assess-external-comms` per ADR-015; hybrid leak detection (regex pre-filter for credentials / business-paired financial figures / business-paired user-counts; subagent for ambiguous prose against `RISK-POLICY.md` Confidential Information classes); `BYPASS_RISK_GATE=1` env override (consistent with `git-push-gate.sh`); RISK-POLICY.md-absent → advisory-only mode (graceful adoption per ADR-008 / ADR-025). Surface coverage: `gh issue create|comment|edit`, `gh pr create|comment|edit`, `gh api .../security-advisories`, `gh api .../comments`, `npm publish`, `PreToolUse:Write|Edit on .changeset/*.md` (P073 author-time gate so leaks never reach CHANGELOG.md / Release PR / npm tarball).
+- **Bats coverage**: 12 assertions in `packages/risk-scorer/hooks/test/external-comms-gate.bats` (12/12 green re-confirmed in this transition iter — surface match, hard-fail leak deny on GitHub-token + AWS-key, marker permit, BYPASS short-circuit, advisory-only fallback, changeset author-time gate revenue-leak deny + clean-content delegate, non-changeset path bypass, gh api security-advisories trigger, npm publish trigger); 11 in `packages/shared/test/external-comms-gate-canonical.bats`; 7 in `packages/shared/test/sync-external-comms-gate.bats` (drift coverage mirrors P095 + P026 patterns).
+- **Awaiting user verification**: real-world exercise of the gate on at least one outbound `gh issue comment` / `gh pr create` / `npm publish` / `.changeset` author event with leak-shaped content blocked at the hook AND at least one clean-content draft permitted via marker-then-delegate. Two `Deferred` checked items in Investigation Tasks remain non-blocking per the ticket — `/wr-itil:report-upstream` SKILL.md cross-reference (the gate fires from the hook regardless of skill prose) and P038 voice-tone composite-marker (P038's iter owns the upgrade).
+
 ## Decision record
 
-**ADR-028 (amended 2026-04-21)** — "External-comms gate — voice-tone + risk/leak evaluators on shared PreToolUse surface". User direction collapsed the sibling-ADR path into a combined ADR-028; this ticket's risk/leak evaluator ships as the `wr-risk-scorer:external-comms` subagent (new type, not an extension of `:pipeline`), paired with `/wr-risk-scorer:assess-external-comms` on-demand skill per ADR-015. Hook distributed via ADR-017 duplicate-script pattern (canonical in `packages/shared/hooks/`; synced copy in `packages/risk-scorer/hooks/`). This ticket (P064) remains Open as the execution tracker for the risk evaluator half (new subagent agent file + new on-demand skill + per-package synced hook copy + bats tests).
+**ADR-028 (amended 2026-04-21)** — "External-comms gate — voice-tone + risk/leak evaluators on shared PreToolUse surface". User direction collapsed the sibling-ADR path into a combined ADR-028; this ticket's risk/leak evaluator ships as the `wr-risk-scorer:external-comms` subagent (new type, not an extension of `:pipeline`), paired with `/wr-risk-scorer:assess-external-comms` on-demand skill per ADR-015. Hook distributed via ADR-017 duplicate-script pattern (canonical in `packages/shared/hooks/`; synced copy in `packages/risk-scorer/hooks/`). Risk evaluator half shipped 2026-04-26 in commit `a0713f3`.
 
 ## Related
 
