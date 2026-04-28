@@ -1,5 +1,52 @@
 # @windyroad/problem
 
+## 0.22.1
+
+### Patch Changes
+
+- 8bf58c8: P085 — `packages/itil/hooks/lib/detectors.sh` Prose-ask detector phrasing-list extension covering 2026-04-28 regression evidence (ticket reopened from Verification Pending). The 2026-04-24 fix (UserPromptSubmit gate + Stop review hook + detector registry) shipped at minor but the canonical phrasing list missed the "Awaiting your direction" / "Pending your decision" / "Once you confirm" shapes the orchestrator emitted at Step 6.75 halt-summary today.
+
+  Specific evidence (Citation 1, this session ~17:25): orchestrator main turn emitted _"Awaiting your direction on whether to add it + resume on P123, or end the session."_ — a binary-choice prose-ask. Empirical verification: existing pattern list returned exit-code 1 on this text. Detector extension closes the gap.
+
+  Files shipped:
+
+  - `packages/itil/hooks/lib/detectors.sh` — `PROSE_ASK_PATTERNS` extended with four new entries: `Awaiting your (direction|input|decision|response|confirmation|answer|reply)`, `Pending your (direction|input|decision|response|confirmation|answer|reply)`, `Once you confirm`, `Awaiting your direction on whether` (specific shape from Citation 1, retained alongside the broader pattern for observability — first-match return reports the more specific phrase).
+  - `packages/itil/hooks/test/itil-assistant-output-review.bats` — 5 new behavioural bats per ADR-037 + P081: Citation 1 verbatim shape, plus four adjacent phrasings each fed through a JSONL transcript to the Stop hook with `stopReason` assertion. Clean-turn negative test unchanged remains green.
+
+  Citation 2 (over-ask when framework prescribes the answer — _"FFS, why are you stopping to ask. what does the decision framework tell you to do?"_) is class-of-behaviour overlap with P132 (Open, WSJF 4.5 — Agents over-ask in interactive sessions). Framework-knowability detection requires a hook that reads SKILL.md decision tables and reasons about whether the question is mechanically answerable; that is a substantially harder problem than the phrasing-list extension here. Deferred to P132's broader fix per architect verdict (composes with ADR-044 R6 numeric gate).
+
+  Transitions P085 Known Error → Verification Pending per ADR-022.
+
+- 8212d4f: P124 Phase 3 — `packages/itil/hooks/lib/session-id.sh::get_current_session_id` within-system selection changed from first-glob-match (alphabetical) to most-recent-mtime (`ls -t | head -1`). Phase 2's portability fix (the for-loop existence check that replaced bash-only `shopt -s nullglob`) is preserved; Phase 3 layers mtime selection on top of it.
+
+  Why Phase 2 alone wasn't enough: glob expansion under both bash and zsh enumerates matches in ASCII-alphabetical order by default. Phase 2's "first match wins" inner loop returned the alphabetically-first present marker. On a developer machine accumulating one `${system}-announced-${SID}` marker per past session in /tmp (observed 103 stale architect markers in a single regression run on 2026-04-28), the alphabetically-first UUID was a stale prior-session UUID. Helper returned a wrong SID; the create-gate hook (P119) read the live SID from its stdin JSON and denied the Write; recovery required brute-touching `manage-problem-grep-` for every known SID (81–103 markers per recovery in evidence).
+
+  Phase 3 fix: within-system selection switches to most-recent-mtime via `ls -t "${marker_dir}/${system}-announced-"* 2>/dev/null | head -1`. `-announced-` markers per ADR-038 are write-once-per-session (no `touch`-refresh, no sliding TTL — unlike `-reviewed-` markers governed by ADR-009 + P111), so mtime IS the announcing session's first-prompt timestamp. Newest mtime within a single system's `-announced-` glob unambiguously identifies the live session. The outer system priority loop (architect → jtbd → tdd → itil-assistant-gate → itil-correction-detect → style-guide → voice-tone) is preserved verbatim.
+
+  `packages/itil/hooks/test/session-id.bats` gains one new behavioural assertion per ADR-037 + P081: write three architect-announced markers with controlled mtimes (`sleep 1` between writes) where the alphabetically-first UUID has the OLDEST mtime; assert helper returns the newest-mtime UUID, not the alphabetical-first. Phase 2's existing 7 assertions remain green; suite is now 8/8.
+
+- dcc65b4: P130 — `packages/itil/skills/work-problems/SKILL.md` Mid-loop ask discipline (orchestrator main turn). Tightens the orchestrator's ask discipline per the user-reframed Fix Strategy: presence-detection is unreliable and is not the goal; treat the user as transient (may answer one question and disappear for hours). The loop's purpose is progress + accumulation; mechanical-stage transitions between iters are framework-resolved.
+
+  The orchestrator MUST NOT call `AskUserQuestion` between iters except at framework-prescribed halt points: Step 0 session-continuity / fetch-failure; Step 2.5 / 2.5b loop-end emit; Step 6.5 above-appetite Rule 5 + CI-failure / release:watch halts; Step 6.75 dirty-for-unknown-reason. Continue iterating until quota exhausts or a stop-condition fires.
+
+  Accumulated user-answerable questions follow strict discipline at surface time:
+
+  - Direction-setting decisions only (no BUFD)
+  - No questions answerable by research / exploration / experimentation — the agent should prototype, read code, run experiments to answer those itself
+  - Each surfaced question must carry enough context for an informed decision (architect's recommended option, alternatives, trade-offs, concrete consequences of each path)
+
+  Files shipped:
+
+  - `packages/itil/skills/work-problems/SKILL.md` — new "Mid-loop ask discipline (orchestrator main turn)" subsection inside Non-Interactive Decision Making; framework-prescribed halt-point enumeration; transient-user framing; accumulated-question discipline; cross-references to Step 5's per-subprocess constraint.
+  - `packages/itil/skills/work-problems/SKILL.md` Step 5 iteration-prompt body — augmented with the transient-user framing.
+  - `packages/itil/skills/work-problems/test/work-problems-no-mid-loop-asking.bats` — 20 new behavioural assertions per ADR-037 + P081 covering the no-mid-iter-asks invariant and the framework-prescribed halt-point allow-list.
+
+  ADR-032 unchanged — the subprocess-boundary contract is preserved verbatim. Out of scope per the reframe: presence-signal helper (`packages/itil/hooks/lib/presence-signal.sh`), dual-mode dispatch, stream-json live-tail observation surface.
+
+  Composes with P132 (over-ask in interactive sessions — same family of agent-discipline gaps; P132's enforcement hook serves P130's reframed direction) and P135 / ADR-044 (decision-delegation contract — framework-resolution boundary).
+
+  Transitions P130 Known Error → Verification Pending per ADR-022.
+
 ## 0.22.0
 
 ### Minor Changes
