@@ -4,6 +4,14 @@
 # and reports which packages were published. On failure: shows what
 # failed and prompts for a fix.
 #
+# Env vars:
+#   RELEASE_WATCH_VERBOSE=1   Print poll-loop progress (P143) to stderr
+#                             while waiting for the changesets/action
+#                             workflow to open the release PR. Default
+#                             off — the script is silent during the poll
+#                             window so existing `npm run release:watch
+#                             | tee` orchestrator pipes are unaffected.
+#
 # Contract with the release gate (per ADR-015, ADR-018, ADR-020):
 #   Callers MUST have an in-session release risk score for this session
 #   (produced by wr-risk-scorer:pipeline). Running this script immediately
@@ -37,14 +45,58 @@ show_failure_guidance() {
   echo "help them fix the issue, then run \`npm run release:watch\` again."
 }
 
-# ── 1. Find and merge the open release PR ────────────────────────────────────
-PR_JSON=$(gh pr list --head changeset-release/main --base main --state open --limit 1 --json number,url 2>/dev/null)
-PR_NUMBER=$(echo "$PR_JSON" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d[0]['number'] if d else '')" 2>/dev/null)
-PR_URL=$(echo "$PR_JSON" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d[0]['url'] if d else '')" 2>/dev/null)
+# ── Helper: poll for the changeset release PR (P143) ─────────────────────────
+# Wraps `gh pr list` in a bounded poll loop to absorb changesets/action
+# workflow latency (~30-120s between `git push` and PR creation/update).
+# Without this, callers invoking release:watch immediately after push:watch
+# routinely raced the PR-creation window and exited 1 on a transient empty
+# query.
+#
+# Contract:
+#   stdout (success): one line, tab-separated <number>\t<url>
+#   exit 0 on success; exit 1 after 12 consecutive empty results (120s)
+#   stderr (verbose only): "Polling for release PR (attempt N/12)..." per
+#     iteration when RELEASE_WATCH_VERBOSE=1
+#
+# Bounds: 12 attempts × 10s sleep = 120s wall-clock ceiling. The final
+# iteration does NOT sleep afterwards — that would burn 10s for nothing.
+find_release_pr() {
+  local max_attempts=12
+  local sleep_seconds=10
+  local attempt=1
+  local pr_json pr_number pr_url
 
-if [ -z "$PR_NUMBER" ]; then
+  while [ "$attempt" -le "$max_attempts" ]; do
+    pr_json=$(gh pr list --head changeset-release/main --base main --state open --limit 1 --json number,url 2>/dev/null || echo "[]")
+    pr_number=$(echo "$pr_json" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d[0]['number'] if d else '')" 2>/dev/null)
+    pr_url=$(echo "$pr_json" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d[0]['url'] if d else '')" 2>/dev/null)
+
+    if [ -n "$pr_number" ]; then
+      printf '%s\t%s\n' "$pr_number" "$pr_url"
+      return 0
+    fi
+
+    if [ "$attempt" -lt "$max_attempts" ]; then
+      if [ "${RELEASE_WATCH_VERBOSE:-0}" = "1" ]; then
+        echo "Polling for release PR (attempt $attempt/$max_attempts)..." >&2
+      fi
+      sleep "$sleep_seconds"
+    fi
+    attempt=$((attempt + 1))
+  done
+
+  return 1
+}
+
+# ── 1. Find and merge the open release PR ────────────────────────────────────
+if PR_LINE=$(find_release_pr); then
+  PR_NUMBER=$(printf '%s\n' "$PR_LINE" | head -1 | cut -f1)
+  PR_URL=$(printf '%s\n' "$PR_LINE" | head -1 | cut -f2)
+else
   echo "No open release PR found (changeset-release/main -> main)." >&2
   echo "Has it already been merged, or are there no pending changesets?" >&2
+  echo "Polled for 120s. The changesets/action workflow may have failed to open a release PR — check Actions tab:" >&2
+  echo "  https://github.com/$REPO/actions/workflows/release.yml" >&2
   exit 1
 fi
 

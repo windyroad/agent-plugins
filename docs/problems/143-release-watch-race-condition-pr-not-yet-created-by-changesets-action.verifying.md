@@ -1,10 +1,10 @@
 # Problem 143: `release-watch.sh` race condition — `gh pr list` queries before changesets/action GitHub workflow has created the release PR
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-29
 **Priority**: 6 (Med) — Impact: Minor (2) x Likelihood: Likely (3) — observed multiple times today; user-visible friction (failed exit, retry required)
 **Effort**: S — `scripts/release-watch.sh` add a poll loop on `gh pr list` (e.g. up to 120s with 10s intervals) before exiting on "no open release PR found". Plus matching behavioural bats per ADR-037 + P081.
-**WSJF**: (6 × 1.0) / 1 = **6.0**
+**WSJF**: 0 (excluded — Verification Pending per ADR-022)
 
 > Surfaced 2026-04-28 during `/wr-itil:work-problems` Step 6.5 drains. First `release:watch` invocation immediately after `push:watch` returned `No open release PR found (changeset-release/main -> main)` with exit 1; manual `gh pr list --state open --base main --head changeset-release/main` ~2 min later showed PR #99 OPEN. Re-invocation succeeded. Same race surfaced again briefly during the `@windyroad/itil@0.23.0` drain.
 
@@ -82,4 +82,18 @@ The script was authored for the synchronous case (release PR exists at invocatio
 - **P054** (`docs/problems/054-...closed.md`) — release-watch SHA-mismatch family; P143 is a different timing bug at the same surface.
 - **scripts/release-watch.sh** — the target file.
 - **ADR-018** — release cadence; P143 refines `release:watch` reliability.
+- **ADR-022 fold-fix amendment (2026-04-29)** — this commit's transition follows the new "Open → Verification Pending in one commit" path documented in ADR-022's `## Fold-fix Open → Verification Pending in one commit` section; cited as a precedent.
 - 2026-04-28 session evidence: race fired at ~17:28 (release for 0.22.1) and again briefly during the 0.23.0 drain. Manual recovery via retry.
+
+## Fix Released
+
+Released in the same commit (fold-fix Open → Verification Pending per ADR-022 amendment, 2026-04-29). Awaiting user verification on the next `/wr-itil:work-problems` Step 6.5 drain or manual `npm run release:watch` invocation immediately after `npm run push:watch`.
+
+**What changed**:
+
+- `scripts/release-watch.sh` — added `find_release_pr` shell function wrapping `gh pr list` in a 12-attempt × 10s = 120s poll loop. The function emits a tab-separated `<number>\t<url>` on success; exits 1 only after the full 120s of empty results. Verbose progress to stderr gated on `RELEASE_WATCH_VERBOSE=1`. The empty-poll exit message now points at the Actions tab so the user can investigate workflow failures directly.
+- `packages/itil/scripts/test/release-watch-poll-loop.bats` — behavioural bats per ADR-037 + P081. Awk-extracts `find_release_pr`, sources it, PATH-shadow-mocks `gh` with comma-delimited iteration sequences ("ok", "empty,empty,ok", 12×"empty"), stubs `sleep` to count without burning wall-clock. Asserts: fast-path one-call no-sleep on immediate PR; three-call two-sleep on iteration-3 PR; 12-call 11-sleep exit-1 on full-empty; verbose-mode-on prints progress; default-off does not; tab-separated parseable output.
+
+**Verification path**: next session-end release drain (`/wr-itil:work-problems` Step 6.5) should no longer surface the "No open release PR found" race against changesets/action workflow latency. The orchestrator's first `release:watch` invocation after `push:watch` should poll silently up to 120s and proceed once the PR appears, instead of exiting 1 on the first empty query.
+
+**Exercise evidence**: bats green 7/7 in this iteration. End-to-end exercise will land on the next AFK release-drain cycle this session or in a subsequent session — at which point the user can transition this ticket to Closed.

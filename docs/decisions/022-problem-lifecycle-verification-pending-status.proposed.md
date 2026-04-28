@@ -78,6 +78,30 @@ Chosen option: **"Verification Pending" status with `.verifying.md` suffix and W
 - P048's detection layer (exercise observations, age-based surfacing) — simplified by this ADR but implemented separately.
 - `manage-incident` does NOT gain an analogous sub-state — its Restored → Closed transition is already gated on the linked problem's status per ADR-011, which now reads `.verifying.md` naturally.
 
+### Fold-fix Open → Verification Pending in one commit (P143 amendment, 2026-04-29)
+
+The canonical lifecycle is `Open → Known Error → Verification Pending → Closed`, with each transition normally landing in its own commit per `transition-problem` SKILL.md's destination-reachability validation. This amendment endorses an explicit fold-fix shortcut: **Open → Verification Pending may land in a single commit when the Open → Known Error pre-flight checks are satisfied inline within that same commit**.
+
+**Pre-flight checks satisfied inline** means the Open ticket already documents:
+
+- root cause analysis (the `## Root Cause Analysis` section is filled in, not stub text);
+- a concrete fix strategy (the `## Fix Strategy` section names the target file, the observed flaw, and the edit summary);
+- workaround documented;
+- effort estimated against the fix strategy;
+
+…AND the same commit ships the fix implementation + tests + ticket transition + `## Fix Released` section + README refresh per ADR-014's single-commit grain. In that case the Known Error state is empirically vacant — the ticket would pass through `.known-error.md` for zero seconds — and the intermediate rename adds no audit value.
+
+**Commit shape**: `fix(<scope>): <description> (closes P<NNN>)` per `manage-problem` SKILL.md Step 11's fold-fix convention. The `git mv` goes directly from `.open.md` to `.verifying.md`. The `## Fix Released` section, the Status field update, and the README refresh ride the same commit.
+
+**Precedents**:
+
+- `cc79ae2` — P140 Phase 1 declarative fix-and-continue on CI failure during Step 6.5 drain; first explicit fold-fix Open → Verifying instance in this repo.
+- The commit folding this amendment + the P143 `release-watch.sh` poll-loop fix.
+
+**When NOT to fold**: if root cause is not yet confirmed (investigation tasks unticked), if the fix strategy is speculative, or if architect review during work expands scope beyond what the Open ticket documented, do the canonical two-hop transition. The fold is for cases where the ticket is already in "Known Error" shape and the fix is mechanical.
+
+The dev-work backlog distinction the ADR's main body protects (multiplier-0 verification queue separate from WSJF dev work) is preserved either way — fold or two-hop, the destination is the same `.verifying.md` suffix with multiplier 0.
+
 ### WSJF multiplier rationale
 
 Multiplier 0 (exclude) was chosen over 0.5 and 2.0 because:
