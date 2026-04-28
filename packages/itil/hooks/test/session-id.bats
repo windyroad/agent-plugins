@@ -135,3 +135,44 @@ mark_announced() {
   [[ "$zsh_run" != *"shopt: command not found"* ]]
   [[ "$zsh_run" != *"command not found: shopt"* ]]
 }
+
+# --- Behavioural contract: within-system mtime selection (P124 Phase 3) ---
+#
+# Phase 2 portability fix (shopt-portable for-loop existence check) shipped
+# 2026-04-28 morning, restoring zsh compatibility but introducing a
+# regression on multi-session developer machines: glob expansion enumerates
+# matches in ASCII-alphabetical order, and the inner "first match wins"
+# heuristic returned the lexically-first stale UUID when /tmp had
+# accumulated `${system}-announced-*` markers from prior sessions. Ticket
+# regression block cites 103 stale architect markers selecting the wrong
+# UUID, denying the create-gate (P119) and forcing a brute-force recovery.
+#
+# Phase 3 selection contract: WITHIN a single system's marker namespace,
+# the most-recent-mtime marker wins. ACROSS systems, the fixed priority
+# order is preserved (asserted by the existing "deterministic priority"
+# test above). `-announced-` markers are write-once-per-session per ADR-038
+# (no `touch`-refresh sliding TTL), so mtime IS the announcing session's
+# first-prompt timestamp — newest mtime unambiguously identifies the live
+# session within that system's marker glob.
+
+@test "within-system mtime: newest architect-announced marker wins over older same-system markers" {
+  oldest_uuid="00000000-0000-0000-0000-000000000001"  # ASCII-first
+  middle_uuid="11111111-1111-1111-1111-111111111111"
+  newest_uuid="22222222-2222-2222-2222-222222222222"  # ASCII-last of the three
+  # Fixture intent: alphabetical-first UUID has the OLDEST mtime; the
+  # newest-mtime UUID is alphabetically last. Phase 2 first-glob-match
+  # would pick `oldest_uuid` (alphabetical first); Phase 3 mtime
+  # selection picks `newest_uuid` (most-recent mtime). The sleep
+  # boundaries guarantee distinct mtimes across filesystems with
+  # 1-second mtime resolution (e.g. older HFS+).
+  mark_announced "architect" "$oldest_uuid"
+  sleep 1
+  mark_announced "architect" "$middle_uuid"
+  sleep 1
+  mark_announced "architect" "$newest_uuid"
+  output=$(discover)
+  [[ "$output" == *"$newest_uuid"* ]]
+  [[ "$output" != *"$oldest_uuid"* ]]
+  [[ "$output" != *"$middle_uuid"* ]]
+  [[ "$output" == *"EXIT:0"* ]]
+}

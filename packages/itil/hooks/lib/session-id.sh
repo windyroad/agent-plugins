@@ -88,25 +88,38 @@ get_current_session_id() {
     voice-tone
   )
 
-  local system marker f
+  local system marker
   for system in "${systems[@]}"; do
-    # Portable existence-check loop. The previous implementation used
-    # `shopt -s nullglob` in a subshell — bash-only, errors under zsh
-    # with `command not found: shopt` and lets the glob fall through to
-    # the literal unmatched-pattern string, returning a wrong UUID.
-    # P124 Phase 2: the for-loop existence check works identically
-    # under bash, zsh, and POSIX dash. The first existing match wins
-    # (selection by fixed marker-system priority order, NOT mtime —
-    # `-announced-` markers are write-once-per-session per ADR-038
-    # so any present marker is the active SID; mtime selection would
-    # reintroduce the `-reviewed-` marker fragility ADR-009 + P111
-    # describe).
-    marker=""
-    for f in "${marker_dir}/${system}-announced-"*; do
-      [ -e "$f" ] || continue
-      marker="$f"
-      break
-    done
+    # Two-axis selection:
+    #   ACROSS systems — fixed priority order (architect first, then
+    #     jtbd, ...). The outer for-loop encodes this. The first system
+    #     with any present marker wins; later systems are not consulted.
+    #   WITHIN a system — most-recent-mtime wins (`ls -t | head -1`).
+    #     Multi-session developer machines accumulate one
+    #     `${system}-announced-${SID}` marker per past session in /tmp;
+    #     the live session's marker is by construction the most-recently-
+    #     created one. P124 Phase 2 used first-glob-match (alphabetical),
+    #     which returned the lexically-first stale UUID when /tmp had
+    #     accumulated markers from prior sessions — observed regression
+    #     2026-04-28 with 103 stale architect markers selecting the
+    #     wrong UUID, denying the create-gate (P119).
+    #
+    # Why mtime is safe here even though Phase 1 architect rejected it:
+    #   The Phase 1 rejection applied to `-reviewed-` markers, which
+    #   `touch`-refresh on every gate check (ADR-009 sliding TTL +
+    #   P111 subprocess refresh). Mtime on a `-reviewed-` marker is
+    #   "last seen", not "first written" — selecting newest-mtime can
+    #   surface a stale session whose marker was just touch-refreshed.
+    #   `-announced-` markers are write-once-per-session per ADR-038
+    #   (no `touch`-refresh, no TTL); their mtime IS the announcing
+    #   session's first-prompt timestamp. Newest mtime within a single
+    #   `-announced-` glob unambiguously identifies the live session.
+    #
+    # Portability: `ls -t` is POSIX (sort by modification time, newest
+    # first). 2>/dev/null suppresses "no such file" when the glob
+    # expands to nothing under both bash and zsh; head -1 gracefully
+    # returns empty in that case.
+    marker=$(ls -t "${marker_dir}/${system}-announced-"* 2>/dev/null | head -1)
     if [ -n "$marker" ]; then
       # Strip the prefix to recover the trailing UUID.
       basename "$marker" | sed "s/^${system}-announced-//"
