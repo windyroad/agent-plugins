@@ -1,6 +1,6 @@
 # Problem 135: Decision-delegation contract — agents over-apply ADR-013 Rule 1's interactive default to framework-resolved decisions; codify the framework-resolution boundary + AFK loop's batched-questions-as-deliverable + lazy-AskUserQuestion measurement
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-04-27
 **Priority**: 12 (High) — Impact: Significant (4) x Likelihood: Likely (3)
 **Effort**: M — bounded multi-phase plan at `/Users/tomhoward/.claude/plans/noble-cuddling-sutton.md` (5 phases, total ~16 hrs of which Phase 1+5+2+3 declarative = ~12 hrs are must-do; Phase 4 enforcement gated). M (not L) because each phase is bounded + per-phase release cadence drains risk to one phase's surface at a time per ADR-042 precedent.
@@ -126,3 +126,71 @@ All declarative phases shipped to npm; Phase 4 enforcement is R6-gated.
 **Verification path to Closed**: observe lazy-AskUserQuestion-count metric across consecutive retros via Step 2d's trail file. If the metric trends to 0 across 3+ retros, P135 transitions Known Error → Verification Pending → Closed (declarative was sufficient — Phase 4 not required). If R6 fires (lazy count ≥2 across 3 consecutive retros), Phase 4 enforcement hook ships and P135 transitions through verification on that release.
 
 **Workaround during verification window**: `run-retro` Step 2d already surfaces lazy calls per retro; user reads the table and corrects via authentic-correction (ADR-044 category 6) if a specific call is misclassified.
+
+## Phase Audit (2026-04-28)
+
+Independent codebase audit performed during AFK iter on 2026-04-28 to verify the Phase status claims (lines 114-128) before transitioning Known Error → Verification Pending. All shippable phases confirmed shipped in code with no deviations from the executed plan.
+
+### Audit method
+
+- `Glob` for the 6 named bats files in Confirmation criteria status.
+- `Grep` for ADR-044 / framework-resolution / Step 2d / outstanding_questions / mid-loop UserPromptSubmit / etc. against the cited SKILL.md surfaces.
+- `git show --stat` against the 5 cited commits (`e703656`, `5d414fc`, `fae42aa`, `328f92a`, `258ac25`).
+- `Read` against the 2 ask-hygiene trail files at `docs/retros/2026-04-{27,28}-ask-hygiene.md`.
+
+### Phase 1 (Anchor) — SHIPPED
+
+- ADR-044 exists at `docs/decisions/044-decision-delegation-contract.proposed.md`.
+- ADR-013 Rule 1 amended in place at line 78 with framework-resolution boundary clause + ADR-044 forward pointer.
+- P135 master ticket exists.
+- Commit: `e703656` — "docs(decisions): land ADR-044 (decision-delegation contract) + amend ADR-013 Rule 1 + open P135 master ticket".
+
+### Phase 5 (Measurement) — SHIPPED
+
+- `packages/retrospective/skills/run-retro/SKILL.md` Step 2d "Ask Hygiene Pass" present at line 212; R6 auto-flag substep 8 at line 246.
+- `packages/retrospective/scripts/check-ask-hygiene.sh` present.
+- `packages/retrospective/scripts/test/check-ask-hygiene.bats` present.
+- `packages/retrospective/skills/run-retro/test/run-retro-step-2d-r6-auto-flag.bats` present.
+- Trail files: `docs/retros/2026-04-27-ask-hygiene.md` (lazy=3 baseline; pre-Phase-2 calls included by design — Phase 2 landed mid-session), `docs/retros/2026-04-28-ask-hygiene.md` (lazy=0; AFK iter — denominator-1 caveat noted in trail file).
+- Commits: `5d414fc` (Phase 5 base), `258ac25` (R6 auto-flag automation).
+
+### Phase 2 (Skill amendments) — SHIPPED
+
+- run-retro Step 3 silent removals at line 287.
+- run-retro Tier 3 silent rotation at line 303.
+- run-retro Step 4a close-on-evidence delegation at line 350.
+- run-retro Step 4b Stage 2 silent fix-shape at line 392.
+- work-problems Step 5 NEVER-AskUserQuestion-mid-loop clause at line 273.
+- work-problems Step 2.5 batch-as-default at lines 119, 121, 125, 320.
+- manage-problem Step 9d evidence-grounded close + recovery path at lines 676-680.
+- transition-problem Step 5 P063 silent-default at lines 96-132.
+- `run-retro-step-4a-recovery-path.bats` + `manage-problem-step-9d-recovery-path.bats` present.
+- Commit: `fae42aa`.
+
+### Phase 3 (AFK loop redesign) — SHIPPED
+
+- ITERATION_SUMMARY `outstanding_questions` schema at work-problems SKILL.md lines 289-294.
+- Deviation-candidate shape (existing-decision + contradicting-evidence + proposed_shape) at line 316.
+- Between-iter aggregation persistence to `.afk-run-state/outstanding-questions.jsonl` at line 320.
+- Mid-loop UserPromptSubmit handler "MUST complete naturally; do NOT abort" at line 322.
+- `work-problems-mid-loop-userpromptsubmit-handler.bats` + `work-problems-deviation-candidate-shape.bats` present.
+- Commit: `328f92a`.
+
+### Phase 4 (Enforcement hook) — DEFERRED, R6-GATED
+
+- R6 numeric gate (lazy AskUserQuestion count ≥ 2 across 3 consecutive retros) is the trigger; auto-flag is wired in run-retro Step 2d substep 8 (commit `258ac25`).
+- Gate has NOT fired. Recent retros: 2026-04-27 lazy=3 (baseline includes pre-Phase-2 calls); 2026-04-28 lazy=0 (AFK iter — `AskUserQuestion` unavailable per ADR-013 Rule 6, so this datapoint does not count toward the gate per the trail-file note).
+- Phase 4 deferral is intentional and self-documenting via the auto-flag mechanism (declarative-first per ADR-040 Tier 3 precedent).
+
+### Verification path
+
+All shippable phases (1, 2, 3, 5 + R6 auto-flag automation) confirmed shipped in code. No deviations from the plan that lived at `.claude/plans/noble-cuddling-sutton.md` (file has since rotated to host P136's plan; the executed-plan artefacts are the 5 cited commits). Phase 4 deferral is intentional.
+
+P135 transitions Known Error → Verification Pending. Closure on lazy-count metric trending to 0 across 3+ consecutive retros (declarative-only path closes P135 without Phase 4) OR R6-fire + Phase 4 ship + verification on that release.
+
+## Fix Released
+
+- **Release marker**: shipped across 5 commits — `e703656` (Phase 1 doc-only), `5d414fc` (Phase 5 measurement), `fae42aa` (Phase 2 skill amendments), `328f92a` (Phase 3 AFK loop redesign), `258ac25` (R6 auto-flag automation). npm releases: `@windyroad/retrospective` minor (Phase 5 + Phase 2 retro surfaces + R6 auto-flag) and `@windyroad/itil` patch (Phase 2 itil surfaces + Phase 3 AFK loop redesign).
+- **Fix summary**: ADR-044 codifies the framework-resolution boundary; SKILL.md edits remove per-action `AskUserQuestion` in framework-resolved zones across 4 SKILLs (run-retro / work-problems / manage-problem / transition-problem); AFK loop redesigned around batched outstanding_questions queue + deviation-candidate shape; Step 2d "Ask Hygiene Pass" measures lazy-AskUserQuestion-count regression metric per retro; R6 numeric gate auto-flags Phase 4 if declarative proves insufficient.
+- **Awaiting user verification**: lazy-count metric trends to 0 across 3+ consecutive retros (declarative-only path closes P135) OR R6 numeric gate fires and Phase 4 enforcement hook ships (enforcement-required path; P135 verifies on that release).
+- **Exercise evidence (this audit)**: 2026-04-28 AFK iter on P135 — `Grep` / `Glob` confirmed all 9 shipped surfaces in code; 6 named bats files present (`run-retro-step-2d-r6-auto-flag`, `run-retro-step-4a-recovery-path`, `check-ask-hygiene`, `manage-problem-step-9d-recovery-path`, `work-problems-mid-loop-userpromptsubmit-handler`, `work-problems-deviation-candidate-shape`); 5 cited commits exist via `git show --stat`; 2 ask-hygiene trail files present (lazy=3 baseline, lazy=0 AFK-iter). No deviations from the executed plan.
