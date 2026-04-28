@@ -29,7 +29,7 @@ setup() {
 @test "install-updates P120: SKILL.md Step 6 documents the cache-hit skip-gate path" {
   run grep -F 'cached scope matches' "$SKILL_MD"
   [ "$status" -eq 0 ]
-  run grep -F 'skip Step 6' "$SKILL_MD"
+  run grep -F 'skip Steps 5b/5c' "$SKILL_MD"
   [ "$status" -eq 0 ]
 }
 
