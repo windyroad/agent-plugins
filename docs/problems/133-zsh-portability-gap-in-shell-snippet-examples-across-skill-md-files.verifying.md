@@ -1,7 +1,8 @@
 # Problem 133: zsh-portability gap in shell-snippet examples across SKILL.md files — bash-style word-splitting + bash-builtin variable names fail silently or noisily on zsh
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-27
+**Fix Released**: 2026-04-28 (P133 Phase 1 — install-updates SKILL.md L167 array form + reconcile-readme.sh defensive rename)
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Likely (3)
 **Effort**: M — likely combination of (a) audit of every SKILL.md and `scripts/*.sh` for bash-isms (unquoted variable iteration, `local status=`, `local declare`, `${array[@]}` zsh-array-vs-bash-array, `[[ ... ]]` extended-test in posix-sh contexts); (b) per-occurrence remediation (replace `for x in $VAR` with `for x in "${VAR[@]}"` or `for x in ${=VAR}` zsh-equivalent; rename `local status` to `local result`; etc.); (c) optional CI step or pre-commit hook lint that fails on bash-isms in shell snippets that should be portable.
 
