@@ -1,5 +1,99 @@
 # @windyroad/problem
 
+## 0.23.0
+
+### Minor Changes
+
+- a8711ab: P131 Phase 2 — `.claude/` user-space write protection. NEW `packages/itil/hooks/itil-claude-space-protection.sh` PreToolUse:Write|Edit hook denies agent writes to project-scoped `.claude/` paths NOT in the user-space allow-list, unless an approval marker is present. NEW shared helper `packages/itil/hooks/lib/claude-space-gate.sh` exporting `is_protected_claude_path` / `has_approval_marker` / `claude_space_deny`.
+
+  Why: `.claude/` is user-controlled config space (settings, memory, MCP servers, user-authored skills/hooks/commands/agents, Claude Code's own state in `projects/` and `worktrees/`). Agents misread the architect/JTBD/TDD/style-guide/voice-tone/risk-scorer gate-exclusion lists as "approved write zones" and write project-generated content (plans, audits, scratch state) under `.claude/`, polluting user space. Project-generated content belongs in `docs/` (plans, audits) or inline in problem-ticket bodies.
+
+  Allow-list (project-relative): `.claude/{settings.json, settings.local.json, MEMORY.md, .install-updates-consent, scheduled_tasks.lock}` + `.claude/{skills, commands, agents, hooks, projects, worktrees}/*` subtrees + `.claude/*.local.json` (root-depth only) + `.claude/.agent-write-approved-*` markers themselves.
+
+  Approval-marker bypass: user creates `.claude/.agent-write-approved-<sha256-of-rel-path>` to pre-authorize specific paths. Persistent (no TTL); user creates once per path. Distinct semantic class from ADR-009 session-scoped /tmp markers — this is a persistent path-keyed approval-marker class, precedent-shaped on `.claude/.install-updates-consent` (ADR-030 / P120).
+
+  Out of scope (unaffected): Read|Glob|Grep on `.claude/` paths, paths outside `$PWD` project root (~/.claude/, other repos' .claude/), `.claude/` subtree edits hitting allow-listed paths.
+
+  Deny message: ~440 bytes (under ADR-038 progressive-disclosure 500-byte cap), names P131 + suggests `docs/plans/` / `docs/audits/` / inline-ticket alternatives + names approval-marker bypass + references project CLAUDE.md MANDATORY rule. Silent on allow path per ADR-045 Pattern 1. Fail-open on parse error per ADR-013 Rule 6.
+
+  Files shipped:
+
+  - `packages/itil/hooks/itil-claude-space-protection.sh` — NEW PreToolUse:Write|Edit hook.
+  - `packages/itil/hooks/lib/claude-space-gate.sh` — NEW shared helper.
+  - `packages/itil/hooks/hooks.json` — registers the new hook.
+  - `packages/itil/hooks/test/itil-claude-space-protection.bats` — NEW 34 behavioural assertions per ADR-037 + P081 covering deny path, allow-list, outside-.claude paths, approval-marker bypass, Read|Glob|Bash unaffected, allow-list anchor depth, deny-message contract, byte budget, silent-on-pass.
+  - `docs/problems/131-...known-error.md` → `.verifying.md` — Status flip + Phase 2 shipped section per ADR-022 fold-fix convention.
+  - `docs/problems/README.md` — WSJF Rankings + Verification Queue refresh per P062.
+
+  Architect: PASS-WITH-NOTES — allow-list amended to add `MEMORY.md`, `commands/`, `agents/`, `hooks/` subtrees + anchor `*.local.json` to root depth; ADR formalising user-space-vs-project-space distinction deferred to Phase 3 per ticket Fix Strategy line 113; marker format consistent with ADR-009 (new persistent semantic class, not conflict).
+  JTBD: ALIGNED PASS — JTBD-001 primary (governance without breaking user editing flows; allow-list preserves "no manual policing"); JTBD-006 strong fit (originating P131 incident was AFK orchestrator writing `.claude/plans/p081-...md`; Phase 2 prevents recurrence); JTBD-101 no conflict; JTBD-202 indirect.
+  Voice-tone: PASS advisory-only (`docs/VOICE-AND-TONE.md` not yet authored).
+  Style-guide: PASS out-of-scope.
+  TDD: 34/34 new bats green; full 129-test itil hooks suite green (no regression).
+
+  Phase 3 remaining (deferred): formalising-ADR; doc-reframe in remaining 4 gate-hook prose surfaces (tdd, style-guide, voice-tone, risk-scorer); `docs/briefing/hooks-and-gates.md` topic file update.
+
+### Patch Changes
+
+- e85d2e1: P123 — `packages/itil/hooks/lib/block-list.sh` shared helper for the inbound-report block-list mechanism. Per ADR-046's v1 implementation contract — audit-log-only — the helper exposes `is_blocked(<hash>)`, `add_block(<hash> <evidence-ticket> <provenance>)`, `remove_block(<hash> <reason>)`, and `list_blocks()`. Caller-supplied opaque hex hashes (SHA-256 width validated); helper does not compute hashes — keeping the surface GitHub-agnostic per ADR-046 §Reassessment.
+
+  Persistence: `docs/blocked-reporters.json` (per-repo JSON array, tracked in git, hashes only — no usernames). Audit log: sibling `docs/blocked-reporters.audit.jsonl` (append-only JSONL, five-field shape per ADR-046 Q2 — `{type, reporter_id_hash, evidence_ticket, timestamp, author}`).
+
+  ADR-046 Q1/Q2/Q3 already adopted (proposed defaults accepted via prior batch AskUserQuestion at iter 9 quota-halt 2026-04-28); this iter ships the audit-log-only v1 slice and transitions ADR-046 `proposed → accepted`. Q3's "agent-monitored review-cycle" direction is resolved; un-block monitor implementation deferred to a future iter beyond this v1 slice (per ADR-046 §Q3 Adopted note).
+
+  No enforcement integration in this slice. P079's inbound-discovery filter and `/wr-itil:report-upstream`'s outbound pre-check land when those features ship — out of scope for P123 per the ticket's pacing decision (line 78). The persistence layer is the foundation those iters consume; without it they would re-derive the shape from ADR-046 inline.
+
+  Files shipped:
+
+  - `packages/itil/hooks/lib/block-list.sh` — NEW shared helper, four functions.
+  - `packages/itil/hooks/test/block-list.bats` — NEW behavioural bats: 10 assertions covering round-trip, idempotent add, remove path, audit-log presence (block + unblock), list_blocks shape, and hex-shape validation rejections (non-hex + wrong-length).
+  - `docs/blocked-reporters.json` — NEW empty array per-repo persistent block list.
+  - `docs/decisions/046-blocked-reporters-persistence.proposed.md` → `.accepted.md` — Status flip; Q1/Q2/Q3 confirmed adopted.
+  - `docs/problems/123-...known-error.md` → `.verifying.md` — Status flip + Fix Released section per ADR-022 fold-fix convention.
+  - `docs/problems/README.md` — WSJF Rankings + Verification Queue refresh per P062.
+
+  Architect: ALIGNED-with-notes / PASS no new ADR — ADR-046 governs; helper-doesn't-hash separation locked in; JSONL audit-log shape obvious local choice.
+  JTBD: ALIGNED / PASS — JTBD-101 (Extend the Suite) primary persona served by foundation-only slice; JTBD-001 + JTBD-202 compose; no regression vs zero-defence today.
+  TDD: 10/10 green; full itil hooks suite 95/95 green (no regression).
+
+- 4d2a55d: P133 — zsh-portability gap in shell-snippet examples. Phase 1 immediate fix at the proximate failure surface (`scripts/repo-local-skills/install-updates/SKILL.md:167`) plus defensive rename in the load-bearing `reconcile-readme.sh` script.
+
+  The 2026-04-27 session hit two distinct zsh-vs-bash failures in `/install-updates` Step 7: (1) `local status=...` errored with `read-only variable: status` because zsh has `$status` as a read-only built-in alias for `$?`; (2) `for plugin in $PLUGINS_TO_UPDATE` (where the variable was a space-separated string) silently iterated **once** under zsh because zsh does NOT word-split unquoted variables by default. All 24 install operations were marked `lost` until the wrapper was rewritten to use a bash array.
+
+  Changes:
+
+  - `scripts/repo-local-skills/install-updates/SKILL.md` Step 6 inner loop now uses bash-array iteration (`PLUGINS_TO_UPDATE=(itil retrospective risk-scorer tdd)` + `for plugin in "${PLUGINS_TO_UPDATE[@]}"`) — portable across bash and zsh. New portability note explains why array form (not unquoted iteration). This is the proximate failure surface that broke the 2026-04-27 session.
+  - `packages/itil/scripts/reconcile-readme.sh` defensive rename `status` → `ticket_status` at the two assignment sites (lines 65-72 filesystem-truth build phase + lines 174-191 drift-detection loop). Script has a hard `#!/usr/bin/env bash` shebang so it never runs under zsh directly, but the rename eliminates the latent footgun for any future caller that sources or copies the pattern. Inline comment cross-references P133.
+  - `packages/itil/scripts/test/reconcile-readme.bats` new behavioural regression test (`run env status=junk "$SCRIPT" "$FIXTURE_DIR"`) confirming drift detection is independent of any caller-controlled `status` env var. 17/17 green (16 prior + 1 new).
+
+  Audit findings (in-scope but clean — recorded for the verifying-transition note):
+
+  - `packages/itil/skills/{work-problems,manage-problem,transition-problem}/SKILL.md` — no bash-isms in fenced shell snippets (greps for `for x in $VAR`, `local status=`, unquoted `${array[@]}` returned no matches).
+  - `packages/retrospective/skills/run-retro/SKILL.md` — same.
+  - `packages/itil/hooks/*.sh` and `packages/itil/hooks/lib/*.sh` — all have `#!/bin/bash` shebangs; safe.
+
+  Phase 2 (repository-wide audit + remediation) and Phase 3 (CI/pre-commit lint detecting bash-isms in committed snippets) deferred to compose with **P136** (ADR-044 alignment audit master) per architect direction.
+
+  Architect ALIGN (no new ADR; alignment with ADR-014 ONE-commit batching, ADR-022 verifying-transition criteria, ADR-030 repo-local-skills source-of-truth governance). JTBD ALIGN (JTBD-001 solo-developer primary fit — silent-failure surface eliminated; JTBD-007 keep-plugins-current direct outcome; JTBD-101 plugin-developer downstream pattern). Style PASS (no UI/visual styling). Voice PASS (no banned patterns).
+
+  Transitions P133 Open → Verification Pending per ADR-022.
+
+- ac2425e: P134 — `docs/problems/README.md` line-3 "Last reviewed" parenthetical accumulator-bloat truncation contract. Applies the P099 reusable triplet (ADR-040 line 92 explicitly names "problems index" as a covered surface) to the problems index: line 3 had grown unbounded to 76,582 bytes — past 62KB it broke the Read tool entirely (25K-token whole-file cap), forcing awk/grep workarounds on every inspection task.
+
+  The fix mirrors P099's `check-briefing-budgets.sh` shape at the new surface:
+
+  - New advisory `packages/itil/scripts/check-problems-readme-budget.sh` (read-only diagnostic; mirrors P099 patterns)
+  - 13 new behavioural assertions in `packages/itil/scripts/test/check-problems-readme-budget.bats` (13/13 green)
+  - New canonical "Last-reviewed line discipline (P134)" subsection in `packages/itil/skills/manage-problem/SKILL.md`; Step 5 P094 / Step 6 P094 / Step 7 P062 reference it inline (one fragment ≤ 1024 bytes soft, 5120 bytes hard ceiling, displaced fragments rotate to forward-chronology `docs/problems/README-history.md` archive sibling)
+  - Same discipline applied to `transition-problem`, `transition-problems`, `review-problems`, and the load-bearing `reconcile-readme` (whose prior "ever-growing prose paragraph" convention was the source-of-bloat surface)
+  - New `docs/problems/README-history.md` archive sibling — forward-chronology log; legacy 76,582-byte content seeded under a 2026-04-28 heading; line 3 trimmed in the same commit as one-shot remediation
+
+  Read-tool symptom verified closed in same session: orchestrator's initial Read of `docs/problems/README.md` returned `File content (48677 tokens) exceeds maximum allowed tokens (25000)` BEFORE; AFTER the fix, `Read offset=1 limit=12` succeeds cleanly (line 3 now 800 bytes, 95× reduction).
+
+  Architect PASS no new ADR (ADR-040 line 92 reusable-pattern note explicitly covers this surface). JTBD PASS (JTBD-001 primary fit — Read-tool affordance restored; JTBD-006 + JTBD-101 compose). 535/535 green across affected bats suites (240/240 manage-problem family + 295/295 hooks/work-problems family).
+
+  Transitions P134 Open → Verification Pending per ADR-022.
+
 ## 0.22.1
 
 ### Patch Changes
