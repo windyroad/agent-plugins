@@ -106,6 +106,8 @@ GitHub reports can arrive via multiple channels: issues, discussions, security a
 
 **Proposed default**: flat list. Cross-channel behaviour appears to be the norm in observed malicious-report patterns; the per-channel shape can be added in a future amend cycle if real-world friction demonstrates the need (anti-BUFD-for-framework-evolution per ADR-044).
 
+**Adopted 2026-04-28** — flat list (proposed default accepted). User confirmed via batch AskUserQuestion at iter 9's quota-halt: *"Flat list per-repo (Recommended — architect default)"*. Per-channel shape deferred to amend cycle if real-world friction surfaces.
+
 #### Q2 — Block-decision provenance: which fields are recorded?
 
 Each block-list entry needs metadata for accountability and for audit-log review. The minimum field set:
@@ -116,6 +118,8 @@ Each block-list entry needs metadata for accountability and for audit-log review
 
 **Proposed default**: the five-field shape above.
 
+**Adopted 2026-04-28** — five-field shape (proposed default accepted). User confirmed via batch AskUserQuestion at iter 9's quota-halt: *"5-field shape (Recommended — architect default)"*.
+
 #### Q3 — Un-block path: maintainer manual vs structured request
 
 A blocked reporter who genuinely files something legitimate later (or who was wrongly classified) needs a recovery path. The shape choice:
@@ -124,6 +128,18 @@ A blocked reporter who genuinely files something legitimate later (or who was wr
 - **Structured request channel**: a dedicated GitHub Discussion or label-based intake for appeal requests. Higher operational overhead; surfaces the block list more visibly to outside observers.
 
 **Proposed default**: manual maintainer review only. Aligns with the per-repo opacity decision (the block list itself shouldn't advertise itself); aligns with solo-developer persona constraints (don't add operational surface ahead of demonstrated need).
+
+**Adopted 2026-04-28 — expanded direction**. User direction verbatim: *"we need to think about this some more. Basically, as a maintainer, I won't be looking for unblock requests, so we should have a monitor of some sorts. I would then need to review and approve or reject. I expect you to bring these to me and ask and then handle the response (close request or unblock)."*
+
+The user rejected pure-manual ("won't be looking for unblock requests") and rejected pure-structured ("higher operational overhead"). The adopted shape is **agent-monitored review-cycle**:
+
+1. **Monitor** — a periodic check (e.g., new entry in a `request-unblock.yml` issue template, or a designated GitHub Discussion category, or some other inbound channel) that the agent watches without maintainer attention. Specific monitor channel deferred to implementation iter — the user's direction is the agent OWNS the monitoring; the maintainer is NOT expected to actively check.
+2. **Surface** — when an unblock request arrives, agent surfaces it to the maintainer with sufficient context (the request's content, the original block's evidence ticket, the reporter's hash, the timestamps) for an informed approve/reject decision. AskUserQuestion-shaped per ADR-013 Rule 1.
+3. **Handle response** — agent applies the decision: on approve, removes the entry from the block list and commits + closes the request acknowledging the unblock; on reject, closes the request with a reason.
+
+Implementation work needed: monitor mechanism (channel choice + polling/event hook), surface format (what context to include in the AskUserQuestion), response-handling (commit + close-with-reason). Deferred to a future implementation iter beyond P123's audit-log-only v1 slice. Audit-log-only v1 ships without this workflow; the workflow ships in a follow-up slice.
+
+The four-state taxonomy (proposed-with-open-questions → all-three-Adopted-but-Q3-deferred-implementation → ...) is itself worth observing for any future ADR that has multi-stage Open Questions resolution. Q1 and Q2 close this ADR's Open Questions cleanly; Q3 closes the *direction* but leaves *implementation specifics* for a future iter.
 
 ### Sequencing — when each Open Question resolves
 

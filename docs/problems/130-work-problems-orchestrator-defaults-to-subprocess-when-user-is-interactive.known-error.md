@@ -94,18 +94,33 @@ The fix is to **make presence-awareness explicit at Step 5** rather than baking 
 
 ## Fix Strategy
 
-**Shape**: SKILL.md Step 5 amendment + presence-signal detector + ADR-032 amendment + bats.
+**Updated 2026-04-28 — direction reframed by user**. The original two-path fix-shape question (dual-mode dispatch vs observation-surface enrichment) was rejected by the user as missing the underlying purpose. The user's direction verbatim: *"you can't tell when I'm AFK or not. I might come in, respond to a question and disappear again. I'm not saying use subprocess unnecessarily, I'm saying don't assume I will be here for follow-up questions for quite some time. Instead follow the main purpose of `work-problems` which is to progress the problem tickets and accumulate questions. When you can no longer make any progress, surface the questions for me to answer (with sufficient context that I can make an informed and educated decision and without doing BUFD, and without asking me questions that would be better determined through research, exploration and experimentation)."*
 
-**Target files**:
-- `packages/itil/skills/work-problems/SKILL.md` — Step 5 dual-mode dispatch (subprocess for absent-presence, main-turn skill invocation for present-presence). Detector logic inline or via shared helper.
-- `packages/itil/hooks/lib/presence-signal.sh` (new shared helper) — function `is_user_presently_interactive()` returning 0/1 based on the chosen detector heuristic. Reuses ADR-038 once-per-session marker conventions.
-- `docs/decisions/032-governance-skill-invocation-patterns.proposed.md` — amendment adding the "interactive-presence variant" alongside the existing subprocess-boundary variant.
-- `packages/itil/skills/work-problems/test/work-problems-step-5-presence-aware-dispatch.bats` — behavioural bats (NOT structural greps per P081 direction once P081 lands) covering presence-absent → subprocess, presence-present → main-turn, signal-decay, opt-out.
-- `.changeset/wr-itil-p130-*.md` — patch (or minor if the dispatch contract is observably different to consumers).
+The reframe:
 
-**Out of scope**: extending presence-awareness to other orchestrator skills (`/wr-itil:transition-problems` batch grain, `/wr-retrospective:run-retro`, etc.). If the pattern generalises after P130 lands, a follow-up codification ADR can lift the helper into `packages/shared/`.
+1. **Presence-detection is unreliable and is not the goal**. Even at the keyboard, the user may answer one question and then disappear for hours. Don't try to detect presence; treat the user as transient.
+2. **The loop's purpose is progress + accumulation, not interactive-vs-AFK routing**. Progress every ticket the agent can advance autonomously. Accumulate user-answerable questions as a side-effect of progress. When stuck (cannot progress further without user input), surface the accumulated questions in one batch.
+3. **Question discipline at surface time**:
+   - Each question must carry enough context for an informed decision (the architect's recommended option, the alternatives considered, the trade-offs, the concrete consequence of each path).
+   - **No BUFD** — don't pre-judge architectural decisions before there's evidence; small actionable questions, not galaxy-brain ones.
+   - **Don't ask questions that research / exploration / experimentation could answer**. The agent should prototype, read code, run experiments to answer those itself. The user is the source for direction-setting decisions only.
 
-**Compose with `--max-turns` / `--input-format json` flags** if Anthropic CLI evolves to support presence-passing from parent session to subprocess (would let subprocess inherit parent's interactivity level).
+**Implementation shape (replaces the original dual-mode approach)**:
+
+The fix is mostly SKILL.md prose discipline, not a new dispatch mode:
+
+- `packages/itil/skills/work-problems/SKILL.md` — tighten the AskUserQuestion-in-orchestrator-main-turn discipline. Step 5/6.5/6.75 should NOT ask the user mid-loop unless the framework explicitly prescribes it (Step 6.5 above-appetite halt, Step 6.75 dirty-for-unknown-reason halt, Step 0 session-continuity). Continue iterating through the backlog until quota exhausts or stop-condition #1/#2/#3 fires.
+- Reinforce Step 2.5b's central role — the halt-with-batched-questions surface IS the framework's prescribed user-interaction point. Don't dilute it by asking mid-loop.
+- Add explicit guidance on what KIND of accumulated questions are acceptable to batch-surface: direction-setting decisions only; no BUFD; no questions answerable by research/experimentation.
+- `packages/itil/skills/work-problems/test/work-problems-no-mid-loop-asking.bats` — behavioural assertions: orchestrator does not fire `AskUserQuestion` between iters when the framework's stop-conditions don't fire.
+- ADR-032 amendment: NOT needed. The subprocess-boundary contract is unchanged. The change is at the orchestrator's main-turn discipline layer.
+
+**Out of scope (per the reframing)**:
+- Presence-detection helper (`packages/itil/hooks/lib/presence-signal.sh`) — removed from scope. Presence is unreliable and is not the goal.
+- Dual-mode dispatch (subprocess vs main-turn) — removed from scope. The dispatch shape stays subprocess-by-default; the change is in WHEN to ask, not HOW to dispatch.
+- Observation-surface enrichment (`--output-format stream-json` live tail) — defer. Could be a P130-follow-up if real-world friction surfaces; today's evidence (this session) is that the friction is "asking too often" not "iter progress is invisible".
+
+**Compose with**: P132 (over-ask in interactive sessions — same family of agent-discipline gaps; P132's Phase 4 enforcement hook directly serves P130's reframed direction), P135 (decision-delegation contract — ADR-044 codifies the framework-resolution boundary that P130 now operationalises in the orchestrator's main turn).
 
 ## Dependencies
 
