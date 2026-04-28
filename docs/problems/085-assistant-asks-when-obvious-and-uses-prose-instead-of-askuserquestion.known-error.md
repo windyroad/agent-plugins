@@ -1,6 +1,6 @@
 # Problem 085: Assistant asks for input when the next step is obvious, AND uses prose asks instead of AskUserQuestion when input is actually needed
 
-**Status**: Verification Pending
+**Status**: Known Error
 **Reported**: 2026-04-21 (AFK iter 6 post-loop, during P084 evidence-update discussion)
 **Priority**: 16 (High) — Impact: High (4) x Likelihood: Almost Certain (4)
 **Effort**: M — requires one or more of: (1) hook on assistant output that detects prose-ask patterns ("Want me to...", "Should I...", "A or B?") and blocks the response with a systemMessage reminder; (2) hook on assistant output that detects consent-gate-when-obvious patterns (immediately-prior user message contains a direction/yes/act-verb AND next assistant message contains a question) and blocks; (3) CLAUDE.md-level mandatory rules promoted from memory feedback; (4) memory feedback addendum making the two rules explicit in the same file. Architect review at implementation to decide hook shape.
@@ -126,3 +126,29 @@ Recommended: (1) + (2). Hook-based enforcement is the only mechanism that has re
 **Follow-up advisory** (architect, not blocking): the P078 + P085 + P082 cluster introduces a new architectural primitive — "assistant-output gate on UserPromptSubmit/Stop" — distinct from the existing "file-edit gate on PreToolUse". A future ADR should codify the primitive + the per-plugin ownership rule. Not drafted this iter; follow-up ticket candidate.
 
 **Related fixes landed together in this commit**: none. Single-ticket commit per ADR-014.
+
+## Regression Evidence (2026-04-28)
+
+User-directed reopen during interactive `/wr-itil:work-problems` orchestrator session. Two distinct correction signals fired in the same session, both targeting behaviours the 2026-04-24 fix was supposed to prevent:
+
+**Citation 1 — orchestrator main-turn prose-ask at Step 6.75 halt-summary emit (2026-04-28 ~17:25)**: After Step 6.75 dirty-for-unknown-reason fired and was user-resolved (internal-mcp scope-blowout disposition), the orchestrator emitted a final summary ending with: *"Loop is still halted from Step 6.75. Remaining open item: missing `.changeset/wr-itil-p130-*.md` for `b9da37e`. Awaiting your direction on whether to add it + resume on P123, or end the session."*
+
+User correction: *"sorry, what do you need from me. If you have a question, don't use prose, actually ask it using the askuserquestion tool"*
+
+The Stop hook (`packages/itil/hooks/itil-assistant-output-review.sh`) shipped with the 2026-04-24 fix should have caught the trailing prose-ask phrasing ("Awaiting your direction on whether to add it + resume on P123, or end the session.") and emitted a `stopReason` nudge. Either the hook didn't fire, or its detector registry missed this phrasing variant. The "Awaiting your direction on whether to ... or ..." shape is a binary-choice prose-ask that should match.
+
+**Citation 2 — over-asking AskUserQuestion when the framework already prescribes the answer (2026-04-28 ~17:32)**: After P085 capture-offer + operational AskUserQuestion was emitted (4 options for loop-continuation: add changeset+resume / add+drain / dispatch repair iter / end), the user replied: *"FFS, why are you stopping to ask. what does the decision framework tell you to do?"*
+
+This is a refined regression: the user asserts that even when AskUserQuestion is the right primitive, asking AT ALL is wrong when the decision framework already prescribes the answer. The just-landed P130 fix (commit `b9da37e`, 2026-04-28 ~16:25) restricts mid-loop AskUserQuestion to framework-prescribed halt points; Step 6.75 IS a framework-prescribed halt point, so the AskUserQuestion call was technically permitted. But the framework's downstream answer (continue progressing the backlog per the loop's stated purpose; missing changeset is iter-2 incomplete-work that the orchestrator can mechanically repair) was knowable without user input. Asking about it surfaced as over-ask.
+
+This second citation is class-of-behaviour overlap with **P132** (Open, WSJF 4.5 — "Agents over-ask in interactive sessions — conflating mechanical-stages with user-interactive-stages of multi-stage skill contracts"). Both P085 and P132 are in scope; the corrective fix may need to extend the existing UserPromptSubmit / Stop hooks to detect "framework-prescribed answer is knowable" cases, not just prose-vs-tool surface.
+
+### What the 2026-04-24 fix did NOT cover
+
+- **Detector phrasing gap**: the canonical phrasing list in `packages/itil/hooks/lib/detectors.sh::PROSE_ASK_PATTERNS` likely doesn't match "Awaiting your direction on whether to ..." or "Awaiting your direction on whether to ... or ...". Add this shape (and similar "Awaiting / Pending / Once you confirm ..." variants) to the registry.
+- **Framework-knowability detection**: when AskUserQuestion is fired but the answer is mechanically derivable from the active skill's SKILL.md decision table, that's a different failure class than the prose-ask one — closer to P132's territory. The hook needs a "is this question answerable from the framework" signal. Hard problem; may require a separate iter or compose with P132's fix.
+- **Stop-hook coverage of orchestrator-final summaries**: if the Stop hook didn't fire on the 17:25 halt-summary message, that's hook-coverage gap. Verify the Stop hook's transcript scan reaches the orchestrator's final assistant turn (not just iter-subprocess turns).
+
+### Fix path
+
+Re-investigate the existing `packages/itil/hooks/itil-assistant-output-review.sh` Stop hook + `packages/itil/hooks/lib/detectors.sh` registry. Add the missing phrasings. Add behavioural bats per ADR-037 + P081 covering the two specific 2026-04-28 evidence shapes (post-halt-summary prose-ask; framework-knowable-question over-ask). Compose with P132's broader over-ask fix.
