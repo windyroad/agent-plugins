@@ -1,6 +1,6 @@
 # Problem 131: Agents write project-generated artefacts under `.claude/` (user-controlled config space) — gate exclusions are read tolerance, not write permission
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-04-27
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Likely (3)
 **Effort**: M — likely combination of (a) project CLAUDE.md adds an explicit "never write project-generated artefacts under `.claude/`" rule, (b) a new PreToolUse:Write|Edit hook that denies writes to `.claude/` for paths the user hasn't explicitly approved, and (c) updates to wr-architect / wr-jtbd gate-exclusion documentation clarifying the exclusion semantics (read tolerance, NOT write permission). The denial hook is the load-bearing piece; CLAUDE.md + docs are the supporting layer.
@@ -62,14 +62,14 @@ Manual cleanup: `rm` the offending file from `.claude/`, move content to project
 - [x] Audit all windyroad plugin hooks' gate-exclusion lists for `.claude/` paths. Confirm the inclusion is intentional read-tolerance and document the semantic. — 2026-04-28: confirmed across 6 packages (architect, jtbd, tdd, style-guide, voice-tone, risk-scorer). The `_doc_exclusions()` helper (`packages/<pkg>/hooks/lib/gate-helpers.sh`) lists `:!.claude/plans/` to exclude that path from doc-content scans; the architect/JTBD enforce-edit hooks have explicit `*/.claude/plans/*.md) exit 0` clauses. Both shapes are READ tolerance, not WRITE permission.
 - [x] Inventory existing project-generated content currently living under `.claude/` (if any) and propose relocation paths. — 2026-04-28: inventoried `.claude/` directory contents — only user-owned files remain (`settings.json`, `.install-updates-consent`, `scheduled_tasks.lock`, `skills/`, `worktrees/`). The `.claude/plans/p081-review-test-agent.md` file that triggered the user correction is already removed (relocated to `docs/problems/081-...open.md` ticket body in the original 2026-04-27 cleanup). No further relocation needed.
 - [x] Decide enforcement shape — 2026-04-28: chose **Option C (hybrid)**. Phase 1 (declarative CLAUDE.md rule) shipped this iteration; Phase 2 (enforcement hook) deferred to follow-on. This matches the ticket's stated Fix Strategy phasing. The pure-CLAUDE.md option is insufficient (relies on every agent reading and following the rule). The pure-enforcement option is too heavy as a first move (adds gate friction for legitimate user-side edits without first establishing the discipline rule). Hybrid lands the cheap declarative layer immediately and preserves the option to add hook enforcement when the rule alone proves insufficient.
-- [ ] If enforcement hook chosen: define the "user has approved" signal. Candidates:
-  - Marker file pattern (e.g. `.claude/.write-approved-${PATH_HASH}`)
+- [x] If enforcement hook chosen: define the "user has approved" signal. Candidates:
+  - Marker file pattern (e.g. `.claude/.write-approved-${PATH_HASH}`) — **chosen**
   - Explicit env-var override (`CLAUDE_USER_SPACE_WRITE=allow`)
   - Per-session AskUserQuestion approval (heavy; only for unfamiliar paths)
 
-  → 2026-04-28: deferred to Phase 2 implementation iteration. Composes with ADR-009 marker conventions; the marker-file-pattern shape is the lead candidate (low friction, persistent, hashable per path).
+  → 2026-04-28 Phase 2: shipped marker-file-pattern shape `.claude/.agent-write-approved-<sha256-of-rel-path>` per architect verdict (PASS-WITH-NOTES) — persistent in-tree marker, file-existence test, sha256 hex of project-relative path. Distinct semantic class from ADR-009 session-scoped /tmp markers; precedent is `.claude/.install-updates-consent` (ADR-030 / P120). Architect recommends Phase 3 ADR explicitly document this as a new persistent path-keyed approval-marker class.
 - [x] Update wr-architect / wr-jtbd / wr-tdd / wr-style-guide / wr-voice-tone / wr-risk-scorer gate-hook source comments to clarify: "these path patterns are excluded from THIS gate's review, NOT approved-for-agent-writes; see P131". — 2026-04-28: shipped this iteration as Phase 3 light-touch — added clarifier blocks to the two highest-leverage Turn-1 emission surfaces (`packages/architect/hooks/architect-detect.sh` + `packages/jtbd/hooks/jtbd-eval.sh`) and inline comments to the path-matching rules in the two enforce-edit hooks (`architect-enforce-edit.sh`, `jtbd-enforce-edit.sh`). The `_doc_exclusions()` helper in `gate-helpers.sh` (across 6 packages) is internal scoping and does not need the clarifier — agents do not read it.
-- [ ] Behavioural bats coverage for the enforcement hook (across allowed shapes / denied shapes / approval-marker honoured / user-side legitimate edits not blocked). — Deferred to Phase 2 implementation iteration.
+- [x] Behavioural bats coverage for the enforcement hook (across allowed shapes / denied shapes / approval-marker honoured / user-side legitimate edits not blocked). — 2026-04-28 Phase 2: shipped `packages/itil/hooks/test/itil-claude-space-protection.bats` with 34 behavioural assertions per ADR-037 + P081, covering deny path (4 cases) / allow path user-space allow-list (15 cases) / outside-.claude paths (4 cases) / approval-marker bypass (3 cases) / tool-name and edge cases (3 cases) / allow-list anchor depth (2 cases) / deny-message contract (5 cases) including ADR-038 <500-byte cap / ADR-045 silent-on-pass (2 cases). 34/34 green and full 129-test itil hooks suite green (no regression).
 
 ### Preliminary hypothesis
 
@@ -112,14 +112,20 @@ Project-CLAUDE.md is the simplest first move; it's a declarative rule the orches
 - Added inline source comments to the `*/.claude/plans/*.md) exit 0 ;;` rules in `packages/architect/hooks/architect-enforce-edit.sh` and `packages/jtbd/hooks/jtbd-enforce-edit.sh` clarifying READ-tolerance semantics for future maintainers.
 - Architect (ADR review) + JTBD (persona review) confirmed the partial-fix shape is aligned with ADR-009/013/022/038 and JTBD-001/JTBD-101 respectively. No new ADR required for this iteration; an ADR formalising the user-space vs project-space distinction is recommended once Phase 2 (enforcement hook) lands.
 
-**Phase 2 (load-bearing enforcement hook) — DEFERRED to follow-on iteration**:
+**2026-04-28 — Phase 2 (load-bearing enforcement hook) shipped via `/wr-itil:work-problems` AFK iteration**:
 
-- New `packages/itil/hooks/itil-claude-space-protection.sh` PreToolUse:Write|Edit hook denying agent writes under `.claude/`
-- Approval-marker pattern (composes with ADR-009) for user-pre-approved write zones
-- Behavioural bats coverage (allowed shapes / denied shapes / approval-marker honoured / user-side legitimate edits not blocked)
-- Plugin manifest registration
+- NEW `packages/itil/hooks/itil-claude-space-protection.sh` PreToolUse:Write|Edit hook — denies agent writes to project-scoped `.claude/` paths NOT in the user-space allow-list, unless an approval marker is present. Silent on allow path per ADR-045 Pattern 1; deny message <500 bytes per ADR-038.
+- NEW `packages/itil/hooks/lib/claude-space-gate.sh` shared helper — exports `is_protected_claude_path` (project-scope + allow-list check), `has_approval_marker` (sha256-keyed file-existence test), and `claude_space_deny` (PreToolUse JSON emitter). Architect verdict: keep semantically distinct from `review-gate.sh` (session-scoped TTL+drift) and `create-gate.sh` (per-session grep marker) — this is a new persistent path-keyed marker class.
+- Allow-list (architect-amended to add `MEMORY.md`, `commands/`, `agents/`, `hooks/` subtrees + anchor `*.local.json` to root depth): `.claude/{settings.json, settings.local.json, MEMORY.md, .install-updates-consent, scheduled_tasks.lock}` + `.claude/{skills, commands, agents, hooks, projects, worktrees}/*` subtrees + `.claude/*.local.json` (root only) + `.claude/.agent-write-approved-*` markers themselves.
+- Approval-marker bypass: `.claude/.agent-write-approved-<sha256-of-rel-path>` lets the user pre-authorize specific paths if they genuinely want agent-managed content under `.claude/`. Persistent (no TTL); user creates once per path. Composes with `.claude/.install-updates-consent` precedent (ADR-030 / P120).
+- UPDATED `packages/itil/hooks/hooks.json` registers the new PreToolUse:Write|Edit hook.
+- Behavioural bats per ADR-037 + P081 — 34/34 in `packages/itil/hooks/test/itil-claude-space-protection.bats` covering deny / allow / approval-marker / edge-cases / deny-message contract / ADR-038 byte budget / ADR-045 silent-on-pass; full 129-test itil hooks suite green (no regression).
+- Architect verdict PASS-WITH-NOTES — defer ADR formalising user-space-vs-project-space distinction to Phase 3 (per ticket Fix Strategy line 113); marker format consistent with ADR-009 (new semantic class, not conflict); hook placement in `packages/itil/hooks/` correct (itil owns discipline-enforcement family).
+- JTBD verdict ALIGNED / PASS — JTBD-001 primary (governance without breaking user editing flows; allow-list preserves "no manual policing"); JTBD-006 strong fit (originating P131 incident was AFK orchestrator writing `.claude/plans/p081-...md`; Phase 2 prevents recurrence); JTBD-101 no conflict (plugin-development edits target `packages/<plugin>/...`, not `.claude/`); JTBD-202 indirect fit.
+- Voice-tone verdict PASS (advisory-only — `docs/VOICE-AND-TONE.md` not yet authored; deny message is appropriately direct, names P131 + remediation paths + bypass).
+- Style-guide PASS (out of scope; no CSS/visual styling).
 
-This is the ticket's Status remaining at Known Error (root cause confirmed, fix path clear, partial fix shipped, load-bearing piece not yet implemented). Per ADR-022, Verifying is reserved for "fix fully shipped, awaiting validation" — Phase 2 outstanding means we are not yet at Verifying.
+Per ADR-022 lifecycle, Phase 1 (declarative) + Phase 2 (load-bearing enforcement) shipped means the ticket transitions Known Error → Verification Pending. User verifies on next session by attempting a Write to `.claude/plans/foo.md` and confirming the hook denies with the canonical `BLOCKED ... (P131)` message; or by creating an approval marker and confirming the bypass works.
 
 **Phase 3 (full doc refresh + briefing topic file) — REMAINING**:
 

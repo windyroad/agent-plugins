@@ -13,6 +13,10 @@
         "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/manage-problem-enforce-create.sh" }]
       },
       {
+        "matcher": "Write|Edit",
+        "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/itil-claude-space-protection.sh" }]
+      },
+      {
         "matcher": "Bash",
         "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/p057-staging-trap-detect.sh" }]
       },
