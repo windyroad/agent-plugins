@@ -1,12 +1,12 @@
 # Problem 123: Blocked-user list mechanism for inbound report management — refuse future tickets from clearly-malicious reporters
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-04-26
 **Priority**: 12 (High) — Impact: Significant (4) x Likelihood: Possible (3)
 **Effort**: M — new per-repo persistence artefact (`docs/blocked-reporters.json`), enforcement at two surfaces (P079's inbound discovery filter + `/wr-itil:report-upstream`'s outbound-target filter), ADR call on the persistence shape + scope boundary. Carved out from P079 per user direction 2026-04-26 to keep P079 focused on the assessment pipeline; P123 gets its own ADR (ADR-046) on per-repo vs per-machine scope.
-**WSJF**: (12 × 1.0) / 2 = **6.0**
+**WSJF**: (12 × 0) / 2 = **0** (Verification Pending — excluded from dev-work ranking per ADR-022)
 
-**Root cause**: documented in **ADR-046** (`docs/decisions/046-blocked-reporters-persistence.proposed.md`, 2026-04-28). The ADR records the resolved persistence-shape decision (per-repo, hashed GitHub user IDs), names the audit-log-only v1 implementation contract, and surfaces 3 Open Questions (block-list shape Q1, provenance Q2, un-block path Q3) that block transition of ADR-046 from `proposed` → `accepted`. Each Open Question carries a proposed default an implementation iter could adopt with user approval. The audit-log-only slice is shippable independently per this ticket's pacing decision; full malicious-actor defence requires P079's inbound-filter integration + `/wr-itil:report-upstream`'s outbound pre-check (ADR-024 extension), both deferred to subsequent iters when those features ship.
+**Root cause**: documented in **ADR-046** (`docs/decisions/046-blocked-reporters-persistence.accepted.md`, 2026-04-28). The ADR records the resolved persistence-shape decision (per-repo, hashed GitHub user IDs), names the audit-log-only v1 implementation contract, and surfaces 3 Open Questions (block-list shape Q1, provenance Q2, un-block path Q3) that block transition of ADR-046 from `proposed` → `accepted`. Each Open Question carries a proposed default an implementation iter could adopt with user approval. The audit-log-only slice is shippable independently per this ticket's pacing decision; full malicious-actor defence requires P079's inbound-filter integration + `/wr-itil:report-upstream`'s outbound pre-check (ADR-024 extension), both deferred to subsequent iters when those features ship.
 
 > Surfaced 2026-04-26 from the P079 (inbound sync of upstream-reported problems) interactive design-question resolution. User direction added a multi-step assessment pipeline for inbound reports including a "clear-malicious" branch that closes the upstream ticket AND adds the user to a blocked-user list (refusing all future tickets from them). The block-list mechanism is a new lifecycle artefact distinct from P079's inbound-discovery scope, and warrants its own ticket so each can ship independently.
 
@@ -97,3 +97,18 @@ None today. Maintainer manually closes each malicious report and burns mental cy
 - **JTBD-101** (plugin-developer / maintainer) — primary fit. Maintainer attention is the resource the block list defends.
 - **JTBD-201** (downstream adopter) — composes; the same maintainer-side defence applies to adopters of `@windyroad/itil` who use the inbound-assessment pipeline in their own projects.
 - 2026-04-26 session evidence: surfaced from P079's interactive design-question resolution (P122 trigger). User direction was explicit about the per-repo scope ("Per-repo (Recommended)") and the block-list's role in the P079 assessment pipeline.
+
+## Fix Released
+
+**Released**: 2026-04-28 (next `@windyroad/itil` release after this commit lands).
+
+**Fix summary**: ADR-046's v1 audit-log-only slice ships. `packages/itil/hooks/lib/block-list.sh` exposes `is_blocked` / `add_block` / `remove_block` / `list_blocks`; `docs/blocked-reporters.json` is the per-repo persistent block list (empty array on creation, hashed GitHub user IDs only); `docs/blocked-reporters.audit.jsonl` is the sibling append-only audit log with the five-field shape adopted in ADR-046 Q2 (`type, reporter_id_hash, evidence_ticket, timestamp, author`). `packages/itil/hooks/test/block-list.bats` carries 10 behavioural assertions covering round-trip, idempotent add, remove path, audit-log presence (block + unblock), `list_blocks` output shape, and hex-shape validation rejections. ADR-046 transitions `proposed → accepted` in the same commit; Q1/Q2/Q3 all marked Adopted (Q3's monitor-mechanism implementation specifics deferred to a future iter).
+
+**Out of scope (deferred per ticket pacing decision line 78)**:
+- P079's inbound-discovery filter integration — when P079's assessment pipeline ships, it consumes `is_blocked()` at the discovery loop.
+- `/wr-itil:report-upstream`'s outbound pre-check — when P070 closes (currently Verifying), the outbound surface adds `is_blocked()` against the upstream-project's block list before filing.
+- ADR-046 Q3's agent-monitored review-cycle implementation (monitor channel + surface format + response-handling) — direction adopted, implementation in a future iter.
+
+**Verification path**: confirm the audit-log-only v1 slice works as advertised — run the bats (`bats packages/itil/hooks/test/block-list.bats` ⇒ 10/10 green) plus the full itil hooks suite (`bats packages/itil/hooks/test/` ⇒ 95/95 green this iter, no regression). Optional manual exercise: source `block-list.sh`, call `add_block <fake-hash> P123 test@example.com`, observe `docs/blocked-reporters.json` updated to `["<hash>"]` and `docs/blocked-reporters.audit.jsonl` carrying the block-typed entry.
+
+Awaiting user verification.

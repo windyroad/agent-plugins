@@ -1,11 +1,13 @@
 ---
-status: proposed
+status: accepted
 date: 2026-04-28
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: [Windy Road plugin users, downstream `@windyroad/itil` adopters]
 reassessment-date: 2026-10-28
 ---
+
+> **Acceptance note (2026-04-28)** — transitioned from `proposed` after the v1 audit-log-only slice landed (P123 iter 4). Q1 (flat list), Q2 (five-field shape), and Q3 (agent-monitored review-cycle) all carry "Adopted" markers below. Q3's monitor-mechanism + surface-format implementation specifics remain deferred to a future iter (per Q3's adopted note); the persistence-layer direction encoded in this ADR is settled. P123 transitions Known Error → Verification Pending in the same commit per ADR-022.
 
 # ADR-046 — Blocked-reporters persistence: per-repo, hashed-ID, audit-log-first
 
