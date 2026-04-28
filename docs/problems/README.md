@@ -10,13 +10,13 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | WSJF | ID | Title | Severity | Status | Effort | Reported |
 |------|-----|-------|----------|--------|--------|----------|
 | 6.0 | P082 | No voice-and-tone or content-risk-scoring gate on commit messages | 12 High | Open | M | 2026-04-21 |
-| 4.5 | P033 | No persistent risk register for ISO 31000 / ISO 27001 compliance — sibling-project survey shows 99% miss rate (regression evidence 2026-04-28) | 9 Med | Known Error | L | 2026-04-17 |
 | 3.0 | P014 | No lightweight aside invocation for governance skills (background-subagent convention per 2026-04-20 direction) | 12 High | Open | L | 2026-04-16 |
 | 3.0 | P081 | Structural source-content tests are wasteful — TDD agent should reject them and require behavioural tests | 12 High | Open | L | 2026-04-21 |
 | 3.0 | P087 | No maturity / battle-hardening signal on plugins, skills, agents, or hooks — READMEs don't tell users which features are stable vs experimental | 12 High | Open | L | 2026-04-21 |
 | 3.0 | P097 | SKILL.md files mix runtime-necessary steps with maintainer-facing rationale, bloating every skill invocation | 12 High | Open | L | 2026-04-22 |
 | 3.0 | P128 | /wr-itil:report-upstream report body lacks consolidated Versions section | 12 High | Open | L | 2026-04-26 |
 | 2.5 | P137 | Plugin-published artifacts (SKILL.md, hooks, agents, CHANGELOGs) reference internal ADR/JTBD/P-IDs that adopter projects can't resolve — confuses and misleads adopter agents | 20 Very High | Open | XL | 2026-04-28 |
+| 2.25 | P033 | No persistent risk register for ISO 31000 / ISO 27001 compliance — sibling-project survey shows 99% miss rate; re-rated L → XL 2026-04-28 (Phase 1a ADR-047 design landed) | 9 Med | Known Error | XL | 2026-04-17 |
 | 2.25 | P015 | TDD enforcement does not flag vague Gherkin outcome steps | 9 Med | Open | L | 2026-04-16 |
 | 2.25 | P136 | ADR-044 alignment audit — sweep all unaudited skills/hooks/agents/ADRs/JTBDs/READMEs against the framework-resolution boundary (master ticket) | 9 Med | Open | L | 2026-04-27 |
 | 2.0 | P018 | TDD enforce BDD + Example Mapping principles | 16 High | Open | XL | 2026-04-16 |

@@ -123,3 +123,30 @@ AFK iter; denominator-zero across architect + JTBD + style-guide + voice-tone ga
 
 Notable signal — **dispatch-state staleness**: orchestrator dispatched this iter with `Status: Open` + `File: ...open.md` but the actual repo state at iter-start (commit `a22d792` already landed) was `Status: Verification Pending` + `File: ...verifying.md`. The transition file rename + Status edit + Fix Released field were already in HEAD; only the underlying code work (install-updates / reconcile-readme / bats / changeset) and the README index update remained for this iter to land. Pre-existing staged drift (P033 reopen + README reconcile + `.claude/settings.json` modifications) was unstaged to keep this commit single-purpose per ADR-014 ONE-commit-batching. See Pipeline Instability section in iter retro summary for the routing decision (defer to next interactive session per AFK fallback).
 
+---
+
+# Ask Hygiene — 2026-04-28 (AFK `/wr-itil:work-problems` iter, P033 Phase 1a ADR-047 design)
+
+Per ADR-044 / P135 Phase 5. Same-day continuation of the trail file; this section covers the P033 Phase 1a iter shipping ADR-047 (install-updates governance-artefact scaffolding design) + P033 ticket re-rate + WSJF refresh.
+
+## In-session AskUserQuestion calls
+
+(none — `claude -p` AFK subprocess; `AskUserQuestion` unavailable per ADR-013 Rule 6 + work-problems iteration-worker prompt forbidding clause)
+
+| Call # | Header | Classification | Citation |
+|--------|--------|----------------|----------|
+| — | — | — | — |
+
+**Lazy count: 0**
+**Direction count: 0**
+**Override count: 0**
+**Silent-framework count: 0**
+**Taste count: 0**
+**Correction-followup count: 0**
+
+## Notes
+
+AFK iter; denominator-zero across architect + JTBD gate delegations (both PASS via `Agent` tool calls, NOT `AskUserQuestion`); risk-scorer commit gate `wr-risk-scorer:pipeline` returned 1/1/1 (all Very Low, well within Low-4 appetite). Per ADR-044, agent-delegation tool calls are framework-resolved via the gate contracts and are NOT `AskUserQuestion`-classifiable. R6 numeric gate NOT firing — six same-day denominator-zero AFK-subprocess iterations cannot move the lazy-count needle by construction.
+
+Notable signal — **`.claude/` write-protection blocks Phase 1b implementation in AFK iters**: the iter dispatcher's "do NOT write under `.claude/`" direction (P131 Phase 2 enforcement) blocks the Phase 1b implementation site (`.claude/skills/install-updates/SKILL.md` + templates + bats test) from this AFK iter. The P131 hook itself ALLOW-LISTS `.claude/skills/*` (per `claude-space-gate.sh::is_protected_claude_path`), so the block is dispatcher-direction-level, not hook-level. The conservative response was to split P033 Phase 1 into Phase 1a (design ADR, this iter) + Phase 1b (SKILL.md + templates + bats, next foreground iter). This is a reusable pattern: when AFK iter cannot reach the implementation site due to dispatcher constraints, ship the declarative slice and defer implementation. Mirrors P131/P132 phasing precedent. Surfaced in Pipeline Instability section of the Step 5 retro summary.
+

@@ -3,8 +3,8 @@
 **Status**: Known Error
 **Reported**: 2026-04-17
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Possible (3)
-**Effort**: L
-**WSJF**: 4.5 — (9 × 2.0) / 4 → now known-error
+**Effort**: XL — re-rated from L 2026-04-28 per architect verdict on ADR-047 phase plan; original L sized only the scaffolding slice and missed the back-channel + backfill + behavioural-test scope surfaced by user's "for each risk in .risk-reports there should be something in the register" direction.
+**WSJF**: 2.25 — (9 × 2.0) / 8 → now known-error (XL effort)
 
 ## Description
 
@@ -77,9 +77,12 @@ Awaiting user verification that the scaffolding matches intent before populating
 - `docs/problems/` — ITIL problem management (similar directory-of-files pattern reused here)
 - `docs/risks/README.md` — the new register index
 - `docs/risks/TEMPLATE.md` — per-risk file template
-- `packages/risk-scorer/` — current risk scoring plugin; could host a future register-management skill
+- `docs/decisions/047-install-updates-scaffolds-governance-artefacts.proposed.md` — Phase 1 design ADR (this iter)
+- `packages/risk-scorer/` — current risk scoring plugin; Phase 2 back-channel implementation site
+- `.claude/skills/install-updates/` — Phase 1 scaffolding implementation site
 - P034 (`docs/problems/034-centralise-risk-reports-for-cross-project-skill-improvement.open.md`) — centralising ephemeral `.risk-reports/` to `~/.claude/`; may share the same centralised storage infrastructure
 - P102 (`docs/problems/102-no-invocation-surface-for-risk-register.open.md`) — follow-up ticket captures the deferred population mechanism. Surfaced 2026-04-22 after the user observed the register had stayed empty for 5 days in Verification Pending. P033's Fix Strategy explicitly deferred the invocation surface to "future work"; P102 is that future work made concrete.
+- P110 — pipeline back-channel hint; Phase 2 consumer of ADR-047's scaffolding output
 
 ## Regression Evidence (2026-04-28 — user-surfaced verification failure)
 
@@ -146,4 +149,71 @@ This refines the fix scope and elevates **Fix candidate 3 (pipeline back-channel
 - Install-updates scaffolding (Fix candidate 1) remains needed for the 4/6 projects that don't even have `docs/risks/` — the back-channel can't write into a non-existent directory.
 
 **Effort re-estimate**: original L estimate may need to inflate to XL given the new scope (back-channel + backfill + behavioural test + install-updates scaffolding + cross-plugin coordination between risk-scorer, install-updates, and any consumer skill). Architect verdict at next-iter time confirms or trims.
+
+## Phase Plan (2026-04-28 — architect-confirmed)
+
+Architect verdict in iter 2026-04-28 (this iter): split the XL fix into 4 phases. Phase 1 ships now; Phases 2-4 are deferred follow-up tickets/iters.
+
+### Phase 1 — install-updates governance-artefact scaffolding
+
+Phase 1 is itself split into Phase 1a (design, this iter) and Phase 1b (implementation, follow-up iter) because the implementation site lives under `.claude/skills/install-updates/` which the iter dispatcher's write-protection direction blocks for AFK iters.
+
+#### Phase 1a — design ADR (THIS ITER, 2026-04-28)
+
+- **ADR-047** (`docs/decisions/047-install-updates-scaffolds-governance-artefacts.proposed.md`) — install-updates scaffolds governance artefacts when policy file is present but artefact is missing.
+- Architect-approved trigger contract: per-sibling, fires when `RISK-POLICY.md` is present AND `docs/risks/` is absent. Idempotent per-file create-if-absent. No marker.
+- ADR-013 Rule 5 (consent-cached silent proceed) + Rule 6 (AFK fail-safe) audit baked in.
+- Final-report integration spec'd: scaffold rows alongside install rows in Step 7 table.
+- JTBD review: PASS (JTBD-001 primary fit, JTBD-006 AFK transparency, JTBD-202 audit-trail).
+- Re-rate Effort L → XL committed (this iter).
+
+#### Phase 1b — install-updates SKILL.md + templates + bats test (next iter)
+
+- `.claude/skills/install-updates/SKILL.md` — Step 6.5 "Scaffold governance artefacts (per-sibling)" between Step 6 and Step 7.
+- `.claude/skills/install-updates/templates/risk-register-README.md.tmpl` — adopter-flavoured (no R001, no "Last reviewed" date).
+- `.claude/skills/install-updates/templates/risk-register-TEMPLATE.md.tmpl` — verbatim copy of `docs/risks/TEMPLATE.md`.
+- `.claude/skills/install-updates/REFERENCE.md` — new section "Governance-artefact scaffold (P033)".
+- `.claude/skills/install-updates/test/install-updates-p033-register-scaffold.bats` — fixture test (mock adopter; assert scaffold + skip-existing + idempotency + RISK-POLICY-absent).
+- Closes the "directory doesn't exist" half of the 99% miss rate. Surveyed 4/6 adopters benefit on next install-updates run after Phase 1b ships.
+
+**Phase 1 does NOT close P033 — only the scaffolding precondition lands.** Master ticket remains Known Error pending Phase 2.
+
+### Phase 2 — pipeline back-channel (load-bearing per user direction; deferred)
+
+- `wr-risk-scorer:pipeline` agent writes/updates `docs/risks/R<NNN>-*.active.md` entries when the report identifies an inherent risk.
+- N reports : 1 register entry (dedupe by risk-name).
+- New register entries get full template fields filled (auto-detected from report); existing entries get evidence-log update (new "fired-on" timestamp + report path citation).
+- Architect-design call deferred: agent autonomy boundary (does pipeline agent write, or emit structured directive consumed by calling skill?). Trade-off captured in ADR-047 Phase 2 scope notes.
+- Integration with `RISK_REGISTER_HINT:` (P110) — hints become directive when above-appetite or user-stated-precondition signals fire.
+- Acceptance: every `.risk-reports/<timestamp>.md` produced after Phase 2 ships has a matching register entry within the same session.
+
+### Phase 3 — backfill (deferred)
+
+- One-time pass per adopter project: enumerate distinct risks across existing `.risk-reports/*.md`; create register entries for each.
+- Per-project marker (`.claude/.risk-register-backfill-done`) gates re-fire.
+- Run-shape options:
+  - As an `/install-updates` Step 6.6 (if scaffolding fired AND backfill marker absent).
+  - As a `/wr-risk-scorer:backfill-register` on-demand skill.
+  - Architect call deferred.
+- Acceptance: bbstats-style ~3 risks materialise per surveyed adopter on first run; subsequent runs skip via marker.
+
+### Phase 4 — behavioural contract test (deferred)
+
+- Test asserts: every distinct `risk-id` (or risk-name canonicalisation) in `.risk-reports/*.md` corresponds to a `docs/risks/R<NNN>-*.active.md` or `.accepted.md` entry.
+- Lives in the risk-scorer plugin's test suite; runs on every `assess-release` / `assess-wip` invocation as a sanity check.
+- Failure mode: warn-with-list, not hard fail (would block legitimate work); above-appetite reports without register entries upgrade to deny.
+- Acceptance: pre-Phase-2 baseline is 99% miss rate; post-Phase-2 + Phase-3 backfill should drop to <5% miss rate within a steady-state 30-day window.
+
+### Phase ordering rationale
+
+- Phase 1 (scaffolding) is the precondition for Phase 2 (back-channel can't write into a non-existent directory) and Phase 3 (backfill needs the directory). Must land first.
+- Phase 2 is the load-bearing fix per user direction. Highest priority once Phase 1 is in place.
+- Phase 3 closes the historical gap (pre-Phase-2 reports without register entries). Lower priority than Phase 2 but blocks Phase 4's contract assertion (backfill must complete before contract can pass).
+- Phase 4 enforces the contract. Last because it depends on Phases 2+3 to materialise the entries it asserts.
+
+### Out of scope for P033 entirely
+
+- Sibling skill `/wr-risk-scorer:scaffold-register` (on-demand surface). Not needed if install-updates trigger covers the use case. Add only if user demand surfaces.
+- Multi-language register templates. Out of scope.
+- Generalised `policy-file → directory-scaffold` registry covering ADR / JTBD / style-guide / voice-tone surfaces. Possible follow-up ADR if Phase 1 pattern proves out across multiple policy-file → directory pairs.
 
