@@ -1,10 +1,22 @@
 # Problem 132: Agents over-ask in interactive sessions — conflating mechanical-stages with user-interactive-stages of multi-stage skill contracts (inverse-P078)
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-27
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Likely (3)
 **Effort**: M — likely combination of (a) new UserPromptSubmit / Stop hook that detects AskUserQuestion calls firing in SKILL-explicit no-ask zones, (b) project CLAUDE.md rule reinforcing "when SKILL contract says mechanical, do not ask", (c) targeted in-skill reminders in run-retro Step 1.5 / Step 4b Stage 1 / Step 4a / wherever a skill explicitly carves out a no-ask zone. The detection hook is the load-bearing piece; CLAUDE.md + per-skill reinforcement are supporting layers.
 **WSJF**: (9 × 1.0) / 2 = **4.5**
+
+## Fix Released
+
+Declarative-layer fix shipped 2026-04-28 in this commit. Phases:
+
+- **Phase 2c (CLAUDE.md MANDATORY rule)** — shipped this iter. Added a fourth MANDATORY discipline-rule entry to project `CLAUDE.md` mirroring the P085 / P078 / P131 entry shape. Rule text: when a SKILL contract names a stage as mechanical / no user decision / policy-authorised silent proceed / agent owns silent classification / silent agent action, do NOT call `AskUserQuestion` in that stage. Cites ADR-044's 6-class authority taxonomy and the worked-example list already in-skill (`run-retro` Step 1.5 / Step 3 / Step 4a / Step 4b; `/wr-itil:work-problems` Step 6.5 + ADR-042 auto-apply; `/install-updates` Step 6a). Authority: `docs/decisions/044-decision-delegation-contract.proposed.md`.
+- **Phase 2a (per-skill SKILL.md reinforcement)** — already shipped via P135 Phase 2 (commit fae42aa, 2026-04-28). The two specific 2026-04-27 user-corrections this ticket called out (Step 3 briefing **removals** and Step 3 Tier 3 topic-file **rotations** in `packages/retrospective/skills/run-retro/SKILL.md`) are now silent agent action with explicit `P135 / ADR-044` citations at SKILL.md lines 285-287 and 303-312. No further SKILL.md edits required this iter — the fix shape is complete via P135 composition.
+- **Phase 2b (load-bearing detection hook)** — DEFERRED. Composes with the P135 R6 numeric gate (lazy-AskUserQuestion count ≥2 across 3 consecutive retros per ADR-044 Reassessment Trigger). The R6 gate has NOT fired per current `docs/retros/<date>-ask-hygiene.md` trail. Phase 2b will be triggered by the framework when reality demands it; deferring is the project's anti-BUFD discipline, not unfinished obligation. Precedent: P131 Phase 1 (CLAUDE.md rule) shipped first; Phase 2 enforcement hook landed in a follow-on after observation.
+
+**Verification path**: direct observation in subsequent interactive sessions. The Step 2d Ask Hygiene Pass (`packages/retrospective/scripts/check-ask-hygiene.sh`) is the cross-session regression metric; lazy count remaining ≥2 across 3 consecutive retros fires the R6 gate and re-opens the question of Phase 2b.
+
+**Recovery path**: declarative rules are reversible — edit the CLAUDE.md MANDATORY entry directly to amend / soften / supersede. Ticket flips back to Open via `/wr-itil:transition-problem 132 open` if the rule itself proves wrong.
 
 > Surfaced 2026-04-27 by direct user observation during `/wr-retrospective:run-retro` execution: *"As part of the retro, there is friction with you asking me if you should update the briefing and/or create tickets. Why do you feel you need to ask me?"*. P078 contradiction-signal pattern (the "you" + "why" pattern that signals a class-of-behaviour correction). The agent then traced the cause back to a defensive over-asking habit accumulated across the session: the user had corrected multiple upstream decisions (subprocess dispatch in iter 9, grep approach for P081, `.claude/` writes for the Plan output, retro cascade scope), and the agent began treating EVERY decision as user-confirmable instead of trusting SKILL contracts that explicitly carved out no-ask zones for mechanical actions.
 
