@@ -9,7 +9,11 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported |
 |------|-----|-------|----------|--------|--------|----------|
+| 6.0 | P143 | `release-watch.sh` race condition — `gh pr list` queries before changesets/action GitHub workflow has created the release PR | 6 Med | Open | S | 2026-04-29 |
 | 6.0 | P082 | No voice-and-tone or content-risk-scoring gate on commit messages | 12 High | Open | M | 2026-04-21 |
+| 4.5 | P141 | AFK iter `packages/<plugin>/` commits without changesets — orchestrator-main-turn back-fill is fragile recovery, hook-level enforcement preferable | 9 Med | Open | M | 2026-04-29 |
+| 4.5 | P142 | P124 Phase 4 — `get_current_session_id` helper system-priority bug; subprocess SIDs win mtime selection over orchestrator SID | 9 Med | Open | M | 2026-04-29 |
+| 4.5 | P144 | P119 hook deny on `manage-problem` Step 2 marker has no documented agent-side recovery; agent attempts brute-force bypass instead of using prescribed surface | 9 Med | Open | M | 2026-04-29 |
 | 3.0 | P014 | No lightweight aside invocation for governance skills (background-subagent convention per 2026-04-20 direction) | 12 High | Open | L | 2026-04-16 |
 | 3.0 | P081 | Structural source-content tests are wasteful — TDD agent should reject them and require behavioural tests | 12 High | Open | L | 2026-04-21 |
 | 3.0 | P087 | No maturity / battle-hardening signal on plugins, skills, agents, or hooks — READMEs don't tell users which features are stable vs experimental | 12 High | Open | L | 2026-04-21 |
