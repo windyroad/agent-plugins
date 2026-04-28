@@ -1,6 +1,6 @@
 # Problem 140: `/wr-itil:work-problems` Step 6.5 halt-on-CI-failure direction should be fix-and-continue when failure is mechanically fixable (P081-class stale assertions)
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-28
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Likely (3) — observed once this session, but pattern fires every CI failure during long AFK loops; cumulative commits = increasing surface area for stale-assertion failures
 **Effort**: M — `packages/itil/skills/work-problems/SKILL.md` Step 6.5 amendment to add fix-and-continue branch on a documented fixable-class allow-list (stale-grep-string, hook stub mismatch, test ID drift, environmental flake), capped at 3 retries before halt fallback. Plus matching behavioural bats per ADR-037 + P081.
@@ -102,3 +102,37 @@ Halt-on-CI-failure was a safe default for the original AFK design. Fix is to add
 - **ADR-044** (`docs/decisions/044-...proposed.md`) — framework-resolution boundary.
 - **ADR-018** (`docs/decisions/018-...proposed.md`) — release cadence; P140 refines Step 6.5's failure-handling rule.
 - 2026-04-28 session evidence: Step 6.5 drain hit CI failure on test 1375 (`install-updates-consent-cache.bats`); user correction *"this shouldn't be a halt. This should be a fix and continue. create a problem ticket for that incorrect desire or direction to halt on test failure instead of fixing and continuing"*. P140 captured.
+
+## Phase 1 shipped (2026-04-28)
+
+Phase 1 declarative SKILL.md amendment shipped. Open → Verification Pending per ADR-022.
+
+What landed:
+- `packages/itil/skills/work-problems/SKILL.md` Step 6.5 "Failure handling" subsection rewritten with:
+  - Diagnostic preamble (`gh run view --log-failed`) per ADR-026 grounding
+  - Closed fixable-in-iter allow-list: P081-class stale-grep-string, hook stub mismatch, test ID drift, environmental flake
+  - Ambiguous classification defaults to halt
+  - Fix-and-continue branch (each retry rides standard ADR-014 commit gate flow per ADR-042 Rule 3 precedent)
+  - 3-retry cap per iteration, not per failure-class
+  - Halt branch preserved for genuinely-unrecoverable: auth failure, npm publish rejection, semantic test requiring user judgment, repeated transient failures, anything outside the closed allow-list
+  - Step 2.5b cross-reference (P126) preserved on the halt branch
+  - Composition cross-references: P081, P130, P132, P135, ADR-013 Rule 5, ADR-026, ADR-042, ADR-044
+- Non-Interactive Decision Making table — new row "CI failure during Step 6.5 drain (within-appetite branch)" routing fix-and-continue + 3-retry cap
+- Mid-loop ask discipline subsection — Step 6.5 CI-failure halt-point bullet narrowed to outside-allow-list / cap-reached scope
+- `packages/itil/skills/work-problems/test/work-problems-step-6-5-fix-and-continue.bats` — NEW 28 behavioural contract assertions per ADR-037 + P081 covering diagnostic preamble, allow-list closedness, ambiguous-defaults-to-halt, fix-and-continue branch, 3-retry cap, halt branch preservation, ADR-013 Rule 5 policy authorisation, per-retry ADR-014 gates, P081/P130/P132/P135 + ADR-026/ADR-042/ADR-044 cross-references, decision-table row presence
+
+Architect: PASS — Phase 1-only scope correct (Phase 2 classifier deferred, observe declarative discipline over 30 days); ADR-014 invariant preserved (retries each ride own commit through gates per ADR-042 Rule 3); fix-and-continue branch belongs inside Failure handling subsection; no new ADR needed (ADR-013 Rule 5 + ADR-044 + in-skill prose suffice). Advisory: closed-allow-list scope-creep guard added (extension is a deviation-candidate per ADR-044).
+
+JTBD: PASS — JTBD-006 primary (restores "progress continues without me being present" while preserving "stops gracefully on a blocker" guarantee); JTBD-001 + JTBD-002 compose intact (per-retry gates preserve governance); persona-misread risk addressed via closed-list framing + ambiguous-defaults-to-halt + per-iteration cap clarification.
+
+TDD: 28/28 new bats green; full 203-test work-problems suite green (no regression).
+
+Verification criteria (for the user when CI/observation closes):
+1. Step 6.5 "Failure handling" subsection reads end-to-end as a closed-allow-list policy (not open-ended auto-fix).
+2. The next mechanically-fixable CI failure during a `/wr-itil:work-problems` AFK drain triggers the fix-and-continue branch (single Edit, ADR-014 gates per retry, push, re-watch). Wall-clock recovery is on the order of minutes, not the prior ~45min halt-and-wait.
+3. The next semantic / unrecoverable failure halts cleanly through the halt branch with the Step 2.5b surfacing routine intact.
+4. Neither retry-cap drift nor allow-list drift is observed over the 30-day observation window. If drift is observed, surface for Phase 2 classifier (load-bearing) or for narrowing the allow-list further.
+
+Phase 2 (deferred):
+- `packages/itil/scripts/diagnose-ci-failure.sh` advisory classifier on `gh run view --log-failed` payload — only ship if 30-day observation shows declarative discipline insufficient.
+- Behavioural bats covering classifier on synthetic failure logs.
