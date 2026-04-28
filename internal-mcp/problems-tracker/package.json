@@ -1,0 +1,17 @@
+{
+  "name": "@internal/problems-tracker-mcp",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Internal Cowork MCP exposing windyroad-claude-plugin's docs/problems backlog to the live-artifact sidebar. Not shipped — sits outside packages/.",
+  "main": "server.mjs",
+  "bin": {
+    "problems-tracker-mcp": "./server.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  }
+}
