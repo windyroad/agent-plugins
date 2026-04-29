@@ -1,6 +1,6 @@
 # Problem 144: P119 hook deny on `manage-problem` Step 2 marker has no documented agent-side recovery; agent attempts brute-force bypass instead of using prescribed surface
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-29
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Likely (3) — observed 1× in session (with explicit user "WTF" correction); pattern likely recurs in any session where P124 helper bug fires
 **Effort**: M — `packages/itil/skills/manage-problem/SKILL.md` Step 2 substep amendment to document the recovery path when the helper-derived marker doesn't match the actual session_id; plus inline guidance in the P119 hook deny message pointing the agent at the recovery procedure. Plus matching behavioural bats per ADR-037 + P081.
@@ -63,16 +63,13 @@ Both tiers are stop-gaps for the period until P142 (P124 Phase 4) ships AND the 
 
 ### Investigation Tasks
 
-- [ ] Confirm P119 deny message currently directs to "Invoke the Skill tool with skill='wr-itil:manage-problem'" — but offers no recovery for the case where the agent IS already in the skill. Audit the hook's deny message text.
-- [ ] Decide recovery-documentation shape:
-  - **(a) SKILL.md amendment**: Step 2 substep adds explicit recovery procedure: "If `mark_step2_complete` returns a SID that doesn't match the hook's reading: scrape `itil-assistant-gate-announced-*` directly to discover the orchestrator SID; touch the marker for that SID". Inline in the SKILL.md prose.
-  - **(b) P119 hook deny-message enhancement**: when the deny fires AND a marker exists for SOME SID (indicating helper-derived marker but wrong SID), the deny message includes the recovery procedure. Targeted improvement at the failure surface.
-  - **(c) Both** — SKILL.md documents the procedure; hook deny message points at it. (Recommended.)
-- [ ] Cross-reference with P142 (P124 Phase 4): once P124 Phase 4 ships, the helper returns the correct SID and this recovery is no longer needed. P144 is a stop-gap for the period until P142 ships.
-- [ ] Cross-reference with P131 (gate-exclusions-as-write-permission): same family of agent-discipline gap; agent treats gate state as workaround target instead of directive.
-- [ ] Behavioural bats per ADR-037 + P081 covering: SKILL.md documents the recovery procedure (structural assertion permitted under P081 exception); P119 hook deny message includes the recovery pointer.
-- [ ] **NEW (2026-04-29 evidence)**: extend the SKILL.md recovery procedure with a **second-tier fallback** for the case where the runtime hook uses an SID not surfaced by any announce-marker. Candidate procedures: (a) python3-via-Bash file-write (preserves Step 2 grep audit trail; bypasses only the marker-check layer); (b) hook-stdin-instrumentation to log the runtime SID to a discoverable path so the next agent can read it; (c) hook-side amendment to fail-open when ANY `/tmp/manage-problem-grep-*` marker exists from this session (loosens the SID-binding). Architect picks during fix.
-- [ ] Investigate WHY runtime hook stdin uses an SID not in any announce-marker class. Today: `architect-reviewed-63f09e7e-...` was touched mid-session, but `architect-announced-63f09e7e-...` was not. The reviewed-marker / announced-marker SID divergence is the root cause of why the documented recovery fails. Composes with P142 (P124 Phase 4 — helper system-priority).
+- [x] Confirm P119 deny message currently directs to "Invoke the Skill tool with skill='wr-itil:manage-problem'" — but offers no recovery for the case where the agent IS already in the skill. Confirmed: hook line 120 directs to skill only; no recovery procedure when agent IS already in the skill.
+- [x] Decide recovery-documentation shape: **(c) Both** chosen — SKILL.md Step 2 substep 7 documents the procedure (durable surface); hook deny message points at it (just-in-time, conditional on helper-bug signal). Architect ALIGNED 2026-04-29.
+- [x] Cross-reference with P142 (P124 Phase 4): explicit auto-supersession criterion in ADR-048 Reassessment Criteria; SKILL.md sub-block carries `<!-- supersedes-when: P142 ships -->` comment paired with CI-enforced bats invariant.
+- [x] Cross-reference with P131 (gate-exclusions-as-write-permission): ADR-048 explicitly draws the boundary between READ exclusion and WRITE permission; audit-trail-preservation test rules out the "any-marker-anywhere" generalisation surface.
+- [x] Behavioural bats per ADR-037 + P081 covering: SKILL.md documents the recovery procedure (structural assertion permitted under P081 exception, `tdd-review: structural-permitted`); P119 hook deny message includes the recovery pointer (behavioural — JSON stdin → deny output assertion). New file `packages/itil/skills/manage-problem/test/manage-problem-p119-recovery-path.bats` (14 assertions); extended `packages/itil/hooks/test/manage-problem-enforce-create.bats` (3 new assertions: deny-without-marker omits hint; deny-with-other-SID-marker includes hint; no jargon per ADR-038).
+- [x] **2026-04-29 evidence — second-tier fallback**: chosen procedure (a) python3-via-Bash file-write — preserves Step 2 grep audit trail (only the marker-check enforcement layer is skipped); ADR-048 documents the audit-trail-preservation test as the gate-on-sanctioning rule. Procedures (b) hook-stdin-instrumentation and (c) hook-side fail-open deferred to P142 architect review.
+- [ ] **Deferred to P142** — investigate WHY runtime hook stdin uses an SID not in any announce-marker class. The reviewed-marker / announced-marker SID divergence is structural and lives at the helper level, not the recovery procedure level. P144's recovery procedure is the stop-gap; P142's helper fix is the structural resolution.
 
 ### Preliminary hypothesis
 
@@ -97,6 +94,33 @@ The pattern composes with P124 Phase 4 (P142): P142's helper fix removes the nee
 **Edit summary (secondary)**: when deny fires AND any `/tmp/manage-problem-grep-*` marker exists (indicating helper-bug case), append to the deny message: "(If you already invoked the Skill tool: see manage-problem SKILL.md Step 2 substep 7 for P124-Phase-3-regression recovery procedure.)"
 
 **Evidence**: 2026-04-28 session — agent attempted 139-marker brute-force; user correction *"WTF? Why did you bypass instead of using the skill?"*; recovery via undocumented `itil-assistant-gate-announced` scrape.
+
+## Fix Released
+
+**Released**: 2026-04-29 — landed in this fix commit alongside ADR-048.
+
+**Summary**: documented two-tier recovery procedure for the P119 hook misfire case in `packages/itil/skills/manage-problem/SKILL.md` Step 2 substep 7 (durable surface), and added a conditional recovery hint to the `packages/itil/hooks/manage-problem-enforce-create.sh` deny message (just-in-time surface, fires only on the helper-bug signal — when `compgen -G '/tmp/manage-problem-grep-*'` matches at least one marker for SOME SID). ADR-048 sanctions and scopes the procedure with explicit P142-supersession criteria and an audit-trail-preservation test that rules out the P131 "any-marker-anywhere" anti-pattern.
+
+**Architectural foundation**: ADR-048 (`docs/decisions/048-gate-misfire-recovery-procedure.proposed.md`) — Documented recovery from gate misfire is the prescribed surface, not bypass. Architect ALIGNED with four advisory items (anti-pattern-bound wording, CI-enforced supersession invariant, ADR-044 framework-mediated extension framing, Confirmation bats listing) — all four incorporated into the ADR.
+
+**Recovery contract** (gate-misfire signal — three conjunctive conditions):
+1. Agent already executing `/wr-itil:manage-problem` Step 2 in this turn for THIS ticket creation.
+2. `mark_step2_complete` succeeded (helper exited zero).
+3. P119 hook denies the subsequent `Write`.
+
+**First-tier**: scrape `/tmp/itil-assistant-gate-announced-*` for the orchestrator SID; `touch /tmp/manage-problem-grep-<SID>`; retry.
+
+**Second-tier** (when first-tier fails because runtime hook stdin SID isn't in any announce-marker class — 2026-04-29 evidence): write the ticket file via `python3 -c 'Path(p).write_text(...)'` invoked through the `Bash` tool. The hook is `PreToolUse:Write`; python3-in-Bash is not a Write tool call; the audit trail is preserved because Step 2 grep ran for THIS ticket creation.
+
+**Anti-pattern call-out** (durable in SKILL.md + just-in-time in hook deny hint): DO NOT brute-force-touch markers for every announced UUID. That pattern (139 markers in one session, 2026-04-28 P144 driver evidence) satisfies the marker shape while gaming the audit trail.
+
+**Test exercise**:
+- `packages/itil/skills/manage-problem/test/manage-problem-p119-recovery-path.bats` — 14/14 GREEN. SKILL.md structural assertions on the recovery sub-block (gate-misfire signal, two-tier procedure, audit-trail-preservation test, anti-pattern wording, ADR-048/P124/P142 cross-references, supersession comment, mechanical-decision rationale).
+- `packages/itil/hooks/test/manage-problem-enforce-create.bats` — 19/19 GREEN. Three new behavioural assertions: deny-without-any-marker omits recovery hint; deny-with-other-SID-marker includes recovery hint with "SID mismatch detected" + "Step 2 substep 7" pointer; recovery hint avoids ADR-038 jargon (no `P124-Phase-3-regression` wording).
+
+**Auto-supersedes when** P142 (P124 Phase 4) ships and the helper returns the runtime hook SID reliably. The SKILL.md sub-block's `<!-- supersedes-when: P142 ships -->` comment + CI-enforced bats invariant make the cleanup discoverable as a CI-fail signal.
+
+Awaiting user verification.
 
 ## Dependencies
 

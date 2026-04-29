@@ -186,3 +186,64 @@ set_marker() {
   [ "$status" -eq 0 ]
   [[ "$output" != *"BLOCKED"* ]]
 }
+
+# --- P144 / ADR-048: gate-misfire recovery hint on deny message ---
+#
+# When the deny fires AND any /tmp/manage-problem-grep-* marker exists for
+# SOME SID, that's the helper-bug signal (P124 Phase 3 regression — helper
+# returned wrong SID, marker exists but doesn't match runtime hook stdin).
+# The deny message appends a recovery pointer to direct the agent at the
+# documented two-tier procedure in SKILL.md Step 2 substep 7.
+#
+# Routine first-creation deny (no marker exists for any SID at all) is
+# unchanged — recovery hint MUST NOT appear.
+
+setup_other_sid_marker() {
+  OTHER_SID="other-sid-$$-$RANDOM"
+  : > "/tmp/manage-problem-grep-${OTHER_SID}"
+}
+
+teardown_other_sid_marker() {
+  if [ -n "${OTHER_SID:-}" ]; then
+    rm -f "/tmp/manage-problem-grep-${OTHER_SID}"
+  fi
+}
+
+@test "deny without ANY /tmp/manage-problem-grep-* marker → deny message OMITS recovery hint" {
+  # Scrub any markers so the helper-bug signal cannot fire.
+  rm -f /tmp/manage-problem-grep-*
+  run run_write_hook "$PWD/docs/problems/999-foo.open.md" "$SID"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"BLOCKED"* ]]
+  # No marker exists for any SID → routine first-creation deny → no recovery hint.
+  [[ "$output" != *"SID mismatch"* ]]
+  [[ "$output" != *"Step 2 substep 7"* ]]
+}
+
+@test "deny with /tmp/manage-problem-grep-* marker for OTHER SID → deny message INCLUDES recovery hint" {
+  # Scrub other markers first, then set a marker for a different SID.
+  rm -f /tmp/manage-problem-grep-*
+  setup_other_sid_marker
+  run run_write_hook "$PWD/docs/problems/999-foo.open.md" "$SID"
+  status=$?
+  teardown_other_sid_marker
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"BLOCKED"* ]]
+  # Marker exists for OTHER SID → helper-bug signal → recovery hint appended.
+  [[ "$output" == *"SID mismatch"* ]]
+  [[ "$output" == *"Step 2 substep 7"* ]]
+}
+
+@test "recovery hint avoids ADR-038 jargon (no internal P-number jargon in deny string)" {
+  # ADR-038 progressive disclosure — deny stays terse + actionable. Architect
+  # advisory rejected "P124-Phase-3-regression" wording in favour of plain
+  # "Helper succeeded but SID mismatch detected".
+  rm -f /tmp/manage-problem-grep-*
+  setup_other_sid_marker
+  run run_write_hook "$PWD/docs/problems/999-foo.open.md" "$SID"
+  status=$?
+  teardown_other_sid_marker
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"BLOCKED"* ]]
+  [[ "$output" != *"P124-Phase-3-regression"* ]]
+}
