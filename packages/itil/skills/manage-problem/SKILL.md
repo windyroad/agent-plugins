@@ -193,8 +193,32 @@ The `wr-itil-reconcile-readme` command is a `$PATH`-resolved shim shipped in `pa
 
 Exit-code routing:
 - **Exit 0 (clean)**: continue to Step 1.
-- **Exit 1 (drift detected)**: structured diff lines printed to stdout, one per drift entry (≤150 bytes per ADR-038 progressive-disclosure budget). **Halt this invocation** with a directive to invoke `/wr-itil:reconcile-readme` (interactive mode) or auto-route through the same skill in non-interactive mode (per ADR-013 Rule 6, AFK orchestrator). The reconciliation must complete and commit before this manage-problem invocation proceeds — proceeding into ticket creation / update / transition with a stale README would re-encode the drift into the post-operation refresh and propagate the lie.
+- **Exit 1 (drift detected)**: structured diff lines printed to stdout, one per drift entry (≤150 bytes per ADR-038 progressive-disclosure budget). Capture stdout to a temp file and classify the drift via the **uncommitted-rename carve-out** (P149) before halt-routing — see "Drift classification carve-out" immediately below.
 - **Exit 2 (parse error)**: README missing or malformed. Halt with the parse-error message; this needs investigation, not mechanical reconciliation. AFK orchestrators halt-with-report per ADR-013 Rule 6.
+
+#### Drift classification carve-out (P149)
+
+The Exit 1 halt-and-route path is correct for **committed cross-session drift** — a past session committed a ticket transition without staging the README refresh, and proceeding now would re-encode the drift into the post-operation refresh and propagate the lie. It is **wrong for uncommitted-rename-rooted drift** — when the current working tree carries a staged ticket rename (a same-session `git mv` that the in-flow P094 / P062 refresh at Step 5 / Step 7 will reconcile in the upcoming commit per ADR-014's single-commit grain). Halting in the latter case forces a separate `/wr-itil:reconcile-readme` commit, splitting one logical change across two commits and violating the ADR-014 grain.
+
+Run the classifier on Exit 1 to distinguish the two cases:
+
+```bash
+wr-itil-reconcile-readme docs/problems > /tmp/wr-itil-drift-$$.txt
+reconcile_exit=$?
+if [ "$reconcile_exit" -eq 1 ]; then
+  wr-itil-classify-readme-drift /tmp/wr-itil-drift-$$.txt docs/problems
+  classify_exit=$?
+  rm -f /tmp/wr-itil-drift-$$.txt
+fi
+```
+
+The `wr-itil-classify-readme-drift` command is a `$PATH`-resolved shim (ADR-049 naming grammar) dispatching `packages/itil/scripts/classify-readme-drift.sh`. It cross-references the drifting IDs from the script's stdout against `git status --porcelain docs/problems/` filtered for staged rename (`R`) entries — the destination path's ticket ID is the post-rename status the in-flow refresh will reconcile.
+
+Classifier exit-code routing:
+
+- **`classify_exit == 0` (INLINE_REFRESH)**: every drifting ID is the destination of a staged rename in the working tree. Log a one-line note ("Step 0 reconcile drift covered by N staged rename(s); deferring README refresh to in-flow Step 5 / Step 7 per P094 / P062 + ADR-014 single-commit grain") and continue to Step 1. Do NOT invoke `/wr-itil:reconcile-readme` — the in-flow refresh will land the README correction in the same commit as the ticket work.
+- **`classify_exit == 1` (HALT_ROUTE_RECONCILE)**: at least one drifting ID is NOT covered by a staged rename — committed cross-session drift OR mixed (some IDs in working tree, some committed-only). **Halt this invocation** with a directive to invoke `/wr-itil:reconcile-readme` (interactive mode) or auto-route through the same skill in non-interactive mode (per ADR-013 Rule 6, AFK orchestrator). The reconciliation must complete and commit before this manage-problem invocation proceeds. Mixed routes to halt because `/wr-itil:reconcile-readme` resolves both classes safely; the in-flow refresh only handles the rename'd subset.
+- **`classify_exit == 2` (parse error)**: classifier received empty / missing drift input — contract violation upstream. Fall back to the conservative halt-and-route path.
 
 This is a **preflight CHECK only** — manage-problem does NOT itself apply edits. The edit application lives in `/wr-itil:reconcile-readme`'s Step 4 with narrative preservation. Per architect verdict on P118 (Q3): manage-problem and work-problems Step 0 invoke the script (cheap mechanical check); transition-problem does NOT (P062 already covers transition-time refresh inside the same commit, redundant preflight there would pay the cost on every transition).
 

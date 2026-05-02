@@ -122,6 +122,10 @@ setup() {
   [ -x "$REPO_ROOT/packages/itil/bin/wr-itil-check-problems-readme-budget" ]
 }
 
+@test "shim wrapper packages/itil/bin/wr-itil-classify-readme-drift exists and is executable (P149)" {
+  [ -x "$REPO_ROOT/packages/itil/bin/wr-itil-classify-readme-drift" ]
+}
+
 @test "shim wrapper packages/retrospective/bin/wr-retrospective-measure-context-budget exists and is executable" {
   [ -x "$REPO_ROOT/packages/retrospective/bin/wr-retrospective-measure-context-budget" ]
 }
@@ -143,6 +147,15 @@ setup() {
 @test "wr-itil-check-problems-readme-budget shim resolves canonical script (smoke)" {
   run "$REPO_ROOT/packages/itil/bin/wr-itil-check-problems-readme-budget" "$REPO_ROOT/docs/problems/README.md"
   [ "$status" -ne 127 ]
+}
+
+@test "wr-itil-classify-readme-drift shim resolves canonical script (smoke) (P149)" {
+  # Script requires a drift-stdout file; passing nothing must hit the
+  # USAGE / PARSE_ERROR branch (exit 2), NOT exit 127 which would mean
+  # the shim itself didn't resolve.
+  run "$REPO_ROOT/packages/itil/bin/wr-itil-classify-readme-drift"
+  [ "$status" -ne 127 ]
+  [ "$status" -eq 2 ]
 }
 
 @test "wr-retrospective-measure-context-budget shim resolves canonical script (smoke)" {

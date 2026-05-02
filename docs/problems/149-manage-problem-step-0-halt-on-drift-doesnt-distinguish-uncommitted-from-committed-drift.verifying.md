@@ -1,9 +1,9 @@
 # Problem 149: `/wr-itil:manage-problem` Step 0 reconcile halt-on-drift directive doesn't distinguish uncommitted-rename-rooted drift (same-session pending) from committed cross-session drift — should refresh inline rather than halt for the former case
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-02
 **Priority**: 4 (Low) — Impact: Minor (2) x Likelihood: Possible (2)
-**Effort**: S — bounded SKILL.md amendment in three files (`manage-problem` Step 0, `work-problems` Step 0, `work-problem` Step 1) + behavioural bats covering the routing branch.
+**Effort**: S — bounded SKILL.md amendment in two files (`manage-problem` Step 0, `work-problems` Step 0) + new `classify-readme-drift.sh` helper + bin shim (ADR-049) + behavioural bats covering both routing branches. Effort confirmed S on landing — `work-problem` (singular) has no Step 0 reconcile preflight (relies on cache freshness via review-problems), so the third file in the original estimate was not edited.
 **WSJF**: (4 × 1.0) / 1 = **4.0**
 
 ## Description
@@ -75,6 +75,24 @@ The fix is a 2-3 line carve-out in the Step 0 routing logic: detect "drift cause
 - **Blocks**: (none directly)
 - **Blocked by**: (none — fix is independent)
 - **Composes with**: P145 (run-retro Tier 3 rotation defers recurringly — same class of "SKILL contract overreach gets papered over by agent-side judgement"), P148 (retro Stage 1 mechanical-ticketing — same composition pattern: agent detects framework-resolvable case but doesn't bypass the halt directive), ADR-014 (single-commit grain — the load-bearing principle the carve-out preserves).
+
+## Fix Released
+
+Deployed in v0.24.0 (next release of `@windyroad/itil`). The fix carves out an **uncommitted-rename detection branch** from the Step 0 Exit-1 routing in two SKILL.md files (`manage-problem` Step 0 + `work-problems` Step 0) and ships a new `packages/itil/scripts/classify-readme-drift.sh` helper + `wr-itil-classify-readme-drift` `$PATH` shim per ADR-049. The classifier reads the captured stdout of `reconcile-readme.sh` plus `git status --porcelain docs/problems/` filtered for staged renames (`R` / `RM`), cross-references drifting IDs against the destination paths of working-tree renames, and emits one of two classifications:
+
+- `INLINE_REFRESH covered=<N>` (exit 0) — every drift ID is the destination of a staged rename; defer to in-flow P094 / P062 refresh per ADR-014 single-commit grain. The SKILL.md Step 0 logs a one-line note and continues to Step 1 inline.
+- `HALT_ROUTE_RECONCILE uncovered=<N>` (exit 1) — at least one drift ID is committed-only or mixed; halt and route to `/wr-itil:reconcile-readme` as today.
+
+Behavioural bats coverage at `packages/itil/scripts/test/classify-readme-drift.bats` (13 tests; INLINE / HALT / mixed / RM / parse-error / no-git-repo / default-arg branches). Shim-existence + smoke parity tests added to `packages/shared/test/no-repo-relative-script-paths-in-skills.bats`.
+
+**Architect verdict**: PASS — no new ADR required. The carve-out aligns with ADR-014 line 136 ("the new ticket file + the refreshed README ride the same commit"); the inline-classify branch IS the ADR-013 Rule 6 fail-safe (deterministic mechanical resolution, no human input deferred). Detection heuristic is appropriately scoped: `R` and `RM` both prefix-match; destination path is parsed for the post-rename status. Bounded as a SKILL.md refinement under ADR-014's existing reassessment window (2026-10-16); P145's MUST_SPLIT precedent (Tier 3 rotation refinement landed inline as SKILL-amendment-without-ADR) is the directly analogous pattern.
+
+**JTBD verdict**: PASS — change serves JTBD-006 (AFK loop continuity), JTBD-001 (governance without slowing down), JTBD-201 (audit trail). The inline path produces a single ADR-014-grain commit; the halt path remains intact for committed cross-session drift, so the cross-session safety net P118 was designed for is preserved. No persona regresses.
+
+**Verification criteria** (close on confirmation):
+1. Next AFK iter that lands on a manage-problem invocation with a same-session staged rename in the working tree continues inline through Step 0 without firing the halt-and-route to `/wr-itil:reconcile-readme`.
+2. The iter's commit captures the README refresh in the same commit as the ticket rename + content edit (single-commit grain per ADR-014).
+3. A future committed cross-session drift case still halts and routes correctly (no regression on the P118 originating scenario).
 
 ## Related
 

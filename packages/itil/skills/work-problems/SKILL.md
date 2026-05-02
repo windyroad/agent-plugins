@@ -93,8 +93,32 @@ The `wr-itil-reconcile-readme` command is a `$PATH`-resolved shim shipped in `pa
 
 Exit-code routing:
 - **Exit 0 (clean)**: continue to Step 1.
-- **Exit 1 (drift detected)**: structured diff lines printed to stdout, one per drift entry (≤150 bytes per ADR-038 progressive-disclosure budget). Per ADR-013 Rule 6 (non-interactive AFK fail-safe), invoke `/wr-itil:reconcile-readme` to apply the corrections + commit a `chore(problems): reconcile README ...` commit, then proceed to Step 1. The reconciled README is the orchestrator's source of truth for Step 3 ranking — a stale read at Step 1 would propagate the lie into the iteration's selection.
+- **Exit 1 (drift detected)**: structured diff lines printed to stdout, one per drift entry (≤150 bytes per ADR-038 progressive-disclosure budget). Capture stdout to a temp file and classify the drift via the **uncommitted-rename carve-out** (P149) before halt-routing — see "Drift classification carve-out" immediately below.
 - **Exit 2 (parse error)**: README missing or malformed. Halt the loop with the parse-error message and the structured Prior-Session State report — this is a deeper repair that needs investigation, not mechanical reconciliation.
+
+##### Drift classification carve-out (P149)
+
+The Exit 1 auto-route to `/wr-itil:reconcile-readme` is correct for **committed cross-session drift** but **wrong for uncommitted-rename-rooted drift** — when a prior AFK iter (or any in-flight session) carries a staged ticket rename that the next iteration's in-flow P094 / P062 refresh will reconcile in the upcoming commit per ADR-014's single-commit grain. Auto-routing in the latter case fires an extra `chore(problems): reconcile README ...` commit and splits one logical change across two commits, violating the grain. Worse for the AFK orchestrator: that extra commit lands BEFORE the iter's actual work commit, so the audit trail reads "reconcile, then ticket work" when the truth is "ticket work in progress, README refresh deferred to its in-flow contract".
+
+Run the classifier on Exit 1 to distinguish the two cases:
+
+```bash
+wr-itil-reconcile-readme docs/problems > /tmp/wr-itil-drift-$$.txt
+reconcile_exit=$?
+if [ "$reconcile_exit" -eq 1 ]; then
+  wr-itil-classify-readme-drift /tmp/wr-itil-drift-$$.txt docs/problems
+  classify_exit=$?
+  rm -f /tmp/wr-itil-drift-$$.txt
+fi
+```
+
+The `wr-itil-classify-readme-drift` command is a `$PATH`-resolved shim (ADR-049 naming grammar) dispatching `packages/itil/scripts/classify-readme-drift.sh`. It cross-references drifting IDs from the script's stdout against `git status --porcelain docs/problems/` filtered for staged rename (`R`) entries.
+
+Classifier exit-code routing:
+
+- **`classify_exit == 0` (INLINE_REFRESH)**: every drifting ID is the destination of a staged rename in the working tree. Log a one-line note in the iter summary ("Step 0 reconcile drift covered by N staged rename(s); deferring README refresh to in-flow Step 5 / Step 7 per P094 / P062 + ADR-014 single-commit grain") and continue to Step 1. Do NOT invoke `/wr-itil:reconcile-readme` — the in-flow refresh will land the README correction in the same commit as the iter's ticket work.
+- **`classify_exit == 1` (HALT_ROUTE_RECONCILE)**: at least one drifting ID is NOT covered by a staged rename — committed cross-session drift OR mixed. Per ADR-013 Rule 6 (non-interactive AFK fail-safe), invoke `/wr-itil:reconcile-readme` to apply the corrections + commit a `chore(problems): reconcile README ...` commit, then proceed to Step 1. The reconciled README is the orchestrator's source of truth for Step 3 ranking — a stale read at Step 1 would propagate the lie into the iteration's selection. Mixed routes to halt because `/wr-itil:reconcile-readme` resolves both classes safely; the in-flow refresh only handles the rename'd subset.
+- **`classify_exit == 2` (parse error)**: classifier received empty / missing drift input — contract violation upstream. Fall back to the conservative auto-route.
 
 This is a robustness layer ON TOP of P094 + P062, not a supersession — both per-operation contracts remain in force inside each iteration's manage-problem / transition-problem invocation.
 
