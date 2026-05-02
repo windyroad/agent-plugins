@@ -1,0 +1,93 @@
+# Problem 151: Published skills reference repo-relative script paths — adopter `bash` invocations hard-fail at Step 0
+
+**Status**: Open
+**Reported**: 2026-05-02
+**Priority**: 20 (Very High) — Impact: Significant (4) x Likelihood: Almost certain (5)
+**Effort**: L — net-new ADR codifying plugin-bundled-script resolution strategy + mechanical edits across 5 SKILL.md files in 2 plugins + path-resolution tests. Bounded if `$CLAUDE_PLUGIN_DIR` (or equivalent) is already supported by the Claude Code plugin marketplace cache; XL if it requires net-new env-var infrastructure or plugin packaging changes.
+
+**WSJF**: (20 × 1.0) / 4 = **5.0**
+
+> Surfaced 2026-05-02 by user during a `/wr-itil:work-problems` AFK loop iter 1: *"some of the published skills (like manage-problem) references files in this repo (like packages/itil/scripts/reconcile-readme.sh), which users of the plugins CANNOT ACCESS because they are repo paths not plugin paths"*. Sibling concern to P137 (internal-ID leakage) but a distinct failure mode — P137 is degraded-semantics (adopter agent ignores or mis-resolves an `ADR-NNN` token); this ticket is **hard runtime failure** (the bash command exits with `No such file or directory` and the skill cannot proceed past Step 0).
+
+## Description
+
+Several published `@windyroad/*` skill SKILL.md files contain `bash packages/<plugin>/scripts/<name>.sh ...` invocations as load-bearing steps. When an adopter project installs the plugin via the Claude Code marketplace and the agent invokes the skill, the SKILL.md prose is expanded into the agent's context. The agent reads the bash command and dispatches it via the Bash tool — which runs in the **adopter's project root**, not the plugin's cache directory. The path `packages/<plugin>/scripts/<name>.sh` never resolves in an adopter tree, so the bash command exits non-zero with `No such file or directory` and the SKILL.md control flow halts before the skill produces any user value.
+
+This is distinct from P137 (Plugin-published artifacts reference internal ADR/JTBD/P-IDs that adopter projects can't resolve). P137 is about **semantic references** to decision documents — the worst case is wrong-resolution to an adopter's unrelated ADR with the same number. P151 is about **executable references** to scripts — the worst case is hard failure on every invocation, blocking the skill at its preflight step. Neither is a substitute for the other; both leak windyroad-internal references through the plugin boundary, but they require different fixes (P137 needs a strip/replace/permalink decision for prose IDs; P151 needs a path-resolution decision for runtime-invoked scripts).
+
+## Symptoms
+
+- An adopter running `/wr-itil:work-problems` halts immediately at Step 0: the orchestrator dispatches `bash packages/itil/scripts/reconcile-readme.sh docs/problems`, the path does not exist in the adopter's working tree, bash returns exit 127 with `No such file or directory`, and the SKILL.md exit-code routing halts the loop with a `parse error` classification (Exit 2 branch in Step 0's exit-code routing) — even though the underlying issue is a missing FILE, not a parse error.
+- An adopter running `/wr-itil:manage-problem <NNN> known-error` halts at Step 0 with the same hard failure before it can read the ticket, run the duplicate-grep, or apply any transition.
+- An adopter running `/wr-itil:reconcile-readme` halts at Step 1 with the same failure when it tries to invoke `bash packages/itil/scripts/reconcile-readme.sh docs/problems`.
+- An adopter running `/wr-retrospective:run-retro` Step 2c (context-budget measurement) halts when it dispatches `bash packages/retrospective/scripts/measure-context-budget.sh "${CLAUDE_PROJECT_DIR:-.}"` — the env-var argument resolves to the adopter's project root, but the SCRIPT PATH is repo-relative and does not exist.
+- An adopter running `/wr-retrospective:analyze-context` halts at Step 2 for the same reason.
+- The CHANGELOG / release notes for `@windyroad/itil` and `@windyroad/retrospective` describe these skills as functional, but a fresh-install adopter cannot exercise them past their first script invocation.
+
+## Workaround
+
+None at the source level — the artefacts ship as-authored. Adopter-side workarounds:
+
+- Adopter could clone `windyroad-claude-plugin` as a sibling submodule so the repo-relative paths resolve. Heavyweight, defeats the plugin model, requires the adopter to maintain a copy of the entire monorepo for what should be a single-plugin install.
+- Adopter could symlink `packages/itil/scripts/` and `packages/retrospective/scripts/` from the plugin marketplace cache into their project root. Brittle (cache version changes invalidate the symlink), uses adopter directory namespace for plugin-internal layout, and the symlinks themselves leak `packages/itil/...` into the adopter's git status.
+- Adopter could manually transcribe the script's bash logic into their own working tree at the right path. Defeats plugin distribution; requires the adopter to read the published script source and copy it; doesn't survive plugin updates.
+- Adopter could disable the affected skills entirely. Loses the value the plugin was installed for.
+
+None of these are reasonable. The fix has to be at the source — the published artifacts must reference scripts via a path that resolves in adopter projects.
+
+## Impact Assessment
+
+- **Who is affected**: The **plugin-user persona** (`docs/jtbd/plugin-user/persona.md`) — every adopter project that installs `@windyroad/itil` or `@windyroad/retrospective`. As of 2026-05-02 those are two of the most actively published `@windyroad/*` plugins. The plugin-user persona's defining constraints (low context on repo internals; AI agent as the primary interface) are *exactly* the conditions that turn the hard-fail into an opaque dead-end — the adopter sees `bash: No such file or directory: packages/itil/scripts/reconcile-readme.sh` and has no path forward without spelunking the plugin's source repo.
+- **Frequency**: Every invocation of an affected skill in any adopter project. Affected skill list (5 SKILL.md files identified by grep on 2026-05-02):
+  - `packages/itil/skills/manage-problem/SKILL.md:189` — Step 0 README reconciliation preflight.
+  - `packages/itil/skills/work-problems/SKILL.md:89` — Step 0 README reconciliation preflight.
+  - `packages/itil/skills/reconcile-readme/SKILL.md:44` — Step 1 diagnose-only script invocation.
+  - `packages/retrospective/skills/run-retro/SKILL.md:179` — Step 2c context-budget measurement.
+  - `packages/retrospective/skills/analyze-context/SKILL.md:45` — Step 2 context-budget measurement.
+- **Severity**: Significant — installed plugins fail to function for adopters per RISK-POLICY Impact-4 verbatim ("hooks fire incorrectly, skills fail to load"). The "skills fail to load" branch applies: the SKILL.md loads, the agent reads its body, but the first script invocation hard-fails before any user-facing output is produced. From the adopter's perspective the skill is broken.
+- **Likelihood**: Almost certain — known gap, no controls in place. Matches RISK-POLICY Likelihood-5 verbatim ("Known gap, no controls in place, or previously observed failure mode"). Every fresh-install adopter session running an affected skill hits this at Step 0.
+- **Analytics**: Direct grep evidence (2026-05-02): `grep -rn -E "bash +packages/[a-z]+/(scripts|hooks)/[a-z-]+\.(sh|py|bats|js|ts)" packages/*/skills/*/SKILL.md` returns the 5 lines above. Two scripts referenced: `packages/itil/scripts/reconcile-readme.sh` (3 invocation sites) and `packages/retrospective/scripts/measure-context-budget.sh` (2 invocation sites). No mitigations in the SKILL.md preambles ("if the script is missing, fall back to ..." — no such branch exists today; the SKILL.md exit-code routing treats missing-file as a parse error per Step 0's Exit 2 branch).
+- **Concrete user-cited evidence (2026-05-02)**: this very session — orchestrator's Step 0 of `/wr-itil:work-problems` ran `bash packages/itil/scripts/reconcile-readme.sh docs/problems` and exited 0 because **this session is in the source repo**. An adopter running the same skill from `~/Projects/their-app/` would have hit `bash: packages/itil/scripts/reconcile-readme.sh: No such file or directory` (exit 127). The user surfaced the issue mid-loop after observing the published-skill prose and recognising the path leak.
+
+## Root Cause Analysis
+
+### Preliminary Hypothesis
+
+Published SKILL.md files were authored against the source-repo working tree where `packages/<plugin>/scripts/<name>.sh` is the natural path. No build step or path-resolution layer rewrites these references when the plugin is published to npm and installed into an adopter's marketplace cache. The same applies to documentation-only references to `packages/itil/scripts/check-problems-readme-budget.sh` (manage-problem SKILL.md lines 465, 477) — those don't hard-fail because they aren't dispatched as bash, but they mislead any adopter agent that tries to follow the reference.
+
+The Claude Code plugin marketplace cache structure (verified 2026-05-02 from this session's environment) places plugin contents under `~/.claude/plugins/cache/<owner>/<plugin>/<version>/`. So `packages/itil/scripts/reconcile-readme.sh` is physically present at `~/.claude/plugins/cache/windyroad/wr-itil/0.23.1/scripts/reconcile-readme.sh` (note the path collapses `packages/itil/` to just the plugin's content root). The source-repo path `packages/itil/scripts/<name>.sh` and the cache-resolved path `<cache>/scripts/<name>.sh` are NOT the same string — they share the trailing `scripts/<name>.sh` but the leading prefix differs.
+
+This suggests a fix shape: published SKILL.md files should reference scripts via a path that resolves correctly in BOTH the source repo (so the skill works during plugin development in this monorepo) AND the marketplace cache (so the skill works for adopters). Candidates to explore in the architect-design phase:
+
+1. **`$CLAUDE_PLUGIN_DIR` env-var resolution** — if Claude Code exports `CLAUDE_PLUGIN_DIR` (or equivalent) pointing at the plugin's cache root when the skill is invoked, SKILL.md could use `bash "$CLAUDE_PLUGIN_DIR/scripts/<name>.sh"`. Requires confirmation that the env var exists and is set correctly during skill invocation. If absent, this requires a Claude Code feature request. Note: hooks already use `${CLAUDE_PLUGIN_ROOT}` (e.g. the manage-problem-enforce-create.sh hook is invoked via `${CLAUDE_PLUGIN_ROOT}/hooks/manage-problem-enforce-create.sh` — confirmed in this session's hook deny output) so a sibling env var for skills is plausible.
+2. **Inline the script logic directly into SKILL.md** — for short scripts, the bash body could be inlined. Eliminates the path-resolution problem entirely but bloats SKILL.md (composes-with P097 — SKILL.md size pressure). For longer scripts (`reconcile-readme.sh` is ~150 LOC) this trade-off may be unfavourable.
+3. **Skill-resolved path via marketplace metadata** — Claude Code's plugin marketplace may already track the cache root per plugin. SKILL.md could reference scripts via a documented marketplace-resolved path token that the agent's runtime expands.
+4. **Plugin-script bundling as agent-side helpers** — relocate scripts under `packages/<plugin>/agents/scripts/` or similar, so they are packaged with the plugin's agent definitions and resolved through the existing agent-loading mechanism. Requires architecture investigation.
+
+### Investigation Tasks
+
+- [ ] Confirm whether `$CLAUDE_PLUGIN_DIR` / `${CLAUDE_PLUGIN_ROOT}` (or any equivalent env var) is exported by Claude Code's runtime when a skill is invoked from the marketplace cache. The hook side already uses `${CLAUDE_PLUGIN_ROOT}` per the manage-problem-enforce-create.sh deny-message evidence; if the same var is available at skill-bash-invocation time the fix is small.
+- [ ] If a plugin-resolution env var exists, audit whether each affected skill's bash invocations work with the resolved path (source repo vs. marketplace cache parity).
+- [ ] If no env var exists, file a Claude Code feature request OR pivot to one of the alternative resolution strategies.
+- [ ] Architect review — codify the chosen resolution strategy as an ADR (likely sibling to P137's pending decision; both touch the plugin-boundary contract).
+- [ ] Mechanical replacement across the 5 SKILL.md files identified by grep + any others discovered during the audit.
+- [ ] Behavioural bats per ADR-005 — assert the path resolution works in both source-repo and marketplace-cache contexts.
+- [ ] Reproduction test exists or referenced (would require simulating a marketplace-cache install, or adopting a path-resolution wrapper bash function).
+- [ ] Identify a workaround for adopters until the fix releases (currently: none reasonable — see Workaround section).
+
+## Dependencies
+
+- **Blocks**: (none — but adopter usability of `@windyroad/itil` and `@windyroad/retrospective` is materially improved when this lands)
+- **Blocked by**: (none — independent of P137 even though they compose; either can land first)
+- **Composes with**: P137 (Plugin-published artifacts reference internal ADR/JTBD/P-IDs — same plugin-boundary leakage class, different failure mode); P097 (SKILL.md size pressure — affects "inline the script logic" candidate fix); P065 / P066 / P137 family (intake / publishing surface)
+
+## Related
+
+- P137 (`docs/problems/137-published-plugin-artifacts-reference-internal-ids-confuses-adopter-agents.open.md`) — sibling concern; semantic references vs. P151's executable references; both leak windyroad-internal artifacts through the plugin boundary.
+- P097 (`docs/problems/097-skill-md-runtime-vs-maintainer-content-mixed.open.md`) — composes-with on the "inline the script logic" candidate fix shape.
+- `packages/itil/skills/manage-problem/SKILL.md` — Step 0 README reconciliation preflight, line 189.
+- `packages/itil/skills/work-problems/SKILL.md` — Step 0 README reconciliation preflight, line 89.
+- `packages/itil/skills/reconcile-readme/SKILL.md` — Step 1 diagnose-only script invocation, line 44.
+- `packages/retrospective/skills/run-retro/SKILL.md` — Step 2c context-budget measurement, line 179.
+- `packages/retrospective/skills/analyze-context/SKILL.md` — Step 2 context-budget measurement, line 45.
+- `packages/itil/skills/manage-problem/SKILL.md` lines 465, 477 — documentation-only references to `packages/itil/scripts/check-problems-readme-budget.sh`; not dispatched as bash but still mislead adopter agents that try to read the script.
