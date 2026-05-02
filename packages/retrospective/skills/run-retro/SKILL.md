@@ -385,7 +385,24 @@ For every codifiable observation identified in Step 2:
 
 **Ownership boundary** (same as Step 4a): run-retro surfaces the observation and delegates ticket creation to `/wr-itil:manage-problem`. The delegated skill renames, edits, and commits per ADR-014. run-retro does not commit its own work.
 
-**Non-interactive / AFK branch**: Stage 1 fires regardless — ticketing is mechanical and does not require user input. If the delegated skill itself is unavailable (e.g. the Skill tool is gated out of the current context), record the observation in the retro summary's "Tickets Deferred" section so the user can ticket on return. Do NOT skip recording the observation.
+**Non-interactive / AFK branch**: Stage 1 fires regardless — ticketing is mechanical and does not require user input (per ADR-044 framework-resolution boundary; Stage 1 is in the framework-mediated zone — the agent reads the framework, ticket-creates per observation, and reports).
+
+**Valid fallback gates** — the ONLY conditions under which an observation may be recorded in the retro summary's "Tickets Deferred" section instead of ticketed via `/wr-itil:manage-problem`:
+
+- `cause: skill_unavailable` — the Skill tool is gated out of the current tool surface, OR `/wr-itil:manage-problem` is not registered in this project's plugin set, OR a structural prerequisite (git access, `docs/problems/` directory) is unreachable. The fallback is a graceful-degradation branch when the mechanical action is physically impossible.
+
+Every "Tickets Deferred" entry MUST carry an explicit `cause:` field naming one of the valid gates. Entries without `cause:`, or with a cause not in the allowlist, are Step 4b Stage 1 violations and are surfaced by `packages/retrospective/scripts/check-tickets-deferred-cause.sh` (advisory; advisory-only initial mode per ADR-040 declarative-first). If the script reports violations, the retro summary renders them under a labelled `Step 4b Stage 1 violations — observations dropped without skill-unavailability cause` subsection.
+
+**Anti-pattern: Do NOT skip Stage 1 ticketing under any of the following rationalisations** (P148, 2026-04-29):
+
+- "The session is long" / "context is at N tokens" / "the user might want to wrap up" — session length is not a Stage 1 fallback gate. The user's wrap-up wish is satisfied AT NEXT SESSION, not by deferring observations to a possibly-not-read retro-summary table.
+- "`/wr-itil:manage-problem` lifecycles are heavyweight in this state" — the lifecycle weight is fixed and budgeted; perceived heaviness is not a fallback gate.
+- "I'll defer this to the retro summary's Tickets Deferred section instead" — the Tickets Deferred section is the SKILL-UNAVAILABLE branch only. Routing observations there because the agent prefers a lighter path is the failure mode P148 documents.
+- Fabricating lighter-path subcommands that do not exist (`manage-problem create-fast` and similar) to justify deferring — the only supported invocation surfaces are the ones in `packages/itil/skills/manage-problem/SKILL.md` Operations table.
+
+**Evidence (P148, 2026-04-29)**: an observation deferred under a non-`skill_unavailable` cause "could have very easily been lost if I was in a rush" (user correction phrasing — captures the lost-observation hazard exactly). Deferred observations depend on the user reading the retro summary AND ticketing before context expires AND the entries still being accurate when re-read days later. Each gating clause adds drop risk; Stage 1 ticketing has zero drop risk because the ticket exists in `docs/problems/` from the moment of creation.
+
+**See also**: ADR-044 framework-mediated surface; P148 (anti-pattern driver ticket); P145 (sibling defer-pattern at the Tier 3 rotation prompt — same class of behaviour, different surface).
 
 #### Stage 2: Record proposed fix strategy on each ticket (silent agent action per P135 / ADR-044)
 
@@ -469,6 +486,16 @@ Present a summary to the user:
 
 ### Problems Created/Updated
 - [problem ticket]: [summary]
+
+### Tickets Deferred
+
+(Emitted only when Step 4b Stage 1 took the SKILL-UNAVAILABLE fallback per the AFK branch above — every row MUST cite a `Cause` field naming a valid fallback gate. Omit this section entirely when no observations were deferred. P148.)
+
+| Observation | Cause | Citation |
+|-------------|-------|----------|
+| <one-line observation summary> | `skill_unavailable` | <retro-step-citation, e.g. `Step 2b detection`, `Step 4a verification candidate`> |
+
+The `Cause` column accepts only `skill_unavailable` (per `packages/retrospective/scripts/check-tickets-deferred-cause.sh` allowlist). Rows with any other cause — or no `Cause` column — are Step 4b Stage 1 violations; the script surfaces them as such on its next run. Session-length rationalisations, perceived heaviness, or fabricated subcommands are NOT valid causes (see the AFK branch's anti-pattern enumeration in Step 4b).
 
 ### Verification Candidates
 

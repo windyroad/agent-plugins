@@ -1,6 +1,6 @@
 # Problem 148: Agent defers ticket creation to retro summary "Tickets Deferred" section instead of immediately invoking `/wr-itil:manage-problem` — observations could be lost if user is in a rush
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-29
 **Priority**: 12 (High) — Impact: Major (4) x Likelihood: Likely (3) — observed today end-to-end with explicit user correction: *"create problem tickets for the improvements PLUS create a problem ticket for the decision to defer the creation of those tickets as they could have very easily been lost if I was in a rush"* — the user explicitly named the lost-observation risk as the reason this pattern needs to stop.
 **Effort**: M — design + ship a discipline rule for retro Step 4b Stage 1 ("Stage 1 fires regardless — ticketing is mechanical and does not require user input") that closes the agent's session-length-pressure-driven defer escape. SKILL.md amendment + behavioural bats covering the Stage 1 mechanical-ticketing invariant + retrospective-side observability test for deferred entries actually landing as tickets.
@@ -102,3 +102,24 @@ This composes with P145's pattern: agents pick low-effort options when end-of-se
 - **`packages/retrospective/skills/run-retro/SKILL.md`** Step 4b Stage 1 — Edit target.
 - **2026-04-29 retro evidence**: today's retro summary "Tickets Deferred" section listed P146 + P147 as `Tickets Deferred — record only`. User correction directly cited the lost-observation hazard.
 - **User correction phrasing**: *"create problem tickets for the improvements PLUS create a problem ticket for the decision to defer the creation of those tickets as they could have very easily been lost if I was in a rush"* — exact phrasing recorded for the P078 hook + future Step 2b pipeline-instability scan citation.
+
+## Fix Released
+
+**Released**: 2026-05-02 (this commit; fix work landed 2026-04-29 AFK iter, commit deferred to 2026-05-02 user session). Architect-picked Fix 1+2 hybrid (verdict 2026-04-29 AFK iter, P148 selection).
+
+**Fix 1 (prose tightening)**: `packages/retrospective/skills/run-retro/SKILL.md` Step 4b Stage 1 AFK-branch paragraph rewritten to (a) name `cause: skill_unavailable` as the only valid fallback gate, (b) require every Tickets Deferred entry carry an explicit `cause:` field, (c) enumerate the four named anti-pattern rationalisations the agent must NOT use (session-length pressure, lifecycle weight, retro-summary-defer preference, fabricated subcommands), (d) cite the user's verbatim correction phrase as evidence, (e) cite ADR-044 framework-mediated surface + P145 sibling pattern. Step 5 retro summary template gains a `### Tickets Deferred` section before `### Verification Candidates` with `Observation | Cause | Citation` columns.
+
+**Fix 2 (advisory check script)**: `packages/retrospective/scripts/check-tickets-deferred-cause.sh` walks `docs/retros/*.md` retro summaries, parses the `### Tickets Deferred` table in each, and emits `RETRO <date> file=<basename> deferred=<N> with_valid_cause=<M> violations=<K>` per file plus a trailing `TOTAL` summary line. Exit 0 always (advisory per ADR-040 declarative-first / ADR-013 Rule 6). Cause allowlist is single-source `{skill_unavailable}` — extending it requires a matching SKILL.md AFK-branch update.
+
+**Tests**:
+- `packages/retrospective/scripts/test/check-tickets-deferred-cause.bats` — 20 behavioural tests against fixture retro directories: empty dir, no-defer steady state, good fixture (skill_unavailable), bad fixture (session_pressure / context_heavyweight — the P148 anti-pattern), legacy fixture (no Cause column), mixed fixture, empty Cause cell, format tolerance (backticks, bold, whitespace), placeholder template row skipping, multi-file ordering, file-type filtering (ask-hygiene + context-analysis + non-date-prefix excluded), portability, read-only contract. All 20 passing.
+- `packages/retrospective/skills/run-retro/test/run-retro-stage-1-fallback-gating.bats` — 3 minimal structural backstop assertions (ADR-037 permitted exception, narrowest scope) linking the SKILL.md prose to the script: prose names `cause: skill_unavailable`, prose references the script path, prose cites P148 driver. All 3 passing.
+- Full `packages/retrospective/skills/run-retro/test/` suite: 127/127 passing — no regressions.
+
+**Awaiting user verification**. Verification path: run a retrospective with two distinct Tickets Deferred shapes (one entry with `cause: skill_unavailable`, one with `cause: session_pressure`) and confirm `bash packages/retrospective/scripts/check-tickets-deferred-cause.sh docs/retros` reports `with_valid_cause=1 violations=1` for that retro. Behavioural confirmation that the rationalisation loop is closed comes from observing whether the agent stops broadening the fallback gate in subsequent retros — measurable via the script's TOTAL violations count tracking down toward 0.
+
+**Cross-references**:
+- Architect verdict (2026-04-29 AFK iter): 1+2 hybrid; rejected Fix 3 on ADR-014 + effort grounds; cited ADR-040 declarative-first + ADR-044 framework-mediated surface + P081 behavioural-tests-preferred.
+- JTBD review (2026-04-29 AFK iter): PASS; aligned with JTBD-001 / JTBD-006 / JTBD-201; advisory-only initial mode preserves JTBD-006 line 32 (extended AFK safety) per Rule 6 graceful-stop contract.
+- Sibling P145: same defer-pattern at the Tier 3 rotation prompt — composing surface; same anti-pattern shape may apply there once measured.
+- Forward-looking deviation-candidate: if the advisory script surfaces ≥2 Stage 1 violations across 3 consecutive retros, the declarative layer is insufficient and an enforcement-hook escalation (P135 R6 trajectory) becomes warranted. Captured in this iteration's `outstanding_questions` for user batched review.
