@@ -72,7 +72,7 @@ After re-scoring, present three sections matching the README.md format (same ren
 |------|-----|-------|----------|--------|--------|----------|-------|
 ```
 
-**Verification Queue** — `.verifying.md` tickets, sorted by release age (oldest first). Highlight any ticket whose release age is **≥ 14 days** with a `yes (N days)` marker in the `Likely verified?` column (within-skill default per P048 Candidate 4 — tunable; promote to cross-skill policy if needed):
+**Verification Queue** — `.verifying.md` tickets, sorted by `Released date ASC` (oldest at row 1; same-day releases tiebreak by ID ASC) per ADR-022 + P048 user-task semantics. Older entries are the most likely-verified candidates the user wants to surface first when closing the queue; newest-first ordering pushes those actionable closure candidates below the fold and contradicts the section header. <!-- VQ-SORT-DIRECTION: oldest-first per ADR-022 --> Any change to the VQ sort direction MUST update this rendering block, Step 5's README template, AND `/wr-itil:manage-problem` SKILL.md Step 5 P094 / Step 7 P062 / Step 9c / Step 9e + `/wr-itil:transition-problem` + `/wr-itil:transition-problems` + `/wr-itil:reconcile-readme` + `/wr-itil:list-problems` — drift re-opens P150. Highlight any ticket whose release age is **≥ 14 days** with a `yes (N days)` marker in the `Likely verified?` column (within-skill default per P048 Candidate 4 — tunable; promote to cross-skill policy if needed):
 
 ```
 | ID | Title | Released | Fix summary | Likely verified? |
@@ -128,7 +128,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 
 ## Verification Queue
 
-Fix released, awaiting user verification (driven off `docs/problems/*.verifying.md` via glob per ADR-022). Ranked by release age, oldest first. `Likely verified?` column marks tickets ≥14 days old (P048 Candidate 4 default).
+Fix released, awaiting user verification (driven off `docs/problems/*.verifying.md` via glob per ADR-022). Sorted by `Released date ASC` (oldest at row 1; same-day releases tiebreak by ID ASC). <!-- VQ-SORT-DIRECTION: oldest-first per ADR-022 --> `Likely verified?` column marks tickets ≥14 days old (P048 Candidate 4 default).
 
 | ID | Title | Released | Likely verified? |
 |----|-------|----------|------------------|

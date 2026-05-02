@@ -171,6 +171,8 @@ Every Step 7 status transition regenerates `docs/problems/README.md` and stages 
 
 The refresh uses the same rendering rules as `/wr-itil:review-problems` Step 9e (glob `docs/problems/*.open.md` / `*.known-error.md` / `*.verifying.md` / `*.parked.md`; rank open/known-error by WSJF; list verifyings in the Verification Queue ordered by release age; list parkeds in the Parked section) but skips the full re-scoring pass — existing WSJF values on the ticket files are trusted. The refresh is a render, not a re-rank.
 
+**Verification Queue sort direction (P150)**: Verification Queue rows are sorted by `Released date ASC` (oldest at row 1; same-day releases tiebreak by ID ASC) per ADR-022 + P048 user-task semantics — older entries are the most likely-verified candidates the user wants to surface first when closing the queue. <!-- VQ-SORT-DIRECTION: oldest-first per ADR-022 --> Drift here re-opens P150.
+
 **Mechanism:**
 
 1. After renaming + Editing + `git add`-ing the transitioned ticket file (per the staging-trap rule above), regenerate `docs/problems/README.md` in-place reflecting the new filename set and the transitioned ticket's new Status.

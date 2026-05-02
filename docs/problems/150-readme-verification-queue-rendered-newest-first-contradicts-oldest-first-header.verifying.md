@@ -1,6 +1,6 @@
 # Problem 150: docs/problems/README.md Verification Queue rendered newest-first contradicts section header "Ranked by release age, oldest first"
 
-**Status**: Open
+**Status**: Verification Pending (fold-fix Open → Verifying per ADR-022 P143 amendment — root cause + fix strategy + workaround documented inline; ships 2026-05-03 AFK iter 9)
 **Reported**: 2026-05-02
 **Priority**: 4 (Low) — Impact: Minor (2) x Likelihood: Possible (2)
 **Effort**: S — single-line section-header text edit OR per-render sort-direction flip; bounded across `manage-problem` Step 9c / Step 9e template, `review-problems` SKILL.md, `transition-problem` Step 7, `reconcile-readme` rendering.
@@ -92,3 +92,36 @@ The fix is small: pick one canonical ordering, encode it in all five SKILL.md re
 - **`packages/itil/skills/reconcile-readme/SKILL.md`** Step 5 — render block.
 - **2026-05-02 P148 release session evidence**: README line 43 vs lines 47-80 contradiction observed and recorded.
 - **`/wr-retrospective:run-retro` 2026-05-02 retro Step 2b detection**: this ticket originated from the pipeline-instability scan during today's retro; category = Skill-contract violations (rendering contract drift across multiple SKILL.md files).
+
+## Fix Released
+
+**Released**: 2026-05-03 (AFK iter 9; pending `@windyroad/itil` patch — fold-fix Open → Verification Pending per ADR-022 P143 amendment)
+
+**Approach**: ratified fix-strategy choice (oldest first per ADR-022 + P048 user-task semantics). Encoded canonical Verification Queue sort direction `Released date ASC` (oldest at row 1; same-day releases tiebreak by ID ASC) at all six SKILL.md render sites:
+
+- `packages/itil/skills/manage-problem/SKILL.md` — Step 5 P094, Step 7 P062, Step 9c presentation, Step 9e template (4 occurrences of the `<!-- VQ-SORT-DIRECTION: oldest-first per ADR-022 -->` marker).
+- `packages/itil/skills/review-problems/SKILL.md` — Step 3 ranking + Step 5 README template.
+- `packages/itil/skills/transition-problem/SKILL.md` — Step 7 README refresh subsection.
+- `packages/itil/skills/transition-problems/SKILL.md` — Step 4a batch render subsection.
+- `packages/itil/skills/reconcile-readme/SKILL.md` — Step 4 row-insertion subsection.
+- `packages/itil/skills/list-problems/SKILL.md` — VQ render block.
+
+**Marker shape**: `<!-- VQ-SORT-DIRECTION: oldest-first per ADR-022 -->` — analogous to P138's `<!-- TIE-BREAK-LADDER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 -->`. Includes a source-of-truth pointer (per architect amendment) so future readers have a one-grep path to the authority.
+
+**Behavioural test**: new `packages/itil/skills/manage-problem/test/manage-problem-readme-vq-sort-order.bats` 13/13 green covering:
+- Marker presence at every render site (6 contract assertions).
+- Released-date ASC direction prose presence (2 assertions).
+- Drift-re-opens-P150 warning prose presence (2 assertions).
+- Behavioural fixture sort with 4 .verifying.md fixtures of known dates → row 1 = oldest entry (1 assertion).
+- Same-day-Released ID-ASC tiebreaker (1 assertion).
+- P048-aligned likely-verified-first ordering (1 assertion).
+
+**README re-rendered**: `docs/problems/README.md` Verification Queue table now top-to-bottom = oldest → newest. Undated rows (Released marker without a YYYY-MM-DD) sort first by ID ASC (16 rows — pre-existing data quality issue, marker preserved verbatim); dated rows follow oldest-first (50 rows — markers recomputed against today_date so stale `(0 days)` markers refresh). Total: 66 rows = 65 original + P150.
+
+**Architect verdict**: PASS. No new ADR required — ADR-022 already authorises VQ ordering ("oldest first" wording in Decision Outcome line 63); ADR-014 covers single-commit grain; P138 fix-shape established as in-repo precedent at `packages/itil/skills/manage-problem/test/manage-problem-readme-tie-break-order.bats`. Marker grammar matches `TIE-BREAK-LADDER-SOURCE` shape (uppercase-kebab key + colon + value + ADR pointer). Inline fold-fix Open → Verifying endorsed per ADR-022 P143 amendment when pre-flight criteria met inline.
+
+**JTBD verdict**: PASS. JTBD-006 primary (AFK loop continuity — actionable closure candidates surface at top of queue, not bottom; precondition for the AFK handoff working at all); JTBD-001 secondary (governance enforced via greppable marker + bats fixture, sibling P138 pattern). No persona regression — no documented need for newest-first VQ framing (that need is served by git log / changelog, not the queue).
+
+**Changeset**: `.changeset/p150-vq-sort-direction.md` (`@windyroad/itil` patch).
+
+**Verification criterion**: user verifies on next session by reading `docs/problems/README.md` Verification Queue table — undated rows appear first sorted by ID ASC, then dated rows sort oldest-first (row immediately after the undated cohort = 2026-04-17 P016; row N = the most-recent release in the cohort). Behavioural confirmation that the recurring-drift loop is closed comes from observing future render sites (Step 7 transitions, Step 9e review re-emits, reconcile-readme repairs) preserve oldest-first ordering across 2-3 retro cycles — measurable via `bats packages/itil/skills/manage-problem/test/manage-problem-readme-vq-sort-order.bats` exit 0 across the cycles.

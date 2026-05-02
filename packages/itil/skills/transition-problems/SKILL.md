@@ -178,7 +178,7 @@ After the per-pair loop finishes, IF AT LEAST ONE PAIR SUCCEEDED:
 
 Per P062, every Step 7 status transition refreshes README.md. At the batch grain, the refresh runs ONCE — a single render reflecting ALL surviving renames + Status updates. Not N refreshes (that would force the README to thrash N times mid-batch and amplify diff noise).
 
-The refresh follows the same render rules as `/wr-itil:review-problems` Step 9e (glob `docs/problems/*.open.md` / `*.known-error.md` / `*.verifying.md` / `*.parked.md`; rank open + known-error by WSJF; Verification Queue ordered by release age; Parked section). It does NOT re-rank — existing WSJF values on ticket files are trusted; the refresh is a render, not a re-rank.
+The refresh follows the same render rules as `/wr-itil:review-problems` Step 9e (glob `docs/problems/*.open.md` / `*.known-error.md` / `*.verifying.md` / `*.parked.md`; rank open + known-error by WSJF; Verification Queue sorted by `Released date ASC` with same-day tiebreak by ID ASC per ADR-022 + P048; Parked section). It does NOT re-rank — existing WSJF values on ticket files are trusted; the refresh is a render, not a re-rank. <!-- VQ-SORT-DIRECTION: oldest-first per ADR-022 --> Drift on the VQ sort direction re-opens P150.
 
 ```bash
 git add docs/problems/README.md

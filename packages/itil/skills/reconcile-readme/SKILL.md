@@ -99,7 +99,7 @@ For each REMOVE: `Edit` with the existing row as `old_string`, and remove it (re
 
 For each ADD to WSJF Rankings: locate the correct WSJF position by descending order. Use `Edit` to insert the new row immediately above the next-lower-WSJF row (or append at the bottom of the table if the new row's WSJF is the lowest). The Edit's `old_string` is the line that the new row inserts above; the `new_string` is the new row + the same line below.
 
-For each ADD to Verification Queue: append at the bottom of the VQ table (the table is loosely sorted by release age, oldest first; recent releases land at the bottom).
+For each ADD to Verification Queue: insert the new row in `Released date ASC` position (oldest at row 1; same-day releases tiebreak by ID ASC) per the canonical VQ sort direction. <!-- VQ-SORT-DIRECTION: oldest-first per ADR-022 --> Recent releases land at the bottom; oldest-pending verifications surface at the top so the user lands on actionable closure candidates first per P048 user-task semantics. Drift here re-opens P150.
 
 After all edits, re-run `packages/itil/scripts/reconcile-readme.sh docs/problems` to confirm exit 0. If the second run still reports drift, investigate the residual edits — do NOT re-run reconciliation in a loop, as that hides systematic edit failures.
 

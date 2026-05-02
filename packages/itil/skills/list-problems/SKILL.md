@@ -66,7 +66,7 @@ Render three sections matching the README.md format so cached and live output lo
 | <score> | P<NNN> | <title> | <severity> | <status> | <effort> |
 ```
 
-**Verification Queue** — `.verifying.md` tickets, sorted by release age (oldest first):
+**Verification Queue** — `.verifying.md` tickets, sorted by `Released date ASC` (oldest at row 1; same-day releases tiebreak by ID ASC) per ADR-022 + P048 user-task semantics. <!-- VQ-SORT-DIRECTION: oldest-first per ADR-022 --> Drift here re-opens P150.
 
 ```
 | ID | Title | Released | Likely verified? |
