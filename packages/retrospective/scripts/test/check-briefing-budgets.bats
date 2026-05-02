@@ -210,3 +210,98 @@ write_briefing_entry() {
   echo "$first_line" | grep -q "alpha.md"
   echo "$last_line" | grep -q "zebra.md"
 }
+
+# ── MUST_SPLIT signal (P145) ────────────────────────────────────────────────
+#
+# Files at ratio >= 2.0x the threshold also emit a MUST_SPLIT line that
+# names the same basename and a `reason=` code. This promotes ADR-040's
+# Tier 3 reassessment trigger ("≥ 3 topic files exceed 2× the configured
+# ceiling for ≥ 2 consecutive retro cycles") from policy-revisit-time to
+# per-cycle enforcement on the same threshold. The MUST_SPLIT line is
+# the "no defer" signal: run-retro Step 3 Tier 3 silent-agent rotation
+# is forced to pick split-by-subtopic / split-by-date for these files.
+#
+# Output format on >= 2x ratio (one line per file, in addition to the
+# existing OVER line):
+#   MUST_SPLIT <basename> reason=<code>
+#
+# @problem P145
+
+@test "check-briefing-budgets: file at exactly 2x threshold emits MUST_SPLIT" {
+  mkdir -p "$FIXTURE_DIR/briefing"
+  # Exactly 10240 bytes = 2.0x of 5120 default threshold
+  printf '%.0s.' $(seq 1 10240) > "$FIXTURE_DIR/briefing/exactly-2x.md"
+  run "$SCRIPT" "$FIXTURE_DIR/briefing"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -E "^MUST_SPLIT exactly-2x.md reason=ratio-exceeds-2x$"
+}
+
+@test "check-briefing-budgets: file just under 2x does NOT emit MUST_SPLIT" {
+  mkdir -p "$FIXTURE_DIR/briefing"
+  # 10239 bytes = 1.9998x of 5120 — under the 2.0x trigger
+  printf '%.0s.' $(seq 1 10239) > "$FIXTURE_DIR/briefing/just-under-2x.md"
+  run "$SCRIPT" "$FIXTURE_DIR/briefing"
+  [ "$status" -eq 0 ]
+  # OVER line still fires (>= threshold)
+  echo "$output" | grep -E "^OVER just-under-2x.md bytes=10239 threshold=5120"
+  # MUST_SPLIT does NOT fire (< 2x ratio)
+  ! echo "$output" | grep -q "MUST_SPLIT"
+}
+
+@test "check-briefing-budgets: file well over 2x emits both OVER and MUST_SPLIT" {
+  mkdir -p "$FIXTURE_DIR/briefing"
+  # 4.0x ceiling — mirrors today's afk-subprocess.md state
+  write_briefing_entry "$FIXTURE_DIR/briefing/very-bloated.md" 20480
+  run "$SCRIPT" "$FIXTURE_DIR/briefing"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -E "^OVER very-bloated.md bytes=[0-9]+ threshold=5120"
+  echo "$output" | grep -E "^MUST_SPLIT very-bloated.md reason=ratio-exceeds-2x$"
+}
+
+@test "check-briefing-budgets: file under threshold emits NEITHER OVER nor MUST_SPLIT" {
+  mkdir -p "$FIXTURE_DIR/briefing"
+  write_briefing_entry "$FIXTURE_DIR/briefing/small.md" 4096
+  run "$SCRIPT" "$FIXTURE_DIR/briefing"
+  [ "$status" -eq 0 ]
+  ! echo "$output" | grep -q "small.md"
+  ! echo "$output" | grep -q "MUST_SPLIT"
+}
+
+@test "check-briefing-budgets: BRIEFING_TIER3_MAX_BYTES env override flows through to MUST_SPLIT" {
+  mkdir -p "$FIXTURE_DIR/briefing"
+  # 4096 bytes is 2.0x of 2048 — should trigger MUST_SPLIT under the override
+  write_briefing_entry "$FIXTURE_DIR/briefing/topic.md" 4096
+  BRIEFING_TIER3_MAX_BYTES=2048 run "$SCRIPT" "$FIXTURE_DIR/briefing"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -E "^OVER topic.md bytes=[0-9]+ threshold=2048"
+  echo "$output" | grep -E "^MUST_SPLIT topic.md reason=ratio-exceeds-2x$"
+}
+
+@test "check-briefing-budgets: mixed OVER + MUST_SPLIT output is sorted deterministically" {
+  mkdir -p "$FIXTURE_DIR/briefing"
+  # Three OVER files; two of them also MUST_SPLIT. Output must be
+  # deterministic so retro summary diffs stay stable across cycles.
+  # Contract: OVER block (sorted by basename) followed by MUST_SPLIT
+  # block (sorted by basename).
+  write_briefing_entry "$FIXTURE_DIR/briefing/zebra-over-only.md" 6000
+  write_briefing_entry "$FIXTURE_DIR/briefing/alpha-must-split.md" 12000
+  write_briefing_entry "$FIXTURE_DIR/briefing/middle-must-split.md" 15000
+  run "$SCRIPT" "$FIXTURE_DIR/briefing"
+  [ "$status" -eq 0 ]
+  # Three OVER lines — alpha first, middle next, zebra last
+  over_lines=$(echo "$output" | grep "^OVER ")
+  [ "$(echo "$over_lines" | wc -l | tr -d ' ')" = "3" ]
+  echo "$over_lines" | sed -n '1p' | grep -q "alpha-must-split.md"
+  echo "$over_lines" | sed -n '2p' | grep -q "middle-must-split.md"
+  echo "$over_lines" | sed -n '3p' | grep -q "zebra-over-only.md"
+  # Two MUST_SPLIT lines — alpha first, middle second; zebra-over-only NOT present
+  must_lines=$(echo "$output" | grep "^MUST_SPLIT ")
+  [ "$(echo "$must_lines" | wc -l | tr -d ' ')" = "2" ]
+  echo "$must_lines" | sed -n '1p' | grep -q "alpha-must-split.md"
+  echo "$must_lines" | sed -n '2p' | grep -q "middle-must-split.md"
+  ! echo "$must_lines" | grep -q "zebra-over-only.md"
+  # All OVER lines come before any MUST_SPLIT line (block ordering)
+  first_must_line_no=$(echo "$output" | grep -n "^MUST_SPLIT " | head -1 | cut -d: -f1)
+  last_over_line_no=$(echo "$output" | grep -n "^OVER " | tail -1 | cut -d: -f1)
+  [ "$last_over_line_no" -lt "$first_must_line_no" ]
+}

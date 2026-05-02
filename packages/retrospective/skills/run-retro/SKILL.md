@@ -292,19 +292,31 @@ After editing topic files, update `docs/briefing/README.md`:
 
 After all topic-file edits, Step 1.5 delete-queue persistence, and the README refresh have completed, run the per-topic-file budget pass. ADR-040 Tier 3 names a 2-5 KB / topic envelope; this pass promotes that budget from informational to advisory enforcement.
 
-**Mechanism**: invoke `packages/retrospective/scripts/check-briefing-budgets.sh` (read-only diagnostic) against `docs/briefing/`. Each line of output identifies a topic file at or above the configured threshold:
+**Mechanism**: invoke `packages/retrospective/scripts/check-briefing-budgets.sh` (read-only diagnostic) against `docs/briefing/`. Output has two line shapes:
 
 ```
 OVER <basename> bytes=<N> threshold=<N>
+MUST_SPLIT <basename> reason=ratio-exceeds-2x
 ```
+
+`OVER` lines fire for every file at or above the configured threshold. `MUST_SPLIT` lines fire (in addition to `OVER`) for files at or above 2× the threshold — promoting ADR-040's reassessment trigger ("≥ 3 topic files exceed 2× the configured ceiling for ≥ 2 consecutive retro cycles") from policy-revisit-time to per-cycle enforcement (P145).
 
 The script's threshold defaults to `5120` bytes (the upper bound of ADR-040's Tier 3 envelope) and is overridable via `BRIEFING_TIER3_MAX_BYTES`. Empty stdout means no files are over budget — skip the rest of this pass.
 
 **Ordering**: this pass runs as the FINAL action of Step 3, after edits + Step 1.5 delete-queue persistence + README refresh. It must observe post-edit byte counts so the deletes the user confirmed in Step 1.5 are reflected in the measurement.
 
-**Silent agent-picked rotation (P135 / ADR-044)** — per the ADR-044 framework-resolution boundary, rotation is silent agent judgement applied to each `OVER` line. The agent has all the inputs needed: file mtimes (split-by-date), Step 1.5 signal scores per entry (trim-noise), header structure within the file (split-by-subtopic). No `AskUserQuestion` per file; surfacing 4 options × 6 over-budget files trains the user to pick "defer" 6 times to escape the cascade — worse than no rotation. Heuristic for picking the rotation shape:
+**Silent agent-picked rotation (P135 / ADR-044)** — per the ADR-044 framework-resolution boundary, rotation is silent agent judgement applied to each `OVER` line. The agent has all the inputs needed: file mtimes (split-by-date), Step 1.5 signal scores per entry (trim-noise), header structure within the file (split-by-subtopic). No `AskUserQuestion` per file; surfacing 4 options × 6 over-budget files trains the user to pick "defer" 6 times to escape the cascade — worse than no rotation.
+
+**Two heuristic branches** depending on whether the file's `OVER` line is accompanied by a `MUST_SPLIT` line:
+
+**Branch A — file has MUST_SPLIT line (ratio ≥ 2.0× ceiling, P145)**: the do-nothing options are not eligible. The accumulated ratio is concrete evidence that prior retros' defers have failed to converge — picking `trim-noise` or `leave-as-is` again is the recurring-defer anti-pattern P145 closes. Pick from this narrowed set:
 
 - If a coherent sub-topic boundary exists (a sub-section that's grown big enough to stand alone, ≥1 KB; e.g. a worked example in a topic that's grown to its own sub-section): **split-by-subtopic** — extract to `docs/briefing/<sub-topic>.md`, update README Topic Index.
+- Else: **split-by-date** — this is the **safe default** when no sub-topic boundary is obvious. Older entries archive cleanly without semantic judgement (mtime-sort + median-age threshold), so the action is mechanical and AFK-safe. Archive oldest entries to `docs/briefing/<topic>-archive.md`. Do NOT pick split-by-subtopic with a weak boundary just because it appears first in the heuristic — split-by-date is preferred when the boundary is unclear because it has zero false-split risk.
+
+**Branch B — file has only OVER line (ratio between 1.0× and 2.0× ceiling)**: the original four-option heuristic applies. Defer is permitted because the ratio is still inside the reassessment trigger envelope; one or two more retros of accumulation will escalate to MUST_SPLIT and force action via Branch A.
+
+- If a coherent sub-topic boundary exists (≥1 KB sub-section): **split-by-subtopic** — extract to `docs/briefing/<sub-topic>.md`, update README Topic Index.
 - Else if the file has clear date-stratified entries (HTML-comment `first-written` fields per Step 1.5) AND ≥30% of bytes are entries older than the median age: **split-by-date** — archive oldest entries to `docs/briefing/<topic>-archive.md`.
 - Else if Step 1.5 surfaced ≥3 noise-classified entries in this file this retro: **trim-noise** — defer rotation; let the next retro's Step 1.5 shrink the file across cycles.
 - Else: **leave-as-is** — record the OVER state in the Step 5 summary; no action this retro. Picks up next retro when more signal accumulates.

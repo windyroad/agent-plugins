@@ -22,17 +22,36 @@
 # per ADR-038 progressive-disclosure budget):
 #   OVER <basename> bytes=<N> threshold=<N>
 #
+# Files at >= 2.0x the threshold also emit a second line that promotes
+# ADR-040's reassessment trigger ("≥ 3 topic files exceed 2× the
+# configured ceiling for ≥ 2 consecutive retro cycles") from
+# policy-revisit-time to per-cycle enforcement on the same threshold:
+#   MUST_SPLIT <basename> reason=<code>
+#
+# The MUST_SPLIT line is the "no defer" signal: run-retro Step 3 Tier 3
+# silent-agent rotation is forced to pick split-by-subtopic /
+# split-by-date for these files (the trim-noise / leave-as-is fall-
+# throughs are not eligible). See P145.
+#
+# Output ordering (deterministic for stable retro-summary diffs):
+#   1. All OVER lines, sorted by basename.
+#   2. Then all MUST_SPLIT lines, sorted by basename.
+#
 # Output is empty (no lines) when no topic files exceed the threshold.
 # README.md is excluded from the scan — it is Tier 2, not Tier 3.
 #
 # Read-only — does NOT mutate any briefing file. Rotation is surfaced
 # to the user via run-retro Step 3.
 #
-# @problem P099
+# @problem P099 (initial OVER advisory)
+# @problem P145 (MUST_SPLIT escalation — closes the defer-recurrence gap)
 # @adr ADR-040 (Session-start briefing surface — Tier 3 budget; this
-#   script promotes Tier 3 from informational to advisory enforcement)
+#   script promotes Tier 3 from informational to advisory enforcement;
+#   MUST_SPLIT promotes the 2× reassessment trigger to per-cycle)
 # @adr ADR-038 (Progressive disclosure — per-row byte budget)
 # @adr ADR-013 (Rule 1 / Rule 6 — interactive vs AFK)
+# @adr ADR-044 (Decision-delegation contract — MUST_SPLIT is framework-
+#   resolved removal of the do-nothing options when ratio is decisive)
 # @adr ADR-005 (Plugin testing strategy)
 # @jtbd JTBD-001 / JTBD-006 / JTBD-101
 
@@ -76,12 +95,27 @@ done
 IFS=$'\n' sorted=($(printf '%s\n' "${entries[@]}" | sort))
 unset IFS
 
+# Pass 1: emit OVER lines for every file at or above threshold.
+# Track MUST_SPLIT candidates (ratio >= 2.0x) for pass 2.
+declare -a must_split=()
 for entry in "${sorted[@]}"; do
   base="${entry% *}"
   bytes="${entry##* }"
   if [ "$bytes" -ge "$THRESHOLD" ]; then
     echo "OVER $base bytes=$bytes threshold=$THRESHOLD"
+    # Integer-arithmetic ratio test: bytes >= 2 * threshold.
+    # Avoids float math; exact at the 2.0x boundary per ADR-040
+    # reassessment trigger.
+    if [ "$bytes" -ge "$(( THRESHOLD * 2 ))" ]; then
+      must_split+=("$base")
+    fi
   fi
+done
+
+# Pass 2: emit MUST_SPLIT lines (already sorted by pass-1 traversal order
+# which is basename-sorted).
+for base in "${must_split[@]}"; do
+  echo "MUST_SPLIT $base reason=ratio-exceeds-2x"
 done
 
 exit 0
