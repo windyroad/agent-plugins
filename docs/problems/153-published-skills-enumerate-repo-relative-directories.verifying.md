@@ -1,6 +1,6 @@
 # Problem 153: Published skills enumerate repo-relative directories — adopter sessions get zero-byte attribution rows from missing trees
 
-**Status**: Open
+**Status**: Verifying
 **Reported**: 2026-05-02
 **Priority**: 15 (High) — Impact: Moderate (3) x Likelihood: Almost certain (5) — within RISK-POLICY appetite High but the surface is adopter-facing
 **Effort**: S — single SKILL.md edit (`/wr-retrospective:analyze-context` Step 2 lines 56-67) plus an extension to the P151 grep-as-lint bats pattern to catch the directory-enumeration class. No new ADR required — covered under ADR-049's reassessment-criteria amendment clause.
@@ -79,11 +79,23 @@ Independent of which Candidate 1/2 fix lands, the cross-plugin grep-as-lint at `
 
 ### Investigation Tasks
 
-- [ ] Confirm marketplace cache layout is stable across Claude Code versions (Candidate 1 viability check).
-- [ ] Pick between Candidate 1 (cache walk) and Candidate 2 (`$PATH` sniff). Architect concurrence.
-- [ ] Implement chosen fix in `packages/retrospective/skills/analyze-context/SKILL.md` lines 56-67.
-- [ ] Extend `packages/shared/test/no-repo-relative-script-paths-in-skills.bats` to catch `for X in packages/*/Y; do` patterns (Candidate 3 — independent of the implementation choice).
-- [ ] Audit `packages/*/skills/*/SKILL.md` for any other repo-relative directory traversals not yet detected.
+- [x] Confirm marketplace cache layout is stable across Claude Code versions (Candidate 1 viability check) — verified empirically during P151 investigation; cache layout `~/.claude/plugins/cache/<owner>/<plugin>/<version>/` documented in ADR-049 Context.
+- [x] Pick between Candidate 1 (cache walk) and Candidate 2 (`$PATH` sniff). Architect concurrence — chose **hybrid Candidate 1+2**: source-tree first (preserves windyroad dev-session output), `$PATH`-derived plugin-cache walk fallback. Architect APPROVED 2026-05-02 citing ADR-049 reassessment-criteria clause 3 — no new ADR required.
+- [x] Implement chosen fix in `packages/retrospective/skills/analyze-context/SKILL.md` lines 56-67 — replaced with single `wr-retrospective-list-plugin-attribution "${CLAUDE_PROJECT_DIR:-.}"` invocation.
+- [x] Extend `packages/shared/test/no-repo-relative-script-paths-in-skills.bats` to catch `for X in packages/*/Y; do` patterns (Candidate 3 — independent of the implementation choice) — added `@test "no published SKILL.md contains 'for X in packages/<plugin>/<subdir>; do ...' directory-enumeration loop"` matching `for +<var>+ in +packages/<plugin-or-glob>/(hooks|skills|scripts|bin)`.
+- [x] Audit `packages/*/skills/*/SKILL.md` for any other repo-relative directory traversals not yet detected — grep-as-lint now covers all current and future skills automatically; no other matches found at fix-land time.
+
+### Resolution
+
+Implemented as a hybrid of Candidate 1 (cache walk) + Candidate 2 (`$PATH` sniff) + Candidate 3 (lint extension):
+
+- New helper `packages/retrospective/scripts/list-plugin-attribution.sh` probes for `<project-root>/packages/*/{hooks,skills}` first; if neither glob expands, sniffs `$PATH` for entries shaped like `*/cache/<owner>/<plugin>/<version>/bin` and back-walks each plugin's root for hooks + skills byte counts. Emits identical row shape to the previous inline loop (`PLUGIN-HOOKS <plugin> bytes=<N>` / `PLUGIN-SKILLS <plugin> bytes=<N>`) plus a `PLUGIN-ATTRIBUTION not-measured reason=no-plugin-source-resolvable` ADR-026 sentinel when neither resolves. Sorted output for stable diffs. Exit 0 always (advisory; matches `measure-context-budget.sh` contract).
+- New 3-line shim `packages/retrospective/bin/wr-retrospective-list-plugin-attribution` per ADR-049 naming grammar (`wr-<plugin>-<kebab-script-name>`).
+- `packages/retrospective/skills/analyze-context/SKILL.md` Step 2 prose replaced with single invocation; resolution-order documentation inlined for adopter-agent context.
+- `packages/shared/test/no-repo-relative-script-paths-in-skills.bats` extended with the directory-enumeration `@test` block + a new shim smoke test (11 tests total, all green).
+- New bats coverage at `packages/retrospective/scripts/test/list-plugin-attribution.bats` pins script behavioural contract (10 tests: existence, exit code, source-tree output shape per plugin, multi-plugin enumeration, cache-fallback from synthetic cache layout, sentinel branch, ADR-038 ≤150-byte per-row budget).
+- Architect APPROVED + JTBD ALIGNED (plugin-user JTBD-301 adjacency, plugin-developer JTBD-101 "clear patterns, not reverse-engineering").
+- Changeset: `.changeset/wr-retrospective-p153-list-plugin-attribution-shim.md` (`@windyroad/retrospective` patch).
 
 ## Dependencies
 

@@ -54,22 +54,28 @@ The output is the deep layer's baseline. Parse each `BUCKET <name> bytes=<N>` ro
 The cheap layer reports `hooks` and `skills` as aggregates. The deep layer decomposes each by plugin, citing concrete byte counts per plugin:
 
 ```bash
-# Per-plugin hooks decomposition
-for plugin_dir in packages/*/hooks; do
-  plugin=$(basename "$(dirname "$plugin_dir")")
-  bytes=$(find "$plugin_dir" -type f -name '*.sh' -print0 2>/dev/null | xargs -0 wc -c 2>/dev/null | tail -1 | awk '{print $1}')
-  printf 'PLUGIN-HOOKS %s bytes=%s\n' "$plugin" "${bytes:-0}"
-done
-
-# Per-plugin skills decomposition
-for plugin_dir in packages/*/skills; do
-  plugin=$(basename "$(dirname "$plugin_dir")")
-  bytes=$(find "$plugin_dir" -type f -name 'SKILL.md' -print0 2>/dev/null | xargs -0 wc -c 2>/dev/null | tail -1 | awk '{print $1}')
-  printf 'PLUGIN-SKILLS %s bytes=%s\n' "$plugin" "${bytes:-0}"
-done
+wr-retrospective-list-plugin-attribution "${CLAUDE_PROJECT_DIR:-.}"
 ```
 
-Each plugin's `hooks` and `skills` row carries a concrete byte count + `find / wc -c` measurement-method citation. The aggregate cheap-layer `hooks` row equals the sum of all `PLUGIN-HOOKS` rows (sanity-check the report).
+The `wr-retrospective-list-plugin-attribution` command is a `$PATH`-resolved shim shipped in `packages/retrospective/bin/` that dispatches the canonical `packages/retrospective/scripts/list-plugin-attribution.sh` body. ADR-049 — never invoke the canonical script via repo-relative path; the path does not resolve in adopter trees. Equivalent contract to ADR-049's `wr-retrospective-measure-context-budget` shim.
+
+Output rows (one per plugin, terse machine-readable per ADR-038 ≤150 bytes):
+
+```
+PLUGIN-HOOKS  <plugin> bytes=<N>
+PLUGIN-SKILLS <plugin> bytes=<N>
+PLUGIN-ATTRIBUTION not-measured reason=<reason>
+```
+
+Resolution order (handled by the helper, transparent to this skill):
+
+1. **Source-tree mode** — when invoked from a windyroad source-repo session, walks `packages/<plugin>/{hooks,skills}` directly.
+2. **Cache-fallback mode** — when invoked from an adopter session (no `packages/` under `${CLAUDE_PROJECT_DIR}`), the helper sniffs `$PATH` for plugin-cache `bin/` entries (`*/cache/<owner>/<plugin>/<version>/bin`) and back-walks each plugin's root for hooks + skills byte counts.
+3. **Neither resolves** — emits a `PLUGIN-ATTRIBUTION not-measured reason=no-plugin-source-resolvable` sentinel per ADR-026. Treat as ungrounded; do NOT fabricate per-plugin numbers when this row appears.
+
+Per-row contract: each `PLUGIN-HOOKS` / `PLUGIN-SKILLS` row carries a concrete byte count from the helper's `find ... -name '*.sh' / SKILL.md` + `wc -c` measurement chain. The aggregate cheap-layer `hooks` row equals the sum of all `PLUGIN-HOOKS` rows (sanity-check the report); `skills` row equals the sum of all `PLUGIN-SKILLS` rows.
+
+P153 / ADR-049 — do NOT re-introduce repo-relative `packages/*/hooks` (or `skills` / `scripts` / `bin`) directory-enumeration glob loops in SKILL.md prose; route every plugin walk through `wr-retrospective-list-plugin-attribution` (or an equivalent bin-shimmed helper). The grep-as-lint at `packages/shared/test/no-repo-relative-script-paths-in-skills.bats` fails CI on regression.
 
 ### 3. Per-turn attribution (when session log is available)
 
