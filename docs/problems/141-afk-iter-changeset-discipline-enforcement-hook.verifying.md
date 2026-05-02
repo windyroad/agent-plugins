@@ -1,6 +1,6 @@
 # Problem 141: AFK iter `packages/<plugin>/` commits without changesets — orchestrator-main-turn back-fill is fragile recovery, hook-level enforcement preferable
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-04-29
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Likely (3) — observed twice in single session (40% miss rate across 5 publishable iters)
 **Effort**: M — new PreToolUse:Bash hook matching `git commit`; deny when staged diff includes `packages/<plugin>/` files but `.changeset/<plugin>-*.md` is not staged. Plus matching behavioural bats per ADR-005 + P081 (architect verdict 2026-05-02: ADR-005 is the plugin-testing-strategy ADR; ADR-037 is skill-scoped, not applicable to hook bats).
@@ -110,3 +110,22 @@ Iter subprocesses operate under context pressure (heavy SKILL.md + ticket body +
 - **ADR-018** — release cadence.
 - **ADR-009** — gate marker conventions.
 - 2026-04-28 session evidence: iter 2 + iter 7 omissions documented in commits `dcc65b4` and `ac2425e` (orchestrator main-turn back-fills).
+
+## Fix Released
+
+**Released in**: @windyroad/itil next patch — see commit landing this transition + `.changeset/wr-itil-p141-changeset-discipline-hook.md`.
+
+**Fix summary**: New `PreToolUse:Bash` hook `packages/itil/hooks/itil-changeset-discipline.sh` denies `git commit` invocations whose staged set includes `packages/<plugin>/*` source files but no `.changeset/*.md` is staged. Detection delegates to `lib/changeset-detect.sh::detect_changeset_required`, which categorises staged paths and returns 1 when a publishable source file is staged without a matching changeset. Allow paths (silent per ADR-045 Pattern 1): test paths (`test/`, `hooks/test/`, `scripts/test/`), package READMEs, `*.md` under package `docs/`, non-`packages/` paths, presence of any `.changeset/*.md` (excluding `README.md`), or `BYPASS_CHANGESET_GATE=1` env var. Deny path emits a single-line directive (≤300 bytes) naming the offending plugin slug, the `bun run changeset` recovery, and the bypass env var.
+
+**Hook registered** in `packages/itil/hooks/hooks.json` as a third `PreToolUse:Bash` matcher alongside `p057-staging-trap-detect.sh` and `pre-publish-intake-gate.sh`.
+
+**Tests**: 21 behavioural bats in `packages/itil/hooks/test/itil-changeset-discipline.bats` per ADR-005 + P081 — payload-on-stdin assertions on emitted JSON (no source-grep). Coverage: deny on staged source without changeset (3 shapes — SKILL.md, hook .sh, plugin.json); deny message naming + ≤300-byte band; allow with valid changeset; allow test-only paths (3 shapes); allow doc-only paths (2 shapes); deny SKILL.md (NOT in allow-list per architect amendment); allow .github/ + top-level docs/ (non-publishable); allow BYPASS env var; ADR-045 Pattern 1 silent-on-pass; non-Bash bypass; non-`git commit` Bash bypass; `.changeset/README.md` does not count as a real changeset; mixed source+test set still requires changeset; fail-open on parse error + outside git tree.
+
+Full `packages/itil/hooks/test/` suite green: 153/153 (132 prior + 21 new). No regressions.
+
+**Awaiting user verification**:
+- Confirm the deployed hook fires on a `packages/<plugin>/` commit without a changeset in a fresh AFK loop session.
+- Confirm allow paths (test-only, doc-only, BYPASS env) do not deny.
+- Spot-check the deny message renders cleanly in deny output (≤300 bytes; names slug + recovery).
+
+**Caveats per session-start briefing**: hooks load from the marketplace cache, not the source path — the new hook will fire on adopter agents only after `@windyroad/itil` is released and re-installed (`uninstall + install` per P106). The orchestrator owns release cadence per ADR-018.

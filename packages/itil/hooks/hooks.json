@@ -23,6 +23,10 @@
       {
         "matcher": "Bash",
         "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/pre-publish-intake-gate.sh" }]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/itil-changeset-discipline.sh" }]
       }
     ],
     "Stop": [

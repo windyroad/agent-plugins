@@ -1,0 +1,102 @@
+#!/bin/bash
+# P141: PreToolUse:Bash hook — denies `git commit` invocations whose
+# staged set includes `packages/<plugin>/` source files but no
+# `.changeset/*.md` is staged. Hook-level enforcement replaces the
+# unreliable iter-prompt-time changeset reminder (40% miss rate
+# observed in 2026-04-28 AFK loop session — see ticket).
+#
+# Detection delegates to `lib/changeset-detect.sh::detect_changeset_required`.
+# When the helper returns 1, this hook emits PreToolUse deny JSON
+# with the offending plugin slug inline and the literal `bun run
+# changeset` recovery command, satisfying ADR-013 Rule 1's "deny
+# redirects to a recovery path" contract via the mechanical-recovery
+# shape (no skill wrapper required — authoring a changeset is a
+# single command).
+#
+# Allow paths (exit 0 silently per ADR-045 Pattern 1):
+#   - tool_name != "Bash"            (only Bash invocations are gated)
+#   - command does not contain      `git commit` substring (non-commit
+#                                   Bash bypasses entirely)
+#   - staged set is changeset-clean  (helper returns 0)
+#   - BYPASS_CHANGESET_GATE=1 env    (helper returns 0 first)
+#   - outside a git work tree        (helper fails-open)
+#   - parse failure on stdin         (mirrors create-gate.sh fail-open)
+#
+# References:
+#   ADR-005 — plugin testing strategy (hook bats live under hooks/test/).
+#   ADR-009 — gate marker lifecycle (this hook deliberately does NOT
+#             use markers; detection is per-invocation deterministic
+#             — same precedent as P125 `p057-staging-trap-detect.sh`).
+#   ADR-013 Rule 1 — deny redirects with mechanical recovery.
+#   ADR-014 — governance skills commit their own work (the hook keeps
+#             iter commits self-contained — no orchestrator-main-turn
+#             back-fill needed).
+#   ADR-018 — inter-iteration release cadence (the hook strengthens
+#             release-cadence integrity by ensuring every publishable
+#             iter has a changeset to drain).
+#   ADR-038 — progressive disclosure / deny-message terseness budget.
+#   ADR-045 — hook injection budget (Pattern 1 silent-on-pass; deny
+#             band ≤300 bytes for this hook).
+#   P073    — sibling changeset author-time gate (Write/Edit on
+#             `.changeset/*.md`); composes-with as defence-in-depth.
+#   P125    — sibling staging-trap hook (same enforcement-layer shape).
+#   P141    — this hook.
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/changeset-detect.sh
+source "$SCRIPT_DIR/lib/changeset-detect.sh"
+
+INPUT=$(cat)
+
+TOOL_NAME=$(echo "$INPUT" | python3 -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    print(data.get('tool_name', ''))
+except:
+    print('')
+" 2>/dev/null || echo "")
+
+# Only gate Bash. Non-Bash tools bypass entirely.
+if [ "$TOOL_NAME" != "Bash" ]; then
+  exit 0
+fi
+
+COMMAND=$(echo "$INPUT" | python3 -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    print(data.get('tool_input', {}).get('command', ''))
+except:
+    print('')
+" 2>/dev/null || echo "")
+
+# Only fire on `git commit` invocations. Substring match catches common
+# shapes (`git commit -m`, `git commit --amend`, leading `cd && git
+# commit`, etc.) without over-matching unrelated bash.
+case "$COMMAND" in
+  *"git commit"*) ;;
+  *) exit 0 ;;
+esac
+
+# Run detection. Helper echoes offending plugin slug on stdout when
+# detected; returns 1 in that case. Returns 0 (allow) on no-trap,
+# bypass env, or fail-open (non-git tree, parse error).
+TRAPPED_SLUG=$(detect_changeset_required 2>/dev/null) && exit 0
+
+# Trap detected — emit deny with terse recovery.
+# Voice-tone budget per ADR-045 deny-band ≤300 bytes total. Names the
+# plugin slug, the literal recovery command (`bun run changeset`), the
+# BYPASS env var escape, and the P141 cite.
+REASON="BLOCKED: P141 changeset discipline. packages/${TRAPPED_SLUG}/ source needs .changeset/*.md. Recovery: bun run changeset. Bypass: BYPASS_CHANGESET_GATE=1."
+
+cat <<EOF
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "${REASON}"
+  }
+}
+EOF
+exit 0
