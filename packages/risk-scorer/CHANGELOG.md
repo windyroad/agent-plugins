@@ -1,5 +1,25 @@
 # @windyroad/risk-scorer
 
+## 0.5.0
+
+### Minor Changes
+
+- b3ff785: `wr-risk-scorer:pipeline` agent now emits a 3-column `RISK_REGISTER_HINT:` block (`<reason-tag> | <risk-slug> | <prose>`) and the `risk-score-mark.sh` PostToolUse hook parses each bullet and appends one JSONL line per valid entry to `.afk-run-state/risk-register-queue.jsonl`. The queue file is the durable bridge between pipeline-fire and risk-register population — consumer skills (work-problems, manage-problem, install-updates, assess-release) drain it in subsequent iters with dedicated `docs(risks): scaffold ...` commits per ADR-014 commit-grain discipline.
+
+  Backward-compatible **dual-parse contract**: the hook accepts both the new 3-column shape AND the legacy 2-column shape (`<reason-tag> | <prose>`), deriving the slug from the reason-tag plus the prose prefix when only two columns are present. In-flight pipeline agents on adopter machines whose prompt cache still emits the 2-column shape continue to enqueue entries — no hint loss during the cache-warm transition.
+
+  Pipeline agent stays `Read, Glob`-only (no agent-side write); the hook stays silent on stdout (ADR-045 Pattern 2); the queue artefact lives under `.afk-run-state/` which is already gitignored. 12-test behavioural-fixture bats covers both parse paths, mixed-shape blocks, malformed-bullet skip, append-only semantics, directory creation, and stdout silence — all GREEN with no regression in adjacent suites.
+
+  Driver: P033 Phase 2a (`docs/problems/033-no-persistent-risk-register.known-error.md`). Authority: ADR-056 (`docs/decisions/056-risk-register-back-channel-write-contract.proposed.md`). Parent ADR: ADR-047 (Phase 1 scaffolding precondition, landed iter 18). P033 status remains Known Error pending Phase 2b drain steps — Phase 2a closes the trigger gap (queue-write); Phase 2b materialises register files from the queue.
+
+- 4466eec: P033 Phase 2b — first consumer-skill drain wires up. Adds shared drain script `packages/risk-scorer/scripts/drain-register-queue.sh` (with `bin/wr-risk-scorer-drain-register-queue` shim per ADR-049) and a new Step 6.4 in `/wr-itil:work-problems` between Step 6 (Report progress) and Step 6.5 (Release-cadence check). The drain reads `.afk-run-state/risk-register-queue.jsonl` (populated by the Phase 2a hook), dedupes by `risk_slug` (N reports : 1 register entry per the user direction), mints new `R<NNN>-<slug>.active.md` files via local-max + origin-max +1 (ADR-019), and updates `docs/risks/README.md` Register table with stub-scoring rows. Existing slug matches gain Evidence Log entries without scoring change; new entries carry `Status: Active (auto-scaffolded — pending review)`, `Curation: pending review`, and ADR-026 sentinel `not estimated — no prior data` for ungrounded scoring fields.
+
+  Per-iter cadence keeps the queue bounded and attaches the resulting `docs(risks): scaffold ...` commit to the iter that produced the hint, preserving ADR-014 single-ticket-unit-of-work grain. Step 6's progress-report template gains a `Risk register: N entries scaffolded (pending review)` line so AFK summaries surface register population per JTBD-006 outcome 4. The drain script exits 0 on no-op (empty queue / missing `docs/risks/`), preserving the queue for next drain when Phase 1 scaffolding has not yet fired.
+
+  Behavioural coverage: 16-test bats fixture at `packages/risk-scorer/scripts/test/drain-register-queue.bats` covers shim resolution, no-op idempotency, single + multi-hint flows, slug dedupe, two-slug sequential IDs, existing-match Evidence Log append, README row append, queue-truncation contract, no-truncate-on-no-op, stdout key=value shape, file-staging, origin-max collision avoidance, and malformed-line skip — all GREEN. Also adds `"scripts/"` to the `@windyroad/risk-scorer` package.json `files` array so the canonical script ships in the npm tarball (ADR-049 packaging requirement).
+
+  Driver: P033 Phase 2b (`docs/problems/033-no-persistent-risk-register.known-error.md`). Authority: ADR-056 (`docs/decisions/056-risk-register-back-channel-write-contract.proposed.md`). Phase 2b remaining (deferred to subsequent iters): `/wr-itil:manage-problem` Step 11 drain, `/install-updates` Step 6.6 drain, `/wr-risk-scorer:assess-release` drain — each integrates via the same shared shim. P033 status remains Known Error until Phase 2b is complete and Phase 3 backfill recovers historical reports.
+
 ## 0.4.2
 
 ### Patch Changes

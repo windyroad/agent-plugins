@@ -1,5 +1,27 @@
 # @windyroad/problem
 
+## 0.24.1
+
+### Patch Changes
+
+- 4466eec: P033 Phase 2b — first consumer-skill drain wires up. Adds shared drain script `packages/risk-scorer/scripts/drain-register-queue.sh` (with `bin/wr-risk-scorer-drain-register-queue` shim per ADR-049) and a new Step 6.4 in `/wr-itil:work-problems` between Step 6 (Report progress) and Step 6.5 (Release-cadence check). The drain reads `.afk-run-state/risk-register-queue.jsonl` (populated by the Phase 2a hook), dedupes by `risk_slug` (N reports : 1 register entry per the user direction), mints new `R<NNN>-<slug>.active.md` files via local-max + origin-max +1 (ADR-019), and updates `docs/risks/README.md` Register table with stub-scoring rows. Existing slug matches gain Evidence Log entries without scoring change; new entries carry `Status: Active (auto-scaffolded — pending review)`, `Curation: pending review`, and ADR-026 sentinel `not estimated — no prior data` for ungrounded scoring fields.
+
+  Per-iter cadence keeps the queue bounded and attaches the resulting `docs(risks): scaffold ...` commit to the iter that produced the hint, preserving ADR-014 single-ticket-unit-of-work grain. Step 6's progress-report template gains a `Risk register: N entries scaffolded (pending review)` line so AFK summaries surface register population per JTBD-006 outcome 4. The drain script exits 0 on no-op (empty queue / missing `docs/risks/`), preserving the queue for next drain when Phase 1 scaffolding has not yet fired.
+
+  Behavioural coverage: 16-test bats fixture at `packages/risk-scorer/scripts/test/drain-register-queue.bats` covers shim resolution, no-op idempotency, single + multi-hint flows, slug dedupe, two-slug sequential IDs, existing-match Evidence Log append, README row append, queue-truncation contract, no-truncate-on-no-op, stdout key=value shape, file-staging, origin-max collision avoidance, and malformed-line skip — all GREEN. Also adds `"scripts/"` to the `@windyroad/risk-scorer` package.json `files` array so the canonical script ships in the npm tarball (ADR-049 packaging requirement).
+
+  Driver: P033 Phase 2b (`docs/problems/033-no-persistent-risk-register.known-error.md`). Authority: ADR-056 (`docs/decisions/056-risk-register-back-channel-write-contract.proposed.md`). Phase 2b remaining (deferred to subsequent iters): `/wr-itil:manage-problem` Step 11 drain, `/install-updates` Step 6.6 drain, `/wr-risk-scorer:assess-release` drain — each integrates via the same shared shim. P033 status remains Known Error until Phase 2b is complete and Phase 3 backfill recovers historical reports.
+
+- 3f671b9: Ship `scripts/` in the published tarball so `bin/wr-itil-*` shims resolve in adopter installs.
+
+  Iter 3's P151 fix added `bin/wr-itil-reconcile-readme` and `bin/wr-itil-check-problems-readme-budget` shims that exec `../scripts/<name>.sh "$@"` per ADR-049. The published `package.json` `files` array did not include `scripts/`, so adopter installs of `@windyroad/itil@0.23.2` through `@windyroad/itil@0.24.0` got the shims but not the scripts they reference — invocation hits a "no such file or directory" at the `exec` line.
+
+  Surfaced 2026-05-03 by iter 20 (P033 Phase 2b) as a sibling-finding while adding `scripts/` to `@windyroad/risk-scorer/package.json` for that plugin's own new `wr-risk-scorer-drain-register-queue` shim. First production-real instance of the regression class P137 covers (ADR-055 namespace-prefix advisory walks source-tree only; missed this because source tree exposes `scripts/` even when published tarball doesn't). Composes with P137 follow-up — npm-pack-output detector — which would catch this class at release-time CI, not in source-tree advisory.
+
+  Closes the broken-shim publishing gap as ADR-042 above-appetite Step 6.5 fix-and-continue per Rule 2 / R1 (residual risk 15/25 → 3/25 with this remediation). Architect PASS-WITH-NOTES + JTBD PASS (JTBD-302 primary fit — adopter trust in README invocability claims). One-line fix; sibling-fix-shape to iter 20's risk-scorer files-array fix.
+
+  Re-rate of impact across already-published versions (0.23.2 → 0.24.0): adopters who installed those versions retain broken shims until they upgrade. `npm install @windyroad/itil@latest` after this patch ships resolves to a fixed tarball; no `npm deprecate` action required (the next version supersedes by SemVer convention).
+
 ## 0.24.0
 
 ### Minor Changes
