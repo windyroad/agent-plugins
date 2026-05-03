@@ -1,6 +1,6 @@
 # Problem 081: Structural source-content tests are wasteful — TDD agent should reject them and require behavioural tests (+ framework / stub enhancements)
 
-**Status**: Open
+**Status**: Verifying
 **Reported**: 2026-04-21
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: L — TDD agent enhancement (new detection + suggestion surface) + testing-framework / stub / harness enhancements (so behavioural tests for LLM-interpreted skills are feasible at all) + amendment / supersession of ADR-005 Permitted-Exception and ADR-037 contract-assertion pattern + retrofit of existing structural bats across the suite (~50+ files across itil, retrospective, architect, risk-scorer, jtbd, voice-tone, style-guide, tdd, connect, discord packages). Architect review at implementation time to decide ADR shape (amend both vs supersede vs draft new) AND to scope the retrofit window (all-at-once vs per-skill-as-touched). L bucket reflects the reasonable-lower bound; may push to XL if the retrofit is bundled into one release, or scope-split across multiple phased tickets if the framework enhancements require new subagent types or Claude Code harness changes.
@@ -158,6 +158,27 @@ No direction pinned yet — architect review at implementation is required becau
 - [ ] Update ADR-037's Confirmation bats — if ADR-037 itself has structural-grep assertions (which it does — it's one of the meta-structural offenders), they become the first retrofit candidates. Target the dogfood.
 - [ ] Cross-check with P012 direction: P012's harness-definition scope narrows to behavioural-first; amend P012's direction record to reflect this session's refinement.
 - [ ] Cross-check with P018 (TDD enforce BDD + Example Mapping) — composition possibility: BDD's behaviour-driven shape naturally aligns with this ticket's behavioural-default direction.
+
+## Fix Released
+
+P081 Layer A implemented in `@windyroad/tdd` 0.4.0 (2026-05-03 AFK iter 13):
+
+- **ADR-052** (`docs/decisions/052-behavioural-tests-default-for-skill-testing.proposed.md`) — supersedes ADR-037; behavioural tests are the default for skill testing; structural-grep on prose documents permitted only with documented justification + linked harness-gap ticket. Includes per-framework exemplars (bats / vitest / cucumber / pytest), Migration section for the ~50 existing structural bats (incremental-as-touched), and reassessment criteria for Phase-2 promotion to PreToolUse blocking.
+- **ADR-037 superseded** — renamed to `037-skill-testing-strategy.superseded.md` with banner block + frontmatter `status: superseded` + `superseded-by: [052-...]`. Audit-trail preserved.
+- **ADR-005 amended** — Permitted-Exception sub-clause added (excludes prose-document content greps; preserves hooks.json / file-existence / safety-construct exceptions); `[Reassessment Triggered 2026-05-03 per ADR-052]` flag in Reassessment Criteria.
+- **`review-test` agent** at `packages/tdd/agents/review-test.md` — semantic test classifier; multi-framework; emits JSON-in-fenced-block verdict `{verdict, evidence, suggestion, harness_gap}`. `harness_gap` MUST cite a ticket ID or be `null` per ADR-026 grounding. Mechanical/silent classification per project CLAUDE.md P132 — never calls AskUserQuestion.
+- **`tdd-review-test.sh`** at `packages/tdd/hooks/tdd-review-test.sh` — PostToolUse Edit|Write advisory hook. Silent on: non-test files, outside-PWD, env-skip, justification-comment, file-not-on-disk. Emits `additionalContext` directive on test-file writes telling assistant to invoke the agent.
+- **`hooks.json` extended** — new entry registered alongside `tdd-post-write.sh` (composes; no modification of existing).
+- **`tdd-review-test.bats`** at `packages/tdd/hooks/test/tdd-review-test.bats` — 15 behavioural tests covering all six advisory paths (test-file → directive; non-test → silent; env-skip → silent; bash-comment → silent; ts-comment → silent; outside-PWD → silent; non-existent-file → silent; advisory text mentions ADR-052 + both escape hatches; exit always 0). Dogfood: NO source greps. All 71 TDD hook tests GREEN.
+- **Changeset** `@windyroad/tdd` minor (0.3.1 → 0.4.0) at `.changeset/p081-review-test-agent-and-hook.md`.
+
+Architect review (PASS): both review rounds returned PASS / ISSUES-RESOLVED with all 6 prior issues incorporated (ADR numbering correction 044→052, supersession-banner mirroring ADR-027, Migration section in ADR-052, ADR-044 escape-hatch category citations, ADR-026 grounding for `harness_gap`, ADR-005 narrowing as additive sub-clause + parallel reassessment-triggered flag, ADR-035 scope-out for verdict store).
+
+JTBD review (PASS): JTBD-001/101/201 anchors confirmed; JTBD-006 AFK-loop friction respected via mechanical-stage carve-out (no AskUserQuestion); JTBD-302/ADR-013 Rule 6 Phase-1-advisory shape matches the README-drift-advisory precedent set by ADR-051.
+
+Layer B (framework primitives) and Layer D (retrofit of ~50 existing structural bats) remain out of this iter's scope. Layer B lands as harness-gap tickets descend from P012; Layer D is incremental-as-touched per ADR-052 Migration section.
+
+Awaiting user verification that the PostToolUse advisory fires on next test-file edit and the agent returns a sane verdict.
 
 ## Related
 

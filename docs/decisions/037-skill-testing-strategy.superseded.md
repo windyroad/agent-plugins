@@ -1,13 +1,23 @@
 ---
-status: "proposed"
+status: "superseded"
 date: 2026-04-21
+superseded-date: 2026-05-03
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: [Windy Road plugin users, addressr maintainer, bbstats maintainer]
 reassessment-date: 2026-07-21
+superseded-by: [052-behavioural-tests-default-for-skill-testing]
 ---
 
 # Skill testing strategy — contract-assertion bats companion to ADR-005
+
+> **SUPERSEDED by [ADR-052](./052-behavioural-tests-default-for-skill-testing.proposed.md) on 2026-05-03.**
+>
+> ADR-052 reverses ADR-037's contract-assertion default. Behavioural tests are the default for skill testing; structural-grep assertions on prose documents (SKILL.md, agent.md, *.proposed.md, RISK-POLICY.md) are permitted only with a `tdd-review: structural-permitted (justification: …)` comment linking a specific P012-descendant harness-gap ticket. ADR-037's "SKILL.md as a contract document" framing is the reversed premise — structural assertions are strictly weaker than behavioural ones; they pass on misleading phrasing, miss behavioural regressions, and block legitimate semantics-preserving SKILL.md compression (documented incident: `install-updates` 2026-04-22 trim, commits `c106e62` / `84c920e`).
+>
+> The contract-assertion bats files that ADR-037 sanctioned remain accepted under ADR-052 until each is touched, at which point the editor retrofits to behavioural assertions OR attaches an in-file justification comment linking a harness-gap ticket. ADR-037's reassessment triggers for the Anthropic `skill-creator` harness carry forward into ADR-052's reassessment section unchanged.
+>
+> This file is preserved for audit-trail integrity; the decision it records is no longer in force. Read ADR-052 for the current contract.
 
 ## Context and Problem Statement
 
