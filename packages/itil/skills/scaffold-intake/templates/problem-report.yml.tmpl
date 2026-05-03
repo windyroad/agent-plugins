@@ -58,15 +58,42 @@ body:
     validations:
       required: true
 
-  - type: textarea
-    id: environment
+  - type: input
+    id: version-local-plugin
     attributes:
-      label: Environment
-      description: Version, runtime, and operating system.
-      placeholder: |
-        - {{project_name}} version: x.y.z
-        - Runtime: Node 20.x / Python 3.12 / ...
-        - OS: macOS 15.2
+      label: Local plugin / project version
+      description: The version of {{project_name}} you are running. Enter `not detected` if you cannot determine the version.
+      placeholder: "x.y.z"
+    validations:
+      required: true
+
+  - type: input
+    id: version-upstream-package
+    attributes:
+      label: Upstream package version
+      description: If the problem involves a non-{{project_name}} upstream package, the package name and version. Enter `not applicable` or `not detected` if neither.
+      placeholder: "<pkg>@<version>"
+
+  - type: input
+    id: version-claude-code
+    attributes:
+      label: Claude Code CLI version
+      description: Output of `claude --version`. Enter `not detected` if not running through Claude Code.
+      placeholder: "1.x.x"
+
+  - type: input
+    id: version-node
+    attributes:
+      label: Node version
+      description: Output of `node --version`. Enter `not detected` if Node is not part of the failure path.
+      placeholder: "v20.11.0"
+
+  - type: input
+    id: version-os
+    attributes:
+      label: Operating system
+      description: Output of `uname -srm` (POSIX) or platform-equivalent. Enter `not detected` if you cannot determine.
+      placeholder: "Darwin 25.3.0 arm64"
     validations:
       required: true
 

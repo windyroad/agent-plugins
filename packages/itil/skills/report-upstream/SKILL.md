@@ -230,7 +230,7 @@ If the upstream had a matching template (Step 3), fill its required fields from 
 | Upstream template field (typical) | Local ticket source |
 |---|---|
 | `plugin` / `package` / `module` | Inferred from upstream repo name or local ticket's "Affected plugin / component" |
-| `version` | Local ticket's environment notes; or `npm view <pkg> version` for the latest if ambiguous |
+| `version` (single-slot version field) | Per ADR-033 amendment 2026-05-03 (P128) — populate with the local plugin version from the consolidated `## Versions` schema below; the full `## Versions` block is ALSO appended to the body's prose so the upstream maintainer has both the template's structured slot AND every version dimension. |
 | `claude-code-version` | `claude --version` if the report originates from a Claude Code session |
 | `os` | Local ticket's environment notes; or `uname -srm` of the reporting host |
 | `description` | Local ticket's `## Description` section |
@@ -238,6 +238,30 @@ If the upstream had a matching template (Step 3), fill its required fields from 
 | `workaround` | Local ticket's `## Workaround` section (or "None identified yet.") |
 | `frequency` | Local ticket's `## Impact Assessment` Frequency line |
 | `evidence` | Commit SHAs, test output, transcript excerpts from Investigation Tasks |
+
+#### Versions schema (ADR-033 amendment 2026-05-03, P128)
+
+Every body — matched-template path AND structured-default fallback — MUST include a labelled `## Versions` section carrying the five-field schema below. Missing fields render as `not detected` (normative MUST per ADR-033 amendment); omitting a field entirely is non-compliant because triage cannot distinguish *field omitted because not applicable* from *detection failed*.
+
+```markdown
+## Versions
+
+- Local plugin: `@windyroad/<pkg>@<version>` (or "not detected" if reporting against a non-windyroad package)
+- Upstream package: `<pkg>@<version>` (or "not detected" if not applicable)
+- Claude Code CLI: `<claude --version output>` (or "not detected")
+- Node: `<node --version output>` (or "not detected")
+- OS: `<uname -srm output or platform detection>` (or "not detected")
+```
+
+**Auto-population sources** (best-effort; each source returns "not detected" on failure rather than crashing the skill):
+
+- **Local plugin** — read `package.json` for `@windyroad/*` dependencies; or run `claude plugin list --json` and pick the matching plugin.
+- **Upstream package** — `gh api repos/<owner>/<repo>/releases/latest` (GitHub-hosted) or `npm view <pkg> version` (npm-published); fall back to the local ticket's environment notes if neither resolves.
+- **Claude Code CLI** — `claude --version`.
+- **Node** — `node --version`.
+- **OS** — `uname -srm` (POSIX) or platform-equivalent.
+
+Cost note: `gh api` and `npm view` are network calls; cache within a session where reasonable. The five-field schema is fixed so downstream consumers (P129's inbound version-aware classifier, when it lands) parse against a stable surface.
 
 For upstream repos whose matched template is `bug-report.yml` / `feature-request.yml` / `question.yml` (Step 3 backward-compat fallback), the skill fills the corresponding field set: `reproduction` ← `## Symptoms`; `expected` / `actual` ← observed-vs-expected contrast lines under `## Description`; `proposal` (for features) ← `## Description`.
 
@@ -266,12 +290,13 @@ Use this body when the Step 3 classifier picked `problem` shape AND the upstream
 
 <from the local ticket's Impact Assessment "Frequency" line>
 
-## Environment
+## Versions
 
-- Package: <inferred from upstream repo>
-- Version: <detected via npm ls or local ticket's notes>
-- Claude Code version: <claude --version>
-- OS: <uname -srm>
+- Local plugin: `@windyroad/<pkg>@<version>` (or "not detected")
+- Upstream package: `<pkg>@<version>` (or "not detected")
+- Claude Code CLI: <claude --version output> (or "not detected")
+- Node: <node --version output> (or "not detected")
+- OS: <uname -srm output> (or "not detected")
 
 ## Evidence
 
@@ -284,7 +309,7 @@ Reported from <downstream-repo-url>/<local-ticket-relative-path>
 This issue is tracked locally as P<NNN> in the downstream project's `docs/problems/` directory.
 ```
 
-The body MUST include the `## Cross-reference` section so Step 7's back-write contract works (the downstream ticket's `## Reported Upstream` section records the upstream URL; the upstream issue body records the downstream reference).
+The body MUST include the `## Cross-reference` section so Step 7's back-write contract works (the downstream ticket's `## Reported Upstream` section records the upstream URL; the upstream issue body records the downstream reference). The body MUST also include the labelled `## Versions` section per the ADR-033 amendment 2026-05-03 (P128); see the Versions schema block under Step 5's field-mapping table for the five-field contract and "not detected" rendering rule.
 
 #### Structured default body — bug-shaped (fallback-only)
 
@@ -307,12 +332,13 @@ Use this body only when the Step 3 classifier picked `bug` shape as backward-com
 
 <from local ticket>
 
-## Environment
+## Versions
 
-- Package: <inferred from upstream repo>
-- Version: <detected via npm ls or local ticket's notes>
-- Claude Code version: <claude --version>
-- OS: <uname -srm>
+- Local plugin: `@windyroad/<pkg>@<version>` (or "not detected")
+- Upstream package: `<pkg>@<version>` (or "not detected")
+- Claude Code CLI: <claude --version output> (or "not detected")
+- Node: <node --version output> (or "not detected")
+- OS: <uname -srm output> (or "not detected")
 
 ## Cross-reference
 
@@ -320,6 +346,8 @@ Reported from <downstream-repo-url>/<local-ticket-relative-path>
 
 This issue is tracked locally as P<NNN> in the downstream project's `docs/problems/` directory.
 ```
+
+The bug-shaped fallback also includes the labelled `## Versions` section per the ADR-033 amendment 2026-05-03 (P128) — schema and "not detected" rendering rule are common to both default body shapes.
 
 #### Structured default body — feature-shaped (fallback-only)
 

@@ -1,6 +1,7 @@
 ---
 status: "proposed"
 date: 2026-04-21
+amended-date: 2026-05-03
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: [Windy Road plugin users, addressr maintainer, bbstats maintainer]
@@ -9,6 +10,10 @@ partially-supersedes: [024-cross-project-problem-reporting-contract]
 ---
 
 # Report-upstream classifier is problem-first — supersedes ADR-024 Decision Outcome Steps 3 + 5
+
+## Amendments
+
+- **2026-05-03 (P128)** — Step 5 structured default body: replace the freeform `## Environment` section with a labelled `## Versions` section carrying a fixed five-field schema (Local plugin, Upstream package, Claude Code CLI, Node, OS). Missing fields render as `"not detected"` (normative MUST) so triage distinguishes *field omitted because not applicable* from *detection failed*. The reshape applies to the problem-shaped default body AND the bug-shaped fallback default; the feature-shaped and question-shaped fallbacks remain unchanged because their typical use cases (feature requests, questions) are not version-bound. Mirrored in `.github/ISSUE_TEMPLATE/problem-report.yml` (this repo's intake) and `packages/itil/skills/scaffold-intake/templates/problem-report.yml.tmpl` (downstream-scaffolded intakes per ADR-036) so inbound and outbound shapes match — what the suite ships out, the suite accepts in. Driver: P128 (`/wr-itil:report-upstream` report body lacks consolidated Versions section). Composes-with: P129 (companion inbound version-aware assessment classifier; depends on this schema being stable).
 
 ## Context and Problem Statement
 

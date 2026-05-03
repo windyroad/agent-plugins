@@ -1,6 +1,6 @@
 # Problem 128: /wr-itil:report-upstream report body lacks consolidated Versions section
 
-**Status**: Open
+**Status**: Verifying
 **Reported**: 2026-04-26
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: M — template change (yaml + structured-default fallback) + auto-detection helper functions in the skill + bats coverage for the new Versions block contract + ADR-033 amendment.
@@ -162,3 +162,44 @@ If the body-shape change is judged broad enough to warrant its own ADR (touches 
 - **JTBD-201** (tech-lead — audit-trail clarity across version transitions)
 - **JTBD-301** (plugin-user — get heard upstream by way of structured intake)
 - **JTBD-001** (solo-developer — governance without slowing down; auto-population helper eliminates manual version-prep effort)
+
+## Fold-fix (2026-05-03 — AFK iter 16)
+
+**Status transition**: Open → Verifying.
+
+**What landed**:
+
+1. **ADR-033 amendment** added at `docs/decisions/033-report-upstream-classifier-problem-first.proposed.md` `## Amendments` section, dated 2026-05-03 (P128). Frontmatter gains `amended-date: 2026-05-03`. The amendment reshapes Step 5's structured default body: replace freeform `## Environment` with labelled `## Versions` carrying a five-field schema (Local plugin / Upstream package / Claude Code CLI / Node / OS); missing fields render as `not detected` (normative MUST). Applies to problem-shaped default AND bug-shaped fallback default; feature-shaped + question-shaped fallbacks unchanged (those use cases are not version-bound). Architect approved (no new ADR; amendment is the right vehicle — Step 5's body shape sits inside what ADR-033 already governs).
+
+2. **ADR-024 forward-pointer** added in `## Amendments` (`docs/decisions/024-cross-project-problem-reporting-contract.proposed.md`) pointing at the ADR-033 2026-05-03 amendment.
+
+3. **SKILL.md changes** (`packages/itil/skills/report-upstream/SKILL.md`):
+   - Added `#### Versions schema (ADR-033 amendment 2026-05-03, P128)` block under Step 5's field-mapping table — documents the five-field schema, the normative `not detected` rendering rule, the auto-population sources (package.json / `claude plugin list`, `gh api` releases or `npm view`, `claude --version`, `node --version`, `uname -srm`), and the network-cost note for `gh api` / `npm view`.
+   - Updated field-mapping table's `version` row to call out the consolidated-schema relationship.
+   - Replaced the freeform `## Environment` block in the problem-shaped structured-default body with the labelled `## Versions` block.
+   - Replaced the freeform `## Environment` block in the bug-shaped fallback default body with the same `## Versions` block.
+
+4. **Intake template (this repo)** at `.github/ISSUE_TEMPLATE/problem-report.yml`: replaced freeform `environment` textarea with five structured `input` fields matching the schema.
+
+5. **Scaffold-intake template** at `packages/itil/skills/scaffold-intake/templates/problem-report.yml.tmpl`: same five-input replacement, with substitution tokens preserved for downstream propagation per ADR-036.
+
+6. **Bats coverage**:
+   - `packages/itil/skills/report-upstream/test/report-upstream-contract.bats` — added six new assertions for the Versions schema (section-header presence, all five labels, `not detected` rule, ADR-033 amendment authority citation, auto-population sources enumeration, freeform-`## Environment`-section absent). Updated existing problem-shaped section-order test to use `## Versions` in place of `## Environment`.
+   - `packages/shared/test/intake-templates.bats` — added `intake: problem-report.yml carries the consolidated Versions schema` test asserting the five `input` field labels; updated existing problem-ticket-sections test to drop `Environment` from its iteration list.
+   - Both bats files carry a `tdd-review: structural-permitted (justification: P012 ...)` comment per ADR-052 line 198 (Migration clause: touched bats files retrofitted-with-justification when no behavioural alternative is yet expressible — P012 is the canonical harness-gap ticket).
+
+7. **Changeset** at `.changeset/p128-consolidated-versions-schema.md` — `@windyroad/itil` minor bump.
+
+**Out of scope for this iter** (deferred composables):
+
+- **Auto-population helper bash code** — the SKILL.md instructions are sufficient for the LLM-driven skill; no extracted helper script needed today. If a runtime-helper extraction emerges later (driven by a behavioural-test harness gap closing), that becomes a separate ticket.
+- **P129 inbound version-aware classifier** — companion ticket; depends on this schema being stable. Now unblocked.
+- **P064 / P038 external-comms gate composability** — architect confirmed version strings are low-leak (factual identifiers, not prose) so the schema is safe to land before P064/P038 verify.
+
+**Verification path**:
+
+1. **Bats green** — `node_modules/.bin/bats packages/itil/skills/report-upstream/test/report-upstream-contract.bats` reports 30/30 ok; `packages/shared/test/intake-templates.bats` reports 12/12 ok; `packages/itil/skills/scaffold-intake/test/` reports 29/29 ok.
+2. **First real `/wr-itil:report-upstream` invocation post-ship** — body should carry the `## Versions` section with all five fields populated (or `not detected` per the rule).
+3. **Downstream scaffold-intake invocation** — adopters running `/wr-itil:scaffold-intake` should get the structured five-input intake template per ADR-036 propagation.
+
+**Effort**: actual L (broader than M-frontmatter estimate — the bats retrofit + ADR-052 migration justification + intake-template symmetry across two source files added scope). Within iter wall-clock; no scope-expansion outcome.

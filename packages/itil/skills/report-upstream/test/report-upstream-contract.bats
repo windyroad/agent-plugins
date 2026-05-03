@@ -1,5 +1,13 @@
 #!/usr/bin/env bats
 
+# tdd-review: structural-permitted (justification: P012 skill testing
+#   harness scope is open; no behavioural alternative for SKILL.md prose-
+#   template structural assertions today. ADR-052 Migration clause permits
+#   structural retrofit-via-justification when the linked harness-gap ticket
+#   has not yet shipped the primitives. The whole-file annotation covers all
+#   assertions in this fixture, including the P128 `## Versions` schema
+#   assertions added 2026-05-03.)
+#
 # Doc-lint structural test (Permitted Exception per ADR-005 — structural
 # SKILL.md content checks, not behavioural). Mirrors the doc-lint pattern
 # established in ADR-011 and ADR-027 Confirmation tests.
@@ -119,17 +127,17 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "report-upstream: SKILL.md structured default uses problem-shaped section order (ADR-033 Step 5)" {
-  # Problem-shaped default body per ADR-033: Description -> Symptoms ->
-  # Workaround -> Affected plugin / component -> Frequency -> Environment
-  # -> Evidence -> Cross-reference. Assert section order in the primary
-  # default block.
+@test "report-upstream: SKILL.md structured default uses problem-shaped section order (ADR-033 Step 5, amended 2026-05-03 P128)" {
+  # Problem-shaped default body per ADR-033 (amended 2026-05-03 by P128):
+  # Description -> Symptoms -> Workaround -> Affected plugin / component ->
+  # Frequency -> Versions (was Environment pre-amendment) -> Evidence ->
+  # Cross-reference. Assert section order in the primary default block.
   desc_line=$(grep -n '^## Description$' "$SKILL_MD" | head -1 | cut -d: -f1)
   symptoms_line=$(grep -n '^## Symptoms$' "$SKILL_MD" | head -1 | cut -d: -f1)
   workaround_line=$(grep -n '^## Workaround$' "$SKILL_MD" | head -1 | cut -d: -f1)
   affected_line=$(grep -nE '^## Affected plugin' "$SKILL_MD" | head -1 | cut -d: -f1)
   freq_line=$(grep -n '^## Frequency$' "$SKILL_MD" | head -1 | cut -d: -f1)
-  env_line=$(grep -n '^## Environment$' "$SKILL_MD" | head -1 | cut -d: -f1)
+  versions_line=$(grep -n '^## Versions$' "$SKILL_MD" | head -1 | cut -d: -f1)
   evidence_line=$(grep -n '^## Evidence$' "$SKILL_MD" | head -1 | cut -d: -f1)
   xref_line=$(grep -n '^## Cross-reference$' "$SKILL_MD" | head -1 | cut -d: -f1)
 
@@ -138,7 +146,7 @@ setup() {
   [ -n "$workaround_line" ] || { echo "missing ## Workaround"; return 1; }
   [ -n "$affected_line" ] || { echo "missing ## Affected plugin / component"; return 1; }
   [ -n "$freq_line" ] || { echo "missing ## Frequency"; return 1; }
-  [ -n "$env_line" ] || { echo "missing ## Environment"; return 1; }
+  [ -n "$versions_line" ] || { echo "missing ## Versions"; return 1; }
   [ -n "$evidence_line" ] || { echo "missing ## Evidence"; return 1; }
   [ -n "$xref_line" ] || { echo "missing ## Cross-reference"; return 1; }
 
@@ -146,8 +154,8 @@ setup() {
   [ "$symptoms_line" -lt "$workaround_line" ]
   [ "$workaround_line" -lt "$affected_line" ]
   [ "$affected_line" -lt "$freq_line" ]
-  [ "$freq_line" -lt "$env_line" ]
-  [ "$env_line" -lt "$evidence_line" ]
+  [ "$freq_line" -lt "$versions_line" ]
+  [ "$versions_line" -lt "$evidence_line" ]
   [ "$evidence_line" -lt "$xref_line" ]
 }
 
@@ -246,4 +254,79 @@ setup() {
   # / above-appetite branches.
   run grep -iE 'dedup.*halt|step 4b.*halt|halt.*dedup|halt-and-save.*dedup' "$SKILL_MD"
   [ "$status" -eq 0 ]
+}
+
+# ─── P128 consolidated Versions schema (ADR-033 amendment 2026-05-03) ─────────
+#
+# P128 reshapes Step 5's structured default body: the freeform `## Environment`
+# section becomes a labelled `## Versions` section carrying a fixed five-field
+# schema. Missing fields render as `not detected` (normative MUST per the
+# ADR-033 amendment 2026-05-03). The reshape applies to the problem-shaped
+# default AND the bug-shaped fallback default.
+
+@test "report-upstream: SKILL.md problem-shaped default body includes ## Versions section (P128)" {
+  # The labelled `## Versions` section MUST appear in the SKILL.md so the
+  # structured default emits it. Two occurrences expected: one in the
+  # field-mapping table's Versions-schema block, one in the problem-shaped
+  # default body, and one in the bug-shaped fallback default body — but the
+  # minimum invariant is that the section header exists.
+  run grep -F '## Versions' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "report-upstream: SKILL.md ## Versions schema lists all five fields (P128)" {
+  # Five-field schema per the ADR-033 amendment 2026-05-03: Local plugin,
+  # Upstream package, Claude Code CLI, Node, OS. All five labels must appear
+  # in the SKILL.md so the structured default's Versions block emits them.
+  run grep -iE '^- Local plugin:' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -iE '^- Upstream package:' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -iE '^- Claude Code CLI:' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -iE '^- Node:' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -iE '^- OS:' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "report-upstream: SKILL.md documents not-detected rendering rule for missing version fields (P128)" {
+  # Normative rendering rule: missing fields render as "not detected".
+  # The literal string MUST appear in the SKILL.md so triage distinguishes
+  # field-not-applicable from detection-failed.
+  run grep -iE '"not detected"|`not detected`' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "report-upstream: SKILL.md cites ADR-033 amendment authority for the Versions schema (P128)" {
+  # The Versions schema authority sits in ADR-033's `## Amendments` section
+  # dated 2026-05-03. The SKILL.md must cite the amendment so future readers
+  # see the authority inline alongside the schema.
+  run grep -iE 'ADR-033 amendment|amendment 2026-05-03' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "report-upstream: SKILL.md documents auto-population sources for each Versions field (P128)" {
+  # Auto-population sources: package.json / claude plugin list, gh api releases
+  # or npm view, claude --version, node --version, uname -srm. The SKILL.md
+  # must enumerate the sources so the LLM-driven skill knows where to look.
+  run grep -F 'claude --version' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'node --version' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'uname -srm' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'npm view' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "report-upstream: SKILL.md problem-shaped default body no longer uses freeform ## Environment section (P128)" {
+  # The problem-shaped default body (lines under "#### Structured default body
+  # — problem-shaped (primary, per ADR-033)") MUST NOT contain a `## Environment`
+  # section header per the ADR-033 amendment 2026-05-03. The bug-shaped fallback
+  # also retired its `## Environment` section. We assert the headers are absent
+  # from the SKILL.md (the field-mapping table's reference to `os` field as a
+  # template-slot remains, but the top-level section header should be gone).
+  run grep -nE '^## Environment$' "$SKILL_MD"
+  [ "$status" -ne 0 ]
 }

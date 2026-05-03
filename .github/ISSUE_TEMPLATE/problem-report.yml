@@ -72,15 +72,46 @@ body:
     validations:
       required: true
 
-  - type: textarea
-    id: environment
+  - type: input
+    id: version-local-plugin
     attributes:
-      label: Environment
-      description: Plugin version (`claude plugin list`), Claude Code version (`claude --version`), and operating system.
-      placeholder: |
-        - Plugin: @windyroad/itil@0.7.2
-        - Claude Code: 1.x.x
-        - OS: macOS 15.2
+      label: Local plugin version
+      description: The `@windyroad/<pkg>@<version>` you are running. Run `claude plugin list` to find it. Enter `not detected` if you cannot determine the version.
+      placeholder: "@windyroad/itil@0.10.0"
+    validations:
+      required: true
+
+  - type: input
+    id: version-upstream-package
+    attributes:
+      label: Upstream package version
+      description: If the problem involves a non-windyroad upstream package (e.g. `claude-code`, `gh`, `npm`), the package name and version. Enter `not applicable` or `not detected` if neither.
+      placeholder: "@anthropic-ai/claude-code@1.x.x"
+
+  - type: input
+    id: version-claude-code
+    attributes:
+      label: Claude Code CLI version
+      description: Output of `claude --version`. Enter `not detected` if not running through Claude Code.
+      placeholder: "1.x.x"
+    validations:
+      required: true
+
+  - type: input
+    id: version-node
+    attributes:
+      label: Node version
+      description: Output of `node --version`. Enter `not detected` if Node is not part of the failure path.
+      placeholder: "v20.11.0"
+    validations:
+      required: true
+
+  - type: input
+    id: version-os
+    attributes:
+      label: Operating system
+      description: Output of `uname -srm` (POSIX) or platform-equivalent. Enter `not detected` if you cannot determine.
+      placeholder: "Darwin 25.3.0 arm64"
     validations:
       required: true
 
