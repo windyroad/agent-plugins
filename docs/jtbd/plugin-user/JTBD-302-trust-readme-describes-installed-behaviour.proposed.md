@@ -1,0 +1,49 @@
+---
+status: proposed
+job-id: trust-readme-describes-installed-behaviour
+persona: plugin-user
+date-created: 2026-05-03
+---
+
+# JTBD-302: Trust That the README Describes the Plugin I Just Installed
+
+## Job Statement
+
+When I install a `@windyroad/*` plugin and read its README to understand what it does, I want to be confident the prose describes the version I just installed (not a prior release), so I can invoke the right skills, configure the right hooks, and trust the documented contract without cross-checking against the source under `node_modules/`.
+
+## Desired Outcomes
+
+- README narrative is anchored to the JTBD jobs the plugin currently serves — not a legacy job framing the plugin grew past.
+- Every shipped skill, agent, and hook listed in the plugin's `plugin.json` / `commands/*.md` / `hooks/*.json` has a corresponding README mention. Inventory drift is detectable, not silent.
+- When a skill is renamed or split (e.g. `manage-problem list` → `list-problems` per P071), README invocation examples reflect the **current** names, not the deprecated ones.
+- When an ADR is amended and a README cited it (e.g. ADR-013 amended by ADR-044), the README citation is refreshed before the next release ships, not left dangling for adopters to catch.
+- A drift-detection signal exists at commit / release / retrospective time so adopters never receive a silently-stale README via `npm install`.
+- The signal is advisory in Phase 1 (per ADR-013 Rule 6 fail-safe) and escalates to load-bearing only if drift accumulates without correction (per ADR-013 Rule 6 escalation pattern).
+- The same source-of-truth anchor (JTBD job IDs) lets an adopter cross-reference the README to `docs/jtbd/<persona>/JTBD-NNN-*.md` and see **what jobs the plugin claims to help with**, not just **what the plugin's CLI surface exposes**.
+
+## Persona Constraints
+
+- **Low context on repo internals.** The adopter does not read the monorepo's ADRs, problem tickets, or source. The README is the primary contract surface — when it drifts, the contract is silently broken.
+- **AI agent as primary interface.** Many adopters interact with installed plugins through Claude Code; an agent reading a stale README expands stale prose into context and acts on out-of-date instructions. Currency is more critical for AI-mediated readership than for human readers who can spot drift through experience.
+- **No `node_modules/` archaeology expected.** The persona's defining constraint is **not** reading source; expecting them to verify README claims against installed source defeats the plugin distribution model.
+- **Trust is asymmetric.** A correct README earns no special trust; one stale claim erodes trust in everything the README says.
+
+## Current Solutions
+
+- **Source side (until P152 fix lands)**: nothing. READMEs are hand-maintained; drift accumulates between releases; release-time is when adopters re-encounter the drift via `npm install`. The asymmetry is stark — code drift has architect, JTBD, risk-scorer, style-guide, voice-tone, TDD, and changeset-discipline gates; README content drift has zero gates.
+- **Adopter side**: compare the plugin's README against `node_modules/@windyroad/<plugin>/SKILL.md` / `hooks.json` / agent definitions. Heavyweight, brittle, and exactly the context this persona is defined as lacking.
+- **Adopter-side fallback**: rely on changelog narrative and ignore the README. Loses the README's intended audience-framing value.
+
+## Related problem tickets
+
+- **P152** — originating ticket. *"There is nothing that provide pressure or nudges for us keeping the documentation up to date... leverage the JTBD pages so we can help the reader understand the value through the jobs it helps them do"* — filled the persona gap that ADR-051's drift-detector mechanism addresses.
+- **P137** — sibling on adopter-facing content quality (semantic correctness axis): plugin-published artefacts reference internal IDs that don't resolve in adopter contexts. Composes with this job (semantic correctness vs currency).
+- **P151** — sibling on adopter-facing content quality (executable correctness axis): published skills reference repo-relative script paths that don't resolve in adopter contexts. Resolved 2026-05-02 via ADR-049 bin/-on-PATH. Composes with this job.
+- **P087** — sibling on adopter-facing content quality (maturity-label axis): no battle-hardening signal for plugin features. Composes with this job (static maturity vs dynamic currency).
+
+## Related decisions
+
+- **ADR-051** — JTBD-anchored README structure with declarative drift advisory. Codifies the structural rule that lets this job be reliably served.
+- **ADR-049** — Plugin-bundled scripts invoked from SKILL.md resolve via `bin/` on `$PATH`. Sibling adopter-context decision (executable correctness axis).
+- **ADR-013** — Structured user interaction; Rule 6 advisory-then-escalate pattern that ADR-051 follows for the drift detector.
+- **ADR-008** — JTBD directory structure. Establishes `docs/jtbd/<persona>/JTBD-NNN-<title>.<status>.md` as the canonical layout the README anchors against.

@@ -19,6 +19,7 @@ When I ship a new version of a plugin I depend on, I want every active project t
 - The refresh is gated by consent when side effects touch sibling projects
 - The process reports what changed, what stayed the same, and what failed
 - Restarting Claude Code is surfaced as the final step so the new code is loaded
+- README content currency tracks code currency — adopters never read prose describing a prior release (per ADR-051: each `@windyroad/*` plugin README cites at least one current JTBD job ID; drift between README narrative and shipped behaviour is detectable via advisory script).
 
 ## Persona Constraints
 
@@ -31,3 +32,7 @@ When I ship a new version of a plugin I depend on, I want every active project t
 
 - Manually running `claude plugin uninstall` + `claude plugin install` per plugin per project
 - Relying on `claude plugin install` alone, which silently no-ops and leaves old code in place (P106)
+
+## Related decisions
+
+- **ADR-051** — `@windyroad/*` plugin READMEs anchor on JTBD job IDs with declarative drift advisory. Extends this job's currency scope from code-currency (the install pulled the latest code) to README-content-currency (the prose describes the latest behaviour). Both are dimensions of the same persona-level currency concern.

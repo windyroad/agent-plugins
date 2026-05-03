@@ -1,6 +1,6 @@
 # Problem 152: No pressure or nudge for keeping documentation up to date — README narrative drifts from package behaviour silently because no gate, hook, or advisory applies pressure on doc-content currency
 
-**Status**: Open
+**Status**: Verifying
 **Reported**: 2026-05-02
 **Priority**: 15 (High) — Impact: Significant (3) x Likelihood: Almost certain (5)
 **Effort**: L — net-new ADR codifying the doc-currency pressure mechanism (JTBD-anchored anchor for what the doc must express + how drift is detected) + at-least-one detector / advisory script per ADR-040 declarative-first precedent + possibly a follow-on hook (R6-gated per ADR-044 escalation pattern, like P131 Phase 1 / Phase 2). Bounded if the JTBD-anchored mechanism reuses existing infrastructure (the project already has `docs/jtbd/<persona>/` per-job files, advisory script precedent in `packages/retrospective/scripts/check-tickets-deferred-cause.sh` and `packages/itil/scripts/check-problems-readme-budget.sh`); XL if the generalization to adopter-project surfaces (marketing HTML, public docs, changelog narrative) is in-scope for the same ticket.
@@ -128,3 +128,44 @@ Candidate fix shapes to explore in the architect-design phase:
 - `docs/jtbd/plugin-user/persona.md` — defines the persona constraints (low context on repo internals; AI agent as primary interface) that make doc currency disproportionately load-bearing.
 - `packages/retrospective/scripts/check-tickets-deferred-cause.sh` — advisory-only-then-escalate precedent (P148 fix; same shape this ticket's Phase 1 detector should adopt).
 - `packages/itil/scripts/check-problems-readme-budget.sh` — advisory-only precedent (P134 hard-ceiling surface; same shape).
+
+## Fix Released — Phase 1 (2026-05-03 iter 11)
+
+Phase 1 of the JTBD-anchored README mechanism shipped via `@windyroad/retrospective` minor bump (changeset `p152-jtbd-anchored-readme-drift-advisory`). Concretely:
+
+- **ADR-051** (`docs/decisions/051-jtbd-anchored-readme-with-drift-advisory.proposed.md`) — codifies the normative rule (every `@windyroad/*` plugin README MUST cite at least one `JTBD-\d{3}` ID that resolves under `docs/jtbd/<persona>/JTBD-NNN-*.md`) plus the recommended `## Jobs to be Done` section structure with persona-grouped subsections. Considered options D1/D2/D3/D4 with D2 chosen.
+- **JTBD-302** (`docs/jtbd/plugin-user/JTBD-302-trust-readme-describes-installed-behaviour.proposed.md`) — new plugin-user job *Trust That the README Describes the Plugin I Just Installed*, the load-bearing persona-anchored job ADR-051's rule serves.
+- **JTBD-007 amendment** (`docs/jtbd/solo-developer/JTBD-007-keep-plugins-current.proposed.md`) — currency expansion from code-currency to doc-content-currency; new Desired Outcome bullet + Related decisions section citing ADR-051.
+- **Advisory detector** — `packages/retrospective/scripts/check-readme-jtbd-currency.sh` walks `packages/*/README.md`, greps for `JTBD-\d{3}` citations, resolves against `docs/jtbd/`, and emits `README package=<name> has_jtbd_anchor=<yes|no> cited_jobs=<N> known_jobs=<M> drift_hints=<csv>` lines + a `TOTAL packages=<N> with_jtbd=<M> drift_instances=<K>` summary. Drift hints vocabulary: `missing-jtbd-section`, `stale-jtbd-citation`, `deprecated-jtbd-citation`, `skill-inventory-drift`. Exit code always 0 per ADR-013 Rule 6 / ADR-040 declarative-first.
+- **Bin shim** per ADR-049 — `packages/retrospective/bin/wr-retrospective-check-readme-jtbd-currency` (3-line `exec` wrapper; resolves on `$PATH` in marketplace-installed sessions).
+- **Behavioural bats** — `packages/retrospective/scripts/test/check-readme-jtbd-currency.bats` (12 tests covering drift / clean / stale-ID / deprecated-only / inventory-drift / multi-package / no-readme cases; all GREEN). Per ADR-005 + P081 (no structural greps on detector source).
+
+**Empirical first-run baseline** (2026-05-03):
+
+```
+README package=agent-plugins   has_jtbd_anchor=no  cited_jobs=0 known_jobs=0 drift_hints=missing-jtbd-section
+README package=architect       has_jtbd_anchor=no  cited_jobs=0 known_jobs=0 drift_hints=missing-jtbd-section,skill-inventory-drift
+README package=c4              has_jtbd_anchor=no  cited_jobs=0 known_jobs=0 drift_hints=missing-jtbd-section
+README package=connect         has_jtbd_anchor=no  cited_jobs=0 known_jobs=0 drift_hints=missing-jtbd-section
+README package=itil            has_jtbd_anchor=yes cited_jobs=1 known_jobs=1 drift_hints=skill-inventory-drift
+README package=jtbd            has_jtbd_anchor=no  cited_jobs=0 known_jobs=0 drift_hints=missing-jtbd-section,skill-inventory-drift
+README package=retrospective   has_jtbd_anchor=no  cited_jobs=0 known_jobs=0 drift_hints=missing-jtbd-section,skill-inventory-drift
+README package=risk-scorer     has_jtbd_anchor=no  cited_jobs=0 known_jobs=0 drift_hints=missing-jtbd-section
+README package=style-guide     has_jtbd_anchor=no  cited_jobs=0 known_jobs=0 drift_hints=missing-jtbd-section
+README package=tdd             has_jtbd_anchor=no  cited_jobs=0 known_jobs=0 drift_hints=missing-jtbd-section
+README package=voice-tone      has_jtbd_anchor=no  cited_jobs=0 known_jobs=0 drift_hints=missing-jtbd-section
+README package=wardley         has_jtbd_anchor=no  cited_jobs=0 known_jobs=0 drift_hints=missing-jtbd-section
+TOTAL packages=12 with_jtbd=1 drift_instances=12
+```
+
+Confirms the Symptoms section's empirical claim: 12/12 plugins flagged with `drift_instances=12`; only 1/12 plugins (`itil`) has any JTBD anchor at all (and even that one has `skill-inventory-drift` from documenting 2 of 16+ shipped skills). The mechanism is working as designed.
+
+**Out of scope for Phase 1 (filed as follow-on work)**:
+
+- **Retroactive content refresh** of the 12 plugin READMEs to JTBD-anchored shape — separate ticket. The retroactive pass IS the empirical validation that the mechanism scales; it follows mechanism shipping rather than co-shipping with it (per the iter-1 P141 / iter-2 P151 mechanism-first pattern).
+- **Wiring the detector into `/wr-retrospective:run-retro` Step 2b** — deferred until the detector is empirically validated against current READMEs.
+- **Generalisation to adopter-project surfaces** (marketing HTML, public docs, changelog narrative) — separate decision, source-of-truth anchor likely differs.
+- **Walking `.github/ISSUE_TEMPLATE/*.yml`** per JTBD-lead's Phase 1.5 recommendation — separate scope.
+- **Phase 2 R6-gated load-bearing hook** — escalates if `drift_instances ≥ 2` across 3 consecutive `chore: version packages` releases without correction (criterion documented in ADR-051 §7 Confirmation; mechanism-checkable per the per-release detector output).
+
+**Verification path**: this transitions to Verifying once the changeset releases via `push:watch` + `release:watch` and a fresh adopter session can invoke `wr-retrospective-check-readme-jtbd-currency` from the marketplace-installed cache. Post-release, expect transition to Closed once the next AFK iter or retro confirms the bin shim resolves on `$PATH` in a clean adopter session.
