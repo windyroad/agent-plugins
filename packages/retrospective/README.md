@@ -32,9 +32,36 @@ Restart Claude Code after installing.
 /wr-retrospective:run-retro
 ```
 
-This walks through the session's work, identifies what went well and what didn't, updates `docs/BRIEFING.md`, and creates problem tickets for any failures.
+This walks through the session's work, identifies what went well and what didn't, updates `docs/BRIEFING.md`, and creates problem tickets for any failures. The retro also runs every shipped advisory script (briefing budgets, ask-hygiene, README JTBD currency per ADR-051, SKILL.md runtime budgets per ADR-054) so doc-content drift surfaces in the retro summary alongside session-level reflections.
+
+**Analyse session context usage:**
+
+```
+/wr-retrospective:analyze-context
+```
+
+Deep on-demand context-usage analyser per ADR-043. Generates per-source attribution, per-plugin decomposition, and suggested trim actions. Complements the cheap-layer measurement that `run-retro` always emits.
 
 The plugin also triggers a reminder via a `Stop` hook when a session ends naturally.
+
+## Skills
+
+| Skill | Purpose |
+|-------|---------|
+| `/wr-retrospective:run-retro` | Run a session retrospective; emits the briefing update, advisory detector outputs, and the Pipeline Instability section per Step 2b |
+| `/wr-retrospective:analyze-context` | Deep on-demand context-usage analyser per ADR-043; produces per-turn attribution and trim suggestions |
+
+## Advisory scripts
+
+Each script ships as a `bin/`-resolvable shim per ADR-049. They emit signal-as-data on stdout and exit 0 always (advisory per ADR-013 Rule 6). `run-retro` invokes them as part of Step 2b / Step 3 and surfaces their findings in the retro summary; they can also be invoked manually before a release or audit.
+
+| Shim | Purpose |
+|------|---------|
+| `wr-retrospective-check-readme-jtbd-currency` | ADR-051 Phase 1 detector — surfaces drift between plugin READMEs and the JTBD jobs they cite |
+| `wr-retrospective-check-skill-md-budgets` | ADR-054 detector — flags SKILL.md files over the WARN / MUST_SPLIT byte budget |
+| `wr-retrospective-check-internal-id-leaks` | ADR-055 detector — flags internal IDs leaking into published artefacts |
+| `wr-retrospective-list-plugin-attribution` | Per-plugin context attribution support for `analyze-context` |
+| `wr-retrospective-measure-context-budget` | Cheap-layer context-budget measurement support for `run-retro` Step 2c |
 
 ## How It Works
 
