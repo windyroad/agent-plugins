@@ -1,6 +1,6 @@
 # Problem 137: Plugin-published artifacts (SKILL.md, hooks, agents) reference internal ADR/JTBD/P-IDs that adopter projects can't resolve — confuses and misleads adopter agents
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-28
 **Priority**: 20 (Very High) — Impact: Significant (4) x Likelihood: Almost certain (5)
 **Effort**: XL — cross-package audit + structural-decision ADR + mechanical replacement across all `@windyroad/*` plugins (SKILL.md files, hook scripts, agent definitions, README badges, all reference ADR-NNN / JTBD-NNN / P-NNN heavily). Requires net-new ADR codifying the resolution strategy (strip / replace-with-prose / permalink / namespace-prefix) before mechanical work can begin.
@@ -140,3 +140,35 @@ A complete fix touches all of these surfaces, not just the SKILL.md surface.
 - **JTBD-101** (`docs/jtbd/plugin-developer/JTBD-101-extend-suite.proposed.md`, "Extend the Suite with New Plugins") — **secondary persona served**: plugin-developer is the *cause-side* persona (the one authoring the dangling references). Phase 4's CONTRIBUTING.md guardrail directly serves JTBD-101 by codifying the convention so future contributors don't re-introduce dangling references. The convention guardrail's value lands on plugin-developer's "extend the suite without regressing existing reliability" outcome.
 - ~~JTBD-001~~ (`docs/jtbd/solo-developer/JTBD-001-enforce-governance-without-slowing-down.proposed.md`) — **NOT a fit** (per JTBD review 2026-04-28). JTBD-001 is about automatic policy enforcement on edits in <60s — its desired outcomes ("every edit reviewed against policy", "no manual step") don't match P137's failure mode (adopter agents loading SKILL.md and resolving dangling `ADR-014`). Conflating "solo-developer adopting a plugin" with "plugin-user persona" silently merges two distinct personas; the adopter is plugin-user by definition.
 - 2026-04-28 session: surfaced by user mid-`/wr-itil:work-problems` iter 3; orchestrator's main-turn captured per ADR-013 Rule 1 (interactive surface).
+
+## Fix Released — Phase 1 (2026-05-03 iter 17)
+
+Phase 1 of the namespace-prefixed-permalinks strategy shipped via `@windyroad/retrospective` minor bump (changeset `p137-internal-id-leak-advisory`). Concretely:
+
+- **ADR-055** (`docs/decisions/055-plugin-published-namespace-prefixed-internal-ids.proposed.md`) — codifies the resolution strategy. Adopt **Option C (namespace-prefix `WR-ADR-NNN` / `WR-JTBD-NNN` / `WR-PNNN`) as the structural rule** with **Option B (GitHub permalinks) as progressive enhancement**. Rejects Option A (strip — lossy), Option D (disclaimer — brittle), Option E (build-step — premature). Completes the 6-ADR adopter-context cluster (ADR-049/051/052/053/054/055) unified by JTBD-302's "trust adopter-facing artefacts" frame.
+
+- **Advisory detector** — `packages/retrospective/scripts/check-internal-id-leaks.sh`. Diagnose-only, silent-on-pass per ADR-045. Walks `packages/<plugin>/skills/<skill>/SKILL.md`, `packages/<plugin>/agents/*.md`, `packages/<plugin>/hooks/*.sh`, `packages/<plugin>/CHANGELOG.md`. Reports `OVER <plugin>/<file> bare_count=<N>` lines + `TOTAL packages=<N> with_leaks=<M> drift_instances=<K>` summary. Exit 0 always (advisory only). Excludes REFERENCE.md siblings (per ADR-054) and `# @adr|@jtbd|@problem` docstring annotation lines.
+
+- **Bin shim** — `packages/retrospective/bin/wr-retrospective-check-internal-id-leaks` per ADR-049 grammar.
+
+- **Behavioural bats fixture** — `packages/retrospective/scripts/test/check-internal-id-leaks.bats` per ADR-052 default. 23 tests, all GREEN. Asserts script *output* on temp-fixture trees, never script source content. Coverage: bare-ID detection across all 4 surfaces, WR-prefix exclusion, docstring-annotation exclusion, REFERENCE.md exclusion, deterministic ordering, count accuracy, TOTAL summary aggregation, error path.
+
+- **Baseline measurement** (2026-05-03): `TOTAL packages=13 with_leaks=81 drift_instances=2880`. This is the reassessment-anchor count for Phase 2 opportunistic sweep progress.
+
+**What's deferred (Phase 2)**:
+
+- Mechanical sweep across 2,880 drift instances proceeds opportunistically per ADR-052 migration shape — no big-bang rewrite. When any SKILL.md / agent / hook / CHANGELOG entry is touched for any other reason, the touching change includes the WR-prefix for any internal IDs in the diff.
+
+- Per-plugin slices may be carved out as separate problem tickets if/when an adopter incident forces prioritisation.
+
+- Promotion to blocking PreToolUse hook (Phase 3) when `drift_instances ≤ 100` and three consecutive monthly retros confirm no regression.
+
+**What's verifiable now**:
+
+- The detector runs against the live repo and returns `TOTAL packages=13 with_leaks=81 drift_instances=2880` — the baseline matches the ADR's recorded value.
+- The detector runs against a clean fixture tree (the bats `setup`) and returns no output, confirming silent-on-pass.
+- ADR-055 codifies the rule, the rejection criteria for Options A/D/E, and the reassessment criteria. Architect + JTBD reviews PASSED.
+
+**Verification path for the user**: read ADR-055, run `packages/retrospective/scripts/check-internal-id-leaks.sh .` from the repo root, confirm baseline output matches the ADR-recorded `drift_instances=2880`, confirm the bats fixture passes (`node_modules/.bin/bats packages/retrospective/scripts/test/check-internal-id-leaks.bats`).
+
+**Composes with**: ADR-049 (executable correctness — sibling `bin/`-on-PATH ADR), ADR-051 (currency — sibling JTBD-anchored README ADR), ADR-052 (test-discipline — sibling behavioural-tests-default ADR), ADR-053 (battle-hardening — sibling maturity-taxonomy ADR), ADR-054 (size — sibling SKILL.md runtime budget ADR). Six ADRs forming the adopter-context cluster, all anchored on JTBD-302's plugin-user persona.
