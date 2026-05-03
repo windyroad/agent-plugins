@@ -132,14 +132,26 @@ setup() {
   # Description -> Symptoms -> Workaround -> Affected plugin / component ->
   # Frequency -> Versions (was Environment pre-amendment) -> Evidence ->
   # Cross-reference. Assert section order in the primary default block.
+  #
+  # P140 fix-and-continue (Step 6.5 closed allow-list, P081-class stale-grep):
+  # iter 16's P128 amendment added a `## Versions` section to the structured
+  # default block (~line 293) but TWO other `## Versions` sections coexist —
+  # the "Drafted Upstream Report" block (~line 247) and the issue-shaped
+  # example block (~line 335). A bare `head -1` picks the earliest match
+  # (line 247) and breaks the order assertion `freq_line < versions_line`.
+  # Scope the `versions_line` lookup to between `freq_line` and `evidence_line`
+  # via awk range so we pick the structured-default block's Versions header.
+  # Architect note 2026-05-03: if a second section-name-collides-across-blocks
+  # test ever needs the same awk-range scoping, factor a
+  # `bats_helpers/section_in_block.bash` helper (P012 / ADR-052 amendment).
   desc_line=$(grep -n '^## Description$' "$SKILL_MD" | head -1 | cut -d: -f1)
   symptoms_line=$(grep -n '^## Symptoms$' "$SKILL_MD" | head -1 | cut -d: -f1)
   workaround_line=$(grep -n '^## Workaround$' "$SKILL_MD" | head -1 | cut -d: -f1)
   affected_line=$(grep -nE '^## Affected plugin' "$SKILL_MD" | head -1 | cut -d: -f1)
   freq_line=$(grep -n '^## Frequency$' "$SKILL_MD" | head -1 | cut -d: -f1)
-  versions_line=$(grep -n '^## Versions$' "$SKILL_MD" | head -1 | cut -d: -f1)
   evidence_line=$(grep -n '^## Evidence$' "$SKILL_MD" | head -1 | cut -d: -f1)
   xref_line=$(grep -n '^## Cross-reference$' "$SKILL_MD" | head -1 | cut -d: -f1)
+  versions_line=$(awk -v lo="${freq_line:-${desc_line:-1}}" -v hi="${evidence_line:-9999}" 'NR>lo && NR<hi && /^## Versions$/{print NR; exit}' "$SKILL_MD")
 
   [ -n "$desc_line" ] || { echo "missing ## Description"; return 1; }
   [ -n "$symptoms_line" ] || { echo "missing ## Symptoms"; return 1; }
