@@ -167,16 +167,21 @@ Phase 1 is itself split into Phase 1a (design, this iter) and Phase 1b (implemen
 - JTBD review: PASS (JTBD-001 primary fit, JTBD-006 AFK transparency, JTBD-202 audit-trail).
 - Re-rate Effort L → XL committed (this iter).
 
-#### Phase 1b — install-updates SKILL.md + templates + bats test (next iter)
+#### Phase 1b — install-updates SKILL.md + templates + bats test (LANDED, iter 18, 2026-05-03)
 
-- `.claude/skills/install-updates/SKILL.md` — Step 6.5 "Scaffold governance artefacts (per-sibling)" between Step 6 and Step 7.
-- `.claude/skills/install-updates/templates/risk-register-README.md.tmpl` — adopter-flavoured (no R001, no "Last reviewed" date).
-- `.claude/skills/install-updates/templates/risk-register-TEMPLATE.md.tmpl` — verbatim copy of `docs/risks/TEMPLATE.md`.
-- `.claude/skills/install-updates/REFERENCE.md` — new section "Governance-artefact scaffold (P033)".
-- `.claude/skills/install-updates/test/install-updates-p033-register-scaffold.bats` — fixture test (mock adopter; assert scaffold + skip-existing + idempotency + RISK-POLICY-absent).
-- Closes the "directory doesn't exist" half of the 99% miss rate. Surveyed 4/6 adopters benefit on next install-updates run after Phase 1b ships.
+Implementation site is `scripts/repo-local-skills/install-updates/` (per P139 — source-of-truth lives outside `.claude/`, with relative symlinks at `.claude/skills/install-updates/`). ADR-047's `.claude/skills/...` paths predate the P139 relocation; semantically equivalent because the symlinks resolve transparently.
 
-**Phase 1 does NOT close P033 — only the scaffolding precondition lands.** Master ticket remains Known Error pending Phase 2.
+Files landed:
+
+- `scripts/repo-local-skills/install-updates/SKILL.md` — new "Step 6.5: Scaffold governance artefacts (per-sibling)" between Step 6 (Install) and Step 7 (Final report). Trigger contract: `RISK-POLICY.md` present AND `docs/risks/` absent → scaffold both files. Per-file create-if-absent — never overwrite. ADR-013 Rule 5/6 audit baked in. Step 7 final-report shape grows scaffold rows alongside install rows.
+- `scripts/repo-local-skills/install-updates/templates/risk-register-README.md.tmpl` — adopter-flavoured (no R001 row, no "Last reviewed" date). ISO 31000 / 27001 mapping preserved. Empty register + retired tables.
+- `scripts/repo-local-skills/install-updates/templates/risk-register-TEMPLATE.md.tmpl` — verbatim copy of this repo's `docs/risks/TEMPLATE.md`.
+- `scripts/repo-local-skills/install-updates/REFERENCE.md` — new "Governance-artefact scaffold (P033)" section with deep context: why install-updates is the trigger surface, full trigger contract, idempotency rationale (no-marker), ADR-013 audit table, template source-of-truth, template-drift mitigation, Phase-1-only scope.
+- `scripts/repo-local-skills/install-updates/test/install-updates-p033-register-scaffold.bats` — 11 behavioural-fixture tests against mock adopter directories (per ADR-052). Asserts scaffold + skip-existing + RISK-POLICY-absent + partial-state + idempotency + ISO-clause-survival. All pass; no regressions in the 47 prior tests.
+
+Closes the "directory doesn't exist" half of the 99% miss rate. Surveyed 4/6 adopters benefit on next install-updates run after Phase 1b ships and the marketplace cache refreshes.
+
+**Phase 1 does NOT close P033 — only the scaffolding precondition lands.** Master ticket remains Known Error pending Phase 2 (back-channel; load-bearing per user direction). Phase 2 is the next iter shape.
 
 ### Phase 2 — pipeline back-channel (load-bearing per user direction; deferred)
 

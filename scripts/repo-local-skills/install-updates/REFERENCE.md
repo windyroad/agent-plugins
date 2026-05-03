@@ -100,6 +100,71 @@ When `AskUserQuestion` is unavailable (running inside a subagent without that to
 
 The fallback preserves ADR-030's "no install without consent" invariant even when the structured interaction path is blocked.
 
+## Governance-artefact scaffold (P033)
+
+ADR-047 amends `/install-updates` to scaffold governance artefacts into adopter siblings when the governing policy file is present but the artefact directory is missing. Step 6.5 is the implementation site. This section is the deep-context companion.
+
+### Why install-updates is the trigger surface
+
+P033 reopened from Verifying on 2026-04-28 with a sibling-survey showing **6/6 adopters with `RISK-POLICY.md` accumulating ~285 cumulative `.risk-reports/` entries, but only 1/6 had populated `docs/risks/`** and 4/6 didn't even have the directory scaffolded. The risk REGISTER required by ISO 31000 § 6.4.2 and ISO 27001 § 6.1.2/6.1.3 was missing on every adopter where it would matter.
+
+The P033 / P102 / P110 fix triplet shipped the *plumbing* (scaffolding pattern in this repo, `/wr-risk-scorer:create-risk` skill, `RISK_REGISTER_HINT:` from the pipeline agent) but no *trigger* fired the directory into existence on adopter projects. Adopters install the plugin, configure `RISK-POLICY.md`, watch `.risk-reports/` accumulate — but `docs/risks/` never appears because nothing creates it. The hint surface is opt-in and undiscoverable; create-risk is opt-in and undiscoverable.
+
+ADR-047 architect verdict: install-updates is the natural trigger surface because it (a) already enumerates siblings, (b) already runs in foreground with consent gate, (c) already has ADR-013 Rule 6 fallback, (d) already writes to sibling project trees. Adding "scaffold `docs/risks/` if `RISK-POLICY.md` exists and the directory is absent" is one additive step within existing scope. Alternatives considered and rejected: SessionStart hook (too aggressive, violates ADR-040 read-mostly contract), new `/wr-risk-scorer:scaffold-register` skill (over-engineered for Phase 1; symmetric with `scaffold-intake` but lacks the install-time trigger), embedding inside `/wr-risk-scorer:create-risk` (conflates two surfaces and still leaves the 99% miss rate). Full options table: ADR-047 § Considered Options.
+
+### Trigger contract (Step 6.5 detail)
+
+Per sibling project enumerated in Step 3 (and the current project as implicit sibling per ADR-004):
+
+1. **Detect** `<sibling>/RISK-POLICY.md` (file-existence test).
+2. **Detect** `<sibling>/docs/risks/` (directory-existence test).
+3. **Trigger condition**: `RISK-POLICY.md` present AND `docs/risks/` absent.
+4. **Action**: scaffold `docs/risks/README.md` and `docs/risks/TEMPLATE.md` from this repo's templates at `scripts/repo-local-skills/install-updates/templates/risk-register-{README,TEMPLATE}.md.tmpl`.
+5. **No substitution tokens** in v1 — templates are project-agnostic. Adopters fill in their own register entries; the scaffold provides only the shell.
+6. **Idempotency**: per-file `create-if-absent`. If `README.md` exists but `TEMPLATE.md` does not (partial scaffold, e.g. user deleted one), only the missing file is written. Existing files are NEVER overwritten.
+
+### Idempotency rationale (no marker)
+
+Unlike `scaffold-intake` (ADR-036) which writes `.claude/.intake-scaffold-done`, this scaffold deliberately **omits a marker file**. The scaffolded files themselves serve as the "done" signal — file-existence is the marker. This is simpler than marker management because:
+
+- No marker TTL to manage.
+- No marker-vs-file drift (where the marker says "done" but a file has been deleted).
+- Decline path is trivial — adopters who don't want the scaffold delete `docs/risks/README.md`; the next install-updates run re-scaffolds. If that proves a pain point, a `.claude/.risk-register-scaffold-declined` marker can be added paralleling ADR-036, but only when evidence demands it.
+
+The intake scaffold needs a marker because it's interactive (an explicit decline path); this scaffold has no interactive gate, so the marker has no decision content.
+
+### ADR-013 Rule 5 / Rule 6 audit
+
+| Branch | Resolution |
+|---|---|
+| Cache-hit / cache-miss with consent granted (Rule 5) | Scaffold fires silently. Existence of `RISK-POLICY.md` plus prior consent IS the policy authorisation. Logged in the final report's scaffold rows. |
+| Non-interactive subagent invocation (Rule 6) | Scaffold does NOT fire. Same fail-safe as the install path: dry-run table only; user must re-run interactively. The scaffold trigger inherits the consent gate's interactivity requirement. |
+| Sibling consent answer was "Current project only" | Scaffold fires for current project only. Other siblings are skipped (consent boundary respected). |
+| Dry-run consent answers | Do NOT scaffold. Dry-run is read-only by contract. |
+
+### Template source-of-truth
+
+Templates colocate at `scripts/repo-local-skills/install-updates/templates/`:
+
+- `risk-register-README.md.tmpl` — adopter-flavoured copy of this repo's `docs/risks/README.md`. Empty register/retired tables. ISO mapping section preserved. Structural diagram preserved. "How to add" instructions citing `TEMPLATE.md`. NO "Last reviewed" date in the scaffolded copy (adopters set their own). NO R001 row (this repo's R001 is project-specific).
+- `risk-register-TEMPLATE.md.tmpl` — verbatim copy of this repo's `docs/risks/TEMPLATE.md`. Risk-file shape (Status, Category, Inherent, Controls, Residual, Treatment, Monitoring, Related, Change Log).
+
+Templates read at install-updates runtime from THIS repo's working tree (the install-updates skill is repo-local; templates ship with it). Sibling adopters never read the templates directly.
+
+### Template drift
+
+Mirror of ADR-036's same flag: when this repo's `docs/risks/README.md` evolves (e.g. ISO mapping table grows), scaffolded adopter copies stay frozen at the version they were scaffolded with. Mitigation: future re-scaffold path or scaffold-version metadata. Not blocking for Phase 1; the bats fixture includes a "verbatim copy of TEMPLATE.md" assertion that catches the most common drift case (TEMPLATE.md in this repo evolving without the template being re-copied).
+
+### Phase-1-only scope
+
+This is the **scaffolding precondition** for the multi-phase P033 fix. Out of scope for Phase 1:
+
+- **Phase 2** — `wr-risk-scorer:pipeline` agent writes/updates `docs/risks/R<NNN>-*.active.md` entries when reports identify register-worthy risks. The load-bearing fix per user direction; deferred follow-up.
+- **Phase 3** — one-time backfill pass over each adopter's existing `.risk-reports/*.md` to identify distinct risks and create register entries.
+- **Phase 4** — behavioural contract test that every risk-id in `.risk-reports/*.md` has a matching `docs/risks/R<NNN>-*.md` entry.
+
+Phase 1 ships scaffolding without the back-channel; the directory exists but is empty. The user could read this as "still broken" if Phase 2 doesn't ship promptly. P033 ticket body explicitly enumerates Phase 2 as the load-bearing follow-up.
+
 ## Not in scope (deliberately)
 
 - Updating non-windyroad plugins (`anthropics/skill-creator`, `claude-plugins-official`). Out of scope.
@@ -112,10 +177,16 @@ The fallback preserves ADR-030's "no install without consent" invariant even whe
 - **ADR-030** — governing decision; Confirmation criteria apply here.
 - **ADR-003** — marketplace distribution (Confirmation amended in the same commit as ADR-030 to permit this skill).
 - **ADR-004** — project-scoped plugin install.
-- **ADR-013 Rule 6** — non-interactive fallback pattern.
+- **ADR-013 Rule 5 / Rule 6** — policy-authorised silent proceed (Step 6.5 cache-hit path) / non-interactive fallback pattern.
+- **ADR-036** — direct precedent (downstream OSS intake scaffold). Step 6.5 applies the same shape to governance-artefact scaffolding (policy-file → directory pair).
 - **ADR-038** — progressive disclosure for governance tooling context. This split implements the pattern at the SKILL.md level.
+- **ADR-040** — SessionStart read-mostly contract (rationale for not putting the trigger in SessionStart).
+- **ADR-047** — Step 6.5 governing decision (install-updates scaffolds governance artefacts).
+- **P033** — driver ticket for Step 6.5 scaffold (no persistent risk register; Phase 1 lands here, Phases 2–4 deferred).
 - **P045** — auto plugin install after governance release; interim manual stopgap.
 - **P061** — sibling-count > 3 `AskUserQuestion` `maxItems` fallback.
 - **P092** — `wr-` prefix mismatch between plugin name and npm package name.
 - **P098** — SKILL+REFERENCE split pattern applied here.
+- **P102** — invocation surface for risk register; sibling-in-fix to P033.
+- **P110** — pipeline back-channel hint; Phase 2 consumer of Step 6.5's scaffolding output.
 - **BRIEFING.md** — marketplace resolution semantics, version-string staleness, `plugin install` vs `plugin update` distinction.

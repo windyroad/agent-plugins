@@ -199,5 +199,5 @@ Revisit this decision if:
 - `RISK-POLICY.md` — trigger condition file.
 - `docs/risks/README.md` — template source-of-truth (this repo).
 - `docs/risks/TEMPLATE.md` — template source-of-truth (this repo).
-- `.claude/skills/install-updates/SKILL.md` — implementation site.
-- `.claude/skills/install-updates/templates/` — template files location.
+- `.claude/skills/install-updates/SKILL.md` — implementation site (symlink → source-of-truth at `scripts/repo-local-skills/install-updates/SKILL.md` per P139 relocation).
+- `.claude/skills/install-updates/templates/` — template files location (under source-of-truth at `scripts/repo-local-skills/install-updates/templates/` per P139).

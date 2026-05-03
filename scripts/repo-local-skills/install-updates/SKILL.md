@@ -180,17 +180,70 @@ done
 
 Shell snippets in this skill use bash-array form (`ARR=(a b c)` + `"${ARR[@]}"`) instead of unquoted-variable iteration (`for x in $VAR`). The array form is portable across bash and zsh; unquoted iteration is bash-only and silently iterates once under zsh — see P133 (`docs/problems/133-...md`).
 
+### 6.5. Scaffold governance artefacts (per-sibling)
+
+Per ADR-047 (P033 Phase 1). For each sibling confirmed in scope by Step 5 (and the current project, treated as an implicit sibling per ADR-004):
+
+```bash
+# scaffold_register_if_eligible <target>
+# Trigger: <target>/RISK-POLICY.md present AND <target>/docs/risks/ absent.
+# Per-file create-if-absent — never overwrite an existing scaffold file.
+scaffold_register_if_eligible() {
+  local target="$1"
+  [ -f "$target/RISK-POLICY.md" ] || { echo "no-policy"; return 0; }
+  local repo_templates
+  repo_templates="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")/templates" 2>/dev/null && pwd)"
+  [ -d "$repo_templates" ] || repo_templates="$PWD/scripts/repo-local-skills/install-updates/templates"
+  mkdir -p "$target/docs/risks"
+  local readme_status="skipped" template_status="skipped"
+  if [ ! -f "$target/docs/risks/README.md" ]; then
+    cp "$repo_templates/risk-register-README.md.tmpl" "$target/docs/risks/README.md"
+    readme_status="scaffolded"
+  fi
+  if [ ! -f "$target/docs/risks/TEMPLATE.md" ]; then
+    cp "$repo_templates/risk-register-TEMPLATE.md.tmpl" "$target/docs/risks/TEMPLATE.md"
+    template_status="scaffolded"
+  fi
+  echo "$readme_status,$template_status"
+}
+```
+
+Per-sibling outcomes feed Step 7's final-report scaffold rows. No marker file — file existence is the marker (idempotent, drift-free).
+
+**Trigger contract** (per ADR-047 § Trigger contract):
+
+- `RISK-POLICY.md` present AND `docs/risks/` absent → scaffold both files.
+- `RISK-POLICY.md` present AND one file missing (partial state) → scaffold only the missing file; preserve existing.
+- `RISK-POLICY.md` present AND both files present → no writes (idempotent skip).
+- `RISK-POLICY.md` absent → no scaffold attempted (precondition not met).
+
+**ADR-013 audit**:
+
+- Cache-hit / cache-miss with consent granted (Rule 5) — scaffold fires silently. Existence of `RISK-POLICY.md` plus prior consent IS the policy authorisation.
+- Non-interactive subagent invocation (Rule 6) — scaffold does NOT fire. Inherits the install-loop's interactivity gate.
+- Sibling consent answer was "Current project only" — scaffold fires for current project only.
+- Dry-run consent answers do NOT scaffold (read-only by contract).
+
+Templates: `scripts/repo-local-skills/install-updates/templates/risk-register-{README,TEMPLATE}.md.tmpl`. Substitution-token-free (project-agnostic) in v1; adopters fill in their own register entries.
+
+Deep context (ADR-013 audit table, idempotency rationale, template-source-of-truth, alternatives considered): `REFERENCE.md` → "Governance-artefact scaffold (P033)".
+
 ### 7. Final report
 
 ```
-| Project | Plugin | Before | After | Status |
-|---------|--------|--------|-------|--------|
+| Project | Surface | Before | After | Status |
+|---------|---------|--------|-------|--------|
 | <project> | wr-itil | 0.7.1 | 0.7.2 | ✓ installed |
 | <project> | wr-jtbd | 0.5.0 | 0.5.0 | ✓ restored (rollback) |
 | <project> | wr-tdd  | 0.4.0 | —     | ✗ lost (rollback failed) |
+| <project> | docs/risks/ | — | scaffolded | ✓ created (RISK-POLICY.md present) |
+| <project> | docs/risks/ | (present) | (present) | ⊘ skipped (already exists) |
+| <project> | docs/risks/ | — | — | ⊘ skipped (no RISK-POLICY.md) |
 ```
 
 Status vocabulary (P112): `✓ installed` — install landed first or within retry budget. `✓ restored (rollback)` — all retries exhausted; marketplace-cache refresh + one rollback install succeeded. `✗ lost (rollback failed)` — retries and rollback both failed; plugin is absent from the project and the user must reinstall manually. `✗ failed` — pre-install step (e.g. uninstall) errored, plugin left in original state.
+
+Scaffold-row vocabulary (ADR-047): `✓ created (RISK-POLICY.md present)` — file written. `⊘ skipped (already exists)` — idempotent skip. `⊘ skipped (no RISK-POLICY.md)` — trigger condition not met.
 
 Then `### Next step` — "Restart Claude Code to pick up the new plugin code. Active sessions continue running the old code until restart (per P045 direction 2026-04-20 — auto-restart explicitly rejected)."
 
@@ -202,7 +255,9 @@ If `AskUserQuestion` is unavailable (e.g. running inside a subagent): emit a dry
 
 - **ADR-030** — repo-local skills (governing).
 - **ADR-003 / ADR-004** — marketplace distribution / project-scope only.
-- **ADR-013 Rule 6** — non-interactive fallback pattern.
+- **ADR-013 Rule 5 / Rule 6** — policy-authorised silent proceed / non-interactive fallback. Both apply to Step 6.5 scaffold.
+- **ADR-047** — install-updates scaffolds governance artefacts (Step 6.5 contract).
+- **P033** — driver ticket for Step 6.5 scaffold (no persistent risk register; Phase 1 lands here).
 - **P045** — auto plugin install after governance release. This skill is the manual stopgap until P045's automated queue lands.
 - **P061** — sibling-count > 3 fallback (`maxItems=4`).
 - **P098** — SKILL+REFERENCE split pattern applied here (progressive disclosure per ADR-038).
