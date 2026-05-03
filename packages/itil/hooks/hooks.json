@@ -1,7 +1,11 @@
 {
   "hooks": {
     "SessionStart": [
-      { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/bin/check-deps.sh wr-itil wr-risk-scorer" }] }
+      { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/bin/check-deps.sh wr-itil wr-risk-scorer" }] },
+      {
+        "matcher": "startup",
+        "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/itil-pending-questions-surface.sh" }]
+      }
     ],
     "UserPromptSubmit": [
       { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/itil-assistant-output-gate.sh" }] },

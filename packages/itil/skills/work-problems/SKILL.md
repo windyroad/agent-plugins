@@ -244,6 +244,15 @@ ITER_JSON=$(mktemp)
 DISPATCH_START_EPOCH=$(date +%s)
 IDLE_TIMEOUT_S="${WORK_PROBLEMS_IDLE_TIMEOUT_S:-3600}"
 
+# AFK-iter cross-context-leak guard (ADR-032 P157 amendment, line 127):
+# the orchestrator-session pending-questions queue at
+# .afk-run-state/outstanding-questions.jsonl is for surfacing on the user's
+# next interactive session — NOT inside iter subprocess contexts. The
+# itil-pending-questions-surface.sh SessionStart hook self-suppresses when
+# this env var is set so the orchestrator's accumulated queue does not leak
+# into iter subprocesses' first turn.
+export WR_SUPPRESS_PENDING_QUESTIONS=1
+
 claude -p \
   --permission-mode bypassPermissions \
   --output-format json \

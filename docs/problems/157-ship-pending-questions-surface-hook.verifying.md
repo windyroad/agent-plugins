@@ -1,6 +1,6 @@
 # Problem 157: Ship pending-questions-surface hook — auto-surface accumulated `outstanding_questions` from `.afk-run-state/outstanding-questions.jsonl` at session start when user returns interactive
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-03
 **Priority**: 12 (High) — Impact: Significant (3) x Likelihood: Almost certain (4)
 **Effort**: M — new SessionStart hook + parser for `outstanding-questions.jsonl` + ranking per ADR-044 6-class taxonomy + AskUserQuestion batch construction (≤4 per call) + cleanup-on-resolve. Hook fires on session-start when `outstanding-questions.jsonl` is non-empty and `AskUserQuestion` is available.
@@ -71,11 +71,19 @@ The fix shape:
 
 ### Investigation Tasks
 
-- [ ] Architect review — pick hook plugin home (itil vs retrospective vs new dedicated plugin) + hook event (SessionStart vs UserPromptSubmit on session-first-prompt).
-- [ ] JTBD review.
-- [ ] Implement: hook script + parser + ranking logic + AskUserQuestion construction + cleanup-on-resolve + behavioural bats.
-- [ ] Wire into hooks.json.
-- [ ] Document in install-updates SKILL.md or BRIEFING.md.
+- [x] Architect review — `@windyroad/itil` plugin home + SessionStart hook + ADR-040 Option A precedent. Verdict PASS-WITH-NOTES (8 actionable items folded in; ADR-040 cited over ADR-045 for SessionStart-specific silent-on-no-content shape; env-var self-suppress per ADR-032 line 127 implementation choice (a)).
+- [x] JTBD review — PASS. Primary JTBD-006 (Progress backlog AFK), secondary JTBD-001 + JTBD-101.
+- [x] Implement: hook script `packages/itil/hooks/itil-pending-questions-surface.sh` + JSONL parser via `jq -e` + ADR-044 6-class precedence ranking + dedup on `(rank, category, ticket_id, question)` + cleanup-on-resolve directive + behavioural bats `packages/itil/hooks/test/itil-pending-questions-surface.bats` (19/19 green).
+- [x] Wire into `packages/itil/hooks/hooks.json` SessionStart array as second entry with matcher `"startup"`.
+- [x] Insert `export WR_SUPPRESS_PENDING_QUESTIONS=1` in `packages/itil/skills/work-problems/SKILL.md` Step 5 dispatch block before `claude -p` to prevent cross-context leak per ADR-032 line 127.
+- [x] Amend ADR-032 with the P157 SessionStart-JSONL-variant section paralleling P155 + P156 amendments.
+
+## Fix Released
+
+Hook + ADR amendment + work-problems Step 5 export shipped 2026-05-03 in iter4 of the AFK loop alongside siblings P155 + P156 (the three ADR-032 child tickets). Awaiting user verification:
+- Hook surfaces accumulated queue on SessionStart (dogfood: ran end-to-end against 9-entry real queue, ranked deviation-approval > direction > silent-framework correctly).
+- 19/19 behavioural bats green (silent-on-no-content × 3, surfacing × 2, ranking × 2, dedup × 2, batching × 2, cleanup × 1, env-var suppress × 2, hooks.json wiring × 1, work-problems Step 5 export × 1, malformed-JSON skip × 2, exists × 1).
+- Verification: next AFK loop end-to-end. The orchestrator's iter subprocesses must NOT see the queue (env-var suppresses); the orchestrator's main turn on session resume must see it via SessionStart hook.
 
 ## Dependencies
 
