@@ -1,0 +1,97 @@
+# Option 1 prototype — session-transcript invocation counts (last 30d)
+# Sessions scanned: 5831; in-window: 4480
+
+## Top skills (by Skill tool invocations)
+  COUNT  SKILL
+    149  wr-retrospective:run-retro
+     96  wr-itil:manage-problem
+     34  wr-risk-scorer:assess-release
+     17  wr-itil:transition-problem
+     10  wr-risk-scorer:pipeline
+      9  wr-itil:report-upstream
+      8  wr-architect:create-adr
+      6  wr-itil:reconcile-readme
+      6  wr-risk-scorer:update-policy
+      6  wr-jtbd:update-guide
+      4  wr-risk-scorer:assess-wip
+      3  wr-itil:work-problems
+      3  wr-itil:review-problems
+      3  wr-risk-scorer:assess-external-comms
+      2  wr-problem:update-ticket
+      2  install-updates
+      2  risk-policy
+      1  wr-problem:manage
+      1  wr-itil:transition-problems
+      1  wr-architect:review-design
+      1  wr-jtbd:review-jobs
+      1  wr-itil:work-problem
+      1  anthropic-skills:skill-creator
+      1  commit
+      1  retrospective
+      1  frontend-design:frontend-design
+      1  problem
+      1  loop
+
+## Top agents (by Agent.subagent_type)
+  COUNT  AGENT
+   1147  wr-risk-scorer:pipeline
+    796  wr-architect:agent
+    638  wr-jtbd:agent
+    342  risk-scorer-wip
+    221  architect
+    200  risk-scorer-pipeline
+    178  wr-voice-tone:agent
+    155  wr-style-guide:agent
+    114  Explore
+     81  accessibility-lead
+     68  wr-risk-scorer:wip
+     67  risk-scorer
+     47  wr-risk-scorer:plan
+     37  wr-sw-critic
+     36  jtbd-lead
+     33  general-purpose
+     30  style-guide-lead
+     28  voice-and-tone-lead
+     27  risk-scorer-plan
+     22  Plan
+
+## Per-plugin rollup (Skill + Agent + Bash-attributed)
+  COUNT  PLUGIN
+   1619  risk-scorer
+   1581  itil
+   1014  architect
+    704  jtbd
+    585  retrospective
+    198  voice-tone
+    163  style-guide
+     97  shared
+     92  tdd
+     44  risk
+     41  core
+     39  react
+     36  newsletter
+     30  problem
+     23  fetch-link
+     19  eslint-config
+     19  svelte
+     18  c4
+     17  connect
+     15  agent-plugins
+
+## Bash-only plugin attribution (subset of above)
+  COUNT  PLUGIN
+   1445  itil
+    436  retrospective
+    281  risk-scorer
+    208  architect
+     97  shared
+     92  tdd
+     59  jtbd
+     44  risk
+     41  core
+     39  react
+     36  newsletter
+     27  problem
+     23  fetch-link
+     20  voice-tone
+     19  eslint-config

@@ -1,0 +1,35 @@
+# Option 2 prototype — per-plugin commit-history composite (window 60d; tickets 90d)
+# Plugins discovered: 13
+
+PLUGIN             COMMITS_W DAYS_SHIPPED CLOSED_TICKETS BC_AGE_DAYS
+--------------------------------------------------------------------
+agent-plugins             15           25              2         999
+architect                 48           25             25         999
+c4                        14           25              0         999
+connect                   18           19              1         999
+itil                     157           18             81         999
+jtbd                      49           25             14         999
+retrospective             66           25             29         999
+risk-scorer               62           25             21         999
+shared                    18           25             19         999
+style-guide               25           25              3         999
+tdd                       31           25              6         999
+voice-tone                26           25              3         999
+wardley                   14           25              0         999
+
+## Composite exercise index (strawman per ADR-053)
+# index = log10(commits_window + 1) + log10(closed_tickets + 1) + (days_shipped >= 60 ? 1 : 0)
+PLUGIN                INDEX
+itil                   4.11
+retrospective          3.30
+risk-scorer            3.14
+architect              3.11
+jtbd                   2.88
+shared                 2.58
+tdd                    2.35
+voice-tone             2.03
+style-guide            2.02
+agent-plugins          1.68
+connect                1.58
+c4                     1.18
+wardley                1.18
