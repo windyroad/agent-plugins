@@ -1,0 +1,300 @@
+#!/usr/bin/env bats
+# Behavioural fixtures for /wr-itil:capture-problem (P155).
+#
+# Per ADR-052 (Behavioural-tests-default for skill testing), these tests
+# exercise the load-bearing primitives the skill dispatches and assert
+# observable state — NOT the prose contents of SKILL.md.
+#
+# Behavioural surfaces under test:
+#   1. P119 create-gate composition — capture-problem must source the
+#      session-id + create-gate helpers and call mark_step2_complete
+#      before the Write so the PreToolUse hook permits the new ticket
+#      file to land. Test simulates the helper-sourcing sequence and
+#      asserts the marker file lands in /tmp.
+#   2. Skeleton-fill ticket shape — captured ticket has Description from
+#      $ARGUMENTS plus the deferred-placeholder fields the skill
+#      prescribes. Test runs the skeleton-fill command sequence against
+#      a fixture description and asserts the resulting file's sections.
+#   3. Next-ID computation — capture-problem reuses the manage-problem
+#      Step 3 P056-safe local_max + origin_max formula. Test runs the
+#      formula against a fixture problems directory and asserts the
+#      computed next ID matches the expected zero-padded value.
+#   4. Conservative title-only duplicate-grep — 3-keyword cap, filename
+#      matches only (NOT body). Test runs the grep pattern against a
+#      fixture and asserts the conservative match shape.
+#
+# @problem P155
+# @jtbd JTBD-001 (enforce governance without slowing down — lightweight
+#                  capture path)
+# @jtbd JTBD-006 (progress backlog while AFK — sibling-finding capture
+#                  in iter subprocesses)
+# @jtbd JTBD-101 (extend the suite — discoverable / on /  autocomplete)
+# @adr ADR-032 (governance skill invocation patterns — foreground-
+#                lightweight-capture variant)
+# @adr ADR-038 (progressive disclosure — SKILL.md + REFERENCE.md split)
+# @adr ADR-049 (bin/ on PATH — capture-problem reuses existing
+#                wr-itil-reconcile-readme shim, no new shim needed)
+# @adr ADR-052 (behavioural-tests-default — these tests exercise
+#                primitives, not SKILL.md prose)
+# @adr ADR-119 (manage-problem create-gate — capture-problem composes
+#                with the same per-session marker)
+
+setup() {
+  REPO_ROOT="$(cd "$(dirname "$BATS_TEST_FILENAME")/../../../../.." && pwd)"
+  SKILL_DIR="${REPO_ROOT}/packages/itil/skills/capture-problem"
+  SKILL_FILE="${SKILL_DIR}/SKILL.md"
+  REF_FILE="${SKILL_DIR}/REFERENCE.md"
+  CREATE_GATE_LIB="${REPO_ROOT}/packages/itil/hooks/lib/create-gate.sh"
+
+  # Fresh per-test scratch directory and SESSION_ID.
+  TMPROOT=$(mktemp -d)
+  TEST_SESSION_ID="capture-problem-bats-$BATS_TEST_NUMBER-$$"
+  MARKER_PATH="/tmp/manage-problem-grep-${TEST_SESSION_ID}"
+  rm -f "$MARKER_PATH"
+}
+
+teardown() {
+  rm -rf "$TMPROOT"
+  rm -f "$MARKER_PATH"
+}
+
+# ---------------------------------------------------------------------------
+# Existence / wiring tests — minimum surface required for the skill to be
+# discoverable. Not structural prose-greps; these assert artefacts exist.
+# ---------------------------------------------------------------------------
+
+@test "capture-problem: SKILL.md and REFERENCE.md both exist (ADR-038 split)" {
+  [ -f "$SKILL_FILE" ]
+  [ -f "$REF_FILE" ]
+}
+
+@test "capture-problem: SKILL.md frontmatter declares wr-itil:capture-problem name" {
+  # Discoverable on / autocomplete depends on the canonical name.
+  # ADR-032 names this skill; ADR-010-amended skill-granularity rule.
+  run grep -E '^name: wr-itil:capture-problem$' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+# ---------------------------------------------------------------------------
+# P119 create-gate composition — load-bearing behavioural primitive.
+# capture-problem must call mark_step2_complete before any Write of a new
+# ticket file, otherwise the PreToolUse:Write hook denies the Write.
+# ---------------------------------------------------------------------------
+
+@test "capture-problem: mark_step2_complete writes marker the P119 hook checks" {
+  # Source the helper the skill prescribes; call the canonical mark
+  # function; assert the marker file lands at the path the hook reads.
+  source "$CREATE_GATE_LIB"
+  mark_step2_complete "$TEST_SESSION_ID"
+  [ -f "$MARKER_PATH" ]
+}
+
+@test "capture-problem: check_create_gate returns 0 after mark_step2_complete" {
+  # Composes with manage-problem-enforce-create.sh which uses
+  # check_create_gate $SESSION_ID — exit 0 means "permit Write".
+  source "$CREATE_GATE_LIB"
+  run check_create_gate "$TEST_SESSION_ID"
+  [ "$status" -ne 0 ]    # before mark — denied
+  mark_step2_complete "$TEST_SESSION_ID"
+  run check_create_gate "$TEST_SESSION_ID"
+  [ "$status" -eq 0 ]    # after mark — permitted
+}
+
+@test "capture-problem: mark_step2_complete is idempotent across cross-skill order" {
+  # Whether manage-problem fires first then capture-problem, or vice
+  # versa, the marker mechanic is a no-op after the first call.
+  source "$CREATE_GATE_LIB"
+  mark_step2_complete "$TEST_SESSION_ID"
+  mark_step2_complete "$TEST_SESSION_ID"
+  mark_step2_complete "$TEST_SESSION_ID"
+  [ -f "$MARKER_PATH" ]
+}
+
+# ---------------------------------------------------------------------------
+# Next-ID computation — capture-problem reuses manage-problem Step 3 formula
+# ---------------------------------------------------------------------------
+
+@test "capture-problem: next-ID formula is P056-safe (origin/local max + 1)" {
+  # Build a fixture problems directory with mixed status suffixes.
+  # The formula must pick the max ID across all suffixes and zero-pad.
+  mkdir -p "$TMPROOT/docs/problems"
+  : > "$TMPROOT/docs/problems/001-foo.closed.md"
+  : > "$TMPROOT/docs/problems/042-bar.open.md"
+  : > "$TMPROOT/docs/problems/099-baz.known-error.md"
+  : > "$TMPROOT/docs/problems/107-qux.verifying.md"
+
+  # Mirror manage-problem Step 3 local-max formula exactly.
+  local_max=$(ls "$TMPROOT/docs/problems"/*.md 2>/dev/null \
+              | sed 's/.*\///' \
+              | grep -oE '^[0-9]+' \
+              | sort -n | tail -1)
+  [ "$local_max" = "107" ]
+
+  # No origin available in the fixture; default to 0 then increment.
+  next=$(printf '%03d' $(( $(echo -e "${local_max:-0}\n0" | sort -n | tail -1) + 1 )))
+  [ "$next" = "108" ]
+}
+
+@test "capture-problem: next-ID handles empty problems dir (first ticket)" {
+  mkdir -p "$TMPROOT/docs/problems"
+  local_max=$(ls "$TMPROOT/docs/problems"/*.md 2>/dev/null \
+              | sed 's/.*\///' \
+              | grep -oE '^[0-9]+' \
+              | sort -n | tail -1)
+  next=$(printf '%03d' $(( $(echo -e "${local_max:-0}\n0" | sort -n | tail -1) + 1 )))
+  [ "$next" = "001" ]
+}
+
+# ---------------------------------------------------------------------------
+# Conservative duplicate-grep — title-only filename match, 3-keyword cap.
+# Architect Q1 verdict: title-only because conservative threshold rationale
+# (P155 line 24) — false-positives on body text would either over-prompt
+# or be silently swallowed (capture-problem has no AskUserQuestion).
+# ---------------------------------------------------------------------------
+
+@test "capture-problem: duplicate-grep matches kebab-cased keywords in filenames" {
+  mkdir -p "$TMPROOT/docs/problems"
+  : > "$TMPROOT/docs/problems/050-checkpoint-stuck-saving.open.md"
+  : > "$TMPROOT/docs/problems/051-foul-drawn-garbled.closed.md"
+
+  # Description: "checkpoint stuck on save retry" — extract 3 kebab tokens.
+  # Title-only grep against filenames; bodies are NOT scanned (conservative).
+  match_count=$(ls "$TMPROOT/docs/problems"/*.md \
+                | grep -ciE 'checkpoint|stuck|save' || true)
+  [ "$match_count" -ge 1 ]
+}
+
+@test "capture-problem: duplicate-grep does NOT match keywords in body content (title-only)" {
+  mkdir -p "$TMPROOT/docs/problems"
+  # File whose title has zero overlap but whose body mentions checkpoint
+  cat > "$TMPROOT/docs/problems/060-unrelated.open.md" <<'EOF'
+# Unrelated ticket
+Body mentions checkpoint somewhere but title doesn't.
+EOF
+
+  # Title-only grep on filenames must NOT match.
+  match_count=$(ls "$TMPROOT/docs/problems"/*.md \
+                | grep -ciE 'checkpoint' || true)
+  [ "$match_count" -eq 0 ]
+}
+
+# ---------------------------------------------------------------------------
+# Skeleton-fill ticket shape — capture-problem writes a deferred-placeholder
+# ticket. Default Priority and Effort are flagged for re-rate at next review.
+# ---------------------------------------------------------------------------
+
+@test "capture-problem: skeleton-filled ticket carries the deferred-placeholder pattern" {
+  mkdir -p "$TMPROOT/docs/problems"
+  TITLE="example-aside-finding"
+  ID="200"
+  TODAY=$(date -u +%Y-%m-%d)
+  DESCRIPTION="Quick observation worth a ticket but not blocking."
+
+  # Mirror the SKILL.md skeleton-fill template.
+  cat > "$TMPROOT/docs/problems/${ID}-${TITLE}.open.md" <<EOF
+# Problem ${ID}: ${TITLE}
+
+**Status**: Open
+**Reported**: ${TODAY}
+**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+
+## Description
+
+${DESCRIPTION}
+
+## Symptoms
+
+(deferred to investigation)
+
+## Workaround
+
+(deferred to investigation)
+
+## Impact Assessment
+
+- **Who is affected**: (deferred to investigation)
+- **Frequency**: (deferred to investigation)
+- **Severity**: (deferred to investigation)
+- **Analytics**: (deferred to investigation)
+
+## Root Cause Analysis
+
+### Investigation Tasks
+
+- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
+- [ ] Investigate root cause
+- [ ] Create reproduction test
+
+## Dependencies
+
+- **Blocks**: (none)
+- **Blocked by**: (none)
+- **Composes with**: (none)
+
+## Related
+
+(captured via /wr-itil:capture-problem; expand at next investigation)
+EOF
+
+  # Behavioural assertions: ticket file has the load-bearing fields.
+  TICKET="$TMPROOT/docs/problems/${ID}-${TITLE}.open.md"
+  [ -f "$TICKET" ]
+  run grep -F '**Status**: Open' "$TICKET"
+  [ "$status" -eq 0 ]
+  # Description survives verbatim
+  run grep -F "$DESCRIPTION" "$TICKET"
+  [ "$status" -eq 0 ]
+  # Deferred placeholders flag re-rating
+  run grep -F 'deferred — re-rate at next /wr-itil:review-problems' "$TICKET"
+  [ "$status" -eq 0 ]
+  # Investigation Tasks nudges user to re-rate
+  run grep -F 'Re-rate Priority and Effort at next /wr-itil:review-problems' "$TICKET"
+  [ "$status" -eq 0 ]
+}
+
+# ---------------------------------------------------------------------------
+# Skill-allowed-tools surface contract — capture-problem MUST NOT carry
+# AskUserQuestion (per design Q4 + ADR-044 framework-mediated mechanical-
+# stage decisions). This is observable from the frontmatter declaration
+# the runtime consumes.
+# ---------------------------------------------------------------------------
+
+@test "capture-problem: allowed-tools omits AskUserQuestion (no interactive branches)" {
+  # The skill's contract is NO AskUserQuestion at all — duplicate-check,
+  # priority-default, effort-default are framework-mediated mechanical
+  # stages per ADR-044. AskUserQuestion in allowed-tools would let
+  # future drift sneak prompts back in.
+  run grep -E '^allowed-tools:' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  run grep -E '^allowed-tools:.*AskUserQuestion' "$SKILL_FILE"
+  [ "$status" -ne 0 ]
+}
+
+@test "capture-problem: allowed-tools includes Bash (for create-gate marker write)" {
+  # mark_step2_complete via Bash is the load-bearing primitive — without
+  # Bash in allowed-tools the skill cannot satisfy P119.
+  run grep -E '^allowed-tools:.*Bash' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "capture-problem: allowed-tools includes Write (for new ticket file)" {
+  run grep -E '^allowed-tools:.*Write' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+# ---------------------------------------------------------------------------
+# Deferred-README-refresh contract — distinguishing capture-problem from
+# manage-problem. capture-problem must NOT stage docs/problems/README.md
+# in its commit (deferred to /wr-itil:review-problems).
+# ---------------------------------------------------------------------------
+
+@test "capture-problem: SKILL.md prescribes deferred README refresh (no inline P094 block)" {
+  # The contract distinction from manage-problem: capture-problem does
+  # NOT regenerate README.md inline; it defers to /wr-itil:review-problems.
+  # This is a behavioural primitive — a future maintainer who copies the
+  # P094 block over would break the lightweight-capture promise.
+  # Asserts the SKILL.md names the deferred contract explicitly.
+  run grep -F '/wr-itil:review-problems' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}

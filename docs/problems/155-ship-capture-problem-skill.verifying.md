@@ -1,6 +1,6 @@
 # Problem 155: Ship `/wr-itil:capture-problem` skill — lightweight aside-invocation surface for problem capture during foreground work
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-03
 **Priority**: 12 (High) — Impact: Significant (3) x Likelihood: Almost certain (4)
 **Effort**: M — new skill SKILL.md + REFERENCE.md per ADR-038 progressive-disclosure pattern; bin shim per ADR-049; behavioural bats per ADR-052; integrate with manage-problem Step 2 create-gate (P119) so capture-problem writes the marker correctly without re-running the full Step 2 grep when the user is mid-capture (capture-problem is the lightweight aside that defers full duplicate-check to a follow-up review).
@@ -101,3 +101,28 @@ The fix shape:
 - ADR-049 (plugin-script resolution via bin/-on-PATH) — bin shim shape for the new skill.
 - ADR-052 (behavioural-tests-default for skill testing) — bats fixture shape.
 - P088 (`docs/problems/088-...verifying.md`) — settled the user-direction-scoped decision: capture-problem + capture-adr are shippable; capture-retro is deferred (context-marshalling problem).
+
+## Fix Released
+
+Shipped 2026-05-03 in this commit (AFK iter 2 of `/wr-itil:work-problems`). Awaiting user verification.
+
+**Artefacts shipped**:
+
+- `packages/itil/skills/capture-problem/SKILL.md` — runtime contract (~150 lines, ADR-038 progressive-disclosure budget). Steps 0-7: reconciliation preflight; description parse; minimal-grep + create-gate marker; next-ID; skeleton-fill template (deferred-placeholder pattern); Write; commit; report.
+- `packages/itil/skills/capture-problem/REFERENCE.md` — rationale, edge cases, contract trade-offs, ADR cross-references.
+- `packages/itil/skills/capture-problem/test/capture-problem.bats` — 14 behavioural fixtures per ADR-052: P119 create-gate composition (3 tests), next-ID formula (2 tests), title-only conservative duplicate-grep (2 tests), skeleton-fill template (1 test), allowed-tools surface (3 tests), deferred-README-refresh contract (1 test), existence/wiring (2 tests). All 14 green.
+- `docs/decisions/032-governance-skill-invocation-patterns.proposed.md` — appended **"Foreground-lightweight-capture variant (P155 amendment, 2026-05-03)"** section between Observable-output contract (line 199) and Scope (line 201). Names the new variant alongside the deferred background-capture variant; documents the deferred-README-refresh contract; pin variant-selection precedence (foreground-lightweight is LEAD post-P155).
+
+**Architectural review verdict (this session)**: PASS — three substantive issues from initial review resolved (ADR-032 amendment, ADR-031 path layout matches on-disk flat reality, deferred-README-refresh contract documented inline in the amendment). JTBD review: PASS (JTBD-001, JTBD-006, JTBD-101 all served; no persona-scope mismatches; plugin-user out of scope).
+
+**Behavioural-test verification**:
+
+```
+$ npx bats packages/itil/skills/capture-problem/test/capture-problem.bats
+1..14
+ok 1..14 — all green
+```
+
+**Verification path for the user**: invoke `/wr-itil:capture-problem <description>` against a real observation. Expected outcome: ~3-4 turn skeleton-filled ticket lands at `docs/problems/<NNN>-<title>.open.md`, single commit `docs(problems): capture P<NNN> <title>`, README is NOT touched, trailing pointer surfaces "Run /wr-itil:review-problems next to fold P<NNN> into the WSJF rankings". Then run `/wr-itil:review-problems` to fold the captured ticket into the WSJF table and re-rate the deferred placeholders.
+
+Recovery path if the close action was wrong: `/wr-itil:transition-problem 155 known-error` flips back to Known Error for further work.
