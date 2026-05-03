@@ -1,5 +1,92 @@
 # @windyroad/problem
 
+## 0.25.0
+
+### Minor Changes
+
+- 86e99e5: P155: ship `/wr-itil:capture-problem` skill — lightweight aside-invocation surface for problem capture during foreground work
+
+  Closes the heavyweight-only-capture-path gap (parent P014 ADR-032 child) — the lightweight aside-invocation surface for problem capture during foreground work. The current capture path is `/wr-itil:manage-problem <description>`, a ~10-turn ceremony designed for canonical new-problem creation. This is wrong for the **aside-invocation** use case where the user (or agent mid-iter) wants to capture an observation quickly without disrupting current task flow.
+
+  Three repeating patterns surfaced the friction:
+
+  - **Mid-AFK-iter sibling-findings** — agent observes a tangential ticket-worthy issue while working on a different problem. The ~10-turn ceremony breaks iter cadence; the observation gets buried in `notes` field of `ITERATION_SUMMARY` and ~50% never reach the backlog.
+  - **User-initiated rapid captures** during retros, code reviews, or correction conversations — "btw, this is broken too — capture it" should not consume 10 turns of the conversation.
+  - **AFK orchestrator main turn captures** — user-driven mid-loop interjections (P151 / P152 / P154 in the session that surfaced P155). Each capture took 5-15 minutes wall-clock through the heavyweight flow.
+
+  `/wr-itil:capture-problem` is the source-side fix.
+
+  Adds:
+
+  - `packages/itil/skills/capture-problem/SKILL.md` (~150 lines, ADR-038 progressive-disclosure budget). Steps 0-7: reconciliation preflight; description parse with empty-arg halt-with-stderr-directive; minimal 3-keyword title-only duplicate-grep + create-gate marker via existing `packages/itil/hooks/lib/create-gate.sh` helper composing with manage-problem's `/tmp/manage-problem-grep-${SESSION_ID}` per P119; P056-safe local_max + origin_max next-ID formula; deferred-placeholder skeleton-fill template (`Priority 3 (Medium) — Impact 3 × Likelihood 1 (deferred — re-rate at next /wr-itil:review-problems)`, `Effort M (deferred — …)`, narrative sections marked `(deferred to investigation)`); single Write; single commit `docs(problems): capture P<NNN> <title>` per ADR-014; trailing pointer to `/wr-itil:review-problems` for WSJF fold + README refresh.
+  - `packages/itil/skills/capture-problem/REFERENCE.md` — rationale (capture vs manage trade-off; capture-time false-positives cheaper than false-negatives), edge cases (empty `$ARGUMENTS` halt, kebab-stopword-soup slug fallback, ID collision with origin, cross-skill marker idempotence, P057 not applicable, multi-concern routing to manage-problem), composition with manage-problem create-gate (P119) + review-problems (deferred WSJF/README refresh) + work-problems iter subprocesses (foreground-lightweight is AFK-compatible; background-capture remains AFK-excluded per ADR-032 line 85).
+  - `packages/itil/skills/capture-problem/test/capture-problem.bats` — 14 behavioural tests per ADR-052: P119 create-gate composition (mark_step2_complete writes marker / check_create_gate exit transition / cross-skill idempotence), next-ID formula (P056-safe mixed-suffix glob / empty-dir first-ticket), title-only conservative duplicate-grep (filename match / body-content non-match), skeleton-fill template (Status / Description / deferred-placeholder / re-rate-investigation-task), allowed-tools surface (no AskUserQuestion / Bash present / Write present), deferred-README-refresh contract presence; 14/14 green.
+
+  Amends:
+
+  - `docs/decisions/032-governance-skill-invocation-patterns.proposed.md` — appends "Foreground-lightweight-capture variant (P155 amendment, 2026-05-03)" section between Observable-output contract and Scope. Names the new variant alongside the deferred background-capture variant per P088 settlement; documents the deferred-README-refresh contract inline (capture-time speed vs README authoritativeness; on-disk inventory is source of truth, README is derived view); pin variant-selection precedence (foreground-lightweight is LEAD post-P155; background-capture remains deferred sibling slot).
+
+  Architectural design (zero AskUserQuestion branches per ADR-044 framework-mediated mechanical-stage carve-out):
+
+  | Decision            | Resolution                                                                                                                                     |
+  | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+  | Duplicate-check     | 3-keyword title-only grep; matches listed in report; capture proceeds regardless. False-positives cheaper than false-negatives (P155 line 24). |
+  | Priority default    | Framework-policy `3 (Medium)`, flagged for re-rate.                                                                                            |
+  | Effort default      | Framework-policy `M`, flagged for re-rate.                                                                                                     |
+  | Multi-concern split | Out of scope; route to `/wr-itil:manage-problem`.                                                                                              |
+  | Empty `$ARGUMENTS`  | Halt-with-stderr-directive (AFK-safe).                                                                                                         |
+
+  Deferred-README-refresh contract:
+
+  - capture-problem does **not** regenerate `docs/problems/README.md` inline (the P094 block from manage-problem Step 5 is intentionally omitted).
+  - README ranking lags new captures until next `/wr-itil:review-problems` invocation, which folds captured-but-not-rated tickets via Step 9b auto-transition pass (keys off the literal deferred-placeholder string).
+  - Trade-off: capture-time speed vs README authoritativeness. On-disk ticket inventory is always source of truth; README is derived view.
+  - Trailing pointer in Step 7 is the user-visible signal that the README is transiently stale and how to reconcile.
+
+  Composes with:
+
+  - ADR-032 (governance skill invocation patterns) — this skill is the foreground-lightweight-capture variant amendment 2026-05-03.
+  - ADR-038 (progressive disclosure) — SKILL.md + REFERENCE.md split shape.
+  - ADR-044 (decision-delegation contract) — framework-mediated mechanical-stage carve-outs justify zero-AskUserQuestion design.
+  - ADR-049 (bin/ on PATH) — capture-problem reuses existing `wr-itil-reconcile-readme` shim; no new shim needed.
+  - ADR-052 (behavioural-tests-default) — bats fixtures exercise primitives, not SKILL.md prose.
+  - P119 (manage-problem create-gate hook) — capture-problem composes with the same per-session marker.
+
+  Unblocks:
+
+  - **P078** (capture-on-correction OFFER pattern) — depends on capture-problem shipping; user can now OFFER `/wr-itil:capture-problem` on strong-affect correction signals.
+  - **P148** (Tickets Deferred retro section) — becomes legacy when capture-problem ships; the ~50%-loss class observation no longer needs a retro-summary surface.
+
+  Sibling P156 (capture-adr) and P157 (pending-questions-surface hook) remain Open under the same parent P014; ship in subsequent iters.
+
+- 69c6dc1: P157: ship `itil-pending-questions-surface.sh` SessionStart hook — auto-surface accumulated `outstanding_questions` from `.afk-run-state/outstanding-questions.jsonl` at session start when user returns interactive
+
+  Closes the queue-file lifecycle gap — accumulated `outstanding_questions` entries from `.afk-run-state/outstanding-questions.jsonl` (written between iters by `/wr-itil:work-problems` per the P135 Phase 3 schema + ADR-044 6-class taxonomy) now surface deterministically on session start when the user returns from an AFK loop that halted before its Step 2.5 / Step 2.5b emit point (manual stop, quota exhaustion, network failure).
+
+  Third and final ADR-032 child of P014 (master tracker) — sibling to P155 (`/wr-itil:capture-problem`) and P156 (`/wr-architect:capture-adr`) shipped earlier in the same AFK loop.
+
+  **What ships**
+
+  - New SessionStart hook `packages/itil/hooks/itil-pending-questions-surface.sh` — parses JSONL queue via `jq -e .` (malformed lines silently skipped per defensive SessionStart-must-not-block-startup contract); dedupes on `(rank, category, ticket_id, question)` tuple; ranks per ADR-044 6-class taxonomy precedence (deviation-approval > direction > one-time-override > silent-framework > taste > correction-followup); emits markdown directive listing entries plus an explicit cleanup directive for the agent to rewrite the queue file with resolved entries removed after each `AskUserQuestion` batch; emits a batching note when entry count > 4 citing the ADR-013 Rule 1 `<=4 per call` cap. Silent-on-no-content per ADR-040 Mechanism step 1 (missing / empty / whitespace-only / all-malformed → exit 0 with zero stdout).
+  - Wired into `packages/itil/hooks/hooks.json` as a second SessionStart entry with matcher `"startup"` (mirrors `wr-retrospective` `session-start-briefing.sh` ADR-040 Option A precedent — Option B's `UserPromptSubmit` + once-per-session marker rejected on the same reasoning: SessionStart is the semantically correct event for boot-time artefact surfaces).
+  - AFK-iter cross-context-leak prevention via `WR_SUPPRESS_PENDING_QUESTIONS=1` env-var self-suppress (architect's implementation choice (a) of the two ADR-032 line 127 enumerations — simpler than orchestrator-side queue drain/restore, idempotent, no state to restore on crash). The `/wr-itil:work-problems` Step 5 dispatch block exports the env var immediately before each `claude -p` subprocess spawn so the orchestrator-session queue does not leak into iter subprocess contexts.
+  - ADR-032 amended with new section `### Pending-questions-surface variant — JSONL queue at SessionStart (P157 amendment, 2026-05-03)` between the P156 amendment and Scope. Disambiguates the two pending-questions surfaces (markdown variant `pending-questions-surface.sh` UserPromptSubmit per ADR-032 line 169 for paused-background-subagent-state tokens; JSONL variant `itil-pending-questions-surface.sh` SessionStart for AFK-loop-accumulated queue), names ADR-040 Option A precedent + ADR-044 6-class precedence, documents the two-hook split + the env-var self-suppress contract; variant-selection precedence pinned (SessionStart-JSONL is LEAD post-P157 for AFK-loop direction-question surfacing across session boundaries; markdown UserPromptSubmit remains LEAD for paused-subagent-state tokens).
+  - 19 behavioural bats `packages/itil/hooks/test/itil-pending-questions-surface.bats` per ADR-052 — silent-on-no-content × 3, surfacing × 2, full 6-class precedence ranking × 2, dedup × 2, batching × 2, cleanup directive × 1, env-var self-suppress × 2, hooks.json wiring × 1, work-problems Step 5 export ordering × 1, malformed-JSON skip × 2, exists × 1. 19/19 green.
+
+  **Empirical evidence**
+
+  This very session sat 16 hours with 9 accumulated entries that only surfaced because the user explicitly asked. With this hook those entries surface deterministically on the next session start. End-to-end dogfood against the real 9-entry queue ranks 1× deviation-approval (P154) first, 6× direction (BRIEFING_TIER3 / P014 / P156×3 / P160) next, 2× silent-framework (P154×2) last; batching note fires (9 > 4); cleanup directive present.
+
+  **Verdicts**
+
+  Architect: PASS-WITH-NOTES (8 actionable items folded in — ADR-040 cited over ADR-045 for SessionStart-specific silent-on-no-content; env-var self-suppress per implementation choice (a); ADR-032 amendment over new ADR; explicit cleanup directive in additionalContext text; work-problems Step 5 export of the env var alongside the hook ship; behavioural bats includes WR_SUPPRESS_PENDING_QUESTIONS=1 case; ADR-040 plain-stdout shape over additionalContext-keyed JSON; cross-reference ADR-040 Mechanism step 1 not ADR-045 Pattern 1).
+
+  JTBD: PASS — JTBD-006 primary (Progress the Backlog While I'm Away — closes "queued for my return, not guessed at" desired-outcome gap by making the queue surface deterministically on return rather than only when Step 2.5 fires); JTBD-001 secondary (direction-class observations resolve before user begins foreground work, preserving 60-second-flow promise); JTBD-101 tertiary (extends the suite via reusable SessionStart-JSONL pattern).
+
+  Closes the ADR-032 child trio. P014 master-tracker now has all three children fix-released this AFK loop.
+
+  Closes P157
+
 ## 0.24.1
 
 ### Patch Changes
