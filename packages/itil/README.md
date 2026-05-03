@@ -78,6 +78,7 @@ See [ADR-011](../../docs/decisions/011-manage-incident-skill.proposed.md) for th
 | Skill | Purpose |
 |-------|---------|
 | `/wr-itil:manage-problem` | Create, update, and close problem tickets through the Open → Known Error → Verifying → Closed lifecycle |
+| `/wr-itil:capture-problem` | Foreground-lightweight aside-invocation variant of `manage-problem` (per ADR-032 background-capture pattern + P078 capture-on-correction) — drafts a ticket scaffold without losing the operational thread when a problem signal surfaces mid-conversation |
 | `/wr-itil:work-problem` | Pick the highest-WSJF actionable ticket and work it to completion |
 | `/wr-itil:work-problems` | AFK orchestrator — batch-work the problem backlog by WSJF priority while the user is away |
 | `/wr-itil:list-problems` | Read-only display of the open and known-error backlog sorted by WSJF |

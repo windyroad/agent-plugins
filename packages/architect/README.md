@@ -35,6 +35,14 @@ Once installed, the plugin works automatically. You don't need to invoke it -- i
 
 This walks you through creating an ADR in [MADR 4.0](https://adr.github.io/madr/) format. It examines your existing decisions, asks about the problem and options, and writes a properly formatted record to `docs/decisions/`.
 
+**Capture an architecture decision in the background while staying in the main turn:**
+
+```
+/wr-architect:capture-adr
+```
+
+The `capture-adr` skill is the foreground-lightweight aside-invocation variant of `create-adr` (per ADR-032 background-capture pattern). Use it when an architecture decision surfaces mid-conversation and you want the ADR scaffold drafted without losing the operational thread.
+
 ## How It Works
 
 | Hook | Trigger | What it does |

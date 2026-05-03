@@ -1,6 +1,7 @@
 # Problem 158: ADR-051 Phase 1 detector shipped but not wired into run-retro Step 2b
 
-**Status**: Verification Pending
+**Status**: Closed
+**Closed**: 2026-05-04 (P159 Phase 1 commit migrated the primary consumption surface to PreToolUse:Bash hook; retro Step 2b wiring shipped under `df47ad1` survives as a backup advisory per ADR-051 amended Confirmation criterion 5. The mechanism this ticket asserted is in place and operational; the architectural direction has shifted to load-bearing-from-the-start at commit time, but the retro wiring is still live as a backup signal so the design intent for which P158 was filed is met. See ADR-051 amendment 2026-05-04 for the supersession-as-primary lifecycle decision and the architect verdict that endorsed Closed over re-Open.)
 **Reported**: 2026-05-03
 **Priority**: 12 (High) — Impact: Significant (4) x Likelihood: Possible (3)
 **Effort**: S — wiring the existing `wr-retrospective-check-readme-jtbd-currency` shim into `/wr-retrospective:run-retro` Step 2b. The detector + bin shim + bats fixtures already ship per [ADR-051](../decisions/051-jtbd-anchored-readme-with-drift-advisory.proposed.md) Phase 1 Confirmation criteria 1-3. The only deferred work is the SKILL.md amendment ADR-051 Confirmation criterion 5 explicitly named ("wiring into `/wr-retrospective:run-retro` Step 2b is deferred to a follow-on iter once the detector is empirically validated against current READMEs").

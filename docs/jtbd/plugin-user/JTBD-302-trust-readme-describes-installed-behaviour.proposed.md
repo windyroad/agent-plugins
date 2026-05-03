@@ -18,7 +18,7 @@ When I install a `@windyroad/*` plugin and read its README to understand what it
 - When a skill is renamed or split (e.g. `manage-problem list` → `list-problems` per P071), README invocation examples reflect the **current** names, not the deprecated ones.
 - When an ADR is amended and a README cited it (e.g. ADR-013 amended by ADR-044), the README citation is refreshed before the next release ships, not left dangling for adopters to catch.
 - A drift-detection signal exists at commit / release / retrospective time so adopters never receive a silently-stale README via `npm install`.
-- The signal is advisory in Phase 1 (per ADR-013 Rule 6 fail-safe) and escalates to load-bearing only if drift accumulates without correction (per ADR-013 Rule 6 escalation pattern).
+- **(Amended 2026-05-04 by P159)** The signal is **load-bearing at commit time** via the PreToolUse:Bash hook (`packages/retrospective/hooks/retrospective-readme-jtbd-currency.sh`); retro-time and release-time advisories ride as backup signals. Drift class detection is enforced at the closest surface to the failure mode (the commit itself), not gradualism-deferred. The original advisory-then-escalate phrasing was superseded by P159 after the user correction *"the drift detector shouldn't be part of the retro. It should be something we are always running and fixing"*.
 - The same source-of-truth anchor (JTBD job IDs) lets an adopter cross-reference the README to `docs/jtbd/<persona>/JTBD-NNN-*.md` and see **what jobs the plugin claims to help with**, not just **what the plugin's CLI surface exposes**.
 
 ## Persona Constraints
@@ -43,7 +43,9 @@ When I install a `@windyroad/*` plugin and read its README to understand what it
 
 ## Related decisions
 
-- **ADR-051** — JTBD-anchored README structure with declarative drift advisory. Codifies the structural rule that lets this job be reliably served.
+- **ADR-051** — JTBD-anchored README structure with load-bearing commit-hook + prose-woven framing (amended 2026-05-04 by P159). Codifies the structural rule that lets this job be reliably served.
+- **(Added 2026-05-04) P159** — Drift detector should be a load-bearing commit-hook with auto-fix, not a retro-time advisory. Drives the load-bearing-from-the-start direction for this job's primary enforcement surface.
+- **(Added 2026-05-04) P158** — Sibling problem ticket; retro Step 2b wiring shipped under `df47ad1`. Retro wiring survives as a backup advisory after P159 migrates the primary surface to the commit-hook.
 - **ADR-049** — Plugin-bundled scripts invoked from SKILL.md resolve via `bin/` on `$PATH`. Sibling adopter-context decision (executable correctness axis).
 - **ADR-013** — Structured user interaction; Rule 6 advisory-then-escalate pattern that ADR-051 follows for the drift detector.
 - **ADR-008** — JTBD directory structure. Establishes `docs/jtbd/<persona>/JTBD-NNN-<title>.<status>.md` as the canonical layout the README anchors against.

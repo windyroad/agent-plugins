@@ -19,7 +19,7 @@ When I ship a new version of a plugin I depend on, I want every active project t
 - The refresh is gated by consent when side effects touch sibling projects
 - The process reports what changed, what stayed the same, and what failed
 - Restarting Claude Code is surfaced as the final step so the new code is loaded
-- README content currency tracks code currency — adopters never read prose describing a prior release (per ADR-051: each `@windyroad/*` plugin README cites at least one current JTBD job ID; drift between README narrative and shipped behaviour is detectable via advisory script).
+- **(Amended 2026-05-04 by P159)** README content currency tracks code currency — adopters never read prose describing a prior release (per ADR-051 amended: each `@windyroad/*` plugin README cites at least one current JTBD job ID; drift between README narrative and shipped behaviour is **enforced at commit time** via PreToolUse:Bash hook; retro/release-time advisories ride as backup signals).
 
 ## Persona Constraints
 
@@ -35,4 +35,5 @@ When I ship a new version of a plugin I depend on, I want every active project t
 
 ## Related decisions
 
-- **ADR-051** — `@windyroad/*` plugin READMEs anchor on JTBD job IDs with declarative drift advisory. Extends this job's currency scope from code-currency (the install pulled the latest code) to README-content-currency (the prose describes the latest behaviour). Both are dimensions of the same persona-level currency concern.
+- **ADR-051** — `@windyroad/*` plugin READMEs anchor on JTBD job IDs with load-bearing commit-hook + prose-woven framing (amended 2026-05-04 by P159). Extends this job's currency scope from code-currency (the install pulled the latest code) to README-content-currency (the prose describes the latest behaviour). Both are dimensions of the same persona-level currency concern.
+- **(Added 2026-05-04) P159** — Drift detector should be a load-bearing commit-hook with auto-fix, not a retro-time advisory. Drives the load-bearing-from-the-start direction for this job's content-currency dimension.

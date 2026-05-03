@@ -1,11 +1,25 @@
 # Problem 159: JTBD currency detector should be a load-bearing commit-hook with auto-fix, not a retro-time advisory; section structure should integrate organically not bolt on a `## Jobs to be Done` block
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-03
 **Priority**: 12 (High) — Impact: Significant (4) x Likelihood: Possible (3)
 **Effort**: L — new PreToolUse:Bash hook + auto-fix orchestration via wr-jtbd:agent + ADR-051 amendment + 12-plugin-README re-integration to weave JTBD content organically + behavioural bats covering hook block and auto-fix paths. Could grow to XL if the auto-fix orchestration requires a new shared library or new agent-tool primitives.
 
 **WSJF**: (12 × 1.0) / 4 = **3.0**
+
+## Fix Released
+
+**Phase 1 shipped 2026-05-04** in `@windyroad/retrospective@0.17.0` (changeset `wr-retrospective-p159-readme-jtbd-currency-hook.md`). What ships: PreToolUse:Bash hook on `git commit` (`packages/retrospective/hooks/retrospective-readme-jtbd-currency.sh`) that runs the existing detector against the project's `./packages/` + `./docs/jtbd/` and denies on `drift_instances > 0`; ADR-051 amendment with new Decision Driver "Load-bearing-from-the-start for drift class" + Recommended Section Structure rewrite (bolt-on `## Jobs to be Done` rejected; prose-weaving target guidance + persona-primacy preservation + anti-pattern citation added); 19 behavioural bats covering deny/allow/fail-open paths; JTBD-302 + JTBD-007 outcome refresh; 2 tactical bootstrap drift fixes (architect README `capture-adr` mention + itil README `capture-problem` mention). Detector signal post-commit: `TOTAL packages=12 with_jtbd=12 drift_instances=0`.
+
+Phase 2-3 explicitly deferred per orchestrator framing: 12-README prose-weaving refresh + auto-fix orchestration via wr-jtbd:agent grant-Edit decision. P158 closed (retro Step 2b wiring survives as backup advisory). P161 filed for the broader drift-class-generalisation observation.
+
+Awaiting user verification — exercise via:
+1. Make a tactical drift in any plugin README (delete a JTBD citation or add a skill dir without README mention).
+2. `git add` the change.
+3. `git commit -m feat: test` — should be denied with "BLOCKED: P159 JTBD drift in <plugin> (...)".
+4. Restore the README — commit allowed.
+
+Verification gate (per ADR-022): user explicitly confirms working before close.
 
 > Surfaced 2026-05-03 by user during pre-audit docs-currency sweep, immediately after the just-shipped retro wiring (`df47ad1` / `@windyroad/retrospective@0.16.0`). User correction (P078 capture-on-correction): *"the drift detector shouldn't be part of the retro. It should be something we are always running and fixing"*. Follow-up clarifications via AskUserQuestion: surface = `git commit` hook with detector running on the post-commit tree, **especially when the staged set does NOT touch README.md** (because that's the most common drift class — contributor added a skill/hook/agent and forgot to update the README); auto-fix = use the JTBD framing to inform existing prose, NOT bolt on a separate `## Jobs to be Done` section.
 

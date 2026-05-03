@@ -1,13 +1,17 @@
 ---
 status: "proposed"
-date: 2026-05-03
+date: 2026-05-04
 decision-makers: [tomhoward]
 consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: []
-reassessment-date: 2026-08-03
+reassessment-date: 2026-08-04
+amended: 2026-05-04
+amendment-driver: P159
 ---
 
-# `@windyroad/*` plugin READMEs anchor on JTBD job IDs with declarative drift advisory
+# `@windyroad/*` plugin READMEs anchor on JTBD job IDs with load-bearing commit-hook + prose-woven framing
+
+> **Amendment 2026-05-04 (P159)**: Phase 1's advisory-only consumption surface (retro-time signal, exit-0 always) was identified as too late for the most common drift class — contributor adds a skill/hook/agent and forgets the README; the offending commit doesn't touch README.md so a retro-time consumer sees the drift only after it has shipped. The amended Phase 1 ships the load-bearing-from-the-start variant: a PreToolUse:Bash hook on `git commit` that runs the existing detector against the post-commit working tree and denies the commit when `drift_instances > 0`. The advisory script remains; retro Step 2b wiring (P158) survives as a backup advisory. Concurrently, the **Recommended Section Structure** clause is rewritten: the bolt-on `## Jobs to be Done` section is rejected as an anti-pattern (the section becomes compliance theatre that absolves the lead prose of doing the job-framing); JTBD framing should instead be **woven into the existing What It Does / Skills / How It Works prose** where adopters are already reading. See the amended Recommended Section Structure clause below for prose-weaving target guidance + persona-primacy preservation + anti-pattern citation.
 
 ## Context and Problem Statement
 
@@ -29,7 +33,8 @@ A normative rule is needed so future plugin authors do not author drift-prone RE
 - **Currency-pressure expansion from code to doc-content (JTBD-007)**: JTBD-007 (Keep Plugins Current Across Projects) currently frames currency as code-currency ("did the install pick up the latest code?"). This ADR extends the same persona's currency concern to README-content-currency. JTBD-007's scope is being **extended** (not reframed); JTBD-007 is a co-primary driver alongside JTBD-302.
 - **Job-framed value description over raw capability enumeration**: per the user's framing of P152, READMEs that lead with "what jobs this plugin helps you do" outperform READMEs that lead with "what skills this plugin exposes" for an audience that doesn't already know which skills they need. The persona docs already use job-framing; READMEs should compose with that vocabulary.
 - **Stable canonical anchor required for drift detection**: a hook firing on a README edit needs SOMETHING to gate against. JTBD job IDs (per ADR-008's per-job-file layout) are the project's most stable + most semantically-load-bearing identifier — more stable than skill names (P071 split precedent), more semantically-rich than ADR IDs (which describe decisions, not jobs).
-- **Advisory-first per ADR-013 Rule 6 fail-safe**: Phase 1 ships a script that emits drift signal as data on stdout; exit code is always 0; no gate fires. Phase 2 (R6-gated escalation) only fires if drift accumulates across N consecutive releases without correction. Matches P099 / P134 / P145 / P148 precedent.
+- **Advisory-first per ADR-013 Rule 6 fail-safe** (original Phase 1 design — superseded as primary 2026-05-04 by P159 amendment, retained as backup): the detector script emits drift signal as data on stdout; exit code is always 0; no gate fires. The script + retro Step 2b wiring (P158) survive as a backup signal; the load-bearing-from-the-start commit-hook (added in the amendment, see new driver below) is the primary surface.
+- **Load-bearing-from-the-start for drift class** (added 2026-05-04 by P159 amendment): drift detectors that catch *mechanical, detectable, structurally-bounded* divergence between code and docs are a different class from design-question / policy detectors. The advisory-then-escalate gradualism (ADR-040 / ADR-013 Rule 6 / P099 / P134 / P145 / P148) optimises for "give the rule time to socialise before it gates" — but for drift-class detection that gradualism re-creates the failure mode the detector exists to solve. The most common drift mode is "contributor adds a skill/hook/agent and forgets the README", which ships in a commit that does not touch README.md; an advisory surface consumed at retro time sees the drift only after the contributor has already committed. Load-bearing-from-the-start at the closest enforcement surface to the failure mode (here: PreToolUse:Bash on `git commit`) closes the gap. Whether this generalises to a meta-rule for drift detectors is the broader question P159 surfaces; that question is queued at outstanding_questions for a separate ticket once 2-3 more drift detectors arrive and follow the same shape.
 - **Plugin-developer persona's "clear patterns, not reverse-engineering" outcome (JTBD-101)** — composition driver: a future contributor authoring a new `@windyroad/*` plugin needs ONE place that says "this is how plugin READMEs are structured". This ADR is that place.
 - **Tech-lead persona's pre-flight governance check (JTBD-202)** — composition driver: the advisory detector script is exactly the kind of release-time signal a tech-lead would consult before recommending a plugin to a team or client.
 - **Solo-developer's enforce-governance job (JTBD-001)** — composition driver: extending the existing pressure-stack to README content composes with the documented-policy-checked-on-every-edit shape.
@@ -49,26 +54,46 @@ Chosen option: **"Option D2 — Plugin README MUST cite at least one current JTB
 
 Sibling to ADR-049 (bin/-on-PATH script resolution) on the "plugin-published artefacts must work in adopter contexts" axis. ADR-049 addresses **executable correctness** in adopter sessions; this ADR addresses **content currency** in adopter README reads. Both are plugin-boundary leakage concerns of different kinds.
 
-Composes with ADR-040 declarative-first / advisory-then-escalate pattern. Composes with ADR-013 Rule 6 fail-safe (Phase 1 advisory; exit-0 always). Composes with ADR-008 (JTBD directory structure) — the per-job-file layout is the load-bearing structural foundation that lets the detector resolve cited IDs deterministically.
+Composes with ADR-040 declarative-first pattern (the rule itself is declarative; the hook is the load-bearing enforcement of the declarative rule). Composes with ADR-013 Rule 1 (deny redirects with mechanical recovery — the hook deny names the wr-jtbd:agent recovery path + hand-edit fallback) and ADR-013 Rule 6 (fail-open paths preserve non-interactive resilience — outside git work tree, in adopter projects without ADR-051 anchors, on detector failure, on parse error). Composes with ADR-008 (JTBD directory structure) — the per-job-file layout is the load-bearing structural foundation that lets the detector resolve cited IDs deterministically.
 
-**Normative rules** (Phase 1):
+**(Amended 2026-05-04 by P159)** The original Phase 1 design's pure advisory consumption (exit-0 always; retro-time signal) is **superseded as the primary surface** by the load-bearing-from-the-start commit-hook. The advisory script + retro Step 2b wiring (P158, `df47ad1`) survive as a backup signal — they catch drift in sessions that bypass the commit-hook (BYPASS_JTBD_CURRENCY=1 audit trail) and provide cross-cutting drift summaries in retros. The amended rationale: drift detectors that catch *mechanical, detectable, structurally-bounded* divergence between code and docs are a different class from design-question / policy detectors; for drift class, advisory-then-escalate gradualism re-creates the failure mode the detector exists to solve (the contributor commits the drift before the advisory consumer sees it). See the new Decision Driver "Load-bearing-from-the-start for drift class" below.
+
+**Normative rules** (Phase 1, amended 2026-05-04):
 
 1. Every `@windyroad/*` plugin's `packages/<plugin>/README.md` MUST contain at least one match for the regex `JTBD-\d{3}`.
-2. Every JTBD ID cited in a plugin README MUST resolve to a current file under `docs/jtbd/<persona>/JTBD-NNN-*.md` — ANY status suffix (`.proposed.md`, `.validated.md`, `.deprecated.md`, `.superseded.md`). Status suffix is surfaced in detector signal as `jtbd_status=<status>` sub-flag so a future Phase 2 can tighten without re-architecting the detector. A README citing a `.deprecated.md` or `.superseded.md` ID is a currency signal worth flagging in `drift_hints`, not a resolution failure.
-3. The advisory detector MAY also flag inventory drift hints (skill defined in `packages/<plugin>/.claude-plugin/plugin.json` or `packages/<plugin>/skills/*/SKILL.md` but not mentioned in the README) as advisory signal — this is a soft heuristic, not a normative rule.
+2. Every JTBD ID cited in a plugin README MUST resolve to a current file under `docs/jtbd/<persona>/JTBD-NNN-*.md` — ANY status suffix (`.proposed.md`, `.validated.md`, `.deprecated.md`, `.superseded.md`). Status suffix is surfaced in detector signal as `jtbd_status=<status>` sub-flag so a future tightening can be added without re-architecting the detector. A README citing a `.deprecated.md` or `.superseded.md` ID is a currency signal worth flagging in `drift_hints`, not a resolution failure.
+3. The detector MAY also flag inventory drift hints (skill defined in `packages/<plugin>/.claude-plugin/plugin.json` or `packages/<plugin>/skills/*/SKILL.md` but not mentioned in the README) as advisory signal — this is a soft heuristic, not a normative rule.
+4. **(Added 2026-05-04 by P159 amendment)** A PreToolUse:Bash hook (`packages/retrospective/hooks/retrospective-readme-jtbd-currency.sh`) MUST gate `git commit` invocations against the detector running on the project's working tree. When `TOTAL drift_instances > 0`, the hook emits a PreToolUse deny that names the offending plugin slug + primary drift hint + the wr-jtbd:agent recovery path with hand-edit fallback + the BYPASS env override. The hook fails-open in adopter projects without `./packages/` or `./docs/jtbd/`, outside a git work tree, on detector-script failure, and on parse error — so the gate is a no-op for projects that haven't adopted the rule's structural anchors.
 
-**Recommended Section Structure** (for plugin READMEs, non-normative):
+**Recommended Section Structure** (for plugin READMEs, non-normative; rewritten 2026-05-04 by P159 amendment):
 
-- A `## Jobs to be Done` section — idiomatic match to repo's JTBD vocabulary; AI-greppable; familiar industry term.
-- Persona-grouped subsections under the heading (one subsection per persona served), each listing the JTBD jobs the plugin helps with for that persona, with the JTBD ID + a one-sentence framing of how this plugin serves the job.
-- Persona ordering reflects **primary readership** for that plugin (e.g. `@windyroad/itil` leads with plugin-user, `@windyroad/architect` leads with tech-lead).
+The bolt-on `## Jobs to be Done` section recommended in the original Phase 1 design is **rejected as an anti-pattern**. Empirical observation across the 12 plugin READMEs refreshed in `8df1692`: the bolted-on section becomes compliance theatre that absolves the lead prose (`## What It Does`) of doing the job-framing, while the adopter's reading attention is at the top of the README — they form their value model from the un-framed prose before the JTBD context arrives. The JTBD framing should instead **inform** the existing prose where adopters are already reading.
+
+**Prose-weaving target guidance** (where to weave JTBD-NNN citations):
+
+- **`## What It Does` (or equivalent value-framing opening section)** — the plugin's primary value claim should name at least one JTBD job in the prose itself, not as a tail-section appendage. Example shape: *"@windyroad/architect serves [JTBD-201](../docs/jtbd/tech-lead/JTBD-201-...) by enforcing architecture decisions documented in `docs/decisions/` against every edit."* The JTBD-NNN citation is the structural anchor; the prose is the value frame.
+- **Per-skill descriptions** — when a skill is introduced in the README, name the JTBD job it serves inline. Example shape: *"`/wr-architect:create-adr` (serves [JTBD-203](../docs/jtbd/tech-lead/JTBD-203-...)) authors a new MADR 4.0 architecture decision in `docs/decisions/`."*
+- **Per-hook / per-agent descriptions** — when a hook or agent is introduced, name the JTBD job that drove its mechanism. Hooks and agents are policy enforcement; the JTBD job names the policy intent.
+
+**Anti-pattern** (do NOT do this):
+
+- A standalone `## Jobs to be Done` section as a tail appendage. Reasoning: (a) the lead prose loses the framing pressure (JTBD context arrives after value model is already formed); (b) the section becomes a compliance tick rather than the canonical narrative anchor; (c) bolted-on sections drift independently from the lead prose at higher rates than woven citations do.
+
+**Persona-primacy preservation** (preserved across the rewrite):
+
+- The lead prose's value framing should reflect the **primary readership persona** for that plugin. `@windyroad/itil` leads with plugin-user (adopter team adopting ITIL framework via Claude); `@windyroad/architect` leads with tech-lead (architect enforcing decision discipline); `@windyroad/retrospective` leads with solo-developer (retro author capturing learnings). Secondary personas appear later in the prose as their jobs are introduced.
+- **Anti-pattern**: leading with capability enumeration (*"This plugin exposes 14 skills..."*) before the primary-persona value framing. The bolt-on section made this anti-pattern easy to fall into because the section provided a "compliance" outlet that absolved the lead prose of doing the framing. Without the bolt-on section, the lead prose carries the audience-framing weight directly.
+
+**Heading vocabulary remains non-normative** — plugins may use `## What It Does`, `## Overview`, `## Why You Want This`, etc. The detector greps for `JTBD-\d{3}` regardless of heading vocabulary; adopters benefit from readable narrative voice over rigid schema conformance.
 
 **Out of scope for this ADR**:
 
 - Generalisation to adopter project surfaces (marketing HTML, public docs, changelog narrative) — follow-on ticket. The user's framing of P152 mentions adopter surfaces; ADR-051's scope is `@windyroad/*` plugin READMEs only. Adopter-surface generalisation is a distinct decision because the source-of-truth anchor differs (adopter projects have their own JTBD structure or none at all).
-- Retroactive refresh of the existing 12 plugin READMEs — follow-on iter (filed alongside this ADR as the validation pass that confirms the mechanism scales). Phase 1 ships the rule + the detector; the retroactive content pass IS the empirical validation.
-- SKILL.md amendments wiring the detector into `/wr-retrospective:run-retro` Step 2b — follow-on iter, deferred until the detector is empirically validated against the existing READMEs.
-- Extension to walk `.github/ISSUE_TEMPLATE/*.yml` per JTBD-lead's recommendation — surfaced as a Phase 1.5 candidate; current scope is plugin READMEs only.
+- **Retroactive prose-weaving refresh of the existing 12 plugin READMEs** — Phase 2 (deferred to a separate iter; surfaced as P159 Phase 2 in the change log). The 12 READMEs currently carry the bolted-on `## Jobs to be Done` shape from `8df1692`; weaving JTBD framing into existing What It Does / Skills / How It Works prose is large agent-driven content work, not Phase 1 scope.
+- **Auto-fix orchestration via wr-jtbd:agent** — Phase 2 (deferred). The amended Phase 1 hook deny redirects to wr-jtbd:agent for guidance, but the agent's contract is currently read-only (Read/Glob/Grep/Bash). Phase 2 will decide whether to grant the agent Edit (architectural choice — agent gains write authority) or have the orchestrator apply edits from the agent's instruction sequence. Either choice will need its own ADR amendment / problem ticket.
+- SKILL.md amendments wiring the detector into `/wr-retrospective:run-retro` Step 2b — shipped under P158 (`df47ad1`); the retro wiring survives as a backup advisory after the P159 amendment migrates the primary surface to the commit-hook.
+- Extension to walk `.github/ISSUE_TEMPLATE/*.yml` per JTBD-lead's original recommendation — surfaced as a Phase 1.5 candidate; current scope is plugin READMEs only.
+- **Generalisation of "load-bearing-from-the-start as default for drift class"** — surfaced for a separate problem ticket (P161) if architect review confirms the pattern after 2-3 more drift detectors arrive following the same shape. P159 captures this as the originating observation.
 
 ### Consequences
 
@@ -76,20 +101,21 @@ Composes with ADR-040 declarative-first / advisory-then-escalate pattern. Compos
 
 - Adopter agents reading a `@windyroad/*` plugin README can cross-reference cited JTBD IDs to the public repo's `docs/jtbd/` tree, giving the persona-defining "low context on repo internals" reader a path to value-frame understanding without source archaeology. JTBD-302's "trust the README" outcome becomes reliably servable.
 - Future plugin authors have ONE place (this ADR) that says "this is how plugin READMEs are structured" — JTBD-101's "clear patterns, not reverse-engineering" outcome is served.
-- Drift is detectable at retro time, release time, and (via Phase 2 escalation if needed) commit time. The pressure-stack asymmetry P152 surfaces is closed in two phases.
+- **(Amended 2026-05-04 by P159)** Drift is gated at commit time (PreToolUse:Bash hook denies drifted commits with redirect to wr-jtbd:agent recovery), with retro time + release time advisory backups (P158 retro Step 2b wiring, advisory script) catching anything that bypasses the gate. The pressure-stack asymmetry P152 surfaces is closed at the closest enforcement surface to the failure mode.
 - README narrative anchors on stable identifiers (JTBD IDs) rather than skill names (which split per P071), ADR IDs (which amend per ADR-013 → ADR-044), or hook names (which churn per P124 / P141 / P144). JTBD IDs are the project's most stable + most semantically-load-bearing identifier.
 - Composes with the `wr-jtbd:agent` review path — when a plugin README is edited, the JTBD agent's existing review surface naturally extends to "are the cited JTBDs still current?".
 
 #### Neutral
 
-- One new advisory script (`packages/retrospective/scripts/check-readme-jtbd-currency.sh`) + one new bin/ shim (`packages/retrospective/bin/wr-retrospective-check-readme-jtbd-currency`) + one new bats fixture set. The script body is one concern; the shim is 3 lines per ADR-049; the fixtures are synthetic markdown. Maintenance footprint is small.
+- One advisory script (`packages/retrospective/scripts/check-readme-jtbd-currency.sh`) + one bin/ shim (`packages/retrospective/bin/wr-retrospective-check-readme-jtbd-currency`) + one detector bats fixture set + **(Added 2026-05-04 by P159)** one PreToolUse:Bash hook (`packages/retrospective/hooks/retrospective-readme-jtbd-currency.sh`) registered in `packages/retrospective/hooks/hooks.json` + one hook bats fixture set. The script body is one concern; the shim is 3 lines per ADR-049; the fixtures are synthetic markdown; the hook is ~50 lines of Bash invoking the detector and parsing its TOTAL line. Maintenance footprint is small.
 - Plugin authors must include at least one JTBD citation in every README. For most plugins, the relevant JTBD already exists; for plugins that don't yet have a JTBD-anchored job (the plugin-user might say "this plugin doesn't help with any documented job"), the answer is to file the missing JTBD, not skip the citation.
 
 #### Bad
 
-- Phase 1 is advisory-only — the detector emits data, but no gate fires. Adopters of the rule rely on retro consumption + release-pre-flight habit, not deterministic enforcement. Phase 2 escalation is the controlled escape hatch for sustained non-compliance.
-- The detector cannot semantically validate that a cited JTBD ID is the **right** job for the plugin — only that the cited ID exists. A README that cites JTBD-001 in every plugin would pass the detector but still be wrong. This is the residual judgement call that retros catch + the JTBD agent's read of the README content addresses — outside this ADR's scope.
-- Plugin renames that change the README's JTBD section composition (e.g. removing a deprecated persona) require coordinated edits across multiple READMEs. This is rare and grep-able.
+- **(Amended 2026-05-04 by P159)** The PreToolUse:Bash hook adds ~80–150ms per `git commit` invocation in the plugin monorepo (architect's ADR-023 perf review at amendment time). Aggregate impact: ~3s per AFK loop session (~30 commits) and ~500ms per non-AFK session (~5 commits). Adopter projects without `./packages/` or `./docs/jtbd/` see ~5ms (fail-open path; one git rev-parse + two directory checks). The cost is acceptable for AFK loops but noted for monitoring; if the detector grows or the per-package count expands materially, performance budget warrants a revisit.
+- The detector cannot semantically validate that a cited JTBD ID is the **right** job for the plugin — only that the cited ID exists. A README that cites JTBD-001 in every plugin would pass the detector but still be wrong. This is the residual judgement call that the wr-jtbd:agent's read of the README content (Phase 2 auto-fix scope) and retros (backup advisory) address.
+- Plugin renames that change the README's JTBD framing composition (e.g. removing a deprecated persona) require coordinated edits across multiple READMEs. This is rare and grep-able.
+- **(Added 2026-05-04 by P159)** The bootstrapping commit that ships the hook itself must clear any pre-existing drift OR use BYPASS_JTBD_CURRENCY=1 — otherwise the hook denies its own creator commit. The amendment commit fixes 2 pre-existing skill-inventory-drift instances tactically (architect README missing `capture-adr`; itil README missing `capture-problem`) so the bootstrap commit clears the gate naturally without BYPASS. Per ADR-053 Bootstrapping clause precedent.
 
 ## Confirmation
 
@@ -102,9 +128,10 @@ This decision is honoured when:
 2. **Detector emits the documented signal vocabulary**: per-package `README package=<name> has_jtbd_anchor=<yes|no> cited_jobs=<count> known_jobs=<count> drift_hints=<comma-list>` lines, plus a trailing `TOTAL packages=<N> with_jtbd=<M> drift_instances=<K>` summary. Per-citation status sub-flag emitted for tightening flexibility in Phase 2. Matches the value-pair convention of sibling detectors (P099 / P134 / P145 / P148).
 3. **Bin/ shim resolves on `$PATH`**: `command -v wr-retrospective-check-readme-jtbd-currency` succeeds when the plugin is installed via the marketplace cache. Per ADR-049 normative rule + naming grammar.
 4. **Changeset accompanies the script + ADR**: `@windyroad/retrospective` minor bump documenting the new advisory script + bin shim. Per ADR-014 + ADR-021 + P141 changeset-discipline.
-5. **No SKILL.md amendment in Phase 1**: the detector ships as an invocable bin command; wiring into `/wr-retrospective:run-retro` Step 2b is deferred to a follow-on iter once the detector is empirically validated against current READMEs.
-6. **Retroactive content refresh deferred to a follow-on ticket**: the 12 plugin READMEs are not refreshed in this iter. The retroactive pass is the validation that the mechanism scales and is filed as a separate ticket.
-7. **Phase 2 escalation criterion documented + mechanically checkable**: if the advisory detector emits `drift_instances ≥ 2` across 3 consecutive `chore: version packages` releases without correction, escalate to a load-bearing hook per ADR-013 Rule 6 escalation pattern. The drift count is read from the detector's `TOTAL drift_instances=<K>` line at each release; the 3-consecutive-releases observation window is checked by sampling the last 3 release-tagged commits' detector output. Explicit threshold + observation window + mechanically-checkable counter source so escalation is mechanical, not subjective.
+5. **(Amended 2026-05-04 by P159) Phase 1 surface is the PreToolUse:Bash commit-hook + retro Step 2b advisory backup**: the load-bearing-from-the-start hook (`packages/retrospective/hooks/retrospective-readme-jtbd-currency.sh`, registered in `packages/retrospective/hooks/hooks.json` under PreToolUse:Bash) is the primary consumption surface. The retro Step 2b wiring shipped under P158 (`df47ad1`) survives as a backup advisory for sessions where the commit-hook is bypassed (BYPASS_JTBD_CURRENCY=1) or where adopters consume the detector at retro time for cross-cutting drift summaries.
+6. **(Amended 2026-05-04 by P159) Hook behaviour is bats-tested**: `packages/retrospective/hooks/test/retrospective-readme-jtbd-currency.bats` asserts deny on drift (no JTBD-NNN cite, skill-inventory-drift), allow on clean tree, BYPASS env, fail-open paths (outside git work tree, no `./packages/`, no `./docs/jtbd/`, parse error, malformed JSON), silent-on-pass per ADR-045 Pattern 1, and deny-band ≤300 bytes per ADR-045. Deny redirects to wr-jtbd:agent recovery with hand-edit fallback per ADR-013 Rule 1.
+7. **Retroactive prose-weaving refresh deferred to Phase 2** (surfaced as a separate iter): the 12 plugin READMEs are not re-integrated in this iter. Each plugin README needs its `## Jobs to be Done` tail-section removed and JTBD-NNN citations woven into the existing What It Does / Skills / How It Works prose per the amended Recommended Section Structure clause. Two pre-existing skill-inventory-drift instances (architect README missing `capture-adr` mention from `d28bd51`; itil README missing `capture-problem` mention from `86e99e5`) are tactically fixed in the same commit as the hook to clear the bootstrap drift; the strategic re-integration follows in Phase 2.
+8. **(Amended 2026-05-04 by P159 — Reassessment trigger refresh)** The original Phase 2 escalation criterion (advisory `drift_instances ≥ 2` across 3 releases triggers a load-bearing hook) is **superseded** by the load-bearing-from-the-start direction. The new reassessment trigger: if the commit-hook produces a sustained false-positive rate (legitimate commits routinely BYPASS-bypassed without remediation), revisit the hook's drift-detection logic; if the detector misses semantic drift the hook cannot catch (e.g. cited JTBD is the wrong persona for the plugin), extend the detector or add a wr-jtbd:agent review gate on README edits. See Reassessment Criteria below.
 
 ## Pros and Cons of the Options
 
@@ -141,19 +168,25 @@ This decision is honoured when:
 
 ## Reassessment Criteria
 
+(Amended 2026-05-04 by P159 — the original "escalate-to-load-bearing-after-3-releases" trigger is superseded because the amended Phase 1 ships the load-bearing variant directly. The triggers below now monitor the load-bearing surface for false-positives / undetected drift / generalisation pressure.)
+
 Reassess if any of the following occur:
 
-- The advisory detector emits `drift_instances ≥ 2` across 3 consecutive `chore: version packages` releases without correction. At that point, escalate to Phase 2 (R6-gated load-bearing hook) per ADR-013 Rule 6 escalation pattern.
+- The PreToolUse:Bash hook produces a sustained false-positive rate — legitimate commits (e.g. work-in-progress branches, intentional drift during a refactor) routinely BYPASS-bypass the gate without remediation. At that point, revisit the hook's drift-detection logic and consider tightening the BYPASS audit trail (e.g. require BYPASS to also stage a follow-up ticket).
 - A plugin README cites a JTBD ID that resolves but is for the wrong persona (semantic drift the detector cannot catch). At that point, extend the detector to flag persona-mismatch as a `drift_hints=persona-mismatch` signal, OR add a `wr-jtbd:agent` review hook on README edits.
 - Adopter-surface generalisation (marketing HTML, public docs, changelog narrative) becomes load-bearing for an adopter project. At that point, extend ADR-051 or author a sibling ADR for the adopter-surface mechanism (the source-of-truth anchor likely differs).
 - A JTBD job is renamed or its status suffix changes during the per-release cadence. The detector resolves any-status-suffix matches per the established ADR-008 layout, so this is non-blocking; reassess if the resolution behaviour produces false positives or false negatives in practice.
 - Generated READMEs (Option D4) become viable — e.g. an adopter's downstream tool generates READMEs from JTBD + SKILL.md and ships them. At that point, the detector should validate the generated content the same way it validates hand-authored content (the rule applies regardless of authorship).
+- **(Added 2026-05-04 by P159 amendment)** Two or three more drift-class detectors arrive following the load-bearing-from-the-start shape (P159 variant). At that point, P161 (or its successor ticket) escalates the meta-question: should advisory-then-escalate be retired as the default for drift-class detectors generally? Until 2-3 more instances arrive, the meta-rule is observation, not codified guidance.
 
 ## Related
 
-- **P152** — driver problem (No pressure or nudge for documentation currency); this ADR's normative rule + Phase 1 advisory addresses the asymmetric pressure-stack the ticket surfaces.
-- **JTBD-302** (newly filed alongside this ADR) — Trust That the README Describes the Plugin I Just Installed; co-primary plugin-user job served by this ADR's rule.
-- **JTBD-007** — Keep Plugins Current Across Projects (currency expansion: code-currency → doc-content-currency); co-primary driver. JTBD-007's file is amended in the same commit as this ADR to add a Desired Outcome line for doc-content currency + a `Related decisions: ADR-051` line.
+- **P152** — driver problem (No pressure or nudge for documentation currency); this ADR's normative rule + amended Phase 1 commit-hook close the asymmetric pressure-stack the ticket surfaces.
+- **(Added 2026-05-04) P159** — amendment driver. P159 surfaced the user correction that retro-time advisory consumption is too late for drift class, and that the bolt-on `## Jobs to be Done` section reads as compliance theatre. This ADR's amendment ships the load-bearing-from-the-start commit-hook + rewrites the Recommended Section Structure clause to favour prose-weaving.
+- **(Added 2026-05-04) P158** — sibling problem ticket; retro Step 2b wiring shipped under `df47ad1`. Retro wiring survives as a backup advisory after the P159 amendment migrates the primary surface to the commit-hook. P158 transitions Verifying → Closed in the P159 commit per architect verdict.
+- **(Added 2026-05-04) P161** — sibling out-of-scope ticket (filed in the P159 commit) — broader question of whether advisory-then-escalate is the right default for drift-class detectors generally. Originating observation: P159. Codified meta-rule deferred until 2-3 more drift detectors arrive following the same shape.
+- **JTBD-302** (newly filed alongside this ADR's original Phase 1) — Trust That the README Describes the Plugin I Just Installed; co-primary plugin-user job served by this ADR's rule. **(Added 2026-05-04)** JTBD-302's Desired Outcome bullet 6 is amended in the P159 commit to reflect commit-time enforcement (vs the original advisory-then-escalate phrasing).
+- **JTBD-007** — Keep Plugins Current Across Projects (currency expansion: code-currency → doc-content-currency); co-primary driver. JTBD-007's file was amended in the original Phase 1 commit. **(Added 2026-05-04)** JTBD-007's currency phrasing is updated in the P159 commit to reflect commit-time enforcement (replacing the "advisory script" wording).
 - **JTBD-301** — Report a Problem Without Pre-Classifying It (transitive: better READMEs → better mental models → better intake).
 - **JTBD-101** — Extend the Suite with New Plugins (clear patterns, not reverse-engineering).
 - **JTBD-001** — Enforce Governance Without Slowing Down (pressure-stack composition).
@@ -162,9 +195,10 @@ Reassess if any of the following occur:
 - **ADR-003** — Marketplace-only distribution (READMEs ship via the marketplace cache; adopter sessions read them).
 - **ADR-008** — JTBD directory structure (per-job-file layout that lets the detector resolve cited IDs deterministically).
 - **ADR-013 Rule 6** — Non-interactive fail-safe / advisory-then-escalate pattern.
-- **ADR-014** — Granular commits (this ADR ships in the same commit as the script + bats + bin shim + JTBD-302 + changeset + JTBD-007 amendment).
-- **ADR-021** — Changesets for releases (Phase 1 ships under a `@windyroad/retrospective` minor bump).
-- **ADR-040** — Session-start briefing surface (advisory-first / declarative-first precedent).
+- **ADR-014** — Granular commits (the original ADR shipped in one commit with the script + bats + bin shim + JTBD-302 + changeset + JTBD-007 amendment; **(Added 2026-05-04)** the P159 amendment ships in one commit with the new hook + hook bats + ADR-051 amendment + JTBD-302 + JTBD-007 edits + 2 tactical README drift fixes + retrospective minor changeset + P159 transition + P161 ticket creation + P158 closure).
+- **ADR-021** — Changesets for releases (the original ADR shipped under a `@windyroad/retrospective` minor bump; **(Added 2026-05-04)** the P159 amendment ships under another `@windyroad/retrospective` minor bump for the new hook).
+- **ADR-040** — Session-start briefing surface (advisory-first / declarative-first precedent — Decision Drivers retain an advisory-first composition note even after the P159 amendment, because the rule itself is declarative and the hook is the load-bearing enforcement of the declarative rule).
+- **(Added 2026-05-04) ADR-053 Bootstrapping clause** — precedent for "the introducing commit is exempt from the rule it introduces"; the P159 amendment commit either fixes pre-existing drift tactically or uses BYPASS_JTBD_CURRENCY=1 for legitimate one-time bootstrapping.
 - **ADR-044** — Decision delegation contract (framework-resolution boundary informs whether Phase 2 escalation is silently agent-decided or surfaced via deviation-candidate).
 - **ADR-049** — Plugin-bundled scripts via bin/ on `$PATH` (sibling adopter-context decision; executable correctness vs content currency).
 - **P137** — Plugin-published artefacts reference internal IDs (sibling adopter-facing-content axis: semantic correctness).
