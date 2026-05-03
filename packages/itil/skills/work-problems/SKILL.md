@@ -412,15 +412,55 @@ After each iteration, report:
 - The outcome (success, partially progressed, skipped, scope expanded)
 - How many problems remain in the backlog
 - The iteration's cost metadata — format: `($<cost>, <duration_s>s, <total_tokens_K>K tokens)`. Cost comes from the `.total_cost_usd` field extracted in Step 5; duration from `.duration_ms`; total tokens is the sum of `.usage.input_tokens + .usage.output_tokens + .usage.cache_creation_input_tokens + .usage.cache_read_input_tokens`.
+- Risk-register scaffold line when Step 6.4 drained ≥1 entry — format: `Risk register: <N> entries scaffolded (pending review)` per JTBD-006 outcome 4 (auditability of AI-assisted work). Omit the line when the drain was a no-op.
 
 Format as a brief status line, not a wall of text. The user will read these when they return.
 
 **Example:**
 ```
 [Iteration 1] Worked P029 (Edit gate overhead for governance docs) — implemented fix, closed. 8 problems remain. ($0.32, 23s, 171K tokens)
-[Iteration 2] Worked P021 (Governance skill structured prompts) — investigated root cause, transitioned to known-error. 7 problems remain. ($0.85, 47s, 432K tokens)
+[Iteration 2] Worked P021 (Governance skill structured prompts) — investigated root cause, transitioned to known-error. 7 problems remain. Risk register: 1 entry scaffolded (pending review). ($0.85, 47s, 432K tokens)
 [Iteration 3] Skipped P016 (Multi-concern ticket splitting) — fix released, awaiting user verification. Worked P024 (Risk scorer WIP flag) — implemented fix, closed. 6 problems remain. ($1.12, 62s, 541K tokens)
 ```
+
+### Step 6.4: Drain risk-register queue (per ADR-056 Phase 2b)
+
+After the iteration's commit lands and before the release-cadence check, drain any `RISK_REGISTER_HINT` entries that the iteration's pipeline runs enqueued to `.afk-run-state/risk-register-queue.jsonl`. The hook (Phase 2a) writes the queue silently; this step (Phase 2b) materialises queued hints into `docs/risks/R<NNN>-<slug>.active.md` register entries. Per-iter cadence keeps the queue bounded and attaches the resulting `docs(risks): scaffold ...` commit to the iter that produced the hint (preserves ADR-014 single-ticket-unit-of-work grain).
+
+**Mechanism — invoke the shared drain script:**
+
+1. Run the shim: `wr-risk-scorer-drain-register-queue` (resolves to `packages/risk-scorer/scripts/drain-register-queue.sh` per ADR-049 naming grammar). The script:
+   - Skips silently if `.afk-run-state/risk-register-queue.jsonl` is empty or absent (no-op exit 0).
+   - Skips silently if `docs/risks/` has not been scaffolded (Phase 1 / install-updates Step 6.5 has not fired in this project yet — preserves the queue for the next drain).
+   - Dedupes by `risk_slug`: N hints for the same slug → one register file with N Evidence Log entries (per the user direction "for each risk in `.risk-reports` there should be something in the register").
+   - Mints new R<NNN> IDs via local-max + origin-max +1 (ADR-019 dual-source ID for ticket-creator surfaces).
+   - Writes each new entry from a fixed shape with `Status: Active (auto-scaffolded — pending review)`, ADR-026 sentinel `not estimated — no prior data` for ungrounded scoring fields, and a `Curation: pending review` field for downstream review tooling.
+   - Updates `docs/risks/README.md` Register table with one row per new risk (em-dash for stub scoring per ADR-056 §pending-review).
+   - Stages all writes via `git add docs/risks` and truncates the queue file on success.
+
+2. Parse stdout key=value output:
+   - `entries_drained=N` — total queue lines processed.
+   - `new_risks_created=N` — new register files written.
+   - `evidence_appended=N` — slug-matched existing files updated.
+   - `next_action=commit-staged|none` — when `commit-staged`, run a dedicated `docs(risks): scaffold` commit through the standard ADR-014 commit-gate flow.
+
+3. **Commit (when `next_action=commit-staged`)**: stage is already done; commit message:
+   ```
+   docs(risks): scaffold R<NNN>... (<N> entries from queue)
+
+   Drained .afk-run-state/risk-register-queue.jsonl per ADR-056 Phase 2b.
+   <new_risks_created> new register entries; <evidence_appended> existing
+   entries gained Evidence Log lines. All entries marked Active
+   (auto-scaffolded — pending review) with ADR-026 sentinels for
+   ungrounded scoring fields.
+   ```
+   The commit goes through architect / JTBD / risk-scorer review per ADR-014. Per ADR-013 Rule 5, the drain action itself is policy-authorised silent proceed — no `AskUserQuestion` round-trip needed; the shape is mechanical and ADR-056 supplies the authority.
+
+4. Pass the `new_risks_created + evidence_appended` count into Step 6's progress report so the AFK summary surfaces register population per JTBD-006 outcome 4. When `entries_drained=0`, omit the register line entirely.
+
+**Idempotency**: safe to invoke when queue is empty / missing. The script's no-op path is the steady state in projects without active above-appetite events.
+
+**Failure handling**: if the drain script exits non-zero (template missing, write error, git failure), do NOT halt the loop — log the failure in the iter report and proceed to Step 6.5. The queue retains entries for next drain; Phase 3 backfill recovers any persistent loss.
 
 ### Step 6.5: Release-cadence check (per ADR-018, above-appetite branch per ADR-042)
 

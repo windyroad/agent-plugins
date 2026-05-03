@@ -202,9 +202,30 @@ What Phase 2a does: every pipeline run that emits a `RISK_REGISTER_HINT:` block 
 
 What Phase 2a does NOT do: drain the queue to materialise actual register files. Adopters running Phase 2a-only see queue-file growth but no `docs/risks/` population. P033 status remains Known Error pending Phase 2b.
 
-#### Phase 2b — consumer-skill drain steps (deferred to next iters)
+#### Phase 2b — consumer-skill drain steps (PARTIAL — work-problems Step 6.4 LANDED iter 20, 2026-05-03)
 
-Each consumer skill that fires after a pipeline run gains a Step-N drain that:
+**Iter 20 progress (2026-05-03)**: shared drain script + first consumer wired up.
+
+Files landed iter 20:
+
+- `packages/risk-scorer/scripts/drain-register-queue.sh` — canonical drain script (bash + python3). Reads `.afk-run-state/risk-register-queue.jsonl`, dedupes by `risk_slug`, writes `docs/risks/R<NNN>-<slug>.active.md` from a fixed shape with `Status: Active (auto-scaffolded — pending review)` + ADR-026 sentinel `not estimated — no prior data` for ungrounded scoring fields + `Curation: pending review` field, appends Evidence Log to existing slug matches, updates `docs/risks/README.md` Register table with em-dash stub rows, stages writes via `git add`, truncates queue on success. Dual-source ID (local-max + origin-max +1) per ADR-019.
+- `packages/risk-scorer/bin/wr-risk-scorer-drain-register-queue` — `bin/`-on-`$PATH` shim per ADR-049 naming grammar. Two-line `exec "$(dirname "$0")/../scripts/drain-register-queue.sh" "$@"`.
+- `packages/risk-scorer/package.json` `files` array — added `"scripts/"` so the canonical script ships in the npm tarball (ADR-049 packaging requirement). Sibling-finding: itil's `files` array has the same gap (its existing `bin/wr-itil-*` shims exec into `../scripts/` which isn't shipped); requires its own ticket / iter to fix.
+- `packages/risk-scorer/scripts/test/drain-register-queue.bats` — 16 behavioural-fixture tests per ADR-052: shim resolution, empty-queue no-op, missing-`docs/risks/` no-op, single-hint creation, README-row-append, multi-hint dedupe, two-slug sequential IDs, existing-match Evidence Log append, queue-truncation contract, no-truncate-on-no-op, stdout key=value shape, file-staging contract, origin-max collision avoidance (ADR-019), malformed-line skip. All GREEN.
+- `packages/itil/skills/work-problems/SKILL.md` — new `### Step 6.4: Drain risk-register queue (per ADR-056 Phase 2b)` between Step 6 (Report progress) and Step 6.5 (Release-cadence check). Step 6.4 invokes the shim, parses key=value output, commits via standard ADR-014 commit-gate flow when `next_action=commit-staged`. Step 6 progress-report template extended with `Risk register: N entries scaffolded (pending review)` line per JTBD-006 outcome 4 (auditability of AI-assisted work).
+
+**Effect**: every AFK work-problems iter that produces a pipeline `RISK_REGISTER_HINT` now materialises register entries before the next iter starts. Queue size is bounded per-iter. Phase 1 scaffolding precondition (ADR-047, landed iter 18) gates the drain — adopters without `docs/risks/` see queue accumulation, awaiting install-updates next-run scaffold.
+
+**Phase 2b remaining (deferred to subsequent iters)**:
+- `/wr-itil:manage-problem` Step 11 drain (pre-commit) — fires on synchronous problem-management sessions.
+- `/install-updates` Step 6.6 drain (after Step 6.5 scaffold) — closes the loop where Phase 1 just landed and Phase 2 hints have queued in the same install pass.
+- `/wr-risk-scorer:assess-release` drain (pre-release-decision) — fires when release-time pipeline run hints accumulate.
+
+The shared `wr-risk-scorer-drain-register-queue` shim is the single integration surface — each remaining consumer skill needs one new step block invoking the shim plus the same key=value parse / commit pattern.
+
+#### Phase 2b — consumer-skill drain steps remaining
+
+Each remaining consumer skill that fires after a pipeline run gains a Step-N drain that:
 
 1. Reads `.afk-run-state/risk-register-queue.jsonl`.
 2. Groups lines by `risk_slug` (dedupe — N reports : 1 register entry per user direction).
