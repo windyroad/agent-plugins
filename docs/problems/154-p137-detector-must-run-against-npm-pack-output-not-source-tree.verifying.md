@@ -1,6 +1,6 @@
 # Problem 154: P137 namespace-prefix detector must run against npm pack output not source tree — source-tree advisory misses publish-manifest drift class (broken-shim regression caught only after production ship)
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-03
 **Priority**: 15 (High) — Impact: Significant (3) x Likelihood: Almost certain (5)
 **Effort**: M — bounded extension to ADR-055's `check-namespace-prefix-leakage.sh` advisory: invoke `npm pack --pack-destination /tmp/<workspace> --json` per workspace package, extract the resulting tarball, walk the extracted file set with the existing detector. Behavioural bats per ADR-052 (synthetic broken fixture asserting tarball-only-leak detection vs source-tree-only-leak detection). No new ADR required — covered under ADR-055's reassessment-criteria clause + composes with ADR-049 plugin-bundled-script resolution. XL only if it requires reshaping the entire detector pipeline; M as a sibling advisory script + invocation in retro Step 2b cross-reference.
@@ -102,3 +102,29 @@ Candidate fix shapes to explore in the architect-design phase:
 - 2026-05-03 R1 commit (3f671b9 in this AFK loop session) — "fix(itil): ship scripts/ in tarball so wr-itil-* shims resolve in adopters (P140 fix-and-continue R1)". First production fix-and-continue of the very regression class P154 closes.
 - iter 20 ITERATION_SUMMARY (P033 Phase 2b) — sibling-finding source. Recorded inline:
   > "itil's package.json `files` array is missing 'scripts/' — its existing wr-itil-* shims (wr-itil-reconcile-readme etc.) exec into ../scripts/ which doesn't ship in the npm tarball. Same root cause as the risk-scorer fix above. Recommend follow-up ticket / fix-and-continue iter to add 'scripts/' to packages/itil/package.json."
+
+## Fix Released — Phase 1 (2026-05-03 P154 iter)
+
+Phase 1 of the tarball-shape detector shipped via `@windyroad/retrospective` minor bump (changeset `wr-retrospective-p154-tarball-shipped-shims-advisory`). Concretely:
+
+- **Advisory detector** — `packages/retrospective/scripts/check-tarball-shipped-shims.sh`. Diagnose-only, silent-on-pass per ADR-045 + ADR-013 Rule 6 + ADR-040. Walks `<root>/packages/<plugin>/package.json` workspaces; runs `npm pack --dry-run --json` per workspace to enumerate the shipped file set; for every `bin/wr-<plugin>-<name>` shim in the tarball, parses the shim source for the `exec`'d `scripts/<name>.sh` target and asserts the target path is also in the tarball. Skips non-ADR-049-grammar bins (`bin/install.mjs`, `bin/check-deps.sh`, `bin/windyroad-<plugin>` legacy installers). Reports `TARBALL_DRIFT package=<name> shim=<bin/wr-...> target=<scripts/...> tarball-status=missing` lines + `TOTAL packages=<N> with_drift=<M> missing_targets=<K>` summary. Exit 0 always. Exit 2 on parse error (root dir missing or `npm` unavailable).
+
+- **Bin shim** — `packages/retrospective/bin/wr-retrospective-check-tarball-shipped-shims` per ADR-049 grammar.
+
+- **Behavioural bats fixture** — `packages/retrospective/scripts/test/check-tarball-shipped-shims.bats` per ADR-052 default. 15 tests, all GREEN. Asserts script *output* on temp-fixture trees, never script source content. Coverage: clean workspace silent-on-pass; broken-shape workspace (`files: ["bin/"]` omitting `scripts/`) emits the canonical TARBALL_DRIFT line; multi-shim and multi-package aggregation; deterministic `<package>/<shim>` sort order; non-ADR-049-grammar bin exclusion; missing-root-dir exit 2 path.
+
+- **Dogfood-fix** — `packages/retrospective/package.json` adds `"scripts/"` to the `files` array. Pre-fix smoke: detector reported 5 TARBALL_DRIFT instances under `@windyroad/retrospective` (the iter-20 regression class replicated across 5 sibling check-* shims — `wr-retrospective-check-internal-id-leaks`, `-check-readme-jtbd-currency`, `-check-skill-md-budgets`, `-list-plugin-attribution`, `-measure-context-budget`). Post-fix: silent-on-pass — all targets resolve in the tarball.
+
+**Live-repo baseline**: as of the post-fix commit, `packages/retrospective/scripts/check-tarball-shipped-shims.sh .` returns no output (exit 0) — every `@windyroad/<plugin>` workspace currently passes the detector. This is the reassessment-anchor count for Phase 2 progress (zero drift means Phase 2 R6-gated escalation is currently inapplicable; reassess if drift rises).
+
+**What's deferred (Phase 2)**:
+
+- Wire the advisory into `/wr-retrospective:run-retro` Step 2b cross-reference alongside `check-internal-id-leaks.sh` (P137 Phase 1) and `check-readme-jtbd-currency.sh` (P158). Same shape as the source-tree detector — when the wiring lands, the advisory surfaces during AFK loops too.
+- Promotion to load-bearing PreToolUse hook (Phase 3) iff drift_instances ≥ 1 across 3 consecutive `chore: version packages` releases without correction. Mirrors the ADR-052 PostToolUse-advisory → PreToolUse-blocking precedent.
+- Generalisation to non-shim manifest drift (files referenced from shipped SKILL.md / hooks / agents that are themselves not shipped) — same detector class, separable extension.
+
+**Composes with**: ADR-049 (executable correctness — sibling `bin/`-on-PATH ADR; this detector enforces ADR-049's confirmation criterion 5 from the publish-manifest side); ADR-055 (sibling adopter-context decision — same `packages/retrospective/scripts/` home + retro Step 2b cross-reference target when P137 Phase 2 wiring lands); ADR-052 (behavioural-tests-default); ADR-040 (declarative-first); ADR-038 (progressive disclosure); ADR-045 (silent-on-pass); ADR-013 Rule 6 (advisory-then-escalate fail-safe).
+
+**Verification path for the user**: read this Fix Released section, run `packages/retrospective/scripts/check-tarball-shipped-shims.sh .` from the repo root, confirm silent-on-pass output (exit 0). Run the bats fixture: `node_modules/.bin/bats packages/retrospective/scripts/test/check-tarball-shipped-shims.bats` — confirm 15/15 tests pass. To exercise the broken-case detection, temporarily revert `"scripts/"` from `packages/retrospective/package.json#files` and re-run the detector; the 5 retrospective shim TARBALL_DRIFT lines should re-appear.
+
+Awaiting user verification.
