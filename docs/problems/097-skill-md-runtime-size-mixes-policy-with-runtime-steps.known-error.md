@@ -1,6 +1,6 @@
 # Problem 097: SKILL.md files mix runtime-necessary steps with maintainer-facing rationale, bloating every skill invocation
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-22
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: L
@@ -166,10 +166,44 @@ This audit IS the Phase 1 deliverable. SKILL.md was deliberately not modified �
 
 **Recommended next-step record for Phase 2**: do not start P097 Phase 2 until P081 is at least at `Known Error` with a credible behavioural-test framework prototype. Mark P097 Phase 2 as `Blocked by: P081` in the Dependencies graph so the transitive-effort rule (P076) carries the block.
 
+## Phase 1 Declarative Contract (2026-05-03)
+
+Phase 1 declarative-first deliverable lands per the ADR-051 / ADR-052 / ADR-053 contract-first / measurement-second / rollout-third precedent. Re-measurement during this iter showed sizes have grown 50-144% since the 2026-04-22 audit:
+
+| Skill | 2026-04-22 | 2026-05-03 | Δ |
+|---|---:|---:|---:|
+| `/wr-itil:work-problems` | 39,265 | 95,861 | +144% |
+| `/wr-itil:manage-problem` | 55,032 | 82,808 | +50% |
+| `/wr-retrospective:run-retro` | 36,292 | 70,105 | +93% |
+
+Pressure is **accelerating**. Phase 1 ships the declarative contract to slow the accumulation; Phase 2-3 unblocks behind P081 Layer B for the actual extraction.
+
+### Phase 1 deliverable
+
+- **ADR-054** (proposed) — `docs/decisions/054-skill-md-runtime-budget-policy.proposed.md`. Codifies:
+  - Per-paragraph content classification taxonomy: `[runtime]` (must stay inline) / `[reference]` (move to sibling REFERENCE.md) / `[deprecated]` (delete after window).
+  - Sibling REFERENCE.md per-skill pattern with explicit "Read REFERENCE.md § X for Y" lazy-load pointers.
+  - Per-skill pointer-overhead ceiling (≤ 20 pointers / ≤ 1.6 KB) — prevents defeating the byte budget by spamming pointers.
+  - Byte budgets: WARN ≥ 8,192 bytes (rotation candidate, defer permitted); MUST_SPLIT ≥ 16,384 bytes (no defer). Vocabulary mirrors ADR-040 / P145 OVER / MUST_SPLIT pair on the briefing-tree surface verbatim — adopters learn one concept across two surfaces.
+  - REFERENCE.md reads are mechanical / silent per CLAUDE.md P132 + ADR-044 silent-framework category.
+  - Phase 2-3 migration shape: opportunistic-as-touched per ADR-052 verbatim (not big-bang).
+- **Advisory detector** — `packages/retrospective/scripts/check-skill-md-budgets.sh`. Read-only; exit 0 always; exit 2 on parse error. Walks `<root>/packages/*/skills/*/SKILL.md` + `<root>/.claude/skills/*/SKILL.md`. Output sorted by `<plugin>/<skill>` identifier. Env-var overrides via `SKILL_MD_WARN_BYTES` / `SKILL_MD_MUST_SPLIT_BYTES`.
+- **Bin shim** — `packages/retrospective/bin/wr-retrospective-check-skill-md-budgets` per ADR-049 grammar.
+- **Behavioural bats fixture** — `packages/retrospective/scripts/test/check-skill-md-budgets.bats`. 21 tests, all behavioural per ADR-052 (no greps of script source).
+- **Changeset** — `@windyroad/retrospective` minor bump.
+
+### Dogfood baseline (2026-05-03 first run against repo)
+
+20 SKILL.md files OVER WARN; 9 MUST_SPLIT (manage-incident, manage-problem, mitigate-incident, report-upstream, review-problems, transition-problem, transition-problems, work-problems, run-retro). The dogfood output IS the Phase 2-3 prioritisation backlog — extraction order will be driven by `bytes / invocation-frequency` once P081 Layer B unblocks.
+
+### Phase 2-3 explicitly deferred
+
+Phase 2 (top-3 offender extraction: manage-problem, work-problems, run-retro) and Phase 3 (remaining top-10 + project-local install-updates) are **`Blocked by: P081`** Layer B — the harness primitives needed to retrofit the 80 structural-grep bats assertions on manage-problem alone (identified in the 2026-04-27 audit) without losing coverage. The unblock criterion lives on P081's ticket, not this ticket.
+
 ## Dependencies
 
 - **Blocks**: (none)
-- **Blocked by**: P081 (structural-content tests blocker for any meaningful `[reference]` extraction; identified during Phase 1 audit 2026-04-27)
+- **Blocked by**: P081 (structural-content tests blocker for any meaningful `[reference]` extraction; identified during Phase 1 audit 2026-04-27. P081 Layer A landed in ADR-052 2026-05-03; Phase 2-3 here gates on Layer B harness primitives)
 - **Composes with**: P091 (parent meta), P095 (sibling — UserPromptSubmit), P096 (sibling — PreToolUse/PostToolUse), P098 (sibling — project-owned context contributors)
 
 ## Related
