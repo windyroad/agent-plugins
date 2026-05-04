@@ -5,6 +5,30 @@
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 
+## Update — 2026-05-04 corrected framing
+
+The original RC3 framing in this ticket (per-action vs lifetime-aggregate appetite distinction) was a **misreading** of the user's intent for `docs/risks/`. User correction during follow-up clarified the model:
+
+- `docs/risks/` is the **persistent catalog of per-action risks** for this project — one universe of risks, documented so the risk-scorer doesn't re-derive the same risk classes on every assessment.
+- Per-action assessments (`.risk-reports/`) READ the catalog, filter to risks applicable to THIS action, assess controls FOR THIS ACTION, compute residual against the **same 4/Low appetite**, and add new risk classes back to the catalog if conceived during assessment.
+- Same appetite (4/Low) applies uniformly. There is NO per-action vs lifetime aggregation distinction.
+- A catalog residual above appetite IS a real signal — baseline controls are not sufficient for the typical action that triggers this risk class.
+
+**Status of the original RCs after correction:**
+
+- RC1 (sparse coverage) — **valid**. Underlying cause clarified: the risk-scorer agent today doesn't bootstrap the catalog from `.risk-reports/` and doesn't consume the catalog during per-action assessments. Both are wasted-effort + missed-risk-class failure modes the user named explicitly.
+- RC2 (controls undercredited) — **valid**. Resolved by the Control Composition rule landed in `RISK-POLICY.md` (commit `9e339d0`, 2026-05-04).
+- RC3 (per-action vs lifetime appetite) — **superseded**. Same appetite uniformly; framing was incorrect. See the new `## Risk Catalog` section in `RISK-POLICY.md` for the corrected framing.
+
+**Status of the original Phase 1-3 plan (R007-R011 + extensions + re-rate):**
+
+- **Superseded** by the user's direction: delete everything in `docs/risks/` and have the risk-scorer bootstrap the catalog from `.risk-reports/` automatically when the catalog is empty. R007-R011 manual authoring is no longer the right path; the bootstrap behaviour is the substantive design that needs to ship.
+- The wipe-and-bootstrap design is captured in a separate problem ticket — see `## Related` for the link.
+- The R002/R005 extension idea remains valid as a behavioural target post-bootstrap (the bootstrap should produce richer coverage of SKILL.md drift / surface-area accumulation / ADR drift than R002/R005 currently capture).
+- The R001-R006 re-rate is also superseded — the bootstrap will produce fresh entries from `.risk-reports/` rather than re-rating existing entries.
+
+The original ticket body below this section is preserved for audit-trail purposes. Investigation Tasks are updated at the bottom to reflect the corrected scope.
+
 ## Description
 
 All 6 standing risks in `docs/risks/` carry residual scores above the project's 4/Low appetite threshold:
@@ -81,21 +105,31 @@ The gap-analysis Recommend further: "Residual ≥ appetite is intentional for po
 
 ### Investigation Tasks
 
+> **Note (2026-05-04 corrected framing)**: the task list below is the original (pre-correction) plan. The active task list is in the **Updated Investigation Tasks** section directly below this block. Original tasks preserved for audit trail.
+
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
 - [x] Confirm or reject RC1 by counting risk-report theme classes absent from `docs/risks/` — **CONFIRMED** by sibling Explore agent output (5 systemic gap themes identified)
 - [x] Confirm or reject RC2 — **PARTIAL CONFIRMATION** by gap analysis (controls observed not credited proportionally; needs structural fix)
-- [ ] Confirm or reject RC3 by checking whether `RISK-POLICY.md` defines a separate appetite threshold for standing-risk residuals vs per-action pipeline residuals
-- [ ] Open R007 (problem-ticket register drifts from README/filesystem state — brand)
-- [ ] Open R008 (multi-step orchestrator drift or session-state corruption — operational)
-- [ ] Open R009 (hook user-facing deny-message violates UX/disclosure budget — brand/operational)
-- [ ] Open R010 (ADR shipped before ratification or amended mid-implementation — operational)
-- [ ] Open R011 (ambient development state accidentally published — operational)
-- [ ] Extend R002 to cover SKILL.md structural prose drift and surface-area accumulation control class
-- [ ] Extend R005 to cover ADR/documentation-boundary drift as concrete drift pattern
-- [ ] Decide whether `RISK-POLICY.md` needs a separate standing-risk appetite (or explicit framing note that the 4/Low threshold is per-action)
-- [ ] Re-rate R001-R006 residuals after R007-R011 land, crediting layered controls explicitly per the proposed control-composition pattern
-- [ ] Add control-composition / defense-in-depth subsection to `docs/risks/TEMPLATE.md` so future risks document layered likelihood credits explicitly
-- [ ] Create reproduction test: register-coverage assertion comparing observed risk-report theme set against the standing-risk class set (test ↔ ADR-026 grounding pattern)
+- [x] ~~Confirm or reject RC3 by checking whether `RISK-POLICY.md` defines a separate appetite threshold for standing-risk residuals vs per-action pipeline residuals~~ — **SUPERSEDED**: RC3 was a misreading; same appetite (4/Low) applies uniformly per corrected framing.
+- [ ] ~~Open R007 (problem-ticket register drifts from README/filesystem state — brand)~~ — **SUPERSEDED** by wipe-and-bootstrap approach
+- [ ] ~~Open R008 (multi-step orchestrator drift or session-state corruption — operational)~~ — **SUPERSEDED**
+- [ ] ~~Open R009 (hook user-facing deny-message violates UX/disclosure budget — brand/operational)~~ — **SUPERSEDED**
+- [ ] ~~Open R010 (ADR shipped before ratification or amended mid-implementation — operational)~~ — **SUPERSEDED**
+- [ ] ~~Open R011 (ambient development state accidentally published — operational)~~ — **SUPERSEDED**
+- [ ] ~~Extend R002 to cover SKILL.md structural prose drift and surface-area accumulation control class~~ — **SUPERSEDED**
+- [ ] ~~Extend R005 to cover ADR/documentation-boundary drift as concrete drift pattern~~ — **SUPERSEDED**
+- [x] ~~Decide whether `RISK-POLICY.md` needs a separate standing-risk appetite~~ — **RESOLVED**: same appetite uniformly. Catalog framing landed in commit `9e339d0`.
+- [ ] ~~Re-rate R001-R006 residuals after R007-R011 land~~ — **SUPERSEDED** by wipe-and-bootstrap approach
+- [ ] ~~Add control-composition / defense-in-depth subsection to `docs/risks/TEMPLATE.md`~~ — **PARTIALLY RESOLVED**: rule landed in `RISK-POLICY.md` `## Control Composition` section, commit `9e339d0`. TEMPLATE.md may still benefit from a citation.
+- [ ] Create reproduction test: register-coverage assertion comparing observed risk-report theme set against the standing-risk class set (test ↔ ADR-026 grounding pattern) — **STILL VALID** but probably belongs in the wipe-and-bootstrap ticket as Confirmation criterion.
+
+### Updated Investigation Tasks (post-correction)
+
+- [x] Land catalog framing + composition rule in `RISK-POLICY.md` — **DONE** (commit `9e339d0`).
+- [ ] Re-rate Priority and Effort at next `/wr-itil:review-problems` (the Effort estimate was M based on the original Phase 1-3 plan; the actual work for THIS ticket post-correction is "land policy framing" which is now done — Effort drops to S, and most remaining work moves to the wipe-and-bootstrap ticket).
+- [ ] Cross-reference the wipe-and-bootstrap ticket from `## Related` once captured.
+- [ ] Optionally: TEMPLATE.md citation pointer to the `## Control Composition` rule.
+- [ ] Transition to `.known-error.md` once the wipe-and-bootstrap ticket is captured and cross-referenced — this ticket's substantive remaining work is delegated; root cause documented.
 
 ## Dependencies
 
