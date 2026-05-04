@@ -54,6 +54,16 @@ Beyond ISO 31000/27001, each entry's frontmatter carries agentic-context attribu
 | [R005](R005-cross-package-release-coordination-drift.active.md) | Cross-package release coordination drift | delivery | 12 (High) | 3 (Low) | Mitigate | plugin-maintainer |
 | [R006](R006-authority-delegation-confusion.active.md) | Authority-delegation confusion | brand | 12 (High) | 6 (Medium) | Mitigate | plugin-maintainer |
 | [R007](R007-ambient-state-leaks-into-commits.active.md) | Ambient / unstaged state leaks into commits | operational | 6 (Medium) | 4 (Low) | Mitigate | plugin-maintainer |
+| [R008](R008-functional-defects-in-shipped-behaviour.active.md) | Functional defects in shipped plugin behaviour | delivery | 16 (High) | 6 (Medium) | Mitigate | plugin-maintainer |
+| [R009](R009-insufficient-test-coverage-on-critical-paths.active.md) | Insufficient bats / behavioural test coverage on critical paths | delivery | 9 (Medium) | 6 (Medium) | Mitigate | plugin-maintainer |
+| [R010](R010-semver-or-backward-compatibility-violation.active.md) | Semver / backward-compatibility violation on plugin contracts | delivery | 12 (High) | 8 (Medium) | Mitigate | plugin-maintainer |
+| [R011](R011-published-package-references-source-tree-only-paths.active.md) | Published packages reference source-tree-only paths and IDs | delivery | 20 (Very High) | 6 (Medium) | Mitigate | plugin-maintainer |
+
+## Bedrock vs agentic-novel
+
+The register intentionally documents both **bedrock software-delivery risks** (R008-R011) and **agentic-AI-novel risks** (R001-R007). The bedrock entries — R008 functional defects, R009 test-coverage gaps, R010 semver violations, R011 publish-boundary leakage — are foundations every software-delivery risk register should include; their inclusion ensures ISO 31000's "comprehensive risk inventory" requirement is met. The agentic-novel entries refine the bedrock with the failure modes specific to agent-driven development (drift / cascade / cache-coherence / authority-delegation / etc.).
+
+R008 explicitly **generalises** R001 / R002 / R005 / R009 / R010: those entries are specialisations describing specific defect modes; R008 is the catch-all for "any other functional defect". Reading the register: start with R008's bedrock framing, then refine via the specialisations.
 
 ## Within Appetite
 
@@ -67,6 +77,10 @@ Beyond ISO 31000/27001, each entry's frontmatter carries agentic-context attribu
 - **R001** (8/Medium) — drift-class generalisation (P161) is the next mitigation milestone.
 - **R004** (6/Medium) — accept structural property; invest in dual-parse contracts + install-updates discipline.
 - **R006** (6/Medium) — ADR-044 alignment audit (P136) is the next mitigation milestone.
+- **R008** (6/Medium) — bedrock class; intentionally above appetite (defect-free software is impossible). Per-action pipeline scoring adds context-specific controls.
+- **R009** (6/Medium) — coverage retrofit incremental-as-touched per ADR-052 Migration; Phase-2 trigger documented.
+- **R010** (8/Medium) — would require automated breaking-change detection (CI surface) to drop further; deferred until evidence justifies cost.
+- **R011** (6/Medium) — phase-2 promotion of namespace-prefix detector from advisory to commit-blocking would drop further.
 
 Above-appetite is intentional for these risk classes — see each entry's `## Treatment` for the rationale. Per RISK-POLICY.md `## Risk Catalog`: "A catalog-documented residual above appetite IS a real signal — baseline controls are not sufficient for the typical action that triggers this risk class."
 
