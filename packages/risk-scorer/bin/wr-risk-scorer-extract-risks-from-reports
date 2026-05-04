@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Shim: dispatches to the canonical script body per ADR-049 ($PATH-resolved bin/).
+exec "$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$0}")")/../scripts/extract-risks-from-reports.sh" "$@"

@@ -1,12 +1,12 @@
 ---
 name: wr-risk-scorer:create-risk
-description: Create a new standing-risk entry in docs/risks/. Examines existing risks, gathers impact/likelihood/controls from the user, writes a file matching docs/risks/TEMPLATE.md, and updates the register index.
+description: Create a new standing-risk entry in docs/risks/. Examines existing risks, gathers impact/likelihood/controls from the user, writes a file using the entry shape inlined in this skill (no TEMPLATE.md dependency — the entry shape is owned by this skill per user direction 2026-05-04), and updates the register index.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 ---
 
 # Risk Register Entry Generator
 
-Create a new standing-risk file in `docs/risks/` following the format defined by `docs/risks/TEMPLATE.md`. The register captures persistent risks (distinct from the ephemeral per-change reports in `.risk-reports/`), and its criteria come from `RISK-POLICY.md`.
+Create a new standing-risk file in `docs/risks/` using the entry shape inlined in this skill (Step 5 below). The register captures persistent risks (distinct from the ephemeral per-change reports in `.risk-reports/`), and its criteria come from `RISK-POLICY.md`. **No `docs/risks/TEMPLATE.md` exists** — per user direction 2026-05-04 the entry shape lives in this skill (and the bootstrap-catalog extractor that reuses the same shape) so the directory is purely the inventory, not its own scaffolding.
 
 This skill is the invocation surface for populating the register (scaffolded by P033; populated per P102). Per ADR-015, it is a plugin-namespaced on-demand skill. Per ADR-014, the skill commits its own work.
 
@@ -15,7 +15,7 @@ This skill is the invocation surface for populating the register (scaffolded by 
 ### 1. Discover existing risks
 
 Scan for existing risk files:
-- Glob `docs/risks/R*.md` (skip `README.md`, `TEMPLATE.md`)
+- Glob `docs/risks/R*.md` (skip `README.md`; there is no `TEMPLATE.md` per user direction 2026-05-04)
 - Note the highest numbered risk to determine the next sequence number
 - Read any risks related to the topic being discussed (if the user has mentioned a topic)
 - If `docs/risks/` does not exist, explain that `/wr-risk-scorer:update-policy` must be run first (it ships the scaffolding) and stop
@@ -118,7 +118,7 @@ Use the Risk Matrix from `RISK-POLICY.md`:
 
 ### 5. Write the risk file
 
-Write the file to `docs/risks/` using the structure from `TEMPLATE.md`:
+Write the file to `docs/risks/` using the entry shape below (the canonical entry shape — owned by this skill per user direction 2026-05-04; the same shape is used by `extract-risks-from-reports.sh` for bootstrap-derived entries):
 
 ```markdown
 # Risk R<NNN>: <Title>

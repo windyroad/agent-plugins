@@ -37,7 +37,7 @@ Manual: invoke `wr-retrospective-check-readme-jtbd-currency` ad-hoc before retro
 
 - **Who is affected**: the **plugin-user persona** (`docs/jtbd/plugin-user/persona.md` / [JTBD-302](../jtbd/plugin-user/JTBD-302-trust-readme-describes-installed-behaviour.proposed.md)); every adopter reading any `@windyroad/*` plugin's README. Sibling impact on the **plugin-developer persona** ([JTBD-101](../jtbd/plugin-developer/JTBD-101-extend-suite.proposed.md) — "clear patterns, not reverse-engineering" outcome is degraded when contributors must reverse-engineer runtime behaviour from prose-stale READMEs).
 - **Frequency**: every retro that does NOT invoke the detector — currently every retro. Drift accumulates between retros at the rate of plugin-source change × the rate of README hand-refresh, with the former generally exceeding the latter.
-- **Severity**: Significant — README drift is the audit-day failure mode the user just experienced. Treated as Impact 4 in the parallel risk-register entry [R005](../risks/R005-readme-skill-md-prose-drifts-from-runtime-behaviour.active.md).
+- **Severity**: Significant — README drift is the audit-day failure mode the user just experienced. Treated as Impact 4 in the parallel risk-register entry R005.
 - **Likelihood**: Possible — the detector exists; the wiring is small; the only reason this gap persists is that it was deferred per ADR-051's Phase 1 staging.
 - **Analytics**: detector output on the post-`8df1692` tree: `TOTAL packages=12 with_jtbd=12 drift_instances=1`. Pre-`8df1692` tree (reconstructable): `with_jtbd=0 drift_instances ≥ 12`. The 12-fold difference is the audit-prep manual closure that this ticket's fix would have caught at retro time without manual intervention.
 
@@ -82,7 +82,7 @@ Sibling structural concern (filed as a separate follow-on, not in this ticket's 
 
 - [ADR-051](../decisions/051-jtbd-anchored-readme-with-drift-advisory.proposed.md) — Confirmation criterion 5 names this ticket's scope verbatim.
 - [P152](152-no-pressure-or-nudge-for-documentation-currency.verifying.md) — parent ticket; landed Phase 1 deliverables 1 + 2.
-- [R005](../risks/R005-readme-skill-md-prose-drifts-from-runtime-behaviour.active.md) — standing risk this ticket's fix mitigates; treatment text explicitly cites Phase 2 escalation as future work.
+- R005 — standing risk this ticket's fix mitigates; treatment text explicitly cites Phase 2 escalation as future work.
 - [ADR-013 Rule 6](../decisions/013-structured-user-interaction-for-governance-decisions.proposed.md) — non-interactive fail-safe; the wiring's interactive-or-AFK branch follows the same shape Step 2b's existing categorical detection uses.
 - [ADR-040](../decisions/040-session-start-briefing-surface.proposed.md) — declarative-first / advisory-then-escalate pattern; the wiring is advisory-only in Phase 1.
 - [ADR-014](../decisions/014-governance-skills-commit-their-own-work.proposed.md) — single-commit grain; the wiring + the `retrospective` README skill-inventory-drift fix + the changeset land in one commit.

@@ -53,7 +53,7 @@ The retro wiring (P158, `df47ad1`, `@windyroad/retrospective@0.16.0`) is harmles
 
 - **Who is affected**: the **plugin-user persona** (`docs/jtbd/plugin-user/JTBD-302`); every adopter reading any `@windyroad/*` plugin's README. Sibling impact on the **plugin-developer persona** ([JTBD-101](../jtbd/plugin-developer/JTBD-101-extend-suite.proposed.md) — "clear patterns, not reverse-engineering" outcome is degraded when contributors must reverse-engineer runtime behaviour from prose-stale READMEs). Solo-developer / tech-lead impact through the broader R005 standing risk.
 - **Frequency**: drift accumulates on every commit that touches `packages/<plugin>/*` source without also touching `packages/<plugin>/README.md`. In an active development cycle that's most commits.
-- **Severity**: Significant (4) — README drift is the audit-day failure mode the user surfaced earlier this session. Scaffolded into [R005](../risks/R005-readme-skill-md-prose-drifts-from-runtime-behaviour.active.md) at Impact 4.
+- **Severity**: Significant (4) — README drift is the audit-day failure mode the user surfaced earlier this session. Scaffolded into R005 at Impact 4.
 - **Likelihood**: Possible (3) — the retro wiring has shipped so first-degree drift will eventually surface at retro time; the per-commit gap remains, but is bounded by retro frequency.
 - **Analytics**: detector evidence post-`8df1692`: `TOTAL packages=12 with_jtbd=12 drift_instances=1`. The 12 plugin READMEs all carry the bolted-on `## Jobs to be Done` shape (12-of-12); the retro wiring catches drift but does not catch *misshapen* JTBD blocks the way the user wants.
 
@@ -97,7 +97,7 @@ Detailed phasing pending architect/JTBD review.
 - [ADR-051](../decisions/051-jtbd-anchored-readme-with-drift-advisory.proposed.md) — parent decision; **Recommended Section Structure** clause + **Confirmation criterion 5** both need amendment to reflect commit-hook-with-prose-weaving direction.
 - [P152](152-no-pressure-or-nudge-for-documentation-currency.verifying.md) — parent-parent ticket; landed Phase 1 detector + bin shim + bats.
 - [P158](158-adr-051-phase-1-detector-shipped-but-not-wired-into-retro-step-2b.verifying.md) — sibling; shipped the retro wiring this ticket supersedes as primary. Retro wiring stays as advisory backup.
-- [R005](../risks/R005-readme-skill-md-prose-drifts-from-runtime-behaviour.active.md) — standing risk. Treatment text references Phase 2 escalation; this ticket is the load-bearing variant.
+- R005 — standing risk. Treatment text references Phase 2 escalation; this ticket is the load-bearing variant.
 - [ADR-040](../decisions/040-session-start-briefing-surface.proposed.md) — declarative-first / advisory-then-escalate pattern. This ticket's design is the load-bearing-from-the-start variant for drift class.
 - [ADR-042](../decisions/042-auto-apply-scorer-remediations-open-vocabulary.proposed.md) — auto-apply scorer remediations precedent for "auto-fix at gate time"; sibling shape.
 - [ADR-013 Rule 5](../decisions/013-structured-user-interaction-for-governance-decisions.proposed.md) — policy-authorised silent-action precedent for the auto-fix path.

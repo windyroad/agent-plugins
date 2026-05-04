@@ -13,7 +13,7 @@ This skill is the on-demand surface (per ADR-059 verdict A4). The auto-trigger s
 
 ## When to invoke
 
-- **First-time setup**: project has accumulated `.risk-reports/` reports but `docs/risks/` is empty (only `README.md` + `TEMPLATE.md` from ADR-047 Phase 1 scaffold). Bootstrap populates the register from the historical corpus.
+- **First-time setup**: project has accumulated `.risk-reports/` reports but `docs/risks/` is empty (or non-existent). Bootstrap walks the historical corpus, generates per-slug entries, and writes a fresh `docs/risks/README.md` index. **No `TEMPLATE.md` is read or written** — per user direction 2026-05-04 the entry shape lives in `extract-risks-from-reports.sh` (deterministic path) and the create-risk skill (interactive path); the directory is purely the inventory.
 - **After a wipe**: per ADR-059 verdict I2 two-pass validation, the wipe pass retires R001-R006 then re-runs this skill on the empty catalog.
 - **NOT for incremental updates**: new risk classes detected during per-action assessments flow through ADR-056 hint-and-drain (`RISK_REGISTER_HINT:` → queue → consumer-skill drain → `/wr-risk-scorer:create-risk --slug --prefill`). Re-running this skill on a populated catalog appends to existing source-evidence blocks but does NOT fire for new slugs (those are the hint-and-drain path's job).
 
@@ -22,14 +22,41 @@ This skill is the on-demand surface (per ADR-059 verdict A4). The auto-trigger s
 Verify before running:
 
 1. `RISK-POLICY.md` is present at the repo root. If absent, the project hasn't opted into the catalog framing — exit cleanly with a one-line message ("RISK-POLICY.md not found; bootstrap not applicable. Run /wr-risk-scorer:update-policy first.") and do not write anything.
-2. `docs/risks/` directory exists with `README.md` + `TEMPLATE.md` (ADR-047 Phase 1 scaffold). If absent, exit cleanly with a one-line message ("docs/risks/ scaffold not found; run /install-updates to scaffold first.") and do not write anything.
+2. `docs/risks/` directory may or may not exist. The extractor script creates it on demand (`mkdir -p`) and writes the README + per-slug entries; no separate scaffold step is required. (Per user direction 2026-05-04 — the previous Phase 1 scaffold step + TEMPLATE.md were wiped because the scaffolded entries were wrong content; bootstrap now owns the directory's full lifecycle.)
 3. `.risk-reports/` directory exists and contains at least one `*.md` file. If empty or absent, exit cleanly with a one-line message ("No .risk-reports/ corpus to walk; bootstrap is a no-op.") and do not write anything.
 
 ## Steps
 
-### 1. Walk the report corpus
+### 1. Invoke the deterministic extractor (Phase 1)
 
-Glob `.risk-reports/*.md`. Read each report. For each report, parse the `RISK_REGISTER_HINT:` block (if present per ADR-056 3-column format `<reason-tag> | <slug> | <prefill>`). If the block is absent (older reports pre-ADR-056), parse risk-item descriptions from the report body and derive slugs per ADR-056's slug-computation rules (lowercase, kebab, drop articles, ≤60 chars, word-boundary truncation).
+Run the canonical extractor script, which walks `.risk-reports/*.md`, parses `RISK_REGISTER_HINT:` bullets per the ADR-056 3-column shape (with 2-column legacy fallback), dedupes by slug, writes one `R<NNN>-<slug>.active.md` per unique slug to `docs/risks/`, and (re)generates `docs/risks/README.md`:
+
+```bash
+wr-risk-scorer-extract-risks-from-reports
+```
+
+The shim resolves to `packages/risk-scorer/scripts/extract-risks-from-reports.sh` per ADR-049. The script outputs a summary of:
+
+- Reports walked.
+- Hinted (deterministic) slugs extracted.
+- New entries created.
+- Existing entries updated (slug-collision append to `## Source Evidence`).
+- **Unhinted reports** count + sample list — these are the Phase 2 candidates.
+
+The script's entry shape is the canonical bootstrap-derived shape (Status `Active (auto-scaffolded — pending review)`, Curation field, ADR-026 sentinel `not estimated — no prior data` for ungrounded scoring fields, `## Source Evidence` block citing originating reports). The same shape is used by `/wr-risk-scorer:create-risk --slug --prefill` for orchestrator-driven prefilled invocation. Per user direction 2026-05-04, this shape is owned by the script + create-risk skill; there is no `TEMPLATE.md` in `docs/risks/`.
+
+### 1b. LLM-walk unhinted reports (Phase 2)
+
+For each unhinted report listed in Step 1's output (older reports pre-ADR-056 that don't carry a `RISK_REGISTER_HINT:` block), the agent reads the report body, identifies its primary risk class, and derives a slug per ADR-056 rules:
+
+- Lowercase, hyphen-separated.
+- Drop articles (the, a, an), prepositions in long phrases, and trailing date markers.
+- Stable across runs: identical risk shape → identical slug.
+- Maximum 60 characters; truncate at word boundary if longer.
+
+Collect derived `(slug, reason-tag, prefill, source-file)` tuples into a TSV file (one row per unique source report). Reason-tag is one of the three reserved values from ADR-056 (`above-appetite-residual`, `confidentiality-disclosure`, `user-stated-precondition`); for unhinted reports, infer the tag from the dominant risk shape — escalating residual matches `above-appetite-residual`, prose mentioning client/revenue/user-counts matches `confidentiality-disclosure`, paired-capability warnings match `user-stated-precondition`.
+
+Reasonably-time-bounded contract: walk reports in batches; emit TSV for each batch; re-invoke the script with `--derived-slugs <file>` to add them. Do NOT attempt to walk all 162+ reports in a single agent turn — split across iterations or sessions.
 
 Record per slug:
 - `slug` (ADR-056 risk-slug — the dedupe key).
@@ -60,7 +87,7 @@ This is the idempotency primitive. Re-running the skill on a populated catalog i
 
 ### 5. Write new register entries
 
-For each new slug, write `docs/risks/R<NNN>-<slug>.active.md` from `docs/risks/TEMPLATE.md` shape with these field values:
+The extractor script (Step 1) writes new entries automatically using the inlined entry shape. For reference (the same shape used by `extract-risks-from-reports.sh` and `/wr-risk-scorer:create-risk --slug --prefill`):
 
 - **Status**: `Active (auto-scaffolded — pending review)` per ADR-056 pending-review pattern.
 - **Category**: heuristic-derive from the reason-tag — `confidentiality-disclosure` → `infosec`; `above-appetite-residual` / `user-stated-precondition` → `operational` unless the slug strongly suggests another category. If ambiguous, default to `operational` and let curation review re-categorise.
@@ -182,8 +209,9 @@ The skill is safe to invoke at any time. Pre-condition checks (Step 0) prevent i
 - **P168** — driver ticket. Closes the missed-risk-class hazard (catalog absence).
 - **P167** — parent ticket. Corrected the policy framing this skill implements at runtime.
 - **P033** — original 99%-miss-rate ticket; this skill is part of the multi-phase fix alongside ADR-047 Phase 1 + ADR-056 Phase 2a.
-- **`docs/risks/TEMPLATE.md`** — template source for new entries.
-- **`docs/risks/README.md`** — register index; updated by Step 7.
+- **`docs/risks/README.md`** — register index; auto-generated by `extract-risks-from-reports.sh`. (No `TEMPLATE.md` — wiped 2026-05-04 per user direction; the entry shape lives in the extractor script + create-risk skill.)
+- **`packages/risk-scorer/scripts/extract-risks-from-reports.sh`** — canonical extractor; the deterministic Phase 1 driver invoked by Step 1 of this skill.
+- **`packages/risk-scorer/bin/wr-risk-scorer-extract-risks-from-reports`** — `$PATH`-resolved shim per ADR-049.
 - **`.risk-reports/`** — corpus walked by Step 1.
 - **`packages/risk-scorer/agents/pipeline.md`** — consume-catalog protocol consumes the entries this skill writes.
 - **`/wr-risk-scorer:create-risk`** — sibling skill for hand-authored entries; flag-driven path (`--slug` / `--prefill`) shares the auto-scaffolded entry shape this skill emits.

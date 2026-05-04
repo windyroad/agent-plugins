@@ -180,69 +180,26 @@ done
 
 Shell snippets in this skill use bash-array form (`ARR=(a b c)` + `"${ARR[@]}"`) instead of unquoted-variable iteration (`for x in $VAR`). The array form is portable across bash and zsh; unquoted iteration is bash-only and silently iterates once under zsh — see P133 (`docs/problems/133-...md`).
 
-### 6.5. Scaffold governance artefacts (per-sibling)
+### 6.5. Bootstrap risk register from `.risk-reports/` (per-sibling)
 
-Per ADR-047 (P033 Phase 1). For each sibling confirmed in scope by Step 5 (and the current project, treated as an implicit sibling per ADR-004):
+**Note**: this step previously scaffolded `docs/risks/README.md` + `docs/risks/TEMPLATE.md` from project-agnostic templates per ADR-047 Phase 1. Per user direction 2026-05-04, those templates were wiped — they encoded the wrong content shape, and the directory should not contain its own scaffolding template (the entry shape is owned by `/wr-risk-scorer:create-risk` + `extract-risks-from-reports.sh` per ADR-059). This step now runs the bootstrap path directly.
 
-```bash
-# scaffold_register_if_eligible <target>
-# Trigger: <target>/RISK-POLICY.md present AND <target>/docs/risks/ absent.
-# Per-file create-if-absent — never overwrite an existing scaffold file.
-scaffold_register_if_eligible() {
-  local target="$1"
-  [ -f "$target/RISK-POLICY.md" ] || { echo "no-policy"; return 0; }
-  local repo_templates
-  repo_templates="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")/templates" 2>/dev/null && pwd)"
-  [ -d "$repo_templates" ] || repo_templates="$PWD/scripts/repo-local-skills/install-updates/templates"
-  mkdir -p "$target/docs/risks"
-  local readme_status="skipped" template_status="skipped"
-  if [ ! -f "$target/docs/risks/README.md" ]; then
-    cp "$repo_templates/risk-register-README.md.tmpl" "$target/docs/risks/README.md"
-    readme_status="scaffolded"
-  fi
-  if [ ! -f "$target/docs/risks/TEMPLATE.md" ]; then
-    cp "$repo_templates/risk-register-TEMPLATE.md.tmpl" "$target/docs/risks/TEMPLATE.md"
-    template_status="scaffolded"
-  fi
-  echo "$readme_status,$template_status"
-}
-```
-
-Per-sibling outcomes feed Step 7's final-report scaffold rows. No marker file — file existence is the marker (idempotent, drift-free).
-
-**Trigger contract** (per ADR-047 § Trigger contract):
-
-- `RISK-POLICY.md` present AND `docs/risks/` absent → scaffold both files.
-- `RISK-POLICY.md` present AND one file missing (partial state) → scaffold only the missing file; preserve existing.
-- `RISK-POLICY.md` present AND both files present → no writes (idempotent skip).
-- `RISK-POLICY.md` absent → no scaffold attempted (precondition not met).
-
-**ADR-013 audit**:
-
-- Cache-hit / cache-miss with consent granted (Rule 5) — scaffold fires silently. Existence of `RISK-POLICY.md` plus prior consent IS the policy authorisation.
-- Non-interactive subagent invocation (Rule 6) — scaffold does NOT fire. Inherits the install-loop's interactivity gate.
-- Sibling consent answer was "Current project only" — scaffold fires for current project only.
-- Dry-run consent answers do NOT scaffold (read-only by contract).
-
-Templates: `scripts/repo-local-skills/install-updates/templates/risk-register-{README,TEMPLATE}.md.tmpl`. Substitution-token-free (project-agnostic) in v1; adopters fill in their own register entries.
-
-Deep context (ADR-013 audit table, idempotency rationale, template-source-of-truth, alternatives considered): `REFERENCE.md` → "Governance-artefact scaffold (P033)".
-
-#### 6.5.1 Bootstrap-from-reports auto-trigger (per ADR-059)
-
-After Step 6.5 scaffold lands (or skips because the directory already exists), check whether the catalog warrants bootstrapping from the existing `.risk-reports/` corpus. ADR-059 promotes ADR-047 Phase 3 (one-time historical backfill) from deferred to active; this sub-step is the auto-trigger surface.
+For each sibling confirmed in scope by Step 5 (and the current project, treated as an implicit sibling per ADR-004):
 
 ```bash
 # bootstrap_register_if_eligible <target>
-# Trigger: <target>/RISK-POLICY.md present AND <target>/docs/risks/ has only README+TEMPLATE
-# (no R*-*.active.md files) AND <target>/.risk-reports/ contains at least one *.md.
-# Per ADR-013 Rule 5: existing per-sibling consent + RISK-POLICY.md presence IS the
-# policy authorisation. No new consent gate.
+# Trigger contract (per ADR-059):
+#   <target>/RISK-POLICY.md present AND
+#   <target>/docs/risks/ has NO R*-*.active.md files AND
+#   <target>/.risk-reports/ contains at least one *.md.
+# Outcome: invoke /wr-risk-scorer:bootstrap-catalog (which calls
+# wr-risk-scorer-extract-risks-from-reports under the hood).
+# Per ADR-013 Rule 5: per-sibling consent + RISK-POLICY.md presence IS
+# the policy authorisation. No new consent gate.
 bootstrap_register_if_eligible() {
   local target="$1"
   [ -f "$target/RISK-POLICY.md" ] || { echo "no-policy"; return 0; }
-  [ -d "$target/docs/risks" ] || { echo "no-scaffold"; return 0; }
-  # Catalog-empty test: no R*-*.active.md files in docs/risks/
+  # Catalog-populated test: any R*-*.active.md exists → skip (steady state)
   if ls "$target/docs/risks/"R*-*.active.md >/dev/null 2>&1; then
     echo "catalog-populated"
     return 0
@@ -252,9 +209,9 @@ bootstrap_register_if_eligible() {
     echo "no-reports"
     return 0
   fi
-  # All pre-conditions met. Invoke the bootstrap-catalog skill.
-  # The skill walks .risk-reports/, dedupes by ADR-056 slug, and writes
-  # one R<NNN>-<slug>.active.md per unique slug per ADR-059.
+  # All pre-conditions met. Invoke the bootstrap-catalog skill (which
+  # creates docs/risks/, runs extract-risks-from-reports, writes the
+  # README and per-slug entries).
   echo "bootstrap-eligible"
   return 0
 }
@@ -262,24 +219,32 @@ bootstrap_register_if_eligible() {
 
 **Trigger contract** (per ADR-059 verdicts A6 + I2):
 
-- `RISK-POLICY.md` present AND `docs/risks/` has scaffold (Step 6.5 result) AND `docs/risks/` has NO `R*-*.active.md` files AND `.risk-reports/` non-empty → invoke `/wr-risk-scorer:bootstrap-catalog`.
+- `RISK-POLICY.md` present AND `docs/risks/` has NO `R*-*.active.md` files AND `.risk-reports/` non-empty → invoke `/wr-risk-scorer:bootstrap-catalog`. The skill creates `docs/risks/` if absent, runs the extractor, and writes per-slug entries + the README.
 - `RISK-POLICY.md` present AND `docs/risks/` populated (any `R*-*.active.md` exists) → skip bootstrap (catalog already has entries; new-class detection flows through ADR-056 hint-and-drain instead).
 - `RISK-POLICY.md` present AND `.risk-reports/` empty/absent → skip bootstrap (nothing to walk).
-- `RISK-POLICY.md` absent → no scaffold AND no bootstrap (Step 6.5 precondition already covers this).
+- `RISK-POLICY.md` absent → skip bootstrap (project hasn't opted in).
 
-**Outcomes feed Step 7 final report** alongside the scaffold rows. Row shape:
+**ADR-013 audit**:
+
+- Cache-hit / cache-miss with consent granted (Rule 5) — bootstrap fires silently. Existence of `RISK-POLICY.md` plus prior consent IS the policy authorisation.
+- Non-interactive subagent invocation (Rule 6) — bootstrap does NOT fire. Inherits the install-loop's interactivity gate.
+- Sibling consent answer was "Current project only" — bootstrap fires for current project only.
+- Dry-run consent answers do NOT bootstrap (read-only by contract).
+
+Per-sibling outcomes feed Step 7's final-report rows. No marker file — `R*-*.active.md` file existence is the idempotency primitive (re-runs on populated catalogs are no-ops; new slugs flow through ADR-056 hint-and-drain).
+
+**Step 7 final-report row shape**:
 
 ```
 | <sibling> | docs/risks/ bootstrap | (empty) | <N> entries from <K> reports | ✓ bootstrapped (ADR-059) |
 | <sibling> | docs/risks/ bootstrap | (populated) | — | ⊘ skipped (catalog already has entries) |
 | <sibling> | docs/risks/ bootstrap | (no reports) | — | ⊘ skipped (.risk-reports/ empty) |
+| <sibling> | docs/risks/ bootstrap | — | — | ⊘ skipped (no RISK-POLICY.md) |
 ```
 
-**ADR-013 audit**: same as Step 6.5 — Rule 5 (cache-hit silent proceed) authorises the bootstrap; Rule 6 (non-interactive fallback) inherits the install-loop's interactivity gate (bootstrap does not fire in dry-run mode). The bootstrap-catalog skill itself is non-interactive (no `AskUserQuestion`); per CLAUDE.md P132 mechanical-stage carve-out.
+**Idempotency**: re-running install-updates on a sibling that's already been bootstrapped is a no-op (the catalog-populated test fires the skip path). New `.risk-reports/` files added since the last bootstrap may surface new slugs on next bootstrap run, but only if the catalog is fully empty — a partially-populated catalog is the steady state once the first bootstrap completes; further new slugs flow through ADR-056 hint-and-drain.
 
-**Idempotency**: re-running install-updates on a sibling that's already been bootstrapped is a no-op for bootstrap (the catalog-populated test fires the skip path). New `.risk-reports/` files added since the last bootstrap may surface new slugs on next bootstrap run, but only if the catalog is fully empty — a partially-populated catalog is the steady state once the first bootstrap completes; further new slugs flow through ADR-056 hint-and-drain.
-
-Deep context: `REFERENCE.md` → "Bootstrap-from-reports auto-trigger (ADR-059)" (TBD; reference points to ADR-059 directly until REFERENCE.md is extended).
+Deep context: `REFERENCE.md` → "Bootstrap risk register from `.risk-reports/` (per-sibling)".
 
 ### 7. Final report
 
@@ -289,9 +254,10 @@ Deep context: `REFERENCE.md` → "Bootstrap-from-reports auto-trigger (ADR-059)"
 | <project> | wr-itil | 0.7.1 | 0.7.2 | ✓ installed |
 | <project> | wr-jtbd | 0.5.0 | 0.5.0 | ✓ restored (rollback) |
 | <project> | wr-tdd  | 0.4.0 | —     | ✗ lost (rollback failed) |
-| <project> | docs/risks/ | — | scaffolded | ✓ created (RISK-POLICY.md present) |
-| <project> | docs/risks/ | (present) | (present) | ⊘ skipped (already exists) |
-| <project> | docs/risks/ | — | — | ⊘ skipped (no RISK-POLICY.md) |
+| <project> | docs/risks/ bootstrap | (empty) | <N> entries from <K> reports | ✓ bootstrapped (ADR-059) |
+| <project> | docs/risks/ bootstrap | (populated) | — | ⊘ skipped (catalog already has entries) |
+| <project> | docs/risks/ bootstrap | (no reports) | — | ⊘ skipped (.risk-reports/ empty) |
+| <project> | docs/risks/ bootstrap | — | — | ⊘ skipped (no RISK-POLICY.md) |
 ```
 
 Status vocabulary (P112): `✓ installed` — install landed first or within retry budget. `✓ restored (rollback)` — all retries exhausted; marketplace-cache refresh + one rollback install succeeded. `✗ lost (rollback failed)` — retries and rollback both failed; plugin is absent from the project and the user must reinstall manually. `✗ failed` — pre-install step (e.g. uninstall) errored, plugin left in original state.
