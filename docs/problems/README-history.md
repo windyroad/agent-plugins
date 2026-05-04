@@ -157,3 +157,8 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-05-04 (P168 transition Open → Known Error — architect + JTBD reviews complete; Effort re-rated M → XL; ADR-058 design path documented)
 
 > Last reviewed: 2026-05-04 **P167 transition Open → Known Error — substantive design successor P168 captured + cross-referenced; root cause documented**: Effort dropped M → S post-correction (residual = cross-reference + transition only; design work delegated to P168); WSJF re-rated 1.5 → 6.0 and moved within the 6.0 tier ahead of P162 per Known-Error-first tie-break. Pre-flight checks satisfied: RC1 + RC2 valid (RC3 superseded), policy framing landed in commit 9e339d0 (RISK-POLICY.md ## Risk Catalog + ## Control Composition sections), reproduction test cited as P168 Confirmation criterion, workaround documented (corrected catalog framing + P168 delegation). External-root-cause detection: skipped — no upstream/external markers in RCA; internal to project. Per /wr-itil:work-problem singular contract; next invocation should target P168 for the substantive design. Prior line-3 fragment (P168 reconciliation) rotated to docs/problems/README-history.md per P134.
+
+
+## 2026-05-04 (P168 transition Known Error → Verification Pending — wipe + extractor + reinstate held changeset; user direction discharged)
+
+> Last reviewed: 2026-05-04 **P168 transition Open → Known Error — architect + JTBD reviews complete; Effort re-rated M → XL; ADR-058 design path documented**: architect verdict ISSUES-FOUND with 8 distinct edits across 2 commits. JTBD verdict PASS centred on JTBD-001 with JTBD-006/202 binding. WSJF re-computed 1.5 → 0.75 — P168 moves to top of WSJF=0.75 tier per Known-Error-first tie-break ahead of P012/P034.

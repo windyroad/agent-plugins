@@ -1,7 +1,8 @@
 # Problem 168: Risk-scorer doesn't consume `docs/risks/` catalog or bootstrap from `.risk-reports/`
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-04
+**Fix Released**: 2026-05-04 (commits ab73328 + af5447c + 8edaf7b; @windyroad/risk-scorer minor bump in `.changeset/wr-risk-scorer-p168-consume-catalog-and-bootstrap.md` ready for next release)
 **Priority**: 3 (Low) — Impact: 3 x Likelihood: 1
 **Effort**: XL (re-rated 2026-05-04: M → XL post-architect-review — 8 distinct edits across new ADR-058, ADR-047 amendment, new bootstrap-catalog skill, install-updates Step 6.5 extension, pipeline.md consume-catalog protocol, create-risk flag extension, orchestrator auto-invoke, wipe pass; ~2 commits per ADR-014; spans 2+ iterations)
 **WSJF**: 0.75 (Severity 3 × Known Error multiplier 2.0 / Effort XL divisor 8)
@@ -191,3 +192,21 @@ Synthesised from architect + JTBD verdicts. Two-commit shape per ADR-014 grain; 
 - `.risk-reports/` — 181 concrete reports that the bootstrap pass will walk.
 - Sibling Explore agent gap-analysis output (P167's session, 2026-05-04) identified 12-14 distinct themes; that analysis is a useful starting point for the bootstrap deduplication design.
 - Captured via /wr-itil:capture-problem; substantive design ticket — superseder of P167's original Phase 1-3 plan.
+
+
+## Fix Released
+
+Released across three coordinated commits per ADR-059 + user direction 2026-05-04:
+
+- **Commit 1** (ab73328): pipeline.md consume-catalog protocol + create-risk `--slug` / `--prefill` flag-driven path + 30 bats. Pure-scorer contract preserved (`Read + Glob` only).
+- **Commit 2** (af5447c): bootstrap-catalog skill + install-updates Step 6.5.1 auto-trigger + 29 bats. On-demand surface for one-shot bootstrap.
+- **Commit 3** (8edaf7b): WIPE R001-R006 + TEMPLATE.md + README.md + install-updates risk-register templates + broken markdown references in P158/P159 (per user direction "FFS WIPE THE RXXX risks ... THEY ARE WRONG"). Wrote `packages/risk-scorer/scripts/extract-risks-from-reports.sh` (~270 lines, two-phase: Phase 1 deterministic extraction from RISK_REGISTER_HINT bullets; Phase 2 LLM-walk of unhinted reports via bootstrap-catalog SKILL.md Step 1b). Wrote 17 behavioural bats. Generated R007 (first bootstrap-derived entry from this repo's actual corpus). Generated docs/risks/README.md. Reinstated the held P168 changeset. Entry shape lives in the create-risk skill + extractor (per user direction "There shouldn't be a template in the directory, because that should be part of the risk creation/capture skill that the extractor uses").
+
+@windyroad/risk-scorer minor bump in `.changeset/wr-risk-scorer-p168-consume-catalog-and-bootstrap.md`. Awaiting user verification.
+
+User-verifiable behaviour:
+- Run `/wr-risk-scorer:assess-wip` against any change. Verify pipeline emits `Catalog match:` and `Catalog baseline:` lines in risk-item blocks. Verify `CATALOG_HIT_RATE: matched=N missed=M` line appears.
+- Run `wr-risk-scorer-extract-risks-from-reports --dry-run` to observe corpus extraction without writes.
+- Run `/wr-risk-scorer:bootstrap-catalog` to walk the unhinted .risk-reports/ corpus via Phase 2 LLM-walk and populate docs/risks/ with derived entries.
+- Run `/install-updates` against a sibling project with RISK-POLICY.md + .risk-reports/ but empty docs/risks/. Verify Step 6.5 bootstrap fires; Step 7 final report shows bootstrap row.
+
