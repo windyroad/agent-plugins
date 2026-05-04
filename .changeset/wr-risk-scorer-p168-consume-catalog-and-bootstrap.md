@@ -1,0 +1,23 @@
+---
+"@windyroad/risk-scorer": minor
+---
+
+P168 / ADR-059: pipeline consume-catalog protocol + create-risk flag-driven path
+
+The `@windyroad/risk-scorer` agent prompt and create-risk skill gain two coordinated extensions per ADR-059 (Consume-catalog and bootstrap-from-reports register population):
+
+- **`packages/risk-scorer/agents/pipeline.md`** — new `## Catalog Consumption Protocol` section. Pipeline now reads `docs/risks/` first, applies a hybrid filter (slug-token-match primary, free-form judgement fallback) to identify catalog entries applicable to THIS action, and emits per-risk-item `Catalog match:` (slug-token / judgement / none) + `Catalog baseline:` (lifetime baseline residual citing R<NNN>) lines. Per-run `CATALOG_HIT_RATE: matched=N missed=M` observability line. `RISK_SCORES:` continues to carry per-action residual (gate-firing semantic preserved); catalog lifetime baseline is contextual NOT in the gate-firing line. Closes the missed-risk-class hazard (P168) by giving the agent a deterministic-first match path against the persistent catalog; closes the wasted-effort cost by removing redundant per-action regeneration of risk classes the agent surfaced before. Pure-scorer contract preserved (`Read + Glob` only — no `Write` grant added). Empty-catalog handling: emit a one-line nudge in the report body recommending `/install-updates` or `/wr-risk-scorer:bootstrap-catalog`; do NOT halt; do NOT inflate per-action residual.
+
+- **`packages/risk-scorer/skills/create-risk/SKILL.md`** — new Step 1b (orchestrator flag-driven path). Skill accepts `--slug <slug>` and `--prefill <prose>` flags (plus optional `--report-path <path>`) for orchestrator-driven prefilled invocation under ADR-013 Rule 5 (catalog framing in `RISK-POLICY.md` IS the policy authorisation). Flag-driven path skips the AskUserQuestion-driven authoring step and writes the entry deterministically with: `Status: Active (auto-scaffolded — pending review)` (ADR-056 pending-review pattern); `Description: <prefill>` verbatim; Inherent / Residual scoring fields = ADR-026 sentinel `not estimated — no prior data`; required `## Source Evidence` block citing originating `.risk-reports/` files. Slug-collision handling: append to existing file's Source Evidence block instead of creating new entry. Existing AskUserQuestion-driven authoring path preserved unchanged for human invocation (no flags supplied).
+
+Backward-compatible — no existing call site changes. Adopters whose pipeline agent prompt cache still emits the pre-ADR-059 risk-item format continue to work; the new lines are additive. Adopter create-risk invocations without flags continue to fire the existing AskUserQuestion-driven authoring path.
+
+Behavioural bats coverage:
+- `packages/risk-scorer/agents/test/risk-scorer-catalog-consumption.bats` — 15 cases covering protocol section, hybrid filter, risk-item-format extension, residual reconciliation, hit-rate observability, empty catalog handling, pure-scorer contract preservation. Permitted Exception structural assertions per ADR-005 / P011 (agent prompts are specification documents).
+- `packages/risk-scorer/skills/create-risk/test/create-risk-flag-driven.bats` — 15 cases covering flag detection, deterministic-write defaults, Source Evidence requirement, AskUserQuestion skip-vs-preserve, slug-collision append, ADR-013 Rule 5 authorisation citation. Same Permitted Exception applies.
+
+Pairs with the forthcoming `/wr-risk-scorer:bootstrap-catalog` skill (Commit 2 of the P168 fix) and the `/install-updates` Step 6.5 bootstrap auto-trigger (also Commit 2). The wipe + re-bootstrap validation pass lands in Commit 3.
+
+ADR-047 amended in-place with one-line forward pointer naming ADR-059 as Phase 2/3 successor.
+
+References: ADR-059 (this fix's design ADR), ADR-056 (slug primitive consumed), ADR-026 (grounding sentinel), ADR-013 Rule 5 (policy-authorised silent proceed), ADR-015 (pure-scorer contract preserved), P168 (driver), P167 (parent), P033 (99%-miss-rate ticket).

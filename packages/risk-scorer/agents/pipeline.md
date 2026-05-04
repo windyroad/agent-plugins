@@ -42,6 +42,32 @@ You receive structured pipeline state context with these sections:
 - **UNRELEASED CHANGES**: Changeset count and cumulative diff
 - **STALE FILES**: Modified files uncommitted for over 24h
 
+## Catalog Consumption Protocol (ADR-059)
+
+Before scoring, READ the standing-risk catalog at `docs/risks/` and filter to risks applicable to THIS action. The catalog is the persistent record of risk classes the project has surfaced; consuming it eliminates the wasted-effort cost of re-deriving risk classes on every assessment AND closes the missed-risk-class hazard (forgetting a class the agent surfaced before because it didn't think of it this time). Per `RISK-POLICY.md` `## Risk Catalog` section.
+
+**Filter mechanism — hybrid (slug-token-match primary, judgement fallback):**
+
+1. **Slug-token-match (primary, deterministic)** — for each `R<NNN>-<slug>.active.md` entry in `docs/risks/`, extract the slug from the filename. Tokenise the slug (split on hyphens). If any token appears in the diff content, commit message, or recent prompt context, the entry is **slug-matched** for this action.
+2. **Free-form judgement (fallback)** — for entries the slug-match path missed, READ the entry's `## Description` section and judge applicability against the diff/commit/prompt context. If the description names a risk shape that THIS action plausibly triggers, the entry is **judgement-matched**.
+3. **Logging** — record the match path on each matched risk-item so the next agent can carry it forward (see Risk Item Format below).
+
+**Residual reconciliation:**
+
+- The catalog entry's residual is the **lifetime baseline** under documented controls (the controls present in the project as a whole).
+- THIS action's residual is the baseline modulated by the controls present (or absent) in this specific change.
+- The pipeline's `RISK_SCORES:` output MUST carry the per-action residual, NOT the catalog's lifetime baseline. Gates fire on per-action thresholds.
+- The catalog's residual is meaningful CONTEXT: log it as `Catalog baseline:` in the risk-item block so reviewers can compare the lifetime baseline against this-action's residual.
+
+**Empty catalog handling:**
+
+- If `docs/risks/` is empty (no `R*-*.active.md` files) BUT `RISK-POLICY.md` is present AND `.risk-reports/` is non-empty, emit a one-line nudge in the report body (NOT the `RISK_SCORES:` line): `"Risk register is empty; run /install-updates or /wr-risk-scorer:bootstrap-catalog to bootstrap from .risk-reports/ corpus."` Do NOT halt; do NOT block; do NOT inflate the per-action residual to compensate.
+- If `docs/risks/` is empty AND `RISK-POLICY.md` is absent, the project hasn't opted into the catalog framing. Silent skip the catalog protocol; proceed with regeneration-from-scratch as before this protocol landed.
+
+**Per-run hit-rate observability:**
+
+After scoring, emit a `CATALOG_HIT_RATE: matched=N missed=M` line to the report (where `matched` counts catalog-matched risks AND `missed` counts risks the agent surfaced this run that weren't in the catalog — those become `RISK_REGISTER_HINT:` candidates per ADR-056). Below ~30% sustained hit rate is a Reassessment signal per ADR-059.
+
 ## Cumulative Risk Report
 
 The report MUST assess risk cumulatively, building up from the release queue:
@@ -81,10 +107,14 @@ Commit score >= push score >= release score (risk accumulates upward).
 - Inherent impact: N/5 (Label) - [why]
 - Inherent likelihood: N/5 (Label) - [why]
 - Inherent risk: N/25 (Label)
+- Catalog match: [slug-token | judgement | none]
+- Catalog baseline: R<NNN> residual=N/25 (Label) — [if matched, cite the catalog entry's lifetime residual; omit line entirely when match=none]
 - Controls:
   - [Specific test file/scenario or hook name] - reduces [dimension] from N to N because [rationale]
 - **Residual risk: N/25 (Label)**
 ```
+
+The `Catalog match:` and `Catalog baseline:` lines (ADR-059) make the catalog consumption auditable per risk-item. `slug-token` indicates the primary deterministic match; `judgement` indicates the fallback applicability judgement; `none` indicates the risk wasn't in the catalog (and the agent should consider whether to emit a `RISK_REGISTER_HINT:` for it per ADR-056).
 
 ### Score File Values
 
