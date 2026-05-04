@@ -207,10 +207,14 @@ fi
 mkdir -p "$TARGET_DIR"
 TODAY=$(date -u '+%Y-%m-%d')
 
-# Compute starting R<NNN> ID per ADR-019 (local-max + origin-max + 1).
+# Compute starting R<NNN> ID — live-filesystem-max + 1 (defaults to R001 when fresh).
+# Note: deviates from ADR-019 dual-source convention because this script bootstraps
+# the catalog as a clean slate. After wipe, origin still carries the wiped R001-R006
+# until push, so origin-max would force next=7+ when the user wants R001 from clean
+# slate. Filesystem-only is correct for the bootstrap case; ADR-019 still applies to
+# /wr-risk-scorer:create-risk for incremental adds post-bootstrap.
 LOCAL_MAX=$(ls "$TARGET_DIR/"R*.active.md "$TARGET_DIR/"R*.retired.md 2>/dev/null | sed 's|.*/R||' | grep -oE '^[0-9]+' | sort -n | tail -1 || true)
-ORIGIN_MAX=$(git ls-tree --name-only origin/main "$TARGET_DIR/" 2>/dev/null | sed 's|.*/R||' | grep -oE '^[0-9]+' | sort -n | tail -1 || true)
-NEXT_ID=$(( $(echo "${LOCAL_MAX:-0} ${ORIGIN_MAX:-0}" | tr ' ' '\n' | sort -n | tail -1) + 1 ))
+NEXT_ID=$(( ${LOCAL_MAX:-0} + 1 ))
 
 CREATED=0
 APPENDED=0
