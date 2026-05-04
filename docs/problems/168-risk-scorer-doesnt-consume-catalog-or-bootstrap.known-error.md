@@ -133,6 +133,24 @@ JTBD verdict: **PASS** — change serves JTBD-001 (Enforce Governance Without Sl
 
 **Persona-centring**: implementation centres on solo-developer JTBD-001 desired outcomes, with JTBD-006 (AFK-safety) and JTBD-202 (audit-grade output shape) as binding constraints. NOT split across personas. JTBD-001 is the load-bearing concern; everything downstream (audit shape, AFK safety, install-updates surfacing) is a constraint on HOW the JTBD-001 fix lands. Splitting along persona lines (e.g., separate tech-lead-only `/wr-itil:export-risk-register` skill) would be premature; defer to a separate ticket if real tech-lead pull emerges.
 
+## Smoke-Test Finding (2026-05-04, post-Commit-2)
+
+Pre-wipe rg scan + corpus inspection ran during the architect-verdict-I2 smoke-test pass. Two findings defer Commit 3 (wipe + re-bootstrap) to a future user-driven session:
+
+1. **Dangling-reference density**: `rg 'R00[1-6]' docs/problems/` surfaced cross-references to R001 and R005 from at least 5 tickets (P158 closed, P102 verifying, P110 verifying, P162 open, P159 verifying). Wiping without first annotating those tickets would break the audit-trail-readable cross-link surface JTBD verdict J4 caveat anticipated. The annotation pass is itself a separate ADR-014-grain commit (~5 ticket file edits with the canonical "register reset 2026-05-04 per P167; see git history" note).
+
+2. **Corpus is mostly pre-ADR-056**: of 164 `.risk-reports/*.md` files, **only 1 carries a structured `RISK_REGISTER_HINT:` block** (the post-ADR-056 hint format the bootstrap-catalog skill consumes deterministically). The remaining 163 reports require LLM-walking per the SKILL.md fallback path (parse risk-item descriptions, compute slugs per ADR-056 rules) — a multi-hundred-tool-call pass impractical to run inline in a single agent session.
+
+**Net effect of wiping now**: replace 6 hand-curated R001-R006 entries (under pre-correction conservatism but referenced by 5+ tickets) with ~1 deterministically-derived entry plus 0-12 LLM-walked entries depending on how aggressively a future bootstrap pass walks the 163 unhinted reports. This is a NET LOSS of register coverage in the short term — the architect-verdict-I2 two-pass validation assumed the bootstrap output would COVER R001-R006's surfaced classes; the smoke-test finding refutes that assumption for this corpus at this maturity.
+
+**Commit 3 deferred**. Reinstate triggers (any of):
+
+- **Corpus matures**: 30+ days post-ADR-056 release accumulates a critical mass of hint-bearing reports (e.g. ≥20 unique slugs surfaced via `RISK_REGISTER_HINT:`). At that point, the bootstrap's deterministic path covers the catalog without LLM-walk dependency.
+- **User-driven LLM-walk pass**: user invokes `/wr-risk-scorer:bootstrap-catalog` interactively in a dedicated session, walks the 163 unhinted reports, and validates the output covers R001-R006's surfaced classes before authorising the wipe.
+- **Dedicated bootstrap script**: `packages/risk-scorer/scripts/bootstrap-catalog.sh` (per ADR-049 plugin-bundled scripts; deferred from Commit 2) extends the SKILL.md's deterministic path to handle pre-ADR-056 reports via heuristic slug derivation. This is itself an XL extension of ADR-059 and warrants its own ADR / iteration.
+
+The deferral does NOT prevent ADR-059 Commit 1 + Commit 2 from being released — the runtime contract is complete; only the historical-backfill validation is deferred. The held changeset (`docs/changesets-holding/wr-risk-scorer-p168-consume-catalog-and-bootstrap.md`, commit `e18c4fa`) remains held until the wipe-or-defer decision is finalised.
+
 ## Fix Strategy
 
 Synthesised from architect + JTBD verdicts. Two-commit shape per ADR-014 grain; XL multi-iteration scope.
