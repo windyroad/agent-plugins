@@ -4,6 +4,25 @@ A commit using `git add -A` / `git add .` (or a too-broad `git add <glob>`) capt
 
 The agent has Bash access including `git add` and the ambient state surfaced in `git status` is non-deterministic (varies per session, OS, Claude Code version). `.gitignore` covers known classes; novel classes appear with new plugin features and aren't covered until someone notices.
 
+## Inherent risk
+
+Per `RISK-POLICY.md` (without controls):
+
+- **Impact**: 2 (Minor) — typically recoverable in-session via `git reset` or `git revert`; bounded post-push for the typical class. Some sub-classes (settings.json with API key fragments) escalate to R008 territory.
+- **Likelihood**: 3 (Possible) — ambient state is in `git status` every session; one bulk-stage away from inclusion.
+- **Inherent score**: 6
+- **Inherent band**: Medium
+
+## Residual risk
+
+Per `RISK-POLICY.md` `## Control Composition`:
+
+- **Likelihood after controls**: 1 (Rare) — two independent paths: `.gitignore` (filesystem-level exclusion of known classes) + `git add <specific-paths>` discipline codified in SKILL.md flows. CLAUDE.md P131 + gitStatus visibility are advisory and fold into the discipline path. 3 → 2 → 1.
+- **Residual score**: 2
+- **Residual band**: Very Low
+
+**Below appetite** (≤ 4/Low). Controls working; residual could be pushed lower with a PreToolUse:Bash hook on `git add -A` / `git add .` requiring explicit acknowledgement, but the cost-benefit doesn't currently warrant it (no observed instance reaching adopter exposure).
+
 ## Controls
 
 - **`.gitignore`** — covers `.claude/settings.local.json`, `.afk-run-state/`, `/tmp/`, `node_modules/`, etc. Covers known classes; zero coverage for novel classes until added.

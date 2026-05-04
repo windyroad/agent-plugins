@@ -4,6 +4,25 @@ A change to a `packages/*/hooks/*.sh` file (or `hooks.json` event registration, 
 
 Cascade fan-out is high (one hook fires across thousands of tool calls per adopter per day); detection latency is long (adopters notice over days/weeks); rollback path is slow (npm publish + marketplace cache update + per-adopter reinstall window is days); AFK orchestrator iters can compound a regression for a full overnight run before the user sees output.
 
+## Inherent risk
+
+Per `RISK-POLICY.md` (without controls):
+
+- **Impact**: 4 (Significant) — `RISK-POLICY.md` L64: "Installed plugins degrade developer workflow — hooks fire incorrectly, skills fail to load". Hook regression is the canonical instance of this Impact class.
+- **Likelihood**: 4 (Likely) — every hook change risks behavioural regression; without dogfood discipline, source-tree-locally-tested-only hooks ship straight to adopters.
+- **Inherent score**: 16
+- **Inherent band**: High
+
+## Residual risk
+
+Per `RISK-POLICY.md` `## Control Composition`:
+
+- **Likelihood after controls**: 1 (Rare) — three independent paths: held-changeset / dogfood-window pattern (catches BEFORE adopter exposure); behavioural bats per ADR-052 (catches in TDD cycle); P141 changeset-discipline gate (forces explicit classification + bypass-only-with-env-var). 4 → 3 → 2 → 1.
+- **Residual score**: 4
+- **Residual band**: Low
+
+**Within appetite** (= 4/Low). Controls stack working; residual is at appetite floor and won't drop further without retiring controls (which would push residual back up).
+
 ## Controls
 
 - **Held-changeset / dogfood-window pattern** (`docs/changesets-holding/`, ADR-042 Rule 7) — hook-bearing changesets land in held area for in-repo dogfood before adopter release. Concurrent holds at any time signal the dogfood pipeline is doing its job (P085 / P064 / P159 are exemplars).

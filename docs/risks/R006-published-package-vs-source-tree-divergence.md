@@ -7,6 +7,25 @@ Three sub-classes:
 - **Repo-relative path leakage** (P151): published bash like `bash packages/itil/scripts/reconcile-readme.sh` resolves in the source repo but hard-fails at adopter installs.
 - **Publish-manifest drift** (P154): a `bin/` shim exists in source but isn't in `package.json` `files` array → ships broken; source-tree-walking detectors miss this because the source has the shim.
 
+## Inherent risk
+
+Per `RISK-POLICY.md` (without controls):
+
+- **Impact**: 4 (Significant) — `RISK-POLICY.md` L64: "skills fail to load" / "installer breaks for users who already have the packages". Adopter hits hard-fail at Step 0 (path case) OR adopter agent applies mis-resolved-ID semantics (ID case).
+- **Likelihood**: 5 (Almost certain) — pre-control state was P137 inherent 20 with "Almost certain". Without ADR-049 + ADR-055 + npm-pack-extension detector, every release introduced new instances by default; `@windyroad/itil@0.23.2 → 0.24.0` shipped broken bin shims for 5 versions before P154 detector caught it.
+- **Inherent score**: 20
+- **Inherent band**: Very High
+
+## Residual risk
+
+Per `RISK-POLICY.md` `## Control Composition`:
+
+- **Likelihood after controls**: 2 (Unlikely) — three independent paths covering different sub-classes: ADR-049 shim pattern (path-leakage sub-class); ADR-055 namespace-prefix (ID-leakage sub-class); P154 npm-pack-extension detector (publish-manifest sub-class). Each control covers ~one sub-class; project-wide weighted residual is 2 (Unlikely) because the three paths together cover the majority but not all of the failure surface.
+- **Residual score**: 8
+- **Residual band**: Medium
+
+**Gap-to-appetite**: residual exceeds appetite (4/Low). Phase-2 promotion of the namespace-prefix detector + npm-pack detector from advisory to commit-blocking (per the load-bearing-from-the-start pattern P159 / ADR-051) would drop residual likelihood to 1 and the score to 4/Low.
+
 ## Controls
 
 - **ADR-049 plugin-bundled scripts via `$PATH bin/`** — thin shim wrappers (`packages/<plugin>/bin/wr-<plugin>-<command>`) dispatch to canonical bodies. SKILL.md prose calls the shim by name; `$PATH` resolves at adopter install.

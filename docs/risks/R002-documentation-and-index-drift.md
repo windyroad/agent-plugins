@@ -4,6 +4,25 @@ Multiple docs that should agree about a fact (skill names, ADR numbers, sort-spe
 
 Includes sub-classes: README index drift from filesystem; ticket lifecycle rename without paired README update; ADR-vs-ADR inconsistency (e.g., one ADR documenting a pattern that contradicts another); SKILL.md sort-spec drift across N render-block sites; truncation discipline misapplied across multiple SKILL.md surfaces.
 
+## Inherent risk
+
+Per `RISK-POLICY.md` (without controls):
+
+- **Impact**: 3 (Moderate) — drift between SKILL.md / agent prompt and runtime causes wrong agent behaviour; not an installer-level break but degrades the read-driven contract adopters and the agent itself rely on.
+- **Likelihood**: 4 (Likely) — without load-bearing detectors, drift accumulates monotonically (every PR can introduce it; only retro-time review would catch it).
+- **Inherent score**: 12
+- **Inherent band**: High
+
+## Residual risk
+
+Per `RISK-POLICY.md` `## Control Composition`:
+
+- **Likelihood after controls**: 2 (Unlikely) — two effective paths: load-bearing commit-hooks for the JTBD-anchored README + ticket-index sub-classes (P159 + P062/P094/P118 stack count as one path each over their domains) and architect/JTBD review on every Edit/Write (broad path). Other controls (P134 truncation, namespace-prefix detector) are sub-class-specific and don't compose project-wide.
+- **Residual score**: 6
+- **Residual band**: Medium
+
+**Gap-to-appetite**: residual exceeds appetite (4/Low). The drift-class generalisation pattern (P161 observation) is the next mitigation milestone — additional load-bearing detectors for the un-covered sub-classes (ADR-vs-ADR inconsistency, sort-spec drift across N render-block sites) would drop residual likelihood to 1.
+
 ## Controls
 
 - **Load-bearing-from-the-start commit hooks** (per ADR-051 + P159 + P161 generalisation direction): `packages/retrospective/hooks/retrospective-readme-jtbd-currency.sh` denies `git commit` on JTBD-anchored README drift with auto-fix path. Pattern intended to extend to other drift sub-classes as evidence accumulates.

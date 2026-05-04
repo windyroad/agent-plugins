@@ -4,6 +4,25 @@ The user has stated in conversation, commit messages, changesets, or problem tic
 
 This is more memo-to-self than typical risk class — the check is mandatory per `packages/risk-scorer/agents/pipeline.md` `## User-Stated Preconditions Check`, and most reports show it as a one-line "no unmet preconditions" pass-through. When it DOES fire as a Risk item with Inherent ≥ 5 (per the policy "Inherent risk MUST be ≥ Medium even when the diff's technical risk alone would score Low"), treat as load-bearing — the user explicitly named the dependency.
 
+## Inherent risk
+
+Per `RISK-POLICY.md` (without controls):
+
+- **Impact**: 4 (Significant) — when a precondition is unmet and ignored, the user explicitly warned about the consequence. Per `pipeline.md` "Inherent risk MUST be ≥ Medium even when the diff's technical risk alone would score Low".
+- **Likelihood**: 3 (Possible) — most preconditions are obvious in context; some get missed when the conversation thread is dense or the precondition lives in a problem-ticket the agent didn't read.
+- **Inherent score**: 12
+- **Inherent band**: High
+
+## Residual risk
+
+Per `RISK-POLICY.md` `## Control Composition`:
+
+- **Likelihood after controls**: 1 (Rare) — three independent paths: pipeline.md mandatory check on every per-action assessment; `/wr-risk-scorer:assess-release` skill provides explicit pre-release surface; held-changeset pattern parks the change until paired-capability ships. 3 → 2 → 1 → 1 (capped).
+- **Residual score**: 4
+- **Residual band**: Low
+
+**At appetite** (= 4/Low). The check itself is low-cost; residual reflects the rare case where multiple sources of preconditions (conversation + ticket + changeset prose) are scanned and one slips through.
+
 ## Controls
 
 - **`packages/risk-scorer/agents/pipeline.md` `## User-Stated Preconditions Check` section** — canonical control; every pipeline run scans recent conversation messages, problem tickets referenced in the diff, commit messages and changeset files on the unreleased queue, and CLAUDE.md notes about cross-cutting dependencies.

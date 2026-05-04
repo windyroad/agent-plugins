@@ -4,6 +4,25 @@ The monorepo ships ~10 plugins via Changesets; each plugin is independently vers
 
 Cross-plugin coupling is structurally common because agentic compositions span plugin boundaries (a SKILL.md in `wr-itil` invokes an agent in `wr-risk-scorer` invokes a hook that writes a queue file consumed by another `wr-itil` skill).
 
+## Inherent risk
+
+Per `RISK-POLICY.md` (without controls):
+
+- **Impact**: 3 (Moderate) — `RISK-POLICY.md` L63: "npm publish or marketplace distribution disrupted — users can't install updates". Mismatched cross-plugin versions land at adopters under `^` semver and produce subtle errors.
+- **Likelihood**: 3 (Possible) — multi-plugin coordination is structurally complex; held-area inventory historically runs ~3 concurrent.
+- **Inherent score**: 9
+- **Inherent band**: Medium
+
+## Residual risk
+
+Per `RISK-POLICY.md` `## Control Composition`:
+
+- **Likelihood after controls**: 1 (Rare) — three independent paths: P141 changeset-discipline gate (forces every plugin source change to declare a changeset); `docs/changesets-holding/` held-area for multi-slice WIP; ADR-014 single-commit grain (intra-commit coupling stays atomic). ADR-042 auto-apply remediations are a 4th path for the above-appetite branch but typically don't fire post-control.
+- **Residual score**: 3
+- **Residual band**: Low
+
+**Within appetite** (≤ 4/Low). Controls stack working.
+
 ## Controls
 
 - **`packages/itil/hooks/itil-changeset-discipline.sh`** (P141) — gates `git commit` on `packages/*/source` change without `.changeset/*.md`. Bypass requires explicit `BYPASS_CHANGESET_GATE=1` env var.
