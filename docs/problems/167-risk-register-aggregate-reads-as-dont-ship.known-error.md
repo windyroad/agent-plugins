@@ -1,9 +1,9 @@
 # Problem 167: Risk register aggregate reads as "don't ship" — sparse coverage + undercredited controls
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-05-04
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 3 (Low) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: S (post-correction; substantive remaining work delegated to P168 — this ticket's residual is the cross-reference + transition only)
 
 ## Update — 2026-05-04 corrected framing
 
@@ -58,7 +58,7 @@ Sibling work at capture time: an Explore agent compared `.risk-reports/` (181 co
 
 ## Workaround
 
-(deferred to investigation — interim mitigation may be to annotate the register README with an "appetite read at the per-action / per-change level, not the aggregate residual" framing note while the structural fix is designed)
+Corrected catalog framing landed in `RISK-POLICY.md` commit `9e339d0` (new `## Risk Catalog` and `## Control Composition` sections). This eliminates the "register reads as don't ship" misreading at the policy layer — `docs/risks/` is now framed as the persistent catalog of per-action risks consumed by per-action assessments at the same 4/Low appetite uniformly, not as a separate lifetime-aggregation surface above per-action appetite. The substantive structural fix (risk-scorer bootstrap-from-empty + consume-catalog) is delegated to **P168** (see `## Related`).
 
 ## Impact Assessment
 
@@ -126,19 +126,20 @@ The gap-analysis Recommend further: "Residual ≥ appetite is intentional for po
 ### Updated Investigation Tasks (post-correction)
 
 - [x] Land catalog framing + composition rule in `RISK-POLICY.md` — **DONE** (commit `9e339d0`).
-- [ ] Re-rate Priority and Effort at next `/wr-itil:review-problems` (the Effort estimate was M based on the original Phase 1-3 plan; the actual work for THIS ticket post-correction is "land policy framing" which is now done — Effort drops to S, and most remaining work moves to the wipe-and-bootstrap ticket).
-- [ ] Cross-reference the wipe-and-bootstrap ticket from `## Related` once captured.
+- [x] Re-rate Priority and Effort — **DONE** (Effort dropped M → S inline at this transition; Priority unchanged at 3 / Low).
+- [x] Cross-reference the wipe-and-bootstrap ticket from `## Related` once captured — **DONE** (P168 link added below).
 - [ ] Optionally: TEMPLATE.md citation pointer to the `## Control Composition` rule.
-- [ ] Transition to `.known-error.md` once the wipe-and-bootstrap ticket is captured and cross-referenced — this ticket's substantive remaining work is delegated; root cause documented.
+- [x] Transition to `.known-error.md` once the wipe-and-bootstrap ticket is captured and cross-referenced — **DONE** (this transition; substantive remaining work delegated to P168; root cause documented).
 
 ## Dependencies
 
 - **Blocks**: (none yet — the R007-R011 standing-risk creates and R002/R005 extensions are dependents but live in `docs/risks/` not `docs/problems/`, so no problem-ticket blocking links)
 - **Blocked by**: (none)
-- **Composes with**: P033 (created the register), P034 (cross-project risk-report aggregation), P102 (register invocation surface), P110 (register passive triggers), P162 (counterfactual risk assessment for held changesets — directly adjacent on rating-quality dimension)
+- **Composes with**: P168 (substantive design successor — wipe-and-bootstrap + consume-catalog), P033 (created the register), P034 (cross-project risk-report aggregation), P102 (register invocation surface), P110 (register passive triggers), P162 (counterfactual risk assessment for held changesets — directly adjacent on rating-quality dimension)
 
 ## Related
 
+- `docs/problems/168-risk-scorer-doesnt-consume-catalog-or-bootstrap.open.md` — **substantive design successor**. Captures the wipe-and-bootstrap + consume-catalog implementation work that supersedes this ticket's original Phase 1-3 plan (manual R007-R011 authoring + R002/R005 extensions + R001-R006 re-rate). P167's residual scope post-correction is the policy-framing landing (done in commit `9e339d0`) + this transition; the design work lives in P168.
 - `RISK-POLICY.md` — Risk Appetite section defines the 4/Low threshold; clarifying its scope (per-action vs lifetime) is part of RC3.
 - `docs/risks/README.md` — register index showing all 6 residuals above appetite.
 - `docs/risks/R001-confidential-info-leak-via-public-repo-push.active.md` — canonical example for RC2 control-undercrediting analysis.
