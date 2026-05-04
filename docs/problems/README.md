@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-05-04 **P167 transition Open → Known Error — substantive design successor P168 captured + cross-referenced; root cause documented**: Effort dropped M → S post-correction (residual = cross-reference + transition only; design work delegated to P168); WSJF re-rated 1.5 → 6.0 and moved within the 6.0 tier ahead of P162 per Known-Error-first tie-break. Pre-flight checks satisfied: RC1 + RC2 valid (RC3 superseded), policy framing landed in commit 9e339d0 (RISK-POLICY.md ## Risk Catalog + ## Control Composition sections), reproduction test cited as P168 Confirmation criterion, workaround documented (corrected catalog framing + P168 delegation). External-root-cause detection: skipped — no upstream/external markers in RCA; internal to project. Per /wr-itil:work-problem singular contract; next invocation should target P168 for the substantive design. Prior line-3 fragment (P168 reconciliation) rotated to docs/problems/README-history.md per P134.
+> Last reviewed: 2026-05-04 **P168 transition Open → Known Error — architect + JTBD reviews complete; Effort re-rated M → XL; ADR-058 design path documented**: architect verdict ISSUES-FOUND with 8 distinct edits across 2 commits (new ADR-058 + ADR-047 amendment + new bootstrap-catalog skill + install-updates Step 6.5 extension + pipeline.md consume-catalog protocol + create-risk flag extension + orchestrator auto-invoke + wipe pass). JTBD verdict PASS centred on JTBD-001 with JTBD-006/202 binding. WSJF re-computed 1.5 → 0.75 (Severity 3 × KE multiplier 2.0 / Effort XL divisor 8) — P168 moves to top of WSJF=0.75 tier per Known-Error-first tie-break ahead of P012/P034. Per /wr-itil:work-problem Step 4 contract: scope-expansion AskUserQuestion (ADR-044 Category 2 deviation-approval) fires next — XL implementation does not fit one /wr-itil:work-problem invocation. Prior line-3 fragment (P167 transition) rotated to docs/problems/README-history.md per P134.
 > Run `/wr-itil:manage-problem review` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -27,7 +27,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 1.875 | P069 | docs/problems/ flat layout is unskimmable — migrate to per-state subdirs + auto-migrate adopter repos (re-rated L → XL 2026-04-20 after auto-migration scope add) | 15 High | Open | XL | 2026-04-20 |
 | 1.875 | P091 | Session-wide context budget — Claude Code consumes substantial context before and during every session across all contributor surfaces (meta) | 15 High | Open | XL | 2026-04-22 |
 | 1.5 | P080 | No bidirectional update of upstream-reported problems — local lifecycle transitions never propagate back to the reporter (re-rated 6.0 → 1.5 transitive 2026-04-26 — blocked by P079/P038/P064) | 12 High | Open | M | 2026-04-21 |
-| 1.5 | P168 | Risk-scorer doesn't consume `docs/risks/` catalog or bootstrap from `.risk-reports/` | 3 Low | Open | M | 2026-05-04 |
 | 1.5 | P045 | Auto plugin install after governance release (deferred install on next session start per 2026-04-20 direction) | 6 Med | Open | L | 2026-04-19 |
 | 1.5 | P079 | No inbound sync of upstream-reported problems — reports filed via the intake templates never surface in the local backlog (re-rated 6.0 → 1.5 transitive 2026-04-26 — assessment-pipeline scope blocked by P038/P064) | 12 High | Open | L | 2026-04-21 |
 | 1.5 | P014 | No lightweight aside invocation for governance skills (master tracker for ADR-032 — capture-* sibling skills + pending-questions hook + supersession cleanup) | 12 High | Open | XL | 2026-04-16 |
@@ -36,6 +35,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 1.5 | P082 | No voice-and-tone or content-risk-scoring gate on commit messages (transitive XL via P038 per P076; marginal M) | 12 High | Open | XL | 2026-04-21 |
 | 1.5 | P129 | P079 inbound assessment pipeline lacks version-aware classification — already-fixed-in-newer / recurred / still-active branches | 12 High | Open | XL | 2026-04-26 |
 | 1.25 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory/blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 10 High | Open | XL | 2026-05-03 |
+| 0.75 | P168 | Risk-scorer doesn't consume `docs/risks/` catalog or bootstrap from `.risk-reports/` | 3 Low | Known Error | XL | 2026-05-04 |
 | 0.75 | P012 | Skill testing harness scope undefined | 6 Med | Open | XL | 2026-04-16 |
 | 0.75 | P034 | Centralise risk reports for cross-project skill improvement | 6 Med | Open | XL | 2026-04-17 |
 
