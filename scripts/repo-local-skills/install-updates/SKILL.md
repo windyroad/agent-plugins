@@ -228,6 +228,59 @@ Templates: `scripts/repo-local-skills/install-updates/templates/risk-register-{R
 
 Deep context (ADR-013 audit table, idempotency rationale, template-source-of-truth, alternatives considered): `REFERENCE.md` → "Governance-artefact scaffold (P033)".
 
+#### 6.5.1 Bootstrap-from-reports auto-trigger (per ADR-059)
+
+After Step 6.5 scaffold lands (or skips because the directory already exists), check whether the catalog warrants bootstrapping from the existing `.risk-reports/` corpus. ADR-059 promotes ADR-047 Phase 3 (one-time historical backfill) from deferred to active; this sub-step is the auto-trigger surface.
+
+```bash
+# bootstrap_register_if_eligible <target>
+# Trigger: <target>/RISK-POLICY.md present AND <target>/docs/risks/ has only README+TEMPLATE
+# (no R*-*.active.md files) AND <target>/.risk-reports/ contains at least one *.md.
+# Per ADR-013 Rule 5: existing per-sibling consent + RISK-POLICY.md presence IS the
+# policy authorisation. No new consent gate.
+bootstrap_register_if_eligible() {
+  local target="$1"
+  [ -f "$target/RISK-POLICY.md" ] || { echo "no-policy"; return 0; }
+  [ -d "$target/docs/risks" ] || { echo "no-scaffold"; return 0; }
+  # Catalog-empty test: no R*-*.active.md files in docs/risks/
+  if ls "$target/docs/risks/"R*-*.active.md >/dev/null 2>&1; then
+    echo "catalog-populated"
+    return 0
+  fi
+  # .risk-reports/ corpus test: at least one *.md
+  if ! ls "$target/.risk-reports/"*.md >/dev/null 2>&1; then
+    echo "no-reports"
+    return 0
+  fi
+  # All pre-conditions met. Invoke the bootstrap-catalog skill.
+  # The skill walks .risk-reports/, dedupes by ADR-056 slug, and writes
+  # one R<NNN>-<slug>.active.md per unique slug per ADR-059.
+  echo "bootstrap-eligible"
+  return 0
+}
+```
+
+**Trigger contract** (per ADR-059 verdicts A6 + I2):
+
+- `RISK-POLICY.md` present AND `docs/risks/` has scaffold (Step 6.5 result) AND `docs/risks/` has NO `R*-*.active.md` files AND `.risk-reports/` non-empty → invoke `/wr-risk-scorer:bootstrap-catalog`.
+- `RISK-POLICY.md` present AND `docs/risks/` populated (any `R*-*.active.md` exists) → skip bootstrap (catalog already has entries; new-class detection flows through ADR-056 hint-and-drain instead).
+- `RISK-POLICY.md` present AND `.risk-reports/` empty/absent → skip bootstrap (nothing to walk).
+- `RISK-POLICY.md` absent → no scaffold AND no bootstrap (Step 6.5 precondition already covers this).
+
+**Outcomes feed Step 7 final report** alongside the scaffold rows. Row shape:
+
+```
+| <sibling> | docs/risks/ bootstrap | (empty) | <N> entries from <K> reports | ✓ bootstrapped (ADR-059) |
+| <sibling> | docs/risks/ bootstrap | (populated) | — | ⊘ skipped (catalog already has entries) |
+| <sibling> | docs/risks/ bootstrap | (no reports) | — | ⊘ skipped (.risk-reports/ empty) |
+```
+
+**ADR-013 audit**: same as Step 6.5 — Rule 5 (cache-hit silent proceed) authorises the bootstrap; Rule 6 (non-interactive fallback) inherits the install-loop's interactivity gate (bootstrap does not fire in dry-run mode). The bootstrap-catalog skill itself is non-interactive (no `AskUserQuestion`); per CLAUDE.md P132 mechanical-stage carve-out.
+
+**Idempotency**: re-running install-updates on a sibling that's already been bootstrapped is a no-op for bootstrap (the catalog-populated test fires the skip path). New `.risk-reports/` files added since the last bootstrap may surface new slugs on next bootstrap run, but only if the catalog is fully empty — a partially-populated catalog is the steady state once the first bootstrap completes; further new slugs flow through ADR-056 hint-and-drain.
+
+Deep context: `REFERENCE.md` → "Bootstrap-from-reports auto-trigger (ADR-059)" (TBD; reference points to ADR-059 directly until REFERENCE.md is extended).
+
 ### 7. Final report
 
 ```

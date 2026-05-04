@@ -73,7 +73,8 @@ The plugin includes six specialised agents:
 | `/wr-risk-scorer:assess-wip` | WIP risk nudge for the current uncommitted diff |
 | `/wr-risk-scorer:assess-release` | Pipeline risk assessment for the unpushed queue (pre-satisfies the commit gate) |
 | `/wr-risk-scorer:assess-external-comms` | External-comms leak review for a draft outbound body (pre-satisfies the external-comms gate) |
-| `/wr-risk-scorer:create-risk` | Create a standing-risk register entry |
+| `/wr-risk-scorer:create-risk` | Create a standing-risk register entry (interactive authoring; orchestrator-driven prefilled invocation via `--slug` / `--prefill` flags per ADR-059) |
+| `/wr-risk-scorer:bootstrap-catalog` | Bootstrap `docs/risks/` register from existing `.risk-reports/` corpus per ADR-059 — walks reports, dedupes by ADR-056 slug, emits one `R<NNN>-<slug>.active.md` per unique slug. Idempotent. Auto-triggers from `/install-updates` Step 6.5.1 when register is empty + `RISK-POLICY.md` present + `.risk-reports/` non-empty |
 | `/wr-risk-scorer:update-policy` | Generate or update `RISK-POLICY.md` |
 
 ## External-comms gate
