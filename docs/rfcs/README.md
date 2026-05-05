@@ -141,6 +141,14 @@ Phase 1 of the RFC framework rides a held-changeset window per ADR-042 / P162. *
 
 `docs/rfcs/README.md` is reconciled against on-disk RFC files by `wr-itil-reconcile-rfcs` (Slice 3 task B5.T6, `$PATH` shim per ADR-049 lands at B5.T7). The reconciliation contract mirrors `wr-itil-reconcile-readme docs/problems` per P118: diagnose-only mechanical drift detector that runs as a Step 0 preflight in `/wr-itil:manage-rfc` invocations.
 
+**Reverse-trace pass (Slice 3 second half — B5.T8)**: `wr-itil-reconcile-rfcs docs/rfcs docs/problems` extends to detect drift in the auto-maintained `## RFCs` reverse-trace section on each problem ticket. Three drift kinds (per ADR-060 Confirmation criterion 3 + architect Q5 verdict):
+
+- `MISSING_REVERSE_TRACE  RFC-<NNN> in P<NNN> ## RFCs` — RFC frontmatter `problems:` claims P<NNN> but P<NNN>'s `## RFCs` table does not list RFC-<NNN>. Skill-side refresh contract was missed at capture-rfc / manage-rfc time.
+- `STALE_REVERSE_TRACE    RFC-<NNN> in P<NNN> ## RFCs` — P<NNN>'s `## RFCs` lists RFC-<NNN> but the RFC frontmatter no longer claims P<NNN>. Re-trace bookkeeping was missed.
+- `STATUS_MISMATCH        RFC-<NNN> in P<NNN> ## RFCs claims=<X> actual=<Y>` — P<NNN>'s `## RFCs` row claims status `<X>` but RFC's filesystem suffix is `<Y>`. Status-column refresh contract was missed.
+
+The reverse-trace pass composes orthogonally with the `itil-rfc-trailer-advisory.sh` PostToolUse:Bash hook (Slice 3 second half — B5.T9): the hook detects per-commit drift (a commit landed with `Refs: RFC-<NNN>` trailer but the driving problem's `## RFCs` table doesn't list the RFC); the reconciler detects systemic drift (cross-tier inconsistency at batch time). Both feed into manage-rfc Step 0 + manage-problem Step 0 preflight halts, mirroring the per-commit-vs-batch-time integrity discipline that `itil-changeset-discipline.sh` (per-commit) and `wr-itil-reconcile-readme docs/problems` (batch-time) already established at the README tier.
+
 ## Related
 
 - **ADR-060** — Problem-RFC-Story framework with mandatory problem-trace and unified problem ontology. The decision that introduces this directory.

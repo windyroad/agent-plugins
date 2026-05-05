@@ -7,9 +7,11 @@
 # disagreement.
 #
 # Usage:
-#   reconcile-rfcs.sh [<rfcs-dir>]
+#   reconcile-rfcs.sh [<rfcs-dir> [<problems-dir>]]
 #
 # Default <rfcs-dir> is ./docs/rfcs.
+# Default <problems-dir> is ./docs/problems (when supplied; absent dir
+# silently skips the reverse-trace pass per backward-compat carve-out).
 #
 # Exit codes:
 #   0 = clean (README matches filesystem)
@@ -22,6 +24,20 @@
 #   MISSING  RFC-<NNN> wsjf-rankings: actual=<status>
 #   STALE    RFC-<NNN> verification-queue: actual=<status>
 #   MISMATCH RFC-<NNN> closed: actual=<status>
+#
+# Reverse-trace pass (B5.T8 — closes ADR-060 Confirmation criterion 3):
+# When <problems-dir> is provided AND on disk, the reconciler also
+# checks the auto-maintained `## RFCs` section on each problem ticket
+# against the RFC frontmatter `problems:` claims. Three drift kinds:
+#   MISSING_REVERSE_TRACE  RFC-<NNN> in P<NNN> ## RFCs
+#     RFC's frontmatter claims P<NNN> but P<NNN>'s ## RFCs table does
+#     not list RFC-<NNN>. Skill-side refresh contract was missed.
+#   STALE_REVERSE_TRACE    RFC-<NNN> in P<NNN> ## RFCs
+#     P<NNN>'s ## RFCs lists RFC-<NNN> but the RFC frontmatter no
+#     longer claims P<NNN>. Re-trace bookkeeping was missed.
+#   STATUS_MISMATCH        RFC-<NNN> in P<NNN> ## RFCs claims=<X> actual=<Y>
+#     P<NNN>'s ## RFCs row claims status <X> but RFC's filesystem
+#     suffix is <Y>. Status-column refresh contract was missed.
 #
 # Read-only — does NOT mutate the README. The /wr-itil:manage-rfc skill
 # applies edits with narrative-aware preservation; this script's only
@@ -47,6 +63,13 @@
 set -uo pipefail
 
 RFCS_DIR="${1:-docs/rfcs}"
+# Default PROBLEMS_DIR to the sibling of RFCS_DIR (so real-use
+# `docs/rfcs` → `docs/problems`, and fixture-isolated test runs in
+# `/tmp/X` → `/tmp/problems` which won't exist, gracefully skipping
+# reverse-trace). Backward-compat: existing 18-case bats fixtures
+# stay clean because `dirname /tmp/<rand>` = `/tmp`, never colliding
+# with the real repo's `docs/problems`.
+PROBLEMS_DIR="${2:-$(dirname "$RFCS_DIR")/problems}"
 README="${RFCS_DIR}/README.md"
 
 # ── Pre-checks ──────────────────────────────────────────────────────────────
@@ -191,6 +214,106 @@ for id in "${!FS_STATUS[@]}"; do
     # drift not flagged at this layer (mirrors reconcile-readme).
   esac
 done
+
+# ── Reverse-trace pass (B5.T8) ──────────────────────────────────────────────
+# When PROBLEMS_DIR exists, validate that each problem ticket's auto-
+# maintained `## RFCs` section agrees with the corresponding RFC
+# frontmatter `problems:` claims (and vice-versa).
+
+if [ -d "$PROBLEMS_DIR" ]; then
+  # rfc_problems_claim["RFC-NNN"] = "P168 P169 ..."
+  declare -A rfc_problems_claim
+  shopt -s nullglob
+  for f in "$RFCS_DIR"/RFC-[0-9][0-9][0-9]-*.md; do
+    base="$(basename "$f")"
+    num="${base#RFC-}"
+    num="${num%%-*}"
+    rfc_id="RFC-${num}"
+    # Parse YAML frontmatter `problems: [P168, P169]` (single line).
+    raw=$(awk '/^problems:/ { print; exit }' "$f")
+    # Strip everything except inside-brackets bare comma-separated content.
+    inner=$(echo "$raw" | sed -E 's/^[[:space:]]*problems:[[:space:]]*\[//; s/\][[:space:]]*$//')
+    # Tokenise on commas, normalise to bare P<NNN> tokens.
+    pids=""
+    if [ -n "$inner" ]; then
+      while IFS= read -r tok; do
+        tok=$(echo "$tok" | tr -d ' "'\''')
+        case "$tok" in
+          P[0-9][0-9][0-9]) pids="${pids:+$pids }$tok" ;;
+        esac
+      done <<< "$(echo "$inner" | tr ',' '\n')"
+    fi
+    rfc_problems_claim["$rfc_id"]="$pids"
+  done
+  shopt -u nullglob
+
+  # problem_rfc_rows["P168 RFC-001"] = "<claimed-status>"
+  # problem_rfc_ids["P168"] = "RFC-001 RFC-002 ..."
+  declare -A problem_rfc_rows
+  declare -A problem_rfc_ids
+  shopt -s nullglob
+  for pf in "$PROBLEMS_DIR"/[0-9][0-9][0-9]-*.md; do
+    pbase="$(basename "$pf")"
+    pnum="${pbase%%-*}"
+    pid="P${pnum}"
+    # Locate `## RFCs` section start (if any).
+    sec_start=$(awk 'BEGIN{flag=0} /^## RFCs[[:space:]]*$/ {print NR; exit}' "$pf")
+    [ -z "$sec_start" ] && continue
+    # Read until next `## ` header or EOF; extract `| RFC-NNN | <status> | ...|` rows.
+    rfcs_in_p=""
+    while IFS= read -r line; do
+      case "$line" in
+        \|*RFC-[0-9][0-9][0-9]*\|*)
+          rid=$(echo "$line" | grep -oE 'RFC-[0-9]{3}' | head -1)
+          claimed=$(echo "$line" | awk -F'|' '{gsub(/^[[:space:]]+|[[:space:]]+$/,"",$3); print $3}')
+          [ -z "$rid" ] && continue
+          problem_rfc_rows["${pid} ${rid}"]="$claimed"
+          rfcs_in_p="${rfcs_in_p:+$rfcs_in_p }$rid"
+          ;;
+      esac
+    done < <(awk -v start="$sec_start" 'NR>start { if (/^## /) exit; print }' "$pf")
+    problem_rfc_ids["$pid"]="$rfcs_in_p"
+  done
+  shopt -u nullglob
+
+  # 1. MISSING_REVERSE_TRACE: RFC claims P, P does not list RFC.
+  for rfc_id in "${!rfc_problems_claim[@]}"; do
+    pids="${rfc_problems_claim[$rfc_id]}"
+    [ -z "$pids" ] && continue
+    for pid in $pids; do
+      listed="${problem_rfc_ids[$pid]:-}"
+      case " $listed " in
+        *" $rfc_id "*) : ;;
+        *)
+          DRIFT_LINES+=("MISSING_REVERSE_TRACE  ${rfc_id} in ${pid} ## RFCs")
+          ;;
+      esac
+    done
+  done
+
+  # 2. STALE_REVERSE_TRACE: P lists RFC, RFC frontmatter does not claim P.
+  #    STATUS_MISMATCH: P's row claims status X but RFC suffix is Y.
+  for pid in "${!problem_rfc_ids[@]}"; do
+    rids="${problem_rfc_ids[$pid]}"
+    [ -z "$rids" ] && continue
+    for rid in $rids; do
+      claimed_pids="${rfc_problems_claim[$rid]:-}"
+      case " $claimed_pids " in
+        *" $pid "*)
+          # Status-mismatch check (only when reverse-trace is itself current).
+          claimed_status="${problem_rfc_rows[${pid} ${rid}]:-}"
+          actual_status="${FS_STATUS[$rid]:-missing}"
+          if [ -n "$claimed_status" ] && [ "$claimed_status" != "$actual_status" ]; then
+            DRIFT_LINES+=("STATUS_MISMATCH        ${rid} in ${pid} ## RFCs claims=${claimed_status} actual=${actual_status}")
+          fi
+          ;;
+        *)
+          DRIFT_LINES+=("STALE_REVERSE_TRACE    ${rid} in ${pid} ## RFCs")
+          ;;
+      esac
+    done
+  done
+fi
 
 # ── Report ──────────────────────────────────────────────────────────────────
 

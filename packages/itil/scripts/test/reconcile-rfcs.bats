@@ -41,10 +41,11 @@ setup() {
   SCRIPTS_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
   SCRIPT="$SCRIPTS_DIR/reconcile-rfcs.sh"
   FIXTURE_DIR="$(mktemp -d)"
+  PROBLEMS_DIR="$(mktemp -d)"
 }
 
 teardown() {
-  rm -rf "$FIXTURE_DIR"
+  rm -rf "$FIXTURE_DIR" "$PROBLEMS_DIR"
 }
 
 # Helper: write a minimal valid RFC README to fixture dir.
@@ -78,21 +79,56 @@ EOF
 }
 
 # Helper: write an RFC ticket file with the given status suffix.
+# Optional 4th arg overrides the `problems:` list (default `[P168]`).
 write_rfc() {
   local id="$1" slug="$2" status="$3"
+  local problems="${4:-[P168]}"
   cat > "$FIXTURE_DIR/RFC-${id}-${slug}.${status}.md" <<EOF
 ---
 status: ${status}
 rfc-id: ${slug}
 reported: 2026-05-05
 decision-makers: [test]
-problems: [P168]
+problems: ${problems}
 ---
 
 # RFC-${id}: ${slug}
 
 stub
 EOF
+}
+
+# Helper: write a problem ticket file with optional `## RFCs` table rows.
+# Args: <pid-num> <slug> <status> <rfcs-rows-block>
+# rfcs-rows-block is the markdown rows (already pipe-formatted) inserted under
+# the `## RFCs` table header — pass an empty string to omit the section
+# entirely (lazy-empty discipline per JTBD-101 atomic-fix-adopter friction guard).
+write_problem() {
+  local num="$1" slug="$2" status="$3" rfcs_rows="${4:-}"
+  local file="$PROBLEMS_DIR/${num}-${slug}.${status}.md"
+  cat > "$file" <<EOF
+# Problem ${num}: ${slug}
+
+**Status**: ${status}
+
+## Description
+
+stub
+
+## Related
+
+stub
+EOF
+  if [ -n "$rfcs_rows" ]; then
+    cat >> "$file" <<EOF
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+${rfcs_rows}
+EOF
+  fi
 }
 
 # ── Existence + executable ──────────────────────────────────────────────────
@@ -258,6 +294,123 @@ EOF
   second_line=$(echo "$output" | sed -n '2p')
   [[ "$first_line" == *"RFC-010"* ]]
   [[ "$second_line" == *"RFC-020"* ]]
+}
+
+# ── Reverse-trace drift detection (B5.T8 — closes ADR-060 Confirmation criterion 3) ──
+#
+# Per architect Q5 verdict: when a problems-dir is provided as second positional
+# arg, reconcile-rfcs.sh extends to detect drift in the `## RFCs` reverse-trace
+# section on driving problem tickets. Three new drift conditions:
+#
+#   MISSING_REVERSE_TRACE  RFC-<NNN> in P<NNN> ## RFCs
+#     RFC frontmatter `problems:` claims P<NNN> but P<NNN>'s `## RFCs` table
+#     does not list RFC-<NNN>.
+#
+#   STALE_REVERSE_TRACE    RFC-<NNN> in P<NNN> ## RFCs
+#     P<NNN>'s `## RFCs` table lists RFC-<NNN> but the RFC's frontmatter
+#     `problems:` no longer claims P<NNN>.
+#
+#   STATUS_MISMATCH        RFC-<NNN> in P<NNN> ## RFCs claims=<X> actual=<Y>
+#     P<NNN>'s `## RFCs` row claims status <X> but RFC's filesystem suffix is <Y>.
+#
+# Backward-compat: when no problems-dir arg is supplied (or the dir is absent),
+# the script preserves the single-arg behaviour from B5.T6 (existing 18 cases
+# above pass unchanged).
+
+@test "reverse-trace: clean — RFC traces P, P has matching ## RFCs row → no drift" {
+  write_rfc "001" "foo" "accepted"
+  write_minimal_readme "| 2.0 | RFC-001 | foo | 3 Med | Accepted | M | 2026-05-05 |"
+  write_problem "168" "p168" "verifying" "| RFC-001 | accepted | foo |"
+  run bash "$SCRIPT" "$FIXTURE_DIR" "$PROBLEMS_DIR"
+  [ "$status" -eq 0 ]
+}
+
+@test "reverse-trace: MISSING_REVERSE_TRACE — RFC claims P, P has no ## RFCs section" {
+  write_rfc "001" "foo" "accepted"
+  write_minimal_readme "| 2.0 | RFC-001 | foo | 3 Med | Accepted | M | 2026-05-05 |"
+  write_problem "168" "p168" "verifying" ""
+  run bash "$SCRIPT" "$FIXTURE_DIR" "$PROBLEMS_DIR"
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"MISSING_REVERSE_TRACE"* ]]
+  [[ "$output" == *"RFC-001"* ]]
+  [[ "$output" == *"P168"* ]]
+}
+
+@test "reverse-trace: MISSING_REVERSE_TRACE — RFC claims P, P has ## RFCs but RFC absent from table" {
+  write_rfc "001" "foo" "accepted"
+  write_rfc "002" "bar" "proposed"
+  write_minimal_readme "| 2.0 | RFC-001 | foo | 3 Med | Accepted | M | 2026-05-05 |"
+  # P168 has ## RFCs section listing RFC-002 but not RFC-001
+  write_problem "168" "p168" "verifying" "| RFC-002 | proposed | bar |"
+  run bash "$SCRIPT" "$FIXTURE_DIR" "$PROBLEMS_DIR"
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"MISSING_REVERSE_TRACE"* ]]
+  [[ "$output" == *"RFC-001"* ]]
+  [[ "$output" == *"P168"* ]]
+}
+
+@test "reverse-trace: STALE_REVERSE_TRACE — P lists RFC, RFC frontmatter no longer claims P" {
+  # RFC-001 traces P169 only; P168's ## RFCs table still lists RFC-001
+  write_rfc "001" "foo" "accepted" "[P169]"
+  write_minimal_readme "| 2.0 | RFC-001 | foo | 3 Med | Accepted | M | 2026-05-05 |"
+  write_problem "168" "p168" "verifying" "| RFC-001 | accepted | foo |"
+  write_problem "169" "p169" "open" "| RFC-001 | accepted | foo |"
+  run bash "$SCRIPT" "$FIXTURE_DIR" "$PROBLEMS_DIR"
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"STALE_REVERSE_TRACE"* ]]
+  [[ "$output" == *"RFC-001"* ]]
+  [[ "$output" == *"P168"* ]]
+}
+
+@test "reverse-trace: STATUS_MISMATCH — P ## RFCs row claims status X but RFC suffix is Y" {
+  write_rfc "001" "foo" "in-progress"
+  write_minimal_readme "| 1.5 | RFC-001 | foo | 3 Med | In-Progress | M | 2026-05-05 |"
+  # P168's ## RFCs table claims RFC-001 is `accepted` but the on-disk suffix is in-progress
+  write_problem "168" "p168" "verifying" "| RFC-001 | accepted | foo |"
+  run bash "$SCRIPT" "$FIXTURE_DIR" "$PROBLEMS_DIR"
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"STATUS_MISMATCH"* ]]
+  [[ "$output" == *"RFC-001"* ]]
+  [[ "$output" == *"P168"* ]]
+  [[ "$output" == *"claims=accepted"* ]]
+  [[ "$output" == *"actual=in-progress"* ]]
+}
+
+@test "reverse-trace: backward-compat — single-arg invocation skips reverse-trace check" {
+  # No problems-dir → existing 18-case behaviour
+  write_rfc "001" "foo" "accepted"
+  write_minimal_readme "| 2.0 | RFC-001 | foo | 3 Med | Accepted | M | 2026-05-05 |"
+  run bash "$SCRIPT" "$FIXTURE_DIR"
+  [ "$status" -eq 0 ]
+}
+
+@test "reverse-trace: problems-dir absent on disk → reverse-trace check skipped (warn-only)" {
+  write_rfc "001" "foo" "accepted"
+  write_minimal_readme "| 2.0 | RFC-001 | foo | 3 Med | Accepted | M | 2026-05-05 |"
+  rm -rf "$PROBLEMS_DIR"
+  run bash "$SCRIPT" "$FIXTURE_DIR" "$PROBLEMS_DIR"
+  # absent problems-dir does not promote to drift; treat as backward-compat
+  [ "$status" -eq 0 ]
+}
+
+@test "reverse-trace: RFC has no problems frontmatter → reverse-trace skipped for that RFC" {
+  # Empty problems list; RFC-001 frontmatter has no claims to validate
+  write_rfc "001" "foo" "accepted" "[]"
+  write_minimal_readme "| 2.0 | RFC-001 | foo | 3 Med | Accepted | M | 2026-05-05 |"
+  write_problem "168" "p168" "verifying" ""
+  run bash "$SCRIPT" "$FIXTURE_DIR" "$PROBLEMS_DIR"
+  [ "$status" -eq 0 ]
+}
+
+@test "reverse-trace: drift output is per-line and ≤150 bytes per line (ADR-038)" {
+  write_rfc "001" "byte-budget-test-with-an-extra-long-slug-to-stress-row-width" "accepted"
+  write_minimal_readme "| 2.0 | RFC-001 | byte-budget-test-with-an-extra-long-slug-to-stress-row-width | 3 Med | Accepted | M | 2026-05-05 |"
+  write_problem "168" "p168" "verifying" ""
+  run bash "$SCRIPT" "$FIXTURE_DIR" "$PROBLEMS_DIR"
+  [ "$status" -eq 1 ]
+  while IFS= read -r line; do
+    [ ${#line} -le 150 ] || { echo "row exceeds 150 bytes: '$line' (${#line} bytes)"; return 1; }
+  done <<< "$output"
 }
 
 # ── ADR-049 bin shim contract ───────────────────────────────────────────────

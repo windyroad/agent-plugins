@@ -131,9 +131,28 @@ git add docs/rfcs/RFC-<NNN>-<slug>.<new-status>.md
 
 After renaming + Editing + `git add`-ing the transitioned RFC file, regenerate `docs/rfcs/README.md` in-place reflecting the new filename set and the transitioned RFC's new Status. Stage the refreshed README with the same commit. The "Last reviewed" line on `docs/rfcs/README.md` follows the same P134 truncation discipline as `docs/problems/README.md`: single most-recent fragment on line 3; displaced fragments rotate to `docs/rfcs/README-history.md` (created on first rotation). Soft cap ≤ 1024 bytes per fragment; hard ceiling 5120 bytes per ADR-040 Tier 3 envelope.
 
-#### Reverse trace on driving problem(s) (Phase 1 deferred to Slice 3 B5.T8)
+#### Reverse trace on driving problem(s) (skill-side primary surface)
 
-The auto-maintained `## RFCs` section on driving problem tickets is fed by the commit-message `Refs: RFC-<NNN>` trailer hook (ADR-060 Phase 1 item 12; lands in Slice 3 task B5.T9). Phase 1 capture-rfc + manage-rfc skeletons emit the trailer in commit messages; the hook recognition + back-write to problem-ticket bodies lands in Slice 3.
+Per ADR-060 Phase 1 item 10 + Confirmation criterion 3 + architect Q1 verdict (skill-side primary, hook-side advisory for arbitrary commits): every transition refreshes the `## RFCs` section on each driving problem ticket inline in the same commit per ADR-014 single-commit grain.
+
+For each `P<NNN>` in the transitioned RFC's frontmatter `problems:` list:
+
+```bash
+for pid_token in $(awk '/^problems:/{gsub(/[][]/,"");gsub(/,/,"\n");for(i=2;i<=NF;i++)print $i;exit}' "$rfc_file"); do
+  pid_num="${pid_token#P}"
+  problem_file=$(ls docs/problems/${pid_num}-*.md 2>/dev/null | head -1)
+  [ -z "$problem_file" ] && continue
+  bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/update-problem-rfcs-section.sh" "$problem_file" docs/rfcs
+  git add "$problem_file"
+done
+```
+
+The helper (`packages/itil/scripts/update-problem-rfcs-section.sh`) is idempotent and applies lazy-empty discipline (zero traced RFCs → section absent — protects atomic-fix-adopter friction guard per JTBD-101). After the transition, the helper:
+- Updates the row's `Status` column to the new lifecycle status.
+- Removes the row when this transition de-traces a problem (frontmatter `problems:` edit removed the entry).
+- No-op when the table is already current (idempotent contract).
+
+The trailer hook (`itil-rfc-trailer-advisory.sh`) sits on top of this skill-side contract as a drift-detection backstop for ARBITRARY commits (e.g. `feat(...)` commits with `Refs: RFC-<NNN>` trailers authored outside the RFC skills) — it never auto-fixes; it advises.
 
 ### 8. List flow (`list`)
 
@@ -156,7 +175,17 @@ Batch re-rank all RFCs and refresh `docs/rfcs/README.md`.
 
 **Step 9d**: For each `.verifying.md` RFC, collect in-session evidence per ADR-044 framework-resolved silent dispatch (mirrors `manage-problem` Step 9d). Concrete + unambiguous citation → close on evidence via the transition path. Ambiguous/absent → leave as Verifying.
 
-**Step 9e**: Update changed files; refresh `docs/rfcs/README.md`; commit per ADR-014:
+**Step 9e**: Update changed files; refresh `docs/rfcs/README.md`; refresh the `## RFCs` reverse-trace section on every problem ticket whose traced RFCs changed status or title in this batch (per ADR-060 Phase 1 item 10 + Confirmation criterion 3 — skill-side primary):
+
+```bash
+# Aggregate the union of P<NNN> across all RFCs touched in this review.
+for problem_file in $(printf '%s\n' "${touched_problem_files[@]}" | sort -u); do
+  bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/update-problem-rfcs-section.sh" "$problem_file" docs/rfcs
+  git add "$problem_file"
+done
+```
+
+The helper is idempotent — a problem ticket whose `## RFCs` table is already current emits no diff, and `git add` of an unchanged file is a no-op. Any drift gets fixed in this commit per ADR-014 single-commit grain. Commit per ADR-014:
 
 ```
 docs(rfcs): review — re-rank RFC priorities

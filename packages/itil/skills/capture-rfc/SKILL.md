@@ -187,9 +187,27 @@ jtbd: []
 
 The deferred-section pattern matches `capture-problem`'s placeholder approach — the captured RFC is intentionally minimal; full scope and task decomposition land at the manage-rfc accepted-transition step.
 
-### 6. Single commit — no README refresh
+### 6. Single commit — `## RFCs` reverse-trace refresh; no rfcs README refresh
 
-**Stage list**: ONLY the new RFC file. **Do NOT** stage `docs/rfcs/README.md`. The deferred-README-refresh contract is the load-bearing capture-time speed differentiator from `/wr-itil:manage-rfc` (mirrors `capture-problem` deferred-README-refresh contract). The next `/wr-itil:manage-rfc review` invocation OR the next `wr-itil-reconcile-rfcs` (Slice 3) refreshes the README.
+**Stage list**: the new RFC file PLUS each driving problem ticket file whose `## RFCs` section needs the reverse-trace row added (per ADR-060 Phase 1 item 10 + Confirmation criterion 3 — auto-maintained reverse trace; architect Q1 verdict skill-side primary). **Do NOT** stage `docs/rfcs/README.md`. The deferred-rfcs-README-refresh contract is the load-bearing capture-time speed differentiator from `/wr-itil:manage-rfc` (mirrors `capture-problem` deferred-`docs/problems/README.md` contract). The next `/wr-itil:manage-rfc review` invocation OR `wr-itil-reconcile-rfcs` refreshes the rfcs README.
+
+The reverse-trace refresh on driving problem tickets, however, IS in-commit per ADR-014 single-commit grain — the cross-tier `## RFCs` table on a problem ticket must stay current the moment a new RFC traces it. Otherwise the trailer hook (`itil-rfc-trailer-advisory.sh`) would fire on every capture commit and the reverse-trace would lag by one manage-rfc invocation.
+
+For each problem ID in `$problem_trace`, invoke the helper before commit:
+
+```bash
+for pid_token in $(echo "$problem_trace" | tr ',' ' '); do
+  pid_num="${pid_token#P}"
+  problem_file=$(ls docs/problems/${pid_num}-*.md 2>/dev/null | head -1)
+  [ -z "$problem_file" ] && continue
+  bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/update-problem-rfcs-section.sh" "$problem_file" docs/rfcs
+  git add "$problem_file"
+done
+```
+
+The helper (`packages/itil/scripts/update-problem-rfcs-section.sh`) is idempotent: running over a current section is a no-op. Lazy-empty discipline applies (zero traced RFCs → section absent) — capture-rfc invocations always have ≥ 1 trace at this step, so this surface always emits a populated section. The `git add` is conditional on the helper actually modifying the file — `cmp -s` no-op-on-current is the helper's idempotency contract; `git add` of an unchanged file is also a no-op.
+
+Stage the new RFC file:
 
 ```bash
 git add docs/rfcs/RFC-<NNN>-<slug>.proposed.md
