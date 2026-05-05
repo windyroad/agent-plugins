@@ -251,7 +251,7 @@ When Phase 1 ships, replace this entire section with a forward pointer to `RFC-N
 - ADR-051 (load-bearing-from-the-start — applies to RFC-introducing controls themselves)
 - ADR-052 (behavioural tests — RFC stories carry behavioural acceptance)
 - ADR-059 (consume-catalog + bootstrap-from-reports — first multi-commit ADR landed under the strain pattern this ticket addresses)
-- JTBD-001 (enforce-governance), JTBD-008 (evolve-framework), JTBD-101 (plugin-developer)
+- JTBD-001 (enforce-governance — extended scope per ADR-060 amendment 2026-05-05), JTBD-101 (plugin-developer — bifurcation acknowledged per ADR-060 amendment 2026-05-05), JTBD-006 (work-backlog-afk), JTBD-201 (restore-service-fast), JTBD-301 (report-without-pre-classifying) — JTBD-008 reference dropped 2026-05-05 (phantom anchor — does not exist; per JTBD-review finding 1)
 - P168 / P169 (substantive design + operationalisation pair — first explicit Problem→workstream-decomposition example session-surfaced)
 - P159 (Phase 1 shipped, Phase 2-3 deferred — second-most-pressing example of the pattern)
 - P051 (6 improve shapes — third-most-pressing example)

@@ -24,6 +24,7 @@ When I'm building a new plugin, I want to follow a clear template and have CI va
 
 - Must not break existing plugins when adding new ones
 - Needs clear patterns, not reverse-engineering
+- **Plugin / framework ceremony must scale down to atomic-change adopters, not only up to complex multi-commit adopters.** Mandatory new framework primitives (e.g. RFC trace, type-tag) need an opt-out or a justification at adopter-graduation time — atomic-fix adopters whose work has always been single-commit should not pay the multi-commit-coordination ceremony tax. (Added 2026-05-05 per ADR-060 RFC framework — JTBD-review finding 3.)
 
 ## Current Solutions
 
