@@ -1,6 +1,6 @@
 # Incident I001: Unreleased changeset queue violates lean WIP and raises cumulative release risk
 
-**Status**: Mitigating
+**Status**: Restored
 **Reported**: 2026-05-06 06:30 UTC
 **Severity**: 6 (Medium) — Impact: Minor (2) x Likelihood: Possible (3)
 **Scope**: Release pipeline + held cluster (`docs/changesets-holding/`) + downstream adopter risk (latent — adopters running stale plugin behaviour because mitigations haven't graduated yet)
@@ -15,6 +15,7 @@
 - [2026-05-06 06:30 UTC] Incident declared by user observation: "we have a massive queue of unreleased changes. This goes against lean principles (too much WIP) and increases the cumulative release risk."
 - [2026-05-06 07:30 UTC] User refines scope: "I'm not worried about the held items for dogfooding. It's all the other stuff that needs to get to the users." Cluster split-graduation strategy chosen per H3 mitigation.
 - [2026-05-06 07:30 UTC] Mitigation attempt: graduate orthogonal-gate `.verifying.md` holds (P064 + P085 + P159) back to `.changeset/`; P170 dogfood cluster (Phase 1 + Slice 3 + Slice 3 second-half) stays held per ADR-060 finding 12 atomic-graduation contract.
+- [2026-05-06 08:00 UTC] Service restored — verification signal: CI green on `push:watch` (run 25406025126, 3m1s Quality Gates) + npm publish success on `release:watch` (release commit `6b6ef50` merged, 3 packages published: `@windyroad/itil@0.26.0` + `@windyroad/retrospective@0.18.0` + `@windyroad/risk-scorer@0.7.0`). Held cluster reduced from 6 → 3 (P170 dogfood-only state). Pipeline residual at appetite ceiling (commit/push/release=4 Low) post-graduation — well within RISK-POLICY band, no above-appetite escalation.
 
 ## Observations
 
@@ -37,4 +38,8 @@
 
 ## Linked Problem
 
-*(none yet — added on restore transition; candidate problems already in backlog: P162 codify-dogfood-graduation-criteria. JTBD review notes the linked Problem ticket should anchor to JTBD-006 (queue-drain outcome) + JTBD-001 (change-set-level governance) in addition to JTBD-201 incident lineage.)*
+**P162** (`Codify dogfood-graduation criteria for held changesets — symmetric risk assessment (release-risk vs delay-risk) drives the reinstate decision, not arbitrary calendar guards`) — `.open.md`, WSJF 6.0.
+
+P162 is the pre-existing backlog ticket that covers the structural gap I001 surfaced (no quantitative WIP-size guard for held cluster + no documented criteria for graduating orthogonal-gate holds independently of atomic-cohort holds). The architect advisory at I001 declaration recommended either a small ADR amendment to ADR-042 Rule 6 ("orthogonal-gate holds graduate independently of atomic-cohort holds") or linking the rule into P162's Fix Strategy. JTBD review recommended anchoring P162 work to JTBD-006 (queue-drain outcome) + JTBD-001 (change-set-level governance) in addition to JTBD-201 incident lineage.
+
+I001 mitigation evidence (graduating orthogonal-gate holds via user-comfort signal + dogfood-window age) is the empirical input P162's codification work needs. See P162 ticket for the Fix Strategy update post-I001.
