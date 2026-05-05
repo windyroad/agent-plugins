@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-05-05 **README reconciled** — 1 drift entry corrected: P172 (MISSING wsjf-rankings row added at WSJF 1.5 tier per tie-break ladder, after P171, before P045 — drift was the deferred-refresh state from a same-session /wr-itil:capture-problem invocation, NOT cross-session). Reconciliation contract per P118 + ADR-014 amended ("Reconciliation as preflight robustness layer"). The capture-problem deferred-refresh contract interacting with manage-problem Step 0 preflight is itself the kind of skill-contract bug P172 captures. Prior line-3 fragment (P171 reconcile) rotated to docs/problems/README-history.md per P134.
+> Last reviewed: 2026-05-06 **README reconciled** — 1 drift entry corrected: P173 (MISSING wsjf-rankings row added at WSJF 1.5 tier per tie-break ladder, after P172, before P045 — cross-session drift, P173 was captured 2026-05-06 in a prior session without staging the README refresh). Reconciliation contract per P118 + ADR-014 amended ("Reconciliation as preflight robustness layer"). Prior line-3 fragment (P172 reconcile) rotated to docs/problems/README-history.md per P134.
 > Run `/wr-itil:manage-problem review` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -30,6 +30,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 1.5 | P169 | Build recogniser-shape catalogue into @windyroad/risk-scorer plugin (automatic bootstrap + ongoing maintenance) — Phase 1 scorer-side, Phase 2 bootstrap-side | 3 Low | Open | M | 2026-05-04 |
 | 1.5 | P171 | drain-register-queue.sh and tests reference obsolete pre-wipe R-file shape | 3 Med | Open | M | 2026-05-05 |
 | 1.5 | P172 | Skill contract "interactive vs AFK" commit-gating anti-pattern contradicts ADR-014 | 3 Med | Open | M | 2026-05-05 |
+| 1.5 | P173 | BYPASS_*_GATE env vars do not propagate from Bash subshell to PreToolUse hook context | 3 Med | Open | M | 2026-05-06 |
 | 1.5 | P045 | Auto plugin install after governance release (deferred install on next session start per 2026-04-20 direction) | 6 Med | Open | L | 2026-04-19 |
 | 1.5 | P079 | No inbound sync of upstream-reported problems — reports filed via the intake templates never surface in the local backlog (re-rated 6.0 → 1.5 transitive 2026-04-26 — assessment-pipeline scope blocked by P038/P064) | 12 High | Open | L | 2026-04-21 |
 | 1.5 | P014 | No lightweight aside invocation for governance skills (master tracker for ADR-032 — capture-* sibling skills + pending-questions hook + supersession cleanup) | 12 High | Open | XL | 2026-04-16 |
