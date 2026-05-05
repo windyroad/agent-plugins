@@ -179,3 +179,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-05-05 (README reconciliation — add missing P171 WSJF Rankings row)
 
 > Last reviewed: 2026-05-05 **P170 re-rate** Effort M → XL, Priority 3 (Low) → 8 (Medium); WSJF 1.5 → 1.0; architect+JTBD AMEND verdicts on ADR-060 (proposed) discharge 2 of 6 P170 investigation tasks. 14 architect findings (2 critical: I1 enforcement contradictory, I2 needs load-bearing test) + 1 JTBD critical block (JTBD-008 phantom anchor) gate Phase 1 implementation; 3 of 4 P170 deferred decisions resolved in-ADR (RFC ID grammar = `RFC-<NNN>`, WSJF placement = RFC-level Phase 1, AskUserQuestion authority classes per ADR-044). Prior line-3 fragment (batch transition P155/P134/P149 close) rotated to docs/problems/README-history.md per P134.
+
+## 2026-05-05 (README reconciliation — add missing P172 WSJF Rankings row from capture-problem deferred-refresh)
+
+> Last reviewed: 2026-05-05 **README reconciled** — 1 drift entry corrected: P171 (MISSING wsjf-rankings row added at WSJF 1.5 tier per tie-break ladder, after P169, before P045). Reconciliation contract per P118 + ADR-014 amended ("Reconciliation as preflight robustness layer"). Prior line-3 fragment (P170 re-rate) rotated to docs/problems/README-history.md per P134.
