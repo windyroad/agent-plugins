@@ -17,6 +17,7 @@ Developer using AI coding agents for personal or small-team projects.
 | JTBD-005 | Invoke Governance Assessments On Demand | [JTBD-005-assess-on-demand.proposed.md](solo-developer/JTBD-005-assess-on-demand.proposed.md) |
 | JTBD-006 | Progress the Backlog While I'm Away | [JTBD-006-work-backlog-afk.proposed.md](solo-developer/JTBD-006-work-backlog-afk.proposed.md) |
 | JTBD-007 | Keep Plugins Current Across Projects | [JTBD-007-keep-plugins-current.proposed.md](solo-developer/JTBD-007-keep-plugins-current.proposed.md) |
+| JTBD-008 | Decompose a Fix Into Coordinated Changes | [JTBD-008-decompose-fix-into-coordinated-changes.proposed.md](solo-developer/JTBD-008-decompose-fix-into-coordinated-changes.proposed.md) |
 
 ## Tech Lead / Consultant
 
@@ -24,7 +25,7 @@ Tech lead or consultant responsible for code quality and governance across teams
 
 [Persona definition](tech-lead/persona.md)
 
-Jobs 001 and 002 also serve this persona.
+Jobs 001, 002, and 008 also serve this persona.
 
 ### Proposed
 
