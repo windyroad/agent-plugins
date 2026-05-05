@@ -165,11 +165,11 @@ Both `wr-architect:agent` and `wr-jtbd:agent` returned **AMEND** verdicts on ADR
 12. Spell out RFC-shaped held-window atomicity (architect finding 12).
 13. Reserve "story" for Phase 2; introduce `task`/`step` placeholder for Phase 1 (architect finding 13).
 14. Add forward-dogfood requirement (architect finding 14).
-15. **Decide JTBD-008 fate**: Option A (drop) or Option B (draft) — JTBD finding 1 critical block.
+15. ~~**Decide JTBD-008 fate**: Option A (drop) or Option B (draft) — JTBD finding 1 critical block.~~ **Resolved 2026-05-05** (per `docs/plans/170-rfc-framework-story-map.md` B3.T1): user direction = **Option A (drop the phantom anchor)**. JTBD-008 references removed from ADR-060 in commit `e646c17`; P170 ## Related section updated (line 254). The slot is now free for the new JTBD (item 19).
 16. Amend JTBD-001 framing + add multi-commit-coordination outcome to JTBD-001 (JTBD finding 2).
 17. Acknowledge JTBD-101 atomic-fix friction in ADR-060 + amend JTBD-101 Persona Constraints (JTBD finding 3).
 18. Add JTBD-006 / JTBD-201 / JTBD-301 to ADR-060 Decision Drivers (JTBD finding 4).
-19. **Decide new JTBD fate**: draft JTBD-008 (`decompose-coordinated-changes`) per JTBD finding 5 if Option A above is taken (frees the slot); otherwise JTBD-009 if Option B is taken.
+19. ~~**Decide new JTBD fate**: draft JTBD-008 (`decompose-coordinated-changes`) per JTBD finding 5 if Option A above is taken (frees the slot); otherwise JTBD-009 if Option B is taken.~~ **Resolved 2026-05-05**: per item 15 outcome (Option A — drop), the new JTBD `decompose-fix-into-coordinated-changes` claims the freed slot **JTBD-008**. Drafting deferred to Slice 2 of `docs/plans/170-rfc-framework-story-map.md` (B3.T3) — slot is reserved; no orphan ID gap for future readers.
 20. (Nitpick) I2 clarifier; (nitpick) Phase 4 category-error caveat; (nitpick) RFC-to-JTBD trace deferred note (JTBD findings 6-8).
 21. (Optional) Add Option G to Considered Options (architect optional).
 
