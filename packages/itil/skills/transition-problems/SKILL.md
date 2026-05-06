@@ -85,10 +85,10 @@ If parsing fails at this stage, NO git operations have run. The user can re-invo
 
 For each pair `(NNN, status)` in argument order:
 
-**2a. Discover the ticket file.**
+**2a. Discover the ticket file.** Dual-tolerant lookup spans flat layout AND per-state subdir layout per RFC-002 migration window:
 
 ```bash
-ls docs/problems/<NNN>-*.md 2>/dev/null
+ls docs/problems/<NNN>-*.md docs/problems/*/<NNN>-*.md 2>/dev/null
 ```
 
 If no file is found OR multiple files are found (suffix-exclusive lifecycle violation), record the pair as a failure with reason `discovery-failed` and continue to the next pair. Do NOT touch git.

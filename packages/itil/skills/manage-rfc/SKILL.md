@@ -140,7 +140,10 @@ For each `P<NNN>` in the transitioned RFC's frontmatter `problems:` list:
 ```bash
 for pid_token in $(awk '/^problems:/{gsub(/[][]/,"");gsub(/,/,"\n");for(i=2;i<=NF;i++)print $i;exit}' "$rfc_file"); do
   pid_num="${pid_token#P}"
-  problem_file=$(ls docs/problems/${pid_num}-*.md 2>/dev/null | head -1)
+  # Dual-tolerant ticket discovery — RFC-002 migration window covers
+  # BOTH flat (`docs/problems/<NNN>-<title>.<state>.md`) AND per-state
+  # subdir (`docs/problems/<state>/<NNN>-<title>.md`) layouts.
+  problem_file=$(ls docs/problems/${pid_num}-*.md docs/problems/*/${pid_num}-*.md 2>/dev/null | head -1)
   [ -z "$problem_file" ] && continue
   bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/update-problem-rfcs-section.sh" "$problem_file" docs/rfcs
   git add "$problem_file"

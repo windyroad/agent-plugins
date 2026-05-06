@@ -49,10 +49,10 @@ Usage: /wr-itil:transition-problem <NNN> <status>
 
 ### 2. Discover the ticket file
 
-Locate the ticket file by ID:
+Locate the ticket file by ID — dual-tolerant lookup spans both the flat layout (`docs/problems/<NNN>-<title>.<state>.md`) AND the per-state subdir layout (`docs/problems/<state>/<NNN>-<title>.md`) per RFC-002 migration window:
 
 ```bash
-ls docs/problems/<NNN>-*.md 2>/dev/null
+ls docs/problems/<NNN>-*.md docs/problems/*/<NNN>-*.md 2>/dev/null
 ```
 
 If no file is found, emit: `No ticket found for ID <NNN>` and stop.
@@ -207,7 +207,7 @@ Release draining is owned by the caller — `/wr-itil:manage-problem` Step 12 (i
 
 `transition-problem` owns (for the user-initiated transition path):
 - Argument parsing (`<NNN> <status>`).
-- Ticket-file discovery via `ls docs/problems/<NNN>-*.md`.
+- Ticket-file discovery via the dual-tolerant lookup `ls docs/problems/<NNN>-*.md docs/problems/*/<NNN>-*.md` (RFC-002 transitional shape; both layouts).
 - Destination-reachability validation (Open → Known Error → Verification Pending → Closed, one step at a time).
 - Pre-flight checks for the supplied destination.
 - P063 external-root-cause detection (Open → Known Error only) — including the AFK fallback that appends the stable `- **Upstream report pending** —` marker.

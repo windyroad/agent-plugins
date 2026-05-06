@@ -63,10 +63,10 @@ Branch on which section is present:
 **Case A — `## Linked Problem` present**:
 
 1. Extract the problem ID `P<NNN>` from the section.
-2. Locate the problem file:
+2. Locate the problem file. Dual-tolerant lookup spans flat layout AND per-state subdir layout (RFC-002 migration window):
 
    ```bash
-   ls docs/problems/<NNN>-*.md 2>/dev/null | head -1
+   ls docs/problems/<NNN>-*.md docs/problems/*/<NNN>-*.md 2>/dev/null | head -1
    ```
 
    Accept both `P<NNN>-*.md` and `<NNN>-*.md` naming conventions for robustness.

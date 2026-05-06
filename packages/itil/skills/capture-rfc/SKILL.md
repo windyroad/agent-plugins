@@ -89,8 +89,10 @@ Derive a kebab-case title slug from the first 8-10 non-stopword tokens of `$desc
 For each `P<NNN>` in the trace list:
 
 ```bash
-# Check existence in any lifecycle status
-trace_files=$(ls docs/problems/<NNN>-*.md 2>/dev/null)
+# Check existence in any lifecycle status (dual-tolerant — RFC-002
+# migration window covers BOTH flat `docs/problems/<NNN>-<title>.<state>.md`
+# AND per-state subdir `docs/problems/<state>/<NNN>-<title>.md` layouts).
+trace_files=$(ls docs/problems/<NNN>-*.md docs/problems/*/<NNN>-*.md 2>/dev/null)
 ```
 
 **I1 hard-block (per ADR-060 § Confirmation criterion 1)**:
@@ -198,7 +200,8 @@ For each problem ID in `$problem_trace`, invoke the helper before commit:
 ```bash
 for pid_token in $(echo "$problem_trace" | tr ',' ' '); do
   pid_num="${pid_token#P}"
-  problem_file=$(ls docs/problems/${pid_num}-*.md 2>/dev/null | head -1)
+  # Dual-tolerant ticket discovery (RFC-002 migration window).
+  problem_file=$(ls docs/problems/${pid_num}-*.md docs/problems/*/${pid_num}-*.md 2>/dev/null | head -1)
   [ -z "$problem_file" ] && continue
   bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/update-problem-rfcs-section.sh" "$problem_file" docs/rfcs
   git add "$problem_file"

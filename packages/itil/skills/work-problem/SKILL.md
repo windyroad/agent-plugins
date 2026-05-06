@@ -41,7 +41,12 @@ Check the `docs/problems/README.md` cache with the same git-history-based freshn
 ```bash
 readme_commit=$(git log -1 --format=%H -- docs/problems/README.md 2>/dev/null)
 if [ -z "$readme_commit" ] || \
-   git log --oneline "${readme_commit}..HEAD" -- 'docs/problems/*.md' ':!docs/problems/README.md' 2>/dev/null | grep -q .; then
+   git log --oneline "${readme_commit}..HEAD" -- 'docs/problems/*.md' 'docs/problems/*/*.md' ':!docs/problems/README.md' 2>/dev/null | grep -q .; then
+  # Pathspec pair `'docs/problems/*.md' 'docs/problems/*/*.md'` is the
+  # RFC-002 dual-tolerant transitional shape — covers BOTH the flat
+  # layout (`docs/problems/<NNN>-<title>.<state>.md`) AND the per-state
+  # subdir layout (`docs/problems/<state>/<NNN>-<title>.md`). T6 drops
+  # the flat half post-T5 verification.
   echo "stale"
 fi
 ```

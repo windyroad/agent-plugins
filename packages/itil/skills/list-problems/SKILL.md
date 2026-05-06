@@ -12,15 +12,16 @@ This skill is the P071 phased-landing split of `/wr-itil:manage-problem list` pe
 
 ## Scope
 
-Included in the ranking table:
-- `docs/problems/*.open.md` — open tickets (under investigation)
-- `docs/problems/*.known-error.md` — known errors (root cause confirmed, fix NOT yet released)
+Included in the ranking table (RFC-002 migration window — each glob is dual-tolerant, covering BOTH the flat `docs/problems/<NNN>-<title>.<state>.md` filename-suffix layout AND the per-state subdir `docs/problems/<state>/<NNN>-<title>.md` layout):
+
+- `docs/problems/*.open.md` + `docs/problems/open/*.md` — open tickets (under investigation)
+- `docs/problems/*.known-error.md` + `docs/problems/known-error/*.md` — known errors (root cause confirmed, fix NOT yet released)
 
 Shown in separate sections, excluded from the dev-work WSJF ranking per ADR-022:
-- `docs/problems/*.verifying.md` — Verification Pending (fix released, awaiting user verification; WSJF multiplier 0)
-- `docs/problems/*.parked.md` — Parked on upstream or user-suspended (WSJF multiplier 0)
+- `docs/problems/*.verifying.md` + `docs/problems/verifying/*.md` — Verification Pending (fix released, awaiting user verification; WSJF multiplier 0)
+- `docs/problems/*.parked.md` + `docs/problems/parked/*.md` — Parked on upstream or user-suspended (WSJF multiplier 0)
 
-`docs/problems/*.closed.md` is omitted entirely (the view is of active backlog, not the closed archive).
+`docs/problems/*.closed.md` + `docs/problems/closed/*.md` is omitted entirely (the view is of active backlog, not the closed archive).
 
 ## Steps
 
@@ -31,7 +32,10 @@ Reuse the same `git log`-based freshness test as `/wr-itil:manage-problem review
 ```bash
 readme_commit=$(git log -1 --format=%H -- docs/problems/README.md 2>/dev/null)
 if [ -z "$readme_commit" ] || \
-   git log --oneline "${readme_commit}..HEAD" -- 'docs/problems/*.md' ':!docs/problems/README.md' 2>/dev/null | grep -q .; then
+   git log --oneline "${readme_commit}..HEAD" -- 'docs/problems/*.md' 'docs/problems/*/*.md' ':!docs/problems/README.md' 2>/dev/null | grep -q .; then
+  # Pathspec pair `'docs/problems/*.md' 'docs/problems/*/*.md'` is the
+  # RFC-002 dual-tolerant transitional shape — covers BOTH the flat
+  # layout AND the per-state subdir layout.
   echo "stale"
 fi
 ```
@@ -42,12 +46,12 @@ fi
 
 ### 2. Live scan (cache-stale fallback)
 
-Enumerate the backlog files via glob:
+Enumerate the backlog files via dual-tolerant globs (RFC-002 migration window — each line covers BOTH the flat `<NNN>-<title>.<state>.md` filename-suffix layout AND the per-state subdir `<state>/<NNN>-<title>.md` layout):
 
 ```bash
-ls docs/problems/*.open.md docs/problems/*.known-error.md 2>/dev/null
-ls docs/problems/*.verifying.md 2>/dev/null  # for Verification Queue section
-ls docs/problems/*.parked.md 2>/dev/null     # for Parked section
+ls docs/problems/*.open.md docs/problems/*.known-error.md docs/problems/open/*.md docs/problems/known-error/*.md 2>/dev/null
+ls docs/problems/*.verifying.md docs/problems/verifying/*.md 2>/dev/null  # for Verification Queue section
+ls docs/problems/*.parked.md docs/problems/parked/*.md 2>/dev/null        # for Parked section
 ```
 
 For each `.open.md` and `.known-error.md` file, read the `**Status**`, `**Priority**`, `**Effort**`, and `**WSJF**` lines from the frontmatter section. Compute WSJF if missing: `WSJF = (Severity × StatusMultiplier) / EffortDivisor` per `/wr-itil:manage-problem` WSJF Prioritisation. Default to M (divisor 2) when Effort is absent; flag missing scores so the user knows a review is overdue.

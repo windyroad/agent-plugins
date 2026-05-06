@@ -58,8 +58,10 @@ If `wr-voice-tone:agent` is not installed in the project, the gate is dormant an
 
 ### 1. Read the local problem ticket
 
+Dual-tolerant lookup spans flat layout AND per-state subdir layout (RFC-002 migration window):
+
 ```bash
-LOCAL_TICKET=$(ls docs/problems/${LOCAL_ID}-*.{open,known-error,verifying,closed}.md 2>/dev/null | head -1)
+LOCAL_TICKET=$(ls docs/problems/${LOCAL_ID}-*.{open,known-error,verifying,closed}.md docs/problems/*/${LOCAL_ID}-*.md 2>/dev/null | head -1)
 [ -n "$LOCAL_TICKET" ] || { echo "Error: local ticket P${LOCAL_ID} not found in docs/problems/"; exit 1; }
 ```
 

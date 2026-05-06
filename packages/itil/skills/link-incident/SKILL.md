@@ -42,11 +42,13 @@ The link operation works on any incident status — investigating, mitigating, r
 
 ### 3. Locate the problem file
 
+Dual-tolerant lookup spans flat layout AND per-state subdir layout (RFC-002 migration window):
+
 ```bash
-ls docs/problems/<MMM>-*.md 2>/dev/null | head -1
+ls docs/problems/<MMM>-*.md docs/problems/*/<MMM>-*.md 2>/dev/null | head -1
 ```
 
-Accept any lifecycle suffix: `.open.md`, `.known-error.md`, `.verifying.md`, `.closed.md`.
+Accept any lifecycle suffix: `.open.md`, `.known-error.md`, `.verifying.md`, `.closed.md` in flat layout; bare `<MMM>-<title>.md` under `docs/problems/<state>/` in per-state layout.
 
 - If no file matches, report "No problem `P<MMM>` found. Check `/wr-itil:list-problems` for the current backlog." and exit.
 - Read the problem file's title from the `# Problem <MMM>: <Title>` header line.

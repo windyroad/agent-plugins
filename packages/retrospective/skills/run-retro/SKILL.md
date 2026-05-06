@@ -362,7 +362,7 @@ Problems whose fix shipped but whose closure is still pending (`docs/problems/*.
 
 **Steps:**
 
-1. **Glob**: enumerate `docs/problems/*.verifying.md` (the driven-by-filename surface per ADR-022).
+1. **Glob**: enumerate `docs/problems/*.verifying.md docs/problems/verifying/*.md` (dual-tolerant — RFC-002 migration window covers BOTH the flat `docs/problems/<NNN>-<title>.verifying.md` filename-suffix surface per ADR-022 AND the per-state subdir `docs/problems/verifying/<NNN>-<title>.md` surface per ADR-031).
 
 2. **Read the `## Fix Released` section** of each file and extract the fix-summary keyword set: release marker (version, commit SHA, or date), affected source path(s), new test file path(s), and any named skill / hook / gate the fix exercises.
 

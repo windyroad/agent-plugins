@@ -306,8 +306,15 @@ Before creating, search existing problems for similar issues. The user may not k
 Compute the next ID as the **max of the local and origin highest IDs**, plus one, zero-padded to 3 digits. Comparing against `origin/<base>` is required by ADR-019 (confirmation criterion 2): without it, parallel sessions can mint the same ID for different problems and force a destructive surgical rebase on push (P040 incident).
 
 ```bash
-# Local-max ID
-local_max=$(ls docs/problems/*.md 2>/dev/null | sed 's/.*\///' | grep -oE '^[0-9]+' | sort -n | tail -1)
+# Local-max ID — dual-tolerant enumeration covers BOTH the flat
+# `docs/problems/<NNN>-<title>.<state>.md` layout AND the per-state
+# subdir `docs/problems/<state>/<NNN>-<title>.md` layout per RFC-002
+# migration window. Both halves contribute to next-ID compute so a
+# pre-migration ticket at flat-104 and a post-migration ticket at
+# per-state-204 BOTH appear in `local_max` — never re-allocates an
+# already-taken ID. `sed 's|.*/||'` strips ALL leading path components
+# (works for both `100-foo.open.md` flat and `open/200-foo.md` per-state).
+local_max=$(ls docs/problems/*.md docs/problems/*/*.md 2>/dev/null | sed 's|.*/||' | grep -oE '^[0-9]+' | sort -n | tail -1)
 
 # Origin-max ID — `git ls-tree origin/<base>` reads remote-tracking ref
 # without requiring a fetch in this step (Step 0 preflight is the place
@@ -317,9 +324,11 @@ local_max=$(ls docs/problems/*.md 2>/dev/null | sed 's/.*\///' | grep -oE '^[0-9
 # `--name-only` is required (P056): without it, each ls-tree line is
 # `<mode> <type> <sha>\t<path>` and the 40-char blob SHA can contain
 # three-digit runs that `grep -oE '[0-9]{3}'` false-matches (observed
-# `origin_max=997` on 2026-04-20 opening P055). `sed` strips the path
-# prefix so the anchored `grep -oE '^[0-9]+'` only picks up filename IDs.
-origin_max=$(git ls-tree --name-only origin/main docs/problems/ 2>/dev/null | sed 's|^docs/problems/||' | grep -oE '^[0-9]+' | sort -n | tail -1)
+# `origin_max=997` on 2026-04-20 opening P055). `-r` recurses into
+# the per-state subdirs introduced by RFC-002. `sed 's|.*/||'` strips
+# all leading path components so the anchored `grep -oE '^[0-9]+'`
+# picks up filename IDs in both layouts.
+origin_max=$(git ls-tree -r --name-only origin/main docs/problems/ 2>/dev/null | sed 's|.*/||' | grep -oE '^[0-9]+' | sort -n | tail -1)
 
 # Take the max of the two and increment.
 next=$(printf '%03d' $(( $(echo -e "${local_max:-0}\n${origin_max:-0}" | sort -n | tail -1) + 1 )))
@@ -467,9 +476,9 @@ The "Last reviewed" line (line 3 of `docs/problems/README.md`) was designed as a
 
 ### 6. For updates: Edit the existing file
 
-Find the file matching the problem ID:
+Find the file matching the problem ID. Dual-tolerant lookup spans the flat layout AND the per-state subdir layout per RFC-002 migration window:
 ```bash
-ls docs/problems/<NNN>-*.md 2>/dev/null
+ls docs/problems/<NNN>-*.md docs/problems/*/<NNN>-*.md 2>/dev/null
 ```
 
 Apply the update — this could be:
@@ -597,7 +606,7 @@ Update the "Status" field to "Closed". Reference the problem ID in the closure c
 
 Every Step 7 status transition (Open → Known Error, Known Error → Verification Pending, Verification Pending → Closed, Parked — regardless of source or destination suffix) regenerates `docs/problems/README.md` and stages it in the same commit so the dev-work table, Verification Queue, Parked section, and "Last reviewed" line never lag the on-disk ticket inventory. Without this step, README.md accumulates staleness between `review` invocations; the next `work` fast-path check correctly detects the lag and forces a full rescan (self-healing but wasteful), and any human browsing the file between transitions sees outdated rankings.
 
-The refresh uses the same rendering rules as Step 9e (glob `docs/problems/*.open.md` / `*.known-error.md` / `*.verifying.md` / `*.parked.md`; rank open/known-error by WSJF; list verifyings in the Verification Queue ordered by release age; list parkeds in the Parked section) but skips the full re-scoring pass — existing WSJF values on the ticket files are trusted. The refresh is a render, not a re-rank.
+The refresh uses the same rendering rules as Step 9e (dual-tolerant glob per RFC-002 migration window: `docs/problems/*.open.md docs/problems/open/*.md` / `*.known-error.md` + `known-error/*.md` / `*.verifying.md` + `verifying/*.md` / `*.parked.md` + `parked/*.md`; rank open/known-error by WSJF; list verifyings in the Verification Queue ordered by release age; list parkeds in the Parked section) but skips the full re-scoring pass — existing WSJF values on the ticket files are trusted. The refresh is a render, not a re-rank.
 
 **WSJF Rankings tie-break sort (P138)**: rows in the WSJF Rankings table are sorted by the multi-key `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)` so the rendered top-to-bottom row order matches `/wr-itil:work-problems` SKILL.md Step 3's tie-break selection 1:1. Within each WSJF tier, rows are ordered by the canonical tie-break ladder: Known Error before Open, smaller Effort before larger, older Reported date before newer. The table MUST include a `Reported` column so the third tie-break input is visible to README readers. <!-- TIE-BREAK-LADDER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 --> Any future change to the tie-break ladder MUST update this render block, the Step 5 P094 block, the Step 9e template, AND `/wr-itil:review-problems` SKILL.md Step 3 / Step 5 — drift here re-opens P138.
 
@@ -617,7 +626,7 @@ The refresh uses the same rendering rules as Step 9e (glob `docs/problems/*.open
 
 ### 8. For list: Show summary
 
-Read all `.open.md` and `.known-error.md` files in `docs/problems/`. Extract ID, title, priority, and status. Sort by priority (highest first). Display as a markdown table.
+Read all open + known-error tickets via the dual-tolerant glob `ls docs/problems/*.open.md docs/problems/*.known-error.md docs/problems/open/*.md docs/problems/known-error/*.md 2>/dev/null` (RFC-002 migration window). Extract ID, title, priority, and status. Sort by priority (highest first). Display as a markdown table.
 
 ### 9. For review: Re-assess all open problems
 
@@ -629,9 +638,12 @@ Before running the full review, check whether `docs/problems/README.md` exists a
 
 ```bash
 readme_commit=$(git log -1 --format=%H -- docs/problems/README.md 2>/dev/null)
-# Cache is stale if: no README commit, OR problem files committed since README, OR uncommitted problem file changes
+# Cache is stale if: no README commit, OR problem files committed since README, OR uncommitted problem file changes.
+# Pathspec pair `'docs/problems/*.md' 'docs/problems/*/*.md'` is the
+# RFC-002 dual-tolerant transitional shape — covers BOTH the flat
+# layout AND the per-state subdir layout. T6 drops the flat half post-T5.
 if [ -z "$readme_commit" ] || \
-   git log --oneline "${readme_commit}..HEAD" -- 'docs/problems/*.md' ':!docs/problems/README.md' 2>/dev/null | grep -q .; then
+   git log --oneline "${readme_commit}..HEAD" -- 'docs/problems/*.md' 'docs/problems/*/*.md' ':!docs/problems/README.md' 2>/dev/null | grep -q .; then
   echo "stale"
 fi
 ```
@@ -649,9 +661,9 @@ If the command prints "stale", or `README.md` does not exist in git, run the ful
 
 Read `RISK-POLICY.md` to get the current impact levels (1-5), likelihood levels (1-5), risk matrix, and label bands. These are the authoritative definitions — do not use outdated scales.
 
-**Step 9b: For each open/known-error problem (skip `.parked.md` and `.verifying.md` files entirely):**
+**Step 9b: For each open/known-error problem (skip parked / verifying tickets entirely):**
 
-Parked problems and Verification Pending problems are excluded from WSJF ranking — do not read, score, or update them in this step. Parked tickets are shown in a dedicated Parked section in step 9c; Verification Pending tickets are shown in a dedicated Verification Queue section in step 9c (ranked by release age, not WSJF — per ADR-022).
+Enumerate via dual-tolerant glob `docs/problems/*.open.md docs/problems/*.known-error.md docs/problems/open/*.md docs/problems/known-error/*.md` per RFC-002 migration window. Parked problems and Verification Pending problems are excluded from WSJF ranking — do not read, score, or update them in this step. Parked tickets are shown in a dedicated Parked section in step 9c; Verification Pending tickets are shown in a dedicated Verification Queue section in step 9c (ranked by release age, not WSJF — per ADR-022).
 
 1. Read the problem file
 2. Read the codebase context — check if the problem's root cause has been investigated, if there are related fixes in git history, or if the problem is stale

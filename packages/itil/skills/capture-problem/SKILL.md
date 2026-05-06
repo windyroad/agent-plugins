@@ -87,10 +87,10 @@ Resolve `type_value` ∈ {`technical`, `user-business`} per the following framew
 
 ### 2. Minimal-grep duplicate check (3-keyword title-only)
 
-Extract up to **3 distinct kebab-cased non-stopword keywords** from the description. Grep the **filenames** of `docs/problems/*.md` (NOT bodies — title-only is the conservative threshold per architect verdict on Q1):
+Extract up to **3 distinct kebab-cased non-stopword keywords** from the description. Grep the **filenames** of `docs/problems/*.md` AND `docs/problems/<state>/*.md` (NOT bodies — title-only is the conservative threshold per architect verdict on Q1; dual-tolerant per RFC-002 migration window):
 
 ```bash
-match_count=$(ls docs/problems/*.md 2>/dev/null \
+match_count=$(ls docs/problems/*.md docs/problems/*/*.md 2>/dev/null \
               | grep -ciE 'kw1|kw2|kw3' || true)
 ```
 
@@ -115,8 +115,16 @@ The marker is shared between `manage-problem` and `capture-problem` per ADR-032 
 Same P056-safe local_max + origin_max formula as `/wr-itil:manage-problem` Step 3:
 
 ```bash
-local_max=$(ls docs/problems/*.md 2>/dev/null | sed 's/.*\///' | grep -oE '^[0-9]+' | sort -n | tail -1)
-origin_max=$(git ls-tree --name-only origin/main docs/problems/ 2>/dev/null | sed 's|^docs/problems/||' | grep -oE '^[0-9]+' | sort -n | tail -1)
+# Dual-tolerant ticket enumeration (RFC-002 migration window). Both
+# halves of the OR contribute to next-ID compute — flat-layout 104 +
+# per-state 204 BOTH appear in `local_max` so the next-ID compute
+# never re-allocates an already-taken ID. Architect finding 2 (RFC-002
+# T2) — capture-problem's next-ID surface is a separate ADR-031
+# contract from generic enumeration; missing the per-state half
+# regresses ID allocation. The `git ls-tree -r` recursive flag
+# extends the same coverage to the origin tree.
+local_max=$(ls docs/problems/*.md docs/problems/*/*.md 2>/dev/null | sed 's|.*/||' | grep -oE '^[0-9]+' | sort -n | tail -1)
+origin_max=$(git ls-tree -r --name-only origin/main docs/problems/ 2>/dev/null | sed 's|.*/||' | grep -oE '^[0-9]+' | sort -n | tail -1)
 next=$(printf '%03d' $(( $(echo -e "${local_max:-0}\n${origin_max:-0}" | sort -n | tail -1) + 1 )))
 ```
 

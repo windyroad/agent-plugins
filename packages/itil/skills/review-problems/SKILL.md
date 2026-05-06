@@ -12,10 +12,11 @@ This skill is the P071 phased-landing split of `/wr-itil:manage-problem review` 
 
 ## Scope
 
-**In scope:**
-- `docs/problems/*.open.md` and `docs/problems/*.known-error.md` — re-scored (Impact × Likelihood × Effort → WSJF); Priority + Effort + WSJF lines updated when they change.
-- `docs/problems/*.verifying.md` — surfaced in the Verification Queue and fed to Step 4's verification prompt (Known Error → Closed path when the user confirms).
-- `docs/problems/*.parked.md` — listed in the Parked section; NOT re-scored (WSJF multiplier is 0).
+**In scope** (RFC-002 migration window — each glob is dual-tolerant, covering BOTH the flat `docs/problems/<NNN>-<title>.<state>.md` filename-suffix layout AND the per-state subdir `docs/problems/<state>/<NNN>-<title>.md` layout):
+
+- `docs/problems/*.open.md` + `docs/problems/open/*.md` and `docs/problems/*.known-error.md` + `docs/problems/known-error/*.md` — re-scored (Impact × Likelihood × Effort → WSJF); Priority + Effort + WSJF lines updated when they change.
+- `docs/problems/*.verifying.md` + `docs/problems/verifying/*.md` — surfaced in the Verification Queue and fed to Step 4's verification prompt (Known Error → Closed path when the user confirms).
+- `docs/problems/*.parked.md` + `docs/problems/parked/*.md` — listed in the Parked section; NOT re-scored (WSJF multiplier is 0).
 - `docs/problems/README.md` — rewritten with the refreshed WSJF Rankings + Verification Queue + Parked tables; staged and committed with the review.
 
 **Out of scope:**
@@ -32,7 +33,7 @@ Read `RISK-POLICY.md` to get the current Impact levels (1-5), Likelihood levels 
 
 ### 2. Re-score every open / known-error ticket
 
-For each `docs/problems/*.open.md` and `docs/problems/*.known-error.md` file (skip `.parked.md` and `.verifying.md` files entirely — their WSJF multiplier is 0 and they have dedicated sections in Step 3):
+For each open / known-error ticket (dual-tolerant enumeration spans `docs/problems/*.open.md docs/problems/*.known-error.md docs/problems/open/*.md docs/problems/known-error/*.md` per RFC-002 migration window; skip `.parked.md` / `.verifying.md` and their per-state-subdir equivalents `docs/problems/parked/*.md` / `docs/problems/verifying/*.md` entirely — their WSJF multiplier is 0 and they have dedicated sections in Step 3):
 
 1. Read the problem file.
 2. Read the codebase context — check if the root cause has been investigated since the last review, whether there are related fixes in git history, or whether the problem is stale.
@@ -97,7 +98,7 @@ Omit an empty section rather than rendering an empty header.
 
 ### 4. Verification prompt (Verification Pending → Closed)
 
-Target `docs/problems/*.verifying.md` via glob — do NOT scan `.known-error.md` bodies for a `## Fix Released` section (per ADR-022, Verification Pending is a first-class status, not a substring marker). For each `.verifying.md` file, use `AskUserQuestion` to ask whether the fix has been verified in production.
+Target the dual-tolerant glob `docs/problems/*.verifying.md docs/problems/verifying/*.md` (RFC-002 migration window) — do NOT scan `.known-error.md` bodies for a `## Fix Released` section (per ADR-022, Verification Pending is a first-class status, not a substring marker). For each verifying ticket file, use `AskUserQuestion` to ask whether the fix has been verified in production.
 
 The question MUST include a fix summary extracted from the `## Fix Released` section — include the first sentence (or first bullet list) of that section in the question body or as the option description, so the user can answer without reading the full problem file. Do NOT ask with only the problem ID + title + version.
 
@@ -128,7 +129,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 
 ## Verification Queue
 
-Fix released, awaiting user verification (driven off `docs/problems/*.verifying.md` via glob per ADR-022). Sorted by `Released date ASC` (oldest at row 1; same-day releases tiebreak by ID ASC). <!-- VQ-SORT-DIRECTION: oldest-first per ADR-022 --> `Likely verified?` column marks tickets ≥14 days old (P048 Candidate 4 default).
+Fix released, awaiting user verification (driven off the dual-tolerant glob `docs/problems/*.verifying.md docs/problems/verifying/*.md` per ADR-022 + RFC-002 migration window). Sorted by `Released date ASC` (oldest at row 1; same-day releases tiebreak by ID ASC). <!-- VQ-SORT-DIRECTION: oldest-first per ADR-022 --> `Likely verified?` column marks tickets ≥14 days old (P048 Candidate 4 default).
 
 | ID | Title | Released | Likely verified? |
 |----|-------|----------|------------------|
