@@ -84,13 +84,14 @@ The verdict is `RISK_VERDICT: PAUSE`. This blocks the next edit until the risk i
 After assessing the risk profile, check whether uncommitted changes represent **completed governance work** that should be committed immediately to reduce WIP pipeline risk (ADR-016).
 
 **Governance-artefact detection heuristic**: Check `git status --short` and `git diff HEAD --name-only`. If ALL uncommitted files fall within these paths:
-- `docs/problems/*.md`
+- `docs/problems/*.md` (flat layout — pre-RFC-002)
+- `docs/problems/*/*.md` (per-state subdir layout — post-RFC-002 per ADR-031; one of `open/`, `known-error/`, `verifying/`, `parked/`, `closed/`)
 - `packages/*/skills/**/*.md`
 - `packages/*/skills/**/*.bats`
 - `docs/decisions/*.md`
 
 AND cumulative risk is **within appetite** (≤ 4), AND at least one completion signal is present:
-- A problem file diff contains "Fix Released" or a status transition keyword (`.known-error.md`, `.closed.md`)
+- A problem file diff contains "Fix Released" or a status transition keyword. Under the flat layout this surfaces as a `.known-error.md` / `.closed.md` filename suffix; under the per-state subdir layout it surfaces as a path move into `docs/problems/known-error/` or `docs/problems/closed/`.
 - A SKILL.md was modified alongside a problem file update
 
 → Emit `RISK_VERDICT: COMMIT` instead of `RISK_VERDICT: CONTINUE`.
