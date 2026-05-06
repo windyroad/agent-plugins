@@ -202,3 +202,9 @@ Effort after scope expansion: **XL** (was L before the auto-migration addition; 
 - **JTBD-001** (Enforce Governance Without Slowing Down) — navigation ergonomics directly affect this.
 - **JTBD-101** (Extend the Suite with Clear Patterns) — the "clear pattern" should include the shape of the directory.
 - **JTBD-201** (Restore Service Fast with an Audit Trail) — browsable audit trail.
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-002 | proposed | docs/problems/ flat layout migration — per-state subdirs + adopter auto-migration |
