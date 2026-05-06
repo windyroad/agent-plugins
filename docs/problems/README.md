@@ -33,6 +33,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 1.5 | P172 | Skill contract "interactive vs AFK" commit-gating anti-pattern contradicts ADR-014 | 3 Med | Open | M | 2026-05-05 |
 | 1.5 | P173 | BYPASS_*_GATE env vars do not propagate from Bash subshell to PreToolUse hook context | 3 Med | Open | M | 2026-05-06 |
 | 1.5 | P174 | Topic-file rotation contract requires `first-written` HTML metadata that doesn't exist on most briefing entries — Step 3 Branch A unenforceable in practice | 3 Med | Open | M | 2026-05-06 |
+| 1.5 | P176 | Agent-side I2 (no type-branching) coverage gap — SKILL.md type-branching invariant not behaviourally testable until skill-invocation harness lands (P012-descendant; surfaced by P170 Slice 4 iter 2) | 6 Med | Open | M | 2026-05-06 |
 | 1.5 | P045 | Auto plugin install after governance release (deferred install on next session start per 2026-04-20 direction) | 6 Med | Open | L | 2026-04-19 |
 | 1.5 | P079 | No inbound sync of upstream-reported problems — reports filed via the intake templates never surface in the local backlog (re-rated 6.0 → 1.5 transitive 2026-04-26 — assessment-pipeline scope blocked by P038/P064) | 12 High | Open | L | 2026-04-21 |
 | 1.5 | P014 | No lightweight aside invocation for governance skills (master tracker for ADR-032 — capture-* sibling skills + pending-questions hook + supersession cleanup) | 12 High | Open | XL | 2026-04-16 |
