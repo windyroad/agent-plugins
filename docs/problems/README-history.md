@@ -195,3 +195,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-05-06 (README reconciliation — add missing P174 WSJF Rankings row)
 
 > Last reviewed: 2026-05-06 **batch transition** — close P147 + P146 + P130 (3 verifyings) via run-retro Step 4a close-on-evidence per ADR-022 + ADR-026 grounding. P147 stuck-before-emit subclass observed empirically (iter 1 PID 21560, exit 143, 0-byte JSON, 60min wall-clock; SKILL.md caveat held); P146 prohibition prose carried in iter 2 dispatch prompt and iter completed clean (no deadlock); P130 orchestrator subprocess-vs-direct-action discipline executed correctly twice (subprocess for P170 XL work, direct for I001 short interactive). Prior line-3 fragment (P173 reconcile) rotated to docs/problems/README-history.md per P134.
+
+## 2026-05-07 (README reconciliation — add missing P175 WSJF Rankings row)
+
+> Last reviewed: 2026-05-06 **README reconciled** — 1 drift entry corrected: P174 (MISSING wsjf-rankings row added at WSJF 1.5 tier per tie-break ladder, after P173, before P045 — cross-session drift, P174 was captured 2026-05-06 in a prior session without staging the README refresh). Reconciliation contract per P118 + ADR-014 amended ("Reconciliation as preflight robustness layer"). Prior line-3 fragment (batch transition P147 + P146 + P130 close) rotated to docs/problems/README-history.md per P134.
