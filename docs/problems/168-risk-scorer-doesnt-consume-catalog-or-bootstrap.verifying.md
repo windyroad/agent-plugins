@@ -152,6 +152,8 @@ Pre-wipe rg scan + corpus inspection ran during the architect-verdict-I2 smoke-t
 
 The deferral does NOT prevent ADR-059 Commit 1 + Commit 2 from being released — the runtime contract is complete; only the historical-backfill validation is deferred. The held changeset (`docs/changesets-holding/wr-risk-scorer-p168-consume-catalog-and-bootstrap.md`, commit `e18c4fa`) remains held until the wipe-or-defer decision is finalised.
 
+**Update 2026-05-06 (RFC-001 retro)**: Commit 3 itself shipped as `8edaf7b` (see `## Fix Released`); the still-deferred sub-component — heuristic-slug derivation for pre-ADR-056 reports (referred to as "Commit 3'") — is now tracked at change-set level under `docs/rfcs/RFC-001-pipeline-consume-catalog-and-bootstrap-from-reports.verifying.md` § Deferred Scope. Reinstate triggers above remain authoritative; RFC-001 references them rather than duplicating.
+
 ## Fix Strategy
 
 Synthesised from architect + JTBD verdicts. Two-commit shape per ADR-014 grain; XL multi-iteration scope.
@@ -193,6 +195,11 @@ Synthesised from architect + JTBD verdicts. Two-commit shape per ADR-014 grain; 
 - Sibling Explore agent gap-analysis output (P167's session, 2026-05-04) identified 12-14 distinct themes; that analysis is a useful starting point for the bootstrap deduplication design.
 - Captured via /wr-itil:capture-problem; substantive design ticket — superseder of P167's original Phase 1-3 plan.
 
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-001 | verifying | Pipeline consume-catalog and bootstrap-from-reports — multi-commit retrofit |
 
 ## Fix Released
 
@@ -209,4 +216,3 @@ User-verifiable behaviour:
 - Run `wr-risk-scorer-extract-risks-from-reports --dry-run` to observe corpus extraction without writes.
 - Run `/wr-risk-scorer:bootstrap-catalog` to walk the unhinted .risk-reports/ corpus via Phase 2 LLM-walk and populate docs/risks/ with derived entries.
 - Run `/install-updates` against a sibling project with RISK-POLICY.md + .risk-reports/ but empty docs/risks/. Verify Step 6.5 bootstrap fires; Step 7 final report shows bootstrap row.
-
