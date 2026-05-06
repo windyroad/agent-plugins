@@ -328,7 +328,7 @@ local_max=$(ls docs/problems/*.md docs/problems/*/*.md 2>/dev/null | sed 's|.*/|
 # the per-state subdirs introduced by RFC-002. `sed 's|.*/||'` strips
 # all leading path components so the anchored `grep -oE '^[0-9]+'`
 # picks up filename IDs in both layouts.
-origin_max=$(git ls-tree -r --name-only origin/main docs/problems/ 2>/dev/null | sed 's|.*/||' | grep -oE '^[0-9]+' | sort -n | tail -1)
+origin_max=$(git ls-tree --name-only -r origin/main docs/problems/ 2>/dev/null | sed 's|.*/||' | grep -oE '^[0-9]+' | sort -n | tail -1)
 
 # Take the max of the two and increment.
 next=$(printf '%03d' $(( $(echo -e "${local_max:-0}\n${origin_max:-0}" | sort -n | tail -1) + 1 )))
