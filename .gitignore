@@ -14,6 +14,9 @@ node_modules/
 .claude/.install-updates-consent
 .claude/.auto-install-consent
 
+# Per-machine local permissions (Bash allowlist etc) — never committed
+.claude/settings.local.json
+
 # AFK runtime state — per-session, never committed (ADR-032 subprocess-boundary)
 .afk-run-state/
 .claude/scheduled_tasks.lock
