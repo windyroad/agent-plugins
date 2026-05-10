@@ -203,3 +203,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-05-10 (P170 transition Open → Known Error with RCA closure)
 
 > Last reviewed: 2026-05-07 **README reconciled** — 1 drift entry corrected: P175 (MISSING wsjf-rankings row added at WSJF 1.5 tier per tie-break ladder, after P174, before P176 — cross-session drift, P175 was captured 2026-05-06 in this session via /wr-itil:capture-problem with deferred-refresh contract). Reconciliation contract per P118 + ADR-014 amended ("Reconciliation as preflight robustness layer"). Prior line-3 fragment (P174 reconcile) rotated to docs/problems/README-history.md per P134.
+
+## 2026-05-11 (README reconciliation — add missing P179 P180 P181 P182 WSJF Rankings rows)
+
+> Last reviewed: 2026-05-10 **P170 transition Open → Known Error** with RCA closure per ADR-022 lifecycle. RCA closed using session evidence + base-rate sweep across 178 tickets (38/178 carry "Phase N" language; 50/178 have multi-commit Fix Strategy sections; 16/178 explicitly name multi-commit/coordinated; 36/178 have sibling-tree references — true base rate 20-28%, well above original N=4 framing). Session itself produced 26 commits across 8 iters on P170 — meta-recursive proof of strain pattern. Adopter-impact deferred-to-monitor (no production adopters yet pre-Slice-6). P178 captured the orchestrator's prior habit of treating architect-PASS as RCA substitute. Prior line-3 fragment (P175 reconcile) rotated to docs/problems/README-history.md per P134.
