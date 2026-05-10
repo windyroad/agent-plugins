@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-05-07 **README reconciled** — 1 drift entry corrected: P175 (MISSING wsjf-rankings row added at WSJF 1.5 tier per tie-break ladder, after P174, before P176 — cross-session drift, P175 was captured 2026-05-06 in this session via /wr-itil:capture-problem with deferred-refresh contract). Reconciliation contract per P118 + ADR-014 amended ("Reconciliation as preflight robustness layer"). Prior line-3 fragment (P174 reconcile) rotated to docs/problems/README-history.md per P134.
+> Last reviewed: 2026-05-10 **P170 transition Open → Known Error** with RCA closure per ADR-022 lifecycle. RCA closed using session evidence + base-rate sweep across 178 tickets (38/178 carry "Phase N" language; 50/178 have multi-commit Fix Strategy sections; 16/178 explicitly name multi-commit/coordinated; 36/178 have sibling-tree references — true base rate 20-28%, well above original N=4 framing). Session itself produced 26 commits across 8 iters on P170 — meta-recursive proof of strain pattern. Adopter-impact deferred-to-monitor (no production adopters yet pre-Slice-6). P178 captured the orchestrator's prior habit of treating architect-PASS as RCA substitute. Prior line-3 fragment (P175 reconcile) rotated to docs/problems/README-history.md per P134.
 > Run `/wr-itil:manage-problem review` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -35,6 +35,8 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 1.5 | P174 | Topic-file rotation contract requires `first-written` HTML metadata that doesn't exist on most briefing entries — Step 3 Branch A unenforceable in practice | 3 Med | Open | M | 2026-05-06 |
 | 1.5 | P175 | Agent over-narrows scope-pin words ("just", "only", "first") into count constraints — halts AFK loop on agent-inferred scope rather than framework-prescribed stop conditions | 3 Med | Open | M | 2026-05-06 |
 | 1.5 | P176 | Agent-side I2 (no type-branching) coverage gap — SKILL.md type-branching invariant not behaviourally testable until skill-invocation harness lands (P012-descendant; surfaced by P170 Slice 4 iter 2) | 6 Med | Open | M | 2026-05-06 |
+| 1.5 | P177 | P141 changeset-discipline gate doesn't recognise `docs/changesets-holding/` — forces 2-commit pattern when work belongs to a held window | 3 Med | Open | M | 2026-05-07 |
+| 1.5 | P178 | Agent skips ITIL state-machine gates on architecture-driven problems — treats architect-PASS as substitute for empirical RCA + skips Open → Known Error transition | 3 Med | Open | M | 2026-05-10 |
 | 1.5 | P045 | Auto plugin install after governance release (deferred install on next session start per 2026-04-20 direction) | 6 Med | Open | L | 2026-04-19 |
 | 1.5 | P079 | No inbound sync of upstream-reported problems — reports filed via the intake templates never surface in the local backlog (re-rated 6.0 → 1.5 transitive 2026-04-26 — assessment-pipeline scope blocked by P038/P064) | 12 High | Open | L | 2026-04-21 |
 | 1.5 | P014 | No lightweight aside invocation for governance skills (master tracker for ADR-032 — capture-* sibling skills + pending-questions hook + supersession cleanup) | 12 High | Open | XL | 2026-04-16 |
@@ -43,7 +45,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 1.5 | P082 | No voice-and-tone or content-risk-scoring gate on commit messages (transitive XL via P038 per P076; marginal M) | 12 High | Open | XL | 2026-04-21 |
 | 1.5 | P129 | P079 inbound assessment pipeline lacks version-aware classification — already-fixed-in-newer / recurred / still-active branches | 12 High | Open | XL | 2026-04-26 |
 | 1.25 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory/blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 10 High | Open | XL | 2026-05-03 |
-| 1.0 | P170 | Problem tickets strain as fixes decompose into multiple coordinated changes — need RFC framework that ties all changes back to problems and unifies technical with user/business problems (ADR-060 proposed; architect+JTBD AMEND 2026-05-05 — 14 + 1 critical findings; re-rated M → XL after Phase 1 scope visibility) | 8 Med | Open | XL | 2026-05-04 |
+| 1.0 | P170 | Problem tickets strain as fixes decompose into multiple coordinated changes — need RFC framework that ties all changes back to problems and unifies technical with user/business problems (ADR-060 accepted; transitioned Open → Known Error 2026-05-10 with RCA closure: base-rate sweep 38/50/16/36 across 178 tickets confirms strain pattern; session evidence = 26 commits across 8 iters meta-recursive proof; adopter-impact deferred to monitor post-Slice-6 release) | 8 Med | Known Error | XL | 2026-05-04 |
 | 0.75 | P012 | Skill testing harness scope undefined | 6 Med | Open | XL | 2026-04-16 |
 | 0.75 | P034 | Centralise risk reports for cross-project skill improvement | 6 Med | Open | XL | 2026-04-17 |
 
