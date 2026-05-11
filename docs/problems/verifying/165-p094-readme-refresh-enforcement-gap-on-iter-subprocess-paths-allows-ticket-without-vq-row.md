@@ -1,7 +1,8 @@
 # Problem 165: P094 README-refresh enforcement gap — iter subprocess commits can land a `.verifying.md` rename without staging the corresponding Verification Queue row in `docs/problems/README.md`
 
-**Status**: Open
+**Status**: Verification Pending — fix released awaiting user verification (per ADR-022)
 **Reported**: 2026-05-04
+**Released**: 2026-05-12 (this commit; pending `@windyroad/itil` patch — ships `itil-readme-refresh-discipline.sh` PreToolUse:Bash commit-gate hook + `lib/readme-refresh-detect.sh` helper + 22-test ADR-052 behavioural bats fixture)
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Likely (3)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 
@@ -53,14 +54,29 @@ Option 2 (PreToolUse hook) is the strongest enforcement and matches the existing
 
 ### Investigation Tasks
 
-- [ ] Confirm scope: only manage-problem Step 5 / Step 7 paths affected, or also transition-problem / transition-problems / capture-problem / review-problems?
-- [ ] Decide enforcement shape — Option 1 / 2 / 3 / 4 above. Architect review.
-- [ ] Implement chosen shape + behavioural bats per ADR-052.
-- [ ] Apply to existing iter subprocess violations (would have caught iter 3 d28bd51).
+- [x] Confirm scope: only manage-problem Step 5 / Step 7 paths affected, or also transition-problem / transition-problems / capture-problem / review-problems? — **All paths**. Hook gates `git commit` at the commit boundary regardless of authoring skill, covering manage-problem Step 5/7 + transition-problem + transition-problems + capture-problem + review-problems + raw `git mv`+`git commit` shapes.
+- [x] Decide enforcement shape — Option 1 / 2 / 3 / 4 above. Architect review. — **Shape #2 (PreToolUse:Bash)** approved by architect 2026-05-12 verdict PASS. Direct sibling of P125 + P141 architectural precedent. No new ADR needed; ADR-009 (no-marker per-invocation), ADR-013 Rule 1 (deny+recovery), ADR-014 (single-commit grain), ADR-022 (`.verifying.md` lifecycle), ADR-038 (terseness), ADR-045 (Pattern 1 + ≤300-byte deny band) all apply unchanged.
+- [x] Implement chosen shape + behavioural bats per ADR-052. — `packages/itil/hooks/itil-readme-refresh-discipline.sh` + `packages/itil/hooks/lib/readme-refresh-detect.sh` ship in this commit; 22-test ADR-052 behavioural bats fixture at `packages/itil/hooks/test/itil-readme-refresh-discipline.bats` (8 deny cases / 7 allow cases / 2 Pattern 1 silence cases / 2 tool-name + command-shape filter cases / 2 mixed-set cases / 2 parse + fail-open cases; 22/22 green; full itil hook suite 231/231 green confirming no regression). Hook registered in `packages/itil/hooks/hooks.json` PreToolUse:Bash array alongside P125 + P141 siblings.
+- [x] Apply to existing iter subprocess violations (would have caught iter 3 d28bd51). — Hook fires on `git commit` regardless of authoring path; iter 3 d28bd51 shape (staged `.verifying.md` rename without README) would emit deny + recovery directive.
 
 ## Fix Strategy
 
-(Deferred to investigation.)
+Architect-approved Shape #2: PreToolUse:Bash hook (`itil-readme-refresh-discipline.sh`) gates `git commit` invocations. Detection delegates to `lib/readme-refresh-detect.sh::detect_readme_refresh_required` which:
+
+1. Bypass via `BYPASS_README_REFRESH_GATE=1` env var.
+2. Fail-open if not inside a git work tree.
+3. Run `git diff --staged --name-only`.
+4. Categorise each path:
+   - `docs/problems/README.md` → counts as README refresh.
+   - `docs/problems/README-history.md` → ignored (rotated history per P134).
+   - `docs/problems/(open|verifying|closed|known-error|parked)/NNN-*.md` → ticket-state-transition surface; records first offending path.
+   - Legacy flat `docs/problems/NNN-*.md` → also recorded.
+   - Anything else → ignored.
+5. If ticket recorded AND README not staged → return 1 + echo offending path.
+
+Hook emits deny JSON with the offending ticket ID (`P<NNN>` extracted from leading digits — full ticket slugs would exceed ADR-045 deny-band), the literal recovery command `git add docs/problems/README.md`, and the `BYPASS_README_REFRESH_GATE=1` escape. Silent-on-pass per ADR-045 Pattern 1. ≤300 bytes per ADR-045 deny band.
+
+JTBD-001 (Enforce Governance Without Slowing Down) primary fit — strengthens the existing commit-time gate band (P125 + P141 siblings) by closing the README-index drift surface. JTBD-302 (Trust That the README Describes the Plugin) composes — load-bearing-from-the-start drift detection at the closest surface to the failure (matches the 2026-05-04 P159 amendment direction).
 
 ## Dependencies
 
@@ -81,3 +97,4 @@ Option 2 (PreToolUse hook) is the strongest enforcement and matches the existing
 ## Change Log
 
 - **2026-05-04** — Opened by orchestrator's main turn at end of `/wr-itil:work-problems` AFK loop iter 7 per user direction "capture all four now". Sibling finding from iter 4 P157 backfill. Skeleton ticket; investigation deferred.
+- **2026-05-12** — Open → Verification Pending. AFK iter `/wr-itil:work-problems`. Architect verdict PASS on Shape #2 (PreToolUse:Bash, sibling to P125 + P141 — no new ADR). JTBD-lead verdict PASS (JTBD-001 primary + JTBD-302 composes; in-scope, no doc update). Ships `@windyroad/itil` patch: new `packages/itil/hooks/itil-readme-refresh-discipline.sh` PreToolUse:Bash commit-gate hook + new `packages/itil/hooks/lib/readme-refresh-detect.sh` shared helper + new 22-test ADR-052 behavioural bats fixture at `packages/itil/hooks/test/itil-readme-refresh-discipline.bats` (22/22 green; full itil hook suite 231/231 green; pre-fix suite 209). Hook registered in `packages/itil/hooks/hooks.json` PreToolUse:Bash array. Deny message ≤300 bytes per ADR-045; uses extracted ticket ID `P<NNN>` (not full slug) to fit budget across all ticket-name lengths. User verifies on next `git commit` in this monorepo: staged ticket without README → deny with redirect; staged ticket+README → commit allowed. Recovery if rollback needed: `BYPASS_README_REFRESH_GATE=1 git commit ...` for one-time bypass, or remove the hooks.json entry for full rollback.
