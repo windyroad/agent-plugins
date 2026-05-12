@@ -110,12 +110,16 @@ migrate_problems_to_per_state_layout() {
   # JTBD-201 audit-trail forward-pointer (T8 jtbd-review nitpick b):
   # commit body cites ADR-031 so future `git log` readers have the
   # semantic context without needing to grep the trailer.
-  local commit_msg
-  commit_msg=$'docs(problems): auto-migrate to per-state subdirectory layout (ADR-031)\n\nSee: docs/decisions/031-problem-ticket-directory-layout.accepted.md\n\nPolicy-authorised under ADR-013 Rule 6 + ADR-019 precedent (pure-rename + pure-mkdir; fully reversible via git revert).'
-
+  # T10 fix: use sequential `-m` paragraphs instead of `--trailer`; the
+  # `--trailer` mechanism in git 2.47.x appended a spurious trailing
+  # colon to the token line, breaking ^RISK_BYPASS:\s*adr-031-migration$
+  # parsers downstream. Sequential `-m` paragraphs write a clean
+  # `RISK_BYPASS: adr-031-migration` line in the body.
   (cd "$repo_root" && git commit \
-    --message "$commit_msg" \
-    --trailer "RISK_BYPASS: adr-031-migration") || {
+    -m "docs(problems): auto-migrate to per-state subdirectory layout (ADR-031)" \
+    -m "See: docs/decisions/031-problem-ticket-directory-layout.accepted.md" \
+    -m "Policy-authorised under ADR-013 Rule 6 + ADR-019 precedent (pure-rename + pure-mkdir; fully reversible via git revert)." \
+    -m "RISK_BYPASS: adr-031-migration") || {
     echo "ERROR: migration commit failed" >&2
     return 1
   }
