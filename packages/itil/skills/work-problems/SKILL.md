@@ -122,6 +122,31 @@ Classifier exit-code routing:
 
 This is a robustness layer ON TOP of P094 + P062, not a supersession — both per-operation contracts remain in force inside each iteration's manage-problem / transition-problem invocation.
 
+### Step 0a: Auto-migrate adopter layout (P170 / RFC-002 / ADR-031)
+
+After Step 0's fetch/divergence preflight and the README reconciliation block but **before** Step 1's backlog scan, source the shared shell migration routine and call the idempotent entrypoint:
+
+```bash
+source packages/itil/lib/migrate-problems-layout.sh
+migrate_problems_to_per_state_layout "$PWD"
+```
+
+The routine is **idempotent and partial-migration-safe**. It no-ops when no flat-layout files (`docs/problems/*.<state>.md` at the top level of `docs/problems/`) are detected — the common case post-Slice-5 T5a in this monorepo and in freshly-migrated adopter repos.
+
+**Closes the Step 1 false-zero defect** (per ADR-031 § Backward Compatibility line 126 "Why both skills"): Step 1 enumerates BEFORE delegating to manage-problem. On a flat-layout adopter repo, the post-ADR-031 Step 1 glob would return zero matches at the per-state shape and stop-condition #1 would fire incorrectly — the orchestrator would exit with a false "nothing to do" signal, never reaching manage-problem's Step 0a auto-migrate. Wiring auto-migrate here at Step 0a is structurally required, not an optimisation.
+
+On a flat-layout adopter repo (first invocation post-update — JTBD-101 plugin-developer auto-migration path), the routine:
+
+1. Creates the five state subdirectories under `docs/problems/`.
+2. Runs `git mv` to relocate every existing ticket from flat to per-state subdir.
+3. Emits a standalone commit with subject `docs(problems): auto-migrate to per-state subdirectory layout (ADR-031)` and footer trailer `RISK_BYPASS: adr-031-migration` (recognised by the commit-gate hook per T11).
+
+**AFK authorisation per ADR-013 Rule 6**: this fires unconditionally even in AFK / non-interactive / orchestrated mode. Pure-rename + pure-mkdir + standalone-commit actions are policy-authorised under ADR-019 precedent — fully reversible (`git revert`), no external-comms surface, no destructive overwrite. No `AskUserQuestion` gate.
+
+**First-fire signal**: the routine emits a single stderr line on the migrating invocation; silent on no-op re-invocations.
+
+After Step 0a completes (whether no-op or migration), proceed to Step 1 backlog scan. The dual-tolerant glob at Step 1 (RFC-002 transitional window) continues to match both layouts; post-T6 (single-pattern collapse), Step 1 will tighten to per-state only and the migration commit ensures the adopter tree matches.
+
 ### Step 1: Scan the backlog
 
 Read `docs/problems/README.md` if it exists and is fresh (check via git history — see manage-problem step 9 for the cache freshness check). If stale or missing, scan all open + known-error tickets via the dual-tolerant pattern `ls docs/problems/*.open.md docs/problems/*.known-error.md docs/problems/open/*.md docs/problems/known-error/*.md 2>/dev/null` (RFC-002 migration window — covers BOTH the flat `<NNN>-<title>.<state>.md` filename-suffix layout AND the per-state subdir `<state>/<NNN>-<title>.md` layout), extract their WSJF scores, and rank them.
