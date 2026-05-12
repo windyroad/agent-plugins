@@ -261,6 +261,61 @@ The hint is consumed by the calling orchestrator **after** the ADR-042 auto-appl
 
 Do NOT emit `RISK_REGISTER_HINT:` when all cumulative scores are within appetite AND no confidentiality disclosure AND no user-stated-precondition fired. The hint is additive to the existing Below-Appetite Output Rule — a silent pass MUST remain silent. Do not emit an empty `RISK_REGISTER_HINT:` header with no bullets either — omit the block entirely.
 
+## Held-Changeset Graduation Evaluation (ADR-061)
+
+When the pipeline state indicates **within-appetite drain mode** (cumulative push and release residual both ≤ 4/25 per `RISK-POLICY.md`) AND `docs/changesets-holding/` contains entries, evaluate each held changeset against ADR-061 Rule 1's symmetric graduation criterion: **reinstate when `release-risk(pipeline with held changeset hypothetically reinstated) ≤ problem-ticket Priority`**.
+
+This is the symmetric counterpart to ADR-042 Rule 2's move-to-holding contract. Material flows in when release-risk would exceed appetite; material flows out when release-risk falls at or below the originating problem-ticket Priority.
+
+### Mechanism — invoke the deterministic graduation evaluator
+
+The Rule 1a join (changeset → problem ID → ticket Priority) and the Rule 2 VP carve-out detection are deterministic lookups. Invoke the `wr-risk-scorer-evaluate-graduation` shim (ADR-049 `$PATH`-resolved) to read structured candidate lines for each held changeset:
+
+```
+GRADUATION_CANDIDATE: changeset=<filename> | ticket=P<NNN> | priority=<N> | class=3a | status=<resolved|vp-blocked|halt-no-resolution>
+GRADUATION_SUMMARY: total=<N> resolved=<N> vp_blocked=<N> halts=<N>
+```
+
+The script does NOT compute release-risk and does NOT apply Rule 4 evidence-floor judgement — those are LLM-judgement surfaces you own per ADR-015's pure-scorer contract. The script's job is to emit candidates with their joined Priority; your job is to decide whether each candidate's release-risk + evidence-floor profile justifies emitting a `reinstate-from-holding` remediation line.
+
+### Per-candidate evaluation rules
+
+For each `status=resolved` candidate:
+
+1. **Compute release-risk with hypothetical reinstate** (Rule 1) — re-score the current pipeline as if the held changeset were `git mv`'d back to `.changeset/`. Use the same scoring path as ADR-042 Rule 2's re-score; this is your existing pipeline-scoring competence applied to the symmetric hypothesis.
+2. **Compare** — `release-risk ≤ priority` from the candidate line. If false, the held entry stays held — no remediation emitted this cycle.
+3. **Verify Rule 4 evidence floor** — class-specific evidence shape per ADR-061 Rule 4:
+   - **PreToolUse:Bash gates**: ≥ 1 gate-fire log entry per intended trigger surface, with post-fire commit trail showing no false-block.
+   - **UserPromptSubmit detectors**: ≥ 1 detector firing logged to hook stderr or `.afk-run-state/<detector>.log`.
+   - **commit-hook-with-auto-fix**: ≥ 1 auto-fix commit log entry visible via `git log --grep=<hook-marker>` with the diff showing the correct fix shape.
+   - **SessionStart additionalContext hooks**: ≥ 1 session-trail entry showing the injection fired without regression in the immediate-next turn.
+
+   Per ADR-026 cite + persist + uncertainty: the evidence must ground in a re-readable artefact, not a bare count.
+4. **Emit `reinstate-from-holding` remediation** (Rule 5) when the comparison evaluates true AND the evidence floor is met:
+
+   ```
+   RISK_REMEDIATIONS:
+   - R<N> | reinstate-from-holding <changeset-name>: release-risk <release-score>/25 ≤ P<NNN> Priority <priority-value>; class 3a; evidence: <class-specific artefact citation> | S | -<release-score> | docs/changesets-holding/<changeset-name>, .changeset/<changeset-name>
+   ```
+
+   The `description` column (free-form prose per ADR-042 Rule 2a open vocabulary) carries the symmetric-balance verdict, the cited evidence artefact, and the class. The agent consuming this line applies it via `git mv docs/changesets-holding/<name>.md .changeset/<name>.md`.
+
+For each `status=vp-blocked` candidate (Rule 2 carve-out — originating ticket in Verification Pending):
+
+- **DO NOT emit a `reinstate-from-holding` line** for this changeset. ADR-022 establishes the user-owned verify-or-reject decision surface; auto-reinstating short-circuits that surface. The `.verifying.md` → `.closed.md` transition auto-clears the carve-out; the next Step 6.5 graduation pass evaluates the changeset normally.
+
+For each `status=halt-no-resolution` candidate (Rule 1a terminal — no ticket resolved):
+
+- **DO NOT auto-graduate**. Surface the unresolved candidate in your report body under an "Unresolvable graduation candidates" section so the caller (orchestrator) sees the join failure and can present it as a user-decision surface per ADR-013 + ADR-044 framework-resolution boundary. Per ADR-061 Rule 1a, join ambiguity is a user-decision surface, not an agent-decision surface.
+
+### Scope — Phase 2a only
+
+This evaluation surface covers **orthogonal-gate class (3a) only** per ADR-061 Rule 3. Atomic-cohort class (3b — RFC-shaped held changesets that graduate as a single atomic unit per ADR-060 finding 12) requires RFC ticket cohort enumeration and is **deferred to Phase 2b**. When the holding-area contains entries that belong to an RFC cohort, the Phase 2a evaluator emits each entry as an independent 3a candidate; treat such candidates conservatively (the symmetric-balance math is identical but the evaluation unit is wrong) and prefer a `RISK_REGISTER_HINT:` over auto-emitting `reinstate-from-holding` until Phase 2b lands the cohort enumeration.
+
+### Audit trail (Rule 6)
+
+Every emitted `reinstate-from-holding` line MUST cite the resolved problem-ticket ID and Priority value in the description column so the audit trail extends ADR-042 Rule 6. The consuming orchestrator additionally appends to `docs/changesets-holding/README.md` "Recently reinstated" per Rule 6 § 2.
+
 ## Confidential Information Disclosure
 
 Check diffs for business metrics (revenue, user counts, pricing, traffic volumes). Flag as a standalone risk if found.
