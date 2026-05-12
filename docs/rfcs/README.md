@@ -41,6 +41,7 @@ decision-makers: [<name>, ...]   # who can move the RFC through lifecycle states
 problems: [P<NNN>, ...]          # REQUIRED (I1 invariant) — bare problem IDs the RFC traces to; ≥ 1
 adrs: [ADR-<NNN>, ...]           # ADRs ride alongside RFCs as decisions made during execution; may be empty
 jtbd: [JTBD-<NNN>, ...]          # Phase 1: optional. Phase 2+: REQUIRED when any traced problem is `type: user-business`. Bare JTBD IDs.
+stories: [STORY-<NNN>, ...]      # Phase 2: ORDERED array (execution sequence) — stories implementing this RFC; 0..N (empty = atomic RFC; ADR-060 line 262 JTBD-101 friction guard)
 ---
 ```
 
@@ -55,6 +56,7 @@ jtbd: [JTBD-<NNN>, ...]          # Phase 1: optional. Phase 2+: REQUIRED when an
 | `problems` | yes (I1) | List of bare problem IDs (`[P168]`, `[P168, P169]`). At least one entry is required at capture-rfc time. The hard-block at I1 fires if this list is empty or absent. |
 | `adrs` | no | List of bare ADR IDs the RFC references. RFC-internal decomposition decisions (story breakdown, phase ordering, task sequencing) do NOT spawn ADRs by default per ADR-060 § Decision Outcome — ADRs created during RFC execution capture decisions with scope outside the RFC's own boundary. |
 | `jtbd` | conditional | Required Phase 2+ when any traced problem carries `type: user-business`. Optional in Phase 1. |
+| `stories` | no (Phase 2) | **ORDERED** array — array position IS execution sequence per ADR-060 line 262. 0..N cardinality: atomic RFCs MAY ship with `stories: []` (JTBD-101 atomic-fix-adopter friction guard); story-decomposed RFCs SHOULD populate the array. `/wr-itil:work-problem <NNN>` reads the linked RFC's `stories:` array on each iter; on empty falls back to Phase 1 per-RFC iter dispatch (no per-story scoping). Populated by `/wr-itil:capture-rfc --stories STORY-NNN,...` at capture or by `/wr-itil:manage-rfc <NNN>` at any lifecycle transition. |
 
 ## RFC body structure
 
@@ -88,6 +90,18 @@ Ordered work-items. Each task is an ADR-014-grain commit candidate. Phase 1 uses
 - [ ] Task 1 — <description>
 - [ ] Task 2 — <description>
 - ...
+
+## Stories (Phase 2 — maintained from frontmatter `stories:` array)
+
+Ordered list of stories implementing this RFC, rendered in execution sequence from the frontmatter `stories:` array per ADR-060 line 270. Auto-refreshed on RFC frontmatter edits via `update-rfc-references-section.sh <rfc-file> "Stories"` (Slice 2b helper); manually rendered by `/wr-itil:manage-rfc <NNN>` at lifecycle transitions; load-bearing for `/wr-itil:work-problem <NNN>`'s per-story dispatch traversal.
+
+The section is **lazy-empty** — when `stories:` is empty (atomic RFC), the section is absent rather than rendered as an empty header. `/wr-itil:work-problem <NNN>` reads the absence as a signal to fall back to Phase 1 per-RFC iter dispatch (Tasks section + commit-message trailer parsing).
+
+```markdown
+1. [STORY-001](../stories/draft/STORY-001-foo.md) — Foo (draft)
+2. [STORY-002](../stories/accepted/STORY-002-bar.md) — Bar (accepted, S effort)
+3. ...
+```
 
 ## Commits (maintained)
 

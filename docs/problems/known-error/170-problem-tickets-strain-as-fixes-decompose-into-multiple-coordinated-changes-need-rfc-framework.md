@@ -272,9 +272,9 @@ Story skills + scaffold (NEW — promoted from Phase 2.5 per user refinement):
 
 RFC frontmatter extension + skill updates:
 
-- [ ] **RFC frontmatter `stories: [STORY-NNN, ...]` extension** — array is ORDERED (execution sequence). Required to populate by `/wr-itil:manage-rfc <NNN> accepted`.
-- [ ] **`/wr-itil:capture-rfc` extension** — accept `--stories STORY-NNN,STORY-NNN,...` argument; populate frontmatter.
-- [ ] **`/wr-itil:manage-rfc` extension** — render `## Stories` body section from frontmatter `stories:` array (forward trace, auto-refreshed on frontmatter edits).
+- [x] **RFC frontmatter `stories: [STORY-NNN, ...]` extension** — array is ORDERED (execution sequence). Required to populate by `/wr-itil:manage-rfc <NNN> accepted`. **Done 2026-05-12 (Phase 2 Slice 11)** — `docs/rfcs/README.md` § RFC frontmatter shape updated with `stories:` field + 0..N + ORDERED cardinality + atomic-RFC empty-array contract (JTBD-101 friction guard); body structure spec gains `## Stories` (Phase 2 — maintained from frontmatter `stories:` array) section with lazy-empty discipline.
+- [x] **`/wr-itil:capture-rfc` extension** — accept `--stories STORY-NNN,STORY-NNN,...` argument; populate frontmatter. **Done 2026-05-12 (Phase 2 Slice 11)** — Step 1 parse-arguments extended with `--stories` flag handling; Step 5 frontmatter template gains `stories: [...]`; Step 6 calls `update-rfc-references-section.sh "$rfc_file" "Stories"` when `--stories` was provided (renders the new RFC's own `## Stories` body section in execution order before commit). Forward-reference permitted at capture (existence check at `manage-rfc accepted`).
+- [x] **`/wr-itil:manage-rfc` extension** — render `## Stories` body section from frontmatter `stories:` array (forward trace, auto-refreshed on frontmatter edits). **Done 2026-05-12 (Phase 2 Slice 11)** — Step 7 forward-trace subsection added invoking `update-rfc-references-section.sh "$rfc_file" "Stories"` on every lifecycle transition; idempotent + lazy-empty per Slice 2a/2b contract. 7-test behavioural bats `packages/itil/scripts/test/rfc-stories-extension.bats` covers: frontmatter spec presence + ORDERED contract; helper acceptance of populated AND empty `stories:` arrays (empty = atomic-RFC JTBD-101 friction guard); SKILL.md presence of load-bearing identifiers in both capture-rfc + manage-rfc.
 
 Reverse-trace surface helpers (4 GENERALISED scripts per architect-amendment-2026-05-10 A5 — 3 JTBD reverse-trace surfaces hit the generalisation trigger threshold immediately):
 

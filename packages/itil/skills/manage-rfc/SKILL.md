@@ -157,6 +157,18 @@ The helper (`packages/itil/scripts/update-problem-rfcs-section.sh`) is idempoten
 
 The trailer hook (`itil-rfc-trailer-advisory.sh`) sits on top of this skill-side contract as a drift-detection backstop for ARBITRARY commits (e.g. `feat(...)` commits with `Refs: RFC-<NNN>` trailers authored outside the RFC skills) — it never auto-fixes; it advises.
 
+#### Forward trace — `## Stories` body section (Phase 2)
+
+Per ADR-060 line 270 + line 296: every transition that touches the RFC body refreshes the RFC's own `## Stories` body section from its frontmatter `stories:` array. The forward-trace surface renders the ordered execution sequence as inline links to the story files, lazy-empty when `stories: []` (atomic RFC — JTBD-101 friction guard). The helper is the Slice 2b sibling `update-rfc-references-section.sh`:
+
+```bash
+bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/update-rfc-references-section.sh" "$rfc_file" "Stories"
+```
+
+Idempotent + lazy-empty per the Slice 2a/2b contract. Run after the rename + frontmatter edit so the section reflects the post-transition `stories:` shape. Stage the RFC file (already staged for the lifecycle transition; the helper modifies the same file in-place).
+
+This composes with the existing `## Story Maps` refresh that the same helper handles via `update-rfc-references-section.sh "$rfc_file" "Story Maps"` — when the RFC traces story-maps via the `story-maps:` frontmatter field (Phase 2+).
+
 ### 8. List flow (`list`)
 
 Read all `.proposed.md`, `.accepted.md`, `.in-progress.md` files in `docs/rfcs/`. Extract ID, title, status, traced problems. Sort by Status priority (Accepted > In-Progress > Proposed) then by `Reported` ASC. Display as a markdown table.

@@ -27,9 +27,12 @@ This skill is one half of the capture-then-manage RFC framework introduced by AD
 
 **Positional**: `<problem-trace> <description>` where `<problem-trace>` is `P<NNN>` or `P<NNN>,P<NNN>,...` (no spaces inside the trace; multiple problems comma-separated).
 
+**Optional flag (Phase 2)**: `--stories STORY-<NNN>,STORY-<NNN>,...` — ORDERED execution sequence per ADR-060 line 262. Cardinality 0..N: atomic RFCs OMIT the flag and capture-rfc populates `stories: []` in frontmatter (JTBD-101 friction guard — atomic RFCs are first-class); story-decomposed RFCs supply the ordered list. The flag accepts STORY-IDs that don't yet resolve to files (forward-reference is permitted at capture; the existence check happens at `manage-rfc <NNN> accepted` transition per ADR-060 working-the-problem flow line 304).
+
 ```
 /wr-itil:capture-rfc P168 Pipeline consume-catalog and bootstrap-from-reports — multi-commit retrofit
 /wr-itil:capture-rfc P038,P064 Voice-and-tone gates on external comms — coordinated rollout across changeset/PR/release-notes
+/wr-itil:capture-rfc P170 --stories STORY-007,STORY-010,STORY-011 Phase 2 story-tier framework — capture-story + list-stories + RFC frontmatter extension
 ```
 
 **ADR-060 § Phase 1 item 2 phrasing footnote**: ADR-060 names "mandatory `--problem P<NNN>` flag" verbatim. This skill uses the **positional** form (no `--problem` prefix) to match the lightweight aside-invocation grammar of `capture-problem` (per ADR-032) and because Claude Code skill arguments don't carry a proper CLI flag parser. The hard-block intent (ADR-060 § Confirmation criterion 1: "without a problem trace") is preserved verbatim — only the surface syntax differs. The `--problem` phrasing in ADR-060 reads as exemplar, not contract.
@@ -75,12 +78,23 @@ fi
 The arguments must begin with a problem-trace token (`P<NNN>` or comma-separated `P<NNN>,P<NNN>,...`). The remainder is the description.
 
 ```bash
-# Tokenise: first token = problem-trace; rest = description
-problem_trace="$1"; shift
-description="$*"
+# Tokenise: first non-flag token = problem-trace; rest = description.
+# Optional --stories STORY-NNN,STORY-NNN,... flag may appear anywhere.
+stories_trace=""
+positional=()
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --stories) stories_trace="$2"; shift 2 ;;
+    *) positional+=("$1"); shift ;;
+  esac
+done
+problem_trace="${positional[0]}"
+description="${positional[*]:1}"
 ```
 
 If `$problem_trace` does not match `^P[0-9]{3}(,P[0-9]{3})*$` (regex), this is an I1 violation — go to Step 2's deny path. If `$description` is empty, halt with the empty-arguments directive from the Rule 6 audit table above.
+
+If `$stories_trace` is non-empty, validate the format matches `^STORY-[0-9]{3}(,STORY-[0-9]{3})*$`. Forward-reference is permitted (STORY-IDs that don't yet resolve to files at capture time) — the existence check happens at `manage-rfc <NNN> accepted` transition. Malformed format (e.g. `--stories foo`) is an argument error: halt with stderr directive naming the expected shape.
 
 Derive a kebab-case title slug from the first 8-10 non-stopword tokens of `$description` (matching `capture-problem` slug derivation).
 
@@ -152,6 +166,7 @@ decision-makers: [<git config user.name>]
 problems: [P<NNN>, P<NNN>, ...]
 adrs: []
 jtbd: []
+stories: [<from --stories flag — ordered execution sequence; or [] if --stories absent>]
 ---
 
 # RFC-<NNN>: <Title>
@@ -209,6 +224,16 @@ done
 ```
 
 The helper (`packages/itil/scripts/update-problem-rfcs-section.sh`) is idempotent: running over a current section is a no-op. Lazy-empty discipline applies (zero traced RFCs → section absent) — capture-rfc invocations always have ≥ 1 trace at this step, so this surface always emits a populated section. The `git add` is conditional on the helper actually modifying the file — `cmp -s` no-op-on-current is the helper's idempotency contract; `git add` of an unchanged file is also a no-op.
+
+**Phase 2 — render `## Stories` body section on the new RFC** (when `--stories` was provided): the just-written RFC file carries `stories: [STORY-NNN, ...]` in frontmatter; the helper `update-rfc-references-section.sh <rfc-file> "Stories"` renders the forward-trace `## Stories` body section from that frontmatter array in execution order per ADR-060 line 270. Lazy-empty discipline applies — when `stories: []` (atomic RFC, JTBD-101 friction guard), the helper omits the section entirely:
+
+```bash
+if [ -n "$stories_trace" ]; then
+  bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/update-rfc-references-section.sh" "docs/rfcs/RFC-${next}-${slug}.proposed.md" "Stories"
+fi
+```
+
+(`git add` of the new RFC file in the next step picks up the section render.)
 
 Stage the new RFC file:
 
