@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: verifying
 rfc-id: docs-problems-flat-layout-migration-per-state-subdirs-adopter-auto-migration
 reported: 2026-05-07
 decision-makers: [Tom Howard]
@@ -10,14 +10,15 @@ jtbd: []
 
 # RFC-002: docs/problems/ flat layout migration — per-state subdirs + adopter auto-migration
 
-**Status**: in-progress
+**Status**: Verification Pending
 **Reported**: 2026-05-07
 **Accepted**: 2026-05-07
 **In-Progress**: 2026-05-07 (T1 commit — dual-pattern hook glob widening)
+**Verification Pending**: 2026-05-12 (after T5b + T7-T11 landing; primary scope complete; T6 deferred-to-post-verification per its calendar-gate trigger)
 **Problems**: P069
 **ADRs**: ADR-031
 **JTBD**: (none directly anchored — P069 anchors JTBD-001 / JTBD-006 / JTBD-101 / JTBD-201; this RFC inherits transitively)
-**WSJF**: 2.8125 — (15 × 1.5) / 8 — Severity 15 inherited from P069 × Status Multiplier 1.5 (in-progress) / Effort XL=8
+**WSJF**: 0 — Verification Pending status excluded from dev ranking per ADR-022 (was 2.8125 in-progress)
 
 ## Summary
 
@@ -81,6 +82,35 @@ ADR-014-grain bounded sub-tasks. Each is a single commit; one commit advances at
 ## Commits
 
 (maintained automatically — populated by the commit-message RFC trailer hook per ADR-060 Phase 1 item 12; lands in Slice 3 task B5.T9)
+
+## Verification
+
+Verification scope (what user verification gate is being held open for) and the trigger to transition `verifying → closed`:
+
+**Primary scope verified end-to-end by ship of T1-T5b + T7-T11**:
+- T1: hook exemption glob widening (commit `9fef067`, shipped 2026-05-07)
+- T2-T4: dual-tolerant SKILL.md / bats / reconcile-readme (commits `0795e91`, `b5af550`, `a75ae3f`, `822c794`, shipped 2026-05-07)
+- T5a: bulk migration of 177 problem tickets from flat to per-state subdirs (commit `e31bd6a`, shipped 2026-05-10)
+- T5b: ADR-031 `proposed → accepted` with transitional-shape carve-out + sibling ADR-022/016/024 cross-references (commit `880c9a5`, shipped 2026-05-12)
+- T7: canonical shared shell migration routine + sync triad + 15-test bats (commit `b963920`, shipped 2026-05-12)
+- T8: manage-problem Step 0a wiring + JTBD-006/201 refinements + 6-test bats (commit `970b615`, shipped 2026-05-12)
+- T9: work-problems Step 0a wiring + Step-1-false-zero-defect closure + 6-test bats (commit `c4e64f2`, shipped 2026-05-12)
+- T10: 11-test behavioural end-to-end fixture + git --trailer colon-suffix bug fix (commit `18c8895`, shipped 2026-05-12)
+- T11: `RISK_BYPASS: adr-031-migration` commit-gate marker recognition + ADR-014 commit-message convention extension + 6-test bats (commit `7741fd4`, shipped 2026-05-12)
+
+**Deferred-to-post-verification** (does NOT block the `verifying → closed` transition; tracked as standalone follow-up):
+- **T6 — drop dual-pattern compatibility**: strip flat-layout half from every dual-tolerant glob landed in T1-T4. Calendar-gated trigger: T5a verification stable for ≥7 days (2026-05-17) OR explicit user-comfort signal. Pure cleanup; doesn't affect the load-bearing migration logic which is canonical per ADR-031 § Backward Compatibility "Transitional dual-pattern window (T1-T6)" subsection.
+
+**Verification trigger for `verifying → closed`** (per ADR-022 / ADR-044 framework-resolved silent dispatch):
+- User runs `manage-problem` or `work-problems` in an adopter repo that previously carried the flat-layout shape AND observes:
+  1. The auto-migration commit appears with the expected subject + body + RISK_BYPASS trailer
+  2. The commit-gate hook silently allows the migration commit (no risk-score prompt)
+  3. Subsequent invocations no-op cleanly
+  4. The Step 1 backlog scan (work-problems) returns the migrated tickets correctly
+  5. Stderr first-fire signal records the action
+
+OR equivalently:
+- User confirms by manual inspection that the test fixtures (`packages/shared/test/migrate-problems-layout-behavioural.bats` 11 tests, `packages/shared/test/sync-migrate-problems-layout.bats` 15 tests, `packages/itil/skills/manage-problem/test/manage-problem-auto-migrate-step.bats` 6 tests, `packages/itil/skills/work-problems/test/work-problems-auto-migrate-step.bats` 6 tests, `packages/risk-scorer/hooks/test/risk-score-commit-gate-adr-031-bypass.bats` 6 tests) cover the contract surface adequately.
 
 ## Related
 

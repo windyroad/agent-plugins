@@ -1,6 +1,6 @@
 # RFC Backlog
 
-> Last reviewed: 2026-05-07 **RFC-002 in-progress** — T1 (dual-pattern hook glob widening) shipped; `accepted → in-progress` lifecycle transition folds rename into the T1 work commit per manage-rfc Step 11 commit-conventions table. WSJF re-rates 3.75 → 2.8125 (Status Multiplier 2.0 → 1.5). RFC-001 verification awaits Slice 5 forward-dogfood completion (RFC-002 reaches `closed`).
+> Last reviewed: 2026-05-12 **RFC-002 Verification Pending** — T1-T5b + T7-T11 shipped; primary scope complete; `in-progress → verifying` lifecycle transition landed at L2 commit. T6 (drop dual-pattern compatibility) deferred-to-post-verification per its calendar-gated trigger (T5a-stable-for-≥7-days = 2026-05-17 OR explicit user-comfort signal). RFC-001 verification still gated on RFC-002 reaching `closed`.
 > Run `/wr-itil:manage-rfc review` to refresh once the manage-rfc skill ships.
 
 ## Status
@@ -118,7 +118,8 @@ One row per RFC in `proposed` / `accepted` / `in-progress` status. RFC-level WSJ
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported |
 |------|-----|-------|----------|--------|--------|----------|
-| 2.8125 | RFC-002 | docs/problems/ flat layout migration — per-state subdirs + adopter auto-migration | 15 | in-progress | XL | 2026-05-07 |
+
+(Empty — RFC-002 transitioned to Verification Pending 2026-05-12; see Verification Queue below.)
 
 ## Verification Queue
 
@@ -127,6 +128,7 @@ Sorted by `Released date ASC`, mirroring the canonical Verification Queue sort d
 | ID | Title | Released | Verification check |
 |----|-------|----------|--------------------|
 | RFC-001 | Pipeline consume-catalog and bootstrap-from-reports — multi-commit retrofit | 2026-05-04 | Commits `ab73328` + `af5447c` + `8edaf7b` shipped under ADR-059. Closure gated on Slice 5 forward-dogfood completion (RFC-002 reaches `closed`) per ADR-060 § Confirmation criterion 6 atomicity contract. |
+| RFC-002 | docs/problems/ flat layout migration — per-state subdirs + adopter auto-migration | 2026-05-12 | T1-T5b + T7-T11 shipped (commits `9fef067` → `7741fd4`). T6 (drop dual-pattern compatibility) deferred-to-post-verification per its calendar-gated trigger. User verification gate: adopter-side first-run auto-migration end-to-end (see RFC-002 § Verification for the explicit checklist). |
 
 ## Closed
 
