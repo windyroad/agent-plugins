@@ -44,12 +44,15 @@ Hypothesis: the agent's SKILL.md instructs it to compute the sha256 but the agen
 ### Investigation Tasks
 
 - [ ] Investigate root cause — confirm hypothesis re tool-surface mismatch.
-- [ ] Decide fix shape: (a) grant Bash to the agent, (b) move sha256 computation to PostToolUse hook (hook reads agent's verdict + computes key from observed input), (c) document the explicit-precompute pattern in SKILL.md as the canonical contract.
-- [ ] Architect review on the chosen direction — sibling to ADR-028 / P064.
+- [x] **Decide fix shape**: ~~(a) grant Bash to the agent~~, (b) move sha256 computation to PostToolUse hook, (c) document explicit-precompute pattern. **User direction 2026-05-13** picked **(a) grant agent Bash for sha256 only** (during `/wr-itil:work-problems` Step 6.75 halt Step 2.5b surfacing — Q2 answer). Narrow tool grant: agent runs `shasum -a 256` via Bash; preserves agent-side key computation. Bundle with TMPDIR-variance fix per Q3 answer — shared helper handles both root causes.
+- [ ] Architect review on the chosen direction (grant-Bash-for-sha256-only) — sibling to ADR-028 / P064. Narrow-tool-grant precedent: confirm whether ADR-028's "no Bash" constraint admits a sha256-only subset, or requires amendment.
+- [ ] Implement: amend `packages/risk-scorer/agents/external-comms.md` allowed-tools + agent prompt; the agent must `Bash(shasum:*)` (or equivalent narrow grant) and `printf '%s\n%s' "$DRAFT" "$SURFACE" | shasum -a 256 | cut -d' ' -f1` to emit the canonical key.
+- [ ] TMPDIR-variance bundle (Q3): shared `${TMPDIR:-/tmp}` resolution helper consumed by ALL gate hooks (external-comms + sibling per-gate marker writers) so PostToolUse and PreToolUse resolve to the SAME path on macOS. Observed 2026-05-04 (P124-sibling — same UUID-stale class, different surface) and 2026-05-13 P185 iter 2 retro (3 distinct dirs per session_id). Per the iter 2 retro's "Pipeline Instability" entry on TMPDIR.
+- [ ] Behavioural bats: agent emits sha256 key matching gate-side computation; TMPDIR helper resolves identically across PostToolUse hook and PreToolUse gate; previously-noted manual-marker workaround in `hooks-and-gates-archive.md` becomes obsolete.
 
 ## Fix Strategy
 
-(Deferred to investigation.)
+**Direction (user 2026-05-13)**: Grant `wr-risk-scorer:external-comms` agent narrow Bash access (`shasum` only) so it computes the canonical sha256 key itself, eliminating the placeholder-key class. Bundle with TMPDIR-variance fix (shared `${TMPDIR}` resolution helper) so PostToolUse marker writes land where PreToolUse gates look. Together they retire the manual-pre-bind workaround documented in `hooks-and-gates-archive.md`.
 
 ## Dependencies
 
@@ -67,3 +70,4 @@ Hypothesis: the agent's SKILL.md instructs it to compute the sha256 but the agen
 ## Change Log
 
 - **2026-05-04** — Opened by orchestrator's main turn at end of `/wr-itil:work-problems` AFK loop iter 7 per user direction "capture all four now". Skeleton ticket; investigation deferred.
+- **2026-05-13** — Updated by orchestrator's main turn at end of `/wr-itil:work-problems` Step 6.75 halt (Step 2.5b surfacing Q2 + Q3 answers). User direction selected fix shape (a) grant agent narrow Bash for sha256; bundled with TMPDIR-variance fix per Q3. Investigation Tasks updated to reflect direction; Fix Strategy section populated. Adjacent friction empirically observed iter 1 + iter 2 of the current session (every changeset-author Write costs 1 extra round-trip; iter 2 retro hit it explicitly when it could not commit its own retro files until orchestrator-side manual marker pre-bind worked the issue).
