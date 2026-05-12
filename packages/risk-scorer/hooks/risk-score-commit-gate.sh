@@ -16,6 +16,21 @@ TOOL_NAME=$(_get_tool_name)
 COMMAND=$(_get_command)
 echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*git commit' || exit 0
 
+# P170 / RFC-002 / ADR-031 T11: commit-message-embedded RISK_BYPASS
+# marker recognition. The adopter auto-migrate routine (T7,
+# packages/shared/lib/migrate-problems-layout.sh) emits a standalone
+# commit with `RISK_BYPASS: adr-031-migration` in its body so the
+# pure-rename + pure-mkdir migration commit (policy-authorised under
+# ADR-013 Rule 6 + ADR-019 precedent) skips the full risk-score
+# overhead while preserving the audit trail (per ADR-031 Open
+# Execution-time Questions resolution Q3 lean (b)). Case-sensitive
+# token match; only `adr-031-migration` is accepted at this surface.
+# Future commit-message-embedded markers MUST be added explicitly
+# here and to ADR-014's commit-message convention table.
+if echo "$COMMAND" | grep -qE 'RISK_BYPASS:[[:space:]]*adr-031-migration([^A-Za-z0-9_-]|$)'; then
+    exit 0
+fi
+
 SESSION_ID=$(_get_session_id)
 [ -n "$SESSION_ID" ] || exit 0
 
