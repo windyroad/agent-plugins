@@ -93,6 +93,14 @@ case "$FILE_PATH" in
     exit 0 ;;
   */docs/PRODUCT_DISCOVERY.md|docs/PRODUCT_DISCOVERY.md)
     exit 0 ;;
+  # Story maps + stories — governed by capture-story-map / manage-story-map
+  # and capture-story / manage-story skills (ADR-060 § Phase 2 amendment
+  # 2026-05-12 lines 481-496). Same pattern as docs/problems and docs/jtbd
+  # exemptions. P170 Phase 2 Slice 2.5.
+  */docs/story-maps/*|docs/story-maps/*)
+    exit 0 ;;
+  */docs/stories/*|docs/stories/*)
+    exit 0 ;;
 esac
 
 # Determine JTBD path — canonical directory layout only (ADR-008 Option 3).

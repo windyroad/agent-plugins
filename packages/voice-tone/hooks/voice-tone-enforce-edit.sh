@@ -45,6 +45,20 @@ case "$FILE_PATH" in
     ;;
 esac
 
+# Governance-managed surface exemptions — ADR-060 § Phase 2 amendment
+# 2026-05-12 lines 481-496 (P170 Phase 2 Slice 2.5). Story-map HTML and
+# story Markdown are governed by capture-story-map / manage-story-map and
+# capture-story / manage-story skills (peer-plugin pattern, mirrors the
+# docs/problems and docs/jtbd exemptions on architect + jtbd gates).
+# Short-circuits before the *.html opt-in match below would otherwise fire
+# on story-map HTML — the empirical block documented at P170 line 297.
+case "$FILE_PATH" in
+  */docs/story-maps/*|docs/story-maps/*)
+    exit 0 ;;
+  */docs/stories/*|docs/stories/*)
+    exit 0 ;;
+esac
+
 # Gate copy-bearing files
 case "$FILE_PATH" in
   *.html|*.jsx|*.tsx|*.vue|*.svelte|*.ejs|*.hbs) ;;

@@ -45,6 +45,18 @@ case "$FILE_PATH" in
     ;;
 esac
 
+# Governance-managed surface exemptions — ADR-060 § Phase 2 amendment
+# 2026-05-12 lines 481-496 (P170 Phase 2 Slice 2.5). Mirrors the
+# docs/problems / docs/jtbd peer-plugin policy exemptions in
+# architect-enforce-edit.sh + jtbd-enforce-edit.sh. Short-circuits before
+# the *.html extension check below would otherwise fire on story-map HTML.
+case "$FILE_PATH" in
+  */docs/story-maps/*|docs/story-maps/*)
+    exit 0 ;;
+  */docs/stories/*|docs/stories/*)
+    exit 0 ;;
+esac
+
 # Gate all UI source files (CSS and component files)
 case "$FILE_PATH" in
   *.css|*.html|*.jsx|*.tsx|*.vue|*.svelte|*.ejs|*.hbs) ;;

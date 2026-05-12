@@ -66,3 +66,33 @@ assert_path_allowed() {
 @test "architect: exempts style-guide policy file (P009)" {
   assert_path_allowed "$PWD/docs/STYLE-GUIDE.md"
 }
+
+# --- Story maps + stories exemptions (P170 Phase 2 Slice 2.5 / ADR-060 amendment 2026-05-12) ---
+# ADR-060 § Phase 2 encoding amendment lines 481-496 mandates exempting
+# `docs/story-maps/**/*.html` and `docs/stories/**/*.md` from the 5
+# enforce-edit gates. Mirrors the docs/problems and docs/jtbd exemptions —
+# these are governance-managed surfaces with their own capture/manage skills.
+
+@test "architect: exempts docs/story-maps/ HTML in per-state subdir (P170 / ADR-060)" {
+  assert_path_allowed "$PWD/docs/story-maps/draft/STORY-MAP-001-rfc-framework.html"
+}
+
+@test "architect: exempts docs/story-maps/ HTML in completed subdir (P170 / ADR-060)" {
+  assert_path_allowed "$PWD/docs/story-maps/completed/STORY-MAP-002-foo.html"
+}
+
+@test "architect: exempts docs/story-maps/README.md (P170 / ADR-060)" {
+  assert_path_allowed "$PWD/docs/story-maps/README.md"
+}
+
+@test "architect: exempts docs/stories/ markdown in per-state subdir (P170 / ADR-060)" {
+  assert_path_allowed "$PWD/docs/stories/draft/STORY-001-some-slice.md"
+}
+
+@test "architect: exempts docs/stories/ markdown in done subdir (P170 / ADR-060)" {
+  assert_path_allowed "$PWD/docs/stories/done/STORY-002-other.md"
+}
+
+@test "architect: exempts docs/stories/README.md (P170 / ADR-060)" {
+  assert_path_allowed "$PWD/docs/stories/README.md"
+}

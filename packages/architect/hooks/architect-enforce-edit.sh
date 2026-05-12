@@ -84,6 +84,15 @@ case "$FILE_PATH" in
     exit 0 ;;
   */docs/STYLE-GUIDE.md|docs/STYLE-GUIDE.md)
     exit 0 ;;
+  # Story maps + stories — governed by capture-story-map / manage-story-map
+  # and capture-story / manage-story skills (ADR-060 § Phase 2 amendment
+  # 2026-05-12 lines 481-496). Same pattern as docs/problems and docs/jtbd
+  # exemptions — these are governance-managed surfaces with their own
+  # capture/manage lifecycle skills. P170 Phase 2 Slice 2.5.
+  */docs/story-maps/*|docs/story-maps/*)
+    exit 0 ;;
+  */docs/stories/*|docs/stories/*)
+    exit 0 ;;
 esac
 
 # Check gate
