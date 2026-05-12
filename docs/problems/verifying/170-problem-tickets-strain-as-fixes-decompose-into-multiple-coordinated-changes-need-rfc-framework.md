@@ -1,11 +1,12 @@
 # Problem 170: Problem tickets strain as fixes decompose into multiple coordinated changes — need an RFC framework that ties all changes back to problems (and unifies technical with user/business problems)
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-04
 **Transitioned to Known Error**: 2026-05-10 (RCA closed using session evidence + base-rate sweep; see updated Investigation Tasks below)
+**Transitioned to Verification Pending**: 2026-05-12 (Phase 1 + Slice 5 primary scope complete — RFC-002 Verification Pending at L2 commit `8799f7b`; T6 deferred-to-post-verification per its calendar-gated trigger; Phase 2/3/4 explicitly deferred per ADR-060 § Out of Scope. See ## Fix Released below.)
 **Priority**: 8 (Medium) — Impact: 2 (Minor) x Likelihood: 4 (Likely) — re-rated 2026-05-05 (was 3 (Low) deferred); strain pattern N=4 in single session = Likely; impact is dev-tooling / framework-integrity slow-burn (not npm publish disruption) = Minor
 **Effort**: XL — re-rated 2026-05-05 (was M deferred); Phase 1 alone is XL (2 new skills, type-tag schema migration with capture-problem AskUserQuestion update + I2 behavioural test, P168 retrospective RFC migration, behavioural bats coverage, held-changeset window) + ADR-060 amendments before code
-**WSJF**: 1.0 — (8 × 1.0) / 8
+**WSJF**: 0 — Verification Pending status excluded from dev ranking per ADR-022 (was 1.0 at Known Error)
 **Type**: technical
 
 ## Description
@@ -309,6 +310,50 @@ Bootstrap migration of existing planning artefact:
 - [ ] Stress-test: run a multi-phase ticket (P168), a feature-shaped ticket (P162), and an observation-only ticket (P161) through the new shape end-to-end; check the framework distinguishes them without artificial scaffolding.
 
 **Migration trigger to story-map representation**: when Phase 2 ships and STORY-MAP-001 is created, this entire `## Implementation Tasks` section migrates into STORY-MAP-001's backbone/ribs/slices structure. This ticket body then carries only a forward pointer to STORY-MAP-001 + the high-level "what is the strain pattern + what's the framework solution" context. Tracking moves from prose-in-ticket-body to first-class story-map artefact per the user direction 2026-05-10 ("user story maps and user stories and incremental delivery of those user stories is exactly how we track it").
+
+## Fix Released
+
+Phase 1 + Slice 5 primary scope shipped as a multi-commit coordinated change traced through RFC-001 (P168 retrospective migration; verifying) and RFC-002 (P069 driver / forward-dogfood; verifying as of 2026-05-12 commit `8799f7b`). This is the framework's own meta-recursive proof: the RFC framework that P170 defines was used to manage the work that ships P170.
+
+**Phase 1 framework deliverables (per ADR-060 § Scope item 1)**:
+- Slice 2 (commit `12725a3`): `/wr-itil:capture-rfc` + `/wr-itil:manage-rfc` skill skeletons; `docs/rfcs/` scaffold + README.
+- Slice 3 first-half (commit `4c909c8`): `packages/itil/scripts/reconcile-rfcs.sh` + `$PATH` shim + bats.
+- Slice 3 second-half (commits `44ae0dc` + `c6ce9cf`): auto-maintained `## RFCs` reverse-trace section + commit-message RFC trailer advisory hook.
+- Slice 4 B6 (commit `9b9920e`): RFC-001 retro migration of P168 (first dogfood).
+- Slice 4 B7 (commits `03105c1` + `592f18c` + `ffa44a1` + `af66e6c`): type-tag schema migration (8a/8b/8c/8d) + I2 behavioural test.
+- Slice 5 RFC-002 forward-dogfood (this session's primary work): T1-T5b + T7-T11 — see RFC-002 § Verification for the full commit chain.
+
+**Slice 5 today's primary work (commits 2026-05-12)**:
+- `880c9a5` — T5b: accept ADR-031 + cross-ref ADR-022/016/024 for per-state layout
+- `b963920` — T7: shared shell migration routine for adopter docs/problems layout
+- `970b615` — T8: manage-problem Step 0a auto-migrate
+- `c4e64f2` — T9: work-problems Step 0a auto-migrate
+- `18c8895` — T10: behavioural fixture + trailer bug-fix
+- `7741fd4` — T11: RISK_BYPASS: adr-031-migration marker in commit-gate
+- `8799f7b` — L2: RFC-002 in-progress → verifying
+
+**Deferred-to-post-verification (does NOT block this transition)**:
+- **T6 — drop dual-pattern compatibility**: pure cleanup of dual-tolerant globs. Calendar-gated trigger: T5a-stable-for-≥7-days (2026-05-17) OR explicit user-comfort signal. The load-bearing migration logic is canonical per ADR-031 § Backward Compatibility "Transitional dual-pattern window (T1-T6)" subsection. T6 stays open as a tracked follow-up; closing P170 does not require T6 to fire.
+
+**Phase 2/3/4 explicitly deferred (per ADR-060 § Out of Scope / Phase amendment 2026-05-10)**:
+- Phase 2 DESIGN was accepted at ADR-060 amendment 2026-05-10; SHIP remains deferred (8 story-map + story skills + 2 reconcile scripts + 4 generalised reverse-trace helpers + RFC frontmatter `stories:` extension + working-the-problem flow rewrite + ADR-019 collision-guard extension + bootstrap migration of `docs/plans/170-rfc-framework-story-map.md` → `STORY-MAP-001`).
+- Phase 3 (beyond-type-tag user/business problem UX, story-level WSJF) deferred.
+- Phase 4 (JTBD-as-problem unification) deferred per Phase 4 category-error caveat.
+
+**Phase 1 graduation gates passing**:
+- Type-tag prompt fires on maintainer-side `/wr-itil:capture-problem` only — verified.
+- `/wr-itil:work-problems` Step 1 selects from `docs/problems/` correctly across the migration window — verified by T9 + the behavioural fixture.
+- `--problem` flag denial rate during dogfood — operational evidence pending broader use.
+- RFC framework + adopter auto-migration validated on forward dogfood (RFC-002 reaches verifying) — architect finding 14 closed.
+
+**Verification check** (user action to transition Verification Pending → Closed):
+1. Confirm the P170 ticket transitioned correctly (this file now lives at `docs/problems/verifying/170-...md`; no `.verifying.md` filename suffix per ADR-031 encoding).
+2. Confirm RFC-002 is in `verifying` (file at `docs/rfcs/RFC-002-...verifying.md`; status frontmatter = `verifying`).
+3. Confirm ADR-031 is in `accepted` (file at `docs/decisions/031-...accepted.md`; status frontmatter = `accepted`; transitional-shape carve-out subsection present).
+4. Confirm the framework is usable end-to-end: `/wr-itil:capture-rfc <title> --problems P170` produces a well-shaped RFC stub traceable to this problem; `/wr-itil:manage-rfc <RFC-NNN> <transition>` advances RFCs through lifecycle states.
+5. Confirm RFC-001 → closed path: RFC-001 verifying was gated on RFC-002 reaching closed per ADR-060 § Confirmation criterion 6 — now that RFC-002 is verifying, the held-changeset window can graduate per ADR-042 / P162 counterfactual risk assessment once user verification of RFC-002 fires.
+
+**Closure path**: when the user verifies, transition Verification Pending → Closed (`git mv docs/problems/verifying/170-...md docs/problems/closed/170-...md` + Status field update + add closure commit + README refresh per ADR-022). The Phase 2/3/4 deferred work migrates to per-phase tracking (story-map artefacts for Phase 2 once shipped; standalone problem tickets for Phase 3/4 if reactivated).
 
 ## Dependencies
 
