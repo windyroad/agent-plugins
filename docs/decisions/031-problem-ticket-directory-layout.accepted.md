@@ -1,8 +1,9 @@
 ---
-status: "proposed"
+status: "accepted"
 date: 2026-04-20
+accepted-date: 2026-05-12
 decision-makers: [Tom Howard]
-consulted: [wr-architect:agent, wr-jtbd:agent]
+consulted: [wr-architect:agent (initial 2026-04-20 + T5b accept-flip review 2026-05-12), wr-jtbd:agent (initial 2026-04-20 + T5b accept-flip review 2026-05-12)]
 informed: [Windy Road plugin users, addressr maintainer, bbstats maintainer]
 reassessment-date: 2026-07-20
 ---
@@ -135,7 +136,31 @@ No external consumers of this repo's `docs/problems/` layout are known; Windy Ro
 
 4. **Novel distribution pattern** — "published skill mutates adopter repo on first-run" has no precedent in this suite. ADR-017 handles shared code inside the monorepo; marketplace ADRs handle skill distribution. The execution commit should either (a) treat this as a one-off with a Reassessment Criterion that captures when to standardise if a second such migration emerges, or (b) introduce a companion ADR that standardises "plugin-driven repo migrations" upfront. Lean: (a) — YAGNI until a second case emerges.
 
-These open questions block the migration execution commit, not this ADR draft. ADR-031 records the decision and names the questions; P069 (execution ticket) will drive them to resolution with architect + user input before the migration ships.
+These open questions block the migration execution commit, not this ADR draft. ADR-031 records the decision and names the questions; P069 (execution ticket) — later subsumed by P170 Slice 5 + RFC-002 — drives them to resolution with architect + user input before the migration ships. See § Open Execution-time Questions resolution (2026-05-12) addendum below for outcomes.
+
+### Open Execution-time Questions resolution (addendum 2026-05-12 — T5b accept-flip)
+
+Resolutions for the four execution-time questions above, captured at the `proposed → accepted` status flip per architect re-review finding 1:
+
+1. **Step numbering** — **MOOT under ADR-032.** ADR-027 (subagent auto-delegation Step 0) was superseded by ADR-032 (governance-skill-invocation-patterns) on 2026-04-21. ADR-032 makes `manage-problem` / `work-problems` foreground-synchronous; there is no Step 0 subagent handoff. Auto-migration lives as a Step 1 substantive action in the main-agent body of each skill (architect-original-lean (a) carried through into the ADR-032 foreground shape). Tracked under P170 Slice 5 T8 (`manage-problem`) and T9 (`work-problems`).
+2. **Shared migration routine distribution** — **DEFERRED to P170 Slice 5 T7.** ADR-017 sync pattern (canonical source in `packages/shared/lib/`, mirrored into each skill's `lib/`) is the chosen template. Architect re-review at T7 execution time per ADR-017 shared-code-sync precedent.
+3. **Commit-gate treatment (ADR-014 interaction)** — **DEFERRED to P170 Slice 5 T11.** Lean (b) confirmed: explicit `RISK_BYPASS: adr-031-migration` marker recognised by the commit-gate hook. T11 lands the marker recognition and amends ADR-014's commit-message-convention table to enumerate the bypass marker grammar.
+4. **Novel distribution pattern (plugin-mutates-adopter-repo on first-run)** — **Reassessment-criterion-only, not a separate ADR.** Lean (a) carried: YAGNI until a second such migration emerges. The Reassessment Criteria section already captures "external consumers of `docs/problems/` appear that require flat layout"; an extension Reassessment Criterion is added under this addendum for "a second plugin-driven repo migration is contemplated — at that point, standardise the pattern in a companion ADR."
+
+### Transitional dual-pattern window (T1-T6) — RFC-002 execution shape
+
+This subsection captures the actual execution shape RFC-002 (P069 driver, P170 Slice 5 forward-dogfood) implemented for the in-repo migration. User direction 2026-05-10 endorsed a dual-pattern transitional window inside the monorepo so dependent skills + bats + hook surfaces could absorb both the pre-migration and post-migration shape during the multi-commit landing, narrowing the bootstrap-blocked-edit risk surface and avoiding a single mega-commit that would breach ADR-014 single-purpose grain.
+
+**Phase shape:**
+
+- **T1-T5 (dual-pattern tolerant)**: SKILL.md globs, bats fixture path-assertions, `reconcile-readme.sh`, hook exemption globs, and `manage-problem` / `work-problems` enumeration paths all accept BOTH `docs/problems/*.<state>.md` (flat) AND `docs/problems/<state>/*.md` (per-state). Forward-compatible; T5a (bulk migration commit `e31bd6a`) runs against this widened tolerance so no SKILL.md / bats / hook regression fires during the rename window.
+- **T6 (single-pattern end-state)**: the flat-layout half of every dual-tolerant glob is dropped; surfaces tighten back to the prescribed `docs/problems/<state>/*.md` single shape. **T6 trigger gate**: T5a-stable-for-≥7-days OR explicit user-comfort signal. Until T6 lands, the in-repo state is `T5b-accepted-with-dual-pattern-tolerance-active`; this is the documented intermediate, not a regression.
+
+**Why the carve-out lives in § Backward Compatibility, not § Decision Outcome**: the chosen option (per-state subdirectories) is unchanged. The carve-out describes the *transitional implementation reality* of how the migration unfolded across multiple commits — a backward-compatibility concern for the in-repo state during the window, not a re-decision of the chosen option.
+
+**JTBD-006 protection during the window** (per jtbd-review non-blocking recommendation 2026-05-12): `work-problems` Step 1 (Scan the backlog) enumeration is dual-tolerant across T1-T5, so the AFK orchestrator continues to select tickets regardless of which side of the migration any given ticket lives on. At T6 collapse, the single-pattern enumeration matches every ticket because T5a has already moved them all. No AFK enumeration regression at any point in the window.
+
+**Adopter-repo invariance**: the dual-pattern window is **internal-monorepo-only**. Adopter repos never see the intermediate — T7-T11 ship `mkdir` + `git mv` + standalone commit auto-migration that detects flat-layout and produces only the per-state end-state in one commit. JTBD-101 atomic-fix adopters and JTBD-101 multi-commit adopters both receive a single self-contained migration commit with `RISK_BYPASS: adr-031-migration` marker recognition (T11). Per jtbd-review finding 1 (PASS with note), no carve-out language is required at JTBD-101 surface; ADR-031 lines 114-127 already document the adopter contract.
 
 External reporters use the `.github/ISSUE_TEMPLATE/problem-report.yml` intake (P066) — that path is unchanged.
 
@@ -172,17 +197,27 @@ External reporters use the `.github/ISSUE_TEMPLATE/problem-report.yml` intake (P
 
 ### Confirmation (this repo, post-migration execution)
 
-A set of structural doc-lint bats assertions validates the migration is complete:
+Per the Transitional dual-pattern window (T1-T6) carve-out above, Confirmation criteria fire in two distinct compliance phases:
 
-- `docs/problems/open/` and `/known-error/` and `/verifying/` and `/parked/` and `/closed/` all exist as directories.
-- Zero files at `docs/problems/*.open.md` / `*.known-error.md` / `*.verifying.md` / `*.parked.md` / `*.closed.md` (the old encoding is fully migrated).
-- Every `.md` file under `docs/problems/<state>/` has a filename matching `^[0-9]{3}-[a-z0-9-]+\.md$` (no `.state.md` suffix).
+**Phase A — T1-T5 dual-tolerant surfaces (post-T5a, pre-T6)**:
+
+- All five state subdirectories (`open/`, `known-error/`, `verifying/`, `parked/`, `closed/`) exist as directories under `docs/problems/`.
+- Every ticket file lives under one of those subdirectories with filename matching `^[0-9]{3}-[a-z0-9-]+\.md$` (no `.state.md` suffix).
 - Every problem-ticket file's in-body `Status:` field matches its containing directory name (case-insensitive, `known-error` ↔ `Known Error`).
-- Every SKILL.md that enumerates problem tickets uses the new glob pattern; no bare `docs/problems/*.<state>.md` references remain in `packages/*/skills/*/SKILL.md`.
-- Hook exemption globs in `packages/architect/hooks/architect-enforce-edit.sh` and `packages/jtbd/hooks/jtbd-enforce-edit.sh` cover `docs/problems/*/*.md`.
-- ADR-016 / ADR-022 / ADR-024 references match the new paths.
+- SKILL.md globs in `manage-problem`, `work-problems`, `manage-incident`, `report-upstream`, `run-retro` accept BOTH `docs/problems/*.<state>.md` AND `docs/problems/<state>/*.md` (dual-tolerant enumeration during the window).
+- Bats fixture path-assertions are dual-tolerant; assertions against "this glob MUST match at least one file" are explicit (no silent empty-set passes).
+- `packages/itil/scripts/reconcile-readme.sh` enumerates both flat AND per-state shapes during the window.
+- Hook exemption globs in `packages/architect/hooks/architect-enforce-edit.sh` and `packages/jtbd/hooks/jtbd-enforce-edit.sh` cover BOTH `docs/problems/*.md` AND `docs/problems/*/*.md` (dual-pattern hook exemption).
+- ADR-016 / ADR-022 / ADR-024 references match the new per-state paths.
 - `packages/risk-scorer/agents/wip.md` governance-artefact path list uses the recursive `docs/problems/**/*.md` glob.
-- `npm test` green (current 428 + N new doc-lint assertions added by this ADR and the migration).
+
+**Phase B — T6 single-pattern end-state (post-T6 collapse)**:
+
+- All Phase A invariants hold.
+- ADDITIONALLY: zero files at `docs/problems/*.open.md` / `*.known-error.md` / `*.verifying.md` / `*.parked.md` / `*.closed.md` (the old encoding is fully migrated).
+- ADDITIONALLY: every SKILL.md that enumerates problem tickets uses the single per-state glob pattern; no bare `docs/problems/*.<state>.md` references remain in `packages/*/skills/*/SKILL.md`.
+- ADDITIONALLY: bats fixtures + `reconcile-readme.sh` + hook exemption globs collapse to single-pattern (`docs/problems/*/*.md` shape) only.
+- `npm test` green (current 428 + N new doc-lint assertions added by this ADR, the migration, and T6 single-pattern enforcement).
 
 ### Confirmation (downstream adopter repos, post-first-run)
 
@@ -206,6 +241,7 @@ Revisit this decision if:
 - External consumers of `docs/problems/` appear that require the flat layout or the filename-suffix encoding (unlikely; ADR-024 is the main candidate, and its reference path moves with this ADR).
 - The lifecycle gains a sixth state, in which case both the directory structure and the transition mechanics need the new state added.
 - The migration proves lossier than expected — e.g. if `git log --follow` handling degrades under the rename volume, or if silent bats-glob failures slip through despite the Confirmation checks.
+- **A second plugin-driven repo migration is contemplated** (per § Open Execution-time Questions resolution Q4) — at that point, standardise the "published skill mutates adopter repo on first-run" pattern in a companion ADR rather than leaving it as a one-off precedent in this ADR's § Backward Compatibility subsection.
 
 ## Related
 

@@ -9,6 +9,8 @@ reassessment-date: 2026-07-19
 
 # Problem lifecycle — add a Verification Pending status between Known Error and Closed
 
+> **Encoding update — see also ADR-031** (accepted 2026-05-12): the filename-suffix encoding referenced throughout this ADR (`.open.md`, `.known-error.md`, `.verifying.md`, `.parked.md`, `.closed.md`) has been replaced by per-state subdirectory encoding (`docs/problems/<state>/<NNN>-<slug>.md`). The Verification Pending *lifecycle* (this ADR's decision) is orthogonal to the *encoding* (ADR-031's decision) and survives unchanged. References below to file paths and globs are encoding-updated under ADR-031; specific lines amended in-place are tagged `(amended 2026-05-12 per ADR-031)`. The state-name semantics, transition rules, WSJF multiplier (0 for Verification Pending), and the Verification Queue rendering pattern are unchanged.
+
 ## Context and Problem Statement
 
 The problem lifecycle today uses four statuses — Open, Known Error, Parked, Closed — mapped to file suffixes `.open.md`, `.known-error.md`, `.parked.md`, `.closed.md`. Known Error is defined as "root cause confirmed, fix path clear". The closure workflow appends a `## Fix Released` section to the same `.known-error.md` file when the fix ships, keeping the status and suffix unchanged until the user explicitly verifies.
@@ -51,7 +53,7 @@ Status-name candidates considered: Verification Pending (chosen), Fix Released, 
 
 ## Decision Outcome
 
-Chosen option: **"Verification Pending" status with `.verifying.md` suffix and WSJF multiplier 0 (excluded from dev ranking)**, because it names the blocked role clearly (the user must verify), produces a concise suffix that round-trips through `ls` output, and keeps the dev-work backlog uncontaminated by user-side items. A separate "Verification Queue" section in `docs/problems/README.md` surfaces items without ranking them against dev work — the same pattern already used for `.parked.md` files.
+Chosen option: **"Verification Pending" status with `.verifying.md` suffix and WSJF multiplier 0 (excluded from dev ranking)**, because it names the blocked role clearly (the user must verify), produces a concise suffix that round-trips through `ls` output, and keeps the dev-work backlog uncontaminated by user-side items. A separate "Verification Queue" section in `docs/problems/README.md` surfaces items without ranking them against dev work — the same pattern already used for `.parked.md` files. **(amended 2026-05-12 per ADR-031)** Encoding has since moved from filename suffix to per-state subdirectory: tickets in this status now live at `docs/problems/verifying/<NNN>-<slug>.md`. The Verification Queue rendering, multiplier-0 ranking exclusion, and Verification Pending semantics are unchanged; only the storage path changed.
 
 ### Scope
 
@@ -111,7 +113,7 @@ Multiplier 0 (exclude) was chosen over 0.5 and 2.0 because:
 - Multiplier 0.5 partially addresses that concern but still mixes user and dev work in one list. Users then have to mentally filter again.
 - Multiplier 0 + a dedicated "Verification Queue" section in the README gives the user one glance-able view of "what dev work is next" and a separate glance at "what verifications are waiting for me".
 
-This mirrors how `.parked.md` tickets are excluded and shown separately today.
+This mirrors how `.parked.md` tickets are excluded and shown separately today. **(amended 2026-05-12 per ADR-031)** Parked tickets now live at `docs/problems/parked/<NNN>-<slug>.md`; the exclusion-from-ranking symmetry survives the encoding change.
 
 ## Consequences
 
@@ -155,9 +157,9 @@ Compliance is verified by:
 2. **Test:** bats test in `packages/itil/skills/manage-problem/test/` asserts:
    - The SKILL.md lifecycle table contains the new status + suffix.
    - The WSJF multiplier table contains the new row.
-   - Renaming a `.known-error.md` with `## Fix Released` → `.verifying.md` preserves the Status field as "Verification Pending".
-   - `grep -l '^## Fix Released' docs/problems/*.verifying.md` returns all such files (sanity check on the migration result).
-3. **Behavioural / migration:** after the migration follow-up commit, `ls docs/problems/*.known-error.md` returns only files WITHOUT a `## Fix Released` section. `ls docs/problems/*.verifying.md` returns the 16 migrated files plus any future Verification Pending tickets. The README "Known Errors (Fix Released)" shadow table has been replaced by the "Verification Queue" section driven off the glob. **Reconciliation invariant (P118, 2026-04-25):** the on-disk set `ls docs/problems/*.verifying.md` matches the IDs in `docs/problems/README.md`'s Verification Queue table (modulo narrative content like the per-row `Released` and `Likely verified?` columns); `ls docs/problems/*.open.md` + `ls docs/problems/*.known-error.md` matches the IDs in the WSJF Rankings table; cross-session drift between either set and the README is detected by `packages/itil/scripts/reconcile-readme.sh` exit code 1 (see ADR-014 amended "Reconciliation as preflight robustness layer" sub-rule).
+   - Renaming a `.known-error.md` with `## Fix Released` → `.verifying.md` preserves the Status field as "Verification Pending". **(amended 2026-05-12 per ADR-031)** The cross-directory rename is `git mv docs/problems/known-error/<NNN>-<slug>.md docs/problems/verifying/<NNN>-<slug>.md`; the Status-field preservation invariant holds across the encoding shift.
+   - `grep -l '^## Fix Released' docs/problems/verifying/*.md` returns all such files (sanity check on the migration result). **(amended 2026-05-12 per ADR-031)**
+3. **Behavioural / migration:** after the migration follow-up commit, `ls docs/problems/known-error/*.md` returns only files WITHOUT a `## Fix Released` section. `ls docs/problems/verifying/*.md` returns the 16 migrated files plus any future Verification Pending tickets. The README "Known Errors (Fix Released)" shadow table has been replaced by the "Verification Queue" section driven off the glob. **Reconciliation invariant (P118, 2026-04-25; amended 2026-05-12 per ADR-031):** the on-disk set `ls docs/problems/verifying/*.md` matches the IDs in `docs/problems/README.md`'s Verification Queue table (modulo narrative content like the per-row `Released` and `Likely verified?` columns); `ls docs/problems/open/*.md` + `ls docs/problems/known-error/*.md` matches the IDs in the WSJF Rankings table; cross-session drift between either set and the README is detected by `packages/itil/scripts/reconcile-readme.sh` exit code 1 (see ADR-014 amended "Reconciliation as preflight robustness layer" sub-rule). During the T1-T5 dual-pattern window of ADR-031's transitional shape, the reconcile script tolerates both flat and per-state shapes; at T6 collapse, single-pattern enumeration only.
 4. **Commit discipline:** the migration commit's message references this ADR (e.g. `chore(problems): migrate Fix Released Known Errors to Verification Pending (ADR-022)`) per ADR-014.
 
 ## Pros and Cons of the Options
@@ -207,6 +209,7 @@ Revisit this decision if:
 - ADR-011: `docs/decisions/011-manage-incident-skill.proposed.md` — incident lifecycle precedent; informs the non-parallel decision for `manage-incident`.
 - ADR-014: `docs/decisions/014-governance-skills-commit-their-own-work.proposed.md` — commit discipline for the migration commit + any follow-on skill edits.
 - ADR-020: `docs/decisions/020-governance-auto-release-for-non-afk-flows.proposed.md` — sibling lifecycle ADR; commit → score → release flow interacts with the new Verification Pending transition.
+- ADR-031: `docs/decisions/031-problem-ticket-directory-layout.accepted.md` — per-state-subdirectory encoding migration (accepted 2026-05-12). The Verification Pending lifecycle decided here is orthogonal to ADR-031's encoding change; specific path/glob references in this ADR are amended in-place where load-bearing.
 - JTBD-001: `docs/jtbd/solo-developer/JTBD-001-enforce-governance.proposed.md`
 - JTBD-006: `docs/jtbd/solo-developer/JTBD-006-work-backlog-afk.proposed.md`
 - JTBD-101: `docs/jtbd/plugin-developer/JTBD-101-extend-suite.proposed.md`

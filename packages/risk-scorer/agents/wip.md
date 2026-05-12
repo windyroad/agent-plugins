@@ -84,8 +84,7 @@ The verdict is `RISK_VERDICT: PAUSE`. This blocks the next edit until the risk i
 After assessing the risk profile, check whether uncommitted changes represent **completed governance work** that should be committed immediately to reduce WIP pipeline risk (ADR-016).
 
 **Governance-artefact detection heuristic**: Check `git status --short` and `git diff HEAD --name-only`. If ALL uncommitted files fall within these paths:
-- `docs/problems/*.md` (flat layout — pre-RFC-002)
-- `docs/problems/*/*.md` (per-state subdir layout — post-RFC-002 per ADR-031; one of `open/`, `known-error/`, `verifying/`, `parked/`, `closed/`)
+- `docs/problems/**/*.md` (recursive glob — per ADR-031 accepted 2026-05-12 per-state-subdirectory encoding; matches both flat-layout (`docs/problems/<NNN>-<slug>.<state>.md` — pre-RFC-002 / pre-T5a) and per-state subdir layout (`docs/problems/<state>/<NNN>-<slug>.md` — post-T5a, the canonical end-state). Subdirs are one of `open/`, `known-error/`, `verifying/`, `parked/`, `closed/`.)
 - `packages/*/skills/**/*.md`
 - `packages/*/skills/**/*.bats`
 - `docs/decisions/*.md`

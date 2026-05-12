@@ -61,7 +61,7 @@ Chosen option: **"Discover + fall through to structured default, skill lives in 
 **In scope (this ADR):**
 
 - **New skill**: `packages/itil/skills/report-upstream/SKILL.md`. Invocation: `/wr-itil:report-upstream <local-problem-id> <upstream-repo-url>` (additional optional args: `--severity`, `--classification`, `--evidence-url`). The skill's steps:
-  1. Read the local problem ticket (`docs/problems/<NNN>-<title>.<status>.md`) to extract Description, Symptoms, Root Cause Analysis, Workaround, Impact Assessment. If the ticket is not found, halt with a clear error.
+  1. Read the local problem ticket (`docs/problems/<status>/<NNN>-<title>.md` per ADR-031 per-state-subdirectory encoding accepted 2026-05-12; amended 2026-05-12 — was `docs/problems/<NNN>-<title>.<status>.md` under the prior filename-suffix encoding) to extract Description, Symptoms, Root Cause Analysis, Workaround, Impact Assessment. If the ticket is not found, halt with a clear error.
   2. Read `.github/ISSUE_TEMPLATE/*.yml` and `.github/ISSUE_TEMPLATE/*.md` on the upstream repo via `gh api repos/<owner>/<repo>/contents/.github/ISSUE_TEMPLATE`. If the directory is 404, treat as no-templates.
   3. Classify the local ticket's shape (bug vs feature vs question) from its title and description. Pick the best-matching upstream template by name or `name:` frontmatter field, preferring `bug` / `bug-report` for defects and `feature` / `feature-request` for enhancements.
   4. **Security-path routing**: if the local ticket's Priority has `security` in its label or the ticket body contains a Security classification section, route to the security path (step 6) instead of opening a public issue.
@@ -125,7 +125,7 @@ Chosen option: **"Discover + fall through to structured default, skill lives in 
 
 - The skill's template-discovery step makes one API call to the upstream repo per invocation. Network-bound; acceptable for a manually-invoked skill.
 - The security-path halt-and-surface branch is interactive (requires `AskUserQuestion` for the no-`SECURITY.md` case). In AFK mode, the skill must fall through to "save the drafted report and halt the orchestrator" rather than auto-route — AFK orchestrators should never auto-report a security-classified ticket.
-- Cross-reference back-writes modify `docs/problems/<NNN>.<status>.md` files, which are excluded from pipeline risk hash per the doc exclusions rule. Reporting is a docs-only local operation from the risk-scorer's perspective.
+- Cross-reference back-writes modify `docs/problems/<status>/<NNN>-<title>.md` files (per ADR-031 per-state-subdirectory encoding; amended 2026-05-12 — was `docs/problems/<NNN>.<status>.md`), which are excluded from pipeline risk hash per the doc exclusions rule. Reporting is a docs-only local operation from the risk-scorer's perspective.
 - Voice-tone gate per ADR-028 fires on the skill's `gh issue create` (Step 5) and `gh api .../security-advisories` (Step 6) calls. The skill should treat the transient deny-plus-delegate as expected and proceed on the retry; the voice-tone agent reviews only the prose body, not structural template fields.
 
 ### Bad
@@ -227,6 +227,7 @@ Revisit this decision if:
 - **ADR-014** — governance skills commit their own work; the back-write to the local ticket follows this ordering.
 - **ADR-015** — on-demand assessment skills; explicitly NOT an application (this is an action skill), but neighbouring precedent for skill-contract shape.
 - **ADR-022** — problem lifecycle Verification Pending; the skill reads the local ticket's Status field.
+- **ADR-031** — per-state-subdirectory encoding for `docs/problems/` (accepted 2026-05-12). Reference paths in this ADR amended in-place where they reference local ticket locations.
 - **JTBD-001**, **JTBD-004**, **JTBD-101**, **JTBD-201** — the four personas whose needs drive this ADR (JTBD-004 is primary fit per jtbd-lead review).
 - **JTBD-006** — AFK persona constraint that the security-path halt-and-surface branch is designed against.
 - **addressr** — downstream project whose session-memory workaround for upstream reporting motivates this ADR; candidate dogfood site.

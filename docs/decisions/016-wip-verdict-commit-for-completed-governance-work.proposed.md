@@ -57,13 +57,13 @@ Uncommitted changes are classified as "completed governance work" when ALL of th
 
 1. **Risk is within appetite**: cumulative risk ≤ 4/25 per RISK-POLICY.md. Above-appetite changes are always PAUSE regardless of artefact type.
 2. **Governance-artefact-only diff**: all uncommitted file changes are in these paths:
-   - `docs/problems/*.md` (problem file transitions or updates)
+   - `docs/problems/**/*.md` (problem file transitions or updates — recursive glob per ADR-031 per-state-subdirectory encoding; amended 2026-05-12)
    - `packages/*/skills/**/*.md` (SKILL.md updates or new tests)
    - `packages/*/skills/**/*.bats` (structural BATS tests)
    - `docs/decisions/*.md` (ADR creation or updates)
 3. **Completion signal present** (any of):
    - A problem file contains "Fix Released" text in the diff
-   - A problem file shows a status transition (`.open.md` → `.known-error.md` or `.known-error.md` → `.closed.md` appearing in `git status`)
+   - A problem file shows a status transition — under ADR-031 encoding this surfaces as a cross-directory `git mv` (e.g. `docs/problems/open/<NNN>-<slug>.md` → `docs/problems/known-error/<NNN>-<slug>.md` or `docs/problems/known-error/<NNN>-<slug>.md` → `docs/problems/verifying/<NNN>-<slug>.md`) appearing in `git status` (amended 2026-05-12)
    - A SKILL.md was modified alongside a problem file update
 
 **False-positive safeguard**: if any uncommitted file falls outside the governance paths above (e.g., any `.ts`, `.js`, `.sh`, `.mjs`, `package.json`), the heuristic does NOT fire. CONTINUE or PAUSE is emitted normally.
