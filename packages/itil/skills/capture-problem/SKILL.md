@@ -23,7 +23,7 @@ This skill is the foreground-lightweight-capture variant of `/wr-itil:manage-pro
 
 ## Rule 6 audit (per ADR-032 + ADR-013)
 
-This skill has **one classification-only AskUserQuestion (type-tag, taste authority per ADR-044 category 5) and zero control-flow branches keyed on the answer**. Each potentially-interactive decision is framework-mediated per ADR-044:
+This skill has **at most one classification-only AskUserQuestion (type-tag, ambiguous-signal fallback only) and zero control-flow branches keyed on the answer**. Each potentially-interactive decision is framework-mediated per ADR-044:
 
 | Decision | Resolution |
 |----------|-----------|
@@ -32,9 +32,9 @@ This skill has **one classification-only AskUserQuestion (type-tag, taste author
 | Effort default | Framework-policy: `M` flagged "deferred — re-rate at next /wr-itil:review-problems". |
 | Multi-concern split | Out of scope: capture-problem creates one ticket per invocation. Multi-concern observations route to `/wr-itil:manage-problem` (its Step 4b owns the split). |
 | Empty `$ARGUMENTS` | Halt-with-stderr-directive: print "capture-problem requires a description in $ARGUMENTS — invoke /wr-itil:manage-problem instead for the full intake flow" and exit. AFK orchestrators MUST NOT invoke capture-problem with empty arguments — caller-side contract. |
-| Type classification (P170 / ADR-060 item 8c) | Taste authority per ADR-044 category 5. AskUserQuestion fires for `type` ∈ {`technical`, `user-business`} when no caller-side flag pre-resolved it. `--type=<value>` flag pre-resolves the answer (silent-proceed). `--no-prompt` flag defaults to `technical` (silent-proceed). Maintainer-side ONLY: this prompt is paired with JTBD-301 protection — `.github/ISSUE_TEMPLATE/problem-report.yml` (plugin-user-side intake) MUST NOT carry an equivalent type selector; triage assigns the type during `/wr-itil:manage-problem` ingestion of user-reported issues. **I2 invariant** (ADR-060 line 98): the prompt is a classification facet, not a workflow split — Steps 0-7 control-flow is identical regardless of the chosen `type_value`; only the substituted value in the Step 4 skeleton template differs. |
+| Type classification (P170 / ADR-060 item 8c; P185 derive-first refactor) | **Derive-first; silent-framework per ADR-044 category 4 on unambiguous-signal descriptions; taste fallback per category 5 on ambiguous descriptions only.** Step 1.5 runs a lexical-signal classifier against the description text. Unambiguous one-sided signal → classify silently + emit stderr advisory. Mixed or zero signals → AskUserQuestion. `--type=<value>` pre-resolves silently (highest priority). `--no-prompt` defaults to `technical` silently (AFK contract). Maintainer-side ONLY: this dispatch is paired with JTBD-301 protection — `.github/ISSUE_TEMPLATE/problem-report.yml` (plugin-user-side intake) MUST NOT carry an equivalent type selector; triage assigns the type during `/wr-itil:manage-problem` ingestion of user-reported issues. **The classifier is also NOT invoked from `/wr-itil:manage-problem`'s ingestion-of-plugin-user-reports path** — plugin-user descriptions do not carry the same authorial intent as maintainer-internal captures, so triage stays user-judgement per JTBD-301. **I2 invariant** (ADR-060 line 98): the prompt is a classification facet, not a workflow split — Steps 0-7 control-flow is identical regardless of the chosen `type_value`; only the substituted value in the Step 4 skeleton template differs. The stderr advisory text shape is also I2-isomorphic: identical sentence structure across `technical` vs `user-business` classifications beyond the substituted values + signal names. |
 
-Per ADR-013 Rule 6 fail-safe: every decision above resolves without interactive user input in non-interactive contexts (the type-tag carve-out resolves to `technical` via `--no-prompt` or `--type=` caller-side pre-resolution). AFK orchestrators MUST pass `--no-prompt` or `--type=<value>` per JTBD-006 § Persona Constraints; AFK callers that omit both flags violate the caller-side contract. Interactive and pre-resolved AFK paths produce identical observable outputs except for the `**Type**:` field value, satisfying the I2 invariant by construction.
+Per ADR-013 Rule 6 fail-safe: every decision above resolves without interactive user input in non-interactive contexts (the type-tag carve-out resolves to `technical` via `--no-prompt` or `--type=` caller-side pre-resolution, or via the derive-first classifier on unambiguous descriptions). AFK orchestrators MUST pass `--no-prompt` or `--type=<value>` per JTBD-006 § Persona Constraints; AFK callers that omit both flags violate the caller-side contract. Interactive (pre-resolved, derive-classified, or ambiguous-fallback) and pre-resolved AFK paths produce identical observable outputs except for the `**Type**:` field value, satisfying the I2 invariant by construction.
 
 ## Steps
 
@@ -61,9 +61,9 @@ fi
 
 | Flag | Effect on Step 1.5 |
 |------|-------------------|
-| `--type=technical` | Pre-resolves type to `technical`; Step 1.5 skips the AskUserQuestion. |
-| `--type=user-business` | Pre-resolves type to `user-business`; Step 1.5 skips the AskUserQuestion. |
-| `--no-prompt` | Pre-resolves type to `technical` (default); Step 1.5 skips the AskUserQuestion. |
+| `--type=technical` | Pre-resolves type to `technical`; Step 1.5 skips the classifier and the AskUserQuestion. |
+| `--type=user-business` | Pre-resolves type to `user-business`; Step 1.5 skips the classifier and the AskUserQuestion. |
+| `--no-prompt` | Pre-resolves type to `technical` (default); Step 1.5 skips the classifier and the AskUserQuestion. |
 
 Strip recognised leading flags from `$ARGUMENTS`; the remainder (after flags) is the free-text description. If both `--type=<value>` and `--no-prompt` are present, `--type=<value>` wins (more specific). Unknown leading flags halt-with-stderr-directive: print "capture-problem: unknown flag '<flag>' — recognised flags: --type=technical, --type=user-business, --no-prompt" and exit.
 
@@ -71,19 +71,45 @@ Empty description (post-flag-strip) halts per the Rule 6 audit above.
 
 Derive a kebab-case title slug from the first 8-10 non-stopword tokens of the description (matching the existing `manage-problem` slug derivation pattern).
 
-### 1.5 Type classification (taste authority per ADR-044 category 5)
+### 1.5 Type classification (derive-first; silent-framework per ADR-044 category 4; taste fallback per category 5 on ambiguity)
 
-Resolve `type_value` ∈ {`technical`, `user-business`} per the following framework-mediated dispatch:
+Resolve `type_value` ∈ {`technical`, `user-business`} per the following framework-mediated dispatch. **The dispatch order is load-bearing** — pre-resolution flags short-circuit BEFORE the classifier runs, and the AskUserQuestion fires ONLY on genuinely-ambiguous descriptions.
 
-1. **If `--type=<value>` was set in Step 1**: use that value; do NOT fire AskUserQuestion (silent-proceed per ADR-013 Rule 5).
-2. **Else if `--no-prompt` was set in Step 1**: default `type_value = technical`; do NOT fire AskUserQuestion. JTBD-006 protection: AFK orchestrators MUST pass this flag (or `--type=<value>`).
-3. **Else** (interactive context, no caller-side pre-resolution): fire AskUserQuestion with options `technical` (default) and `user-business`. Question text: *"What type of problem is this?"* Per-option descriptions:
-   - `technical` — *"Bug, defect, broken behaviour, framework drift — root cause sits in code or process."*
-   - `user-business` — *"Missing capability, UX gap, adopter friction, JTBD-shaped need — root cause sits in unmet user need."*
+1. **If `--type=<value>` was set in Step 1**: use that value; do NOT run the classifier; do NOT fire AskUserQuestion (silent-proceed per ADR-013 Rule 5).
+2. **Else if `--no-prompt` was set in Step 1**: default `type_value = technical`; do NOT run the classifier; do NOT fire AskUserQuestion. JTBD-006 protection: AFK orchestrators MUST pass this flag (or `--type=<value>`).
+3. **Else** (interactive context, no caller-side pre-resolution): run the **lexical-signal classifier** against the description text:
 
-**I2 invariant guard (ADR-060 line 98)**: the resolved `type_value` is used at Step 4 ONLY as a substituted string in the skeleton template's `**Type**:` body field. Steps 2, 3, 4 (other than the `**Type**:` substitution), 5, 6, 7 execute identically regardless of `type_value`. The skill carries NO control-flow branch keyed on `type` — that would convert classification into a workflow split and violate I2. Pure-bash supporting-script enforcement of this invariant lives in `packages/itil/scripts/test/i2-no-type-branching.bats`; the SKILL.md surface coverage gap is named at P176 (descendant of P012 master harness).
+   **Technical signals** (regex; matched against the post-flag-strip description, case-insensitive unless noted):
+   - Code identifiers: `[a-z]+[A-Z][a-zA-Z]+` (camelCase), `[a-z]+-[a-z][a-z-]+` (kebab-case identifiers with ≥2 hyphens), `[a-z]+_[a-z][a-z_]+` (snake_case).
+   - File paths: `\.(md|sh|bats|ts|js|json|yaml|yml|py|rb|go|css|html)\b`, `packages/[a-z-]+/`, `docs/[a-z-]+/`, `\.github/`, `\.claude/`, `/tmp/`.
+   - Command-name patterns: `/wr-[a-z-]+:[a-z-]+\b`, `\bgit (commit|push|mv|add|rebase|merge)\b`, `\bnpm (run|install|publish)\b`, `\bbash\b`, `\bbats\b`, `\bgrep\b`, `\bsed\b`, `\bjq\b`.
+   - Mechanism words: `\b(drift|regression|hook|marker|gate|refresh|idempotent|exit code|stderr|stdout|regex|formula|dispatch|frontmatter|substring|escape|sentinel|bypass|TTL|cache|invalidate|deduplicate|race|deadlock|timeout|preflight)\b`.
+   - Error-message patterns: `\b(error|failure|exception|panic|stack trace|segfault|null pointer|undefined|not found|permission denied|EACCES|ENOENT|exit \d+)\b`.
 
-**JTBD-301 scope guard**: this prompt fires on the maintainer-side `/wr-itil:capture-problem` skill only. The plugin-user-side intake (`.github/ISSUE_TEMPLATE/problem-report.yml`) MUST NOT carry an equivalent type selector — plugin-user persona constraint is "no pre-classification". Triage assigns `type` during `/wr-itil:manage-problem` ingestion of user-reported issues, not at user-report time.
+   **User-business signals** (regex; same casing):
+   - Persona names: `\b(adopter|adopters|plugin-user|plugin-users|solo[-_ ]?developer|maintainer-persona|end[-_ ]?user|customer|stakeholder)\b`.
+   - Journey words: `\b(workflow|journey|onboarding|friction|UX|experience|usability|discoverability|cognitive load|attention|interrupt|context-switch)\b`.
+   - JTBD-shaped need words: `\bJTBD-\d+\b`, `\bjob-to-be-done\b`, `\b(want|need|can't|cannot|blocked from|unable to|hard to|painful to)\b\s+(use|access|find|discover|complete)`, `\bdesired outcome\b`, `\bunmet need\b`.
+
+   **Decision rule**:
+
+   - **Unambiguous technical** (≥1 technical signal AND 0 user-business signals): set `type_value = technical`; emit stderr advisory and proceed. Do NOT fire AskUserQuestion.
+   - **Unambiguous user-business** (0 technical signals AND ≥1 user-business signal): set `type_value = user-business`; emit stderr advisory and proceed. Do NOT fire AskUserQuestion.
+   - **Ambiguous** (≥1 signal each side, OR 0 signals on both sides): fire AskUserQuestion with options `technical` (default) and `user-business`. Question text: *"What type of problem is this?"* Per-option descriptions:
+     - `technical` — *"Bug, defect, broken behaviour, framework drift — root cause sits in code or process."*
+     - `user-business` — *"Missing capability, UX gap, adopter friction, JTBD-shaped need — root cause sits in unmet user need."*
+
+   **Stderr advisory contract** (silent-classification path only): emit a SINGLE line to stderr (NOT stdout, NOT in the ticket body) of the form:
+
+   ```
+   capture-problem: classified type=<value> from description signals: <signal1>, <signal2>[, ...]; re-invoke with --type=<other-value> to override
+   ```
+
+   The advisory text shape is I2-isomorphic — the sentence structure (`classified type=<value> from description signals: ...; re-invoke with --type=<other-value> to override`) is identical regardless of which type was classified; only the substituted `<value>` / `<other-value>` / `<signal*>` tokens differ. Embedding the advisory in stdout would risk machine-readers parsing it as a ticket-body line; embedding it in the ticket body would violate ADR-060's frontmatter / body-bullet schema. Stderr is the correct channel — visible to interactive maintainers in the terminal; invisible to ticket consumers; loggable by AFK orchestrators that capture subprocess stderr.
+
+**I2 invariant guard (ADR-060 line 98)**: the resolved `type_value` is used at Step 4 ONLY as a substituted string in the skeleton template's `**Type**:` body field. Steps 2, 3, 4 (other than the `**Type**:` substitution), 5, 6, 7 execute identically regardless of `type_value`. The skill carries NO control-flow branch keyed on `type` — that would convert classification into a workflow split and violate I2. The lexical-signal classifier is UPSTREAM of the value's substitution (it resolves WHICH value to substitute, not WHICH workflow to execute); the substitution and all downstream steps remain uniform. Pure-bash supporting-script enforcement of this invariant lives in `packages/itil/scripts/test/i2-no-type-branching.bats`; the SKILL.md surface coverage gap is named at P176 (descendant of P012 master harness).
+
+**JTBD-301 scope guard**: this dispatch fires on the maintainer-side `/wr-itil:capture-problem` skill only. The plugin-user-side intake (`.github/ISSUE_TEMPLATE/problem-report.yml`) MUST NOT carry an equivalent type selector — plugin-user persona constraint is "no pre-classification". Triage assigns `type` during `/wr-itil:manage-problem` ingestion of user-reported issues, not at user-report time. **The lexical-signal classifier is ALSO NOT invoked from `/wr-itil:manage-problem`'s ingestion-of-plugin-user-reports path** — plugin-user descriptions do not carry the same authorial intent as maintainer-internal captures (a plugin-user describing their friction in maintainer-vocabulary terms would mis-classify); triage stays user-judgement, not lexical-classifier inference.
 
 ### 2. Minimal-grep duplicate check (3-keyword title-only)
 
@@ -226,9 +252,9 @@ The trailing pointer is **not optional** — it is the user-visible signal that 
 |---------|----------------|-----------------|
 | Duplicate-check | Wide-net grep + AskUserQuestion branch on matches | 3-keyword title-only grep, list-only (no branch) |
 | Multi-concern split | Step 4b AskUserQuestion | Out of scope (one ticket per invocation) |
-| Skeleton-fill | Full-intake; AskUserQuestion for missing fields | Deferred-placeholder pattern + one classification-only AskUserQuestion (type-tag) |
-| Type-tag prompt | Step 4-equivalent AskUserQuestion fires alongside other intake fields | Step 1.5 classification-only AskUserQuestion; `--type=` and `--no-prompt` flags pre-resolve for non-interactive callers; I2 invariant: no control-flow branch keyed on type |
-| AskUserQuestion authority | Multiple branches (deviation-approval / direction-setting / taste / mechanical) | Exactly one classification-only fire (taste, ADR-044 cat. 5); zero control-flow branches |
+| Skeleton-fill | Full-intake; AskUserQuestion for missing fields | Deferred-placeholder pattern + derive-first type classification (AskUserQuestion fires only on ambiguous descriptions) |
+| Type-tag prompt | Step 4-equivalent AskUserQuestion fires alongside other intake fields | Step 1.5 derive-first dispatch — lexical-signal classifier silently resolves unambiguous descriptions (with stderr advisory); ambiguous descriptions fall back to classification-only AskUserQuestion. `--type=` and `--no-prompt` flags pre-resolve for non-interactive callers. I2 invariant: no control-flow branch keyed on type |
+| AskUserQuestion authority | Multiple branches (deviation-approval / direction-setting / taste / mechanical) | Zero unconditional AskUserQuestion fires; ambiguous-signal fallback only (silent-framework per ADR-044 cat. 4 on unambiguous; taste per cat. 5 on ambiguous); zero control-flow branches |
 | README refresh | P094 inline (regenerate + stage in same commit) | Deferred to next `/wr-itil:review-problems` |
 | Status transitions | Step 7 owns Open → Known Error → Verifying → Closed | Out of scope (creation only) |
 | Commit grain | One commit per intake (or per split-concern set) | One commit per capture |
@@ -246,7 +272,8 @@ The two skills share the `/tmp/manage-problem-grep-${SESSION_ID}` create-gate ma
 - **P176** — agent-side I2 (no type-branching) coverage gap on the SKILL.md surface (this file's surface); descendant of P012 master harness ticket. The Step 1.5 I2 invariant guard is enforced by audit-trailed prose here per ADR-052 § Surface 2 escape-hatch contract; behavioural enforcement awaits the master harness.
 - **ADR-032** (`docs/decisions/032-governance-skill-invocation-patterns.proposed.md`) — foreground-lightweight-capture variant amendment.
 - **ADR-038** — progressive-disclosure pattern (SKILL.md + REFERENCE.md split).
-- **ADR-044** — decision-delegation contract; type classification is taste authority per category 5; `--no-prompt` / `--type=<value>` are policy-authorised silent-proceed shapes per category 4.
+- **ADR-044** — decision-delegation contract; type classification is **derive-first**: silent-framework per category 4 on unambiguous-signal descriptions (the classifier IS the framework resolving the answer from observable evidence per ADR-026 grounding); taste per category 5 fallback on genuinely-ambiguous descriptions only. `--no-prompt` / `--type=<value>` are policy-authorised silent-proceed shapes per category 4 (caller-side pre-resolution). P185 re-classified Step 1.5's taxonomy position from "cat 5 unconditional ask" to "cat 4 derive-first with cat 5 fallback".
+- **P185** — `/wr-itil:capture-problem` asks a classification question it can answer itself from the description's observable evidence — inverse-P078 / P132 trap at a SKILL contract surface. The Step 1.5 derive-first refactor (lexical-signal classifier + stderr advisory) ships this fix.
 - **ADR-049** — bin/ on PATH; capture-problem reuses the existing `wr-itil-reconcile-readme` shim.
 - **ADR-052** — behavioural-tests-default for skill testing; SKILL.md I2 surface coverage gap is named, not silent (P176 + ADR-052 § Surface 2).
 - **ADR-060** (`docs/decisions/060-...accepted.md`) — Phase 1 item 8c authored Step 1.5 here; I2 invariant (line 98) governs the no-control-flow-branch contract; line 132 names the maintainer-side-only / JTBD-301-protection scope; line 160 (Confirmation criterion 4) gates the type-prompt placement.

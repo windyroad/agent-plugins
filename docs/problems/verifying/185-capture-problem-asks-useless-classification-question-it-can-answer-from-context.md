@@ -1,6 +1,6 @@
 # Problem 185: `/wr-itil:capture-problem` asks a classification question (technical vs user-business) that it can answer itself from the description's observable evidence
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-12
 **Priority**: 10 (High) — Impact: 2 (Minor — dev tooling friction in installed SKILL; published packages unaffected) x Likelihood: 5 (Almost certain — every interactive `/wr-itil:capture-problem` invocation deterministically fires the AskUserQuestion; observed today on the P185 capture itself)
 **Effort**: M (Step 1.5 derive-first refactor + lexical-signal classifier in `packages/itil/skills/capture-problem/SKILL.md` + behavioural bats covering signal classes + stderr-advisory contract; sibling capture-* skills "title taste" investigation is conditional follow-up not in marginal scope)
@@ -41,10 +41,26 @@ Pass `--type=technical` or `--type=user-business` on every interactive invocatio
 ### Investigation Tasks
 
 - [x] Re-rate Priority and Effort at next /wr-itil:review-problems (re-rated 2026-05-12 — Priority 10 High / Severity 10, Effort M, WSJF 5.0)
-- [ ] Investigate the lexical signals that reliably distinguish `technical` from `user-business` descriptions. Candidate signals: code identifiers (camelCase, kebab-case, snake_case, file paths, error messages, command names) → technical; persona names (adopter, user, plugin-user, solo-developer), journey words (workflow, flow, journey, onboarding, friction, UX), JTBD-shaped need words → user-business. Build a small classifier and test against the existing N=185 problem corpus.
-- [ ] Design the derive-first, ask-on-ambiguity-only Step 1.5 replacement. Confidence threshold: when the signal set unambiguously points one way (e.g. 0 user-business signals + ≥1 technical signal), classify silently with stderr advisory. When signals are mixed or absent, fall back to the current AskUserQuestion.
-- [ ] Create a reproduction test: invoke `/wr-itil:capture-problem` with 10 descriptions covering edge cases; assert (a) no AskUserQuestion fires for the 8 unambiguous cases; (b) the 2 ambiguous cases fire the prompt; (c) all 10 land with the correct `**Type**:` field.
-- [ ] Investigate whether the same derive-first pattern applies to other capture skills (`capture-rfc`, `capture-story`, `capture-story-map`). They don't currently fire a type classification AskUserQuestion, but they DO fire a "title taste" prompt; same derivability question applies.
+- [x] Investigate the lexical signals that reliably distinguish `technical` from `user-business` descriptions. **Result (2026-05-13)**: classifier ships in `packages/itil/skills/capture-problem/SKILL.md` Step 1.5 with five technical signal classes (camelCase / kebab-case / snake_case identifiers; file paths; command-name patterns; mechanism words; error-message patterns) and three user-business signal classes (persona names; journey words; JTBD-shaped need words). Patterns documented inline at Step 1.5 with case-sensitivity notes. Behavioural validation via `packages/itil/skills/capture-problem/test/capture-problem.bats` exercises pure-technical, pure-user-business, mixed, and no-signal fixtures.
+- [x] Design the derive-first, ask-on-ambiguity-only Step 1.5 replacement. **Result (2026-05-13)**: dispatch order is `--type=<value>` (highest priority caller flag) → `--no-prompt` (AFK contract default to `technical`) → lexical-signal classifier (unambiguous one-sided signal → silent classification + stderr advisory) → AskUserQuestion fallback (mixed or zero signals). Stderr advisory contract: SINGLE line of the form `"capture-problem: classified type=<value> from description signals: <s1>, <s2>; re-invoke with --type=<other> to override"` — to stderr only, never stdout, never in ticket body. I2-isomorphic sentence structure across both classifications.
+- [x] Create a reproduction test. **Result**: 17 new bats tests in `packages/itil/skills/capture-problem/test/capture-problem.bats` — 8 classifier-decision tests across pure-technical / pure-user-business / mixed / no-signal fixtures; 3 stderr-advisory shape tests for I2 isomorphism; 5 dispatch-precedence tests for flag short-circuit + derive-first dispatch + ambiguous fallback; 1 meta-recursive test against a representative slice of P185's own body. All 32 tests in the suite (15 pre-existing + 17 new) pass.
+- [ ] Investigate whether the same derive-first pattern applies to other capture skills (`capture-rfc`, `capture-story`, `capture-story-map`). They don't currently fire a type classification AskUserQuestion, but they DO fire a "title taste" prompt; same derivability question applies. **Deferred** per the Effort M bound — this is the conditional follow-up named in the ticket's Effort field and tracked as a separate observation if the sibling skills exhibit the same friction in real captures.
+
+## Fix Released
+
+Fixed in AFK iter 2 of 2026-05-13 `/wr-itil:work-problems` session. Implementation surfaces:
+
+- `packages/itil/skills/capture-problem/SKILL.md` Step 1.5 — derive-first dispatch + lexical-signal classifier + stderr advisory contract.
+- `packages/itil/skills/capture-problem/SKILL.md` Rule 6 audit table — recategorised type-tag dispatch from "taste authority per ADR-044 category 5" to "silent-framework per category 4 on unambiguous; taste fallback per category 5 on ambiguous". Architect verdict 2026-05-13: in-scope under ADR-044 Reassessment Criteria; no ADR amendment needed.
+- `packages/itil/skills/capture-problem/SKILL.md` Composition table — Type-tag row + AskUserQuestion authority row updated to reflect derive-first dispatch.
+- `packages/itil/skills/capture-problem/SKILL.md` JTBD-301 scope guard — extended with explicit "classifier NOT invoked from manage-problem ingestion-of-plugin-user-reports path" guard per architect rider.
+- `packages/itil/skills/capture-problem/test/capture-problem.bats` — 17 new behavioural bats tests (classifier outcomes + stderr advisory isomorphism + dispatch precedence + meta-recursive corpus validation).
+
+Visible-enforcement preservation (the original P170 Phase 1 Slice 4 B7.T3 design intent for visible I2 enforcement at capture-time): stderr advisory on every derived classification makes the resolver's decision observable, with a single-flag override path.
+
+Memory file `feedback_derive_classification_dont_ask.md` already captures this principle as a class-of-behaviour rule (sibling to `feedback_dont_subcontract_declaration_fields.md` and `feedback_act_on_obvious_decisions.md`).
+
+Awaiting user verification that (1) interactive `/wr-itil:capture-problem "..."` on a description with clear technical signals classifies silently (with stderr advisory) instead of firing the AskUserQuestion; (2) on a description with clear user-business signals, same silent classification; (3) on a genuinely-ambiguous description (mixed or zero signals), the AskUserQuestion still fires; (4) `--type=<value>` and `--no-prompt` still short-circuit per the pre-existing contract.
 
 ## Dependencies
 
