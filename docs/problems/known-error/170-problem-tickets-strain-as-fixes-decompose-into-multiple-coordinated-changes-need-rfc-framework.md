@@ -259,7 +259,7 @@ Story-map skills + scaffold:
 - [ ] **Build `/wr-itil:manage-story-map` skill** (heavyweight intake + lifecycle management; backbone/ribs/slices authoring guidance in HTML; **slices reference story IDs via `<a href data-story-id>`**, not contain stories inline; trace-gate enforcement).
 - [ ] **Build `/wr-itil:reconcile-story-maps` skill + `packages/itil/scripts/reconcile-story-maps.sh` + `packages/itil/bin/wr-itil-reconcile-story-maps` shim** per ADR-049. Includes `render-story-map-index.sh` helper for `docs/story-maps/README.md` rendering from `<meta>` data attributes.
 - [ ] **Build `/wr-itil:list-story-maps` skill** (read-only display per the `list-problems` precedent P071).
-- [ ] **Scaffold `docs/story-maps/` directory** with 5 lifecycle subdirs (`draft/`, `accepted/`, `in-progress/`, `completed/`, `archived/`) + `README.md` lifecycle index anchored to JTBD-008 + JTBD-302 per ADR-051 sibling pattern.
+- [x] **Scaffold `docs/story-maps/` directory** with 5 lifecycle subdirs (`draft/`, `accepted/`, `in-progress/`, `completed/`, `archived/`) + `README.md` lifecycle index anchored to JTBD-008 + JTBD-302 per ADR-051 sibling pattern. **Done 2026-05-12** — directories + `.gitkeep` placeholders + comprehensive README documenting HTML schema, filename grammar, four-tier governance hierarchy, story-map ranking + reconciliation pattern.
 
 Story skills + scaffold (NEW — promoted from Phase 2.5 per user refinement):
 
@@ -267,7 +267,7 @@ Story skills + scaffold (NEW — promoted from Phase 2.5 per user refinement):
 - [ ] **Build `/wr-itil:manage-story` skill** (heavyweight lifecycle; INVEST checks at accepted transition per I10; trace-gate enforcement I7/I8/I9; auto-transition draft→in-progress on first `Implements: STORY-NNN` commit trailer; auto-transition in-progress→done on linked-RFC-closes + acceptance-criteria all-ticked).
 - [ ] **Build `/wr-itil:reconcile-stories` skill + `packages/itil/scripts/reconcile-stories.sh` + `packages/itil/bin/wr-itil-reconcile-stories` shim** per ADR-049.
 - [ ] **Build `/wr-itil:list-stories` skill** (read-only display, with optional `--rfc RFC-NNN` filter to surface a specific RFC's ordered story list).
-- [ ] **Scaffold `docs/stories/` directory** with 5 lifecycle subdirs (`draft/`, `accepted/`, `in-progress/`, `done/`, `archived/`) + `README.md` lifecycle index.
+- [x] **Scaffold `docs/stories/` directory** with 5 lifecycle subdirs (`draft/`, `accepted/`, `in-progress/`, `done/`, `archived/`) + `README.md` lifecycle index. **Done 2026-05-12** — directories + `.gitkeep` placeholders + comprehensive README documenting markdown story shape, frontmatter schema, body structure with INVEST acceptance-gate sections, story rankings + reconciliation pattern. README anchored to JTBD-008 + JTBD-001 per ADR-051.
 
 RFC frontmatter extension + skill updates:
 
