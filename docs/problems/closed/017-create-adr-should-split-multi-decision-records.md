@@ -1,6 +1,6 @@
 # Problem 017: `create-adr` skill does not flag or split multi-decision inputs
 
-**Status**: Verification Pending
+**Status**: Closed (verified 2026-05-12 via /wr-itil:review-problems Step 4 user confirmation — split-prompt fix exercised in production; 25 days since release)
 **Reported**: 2026-04-16
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Possible (3)
 **Effort**: M

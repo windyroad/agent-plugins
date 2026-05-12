@@ -1,6 +1,6 @@
 # Problem 047: WSJF effort buckets are coarse and not re-rated at lifecycle transitions
 
-**Status**: Verification Pending
+**Status**: Closed (verified 2026-05-12 via /wr-itil:review-problems Step 4 — direct evidence observed THIS session: live re-rate of P185 Effort from "deferred — re-rate at next /wr-itil:review-problems" to "M" with rationale during Step 2 of this same review pass. The lifecycle-transition re-rate P047 designed for fired and produced correct output. Direct observation, not age-based heuristic — closing on session-evidence per user direction "things you actually observe", which is itself the P186 critique driver)
 **Reported**: 2026-04-19
 **Priority**: 6 (Medium) — Impact: Minor (2) x Likelihood: Possible (3)
 **Effort**: M — SKILL.md additive edits + bats doc-lint test + in-session audit of 8 L-bucket tickets (estimate confirmed accurate for the scope shipped)

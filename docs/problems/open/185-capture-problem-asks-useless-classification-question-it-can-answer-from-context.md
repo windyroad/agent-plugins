@@ -2,8 +2,9 @@
 
 **Status**: Open
 **Reported**: 2026-05-12
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 10 (High) — Impact: 2 (Minor — dev tooling friction in installed SKILL; published packages unaffected) x Likelihood: 5 (Almost certain — every interactive `/wr-itil:capture-problem` invocation deterministically fires the AskUserQuestion; observed today on the P185 capture itself)
+**Effort**: M (Step 1.5 derive-first refactor + lexical-signal classifier in `packages/itil/skills/capture-problem/SKILL.md` + behavioural bats covering signal classes + stderr-advisory contract; sibling capture-* skills "title taste" investigation is conditional follow-up not in marginal scope)
+**WSJF**: 5.0 = (Severity 10 × Status Multiplier 1.0 Open) / Effort divisor 2 (M)
 **Type**: technical
 
 ## Description
@@ -39,7 +40,7 @@ Pass `--type=technical` or `--type=user-business` on every interactive invocatio
 
 ### Investigation Tasks
 
-- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
+- [x] Re-rate Priority and Effort at next /wr-itil:review-problems (re-rated 2026-05-12 — Priority 10 High / Severity 10, Effort M, WSJF 5.0)
 - [ ] Investigate the lexical signals that reliably distinguish `technical` from `user-business` descriptions. Candidate signals: code identifiers (camelCase, kebab-case, snake_case, file paths, error messages, command names) → technical; persona names (adopter, user, plugin-user, solo-developer), journey words (workflow, flow, journey, onboarding, friction, UX), JTBD-shaped need words → user-business. Build a small classifier and test against the existing N=185 problem corpus.
 - [ ] Design the derive-first, ask-on-ambiguity-only Step 1.5 replacement. Confidence threshold: when the signal set unambiguously points one way (e.g. 0 user-business signals + ≥1 technical signal), classify silently with stderr advisory. When signals are mixed or absent, fall back to the current AskUserQuestion.
 - [ ] Create a reproduction test: invoke `/wr-itil:capture-problem` with 10 descriptions covering edge cases; assert (a) no AskUserQuestion fires for the 8 unambiguous cases; (b) the 2 ambiguous cases fire the prompt; (c) all 10 land with the correct `**Type**:` field.
