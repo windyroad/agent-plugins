@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-05-13 **P185 fold-fix Open → Verification Pending** — `/wr-itil:capture-problem` Step 1.5 derive-first refactor (lexical-signal classifier + stderr-advisory contract; cat-5 → cat-4 silent-framework with cat-5 fallback on ambiguity per architect verdict; 17 new behavioural bats; SKILL.md Rule 6 + Composition tables updated; 32/32 capture-problem.bats green; full I2-no-type-branching.bats 9/9 green) lands via `@windyroad/itil` patch in AFK iter 2 of `/wr-itil:work-problems`. P185 row removed from WSJF Rankings, inserted at bottom of Verification Queue per ADR-022 fold-fix mechanic. Prior line-3 fragment (P187 add) rotated to docs/problems/README-history.md per P134.
+> Last reviewed: 2026-05-13 **README reconciled** — 1 drift entry corrected: P188 added to WSJF Rankings (deferred re-rate placeholder at WSJF 1.0 / Severity 3 Med / Effort M, mirroring sibling deferred captures P183 / P184 / P187). Reconciliation contract per P118 + ADR-014 amended ("Reconciliation as preflight robustness layer"). Prior line-3 fragment (P185 fold-fix Open → Verifying) rotated to docs/problems/README-history.md per P134.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -50,6 +50,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 1.0 | P183 | AFK orchestrator halts on transient API stream-idle-timeout — should classify is_error reason and retry transient classes instead of halting the whole loop (captured 2026-05-11 via /wr-itil:capture-problem; deferred re-rate) | 3 Med | Open | M | 2026-05-11 |
 | 1.0 | P184 | Agent treats conditionally-deferred work (deferred-pending-X-graduation) as permanently out of scope — prematurely transitions parent ticket when X graduates (captured 2026-05-12 via /wr-itil:capture-problem after the P170 premature-Verifying transition revert; sibling to P179 defer-discipline at a different decision surface; would have silently lost Phase 2 work if user hadn't asked about story maps; deferred re-rate) | 3 Med | Open | M | 2026-05-12 |
 | 1.0 | P187 | AFK orchestrator detects `/wr-itil:review-problems` would unblock its preflight but halts with a "recommended next step" instead of auto-dispatching the unblock (captured 2026-05-12 via /wr-itil:capture-problem; deferred re-rate) | 3 Med | Open | M | 2026-05-12 |
+| 1.0 | P188 | AFK orchestrator Step 2.5b AskUserQuestion option-sets assume AFK-only paths even when the user's answering the AskUserQuestion is itself proof of interactivity — should include "do it interactively now" options when user-presence is proven by the surface firing | 3 Med | Open | M | 2026-05-13 |
 | 0.75 | P012 | Skill testing harness scope undefined | 6 Med | Open | XL | 2026-04-16 |
 | 0.75 | P034 | Centralise risk reports for cross-project skill improvement | 6 Med | Open | XL | 2026-04-17 |
 

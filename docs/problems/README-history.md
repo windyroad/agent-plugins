@@ -231,3 +231,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-05-12 (README reconciled — P187 added; prior P185 re-rate cohort rotated)
 
 > Last reviewed: 2026-05-12 **README reconciled** — 1 drift entry corrected: P187 added to WSJF Rankings (deferred re-rate placeholder at WSJF 1.0 / Severity 3 Med / Effort M, mirroring sibling deferred captures P183 / P184). Reconciliation contract per P118 + ADR-014 amended ("Reconciliation as preflight robustness layer"). Prior line-3 fragment (P185 re-rate + P186 capture+re-rate + P016/P017/P047 close batch) rotated to docs/problems/README-history.md per P134.
+
+## 2026-05-13 (README reconciled — P188 added)
+
+> Last reviewed: 2026-05-13 **P185 fold-fix Open → Verification Pending** — `/wr-itil:capture-problem` Step 1.5 derive-first refactor (lexical-signal classifier + stderr-advisory contract; cat-5 → cat-4 silent-framework with cat-5 fallback on ambiguity per architect verdict; 17 new behavioural bats; SKILL.md Rule 6 + Composition tables updated; 32/32 capture-problem.bats green; full I2-no-type-branching.bats 9/9 green) lands via `@windyroad/itil` patch in AFK iter 2 of `/wr-itil:work-problems`. P185 row removed from WSJF Rankings, inserted at bottom of Verification Queue per ADR-022 fold-fix mechanic. Prior line-3 fragment (P187 add) rotated to docs/problems/README-history.md per P134.
