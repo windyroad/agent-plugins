@@ -1,11 +1,15 @@
 # Problem 170: Problem tickets strain as fixes decompose into multiple coordinated changes — need an RFC framework that ties all changes back to problems (and unifies technical with user/business problems)
 
-**Status**: Verification Pending
+**Status**: Known Error
 **Reported**: 2026-05-04
 **Transitioned to Known Error**: 2026-05-10 (RCA closed using session evidence + base-rate sweep; see updated Investigation Tasks below)
-**Phase 1 + Slice 5 primary scope shipped**: 2026-05-12 (commits `880c9a5` T5b → `8799f7b` L2 RFC-002 verifying; Phase 1 graduated). Phase 2 SHIP completed 2026-05-12 (this session — Slices 2.5, 7, 8, 9, 10, 11, 13, 14, 15-partial, 3, 4, 5, 6 + this transition commit).
-**Transitioned to Verification Pending**: 2026-05-12 (this commit) — Phase 2 framework code shipped per Slices 2.5/3/4/5/6/7/8/9/10/11/13/14/15-partial. Hook exemption globs released to marketplace cache post-this-session via `/install-updates` cycle; STORY-MAP-001 bootstrap migrated; RFC-003 captured + 7 bootstrap stories shipped under `docs/stories/done/`; manage-problem § Working a Problem → Known Error rewritten with the Phase 2 traversal. Slice 15 (bootstrap stories extraction) shipped 7 representative stories with full extraction of the prior-session B1-B10/T1-T11 backbone deferred. Slice 14 (STORY-MAP-001 bootstrap) shipped the HTML scaffold with full backbone migration from `docs/plans/170-rfc-framework-story-map.md` deferred. Both partials annotated explicit follow-up trails; the framework primitives are all in place and ready for forward use.
-**Phase-2 reversion note (2026-05-12)**: An earlier transition to Verification Pending was reverted at this commit. The agent treated "SHIP deferred to post-Phase-1-graduation" as equivalent to "permanently out of scope" and prematurely transitioned to Verification Pending. User correction 2026-05-12: P170 must do Phase 2 to completion before it transitions. The deferral was conditional on a dependency that has now lifted, not on indefinite future work — Phase 2 is in scope NOW. **Resolved 2026-05-12 (this commit)**: Phase 2 has completed; the legitimate transition to Verification Pending now fires.
+**Phase 1 + Slice 5 primary scope shipped**: 2026-05-12 (commits `880c9a5` T5b → `8799f7b` L2 RFC-002 verifying; Phase 1 graduated).
+**Phase 2 SHIP completed**: 2026-05-12 (Slices 2.5, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15-partial). Hook exemption globs awaiting marketplace cache release; STORY-MAP-001 bootstrap migrated; RFC-003 captured + 7 bootstrap stories shipped under `docs/stories/done/`; manage-problem § Working a Problem → Known Error rewritten with the Phase 2 traversal. Slice 15 (bootstrap stories extraction) shipped 7 representative stories with full extraction of the prior-session B1-B10/T1-T11 backbone deferred. Slice 14 (STORY-MAP-001 bootstrap) shipped the HTML scaffold with full backbone migration from `docs/plans/170-rfc-framework-story-map.md` deferred. Both partials annotated explicit follow-up trails; the framework primitives are all in place and ready for forward use.
+**Phase 3 + Phase 4 SHIP**: 2026-05-13 in-scope per user direction. *Phase 3* = beyond-type-tag user/business problem UX (JTBD-trace-conditional, NOT type-conditional per ADR-060 I2 invariant) + story-level WSJF (promote I11 from "no-leak" to first-class). *Phase 4* = JTBD-as-problem unification + `persona:` frontmatter field. Both phases were previously annotated "deferred" in this ticket body without corresponding user-deferral direction — that framing was a class-of-behaviour instance now captured at [[P189]] (sibling to [[P184]] transition-surface and [[P179]] untracked-phase-defer).
+
+**Premature Verification Pending transitions (history)**:
+- **2026-05-12 (first attempt)** — reverted same commit chain. Agent treated "SHIP deferred to post-Phase-1-graduation" as equivalent to "permanently out of scope" and prematurely transitioned to Verification Pending. User correction 2026-05-12: P170 must do Phase 2 to completion before it transitions. The deferral was conditional on a dependency that has now lifted, not on indefinite future work. Resolved 2026-05-12 with Phase 2 SHIP completion.
+- **2026-05-12 (second attempt — at end of Phase 2 SHIP)** — also reverted, but only later (this commit, 2026-05-13). Agent transitioned to Verification Pending after Phase 2 SHIP, treating Phase 3 + Phase 4 as deferred — but the "deferred" framing in this ticket body was agent-authored without a user-deferral utterance to cite. The framing then propagated to today's "anything deferred?" question and surfaced as established user-intent in the agent's summary. User correction 2026-05-13: *"release and then implement phase 3 and phase 4. I never deferred those phases."* **Resolved 2026-05-13 (this commit)**: P170 returns to Known Error; Phase 3 + Phase 4 are explicitly in-scope; this ticket transitions to Verification Pending only after Phase 3 + Phase 4 ship and user verification confirms.
 **Priority**: 8 (Medium) — Impact: 2 (Minor) x Likelihood: 4 (Likely) — re-rated 2026-05-05 (was 3 (Low) deferred); strain pattern N=4 in single session = Likely; impact is dev-tooling / framework-integrity slow-burn (not npm publish disruption) = Minor
 **Effort**: XL — re-rated 2026-05-05 (was M deferred). Phase 1 alone was XL (now shipped); Phase 2 SHIP is an additional XL (8 new skills + 2 reconcile scripts + 4 generalised reverse-trace helpers + RFC frontmatter `stories:` extension + working-the-problem flow rewrite + ADR-019 collision-guard extension + STORY-MAP-001 bootstrap migration + Phase 2 commit-grain decomposition per ADR-060 architect-amendment-2026-05-10 A3).
 **WSJF**: 1.0 — (8 × 1.0) / 8 (Known Error status multiplier 1.0)
@@ -195,7 +199,7 @@ Both `wr-architect:agent` and `wr-jtbd:agent` returned **AMEND** verdicts on ADR
 - ✓ I1 trace-to-problem invariant + I2 uniform-problem-ontology invariant.
 - ✓ RFC vs ADR boundary (ADR = how we decided; RFC = what we're shipping).
 - ✓ Backwards-compat path: P168 retrospectively migrates to RFC-001 as Phase 1 dogfood; P159 / P051 / P169 grandfathered unless cost-of-migration is reassessed at later phase boundaries.
-- ✓ JTBD unification roadmap (Phase 4 deferred; sequencing recorded as direction).
+- ✓ JTBD unification roadmap (Phase 4 sequenced after Phase 1-3; revoked "deferred" framing per user direction 2026-05-13).
 - ✓ RFC lifecycle states (`proposed` / `accepted` / `in-progress` / `verifying` / `closed`).
 
 **Decisions resolved by architect review 2026-05-05** (in-ADR amendment recommended; see `## Review Findings (2026-05-05)` finding 3):
@@ -300,15 +304,15 @@ Bootstrap migration of existing planning artefact:
 - [~] **Bootstrap stories extraction** — every existing slice in the bootstrap map (Slices 1-6 backbone + B1-B10 ribs + T1-T11 tasks) extracts to an individual `STORY-NNN-<slug>.md` file in the appropriate lifecycle subdir. **Partial 2026-05-12 (Phase 2 Slice 15)** — 7 representative bootstrap stories shipped under RFC-003 capture for THIS SESSION's Phase 2 slices: STORY-001 (Slice 2.5 hook exemption), STORY-002 (Slice 7 capture-story), STORY-003 (Slice 10 list-stories), STORY-004 (Slice 11 RFC stories extension), STORY-005 (Slice 13 working-the-problem traversal), STORY-006 (Slice 9 reconcile-stories), STORY-007 (Slice 8 manage-story). All 7 carry the bootstrap-exemption marker per ADR-060 line 339 + ADR-053 Bootstrapping precedent. Full extraction of every Slice 0-15 backbone + ribs (B1-B10 + T1-T11 from `docs/plans/170-rfc-framework-story-map.md`) deferred — those stories represent prior-session and RFC-001/RFC-002 work and warrant their own bootstrap RFC capture.
 - [~] **RFC-001 + RFC-002 frontmatter `stories:` populated** — RFC-001's frontmatter gains `stories: [...]` listing its slices in execution order; RFC-002's frontmatter gains `stories: [...]` listing T1-T11 + L2-L3 in execution order. **Partial 2026-05-12 (Phase 2 Slice 15)** — RFC-003 (NEW — P170 Phase 2 framework code) created with `stories: [STORY-001 .. STORY-007]` populated in execution order. RFC-001 + RFC-002 frontmatter backfill deferred to a sibling bootstrap pass (their respective work has already shipped + verified; backfilling their `stories:` is retroactive documentation, lower urgency than the in-flight RFC-003 trace).
 
-**Phase 3 implementation tasks** (deferred):
+**Phase 3 implementation tasks** (in-scope 2026-05-13 per user direction — was previously labelled "deferred" without user-deferral citation; reversion captured at [[P189]]):
 
-- [ ] **Beyond-type-tag user/business problem UX** — e.g. JTBD trace prompt at capture-problem time when `type: user-business`. ADR-060 § Out of Scope explicitly REJECTS type-conditional capture-flow differentiation; any UX differentiation MUST be JTBD-trace-conditional or nullable-field-conditional, not type-conditional.
-- [ ] **Story-level WSJF placement** — promote I11 from "no WSJF leak" to "story-level WSJF as Phase 3 deliverable". Story carries its own WSJF; participates in `/wr-itil:work-problems` Step 3 selection. Composes with existing problem-level + RFC-level WSJF surfaces. Trigger: Phase 2 use evidence shows orchestrator selection benefits from story-level granularity.
+- [ ] **Beyond-type-tag user/business problem UX** — JTBD-trace prompt at capture-problem time when JTBD trace is **nullable-absent**, NOT when `type: user-business`. ADR-060 I2 invariant (line 98) prohibits type-conditional capture-flow differentiation outright; any UX differentiation MUST be JTBD-trace-conditional or nullable-field-conditional. Architect review of the prompt placement + ADR-060 § Phase 3 amendment required before implementation.
+- [ ] **Story-level WSJF placement** — promote I11 from "no WSJF leak" to "story-level WSJF as first-class". Story carries its own WSJF; participates in `/wr-itil:work-problems` Step 3 selection. Composes with existing problem-level + RFC-level WSJF surfaces. Architect review of multi-level WSJF composition + JTBD-006 protection (orchestrator selection during the transition) required before implementation.
 
-**Phase 4 implementation tasks** (deferred — depends on Phase 2 ship + Phase 2.5 evidence):
+**Phase 4 implementation tasks** (in-scope 2026-05-13 per user direction — was previously labelled "deferred" without user-deferral citation; reversion captured at [[P189]]):
 
-- [ ] **JTBD-as-problem unification** — migration scripts; possible deprecation of `docs/jtbd/` if redundant under unified ontology. Phase 4 risk per JTBD-review nitpick 7: persona-anchoring is JTBD-essential and problem-optional — unification cannot collapse one into the other.
-- [ ] **`persona:` frontmatter field** on user-business problem tickets — required for JTBD-derived problems; optional for technical problems. Schema decision deferred to Phase 4 design.
+- [ ] **JTBD-as-problem unification** — migration scripts; possible deprecation of `docs/jtbd/` if redundant under unified ontology. Phase 4 risk per JTBD-review nitpick 7: persona-anchoring is JTBD-essential and problem-optional — unification cannot collapse one into the other. **Mandatory pre-implementation reviews**: full architect review (ADR-060 § Phase 4 amendment, possibly a new ADR for the JTBD/problem ontology merge) AND full JTBD review (since the work restructures `docs/jtbd/` — touches every persona's job-statement surface).
+- [ ] **`persona:` frontmatter field** on user-business problem tickets — required for JTBD-derived problems; optional for technical problems. Schema design at ADR-060 § Phase 4 amendment time; bats coverage of the field-presence invariant before bulk-migration.
 
 **Cross-phase work**:
 
@@ -317,11 +321,11 @@ Bootstrap migration of existing planning artefact:
 
 **Migration trigger to story-map representation**: when Phase 2 ships and STORY-MAP-001 is created, this entire `## Implementation Tasks` section migrates into STORY-MAP-001's backbone/ribs/slices structure. This ticket body then carries only a forward pointer to STORY-MAP-001 + the high-level "what is the strain pattern + what's the framework solution" context. Tracking moves from prose-in-ticket-body to first-class story-map artefact per the user direction 2026-05-10 ("user story maps and user stories and incremental delivery of those user stories is exactly how we track it").
 
-## Phase 1 + Slice 5 evidence (partial-fix; Phase 2 still ahead)
+## Phase 1 + Slice 5 evidence (partial-fix; Phase 3 + Phase 4 still ahead)
 
 Phase 1 + Slice 5 primary scope shipped as a multi-commit coordinated change traced through RFC-001 (P168 retrospective migration; verifying) and RFC-002 (P069 driver / forward-dogfood; verifying as of 2026-05-12 commit `8799f7b`). This is the framework's own meta-recursive proof at the Phase 1 layer: the RFC framework that P170 defines was used to manage the work that ships P170 Phase 1.
 
-**This is NOT a fix-released signal for P170 as a whole** — Phase 2 SHIP is now in-scope (was deferred-pending-Phase-1-graduation; gate lifted today). P170 stays at Known Error until Phase 2 ships + user verification.
+**This is NOT a fix-released signal for P170 as a whole** — Phase 2 SHIP completed 2026-05-12 (see § Phase 2 SHIP evidence below); Phase 3 + Phase 4 are the remaining in-scope phases per user direction 2026-05-13. P170 stays at Known Error until Phase 3 + Phase 4 ship + user verification.
 
 **Phase 1 framework deliverables (per ADR-060 § Scope item 1)**:
 - Slice 2 (commit `12725a3`): `/wr-itil:capture-rfc` + `/wr-itil:manage-rfc` skill skeletons; `docs/rfcs/` scaffold + README.
@@ -343,10 +347,7 @@ Phase 1 + Slice 5 primary scope shipped as a multi-commit coordinated change tra
 **Deferred-to-post-verification (does NOT block this transition)**:
 - **T6 — drop dual-pattern compatibility**: pure cleanup of dual-tolerant globs. Calendar-gated trigger: T5a-stable-for-≥7-days (2026-05-17) OR explicit user-comfort signal. The load-bearing migration logic is canonical per ADR-031 § Backward Compatibility "Transitional dual-pattern window (T1-T6)" subsection. T6 stays open as a tracked follow-up; closing P170 does not require T6 to fire.
 
-**Phase 2/3/4 explicitly deferred (per ADR-060 § Out of Scope / Phase amendment 2026-05-10)**:
-- Phase 2 DESIGN was accepted at ADR-060 amendment 2026-05-10; SHIP remains deferred (8 story-map + story skills + 2 reconcile scripts + 4 generalised reverse-trace helpers + RFC frontmatter `stories:` extension + working-the-problem flow rewrite + ADR-019 collision-guard extension + bootstrap migration of `docs/plans/170-rfc-framework-story-map.md` → `STORY-MAP-001`).
-- Phase 3 (beyond-type-tag user/business problem UX, story-level WSJF) deferred.
-- Phase 4 (JTBD-as-problem unification) deferred per Phase 4 category-error caveat.
+**Phase 2 SHIP completed 2026-05-12** — see § Fix Released for the commit chain; Phase 3 + Phase 4 are the remaining in-scope phases per user direction 2026-05-13 (was: agent-authored "deferred" framing without user-direction citation; reversion captured at [[P189]]; see § Implementation Tasks Phase 3 + Phase 4 blocks above).
 
 **Phase 1 graduation gates passing**:
 - Type-tag prompt fires on maintainer-side `/wr-itil:capture-problem` only — verified.
@@ -354,11 +355,13 @@ Phase 1 + Slice 5 primary scope shipped as a multi-commit coordinated change tra
 - `--problem` flag denial rate during dogfood — operational evidence pending broader use.
 - RFC framework + adopter auto-migration validated on forward dogfood (RFC-002 reaches verifying) — architect finding 14 closed.
 
-**Phase 2 next**: P170 stays at Known Error. The next coordinated change ships Phase 2 SHIP per the task list in § Implementation Tasks (Phase 2 implementation tasks block lines 249-294 of this ticket). When Phase 2 ships + user verification, P170 transitions Known Error → Verification Pending (this time legitimately) → Closed.
+**Phase 3 + Phase 4 next**: P170 stays at Known Error. Phase 2 SHIP completed 2026-05-12; Phase 3 (JTBD-trace-conditional UX + story-level WSJF) and Phase 4 (JTBD-as-problem unification + `persona:` frontmatter) ship next per the task lists in § Implementation Tasks. Both phases gate on full architect + JTBD reviews of ADR-060 amendments before implementation. When Phase 3 + Phase 4 ship + user verification, P170 transitions Known Error → Verification Pending → Closed.
 
-## Fix Released
+## Phase 2 SHIP evidence (Phase 3 + Phase 4 still ahead)
 
-Phase 2 framework code shipped 2026-05-12 across the following commits (this session, plus the transition commit you're reading):
+**This section was previously titled `## Fix Released`** as part of the 2026-05-12 (second-attempt) premature Verification Pending transition. Reverted 2026-05-13 — Phase 2 SHIP is real and documented below, but the parent ticket transition was premature because Phase 3 + Phase 4 are still in-scope (see § Premature Verification Pending transitions above + § Implementation Tasks Phase 3 + Phase 4 blocks).
+
+Phase 2 framework code shipped 2026-05-12 across the following commits:
 
 - `b60f576` — Phase 2 Slice 2.5: Hook exemption globs for `docs/story-maps/**/*.html` + `docs/stories/**/*.md` across 4 enforce-edit hooks (architect / jtbd / style-guide / voice-tone). Takes effect for adopters after marketplace release cycle + `/install-updates` + session restart.
 - `b9085b9` + `8280815` — Phase 2 Slice 7: `/wr-itil:capture-story` lightweight aside skill (~430 lines + 12 bats).
@@ -370,7 +373,7 @@ Phase 2 framework code shipped 2026-05-12 across the following commits (this ses
 - `eda6ea0` — Phase 2 Slice 15 PARTIAL: RFC-003 capture for the Phase 2 framework + 7 bootstrap stories (STORY-001 .. STORY-007) under `docs/stories/done/` carrying bootstrap-exemption marker per ADR-060 line 339.
 - `c00c82e` — Phase 2 Slice 14: STORY-MAP-001 HTML bootstrap + `docs/VOICE-AND-TONE.md` + `docs/STYLE-GUIDE.md` policy files (the in-session unblock path for the voice-tone-hook-on-HTML blocker from line 297).
 - `e99b275` — Phase 2 Slices 3+4+5+6 batch: story-map tier MVP (capture-story-map + manage-story-map + reconcile-story-maps trio + list-story-maps; 36 bats total).
-- `<this commit>` — Phase 2 Slice 16: P170 transition Known Error → Verification Pending (this rename + Status edit + Fix Released section + README refresh).
+- `3e35206` — Phase 2 Slice 16 (premature transition Known Error → Verification Pending; reverted 2026-05-13).
 
 **Released artefacts**: 23 changesets queued under `@windyroad/architect` + `@windyroad/jtbd` + `@windyroad/style-guide` + `@windyroad/voice-tone` + `@windyroad/itil` (most under `@windyroad/itil` minor). Held-area changesets: `wr-itil-p165-readme-refresh-discipline.md` (P165 carryover; reinstate trigger pending).
 
@@ -378,7 +381,7 @@ Phase 2 framework code shipped 2026-05-12 across the following commits (this ses
 - Slice 14: full B1-B10 / T1-T11 backbone migration from `docs/plans/170-rfc-framework-story-map.md` deferred — the plans file represents pre-Phase-2 thinking and stays as a planning artefact by reference; STORY-MAP-001 captures the slice-grain decomposition that the framework actually ran on.
 - Slice 15: full bootstrap stories extraction (every Slice 0-15 backbone + ribs from the plans file) deferred — the 7 representative stories ship under RFC-003 for THIS SESSION's slices; prior-session work (RFC-001 + RFC-002) warrants its own bootstrap RFC capture pass with frontmatter `stories:` backfill.
 
-**User verification gate**: per ADR-022, this transition signals "fix released, awaiting user verification". The user verifies by running the new skills in forward-dogfood mode in a follow-on session post-marketplace-release-cycle (the hook exemption globs from Slice 2.5 + the new skills both ship via the next `@windyroad/itil` release). Verification passes when (a) `/wr-itil:capture-story-map P<NNN> JTBD-<NNN> <description>` writes a fresh STORY-MAP-NNN HTML without rejection; (b) `/wr-itil:capture-story P<NNN> JTBD-<NNN> <description>` writes a fresh STORY-NNN markdown with the I6 + I9 hard-block firing on missing traces; (c) `/wr-itil:manage-story <NNN> accepted` enforces I7+I8+I10; (d) `/wr-itil:work-problem <NNN>` traverses Problem → Fix Strategy → RFC → stories: → next not-done story per the Slice 13 rewrite. On verification PASS, transition Verification Pending → Closed.
+**Phase 2 forward-dogfood verification (Phase 3 + Phase 4 still required for full ticket closure)**: Phase 2 framework primitives verify when (a) `/wr-itil:capture-story-map P<NNN> JTBD-<NNN> <description>` writes a fresh STORY-MAP-NNN HTML without rejection; (b) `/wr-itil:capture-story P<NNN> JTBD-<NNN> <description>` writes a fresh STORY-NNN markdown with the I6 + I9 hard-block firing on missing traces; (c) `/wr-itil:manage-story <NNN> accepted` enforces I7+I8+I10; (d) `/wr-itil:work-problem <NNN>` traverses Problem → Fix Strategy → RFC → stories: → next not-done story per the Slice 13 rewrite. Phase 2 dogfood can fire opportunistically during Phase 3 + Phase 4 SHIP work (the new skills get exercised as part of normal capture flow). Full ticket transition Known Error → Verification Pending fires only after Phase 3 + Phase 4 SHIP completes.
 
 ## Dependencies
 
