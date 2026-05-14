@@ -1,6 +1,6 @@
 # RFC Backlog
 
-> Last reviewed: 2026-05-15 **RFC-004 Accepted** — populate Scope + Tasks for P079 inbound upstream-report discovery + assessment pipeline rollout (ADR-062). Slices A + D shipped (`ca4f6e4`); B / C / E / F / G outstanding. Two-commit precedent per RFC-002 (`0e24666` capture → `0a1d1da` accepted). RFC-002 still Verification Pending (`9fef067` → `7741fd4`); T6 deferred-to-post-verification per calendar gate (T5a-stable-for-≥7-days = 2026-05-17). RFC-001 verification gated on RFC-002 reaching `closed`.
+> Last reviewed: 2026-05-15 **RFC-004 In-Progress** — Slice B shipped (inbound-report subagent + assess-inbound-report skill + RISK-POLICY `## Inbound Report Risk Classes` + ADR-015 Scope row); accepted → in-progress transition rode the slice commit per the README transition-table contract. Slices A + B + D done; C / E / F / G outstanding. RFC-002 still Verification Pending (T6 deferred to 2026-05-17 calendar gate). RFC-001 verification gated on RFC-002 reaching `closed`.
 > Run `/wr-itil:manage-rfc review` to refresh once the manage-rfc skill ships.
 
 ## Status
@@ -132,7 +132,7 @@ One row per RFC in `proposed` / `accepted` / `in-progress` status. RFC-level WSJ
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported |
 |------|-----|-------|----------|--------|--------|----------|
-| 6.0 | RFC-004 | P079 inbound upstream-report discovery + assessment pipeline (ADR-062 implementation rollout) | 12 High | Accepted | L | 2026-05-15 |
+| 4.5 | RFC-004 | P079 inbound upstream-report discovery + assessment pipeline (ADR-062 implementation rollout) | 12 High | In-Progress | L | 2026-05-15 |
 
 ## Verification Queue
 

@@ -65,6 +65,7 @@ The plugin includes six specialised agents:
 | `wr-risk-scorer:plan` | Reviews implementation plans for risk |
 | `wr-risk-scorer:policy` | Validates `RISK-POLICY.md` for ISO 31000 compliance |
 | `wr-risk-scorer:external-comms` | Reviews drafts of outbound prose (gh issues/PRs, advisories, npm publish, changeset bodies) for confidential-information leaks per `RISK-POLICY.md` |
+| `wr-risk-scorer:inbound-report` | Reviews inbound third-party reports (problem-report issues, Q&A discussions, security-advisory submissions) for Request-risk + Fix-risk per `RISK-POLICY.md` § Inbound Report Risk Classes — sibling of `:external-comms` (NOT extension). Consumed by the assessment-pipeline (P079 / ADR-062). Serves JTBD-301 (verdict-on-close acknowledgement) + JTBD-001 (mechanical-stage carve-out). |
 
 ## On-demand assessment skills
 
@@ -73,6 +74,7 @@ The plugin includes six specialised agents:
 | `/wr-risk-scorer:assess-wip` | WIP risk nudge for the current uncommitted diff |
 | `/wr-risk-scorer:assess-release` | Pipeline risk assessment for the unpushed queue (pre-satisfies the commit gate) |
 | `/wr-risk-scorer:assess-external-comms` | External-comms leak review for a draft outbound body (pre-satisfies the external-comms gate) |
+| `/wr-risk-scorer:assess-inbound-report` | Inbound-report risk review for a third-party submission — two-axis (Request-risk + Fix-risk) classification per `RISK-POLICY.md` (P079 / ADR-062). Serves JTBD-005 (on-demand assessment) + JTBD-202 (pre-flight governance check). |
 | `/wr-risk-scorer:create-risk` | Create a standing-risk register entry (interactive authoring; orchestrator-driven prefilled invocation via `--slug` / `--prefill` flags per ADR-059) |
 | `/wr-risk-scorer:bootstrap-catalog` | Bootstrap `docs/risks/` register from existing `.risk-reports/` corpus per ADR-059 — walks reports, dedupes by ADR-056 slug, emits one `R<NNN>-<slug>.active.md` per unique slug. Idempotent. Auto-triggers from `/install-updates` Step 6.5.1 when register is empty + `RISK-POLICY.md` present + `.risk-reports/` non-empty |
 | `/wr-risk-scorer:update-policy` | Generate or update `RISK-POLICY.md` |

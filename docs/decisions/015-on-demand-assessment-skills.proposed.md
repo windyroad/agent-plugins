@@ -88,6 +88,7 @@ Keep assessments hook-triggered only. Document the manual Task-tool invocation p
 | `wr-risk-scorer` | `assess-release` | `wr-risk-scorer:pipeline` | Commit/push/release risk score |
 | `wr-risk-scorer` | `assess-wip` | `wr-risk-scorer:wip` | Uncommitted-diff risk score |
 | `wr-risk-scorer` | `assess-external-comms` | `wr-risk-scorer:external-comms` | Risk/leak review of outbound prose drafts (P064 / ADR-028 amended 2026-05-14) |
+| `wr-risk-scorer` | `assess-inbound-report` | `wr-risk-scorer:inbound-report` | Two-axis (Request-risk + Fix-risk) review of inbound third-party reports against this repo's intake (P079 / ADR-062 — sibling of `:external-comms`, NOT extension) |
 | `wr-voice-tone` | `assess-external-comms` | `wr-voice-tone:external-comms` | Voice + tone review of outbound prose drafts (P038 / ADR-028 amended 2026-05-14) |
 | `wr-architect` | `review-design` | `wr-architect:agent` | ADR compliance review |
 | `wr-jtbd` | `review-jobs` | `wr-jtbd:agent` | Persona/job alignment review |
@@ -185,6 +186,7 @@ No hint is emitted when all cumulative scores are within appetite AND no confide
 
 - [x] `packages/risk-scorer/skills/assess-release/SKILL.md` created; skill delegates to `wr-risk-scorer:pipeline` via the Skill tool
 - [x] `packages/risk-scorer/skills/assess-wip/SKILL.md` created; skill delegates to `wr-risk-scorer:wip` via the Skill tool
+- [x] `packages/risk-scorer/skills/assess-inbound-report/SKILL.md` created; skill delegates to `wr-risk-scorer:inbound-report` via the Skill tool (RFC-004 Slice B / ADR-062)
 - [x] `packages/architect/skills/review-design/SKILL.md` created; skill delegates to `wr-architect:agent` via the Skill tool
 - [x] `packages/jtbd/skills/review-jobs/SKILL.md` created; skill delegates to `wr-jtbd:agent` via the Skill tool
 - [x] No skill contains `touch`, `echo`, or `mkdir` instructions targeting `$TMPDIR/claude-risk-*` directly
@@ -198,8 +200,10 @@ No hint is emitted when all cumulative scores are within appetite AND no confide
 ## Related
 
 - P020: `docs/problems/020-on-demand-assessment-skills.open.md` — the problem this ADR resolves
+- P079: `docs/problems/open/079-no-inbound-sync-of-upstream-reported-problems.md` — driver for the `assess-inbound-report` row (RFC-004 Slice B / ADR-062)
 - ADR-011: `docs/decisions/011-manage-incident-skill.proposed.md` — skill-wrapping precedent
 - ADR-009: `docs/decisions/009-gate-marker-lifecycle.proposed.md` — gate marker TTL+drift model
+- ADR-062: `docs/decisions/062-inbound-upstream-report-discovery-assessment-pipeline.proposed.md` — names the `wr-risk-scorer:inbound-report` sibling subagent + the on-demand skill wrapper this ADR's Scope table extends
 - ADR-014: `docs/decisions/014-governance-skills-commit-their-own-work.proposed.md` — assessment skills are read-only, exempt from commit obligation
 - ADR-013: `docs/decisions/013-structured-user-interaction-for-governance-decisions.proposed.md` — AskUserQuestion at branch points
 - ADR-002: `docs/decisions/002-monorepo-per-plugin-packages.proposed.md` — package layout; inventory to be updated

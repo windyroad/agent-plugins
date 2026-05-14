@@ -1,20 +1,20 @@
 ---
-status: accepted
+status: in-progress
 rfc-id: p079-inbound-upstream-report-discovery-assessment-pipeline
 reported: 2026-05-15
 decision-makers: [Tom Howard]
 problems: [P079]
-adrs: [ADR-062]
-jtbd: [JTBD-001, JTBD-006, JTBD-101, JTBD-201, JTBD-202, JTBD-301]
+adrs: [ADR-062, ADR-015]
+jtbd: [JTBD-001, JTBD-005, JTBD-006, JTBD-101, JTBD-201, JTBD-202, JTBD-301]
 ---
 
 # RFC-004: P079 inbound upstream-report discovery + assessment pipeline (ADR-062 implementation rollout)
 
-**Status**: accepted
+**Status**: in-progress
 **Reported**: 2026-05-15
 **Problems**: P079
-**ADRs**: ADR-062
-**JTBD**: JTBD-001, JTBD-006, JTBD-101, JTBD-201, JTBD-202, JTBD-301
+**ADRs**: ADR-062, ADR-015
+**JTBD**: JTBD-001, JTBD-005, JTBD-006, JTBD-101, JTBD-201, JTBD-202, JTBD-301
 
 ## Summary
 
@@ -56,7 +56,7 @@ Ordered A → D → B → C → E → F → G per P079's "lightest first, gives 
 
 - [x] **Slice A** — channel-config + cache JSON schema files committed; `/wr-itil:review-problems` SKILL.md Step 8.5 contract documentation (shipped commit `ca4f6e4`).
 - [x] **Slice D** — audit-log file scaffold at `docs/audits/inbound-discovery-log.md` with documented append shape; ADR-062 § Confirmation criterion 4 audit-log-shape extension (shipped commit `ca4f6e4`).
-- [ ] **Slice B** — `wr-risk-scorer:inbound-report` subagent + `/wr-risk-scorer:assess-inbound-report` on-demand skill; `RISK-POLICY.md` `## Inbound Report Risk Classes` amendment (Request-risk + Fix-risk classes); ADR-015 Scope table row addition.
+- [x] **Slice B** — `wr-risk-scorer:inbound-report` subagent (`packages/risk-scorer/agents/inbound-report.md`) + `/wr-risk-scorer:assess-inbound-report` on-demand skill (`packages/risk-scorer/skills/assess-inbound-report/SKILL.md`); `RISK-POLICY.md` `## Inbound Report Risk Classes` amendment (Request-risk + Fix-risk classes); ADR-015 Scope table row + Confirmation checkbox + Related entry (shipped `<this commit>`). Bats coverage deferred to Slice E per RFC scope.
 - [ ] **Slice C** — `/wr-itil:review-problems` Step 8.5 implementation: `gh issue list` / `gh api discussions` / `gh api security-advisories` polling, cache write, six-step pipeline orchestration (version-aware-classification stub-seam / JTBD-alignment classifier / dual-axis risk classifier / above-threshold-pushback / clear-malicious-close-with-verdict / safe-and-valid-local-ticket-create), audit-log append, fail-soft GH API handling.
 - [ ] **Slice E** — bats coverage per ADR-037 + P081 (behavioural). Synthetic-channel fixture exercising each of the six pipeline outcomes; cache TTL contract; `--force-upstream-recheck` flag contract; subagent prompt contract (`INBOUND_REPORT_VERDICT` + `INBOUND_REPORT_KEY`); README `## Inbound Upstream Reports` renderer contract; **anti-`AskUserQuestion` assertion** on the pipeline path (load-bearing test protecting JTBD-001 + JTBD-006 against inverse-P078 drift per P132 mechanical-stage carve-out).
 - [ ] **Slice F** — `--force-upstream-recheck` flag wiring on `/wr-itil:review-problems` invocation + TTL-expiry auto-recheck branch (when cache age > `ttl_seconds`, force recheck without flag).
@@ -69,7 +69,8 @@ Maintained automatically by the commit-message RFC trailer hook per ADR-060 Phas
 - `ca4f6e4` — Slice A + D scaffold per ADR-062 (channel-config + cache JSON schemas + audit-log file)
 - `0e41f87` — ADR-062 + P079 RCA extensions — inbound discovery + assessment pipeline (peer of ADR-024)
 - `f41925f` — capture RFC-004 (skeleton at proposed)
-- `<this commit>` — accepted transition (populate Scope + Tasks + Related)
+- `63b3feb` — accepted transition (populate Scope + Tasks + Related)
+- `<this commit>` — Slice B + accepted → in-progress transition (inbound-report subagent + assess-inbound-report skill + RISK-POLICY `## Inbound Report Risk Classes` + ADR-015 Scope row)
 
 ## Related
 
@@ -85,7 +86,7 @@ Maintained automatically by the commit-message RFC trailer hook per ADR-060 Phas
 - **ADR-046** — blocked-reporters persistence; clear-malicious branch writes to audit-log (P123 enforcement extension follow-up).
 - **ADR-060** — Problem-RFC-Story framework; this RFC is a canonical I1-satisfying instance.
 - **ADR-014** — single-commit governance grain; each unshipped slice = one ADR-014-grain commit.
-- **ADR-015** — agent scope table; Slice B amends with the `wr-risk-scorer:inbound-report` row.
+- **ADR-015** — agent scope table; Slice B amended with the `wr-risk-scorer:inbound-report` row + `/wr-risk-scorer:assess-inbound-report` skill row.
 - **ADR-022** — lifecycle suffix conventions; RFC lifecycle mirrors.
 - **P129** — version-aware classifier carve-out; integration seam at pipeline Step 1.
 - **P128** — outbound Versions schema; consumed by P129's classifier (already shipped).
@@ -95,6 +96,7 @@ Maintained automatically by the commit-message RFC trailer hook per ADR-060 Phas
 - **P132** + inverse-P078 — mechanical-stage carve-out; load-bearing for Slice E's anti-`AskUserQuestion` behavioural test.
 - **JTBD-301** (plugin-user — Report a Problem Without Pre-Classifying It) — driving persona; verdict-on-close requirement is non-negotiable.
 - **JTBD-001** (solo-developer — Enforce Governance Without Slowing Down) — mechanical-stage carve-out preserves "without slowing down".
+- **JTBD-005** (solo-developer — Invoke Governance Assessments On Demand) — `/wr-risk-scorer:assess-inbound-report` is the pre-flight surface added in Slice B (added to RFC-004 frontmatter 2026-05-15 after JTBD review surfaced the under-trace).
 - **JTBD-006** (solo-developer — Progress the Backlog While I'm Away) — AFK orchestrator throughput protected by branch-deterministic pipeline.
 - **JTBD-101** (plugin-developer — Extend the Suite with New Plugins) — downstream-adopter non-obligation prevents ceremony-tax accumulation.
 - **JTBD-201** (tech-lead — Restore Service Fast with an Audit Trail) — audit-log surface satisfies replay-ability.

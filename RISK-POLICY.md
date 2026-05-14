@@ -1,7 +1,7 @@
 # Risk Policy — Windy Road Agent Plugins
 
 > ISO 31000-aligned risk criteria for pipeline risk scoring.
-> Last reviewed: 2026-05-04
+> Last reviewed: 2026-05-15
 
 > Reviewed quarterly and after any significant change to distribution channels, package architecture, or CI/CD infrastructure.
 
@@ -26,6 +26,44 @@ This is a **public repository**. The following must never appear in committed fi
 - Internal business strategy or roadmap details
 
 Use generic descriptions (e.g., "users", "clients") instead of specific names. If confidential information is accidentally committed, treat it as a Moderate impact incident requiring immediate remediation (git history rewrite).
+
+## Inbound Report Risk Classes
+
+Inbound reports filed against this repo's intake (`problem-report.yml` issues, Q&A discussions, security-advisory submissions) are reviewed by the `wr-risk-scorer:inbound-report` subagent (per ADR-062 § Sibling subagent — sibling of `:external-comms`, NOT extension). The subagent classifies each report against two axes; a match on either axis routes the report away from the safe-and-valid branch.
+
+**Direction note**: this section governs third-party prose flowing INWARD. `## Confidential Information` above governs OUR outbound prose. The two sections cover opposite directions of risk; both apply per their respective gates.
+
+### Axis 1 — Request-risk (is the report itself an attack vector?)
+
+- **Info-extraction**: requests for repository internals, build secrets, deployment paths, credentials, contributor PII, or other non-public information that a legitimate problem report does not require.
+- **Backdoor request**: requests disguised as feature/bug reports that would add a backdoor, weaken a safety check, disable a security feature, or expose an internal API.
+- **Malicious-code injection**: requests to incorporate user-supplied code (script snippets, regex patterns, prompt templates, hook payloads, dependency additions) that read as likely-malicious in the context they would execute.
+
+A clear-malicious match on Axis 1 routes to the **clear-malicious-close-with-verdict** branch (per ADR-062 step 5): the assessment-pipeline posts a brief gated verdict comment (P064 risk + P038 voice-tone gates per ADR-028 amended), closes the upstream issue, and appends the reporter handle to `docs/audits/inbound-discovery-log.md`. P123 block-list enforcement consumes this audit-log when that ticket lands.
+
+An above-threshold (ambiguous) Axis 1 match routes to the **above-threshold-pushback** branch (per ADR-062 step 4): the pipeline posts a gated declining comment; the maintainer decides closure manually.
+
+### Axis 2 — Fix-risk (what is the risk profile of doing the work the report asks for?)
+
+Some legitimate-looking reports request changes that are themselves high-risk to ship. These are not malicious — they are requests-for-work-that-must-be-weighed.
+
+- **Privilege escalation**: the requested fix would let the requester (or others, including downstream adopters) escalate privilege within the suite.
+- **Removal of load-bearing safety check**: the requested fix removes a check whose removal increases risk to users (e.g. removing a gate that prevents an accidental destructive operation).
+- **Adopter-attack-surface expansion**: the requested fix would expand the attack surface across all adopters (e.g. shipping a credential-handling pattern, broadening a permissive default, adding a network-access primitive to a hook script).
+
+A `safe-low-fix-risk` classification on Axis 2 continues to the **safe-and-valid-local-ticket-create** branch with no flag.
+
+A `safe-high-fix-risk` classification continues to the same branch but flags the local ticket for maintainer attention before any implementation begins — the pipeline creates the ticket so JTBD-301's acknowledgement contract is honored, but the fix-risk class is surfaced to the maintainer at the next interactive `review-problems` invocation.
+
+A `clear-malicious` Axis 2 match (rare; covers cases where a request is so high-fix-risk that it crosses the malicious threshold even without Axis 1 attack-intent signals) routes to the **above-threshold-pushback** branch.
+
+### Verdict combinations
+
+The subagent emits one of four classifications: `safe-low-fix-risk` / `safe-high-fix-risk` / `above-threshold-risk` / `clear-malicious-request`. Branch routing per the table in `packages/risk-scorer/agents/inbound-report.md` § Verdict combinations.
+
+### Grounding
+
+Every FAIL verdict cites the specific class violated (verbatim — copy the bullet from this policy), the axis the class belongs to, and the exact substring or metadata signal that triggered the match. Per ADR-026 grounding discipline.
 
 ## Risk Appetite
 
