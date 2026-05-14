@@ -239,3 +239,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-05-13 (README reconciled — P188 added; prior P185 fold-fix rotated)
 
 > Last reviewed: 2026-05-13 **README reconciled** — 1 drift entry corrected: P188 added to WSJF Rankings (deferred re-rate placeholder at WSJF 1.0 / Severity 3 Med / Effort M, mirroring sibling deferred captures P183 / P184 / P187). Reconciliation contract per P118 + ADR-014 amended ("Reconciliation as preflight robustness layer"). Prior line-3 fragment (P185 fold-fix Open → Verifying) rotated to docs/problems/README-history.md per P134.
+
+## 2026-05-14 (P064 Verifying → Closed)
+
+> Last reviewed: 2026-05-13 **P170 Verifying → Known Error revert** — second-attempt premature Verification Pending transition (commit `3e35206`, 2026-05-12) reverted. Agent labelled P170 Phase 3 + Phase 4 as "deferred by design" in ticket body without user-deferral citation; framing then propagated to today's "anything deferred?" question as established intent. User correction: *"I never deferred those phases."* P170 returns to Known Error with Phase 3 + Phase 4 explicitly in-scope; sibling [[P189]] captures the class-of-behaviour at the ticket-body authoring surface (distinct from [[P184]] transition surface + [[P179]] untracked-phase-defer). P170 row removed from Verification Queue, re-inserted at WSJF 1.0 tier ahead of P183 per Known-Error tie-break (Known-Error-first). Prior line-3 fragment (P188 add reconcile) rotated to docs/problems/README-history.md per P134.
