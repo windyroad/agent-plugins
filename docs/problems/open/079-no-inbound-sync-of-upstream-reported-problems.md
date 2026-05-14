@@ -235,4 +235,4 @@ Concrete instance of the inbound-discovery gap and the three new sub-concerns ab
 
 | RFC | Status | Title |
 |-----|--------|-------|
-| RFC-004 | proposed | P079 inbound upstream-report discovery + assessment pipeline (ADR-062 implementation rollout) |
+| RFC-004 | accepted | P079 inbound upstream-report discovery + assessment pipeline (ADR-062 implementation rollout) |

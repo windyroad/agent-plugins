@@ -1,6 +1,6 @@
 # RFC Backlog
 
-> Last reviewed: 2026-05-12 **RFC-002 Verification Pending** — T1-T5b + T7-T11 shipped; primary scope complete; `in-progress → verifying` lifecycle transition landed at L2 commit. T6 (drop dual-pattern compatibility) deferred-to-post-verification per its calendar-gated trigger (T5a-stable-for-≥7-days = 2026-05-17 OR explicit user-comfort signal). RFC-001 verification still gated on RFC-002 reaching `closed`.
+> Last reviewed: 2026-05-15 **RFC-004 Accepted** — populate Scope + Tasks for P079 inbound upstream-report discovery + assessment pipeline rollout (ADR-062). Slices A + D shipped (`ca4f6e4`); B / C / E / F / G outstanding. Two-commit precedent per RFC-002 (`0e24666` capture → `0a1d1da` accepted). RFC-002 still Verification Pending (`9fef067` → `7741fd4`); T6 deferred-to-post-verification per calendar gate (T5a-stable-for-≥7-days = 2026-05-17). RFC-001 verification gated on RFC-002 reaching `closed`.
 > Run `/wr-itil:manage-rfc review` to refresh once the manage-rfc skill ships.
 
 ## Status
@@ -132,8 +132,7 @@ One row per RFC in `proposed` / `accepted` / `in-progress` status. RFC-level WSJ
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported |
 |------|-----|-------|----------|--------|--------|----------|
-
-(Empty — RFC-002 transitioned to Verification Pending 2026-05-12; see Verification Queue below.)
+| 6.0 | RFC-004 | P079 inbound upstream-report discovery + assessment pipeline (ADR-062 implementation rollout) | 12 High | Accepted | L | 2026-05-15 |
 
 ## Verification Queue
 
