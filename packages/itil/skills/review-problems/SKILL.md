@@ -229,6 +229,19 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P<NNN> | <title> | <release marker> | <yes (N days) / no (N days)> |
 ...
 
+## Inbound Upstream Reports
+
+Inbound reports discovered by Step 4.5 (ADR-062 § Step 9e renderer per the naming-reconciliation note at the head of Step 4.5; rendered off `docs/problems/.upstream-cache.json`). Section is **lazy-empty**: when `.upstream-cache.json` has `last_checked: null` OR no channels have any reports, the section header is rendered but the table body is empty (the empty-table state itself signals "discovery has run; no reports awaiting triage"). Sorted by `created_at ASC` within each classification group.
+
+| # | Source | Title | Author | Created | Classification | Matched local ticket |
+|---|--------|-------|--------|---------|----------------|----------------------|
+| #<id> | <channel:repo> | <title> | <author> | <YYYY-MM-DD> | <safe-and-valid \| safe-high-fix-risk \| above-threshold-pushback \| clear-malicious-closed \| matched-local-ticket \| audit-flagged> | P<NNN> \| — |
+...
+
+The `Classification` column carries the assessment-pipeline verdict; see `packages/risk-scorer/agents/inbound-report.md` § Verdict combinations for branch routing. The `Matched local ticket` column carries either the local ticket ID (when the pipeline created or matched one) or `—` (when the report is pushback or audit-flagged with no local ticket created).
+
+When `docs/problems/.upstream-cache.json` is missing OR has `last_checked: null` AND no reports cached (initial state, first run), the section is rendered with a single advisory row: `_No inbound discovery pass has run yet. Run /wr-itil:review-problems to poll the configured channels._`
+
 ## Parked
 
 | ID | Title | Reason | Parked since |

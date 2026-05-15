@@ -116,6 +116,25 @@ setup() {
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
+# Slice G: Step 5 README template carries the ## Inbound Upstream Reports section
+# ──────────────────────────────────────────────────────────────────────────────
+
+@test "Step 5 README template carries the ## Inbound Upstream Reports section header (Slice G)" {
+  run grep -nE '^## Inbound Upstream Reports$' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "Slice G renderer documents the lazy-empty discipline (advisory row when no pass run)" {
+  run grep -inE 'lazy-empty|No inbound discovery pass has run' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "Slice G renderer documents the classification + matched-local-ticket columns" {
+  run grep -inE 'Classification.*Matched local ticket|matched.local.ticket.*column' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+# ──────────────────────────────────────────────────────────────────────────────
 # Six pipeline outcomes (4.5e steps 1-6)
 # ──────────────────────────────────────────────────────────────────────────────
 

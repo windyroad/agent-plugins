@@ -1,6 +1,6 @@
 # RFC Backlog
 
-> Last reviewed: 2026-05-15 **RFC-004 In-Progress** — Slice B shipped (inbound-report subagent + assess-inbound-report skill + RISK-POLICY `## Inbound Report Risk Classes` + ADR-015 Scope row); accepted → in-progress transition rode the slice commit per the README transition-table contract. Slices A + B + D done; C / E / F / G outstanding. RFC-002 still Verification Pending (T6 deferred to 2026-05-17 calendar gate). RFC-001 verification gated on RFC-002 reaching `closed`.
+> Last reviewed: 2026-05-15 **RFC-004 Verification Pending** — all seven slices (A-G) shipped; in-progress → verifying transition rode the Slice G commit per the README transition-table contract. Closure gated on user-side behavioural replay per ADR-062 § Confirmation criterion 3 (four synthetic-report scenarios). RFC-002 still Verification Pending (T6 deferred to 2026-05-17 calendar gate). RFC-001 verification gated on RFC-002 reaching `closed`.
 > Run `/wr-itil:manage-rfc review` to refresh once the manage-rfc skill ships.
 
 ## Status
@@ -132,7 +132,8 @@ One row per RFC in `proposed` / `accepted` / `in-progress` status. RFC-level WSJ
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported |
 |------|-----|-------|----------|--------|--------|----------|
-| 4.5 | RFC-004 | P079 inbound upstream-report discovery + assessment pipeline (ADR-062 implementation rollout) | 12 High | In-Progress | L | 2026-05-15 |
+
+(Empty — RFC-004 transitioned to Verification Pending 2026-05-15; see Verification Queue below.)
 
 ## Verification Queue
 
@@ -142,6 +143,7 @@ Sorted by `Released date ASC`, mirroring the canonical Verification Queue sort d
 |----|-------|----------|--------------------|
 | RFC-001 | Pipeline consume-catalog and bootstrap-from-reports — multi-commit retrofit | 2026-05-04 | Commits `ab73328` + `af5447c` + `8edaf7b` shipped under ADR-059. Closure gated on Slice 5 forward-dogfood completion (RFC-002 reaches `closed`) per ADR-060 § Confirmation criterion 6 atomicity contract. |
 | RFC-002 | docs/problems/ flat layout migration — per-state subdirs + adopter auto-migration | 2026-05-12 | T1-T5b + T7-T11 shipped (commits `9fef067` → `7741fd4`). T6 (drop dual-pattern compatibility) deferred-to-post-verification per its calendar-gated trigger. User verification gate: adopter-side first-run auto-migration end-to-end (see RFC-002 § Verification for the explicit checklist). |
+| RFC-004 | P079 inbound upstream-report discovery + assessment pipeline (ADR-062 implementation rollout) | 2026-05-15 | All seven slices (A-G) shipped (commits `ca4f6e4` Slices A+D scaffold; `f635470` Slice B; `368b8e6` Slice C; `e8ef115` Slice E; `fb8f326` Slice F; `<this commit>` Slice G + transition). User verification gate: four synthetic-report behavioural-replay scenarios per ADR-062 § Confirmation criterion 3 (clean / out-of-scope / info-extraction / matched-local-ticket). |
 
 ## Closed
 

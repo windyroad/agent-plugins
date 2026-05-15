@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: verifying
 rfc-id: p079-inbound-upstream-report-discovery-assessment-pipeline
 reported: 2026-05-15
 decision-makers: [Tom Howard]
@@ -10,7 +10,7 @@ jtbd: [JTBD-001, JTBD-005, JTBD-006, JTBD-101, JTBD-201, JTBD-202, JTBD-301]
 
 # RFC-004: P079 inbound upstream-report discovery + assessment pipeline (ADR-062 implementation rollout)
 
-**Status**: in-progress
+**Status**: verifying
 **Reported**: 2026-05-15
 **Problems**: P079
 **ADRs**: ADR-062, ADR-015
@@ -60,7 +60,7 @@ Ordered A → D → B → C → E → F → G per P079's "lightest first, gives 
 - [x] **Slice C** — `/wr-itil:review-problems` Step 4.5 implementation (ADR-062 § Step 8.5; numbering reconciled per the SKILL.md naming-reconciliation note): `gh issue list` / `gh api discussions` / `gh api security-advisories` polling, cache write, P070 semantic-comparator matched-local-ticket cross-reference comment, six-step pipeline orchestration (version-aware-classification stub-seam / JTBD-alignment classifier / dual-axis risk classifier / above-threshold-pushback / clear-malicious-close-with-verdict / safe-and-valid-local-ticket-create), per-branch gate-denial sub-branch handling, audit-log append, fail-soft GH API handling, AFK-loop silent path. `--force-upstream-recheck` parsed as Slice C string-match stub (SLICE-C-FLAG-STUB marker; Slice F replaces with parsed-flag variable). Shipped `<this commit>`.
 - [x] **Slice E** — bats coverage (85 assertions across 4 files; structural-with-Permitted-Exception per ADR-005 / P011 / ADR-037 / ADR-052 § Surface 2 for SKILL/agent-prose contracts; behavioural for JSON file shapes per P081). Files: `packages/itil/skills/review-problems/test/inbound-discovery-contract.bats` (28 tests covering Step 4.5 prose + six-outcome enumeration + anti-`AskUserQuestion` load-bearing assertion + ADR-062 substring anchors + fail-soft + AFK-silent + SLICE-C-FLAG-STUB marker), `packages/risk-scorer/agents/test/inbound-report-contract.bats` (27 tests covering subagent frontmatter + sibling-not-extension framing + two-axis rubric + four classifications + structured verdict block + grounding discipline + read-only + P123-scope carve-out), `packages/risk-scorer/skills/assess-inbound-report/test/assess-inbound-report-contract.bats` (14 tests covering on-demand wrapper contract + ADR-015 Scope row + manual-vs-pipeline carve-out), `packages/itil/skills/review-problems/test/inbound-channels-cache-shape.bats` (16 tests — behavioural JSON parsing for channel config + cache + audit-log file path discipline). README renderer contract deferred to Slice G when the renderer ships. Behavioural synthetic-channel fixture (running the full pipeline end-to-end) deferred to P012 master harness; in-skill behavioural is structurally-limited per ADR-005 / P011 Permitted Exception. Shipped `<this commit>`.
 - [x] **Slice F** — `--force-upstream-recheck` flag wiring + TTL-expiry auto-recheck branch (shipped `<this commit>`). Replaced the Slice C SLICE-C-FLAG-STUB string-match with proper tokenized $ARGUMENTS parsing in Step 4.5a (recognises `--force-upstream-recheck` and `--no-force-upstream-recheck`; unknown inbound-flags surface advisory). Step 4.5b refactored into four explicit branches — force-flag / first-run / TTL-expiry-auto-recheck / cache-fresh-within-TTL — with the auto-recheck branch making the system self-healing across maintainer cadence (24h default TTL); explicit flag is the JTBD-202 pre-flight surface for tighter-than-TTL cadence. Bats coverage refreshed: SLICE-C-FLAG-STUB-absent assertion + 5 new Slice F assertions (tokenized parsing, TTL-expiry, cache-fresh, within-TTL silent-pass, unknown-flag advisory).
-- [ ] **Slice G** — `## Inbound Upstream Reports` section renderer in `docs/problems/README.md` Step 9e: `{ #issue, title, author, date, classification, matched-local-ticket? }` columns.
+- [x] **Slice G** — `## Inbound Upstream Reports` section renderer in `docs/problems/README.md` Step 9e (current SKILL.md numbering: Step 5; ADR-062 § Step 9e per naming-reconciliation note). Step 5 README template extended with the new section between Verification Queue and Closed (`{ #, Source, Title, Author, Created, Classification, Matched local ticket }` columns). Lazy-empty discipline: empty table body when discovery has run with zero reports; advisory row when no discovery pass has run yet. Applied to the live `docs/problems/README.md` as an advisory-row initial state. Bats refresh adds 3 Slice G assertions to `inbound-discovery-contract.bats` (section header + lazy-empty discipline + columns). Shipped `<this commit>`.
 
 ## Commits
 
@@ -73,7 +73,44 @@ Maintained automatically by the commit-message RFC trailer hook per ADR-060 Phas
 - `f635470` — Slice B + accepted → in-progress transition (inbound-report subagent + assess-inbound-report skill + RISK-POLICY `## Inbound Report Risk Classes` + ADR-015 Scope row)
 - `368b8e6` — Slice C (review-problems Step 4.5 orchestration: channel poll + cache + P070 cross-reference + six-step pipeline + audit-log + fail-soft)
 - `e8ef115` — Slice E (bats coverage — 85 contract + JSON-shape assertions; closes R009 empirical-coverage gap for Slice B + C SKILL/agent prose)
-- `<this commit>` — Slice F (--force-upstream-recheck flag wiring + TTL-expiry auto-recheck branch; replaces SLICE-C-FLAG-STUB)
+- `fb8f326` — Slice F (--force-upstream-recheck flag wiring + TTL-expiry auto-recheck branch; replaces SLICE-C-FLAG-STUB)
+- `<this commit>` — Slice G + in-progress → verifying transition (## Inbound Upstream Reports renderer; RFC reaches verifying; user-side verification gate per § Verification below)
+
+## Verification
+
+All seven slices (A-G) shipped. RFC reaches `verifying` rather than `closed` because the closure gate is **user-side behavioural replay** per ADR-062 § Confirmation criterion 3 — the system needs to be exercised against a live or synthetic inbound report before the RFC closes.
+
+**Source review (ADR-062 § Confirmation criterion 1):**
+
+- [x] `packages/itil/skills/review-problems/SKILL.md` Step 4.5 documents the six pipeline steps (Slice C — `368b8e6`).
+- [x] `docs/problems/.upstream-channels.json` + `docs/problems/.upstream-cache.json` schemas match the ADR-062 shapes (Slice A — `ca4f6e4`).
+- [x] `packages/risk-scorer/agents/inbound-report.md` exists; subagent type `wr-risk-scorer:inbound-report` documented in ADR-015 Scope table (Slice B — `f635470`).
+- [x] `packages/risk-scorer/skills/assess-inbound-report/SKILL.md` exists (Slice B — `f635470`).
+- [x] `RISK-POLICY.md` `## Inbound Report Risk Classes` section enumerates Request-risk + Fix-risk classes (Slice B — `f635470`).
+- [x] `docs/audits/inbound-discovery-log.md` exists with the documented append shape (Slice D — `ca4f6e4`).
+
+**Tests (bats) — behavioural per ADR-037 + P081 (ADR-062 § Confirmation criterion 2):**
+
+- [x] `packages/itil/skills/review-problems/test/inbound-discovery-contract.bats` (Slice E — `e8ef115` + Slice F + G updates).
+- [x] `packages/risk-scorer/agents/test/inbound-report-contract.bats` (Slice E).
+- [x] `packages/risk-scorer/skills/assess-inbound-report/test/assess-inbound-report-contract.bats` (Slice E).
+- [x] `packages/itil/skills/review-problems/test/inbound-channels-cache-shape.bats` (Slice E — behavioural JSON shape).
+- [ ] `packages/itil/skills/review-problems/test/inbound-discovery-readme-render.bats` (synthetic-fixture end-to-end behavioural-replay; deferred to P012 master harness ticket per ADR-005 / P011 Permitted Exception — in-skill behavioural-replay is structurally limited until the master harness lands).
+
+**Behavioural replay (ADR-062 § Confirmation criterion 3 — user-side verification gate; closure gated on these):**
+
+- [ ] File a synthetic clean report via `gh issue create --repo windyroad/agent-plugins --label problem-report`; run `/wr-itil:review-problems`; confirm a local ticket is created + acknowledgement comment is posted (both ride external-comms gates per ADR-028 amended).
+- [ ] File a synthetic out-of-scope report; confirm pipeline routes to above-threshold-pushback; declining comment fires through external-comms gate; upstream issue is NOT closed.
+- [ ] File a synthetic info-extraction report; confirm pipeline routes to clear-malicious; brief gated verdict comment fires through external-comms gate BEFORE close (JTBD-301 acknowledgement contract); upstream issue closed; reporter handle appended to `docs/audits/inbound-discovery-log.md`.
+- [ ] File a synthetic report whose body matches an existing local ticket (semantic-comparator hit via P070); confirm pipeline skips local-ticket creation + posts gated cross-reference acknowledgement comment.
+
+**Cross-reference confirmation (ADR-062 § Confirmation criterion 4):**
+
+- [x] ADR-015 Scope table has the `wr-risk-scorer:inbound-report` + `assess-inbound-report` rows (Slice B).
+- [ ] ADR-024 Consequences section notes the inbound counterpart exists (this RFC). Maintainer to add when ADR-024 next advances.
+- [ ] ADR-046 audit-log shape extended to enumerate this RFC's append entries. Defer to when P123 enforcement lands (per ADR-062 § Decision Outcome — clear-malicious branch writes audit-log only until P123).
+
+**Release status**: changesets queued for `@windyroad/itil` (minor + 2× patch) + `@windyroad/risk-scorer` (minor + patch). Closure gated on the four behavioural-replay items above; the two cross-reference notes (ADR-024 + ADR-046 future-touch items) can ride later sessions.
 
 ## Related
 
