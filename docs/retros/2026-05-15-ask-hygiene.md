@@ -35,3 +35,20 @@ Session scope: ship work-problems Step 0b auto-pre-flight + process 31 inbound u
 **Correction-followup count: 1**
 
 Trend: 2 retros 2026-05-15, both `lazy=0`. R6 gate (lazy ≥2 across 3 consecutive retros) not at risk.
+
+## Third retro append — 2026-05-15 (post-correction recovery)
+
+Session scope: user correction recovery — P229 capture (ack-comment JTBD-301 violation) + retroactive JTBD-alignment audit of 22 inbound-pipeline tickets.
+
+| Call # | Header | Classification | Citation |
+|--------|--------|----------------|----------|
+| 1 | Problem type (P229 capture) | taste | Gap: type classification for P229 was genuinely ambiguous — root cause is unmet plugin-user need (JTBD-301 verdict-shape) AND fix surface is SKILL.md prose; SKILL Step 1.5 prescribes AskUserQuestion on ambiguity (ADR-044 cat 5) |
+
+**Lazy count: 0**
+**Direction count: 0**
+**Override count: 0**
+**Silent-framework count: 0**
+**Taste count: 1**
+**Correction-followup count: 0**
+
+Trend: 3 retros 2026-05-15, all `lazy=0`. R6 gate (lazy ≥2 across 3 consecutive retros) not at risk.
