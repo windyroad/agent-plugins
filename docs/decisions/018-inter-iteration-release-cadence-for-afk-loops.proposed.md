@@ -96,6 +96,23 @@ The Mechanism above covers the at-or-below-appetite drain path (≤ 4/25). Above
 
 This amendment replaces the prior implicit "skip the drain, user resolves on return" behaviour. The at-or-below-appetite drain mechanism documented above is unchanged.
 
+### Amendment 2026-05-15 — Graduatable held-changeset disjunct (ADR-061 Rule 8)
+
+The Mechanism above predicates the release-watch step on `.changeset/` non-empty. This amendment adds a symmetric disjunct per **ADR-061 (Dogfood graduation criteria for held changesets — symmetric risk balance drives the reinstate decision)** Rule 8 so the drain wakes when graduation-eligible material exists in `docs/changesets-holding/` even when `.changeset/` is empty. The combined amended drain condition reads:
+
+```
+Drain when: pipeline residual ≤ 4/25 AND
+            (.changeset/ non-empty OR
+             docs/changesets-holding/ contains entries that satisfy ADR-061 Rule 1
+             AND are not VP-blocked per ADR-061 Rule 2)
+```
+
+The Mechanism's release-watch bullet ("If `.changeset/` is non-empty, run `npm run release:watch`") is amended to read: *"If `.changeset/` is non-empty OR `docs/changesets-holding/` contains entries that satisfy ADR-061 Rule 1 graduation criterion AND are not VP-blocked per ADR-061 Rule 2, run `npm run release:watch`. Graduatable held entries are first reinstated to `.changeset/` via `git mv` per ADR-061 Rule 6 audit-trail discipline (the iteration / skill report logs the pre-apply / post-apply scores, the evidence-artefact citation, the resolved problem-ticket ID + Priority value, and the graduation class)."*
+
+Rationale: I002 (2026-05-11, `docs/incidents/I002-release-pressure-and-wip-limit-controls-not-firing.restored.md`) observed the silent-stop failure mode — ADR-042 Rule 2/6 auto-apply moved every changeset to holding, leaving `.changeset/` permanently empty and silencing `release:watch` AND `push:watch` for 4 days while the held cluster grew 3 → 13. Adding the graduatable-holding disjunct closes the empty-conjunct coupling at the drain-condition layer; the symmetric never-hold-below-graduation-threshold invariant (ADR-061 Rule 1) ensures held entries become graduation-eligible when release-risk decays at or below problem-ticket Priority.
+
+The at-or-below-appetite drain mechanism is otherwise unchanged. Above-appetite behaviour remains governed by ADR-042 per the 2026-04-22 amendment. P162 (`docs/problems/open/162-codify-dogfood-graduation-criteria-with-counterfactual-risk-assessment-for-held-changesets.md`) Phase 4 lands this amendment.
+
 ## Consequences
 
 ### Good

@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-05-15 **P229 captured — ack-comment JTBD-301 violation surfaced by user correction** — 31 inbound-pipeline ack comments posted this session carried framework-vocab boilerplate instead of JTBD-301 verdict-shape; SKILL.md Step 4.5e step 6 lacks comment-shape template. Sibling concern (JTBD-alignment classifier bypassed for 22/31 reports — P197 pattern recurring) — retroactive JTBD-alignment review pending per user direction. Earlier same-day: 31 of 31 inbound reports processed; Step 0b shipped; P197 + P198–P228 captured. Prior fragment supplanted in-place per P134.
+> Last reviewed: 2026-05-15 **P162 Phase 4 landed — Rule 8 drain-condition disjunct prose** — ADR-018/020 amended with the graduatable-held-changeset disjunct per ADR-061 Rule 8; docs/changesets-holding/README.md Process gains step 5 (orchestrator-evaluated graduation flow). Closes I002 silent-stop failure mode at the drain-condition layer. Docs-only; no source/script change; no ranking-bearing field changed on P162 (Phase 4 Investigation Task checkbox + Change Log entry are narrative-only); README inventory unchanged. Prior fragment supplanted in-place per P134.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings

@@ -75,6 +75,21 @@ After the skill's `git commit` step lands, the same terminal step MUST continue 
 
 Scope is **per-skill**: unlike ADR-018's loop-level rule, ADR-020 fires once per governance skill invocation after that invocation's single commit. It does not iterate. When ADR-042 Rule 2's auto-apply loop fires inside a non-AFK skill invocation, each auto-apply is its own commit (ADR-042 Rule 3 — no iteration wrapper to fold into).
 
+### Amendment 2026-05-15 — Graduatable held-changeset disjunct (ADR-061 Rule 8)
+
+The Mechanism above predicates the drain condition (step 3) on `.changeset/` non-empty. This amendment adds a symmetric disjunct per **ADR-061 (Dogfood graduation criteria for held changesets — symmetric risk balance drives the reinstate decision)** Rule 8 so the drain wakes when graduation-eligible material exists in `docs/changesets-holding/` even when `.changeset/` is empty. The combined amended drain condition reads:
+
+```
+Drain when: pipeline residual ≤ 4/25 AND
+            (.changeset/ non-empty OR
+             docs/changesets-holding/ contains entries that satisfy ADR-061 Rule 1
+             AND are not VP-blocked per ADR-061 Rule 2)
+```
+
+Step 3 of the Mechanism is amended to read: *"**Drain condition** — if `push` or `release` is within appetite (≤ 4/25, "Low" band per `RISK-POLICY.md`) AND (`.changeset/` is non-empty OR `docs/changesets-holding/` contains entries that satisfy ADR-061 Rule 1 graduation criterion AND are not VP-blocked per ADR-061 Rule 2), proceed to drain."* Step 4 (Drain action) gains a preceding sub-step: *"Graduatable held entries are first reinstated to `.changeset/` via `git mv` per ADR-061 Rule 6 audit-trail discipline (the skill report logs the pre-apply / post-apply scores, the evidence-artefact citation, the resolved problem-ticket ID + Priority value, and the graduation class)."*
+
+Rationale: symmetric to ADR-018's 2026-05-15 amendment. The non-AFK governance path inherits the same empty-conjunct coupling failure mode observed in I002 (2026-05-11): when ADR-042 Rule 2/6 auto-apply moves every changeset to holding, the `.changeset/` non-empty conjunct silently silences the drain. Adding the graduatable-holding disjunct closes the coupling at the drain-condition layer; ADR-061 Rule 1's symmetric never-hold-below-graduation-threshold invariant ensures held entries become graduation-eligible when release-risk decays at or below problem-ticket Priority. The per-skill / once-per-invocation scope is otherwise unchanged. Above-appetite behaviour remains governed by ADR-042 per step 6. P162 (`docs/problems/open/162-codify-dogfood-graduation-criteria-with-counterfactual-risk-assessment-for-held-changesets.md`) Phase 4 lands this amendment.
+
 ### Non-interactive authorisation
 
 Per ADR-013 Rule 6, `npm run push:watch` and `npm run release:watch` are policy-authorised actions when the risk-scorer reports residual risk within appetite. No `AskUserQuestion` is required for the release itself. The fail-safe applies only when residual risk is above appetite or when CI/publish fails.
@@ -129,6 +144,8 @@ Revisit this decision if:
 - ADR-019: `docs/decisions/019-afk-orchestrator-preflight.proposed.md` — AFK preflight (loop-start); ADR-020 operates post-commit, a different lifecycle phase
 - P028: `docs/problems/028-governance-skills-should-auto-release-and-install.known-error.md` — problem ticket this ADR resolves
 - P045: `docs/problems/045-auto-plugin-install-after-governance-release.open.md` — split-out auto-install concern (deferred)
+- ADR-061: `docs/decisions/061-dogfood-graduation-criteria.proposed.md` — symmetric outflow contract for held changesets; Rule 8 amends §3 drain condition (2026-05-15 amendment above)
+- P162: `docs/problems/open/162-codify-dogfood-graduation-criteria-with-counterfactual-risk-assessment-for-held-changesets.md` — driver ticket for the 2026-05-15 amendment (Phase 4)
 - JTBD-001: `docs/jtbd/solo-developer/JTBD-001-enforce-governance.proposed.md`
 - JTBD-005: `docs/jtbd/solo-developer/JTBD-005-assess-on-demand.proposed.md`
 - JTBD-006: `docs/jtbd/solo-developer/JTBD-006-work-backlog-afk.proposed.md`
