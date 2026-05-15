@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-05-15 **P203-P206 captured (inbound #120/#117/#110/#98 batch)** — third pipeline batch: P203 architect/jtbd docs/retros exclusion; P204 wr-retrospective:migrate-briefing skill (new-jtbd-flag); P205 assess-release SKILL.md prose-vs-parameter; P206 work-problems iter workers no changesets. 9 of 31 reports processed end-to-end (22 remaining). Earlier same-day P197/P198/P199-P202 + inbound-discovery foundation + Step 0b. Prior fragment supplanted in-place per P134 same-day-duplicate carve-out.
+> Last reviewed: 2026-05-15 **P207-P210 captured (inbound #87/#86/#85/#84 batch)** — fourth pipeline batch: P207 report-upstream --label flag fails on label-less upstreams; P208 git-push-gate CI-status gap (safe-high-fix-risk — load-bearing gate hardening); P209 manage-problem Step 0 exit 127 on marketplace consumers; P210 work-problems em-dash. 13 of 31 reports processed end-to-end (18 remaining). Prior fragment supplanted in-place per P134 same-day-duplicate carve-out.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -71,6 +71,10 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 0.75 | P204 | No /wr-retrospective:migrate-briefing skill — legacy docs/BRIEFING.md → docs/briefing/ tree migration is manual (upstream-mirror of #117; **new-jtbd-flag**) | 3 Med | Open | M | 2026-05-15 |
 | 0.75 | P205 | wr-risk-scorer:assess-release SKILL.md step 5 prose-vs-parameter mismatch (upstream-mirror of #110) | 3 Med | Open | M | 2026-05-15 |
 | 0.75 | P206 | work-problems iter workers don't add changesets — fix commits accumulate without release (upstream-mirror of #98 / bbstats P195) | 3 Med | Open | M | 2026-05-15 |
+| 0.75 | P207 | report-upstream SKILL.md Step 5 example uses --label flag that fails when upstream repo has no labels (upstream-mirror of #87) | 3 Med | Open | M | 2026-05-15 |
+| 0.75 | P208 | git-push-gate.sh does not check CI status on push/release before scoring risk — **safe-high-fix-risk** (load-bearing gate hardening) (upstream-mirror of #86) | 3 Med | Open | M | 2026-05-15 |
+| 0.75 | P209 | manage-problem Step 0 reconcile-readme.sh hits exit 127 on marketplace consumers; script only resolves via repo-relative path (upstream-mirror of #85) | 3 Med | Open | M | 2026-05-15 |
+| 0.75 | P210 | work-problems SKILL.md AFK-fallback marker uses em-dash, forces consumer whitespace surgery (upstream-mirror of #84) | 3 Med | Open | M | 2026-05-15 |
 
 ## Verification Queue
 
