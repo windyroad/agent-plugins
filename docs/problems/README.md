@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-05-15 **P197 captured (contract-bypass-reflex class) + inbound-discovery filter fix + Step 0b shipped** — P197 captured via `/wr-itil:capture-problem` after user correction "DONT skip using the capture-problem skill"; bypass-reflex pattern recorded (sibling P078/P119/P196). Earlier same-day: `/wr-itil:review-problems` Step 4.5 inaugural pass surfaced label-filter drift (31 inbound issues unlabelled; `title_prefix: "[problem]"` filter substituted; cache transitioned `last_checked: null` → `2026-05-15T04:33:26Z`; 31 reports recorded `pending-pipeline-processing`); Step 0b pre-flight wired into work-problems (aacec45). Prior same-day Slice G + P196 fragment supplanted in-place per P134 same-day-duplicate carve-out.
+> Last reviewed: 2026-05-15 **P198 captured (inbound #125 → external-comms gate sha-bug) + P197 (contract-bypass-reflex class) + inbound-discovery filter fix + Step 0b shipped** — P198 captured via `/wr-itil:capture-problem` from inbound-discovery pipeline (review-problems Step 4.5e safe-and-valid branch processing upstream #125); first of 31 inbound reports processed end-to-end (30 remaining queued at `pending-pipeline-processing` in cache). P197 + Step 0b + inbound-discovery foundation earlier same-day. Prior same-day fragment supplanted in-place per P134 same-day-duplicate carve-out.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -62,6 +62,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 0.75 | P012 | Skill testing harness scope undefined | 6 Med | Open | XL | 2026-04-16 |
 | 0.75 | P034 | Centralise risk reports for cross-project skill improvement | 6 Med | Open | XL | 2026-04-17 |
 | 0.75 | P197 | Agent proposes bypassing documented processes (SKILL contracts, classifier pipelines, changeset discipline) when work feels large/expensive — contract-bypass-reflex class-of-behaviour (sibling of P078/P119/P196; captured via /wr-itil:capture-problem post-correction "DONT skip using the capture-problem skill") | 3 Med | Open | M | 2026-05-15 |
+| 0.75 | P198 | external-comms gate marker key cannot be computed by the reviewer agent (Read/Glob/Grep tool surface — no shasum); hash-scope ambiguity adds three+ recurrences (upstream-mirror of inbound #125 from downstream bbstats P205; sibling P163/P166) | 3 Med | Open | M | 2026-05-15 |
 
 ## Verification Queue
 
