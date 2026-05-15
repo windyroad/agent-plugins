@@ -33,11 +33,17 @@ Captured as `feedback_dont_subcontract_declaration_fields.md` memory (project-sc
 
 Closes the 2026-05-06 I001 regression on the manage-incident surface (3 of 4 lazy sub-questions become 0 of 1 lazy sub-question; Scope alone is the surviving genuine cat-1 surface). Bats coverage extended in `manage-incident-adr-044-contract.bats` with 7 new Surface 2 assertions (cat-4 cross-ref, Title derive-from-prose, Start time derive-from-evidence, Severity derive-from-matrix, Scope-retains-Ask negative-of-negative guard, P132 traceability, ADR-026 stderr advisory contract). All 53 manage-incident bats green.
 
-**Phase 2a-ii (manage-problem create flow) — DEFERRED** to subsequent `/wr-itil:work-problems` iter per ADR-014 commit-grain discipline (this iter scoped to ONE declaration skill).
+**Phase 2a-ii: manage-problem Step 4 (shipped 2026-05-15)** — `/wr-itil:work-problems` iter 4 of 2026-05-15. Rewrote `packages/itil/skills/manage-problem/SKILL.md` Step 4 from "Use AskUserQuestion for anything not in args" to a derive-first dispatch table mirroring iter 3's manage-incident Step 4 refactor (commit b7cc645) and capture-problem Step 1.5 worked example (P185):
+- **Title**: silent kebab-case-from-prose derivation + stderr advisory citing source tokens (cat-4 silent-framework).
+- **Priority** (Impact × Likelihood): RISK-POLICY matrix lookup against description signals (impact / likelihood / named anchors); clear-cell maps silently; ambiguous evidence falls back to AskUserQuestion as the genuine cat-5 (taste) surface.
+- **Description**: retained as AskUserQuestion ADR-044 cat-1 (direction-setting) fallback ONLY when `$ARGUMENTS` carries no prose at all — without prose there is literally nothing to capture.
+- **Reported / Status / Symptoms / Workaround**: already inferred, unchanged.
 
-**Phase 2a-iii (wr-architect:create-adr argument-collection) — DEFERRED** to subsequent iter per same discipline.
+Three declaration-skill surfaces now ship the I2-isomorphic derive-first dispatch (`/wr-itil:capture-problem` Step 1.5, `/wr-itil:manage-incident` Step 4, `/wr-itil:manage-problem` Step 4). Architect verdict PASS (no new ADR — ADR-044/013/026/052 already authorise + P132 Phase 2a explicit fix strategy). JTBD verdict PASS (JTBD-001 primary; JTBD-006 + JTBD-101 compose). Bats coverage in new file `packages/itil/skills/manage-problem/test/manage-problem-adr-044-step4-derive-first.bats` (10 assertions: cat-4 cross-ref, cat-1 fallback cross-ref, Title derive-from-prose, Priority derive-from-RISK-POLICY, Description-retains-Ask negative-of-negative, P132 traceability, ADR-026 stderr advisory contract, cross-skill consistency cross-ref, Step 4b multi-concern preservation guard, Step 2 duplicate-check preservation guard). 168/168 manage-problem suite green.
 
-**Reassessment trigger**: if a regression analogous to I001 fires on either deferred surface (manage-problem create flow or create-adr argument-collection) before the deferred phases ship, escalate priority via WSJF re-rank.
+**Phase 2a-iii (wr-architect:create-adr argument-collection) — DEFERRED** to subsequent `/wr-itil:work-problems` iter per ADR-014 commit-grain discipline (this iter scoped to ONE declaration skill).
+
+**Reassessment trigger**: if a regression analogous to I001 fires on the remaining deferred surface (create-adr argument-collection) before Phase 2a-iii ships, escalate priority via WSJF re-rank.
 
 ## Fix Released
 

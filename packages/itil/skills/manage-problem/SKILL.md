@@ -374,19 +374,34 @@ next=$(printf '%03d' $(( 10#$(echo -e "${local_max:-0}\n${origin_max:-0}" | sort
 
 If the local choice would have collided with an origin ticket created since the last fetch, the `git ls-tree origin/<base>` lookup catches it here and the renumber is automatic. Log the renumber decision in the operation report (e.g. "Bumped next ID from 042 → 043 to avoid collision with origin").
 
-### 4. For new problems: Gather information
+### 4. For new problems: Gather information (P132 derive-first; ADR-044 category-4 silent-framework on derivable fields; category-1 direction-setting fallback only on Description)
 
-If the arguments contain a description, extract what you can. For anything missing, use `AskUserQuestion` to gather:
+**Derive-first dispatch.** Problem-declaration inputs carry observable evidence in the user's prose, the working tree, `RISK-POLICY.md`, and the wall-clock — the framework can resolve most fields without firing `AskUserQuestion`. Only **Description** is genuinely user-knowledge (without prose there is literally nothing to capture); only **Description** retains the AskUserQuestion gate.
 
-- **Title**: Short kebab-case-friendly description
-- **Description**: What is happening? What should happen instead?
-- **Priority**: Impact (1-5) × Likelihood (1-5) per RISK-POLICY.md
+The P132 inverse-P078 trap (`docs/problems/known-error/132-...md`) is the load-bearing motivation. The 2026-05-06 I001 declaration regression cited in P132 fired a 4-question AskUserQuestion with 3 of 4 sub-questions being lazy classifications (Title kebab-derivable, Severity matrix-derivable, Start time git-log-derivable). manage-problem Step 4 is the second declaration-skill surface under Phase 2a (after manage-incident Step 4 in commit b7cc645) to ship the derive-first dispatch. The pattern is isomorphic across `/wr-itil:capture-problem` Step 1.5 (P185 worked example), `/wr-itil:manage-incident` Step 4, and this skill.
 
-Do NOT ask for fields that can be inferred:
-- **Reported date**: Use today's date
-- **Status**: Always "Open" for new problems
-- **Symptoms**: Infer from description if possible
-- **Workaround**: Default to "None identified yet." unless obvious from context
+Resolve each field via the following dispatch. **The order is load-bearing** — every field except Description resolves silently with a stderr advisory citing the source; Description alone fires `AskUserQuestion` as the genuine category-1 surface.
+
+| Field | Dispatch | ADR-044 category |
+|-------|----------|------------------|
+| **Title** | Derive silently. Kebab-case the first 8-10 non-stopword tokens of the user's prose description (same slug derivation as `/wr-itil:capture-problem` Step 1.4 and `/wr-itil:manage-incident` Step 4). Emit stderr advisory: `manage-problem: derived title='<slug>' from description; re-invoke with the desired title or rename the file if the slug is wrong`. Do NOT fire AskUserQuestion. | category-4 silent-framework |
+| **Description** | Pull verbatim from `$ARGUMENTS` prose into Step 5's `## Description` section. **Fallback**: when `$ARGUMENTS` carries NO prose at all (only flags / status / no body), fire AskUserQuestion as the genuine category-1 direction-setting surface — *"only the user knows the goals that haven't been written down yet."* Question text: *"What is happening? What should happen instead?"* This is the ONLY user-knowledge field at Step 4. | category-1 direction-setting (fallback only; category-4 silent-framework on the typical path where prose is present) |
+| **Priority** (Impact × Likelihood) | Derive silently when description signals map to a clear `RISK-POLICY.md` Impact × Likelihood cell. Cross-reference signals: (a) **impact** — service-disruption keywords (`down` / `degraded` / `unavailable` / `data loss` → high; latency / throughput / slow → moderate; cosmetic / typo / minor friction → low); (b) **likelihood** — reproducibility keywords (`every invocation` / `reproducible` / `100%` → high; `intermittent` / `flaky` / `sometimes` → medium; `one-off` / `single observation` → low); (c) **named anchors** — explicit `Impact: <label>` / `Likelihood: <label>` or `Priority: <score>` mentions in prose take precedence. When the cross-reference produces a single clear cell, set it silently and emit stderr advisory: `manage-problem: priority derived as <score> (<label>) from RISK-POLICY matrix + evidence: <evidence list>; re-invoke or update if mis-rated`. **Ambiguous-evidence fallback** (no mappable signal, or signals point to conflicting cells): fire AskUserQuestion with the Impact (1-5) × Likelihood (1-5) options as the genuine ADR-044 **category-5 (taste)** fallback surface. The fallback is genuine ambiguity, NOT defaults. | category-4 silent-framework (derivable); category-5 fallback (ambiguous) |
+
+**Inferred fields (no ask, no advisory needed)**:
+
+- **Reported date**: today's date (`date +%Y-%m-%d`)
+- **Status**: always "Open" for new problems
+- **Symptoms**: infer from description verbatim into Step 5's `## Symptoms` section
+- **Workaround**: default to "None identified yet." unless explicit workaround prose appears in `$ARGUMENTS`
+
+**Stderr advisory contract**: each derived field emits a SINGLE line to stderr (NOT stdout, NOT in the ticket body) per the capture-problem Step 1.5 + manage-incident Step 4 pattern. The advisory text shape is I2-isomorphic — identical sentence structure across the three declaration-skill surfaces (`<skill>: derived <field>=<value> from <source>; <reversibility-clause>`) beyond substituted values + source names. Embedding the advisory in stdout would risk machine-readers parsing it as a ticket-body line; embedding it in the ticket body would violate the required-section schema. Stderr is the correct channel — visible to interactive maintainers in the terminal; invisible to ticket consumers; loggable by orchestrators that capture subprocess stderr.
+
+**ADR-026 cost-source grounding**: each derived field cites its source in the advisory (description token sequence for Title; RISK-POLICY matrix cell + named evidence for Priority). The `re-invoke or update if mis-rated` clause carries the reversibility marker ADR-026 mandates for ungrounded outputs.
+
+**AFK fail-safe (ADR-013 Rule 6)**: under AFK orchestration, all derivable fields resolve without interactive input; only Description-when-absent can block. The orchestrator should halt-with-stderr citing the missing-prose case rather than guess (Description is genuinely user-judgment per JTBD-006's "Problems requiring my judgment ... are queued for my return, not guessed at"). The typical AFK manage-problem call carries prose in `$ARGUMENTS` (or the orchestrator's per-iter context supplies it), so the halt-on-Description path is the rare-corner-case behaviour, not the routine flow.
+
+**Cross-skill consistency note**: this is the third declaration-skill surface to ship the derive-first dispatch (after `/wr-itil:capture-problem` Step 1.5 and `/wr-itil:manage-incident` Step 4 in commit b7cc645). The architect verdict 2026-05-15 P132 Phase 2a-ii flagged this triplet as the pattern-lock point — the I2-isomorphic stderr advisory format is now established across three skills before Phase 2a-iii (`/wr-architect:create-adr` argument-collection) extends the same pattern to a fourth.
 
 ### 4b. For new problems: Concern-boundary analysis (multi-concern check)
 
