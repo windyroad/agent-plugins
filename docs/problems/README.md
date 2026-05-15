@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-05-15 **P211-P214 captured (inbound #97/#83/#82/#81 batch)** — fifth pipeline batch: P211 orchestrator Fix-Strategy leakage; P212 BRIEFING handoff uncommitted; P213 risk-scorer 30-min TTL too short; P214 work-problems is_error:true unhandled. 17 of 31 reports processed (14 remaining). Prior fragment supplanted in-place per P134.
+> Last reviewed: 2026-05-15 **P215-P218 captured (inbound #80/#79/#78/#77 architect-cluster batch)** — sixth pipeline batch: P215 architect-gate marker recovery; P216 hash-refresh path-filter under-scoped; P217 mark-reviewed strict-verdict miscount; P218 manage-problem SID-derivation undoc'd (in-session repro). 21 of 31 reports processed (10 remaining). Prior fragment supplanted in-place per P134.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -79,6 +79,10 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 0.75 | P212 | work-problems iter boundary leaves run-retro BRIEFING.md edits uncommitted (upstream-mirror of #83) | 3 Med | Open | M | 2026-05-15 |
 | 0.75 | P213 | risk-scorer 30-min TTL expires during long orchestrator turns (upstream-mirror of #82) | 3 Med | Open | M | 2026-05-15 |
 | 0.75 | P214 | work-problems Step 5 exit-code rule doesn't handle is_error:true transient API failures 529 Overloaded (upstream-mirror of #81) | 3 Med | Open | M | 2026-05-15 |
+| 0.75 | P215 | architect-gate drift detection rm's marker without offering recovery path (upstream-mirror of #80) | 3 Med | Open | M | 2026-05-15 |
+| 0.75 | P216 | architect-refresh-hash only refreshes on docs/decisions/ writes, leaves cross-session drift on other gated paths (upstream-mirror of #79) | 3 Med | Open | M | 2026-05-15 |
+| 0.75 | P217 | architect-mark-reviewed strict-verdict-string parsing under-counts affirmative ISSUES FOUND verdicts as FAIL (upstream-mirror of #78) | 3 Med | Open | M | 2026-05-15 |
+| 0.75 | P218 | manage-problem SKILL.md doesn't explain how to obtain SESSION_ID for P119 marker (upstream-mirror of #77; in-session repro this monorepo) | 3 Med | Open | M | 2026-05-15 |
 
 ## Verification Queue
 
