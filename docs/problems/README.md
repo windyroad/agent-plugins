@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-05-15 **P223-P226 captured (inbound #60/#59/#58/#57 batch)** — eighth pipeline batch: P223 release-risk accumulation; P224 risk-scorer score-write gap; P225 docs-only changes (safe-high-fix-risk — allowlist scope); P226 review-marker TTL. 29 of 31 reports processed (2 remaining: #56, #42). Prior fragment supplanted in-place per P134.
+> Last reviewed: 2026-05-15 **31 of 31 inbound reports processed end-to-end** — final batch P227 risk-scorer monitoring-as-control category error; P228 ADR-022 KE→Verifying transition gap. Full pipeline complete: cache reflects all 31 reports as safe-and-valid with classifications; 31 local tickets P198–P228 captured via /wr-itil:capture-problem; 31 upstream issues acknowledged via gated gh issue comment. 26 safe-low-fix-risk + 5 safe-high-fix-risk flagged (P200/P208/P221/P225/+ #117 new-jtbd-flag P204). Inbound-discovery foundation + Step 0b wired earlier same-day. Prior fragment supplanted in-place per P134.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -91,6 +91,8 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 0.75 | P224 | Risk-scorer agent does not write numeric score to gate files (upstream-mirror of #59) | 3 Med | Open | M | 2026-05-15 |
 | 0.75 | P225 | Docs-only changes should not invoke risk scorer or trigger drift detection — **safe-high-fix-risk** (load-bearing allowlist scope) (upstream-mirror of #58) | 3 Med | Open | M | 2026-05-15 |
 | 0.75 | P226 | Review-marker TTL forces repeated re-review cycles on multi-file work (upstream-mirror of #57; sibling P213) | 3 Med | Open | M | 2026-05-15 |
+| 0.75 | P227 | Risk scorer credits monitoring/post-release activities as residual-risk reducers (upstream-mirror of #56) | 3 Med | Open | M | 2026-05-15 |
+| 0.75 | P228 | ADR-022 .known-error.md → .verifying.md transition not happening consistently at release time (upstream-mirror of #42) | 3 Med | Open | M | 2026-05-15 |
 
 ## Verification Queue
 
