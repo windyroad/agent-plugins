@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-05-15 **P219-P222 captured (inbound #76/#63/#62/#61 batch)** — seventh pipeline batch: P219 manage-problem script-path; P220 upstream-bound-ticket cadence; P221 work-problems Step 6.5 CI-health (safe-high-fix-risk); P222 manage-problem auto-commit (likely ADR-014). 25 of 31 reports processed (6 remaining). Prior fragment supplanted in-place per P134.
+> Last reviewed: 2026-05-15 **P223-P226 captured (inbound #60/#59/#58/#57 batch)** — eighth pipeline batch: P223 release-risk accumulation; P224 risk-scorer score-write gap; P225 docs-only changes (safe-high-fix-risk — allowlist scope); P226 review-marker TTL. 29 of 31 reports processed (2 remaining: #56, #42). Prior fragment supplanted in-place per P134.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -87,6 +87,10 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 0.75 | P220 | manage-problem has no cadence for checking upstream-bound tickets (upstream-mirror of #63; composes P063+ADR-062) | 3 Med | Open | M | 2026-05-15 |
 | 0.75 | P221 | work-problems Step 6.5 lacks baseline CI health check before drain — **safe-high-fix-risk** (load-bearing AFK drain; sibling P208/#86) (upstream-mirror of #62) | 3 Med | Open | M | 2026-05-15 |
 | 0.75 | P222 | manage-problem skill should auto-commit ticket file changes — likely resolved by ADR-014 (upstream-mirror of #61) | 3 Med | Open | M | 2026-05-15 |
+| 0.75 | P223 | Risk scorer ignores release-risk accumulation across commits (upstream-mirror of #60) | 3 Med | Open | M | 2026-05-15 |
+| 0.75 | P224 | Risk-scorer agent does not write numeric score to gate files (upstream-mirror of #59) | 3 Med | Open | M | 2026-05-15 |
+| 0.75 | P225 | Docs-only changes should not invoke risk scorer or trigger drift detection — **safe-high-fix-risk** (load-bearing allowlist scope) (upstream-mirror of #58) | 3 Med | Open | M | 2026-05-15 |
+| 0.75 | P226 | Review-marker TTL forces repeated re-review cycles on multi-file work (upstream-mirror of #57; sibling P213) | 3 Med | Open | M | 2026-05-15 |
 
 ## Verification Queue
 
