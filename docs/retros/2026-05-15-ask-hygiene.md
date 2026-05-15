@@ -14,3 +14,24 @@ Session scope: Finish RFC for P079 (Slices B-G), release + install, retro.
 **Correction-followup count: 0**
 
 Trend across recent retros (read from `packages/retrospective/scripts/check-ask-hygiene.sh` if present): N/A — first trail entry for this session.
+
+## Second retro append — 2026-05-15 (inbound-discovery pipeline + Step 0b)
+
+Session scope: ship work-problems Step 0b auto-pre-flight + process 31 inbound upstream reports end-to-end through ADR-062 Step 4.5e + dogfood capture-problem on P197 meta-capture.
+
+| Call # | Header | Classification | Citation |
+|--------|--------|----------------|----------|
+| 1 | Capture pattern | correction-followup | Gap: user delivered strong-affect correction ("DONT skip using the capture-problem skill. FFS"); agent offered ticket capture per P078 |
+| 2 | Problem type | taste | Gap: type classification for P197 was genuinely ambiguous (technical + JTBD-shaped signals); SKILL Step 1.5 prescribes AskUserQuestion on ambiguity (ADR-044 cat 5) |
+| 3 | Fix scope (31-issues) | direction | Gap: filter-drift resolution; 4 distinct paths with different downstream commitments — user-direction territory |
+| 4 | Pipeline scope (31-reports) | direction | Gap: budget-direction on processing scale; 4 paths with visible cost trade-offs |
+| 5 | Continue 30? | direction | Gap: budget-reality check after workflow validated end-to-end for one report; user could re-direct mid-batch |
+
+**Lazy count: 0**
+**Direction count: 3**
+**Override count: 0**
+**Silent-framework count: 0**
+**Taste count: 1**
+**Correction-followup count: 1**
+
+Trend: 2 retros 2026-05-15, both `lazy=0`. R6 gate (lazy ≥2 across 3 consecutive retros) not at risk.
