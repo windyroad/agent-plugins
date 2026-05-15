@@ -116,15 +116,31 @@ Per ADR-062 (peer of ADR-024). Polls configured upstream channels, runs each unm
 
 **Fail-soft contract**: any error in Step 4.5 (missing channel config, GH API failure, malformed cache, subagent failure, gate denial on a verdict-comment post) MUST NOT block the review — emit an advisory note, skip the failing channel/report, and continue. Step 5 (README rewrite) proceeds regardless. The assessment pipeline is purely additive; no-inbound-discovery is the status-quo baseline.
 
-#### 4.5a. Read channel config
+#### 4.5a. Read channel config + parse invocation flags
 
 Read `docs/problems/.upstream-channels.json`. If missing or malformed: log an advisory note (`channel config absent or malformed; inbound-discovery skipped this pass`) and skip Step 4.5 entirely. Adopters who don't ship this file inherit zero ceremony tax — the downstream-adopter non-obligation per ADR-062 § Downstream-adopter contract + JTBD-101.
 
-When `$ARGUMENTS` contains the literal substring `--force-upstream-recheck`, set `force_recheck=true` for the cache TTL check in 4.5b. <!-- SLICE-C-FLAG-STUB: $ARGUMENTS string-match for --force-upstream-recheck is a Slice C minimal stub; Slice F (RFC-004) owns proper argument parsing + TTL-expiry auto-recheck. Remove this string-match when Slice F lands; replace with Slice F's parsed-flag variable. -->
+Parse `$ARGUMENTS` as a whitespace-separated token list. Recognised invocation flags for inbound-discovery:
 
-#### 4.5b. Cache TTL check
+- `--force-upstream-recheck` → set `force_recheck=true`. Bypasses the TTL check in 4.5b; forces a fresh poll of every channel. Use case: maintainer pre-flight before a release (JTBD-202) — rebuild the cache from the upstream authoritative source rather than trusting in-window cached state.
+- `--no-force-upstream-recheck` → set `force_recheck=false` explicitly (the default). Surfaces the flag's existence in `--help`-style discovery without changing behaviour.
 
-Read `docs/problems/.upstream-cache.json`. If `last_checked` is non-null and within `ttl_seconds` of now AND `force_recheck` is false, skip polling: reuse the cached report list for the pipeline pass below. Otherwise proceed to 4.5c.
+Unknown leading flags addressed at inbound-discovery (those starting with `--force-upstream` or `--inbound-`) halt the inbound-discovery step with an advisory note naming the unrecognised flag; non-inbound flags are passed through unchanged (e.g. flags consumed by Step 2's re-scoring or Step 4's verification prompt are not in scope here).
+
+Flag-parsing defaults: `force_recheck=false` when neither flag is present.
+
+#### 4.5b. Cache TTL check + TTL-expiry auto-recheck
+
+Read `docs/problems/.upstream-cache.json`. Compute `cache_age_seconds = (now - last_checked)` when `last_checked` is non-null.
+
+Branch:
+
+- `force_recheck == true` → **force-flag branch**: bypass TTL; proceed to 4.5c (fresh poll). Emit advisory note `inbound-discovery: --force-upstream-recheck flag set; bypassing TTL`.
+- `last_checked == null` → **first-run branch**: cache is empty; proceed to 4.5c. Emit advisory note `inbound-discovery: cache empty (last_checked null); initial poll`.
+- `cache_age_seconds > ttl_seconds` → **TTL-expiry auto-recheck branch**: cache is stale; proceed to 4.5c without requiring the explicit flag. Emit advisory note `inbound-discovery: cache age <N>s exceeds ttl_seconds <M>; auto-recheck`.
+- `cache_age_seconds <= ttl_seconds` AND `force_recheck == false` → **cache-fresh branch**: skip polling; reuse the cached report list for the pipeline pass below. Emit no advisory (silent within-TTL path per ADR-013 Rule 5 below-appetite silent-pass).
+
+The TTL-expiry auto-recheck is what makes the system self-healing across maintainer cadence: a maintainer who runs `/wr-itil:review-problems` once a week without the explicit flag still gets a fresh poll after the 24-hour TTL expires. The explicit `--force-upstream-recheck` flag is the pre-flight surface (JTBD-202) for tighter cadence — e.g. immediately before a release when the maintainer wants the freshest discovery state.
 
 #### 4.5c. Poll each channel
 

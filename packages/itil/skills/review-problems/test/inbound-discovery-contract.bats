@@ -226,15 +226,48 @@ setup() {
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Slice C flag stub marker (Slice F replaces with parsed-flag variable)
+# Slice F: --force-upstream-recheck flag parsing + TTL-expiry auto-recheck
+# (Slice F replaced the Slice C SLICE-C-FLAG-STUB string-match with proper
+# tokenized flag parsing + explicit TTL-expiry branch)
 # ──────────────────────────────────────────────────────────────────────────────
 
-@test "SLICE-C-FLAG-STUB marker present on --force-upstream-recheck string-match" {
-  # Architect issue 4: declare the stub explicitly so Slice F's refactor
-  # surface is discoverable. Stub is removed when Slice F lands.
+@test "SLICE-C-FLAG-STUB marker has been removed (Slice F replaced the stub)" {
+  # Slice F (RFC-004) replaces the Slice C string-match with proper
+  # tokenized flag parsing. The stub marker must be gone — its presence
+  # would indicate Slice F regression.
   run grep -nE 'SLICE-C-FLAG-STUB' "$SKILL_FILE"
-  [ "$status" -eq 0 ]
+  [ "$status" -ne 0 ]
+}
+
+@test "--force-upstream-recheck flag documented (Slice F)" {
   run grep -nE -- '--force-upstream-recheck' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "Step 4.5a parses \$ARGUMENTS as tokenized flag list (Slice F)" {
+  # Slice F replaces the Slice C string-match with proper tokenized parsing.
+  run grep -inE 'tokenize|whitespace-separated token|parse.*ARGUMENTS' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "Step 4.5b — TTL-expiry auto-recheck branch fires when cache_age > ttl_seconds (Slice F)" {
+  # Self-healing: maintainer who runs review-problems once a week still
+  # gets a fresh poll after the 24-hour TTL expires, without needing the
+  # explicit flag.
+  run grep -inE 'TTL-expiry auto-recheck|cache.age.*exceeds.*ttl_seconds|cache_age.*> *ttl_seconds' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "Step 4.5b — explicit branch for cache-fresh (within-TTL silent-pass)" {
+  # Within-TTL path is silent per ADR-013 Rule 5 below-appetite silent-pass.
+  run grep -inE 'cache-fresh branch|within-TTL|silent within-TTL' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "Step 4.5a — unknown inbound-flags surface advisory rather than silently ignoring" {
+  # Defensive contract: unknown --force-upstream / --inbound- flags get
+  # named in an advisory so typos are visible (e.g. --force-upsteam-recheck).
+  run grep -inE 'Unknown.*flag.*halt|unrecognised flag' "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }
 
