@@ -11,6 +11,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/lib/gate-helpers.sh"
+# shellcheck source=lib/external-comms-key.sh
+source "$SCRIPT_DIR/lib/external-comms-key.sh"
 _enable_err_trap
 
 _parse_input
@@ -204,18 +206,43 @@ if echo "$SUBAGENT" | grep -qE 'risk-scorer.policy'; then
 fi
 
 # ---------------------------------------------------------------------------
-# External-comms reviewer (P064 / ADR-028 amended 2026-05-14): write
-# per-evaluator marker keyed on sha256(draft + '\n' + surface). Subagent
-# emits the key; this hook trusts and uses it. Marker file:
-# external-comms-risk-reviewed-<key>. The voice-tone evaluator (P038)
-# writes its own peer marker external-comms-voice-tone-reviewed-<key>
-# from packages/voice-tone/hooks/external-comms-mark-reviewed.sh.
+# External-comms reviewer (P064 / ADR-028 amended 2026-05-14, further
+# amended 2026-05-16 P166): write per-evaluator marker keyed on
+# sha256(draft + '\n' + surface). The hook derives the key from the
+# agent's tool_input.prompt (structured `SURFACE:` line + `<draft>`
+# block) instead of trusting an agent-emitted KEY — single fire per
+# gate cycle suffices. Backward-compat fallback to the agent's
+# EXTERNAL_COMMS_RISK_KEY line preserved during the deprecation window
+# (one release cycle).
+# Marker file: external-comms-risk-reviewed-<key>. The voice-tone
+# evaluator (P038) writes its own peer marker
+# external-comms-voice-tone-reviewed-<key> from
+# packages/voice-tone/hooks/external-comms-mark-reviewed.sh.
 # ---------------------------------------------------------------------------
 if echo "$SUBAGENT" | grep -qE 'risk-scorer.external-comms'; then
   VERDICT_LINE=$(echo "$AGENT_OUTPUT" | grep -E '^EXTERNAL_COMMS_RISK_VERDICT:' | tail -1) || true
-  KEY_LINE=$(echo "$AGENT_OUTPUT" | grep -E '^EXTERNAL_COMMS_RISK_KEY:' | tail -1) || true
   VERDICT=$(echo "$VERDICT_LINE" | sed 's/^EXTERNAL_COMMS_RISK_VERDICT:[[:space:]]*//' | tr -d '[:space:]')
-  KEY=$(echo "$KEY_LINE" | sed 's/^EXTERNAL_COMMS_RISK_KEY:[[:space:]]*//' | tr -d '[:space:]')
+
+  # Read the prompt the orchestrator sent to the agent so we can derive
+  # the canonical key locally. _HOOK_INPUT is set by gate-helpers.sh's
+  # _parse_input upstream of this branch.
+  PROMPT=$(echo "$_HOOK_INPUT" | python3 -c "
+import sys, json
+try:
+    print(json.load(sys.stdin).get('tool_input', {}).get('prompt', ''))
+except Exception:
+    print('')
+" 2>/dev/null || echo "")
+
+  # Primary: derive from the prompt (P166 single-fire path).
+  KEY=$(derive_external_comms_key_from_prompt "$PROMPT")
+  if [ -z "$KEY" ]; then
+    # Fallback: cached old SKILL.md still instructs the agent to emit
+    # EXTERNAL_COMMS_RISK_KEY. Honour it during the deprecation window.
+    KEY_LINE=$(echo "$AGENT_OUTPUT" | grep -E '^EXTERNAL_COMMS_RISK_KEY:' | tail -1) || true
+    KEY=$(echo "$KEY_LINE" | sed 's/^EXTERNAL_COMMS_RISK_KEY:[[:space:]]*//' | tr -d '[:space:]')
+  fi
+
   # Validate key: 64 hex chars (sha256 output). Reject anything else.
   if echo "$KEY" | grep -qE '^[0-9a-f]{64}$'; then
     case "$VERDICT" in

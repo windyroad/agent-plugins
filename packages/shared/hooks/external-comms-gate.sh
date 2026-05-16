@@ -31,7 +31,12 @@
 # Marker location: ${TMPDIR:-/tmp}/claude-risk-${SESSION_ID}/external-comms-<EVALUATOR_ID>-reviewed-<sha256>
 # Marker writer:   PostToolUse:Agent hook in each consumer plugin
 #                  (risk-score-mark.sh or external-comms-mark-reviewed.sh) on
-#                  subagent type wr-<plugin>:external-comms.
+#                  subagent type wr-<plugin>:external-comms. The mark hook
+#                  derives the marker key from the agent's tool_input.prompt
+#                  by parsing the same `SURFACE:` + `<draft>` structure the
+#                  orchestrator was instructed to include (P166 / ADR-028
+#                  amended 2026-05-16). Single fire per gate cycle suffices;
+#                  the agent no longer needs to compute the key itself.
 #
 # Per-evaluator marker scheme (ADR-028 amended 2026-05-14): when both
 # voice-tone and risk-scorer are installed, both gates fire on the same
@@ -234,8 +239,12 @@ if [ -f "$MARKER" ]; then
 fi
 
 # Marker absent — deny + delegate.
+# P166: instruct the orchestrator to structure the agent prompt with a
+# leading `SURFACE: <name>` line and a `<draft>...</draft>` block so the
+# PostToolUse mark hook can derive the canonical marker key locally
+# (sha256(DRAFT + '\n' + SURFACE)). Single fire per gate cycle.
 VERDICT_PREFIX="${EXTERNAL_COMMS_VERDICT_PREFIX:-EXTERNAL_COMMS_${EXTERNAL_COMMS_EVALUATOR_ID^^}}"
-REASON=$(printf 'BLOCKED (external-comms gate / %s evaluator): %s draft has not been reviewed by %s. Delegate to %s (subagent_type: '"'"'%s'"'"') with the draft body for review. The PostToolUse hook will mark this draft reviewed when the subagent emits %s_VERDICT: PASS. Use %s for an interactive walkthrough. Override only when intentional: BYPASS_RISK_GATE=1.' \
-    "$EXTERNAL_COMMS_EVALUATOR_ID" "$SURFACE" "$EXTERNAL_COMMS_SUBAGENT_TYPE" "$EXTERNAL_COMMS_SUBAGENT_TYPE" "$EXTERNAL_COMMS_SUBAGENT_TYPE" "$VERDICT_PREFIX" "$EXTERNAL_COMMS_ASSESS_SKILL")
+REASON=$(printf 'BLOCKED (external-comms gate / %s evaluator): %s draft has not been reviewed by %s. Delegate to %s (subagent_type: '"'"'%s'"'"') with a prompt that starts with the line `SURFACE: %s` and wraps the draft body verbatim inside `<draft>...</draft>` markers. The PostToolUse hook derives the marker key from that structure and marks the draft reviewed when the subagent emits %s_VERDICT: PASS — single fire suffices. Use %s for an interactive walkthrough. Override only when intentional: BYPASS_RISK_GATE=1.' \
+    "$EXTERNAL_COMMS_EVALUATOR_ID" "$SURFACE" "$EXTERNAL_COMMS_SUBAGENT_TYPE" "$EXTERNAL_COMMS_SUBAGENT_TYPE" "$EXTERNAL_COMMS_SUBAGENT_TYPE" "$SURFACE" "$VERDICT_PREFIX" "$EXTERNAL_COMMS_ASSESS_SKILL")
 deny_with_reason "$REASON"
 exit 0

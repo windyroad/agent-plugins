@@ -8,6 +8,7 @@ setup() {
   SYNC_SCRIPT="$REPO_ROOT/scripts/sync-external-comms-gate.sh"
   CANONICAL_HOOK="$REPO_ROOT/packages/shared/hooks/external-comms-gate.sh"
   CANONICAL_LIB="$REPO_ROOT/packages/shared/hooks/lib/leak-detect.sh"
+  CANONICAL_KEY_LIB="$REPO_ROOT/packages/shared/hooks/lib/external-comms-key.sh"
 }
 
 @test "sync-external-comms-gate: canonical hook exists" {
@@ -58,8 +59,10 @@ setup() {
            "$tmp/scripts"
   cp "$CANONICAL_HOOK" "$tmp/packages/shared/hooks/external-comms-gate.sh"
   cp "$CANONICAL_LIB"  "$tmp/packages/shared/hooks/lib/leak-detect.sh"
+  cp "$CANONICAL_KEY_LIB" "$tmp/packages/shared/hooks/lib/external-comms-key.sh"
   cp "$CANONICAL_HOOK" "$tmp/packages/risk-scorer/hooks/external-comms-gate.sh"
   cp "$CANONICAL_LIB"  "$tmp/packages/risk-scorer/hooks/lib/leak-detect.sh"
+  cp "$CANONICAL_KEY_LIB" "$tmp/packages/risk-scorer/hooks/lib/external-comms-key.sh"
   echo "# drift" >> "$tmp/packages/risk-scorer/hooks/external-comms-gate.sh"
 
   cp "$SYNC_SCRIPT" "$tmp/scripts/sync-external-comms-gate.sh"
@@ -80,7 +83,8 @@ setup() {
            "$tmp/scripts"
   cp "$CANONICAL_HOOK" "$tmp/packages/shared/hooks/external-comms-gate.sh"
   cp "$CANONICAL_LIB"  "$tmp/packages/shared/hooks/lib/leak-detect.sh"
-  # Don't create the risk-scorer copy.
+  cp "$CANONICAL_KEY_LIB" "$tmp/packages/shared/hooks/lib/external-comms-key.sh"
+  # Don't create the risk-scorer copies.
   cp "$SYNC_SCRIPT" "$tmp/scripts/sync-external-comms-gate.sh"
   chmod +x "$tmp/scripts/sync-external-comms-gate.sh"
 

@@ -1,6 +1,6 @@
 # Problem 163: `wr-risk-scorer:external-comms` agent emits placeholder marker key on first invocation when prompt doesn't direct shasum computation
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-04
 **Priority**: 6 (Medium) — Impact: Moderate (3) x Likelihood: Possible (2)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -54,6 +54,14 @@ Hypothesis: the agent's SKILL.md instructs it to compute the sha256 but the agen
 
 **Direction (user 2026-05-13)**: Grant `wr-risk-scorer:external-comms` agent narrow Bash access (`shasum` only) so it computes the canonical sha256 key itself, eliminating the placeholder-key class. Bundle with TMPDIR-variance fix (shared `${TMPDIR}` resolution helper) so PostToolUse marker writes land where PreToolUse gates look. Together they retire the manual-pre-bind workaround documented in `hooks-and-gates-archive.md`.
 
+**Direction reversal (2026-05-16)**: superseded in favour of P166's hook-side-compute path (fix shape (b) per the original investigation enumeration). The (b) approach closes both P163 AND P166 in one go where (a) only addressed P163, and preserves ADR-013 Rule 2 ("scoring/analysis agents remain pure output-only — tools stay [Read, Glob]") instead of eroding it with a narrow-Bash grant precedent. Architect verdict on the reversal: PROCEED. See ADR-028 amendment 2026-05-16 for the contract change.
+
+The narrow-Bash + TMPDIR-helper plan is no longer needed — the PostToolUse hook now derives the marker key directly from the prompt's `SURFACE: <name>` + `<draft>...</draft>` structure (single shared helper `packages/shared/hooks/lib/external-comms-key.sh`). The agent emits only `EXTERNAL_COMMS_<EVAL>_VERDICT` + optional `_REASON` on FAIL — no key field, no Bash dependency, single fire per gate cycle. Both P163 and P166 close in the same commit per ADR-014.
+
+## Fix Released
+
+Released 2026-05-16 in the same commit as P166. The placeholder-key class is eliminated by removing the agent's key-emit responsibility entirely — the hook computes the canonical sha256 from observable prompt structure. Backward-compat fallback to the agent-emitted KEY line preserved for one release cycle to cover cached-old-prompt rollover. Awaiting user verification: confirm the next changeset commit-gate cycle does not exhibit the placeholder-key class (single-fire path lands the marker directly).
+
 ## Dependencies
 
 - **Blocks**: (none)
@@ -71,3 +79,4 @@ Hypothesis: the agent's SKILL.md instructs it to compute the sha256 but the agen
 
 - **2026-05-04** — Opened by orchestrator's main turn at end of `/wr-itil:work-problems` AFK loop iter 7 per user direction "capture all four now". Skeleton ticket; investigation deferred.
 - **2026-05-13** — Updated by orchestrator's main turn at end of `/wr-itil:work-problems` Step 6.75 halt (Step 2.5b surfacing Q2 + Q3 answers). User direction selected fix shape (a) grant agent narrow Bash for sha256; bundled with TMPDIR-variance fix per Q3. Investigation Tasks updated to reflect direction; Fix Strategy section populated. Adjacent friction empirically observed iter 1 + iter 2 of the current session (every changeset-author Write costs 1 extra round-trip; iter 2 retro hit it explicitly when it could not commit its own retro files until orchestrator-side manual marker pre-bind worked the issue).
+- **2026-05-16** — Fix-strategy reversal. Original 2026-05-13 direction (option a — grant agent narrow Bash) superseded in favour of option b (hook-side compute) per architect + JTBD review under P166. Option b closes both P163 and P166 simultaneously while preserving ADR-013 Rule 2's "agents stay [Read, Glob] only" discipline. Implementation landed in same commit as P166 transition: shared helper `packages/shared/hooks/lib/external-comms-key.sh` derives sha256 from agent prompt's `SURFACE:` + `<draft>` structure; PostToolUse mark hooks consume the helper; agent surface contract no longer requires `EXTERNAL_COMMS_<EVAL>_KEY`. ADR-028 amendment 2026-05-16 documents the reversal explicitly. Transitioned to Verification Pending — awaiting user dogfood confirmation that the placeholder-key class is eliminated.

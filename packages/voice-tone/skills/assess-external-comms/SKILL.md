@@ -53,12 +53,24 @@ Do not ask if the surface is obvious from the conversation context.
 
 ### 3. Construct the review prompt
 
-Build a self-contained prompt for the `wr-voice-tone:external-comms` subagent that includes:
+Build a self-contained prompt for the `wr-voice-tone:external-comms` subagent. The prompt MUST be structured so the PostToolUse hook can derive the marker key locally (P166 / ADR-028 amended 2026-05-16) — single fire per gate cycle suffices:
 
-- The **draft body** verbatim (between explicit `<draft>...</draft>` markers so the agent's substring extraction is unambiguous).
-- The **target surface** (one of the canonical strings above).
-- The **destination** when known.
-- A reminder to compute `EXTERNAL_COMMS_VOICE_TONE_KEY = sha256(draft + '\n' + surface)`.
+```
+SURFACE: <surface-name>
+<draft>
+<draft body verbatim>
+</draft>
+
+Destination: <destination if known>
+Review against docs/VOICE-AND-TONE.md.
+```
+
+Two requirements:
+
+- A leading line `SURFACE: <surface-name>` where `<surface-name>` is one of the canonical strings (`gh-issue-create`, `gh-pr-comment`, etc.) — anchored to line start, single token.
+- The **draft body** wrapped verbatim inside `<draft>...</draft>` markers — the hook extracts everything between these markers and uses it for `sha256(DRAFT + '\n' + SURFACE)`.
+
+The orchestrator does NOT pre-compute the key — the hook derives it from the prompt structure. Skip the agent-emitted key entirely.
 
 ### 4. Delegate to wr-voice-tone:external-comms
 
@@ -69,7 +81,7 @@ subagent_type: wr-voice-tone:external-comms
 prompt: <constructed review prompt from step 3>
 ```
 
-Wait for the subagent to complete. The subagent will output a structured verdict block (`EXTERNAL_COMMS_VOICE_TONE_VERDICT: PASS|FAIL` + `EXTERNAL_COMMS_VOICE_TONE_KEY: <sha>` + optional `EXTERNAL_COMMS_VOICE_TONE_REASON: ...`). The `PostToolUse:Agent` hook (`external-comms-mark-reviewed.sh`) reads that output and writes the per-evaluator marker automatically.
+Wait for the subagent to complete. The subagent outputs a structured verdict block (`EXTERNAL_COMMS_VOICE_TONE_VERDICT: PASS|FAIL` + optional `EXTERNAL_COMMS_VOICE_TONE_REASON: ...` on FAIL). The `PostToolUse:Agent` hook (`external-comms-mark-reviewed.sh`) parses the verdict, derives the marker key from the prompt's `SURFACE:` + `<draft>` structure, and writes the per-evaluator marker automatically on PASS.
 
 **Do not write to `${TMPDIR:-/tmp}/claude-risk-*` yourself.** The hook is the only correct mechanism.
 

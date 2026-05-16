@@ -20,6 +20,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SHARED_HOOK="$REPO_ROOT/packages/shared/hooks/external-comms-gate.sh"
 SHARED_LIB="$REPO_ROOT/packages/shared/hooks/lib/leak-detect.sh"
+SHARED_KEY_LIB="$REPO_ROOT/packages/shared/hooks/lib/external-comms-key.sh"
 
 if [ ! -f "$SHARED_HOOK" ]; then
   echo "ERROR: canonical hook not found at $SHARED_HOOK" >&2
@@ -27,6 +28,10 @@ if [ ! -f "$SHARED_HOOK" ]; then
 fi
 if [ ! -f "$SHARED_LIB" ]; then
   echo "ERROR: canonical lib not found at $SHARED_LIB" >&2
+  exit 1
+fi
+if [ ! -f "$SHARED_KEY_LIB" ]; then
+  echo "ERROR: canonical key-derivation lib not found at $SHARED_KEY_LIB" >&2
   exit 1
 fi
 
@@ -48,9 +53,10 @@ sync_or_check_pair() {
   local plugin="$1"
   local target_hook="$REPO_ROOT/packages/$plugin/hooks/external-comms-gate.sh"
   local target_lib="$REPO_ROOT/packages/$plugin/hooks/lib/leak-detect.sh"
+  local target_key_lib="$REPO_ROOT/packages/$plugin/hooks/lib/external-comms-key.sh"
   local target_lib_dir="$REPO_ROOT/packages/$plugin/hooks/lib"
 
-  for pair in "$SHARED_HOOK:$target_hook" "$SHARED_LIB:$target_lib"; do
+  for pair in "$SHARED_HOOK:$target_hook" "$SHARED_LIB:$target_lib" "$SHARED_KEY_LIB:$target_key_lib"; do
     local src="${pair%%:*}"
     local dst="${pair##*:}"
 
@@ -93,7 +99,7 @@ if [ "$MODE" = "check" ]; then
     echo "Run: bash scripts/sync-external-comms-gate.sh" >&2
     exit 1
   fi
-  TOTAL=$(( ${#CONSUMERS[@]} * 2 ))
+  TOTAL=$(( ${#CONSUMERS[@]} * 3 ))
   echo "OK: all $TOTAL external-comms-gate copies match canonical sources"
 else
   if [ "$SYNCED" -eq 0 ] && [ "$CREATED" -eq 0 ]; then

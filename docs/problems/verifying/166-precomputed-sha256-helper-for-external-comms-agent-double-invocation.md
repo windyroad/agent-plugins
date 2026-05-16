@@ -1,6 +1,6 @@
 # Problem 166: Precomputed-sha256 helper for `wr-risk-scorer:external-comms` agent invocations to eliminate double-invocation cost
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-04
 **Priority**: 3 (Low) — Impact: Minor (1) x Likelihood: Almost certain (4)
 **Effort**: S (deferred — re-rate at next /wr-itil:review-problems)
@@ -51,12 +51,30 @@ The double-invocation pattern itself IS the workaround for P163. P166 is the opt
 
 ### Investigation Tasks
 
-- [ ] Architect review: Option 1 (helper) vs Option 2 (hook-side compute). Likely Option 2 per architectural cleanliness.
-- [ ] Implement chosen option + behavioural bats covering the single-fire path.
+- [x] Architect review: Option 1 (helper) vs Option 2 (hook-side compute). Likely Option 2 per architectural cleanliness. **Verdict 2026-05-16**: PROCEED with Option 2 (prompt-parsing variant — sidecar variant cannot identify which pending key the agent reviewed under interleaved surfaces). ADR-028 amendment (not new ADR) per architect direction.
+- [x] Implement chosen option + behavioural bats covering the single-fire path. **Implemented 2026-05-16**: shared helper `packages/shared/hooks/lib/external-comms-key.sh` derives sha256 from prompt structure; both PostToolUse mark hooks (risk-scorer + voice-tone) consume the helper; backward-compat fallback to agent-emitted KEY preserved for one release-cycle; structured-prompt requirement (`SURFACE:` + `<draft>...</draft>`) lands in both SKILL.md files + gate denial message.
 
 ## Fix Strategy
 
-(Deferred to investigation.)
+**Option 2 (chosen)** — hook-side compute via prompt-parsing. The PostToolUse:Agent mark hook derives the marker key from the agent's `tool_input.prompt` (`SURFACE: <name>` line + `<draft>...</draft>` block) and computes `sha256(DRAFT + '\n' + SURFACE)` — byte-identical to the gate's PreToolUse computation. The agent no longer needs to emit or compute the key. Single fire per gate cycle.
+
+Shared helper `derive_external_comms_key_from_prompt` lives at `packages/shared/hooks/lib/external-comms-key.sh` and syncs into each consumer plugin via `scripts/sync-external-comms-gate.sh` per ADR-017. Both consumer mark hooks (`risk-scorer/hooks/risk-score-mark.sh` external-comms branch + `voice-tone/hooks/external-comms-mark-reviewed.sh`) source the helper.
+
+Backward-compat fallback: when the prompt lacks structure (cached old SKILL.md / agent prompts), the hook falls back to the agent-emitted `EXTERNAL_COMMS_<EVAL>_KEY` line. Removed in a subsequent amendment after one release cycle.
+
+ADR-028 amended 2026-05-16 documents the contract change.
+
+## Fix Released
+
+Released 2026-05-16 in the same commit as this transition. Behavioural bats coverage:
+
+- `packages/shared/test/external-comms-key-helper.bats` — 9 tests covering well-formed prompt → correct sha256 derivation; missing SURFACE / missing `<draft>` → empty string; multi-line drafts; surface name extraction discipline.
+- `packages/voice-tone/hooks/test/external-comms-mark-prompt-parse.bats` — 6 tests covering PASS with structured prompt → marker lands at hook-derived key; FAIL → no marker; hook-derived key wins over bogus agent KEY; backward-compat fallback; unrelated subagent ignored.
+- `packages/risk-scorer/hooks/test/risk-score-mark-external-comms-prompt-parse.bats` — 5 tests covering same shape for the risk evaluator branch.
+
+Sync verification (`bash scripts/sync-external-comms-gate.sh --check`): OK — all 6 canonical/copy pairs (gate.sh + leak-detect.sh + external-comms-key.sh × 2 consumers) byte-identical.
+
+Awaiting user verification: dogfood the next changeset commit-gate cycle and confirm the external-comms agent fires exactly once per gate (no double-invocation).
 
 ## Dependencies
 
@@ -75,3 +93,4 @@ The double-invocation pattern itself IS the workaround for P163. P166 is the opt
 ## Change Log
 
 - **2026-05-04** — Opened by orchestrator's main turn at end of `/wr-itil:work-problems` AFK loop iter 7 per user direction "capture all four now". Sibling finding from iter 4 P157 commit gate. Skeleton ticket; investigation deferred. Companion to P163.
+- **2026-05-16** — Worked via `/wr-itil:work-problems` AFK loop iter 5. Architect + JTBD reviewed Option 2 (PROCEED + ALIGNED). Hook-side prompt-parsing chosen over sidecar variant for correctness under interleaved surfaces. Implemented shared helper + updated both PostToolUse mark hooks + both agent prompts + both SKILL.md + gate denial message + ADR-028 amendment. Backward-compat fallback preserved one release cycle. Bats coverage: 20 new tests across 3 files; existing sync-fixture tests updated to copy the new helper. Transitioned to Verification Pending — awaiting user dogfood of next changeset commit-gate cycle (expect single-fire).

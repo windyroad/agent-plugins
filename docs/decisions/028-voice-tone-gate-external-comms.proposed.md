@@ -1,7 +1,7 @@
 ---
 status: "proposed"
 date: 2026-04-20
-amended-date: 2026-05-14
+amended-date: 2026-05-16
 decision-makers: [tomhoward]
 consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: [Windy Road plugin users, addressr maintainer, bbstats maintainer]
@@ -328,3 +328,95 @@ Per-package files (NOT synced; package-specific):
 
 - Whether to publish a future `external-comms-mark.sh` shared helper if a third evaluator emerges and the per-package wrapper logic begins to duplicate. The current 2-evaluator scope is well-served by per-package wrappers each ≤30 lines.
 - ADR-028 status flip from proposed → accepted. Stays proposed until both halves observed in production for one release cycle per the project's ADR-006-vintage deliberation discipline (per the architect verdict on this amendment).
+
+### 2026-05-16 — Hook-side key derivation (P166 + P163 close)
+
+Resolves the double-invocation cost class (P166) and supersedes the agent-emitted-key class (P163) by moving sha256 computation from the agent's structured emit into the PostToolUse mark hook. Architect (PROCEED) + JTBD (ALIGNED) confirmed 2026-05-16.
+
+**Problem being closed:**
+
+- **P166** — every commit-gate cycle fires the external-comms agent twice: first to emit a placeholder key, then with an orchestrator-precomputed key in the prompt so the marker can land. ~$0.05 per cycle wasted; ~$300/year across projected contributor activity.
+- **P163** — sibling placeholder-key root cause. Original 2026-05-13 user direction picked fix shape (a) "grant agent narrow Bash for sha256 only". This amendment reverses that direction in favour of fix shape (b) "move sha256 computation to PostToolUse hook" because (b) is structurally cleaner: it preserves ADR-013 Rule 2 ("scoring/analysis agents remain pure output-only — tools stay [Read, Glob]") rather than eroding it, and closes both P166 and P163 in one go (a) only addressed P163. Direction reversal documented inline here + in P163's Change Log.
+
+**Hook-side key derivation contract:**
+
+The PostToolUse:Agent mark hook (`risk-score-mark.sh` external-comms branch + `external-comms-mark-reviewed.sh`) derives the marker key directly from the agent's `tool_input.prompt` by parsing two mandatory structural elements:
+
+- A leading `SURFACE: <name>` line — anchored to line start (MULTILINE), single-token surface name.
+- A `<draft>...</draft>` block containing the draft body verbatim.
+
+The hook computes `sha256(DRAFT + '\n' + SURFACE)` — byte-identical to the gate's PreToolUse computation at `external-comms-gate.sh` line 229. The agent does NOT emit or compute the key. Single fire per gate cycle.
+
+The shared helper `packages/shared/hooks/lib/external-comms-key.sh` provides `derive_external_comms_key_from_prompt` — synced byte-identically into each consumer plugin via `scripts/sync-external-comms-gate.sh` per the ADR-017 duplicate-script pattern. Helper is consumed by both `packages/risk-scorer/hooks/risk-score-mark.sh` (external-comms branch) and `packages/voice-tone/hooks/external-comms-mark-reviewed.sh`.
+
+**Backward-compatibility fallback:**
+
+When the prompt lacks the structured markers (cached old SKILL.md / agent prompts during the deprecation window), the hook falls back to the agent-emitted `EXTERNAL_COMMS_<EVAL>_KEY` line — same code path the 2026-05-14 amendment's structured-output contract used. The fallback exists for one release cycle while in-flight cached prompts roll over; removed in a subsequent amendment once the deprecation window closes.
+
+**Hook-derived key takes precedence over agent-emitted key:**
+
+When both the prompt structure AND an agent-emitted `EXTERNAL_COMMS_<EVAL>_KEY` line are present, the hook uses the prompt-derived key. The agent-emitted key becomes advisory / ignored in the canonical path. This makes the hook authoritative on the (DRAFT, SURFACE) identity binding and removes a class of "agent says X but actual draft is Y" mismatches.
+
+**Agent surface contract change (supersedes 2026-05-14 amendment's "Structured-output contract" subsection):**
+
+- Agent emits `EXTERNAL_COMMS_<EVAL>_VERDICT: PASS|FAIL` (mandatory).
+- Agent emits `EXTERNAL_COMMS_<EVAL>_REASON: <one-line>` on FAIL (mandatory).
+- Agent does NOT emit `EXTERNAL_COMMS_<EVAL>_KEY` — superseded; field is no longer required on the canonical path. Cached old agents that still emit it land at the fallback path harmlessly.
+
+**Gate denial message update:**
+
+The canonical `external-comms-gate.sh` denial message instructs the orchestrator to construct the agent prompt with the structured `SURFACE: <name>` + `<draft>...</draft>` shape so the mark hook can derive the key without the agent's participation. Same denial verb (delegate to the subagent); only the prompt-construction guidance is updated.
+
+**Files changed (atomic commit):**
+
+- `packages/shared/hooks/external-comms-gate.sh` — denial message update; comment block updated.
+- `packages/shared/hooks/lib/external-comms-key.sh` — NEW (canonical helper).
+- `packages/{risk-scorer,voice-tone}/hooks/external-comms-gate.sh` — synced byte-identically.
+- `packages/{risk-scorer,voice-tone}/hooks/lib/external-comms-key.sh` — synced byte-identically.
+- `packages/risk-scorer/hooks/risk-score-mark.sh` — external-comms branch sources helper + reads prompt + derives key with fallback.
+- `packages/voice-tone/hooks/external-comms-mark-reviewed.sh` — same change.
+- `packages/risk-scorer/agents/external-comms.md` — drops `EXTERNAL_COMMS_RISK_KEY` from MANDATORY verdict format; documents hook-side derivation.
+- `packages/voice-tone/agents/external-comms.md` — drops `EXTERNAL_COMMS_VOICE_TONE_KEY` from MANDATORY verdict format; documents hook-side derivation.
+- `packages/{risk-scorer,voice-tone}/skills/assess-external-comms/SKILL.md` — step 3 prompt-construction updated to require `SURFACE:` line + `<draft>...</draft>` block; step 4 verdict-block expectations updated.
+- `scripts/sync-external-comms-gate.sh` — extends sync to cover `external-comms-key.sh`.
+- New bats coverage: `packages/shared/test/external-comms-key-helper.bats` (helper); `packages/{risk-scorer,voice-tone}/hooks/test/*-external-comms-prompt-parse.bats` (hook prompt-parse paths + backward-compat fallback).
+
+**Confirmation criteria delta (supersedes Confirmation Criterion 1 + 2026-05-14 "Structured-output contract"):**
+
+- **Criterion 1** (was: per-evaluator marker key is `sha256(draft + '\n' + surface)` computed by the agent and emitted as `EXTERNAL_COMMS_<EVALUATOR>_KEY`) — current: per-evaluator marker key is `sha256(DRAFT + '\n' + SURFACE)` DERIVED BY THE HOOK from the agent's `tool_input.prompt` (`SURFACE:` line + `<draft>...</draft>` block). Backward-compat fallback to agent-emitted key during the deprecation window.
+- **Structured-output contract (2026-05-14)** — `EXTERNAL_COMMS_<EVAL>_KEY` field demoted from MANDATORY to OPTIONAL (fallback-only); other fields unchanged.
+- **Bats coverage delta**:
+  - ADDED: `packages/shared/test/external-comms-key-helper.bats` — helper derivation correctness against gate's canonical key shape.
+  - ADDED: `packages/risk-scorer/hooks/test/risk-score-mark-external-comms-prompt-parse.bats` — risk evaluator hook prompt-parse path + fallback.
+  - ADDED: `packages/voice-tone/hooks/test/external-comms-mark-prompt-parse.bats` — voice-tone evaluator hook prompt-parse path + fallback.
+  - Existing agent-contract bats (`*-external-comms-contract.bats`) that assert `EXTERNAL_COMMS_<EVAL>_KEY` is REQUIRED — flip to OPTIONAL OR remove the KEY-line assertion entirely. Inventory follow-up below.
+
+**ADR-013 Rule 2 alignment (strengthens, not deviates):**
+
+The 2026-05-13 user direction on P163 picked grant-narrow-Bash-to-agent (option a). This amendment reverses to hook-side compute (option b) because:
+
+- (a) introduces a narrow-tool-grant precedent that erodes ADR-013 Rule 2 ("scoring/analysis agents remain pure output-only — tools stay [Read, Glob]").
+- (b) keeps the agent surface narrower not wider; matches ADR-013 Option B "pure scorer pattern".
+- (b) closes P166 (double-invocation cost) in addition to P163 (placeholder-key class); (a) only addresses P163.
+
+The reversal is an informed direction change, not a silent supersession — captured here + in P163's Change Log.
+
+**ADR-026 grounding (preserved):**
+
+The agent's `EXTERNAL_COMMS_<EVAL>_REASON` line (FAIL only) remains the ADR-026 grounding citation surface. No change to grounding contract.
+
+**ADR-045 silent-on-pass (preserved):**
+
+PostToolUse mark hooks continue to follow ADR-045 Pattern 2 (side-effect-only silent). Empty stdout on PASS marker-write; no advisory prose on the happy path. New prompt-parse / fallback logic does not emit any stdout output.
+
+**Out-of-scope-deferred follow-ups:**
+
+- Removal of the backward-compat fallback once the deprecation window closes (one release cycle). Tracked as a follow-up amendment; not landed in this commit.
+- Inventory + flip of existing `*-external-comms-contract.bats` files (if any) that assert the KEY field is required. Best-effort grep + flip in this commit; remaining edits land in the follow-up.
+
+**Performance impact (no governance ADR but tracked here):**
+
+- Before: 2 agent fires per gate cycle, ~$0.05 cumulative, ~3-6s extra wall-clock per cycle.
+- After: 1 agent fire per gate cycle, ~$0.025 cumulative, 0s extra wall-clock (eliminated second fire). Hook-side sha256 + prompt-parse adds ~5ms CPU.
+- Aggregate (per P166's projection of ~75 gate cycles/day across 3 contributors): ~$1.88/day saved; ~$685/year saved; ~225-450s/day saved across the user base.
+- Monotonically improving (no regression risk); recorded for amendment audit trail per ADR-023 performance-review nitpick.
