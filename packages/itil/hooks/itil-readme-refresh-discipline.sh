@@ -103,8 +103,12 @@ esac
 # Trap detected — emit deny with terse recovery.
 # Voice-tone budget per ADR-045 deny-band ≤300 bytes total. Names the
 # offending ticket ID, the literal recovery command, the BYPASS env
-# var escape, and the P165 cite.
-REASON="BLOCKED: P165. ${TICKET_ID} needs docs/problems/README.md refresh. Run: git add docs/problems/README.md. Bypass: BYPASS_README_REFRESH_GATE=1."
+# var escape with correct propagation syntax (P231 / P173), and the
+# P165 cite. Inline-prefix `VAR=1 git commit ...` does NOT propagate
+# from a Bash subshell to PreToolUse hooks; the env field of
+# `.claude/settings.json` (or shell `export` before `claude` launch)
+# is the working path.
+REASON="BLOCKED: P165. ${TICKET_ID} needs README refresh: git add docs/problems/README.md. Bypass: BYPASS_README_REFRESH_GATE=1 via .claude/settings.json env (P173)."
 
 cat <<EOF
 {

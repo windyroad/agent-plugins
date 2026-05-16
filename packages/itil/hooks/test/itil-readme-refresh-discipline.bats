@@ -259,3 +259,163 @@ run_bash_hook() {
   [ "$status" -eq 0 ]
   [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
 }
+
+# --- P230: narrative-only short-circuit (reconcile-readme is authority) ---
+#
+# When all staged ticket edits are purely narrative (Change Log entries,
+# Investigation Task checkbox ticks, prose edits — no ranking-bearing
+# field change, no rename between state subdirs, no creation/deletion)
+# AND `packages/itil/scripts/reconcile-readme.sh` reports exit=0 against
+# the current README, the hook silently passes. Ranking-bearing edits
+# still fall through to existing detection per ADR-014 single-commit
+# grain (architect verdict: reconcile is robustness layer, not
+# supersession of per-operation refresh).
+
+seed_valid_readme_p999_open() {
+  cat > docs/problems/README.md <<EOF
+# Problem Backlog
+
+## WSJF Rankings
+
+| ID | Title | WSJF |
+|---|---|---|
+| P999 | Test ticket | 1.0 |
+
+## Verification Queue
+
+(none)
+
+## Closed
+
+(none)
+EOF
+}
+
+@test "P230 allow: narrative-only edit + reconcile-readme exit=0 → allow silently" {
+  cat > docs/problems/open/999-narrative.md <<EOF
+# Problem 999: Test ticket
+**Status**: Open
+**Priority**: 1
+EOF
+  seed_valid_readme_p999_open
+  git add docs/problems/open/999-narrative.md docs/problems/README.md
+  git -c commit.gpgsign=false commit --quiet -m "seed p999"
+  # Narrative-only edit: append a Change Log line
+  echo "- 2026-05-16 — narrative tweak" >> docs/problems/open/999-narrative.md
+  git add docs/problems/open/999-narrative.md
+  run run_bash_hook "git commit -m 'docs(problems): narrative tweak'"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
+}
+
+@test "P230 allow: Investigation Task checkbox tick (narrative-only) + reconcile=0 → allow silently" {
+  cat > docs/problems/open/999-checkbox.md <<EOF
+# Problem 999: Test ticket
+**Status**: Open
+**Priority**: 1
+
+## Investigation Tasks
+
+- [ ] First task
+EOF
+  seed_valid_readme_p999_open
+  git add docs/problems/open/999-checkbox.md docs/problems/README.md
+  git -c commit.gpgsign=false commit --quiet -m "seed p999"
+  # Narrative-only edit: tick a checkbox
+  sed -i.bak 's/- \[ \] First task/- [x] First task/' docs/problems/open/999-checkbox.md
+  rm docs/problems/open/999-checkbox.md.bak
+  git add docs/problems/open/999-checkbox.md
+  run run_bash_hook "git commit -m 'docs(problems): tick task'"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
+}
+
+@test "P230 deny: ranking-bearing Status field change + reconcile=0 → still deny per ADR-014 single-commit grain" {
+  cat > docs/problems/open/999-ranking.md <<EOF
+# Problem 999: Test ticket
+**Status**: Open
+**Priority**: 1
+EOF
+  seed_valid_readme_p999_open
+  git add docs/problems/open/999-ranking.md docs/problems/README.md
+  git -c commit.gpgsign=false commit --quiet -m "seed p999"
+  # Ranking-bearing edit: change Status
+  sed -i.bak 's/\*\*Status\*\*: Open/\*\*Status\*\*: Verifying/' docs/problems/open/999-ranking.md
+  rm docs/problems/open/999-ranking.md.bak
+  git add docs/problems/open/999-ranking.md
+  run run_bash_hook "git commit -m 'transition'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
+}
+
+@test "P230 deny: ranking-bearing Priority field change + reconcile=0 → still deny" {
+  cat > docs/problems/open/999-priority.md <<EOF
+# Problem 999: Test ticket
+**Status**: Open
+**Priority**: 1
+EOF
+  seed_valid_readme_p999_open
+  git add docs/problems/open/999-priority.md docs/problems/README.md
+  git -c commit.gpgsign=false commit --quiet -m "seed p999"
+  # Ranking-bearing edit: change Priority
+  sed -i.bak 's/\*\*Priority\*\*: 1/\*\*Priority\*\*: 5/' docs/problems/open/999-priority.md
+  rm docs/problems/open/999-priority.md.bak
+  git add docs/problems/open/999-priority.md
+  run run_bash_hook "git commit -m 're-rate'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
+}
+
+@test "P230 deny: git mv between state subdirs (open→verifying) + no README refresh → deny (canonical iter-subprocess case)" {
+  cat > docs/problems/open/999-rename.md <<EOF
+# Problem 999: Test ticket
+**Status**: Open
+EOF
+  seed_valid_readme_p999_open
+  git add docs/problems/open/999-rename.md docs/problems/README.md
+  git -c commit.gpgsign=false commit --quiet -m "seed p999"
+  # Rename to verifying state subdir
+  git mv docs/problems/open/999-rename.md docs/problems/verifying/999-rename.md
+  run run_bash_hook "git commit -m 'transition'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
+}
+
+@test "P230 deny: narrative-only edit + reconcile-readme drift (README missing ticket) → still deny per existing logic" {
+  cat > docs/problems/open/999-narrative-drift.md <<EOF
+# Problem 999: Test ticket
+**Status**: Open
+EOF
+  # README does NOT list P999 → reconcile detects MISSING drift → exit=1
+  cat > docs/problems/README.md <<EOF
+# Problem Backlog
+
+## WSJF Rankings
+
+| ID | Title | WSJF |
+|---|---|---|
+EOF
+  git add docs/problems/open/999-narrative-drift.md docs/problems/README.md
+  git -c commit.gpgsign=false commit --quiet -m "seed p999"
+  # Narrative-only edit
+  echo "- 2026-05-16 — narrative line" >> docs/problems/open/999-narrative-drift.md
+  git add docs/problems/open/999-narrative-drift.md
+  run run_bash_hook "git commit -m 'docs(problems): narrative'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
+}
+
+# --- P231: deny message advertises correct bypass syntax (Option A) ---
+#
+# Deny message advertises `.claude/settings.json env` rather than inline
+# prefix (which doesn't propagate to PreToolUse hooks per P173).
+
+@test "P231 deny message advertises .claude/settings.json bypass path + P173 reference" {
+  echo "# Problem 999" > docs/problems/open/999-bypass-msg.md
+  git add docs/problems/open/999-bypass-msg.md
+  run run_bash_hook "git commit -m 'feat'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
+  [[ "$output" == *".claude/settings.json"* ]]
+  [[ "$output" == *"P173"* ]]
+}

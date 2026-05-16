@@ -1,7 +1,8 @@
 # Problem 230: README-refresh-discipline hook misfires on narrative-only ticket edits when no ranking-bearing field changed AND reconcile-readme.sh exit=0
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-05-15
+**Closed**: 2026-05-16
 **Priority**: 6 (Med) — Impact: 2 (Minor — false-positive deny adds friction but recovery is mechanical; no data loss) × Likelihood: 3 (Likely — fires on every Change Log / Investigation Task checkbox edit where ranking-bearing fields unchanged AND README already in sync)
 **Effort**: S (deferred — re-rate at next `/wr-itil:review-problems`)
 **WSJF**: (6 × 1.0) / 1 = **6.0** (deferred — provisional)
@@ -32,15 +33,30 @@ Substantive narrative edit to `docs/problems/README.md` "Last reviewed" line + `
 
 ### Investigation Tasks
 
-- [ ] Audit `readme-refresh-detect.sh` for the staged-diff parsing — does it distinguish ranking-bearing vs narrative-only edits?
-- [ ] Confirm the reconcile-readme exit-code disjunct: if exit=0 (no drift), the hook should silently pass regardless of ticket edits
-- [ ] Behavioural bats: narrative-only edit + exit=0 reconcile → hook passes silently
-- [ ] Behavioural bats: ranking-bearing edit + exit=1 reconcile → hook denies as today
-- [ ] Behavioural bats: ranking-bearing edit + exit=0 reconcile (race) → hook passes (reconcile is the authority)
+- [x] Audit `readme-refresh-detect.sh` for the staged-diff parsing — confirmed the helper had no distinction; every staged ticket-path triggered the deny when README was unstaged.
+- [x] Confirm the reconcile-readme exit-code disjunct — confirmed for the **narrative-only** edit class only; architect verdict (Option Y) preserves the ADR-014 single-commit invariant for ranking-bearing edits regardless of reconcile state.
+- [x] Behavioural bats: narrative-only edit + exit=0 reconcile → hook passes silently (covered + green).
+- [x] Behavioural bats: ranking-bearing edit + reconcile drift → deny (covered + green).
+- [x] Behavioural bats: ranking-bearing edit + exit=0 reconcile → **deny** per ADR-014 single-commit grain (architect rejected the "race → allow" framing; reconcile is a robustness layer, not a supersession of per-operation refresh).
 
 ## Fix Strategy
 
-Extend `readme-refresh-detect.sh` with narrative-only-edit detection: when staged ticket has no ranking-bearing field change (grep staged diff for Priority/Effort/Status/WSJF/Title field-line changes — empty match = narrative-only) AND `reconcile-readme.sh` reports exit=0 against current README, silently pass. Eliminates the friction class for narrative-only ticket edits.
+**Implemented** — Option Y, architect-approved:
+
+Extend `packages/itil/hooks/lib/readme-refresh-detect.sh` with a narrative-only short-circuit. After the existing bypass + fail-open + trap-detection guards, branch on ranking-bearing detection:
+
+- **Ranking-bearing** = field-line diff matching `^[+-]**(Priority|Effort|Status|WSJF|Type)**:` OR title diff `^[+-]# Problem` OR `git diff --staged --name-status -M` shows A/D entries on ticket paths OR R<NN> rename involving ticket paths. Falls through to existing deny logic.
+- **Narrative-only** = no ranking-bearing change. Consult `packages/itil/scripts/reconcile-readme.sh` against `docs/problems`; if exit=0, return 0 (allow silently). Otherwise fall through to deny.
+
+Ranking-bearing edits remain gated by ADR-014 single-commit grain regardless of reconcile state — reconcile is a robustness layer on top of per-operation refresh, not a supersession.
+
+## Resolution
+
+Closed 2026-05-16 by `/wr-itil:work-problems` AFK loop iter 2.
+
+- `packages/itil/hooks/lib/readme-refresh-detect.sh` — extended with `_readme_refresh_staged_is_ranking_bearing` + `_readme_refresh_reconcile_clean` helpers; narrative-only short-circuit at the top of `detect_readme_refresh_required` after the no-ticket / has-readme early returns.
+- `packages/itil/hooks/test/itil-readme-refresh-discipline.bats` — 7 new behavioural cases (2 narrative-only allow, 2 ranking-bearing field deny, 1 git mv rename deny, 1 narrative+drift deny, 1 P231 deny-message assertion). 29/29 green.
+- Sibling [[P231]] closed in the same commit (Option A — deny message advertises `.claude/settings.json` env path + P173 reference; replaces misleading inline-prefix advertisement).
 
 ## Dependencies
 
@@ -55,3 +71,4 @@ Extend `readme-refresh-detect.sh` with narrative-only-edit detection: when stage
 ## Change Log
 
 - **2026-05-15** — Opened by `/wr-itil:work-problems` AFK orchestrator main-turn wrap, per user answer "Yes — capture as two separate tickets" to README-refresh question after iter 1 surfaced the friction.
+- **2026-05-16** — Closed by `/wr-itil:work-problems` iter 2. Option Y implementation landed (narrative-only short-circuit with reconcile-readme as authority for narrative class; ranking-bearing remains ADR-014-gated). 29/29 hook bats green. Folded with [[P231]] Option A deny-message correction in single commit per ADR-014 single-commit grain.

@@ -37,8 +37,25 @@
 #
 # Bypass:
 #   - `BYPASS_README_REFRESH_GATE=1` env var → return 0 (allow). For
-#     legitimate narrative-only ticket-body edits that don't change
-#     ranking-bearing fields. Audit-traceable via shell history.
+#     legitimate one-off escape (e.g. force-amend after rebase rewrote
+#     history). Audit-traceable via shell history. Set in
+#     `.claude/settings.json` env field or shell `export` before
+#     launching `claude` — inline-prefix syntax (`VAR=1 git commit ...`)
+#     does NOT propagate from a Bash subshell to PreToolUse hooks (P173).
+#
+# Narrative-only short-circuit (P230):
+#   - When all staged ticket edits are purely narrative — no
+#     ranking-bearing field change (Priority / Effort / Status / WSJF /
+#     Type field-lines), no title change, no rename between state
+#     subdirs, no creation/deletion — AND
+#     `packages/itil/scripts/reconcile-readme.sh` reports exit=0 against
+#     the current README, return 0 (allow). Reconcile-readme is the
+#     authoritative drift oracle for narrative-only edits.
+#   - Ranking-bearing edits still fall through to existing detection
+#     regardless of reconcile state, preserving ADR-014 single-commit
+#     grain for the change-set surface (architect verdict: reconcile is
+#     a robustness layer on top of per-operation refresh, not a
+#     supersession of either).
 #
 # Fail-open contract:
 #   - Outside a git working tree, or when `git diff` fails for any
@@ -111,6 +128,7 @@ detect_readme_refresh_required() {
   local has_readme=0
   local offending_ticket=""
   local path basename
+  local staged_tickets=()
 
   while IFS= read -r path; do
     [ -n "$path" ] || continue
@@ -135,6 +153,7 @@ detect_readme_refresh_required() {
         case "$basename" in
           [0-9]*.md)
             [ -z "$offending_ticket" ] && offending_ticket="$path"
+            staged_tickets+=("$path")
             ;;
         esac
         ;;
@@ -143,6 +162,7 @@ detect_readme_refresh_required() {
         # Excludes README.md and README-history.md (already cased
         # above; both start with `R`, not a digit).
         [ -z "$offending_ticket" ] && offending_ticket="$path"
+        staged_tickets+=("$path")
         ;;
       *)
         # Non-ticket surface: ignored.
@@ -152,10 +172,84 @@ detect_readme_refresh_required() {
 $staged
 EOF
 
-  if [ -n "$offending_ticket" ] && [ "$has_readme" -eq 0 ]; then
-    printf '%s\n' "$offending_ticket"
-    return 1
+  # No staged ticket — nothing to gate.
+  [ -n "$offending_ticket" ] || return 0
+
+  # README staged alongside — clean.
+  [ "$has_readme" -eq 1 ] && return 0
+
+  # P230 narrative-only short-circuit. Detect whether the staged ticket
+  # set is purely narrative (no ranking-bearing field change, no rename
+  # between state subdirs, no creation/deletion). If so, consult
+  # reconcile-readme.sh as the authoritative drift oracle; exit=0 means
+  # the README is in sync with filesystem truth and narrative-only
+  # ticket edits are safe to allow silently.
+  if ! _readme_refresh_staged_is_ranking_bearing "${staged_tickets[@]}"; then
+    if _readme_refresh_reconcile_clean; then
+      return 0
+    fi
   fi
 
-  return 0
+  # Either ranking-bearing, or narrative-only with reconcile drift —
+  # fall through to deny.
+  printf '%s\n' "$offending_ticket"
+  return 1
+}
+
+# Returns 0 if any staged ticket exhibits a ranking-bearing change:
+#   - field-line diff matching ^[+-]**(Priority|Effort|Status|WSJF|Type)**:
+#   - title-line diff matching ^[+-]# Problem
+#   - new ticket file added (A entry on a ticket path)
+#   - ticket file deleted (D entry on a ticket path)
+#   - rename between state subdirs (R<NN> entry where either path is a
+#     ticket path)
+# Returns 1 if narrative-only.
+_readme_refresh_staged_is_ranking_bearing() {
+  local tickets=("$@")
+  [ "${#tickets[@]}" -gt 0 ] || return 1
+
+  # (i) Field-line / title-line diff
+  if git diff --staged -- "${tickets[@]}" 2>/dev/null \
+      | grep -qE '^[+-](\*\*(Priority|Effort|Status|WSJF|Type)\*\*:|# Problem )'; then
+    return 0
+  fi
+
+  # (ii) Creation / deletion / rename via --name-status -M
+  local namestatus
+  namestatus=$(git diff --staged --name-status -M 2>/dev/null) || return 1
+
+  local ticket_re='^docs/problems/(open|verifying|closed|known-error|parked)/[0-9].*\.md$'
+  local legacy_re='^docs/problems/[0-9].*\.md$'
+
+  while IFS=$'\t' read -r status p1 p2; do
+    [ -n "$status" ] || continue
+    case "$status" in
+      A|D)
+        if [[ "$p1" =~ $ticket_re ]] || [[ "$p1" =~ $legacy_re ]]; then
+          return 0
+        fi
+        ;;
+      R*)
+        if [[ "$p1" =~ $ticket_re ]] || [[ "$p1" =~ $legacy_re ]] \
+           || [[ "$p2" =~ $ticket_re ]] || [[ "$p2" =~ $legacy_re ]]; then
+          return 0
+        fi
+        ;;
+    esac
+  done <<EOF
+$namestatus
+EOF
+
+  return 1
+}
+
+# Returns 0 if reconcile-readme.sh reports the README is in sync with
+# filesystem truth (exit=0), 1 otherwise (drift, parse error, or script
+# not located).
+_readme_refresh_reconcile_clean() {
+  local lib_dir
+  lib_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)" || return 1
+  local reconcile="$lib_dir/../../scripts/reconcile-readme.sh"
+  [ -f "$reconcile" ] || return 1
+  bash "$reconcile" "docs/problems" >/dev/null 2>&1
 }

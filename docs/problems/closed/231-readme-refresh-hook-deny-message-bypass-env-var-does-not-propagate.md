@@ -1,7 +1,8 @@
 # Problem 231: README-refresh-discipline hook deny message advertises BYPASS_README_REFRESH_GATE=1 inline-prefix that does not propagate to the PreToolUse hook (recurrence of P173 at a new surface)
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-05-15
+**Closed**: 2026-05-16
 **Priority**: 3 (Low) — Impact: 1 (Negligible — misleading docs; concrete workaround exists) × Likelihood: 3 (Likely — users attempting documented bypass syntax encounter the failure mode)
 **Effort**: S (deferred — re-rate at next `/wr-itil:review-problems`)
 **WSJF**: (3 × 1.0) / 1 = **3.0** (deferred — provisional)
@@ -32,17 +33,21 @@ Either (a) accept the deny and apply the README-refresh edit per the gate's inte
 
 ### Investigation Tasks
 
-- [ ] Confirm P173's broader root cause (env-var propagation gap) is the same here
-- [ ] Decide: correct the deny message to point at `.claude/settings.json` env field OR remove the bypass hint entirely (if [[P230]] lands first and the bypass becomes redundant)
-- [ ] If P230 lands and renders bypass unnecessary, fold this ticket into P230 closure instead of separate fix
+- [x] Confirm P173's broader root cause (env-var propagation gap) is the same here — confirmed: same parent-process-env-vs-bash-subshell-env propagation gap as P173.
+- [x] Decide: correct the deny message OR remove. **Decision: Option A** (correct). Architect rejected Option B — narrative-only short-circuit (P230) doesn't render the bypass redundant; legitimate one-off escape cases remain (force-amend after rebase, partial-progress hand-off).
+- [x] If P230 lands and renders bypass unnecessary, fold this ticket into P230 closure — folded into the same commit as Option A correction (not Option B removal), per architect verdict.
 
 ## Fix Strategy
 
-Option A — **Correct the deny message** to: `Bypass: set BYPASS_README_REFRESH_GATE=1 in .claude/settings.json env field or shell export before launching claude (inline-prefix env-vars do not propagate to PreToolUse hooks — see P173).`
+**Implemented** — Option A, architect-approved:
 
-Option B — **Remove the bypass hint** if [[P230]] lands first and the bypass becomes redundant (narrative-only edits silently pass; ranking-bearing edits should refresh README — no legitimate bypass case remains).
+`packages/itil/hooks/itil-readme-refresh-discipline.sh` REASON string updated to advertise the working syntax:
 
-Option B preferred if P230 lands first.
+```
+Bypass: BYPASS_README_REFRESH_GATE=1 via .claude/settings.json env (P173).
+```
+
+Replaces the misleading `Bypass: BYPASS_README_REFRESH_GATE=1.` advertisement that implied inline-prefix syntax worked. Stays within ADR-045 deny-band ≤300 bytes. Names P173 inline so future readers can navigate to the propagation-gap class.
 
 ## Dependencies
 
@@ -57,3 +62,4 @@ Option B preferred if P230 lands first.
 ## Change Log
 
 - **2026-05-15** — Opened by `/wr-itil:work-problems` AFK orchestrator main-turn wrap, per user answer "Yes — capture as two separate tickets" to README-refresh question after iter 1 surfaced the friction.
+- **2026-05-16** — Closed by `/wr-itil:work-problems` iter 2. Option A fix landed (deny message advertises `.claude/settings.json` env path + P173 reference). Folded into [[P230]] single commit per ADR-014 single-commit grain.
