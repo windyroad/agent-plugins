@@ -154,6 +154,8 @@ echo "$next"
 
 ### 4. For new incidents: Gather information (P132 derive-first; ADR-044 category-4 silent-framework on derivable fields; category-1 direction-setting fallback only on Scope)
 
+**Shared dispatch helper**: this surface invokes `packages/itil/lib/derive-first-dispatch.sh` for the canonical slug derivation (Title), RISK-POLICY matrix lookup (Severity), and I2-isomorphic stderr advisory format. The helper is sourced by `/wr-itil:capture-problem`, `/wr-itil:manage-incident`, and `/wr-itil:manage-problem`; drift in the advisory shape re-opens P132. Surface-specific signal definitions (severity impact / likelihood regex lists, start-time evidence sources) stay inline below — the helper owns the mechanism, not the per-surface signals (architect verdict 2026-05-15 P132 Phase 2a-iii-A: "Helper must preserve per-surface signal definitions; only the dispatch mechanism is shared").
+
 **Derive-first dispatch.** Incident declarations carry observable evidence in the user's prose, the working tree, `RISK-POLICY.md`, and the wall-clock — the framework can resolve most fields without firing `AskUserQuestion`. Only **Scope** is genuinely user-judgment (semantic blast-radius the framework cannot infer); only **Scope** retains the AskUserQuestion gate.
 
 The P132 inverse-P078 trap (`docs/problems/known-error/132-...md`) is the load-bearing motivation: the I001 declaration regression fired a 4-question AskUserQuestion with 3 of 4 sub-questions being lazy classifications (Title kebab-derivable, Severity matrix-derivable, Start time git-log-derivable). This dispatch closes that regression on the manage-incident surface and mirrors `/wr-itil:capture-problem` Step 1.5's worked-example pattern (P185 derive-first refactor).

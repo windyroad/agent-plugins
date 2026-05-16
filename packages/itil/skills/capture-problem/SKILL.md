@@ -75,6 +75,8 @@ Derive a kebab-case title slug from the first 8-10 non-stopword tokens of the de
 
 ### 1.5 Type classification (derive-first; silent-framework per ADR-044 category 4; taste fallback per category 5 on ambiguity)
 
+**Shared dispatch helper**: this surface invokes `packages/itil/lib/derive-first-dispatch.sh` for the canonical lexical-classifier mechanism + I2-isomorphic stderr advisory format. The helper is sourced by `/wr-itil:capture-problem`, `/wr-itil:manage-incident`, and `/wr-itil:manage-problem`; drift in the advisory shape re-opens P132. Surface-specific signal definitions (technical-vs-user-business regex lists) stay inline below — the helper owns the mechanism, not the per-surface signals (architect verdict 2026-05-15 P132 Phase 2a-iii-A: "Helper must preserve per-surface signal definitions; only the dispatch mechanism is shared").
+
 Resolve `type_value` ∈ {`technical`, `user-business`} per the following framework-mediated dispatch. **The dispatch order is load-bearing** — pre-resolution flags short-circuit BEFORE the classifier runs, and the AskUserQuestion fires ONLY on genuinely-ambiguous descriptions.
 
 1. **If `--type=<value>` was set in Step 1**: use that value; do NOT run the classifier; do NOT fire AskUserQuestion (silent-proceed per ADR-013 Rule 5).
@@ -101,13 +103,13 @@ Resolve `type_value` ∈ {`technical`, `user-business`} per the following framew
      - `technical` — *"Bug, defect, broken behaviour, framework drift — root cause sits in code or process."*
      - `user-business` — *"Missing capability, UX gap, adopter friction, JTBD-shaped need — root cause sits in unmet user need."*
 
-   **Stderr advisory contract** (silent-classification path only): emit a SINGLE line to stderr (NOT stdout, NOT in the ticket body) of the form:
+   **Stderr advisory contract** (silent-classification path only): emit a SINGLE line to stderr (NOT stdout, NOT in the ticket body) via the shared helper's `emit_stderr_advisory` function in `packages/itil/lib/derive-first-dispatch.sh`. The canonical format produced by the helper:
 
    ```
-   capture-problem: classified type=<value> from description signals: <signal1>, <signal2>[, ...]; re-invoke with --type=<other-value> to override
+   capture-problem: derived type=<value> from description signals: <signal1>, <signal2>[, ...]; re-invoke with --type=<other-value> to override
    ```
 
-   The advisory text shape is I2-isomorphic — the sentence structure (`classified type=<value> from description signals: ...; re-invoke with --type=<other-value> to override`) is identical regardless of which type was classified; only the substituted `<value>` / `<other-value>` / `<signal*>` tokens differ. Embedding the advisory in stdout would risk machine-readers parsing it as a ticket-body line; embedding it in the ticket body would violate ADR-060's frontmatter / body-bullet schema. Stderr is the correct channel — visible to interactive maintainers in the terminal; invisible to ticket consumers; loggable by AFK orchestrators that capture subprocess stderr.
+   The advisory text shape is I2-isomorphic — same sentence structure (`<skill>: derived <field>=<value> from <source>; <reversibility>`) across all three derive-first declaration-skill surfaces. The helper is the single source-of-truth for this format; drift here re-opens P132. Embedding the advisory in stdout would risk machine-readers parsing it as a ticket-body line; embedding it in the ticket body would violate ADR-060's frontmatter / body-bullet schema. Stderr is the correct channel — visible to interactive maintainers in the terminal; invisible to ticket consumers; loggable by AFK orchestrators that capture subprocess stderr.
 
 **I2 invariant guard (ADR-060 line 98)**: the resolved `type_value` is used at Step 4 ONLY as a substituted string in the skeleton template's `**Type**:` body field. Steps 2, 3, 4 (other than the `**Type**:` substitution), 5, 6, 7 execute identically regardless of `type_value`. The skill carries NO control-flow branch keyed on `type` — that would convert classification into a workflow split and violate I2. The lexical-signal classifier is UPSTREAM of the value's substitution (it resolves WHICH value to substitute, not WHICH workflow to execute); the substitution and all downstream steps remain uniform. Pure-bash supporting-script enforcement of this invariant lives in `packages/itil/scripts/test/i2-no-type-branching.bats`; the SKILL.md surface coverage gap is named at P176 (descendant of P012 master harness).
 

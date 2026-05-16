@@ -459,12 +459,17 @@ classify_description() {
 # I2 leak through the back door.
 # ---------------------------------------------------------------------------
 
-# Mirror of the SKILL.md advisory template.
+# Mirror of the SKILL.md advisory template. P132 Phase 2a-iii-A renamed
+# the verb from `classified` to `derived` to align with the shared helper
+# `packages/itil/lib/derive-first-dispatch.sh`'s emit_stderr_advisory
+# function — I2-isomorphic format `<skill>: derived <field>=<value> from
+# <source>; <reversibility>` across all three derive-first declaration-skill
+# surfaces.
 format_stderr_advisory() {
   local resolved_type="$1"
   local other_type="$2"
   local signals="$3"
-  printf 'capture-problem: classified type=%s from description signals: %s; re-invoke with --type=%s to override\n' \
+  printf 'capture-problem: derived type=%s from description signals: %s; re-invoke with --type=%s to override\n' \
     "$resolved_type" "$signals" "$other_type"
 }
 
@@ -492,14 +497,17 @@ strip_substituted_tokens() {
 }
 
 @test "P185: stderr advisory does NOT prefix with type-value when describing the contract" {
-  # The shape `classified type=<value> from description signals: <list>;
+  # The shape `derived type=<value> from description signals: <list>;
   # re-invoke with --type=<other> to override` — the leading prose
-  # "capture-problem: classified type=" must be identical regardless of
-  # type value (substitution happens AFTER the equals sign).
+  # "capture-problem: derived type=" must be identical regardless of
+  # type value (substitution happens AFTER the equals sign). P132 Phase
+  # 2a-iii-A renamed `classified` -> `derived` to align with the shared
+  # helper `packages/itil/lib/derive-first-dispatch.sh`'s I2-isomorphic
+  # format across all three declaration-skill surfaces.
   tech_msg=$(format_stderr_advisory technical user-business "sig")
   ub_msg=$(format_stderr_advisory user-business technical "sig")
-  echo "$tech_msg" | grep -q '^capture-problem: classified type='
-  echo "$ub_msg" | grep -q '^capture-problem: classified type='
+  echo "$tech_msg" | grep -q '^capture-problem: derived type='
+  echo "$ub_msg" | grep -q '^capture-problem: derived type='
 }
 
 # ---------------------------------------------------------------------------
