@@ -1,16 +1,16 @@
 {
   "$schema": "https://windyroad.github.io/agent-plugins/schemas/upstream-cache.json",
   "$comment": "Cache file for inbound report discovery (P079 / ADR-062). Written by /wr-itil:review-problems Step 8.5 after each discovery pass.",
-  "last_checked": "2026-05-15T04:56:14Z",
+  "last_checked": "2026-05-17T11:21:52Z",
   "channels": {
     "github-issues:windyroad/agent-plugins": {
-      "fetched_at": "2026-05-15T04:56:14Z",
+      "fetched_at": "2026-05-17T11:21:52Z",
       "filter": "title_prefix=[problem] (label filter removed; see channels-config $filter-note)",
       "status": "ok",
       "reports": [
         {
           "number": 126,
-          "title": "[problem] capture-problem \u2192 manage-problem same-session halts at Step 0 reconcile (HALT_ROUTE_RECONCILE on deferred-refresh seam)",
+          "title": "[problem] capture-problem → manage-problem same-session halts at Step 0 reconcile (HALT_ROUTE_RECONCILE on deferred-refresh seam)",
           "author": "tompahoward",
           "createdAt": "2026-05-13T20:13:45Z",
           "body_hash": "43eeab2af47e1acb",
@@ -19,7 +19,7 @@
         },
         {
           "number": 125,
-          "title": "[problem] external-comms gate marker key cannot be computed by the reviewer agent (Read/Glob/Grep tool surface \u2014 no shasum); hash-scope ambiguity adds three recurrences",
+          "title": "[problem] external-comms gate marker key cannot be computed by the reviewer agent (Read/Glob/Grep tool surface — no shasum); hash-scope ambiguity adds three recurrences",
           "author": "tompahoward",
           "createdAt": "2026-05-13T20:12:24Z",
           "body_hash": "8e2fa16bdf660e46",
@@ -64,7 +64,7 @@
         },
         {
           "number": 117,
-          "title": "[problem] No /wr-retrospective:migrate-briefing skill \u2014 legacy docs/BRIEFING.md \u2192 docs/briefing/ topic-tree migration is manual per-adopter",
+          "title": "[problem] No /wr-retrospective:migrate-briefing skill — legacy docs/BRIEFING.md → docs/briefing/ topic-tree migration is manual per-adopter",
           "author": "tompahoward",
           "createdAt": "2026-05-10T20:10:01Z",
           "body_hash": "1761465715adefe1",
@@ -82,7 +82,7 @@
         },
         {
           "number": 98,
-          "title": "[problem] work-problems iter workers don't add changesets \u2014 fix commits accumulate without release path",
+          "title": "[problem] work-problems iter workers don't add changesets — fix commits accumulate without release path",
           "author": "tompahoward",
           "createdAt": "2026-04-28T02:31:57Z",
           "body_hash": "b2c16163511e0421",
@@ -280,7 +280,7 @@
         },
         {
           "number": 42,
-          "title": "[problem] ADR-022 .known-error.md \u2192 .verifying.md transition not happening consistently at release time",
+          "title": "[problem] ADR-022 .known-error.md → .verifying.md transition not happening consistently at release time",
           "author": "tompahoward",
           "createdAt": "2026-04-21T00:20:36Z",
           "body_hash": "b66ba6368d1d0dae",
@@ -290,16 +290,16 @@
       ]
     },
     "github-discussions:windyroad/agent-plugins": {
-      "fetched_at": "2026-05-15T04:56:14Z",
+      "fetched_at": "2026-05-17T11:21:52Z",
       "reports": [],
       "status": "skipped",
       "skip_reason": "discussions-disabled-for-repo (HTTP 410)"
     },
     "github-security-advisories:windyroad/agent-plugins": {
-      "fetched_at": "2026-05-15T04:56:14Z",
+      "fetched_at": "2026-05-17T11:21:52Z",
       "reports": [],
       "status": "skipped",
-      "skip_reason": "external-comms-gate-misclassifies-read-only-list-as-outbound (gate bug \u2014 see upstream issue #125)"
+      "skip_reason": "external-comms-gate-misclassifies-read-only-list-as-outbound (gate bug — see upstream issue #125)"
     }
   }
 }

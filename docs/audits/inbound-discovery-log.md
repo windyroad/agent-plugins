@@ -36,3 +36,28 @@ First inbound-discovery pass executed via `/wr-itil:review-problems` Step 4.5 (A
 - Notable: upstream #125 reports the external-comms-gate sha-computation bug verbatim (the same bug surfaced in this session when seeding markers for the changeset write). The local capture for #125 will close the loop on the deferred capture-on-correction.
 - The Discussions HTTP 410 reflects the repo's current Discussions setting (disabled). When the maintainer enables Discussions + creates the Q&A category, this channel will start returning data without configuration changes.
 - The security-advisories gate-misclassification is a **real gate bug**: read-only LIST calls fire the same gate as write calls. The gate's surface-match regex doesn't distinguish HTTP method. Tracked upstream as #125 (or related); local capture pending.
+
+## 2026-05-17T11:21:52Z — Discovery pass (TTL-expiry auto-recheck via `/wr-itil:work-problems` Step 0b pre-flight)
+
+Pre-flight iter dispatched from `/wr-itil:work-problems` Step 0b after the AFK orchestrator detected the upstream-cache TTL had expired (cache age 198278s > 86400s `ttl_seconds`). Step 4.5b TTL-expiry auto-recheck branch fired without an explicit `--force-upstream-recheck` flag — the documented self-healing-across-maintainer-cadence path per ADR-062.
+
+**Channels polled** (3 configured, 1 polled OK, 2 skipped fail-soft):
+
+| Channel | Status | Reports |
+|---|---|---|
+| `github-issues:windyroad/agent-plugins` (title_prefix=`[problem]`) | OK | 31 |
+| `github-discussions:windyroad/agent-plugins` (category=`Q&A`) | skipped | 0 — Discussions disabled for repo (HTTP 410); skip-reason preserved from prior cache per Step 4.5 fail-soft contract |
+| `github-security-advisories:windyroad/agent-plugins` | skipped | 0 — LIST call still blocked by external-comms gate (gate bug not yet fixed; tracked as upstream #125 / local P198); skip-reason preserved |
+
+**Set delta vs prior cache (2026-05-15T04:56:14Z)**: zero — identical 31-issue set (42, 56, 57, 58, 59, 60, 61, 62, 63, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 97, 98, 110, 117, 120, 121, 123, 124, 125, 126). No new reports, no closed reports. Body hashes preserved (no content diff observed at the body-hash layer — see audit notes for diffing strategy).
+
+**Pipeline outcomes**: 0 new pipeline classifications this pass. All 31 reports remain at `classification: pending-pipeline-processing` per the 2026-05-15 user direction (verbatim from each report's `cache_audit_note`: *"discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"*). The JTBD-alignment + dual-axis-risk classifier passes (Step 4.5e steps 2-3) and branch routing (steps 4-6) remain deferred until the external-comms-gate sha-computation bug is fully resolved across both consumer packages (cache shows P163 + P166 closed 2026-05-16 in the local backlog; verification of the fix across a full ack-comment posting cycle has not yet been observed in-session per P186 evidence-first principle).
+
+**Cache refresh confirmation**: `docs/problems/.upstream-cache.json` rewritten with `last_checked: 2026-05-17T11:21:52Z` + per-channel `fetched_at` refreshed; reports payload preserved verbatim with no field changes. File diff is a 4-line timestamp refresh (top-level + 3 channels).
+
+**Audit notes**:
+
+- This is a discovery-only refresh; the pre-flight iter exists to keep the AFK orchestrator's upstream-visibility surface fresh without forcing the maintainer to remember `/wr-itil:review-problems` manually. JTBD-006 desired outcome line 24 (the *"stale-cache or missing-cache auto-promotes `/wr-itil:review-problems` as a pre-flight pass"* contract) is the load-bearing job here.
+- Body-hash diffing strategy: this pass did not recompute body hashes from fresh poll bodies — the 31-issue set was identical at the (number, createdAt) layer and body-hash recomputation across the full report set would cost ~150KB of body content read for zero expected delta (the cached reports are upstream-mirrors filed via `/wr-itil:report-upstream`, not external user content; body edits by the reporter author are extremely unlikely between TTL windows). If a body-edit scenario surfaces later, a `--force-upstream-recheck` invocation will rebuild hashes from fresh bodies.
+- The 31 local upstream-mirror tickets (P198-P228) already exist in `docs/problems/known-error/` and `docs/problems/open/` from prior sessions. The cache's `matched_local_ticket` field is not yet populated for these — populating it is part of Step 4.5d's semantic-comparator hit branch, which is gated behind the same pipeline deferral. Once the gate-fix verifies, a future review-problems pass will populate `matched_local_ticket` + post the gated acknowledgement comments (or skip them per P229's "acknowledgement comments are bureaucratic, not verdict-shaped" alternative — pending resolution of P229's design surface).
+- No new problem-tickets captured this pass; no clear-malicious closures; no above-threshold pushbacks. The skill's fail-soft contract held: 2 skipped channels did not block the discovery-pass completion.
