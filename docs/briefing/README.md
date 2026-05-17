@@ -29,6 +29,14 @@ The highest-value entries across the briefing — the handful of rules that save
 | [plugin-distribution.md](./plugin-distribution.md) | Marketplace, plugin cache, install scope, npm package naming, Discord, 1Password env | Plugin install / rename / publish work, `/install-updates`, environment setup. |
 | [agent-interaction-patterns.md](./agent-interaction-patterns.md) | Framing validation, re-stage traps, user-frustration signals | Before asking the user solution-detail questions; ticket-framing checks. |
 
+> **Archive siblings** (Tier 3 budget rotations per P145, multi-pass 2026-05-11 / 13 / 17): topic files have date-stratified archives. Load alongside the primary file when full historical context is needed.
+> - `hooks-and-gates-archive.md` (2026-05-04/05) + `hooks-and-gates-archive-pre-2026-05-04.md` (2026-04-19 through 04-26)
+> - `governance-workflow-archive.md` (2026-05-04/05/12) + `governance-workflow-archive-mid.md` (2026-04-23/24/25) + `governance-workflow-archive-pre-2026-04-23.md` (2026-04-19 through 04-22)
+> - `governance-workflow-surprises.md` (sibling brief — ADR mechanics, JTBD reviewer behaviour, README-refresh reconciliation)
+> - `releases-and-ci-archive.md` (older release-pipeline entries)
+> - `afk-subprocess-mechanics.md` + `afk-subprocess-recovery.md` (sibling briefs split out 2026-05-03)
+> - `agent-hook-gate-quirks.md` (sibling brief — hook-gate quirks)
+
 ## How to Use
 
 - **At session start**: the Critical Points section above is the intended session-start surface. Load this README first; expand topic files on demand.
