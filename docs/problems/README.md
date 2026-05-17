@@ -48,6 +48,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 1.5 | P242 | ADR-054 sibling-REFERENCE.md extraction — install-updates project-local (coupling-dependent block) | 6 Med | Open | M | 2026-05-17 |
 | 1.5 | P243 | ADR-054 sibling-REFERENCE.md extraction — WARN-band cohort umbrella (24+ skills; defer-permitted opportunistic-per-touch) | 4 LowM | Open | L | 2026-05-17 |
 | 1.5 | P244 | Phase 3 (F9) `wr-itil-plugin-maturity-list` in-suite display shim (P087 child) | 3 Med | Open | M | 2026-05-17 |
+| 1.5 | P245 | AFK iter retro surfaces three hook-vs-SKILL-contract drift observations (external-comms key derivation; P165 README refresh on capture; P141 changeset-discipline held-area awareness) | 3 Med | Open | M | 2026-05-17 |
 | 1.5 | P045 | Auto plugin install after governance release (deferred install on next session start per 2026-04-20 direction) | 6 Med | Open | L | 2026-04-19 |
 | 1.5 | P079 | No inbound sync of upstream-reported problems — reports filed via the intake templates never surface in the local backlog (re-rated 6.0 → 1.5 transitive 2026-04-26 — assessment-pipeline scope blocked by P038/P064) | 12 High | Open | L | 2026-04-21 |
 | 1.5 | P014 | No lightweight aside invocation for governance skills (master tracker for ADR-032 — capture-* sibling skills + pending-questions hook + supersession cleanup) | 12 High | Open | XL | 2026-04-16 |
