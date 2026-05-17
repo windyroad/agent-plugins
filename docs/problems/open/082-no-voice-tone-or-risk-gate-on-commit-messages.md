@@ -24,6 +24,18 @@ Blocked on P038 (voice-tone gate on external comms) + P064 (risk-scoring gate on
 
 **Wait for P038 to land first.** P064's risk-evaluator half shipped this session (commit `a0713f3`; changeset held in `docs/changesets-holding/` for dogfood per ADR-042 Rule 2). P038 is still Open. The user explicitly chose to wait rather than ship a marginal P082 now using existing risk-scorer infra alone. Rationale: P082 + P064 + P038 + P073 all compose at the `PreToolUse:Bash` matcher level once P038's voice-tone evaluator lands; shipping a marginal commit-message gate now would require a second iter to add voice-tone after P038 lands (effort double-spend) and would surface in npm releases as an incomplete feature. WSJF stays at 1.5 under the P076 transitive rule until P038 ships; AFK loops should skip P082 with `upstream-blocked` reason category citing P038 (and the README ranking should reflect WSJF 1.5 not 6.0 — re-rate at next `/wr-itil:review-problems` invocation).
 
+## Scope expansion (2026-05-17 user direction)
+
+**P082 also includes a cognitive accessibility check.** Commit messages reach human readers across `git log`, GitHub PR commits tab, release pages, CHANGELOG, and `git shortlog` contributor reports. Cognitive accessibility (WCAG 2.2 SC 3.1.5 Reading Level, COGA guidance on plain language, sentence structure, and clarity) is a third evaluator domain alongside voice-tone and content-risk:
+
+- **Voice-tone** (`@windyroad/voice-tone`) — AI-sounding output, em-dashes, hedging, brand-voice alignment.
+- **Content-risk** (`@windyroad/risk-scorer`) — leaking metrics, secrets, confidentials, business-metric disclosure.
+- **Cognitive accessibility** (NEW — plugin TBD; candidate `@windyroad/cognitive-a11y` or extension of voice-tone) — plain-language assessment, reading level, sentence complexity, jargon flagging, structure clarity. Aligns with the `cognitive-accessibility` agent persona that already exists in the global accessibility-agents toolkit (`~/CLAUDE.md` § Available Specialist Agents).
+
+The evaluator triple composes at the same `PreToolUse:Bash` matcher and shares the same fail-soft / fail-loud verdict shape per ADR-028. Architectural choice (single hook with three evaluators / three chained hooks / three subagent calls) is a design-question to resolve at implementation; the SCOPE is now three evaluators, not two.
+
+Symmetric scope expansion targets — P038 (voice-tone gate on external comms), P064 (risk-gate on external comms), and P073 (voice-tone/risk-gate on changeset authoring) — should also acquire the cognitive-accessibility evaluator at the same external-comms surface (every reader-facing prose surface deserves the same clarity bar). Flag for at-touch review in those tickets when next worked.
+
 ## Description
 
 User direction (2026-04-21 interactive, verbatim):
@@ -156,7 +168,8 @@ P038 (Open, XL) propagates XL transitive effort per P076. P064 (`.verifying.md`)
 - **P070** (`docs/problems/070-report-upstream-does-not-check-for-existing-upstream-issues.open.md`) — maintainer-annoyance risk evaluator. P082's content-risk evaluator is a sibling evaluator domain.
 - **P076** (`docs/problems/076-wsjf-does-not-model-transitive-dependencies.open.md`) — transitive-dependency rule used in this ticket's effort + WSJF re-rates.
 - **P081** (`docs/problems/081-structural-content-tests-are-wasteful-tdd-agent-should-require-behavioural.open.md`) — tests for the new hook must be behavioural per this direction; don't ship structural-grep assertions on the hook script.
-- **ADR-028** (`docs/decisions/028-external-comms-gate.proposed.md` — amended this session for external-comms cluster) — amendment target or sibling ADR for the commit-message surface class.
+- **ADR-028** (`docs/decisions/028-external-comms-gate.proposed.md` — amended this session for external-comms cluster) — amendment target or sibling ADR for the commit-message surface class. Per 2026-05-17 scope expansion, ADR-028 also gains the cognitive-accessibility evaluator at the same surface.
+- **WCAG 2.2 SC 3.1.5 (Reading Level)** + **COGA (Cognitive Accessibility Guidance)** — standards anchor for the cognitive-accessibility evaluator. The global `cognitive-accessibility` specialist agent already exists in `~/CLAUDE.md` § Available Specialist Agents and is the reference implementation for the evaluator's verdict shape.
 - **ADR-013** (`docs/decisions/013-structured-user-interaction-for-governance-decisions.proposed.md`) — Rule 6 non-interactive fail-safe for AFK iteration-subagent commit-message gates.
 - **ADR-014** (`docs/decisions/014-governance-skills-commit-their-own-work.proposed.md`) — skills that commit their own work (manage-problem, create-adr, run-retro, etc.) must pass through this new gate.
 - **ADR-015** (`docs/decisions/015-on-demand-assessment-skills.proposed.md`) — risk-scorer subagent-type precedent; content-risk evaluator follows same pattern.
