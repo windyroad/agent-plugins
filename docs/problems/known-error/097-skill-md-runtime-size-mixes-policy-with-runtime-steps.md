@@ -201,10 +201,40 @@ Pressure is **accelerating**. Phase 1 ships the declarative contract to slow the
 
 Phase 2 (top-3 offender extraction: manage-problem, work-problems, run-retro) and Phase 3 (remaining top-10 + project-local install-updates) are **`Blocked by: P081`** Layer B — the harness primitives needed to retrofit the 80 structural-grep bats assertions on manage-problem alone (identified in the 2026-04-27 audit) without losing coverage. The unblock criterion lives on P081's ticket, not this ticket.
 
+## Empirical baseline (2026-05-17 — work-problems iter 8)
+
+First concrete application of ADR-054's sibling-`REFERENCE.md` pattern: `packages/retrospective/skills/analyze-context/SKILL.md`. Picked as a low-coupling WARN-band target outside the P081-blocked top-10 cohort, to validate the mechanic end-to-end before P081 Layer B unblocks the heavy-coupling extraction work.
+
+**Architect verdict** (PASS, 2026-05-17): scope ADR-054-compliant; `analyze-context` (rank ~14 by size, OVER WARN only, NOT in top-10 MUST_SPLIT cohort) is outside Phase 2-3's named block — the P081 dependency does not bind. Token-by-token verification confirmed all 19 structural-grep assertions in the sibling bats anchor runtime sections that don't move; bats remain green post-extraction.
+
+**JTBD verdict** (PASS): JTBD-001 / JTBD-006 / JTBD-101 served; first canonical empirical example of the ADR-054 pattern for downstream plugin authors to copy.
+
+**Risk verdict** (CONTINUE / Very Low): mechanical content move; user-invoked skill (per ADR-043 never-auto-fires); single-skill blast radius.
+
+**Extraction shape**:
+- Moved `## Composition with sibling measurements` (~700B) and `## ADRs cited` (~1KB) from `SKILL.md` → new sibling `REFERENCE.md`
+- Added 2 lazy-load pointer lines to `SKILL.md` per ADR-054 § "Sibling REFERENCE.md pattern" (~280B total — well under the 1.6KB ceiling)
+- REFERENCE.md uses single `# analyze-context — Reference` H1 + one-line orientation paragraph per architect verdict (no frontmatter required per ADR-054 line 88)
+
+**Measurement**:
+
+| File | Before | After | Δ |
+|---|---:|---:|---:|
+| `analyze-context/SKILL.md` bytes | 15,638 | 14,426 | **-1,212 (-7.7%)** |
+| `analyze-context/REFERENCE.md` bytes | — | 2,249 | new |
+| Structural-grep bats (sibling test/) | 18 green | 18 green | no regression |
+| `check-skill-md-budgets.sh` bats | 21 green | 21 green | no regression |
+| Skill remains OVER WARN | yes | yes | acceptable per ADR-054 § "Phase 2-3 sequencing" (WARN-band is rotation-candidate; full bring-under-budget is opportunistic follow-on) |
+
+**Phase 2-3 follow-ons captured per P179 carve-out** (umbrella-per-cohort granularity per architect Q6):
+- **P241** — ADR-054 sibling-REFERENCE.md extraction MUST_SPLIT cohort (10 skills incl. work-problems / manage-problem / run-retro). `Blocked by: P081` Layer B.
+- **P242** — ADR-054 sibling-REFERENCE.md extraction for project-local `.claude/skills/install-updates/`. Coupling-dependent block; may unblock independently of P241.
+- **P243** — ADR-054 sibling-REFERENCE.md extraction WARN-band cohort (24+ skills OVER WARN but below MUST_SPLIT). Defer-permitted per ADR-054 line 100; opportunistic per-touch with escalation to P241 if heavy-coupling discovered.
+
 ## Dependencies
 
-- **Blocks**: (none)
-- **Blocked by**: P081 (structural-content tests blocker for any meaningful `[reference]` extraction; identified during Phase 1 audit 2026-04-27. P081 Layer A landed in ADR-052 2026-05-03; Phase 2-3 here gates on Layer B harness primitives)
+- **Blocks**: P241 (MUST_SPLIT cohort umbrella), P242 (install-updates project-local), P243 (WARN-band cohort umbrella)
+- **Blocked by**: (none for empirical-baseline scope; P241 inherits the P081 Layer B block)
 - **Composes with**: P091 (parent meta), P095 (sibling — UserPromptSubmit), P096 (sibling — PreToolUse/PostToolUse), P098 (sibling — project-owned context contributors)
 
 ## Related

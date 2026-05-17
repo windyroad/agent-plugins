@@ -40,6 +40,13 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 1.5 | P180 | Agent defers mitigation selection to user during active incident — surfaces mitigation choice as user-authority when SKILL contract empowers agent-driven reversible mitigations | 3 Med | Open | M | 2026-05-10 |
 | 1.5 | P181 | PostToolUse `architect-mark-reviewed.sh` verdict-grep is fragile — `"ISSUES FOUND"` substring anywhere blocks marker even when proposed-change verdict is PASS | 3 Med | Open | M | 2026-05-11 |
 | 1.5 | P236 | AFK iter queues "proceed-vs-defer" as direction-setting when the framework's re-evaluate-when-X trigger has already fired (sibling to P132 / P234 / P135 / ADR-044; preferred fix: iter classifier rule — trigger-fired → silent proceed, not outstanding_questions) | 3 Med | Open | M | 2026-05-17 |
+| 1.5 | P237 | Phase 3a — `wr-itil-plugin-maturity-populate` writes `plugin.json` `maturity:` field from Phase 2 NDJSON (P087 child) | 3 Med | Open | M | 2026-05-17 |
+| 1.5 | P238 | Phase 3b — plugin maturity renderer + drift detector (P087 child) | 3 Med | Open | M | 2026-05-17 |
+| 1.5 | P239 | Phase 3c — plugin maturity bats doc-lint (P087 child) | 3 Med | Open | M | 2026-05-17 |
+| 1.5 | P240 | Phase 3d — JTBD outcome amendments for maturity rollout (P087 child) | 3 Med | Open | M | 2026-05-17 |
+| 1.5 | P241 | ADR-054 sibling-REFERENCE.md extraction — MUST_SPLIT cohort umbrella (10 skills; blocked by P081 Layer B) | 9 MedH | Open | XL | 2026-05-17 |
+| 1.5 | P242 | ADR-054 sibling-REFERENCE.md extraction — install-updates project-local (coupling-dependent block) | 6 Med | Open | M | 2026-05-17 |
+| 1.5 | P243 | ADR-054 sibling-REFERENCE.md extraction — WARN-band cohort umbrella (24+ skills; defer-permitted opportunistic-per-touch) | 4 LowM | Open | L | 2026-05-17 |
 | 1.5 | P045 | Auto plugin install after governance release (deferred install on next session start per 2026-04-20 direction) | 6 Med | Open | L | 2026-04-19 |
 | 1.5 | P079 | No inbound sync of upstream-reported problems — reports filed via the intake templates never surface in the local backlog (re-rated 6.0 → 1.5 transitive 2026-04-26 — assessment-pipeline scope blocked by P038/P064) | 12 High | Open | L | 2026-04-21 |
 | 1.5 | P014 | No lightweight aside invocation for governance skills (master tracker for ADR-032 — capture-* sibling skills + pending-questions hook + supersession cleanup) | 12 High | Open | XL | 2026-04-16 |
