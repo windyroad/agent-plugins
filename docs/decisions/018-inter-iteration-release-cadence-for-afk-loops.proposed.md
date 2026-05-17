@@ -113,6 +113,35 @@ Rationale: I002 (2026-05-11, `docs/incidents/I002-release-pressure-and-wip-limit
 
 The at-or-below-appetite drain mechanism is otherwise unchanged. Above-appetite behaviour remains governed by ADR-042 per the 2026-04-22 amendment. P162 (`docs/problems/open/162-codify-dogfood-graduation-criteria-with-counterfactual-risk-assessment-for-held-changesets.md`) Phase 4 lands this amendment.
 
+### Amendment 2026-05-18 — Drain trigger is releasable material, not residual band (P250)
+
+The original Mechanism predicates the drain on residual risk reaching the appetite band ("If the returned `push` or `release` score is at or above the appetite threshold (4/25, 'Low' band per `RISK-POLICY.md`), the orchestrator MUST drain the queue"). This codifies an accumulation-permitted-below-threshold semantic that violates the user's release principle and the symmetric-balance principle established in ADR-061 Rule 1. P250 (2026-05-17, `docs/problems/open/250-work-problems-step-6-5-within-appetite-no-drain-clause-defers-low-risk-releases-encoding-accumulation.md`) captures the user's verbatim direction: *"You don't want to accumulate risk. If it's low risk, you should release."*
+
+The amended drain condition reads:
+
+```
+Drain when: pipeline residual ≤ 4/25 AND
+            (any unpushed commits on HEAD..origin/<base> OR
+             .changeset/ non-empty OR
+             docs/changesets-holding/ contains entries that satisfy ADR-061 Rule 1
+             AND are not VP-blocked per ADR-061 Rule 2)
+
+No drain when: pipeline residual ≤ 4/25 AND empty queue
+               (no unpushed commits AND no .changeset/ entries AND
+                no graduation-eligible held entries)
+               — literally nothing to release; the genuine no-op fast-path.
+
+Above-appetite (≥ 5/25): route to ADR-042 auto-apply (unchanged).
+```
+
+The Mechanism bullet that previously read *"If the returned `push` or `release` score is at or above the appetite threshold (4/25, 'Low' band per `RISK-POLICY.md`), the orchestrator MUST drain the queue before starting the next iteration"* is amended to read: *"If the residual score is within appetite (≤ 4/25) AND there is releasable material in the queue (any unpushed commits, `.changeset/` non-empty, or graduation-eligible held entries per ADR-061 Rule 1), the orchestrator MUST drain the queue before starting the next iteration. If the residual is within appetite AND the queue is empty, no drain is needed (literally nothing to release). Above-appetite states (≥ 5/25) route to ADR-042 per the 2026-04-22 amendment."*
+
+Rationale: the at-appetite-only-drain semantic encoded "accumulate until the safety band is breached" as policy. Under repeated low-risk iterations the agent silently accumulated unreleased changesets across multiple iters, then required a re-score round-trip (~$0.15-0.30 each) to detect the threshold breach, then drained a larger cumulative batch with a larger cumulative risk envelope. The amended trigger collapses this to "release every iter that produces releasable material, when residual is within appetite" — the smallest, freshest releases that still respect the never-release-above-appetite invariant. The Above-appetite branch (ADR-042) remains the safety gate; the within-appetite branch is now an action gate driven by *presence of releasable material*, not by residual reaching a band threshold.
+
+ADR-061 Rule 1 alignment: ADR-061's symmetric-balance principle (`release-risk ≤ problem-ticket Priority` → release/graduate) is the parent principle this amendment realises at the release-cadence surface. The accumulation-permitted-below-threshold semantic was a direct violation of that principle on the `/wr-itil:work-problems` Step 6.5 surface.
+
+P250 Phase 1 lands this amendment alongside the SKILL.md Step 6.5 amendment and bats coverage. Sibling P246 / P247 / P234 / P145 / P148 remain Open for their respective SKILL surfaces (meta-class consistency tracked via run-retro pattern detection, not through this ADR's scope).
+
 ## Consequences
 
 ### Good

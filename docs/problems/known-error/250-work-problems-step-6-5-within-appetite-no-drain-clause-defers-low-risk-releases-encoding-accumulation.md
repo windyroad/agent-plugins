@@ -1,10 +1,11 @@
 # Problem 250: work-problems Step 6.5 "≤3 within appetite — no drain" clause defers low-risk releases, encoding accumulation
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-05-17
+**Root cause confirmed**: 2026-05-18
 **Priority**: 12 (High) — Impact: 3 (Moderate — encodes accumulation against the RISK-POLICY appetite invariant; defers low-risk releases against explicit user direction "If it's low risk, you should release") × Likelihood: 4 (Likely — fires on every Step 6.5 pass where there is something to release but the cohort isn't full AND risk is below 4/Low appetite; observed pattern, not hypothetical)
 **Effort**: M (Step 6.5 SKILL.md contract amendment — drop "at-appetite-only drain" semantics; drain whenever there is something to release; bats coverage for the new drain condition; potential ADR-018 amendment to align cadence framing with no-accumulation invariant)
-**WSJF**: 12/2 = **6.0** (Open multiplier 1.0; re-rated 2026-05-17 from placeholder during `/wr-itil:review-problems` — ties with P234 / P162 at top of WSJF ranking; sibling P246/P247 fictional-defer class at release-cadence surface)
+**WSJF**: 12/2 = **6.0** (raw Priority/Effort retained per README display convention; Known-Error-first tiebreak per `/wr-itil:work-problems` Step 3; fix landed in `/wr-itil:work-problems` iter 2026-05-18; transitions to Verifying on release per ADR-022)
 **Type**: technical
 
 ## Description
@@ -66,14 +67,50 @@ Currently manual: user catches the "no drain — within appetite" decision + dir
 
 ## Root Cause Analysis
 
+### Root cause (confirmed 2026-05-18)
+
+The Step 6.5 classification clause `Within appetite (≤ 3/25) — no drain needed` codified an accumulation-permitted-below-threshold semantic that violated the symmetric-balance principle (ADR-061 Rule 1) and the user's release principle. The drain trigger pivoted on residual band reaching appetite, not on presence of releasable material. The defective semantic was inherited from ADR-018 line 74-76 (Mechanism: *"If the returned `push` or `release` score is at or above the appetite threshold (4/25, 'Low' band per `RISK-POLICY.md`), the orchestrator MUST drain"*).
+
+### Fix shape (landed 2026-05-18)
+
+Three-band classification pivoting on releasable material:
+
+1. **Above appetite (≥ 5/25)** → ADR-042 auto-apply (unchanged).
+2. **Within appetite (≤ 4/25) AND releasable material** (any unpushed commits OR any `.changeset/` entries OR any graduation-eligible held entries per ADR-061 Rule 1) → drain via standard `push:watch` then `release:watch`.
+3. **Within appetite (≤ 4/25) AND empty queue** → no drain (literally nothing to release; the genuine no-op fast-path).
+
+The residual band remains the safety check (above-appetite never releases); the within-appetite branch is now an action gate driven by presence of releasable material.
+
 ### Investigation Tasks
 
-- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Audit `/wr-itil:work-problems` SKILL.md Step 6.5 classification — propose the binary or three-band redesign per the Description above
-- [ ] Audit ADR-018 (release-cadence policy parent) for the "at-appetite-only drain" semantics; amend if the SKILL contract changes
-- [ ] Audit ADR-061 (dogfood-graduation criteria) for the same defective clause shape — Rule 1 symmetric balance is the principle; check whether the SKILL surfaces consistently apply it (P246 already captured one inconsistency at the cohort-graduation surface)
-- [ ] Cross-reference P246 (calendar trigger), P247 (Tier 3 Branch B leave-as-is), P234 (fictional defer), P145 (recurring-defer Tier 3) — all siblings of the same meta-class
-- [ ] Create reproduction test — bats fixture: iter commits a 1/1/1 score; orchestrator's Step 6.5 should drain (not skip)
+- [x] Re-rate Priority and Effort at next /wr-itil:review-problems — completed during /wr-itil:review-problems 2026-05-17 (WSJF 6.0; tied with P234/P162 at top)
+- [x] Audit `/wr-itil:work-problems` SKILL.md Step 6.5 classification — three-band redesign landed (architect verdict: three-band preferred over binary; preserves no-op fast-path)
+- [x] Audit ADR-018 (release-cadence policy parent) for the "at-appetite-only drain" semantics; amend if the SKILL contract changes — Amendment 2026-05-18 landed in same commit per ADR-014 single-unit-of-work
+- [x] Audit ADR-061 (dogfood-graduation criteria) for the same defective clause shape — ADR-061 Rule 1 IS the parent principle the SKILL was violating; no ADR-061 amendment needed (the principle was already correct; only the Step 6.5 implementation drifted)
+- [x] Cross-reference P246 / P247 / P234 / P145 / P148 — captured in Change Log; siblings remain Open for their own SKILL surfaces (meta-class consistency tracked via run-retro pattern detection)
+- [x] Create reproduction test — bats fixture: iter commits a 1/1/1 score; orchestrator's Step 6.5 should drain (not skip) — landed at `packages/itil/skills/work-problems/test/work-problems-step-6-5-always-drain.bats` (24 contract-assertion tests; ADR-037 Permitted Exception class)
+
+### Verification (post-release)
+
+- After release, observe `/wr-itil:work-problems` AFK loops with low-risk iters (1/1/1 to 3/3/3 scores).
+- Expected: orchestrator drains after each iter that produces releasable material (an unpushed commit OR a new `.changeset/` entry).
+- Counter-expected: orchestrator skipping the drain at low residual with a non-empty queue.
+- Verification window: 5 AFK loop iterations across ≥2 sessions.
+
+## Change Log
+
+### 2026-05-18 — Phase 1 landed (Known Error)
+
+- **SKILL.md Step 6.5 classification amended** (`packages/itil/skills/work-problems/SKILL.md` lines 538-552): defective "Within appetite (≤ 3/25) — no drain needed" + "At appetite (= 4/25) — drain" two-band collapsed into the new three-band shape pivoting on releasable material. Quoted the user's verbatim direction inline for traceability.
+- **Non-Interactive Decision Making table updated** (`packages/itil/skills/work-problems/SKILL.md` line ~679): old "Pipeline risk at appetite (push or release = 4/25)" row replaced by two rows — one for the within-appetite-with-releasable-material drain trigger, one for the empty-queue no-drain fast-path.
+- **ADR-018 amended** (`docs/decisions/018-inter-iteration-release-cadence-for-afk-loops.proposed.md`): new "Amendment 2026-05-18 — Drain trigger is releasable material, not residual band" section added after the 2026-05-15 graduatable-held-changeset disjunct amendment. ADR-018 is `.proposed.md` so amendment is in-place; no supersession ceremony.
+- **Bats coverage added** (`packages/itil/skills/work-problems/test/work-problems-step-6-5-always-drain.bats`): 24 contract-assertion tests covering the new three-band classification, regression guards against re-introducing the defective wording, ADR-018 amendment presence, Decision Making table row updates, and cross-reference preservation. All pass.
+- **Architect verdict** (in-iter): three-band preferred over binary (preserves no-op fast-path); ADR-018 amendment in-scope (in same commit per ADR-014 single-unit-of-work); ADR-061 alignment confirmed.
+- **JTBD verdict** (in-iter): aligned with JTBD-006 (Outcome 2 — never accumulate) and JTBD-002 (small frequent releases).
+
+**Sibling-class bounding**: P246 (calendar trigger), P247 (Tier 3 Branch B leave-as-is), P234 (fictional defer parent), P145 (Tier 3 predecessor), P148 (Stage 1 ticketing fictional-defer) remain Open. The meta-class consistency principle (no accumulation-permitted-below-threshold) is the shared invariant; each sibling has its own SKILL surface. P250's fix is bounded to Step 6.5 only.
+
+**Transition**: Open → Known Error. Will transition Known Error → Verifying on release per ADR-022.
 
 ## Dependencies
 

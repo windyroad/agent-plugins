@@ -537,7 +537,7 @@ After the iteration's commit lands and before the release-cadence check, drain a
 
 ### Step 6.5: Release-cadence check (per ADR-018, above-appetite branch per ADR-042)
 
-After the iteration's commit lands but before starting the next iteration, check whether the unreleased queue would push pipeline risk to or above appetite. This prevents silent accumulation of unreleased changesets across AFK iterations (P041). **The orchestrator MUST NOT release above appetite under any circumstance** — above-appetite states route to the ADR-042 auto-apply loop or halt.
+After the iteration's commit lands but before starting the next iteration, check whether there is releasable material to drain. This prevents silent accumulation of unreleased changesets across AFK iterations (P041, P250) — accumulation costs audit fidelity and increases future drain risk with no governance benefit when residual stays within appetite. **The orchestrator MUST NOT release above appetite under any circumstance** — above-appetite states route to the ADR-042 auto-apply loop or halt.
 
 **Mechanism — delegate, do not re-implement scoring:**
 
@@ -545,10 +545,10 @@ After the iteration's commit lands but before starting the next iteration, check
    - **Primary**: delegate to subagent type `wr-risk-scorer:pipeline` via the Agent tool.
    - **Fallback**: if that subagent type is not available, invoke skill `/wr-risk-scorer:assess-release` via the Skill tool. The skill wraps the same pipeline subagent.
 2. Read the returned `RISK_SCORES: commit=X push=Y release=Z` line and the `RISK_REMEDIATIONS:` block (if present).
-3. **Classify the residual**:
-   - **Within appetite (≤ 3/25)** — no drain needed. Proceed to Step 6.75.
-   - **At appetite (= 4/25)** — drain the queue per the Drain action below, then proceed to Step 6.75.
+3. **Classify the residual + queue state (P250)**:
    - **Above appetite (≥ 5/25)** — route to the **Above-appetite branch** below. Do NOT drain. Do NOT proceed to Step 6.75 until either (a) the auto-apply loop re-converges within appetite and drain succeeds, or (b) Rule 5 halt fires.
+   - **Within appetite (≤ 4/25) AND there is releasable material** (any unpushed commits on `HEAD..origin/<base>` OR any entries in `.changeset/` OR any graduation-eligible entries in `docs/changesets-holding/` per ADR-061 Rule 1 that are not VP-blocked per Rule 2) — drain the queue per the Drain action below, then proceed to Step 6.75. The release-action threshold is "is there something to release?", NOT "has accumulated risk reached the safety band?" Per user direction 2026-05-17 (P250 Description): *"If it's low risk, you should release."* Low cost to release + low residual risk = release now; never accumulate.
+   - **Within appetite (≤ 4/25) AND empty queue** (no unpushed commits AND no `.changeset/` entries AND no graduation-eligible held entries) — no drain (literally nothing to release). Proceed to Step 6.75. This is the genuine no-op fast-path; the gate is *absence of releasable material*, not residual band.
 
 **Drain action (non-interactive, policy-authorised per ADR-013 Rule 6):**
 
@@ -676,7 +676,8 @@ When `AskUserQuestion` is unavailable or the user is AFK, the skill (and the del
 | Scope expansion during work | Update problem file, re-score WSJF, move to next problem instead of continuing |
 | Commit when risk within appetite | Auto-commit (manage-problem step 9e fallback) |
 | Commit when risk above appetite | Skip commit, report uncommitted state |
-| Pipeline risk at appetite (push or release = 4/25) | Drain release queue (`push:watch` then `release:watch`) before next iteration — per ADR-018 (Step 6.5) |
+| Pipeline risk within appetite (≤ 4/25) with releasable material (any unpushed commits OR any `.changeset/` entries OR any graduation-eligible held entries per ADR-061 Rule 1) | Drain release queue (`push:watch` then, if releasable changesets exist, `release:watch`) before next iteration — per ADR-018 (Step 6.5) as amended by P250. Trigger is *presence of releasable material*, not residual band reaching appetite. User direction 2026-05-17: "If it's low risk, you should release." |
+| Pipeline risk within appetite (≤ 4/25) AND empty queue (no unpushed commits AND no `.changeset/` AND no graduation-eligible held entries) | No drain — literally nothing to release. Proceed directly to Step 6.75. The genuine no-op fast-path per P250. |
 | Post-release plugin cache refresh between iters (P233) | After a successful within-appetite Drain action shipped a release to npm, chain `/install-updates` to refresh the plugin cache before the next iter dispatches. Conditional on actual release (skipped when `push:watch` ran alone with no changeset); non-blocking on `/install-updates` failure (degrades to cache-stays-stale, equivalent to pre-amendment behaviour). Mid-loop ask discipline preserved by treating any `/install-updates` AskUserQuestion surface AS the Non-interactive fallback dry-run path. Per ADR-013 Rule 5 + ADR-044 + P130 + P106 + P233 (Step 6.5 Post-release cache refresh subsection). |
 | CI failure during Step 6.5 drain (within-appetite branch) | Diagnose via `gh run view --log-failed`, classify against the closed fixable-in-iter allow-list (P081-class stale-grep-string, hook stub mismatch, test ID drift, environmental flake), fix-and-continue for fixable classes (each retry rides its own ADR-014 commit gate), 3-retry cap per iteration, halt for unrecoverable classes. Ambiguous classification defaults to halt. ADR-013 Rule 5 policy-authorised. Per ADR-026 grounding + ADR-044 framework-resolution boundary + P140 (Step 6.5 Failure handling). |
 | Pipeline risk above appetite (push or release >= 5/25) | Auto-apply scorer remediations incrementally (ADR-042 Rule 2). The agent reads suggestions and decides what to do. Re-score after each apply; drain when within appetite. **Never release above appetite** (ADR-042 Rule 1) — no AskUserQuestion shortcut. Halt the loop with `outcome: halted-above-appetite` if the loop exhausts without convergence (ADR-042 Rule 5). Verification Pending commits excluded from auto-revert (Rule 2b). Per ADR-042 (Step 6.5 Above-appetite branch). |
