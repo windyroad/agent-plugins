@@ -2,16 +2,16 @@
   "enabledPlugins": {
     "wr-c4@windyroad": true,
     "wr-wardley@windyroad": true,
-    "wr-connect@windyroad": true,
     "discord@claude-plugins-official": true,
     "fakechat@claude-plugins-official": true,
-    "wr-jtbd@windyroad": true,
     "wr-style-guide@windyroad": true,
     "wr-voice-tone@windyroad": true,
+    "wr-connect@windyroad": true,
+    "wr-jtbd@windyroad": true,
     "wr-tdd@windyroad": true,
     "wr-architect@windyroad": true,
-    "wr-itil@windyroad": true,
+    "wr-risk-scorer@windyroad": true,
     "wr-retrospective@windyroad": true,
-    "wr-risk-scorer@windyroad": true
+    "wr-itil@windyroad": true
   }
 }
