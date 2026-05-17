@@ -1,5 +1,30 @@
 # @windyroad/problem
 
+## 0.33.0
+
+### Minor Changes
+
+- 229539c: P170 Phase 3 P3.1 + Phase 4 P4.2 + I12 invariant: `/wr-itil:capture-problem` Step 1.5b JTBD-trace + persona dispatch. Extends Step 1.5 with a sibling dispatcher that resolves `jtbd_trace_value` (lexical detection of `JTBD-\d+` IDs in description, OR `--jtbd=` flag) and `persona_value` (`--persona=<value>` flag with closed-enum validation, OR derivation from cited JTBDs' frontmatter, OR AskUserQuestion fallback). New I12 hard-block per ADR-060 § Phase 3 + Phase 4 in-scope amendment (2026-05-13) Confirmation criterion 10: `type: user-business` AND empty `jtbd:` trace AND no `--jtbd` flag halts with stderr directive (forces JTBD trace on user-business problems; preserves persona-anchored JTBD-as-source-of-truth asymmetry). Nullable-field-conditional shape per ADR-060 line 536 — Step 1.5b dispatch keys on `jtbd_trace_value` and `persona_value` nullability, NEVER on `type` value as a control-flow branch (preserves I2 invariant; extends to Confirmation criterion 11 `persona:` field uniformity). Step 4 skeleton template carries `**JTBD**:` and `**Persona**:` body fields (matches existing `**Type**:` convention; YAML frontmatter migration deferred to Phase 4 follow-on). Skill flag table extends with `--jtbd=JTBD-NNN[,...]` and `--persona=<value>`. JTBD-301 firewall preserved — Step 1.5b is maintainer-side `/wr-itil:capture-problem` only; plugin-user-side `.github/ISSUE_TEMPLATE/problem-report.yml` MUST NOT prompt for JTBD or persona. Sibling helper extension: `update-jtbd-references-section.sh` body-field `**JTBD**:` extraction now composes with YAML-frontmatter `jtbd:` arrays in the existing `markdown-frontmatter-jtbd` mode (graceful fallback when frontmatter silent). 25 behavioural bats `capture-problem-step-1-5b-jtbd-trace.bats` green; full capture-problem suite 57/57 green; update-jtbd-references-related-problems.bats grows to 8/8 green (body-field test added). Held per ADR-042 atomic-cohort discipline — Phase 3 + Phase 4 graduate as one cohort.
+- 229539c: P246: `/wr-itil:work-problems` Step 6.5 — insert cohort-graduation pre-check before the Drain action.
+
+  When the within-appetite-with-releasable-material branch fires AND `docs/changesets-holding/` is non-empty, the orchestrator now invokes `wr-risk-scorer-evaluate-graduation` (the deterministic Rule 1a join + Rule 2 VP carve-out + Rule 3b cohort-grouping pass shipped in `@windyroad/risk-scorer` Phase 2a/2b) and branches per the 3-status taxonomy the evaluator emits:
+
+  - `status=resolved` — graduate. `git mv docs/changesets-holding/<basename> .changeset/<basename>`, append README "Recently reinstated" entry, amend the iter's main commit per ADR-042 Rule 3. Class=3b cohorts graduate atomically (Rule 3b cohort propagation). Policy-authorised silent proceed per ADR-013 Rule 5 + ADR-061 Rule 5.
+  - `status=vp-blocked` — skip per ADR-061 Rule 2 (Verification Pending carve-out).
+  - `status=halt-no-resolution` — halt at the new framework-prescribed "Step 6.5 cohort-graduation halt-no-resolution" halt point per ADR-061 Rule 1a terminal.
+
+  **Evidence-based, not time-based** (user direction 2026-05-17: _"Dogfooding makes sense, but it shouldn't be time based, it should be until we are happy that it's working as desired."_ + _"Why are we waiting? That seems to go against the principles if you ask me."_). Calendar predicates (`≥7 days in-repo dogfood`, `on or after <date>`) are NEVER a primary graduation trigger; the evaluator's `status=resolved` IS the graduation signal.
+
+  Composes with the P250 Step 6.5 drain-on-releasable-material amendment (iter 2 of this session): the pre-check fires on the same within-appetite branch P250 already covers, before the Drain action it already triggers.
+
+  Also updates `docs/changesets-holding/README.md` Process section step 5 to state criterion is positive evidence (Rule 4 per-class evidence floor), not elapsed wall-clock time; cites user direction verbatim; preserves at-hold-time historical contracts in per-entry `Currently held` lines (architect verdict — not retroactively rewritten).
+
+  Bats coverage: 39 contract-assertion class fixtures at `packages/itil/skills/work-problems/test/work-problems-step-6-5-cohort-graduation.bats`.
+
+### Patch Changes
+
+- 229539c: P170 Phase 4 P4.1: `update-jtbd-references-section.sh` extension — adds a fourth `Related problems` lookup-table row (alongside `RFCs`, `Story Maps`, `Stories`) so JTBD files can auto-maintain a `## Related problems` reverse-trace section sourced from problem-ticket frontmatter `jtbd:` arrays. Per ADR-060 § Phase 3 + Phase 4 in-scope amendment (2026-05-13) P4.1 (architect finding A4 + JTBD finding F5). Lookup-table row addition only — no new helper, no per-section-name branching (structural test asserts). Adds `SECTION_ID_PREFIX` cell to render `P<NNN>` for problem rows. `extract_status_md` extends to fall back to body `**Status**:` lines when frontmatter `status:` absent (preserves Story/RFC frontmatter compat). 7-test behavioural bats fixture green; full itil/scripts suite 229/229 green. Held per ADR-042 / P162 atomic-cohort discipline — Phase 3 + Phase 4 ship as a single graduation cohort once end-of-chain user verification fires.
+
 ## 0.32.3
 
 ### Patch Changes
