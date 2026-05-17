@@ -1,6 +1,6 @@
 # RFC Backlog
 
-> Last reviewed: 2026-05-15 **RFC-004 Verification Pending** — all seven slices (A-G) shipped; in-progress → verifying transition rode the Slice G commit per the README transition-table contract. Closure gated on user-side behavioural replay per ADR-062 § Confirmation criterion 3 (four synthetic-report scenarios). RFC-002 still Verification Pending (T6 deferred to 2026-05-17 calendar gate). RFC-001 verification gated on RFC-002 reaching `closed`.
+> Last reviewed: 2026-05-17 **RFC-005 proposed → accepted transition via /wr-itil:manage-rfc** — full intake of "RFC-first trace invariant not enforced at fix-time" (drives P251, captured this session via user correction). Scope ratified F1-F7: gate placement `Open → Known Error` in `/wr-itil:manage-problem` Step 7 (single gate, no new lifecycle state); atomic-fix carve-out Effort ≤ M skips ceremony with `--rfc-deferred <reason>` override hatch + structured `logs/i13-deviations.jsonl` log; problem-ticket frontmatter extended with `rfcs: [RFC-NNN, ...]` cardinality 0..N; iter dispatch hard-block with `logs/i13-iter-dispatch-denials.jsonl` + recovery-routing to `/wr-itil:capture-rfc`; structural hook `itil-i13-rfc-trace-gate.sh` PreToolUse:Bash sibling to P165 readme-refresh-discipline; story-map composition deferred (transitive guarantee via ADR-060 I7/I8); new I13 invariant amends ADR-060. Tasks decomposed B1-B10 with held-changeset graduation per ADR-042 / P162 (atomic graduation per ADR-060 architect finding 12). Architect PASS + JTBD PASS on accepted-transition pre-flight. Frontmatter `adrs:` extended to [ADR-060, ADR-051, ADR-052, ADR-042, ADR-044]; `jtbd:` extended to [JTBD-008, JTBD-001, JTBD-006, JTBD-101]. Considered Options / Alternatives Rejected section records F1/F2/F4 rejected alternatives for trace clarity at reassessment. Prior line-3 fragment (RFC-004 Verification Pending, 2026-05-15) rotated to `docs/rfcs/README-history.md` per P134.
 > Run `/wr-itil:manage-rfc review` to refresh once the manage-rfc skill ships.
 
 ## Status
@@ -132,8 +132,9 @@ One row per RFC in `proposed` / `accepted` / `in-progress` status. RFC-level WSJ
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported |
 |------|-----|-------|----------|--------|--------|----------|
+| 3.0 | RFC-005 | RFC-first trace invariant not enforced at fix-time | 3 Med | accepted | M | 2026-05-17 |
 
-(Empty — RFC-004 transitioned to Verification Pending 2026-05-15; see Verification Queue below.)
+WSJF for RFC-005: Severity inherited from highest-severity traced problem (P251 = 3 Med); Status multiplier `accepted` = 2.0; Effort M divisor = 2; WSJF = (3 × 2.0) / 2 = 3.0.
 
 ## Verification Queue
 

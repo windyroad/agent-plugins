@@ -74,4 +74,4 @@ Possible interim workarounds (to validate):
 
 | RFC | Status | Title |
 |-----|--------|-------|
-| RFC-005 | proposed | RFC-first trace invariant not enforced at fix-time |
+| RFC-005 | accepted | RFC-first trace invariant not enforced at fix-time |
