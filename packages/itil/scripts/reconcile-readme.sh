@@ -36,10 +36,16 @@
 #
 # @problem P118
 # @problem P170 (RFC-002 — dual-tolerant migration window)
+# @problem P252 (Inbound Upstream Reports rows mis-attributed to VQ)
 # @adr ADR-014 (Reconciliation as preflight robustness layer)
 # @adr ADR-022 (Verification Pending lifecycle excludes from WSJF Rankings)
 # @adr ADR-031 (Per-state subdir is post-migration authoritative state signal)
 # @adr ADR-038 (Progressive disclosure — per-row byte budget)
+# @adr ADR-062 (Inbound upstream-report discovery + assessment pipeline)
+# @rfc RFC-004 (P079 inbound-upstream-report discovery)
+# @jtbd JTBD-006 (Progress the Backlog While I'm Away)
+# @jtbd JTBD-001 (Enforce Governance Without Slowing Down)
+# @jtbd JTBD-302 (Trust That the README Describes the Plugin I Just Installed)
 
 set -uo pipefail
 
@@ -108,13 +114,21 @@ shopt -u nullglob
 
 WSJF_START=$(grep -n '^## WSJF Rankings' "$README" | head -1 | cut -d: -f1)
 VQ_START=$(grep -n '^## Verification Queue' "$README" | head -1 | cut -d: -f1)
+# Inbound Upstream Reports (ADR-062 / RFC-004) sits between Verification
+# Queue and Closed when populated. Its `Matched local ticket` column
+# carries `| P<NNN> |` cross-refs that look like VQ rows but live in a
+# distinct section. The VQ slice MUST terminate at this header when
+# present, otherwise its rows get miscounted as VQ entries (P252).
+INBOUND_START=$(grep -n '^## Inbound Upstream Reports' "$README" | head -1 | cut -d: -f1)
 CLOSED_START=$(grep -n '^## Closed' "$README" | head -1 | cut -d: -f1)
 PARKED_START=$(grep -n '^## Parked' "$README" | head -1 | cut -d: -f1)
 END_LINE=$(wc -l < "$README")
 
-# Sentinel each end with the next section start (or EOF).
-WSJF_END=${VQ_START:-${CLOSED_START:-${PARKED_START:-$END_LINE}}}
-VQ_END=${CLOSED_START:-${PARKED_START:-$END_LINE}}
+# Sentinel each end with the next section start (or EOF). The VQ_END
+# cascade prefers INBOUND_START when present so Inbound rows are
+# excluded from VQ extraction (P252).
+WSJF_END=${VQ_START:-${INBOUND_START:-${CLOSED_START:-${PARKED_START:-$END_LINE}}}}
+VQ_END=${INBOUND_START:-${CLOSED_START:-${PARKED_START:-$END_LINE}}}
 CLOSED_END=${PARKED_START:-$END_LINE}
 PARKED_END=$END_LINE
 

@@ -860,3 +860,148 @@ EOF
   run "$SCRIPT" "$FIXTURE_DIR"
   [ "$status" -eq 0 ]
 }
+
+# ── P252: Inbound Upstream Reports section excluded from VQ slice ───────────
+#
+# Contract: when `docs/problems/README.md` carries a `## Inbound Upstream
+# Reports` section (per ADR-062 + RFC-004), its rows MUST NOT be counted as
+# Verification Queue rows. Pre-fix the script slices VQ as
+# `[VQ_START, CLOSED_START)`, which swallows the entire Inbound table and
+# mis-attributes its `| P<NNN> |` cross-ref cells to the VQ. Post-fix the
+# VQ slice terminates at `## Inbound Upstream Reports` when present.
+#
+# Behavioural assertion shape: reconcile against a README that has VQ
+# matching filesystem ground truth AND an Inbound Upstream Reports table
+# carrying cross-refs to Open tickets → exit 0. Pre-fix this would emit
+# 31-ish STALE entries. Post-fix it emits none.
+#
+# @problem P252
+# @adr ADR-062 (Inbound upstream-report discovery + assessment pipeline)
+# @rfc RFC-004 (P079 inbound-upstream-report discovery)
+# @jtbd JTBD-006 (Progress the Backlog While I'm Away)
+# @jtbd JTBD-302 (Trust That the README Describes the Plugin I Just Installed)
+
+@test "reconcile-readme P252: Inbound Upstream Reports cross-refs are NOT counted as Verification Queue rows" {
+  # Two Open tickets cross-referenced as inbound-mirror entries. Pre-fix
+  # the script slices VQ as [VQ_START, CLOSED_START), which swallows the
+  # Inbound table — both P-IDs get reported as STALE verification-queue.
+  # Post-fix the VQ slice terminates at Inbound; both IDs are correctly
+  # recognised as Open (their .open.md files exist) and no drift fires.
+  cat > "$FIXTURE_DIR/198-foo.open.md" <<EOF
+**Status**: Open
+EOF
+  cat > "$FIXTURE_DIR/199-bar.open.md" <<EOF
+**Status**: Open
+EOF
+  cat > "$FIXTURE_DIR/README.md" <<'EOF'
+## WSJF Rankings
+
+| WSJF | ID | Title | Severity | Status | Effort |
+|------|-----|-------|----------|--------|--------|
+| 5.0 | P198 | Foo | 12 High | Open | M |
+| 4.0 | P199 | Bar | 12 High | Open | M |
+
+## Verification Queue
+
+| ID | Title | Released | Likely verified? |
+|----|-------|----------|------------------|
+
+## Inbound Upstream Reports
+
+Inbound mirrors discovered via the discovery pipeline (ADR-062 / RFC-004).
+The `Matched local ticket` column carries cross-refs that look like VQ rows
+but live in a different section and MUST NOT be parsed as VQ entries.
+
+| # | Inbound | Matched local ticket |
+|---|---------|----------------------|
+| 1 | upstream/issues/42 | P198 |
+| 2 | upstream/issues/43 | P199 |
+
+## Closed
+
+| ID | Title | Closed via |
+|----|-------|-----------|
+EOF
+  run "$SCRIPT" "$FIXTURE_DIR"
+  # Clean state — both P-IDs are correctly Open on disk AND in WSJF
+  # Rankings; the Inbound section's cross-refs are scoped out.
+  [ "$status" -eq 0 ]
+  # Defensive: even if exit 0 lands by accident, output must not contain
+  # any false-positive STALE entries citing Inbound IDs.
+  ! echo "$output" | grep -q "P198 verification-queue"
+  ! echo "$output" | grep -q "P199 verification-queue"
+}
+
+@test "reconcile-readme P252: real VQ drift surfaces, Inbound cross-refs stay silent" {
+  # Mixed fixture: one genuine STALE VQ row (P056 — README lists in VQ,
+  # disk has it Closed) + an Inbound section with cross-refs to Open
+  # tickets. Drift output MUST cite P056 only; Inbound IDs MUST NOT
+  # appear in any verification-queue drift line.
+  cat > "$FIXTURE_DIR/056-qux.closed.md" <<EOF
+**Status**: Closed
+EOF
+  cat > "$FIXTURE_DIR/198-foo.open.md" <<EOF
+**Status**: Open
+EOF
+  cat > "$FIXTURE_DIR/README.md" <<'EOF'
+## WSJF Rankings
+
+| WSJF | ID | Title | Severity | Status | Effort |
+|------|-----|-------|----------|--------|--------|
+| 5.0 | P198 | Foo | 12 High | Open | M |
+
+## Verification Queue
+
+| ID | Title | Released | Likely verified? |
+|----|-------|----------|------------------|
+| P056 | Qux | 2026-01-01 | yes |
+
+## Inbound Upstream Reports
+
+| # | Inbound | Matched local ticket |
+|---|---------|----------------------|
+| 1 | upstream/issues/42 | P198 |
+
+## Closed
+
+| ID | Title | Closed via |
+|----|-------|-----------|
+EOF
+  run "$SCRIPT" "$FIXTURE_DIR"
+  [ "$status" -eq 1 ]
+  # P056 is the genuine drift (in VQ, file is Closed).
+  echo "$output" | grep -q "P056"
+  # P198 must NOT appear in any verification-queue drift line — it's an
+  # Inbound cross-ref, not a VQ row.
+  ! echo "$output" | grep -q "P198 verification-queue"
+}
+
+@test "reconcile-readme P252: missing Inbound section preserves existing behaviour (back-compat)" {
+  # A README that does NOT have an Inbound Upstream Reports section must
+  # continue to slice VQ as [VQ_START, CLOSED_START) without regression.
+  # This guards against the fix accidentally requiring the Inbound header
+  # to exist.
+  cat > "$FIXTURE_DIR/056-qux.closed.md" <<EOF
+**Status**: Closed
+EOF
+  cat > "$FIXTURE_DIR/README.md" <<'EOF'
+## WSJF Rankings
+
+| WSJF | ID | Title | Severity | Status | Effort |
+|------|-----|-------|----------|--------|--------|
+
+## Verification Queue
+
+| ID | Title | Released | Likely verified? |
+|----|-------|----------|------------------|
+| P056 | Qux | 2026-01-01 | yes |
+
+## Closed
+
+| ID | Title | Closed via |
+|----|-------|-----------|
+EOF
+  run "$SCRIPT" "$FIXTURE_DIR"
+  [ "$status" -eq 1 ]
+  echo "$output" | grep -q "P056"
+}
