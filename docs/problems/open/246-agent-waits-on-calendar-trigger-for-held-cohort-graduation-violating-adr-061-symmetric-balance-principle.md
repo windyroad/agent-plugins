@@ -11,7 +11,15 @@
 
 Class-of-behaviour: when held-changeset cohorts in `docs/changesets-holding/` are eligible for graduation per ADR-061 Rule 1 symmetric balance (`release-risk ≤ problem-ticket Priority`) AND no negative evidence has accumulated, the agent waits on the calendar trigger (`≥7-day dogfood`) instead of evaluating actual risk and graduating now.
 
-The "≥7-day dogfood" is a CALENDAR FALLBACK for when risk-scorer evaluation is unavailable. The PRIMARY principle per ADR-061 Rule 1 is symmetric balance: release when current release-risk is at or below the held tickets' Priority. Treating the calendar as primary trigger violates the principle.
+### Refined framing (post-2026-05-17 user direction)
+
+The deeper defect: **the calendar trigger should not exist as a criterion at all**. The dogfood criterion is "positive evidence shows the surface works as desired" — that's an evidence threshold, not a time threshold. User direction at session 4 wrap: *"Dogfooding makes sense, but it shouldn't be time based, it should be until we are happy that it's working as desired."*
+
+Every existing reinstate-trigger in `docs/changesets-holding/README.md` is phrased as `≥7 days in-repo dogfood with <evidence condition> — review at /wr-itil:work-problems Step 6.5 on or after <date>, OR risk scorer downgrades release residual ≤ 4/25`. The calendar predicate (`≥7 days` / `on or after <date>`) is the load-bearing waste — when the evidence condition is met BEFORE 7 days, the calendar artificially delays graduation; when evidence is NEGATIVE (e.g. P166+P163 hook misfired 5+ times this session), the calendar's expiry would falsely promote graduation. Time tracks nothing relevant.
+
+Correct framing: graduate when **positive evidence shows the surface works as desired** (defined per-surface). Hold while **evidence is missing OR negative**. The risk-scorer's evaluation is the evidence-evaluation surface; if it can't reach a verdict, the answer is "need more evidence", not "wait 7 days".
+
+The "≥7-day dogfood" was originally a heuristic baseline from I001 / I002 manual graduations. It encoded the empirical observation that those particular surfaces took ~7-10 days to accumulate enough evidence to feel safe. That heuristic should NOT become a contract — it confuses "this much time happened" with "evidence accumulated".
 
 Evidence — 2026-05-17 session 4 iter 9 wrap:
 - 3-entry P087 atomic-cohort in `docs/changesets-holding/` (Phase 2a + 2b + 3a):
@@ -61,7 +69,9 @@ User issues direct graduation command. Currently manual.
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
 - [ ] Audit orchestrator Step 2.5 / Step 6.5 SKILL.md surfaces for calendar-vs-evaluator decision ordering
 - [ ] Wire the Phase 2b cohort-aware evaluator into Step 6.5 within-appetite drain check (and/or Step 2.5 loop-end emit)
-- [ ] Create reproduction test — empty cohort + populated cohort + cohort with evidence floor met → evaluator should emit reinstate; orchestrator should auto-graduate
+- [ ] **Amend ADR-061** to remove calendar-trigger phrasing from reinstate-trigger contracts — criterion is evidence-of-working-as-desired, not elapsed time. Per-surface evidence definitions replace per-surface day counts.
+- [ ] **Sweep `docs/changesets-holding/README.md` reinstate-trigger language** — strip `≥7 days in-repo dogfood` and `on or after <date>` predicates from all existing entries; replace with the positive-evidence threshold for each surface (e.g. "no false-positive deny observed across N adopter-relevant invocations" — but the N is evidence-count, not date).
+- [ ] Create reproduction test — empty cohort + populated cohort + cohort with evidence floor met → evaluator should emit reinstate; orchestrator should auto-graduate.
 
 ## Dependencies
 
