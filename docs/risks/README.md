@@ -84,6 +84,22 @@ R001 + R008 are confidentiality classes (different surfaces). R004 is a state-le
 | [R008](R008-credentials-in-committed-files.md) | Credentials / secrets in committed files | 15 (High) | 5 (Medium) | above |
 | [R009](R009-functional-defects-in-shipped-behaviour.md) | Functional defects in shipped plugin behaviour (bedrock) | 16 (High) | 8 (Medium) | above |
 | [R010](R010-semver-or-backward-compatibility-violation.md) | Semver / backward-compatibility violation on plugin contracts | 12 (High) | 4 (Low) | at appetite |
+| [R011](R011-load-bearing-commit-hook-first-release-blast-radius.md) | Load-bearing commit-hook first-release blast radius | — | — | pending review |
+| [R012](R012-rfc-chain-atomicity-precondition-breach.md) | RFC-chain atomicity / precondition breach | — | — | pending review |
+| [R013](R013-rfc-001-chain-atomicity-paired-capability-unmet.md) | RFC-001 chain atomicity / paired capability unmet | — | — | pending review |
+| [R014](R014-release-pressure-wip-limit-controls-not-firing.md) | Release-pressure / WIP-limit controls not firing | — | — | pending review |
+| [R015](R015-new-hook-first-landing-without-dogfood-window.md) | New hook first-landing without dogfood window | — | — | pending review |
+| [R016](R016-release-batch-r009-skill-prose-concentration-above-appetite.md) | Release-batch R009 skill-prose concentration above appetite | — | — | pending review |
+| [R017](R017-skill-prose-class-bats-deferred-residual-above-appetite.md) | Skill-prose class / bats-deferred residual above appetite | — | — | pending review |
+| [R018](R018-r009-bedrock-functional-defect-class-floor-medium.md) | R009 bedrock functional-defect class floor medium | — | — | pending review |
+| [R019](R019-external-comms-hook-source-without-dogfood-window.md) | External-comms hook source without dogfood window | — | — | pending review |
+| [R020](R020-new-hook-shipped-without-dogfood-window-bash-gate-class.md) | New hook shipped without dogfood window (Bash gate class) | — | — | pending review |
+| [R021](R021-new-user-facing-surface-no-dogfood-window.md) | New user-facing surface — no dogfood window | — | — | pending review |
+| [R022](R022-phase-3a-shipped-ahead-of-held-phase-2-dependencies.md) | Phase 3a shipped ahead of held Phase 2 dependencies | — | — | pending review |
+| [R023](R023-release-coordination-changeset-drift-phase-3a-ahead-of-phase-2.md) | Release-coordination changeset drift (Phase 3a ahead of Phase 2) | — | — | pending review |
+| [R024](R024-risk-catalog-empty-no-baseline-controls-documented.md) | Risk catalog empty / no baseline controls documented (obsolete — superseded by R001-R010 bootstrap) | — | — | pending review |
+
+> **Pending-review queue**: R011-R024 were auto-scaffolded by the Phase 2b drain on 2026-05-17 from `.afk-run-state/risk-register-queue.jsonl` (14 slugs accumulated since Phase 1 bootstrap). Each entry carries ADR-026 sentinels for ungrounded scoring fields and `Status: Active (auto-scaffolded — pending review)` for downstream human curation. Per ADR-056 §"Bad consequences" reassessment criterion #2 — several entries (R011, R015, R019, R020, R021 in the no-dogfood-window class; R012, R013 in the RFC-chain-atomicity class) are semantic duplicates from slug-drift across pipeline runs; curation will merge during review.
 
 ## Where we need more controls (above-appetite entries)
 
