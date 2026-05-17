@@ -86,6 +86,7 @@ See [ADR-011](../../docs/decisions/011-manage-incident-skill.proposed.md) for th
 | `/wr-itil:review-problems` | Re-rate every open and known-error ticket and refresh the WSJF ranking |
 | `/wr-itil:reconcile-readme` | Detect and correct drift between `docs/problems/README.md` and on-disk ticket inventory |
 | `/wr-itil:report-upstream` | Report a local problem as a structured issue against an upstream repository (ADR-024) |
+| `/wr-itil:check-upstream-responses` | Poll upstream issues we filed via `/wr-itil:report-upstream` and surface new comments / state changes / label changes since last check (P249 Phase 1; outbound symmetric counterpart to ADR-062 inbound discovery; serves [JTBD-004](../../docs/jtbd/solo-developer/JTBD-004-connect-agents.proposed.md)) |
 | `/wr-itil:capture-rfc` | Lightweight RFC-capture skill — mandatory problem-trace per ADR-060 I1 invariant; opens a coordinated multi-commit change traceable to ≥ 1 driving problem (Phase 1 of the Problem-RFC-Story framework, P170 / ADR-060) |
 | `/wr-itil:manage-rfc` | Heavyweight RFC intake + lifecycle management — proposed → accepted → in-progress → verifying → closed; sibling to `manage-problem` at the RFC tier (ADR-060) |
 | `/wr-itil:capture-story` | Lightweight story-capture skill — mandatory problem-trace AND JTBD-trace per ADR-060 I6 + I9 invariants; optional `--rfc` / `--story-map` flags (I7 + I8 enforce at `accepted` transition); drafts an INVEST-shaped sub-workstream entity under a parent RFC (Phase 2 of the Problem-RFC-Story framework, P170 / ADR-060) |
