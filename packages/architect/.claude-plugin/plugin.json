@@ -1,120 +1,122 @@
 {
   "description": "Architecture decision enforcement for Claude Code",
   "maturity": {
-    "band": "Experimental",
-    "schema_version": "2.0",
-    "hooks": {
-      "architect-detect": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+    "agents": {
+      "agent": {
+        "band": "Alpha",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 27,
-          "days_shipped": 39,
+          "days_shipped": 40,
+          "invocations_30d": 800
+        },
+        "schema_version": "2.0"
+      }
+    },
+    "band": "Experimental",
+    "bootstrapping": true,
+    "hooks": {
+      "architect-detect": {
+        "band": "Experimental",
+        "computed_at": "2026-05-18T11:42:50Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 27,
+          "days_shipped": 40,
           "invocations_30d": null
         },
         "schema_version": "2.0"
       },
       "architect-enforce-edit": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 27,
-          "days_shipped": 39,
+          "days_shipped": 40,
           "invocations_30d": null
         },
         "schema_version": "2.0"
       },
       "architect-mark-reviewed": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 27,
-          "days_shipped": 39,
+          "days_shipped": 40,
           "invocations_30d": null
         },
         "schema_version": "2.0"
       },
       "architect-plan-enforce": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 27,
-          "days_shipped": 39,
+          "days_shipped": 40,
           "invocations_30d": null
         },
         "schema_version": "2.0"
       },
       "architect-refresh-hash": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 27,
-          "days_shipped": 39,
+          "days_shipped": 40,
           "invocations_30d": null
         },
         "schema_version": "2.0"
       },
       "architect-slide-marker": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 27,
-          "days_shipped": 39,
+          "days_shipped": 40,
           "invocations_30d": null
         },
         "schema_version": "2.0"
       }
     },
+    "rollup_invocations_30d": 811,
+    "schema_version": "2.0",
     "skills": {
       "capture-adr": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 27,
-          "days_shipped": 39,
+          "days_shipped": 40,
           "invocations_30d": 4
         },
         "schema_version": "2.0"
       },
       "create-adr": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 27,
-          "days_shipped": 39,
-          "invocations_30d": 5
+          "days_shipped": 40,
+          "invocations_30d": 6
         },
         "schema_version": "2.0"
       },
       "review-design": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 27,
-          "days_shipped": 39,
+          "days_shipped": 40,
           "invocations_30d": 1
-        },
-        "schema_version": "2.0"
-      }
-    },
-    "agents": {
-      "agent": {
-        "band": "Alpha",
-        "computed_at": "2026-05-18T01:29:14Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 27,
-          "days_shipped": 39,
-          "invocations_30d": 778
         },
         "schema_version": "2.0"
       }

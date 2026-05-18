@@ -1,6 +1,6 @@
 # @windyroad/itil
 
-**ITIL-aligned IT service management for Claude Code.** Track recurring incidents, perform root cause analysis, and prioritise fixes using WSJF -- all inside your coding sessions. *Maturity: Experimental.*
+**ITIL-aligned IT service management for Claude Code.** Track recurring incidents, perform root cause analysis, and prioritise fixes using WSJF -- all inside your coding sessions. *Maturity: Experimental (suite-bootstrap window; 327 invocations / 30d).*
 
 Part of [Windy Road Agent Plugins](../../README.md).
 

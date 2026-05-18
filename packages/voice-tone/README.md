@@ -1,6 +1,6 @@
 # @windyroad/voice-tone
 
-**Voice and tone enforcement for Claude Code.** Reviews user-facing copy against your brand's voice and tone guide before it ships. *Maturity: Experimental.*
+**Voice and tone enforcement for Claude Code.** Reviews user-facing copy against your brand's voice and tone guide before it ships. *Maturity: Experimental (suite-bootstrap window; 169 invocations / 30d).*
 
 Part of [Windy Road Agent Plugins](../../README.md).
 

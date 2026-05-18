@@ -1,6 +1,6 @@
 # @windyroad/style-guide
 
-**Style guide enforcement for Claude Code.** Reviews CSS and UI component changes against your design system before they're applied. *Maturity: Experimental.*
+**Style guide enforcement for Claude Code.** Reviews CSS and UI component changes against your design system before they're applied. *Maturity: Experimental (suite-bootstrap window; 100 invocations / 30d).*
 
 Part of [Windy Road Agent Plugins](../../README.md).
 

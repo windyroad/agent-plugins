@@ -1,76 +1,78 @@
 {
   "description": "Style guide enforcement for Claude Code",
   "maturity": {
-    "band": "Experimental",
-    "schema_version": "2.0",
-    "hooks": {
-      "style-guide-enforce-edit": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+    "agents": {
+      "agent": {
+        "band": "Alpha",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 3,
-          "days_shipped": 39,
+          "days_shipped": 40,
+          "invocations_30d": 100
+        },
+        "schema_version": "2.0"
+      }
+    },
+    "band": "Experimental",
+    "bootstrapping": true,
+    "hooks": {
+      "style-guide-enforce-edit": {
+        "band": "Experimental",
+        "computed_at": "2026-05-18T11:42:50Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 3,
+          "days_shipped": 40,
           "invocations_30d": null
         },
         "schema_version": "2.0"
       },
       "style-guide-eval": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 3,
-          "days_shipped": 39,
+          "days_shipped": 40,
           "invocations_30d": null
         },
         "schema_version": "2.0"
       },
       "style-guide-mark-reviewed": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 3,
-          "days_shipped": 39,
+          "days_shipped": 40,
           "invocations_30d": null
         },
         "schema_version": "2.0"
       },
       "style-guide-slide-marker": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 3,
-          "days_shipped": 39,
+          "days_shipped": 40,
           "invocations_30d": null
         },
         "schema_version": "2.0"
       }
     },
+    "rollup_invocations_30d": 100,
+    "schema_version": "2.0",
     "skills": {
       "update-guide": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 3,
-          "days_shipped": 39,
+          "days_shipped": 40,
           "invocations_30d": 0
-        },
-        "schema_version": "2.0"
-      }
-    },
-    "agents": {
-      "agent": {
-        "band": "Alpha",
-        "computed_at": "2026-05-18T01:29:14Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 3,
-          "days_shipped": 39,
-          "invocations_30d": 100
         },
         "schema_version": "2.0"
       }

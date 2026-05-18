@@ -2,39 +2,41 @@
   "description": "Connect Claude Code sessions across repos via Discord (experimental)",
   "maturity": {
     "band": "Experimental",
-    "schema_version": "2.0",
+    "bootstrapping": true,
     "hooks": {
       "session-start": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 1,
-          "days_shipped": 33,
+          "days_shipped": 34,
           "invocations_30d": null
         },
         "schema_version": "2.0"
       }
     },
+    "rollup_invocations_30d": 0,
+    "schema_version": "2.0",
     "skills": {
       "send": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 1,
-          "days_shipped": 33,
+          "days_shipped": 34,
           "invocations_30d": 0
         },
         "schema_version": "2.0"
       },
       "setup": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 1,
-          "days_shipped": 33,
+          "days_shipped": 34,
           "invocations_30d": 0
         },
         "schema_version": "2.0"

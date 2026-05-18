@@ -1,6 +1,6 @@
 # @windyroad/jtbd
 
-**Jobs-to-be-done enforcement for Claude Code.** Reviews UI changes against your documented user jobs, personas, and desired outcomes before they ship. *Maturity: Experimental.*
+**Jobs-to-be-done enforcement for Claude Code.** Reviews UI changes against your documented user jobs, personas, and desired outcomes before they ship. *Maturity: Experimental (suite-bootstrap window; 729 invocations / 30d).*
 
 Part of [Windy Road Agent Plugins](../../README.md).
 

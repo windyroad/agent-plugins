@@ -1,6 +1,6 @@
 # @windyroad/retrospective
 
-**Session retrospectives for Claude Code.** Captures learnings at the end of each session and creates problem tickets for failures and friction. *Maturity: Experimental.*
+**Session retrospectives for Claude Code.** Captures learnings at the end of each session and creates problem tickets for failures and friction. *Maturity: Experimental (suite-bootstrap window; 282 invocations / 30d).*
 
 Part of [Windy Road Agent Plugins](../../README.md).
 

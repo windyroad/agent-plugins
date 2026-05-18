@@ -1,307 +1,309 @@
 {
   "description": "Pipeline risk scoring, commit/push/release gates for Claude Code",
   "maturity": {
-    "band": "Experimental",
-    "schema_version": "2.0",
-    "hooks": {
-      "external-comms-gate": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
-          "invocations_30d": null
-        },
-        "schema_version": "2.0"
-      },
-      "git-push-gate": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
-          "invocations_30d": null
-        },
-        "schema_version": "2.0"
-      },
-      "plan-risk-guidance": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
-          "invocations_30d": null
-        },
-        "schema_version": "2.0"
-      },
-      "risk-hash-refresh": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
-          "invocations_30d": null
-        },
-        "schema_version": "2.0"
-      },
-      "risk-policy-enforce-edit": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
-          "invocations_30d": null
-        },
-        "schema_version": "2.0"
-      },
-      "risk-score": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
-          "invocations_30d": null
-        },
-        "schema_version": "2.0"
-      },
-      "risk-score-commit-gate": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
-          "invocations_30d": null
-        },
-        "schema_version": "2.0"
-      },
-      "risk-score-mark": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
-          "invocations_30d": null
-        },
-        "schema_version": "2.0"
-      },
-      "risk-score-plan-enforce": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
-          "invocations_30d": null
-        },
-        "schema_version": "2.0"
-      },
-      "risk-slide-marker": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
-          "invocations_30d": null
-        },
-        "schema_version": "2.0"
-      },
-      "secret-leak-gate": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
-          "invocations_30d": null
-        },
-        "schema_version": "2.0"
-      },
-      "wip-risk-gate": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
-          "invocations_30d": null
-        },
-        "schema_version": "2.0"
-      },
-      "wip-risk-mark": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
-          "invocations_30d": null
-        },
-        "schema_version": "2.0"
-      }
-    },
-    "skills": {
-      "assess-external-comms": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
-          "invocations_30d": 33
-        },
-        "schema_version": "2.0"
-      },
-      "assess-inbound-report": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
-          "invocations_30d": 0
-        },
-        "schema_version": "2.0"
-      },
-      "assess-release": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
-          "invocations_30d": 53
-        },
-        "schema_version": "2.0"
-      },
-      "assess-wip": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
-          "invocations_30d": 2
-        },
-        "schema_version": "2.0"
-      },
-      "bootstrap-catalog": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
-          "invocations_30d": 0
-        },
-        "schema_version": "2.0"
-      },
-      "create-risk": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
-          "invocations_30d": 0
-        },
-        "schema_version": "2.0"
-      },
-      "update-policy": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
-          "invocations_30d": 11
-        },
-        "schema_version": "2.0"
-      }
-    },
     "agents": {
       "agent": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
           "invocations_30d": 0
         },
         "schema_version": "2.0"
       },
       "external-comms": {
         "band": "Alpha",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
-          "invocations_30d": 247
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
+          "invocations_30d": 261
         },
         "schema_version": "2.0"
       },
       "inbound-report": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
           "invocations_30d": 15
         },
         "schema_version": "2.0"
       },
       "pipeline": {
         "band": "Alpha",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
-          "invocations_30d": 1567
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
+          "invocations_30d": 1611
         },
         "schema_version": "2.0"
       },
       "plan": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
           "invocations_30d": 21
         },
         "schema_version": "2.0"
       },
       "policy": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
           "invocations_30d": 13
         },
         "schema_version": "2.0"
       },
       "wip": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
-          "closed_tickets_window": 25,
-          "days_shipped": 39,
-          "invocations_30d": 24
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
+          "invocations_30d": 25
+        },
+        "schema_version": "2.0"
+      }
+    },
+    "band": "Experimental",
+    "bootstrapping": true,
+    "hooks": {
+      "external-comms-gate": {
+        "band": "Experimental",
+        "computed_at": "2026-05-18T11:42:50Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
+          "invocations_30d": null
+        },
+        "schema_version": "2.0"
+      },
+      "git-push-gate": {
+        "band": "Experimental",
+        "computed_at": "2026-05-18T11:42:50Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
+          "invocations_30d": null
+        },
+        "schema_version": "2.0"
+      },
+      "plan-risk-guidance": {
+        "band": "Experimental",
+        "computed_at": "2026-05-18T11:42:50Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
+          "invocations_30d": null
+        },
+        "schema_version": "2.0"
+      },
+      "risk-hash-refresh": {
+        "band": "Experimental",
+        "computed_at": "2026-05-18T11:42:50Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
+          "invocations_30d": null
+        },
+        "schema_version": "2.0"
+      },
+      "risk-policy-enforce-edit": {
+        "band": "Experimental",
+        "computed_at": "2026-05-18T11:42:50Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
+          "invocations_30d": null
+        },
+        "schema_version": "2.0"
+      },
+      "risk-score": {
+        "band": "Experimental",
+        "computed_at": "2026-05-18T11:42:50Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
+          "invocations_30d": null
+        },
+        "schema_version": "2.0"
+      },
+      "risk-score-commit-gate": {
+        "band": "Experimental",
+        "computed_at": "2026-05-18T11:42:50Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
+          "invocations_30d": null
+        },
+        "schema_version": "2.0"
+      },
+      "risk-score-mark": {
+        "band": "Experimental",
+        "computed_at": "2026-05-18T11:42:50Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
+          "invocations_30d": null
+        },
+        "schema_version": "2.0"
+      },
+      "risk-score-plan-enforce": {
+        "band": "Experimental",
+        "computed_at": "2026-05-18T11:42:50Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
+          "invocations_30d": null
+        },
+        "schema_version": "2.0"
+      },
+      "risk-slide-marker": {
+        "band": "Experimental",
+        "computed_at": "2026-05-18T11:42:50Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
+          "invocations_30d": null
+        },
+        "schema_version": "2.0"
+      },
+      "secret-leak-gate": {
+        "band": "Experimental",
+        "computed_at": "2026-05-18T11:42:50Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
+          "invocations_30d": null
+        },
+        "schema_version": "2.0"
+      },
+      "wip-risk-gate": {
+        "band": "Experimental",
+        "computed_at": "2026-05-18T11:42:50Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
+          "invocations_30d": null
+        },
+        "schema_version": "2.0"
+      },
+      "wip-risk-mark": {
+        "band": "Experimental",
+        "computed_at": "2026-05-18T11:42:50Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
+          "invocations_30d": null
+        },
+        "schema_version": "2.0"
+      }
+    },
+    "rollup_invocations_30d": 2047,
+    "schema_version": "2.0",
+    "skills": {
+      "assess-external-comms": {
+        "band": "Experimental",
+        "computed_at": "2026-05-18T11:42:50Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
+          "invocations_30d": 35
+        },
+        "schema_version": "2.0"
+      },
+      "assess-inbound-report": {
+        "band": "Experimental",
+        "computed_at": "2026-05-18T11:42:50Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
+          "invocations_30d": 0
+        },
+        "schema_version": "2.0"
+      },
+      "assess-release": {
+        "band": "Experimental",
+        "computed_at": "2026-05-18T11:42:50Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
+          "invocations_30d": 53
+        },
+        "schema_version": "2.0"
+      },
+      "assess-wip": {
+        "band": "Experimental",
+        "computed_at": "2026-05-18T11:42:50Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
+          "invocations_30d": 2
+        },
+        "schema_version": "2.0"
+      },
+      "bootstrap-catalog": {
+        "band": "Experimental",
+        "computed_at": "2026-05-18T11:42:50Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
+          "invocations_30d": 0
+        },
+        "schema_version": "2.0"
+      },
+      "create-risk": {
+        "band": "Experimental",
+        "computed_at": "2026-05-18T11:42:50Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
+          "invocations_30d": 0
+        },
+        "schema_version": "2.0"
+      },
+      "update-policy": {
+        "band": "Experimental",
+        "computed_at": "2026-05-18T11:42:50Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 26,
+          "days_shipped": 40,
+          "invocations_30d": 11
         },
         "schema_version": "2.0"
       }

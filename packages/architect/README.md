@@ -1,6 +1,6 @@
 # @windyroad/architect
 
-**Architecture decision enforcement for Claude Code.** Ensures every code change is reviewed against your project's architecture decisions before it lands. *Maturity: Experimental.*
+**Architecture decision enforcement for Claude Code.** Ensures every code change is reviewed against your project's architecture decisions before it lands. *Maturity: Experimental (suite-bootstrap window; 811 invocations / 30d).*
 
 Part of [Windy Road Agent Plugins](../../README.md).
 

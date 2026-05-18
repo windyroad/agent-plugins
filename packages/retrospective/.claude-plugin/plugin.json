@@ -2,62 +2,64 @@
   "description": "Session retrospective reminders and plan review for Claude Code",
   "maturity": {
     "band": "Experimental",
-    "schema_version": "2.0",
+    "bootstrapping": true,
     "hooks": {
       "retrospective-readme-jtbd-currency": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
-          "closed_tickets_window": 32,
-          "days_shipped": 39,
+          "closed_tickets_window": 33,
+          "days_shipped": 40,
           "invocations_30d": null
         },
         "schema_version": "2.0"
       },
       "retrospective-reminder": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
-          "closed_tickets_window": 32,
-          "days_shipped": 39,
+          "closed_tickets_window": 33,
+          "days_shipped": 40,
           "invocations_30d": null
         },
         "schema_version": "2.0"
       },
       "session-start-briefing": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
-          "closed_tickets_window": 32,
-          "days_shipped": 39,
+          "closed_tickets_window": 33,
+          "days_shipped": 40,
           "invocations_30d": null
         },
         "schema_version": "2.0"
       }
     },
+    "rollup_invocations_30d": 282,
+    "schema_version": "2.0",
     "skills": {
       "analyze-context": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
-          "closed_tickets_window": 32,
-          "days_shipped": 39,
+          "closed_tickets_window": 33,
+          "days_shipped": 40,
           "invocations_30d": 0
         },
         "schema_version": "2.0"
       },
       "run-retro": {
         "band": "Alpha",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
-          "closed_tickets_window": 32,
-          "days_shipped": 39,
-          "invocations_30d": 261
+          "closed_tickets_window": 33,
+          "days_shipped": 40,
+          "invocations_30d": 282
         },
         "schema_version": "2.0"
       }

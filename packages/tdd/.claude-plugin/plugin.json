@@ -1,97 +1,99 @@
 {
   "description": "TDD state machine enforcement (IDLE/RED/GREEN/BLOCKED) for Claude Code",
   "maturity": {
-    "band": "Experimental",
-    "schema_version": "2.0",
-    "hooks": {
-      "tdd-enforce-edit": {
+    "agents": {
+      "review-test": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 6,
-          "days_shipped": 39,
+          "days_shipped": 40,
+          "invocations_30d": 0
+        },
+        "schema_version": "2.0"
+      }
+    },
+    "band": "Experimental",
+    "bootstrapping": true,
+    "hooks": {
+      "tdd-enforce-edit": {
+        "band": "Experimental",
+        "computed_at": "2026-05-18T11:42:50Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 6,
+          "days_shipped": 40,
           "invocations_30d": null
         },
         "schema_version": "2.0"
       },
       "tdd-inject": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 6,
-          "days_shipped": 39,
+          "days_shipped": 40,
           "invocations_30d": null
         },
         "schema_version": "2.0"
       },
       "tdd-post-write": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 6,
-          "days_shipped": 39,
+          "days_shipped": 40,
           "invocations_30d": null
         },
         "schema_version": "2.0"
       },
       "tdd-reset": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 6,
-          "days_shipped": 39,
+          "days_shipped": 40,
           "invocations_30d": null
         },
         "schema_version": "2.0"
       },
       "tdd-review-test": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 6,
-          "days_shipped": 39,
+          "days_shipped": 40,
           "invocations_30d": null
         },
         "schema_version": "2.0"
       },
       "tdd-setup-marker": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 6,
-          "days_shipped": 39,
+          "days_shipped": 40,
           "invocations_30d": null
         },
         "schema_version": "2.0"
       }
     },
+    "rollup_invocations_30d": 0,
+    "schema_version": "2.0",
     "skills": {
       "setup-tests": {
         "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
+        "computed_at": "2026-05-18T11:42:50Z",
         "evidence": {
           "breaking_change_age_days": null,
           "closed_tickets_window": 6,
-          "days_shipped": 39,
-          "invocations_30d": 0
-        },
-        "schema_version": "2.0"
-      }
-    },
-    "agents": {
-      "review-test": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T01:29:14Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 6,
-          "days_shipped": 39,
+          "days_shipped": 40,
           "invocations_30d": 0
         },
         "schema_version": "2.0"

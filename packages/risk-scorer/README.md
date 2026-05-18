@@ -1,6 +1,6 @@
 # @windyroad/risk-scorer
 
-**Pipeline risk scoring, commit/push gates, and secret leak detection for Claude Code.** Scores every change for risk and blocks high-risk commits and pushes before they happen. *Maturity: Experimental.*
+**Pipeline risk scoring, commit/push gates, and secret leak detection for Claude Code.** Scores every change for risk and blocks high-risk commits and pushes before they happen. *Maturity: Experimental (suite-bootstrap window; 2047 invocations / 30d).*
 
 Part of [Windy Road Agent Plugins](../../README.md).
 
