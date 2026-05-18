@@ -418,6 +418,12 @@ for pkg_dir in plugin_dirs:
     # NOT additive per ADR-058 §Confirmation #8.
     kind_to_key = {"skill": "skills", "agent": "agents", "hook": "hooks", "command": "commands"}
     surface_bands_for_rollup = []
+    # P269: collect per-surface invocations_30d across the populate pass so
+    # the rollup can carry the sum. Non-null integers participate in the sum;
+    # nulls (hook sentinel — architect §C) are excluded. All-null surface
+    # set yields a null rollup_invocations_30d to preserve the "not
+    # measurable" vs "measurably zero" honesty contract.
+    surface_invocations_for_rollup = []
 
     # Pre-read existing nested maturity payload so re-runs preserve any
     # forward-compat extras (architect issue 2: read-side line 417 fix).
@@ -450,6 +456,8 @@ for pkg_dir in plugin_dirs:
             maturity_record["schema_version"] = "2.0"
             new_map[name] = maturity_record
             surface_bands_for_rollup.append(maturity_record.get("band"))
+            rec_inv = maturity_record.get("evidence", {}).get("invocations_30d")
+            surface_invocations_for_rollup.append(rec_inv)
         new_maturity_kinds[key] = new_map
         wrote_records += len(new_map)
 
@@ -458,9 +466,31 @@ for pkg_dir in plugin_dirs:
     # at top level. Write-ordering fix (architect issue 2 line 441): build
     # the entire `maturity:` dict in a single assignment so the rollup
     # write does not clobber the per-kind nested maps.
+    #
+    # ADR-063 Amendment 2026-05-18 (P269 — rollup compound-evidence write):
+    # rollup additionally carries `rollup_invocations_30d` + `bootstrapping`
+    # so the Phase 3b renderer's AND-gated compound predicate
+    # (plugin-maturity-render.sh:146) can fire the
+    # `*Maturity: <Band> (suite-bootstrap window; <N> invocations / 30d).*`
+    # form during the bootstrapping window. Without these two fields the
+    # renderer falls through to bare-band, violating ADR-053 §Bootstrapping
+    # clause Phase 3 rendering requirement (line 88). Additive-within-2.0
+    # per ADR-058 §Confirmation #8 — old consumers reading
+    # `{schema_version, band}` continue to work; new consumers get the
+    # additional fields where present.
     rollup = rollup_band(surface_bands_for_rollup)
     if rollup is not None:
-        maturity_doc = {"schema_version": "2.0", "band": rollup}
+        non_null_invs = [v for v in surface_invocations_for_rollup if isinstance(v, int)]
+        if non_null_invs:
+            rollup_invocations_30d = sum(non_null_invs)
+        else:
+            rollup_invocations_30d = None
+        maturity_doc = {
+            "schema_version": "2.0",
+            "band": rollup,
+            "rollup_invocations_30d": rollup_invocations_30d,
+            "bootstrapping": bootstrapping_active,
+        }
         maturity_doc.update(new_maturity_kinds)
         plugin_doc["maturity"] = maturity_doc
     else:

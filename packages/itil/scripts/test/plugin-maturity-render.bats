@@ -151,6 +151,64 @@ make_plugin() {
   [[ "$out" != *"invocations"* ]]
 }
 
+# ── P269: AND-gated compound predicate — null rollup_invocations_30d → bare ─
+
+@test "rollup badge: bootstrapping=true + rollup_invocations_30d=null → bare-band (hook-only plugin)" {
+  # P269: when populate writes bootstrapping=true but rollup_invocations_30d
+  # is null (hook-only plugin — no countable surfaces), the renderer's
+  # AND-gated compound predicate at plugin-maturity-render.sh:146 must fall
+  # through to bare-band. `0 invocations / 30d` would lie; bare-band is the
+  # honest fall-through.
+  make_plugin "hookonly" '{"name":"wr-hookonly","version":"0.1.0","description":"Hook-only","maturity":{"schema_version":"2.0","band":"Experimental","bootstrapping":true,"rollup_invocations_30d":null}}' \
+"# @windyroad/hookonly
+
+**Hook-only plugin description.**
+
+## Skills
+
+| Skill | Purpose |
+|-------|---------|
+| /wr-hookonly:thing | Does a thing |
+"
+
+  run bash "$SCRIPT" --project-root="$PROJECT_ROOT"
+  [ "$status" -eq 0 ]
+
+  local out; out="$(cat "$PROJECT_ROOT/packages/hookonly/README.md")"
+  [[ "$out" == *"*Maturity: Experimental.*"* ]]
+  [[ "$out" != *"suite-bootstrap"* ]]
+  [[ "$out" != *"invocations"* ]]
+}
+
+# ── P269: AND-gated compound predicate — bootstrapping=false → bare-band ────
+
+@test "rollup badge: bootstrapping=false + rollup_invocations_30d=integer → bare-band (post-sunset)" {
+  # P269: when bootstrapping has lapsed (suite_oldest_days >= 60), populate
+  # writes bootstrapping=false. Even with a non-null rollup_invocations_30d,
+  # the AND-gated predicate falls through to bare-band — the compound
+  # rendering is scoped to the bootstrapping window per ADR-053 §Bootstrapping
+  # clause Phase 3 rendering requirement.
+  make_plugin "stedp" '{"name":"wr-stedp","version":"0.1.0","description":"Steady","maturity":{"schema_version":"2.0","band":"Beta","bootstrapping":false,"rollup_invocations_30d":1500}}' \
+"# @windyroad/stedp
+
+**Steady-state plugin description.**
+
+## Skills
+
+| Skill | Purpose |
+|-------|---------|
+| /wr-stedp:thing | Does a thing |
+"
+
+  run bash "$SCRIPT" --project-root="$PROJECT_ROOT"
+  [ "$status" -eq 0 ]
+
+  local out; out="$(cat "$PROJECT_ROOT/packages/stedp/README.md")"
+  [[ "$out" == *"*Maturity: Beta.*"* ]]
+  [[ "$out" != *"suite-bootstrap"* ]]
+  [[ "$out" != *"invocations"* ]]
+}
+
 # ── Confirmation #2 (ADR-063): per-skill Maturity column populated ──────────
 
 @test "per-skill column: adds Maturity column to existing Skills table" {

@@ -298,7 +298,12 @@ print(obj if not isinstance(obj, (dict, list)) else json.dumps(obj))
   [ "$(get_json_field "$pj" "maturity.skills.manage-problem.evidence.closed_tickets_window")" = "5" ]
 }
 
-@test "plugin-maturity-populate: plugin root rollup carries schema_version + band only, no evidence" {
+@test "plugin-maturity-populate: plugin root rollup carries schema_version + band + rollup_invocations_30d + bootstrapping, no evidence" {
+  # P269 amendment: rollup now carries rollup_invocations_30d (sum of non-null
+  # per-surface invocations_30d) + bootstrapping (snapshot of window state at
+  # populate time) so the renderer's AND-gated compound predicate
+  # (plugin-maturity-render.sh:146) can fire. The §evidence dict is still NOT
+  # written on the rollup — only at per-surface entries.
   make_plugin "rollupp" "skill:s1" "skill:s2"
   local trans="$FIXTURE_DIR/transcript.ndjson"
   local exer="$FIXTURE_DIR/exercise.ndjson"
@@ -318,6 +323,141 @@ print(obj if not isinstance(obj, (dict, list)) else json.dumps(obj))
   [ "$(get_json_field "$pj" "maturity.schema_version")" = "2.0" ]
   [ "$(get_json_field "$pj" "maturity.band")" != "MISSING" ]
   [ "$(get_json_field "$pj" "maturity.evidence")" = "MISSING" ]
+  [ "$(get_json_field "$pj" "maturity.rollup_invocations_30d")" != "MISSING" ]
+  [ "$(get_json_field "$pj" "maturity.bootstrapping")" != "MISSING" ]
+}
+
+# ── P269: rollup_invocations_30d sums non-null per-surface entries ───────────
+
+@test "plugin-maturity-populate: rollup_invocations_30d equals sum of non-null per-surface invocations" {
+  # P269 fix details step 1: rollup_invocations_30d = sum across non-null
+  # per-surface entries. 200 + 1 = 201.
+  make_plugin "summp" "skill:s1" "skill:s2"
+  local trans="$FIXTURE_DIR/transcript.ndjson"
+  local exer="$FIXTURE_DIR/exercise.ndjson"
+  write_transcript_ndjson "$trans" \
+    "skill" "wr-summp:s1" 200 \
+    "skill" "wr-summp:s2" 1
+  write_exercise_ndjson "$exer" "summp" 10 20 2 NULL
+
+  run "$SCRIPT" \
+    --transcript-ndjson="$trans" \
+    --exercise-ndjson="$exer" \
+    --project-root="$PROJECT_ROOT" \
+    --now=2026-05-17T12:00:00Z
+  [ "$status" -eq 0 ]
+
+  local pj="$PROJECT_ROOT/packages/summp/.claude-plugin/plugin.json"
+  [ "$(get_json_field "$pj" "maturity.rollup_invocations_30d")" = "201" ]
+}
+
+# ── P269: rollup_invocations_30d sums non-null only (hooks excluded) ────────
+
+@test "plugin-maturity-populate: rollup_invocations_30d excludes null hook surfaces from sum" {
+  # Mixed surfaces — a skill with invocations + a hook with null sentinel.
+  # The sum should equal the skill invocations alone; the null hook does NOT
+  # participate in the sum (architect §C null sentinel preserves
+  # "not measurable" vs "measurably zero" semantics).
+  make_plugin "mixp" "skill:thing" "hook:somehook"
+  local trans="$FIXTURE_DIR/transcript.ndjson"
+  local exer="$FIXTURE_DIR/exercise.ndjson"
+  write_transcript_ndjson "$trans" "skill" "wr-mixp:thing" 75
+  write_exercise_ndjson "$exer" "mixp" 10 20 2 NULL
+
+  run "$SCRIPT" \
+    --transcript-ndjson="$trans" \
+    --exercise-ndjson="$exer" \
+    --project-root="$PROJECT_ROOT" \
+    --now=2026-05-17T12:00:00Z
+  [ "$status" -eq 0 ]
+
+  local pj="$PROJECT_ROOT/packages/mixp/.claude-plugin/plugin.json"
+  [ "$(get_json_field "$pj" "maturity.rollup_invocations_30d")" = "75" ]
+}
+
+# ── P269: rollup_invocations_30d is null when ALL per-surface entries are null ─
+
+@test "plugin-maturity-populate: rollup_invocations_30d is null on hook-only plugin" {
+  # Hook-only plugin: every per-surface invocations_30d is null. The rollup
+  # MUST emit null (not 0) so the renderer's AND-gated compound predicate
+  # falls through correctly — `0 invocations / 30d` would lie.
+  make_plugin "hookonly" "hook:a" "hook:b"
+  local trans="$FIXTURE_DIR/transcript.ndjson"
+  local exer="$FIXTURE_DIR/exercise.ndjson"
+  : >"$trans"  # empty transcript — hooks never appear there
+  write_exercise_ndjson "$exer" "hookonly" 5 30 1 NULL
+
+  run "$SCRIPT" \
+    --transcript-ndjson="$trans" \
+    --exercise-ndjson="$exer" \
+    --project-root="$PROJECT_ROOT" \
+    --now=2026-05-17T12:00:00Z
+  [ "$status" -eq 0 ]
+
+  local pj="$PROJECT_ROOT/packages/hookonly/.claude-plugin/plugin.json"
+  # `get_json_field` collapses null to display "None"; check the raw JSON.
+  local raw
+  raw=$(python3 -c "
+import json
+obj = json.load(open('$pj'))
+print(json.dumps(obj['maturity']['rollup_invocations_30d']))
+")
+  [ "$raw" = "null" ]
+}
+
+# ── P269: bootstrapping flag write — true during bootstrapping window ───────
+
+@test "plugin-maturity-populate: rollup bootstrapping=true during bootstrapping window" {
+  # suite_oldest_days < 60 → bootstrapping active → rollup carries true.
+  make_plugin "bsp" "skill:s1"
+  local trans="$FIXTURE_DIR/transcript.ndjson"
+  local exer="$FIXTURE_DIR/exercise.ndjson"
+  write_transcript_ndjson "$trans" "skill" "wr-bsp:s1" 50
+  write_exercise_ndjson "$exer" "bsp" 10 20 2 NULL  # days_shipped=20 < 60
+
+  run "$SCRIPT" \
+    --transcript-ndjson="$trans" \
+    --exercise-ndjson="$exer" \
+    --project-root="$PROJECT_ROOT" \
+    --now=2026-05-17T12:00:00Z
+  [ "$status" -eq 0 ]
+
+  local pj="$PROJECT_ROOT/packages/bsp/.claude-plugin/plugin.json"
+  local raw
+  raw=$(python3 -c "
+import json
+obj = json.load(open('$pj'))
+print(json.dumps(obj['maturity']['bootstrapping']))
+")
+  [ "$raw" = "true" ]
+}
+
+# ── P269: bootstrapping flag write — false once max(days_shipped) ≥ 60 ──────
+
+@test "plugin-maturity-populate: rollup bootstrapping=false once suite_oldest_days >= 60" {
+  # max(days_shipped) >= 60 → bootstrapping inactive → rollup carries false.
+  # Independent of --now (auto-derives from data per architect §D).
+  make_plugin "stp" "skill:s1"
+  local trans="$FIXTURE_DIR/transcript.ndjson"
+  local exer="$FIXTURE_DIR/exercise.ndjson"
+  write_transcript_ndjson "$trans" "skill" "wr-stp:s1" 50
+  write_exercise_ndjson "$exer" "stp" 100 200 15 NULL  # days_shipped=200 >= 60
+
+  run "$SCRIPT" \
+    --transcript-ndjson="$trans" \
+    --exercise-ndjson="$exer" \
+    --project-root="$PROJECT_ROOT" \
+    --now=2026-05-17T12:00:00Z
+  [ "$status" -eq 0 ]
+
+  local pj="$PROJECT_ROOT/packages/stp/.claude-plugin/plugin.json"
+  local raw
+  raw=$(python3 -c "
+import json
+obj = json.load(open('$pj'))
+print(json.dumps(obj['maturity']['bootstrapping']))
+")
+  [ "$raw" = "false" ]
 }
 
 # ── Granularity contract (ADR-063 #10): rollup = worst-case among surfaces ──

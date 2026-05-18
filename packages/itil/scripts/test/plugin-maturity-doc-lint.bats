@@ -173,6 +173,60 @@ PYEOF
   done
 }
 
+# ── P269 — rollup compound-evidence fields shape (when present) ─────────────
+
+@test "plugin-maturity-doc-lint: rollup rollup_invocations_30d is int or null (when present)" {
+  # ADR-063 §Amendment 2026-05-18 (P269 — rollup compound-evidence write):
+  # the rollup carries `rollup_invocations_30d: integer | null`. Integer when
+  # at least one per-surface entry has a non-null invocations_30d; null when
+  # ALL per-surface entries are null (e.g. hook-only plugins) — preserves the
+  # "not measurable" vs "measurably zero" honesty contract per architect §C.
+  # Per ADR-063 §Confirmation #10 (shape-when-present), this lint asserts
+  # type-shape when the field is present and tolerates absence for plugins
+  # that haven't been re-populated since the P269 amendment.
+  local plugin
+  for plugin in $(plugins_with_maturity); do
+    local pj="$REPO_ROOT/packages/$plugin/.claude-plugin/plugin.json"
+    python3 <<PYEOF
+import json, sys
+d = json.load(open("$pj"))
+m = d["maturity"]
+if "rollup_invocations_30d" not in m:
+    sys.exit(0)  # field absent — tolerated per shape-when-present
+v = m["rollup_invocations_30d"]
+if v is None:
+    sys.exit(0)
+if not isinstance(v, int) or isinstance(v, bool):
+    sys.exit(f"$plugin: maturity.rollup_invocations_30d = {v!r} ({type(v).__name__}); must be int or null")
+if v < 0:
+    sys.exit(f"$plugin: maturity.rollup_invocations_30d = {v!r}; must be non-negative")
+PYEOF
+  done
+}
+
+@test "plugin-maturity-doc-lint: rollup bootstrapping is bool (when present)" {
+  # ADR-063 §Amendment 2026-05-18 (P269 — rollup compound-evidence write):
+  # the rollup carries `bootstrapping: bool` — populate-time snapshot of the
+  # bootstrapping-window state. The renderer's AND-gated compound predicate
+  # (plugin-maturity-render.sh:146) reads this flag to decide whether to
+  # emit the compound form. Shape-when-present per the same tolerance as
+  # rollup_invocations_30d above.
+  local plugin
+  for plugin in $(plugins_with_maturity); do
+    local pj="$REPO_ROOT/packages/$plugin/.claude-plugin/plugin.json"
+    python3 <<PYEOF
+import json, sys
+d = json.load(open("$pj"))
+m = d["maturity"]
+if "bootstrapping" not in m:
+    sys.exit(0)
+v = m["bootstrapping"]
+if not isinstance(v, bool):
+    sys.exit(f"$plugin: maturity.bootstrapping = {v!r} ({type(v).__name__}); must be bool")
+PYEOF
+  done
+}
+
 # ── Regression fence (architect adjustment A1, iter-11): no top-level kind maps ─
 
 @test "plugin-maturity-doc-lint: no top-level skills/agents/hooks/commands maturity-shaped records (iter-10 P0 hotfix fence)" {

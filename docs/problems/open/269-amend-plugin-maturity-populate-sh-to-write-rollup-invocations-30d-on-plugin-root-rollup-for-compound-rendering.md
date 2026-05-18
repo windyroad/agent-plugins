@@ -22,7 +22,8 @@ Observed 2026-05-18 P087 iter-10 retroactive rollout: renderer's compound-render
 Fix details:
 
 1. Extend `packages/itil/scripts/plugin-maturity-populate.sh` rollup-emission block to compute `rollup_invocations_30d = sum(invocations_30d across non-null per-surface entries)` during the populate pass.
-2. Update ADR-063 §rollup schema to include `rollup_invocations_30d: integer | null` (null when ALL per-surface entries are null-sentinel, e.g. hook-only plugins).
+1a. Also write `bootstrapping: <bool>` to the rollup using the existing module-scope `bootstrapping_active` flag (architect Adjustment E, 2026-05-18 review). The renderer's compound-form predicate at `plugin-maturity-render.sh` line 144-147 is AND-gated on **both** `bootstrapping` AND `rollup_invocations_30d` — writing only one of them leaves the compound-render path unfireable. Single-ticket closure: one observable outcome (compound rendering fires) requires both fields, so they ship together rather than splitting into sibling tickets.
+2. Update ADR-063 §rollup schema to include `rollup_invocations_30d: integer | null` (null when ALL per-surface entries are null-sentinel, e.g. hook-only plugins) AND `bootstrapping: bool` (populate-time snapshot of the bootstrapping-window state — not a render-time recompute).
 3. Add Phase 3a populate bats coverage: rollup carries `rollup_invocations_30d` field; sum matches per-surface values; null when no countable surfaces.
 4. Add Phase 3b renderer bats coverage: compound rendering fires when `rollup_invocations_30d` is present + bootstrapping flag is active; falls through to bare-band when missing or null.
 5. Add Phase 3c doc-lint coverage (`packages/itil/scripts/test/plugin-maturity-doc-lint.bats`): assert rollup `rollup_invocations_30d` field shape per amended ADR-063.

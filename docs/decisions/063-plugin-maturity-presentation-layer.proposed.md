@@ -84,7 +84,7 @@ Phase 3 sub-iters land as ordered follow-on tickets: **3a (population script, wr
 
 **Schema relocation**: per-surface maturity records nest UNDER the top-level `maturity:` key at `plugin_doc.maturity.<kind>.<name>` (where `<kind>` ∈ {`skills`, `agents`, `hooks`, `commands`}). The nested record IS the maturity record directly — no inner `.maturity` envelope. The top-level `maturity:` key carries both the rollup (`schema_version`, `band`) AND the per-kind nested maps.
 
-**Corrected schema** (replaces the §"`plugin.json` `maturity:` field schema" section that follows for canonical reference):
+**Corrected schema** (replaces the §"`plugin.json` `maturity:` field schema" section that follows for canonical reference; **further amended by §Amendment 2026-05-18 (P269)** below to add `rollup_invocations_30d` + `bootstrapping` to the rollup):
 
 ```jsonc
 {
@@ -94,6 +94,8 @@ Phase 3 sub-iters land as ordered follow-on tickets: **3a (population script, wr
   "maturity": {
     "schema_version": "2.0",
     "band": "Experimental",
+    "rollup_invocations_30d": 796,    // P269 amendment
+    "bootstrapping": true,             // P269 amendment
     "skills": {
       "manage-problem": {
         "schema_version": "2.0",
@@ -121,6 +123,55 @@ Phase 3 sub-iters land as ordered follow-on tickets: **3a (population script, wr
 - New §Confirmation #11 (Manifest validator compatibility): a `claude plugin install <plugin>@windyroad --scope project` against a freshly-published plugin MUST succeed. The Phase 3a bats coverage was insufficient — bats fixtures asserted JSON shape but not installer acceptance. Follow-on iter SHOULD add CI gate that runs `claude plugin install --dry-run` against each plugin pre-publish (P246 sibling-class — gate-the-actual-load-bearing-surface, not a proxy).
 - New §Confirmation #12 (Schema version stamping): both rollup (`maturity.schema_version`) and per-surface (`maturity.<kind>.<name>.schema_version`) carry `"2.0"`. Re-runs of `wr-itil-plugin-maturity-populate` preserve any Deprecated-band overlays at the nested location (architect §I + ADR-053 #6 / #102 invariant).
 
+### Amendment 2026-05-18 (P269 — rollup compound-evidence write)
+
+**Forcing function**: this amendment restores compliance with **ADR-053 §Bootstrapping clause Phase 3 rendering requirement** (the binding contract that *"Phase 3 implementations that render a bare band during the bootstrapping window violate this clause and should be reverted"*). The §Amendment 2026-05-18 P0 hotfix above shipped the per-kind-nesting fix in the populate writer but did not extend the rollup payload to include the bootstrapping-window evidence that the Phase 3b renderer (`packages/itil/scripts/plugin-maturity-render.sh` line 144-147) requires. The renderer's compound-form predicate is AND-gated on **both** `bootstrapping` AND `rollup_invocations_30d`:
+
+```python
+bootstrapping = bool(maturity_record.get("bootstrapping"))
+inv = maturity_record.get("rollup_invocations_30d")
+if bootstrapping and isinstance(inv, int) and inv > 0:
+    return f"*Maturity: {band} (suite-bootstrap window; {inv} invocations / 30d).*"
+return f"*Maturity: {band}.*"
+```
+
+Pre-amendment, the populate writer emitted neither field on the rollup. Both `maturity_record.get(...)` calls returned `None`, the AND-gated predicate evaluated to `False`, and every plugin fell through to the bare-band form during the bootstrapping window — invisible-evidence rendering across all 12 plugins shipped pre-amendment.
+
+**User direction at session 7 loop-end Step 2.5 routing (2026-05-18)**: amend the **populate writer** to emit both fields rather than amending the renderer to derive on-fly. The single-source-of-truth principle pins the bootstrapping-window evidence as a property of the populate-time snapshot (not as a render-time recomputation): the rollup snapshot travels with the published `plugin.json` so adopters who `npm install` get a frozen, auditable record rather than a rendering-time guess that might disagree with the bands derived alongside.
+
+**Schema additions** (additive-within-2.0 per ADR-058 §Confirmation #8):
+
+The rollup carries two new fields alongside the existing `{schema_version, band}` pair:
+
+- **`rollup_invocations_30d: integer | null`** — sum of `invocations_30d` across non-null per-surface entries during the populate pass. `null` when ALL per-surface entries are the null sentinel (e.g. hook-only plugins; hooks are not transcript-observable per architect §C). Excluding null sentinels from the sum preserves the "not measurable" vs "measurably zero" honesty contract — a hook-only plugin reporting `0` would lie, whereas `null` correctly conveys "no countable surfaces."
+- **`bootstrapping: bool`** — snapshot of the bootstrapping-window state at populate time, copied from the existing module-scope `bootstrapping_active` flag computed from `suite_oldest_days < 60` per ADR-053 §Bootstrapping clause auto-derivation. **Populate-time snapshot, not render-time recompute** — if the sunset fires between populate and render, the renderer trusts the snapshot. Snapshot-not-recompute matches the same precedent the `computed_at` field already establishes on per-surface records.
+
+The §155 commentary *"Computing an aggregated `evidence:` record on the rollup would invent semantic content not present in any single surface"* still holds for the four-field `evidence:` dict. The two new fields are NOT a rollup `evidence:` block — they are deterministic-sum + window-state-snapshot derivations, not invented aggregations (no average / median / extrapolation). The rollup still defers to constituent surfaces for the full `evidence:` audit trail; the rollup gains only the two summary fields the renderer's compound predicate requires.
+
+**Schema version semantics**: additive-within-2.0 per ADR-058 §Confirmation #8. Old consumers reading only `{schema_version, band}` continue to work (the new fields are ignored). New consumers reading the new fields get them where present. **Contrast with the §Amendment 2026-05-18 P0 hotfix above** — that amendment bumped `"1.0" → "2.0"` because the path-move was non-additive (old-path readers got nothing under the new shape and vice versa). The P269 amendment is the opposite shape — strictly additive — so it lives entirely within `"2.0"` without a major-version bump.
+
+**Corrected rollup schema** (replaces the §"`plugin.json` `maturity:` field schema" §"Per plugin (root entry, rollup)" example that follows for canonical reference):
+
+```jsonc
+{
+  "maturity": {
+    "schema_version": "2.0",
+    "band": "Experimental",
+    "rollup_invocations_30d": 796,
+    "bootstrapping": true,
+    "skills":   { "<name>": { /* per-surface rich record */ } },
+    "agents":   { "<name>": { /* per-surface rich record */ } },
+    "hooks":    { "<name>": { /* per-surface rich record, null invocations */ } },
+    "commands": { "<name>": { /* per-surface rich record */ } }
+  }
+}
+```
+
+**Confirmation criteria additions**:
+- New §Confirmation #13 (P269 rollup compound-evidence write): the writer emits `rollup_invocations_30d = sum(non-null per-surface invocations_30d)` on the rollup, or `null` when ALL per-surface entries are null. The writer also emits `bootstrapping = bootstrapping_active` (boolean) on the rollup. Bats fixtures: `packages/itil/scripts/test/plugin-maturity-populate.bats` covers sum-of-non-null, null-when-all-hook, bootstrapping-true-during-window, bootstrapping-false-post-sunset.
+- New §Confirmation #14 (Phase 3b AND-gated compound predicate): the renderer emits the compound form `*Maturity: <Band> (suite-bootstrap window; <N> invocations / 30d).*` iff `bootstrapping == true` AND `rollup_invocations_30d` is a positive integer; falls through to bare-band `*Maturity: <Band>.*` otherwise. Bats fixtures: `packages/itil/scripts/test/plugin-maturity-render.bats` covers compound-positive (window + integer), bootstrapping=true + null-invocations → bare-band (hook-only), bootstrapping=false + integer → bare-band (post-sunset).
+- New §Confirmation #15 (Phase 3c doc-lint shape-when-present): the lint asserts `rollup_invocations_30d` is `int | null` and `bootstrapping` is `bool` when present on the rollup; tolerates absence for plugins that haven't been re-populated since the P269 amendment (shape-when-present semantics per §23-25 of `plugin-maturity-doc-lint.bats` header).
+
 ### `plugin.json` `maturity:` field schema
 
 Per surface (skill / agent / hook / command / sub-skill entry):
@@ -146,15 +197,17 @@ Per plugin (root entry, rollup):
 ```json
 {
   "maturity": {
-    "schema_version": "1.0",
-    "band": "Experimental"
+    "schema_version": "2.0",
+    "band": "Experimental",
+    "rollup_invocations_30d": 796,
+    "bootstrapping": true
   }
 }
 ```
 
-The rollup carries only `schema_version` + `band` because the rollup is **derived** from constituent surfaces (worst-case band per ADR-053 §granularity contract). Computing an aggregated `evidence:` record on the rollup would invent semantic content not present in any single surface; the rollup defers to the constituent surfaces for the evidence trail.
+The rollup carries `schema_version` + `band` (worst-case across constituent surfaces per ADR-053 §granularity contract), plus the two compound-rendering-evidence fields added by the §Amendment 2026-05-18 (P269) above: `rollup_invocations_30d` (sum of non-null per-surface `invocations_30d`; `null` when all-null, e.g. hook-only plugins) and `bootstrapping` (populate-time snapshot of the bootstrapping-window state). These two are deterministic-sum + window-state-snapshot derivations — they do NOT invent aggregated `evidence:` semantic content (no average / median / extrapolation). The rollup still defers to constituent surfaces for the full `evidence:` audit trail; only the two summary fields the renderer's compound-form AND-gated predicate requires are surfaced at the rollup.
 
-`schema_version` is `"1.0"` for the initial Phase 3a writer. Future schema additions are additive-only within the major version per ADR-058 §Confirmation #8 precedent.
+`schema_version` is `"2.0"` post the §Amendment 2026-05-18 P0 hotfix path-move. The P269 compound-evidence addition is additive-within-2.0 per ADR-058 §Confirmation #8 — no further version bump required.
 
 **Deprecated band carries an additional `supersededBy:` field** per ADR-053 §promotion criteria + ADR-010 precedent. The `supersededBy:` pointer is the only field on the maturity record that may be hand-authored; all other fields are written exclusively by the Phase 3a population script. Hand-edits to other fields are advisory-detectable by the Phase 3b drift detector and warrant follow-up.
 
