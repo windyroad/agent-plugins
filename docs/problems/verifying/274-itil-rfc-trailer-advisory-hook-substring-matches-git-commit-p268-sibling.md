@@ -1,10 +1,11 @@
 # Problem 274: `itil-rfc-trailer-advisory.sh` hook substring-matches `git commit` anywhere in Bash command — P268 sibling
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-18
 **Priority**: 5 (Medium) — Impact: 1 × Likelihood: 5
 **Effort**: S (re-estimated 2026-05-18 — call shared helper landed by P268 + mirror P268 regression bats fixtures; advisory-class)
 **Type**: technical
+**Fix Released**: pending release (batched P268-sibling sweep with P273 + P275; one-commit ADR-014 batch grain)
 
 ## Description
 

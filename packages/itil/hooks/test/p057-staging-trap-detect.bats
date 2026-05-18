@@ -139,3 +139,93 @@ run_bash_hook() {
   [ "$status" -eq 0 ]
   [ "${#output}" -lt 400 ]
 }
+
+# --- P273 / P268: leading-executable command detection regression cases ---
+#
+# The hook must fire on ACTUAL `git commit` invocations, NOT on Bash that
+# merely MENTIONS the phrase "git commit" in argument vectors or heredoc
+# bodies. Mirrors the P268 regression fixtures landed in
+# command-detect.bats and the P272 sibling fixtures in
+# itil-changeset-discipline.bats.
+
+@test "allow: grep with literal 'git commit' pattern in trap state does NOT deny" {
+  # Trap shape IS present in the working tree, but the Bash is a grep
+  # invocation whose pattern argument MENTIONS "git commit" — the hook
+  # must not fire (leading executable is `grep`, not `git`).
+  git mv foo.md bar.md
+  echo "modified" > bar.md
+  run run_bash_hook "grep -r 'git commit' ."
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
+}
+
+@test "allow: sed pattern containing 'git commit' in trap state does NOT deny" {
+  git mv foo.md bar.md
+  echo "modified" > bar.md
+  run run_bash_hook "sed -n 's/git commit/X/p' bar.md"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
+}
+
+@test "allow: echo with literal 'git commit' string in trap state does NOT deny" {
+  git mv foo.md bar.md
+  echo "modified" > bar.md
+  run run_bash_hook "echo 'run git commit -m foo'"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
+}
+
+@test "allow: cat heredoc body containing 'git commit' in trap state does NOT deny" {
+  git mv foo.md bar.md
+  echo "modified" > bar.md
+  run run_bash_hook "cat <<EOF
+prose mentioning git commit invocations
+EOF"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
+}
+
+@test "allow: git log --grep with 'git commit' search term does NOT deny" {
+  git mv foo.md bar.md
+  echo "modified" > bar.md
+  run run_bash_hook "git log --grep='git commit'"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
+}
+
+@test "allow: git commit-tree plumbing in trap state does NOT deny (boundary)" {
+  # `git commit-tree` is a different git subcommand — the helper must
+  # not match it on the `commit-*` boundary.
+  git mv foo.md bar.md
+  echo "modified" > bar.md
+  run run_bash_hook "git commit-tree HEAD^{tree} -m 'msg'"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
+}
+
+# --- P273 / P268: positive leading-executable cases still deny ---
+
+@test "deny: env-var-prefixed git commit in trap state still triggers deny" {
+  git mv foo.md bar.md
+  echo "modified" > bar.md
+  run run_bash_hook "GIT_AUTHOR_NAME=foo git commit -m 'test'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
+  [[ "$output" == *"P057"* ]]
+}
+
+@test "deny: cd-prefixed git commit in trap state still triggers deny" {
+  git mv foo.md bar.md
+  echo "modified" > bar.md
+  run run_bash_hook "cd . && git commit -m 'test'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
+}
+
+@test "deny: leading-whitespace git commit in trap state still triggers deny" {
+  git mv foo.md bar.md
+  echo "modified" > bar.md
+  run run_bash_hook "   git commit -m 'test'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
+}

@@ -10,10 +10,19 @@
 # a recovery path" contract via the mechanical-recovery shape (no
 # skill wrapper required — re-staging a file is a single command).
 #
+# Command-shape detection delegates to
+# `lib/command-detect.sh::command_invokes_git_commit`, which strips
+# common prefix shapes (leading whitespace, env-var assignments,
+# `cd <path> &&`) and checks whether the residual leading token pair
+# is literally `git commit`. P273: replaced the prior substring match
+# `*"git commit"*` that misfired on non-commit Bash whose argument
+# vectors merely mentioned the phrase (grep / sed / cat-heredoc /
+# echo / `git log --grep`).
+#
 # Allow paths (exit 0 without deny):
 #   - tool_name != "Bash"          (only Bash invocations are gated)
-#   - command does not contain     `git commit` substring (non-commit
-#                                  Bash bypasses entirely)
+#   - command is not a `git commit` invocation by leading-executable
+#                                  semantics (helper returns 1)
 #   - working tree clean of trap  (helper returns 0)
 #   - outside a git work tree     (helper fails-open)
 #   - parse failure on stdin      (mirrors create-gate.sh fail-open)
@@ -23,15 +32,23 @@
 #   ADR-009 — gate marker lifecycle (this hook deliberately does NOT
 #             use markers; detection is per-invocation deterministic).
 #   ADR-013 Rule 1 — deny redirects with mechanical recovery.
+#   ADR-017 — shared-code sync pattern (command-detect.sh canonical at
+#             packages/shared/hooks/lib/; synced into per-package
+#             hooks/lib/ via scripts/sync-command-detect.sh).
 #   ADR-038 — progressive disclosure / deny-message terseness budget.
 #   P057    — original staging-trap ticket; this hook is the
 #             enforcement layer the documentation alone didn't provide.
 #   P119    — sibling create-gate hook (PreToolUse:Write + lib/create-gate.sh).
 #   P125    — this hook.
+#   P268    — shared `command_invokes_git_commit` helper landed for
+#             `itil-readme-refresh-discipline.sh`.
+#   P273    — sibling-hook refactor: substring-match → helper here.
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=lib/staging-detect.sh
 source "$SCRIPT_DIR/lib/staging-detect.sh"
+# shellcheck source=lib/command-detect.sh
+source "$SCRIPT_DIR/lib/command-detect.sh"
 
 INPUT=$(cat)
 
@@ -58,13 +75,12 @@ except:
     print('')
 " 2>/dev/null || echo "")
 
-# Only fire on `git commit` invocations. Substring match catches
-# common shapes (`git commit -m`, `git commit --amend`, leading
-# `cd && git commit`, etc.) without over-matching unrelated bash.
-case "$COMMAND" in
-  *"git commit"*) ;;
-  *) exit 0 ;;
-esac
+# Only fire on actual `git commit` invocations. Delegates to
+# `lib/command-detect.sh::command_invokes_git_commit`, which strips
+# common prefix shapes (leading whitespace, env-var assignments,
+# `cd <path> &&`) and checks whether the residual leading token pair
+# is literally `git commit`. P273: replaces the prior substring match.
+command_invokes_git_commit "$COMMAND" || exit 0
 
 # Run detection. Helper echoes trap'd path on stdout when detected;
 # returns 1 in that case. Returns 0 (allow) on no-trap or fail-open

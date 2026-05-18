@@ -81,6 +81,9 @@
 #             retro-time advisory consumption as primary).
 #   ADR-052 — behavioural-tests default (bats fixture asserts on
 #             emitted JSON, not source content).
+#   ADR-017 — shared-code sync pattern (command-detect.sh canonical at
+#             packages/shared/hooks/lib/; synced into per-package
+#             hooks/lib/ via scripts/sync-command-detect.sh).
 #   P081 — behavioural tests preferred over structural greps.
 #   P125 — sibling staging-trap helper (per-invocation no-marker).
 #   P141 — sibling changeset-discipline gate on `git commit` (same
@@ -88,9 +91,15 @@
 #   P158 — retro Step 2b wiring (backup advisory; survives this
 #             hook's primary-surface migration).
 #   P159 — this hook.
+#   P268 — shared `command_invokes_git_commit` helper landed in
+#             packages/shared/hooks/lib/command-detect.sh.
+#   P275 — sibling-hook refactor: substring-match → helper here
+#             (first cross-package consumer of the shared helper).
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 DETECTOR="$SCRIPT_DIR/../scripts/check-readme-jtbd-currency.sh"
+# shellcheck source=lib/command-detect.sh
+source "$SCRIPT_DIR/lib/command-detect.sh"
 
 INPUT=$(cat)
 
@@ -117,15 +126,10 @@ except:
     print('')
 " 2>/dev/null || echo "")
 
-# Only fire on `git commit` invocations. Substring match catches common
-# shapes (`git commit -m`, `git commit --amend`, leading `cd && git
-# commit`, `chore: version packages` release commits routed via
-# `git commit -m 'chore: version packages'`, etc.) without
-# over-matching unrelated bash.
-case "$COMMAND" in
-  *"git commit"*) ;;
-  *) exit 0 ;;
-esac
+# Only fire on actual `git commit` invocations. P275: delegates to the
+# shared `command_invokes_git_commit` helper for leading-executable
+# semantics (was substring match prone to grep/sed/echo false positives).
+command_invokes_git_commit "$COMMAND" || exit 0
 
 # Bypass via env var — single most-common legitimate escape.
 if [ "${BYPASS_JTBD_CURRENCY:-}" = "1" ]; then

@@ -271,3 +271,105 @@ Refs: RFC-002"
   # Permit per-line overhead; the advisory should remain readable.
   [ "${#output}" -le 600 ]
 }
+
+# ── P274 / P268 leading-executable regression cases ─────────────────────────
+#
+# The hook must fire on ACTUAL `git commit` invocations, NOT on Bash that
+# merely MENTIONS the phrase "git commit" in argument vectors or heredoc
+# bodies. Mirrors the P268 regression fixtures in command-detect.bats and
+# the P272 sibling fixtures in itil-changeset-discipline.bats.
+#
+# Setup constructs a drift state (RFC + stale problem) — the hook would
+# emit an advisory on any `git commit` after `Refs: RFC-001` lands in HEAD.
+# These tests confirm non-commit Bash that mentions "git commit" does NOT
+# emit the advisory.
+
+@test "P274 allow: grep with literal 'git commit' pattern in drift state → silent" {
+  write_rfc "001" "foo" "accepted"
+  write_problem_without_rfcs_section "168"
+  echo "x" > stub.txt
+  git add stub.txt
+  git -c commit.gpgsign=false commit --quiet -m "feat: stub" -m "" -m "Refs: RFC-001"
+  run run_post_bash_hook "grep -r 'git commit' ."
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "P274 allow: sed pattern containing 'git commit' in drift state → silent" {
+  write_rfc "001" "foo" "accepted"
+  write_problem_without_rfcs_section "168"
+  echo "x" > stub.txt
+  git add stub.txt
+  git -c commit.gpgsign=false commit --quiet -m "feat: stub" -m "" -m "Refs: RFC-001"
+  run run_post_bash_hook "sed -n 's/git commit/X/p' stub.txt"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "P274 allow: echo with literal 'git commit' string in drift state → silent" {
+  write_rfc "001" "foo" "accepted"
+  write_problem_without_rfcs_section "168"
+  echo "x" > stub.txt
+  git add stub.txt
+  git -c commit.gpgsign=false commit --quiet -m "feat: stub" -m "" -m "Refs: RFC-001"
+  run run_post_bash_hook "echo 'run git commit -m foo'"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "P274 allow: git log --grep with 'git commit' search term in drift state → silent" {
+  write_rfc "001" "foo" "accepted"
+  write_problem_without_rfcs_section "168"
+  echo "x" > stub.txt
+  git add stub.txt
+  git -c commit.gpgsign=false commit --quiet -m "feat: stub" -m "" -m "Refs: RFC-001"
+  run run_post_bash_hook "git log --grep='git commit'"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "P274 allow: git commit-tree plumbing in drift state → silent (boundary)" {
+  write_rfc "001" "foo" "accepted"
+  write_problem_without_rfcs_section "168"
+  echo "x" > stub.txt
+  git add stub.txt
+  git -c commit.gpgsign=false commit --quiet -m "feat: stub" -m "" -m "Refs: RFC-001"
+  run run_post_bash_hook "git commit-tree HEAD^{tree} -m 'msg'"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+# ── P274 positive leading-executable cases still emit advisory ──────────────
+
+@test "P274 advisory: env-var-prefixed git commit in drift state still emits advisory" {
+  write_rfc "001" "foo" "accepted"
+  write_problem_without_rfcs_section "168"
+  echo "x" > stub.txt
+  git add stub.txt
+  git -c commit.gpgsign=false commit --quiet -m "feat: stub" -m "" -m "Refs: RFC-001"
+  run run_post_bash_hook "GIT_AUTHOR_NAME=foo git commit -m foo"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"RFC-001"* ]]
+}
+
+@test "P274 advisory: cd-prefixed git commit in drift state still emits advisory" {
+  write_rfc "001" "foo" "accepted"
+  write_problem_without_rfcs_section "168"
+  echo "x" > stub.txt
+  git add stub.txt
+  git -c commit.gpgsign=false commit --quiet -m "feat: stub" -m "" -m "Refs: RFC-001"
+  run run_post_bash_hook "cd . && git commit -m foo"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"RFC-001"* ]]
+}
+
+@test "P274 advisory: leading-whitespace git commit in drift state still emits advisory" {
+  write_rfc "001" "foo" "accepted"
+  write_problem_without_rfcs_section "168"
+  echo "x" > stub.txt
+  git add stub.txt
+  git -c commit.gpgsign=false commit --quiet -m "feat: stub" -m "" -m "Refs: RFC-001"
+  run run_post_bash_hook "   git commit -m foo"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"RFC-001"* ]]
+}

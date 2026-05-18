@@ -88,6 +88,9 @@ jobs:
       - name: Check derive-first-dispatch.sh copies in sync (P132 Phase 2a-iii-B, ADR-017)
         run: npm run check:derive-first-dispatch
 
+      - name: Check command-detect.sh copies in sync (P268 / P275, ADR-017)
+        run: npm run check:command-detect
+
       - name: Check plugin manifest versions in sync with package.json (P042, ADR-021)
         run: npm run check:plugin-manifests
 

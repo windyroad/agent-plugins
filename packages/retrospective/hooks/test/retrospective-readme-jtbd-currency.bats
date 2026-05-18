@@ -261,3 +261,74 @@ EOF
   [ "$status" -eq 0 ]
   [ "${#output}" -eq 0 ]
 }
+
+# ── P275 / P268 leading-executable regression cases ─────────────────────────
+#
+# The hook must fire on ACTUAL `git commit` invocations, NOT on Bash that
+# merely MENTIONS the phrase "git commit" in argument vectors or heredoc
+# bodies. Mirrors P268 regression fixtures in command-detect.bats and
+# P272 sibling fixtures in itil-changeset-discipline.bats.
+
+@test "P275 allow: grep with literal 'git commit' pattern on drifted project does NOT deny" {
+  make_drifted_project
+  run run_bash_hook "grep -r 'git commit' ."
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
+  [ "${#output}" -eq 0 ]
+}
+
+@test "P275 allow: sed pattern containing 'git commit' on drifted project does NOT deny" {
+  make_drifted_project
+  run run_bash_hook "sed -n 's/git commit/X/p' packages/stub/README.md"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
+  [ "${#output}" -eq 0 ]
+}
+
+@test "P275 allow: echo with literal 'git commit' string on drifted project does NOT deny" {
+  make_drifted_project
+  run run_bash_hook "echo 'run git commit -m foo'"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
+  [ "${#output}" -eq 0 ]
+}
+
+@test "P275 allow: git log --grep with 'git commit' search term on drifted project does NOT deny" {
+  make_drifted_project
+  run run_bash_hook "git log --grep='git commit'"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
+  [ "${#output}" -eq 0 ]
+}
+
+@test "P275 allow: git commit-tree plumbing on drifted project does NOT deny (boundary)" {
+  make_drifted_project
+  run run_bash_hook "git commit-tree HEAD^{tree} -m 'msg'"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
+  [ "${#output}" -eq 0 ]
+}
+
+# ── P275 positive leading-executable cases still deny ──────────────────────
+
+@test "P275 deny: env-var-prefixed git commit on drifted project still triggers deny" {
+  make_drifted_project
+  run run_bash_hook "GIT_AUTHOR_NAME=foo git commit -m 'feat'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
+  [[ "$output" == *"P159"* ]]
+}
+
+@test "P275 deny: cd-prefixed git commit on drifted project still triggers deny" {
+  make_drifted_project
+  run run_bash_hook "cd . && git commit -m 'feat'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
+}
+
+@test "P275 deny: leading-whitespace git commit on drifted project still triggers deny" {
+  make_drifted_project
+  run run_bash_hook "   git commit -m 'feat'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
+}

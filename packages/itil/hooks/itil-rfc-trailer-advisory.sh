@@ -48,11 +48,22 @@
 # marker (per-invocation deterministic; mirrors P125 staging-detect.sh
 # and P141 itil-changeset-discipline.sh precedent).
 #
+# Command-shape detection delegates to
+# `lib/command-detect.sh::command_invokes_git_commit`, which strips
+# common prefix shapes (leading whitespace, env-var assignments,
+# `cd <path> &&`) and checks whether the residual leading token pair
+# is literally `git commit`. P274: replaced the prior substring match
+# `*"git commit"*` that misfired on non-commit Bash whose argument
+# vectors merely mentioned the phrase (grep / sed / cat-heredoc /
+# echo / `git log --grep`).
+#
 # References:
 #   ADR-005 — plugin testing strategy (hook bats live under hooks/test/).
 #   ADR-013 Rule 6 — fail-open on missing inputs / parse errors.
 #   ADR-014 — single-commit grain (this hook never auto-fixes via
 #             follow-up commit; advisory-only).
+#   ADR-017 — shared-code sync pattern (command-detect.sh canonical at
+#             packages/shared/hooks/lib/).
 #   ADR-038 — progressive disclosure / advisory band ≤300 bytes.
 #   ADR-045 — hook injection budget; Pattern 1 silent-on-pass.
 #   ADR-051 — load-bearing-from-the-start (drift detection ships at
@@ -63,6 +74,12 @@
 #   P081    — behavioural tests preferred over structural greps.
 #   P125    — sibling per-invocation no-marker hook precedent.
 #   P141    — sibling commit-time gate hook precedent.
+#   P268    — shared `command_invokes_git_commit` helper.
+#   P274    — sibling-hook refactor: substring-match → helper here.
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/command-detect.sh
+source "$SCRIPT_DIR/lib/command-detect.sh"
 
 INPUT=$(cat)
 
@@ -89,11 +106,10 @@ except:
     print('')
 " 2>/dev/null || echo "")
 
-# Only fire on `git commit` invocations.
-case "$COMMAND" in
-  *"git commit"*) ;;
-  *) exit 0 ;;
-esac
+# Only fire on actual `git commit` invocations. P274: delegates to the
+# shared `command_invokes_git_commit` helper for leading-executable
+# semantics (was substring match prone to grep/sed/echo false positives).
+command_invokes_git_commit "$COMMAND" || exit 0
 
 # Bypass via env var.
 if [ "${BYPASS_RFC_TRAILER_ADVISORY:-}" = "1" ]; then
