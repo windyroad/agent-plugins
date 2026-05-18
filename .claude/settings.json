@@ -5,13 +5,13 @@
     "wr-architect@windyroad": true,
     "wr-c4@windyroad": true,
     "wr-connect@windyroad": true,
-    "wr-itil@windyroad": true,
     "wr-jtbd@windyroad": true,
     "wr-retrospective@windyroad": true,
     "wr-risk-scorer@windyroad": true,
     "wr-style-guide@windyroad": true,
     "wr-tdd@windyroad": true,
     "wr-voice-tone@windyroad": true,
-    "wr-wardley@windyroad": true
+    "wr-wardley@windyroad": true,
+    "wr-itil@windyroad": true
   }
 }
