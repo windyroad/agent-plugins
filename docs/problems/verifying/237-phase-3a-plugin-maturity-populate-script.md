@@ -1,6 +1,6 @@
 # Problem 237: Phase 3a — `wr-itil-plugin-maturity-populate` writes `plugin.json` `maturity:` field from Phase 2 NDJSON
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-17
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -59,3 +59,13 @@ Child of P087. Driver: ADR-063 Phase 3 sub-iter contract.
 - P238 — Phase 3b renderer + drift detector (blocked by this ticket)
 - P239 — Phase 3c bats doc-lint per plugin
 - P240 — Phase 3d JTBD outcome amendments
+
+## Fix Released
+
+Phase 3a population script shipped 2026-05-17 in `/wr-itil:work-problems` AFK orchestrator iter 9 (session 4), commit `b840a7a feat(itil): ship Phase 3a plugin maturity populate script (P087, P237)`. Released across `@windyroad/itil@0.31.x` cohort (Phase 2a + 2b + 3a atomic-cohort graduation per user direction, commit `287e4c6`).
+
+Fold-fix Open → Verification Pending per ADR-022 P143 amendment — the script's contract is documented inline (canonical body, ADR-049 shim, 17 behavioural bats covering ADR-063 §Confirmation criteria 1-3 plus schema-shape / rollup worst-case / hook null-sentinel / Deprecated-overlay preservation / fail-safe missing-input / no-network-primitive). Smoke test against live monorepo confirmed 11 plugins × 121 surfaces written; idempotency confirmed via pinned `--now`; populated values reverted from commit per strict architect §E scope (retroactive mechanical rollout composes with Phase 3b per P087 line 133).
+
+Awaiting user verification — next adopter session that runs `wr-itil-plugin-maturity-populate` from a marketplace-installed cache against a Phase 2 NDJSON pair confirms script behaves per ADR-063 contract. P237 was tracked separately from P087's Phase 3a `[x]` Investigation Task to surface the script-deliverable as a discrete WSJF-ranked entity; both representations stay in sync per ADR-014 governance.
+
+Recovery path: `/wr-itil:transition-problem 237 known-error` after reverting the script commits.

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# packages/retrospective/bin/wr-retrospective-check-plugin-maturity-drift
+#
+# ADR-049 shim — resolves the canonical body in this package's scripts/
+# dir. Phase 3b drift detector entrypoint; sibling to ADR-051's
+# `wr-retrospective-check-readme-jtbd-currency`.
+
+exec "$(dirname "$0")/../scripts/check-plugin-maturity-drift.sh" "$@"

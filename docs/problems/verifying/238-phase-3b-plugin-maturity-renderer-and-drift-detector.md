@@ -1,6 +1,6 @@
 # Problem 238: Phase 3b — README badge renderer (`wr-itil-plugin-maturity-render`) + advisory drift detector (`check-plugin-maturity-drift.sh`)
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-17
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -64,3 +64,14 @@ Child of P087. Driver: ADR-063 Phase 3 sub-iter contract.
 - ADR-052 — behavioural bats
 - P237 — Phase 3a population script (blocks this ticket)
 - P239 — Phase 3c bats doc-lint per plugin
+
+## Fix Released
+
+Phase 3b renderer + drift detector shipped 2026-05-18 in `/wr-itil:work-problems` AFK orchestrator iter 8 (session 6). Two changesets land in the same iter commit:
+
+- `@windyroad/itil` minor — renderer `wr-itil-plugin-maturity-render` (`packages/itil/scripts/plugin-maturity-render.sh` + `packages/itil/bin/wr-itil-plugin-maturity-render`). 17 behavioural bats fixtures at `packages/itil/scripts/test/plugin-maturity-render.bats` — all green.
+- `@windyroad/retrospective` minor — drift detector `wr-retrospective-check-plugin-maturity-drift` (`packages/retrospective/scripts/check-plugin-maturity-drift.sh` + `packages/retrospective/bin/wr-retrospective-check-plugin-maturity-drift`). 14 behavioural bats fixtures at `packages/retrospective/scripts/test/check-plugin-maturity-drift.bats` — all green.
+
+Awaiting user verification — next adopter session that runs `wr-itil-plugin-maturity-render` and `wr-retrospective-check-plugin-maturity-drift` from a marketplace-installed cache against a populated `plugin.json` set confirms the renderer + drift detector behave as documented. Per ADR-022 the user may also signal verification by acknowledging Phase 3b's smoke-test behaviour against the live monorepo (12 plugins / 0 drift instances at baseline — coherent because all 11 plugins lack `maturity:` field pending Phase 3a mechanical rollout).
+
+Recovery path: `/wr-itil:transition-problem 238 known-error` after reverting the iter commit.

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# packages/itil/bin/wr-itil-plugin-maturity-render
+#
+# ADR-049 shim — resolves the canonical body in this package's scripts/
+# dir. The canonical body lives at
+# `packages/itil/scripts/plugin-maturity-render.sh`; this shim is the
+# `$PATH`-resolvable entrypoint that adopter trees invoke.
+#
+# Phase 3b of the P087 plugin maturity rollout.
+
+exec "$(dirname "$0")/../scripts/plugin-maturity-render.sh" "$@"
