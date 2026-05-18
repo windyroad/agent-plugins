@@ -1,9 +1,12 @@
 # Problem 266: Agent follows SKILL.md ≤3-no-drain clause despite P250's amended framing when releasable material exists
 
-**Status**: Open
+**Status**: Verifying
 **Reported**: 2026-05-18
+**Root cause confirmed**: 2026-05-18 (same surface as P250 — `packages/itil/skills/work-problems/SKILL.md` Step 6.5 ≤3-no-drain classification clause)
+**Fix released**: 2026-05-18 (`@windyroad/itil@0.32.3`, source commit `e9fb7f0` "fix(itil): P250 Step 6.5 drain on releasable material, not residual band"; version-packages commit `4a0e1b7` 2026-05-17 21:29 UTC; PR #141 merge commit `4df08ec`; current cache `@windyroad/itil@0.35.3`. Fold-fix transition Open → Verifying per ADR-022 P143 amendment — the SKILL.md amendment + ADR-018 amendment that resolved P250's clause simultaneously resolves P266's agent-behaviour surface since the agent's behaviour is reading SKILL.md. Bats fixture `packages/itil/skills/work-problems/test/work-problems-step-6-5-always-drain.bats` 24/24 green, including the explicit regression guard `SKILL.md no longer contains 'Within appetite (≤ 3/25) — no drain needed' clause` at line 60. Sibling-pattern audit across `packages/**/SKILL.md` found zero residual "below-appetite no-action" clauses encoding accumulation.)
 **Priority**: 9 (Mod) — Impact: 3 (Moderate — encodes accumulation against the RISK-POLICY appetite invariant; defers low-risk releases against explicit user direction "If it's low risk, you should release") × Likelihood: 3 (Possible — fires when an iter ships a changeset and Step 6.5 evaluates within-appetite; observed pattern this session at iter 5 boundary) (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (Step 6.5 SKILL.md contract amendment — drop the "≤3 within appetite — no drain" classification clause; replace with "drain whenever there is something to release at residual ≤4 within appetite"; bats coverage; sibling pattern to P250 fix amendment) (deferred — re-rate at next /wr-itil:review-problems)
+**WSJF**: 9/2 = **4.5** (raw Priority/Effort retained per README display convention; Open → Verifying on fold-fix per ADR-022 P143 amendment — pre-flight criteria met inline: root cause documented, fix shipped, bats coverage green, sibling audit zero-finding; awaiting in-loop verification window — 5 AFK iterations across ≥2 sessions per § Verification (post-release))
 **Type**: technical
 
 ## Description
