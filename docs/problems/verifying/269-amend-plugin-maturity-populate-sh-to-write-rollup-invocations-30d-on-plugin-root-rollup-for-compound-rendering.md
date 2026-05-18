@@ -1,9 +1,12 @@
 # Problem 269: Amend `plugin-maturity-populate.sh` to write `rollup_invocations_30d` on plugin root rollup for compound rendering
 
-**Status**: Open
+**Status**: Verifying
 **Reported**: 2026-05-18
+**Root cause confirmed**: 2026-05-18
+**Fix released**: 2026-05-18 (`@windyroad/itil@0.35.4` — source commit `7ca47ef` "fix(maturity): P087 Phase 3 (P269) — amend populate to write rollup_invocations_30d + bootstrapping on plugin root for compound rendering" + retroactive rollout `f3c0d26` + doc-lint fold-fix `3040b69` + retro `d945727`; version-packages commit `28ac9e7`; PR #150 merge commit `6127ed8` 2026-05-18; released session 8 loop-end Step 6.5 drain; transitions Open → Verifying per ADR-022 P143 fold-fix amendment — changeset removal in `28ac9e7` IS the canonical fix-shipped signal; verification window remains in-flight — 5 AFK iterations across ≥2 sessions of low-risk iters; recovery path: `/wr-itil:transition-problem 269 known-error` after reverting the iter commits)
 **Priority**: 3 (Medium) — Impact: 3 × Likelihood: 3 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: S (deferred — re-rate at next /wr-itil:review-problems)
+**WSJF**: 9/3 = **3.0** (raw Priority/Effort retained per README display convention)
 **Type**: technical
 
 ## Description
