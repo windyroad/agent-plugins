@@ -1,11 +1,12 @@
 # Problem 249: No process for issue reporters to check for responses — symmetric gap to inbound discovery
 
-**Status**: Known Error
+**Status**: Verifying
 **Reported**: 2026-05-17
 **Phase 1 fix landed**: 2026-05-18 — `/wr-itil:check-upstream-responses` skill ships us-as-upstream-reporter polling surface. Phase 2 (external-reporter-as-our-reporter) remains scheduled-future-surface per P179.
+**Fix released**: 2026-05-18 (`@windyroad/itil@0.34.0`, source commit `49dd0ba`; consumed in version-packages commit `11caa25` 2026-05-17 23:41:35 UTC, merged via PR #144 / merge commit `5388ba3` 2026-05-18 09:46:05 AEST; current ships at 0.35.2)
 **Priority**: 9 (Medium) — Impact: 3 (Moderate — symmetric gap leaves reporters without acknowledgement signal; degrades inbound-channel quality and the feedback loop completing ADR-062's "every submitted report receives a verdict" contract) × Likelihood: 3 (Possible — fires whenever we report upstream via `/wr-itil:report-upstream` AND whenever an external reporter files via our intake)
 **Effort**: M (Phase 1 landed; Phase 2 estimated S — composes with existing `.github/ISSUE_TEMPLATE/problem-report.yml` intake surface)
-**WSJF**: 9/2 = **4.5** (Known Error multiplier 2.0 applies after Phase 1 lands, but Phase 2 stays Open; re-rated 2026-05-17 from placeholder during `/wr-itil:review-problems` — ties with P247/P246 sibling fictional-defer / symmetric-gap class)
+**WSJF**: 9/2 = **4.5** (raw Priority/Effort retained per README display convention; Known Error → Verifying on release per ADR-022 P143 fold-fix amendment; Phase 1 ships in 0.34.0; awaiting in-loop verification window — 5 AFK iterations across ≥2 sessions per § Verification (post-release); Phase 2 remains Open as scheduled-future-surface per P179)
 **Type**: technical
 
 ## Description
@@ -60,11 +61,31 @@ Currently manual: visit the GitHub issue URL directly to see if there's a respon
 - **Blocked by**: potentially P072 (external-reporter persona) if interpretation 2 is in scope; potentially P080 (bidirectional update) if the surfaces compose
 - **Composes with**: P079 (inbound assessment pipeline parent), P080 (bidirectional update), P229 (ack-comment shape), P072 (external-reporter persona), ADR-062 (inbound discovery)
 
+## Fix Released
+
+Shipped 2026-05-18 in `@windyroad/itil@0.34.0`:
+
+- Source commit: `49dd0ba` "feat(itil): P249 Phase 1 — /wr-itil:check-upstream-responses skill ships outbound symmetric counterpart to ADR-062 inbound discovery" (2026-05-18)
+- README skill-inventory follow-up: `e4e100b` "docs(itil): README skill-inventory row for /wr-itil:check-upstream-responses (P249 Phase 1 follow-up)"
+- Changeset removed: `.changeset/itil-p249-phase-1-check-upstream-responses.md` (per ADR-022 P143 fold-fix — changeset removal IS the canonical fix-shipped signal)
+- Version-packages commit: `11caa25` (2026-05-17 23:41:35 UTC) — `0.33.0` → `0.34.0`
+- Merge PR: #144, merge commit `5388ba3` (2026-05-18 09:46:05 AEST)
+- Current cache: `@windyroad/itil@0.35.2` — 3 subsequent release cycles (0.35.0 / 0.35.1 / 0.35.2) with zero regression on the `/wr-itil:check-upstream-responses` skill surface; skill SKILL.md present in cache at both 0.34.0 and 0.35.2
+
+**Phase 1 scope (shipped)**: `/wr-itil:check-upstream-responses` skill ships us-as-upstream-reporter polling surface — script `packages/itil/scripts/check-upstream-responses.sh` + bin shim `wr-itil-check-upstream-responses` + `packages/itil/skills/check-upstream-responses/SKILL.md` + 13 behavioural bats tests (mocks `gh` via `--gh-bin` flag for testability). ADR-014 commit-message-convention table amended (new row for the `## Reported Upstream` back-link audit-log entry). ADR-024 Confirmation amended (back-link section URL field now load-bearing for two skills — `/wr-itil:report-upstream` writes it; `/wr-itil:check-upstream-responses` reads it). ADR-062 `## Related` amended (forward-pointer to P249 Phase 1 sibling — completes the symmetric inbound/outbound feedback loop at the assessment-pipeline level).
+
+**Phase 2 scope (deferred — this ticket NOT the SFS for Phase 2)**: external-reporter-as-our-reporter surface (composes with `.github/ISSUE_TEMPLATE/problem-report.yml` intake; structured feedback channel for plugin users) remains Open as a separate concern per P179 deferred-with-scheduled-future-surface pattern. The K → V transition is gated on Phase 1 alone because Phase 1 is a self-contained shipped slice with its own user-facing surface (`/wr-itil:check-upstream-responses`); Phase 2 is a distinct user surface (intake-template structured feedback) that does NOT compose with Phase 1's polling shape — they're orthogonal halves of the symmetric gap per the ticket's own scope-split decision (Phase 1 = us-as-upstream-reporter; Phase 2 = external-reporter-as-our-reporter). Same scope-bounding shape exercised in P246 / P247 / P250 K → V transitions this session (release-vehicle citation, Phase 2 deferral via P179, single-commit grain per ADR-014, README Verification Queue insert per P186 evidence-cell shape).
+
+**Sibling-class linkage**: Fourth K → V transition this session (after P250 iter-1, P246 iter-2, P247 iter-3) — distinct surface (skill-ship vs SKILL.md contract amendment) but identical transition shape. The K → V fold-fix shape (release-vehicle citation, Phase deferral via P179 SFS, single-commit grain per ADR-014, README Verification Queue insert per P186 evidence-cell shape) is now exercised across four distinct surfaces this session, demonstrating the pattern's portability across skill-creation (P249), SKILL.md contract amendment (P247), Step 6.5 mechanic refinement (P246), and clause-removal (P250).
+
+Verification window remains in-flight per § Verification (post-release) — 5 AFK iterations across ≥2 sessions of low-risk iters. Recovery path: `/wr-itil:transition-problem 249 known-error` after reverting commit `49dd0ba`.
+
 ## Change Log
 
 - **2026-05-17**: Captured via /wr-itil:capture-problem. Initial WSJF placeholder.
 - **2026-05-17**: Re-rated to Priority 9 / Effort M / WSJF 4.5 via /wr-itil:review-problems.
 - **2026-05-18**: Phase 1 implementation landed. Skill `/wr-itil:check-upstream-responses` + script `packages/itil/scripts/check-upstream-responses.sh` + bin shim `wr-itil-check-upstream-responses` + 13 behavioural bats tests. ADR-014 commit-message-convention table amended (new row for `chore(problems): check upstream responses ...`). ADR-024 Confirmation amended (back-link section URL field now load-bearing for two skills). ADR-062 `## Related` amended (forward-pointer to P249 Phase 1 sibling). Status: Open → Known Error (Phase 1 fix released; Phase 2 remains Open as scheduled-future-surface per P179 deferred-with-scheduled-future-surface pattern).
+- **2026-05-18** (session 7 iter 4): Known Error → Verifying via `/wr-itil:work-problems` AFK loop. Fold-fix per ADR-022 P143 amendment — changeset `itil-p249-phase-1-check-upstream-responses.md` removed in version-packages commit `11caa25` (2026-05-17 23:41:35 UTC, shipped `@windyroad/itil@0.34.0`), merged via PR #144 / merge commit `5388ba3` (2026-05-18 09:46:05 AEST); current cache `@windyroad/itil@0.35.2` spans 3 subsequent release cycles (0.35.0 / 0.35.1 / 0.35.2) with zero regression on the `/wr-itil:check-upstream-responses` skill surface; cache verification confirms SKILL.md present in both 0.34.0 and 0.35.2. Architect + JTBD pre-edit reviews PASS — no new ADR required (ADR-022 P143 fold-fix + ADR-014 single-commit grain + ADR-031 per-state subdir + P186 evidence-first cell shape + ADR-024 back-link audit-log amendment + ADR-062 outbound symmetric counterpart amendment all honoured; docs/problems/ edits are gate-excluded per system-reminder READ tolerance). README Known Error Rankings row removed; Verification Queue row inserted at 2026-05-18 same-day-ID-ASC position (after P247, before P250); evidence cell carries P186-conformant default. Recovery path: `/wr-itil:transition-problem 249 known-error` after reverting commit `49dd0ba`.
 
 ## Related
 
