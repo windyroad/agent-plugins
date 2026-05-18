@@ -24,6 +24,7 @@ The pattern matches P145's anti-pattern definition (recurring-defer escapes the 
 - `check-briefing-budgets.sh` emits OVER lines on 13 of 14 files every retro.
 - 2 files at MUST_SPLIT threshold (≥2× ceiling); per Branch A, do-nothing options should not be eligible — but the rotation keeps getting deferred.
 - `briefing` bucket measures 119,103 bytes / 3.6% of total cheap-layer context (small in absolute terms but every byte loaded at session start).
+- **Session-8 evidence appended 2026-05-19**: at session-wrap retro start, `check-briefing-budgets.sh` reported **15 OVER files** with `plugin-distribution.md` at MUST_SPLIT (10370 bytes / 2.03× ceiling). Briefing bucket now 136835 bytes (up from 119103 measured at P195 capture — +14.9%). Session 8 retro rotated 1 file (plugin-distribution.md → split-by-subtopic to `plugin-distribution-cache-mechanics.md`); plugin-distribution.md now 3118 bytes (under threshold), sibling 7971 bytes (still Branch B OVER but no longer MUST_SPLIT). **14 Branch B OVER files remain unrotated** after session 8 retro. The pattern continues — per-retro rotation pace (~1 file/retro) is not keeping up with accretion across 12 plugin files + 17 topic files. Branch A escalation (P145 stricter contract / CI gate / sibling rotation skill) is increasingly warranted as evidence accumulates.
 
 ## Workaround
 

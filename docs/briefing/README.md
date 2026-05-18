@@ -26,7 +26,8 @@ The highest-value entries across the briefing — the handful of rules that save
 | [releases-and-ci.md](./releases-and-ci.md) | push:watch, release:watch, changesets, npm publish, GitHub Actions pipeline | Any release work, CI debugging, workflow authoring, bypass-marker behaviour. |
 | [governance-workflow.md](./governance-workflow.md) | ADRs, architect/JTBD reviews, risk scoring, voice-tone, canonical+sync, SKILL+REFERENCE | ADR drafting, governance skill work, session-wide pattern application. |
 | [afk-subprocess.md](./afk-subprocess.md) | `/wr-itil:work-problems` AFK loops, `claude -p` subprocess, iteration workers | AFK orchestrator work, subprocess dispatch debugging, iteration-worker protocol. |
-| [plugin-distribution.md](./plugin-distribution.md) | Marketplace, plugin cache, install scope, npm package naming, Discord, 1Password env | Plugin install / rename / publish work, `/install-updates`, environment setup. |
+| [plugin-distribution.md](./plugin-distribution.md) | Skill invocation grammar, Discord wiring, 1Password env, npm package naming | Plugin naming, Discord setup, environment setup. |
+| [plugin-distribution-cache-mechanics.md](./plugin-distribution-cache-mechanics.md) | Marketplace cache, install/uninstall/refresh patterns, manifest validator, worktree shadowing, TUI vs agent enumerator | Plugin install / refresh / publish work, `/install-updates` debugging, broken-manifest recovery. |
 | [agent-interaction-patterns.md](./agent-interaction-patterns.md) | Framing validation, re-stage traps, user-frustration signals | Before asking the user solution-detail questions; ticket-framing checks. |
 
 > **Archive siblings** (Tier 3 budget rotations per P145, multi-pass 2026-05-11 / 13 / 17): topic files have date-stratified archives. Load alongside the primary file when full historical context is needed.
