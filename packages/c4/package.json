@@ -1,6 +1,6 @@
 {
   "name": "@windyroad/c4",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "C4 architecture diagram generation and validation",
   "bin": {
     "windyroad-c4": "./bin/install.mjs"
