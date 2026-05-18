@@ -20,6 +20,7 @@ When I install a `@windyroad/*` plugin and read its README to understand what it
 - A drift-detection signal exists at commit / release / retrospective time so adopters never receive a silently-stale README via `npm install`.
 - **(Amended 2026-05-04 by P159)** The signal is **load-bearing at commit time** via the PreToolUse:Bash hook (`packages/retrospective/hooks/retrospective-readme-jtbd-currency.sh`); retro-time and release-time advisories ride as backup signals. Drift class detection is enforced at the closest surface to the failure mode (the commit itself), not gradualism-deferred. The original advisory-then-escalate phrasing was superseded by P159 after the user correction *"the drift detector shouldn't be part of the retro. It should be something we are always running and fixing"*.
 - The same source-of-truth anchor (JTBD job IDs) lets an adopter cross-reference the README to `docs/jtbd/<persona>/JTBD-NNN-*.md` and see **what jobs the plugin claims to help with**, not just **what the plugin's CLI surface exposes**.
+- **(Amended in P087 Phase 3)** I can see the maturity band (and, during the suite-bootstrap window, the compound evidence per ADR-053 §Bootstrapping clause Phase 3 rendering requirement) for every plugin and every per-skill surface from the README alone, without source archaeology under `node_modules/` and without invoking measurement scripts. Drivers: ADR-053 (maturity taxonomy), ADR-058 (measurement scripts), ADR-063 (presentation-layer contract), P087 (parent ticket).
 
 ## Persona Constraints
 
