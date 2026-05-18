@@ -397,9 +397,15 @@ PYEOF
     [ -f "$rdm" ] || continue  # README absent — skip (no marker to check)
     local band
     band=$(python3 -c "import json; print(json.load(open('$pj'))['maturity']['band'])")
-    # Anchored regex: `*Maturity: <band>` followed by `.` OR `(`.
-    if ! grep -qE "\\*Maturity: ${band}[.(]" "$rdm"; then
-      echo "$plugin: README missing badge marker *Maturity: ${band}<.|(>" >&2
+    # Anchored regex: `*Maturity: <band>` followed by `.` (bare form) OR
+    # ` (` (compound prefix — space + open paren per the renderer's
+    # `*Maturity: <Band> (suite-bootstrap window; <N> invocations / 30d).*`
+    # output shape at plugin-maturity-render.sh line 147). P269 fold-fix:
+    # the previous `[.(]` character class missed the space-before-paren
+    # case that became visible across the live monorepo once compound
+    # rendering started firing post-rollout.
+    if ! grep -qE "\\*Maturity: ${band}(\\.| \\()" "$rdm"; then
+      echo "$plugin: README missing badge marker *Maturity: ${band}<.|space-paren>" >&2
       false
     fi
   done
