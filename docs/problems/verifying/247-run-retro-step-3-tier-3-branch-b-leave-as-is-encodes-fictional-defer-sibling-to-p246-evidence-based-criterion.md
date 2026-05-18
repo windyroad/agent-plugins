@@ -1,11 +1,12 @@
 # Problem 247: run-retro Step 3 Tier 3 Branch B "leave-as-is" encodes fictional defer — sibling to P246 evidence-based criterion
 
-**Status**: Known Error
+**Status**: Verifying
 **Reported**: 2026-05-17
-**Fix Released**: pending (commit at this iter; release via orchestrator drain)
+**Root cause confirmed**: 2026-05-18
+**Fix released**: 2026-05-18 (`@windyroad/retrospective@0.19.0`, source commit `b22e006`; consumed in version-packages commit `1ef3157` 2026-05-17 23:01:05 UTC, merged via PR #143 / merge commit `10aecdf` 2026-05-18 09:05:28 AEST; current ships at 0.20.2)
 **Priority**: 9 (Med) — Impact: 3 (Moderate — briefing topic files accumulate past Tier 3 thresholds; each retro defers ratherthan rotating; the deferred rotations have no scheduled-future-surface; same fictional-defer class as P234 / P145 / P246 at a different SKILL surface) × Likelihood: 3 (Likely — fired today on session 4 wrap retro for 14 OVER files; will fire on EVERY future retro until SKILL contract is amended)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
-**WSJF**: 9/2 = **4.5** (deferred — provisional; ties with P132 + P246)
+**WSJF**: 9/2 = **4.5** (raw Priority/Effort retained per README display convention; Known Error → Verifying on release per ADR-022; Phase 1 ships in 0.19.0; awaiting in-loop verification window — 5 AFK iterations across ≥2 sessions per § Verification (post-release); Phase 2 rotation work remains deferred with this ticket as scheduled-future-surface per P179)
 **Type**: technical (skill-contract violation)
 
 ## Description
@@ -82,10 +83,29 @@ User catches each retro's defer + manually directs rotation. Currently manual (t
 
 **Tests**: `npx bats packages/retrospective/skills/run-retro/test/run-retro-step-3-tier-3-branch-b-evidence-based.bats` — 11/11 pass. `npx bats packages/retrospective/scripts/test/check-briefing-budgets.bats` — 20/20 pass (input-signal layer unchanged).
 
+## Fix Released
+
+Shipped 2026-05-18 in `@windyroad/retrospective@0.19.0`:
+
+- Source commit: `b22e006` "fix(retro): P247 Step 3 Tier 3 Branch B eliminate 'leave-as-is' — evidence-based rotation (closes Phase 1)" (2026-05-18)
+- Changeset removed: `.changeset/retro-p247-step-3-tier-3-branch-b-evidence-based.md` (per ADR-022 P143 fold-fix — changeset removal IS the canonical fix-shipped signal)
+- Version-packages commit: `1ef3157` (2026-05-17 23:01:05 UTC) — `0.18.2` → `0.19.0`
+- Merge PR: #143, merge commit `10aecdf` (2026-05-18 09:05:28 AEST)
+- Current cache: `@windyroad/retrospective@0.20.2` — 3 subsequent release cycles (0.20.0 / 0.20.1 / 0.20.2) with zero regression on the Step 3 Tier 3 Branch B evidence-based rotation surface
+
+**Phase 1 scope (shipped)**: SKILL.md contract amendment + behavioural+structural bats fixture + ticket lifecycle Open → Known Error.
+
+**Phase 2 scope (deferred — this ticket IS the scheduled-future-surface per P179)**: rotate the 14 currently-OVER topic files in `docs/briefing/` per the new evidence-based criterion (split-by-subtopic / split-by-date / trim-noise with split-by-date safe-default fall-through). Phase 2 iter will commit per ADR-014 grain as `docs(briefing): rotate OVER files per evidence-based criterion (P247 Phase 2)` and transition this ticket Verifying → Closed after the rotation work lands AND the verification window completes. The K → V transition is gated on Phase 1 alone because Phase 1 is a self-contained shipped slice; the broader meta-class fix (Phase 2 + P234 + P145 + P148 + P246 across distinct SKILL surfaces) lives across multiple tickets per their distinct surfaces — same scope-bounding shape exercised in P246's K → V transition this session.
+
+**Sibling-class linkage**: Fix mirrors P246 (commit `229539c`, `@windyroad/itil@0.33.0`, K → V earlier this session) — same fictional-defer class, different SKILL surface, same evidence-based principle (ADR-061 Rule 1 symmetric balance — evidence-based, not time-based). The K → V transition shape (release-vehicle citation, Phase 2 deferral via P179 SFS, single-commit grain per ADR-014, README Verification Queue insert per P186 evidence-cell shape) is identical to P246's transition pattern verified in iter-2 of this session.
+
+Verification window remains in-flight per § Verification (post-release) — 5 AFK iterations across ≥2 sessions of low-risk iters. Recovery path: `/wr-itil:transition-problem 247 known-error` after reverting commit `b22e006`.
+
 ## Change Log
 
 - **2026-05-17** — Captured during session 4 wrap retro (P078 strong-signal user correction). Sibling-class to P246 at Tier 3 Branch B surface.
 - **2026-05-18** — Iter 5 of `/wr-itil:work-problems` AFK loop: architect-confirmed option A (eliminate "leave-as-is"; fall-through = split-by-date safe default). JTBD review PASS (JTBD-001 friction-removal, JTBD-006 AFK-safe-default, JTBD-101 reusable pattern). SKILL.md amended; behavioural+structural bats fixture (11 assertions) added; transitioned Open → Known Error. Phase 2 (14-file rotation) deferred to separate iter.
+- **2026-05-18** (session 7 iter 3): Known Error → Verifying via `/wr-itil:work-problems` AFK loop. Fold-fix per ADR-022 P143 amendment — changeset `retro-p247-step-3-tier-3-branch-b-evidence-based.md` removed in version-packages commit `1ef3157` (2026-05-17 23:01:05 UTC, shipped `@windyroad/retrospective@0.19.0`), merged via PR #143 / merge commit `10aecdf` (2026-05-18 09:05:28 AEST); current cache `@windyroad/retrospective@0.20.2` spans 3 subsequent release cycles (0.20.0 / 0.20.1 / 0.20.2) with zero regression on the Branch B evidence-based rotation surface. Architect + JTBD pre-edit reviews PASS — no new ADR required (ADR-022 P143 fold-fix + ADR-014 single-commit grain + ADR-031 per-state subdir + P186 evidence-first cell shape + ADR-061 Rule 1 evidence-based Phase 2 deferral via P179 SFS all honoured). README Known Error Rankings row removed; Verification Queue row inserted at 2026-05-18 same-day-ID-ASC position (after P246, before P250); evidence cell carries P186-conformant default. Recovery path: `/wr-itil:transition-problem 247 known-error` after reverting commit `b22e006`.
 
 ## Dependencies
 
