@@ -1,7 +1,8 @@
 # Problem 073: No voice-and-tone check or risk assessment on changeset bodies (which populate CHANGELOG.md, Release PRs, GitHub Releases, and npm release notes)
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-04-20
+**Closed**: 2026-05-23
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: S <!-- transitive: collapsed to marginal S 2026-05-23; P038 + P064 both CLOSED → 0 per P076 upstream-status carve-out (was transitive XL) -->
 **WSJF**: 12.0 — (12 × 1.0) / 1 — re-rated 2026-05-23: transitive blockers P038/P064 closed; effort collapses to marginal S (P076)
@@ -71,16 +72,33 @@ No new standalone ADR is proposed — this extends the surface inventories that 
 
 ### Investigation Tasks
 
-- [ ] Cross-reference P073 in P038 and P064 Related sections so the surface-inventory row is not missed when those tickets are worked.
-- [ ] When P038 lands, assert the `.changeset/*.md` surface row is present in the shipped hook / skill surface list.
-- [ ] When P064 lands, assert the `.changeset/*.md` surface row is present in the shipped hook rules.
-- [ ] Add a bats doc-lint assertion in each of P038's and P064's test files that the surface list contains `.changeset/*.md` (regression guard).
-- [ ] Decide whether the changeset-authoring gate runs independently of the P038/P064 shared infrastructure (simple regex-based check now) or waits for the shared hook surface to land (coherent check later). Lean: wait — the shared evaluator is the right home.
-- [ ] Consider whether `npx changeset add` should also fire an advisory; the interactive prompt can't be intercepted but the invocation can.
+- [x] Cross-reference P073 in P038 and P064 Related sections so the surface-inventory row is not missed when those tickets are worked. — Both P038 and P064 worked and closed; the changeset surface landed inside P064's implementation.
+- [x] When P038 lands, assert the `.changeset/*.md` surface row is present in the shipped hook / skill surface list. — Present (voice-tone copy is byte-identical to the shared canonical, which carries the surface). Behavioural test: `packages/voice-tone/hooks/test/external-comms-gate.bats:148` "PreToolUse:Write on .changeset/*.md triggers deny+delegate".
+- [x] When P064 lands, assert the `.changeset/*.md` surface row is present in the shipped hook rules. — Present in `packages/risk-scorer/hooks/external-comms-gate.sh`. Behavioural tests: `packages/risk-scorer/hooks/test/external-comms-gate.bats:152` (revenue-leak deny) + `:159` (clean-content deny-then-delegate).
+- [x] Add a bats doc-lint assertion in each of P038's and P064's test files that the surface list contains `.changeset/*.md` (regression guard). — Canonical structural guard `packages/shared/test/external-comms-gate-canonical.bats:43` "canonical hook matches .changeset/*.md PreToolUse:Write/Edit surface (P073)" PLUS the stronger behavioural deny tests above (preferred per P081 — behavioural over structural grep).
+- [x] Decide whether the changeset-authoring gate runs independently of the P038/P064 shared infrastructure (simple regex-based check now) or waits for the shared hook surface to land (coherent check later). — DECIDED: shared evaluator. The `.changeset/*.md` surface is matched by the shared canonical `packages/shared/hooks/external-comms-gate.sh` (`Write|Edit` case, `SURFACE="changeset-author"`), synced byte-identically into both per-package copies. Both evaluators (risk + voice-tone) gate the surface; the risk copy adds the leak pre-filter, voice-tone runs marker-only.
+- [~] Consider whether `npx changeset add` should also fire an advisory; the interactive prompt can't be intercepted but the invocation can. — DEFERRED as non-goal. The interactive prompt body cannot be reached by a PreToolUse hook, and the actual content surface (the written `.changeset/*.md` body that reaches CHANGELOG / PR / Release / npm) is already gated at Write/Edit time. An invocation-time advisory adds only marginal reminder value and is out of scope for this ticket's close condition. Not tracked as a follow-on — re-open if author-time friction is observed.
 
 ## Decision record
 
 **ADR-028 (amended 2026-04-21)** — "External-comms gate — voice-tone + risk/leak evaluators on shared PreToolUse surface". The amendment adds `PreToolUse:Write` and `PreToolUse:Edit` on paths matching `.changeset/*.md` to the shared hook's surface regex list, alongside the other newly-added surfaces (`gh issue create`, `gh api .../security-advisories`, `gh api .../comments`, `npm publish` README-diff). No separate ADR for this ticket — surface-inventory extension under ADR-028's combined gate. This ticket (P073) remains Open as the execution tracker; closes when the amended hook ships with the new surface in both per-package synced copies and the associated bats assertions pass for `.changeset/*.md` fixtures.
+
+## Fix Released
+
+Shipped **inside P064's implementation** (commit `a0713f3`, 2026-04-26 — `fix(risk-scorer): P064 external-comms risk-leak gate (gh issue/pr/api, npm publish, .changeset) — known error`) and confirmed across both evaluators when P038's voice-tone half landed (commit `0fda8a5`). The shared canonical hook `packages/shared/hooks/external-comms-gate.sh` matches `.changeset/*.md` in its `Write|Edit` surface case (`SURFACE="changeset-author"`), and is synced byte-identically into both `packages/risk-scorer/hooks/external-comms-gate.sh` and `packages/voice-tone/hooks/external-comms-gate.sh` (verified MD5-identical 2026-05-23).
+
+Released in `@windyroad/risk-scorer@0.10.3` and `@windyroad/voice-tone@0.5.3` (changeset surface enumerated in both CHANGELOGs). Both host tickets P038 and P064 are **Closed** — the changeset surface row was part of the gate the user verified when closing P064 (commit `15df29d` "risk-scoring gate on external comms verified").
+
+## Resolution
+
+Closed 2026-05-23 (`/wr-itil:work-problems` AFK iter, verification close-on-evidence per manage-problem Step 9d + ADR-044 framework-resolution boundary). P073's authored close condition (the ADR-028 amendment above) is mechanical and verifiable — "amended hook ships with the new surface in both per-package synced copies AND the associated bats assertions pass for `.changeset/*.md` fixtures" — and both halves are met:
+
+1. **Surface in both synced copies**: the shared canonical hook carries `SURFACE="changeset-author"` and both per-package copies are byte-identical (MD5 `5d57260b…`). Released in risk-scorer 0.10.3 + voice-tone 0.5.3.
+2. **Bats assertions pass**: 47/47 green this session across the four gate suites — `packages/risk-scorer/hooks/test/external-comms-gate.bats`, `packages/voice-tone/hooks/test/external-comms-gate.bats`, `packages/shared/test/external-comms-gate-canonical.bats`, `packages/shared/test/sync-external-comms-gate.bats`. The P073-specific assertions: canonical structural guard "canonical hook matches .changeset/*.md PreToolUse:Write/Edit surface (P073)" + behavioural deny tests (revenue-leak deny, clean-content deny-then-delegate, non-changeset-path ignored) in the risk-scorer suite + the voice-tone deny+delegate test.
+
+Both evaluators gate changeset authoring: the risk copy runs the leak pre-filter then the marker gate; the voice-tone copy runs the marker gate only (leak detection is the risk evaluator's concern per `EXTERNAL_COMMS_LEAK_PREFILTER=no`). This satisfies the ticket title's "voice-and-tone **or** risk gate" — in fact both fire.
+
+**Recovery path**: if the gate is later found not to operate as designed, this close is reversible via `/wr-itil:transition-problem 073 known-error`. Note that follow-on marker-mechanics defects on this surface are tracked separately and do NOT reopen the surface-inventory scope this ticket owns: **P276** (marker over-fires on PASS-class content edits) and **P198** (marker key cannot be computed by the reviewer agent).
 
 ## Related
 
