@@ -4,7 +4,7 @@
 **Reported**: 2026-05-06
 **Priority**: 6 (Medium) — Impact: 3 (Moderate) x Likelihood: 2 (Possible) — deferred (re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — depends on P012 skill testing harness shape)
-**WSJF**: 1.5 — (6 × 1.0) / 4
+**WSJF**: 0.75 — (6 × 1.0) / 8 — re-rated 2026-05-23: transitive via P012 (XL) per P076 (was 1.5 marginal-only)
 **Type**: technical
 
 ## Description

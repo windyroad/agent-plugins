@@ -4,7 +4,7 @@
 **Reported**: 2026-04-21 (AFK iter-7 post-run, user observation)
 **Priority**: 12 (High) — Impact: Significant (3) x Likelihood: Almost Certain (4)
 **Effort**: L — requires: (a) an ADR defining the maturity taxonomy (Experimental / Alpha / Beta / Stable / Deprecated, or similar), promotion/demotion criteria, and where the signal lives (README badge, plugin.json frontmatter, manifest field, or runtime); (b) a measurement mechanism that actually computes the signal from observable evidence (not self-report); (c) surfacing the signal in every plugin's README, `claude plugin list` output, and the marketplace listing; (d) retroactive assessment for the 11 existing `@windyroad/*` plugins and every skill/agent/hook within them. Cross-cutting — touches every plugin, the marketplace manifest, and likely a new shared telemetry/metrics convention.
-**WSJF**: 3.0 — (12 × 1.0) / 4 — High severity (users currently cannot distinguish `manage-incident` which has never fired in anger from `manage-problem` which has shipped hundreds of tickets this repo alone — adoption decisions are made blind); L effort because it's ADR-level cross-cutting + retroactive assessment across 11 plugins.
+**WSJF**: 6.0 — (12 × 2.0) / 4 — corrected 2026-05-23: Known-Error ×2.0 multiplier (was mis-computed at ×1.0 = 3.0)
 **Type**: technical
 
 ## Description

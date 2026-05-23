@@ -3,9 +3,9 @@
 **Status**: Open
 **Reported**: 2026-04-21
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
-**Effort**: XL <!-- transitive: XL via P038 (marginal: M) --> — transitive XL per P076 (`## Dependencies` → Blocked by P038 Open XL). Marginal-only work on top of P038 (voice-tone gate) + P064 (external-comms risk gate, now `.verifying.md` — contributes 0 per P076 carve-out) infrastructure: add `git commit` message-body interception to the same `PreToolUse:Bash` hook family, wire through the voice-tone rewrite skill (from P038) and the external-comms risk scorer (from P064). Commit messages are a NEW surface in the P038 / P064 / P073 surface-inventory family but the plumbing reuses their hook-and-skill pattern verbatim. Re-rate marginal back to S or M after P038 lands; transitive collapses to marginal once upstreams clear.
+**Effort**: M <!-- transitive: P038+P064 CLOSED → 0 2026-05-23; effort = marginal M (was transitive XL) -->
 
-**WSJF**: 1.5 — (12 × 1.0) / 8 — Severity 12 (High); transitive Effort XL (divisor 8) via P038 per P076 — P082 cannot out-rank the upstream whose work is strictly contained within it. Sits alongside P038 / P073 in the 1.5 tier of the external-comms surface-completion cluster (P064 already verifying — contributes 0). Re-rates back to (12 × 1.0) / 2 = 6.0 once P038 lands and the marginal-only effort applies. Cluster is more valuable when all four land together than any one in isolation.
+**WSJF**: 6.0 — (12 × 1.0) / 2 — re-rated 2026-05-23: P038/P064 closed, transitive collapses to marginal M
 **Type**: technical
 
 ## Direction decision (2026-04-21, user — interactive AskUserQuestion post-AFK-iter-7)

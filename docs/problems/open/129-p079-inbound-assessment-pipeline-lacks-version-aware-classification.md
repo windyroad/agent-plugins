@@ -4,7 +4,7 @@
 **Reported**: 2026-04-26
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: L — assessment-pipeline classifier extension + recurrence-class lifecycle semantics + integration with closed-ticket history search + bats coverage. Marginal estimate.
-**WSJF**: 1.5 — `(12 × 1.0) / 4 = 3.0` marginal; transitive `(12 × 1.0) / max(L=4, P038=XL=8, P064=L=4, P079=L=4, P128=L=4) = 12 / 8 = 1.5` via P038 (P079's parent transitive blocker propagates through). Records the transitive value per ADR-022 / P076. <!-- transitive: L (marginal) → XL (transitive) via P038 (chained through P079) -->
+**WSJF**: 3.0 — (12 × 1.0) / max(L=4, P079=4) = 12/4 — re-rated 2026-05-23: P038/P064 closed, P128 verifying→0; bounded by P079/marginal L
 **Type**: technical
 
 ## Description

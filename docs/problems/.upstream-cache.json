@@ -1,13 +1,49 @@
 {
   "$schema": "https://windyroad.github.io/agent-plugins/schemas/upstream-cache.json",
   "$comment": "Cache file for inbound report discovery (P079 / ADR-062). Written by /wr-itil:review-problems Step 8.5 after each discovery pass.",
-  "last_checked": "2026-05-17T11:21:52Z",
+  "last_checked": "2026-05-23T12:32:32Z",
   "channels": {
     "github-issues:windyroad/agent-plugins": {
-      "fetched_at": "2026-05-17T11:21:52Z",
+      "fetched_at": "2026-05-23T12:32:32Z",
       "filter": "title_prefix=[problem] (label filter removed; see channels-config $filter-note)",
       "status": "ok",
       "reports": [
+        {
+          "number": 149,
+          "title": "[problem] external-comms gate friction + commit/push/release threshold drift (composed P010+P007)",
+          "author": "tompahoward",
+          "createdAt": "2026-05-18T11:55:37Z",
+          "body_hash": "bfda21a42bc40001",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-05-23"
+        },
+        {
+          "number": 139,
+          "title": "[problem] migrate-problems-layout.sh helper uses bashisms but /wr-itil:work-problems Step 0a SKILL.md does not specify bash — sourcing fails under zsh",
+          "author": "tompahoward",
+          "createdAt": "2026-05-17T20:51:10Z",
+          "body_hash": "4718c55fe9f0c267",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-05-23"
+        },
+        {
+          "number": 138,
+          "title": "[problem] /wr-itil:work-problems assistant defers actionable items to 'next session' when user is observably present",
+          "author": "tompahoward",
+          "createdAt": "2026-05-17T12:15:40Z",
+          "body_hash": "54c7dc161ccdb925",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-05-23"
+        },
+        {
+          "number": 137,
+          "title": "[problem] manage-problem SKILL.md commit-message convention fails @commitlint/config-conventional subject-case rule",
+          "author": "tompahoward",
+          "createdAt": "2026-05-17T12:13:47Z",
+          "body_hash": "7e24420525961a0b",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-05-23"
+        },
         {
           "number": 126,
           "title": "[problem] capture-problem → manage-problem same-session halts at Step 0 reconcile (HALT_ROUTE_RECONCILE on deferred-refresh seam)",
@@ -290,16 +326,16 @@
       ]
     },
     "github-discussions:windyroad/agent-plugins": {
-      "fetched_at": "2026-05-17T11:21:52Z",
+      "fetched_at": "2026-05-23T12:32:32Z",
       "reports": [],
       "status": "skipped",
-      "skip_reason": "discussions-disabled-for-repo (HTTP 410)"
+      "skip_reason": "discussions-disabled-for-repo (HTTP 410) — reconfirmed 2026-05-23"
     },
     "github-security-advisories:windyroad/agent-plugins": {
-      "fetched_at": "2026-05-17T11:21:52Z",
+      "fetched_at": "2026-05-23T12:32:32Z",
       "reports": [],
       "status": "skipped",
-      "skip_reason": "external-comms-gate-misclassifies-read-only-list-as-outbound (gate bug — see upstream issue #125)"
+      "skip_reason": "external-comms-gate-misclassifies-read-only-list-as-outbound (gate bug P198/#125; reconfirmed 2026-05-23 — gate blocked the poll command verbatim)"
     }
   }
 }
