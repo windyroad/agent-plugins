@@ -1,5 +1,15 @@
 # @windyroad/risk-scorer
 
+## 0.11.0
+
+### Minor Changes
+
+- 3c732ba: The pipeline risk gate now reads its block threshold from the project's RISK-POLICY.md risk appetite instead of a hardcoded 5. It blocks when the assessed score exceeds the appetite parsed from the Risk Appetite section (tolerant of "Threshold: N", "exceeds N", and "N/Low appetite"), with an optional RISK_APPETITE environment override. When RISK-POLICY.md is absent or states no appetite number it defaults to 4, which reproduces the previous score >= 5 behaviour exactly for integer scores, so existing installs see no change. Adopters whose policy sets a higher appetite no longer have within-appetite changes rejected, and the deny message now names the actual appetite applied. Fixes #149 (P007). See ADR-065.
+
+### Patch Changes
+
+- 56bae5f: The external-comms gate now strips the changeset YAML frontmatter and normalizes trailing whitespace before computing the review-marker key, so the key the gate checks at author time matches the key the mark hook writes after the reviewer returns PASS. This fixes the deny-after-PASS loop that blocked changeset authoring even after the external-comms reviewer passed. The gate and the mark hook now share one key function, so the two sides cannot drift apart again. Closes #149 (P010) and P198.
+
 ## 0.10.3
 
 ### Patch Changes
