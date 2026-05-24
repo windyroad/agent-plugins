@@ -226,7 +226,7 @@ Wipe R001-R006 → run bootstrap → land. **Rejected.** Wipe-before risks a win
 **Chosen design (synthesises verdicts A4+A6 / B1 / C1 / D1 / E3 / F2 / G / H / I2):**
 
 1. **New `/wr-risk-scorer:bootstrap-catalog` skill** — on-demand surface for one-shot bootstrap of `docs/risks/` from `.risk-reports/`. Walks reports, computes slugs per ADR-056, emits one `R<NNN>-<slug>.active.md` per unique slug with `## Source Evidence` block. Maturity tag per ADR-053: `proposed`.
-2. **`/install-updates` Step 6.5 extension** — auto-trigger bootstrap when catalog is empty AND `RISK-POLICY.md` is present AND `.risk-reports/` is non-empty. Step 7 final report shows bootstrap line item.
+2. ~~**`/install-updates` Step 6.5 extension** — auto-trigger bootstrap when catalog is empty AND `RISK-POLICY.md` is present AND `.risk-reports/` is non-empty. Step 7 final report shows bootstrap line item.~~ **[RETIRED 2026-05-25 — see "Amendment 2026-05-25" below. Verdict A6 (the install-updates auto-trigger surface) is retired; `install-updates` no longer hosts a Step 6.5. The bootstrap CAPABILITY survives via verdict A4 — the on-demand `/wr-risk-scorer:bootstrap-catalog` skill (Decision Outcome item 1) — plus the JTBD J6 per-action nudge.]**
 3. **`packages/risk-scorer/agents/pipeline.md` consume-catalog protocol** — hybrid filter (slug-token-match primary; free-form judgement fallback). Risk-item format gains `Catalog baseline:` and `Catalog match:` lines. Per-run `CATALOG_HIT_RATE:` observability line.
 4. **`packages/risk-scorer/skills/create-risk/SKILL.md` flag extension** — accept `--slug <slug>` and `--prefill <prose>` flags for orchestrator-driven prefilled invocation. Existing AskUserQuestion-driven authoring path preserved for human invocation.
 5. **Orchestrator-side auto-invoke** — Phase 2b drain step in `/wr-itil:work-problems`, `/wr-itil:manage-problem` Step 11, `/install-updates`, `/wr-risk-scorer:assess-release` invokes `/wr-risk-scorer:create-risk --slug --prefill` per ADR-056 queue line. This ADR's Confirmation requires AT LEAST the AFK orchestrator (`/wr-itil:work-problems`) drain to land in Commit 1; other consumers ride subsequent iters.
@@ -320,7 +320,7 @@ Pre-wipe gate: `rg 'R00[1-6]' docs/problems/` to detect dangling references; ann
 4. `packages/risk-scorer/skills/create-risk/SKILL.md` accepts `--slug <slug>` and `--prefill <prose>` flags. Flag-driven path skips AskUserQuestion. Existing human-invoked path preserved.
 5. `packages/risk-scorer/skills/bootstrap-catalog/SKILL.md` exists; describes walk-`.risk-reports/`-once + slug-collapse + emit-`R<NNN>-<slug>.active.md` + `## Source Evidence` block. Maturity tag in frontmatter per ADR-053.
 6. `packages/risk-scorer/skills/bootstrap-catalog/REFERENCE.md` exists with deep context (slug rules, source-evidence shape, idempotency contract).
-7. `scripts/repo-local-skills/install-updates/SKILL.md` Step 6.5 has bootstrap auto-trigger logic. Step 7 final-report integration shows bootstrap line item.
+7. ~~`scripts/repo-local-skills/install-updates/SKILL.md` Step 6.5 has bootstrap auto-trigger logic. Step 7 final-report integration shows bootstrap line item.~~ **[RETIRED 2026-05-25 — superseded by "Amendment 2026-05-25" below. Verdict A6 retired; `install-updates` no longer has a Step 6.5 bootstrap auto-trigger. This criterion is replaced by: `install-updates` SKILL.md contains no bootstrap logic and points readers to `/wr-risk-scorer:bootstrap-catalog` (A4) for on-demand register bootstrap.]**
 8. `packages/itil/skills/work-problems/SKILL.md` gains a "Drain risk-register queue" step that consumes ADR-056 queue and invokes `/wr-risk-scorer:create-risk --slug --prefill`.
 
 ### Behavioural bats fixtures (per ADR-052; P081 behavioural-only assertion)
@@ -364,6 +364,33 @@ All fixtures below are **behavioural** per ADR-052 / P081 — each test exercise
 3. Run `/wr-itil:work-problems` AFK loop. Verify the loop's drain step consumes any queued hints from ADR-056's queue and invokes `/wr-risk-scorer:create-risk --slug --prefill` programmatically. Queue truncates after drain.
 4. Run a per-action assessment (`/wr-risk-scorer:assess-wip`). Verify pipeline emits `Catalog match:` and `Catalog baseline:` lines in the risk-item block. Verify `CATALOG_HIT_RATE:` line emitted.
 5. Run `/install-updates` against a fresh sibling project with `RISK-POLICY.md` and non-empty `.risk-reports/`. Verify Step 6.5 bootstrap fires; Step 7 final report shows bootstrap row.
+
+## Amendment 2026-05-25 — verdict A6 retired (install-updates bootstrap auto-trigger removed)
+
+**Status: in effect (ADR remains `proposed`).**
+
+### What changed
+
+Verdict **A6** (the `/install-updates` Step 6.5 bootstrap auto-trigger surface) is **retired**. The `install-updates` skill was concurrently narrowed to a single global-cache refresh run (ADR-030 amendment 2026-05-25), which removed its sibling loop, consent gate, and Step 6.5 entirely. With Step 6.5 gone, the A6 auto-trigger has no host.
+
+The bootstrap **capability is unchanged** — it survives via verdict **A4**, the on-demand `/wr-risk-scorer:bootstrap-catalog` skill (Decision Outcome item 1), which is fully implemented and stands alone. Only the auto-trigger firing surface is removed; the dual-surface design (A4 + A6) collapses to a single on-demand surface (A4).
+
+User direction (verbatim, 2026-05-25, via `AskUserQuestion`): *"Amend ADR-059 (A6)."*
+
+### Effect on this ADR's clauses
+
+- **Decision Outcome item 2** — retired (annotated inline above).
+- **Confirmation item 7** — retired/replaced (annotated inline above): `install-updates` SKILL.md now contains no bootstrap logic and points to `/wr-risk-scorer:bootstrap-catalog`.
+- **Decision Outcome item 1 (A4 skill), items 3-5 (consume-catalog protocol, create-risk flags, orchestrator drain), and the load-bearing AFK-orchestrator drain (`/wr-itil:work-problems`)** — all preserved unchanged. `install-updates` was never a *required* drain consumer (Scope § Out of scope already lists its drain step as "ride subsequent iters"), so retiring A6 breaches no Confirmation criterion.
+
+### Trade-off recorded (accepted per user direction)
+
+This ADR's existing "Bad" consequence — *"Install-updates auto-trigger ties bootstrap to user invoking install-updates. Adopters who skip install-updates miss the bootstrap. Mitigation: per-action assessment carries a gentle nudge … JTBD verdict J6"* — now becomes the **governing** statement rather than a mitigated edge case. With A6 gone, the **only** bootstrap triggers are (1) the on-demand A4 skill `/wr-risk-scorer:bootstrap-catalog` and (2) the JTBD J6 per-action nudge ("Risk register is empty; run `/wr-risk-scorer:bootstrap-catalog`"). The opportunistic, rides-the-next-install discoverability path that A6 provided is removed, so the discoverability gap ADR-047 originally set out to close **partially re-opens**. This is accepted per the user's pinned direction: bootstrap is treated as a standalone concern, not something install-updates should carry. If adopter `docs/risks/` populate-rate degrades as a result, the existing Reassessment Criterion "`/wr-risk-scorer:bootstrap-catalog` on-demand surface is unused / populate-rate near zero" catches it.
+
+### Related
+
+- ADR-030 amendment 2026-05-25 — the coupled narrowing of `install-updates` to a global-cache refresh.
+- ADR-047 — stale-ref cleanup note 2026-05-25; install-updates coupling fully dissolved.
 
 ## Reassessment Criteria
 

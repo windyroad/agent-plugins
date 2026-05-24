@@ -6,6 +6,8 @@
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 **Type**: technical
 
+> **Likely resolved (2026-05-25):** the install-updates global-cache-refresh simplification removed the per-sibling `claude plugin install --scope project` loop (ADR-030 amendment 2026-05-25) → no more `.claude/settings.json` writes, which were the source of the `enabledPlugins` reorder churn. Verify and close at next review.
+
 ## Description
 
 After every `/install-updates` invocation (canonically fired at session-wrap and after every release per ADR-030), the script's project-scope install step writes `.claude/settings.json` with a re-keyed ordering of `enabledPlugins` that differs from the prior on-disk ordering by map-iteration order alone — no semantic change. The agent (or user) then commits the churn as a `chore(settings)` commit to keep the working tree clean before the next push.

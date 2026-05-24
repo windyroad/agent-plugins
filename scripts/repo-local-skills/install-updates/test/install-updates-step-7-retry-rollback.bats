@@ -1,14 +1,16 @@
 #!/usr/bin/env bats
 
-# P112: Step 7 of /install-updates must retry install on failure with
-# bounded exponential backoff, attempt a rollback path if all retries
-# exhaust, and report a distinct terminal status per outcome. Addresses
+# P112: the Install step of /install-updates (Step 4) must retry install on
+# failure with bounded exponential backoff, attempt a rollback path if all
+# retries exhaust, and report a distinct terminal status per outcome. Addresses
 # the unrecoverable failure window introduced by the P106 uninstall+install
 # workaround: if uninstall succeeds but install fails (network, rate limit,
 # signature mismatch), the plugin must not be silently lost.
+# (Filename retains the historical "step-7" label from the pre-2026-05-25
+# step numbering; the function now lives under Step 4 "Install".)
 #
 # Behavioural test: extracts `install_with_retry_rollback` from SKILL.md
-# Step 7, sources it with a mocked `claude` CLI, and asserts retry counts,
+# Step 4, sources it with a mocked `claude` CLI, and asserts retry counts,
 # rollback invocation, and terminal status per scenario. Aligns with P081
 # direction (behavioural over structural grep).
 
@@ -67,7 +69,7 @@ stub_sleep() {
   export -f sleep
 }
 
-@test "install-updates Step 6 P112: install succeeds on first attempt — no retry, no rollback" {
+@test "install-updates Step 4 Install P112: install succeeds on first attempt — no retry, no rollback" {
   [ -s "$FN_FILE" ] || { echo "install_with_retry_rollback missing from SKILL.md"; return 1; }
   # shellcheck disable=SC1090
   source "$FN_FILE"
@@ -84,7 +86,7 @@ stub_sleep() {
   [ "${marketplace_calls:-0}" -eq 0 ]
 }
 
-@test "install-updates Step 6 P112: install fails twice then succeeds on third attempt — no rollback" {
+@test "install-updates Step 4 Install P112: install fails twice then succeeds on third attempt — no rollback" {
   [ -s "$FN_FILE" ] || { echo "install_with_retry_rollback missing from SKILL.md"; return 1; }
   # shellcheck disable=SC1090
   source "$FN_FILE"
@@ -101,7 +103,7 @@ stub_sleep() {
   [ "${marketplace_calls:-0}" -eq 0 ]
 }
 
-@test "install-updates Step 6 P112: all retries exhaust, rollback install succeeds — status 'restored'" {
+@test "install-updates Step 4 Install P112: all retries exhaust, rollback install succeeds — status 'restored'" {
   [ -s "$FN_FILE" ] || { echo "install_with_retry_rollback missing from SKILL.md"; return 1; }
   # shellcheck disable=SC1090
   source "$FN_FILE"
@@ -119,7 +121,7 @@ stub_sleep() {
   [ "$marketplace_calls" -eq 1 ]
 }
 
-@test "install-updates Step 6 P112: all retries and rollback fail — status 'lost', non-zero exit" {
+@test "install-updates Step 4 Install P112: all retries and rollback fail — status 'lost', non-zero exit" {
   [ -s "$FN_FILE" ] || { echo "install_with_retry_rollback missing from SKILL.md"; return 1; }
   # shellcheck disable=SC1090
   source "$FN_FILE"
@@ -134,7 +136,7 @@ stub_sleep() {
   [ "$install_calls" -eq 4 ]
 }
 
-@test "install-updates Step 6 P112: uninstall runs exactly once regardless of install retry count" {
+@test "install-updates Step 4 Install P112: uninstall runs exactly once regardless of install retry count" {
   [ -s "$FN_FILE" ] || { echo "install_with_retry_rollback missing from SKILL.md"; return 1; }
   # shellcheck disable=SC1090
   source "$FN_FILE"
@@ -148,20 +150,20 @@ stub_sleep() {
   [ "$uninstall_calls" -eq 1 ]
 }
 
-@test "install-updates Step 6 P112: SKILL.md final report documents new Status vocabulary" {
+@test "install-updates Step 4 Install P112: SKILL.md final report documents new Status vocabulary" {
   # Users must be able to interpret the retry/rollback outcomes from the
   # final-report table — the new status tokens must appear in the report
   # section prose.
   local report_section
-  report_section=$(sed -n '/^### 7\. Final report/,/^## /p' "$SKILL_MD")
+  report_section=$(sed -n '/^### 5\. Final report/,/^## /p' "$SKILL_MD")
   grep -F 'restored' <<< "$report_section"
   grep -F 'lost' <<< "$report_section"
 }
 
-@test "install-updates Step 6 P112: SKILL.md Step 6 preserves --scope project invariant (ADR-004)" {
+@test "install-updates Step 4 Install P112: SKILL.md Step 4 Install preserves --scope project invariant (ADR-004)" {
   # Any retry or rollback command must still carry --scope project.
   local step6
-  step6=$(sed -n '/^### 6\. Install/,/^### /p' "$SKILL_MD")
+  step6=$(sed -n '/^### 4\. Install/,/^### /p' "$SKILL_MD")
   local count
   count=$(grep -cF -- '--scope project' <<< "$step6")
   [ "$count" -ge 2 ]

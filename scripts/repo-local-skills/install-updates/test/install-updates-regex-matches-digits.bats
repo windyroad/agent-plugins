@@ -1,11 +1,14 @@
 #!/usr/bin/env bats
 
-# P058: install-updates SKILL.md Step 2/3 discovery regex must match
+# P058: install-updates SKILL.md current-project discovery regex must match
 # plugin names containing digits (e.g. wr-c4). The prior `[a-z-]+`
 # character class silently skipped any such plugin; the corrected
 # `[a-z0-9-]+` covers the npm naming convention (lowercase + digits
 # + hyphens). Also exercises ADR-030's "bats tests optional under
 # .claude/skills/<name>/test/" contract for the first time.
+# (Pre-2026-05-25 there were two discovery blocks — current project AND
+# siblings; the sibling loop was retired when install-updates narrowed to
+# a single global-cache refresh, so the pattern now appears once.)
 
 setup() {
   # This test file lives at .claude/skills/install-updates/test/ —
@@ -18,11 +21,11 @@ setup() {
   [ -f "$SKILL_MD" ]
 }
 
-@test "install-updates: Step 2 and Step 3 discovery regex uses [a-z0-9-]+ character class (P058)" {
+@test "install-updates: current-project discovery regex uses [a-z0-9-]+ character class (P058)" {
   # Doc-lint guard — prevents regression to [a-z-]+ which drops wr-c4.
   local count
   count=$(grep -cE '"wr-\[a-z0-9-\]\+@windyroad"' "$SKILL_MD")
-  [ "$count" -ge 2 ]
+  [ "$count" -ge 1 ]
 }
 
 @test "install-updates: SKILL.md contains no regressed [a-z-]+ character class in windyroad pattern (P058)" {

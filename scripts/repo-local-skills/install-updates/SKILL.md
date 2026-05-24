@@ -1,20 +1,22 @@
 ---
 name: install-updates
-description: Refresh the windyroad marketplace cache and re-install any updated `@windyroad/*` plugins into the current project AND into each sibling project (`../*/`) that has one or more windyroad plugins enabled. Run at end-of-session after a release loop so every active project picks up the new code on next session start. Repo-local skill per ADR-030.
-allowed-tools: Read, Bash, Grep, Glob, AskUserQuestion
+description: Refresh the windyroad marketplace cache and re-install any updated `@windyroad/*` plugins. Runs a single global-cache refresh from the current project — because the plugin install cache is global/shared across projects, this advances the active version for every project that enables those plugins. Run at end-of-session after a release loop so every active project picks up the new code on next session start. Repo-local skill per ADR-030.
+allowed-tools: Read, Bash, Grep, Glob
 ---
 
 # /install-updates
 
-Refresh every windyroad plugin install touched by recent releases — current project plus sibling projects — in one skill invocation. Interim stopgap for P045.
+Refresh every windyroad plugin touched by recent releases in one skill invocation — a single global-cache refresh run from the current project. Interim stopgap for P045.
 
-See `REFERENCE.md` in this directory for rationale, edge cases, scope exclusions, and the ADR-030 Confirmation amendment.
+**Why current-project-only is sufficient: the plugin install cache is global.** The install cache at `~/.claude/plugins/cache/windyroad/<key>/<version>/` is shared across all projects on this machine — there is no per-project copy of the plugin code. Refreshing it from the current project (uninstall + reinstall, to defeat the P106 install-no-op) advances the active version for EVERY project that enables those plugins. No sibling-project tree is written, so there is no cross-project side effect to discover or consent to. (Historical note: earlier versions ran a per-sibling install loop behind an `AskUserQuestion` consent gate; both were retired 2026-05-25 once the global-cache fact was confirmed — see ADR-030 amendment 2026-05-25.)
+
+See `REFERENCE.md` in this directory for marketplace-resolution semantics, the uninstall+install rationale, edge cases, and scope exclusions.
 
 ## When to invoke
 
 - End of a release-loop session (after `npm run release:watch` publishes `@windyroad/*` packages).
 - After noting a plugin bump in another session's commit log.
-- Never mid-work on something unrelated — this skill writes to sibling projects.
+- Safe to run any time — it only refreshes the global cache for already-enabled plugins; it makes no cross-project tree write.
 
 ## Steps
 
@@ -26,31 +28,18 @@ claude plugin marketplace update windyroad
 
 Marketplace resolves from the remote GitHub repo, not the local working tree — push before running. See REFERENCE.md → "Marketplace resolution semantics".
 
-### 2. Discover current project's installed windyroad plugins
+### 2. Discover the current project's installed windyroad plugins
 
 ```bash
-CURRENT_PROJECT=$(basename "$PWD")
 CURRENT_PLUGINS=$(grep -oE '"wr-[a-z0-9-]+@windyroad"' .claude/settings.json 2>/dev/null \
   | sed 's/"//g; s/@windyroad//' | sort -u)
 ```
 
-### 3. Discover sibling projects
+These are the plugin keys (`wr-<short>`) to check for updates. The skill refreshes only what is already enabled — it does not bootstrap new installs.
 
-```bash
-SIBLINGS=()
-for d in ../*/; do
-  name=$(basename "$d")
-  [ "$name" = "$CURRENT_PROJECT" ] && continue
-  [ -f "$d.claude/settings.json" ] || continue
-  if grep -qE '"wr-[a-z0-9-]+@windyroad"' "$d.claude/settings.json" 2>/dev/null; then
-    SIBLINGS+=("$name")
-  fi
-done
-```
+### 3. Determine which plugins have new npm versions
 
-### 4. Determine which plugins have new npm versions
-
-For each unique plugin key (`wr-<short>`) across current + siblings:
+For each unique plugin key (`wr-<short>`):
 
 ```bash
 # Plugin/marketplace side uses the wr- prefix; the npm package omits it.
@@ -63,66 +52,11 @@ npm view "$npm_name" version
 
 Naming convention (ADR-002): `wr-<short>` on the plugin/marketplace side, `@windyroad/<short>` on the npm side, same `<short>` as the source directory under `packages/`.
 
-**Empty `npm view` output with exit 0 means the package name is wrong — NOT that the package is private.** `@windyroad/*` packages are public on the npm registry (e.g. <https://www.npmjs.com/package/@windyroad/itil>). If every plugin returns empty, the skill is using the wrong naming transformation — stop and fix before concluding "nothing to install," otherwise Step 6 will silently skip real updates.
+**Empty `npm view` output with exit 0 means the package name is wrong — NOT that the package is private.** `@windyroad/*` packages are public on the npm registry (e.g. <https://www.npmjs.com/package/@windyroad/itil>). If every plugin returns empty, the skill is using the wrong naming transformation — stop and fix before concluding "nothing to install," otherwise Step 4 will silently skip real updates.
 
 Compare against `~/.claude/plugins/cache/windyroad/${plugin_key}/` (the cache directory uses the plugin key `wr-<short>`, not the npm name). Re-install only when npm latest > highest cached version. `claude plugin list` version strings may be stale — compare against cache dir names.
 
-### 5. Consent gate (mandatory per ADR-030)
-
-#### 5a. Cache check (P120) — skip the gate when consent is already on file
-
-Read `.claude/.install-updates-consent` (per-project, gitignored). When present, parse the JSON:
-
-```json
-{
-  "scope": ["addressr-mcp", "addressr-react", "addressr", "bbstats", "windyroad"],
-  "cached_at": "2026-04-25T13:33:05Z"
-}
-```
-
-Compute the **detected sibling set** from Step 3 (sibling project names that have one or more `wr-*@windyroad` plugins enabled). Compare to the cached `scope` array using **set equality** (same names, ignoring order; current project is implicitly in scope and is not part of the cache).
-
-- **Cache hit** (cached scope matches detected sibling set): **skip Steps 5b/5c** — proceed directly to Step 6 with the cached scope. The user's prior explicit answer authorises the install per **ADR-013 Rule 5 (policy-authorised silent proceed)** — the cached on-disk consent IS the policy authorisation.
-- **Cache miss — sibling set has changed** (a new sibling appeared, or one was removed since the cache was written): fire Step 5b/5c with the **previous answer surfaced as `(Recommended)`** in the question body so the user can re-confirm or adjust quickly.
-- **Cache miss — no cache** (first invocation in this project, or cache was deleted): fire Step 5b/5c as today.
-- **Cache silenced — `INSTALL_UPDATES_RECONFIRM=1`**: when this envvar is set on the invocation, fire Step 5b/5c regardless of cache state. Equivalent escape hatch: `rm .claude/.install-updates-consent` and re-run. Both routes restore the user's access to the dry-run option (which only surfaces inside the gate body).
-
-Cache file shape, invalidation rules, and rationale: see `REFERENCE.md` → "Consent cache (P120)". Architectural precedent: **ADR-034**'s `.claude/.auto-install-consent` per-project marker for the SessionStart auto-install surface — same per-project, gitignored, stable-answer-cache shape; the two markers are independent (presence of one does not imply the other).
-
-#### 5b/5c. Fire the consent gate (cache miss path)
-
-Invoke `AskUserQuestion` with one question, `multiSelect=true`.
-
-**Sibling count ≤ 3** — original contract applies: one option per sibling plus `"Dry-run — show the plan but don't install"`.
-
-**Sibling count > 3 — grouping fallback (P061)**. `AskUserQuestion` caps `maxItems` at 4; fall back to bucketed options, and **name every detected sibling in the question body text** (the cap applies to options, not to the question description, so the full list is still presented per ADR-030's "list every sibling" requirement):
-
-1. `All <N> projects (Recommended)`
-2. `Current project only`
-3. `Dry-run — show the plan but don't install`
-4. The auto-provided `Other — provide custom text` covers custom subsets.
-
-Either shape (≤ 3 or > 3 fallback) satisfies the ADR-030 Confirmation consent gate. Never install without explicit consent for a sibling.
-
-#### 5d. Cache write (P120) — at end of successful run
-
-After Step 6 install completes WITHOUT a `lost` status (i.e. every confirmed sibling either reached `installed` or `restored`), write `.claude/.install-updates-consent` with the install-plan scope:
-
-```bash
-python3 -c "
-import json, datetime, os
-data = {
-  'scope': sorted(['<sibling-1>', '<sibling-2>', ...]),
-  'cached_at': datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds').replace('+00:00','Z'),
-}
-os.makedirs('.claude', exist_ok=True)
-open('.claude/.install-updates-consent', 'w').write(json.dumps(data, indent=2) + chr(10))
-"
-```
-
-`Dry-run` answers do NOT write the cache (a dry-run is not a consent grant). `Current project only` writes an empty `scope` array (the empty-set is a valid stable answer). Cache is per-machine — gitignored — and is not committed.
-
-### 6. Install
+### 4. Install
 
 Uninstall first to force a fresh download — `claude plugin install` silently no-ops when the plugin is already installed, so updates never land (P106 / BRIEFING "Plugin Distribution"). The uninstall+install chain is not atomic: if uninstall succeeds and install fails, the plugin is gone (P112). Wrap the install side in bounded retry + rollback so a transient failure cannot silently remove a plugin.
 
@@ -153,7 +87,7 @@ install_with_retry_rollback() {
   # has been refreshed, maximising the chance a different outcome lands.
   # Prior version (${prior}) is captured for reporting; marketplace
   # resolves to latest, so "restored" here means the plugin is present,
-  # not necessarily at the pre-Step-6 version.
+  # not necessarily at the pre-refresh version.
   claude plugin marketplace update windyroad >/dev/null 2>&1 || true
   if (cd "$target" && claude plugin install "$key" --scope project); then
     echo "restored"
@@ -167,118 +101,50 @@ declare -A PROJECT_STATUS
 # PLUGINS_TO_UPDATE is a bash array (NOT a space-separated string) for
 # cross-shell portability — see P133. Plain `for x in $VAR` word-splits
 # under bash but iterates ONCE under zsh (zsh does not word-split unquoted
-# variables by default), silently masking 24 lost plugins as one bogus
-# joined-name install in the 2026-04-27 session. Array form + quoted
-# `"${ARR[@]}"` expansion behaves identically under bash and zsh.
+# variables by default), silently masking lost plugins as one bogus
+# joined-name install. Array form + quoted `"${ARR[@]}"` expansion behaves
+# identically under bash and zsh.
+TARGET_DIR="$PWD"
 PLUGINS_TO_UPDATE=(itil retrospective risk-scorer tdd)
 for plugin in "${PLUGINS_TO_UPDATE[@]}"; do
   PROJECT_STATUS["$plugin"]=$(install_with_retry_rollback "$plugin" "$TARGET_DIR" "${PRIOR_VERSION[$plugin]}")
 done
 ```
 
-`--scope project` always (ADR-004). Capture per-install exit status. Do not abort the batch on a single failure — report and continue. A `lost` status means the plugin was removed and could not be restored; the user must reinstall manually.
+`--scope project` always (ADR-004). The refresh runs in the current project (`TARGET_DIR="$PWD"`); because the install cache is global, a single current-project refresh advances the active version for every project that enables the plugin. Capture per-install exit status. Do not abort the batch on a single failure — report and continue. A `lost` status means the plugin was removed and could not be restored; the user must reinstall manually.
 
 Shell snippets in this skill use bash-array form (`ARR=(a b c)` + `"${ARR[@]}"`) instead of unquoted-variable iteration (`for x in $VAR`). The array form is portable across bash and zsh; unquoted iteration is bash-only and silently iterates once under zsh — see P133 (`docs/problems/133-...md`).
 
-### 6.5. Bootstrap risk register from `.risk-reports/` (per-sibling)
-
-**Note**: this step previously scaffolded `docs/risks/README.md` + `docs/risks/TEMPLATE.md` from project-agnostic templates per ADR-047 Phase 1. Per user direction 2026-05-04, those templates were wiped — they encoded the wrong content shape, and the directory should not contain its own scaffolding template (the entry shape is owned by `/wr-risk-scorer:create-risk` + `extract-risks-from-reports.sh` per ADR-059). This step now runs the bootstrap path directly.
-
-For each sibling confirmed in scope by Step 5 (and the current project, treated as an implicit sibling per ADR-004):
-
-```bash
-# bootstrap_register_if_eligible <target>
-# Trigger contract (per ADR-059):
-#   <target>/RISK-POLICY.md present AND
-#   <target>/docs/risks/ has NO R*-*.active.md files AND
-#   <target>/.risk-reports/ contains at least one *.md.
-# Outcome: invoke /wr-risk-scorer:bootstrap-catalog (which calls
-# wr-risk-scorer-extract-risks-from-reports under the hood).
-# Per ADR-013 Rule 5: per-sibling consent + RISK-POLICY.md presence IS
-# the policy authorisation. No new consent gate.
-bootstrap_register_if_eligible() {
-  local target="$1"
-  [ -f "$target/RISK-POLICY.md" ] || { echo "no-policy"; return 0; }
-  # Catalog-populated test: any R*-*.active.md exists → skip (steady state)
-  if ls "$target/docs/risks/"R*-*.active.md >/dev/null 2>&1; then
-    echo "catalog-populated"
-    return 0
-  fi
-  # .risk-reports/ corpus test: at least one *.md
-  if ! ls "$target/.risk-reports/"*.md >/dev/null 2>&1; then
-    echo "no-reports"
-    return 0
-  fi
-  # All pre-conditions met. Invoke the bootstrap-catalog skill (which
-  # creates docs/risks/, runs extract-risks-from-reports, writes the
-  # README and per-slug entries).
-  echo "bootstrap-eligible"
-  return 0
-}
-```
-
-**Trigger contract** (per ADR-059 verdicts A6 + I2):
-
-- `RISK-POLICY.md` present AND `docs/risks/` has NO `R*-*.active.md` files AND `.risk-reports/` non-empty → invoke `/wr-risk-scorer:bootstrap-catalog`. The skill creates `docs/risks/` if absent, runs the extractor, and writes per-slug entries + the README.
-- `RISK-POLICY.md` present AND `docs/risks/` populated (any `R*-*.active.md` exists) → skip bootstrap (catalog already has entries; new-class detection flows through ADR-056 hint-and-drain instead).
-- `RISK-POLICY.md` present AND `.risk-reports/` empty/absent → skip bootstrap (nothing to walk).
-- `RISK-POLICY.md` absent → skip bootstrap (project hasn't opted in).
-
-**ADR-013 audit**:
-
-- Cache-hit / cache-miss with consent granted (Rule 5) — bootstrap fires silently. Existence of `RISK-POLICY.md` plus prior consent IS the policy authorisation.
-- Non-interactive subagent invocation (Rule 6) — bootstrap does NOT fire. Inherits the install-loop's interactivity gate.
-- Sibling consent answer was "Current project only" — bootstrap fires for current project only.
-- Dry-run consent answers do NOT bootstrap (read-only by contract).
-
-Per-sibling outcomes feed Step 7's final-report rows. No marker file — `R*-*.active.md` file existence is the idempotency primitive (re-runs on populated catalogs are no-ops; new slugs flow through ADR-056 hint-and-drain).
-
-**Step 7 final-report row shape**:
+### 5. Final report
 
 ```
-| <sibling> | docs/risks/ bootstrap | (empty) | <N> entries from <K> reports | ✓ bootstrapped (ADR-059) |
-| <sibling> | docs/risks/ bootstrap | (populated) | — | ⊘ skipped (catalog already has entries) |
-| <sibling> | docs/risks/ bootstrap | (no reports) | — | ⊘ skipped (.risk-reports/ empty) |
-| <sibling> | docs/risks/ bootstrap | — | — | ⊘ skipped (no RISK-POLICY.md) |
-```
-
-**Idempotency**: re-running install-updates on a sibling that's already been bootstrapped is a no-op (the catalog-populated test fires the skip path). New `.risk-reports/` files added since the last bootstrap may surface new slugs on next bootstrap run, but only if the catalog is fully empty — a partially-populated catalog is the steady state once the first bootstrap completes; further new slugs flow through ADR-056 hint-and-drain.
-
-Deep context: `REFERENCE.md` → "Bootstrap risk register from `.risk-reports/` (per-sibling)".
-
-### 7. Final report
-
-```
-| Project | Surface | Before | After | Status |
-|---------|---------|--------|-------|--------|
-| <project> | wr-itil | 0.7.1 | 0.7.2 | ✓ installed |
-| <project> | wr-jtbd | 0.5.0 | 0.5.0 | ✓ restored (rollback) |
-| <project> | wr-tdd  | 0.4.0 | —     | ✗ lost (rollback failed) |
-| <project> | docs/risks/ bootstrap | (empty) | <N> entries from <K> reports | ✓ bootstrapped (ADR-059) |
-| <project> | docs/risks/ bootstrap | (populated) | — | ⊘ skipped (catalog already has entries) |
-| <project> | docs/risks/ bootstrap | (no reports) | — | ⊘ skipped (.risk-reports/ empty) |
-| <project> | docs/risks/ bootstrap | — | — | ⊘ skipped (no RISK-POLICY.md) |
+| Surface | Before | After | Status |
+|---------|--------|-------|--------|
+| wr-itil | 0.7.1 | 0.7.2 | ✓ installed |
+| wr-jtbd | 0.5.0 | 0.5.0 | ✓ restored (rollback) |
+| wr-tdd  | 0.4.0 | —     | ✗ lost (rollback failed) |
 ```
 
 Status vocabulary (P112): `✓ installed` — install landed first or within retry budget. `✓ restored (rollback)` — all retries exhausted; marketplace-cache refresh + one rollback install succeeded. `✗ lost (rollback failed)` — retries and rollback both failed; plugin is absent from the project and the user must reinstall manually. `✗ failed` — pre-install step (e.g. uninstall) errored, plugin left in original state.
-
-Scaffold-row vocabulary (ADR-047): `✓ created (RISK-POLICY.md present)` — file written. `⊘ skipped (already exists)` — idempotent skip. `⊘ skipped (no RISK-POLICY.md)` — trigger condition not met.
 
 Then `### Next step` — "Restart Claude Code to pick up the new plugin code. Active sessions continue running the old code until restart (per P045 direction 2026-04-20 — auto-restart explicitly rejected)."
 
 ## Non-interactive fallback
 
-If `AskUserQuestion` is unavailable (e.g. running inside a subagent): emit a dry-run table of intended installs and a note that the user must re-run interactively. Do NOT install without consent.
+This skill is safe to run non-interactively (e.g. inside a subagent or an AFK loop): it makes no cross-project tree write and asks no questions, so there is nothing to gate. Run it directly — it refreshes the global cache for the current project's enabled plugins and reports what it refreshed (the Step 5 table). If `npm view` or the marketplace refresh fails for a plugin, report and skip that plugin without aborting the batch.
 
 ## References
 
-- **ADR-030** — repo-local skills (governing).
+- **ADR-030** — repo-local skills (governing). Amended 2026-05-25 — consent gate / sibling-discovery retired (global cache means no cross-project tree write to consent to).
 - **ADR-003 / ADR-004** — marketplace distribution / project-scope only.
-- **ADR-013 Rule 5 / Rule 6** — policy-authorised silent proceed / non-interactive fallback. Both apply to Step 6.5 scaffold.
-- **ADR-047** — install-updates scaffolds governance artefacts (Step 6.5 contract).
-- **P033** — driver ticket for Step 6.5 scaffold (no persistent risk register; Phase 1 lands here).
+- **ADR-002** — `wr-<short>` ↔ `@windyroad/<short>` naming transform (`npm view` package-name derivation).
+- **P106** — `claude plugin install` silent no-op when already installed; `uninstall + install` is the refresh pattern.
+- **P112** — non-atomic uninstall+install; bounded retry + marketplace-refresh-rollback safety (`install_with_retry_rollback`).
+- **P133** — bash-array portability (`ARR=(...)` + `"${ARR[@]}"`; never unquoted `for x in $VAR`).
+- **P139 / ADR-030 Symlink Contract** — source-of-truth at `scripts/repo-local-skills/install-updates/`; `.claude/skills/install-updates/` carries relative symlinks. Edit the source path only.
+- **P092** — npm package-name gap; empty `npm view` output means wrong name, not private package.
+- **P098 / ADR-038** — SKILL+REFERENCE progressive-disclosure split applied here.
 - **P045** — auto plugin install after governance release. This skill is the manual stopgap until P045's automated queue lands.
-- **P061** — sibling-count > 3 fallback (`maxItems=4`).
-- **P098** — SKILL+REFERENCE split pattern applied here (progressive disclosure per ADR-038).
+- **Risk-register bootstrap moved out of this skill.** The Step 6.5 bootstrap auto-trigger (ADR-059 verdict A6) was retired 2026-05-25 — see ADR-059 amendment 2026-05-25. Bootstrap a `docs/risks/` register from `.risk-reports/` on demand via `/wr-risk-scorer:bootstrap-catalog` (the A4 surface).
 
 Rationale, edge cases, scope exclusions, and per-step BRIEFING references: `REFERENCE.md`.

@@ -82,7 +82,7 @@ Write `scripts/install-updates.sh`. The user runs it directly.
 1. **Source-of-truth location**: `scripts/repo-local-skills/<skill-name>/SKILL.md` (with optional `REFERENCE.md` and `test/`). All editing targets this path.
    **Resolution-layer location**: `.claude/skills/<skill-name>/` is a directory of relative symlinks pointing into the source-of-truth — one symlink per file (`SKILL.md`, `REFERENCE.md`, `test/`). Claude Code resolves `/<skill-name>` autocomplete via the symlinks. The architect / JTBD / style-guide / voice-tone gates fire on the source path under their normal rules; the symlink targets are write-once (one architect approval at creation; subsequent edits go through the source path under normal review). See "Symlink contract" below.
 2. **Scope**: project-specific workflow tooling that would not be useful in a published plugin. If a skill's logic is re-usable, publish it via the marketplace instead.
-3. **Cross-project side effects** (when applicable): the skill's first action MUST be an `AskUserQuestion` listing every sibling project it detected and requiring the user to confirm the set before any install, write, or network call. A dry-run option must appear in the same call.
+3. **Cross-project side effects** (when applicable): the skill's first action MUST be an `AskUserQuestion` listing every sibling project it detected and requiring the user to confirm the set before any install, write, or network call. A dry-run option must appear in the same call. **[RETIRED for `install-updates` 2026-05-25 — see "Amendment 2026-05-25" below. `install-updates` no longer writes to any sibling tree (the plugin install cache is global/shared), so the cross-project-write risk this gate guarded no longer exists. The consent gate, dry-run option, and P120 consent cache are removed for `install-updates`. This contract clause survives as the general rule for any FUTURE repo-local skill that genuinely writes to sibling project trees.]**
 4. **No hooks**: repo-local skills do NOT install hooks. Hook scripts go in published plugins (ADR-009 gate-marker lifecycle, ADR-014 commit ordering) where they are versioned and tested.
 5. **No CHANGELOG** required — repo-local skills are versioned by the repo's own git history, not by changeset.
 6. **Bats tests optional**: doc-lint bats tests are welcome but not required. If present, they live under `scripts/repo-local-skills/<name>/test/` (the source-of-truth path) and are wired into `npm test` via the existing `bats --recursive` glob. Tests SHOULD run independent of symlink resolution so they pass on platforms where symlink creation is restricted (Windows without Developer Mode, sandboxed CI).
@@ -142,13 +142,51 @@ On Windows, symlink creation requires either Developer Mode enabled or `core.sym
 - `.claude/skills/install-updates/SKILL.md`, `REFERENCE.md`, and `test/` are relative symlinks pointing into `scripts/repo-local-skills/install-updates/` (e.g. `SKILL.md → ../../../scripts/repo-local-skills/install-updates/SKILL.md`).
 - `bats scripts/repo-local-skills/install-updates/test/` passes (tests run against the source-of-truth path independent of symlink resolution).
 - Architect and JTBD PreToolUse hooks fire on edits to `scripts/repo-local-skills/<name>/` (verified: no `scripts/` carve-out in `packages/architect/hooks/architect-enforce-edit.sh` or `packages/jtbd/hooks/jtbd-enforce-edit.sh`). Style-guide, voice-tone, and risk-scorer hooks use file-type matching not path exclusion, so they fire based on content independent of location.
-- The skill's first action is an `AskUserQuestion` listing detected sibling projects and requiring consent before any install runs.
-- A dry-run preview option is available in the same consent call.
+- ~~The skill's first action is an `AskUserQuestion` listing detected sibling projects and requiring consent before any install runs.~~ **[RETIRED 2026-05-25 — superseded by "Amendment 2026-05-25" below. `install-updates` is now a single global-cache refresh run from the current project with no sibling-tree write and no consent gate.]**
+- ~~A dry-run preview option is available in the same consent call.~~ **[RETIRED 2026-05-25 — superseded by "Amendment 2026-05-25". No consent call exists, so there is no dry-run option within it; the skill is safe to run directly because it makes no cross-project tree write.]**
 - The skill reports a per-project × per-plugin table (version-before, version-after, status) at completion.
 - The skill does NOT install hooks.
 - No CHANGELOG entry is created for the skill; the skill is versioned by repo git history.
 - ADR-003's Confirmation criterion on `.claude/skills/` is amended in the same commit to point at this ADR.
-- **Consent cache carve-out (P120, 2026-04-25 amendment)**: the "first action is consent gate" rule narrows to "consent gate as first action UNLESS a per-project consent cache (`.claude/.install-updates-consent`) exists AND its cached scope matches the current sibling set. When the cache hits, the gate is skipped per ADR-013 Rule 5 (policy-authorised silent proceed) — the cached on-disk consent IS the policy authorisation. When the cache misses or mismatches, the gate fires as today (cache-miss-with-stale-cache surfaces the previous answer as `(Recommended)` in the question body). The match rule is **set equality** of the cached `scope` against the detected sibling set from Step 3 — same names, ignoring order. A plugin-list change in any sibling does NOT invalidate the cache (the cache governs project membership in the install plan, not plugin selection); cache invalidation has no time component on a stable workspace. Dry-run access is preserved via two equivalent escape hatches: `INSTALL_UPDATES_RECONFIRM=1 /install-updates` envvar silences the cache for one invocation, or `rm .claude/.install-updates-consent && /install-updates` deletes the cache file; both restore the user to the gate-with-dry-run path. Cache file shape, invalidation rules, and the parallel-pattern note vs. ADR-034's `.claude/.auto-install-consent` live in `REFERENCE.md` → "Consent cache (P120)". The two markers are independent — presence of one does not imply the other.
+- **Consent cache carve-out (P120, 2026-04-25 amendment)** **[RETIRED 2026-05-25 — superseded by "Amendment 2026-05-25" below. With the consent gate itself retired for `install-updates`, the consent cache it optimised has no decision content to cache; the `.claude/.install-updates-consent` marker is no longer read or written.]**: the "first action is consent gate" rule narrows to "consent gate as first action UNLESS a per-project consent cache (`.claude/.install-updates-consent`) exists AND its cached scope matches the current sibling set. When the cache hits, the gate is skipped per ADR-013 Rule 5 (policy-authorised silent proceed) — the cached on-disk consent IS the policy authorisation. When the cache misses or mismatches, the gate fires as today (cache-miss-with-stale-cache surfaces the previous answer as `(Recommended)` in the question body). The match rule is **set equality** of the cached `scope` against the detected sibling set from Step 3 — same names, ignoring order. A plugin-list change in any sibling does NOT invalidate the cache (the cache governs project membership in the install plan, not plugin selection); cache invalidation has no time component on a stable workspace. Dry-run access is preserved via two equivalent escape hatches: `INSTALL_UPDATES_RECONFIRM=1 /install-updates` envvar silences the cache for one invocation, or `rm .claude/.install-updates-consent && /install-updates` deletes the cache file; both restore the user to the gate-with-dry-run path. Cache file shape, invalidation rules, and the parallel-pattern note vs. ADR-034's `.claude/.auto-install-consent` live in `REFERENCE.md` → "Consent cache (P120)". The two markers are independent — presence of one does not imply the other.
+
+## Amendment 2026-05-25 — install-updates narrowed to global-cache refresh (consent gate retired)
+
+**Status: in effect (ADR remains `proposed`).** This amendment narrows the `install-updates` worked example; it does NOT change the general repo-local-skill contract for any future skill that genuinely writes to sibling project trees.
+
+### What changed
+
+`install-updates` is narrowed to a **single global-cache refresh run from the current project**. The sibling-project discovery loop, the per-sibling `claude plugin install --scope project` loop, the `AskUserQuestion` consent gate (Decision Outcome point 3), the dry-run option, the P120 consent cache (`.claude/.install-updates-consent`), and the P061 sibling-cap fallback are all **retired** for this skill.
+
+### Why the consent gate is retired (the risk it guarded no longer exists)
+
+The original consent gate existed to satisfy Decision Driver "Consent for cross-project writes" and to mitigate the concern recorded in Context point 2: *"a skill that writes to sibling projects' `.claude/` directories inverts ADR-004's project-isolation model."*
+
+The user-confirmed architectural fact (2026-05-25) dissolves that premise: the plugin **install cache is global/shared** across all projects on the machine — `~/.claude/plugins/cache/windyroad/<key>/<version>/` is a single copy of the plugin code, not a per-project copy. Refreshing it from the current project (uninstall + reinstall, to defeat the P106 install-no-op) advances the active version for **every** project that enables those plugins. There is **no per-project cache and no sibling-project tree write** — so there is no cross-project side effect to discover, list, or consent to. The consent gate guarded a write that no longer occurs; it is removed rather than preserved as dead ceremony.
+
+User direction (verbatim, 2026-05-25, via `AskUserQuestion`): *"it just needs to refresh. That will impact all the sibling projects that use it. There isn't another viable option. So just do that."*
+
+### Effect on this ADR's clauses
+
+- **Decision Outcome point 3** — retired for `install-updates` (annotated inline above). Survives as the general rule for any future repo-local skill that genuinely writes to sibling trees.
+- **Confirmation** — the "first action is an `AskUserQuestion` listing detected sibling projects" and "dry-run preview option" criteria are retired/superseded (annotated inline above). The P120 consent-cache carve-out is likewise retired (the cache has no decision content once the gate is gone).
+- **Symlink Contract (P139), source-of-truth location, no-hooks, no-CHANGELOG, scope-test, marketplace-default** — all preserved unchanged.
+
+### New `install-updates` confirmation criteria (replacing the retired ones)
+
+- The skill runs a single global-cache refresh from the current project; it makes no sibling-project tree write and asks no questions.
+- It refreshes the marketplace cache, compares each enabled `wr-*` plugin's npm latest against the cached version, and uninstall+reinstalls (P106) with bounded retry + rollback (P112) only those that are behind.
+- It is safe to run non-interactively (subagent / AFK loop) — there is nothing to gate.
+- It reports a per-plugin before/after/status table and a restart note.
+
+### Trade-off recorded
+
+This removes the "agents silently write to my sibling projects" guardrail named in Decision Driver "Solo-developer persona constraint" — but the guardrail is moot because no sibling write occurs. The remaining cross-project effect (a global-cache version advance) is exactly the user-desired outcome (JTBD-007), is reported in the final table, and does not take effect in already-running sibling sessions until they restart (the existing P045 restart note covers this).
+
+### Related
+
+- ADR-059 amendment 2026-05-25 retires the coupled `install-updates` Step 6.5 risk-register bootstrap auto-trigger (verdict A6); bootstrap survives on-demand via `/wr-risk-scorer:bootstrap-catalog`.
+- ADR-047 install-updates coupling fully dissolved (stale-ref cleanup note 2026-05-25).
 
 ## Follow-ups (non-blocking for this ADR)
 

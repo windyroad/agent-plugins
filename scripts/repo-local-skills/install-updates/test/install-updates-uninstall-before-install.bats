@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-# P106: install-updates SKILL.md Step 6 must uninstall before install.
+# P106: install-updates SKILL.md Step 4 (Install) must uninstall before install.
 # `claude plugin install` is a silent no-op when the plugin is already
 # installed, so updates never land. The fix is `uninstall + install`
 # in `--scope project`, which forces a fresh marketplace download.
@@ -14,10 +14,10 @@ setup() {
   REF_MD="$REPO_ROOT/.claude/skills/install-updates/REFERENCE.md"
 }
 
-@test "install-updates: SKILL.md Step 6 contains uninstall before install (P106)" {
-  # Extract Step 6 block (from "### 7. Install" to the next ### or EOF)
+@test "install-updates: SKILL.md Step 4 Install contains uninstall before install (P106)" {
+  # Extract the Step 4 (Install) block — from "### 4. Install" to the next ### or EOF.
   local step7
-  step7=$(sed -n '/^### 6\. Install/,/^### /p' "$SKILL_MD" | sed '$d')
+  step7=$(sed -n '/^### 4\. Install/,/^### /p' "$SKILL_MD" | sed '$d')
   [ -n "$step7" ]
 
   # Must contain an uninstall command
@@ -28,7 +28,7 @@ setup() {
   run grep -F 'claude plugin install' <<< "$step7"
   [ "$status" -eq 0 ]
 
-  # uninstall must appear BEFORE install in the Step 6 block
+  # uninstall must appear BEFORE install in the Step 4 (Install) block
   local uninstall_line install_line
   uninstall_line=$(grep -nF 'claude plugin uninstall' <<< "$step7" | head -1 | cut -d: -f1)
   install_line=$(grep -nF 'claude plugin install' <<< "$step7" | tail -1 | cut -d: -f1)
@@ -37,14 +37,14 @@ setup() {
   [ "$uninstall_line" -lt "$install_line" ]
 }
 
-@test "install-updates: Step 6 uninstall uses --scope project (P106)" {
+@test "install-updates: Step 4 Install uninstall uses --scope project (P106)" {
   local step7
-  step7=$(sed -n '/^### 6\. Install/,/^### /p' "$SKILL_MD" | sed '$d')
+  step7=$(sed -n '/^### 4\. Install/,/^### /p' "$SKILL_MD" | sed '$d')
   run grep -F -- '--scope project' <<< "$step7"
   [ "$status" -eq 0 ]
 }
 
-@test "install-updates: Step 6 captures per-install exit status (P106)" {
+@test "install-updates: Step 4 Install captures per-install exit status (P106)" {
   # The fix must not drop the existing "Capture per-install exit status"
   # contract — continue on failure, report and continue.
   run grep -iF 'exit status' "$SKILL_MD"
