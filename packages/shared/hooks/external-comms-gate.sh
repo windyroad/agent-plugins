@@ -24,7 +24,13 @@
 #      (Voice-tone evaluator: skips leak pre-filter — leak detection is the
 #      risk evaluator's concern; voice-tone reviews tone/voice only.)
 #   4. Otherwise: check for THIS evaluator's per-evaluator marker keyed on
-#      sha256(draft_body + '\n' + surface). Marker present → permit.
+#      compute_external_comms_key(draft, surface) =
+#      sha256(normalize(draft, surface) + '\n' + surface) — the SINGLE
+#      canonical key shared with the mark hook (lib/external-comms-key.sh).
+#      For the changeset-author surface normalize() strips the leading YAML
+#      frontmatter block so the gate (which sees the FULL Write content) and
+#      the mark hook (which sees only the <draft> body) hash identical input
+#      (P010 / ADR-028 amended 2026-05-25). Marker present → permit.
 #      Marker absent → deny with directive to delegate to this plugin's
 #      subagent (configured via external-comms-evaluator.conf).
 #
@@ -48,6 +54,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=lib/leak-detect.sh
 source "$SCRIPT_DIR/lib/leak-detect.sh"
+# shellcheck source=lib/external-comms-key.sh
+# Provides compute_external_comms_key — the SINGLE canonical marker-key
+# normalization shared with the PostToolUse mark hook (ADR-028 amended
+# 2026-05-25 / P010). Sourced via the same $SCRIPT_DIR/lib convention as
+# leak-detect.sh so byte-identity holds across the synced per-package copies.
+source "$SCRIPT_DIR/lib/external-comms-key.sh"
 
 # ---------- Per-package evaluator config (ADR-028 amended 2026-05-14) ----------
 # Each consumer plugin ships its own external-comms-evaluator.conf alongside this
@@ -231,7 +243,12 @@ fi
 # ---------- Marker-based gate (per-evaluator marker per ADR-028 amended 2026-05-14) ----------
 SESSION_DIR="${TMPDIR:-/tmp}/claude-risk-${SESSION_ID}"
 mkdir -p "$SESSION_DIR"
-KEY=$(printf '%s\n%s' "$DRAFT" "$SURFACE" | shasum -a 256 | cut -d' ' -f1)
+# Canonical marker key — normalize() strips changeset frontmatter + trailing
+# whitespace so this PreToolUse key matches the PostToolUse mark-hook key
+# (compute_external_comms_key in lib/external-comms-key.sh; P010 / ADR-028
+# amended 2026-05-25). For changeset-author $DRAFT is the FULL Write content
+# (frontmatter + body); compute_external_comms_key strips the frontmatter.
+KEY=$(compute_external_comms_key "$DRAFT" "$SURFACE")
 MARKER="${SESSION_DIR}/external-comms-${EXTERNAL_COMMS_EVALUATOR_ID}-reviewed-${KEY}"
 
 if [ -f "$MARKER" ]; then
@@ -244,7 +261,7 @@ fi
 # PostToolUse mark hook can derive the canonical marker key locally
 # (sha256(DRAFT + '\n' + SURFACE)). Single fire per gate cycle.
 VERDICT_PREFIX="${EXTERNAL_COMMS_VERDICT_PREFIX:-EXTERNAL_COMMS_${EXTERNAL_COMMS_EVALUATOR_ID^^}}"
-REASON=$(printf 'BLOCKED (external-comms gate / %s evaluator): %s draft has not been reviewed by %s. Delegate to %s (subagent_type: '"'"'%s'"'"') with a prompt that starts with the line `SURFACE: %s` and wraps the draft body verbatim inside `<draft>...</draft>` markers. The PostToolUse hook derives the marker key from that structure and marks the draft reviewed when the subagent emits %s_VERDICT: PASS — single fire suffices. Use %s for an interactive walkthrough. Override only when intentional: BYPASS_RISK_GATE=1.' \
+REASON=$(printf 'BLOCKED (external-comms gate / %s evaluator): %s draft has not been reviewed by %s. Delegate to %s (subagent_type: '"'"'%s'"'"') with a prompt that starts with the line `SURFACE: %s` and wraps the draft body verbatim inside `<draft>...</draft>` markers (for the changeset-author surface the body is the changeset summary WITHOUT the leading `---` frontmatter block — the gate strips frontmatter before hashing the marker key). The PostToolUse hook derives the marker key from that structure and marks the draft reviewed when the subagent emits %s_VERDICT: PASS — single fire suffices. Use %s for an interactive walkthrough. Override only when intentional: BYPASS_RISK_GATE=1.' \
     "$EXTERNAL_COMMS_EVALUATOR_ID" "$SURFACE" "$EXTERNAL_COMMS_SUBAGENT_TYPE" "$EXTERNAL_COMMS_SUBAGENT_TYPE" "$EXTERNAL_COMMS_SUBAGENT_TYPE" "$SURFACE" "$VERDICT_PREFIX" "$EXTERNAL_COMMS_ASSESS_SKILL")
 deny_with_reason "$REASON"
 exit 0

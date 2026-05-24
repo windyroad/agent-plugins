@@ -186,3 +186,29 @@ run_hook() {
   [[ "$output" == *"deny"* ]]
   [[ "$output" == *"wr-risk-scorer:external-comms"* ]]
 }
+
+# ---------------------------------------------------------------------------
+# P010 / ADR-028 amended 2026-05-25 — deny-after-PASS regression.
+# The gate sees the FULL Write content (YAML frontmatter + body) on the
+# changeset-author surface, but the mark hook keys the marker on the body
+# the agent wrapped in <draft>. Before the fix the gate hashed the full
+# content (incl. frontmatter), so the body-keyed PASS marker landed at a
+# key the gate never re-read → permanent deny-after-PASS. After the fix the
+# gate strips frontmatter before hashing, so a body-keyed marker permits.
+# ---------------------------------------------------------------------------
+
+@test "P010: changeset Write permits when the PASS marker is keyed on the <draft> body (frontmatter stripped before hash)" {
+  BODY="external-comms gate strips changeset frontmatter before key hash"
+  SURFACE="changeset-author"
+  # Marker keyed on the body the mark-hook helper derives from <draft> — for a
+  # frontmatter-free body the canonical key equals the raw printf-of-body key.
+  KEY=$(printf '%s\n%s' "$BODY" "$SURFACE" | shasum -a 256 | cut -d' ' -f1)
+  touch "${RDIR}/external-comms-risk-reviewed-${KEY}"
+
+  # The gate sees the full changeset file: frontmatter + blank line + body.
+  CONTENT=$'---\n"@windyroad/risk-scorer": patch\n---\n\n'"$BODY"
+  INPUT=$(build_write_input ".changeset/p010-fix.md" "$CONTENT")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}

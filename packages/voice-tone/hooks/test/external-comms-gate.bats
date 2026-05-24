@@ -198,3 +198,24 @@ run_hook() {
   [ "$status" -eq 0 ]
   [[ "$output" == *"deny"* ]]
 }
+
+# ---------------------------------------------------------------------------
+# P010 / ADR-028 amended 2026-05-25 — deny-after-PASS regression (voice-tone).
+# Mirror of the risk-scorer regression: the gate sees the FULL changeset
+# content (YAML frontmatter + body) but the mark hook keys the marker on the
+# <draft> body. After the fix the gate strips frontmatter before hashing, so
+# a body-keyed voice-tone PASS marker permits the changeset Write.
+# ---------------------------------------------------------------------------
+
+@test "P010: changeset Write permits when the voice-tone PASS marker is keyed on the <draft> body (frontmatter stripped before hash)" {
+  BODY="external-comms gate strips changeset frontmatter before key hash"
+  SURFACE="changeset-author"
+  KEY=$(printf '%s\n%s' "$BODY" "$SURFACE" | shasum -a 256 | cut -d' ' -f1)
+  touch "${RDIR}/external-comms-voice-tone-reviewed-${KEY}"
+
+  CONTENT=$'---\n"@windyroad/voice-tone": patch\n---\n\n'"$BODY"
+  INPUT=$(build_write_input ".changeset/p010-fix.md" "$CONTENT")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}

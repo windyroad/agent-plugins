@@ -24,6 +24,13 @@ gate_key() {
   printf '%s\n%s' "$draft" "$surface" | shasum -a 256 | cut -d' ' -f1
 }
 
+# Canonical key computation shared by the gate and the mark-hook helper
+# (ADR-028 amended 2026-05-25). Runs the real compute_external_comms_key.
+compute() {
+  local draft="$1" surface="$2"
+  bash -c "source '$LIB' && compute_external_comms_key \"\$1\" \"\$2\"" _ "$draft" "$surface"
+}
+
 @test "derives key from well-formed prompt matching gate computation" {
   PROMPT=$'SURFACE: changeset-author\n<draft>\nfix the build on Node 20\n</draft>\nReview this for confidential info.'
   KEY=$(derive "$PROMPT")
@@ -86,4 +93,57 @@ gate_key() {
   PROMPT=$'context says SURFACE: should-not-match\n<draft>\nbody\n</draft>'
   KEY=$(derive "$PROMPT")
   [ -z "$KEY" ]
+}
+
+# ---------------------------------------------------------------------------
+# P010 / ADR-028 amended 2026-05-25 — changeset frontmatter strip + canonical
+# newline normalization. The GATE sees the FULL Write content (incl. YAML
+# frontmatter) for the changeset-author surface; the agent wraps only the
+# body in <draft>. Both sides must strip the frontmatter + rstrip trailing
+# whitespace before hashing so the mark-hook-derived key matches the gate key
+# (fixes deny-after-PASS).
+# ---------------------------------------------------------------------------
+
+@test "P010: gate-side full changeset content and mark-side <draft> body derive the SAME key (frontmatter stripped)" {
+  # The body the agent wraps in <draft>.
+  BODY=$'external-comms gate now strips changeset frontmatter before key hash.'
+  # The full Write content the gate sees: YAML frontmatter + blank line + body.
+  FULL=$'---\n"@windyroad/risk-scorer": patch\n"@windyroad/voice-tone": patch\n---\n\n'"$BODY"
+
+  # Gate side: compute on the FULL content with the changeset-author surface.
+  GATE_KEY=$(compute "$FULL" "changeset-author")
+  # Mark side: derive from a structured prompt wrapping ONLY the body.
+  PROMPT=$'SURFACE: changeset-author\n<draft>\n'"$BODY"$'\n</draft>'
+  MARK_KEY=$(derive "$PROMPT")
+
+  [ -n "$GATE_KEY" ]
+  [ "$GATE_KEY" = "$MARK_KEY" ]
+}
+
+@test "P010: trailing-newline asymmetry — body with and without trailing newlines yields the same key" {
+  BODY="a clean changeset summary line"
+  K0=$(compute "$BODY" "changeset-author")
+  K1=$(compute "${BODY}"$'\n' "changeset-author")
+  K2=$(compute "${BODY}"$'\n\n\n' "changeset-author")
+  [ "$K0" = "$K1" ]
+  [ "$K0" = "$K2" ]
+}
+
+@test "P010: non-changeset surfaces are NOT frontmatter-stripped (gh-issue-create body preserved verbatim)" {
+  # A gh-issue body that happens to begin with a '---' fence must keep it —
+  # only the changeset-author surface strips frontmatter.
+  WITH_FENCE=$'---\nnot frontmatter\n---\n\nbody text'
+  STRIPPED="body text"
+  K_FENCE=$(compute "$WITH_FENCE" "gh-issue-create")
+  K_STRIPPED=$(compute "$STRIPPED" "gh-issue-create")
+  # If the gate wrongly stripped, these would collide. They must differ.
+  [ "$K_FENCE" != "$K_STRIPPED" ]
+}
+
+@test "P010: changeset-author key equals the body-only key (frontmatter is invisible to the hash)" {
+  BODY="patch the gate"
+  FULL=$'---\n"@windyroad/risk-scorer": patch\n---\n\n'"$BODY"
+  K_FULL=$(compute "$FULL" "changeset-author")
+  K_BODY=$(compute "$BODY" "changeset-author")
+  [ "$K_FULL" = "$K_BODY" ]
 }

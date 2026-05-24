@@ -1,7 +1,7 @@
 ---
 status: "proposed"
 date: 2026-04-20
-amended-date: 2026-05-16
+amended-date: 2026-05-25
 decision-makers: [tomhoward]
 consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: [Windy Road plugin users, addressr maintainer, bbstats maintainer]
@@ -383,7 +383,7 @@ The canonical `external-comms-gate.sh` denial message instructs the orchestrator
 
 **Confirmation criteria delta (supersedes Confirmation Criterion 1 + 2026-05-14 "Structured-output contract"):**
 
-- **Criterion 1** (was: per-evaluator marker key is `sha256(draft + '\n' + surface)` computed by the agent and emitted as `EXTERNAL_COMMS_<EVALUATOR>_KEY`) — current: per-evaluator marker key is `sha256(DRAFT + '\n' + SURFACE)` DERIVED BY THE HOOK from the agent's `tool_input.prompt` (`SURFACE:` line + `<draft>...</draft>` block). Backward-compat fallback to agent-emitted key during the deprecation window.
+- **Criterion 1** (was: per-evaluator marker key is `sha256(draft + '\n' + surface)` computed by the agent and emitted as `EXTERNAL_COMMS_<EVALUATOR>_KEY`) — current: per-evaluator marker key is `sha256(DRAFT + '\n' + SURFACE)` DERIVED BY THE HOOK from the agent's `tool_input.prompt` (`SURFACE:` line + `<draft>...</draft>` block). Backward-compat fallback to agent-emitted key during the deprecation window. **Further refined 2026-05-25 (see Amendments § 2026-05-25)**: the key is `sha256(normalize(DRAFT, SURFACE) + '\n' + SURFACE)` where `normalize` strips the changeset YAML frontmatter (changeset-author surface only) and rstrips trailing whitespace; `normalize` is defined once in `lib/external-comms-key.sh::compute_external_comms_key` and shared by the gate and the mark hook.
 - **Structured-output contract (2026-05-14)** — `EXTERNAL_COMMS_<EVAL>_KEY` field demoted from MANDATORY to OPTIONAL (fallback-only); other fields unchanged.
 - **Bats coverage delta**:
   - ADDED: `packages/shared/test/external-comms-key-helper.bats` — helper derivation correctness against gate's canonical key shape.
@@ -420,3 +420,47 @@ PostToolUse mark hooks continue to follow ADR-045 Pattern 2 (side-effect-only si
 - After: 1 agent fire per gate cycle, ~$0.025 cumulative, 0s extra wall-clock (eliminated second fire). Hook-side sha256 + prompt-parse adds ~5ms CPU.
 - Aggregate (per P166's projection of ~75 gate cycles/day across 3 contributors): ~$1.88/day saved; ~$685/year saved; ~225-450s/day saved across the user base.
 - Monotonically improving (no regression risk); recorded for amendment audit trail per ADR-023 performance-review nitpick.
+
+### 2026-05-25 — Changeset frontmatter strip + canonical newline normalization (P010 / P198 / #149 close)
+
+Closes the deny-after-PASS marker-key mismatch on the `changeset-author` surface (upstream #149 P010 half; local known-error P198; verifying P163/P166). Architect (PASS) + JTBD (PASS) + WIP-risk (CONTINUE, within appetite) confirmed 2026-05-25. Inbound report: #149 / #125.
+
+**Problem being closed:**
+
+The 2026-05-16 amendment asserted byte-identity between the gate's PreToolUse key (`external-comms-gate.sh`) and the mark hook's key (`derive_external_comms_key_from_prompt`). That identity held for the body-only surfaces (gh-*, npm-publish) but **broke for `changeset-author`** because the two sides hash different inputs:
+
+- **Gate side**: for a `Write`/`Edit` on `.changeset/*.md`, `DRAFT = tool_input.content + new_string` — the FULL changeset file INCLUDING its YAML frontmatter block (`---\n"@windyroad/x": minor\n---\n\n<body>`).
+- **Mark side**: the agent wraps only the changeset summary `<body>` inside `<draft>...</draft>` (the gate's deny message instructs "wrap the draft body verbatim"). The helper hashes that body alone.
+
+So `sha256(frontmatter + body + '\n' + surface) ≠ sha256(body + '\n' + surface)` → the PASS marker landed at a key the gate never re-read → permanent deny-after-PASS on changeset authoring. A secondary **newline-strip asymmetry** compounded it: the gate's `$()` strips ALL trailing newlines while the helper's `<draft>\n?(.*?)\n?</draft>` regex strips only one.
+
+**Decision (Option B — preserves per-draft content-binding):**
+
+A SINGLE canonical normalization, `compute_external_comms_key <draft> <surface>` in `packages/shared/hooks/lib/external-comms-key.sh`, is now the one place the marker key is computed. Both the gate (PreToolUse) and the mark-hook helper (PostToolUse) route through it, so they hash byte-identical input.
+
+`normalize(draft, surface)`:
+- **changeset-author surface**: strip the leading YAML frontmatter block (`^---\n.*?\n---\n` non-greedy + the blank line after it). The gate passes its full-content `DRAFT`; the frontmatter is stripped before hashing so it matches the agent-wrapped body. All other surfaces (gh-*, npm-publish) are left unchanged — they are already body-only via the gate's `--body` / `--field` extraction.
+- **all surfaces**: rstrip ALL trailing whitespace. This single canonical newline normalization subsumes the gate's `$()` trailing-newline strip AND the helper's single-newline regex strip, making the two provably symmetric on trailing whitespace.
+
+Net: gate hashes `sha256(normalize(full_content) + '\n' + surface)`; helper hashes `sha256(normalize(<draft>_body) + '\n' + surface)`; they match because frontmatter-strip is a no-op on the already-body-only `<draft>` and the rstrip is identical on both sides. The contract is still per-draft content-bound (a different changeset body → a different key → re-review).
+
+**Files changed (atomic commit):**
+
+- `packages/shared/hooks/lib/external-comms-key.sh` — NEW `compute_external_comms_key` (the single normalization+hash); `derive_external_comms_key_from_prompt` refactored to extract `SURFACE` + `<draft>` body then delegate to it.
+- `packages/shared/hooks/external-comms-gate.sh` — sources `lib/external-comms-key.sh`; the marker-key computation now calls `compute_external_comms_key "$DRAFT" "$SURFACE"` instead of an inline `printf | shasum`; deny message clarifies that the changeset-author body excludes the `---` frontmatter (the gate strips it before hashing); comment block updated.
+- `packages/{risk-scorer,voice-tone}/hooks/external-comms-gate.sh` + `…/hooks/lib/external-comms-key.sh` — synced byte-identically via `scripts/sync-external-comms-gate.sh` (no new sync target; all three files were already in the sync set).
+- Behavioural bats added: `packages/shared/test/external-comms-key-helper.bats` (gate-key ↔ mark-key equality with frontmatter; newline-asymmetry; non-changeset-not-stripped); `packages/{risk-scorer,voice-tone}/hooks/test/external-comms-gate.bats` (changeset Write permits when the PASS marker is keyed on the `<draft>` body).
+
+**Confirmation criteria delta (supersedes the 2026-05-16 Criterion 1):**
+
+- **Criterion 1** — current: per-evaluator marker key is `sha256(normalize(draft_body, surface) + '\n' + surface)`, where `normalize` is defined ONCE in `compute_external_comms_key` (`lib/external-comms-key.sh`) and shared byte-for-byte by the gate and the mark hook. `normalize` strips the YAML frontmatter block for the `changeset-author` surface (no-op on other surfaces) and rstrips trailing whitespace on all surfaces. The gate's full-content `DRAFT` and the mark hook's `<draft>` body therefore hash identically for changeset authoring (no deny-after-PASS). Backward-compat fallback to the agent-emitted key remains during the deprecation window.
+- **Behavioural replay (additions to § Confirmation section 6):**
+  - **Body-vs-full-content**: a `Write` to `.changeset/p010.md` with `---\n"@windyroad/x": patch\n---\n\n<body>` and a PASS marker keyed on `<body>` → gate permits (frontmatter stripped before hashing). Was: gate denied (full-content key ≠ body key).
+  - **Newline-asymmetry**: a body with 0 / 1 / N trailing newlines yields the same key (both sides rstrip).
+  - **Non-changeset-unaffected**: a `gh-issue-create` body that begins with a `---` fence is NOT frontmatter-stripped — only the `changeset-author` surface strips.
+
+**ADR-017 compliance**: the gate sources the helper via the established `$SCRIPT_DIR/lib/external-comms-key.sh` convention (same shape as `lib/leak-detect.sh`); both files were already in `scripts/sync-external-comms-gate.sh`'s sync set, so byte-identity across `shared`/`risk-scorer`/`voice-tone` holds and `check:external-comms-gate` passes.
+
+**ADR-045 silent-on-pass (preserved)**: no stdout change on the happy path.
+
+**Status**: stays `proposed`. Per the project's deliberation discipline (and the 2026-05-14 amendment's note, line 330), ADR-028 holds at `proposed` until observed in production for one release cycle.
