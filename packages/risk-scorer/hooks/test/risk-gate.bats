@@ -17,6 +17,21 @@ setup() {
 
 teardown() {
   rm -rf "${TMPDIR:-/tmp}/claude-risk-${TEST_SESSION}"
+  [ -n "${POLICY_DIR:-}" ] && rm -rf "$POLICY_DIR"
+  unset RISK_APPETITE 2>/dev/null || true
+}
+
+# Write a RISK-POLICY.md whose § Risk Appetite carries $1 into a fresh temp
+# dir and cd into it, so check_risk_gate reads the appetite from cwd. Pass an
+# empty string to OMIT the file entirely (absent-policy default path).
+_use_policy() {
+  local appetite_section="$1"
+  POLICY_DIR=$(mktemp -d)
+  if [ -n "$appetite_section" ]; then
+    printf '# Risk Policy\n\n## Risk Appetite\n\n%s\n\n## Impact Levels\n| L | x |\n' \
+      "$appetite_section" > "$POLICY_DIR/RISK-POLICY.md"
+  fi
+  cd "$POLICY_DIR"
 }
 
 # Helper: call check_risk_gate directly (not via run) so RISK_GATE_REASON is visible
@@ -218,4 +233,80 @@ _write_matching_hash() {
   ! check_risk_gate "$TEST_SESSION" "commit"
   [ "$RISK_GATE_CATEGORY" = "threshold" ]
   [ "$RISK_GATE_SCORE" = "7" ]
+}
+
+# ---------------------------------------------------------------------------
+# P007 / ADR-065 — the block threshold is the project's RISK-POLICY.md risk
+# appetite (block when score > N), not a hardcoded 5. Default N=4 when the
+# policy is absent or unparseable, which reproduces the prior `score >= 5`
+# behaviour exactly for integer scores. Precedence: RISK_APPETITE env >
+# RISK-POLICY.md parse > default 4. (Behavioural fixtures per ADR-052.)
+# ---------------------------------------------------------------------------
+
+@test "appetite 9 (exceeds 9): score 7 within the 5-9 band PASSES" {
+  _use_policy 'Pipeline gates block when cumulative residual risk exceeds 9.'
+  printf '7' > "$SCORE_FILE"
+  rm -f "$HASH_FILE"
+  assert_gate_allows "$TEST_SESSION" "commit"
+}
+
+@test "appetite 9 (exceeds 9): score 10 above the band FAILS and deny renders the parsed appetite 9/25" {
+  _use_policy 'Pipeline gates block when cumulative residual risk exceeds 9.'
+  printf '10' > "$SCORE_FILE"
+  rm -f "$HASH_FILE"
+  assert_gate_denies "$TEST_SESSION" "commit" "appetite of 9/25"
+}
+
+@test "appetite via 'Threshold: 9' phrasing: score 9 PASSES, score 10 FAILS" {
+  _use_policy '**Threshold: 9 (Medium)**'
+  rm -f "$HASH_FILE"
+  printf '9' > "$SCORE_FILE"
+  assert_gate_allows "$TEST_SESSION" "commit"
+  printf '10' > "$SCORE_FILE"
+  assert_gate_denies "$TEST_SESSION" "commit" "10/25"
+}
+
+@test "appetite 4 (exceeds 4): score 4 PASSES, score 5 FAILS" {
+  _use_policy 'Pipeline gates block when cumulative residual risk exceeds 4.'
+  rm -f "$HASH_FILE"
+  printf '4' > "$SCORE_FILE"
+  assert_gate_allows "$TEST_SESSION" "commit"
+  printf '5' > "$SCORE_FILE"
+  assert_gate_denies "$TEST_SESSION" "commit" "appetite of 4/25"
+}
+
+@test "absent RISK-POLICY.md: defaults to appetite 4 (4 PASSES, 5 FAILS)" {
+  _use_policy ''   # no RISK-POLICY.md in the temp dir
+  rm -f "$HASH_FILE"
+  printf '4' > "$SCORE_FILE"
+  assert_gate_allows "$TEST_SESSION" "commit"
+  printf '5' > "$SCORE_FILE"
+  assert_gate_denies "$TEST_SESSION" "commit" "appetite of 4/25"
+}
+
+@test "unparseable RISK-POLICY.md (no appetite integer): defaults to appetite 4" {
+  _use_policy 'We are conservative about risk but state no number here.'
+  rm -f "$HASH_FILE"
+  printf '4' > "$SCORE_FILE"
+  assert_gate_allows "$TEST_SESSION" "commit"
+  printf '5' > "$SCORE_FILE"
+  assert_gate_denies "$TEST_SESSION" "commit" "appetite of 4/25"
+}
+
+@test "fractional score 4.5 FAILS under default appetite 4 (4.5 > 4)" {
+  _use_policy ''
+  rm -f "$HASH_FILE"
+  printf '4.5' > "$SCORE_FILE"
+  assert_gate_denies "$TEST_SESSION" "commit" "4.5/25"
+}
+
+@test "RISK_APPETITE env override takes precedence over RISK-POLICY.md parse" {
+  _use_policy 'Pipeline gates block when cumulative residual risk exceeds 4.'
+  rm -f "$HASH_FILE"
+  RISK_APPETITE=9
+  printf '7' > "$SCORE_FILE"
+  assert_gate_allows "$TEST_SESSION" "commit"
+  printf '10' > "$SCORE_FILE"
+  assert_gate_denies "$TEST_SESSION" "commit" "appetite of 9/25"
+  unset RISK_APPETITE
 }

@@ -100,16 +100,53 @@ check_risk_gate() {
     return 1
   fi
 
-  # 5. Threshold check
-  local DENIED=$(python3 -c "
-score = float('$SCORE')
-print('yes' if score >= 5 else 'no')
-" 2>/dev/null || echo "no")
+  # 5. Threshold check — block when the score EXCEEDS the project's
+  #    RISK-POLICY.md risk appetite (P007 / ADR-065). The threshold is the
+  #    adopter's documented appetite, not a code constant: a project whose
+  #    policy sets a higher appetite (e.g. "exceeds 9") must not have its
+  #    within-appetite changes gate-rejected.
+  #    Precedence: RISK_APPETITE env override > RISK-POLICY.md § Risk Appetite
+  #    parse > default 4. Default 4 reproduces the prior hardcoded `score >= 5`
+  #    behaviour exactly for integer scores (5 blocks, 4 passes) when the
+  #    policy is absent or unparseable. The parse is tolerant of the phrasings
+  #    "Threshold: N", "exceeds N", and "N/Low appetite", scoped to the
+  #    "## Risk Appetite" section. Cost ~3-8ms/invocation (ADR-065 § Consequences).
+  local DECISION
+  DECISION=$(RISK_SCORE_VAL="$SCORE" RISK_APPETITE_ENV="${RISK_APPETITE:-}" python3 -c "
+import os, re, sys
+try:
+    score = float(os.environ['RISK_SCORE_VAL'])
+except Exception:
+    print('no 4'); sys.exit(0)
+N = None
+override = os.environ.get('RISK_APPETITE_ENV', '').strip()
+if override.isdigit():
+    N = int(override)
+else:
+    try:
+        text = open('RISK-POLICY.md', encoding='utf-8').read()
+    except Exception:
+        text = ''
+    if text:
+        # Scope to the '## Risk Appetite' section so unrelated numbers
+        # elsewhere in the policy cannot match.
+        sec = re.search(r'##\s*Risk Appetite\s*(.*?)(?=\n##\s|\Z)', text, re.DOTALL | re.IGNORECASE)
+        scope = sec.group(1) if sec else text
+        for pat in (r'Threshold:\s*(\d+)', r'exceeds\s+(\d+)', r'(\d+)\s*/\s*Low appetite'):
+            m = re.search(pat, scope, re.IGNORECASE)
+            if m:
+                N = int(m.group(1)); break
+if N is None:
+    N = 4
+print(('yes' if score > N else 'no') + ' ' + str(N))
+" 2>/dev/null || echo "no 4")
+  local DENIED="${DECISION%% *}"
+  local APPETITE="${DECISION##* }"
 
   if [ "$DENIED" = "yes" ]; then
     RISK_GATE_CATEGORY="threshold"
     RISK_GATE_SCORE="$SCORE"
-    RISK_GATE_REASON="${ACTION} risk score ${SCORE}/25 (Medium or above). To proceed: (1) split the ${ACTION}, (2) add risk-reducing measures, or (3) for a LIVE INCIDENT, delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') with incident context for an incident bypass."
+    RISK_GATE_REASON="${ACTION} risk score ${SCORE}/25 exceeds the project appetite of ${APPETITE}/25 (RISK-POLICY.md). To proceed: (1) split the ${ACTION}, (2) add risk-reducing measures, or (3) for a LIVE INCIDENT, delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') with incident context for an incident bypass."
     return 1
   fi
 
