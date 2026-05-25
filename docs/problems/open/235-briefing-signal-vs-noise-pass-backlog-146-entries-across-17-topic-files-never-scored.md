@@ -70,3 +70,7 @@ Three options:
 ## Change Log
 
 - **2026-05-17** — Captured by `/wr-retrospective:run-retro` session 3 retro wrap as P234 remediation. The retro's earlier "Next retro should run a full pass" entry was a fictional defer; this ticket gives the work a real WSJF-ranked home. Captured via direct write per Step 4b Stage 1 mechanical ticketing + ADR-044 framework-resolution boundary.
+
+## Progress — 2026-05-25 signal-vs-noise decay pass
+
+The ~146 never-decay-scored entries were scored in the 2026-05-25 briefing-curation pass (see P195 Progress). All surviving entries across the topic tree now carry `last-classified: 2026-05-25`; stale entries (CLOSED-ticket issues, superseded mechanisms) removed or collapsed against the closed/verifying ticket-state index. Recurring fix unchanged: the per-entry decay scoring must run each retro (Step 1.5), not accumulate.

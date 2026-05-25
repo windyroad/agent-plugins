@@ -25,3 +25,6 @@ node_modules/
 # (trace-violation-rate criterion). Per-session telemetry; CI runs and
 # local development should not commit deny entries.
 logs/
+
+# Editor config (user-specific)
+.vscode/
