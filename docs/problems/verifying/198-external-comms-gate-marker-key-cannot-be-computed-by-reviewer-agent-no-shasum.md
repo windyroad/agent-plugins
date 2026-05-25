@@ -1,10 +1,14 @@
 # Problem 198: external-comms gate marker key cannot be computed by the reviewer agent (Read/Glob/Grep tool surface — no shasum); hash-scope ambiguity adds three recurrences
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-15
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 **Type**: technical
+
+## Fix Released
+
+Fixed by `56bae5f` "external-comms gate strips changeset frontmatter before key hash" — the gate and the mark hook now share one key function (strip YAML frontmatter + normalize trailing whitespace before hashing), so the key the gate checks at author time matches the key the mark hook writes after the reviewer returns PASS. The risk-scorer 0.11.0 CHANGELOG names "Closes #149 (P010) and P198". Released in `@windyroad/risk-scorer@0.11.0`. Verify: the deny-after-PASS changeset-author loop no longer recurs across a full reviewer cycle.
 
 ## Description
 

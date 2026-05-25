@@ -2,9 +2,9 @@
 
 **Status**: Open
 **Reported**: 2026-05-25
-**Priority**: 5 (Medium) — Impact: 2 (Minor — the `type: technical | user-business` tag adds a capture-time AskUserQuestion prompt + gate-enforced schema that the user has judged redundant; carrying redundant classification degrades the schema's clarity but does not break workflow) × Likelihood: 3 (Possible — the type prompt fires on every maintainer-side `/wr-itil:capture-problem`; the redundancy is exercised on every new problem)
+**Priority**: 6 (Medium) — Impact: 2 (Minor — the `type: technical | user-business` tag adds a capture-time AskUserQuestion prompt + gate-enforced schema that the user has judged redundant; carrying redundant classification degrades the schema's clarity but does not break workflow) × Likelihood: 3 (Possible — the type prompt fires on every maintainer-side `/wr-itil:capture-problem`; the redundancy is exercised on every new problem)
 **Effort**: M — ADR-060 amendment (in-place or supersede) + capture-problem type-prompt removal + bulk un-migration of `type:` fields + I2/Phase-4 reconciliation + behavioural-test update
-**WSJF**: 5/2 = **2.5** (Open multiplier 1.0)
+**WSJF**: 6/2 = **3.0** (Open multiplier 1.0) — corrected 2026-05-26: Impact 2 × Likelihood 3 = 6, not 5
 **Type**: technical
 
 ## Description

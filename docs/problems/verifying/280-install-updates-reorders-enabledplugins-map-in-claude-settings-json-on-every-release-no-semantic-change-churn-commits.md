@@ -1,10 +1,14 @@
 # Problem 280: `/install-updates` reorders `enabledPlugins` map in `.claude/settings.json` on every release producing no-semantic-change churn commits
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-19
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 **Type**: technical
+
+## Fix Released
+
+Fixed by `7a14b8b` "refactor(install-updates): narrow to global-cache refresh; decouple bootstrap (ADR-030/059 amendment)" — the per-sibling `claude plugin install --scope project` loop was removed, so `/install-updates` no longer writes `.claude/settings.json` and the `enabledPlugins` reorder churn is gone. `/install-updates` is a repo-local skill (live once on main). Verify: a release-cycle `/install-updates` run produces no `enabledPlugins`-reorder diff in `.claude/settings.json`.
 
 > **Likely resolved (2026-05-25):** the install-updates global-cache-refresh simplification removed the per-sibling `claude plugin install --scope project` loop (ADR-030 amendment 2026-05-25) → no more `.claude/settings.json` writes, which were the source of the `enabledPlugins` reorder churn. Verify and close at next review.
 

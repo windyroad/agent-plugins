@@ -1,10 +1,14 @@
 # Problem 284: Release pipeline halts — `changeset publish` E404 on a new version of an existing scoped package (@windyroad/architect@0.8.0)
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-23
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 **Type**: technical
+
+## Fix Released
+
+Resolved — `@windyroad/architect@0.8.0` is now published on npm, so the `changeset publish` E404 release-pipeline halt is cleared. Root cause was an npm auth/2FA failure masked as a 404 (the token lacked Bypass-2FA); a fresh Automation token was set 2026-05-24 and the release went through. Verify: `npm view @windyroad/architect version` = 0.8.0 (confirmed during this review) and subsequent releases publish without E404.
 
 ## Description
 

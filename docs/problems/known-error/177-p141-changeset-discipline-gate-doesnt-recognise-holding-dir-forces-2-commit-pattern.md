@@ -1,9 +1,10 @@
 # Problem 177: P141 changeset-discipline gate doesn't recognise `docs/changesets-holding/` — forces 2-commit pattern when work belongs to a held window
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-05-07
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 6 (Medium) — Impact: 2 (Minor — forces a 2-commit pattern on held-window work; dev-tooling friction, not published-distribution) x Likelihood: 3 (Possible — fires on every held-window iter)
+**Effort**: M
+**WSJF**: 6.0 — (6 × 2.0) / 2 (Known Error multiplier 2.0) — auto-transitioned Open → Known Error 2026-05-26 (confirmed root cause + documented workaround); Likelihood un-deferred from placeholder 1 → 3
 **Type**: technical
 
 ## Description

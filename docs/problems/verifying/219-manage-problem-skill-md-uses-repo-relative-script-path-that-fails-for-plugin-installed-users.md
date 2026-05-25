@@ -1,10 +1,14 @@
 # Problem 219: manage-problem SKILL.md uses repo-relative script path that fails for plugin-installed users
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-15
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 **Type**: technical
+
+## Fix Released
+
+Fixed by `148d189` "plugin-bundled scripts via bin/-on-PATH (closes P151)" — the repo-relative `bash packages/itil/scripts/reconcile-readme.sh` invocation was replaced by the `wr-itil-reconcile-readme` bin shim resolved on PATH; an audit of all SKILL.md files shows no remaining repo-relative script paths. Released in `@windyroad/itil`. Verify: plugin-installed projects run Step 0 without "No such file or directory". (Sibling P209 verifies together.)
 
 ## Description
 

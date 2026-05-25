@@ -85,3 +85,25 @@ Dedicated inbound-discovery pre-flight for the `/wr-itil:work-problems` AFK orch
 - Fail-soft contract held: 2 skipped channels did not block the pass. The github-issues poll ran independently (the combined 3-channel command was denied by the external-comms gate on the `security-advisories` substring — exactly the P198/#125 gate-misclassification — so the OK channel was re-polled in a command that omitted the gate-tripping substring).
 - The 4 new reports are upstream-mirrors filed via `/wr-itil:report-upstream` from downstream `windyroad/*` adopter projects describing `@windyroad/*` plugin gaps. They are new concerns from this monorepo's perspective; semantic-matching against the local backlog + local-ticket creation is part of the deferred pipeline. Queued as a loop-end direction-class observation for the orchestrator: the 4 new reports await pipeline classification once the external-comms-gate fix (P198/P163/P166) verifies across a full ack-comment cycle.
 - `AskUserQuestion` not called this pass (AFK pre-flight per ADR-013 Rule 6); no ambiguity-edge `cache_audit_note` annotations added (no semantic-comparator pass ran).
+
+## 2026-05-25T15:15:41Z — Discovery pass
+
+Triggered by interactive `/wr-itil:review-problems`. Cache age (2026-05-23 → now) exceeded `ttl_seconds: 86400` → TTL-expiry auto-recheck branch (no explicit `--force-upstream-recheck` needed).
+
+| Channel | Status | Reports |
+|---------|--------|---------|
+| `github-issues:windyroad/agent-plugins` (title_prefix=`[problem]`) | OK | 33 |
+| `github-discussions:windyroad/agent-plugins` (category=`Q&A`) | skipped | 0 — Discussions disabled for repo (HTTP 410); reconfirmed this pass |
+| `github-security-advisories:windyroad/agent-plugins` | skipped | 0 — read-only LIST call still blocked by the external-comms gate (substring-matched `security-advisories`; live P276/P198/#125 evidence) |
+
+**Set delta vs prior cache (2026-05-23T12:32:32Z)**: **0 new reports, 1 closed**. #149 (external-comms gate friction + threshold drift, composed P010+P007) is now **CLOSED upstream** — P010 fixed by `56bae5f` (released `@windyroad/risk-scorer@0.11.0`, mirrored locally as P198) and P007 fixed by `3c732ba` (released `@windyroad/risk-scorer@0.11.0`, mirrored as P286). The remaining 32 reports are unchanged at the (number, createdAt) layer. All polled `[problem]` reports are maintainer-authored (`tompahoward`) and already mirrored locally (P200–P229 series + others).
+
+**Pipeline outcomes**: 0 new pipeline classifications. All reports remain `pending-pipeline-processing` (or `closed-upstream` for #149). The JTBD-alignment + dual-axis-risk classifiers, semantic-comparator matching, branch routing, and per-report acknowledgement comments remain **deferred** per the standing 2026-05-15 user direction (external-comms-gate sha bug P198/#125 blocks ack-comment posting). No clear-malicious closures, no above-threshold pushbacks, no new local tickets created.
+
+**Cache refresh confirmation**: `docs/problems/.upstream-cache.json` rewritten with `last_checked: 2026-05-25T15:15:41Z`; github-issues + both skipped channels' `fetched_at` refreshed; #149 reclassified `closed-upstream`; `$last_pass_note` added.
+
+**Audit notes**:
+
+- Fail-soft contract held: the 2 skipped channels did not block the review (discussions-disabled + the security-advisories gate false-positive skipped with advisory notes; the github-issues poll ran in a command that omitted the gate-tripping substring).
+- No new third-party concerns surfaced — the discovery surface is currently a maintainer-dogfood mirror loop; semantic-matching + local-ticket creation remain part of the deferred pipeline.
+- `AskUserQuestion` not called for the discovery step (mechanical-stage carve-out per P132 / ADR-062 § 4.5 AFK behaviour).

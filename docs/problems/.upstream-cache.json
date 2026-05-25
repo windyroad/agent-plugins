@@ -1,10 +1,11 @@
 {
   "$schema": "https://windyroad.github.io/agent-plugins/schemas/upstream-cache.json",
   "$comment": "Cache file for inbound report discovery (P079 / ADR-062). Written by /wr-itil:review-problems Step 8.5 after each discovery pass.",
-  "last_checked": "2026-05-23T12:32:32Z",
+  "last_checked": "2026-05-25T15:15:41Z",
+  "$last_pass_note": "2026-05-26 review-problems discovery pass (TTL-expiry auto-recheck). github-issues: 33 [problem] reports, all maintainer-authored, all already mirrored locally (P200-P229 series); #149 now CLOSED upstream. discussions disabled (HTTP 410); security-advisories poll skipped (external-comms gate false-positive P276/P198). No new unmatched third-party reports. Pipeline classification remains deferred per 2026-05-15 user direction.",
   "channels": {
     "github-issues:windyroad/agent-plugins": {
-      "fetched_at": "2026-05-23T12:32:32Z",
+      "fetched_at": "2026-05-25T15:15:41Z",
       "filter": "title_prefix=[problem] (label filter removed; see channels-config $filter-note)",
       "status": "ok",
       "reports": [
@@ -14,8 +15,8 @@
           "author": "tompahoward",
           "createdAt": "2026-05-18T11:55:37Z",
           "body_hash": "bfda21a42bc40001",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-05-23"
+          "classification": "closed-upstream",
+          "cache_audit_note": "CLOSED upstream as of 2026-05-26 poll — P010 fixed by 56bae5f (released risk-scorer 0.11.0, mirrored locally as P198) and P007 fixed by 3c732ba (released risk-scorer 0.11.0, mirrored as P286). No pipeline action needed."
         },
         {
           "number": 139,
@@ -326,16 +327,16 @@
       ]
     },
     "github-discussions:windyroad/agent-plugins": {
-      "fetched_at": "2026-05-23T12:32:32Z",
+      "fetched_at": "2026-05-25T15:15:41Z",
       "reports": [],
       "status": "skipped",
-      "skip_reason": "discussions-disabled-for-repo (HTTP 410) — reconfirmed 2026-05-23"
+      "skip_reason": "discussions-disabled-for-repo (HTTP 410) — reconfirmed 2026-05-26"
     },
     "github-security-advisories:windyroad/agent-plugins": {
-      "fetched_at": "2026-05-23T12:32:32Z",
+      "fetched_at": "2026-05-25T15:15:41Z",
       "reports": [],
       "status": "skipped",
-      "skip_reason": "external-comms-gate-misclassifies-read-only-list-as-outbound (gate bug P198/#125; reconfirmed 2026-05-23 — gate blocked the poll command verbatim)"
+      "skip_reason": "external-comms-gate-misclassifies-read-only-list-as-outbound (gate bug P276/P198/#125; reconfirmed 2026-05-26 — gate blocked the poll command verbatim again)"
     }
   }
 }

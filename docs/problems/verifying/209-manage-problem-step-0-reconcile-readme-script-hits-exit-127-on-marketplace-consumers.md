@@ -1,10 +1,14 @@
 # Problem 209: manage-problem Step 0 reconcile-readme.sh hits exit 127 on marketplace consumers; script only resolves via repo-relative path
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-15
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 **Type**: technical
+
+## Fix Released
+
+Fixed by `148d189` "plugin-bundled scripts via bin/-on-PATH (closes P151)" — `manage-problem` Step 0 now invokes the `wr-itil-reconcile-readme` bin shim (on PATH for plugin-installed users) instead of the repo-relative script path, eliminating the exit-127 on marketplace consumers. Released in `@windyroad/itil`. Verify: a marketplace-installed adopter's Step 0 reconcile resolves without `command not found`.
 
 ## Description
 

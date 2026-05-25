@@ -1,10 +1,14 @@
 # Problem 286: pipeline gate block threshold was hardcoded (score >= 5) instead of derived from RISK-POLICY.md appetite
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-25
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 **Type**: technical
+
+## Fix Released
+
+Fixed by `3c732ba` "derive pipeline gate threshold from RISK-POLICY.md appetite (ADR-065)" — the pipeline risk gate now reads its block threshold from RISK-POLICY.md's Risk Appetite (tolerant of "Threshold: N" / "exceeds N" / "N/Low appetite", with a `RISK_APPETITE` env override), defaulting to 4 when absent. Released in `@windyroad/risk-scorer@0.11.0`. Verify: an adopter whose policy sets appetite > 4 no longer has within-appetite changes rejected, and the deny message names the actual appetite applied.
 
 ## Description
 
