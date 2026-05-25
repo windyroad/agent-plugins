@@ -1,6 +1,8 @@
 ---
 status: "proposed"
 date: 2026-05-04
+human-oversight: confirmed
+oversight-date: 2026-05-25
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent (P168 design review 2026-05-04 + ADR-059 draft review 2026-05-04), wr-jtbd:agent (P168 design review 2026-05-04)]
 informed: [Windy Road plugin users, adopter maintainers (addressr, addressr-mcp, addressr-react, very-fetching, bbstats, windyroad)]

@@ -1,6 +1,8 @@
 ---
 status: proposed
 date: 2026-05-03
+human-oversight: confirmed
+oversight-date: 2026-05-25
 deciders: solo-developer
 consulted: wr-architect:agent (PASS-WITH-NOTES; 4 notes folded in), wr-jtbd:agent
 informed: plugin-developer (composes-with future cluster ADRs)
