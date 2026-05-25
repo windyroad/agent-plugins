@@ -1,6 +1,6 @@
 # Problem 279: ADR-017 § Consequences documents flat layout under `packages/shared/`, but hook-helpers cluster under nested `hooks/lib/` — housekeeping clarification
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-19
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: S (deferred — re-rate at next /wr-itil:review-problems)
@@ -38,10 +38,22 @@ None needed currently — the iter-6 commit message + architect verdict both doc
 
 ### Investigation Tasks
 
-- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Investigate root cause — ADR-017 § Consequences may need explicit two-pattern documentation
-- [ ] Amend ADR-017 § Consequences with the hook-helper nested-clustering convention
-- [ ] Consider whether to add a `packages/shared/README.md` listing the conventions inline
+- [x] Re-rate Priority and Effort at next /wr-itil:review-problems — Priority 3 (Med) / Effort S confirmed accurate; ticket now excluded from WSJF (verifying, multiplier 0 per ADR-022)
+- [x] Investigate root cause — ADR-017 § Consequences documented only the flat layout; the hook-helper `hooks/lib/` destination subpath was undocumented. Verified on-disk: BOTH conventions use the same ADR-017 sync mechanism (sync-*.sh + check:* CI gates exist for session-marker, command-detect, derive-first-dispatch, migrate-problems-layout); only the per-package destination subpath differs by helper role (`lib/` vs `hooks/lib/`). The ticket's earlier "hooks source from there directly" framing was imprecise — hook helpers ARE synced per-package (8 copies of session-marker.sh across packages), preserving self-containment.
+- [x] Amend ADR-017 § Consequences with the hook-helper nested-clustering convention — added Neutral bullet "Two destination-path conventions, one sync mechanism"
+- [x] Consider whether to add a `packages/shared/README.md` listing the conventions inline — added a concise pointer-doc (packages/shared/ was the lone package without a README); it defers to ADR-017 as authoritative rather than restating the decision (drift-safe per architect + JTBD verdicts)
+
+## Fix Released
+
+Docs-only housekeeping, committed this session (2026-05-26 AFK `/wr-itil:work-problems` iter). **No npm publish / no changeset** — `packages/shared/` is not a published plugin and ADR-017 is repo-internal, so there is no release vehicle; the fix is live on `main` once committed.
+
+Changes:
+- `docs/decisions/017-shared-code-sync-pattern.proposed.md` § Consequences § Neutral — new bullet "Two destination-path conventions, one sync mechanism" documenting that cross-cutting libs sync into each package's `lib/` and hook helpers sync into each package's `hooks/lib/`, both under the same `sync-<name>.sh` + `check:<name>` CI drift gate; only the destination subpath differs by helper role.
+- `packages/shared/README.md` (new) — concise contributor-facing pointer-doc mapping the directory layout → role→subpath rule → ADR-017 (authoritative).
+
+Gates: architect PASS (no new ADR — housekeeping carve-out, consistent with iter-6 verdict), JTBD PASS (serves JTBD-101 plugin-developer "undocumented conventions requiring reverse-engineering" pain point). Voice-tone + style-guide gates non-applicable (extension-scoped to `.css`/`.html`/`.jsx`/UI; this change is pure markdown).
+
+Awaiting user verification: read the amended ADR-017 § Consequences + `packages/shared/README.md` and confirm the two-convention documentation is accurate and useful.
 
 ## Dependencies
 

@@ -47,6 +47,11 @@ This decision establishes a pattern: future shared code whose consumers must rem
 ### Neutral
 
 - Canonical-file authorship lives in `packages/shared/`; per-package copies are read-only in practice. This is an inversion of the usual "edit where you see it" reflex but is consistent across all shared code following this pattern.
+- **Two destination-path conventions, one sync mechanism.** Every shared helper's canonical copy lives under `packages/shared/` and is synced into every consuming package via its `sync-<name>.sh` + `check:<name>` CI gate. The destination subpath *within* each package depends on the helper's role:
+  - **Cross-cutting libs** (e.g. `derive-first-dispatch.sh`, `migrate-problems-layout.sh`, `install-utils.mjs`) — canonical at `packages/shared/` or `packages/shared/lib/`, synced flat into each package's `lib/` (e.g. `packages/itil/lib/derive-first-dispatch.sh`).
+  - **Hook helpers** (e.g. `session-marker.sh`, `leak-detect.sh`, `external-comms-key.sh`, `command-detect.sh`) — canonical at `packages/shared/hooks/lib/`, synced into each package's `hooks/lib/` (e.g. `packages/itil/hooks/lib/session-marker.sh`) so the helper sits beside the hooks that consume it.
+
+  Both share the same drift-detection and self-contained-package guarantees — hook helpers are *synced per-package*, not *sourced directly* from `packages/shared/`, so the self-containment driver above holds either way. Only the destination subdirectory differs. A new shared helper picks its subpath by role: a hook helper under `hooks/lib/`, anything else under `lib/`. The § Confirmation criterion below (parallel `sync-<utility>.sh` / `check:<utility>` per new utility) applies to both — the sync *mechanism* is identical; only the destination subpath varies.
 
 ### Bad
 

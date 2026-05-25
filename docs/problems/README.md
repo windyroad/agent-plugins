@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-05-26 **P182 Known Error → Verification Pending (fix committed, release pending)** — `measure-context-budget.sh` problems bucket now walks both the flat and per-state-subdir layouts (dual-tolerant per RFC-002 T4 / ADR-031, dedup on ticket ID, per-state wins), fixing the ~99% under-count + phantom delta in run-retro Step 2c / analyze-context reports; real-repo bucket corrected 286,459 → 3,797,225 bytes; sole remaining flat-glob (sibling scripts already dual-tolerant); 3 new bats, full file 34/34 green; `@windyroad/retrospective` patch changeset queued (release deferred to orchestrator Step 6.5 drain). Excluded from WSJF (multiplier 0) per ADR-022. Prior P258 fragment rotated to README-history.md per P134.
+> Last reviewed: 2026-05-26 **P279 Known Error → Verification Pending (docs-only housekeeping shipped)** — ADR-017 § Consequences § Neutral now documents the two shared-helper destination-path conventions under one sync mechanism: cross-cutting libs (`derive-first-dispatch.sh` etc.) sync flat into each package's `lib/`; hook helpers (`session-marker.sh`, `command-detect.sh` etc.) sync into each package's `hooks/lib/` beside their consuming hooks — both share the same `sync-<name>.sh` + `check:<name>` CI drift gate + self-contained-package guarantee, only the destination subpath differs by role. New `packages/shared/README.md` pointer-doc (the lone package without one) maps the layout → role→subpath rule → ADR-017 as authoritative. Architect + JTBD PASS, no new ADR (housekeeping carve-out). Docs-only: no changeset, no npm publish (`packages/shared/` unpublished + ADR repo-internal). Architect advisory queued: ADR-017 reassessment trigger (>5 shared modules) now met (~8 helpers). Excluded from WSJF (multiplier 0) per ADR-022. Prior P182 fragment rotated to README-history.md per P134.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -10,7 +10,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported |
 |------|-----|-------|----------|--------|--------|----------|
-| 6.0 | P279 | ADR-017 § Consequences flat-layout doc vs hook-helpers nested clustering (housekeeping) — iter-6 architect surfaced two coexisting conventions in packages/shared/ (captured 2026-05-19 via /wr-itil:capture-problem; deferred re-rate) | 3 Med | Known Error | S | 2026-05-19 |
 | 6.0 | P173 | BYPASS_*_GATE env vars do not propagate from Bash subshell to PreToolUse hook context | 6 Med | Known Error | M | 2026-05-06 |
 | 6.0 | P177 | P141 changeset-discipline gate doesn't recognise `docs/changesets-holding/` — forces 2-commit pattern when work belongs to a held window | 6 Med | Known Error | M | 2026-05-07 |
 | 6.0 | P259 | install-updates failure cascade gutted `.claude/settings.json` — uninstall succeeded but repeated installs failed, settings reduced to fallback-plugins-only (recovery: git checkout HEAD -- .claude/settings.json) | 6 Med | Known Error | M | 2026-05-18 |
@@ -242,6 +241,7 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P286 | pipeline gate block threshold was hardcoded instead of derived from RISK-POLICY appetite | @windyroad/risk-scorer@0.11.0 (commit 3c732ba) | no — not observed |
 | P182 | `measure-context-budget.sh` flat-glob misses per-state-subdir problem tickets — sibling fix to RFC-002 T4 dual-tolerant `reconcile-readme.sh` | pending `@windyroad/retrospective` patch (P182 commit, release deferred to AFK orchestrator Step 6.5 drain) — problems bucket now walks flat + per-state-subdir layouts, dedups on ticket ID (per-state wins per ADR-031); real-repo problems bucket corrected 286,459 → 3,797,225 bytes; 3 new bats, full file 34/34 green | no — not observed |
 | P258 | plugin.json top-level hooks:/skills:/agents:/commands: are recognised, type-checked component-path keys — off-schema values hard-reject `claude plugin install` (P0 driver; mitigated by ADR-063 Amendment 2026-05-18; structural prevention tracked at P263) | 2026-05-26 (docs commit — validator accepted-shape + recognised-vs-unrecognised rule documented in briefing; ADR-063 root-cause refined; ADR-058 amendment N/A; P263 cross-referenced) | no — not observed |
+| P279 | ADR-017 § Consequences flat-layout doc vs hook-helpers nested clustering (housekeeping) | 2026-05-26 (docs-only — ADR-017 § Consequences § Neutral now documents the two destination-path conventions under one sync mechanism; new `packages/shared/README.md` pointer-doc; architect + JTBD PASS, no new ADR; no npm publish — `packages/shared/` is unpublished + ADR is repo-internal) | no — not observed |
 
 ## Inbound Upstream Reports
 
