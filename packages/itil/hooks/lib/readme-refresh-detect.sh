@@ -43,15 +43,18 @@
 #     launching `claude` — inline-prefix syntax (`VAR=1 git commit ...`)
 #     does NOT propagate from a Bash subshell to PreToolUse hooks (P173).
 #   - Registered `RISK_BYPASS: <token>` commit-message trailer (P265) →
-#     return 0 (allow). Narrow allow-list (currently only
-#     `adr-031-migration`, the standalone ADR-031 layout-migration
-#     commit, which is a rename-only change that legitimately stages no
-#     README refresh). The trailer is read from the live `git commit`
-#     command string at PreToolUse time (the commit message is not yet
-#     written), matching the sibling `risk-score-commit-gate.sh`
-#     recognition (P170 T11) so one logical migration commit clears both
-#     gates. Registry of record: ADR-014 commit-message bypass-token
-#     table.
+#     return 0 (allow). Narrow allow-list: `adr-031-migration` (the
+#     standalone ADR-031 layout-migration commit — a rename-only change
+#     that legitimately stages no README refresh; also clears
+#     risk-score-commit-gate.sh) and `capture-deferred-readme` (the
+#     /wr-itil:capture-problem Step 6 commit, whose README refresh is
+#     deferred to /wr-itil:review-problems per ADR-032 — P262; this
+#     token clears THIS gate only, not the risk-score gate). The trailer
+#     is read from the live `git commit` command string at PreToolUse
+#     time (the commit message is not yet written), matching the sibling
+#     `risk-score-commit-gate.sh` recognition (P170 T11) for the shared
+#     `adr-031-migration` token. Registry of record: ADR-014
+#     commit-message bypass-token table.
 #
 # Narrative-only short-circuit (P230):
 #   - When all staged ticket edits are purely narrative — no
@@ -129,7 +132,21 @@
 #     risk-score-commit-gate.sh (P170 T11); both gates recognise it via
 #     the identical grep below so one logical migration commit clears
 #     both. Registry of record: ADR-014 commit-message bypass-token table.
-_README_REFRESH_BYPASS_TRAILERS=("adr-031-migration")
+#   capture-deferred-readme — the lightweight /wr-itil:capture-problem
+#     Step 6 commit (subject `docs(problems): capture P<NNN> ...`). Per
+#     ADR-032 the capture variant DEFERS the README refresh to the next
+#     /wr-itil:review-problems (capture-time speed is the load-bearing
+#     distinction from manage-problem's full-intake path), so the capture
+#     commit legitimately stages only the new ticket file. Without this
+#     token the P165 gate's new-ticket-is-ranking-bearing rule denied
+#     every capture commit (P262 — observed 4×/session). UNLIKE
+#     adr-031-migration this token clears the P165 README-refresh gate
+#     ONLY — it is intentionally NOT registered in
+#     risk-score-commit-gate.sh (a capture commit is real work and must
+#     be risk-scored normally; risk-score-commit-gate.sh hard-greps only
+#     `adr-031-migration`). Registry of record: ADR-014 commit-message
+#     bypass-token table (which documents the README-gate-only asymmetry).
+_README_REFRESH_BYPASS_TRAILERS=("adr-031-migration" "capture-deferred-readme")
 
 # Returns 0 if the given `git commit` command string carries a
 # registered RISK_BYPASS trailer from the allow-list above. The grep

@@ -257,13 +257,23 @@ Satisfy the commit gate per ADR-014 — same two-path pattern as manage-problem 
 - **Primary**: delegate to subagent type `wr-risk-scorer:pipeline` via the Agent tool.
 - **Fallback**: invoke `/wr-risk-scorer:assess-release` via the Skill tool when the subagent type is unavailable in the current tool surface.
 
-Commit message:
+Commit message — the body MUST carry the `RISK_BYPASS: capture-deferred-readme` trailer:
 
 ```
 docs(problems): capture P<NNN> <title>
+
+RISK_BYPASS: capture-deferred-readme
 ```
 
 The `capture` verb in the message is the audit signal that this ticket landed via the lightweight aside path (vs. `open` for manage-problem's full intake).
+
+**Why the trailer (P262)**: the P165 README-refresh-discipline hook (`packages/itil/hooks/itil-readme-refresh-discipline.sh`) treats any newly-staged ticket file as ranking-bearing and DENIES a `git commit` that does not also stage `docs/problems/README.md`. That enforcement is correct for `/wr-itil:manage-problem`'s full-intake path (P094 refresh-on-create) but conflicts with this skill's deliberate deferred-README-refresh contract. The `RISK_BYPASS: capture-deferred-readme` trailer is a registered allow-list token (P265 mechanism; registry of record is the ADR-014 commit-message bypass-token table) that clears the **README-refresh gate ONLY** — the commit is still risk-scored normally (`risk-score-commit-gate.sh` does not recognise this token). Emit the trailer via a second `-m` paragraph so the literal token appears in the `git commit` command string the PreToolUse hook inspects:
+
+```bash
+git commit -m "docs(problems): capture P<NNN> <title>" -m "RISK_BYPASS: capture-deferred-readme"
+```
+
+Do NOT drop the trailer and stage the README instead — that would silently abandon the deferred-README-refresh contract (the capture-time-speed distinction this skill exists to provide per ADR-032). The README is reconciled at the next `/wr-itil:review-problems` per Step 7's trailing pointer.
 
 ### 7. Report
 
@@ -297,6 +307,8 @@ The two skills share the `/tmp/manage-problem-grep-${SESSION_ID}` create-gate ma
 - **P014** (`docs/problems/014-aside-invocation-for-governance-skills.open.md`) — parent / master tracker.
 - **P078** — capture-on-correction OFFER pattern; depends on capture-problem shipping.
 - **P119** — manage-problem create-gate hook; capture-problem composes with the same marker.
+- **P262** — the P165 README-refresh-discipline hook conflicted with this skill's deferred-README-refresh contract (Step 6 "do NOT stage README" was denied by the hook on every capture commit). Resolved by the `RISK_BYPASS: capture-deferred-readme` allow-list token (Step 6 trailer above); clears the README-refresh gate only, not the risk-score gate.
+- **P265** — the RISK_BYPASS-trailer allow-list mechanism in `readme-refresh-detect.sh` that P262's `capture-deferred-readme` token registers into.
 - **P170** (`docs/problems/170-...open.md`) — RFC framework driver; Slice 4 B7.T3 / item 8c authored the type-classification prompt at Step 1.5.
 - **P176** — agent-side I2 (no type-branching) coverage gap on the SKILL.md surface (this file's surface); descendant of P012 master harness ticket. The Step 1.5 I2 invariant guard is enforced by audit-trailed prose here per ADR-052 § Surface 2 escape-hatch contract; behavioural enforcement awaits the master harness.
 - **ADR-032** (`docs/decisions/032-governance-skill-invocation-patterns.proposed.md`) — foreground-lightweight-capture variant amendment.

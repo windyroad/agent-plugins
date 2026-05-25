@@ -581,3 +581,62 @@ EOF
   [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
   [ "${#output}" -eq 0 ]
 }
+
+# --- P262: capture-deferred-readme RISK_BYPASS trailer allow-list bypass ---
+#
+# /wr-itil:capture-problem SKILL.md Step 6 deliberately stages ONLY the new
+# ticket file and NOT docs/problems/README.md — the deferred-README-refresh
+# contract is the load-bearing capture-time-speed distinction from
+# /wr-itil:manage-problem (ADR-032). The P165 gate treats any new ticket
+# file (status A) as ranking-bearing, so a bare capture commit was denied
+# 4×/session. Architect verdict (P262): register a reason-named token
+# `capture-deferred-readme` into the same P265 allow-list mechanism; the
+# capture commit carries `RISK_BYPASS: capture-deferred-readme` in its
+# message body. The carve-out is scoped to the TOKEN, not the commit
+# subject — a `docs(problems): capture` subject WITHOUT the trailer still
+# denies (proves the bypass cannot be self-claimed by message prose, and
+# manage-problem's full-intake `docs(problems): open` path still enforces
+# the refresh).
+
+@test "P262 allow: capture commit with RISK_BYPASS: capture-deferred-readme trailer → allow silently" {
+  echo "# Problem 999" > docs/problems/open/999-capture.md
+  git add docs/problems/open/999-capture.md
+  run run_bash_hook "git commit -m 'docs(problems): capture P999 some-thing' -m 'RISK_BYPASS: capture-deferred-readme'"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
+  # Bypass is an allow path — silent per ADR-045 Pattern 1.
+  [ "${#output}" -eq 0 ]
+}
+
+@test "P262 deny: capture-subject commit WITHOUT the trailer still denies (token-scoped, not subject-scoped)" {
+  echo "# Problem 999" > docs/problems/open/999-capture.md
+  git add docs/problems/open/999-capture.md
+  run run_bash_hook "git commit -m 'docs(problems): capture P999 some-thing'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
+  [[ "$output" == *"P165"* ]]
+}
+
+@test "P262 deny: subject merely contains the word capture but no registered trailer still denies" {
+  echo "# Problem 999" > docs/problems/open/999-x.md
+  git add docs/problems/open/999-x.md
+  run run_bash_hook "git commit -m 'fix(itil): handle the capture edge case'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
+}
+
+@test "P262 deny: docs(problems): open (manage-problem full intake) without README still denies" {
+  echo "# Problem 999" > docs/problems/open/999-x.md
+  git add docs/problems/open/999-x.md
+  run run_bash_hook "git commit -m 'docs(problems): open P999 some-thing'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
+}
+
+@test "P262 deny: unregistered capture-ish token does NOT bypass (allow-list scope)" {
+  echo "# Problem 999" > docs/problems/open/999-x.md
+  git add docs/problems/open/999-x.md
+  run run_bash_hook "git commit -m 'docs(problems): capture P999 x' -m 'RISK_BYPASS: capture-something-else'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
+}
