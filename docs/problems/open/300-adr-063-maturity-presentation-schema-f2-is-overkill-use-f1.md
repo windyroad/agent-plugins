@@ -13,7 +13,9 @@ Surfaced during the P283/ADR-066 ADR-oversight drain (2026-05-25). When ADR-063 
 
 > User direction 2026-05-25 (drain): *"option F2 is overkill. F1 is sufficient to begin with."*
 
-ADR-063 chose **F2** (rich-record per-surface + string rollup `plugin.json` schema) for the maturity presentation layer. The user wants **F1** (the simpler schema) to begin with — YAGNI: start with the minimal schema and only enrich to F2 if a concrete need emerges. The rest of ADR-063 (markdown prose-woven README badge F5, in-suite `wr-itil-plugin-maturity-list` display shim F9) is fine; only the schema option changes F2 → F1.
+ADR-063 chose **F2** (rich-record per-surface + string rollup `plugin.json` schema) for the maturity presentation layer. The user wants **F1** (the simpler schema) to begin with — YAGNI: start with the minimal schema and only enrich to F2 if a concrete need emerges. The in-suite `wr-itil-plugin-maturity-list` display shim (F9) is fine.
+
+**Badge rendering (user direction 2026-05-25): use a Shields.io URL badge**, NOT the recorded F5 (markdown prose-woven text badge). The README maturity badge should be a hosted `https://img.shields.io/badge/...` image badge (the standard OSS-README badge convention — renders a recognisable shield image, links to the maturity detail) rather than inline markdown text. So ADR-063 changes on TWO axes: schema F2 → F1, and badge F5 → Shields.io URL badge.
 
 ADR-063 is **left unoversighted** (P283/ADR-066 marker withheld) until amended.
 
@@ -28,7 +30,8 @@ ADR-063 is **left unoversighted** (P283/ADR-066 marker withheld) until amended.
 
 ### Investigation Tasks
 
-- [ ] Amend ADR-063: change the chosen schema option F2 → F1 (the simpler schema). Confirm what F1's exact shape is (re-read ADR-063 Considered Options) and that F5 (README badge) + F9 (display shim) still compose with F1.
+- [ ] Amend ADR-063: change the chosen schema option F2 → F1 (the simpler schema). Confirm what F1's exact shape is (re-read ADR-063 Considered Options) and that the badge + F9 (display shim) still compose with F1.
+- [ ] Amend ADR-063 badge rendering F5 → **Shields.io URL badge**: the README maturity badge is a hosted `https://img.shields.io/badge/<label>-<band>-<color>` image badge (links to maturity detail), not an inline markdown text badge. Pick the per-band colour mapping (Experimental/Alpha/Beta/Stable/Deprecated → shield colours) and the label scheme.
 - [ ] Reconcile with ADR-053 (the maturity taxonomy) + ADR-058 (the measurement mechanism feeding the schema) — F1 must still carry enough to render the five-band badge + rollup.
 - [ ] Note the YAGNI reassessment trigger: enrich F1 → F2 only when a concrete consumer needs the per-surface rich record.
 - [ ] Re-confirm amended ADR-063 via `/wr-architect:review-decisions`.
