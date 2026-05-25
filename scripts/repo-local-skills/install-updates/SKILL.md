@@ -97,6 +97,32 @@ install_with_retry_rollback() {
   return 1
 }
 
+# restore_settings_on_loss <snapshot> <settings_file> [<lost_plugin>...]
+# P259 defensive recovery. Restore the pre-loop .claude/settings.json snapshot
+# iff at least one plugin ended `lost` (all retries + the marketplace-refresh
+# rollback exhausted — the plugin is now absent from settings.json because the
+# Step-4 uninstall removed its enabledPlugins entry and no install re-added it).
+# SAFE for plugins that refreshed successfully in the SAME run: the
+# enabledPlugins map carries NO version pin — the version advance lives in the
+# global cache (~/.claude/plugins/cache/...), not in settings.json — so a
+# successful refresh's entry is byte-identical before and after the loop, and a
+# full-file restore re-adds the lost plugin(s) without regressing any success.
+# ASSUMES enabledPlugins has no per-run-mutated field; if a future Claude Code
+# release adds version pinning here, switch to a surgical re-add of the lost
+# keys only. Prints "restored <plugins>" or "no-restore".
+restore_settings_on_loss() {
+  local snapshot="$1" settings="$2"; shift 2
+  local lost=("$@")
+  if [ "${#lost[@]}" -gt 0 ] && [ -n "$snapshot" ] && [ -f "$snapshot" ]; then
+    cp "$snapshot" "$settings"
+    echo "install-updates: restored .claude/settings.json from pre-loop snapshot — lost plugin(s): ${lost[*]}" >&2
+    echo "restored ${lost[*]}"
+    return 0
+  fi
+  echo "no-restore"
+  return 0
+}
+
 declare -A PROJECT_STATUS
 # PLUGINS_TO_UPDATE is a bash array (NOT a space-separated string) for
 # cross-shell portability — see P133. Plain `for x in $VAR` word-splits
@@ -106,12 +132,42 @@ declare -A PROJECT_STATUS
 # identically under bash and zsh.
 TARGET_DIR="$PWD"
 PLUGINS_TO_UPDATE=(itil retrospective risk-scorer tdd)
+
+# P259: snapshot the project's plugin-enablement state BEFORE the
+# uninstall+install loop. The uninstall side of each refresh immediately
+# removes the plugin's enabledPlugins entry; if every install attempt AND the
+# marketplace-refresh rollback then fail (e.g. a broken manifest already
+# published — the 2026-05-18 P0), the plugin is left absent and the project
+# silently loses enablement (the cascade that gutted settings from 13 plugins
+# to 2). The snapshot lets an exhausted `lost` outcome be undone below. A
+# working-tree `cp` (not `git checkout HEAD`) captures the exact pre-run state,
+# including any uncommitted settings.json edits and the untracked-file case.
+SETTINGS_FILE="$TARGET_DIR/.claude/settings.json"
+SETTINGS_SNAPSHOT=""
+if [ -f "$SETTINGS_FILE" ]; then
+  SETTINGS_SNAPSHOT="$(mktemp -t install-updates-settings.XXXXXX)"
+  cp "$SETTINGS_FILE" "$SETTINGS_SNAPSHOT"
+fi
+
 for plugin in "${PLUGINS_TO_UPDATE[@]}"; do
   PROJECT_STATUS["$plugin"]=$(install_with_retry_rollback "$plugin" "$TARGET_DIR" "${PRIOR_VERSION[$plugin]}")
 done
+
+# P259: restore-on-exhausted-loss. Collect plugins that ended `lost` and
+# restore the pre-loop snapshot if any are present, so a broken-manifest
+# cascade can no longer gut .claude/settings.json. No-op when nothing was lost
+# (empty array → zero trailing args → restore_settings_on_loss prints
+# "no-restore"). Quoted `"${lost_plugins[@]}"` expansion is bash/zsh-portable
+# per P133 and expands an empty array to zero args under both shells.
+lost_plugins=()
+for plugin in "${PLUGINS_TO_UPDATE[@]}"; do
+  [ "${PROJECT_STATUS[$plugin]}" = "lost" ] && lost_plugins+=("$plugin")
+done
+restore_settings_on_loss "$SETTINGS_SNAPSHOT" "$SETTINGS_FILE" "${lost_plugins[@]}"
+[ -n "$SETTINGS_SNAPSHOT" ] && rm -f "$SETTINGS_SNAPSHOT"
 ```
 
-`--scope project` always (ADR-004). The refresh runs in the current project (`TARGET_DIR="$PWD"`); because the install cache is global, a single current-project refresh advances the active version for every project that enables the plugin. Capture per-install exit status. Do not abort the batch on a single failure — report and continue. A `lost` status means the plugin was removed and could not be restored; the user must reinstall manually.
+`--scope project` always (ADR-004). The refresh runs in the current project (`TARGET_DIR="$PWD"`); because the install cache is global, a single current-project refresh advances the active version for every project that enables the plugin. Capture per-install exit status. Do not abort the batch on a single failure — report and continue. A `lost` status means the install could not be landed within the retry + rollback budget. The post-loop snapshot restore (P259) re-adds the lost plugin's `.claude/settings.json` enablement so the project is not left gutted — but the plugin code is still un-refreshed; the user must re-run after the upstream cause (e.g. a broken manifest) is hotfixed. If the snapshot itself is unavailable (settings.json untracked and no snapshot captured), recover the enablement manually with `git checkout HEAD -- .claude/settings.json` (settings.json is git-tracked in this repo).
 
 Shell snippets in this skill use bash-array form (`ARR=(a b c)` + `"${ARR[@]}"`) instead of unquoted-variable iteration (`for x in $VAR`). The array form is portable across bash and zsh; unquoted iteration is bash-only and silently iterates once under zsh — see P133 (`docs/problems/133-...md`).
 

@@ -1,9 +1,9 @@
 # Problem 259: install-updates failure cascade gutted `.claude/settings.json` — uninstall succeeded but repeated installs failed, settings reduced to fallback-plugins-only
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-18
 **Priority**: 6 (Medium) — Impact: 3 (Moderate — project temporarily lost all wr-* plugin enablement; subprocess dispatches would have failed if a fresh iter had launched; recovered via `git checkout HEAD -- .claude/settings.json`) x Likelihood: 2 (Unlikely — only fires when /install-updates loops through N plugins each with 3 failed install attempts)
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems; defensive snapshot-and-restore in /install-updates)
+**Effort**: M (confirmed 2026-05-26 — one SKILL.md block edit + one bats fixture + one briefing bullet)
 **Type**: technical
 
 ## Description
@@ -37,10 +37,22 @@ Recovery used `git checkout HEAD -- .claude/settings.json` to restore the pre-ca
 
 ### Investigation Tasks
 
-- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems.
-- [ ] Add a defensive snapshot-and-restore mechanism to /install-updates: capture `.claude/settings.json` before the uninstall+install loop, restore on FINAL install failure for any plugin (after all retries + rollback exhausted).
-- [ ] Document the recovery path (`git checkout HEAD -- .claude/settings.json`) in `docs/briefing/plugin-distribution.md` "What Will Surprise You" section.
-- [ ] Cross-reference P106 (claude plugin install silent-no-op) + P112 (install-updates rollback path) + P133 (zsh portability) — this is the next layer of failure modes in the same SKILL.
+- [x] Re-rate Priority and Effort at next /wr-itil:review-problems. (Effort M confirmed 2026-05-26; Priority unchanged at 6.)
+- [x] Add a defensive snapshot-and-restore mechanism to /install-updates: capture `.claude/settings.json` before the uninstall+install loop, restore on FINAL install failure for any plugin (after all retries + rollback exhausted).
+- [x] Document the recovery path (`git checkout HEAD -- .claude/settings.json`) in `docs/briefing/plugin-distribution.md` "What Will Surprise You" section.
+- [x] Cross-reference P106 (claude plugin install silent-no-op) + P112 (install-updates rollback path) + P133 (zsh portability) — already cross-referenced in `## Related`.
+
+## Fix Released
+
+Fixed 2026-05-26 (repo-local skill per ADR-030 — committed this iteration; **no npm release / no changeset**, the orchestrator pushes to `main`). Added a defensive snapshot-and-restore to `/install-updates` Step 4 (source-of-truth `scripts/repo-local-skills/install-updates/SKILL.md`, edited via the P139 symlink contract — never the `.claude/` copy):
+
+- `.claude/settings.json` is snapshotted to a tmp file via a working-tree `cp` **before** the uninstall+install loop (captures exact pre-run state, including uncommitted edits and the untracked-file case — more robust than `git checkout HEAD`).
+- After the loop, any plugin that ended `lost` (all retries + the marketplace-refresh rollback exhausted) triggers `restore_settings_on_loss`, which restores the snapshot — re-adding the lost plugin's enablement **without regressing same-run successes** (safe because `enabledPlugins` carries no version pin; the version advance lives in the global cache, not settings.json). A code comment pins that invariant for future maintainers.
+- Recovery path `git checkout HEAD -- .claude/settings.json` documented in `docs/briefing/plugin-distribution.md` "What Will Surprise You".
+
+Behavioural bats fixture `scripts/repo-local-skills/install-updates/test/install-updates-settings-restore-on-loss.bats` — 5/5 green; full install-updates suite 32/32 green. Asserts: restore-on-loss, non-clobbering of same-run successes, no-restore-on-no-loss, defensive no-restore-without-snapshot, and the snapshot-before-loop / restore-after-loop ordering invariant. Step 4 block syntax-checked clean under both bash and zsh (P133). Architect + JTBD verdicts PASS (no new ADR — in-scope ADR-030 robustness addition; ADR-004 `--scope project` invariant preserved). REFERENCE.md stale consent-gate prose explicitly left to P285.
+
+**Awaiting user verification.** Verify on the next `/install-updates` run that hits a `lost` outcome (or simulate by mocking a broken-manifest install): `.claude/settings.json` retains the lost plugin's `enabledPlugins` entry rather than being gutted. Recovery if rollback needed: `/wr-itil:transition-problem 259 known-error`.
 
 ## Dependencies
 
