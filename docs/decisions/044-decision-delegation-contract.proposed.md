@@ -1,6 +1,8 @@
 ---
 status: proposed
 date: 2026-04-27
+human-oversight: confirmed
+oversight-date: 2026-05-25
 decision-makers: [tomhoward]
 consulted: [wr-architect:agent, wr-jtbd:agent, wr-risk-scorer:plan]
 amends: [013-structured-user-interaction-for-governance-decisions]
