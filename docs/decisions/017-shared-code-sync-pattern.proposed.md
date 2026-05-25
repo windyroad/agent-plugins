@@ -1,6 +1,8 @@
 ---
 status: "proposed"
 date: 2026-04-17
+human-oversight: confirmed
+oversight-date: 2026-05-25
 decision-makers: [tomhoward]
 consulted: []
 informed: []
