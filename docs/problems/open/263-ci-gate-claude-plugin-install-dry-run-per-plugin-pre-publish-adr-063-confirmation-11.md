@@ -31,6 +31,8 @@ A new GitHub Actions step in the CI workflow (e.g. `.github/workflows/ci.yml`) t
 - Does `claude plugin install --dry-run` exist? If not, may need to run a JSON-schema validation against the same schema Claude Code's installer uses (need to extract / reproduce the validator).
 - How to install from a local marketplace in CI (vs the published one)? May need a CI-time marketplace setup step.
 
+**Cross-reference (from P258 investigation 2026-05-26)** — partial answer to question 1: the [Claude Code plugins reference](https://code.claude.com/docs/en/plugins-reference) documents **`claude plugin validate <path> --strict`** as the manifest/frontmatter/hooks validation surface; `--strict` promotes warnings (unrecognised top-level keys) to errors, which is exactly the CI posture this gate needs. This is likely a simpler, more stable gate than reproducing the installer's validator — it validates `plugin.json`, skill/agent/command frontmatter, and `hooks/hooks.json` directly. The P258 grounding also clarifies the failure class this gate must catch: a **recognised, type-checked** top-level key (`hooks`/`skills`/`agents`/`commands`) carrying a wrong-typed value is a hard error even *without* `--strict`, whereas an unrecognised key needs `--strict` to surface. Implementation should confirm `claude plugin validate --strict` behaviour in CI before falling back to schema reproduction.
+
 ## Symptoms
 
 - Without this gate: future plugin.json schema changes can ship to npm with shapes that break `claude plugin install`. Same class as the P0 incident.

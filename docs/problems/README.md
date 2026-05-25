@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-05-26 **review re-rank pass: 7 released-fix tickets → Verification Pending** — P069/P198/P209/P219/P280/P284/P286 had fixes verified released (npm + `@windyroad/risk-scorer@0.11.0` CHANGELOG + `architect@0.8.0` published) but sat in Open/Known Error; moved to the Verification Queue with cited Fix Released sections. Also: 2 Open→Known Error auto-transitions (P173, P177 — root cause + workaround documented; WSJF 1.5→6.0); WSJF corrections (P258→15.0, P297/P303/P169→4.5, P287→3.0). Inbound discovery (TTL auto-recheck): #149 closed upstream, no new third-party reports, classification still deferred. The agent-behaviour-class uniform-uplift proposed by a re-score batch was rejected (interpretation drift). Prior P265 fragment rotated to README-history.md per P134.
+> Last reviewed: 2026-05-26 **P258 Known Error → Verification Pending (documented learning shipped)** — plugin.json reserved-keys P0 learning completed: validator accepted top-level key shape enumerated + recognised-vs-unrecognised key behaviour documented in `docs/briefing/plugin-distribution.md` (grounded against the Claude Code plugins reference — recognised keys are type-checked → wrong-typed value is a hard install failure; unrecognised keys are warning-only); ADR-063 Amendment 2026-05-18 root-cause phrasing refined; ADR-058 amendment determined not applicable (NDJSON-stdout surface, no manifest validator); P263 cross-referenced with the `claude plugin validate --strict` finding. Excluded from WSJF (multiplier 0) per ADR-022. Prior review-re-rank fragment rotated to README-history.md per P134.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -10,7 +10,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported |
 |------|-----|-------|----------|--------|--------|----------|
-| 15.0 | P258 | plugin.json top-level hooks:/skills:/agents: keys are RESERVED by Claude Code's manifest validator — adding arbitrary content (e.g. maturity records) breaks `claude plugin install` across all adopters (P0 driver this session; mitigated by ADR-063 Amendment 2026-05-18; structural prevention tracked at P263) | 15 High | Known Error | M | 2026-05-18 |
 | 6.0 | P182 | `measure-context-budget.sh` flat-glob misses per-state-subdir problem tickets — sibling fix to RFC-002 T4 dual-tolerant `reconcile-readme.sh` | 3 Med | Known Error | S | 2026-05-11 |
 | 6.0 | P279 | ADR-017 § Consequences flat-layout doc vs hook-helpers nested clustering (housekeeping) — iter-6 architect surfaced two coexisting conventions in packages/shared/ (captured 2026-05-19 via /wr-itil:capture-problem; deferred re-rate) | 3 Med | Known Error | S | 2026-05-19 |
 | 6.0 | P173 | BYPASS_*_GATE env vars do not propagate from Bash subshell to PreToolUse hook context | 6 Med | Known Error | M | 2026-05-06 |
@@ -242,6 +241,7 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P280 | /install-updates reorders enabledPlugins map in .claude/settings.json on every release | commit 7a14b8b (install-updates repo-local; ADR-030 amend 2026-05-25) | no — not observed |
 | P284 | Release pipeline halts — changeset publish E404 on @windyroad/architect@0.8.0 | @windyroad/architect@0.8.0 published (E404 resolved 2026-05-24) | no — not observed |
 | P286 | pipeline gate block threshold was hardcoded instead of derived from RISK-POLICY appetite | @windyroad/risk-scorer@0.11.0 (commit 3c732ba) | no — not observed |
+| P258 | plugin.json top-level hooks:/skills:/agents:/commands: are recognised, type-checked component-path keys — off-schema values hard-reject `claude plugin install` (P0 driver; mitigated by ADR-063 Amendment 2026-05-18; structural prevention tracked at P263) | 2026-05-26 (docs commit — validator accepted-shape + recognised-vs-unrecognised rule documented in briefing; ADR-063 root-cause refined; ADR-058 amendment N/A; P263 cross-referenced) | no — not observed |
 
 ## Inbound Upstream Reports
 
