@@ -1,9 +1,9 @@
 # Problem 261: iter subprocess API stream timeout class — orchestrator salvage path for stuck-before-commit needs documentation
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-18
 **Priority**: 6 (Medium) — Impact: 3 (Moderate — wasted iter cost if not salvaged; iter 4 of session 6 burned $12.91 on Phase 3b work that would have been lost) x Likelihood: 2 (Unlikely — observed once per ~10 iters in session 6; may correlate with iter length / context size)
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems; SKILL.md amendment + bats coverage)
+**Effort**: M (confirmed at fix time — SKILL.md amendment + ADR-032 amendment + behavioural bats fixture + briefing entry; single-plugin, no migration)
 **Type**: technical
 
 ## Description
@@ -46,12 +46,19 @@ Orchestrator main turn applies the 4-step salvage path (above) when the iter's s
 
 ### Investigation Tasks
 
-- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems.
-- [ ] Amend `packages/itil/skills/work-problems/SKILL.md` Step 5 exit-code semantics to add the "is_error: true with coherent staged work" carve-out:
+- [x] Re-rate Priority and Effort at next /wr-itil:review-problems. (Effort confirmed M at fix time.)
+- [x] Amend `packages/itil/skills/work-problems/SKILL.md` Step 5 exit-code semantics to add the "is_error: true with coherent staged work" carve-out:
   - If is_error: true AND staged files exist AND any iter-authored bats fixtures pass → orchestrator MAY apply the 4-step salvage path before halting.
   - Else (staged work incoherent, bats fail, no work staged) → halt per existing contract.
-- [ ] Add behavioural bats coverage for the salvage path: fake-stuck-shim that exits is_error=true with staged work; assert orchestrator commits with attribution; assert commit-gate validates.
-- [ ] Update `docs/briefing/afk-subprocess.md` to document the salvage path as "What You Need to Know" entry.
+- [x] Add behavioural bats coverage for the salvage path: fake-stuck-shim that exits is_error=true with staged work; assert orchestrator commits with attribution; assert commit-gate validates. (`packages/itil/skills/work-problems/test/work-problems-step-5-stream-timeout-salvage.bats`, 13/13 green.)
+- [x] Update `docs/briefing/afk-subprocess.md` to document the salvage path as "What You Need to Know" entry.
+- [x] Record the commit-authorship carve-out in ADR-032 (architect-required — the salvage commit crosses the "orchestrator does NOT commit from its main turn" invariant; new § "is_error:true stream-timeout salvage (P261 amendment)").
+
+## Fix Released
+
+Fix committed this AFK iteration (release marker: `@windyroad/itil` patch changeset `.changeset/p261-stream-timeout-salvage.md`; npm publish drained by the orchestrator's Step 6.5 release-cadence check). The `is_error: true` stream-timeout salvage path is now a contractual Step 5 exit-code branch: SKILL.md Step 5 documents the deterministic SALVAGE-vs-HALT gate + the line-486 orchestrator-commit exception, ADR-032 carries the "is_error:true stream-timeout salvage (P261 amendment)" sub-variant (commit-authorship carve-out + one-commit-grain preservation + ADR-009 fresh-gate-marker behaviour), and `docs/briefing/afk-subprocess.md` carries the "What You Need to Know" salvage entry.
+
+**Exercised in-session**: the behavioural fixture `work-problems-step-5-stream-timeout-salvage.bats` ran 13/13 green (4 behavioural SALVAGE/HALT branch cases via a fake-stuck-shim emitting `is_error: true` + 9 doc-lint contract assertions); the full work-problems suite ran 316/316 green (no regression from the SKILL.md edits). Awaiting user verification of the contract on the next real stream-timeout occurrence.
 
 ## Dependencies
 
