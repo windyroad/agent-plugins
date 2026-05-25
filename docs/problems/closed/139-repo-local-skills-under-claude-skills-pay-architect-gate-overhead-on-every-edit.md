@@ -1,7 +1,8 @@
 # Problem 139: Repo-local skills under `.claude/skills/` pay architect-gate overhead on every edit — relocate source-of-truth outside `.claude/` and symlink
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-28
+**Closed**: 2026-05-26 — verified in-session during the P259 work iteration, which exercised the documented verification criteria exactly: edited the relocated source `scripts/repo-local-skills/install-updates/{SKILL.md,test/}`, the architect + JTBD gates fired on the `scripts/` path through normal review (NOT blocked-on-`.claude/`), the `.claude/skills/install-updates/SKILL.md` symlink resolved (bats read the source edits via the symlink path), and P139's dedicated contract bats `install-updates-symlink-contract.bats` ran 10/10 green within the full 32/32 install-updates suite (Step 4a close-on-evidence via /wr-retrospective:run-retro).
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: M — relocate `.claude/skills/install-updates/` (and any future repo-local skill) under `packages/repo-local/<skill>/` (or equivalent canonical location), replace the in-`.claude/skills/` content with a symlink to the new source-of-truth, amend ADR-030 to record the new location convention + the symlink contract, audit gate-exclusion lists across plugin hooks (architect, JTBD, TDD, style-guide, voice-tone, risk-scorer) to confirm that the symlink-target path under `packages/` follows the normal review process, and update `MEMORY.md` / BRIEFING references.
 **WSJF**: (12 × 1.0) / 2 = **6.0**
