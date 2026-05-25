@@ -1,11 +1,19 @@
 # Problem 173: BYPASS_*_GATE env vars do not propagate from Bash subshell to PreToolUse hook context
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-06
 **Priority**: 6 (Medium) — Impact: 2 (Minor — gate-bypass friction blocks the maintainer's in-session commits, forcing external-terminal workarounds; dev-tooling, not published-distribution) x Likelihood: 3 (Possible — documented recurring across sessions per the cross-session briefing)
 **Effort**: M
 **WSJF**: 6.0 — (6 × 2.0) / 2 (Known Error multiplier 2.0) — auto-transitioned Open → Known Error 2026-05-26 (confirmed root cause + documented workaround); Likelihood un-deferred from placeholder 1 → 3
 **Type**: technical
+
+## Fix Released
+
+**Release marker**: `@windyroad/itil@0.35.9` + `@windyroad/retrospective@0.21.2` + `@windyroad/risk-scorer@0.11.1` + `@windyroad/voice-tone@0.5.5` (commit `0ea7196`, `fix(hooks): gate deny messages clarify env bypass is pre-session`); released via the `/wr-itil:work-problems` AFK loop Step 6.5 drain 2026-05-26.
+**Fix summary**: the deny messages of the three affected PreToolUse gates (`itil-changeset-discipline.sh`, `retrospective-readme-jtbd-currency.sh`, `external-comms-gate.sh` — canonical + synced copies) now lead with the accurate in-flight recovery and state that the `BYPASS_*_GATE` env bypass takes effect **only when set in Claude Code's process env before the session starts** — a mid-session Bash `export` never reaches the hook process.
+**Scope note (load-bearing)**: only the **local deny-message accuracy** was fixed. The core mechanism — that a `BYPASS_*` env var set in a Bash subshell does not propagate to the PreToolUse hook process — is a **Claude Code runtime characteristic (upstream / by-design)** and was NOT changed here; the gate enforcement logic, exit codes, and marker semantics are byte-for-byte unchanged.
+**Exercise evidence**: TDD GREEN — bats coverage added/extended for each edited gate's deny surface (`itil-changeset-discipline.bats`, `retrospective-readme-jtbd-currency.bats`, `external-comms-gate.bats` ×2). SID-mismatch sub-finding deduped to P142/P260 (not split).
+**Awaiting user verification**: on the next session, trigger any of the three gates (e.g. attempt a commit that needs a changeset) and confirm the deny message now leads with the in-flight recovery and labels the env bypass pre-session-only, rather than advertising the misleading mid-session env escape.
 
 ## Description
 
