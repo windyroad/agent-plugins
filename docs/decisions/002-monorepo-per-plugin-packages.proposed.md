@@ -1,6 +1,8 @@
 ---
 status: "proposed"
 date: 2026-04-08
+human-oversight: confirmed
+oversight-date: 2026-05-25
 decision-makers: [Tom Howard]
 consulted: [Claude Code plugin docs, npm workspaces docs, ADR-001]
 informed: [Windy Road plugin users]
