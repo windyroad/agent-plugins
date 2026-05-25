@@ -3,13 +3,15 @@ status: proposed
 job-id: report-problem-without-pre-classifying
 persona: plugin-user
 date-created: 2026-04-20
+human-oversight: confirmed
+oversight-date: 2026-05-25
 ---
 
 # JTBD-301: Report a Problem Without Pre-Classifying It
 
 ## Job Statement
 
-When I hit a problem with a windyroad plugin I installed, I want to describe what I observed in one place without deciding in advance whether it's a bug, a feature gap, or a documentation issue, so I can submit a useful report and get back to my own work.
+When I hit a problem with a windyroad plugin I installed, I want to submit a useful report without having to decide in advance whether it's a bug, a feature gap, or a documentation issue, so I can get the problem fixed and get back to my own work.
 
 ## Desired Outcomes
 

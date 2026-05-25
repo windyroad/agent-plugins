@@ -3,6 +3,8 @@ status: proposed
 job-id: restore-service-fast
 persona: tech-lead
 date-created: 2026-04-16
+human-oversight: confirmed
+oversight-date: 2026-05-25
 ---
 
 # JTBD-201: Restore Service Fast with an Audit Trail

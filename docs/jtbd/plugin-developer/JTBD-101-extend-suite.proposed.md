@@ -3,6 +3,8 @@ status: proposed
 job-id: extend-suite
 persona: plugin-developer
 date-created: 2026-04-14
+human-oversight: confirmed
+oversight-date: 2026-05-25
 ---
 
 # JTBD-101: Extend the Suite with New Plugins

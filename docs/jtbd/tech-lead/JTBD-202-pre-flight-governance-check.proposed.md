@@ -3,6 +3,8 @@ status: proposed
 job-id: pre-flight-governance-check
 persona: tech-lead
 date-created: 2026-04-16
+human-oversight: confirmed
+oversight-date: 2026-05-25
 ---
 
 # JTBD-202: Run Pre-Flight Governance Checks Before Release or Handover

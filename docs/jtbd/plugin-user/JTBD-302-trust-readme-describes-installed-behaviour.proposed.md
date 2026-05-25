@@ -3,6 +3,8 @@ status: proposed
 job-id: trust-readme-describes-installed-behaviour
 persona: plugin-user
 date-created: 2026-05-03
+human-oversight: confirmed
+oversight-date: 2026-05-25
 ---
 
 # JTBD-302: Trust That the README Describes the Plugin I Just Installed
