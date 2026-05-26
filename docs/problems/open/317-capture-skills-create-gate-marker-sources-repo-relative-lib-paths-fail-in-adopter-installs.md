@@ -59,6 +59,21 @@ These `packages/itil/hooks/lib/...` paths exist **only in this plugin-source mon
 - [ ] **Structural prevention ("never happens again")**: a CI lint that scans every PUBLISHED skill/agent/hook artifact for repo-relative `packages/` `source`/path references (and repo-relative dir enumeration) that won't resolve in an adopter install — fail the publish if any are found. This is the gate-the-actual-load-bearing-surface ask; compose with P263 (`claude plugin install --dry-run` CI gate) and the P151/P153/P219 class. The lint must run against the artifact as it ships, not the source tree (the source-tree-masks-the-bug root cause above).
 - [ ] Audit the full shipped corpus for other repo-relative `source`/path references on hot paths (sibling sweep with P151/P153/P219).
 
+## Scope finding (2026-05-27 investigation)
+
+The create-gate marker step is one of **24 broken repo-relative references** in shipped SKILLs (much wider than the screenshot instance):
+
+- **7 HARD `source packages/...` references** (always break in adopters — `source` needs a real file path):
+  - `manage-problem/SKILL.md`: `source packages/itil/lib/migrate-problems-layout.sh` (L217); `source packages/itil/hooks/lib/session-id.sh` + `create-gate.sh` (L340–341)
+  - `capture-problem/SKILL.md`: `source packages/itil/hooks/lib/session-id.sh` + `create-gate.sh` (L159–160)
+  - `work-problems/SKILL.md`: `source packages/itil/lib/migrate-problems-layout.sh` (L130); `source packages/itil/lib/check-upstream-cache-staleness.sh` (L157)
+- **17 SHIM-FALLBACK references** of the form `bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/<x>.sh"` across manage-story, reconcile-stories, capture-story, manage-rfc, manage-story-map, capture-rfc, capture-story-map. **`wr-itil-script-path` shim DOES NOT EXIST** — so the repo-relative `|| echo` fallback ALWAYS fires in adopter trees. Effectively hard-broken, just silently.
+- 3 comment-only examples in `hooks/lib/*.sh` reinforce the bad pattern (copy-paste hazard).
+
+**P263 does NOT cover this** — it scopes manifest-structure validation (`claude plugin validate`), not runtime path resolution. So structural prevention needs a NEW lint.
+
+**Genuine design decision (needs substance-confirm before building, per ADR-074):** `source`-d libraries can't use the ADR-049 `exec`-shim pattern (a subshell can't export functions back to the caller). Resolution strategies differ for the two reference kinds: a directory-resolver shim (`wr-itil-lib-path` / create the missing `wr-itil-script-path`) that the SKILLs `source "$(wr-itil-lib-path)/x.sh"` from, vs converting source-based helpers into PATH-invoked standalone scripts. This is the substantive choice to confirm.
+
 ## Dependencies
 
 - **Composes with**: P263 (CI `--dry-run` per-plugin pre-publish gate — the structural-prevention vehicle), ADR-049 (bin-on-PATH shim pattern — the fix vehicle for this instance).
