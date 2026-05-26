@@ -47,6 +47,7 @@ Either reading captures the same defect: agents write durable evidence INTO tick
 - Agents edit `.verifying.md` ticket bodies to add evidence sections (Fix direction (per user, ...), Validation note, Confirmation log) without considering the lifecycle implication.
 - Adopter projects (e.g. voder-mcp-hub) show the same pattern — the issue is in the shared SKILL surfaces (manage-problem Step 4 update path, transition-problem, work-problems iteration loops) not in any single project's local config.
 - The agent's mental model treats ticket body and ticket status as orthogonal axes; the user's mental model treats them as semantically yoked (if the body documents closure-justifying work, the status should reflect that).
+- **Prior-session `yes — observed` rows never auto-close (2026-05-26 evidence).** The README Verification Queue `Likely verified?` column (P186) is the durable evidence signal — a ticket verified across subsequent sessions carries `yes — observed: <citations>`. But NO automatic surface consumes that column to close the ticket: run-retro Step 4a (step 8 same-session exclusion) and manage-problem Step 9d both scan the *current* session's activity for evidence. A ticket verified in a *prior* session — its evidence already on disk in the README column AND its body Change Log — is structurally invisible to both close surfaces forever, because the evidence is not in any later session's tool-call history. Closure then only happens when a human manually asks (as it did 2026-05-26).
 
 ## Workaround
 
@@ -80,6 +81,7 @@ Plausible workarounds pending diagnosis:
 - [ ] Implement chosen trigger with behavioural test fixture (a `.verifying.md` ticket edited with evidence content; assert V→Closed transition fires OR is offered)
 - [ ] Investigate the adjacent K→V analogue per P228 — same trigger-shape (body-content scan) applies to fix-released detection
 - [ ] Consider whether `/wr-retrospective:run-retro` Step 4a (the verification-queue close pass) should ALSO do the body-content scan as a session-wrap belt-and-braces check
+- [ ] **Add a prior-session-evidence close surface (2026-05-26).** Step 4a's same-session exclusion (step 8) correctly prevents a session verifying its own fix, but it ALSO permanently excludes rows whose `Likely verified?` README column already reads `yes — observed: …` from a prior session — those never get picked up by any later Step 4a run. Design a surface (Step 4a addendum, Step 9d addendum, or a dedicated review pass) that scans the README `Likely verified?` column for pre-existing `yes — observed` rows and surfaces/closes them independent of current-session activity. Same-session exclusion stays; prior-session-recorded `yes — observed` becomes its own close trigger.
 - [ ] Create reproduction fixture (a `.verifying.md` ticket; agent edits it to add a Fix direction section; assert agent offers V→Closed transition)
 
 ## Dependencies
@@ -99,6 +101,7 @@ Plausible workarounds pending diagnosis:
 (captured via /wr-itil:capture-problem; expand at next investigation)
 
 - Concrete instance: `voder-mcp-hub` P027 (`docs/problems/verifying/027-bank-feed-needs-search-api-llm-paginates-poorly.verifying.md`) — body contains "End-to-end validation of P018" + "Fix direction (per user, 2026-05-19)" sections; status `verifying`; agent did not transition.
+- **2026-05-26 verifying-queue review session evidence (this repo).** User asked to review the verifying queue and close any closeable. Of 91 `verifying/` rows, 8 carried `yes — observed: …` in the README `Likely verified?` column — verified across prior sessions (4/5/6, multiple release cycles) — yet ALL 8 still sat in `verifying`. None had been auto-closed despite the durable recorded evidence; closure required the user to manually prompt. 3 were ripe (P132/P233/P234 — multi-session evidence, zero regression, author marked window met) and closed this session; 5 held for legitimate reasons (P246/P250 author "in-flight", P266 same-artefact, P262/P283 same-day same-session). Concrete accumulation cost: the README Verification Queue section reached **134 KB**, exceeding the Read-tool 25K-token whole-file cap — the queue could not be read in a single tool call, forcing persisted-output + paged reads. Confirms the Impact-line "Verification Queue accumulates effectively-closed tickets" with a measured readability failure, and motivates the prior-session-evidence close surface Investigation Task above.
 - P068 — narrower close-on-evidence ticket for `/wr-retrospective:run-retro` (sibling, NOT duplicate).
 - P228 — K→V analogue; sibling missing-transition class.
 - ADR-022 — Verification Pending state machine.
