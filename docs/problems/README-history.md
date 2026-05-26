@@ -554,3 +554,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-05-26 (P138 verification-close fragment rotated for README reconciliation — P307/P308/P309 added)
 
 > Last reviewed: 2026-05-26 **P138 Verification Pending → Closed** (verification close-on-evidence per run-retro Step 4a / ADR-044) — during a `/wr-itil:work-problems` + run-retro session, Step 3 selection read this README's WSJF Rankings table top-to-bottom and took row 1 (P177) as the pick with NO in-memory re-sort; the rendered order matched the tie-break ladder 1:1 (WSJF-6.0 group: P177 → P260/P267 → P087/P097 → P082/P263/P282 — KE-first, effort asc, date asc), which is precisely P138's fix. Reversible via `/wr-itil:transition-problem 138 known-error`. Excluded from WSJF (multiplier 0) per ADR-022. Prior batch-verification-close fragment (P132/P233/P234) rotated to README-history.md per P134.
+
+## 2026-05-26 (README reconciliation fragment rotated for P177 Known Error → Verification Pending transition)
+
+> Last reviewed: 2026-05-26 **README reconciled** — 3 drift entries corrected: P307, P308, P309 (open on disk, missing from WSJF Rankings — committed cross-session drift from the prior session's capture commits; classifier returned HALT_ROUTE_RECONCILE uncovered=3, no staged renames). Added at WSJF 3.0 (Priority 3 / Effort M, deferred — re-rate at next `/wr-itil:review-problems`). Reconciliation contract per P118 + ADR-014 amended ("Reconciliation as preflight robustness layer"). Prior P138 verification-close fragment rotated to README-history.md per P134.

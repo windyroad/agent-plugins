@@ -1,6 +1,6 @@
 # Problem 177: P141 changeset-discipline gate doesn't recognise `docs/changesets-holding/` — forces 2-commit pattern when work belongs to a held window
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-07
 **Priority**: 6 (Medium) — Impact: 2 (Minor — forces a 2-commit pattern on held-window work; dev-tooling friction, not published-distribution) x Likelihood: 3 (Possible — fires on every held-window iter)
 **Effort**: M
@@ -70,6 +70,12 @@ Three resolution shapes for next-review-pass triage:
   - **P170** + **ADR-060** § Confirmation criterion 6 — atomicity contract that creates the held-window slice this friction surfaces in. Slice 6 graduate-to-adopters closes the immediate window for P170; but the gate-vs-held-window mismatch persists for any future held-window slice on any plugin.
   - **ADR-042** Rule 2 + Rule 7 — auto-apply + held-window blessing. Rule 7 is the load-bearing context that makes `docs/changesets-holding/` a legitimate alternative to `.changeset/`, which P141's gate doesn't yet acknowledge.
   - **ADR-014** Architect finding 8 (grain composition) — the 2-commit pattern is structurally consistent with one-commit-per-bounded-sub-task; this is "feature, not defect" framing for option (c).
+
+## Fix Released
+
+Released in `@windyroad/itil@0.35.13` (fix commit `a8823be`, 2026-05-26). Option (a) implemented: `detect_changeset_required` in `packages/itil/hooks/lib/changeset-detect.sh` now sets `has_changeset=1` on a staged `docs/changesets-holding/<name>.md` held-window entry (per ADR-042 Rule 7), mirroring the existing `.changeset/*.md` branch and its README meta-doc exclusion — so held-window-bound `packages/<plugin>/` source lands in a single commit instead of the prior 2-commit work-then-move workaround. Release/drain semantics unchanged: the Release workflow reads `.changeset/` only; a held entry is never drained without a graduation `git mv`. 4 behavioural bats tests added (both holding-route allow cases + README-meta-doc deny + neither-`.changeset`-nor-holding deny regression guard); full file 36/36 green. Architect APPROVE + JTBD PASS recorded at fix time (no new ADR; composes with ADR-042 Rule 7).
+
+Awaiting user verification: a held-window AFK iter commits `packages/<plugin>/` source alongside a staged `docs/changesets-holding/<name>.md` entry (no `.changeset/*.md` present) and the changeset-discipline gate **allows** the commit in one shot, while source staged with neither a `.changeset/` nor a holding entry is still **denied**.
 
 ## Related
 
