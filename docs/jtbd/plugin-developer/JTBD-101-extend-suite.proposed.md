@@ -4,7 +4,7 @@ job-id: extend-suite
 persona: plugin-developer
 date-created: 2026-04-14
 human-oversight: confirmed
-oversight-date: 2026-05-25
+oversight-date: 2026-05-26
 ---
 
 # JTBD-101: Extend the Suite with New Plugins
@@ -27,7 +27,7 @@ When I'm building a new plugin, I want to follow a clear template and have CI va
 
 - Must not break existing plugins when adding new ones
 - Needs clear patterns, not reverse-engineering
-- **Plugin / framework ceremony must scale down to atomic-change adopters, not only up to complex multi-commit adopters.** Mandatory new framework primitives (e.g. RFC trace, type-tag) need an opt-out or a justification at adopter-graduation time — atomic-fix adopters whose work has always been single-commit should not pay the multi-commit-coordination ceremony tax. (Added 2026-05-05 per ADR-060 RFC framework — JTBD-review finding 3.)
+- **Framework ceremony scales by surfacing the multi-commit *coordination* tier (stories / story maps) only when the work needs it — NOT by exempting atomic adopters from the RFC trace.** The RFC-trace primitive has **no opt-out**: every fix goes through an RFC (per ADR-071 — every problem is fixed only via an RFC, unconditionally; the atomic-fix carve-out was disavowed by the user 2026-05-26, P311). Atomic-change adopters pay the same RFC ceremony as anyone; what they don't pay is the story / story-map *coordination* ceremony, because their work isn't decomposed into stories. The `type` tag remains a classification facet only (ADR-060 I2), never a workflow exemption. (Added 2026-05-05 per ADR-060 RFC framework — JTBD-review finding 3; reframed 2026-05-26 per ADR-071 — no opt-out, no scale-down of the RFC trace.)
 
 ## Current Solutions
 

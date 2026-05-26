@@ -4,6 +4,8 @@ job-id: decompose-fix-into-coordinated-changes
 persona: solo-developer
 secondary-persona: tech-lead
 date-created: 2026-05-05
+human-oversight: confirmed
+oversight-date: 2026-05-26
 ---
 
 # JTBD-008: Decompose a Fix Into Coordinated Changes
@@ -18,12 +20,12 @@ When my fix to a problem decomposes into multiple coordinated changes (a refacto
 - **Trace invariant** — every RFC traces back to a problem (no orphan RFCs). The trace is gate-enforced at capture time, not advisory. WSJF prioritisation works uniformly across the framework because every change is solving some problem.
 - **Time-boxing** — each RFC carries a bounded scope; mid-flight scope expansion triggers a structured re-evaluation (`AskUserQuestion` deviation-approval per ADR-044 category 2) rather than silent body-drift.
 - **First-class sub-workstream entities** — phased work is ordered explicitly (Phase 1 → 2 → …); deferred phases stay visible as first-class entities competing for WSJF attention rather than buried as TODO bullets in a parent ticket's body.
-- **Atomic-fix shapes pay no ceremony** — single-commit fixes continue to work without RFC ceremony. The framework scales down for atomic adopters and scales up for multi-commit-coordination adopters; the type-tag prompt at capture-problem is the load-bearing surface where the friction (or non-friction) lands.
+- **Every fix goes through an RFC — no atomic-fix exemption** — single-commit and multi-commit fixes alike are scoped as an RFC traced to the driving problem (per ADR-071: every problem is fixed only via an RFC, unconditionally — no carve-out, no effort threshold, no lighter path). An atomic fix is the **same** RFC as any other (its `stories:` array is simply empty when the work is not decomposed into stories); it is NOT a thin or scaled-down variant. The framework scales the multi-commit *coordination* surface (stories / story maps) **up** when the work needs it; it never scales the RFC itself **down**.
 - **Composes with the existing problem framework** — RFC lifecycle mirrors problem lifecycle states (`proposed` / `accepted` / `in-progress` / `verifying` / `closed`); same WSJF formula; same capture-then-manage skill split (lightweight aside + heavyweight intake per ADR-032).
 
 ## Persona Constraints
 
-- Solo developer using AI agents to investigate, fix, and ship work end-to-end. Multi-commit coordinated changes are the **exception**, not the norm — the framework must scale down for atomic shapes (JTBD-101 atomic-fix-adopter friction guard) and only surface multi-commit ceremony when the work shape genuinely needs it.
+- Solo developer using AI agents to investigate, fix, and ship work end-to-end. Multi-commit coordinated changes are the **exception**, not the norm — but every fix, atomic or coordinated, goes through an RFC (ADR-071). The framework surfaces the multi-commit *coordination* ceremony (stories / story maps) only when the work shape genuinely needs it; it does NOT scale the RFC itself down or exempt atomic shapes. There are no short cuts (user direction 2026-05-26, P311).
 - **The new framework must visibly compose with JTBD-001 (per-edit governance) and JTBD-006 (AFK orchestrator selection) without rebuilding either.** JTBD-001 handles per-edit governance and (per its 2026-05-05 amendment) multi-commit coordinated-change governance at the change-set level; JTBD-006 handles AFK orchestration of WSJF-ranked work. JTBD-008 is the **capture-time and scoping** surface — it handles the act of decomposing (when do I split? how do I scope? how do I sequence?) and trace-to-problem invariant enforcement. Once decomposed, JTBD-001 governs the resulting commits and JTBD-006 selects them; JTBD-008 does not re-host either of those concerns.
 - Strain surfaces first in the solo-developer persona but composes naturally with tech-lead multi-team coordination needs (audit-trail, hand-off, parallel workstreams). Tech-lead persona is the secondary anchor.
 - The framework must not introduce a parallel hierarchy that drifts from the problem-management primitives — RFCs sit alongside problems, never replace them; JTBD jobs unify with problems as `type: user-business` per the future ADR-060 Phase 4 direction.
@@ -41,7 +43,7 @@ None of these compose well with WSJF prioritisation when phases need to compete 
 - **ADR-060** — Problem-RFC-Story framework with mandatory problem-trace and unified problem ontology. The decision that introduces the RFC layer JTBD-008 is anchored to.
 - **JTBD-001** — Enforce Governance Without Slowing Down. JTBD-001 § Desired Outcomes was amended 2026-05-05 (P170 / ADR-060) to cover multi-commit coordinated-change governance at the change-set level. JTBD-008 composes by handling the **capture-time decomposition** surface; JTBD-001 handles the **lifecycle-time governance** of the resulting work.
 - **JTBD-006** — Progress the Backlog While I'm Away. AFK orchestrator selects by WSJF; ADR-060 Phase 1 resolves WSJF placement at RFC-level so JTBD-006 selection from `docs/problems/` continues to work during the bootstrap window. JTBD-008 protects JTBD-006 by surfacing decomposition signals at capture time rather than letting work-shape drift hide multi-phase scope from the orchestrator's selection input.
-- **JTBD-101** — Extend the Suite with New Plugins. Atomic-fix-adopter friction guard. JTBD-008's capture-time prompts must scale down: atomic-fix shapes never see RFC ceremony; only adopters whose work decomposes hit the framework's coordination surface.
+- **JTBD-101** — Extend the Suite with New Plugins. Atomic-fix-adopter constraint. Per ADR-071 the RFC trace has **no opt-out**: atomic-fix shapes go through the same RFC as any fix. Only the multi-commit *coordination* surface (stories / story maps) is conditional on the work decomposing; the RFC trace itself is unconditional.
 - **JTBD-201** — Restore Service Fast with an Audit Trail. Incident-driven problems compose naturally with RFC trace-to-problem invariant; tech-lead persona inherits JTBD-008 for incident-aftermath multi-commit fixes.
 
 ## Related problems
