@@ -1,6 +1,6 @@
 # RFC Backlog
 
-> Last reviewed: 2026-05-17 **RFC-005 proposed → accepted transition via /wr-itil:manage-rfc** — full intake of "RFC-first trace invariant not enforced at fix-time" (drives P251, captured this session via user correction). Scope ratified F1-F7: gate placement `Open → Known Error` in `/wr-itil:manage-problem` Step 7 (single gate, no new lifecycle state); atomic-fix carve-out Effort ≤ M skips ceremony with `--rfc-deferred <reason>` override hatch + structured `logs/i13-deviations.jsonl` log; problem-ticket frontmatter extended with `rfcs: [RFC-NNN, ...]` cardinality 0..N; iter dispatch hard-block with `logs/i13-iter-dispatch-denials.jsonl` + recovery-routing to `/wr-itil:capture-rfc`; structural hook `itil-i13-rfc-trace-gate.sh` PreToolUse:Bash sibling to P165 readme-refresh-discipline; story-map composition deferred (transitive guarantee via ADR-060 I7/I8); new I13 invariant amends ADR-060. Tasks decomposed B1-B10 with held-changeset graduation per ADR-042 / P162 (atomic graduation per ADR-060 architect finding 12). Architect PASS + JTBD PASS on accepted-transition pre-flight. Frontmatter `adrs:` extended to [ADR-060, ADR-051, ADR-052, ADR-042, ADR-044]; `jtbd:` extended to [JTBD-008, JTBD-001, JTBD-006, JTBD-101]. Considered Options / Alternatives Rejected section records F1/F2/F4 rejected alternatives for trace clarity at reassessment. Prior line-3 fragment (RFC-004 Verification Pending, 2026-05-15) rotated to `docs/rfcs/README-history.md` per P134.
+> Last reviewed: 2026-05-26 **RFC-006 accepted + RFC-005 retrofit (ADR-070/071)** — implementation of ADR-070 (RFCs hold no independent decisions) + ADR-071 (every fix goes through an RFC, unconditionally — no carve-out, no effort threshold, no thin/scaled-down path). RFC-005 reduced to scope + decomposition + traces: F1 → ADR-072 (gate placement), F4 → ADR-073 (orchestrator dispatch), F2 atomic-fix carve-out **repudiated**, embedded F1–F7 Decision/Rationale blocks + the "Considered Options / Alternatives Rejected" section struck. RFC-006 scopes the decision-homing + de-carve-out + ADR-060 line-97/I13 amendment + ADR-052 enforcement test + P260 backfill. The prior RFC-005-accepted line-3 fragment — which advertised the now-disavowed atomic-fix carve-out (`--rfc-deferred` hatch, "Effort ≤ M skips ceremony") — rotated to `docs/rfcs/README-history.md` per P134.
 > Run `/wr-itil:manage-rfc review` to refresh once the manage-rfc skill ships.
 
 ## Status
@@ -41,7 +41,7 @@ decision-makers: [<name>, ...]   # who can move the RFC through lifecycle states
 problems: [P<NNN>, ...]          # REQUIRED (I1 invariant) — bare problem IDs the RFC traces to; ≥ 1
 adrs: [ADR-<NNN>, ...]           # ADRs ride alongside RFCs as decisions made during execution; may be empty
 jtbd: [JTBD-<NNN>, ...]          # Phase 1: optional. Phase 2+: REQUIRED when any traced problem is `type: user-business`. Bare JTBD IDs.
-stories: [STORY-<NNN>, ...]      # Phase 2: ORDERED array (execution sequence) — stories implementing this RFC; 0..N (empty = atomic RFC; ADR-060 line 262 JTBD-101 friction guard)
+stories: [STORY-<NNN>, ...]      # Phase 2: ORDERED array (execution sequence) — stories implementing this RFC; 0..N (empty when the RFC's work is not decomposed into stories per ADR-060 line 262 — a structural state, NOT a reduced-ceremony path)
 ---
 ```
 
@@ -54,9 +54,9 @@ stories: [STORY-<NNN>, ...]      # Phase 2: ORDERED array (execution sequence) �
 | `reported` | yes | ISO date. |
 | `decision-makers` | yes | List of names. Solo-developer projects typically have one entry. |
 | `problems` | yes (I1) | List of bare problem IDs (`[P168]`, `[P168, P169]`). At least one entry is required at capture-rfc time. The hard-block at I1 fires if this list is empty or absent. |
-| `adrs` | no | List of bare ADR IDs the RFC references. RFC-internal decomposition decisions (story breakdown, phase ordering, task sequencing) do NOT spawn ADRs by default per ADR-060 § Decision Outcome — ADRs created during RFC execution capture decisions with scope outside the RFC's own boundary. |
+| `adrs` | no | List of bare ADR IDs the RFC references. An RFC holds **no independent decisions** (ADR-070): every choice among ≥2 viable options is recorded as an ADR (inheriting the ADR-064 confirm gate + ADR-066 oversight marker). Only pure sequencing/breakdown of *already-decided* work (story breakdown, phase ordering, task sequencing) stays in the RFC and does NOT spawn an ADR. |
 | `jtbd` | conditional | Required Phase 2+ when any traced problem carries `type: user-business`. Optional in Phase 1. |
-| `stories` | no (Phase 2) | **ORDERED** array — array position IS execution sequence per ADR-060 line 262. 0..N cardinality: atomic RFCs MAY ship with `stories: []` (JTBD-101 atomic-fix-adopter friction guard); story-decomposed RFCs SHOULD populate the array. `/wr-itil:work-problem <NNN>` reads the linked RFC's `stories:` array on each iter; on empty falls back to Phase 1 per-RFC iter dispatch (no per-story scoping). Populated by `/wr-itil:capture-rfc --stories STORY-NNN,...` at capture or by `/wr-itil:manage-rfc <NNN>` at any lifecycle transition. |
+| `stories` | no (Phase 2) | **ORDERED** array — array position IS execution sequence per ADR-060 line 262. 0..N cardinality: an RFC ships with `stories: []` when its work is not decomposed into stories — a structural state, NOT a reduced-ceremony or "thin" path (every fix goes through an RFC per ADR-071); story-decomposed RFCs populate the array. `/wr-itil:work-problem <NNN>` reads the linked RFC's `stories:` array on each iter; on empty falls back to Phase 1 per-RFC iter dispatch (no per-story scoping). Populated by `/wr-itil:capture-rfc --stories STORY-NNN,...` at capture or by `/wr-itil:manage-rfc <NNN>` at any lifecycle transition. |
 
 ## RFC body structure
 
@@ -95,7 +95,7 @@ Ordered work-items. Each task is an ADR-014-grain commit candidate. Phase 1 uses
 
 Ordered list of stories implementing this RFC, rendered in execution sequence from the frontmatter `stories:` array per ADR-060 line 270. Auto-refreshed on RFC frontmatter edits via `update-rfc-references-section.sh <rfc-file> "Stories"` (Slice 2b helper); manually rendered by `/wr-itil:manage-rfc <NNN>` at lifecycle transitions; load-bearing for `/wr-itil:work-problem <NNN>`'s per-story dispatch traversal.
 
-The section is **lazy-empty** — when `stories:` is empty (atomic RFC), the section is absent rather than rendered as an empty header. `/wr-itil:work-problem <NNN>` reads the absence as a signal to fall back to Phase 1 per-RFC iter dispatch (Tasks section + commit-message trailer parsing).
+The section is **lazy-empty** — when `stories:` is empty (an RFC not decomposed into stories), the section is absent rather than rendered as an empty header. `/wr-itil:work-problem <NNN>` reads the absence as a signal to fall back to Phase 1 per-RFC iter dispatch (Tasks section + commit-message trailer parsing).
 
 ```markdown
 1. [STORY-001](../stories/draft/STORY-001-foo.md) — Foo (draft)
@@ -120,6 +120,8 @@ Final scope statement: what shipped, what was deferred, what was dropped. Deferr
 Links to ADRs, JTBDs, retro docs, and other RFCs this work composes with.
 ```
 
+**No "Considered Options / Alternatives Rejected" section.** An RFC body carries no rejected-alternatives block. Per **ADR-070** (RFCs hold no independent decisions), every contested choice among ≥2 viable options is recorded as an ADR — the RFC references the governing ADR(s) in its `adrs:` frontmatter rather than re-arguing the choice in its body. The machine-detectable tell (enforced by the ADR-052 behavioural lint): an RFC body containing a rejected-alternatives block with no matching `adrs:` reference is a decision masquerading as scope.
+
 ## Commit-grain composition (per ADR-060 architect finding 8 + ADR-014)
 
 - **Mapping**: one RFC = N × ADR-014-grain commits, ordered. RFCs decompose into commits that ride the existing single-purpose grain.
@@ -133,8 +135,11 @@ One row per RFC in `proposed` / `accepted` / `in-progress` status. RFC-level WSJ
 | WSJF | ID | Title | Severity | Status | Effort | Reported |
 |------|-----|-------|----------|--------|--------|----------|
 | 3.0 | RFC-005 | RFC-first trace invariant not enforced at fix-time | 3 Med | accepted | M | 2026-05-17 |
+| 1.5 | RFC-006 | Implement ADR-070 + ADR-071 — re-home RFC decisions to ADRs and make RFC-first unconditional | 3 Med | accepted | L | 2026-05-26 |
 
 WSJF for RFC-005: Severity inherited from highest-severity traced problem (P251 = 3 Med); Status multiplier `accepted` = 2.0; Effort M divisor = 2; WSJF = (3 × 2.0) / 2 = 3.0.
+
+WSJF for RFC-006: Severity inherited from highest-severity traced problem (max of P310, P251 = 3 Med); Status multiplier `accepted` = 2.0; Effort L divisor = 4; WSJF = (3 × 2.0) / 4 = 1.5.
 
 ## Verification Queue
 
