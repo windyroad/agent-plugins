@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
 
 Create, update, or transition RFC tickets following the Problem-RFC-Story framework introduced by ADR-060 (accepted 2026-05-05). This skill is the heavyweight counterpart to `/wr-itil:capture-rfc` — it owns the full intake flow, lifecycle transitions, batch review, and README refresh.
 
-**Related JTBDs**: JTBD-008 (primary — Decompose a Fix Into Coordinated Changes; this skill governs the lifecycle of decomposed work), JTBD-001 (extended scope — change-set-level governance), JTBD-101 (atomic-fix-adopter friction guard — RFC ceremony only fires on opt-in invocations).
+**Related JTBDs**: JTBD-008 (primary — Decompose a Fix Into Coordinated Changes; this skill governs the lifecycle of decomposed work), JTBD-001 (extended scope — change-set-level governance), JTBD-101 (atomic-fix-adopter — every fix goes through an RFC per ADR-071; the RFC skills are invoked deliberately, not auto-fired, because RFC scope is direction-setting per ADR-073 — NOT because atomic fixes skip ceremony).
 
 ## RFC Lifecycle
 
@@ -96,6 +96,8 @@ Apply the update — typical edits:
 - Adding `## Related` entries.
 - Updating `decision-makers` or `adrs` frontmatter when ADRs are referenced mid-RFC execution.
 
+**Do NOT add a "Considered Options / Alternatives Rejected" section to the RFC body.** Per ADR-070 (RFCs hold no independent decisions), every contested choice among ≥ 2 viable options is recorded as an ADR (inheriting the ADR-064 confirm gate + ADR-066 oversight marker) and referenced in the RFC's `adrs:` frontmatter — never re-argued in the RFC body. An RFC carries only scope, decomposition (sequencing/breakdown of already-decided work), and traces. The ADR-052 behavioural lint hard-fails any RFC body that contains a rejected-alternatives block without a matching `adrs:` reference.
+
 #### README refresh on conditional update (P094 mirror)
 
 If the update changed any ranking-bearing field (Status, Severity-via-problems, Effort, WSJF), regenerate `docs/rfcs/README.md` in-place reflecting the new ranking and stage it in the same commit. If the edit touched only `## Summary`, `## Scope`, `## Tasks`, `## Related`, or other non-ranking sections, skip the refresh.
@@ -150,7 +152,7 @@ for pid_token in $(awk '/^problems:/{gsub(/[][]/,"");gsub(/,/,"\n");for(i=2;i<=N
 done
 ```
 
-The helper (`packages/itil/scripts/update-problem-rfcs-section.sh`) is idempotent and applies lazy-empty discipline (zero traced RFCs → section absent — protects atomic-fix-adopter friction guard per JTBD-101). After the transition, the helper:
+The helper (`packages/itil/scripts/update-problem-rfcs-section.sh`) is idempotent and applies lazy-empty discipline (zero traced RFCs → section absent — a structural rendering rule, not a ceremony exemption; a problem traces ≥ 1 RFC once it reaches fix-time per ADR-071 / I13). After the transition, the helper:
 - Updates the row's `Status` column to the new lifecycle status.
 - Removes the row when this transition de-traces a problem (frontmatter `problems:` edit removed the entry).
 - No-op when the table is already current (idempotent contract).
@@ -159,7 +161,7 @@ The trailer hook (`itil-rfc-trailer-advisory.sh`) sits on top of this skill-side
 
 #### Forward trace — `## Stories` body section (Phase 2)
 
-Per ADR-060 line 270 + line 296: every transition that touches the RFC body refreshes the RFC's own `## Stories` body section from its frontmatter `stories:` array. The forward-trace surface renders the ordered execution sequence as inline links to the story files, lazy-empty when `stories: []` (atomic RFC — JTBD-101 friction guard). The helper is the Slice 2b sibling `update-rfc-references-section.sh`:
+Per ADR-060 line 270 + line 296: every transition that touches the RFC body refreshes the RFC's own `## Stories` body section from its frontmatter `stories:` array. The forward-trace surface renders the ordered execution sequence as inline links to the story files, lazy-empty when `stories: []` (an RFC not decomposed into stories). The helper is the Slice 2b sibling `update-rfc-references-section.sh`:
 
 ```bash
 bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/update-rfc-references-section.sh" "$rfc_file" "Stories"
@@ -251,7 +253,7 @@ The two skills share the `/tmp/wr-itil-rfc-capture-grep-${SESSION_ID}` create-ga
 - **ADR-060** — Problem-RFC-Story framework with mandatory problem-trace and unified problem ontology.
 - **P170** — driver problem ticket.
 - **`docs/plans/170-rfc-framework-story-map.md`** — Slice 2 task B5.T4 lands this skill.
-- **JTBD-008** (primary), JTBD-001 (extended scope), JTBD-101 (atomic-fix-adopter friction guard).
+- **JTBD-008** (primary), JTBD-001 (extended scope), JTBD-101 (atomic-fix-adopter — every fix via RFC per ADR-071).
 - **`docs/rfcs/README.md`** — lifecycle index + frontmatter shape (Slice 2 B5.T1 + B5.T2 — `adc53c8`).
 - **`packages/itil/skills/capture-rfc/SKILL.md`** — sibling lightweight capture skill.
 - **`packages/itil/skills/manage-problem/SKILL.md`** — heavyweight counterpart at the problem tier; structural template for this skill.

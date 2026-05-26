@@ -10,7 +10,7 @@ Capture a Request for Change (RFC) ticket quickly during foreground work. Lightw
 
 This skill is one half of the capture-then-manage RFC framework introduced by ADR-060 (Problem-RFC-Story framework with mandatory problem-trace and unified problem ontology, accepted 2026-05-05). The other half is `/wr-itil:manage-rfc` (heavyweight intake + lifecycle management).
 
-**Related JTBDs**: JTBD-008 (primary — Decompose a Fix Into Coordinated Changes; this skill IS the capture-time decomposition surface), JTBD-001 (extended scope — change-set-level governance), JTBD-101 (atomic-fix-adopter friction guard — capture-rfc remains opt-in, never auto-fires on atomic captures).
+**Related JTBDs**: JTBD-008 (primary — Decompose a Fix Into Coordinated Changes; this skill IS the capture-time decomposition surface), JTBD-001 (extended scope — change-set-level governance), JTBD-101 (atomic-fix-adopter — every fix goes through an RFC per ADR-071; capture-rfc is invoked deliberately, not auto-fired, because RFC scope is direction-setting per ADR-073 — NOT because atomic fixes skip ceremony).
 
 ## When to invoke
 
@@ -27,7 +27,7 @@ This skill is one half of the capture-then-manage RFC framework introduced by AD
 
 **Positional**: `<problem-trace> <description>` where `<problem-trace>` is `P<NNN>` or `P<NNN>,P<NNN>,...` (no spaces inside the trace; multiple problems comma-separated).
 
-**Optional flag (Phase 2)**: `--stories STORY-<NNN>,STORY-<NNN>,...` — ORDERED execution sequence per ADR-060 line 262. Cardinality 0..N: atomic RFCs OMIT the flag and capture-rfc populates `stories: []` in frontmatter (JTBD-101 friction guard — atomic RFCs are first-class); story-decomposed RFCs supply the ordered list. The flag accepts STORY-IDs that don't yet resolve to files (forward-reference is permitted at capture; the existence check happens at `manage-rfc <NNN> accepted` transition per ADR-060 working-the-problem flow line 304).
+**Optional flag (Phase 2)**: `--stories STORY-<NNN>,STORY-<NNN>,...` — ORDERED execution sequence per ADR-060 line 262. Cardinality 0..N: an RFC whose work is not decomposed into stories OMITS the flag and capture-rfc populates `stories: []` in frontmatter (a structural state, NOT a reduced-ceremony path — every fix goes through an RFC per ADR-071); story-decomposed RFCs supply the ordered list. The flag accepts STORY-IDs that don't yet resolve to files (forward-reference is permitted at capture; the existence check happens at `manage-rfc <NNN> accepted` transition per ADR-060 working-the-problem flow line 304).
 
 ```
 /wr-itil:capture-rfc P168 Pipeline consume-catalog and bootstrap-from-reports — multi-commit retrofit
@@ -225,7 +225,7 @@ done
 
 The helper (`packages/itil/scripts/update-problem-rfcs-section.sh`) is idempotent: running over a current section is a no-op. Lazy-empty discipline applies (zero traced RFCs → section absent) — capture-rfc invocations always have ≥ 1 trace at this step, so this surface always emits a populated section. The `git add` is conditional on the helper actually modifying the file — `cmp -s` no-op-on-current is the helper's idempotency contract; `git add` of an unchanged file is also a no-op.
 
-**Phase 2 — render `## Stories` body section on the new RFC** (when `--stories` was provided): the just-written RFC file carries `stories: [STORY-NNN, ...]` in frontmatter; the helper `update-rfc-references-section.sh <rfc-file> "Stories"` renders the forward-trace `## Stories` body section from that frontmatter array in execution order per ADR-060 line 270. Lazy-empty discipline applies — when `stories: []` (atomic RFC, JTBD-101 friction guard), the helper omits the section entirely:
+**Phase 2 — render `## Stories` body section on the new RFC** (when `--stories` was provided): the just-written RFC file carries `stories: [STORY-NNN, ...]` in frontmatter; the helper `update-rfc-references-section.sh <rfc-file> "Stories"` renders the forward-trace `## Stories` body section from that frontmatter array in execution order per ADR-060 line 270. Lazy-empty discipline applies — when `stories: []` (an RFC not decomposed into stories), the helper omits the section entirely:
 
 ```bash
 if [ -n "$stories_trace" ]; then
@@ -288,7 +288,7 @@ The two skills share the `/tmp/wr-itil-rfc-capture-grep-${SESSION_ID}` create-ga
 - **`docs/plans/170-rfc-framework-story-map.md`** — Slice 2 task B5.T3 lands this skill.
 - **JTBD-008** — Decompose a Fix Into Coordinated Changes. Primary persona-anchor.
 - **JTBD-001** (extended scope) — change-set-level governance composition.
-- **JTBD-101** (atomic-fix-adopter friction guard) — capture-rfc remains opt-in aside-invocation.
+- **JTBD-101** (atomic-fix-adopter) — every fix goes through an RFC (ADR-071); capture-rfc is a deliberate aside-invocation, not auto-fired (RFC scope is direction-setting per ADR-073).
 - **`docs/rfcs/README.md`** — RFC tier lifecycle index + frontmatter shape spec (Slice 2 tasks B5.T1 + B5.T2 — committed `adc53c8`).
 - **ADR-014** — governance skills commit their own work. Single-commit grain per capture.
 - **ADR-022** — problem lifecycle conventions; RFC lifecycle mirrors.
