@@ -1,6 +1,6 @@
 # Problem 163: `wr-risk-scorer:external-comms` agent emits placeholder marker key on first invocation when prompt doesn't direct shasum computation
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-05-04
 **Priority**: 6 (Medium) — Impact: Moderate (3) x Likelihood: Possible (2)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -80,3 +80,7 @@ Released 2026-05-16 in the same commit as P166. The placeholder-key class is eli
 - **2026-05-04** — Opened by orchestrator's main turn at end of `/wr-itil:work-problems` AFK loop iter 7 per user direction "capture all four now". Skeleton ticket; investigation deferred.
 - **2026-05-13** — Updated by orchestrator's main turn at end of `/wr-itil:work-problems` Step 6.75 halt (Step 2.5b surfacing Q2 + Q3 answers). User direction selected fix shape (a) grant agent narrow Bash for sha256; bundled with TMPDIR-variance fix per Q3. Investigation Tasks updated to reflect direction; Fix Strategy section populated. Adjacent friction empirically observed iter 1 + iter 2 of the current session (every changeset-author Write costs 1 extra round-trip; iter 2 retro hit it explicitly when it could not commit its own retro files until orchestrator-side manual marker pre-bind worked the issue).
 - **2026-05-16** — Fix-strategy reversal. Original 2026-05-13 direction (option a — grant agent narrow Bash) superseded in favour of option b (hook-side compute) per architect + JTBD review under P166. Option b closes both P163 and P166 simultaneously while preserving ADR-013 Rule 2's "agents stay [Read, Glob] only" discipline. Implementation landed in same commit as P166 transition: shared helper `packages/shared/hooks/lib/external-comms-key.sh` derives sha256 from agent prompt's `SURFACE:` + `<draft>` structure; PostToolUse mark hooks consume the helper; agent surface contract no longer requires `EXTERNAL_COMMS_<EVAL>_KEY`. ADR-028 amendment 2026-05-16 documents the reversal explicitly. Transitioned to Verification Pending — awaiting user dogfood confirmation that the placeholder-key class is eliminated.
+
+## Closed 2026-05-26
+
+Closed (Verification Pending → Closed) during the P283 prong-2 drain surfacing, per user direction. **Verification evidence**: incidentally exercised successfully while authoring the P262 changeset — the external-comms evaluators emitted PASS with NO agent-side key computation (the agent no longer emits or computes the marker key), and the hook-side `sha256(DRAFT + '\n' + SURFACE)` derivation matched on the retry Write. Confirms the P166 option-b hook-side-compute fix (which closed P163's reversal) works end-to-end.

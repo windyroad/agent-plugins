@@ -1,6 +1,6 @@
 # Problem 198: external-comms gate marker key cannot be computed by the reviewer agent (Read/Glob/Grep tool surface — no shasum); hash-scope ambiguity adds three recurrences
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-05-15
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -90,3 +90,7 @@ touch "/tmp/claude-risk-<session>/external-comms-voice-tone-reviewed-${KEY}"
 ## Change Log
 
 - **2026-05-17** — Session 4 evidence appended (user direction at session wrap, P078 mechanical action). Pattern recurred **5+ times across iters 3-9 of /wr-itil:work-problems session 4**: agent-emitted EXTERNAL_COMMS_RISK_KEY required manual SHA computation in Bash heredoc + cross-SID marker copy + final BYPASS_RISK_GATE=1 fallback to write legitimately-PASS-verified changesets. Iter 8 surfaced as deviation-candidate; iter 9 documented as Pipeline Instability observation #1 in retro (bundled into P245 coordinating ticket). Two distinct sub-patterns observed: (a) **hook-receives-wrong-key** — agent emits key K1, hook computes expected K2, mismatch fails; workaround: manually compute hook-expected key, seed marker (iters 3, 5, 6, 7); (b) **cross-SID isolation** — agent emits valid key, marker lands in helper-SID directory, hook checks main-SID directory, mismatch fails; workaround: copy marker across SID directories (iters 8, 9). Sub-pattern (b) is the same shape as the Note line 84 above. Ranking-bearing fields unchanged (WSJF cluster unchanged); README.md refresh per P094 conditional-update trigger does not fire.
+
+## Closed 2026-05-26
+
+Closed (Verification Pending → Closed) during the P283 prong-2 drain surfacing, per user direction. **Verification evidence**: incidentally exercised successfully while authoring the P262 changeset — the reviewer agent did NOT need to compute the marker key (hook-side derivation per the external-comms-key.sh shared helper); the evaluators emitted PASS and the hook-side key matched on the retry Write. Confirms the shasum-computed-hook-side fix (released @windyroad/risk-scorer@0.11.0) works end-to-end.

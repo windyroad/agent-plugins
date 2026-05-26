@@ -126,3 +126,7 @@ The system priority list in P124 Phase 3 was chosen for "most-likely-to-fire-on-
 - **ADR-038** — once-per-session announce marker pattern; defines the `<system>-announced-<SID>` shape this helper consumes.
 - **ADR-009** — gate marker lifecycle.
 - 2026-04-28 session evidence: helper-returned SID mismatch documented in P140 ticket body's Composes-with section (`P124 Phase 3 helper system-priority bug observed during P140 capture`).
+
+## Verification note (2026-05-26)
+
+The P173 iter cross-referenced P142 as the SID-mismatch root cause and flagged its 2026-05-06 observations as ambiguous (regression-of-the-fix vs pre-fix-on-stale-cache). **User determination 2026-05-26 (P283 drain surfacing): pre-fix behaviour on an un-refreshed plugin cache — NOT a regression.** The 2026-05-06 observations predate / ran against a cache without the ADR-050 fix, so they support (not contradict) P142's fix. Leaving P142 in Verification Pending awaiting a clean post-fix observation; P260's Option-C implementation will also exercise this surface and provide that evidence.
