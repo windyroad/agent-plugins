@@ -37,13 +37,15 @@ The architect is a read-only reviewer (`Read`/`Glob`/`Grep`). It cannot call `As
 
 Chosen: **Shape B + a thin slice of Shape C; Shape A rejected.**
 
-- **Shape B (primary):** add a third verdict type to the architect agent — **Needs Direction**. When the architect detects an undocumented decision with 2+ viable options AND no pinned direction, it emits a structured block naming (a) the decision question and (b) the candidate options (each grounded in what it read, per ADR-026) — instead of auto-picking or prose-asking. When direction IS pinned, it emits a "direction already given" note and the main agent acts without asking.
+> **Amendment 2026-05-27 (ADR-074):** the Needs-Direction verdict and its translation must name and confirm the decision's **substance** (the actual chosen option), not a meta/grain framing question (e.g. "one ADR or two?"). Confirming a grain question alone does NOT satisfy "confirm before recording." See the clauses below + ADR-074 (confirm-substance-before-build), which also adds the build-upon enforcement surface.
+
+- **Shape B (primary):** add a third verdict type to the architect agent — **Needs Direction**. When the architect detects an undocumented decision with 2+ viable options AND no pinned direction, it emits a structured block naming (a) the decision question and (b) the candidate options (each grounded in what it read, per ADR-026) — instead of auto-picking or prose-asking. **The named options must be the *substantive* choice (the load-bearing options among which the user must pick), not a meta/grain framing question** (ADR-074). When direction IS pinned, it emits a "direction already given" note and the main agent acts without asking.
 
   **Pinned-direction sources** (shared verbatim between this ADR and the agent prompt to prevent drift) — direction counts as given when the option is fixed by any of: a same-turn pin, a same-session pin, an accepted ADR, `RISK-POLICY.md` appetite, or a CLAUDE.md mandatory rule.
 
   **Negative bound (inverse-P078 guard):** Needs Direction does NOT fire when only **one** viable option exists (the "obvious choice" / "only one viable option" case already in agent.md's "When NOT to flag" list). Over-firing on obvious choices is exactly the over-ask trap CLAUDE.md P132 warns against.
 
-- **Main-agent translation contract:** on a Needs-Direction verdict, the main agent (or the calling skill) translates the named question + options into an `AskUserQuestion` call — never a prose ask — before recording the decision.
+- **Main-agent translation contract:** on a Needs-Direction verdict, the main agent (or the calling skill) translates the named question + options into an `AskUserQuestion` call — never a prose ask — before recording the decision. **The ask must surface the substantive option choice; confirming only a meta/grain question (file split, naming, ADR count) does NOT satisfy this contract.** Per ADR-074, the substance must additionally be confirmed before any *dependent work* is built on the decision — recording a born-`proposed` decision is not a licence to build on its unconfirmed substance.
 
   **AFK carve-out (inherits ADR-044):** under an AFK orchestrator (`/wr-itil:work-problems`) that cannot ask mid-loop, a Needs-Direction verdict queues to the iteration's `outstanding_questions` for batched return-presentation rather than blocking the loop or guessing — preserving JTBD-006.
 

@@ -50,6 +50,8 @@ Chosen: **Option 1 (flat scalars)** — confirmed by the user via `AskUserQuesti
 6. **Confirmation gate.** A `capture-adr` `.proposed.md` skeleton MUST NOT transition to `accepted` without a `create-adr` / `AskUserQuestion` confirm pass — closing the "auto-decided skeleton stands as a decision" gap.
 7. **Dogfood.** ADR-066 itself is recorded through the asking flow and born `human-oversight: confirmed` (the architect PASSed; the user confirmed the marker shape via `AskUserQuestion`).
 
+> **Amendment 2026-05-27 (ADR-074) — marker ≠ implementation licence.** The "born-`proposed`, drain later" model governs the *recording/existence* of a decision and the *marker* alone. It is **NOT** a licence to build dependent work (other ADRs, RFC slices, invariants, code) on the decision's **substance** before that substance is human-confirmed. P315's root cause was exactly this conflation — "don't born-confirm the marker" was misread as "OK to implement before confirmation," and dependent work (ADR-060 I13 + the RFC-005 retrofit) was built on ADR-072/073 before the drain rejected them. The drain catching an unconfirmed decision is the backlog safety net; it is not the intended first point of substance-confirmation for a decision being actively built upon. See ADR-074 (confirm-substance-before-build) for the build-upon enforcement contract.
+
 ### Precedent citations (per architect review)
 
 - **ADR-009** is cited for the **never-re-ask principle only**. This marker does **NOT** inherit ADR-009's TTL / drift-hash / subprocess-slide lifecycle — those govern *ephemeral* `/tmp` gate markers and are the opposite of what is wanted here. The oversight marker is durable, git-tracked, and write-once-permanent.

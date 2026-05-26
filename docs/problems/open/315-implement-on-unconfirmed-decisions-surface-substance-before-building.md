@@ -32,14 +32,31 @@ When extracting/recording a genuine decision (≥2 viable options, framework can
 - **Frequency**: the "born-proposed + implement, drain later" pattern is the documented ADR-066 flow, so this can recur whenever genuine decisions are recorded mid-implementation.
 - **Severity**: Moderate-to-significant — built-on-sand rework when the drain rejects (this session: I13 + RFC-005 retrofit + RFC-006 slices against a wrong gate design).
 
+## Confirmed design (2026-05-27 — user-ratified via AskUserQuestion)
+
+The contract substance was human-confirmed BEFORE any artifact was built — dogfooding the fix on its own fix. Architect returned a Needs-Direction verdict naming three encoding options; the user confirmed **Option A** via `AskUserQuestion`.
+
+- **The contract (ADR-074):** for a genuine choice among ≥2 viable options the framework cannot resolve (ADR-044 cat-1), the **substantive chosen option** must be human-confirmed via `AskUserQuestion` **before any dependent work is built on it**. Confirming a meta/grain question (e.g. "one ADR or two?") does NOT satisfy this. "Decision recorded" (born-`proposed` marker OK per ADR-066) is distinct from "decision built upon" (needs substance-confirm first).
+- **Enforcement surface 1 — architect-verdict layer:** thin amend to ADR-064 — Needs-Direction must name the *substantive* choice, not a grain question; "confirm before recording" is not satisfied by a meta question alone.
+- **Enforcement surface 2 — process guard:** at the `/wr-itil:work-problems` + `/wr-itil:manage-problem` propose-fix (ADR-060 I13) surface — check whether the fix builds on a born-`proposed` decision whose substance is unconfirmed; if so, surface via `AskUserQuestion` (interactive) or queue to `outstanding_questions` (AFK) before dependent work lands. **NOT** a PreToolUse hook (semantic judgment → would over-fire).
+- **ADR-066 carve-out:** the born-`proposed` marker covers recording, not implementation licence.
+- **ADR-044 composition:** the substance-confirm-before-build ask is cat-1 and is EXCLUDED from the lazy-AskUserQuestion regression metric; trigger is narrow (only when a ≥2-option decision is about to be BUILT ON) — never obvious/single-option/pinned (inverse-P078 / P132 guard).
+
+## Fix Strategy
+
+**Kind**: improve — **Shape**: ADR + amendments + skill process-guard.
+
+- **Design layer — DONE 2026-05-27 (this session, committed):** ADR-074 created born-`human-oversight: confirmed`; ADR-064 amended (grain-vs-substance clause at Shape B + translation contract); ADR-066 carve-out clause (marker ≠ implementation licence). Architect Needs-Direction + user AskUserQuestion confirm; JTBD PASS.
+- **Implementation layer — remaining (rides an RFC traced to this problem per ADR-071):** build the propose-fix process guard in the `/wr-itil:work-problems` + `/wr-itil:manage-problem` SKILLs (detect build-on-unconfirmed-born-`proposed`-decision → AskUserQuestion / `outstanding_questions`); sharpen the `wr-architect:agent` Needs-Direction prompt to name substance; add the ADR-044 lazy-count exclusion in `check-ask-hygiene.sh`; behavioural tests per ADR-052 (blocked on P176 skill-invocation harness for the skill-flow assertions; the agent-prompt + hygiene-exclusion surfaces are testable now).
+
 ## Root Cause Analysis
 
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems.
-- [ ] Decide the contract: for a genuine new decision the framework can't resolve, MUST its substance be human-confirmed (AskUserQuestion at decision time) before dependent work is built? How does this compose with ADR-066's born-proposed-then-drain (marker) — i.e. born-proposed is fine for the MARKER, but implementation must wait for substance-confirmation. Distinguish "decision recorded" (born-proposed OK) from "decision built upon" (needs substance-confirm).
-- [ ] Where does the contract live: ADR-064 (architect Needs-Direction must name the substantive choice, not just defer to a meta-question) + a run-retro / work-problems guard? Possibly an amendment to ADR-064 or a new ADR.
-- [ ] Distinguish from lazy-AskUserQuestion (ADR-044 Step 2d): this is the INVERSE — under-asking on substance, not over-asking. The fix must not swing into over-asking; the trigger is specifically "a genuine ≥2-option decision is about to be BUILT ON."
+- [x] Decide the contract: substance must be human-confirmed before dependent work; born-`proposed` is fine for the MARKER only. → **ADR-074** (decided + confirmed 2026-05-27).
+- [x] Where does the contract live: new ADR + thin amend ADR-064 + carve-out ADR-066, enforced at architect-verdict layer + propose-fix/I13 process guard. → **Option A confirmed** via AskUserQuestion 2026-05-27.
+- [x] Distinguish from lazy-AskUserQuestion (ADR-044 Step 2d): recorded in ADR-074 as the cat-1 lazy-count exclusion + narrow build-on trigger (inverse-P078 guard).
 
 ## Dependencies
 
