@@ -15,3 +15,10 @@ Forward-chronology archive of hooks-and-gates.md entries dated 2026-05-04 / 05. 
 ## What Will Surprise You
 
 (Pre-2026-05-04 surprises in [`hooks-and-gates-archive-pre-2026-05-04.md`](./hooks-and-gates-archive-pre-2026-05-04.md).)
+
+## Rotated 2026-05-26 (Tier-3 split-by-date — oldest entries from hooks-and-gates.md; span 2026-04-19→05-18)
+
+- **Four edit gates fire on every edit**: architect review, JTBD review, WIP risk assessment, and TDD enforcement. Each requires its own agent delegation before the edit is allowed. Plan for this overhead. <!-- signal-score: +2 | last-classified: 2026-05-25 | first-written: 2026-04-19 -->
+- **Risk-scorer agents are tool-restricted to `Read + Glob`** — no `AskUserQuestion`, no `EnterPlanMode` (sub-agents via Task can't enter plan mode either). Any "scorer asks the user" design must split scorer/orchestrator: scorer emits structured markers, the calling skill/primary owns the interaction (P021). <!-- signal-score: +2 | last-classified: 2026-05-25 | first-written: 2026-04-19 -->
+- **`BYPASS_*_GATE=1` does not reach a PreToolUse hook from the same Bash call** (P173 verifying) — inline and `export; git commit` both fail since the hook runs before git. Working pattern: write a wrapper script (`export BYPASS_*_GATE=1; git commit -F msg`) and invoke `bash /tmp/commit-<ticket>.sh`; the hook fires on the outer `bash ...` text and the export is visible to the child shell. Use only when bypass conditions are legitimately met. <!-- signal-score: 0 | last-classified: 2026-05-25 | first-written: 2026-05-16 -->
+- **`/wr-itil:capture-problem` Step 2 dedup listing truncates at ~top-10** (P252 verifying) — `match_count` is total but the agent inspects only the first ~10, so a duplicate beyond that is missed. When `match_count > 10`, `grep -liE '<kw1>|<kw2>|<kw3>'` all matches, or use `/wr-itil:manage-problem` (wider dedup). <!-- signal-score: +2 | last-classified: 2026-05-25 | first-written: 2026-05-18 -->

@@ -20,3 +20,9 @@ Cold-storage one-line stubs of releases-and-ci.md entries dated 2026-04-19 throu
 - **GNU `cp -R . dest` refuses source-into-itself; BSD on macOS allows it silently** — bats fixtures snapshotting a working dir must target OUTSIDE the source tree (`SNAP=$(mktemp -d); cp -R "$TEST_DIR/." "$SNAP"`). Reproduce via `docker run --rm -v "$PWD:/work" -w /work bats/bats:latest <fixture>`. (P127) <!-- signal-score: 0 | last-classified: 2026-05-25 | first-written: 2026-04-26 -->
 
 > Archived from `releases-and-ci.md` on 2026-05-13 per ADR-040 Tier 3 budget MUST_SPLIT. These entries remain authoritative; load alongside `releases-and-ci.md` when full historical context is needed.
+
+## Rotated 2026-05-26 (Tier-3 split-by-date — oldest/settled entries from releases-and-ci.md)
+
+- **GITHUB_TOKEN pushes don't trigger pull_request events**. The release preview uses `workflow_run` trigger instead. If adding new PR-triggered workflows for changesets PRs, use the same pattern.
+- **npm won't overwrite a published version**. Preview publishes use pre-release suffixes (e.g., `0.1.2-preview.13`) to avoid blocking `changeset publish` from publishing the clean version to `latest`.
+- **Multi-day commit accumulation surfaces latent test-fixture regressions on first push** — the regression often traces to an earlier commit in the chain that wiped a fixture source without a matching test sweep. Before wiping/renaming files referenced by tests, sweep `grep -r '<deleted-name>' packages/*/{scripts,skills,hooks}/**/test` first; synthesize fixture-local equivalents inline so tests aren't coupled to canonical state. Sibling to P116 (batched-push hazard). <!-- signal-score: 0 | last-classified: 2026-05-25 | first-written: 2026-05-05 -->

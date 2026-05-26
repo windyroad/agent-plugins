@@ -16,11 +16,6 @@ When implementing a ratified **unconditional / no-carve-out / no-exemption** dec
 
 `wr-itil-reconcile-rfcs docs/rfcs` emits spurious `MISSING_REVERSE_TRACE RFC-NNN in PNNN ## RFCs` for problem tickets that DO carry the reverse-trace, because its reverse-trace check globs the flat `docs/problems/*.md` only and misses the per-state subdirs (`open/`, `verifying/`, …) — the RFC-002-class dual-tolerant-glob gap already fixed in `update-problem-rfcs-section.sh`. Trust direct inspection of the ticket's `## RFCs` section (or the helper that renders it) over the reconciler's MISSING lines until fixed. Pre-existing rfcs-README rankings/closed drift (RFC-001/002/003/004) is separate + real. See **P312**. <!-- signal-score: 0 | last-classified: 2026-05-26 | first-written: 2026-05-26 -->
 
-### Dual-tolerant flat + per-state-subdir enumeration must dedup on ticket ID, NOT basename (2026-05-26)
-
-When widening a script to walk both the flat (`docs/problems/<NNN>-*.<state>.md`) and per-state-subdir (`docs/problems/<state>/<NNN>-*.md`) layouts per RFC-002 T4 / ADR-031, dedup on **ticket ID** (`${base%%-*}`), not basename — the subdir layout drops the `.<state>` suffix, so the same ticket has different basenames across layouts (`182-foo.open.md` vs `182-foo.md`) and a basename key double-counts. Per-state subdir wins (run its loop second). `reconcile-readme.sh` keys on ID for this reason; architect caught it on the P182 design pass. Verify any NEW dual-tolerant consumer keys on ID (existing ones — evaluate-graduation, update-jtbd-references, edit-gates — are correct).
-<!-- signal-score: 0 | last-classified: 2026-05-26 | first-written: 2026-05-26 -->
-
 - **Risk appetite is Low (4)**. Changes scoring Medium (5+) need explicit acknowledgement. See `RISK-POLICY.md`.
 - **All ADRs in `docs/decisions/` are still `.proposed.md`** — none ratified. Amendments are cheap: prefer amending over superseding. When a P-problem intersects a proposed ADR, revise the ADR rather than adding a compatibility clause.
 - **ADR-002 plugin dependency graph lists `@windyroad/tdd` as standalone.** Cross-plugin features must update the graph explicitly; don't silently add deps.
