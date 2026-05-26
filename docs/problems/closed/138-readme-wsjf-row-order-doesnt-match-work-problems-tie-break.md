@@ -1,6 +1,6 @@
 # Problem 138: `docs/problems/README.md` WSJF Rankings table row order doesn't match `/wr-itil:work-problems`'s tie-break selection — users assume the orchestrator is broken
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-28
 **Priority**: 10 (High) — Impact: Minor (2) x Likelihood: Almost certain (5)
 **Effort**: M — update render logic in `manage-problem` SKILL.md Step 5 P094 + Step 7 P062 + `/wr-itil:review-problems` to sort rows in tie-break order (or add tie-break-input columns); add bats coverage; touches 3 SKILL.md files + the rendered README. No new ADR needed — the tie-break rule already lives in `work-problems` SKILL.md Step 3 and ADR-044's Prioritisation row.
