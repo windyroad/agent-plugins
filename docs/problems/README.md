@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-05-26 **P177 Known Error → Verification Pending** — the P141 changeset-discipline gate now recognises `docs/changesets-holding/<name>.md` held-window entries (option a, fix commit `a8823be`) released in `@windyroad/itil@0.35.13`; held-window-bound `packages/<plugin>/` source now lands in a single commit (no more 2-commit work-then-move workaround). The K→V transition was deferred at release time per ADR-018 and never executed, leaving the ticket stale in `known-error/` (the prior salvage+release session ended after retro without it) — this transition reconciles the lifecycle to the released reality. Awaiting user verification. Excluded from WSJF (multiplier 0) per ADR-022. Prior README-reconciliation fragment (P307/P308/P309) rotated to README-history.md per P134.
+> Last reviewed: 2026-05-26 **README reconciled** — 1 drift entry corrected: P310 (open on disk, missing from WSJF Rankings — committed cross-session deferred-refresh drift from capture-problem). Reconciliation contract per P118 + ADR-014 amended ("Reconciliation as preflight robustness layer"). Prior P177 K→V fragment rotated to README-history.md per P134.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -115,6 +115,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 1.5 | P257 | voice-tone hook should adopt risk-scorer's prompt-derivation pattern for EXTERNAL_COMMS_VOICE_TONE_KEY — closes the evaluator-hook asymmetry; user-approved deviation at session 6 loop-end (captured via /wr-itil:capture-problem; Priority/Effort deferred to next /wr-itil:review-problems) | 3 Med | Open | M | 2026-05-18 |
 | 1.5 | P276 | external-comms gate marker over-fires on PASS-class content edits (P073 surface) (captured 2026-05-19 via /wr-itil:capture-problem; deferred re-rate) | 3 Med | Open | M | 2026-05-19 |
 | 1.5 | P285 | install-updates global-cache-refresh simplification left stale references to the retired consent gate + Step 6.5 bootstrap across downstream surfaces (deferred re-rate) | 3 Med | Open | M | 2026-05-25 |
+| 1.5 | P310 | RFCs carry independent decisions invisible to the ADR-066 human-oversight net | 3 Med | Open | M | 2026-05-26 |
 | 1.5 | P045 | Auto plugin install after governance release (deferred install on next session start per 2026-04-20 direction) | 6 Med | Open | L | 2026-04-19 |
 | 1.5 | P194 | ADRs accumulate forward-chronology evidence inline (Phase 2 dogfood evidence, amendment history, cross-iter cross-references) — `decisions` bucket dominates context at 41% / 1.3 MiB | 6 Med | Open | L | 2026-05-15 |
 | 1.5 | P235 | Briefing Signal-vs-Noise pass backlog — 146 entries across 17 topic files never scored per ADR-026 citation (P234 remediation: scheduled future surface for the deferred Signal-vs-Noise pass) | 6 Med | Open | L | 2026-05-17 |
