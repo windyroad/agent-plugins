@@ -15,7 +15,7 @@ stories: []
 **Reported**: 2026-05-17
 **Problems**: P251
 **ADRs**: ADR-071 (unconditional RFC-first — the governing decision), ADR-072 (fix-time gate placement: Open→Known Error), ADR-073 (orchestrator dispatch hard-block), ADR-070 (RFCs hold no independent decisions — why this RFC carries none), ADR-060 (parent framework; I13 invariant added under RFC-006), ADR-051 (load-bearing structural hook), ADR-052 (behavioural-test coverage), ADR-042 (held-changeset graduation), ADR-044 (decision-delegation contract)
-**JTBD**: JTBD-008 (primary — decompose-fix-into-coordinated-changes), JTBD-001 (governance composition), JTBD-006 (AFK orchestrator throughput), JTBD-101 (atomic-fix-adopter — friction guard now the thin-RFC path per ADR-071)
+**JTBD**: JTBD-008 (primary — decompose-fix-into-coordinated-changes), JTBD-001 (governance composition), JTBD-006 (AFK orchestrator throughput), JTBD-101 (atomic-fix-adopter — the carve-out is removed; atomic fixes go through the same RFC per ADR-071)
 
 > **Retrofitted 2026-05-26 under RFC-006 (ADR-070).** This RFC originally carried its own decisions (facets F1–F7) inline, plus a "Considered Options / Alternatives Rejected" section — exactly the P310 blind spot ADR-070 closes. It has been reduced to **scope + decomposition + traces**. The decisions it used to hold now live in the ADR ledger: gate placement → **ADR-072**, orchestrator dispatch stance → **ADR-073**, RFC-first-is-unconditional → **ADR-071** (which **repudiated** the atomic-fix carve-out the original F2/F7/I13 carried). The I13 invariant text is added to ADR-060 under RFC-006 slice 4. RFC-005 now ships only the **gate mechanism** (schema + hook + skill enforcement + bats); it makes no decisions of its own.
 
@@ -34,7 +34,7 @@ RFC-005 ships the **mechanism** that enforces the Problem→RFC trace at fix-tim
 RFC-005 extends ADR-060's I-series with the symmetric Problem→RFC trace at fix-time (the I13 invariant, added to ADR-060 under RFC-006 slice 4). It ships the **enforcement mechanism only** — every choice among ≥2 viable options that this RFC used to embed is now an ADR (per ADR-070):
 
 - **Gate placement** — fires at `Open → Known Error` and at the `git commit` that lands the staged transition. Decision: **ADR-072**.
-- **Unconditional, no carve-out** — every problem fix traces to an RFC; there is no effort threshold and no `--rfc-deferred` override. Decision: **ADR-071** (repudiates the original F2 carve-out). The atomic-fix-adopter friction guard (JTBD-101) is preserved as the thin-RFC (`stories: []`) minimal-ceremony path, not as an exemption from RFC trace.
+- **Unconditional, no carve-out** — every problem fix traces to an RFC; there is no effort threshold and no `--rfc-deferred` override. Decision: **ADR-071** (repudiates the original F2 carve-out). Atomic fixes go through the **same** RFC as any fix — there is no lighter, thin, or scaled-down path; the JTBD-101 atomic-fix-adopter carve-out is removed, not relocated.
 - **Orchestrator dispatch** — `/wr-itil:work-problems` Step 5 hard-blocks an RFC-less fix and advances to the next-highest-WSJF candidate (the loop does not terminate), surfacing `/wr-itil:capture-rfc P<NNN>` recovery routing. Decision: **ADR-073**.
 - **Structural enforcement** — the gate ships as a PreToolUse:Bash hook on day one, not advisory prose. Application of **ADR-051** (load-bearing-from-the-start).
 - **Story-map composition deferred** — I13 enforces the RFC trace only; story-map presence at fix-time is transitively assured by ADR-060 I7/I8 and is out of scope here. Scope boundary; revisit only if RFC-003 ships and dogfood evidence shows a gap.
@@ -70,6 +70,6 @@ Ordered slice decomposition (one-purpose-per-commit per ADR-014). Slices land in
 - **ADR-060** — parent framework. RFC-005 ships the symmetric Problem→RFC direction; the I13 invariant text lands in ADR-060 under RFC-006 slice 4.
 - **ADR-051** — load-bearing-from-the-start; structural hook over prose-only.
 - **ADR-052** — behavioural-tests-default; B6 task contract.
-- **JTBD-008** — primary anchor. **JTBD-101** — atomic-fix-adopter friction guard, now the thin-RFC path (per ADR-071). **JTBD-006** — AFK orchestrator throughput (ADR-073 dispatch stance). **JTBD-001** — per-edit governance composition.
+- **JTBD-008** — primary anchor. **JTBD-101** — atomic-fix-adopter; the carve-out is removed (per ADR-071), atomic fixes go through the same RFC. **JTBD-006** — AFK orchestrator throughput (ADR-073 dispatch stance). **JTBD-001** — per-edit governance composition.
 - **P165** — sibling structural hook shape; PreToolUse:Bash gate on staged ticket surfaces.
 - **P196 / P189** — sibling premature-completion / fictional-defer failure modes at the RFC/SKILL surfaces.

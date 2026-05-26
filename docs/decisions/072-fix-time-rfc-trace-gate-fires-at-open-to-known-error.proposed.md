@@ -54,7 +54,7 @@ This ADR records the placement decision. ADR-060's I13 invariant (added under RF
 
 ### Bad
 
-- A problem cannot reach `Known Error` until its RFC exists — a small up-front ceremony cost, accepted under ADR-071 (mitigated by the thin-RFC `stories: []` path).
+- A problem cannot reach `Known Error` until its RFC exists — an up-front ceremony cost, accepted under ADR-071. There is no lighter path; every fix goes through the same RFC.
 
 ## Confirmation
 

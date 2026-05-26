@@ -25,7 +25,7 @@ This ADR decides that the RFC is the mandatory, unconditional vehicle for every 
 
 - RFC-first trace must be unconditional (P251) — a carve-out is precisely the surface where unratified scope decisions hide (the atomic-fix carve-out being the concrete instance).
 - Uniformity + auditability: every fix traceable through one RFC primitive, with no exemption class to drift.
-- ADR-060 already provides the thin-RFC landing pad (an atomic fix is "an RFC with empty `stories: []`"), so unconditional RFC-first does not require heavy ceremony for small fixes.
+- ADR-060 already provides the RFC primitive for every fix shape — an atomic single-commit fix is captured as an RFC like any other (its `stories:` array is simply empty when the work is not decomposed into stories). RFC-first applies uniformly; there is no separate, lighter, or "thin" path for small fixes.
 
 ## Considered Options
 
@@ -40,7 +40,9 @@ Chosen option: **"Every problem is fixed only via an RFC — no carve-out, no ef
 Concretely:
 
 - **RFC-first is mandatory and unconditional.** Every problem is fixed only via an RFC. There is no atomic-fix carve-out and no effort threshold. This repudiates RFC-005 F2/F7/I13 and its JTBD-008/JTBD-101 anchor.
-- **An atomic single-commit fix becomes "an RFC with an empty `stories: []` list"** — the fallback ADR-060 already provides (lines 268/311/316) — not "a fix that skips the RFC." The scale-down *value* for atomic-fix adopters (JTBD-101) is preserved by relocating it to a minimal-ceremony RFC, not deleted.
+- **An atomic single-commit fix is captured as an RFC like any other** — its `stories:` array is simply empty when the work is not decomposed into stories (the ADR-060 cardinality at lines 268/311/316). This is the **same RFC process**, not a lighter, "thin", or scaled-down variant. The JTBD-101 atomic-fix-adopter carve-out is **removed, not relocated** — there is no preserved reduced-ceremony value for atomic fixes.
+
+> **Amendment 2026-05-26 (direct user correction; P311).** The original wording of this outcome and several consequences framed the empty-`stories: []` shape as a "thin / minimal-ceremony RFC" that "preserved the scale-down value for atomic-fix adopters." That softening was disavowed by the user: *"No. Same RFC. Not scaled down. No short cuts."* / *"No 'thin RFC'. No short cuts."* The softening has been struck throughout. **The unconditional core decision below is unchanged and reinforced** — every problem is fixed only via an RFC, no carve-out, no effort threshold, and no lighter path. `human-oversight: confirmed` is retained: this correction IS the oversight act.
 
 This ADR records the decision. A separate RFC (tracing P251 + P310) scopes the implementation — the Problem→RFC fix-time gate and the JTBD-008/JTBD-101 amendments.
 
@@ -54,11 +56,11 @@ This ADR records the decision. A separate RFC (tracing P251 + P310) scopes the i
 
 ### Neutral
 
-- Atomic fixes shift from "no RFC" to "thin RFC with empty `stories: []`" — the adopter scale-down value is relocated, not lost.
+- Atomic fixes shift from "no RFC" to the same full RFC as any fix (its `stories:` array empty when undecomposed). No reduced-ceremony or scale-down value is preserved — atomic and multi-commit fixes pay the same RFC ceremony.
 
 ### Bad
 
-- A per-fix ceremony floor lands on the speed-optimised solo-developer / atomic-fix-adopter personas (the carve-out previously waived it). Mitigated by the thin-RFC path; the trade (uniformity + auditability over per-fix speed) is user-ratified.
+- A per-fix RFC ceremony floor lands on the speed-optimised solo-developer / atomic-fix-adopter personas (the carve-out previously waived it). There is **no lighter path** that mitigates this — the trade (uniformity + auditability over per-fix speed) is user-ratified: *"No short cuts. Same RFC."*
 - One-time amendment cost: JTBD-008 (lines 21/26/44) + JTBD-101 (line 30) carve-out struck/reframed.
 
 ## Confirmation
@@ -66,13 +68,13 @@ This ADR records the decision. A separate RFC (tracing P251 + P310) scopes the i
 - A Problem→RFC fix-time gate enforces RFC-first with no effort carve-out (a problem fix cannot commence/commit without an RFC trace).
 - JTBD-008 (lines 21/26/44) + JTBD-101 (line 30) no longer contain the atomic-fix carve-out; both edits route through the ADR-068 oversight-confirm flow (clear-and-reconfirm JTBD-101 which carries a marker; born-confirm JTBD-008 which does not).
 - RFC-005's F2/F7/I13 carve-out is removed under the implementation RFC.
-- The thin-RFC path (empty `stories: []`) is documented as the atomic-fix shape.
+- JTBD-008 + JTBD-101 document that atomic fixes go through the **same** RFC as any fix — explicitly NOT a thin / minimal-ceremony / scaled-down path.
 
 ## Pros and Cons of the Options
 
 ### Option 1 — Every fix via RFC, no carve-out
 
-- Good: unconditional, uniform, auditable; no exemption class to drift; reuses the thin-RFC fallback.
+- Good: unconditional, uniform, auditable; no exemption class to drift; one RFC process for every fix shape.
 - Bad: per-fix ceremony floor on speed-optimised personas; one-time JTBD amendment cost.
 
 ### Option 2 — Keep the effort-threshold carve-out
@@ -87,7 +89,7 @@ This ADR records the decision. A separate RFC (tracing P251 + P310) scopes the i
 
 ## Reassessment Criteria
 
-Revisit if the per-fix ceremony floor proves to materially slow the solo-developer / atomic-fix-adopter personas in measured practice (e.g. the thin-RFC path is not actually thin), or if a class of trivial fixes emerges where even a thin RFC adds no auditability value.
+Revisit if the per-fix RFC ceremony floor proves to materially slow the solo-developer / atomic-fix-adopter personas in measured practice, or if a class of trivial fixes emerges where an RFC adds no auditability value. Any such revisit must come back to the user as a decision — it MUST NOT be resolved by silently re-introducing a lighter / thin / scaled-down path; that is the P311 failure mode.
 
 ## Related
 

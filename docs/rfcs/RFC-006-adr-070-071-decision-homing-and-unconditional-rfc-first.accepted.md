@@ -15,11 +15,11 @@ stories: []
 **Reported**: 2026-05-26
 **Problems**: P310, P251
 **ADRs**: ADR-070 (RFCs hold no independent decisions), ADR-071 (every fix goes through an RFC), ADR-072 (fix-time gate placement), ADR-073 (orchestrator dispatch hard-block), ADR-060 (parent framework — amended), ADR-068 (JTBD oversight re-confirm flow), ADR-052 (behavioural-test enforcement surface)
-**JTBD**: JTBD-008 (decompose-fix-into-coordinated-changes — carve-out reframed), JTBD-101 (extend-suite — atomic-fix-adopter friction guard reframed)
+**JTBD**: JTBD-008 (decompose-fix-into-coordinated-changes — carve-out struck), JTBD-101 (extend-suite — atomic-fix-adopter carve-out struck)
 
 ## Summary
 
-Implement the two ratified, born-confirmed sibling decisions ADR-070 (RFCs hold no independent decisions) and ADR-071 (every fix goes through an RFC — no atomic-fix carve-out, no effort threshold). The work re-homes RFC-005's genuine decisions out to the ADR ledger (so they enter the ADR-066 oversight net), repudiates the disavowed atomic-fix carve-out, reframes the JTBD-008/JTBD-101 carve-out language into the thin-RFC minimal-ceremony path, amends ADR-060's permissive line-97 clause + adds the unconditional fix-time I13 invariant, ships the ADR-052 enforcement test, and retro-fits a thin RFC for P260 so its held `@windyroad/itil` changeset can release under the new unconditional gate. This RFC dogfoods ADR-071: the decision-homing fix itself goes through an RFC.
+Implement the two ratified, born-confirmed sibling decisions ADR-070 (RFCs hold no independent decisions) and ADR-071 (every fix goes through an RFC — no atomic-fix carve-out, no effort threshold). The work re-homes RFC-005's genuine decisions out to the ADR ledger (so they enter the ADR-066 oversight net), repudiates the disavowed atomic-fix carve-out, strikes the JTBD-008/JTBD-101 carve-out language entirely (every fix goes through the **same** RFC — no thin / scaled-down / minimal-ceremony path), amends ADR-060's permissive line-97 clause + adds the unconditional fix-time I13 invariant, ships the ADR-052 enforcement test, and retro-fits an RFC for P260 so its held `@windyroad/itil` changeset can release under the new unconditional gate. This RFC dogfoods ADR-071: the decision-homing fix itself goes through an RFC.
 
 ## Driving problem trace
 
@@ -33,10 +33,10 @@ RFC-006 discharges ADR-070's and ADR-071's Confirmation criteria. It holds **no 
 In scope:
 
 - **Decision-homing (ADR-070).** Extract RFC-005's genuine decisions (the facets that recorded "alternatives rejected") into the ADR ledger; reduce RFC-005 to scope + decomposition + traces. F1 → ADR-072, F4 → ADR-073 (shipped in slice 1a). F2 (atomic-fix carve-out) is repudiated by ADR-071, struck not extracted. F3 (`rfcs:` problem-frontmatter schema), F5 (PreToolUse hook surface — application of ADR-051), F6 (story-map composition deferral — scope boundary), F7 (I13 invariant text — the ADR-060 amendment) remain RFC-resident decomposition.
-- **Carve-out repudiation (ADR-071).** Strike/reframe the atomic-fix carve-out in JTBD-008 + JTBD-101 into the thin-RFC (empty `stories: []`) minimal-ceremony path, routed through the ADR-068 oversight re-confirm flow.
+- **Carve-out repudiation (ADR-071).** Strike the atomic-fix carve-out in JTBD-008 + JTBD-101 entirely — every fix goes through the **same** RFC, with no thin / scaled-down / minimal-ceremony path; routed through the ADR-068 oversight re-confirm flow.
 - **Framework amendment.** Delete ADR-060 line-97's permissive half (RFC-internal decisions skip ADR capture); retain + reframe its protective half (pure sequencing is not an ADR); add the unconditional fix-time I13 invariant.
 - **Enforcement surface.** Strip the "Considered Options / Alternatives Rejected" section from the RFC template + capture-rfc + manage-rfc; ship the ADR-052 behavioural lint (no RFC body carries a rejected-alternatives block without a matching `adrs:` reference).
-- **Backfill.** Retro-fit a thin RFC for P260 so its held `@windyroad/itil` changeset releases under the new unconditional gate.
+- **Backfill.** Retro-fit an RFC for P260 so its held `@windyroad/itil` changeset releases under the new unconditional gate.
 
 Out of scope (deferred, per F6 boundary): composing story-map presence into the fix-time gate (transitively assured by ADR-060 I7/I8; revisit if RFC-003 ships and dogfood evidence shows a gap). The structural I13 hook + `/wr-itil:manage-problem`/`work-problems` enforcement code is named in the task decomposition but ships under the same held-changeset window as the rest of the RFC framework per ADR-042.
 
@@ -46,11 +46,11 @@ Ordered slice decomposition (one coherent purpose per commit per ADR-014; each c
 
 - [x] **Slice 1a** — Record ADR-072 (fix-time gate placement, from F1) + ADR-073 (orchestrator dispatch hard-block, from F4). Born proposed, no oversight marker. (commit `b30d08f`)
 - [ ] **Slice 1b** — Retrofit RFC-005: strike the embedded F1–F7 Decision/Rationale blocks + the "Considered Options / Alternatives Rejected" section; F2 carve-out struck; F1→ADR-072 / F4→ADR-073 references; de-carve-out the B1–B10 task list; add ADR-070/071/072/073 to `adrs:` frontmatter.
-- [ ] **Slice 2** — Amend JTBD-008 (lines 21/26/44 — born-confirm) + JTBD-101 (line 30 — clear-and-reconfirm) to reframe the atomic-fix carve-out into the thin-RFC minimal-ceremony path. Route through the ADR-068 oversight-confirm flow.
+- [ ] **Slice 2** — Amend JTBD-008 (lines 21/26/44 — born-confirm) + JTBD-101 (line 30 — clear-and-reconfirm) to strike the atomic-fix carve-out entirely (every fix goes through the **same** RFC — no thin / scaled-down path). Route through the ADR-068 oversight-confirm flow.
 - [ ] **Slice 3** — Drop the "Considered Options / Alternatives Rejected" section from the RFC body-structure template (`docs/rfcs/README.md`) + capture-rfc + manage-rfc; add explicit negative guidance per ADR-070 (contested choices reference governing ADRs).
 - [ ] **Slice 4 + 6** — Amend ADR-060: delete line-97's permissive half + retain/reframe the protective half (slice 6); add the unconditional fix-time I13 invariant (slice 4); append the `2026-05-26` `prior-amendments:` entry. Mirror the line-97 fix in `docs/rfcs/README.md` line-57 `adrs` field semantics.
 - [ ] **Slice 5** — Ship the ADR-052 behavioural lint: a checker script + bats asserting no RFC body in `docs/rfcs/` carries a rejected-alternatives block without a matching `adrs:` reference (artefact-state behavioural over the corpus + synthetic fixtures).
-- [ ] **Slice 7** — Retro-fit a thin RFC (`stories: []`) tracing P260 so its held `@windyroad/itil` Option-C changeset releases under the new unconditional gate.
+- [ ] **Slice 7** — Retro-fit an RFC tracing P260 (an undecomposed single-commit fix, so its `stories:` array is empty — not a "thin" RFC, just an RFC with no story decomposition) so its held `@windyroad/itil` Option-C changeset releases under the new unconditional gate.
 - [ ] **Finalize** — Advance RFC-006 → verifying; author the `@windyroad/itil` changeset for the skill/test/script surface changes; refresh `docs/rfcs/README.md`.
 
 ## Commits
