@@ -68,3 +68,9 @@ The contract substance was human-confirmed BEFORE any artifact was built — dog
 - **ADR-072 / ADR-073** — the built-on-then-rejected decisions (this session's instance).
 - **P314** — the rework caused by this failure mode.
 - captured via /wr-architect:review-decisions Reject path + P078 capture-on-correction, 2026-05-26.
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-008 | proposed | Confirm-substance-before-build enforcement (ADR-074 mechanical layer) |
