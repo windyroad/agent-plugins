@@ -1,5 +1,9 @@
 ---
 status: "proposed"
+human-oversight: confirmed
+oversight-date: 2026-05-26
+amended: 2026-05-26
+amendment-driver: P283-prong-2-oversight — deep layer MUST have an automatic trigger, not on-demand-only (user direction 2026-05-26 — "it shouldn't rely on someone remembering"; the automatic-cadence principle). See "Amendment 2026-05-26" in Decision Outcome. Trigger implementation tracked as a follow-up ticket.
 date: 2026-04-26
 decision-makers: [tomhoward]
 consulted: [wr-architect:agent, wr-jtbd:agent]
@@ -45,6 +49,8 @@ The user's delivery-mode preference is **two-layer**: a cheap layer integrated i
 ## Decision Outcome
 
 **Chosen: Option 1 — two-layer.** Cheap layer (Step 2c in `run-retro`) + deep layer (new `/wr-retrospective:analyze-context` skill). Fail-open guard: if the cheap layer's static budget proof becomes invalid (e.g. byte-count operations grow beyond `< 5%` of session budget), the cheap layer disables itself and Step 2c emits a one-line pointer to the deep layer.
+
+> **Amendment 2026-05-26 — deep layer MUST be automatically triggered (human-oversight correction, P283 prong 2).** The deep layer as originally specified is **on-demand only** (`/wr-retrospective:analyze-context` invoked by the user). User direction 2026-05-26: *"We need a way to automatically trigger the deep layer. It shouldn't rely on someone remembering."* This realises the automatic-cadence principle (a maintenance action with no automatic cadence never happens — the analyzer that's never run is no analyzer). **Requirement:** the deep layer MUST have an automatic trigger, not on-demand-only. On-demand invocation remains available but is no longer the *sole* path. **Candidate mechanism** (design + implementation tracked as a follow-up ticket, not settled by this amendment): a **threshold/tiered escalation from the cheap layer** — the cheap layer already runs every retro and measures per-bucket bytes, so it can auto-fire (or auto-recommend with a one-keystroke accept) the deep layer when total context crosses a budget threshold OR a bucket grows beyond a delta-vs-prior-snapshot threshold; a low-frequency cadence (e.g. every Nth retro) is an acceptable fallback. The "analyzer must not itself be bloat" constraint still binds — the auto-trigger must keep the every-retro path cheap (the deep layer fires only on threshold breach / cadence, not every retro). Implementation: follow-up ticket (see P283 prong-2 drain outcome).
 
 ### Scope
 

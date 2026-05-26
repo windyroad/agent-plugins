@@ -1,10 +1,12 @@
 ---
 status: "accepted"
+human-oversight: confirmed
+oversight-date: 2026-05-26
 date: 2026-05-04
 accepted-date: 2026-05-05
-amended: 2026-05-13
-amendment-driver: P170-Phase-3-and-Phase-4-in-scope-reversion (Phase 3 JTBD-trace-conditional UX extending capture-problem Step 1.5 + story-level WSJF as within-RFC tie-break only; Phase 4 `persona:` + `jtbd:` frontmatter on user-business problem tickets + parallel-existence one-way reverse-trace to docs/jtbd/; new I12 invariant — JTBD-as-source-of-truth for persona-anchored unmet need; extended I2 behavioural test to cover nullable-field-conditional persona presence; closes agent-authored "deferred" framing without user-direction citation per [[P189]])
-prior-amendments: [2026-05-12 (Phase 2 Slice 0 — HTML encoding for story-maps), 2026-05-10 (Phase 2 design accepted, ship deferred)]
+amended: 2026-05-26
+amendment-driver: P283-prong-2-human-oversight-canonical-spine-clarification (the canonical execution spine is Problem (fix) → RFC → user story map(s) → user stories, with ADRs riding alongside as decisions referencing problems/RFCs rather than a linear spine tier; the numbered tiers below remain the ontology's node-type catalogue — see "Amendment 2026-05-26" in Decision Outcome; recorded as a human-oversight correction during the P283 prong-2 review-decisions drain)
+prior-amendments: [2026-05-13 (P170 Phase 3+4 in-scope reversion — JTBD-trace-conditional UX + persona/jtbd frontmatter + I12 invariant), 2026-05-12 (Phase 2 Slice 0 — HTML encoding for story-maps), 2026-05-10 (Phase 2 design accepted, ship deferred)]
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent (initial review + re-review 2026-05-05 + amendment review 2026-05-10 + Phase 2 HTML encoding review 2026-05-12 + Phase 3 + Phase 4 design review 2026-05-13), wr-jtbd:agent (initial review + re-review 2026-05-05 + Phase 2 HTML encoding review 2026-05-12 + Phase 4 design review 2026-05-13)]
 informed: [Windy Road plugin users, adopter maintainers]
@@ -86,7 +88,9 @@ User direction also names a future direction: **unify JTBD job statements with t
 
 ## Decision Outcome
 
-Introduce a four-tier hierarchy:
+> **Amendment 2026-05-26 — canonical execution spine (human-oversight correction, P283 prong 2).** The **canonical execution spine** of a fix runs: **Problem (fix) → RFC → user story map(s) → user stories**. ADRs are **not** a linear tier in that spine — they ride *alongside* it as decisions that reference ≥ 0 problems and underpin ≥ 0 RFCs (a decision can predate, follow, or be independent of any single fix's execution). The numbered "four-tier hierarchy" below is the ontology's **node-type catalogue** (the four kinds of artefact and their lifecycles), not the linear flow; it lists ADR as a node type for completeness. Where the catalogue's ordering reads as a linear Problem→ADR→RFC→Story spine, defer to this amendment: the execution spine threads Problem→RFC→**story map(s)**→stories, and story maps are a first-class organising tier between an RFC and its stories (per the Phase 2 story-map encoding, prior-amendment 2026-05-12). This correction was recorded as a human-oversight confirmation during the P283 prong-2 `/wr-architect:review-decisions` drain; it sharpens the description toward what the tier bodies already assert (tier 2: "decisions can predate or be independent of execution"; tier 3: "ADRs ride alongside RFCs"), and does not change any decision outcome.
+
+Introduce a four-tier hierarchy (**node-type catalogue** — see the canonical execution spine in the 2026-05-26 amendment above; this is the artefact-kind catalogue, not the linear fix-flow):
 
 1. **Problem** (existing) — *what hurts*. Lifecycle: `Open` / `Known Error` / `Verifying` / `Closed` / `Parked`. Per existing `docs/problems/` shape. **New**: type-tag added to frontmatter (`type: technical` | `type: user-business`); both treated identically by WSJF, capture skill, and lifecycle (invariant 2).
 2. **ADR** (existing) — *how we decided to solve it*. Status: `proposed` / `accepted` / `superseded`. Per existing `docs/decisions/` shape. May reference ≥ 0 problems; may underpin ≥ 0 RFCs (decisions can predate or be independent of execution).
