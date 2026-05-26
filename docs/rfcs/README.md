@@ -1,6 +1,6 @@
 # RFC Backlog
 
-> Last reviewed: 2026-05-26 **RFC-006 accepted + RFC-005 retrofit (ADR-070/071)** — implementation of ADR-070 (RFCs hold no independent decisions) + ADR-071 (every fix goes through an RFC, unconditionally — no carve-out, no effort threshold, no thin/scaled-down path). RFC-005 reduced to scope + decomposition + traces: F1 → ADR-072 (gate placement), F4 → ADR-073 (orchestrator dispatch), F2 atomic-fix carve-out **repudiated**, embedded F1–F7 Decision/Rationale blocks + the "Considered Options / Alternatives Rejected" section struck. RFC-006 scopes the decision-homing + de-carve-out + ADR-060 line-97/I13 amendment + ADR-052 enforcement test + P260 backfill. The prior RFC-005-accepted line-3 fragment — which advertised the now-disavowed atomic-fix carve-out (`--rfc-deferred` hatch, "Effort ≤ M skips ceremony") — rotated to `docs/rfcs/README-history.md` per P134.
+> Last reviewed: 2026-05-26 **RFC-006 accepted → verifying (ADR-070/071 implemented); RFC-007 captured (P260 retro-fit)** — all seven RFC-006 slices shipped (decision-homing per ADR-070; unconditional RFC-first per ADR-071; ADR-060 line-97 permissive clause deleted + unconditional I13 added; JTBD-008/101 carve-out struck via ADR-068; ADR-052 rejected-alternatives lint shipped + green; capture-rfc/manage-rfc carve-out framing struck). Mid-flight the user disavowed an unauthorized "thin RFC / scale-down" softening the agent had introduced (captured P311; corrective sweep applied). RFC-006 → Verification Queue; its `@windyroad/itil` changesets release this finalize. RFC-007 (in-progress) retro-fits the already-committed P260 ADR-050 Option-C fix under ADR-071 so its held changeset can release. Prior RFC-005-retrofit fragment rotated to `docs/rfcs/README-history.md` per P134.
 > Run `/wr-itil:manage-rfc review` to refresh once the manage-rfc skill ships.
 
 ## Status
@@ -134,12 +134,14 @@ One row per RFC in `proposed` / `accepted` / `in-progress` status. RFC-level WSJ
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported |
 |------|-----|-------|----------|--------|--------|----------|
+| 4.5 | RFC-007 | P260 — concurrent-session create-gate marker race fix (ADR-050 Option C) | 6 Med | in-progress | M | 2026-05-26 |
 | 3.0 | RFC-005 | RFC-first trace invariant not enforced at fix-time | 3 Med | accepted | M | 2026-05-17 |
-| 1.5 | RFC-006 | Implement ADR-070 + ADR-071 — re-home RFC decisions to ADRs and make RFC-first unconditional | 3 Med | accepted | L | 2026-05-26 |
+
+WSJF for RFC-007: Severity inherited from traced problem (P260 = 6 Med); Status multiplier `in-progress` = 1.5; Effort M divisor = 2; WSJF = (6 × 1.5) / 2 = 4.5.
 
 WSJF for RFC-005: Severity inherited from highest-severity traced problem (P251 = 3 Med); Status multiplier `accepted` = 2.0; Effort M divisor = 2; WSJF = (3 × 2.0) / 2 = 3.0.
 
-WSJF for RFC-006: Severity inherited from highest-severity traced problem (max of P310, P251 = 3 Med); Status multiplier `accepted` = 2.0; Effort L divisor = 4; WSJF = (3 × 2.0) / 4 = 1.5.
+RFC-006 transitioned `accepted → verifying` 2026-05-26 (all seven slices shipped) — excluded from RFC Rankings (multiplier 0); see Verification Queue.
 
 ## Verification Queue
 
@@ -150,6 +152,7 @@ Sorted by `Released date ASC`, mirroring the canonical Verification Queue sort d
 | RFC-001 | Pipeline consume-catalog and bootstrap-from-reports — multi-commit retrofit | 2026-05-04 | Commits `ab73328` + `af5447c` + `8edaf7b` shipped under ADR-059. Closure gated on Slice 5 forward-dogfood completion (RFC-002 reaches `closed`) per ADR-060 § Confirmation criterion 6 atomicity contract. |
 | RFC-002 | docs/problems/ flat layout migration — per-state subdirs + adopter auto-migration | 2026-05-12 | T1-T5b + T7-T11 shipped (commits `9fef067` → `7741fd4`). T6 (drop dual-pattern compatibility) deferred-to-post-verification per its calendar-gated trigger. User verification gate: adopter-side first-run auto-migration end-to-end (see RFC-002 § Verification for the explicit checklist). |
 | RFC-004 | P079 inbound upstream-report discovery + assessment pipeline (ADR-062 implementation rollout) | 2026-05-15 | All seven slices (A-G) shipped (commits `ca4f6e4` Slices A+D scaffold; `f635470` Slice B; `368b8e6` Slice C; `e8ef115` Slice E; `fb8f326` Slice F; `<this commit>` Slice G + transition). User verification gate: four synthetic-report behavioural-replay scenarios per ADR-062 § Confirmation criterion 3 (clean / out-of-scope / info-extraction / matched-local-ticket). |
+| RFC-006 | Implement ADR-070 + ADR-071 — re-home RFC decisions to ADRs and make RFC-first unconditional | 2026-05-26 | All seven slices shipped (see RFC-006 § Commits). Release marker: the `@windyroad/itil` release carrying `wr-itil-adr-070-071-rfc-skills.md` + `wr-itil-rfc-no-rejected-alternatives-lint.md`. User verification gate: the dropped atomic-fix carve-out + the ADR-052 rejected-alternatives lint are observable in published `@windyroad/itil`; the unconditional I13 gate (hook + skill enforcement) ships separately under RFC-005's B2–B10 held-changeset chain. |
 
 ## Closed
 

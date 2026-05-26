@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: verifying
 rfc-id: adr-070-071-decision-homing-and-unconditional-rfc-first
 reported: 2026-05-26
 decision-makers: [Tom Howard]
@@ -11,7 +11,7 @@ stories: []
 
 # RFC-006: Implement ADR-070 + ADR-071 — re-home RFC decisions to ADRs and make RFC-first unconditional
 
-**Status**: accepted
+**Status**: verifying
 **Reported**: 2026-05-26
 **Problems**: P310, P251
 **ADRs**: ADR-070 (RFCs hold no independent decisions), ADR-071 (every fix goes through an RFC), ADR-072 (fix-time gate placement), ADR-073 (orchestrator dispatch hard-block), ADR-060 (parent framework — amended), ADR-068 (JTBD oversight re-confirm flow), ADR-052 (behavioural-test enforcement surface)
@@ -44,24 +44,40 @@ Out of scope (deferred, per F6 boundary): composing story-map presence into the 
 
 Ordered slice decomposition (one coherent purpose per commit per ADR-014; each carries a `Refs: RFC-006` trailer).
 
-- [x] **Slice 1a** — Record ADR-072 (fix-time gate placement, from F1) + ADR-073 (orchestrator dispatch hard-block, from F4). Born proposed, no oversight marker. (commit `b30d08f`)
-- [ ] **Slice 1b** — Retrofit RFC-005: strike the embedded F1–F7 Decision/Rationale blocks + the "Considered Options / Alternatives Rejected" section; F2 carve-out struck; F1→ADR-072 / F4→ADR-073 references; de-carve-out the B1–B10 task list; add ADR-070/071/072/073 to `adrs:` frontmatter.
-- [ ] **Slice 2** — Amend JTBD-008 (lines 21/26/44 — born-confirm) + JTBD-101 (line 30 — clear-and-reconfirm) to strike the atomic-fix carve-out entirely (every fix goes through the **same** RFC — no thin / scaled-down path). Route through the ADR-068 oversight-confirm flow.
-- [ ] **Slice 3** — Drop the "Considered Options / Alternatives Rejected" section from the RFC body-structure template (`docs/rfcs/README.md`) + capture-rfc + manage-rfc; add explicit negative guidance per ADR-070 (contested choices reference governing ADRs).
-- [ ] **Slice 4 + 6** — Amend ADR-060: delete line-97's permissive half + retain/reframe the protective half (slice 6); add the unconditional fix-time I13 invariant (slice 4); append the `2026-05-26` `prior-amendments:` entry. Mirror the line-97 fix in `docs/rfcs/README.md` line-57 `adrs` field semantics.
-- [ ] **Slice 5** — Ship the ADR-052 behavioural lint: a checker script + bats asserting no RFC body in `docs/rfcs/` carries a rejected-alternatives block without a matching `adrs:` reference (artefact-state behavioural over the corpus + synthetic fixtures).
-- [ ] **Slice 7** — Retro-fit an RFC tracing P260 (an undecomposed single-commit fix, so its `stories:` array is empty — not a "thin" RFC, just an RFC with no story decomposition) so its held `@windyroad/itil` Option-C changeset releases under the new unconditional gate.
-- [ ] **Finalize** — Advance RFC-006 → verifying; author the `@windyroad/itil` changeset for the skill/test/script surface changes; refresh `docs/rfcs/README.md`.
+- [x] **Slice 1a** — Record ADR-072 (fix-time gate placement, from F1) + ADR-073 (orchestrator dispatch hard-block, from F4). Born proposed, no oversight marker. (`b30d08f`)
+- [x] **Slice 1b** — Retrofit RFC-005 to scope + decomposition + traces: strike the embedded F1–F7 Decision/Rationale blocks + the "Considered Options / Alternatives Rejected" section; F2 carve-out struck; F1→ADR-072 / F4→ADR-073 references; de-carve-out the B1–B10 task list; ADR-070/071/072/073 added to `adrs:` frontmatter. (`49c25f4`)
+- [x] **Slice 2** — Amend JTBD-008 (born-confirm) + JTBD-101 (clear-and-reconfirm) to strike the atomic-fix carve-out entirely (every fix goes through the **same** RFC — no thin / scaled-down path), via the ADR-068 oversight-confirm flow. (`8d8da90`)
+- [x] **Slice 3** — Strike the atomic-fix carve-out framing from capture-rfc + manage-rfc; add explicit no-"Considered Options" guidance per ADR-070; align `docs/rfcs/README.md`. (`0c8976f`, `38edcdb`)
+- [x] **Slice 4 + 6** — Amend ADR-060: delete line-97's permissive half + retain/reframe the protective half (slice 6); add the unconditional fix-time I13 invariant (slice 4); `prior-amendments:` + amendment subsection updated. (`065f76b`)
+- [x] **Slice 5** — Ship the ADR-052 behavioural lint `check-rfc-rejected-alternatives.sh` + behavioural bats (8 green, incl. a real-corpus dogfood). (`8aa3176`)
+- [x] **Slice 7** — Retro-fit RFC-007 tracing P260 (undecomposed fix, `stories: []`) so its held `@windyroad/itil` Option-C changeset releases under the new unconditional gate. (`df7630f`)
+- [x] **Correction (P311)** — Mid-flight user correction: strike the unauthorized "thin RFC / scale-down / minimal-ceremony" softening the agent had introduced; captured as P311; corrective sweep across ADR-071/072, RFC-005/006. (`4671755`, `bd42dad`)
+- [x] **Finalize** — Advance RFC-006 → verifying; `@windyroad/itil` changesets queued (RFC-skills alignment + ADR-052 lint); `docs/rfcs/README.md` refreshed; push + release.
 
 ## Commits
 
 (maintained automatically — populated by the commit-message RFC trailer hook per ADR-060 Phase 1 item 12)
 
+- `56ea8ad` — capture RFC-006 skeleton.
+- `cb83066` — RFC-006 accepted (scope + 7-slice decomposition).
 - `b30d08f` — slice 1a: record ADR-072 + ADR-073.
+- `49c25f4` — slice 1b: retrofit RFC-005.
+- `bd42dad` — P311 corrective sweep (strike thin-RFC/scale-down softening).
+- `8d8da90` — slice 2: strike carve-out from JTBD-008 + JTBD-101.
+- `38edcdb` — align docs/rfcs/README.md to ADR-070/071.
+- `0c8976f` — slice 3: strike carve-out framing from RFC skills.
+- `065f76b` — slices 4+6: amend ADR-060 (line-97 + I13).
+- `8aa3176` — slice 5: ADR-052 behavioural lint.
+- `df7630f` — slice 7: capture RFC-007 (P260 retro-fit).
 
 ## Verification
 
-(populated at the `in-progress → verifying` transition once all slices land — release marker for the `@windyroad/itil` changeset, the ADR-052 bats green, the P260 changeset released, and the ADR-070/071 Confirmation criteria discharged.)
+All seven slices shipped (commits above); the corrective P311 sweep removed the unauthorized softening. ADR-070/071 Confirmation criteria discharged:
+
+- **ADR-070**: RFC-005's F1/F4 decisions re-homed to ADR-072/073; RFC-005 reduced to scope + decomposition + traces; the "Considered Options / Alternatives Rejected" section dropped from the template + skills; the ADR-052 behavioural lint (`check-rfc-rejected-alternatives.sh`, 8 bats green) asserts no RFC body carries a rejected-alternatives block without a matching `adrs:` reference (real corpus clean across 7 RFCs); ADR-060 line-97 permissive half deleted.
+- **ADR-071**: unconditional fix-time I13 invariant added to ADR-060 (no carve-out, no effort threshold, no override); JTBD-008/JTBD-101 carve-out struck via the ADR-068 flow; P260's pre-existing fix retro-fitted under RFC-007.
+
+**Release marker**: the `@windyroad/itil` release carrying `wr-itil-adr-070-071-rfc-skills.md` + `wr-itil-rfc-no-rejected-alternatives-lint.md` (+ the P260 Option-C changeset). **User-side verification**: the dropped carve-out + the lint are observable in the published `@windyroad/itil`; the I13 gate (structural hook + skill enforcement) ships under RFC-005's B2–B10 held-changeset chain, separately verified when that chain graduates.
 
 ## Related
 
