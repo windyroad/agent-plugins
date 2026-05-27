@@ -37,11 +37,13 @@ Out of scope: re-deciding Option C; P263's manifest-validation gate (separate la
 
 ## Tasks
 
-- [ ] T1 — `wr-itil-mark-create-gate` + `wr-itil-mark-rfc-capture-gate` standalone commands (internalise the `get_candidate_session_ids | mark_step2_complete_candidates` / `mark_rfc_capture_complete` pipelines). Rewrite the 3 create-gate marker sites (capture-problem L159-161, manage-problem L340-342, capture-rfc) to call them. Behavioural bats. **(The screenshot bug — highest user value; land first.)**
-- [ ] T2 — KIND A residue audit: can `migrate-problems-layout.sh` + `check-upstream-cache-staleness.sh` internalise into commands, or do they export functions the SKILL's later steps call? For genuine residue: add `wr-itil-lib-path` resolver shim + **ADR-049 amendment** (admit the echo-a-path shim shape; born-confirmed — Option C was user-ratified 2026-05-27). Rewrite the 4 `source` sites accordingly.
-- [ ] T3 — KIND B: 5 `wr-itil-update-*` exec-shims for `update-{problem-references,jtbd-references,rfc-references,problem-rfcs}-section.sh` (+ any sibling); rewrite the 17 call sites to invoke by name; delete the `wr-itil-script-path || echo` fallback. Behavioural bats per shim.
-- [ ] T4 — extend `no-repo-relative-script-paths-in-skills.bats` for `source packages/...` + `|| echo packages/...`; encode the blessed forms as negative cases. Must be GREEN only after T1-T3 land (it fails on the 24 refs until they're fixed).
-- [ ] T5 — fix the 3 comment-only repo-relative examples in `hooks/lib/{session-id,runtime-sid}.sh` (copy-paste hazard) to show the blessed form.
+- [x] **T1 DONE** — `wr-itil-mark-create-gate` + `wr-itil-mark-rfc-capture-gate` standalone commands (`scripts/mark-create-gate.sh` + `mark-rfc-capture-gate.sh` + bin shims) internalise the candidate-SID marker writes, resolving sibling libs via `$(dirname)`. Rewrote the 3 marker sites (capture-problem, manage-problem) AND added the missing marker step to capture-rfc (latent gap — it had none). 4 behavioural bats GREEN (`test/mark-create-gate.bats`).
+- [x] **T2 DONE (Option C → fully Option B)** — both `migrate-problems-layout.sh` + `check-upstream-cache-staleness.sh` internalised cleanly into `wr-itil-migrate-problems-layout` + `wr-itil-check-upstream-cache-staleness` commands (side-effect / stdout-capture; no function-export residue). **No `wr-itil-lib-path` shim and NO ADR-049 amendment needed.** Rewrote the 3 `source` sites (manage-problem, work-problems ×2). 3 behavioural bats GREEN (`test/kind-a-commands.bats`).
+- [x] **T3 DONE** — 4 `wr-itil-update-*` exec-shims (`update-{problem-references,jtbd-references,rfc-references,problem-rfcs}-section`); rewrote all 17 call sites across 7 SKILLs to invoke by name; deleted the phantom `wr-itil-script-path || echo` fallback. Shim dispatch verified.
+- [x] **T4 DONE** — extended `no-repo-relative-script-paths-in-skills.bats` with 2 new line-anchored guards (`^source packages/...` + `|| echo packages/...`); 15 bats GREEN. Structural prevention live: any future repo-relative ref in a shipped SKILL fails CI.
+- [x] **T5 DONE** — fixed the 4 comment-only repo-relative examples in `hooks/lib/{session-id,runtime-sid}.sh` to the sibling-relative form + a "never source repo-relative from a SKILL" note.
+
+**Implementation status (2026-05-27): COMPLETE.** All 24 broken refs fixed; 105 affected bats GREEN; structural-prevention lint live. Remaining: RFC lifecycle transition + release (this commit + changeset).
 
 ## Commits
 

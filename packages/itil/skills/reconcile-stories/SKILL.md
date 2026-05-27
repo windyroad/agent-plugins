@@ -56,11 +56,11 @@ For reverse-trace drift entries — invoke the appropriate Slice 2a/2b helper fo
 
 ```bash
 # Problem parent
-bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/update-problem-references-section.sh" "$problem_file" "Stories"
+wr-itil-update-problem-references-section "$problem_file" "Stories"
 # RFC parent
-bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/update-rfc-references-section.sh" "$rfc_file" "Stories"
+wr-itil-update-rfc-references-section "$rfc_file" "Stories"
 # JTBD parent
-bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/update-jtbd-references-section.sh" "$jtbd_file" "Stories"
+wr-itil-update-jtbd-references-section "$jtbd_file" "Stories"
 ```
 
 ### 4. Verify + commit

@@ -147,7 +147,7 @@ for pid_token in $(awk '/^problems:/{gsub(/[][]/,"");gsub(/,/,"\n");for(i=2;i<=N
   # subdir (`docs/problems/<state>/<NNN>-<title>.md`) layouts.
   problem_file=$(ls docs/problems/${pid_num}-*.md docs/problems/*/${pid_num}-*.md 2>/dev/null | head -1)
   [ -z "$problem_file" ] && continue
-  bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/update-problem-rfcs-section.sh" "$problem_file" docs/rfcs
+  wr-itil-update-problem-rfcs-section "$problem_file" docs/rfcs
   git add "$problem_file"
 done
 ```
@@ -164,7 +164,7 @@ The trailer hook (`itil-rfc-trailer-advisory.sh`) sits on top of this skill-side
 Per ADR-060 line 270 + line 296: every transition that touches the RFC body refreshes the RFC's own `## Stories` body section from its frontmatter `stories:` array. The forward-trace surface renders the ordered execution sequence as inline links to the story files, lazy-empty when `stories: []` (an RFC not decomposed into stories). The helper is the Slice 2b sibling `update-rfc-references-section.sh`:
 
 ```bash
-bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/update-rfc-references-section.sh" "$rfc_file" "Stories"
+wr-itil-update-rfc-references-section "$rfc_file" "Stories"
 ```
 
 Idempotent + lazy-empty per the Slice 2a/2b contract. Run after the rename + frontmatter edit so the section reflects the post-transition `stories:` shape. Stage the RFC file (already staged for the lifecycle transition; the helper modifies the same file in-place).
@@ -197,7 +197,7 @@ Batch re-rank all RFCs and refresh `docs/rfcs/README.md`.
 ```bash
 # Aggregate the union of P<NNN> across all RFCs touched in this review.
 for problem_file in $(printf '%s\n' "${touched_problem_files[@]}" | sort -u); do
-  bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/update-problem-rfcs-section.sh" "$problem_file" docs/rfcs
+  wr-itil-update-problem-rfcs-section "$problem_file" docs/rfcs
   git add "$problem_file"
 done
 ```

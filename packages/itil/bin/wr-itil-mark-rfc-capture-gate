@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# ADR-049 $PATH shim — dispatches to the canonical mark-rfc-capture-gate script.
+exec "$(dirname "$0")/../scripts/mark-rfc-capture-gate.sh" "$@"

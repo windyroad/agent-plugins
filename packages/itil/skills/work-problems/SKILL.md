@@ -127,9 +127,10 @@ This is a robustness layer ON TOP of P094 + P062, not a supersession — both pe
 After Step 0's fetch/divergence preflight and the README reconciliation block but **before** Step 1's backlog scan, source the shared shell migration routine and call the idempotent entrypoint:
 
 ```bash
-source packages/itil/lib/migrate-problems-layout.sh
-migrate_problems_to_per_state_layout "$PWD"
+wr-itil-migrate-problems-layout "$PWD"
 ```
+
+`wr-itil-migrate-problems-layout` is the ADR-049 `$PATH` shim (adopter-safe — resolves `lib/migrate-problems-layout.sh` relative to the script, NOT cwd; P317/RFC-009) that internalises the former inline `source packages/itil/lib/migrate-problems-layout.sh; migrate_problems_to_per_state_layout "$PWD"`. NEVER `source packages/...` repo-relative from a SKILL — those paths only resolve in the source monorepo, not adopter installs.
 
 The routine is **idempotent and partial-migration-safe**. It no-ops when no flat-layout files (`docs/problems/*.<state>.md` at the top level of `docs/problems/`) are detected — the common case post-Slice-5 T5a in this monorepo and in freshly-migrated adopter repos.
 
@@ -154,9 +155,10 @@ After Step 0a's auto-migrate and before Step 1's backlog scan, check whether the
 **Mechanism:**
 
 ```bash
-source packages/itil/lib/check-upstream-cache-staleness.sh
-preflight_reason="$(should_promote_inbound_discovery_preflight "$PWD")"
+preflight_reason="$(wr-itil-check-upstream-cache-staleness "$PWD")"
 ```
+
+`wr-itil-check-upstream-cache-staleness` is the ADR-049 `$PATH` shim (adopter-safe — resolves `lib/check-upstream-cache-staleness.sh` relative to the script, NOT cwd; P317/RFC-009) that internalises the former inline `source ...; should_promote_inbound_discovery_preflight "$PWD"` and echoes the result. NEVER `source packages/...` repo-relative from a SKILL — those paths only resolve in the source monorepo, not adopter installs.
 
 The helper returns one of five outcomes (contract documented at `packages/itil/lib/check-upstream-cache-staleness.sh` + asserted by `packages/itil/skills/work-problems/test/work-problems-step-0b-cache-staleness-behavioural.bats`):
 

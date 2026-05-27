@@ -104,7 +104,7 @@ for pid_token in $(grep -oE '<meta name="problems" content="[^"]*"' "$map_file" 
   pid_num="${pid_token#P}"
   problem_file=$(ls docs/problems/${pid_num}-*.md docs/problems/*/${pid_num}-*.md 2>/dev/null | head -1)
   [ -z "$problem_file" ] && continue
-  bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/update-problem-references-section.sh" "$problem_file" "Story Maps"
+  wr-itil-update-problem-references-section "$problem_file" "Story Maps"
   git add "$problem_file"
 done
 

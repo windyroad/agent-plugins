@@ -138,7 +138,7 @@ for pid_token in $(awk '/^problems:/{gsub(/[][]/,""); gsub(/,/," "); for(i=2;i<=
   pid_num="${pid_token#P}"
   problem_file=$(ls docs/problems/${pid_num}-*.md docs/problems/*/${pid_num}-*.md 2>/dev/null | head -1)
   [ -z "$problem_file" ] && continue
-  bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/update-problem-references-section.sh" "$problem_file" "Stories"
+  wr-itil-update-problem-references-section "$problem_file" "Stories"
   git add "$problem_file"
 done
 
@@ -146,7 +146,7 @@ done
 for jid in $(awk '/^jtbd:/{gsub(/[][]/,""); gsub(/,/," "); for(i=2;i<=NF;i++)print $i; exit}' "$story_file"); do
   jtbd_file=$(ls docs/jtbd/*/${jid}-*.md 2>/dev/null | head -1)
   [ -z "$jtbd_file" ] && continue
-  bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/update-jtbd-references-section.sh" "$jtbd_file" "Stories"
+  wr-itil-update-jtbd-references-section "$jtbd_file" "Stories"
   git add "$jtbd_file"
 done
 
@@ -154,7 +154,7 @@ done
 for rid in $(awk '/^rfcs:/{gsub(/[][]/,""); gsub(/,/," "); for(i=2;i<=NF;i++)print $i; exit}' "$story_file"); do
   rfc_file=$(ls docs/rfcs/${rid}-*.md 2>/dev/null | head -1)
   [ -z "$rfc_file" ] && continue
-  bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/update-rfc-references-section.sh" "$rfc_file" "Stories"
+  wr-itil-update-rfc-references-section "$rfc_file" "Stories"
   git add "$rfc_file"
 done
 

@@ -135,6 +135,14 @@ For each resolved trace file, classify by suffix:
 
 **Why advisory and not hard-block at capture-time**: the bounded-escape contract in ADR-060 § Confirmation criterion 2 scopes I1 hard-block to `accepted → in-progress` and `→ verifying` lifecycle transitions; advisory-with-escalation only fires at `→ closed` transition. Capture-time tolerance for Closed/Parked traces is **load-bearing for the Phase 1 dogfood pass**: RFC-001 retro on P168 (P168 is `.verifying.md`) is structurally impossible without it. This is NOT a relaxation of I1; it is the bounded-escape window the ADR carved out at the right lifecycle phase. See ADR-060 § Confirmation criterion 5 (no semantic loss) + Phase 1 item 9 (retro migration as dogfood pass).
 
+**After the trace validation passes**, write the RFC-tier create-gate marker so the `PreToolUse:Write` hook (P119, `manage-problem-enforce-create.sh`) permits the Step 5 Write of the new `docs/rfcs/RFC-*.proposed.md` file:
+
+```bash
+wr-itil-mark-rfc-capture-gate
+```
+
+`wr-itil-mark-rfc-capture-gate` is the ADR-049 `$PATH` shim (adopter-safe — resolves its `hooks/lib` siblings relative to the script, NOT cwd; P317/RFC-009) that writes `/tmp/wr-itil-rfc-capture-grep-${SESSION_ID}` under every recent candidate SID (P260 / ADR-050 Option C — same candidate-set discipline as `wr-itil-mark-create-gate`). NEVER `source packages/...` repo-relative from a SKILL — those paths only resolve in the source monorepo, not adopter installs. The marker is per-session and idempotent, so a single write covers multiple RFC creations this session (e.g. a multi-problem-trace split).
+
 ### 3. Compute next RFC ID
 
 Same `max(local, origin) + 1` formula as `capture-problem` Step 3, scanning `docs/rfcs/RFC-*.md` instead:
@@ -218,7 +226,7 @@ for pid_token in $(echo "$problem_trace" | tr ',' ' '); do
   # Dual-tolerant ticket discovery (RFC-002 migration window).
   problem_file=$(ls docs/problems/${pid_num}-*.md docs/problems/*/${pid_num}-*.md 2>/dev/null | head -1)
   [ -z "$problem_file" ] && continue
-  bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/update-problem-rfcs-section.sh" "$problem_file" docs/rfcs
+  wr-itil-update-problem-rfcs-section "$problem_file" docs/rfcs
   git add "$problem_file"
 done
 ```
@@ -229,7 +237,7 @@ The helper (`packages/itil/scripts/update-problem-rfcs-section.sh`) is idempoten
 
 ```bash
 if [ -n "$stories_trace" ]; then
-  bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/update-rfc-references-section.sh" "docs/rfcs/RFC-${next}-${slug}.proposed.md" "Stories"
+  wr-itil-update-rfc-references-section "docs/rfcs/RFC-${next}-${slug}.proposed.md" "Stories"
 fi
 ```
 

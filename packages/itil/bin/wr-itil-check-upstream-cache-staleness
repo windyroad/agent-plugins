@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# ADR-049 $PATH shim — dispatches to the canonical run-check-upstream-cache-staleness script.
+exec "$(dirname "$0")/../scripts/run-check-upstream-cache-staleness.sh" "$@"

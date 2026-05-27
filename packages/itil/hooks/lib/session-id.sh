@@ -57,8 +57,9 @@
 # Returns the canonical session UUID for the current invocation.
 # Echoes the UUID on stdout. Exit 0 if discovered, 1 if not.
 #
-# Usage:
-#   source packages/itil/hooks/lib/session-id.sh
+# Usage (resolve relative to the caller's own location — NEVER repo-relative
+# `packages/...`, which only exists in the source monorepo; P317/RFC-009):
+#   source "$(dirname "${BASH_SOURCE[0]}")/session-id.sh"   # or ../hooks/lib/ from a scripts/ wrapper
 #   sid=$(get_current_session_id) || { echo "no SID available" >&2; exit 1; }
 get_current_session_id() {
   # Env-var fast path. CLAUDE_SESSION_ID is not exported in agent
@@ -203,9 +204,10 @@ get_current_session_id() {
 # Test overrides: SESSION_MARKER_DIR (marker dir, default /tmp) +
 # SESSION_CANDIDATE_WINDOW_MINS (window minutes, default 1440).
 #
-# Usage:
-#   source packages/itil/hooks/lib/session-id.sh
-#   source packages/itil/hooks/lib/create-gate.sh
+# Usage — SKILLs call the `wr-itil-mark-create-gate` command (it does the
+# source+pipe internally, adopter-safe); direct callers resolve the libs relative
+# to their OWN location, NEVER repo-relative `packages/...` (P317/RFC-009):
+#   LIB="$(dirname "${BASH_SOURCE[0]}")"; source "$LIB/session-id.sh"; source "$LIB/create-gate.sh"
 #   get_candidate_session_ids | mark_step2_complete_candidates
 get_candidate_session_ids() {
   local marker_dir="${SESSION_MARKER_DIR:-/tmp}"

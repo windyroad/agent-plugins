@@ -44,8 +44,9 @@
 
 # Echoes the runtime-SID marker path on stdout. Always exits 0.
 #
-# Usage:
-#   source packages/itil/hooks/lib/runtime-sid.sh
+# Usage (resolve relative to the caller's own location — NEVER repo-relative
+# `packages/...`, which only exists in the source monorepo; P317/RFC-009):
+#   source "$(dirname "${BASH_SOURCE[0]}")/runtime-sid.sh"
 #   path=$(runtime_sid_path)
 runtime_sid_path() {
   if [ -n "${SESSION_MARKER_DIR:-}" ]; then

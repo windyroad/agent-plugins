@@ -156,12 +156,12 @@ If matches are found: list them in the final report. **Do NOT halt or branch.** 
 **After the grep completes**, write the per-session create-gate marker so the `PreToolUse:Write` hook (P119) permits the subsequent Write of the new `.open.md` file. Per **P260 / ADR-050 Option C**, write it under EVERY recent candidate session SID (not just one) so a concurrent orchestrator+subprocess race cannot land the marker under the wrong UUID:
 
 ```bash
-source packages/itil/hooks/lib/session-id.sh
-source packages/itil/hooks/lib/create-gate.sh
-get_candidate_session_ids | mark_step2_complete_candidates
+wr-itil-mark-create-gate
 ```
 
-The marker is shared between `manage-problem` and `capture-problem` per ADR-032 amendment — same `/tmp/manage-problem-grep-${SESSION_ID}` path, idempotent across cross-skill ordering. `get_candidate_session_ids` enumerates the `get_current_session_id` pick (P124) plus every recent `/tmp/<system>-announced-<UUID>` UUID within a 24h mtime window, and `mark_step2_complete_candidates` writes the marker under each — so whichever SID the hook reads from the Write's stdin, a matching marker exists. This closes the P260 create-gate race that fires when the orchestrator main turn captures a ticket while a backgrounded iter subprocess holds the per-machine runtime-sid marker (last-writer-wins). The candidate set is bounded to recent same-machine markers — not a global fail-open (the P119 audit invariant holds: each marker still records that THIS session ran the duplicate-check grep). See `/wr-itil:manage-problem` Step 2 substep 7 for the full mechanism.
+`wr-itil-mark-create-gate` is the ADR-049 `$PATH` shim that internalises the former inline `source packages/itil/hooks/lib/{session-id,create-gate}.sh` + `get_candidate_session_ids | mark_step2_complete_candidates`. It resolves those `hooks/lib` siblings RELATIVE TO THE SCRIPT, not cwd (P317/RFC-009) — so it works in adopter installs. NEVER `source packages/...` repo-relative from a SKILL; those paths only resolve in the source monorepo, not where the plugin is installed.
+
+The marker is shared between `manage-problem` and `capture-problem` per ADR-032 amendment — same `/tmp/manage-problem-grep-${SESSION_ID}` path, idempotent across cross-skill ordering. Internally the command enumerates the `get_current_session_id` pick (P124) plus every recent `/tmp/<system>-announced-<UUID>` UUID within a 24h mtime window, and writes the marker under each — so whichever SID the hook reads from the Write's stdin, a matching marker exists. This closes the P260 create-gate race that fires when the orchestrator main turn captures a ticket while a backgrounded iter subprocess holds the per-machine runtime-sid marker (last-writer-wins). The candidate set is bounded to recent same-machine markers — not a global fail-open (the P119 audit invariant holds: each marker still records that THIS session ran the duplicate-check grep). See `/wr-itil:manage-problem` Step 2 substep 7 for the full mechanism.
 
 ### 3. Compute the next ID
 

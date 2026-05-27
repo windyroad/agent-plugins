@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# ADR-049 $PATH shim — dispatches to the canonical update-rfc-references-section script.
+exec "$(dirname "$0")/../scripts/update-rfc-references-section.sh" "$@"

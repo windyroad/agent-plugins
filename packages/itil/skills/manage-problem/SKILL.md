@@ -212,11 +212,10 @@ The Phase 2 working-the-problem traversal makes "implement the fix" concretely t
 Before the README-reconciliation preflight (Step 0) and any other layout-dependent logic, source the shared shell migration routine and call the idempotent entrypoint:
 
 ```bash
-# Source the synced copy from this package's lib/ (canonical lives at
-# packages/shared/lib/migrate-problems-layout.sh per ADR-017 sync pattern).
-source packages/itil/lib/migrate-problems-layout.sh
-migrate_problems_to_per_state_layout "$PWD"
+wr-itil-migrate-problems-layout "$PWD"
 ```
+
+`wr-itil-migrate-problems-layout` is the ADR-049 `$PATH` shim (adopter-safe — resolves the canonical `lib/migrate-problems-layout.sh` relative to the script, NOT cwd; P317/RFC-009) that internalises the former inline `source packages/itil/lib/migrate-problems-layout.sh; migrate_problems_to_per_state_layout "$PWD"`. NEVER `source packages/...` repo-relative from a SKILL — those paths only resolve in the source monorepo, not adopter installs.
 
 The routine is **idempotent and partial-migration-safe**. It no-ops when no flat-layout files (`docs/problems/*.<state>.md` at the top level of `docs/problems/`) are detected — the common case in this monorepo (post-Slice-5 T5a 2026-05-10) and in freshly-migrated adopter repos.
 
@@ -337,12 +336,12 @@ Before creating, search existing problems for similar issues. The user may not k
 7. **After the grep completes** (whether duplicates were found or not), write the per-session create-gate marker so the `PreToolUse:Write` hook (`packages/itil/hooks/manage-problem-enforce-create.sh`, P119) allows the subsequent Write of the new `.open.md` file. The marker is `/tmp/manage-problem-grep-${SESSION_ID}`. Per **P260 / ADR-050 Option C**, the agent writes it under EVERY recent candidate session SID — not just one — by sourcing the discovery helpers (P124) and piping the candidate set into `mark_step2_complete_candidates`:
 
    ```bash
-   source packages/itil/hooks/lib/session-id.sh
-   source packages/itil/hooks/lib/create-gate.sh
-   get_candidate_session_ids | mark_step2_complete_candidates
+   wr-itil-mark-create-gate
    ```
 
-   **Why every candidate, not one (P260 / ADR-050 Option C)**: under `/wr-itil:work-problems` the orchestrator main turn fires PreToolUse hooks concurrently with its backgrounded iter subprocess (Step 5). Both sessions write the same per-machine runtime-sid marker (last-writer-wins), so the single-SID `get_current_session_id` can return the subprocess SID while the orchestrator's Write carries the orchestrator SID on its stdin — marker mismatch, create-gate deny. No agent-side algorithm can predict the right single SID from filesystem state alone (ADR-050 §Context). `get_candidate_session_ids` instead enumerates EVERY candidate SID the hook might read — the `get_current_session_id` pick (env-var > runtime-sid > announce-marker priority, P124) PLUS every recent `/tmp/<system>-announced-<UUID>` UUID within a 24h mtime window (ADR-038 announce markers, set on prompt 1 of every session by architect / jtbd / tdd / style-guide / voice-tone / itil-assistant-gate / itil-correction-detect hooks) — and `mark_step2_complete_candidates` writes the marker under each. Whichever SID the hook reads from the Write's stdin, a matching marker provably exists. The candidate set is **bounded** to recent same-machine announce markers + the runtime-sid value — NOT a global fail-open: the P119 audit invariant holds (every marker still records that THIS session ran the duplicate-check grep). The marker is per-session, so a single write covers all new tickets for the rest of this session, enabling Step 4b multi-concern splits and same-session unrelated-ticket creation without re-running the grep.
+   `wr-itil-mark-create-gate` is the ADR-049 `$PATH` shim (adopter-safe — resolves its `hooks/lib` siblings relative to the script, NOT cwd; P317/RFC-009) that internalises the former inline `source packages/itil/hooks/lib/{session-id,create-gate}.sh` + `get_candidate_session_ids | mark_step2_complete_candidates`. NEVER `source packages/...` repo-relative from a SKILL — those paths only resolve in the source monorepo, not adopter installs.
+
+   **Why every candidate, not one (P260 / ADR-050 Option C)**: under `/wr-itil:work-problems` the orchestrator main turn fires PreToolUse hooks concurrently with its backgrounded iter subprocess (Step 5). Both sessions write the same per-machine runtime-sid marker (last-writer-wins), so the single-SID `get_current_session_id` can return the subprocess SID while the orchestrator's Write carries the orchestrator SID on its stdin — marker mismatch, create-gate deny. No agent-side algorithm can predict the right single SID from filesystem state alone (ADR-050 §Context). The command instead enumerates EVERY candidate SID the hook might read — the `get_current_session_id` pick (env-var > runtime-sid > announce-marker priority, P124) PLUS every recent `/tmp/<system>-announced-<UUID>` UUID within a 24h mtime window (ADR-038 announce markers, set on prompt 1 of every session by architect / jtbd / tdd / style-guide / voice-tone / itil-assistant-gate / itil-correction-detect hooks) — and writes the marker under each. Whichever SID the hook reads from the Write's stdin, a matching marker provably exists. The candidate set is **bounded** to recent same-machine announce markers + the runtime-sid value — NOT a global fail-open: the P119 audit invariant holds (every marker still records that THIS session ran the duplicate-check grep). The marker is per-session, so a single write covers all new tickets for the rest of this session, enabling Step 4b multi-concern splits and same-session unrelated-ticket creation without re-running the grep.
 
    **Why helpers instead of inline `${CLAUDE_SESSION_ID:-default}`**: the agent's process does NOT export `CLAUDE_SESSION_ID` today; the hook side reads `session_id` from its stdin JSON payload (per the Claude Code PreToolUse contract). The prior fallback wrote the marker under `default` while the hook checked the real UUID — mismatch caused the Write deny on every first ticket of a session until the agent ad-hoc scraped a UUID-bearing marker. The helpers canonicalise that scrape so every agent context discovers candidate SIDs the same way. P124.
 

@@ -114,6 +114,51 @@ setup() {
   fi
 }
 
+@test "no published SKILL.md sources a repo-relative library at runtime (P317 / ADR-049 reassessment clause 3)" {
+  # `source packages/<plugin>/.../*.sh` only resolves in the source monorepo;
+  # in adopter installs the file does not exist, the source fails, and the
+  # functions it would define are undefined (P317 — the create-gate marker
+  # class: capture-problem / manage-problem / work-problems all sourced
+  # packages/itil/{lib,hooks/lib}/*.sh inline). Line-anchored (`^[[:space:]]*source`)
+  # so RUNTIME source lines match but inline instructional prose
+  # ("NEVER `source packages/...`") does NOT. Fix: internalise the source+call
+  # into a standalone command that resolves its sibling lib via
+  # $(dirname "$0")/../{lib,hooks/lib} and is invoked by name (RFC-009 Option B/C).
+  local hits
+  hits=$(grep -rnE '^[[:space:]]*source +packages/[a-z][a-z0-9-]*/' \
+    "$REPO_ROOT"/packages/*/skills/*/SKILL.md 2>/dev/null || true)
+  if [ -n "$hits" ]; then
+    echo "P317 / ADR-049 violation — repo-relative library source in published SKILL.md:"
+    echo "$hits"
+    echo ""
+    echo "A SKILL cannot 'source packages/...': that path only exists in the source monorepo."
+    echo "Internalise the source+call into a command that resolves its lib via"
+    echo "\$(dirname \"\$0\")/../{lib,hooks/lib} and invoke it by name (ADR-049 shim):"
+    echo "  source packages/<plugin>/lib/<x>.sh; <fn> ARG"
+    echo "  → wr-<plugin>-<kebab-name> ARG   (the script does the source+call internally)"
+    return 1
+  fi
+}
+
+@test "no published SKILL.md uses a repo-relative '|| echo packages/...' path fallback (P317 / ADR-049)" {
+  # The `\$(wr-...-path 2>/dev/null || echo packages/<plugin>/scripts)/x.sh` shape
+  # assumes a path-resolver shim; when that shim is absent (it never shipped)
+  # the repo-relative `|| echo packages/...` fallback ALWAYS fires and breaks in
+  # adopter trees (P317 KIND B — 17 sites across the story/RFC skills). Call the
+  # per-script bin shim by name instead (ADR-049 per-script exec-shim).
+  local hits
+  hits=$(grep -rnE '\|\| +echo +packages/[a-z][a-z0-9-]*/' \
+    "$REPO_ROOT"/packages/*/skills/*/SKILL.md 2>/dev/null || true)
+  if [ -n "$hits" ]; then
+    echo "P317 / ADR-049 violation — repo-relative '|| echo packages/...' fallback in published SKILL.md:"
+    echo "$hits"
+    echo ""
+    echo "Replace 'bash \"\$(wr-...-path || echo packages/<plugin>/scripts)/<x>.sh\" ARG'"
+    echo "with the per-script bin shim called by name: wr-<plugin>-<kebab-name> ARG"
+    return 1
+  fi
+}
+
 @test "shim wrapper packages/itil/bin/wr-itil-reconcile-readme exists and is executable" {
   [ -x "$REPO_ROOT/packages/itil/bin/wr-itil-reconcile-readme" ]
 }

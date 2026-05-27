@@ -55,9 +55,13 @@ These `packages/itil/hooks/lib/...` paths exist **only in this plugin-source mon
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems.
-- [ ] **Fix (this instance)**: replace the repo-relative `source packages/itil/hooks/lib/*.sh` marker step with a PATH-resolved shim per ADR-049 — e.g. a `wr-itil-mark-create-gate` (and `wr-itil-mark-rfc-capture-gate`) bin shim that does the candidate-SID marker write, so SKILL.md calls a command on `$PATH` (like `wr-itil-reconcile-readme`) instead of sourcing files that don't ship to adopter roots. Apply across capture-problem, capture-rfc, manage-problem.
-- [ ] **Structural prevention ("never happens again")**: a CI lint that scans every PUBLISHED skill/agent/hook artifact for repo-relative `packages/` `source`/path references (and repo-relative dir enumeration) that won't resolve in an adopter install — fail the publish if any are found. This is the gate-the-actual-load-bearing-surface ask; compose with P263 (`claude plugin install --dry-run` CI gate) and the P151/P153/P219 class. The lint must run against the artifact as it ships, not the source tree (the source-tree-masks-the-bug root cause above).
-- [ ] Audit the full shipped corpus for other repo-relative `source`/path references on hot paths (sibling sweep with P151/P153/P219).
+- [x] **Fix DONE (2026-05-27, RFC-009)**: replaced all repo-relative `source packages/...` marker/lib steps with ADR-049 PATH-shim commands (`wr-itil-mark-create-gate`, `wr-itil-mark-rfc-capture-gate`, `wr-itil-migrate-problems-layout`, `wr-itil-check-upstream-cache-staleness`) that resolve their libs via `$(dirname)`. Applied across capture-problem, manage-problem, work-problems, and added the missing marker step to capture-rfc.
+- [x] **Structural prevention DONE ("never happens again")**: extended `packages/shared/test/no-repo-relative-script-paths-in-skills.bats` with line-anchored guards for `source packages/...` + `|| echo packages/...`. Any future repo-relative ref in a shipped SKILL fails CI. Composes with P263 (orthogonal manifest-validation layer).
+- [x] **Audit DONE**: full shipped-SKILL sweep found 24 refs (7 KIND A source + 17 KIND B fallback); all fixed. Sibling class P151/P153/P219 — the lint now covers their failure modes too.
+
+## Resolution (2026-05-27 — RFC-009)
+
+Fix-complete. 24 broken refs eliminated; the screenshotted create-gate marker bug (capture-problem/capture-rfc/manage-problem) is fixed; structural-prevention lint is live (15 bats GREEN). Design dogfooded ADR-074 (architect Needs-Direction → user confirmed Option C). 105 affected bats GREEN. **Close to Verifying when RFC-009 releases** (this session's changeset). The P151/P153/P219 merge-vs-distinct decision is deferred to /wr-itil:review-problems (the lint now structurally covers all of them).
 
 ## Scope finding (2026-05-27 investigation)
 
@@ -85,3 +89,9 @@ The create-gate marker step is one of **24 broken repo-relative references** in 
 - **P263** — structural-prevention CI gate; the "never happens again" requirement points here.
 - Evidence: adopter project `voder-mcp-hub`, 2026-05-27 (screenshot supplied by user).
 - captured via /wr-itil:capture-problem, 2026-05-27. The 3-keyword dup-check (publish|adopter|path) surfaced P151/P153/P219/P263/P281 — listed above for the next /wr-itil:review-problems merge decision.
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-009 | proposed | Adopter-safe path resolution in shipped SKILLs (P317 — 24 repo-relative references) |

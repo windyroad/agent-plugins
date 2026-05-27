@@ -260,7 +260,7 @@ for pid_token in $(echo "$problem_trace" | tr ',' ' '); do
   # Dual-tolerant ticket discovery (RFC-002 migration window).
   problem_file=$(ls docs/problems/${pid_num}-*.md docs/problems/*/${pid_num}-*.md 2>/dev/null | head -1)
   [ -z "$problem_file" ] && continue
-  bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/update-problem-references-section.sh" "$problem_file" "Stories"
+  wr-itil-update-problem-references-section "$problem_file" "Stories"
   git add "$problem_file"
 done
 ```
@@ -272,7 +272,7 @@ for jid_token in $(echo "$jtbd_trace" | tr ',' ' '); do
   jid_num="${jid_token#JTBD-}"
   jtbd_file=$(ls docs/jtbd/*/JTBD-${jid_num}-*.md 2>/dev/null | head -1)
   [ -z "$jtbd_file" ] && continue
-  bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/update-jtbd-references-section.sh" "$jtbd_file" "Stories"
+  wr-itil-update-jtbd-references-section "$jtbd_file" "Stories"
   git add "$jtbd_file"
 done
 ```
@@ -284,7 +284,7 @@ for rid_token in $(echo "$rfc_trace" | tr ',' ' '); do
   [ -z "$rid_token" ] && continue
   rfc_file=$(ls docs/rfcs/${rid_token}-*.md 2>/dev/null | head -1)
   [ -z "$rfc_file" ] && continue
-  bash "$(wr-itil-script-path 2>/dev/null || echo packages/itil/scripts)/update-rfc-references-section.sh" "$rfc_file" "Stories"
+  wr-itil-update-rfc-references-section "$rfc_file" "Stories"
   git add "$rfc_file"
 done
 ```
