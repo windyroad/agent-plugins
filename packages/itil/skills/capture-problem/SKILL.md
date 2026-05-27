@@ -65,7 +65,7 @@ fi
 | `--type=user-business` | Pre-resolves type to `user-business`; Step 1.5 skips the classifier and the AskUserQuestion. |
 | `--no-prompt` | Pre-resolves type to `technical` (default); Step 1.5 skips the classifier and the AskUserQuestion. |
 | `--jtbd=JTBD-NNN[,JTBD-NNN...]` | Pre-resolves the JTBD-trace value (Phase 4 P3.1 + I12 invariant per ADR-060 § Phase 3 + Phase 4 in-scope amendment 2026-05-13). Step 1.5b skips the JTBD-trace lexical dispatch and the I12 hard-block. Comma-separated list of JTBD IDs (no spaces). |
-| `--persona=<value>` | Pre-resolves the persona value (Phase 4 P4.2). Step 1.5b skips persona derivation. Value MUST be one of: `solo-developer`, `tech-lead`, `plugin-developer`, `plugin-user`. |
+| `--persona=<value>` | Pre-resolves the persona value (Phase 4 P4.2). Step 1.5b skips persona derivation. Value MUST be one of: `developer`, `tech-lead`, `plugin-developer`, `plugin-user`. |
 
 Strip recognised leading flags from `$ARGUMENTS`; the remainder (after flags) is the free-text description. If both `--type=<value>` and `--no-prompt` are present, `--type=<value>` wins (more specific). Unknown leading flags halt-with-stderr-directive: print "capture-problem: unknown flag '<flag>' — recognised flags: --type=technical, --type=user-business, --no-prompt, --jtbd=JTBD-NNN, --persona=<value>" and exit.
 
@@ -127,9 +127,9 @@ Per ADR-060 § Phase 3 + Phase 4 in-scope amendment (2026-05-13). Fires ONLY whe
 
 **Resolve `persona_value`** (a scalar enum value OR empty) via the following dispatch:
 
-1. **If `--persona=<value>` was set in Step 1**: validate `<value>` ∈ `{solo-developer, tech-lead, plugin-developer, plugin-user}`; halt with directive if invalid; otherwise assign and proceed silently.
+1. **If `--persona=<value>` was set in Step 1**: validate `<value>` ∈ `{developer, tech-lead, plugin-developer, plugin-user}`; halt with directive if invalid; otherwise assign and proceed silently.
 2. **Else if `jtbd_trace_value` is non-empty**: derive persona from cited JTBDs' frontmatter. Read each cited `docs/jtbd/<persona>/JTBD-<NNN>-*.md` file; extract its `persona:` (and optionally `secondary-persona:`) frontmatter values; if all cited JTBDs agree on a single persona, set `persona_value` to that persona silently and emit stderr advisory: `capture-problem: derived persona=<value> from cited JTBD <id> frontmatter`. If cited JTBDs disagree, fire AskUserQuestion with the union-of-derived-personas as options.
-3. **Else if `type_value = user-business`**: AskUserQuestion fires with the closed enum as options. Per ADR-060 P4.2: `solo-developer | tech-lead | plugin-developer | plugin-user`. Question text: *"What persona does this user-business problem serve?"*
+3. **Else if `type_value = user-business`**: AskUserQuestion fires with the closed enum as options. Per ADR-060 P4.2: `developer | tech-lead | plugin-developer | plugin-user`. Question text: *"What persona does this user-business problem serve?"*
 4. **Else (`type_value = technical`)**: leave `persona_value` empty. `persona:` frontmatter is OPTIONAL on technical problems.
 
 **I12 hard-block escape hatch (none)**: there is no `BYPASS_I12=1` env override at the SKILL surface. The block is a load-bearing schema constraint per ADR-060 Confirmation criterion 10; if a maintainer captures a user-business problem without yet knowing the JTBD trace, they must EITHER capture as `--type=technical` and re-classify during `/wr-itil:manage-problem` ingestion (when the JTBD becomes clear), OR fast-capture a placeholder JTBD via `/wr-itil:capture-jtbd` (when it ships under Phase 4 follow-on) and reference it.

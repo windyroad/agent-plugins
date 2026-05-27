@@ -1,23 +1,23 @@
 # Jobs To Be Done (JTBD) Index
 
-## Solo Developer
+## Developer
 
-Developer using AI coding agents for personal or small-team projects.
+Developer using AI coding agents — solo, small-team, or within a larger software development team.
 
-[Persona definition](solo-developer/persona.md)
+[Persona definition](developer/persona.md)
 
 ### Proposed
 
 | ID | Job | File |
 |----|-----|------|
-| JTBD-001 | Enforce Governance Without Slowing Down | [JTBD-001-enforce-governance.proposed.md](solo-developer/JTBD-001-enforce-governance.proposed.md) |
-| JTBD-002 | Ship AI-Assisted Code with Confidence | [JTBD-002-ship-with-confidence.proposed.md](solo-developer/JTBD-002-ship-with-confidence.proposed.md) |
-| JTBD-003 | Compose Only the Guardrails I Need | [JTBD-003-compose-guardrails.proposed.md](solo-developer/JTBD-003-compose-guardrails.proposed.md) |
-| JTBD-004 | Connect Agents Across Repos to Collaborate | [JTBD-004-connect-agents.proposed.md](solo-developer/JTBD-004-connect-agents.proposed.md) |
-| JTBD-005 | Invoke Governance Assessments On Demand | [JTBD-005-assess-on-demand.proposed.md](solo-developer/JTBD-005-assess-on-demand.proposed.md) |
-| JTBD-006 | Progress the Backlog While I'm Away | [JTBD-006-work-backlog-afk.proposed.md](solo-developer/JTBD-006-work-backlog-afk.proposed.md) |
-| JTBD-007 | Keep Plugins Current Across Projects | [JTBD-007-keep-plugins-current.proposed.md](solo-developer/JTBD-007-keep-plugins-current.proposed.md) |
-| JTBD-008 | Decompose a Fix Into Coordinated Changes | [JTBD-008-decompose-fix-into-coordinated-changes.proposed.md](solo-developer/JTBD-008-decompose-fix-into-coordinated-changes.proposed.md) |
+| JTBD-001 | Enforce Governance Without Slowing Down | [JTBD-001-enforce-governance.proposed.md](developer/JTBD-001-enforce-governance.proposed.md) |
+| JTBD-002 | Ship AI-Assisted Code with Confidence | [JTBD-002-ship-with-confidence.proposed.md](developer/JTBD-002-ship-with-confidence.proposed.md) |
+| JTBD-003 | Compose Only the Guardrails I Need | [JTBD-003-compose-guardrails.proposed.md](developer/JTBD-003-compose-guardrails.proposed.md) |
+| JTBD-004 | Connect Agents Across Repos to Collaborate | [JTBD-004-connect-agents.proposed.md](developer/JTBD-004-connect-agents.proposed.md) |
+| JTBD-005 | Invoke Governance Assessments On Demand | [JTBD-005-assess-on-demand.proposed.md](developer/JTBD-005-assess-on-demand.proposed.md) |
+| JTBD-006 | Progress the Backlog While I'm Away | [JTBD-006-work-backlog-afk.proposed.md](developer/JTBD-006-work-backlog-afk.proposed.md) |
+| JTBD-007 | Keep Plugins Current Across Projects | [JTBD-007-keep-plugins-current.proposed.md](developer/JTBD-007-keep-plugins-current.proposed.md) |
+| JTBD-008 | Decompose a Fix Into Coordinated Changes | [JTBD-008-decompose-fix-into-coordinated-changes.proposed.md](developer/JTBD-008-decompose-fix-into-coordinated-changes.proposed.md) |
 
 ## Tech Lead / Consultant
 

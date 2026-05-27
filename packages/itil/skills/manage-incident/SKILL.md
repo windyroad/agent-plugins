@@ -272,7 +272,7 @@ Do not re-implement the link logic here — delegate. See "Deprecated-argument f
 - **No problem required** — record a **No Problem** section with justification; close immediately.
 - **Multiple incidents → one problem** — each incident links to the same `P<NNN>`; the problem file accumulates "Reported by incident" entries via `manage-problem`'s update flow.
 - **Problem re-opens after the incident closed** — the closed incident stays closed; a new incident is declared for the new occurrence, linked to the re-opened problem.
-- **Low-severity / solo-developer lightweight path** — for Sev 4-5 incidents, the skill may skip the Hypotheses section if the user confirms no investigation is needed. Timeline, Observations, and at least one mitigation attempt remain mandatory.
+- **Low-severity / developer lightweight path** — for Sev 4-5 incidents, the skill may skip the Hypotheses section if the user confirms no investigation is needed. Timeline, Observations, and at least one mitigation attempt remain mandatory.
 
 ### 13. Quality checks
 
@@ -358,7 +358,7 @@ Otherwise, after the commit in step 14 lands, drain the release queue so the fix
 - **ADR-042** — auto-apply scorer remediations. Step 15 above-appetite branch unchanged.
 - **P071** — skill-split origin (slice 6 — manage-incident is the host with thin-router forwarders for `list`, `mitigate`, `restored`, `close`, `link`).
 - **P081** — structural-grep retrofit; the `manage-incident-adr-044-contract.bats` companion test file carries the `tdd-review: structural-permitted` marker as the bridge until P081 Phase 2 retrofit lands.
-- **JTBD-001** (`docs/jtbd/solo-developer/JTBD-001-enforce-governance.proposed.md`) — Surface 1 refactor preserves the duplicate-check governance gate while removing the prose-ask compliance gap; Surfaces 2 + 3 + 4 retain genuine consent-gate-for-the-genuinely-direction-setting / deviation-approval / one-time-override.
+- **JTBD-001** (`docs/jtbd/developer/JTBD-001-enforce-governance.proposed.md`) — Surface 1 refactor preserves the duplicate-check governance gate while removing the prose-ask compliance gap; Surfaces 2 + 3 + 4 retain genuine consent-gate-for-the-genuinely-direction-setting / deviation-approval / one-time-override.
 - **JTBD-101** (`docs/jtbd/plugin-developer/JTBD-101-extend-suite.proposed.md`) — Step 6 evidence-gate refactor brings manage-incident into pattern parity with mitigate-incident's slice-6a evidence-gate. Adopters get one consistent evidence-gate pattern across both incident skills.
 - **JTBD-201** (`docs/jtbd/tech-lead/JTBD-201-restore-service-fast.proposed.md`) — Step 6 explicit `Record anyway` bypass strengthens the audit-trail outcome (implicit-bypass becomes explicit-bypass-with-permanent-trail) without weakening the cool-headed-commitment outcome (`Add evidence` remains the friction-free default; bypass requires conscious second choice).
 

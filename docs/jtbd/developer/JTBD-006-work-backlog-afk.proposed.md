@@ -1,7 +1,7 @@
 ---
 status: proposed
 job-id: work-backlog-afk
-persona: solo-developer
+persona: developer
 date-created: 2026-04-17
 ---
 

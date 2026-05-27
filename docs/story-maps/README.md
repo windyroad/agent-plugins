@@ -8,7 +8,7 @@
 
 This index serves two persona-jobs per ADR-051 sibling pattern (JTBD-anchored README rule):
 
-### solo-developer
+### developer
 
 - **JTBD-008 (Decompose a Fix Into Coordinated Changes)** — primary fit. Story maps ARE the decomposition surface: when a fix decomposes into multiple coordinated changes (refactor across packages, phased migration, framework evolution), the story map provides the spatial 2D backbone × ribs × slices structure that names each sub-workstream as a first-class entity competing for WSJF attention at a level above individual commits. Patton's whole point is that the spatial layout *is* the meaning; HTML encoding preserves that semantic in a way markdown linearises away.
 

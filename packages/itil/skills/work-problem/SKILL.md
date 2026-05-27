@@ -135,7 +135,7 @@ After the delegated `/wr-itil:manage-problem <NNN>` completes:
 - **P031** — git-history freshness check rationale (mtime unreliable in worktrees). Applies to the README cache this skill reads.
 - **P062** — `/wr-itil:review-problems` is the canonical README.md cache writer. This skill defers to it for refreshes.
 - **P077** — `/wr-itil:work-problems` Step 5 delegates iterations via the Agent tool. The delegated subagent invokes this skill's execution unit per iteration.
-- **JTBD-001** (`docs/jtbd/solo-developer/JTBD-001-enforce-governance.proposed.md`) — discoverable surface via `/wr-itil:` autocomplete. Users type `/wr-itil:work-problem` rather than remembering the `manage-problem work` subcommand.
+- **JTBD-001** (`docs/jtbd/developer/JTBD-001-enforce-governance.proposed.md`) — discoverable surface via `/wr-itil:` autocomplete. Users type `/wr-itil:work-problem` rather than remembering the `manage-problem work` subcommand.
 - **JTBD-101** (`docs/jtbd/plugin-developer/JTBD-101-extend-suite.proposed.md`) — one skill per distinct user intent.
 - `packages/itil/skills/manage-problem/SKILL.md` — hosts the thin-router forwarder for the deprecated `manage-problem work` form; also the delegated execution target for each ticket.
 - `packages/itil/skills/review-problems/SKILL.md` — sibling refresh skill; this skill defers to it when the cache is stale.

@@ -280,8 +280,8 @@ When the per-ticket mechanic changes (e.g. a new pre-flight check or P063 token 
 - **P057** — `git mv` + Edit staging trap; the per-pair re-stage rule applied N times in this skill's loop.
 - **P062** — README.md refresh on every transition. At batch grain, the refresh fires ONCE at the end (single render covers all surviving renames).
 - **P063** — external-root-cause detection at Open → Known Error. Fires per pair; AFK fallback inherited from the singular (append the stable Upstream report pending marker).
-- **JTBD-001** (`docs/jtbd/solo-developer/JTBD-001-enforce-governance.proposed.md`) — eliminates the N×SKILL.md reload tax + ownership-boundary violation at batch closures; serves the "without slowing down" half of the job.
-- **JTBD-006** (`docs/jtbd/solo-developer/JTBD-006-work-backlog-afk.proposed.md`) — work-problems orchestrator may delegate release-batched closures through this surface during extended AFK runs.
+- **JTBD-001** (`docs/jtbd/developer/JTBD-001-enforce-governance.proposed.md`) — eliminates the N×SKILL.md reload tax + ownership-boundary violation at batch closures; serves the "without slowing down" half of the job.
+- **JTBD-006** (`docs/jtbd/developer/JTBD-006-work-backlog-afk.proposed.md`) — work-problems orchestrator may delegate release-batched closures through this surface during extended AFK runs.
 - **JTBD-101** (`docs/jtbd/plugin-developer/JTBD-101-extend-suite.proposed.md`) — singular/plural split is the established pattern; plugin-developers reading this should immediately recognise the shape.
 - `packages/itil/skills/transition-problem/SKILL.md` — singular sibling. Source-of-truth for the per-ticket mechanic this skill carries an inline copy of. When the mechanic changes, update both files in lockstep.
 - `packages/itil/skills/manage-problem/SKILL.md` — third call site of the per-ticket mechanic (in-skill Step 7 block). Per ADR-010 amended "copy, not move", three inline copies coexist.

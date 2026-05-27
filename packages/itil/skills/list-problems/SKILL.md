@@ -108,7 +108,7 @@ After the tables, print one of two short pointers depending on what the output s
 - **P031** — git-history freshness check rationale (mtime unreliable in worktrees).
 - **P048** Candidate 4 — original `Likely verified?` column (14-day age-heuristic). Superseded by P186.
 - **P186** — evidence-first cell shape (`yes — observed: <evidence>` / `no — not observed` / `no — observed regression`) replaces the age-based heuristic; `<!-- LIKELY-VERIFIED-CELL-SHAPE: evidence-based per P186 -->` drives cross-skill drift detection.
-- **JTBD-001** (`docs/jtbd/solo-developer/JTBD-001-enforce-governance.proposed.md`) — discoverable surface via `/wr-itil:` autocomplete.
+- **JTBD-001** (`docs/jtbd/developer/JTBD-001-enforce-governance.proposed.md`) — discoverable surface via `/wr-itil:` autocomplete.
 - **JTBD-101** (`docs/jtbd/plugin-developer/JTBD-101-extend-suite.proposed.md`) — one skill per distinct user intent.
 - `packages/itil/skills/manage-problem/SKILL.md` — hosts the thin-router forwarder for the deprecated `manage-problem list` form.
 

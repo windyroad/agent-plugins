@@ -185,7 +185,7 @@ If the user wants any of the above, the skill reports the appropriate sibling an
 - **ADR-015** — release scorer delegation pattern.
 - **ADR-020** — auto-release when changesets are queued.
 - **ADR-037** (`docs/decisions/037-skill-testing-strategy.proposed.md`) — contract-assertion bats pattern applied to this skill.
-- **JTBD-001** (`docs/jtbd/solo-developer/JTBD-001-enforce-governance.proposed.md`) — discoverable surface via `/wr-itil:` autocomplete.
+- **JTBD-001** (`docs/jtbd/developer/JTBD-001-enforce-governance.proposed.md`) — discoverable surface via `/wr-itil:` autocomplete.
 - **JTBD-101** (`docs/jtbd/plugin-developer/JTBD-101-extend-suite.proposed.md`) — one skill per distinct user intent.
 - **JTBD-201** (`docs/jtbd/tech-lead/JTBD-201-restore-service-fast.proposed.md`) — this skill IS the active-restoration path; audit trail invariants preserved post-split.
 - `packages/itil/skills/manage-incident/SKILL.md` — hosts the thin-router forwarder for the deprecated `manage-incident <I###> restored` form.

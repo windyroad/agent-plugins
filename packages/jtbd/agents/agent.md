@@ -58,7 +58,7 @@ wr-jtbd-is-job-or-persona-unconfirmed <persona-name | JTBD-NNN>
 
 **Key the flag on the oversight marker, NEVER on `status:`.** `status: proposed`/`accepted` and `human-oversight:` are orthogonal axes (ADR-066). Building on a **ratified** job whose `status` is still `proposed` is fine — do NOT flag it; only the *unratified* (marker-absent, non-superseded) case flags.
 
-**Bound to explicit cite/implement — NOT ambient alignment.** You already match every change to a job ID for the PASS verdict (see Job Alignment above); the `[Unratified Dependency]` flag must NOT fire on that mere match — only on an **explicit** dependency the change names. This is the inverse-P078 / P132 over-fire guard. Note: the JTBD unratified set is currently large (the P288 drain is in progress), so unlike the architect surface this will fire more often until that drain completes — that is the intended forcing function, not noise. The deliberately-held `solo-developer` persona (pending the P289 rename) is the canonical first-fire case.
+**Bound to explicit cite/implement — NOT ambient alignment.** You already match every change to a job ID for the PASS verdict (see Job Alignment above); the `[Unratified Dependency]` flag must NOT fire on that mere match — only on an **explicit** dependency the change names. This is the inverse-P078 / P132 over-fire guard. Note: the JTBD unratified set is currently large (the P288 drain is in progress), so unlike the architect surface this will fire more often until that drain completes — that is the intended forcing function, not noise. The `developer`-persona jobs still pending the P288 drain (e.g. `JTBD-001`) are the canonical first-fire cases — the `developer` persona itself was ratified via P289.
 
 ## Output Formatting
 

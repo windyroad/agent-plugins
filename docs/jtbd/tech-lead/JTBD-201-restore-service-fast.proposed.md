@@ -26,7 +26,7 @@ When production breaks, I want an evidence-first workflow that gets service rest
 
 - Needs consistent incident-response standards across teams and client engagements
 - Requires auditability of AI-assisted incident work for post-incident review
-- Cross-links to solo-developer: workflow stays lightweight — low-severity incidents can skip the full template without breaking the lifecycle
+- Cross-links to developer: workflow stays lightweight — low-severity incidents can skip the full template without breaking the lifecycle
 
 ## Current Solutions
 

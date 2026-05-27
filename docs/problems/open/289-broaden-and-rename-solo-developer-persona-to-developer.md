@@ -33,12 +33,16 @@ None needed — the persona functions correctly; the name is the issue.
 
 ### Investigation Tasks
 
-- [ ] **Migration-strategy decision** (the load-bearing open question): rename live references only (the `docs/jtbd/developer/` files + active skill/hook/agent references + root README) and leave historical mentions (closed problem tickets, dated retros, accepted-ADR bodies) as point-in-time-accurate `solo-developer`? OR rename ALL 275 occurrences for consistency? Historical-doc rewriting risks falsifying the record; live-only risks a confusing split. Likely: live-only + a note in ADR-008.
-- [ ] Pick the final name: `developer` vs `software-developer` (the AskUserQuestion option said `developer`).
-- [ ] Execute: `git mv docs/jtbd/solo-developer docs/jtbd/developer`; update the 8 jobs' `persona:` field + the persona.md `name:` + `description:`; refresh `docs/jtbd/README.md`; update live references per the migration-strategy decision.
-- [ ] Verify the JTBD edit gate + any `persona:`-keyed logic still resolves (jtbd-eval.sh, review-jobs, the new confirm-jobs-and-personas detector — the detector is name-agnostic so it is unaffected).
-- [ ] Re-confirm the renamed persona via `/wr-jtbd:confirm-jobs-and-personas` → write `human-oversight: confirmed`.
-- [ ] Possibly record an ADR amendment if ADR-008 (JTBD directory structure) names the persona set.
+- [x] **DONE 2026-05-27 — Migration-strategy decision**: **live-only** (user-confirmed via AskUserQuestion). Renamed the `docs/jtbd/developer/` files + active skill/hook/agent references + root README + the JTBD-anchored stories/story-maps README persona headings; left historical mentions (CHANGELOGs, dated retros, closed/open problem-ticket narrative, accepted-ADR + RFC bodies, README-history, .bats fixtures) as point-in-time-accurate `solo-developer`.
+- [x] **DONE — final name**: `developer` (user-confirmed via AskUserQuestion 2026-05-27).
+- [x] **DONE — execute**: `git mv docs/jtbd/solo-developer docs/jtbd/developer`; updated the 8 jobs' `persona:` field + the persona.md `name:` / `description:` / heading / broadened content; refreshed `docs/jtbd/README.md`; repointed the dead `docs/jtbd/solo-developer/...` doc-links in ~14 SKILL.md files; updated the capture-problem `--persona=` enum (`developer`); reworded the jtbd agent.md surface-3 first-fire example; updated root README persona table.
+- [x] **DONE — verify**: `developer` persona resolves + is ratified (`wr-jtbd-is-job-or-persona-unconfirmed developer` → exit 1); the name-agnostic detector + new predicate unaffected; full jtbd suite (34) + capture-problem suite (57) GREEN; no `solo-developer` left in any LIVE surface.
+- [x] **DONE — re-confirm**: wrote `human-oversight: confirmed` + `oversight-date: 2026-05-27` to `docs/jtbd/developer/persona.md` (born-confirmed — the user directly confirmed the rename + broadening substance via AskUserQuestion, so the marker is written per ADR-068 surface 1; no separate `/wr-jtbd:confirm-jobs-and-personas` pass needed). The persona's **jobs** JTBD-001..007 remain unratified (P288 drain scope, not P289).
+- [x] **DONE — ADR check**: architect PASS — no ADR amendment required. ADR-008 defines the dir layout with `<persona-name>` as a variable (not an enumerated literal). ADR-060 P4.2 names the persona enum literal, but editing the capture-problem SKILL enum (`solo-developer`→`developer`) *preserves* P4.2 compliance (keeps the closed enum resolvable) rather than violating it — implementation surface, not a competing decision.
+
+## Resolution (2026-05-27)
+
+Renamed `solo-developer` → `developer` (live-only migration) and ratified the broadened persona. The persona's relevance was broadened from "personal or small-team" to "solo, small-team, or larger team" — the distinguishing axis is now explicitly **role** (the developer who does the work) vs `tech-lead` (governance), not team size. The new JTBD surface-3 build-upon guard (P323/RFC-011) now passes the ratified `developer` persona and continues to flag its still-unratified jobs (P288 drain). Shipped-file reference changes (capture-problem enum, agent.md example) ride with the next `@windyroad/itil` / `@windyroad/jtbd` release (the jtbd half rides with the held RFC-011 changeset). **Close to Verifying.**
 
 ## Dependencies
 

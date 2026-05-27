@@ -80,7 +80,7 @@ description: <one-line description>
 <bullet list of frustrations this product addresses>
 ```
 
-Use kebab-case for the directory name (e.g., `solo-developer`, `tech-lead`).
+Use kebab-case for the directory name (e.g., `developer`, `tech-lead`).
 
 ### 4. Confirm personas with the user
 

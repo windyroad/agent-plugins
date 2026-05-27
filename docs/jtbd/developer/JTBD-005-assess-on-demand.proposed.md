@@ -1,7 +1,7 @@
 ---
 status: proposed
 job-id: assess-on-demand
-persona: solo-developer
+persona: developer
 date-created: 2026-04-16
 ---
 

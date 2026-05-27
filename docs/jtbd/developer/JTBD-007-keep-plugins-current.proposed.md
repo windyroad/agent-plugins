@@ -1,7 +1,7 @@
 ---
 status: proposed
 job-id: keep-plugins-current
-persona: solo-developer
+persona: developer
 date-created: 2026-04-23
 ---
 

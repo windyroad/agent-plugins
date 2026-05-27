@@ -8,7 +8,7 @@
 
 This index serves two persona-jobs per ADR-051 sibling pattern (JTBD-anchored README rule):
 
-### solo-developer
+### developer
 
 - **JTBD-008 (Decompose a Fix Into Coordinated Changes)** — primary fit. Stories are the INVEST-shaped + JTBD-anchored sub-workstream entities a story map decomposes into. Each story names a slice of value that can be implemented, tested, and traced to its driving problem + RFC + JTBD. The story-level surface is where the `/wr-itil:work-problem` traversal lands ("first not-done story") so dispatch is unambiguous.
 - **JTBD-001 (Enforce Governance Without Slowing Down)** — secondary fit. Story files carry their own INVEST checks at acceptance (per I10); acceptance criteria all-ticked + linked-RFC-closes auto-transitions a story from in-progress → done. Per-edit governance applies to story files via the same hook exemption surface as problem tickets.

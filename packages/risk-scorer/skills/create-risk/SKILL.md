@@ -81,7 +81,7 @@ Ask the user (one AskUserQuestion call with grouped questions):
 4. **Existing controls?** Each control names what it does and where it is implemented (file path or `ADR-NNN`). If none, leave empty.
 5. **Residual impact and likelihood** (after controls). If controls are minimal, residual = inherent — do not fabricate reductions. Per ADR-026, quantitative reduction claims must cite evidence (test, hook gate, pipeline report). If no evidence, state "Residual same as inherent pending control evidence" in the Treatment section and set residual = inherent.
 6. **Treatment choice?** Accept · Mitigate · Transfer · Avoid. Include brief justification.
-7. **Owner?** Persona or role (e.g. `solo-developer`, `plugin-maintainer`, `tech-lead`).
+7. **Owner?** Persona or role (e.g. `developer`, `plugin-maintainer`, `tech-lead`).
 
 If the user has already provided this context in the conversation (e.g. as arguments, or as part of a pipeline-finding hand-off), use what they have given and only ask about what is missing.
 
