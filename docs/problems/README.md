@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-05-27 **README reconciled** — 7 drift entries corrected: P317 / P318 / P319 / P320 / P321 / P322 / P323 (open on disk, missing from WSJF Rankings — committed deferred-refresh drift from the 2026-05-27 run-retro P319-P322 captures + P317/P318/P323 fix-session captures). All deferred-rated (Priority/Effort placeholders) — re-rate at next /wr-itil:review-problems. Reconciliation contract per P118 + ADR-014 amended ("Reconciliation as preflight robustness layer"). Prior P316-reconcile fragment rotated to README-history.md per P134.
+> Last reviewed: 2026-05-28 **README reconciled** — 1 drift entry corrected: P324 (open on disk, missing from WSJF Rankings — deferred-refresh drift from this session's P324 capture; WSJF 2.25 = Priority 9 ÷ L). Reconciliation contract per P118 + ADR-014 amended ("Reconciliation as preflight robustness layer"). Prior P317-P323-reconcile fragment rotated to README-history.md per P134.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -90,6 +90,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 2.25 | P015 | TDD enforcement does not flag vague Gherkin outcome steps | 9 Med | Open | L | 2026-04-16 |
 | 2.25 | P136 | ADR-044 alignment audit — sweep all unaudited skills/hooks/agents/ADRs/JTBDs/READMEs against the framework-resolution boundary (master ticket) | 9 Med | Open | L | 2026-04-27 |
 | 2.25 | P290 | Harden ADR-052 to behavioural-only — remove the structural-test escape hatch entirely (user direction during the P283 oversight drain: "structural tests not permitted at all"); supersedes ADR-005 Permitted Exception + P011, converts ~14 structural test files, resolves the Layer-B-primitive tension. Blocks ADR-052 oversight confirmation | 9 Med High | Open | L | 2026-05-25 |
+| 2.25 | P324 | Agent-prose verdicts have no behavioural test harness — forces the ADR-052 structural-escape hatch + above-appetite release workarounds; ADR-075 adopts promptfoo (two-tier: A blocks CI+pre-push, B blocks release). Sibling of P290 (removes the escape hatch this unblocks) | 9 Med High | Open | L | 2026-05-28 |
 | 2.0 | P170 | Problem tickets strain as fixes decompose into multiple coordinated changes — need RFC framework that ties all changes back to problems and unifies technical with user/business problems (Phase 1 + Phase 2 shipped 2026-05-12; ticket re-opened from 2026-05-12 premature Verifying transition per user direction 2026-05-13 — Phase 3 + Phase 4 in-scope; sibling [[P189]] captures the "deferred without user direction" class-of-behaviour) | 8 Med | Known Error | XL | 2026-05-04 |
 | 2.0 | P313 | Pre-edit governance-gate catch-22 — review agent withholds PASS because edits "aren't applied yet", but the gate blocks the edits | 4 Low-Med | Open | M | 2026-05-26 |
 | 2.0 | P314 | Rework the fix-time RFC-trace gate — wrong lifecycle placement (ADR-072) + hard-block should be auto-create (ADR-073), per corrected Known Error semantics | 8 Med | Open | L | 2026-05-26 |
