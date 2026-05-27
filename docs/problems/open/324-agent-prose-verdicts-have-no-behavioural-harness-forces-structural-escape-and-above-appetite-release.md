@@ -54,3 +54,9 @@ There is no behavioural test harness for **agent-prose verdicts** — the LLM-ge
 - **ADR-052** — behavioural-tests-default; its Surface-2 structural escape hatch (the selected line) is what this harness would let P290 remove.
 - **R009** (`docs/risks/`) — the 8/25 agent-prose residual class this harness reduces.
 - RFC-010 / RFC-011 — the two in-session instances that paid the escape-hatch + override tax.
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-012 | proposed | Build the promptfoo agent-prose verdict eval harness |
