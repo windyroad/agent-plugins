@@ -83,4 +83,4 @@ The JTBD oversight machinery (ADR-068) was built as a faithful sibling of the AD
 
 | RFC | Status | Title |
 |-----|--------|-------|
-| (to be created) | — | JTBD review flags changes built on an unratified persona or job |
+| RFC-011 | proposed | JTBD review flags changes built on an unratified persona or job |
