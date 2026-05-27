@@ -44,6 +44,22 @@ All review criteria come from the JTBD documentation. Read the docs first and ap
 - If the change involves API interactions, do the actions align with the job's expected flow?
 - Are new actions documented in the relevant job's action list?
 
+### Unratified Dependency (build-upon guard — ADR-068 enforcement surface 3)
+
+When the change or plan under review **explicitly cites, implements, or serves** a specific persona or job — an `@jtbd JTBD-NNN` annotation, a `persona: <name>` reference, or it is authoring that artifact's own flow — check whether that persona/job has been **ratified** (carries `human-oversight: confirmed` in its frontmatter) before letting the change stand. You have `Bash`, so run the predicate by **exit code** (you do NOT need to grep frontmatter yourself):
+
+```bash
+wr-jtbd-is-job-or-persona-unconfirmed <persona-name | JTBD-NNN>
+```
+
+- **Exit 0** (frontmatter lacks the marker AND the artifact is not superseded) → the artifact is **unratified**. Emit **ISSUES FOUND / [Unratified Dependency]** with action: "ratify `<persona | JTBD-NNN>` via `/wr-jtbd:confirm-jobs-and-personas` before this lands." (The predicate prints the resolved path on stdout.)
+- **Exit 1** (ratified, or superseded) → do NOT flag.
+- **Exit 2** (ref not found) → the change cites a persona/job that does not exist; that is a separate Job Gap / Persona Mismatch, not an Unratified Dependency.
+
+**Key the flag on the oversight marker, NEVER on `status:`.** `status: proposed`/`accepted` and `human-oversight:` are orthogonal axes (ADR-066). Building on a **ratified** job whose `status` is still `proposed` is fine — do NOT flag it; only the *unratified* (marker-absent, non-superseded) case flags.
+
+**Bound to explicit cite/implement — NOT ambient alignment.** You already match every change to a job ID for the PASS verdict (see Job Alignment above); the `[Unratified Dependency]` flag must NOT fire on that mere match — only on an **explicit** dependency the change names. This is the inverse-P078 / P132 over-fire guard. Note: the JTBD unratified set is currently large (the P288 drain is in progress), so unlike the architect surface this will fire more often until that drain completes — that is the intended forcing function, not noise. The deliberately-held `solo-developer` persona (pending the P289 rename) is the canonical first-fire case.
+
 ## Output Formatting
 
 When referencing JTBD IDs, problem IDs (P<NNN>), or ADR IDs in prose output, always include the human-readable title on first mention. Use the format `JTBD-001 (Enforce Governance Without Slowing Down)`, not bare `JTBD-001`.
@@ -59,11 +75,11 @@ If there are misalignments or gaps:
 
 > **JTBD Review: ISSUES FOUND**
 >
-> 1. **[Job Gap / Persona Mismatch / Missing Annotation]**
+> 1. **[Job Gap / Persona Mismatch / Missing Annotation / Unratified Dependency]**
 >    - **File**: `path`, Line ~N
->    - **Issue**: What is misaligned
+>    - **Issue**: What is misaligned (for **Unratified Dependency**: the change builds on `<persona | JTBD-NNN>` which lacks `human-oversight: confirmed`)
 >    - **Job**: Which job is affected (or "no matching job")
->    - **Fix**: Suggested resolution (update JTBD doc, adjust UI, add annotation)
+>    - **Fix**: Suggested resolution (update JTBD doc, adjust UI, add annotation; for **Unratified Dependency**: ratify via `/wr-jtbd:confirm-jobs-and-personas` before this lands)
 >
 > 2. ...
 
