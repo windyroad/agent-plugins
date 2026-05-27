@@ -38,11 +38,13 @@ Out of scope: the P288 drain itself (surfaces 1 & 2, already shipped); the `solo
 ## Tasks
 
 - [x] **T0 DONE** — recorded **enforcement surface 3** as the 2026-05-27 amendment to ADR-068 (item 7 + Confirmation criterion 6 + Related). Decision home user-confirmed via AskUserQuestion (amend ADR-068). Architect PASS + JTBD PASS.
-- [ ] **T1** — `packages/jtbd/scripts/is-job-or-persona-unconfirmed.sh` + the `wr-jtbd-is-job-or-persona-unconfirmed` shim (sibling of the architect predicate; ADR-008 ref-resolution; frontmatter-scoped marker; superseded-skip).
-- [ ] **T2** — behavioural bats for the predicate (marker-present/absent/superseded over a fixture tree).
-- [ ] **T3** — `packages/jtbd/agents/agent.md`: add the `[Unratified Dependency]` issue type + the "When to flag" instruction (explicit-cite-bound, runs the predicate by exit code, marker-keyed-not-status).
-- [ ] **T4** — structural-permitted bats for the agent verdict-presence (ADR-052 Surface 2 header citing P323/RFC-011).
-- [ ] **T5** — changeset for `@windyroad/jtbd`.
+- [x] **T1 DONE** — `packages/jtbd/scripts/is-job-or-persona-unconfirmed.sh` + the `wr-jtbd-is-job-or-persona-unconfirmed` shim (sibling of the architect predicate; ADR-008 ref-resolution for `persona: <name>` + `JTBD-NNN`; frontmatter-scoped marker; superseded-skip). Verified against the real repo: flags the unratified `solo-developer` persona (exit 0), passes ratified `tech-lead` (exit 1).
+- [x] **T2 DONE** — `is-job-or-persona-unconfirmed.bats`: 10 behavioural tests GREEN (persona/job/superseded/not-found/bare-numeric/direct-path + the `agrees with detect-unoversighted` sync guard).
+- [x] **T3 DONE** — `packages/jtbd/agents/agent.md`: added the `[Unratified Dependency]` verdict + "Unratified Dependency (build-upon guard)" instruction (explicit-cite-bound, runs the predicate by exit code, marker-keyed-not-status, routes the fix to `/wr-jtbd:confirm-jobs-and-personas`).
+- [x] **T4 DONE** — `jtbd-unratified-dependency-verdict.bats`: 6 structural-permitted tests GREEN (`tdd-review: structural-permitted (justification: P176)` header per ADR-052 Surface 2). Full jtbd suite GREEN (34 tests, no regression).
+- [x] **T5 DONE (HELD)** — `@windyroad/jtbd` patch changeset authored (both external-comms gates PASS); **moved to `docs/changesets-holding/`** per ADR-042 Rule 2 (risk-scorer scored the release at 8/25 on the R009 agent-prose surface, above the 4/Low appetite). Reinstate criterion (ADR-061 Rule 4 agent-prose class): ≥1 observation of the verdict firing correctly on a real unratified-persona/job cite + staying silent on a ratified-`proposed` job.
+
+**Implementation status (2026-05-27): COMPLETE, changeset held.** Architect PASS (ADR-068 surface-3 amendment) + JTBD PASS. Predicate behaviourally covered + real-repo-verified; agent-prose verdict in place. Commit references `Refs: RFC-011`. Releases when the held changeset graduates on dogfood evidence (or earlier per ADR-061 Rule 5 user direction — the RFC-010 twin released at the same 8/25 profile).
 
 ## Commits
 
