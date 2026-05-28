@@ -195,6 +195,7 @@ Log the renumber decision in the operation report if origin and local diverged.
 **Status**: Open
 **Reported**: <YYYY-MM-DD>
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Origin**: internal
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 **Type**: <type_value>
 **JTBD**: <jtbd_trace_value_as_comma_separated_list_OR_omit_line_when_empty>

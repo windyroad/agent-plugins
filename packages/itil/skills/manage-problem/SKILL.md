@@ -453,6 +453,7 @@ Before writing the problem file, perform a concern-boundary analysis on the gath
 **Status**: Open
 **Reported**: <YYYY-MM-DD>
 **Priority**: <score> (<label>) — Impact: <label> (<n>) x Likelihood: <label> (<n>)
+**Origin**: internal
 
 ## Description
 
@@ -492,6 +493,11 @@ Before writing the problem file, perform a concern-boundary analysis on the gath
 <links to related files, problems, ADRs>
 ```
 
+**`**Origin**` field (ADR-076)** records where the problem came from and is an authoritative input to the ADR-076 reported-first ranking tier. Two values:
+
+- `internal` — internally discovered (the default for tickets created by hand or by an internal observation).
+- `inbound-reported (#NN)` — reported to us by an external user via an upstream channel, where `#NN` is the upstream issue/discussion number. Written by ADR-062's inbound-discovery safe-and-valid branch at ticket creation. This is the **inbound** direction and is distinct from the `## Reported Upstream` section (which records the **outbound** direction — a ticket *we* reported up to someone else). The `**Origin**` field, not the regenerable `.upstream-cache.json`, is the rank-determining source of truth (ADR-076). When backfilling existing tickets during a review, stamp reported ones with `inbound-reported (#NN)`; leave the rest `internal`.
+
 The `## Dependencies` section uses **bare ticket IDs** (`P038`, not `[P038](./038-...)` link syntax) — review output renders to links on demand. An empty row is valid and explicit: `- **Blocked by**: (none)` reads better than omitting the row. The transitive-effort rule in the WSJF Prioritisation section consumes this section at review time.
 
 **Concrete example** (for P073 referencing two upstreams):
@@ -510,7 +516,7 @@ After writing the new `.open.md` file, regenerate `docs/problems/README.md` to i
 
 **Mechanism**: use the same rendering rules as Step 7's P062 block (glob `docs/problems/*.open.md` / `*.known-error.md` / `*.verifying.md` / `*.parked.md`; rank open/known-error by WSJF; list verifyings in the Verification Queue ordered by release age; list parkeds in the Parked section). The refresh is a **render, not a re-rank** — existing WSJF values on the other ticket files are trusted per P062's established discipline. Only the new ticket's own WSJF is consumed from its freshly-written file.
 
-**WSJF Rankings tie-break sort (P138)**: rows in the WSJF Rankings table are sorted by the multi-key `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)` so the rendered top-to-bottom row order matches `/wr-itil:work-problems` SKILL.md Step 3's tie-break selection 1:1. The first key (WSJF desc) sets the tier; within a tier the next three keys are the canonical tie-break ladder (Known Error before Open; smaller effort before larger; older Reported date before newer); ID asc is the deterministic final tiebreaker for full-tie cases. The table MUST include a `Reported` column so the third tie-break input is visible to README readers — without it, users cannot reconcile the rendered order against the orchestrator's selection. <!-- TIE-BREAK-LADDER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 --> Any future change to the tie-break ladder MUST update this render block, the Step 7 P062 block, the Step 9e template, AND `/wr-itil:review-problems` SKILL.md Step 3 / Step 5 — drift here re-opens P138.
+**WSJF Rankings tier + tie-break sort (P138 + ADR-076)**: rows render **tier-first** — Tier 0 Critical-bypass (Severity Very High ≥17 OR security-classified OR incident-linked) → Tier 1 Inbound-reported (`**Origin**: inbound-reported`) → Tier 2 Internal — and **within each tier** by the multi-key `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)` so the rendered top-to-bottom row order matches `/wr-itil:work-problems` SKILL.md Step 3's selection 1:1. The ADR-076 tier partition sets the top-level order; within a tier WSJF desc sets the band, then the next three keys are the canonical tie-break ladder (Known Error before Open; smaller effort before larger; older Reported date before newer); ID asc is the deterministic final tiebreaker for full-tie cases. The table MUST include a `Reported` column so the third tie-break input is visible, and an `Origin` column so the Tier 1 partition is visible — without them, users cannot reconcile the rendered order against the orchestrator's selection. <!-- REPORTED-FIRST-TIER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 (ADR-076) --> <!-- TIE-BREAK-LADDER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 --> Any future change to the tie-break ladder OR the reported-first tier MUST update this render block, the Step 7 P062 block, the Step 9e template, AND `/wr-itil:review-problems` SKILL.md Step 3 / Step 5 — drift here re-opens P138 / ADR-076.
 
 **Verification Queue sort direction (P150)**: rows in the Verification Queue table are sorted by `Released date ASC` (oldest at row 1; same-day releases tiebreak by ID ASC) per ADR-022 + P048 user-task semantics — older entries are the most likely-verified candidates the user wants to surface first when closing the queue. Newest-first ordering pushes those actionable closure candidates below the fold and contradicts the section header. <!-- VQ-SORT-DIRECTION: oldest-first per ADR-022 --> Any future change to the VQ sort direction MUST update this render block, the Step 7 P062 block, the Step 9c presentation block, the Step 9e template, AND `/wr-itil:review-problems` + `/wr-itil:transition-problem` + `/wr-itil:transition-problems` + `/wr-itil:reconcile-readme` + `/wr-itil:list-problems` — drift here re-opens P150.
 
@@ -679,7 +685,7 @@ Every Step 7 status transition (Open → Known Error, Known Error → Verificati
 
 The refresh uses the same rendering rules as Step 9e (dual-tolerant glob per RFC-002 migration window: `docs/problems/*.open.md docs/problems/open/*.md` / `*.known-error.md` + `known-error/*.md` / `*.verifying.md` + `verifying/*.md` / `*.parked.md` + `parked/*.md`; rank open/known-error by WSJF; list verifyings in the Verification Queue ordered by release age; list parkeds in the Parked section) but skips the full re-scoring pass — existing WSJF values on the ticket files are trusted. The refresh is a render, not a re-rank.
 
-**WSJF Rankings tie-break sort (P138)**: rows in the WSJF Rankings table are sorted by the multi-key `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)` so the rendered top-to-bottom row order matches `/wr-itil:work-problems` SKILL.md Step 3's tie-break selection 1:1. Within each WSJF tier, rows are ordered by the canonical tie-break ladder: Known Error before Open, smaller Effort before larger, older Reported date before newer. The table MUST include a `Reported` column so the third tie-break input is visible to README readers. <!-- TIE-BREAK-LADDER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 --> Any future change to the tie-break ladder MUST update this render block, the Step 5 P094 block, the Step 9e template, AND `/wr-itil:review-problems` SKILL.md Step 3 / Step 5 — drift here re-opens P138.
+**WSJF Rankings tier + tie-break sort (P138 + ADR-076)**: rows render **tier-first** — Tier 0 Critical-bypass (Severity Very High ≥17 OR security-classified OR incident-linked) → Tier 1 Inbound-reported (`**Origin**: inbound-reported`) → Tier 2 Internal — and **within each tier** by the multi-key `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)` so the rendered top-to-bottom row order matches `/wr-itil:work-problems` SKILL.md Step 3's selection 1:1. Within each tier, rows are ordered by the canonical tie-break ladder: Known Error before Open, smaller Effort before larger, older Reported date before newer. The table MUST include a `Reported` column so the third tie-break input is visible, and an `Origin` column so the Tier 1 partition is visible. <!-- REPORTED-FIRST-TIER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 (ADR-076) --> <!-- TIE-BREAK-LADDER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 --> Any future change to the tie-break ladder OR the reported-first tier MUST update this render block, the Step 5 P094 block, the Step 9e template, AND `/wr-itil:review-problems` SKILL.md Step 3 / Step 5 — drift here re-opens P138 / ADR-076.
 
 **Verification Queue sort direction (P150)**: rows in the Verification Queue table are sorted by `Released date ASC` (oldest at row 1; same-day releases tiebreak by ID ASC) per ADR-022 + P048 user-task semantics — older entries are the most likely-verified candidates the user wants to surface first when closing the queue. Newest-first ordering pushes those actionable closure candidates below the fold and contradicts the section header. <!-- VQ-SORT-DIRECTION: oldest-first per ADR-022 --> Any future change to the VQ sort direction MUST update this render block, the Step 5 P094 block, the Step 9c presentation block, the Step 9e template, AND `/wr-itil:review-problems` + `/wr-itil:transition-problem` + `/wr-itil:transition-problems` + `/wr-itil:reconcile-readme` + `/wr-itil:list-problems` — drift here re-opens P150.
 
@@ -775,10 +781,10 @@ The re-rate pass is part of Step 9b's output — a re-rate row appears in the st
 
 **Step 9c: Present summary and select problem to work**
 
-After reviewing all problems, present a WSJF-ranked table for open/known-error problems (the main dev-work queue). Sort rows by `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)` so row order matches `/wr-itil:work-problems` Step 3 tie-break selection 1:1 (P138):
+After reviewing all problems, present a WSJF-ranked table for open/known-error problems (the main dev-work queue). Sort rows **tier-first** (Tier 0 Critical-bypass [Severity Very High ≥17 OR security-classified OR incident-linked] → Tier 1 Inbound-reported [`**Origin**: inbound-reported`] → Tier 2 Internal), then within each tier by `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)` so row order matches `/wr-itil:work-problems` Step 3 selection 1:1 (P138 + ADR-076): <!-- REPORTED-FIRST-TIER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 (ADR-076) -->
 
-| WSJF | ID | Title | Severity | Status | Effort | Reported | Notes |
-|------|-----|-------|----------|--------|--------|----------|-------|
+| WSJF | ID | Title | Severity | Status | Effort | Reported | Origin | Notes |
+|------|-----|-------|----------|--------|--------|----------|--------|-------|
 
 Then present a separate **Verification Queue** section for `.verifying.md` files (per ADR-022 — ranked by release age, oldest first; no WSJF because the multiplier is 0). Sort key + direction is the canonical `Released date ASC` (oldest at row 1; same-day releases tiebreak by ID ASC) — drift here re-opens P150. <!-- VQ-SORT-DIRECTION: oldest-first per ADR-022 --> The final `Likely verified?` column carries an **evidence-first** cell (per P186 — supersedes the original P048 Candidate 4 14-day heuristic). <!-- LIKELY-VERIFIED-CELL-SHAPE: evidence-based per P186 --> Three canonical values:
 
@@ -824,7 +830,7 @@ When evidence is **ambiguous, contested, or absent** (no specific in-session cit
 
 Edit each problem file where the priority changed. Then write/overwrite `docs/problems/README.md` with the current ranked table so future `work` invocations can skip the full re-scan.
 
-**WSJF Rankings tie-break sort (P138)**: rows in the WSJF Rankings table are sorted by the multi-key `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)` so the rendered top-to-bottom row order matches `/wr-itil:work-problems` SKILL.md Step 3's tie-break selection 1:1. Within a WSJF tier, rows are ordered by the canonical tie-break ladder: Known Error before Open, smaller Effort before larger, older Reported date before newer. The `Reported` column MUST appear so the third tie-break input is visible to README readers. <!-- TIE-BREAK-LADDER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 --> Any future change to the tie-break ladder MUST update this template, the Step 5 P094 block, the Step 7 P062 block, AND `/wr-itil:review-problems` SKILL.md Step 3 / Step 5 — drift here re-opens P138.
+**WSJF Rankings tier + tie-break sort (P138 + ADR-076)**: rows render **tier-first** — Tier 0 Critical-bypass (Severity Very High ≥17 OR security-classified OR incident-linked) → Tier 1 Inbound-reported (`**Origin**: inbound-reported`) → Tier 2 Internal — and **within each tier** by the multi-key `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)` so the rendered top-to-bottom row order matches `/wr-itil:work-problems` SKILL.md Step 3's selection 1:1. Within a tier, rows are ordered by the canonical tie-break ladder: Known Error before Open, smaller Effort before larger, older Reported date before newer. The `Reported` column MUST appear so the third tie-break input is visible, and an `Origin` column so the Tier 1 partition is visible. <!-- REPORTED-FIRST-TIER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 (ADR-076) --> <!-- TIE-BREAK-LADDER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 --> Any future change to the tie-break ladder OR the reported-first tier MUST update this template, the Step 5 P094 block, the Step 7 P062 block, AND `/wr-itil:review-problems` SKILL.md Step 3 / Step 5 — drift here re-opens P138 / ADR-076.
 
 ```markdown
 # Problem Backlog
@@ -834,9 +840,9 @@ Edit each problem file where the priority changed. Then write/overwrite `docs/pr
 
 ## WSJF Rankings
 
-| WSJF | ID | Title | Severity | Status | Effort | Reported |
-|------|-----|-------|----------|--------|--------|----------|
-| <score> | P<NNN> | <title> | <severity> | <status> | <effort> | <YYYY-MM-DD> |
+| WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
+|------|-----|-------|----------|--------|--------|----------|--------|
+| <score> | P<NNN> | <title> | <severity> | <status> | <effort> | <YYYY-MM-DD> | <internal / inbound-reported (#NN)> |
 ...
 
 ## Verification Queue

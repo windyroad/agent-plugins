@@ -5,6 +5,14 @@
 # the table must include a Reported date column so the third tie-break
 # input is visible to README readers.
 #
+# ADR-076: selection partitions into three tiers ABOVE the WSJF ladder —
+#   Tier 0 Critical-bypass (Severity >=17 OR security OR incident-linked)
+#   Tier 1 Inbound-reported (**Origin**: inbound-reported)
+#   Tier 2 Internal
+# The tier dominates WSJF; within each tier the existing P138 ladder
+# applies unchanged. Each render site carries a REPORTED-FIRST-TIER-SOURCE
+# marker and an Origin column. Drift re-opens P138 / ADR-076.
+#
 # Hybrid coverage per ADR-005 + ADR-037:
 #   - Structural contract-assertions (Permitted Exception per ADR-005 /
 #     contract-assertion pattern per ADR-037): each of the five render-
@@ -212,5 +220,99 @@ EOF
   sorted=$(sort -t$'\t' -k1,1nr -k2,2n -k3,3n -k4,4 -k5,5n "$fixture_in" | cut -f6)
   expected="T_high: Open S high-WSJF
 T_low: KE M low-WSJF"
+  [ "$sorted" = "$expected" ]
+}
+
+# ---------------------------------------------------------------------------
+# ADR-076 structural contract-assertions — reported-first tier
+# ---------------------------------------------------------------------------
+
+@test "manage-problem render blocks carry the REPORTED-FIRST-TIER-SOURCE marker (ADR-076)" {
+  # Each WSJF Rankings render block must carry the greppable tier marker
+  # pointing back to /wr-itil:work-problems Step 3 (the canonical tier
+  # source). Drift across render sites re-opens ADR-076.
+  run grep -F '<!-- REPORTED-FIRST-TIER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 (ADR-076) -->' "$MANAGE_SKILL"
+  [ "$status" -eq 0 ]
+  # Step 5 P094, Step 7 P062, Step 9c presentation, Step 9e template.
+  count=$(grep -c -F '<!-- REPORTED-FIRST-TIER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 (ADR-076) -->' "$MANAGE_SKILL")
+  [ "$count" -ge 3 ]
+}
+
+@test "review-problems carries the REPORTED-FIRST-TIER-SOURCE marker (ADR-076)" {
+  run grep -F '<!-- REPORTED-FIRST-TIER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 (ADR-076) -->' "$REVIEW_SKILL"
+  [ "$status" -eq 0 ]
+}
+
+@test "work-problems carries the REPORTED-FIRST-TIER-SOURCE marker (ADR-076)" {
+  run grep -F '<!-- REPORTED-FIRST-TIER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 (ADR-076) -->' "$WORK_SKILL"
+  [ "$status" -eq 0 ]
+}
+
+@test "manage-problem + review-problems README templates include the Origin column (ADR-076)" {
+  # Tier 1 (inbound-reported) membership must be visible to README readers,
+  # mirroring the Reported-column rationale for the third tie-break level.
+  run grep -F '| WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |' "$MANAGE_SKILL"
+  [ "$status" -eq 0 ]
+  run grep -F '| WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |' "$REVIEW_SKILL"
+  [ "$status" -eq 0 ]
+}
+
+@test "manage-problem ticket template defines the Origin field (ADR-076)" {
+  run grep -F '**Origin**: internal' "$MANAGE_SKILL"
+  [ "$status" -eq 0 ]
+}
+
+@test "render blocks warn that drift re-opens ADR-076" {
+  count=$(grep -c -F 're-opens P138 / ADR-076' "$MANAGE_SKILL")
+  [ "$count" -ge 3 ]
+}
+
+# ---------------------------------------------------------------------------
+# ADR-076 behavioural fixture: tier partition dominates the WSJF ladder
+# ---------------------------------------------------------------------------
+
+@test "behavioural: tier partition outranks WSJF — critical-bypass + reported beat higher-WSJF internal" {
+  # Fixture columns: tier  WSJF  KE_flag  Effort  Reported  ID  Title
+  #   tier: 0=critical-bypass, 1=inbound-reported, 2=internal
+  #
+  # The full selection key is tier ASC (k1) dominating, then the existing
+  # P138 ladder within tier: WSJF desc (k2), KE-first (k3), Effort asc (k4),
+  # Reported asc (k5), ID asc (k6).
+  #
+  # Tickets:
+  #   C: critical-bypass, WSJF 2.0  (Severity 20 Open XL) — lowest WSJF
+  #   R: inbound-reported, WSJF 3.0 (Severity 6 Open M)
+  #   I: internal, WSJF 16.0        (Severity 8 KE S)     — highest WSJF
+  #
+  # Without the tier, I (WSJF 16.0) would top the queue. With ADR-076 the
+  # tier dominates: C → R → I. This is the regression guard that the most
+  # critical issues come first and reported beats internal regardless of WSJF.
+  fixture_in="$TEST_TMP/fixture-tier.tsv"
+  cat >"$fixture_in" <<'EOF'
+2	16.0	0	1	2026-05-20	502	I: internal high-WSJF
+0	2.0	1	8	2026-05-10	501	C: critical low-WSJF
+1	3.0	1	2	2026-05-15	503	R: reported mid-WSJF
+EOF
+
+  # k1 tier asc; k2 WSJF desc; k3 KE_flag asc; k4 Effort asc; k5 Reported asc; k6 ID asc
+  sorted=$(sort -t$'\t' -k1,1n -k2,2nr -k3,3n -k4,4n -k5,5 -k6,6n "$fixture_in" | cut -f7)
+  expected="C: critical low-WSJF
+R: reported mid-WSJF
+I: internal high-WSJF"
+  [ "$sorted" = "$expected" ]
+}
+
+@test "behavioural: within a tier, the existing WSJF + tie-break ladder still applies (ADR-076)" {
+  # Two inbound-reported tickets in the same tier must order by the
+  # unchanged within-tier ladder: higher WSJF first, then KE-first.
+  fixture_in="$TEST_TMP/fixture-within-tier.tsv"
+  cat >"$fixture_in" <<'EOF'
+1	6.0	1	1	2026-05-12	601	R_low: reported WSJF 6
+1	12.0	0	2	2026-05-11	602	R_high: reported WSJF 12
+EOF
+
+  sorted=$(sort -t$'\t' -k1,1n -k2,2nr -k3,3n -k4,4n -k5,5 -k6,6n "$fixture_in" | cut -f7)
+  expected="R_high: reported WSJF 12
+R_low: reported WSJF 6"
   [ "$sorted" = "$expected" ]
 }

@@ -192,7 +192,7 @@ After Step 0b completes (whether dispatched or silent-passed), proceed to Step 1
 
 Read `docs/problems/README.md` if it exists and is fresh (check via git history — see manage-problem step 9 for the cache freshness check). If stale or missing, scan all open + known-error tickets via the dual-tolerant pattern `ls docs/problems/*.open.md docs/problems/*.known-error.md docs/problems/open/*.md docs/problems/known-error/*.md 2>/dev/null` (RFC-002 migration window — covers BOTH the flat `<NNN>-<title>.<state>.md` filename-suffix layout AND the per-state subdir `<state>/<NNN>-<title>.md` layout), extract their WSJF scores, and rank them.
 
-**README row order matches Step 3 tie-break selection (P138)**: as of P138, the README's WSJF Rankings table is rendered with the multi-key sort `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)`. The cache-fresh path can therefore read the rendered table top-to-bottom and the first row is the orchestrator's pick — no in-memory tie-break re-application needed. The slow path scan must apply the same multi-key sort. <!-- TIE-BREAK-LADDER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 -->
+**README row order matches Step 3 tier + tie-break selection (P138 + ADR-076)**: the README's WSJF Rankings table is rendered tier-first — rows partition into Tier 0 Critical-bypass (Severity ≥17 OR security-classified OR incident-linked) → Tier 1 Inbound-reported (`**Origin**: inbound-reported`) → Tier 2 Internal, and within each tier by the multi-key sort `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)`. The cache-fresh path can therefore read the rendered table top-to-bottom and the first row is the orchestrator's pick — no in-memory tier/tie-break re-application needed. The slow path scan must apply the same tier partition then multi-key sort. <!-- REPORTED-FIRST-TIER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 (ADR-076) --> <!-- TIE-BREAK-LADDER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 -->
 
 Exclude:
 - `.closed.md` files (done)
@@ -253,12 +253,21 @@ Step 2.5b is the single source of truth for routing accumulated user-answerable 
 
 **Cross-skill principle (architect FLAG, P122 + P126)**: orchestrator main turns default to `AskUserQuestion` when available; the AFK persona (JTBD-006) is served by the **subprocess-boundary contract under ADR-032** (iteration subprocess workers are AFK by construction via `claude -p` — they exit at `ITERATION_SUMMARY` and never reach the orchestrator's stop or halt surfaces), NOT by suppressing `AskUserQuestion` at the orchestrator layer. Step 5's iteration-prompt template carries the per-subprocess AFK contract (constraint: "Do not call `AskUserQuestion`"); the orchestrator's stop and halt surfaces fire only in the main turn where the user is presumed present. P122 established this principle at Step 2.5; P126 extends it to every halt path that emits a final AFK summary (the principle: **halt-paths-must-route-design-questions-through-Step-2.5b** — every halt path that fires after iters have accumulated user-answerable skips MUST run Step 2.5b before emitting its summary).
 
-### Step 3: Pick the highest-WSJF problem
+### Step 3: Pick the highest-WSJF problem in the highest non-empty tier
 
-Select the problem with the highest WSJF score. If there's a tie, prefer:
+Selection partitions the backlog into three **tiers** and works the highest non-empty tier first; the WSJF tie-break ladder applies **within** a tier, not across tiers. Tiers, highest first (ADR-076):
+
+1. **Tier 0 — Critical bypass**: Severity Very High (≥17) OR security-classified OR incident-linked. The most critical issues always come first, regardless of origin.
+2. **Tier 1 — Inbound-reported**: ticket carries `**Origin**: inbound-reported` (reported to us by an external user; ADR-062). Worked ahead of internal tickets — customer-service / feedback-signal preservation: ignored reporters stop reporting and churn.
+3. **Tier 2 — Internal**: everything else (`**Origin**: internal` or no Origin field).
+
+Within the highest non-empty tier, select the problem with the highest WSJF score. If there's a tie, prefer:
 1. Known Errors over Open problems (they have a confirmed fix path — less risk of wasted effort)
 2. Smaller effort over larger (faster throughput)
 3. Older reported date (longer wait = higher urgency)
+4. Lower ID (deterministic final tiebreaker)
+
+The full selection order is therefore: **tier** (Critical-bypass → Inbound-reported → Internal), then the within-tier ladder `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)`. <!-- REPORTED-FIRST-TIER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 (ADR-076) -->
 
 ### Step 4: Classify each problem
 

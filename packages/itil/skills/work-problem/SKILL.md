@@ -6,7 +6,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Skill, Agen
 
 # Work Problem — Pick-and-Run
 
-Pick the highest-WSJF ticket from the current backlog and work it end-to-end. This is the **singular** entry point — one ticket per invocation. Selection is **framework-mediated** per ADR-044's Framework-Mediated Surface (Prioritisation row): the agent applies the WSJF formula + documented tie-break ladder mechanically and reports the chosen ticket + the rung that decided. The user retains direct override via `/wr-itil:work-problem <NNN>` invocation and via mid-flow correction (ADR-044 category 6).
+Pick the highest-WSJF ticket from the current backlog and work it end-to-end. This is the **singular** entry point — one ticket per invocation. Selection is **framework-mediated** per ADR-044's Framework-Mediated Surface (Prioritisation row): the agent applies the ADR-076 tier partition (Critical-bypass → Inbound-reported → Internal) then the WSJF formula + documented within-tier tie-break ladder mechanically, and reports the chosen ticket + its tier + the rung that decided. The user retains direct override via `/wr-itil:work-problem <NNN>` invocation and via mid-flow correction (ADR-044 category 6).
 
 This skill is the P071 phased-landing split of `/wr-itil:manage-problem work` per ADR-010 amended Skill Granularity rule: one skill per distinct user intent. The original `/wr-itil:manage-problem work` subcommand route remains as a thin-router forwarder during the deprecation window but is scheduled for removal in `@windyroad/itil`'s next major version.
 
@@ -21,7 +21,7 @@ Both names coexist intentionally per P071's out-of-scope note on the naming coex
 
 **In scope:**
 - Read `docs/problems/README.md` when fresh; otherwise delegate the refresh to `/wr-itil:review-problems` first (never re-implement the re-scoring logic locally — same anti-fork discipline as the list-problems cache path).
-- Pick the highest-WSJF ticket via the framework-mediated tie-break ladder (Known Error > Open; smaller effort first; older reported date; ticket number ascending) per ADR-044 Framework-Mediated Surface. Report the chosen ticket + the rung that decided. No `AskUserQuestion` fires for selection.
+- Pick the highest-priority ticket via the framework-mediated selection: first by ADR-076 **tier** (Tier 0 Critical-bypass [Severity Very High ≥17 OR security-classified OR incident-linked] → Tier 1 Inbound-reported [`**Origin**: inbound-reported`] → Tier 2 Internal), then within the highest non-empty tier by the tie-break ladder (Known Error > Open; smaller effort first; older reported date; ticket number ascending) per ADR-044 Framework-Mediated Surface. Report the chosen ticket + its tier + the rung that decided. No `AskUserQuestion` fires for selection.
 - Honour the user-override path `/wr-itil:work-problem <NNN>` — when the user names a ticket directly, skip the ladder and proceed to Step 3 with the named ticket.
 - Delegate the actual work to `/wr-itil:manage-problem <NNN>` via the Skill tool so the investigation / known-error transition / fix / closure flow stays hosted on a single authoritative workflow (ADR-010 thin-router discipline applied to the work path).
 - Scope-expansion prompt (ADR-013 Rule 1; ADR-044 category-2 deviation-approval surface) when the selected ticket's effort grows during work — same three-option structure as `/wr-itil:manage-problem`'s Working a Problem section.
