@@ -586,3 +586,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-05-28 (P317-P323-reconcile fragment rotated for P324 README reconciliation)
 
 > Last reviewed: 2026-05-27 **README reconciled** — 7 drift entries corrected: P317 / P318 / P319 / P320 / P321 / P322 / P323 (open on disk, missing from WSJF Rankings — committed deferred-refresh drift from the 2026-05-27 run-retro P319-P322 captures + P317/P318/P323 fix-session captures). All deferred-rated (Priority/Effort placeholders) — re-rate at next /wr-itil:review-problems. Reconciliation contract per P118 + ADR-014 amended ("Reconciliation as preflight robustness layer"). Prior P316-reconcile fragment rotated to README-history.md per P134.
+
+## 2026-05-30 (P324-reconcile fragment rotated for P325/P326 README reconciliation)
+
+> Last reviewed: 2026-05-28 **README reconciled** — 1 drift entry corrected: P324 (open on disk, missing from WSJF Rankings — deferred-refresh drift from this session's P324 capture; WSJF 2.25 = Priority 9 ÷ L). Reconciliation contract per P118 + ADR-014 amended ("Reconciliation as preflight robustness layer"). Prior P317-P323-reconcile fragment rotated to README-history.md per P134.
