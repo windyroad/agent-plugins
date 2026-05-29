@@ -107,6 +107,7 @@ When a change includes a new or modified decision file in `docs/decisions/`:
 - Does it list at least 2 considered options with pros/cons?
 - Does it include reassessment criteria?
 - If it supersedes another decision, is the old decision properly updated?
+- **Is `docs/decisions/README.md` (the compendium) refreshed and staged?** Per ADR-077, the compendium is the architect agent's routine load surface and MUST be regenerated whenever an ADR body changes. Skills (`/wr-architect:create-adr`, `/wr-architect:capture-adr`, `/wr-architect:review-decisions`) regenerate it automatically; off-skill hand-edits and bulk renames must regenerate it explicitly. Flag any change that touches `docs/decisions/<NNN>-*.md` without also staging a fresh `docs/decisions/README.md`. Recovery is mechanical: `wr-architect-generate-decisions-compendium && git add docs/decisions/README.md`. The `architect-compendium-refresh-discipline.sh` commit-time hook is the safety-net backstop, not the primary mechanism.
 
 ## Output Formatting
 

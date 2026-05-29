@@ -137,12 +137,22 @@ The numbered-options placeholder (`1. Option A (chosen) ...` + `2. (deferred ...
 
 Single `Write` to `docs/decisions/<NNN>-<kebab-title>.proposed.md`.
 
-### 5. Commit per ADR-014 — single commit, no architect-review handoff
+### 4.5. Refresh the decisions compendium (ADR-077)
 
-**Stage list**: ONLY the new ADR file.
+After the ADR skeleton lands, regenerate `docs/decisions/README.md` so the architect-agent routine load surface includes the new entry:
 
 ```bash
-git add docs/decisions/<NNN>-<kebab-title>.proposed.md
+wr-architect-generate-decisions-compendium
+```
+
+The compendium is the architect agent's primary load surface per ADR-077; capture-adr owns keeping it fresh (skills + agent are PRIMARY; the `architect-compendium-refresh-discipline.sh` hook is the safety-net backstop). The next step stages both files together.
+
+### 5. Commit per ADR-014 — single commit, no architect-review handoff
+
+**Stage list**: the new ADR file AND the refreshed compendium (ADR-077 — both move in the same commit so the architect-compendium-refresh-discipline hook passes).
+
+```bash
+git add docs/decisions/<NNN>-<kebab-title>.proposed.md docs/decisions/README.md
 ```
 
 Satisfy the commit gate per ADR-014 — same two-path pattern as `manage-problem` Step 11 / `capture-problem` Step 6:

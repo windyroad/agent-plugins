@@ -23,12 +23,49 @@
 
 set -uo pipefail
 
+# --- Flag parsing ----------------------------------------------------------
+# `--check` (no write): generate to a temp file and diff against the on-disk
+# compendium. Exit 0 if byte-identical, 1 if drift, 2 if directory missing.
+# Used by the architect-compendium-refresh-discipline.sh enforcement hook
+# (Slice 2) to verify the staged compendium matches the working-tree ADRs.
+CHECK_MODE=0
+case "${1:-}" in
+    --check)
+        CHECK_MODE=1
+        shift
+        ;;
+    --help|-h)
+        cat <<'EOF'
+Usage: generate-decisions-compendium.sh [--check] [decisions_dir]
+
+Without --check: regenerates <decisions_dir>/README.md from the per-ADR
+bodies. Idempotent — same in-force ADR set produces byte-identical output.
+
+With --check: generates to a temp file and diffs against the existing
+<decisions_dir>/README.md. Exits 0 if up-to-date, 1 if stale (with a
+diff hint), 2 on directory error. Does NOT modify any file. Used by the
+ADR-077 enforcement hook to verify the committed compendium matches the
+current ADR bodies.
+EOF
+        exit 0
+        ;;
+esac
+
 DECISIONS_DIR="${1:-docs/decisions}"
-COMPENDIUM="$DECISIONS_DIR/README.md"
+TARGET_COMPENDIUM="$DECISIONS_DIR/README.md"
 
 if [ ! -d "$DECISIONS_DIR" ]; then
     echo "generate-decisions-compendium: decisions directory not found: $DECISIONS_DIR" >&2
     exit 2
+fi
+
+# In check mode, redirect generation to a temp file so the on-disk
+# compendium is never mutated.
+if [ "$CHECK_MODE" = "1" ]; then
+    COMPENDIUM=$(mktemp -t architect-compendium-check.XXXXXX)
+    trap 'rm -f "$COMPENDIUM"' EXIT
+else
+    COMPENDIUM="$TARGET_COMPENDIUM"
 fi
 
 # --- Field extractors ------------------------------------------------------
@@ -214,16 +251,48 @@ emit_entry() {
 
 # Collect + sort ADR files. README.md and any sibling -history.md / -summary.md
 # style files (future P194 etc.) are excluded.
-files=()
+#
+# Status sectioning (ADR-077 amended 2026-05-30): the compendium is split
+# into two sections so the architect agent's routine load reads in-force
+# decisions first and historical decisions second.
+#   - In-force (proposed + accepted): the current rules to follow.
+#   - Historical (superseded + rejected + deprecated): direction for what NOT
+#     to do — useful when reviewing a proposed change that re-treads a path
+#     that was tried and rejected, or that conflicts with a superseded
+#     decision's still-valid intent.
+# Both sections sort by ID ascending; the status badge on each entry tells
+# the agent which kind it is.
+all_files=()
 while IFS= read -r f; do
-    files+=("$f")
+    all_files+=("$f")
 done < <(find "$DECISIONS_DIR" -maxdepth 1 -type f -name '*.md' \
             ! -name 'README.md' \
             ! -name '*-history.md' \
             ! -name '*-summary.md' \
             2>/dev/null | sort)
 
-total=${#files[@]}
+in_force_files=()
+historical_files=()
+for f in "${all_files[@]}"; do
+    s=$(get_frontmatter_field "$f" "status")
+    case "$s" in
+        proposed|accepted)
+            in_force_files+=("$f")
+            ;;
+        superseded|rejected|deprecated)
+            historical_files+=("$f")
+            ;;
+        *)
+            # Unknown status: surface as in-force so it isn't silently dropped;
+            # the badge will show "?" and a reviewer can correct the source.
+            in_force_files+=("$f")
+            ;;
+    esac
+done
+
+in_force_total=${#in_force_files[@]}
+historical_total=${#historical_files[@]}
+total=$((in_force_total + historical_total))
 
 # Header is deterministic — NO timestamp, NO date. The compendium must be
 # idempotent (same input bodies => byte-identical output) so the ADR-077
@@ -237,14 +306,58 @@ total=${#files[@]}
     echo ""
     echo "Compact rendered index of every ADR's chosen option, confirmation criteria, and relationship graph. **Authoritative substance lives in the per-ADR body** (\`<NNN>-<slug>.<status>.md\`); this compendium is a derived view for routine \`wr-architect:agent\` compliance review."
     echo ""
+    echo "**Two sections:**"
+    echo ""
+    echo "- **In-force decisions** (\`proposed\` + \`accepted\`) — the current rules to follow."
+    echo "- **Historical decisions** (\`superseded\` + \`rejected\` + \`deprecated\`) — direction for what NOT to do. Useful when reviewing a proposed change that re-treads a path already tried, or that conflicts with a superseded decision's still-valid intent. The status badge on each entry says which kind it is."
+    echo ""
     echo "For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. \`/wr-architect:create-adr\`, \`/wr-architect:capture-adr\`, and \`/wr-architect:review-decisions\` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body."
     echo ""
-    echo "**Total ADRs:** ${total}"
+    echo "**Total ADRs:** ${total} (${in_force_total} in-force, ${historical_total} historical)"
     echo ""
     echo "---"
-    for f in "${files[@]}"; do
+    echo ""
+    echo "## In-force decisions"
+    echo ""
+    echo "_${in_force_total} ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._"
+    for f in "${in_force_files[@]}"; do
         emit_entry "$f"
     done
+    if [ "$historical_total" -gt 0 ]; then
+        echo ""
+        echo "---"
+        echo ""
+        echo "## Historical decisions"
+        echo ""
+        echo "_${historical_total} ADRs. These were tried and superseded, rejected, or deprecated. Read them as direction for what NOT to do, or to understand the lineage of an in-force decision. Do not enforce them as current rules._"
+        for f in "${historical_files[@]}"; do
+            emit_entry "$f"
+        done
+    fi
 } > "$COMPENDIUM"
 
-echo "generate-decisions-compendium: wrote $COMPENDIUM (${total} ADRs)" >&2
+if [ "$CHECK_MODE" = "1" ]; then
+    # Check mode: diff temp against target. Idempotency contract holds only
+    # when both files exist; treat absence as "stale" (drift detected).
+    if [ ! -f "$TARGET_COMPENDIUM" ]; then
+        echo "generate-decisions-compendium: compendium MISSING — $TARGET_COMPENDIUM does not exist" >&2
+        echo "  run: wr-architect-generate-decisions-compendium" >&2
+        exit 1
+    fi
+    if cmp -s "$COMPENDIUM" "$TARGET_COMPENDIUM"; then
+        echo "generate-decisions-compendium: compendium up-to-date (${total} ADRs — ${in_force_total} in-force, ${historical_total} historical)" >&2
+        exit 0
+    fi
+    {
+        echo "generate-decisions-compendium: compendium IS STALE relative to ADR bodies"
+        echo "  expected (fresh generator output): $COMPENDIUM"
+        echo "  actual   (on disk):                $TARGET_COMPENDIUM"
+        echo "  run: wr-architect-generate-decisions-compendium && git add $TARGET_COMPENDIUM"
+        echo ""
+        echo "diff (first 40 lines):"
+        diff "$TARGET_COMPENDIUM" "$COMPENDIUM" 2>/dev/null | head -40
+    } >&2
+    exit 1
+fi
+
+echo "generate-decisions-compendium: wrote $COMPENDIUM (${total} ADRs total — ${in_force_total} in-force, ${historical_total} historical)" >&2

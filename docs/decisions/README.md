@@ -4,15 +4,20 @@
 
 Compact rendered index of every ADR's chosen option, confirmation criteria, and relationship graph. **Authoritative substance lives in the per-ADR body** (`<NNN>-<slug>.<status>.md`); this compendium is a derived view for routine `wr-architect:agent` compliance review.
 
+**Two sections:**
+
+- **In-force decisions** (`proposed` + `accepted`) — the current rules to follow.
+- **Historical decisions** (`superseded` + `rejected` + `deprecated`) — direction for what NOT to do. Useful when reviewing a proposed change that re-treads a path already tried, or that conflicts with a superseded decision's still-valid intent. The status badge on each entry says which kind it is.
+
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 75
+**Total ADRs:** 75 (68 in-force, 7 historical)
 
 ---
 
-### ADR-001 — Unified Install Experience via npm Package
-**Status:** superseded
-**Confirmation:** Running npx @windyroad/claude-plugins installs all 10 plugins and all 10 skills; After install, /wr: autocomplete shows all 10 skills; After install, claude plugin list shows all 10 plugins; The install is idempotent (safe to re-run)
+## In-force decisions
+
+_68 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -34,10 +39,6 @@ For deep-dive — creating, evolving, ratifying, or contesting a decision — op
 ### ADR-006 — Connect Plugin (Experimental)
 **Status:** proposed | **Oversight:** confirmed
 **Confirmation:** Setup skill asks for explicit opt-in before any configuration; No credentials stored in project files (env vars only); SessionStart hook warns (not blocks) when env vars are set but --channels is inactive; SessionStart hook outputs a collaboration primer when env vars are set and --channels is active; SessionStart hook is silent when env vars are not set (plugin is inactive)
-
-### ADR-007 — JTBD Project-Wide Enforcement
-**Status:** superseded
-**Confirmation:** jtbd-eval.sh suggests /wr-jtbd:update-guide for any project missing the doc (no UI file check); jtbd-enforce-edit.sh gates all project files except the exclusion list; jtbd-enforce-edit.sh allows: .css, .scss, .png, .jpg, .svg, .woff, package-lock.json, .changeset/*.md, MEMORY.…; jtbd-enforce-edit.sh blocks: .ts, .js, .sh, .mjs, .json (non-lockfile), .md (non-excluded); BATS tests exist for the broadened scope
 
 ### ADR-008 — JTBD Directory Structure
 **Status:** proposed | **Oversight:** confirmed | **Supersedes:** [007-jtbd-project-wide-enforcement]
@@ -126,11 +127,6 @@ For deep-dive — creating, evolving, ratifying, or contesting a decision — op
 **Chosen:** Chosen option: **Option 1 — Cite + persist + uncertainty, measurement surface on `.closed.md` tickets, WSJF buckets with comparable-prior citation, explicit `not estimated` marker when ungrounded.**
 **Related:** ADR-026, ADR-023, ADR-022, ADR-015, ADR-005
 
-### ADR-027 — Governance skill auto-delegation — Step 0 delegates skill workflow to a subagent
-**Status:** superseded
-**Chosen:** Chosen option: **Option 1 — Step-0 auto-delegation to `general-purpose` subagent for all named governance skills.**
-**Related:** ADR-013, ADR-014, ADR-015, ADR-027, ADR-018, ADR-019, ADR-024
-
 ### ADR-028 — External-comms gate — voice-tone + risk/leak evaluators on shared PreToolUse surface
 **Status:** proposed | **Oversight:** confirmed
 **Related:** ADR-002, ADR-017, ADR-008, ADR-009, ADR-013, ADR-015, ADR-020, ADR-024, ADR-025, ADR-026, ADR-027
@@ -174,11 +170,6 @@ For deep-dive — creating, evolving, ratifying, or contesting a decision — op
 **Confirmation:** packages/itil/skills/scaffold-intake/SKILL.md exists with the foreground-synchronous pattern documented, the R…; packages/itil/skills/scaffold-intake/templates/ contains the five .tmpl files (config.yml.tmpl, problem-report…; packages/itil/hooks/pre-publish-intake-gate.sh exists and ships with @windyroad/itil.; packages/itil/.claude-plugin/plugin.json declares the new skill + the pre-publish hook.; Trigger 1 wiring in packages/itil/skills/manage-problem/SKILL.md + packages/itil/skills/work-problems/SKILL.md…
 **Related:** ADR-024, ADR-032, ADR-013, ADR-009, ADR-010, ADR-033, ADR-014, ADR-002, ADR-035
 
-### ADR-037 — Skill testing strategy — contract-assertion bats companion to ADR-005
-**Status:** superseded
-**Confirmation:** packages/shared/test/skill-test-helpers.bash exists with the baseline assertion library (SKILL.md-exists, cite…; Per-skill <skill>-contract.bats exists for every skill in every @windyroad/* plugin. Retrofit tracked under P0…; Each contract bats asserts: SKILL.md file path exists; frontmatter name: matches the skill directory; at least…; ADR-005 gets a [Reassessment Triggered] flag in its Reassessment Criteria section with a pointer to ADR-037.; packages/shared/test/skill-contract-coverage.bats — enumerates every packages/*/skills/*/SKILL.md and assert…
-**Related:** ADR-005, ADR-010, ADR-011, ADR-017, ADR-025, ADR-026, ADR-032, ADR-035, ADR-036
-
 ### ADR-038 — Progressive disclosure + once-per-session budget for UserPromptSubmit governance prose
 **Status:** proposed | **Oversight:** confirmed
 **Related:** ADR-002, ADR-008, ADR-009, ADR-014, ADR-015, ADR-017, ADR-022, ADR-023, ADR-028, ADR-037
@@ -186,11 +177,6 @@ For deep-dive — creating, evolving, ratifying, or contesting a decision — op
 ### ADR-040 — Session-start briefing surface — SessionStart hook over tiered directory + indexed README
 **Status:** proposed | **Oversight:** confirmed
 **Confirmation:** docs/briefing/ tree exists and docs/briefing/README.md has a ## Critical Points (Session-Start Surface) sectio…; packages/retrospective/hooks/session-start-briefing.sh exists, extracts the Critical Points section cleanly, e…; packages/retrospective/hooks/hooks.json contains a SessionStart entry with "matcher": "startup" targeting the …; docs/BRIEFING.md is deleted.; @windyroad/retrospective@0.7.0 published to npm. Adopter projects installing the new version and starting a Cl…
-
-### ADR-041 — Auto-apply scorer remediations to reach within appetite — never release above
-**Status:** superseded
-**Chosen:** Chosen option: **"Liberal auto-apply with halt-on-exhaustion"**, because the never-release-above-appetite invariant is the primary constraint and liberal auto-apply is the only mechanism that reliably honours it across AFK and non-AFK flows…
-**Related:** ADR-013, ADR-014, ADR-032, ADR-015, ADR-018, ADR-020, ADR-022, ADR-037, ADR-041
 
 ### ADR-042 — Auto-apply scorer remediations to reach within appetite — open action-class vocabulary
 **Status:** proposed | **Oversight:** confirmed | **Supersedes:** ADR-041
@@ -218,11 +204,6 @@ For deep-dive — creating, evolving, ratifying, or contesting a decision — op
 **Confirmation:** .claude/skills/install-updates/SKILL.md — Step 6.5 "Scaffold governance artefacts (per-sibling)" exists betw…; .claude/skills/install-updates/REFERENCE.md — new section "Governance-artefact scaffold (P033)" present with…; .claude/skills/install-updates/templates/risk-register-README.md.tmpl — present; adopter-flavoured (no R001 …; .claude/skills/install-updates/templates/risk-register-TEMPLATE.md.tmpl — present; verbatim copy of this rep…; docs/problems/033-no-persistent-risk-register.known-error.md — Phase 1 marked complete with ADR-047 citation…
 **Related:** ADR-036, ADR-030, ADR-013, ADR-014, ADR-038, ADR-040, ADR-004
 
-### ADR-048 — Documented recovery from gate misfire is the prescribed surface, not bypass
-**Status:** superseded
-**Confirmation:** packages/itil/skills/manage-problem/SKILL.md Step 2 substep 7 — sub-block "Recovery if hook denial persists"…; packages/itil/hooks/manage-problem-enforce-create.sh — compgen -G '/tmp/manage-problem-grep-*' test on deny …; docs/problems/144-...verifying.md — ## Fix Released section cites ADR-048 + the two-tier procedure landing i…; packages/itil/skills/manage-problem/test/manage-problem-p119-recovery-path.bats (new) — SKILL.md structural …; packages/itil/hooks/test/manage-problem-enforce-create.bats (extended) — behavioural tests:
-**Related:** ADR-009, ADR-013, ADR-022, ADR-031, ADR-037, ADR-038, ADR-044
-
 ### ADR-049 — Plugin-bundled scripts invoked from SKILL.md resolve via `bin/` on `$PATH`
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **"Option D — `bin/` on `$PATH` with thin shim wrapper"**, because it works today (no upstream feature dependency), preserves canonical-body editability under `packages/<plugin>/scripts/`, ships portably across Windows + np…
@@ -232,11 +213,6 @@ For deep-dive — creating, evolving, ratifying, or contesting a decision — op
 **Status:** proposed | **Oversight:** confirmed | **Supersedes:** ["048-gate-misfire-recovery-procedure.proposed.md"]
 **Confirmation:** packages/itil/hooks/lib/runtime-sid.sh exists and exports runtime_sid_path().; packages/itil/hooks/itil-runtime-sid-marker.sh exists, is executable, and parses session_id from stdin JSON.; packages/itil/hooks/hooks.json registers the new hook under PreToolUse with matcher Bash|Write|Edit|Read.; packages/itil/hooks/lib/session-id.sh get_current_session_id reads runtime marker before announce-marker prior…; packages/itil/skills/manage-problem/SKILL.md Step 2 substep 7 no longer contains the ADR-048 recovery prose.
 **Related:** ADR-048, ADR-038, ADR-045, ADR-037, ADR-017, ADR-009, ADR-044, ADR-023
-
-### ADR-051 — `@windyroad/*` plugin READMEs anchor on JTBD job IDs with load-bearing commit-hook + prose-woven framing
-**Status:** superseded
-**Chosen:** Chosen option: **"Option D2 — Plugin README MUST cite at least one current JTBD job ID; value framing SHOULD derive from JTBD"**, because it (a) creates a stable, structurally-simple drift-detection anchor (JTBD ID grep + filesystem resol…
-**Related:** ADR-002, ADR-003, ADR-008, ADR-013, ADR-014, ADR-051, ADR-021, ADR-040, ADR-053, ADR-044, ADR-049
 
 ### ADR-052 — Behavioural-tests-default for skill testing
 **Status:** proposed | **Oversight:** confirmed | **Supersedes:** [037-skill-testing-strategy]
@@ -361,3 +337,42 @@ For deep-dive — creating, evolving, ratifying, or contesting a decision — op
 **Chosen:** Chosen option: **"Generated `docs/decisions/README.md` compendium"** (option 2), because it delivers the largest single-load token win (one file vs N), has a direct precedent in the codebase at a sibling surface (ADR-031's problem-ticket RE…
 **Confirmation:** (a) Agent prompt amendment — packages/architect/agents/agent.md Step 1 (~:20) carries the new load contract:…; (b) Generator script — packages/architect/scripts/generate-decisions-compendium.sh exists and is idempotent …; (c) Initial generated compendium — docs/decisions/README.md exists, contains an entry for every <NNN>-*.md A…; (d) /wr-architect:create-adr integration — Step 4 template authoring + Step 5 confirm extended to regenerate…; (e) /wr-architect:capture-adr integration — skeleton-write step extended to regenerate the compendium and in…
 **Related:** ADR-038, ADR-054, ADR-066, ADR-031, ADR-026, ADR-014
+
+---
+
+## Historical decisions
+
+_7 ADRs. These were tried and superseded, rejected, or deprecated. Read them as direction for what NOT to do, or to understand the lineage of an in-force decision. Do not enforce them as current rules._
+
+### ADR-001 — Unified Install Experience via npm Package
+**Status:** superseded
+**Confirmation:** Running npx @windyroad/claude-plugins installs all 10 plugins and all 10 skills; After install, /wr: autocomplete shows all 10 skills; After install, claude plugin list shows all 10 plugins; The install is idempotent (safe to re-run)
+
+### ADR-007 — JTBD Project-Wide Enforcement
+**Status:** superseded
+**Confirmation:** jtbd-eval.sh suggests /wr-jtbd:update-guide for any project missing the doc (no UI file check); jtbd-enforce-edit.sh gates all project files except the exclusion list; jtbd-enforce-edit.sh allows: .css, .scss, .png, .jpg, .svg, .woff, package-lock.json, .changeset/*.md, MEMORY.…; jtbd-enforce-edit.sh blocks: .ts, .js, .sh, .mjs, .json (non-lockfile), .md (non-excluded); BATS tests exist for the broadened scope
+
+### ADR-027 — Governance skill auto-delegation — Step 0 delegates skill workflow to a subagent
+**Status:** superseded
+**Chosen:** Chosen option: **Option 1 — Step-0 auto-delegation to `general-purpose` subagent for all named governance skills.**
+**Related:** ADR-013, ADR-014, ADR-015, ADR-027, ADR-018, ADR-019, ADR-024
+
+### ADR-037 — Skill testing strategy — contract-assertion bats companion to ADR-005
+**Status:** superseded
+**Confirmation:** packages/shared/test/skill-test-helpers.bash exists with the baseline assertion library (SKILL.md-exists, cite…; Per-skill <skill>-contract.bats exists for every skill in every @windyroad/* plugin. Retrofit tracked under P0…; Each contract bats asserts: SKILL.md file path exists; frontmatter name: matches the skill directory; at least…; ADR-005 gets a [Reassessment Triggered] flag in its Reassessment Criteria section with a pointer to ADR-037.; packages/shared/test/skill-contract-coverage.bats — enumerates every packages/*/skills/*/SKILL.md and assert…
+**Related:** ADR-005, ADR-010, ADR-011, ADR-017, ADR-025, ADR-026, ADR-032, ADR-035, ADR-036
+
+### ADR-041 — Auto-apply scorer remediations to reach within appetite — never release above
+**Status:** superseded
+**Chosen:** Chosen option: **"Liberal auto-apply with halt-on-exhaustion"**, because the never-release-above-appetite invariant is the primary constraint and liberal auto-apply is the only mechanism that reliably honours it across AFK and non-AFK flows…
+**Related:** ADR-013, ADR-014, ADR-032, ADR-015, ADR-018, ADR-020, ADR-022, ADR-037, ADR-041
+
+### ADR-048 — Documented recovery from gate misfire is the prescribed surface, not bypass
+**Status:** superseded
+**Confirmation:** packages/itil/skills/manage-problem/SKILL.md Step 2 substep 7 — sub-block "Recovery if hook denial persists"…; packages/itil/hooks/manage-problem-enforce-create.sh — compgen -G '/tmp/manage-problem-grep-*' test on deny …; docs/problems/144-...verifying.md — ## Fix Released section cites ADR-048 + the two-tier procedure landing i…; packages/itil/skills/manage-problem/test/manage-problem-p119-recovery-path.bats (new) — SKILL.md structural …; packages/itil/hooks/test/manage-problem-enforce-create.bats (extended) — behavioural tests:
+**Related:** ADR-009, ADR-013, ADR-022, ADR-031, ADR-037, ADR-038, ADR-044
+
+### ADR-051 — `@windyroad/*` plugin READMEs anchor on JTBD job IDs with load-bearing commit-hook + prose-woven framing
+**Status:** superseded
+**Chosen:** Chosen option: **"Option D2 — Plugin README MUST cite at least one current JTBD job ID; value framing SHOULD derive from JTBD"**, because it (a) creates a stable, structurally-simple drift-detection anchor (JTBD ID grep + filesystem resol…
+**Related:** ADR-002, ADR-003, ADR-008, ADR-013, ADR-014, ADR-051, ADR-021, ADR-040, ADR-053, ADR-044, ADR-049

@@ -207,6 +207,15 @@ oversight-date: YYYY-MM-DD   # today
 
 This is the load-bearing born-confirmed gate: an ADR recorded through create-adr enters the world already human-oversighted (it does not appear in `/wr-architect:review-decisions`' unoversighted set). Do NOT write the marker if the user has not confirmed (rejected / still-iterating ADRs stay unmarked). The marker is orthogonal to `status:` — a `proposed` ADR can be `human-oversight: confirmed`.
 
+**Refresh the decisions compendium (ADR-077).** After the ADR file is written and any born-confirmed marker is applied, regenerate `docs/decisions/README.md` so the architect-agent routine load surface includes the new entry. Run:
+
+```bash
+wr-architect-generate-decisions-compendium
+git add docs/decisions/README.md
+```
+
+The compendium is the architect agent's primary load surface per ADR-077; skills own keeping it fresh. The `architect-compendium-refresh-discipline.sh` PreToolUse hook is the safety-net backstop — it will DENY a commit that stages the new `docs/decisions/<NNN>-*.md` without a matching `docs/decisions/README.md`. Regenerating here makes that hook a no-op on the happy path.
+
 ### 6. Handle supersession (if applicable)
 
 If the user mentions this decision replaces an existing one:
