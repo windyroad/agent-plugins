@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# ADR-049 $PATH shim — dispatches to the canonical generate-decisions-compendium script (ADR-077).
+exec "$(dirname "$0")/../scripts/generate-decisions-compendium.sh" "$@"

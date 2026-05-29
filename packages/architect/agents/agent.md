@@ -17,7 +17,7 @@ You are the Architect. You review proposed changes against the project's archite
 
 ## Your Role
 
-1. Read all existing decisions in `docs/decisions/` (glob for `*.md`, skip `README.md`). If `docs/decisions/` does not exist yet, that is fine. Proceed with the review noting that no prior decisions are recorded.
+1. Read `docs/decisions/README.md` — the generated **Decisions Compendium**. It carries every ADR's chosen option, confirmation criteria, and relationship graph in a compact form (~40 KB vs ~1.6 MB for the full body set; ~40× reduction). **This is the routine load surface for compliance review** (per ADR-077). If `docs/decisions/README.md` does not exist, fall back to globbing `docs/decisions/*.md` (skip the absent README) — the project may predate ADR-077 or be a fresh install. If `docs/decisions/` itself does not exist, that is fine; proceed noting that no prior decisions are recorded. **Load a specific ADR's full body** (`docs/decisions/<NNN>-*.md`) **only when the compendium entry is insufficient for the current review** — deep-dive on a contested change, evolving a decision, ratifying a new ADR via `/wr-architect:create-adr`, or confirming a substance question the compendium summary does not resolve. The per-ADR body remains the authoritative substance (ADR-031); the compendium is a derived view.
 2. Read the file(s) being edited to understand the current state and proposed change
 3. Review the proposed change against existing decisions (if any)
 4. Determine if the change requires a new decision to be documented

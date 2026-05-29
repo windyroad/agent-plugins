@@ -15,7 +15,11 @@ In adopting projects using @windyroad/architect, `docs/decisions/` ADR content d
 
 **Reporter framing.** Reported by external adopters during multi-project sessions — this is an inbound report per ADR-076 (Tier 1: customer-service / feedback-signal preservation). User signal during capture: *"that's probably the highest priority issue because of the amount of token burn."*
 
-**Goal.** Drop the architect / JTBD / risk-scorer per-edit token cost without losing the deep-context-on-demand value that the full ADR body provides.
+**Goal.** Drop the architect per-edit token cost without losing the deep-context-on-demand value that the full ADR body provides.
+
+**Scope correction (architect vet 2026-05-30).** The initial framing said "architect / JTBD / risk-scorer" — only partly correct. Only `wr-architect:agent` body-reads ADRs in the load path (`packages/architect/agents/agent.md:20`: "Read all existing decisions in `docs/decisions/`"). `wr-jtbd:agent` reads `docs/jtbd/`, not `docs/decisions/`. `wr-risk-scorer:wip` enumerates `docs/decisions/*.md` as a path-list only (governance-artefact diff-detection — not body-read). The architect agent is the **single dominant ADR-body consumer**; designing for it captures essentially all the win.
+
+**Direction (user pick 2026-05-30): `docs/decisions/README.md` compendium.** One generated file listing every ADR's chosen option + key constraints in a compact format; architect agent loads the compendium instead of N individual ADRs for routine compliance. Direct precedent in ADR-031 (problem-ticket README-as-rendered-index). Full ADR bodies remain authoritative; the compendium is a derived/cached view kept in sync by a generator + drift detector (mirrors P138 tie-break-ladder drift pattern).
 
 ## Symptoms
 
