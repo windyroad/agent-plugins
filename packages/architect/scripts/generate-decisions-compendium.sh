@@ -125,7 +125,10 @@ get_bullets() {
         | head -"$cap"
 }
 
-# Compact-join bullets onto one line, truncating each to N chars + "…".
+# Compact-join bullets onto one line, truncating each to N chars + "...".
+# P334: ASCII "..." (3 bytes) instead of Unicode `…` (U+2026, 3 bytes UTF-8) so
+# substr() length math agrees across BSD awk (byte-counting) and GNU awk
+# (char-counting) without LC_ALL gymnastics. Sibling: P328.
 # Joins with "; ". Strips markdown emphasis to keep the line scannable.
 compact_join_bullets() {
     local per_item="${1:-120}"
@@ -138,7 +141,7 @@ compact_join_bullets() {
             gsub(/`/, "")
             # Drop nested-bullet continuation lines that survived earlier filters.
             if (length($0) == 0) next
-            if (length($0) > n) line = substr($0, 1, n) "…"
+            if (length($0) > n) line = substr($0, 1, n) "..."
             else line = $0
             if (out == "") out = line
             else out = out "; " line
@@ -188,7 +191,7 @@ truncate_with_ellipsis() {
         printf '%s' "$s"
         return
     fi
-    printf '%s' "${s:0:n}…"
+    printf '%s' "${s:0:n}..."
 }
 
 # --- Per-ADR entry emitter -------------------------------------------------
@@ -211,7 +214,7 @@ emit_entry() {
 
     # Chosen-option line — truncate to a comfortable summary length.
     chosen=$(get_chosen "$file" | strip_links | oneline)
-    chosen=$(printf '%s' "$chosen" | awk -v n=240 '{ if (length($0) > n) print substr($0,1,n) "…"; else print }')
+    chosen=$(printf '%s' "$chosen" | awk -v n=240 '{ if (length($0) > n) print substr($0,1,n) "..."; else print }')
 
     # Confirmation: cap 5 bullets, ≤ 110 chars each, joined with "; " on one line.
     # This is the routine-compliance scannable view; the full Confirmation list
