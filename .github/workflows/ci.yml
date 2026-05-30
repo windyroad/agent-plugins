@@ -106,5 +106,11 @@ jobs:
             node "$pkg" --dry-run
           done
 
+      - name: Install Claude Code CLI for plugin manifest validation (P263, ADR-063 Confirmation #11)
+        run: npm i -g @anthropic-ai/claude-code@2.1.150
+
+      - name: Validate each plugin manifest (P263, ADR-063 Confirmation #11; non-strict per P258 refined RCA)
+        run: packages/itil/bin/wr-itil-plugin-validate-ci-gate
+
       - name: Run hook tests
         run: npm test
