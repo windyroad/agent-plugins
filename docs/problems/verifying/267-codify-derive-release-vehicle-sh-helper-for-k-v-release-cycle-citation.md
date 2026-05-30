@@ -1,6 +1,6 @@
 # Problem 267: Codify `derive-release-vehicle.sh` helper for K→V release-cycle citation
 
-**Status**: Known Error
+**Status**: Verifying
 **Reported**: 2026-05-18
 **Priority**: 6 (Medium) — Impact: 2 × Likelihood: 3
 **Effort**: M (re-estimated 2026-05-18 — script + bin shim + bats fixture + transition-problem integration)
@@ -60,3 +60,17 @@ Cross-reference every hand-typed release ref against `git log` output BEFORE wri
 - P250 iter-1 retro Observation 1 — origin signal
 - `/wr-itil:transition-problem` SKILL.md Step 7 — integration point
 - `wr-itil-reconcile-readme` / `wr-itil-classify-readme-drift` — sibling ADR-049 shim precedent
+
+## Fix Released
+
+Shipped 2026-05-30 in `@windyroad/itil@0.37.0`:
+
+- Source commit: `96da70d` "feat(itil): ship derive-release-vehicle helper for deterministic K→V citation (closes P267)" (2026-05-30)
+- Changeset removed: `.changeset/p267-derive-release-vehicle-helper.md` (per ADR-022 P143 fold-fix — changeset removal IS the canonical fix-shipped signal)
+- Version-packages commit: `8ee2a82` — `0.36.0` → `0.37.0`
+- Merge PR: #174, merge commit `3432502` (2026-05-30)
+- Current cache: `@windyroad/itil@0.37.0` (verified by orchestrator /install-updates chain)
+
+Citation derived deterministically via `wr-itil-derive-release-vehicle P267` — this is the first real-world dogfood of the helper this ticket codifies. The structured K→V citation block (changeset / version-packages-commit / PR / merge-commit / release-date) is now eliminating the wrong-release-cited class-of-error that originated in 2026-05-18 session 7 iter 1 (P250 K→V cited P247's refs).
+
+**Verification window**: observe `/wr-itil:transition-problem` Step 6 K→V transitions across ≥3 subsequent sessions citing release vehicles via the helper (vs. hand-typed). Counter-expected signal: a session reverting to hand-typed citation because the helper failed to resolve a release vehicle (exit codes 2/3/4 surface the failure mode explicitly).
