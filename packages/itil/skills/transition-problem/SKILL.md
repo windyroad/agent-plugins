@@ -157,6 +157,33 @@ The `## Fix Released` section contains: release marker (version, commit SHA, or 
 
 When this transition is folded into a `fix(<scope>): ... (closes P<NNN>)` commit (the common case), the `git mv` + `Edit` + re-stage + README refresh all join that single commit — never split across commits.
 
+**Release-vehicle citation (P267)**: derive the release marker deterministically — never hand-type it from `git log` browse output. Hand-typed citations are fragile to wrong-release-cited errors when a session pre-applies transitions for multiple sibling tickets before working any of them (origin: 2026-05-18 session 7 iter 1 — P250's K→V cited P247's release refs). Invoke the helper:
+
+```bash
+wr-itil-derive-release-vehicle <NNN>
+```
+
+`wr-itil-derive-release-vehicle` is the ADR-049 `$PATH` shim (adopter-safe — resolves the canonical `derive-release-vehicle.sh` relative to the script, NOT cwd; P317/RFC-009) that reads the ticket body for the `.changeset/<name>.md` reference, walks `git log --diff-filter=D` for the deletion commit (`chore: version packages`), resolves the merge PR via the first-parent ancestry-path merge commit (or `gh pr list` fallback when available), and emits a structured citation block on stdout:
+
+```
+RELEASE_VEHICLE:
+  changeset: .changeset/<name>.md
+  version-packages-commit: <SHA>
+  pr: #<N>
+  merge-commit: <SHA>
+  release-date: <YYYY-MM-DD>
+```
+
+Use the structured values verbatim when authoring the `## Fix Released` section's release marker (e.g. `Released in @windyroad/itil@<version> (merge commit <merge-commit>, PR #<N>, released <release-date>)`). The helper is **mechanical** per ADR-044 framework-resolution — no `AskUserQuestion` per transition.
+
+**Helper exit-code routing**:
+
+- Exit 0 (full citation emitted): use the values in the `## Fix Released` section.
+- Exit 1 (ticket file not found): the upstream ticket-discovery step (Step 2) should have caught this; if it fires here, halt and report.
+- Exit 2 (no `.changeset/<name>.md` reference in ticket body): add the changeset reference to the ticket's Fix Strategy section, OR cite the release marker manually with explicit `<!-- no-changeset-reference -->` comment so a future review can audit the gap.
+- Exit 3 (changeset still in working tree — unreleased): the fix has not yet been released to npm. Halt the transition — `.known-error.md` → `.verifying.md` requires a shipped release per ADR-022. The orchestrator's Step 6.5 drain should fire first.
+- Exit 4 (deletion commit found but no merge PR resolvable): direct-to-main commit (no PR), or `gh pr list` unavailable + first-parent walk did not match. Cite the deletion commit SHA manually in the `## Fix Released` section with an explicit `<!-- no-pr -->` comment.
+
 **Verification Pending → Closed**:
 
 ```bash
