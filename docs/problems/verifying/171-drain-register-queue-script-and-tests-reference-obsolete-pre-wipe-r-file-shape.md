@@ -1,6 +1,6 @@
 # Problem 171: drain-register-queue.sh and tests reference obsolete pre-wipe R-file shape
 
-**Status**: Known Error
+**Status**: Verifying
 **Reported**: 2026-05-05
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -65,6 +65,16 @@ Surface 2026-05-05 during the P170 story map Slice 1 release-queue drain (user-d
 - **Blocks**: graduation of `@windyroad/risk-scorer` queued changeset (P168 / ADR-059) without producing divergent R-files in adopter projects. Currently the queued changeset is on `.changeset/` awaiting release; the divergence won't manifest until the script actually fires against an adopter's `docs/risks/` post-release.
 - **Blocked by**: (none directly — fix is bounded to the risk-scorer package; no external dependencies)
 - **Composes with**: P168 (the wipe direction's parent ticket; this is the cleanup pass), ADR-056 (Phase 2b drain — this script is the deliverable), ADR-059 (consume-catalog protocol — divergence affects what consumers see).
+
+## Resolution (2026-05-31, AFK iter 4)
+
+Fix landed: vestigial `TEMPLATE_FILE` gate at `packages/risk-scorer/scripts/drain-register-queue.sh` removed (gate clause, var assignment, python argv, python unpacking, python-side `'TEMPLATE.md'` dir-skip literal — all struck). Bats `setup()` at `packages/risk-scorer/scripts/test/drain-register-queue.bats` no longer synthesises a fixture-local `TEMPLATE.md`; new behavioural test "drain succeeds against canonical (post-wipe) docs/risks/ with NO TEMPLATE.md (P171)" asserts the canonical-state contract. All 17 bats tests GREEN; sibling `extract-risks-from-reports.bats` + `bootstrap-catalog.bats` (36 tests) unchanged and GREEN.
+
+Investigation Task items (b), (c), (e) — flipping the script's R-file shape from `.active.md` to bare `.md` — were **superseded by commit `9b52610`** (`refactor(risks): migrate 24 register entries to canonical .active.md suffix`, post-ticket). That migration explicitly re-canonicalised to `.active.md` because "all risk tooling globs the canonical .active.md status suffix (per ADR-056 / ADR-059)". Executing items (b)(c)(e) would now invert the canonical migration and break the working catalog, so they are **dropped from scope**.
+
+Residual scope (a) + (d) + (vestigial argument cleanup) — all landed in this commit. Changeset queued at `.changeset/p171-drain-template-gate-removal.md` (`@windyroad/risk-scorer` patch).
+
+Verification on next release: post-publish, run `/wr-risk-scorer:bootstrap-catalog` or invoke `drain-register-queue.sh` against a queue against canonical (post-wipe) `docs/risks/` and confirm entries materialise without TEMPLATE.md.
 
 ## Related
 

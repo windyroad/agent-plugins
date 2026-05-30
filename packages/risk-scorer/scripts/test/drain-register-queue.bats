@@ -18,33 +18,13 @@ setup() {
   git config user.email "drain-test@example.com"
   git config user.name "Drain Test"
   git commit --quiet --allow-empty -m "init"
-  # Mock template + README + a single seeded R-file
-  # NOTE: TEMPLATE.md was wiped from canonical docs/risks/ per the 2026-05-04
-  # user direction ("FFS WIPE THE RXXX risks ... THEY ARE WRONG"; commit 8edaf7b).
-  # The drain script (ADR-056 Phase 2b) still gates on TEMPLATE.md existence at
-  # line 66 and accepts the path as an unused argument; the gate is vestigial
-  # but unchanged in this iter. Tests synthesise fixture-local TEMPLATE.md +
-  # an old-shape R001-...active.md inline so the drain contract is exercised
-  # end-to-end without depending on the canonical (post-wipe) state. The
-  # divergence between the drain script's expected R-file shape (.active.md
-  # with structured frontmatter) and the canonical post-wipe R-file shape
-  # (bare .md without status frontmatter, slug-only body) is captured as P171
-  # (docs/problems/171-drain-register-queue-script-and-tests-reference-
-  # obsolete-pre-wipe-r-file-shape.open.md). This synthetic-fixture pattern
-  # is the workaround until P171's fix lands.
+  # Seed README + a single R-file fixture matching the canonical .active.md
+  # shape. P171 resolved 2026-05-31: drain script's vestigial TEMPLATE.md gate
+  # was removed (it was a pre-wipe-direction residual). Canonical docs/risks/
+  # has NO TEMPLATE.md per the 2026-05-04 user direction (commit 8edaf7b) +
+  # the canonical .active.md suffix per commit 9b52610. Seeded R-file uses the
+  # canonical shape; tests no longer synthesize a fixture-local TEMPLATE.md.
   mkdir -p docs/risks .afk-run-state
-  cat > docs/risks/TEMPLATE.md <<'TEMPLATE_EOF'
-# Risk RNNN: <title>
-
-**Status**: Active
-**Category**: <category>
-**Identified**: <YYYY-MM-DD>
-**Owner**: <owner>
-
-## Description
-
-<description>
-TEMPLATE_EOF
   cp "$REPO_ROOT/docs/risks/README.md" docs/risks/README.md
   cat > docs/risks/R001-confidential-info-leak-via-public-repo-push.active.md <<'R001_EOF'
 # Risk R001: Confidential info leak via public repo push
@@ -324,4 +304,23 @@ EOF
   [ "$status" -eq 0 ]
   echo "$output" | grep -q '^new_risks_created=1$'
   [ -f docs/risks/R002-good-line.active.md ]
+}
+
+@test "drain succeeds against canonical (post-wipe) docs/risks/ with NO TEMPLATE.md (P171)" {
+  # P171 regression coverage. The 2026-05-04 wipe direction (commit 8edaf7b)
+  # removed TEMPLATE.md from canonical docs/risks/; commit 9b52610 then re-
+  # canonicalized the R-file suffix to .active.md. The drain script previously
+  # gated on TEMPLATE.md existence and would silent-no-op against the canonical
+  # (TEMPLATE.md-absent) state. This test asserts the gate is gone: a queue with
+  # one hint MUST materialize a register entry even without TEMPLATE.md.
+  rm -f docs/risks/TEMPLATE.md
+  cat > .afk-run-state/risk-register-queue.jsonl <<EOF
+{"ts":"2026-05-03T14:00:00Z","session_id":"s1","report_path":".risk-reports/p171.md","reason_tag":"above-appetite-residual","risk_slug":"p171-canonical-fire","slug_source":"agent","prefill":"Canonical post-wipe drain works without TEMPLATE.md."}
+EOF
+  run bash "$SCRIPT" "$WORK_DIR"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q '^entries_drained=1$'
+  echo "$output" | grep -q '^new_risks_created=1$'
+  echo "$output" | grep -q '^next_action=commit-staged$'
+  [ -f docs/risks/R002-p171-canonical-fire.active.md ]
 }

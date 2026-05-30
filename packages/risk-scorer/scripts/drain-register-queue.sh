@@ -48,7 +48,6 @@ set -uo pipefail
 PROJECT_ROOT="${1:-$(pwd)}"
 QUEUE_FILE="${PROJECT_ROOT}/.afk-run-state/risk-register-queue.jsonl"
 RISKS_DIR="${PROJECT_ROOT}/docs/risks"
-TEMPLATE_FILE="${RISKS_DIR}/TEMPLATE.md"
 README_FILE="${RISKS_DIR}/README.md"
 
 emit_no_op() {
@@ -63,7 +62,7 @@ if [ ! -f "$QUEUE_FILE" ] || [ ! -s "$QUEUE_FILE" ]; then
   exit 0
 fi
 
-if [ ! -d "$RISKS_DIR" ] || [ ! -f "$TEMPLATE_FILE" ] || [ ! -f "$README_FILE" ]; then
+if [ ! -d "$RISKS_DIR" ] || [ ! -f "$README_FILE" ]; then
   emit_no_op
   exit 0
 fi
@@ -80,7 +79,7 @@ ORIGIN_MAX="${ORIGIN_MAX:-0}"
 # so R099 → 099 → "value too great for base" without the 10# prefix.
 NEXT_ID=$(( (10#$LOCAL_MAX > 10#$ORIGIN_MAX ? 10#$LOCAL_MAX : 10#$ORIGIN_MAX) + 1 ))
 
-DRAIN_RESULT=$(python3 - "$QUEUE_FILE" "$RISKS_DIR" "$TEMPLATE_FILE" "$README_FILE" "$NEXT_ID" "$PROJECT_ROOT" <<'PYEOF'
+DRAIN_RESULT=$(python3 - "$QUEUE_FILE" "$RISKS_DIR" "$README_FILE" "$NEXT_ID" "$PROJECT_ROOT" <<'PYEOF'
 import json
 import os
 import re
@@ -88,7 +87,7 @@ import sys
 from collections import OrderedDict
 from datetime import datetime
 
-queue_file, risks_dir, template_file, readme_file, next_id_str, project_root = sys.argv[1:7]
+queue_file, risks_dir, readme_file, next_id_str, project_root = sys.argv[1:6]
 next_id = int(next_id_str)
 
 hints = []
@@ -121,7 +120,7 @@ for h in hints:
 
 existing = {}
 for fn in os.listdir(risks_dir):
-    if fn in ('README.md', 'TEMPLATE.md'):
+    if fn == 'README.md':
         continue
     m = re.match(r'^R(\d+)-(.+)\.active\.md$', fn)
     if m:
