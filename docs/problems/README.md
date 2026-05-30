@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-05-30 **work-problems wrap retro** — captured 2 codification tickets: P330 (derive-release-vehicle helper UX gap — 3-touch K→V cycle; 2-of-3 dogfood evidence) + P331 (transition-problem Step 7 P134 Last-reviewed rotation silently skipped iter-7+iter-8 evidence chain). Both Open/S deferred-rate WSJF 3.0. Prior P302 O→KE fragment rotated to README-history.md per P134.
+> Last reviewed: 2026-05-30 **README reconciled** — 1 drift entry corrected: P332. Reconciliation contract per P118 + ADR-014 amended ("Reconciliation as preflight robustness layer").
 
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
@@ -85,6 +85,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3.0 | P307 | work-problems Step 5 idle-timeout SIGTERM uses wall-clock not active/monotonic time — machine-sleep falsely kills a completing iter and loses its commit + metadata | 3 Med | Open | M | 2026-05-26 |
 | 3.0 | P308 | work-problems Step 6.5 cohort-graduation treats evaluator `status=resolved` as graduate-now, skipping the Rule 4 evidence-floor judgment the holding-README Process requires — AFK false-graduation hazard | 3 Med | Open | M | 2026-05-26 |
 | 3.0 | P309 | `wr-risk-scorer-drain-register-queue` no-ops on queued slugs that have no register file — creates 0, appends 0, and does NOT truncate the queue | 3 Med | Open | M | 2026-05-26 |
+| 3.0 | P332 | run-retro skips Step 1.5 / Step 3 / Step 4b Stage 1 under session-length rationalization — recurrence of P148 anti-pattern class on the run-retro meta-surface | 3 Med | Open | M | 2026-05-30 |
 | 3.0 | P312 | reconcile-rfcs reports spurious MISSING_REVERSE_TRACE — doesn't traverse docs/problems/ per-state subdirs (RFC-002-class glob gap) | 3 Med | Open | S | 2026-05-26 |
 | 3.0 | P320 | /install-updates Step 2/3 discovery loop is zsh-unsafe — `for X in $VAR` word-split (P133) + `status` is a read-only zsh var | 3 Med | Open | S | 2026-05-27 |
 | 3.0 | P322 | Tier-3 briefing-budget pass flags `*-archive*.md` sink files — re-rotating a rotation SINK proliferates siblings for ~zero reader value | 3 Med | Open | S | 2026-05-27 |
