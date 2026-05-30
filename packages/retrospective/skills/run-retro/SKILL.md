@@ -393,6 +393,28 @@ Problems whose fix shipped but whose closure is still pending (`docs/problems/*.
 
 8. **Same-session verifyings excluded** (unchanged from P068 design): `.verifying.md` tickets for fixes that ship in the currently-running session (e.g. P127, P065, P126, P101 just transitioned this session) are NOT close-candidates — a session cannot verify its own fix beyond "bats passed at commit time"; subsequent-session exercise is the meaningful signal. Same-session verifyings are skipped in step 4 categorisation.
 
+9. **Prior-session evidence drain (P282)** — surfaces tickets whose `## Fix Released` section was written in a prior session AND whose `docs/problems/README.md` Verification Queue `Likely verified?` cell already records `yes — observed: <citations>` from that prior session. Sub-steps 1-8 above scan the CURRENT session's tool-call activity for evidence; this sub-step consumes durable on-disk evidence that was structurally invisible to those scans — the evidence is not in any later session's tool-call context, so without this drain a prior-session-verified ticket stays in `verifying` forever.
+
+   **Why a separate stage**: the same-session exclusion in sub-step 8 correctly prevents a session from verifying its own fix. Without this stage, a ticket whose evidence landed in a prior session has no surface that ever re-considers it — closure depends on a user manually prompting. 2026-05-26 evidence in this repo (P282 Related section): 8/91 `verifying/` rows carried `yes — observed: …` from prior sessions; none auto-closed; the README Verification Queue grew to 134 KB exceeding the Read-tool 25K-token whole-file cap, forcing persisted-output + paged reads.
+
+   **Sub-steps:**
+
+   a. **Read `docs/problems/README.md`** Verification Queue table (the section starts at the `## Verification Queue` heading and ends at the next `## ` heading). Parse each row's `Likely verified?` cell — the last `|`-delimited column.
+
+   b. **Filter to evidence-bearing rows**: cell value begins with `yes — observed:` — the canonical P186 evidence-first cell shape (`yes — observed: <citations>` / `no — not observed` / `no — observed regression`). The `no — *` rows are skipped (no durable evidence yet); the `yes — observed:` rows are the close-candidates.
+
+   c. **Same-session exclusion (inherited from sub-step 8)**: skip rows whose `.verifying.md` rename was committed in the current session. Detect via `git log --since=<session-start> --diff-filter=R --name-status` filtered to renames into `docs/problems/verifying/`. A ticket whose `yes — observed:` cell was written in the current session has its rename in the current session's git log and is excluded from the drain — sub-steps 5-7 already handled it via the in-session evidence flow.
+
+   d. **Dispatch close** per the same cross-plugin contract as sub-step 5: invoke `/wr-itil:transition-problem <NNN> close` via the Skill tool. The dispatch success / failure / unavailable outcomes are recorded in the Step 5 Verification Candidates table per sub-step 7's contract — uniform treatment regardless of evidence source.
+
+   e. **Record source distinction** in the Decision column: append `(prior-session README cell)` to the Decision text. The Citations column carries the README cell's `yes — observed: <citations>` text verbatim so the user can audit the evidence that drove the close.
+
+   **Composition**: this sub-step fires AFTER sub-steps 5-7 dispatched any current-session evidence. Each transition-problem dispatch refreshes the README per P062, so by the time sub-step 9 reads the README the rows handled by sub-steps 5-7 are already gone — the remaining `yes — observed:` rows are exactly the prior-session set.
+
+   **Recovery path (inherited from sub-step 6)**: a wrong close is reversible via `/wr-itil:transition-problem <NNN> known-error` (or the `.verifying.md` flip-back path used in the 2026-04-27 P124 regression). Recovery is a single-skill invocation.
+
+   **Closes P282** (V→Closed transition skipped when validation lands inline) — the README `Likely verified?` cell is the durable encoding of prior-session validation evidence; consuming it pairs the lifecycle transition with the evidence already on disk. The body-content-scan trigger surfaces (option (a) `/wr-itil:transition-problem` Step 4 pre-flight; option (b) PostToolUse hook on `.verifying.md` Edit) named in P282's Investigation Tasks are within thin-extension territory but deferred per the architect+JTBD verdicts ranking (c) highest persona-service — if the prior-session drain proves insufficient on next-session evidence, capture a sibling ticket for the body-content scan surface.
+
 **ADR-032 supersession note** (was: ADR-027 compatibility note): ADR-027's Step-0 subagent auto-delegation was superseded by **ADR-032** (Governance skill invocation patterns). No Step-0 subagent migration applies to run-retro — Step 4a's evidence scan runs directly in main-agent context, where session-activity citations are natively grounded per ADR-026. The hypothetical session-activity-summary marshalling this note previously discussed is obviated by the supersession; preserved here as audit-trail continuity for prior cross-references.
 
 **Interaction with other surfaces**:

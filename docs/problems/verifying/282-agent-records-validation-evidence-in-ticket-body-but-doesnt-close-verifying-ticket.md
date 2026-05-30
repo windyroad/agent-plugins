@@ -1,6 +1,6 @@
 # Problem 282: Agent records validation evidence in ticket body but doesn't close verifying ticket — V→Closed transition skipped when validation lands inline
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-19
 **Priority**: 12 (High) — Impact: 3 (Moderate — Verification Queue accumulates effectively-closed tickets; audit-trail decoupled from validation-work record; cross-ticket lifecycle reasoning degraded) x Likelihood: 4 (Almost Certain — affects every session where any agent edits a `.verifying.md` body to add Fix Direction / Validation Note / Confirmation Log content; pattern observable in this very session — 94 verifying tickets and growing)
 **Effort**: M — define evidence-keyword vocabulary + add body-content scan to `/wr-itil:transition-problem` SKILL + optional PostToolUse hook on `.verifying.md` Edit; architect verdict on trigger surface (SKILL vs hook vs hybrid)
@@ -95,6 +95,29 @@ Plausible workarounds pending diagnosis:
   - **`/wr-itil:transition-problem` SKILL** — the canonical transition surface; likely needs the body-content scan
   - **`/wr-itil:manage-problem` SKILL** Step 4 update path — likely needs the body-content scan when edits land on `.verifying.md`
   - **feedback_verify_from_own_observation.md** — user-memory grounding for the agent-should-verify-from-own-observations principle scaled to ticket body content
+
+## Fix Released
+
+Shipped 2026-05-30 (`/wr-itil:work-problems` AFK orchestrator session 8 iter 6; pending `@windyroad/retrospective` patch — orchestrator owns release cadence per its constraints). Fold-fix Open → Verification Pending per ADR-022 P143 amendment (root cause documented inline; fix strategy named the trigger-surface architect verdict; effort matched the M bucket; workaround documented).
+
+**Architect verdict** (PASS, this session): no new ADR required. The trigger-surface choice (SKILL extension vs PostToolUse hook vs hybrid vs Step 4a addendum drain) is implementation grain inside the envelope of ADR-022 (Verification Pending lifecycle) + ADR-014 (governance commits its own work) + ADR-074 (substance-confirm-before-build trip-wire DOES NOT FIRE because the semantic substance — "body-content evidence on a `.verifying.md` should yoke to V→Closed" — is already pinned by ADR-022 + `feedback_verify_from_own_observation.md`). All four candidate options (a/b/c/d) are within thin-extension territory; the choice is a category-1 implementation pick, not a load-bearing direction-setting decision.
+
+**JTBD verdict** (PASS, this session): ranks **(c) > (d) > (a) > (b)**. Option (c) — Step 4a prior-session evidence drain — serves the solo-developer persona's manual-policing-AI-output constraint strongest because it consumes the README `Likely verified?` column's `yes — observed: <citations>` cell, which is **explicit durable on-disk evidence** (recorded by P186's evidence-first cell mechanism), not inference on a current edit. JTBD-006 honoured: prior-session-recorded evidence on disk is the safe-default signal, not a guess.
+
+**Shape shipped (option (c))**: `packages/retrospective/skills/run-retro/SKILL.md` Step 4a gains **sub-step 9: Prior-session evidence drain (P282)** placed after sub-step 8's same-session exclusion. The drain reads `docs/problems/README.md`'s Verification Queue table, filters to rows whose `Likely verified?` cell begins with `yes — observed:`, preserves the same-session exclusion via `git log --since=<session-start>` rename detection, and dispatches `/wr-itil:transition-problem <NNN> close` per the existing sub-step 5-7 cross-plugin contract. Source distinction `(prior-session README cell)` rides the Decision column of the Step 5 Verification Candidates table so the user can audit drained-from-cell closures separately from current-session-evidence closures. Composition note documents the AFTER-ordering vs sub-steps 5-7. Recovery path inherited from sub-step 6 (`/wr-itil:transition-problem <NNN> known-error` flip-back) — closes are reversible.
+
+**Test coverage**: `packages/retrospective/skills/run-retro/test/run-retro-step-4a-prior-session-evidence-drain.bats` — NEW. 12 assertions (11 structural per ADR-005 Permitted Exception + 1 behavioural fixture exercising the `yes — observed:` row-detection heuristic against a sample README VQ table) covering the drain stage's presence, README source, P186 cell-shape filter, same-session exclusion inheritance, /wr-itil:transition-problem dispatch, P135 R3 dispatch outcome contract, Decision-column source distinction, P135 R5 recovery path, AFTER-ordering composition, 2026-05-26 evidence citation, and explicit `**Closes P282**` ticket-link. Full run-retro suite: 150/150 green (was 138; +12 from new fixture).
+
+**Out of scope (left for sibling tickets if next-session evidence shows insufficient)**:
+
+- **Option (a)** — body-content scan in `/wr-itil:transition-problem` Step 4 pre-flight: within thin-extension territory per architect verdict but only fires on explicit user invocation; doesn't address the "agent doesn't invoke transition-problem" gap. Capture sibling ticket if needed.
+- **Option (b)** — PostToolUse hook on `.verifying.md` Edit: within thin-extension per architect (must be advisory-only per ADR-045 hook budget) but carries false-positive risk on housekeeping edits (typo fixes, formatting); JTBD ranked weakest. Capture sibling ticket if needed.
+- **K→V analogue per P228**: distinct sibling missing-transition class one step earlier in the state machine. Stays separate per architect verdict — fold would erase the surface distinction P282 itself preserved.
+- **Body-content scan in `/wr-itil:manage-problem` Step 4 update path**: candidate (a)-equivalent at the manage-problem surface. Capture sibling ticket if needed.
+
+**Awaiting user verification**: next `/wr-retrospective:run-retro` invocation, with `docs/problems/README.md` Verification Queue carrying ≥1 row whose `Likely verified?` cell begins with `yes — observed:` from a prior session, should surface the drain dispatching `/wr-itil:transition-problem <NNN> close` per row — the Step 5 Verification Candidates table records each drained close with Decision `closed via transition-problem (prior-session README cell)` and the cell's citation text inline. Concrete repro fixture: the 8 `yes — observed:` rows currently in this repo's README (P246, P250, P262, P266, P267, P283 plus this session's own additions) — sub-step 9 should drain those that are not in the current-session exclusion list.
+
+**Recovery path** if the drain misfires: `/wr-itil:transition-problem <NNN> known-error` flips the wrongly-closed ticket back to known-error per ADR-022. Per-close reversibility is the design property that justifies silent dispatch per ADR-044.
 
 ## Related
 

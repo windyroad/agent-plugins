@@ -606,3 +606,8 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-05-30 (inbound-discovery fragment rotated for P316 K→V)
 
 > Last reviewed: 2026-05-30 **inbound-discovery refresh (work-problems Step 0b preflight)** — TTL-expiry auto-recheck against `windyroad/agent-plugins`; 34 active `[problem]` reports polled (#149 still closed-upstream historical entry), 0 new third-party reports, all maintainer-authored + locally mirrored; pipeline classification remains deferred per 2026-05-15 user direction; discussions still HTTP 410, security-advisories still gate-blocked (P276/P198/#125). Cache rewritten `last_checked: 2026-05-30T01:20:15Z`; audit-log entry appended to `docs/audits/inbound-discovery-log.md`. Prior P328-reconcile fragment rotated to README-history.md per P134.
+
+
+## 2026-05-30 (P316 K→V fragment rotated for P282 O→V fold-fix)
+
+> Last reviewed: 2026-05-30 **P316 K→V transition (work-problems iter-5)** — `@windyroad/architect@0.12.0` + `@windyroad/jtbd@0.9.0` released via PR #175 / merge `241db7f` shipped the ADR-066 amendment introducing `human-oversight: rejected-pending-supersede` + `supersede-ticket: P<NNN>`. Detector + build-upon predicate honour the new exclusion; JTBD sibling mirrors symmetrically; drain SKILLs capture the supersede ticket via follow-up AskUserQuestion on Reject; compendium renderer surfaces the disposition. ADR-034/047/055/063 backfilled and verified excluded post-fix. Citation derived deterministically via second real-world dogfood of `wr-itil-derive-release-vehicle` (after P267 iter-2). Prior inbound-discovery fragment rotated to README-history.md per P134.
