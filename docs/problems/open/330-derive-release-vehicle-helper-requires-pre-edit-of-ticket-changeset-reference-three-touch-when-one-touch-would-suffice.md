@@ -13,13 +13,14 @@ The `wr-itil-derive-release-vehicle` helper (shipped @windyroad/itil@0.37.0 iter
 
 ## Symptoms
 
-- 3 K→V dogfoods this session (P267 iter 2, P316 iter 5, P281 iter 8). Of those:
+- 4 K→V dogfoods this session (P267 iter 2, P316 iter 5, P281 iter 8, P302 iter 10). Of those:
   - P267 iter 2: inherited the changeset reference from prior iter 1 work (worked first-call)
   - P316 iter 5: required exit-2 routing — append changeset path to ticket body, re-run helper
   - P281 iter 8: required exit-2 routing — same pattern as P316
+  - P302 iter 10: required exit-2 routing — same pattern as P316/P281 (4th data point; 3/4 dogfoods = 75% hit rate)
 - Helper script: `packages/itil/scripts/derive-release-vehicle.sh` line 109 (the contract check that emits the ERROR).
-- Concrete observable: iter 8 first probe returned `ERROR: no .changeset/<name>.md reference in docs/problems/known-error/281-...md` exit 2; iter manually appended the reference, second probe returned exit 0.
-- Cross-iter session evidence: 2 of 3 dogfoods (~66%) hit the friction — sustained, not single-shot.
+- Concrete observable: iter 8 first probe returned `ERROR: no .changeset/<name>.md reference in docs/problems/known-error/281-...md` exit 2; iter manually appended the reference, second probe returned exit 0. iter 10 (P302) reproduced exactly: first probe `ERROR: no .changeset/<name>.md reference in docs/problems/known-error/302-...md` exit 2; appended `**Release vehicle**: .changeset/p302-decision-confirmation-presentation-rule.md ...` paragraph to Fix Strategy; second probe exit 0 with full citation.
+- Cross-iter session evidence: 3 of 4 dogfoods (~75%) hit the friction — sustained pattern, confirmed across sessions (P302 iter 10 is a separate subprocess from P281 iter 8; same defect class fires reliably).
 
 ## Workaround
 
@@ -69,5 +70,7 @@ Three candidate options (architect verdict needed):
 - P267 (Verifying — the codification ticket that shipped the helper this session)
 - P281 (Verifying — second K→V dogfood instance where exit-2 routing required)
 - P316 (Verifying — first K→V dogfood instance where exit-2 routing required)
+- P302 (Verifying — fourth K→V dogfood instance where exit-2 routing required; transitioned this iter)
 - 2026-05-30 work-problems iter 8 retro observation (captured in `docs/retros/2026-05-30-work-problems-iter8-p281-kv.md` outstanding_questions)
-- 2026-05-30 work-problems wrap retro (this capture)
+- 2026-05-30 work-problems wrap retro (P330 capture)
+- 2026-05-30 work-problems iter 10 retro (P302 K→V dogfood — this evidence append)
