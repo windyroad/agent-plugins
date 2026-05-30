@@ -2,7 +2,8 @@
 status: "proposed"
 date: 2026-05-30
 human-oversight: confirmed
-oversight-date: 2026-05-30
+oversight-date: 2026-05-31
+amended: 2026-05-31
 decision-makers: [Tom Howard]
 consulted: []
 informed: []
@@ -41,88 +42,113 @@ Best-practices research (2026-05-30):
 
 ## Considered Options
 
-1. **First sentence of Decision Outcome (semantic boundary)** — extract the first sentence (terminated at `. ` / `.\n` / `! ` / `? `); never truncate mid-sentence. Falls back to second sentence if first is framing prose.
-2. **Whole Decision Outcome section, no cap** — emit the full `## Decision Outcome` body; accept uneven growth.
-3. **Author-controlled `<!-- @compendium-include start/end -->` markers** — ADR body marks the region the generator should extract; defaults to first sentence when markers absent.
-4. **MADR-TL;DR discipline, retroactive** — require every ADR's Decision Outcome to lead with a `Chosen option:` single sentence (MADR-canonical form); backfill 43 non-conforming existing ADRs as a one-time cost.
-5. **Hybrid section-aware extraction with section-level token budget** — measure tokens per section; include whole section if under budget, fall back to first sentence if over.
-6. **(Recommended) MADR-canonical primary + first-sentence fallback + fail-open authoring validator + cadence-embedded opportunistic upgrade** — four-layered approach: (a) generator extracts MADR-canonical `Chosen option:` line when present (existing behaviour, preserved); (b) generator falls back to first sentence of `## Decision Outcome` when no canonical line found, with framing-prose advance to second sentence; (c) a new authoring validator (CI gate + PreToolUse hook on `docs/decisions/*.proposed.md` writes) fails-OPEN with a warning when framing-prose detection fires — does NOT deny-write — and the warning surfaces in the architect-agent verdict on the next review; (d) the `/wr-architect:review-decisions` ratification drain gains an opportunistic-upgrade step that offers to repair Decision Outcome shape when ratifying an ADR whose render would be empty or framing-prose-only.
+1. **First sentence of Decision Outcome (semantic boundary)** — extract the first sentence (terminated at `. ` / `.\n` / `! ` / `? `); never truncate mid-sentence. Falls back to second sentence if first is framing prose. Programmatic.
+2. **Whole Decision Outcome section, no cap** — emit the full `## Decision Outcome` body; accept uneven growth. Programmatic.
+3. **Author-controlled `<!-- @compendium-include start/end -->` markers** — ADR body marks the region the generator should extract; defaults to first sentence when markers absent. Programmatic.
+4. **MADR-TL;DR discipline, retroactive** — require every ADR's Decision Outcome to lead with a `Chosen option:` single sentence (MADR-canonical form); backfill 43 non-conforming existing ADRs as a one-time cost. Programmatic with author discipline.
+5. **Hybrid section-aware extraction with section-level token budget** — measure tokens per section; include whole section if under budget, fall back to first sentence if over. Programmatic.
+6. **MADR-canonical primary + first-sentence fallback + fail-open authoring validator + cadence-embedded opportunistic upgrade** — four-layered programmatic-heuristic approach: generator extracts MADR-canonical `Chosen option:` line when present; falls back to first sentence with framing-prose advance regex; new authoring validator fails-OPEN warning; cadence-embedded opportunistic upgrade in review-decisions drain. **Initially drafted as the recommended option in this ADR's 2026-05-30 first commit; superseded by user direction 2026-05-31 in favour of Option 9.**
+7. **LLM-cached `tldr:` frontmatter field** — author runs LLM at write time to produce a single-sentence TL;DR; cached in frontmatter; generator extracts that field programmatically. Drift risk between cached field and edited body.
+8. **LLM-emit-TL;DR-in-architect-verdict** — when architect reviews an ADR (already happens on every write per architect gate), agent emits the TL;DR as part of its verdict; PostToolUse hook captures and applies. Three sub-shapes: (8a) cache in frontmatter `tldr:`; (8b) normalize body's `## Decision Outcome` opening to MADR-canonical form (existing generator picks up); (8c) write README entry directly.
+9. **(Chosen, user direction 2026-05-31) Architect-on-edit writes README entry directly + auto-fire-on-every-edit** — PostToolUse:Edit/Write on `docs/decisions/*.md` invokes the architect agent with the just-edited body + the current README entry for that ADR; architect emits the updated entry shape (Title + Status + Oversight + `**Decides:**` line + Confirmation line + Related); hook applies architect's output as `Edit` on README; staging is automatic so README change lands in the same commit as the ADR edit. **No programmatic generator. No frontmatter cache. No body normalization. No fail-open validator. No cadence-embedded upgrade step.** Drift is structurally impossible: every body edit triggers a README edit in the same hook chain. Existing 43 non-canonical ADRs migrate the next time each is touched (cadence-driven naturally — every edit IS the cadence).
 
 ## Decision Outcome
 
-Chosen option: **"Option 6 — MADR-canonical primary + first-sentence fallback + fail-open authoring validator + cadence-embedded opportunistic upgrade"**, because it closes the P337 gap without requiring author discipline at scale, preserves MADR canonical alignment, embeds the right convention as structure (validator) rather than guideline, fails-open to avoid becoming P327-class friction, and ties opportunistic upgrade to an existing cadence so the principle "no automatic cadence = doesn't happen" doesn't bite.
+Chosen option: **"Option 9 — Architect-on-edit writes README entry directly + auto-fire-on-every-edit"**, because it eliminates drift by structural construction (every body edit triggers a same-hook README write), gives every entry LLM-quality semantic TL;DR without regex-heuristic limitations, dissolves the body-authoritative-vs-compendium-derived two-store coordination problem, and migrates the existing 43 non-canonical ADRs naturally through the edit cadence with no backfill obligation.
 
-Four layered changes ship across three phases:
+**Amendment history**: 2026-05-30 first commit chose Option 6 (programmatic-heuristic with fail-open validator and cadence-embedded upgrade). User direction 2026-05-31 surfaced that Option 6 was agent-recommended at draft time, not user-authorised — substance-confirm-before-build (ADR-074) was satisfied formally but not materially (P339 captures the create-adr SKILL-surface gap). User redirected to Option 9 explicitly: *"8 sounds good, but why does it need to insert the tldr into frontmatter? Can it just update the readme?"* + *"we minimise drift if on every ADR edit, we update the readme"* + *"Yes, amend"*. This amendment implements that direction.
 
-**Phase 1 (generator)**:
-- Extend `get_chosen` in `packages/architect/scripts/generate-decisions-compendium.sh` (line 124) to fall through to `get_section "$file" "Decision Outcome"` + emit the first sentence (semantic boundary, not character truncation) when no MADR-canonical `Chosen option:` line is found.
-- Sentence boundary defined as: text up to and including the first `. ` or `.\n` (period followed by space, period followed by newline), `! `, `! \n`, `? `, `? \n`. Never mid-word, never mid-sentence.
-- If the first sentence is framing prose (regex match against `^(This ADR|This decision|We address|We need to|The problem)`), advance to the second sentence.
-- Hard fallback if no Decision Outcome section exists at all: emit `**Decides:** (no Decision Outcome section authored)` and flag in stderr so CI catches the gap on the next pre-commit run.
+One implementation phase replaces the three phases of the original Option 6:
 
-**Phase 2 (fail-OPEN authoring validator)**:
-- New script `packages/architect/scripts/validate-adr-shape.sh` checks that every `docs/decisions/<NNN>-*.<status>.md` file (excluding README.md) has a `## Decision Outcome` section AND that section opens with either a MADR-canonical `Chosen option:` line OR another non-framing leading sentence (no `^This ADR`, `^This decision`, etc.).
-- Distributed via the ADR-049 `$PATH` shim at `packages/architect/bin/wr-architect-validate-adr-shape` — hooks and skills MUST invoke the shim, not the script's repo-relative path (per memory `feedback_no_repo_relative_paths_in_published_artifacts.md`).
-- Wired into CI as a new "Validate ADR shapes" Quality Gates step that emits warnings (not failures) when framing-prose detection fires on legitimate-looking ADRs; emits failures only on missing `## Decision Outcome` section.
-- Wired into a new PreToolUse:Write hook on `docs/decisions/*.proposed.md` paths that runs the same validator. The hook FAILS-OPEN — it surfaces the warning in stderr but does NOT deny the Write. The warning is then surfaced in the next `wr-architect:agent` review for human judgment (per architect advisory 2026-05-30: a deny-write validator becomes the next P327-class friction surface).
-- Authoring escape hatch: if the user genuinely wants a non-canonical Decision Outcome opening (the architect advisory cites "After weighing options A and B, we chose X" as a legitimate non-framing form not covered by the regex), the warning is informational only and the write proceeds.
-- Behavioural bats coverage: shape validator must accept canonical-MADR ADR; emit warning on `## Decision Outcome` followed by `This ADR addresses...` framing; accept `## Decision Outcome` followed by `Chosen option: X` line; accept `## Decision Outcome` followed by other non-framing leading sentence; emit failure only on missing `## Decision Outcome` section.
+**Phase 1 (single phase — architect-on-edit hook)**:
 
-**Phase 3 (cadence-embedded opportunistic upgrade — NOT mass backfill)**:
-- The existing 43 non-canonical ADRs continue to render via the Phase 1 fallback.
-- Extend `/wr-architect:review-decisions` (the ratification drain) to detect when the ADR being ratified would render empty or framing-prose-only in the compendium. When detected, the drain OFFERS (via `AskUserQuestion`) to repair the Decision Outcome shape inline as part of the ratification commit.
-- Cadence-driven by construction — the drain is already the periodic human-confirm surface for ratifying ADRs. No new periodic task needed; no reliance on author discipline; the principle "no automatic cadence = doesn't happen" is satisfied because the cadence is the drain itself.
-- No mass backfill commit. Per the "structure over discipline" insight, the validator catches new regressions; old ADRs migrate via the ratification cadence; nothing relies on remembering to do something.
+- New PostToolUse hook `packages/architect/hooks/architect-compendium-update-entry.sh` triggers on Edit/Write events targeting `docs/decisions/*.md` (excluding `README.md`).
+- The hook spawns a `claude -p` subprocess invoking the architect agent with the just-edited ADR body + the current README entry for that ADR (or empty string if the ADR is new). Prompt asks the agent to emit the updated compendium entry shape: Title, Status badge, Oversight badge, supersession ref if applicable, `**Decides:**` line (one-or-two-sentence semantic TL;DR derived from the body's `## Decision Outcome` section), `**Confirmation:**` line (truncated bullet join from `## Confirmation`), `**Related:**` line (deduped ADR-ID list from the body's `## Related` section and inline mentions).
+- Hook captures the architect's emitted entry from the subprocess's JSON `.result` field; applies it as `Edit` on `docs/decisions/README.md` (replacing the existing entry block for that ADR-ID, or inserting a new one in numeric-sort order under the appropriate section: in-force / historical).
+- Hook stages the README change automatically so it lands in the same commit as the ADR body change.
+- The hook is the SINGLE mechanism — there is no programmatic generator, no frontmatter cache, no body normalization step, no fail-open validator, no cadence-embedded upgrade in the ratification drain.
+- The hook is published as part of `@windyroad/architect`; adopter installs receive it via the standard plugin install path. No new ADR-049 shim is required because the hook does not need a `$PATH`-resolved invocation surface — it runs as a hook by the Claude Code runtime.
+- Existing 43 non-canonical ADRs migrate the next time each is touched (the hook fires on every edit; cadence-driven naturally).
+- Retiring infrastructure:
+  - `packages/architect/scripts/generate-decisions-compendium.sh` — retire as load-bearing primary path. Keep as a backstop / migration tool for one release cycle (callable via `wr-architect-generate-decisions-compendium`), then remove. While present, the script's output is no longer ADR-077 confirmation criterion (b) idempotency-bound; it produces a best-effort programmatic render that may differ from the architect-authored entries.
+  - `packages/architect/scripts/test/generate-decisions-compendium.bats` — retire idempotency assertion (criterion 2 in the existing bats) once the generator is removed. Drift-gate test 2145 (`committed compendium matches generator output`) gets replaced by the new "every ADR body change in a commit is accompanied by a README change" pre-commit assertion (criterion (g) replacement below).
+  - `architect-compendium-refresh-discipline.sh` PreToolUse refresh-discipline hook — retire (it currently denies commits when README is out of sync with bodies; under Option 9 the new PostToolUse hook keeps them in sync by construction).
+
+**Drift safety under Option 9**:
+
+- Pre-commit hook `packages/architect/hooks/architect-readme-pairing-check.sh` asserts: `git diff --cached --name-only` filtered for `docs/decisions/*.md` MUST be accompanied by `docs/decisions/README.md` in the same diff. If a commit edits any ADR body but does NOT also edit README, the hook denies the commit with a clear directive to re-run the edit (which would re-trigger the PostToolUse hook). This is the replacement for ADR-077's confirmation criterion (g).
+
+**Architectural relationship between body and README under Option 9**:
+
+- The per-ADR body remains authoritative (ADR-031 preserved). The architect derives the compendium entry from the body each time the body changes.
+- The compendium is no longer "generated from bodies via deterministic programmatic extraction" (ADR-077's original framing). It is "architect-authored per-edit, derived from bodies via LLM extraction".
+- Offline reproducibility: re-running architect on every ADR body produces the compendium. Slow (~$1-2 across the whole 76-ADR corpus per run) but possible.
+- ADR-077 confirmation criteria amendment (companion change in this same commit):
+  - (b) "Generator is idempotent — two runs produce byte-identical output" → **retired**. Replaced by **freshness-on-edit invariant**: every body edit triggers a same-commit README edit.
+  - (g) "Committed compendium matches generator output (CI drift gate)" → **retired**. Replaced by **pre-commit pairing assertion**: every commit that edits a `docs/decisions/*.md` body MUST also edit `docs/decisions/README.md`.
+  - (h) "Skills regenerate the compendium after writing an ADR" → **retired**. Replaced by the PostToolUse hook firing automatically.
+- These three criterion changes formalise the move from "compendium = generated derivation of bodies" to "compendium = architect-authored living view, body remains authoritative".
+
+**Cost model**:
+
+- Per ADR edit: one `claude -p` subprocess invocation against the architect agent. Estimated ~$0.05-0.20 per edit.
+- Per typical session: 5-10 ADR edits = ~$0.50-$2.00. Equivalent to ~1-2% of the per-iter LLM cost the AFK orchestrator already runs.
+- Per-corpus full re-emit (offline reproducibility check, model migration): 76 ADRs × ~$0.10 = ~$7.60. Bounded.
 
 ## Consequences
 
 ### Good
 
-- P337 closes: every ADR renders Decision Outcome content in the compendium.
-- MADR canonical alignment preserved: new ADRs authored per MADR convention render with the tightest TL;DR (the `Chosen option:` line).
-- Author discipline minimized: existing ADRs work via fallback without backfill effort; new ADRs are catch-on-write via validator; opportunistic upgrade ties to existing cadence.
-- Token cost bounded: ~3k extra tokens for the fallback-extracted first sentences on the 43 non-canonical ADRs; compendium grows from ~10k → ~13k. Stays under the ~15k routine-load ceiling.
-- Generator idempotency preserved: deterministic extraction; no LLM synthesis at generate time.
-- Validator is fail-open: no P327-class friction surface introduced; warnings surface in the next architect review for human judgment.
-- ADR-049 shim discipline preserved: validator distributed via `$PATH`-resolved shim, not repo-relative paths.
-- Cadence-over-discipline: Phase 3 opportunistic upgrade is triggered by the existing `/wr-architect:review-decisions` cadence, not by a separate "remember to backfill" obligation.
+- P337 closes structurally: drift between body and compendium becomes impossible (same-hook coupling) rather than detectable-and-fixable.
+- LLM-quality TL;DR per entry: no regex-heuristic limitations on sentence-boundary detection, framing-prose advance, or MADR-tag presence. Architect renders entries with semantic understanding of the Decision Outcome.
+- Existing 43 non-canonical ADRs migrate naturally via the edit cadence — no mass backfill, no opportunistic-upgrade-in-ratification-drain step, no author-discipline obligation.
+- Single mechanism end-to-end: PostToolUse hook + architect agent. No two-store coordination (body + frontmatter cache, or body + README), no programmatic-vs-LLM split, no validator + fallback + cadence chain.
+- ADR-031 (body authoritative) preserved: the architect derives the entry from the body; the body is the source of truth.
+- Compendium token cost bounded by architect prompt budget: the agent is instructed to emit a one-or-two-sentence `**Decides:**` line; entries stay roughly the same size as the existing canonical-path entries.
+- Pre-commit pairing assertion replaces drift gate test 2145 with a structurally simpler check: a commit touching `docs/decisions/*.md` body MUST also touch `docs/decisions/README.md`. Cheap to test; impossible to bypass without explicit intent.
+- Eliminates three pieces of existing infrastructure that become unnecessary: the programmatic generator script + bats, the refresh-discipline PreToolUse hook, and the planned Phase 2 fail-open validator. Net code reduction.
 
 ### Neutral
 
-- Two extraction paths in the generator (canonical primary, semantic fallback) add a code branch but the branch is simple: try the MADR tag, fall through if absent.
-- The "framing prose" regex is heuristic — future ADRs may use opening forms not in the current regex. Easy to amend incrementally; fail-open behaviour means false positives are warnings, not blockers.
-- The validator is one more CI step + one more PreToolUse hook; modest extension of the existing safety net (`architect-compendium-refresh-discipline.sh`).
-- Phase 3 inline-upgrade during ratification means the drain UX gains a step. Bounded — only fires when the render would be empty or framing-prose-only.
+- The architect agent is invoked on every ADR body edit (a new automatic trigger). Mechanical / category-4-silent-framework per ADR-044; no user prompt; the hook fires without interaction.
+- Cost-per-edit is ~$0.05-0.20 LLM call — bounded but non-zero. Comparable to ~1-2% of typical AFK-iter LLM spend per session.
+- Compendium becomes "architect-authored derived view" rather than "programmatically-generated derived view". The deriv-relationship is preserved; the deriv-mechanism changes from awk/regex to LLM.
 
 ### Bad
 
-- Existing 43 non-canonical ADRs surface their first sentence as Decision Outcome, which may be opening prose ("This ADR addresses the problem that...") even with the framing-detect regex. Trade-off: some ADRs render slightly noisier first sentences than the canonical form would produce. Acceptable because the alternative is no Decision Outcome content at all.
-- The validator may surface false-positive warnings on legitimate non-framing openings the regex doesn't cover. Trade-off: fail-open behaviour means false positives are informational, not blocking. Author has clear visibility of the trigger in stderr.
-- Phase 3 opportunistic upgrade is gated by ratification cadence — ADRs that are never ratified (stay `proposed` indefinitely) don't get upgraded. Acceptable: those ADRs render via the Phase 1 fallback; the upgrade is opportunistic by design.
+- Offline determinism is lost: re-running the architect across the corpus can produce slightly different prose for each entry across runs (LLM non-determinism). Mitigation: the body is authoritative; the compendium is a derived view; if the user wants byte-stable reproducibility they can capture a known-good compendium and version it.
+- Model migration cost: if the architect model changes (e.g. Sonnet → Opus → next-gen), the full 76-ADR corpus needs re-emission to render in the new model's voice. Bounded cost (~$7.60 per full corpus re-emit) but real.
+- Architect agent availability: if the architect's LLM call fails (network, quota, model error), the PostToolUse hook's failure-mode needs definition. Open question: does the hook leave the README stale + warn (degraded mode), or block the edit (fail-closed)? Implementation iter resolves; default leans degraded-mode-warn per "fail-open" precedent from the abandoned Option 6.
+- New automatic LLM invocation surface: every ADR edit fires a Claude API call. Adopters with API-cost-sensitive setups may need an opt-out mechanism. Implementation iter adds an env-var or settings opt-out.
+- Existing 43 non-canonical ADRs continue to render via the OLD compendium (generated 2026-05-30 with the programmatic extractor) until each is touched. Acceptable: the migration cadence is the edit cadence; nothing forces the user to touch ADRs they don't have other reason to touch.
 
 ## Confirmation
 
 Concrete, testable criteria — every item must be verifiable by a bats fixture or empirical command:
 
-(a) **Compendium completeness**: running `wr-architect-generate-decisions-compendium && grep -c '^\*\*Decides:\*\*' docs/decisions/README.md` returns 75 (or whatever the current ADR count is). Every ADR has a Decides line. Currently returns 32; target is 75.
+(a) **PostToolUse hook fires on ADR edit**: a bats fixture edits a `docs/decisions/*.md` body via the Write tool surface; observes the hook firing (stderr signal or log file); confirms `docs/decisions/README.md` is also modified.
 
-(b) **Fallback correctness**: a bats fixture creates an ADR with `## Decision Outcome` opening with a non-framing sentence (no `Chosen option:` tag); generator emits that sentence as the Decides line; idempotency holds.
+(b) **Architect emits the entry shape**: a bats fixture (using a stubbed architect subprocess or `claude -p` integration test) confirms the architect's emit conforms to the expected shape — `### ADR-NNN — <title>` h3 header, Status badge, Oversight badge (if applicable), Supersedes link (if applicable), `**Decides:**` line, `**Confirmation:**` line, `**Related:**` line.
 
-(c) **Framing-prose advance**: a bats fixture creates an ADR with `## Decision Outcome` opening with `This ADR addresses ...`; generator advances to second sentence per the framing-detect regex.
+(c) **README pairing assertion enforced at commit**: pre-commit hook `architect-readme-pairing-check.sh` denies commits where any staged `docs/decisions/*.md` body change lacks an accompanying `docs/decisions/README.md` change. Bats fixture: stage a body change without README change → commit denied with clear directive.
 
-(d) **Fail-open validator on CI**: new "Validate ADR shapes" Quality Gates step; emits warnings (does not fail the build) on framing-prose detection; emits failures only on missing `## Decision Outcome` section.
+(d) **README entry replaced in-place on amendment**: when an existing ADR body is amended, the architect emits the updated entry; the hook applies it as `Edit` (not insert) to replace the existing entry block. Bats fixture asserts no duplicate entries appear.
 
-(e) **Fail-open validator on PreToolUse:Write**: writing a new ADR whose Decision Outcome opens with framing prose surfaces a stderr warning citing the framing pattern; the Write PROCEEDS; new behavioural bats covers this path.
+(e) **New ADR entry inserted at correct sort position**: when a new ADR body is written, the hook inserts the entry in numeric-sort order under the appropriate section (in-force for `proposed` / `accepted`; historical for `superseded` / `rejected` / `deprecated`). Bats fixture asserts ordering.
 
-(f) **Token cost ceiling**: post-Phase-1, `wc -w docs/decisions/README.md` × 1.3 (rough word→token conversion) ≤ 15000. If exceeded, document the deviation and consider accelerating Phase 3 cadence.
+(f) **Status-based section migration**: when an ADR transitions from `accepted` to `superseded` (or any in-force → historical transition), the hook moves the entry from the in-force section to the historical section in the same edit. Bats fixture asserts migration.
 
-(g) **Drift gate preservation**: existing test 2145 (`committed compendium matches generator output`) continues to pass — the extraction layered change does not break ADR-077 confirmation criterion (g).
+(g) **Existing 43 non-canonical ADRs migrate via edit cadence**: a bats fixture amends one of the currently-empty-Decision-Outcome ADRs (e.g. ADR-002); confirms the architect re-emits the entry with a populated `**Decides:**` line.
 
-(h) **MADR-canonical preservation**: ADRs that follow MADR canonical form render exactly as before — no behaviour change for the 32 conforming ADRs.
+(h) **Token cost bound**: post-migration, `wc -w docs/decisions/README.md` × 1.3 ≤ 15000. Confirm in a bats fixture against the architect-authored corpus state.
 
-(i) **ADR-049 shim discipline**: the validator script is invoked via `wr-architect-validate-adr-shape` shim throughout; bats fixture asserts the shim exists, is executable, and resolves its library siblings relative to the script's own location (not cwd) so it works in adopter installs.
+(i) **Pre-commit hook is the drift-safety primary**: assert the new pairing-check hook is registered in `packages/architect/hooks/hooks.json` as a pre-commit (or PreToolUse:Bash matching `git commit`) hook.
 
-(j) **Cadence-embedded opportunistic upgrade**: `/wr-architect:review-decisions` SKILL.md documents the inline-upgrade offer; bats fixture asserts the skill's Step `N` carries the `AskUserQuestion` for upgrade-or-skip when ratifying an ADR with empty / framing-prose-only render.
+(j) **Programmatic generator deprecation pathway**: `packages/architect/scripts/generate-decisions-compendium.sh` carries a stderr deprecation notice on every invocation citing this ADR; the script's bats test for idempotency (criterion 2 in the existing bats) is marked `skip` with a TODO reference to this ADR's reassessment date.
+
+(k) **Adopter opt-out mechanism**: an `ARCHITECT_AUTO_UPDATE_COMPENDIUM=0` env var (or equivalent settings.json key) disables the PostToolUse hook for adopters with API-cost-sensitive setups. Bats fixture confirms the hook self-suppresses when the opt-out is set; degrades to "user must run `wr-architect-generate-decisions-compendium` manually" with stderr message.
+
+(l) **Failure-mode behaviour**: when the architect subprocess fails (network error, quota exhaustion), the hook logs the failure + leaves the README unchanged (degraded mode) rather than blocking the body edit. A subsequent commit attempt is denied by the pre-commit pairing check, surfacing the failure to the user for manual recovery.
 
 ## Pros and Cons of the Options
 
@@ -161,28 +187,60 @@ Concrete, testable criteria — every item must be verifiable by a bats fixture 
 - Bad: Token-per-section accounting is non-trivial to implement deterministically.
 - Bad: Same framing-prose problem as Option 1 within the truncated path.
 
-### Option 6 — MADR-canonical primary + first-sentence fallback + fail-open authoring validator + cadence-embedded opportunistic upgrade (CHOSEN)
+### Option 6 — MADR-canonical primary + first-sentence fallback + fail-open authoring validator + cadence-embedded opportunistic upgrade (SUPERSEDED 2026-05-31)
 
-- Good: Closes P337 directly; every ADR renders Decision Outcome.
+- Good: Closes P337 by adding extractor coverage; every ADR renders some Decision Outcome.
 - Good: MADR alignment preserved (canonical primary path).
+- Good: Programmatic generator preserves idempotency.
 - Good: Structural enforcement (validator) for new ADRs; structure-over-discipline.
 - Good: Fail-open validator avoids P327-class friction.
-- Good: Cadence-embedded opportunistic upgrade ties to existing ratification drain — no relies-on-discipline trap.
-- Good: ADR-049 shim discipline carried in the proposal.
 - Good: No mass backfill required; existing corpus handled by fallback.
-- Good: Token cost bounded (~3k growth, stays under ~15k ceiling).
-- Bad: Two extraction paths (slight generator complexity).
-- Bad: Existing non-canonical ADRs render their first sentence, which may be noisier than ideal until opportunistic upgrade lands during ratification.
-- Bad: Phase 3 inline-upgrade adds a step to the ratification drain UX — bounded but real.
+- Bad: Drift is detected-and-fixable rather than structurally impossible — body and compendium remain two stores.
+- Bad: Regex-heuristic limitations on sentence-boundary detection (abbreviations, URLs) and framing-prose advance regex (incomplete coverage of opening forms).
+- Bad: Three-phase implementation (generator + validator + cadence-embedded upgrade) — multiple moving parts to land.
+- Bad: Initially recommended by the agent at draft time without user-direction sign-off (P339 captures this surface gap); user direction 2026-05-31 superseded in favour of Option 9.
+
+### Option 7 — LLM-cached `tldr:` frontmatter field
+
+- Good: LLM-quality TL;DR per entry.
+- Good: Generator stays programmatic (cached field is deterministic to extract).
+- Good: Idempotency preserved.
+- Bad: Cache drift between frontmatter `tldr:` and edited Decision Outcome body — needs a drift detector.
+- Bad: Author runs LLM at write time as an extra explicit step (or via a hook).
+- Bad: New frontmatter field — adopters' tooling may not handle it.
+
+### Option 8 — LLM-emit-TL;DR-in-architect-verdict (three sub-shapes)
+
+- Good: Reuses architect agent's existing LLM round (PreToolUse review verdict).
+- Good: No new explicit author step.
+- 8a (frontmatter cache): same drift risk as Option 7.
+- 8b (body normalization): elegant; body becomes self-describing; existing generator works unchanged. But still two writes per edit (body norm + generator regen).
+- 8c (direct README write): simplest mechanism but breaks ADR-077's generated-derivation framing without addressing drift.
+
+### Option 9 — Architect-on-edit writes README entry directly + auto-fire-on-every-edit (CHOSEN, user direction 2026-05-31)
+
+- Good: Drift is structurally impossible (same-hook coupling between body edit and README write).
+- Good: LLM-quality TL;DR per entry — no regex heuristic limitations.
+- Good: Single mechanism end-to-end — PostToolUse hook + architect agent.
+- Good: ADR-031 (body authoritative) preserved.
+- Good: Existing 43 non-canonical ADRs migrate naturally via edit cadence.
+- Good: Eliminates programmatic generator, refresh-discipline hook, planned Phase 2 validator, Phase 3 ratification-drain upgrade — net code reduction.
+- Good: Cost-per-edit is bounded (~$0.05-0.20); per-session is ~1-2% of typical AFK-iter LLM spend.
+- Bad: Offline determinism lost; LLM is non-deterministic.
+- Bad: Model migration cost: full corpus re-emit per architect-model change (~$7.60).
+- Bad: Failure mode needs definition (architect subprocess error → degraded-mode-warn or block? — leans degraded per existing fail-open precedent).
+- Bad: New automatic LLM-invocation surface; adopters with API-cost sensitivity need opt-out (env var).
 
 ## Reassessment Criteria
 
 Revisit this decision when any of:
 
-- Compendium token cost reaches ~15k (the routine-load ceiling) — re-evaluate whether to accelerate Phase 3 cadence (e.g., bulk-upgrade campaign during a dedicated session), or whether Option 2 (whole-section) should be cancelled for budget reasons.
-- The fail-open authoring validator fires false-positive warnings more than once per ratification drain pass — re-evaluate whether the framing-detect regex needs amendment or whether the validator should be quieted.
-- A future MADR template revision changes the canonical Decision Outcome opening shape — re-align the extractor.
-- A new ADR-tooling best-practice emerges (e.g., a community-standard `compendium-include` marker syntax) — re-evaluate Option 3 for future alignment.
+- Compendium token cost reaches ~15k (the routine-load ceiling) — re-evaluate whether the architect's per-entry prompt budget needs tightening (e.g., enforce a single-sentence `**Decides:**` line instead of the current one-or-two-sentence allowance).
+- Architect-subprocess cost-per-session exceeds ~$5 for a typical 10-edit session — re-evaluate whether the hook should batch or defer, or whether some edit classes (e.g. cosmetic frontmatter-only changes) should opt-out of triggering.
+- Architect model change degrades entry quality across the corpus — re-evaluate whether a corpus-wide re-emit needs to be triggered automatically, or whether a freeze-on-current-model strategy is preferable.
+- A new ADR-tooling best-practice emerges (e.g., a community-standard programmatic-extraction format that delivers comparable quality without LLM cost) — re-evaluate whether the architect-on-edit mechanism should defer to a programmatic surface for routine extractions.
+- Drift gate pre-commit pairing assertion fires false-positives more than once per session — re-evaluate the hook scope (e.g. exclude purely-comment changes to ADR bodies from the pairing requirement).
+- Adopter-portability concerns surface: the PostToolUse hook fires `claude -p` which assumes a Claude Code subscription/auth context — re-evaluate whether adopters without that auth context need a fallback (e.g. the programmatic generator stays as the fallback path for unauthenticated environments).
 - The compendium load-surface purpose itself shifts (e.g., agents start receiving the full per-ADR set instead of the compendium for routine review) — re-evaluate whether the compendium remains the right load surface or should be deprecated.
 
 Default reassessment: 3 months from approval (2026-08-30).
