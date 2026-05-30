@@ -17,6 +17,10 @@ Net effect: every commit that routes through the risk-scorer delegation pays an 
 - `git add X` → delegate to `wr-risk-scorer:pipeline` → `git commit` → `Changes not staged for commit` (the staged set was emptied during the delegation).
 - Re-running the identical `git add X` + `git commit` immediately succeeds (the score/bypass marker from the delegation is still valid), confirming the only thing lost was the staging, not the score.
 
+### Recurrence — 2026-05-30 session (run-retro evidence)
+
+Fired again 3+ times during the ADR-076 / ADR-077 session: Slice 1 ADR-077 commit `846b5f2`, README reconcile `1da2ef5`, Slice 2 ADR-077 commit `9832593`. Each required a re-`git add` after the RISK-POLICY-staleness gate denial cleared the index. Wrapper-helper fix-strategy (e.g. `wr-risk-scorer-commit` that encapsulates `git add` + delegate + re-add + `git commit`) would eliminate the round-trip; route via Step 4b Stage 2 Option 3.
+
 ## Workaround
 
 Re-`git add` the exact paths immediately before `git commit`, after the scorer delegation returns. (This session applied it ~3-4×.)
