@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-05-30 **README reconciled** — 1 drift entry corrected: P332. Reconciliation contract per P118 + ADR-014 amended ("Reconciliation as preflight robustness layer").
+> Last reviewed: 2026-05-30 **README reconciled** — 3 drift entries corrected: P333, P334, P335. Reconciliation contract per P118 + ADR-014 amended ("Reconciliation as preflight robustness layer").
 
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
@@ -86,6 +86,9 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3.0 | P308 | work-problems Step 6.5 cohort-graduation treats evaluator `status=resolved` as graduate-now, skipping the Rule 4 evidence-floor judgment the holding-README Process requires — AFK false-graduation hazard | 3 Med | Open | M | 2026-05-26 |
 | 3.0 | P309 | `wr-risk-scorer-drain-register-queue` no-ops on queued slugs that have no register file — creates 0, appends 0, and does NOT truncate the queue | 3 Med | Open | M | 2026-05-26 |
 | 3.0 | P332 | run-retro skips Step 1.5 / Step 3 / Step 4b Stage 1 under session-length rationalization — recurrence of P148 anti-pattern class on the run-retro meta-surface | 3 Med | Open | M | 2026-05-30 |
+| 3.0 | P333 | /wr-itil:work-problems Step 0 session-continuity detection has no staleness filter on .afk-run-state/iter-*.json error markers — stale residuals false-positive the halt/ask gate indefinitely | 3 Med | Open | M | 2026-05-30 |
+| 3.0 | P334 | generate-decisions-compendium.sh uses awk substr() with Unicode `…` ellipsis — not portable between macOS BSD awk and Linux GNU awk; CI drift gate fires on cross-platform regenerations | 3 Med | Open | M | 2026-05-30 |
+| 3.0 | P335 | AFK iter subprocesses can over-claim completion in their ITERATION_SUMMARY — orchestrator trusts the claim but on-disk state contradicts it | 3 Med | Open | M | 2026-05-30 |
 | 3.0 | P312 | reconcile-rfcs reports spurious MISSING_REVERSE_TRACE — doesn't traverse docs/problems/ per-state subdirs (RFC-002-class glob gap) | 3 Med | Open | S | 2026-05-26 |
 | 3.0 | P320 | /install-updates Step 2/3 discovery loop is zsh-unsafe — `for X in $VAR` word-split (P133) + `status` is a read-only zsh var | 3 Med | Open | S | 2026-05-27 |
 | 3.0 | P322 | Tier-3 briefing-budget pass flags `*-archive*.md` sink files — re-rotating a rotation SINK proliferates siblings for ~zero reader value | 3 Med | Open | S | 2026-05-27 |
