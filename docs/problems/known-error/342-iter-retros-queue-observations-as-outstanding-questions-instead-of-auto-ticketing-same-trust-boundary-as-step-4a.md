@@ -1,6 +1,6 @@
 # Problem 342: Iter retros queue their own observations as `outstanding-questions.jsonl` entries for user-direction triage instead of auto-ticketing — same trust-boundary as `/wr-retrospective:run-retro` Step 4a
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-05-31
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next `/wr-itil:review-problems`; HIGH in practice — retros are the system designed to mechanically observe recurring patterns; routing those observations through user-direction triage instead of mechanical-ticket capture inverts the trust-boundary the run-retro skill already encodes)
 
@@ -61,13 +61,55 @@ The required structural shape:
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next `/wr-itil:review-problems`
-- [ ] Amend `/wr-itil:work-problems` SKILL.md Step 5 iter-prompt body: relax the `no-capture-*-siblings-mid-loop` rule for retro-surfaced observations; direct retro to auto-ticket recurring class-of-behaviour observations via `/wr-itil:capture-problem`; route direction-setting observations to `outstanding_questions` only.
-- [ ] Amend `/wr-retrospective:run-retro` SKILL.md Step 4b stage classification to enforce the mechanical-auto-ticket vs direction-setting-queue split per the same trust-boundary as Step 4a.
-- [ ] Behavioural bats: assert work-problems SKILL.md carries the retro-auto-ticket exception to the no-capture-* rule; assert run-retro SKILL.md Step 4b carves out the mechanical-stage path.
-- [ ] Cross-reference and possibly amend the `ITERATION_SUMMARY.outstanding_questions` schema: retros that emit OBSERVATIONS should not all funnel through that field; direction-setting subset only.
-- [ ] Decide whether the auto-ticket path needs explicit policy authorisation (ADR-013 Rule 5 silent-proceed) given it fires `/wr-itil:capture-problem` from an iter context — likely yes; cite the precedent in the iter-prompt amendment.
-- [ ] Sibling capture: P341 (work-problems must surface outstanding questions + run retro before ALL_DONE).
-- [ ] Cross-check against the existing `.afk-run-state/outstanding-questions.jsonl` in this session for entries that should have been tickets; lift opportunistically during the next interactive session.
+- [x] Amend `/wr-itil:work-problems` SKILL.md Step 5 iter-prompt body: relax the `no-capture-*-siblings-mid-loop` rule for retro-surfaced observations; direct retro to auto-ticket recurring class-of-behaviour observations via `/wr-itil:capture-problem`; route direction-setting observations to `outstanding_questions` only. — implemented session 9 iter 6 (2026-05-31).
+- [x] Amend `/wr-retrospective:run-retro` SKILL.md Step 4b stage classification to enforce the mechanical-auto-ticket vs direction-setting-queue split per the same trust-boundary as Step 4a. — implemented session 9 iter 6 (new Step 4b Stage 1 sub-step 2 carries the classification taxonomy; Step 4b Stage 1 numbering renumbered to host the new step).
+- [x] Behavioural bats: assert work-problems SKILL.md carries the retro-auto-ticket exception to the no-capture-* rule; assert run-retro SKILL.md Step 4b carves out the mechanical-stage path. — `packages/itil/skills/work-problems/test/work-problems-p342-retro-auto-ticket-carveout.bats` (10 fixtures) + `packages/retrospective/skills/run-retro/test/run-retro-step-4b-retro-auto-ticket-carveout.bats` (9 fixtures), all GREEN.
+- [x] Cross-reference and possibly amend the `ITERATION_SUMMARY.outstanding_questions` schema: retros that emit OBSERVATIONS should not all funnel through that field; direction-setting subset only. — schema unchanged (the schema already carries category-typed entries); the routing discipline is captured in the iter-prompt taxonomy + run-retro Step 4b mirror, so the schema continues to host direction-setting subset only.
+- [x] Decide whether the auto-ticket path needs explicit policy authorisation (ADR-013 Rule 5 silent-proceed) given it fires `/wr-itil:capture-problem` from an iter context — likely yes; cite the precedent in the iter-prompt amendment. — confirmed: iter-prompt body cites ADR-013 Rule 5 + ADR-044 framework-resolution boundary as the carve-out's authority; Step 4b mirror cites the same.
+- [x] Sibling capture: P341 (work-problems must surface outstanding questions + run retro before ALL_DONE). — both shipped in same changeset.
+- [ ] Cross-check against the existing `.afk-run-state/outstanding-questions.jsonl` in this session for entries that should have been tickets; lift opportunistically during the next interactive session. — deferred (session-specific queue triage is a manual user task on return; not gating).
+
+## Fix Strategy
+
+Implemented session 9 iter 6 (2026-05-31). Two-locus SKILL.md amendment + behavioural bats coverage + changeset queued via single batch per ADR-014 (rides same commit as P341).
+
+**Loci:**
+- `packages/itil/skills/work-problems/SKILL.md` Step 5 iter-prompt body — Constraint #3 amended to carve out `/wr-itil:capture-problem` on the retro path EXCEPT for retro-surfaced observations of recurring class-of-behaviour (mechanical-stage carve-out per run-retro Step 4a precedent); Constraint #4 retro-on-exit clause now carries the P342 classification taxonomy (recurring class-of-behaviour / SKILL-contract drift / hook misbehaviour / framework-gap → auto-ticket; direction-setting → outstanding_questions; ambiguous → default to auto-ticket).
+- `packages/retrospective/skills/run-retro/SKILL.md` Step 4b Stage 1 — new sub-step 2 carries the symmetric mirror of the same classification taxonomy so the trust-boundary fires whether retro runs in iter context (work-problems Step 5) OR standalone in main turn (run-retro Step 4b). Existing Stage 1 numbering renumbered to host the new step (1 → P016 concern-boundary; 2 → P342 classification; 3 → manage-problem dispatch).
+- `packages/itil/skills/work-problems/test/work-problems-p342-retro-auto-ticket-carveout.bats` — 10 behavioural fixtures.
+- `packages/retrospective/skills/run-retro/test/run-retro-step-4b-retro-auto-ticket-carveout.bats` — 9 behavioural fixtures.
+
+**Behavioural assertions covered (work-problems):**
+- Iter-prompt body carves out capture-* for retro-surfaced observations.
+- Iter-prompt directs retro to auto-ticket via /wr-itil:capture-problem.
+- Iter-prompt cites Step 4a precedent for mechanical-stage carve-out.
+- Iter-prompt classifies recurring class-of-behaviour as auto-ticket.
+- Iter-prompt classifies direction-setting as outstanding_questions.
+- Iter-prompt classifies ambiguous observations as default-to-auto-ticket.
+- Iter-prompt cross-references run-retro Step 4b carve-out symmetry.
+- P130 mid-loop AskUserQuestion ban preserved.
+
+**Behavioural assertions covered (run-retro Step 4b mirror):**
+- Names mechanical-auto-ticket vs direction-setting-queue split.
+- Cites Step 4a precedent.
+- Names recurring class-of-behaviour as auto-ticket route.
+- Names direction-setting as outstanding_questions route.
+- Names ambiguous default-to-auto-ticket asymmetry.
+- Cross-references work-problems Step 5 iter-prompt symmetry.
+- Cites ADR-044 + ADR-014.
+- Cites P342.
+
+**Composition:**
+- Composes with run-retro Step 4a precedent (verification close-on-evidence mechanical-stage carve-out — same trust-boundary applied to a different surface).
+- Composes with ADR-013 Rule 5 (policy-authorised silent proceed for capture-* on retro path).
+- Composes with ADR-014 (capture-problem / manage-problem commits per ticket; run-retro does NOT commit auto-ticket creates).
+- Composes with ADR-032 (foreground-spawns-N-background fanout pattern already documented for Stage 1 — P342 reinforces, does not contradict).
+- Composes with ADR-044 (mechanical-stage carve-out framework-resolved authority).
+- Composes with P130 (mid-loop AskUserQuestion ban unchanged — carve-out is for capture-* siblings on retro path only).
+- Composes with P078 (capture-on-correction — distinct trigger; both end in capture but for different signals).
+- Composes with P148 (Stage 1 anti-pattern guard preserved — auto-ticket IS the legitimate Stage 1 path; the carve-out doesn't add a new "Tickets Deferred" cause class).
+
+Awaiting release ship via `.changeset/p341-p342-pre-all-done-gate-and-retro-auto-ticket-carveout.md` (`@windyroad/itil` minor + `@windyroad/retrospective` minor). On release, `Status` will auto-transition to `Verification Pending` per ADR-022.
 
 ## Dependencies
 

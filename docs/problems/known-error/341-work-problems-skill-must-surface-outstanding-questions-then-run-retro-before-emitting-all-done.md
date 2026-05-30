@@ -1,6 +1,6 @@
 # Problem 341: `/wr-itil:work-problems` SKILL must surface outstanding questions FIRST, then run a retro, THEN emit `ALL_DONE` — current SKILL contract allows `ALL_DONE` to fire without one or both gates
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-05-31
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next `/wr-itil:review-problems`; HIGH in practice — accumulated direction-class observations and retro-class learnings can both be silently dropped on AFK-loop end if the orchestrator emits `ALL_DONE` without surfacing them or running retro)
 **Origin**: internal
@@ -58,12 +58,43 @@ The required structural shape:
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next `/wr-itil:review-problems`
-- [ ] Amend `/wr-itil:work-problems` SKILL.md to add a new step (e.g. "Step 2.4 — Pre-`ALL_DONE` gate sequence") that fires UNCONDITIONALLY before `ALL_DONE` emit, sequencing (a) outstanding-questions surface + (b) session-level retro.
-- [ ] Amend the SKILL.md Output Format section to reflect the new gate sequence — `ALL_DONE` appears AFTER outstanding-questions surface AND retro, not before/around.
-- [ ] Behavioural bats coverage: assert SKILL.md carries the new step prose; assert SKILL.md `ALL_DONE` mention is positioned AFTER the gate-sequence prose; assert the gate-sequence prose names BOTH outstanding-questions surface AND session-level retro as hard prerequisites.
-- [ ] Consider whether the gate sequence needs hook-enforced ordering (e.g., a PostToolUse hook that denies emitting `ALL_DONE` in the orchestrator main turn output if the queue is non-empty OR if no retro commit was made this session). Decide opportunistically; default to SKILL.md prose enforcement for the first cut.
-- [ ] Sibling-amend `/wr-itil:work-problem` (singular) SKILL.md if it has the same structural gap.
-- [ ] Cross-reference P342 (sibling — iter retros queue observations instead of auto-ticketing; same trust-boundary class).
+- [x] Amend `/wr-itil:work-problems` SKILL.md to add a new step (e.g. "Step 2.4 — Pre-`ALL_DONE` gate sequence") that fires UNCONDITIONALLY before `ALL_DONE` emit, sequencing (a) outstanding-questions surface + (b) session-level retro. — implemented session 9 iter 6 (2026-05-31).
+- [x] Amend the SKILL.md Output Format section to reflect the new gate sequence — `ALL_DONE` appears AFTER outstanding-questions surface AND retro, not before/around. — implemented session 9 iter 6.
+- [x] Behavioural bats coverage: assert SKILL.md carries the new step prose; assert SKILL.md `ALL_DONE` mention is positioned AFTER the gate-sequence prose; assert the gate-sequence prose names BOTH outstanding-questions surface AND session-level retro as hard prerequisites. — `packages/itil/skills/work-problems/test/work-problems-p341-pre-all-done-gate.bats` (11 fixtures, all GREEN).
+- [ ] Consider whether the gate sequence needs hook-enforced ordering (e.g., a PostToolUse hook that denies emitting `ALL_DONE` in the orchestrator main turn output if the queue is non-empty OR if no retro commit was made this session). Decide opportunistically; default to SKILL.md prose enforcement for the first cut. — deferred per opportunistic-vs-prose-first decision in this iter; revisit if Phase 4 numeric gate fires (lazy-count-style trail).
+- [x] Sibling-amend `/wr-itil:work-problem` (singular) SKILL.md if it has the same structural gap. — checked session 9 iter 6: singular `/wr-itil:work-problem` is pick-and-run with no `ALL_DONE` emit and no loop; no amendment needed.
+- [x] Cross-reference P342 (sibling — iter retros queue observations instead of auto-ticketing; same trust-boundary class). — both Related sections cross-link; both shipped in same changeset `.changeset/p341-p342-pre-all-done-gate-and-retro-auto-ticket-carveout.md`.
+
+## Fix Strategy
+
+Implemented session 9 iter 6 (2026-05-31). SKILL.md amendments + behavioural bats coverage + changeset queued via single batch per ADR-014.
+
+**Loci:**
+- `packages/itil/skills/work-problems/SKILL.md` — new `### Step 2.4: Pre-ALL_DONE gate sequence` heading (fires UNCONDITIONALLY before every `ALL_DONE` emit; sequences gate (a) outstanding-questions surface via Step 2.5b + gate (b) session-level retro via `/wr-retrospective:run-retro` + gate (c) `ALL_DONE` emit ONLY after both complete; hard-fail mode halts with directive instead of emit `ALL_DONE` when either gate cannot complete cleanly).
+- `packages/itil/skills/work-problems/SKILL.md` — Step 2.5 closing prose amended to hand control to Step 2.4 (b) instead of emitting `ALL_DONE` directly; Step 2.4 is now the single canonical `ALL_DONE` emit position.
+- `packages/itil/skills/work-problems/SKILL.md` — Non-Interactive Decision Making table carries new "Pre-`ALL_DONE` gate sequence" row.
+- `packages/itil/skills/work-problems/SKILL.md` — Output Format section carries explicit `ALL_DONE` position prose tying it to Step 2.4 gate (c).
+- `packages/itil/skills/work-problems/test/work-problems-p341-pre-all-done-gate.bats` — 11 behavioural fixtures covering the gate-sequence prose, hard-fail mode, ADR-014 commit-ownership citation, Output Format reference, Decision Table row, and Related P341 cross-reference.
+
+**Behavioural assertions covered:**
+- SKILL.md names a Pre-ALL_DONE gate sequence step (Step 2.4 heading present).
+- Gate-sequence is unconditional (fires before every ALL_DONE emit).
+- Gate-sequence names outstanding-questions surface as gate (a).
+- Gate-sequence names session-level retro as gate (b).
+- Gate-sequence names ALL_DONE as gate (c) ONLY after (a) and (b).
+- Hard-fail mode (halt with directive) is documented.
+- ADR-014 commit-ownership for retro work is preserved.
+- Output Format reflects new sequence.
+- Non-Interactive Decision Making table carries the row.
+- Related section cites P341.
+
+**Composition:**
+- Composes with P086 (extends iter-level retro-on-exit to orchestrator-level — distinct surface: P086 fires retro at iter-subprocess layer per-iter; P341 fires retro at orchestrator-main-turn layer once per loop end).
+- Composes with P126 (`halt-paths-must-route-design-questions-through-Step-2.5b` principle preserved — gate (a) inherits Step 2.5b's surfacing routine unchanged).
+- Composes with ADR-014 (retro commits its own work; orchestrator does not re-commit retro's output).
+- Composes with ADR-044 (framework-resolution boundary — when to surface is now framework-resolved as unconditional pre-`ALL_DONE`; the user-input surface within gate (a) is unchanged).
+
+Awaiting release ship via `.changeset/p341-p342-pre-all-done-gate-and-retro-auto-ticket-carveout.md` (`@windyroad/itil` minor + `@windyroad/retrospective` minor). On release, `Status` will auto-transition to `Verification Pending` per ADR-022.
 
 ## Dependencies
 
