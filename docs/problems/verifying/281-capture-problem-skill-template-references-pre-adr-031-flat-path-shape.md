@@ -1,6 +1,6 @@
 # Problem 281: capture-problem skill template references pre-ADR-031 flat-path shape
 
-**Status**: Known Error
+**Status**: Verifying
 **Reported**: 2026-05-19
 **Priority**: 9 (Med High) — Impact: 3 (Moderate — adopter projects accumulate flat-layout tickets; README cache mis-classify risk; cross-adopter inventory drift) x Likelihood: 3 (Likely — structural defect; every adopter following SKILL.md literally hits it; observed once concretely in voder-mcp-hub today)
 **Effort**: M — three plausible resolution shapes enumerated (adopter migration / SKILL template literal refresh / agent inference-vs-template precedence rule); template-refresh alone might be S but combined fix sits at M
@@ -62,6 +62,7 @@ Plausible workarounds pending diagnosis:
 - `packages/itil/skills/capture-problem/SKILL.md` lines 188, 246, 253 + the Step 2 prose at line 156 + stale Related-section ticket paths now name `docs/problems/open/<NNN>-<kebab-title>.md` per ADR-031.
 - 4 new behavioural bats tests at `packages/itil/skills/capture-problem/test/capture-problem.bats` (P281 regression guards, structural-grep on the SKILL.md contract surface per ADR-052 § Surface 2 escape-hatch).
 - The skeleton-fill fixture test was updated to write at the per-state path (was using the now-wrong flat shape).
+- Changeset: `.changeset/p281-capture-problem-skill-path-template.md` (patch on `@windyroad/itil`).
 
 **Architect verdict**: textual conformance to ratified ADR-031 (accepted + human-oversight: confirmed); no new ADR required for the template refresh itself. The "agent inference vs literal SKILL template precedence" question deserves a NEW ADR — descendant ticket.
 
@@ -102,3 +103,22 @@ This ticket transitions Open → Known Error this iter (root cause confirmed + c
 - Commit reference (adopter-side): `6c73880` in `voder-mcp-hub`.
 - This SKILL surface (`packages/itil/skills/capture-problem/SKILL.md`) Step 4 template literal — likely the load-bearing drift site for option (2) above.
 - Sibling capture skills (capture-rfc, capture-story, capture-story-map) — cross-check the same template-shape drift; if uniform across sibling skills, the fix is a multi-skill SKILL.md refresh (probably one changeset, multiple files).
+
+## Fix Released
+
+Released as **@windyroad/itil@0.37.1** on **2026-05-30** via PR [#177](https://github.com/windyroad/windyroad-claude-plugin/pull/177).
+
+Citation derived deterministically by `wr-itil-derive-release-vehicle` (helper invocation, third real-world dogfood):
+
+```
+RELEASE_VEHICLE:
+  changeset: .changeset/p281-capture-problem-skill-path-template.md
+  version-packages-commit: 63d5bd6cee89386ea93ee17a8925ce42f8350569
+  pr: #177
+  merge-commit: a7d47b982a6221628ec00d94cd2a6efa41fefdec
+  release-date: 2026-05-30
+```
+
+Fix commit: `dd47f8a` (capture-problem SKILL.md path template names per-state-subdir layout per ADR-031 — closes P281 capture-problem sub-shape).
+
+**Verification path**: closure happens when an adopter capture lands at the per-state subdir post-release (e.g. a fresh capture in voder-mcp-hub or any adopter using `@windyroad/itil@0.37.1+` writes `docs/problems/open/<NNN>-<slug>.md` rather than the legacy flat `docs/problems/<NNN>-<slug>.open.md` shape). Sibling-SKILL drift, adopter migration, and the inference-vs-template precedence rule remain open under P329 + descendants.
