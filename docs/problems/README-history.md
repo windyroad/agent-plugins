@@ -633,3 +633,8 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-05-30 (README reconciliation fragment rotated for P302 K→V)
 
 > Last reviewed: 2026-05-30 **README reconciled** — 3 drift entries corrected: P333, P334, P335. Reconciliation contract per P118 + ADR-014 amended ("Reconciliation as preflight robustness layer").
+
+
+## 2026-05-30 (P302 K→V fragment rotated for P087 K→V)
+
+> Last reviewed: 2026-05-30 **P302 K→V (work-problems AFK iter)** — `@windyroad/architect@0.12.1` released via PR #178 / merge `d929acd` (version-packages commit `5244b5f`) shipped the substance-first presentation rule for decision-confirmation prompts to `/wr-architect:review-decisions` Step 3 + `docs/briefing/agent-interaction-patterns.md`. JTBD mirror at `/wr-jtbd:confirm-jobs-and-personas` Step 3 is intentionally held with `docs/changesets-holding/p288-jtbd-persona-oversight.md` and rides that changeset's graduation. Citation derived deterministically via `wr-itil-derive-release-vehicle P302` per the helper's structured key:value output (fourth real-world dogfood after P267 / P316 / P281). Prior README-reconciled fragment rotated to README-history.md per P134.
