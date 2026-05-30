@@ -1,7 +1,8 @@
 # Problem 340: Human-oversight marker can be written on draft-acceptance without verifying substance-confirmation — the substance-confirmation interaction pattern needs prose briefing + each option as a selectable option + no ID-as-explainer + informed-decision-without-external-doc-lookup
 
-**Status**: Open
+**Status**: Known Error (Fix Pending on commit; subsumes P339)
 **Reported**: 2026-05-31
+**Transitioned to Known Error**: 2026-05-31
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems; HIGH in practice — ratification claims may stamp ADRs whose substance was never user-authorised, and the architect agent reads the marker as proof of ratification per ADR-066, so the entire governance chain downstream operates on a foundation that didn't actually exist)
 **Origin**: internal
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems; SKILL.md amendments on `/wr-architect:create-adr` Step 5 + `/wr-architect:capture-adr` if applicable + architect agent's review-decisions flow + behavioural bats coverage of the new substance-confirm pattern)
@@ -94,6 +95,31 @@ Until the answer selects a specific option from the considered-options set, the 
 - **Blocks**: trustworthy ratification claims across the ADR corpus. Until the marker mechanism only fires on verified substance-confirmation, every ratified ADR is potentially bogus by the same path that ADR-078's first commit was.
 - **Blocked by**: (none — fix is bounded to SKILL.md amendments + bats coverage + possibly ADR-066 / ADR-064 amendments).
 - **Composes with**: P339 (substance-question shape), ADR-074 (substance-confirm-before-build framework), ADR-066 (born-confirmed marker contract), ADR-064 (review-and-confirm-every-ADR gate).
+
+## Fix Pending (2026-05-31)
+
+AFK iter 2026-05-31 lands the fix:
+
+1. **`packages/architect/skills/create-adr/SKILL.md` Step 5** — replaces the bundled "review pass" `AskUserQuestion` with two separate fires:
+   - **Step 5a substance-confirm fire** — main-turn prose briefing of considered-options + selected-option + rationale BEFORE the `AskUserQuestion` fires; `AskUserQuestion` options-array contains each considered option as a selectable entry (NOT yes/no shape); briefing prose + question + options is self-contained (no `ADR-NNN` / `P-NNN` / `JTBD-NNN` / `RFC-NNN` IDs as explainers); user can make an informed decision without external document lookup.
+   - **Born-confirmed marker write** is gated on the substance-confirm answer specifying a substantive option from the considered-options set AND matching the option the draft was authored against. Mismatch triggers re-draft of Decision Outcome + dependent sections + re-fire of substance-confirm (NOT a soft warn-and-proceed).
+   - **Step 5b draft-quality review fire** (optional, after Step 5a passes) — narrow questions on prose quality + consulted/informed list + edge cases. Does NOT gate the marker.
+
+2. **ADR-064 § Decision Outcome** — amended 2026-05-31 with the five interaction-pattern requirements (briefing-in-prose / option-shaped-not-yes-no / no-IDs-as-explainers / informed-without-external-lookup / substance-only-at-this-fire). Extends the 2026-05-27 ADR-074 amendment. Retains `human-oversight: confirmed` (mechanism tightening, not substance change).
+
+3. **ADR-066 § Decision Outcome item 5** — amended 2026-05-31 to tighten the marker-write trigger: marker writes ONLY in response to a substance-confirm answer that selects ONE specific substantive option from the considered-options set AND matches the draft on disk. Retains `human-oversight: confirmed` per the Reassessment Criteria carve-out (mechanism tightening, not substance change).
+
+4. **Bats coverage** — new file `packages/architect/skills/create-adr/test/create-adr-substance-confirm-pattern.bats` with 12 behavioural assertions covering: substance-confirm fire distinct from draft-quality; briefing in main-turn prose BEFORE AskUserQuestion; option-shaped not yes/no; no-IDs-as-explainers; informed-without-external-lookup; marker-write gated on substantive option; re-draft + re-fire on mismatch; draft-quality fire is optional and does not gate marker.
+
+5. **Changeset** — `.changeset/p339-p340-substance-confirm-pattern.md` (@windyroad/architect minor).
+
+P340 transitions to Verifying on release of @windyroad/architect.
+
+**Out-of-scope (deferred):**
+
+- Sweep of existing ADRs whose ratification claims may be bogus by the same mechanism (Investigation Tasks line 90) — deferred to a dedicated session.
+- `/wr-architect:capture-adr` SKILL.md review (Investigation Tasks line 82) — capture-adr is zero-ask (skeleton, no born-confirmed write), so the marker-mechanism gap does not apply. The Confirmation gate at promotion from `.proposed` → `.accepted` runs through `/wr-architect:create-adr` Step 5 per ADR-066 Decision Outcome item 6; that path now picks up the substance-confirm fix automatically. No capture-adr amendment required.
+- Persona-gap on `docs/jtbd/tech-lead/persona.md` re: device-matrix/assistive-tech context constraints (jtbd-lead advisory) — separate ticket follow-up; latent pre-existing gap not introduced by this change.
 
 ## Related
 

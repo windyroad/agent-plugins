@@ -188,24 +188,71 @@ Chosen option: **"Option X"**, because [primary justification].
 
 Use today's date for the `date` field. Set `reassessment-date` to 3 months from today unless the user specifies otherwise.
 
-### 5. Confirm with the user
+### 5. Confirm with the user — two separate fires (P339 + P340)
 
-Present the written ADR and use AskUserQuestion to ask:
-1. Does the problem statement accurately capture the situation?
-2. Are the pros/cons fair and complete?
-3. Are the confirmation criteria testable?
-4. Should anyone else be listed as consulted or informed?
+Step 5 fires TWO separate `AskUserQuestion` passes, in this order:
 
-Apply any feedback by editing the file.
+1. **Substance-confirm fire** — the user picks the chosen option from the considered-options set. THIS fire gates the born-confirmed marker write.
+2. **Draft-quality review fire** (optional, after substance-confirm passes) — narrow questions on prose quality, consulted/informed list, edge cases. Does NOT gate the marker.
 
-**Born-confirmed write (ADR-066).** Once the user confirms the ADR via this AskUserQuestion pass, write the human-oversight marker into the frontmatter — insert immediately after the `date:` line:
+This split closes the P339 / P340 gap: previously Step 5 fired ONE bundled "review pass" AskUserQuestion ("does the problem statement + Decision Outcome (Option X) capture the situation? — yes/no/edits/different-option"), and the user's "Yes" was treated as substance-ratification when in practice the user was confirming draft quality alone. The bundled answer landed the human-oversight marker on substance the user never explicitly affirmed. ADR-078 commit 5196e3d is the in-session exemplar; user correction 2026-05-31: *"I never approved the scripted extraction. You are supposed to run decisions by me"* + *"the previous iteration of the decision, with the programmatic extraction was not approved. How did that ADR skip ratification?"*. ADR-074 § Enforcement surface 1 is what this step now operationalises at the create-adr surface.
+
+#### 5a. Substance-confirm fire (P340 — load-bearing for the marker write)
+
+The substance-confirm fire MUST satisfy ALL FIVE interaction-pattern requirements pinned by user direction 2026-05-31 (encoded in ADR-064 + ADR-066 amendments + P340 § Root Cause Analysis):
+
+1. **Briefing in main-turn prose** — emit the considered-options + selected-option + rationale as plain main-turn text BEFORE the `AskUserQuestion` fires. The briefing carries the substance-of-the-decision in a form the user can read and reason about. Long AskUserQuestion text is NOT readable on some devices (mobile clients, accessibility tooling, certain notification surfaces); long prose + short question IS readable across the full device matrix. The split is load-bearing — briefing carries the briefing; the AskUserQuestion stays narrow.
+
+2. **AskUserQuestion is option-shaped, NOT yes/no** — the `options:` array MUST contain each considered option as a selectable option (one entry per considered option). The user picks the substantive direction positively (chooses ONE option), not by clicking "yes" on a bundled "is this OK?" question. Yes/no shape is forbidden at this fire.
+
+3. **No IDs as explainers** — neither the briefing prose nor the `AskUserQuestion` text/options/descriptions may use IDs (`ADR-NNN`, `P-NNN`, `JTBD-NNN`, `RFC-NNN`) as the carrier of meaning. The user does NOT have access to those IDs on all devices (mobile clients without the project filesystem; notification surfaces; accessibility readers that can't follow links). Every option's substance MUST be self-contained in the briefing prose + the option label/description. IDs may appear ONLY as audit-trail annotations after a self-contained explanation, never as the explanation itself.
+
+4. **Informed-decision-without-external-document-lookup** — the briefing + question + options is a self-contained surface. If understanding a chosen option requires the user to first read another document, the briefing has failed. The briefing carries enough context that a user reading ONLY the main-turn text and the AskUserQuestion can pick.
+
+5. **Each option's substance is the actual chosen option** — the options array contains the actual considered options from the ADR draft (Option A / Option B / Option C / ... as worded in the Considered Options section), NOT meta-options ("yes accept draft" / "ask differently"). The label is a short readable phrase; the description carries the trade-off. Picking an option IS the substantive choice.
+
+**Suggested AskUserQuestion shape** (each considered option as one selectable option):
+
+```text
+question: "Which option should this ADR record as the chosen direction?"
+header: "Chosen option"
+multiSelect: false
+options:
+  - label: "<Option A short name>"
+    description: "<Option A self-contained trade-off summary, no IDs as explainers>"
+  - label: "<Option B short name>"
+    description: "<Option B self-contained trade-off summary, no IDs as explainers>"
+  - ...one entry per considered option
+```
+
+**Born-confirmed marker write (ADR-066 — tightened by P340 amendment).** The marker write fires ONLY when the substance-confirm answer specifies a substantive option from the considered-options set AND that option matches the option the draft was authored against. On a substantive match, insert immediately after the `date:` line:
 
 ```yaml
 human-oversight: confirmed
 oversight-date: YYYY-MM-DD   # today
 ```
 
-This is the load-bearing born-confirmed gate: an ADR recorded through create-adr enters the world already human-oversighted (it does not appear in `/wr-architect:review-decisions`' unoversighted set). Do NOT write the marker if the user has not confirmed (rejected / still-iterating ADRs stay unmarked). The marker is orthogonal to `status:` — a `proposed` ADR can be `human-oversight: confirmed`.
+**Mismatch handling.** If the substance-confirm answer selects a DIFFERENT option than the draft was authored against:
+
+- DO NOT write the marker.
+- Re-draft Decision Outcome + Consequences + Confirmation + Pros and Cons (and Reassessment Criteria if affected) against the newly-chosen option.
+- Re-fire the substance-confirm `AskUserQuestion` against the re-drafted text to verify the substance now matches the user's pick.
+- The marker writes ONLY after a substance-confirm pass whose answer matches the draft on disk.
+
+This is NOT a soft "warn and proceed" path — the marker only ever writes when the draft on disk encodes the user's substantive pick. Mismatch is a re-draft trigger, not an override.
+
+**What the marker means.** This is the load-bearing born-confirmed gate: an ADR recorded through create-adr enters the world already human-oversighted (it does not appear in `/wr-architect:review-decisions`' unoversighted set) ONLY because the substance-confirm fire above explicitly affirmed the chosen option. Do NOT write the marker if the user has not confirmed substance (rejected / still-iterating ADRs stay unmarked). The marker is orthogonal to `status:` — a `proposed` ADR can be `human-oversight: confirmed`.
+
+#### 5b. Draft-quality review fire (optional, after 5a passes)
+
+After the substance-confirm fire passes and the marker is written, fire a separate narrow `AskUserQuestion` for draft-quality review:
+
+1. Does the problem statement accurately capture the situation?
+2. Are the pros/cons fair and complete?
+3. Are the confirmation criteria testable?
+4. Should anyone else be listed as consulted or informed?
+
+Apply any feedback by editing the file. This fire is OPTIONAL — when the agent has high confidence the prose is sound and the consulted/informed list is complete, this fire MAY be skipped. The draft-quality review does NOT gate the marker — the marker writes (or doesn't) on the substance-confirm answer alone. Surfacing a draft-quality fire after marker-write is correct; gating the marker on draft-quality answers is what P340 prohibits.
 
 **Refresh the decisions compendium (ADR-077).** After the ADR file is written and any born-confirmed marker is applied, regenerate `docs/decisions/README.md` so the architect-agent routine load surface includes the new entry. Run:
 
