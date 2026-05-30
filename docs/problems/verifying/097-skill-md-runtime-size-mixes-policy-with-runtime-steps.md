@@ -1,13 +1,46 @@
 # Problem 097: SKILL.md files mix runtime-necessary steps with maintainer-facing rationale, bloating every skill invocation
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-04-22
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: L
-**WSJF**: 6.0 — (12 × 2.0) / 4 — corrected 2026-05-23: Known-Error ×2.0 multiplier (was ×1.0 = 3.0)
+**WSJF**: 0 (Verification Pending — excluded from ranking per ADR-022)
 **Type**: technical
 
 > Split from P091 meta (session-wide context budget) on 2026-04-22. Size data collected during the P091 audit is already damning — the RCA is confirmed on magnitude. What remains unproven is the fix path: whether the "runtime steps vs reference material" split is achievable without runtime support from Claude Code. Hence Open, not Known Error, until the fix path is validated.
+
+## Fix Released
+
+P097's defined scope (Phase 1 declarative contract + empirical baseline + Phase 2-3 carve-out) is complete. Residual extraction work is properly tracked in sibling tickets P241 / P242 / P243.
+
+**Phase 1 declarative contract** — shipped 2026-05-03 via `@windyroad/retrospective` minor bump:
+- ADR-054 (proposed) `docs/decisions/054-skill-md-runtime-budget-policy.proposed.md` codifying `[runtime]` / `[reference]` / `[deprecated]` per-paragraph taxonomy, sibling-REFERENCE.md pattern, ≤ 20-pointer / ≤ 1.6 KB pointer-overhead ceiling, WARN ≥ 8 KB / MUST_SPLIT ≥ 16 KB byte budgets, mechanical/silent lazy-load reads per ADR-044, opportunistic-as-touched migration shape per ADR-052
+- Advisory detector `packages/retrospective/scripts/check-skill-md-budgets.sh` (read-only, exit 0 always, exit 2 on parse error)
+- Bin shim `packages/retrospective/bin/wr-retrospective-check-skill-md-budgets` per ADR-049 grammar
+- 21 behavioural bats in `packages/retrospective/scripts/test/check-skill-md-budgets.bats` (all behavioural per ADR-052; no greps of script source)
+- Dogfood baseline: 20 SKILL.md files OVER WARN; 9 MUST_SPLIT — the dogfood output IS the Phase 2-3 prioritisation backlog
+
+**Empirical baseline** — shipped 2026-05-17 (`/wr-itil:work-problems` AFK iter 8):
+- First canonical ADR-054 worked example: `packages/retrospective/skills/analyze-context/SKILL.md` → sibling `REFERENCE.md` extraction
+- Measured: SKILL.md 15,638 → 14,426 bytes (−1,212 / −7.7%); REFERENCE.md 2,249 bytes new
+- 18/18 sibling structural-grep bats remain green (no contract regression); 21/21 detector bats remain green
+- Architect verdict PASS (scope ADR-054-compliant; outside P081-blocked top-10 cohort); JTBD verdict PASS (JTBD-001 / JTBD-006 / JTBD-101 served); Risk verdict CONTINUE / Very Low (mechanical content move, user-invoked skill, single-skill blast radius)
+
+**Phase 2-3 carve-out** — captured 2026-05-17 per P179 umbrella-per-cohort granularity (architect Q6):
+- **P241** — ADR-054 sibling-REFERENCE.md extraction MUST_SPLIT cohort (10 skills incl. work-problems / manage-problem / run-retro); `Blocked by: P081` Layer B
+- **P242** — ADR-054 sibling-REFERENCE.md extraction for project-local `.claude/skills/install-updates/`; coupling-dependent block (may unblock independently of P241)
+- **P243** — ADR-054 sibling-REFERENCE.md extraction WARN-band cohort (24+ skills OVER WARN but below MUST_SPLIT); defer-permitted per ADR-054 line 100, opportunistic per-touch with escalation to P241 on heavy-coupling
+
+**Phase 4 ADR codification** — ADR-054 reaches `proposed` state; acceptance flows through the standard wr-architect human-oversight drain (P283 / ADR-066 mechanism), not P097's responsibility.
+
+### Verification
+
+- `docs/decisions/054-skill-md-runtime-budget-policy.proposed.md` present
+- `packages/retrospective/scripts/check-skill-md-budgets.sh` executes against this repo with `OVER WARN` / `MUST_SPLIT` summary; `wr-retrospective-check-skill-md-budgets` bin shim resolves on `$PATH`
+- `packages/retrospective/skills/analyze-context/SKILL.md` carries lazy-load pointer; sibling `REFERENCE.md` present
+- P241, P242, P243 sibling tickets present in `docs/problems/open/` with `Blocked by: P081` (P241) recorded
+- 21/21 behavioural bats in `packages/retrospective/scripts/test/check-skill-md-budgets.bats` green
+- Behavioural confirmation that the original symptom (top-10 SKILL.md bloat) is closing: trends on `check-skill-md-budgets` output across 2–3 retro cycles as P241 / P243 extractions land
 
 ## Description
 
