@@ -23,6 +23,17 @@
 
 set -uo pipefail
 
+# P334: force byte-locale for all awk/sed/sort/grep invocations in this script.
+# Without this, BSD awk on macOS (default byte-counting for length/substr) and
+# GNU awk on Linux (default character-counting under any UTF-8 locale) produce
+# divergent output when ADR bodies contain multi-byte chars (em-dashes, smart
+# quotes, etc.). LC_ALL=C makes both treat input as raw bytes — the truncated
+# slice may cut mid-UTF-8 on long lines, but the output is byte-identical
+# across platforms (which is what the CI drift gate at test 2145 enforces).
+# Companion to the ASCII `...` change in compact_join_bullets/chosen
+# truncation — both halves are needed to close P334.
+export LC_ALL=C
+
 # --- Flag parsing ----------------------------------------------------------
 # `--check` (no write): generate to a temp file and diff against the on-disk
 # compendium. Exit 0 if byte-identical, 1 if drift, 2 if directory missing.
