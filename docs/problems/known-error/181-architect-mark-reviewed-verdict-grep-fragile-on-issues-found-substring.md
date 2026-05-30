@@ -93,3 +93,14 @@ When the architect's substantive verdict is PASS-with-non-blocking-follow-ups bu
 **Observed flaw**: literal-substring grep on `ISSUES FOUND` matches anywhere in agent output, including non-blocking follow-up narrative.
 **Edit summary**: anchor the verdict-classification grep to the heading position OR introduce a structured `VERDICT:` line emitted by the agent and parsed exclusively by the hook. Path option 1 (anchored heading) is the more bounded edit; option 2 (structured verdict line) decouples but requires agent-prompt amendments.
 **Evidence**: 2026-05-10 I002 mitigation declaration — single observation this session, pattern likely recurs.
+
+## Fix Released
+
+Fixed 2026-05-31 in session 9 AFK iter 5 (single commit, `@windyroad/architect` patch — pending release). Anchored verdict-classification grep in `packages/architect/hooks/architect-mark-reviewed.sh` to the canonical heading shape from `packages/architect/agents/agent.md` "How to Report": `^[[:space:]]*>?[[:space:]]*\*\*Architecture Review: (PASS|ISSUES FOUND)\*\*`, replacing literal substring matching. Optional `> ` blockquote prefix tolerated; PASS check still runs first so PASS-with-inline-issues-prose narrows to PASS. Path option 1 (anchored heading) chosen over option 2 (structured `VERDICT:` line) — bounded, no agent-prompt amendment required, sibling parity unaffected (jtbd/style-guide/voice-tone use a separate `/tmp/<name>-verdict` file mechanism, not grep-on-output — confirmed during pre-fix survey). New behavioural bats fixture `packages/architect/hooks/test/architect-mark-reviewed-verdict-grep.bats` (8 tests; 2 RED→GREEN cases reproduce the substring false-positive on inline body prose). NEEDS DIRECTION verdict handling (informational follow-up surfaced during architect pre-review) NOT widened into this scope — separate concern.
+
+Awaiting user verification that the next architect-agent invocation in a fresh session correctly drops the marker on a PASS verdict whose body references the `ISSUES FOUND` shape inline (the canonical P181 false-positive scenario).
+
+## Related
+
+- ADR-009 — Edit-gate hook contract; this fix is a parser-precision change within ADR-009's TTL+drift regime, not a contract change.
+- ADR-074 — Substance-confirm-before-build: the ticket's recorded Fix Strategy (Path option 1, anchored heading) is the user-confirmed substance the fix implements.

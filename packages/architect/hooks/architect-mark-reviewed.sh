@@ -21,12 +21,18 @@ fi
 
 case "$SUBAGENT" in
   *architect*)
-    # Parse verdict from agent output text (no temp file needed)
+    # Parse verdict from agent output text (no temp file needed).
+    # Anchored to the canonical heading shape from
+    # packages/architect/agents/agent.md "How to Report"
+    # (`**Architecture Review: PASS**` / `**Architecture Review: ISSUES FOUND**`).
+    # Tolerates optional `> ` blockquote prefix + leading whitespace.
+    # Anchored match (not substring) prevents P181 false-positive FAIL when
+    # body prose narratively references the ISSUES FOUND verdict.
     AGENT_OUTPUT=$(_get_tool_output)
     VERDICT=""
-    if echo "$AGENT_OUTPUT" | grep -q "Architecture Review: PASS"; then
+    if echo "$AGENT_OUTPUT" | grep -qE '^[[:space:]]*>?[[:space:]]*\*\*Architecture Review: PASS\*\*'; then
       VERDICT="PASS"
-    elif echo "$AGENT_OUTPUT" | grep -q "ISSUES FOUND"; then
+    elif echo "$AGENT_OUTPUT" | grep -qE '^[[:space:]]*>?[[:space:]]*\*\*Architecture Review: ISSUES FOUND\*\*'; then
       VERDICT="FAIL"
     fi
 
