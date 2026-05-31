@@ -1,11 +1,27 @@
 # Problem 289: Broaden + rename the `solo-developer` persona → `developer`
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-05-25
+**Closed**: 2026-05-31
 **Priority**: 6 (Medium) — Impact: 2 (Minor — the persona's jobs are correct and serve real need; the defect is that they are filed under a too-narrow persona name, degrading the taxonomy's clarity and mis-signalling that the jobs are solo-only; no functional breakage) × Likelihood: 3 (Possible — every JTBD alignment review and every `persona:`-keyed reference reads the name)
 **Effort**: L — 275 occurrences across 164 files (134 docs + 28 packages + scripts + root README); needs a migration-strategy decision (rename live-only vs all-historical) before execution
 **WSJF**: 6/4 = **1.5** (Open multiplier 1.0)
 **Type**: technical
+
+## Closed as no longer relevant
+
+**Closure date**: 2026-05-31 (foreground relevance-scan batch 3, user-confirmed)
+**Closure reason**: implementation-shipped (ticket body's own "Close to Verifying" marker honoured) — live-only migration strategy executed; the persona rename + JTBD relocation + active-reference scrub are done; the lifecycle transition is the lag this close resolves.
+**Evidence (per ADR-026 grounding + ADR-079 evidence-based relevance-close pass)**:
+- `docs/jtbd/developer/` directory exists with 8 JTBDs (verified `ls`): JTBD-001 through JTBD-008 + persona.md
+- `docs/jtbd/solo-developer/` directory is gone (verified `ls` — "No such file or directory")
+- Ticket body literally says: *"DONE 2026-05-27 — Migration-strategy decision: live-only (user-confirmed via AskUserQuestion). Renamed the docs/jtbd/developer/ files + active skill/hook/agent references + root README + the JTBD-anchored stories/story-maps README persona headings; left historical mentions (CHANGELOGs, dated retros, closed/open problem-ticket narrative, accepted-ADR + RFC bodies, README-history, .bats fixtures) as point-in-time-accurate solo-developer."*
+- Ticket body literally says: *"persona's relevance was broadened from 'personal or small-team' to 'solo, small-team, or larger team' — the distinguishing axis is now explicitly role (the developer who does the work) vs tech-lead (governance), not team size."*
+- Ticket body literally says: *"Close to Verifying."*
+- 178 remaining `solo-developer` string occurrences are intentional historical references per the live-only migration strategy explicitly chosen by the user
+
+**Relevance evidence shape**: implementation-shipped (the fix shipped 2026-05-27; the ticket body itself marks "Close to Verifying" — close-on-evidence per ADR-044, same shape as P334/P336 today)
+**Authorising decision**: P346 user direction 2026-05-31; user confirmed P289 in foreground relevance-scan batch 3. Sibling-class observation: this is also an instance of P345 (fix-titled commits do not transition the ticket lifecycle) — the work shipped but the lifecycle stayed Open until the relevance-close pass surfaced it.
 
 ## Description
 

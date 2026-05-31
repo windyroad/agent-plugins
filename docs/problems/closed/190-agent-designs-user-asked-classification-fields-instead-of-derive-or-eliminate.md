@@ -1,10 +1,24 @@
 # Problem 190: Agent designs schemas with user-asked classification fields when the framework should derive silently OR eliminate the classification entirely — deeper generalisation of P185 derive-first-don't-ask
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-05-14
+**Closed**: 2026-05-31
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 **Type**: technical
+
+## Closed as no longer relevant
+
+**Closure date**: 2026-05-31 (foreground relevance-scan batch 3, user-confirmed)
+**Closure reason**: implementation-shipped + structural-follow-on-tracked-separately — the "must not be asked" core requirement shipped via Step 1.5 derive-first dispatch; the deeper "eliminate type entirely" structural work has a focused sibling ticket (P287).
+**Evidence (per ADR-026 grounding + ADR-079 evidence-based relevance-close pass)**:
+- `packages/itil/skills/capture-problem/SKILL.md` Step 1.5 (derive-first; silent-framework per ADR-044 cat 4 on unambiguous descriptions; taste fallback per cat 5 on ambiguity) shipped per P185 refactor (P185 is in `docs/problems/verifying/`)
+- `packages/itil/lib/derive-first-dispatch.sh` shared helper exists; sourced by capture-problem + manage-incident + manage-problem per the SKILL prose
+- The user-direction "must not be asked" requirement is satisfied: in interactive contexts the classifier silently resolves unambiguous descriptions; only genuinely-ambiguous descriptions fall back to AskUserQuestion; AFK callers pass `--no-prompt` or `--type=<value>` per JTBD-006
+- The deeper "eliminate type classification entirely" + "JTBD applies to ALL problems" requirements are tracked by P287 (`docs/problems/open/287-remove-technical-user-business-type-classification-from-problems-redundant-with-rfc-persona-anchoring.md`) — a focused 6/2=WSJF-3.0 ticket explicitly named as ADR-060 amendment
+
+**Relevance evidence shape**: implementation-shipped + structural-follow-on-tracked-separately (catch-pattern observation has split into shipped piece + focused tracked piece; the umbrella's continued existence would duplicate P287)
+**Authorising decision**: P346 user direction 2026-05-31; user confirmed P190 in foreground relevance-scan batch 3.
 
 ## Description
 
