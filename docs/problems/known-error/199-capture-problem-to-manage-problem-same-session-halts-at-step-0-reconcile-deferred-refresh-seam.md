@@ -35,8 +35,8 @@ Three viable paths: (1) Run `/wr-itil:review-problems` between capture-problem a
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Decide on Option 1 (same-session-capture marker carve-out, symmetric to P149) OR Option 2 (stage README in capture-problem commit, killing the deferred-refresh contract) OR Option 3 (auto-inline-refresh for single same-session MISSING entry).
-- [ ] Reconcile with P165 in-monorepo precedent: the README-refresh discipline already blocks capture-problem commits without README, so the deferred-refresh contract is already partially superseded. Either roll back P165 OR update capture-problem SKILL.md Step 6.
+- [x] Decide on Option 1 OR Option 2 OR Option 3 — **DECIDED 2026-05-31 (user direction)**: Option 2 (kill deferred-refresh; stage README in capture-problem). User reasoning: the P165 hook already blocks capture-problem commits without README, so the deferred-refresh contract is already half-superseded; Option 2 acknowledges reality rather than working around the contradiction.
+- [x] Reconcile with P165 in-monorepo precedent — **DECIDED 2026-05-31 (user direction)**: keep P165; update capture-problem SKILL.md Step 6 to stage README inline (consistent with Option 2 above). No rollback of P165.
 
 ## Dependencies
 

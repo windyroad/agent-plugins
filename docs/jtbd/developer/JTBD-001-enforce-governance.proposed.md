@@ -4,6 +4,8 @@ job-id: enforce-governance
 persona: developer
 secondary-persona: tech-lead
 date-created: 2026-04-14
+human-oversight: confirmed
+oversight-date: 2026-05-31
 ---
 
 # JTBD-001: Enforce Governance Without Slowing Down

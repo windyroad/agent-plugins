@@ -60,7 +60,9 @@ Adopters can manually author catalogue entries in the recogniser shape using thi
 - [ ] JTBD review: which persona jobs are served (likely JTBD-001 enforce-governance + JTBD-006 AFK-safety + JTBD-007 keep-plugins-current; JTBD-101 plugin-developer for the starter contract)
 - [ ] ADR-056 amendment OR new ADR: hint format extension for the drain path to carry recogniser hints (5-column shape OR 3-column + orchestrator-curation step)
 - [ ] Decide: starter catalogue scope — which entries from this repo's R001-R010 generalise to ALL plugin adopters vs which are project-specific
-- [ ] Decide: dual-parse contract shape for the pipeline.md update — accept old "reduces from N to N" output during cache-window AND new recogniser-shape output, OR force a major bump and require adopter cache refresh
+- [x] Decide: dual-parse contract shape for the pipeline.md update — **DECIDED 2026-05-31 (user direction)**: force a major bump and require adopter cache refresh (NO dual-parse). Cleaner long-term contract; one-time friction for adopters; stricter scorer prompt.
+- [x] Decide: consumption mechanics — **DECIDED 2026-05-31 (user direction)**: in-prompt LLM judgment only. Agent reads each `R*.active.md` catalogue entry and applies recogniser / controls / modulator logic via LLM reasoning. No deterministic pre-compute script; preserves ADR-015 pure-scorer architecture; consistent with ADR-059 hybrid-filter mechanism extension. Token surface tradeoff accepted.
+- [x] Decide: Phase 2 scope — **DECIDED 2026-05-31 (user direction)**: extend this ticket to cover both Phase 1 (pipeline.md update) and Phase 2 (starter catalogue + extractor update + bootstrap-catalog SKILL update + ADR-056 amendment). One ticket, both phases; close criteria covers both phases shipped.
 - [ ] Phase 1 implementation: pipeline.md update + bats coverage + held changeset
 - [ ] Phase 2 implementation: starter catalogue + extractor update + bootstrap-catalog SKILL.md update + ADR amendment + held changeset
 - [ ] Dogfood pass per phase: run pipeline scorer against this repo's commits with new shape; verify residual reconciliation against `.risk-reports/` history

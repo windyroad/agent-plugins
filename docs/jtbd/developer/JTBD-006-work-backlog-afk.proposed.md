@@ -3,6 +3,8 @@ status: proposed
 job-id: work-backlog-afk
 persona: developer
 date-created: 2026-04-17
+human-oversight: confirmed
+oversight-date: 2026-05-31
 ---
 
 # JTBD-006: Progress the Backlog While I'm Away
