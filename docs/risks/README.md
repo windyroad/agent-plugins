@@ -117,3 +117,8 @@ Identifying a new class during scoring? Author it via `/wr-risk-scorer:create-ri
 The entry shape (per-entry sections to author): description; recogniser (path patterns + diff keywords + anti-patterns); stage applicability; inherent risk per `RISK-POLICY.md`; controls table with "if absent for THIS action" column; per-action modulators (composition: max-pessimistic); residual; watch-out; see-also. Refer to existing entries as templates — R001 / R003 are the canonical examples.
 
 The catalogue is self-pruning: when a class stops surfacing in `.risk-reports/` (controls have made it rare), retire its entry by renaming `R<NNN>-<slug>.md` to `R<NNN>-<slug>.retired.md`. Git history preserves prior content.
+| [R025](R025-external-adopter-name-in-public-repo-ticket-prose.active.md) | External Adopter Name In Public Repo Ticket Prose | pending | — | — | pending | pending | 2026-05-31 |
+| [R026](R026-new-sessionstart-hook-first-landing-no-dogfood-window.active.md) | New Sessionstart Hook First Landing No Dogfood Window | pending | — | — | pending | pending | 2026-05-31 |
+| [R027](R027-new-sessionstart-hook-shipped-without-dogfood-window.active.md) | New Sessionstart Hook Shipped Without Dogfood Window | pending | — | — | pending | pending | 2026-05-31 |
+| [R028](R028-jtbd-build-upon-guard-agent-prose-verdict-residual-above-appetite.active.md) | Jtbd Build Upon Guard Agent Prose Verdict Residual Above Appetite | pending | — | — | pending | pending | 2026-05-31 |
+| [R029](R029-r009-agent-prose-verdict-surface-no-llm-harness.active.md) | R009 Agent Prose Verdict Surface No Llm Harness | pending | — | — | pending | pending | 2026-05-31 |
