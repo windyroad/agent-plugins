@@ -666,3 +666,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-05-31 (Step 0b pre-flight refresh fragment rotated for P334 O→Closed)
 
 > Last reviewed: 2026-05-31T00:00 **Step 0b pre-flight refresh** — inbound-discovery cache TTL-expired (~99939s>86400s) auto-recheck: 8 NEW upstream reports captured (#180/#181/#183/#184/#185/#186/#187/#188 — all maintainer governance/UX); 13 deferred-placeholder tickets re-rated honestly against RISK-POLICY scales (P334/P336 WSJF 3.0→12.0 surface as release-blockers; P337/P343/P330/P331 → 6.0; P332/P335 → 4.5; P328 → 4.0; P338 honest-drop 3.0→1.0; P329/P333/P344 confirmed at 3.0). Prior fragment rotated to README-history.md per P134.
+
+## 2026-05-31 (P334 O→Closed iter-1 fragment rotated for P336 O→Closed iter-2)
+
+> Last reviewed: 2026-05-31T (iter 1 work-problems AFK) **P334 Open→Closed** — fix already shipped in `@windyroad/architect@0.12.2` (commits `3945878`+`3e53a94`+`e9f7ce4`); verification close-on-evidence per ADR-044 (local --check exit 0 + CI green on commit bad2eac run 26701674556). Lifecycle was missed at session-8 wrap; iter 1 of session 9 closes the lifecycle on already-shipped work. Prior fragment rotated to README-history.md per P134.
