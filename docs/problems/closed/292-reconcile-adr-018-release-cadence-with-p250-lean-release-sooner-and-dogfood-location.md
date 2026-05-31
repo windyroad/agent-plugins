@@ -1,11 +1,26 @@
 # Problem 292: Reconcile ADR-018 release-cadence text with P250 (lean / release-sooner; appetite is a ceiling, not a trigger) + add the dogfood-location-before-public clause
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-05-25
+**Closed**: 2026-05-31
 **Priority**: 6 (Medium) — Impact: 2 (Minor — the implementation already follows the lean principle via P250's amendment to work-problems Step 6.5, so behaviour is correct; the defect is that ADR-018's *recorded decision* still says "release when risk approaches appetite", which misleads every reader of the release-cadence decision and contradicts the live behaviour) × Likelihood: 3 (Likely — ADR-018 is the cited parent for all release-cadence behaviour; the stale text is read on every cadence question)
 **Effort**: M — ADR-018 Decision-Outcome amendment + add the dogfood-location clause + verify consistency with P250 + ADR-061 (held-changeset graduation) + the work-problems Step 6.5 implementation
 **WSJF**: 6/2 = **3.0** (Open multiplier 1.0)
 **Type**: technical
+
+## Closed as no longer relevant
+
+**Closure date**: 2026-05-31 (foreground relevance-scan batch 5, user-confirmed)
+**Closure reason**: implementation-shipped — the reconciliation this ticket asks for was done; ADR-018 body and the work-problems Step 6.5 SKILL both carry the P250 amendment text verbatim.
+**Evidence (per ADR-026 grounding + ADR-079 evidence-based relevance-close pass)**:
+- `docs/decisions/018-release-cadence-afk-loops.proposed.md` carries the literal heading: *"Amendment 2026-05-18 — Drain trigger is releasable material, not residual band (P250)"* (verified `grep`)
+- The amendment body quotes the user direction verbatim: *"You don't want to accumulate risk. If it's low risk, you should release."*
+- `packages/itil/skills/work-problems/SKILL.md` Step 6.5 carries the matching SKILL prose: *"The release-action threshold is 'is there something to release?', NOT 'has accumulated risk reached the safety band?'"* + *"Per user direction 2026-05-17 (P250 Description): 'If it's low risk, you should release.'"*
+- The non-interactive decision-making table in work-problems SKILL is amended to match (verified `grep` shows the rows referencing 'releasable material' / 'no drain' fast-paths)
+- P292's premise that *"ADR-018's recorded decision still says 'release when risk approaches appetite'"* is no longer true — the recorded decision was amended
+
+**Relevance evidence shape**: implementation-shipped (the recorded-decision text was amended directly + the matching SKILL prose was amended in the same direction; the dogfood-location-before-public clause within scope is also carried in ADR-061's held-changeset graduation contract)
+**Authorising decision**: P346 user direction 2026-05-31; user confirmed P292 in foreground relevance-scan batch 5.
 
 ## Description
 

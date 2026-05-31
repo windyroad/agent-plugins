@@ -1,10 +1,26 @@
 # Problem 194: ADRs accumulate forward-chronology evidence inline (Phase 2 dogfood evidence, amendment history, cross-iter cross-references) — `decisions` bucket dominates context at 41% / 1.3 MiB
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-05-15
+**Closed**: 2026-05-31
 **Priority**: 6 (Med) — Impact: 3 (Moderate — context-bucket dominance compounds session-cost across all consumers) x Likelihood: 2 (Possible — pattern emerges as the suite matures) (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: L (deferred — re-rate at next /wr-itil:review-problems)
 **Type**: technical
+
+## Closed as no longer relevant
+
+**Closure date**: 2026-05-31 (foreground relevance-scan batch 5, user-confirmed)
+**Closure reason**: implementation-shipped-via-different-shape — the routine-cost half of P194 (architect-agent context-bucket dominance from pulling every per-ADR body inline) is structurally resolved by ADR-077's compendium pattern, which gives a token-cheap per-ADR summary surface that routine reads use instead of the bloated per-ADR bodies.
+**Evidence (per ADR-026 grounding + ADR-079 evidence-based relevance-close pass)**:
+- `docs/decisions/077-decisions-compendium-as-token-cheap-load-surface.proposed.md` exists — defines the compendium pattern
+- `packages/architect/scripts/generate-decisions-compendium.sh` exists — the generator
+- `docs/decisions/README.md` (the compendium) carries per-ADR `### ADR-NNN` entries with `**Confirmation:**` / `**Chosen:**` summary fields; routine architect-agent reads load this surface, not the bloated per-ADR bodies
+- ADR-078 ("compendium Decision Outcome progressive disclosure") amended the compendium to also include Decision Outcome on the ADRs that have one — further closing P194's content-coverage gap (P337 tracks the generator-side implementation)
+- Routine-cost (the 41% dominance was from architect routine reads pulling every per-ADR body) is structurally addressed
+
+**Caveat**: deep-dive ADR reads still pay per-ADR bloat (forward-chronology evidence, amendment history, cross-iter cross-references). P194's framing covered both routine and deep-dive paths; only the routine path is structurally addressed. If structural bloat-per-ADR-body is the real future concern, it deserves a fresh focused ticket (sibling P337 may absorb some of this scope; P296 covers SKILL.md extraction analogy).
+**Relevance evidence shape**: implementation-shipped-via-different-shape (compendium pattern superseded the original "archive forward-chronology" framing; deep-dive bloat tracked separately if needed)
+**Authorising decision**: P346 user direction 2026-05-31; user confirmed P194 in foreground relevance-scan batch 5.
 
 ## Description
 
