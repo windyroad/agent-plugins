@@ -1,11 +1,25 @@
 # Problem 022: Agents must not fabricate time estimates without grounded data
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-04-16
+**Closed**: 2026-05-31
 **Priority**: 16 (High) — Impact: Significant (4) x Likelihood: Likely (4)
 **Effort**: XL — new cross-cutting ADR (ID to be minted by `create-adr` at draft time — next free ID is ≥030 as of 2026-04-20; the previously-penciled `014-agent-output-grounding` collides with the accepted ADR-014 governance-commit decision), audit of every agent prompt across the suite (risk-scorer, manage-problem, architect, plan-risk-guidance), WSJF effort-bucket semantics rework, grounding-citation convention (L → XL 2026-04-19 per P047: multi-day, cross-package, new ADR required)
 **WSJF**: 2.0 — (16 × 1.0) / 8
 **Type**: technical
+
+## Closed as no longer relevant
+
+**Closure date**: 2026-05-31 (foreground relevance-scan batch 2, user-confirmed)
+**Closure reason**: implementation-shipped — ADR-026 captured the chosen direction (cite + persist + uncertainty) and the sentinel convention is in active use.
+**Evidence (per ADR-026 grounding + ADR-079 evidence-based relevance-close pass)**:
+- `docs/decisions/026-agent-output-grounding.proposed.md` exists; title: *"Agent output grounding — no fabricated quantitative estimates, cite + persist + uncertainty"*; `status: proposed`, `human-oversight: confirmed (2026-05-25)`
+- Chosen option (per ADR-026 body): *"Cite + persist + uncertainty (chosen) — three-part grounding definition. An estimate is grounded only if (a) it cites a specific source measurement, (b) the source is persisted somewhere the agent can re-read, and (c) the estimate includes explicit uncertainty (range or confidence)."*
+- "not estimated — no prior data" sentinel in active use across 21 tickets/risk-register entries (verified `grep -lr 'not estimated' docs/problems/open/ docs/risks/`)
+- The R030 risk-register entry scaffolded earlier today uses ADR-026 sentinels for ungrounded scoring fields per ADR-056 Phase 2b — the principle is operational
+
+**Relevance evidence shape**: implementation-shipped (ADR + sentinel convention both shipped; the rule is enforced in tickets + risk-register; output-filter hook can be a sibling tracking ticket if the structural enforcement axis is wanted)
+**Authorising decision**: P346 user direction 2026-05-31; user confirmed P022 in foreground relevance-scan batch 2.
 
 ## Direction decision (2026-04-21, user — interactive AskUserQuestion post-AFK-iter-7)
 

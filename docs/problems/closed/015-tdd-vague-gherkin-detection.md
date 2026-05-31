@@ -1,11 +1,25 @@
 # Problem 015: TDD enforcement does not flag vague Gherkin outcome steps
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-04-16
+**Closed**: 2026-05-31
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Possible (3)
 **Effort**: L — ADR + heuristic design + reproduction fixtures (scope contained within the `@windyroad/tdd` plugin per direction decision below)
 **WSJF**: 2.25 — (9 × 1.0) / 4
 **Type**: technical
+
+## Closed as no longer relevant
+
+**Closure date**: 2026-05-31 (foreground relevance-scan batch 2, user-confirmed)
+**Closure reason**: implementation-shipped — ADR-025 was authored explicitly to cover BOTH P015 (Cucumber-specific) and P018 (framework-agnostic).
+**Evidence (per ADR-026 grounding + ADR-079 evidence-based relevance-close pass)**:
+- `docs/decisions/025-test-content-quality-review.proposed.md` exists; `status: proposed`, `human-oversight: confirmed (2026-05-25)`
+- ADR-025 verbatim: *"P018's investigation notes explicitly frame P015 as the Cucumber-specific adapter of P018's framework-agnostic rule; the user has confirmed 'one combined ADR.' This ADR closes both."*
+- `packages/tdd/agents/review-test.md` agent shipped — classifies tests as STRUCTURAL vs BEHAVIOURAL (multi-framework: bats, vitest, jest, mocha, cucumber/.feature, pytest)
+- Sibling P018 closed concurrently in this batch
+
+**Relevance evidence shape**: implementation-shipped (the chosen direction "combined ADR closing both P015 and P018" landed verbatim under ADR-025)
+**Authorising decision**: P346 user direction 2026-05-31; user confirmed P015 in foreground relevance-scan batch 2.
 
 ## Direction decisions (2026-04-20, user — AFK loop stop-condition #2)
 

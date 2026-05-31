@@ -1,11 +1,31 @@
 # Problem 039: Autonomous loops conflate diagnose with implement
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-04-17
+**Closed**: 2026-05-31
 **Priority**: 16 (High) — Impact: Significant (4) x Likelihood: Likely (4)
 **Effort**: XL — shared diagnose-before-implement subagent template + per-skill hypothesis-verification gate + ADR extending 013/014/016 + cross-skill rollout (work-problems, manage-incident, others)
 **WSJF**: 2.0 — (16 × 1.0) / 8
 **Type**: technical
+
+## Closed as no longer relevant
+
+**Closure date**: 2026-05-31 (foreground relevance-scan batch 2, user-confirmed with explicit caveat — see "shared-template gap" below)
+**Closure reason**: implementation-shipped-via-different-shape — ADR-029 captures the diagnose-first principle and per-SKILL discipline is operational; the specifically-proposed "shared subagent template" was not built as a named artifact (caveat acknowledged by user during batch-2 confirmation).
+**Evidence (per ADR-026 grounding + ADR-079 evidence-based relevance-close pass)**:
+- `docs/decisions/029-diagnose-before-implement.proposed.md` exists; title: *"Diagnose before implement — structured hypothesis + evidence + RED-for-the-right-reason gate"*; `status: proposed`, `human-oversight: confirmed (2026-05-25)`
+- `packages/itil/skills/manage-problem/SKILL.md` carries Open → Known Error gating on RCA confirmation (13 investigation/RCA mentions)
+- `packages/itil/skills/manage-incident/SKILL.md` carries hypothesis-verification gates (per ADR-011 + ADR-029)
+- `packages/itil/skills/work-problems/SKILL.md` Step 4 routes Open tickets with no leads to investigation-first (not implementation-first)
+- "Wrong Approach" + "Buggy Code" friction patterns ADR-029 names are addressed via per-SKILL discipline rather than a shared cross-skill template
+
+**Shared-template gap (user-acknowledged caveat)**:
+- ADR-029 + per-SKILL discipline cover the *principle* without a *shared diagnose-before-implement subagent template* as a named cross-skill artifact
+- The cross-skill rollout has been per-SKILL contract amendments rather than a single template — pragmatic but not the originally-proposed shape
+- If the structural shared-template gap becomes load-bearing, capture as a fresh focused ticket; this 6-week-old umbrella's WSJF-2.0 framing assumed the unbuilt template surface
+
+**Relevance evidence shape**: implementation-shipped-via-different-shape (per-SKILL discipline replaced the proposed shared template; the principle is operational)
+**Authorising decision**: P346 user direction 2026-05-31; user confirmed P039 with explicit acknowledgment of the shared-template caveat in foreground relevance-scan batch 2.
 
 ## Direction decision (2026-04-21, user — interactive AskUserQuestion post-AFK-iter-7)
 

@@ -1,11 +1,25 @@
 # Problem 018: TDD plugin should enforce BDD + Example Mapping principles, with examples traceable to Jobs-To-Be-Done
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-04-16
+**Closed**: 2026-05-31
 **Priority**: 16 (High) — Impact: Significant (4) x Likelihood: Likely (4)
 **Effort**: XL — new ADR (docs/decisions/NNN-test-content-quality-review.proposed.md, ID to be minted at creation per P022 renumber rule), ADR-002 dependency-graph update if any (tdd → jtbd soft dep), per-framework invariant mapping (Jest/Vitest/Mocha/Bats/pytest/Go/Gherkin), gate + agent enforcement surfaces (L → XL 2026-04-19 per P047: multi-day, cross-package, new ADR required)
 **WSJF**: 2.0 — (16 × 1.0) / 8
 **Type**: technical
+
+## Closed as no longer relevant
+
+**Closure date**: 2026-05-31 (foreground relevance-scan batch 2, user-confirmed)
+**Closure reason**: implementation-shipped — ADR-025 was authored explicitly to cover BOTH P018 (framework-agnostic) and P015 (Cucumber-specific adapter).
+**Evidence (per ADR-026 grounding + ADR-079 evidence-based relevance-close pass)**:
+- `docs/decisions/025-test-content-quality-review.proposed.md` exists; title: *"Test content quality review — concreteness + traceability (JTBD or Problem) invariant for `@windyroad/tdd`"*; `status: proposed`, `human-oversight: confirmed (2026-05-25)`
+- ADR-025 verbatim: *"the user has confirmed 'one combined ADR.' This ADR closes both [P015 + P018]"*
+- `packages/tdd/agents/review-test.md` agent shipped — multi-framework classification (bats / vitest / jest / mocha / cucumber-.feature / pytest); structural vs behavioural taxonomy directly addresses P018's Example Mapping rule (every test should encode a rule backed by at least one concrete example)
+- Sibling P015 closed concurrently in this batch
+
+**Relevance evidence shape**: implementation-shipped (ADR + agent both landed; combined-ADR direction matches the ticket's request)
+**Authorising decision**: P346 user direction 2026-05-31; user confirmed P018 in foreground relevance-scan batch 2.
 
 ## Direction decision (2026-04-21, user — interactive AskUserQuestion post-AFK-iter-7)
 
