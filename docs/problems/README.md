@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-05-31 **P325 K→V transition + P336/P337/P338/P343 README backfill** — P325 (Node 20 action pins) → Verification Pending on @windyroad/architect@0.13.0 / itil@0.39.0 / retrospective@0.22.0 / risk-scorer@0.11.3 release (CI test 2145 root cause was stale 0.11.0 plugin shim on PATH overriding 0.12.2 — captured as P343 + memory `feedback_if_you_see_something_broken_fix_it`); also backfilling WSJF Rankings entries for P336 (transition-problems YAML — fix shipped same release), P337 (compendium Decision Outcome gap → ADR-078 amended to Option 9), P338 (P082 Phase 2 cognitive-a11y plugin sibling), P343 (install-updates PATH-ordering gap). Reconcile preflight reported 5 drift entries; all resolved in this commit.
+> Last reviewed: 2026-05-31 **README reconciled** — 1 drift entry corrected: P344 (work-problems orchestrator JTBD-predicate-check) added to WSJF Rankings (Open M, Reported 2026-05-31). Reconciliation contract per P118 + ADR-014 amended ("Reconciliation as preflight robustness layer"). Prior fragment (P325 K→V + P336/P337/P338/P343 backfill) rotated to README-history.md per P134.
 
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
@@ -88,6 +88,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3.0 | P337 | Decisions compendium omits Decision Outcome for 57% of ADRs — generator only extracts `Chosen option:` MADR-tag, not Decision Outcome section body | 3 Med | Open | M | 2026-05-30 |
 | 3.0 | P338 | P082 Phase 2 cognitive-accessibility evaluator on the 4 external-comms surfaces, shipped as a NEW `@windyroad/cognitive-a11y` plugin (sibling of P082; design pinned 2026-05-30 = new plugin) | 3 Med | Open | M | 2026-05-30 |
 | 3.0 | P343 | /install-updates refreshes global plugin cache but does NOT fix PATH ordering — stale plugin-version shims stay first on PATH, so subsequent shim invocations run old code (caused session-9 CI test 2145 saga) | 3 Med | Open | M | 2026-05-31 |
+| 3.0 | P344 | `/wr-itil:work-problems` orchestrator should predicate-check the cited JTBDs of the selected ticket BEFORE dispatching the iter-worker — wasted-iter-dispatch class when JTBDs are unratified | 3 Med | Open | M | 2026-05-31 |
 | 3.0 | P339 | `/wr-architect:create-adr` drafts substance then asks Step 5 confirm — substance not surfaced as separate AskUserQuestion before drafting Decision Outcome (subsumed by P340; fix shipping on same commit; transitions to Verifying on `@windyroad/architect` release) | 3 Med | Known Error | M | 2026-05-31 |
 | 3.0 | P340 | Human-oversight marker can be written on draft-acceptance answer without verifying substance-confirmation — substance-confirmation interaction pattern needs prose briefing + each option as a selectable option + no-IDs-as-explainers + informed-decision-without-external-doc-lookup (subsumes P339; transitions to Verifying on `@windyroad/architect` release) | 3 Med | Known Error | M | 2026-05-31 |
 | 3.0 | P312 | reconcile-rfcs reports spurious MISSING_REVERSE_TRACE — doesn't traverse docs/problems/ per-state subdirs (RFC-002-class glob gap) | 3 Med | Open | S | 2026-05-26 |
