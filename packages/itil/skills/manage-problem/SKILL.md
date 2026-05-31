@@ -351,6 +351,28 @@ Before creating, search existing problems for similar issues. The user may not k
 
 **Search strategy**: Search problem filenames AND file content. A match on the filename (kebab-case title) or the Description/Symptoms sections counts. Cast a wide net — false positives are cheap (user chooses), but false negatives mean duplicate problems.
 
+#### Sub-step 2.8 — Hang-off-check via fresh-context subagent (P346 Phase 3 amendment, 2026-05-31; ADR-032 5th invocation pattern)
+
+The wide-net grep + AskUserQuestion at sub-steps 1-6 above handles the title/keyword-overlap class. Sub-step 2.8 closes a wider gap: parent tickets where the new problem's scope belongs absorbed as an Investigation Tasks expansion / Phase N section rather than as a sibling. The wrongly-captured P347 sibling of P346 on 2026-05-31 (now closed as duplicate-of-P346) is the canonical regression — the main agent mid-iter pattern-matched the existing capture flow under session-context bias.
+
+Sub-step 2.8 adds a **mechanical pre-filter + fresh-context subagent dispatch** that closes this gap without re-introducing the main agent's bias. Mirrors the `/wr-itil:capture-problem` Step 2 sub-step 2b dispatch verbatim.
+
+**Mechanical pre-filter** — grep `docs/problems/open/*.md` + `docs/problems/verifying/*.md` BODIES for tokens shared with the new problem's description: any `ADR-NNN` / `RFC-NNN` / `JTBD-NNN` reference, SKILL path (`/wr-<plugin>:<skill>` or `packages/<plugin>/skills/<skill>/`), or file path (`packages/...`, `docs/...`, `.github/...`, `bin/...`, `scripts/...`). Collect candidates that share ≥1 signal; cap at 5; empty or >5 → skip dispatch.
+
+**JTBD-301 firewall** — sub-step 2.8 fires on **maintainer-internal new-problem** captures ONLY. The dispatch MUST be skipped when manage-problem is ingesting a plugin-user-reported issue from `.github/ISSUE_TEMPLATE/problem-report.yml` (plugin-user descriptions do not carry the same authorial intent as maintainer-internal captures; a plugin-user describing their friction in maintainer vocabulary could plausibly trigger a wrong-parent HANG_OFF). When ingesting plugin-user reports, triage stays user-judgement per JTBD-301. Mirrors the existing Step 1.5 / Step 4 firewall patterns in `/wr-itil:capture-problem` (see line 116 of `packages/itil/skills/capture-problem/SKILL.md`).
+
+**AFK safe-default**: when `--no-prompt` is propagated, the dispatch still fires (the subagent verdict is non-interactive by construction — no `AskUserQuestion`), and ambiguous-multi-parent cases collapse to `PROCEED_NEW` per the subagent's Rule 6 contract. This satisfies JTBD-006's safe-default contract.
+
+**Dispatch** — delegate to `wr-itil:hang-off-check` via the Agent tool with the same structured payload shape capture-problem uses (`SURFACE: manage-problem-step-2.8`; `<new-capture>` payload; `<candidates>` payload with `P<NNN> | <title> | <path> | shared-signals: ...` per row). The subagent reads candidate bodies in full and emits:
+
+- `HANG_OFF: P<NNN>` with **Rationale**, **Signals matched**, **Where to absorb** → halt manage-problem's new-problem creation; route to the parent-ticket update flow (Step 6 ticket-body edit on the named parent). Record the hang-off decision + rationale in the parent ticket's Investigation Tasks bullet or `### Phase N — <name>` section per the subagent's `Where to absorb` directive. Single-commit grain preserved (the parent-ticket amendment commit IS this manage-problem invocation's commit per ADR-014).
+
+- `PROCEED_NEW` with **Rationale** + **Per-candidate explanation** → continue to Step 3 (ID assignment). Append the subagent's rationale + per-candidate explanation to the new ticket's `## Related` section as the audit trail per ADR-026 grounding + JTBD-201.
+
+**Why a subagent (not in-SKILL checks)**: the main agent is biased by session context — mid-iter, mid-work, pattern-matching existing flows ("I captured X then dispatched iter; do the same shape for Y"). A fresh subagent invocation starts clean, reads only the structured inputs, and reasons about candidate absorption without the bias. Same architectural pattern as `wr-architect:agent` / `wr-jtbd:agent` / `tdd:review-test` / `wr-risk-scorer:pipeline` — codified as ADR-032's 5th invocation pattern under the P346 amendment 2026-05-31.
+
+**Cross-references**: `packages/itil/agents/hang-off-check.md` (the subagent); `packages/itil/agents/test/fixtures/regression-p347-vs-p346.md` (canonical behavioural fixture); `docs/decisions/032-governance-skill-invocation-patterns.proposed.md` § Foreground fresh-context-subagent-as-decision-arbiter variant; `docs/rfcs/RFC-013-p346-backlog-flow-control-multi-phase.proposed.md` (multi-phase trace per ADR-071); `docs/problems/.../346-...md` (driver master ticket).
+
 **Hook contract (P119)**: writing a `.open.md` (or any `.<status>.md`) file under `docs/problems/` without first running this Step 2 grep + marker-touch is blocked by the `manage-problem-enforce-create.sh` PreToolUse hook with a `permissionDecision: deny` directing the agent back to this skill. Agents that try to bypass the skill (e.g. mid-retrospective inline capture, post-mortem wrap-up, or any "I'll just write it directly" shortcut) will hit the deny and be redirected here. Do not work around the deny by setting the marker manually — the marker exists to record that this Step 2 ran, and a marker without a grep is the audit-trail gap P119 closes.
 
 ### 3. For new problems: Assign the next ID

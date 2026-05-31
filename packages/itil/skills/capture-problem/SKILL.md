@@ -28,6 +28,7 @@ This skill has **at most one classification-only AskUserQuestion (type-tag, ambi
 | Decision | Resolution |
 |----------|-----------|
 | Duplicate-check | Mechanical 3-keyword title-only grep; matches listed in report; capture proceeds regardless. False-positives are cheaper than false-negatives (P155 line 24). |
+| Hang-off arbitration (P346 Phase 3) | Mechanical pre-filter (≤5 candidates by shared ADR/RFC/SKILL/file signal) + fresh-context `wr-itil:hang-off-check` subagent dispatch (ADR-032 5th invocation pattern). Verdict-acts: `HANG_OFF: P<NNN>` halts capture + routes orchestrator to amend parent; `PROCEED_NEW` continues + appends rationale to `## Related`. AFK safe-default: ambiguous → PROCEED_NEW per subagent Rule 6 contract. JTBD-301 firewall: maintainer-side only. |
 | Priority default | Framework-policy: `3 (Medium) — Impact 3 × Likelihood 1` flagged "deferred — re-rate at next /wr-itil:review-problems". |
 | Effort default | Framework-policy: `M` flagged "deferred — re-rate at next /wr-itil:review-problems". |
 | Multi-concern split | Out of scope: capture-problem creates one ticket per invocation. Multi-concern observations route to `/wr-itil:manage-problem` (its Step 4b owns the split). |
@@ -138,7 +139,9 @@ Per ADR-060 § Phase 3 + Phase 4 in-scope amendment (2026-05-13). Fires ONLY whe
 
 **Phase 3 P3.1 nullable-field-conditional shape**: the JTBD-trace prompt + I12 hard-block fire on `jtbd_trace_value` nullability (absent vs present), NOT on the `type` field's value. The composite gate (`type == user-business AND jtbd_trace_value == empty`) treats `type` as upstream-determined co-incident input — exactly the carve-out permitted by ADR-060 line 536. Steps 2-7 below execute identically regardless of `type_value`, `jtbd_trace_value`, or `persona_value`; only the values substituted into the Step 4 skeleton template differ. This preserves I2 control-flow uniformity AND extends the I2 behavioural test (per ADR-060 Confirmation criterion 11) to assert no control-flow branch on `persona:` field presence.
 
-### 2. Minimal-grep duplicate check (3-keyword title-only)
+### 2. Minimal-grep duplicate check (3-keyword title-only) + hang-off-check subagent dispatch (P346 Phase 3 amendment, 2026-05-31)
+
+**Sub-step 2a — title-only grep (pre-existing minimal duplicate check)**
 
 Extract up to **3 distinct kebab-cased non-stopword keywords** from the description. Grep the **filenames** of `docs/problems/*.md` AND `docs/problems/<state>/*.md` (NOT bodies — title-only is the conservative threshold per architect verdict on Q1; dual-tolerant per RFC-002 migration window):
 
@@ -153,7 +156,78 @@ The **3-keyword cap** is a hard-coded constant. Do NOT make it env-overridable �
 
 If matches are found: list them in the final report. **Do NOT halt or branch.** Capture proceeds. The user can resolve duplicates at the next `/wr-itil:review-problems` invocation (or invoke `/wr-itil:manage-problem` directly if the duplicate-check shape needs a structured branch).
 
-**After the grep completes**, write the per-session create-gate marker so the `PreToolUse:Write` hook (P119) permits the subsequent Write of the new ticket file under `docs/problems/open/`. Per **P260 / ADR-050 Option C**, write it under EVERY recent candidate session SID (not just one) so a concurrent orchestrator+subprocess race cannot land the marker under the wrong UUID:
+**Sub-step 2b — hang-off-check via fresh-context subagent (P346 Phase 3; ADR-032 5th invocation pattern)**
+
+The 3-keyword title-only grep at sub-step 2a is conservative: it catches narrow shape-overlap on titles but misses the wider class of hang-off candidates — parent tickets where the new capture's scope belongs as an Investigation Tasks expansion / Phase N section rather than as a sibling ticket. The wrongly-captured P347 sibling of P346 on 2026-05-31 is the canonical regression: the main agent (mid-iter, with rich session context) pattern-matched the existing capture flow and missed that the new spec belonged inside P346 as Phase 3.
+
+Sub-step 2b adds a **mechanical pre-filter + fresh-context subagent dispatch** that closes this gap without re-introducing the main agent's session-context bias. The subagent runs in isolation (no parent-session context) and emits a structured verdict the SKILL acts on deterministically.
+
+**Mechanical pre-filter** — grep `docs/problems/open/*.md` + `docs/problems/verifying/*.md` BODIES for tokens shared with the description: any `ADR-NNN` reference, `RFC-NNN` reference, `JTBD-NNN` reference, SKILL path (`/wr-<plugin>:<skill>` or `packages/<plugin>/skills/<skill>/`), file path (`packages/...`, `docs/...`, `.github/...`, `bin/...`, `scripts/...`), or named feature word the description cites. Collect candidates that share **≥1** signal.
+
+```bash
+# Extract candidate signals from the description (post-flag-strip).
+adr_refs=$(echo "$description" | grep -oE 'ADR-[0-9]{3}' | sort -u)
+rfc_refs=$(echo "$description" | grep -oE 'RFC-[0-9]{3}' | sort -u)
+skill_refs=$(echo "$description" | grep -oE '/wr-[a-z-]+:[a-z-]+' | sort -u)
+file_refs=$(echo "$description" | grep -oE '(packages|docs|\.github|bin|scripts)/[a-zA-Z0-9_./-]+' | sort -u)
+signals="$adr_refs"$'\n'"$rfc_refs"$'\n'"$skill_refs"$'\n'"$file_refs"
+signals=$(echo "$signals" | grep -v '^$' | sort -u)
+
+# If no signals extractable from description, skip the dispatch entirely
+# (the title-only grep at 2a is the only duplicate check this capture gets).
+[ -z "$signals" ] && SKIP_HANG_OFF_CHECK=1
+
+# Otherwise: pre-filter candidates from open/ + verifying/ that share ≥1 signal.
+candidates=()
+if [ -z "$SKIP_HANG_OFF_CHECK" ]; then
+  for f in docs/problems/open/*.md docs/problems/verifying/*.md; do
+    [ -f "$f" ] || continue
+    for sig in $signals; do
+      if grep -qF "$sig" "$f"; then
+        candidates+=("$f")
+        break
+      fi
+    done
+  done
+fi
+```
+
+**Candidate-cap short-circuit (latency-bound per ADR-032 + JTBD-001's 60s flow budget)**: if `${#candidates[@]} -gt 5`, **skip the subagent dispatch** and record the candidate list in the captured ticket's `## Related` section for review-time re-evaluation by `/wr-itil:review-problems`. Wide candidate sets blow the lightweight-capture latency budget; the safe default is "skip + defer to cluster pass."
+
+**Empty-candidates short-circuit**: if `${#candidates[@]} -eq 0` (no shared signals), skip the dispatch and proceed to the marker step. The mechanical pre-filter found nothing to arbitrate.
+
+**JTBD-301 firewall** — sub-step 2b fires on maintainer-side `/wr-itil:capture-problem` invocations ONLY. Plugin-user-side `.github/ISSUE_TEMPLATE/problem-report.yml` MUST NOT carry an equivalent dispatch (plugin-user descriptions do not carry the same authorial intent; a plugin-user describing their friction in maintainer vocabulary could plausibly trigger a wrong-parent HANG_OFF). Triage during `/wr-itil:manage-problem` ingestion stays user-judgement per JTBD-301. Mirrors the existing Step 1.5 firewall at line 116.
+
+**AFK safe-default (--no-prompt / AFK propagation)**: when `--no-prompt` is set, the dispatch still fires (the subagent verdict is non-interactive by construction — no `AskUserQuestion`), and ambiguous-multi-parent cases collapse to `PROCEED_NEW` per the subagent's Rule 6 contract. This satisfies JTBD-006's "Decisions normally requiring my input are resolved using safe defaults."
+
+**Dispatch** — when the candidate set is non-empty and ≤5, delegate to `wr-itil:hang-off-check` via the Agent tool with a structured input payload:
+
+```
+SURFACE: capture-problem-step-2b
+
+<new-capture>
+<description verbatim, post-flag-strip>
+</new-capture>
+
+<candidates>
+P<NNN1> | <title1> | <path1> | shared-signals: <signal1, signal2, ...>
+P<NNN2> | <title2> | <path2> | shared-signals: <signal1, signal3, ...>
+...
+</candidates>
+```
+
+The subagent reads the candidate ticket bodies in full as needed (via its own Read tool), reasons about absorb-vs-proceed, and returns one of:
+
+- `HANG_OFF: P<NNN>` with **Rationale**, **Signals matched**, **Where to absorb** sections.
+- `PROCEED_NEW` with **Rationale** and **Per-candidate explanation** for each surfaced candidate.
+
+**Act on verdict:**
+
+- **HANG_OFF: P<NNN>**: **halt** capture-problem. Emit a structured halt directive to the calling orchestrator agent naming (a) the parent ticket file path, (b) the new scope to amend in, (c) the `Where to absorb` directive from the subagent verdict. The orchestrator agent owns the parent-ticket edit + commit per the standard ticket-edit flow (do NOT amend the parent ticket from inside capture-problem — capture-problem creates new tickets; ticket-body amendments are manage-problem's surface). Record the hang-off decision + rationale in stderr for the audit trail.
+
+- **PROCEED_NEW**: continue to the marker step below. Capture the subagent's rationale + per-candidate explanation in a transient note (stderr) and append it to the new ticket's `## Related` section so the next reviewer sees what was considered. This is the audit-trail contract per ADR-026 grounding + JTBD-201 audit-trail completeness.
+
+**After the grep + (optional) hang-off-check completes**, write the per-session create-gate marker so the `PreToolUse:Write` hook (P119) permits the subsequent Write of the new ticket file under `docs/problems/open/`. Per **P260 / ADR-050 Option C**, write it under EVERY recent candidate session SID (not just one) so a concurrent orchestrator+subprocess race cannot land the marker under the wrong UUID:
 
 ```bash
 wr-itil-mark-create-gate
@@ -312,7 +386,10 @@ The two skills share the `/tmp/manage-problem-grep-${SESSION_ID}` create-gate ma
 - **P265** — the RISK_BYPASS-trailer allow-list mechanism in `readme-refresh-detect.sh` that P262's `capture-deferred-readme` token registers into.
 - **P170** (`docs/problems/known-error/170-problem-tickets-strain-as-fixes-decompose-into-multiple-coordinated-changes-need-rfc-framework.md`) — RFC framework driver; Slice 4 B7.T3 / item 8c authored the type-classification prompt at Step 1.5.
 - **P176** — agent-side I2 (no type-branching) coverage gap on the SKILL.md surface (this file's surface); descendant of P012 master harness ticket. The Step 1.5 I2 invariant guard is enforced by audit-trailed prose here per ADR-052 § Surface 2 escape-hatch contract; behavioural enforcement awaits the master harness.
-- **ADR-032** (`docs/decisions/032-governance-skill-invocation-patterns.proposed.md`) — foreground-lightweight-capture variant amendment.
+- **ADR-032** (`docs/decisions/032-governance-skill-invocation-patterns.proposed.md`) — foreground-lightweight-capture variant amendment (P155); 5th invocation pattern amendment (P346 Phase 3, 2026-05-31) codifies the hang-off-check sub-step 2b dispatch as the canonical fresh-context-subagent-as-decision-arbiter shape.
+- **P346** (`docs/problems/.../346-...md`) — backlog-flow-control master ticket; Phase 3 deliverable lands the hang-off-check dispatch at sub-step 2b above.
+- **RFC-013** (`docs/rfcs/RFC-013-...proposed.md`) — traces P346 Phases 1+2+3 per ADR-071 unconditional Problem→RFC trace.
+- **`packages/itil/agents/hang-off-check.md`** — the fresh-context subagent invoked by sub-step 2b; reads only the structured input payload; emits HANG_OFF: P<NNN> or PROCEED_NEW with rationale + signals + absorb directive.
 - **ADR-038** — progressive-disclosure pattern (SKILL.md + REFERENCE.md split).
 - **ADR-044** — decision-delegation contract; type classification is **derive-first**: silent-framework per category 4 on unambiguous-signal descriptions (the classifier IS the framework resolving the answer from observable evidence per ADR-026 grounding); taste per category 5 fallback on genuinely-ambiguous descriptions only. `--no-prompt` / `--type=<value>` are policy-authorised silent-proceed shapes per category 4 (caller-side pre-resolution). P185 re-classified Step 1.5's taxonomy position from "cat 5 unconditional ask" to "cat 4 derive-first with cat 5 fallback".
 - **P185** — `/wr-itil:capture-problem` asks a classification question it can answer itself from the description's observable evidence — inverse-P078 / P132 trap at a SKILL contract surface. The Step 1.5 derive-first refactor (lexical-signal classifier + stderr advisory) ships this fix.
