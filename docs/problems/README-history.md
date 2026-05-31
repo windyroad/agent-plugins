@@ -678,3 +678,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-05-31 (P346 backfill iter 4 fragment rotated for P346 O→V iter 4 fold-fix)
 
 > Last reviewed: 2026-05-31T (iter 4 work-problems AFK) **P346 backfill into WSJF Rankings** — pre-existing drift caught by Step 0 reconcile (committed cross-session capture lacked README refresh; classifier exit=2 parse-error fallback halt-and-route per P118 + ADR-014 conservative branch). P346 inserted at WSJF 4.5 (Severity 9 ÷ Effort M=2) in canonical tie-break position. Prior fragment (P082 KE→V + P345 backfill iter 3) rotated to README-history.md per P134.
+
+## 2026-05-31 (P346 iter 4 fold-fix fragment rotated for foreground relevance-scan batch 1 closes)
+
+> Last reviewed: 2026-05-31T (iter 4 work-problems AFK) **P346 Open→Verifying fold-fix** — Phase 1 relevance-close pass shipped (ADR-079 captured + new `/wr-itil:review-problems` Step 4.6 + canonical `evaluate-relevance.sh` + ADR-049 shim `wr-itil-evaluate-relevance` + 18/18 GREEN behavioural bats per ADR-052; ADR-022 lifecycle extension Open|Known Error → Closed bypassing Verifying when no fix was released; `@windyroad/itil` minor changeset). Smoke test 2026-05-31 against 143 open/known-error tickets: 6 CLOSE-CANDIDATE / 44 KEEP / 93 SKIP — conservative. Prior fragment (P346 backfill iter 4) rotated to README-history.md per P134.

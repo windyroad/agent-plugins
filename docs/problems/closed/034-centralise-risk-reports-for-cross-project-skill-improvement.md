@@ -1,11 +1,25 @@
 # Problem 034: Centralise risk reports for cross-project skill improvement
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-04-17
+**Closed**: 2026-05-31
 **Priority**: 6 (Medium) — Impact: Moderate (3) x Likelihood: Unlikely (2)
 **Effort**: XL — home-dir storage pattern under `~/.risk-reports/` (or similar), skill-improvement feedback loop design for 8+ plugins (architect, jtbd, itil, voice-tone, style-guide, tdd, wardley, c4), new ADR (L → XL 2026-04-19 per P047: cross-project, cross-plugin, new ADR required)
 **WSJF**: 0.75 — (6 × 1.0) / 8
 **Type**: technical
+
+## Closed as no longer relevant
+
+**Closure date**: 2026-05-31 (foreground relevance-scan session, user-confirmed)
+**Closure reason**: implementation-shipped-via-different-shape — the centralisation pattern landed under ADR-056 (risk-register) instead of the originally-proposed `~/.risk-reports/` home-dir storage. The "central aggregation for skill-improvement" intent is fulfilled.
+**Evidence (per ADR-026 grounding + ADR-079 evidence-based relevance-close pass)**:
+- `docs/decisions/056-risk-register-back-channel-write-contract.proposed.md` exists — defines the centralised risk-register
+- `docs/risks/` contains 30 active `R<NNN>-<slug>.active.md` register entries (R001-R030 verified `ls`); R030 added today's iter 3 via Step 6.4 mechanical drain
+- `wr-risk-scorer-drain-register-queue` shim shipped — feeds `.afk-run-state/risk-register-queue.jsonl` into the register
+- The "skill improvement feedback loop" half stays open via separate sibling tickets (e.g. `P012` master harness, `skill-creator:skill-creator` for eval design) — those continue independently; this umbrella is not the right home for them
+
+**Relevance evidence shape**: implementation-shipped-via-different-shape (ADR-079 future Phase 2 shape; the "no longer concerning" sub-shape covers it — the original `~/.risk-reports/` scope was superseded by the in-repo register)
+**Authorising decision**: P346 user direction 2026-05-31; user confirmed P034 in the foreground relevance-scan batch.
 
 ## Direction decision (2026-04-20, user — AFK loop stop-condition #2)
 

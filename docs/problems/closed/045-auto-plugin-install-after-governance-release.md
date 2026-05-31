@@ -1,11 +1,26 @@
 # Problem 045: Auto plugin install on user's machine after governance release
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-04-19
+**Closed**: 2026-05-31
 **Priority**: 6 (Medium) — Impact: Minor (2) x Likelihood: Possible (3)
 **Effort**: L
 **WSJF**: 1.5 — (6 × 1.0) / 4
 **Type**: technical
+
+## Closed as no longer relevant
+
+**Closure date**: 2026-05-31 (foreground relevance-scan session, user-confirmed)
+**Closure reason**: implementation-shipped — `/install-updates` skill exists and is the operational path for picking up new plugin code; wired into the work-problems Step 6.5 post-release cache refresh (P233).
+**Evidence (per ADR-026 grounding + ADR-079 evidence-based relevance-close pass)**:
+- `scripts/repo-local-skills/install-updates/SKILL.md` exists (verified `ls`)
+- `packages/itil/skills/work-problems/SKILL.md` Step 6.5 "Post-release cache refresh (P233)" subsection wires `/install-updates` into the orchestrator after a within-appetite release drain
+- User actively runs `/install-updates` at end-of-session per the install-updates skill's documented contract
+- The skill resolves the practical concern this ticket described (active session running old code after release); the original "auto-install via queue file + startup check" mechanism was superseded by the simpler "user runs `/install-updates` at end-of-session, orchestrator runs it after AFK releases" pattern
+- Outstanding sub-concerns (PATH-ordering — P343 captured the residual; per-project auto-install via ADR-034 SessionStart — P299 / P297 captured those) are sibling tickets, not part of this umbrella
+
+**Relevance evidence shape**: implementation-shipped-via-different-shape (the "auto" half landed as orchestrator-cadenced + user-cadenced rather than full session restart)
+**Authorising decision**: P346 user direction 2026-05-31; user confirmed P045 in the foreground relevance-scan batch.
 
 ## Direction decision (2026-04-20, user — AFK loop stop-condition #2)
 

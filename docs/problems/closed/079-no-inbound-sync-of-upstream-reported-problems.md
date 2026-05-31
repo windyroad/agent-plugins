@@ -1,12 +1,27 @@
 # Problem 079: No inbound sync of upstream-reported problems — reports filed via the intake templates never surface in the local backlog
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-04-21
+**Closed**: 2026-05-31
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: L — re-rated 2026-04-26 from M after user direction resolved 4 of 7 design questions and added substantive new scope (inbound-report assessment pipeline + blocked-user-list + downstream-contract symmetry). Original M scope (gh issue list + JSON cache + README section) remains the foundation; new scope adds: (1) JTBD alignment classifier that assesses each inbound report against documented persona JTBDs OR detects a new valid JTBD for an existing persona; (2) two-axis risk assessment of each report (risk of the request itself — malicious info-extraction / backdoor / malicious code injection — AND risk of fixing the reported problem); (3) above-threshold pushback path — comment back explaining why we're declining (the comment goes through external-comms risk gate + voice-and-tone gate per P064 and P038); (4) malicious-request path — close the upstream ticket AND maintain a blocked-user list refusing future tickets from the user; (5) safe-and-valid path — create the local problem ticket AND respond on the upstream issue with details (the response also goes through risk + voice-tone gates); (6) downstream-contract symmetry — our shipped intake templates must mirror the lookup pattern that `/wr-itil:report-upstream` uses to discover upstream contracts (so downstream projects' report-upstream can find our intake correctly). Pushes effort from M (4 hours) to L (full day) and creates transitive dependencies on P064 (risk gate on external comms — required for the pushback + response paths) and P038 (voice-tone gate on external comms — required same paths). Marginal effort post-dependency-closure: still L for the assessment-pipeline + blocked-user-list infrastructure. <!-- transitive: P064+P038 CLOSED → 0 2026-05-23; effort = marginal L -->
 
 **WSJF**: 3.0 — (12 × 1.0) / 4 — re-rated 2026-05-23: P038/P064 closed, transitive = marginal L (was 1.5 transitive-XL)
 **Type**: technical
+
+## Closed as no longer relevant
+
+**Closure date**: 2026-05-31 (foreground relevance-scan session, user-confirmed)
+**Closure reason**: implementation-shipped — ADR-062 inbound-discovery + assessment pipeline shipped; review-problems Step 4.5b runs it.
+**Evidence (per ADR-026 grounding + ADR-079 evidence-based relevance-close pass)**:
+- `docs/decisions/062-inbound-upstream-report-discovery-assessment-pipeline.proposed.md` exists (verified `ls`)
+- `packages/itil/skills/review-problems/SKILL.md` carries Step 4.5 inbound-discovery + Step 4.5b TTL-expiry auto-recheck (verified `grep`)
+- Today's Step 0b pre-flight ran the discovery pipeline at session start and added 8 new inbound entries (#180/#181/#183/#184/#185/#186/#187/#188 per the pre-flight commit `2034832`)
+- The core "manage-problem review should check upstream channels for new reports + cache + force-recheck escape + default TTL-based auto-recheck" surface — verified live and operational
+- Out-of-scope sub-features that were scope-expanded into this umbrella (blocked-user-list, two-axis-risk-assessment, downstream-contract-symmetry) belong in fresh focused tickets if still wanted — not in this 6-week-old umbrella
+
+**Relevance evidence shape**: implementation-shipped (the core scope landed verbatim under ADR-062; scope-expansion sub-features are out-of-scope for the umbrella)
+**Authorising decision**: P346 user direction 2026-05-31; user confirmed P079 in the foreground relevance-scan batch.
 
 <!-- transitive: L (marginal) → XL (transitive) via P038 -->
 

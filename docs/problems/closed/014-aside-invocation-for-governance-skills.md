@@ -1,11 +1,27 @@
 # Problem 014: No lightweight aside invocation for governance skills (problems, retros, ADRs)
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-04-16
+**Closed**: 2026-05-31
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: XL — re-sized up from L 2026-04-20 (AFK iter 2 architect review): ADR-027 conflict requires a new/amended/superseding ADR plus 4 SKILL.md edits, regardless of which reconciliation option the user picks. See "Architect-detected conflict" section below. (Earlier L sizing assumed no ADR-level conflict; re-sized down from original XL when the new-pattern + new-ADR scope was dropped via user direction; now re-sized back up by the architect-flagged ADR-027 collision.)
 **WSJF**: 1.5 — (12 × 1.0) / 8
 **Type**: technical
+
+## Closed as no longer relevant
+
+**Closure date**: 2026-05-31 (foreground relevance-scan session, user-confirmed)
+**Closure reason**: implementation-shipped — the umbrella gap this ticket described is filled by shipped child skills.
+**Evidence (per ADR-026 grounding + ADR-079 evidence-based relevance-close pass)**:
+- `packages/itil/skills/capture-problem/SKILL.md` exists (verified `ls`) — covers the `/wr-itil:manage-problem` aside surface
+- `packages/architect/skills/capture-adr/SKILL.md` exists (verified `ls`) — covers the `/wr-architect:create-adr` aside surface
+- `packages/retrospective/skills/run-retro/SKILL.md` already provides retro queueing surface
+- Implementation driver **P155** is CLOSED at `docs/problems/closed/155-ship-capture-problem-skill.md`
+- This ticket was the parent/umbrella tracker; all three named child surfaces now have lightweight aside paths
+
+**Relevance evidence shape**: implementation-shipped-via-children (ADR-079 future Phase 2 shape; current Phase 1 only handles file-no-longer-exists)
+**Authorising decision**: P346 user direction 2026-05-31 — *"closes tickets that are no longer relevant, but not just because they are old"*; user confirmed P014 in the foreground relevance-scan batch.
+**Sibling tickets** (extensions / different surfaces): if future aside surfaces are needed, capture as new focused tickets — not reopens of this umbrella.
 
 ## Iter 12 progress (2026-05-03)
 
