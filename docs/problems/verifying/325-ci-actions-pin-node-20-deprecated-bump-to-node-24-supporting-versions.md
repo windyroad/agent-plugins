@@ -1,10 +1,16 @@
 # Problem 325: CI actions pin Node-20 versions (`checkout@v4`, `setup-node@v4`) — GitHub deprecates Node 20 on runners; bump before the forced 2026-06 migration
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-28
 **Priority**: 4 (Low-Med) — Impact: 2 x Likelihood: 2 (deferred — re-rate at next /wr-itil:review-problems; time-bounded, see below)
 **Effort**: S (deferred — re-rate at next /wr-itil:review-problems)
 **Type**: technical
+
+## Fix Released
+
+- **Release marker**: shipped in `@windyroad/architect@0.13.0` / `@windyroad/itil@0.39.0` / `@windyroad/retrospective@0.22.0` / `@windyroad/risk-scorer@0.11.3` on 2026-05-31 (release commit e9f7ce4 → CI passed → release PR merged → npm publish via changesets workflow).
+- **Fix summary**: bumped `actions/checkout@v4` → `@v5` and `actions/setup-node@v4` → `@v5` across `.github/workflows/*.yml` in prior commit b698b45 (`fix(ci): bump Node-20 action pins to Node-24-supporting majors (P325 known error)`). The Node 24 default-flip (2026-06-02) no longer triggers deprecation warnings.
+- **Awaiting user verification**: confirm CI runs clean on the next push (no Node 20 deprecation warnings emitted by GitHub Actions runners).
 
 ## Description
 
