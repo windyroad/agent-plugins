@@ -61,10 +61,10 @@ This guide applies to:
 - HTML files under `docs/story-maps/**/*.html`
 - JSX / TSX / Vue / Svelte components if any UI ships from this repo (currently none — plugin-development monorepo)
 - ejs / hbs templates if any ship (currently none)
+- Changesets (`.changeset/*.md`) per ADR-028 — author-time gate on `PreToolUse:Write/Edit`. Both voice-tone + risk-scorer evaluators fire; voice-tone catches AI-tells / brand-voice drift before the body reaches CHANGELOG.md / Release PRs / GitHub Releases / published npm tarballs. Closed under P073.
 
 It does NOT apply to:
 - Markdown documentation (covered by per-skill SKILL.md guidance + project CLAUDE.md)
-- Changesets (`.changeset/*.md` covered by `wr-risk-scorer:external-comms` review gate per P073)
 - Commit messages (covered by ADR-014 + ADR-018)
 
 ## Related
