@@ -1,11 +1,72 @@
 # Problem 346: `/wr-itil:review-problems` has no path to close tickets that are no longer relevant (evidence-based, NOT age-based) — structural outflow gap drives monotonic backlog growth
 
-**Status**: Verification Pending
+**Status**: Open
 **Reported**: 2026-05-31
 **Priority**: 9 (High) — Impact: 3 × Likelihood: 3 (deferred — re-rate at next /wr-itil:review-problems; severity raised at capture per user direction "I'm worried about the trajectory")
 **Origin**: internal
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems; design + ADR + SKILL.md amendment + behavioural bats — likely M, possibly L if relevance-evidence taxonomy is broad)
 **Type**: technical
+
+## Multi-phase scope
+
+This is the master ticket for the framework's backlog-flow-control mechanisms. Phase 1 ships outflow (relevance-close on file-no-longer-exists shape). Phase 2 extends outflow to 4 more evidence shapes + Phase 1 false-positive fixes. Phase 3 ships inflow discipline (capture-time hang-off check) to prevent capturing siblings when existing tickets can absorb. Phases re-open the lifecycle (Verifying → Open) when new phases land.
+
+### Phase 1 — relevance-close pass (shipped 2026-05-31, iter 4, @windyroad/itil@0.40.0)
+
+- Status: shipped + verified in-session
+- ADR: `docs/decisions/079-evidence-based-relevance-close-pass.proposed.md`
+- Script: `packages/itil/scripts/evaluate-relevance.sh`; shim `packages/itil/bin/wr-itil-evaluate-relevance`
+- SKILL Step: `/wr-itil:review-problems` Step 4.6
+- Bats: 18/18 GREEN on `packages/itil/scripts/test/evaluate-relevance.bats`
+- Smoke test 2026-05-31 against 143 active tickets: 6 CLOSE-CANDIDATE / 44 KEEP / 93 SKIP — conservative
+- Evidence shape: file-no-longer-exists (single shape; smoke-test surfaced ~60% false-positive rate from rename / state-suffix / sibling-file class — fixed in Phase 2)
+
+### Phase 2 — evidence shape expansion + Phase 1 false-positive fixes (shipped 2026-05-31, iter 5)
+
+- Status: shipped via wrongly-captured sibling-ticket P347 (now Closed as duplicate-of-P346); deliverable artefacts stay shipped
+- Driver: empirical foreground relevance-scan today (5 batches, 14 closes) revealed 4 evidence shapes Phase 1 doesn't implement; the 1 shape Phase 1 does implement had the highest false-positive rate
+- Commits (attributed to P347 historically; substance belongs to this ticket):
+  - `6980e13 docs(decisions): amend ADR-079 with Phase 2 (4 evidence shapes + Phase 1 false-positive fixes)`
+  - `b160eb8 feat(itil): P347 + ADR-079 Phase 2 — 4 more evidence shapes + Phase 1 false-positive fixes`
+  - `3bdd1d7 docs(itil): P347 + ADR-079 Phase 2 — review-problems Step 4.6 + manage-problem lifecycle sync to 5 shapes`
+- 4 new evidence shapes added to `evaluate-relevance.sh`:
+  - ADR-shipped-with-`human-oversight: confirmed` (8 of today's 14 closes used this)
+  - named-skill-or-feature-exists (6 of today's 14 closes used this)
+  - self-marker-in-body (P289-class — explicit "Close to Verifying" in body without lifecycle transition)
+  - driver-child-ticket-closed (P155-closed → P014-closeable)
+- Phase 1 file-no-longer-exists fixes: state-suffix detection (P180 false-positive class) + sibling-file detection (P244 false-positive class) + rename detection via `git log --follow` (P251 false-positive class)
+- Caveat-handling: `CLOSE-CANDIDATE-WITH-CAVEAT` for partial-scope cases (P039 shared-template, P194 deep-dive bloat)
+- Bats: 33/33 GREEN (extended from 18 to 33 fixtures; 14 CLOSE-CANDIDATE labeled fixtures + 3 KEEP test fixtures + regression fixtures per false-positive class)
+- Changesets: `.changeset/p347-relevance-close-pass-phase-2.md` (@windyroad/itil minor) + `.changeset/p347-phase2-skill-prose-sync.md` (@windyroad/itil patch)
+
+### Phase 3 — capture-time hang-off check via subagent (DESIGN — implementation outstanding)
+
+**Driver**: today's wrongly-captured P347 illustrated a gap in the SKILL itself. The capture-problem Step 2 3-keyword title-only duplicate check is too narrow to catch hang-off candidates (parent tickets where new work fits as a Phase / Investigation Task extension). User correction 2026-05-31 (verbatim): *"we need to have the ticket creation process do more effort in finding existing ticket to add to."*
+
+**Architecture (user-directed: "use a subagent to avoid bias from existing context, then you probably can make it much simpler")**:
+
+A subagent invocation avoids the main agent's session-context bias — the main agent (mid-work, with rich session context) pattern-matches existing capture flows and fails to recognise hang-off opportunities. A fresh subagent with no session context reasons cleanly about candidate parents.
+
+**Specification**:
+
+1. **New subagent** at `packages/itil/agents/hang-off-check.md`
+   - Inputs: new capture's description + filtered candidate ticket list (`open/` + `verifying/`, mechanically pre-filtered to those sharing ≥1 ADR-NNN ref / SKILL path / file path with the description)
+   - Outputs: structured verdict — `HANG_OFF: P<NNN>` (with rationale citing which candidate ticket absorbs the new scope and how) OR `PROCEED_NEW` (with rationale per candidate explaining why none absorb)
+   - Spawns fresh; reads only the inputs; no session context bias
+   - Same architectural pattern as `wr-architect:agent` / `wr-jtbd:agent` / `tdd:review-test` (bias-free verdicts via context isolation)
+2. **`/wr-itil:capture-problem` Step 2 amendment**
+   - After the existing narrow title-only grep, run the mechanical pre-filter (cheap; bounds the input set)
+   - If filtered candidate set non-empty: delegate to `wr-itil:hang-off-check` subagent
+   - Act on verdict: `HANG_OFF` → halt-and-route the calling agent to amend the named ticket's body (Investigation Tasks expansion / Phase N section addition); `PROCEED_NEW` → proceed to Step 3
+3. **`/wr-itil:manage-problem` Step 2 amendment** — same dispatch
+4. **Behavioural bats**
+   - Fixture 1 (regression for today's miss): feed the subagent P347's description + candidate set containing P346 → assert `HANG_OFF: P346`
+   - Fixture 2: feed it a genuinely-new description with no real candidates → assert `PROCEED_NEW`
+   - Fixture 3: subtle sibling-vs-parent case (e.g. P070 vs new report-upstream surface ticket on a different SKILL) → assert `PROCEED_NEW` with reasoned rationale
+
+**Why a subagent (not in-SKILL checks)**: the main agent is biased by session context — it has just been working on the ADR/SKILL/script and pattern-matches existing flows ("I captured X then dispatched iter; do the same shape for Y"). A subagent invocation starts fresh, reads only the structured inputs, and reasons about candidate absorption without the bias. This collapses what would otherwise be 5+ defensive checks into "subagent reasons about absorption". Matches the project's established architectural pattern for bias-free verdicts.
+
+**Negative regression fixture**: this very session's P347-vs-P346 case is the canonical test — if the subagent receives P347's description + P346 in the candidate set, it MUST return `HANG_OFF: P346`. Failing fixture = the SKILL is insufficient.
 
 ## Description
 
@@ -60,15 +121,34 @@ User direction at capture (verbatim, 2026-05-31): *"Ok, I'm happy for a skill ex
 
 ### Investigation Tasks
 
-- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Investigate root cause: which inflow sources are dominant (external inbound vs retro auto-capture vs agent mid-iter observations vs user-correction captures)
-- [ ] Draft a relevance-evidence taxonomy ADR (likely depends on ADR-026 grounding + ADR-022 lifecycle status conventions)
-- [ ] Decide auto-close vs surface-with-options (likely surface-with-options for first iteration; auto-close only on highest-confidence evidence shapes like "file no longer exists")
-- [ ] Design the audit-trail contract — closed ticket body MUST cite the relevance evidence per ADR-026
-- [ ] SKILL.md amendment to `/wr-itil:review-problems` — new Step 4.x (likely after Step 4 re-rate, before Step 5 README refresh)
-- [ ] Behavioural bats coverage per ADR-052 — assert each evidence shape correctly identifies / surfaces / closes the right candidate tickets
-- [ ] Consider integration with the existing `/wr-itil:transition-problem` mechanism vs a new `/wr-itil:close-as-stale` transition
-- [ ] Reproduction test: a synthetic backlog with N "now-stale" tickets + M "still-relevant" tickets → assert relevance-pass closes N, keeps M
+Phase 1 — relevance-close pass (DONE 2026-05-31 iter 4):
+- [x] Draft a relevance-evidence taxonomy ADR — ADR-079 captured
+- [x] Decide auto-close vs surface-with-options — surface-with-options for Phase 1 + 1-shape conservative
+- [x] Design the audit-trail contract — `## Closed as no longer relevant` body section with ADR-026 cite
+- [x] SKILL.md amendment to `/wr-itil:review-problems` — Step 4.6 added
+- [x] Behavioural bats coverage per ADR-052 — 18 fixtures GREEN (Phase 1) → 33 fixtures GREEN (Phase 2)
+- [x] Consider integration with `/wr-itil:transition-problem` — kept; relevance-close composes with existing transition mechanism
+- [x] Reproduction test — smoke test against 143 active tickets, 6 CLOSE-CANDIDATE / 44 KEEP / 93 SKIP
+
+Phase 2 — evidence shape expansion (DONE 2026-05-31 iter 5):
+- [x] Empirically catalogue evidence shapes via foreground relevance-scan — 14 closes labeled across 5 batches
+- [x] Amend ADR-079 with Phase 2 Considered Options — `6980e13`
+- [x] Extend `evaluate-relevance.sh` with 4 new shapes — `b160eb8`
+- [x] Fix Phase 1 false-positive class (state-suffix / sibling-file / rename) — `b160eb8`
+- [x] Add Phase 2 bats fixtures (regression + KEEP cases) — extended to 33/33 GREEN
+- [x] Update SKILL Step 4.6 + manage-problem lifecycle table — `3bdd1d7`
+- [x] Add `@windyroad/itil` minor + patch changesets — queued for next release
+
+Phase 3 — capture-time hang-off check (OUTSTANDING):
+- [ ] Author `packages/itil/agents/hang-off-check.md` subagent (inputs/outputs per Phase 3 spec above)
+- [ ] Amend `/wr-itil:capture-problem` Step 2 to dispatch the subagent after mechanical pre-filter
+- [ ] Amend `/wr-itil:manage-problem` Step 2 to dispatch the same subagent
+- [ ] Add behavioural bats: P347-vs-P346 regression fixture (assert HANG_OFF: P346); genuinely-new fixture (assert PROCEED_NEW); subtle sibling-vs-parent fixture
+- [ ] Add `@windyroad/itil` minor changeset for the Phase 3 feature
+- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems — Phase 3 effort likely M (subagent + 2 SKILL amendments + 3 bats fixtures)
+
+Cross-cutting:
+- [ ] After Phase 3 ships, re-evaluate the trajectory chart (the dashboard at `/wr-architect:agent` accessible via `/wr-itil:list-problems`) — expected: backlog growth slows due to inflow discipline + outflow continues from Phase 1+2
 
 ## Dependencies
 

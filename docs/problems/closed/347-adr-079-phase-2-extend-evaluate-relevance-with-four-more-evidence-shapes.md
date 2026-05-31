@@ -1,12 +1,30 @@
 # Problem 347: ADR-079 Phase 2 — extend `evaluate-relevance.sh` with 4 more evidence shapes + fix Phase 1 file-no-longer-exists false-positive class
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-05-31
 **Released**: 2026-05-31 (Phase 2 shipped iter 5 — 3-commit bundle in the @windyroad/itil minor release window)
+**Closed**: 2026-05-31
 **Priority**: 9 (Med High) — Impact: 3 (Moderate — Phase 1 covers only 1 of 5 empirically-observed shapes; 13 of today's 14 closes used shapes Phase 1 doesn't implement; the relevance-close skill currently won't surface most reasonable candidates without Phase 2) × Likelihood: 3 (Likely — every review-problems Step 4.6 invocation hits this coverage gap)
 **Origin**: internal
 **Effort**: L (deferred — re-rate at next /wr-itil:review-problems; multi-file: ADR-079 amendment + 4 new shapes in script + Phase 1 fix + behavioural bats per shape + SKILL Step 4.6 amendment + changeset)
 **Type**: technical
+
+## Closed as no longer relevant — duplicate of P346 (wrongly-captured sibling that should have been Phase 2 of P346)
+
+**Closure date**: 2026-05-31 (foreground consolidation, user-directed)
+**Closure reason**: duplicate-of-P346 — this ticket was a wrongly-captured sibling. The Phase 2 work it tracks IS the next slice of P346's problem-trace, not a new problem. ADR-079 was authored against P346 in iter 4; Phase 2 of ADR-079 is Phase 2 of P346 by construction.
+**Evidence (per ADR-026 grounding + ADR-079 evidence-based relevance-close pass)**:
+- P346 (`docs/problems/open/346-...md`) is the canonical problem-trace for ADR-079 — iter 4's commit `c5e2eb5` authored ADR-079 against P346
+- P346's Description enumerates BOTH inflow and outflow structural concerns; Phase 1 (closure) shipped, Phases 2+ (evidence-shape expansion + capture-time hang-off check) are outstanding work folded into P346 on this consolidation
+- User correction (verbatim, 2026-05-31): *"We didn't need a new problem ticket, there was an existing one. This is part of the issue. You keep creating new problem tickets even when there are existing ones you can hang off."* + *"What about p346?"* + *"And yes, close p347"*
+- Memory `feedback_hang_off_existing_ticket_before_capturing_new` captured this lesson with the P347-vs-P346 case as the concrete example
+- The Phase 2 work itself (iter 5's commits `6980e13` + `b160eb8` + `3bdd1d7` + `8c8a256`) is real implementation work and ships — only the attribution to a new ticket was wrong
+- The Phase 2 commits' "P347" references stay as historical capture-surface; the audit trail still resolves via this closure pointer to P346
+
+**Relevance evidence shape**: duplicate-of (ADR-079 Phase 2 work belongs in P346 as Phase 2 expansion, not a sibling ticket — surfaced via the user's read-the-Description-of-candidate-parent-tickets discipline that the SKILL's narrow 3-keyword title-only dup-check failed to enforce)
+**Authorising decision**: P346 user direction 2026-05-31 (verbatim above). Phase 2's deliverable artefacts stay shipped (ADR-079 amended, evaluate-relevance.sh extended to 5 shapes, 33/33 bats GREEN, SKILL Step 4.6 amended, @windyroad/itil minor + patch changesets queued); only the ticket attribution moves to P346.
+
+**Cross-reference**: see P346 `## Phase 2 — evidence shape expansion` section for the work this ticket tracked, and P346 `## Phase 3 — capture-time hang-off check` section for the mechanism designed to prevent recurrence of the wrong-attribution class.
 
 ## Description
 

@@ -698,3 +698,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-05-31 (Foreground relevance-scan batch 4 close fragment rotated for batch 5 closes)
 
 > Last reviewed: 2026-05-31 **Foreground relevance-scan batch 4 close** — 1 more ticket closed: P033 (no persistent risk register → implementation-shipped: ADR-056 + 30 active R<NNN> entries + R030 scaffolded today via Step 6.4 drain proves the back-channel is end-to-end operational). First Known Error → Closed transition leveraging the ADR-079 lifecycle extension (bypasses Verifying when no single-ship fix exists; accretion-shape fixes apply too). Cumulative session: 102 → 91 Open + 40 → 39 Known Error (12 foreground closes today across batches 1+2+3+4). Prior fragment (batch 3) rotated to README-history.md per P134.
+
+## 2026-05-31 (Foreground relevance-scan batch 5 closes fragment rotated for P347 consolidation)
+
+> Last reviewed: 2026-05-31 **Foreground relevance-scan batch 5 closes** — 2 more tickets closed: P194 (ADRs accumulate forward-chronology evidence → ADR-077 compendium pattern shipped, routine architect-agent reads use the compendium not bloated per-ADR bodies; deep-dive bloat caveat noted), P292 (reconcile ADR-018 text with P250 → ADR-018 body carries the literal P250 amendment + work-problems Step 6.5 SKILL has matching prose). Cumulative session: 102 → 89 Open + 40 → 39 Known Error (14 total foreground closes today across 5 batches). Prior fragment (batch 4) rotated to README-history.md per P134.
