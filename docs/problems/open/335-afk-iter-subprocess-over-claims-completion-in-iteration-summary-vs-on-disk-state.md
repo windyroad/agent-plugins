@@ -2,9 +2,10 @@
 
 **Status**: Open
 **Reported**: 2026-05-30
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 9 (Medium) — Impact: 3 (Moderate — false-pass classification causes silently-unshipped work; orchestrator commits without the claimed surface present on disk) × Likelihood: 3 (Possible — directly observed in session 8 iter 1; pattern is plausible across any iter relying on subprocess truth-telling)
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems; likely Step 6.75 extension or new verify-iter-claims step)
+**Effort**: M (Step 6.75 verify-claims FIRST per user-pinned option (a); observe whether iter-local drift-bats is still needed after data collection)
+**WSJF**: 4.5 (re-rated 2026-05-31; was placeholder I=3×L=1; honest grounding lands at S9/L3/M)
 **Type**: technical
 
 ## Description

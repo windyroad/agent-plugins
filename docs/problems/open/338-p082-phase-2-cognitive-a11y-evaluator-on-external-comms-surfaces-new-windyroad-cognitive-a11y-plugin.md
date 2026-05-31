@@ -2,9 +2,10 @@
 
 **Status**: Open
 **Reported**: 2026-05-30
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 4 (Low) — Impact: 2 (Minor — sibling-cohort follow-on; new plugin scaffold; doesn't break existing surfaces) × Likelihood: 2 (Unlikely — speculative integration risk; absence is currently a documented gap, not an active fault)
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems; suite-wide cognitive-a11y plugin scaffold + ADR-028 amendment + 4 surface integrations is plausibly L when accounting for the per-surface bats coverage)
+**Effort**: L (suite-wide cognitive-a11y plugin scaffold + ADR-028 amendment + 4 surface integrations + per-surface bats coverage)
+**WSJF**: 1.0 (re-rated 2026-05-31; was placeholder I=3×L=1; honest grounding is below appetite per acceptance-deferred sibling-cohort framing)
 **Type**: technical
 
 ## Description

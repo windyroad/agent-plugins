@@ -2,9 +2,10 @@
 
 **Status**: Open
 **Reported**: 2026-05-31
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next `/wr-itil:review-problems`; framework-improvement class; cost is bounded per occurrence but accumulates across sessions)
+**Priority**: 6 (Medium) — Impact: 2 (Minor — wasted-iter cost bounded per occurrence; orchestrator continues) × Likelihood: 3 (Possible — fires on any unratified-JTBD ticket selection; accumulates across sessions until predicate-check ships)
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next `/wr-itil:review-problems`; SKILL.md Step 0 / Step 3 amendment + predicate helper + behavioural bats coverage)
+**Effort**: M (work-problems SKILL.md Step 0 / Step 3 amendment + predicate helper + behavioural bats coverage)
+**WSJF**: 3.0 (re-rated 2026-05-31; was placeholder I=3×L=1; honest grounding lands at S6/L3/M)
 **Type**: technical
 
 ## Description

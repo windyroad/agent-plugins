@@ -2,9 +2,10 @@
 
 **Status**: Open
 **Reported**: 2026-05-31
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next `/wr-itil:review-problems`; HIGH in practice — caused the entire session-9 CI test 2145 saga where ~10 commits accumulated un-shippable because every `wr-architect-generate-decisions-compendium` invocation ran a stale 0.11.0 script producing Unicode `…` while CI Linux ran in-repo script producing ASCII `...`)
+**Priority**: 12 (High) — Impact: 3 (Moderate — directly blocked ~10 commits across session 9 from being shippable; caused entire CI test 2145 saga) × Likelihood: 4 (Likely — fires every session after a plugin release where the user does not also restart the shell to refresh PATH)
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next `/wr-itil:review-problems`; either install-updates skill amendment to reorder PATH OR amend shim resolution to always pick highest-version OR session-start mechanism to refresh PATH)
+**Effort**: M (install-updates amendment to reorder PATH OR shim-resolution to always pick highest-version OR session-start refresh mechanism)
+**WSJF**: 6.0 (re-rated 2026-05-31; was placeholder I=3×L=1; session-9 blast-radius warrants honest S12/L4/M scoring)
 **Type**: technical
 
 ## Description

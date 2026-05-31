@@ -2,9 +2,10 @@
 
 **Status**: Open
 **Reported**: 2026-05-30
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems; HIGH in practice — blocks every release of `@windyroad/architect` until compendium is regenerated on Linux or generator is hardened)
+**Priority**: 12 (High) — Impact: 3 (Moderate — blocks every `@windyroad/architect` release until compendium is regenerated on Linux or generator hardened) × Likelihood: 4 (Likely — fires every time the compendium is regenerated on macOS and pushed to a Linux CI; recurring on every create-adr / capture-adr / review-decisions confirm/amend)
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems; small generator edit OR larger perl/python rewrite)
+**Effort**: S (per user-directed fix locus option (a) — swap awk substr() `…` → ASCII `...`)
+**WSJF**: 12.0 (re-rated 2026-05-31; was placeholder I=3×L=1; user-pinned fix locus (a) collapses Effort M → S, raising WSJF; CI-blocking surface)
 **Type**: technical
 
 ## Description

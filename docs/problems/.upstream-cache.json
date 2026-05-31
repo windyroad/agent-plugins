@@ -1,11 +1,11 @@
 {
   "$schema": "https://windyroad.github.io/agent-plugins/schemas/upstream-cache.json",
   "$comment": "Cache file for inbound report discovery (P079 / ADR-062). Written by /wr-itil:review-problems Step 8.5 after each discovery pass.",
-  "last_checked": "2026-05-30T01:20:15Z",
-  "$last_pass_note": "2026-05-30 review-problems discovery pass (work-problems Step 0b preflight, TTL-expiry auto-recheck; cache age ~4.4 days exceeded ttl_seconds 86400). github-issues: 34 active [problem] reports, all maintainer-authored, all already mirrored locally (P198-P229 series + P228/P282-class); #149 remains CLOSED upstream. discussions skipped (HTTP 410 \u2014 disabled for repo); security-advisories poll skipped (P276/P198/#125 external-comms gate misclassification \u2014 preserved per prior-pass evidence). No new unmatched third-party reports. Pipeline classification remains deferred per 2026-05-15 user direction.",
+  "last_checked": "2026-05-31T00:00:00Z",
+  "$last_pass_note": "2026-05-31 review-problems discovery pass (work-problems Step 0b preflight, TTL-expiry auto-recheck; cache age ~99939s exceeded ttl_seconds 86400). github-issues: 43 active [problem] reports (prior set 34 + 8 NEW: #180/#181/#183/#184/#185/#186/#187/#188 — all maintainer-authored governance/UX observations + #170 returned by gh search but FILTERED OUT as it lacks the [problem] title prefix the channel config requires). #149 retained as historical closed-upstream entry. discussions skipped (HTTP 410 — disabled for repo); security-advisories poll skipped (P276/P198/#125 external-comms gate misclassification — preserved per prior-pass evidence). Pipeline classification for the 8 new reports remains deferred per 2026-05-15 user direction (external-comms-gate ack-comment bottleneck not yet cleared).",
   "channels": {
     "github-issues:windyroad/agent-plugins": {
-      "fetched_at": "2026-05-30T01:20:15Z",
+      "fetched_at": "2026-05-31T00:00:00Z",
       "filter": "title_prefix=[problem] (label filter removed; see channels-config $filter-note)",
       "status": "ok",
       "reports": [
@@ -16,16 +16,88 @@
           "createdAt": "2026-05-18T11:55:37Z",
           "body_hash": "bfda21a42bc40001",
           "classification": "closed-upstream",
-          "cache_audit_note": "CLOSED upstream as of 2026-05-26 poll \u2014 P010 fixed by 56bae5f (released risk-scorer 0.11.0, mirrored locally as P198) and P007 fixed by 3c732ba (released risk-scorer 0.11.0, mirrored as P286). No pipeline action needed."
+          "cache_audit_note": "CLOSED upstream as of 2026-05-26 poll — P010 fixed by 56bae5f (released risk-scorer 0.11.0, mirrored locally as P198) and P007 fixed by 3c732ba (released risk-scorer 0.11.0, mirrored as P286). No pipeline action needed."
+        },
+        {
+          "number": 188,
+          "title": "[problem] staging-trap recovery contract re-stages only trapped file; co-staged sibling files dropped, splits ADR-014 single-commit grain",
+          "author": "tompahoward",
+          "createdAt": "2026-05-31T03:15:17Z",
+          "body_hash": "633d11ea3d9e4bed",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-05-31"
+        },
+        {
+          "number": 187,
+          "title": "[problem] transition-problem + review-problems + run-retro lack sibling-family completeness scan before close; friction-class tickets recur",
+          "author": "tompahoward",
+          "createdAt": "2026-05-31T03:12:45Z",
+          "body_hash": "c13abd2f39c3c9f7",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction; new this pass 2026-05-31"
+        },
+        {
+          "number": 186,
+          "title": "[problem] P186 evidence-cell canonical wire format uses U+2014 separator; blocks adopters with no-em-dash hook",
+          "author": "tompahoward",
+          "createdAt": "2026-05-31T03:10:19Z",
+          "body_hash": "21eeb6fd674bc133",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction; new this pass 2026-05-31"
+        },
+        {
+          "number": 185,
+          "title": "[problem] capture-adr SKILL.md template literals carry U+2014 long-dashes; first Write blocked on adopters with no-em-dash hook",
+          "author": "tompahoward",
+          "createdAt": "2026-05-31T03:08:09Z",
+          "body_hash": "45f9dad56e1818f1",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction; new this pass 2026-05-31"
+        },
+        {
+          "number": 184,
+          "title": "[problem] reconcile-readme.sh section-end fallback-chain produces false-positive STALE when Parked section sits between WSJF Rankings and Verification Queue",
+          "author": "tompahoward",
+          "createdAt": "2026-05-31T03:06:08Z",
+          "body_hash": "dc63199cd381ca8d",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction; new this pass 2026-05-31"
+        },
+        {
+          "number": 183,
+          "title": "[problem] jtbd-enforce-edit hook uses relative docs/jtbd path; fails when cwd is not project root",
+          "author": "tompahoward",
+          "createdAt": "2026-05-31T00:26:30Z",
+          "body_hash": "e2cca93fdefc6a5f",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction; new this pass 2026-05-31"
+        },
+        {
+          "number": 181,
+          "title": "[problem] wr-itil gate-marker UX + AFK orchestrator robustness follow-on (composed P035+P037+P041)",
+          "author": "tompahoward",
+          "createdAt": "2026-05-30T10:37:19Z",
+          "body_hash": "bf42a1e4668d406d",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction; new this pass 2026-05-31"
+        },
+        {
+          "number": 180,
+          "title": "[problem] wr-itil / wr-architect / wr-jtbd gate-marker friction (composed P036+P038+P044)",
+          "author": "tompahoward",
+          "createdAt": "2026-05-30T10:01:11Z",
+          "body_hash": "ca680bcd39e2f2b1",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction; new this pass 2026-05-31"
         },
         {
           "number": 139,
-          "title": "[problem] migrate-problems-layout.sh helper uses bashisms but /wr-itil:work-problems Step 0a SKILL.md does not specify bash \u2014 sourcing fails under zsh",
+          "title": "[problem] migrate-problems-layout.sh helper uses bashisms but /wr-itil:work-problems Step 0a SKILL.md does not specify bash — sourcing fails under zsh",
           "author": "tompahoward",
           "createdAt": "2026-05-17T20:51:10Z",
           "body_hash": "4718c55fe9f0c267",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-05-23"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
         },
         {
           "number": 138,
@@ -34,7 +106,7 @@
           "createdAt": "2026-05-17T12:15:40Z",
           "body_hash": "54c7dc161ccdb925",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-05-23"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 137,
@@ -43,25 +115,25 @@
           "createdAt": "2026-05-17T12:13:47Z",
           "body_hash": "7e24420525961a0b",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-05-23"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 126,
-          "title": "[problem] capture-problem \u2192 manage-problem same-session halts at Step 0 reconcile (HALT_ROUTE_RECONCILE on deferred-refresh seam)",
+          "title": "[problem] capture-problem → manage-problem same-session halts at Step 0 reconcile (HALT_ROUTE_RECONCILE on deferred-refresh seam)",
           "author": "tompahoward",
           "createdAt": "2026-05-13T20:13:45Z",
           "body_hash": "43eeab2af47e1acb",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 125,
-          "title": "[problem] external-comms gate marker key cannot be computed by the reviewer agent (Read/Glob/Grep tool surface \u2014 no shasum); hash-scope ambiguity adds three recurrences",
+          "title": "[problem] external-comms gate marker key cannot be computed by the reviewer agent (Read/Glob/Grep tool surface — no shasum); hash-scope ambiguity adds three recurrences",
           "author": "tompahoward",
           "createdAt": "2026-05-13T20:12:24Z",
           "body_hash": "8e2fa16bdf660e46",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 124,
@@ -70,7 +142,7 @@
           "createdAt": "2026-05-13T13:12:54Z",
           "body_hash": "10996f5c68dbb795",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 123,
@@ -79,7 +151,7 @@
           "createdAt": "2026-05-13T13:12:00Z",
           "body_hash": "f4b976746da40578",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 121,
@@ -88,7 +160,7 @@
           "createdAt": "2026-05-13T07:58:34Z",
           "body_hash": "32305e86135390bf",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 120,
@@ -97,16 +169,16 @@
           "createdAt": "2026-05-13T07:55:22Z",
           "body_hash": "e733d89ac41027d7",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 117,
-          "title": "[problem] No /wr-retrospective:migrate-briefing skill \u2014 legacy docs/BRIEFING.md \u2192 docs/briefing/ topic-tree migration is manual per-adopter",
+          "title": "[problem] No /wr-retrospective:migrate-briefing skill — legacy docs/BRIEFING.md → docs/briefing/ topic-tree migration is manual per-adopter",
           "author": "tompahoward",
           "createdAt": "2026-05-10T20:10:01Z",
           "body_hash": "1761465715adefe1",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 110,
@@ -115,16 +187,16 @@
           "createdAt": "2026-05-03T05:04:36Z",
           "body_hash": "e6858e0229de550e",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 98,
-          "title": "[problem] work-problems iter workers don't add changesets \u2014 fix commits accumulate without release path",
+          "title": "[problem] work-problems iter workers don't add changesets — fix commits accumulate without release path",
           "author": "tompahoward",
           "createdAt": "2026-04-28T02:31:57Z",
           "body_hash": "b2c16163511e0421",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 97,
@@ -133,7 +205,7 @@
           "createdAt": "2026-04-28T02:31:22Z",
           "body_hash": "56ae9180570cc656",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 87,
@@ -142,7 +214,7 @@
           "createdAt": "2026-04-27T04:04:16Z",
           "body_hash": "0404f2ade77d5ef7",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 86,
@@ -151,7 +223,7 @@
           "createdAt": "2026-04-27T03:50:15Z",
           "body_hash": "52723fd380617eb7",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 85,
@@ -160,7 +232,7 @@
           "createdAt": "2026-04-26T22:56:18Z",
           "body_hash": "ad27ab6902636a54",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 84,
@@ -169,7 +241,7 @@
           "createdAt": "2026-04-26T22:55:02Z",
           "body_hash": "4050a0ab7c86e6df",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 83,
@@ -178,7 +250,7 @@
           "createdAt": "2026-04-26T22:53:33Z",
           "body_hash": "8a11e12c7cf209ef",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 82,
@@ -187,7 +259,7 @@
           "createdAt": "2026-04-26T22:52:22Z",
           "body_hash": "7050cd894bc13771",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 81,
@@ -196,7 +268,7 @@
           "createdAt": "2026-04-26T22:51:15Z",
           "body_hash": "e47f49a05811005d",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 80,
@@ -205,7 +277,7 @@
           "createdAt": "2026-04-26T22:50:09Z",
           "body_hash": "c655a2c4bab5a4d6",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 79,
@@ -214,7 +286,7 @@
           "createdAt": "2026-04-26T22:48:55Z",
           "body_hash": "698160ca31f76ec6",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 78,
@@ -223,7 +295,7 @@
           "createdAt": "2026-04-26T22:47:24Z",
           "body_hash": "3d7151ba72e89323",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 77,
@@ -232,7 +304,7 @@
           "createdAt": "2026-04-26T20:58:59Z",
           "body_hash": "7b972d19f2d2a4c0",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 76,
@@ -241,7 +313,7 @@
           "createdAt": "2026-04-26T20:58:23Z",
           "body_hash": "702f7b8aaea70578",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 63,
@@ -250,7 +322,7 @@
           "createdAt": "2026-04-24T00:04:58Z",
           "body_hash": "4387d60dbaf303df",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 62,
@@ -259,7 +331,7 @@
           "createdAt": "2026-04-24T00:02:30Z",
           "body_hash": "256fe774ce03fbc4",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 61,
@@ -268,7 +340,7 @@
           "createdAt": "2026-04-24T00:02:29Z",
           "body_hash": "f0f4b8475e2317db",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 60,
@@ -277,7 +349,7 @@
           "createdAt": "2026-04-24T00:02:27Z",
           "body_hash": "bae46e8f3cc60865",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 59,
@@ -286,7 +358,7 @@
           "createdAt": "2026-04-24T00:02:25Z",
           "body_hash": "a807b7dae1004900",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 58,
@@ -295,7 +367,7 @@
           "createdAt": "2026-04-24T00:02:24Z",
           "body_hash": "6ccd5e56a7531244",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 57,
@@ -304,7 +376,7 @@
           "createdAt": "2026-04-24T00:02:22Z",
           "body_hash": "2062a14e3aaf4944",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 56,
@@ -313,30 +385,30 @@
           "createdAt": "2026-04-24T00:02:16Z",
           "body_hash": "7c1c3eac26e80d90",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         },
         {
           "number": 42,
-          "title": "[problem] ADR-022 .known-error.md \u2192 .verifying.md transition not happening consistently at release time",
+          "title": "[problem] ADR-022 .known-error.md → .verifying.md transition not happening consistently at release time",
           "author": "tompahoward",
           "createdAt": "2026-04-21T00:20:36Z",
           "body_hash": "b66ba6368d1d0dae",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
         }
       ]
     },
     "github-discussions:windyroad/agent-plugins": {
-      "fetched_at": "2026-05-30T01:20:15Z",
+      "fetched_at": "2026-05-31T00:00:00Z",
       "reports": [],
       "status": "skipped",
-      "skip_reason": "discussions-disabled-for-repo (HTTP 410) \u2014 reconfirmed 2026-05-30 (preserved status from prior 2026-05-26 poll; channel-skip status carried forward per fail-soft contract)"
+      "skip_reason": "discussions-disabled-for-repo (HTTP 410) — reconfirmed 2026-05-31 (preserved status from prior 2026-05-30 poll; channel-skip status carried forward per fail-soft contract)"
     },
     "github-security-advisories:windyroad/agent-plugins": {
-      "fetched_at": "2026-05-30T01:20:15Z",
+      "fetched_at": "2026-05-31T00:00:00Z",
       "reports": [],
       "status": "skipped",
-      "skip_reason": "external-comms-gate-misclassifies-read-only-list-as-outbound (gate bug P276/P198/#125; preserved per fail-soft contract \u2014 no fresh poll attempted this pass to avoid retriggering the gate-denial cycle; the gate-bug landing in @windyroad/risk-scorer is the unblock path)"
+      "skip_reason": "external-comms-gate-misclassifies-read-only-list-as-outbound (gate bug P276/P198/#125; preserved per fail-soft contract — no fresh poll attempted this pass to avoid retriggering the gate-denial cycle; the gate-bug landing in @windyroad/risk-scorer is the unblock path)"
     }
   }
 }

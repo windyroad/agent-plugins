@@ -2,9 +2,10 @@
 
 **Status**: Open
 **Reported**: 2026-05-30
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems; HIGH in practice — defeats the stated ADR-077 goal of "token-cheap load surface for routine architect-agent compliance review" because 43/75 ADRs render with no statement of what was decided at all)
+**Priority**: 12 (High) — Impact: 3 (Moderate — defeats ADR-077 token-cheap-load-surface goal; 43/75 ADRs render with no statement of what was decided) × Likelihood: 4 (Likely — fires for every ADR lacking a MADR `Chosen option:` tag — currently 57% of corpus)
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems; small generator edit to extract the `## Decision Outcome` section body, similar in shape to the existing `get_section`/`get_bullets` helpers)
+**Effort**: M (extract `## Decision Outcome` section body via `get_section`/`get_bullets`-shaped helper; plus per-ADR retro-fit pass)
+**WSJF**: 6.0 (re-rated 2026-05-31; was placeholder I=3×L=1; honest grounding lands at S12/L4/M)
 **Type**: technical
 
 ## Description

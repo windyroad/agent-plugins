@@ -4,7 +4,8 @@
 **Reported**: 2026-05-30
 **Priority**: 6 (Medium) — Impact: 3 (Moderate — same adopter-side mis-classification risk as P281, broader surface: 6 SKILLs vs 1) x Likelihood: 2 (Likely-but-narrower — each SKILL is invoked less frequently than capture-problem; agent inference may compensate in some flows)
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: M (6 SKILL.md path-template Edits across sibling skills; mechanical sweep with per-SKILL bats touch)
+**WSJF**: 3.0 (re-rated 2026-05-31; Severity 6 / Effort M preserved)
 **Type**: technical
 
 ## Description

@@ -2,9 +2,10 @@
 
 **Status**: Open
 **Reported**: 2026-05-30
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 12 (High) — Impact: 3 (Moderate — `claude plugin validate packages/itil` hard-fails for adopters; npm publish path disrupted) × Likelihood: 4 (Likely — already hit on dogfood; persistent on `@windyroad/itil@0.39.0`)
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: S (one-line frontmatter quoting fix; shipped session 9)
+**WSJF**: 12.0 (re-rated 2026-05-31; fix shipped session 9, awaiting K→V transition on next `@windyroad/itil` release)
 **Type**: technical
 
 ## Description

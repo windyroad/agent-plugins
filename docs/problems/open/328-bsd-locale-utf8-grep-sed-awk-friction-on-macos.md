@@ -2,9 +2,10 @@
 
 **Status**: Open
 **Reported**: 2026-05-30
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 8 (Medium) — Impact: 2 (Minor — dev tooling friction on contributor environments; published packages unaffected) × Likelihood: 4 (Likely — every macOS contributor without `LC_ALL=en_US.UTF-8` export hits at least one of the grep/sed/awk failure modes; observed multiple times in single session)
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: M (multiple call-sites across packages/* scripts need locale-export wrappers or a shared helper source)
+**WSJF**: 4.0 (re-rated 2026-05-31; was placeholder I=3×L=1; honest grounding raises to S8/L4/Effort-M)
 **Type**: technical
 
 ## Description

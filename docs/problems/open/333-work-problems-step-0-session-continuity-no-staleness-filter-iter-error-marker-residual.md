@@ -2,9 +2,10 @@
 
 **Status**: Open
 **Reported**: 2026-05-30
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 6 (Medium) — Impact: 2 (Minor — false-positive halt; recoverable via explicit user direction "Proceed") × Likelihood: 3 (Possible — fires on every session-start after any iter that left an error marker until the staleness gap is closed)
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: M (Step 0 SKILL.md amendment + staleness predicate + behavioural bats)
+**WSJF**: 3.0 (re-rated 2026-05-31; was placeholder I=3×L=1; honest grounding lands at S6/L3/M)
 **Type**: technical
 
 ## Description

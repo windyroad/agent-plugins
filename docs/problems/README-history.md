@@ -658,3 +658,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-05-31 (P325 K→V + P336/P337/P338/P343 backfill fragment rotated for P344 backfill)
 
 > Last reviewed: 2026-05-31 **P325 K→V transition + P336/P337/P338/P343 README backfill** — P325 (Node 20 action pins) → Verification Pending on @windyroad/architect@0.13.0 / itil@0.39.0 / retrospective@0.22.0 / risk-scorer@0.11.3 release (CI test 2145 root cause was stale 0.11.0 plugin shim on PATH overriding 0.12.2 — captured as P343 + memory `feedback_if_you_see_something_broken_fix_it`); also backfilling WSJF Rankings entries for P336 (transition-problems YAML — fix shipped same release), P337 (compendium Decision Outcome gap → ADR-078 amended to Option 9), P338 (P082 Phase 2 cognitive-a11y plugin sibling), P343 (install-updates PATH-ordering gap). Reconcile preflight reported 5 drift entries; all resolved in this commit.
+
+## 2026-05-31 (README reconciliation fragment rotated for /wr-itil:review-problems Step 0b pre-flight refresh)
+
+> Last reviewed: 2026-05-31 **README reconciled** — 1 drift entry corrected: P344 (work-problems orchestrator JTBD-predicate-check) added to WSJF Rankings (Open M, Reported 2026-05-31). Reconciliation contract per P118 + ADR-014 amended ("Reconciliation as preflight robustness layer"). Prior fragment (P325 K→V + P336/P337/P338/P343 backfill) rotated to README-history.md per P134.

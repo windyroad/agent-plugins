@@ -3,9 +3,9 @@
 **Status**: Open
 **Reported**: 2026-05-30 (work-problems wrap retro — defers from iter 9 retro deferred-ticket observation per iter 10 retro carry-forward)
 **Priority**: 6 (Medium) — Impact: 2 (Minor — line 3 staleness propagates across multiple iters; README-history.md misses entries; audit trail decoupled) × Likelihood: 3 (Likely — recurred 2 consecutive iters before iter-9 retro caught it)
-**Effort**: S (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: S (SKILL.md Step 7 anti-skip guard + behavioural bats; single-file shape)
 **Type**: technical
-**WSJF**: 3.0 (deferred — re-rate at next /wr-itil:review-problems)
+**WSJF**: 6.0 (re-rated 2026-05-31; Effort S confirmed; was 3.0 placeholder)
 
 ## Description
 

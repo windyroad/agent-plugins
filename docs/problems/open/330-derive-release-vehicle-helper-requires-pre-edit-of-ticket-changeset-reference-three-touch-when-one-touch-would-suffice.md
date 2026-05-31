@@ -3,9 +3,9 @@
 **Status**: Open
 **Reported**: 2026-05-30 (work-problems wrap retro)
 **Priority**: 6 (Medium) — Impact: 2 (Minor — adopter UX friction on every K→V transition; recoverable via documented exit-2 routing) × Likelihood: 3 (Possible — fires on every K→V where the changeset reference isn't already in the ticket body)
-**Effort**: S (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: S (small helper amendment OR manage-problem fix-ship-step seed; either path is single-file)
 **Type**: technical
-**WSJF**: 3.0 (deferred — re-rate at next /wr-itil:review-problems)
+**WSJF**: 6.0 (re-rated 2026-05-31; Effort S confirmed; was 3.0 placeholder)
 
 ## Description
 

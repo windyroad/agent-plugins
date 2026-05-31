@@ -130,3 +130,26 @@ Triggered by `/wr-itil:work-problems` Step 0b preflight dispatch (subprocess) ru
 - Step 4.5 invoked as part of `/wr-itil:work-problems` Step 0b preflight robustness layer — orchestrator dispatched a subprocess to refresh the inbound-discovery cache before entering the work-loop, so that the work-loop sees fresh discovery state (rather than 4.4-day-stale cache). This is the documented self-healing TTL-expiry pattern (a maintainer who runs `work-problems` once a week without `--force-upstream-recheck` still gets a fresh inbound-discovery pass at Step 0b).
 - No new third-party concerns surfaced — the discovery surface remains the maintainer-dogfood mirror loop; semantic-matching + local-ticket creation remain part of the deferred pipeline.
 - `AskUserQuestion` not called for the discovery step (subprocess context per orchestrator instruction — user presumed absent; mechanical-stage carve-out per P132 / ADR-062 § 4.5 AFK behaviour).
+
+## 2026-05-31T00:00:00Z — Discovery pass
+
+Triggered by `/wr-itil:work-problems` Step 0b preflight dispatch (subprocess) running `/wr-itil:review-problems`. Cache age (2026-05-30T01:20:15Z → now) was ~99939s — exceeded `ttl_seconds: 86400` → TTL-expiry auto-recheck branch (no explicit `--force-upstream-recheck` needed).
+
+| Channel | Status | Reports |
+|---------|--------|---------|
+| `github-issues:windyroad/agent-plugins` (title_prefix=`[problem]`) | OK | 43 active (open upstream) + 1 retained closed-upstream historical entry (#149) |
+| `github-discussions:windyroad/agent-plugins` (category=`Q&A`) | skipped | 0 — Discussions disabled for repo (HTTP 410); status carried forward |
+| `github-security-advisories:windyroad/agent-plugins` | skipped | 0 — read-only LIST call still blocked by the external-comms gate (P276/P198/#125 live; fresh poll not attempted this pass to preserve fail-soft semantics) |
+
+**Set delta vs prior cache (2026-05-30T01:20:15Z)**: **8 NEW reports, 0 newly-closed**. New entries: #180, #181, #183, #184, #185, #186, #187, #188 — all maintainer-authored (`tompahoward`) governance/UX observations filed via `/wr-itil:report-upstream` from this monorepo and adopter projects. Topics span gate-marker friction (#180/#181 — composes P035/P036/P037/P038/P041/P044), hook cwd-portability (#183), reconcile-readme false-positive (#184), em-dash blockers (#185/#186), sibling-family completeness scans (#187), staging-trap recovery splits ADR-014 grain (#188). #149 remains closed upstream (preserved as historical entry). Issue #170 returned by `gh search` but **filtered out** — title lacks the `[problem]` prefix the channel config requires (it is a meta-issue about issue-template label drift, not a problem report).
+
+**Pipeline outcomes**: 0 new pipeline classifications. The 8 new reports record as `pending-pipeline-processing`. The JTBD-alignment + dual-axis-risk classifiers, semantic-comparator matching, branch routing, and per-report acknowledgement comments remain **deferred** per the standing 2026-05-15 user direction (external-comms-gate sha bug P198/#125 blocks ack-comment posting). No clear-malicious closures, no above-threshold pushbacks, no new local tickets created from this discovery pass. (Some of the 8 new reports likely map to recently-captured local tickets — for example #188 likely composes with the P326 staged-index area, #184 with the P252/P306 reconcile-readme classifier family, #187 with P220/P229 batch-close discipline — but semantic-comparator matching is part of the deferred pipeline path, not asserted here.)
+
+**Cache refresh confirmation**: `docs/problems/.upstream-cache.json` rewritten with `last_checked: 2026-05-31T00:00:00Z`; per-channel `fetched_at` refreshed on all three channels; reports array extended with 8 new entries (newest-first within the open set, preserving prior entries' order); `$last_pass_note` updated.
+
+**Audit notes**:
+
+- Fail-soft contract held: the 2 skipped channels did not block the pass (discussions HTTP 410 + security-advisories gate-block both preserve their prior skip status).
+- Step 4.5 invoked as part of `/wr-itil:work-problems` Step 0b preflight robustness layer — orchestrator dispatched a subprocess to refresh the inbound-discovery cache before entering the work-loop, so the work-loop sees fresh discovery state. This is the documented self-healing TTL-expiry pattern (a maintainer who runs `work-problems` after the 24-hour TTL elapses still gets a fresh inbound-discovery pass at Step 0b).
+- The 8 new reports broaden the maintainer-dogfood mirror loop with concerns that surfaced this session (gate-marker friction class + sibling completeness + adopter-portability issues). Semantic-matching against the local backlog + local-ticket creation remain part of the deferred pipeline.
+- `AskUserQuestion` not called for the discovery step (subprocess context per orchestrator instruction — mechanical-stage carve-out per P132 / ADR-062 § 4.5 AFK behaviour). Pipeline classification deferral is recorded with the standing-direction citation rather than queued as a per-report ambiguity.

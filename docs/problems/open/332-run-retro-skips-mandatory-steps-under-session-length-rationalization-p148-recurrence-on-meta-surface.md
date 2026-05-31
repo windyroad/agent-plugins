@@ -2,9 +2,10 @@
 
 **Status**: Open
 **Reported**: 2026-05-30
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 9 (Medium) — Impact: 3 (Moderate — codification observations + briefing learnings + signal-vs-noise scoring lost; session-to-session continuity silently degrades) × Likelihood: 3 (Possible — directly witnessed this session; recurrence rate unknown but suspected across prior wrap retros)
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: M (anti-pattern enumeration blocks on Step 1.5 + Step 3 + wrap-mode disambiguation + SKILL.md amendments across run-retro)
+**WSJF**: 4.5 (re-rated 2026-05-31; was placeholder I=3×L=1; raised to S9 after grounding evidence)
 **Type**: technical
 
 ## Description
