@@ -1,11 +1,27 @@
 # Problem 033: No persistent risk register for ISO 31000 / ISO 27001 compliance
 
-**Status**: Known Error
+**Status**: Closed
 **Reported**: 2026-04-17
+**Closed**: 2026-05-31
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Possible (3)
 **Effort**: XL — re-rated from L 2026-04-28 per architect verdict on ADR-047 phase plan; original L sized only the scaffolding slice and missed the back-channel + backfill + behavioural-test scope surfaced by user's "for each risk in .risk-reports there should be something in the register" direction.
 **WSJF**: 2.25 — (9 × 2.0) / 8 → now known-error (XL effort)
 **Type**: technical
+
+## Closed as no longer relevant
+
+**Closure date**: 2026-05-31 (foreground relevance-scan batch 4, user-confirmed; ADR-022 lifecycle extension Known Error → Closed bypassing Verifying per ADR-079 — no fix was released as a single ship, the register accreted across multiple releases)
+**Closure reason**: implementation-shipped — the persistent risk register pattern shipped under ADR-056 with 30 active entries and an operational back-channel.
+**Evidence (per ADR-026 grounding + ADR-079 evidence-based relevance-close pass)**:
+- `docs/decisions/056-risk-register-back-channel-write-contract.proposed.md` exists — defines the register schema + back-channel hook + drain shim
+- `docs/risks/` contains 30 active `R<NNN>-<slug>.active.md` register entries (R001-R030 verified `ls`); R030 was scaffolded TODAY via the Step 6.4 mechanical drain of `.afk-run-state/risk-register-queue.jsonl` per ADR-056 Phase 2b — proves the back-channel is operational end-to-end
+- `wr-risk-scorer-drain-register-queue` shim (ADR-049) ships the Phase 2b drain primitive
+- Each register entry carries the ADR-026 sentinels (`Status: Active (auto-scaffolded — pending review)`, `not estimated — no prior data` for ungrounded scoring fields) — matches the ISO 31000 risk register contract for owners, treatment, residual
+- User direction *"for each risk in .risk-reports there should be something in the register"* is operational — the queue-then-drain mechanism guarantees every scorer-emitted risk gets a register entry
+- ISO 27001 axis (information-security-specific) overlaps with the ADR-056 register's R001/R025 entries (confidential-disclosure-in-outbound-prose / external-adopter-name-in-public-repo-ticket-prose)
+
+**Relevance evidence shape**: implementation-shipped (the directed register pattern shipped + 30 entries operational; queue-then-drain pattern operates end-to-end)
+**Authorising decision**: P346 user direction 2026-05-31; user confirmed P033 in foreground relevance-scan batch 4 ("close P033 then keep scanning"). The Known Error → Closed transition (bypassing Verifying) leverages the ADR-079 lifecycle extension shipped today by iter 4 — the close-on-evidence pattern applies to multi-release accretion-shape fixes as well as single-commit fixes.
 
 ## Description
 
