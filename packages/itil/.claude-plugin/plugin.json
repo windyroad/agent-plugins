@@ -7,7 +7,7 @@
         "computed_at": "2026-05-31T00:00:00Z",
         "evidence": {
           "breaking_change_age_days": null,
-          "closed_tickets_window": null,
+          "closed_tickets_window": 0,
           "days_shipped": 0,
           "invocations_30d": null
         },
