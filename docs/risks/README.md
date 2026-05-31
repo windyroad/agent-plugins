@@ -122,3 +122,4 @@ The catalogue is self-pruning: when a class stops surfacing in `.risk-reports/` 
 | [R027](R027-new-sessionstart-hook-shipped-without-dogfood-window.active.md) | New Sessionstart Hook Shipped Without Dogfood Window | pending | — | — | pending | pending | 2026-05-31 |
 | [R028](R028-jtbd-build-upon-guard-agent-prose-verdict-residual-above-appetite.active.md) | Jtbd Build Upon Guard Agent Prose Verdict Residual Above Appetite | pending | — | — | pending | pending | 2026-05-31 |
 | [R029](R029-r009-agent-prose-verdict-surface-no-llm-harness.active.md) | R009 Agent Prose Verdict Surface No Llm Harness | pending | — | — | pending | pending | 2026-05-31 |
+| [R030](R030-new-deny-surface-shipped-direct-to-changeset-no-dogfood.active.md) | New Deny Surface Shipped Direct To Changeset No Dogfood | pending | — | — | pending | pending | 2026-05-31 |
