@@ -1,8 +1,9 @@
 # Problem 141: AFK iter `packages/<plugin>/` commits without changesets — orchestrator-main-turn back-fill is fragile recovery, hook-level enforcement preferable
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-04-29
 **Re-opened**: 2026-05-31 (Phase 2 amendment per user direction — see "Multi-phase scope" below)
+**Phase 2 fix-released**: 2026-05-31 (Check 2b in-scope-changeset coverage shipped; awaiting verification in fresh AFK loop session)
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Likely (3) — observed twice in single session (40% miss rate across 5 publishable iters)
 **Effort**: M — new PreToolUse:Bash hook matching `git commit`; deny when staged diff includes `packages/<plugin>/` files but `.changeset/<plugin>-*.md` is not staged. Plus matching behavioural bats per ADR-005 + P081 (architect verdict 2026-05-02: ADR-005 is the plugin-testing-strategy ADR; ADR-037 is skill-scoped, not applicable to hook bats).
 **WSJF**: (9 × 2.0) / 2 = **9.0**
@@ -53,10 +54,10 @@ The Phase 1 hook's allow-list logic (`packages/itil/hooks/lib/changeset-detect.s
 
 - [x] **Phase 1 design + ship** (2026-04-29 → 2026-05-02)
 - [x] **Phase 1 verification across multiple sessions** (verified across sessions 4/5/6/7/8/9)
-- [ ] **Phase 2 amendment to `packages/itil/hooks/lib/changeset-detect.sh`** — add Check 2b (in-range existing changeset for plugin)
-- [ ] **Phase 2 bats** — 3 positive fixtures + 1 negative fixture per spec above
-- [ ] **Phase 2 SKILL.md guidance** — manage-problem Step 11 multi-commit slice note
-- [ ] **Phase 2 changeset** — `@windyroad/itil` minor
+- [x] **Phase 2 amendment to `packages/itil/hooks/lib/changeset-detect.sh`** — Check 2b shipped 2026-05-31 (in-scope-changeset coverage: unpushed-range additions + untracked + modified-not-staged; per-plugin granularity via YAML frontmatter scan; base = `@{u}` with `origin/main` fallback)
+- [x] **Phase 2 bats** — 8 new fixtures shipped 2026-05-31 (in-range positive, consumed-to-origin boundary, wrong-plugin negative, untracked positive, modified-not-staged positive, frontmatter-wrong-slug negative, held-window in-range positive, no-base fail-open-to-Phase-1)
+- [x] **Phase 2 SKILL.md guidance** — `manage-problem` Step 11 multi-commit slice note shipped 2026-05-31
+- [x] **Phase 2 changeset** — `.changeset/wr-itil-p141-phase-2-multi-commit-slice.md` (`@windyroad/itil` minor)
 - [ ] **Re-rate Priority and Effort** at next /wr-itil:review-problems
 
 > Surfaced 2026-04-28 / 2026-04-29 across the long `/wr-itil:work-problems` AFK loop session: iter 2 (P130 commit `b9da37e`) shipped `packages/itil/skills/work-problems/SKILL.md` + new bats without authoring `.changeset/wr-itil-p130-*.md`. Orchestrator main-turn back-filled at `dcc65b4`. Iter 7 (P134 commit `a8b6f18`) shipped 5-SKILL changes + new advisory script + 13 new bats without changeset. Orchestrator back-filled at `ac2425e`. Pattern: 2/5 publishable iters omitted changesets. Recovery cost: ~2× orchestrator main-turn commits + ~$2 risk-scorer round-trips per recovery.
@@ -182,3 +183,34 @@ Full `packages/itil/hooks/test/` suite green: 153/153 (132 prior + 21 new). No r
 - Spot-check the deny message renders cleanly in deny output (≤300 bytes; names slug + recovery).
 
 **Caveats per session-start briefing**: hooks load from the marketplace cache, not the source path — the new hook will fire on adopter agents only after `@windyroad/itil` is released and re-installed (`uninstall + install` per P106). The orchestrator owns release cadence per ADR-018.
+
+## Fix Released (Phase 2)
+
+**Released in**: `@windyroad/itil` next minor — see commit landing this transition + `.changeset/wr-itil-p141-phase-2-multi-commit-slice.md`.
+
+**Fix summary**: amends `packages/itil/hooks/lib/changeset-detect.sh::detect_changeset_required` with Check 2b — an in-scope `.changeset/*.md` (or held-window `docs/changesets-holding/*.md` entry per ADR-042 Rule 7) targeting `"@windyroad/<plugin>": <any-bump>` via YAML frontmatter satisfies the gate for subsequent same-plugin commits. Scope = unpushed-range additions (`<base>..HEAD` where base = `@{u}` upstream tracking branch with fallback to `origin/main`) + untracked working-tree files + modified-not-staged working-tree files. Once a changeset is consumed onto `origin/<base>` (drained by changesets-action at release time), Check 2b returns 1 and a fresh changeset is required for the next slice. Per-plugin granularity preserved: an `@windyroad/itil` changeset does NOT cover a `packages/voice-tone/` commit (the frontmatter scan is per-plugin-slug). Phase 1 strict-deny semantics preserved when neither Check 2a (staged) nor Check 2b (in-scope) is satisfied. Phase 1 → Phase 2 is a strict-widen-allow: no new deny paths introduced.
+
+**SKILL guidance**: `packages/itil/skills/manage-problem/SKILL.md` Step 11 amended with a `**Multi-commit slice changeset discipline (P141 Phase 2)**` paragraph documenting the pattern — author the changeset on the first commit in a same-plugin slice; subsequent commits naturally allow via Check 2b. Once consumed onto origin, fresh changeset required.
+
+**Tests**: 8 new behavioural bats per ADR-005 + P081 in `packages/itil/hooks/test/itil-changeset-discipline.bats`:
+- `P141 Phase 2 allow: in-range committed changeset for plugin covers subsequent same-plugin commit`
+- `P141 Phase 2 deny boundary: changeset consumed onto origin no longer counts; fresh required`
+- `P141 Phase 2 deny: in-range changeset for DIFFERENT plugin does not cover this plugin's source (wrong-plugin)`
+- `P141 Phase 2 allow: untracked .changeset/*.md targeting plugin covers staged source`
+- `P141 Phase 2 allow: in-range changeset that was modified-not-staged still covers`
+- `P141 Phase 2 deny: in-range changeset for plugin exists but its frontmatter targets a different plugin slug`
+- `P141 Phase 2 allow: held-window docs/changesets-holding/*.md in-range entry also covers (ADR-042 Rule 7 composes with Phase 2)`
+- `P141 Phase 2: when no upstream and no origin/main ref exists, Check 2b skips silently and Phase 1 strict-deny is preserved`
+
+Full `packages/itil/hooks/test/` suite green: 377/377 (369 prior + 8 new). No regressions to Phase 1 / P177 / P272 fixtures.
+
+**Self-application**: the Phase 2 amendment itself was committed as a single ADR-014-grain commit (hook + bats + SKILL note + changeset + ticket transition + README refresh) in iter 7 of the 2026-05-31 AFK loop — the OLD Phase 1 cache was still active during this iter, so single-commit grain avoided needing `BYPASS_CHANGESET_GATE=1` for a second commit. Verification of the new Phase 2 behaviour requires release + marketplace cache refresh per P106 (`uninstall + install`).
+
+**Awaiting user verification**:
+- Confirm in a fresh AFK loop session that an iter ships a multi-commit same-plugin slice with ONE changeset (not N) and the gate allows subsequent commits without `BYPASS_CHANGESET_GATE=1`.
+- Confirm the consumed-to-origin boundary fires: after a release drains a changeset, the next slice requires a fresh changeset.
+- Confirm cross-plugin coverage is denied (e.g. `@windyroad/itil` changeset does not satisfy a `packages/voice-tone/` commit).
+
+**Architecture composition**: composes with ADR-005 (plugin testing strategy), ADR-014 (single-commit grain), ADR-018 (release cadence), ADR-021 (changesets per package), ADR-038 (deny-message terseness — no deny changes; Check 2b only widens allow path), ADR-045 (Pattern 1 silent-on-pass — Check 2b's new allow branch stays silent), ADR-042 Rule 7 (held-window blessing — Check 2b reads held entries the same as `.changeset/`). No new ADR required (architect verdict 2026-05-31: same hook surface as Phase 1, same `publishable iter has a changeset in scope` semantic, just widens scope from `staged` to `staged ∪ in-range ∪ untracked ∪ modified-not-staged`).
+
+**JTBD alignment** (review 2026-05-31): serves JTBD-006 (Progress the Backlog While I'm Away), JTBD-008 (Decompose a Fix Into Coordinated Changes — the 2026-05-05 amendment to JTBD-001 explicitly names change-set-level governance), JTBD-001 (Enforce Governance Without Slowing Down), JTBD-302 (Trust That the README Describes the Plugin I Just Installed — cleaner CHANGELOG one-bullet-per-logical-release). No documented job requires per-commit changeset grain.

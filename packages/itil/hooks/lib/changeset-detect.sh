@@ -31,8 +31,29 @@
 #           - otherwise: publishable source — record the slug.
 #       * any other path: ignored (non-publishable surface — `.github/`,
 #         root config, top-level `docs/`, etc.).
-#   - If any path is publishable source AND no valid changeset is
-#     staged, return 1 + echo the slug.
+#   - If any path is publishable source:
+#       * **Check 2a (Phase 1)**: a `.changeset/*.md` (or held-window
+#         `docs/changesets-holding/*.md` per P177) staged → allow.
+#       * **Check 2b (Phase 2)**: an in-scope `.changeset/*.md` (or
+#         held-window entry) targeting the plugin via YAML frontmatter
+#         `"@windyroad/<slug>": <any-bump>` → allow. Scope =
+#         in-unpushed-range additions (`<base>..HEAD`) + untracked
+#         working-tree files + modified-not-staged working-tree files.
+#         Base = `@{u}` (current branch upstream) with fallback to
+#         `origin/main`. Once consumed onto origin (drained by
+#         changesets-action), the changeset is gone and a fresh one
+#         is required.
+#       * Neither check satisfied → return 1 + echo the slug.
+#
+# Phase 2 rationale (P141 2026-05-31): AFK orchestrator iters that
+# ship a multi-commit slice for one plugin (e.g. P346 Phase 3 across
+# 4 commits, 2 of which touched `packages/itil/`) should not author N
+# redundant changesets for one logical bump. changesets-action
+# collapses bump-class at version-package time, so per-commit
+# changesets render N CHANGELOG bullets for one release entry. Phase
+# 2's Check 2b lets the author write the changeset on the FIRST
+# commit; subsequent same-plugin commits naturally allow because the
+# changeset is already in the unpushed-range scope.
 #
 # Bypass:
 #   - `BYPASS_CHANGESET_GATE=1` env var → return 0 (allow). For
@@ -77,14 +98,85 @@
 #              shape — per-invocation deterministic, no markers).
 #   P141     — this helper.
 
+# P141 Phase 2 helper — does any `.changeset/*.md` (or held entry under
+# `docs/changesets-holding/*.md`) ALREADY in scope target the plugin
+# slug via its YAML frontmatter `"@windyroad/<slug>": <bump>` line?
+#
+# Scope = files reachable from HEAD but not from `origin/<base>`,
+# plus untracked working-tree changesets, plus modified-not-staged
+# changesets. Once a changeset is on `origin/<base>` (drained by
+# changesets-action at release time), it no longer counts — Check 2b
+# requires a fresh changeset for the next slice.
+#
+# Per-plugin granularity (NOT per-bump-class — changesets-action
+# collapses bump-class at version-package time when multiple
+# changesets for the same plugin merge; the published bump-class is
+# the maximum across the merged set).
+#
+# Base resolution: prefer the current branch's upstream (`@{u}`),
+# fall back to `origin/main`. If neither resolves (e.g. fresh
+# repo with no remotes), Check 2b returns 1 (no in-range scope to
+# inspect) — Phase 1 strict-deny behaviour is preserved.
+#
+# Returns: 0 (an in-scope changeset covers the plugin → allow)
+#          1 (no covering changeset found → caller falls through)
+_changeset_in_scope_covers_plugin() {
+  local slug="$1"
+  local base
+  local candidates path
+
+  base=$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null) \
+    || base="origin/main"
+  git rev-parse --verify --quiet "$base" >/dev/null 2>&1 || return 1
+
+  # Enumerate candidate changeset files:
+  #   1. In-range additions: changesets added in unpushed commits
+  #      (`<base>..HEAD`). A changeset later deleted in the same
+  #      range is filtered by the on-disk existence check below.
+  #   2. Untracked: changesets in the working tree not yet tracked
+  #      by git (author wrote but did not stage).
+  #   3. Modified-not-staged: changesets edited since their last
+  #      commit but not yet re-staged.
+  # Excludes `*/README.md` meta-docs (mirrors the staged-path branch).
+  candidates=$(
+    {
+      git log --diff-filter=A --name-only --pretty=format: "${base}..HEAD" \
+        -- '.changeset/*.md' 'docs/changesets-holding/*.md' 2>/dev/null
+      git ls-files --others --exclude-standard \
+        -- '.changeset/*.md' 'docs/changesets-holding/*.md' 2>/dev/null
+      git diff --name-only \
+        -- '.changeset/*.md' 'docs/changesets-holding/*.md' 2>/dev/null
+    } | grep -v '/README\.md$' | sort -u
+  )
+
+  [ -n "$candidates" ] || return 1
+
+  while IFS= read -r path; do
+    [ -n "$path" ] || continue
+    [ -f "$path" ] || continue
+    # Extract YAML frontmatter (lines between the first two `---`
+    # markers) and match the canonical `"@windyroad/<slug>":` line.
+    # awk scoping prevents false positives from prose body mentions.
+    if awk '/^---[[:space:]]*$/ { c++; if (c == 1) next; if (c == 2) exit } c == 1 { print }' "$path" 2>/dev/null \
+        | grep -qE "^\"@windyroad/${slug}\":[[:space:]]"; then
+      return 0
+    fi
+  done <<EOF
+$candidates
+EOF
+
+  return 1
+}
+
 # Detect whether the current staged set requires a changeset that is
-# not staged.
+# not satisfied by either staged Check 2a or in-scope Check 2b.
 #
 # Echoes the offending plugin slug on stdout when detected.
 #
 # Returns:
-#   0 — no change required, or BYPASS env set, or fail-open (allow)
-#   1 — change required + no changeset staged (caller should deny)
+#   0 — no change required, BYPASS env set, fail-open, or an in-scope
+#       changeset covers the plugin (Phase 2 Check 2b)
+#   1 — change required + no covering changeset (caller should deny)
 detect_changeset_required() {
   # Bypass via env var — single most-common legitimate escape.
   if [ "${BYPASS_CHANGESET_GATE:-}" = "1" ]; then
@@ -170,10 +262,22 @@ detect_changeset_required() {
 $staged
 EOF
 
-  if [ -n "$plugin_source_slug" ] && [ "$has_changeset" -eq 0 ]; then
-    printf '%s\n' "$plugin_source_slug"
-    return 1
+  # No publishable plugin source staged → allow.
+  [ -n "$plugin_source_slug" ] || return 0
+
+  # Check 2a — staged changeset satisfies (Phase 1 behaviour).
+  if [ "$has_changeset" -eq 1 ]; then
+    return 0
   fi
 
-  return 0
+  # Check 2b (P141 Phase 2) — in-scope changeset targeting the plugin
+  # satisfies. Scope = unpushed-range commits + untracked + modified-
+  # not-staged working-tree files. Once consumed onto origin, the
+  # changeset is gone and a fresh one is required.
+  if _changeset_in_scope_covers_plugin "$plugin_source_slug"; then
+    return 0
+  fi
+
+  printf '%s\n' "$plugin_source_slug"
+  return 1
 }

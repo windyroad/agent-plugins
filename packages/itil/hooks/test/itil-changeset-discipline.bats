@@ -421,3 +421,156 @@ run_bash_hook() {
   [ "$status" -eq 0 ]
   [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
 }
+
+# --- P141 Phase 2: in-scope-changeset coverage for multi-commit slices ---
+#
+# Phase 2 amendment (2026-05-31) widens the allow path: a `.changeset/*.md`
+# already in the unpushed slice scope (committed in a prior unpushed commit,
+# untracked in the working tree, or modified-not-staged) that targets the
+# plugin via its YAML frontmatter `"@windyroad/<plugin>": <any-bump>` line
+# also satisfies the gate. Phase 1 strict-deny behaviour preserved for the
+# no-coverage case.
+#
+# Scope boundary: `<base>..HEAD` where base = `@{u}` upstream tracking branch
+# with fallback to `origin/main`. Once a changeset is on `origin/<base>`
+# (drained by changesets-action), it no longer counts — Phase 2 boundary
+# fixture below proves this.
+#
+# Per-plugin granularity: an `@windyroad/itil` changeset does NOT cover a
+# `packages/voice-tone/` commit — wrong-plugin negative fixture below.
+
+# Helper: mark the current HEAD as `origin/main` so subsequent commits
+# fall into the unpushed-range scope `origin/main..HEAD`. The bats setup
+# creates a local repo with no remote; this synthesises an origin/main
+# ref via `git update-ref` for behavioural testing.
+mark_origin_at_head() {
+  git update-ref refs/remotes/origin/main HEAD
+}
+
+@test "P141 Phase 2 allow: in-range committed changeset for plugin covers subsequent same-plugin commit" {
+  mark_origin_at_head
+  # Commit 1: ship the changeset + initial source together (Phase 1 case).
+  echo "skill body 1" > packages/itil/skills/foo/SKILL.md
+  printf -- '---\n"@windyroad/itil": patch\n---\nfix the thing\n' > .changeset/wr-itil-p347.md
+  git add packages/itil/skills/foo/SKILL.md .changeset/wr-itil-p347.md
+  git -c commit.gpgsign=false commit --quiet -m "feat 1"
+  # Commit 2: stage more itil source — no new changeset, but the in-range
+  # changeset from commit 1 covers @windyroad/itil. Gate must allow.
+  echo "more skill" > packages/itil/skills/foo/SKILL.md
+  git add packages/itil/skills/foo/SKILL.md
+  run run_bash_hook "git commit -m 'feat 2'"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
+  # Silent pass per ADR-045 Pattern 1.
+  [ "${#output}" -eq 0 ]
+}
+
+@test "P141 Phase 2 deny boundary: changeset consumed onto origin no longer counts; fresh required" {
+  # Commit 1: ship the changeset onto the base.
+  printf -- '---\n"@windyroad/itil": patch\n---\nfix the thing\n' > .changeset/wr-itil-p347.md
+  git add .changeset/wr-itil-p347.md
+  git -c commit.gpgsign=false commit --quiet -m "changeset on base"
+  # Mark as drained-to-origin — changesets-action consumed it at release.
+  mark_origin_at_head
+  # Remove the file as changesets-action would on consumption.
+  git rm --quiet .changeset/wr-itil-p347.md
+  git -c commit.gpgsign=false commit --quiet -m "changeset consumed on origin"
+  mark_origin_at_head
+  # Now stage fresh itil source — no in-range changeset, no staged changeset.
+  echo "skill body" > packages/itil/skills/foo/SKILL.md
+  git add packages/itil/skills/foo/SKILL.md
+  run run_bash_hook "git commit -m 'feat'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
+  [[ "$output" == *"P141"* ]]
+}
+
+@test "P141 Phase 2 deny: in-range changeset for DIFFERENT plugin does not cover this plugin's source (wrong-plugin)" {
+  mark_origin_at_head
+  # Commit 1: ship an @windyroad/itil changeset.
+  echo "itil source" > packages/itil/skills/foo/SKILL.md
+  printf -- '---\n"@windyroad/itil": patch\n---\nfix itil\n' > .changeset/wr-itil-p347.md
+  git add packages/itil/skills/foo/SKILL.md .changeset/wr-itil-p347.md
+  git -c commit.gpgsign=false commit --quiet -m "feat itil"
+  # Commit 2: stage voice-tone source. The in-range itil changeset must
+  # NOT satisfy the gate for a different plugin (per-plugin granularity).
+  mkdir -p packages/voice-tone/src
+  echo "voice source" > packages/voice-tone/src/x.ts
+  git add packages/voice-tone/src/x.ts
+  run run_bash_hook "git commit -m 'feat voice'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
+  # Deny message names the offending plugin slug — voice-tone, not itil.
+  [[ "$output" == *"voice-tone"* ]]
+}
+
+@test "P141 Phase 2 allow: untracked .changeset/*.md targeting plugin covers staged source" {
+  mark_origin_at_head
+  # Author the changeset to disk but DO NOT stage. Gate must still
+  # recognise it via `git ls-files --others --exclude-standard`.
+  printf -- '---\n"@windyroad/itil": minor\n---\nfeature\n' > .changeset/wr-itil-p347.md
+  echo "skill body" > packages/itil/skills/foo/SKILL.md
+  git add packages/itil/skills/foo/SKILL.md
+  run run_bash_hook "git commit -m 'feat'"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
+  [ "${#output}" -eq 0 ]
+}
+
+@test "P141 Phase 2 allow: in-range changeset that was modified-not-staged still covers" {
+  mark_origin_at_head
+  # Commit 1: ship the changeset.
+  printf -- '---\n"@windyroad/itil": patch\n---\noriginal\n' > .changeset/wr-itil-p347.md
+  git add .changeset/wr-itil-p347.md
+  git -c commit.gpgsign=false commit --quiet -m "changeset"
+  # Modify the prose body (frontmatter preserved); do NOT stage the edit.
+  printf -- '---\n"@windyroad/itil": patch\n---\nedited prose\n' > .changeset/wr-itil-p347.md
+  # Stage source.
+  echo "skill body" > packages/itil/skills/foo/SKILL.md
+  git add packages/itil/skills/foo/SKILL.md
+  run run_bash_hook "git commit -m 'feat'"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
+}
+
+@test "P141 Phase 2 deny: in-range changeset for plugin exists but its frontmatter targets a different plugin slug" {
+  mark_origin_at_head
+  # A changeset committed in-range whose frontmatter declares ONLY
+  # @windyroad/voice-tone, not @windyroad/itil. Staged source is itil.
+  # Check 2b must NOT match (frontmatter scan is per-plugin-slug).
+  printf -- '---\n"@windyroad/voice-tone": patch\n---\nfix voice\n' > .changeset/wr-voice-p999.md
+  git add .changeset/wr-voice-p999.md
+  git -c commit.gpgsign=false commit --quiet -m "voice changeset"
+  echo "skill body" > packages/itil/skills/foo/SKILL.md
+  git add packages/itil/skills/foo/SKILL.md
+  run run_bash_hook "git commit -m 'feat itil'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
+  [[ "$output" == *"itil"* ]]
+}
+
+@test "P141 Phase 2 allow: held-window docs/changesets-holding/*.md in-range entry also covers (ADR-042 Rule 7 composes with Phase 2)" {
+  mark_origin_at_head
+  mkdir -p docs/changesets-holding
+  printf -- '---\n"@windyroad/itil": patch\n---\nheld fix\n' > docs/changesets-holding/wr-itil-p347.md
+  git add docs/changesets-holding/wr-itil-p347.md
+  git -c commit.gpgsign=false commit --quiet -m "held changeset"
+  # Subsequent itil source commit — held entry in range covers.
+  echo "skill body" > packages/itil/skills/foo/SKILL.md
+  git add packages/itil/skills/foo/SKILL.md
+  run run_bash_hook "git commit -m 'feat'"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
+}
+
+@test "P141 Phase 2: when no upstream and no origin/main ref exists, Check 2b skips silently and Phase 1 strict-deny is preserved" {
+  # No mark_origin_at_head — refs/remotes/origin/main is absent.
+  # Stage source without any changeset. Phase 1 strict-deny must fire
+  # (Check 2b returns 1 on missing base, Check 2a returns 0).
+  echo "skill body" > packages/itil/skills/foo/SKILL.md
+  git add packages/itil/skills/foo/SKILL.md
+  run run_bash_hook "git commit -m 'feat'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
+  [[ "$output" == *"P141"* ]]
+}
