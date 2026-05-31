@@ -1,6 +1,6 @@
 # Problem 346: `/wr-itil:review-problems` has no path to close tickets that are no longer relevant (evidence-based, NOT age-based) — structural outflow gap drives monotonic backlog growth
 
-**Status**: Open
+**Status**: Verifying
 **Reported**: 2026-05-31
 **Priority**: 9 (High) — Impact: 3 × Likelihood: 3 (deferred — re-rate at next /wr-itil:review-problems; severity raised at capture per user direction "I'm worried about the trajectory")
 **Origin**: internal
@@ -139,13 +139,16 @@ Phase 2 — evidence shape expansion (DONE 2026-05-31 iter 5):
 - [x] Update SKILL Step 4.6 + manage-problem lifecycle table — `3bdd1d7`
 - [x] Add `@windyroad/itil` minor + patch changesets — queued for next release
 
-Phase 3 — capture-time hang-off check (OUTSTANDING):
-- [ ] Author `packages/itil/agents/hang-off-check.md` subagent (inputs/outputs per Phase 3 spec above)
-- [ ] Amend `/wr-itil:capture-problem` Step 2 to dispatch the subagent after mechanical pre-filter
-- [ ] Amend `/wr-itil:manage-problem` Step 2 to dispatch the same subagent
-- [ ] Add behavioural bats: P347-vs-P346 regression fixture (assert HANG_OFF: P346); genuinely-new fixture (assert PROCEED_NEW); subtle sibling-vs-parent fixture
-- [ ] Add `@windyroad/itil` minor changeset for the Phase 3 feature
-- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems — Phase 3 effort likely M (subagent + 2 SKILL amendments + 3 bats fixtures)
+Phase 3 — capture-time hang-off check (DONE 2026-05-31 iter 6):
+- [x] Author `packages/itil/agents/hang-off-check.md` subagent (inputs/outputs per Phase 3 spec above) — commit `89c0ea7`
+- [x] Amend `/wr-itil:capture-problem` Step 2 to dispatch the subagent after mechanical pre-filter — Step 2 split into 2a (existing) + 2b (NEW dispatch) — commit `f9a7d6a`
+- [x] Amend `/wr-itil:manage-problem` Step 2 to dispatch the same subagent — sub-step 2.8 added (parallel shape to 2b; JTBD-301 firewall skips plugin-user-ingestion path) — commit `f9a7d6a`
+- [x] Add behavioural bats: P347-vs-P346 regression fixture (assert HANG_OFF: P346); genuinely-new fixture (assert PROCEED_NEW); subtle sibling-vs-parent fixture — `packages/itil/agents/test/hang-off-check.bats` + `test/fixtures/regression-p347-vs-p346.md` + `test/fixtures/proceed-new-genuinely-new.md` + `test/fixtures/proceed-new-subtle-sibling.md` — 32 structural assertions GREEN per ADR-052 Surface 2; behavioural execution lands under RFC-012 (promptfoo eval harness — proposed) — commit `89c0ea7`
+- [x] Add `@windyroad/itil` minor changeset for the Phase 3 feature — TWO changesets (subagent + SKILL wiring; ADR-014 single-commit grain split across slices 3b + 3c) — commits `89c0ea7` + `f9a7d6a`
+- [x] Codify the fresh-context-subagent architectural pattern — ADR-032 amended with 5th invocation pattern (P346 amendment, 2026-05-31) per architect issue #1 — commit `d58d408`
+- [x] RFC trace per ADR-071 unconditional Problem→RFC — RFC-013 created tracing Phases 1+2+3 — commit `d58d408`
+- [x] Fix architect-flagged ADR-046 mis-citation in P346 body Phase 3 section — commit `d58d408`
+- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems — observed effort: L (subagent + 2 SKILL amendments + 3 bats fixtures + 32 structural assertions + 3 canonical fixture markdowns + ADR-032 amendment + RFC-013 + 2 changesets + plugin.json registration + P346 body update)
 
 Cross-cutting:
 - [ ] After Phase 3 ships, re-evaluate the trajectory chart (the dashboard at `/wr-architect:agent` accessible via `/wr-itil:list-problems`) — expected: backlog growth slows due to inflow discipline + outflow continues from Phase 1+2
@@ -197,6 +200,20 @@ Phase 1 shipped in this commit (Open → Verifying via ADR-022 P143 fold-fix ame
 - **Real-backlog smoke test (2026-05-31, 143 open/known-error tickets)**: 6 CLOSE-CANDIDATE (4.2%), 44 KEEP, 93 SKIP — conservative behaviour confirmed; no false-positive closes on tickets with live file references. The 6 CLOSE-CANDIDATEs (P091/P180/P242/P244/P251/P212) reference paths verified absent in `git ls-files`.
 
 Awaiting user verification. Verification path: run `/wr-itil:review-problems` after release lands → confirm Step 4.6 fires the relevance-close pass + correctly batches the surfaced CLOSE-CANDIDATE tickets into one commit + Step 5's README refresh rides the same commit.
+
+**Phase 3 shipped 2026-05-31 iter 6** via 3 commits per ADR-014 single-commit grain:
+
+- **Commit `d58d408`** (governance prerequisites): ADR-032 amendment (5th invocation pattern row + "Foreground fresh-context-subagent-as-decision-arbiter variant (P346 amendment, 2026-05-31)" section) + RFC-013 (multi-phase trace per ADR-071) + P346 body ADR-046 mis-citation fix + auto-added `## RFCs` reverse-trace section.
+- **Commit `89c0ea7`** (subagent + tests + changeset): `packages/itil/agents/hang-off-check.md` (read-only reviewer; HANG_OFF: P<NNN> | PROCEED_NEW verdict; JTBD-301 firewall; AFK safe-default; @jtbd JTBD-001/006/101/201 annotation) + `packages/itil/agents/test/hang-off-check.bats` (32 assertions GREEN) + 3 canonical fixture markdowns + plugin.json maturity registration + `.changeset/p346-phase-3-hang-off-check-subagent.md`.
+- **Commit `f9a7d6a`** (SKILL wiring + companion changeset): `/wr-itil:capture-problem` Step 2 split into 2a (existing title-only grep) + 2b (NEW mechanical pre-filter + subagent dispatch) + `/wr-itil:manage-problem` Step 2 sub-step 2.8 (parallel shape; JTBD-301 firewall skips plugin-user-ingestion path) + `.changeset/p346-phase-3-wire-hang-off-check-into-skills.md`.
+
+- **Architect verdict** 2026-05-31 iter 6: ALIGNED-WITH-NITS (issue #1 — codify the 5th invocation pattern, done as ADR-032 amendment; issue #2 — ADR-046 mis-citation, fixed; issue #3 — RFC trace per ADR-071, done as RFC-013).
+- **JTBD verdict** 2026-05-31 iter 6: ALIGNED-WITH-NITS across JTBD-001 (60s flow budget protected via candidate-cap short-circuit), JTBD-006 (AFK safe-default: ambiguous → PROCEED_NEW), JTBD-101 (reusable fresh-context-subagent primitive), JTBD-201 (rationale + per-candidate explanation captured in audit trail), JTBD-301 firewall (maintainer-side only; plugin-user-ingestion path skipped).
+- **Risk-scorer verdict** 2026-05-31: WITHIN-APPETITE on all three commits (4/25 Low across commit/push/release layers).
+- **Behavioural second-source**: 32/32 GREEN bats fixtures on `hang-off-check.bats`; 3 canonical fixture markdowns documenting the expected verdict shape for promptfoo behavioural execution under RFC-012 (proposed).
+- **Negative regression coverage**: the P347-vs-P346 case from this very session is the canonical fixture at `packages/itil/agents/test/fixtures/regression-p347-vs-p346.md`. If a future change regresses the subagent's verdict on this fixture, the SKILL no longer fulfils its driver.
+
+Verification path for the user (post-release): run `/wr-itil:capture-problem` with a description carrying signals shared with an existing open/verifying parent; confirm Step 2b mechanical pre-filter surfaces the candidate, hang-off-check subagent dispatches, returns HANG_OFF: P<NNN> with rationale, and capture-problem halts with a structured directive for the orchestrator. Smoke against a known-distinct capture; confirm PROCEED_NEW + rationale appended to the new ticket's `## Related` section.
 
 Deferred to sibling tickets per ADR-079 Phase 1 scope discipline:
 - ADR-supersession evidence shape (a ticket depending on an ADR that has since been superseded by a later decision).
