@@ -153,3 +153,28 @@ Triggered by `/wr-itil:work-problems` Step 0b preflight dispatch (subprocess) ru
 - Step 4.5 invoked as part of `/wr-itil:work-problems` Step 0b preflight robustness layer — orchestrator dispatched a subprocess to refresh the inbound-discovery cache before entering the work-loop, so the work-loop sees fresh discovery state. This is the documented self-healing TTL-expiry pattern (a maintainer who runs `work-problems` after the 24-hour TTL elapses still gets a fresh inbound-discovery pass at Step 0b).
 - The 8 new reports broaden the maintainer-dogfood mirror loop with concerns that surfaced this session (gate-marker friction class + sibling completeness + adopter-portability issues). Semantic-matching against the local backlog + local-ticket creation remain part of the deferred pipeline.
 - `AskUserQuestion` not called for the discovery step (subprocess context per orchestrator instruction — mechanical-stage carve-out per P132 / ADR-062 § 4.5 AFK behaviour). Pipeline classification deferral is recorded with the standing-direction citation rather than queued as a per-report ambiguity.
+
+
+## 2026-06-01T05:04:00Z — Discovery pass
+
+Triggered by `/wr-itil:work-problems` Step 0b preflight dispatch running `/wr-itil:review-problems`. Cache age (2026-05-31T00:00:00Z → now) was ~104040s — exceeded `ttl_seconds: 86400` → TTL-expiry auto-recheck branch (no explicit `--force-upstream-recheck` needed).
+
+| Channel | Status | Reports |
+|---------|--------|---------|
+| `github-issues:windyroad/agent-plugins` (title_prefix=`[problem]`) | OK | 42 active (open upstream) + 1 retained closed-upstream historical entry (#149) |
+| `github-discussions:windyroad/agent-plugins` (category=`Q&A`) | skipped | 0 — Discussions disabled for repo (HTTP 410); status carried forward |
+| `github-security-advisories:windyroad/agent-plugins` | skipped | 0 — read-only LIST call still blocked by the external-comms gate (P276/P198/#125 live; fresh poll not attempted this pass to preserve fail-soft semantics) |
+
+**Set delta vs prior cache (2026-05-31T00:00:00Z)**: **0 new, 0 newly-closed**. The 42 `[problem]`-prefixed open issues match the prior cache set exactly (no inbound surface activity in the ~29-hour TTL window). #149 remains closed upstream (preserved as historical entry).
+
+**Pipeline outcomes**: 0 new pipeline classifications. The 42 cached reports remain `pending-pipeline-processing`. The JTBD-alignment + dual-axis-risk classifiers, semantic-comparator matching, branch routing, and per-report acknowledgement comments remain **deferred** per the standing 2026-05-15 user direction (external-comms-gate sha bug P198/#125 blocks ack-comment posting).
+
+**Cache refresh confirmation**: `docs/problems/.upstream-cache.json` rewritten with `last_checked: 2026-06-01T05:04:00Z`; per-channel `fetched_at` refreshed on all three channels; reports array unchanged (zero-delta); `$last_pass_note` updated.
+
+**Step 4.6 relevance-close observation (not actioned this pass)**: evaluator surfaced 2 plain `CLOSE-CANDIDATE` verdicts — P229 (inbound-discovery ack comments bureaucratic) and P263 (CI gate `claude plugin install --dry-run`). Both visibly active K-state tickets with `Awaiting release for K→V transition` / structural-fix-pending narrative; ADR-shipped + skill-exists citations are CONTEXT, not drivers whose shipping renders the tickets moot. Preserved against auto-close per the false-positive class P347 / ADR-079 Phase 2 (the evaluator's shape-vocabulary doesn't disambiguate "active K-state body cites shipped ADR" from "ticket itself driven by shipped ADR"). Remaining 84 verdicts route to `CLOSE-CANDIDATE-WITH-CAVEAT` (next interactive review's AskUserQuestion surface), 4 to `KEEP-WITH-NOTE` (Phase 1 false-positive class), 38 to `SKIP` (age gate).
+
+**Audit notes**:
+
+- Fail-soft contract held: the 2 skipped channels did not block the pass (discussions HTTP 410 + security-advisories gate-block both preserve their prior skip status).
+- Step 4.5 invoked as part of `/wr-itil:work-problems` Step 0b preflight robustness layer — orchestrator dispatched this subprocess to refresh the inbound-discovery cache before re-entering the work-loop, so the work-loop sees fresh discovery state. Self-healing TTL-expiry pattern continues to hold.
+- `AskUserQuestion` not called for the discovery step OR the relevance-close observation (subprocess context per orchestrator instruction — mechanical-stage carve-out per P132 / ADR-062 § 4.5 AFK behaviour). P229/P263 false-positive observation recorded here for the next interactive review surface (NOT silently actioned per `feedback_if_you_see_something_broken_fix_it` discipline — silent close of clearly-active tickets would be observably broken).

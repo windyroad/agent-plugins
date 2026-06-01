@@ -1,11 +1,11 @@
 {
   "$schema": "https://windyroad.github.io/agent-plugins/schemas/upstream-cache.json",
   "$comment": "Cache file for inbound report discovery (P079 / ADR-062). Written by /wr-itil:review-problems Step 8.5 after each discovery pass.",
-  "last_checked": "2026-05-31T00:00:00Z",
-  "$last_pass_note": "2026-05-31 review-problems discovery pass (work-problems Step 0b preflight, TTL-expiry auto-recheck; cache age ~99939s exceeded ttl_seconds 86400). github-issues: 43 active [problem] reports (prior set 34 + 8 NEW: #180/#181/#183/#184/#185/#186/#187/#188 — all maintainer-authored governance/UX observations + #170 returned by gh search but FILTERED OUT as it lacks the [problem] title prefix the channel config requires). #149 retained as historical closed-upstream entry. discussions skipped (HTTP 410 — disabled for repo); security-advisories poll skipped (P276/P198/#125 external-comms gate misclassification — preserved per prior-pass evidence). Pipeline classification for the 8 new reports remains deferred per 2026-05-15 user direction (external-comms-gate ack-comment bottleneck not yet cleared).",
+  "last_checked": "2026-06-01T05:04:00Z",
+  "$last_pass_note": "2026-06-01 review-problems discovery pass (work-problems Step 0b preflight, TTL-expiry auto-recheck; cache age ~104040s exceeded ttl_seconds 86400). github-issues: 42 active [problem] reports — set unchanged vs prior 2026-05-31 cache (zero new, zero newly-closed). #149 retained as historical closed-upstream entry. discussions skipped (HTTP 410 — disabled for repo); security-advisories poll skipped (P276/P198/#125 external-comms gate misclassification — preserved per prior-pass evidence). Pipeline classification for the 42 unchanged reports remains deferred per 2026-05-15 user direction (external-comms-gate ack-comment bottleneck not yet cleared).",
   "channels": {
     "github-issues:windyroad/agent-plugins": {
-      "fetched_at": "2026-05-31T00:00:00Z",
+      "fetched_at": "2026-06-01T05:04:00Z",
       "filter": "title_prefix=[problem] (label filter removed; see channels-config $filter-note)",
       "status": "ok",
       "reports": [
@@ -399,13 +399,13 @@
       ]
     },
     "github-discussions:windyroad/agent-plugins": {
-      "fetched_at": "2026-05-31T00:00:00Z",
+      "fetched_at": "2026-06-01T05:04:00Z",
       "reports": [],
       "status": "skipped",
-      "skip_reason": "discussions-disabled-for-repo (HTTP 410) — reconfirmed 2026-05-31 (preserved status from prior 2026-05-30 poll; channel-skip status carried forward per fail-soft contract)"
+      "skip_reason": "discussions-disabled-for-repo (HTTP 410) — reconfirmed 2026-06-01 (preserved status from prior 2026-05-31 poll; channel-skip status carried forward per fail-soft contract)"
     },
     "github-security-advisories:windyroad/agent-plugins": {
-      "fetched_at": "2026-05-31T00:00:00Z",
+      "fetched_at": "2026-06-01T05:04:00Z",
       "reports": [],
       "status": "skipped",
       "skip_reason": "external-comms-gate-misclassifies-read-only-list-as-outbound (gate bug P276/P198/#125; preserved per fail-soft contract — no fresh poll attempted this pass to avoid retriggering the gate-denial cycle; the gate-bug landing in @windyroad/risk-scorer is the unblock path)"
