@@ -4,8 +4,8 @@
 **Reported**: 2026-05-30
 **Priority**: 12 (High) — Impact: 3 (Moderate — defeats ADR-077 token-cheap-load-surface goal; 43/75 ADRs render with no statement of what was decided) × Likelihood: 4 (Likely — fires for every ADR lacking a MADR `Chosen option:` tag — currently 57% of corpus)
 **Origin**: internal
-**Effort**: M (extract `## Decision Outcome` section body via `get_section`/`get_bullets`-shaped helper; plus per-ADR retro-fit pass)
-**WSJF**: 6.0 (re-rated 2026-05-31; was placeholder I=3×L=1; honest grounding lands at S12/L4/M)
+**Effort**: L (re-rated 2026-06-01 — architect verdict on 2026-06-01 work-problems iteration redirected the fix path from "extend the programmatic extractor" to ADR-078 Phase 1: new `architect-compendium-update-entry.sh` PostToolUse hook + `architect-readme-pairing-check.sh` pre-commit hook + retire bats test 2145 + retire `architect-compendium-refresh-discipline.sh` PreToolUse hook + cadence-driven migration of 43 non-canonical ADRs. RFC-scope per ADR-060. Was M when scoped as a regex extension; superseded.)
+**WSJF**: 3.0 (re-rated 2026-06-01 — (Severity 12 × Status 1.0) / Effort L (4) = 3.0; was 6.0 under the M-effort regex-extension scope.)
 **Type**: technical
 
 ## Description
@@ -53,26 +53,56 @@ Open the per-ADR file (`docs/decisions/<NNN>-<slug>.<status>.md`) for any ADR wh
 
 ## Root Cause Analysis
 
+Root cause confirmed at two layers:
+
+1. **Surface-level**: `get_chosen` regex `/^Chosen/` matches only 34 of 77 ADRs (the plain-prefix MADR `Chosen option: …` shape). 38 ADRs use bold-prefixed `**Chosen option:**` (regex MISSES the leading `**`); 4 ADRs use prose-only `## Decision Outcome` (MADR-permitted alternative — no `Chosen option:` tag at all). Total gap: 42 ADRs.
+2. **Architecture-level (architect verdict 2026-06-01)**: the original Investigation Tasks below (extend `get_chosen` regex + add Decision-Outcome-body fallback + bats coverage) is **Option 6** from ADR-078's Considered Options. ADR-078 (`human-oversight: confirmed`, oversight-date 2026-05-31) explicitly chose Option 9 (architect-on-edit LLM-authored entries via PostToolUse hook) and **rejected** Option 6 with prejudice. User direction recorded in ADR-078 amendment 2026-05-31: *"I never approved the scripted extraction. You are supposed to run decisions by me"* (P339). Implementing the regex+fallback path now would re-invest in retiring infrastructure and contradict the ratified architectural choice.
+
 ### Investigation Tasks
 
-- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems — likely HIGH given the load-surface impact
-- [ ] Extend `get_chosen` to fall back to `get_section "$file" "Decision Outcome"` and emit the first paragraph (or first ~240 chars) when no `Chosen option:` tag is found
-- [ ] Decide whether to additionally surface the first Decision Drivers bullet on entries that have no Decision Outcome prose either — separate decision per ADR-077 § Intentionally NOT in this routine view
-- [ ] Update `docs/decisions/README.md` head-of-file prose at line 12 if the inclusion set widens beyond Chosen tag
-- [ ] Behavioural bats in `packages/architect/scripts/test/generate-decisions-compendium.bats`: assert that every ADR in `docs/decisions/` (excluding README.md) renders a Decision Outcome line in the compendium output — coverage floor; currently the `each ADR emits ID + Title + Status + Chosen + Confirmation + Related` test passes despite 57% having no Chosen line because the test fixture's ADRs all carry the tag
-- [ ] Patch the existing `# 9 each ADR emits ID + Title + Status + Chosen + Confirmation + Related` bats fixture to include an ADR WITHOUT a `Chosen option:` tag and assert it still renders Decision Outcome content — closes the gap that lets the production corpus drift past the fixture
+- [x] Re-rate Priority and Effort at next /wr-itil:review-problems — done 2026-06-01: Effort re-rated M → L given ADR-078 Phase 1 scope (multi-hook + retirement), WSJF re-rated 6.0 → 3.0.
+- [x] Surface that the regex-extension fix path is the wrong mechanism — done 2026-06-01 via architect agent verdict during work-problems iteration. See `## Fix Strategy` below.
+- [ ] ~~Extend `get_chosen` to fall back to `get_section "$file" "Decision Outcome"` and emit the first paragraph (or first ~240 chars) when no `Chosen option:` tag is found~~ — **SUPERSEDED by ADR-078 Option 9**. Do not implement; see Fix Strategy.
+- [ ] ~~Decide whether to additionally surface the first Decision Drivers bullet~~ — **SUPERSEDED**. Architect-authored entries will surface what the architect agent judges material per-edit; no separate driver-bullet decision needed.
+- [ ] ~~Update `docs/decisions/README.md` head-of-file prose at line 12 if the inclusion set widens beyond Chosen tag~~ — **SUPERSEDED**. Architect-on-edit will rewrite entries per-edit; the head-of-file prose changes only if the architectural framing changes (already amended by ADR-078).
+- [ ] ~~Behavioural bats in `packages/architect/scripts/test/generate-decisions-compendium.bats`~~ — **SUPERSEDED**. ADR-078 retires bats test 2145 (`committed compendium matches generator output`) and the idempotency criterion entirely; replacement is `architect-readme-pairing-check.sh` pre-commit hook.
+- [ ] ~~Patch the existing `# 9 each ADR emits ID + Title + Status + Chosen + Confirmation + Related` bats fixture~~ — **SUPERSEDED**. See above.
+
+## Fix Strategy
+
+Per ADR-078 Phase 1 (single phase — architect-on-edit hook), the fix is RFC-scoped infrastructure:
+
+1. **New PostToolUse hook** `packages/architect/hooks/architect-compendium-update-entry.sh` triggers on Edit/Write events targeting `docs/decisions/*.md` (excluding `README.md`). Spawns `claude -p` subprocess invoking the architect agent with just-edited ADR body + current README entry; architect emits updated entry (Title + Status + Oversight + `**Decides:**` semantic TL;DR + `**Confirmation:**` + `**Related:**`); hook applies as `Edit` on README; stages so same-commit landing per ADR-014.
+2. **New pre-commit hook** `packages/architect/hooks/architect-readme-pairing-check.sh` asserts every commit that edits a `docs/decisions/*.md` body also edits `docs/decisions/README.md`. Replaces ADR-077 confirmation criterion (g) drift gate.
+3. **Retire** `packages/architect/scripts/generate-decisions-compendium.sh` as load-bearing primary path (keep as backstop for one release cycle, then remove).
+4. **Retire** `packages/architect/scripts/test/generate-decisions-compendium.bats` idempotency assertion + drift-gate test 2145.
+5. **Retire** `packages/architect/hooks/architect-compendium-refresh-discipline.sh` PreToolUse refresh-discipline hook (Option 9 makes drift structurally impossible).
+6. **Cadence-driven migration**: existing 43 non-canonical ADRs migrate naturally the next time each is touched (the new hook fires on every edit; no mass backfill).
+7. **Amend ADR-077** confirmation criteria (b), (g), (h) per ADR-078 § "Architectural relationship between body and README under Option 9".
+
+**Scope warrants RFC capture** per ADR-060 framework — multi-hook implementation + retirement schedule + ADR-077 amendment. Stories:
+
+- Story A: implement + test architect-compendium-update-entry.sh (PostToolUse hook + claude -p invocation + Edit application + staging).
+- Story B: implement + test architect-readme-pairing-check.sh (pre-commit pairing assertion).
+- Story C: retire generate-decisions-compendium.sh + bats (deferred to release cycle N+1 per ADR-078 backstop guidance).
+- Story D: retire architect-compendium-refresh-discipline.sh (gated on Story A landing).
+- Story E: ADR-077 confirmation-criteria amendment commit.
+
+**Direction question queued for human ratification** (outstanding_questions in this iteration's summary): RFC capture for ADR-078 Phase 1 implementation, decomposed into the 5 stories above. The AFK orchestrator will not capture the RFC or implement the stories without explicit user direction (this work is RFC-grain per ADR-060 + carries a ratified ADR substance dependency).
 
 ## Dependencies
 
 - **Blocks**: ADR-077's load-surface goal for routine architect-agent compliance review on 57% of ADRs.
-- **Blocked by**: (none)
-- **Composes with**: ADR-077 (the compendium ADR — this is a defect against confirmation criterion (a) "Compact rendered index of every ADR's chosen option"); P334 (just-shipped portability fix — same script).
+- **Blocked by**: (none mechanical; RFC capture for ADR-078 Phase 1 is a direction-class outstanding question for the user — not encoded as a problem-ticket blocker, no ticket to reference)
+- **Composes with**: ADR-077 (the compendium ADR — this is a defect against confirmation criterion (a) "Compact rendered index of every ADR's chosen option"); ADR-078 (the implementation path — Option 9 ratified 2026-05-31; fix delivers via ADR-078 Phase 1 hooks, not the original regex-extension path); P334 (just-shipped portability fix — same script being retired); P339 (substance-confirm-before-build prior occurrence on this same ADR-078).
 
 ## Related
 
-(captured via /wr-itil:capture-problem during session 9 work-problems loop after user observation 2026-05-30)
+(captured via /wr-itil:capture-problem during session 9 work-problems loop after user observation 2026-05-30; updated 2026-06-01 with architect verdict after the original Investigation Tasks fix path was identified as the user-rejected ADR-078 Option 6)
 
-- **ADR-077** — the compendium ADR; this defect violates its stated load-surface purpose for the majority of entries.
-- **P334** — sibling generator defect (just shipped — awk substr Unicode portability); both touch the same script.
-- `packages/architect/scripts/generate-decisions-compendium.sh` line 115 — the locus of the gap.
-- `packages/architect/scripts/test/generate-decisions-compendium.bats` test 9 — passing-but-incomplete coverage that allowed the gap to ship.
+- **ADR-077** — the compendium ADR; this defect violates its stated load-surface purpose for the majority of entries. Confirmation criteria (b), (g), (h) are scheduled for retirement per ADR-078.
+- **ADR-078** — the implementation path; chose Option 9 (architect-on-edit LLM-authored entries) 2026-05-31 with `human-oversight: confirmed`. THIS IS THE LOAD-BEARING ADR for P337's fix path.
+- **P334** — sibling generator defect (just shipped — awk substr Unicode portability); both touch the same script being retired per ADR-078.
+- **P339** — substance-confirm-before-build gap on this same ADR-078 (prior occurrence). The 2026-06-01 architect verdict on P337 caught the SECOND iteration of the same anti-pattern (agent about to implement Option 6 after Option 9 was ratified).
+- `packages/architect/scripts/generate-decisions-compendium.sh` line 115 — the original locus of the gap; will be retired per ADR-078 Story C.
+- `packages/architect/scripts/test/generate-decisions-compendium.bats` test 9 — passing-but-incomplete coverage; retired per ADR-078 Story C.
