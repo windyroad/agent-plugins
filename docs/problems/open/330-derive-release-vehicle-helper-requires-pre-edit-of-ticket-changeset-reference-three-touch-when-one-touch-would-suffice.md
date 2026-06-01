@@ -42,22 +42,70 @@ The helper's contract is "derive release vehicle from a closed-ticket file body 
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Confirm the 3 candidate fix options below + architect verdict on which option fits ADR-049 shim contract + ADR-022 lifecycle
-- [ ] Bats coverage extending derive-release-vehicle.bats with the K→V-standalone path
+- [x] Confirm the 3 candidate fix options below + architect verdict on which option fits ADR-049 shim contract + ADR-022 lifecycle — analysis below; **awaiting user ratification of locus pick** (2026-06-01 iter, work-problems AFK; per `feedback_confirm_decision_substance_before_building` + `feedback_run_decisions_by_user_before_drafting`, locus not picked autonomously)
+- [ ] Bats coverage extending derive-release-vehicle.bats with the K→V-standalone path (after locus ratified)
 
 ## Fix Strategy
 
-Three candidate options (architect verdict needed):
+Three candidate options (architect verdict needed — **awaiting user ratification**):
 
-- **Option A**: helper accepts `--changeset <name>` flag for first-K→V cases — caller passes the changeset path explicitly, no ticket edit required.
-- **Option B**: `/wr-itil:manage-problem` Step N (fix-ship time) inserts changeset reference inline as part of the `**Fix Shipped:**` frontmatter shape — every fix-ship seeds the reference deterministically.
-- **Option C** (combine): helper accepts flag AND manage-problem ships reference inline.
+### Option A — helper accepts `--changeset <name>` flag
+
+`wr-itil-derive-release-vehicle --changeset .changeset/<name>.md <NNN>` — caller passes the changeset path explicitly; helper skips the ticket-body grep when the flag is present.
+
+**Pros**:
+- Surgical: helper-only edit (~10 lines in `derive-release-vehicle.sh` argument parsing + grep skip).
+- No SKILL.md churn; transition-problem Step 6 contract unchanged.
+
+**Cons**:
+- Caller-burden inversion: the K→V caller must now look up the changeset name, which is **exactly what the helper was designed to do**. Pushing the lookup to the caller re-invents the contract.
+- Doesn't address the underlying audit-trail gap: ticket bodies still lack the changeset reference, so future "which changeset shipped P<NNN>" grep stays broken.
+- Doesn't match the user's observed workaround pattern (the workaround is body-edit — `**Release vehicle**: .changeset/...` paragraph appended to Fix Strategy — not flag-pass).
+- Standalone K→V iter (iter N+M for a fix shipped at iter N) still needs lookup logic somewhere; flag just moves the lookup outward.
+
+### Option B — manage-problem fix-ship step seeds reference inline (RECOMMENDED)
+
+`/wr-itil:manage-problem` Step 7 (the K→V transition surface that writes `## Fix Released`) AND/OR Step 11 (commit handling when the fix folds with the closing commit) edits the ticket body to insert a `**Release vehicle**: .changeset/<name>.md` paragraph in the Fix Strategy section BEFORE the `git mv` to `.verifying.md`. Every fix-ship seeds the reference deterministically.
+
+**Pros**:
+- Root-cause fix: closes the audit-trail gap at the natural seed point — fix-ship has the changeset name (it just created the changeset).
+- Matches the user's documented workaround pattern verbatim (the iter-10 P302 workaround was: append `**Release vehicle**: .changeset/p302-...md` to Fix Strategy — exactly what this codifies).
+- Helper contract stays unchanged (no flag, no new exit-code routing).
+- Ticket body becomes self-documenting for the audit trail — future `grep -r .changeset/ docs/problems/closed/` finds which changeset shipped each ticket.
+- Deterministic across all K→V paths (folded-fix, standalone-iter, orchestrator AFK drain).
+
+**Cons**:
+- Touches `packages/itil/skills/manage-problem/SKILL.md` Step 7 — adds an explicit body-edit step before the K→V rename (one extra Edit-tool call per transition).
+- Doesn't help legacy tickets shipped before codification — exit-2 routing in transition-problem Step 6 remains as a recovery path for those (already documented).
+- Cross-skill consistency: `/wr-itil:transition-problem` Step 6 inherits the same seed step via the in-skill Step 7 copy (per ADR-010 amended "copy, not move") — two surfaces to keep in sync.
+
+### Option C — combine A + B (belt-and-braces)
+
+Both flag AND inline seeding.
+
+**Pros**:
+- Defence in depth: even if fix-ship misses the inline seed (Option B), the helper-flag (Option A) is a fallback.
+
+**Cons**:
+- Larger surface area for the same outcome.
+- Once Option B ships, Option A becomes vestigial — the exit-2 routing already documented in `transition-problem` SKILL Step 6 is itself a recovery path; a third path adds no clear value.
+- Violates ADR-038 progressive disclosure: extra surface that does not pay for its own cognitive cost.
+
+### Recommendation: Option B
+
+Recommended pick: **Option B**. Rationale:
+1. Matches the user's lived workaround pattern (iter-10 P302 body-edit). Codifying observed behaviour beats inventing a new surface.
+2. Closes the audit-trail gap at the natural seed point — fix-ship knows the changeset name; pushing the lookup to a flag-caller re-creates the gap.
+3. Helper contract stays unchanged; exit-2 routing remains as the legacy-ticket recovery path (already documented in `transition-problem` SKILL Step 6).
+4. Survives ADR-049 shim contract review (no helper-side change) and ADR-022 lifecycle review (the inline seed lands in the same fix-ship commit that creates the changeset, riding ADR-014 single-commit grain).
+
+**Pending ratification** — per `feedback_confirm_decision_substance_before_building` + `feedback_run_decisions_by_user_before_drafting`, the locus pick (A/B/C) is a genuine ≥2-option design decision and must be human-confirmed BEFORE dependent SKILL edits ship. Surfaced via outstanding_question in the 2026-06-01 iter retro.
 
 **Kind**: improve  
-**Shape**: script (helper script + optional SKILL.md update)  
-**Target file**: `packages/itil/scripts/derive-release-vehicle.sh` + `packages/itil/skills/transition-problem/SKILL.md` Step 6 + possibly `packages/itil/skills/manage-problem/SKILL.md`  
+**Shape**: skill (manage-problem SKILL.md Step 7 + transition-problem SKILL.md Step 6 inline copy per ADR-010 amended)  
+**Target file**: `packages/itil/skills/manage-problem/SKILL.md` Step 7 + `packages/itil/skills/transition-problem/SKILL.md` Step 6 (copy-not-move per ADR-010)  
 **Observed flaw**: 3-touch K→V cycle when 1-touch would suffice; helper assumes prior reference seed that standalone K→V iter doesn't provide  
-**Edit summary**: per architect verdict, add `--changeset` flag to helper OR add seeding step to manage-problem fix-ship surface OR both
+**Edit summary** (Option B, pending ratification): insert body-edit step in manage-problem Step 7 (and transition-problem Step 6 inline copy) that appends `**Release vehicle**: .changeset/<name>.md` paragraph to the ticket's Fix Strategy section BEFORE the `git mv` to `.verifying.md`; helper contract unchanged; legacy-ticket exit-2 routing remains documented
 
 ## Dependencies
 
@@ -74,3 +122,4 @@ Three candidate options (architect verdict needed):
 - 2026-05-30 work-problems iter 8 retro observation (captured in `docs/retros/2026-05-30-work-problems-iter8-p281-kv.md` outstanding_questions)
 - 2026-05-30 work-problems wrap retro (P330 capture)
 - 2026-05-30 work-problems iter 10 retro (P302 K→V dogfood — this evidence append)
+- 2026-06-01 work-problems iter (this iter) — Fix Strategy refinement + Option B recommendation pending user ratification
