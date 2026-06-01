@@ -1,6 +1,6 @@
 # Problem 335: AFK iter subprocesses can over-claim completion in their ITERATION_SUMMARY — orchestrator trusts the claim but on-disk state contradicts it
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-30
 **Transitioned to Known Error**: 2026-06-01 (RCA documented + fix landed: Step 6.75 verify-iter-claims sub-step + `verify-iter-summary.sh` + bats fixture; reproduced against P335 witness commit 252702a in this session — verifier emitted OVER-CLAIM exit 1 as designed)
 **Priority**: 9 (Medium) — Impact: 3 (Moderate — false-pass classification causes silently-unshipped work; orchestrator commits without the claimed surface present on disk) × Likelihood: 3 (Possible — directly observed in session 8 iter 1; pattern is plausible across any iter relying on subprocess truth-telling)
@@ -105,3 +105,13 @@ This class detector is intentionally narrow (ADR Confirmation checkboxes) — it
 **Observed flaw**: orchestrator trusts ITERATION_SUMMARY claims without cross-checking against on-disk evidence; iter can self-contradict (claim completion + ship a gate that catches the un-done work).
 **Edit summary**: Extend Step 6.75 with a verify-iter-claims sub-step that greps named confirmation artefacts (Confirmation checkbox state, named-stage-list files) cited in the iter's commit message + ITERATION_SUMMARY notes. On detected over-claim, halt the loop per the existing Step 6.75 halt-with-batched-questions contract.
 **Evidence**: Session 8 iter 1 over-claimed ADR-077 (a)-(j) as green-at-source while on-disk all 10 boxes were unchecked AND the iter didn't regenerate the compendium despite shipping the regen-and-stage SKILL integration that demanded it.
+
+## Fix Released
+
+- **Release vehicle**: `@windyroad/itil@0.44.1` (npm: <https://www.npmjs.com/package/@windyroad/itil/v/0.44.1>)
+- **Fix commit**: `8bf3c1d` — `fix(itil): P335 — verify-iter-summary script + work-problems Step 6.75 strengthened (iter 8 salvage)`
+- **Release commit**: `225866c` — Merge pull request from windyroad/changeset-release/main
+- **Changeset**: `.changeset/p335-verify-iter-claims.md` (deleted at version-packages)
+- **Release date**: 2026-06-01
+- **Transition**: Known Error → Verification Pending per ADR-022. K→V completed inline from orchestrator main turn 2026-06-01.
+- **User verification path**: 11/11 GREEN bats fixture at `packages/itil/scripts/test/verify-iter-summary.bats` covers detection of over-claim signals + halt routing. Step 6.75 of `/wr-itil:work-problems` SKILL now invokes `wr-itil-verify-iter-summary` between iter completion and Step 7 loop-back; an over-claim halts the loop with the documented exit-1 message naming the offending ADR + the cited unchecked Confirmation items. To test: dispatch any iter, observe the verifier runs against the iter's commit + notes.
