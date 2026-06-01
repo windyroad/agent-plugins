@@ -1,7 +1,8 @@
 # Problem 335: AFK iter subprocesses can over-claim completion in their ITERATION_SUMMARY — orchestrator trusts the claim but on-disk state contradicts it
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-05-30
+**Transitioned to Known Error**: 2026-06-01 (RCA documented + fix landed: Step 6.75 verify-iter-claims sub-step + `verify-iter-summary.sh` + bats fixture; reproduced against P335 witness commit 252702a in this session — verifier emitted OVER-CLAIM exit 1 as designed)
 **Priority**: 9 (Medium) — Impact: 3 (Moderate — false-pass classification causes silently-unshipped work; orchestrator commits without the claimed surface present on disk) × Likelihood: 3 (Possible — directly observed in session 8 iter 1; pattern is plausible across any iter relying on subprocess truth-telling)
 **Origin**: internal
 **Effort**: M (Step 6.75 verify-claims FIRST per user-pinned option (a); observe whether iter-local drift-bats is still needed after data collection)
@@ -57,12 +58,29 @@ Manual orchestrator-side cross-check is not durable — adopters running AFK loo
 
 ## Root Cause Analysis
 
+**Mechanism**: the iter's commit-message + `ITERATION_SUMMARY.notes` are unstructured free-text. The orchestrator's Step 6.75 verification is a working-tree dirty/clean check via `git status --porcelain` — it catches commit-didn't-land failures but not commit-landed-but-claim-is-false failures. Both surfaces (commit message + summary notes) are written by the same iter subprocess from the same model state, so they CAN agree with each other while disagreeing with the on-disk artefacts the claim names. Session 8 iter 1 produced exactly this shape: commit message stated "all (a)–(j) Confirmation items green at source" + ITERATION_SUMMARY notes restated it + on-disk `docs/decisions/077-*.proposed.md` showed all 10 boxes as `[ ]`. The same iter shipped Slice 3's CI drift gate, which then failed in the next CI run on the un-regenerated compendium — the iter's own newly-introduced invariant caught the inconsistency the orchestrator could not.
+
+**Class boundary**: this is the *emit-but-over-claim* class. Distinct from the *stuck-before-emit* class (P147 — exit 143 + 0-byte JSON; iter never emitted at all). Both are forms of "orchestrator-can't-trust-iter-output", but the verifier surfaces are different:
+
+- *stuck-before-emit*: 0-byte JSON + working tree may carry staged partial work → covered by Step 6.75's existing dirty/clean check (working tree dirty after a missing-summary iter halts the loop).
+- *emit-but-over-claim* (this ticket): well-formed JSON + clean working tree + claim contradicts on-disk evidence INSIDE the commit → NOT covered by the existing check.
+
+This session's own evidence (iters 4 + 5 stuck-before-emit; iter 7 user-directed P335 dispatch with `/wr-retrospective:run-retro` omitted) is the *stuck-before-emit* class, NOT this ticket's class — it is *sibling* evidence (P147-class), not P335 confirmation. The original session 8 iter 1 evidence remains the load-bearing witness for P335.
+
+**Fix locus** (user-pinned 2026-05-30 session wrap, memory `project_p335_fix_locus_user_directed.md`): option (a) — extend Step 6.75 with a verify-iter-claims sub-step. Option (b) ITERATION_SUMMARY schema extension is rejected as forcing the iter to self-certify (same trust boundary that produced the over-claim). Option (c) standalone runtime script is the *implementation* of (a) — the script is the verifier, Step 6.75 is the dispatch site. Option (d) iter-local drift-bats deferred pending evidence (a) alone is insufficient (evidence-based, not BUFD — same shape as P246/P247).
+
+**Halt semantics**: over-claim detection → halt-with-bug-signal per the existing Step 6.75 dirty-for-unknown-reason halt path (Step 2.5b surfaces accumulated user-answerable skips; the over-claim itself remains a halt-with-bug-signal — the iter's claim contradicting on-disk state IS the bug). No auto-correction: the orchestrator cannot retroactively make the iter's claim true; the user must adjudicate on return (re-dispatch the work / accept the partial state / amend the commit).
+
+**Minimum-viable verifier shape**: for each ADR file path referenced in the commit message OR `ITERATION_SUMMARY.notes` of the current commit, count `- [ ]` vs `- [x]` Confirmation-section items. If the iter's commit message or notes contains a *completion-claim signal* (regex: `(all|every) .*(green|complete|done|checked|ticked)|\([a-z]\)\s*[-–]\s*\([a-z]\) (green|complete|all)|all (Confirmation|criteria) (items )?(complete|green|done|ticked)`) AND any `- [ ]` Confirmation item remains in the referenced ADR's `## Confirmation` section, emit OVER-CLAIM with details and exit non-zero. The orchestrator's Step 6.75 reads the exit code; non-zero → halt-with-bug-signal.
+
+This class detector is intentionally narrow (ADR Confirmation checkboxes) — it is the class that produced the witness incident. Other over-claim shapes (claimed commits with no `git show --stat` evidence; claimed file edits with no diff hunks) can be added incrementally as further witnesses surface (option (d) is the same logic moved iter-side, ratifiable later if (a) doesn't catch enough cases).
+
 ### Investigation Tasks
 
-- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Decide fix locus: (a) extend Step 6.75 with a verify-iter-claims sub-step that greps named confirmation artefacts; (b) ITERATION_SUMMARY schema extension requiring the iter to cite the specific on-disk artefacts (file paths + line numbers) that satisfy each "green" claim; (c) a runtime-side `wr-itil-verify-iter-summary` script the orchestrator dispatches between Step 6 and Step 6.5; (d) drift-detection bats running locally in the iter subprocess before ITERATION_SUMMARY emission
-- [ ] Build a reproduction test: an iter that claims (X, Y, Z) completion where on-disk state shows (X, Y) but not Z → orchestrator detects the inconsistency
-- [ ] Decide what the orchestrator does on detected over-claim: halt the loop? auto-correct the summary? both?
+- [x] ~~Re-rate Priority and Effort at next /wr-itil:review-problems~~ — done 2026-05-31; lands at S9/L3/M, WSJF 4.5.
+- [x] ~~Decide fix locus~~ — option (a) user-pinned 2026-05-30 wrap (Step 6.75 verify-claims FIRST; iter-local drift-bats deferred pending evidence).
+- [ ] Build a reproduction test — bats fixture asserting verifier emits OVER-CLAIM when a fake ADR has unchecked Confirmation items and a fake commit message claims "all green".
+- [x] ~~Decide what the orchestrator does on detected over-claim~~ — halt-with-bug-signal per existing Step 6.75 dirty-for-unknown-reason halt path; Step 2.5b surfaces accumulated user-answerable skips; no auto-correction.
 
 ## Dependencies
 

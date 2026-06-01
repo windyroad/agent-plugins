@@ -1,6 +1,6 @@
 # Problem 332: run-retro skips Step 1.5 / Step 3 / Step 4b Stage 1 under session-length rationalization — recurrence of P148 anti-pattern class on the run-retro meta-surface
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-30
 **Transitioned to Known Error**: 2026-06-01 — RCA confirmed; fix in `packages/retrospective/skills/run-retro/SKILL.md` Step 1.5 + Step 3 mirrors Step 4b Stage 1's P148 anti-pattern enumeration block. Architect PASS (path (i) — no structural bats per ADR-052; next retro is the behavioural validation surface, P332's own evidence shape). JTBD PASS (serves JTBD-001).
 **Priority**: 9 (Medium) — Impact: 3 (Moderate — codification observations + briefing learnings + signal-vs-noise scoring lost; session-to-session continuity silently degrades) × Likelihood: 3 (Possible — directly witnessed this session; recurrence rate unknown but suspected across prior wrap retros)
@@ -91,3 +91,13 @@ Manual self-review of the retro after emit — check whether each mandatory step
 - **ADR-044** (decision-delegation contract — framework-resolution boundary; "mechanical" stage classifications).
 - 2026-05-30 work-problems wrap retro meta-retro conversation (this capture's authoring context).
 - `docs/retros/2026-05-30-work-problems-wrap-retro-ask-hygiene.md` — ask-hygiene trail noting Call #2 "Refresh shape" classified as lazy; same class of rationalization-leaking-through-the-cracks.
+
+## Fix Released
+
+- **Release vehicle**: `@windyroad/retrospective@0.22.1` (npm: <https://www.npmjs.com/package/@windyroad/retrospective/v/0.22.1>)
+- **Fix commit**: `48f9759` — `fix(retrospective): P332 — anti-skip guards at Step 1.5 + Step 3 (Open → Known Error)`
+- **Release commit**: `524c086` — `Merge pull request from windyroad/changeset-release/main`
+- **Changeset**: `.changeset/p332-run-retro-anti-pattern-blocks-step-1-5-step-3.md` (deleted at version-packages)
+- **Release date**: 2026-06-01
+- **Transition**: Known Error → Verification Pending per ADR-022. K→V completed inline from orchestrator main turn.
+- **User verification path**: trigger /wr-retrospective:run-retro at any session — Step 1.5 (signal-vs-noise pass) and Step 3 (briefing curation) now carry the same anti-pattern enumeration block as Step 4b Stage 1, naming "session length is not a valid skip rationale" + "session is long is a P148-class defer-with-rationalization" verbatim.
