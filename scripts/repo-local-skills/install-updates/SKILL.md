@@ -39,22 +39,38 @@ These are the plugin keys (`wr-<short>`) to check for updates. The skill refresh
 
 ### 3. Determine which plugins have new npm versions
 
-For each unique plugin key (`wr-<short>`):
+Iterate over `$CURRENT_PLUGINS` (newline-joined from Step 2) with a `while IFS= read -r` loop — NOT `for key in $CURRENT_PLUGINS`, which iterates ONCE under zsh because zsh does not word-split unquoted variables by default (P133 / P320 defect 1). The whole 11-plugin blob then arrives in `key` and `npm view` gets a garbage package name. The skill already applies the same P133 discipline in Step 4 via bash arrays — Step 3 must match.
+
+Avoid zsh-reserved special variable names inside the loop body: **`status`, `path`, `argv`, `pipestatus`** are read-only under zsh; assigning to any of them aborts the loop with `read-only variable: …` (P320 defect 2). Use `st`, `pkg_path`, etc.
 
 ```bash
 # Plugin/marketplace side uses the wr- prefix; the npm package omits it.
 # Strip the prefix to obtain the npm package name:
 #   plugin_key="wr-itil"      → npm_name="@windyroad/itil"
 #   plugin_key="wr-architect" → npm_name="@windyroad/architect"
-npm_name="@windyroad/${plugin_key#wr-}"
-npm view "$npm_name" version
+while IFS= read -r plugin_key; do
+  [ -z "$plugin_key" ] && continue
+  npm_name="@windyroad/${plugin_key#wr-}"
+  latest_npm=$(npm view "$npm_name" version 2>/dev/null)
+  # Filter cache dirs to strict semver (M.N.P) BEFORE sort -V | tail -1.
+  # Without the filter, SHA-named git-source residual dirs (e.g.
+  # `2287c49f7b4b`) win the sort — `sort -V` treats `2287c49f...` as version
+  # `2287` and orders it above any `0.8.x`, so `tail -1` returns the SHA and
+  # every plugin false-reports stale (P320 defect 3 / the trap captured in
+  # `feedback_verify_cache_refresh_by_version_dir`).
+  cached_dir="$HOME/.claude/plugins/cache/windyroad/${plugin_key}"
+  highest_cached=$(ls "$cached_dir" 2>/dev/null \
+    | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' \
+    | sort -V | tail -1)
+  echo "${plugin_key}: npm=${latest_npm:-?}  cached=${highest_cached:-none}"
+done < <(printf '%s\n' "$CURRENT_PLUGINS")
 ```
 
 Naming convention (ADR-002): `wr-<short>` on the plugin/marketplace side, `@windyroad/<short>` on the npm side, same `<short>` as the source directory under `packages/`.
 
 **Empty `npm view` output with exit 0 means the package name is wrong — NOT that the package is private.** `@windyroad/*` packages are public on the npm registry (e.g. <https://www.npmjs.com/package/@windyroad/itil>). If every plugin returns empty, the skill is using the wrong naming transformation — stop and fix before concluding "nothing to install," otherwise Step 4 will silently skip real updates.
 
-Compare against `~/.claude/plugins/cache/windyroad/${plugin_key}/` (the cache directory uses the plugin key `wr-<short>`, not the npm name). Re-install only when npm latest > highest cached version. `claude plugin list` version strings may be stale — compare against cache dir names.
+Re-install only when `latest_npm > highest_cached`. `claude plugin list` version strings may be stale — compare against cache dir names (and filter to semver per the snippet above; the SHA residual is the recurring trap).
 
 ### 4. Install
 

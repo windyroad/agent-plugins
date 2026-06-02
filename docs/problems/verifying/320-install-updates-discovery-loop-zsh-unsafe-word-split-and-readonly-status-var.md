@@ -1,7 +1,8 @@
 # Problem 320: /install-updates Step 2/3 discovery loop is zsh-unsafe — `for X in $VAR` word-split (P133) + `status` is a read-only zsh var
 
-**Status**: Open
+**Status**: Verifying
 **Reported**: 2026-05-27
+**Fix Released**: 2026-06-02 (fold-fix per ADR-022 P143-class — RCA + Fix Strategy + Workaround all documented inline + fix shipped same iter)
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: S (deferred — re-rate at next /wr-itil:review-problems)
 
@@ -32,9 +33,26 @@ Use `while IFS= read -r key; do ...; done < <(printf '%s\n' "$CURRENT_PLUGINS")`
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems.
-- [ ] Fix the install-updates SKILL.md Step 2/3 example: replace `for key in $CURRENT_PLUGINS` with a `while IFS= read` loop (or bash array + `"${ARR[@]}"`) per P133; the skill already cites P133 for its Step 4 array — extend the discipline to Step 2/3.
-- [ ] Audit the skill's shell snippets for zsh-reserved variable names (`status`, `path`, `argv`, `pipestatus`).
-- [ ] Fix Step 3 version-compare to filter to strict semver dirs (`grep -E '^[0-9]+\.[0-9]+\.[0-9]+$'`) before `sort -V | tail -1`, so SHA-named git-source residual dirs (`2287c49f7b4b`) cannot win the sort and false-flag every plugin stale (defect 3; the `feedback_verify_cache_refresh_by_version_dir` memory's exact trap).
+- [x] Fix the install-updates SKILL.md Step 2/3 example: replaced prose-implied `for key in $CURRENT_PLUGINS` with an explicit `while IFS= read -r plugin_key; do …; done < <(printf '%s\n' "$CURRENT_PLUGINS")` snippet per P133 — 2026-06-02 (AFK iter, this commit). Step 3 now carries the loop inline; Step 4's bash-array form is unchanged.
+- [x] Audited the skill's shell snippets for zsh-reserved variable names. Step 3 prose now explicitly calls out `status`, `path`, `argv`, `pipestatus` as read-only under zsh and directs renaming (`st`, `pkg_path`, etc.). The `PROJECT_STATUS` associative array name in Step 4 is unaffected — zsh's read-only constraint applies to the special-var names themselves (`$status`, `$path`), not to user-named arrays — 2026-06-02 (this commit).
+- [x] Fix Step 3 version-compare to filter to strict semver dirs before `sort -V | tail -1` — landed inline as `grep -E '^[0-9]+\.[0-9]+\.[0-9]+$'` between `ls` and `sort -V`; the snippet's comment block cites the trap captured in `feedback_verify_cache_refresh_by_version_dir` — 2026-06-02 (this commit).
+
+### Fix Strategy
+
+Direct text edit to `scripts/repo-local-skills/install-updates/SKILL.md` Step 3 — three changes in one Edit:
+
+1. Explicit `while IFS= read -r plugin_key` loop snippet replacing the prose "For each unique plugin key" + naked `npm view` example.
+2. Prose paragraph listing the zsh-reserved special variables (`status`, `path`, `argv`, `pipestatus`) and directing rename.
+3. `grep -E '^[0-9]+\.[0-9]+\.[0-9]+$'` semver pre-filter inline in the cache-version-compare snippet, with a comment citing the SHA-residual sort trap.
+
+### Verification
+
+After landing the fix, `/install-updates` should:
+- Iterate `$CURRENT_PLUGINS` correctly under zsh (one `npm view` call per plugin, not one for the whole blob).
+- Pick the newest semver cache dir (e.g. `0.8.4`), NOT the SHA-named residual (`2287c49f7b4b`).
+- Not abort on assignment to a reserved zsh special variable.
+
+Verifying status will close at next `/wr-itil:transition-problems` pass once an `/install-updates` run on zsh confirms all three behaviours.
 
 ## Dependencies
 
