@@ -73,6 +73,7 @@ Log the renumber decision in the operation report if origin and local diverged.
 ---
 status: "proposed"
 date: <YYYY-MM-DD>
+human-oversight: unconfirmed
 decision-makers: [unspecified — fill at canonical review]
 consulted: []
 informed: []
@@ -179,6 +180,8 @@ After the commit, report:
 The trailing pointer is **not optional** — it is the user-visible signal that the skeleton needs canonical expansion before acceptance review.
 
 **Confirm-every-ADR gate (ADR-064):** a capture-adr skeleton is recorded `proposed` with a pre-pinned decision but WITHOUT human review of the options. It must NOT be promoted to `accepted` until it has been through a `/wr-architect:create-adr` (or equivalent) `AskUserQuestion` review-and-confirm pass. Capture records the decision quickly; the confirm — not the capture — is what gives it human oversight. This is prong 1 of P283 (lift auto-/quick-recorded decisions to human-confirmed before they stand).
+
+**Oversight marker discipline (ADR-066 amendment 2026-06-02 / P348).** A capture-adr skeleton MUST be born `human-oversight: unconfirmed` — NOT `confirmed`. Capture is the AFK-friendly aside surface; there is no substance-confirm `AskUserQuestion` pass in this flow, so `confirmed` would be a hollow marker (the P348 bug class). The `architect-oversight-marker-discipline.sh` PreToolUse hook will DENY any Edit/Write that introduces `human-oversight: confirmed` without a matching session-scoped evidence marker. The frontmatter skeleton (Step 3 above) MUST include `human-oversight: unconfirmed` so the ADR enters the world honestly self-identified as needing user confirmation. The drain (`/wr-architect:review-decisions`) and the canonical-expansion path (`/wr-architect:create-adr <NNN>`) are the surfaces that legitimately promote it to `confirmed` via `wr-architect-mark-oversight-confirmed` + the gated marker write.
 
 ## Composition with create-adr
 

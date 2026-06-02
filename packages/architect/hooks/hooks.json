@@ -8,6 +8,7 @@
     ],
     "PreToolUse": [
       { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-enforce-edit.sh" }] },
+      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-oversight-marker-discipline.sh" }] },
       { "matcher": "ExitPlanMode", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-plan-enforce.sh" }] },
       { "matcher": "Bash", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-compendium-refresh-discipline.sh" }] }
     ],

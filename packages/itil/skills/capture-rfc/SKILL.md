@@ -170,6 +170,7 @@ If interactive (AskUserQuestion available) AND the description is short enough t
 status: proposed
 rfc-id: <kebab-slug>
 reported: <YYYY-MM-DD>
+human-oversight: unconfirmed
 decision-makers: [<git config user.name>]
 problems: [P<NNN>, P<NNN>, ...]
 adrs: []
@@ -274,6 +275,8 @@ After the commit, report:
 - Trailing pointer: `Run /wr-itil:manage-rfc <RFC-<NNN>> next to populate Scope / Tasks and advance to accepted; refresh docs/rfcs/README.md.`
 
 The trailing pointer is **not optional** — it is the user-visible signal that the RFC is intentionally skeleton-only and how to advance it.
+
+**Oversight marker discipline (ADR-066 + ADR-068 amendments 2026-06-02 / P348).** The skeleton frontmatter MUST include `human-oversight: unconfirmed`. capture-rfc is the AFK-friendly aside surface; there is no substance-confirm `AskUserQuestion` pass in this flow (deferred to `/wr-itil:manage-rfc accepted`), so `confirmed` would be a hollow marker (the P348 bug class). The architect-side hook (`architect-oversight-marker-discipline.sh`) does NOT gate `docs/rfcs/`, but downstream paths that promote a captured RFC to `confirmed` MUST do so via a proper substance-confirm AskUserQuestion (e.g. `/wr-itil:manage-rfc accepted` for genuine ratification) — agents authoring RFCs at capture-time MUST NOT write `confirmed`. The drain pattern mirrors the ADR drain: an RFC's `unconfirmed` state surfaces interactively during the `accepted` transition.
 
 ## Composition with manage-rfc
 

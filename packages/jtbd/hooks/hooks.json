@@ -7,7 +7,8 @@
       { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/jtbd-eval.sh" }] }
     ],
     "PreToolUse": [
-      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/jtbd-enforce-edit.sh" }] }
+      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/jtbd-enforce-edit.sh" }] },
+      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/jtbd-oversight-marker-discipline.sh" }] }
     ],
     "PostToolUse": [
       { "matcher": "Agent", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/jtbd-mark-reviewed.sh" }] },
