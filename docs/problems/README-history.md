@@ -784,3 +784,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-06-03 (P193 Open→KE fragment rotated for P193 K→V transition)
 
 > Last reviewed: 2026-06-03 **P193 Open → Known Error** — `risk-gate.bats:174` flake fixed (option (b) test-only timing-margin tightening: `_backdate "$SCORE_FILE" 3` → `2`, elapsed ~3s comfortably inside Band B `[2.5, 5)` against TTL=5s; production gate `age < TTL` strict-less-than contract untouched per ADR-009). Verified 5/5 deterministic runs (full 28/28 each pass). Architect PASS + JTBD PASS. Changeset queued: `@windyroad/risk-scorer` patch. Verifying transition gated on release ship (helper exit 3 — changeset still in working tree per ADR-022). Prior fragment (P322 O→V fold-fix) rotated to README-history.md per P134.
+
+## 2026-06-03 (P193 K→V transition fragment rotated for P278 O→V fold-fix)
+
+> Last reviewed: 2026-06-03 **P193 K→V transition** — `@windyroad/risk-scorer` released with `risk-gate.bats:174` flake fix (fix commit `96fadc8` salvaged from iter 24 stuck-before-emit). Mechanical K→V transition per ADR-022. Orchestrator-main-turn inline transition. Prior fragment (P193 Open → Known Error) rotated to README-history.md per P134.
