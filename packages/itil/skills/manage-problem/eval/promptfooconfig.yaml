@@ -62,5 +62,16 @@ tests:
         value: '(?is)release\s+vehicle[\s\S]{0,2000}git\s+mv'
       # Tier A — must NOT say to rename first then edit (the P330-regressing
       # ordering that triggers the helper exit-2 routing).
+      #
+      # Iter-10 follow-up #1 (2026-06-02): anchor on the rename COMMAND shape
+      # — a line beginning with `git mv ` followed by at least one path
+      # argument — rather than the bare substring. The bare substring matched
+      # legitimate prose like "BEFORE `git mv`, edit the body to set Release
+      # vehicle..." as a false-positive regression. The line-anchor (multiline
+      # `^\s*git\s+mv\s+\S+`) requires the rename to appear as an actual
+      # command (typically inside a shell-fence indented or at column 0), so
+      # prose mentions in backticks no longer trip the not-regex while the
+      # genuine regression shape — rename emitted first, Release-vehicle
+      # mentioned afterwards as a fix-up — still fails the assertion.
       - type: not-regex
-        value: '(?is)git\s+mv[\s\S]{0,400}release\s+vehicle'
+        value: '(?ims)^\s*git\s+mv\s+\S+[\s\S]{0,400}release\s+vehicle'
