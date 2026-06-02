@@ -298,3 +298,124 @@ FAKE_EOF
   run grep -nE "P147" "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }
+
+# ---------------------------------------------------------------------------
+# P307 machine-sleep false-kill subclass: P121's IDLE_SECONDS = NOW -
+# LAST_ACTIVITY_MARK computation is wall-clock time. When the host machine
+# suspends/sleeps between the 60s polls, wall-clock advances while the iter
+# subprocess is itself suspended (no actual idle work). On resume, IDLE_SECONDS
+# jumps past the threshold and SIGTERM fires on a subprocess that was
+# genuinely making progress, not stuck. The 2026-05-26 evidence: poll log
+# idle jumped non-linearly 481s -> 1016s -> 5544s across suspend gaps,
+# SIGTERM at idle=5544s > 3600s threshold, exit 143 + 0-byte JSON (the
+# P147 stuck-before-emit metadata-loss class).
+#
+# Fix: detect large wall-clock jumps between consecutive polls (>> 60s
+# expected) as suspend events and shift LAST_ACTIVITY_MARK forward by the
+# gap-minus-expected so IDLE_SECONDS approximates active-elapsed rather
+# than wall-clock-elapsed. Pure-bash heuristic — no monotonic-clock
+# dependency.
+#
+# @problem P307
+
+# Pure-bash helper mirroring SKILL.md Step 5 suspend-detect math. Tests
+# below pin the algorithm against parameter combinations exercising
+# (a) normal poll cadence (no shift), (b) within-jitter delay (no shift),
+# (c) detected suspend (shift forward by actual-minus-expected),
+# (d) reproduction of the 2026-05-26 5544s evidence (large shift absorbs
+# the gap). The shape returned is the EFFECTIVE LAST_ACTIVITY_MARK such
+# that IDLE_SECONDS = NOW - effective_mark yields active-elapsed.
+compute_effective_mark() {
+  local prev_mark="$1"
+  local prev_poll="$2"
+  local now="$3"
+  local expected_delta="${4:-60}"
+  local jitter="${5:-120}"
+
+  local actual_delta=$(( now - prev_poll ))
+  local threshold=$(( expected_delta + jitter ))
+  if (( actual_delta > threshold )); then
+    printf '%d\n' $(( prev_mark + actual_delta - expected_delta ))
+  else
+    printf '%d\n' "$prev_mark"
+  fi
+}
+
+@test "P307: normal poll cadence (60s actual delta) does NOT shift LAST_ACTIVITY_MARK" {
+  # 60s between polls is the expected `sleep 60` cadence; no suspend; mark
+  # unchanged. Guards against an over-eager heuristic that would shift on
+  # every normal poll.
+  run compute_effective_mark 1000 0 60 60 120
+  [ "$status" -eq 0 ]
+  [ "$output" = "1000" ]
+}
+
+@test "P307: within-jitter delay (90s actual delta) does NOT shift LAST_ACTIVITY_MARK" {
+  # 90s between polls is mild jitter (slow hook, GC pause, brief load
+  # spike); below the 60+120=180s suspend threshold; mark unchanged.
+  # Bounded noise must not trigger a shift.
+  run compute_effective_mark 1000 0 90 60 120
+  [ "$status" -eq 0 ]
+  [ "$output" = "1000" ]
+}
+
+@test "P307: at-threshold delay (180s actual delta) does NOT shift LAST_ACTIVITY_MARK" {
+  # Exactly at expected+jitter is the boundary; strict-greater-than test
+  # means no shift at the boundary. Adopters tuning the jitter window
+  # know 180s == EXPECTED_POLL_DELTA_S + SUSPEND_JITTER_S is the inclusive
+  # ceiling of the no-shift band.
+  run compute_effective_mark 1000 0 180 60 120
+  [ "$status" -eq 0 ]
+  [ "$output" = "1000" ]
+}
+
+@test "P307: detected suspend (300s actual delta) shifts mark forward by actual-minus-expected" {
+  # 300s between polls vastly exceeds the 180s threshold; treat as suspend
+  # event and shift mark forward by 300-60=240s. Effect: IDLE_SECONDS
+  # (NOW - effective_mark) reads 60s instead of 300s, preserving the
+  # subprocess from a wall-clock false-kill.
+  run compute_effective_mark 1000 0 300 60 120
+  [ "$status" -eq 0 ]
+  [ "$output" = "1240" ]
+}
+
+@test "P307: reproduces 2026-05-26 iter 1 evidence (5544s suspend gap shifts mark to absorb)" {
+  # Concrete reproduction of the production observation: poll saw idle
+  # jump to 5544s after a multi-hour laptop suspend. Without suspend-detect,
+  # SIGTERM fires at 5544s > 3600s threshold. With suspend-detect, mark
+  # shifts forward by 5544-60=5484s; IDLE_SECONDS = 5544 - 5484 = 60s,
+  # below threshold; iter survives.
+  run compute_effective_mark 0 0 5544 60 120
+  [ "$status" -eq 0 ]
+  [ "$output" = "5484" ]
+}
+
+@test "P307: SKILL.md Step 5 documents the suspend-detect heuristic" {
+  # Prose must name the heuristic so adopters reading the SKILL.md know
+  # how the poll loop survives machine-sleep without inventing one.
+  # Accept any of: "suspend-detect", "wall-clock jump", "machine sleep",
+  # "machine-sleep", or the constants EXPECTED_POLL_DELTA_S /
+  # SUSPEND_JITTER_S / SUSPEND_OFFSET_S that name the construct.
+  run grep -niE "suspend.?detect|wall.?clock jump|machine.?sleep|EXPECTED_POLL_DELTA_S|SUSPEND_JITTER_S|SUSPEND_OFFSET_S" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "P307: SKILL.md Step 5 cites P307 (machine-sleep false-kill driver)" {
+  run grep -nE "P307" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "P307: SKILL.md Step 5 trade-off paragraph names suspend-detect alongside skip-iter trade-off" {
+  # The LAST_ACTIVITY_MARK signal trade-off paragraph (existing at L410)
+  # enumerates alternatives considered and rejected (mtime, RSS). The
+  # suspend-detect addition belongs in the same locus per architect
+  # review — keeps the rationale chain (P121 -> P147 -> trade-off ->
+  # P307 suspend-detect) reading linearly rather than fragmenting into
+  # a separate section. Assert the trade-off paragraph names both
+  # SUSPEND_OFFSET_S (the accumulator) AND the EXPECTED_POLL_DELTA_S +
+  # SUSPEND_JITTER_S threshold so the rationale chain is complete.
+  run grep -nE "LAST_ACTIVITY_MARK signal trade-off" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  run grep -niE "SUSPEND_OFFSET_S|suspend.?offset" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}

@@ -368,9 +368,26 @@ claude -p \
 ITER_PID=$!
 
 SIGTERM_SENT=0
+LAST_POLL_EPOCH=$DISPATCH_START_EPOCH
+SUSPEND_OFFSET_S=0
+EXPECTED_POLL_DELTA_S=60   # matches `sleep 60` cadence below
+SUSPEND_JITTER_S=120       # tolerance above expected before treating gap as suspend (P307)
 while kill -0 "$ITER_PID" 2>/dev/null; do
-  sleep 60
+  sleep "$EXPECTED_POLL_DELTA_S"
   NOW=$(date +%s)
+  # P307 machine-sleep false-kill: when the host suspends between polls,
+  # wall-clock advances while the iter subprocess is itself suspended (no
+  # actual idle work). Detect the wall-clock jump and accumulate it into
+  # SUSPEND_OFFSET_S so IDLE_SECONDS (computed against NOW - SUSPEND_OFFSET_S
+  # below) reads active-elapsed rather than wall-clock-elapsed. Without
+  # this, laptop suspend falsely kills a completing iter (2026-05-26 iter 1
+  # evidence: idle jumped 481s -> 1016s -> 5544s across suspend gaps;
+  # SIGTERM fired at 5544s > 3600s, lost the iter's commit + cost metadata).
+  ACTUAL_POLL_DELTA=$(( NOW - LAST_POLL_EPOCH ))
+  if (( ACTUAL_POLL_DELTA > EXPECTED_POLL_DELTA_S + SUSPEND_JITTER_S )); then
+    SUSPEND_OFFSET_S=$(( SUSPEND_OFFSET_S + ACTUAL_POLL_DELTA - EXPECTED_POLL_DELTA_S ))
+  fi
+  LAST_POLL_EPOCH=$NOW
   LAST_COMMIT_EPOCH=$(git log -1 --format=%at HEAD 2>/dev/null || echo "$DISPATCH_START_EPOCH")
   # LAST_ACTIVITY_MARK = max(DISPATCH_START_EPOCH, last commit timestamp).
   # The dispatch-start floor handles skip-iterations that produce no commit:
@@ -381,7 +398,7 @@ while kill -0 "$ITER_PID" 2>/dev/null; do
   else
     LAST_ACTIVITY_MARK=$DISPATCH_START_EPOCH
   fi
-  IDLE_SECONDS=$(( NOW - LAST_ACTIVITY_MARK ))
+  IDLE_SECONDS=$(( NOW - SUSPEND_OFFSET_S - LAST_ACTIVITY_MARK ))
   if (( IDLE_SECONDS > IDLE_TIMEOUT_S )) && (( SIGTERM_SENT == 0 )); then
     kill -TERM "$ITER_PID" 2>/dev/null || true
     SIGTERM_SENT=1
@@ -408,6 +425,8 @@ rm -f "$ITER_JSON"
 **SIGTERM exit-flush is conditional, not universal (P147).** The "clean exit-flush" claim above is empirically true ONLY when the subprocess has already emitted `ITERATION_SUMMARY` through the agent stream before going idle (the P118 shape: semantic work complete + retro complete, then idle-wait on some final hook). The 2026-04-29 P146 incident falsified the universal generalisation: an iteration deadlocked in a `bash until`-loop polling a backgrounded-task output file (commits had landed; ITERATION_SUMMARY had NEVER been emitted) and SIGTERM at 68m34s produced exit 143 with a **0-byte JSON file**. `claude -p --output-format json` writes the entire response as a single blob ON normal exit; the SIGTERM-handler (whatever it does inside the CLI) cannot synthesise a JSON response that the agent loop never produced. **Stuck-before-emit subclass: SIGTERM still recovers wall-clock, but loses metadata.** When the orchestrator observes exit 143 + 0-byte JSON, it MUST treat the iteration as a metadata-loss event: (1) verify work integrity from independent evidence (`git log` for commits + `git status --porcelain` for tree state); (2) halt the AFK loop per exit-code semantics rather than silently continue; (3) reconstruct cost from the Anthropic billing dashboard rather than from the missing JSON envelope. The behavioural second-source for the stuck-before-emit case lives in the same `test/work-problems-step-5-idle-timeout-sigterm.bats` fixture (a fake-shim that traps SIGTERM and exits without writing stdout, asserting `JSON_BYTES=0` after the orchestrator-shape harness fires SIGTERM). Cost-of-metadata-loss < cost-of-stuck-subprocess; SIGTERM remains the right recovery primitive — the conditional caveat is about what flushes after, not whether to fire.
 
 **LAST_ACTIVITY_MARK signal trade-off.** The mark is `max(DISPATCH_START_EPOCH, last commit timestamp)`. The dispatch-start floor is intentional: skip-iterations that produce no commit (Step 4 routes a ticket to `action: skipped`) are bounded by `IDLE_TIMEOUT_S` since dispatch start, not by an arbitrarily-stale prior-commit timestamp. This protects against false-positive SIGTERM at iter T=0 when the most recent commit happens to be hours old. The trade-off is the inverse: a skip-iter that runs for `IDLE_TIMEOUT_S` (60 min default) will SIGTERM even though it never had a chance to commit. The 60-min default is well past the typical skip-iter wall-clock (a normal skip completes in seconds), so the trade-off rarely fires in practice; adopters who run unusually long skip-evaluation iters (e.g. deep architect-design probes) should raise `WORK_PROBLEMS_IDLE_TIMEOUT_S` accordingly. Alternative signals considered and rejected: `stat -f%m "$ITER_JSON"` (binary — file mtime only changes on subprocess exit, useless during the idle gap); subprocess RSS-change tracking (noisy; spikes during Agent-tool expansions confound the signal). The git-log signal is the cheapest reliable progress indicator the orchestrator already has.
+
+**Machine-sleep false-kill — suspend-detect heuristic (P307).** The IDLE_SECONDS computation above subtracts `SUSPEND_OFFSET_S` from wall-clock `NOW` so the orchestrator measures *active-elapsed* time rather than raw wall-clock between LAST_ACTIVITY_MARK and now. The offset accumulates whenever a poll observes `ACTUAL_POLL_DELTA > EXPECTED_POLL_DELTA_S + SUSPEND_JITTER_S` (default `60 + 120 = 180s`) — i.e., the gap between consecutive `sleep 60` polls vastly exceeds the cadence the loop scheduled. The driver is the 2026-05-26 iter 1 evidence: the iter's host suspended (lid-close mid-loop) and the next poll observed an idle of 5544s; the wall-clock-only computation tripped SIGTERM at 5544s > 3600s, exit 143 + 0-byte JSON (the P147 stuck-before-emit metadata-loss class), losing a commit + cost metadata for an iter whose semantic work had completed. The suspend-detect heuristic converts that wall-clock-elapsed measure to "active-elapsed approximate" without needing monotonic clocks (which bash does not natively expose anyway). Alternatives considered and rejected: (a) monotonic / active-time clocks (POSIX `CLOCK_MONOTONIC` is not surfaced by `date` or `$EPOCHSECONDS`; would require a C helper or a Python-shim subprocess per poll); (b) iter-side heartbeat file the poll loop reads instead of wall-clock (works but adds an iter-side write contract; suspend-detect is purely orchestrator-side, no iter-prompt changes). The jitter buffer (`SUSPEND_JITTER_S=120`) is the load-bearing safety margin: it tolerates slow-hook / GC / brief-load-spike jitter (up to 180s total inter-poll delay) without falsely shifting; only genuine suspend / system-clock jumps cross the threshold. Adopters with unusually noisy hosts can raise `SUSPEND_JITTER_S` per environment; lowering it risks counting brief stalls as suspend. The heuristic is asymmetric — it can absorb a 5 min host hang into the offset and treat it as suspend, but the cost is at worst that one iter runs an extra 5 min before SIGTERM (cheaper than losing the iter's commit + metadata to a false-kill).
 
 **Iteration prompt body (self-contained — the subprocess has no prior conversation context):**
 

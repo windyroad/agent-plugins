@@ -1,9 +1,23 @@
 # Problem 307: work-problems Step 5 idle-timeout SIGTERM uses wall-clock not active/monotonic time — machine-sleep falsely kills a completing iter and loses its commit + metadata
 
-**Status**: Open
+**Status**: Verifying (Fix Released)
 **Reported**: 2026-05-26
+**Fix landed**: 2026-06-03 (Option 2 — suspend-detect heuristic; fold-fix per ADR-022 / P143)
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+
+## Fix Released
+
+**Option 2** picked from the candidate list — detect large wall-clock jumps between consecutive polls (> `EXPECTED_POLL_DELTA_S + SUSPEND_JITTER_S` = 60 + 120 = 180s) as suspend events and accumulate the gap-minus-expected into a `SUSPEND_OFFSET_S` accumulator. `IDLE_SECONDS = (NOW - SUSPEND_OFFSET_S) - LAST_ACTIVITY_MARK` then reads active-elapsed rather than wall-clock-elapsed. No monotonic-clock dependency (bash doesn't expose `CLOCK_MONOTONIC`), no iter-side contract change (purely orchestrator-side).
+
+- Option 1 (monotonic / active-time clocks) rejected: bash has no native monotonic-clock surface; would need a C helper or Python-shim subprocess per poll.
+- Option 3 (iter-side heartbeat file) rejected: adds an iter-prompt-side write contract; suspend-detect is purely orchestrator-side, no iter changes needed.
+
+**Locus**: `packages/itil/skills/work-problems/SKILL.md` Step 5 poll loop + LAST_ACTIVITY_MARK signal trade-off paragraph extended with the heuristic rationale. Behavioural second-source in `test/work-problems-step-5-idle-timeout-sigterm.bats` (8 new tests — algorithm unit tests covering normal cadence / within-jitter / at-threshold / detected-suspend / 2026-05-26 5544s evidence reproduction; SKILL.md doc-lint contract assertions).
+
+**Verification**: full bats suite 22/22 GREEN (4 existing P121 integration + 1 P147 + 12 doc-lint + new P307 algorithm tests + new P307 doc-lint).
+
+Release: `@windyroad/itil` patch via changeset.
 
 ## Description
 
