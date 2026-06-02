@@ -38,13 +38,25 @@
 #   2. Then all MUST_SPLIT lines, sorted by basename.
 #
 # Output is empty (no lines) when no topic files exceed the threshold.
-# README.md is excluded from the scan — it is Tier 2, not Tier 3.
+#
+# Two scan exclusions:
+#   1. README.md — the Tier 2 index, not a Tier 3 topic file.
+#   2. *-archive*.md — rotation SINKS produced by split-by-date.
+#      Archives are loaded on-demand only (per docs/briefing/README.md
+#      "load alongside when full historical context needed"); they are
+#      NOT session-start-loaded and therefore sit outside the per-topic
+#      session-surface budget that ADR-040 Tier 3 governs. Flagging them
+#      forces a churn-vs-defer choice with no correct destination
+#      (a sink has no chronologically-correct sibling slot for further
+#      splitting). P322 closes this — archives are explicitly out of
+#      scope for the OVER / MUST_SPLIT pass.
 #
 # Read-only — does NOT mutate any briefing file. Rotation is surfaced
 # to the user via run-retro Step 3.
 #
 # @problem P099 (initial OVER advisory)
 # @problem P145 (MUST_SPLIT escalation — closes the defer-recurrence gap)
+# @problem P322 (archive-sink exclusion — closes the sink-rotation forced-choice)
 # @adr ADR-040 (Session-start briefing surface — Tier 3 budget; this
 #   script promotes Tier 3 from informational to advisory enforcement;
 #   MUST_SPLIT promotes the 2× reassessment trigger to per-cycle)
@@ -87,6 +99,12 @@ for path in "${files[@]}"; do
   if [ "$base" = "README.md" ]; then
     continue
   fi
+  # *-archive*.md files are rotation SINKS — loaded on-demand only,
+  # NOT session-start-loaded; out of scope for the session-surface
+  # budget. See P322 + header rationale.
+  case "$base" in
+    *-archive*.md) continue ;;
+  esac
   bytes=$(wc -c < "$path" | tr -d ' ')
   entries+=("$base $bytes")
 done

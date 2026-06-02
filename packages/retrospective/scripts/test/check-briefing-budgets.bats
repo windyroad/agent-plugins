@@ -146,6 +146,48 @@ write_briefing_entry() {
   [ -z "$output" ]
 }
 
+# ── Archive-sink exclusion (P322) ───────────────────────────────────────────
+#
+# Archive files match `*-archive*.md` and are rotation SINKS — destination
+# of split-by-date — loaded on-demand only, NOT session-start-loaded.
+# Holding them to the per-topic session-surface budget forces a churn-vs-
+# defer choice with no correct answer (re-rotating a sink has no
+# chronologically-correct destination among existing siblings). The
+# session-start surface budget (ADR-040 Tier 3) targets session-start-
+# loaded files only. P322 closes this by excluding `*-archive*.md` from
+# the OVER / MUST_SPLIT pass — same shape as the README.md exclusion.
+#
+# @problem P322
+
+@test "check-briefing-budgets: archive file at or above threshold is excluded (P322 rotation sink)" {
+  mkdir -p "$FIXTURE_DIR/briefing"
+  # Archive sink that would otherwise trip OVER + MUST_SPLIT
+  write_briefing_entry "$FIXTURE_DIR/briefing/governance-workflow-archive.md" 20000
+  run "$SCRIPT" "$FIXTURE_DIR/briefing"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "check-briefing-budgets: archive variant -archive-2026-05.md is also excluded" {
+  mkdir -p "$FIXTURE_DIR/briefing"
+  # Date-suffixed archive sibling created by split-by-date rotation
+  write_briefing_entry "$FIXTURE_DIR/briefing/hooks-and-gates-archive-2026-05.md" 12000
+  run "$SCRIPT" "$FIXTURE_DIR/briefing"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "check-briefing-budgets: non-archive over-threshold file is still flagged alongside archive exclusion" {
+  mkdir -p "$FIXTURE_DIR/briefing"
+  # Mixed case: session-start surface file IS flagged; archive sink IS NOT.
+  write_briefing_entry "$FIXTURE_DIR/briefing/active-topic.md" 8000
+  write_briefing_entry "$FIXTURE_DIR/briefing/active-topic-archive.md" 8000
+  run "$SCRIPT" "$FIXTURE_DIR/briefing"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -E "^OVER active-topic.md bytes=[0-9]+ threshold=5120"
+  ! echo "$output" | grep -q "active-topic-archive.md"
+}
+
 # ── Configurable threshold via env var ──────────────────────────────────────
 
 @test "check-briefing-budgets: BRIEFING_TIER3_MAX_BYTES env var overrides default" {

@@ -1,9 +1,17 @@
 # Problem 322: Tier-3 briefing-budget pass flags `*-archive*.md` sink files — re-rotating a rotation SINK proliferates siblings for ~zero reader value
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-27
 **Priority**: 3 (Medium) — Impact: 2 x Likelihood: 3 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: S (deferred — re-rate at next /wr-itil:review-problems)
+
+## Fix
+
+Fix landed 2026-06-03 (this commit). `packages/retrospective/scripts/check-briefing-budgets.sh` now excludes `*-archive*.md` from the OVER / MUST_SPLIT pass alongside the existing `README.md` exclusion. Header comment documents the rationale (rotation sinks, on-demand-only loading, ADR-040 Tier 3 session-start surface intent). Three bats fixtures in `packages/retrospective/scripts/test/check-briefing-budgets.bats` pin the new exclusion behaviour: (a) archive file ≥ threshold not flagged, (b) date-suffixed archive variant `*-archive-2026-05.md` not flagged, (c) non-archive over-threshold file still flagged alongside an archive sibling.
+
+Architect verdict ALIGN-WITH-CONDITIONS — C1 (ADR-040 Confirmation field amend + ADR-077 compendium regen) queued as P349 per AFK no-ADR-edits constraint.
+
+Composes-with: P099 (the budget pass surface), P145/P247 (don't-defer rotation discipline).
 
 ## Description
 
