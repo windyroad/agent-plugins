@@ -65,9 +65,10 @@ setup() {
   diff -q "$HELPER" "$REPO_ROOT/packages/architect/lib/derive-first-dispatch.sh"
 }
 
-@test "P287: capture-problem SKILL.md does not carry --type= or --no-prompt flag rows" {
+@test "P287: capture-problem SKILL.md does not carry --type= flag rows (--no-prompt REVIVED per ADR-060 Amendment 2026-06-02 as AFK marker)" {
   # The retired Step 1.5 dispatch flags must not appear in the flag table.
+  # NB: --no-prompt was REVIVED per ADR-060 Amendment 2026-06-02 — see
+  # capture-problem-step-1-5b-jtbd-trace.bats line 327 (positive assertion).
   ! grep -E '^\| `--type=technical`' "$SKILL_FILE"
   ! grep -E '^\| `--type=user-business`' "$SKILL_FILE"
-  ! grep -E '^\| `--no-prompt`' "$SKILL_FILE"
 }

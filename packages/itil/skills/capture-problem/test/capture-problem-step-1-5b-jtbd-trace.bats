@@ -317,7 +317,7 @@ parse_no_prompt_flag() {
 }
 
 @test "SKILL.md: Step 1.5b preserves JTBD-301 firewall on plugin-user-side intake" {
-  grep -qE 'plugin-user-side .* MUST NOT (prompt|carry)' "$SKILL_FILE"
+  grep -qE '[Pp]lugin-user-side.*MUST NOT (prompt|carry)' "$SKILL_FILE"
 }
 
 @test "SKILL.md: Step 1.5b names derive-then-ratify contract" {
