@@ -1,6 +1,6 @@
 # Problem 348: iter subprocesses set `human-oversight: confirmed` marker on ADRs / personas / JTBDs without an actual user-confirmation event
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-06-02
 **Priority**: 15 (Very High) — Impact: 5 (Significant — entire oversight mechanism rests on this marker; if iters self-certify, the marker is hollow and the safety guarantee P283/P288/ADR-066/ADR-068 codify is compromised) × Likelihood: 5 (Almost certain — observed verbatim in a prior session per user screenshot 2026-06-02; the SKILL contracts for capture-adr / create-adr / capture-rfc / update-guide / oversight drains don't structurally prevent iter subprocesses from writing the marker)
 **Origin**: internal
@@ -100,3 +100,21 @@ Each has trade-offs (option 1 is simplest; option 3 leaves a permanent audit tra
 - **ADR-066** — current marker authority (needs amendment to require structural-evidence precondition).
 - **ADR-068** — JTBD/persona marker authority (needs amendment same as ADR-066).
 - **ADR-074** — substance-confirm-before-build (adjacent; this ticket extends the principle to MARKER-WRITE authority, not just BUILD authority).
+
+## Fix Released
+
+- **Release vehicle**: `@windyroad/architect@0.15.0` + `@windyroad/jtbd@0.11.0` + `@windyroad/itil@0.48.0` (cohort released together)
+- **Fix commit**: `4694239` — `fix: P348 — structural guard against iter self-set human-oversight: confirmed`
+- **Release commit**: from PR #206 merge
+- **Release date**: 2026-06-02
+- **Fix design** (user-ratified 2026-06-02):
+  - Evidence shape: **Option 1** — session-scoped marker file `/tmp/oversight-confirmed-<artefact-path-hash>-<session-id>`. Written by SKILLs after AskUserQuestion-confirm; PreToolUse:Edit/Write reads to verify before allowing marker write.
+  - AFK iter contract: when iter creates ADR/persona/JTBD without AskUserQuestion access, writes `human-oversight: unconfirmed` explicitly. Drains queue for orchestrator-main-turn surface at loop end (work-problems Step 2.4 gate (a) extension).
+- **Components shipped**:
+  - NEW PreToolUse hooks: `packages/architect/hooks/architect-oversight-marker-discipline.sh` + `packages/jtbd/hooks/jtbd-oversight-marker-discipline.sh`
+  - NEW helpers + ADR-049 shims: `wr-architect-mark-oversight-confirmed`, `wr-jtbd-mark-oversight-confirmed`
+  - 22/22 GREEN bats fixtures (12 architect + 10 jtbd)
+  - ADR-066 + ADR-068 Amendments 2026-06-02 codifying the structural guard + new `unconfirmed` enum value
+  - 5 SKILL surfaces updated: create-adr Step 5a, capture-adr, jtbd update-guide (×2), capture-rfc, work-problems Step 2.4 drain
+- **Transition**: Open → Verification Pending per ADR-022 P143 fold-fix amendment (RCA + Fix Strategy + Workaround documented inline; fix released same session).
+- **Migration deferred**: 63 ADRs + 17 JTBDs carry `human-oversight: confirmed` from prior sessions. Audit cadence-driven via `/wr-architect:review-decisions` + `/wr-jtbd:confirm-jobs-and-personas` drains. Markers from this session (ADR-060/075/080/081 + amendments) were legitimately set via in-session AskUserQuestion sequences.

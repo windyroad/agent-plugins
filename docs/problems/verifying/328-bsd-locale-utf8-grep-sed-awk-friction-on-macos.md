@@ -1,6 +1,6 @@
 # Problem 328: BSD `grep` / `sed` / `awk` on macOS silently fail or error on UTF-8 without `LC_ALL=en_US.UTF-8`
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-30
 **Priority**: 8 (Medium) — Impact: 2 (Minor — dev tooling friction on contributor environments; published packages unaffected) × Likelihood: 4 (Likely — every macOS contributor without `LC_ALL=en_US.UTF-8` export hits at least one of the grep/sed/awk failure modes; observed multiple times in single session)
 **Origin**: internal
@@ -109,3 +109,13 @@ Triggers / Evidence: 3+ distinct incidents in the 2026-05-30 ADR-077 session (on
 - Audit + migrate existing unprotected scripts to add `export LC_ALL=en_US.UTF-8` at the top (Investigation Task in Fix Strategy step 2). Migration is a follow-on backlog of its own; the lint surfaces the exposure surface count (372 / 152) to inform WSJF on that work.
 - Once migration lands, promote `WR_LOCALE_DISCIPLINE_WARN_ONLY=0` in the CI step (Phase 1 → Phase 2 advisory → load-bearing).
 - Optional Phase 3: `packages/shared/bin/wr-grep` / `wr-sed` / `wr-awk` wrapper shims (Fix Strategy step 3 — defer; lint may suffice).
+
+## Fix Released
+
+- **Release vehicle**: `@windyroad/itil@0.47.1` (npm: <https://www.npmjs.com/package/@windyroad/itil/v/0.47.1>)
+- **Fix commit**: `4d5217b` — `fix(itil): P328 — CI lint warns grep/sed/awk without LC_ALL (Option 3, user-ratified 2026-06-02)`
+- **Release commit**: `185a732` — Merge pull request from windyroad/changeset-release/main
+- **Release date**: 2026-06-02
+- **Fix strategy**: Option 3 (user-ratified) — CI lint script `packages/itil/scripts/check-locale-discipline.sh` walks `packages/*/scripts|hooks|lib/*.sh` and warns on `grep`/`sed`/`awk` invocations missing a preceding `LC_ALL=en_US.UTF-8` export. Phase 1 advisory mode (`WR_LOCALE_DISCIPLINE_WARN_ONLY=1` default, exits 0); promotion to Phase 2 enforces exit 1. Wired into CI step "Check locale-discipline in bash scripts (P328, advisory)". ADR-049 PATH shim `wr-itil-check-locale-discipline`. 24/24 GREEN bats.
+- **Baseline observed**: 372 violations across 152 scripts at fix-ship time (only 2 carry export LC_ALL currently). Cadence-driven migration follows.
+- **Transition**: Known Error → Verification Pending per ADR-022. Orchestrator-main-turn inline transition.
