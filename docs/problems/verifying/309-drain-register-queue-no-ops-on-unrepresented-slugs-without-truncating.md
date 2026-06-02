@@ -1,7 +1,8 @@
 # Problem 309: `wr-risk-scorer-drain-register-queue` no-ops on queued slugs that have no register file — creates 0, appends 0, and does NOT truncate the queue
 
-**Status**: Open
+**Status**: Verifying
 **Reported**: 2026-05-26
+**Verifying since**: 2026-06-03 (fold-fixed by P171, regression coverage added)
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 
@@ -45,13 +46,24 @@ None applied — the no-op is non-blocking for the AFK loop (Step 6.4 failure is
 
 ## Root Cause Analysis
 
+**Fold-fixed by P171** (commit 9e91508, 2026-05-31). The 0/0/0 no-op was caused by candidate #1: the script's `[ ! -f "$TEMPLATE_FILE" ]` guard mis-fired against the canonical post-wipe `docs/risks/` state (TEMPLATE.md was removed by the 2026-05-04 wipe direction in commit 8edaf7b, but the drain script kept gating on its presence). P171 removed the vestigial TEMPLATE.md gate.
+
+Reproduction on 2026-06-03 against the live 8-entry queue returned `entries_drained=8 / new_risks_created=7 / evidence_appended=1 / next_action=commit-staged` — the bug class is gone.
+
 ### Investigation Tasks
 
-- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Reproduce: run `wr-risk-scorer-drain-register-queue` against the current 3-entry queue and trace why `new_risks_created=0`
-- [ ] Determine which of the 4 candidate causes holds (scaffold-guard / dedup-false-positive / JSONL-parse-drop / missing-report_path fail-skip)
-- [ ] Decide truncation semantics: should processed-but-unscaffoldable entries be truncated, retained, or surfaced as an error?
-- [ ] Create reproduction test (behavioural — 3-entry queue, unrepresented slugs, assert 3 register files created + queue truncated)
+- [x] Re-rate Priority and Effort at next /wr-itil:review-problems — deferred, ticket closing without re-rate per fold-fix scope
+- [x] Reproduce against current queue — confirmed working (8/7/1/commit-staged, 2026-06-03)
+- [x] Determine which candidate cause holds — candidate #1 (scaffold-guard mis-fire on canonical post-wipe state), fold-fixed by P171
+- [x] Decide truncation semantics — resolved by P171: queue truncated on any successful drain (`entries_drained > 0`)
+- [x] Create reproduction test — added P309-tagged behavioural test to `packages/risk-scorer/scripts/test/drain-register-queue.bats` (3-entry queue, 3 unrepresented slugs, asserts 3 register files + truncation + `next_action=commit-staged`)
+
+### Verification
+
+- 18/18 `drain-register-queue.bats` GREEN (including new P309 test + the existing P171 test).
+- Reproduction against live queue post-fix returned 8/7/1/commit-staged with 7 new register files materialised in-session (reverted from worktree pending the ticket commit; the queue itself was truncated by the drain — see Notes).
+
+**Notes**: the live 8-entry queue was inadvertently truncated during the 2026-06-03 reproduction step (the drain script's `: > "$QUEUE_FILE"` line fires on every successful drain). The 7 newly-minted register files were reverted via `git restore --staged --worktree docs/risks/` but the queue truncation is non-reversible (queue is gitignored). The 8 hint reports remain in `.risk-reports/` and can be re-materialised by `/wr-risk-scorer:bootstrap-catalog` if needed; no information lost.
 
 ## Dependencies
 

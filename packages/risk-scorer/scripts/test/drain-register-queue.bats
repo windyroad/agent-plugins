@@ -306,6 +306,39 @@ EOF
   [ -f docs/risks/R002-good-line.active.md ]
 }
 
+@test "P309/P171 — three unrepresented slugs drain to three register files + queue truncated" {
+  # P309 regression coverage (fold-fixed by P171, commit 9e91508).
+  # Replays the original P309 observation: a 3-entry queue with three slugs
+  # that have no matching docs/risks/ register file. Prior to the P171 fix,
+  # this returned entries_drained=0 / new_risks_created=0 / next_action=none
+  # AND did not truncate the queue — entries accumulated indefinitely off-
+  # ledger. Post-fix, the drain MUST materialise all three register files,
+  # truncate the queue, and emit next_action=commit-staged.
+  rm -f docs/risks/TEMPLATE.md
+  cat > .afk-run-state/risk-register-queue.jsonl <<EOF
+{"ts":"2026-05-24T10:00:00Z","session_id":"s1","report_path":".risk-reports/2026-05-24-r1.md","reason_tag":"above-appetite-residual","risk_slug":"p309-unrepresented-slug-a","slug_source":"agent","prefill":"First unrepresented slug — should mint a new register entry."}
+{"ts":"2026-05-25T10:00:00Z","session_id":"s2","report_path":".risk-reports/2026-05-25-r2.md","reason_tag":"above-appetite-residual","risk_slug":"p309-unrepresented-slug-b","slug_source":"agent","prefill":"Second unrepresented slug — should mint a second new register entry."}
+{"ts":"2026-05-25T11:00:00Z","session_id":"s2","report_path":".risk-reports/2026-05-25-r3.md","reason_tag":"above-appetite-residual","risk_slug":"p309-unrepresented-slug-c","slug_source":"agent","prefill":"Third unrepresented slug — should mint a third new register entry."}
+EOF
+  run bash "$SCRIPT" "$WORK_DIR"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q '^entries_drained=3$'
+  echo "$output" | grep -q '^new_risks_created=3$'
+  echo "$output" | grep -q '^evidence_appended=0$'
+  echo "$output" | grep -q '^next_action=commit-staged$'
+  # Three register files materialised with sequential IDs (R002, R003, R004
+  # because R001 is in the seeded README fixture).
+  [ -f docs/risks/R002-p309-unrepresented-slug-a.active.md ]
+  [ -f docs/risks/R003-p309-unrepresented-slug-b.active.md ]
+  [ -f docs/risks/R004-p309-unrepresented-slug-c.active.md ]
+  # Queue truncated — entries no longer accumulate off-ledger.
+  [ ! -s .afk-run-state/risk-register-queue.jsonl ]
+  # README Register table picks up all three new rows.
+  grep -q 'R002-p309-unrepresented-slug-a' docs/risks/README.md
+  grep -q 'R003-p309-unrepresented-slug-b' docs/risks/README.md
+  grep -q 'R004-p309-unrepresented-slug-c' docs/risks/README.md
+}
+
 @test "drain succeeds against canonical (post-wipe) docs/risks/ with NO TEMPLATE.md (P171)" {
   # P171 regression coverage. The 2026-05-04 wipe direction (commit 8edaf7b)
   # removed TEMPLATE.md from canonical docs/risks/; commit 9b52610 then re-
