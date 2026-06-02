@@ -1,13 +1,33 @@
 ---
-status: "proposed"
+status: rejected
 date: 2026-06-02
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: []
-reassessment-date: 2026-09-02
+human-oversight: confirmed
+oversight-date: 2026-06-02
+replaced-by: ADR-080
 ---
 
 # SessionStart PATH refresh hook for plugin cache
+
+## Rejection (2026-06-02)
+
+**Status: REJECTED before implementation.** User direction via the ADR-080 SQ-080-6 substance-ratification surface (2026-06-02 AskUserQuestion pin: "ABANDON ADR-081; ADR-080 standalone").
+
+**Reasoning**: ADR-080's invoke-time wrapper resolves to the highest-version sibling regardless of `PATH` order, which makes the cache-state — not the `PATH` order — authoritative for shim binaries. The first shim invocation in a new session resolves to the highest-version sibling whether or not session-init populated `PATH` with a stale `bin/` first. This subsumes the cold-start staleness case that ADR-081 was sized to address (the dominant JTBD-007 surface, per P343 § Root Cause Analysis).
+
+The narrow residual surface that ADR-081 would still have covered is **non-shim-wrapped binaries** (e.g. plugin scaffold scripts called by absolute path; other `PATH` lookups not routed through ADR-049 shims). This surface is observable but not currently a JTBD-001/007 blocker. If it surfaces in the field, a fresh problem ticket can revive the SessionStart-hook surface — ADR-080's Reassessment Criteria explicitly names this trigger.
+
+The ADR-081 surface (Context, Decision Drivers, Considered Options, sub-decisions SQ-081-1 through SQ-081-7, Consequences, Pros and Cons) is preserved below as institutional knowledge per MADR convention. **No implementation work was done; no hooks were shipped; no scaffold templates were modified.** The sub-decisions SQ-081-1 through SQ-081-7 were never ratified — they remain as recorded options for the rejected proposal, not as pinned decisions.
+
+**Authority**: ADR-066 born-`proposed` marker model accepts "reject" as a valid ratification outcome; ADR-074 substance-confirm-before-build resolves at the ratification surface (which here resolved to "reject"). No dependent implementation was built per ADR-074 § Enforcement surface 1 — the SQ-080-6 ratification surface absorbed and obviated this ADR before any code referenced it.
+
+**Related**: ADR-080 § Decision Outcome SQ-080-6 (the ratification surface); ADR-080 § Reassessment Criteria (the trigger for revisiting if non-shim-wrapped binary cold-start staleness surfaces); P343 § Fix (records Option 4 SUPERSEDED 2026-06-02).
+
+---
+
+> Historical record below — the surface as originally proposed for institutional knowledge per MADR convention. The DRAFT banner from the proposed shape is preserved verbatim to make clear that **none of the sub-decisions SQ-081-1 through SQ-081-7 were ratified** before the ADR was rejected.
 
 > **DRAFT — substance pending ratification per ADR-074 / P339.** The headline option (Option A: SessionStart hook recomputes `PATH` from current cache state at every session start) is user-directed per P343 Option 4. Substantive sub-decisions inside that direction (hook scope, PATH mutation semantics, interaction with sibling ADR-080 shim wrapper, failure mode, interaction with `.claude/settings.json` env config) are queued in this iteration's `outstanding_questions` and remain un-pinned; no implementation builds on this ADR until the user pins them at the next interactive transition.
 

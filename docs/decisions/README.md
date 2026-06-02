@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 79 (72 in-force, 7 historical)
+**Total ADRs:** 79 (71 in-force, 8 historical)
 
 ---
 
 ## In-force decisions
 
-_72 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_71 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -349,20 +349,15 @@ _72 ADRs. These are the current rules. The architect agent reads this section fi
 **Related:** ADR-022, ADR-026, ADR-014, ADR-049, ADR-052, ADR-013, ADR-044, ADR-066, ADR-074
 
 ### ADR-080 — Highest-version-wins shim wrapper for plugin scaffold-template shims
-**Status:** proposed
+**Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **"Option A — Shim wrapper resolves to highest-version sibling at invoke time"**, because it closes the mid-session staleness window that motivated P343 (the dominant cost driver of session 9), aligns with the existing ADR-...
-**Related:** ADR-049, ADR-081, ADR-040, ADR-002, ADR-003, ADR-014, ADR-066, ADR-074
-
-### ADR-081 — SessionStart PATH refresh hook for plugin cache
-**Status:** proposed
-**Chosen:** Chosen option: **"Option A — SessionStart hook recomputes `PATH` from current cache state at every session start"**, because it closes the cold-start staleness window that P343 documents, reuses the established ADR-040 SessionStart surfac...
-**Related:** ADR-040, ADR-080, ADR-049, ADR-002, ADR-003, ADR-014, ADR-066, ADR-074
+**Related:** ADR-049, ADR-081, ADR-040, ADR-080, ADR-002, ADR-003, ADR-014, ADR-066, ADR-074
 
 ---
 
 ## Historical decisions
 
-_7 ADRs. These were tried and superseded, rejected, or deprecated. Read them as direction for what NOT to do, or to understand the lineage of an in-force decision. Do not enforce them as current rules._
+_8 ADRs. These were tried and superseded, rejected, or deprecated. Read them as direction for what NOT to do, or to understand the lineage of an in-force decision. Do not enforce them as current rules._
 
 ### ADR-001 — Unified Install Experience via npm Package
 **Status:** superseded
@@ -396,3 +391,8 @@ _7 ADRs. These were tried and superseded, rejected, or deprecated. Read them as 
 **Status:** superseded
 **Chosen:** Chosen option: **"Option D2 — Plugin README MUST cite at least one current JTBD job ID; value framing SHOULD derive from JTBD"**, because it (a) creates a stable, structurally-simple drift-detection anchor (JTBD ID grep + filesystem resol...
 **Related:** ADR-002, ADR-003, ADR-008, ADR-013, ADR-014, ADR-051, ADR-021, ADR-040, ADR-053, ADR-044, ADR-049
+
+### ADR-081 — SessionStart PATH refresh hook for plugin cache
+**Status:** rejected | **Oversight:** confirmed
+**Chosen:** Chosen option: **"Option A — SessionStart hook recomputes `PATH` from current cache state at every session start"**, because it closes the cold-start staleness window that P343 documents, reuses the established ADR-040 SessionStart surfac...
+**Related:** ADR-040, ADR-080, ADR-049, ADR-002, ADR-003, ADR-014, ADR-066, ADR-074
