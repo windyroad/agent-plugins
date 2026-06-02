@@ -1,6 +1,6 @@
 # Problem 330: derive-release-vehicle helper requires pre-edit of ticket changeset reference — three-touch when one-touch would suffice
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-05-30 (work-problems wrap retro)
 **Priority**: 6 (Medium) — Impact: 2 (Minor — adopter UX friction on every K→V transition; recoverable via documented exit-2 routing) × Likelihood: 3 (Possible — fires on every K→V where the changeset reference isn't already in the ticket body)
 **Effort**: S (small helper amendment OR manage-problem fix-ship-step seed; either path is single-file)
@@ -42,10 +42,15 @@ The helper's contract is "derive release vehicle from a closed-ticket file body 
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [x] Confirm the 3 candidate fix options below + architect verdict on which option fits ADR-049 shim contract + ADR-022 lifecycle — analysis below; **awaiting user ratification of locus pick** (2026-06-01 iter, work-problems AFK; per `feedback_confirm_decision_substance_before_building` + `feedback_run_decisions_by_user_before_drafting`, locus not picked autonomously)
-- [ ] Bats coverage extending derive-release-vehicle.bats with the K→V-standalone path (after locus ratified)
+- [x] Confirm the 3 candidate fix options below + architect verdict on which option fits ADR-049 shim contract + ADR-022 lifecycle — **Option B ratified by user 2026-06-01** in /wr-itil:work-problems AFK iter dispatch instruction ("User RATIFIED P330 fix locus: Option B (manage-problem fix-ship step seeds .changeset/<name>.md reference inline in ticket body)")
+- [x] Codify Option B in manage-problem SKILL.md Step 7 + transition-problem SKILL.md Step 6 (copy-not-move per ADR-010 amended / P093) with structural bats backstop — shipped in this iter's commit (2026-06-01)
+- [ ] Bats coverage extending derive-release-vehicle.bats with the K→V-standalone path — **deferred-retrofit**: the structural backstop at `packages/itil/skills/manage-problem/test/manage-problem-release-vehicle-seed.bats` (with ADR-052 § Surface 2 `tdd-review: structural-permitted` marker citing this task) carries the contract in the meantime; behavioural K→V-mock test follows in a separate commit
 
 ## Fix Strategy
+
+**Status: Option B ratified and codified 2026-06-01.** User-ratified in this iter's /wr-itil:work-problems AFK dispatch instruction. Codification shipped in this iter's single ADR-014 commit: `packages/itil/skills/manage-problem/SKILL.md` Step 7 + `packages/itil/skills/transition-problem/SKILL.md` Step 6 amended with the seed-`Release vehicle`-reference-BEFORE-rename step + structural bats backstop at `packages/itil/skills/manage-problem/test/manage-problem-release-vehicle-seed.bats`. The three-option analysis is preserved below for historical audit trail.
+
+**Release vehicle**: .changeset/wr-itil-p330-option-b.md
 
 Three candidate options (architect verdict needed — **awaiting user ratification**):
 
