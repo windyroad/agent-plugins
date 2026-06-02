@@ -1,6 +1,6 @@
 # Problem 349: ADR-040 Confirmation field stale after P322 archive-sink exclusion — needs Confirmation amend + docs/decisions/README.md compendium regen
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-06-03
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: internal
@@ -51,3 +51,11 @@ The behavioural fix is in place — only the documentation/compendium lags. Arch
 ## Related
 
 (captured via /wr-itil:capture-problem on 2026-06-03 during work-problems AFK iter on P322; hang-off-check ran title-keyword pre-filter, considered P302/P322/P288 as candidates, verdict PROCEED_NEW — P322 is the upstream behavioural fix entering Verifying, this ticket carries the downstream documentation-sync that architect verdict C1 named as a separate condition the AFK constraint required to queue. expand at next investigation.)
+
+## Fix Released
+
+- **Fix commit**: `198ce21` — `docs(architect): amend ADR-040 — Confirmation field gains *-archive*.md exclusion (closes P349)`
+- **Fix date**: 2026-06-03
+- **Fix**: ADR-040 Confirmation bullet at line 149 amended to add `*-archive*.md` exclusion. New Amendment 2026-06-02 section codifies the P322 rationale. User-ratified 2026-06-03 morning via AskUserQuestion.
+- **Transition**: Open → Verification Pending per ADR-022 P143 fold-fix (RCA + Fix Strategy + Workaround documented inline; fix landed same iter).
+- **No release vehicle**: docs-only ADR amendment; no changeset needed (governance doc, not @windyroad/* package source).

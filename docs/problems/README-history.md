@@ -788,3 +788,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-06-03 (P193 K→V transition fragment rotated for P278 O→V fold-fix)
 
 > Last reviewed: 2026-06-03 **P193 K→V transition** — `@windyroad/risk-scorer` released with `risk-gate.bats:174` flake fix (fix commit `96fadc8` salvaged from iter 24 stuck-before-emit). Mechanical K→V transition per ADR-022. Orchestrator-main-turn inline transition. Prior fragment (P193 Open → Known Error) rotated to README-history.md per P134.
+
+## 2026-06-03 (P193 K→V fragment rotated for P349 fold-fix)
+
+> Last reviewed: 2026-06-03 **P278 Open → Verification Pending (fold-fix per ADR-022 P143 amendment)** — Option A docs-only path: `.changeset/README.md` created documenting the per-package vs renderer-package boundary rule (README content shifts → renderer's package suffices; `plugin.json` field shape changes → per-package changeset entry; non-allow-listed source code → per-package), citing the 3cfa6fc P0 hotfix precedent. ADR-021 amendment NOT required (ADR-021 governs plugin-manifest-version sync, not changeset-author conventions). No `@windyroad/*` changeset queued — docs-only convention clarification is not a published-package change. External-comms risk-scorer PASS + voice-tone PASS on draft body. Prior fragment (P193 K→V transition) rotated to README-history.md per P134.
