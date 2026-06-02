@@ -251,8 +251,16 @@ if [ -d "$PROBLEMS_DIR" ]; then
   # problem_rfc_ids["P168"] = "RFC-001 RFC-002 ..."
   declare -A problem_rfc_rows
   declare -A problem_rfc_ids
+  # P312 / ADR-031: scan both flat docs/problems/<NNN>-*.md AND per-state
+  # subdir docs/problems/<state>/<NNN>-*.md layouts so the reverse-trace
+  # remains valid post-migration. Mirrors reconcile-readme.sh lines 74-110.
   shopt -s nullglob
-  for pf in "$PROBLEMS_DIR"/[0-9][0-9][0-9]-*.md; do
+  problem_files=( "$PROBLEMS_DIR"/[0-9][0-9][0-9]-*.md )
+  for ticket_status in open known-error verifying closed parked; do
+    problem_files+=( "$PROBLEMS_DIR"/"$ticket_status"/[0-9][0-9][0-9]-*.md )
+  done
+  shopt -u nullglob
+  for pf in "${problem_files[@]}"; do
     pbase="$(basename "$pf")"
     pnum="${pbase%%-*}"
     pid="P${pnum}"
@@ -274,7 +282,6 @@ if [ -d "$PROBLEMS_DIR" ]; then
     done < <(awk -v start="$sec_start" 'NR>start { if (/^## /) exit; print }' "$pf")
     problem_rfc_ids["$pid"]="$rfcs_in_p"
   done
-  shopt -u nullglob
 
   # 1. MISSING_REVERSE_TRACE: RFC claims P, P does not list RFC.
   for rfc_id in "${!rfc_problems_claim[@]}"; do

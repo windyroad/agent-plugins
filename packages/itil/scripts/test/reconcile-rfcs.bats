@@ -131,6 +131,40 @@ EOF
   fi
 }
 
+# Helper: write a problem ticket under the per-state subdir layout per
+# ADR-031 (state is the parent directory; filename has NO `.state.md` suffix).
+# Args: <pid-num> <slug> <state> <rfcs-rows-block>
+# Used to regression-test P312 — reconcile-rfcs reverse-trace must traverse
+# docs/problems/<state>/<NNN>-*.md, not just flat docs/problems/<NNN>-*.<state>.md.
+write_problem_subdir() {
+  local num="$1" slug="$2" state="$3" rfcs_rows="${4:-}"
+  mkdir -p "$PROBLEMS_DIR/$state"
+  local file="$PROBLEMS_DIR/$state/${num}-${slug}.md"
+  cat > "$file" <<EOF
+# Problem ${num}: ${slug}
+
+**Status**: ${state}
+
+## Description
+
+stub
+
+## Related
+
+stub
+EOF
+  if [ -n "$rfcs_rows" ]; then
+    cat >> "$file" <<EOF
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+${rfcs_rows}
+EOF
+  fi
+}
+
 # ── Existence + executable ──────────────────────────────────────────────────
 
 @test "reconcile-rfcs: script exists" {
@@ -411,6 +445,35 @@ EOF
   while IFS= read -r line; do
     [ ${#line} -le 150 ] || { echo "row exceeds 150 bytes: '$line' (${#line} bytes)"; return 1; }
   done <<< "$output"
+}
+
+# ── P312: per-state subdir reverse-trace (ADR-031 layout) ───────────────────
+# Closes P312 — reconcile-rfcs reported spurious MISSING_REVERSE_TRACE for
+# tickets that live under docs/problems/<state>/<NNN>-*.md because the
+# reverse-trace pass only globbed the flat docs/problems/<NNN>-*.md layout.
+# RFC-002-class dual-tolerant-glob fix mirroring the sibling already shipped
+# in reconcile-readme.sh (P118).
+
+@test "P312: reverse-trace clean when problem ticket lives in per-state subdir" {
+  write_rfc "001" "foo" "accepted"
+  write_minimal_readme "| 2.0 | RFC-001 | foo | 3 Med | Accepted | M | 2026-05-05 |"
+  # Ticket lives under docs/problems/verifying/168-p168.md (no .state suffix).
+  write_problem_subdir "168" "p168" "verifying" "| RFC-001 | accepted | foo |"
+  run bash "$SCRIPT" "$FIXTURE_DIR" "$PROBLEMS_DIR"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"MISSING_REVERSE_TRACE"* ]]
+}
+
+@test "P312: reverse-trace detects missing trace when problem ticket lives in per-state subdir" {
+  write_rfc "001" "foo" "accepted"
+  write_minimal_readme "| 2.0 | RFC-001 | foo | 3 Med | Accepted | M | 2026-05-05 |"
+  # Subdir ticket WITHOUT a `## RFCs` section → MISSING_REVERSE_TRACE must fire.
+  write_problem_subdir "168" "p168" "verifying" ""
+  run bash "$SCRIPT" "$FIXTURE_DIR" "$PROBLEMS_DIR"
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"MISSING_REVERSE_TRACE"* ]]
+  [[ "$output" == *"RFC-001"* ]]
+  [[ "$output" == *"P168"* ]]
 }
 
 # ── ADR-049 bin shim contract ───────────────────────────────────────────────

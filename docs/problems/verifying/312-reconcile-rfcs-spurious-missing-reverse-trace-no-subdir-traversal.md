@@ -1,9 +1,9 @@
 # Problem 312: reconcile-rfcs reports spurious MISSING_REVERSE_TRACE — doesn't traverse docs/problems/ per-state subdirs (RFC-002-class glob gap)
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-26
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
-**Effort**: S (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1
+**Effort**: S
 
 ## Description
 
@@ -33,8 +33,8 @@ Verify reverse-traces by direct inspection of the problem ticket's `## RFCs` sec
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems.
-- [ ] Confirm the reverse-trace glob in `packages/itil/scripts/reconcile-rfcs.sh` scans `docs/problems/*.md` only.
-- [ ] Add a regression bats fixture (problem ticket in a subdir with a correct `## RFCs` reverse-trace → reconciler reports clean, not MISSING).
+- [x] Confirm the reverse-trace glob in `packages/itil/scripts/reconcile-rfcs.sh` scans `docs/problems/*.md` only. **CONFIRMED 2026-06-02 AFK iter** — line 255 globbed flat layout only; per-state subdir layout (ADR-031) invisible.
+- [x] Add a regression bats fixture (problem ticket in a subdir with a correct `## RFCs` reverse-trace → reconciler reports clean, not MISSING). **DONE 2026-06-02** — `packages/itil/scripts/test/reconcile-rfcs.bats` `P312:` cases (clean + missing-trace in subdir layout). Test 25 was RED pre-fix (proved the bug), GREEN post-fix.
 
 ## Fix Strategy
 
@@ -51,3 +51,12 @@ Verify reverse-traces by direct inspection of the problem ticket's `## RFCs` sec
 ## Related
 
 (captured via /wr-retrospective:run-retro Step 2b pipeline-instability scan, 2026-05-26 ADR-070/071 implementation session; expand at next investigation)
+
+## Fix Released
+
+Fix shipped 2026-06-02 in @windyroad/itil (changeset `.changeset/p312-reconcile-rfcs-dual-tolerant.md`, patch). Same-iter fold-fix per ADR-022 P143: RCA + Fix Strategy + Workaround all documented inline; mechanical fix authored under TDD (test 25 RED→GREEN); transition Open→Verifying gated on changeset release vehicle landing.
+
+Verification (close-on-evidence at next /wr-itil:work-problems or review pass):
+1. After `@windyroad/itil` patch publishes and `/install-updates` refreshes the cache, run `wr-itil-reconcile-rfcs docs/rfcs` against this repo.
+2. Expected: `MISSING_REVERSE_TRACE` line count drops from 16 (pre-fix, all spurious for in-subdir tickets) to 2 (genuine remaining drift in P012 and P170 whose `## RFCs` sections are empty — separate pre-existing issue, out of P312 scope per ADR-014 single-purpose).
+3. Bats regression suite `packages/itil/scripts/test/reconcile-rfcs.bats` runs clean (29 tests; new `P312:` cases at 25 + 26).
