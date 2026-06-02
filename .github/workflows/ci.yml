@@ -97,6 +97,9 @@ jobs:
       - name: Check shim-wrapper templates in sync (P343, ADR-080)
         run: npm run check:shim-wrappers
 
+      - name: Check locale-discipline in bash scripts (P328, advisory)
+        run: packages/itil/bin/wr-itil-check-locale-discipline .
+
       - name: Dry-run meta-installer
         run: node packages/agent-plugins/bin/install.mjs --dry-run
 

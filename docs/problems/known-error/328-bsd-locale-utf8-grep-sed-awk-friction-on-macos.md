@@ -1,6 +1,6 @@
 # Problem 328: BSD `grep` / `sed` / `awk` on macOS silently fail or error on UTF-8 without `LC_ALL=en_US.UTF-8`
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-05-30
 **Priority**: 8 (Medium) — Impact: 2 (Minor — dev tooling friction on contributor environments; published packages unaffected) × Likelihood: 4 (Likely — every macOS contributor without `LC_ALL=en_US.UTF-8` export hits at least one of the grep/sed/awk failure modes; observed multiple times in single session)
 **Origin**: internal
@@ -84,3 +84,28 @@ Triggers / Evidence: 3+ distinct incidents in the 2026-05-30 ADR-077 session (on
 - **ADR-076** — meta: the session that captured P327 (inbound-reported compendium token-burn problem) also captured this UTF-8 friction observation via run-retro Step 2b — the retro's pipeline-instability scan working as designed.
 
 (captured via /wr-itil:capture-problem; expand at next investigation)
+
+## Fix Released
+
+**Release vehicle**: `.changeset/p328-locale-discipline-lint.md` (@windyroad/itil patch)
+
+**Strategy**: Option 3 (user-ratified 2026-06-02) — **CI lint warns on `grep` / `sed` / `awk` invocations without preceding `LC_ALL=en_US.UTF-8`**. Cheapest of the three candidates in the Fix-strategy block above; catches future regressions without rewriting existing scripts immediately. Advisory in Phase 1 per ADR-040's reusable advisory-then-load-bearing pattern (line 92); promoted to load-bearing once existing scripts have been migrated.
+
+**Shipped**:
+
+- `packages/itil/scripts/check-locale-discipline.sh` — walks `packages/*/scripts/*.sh` + `packages/*/hooks/*.sh` (incl. nested `lib/`) + `packages/*/lib/*.sh` and emits one `WARN  <relpath>:<line>  <tool> without preceding LC_ALL=en_US.UTF-8` per unprotected invocation. Tracks file-wide `export LC_ALL=...` state, recognises inline `LC_ALL=...` prefix on the same line, skips `git grep` (different binary), skips comment lines, skips heredoc bodies. Self-application: the lint exports `LC_ALL=en_US.UTF-8` at the top of its own body so it doesn't reintroduce P328 in the lint itself. Default `WR_LOCALE_DISCIPLINE_WARN_ONLY=1` exits 0 even with violations (Phase 1); flip to `0` for Phase 2 load-bearing.
+- `packages/itil/scripts/test/check-locale-discipline.bats` — 24 behavioural tests (ADR-052 default) against a synthesised `packages/` fixture tree. Covers positive cases (file-wide `export`, inline `LC_ALL=` prefix), negative cases (raw grep / sed / awk), edge cases (multi-tool-per-line, `git grep` skip, heredoc bodies, comment lines, identifiers containing tool substrings), scope (`scripts/` + `hooks/` + nested `hooks/lib/` + `lib/`), Phase 1 vs Phase 2 exit semantics, argument handling, output shape, and self-application (the lint itself sets `LC_ALL`). 24/24 GREEN locally.
+- `packages/itil/bin/wr-itil-check-locale-discipline` — ADR-049 PATH shim generated from the ADR-080 highest-version-wins template; `npm run check:shim-wrappers` reports 40 shims in sync after the regeneration.
+- `.github/workflows/ci.yml` — new "Check locale-discipline in bash scripts (P328, advisory)" step between the existing "Check shim-wrapper templates in sync (P343, ADR-080)" step and the "Dry-run meta-installer" step. Phase 1 advisory — exits 0 even with violations — so the gate publishes the warning surface without blocking CI on the (currently large) backlog of unmigrated scripts.
+
+**Baseline at ship-time**: 372 violations across 152 scripts (only `packages/architect/scripts/generate-decisions-compendium.sh` and `packages/itil/scripts/evaluate-relevance.sh` carry `export LC_ALL=en_US.UTF-8` today). The lint surfaces the migration surface; Phase 2 promotion is gated on follow-up migration work (Investigation Task in Fix Strategy step 2).
+
+**Architect verdict** (2026-06-02): PASS. No new ADR required — the lint is the fourth instance of the established discipline-lint pattern (`check-problems-readme-budget`, `check-rfc-rejected-alternatives`, `check-upstream-responses`). Location `packages/itil/scripts/` confirmed correct over `packages/shared/scripts/`; CI step name cites P328 only (matches sibling pattern); advisory-then-load-bearing two-phase rollout aligned with ADR-040 line 92 + 155.
+
+**JTBD verdict** (2026-06-02): PASS. Primary job served: JTBD-101 (Extend the Suite with New Plugins — *"CI validates required files, package fields, installer dry-runs, and hook tests"*). Secondary: JTBD-001 (Enforce Governance Without Slowing Down — *"Every edit to a project file is reviewed against relevant policy before it lands"*). No persona conflicts.
+
+**Next steps** (queued):
+
+- Audit + migrate existing unprotected scripts to add `export LC_ALL=en_US.UTF-8` at the top (Investigation Task in Fix Strategy step 2). Migration is a follow-on backlog of its own; the lint surfaces the exposure surface count (372 / 152) to inform WSJF on that work.
+- Once migration lands, promote `WR_LOCALE_DISCIPLINE_WARN_ONLY=0` in the CI step (Phase 1 → Phase 2 advisory → load-bearing).
+- Optional Phase 3: `packages/shared/bin/wr-grep` / `wr-sed` / `wr-awk` wrapper shims (Fix Strategy step 3 — defer; lint may suffice).
