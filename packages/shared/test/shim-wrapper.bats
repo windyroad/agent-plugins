@@ -1,5 +1,7 @@
 #!/usr/bin/env bats
 
+bats_require_minimum_version 1.5.0
+
 # ADR-080 + ADR-049: highest-version-wins shim wrapper template behavioural
 # fixture. Exercises the wrapper logic from packages/shared/lib/shim-wrapper-template.sh
 # against synthetic cache layouts under mktemp -d (no source-repo cohabitation
