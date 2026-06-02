@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-06-03 **P322 O→V fold-fix** — Tier-3 briefing-budget pass `*-archive*.md` rotation-sink exclusion shipped in `@windyroad/retrospective` patch (`check-briefing-budgets.sh` adds basename-pattern exclusion alongside existing `README.md` carve-out; 3 new bats fixtures pin contract; 23/23 GREEN). Architect verdict ALIGN-WITH-CONDITIONS — downstream condition C1 (ADR-040 Confirmation field amend + ADR-077 compendium regen) captured as P349 per AFK no-ADR-edits constraint. Prior fragment (2026-06-02 P328 + P348 K→V batch transition) rotated to README-history.md per P134.
+> Last reviewed: 2026-06-03 **P193 Open → Known Error** — `risk-gate.bats:174` flake fixed (option (b) test-only timing-margin tightening: `_backdate "$SCORE_FILE" 3` → `2`, elapsed ~3s comfortably inside Band B `[2.5, 5)` against TTL=5s; production gate `age < TTL` strict-less-than contract untouched per ADR-009). Verified 5/5 deterministic runs (full 28/28 each pass). Architect PASS + JTBD PASS. Changeset queued: `@windyroad/risk-scorer` patch. Verifying transition gated on release ship (helper exit 3 — changeset still in working tree per ADR-022). Prior fragment (P322 O→V fold-fix) rotated to README-history.md per P134.
 
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
@@ -19,6 +19,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 4.0 | P270 | Agent waits for human to initiate upstream report instead of filing on detect — feedback delay class | 8 Med | Open | M | 2026-05-18 |
 | 4.0 | P271 | `/wr-itil:review-problems` not auto-fired when needed — user has to remember to run it; framework should trigger on accumulated-placeholder threshold | 8 Med | Open | M | 2026-05-18 |
 | 4.0 | P315 | Agent implements dependent work on genuine new decisions before human-confirming their SUBSTANCE — surfaces only meta-questions (e.g. ADR grain), so load-bearing content rides unconfirmed until a post-hoc drain | 8 Med | Open | M | 2026-05-26 |
+| 3.0 | P193 | `risk-gate.bats:163` "Band B with no hash file" test fails non-deterministically at the 5s/5s TTL boundary | 3 Med | Known Error | S | 2026-05-15 |
 | 3.0 | P199 | capture-problem → manage-problem same-session halts at Step 0 reconcile (HALT_ROUTE_RECONCILE on deferred-refresh seam; upstream-mirror of #126 from bbstats P221) | 3 Med | Known Error | M | 2026-05-15 |
 | 3.0 | P200 | wr-voice-tone:agent returns blanket FAIL when docs/VOICE-AND-TONE.md is missing — **safe-high-fix-risk flag** (upstream-mirror of #124 from dry-aged-deps P005) | 3 Med | Known Error | M | 2026-05-15 |
 | 3.0 | P201 | @windyroad/tdd hook only recognises same-dir or __tests__/ test associations (upstream-mirror of #123) | 3 Med | Known Error | M | 2026-05-15 |
@@ -50,7 +51,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3.0 | P229 | Inbound-discovery ack comments are bureaucratic, not verdict-shaped — JTBD-301 violation; 31 comments posted with framework-vocab boilerplate this session | 3 Med | Known Error | M | 2026-05-15 |
 | 3.0 | P245 | AFK iter retro surfaces three hook-vs-SKILL-contract drift observations (external-comms key derivation; P165 README refresh on capture; P141 changeset-discipline held-area awareness) | 3 Med | Known Error | M | 2026-05-17 |
 | 3.0 | P277 | P165 README-refresh hook doesn't distinguish iter-staged from cross-turn-staged tickets when AFK subprocess + orchestrator main turn share working tree (captured 2026-05-19 via /wr-itil:capture-problem; deferred re-rate) | 3 Med | Known Error | M | 2026-05-19 |
-| 3.0 | P193 | `risk-gate.bats:163` "Band B with no hash file" test fails non-deterministically at the 5s/5s TTL boundary | 3 Med | Open | S | 2026-05-15 |
 | 3.0 | P278 | renderer-package-counts-the-readme-changes convention scope vs P141 per-package source change discipline (ADR-021 boundary clarification) (captured 2026-05-19 via /wr-itil:capture-problem; deferred re-rate) | 3 Med | Open | S | 2026-05-19 |
 | 3.0 | P161 | Advisory-then-escalate may be over-applied as the default for drift-class detectors generally; load-bearing-from-the-start may be the better default — observation-only meta-question ticket surfaced by P159 | 6 Mod | Open | M | 2026-05-04 |
 | 3.0 | P191 | JTBD edit gate misfires "no JTBD documentation exists" branch on bats fixture edits despite `docs/jtbd/` being present in session CWD | 6 Med | Open | M | 2026-05-15 |

@@ -171,7 +171,7 @@ _write_matching_hash() {
 
 @test "Band B with no hash file: passes but does NOT slide (no invariance proof)" {
   printf '3' > "$SCORE_FILE"
-  _backdate "$SCORE_FILE" 3
+  _backdate "$SCORE_FILE" 2
   rm -f "$HASH_FILE"
   BEFORE_MTIME=$(_mtime "$SCORE_FILE")
   sleep 1
