@@ -33,6 +33,8 @@
     "check:migrate-problems-layout": "bash scripts/sync-migrate-problems-layout.sh --check",
     "sync:plugin-manifests": "node scripts/sync-plugin-manifests.mjs",
     "check:plugin-manifests": "node scripts/sync-plugin-manifests.mjs --check",
+    "sync:shim-wrappers": "bash scripts/sync-shim-wrappers.sh",
+    "check:shim-wrappers": "bash scripts/sync-shim-wrappers.sh --check",
     "version": "changeset version && node scripts/sync-plugin-manifests.mjs",
     "release": "changeset publish",
     "release:watch": "bash scripts/release-watch.sh",

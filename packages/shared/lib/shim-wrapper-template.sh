@@ -30,7 +30,7 @@ SEMVER_RE='^[0-9]+\.[0-9]+\.[0-9]+([-+][0-9A-Za-z.-]+)?$'
 
 # Source-repo guard: own parent dir is NOT semver → dispatch to own scripts/.
 if ! [[ "$OWN_VERSION_NAME" =~ $SEMVER_RE ]]; then
-  exec "$SHIM_DIR/../scripts/plugin-maturity-render.sh" "$@"
+  exec "$SHIM_DIR/../scripts/__SCRIPT_NAME__.sh" "$@"
 fi
 
 # Cache execution: pick the highest-semver sibling under CACHE_PARENT.
@@ -48,4 +48,4 @@ if [[ -z "$HIGHEST" ]]; then
   exit 127
 fi
 
-exec "$CACHE_PARENT/$HIGHEST/scripts/plugin-maturity-render.sh" "$@"
+exec "$CACHE_PARENT/$HIGHEST/scripts/__SCRIPT_NAME__.sh" "$@"

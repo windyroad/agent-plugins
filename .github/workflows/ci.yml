@@ -94,6 +94,9 @@ jobs:
       - name: Check plugin manifest versions in sync with package.json (P042, ADR-021)
         run: npm run check:plugin-manifests
 
+      - name: Check shim-wrapper templates in sync (P343, ADR-080)
+        run: npm run check:shim-wrappers
+
       - name: Dry-run meta-installer
         run: node packages/agent-plugins/bin/install.mjs --dry-run
 

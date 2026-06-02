@@ -60,6 +60,10 @@ exec "$(dirname "$0")/../scripts/<name>.sh" "$@"
 
 The shim resolves the canonical script body relative to its own location, so it works under any cache layout (development tree, npm-pack tarball, marketplace install). The shim file is executable (`chmod +x`); the canonical script under `scripts/` retains its existing executable bit.
 
+### Amendments
+
+- **2026-06-02 — ADR-080 (Highest-version-wins shim wrapper) amends the canonical shim body shape.** The 3-line `exec` above is superseded by a ~25-line resolver that picks the highest-version sibling under the cache parent at every invocation (source-monorepo execution falls through to a `$(dirname "$0")/../scripts/<name>.sh` branch via the source-repo guard, preserving the dev-tree behaviour this ADR established). The `wr-<plugin>-<kebab-script-name>` naming grammar is preserved unchanged. The canonical template lives at `packages/shared/lib/shim-wrapper-template.sh`; per-shim regeneration is driven by `scripts/sync-shim-wrappers.sh` per the ADR-017 sync-script pattern. The amendment closes the P343 mid-session-staleness window without altering this ADR's normative rule that script invocations resolve via `bin/` on `$PATH`.
+
 ## Consequences
 
 ### Good
@@ -134,6 +138,7 @@ Reassess if any of the following occur:
 - ADR-003 — marketplace-only distribution (confirms `bin/` ships through the marketplace cache).
 - ADR-017 — shared-code-sync pattern (precedent for canonical-body + thin-wrapper shape).
 - ADR-038 — progressive disclosure (related — repo-relative path leakage is a context-budget issue at the adopter session boundary).
+- ADR-080 — highest-version-wins shim wrapper plugin scaffold (amends the canonical shim body shape per the Amendments subsection above; preserves the `wr-<plugin>-<kebab-script-name>` naming grammar and the `bin/` on `$PATH` normative rule).
 - P151 — Published skills reference repo-relative script paths (the driver problem this ADR addresses).
 - P137 — Plugin-published artifacts reference internal ADR/JTBD/P-IDs (sibling concern; semantic references vs P151's executable references; both leak windyroad-internal artifacts through the plugin boundary).
 - P097 — SKILL.md runtime vs maintainer content mixed (composes-with on the "inline the script logic" candidate fix shape).

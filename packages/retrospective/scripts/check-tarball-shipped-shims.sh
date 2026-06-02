@@ -176,12 +176,18 @@ for f in files:
         if [ ! -f "$shim_path" ]; then
           continue
         fi
-        # Heuristic: extract the relative path after `$(dirname "$0")/../`.
-        # Matches the WR-ADR-049 grammar both for `exec "$(dirname "$0")/../scripts/foo.sh" "$@"`
-        # and the same shape with single quotes / no quotes around dirname.
+        # Heuristic: extract the `scripts/<name>.sh` exec target. Matches:
+        #   - Legacy WR-ADR-049 3-line shape: `exec "$(dirname "$0")/../scripts/<name>.sh" "$@"`
+        #   - WR-ADR-080 highest-version-wins wrapper source-repo-guard branch:
+        #     `exec "$SHIM_DIR/../scripts/<name>.sh" "$@"`
+        #   - WR-ADR-080 cache-execution branch (parsed as fallback —
+        #     same `<name>.sh` resolves the same tarball entry):
+        #     `exec "$CACHE_PARENT/$HIGHEST/scripts/<name>.sh" "$@"`
+        # Anchored on the first `exec`-prefixed line containing `scripts/<name>.sh`.
         target=$(perl -ne '
-          if (/\$\(dirname\s+["'\'']?\$0["'\'']?\)\/\.\.\/(\S+?)["'\'']?\s/) {
-            print $1; exit;
+          next unless /^\s*exec\s/;
+          if (/scripts\/([A-Za-z0-9._-]+\.sh)/) {
+            print "scripts/" . $1; exit;
           }
         ' "$shim_path")
 
