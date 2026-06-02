@@ -105,7 +105,7 @@ EOF
   local shim
   shim=$(materialise_wrapper wr-fake 0.1.0 wr-fake-shim wr-fake-script)
   # Do NOT create scripts/ — leave the dir empty.
-  run "$shim"
+  run -127 "$shim"
   [ "$status" -eq 127 ]
 }
 
