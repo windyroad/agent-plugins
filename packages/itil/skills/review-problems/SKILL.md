@@ -45,7 +45,7 @@ For each open / known-error ticket (dual-tolerant enumeration spans `docs/proble
 8. **Calculate WSJF** = (Severity × Status Multiplier) / Effort Divisor. Status Multiplier is 1.0 for Open, 2.0 for Known Error (per `/wr-itil:manage-problem`'s WSJF table — re-read if unsure).
 9. **Update the Priority and WSJF lines** in the problem file if the scores changed.
 10. **Auto-transition to Known Error** — if an open problem has confirmed root cause AND a workaround documented (even "feature disabled"), automatically transition it:
-    - `git mv docs/problems/<NNN>-<title>.open.md docs/problems/<NNN>-<title>.known-error.md`
+    - `git mv docs/problems/open/<NNN>-<title>.md docs/problems/known-error/<NNN>-<title>.md`
     - Update the Status field to "Known Error".
     - Re-stage explicitly per the P057 staging trap: `git add <new-path>` after the Edit.
     - This happens automatically — do not ask the user. The transition's fix-strategy is documented; only the shipping is outstanding.

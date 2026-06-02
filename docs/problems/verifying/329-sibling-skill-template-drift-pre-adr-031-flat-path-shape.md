@@ -1,6 +1,6 @@
 # Problem 329: sibling SKILL.md path templates carry pre-ADR-031 flat-path shape
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-30
 **Priority**: 6 (Medium) — Impact: 3 (Moderate — same adopter-side mis-classification risk as P281, broader surface: 6 SKILLs vs 1) x Likelihood: 2 (Likely-but-narrower — each SKILL is invoked less frequently than capture-problem; agent inference may compensate in some flows)
 **Origin**: internal
@@ -69,3 +69,18 @@ Per architect verdict on P281 (2026-05-30): each SKILL.md is independently autho
 - **ADR-031** (`docs/decisions/031-problem-ticket-directory-layout.accepted.md`) — the ratified per-state-subdir layout this SKILL drift violates.
 - Architect verdict on P281 (2026-05-30): "Partial scope is fine. Each SKILL.md is independently authored. Queueing P281-descendant tickets for capture-rfc, manage-problem Step 4, review-problems, transition-problems, transition-problem, reconcile-readme is correct."
 - Sibling ADR-candidate: "agent inference vs literal SKILL template precedence" question deserves a NEW ADR per architect verdict on P281 — recommend new sibling ticket if a maintainer wants to take that on directly; otherwise rolls into this ticket's investigation as a follow-on once template-refresh is shipped.
+
+## Fix Released
+
+- **Fix commit**: iter 28 salvage commit this iter
+- **Fix date**: 2026-06-03
+- **Fix**: 5 SKILL.md surfaces updated per ADR-031 per-state-subdir layout:
+  - packages/itil/skills/manage-problem/SKILL.md (Step 4 File path + 2 git mv blocks + park/unpark prose)
+  - packages/itil/skills/review-problems/SKILL.md (git mv path)
+  - packages/itil/skills/transition-problem/SKILL.md (git mv block)
+  - packages/itil/skills/transition-problems/SKILL.md (git mv block)
+  - packages/itil/skills/reconcile-readme/SKILL.md (grep patterns)
+  - Plus packages/itil/skills/manage-problem/test/manage-problem-release-vehicle-seed.bats updated to assert new shape.
+- **capture-rfc/SKILL.md scope NOTE**: not modified — RFCs use flat layout (`docs/rfcs/RFC-<NNN>-<slug>.<state>.md`) NOT per-state subdir layout. ADR-031 covers `docs/problems/` only. Ticket scope was over-broad; capture-rfc is correct as-is.
+- **Transition**: Open → Verification Pending per ADR-022 P143 fold-fix.
+- **Bats verification**: 185 manage-problem + 150 review/transition/reconcile suite all GREEN post-fix.

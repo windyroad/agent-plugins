@@ -135,24 +135,24 @@ The detection is per-pair; each Open → Known Error pair runs its own check ind
 
 ```bash
 # Open → Known Error
-git mv docs/problems/<NNN>-<title>.open.md docs/problems/<NNN>-<title>.known-error.md
+git mv docs/problems/open/<NNN>-<title>.md docs/problems/known-error/<NNN>-<title>.md
 # Edit Status field to "Known Error"
-git add docs/problems/<NNN>-<title>.known-error.md
+git add docs/problems/known-error/<NNN>-<title>.md
 ```
 
 ```bash
 # Known Error → Verification Pending (per ADR-022)
-git mv docs/problems/<NNN>-<title>.known-error.md docs/problems/<NNN>-<title>.verifying.md
+git mv docs/problems/known-error/<NNN>-<title>.md docs/problems/verifying/<NNN>-<title>.md
 # Edit Status to "Verification Pending" AND add ## Fix Released section
 # (release marker, one-sentence summary, Awaiting user verification)
-git add docs/problems/<NNN>-<title>.verifying.md
+git add docs/problems/verifying/<NNN>-<title>.md
 ```
 
 ```bash
 # Verification Pending → Closed
-git mv docs/problems/<NNN>-<title>.verifying.md docs/problems/<NNN>-<title>.closed.md
+git mv docs/problems/verifying/<NNN>-<title>.md docs/problems/closed/<NNN>-<title>.md
 # Edit Status field to "Closed"
-git add docs/problems/<NNN>-<title>.closed.md
+git add docs/problems/closed/<NNN>-<title>.md
 ```
 
 If `git mv` or `git add` fails for a pair (e.g. the file has been moved by a parallel process), record the pair as `git-failed` with the error and continue to the next pair. Do NOT attempt to roll back prior pairs' staged renames — those are now part of the in-progress batch.

@@ -44,7 +44,7 @@ setup() {
   # lands AFTER the rename in the prose, the agent reading top-to-bottom would do the
   # rename first and the seed-on-known-error-path would target a non-existent file.
   seed_line=$(grep -nE 'Seed `Release vehicle` reference BEFORE the rename' "$MANAGE_PROBLEM_SKILL" | head -1 | cut -d: -f1)
-  rename_line=$(grep -nE 'git mv docs/problems/<NNN>-<title>\.known-error\.md docs/problems/<NNN>-<title>\.verifying\.md' "$MANAGE_PROBLEM_SKILL" | head -1 | cut -d: -f1)
+  rename_line=$(grep -nE 'git mv docs/problems/known-error/<NNN>-<title>\.md docs/problems/verifying/<NNN>-<title>\.md' "$MANAGE_PROBLEM_SKILL" | head -1 | cut -d: -f1)
   [ -n "$seed_line" ]
   [ -n "$rename_line" ]
   [ "$seed_line" -lt "$rename_line" ]

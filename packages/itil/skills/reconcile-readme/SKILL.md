@@ -69,8 +69,8 @@ For each `MISSING` entry, read the ticket file to extract the row data:
 
 ```bash
 # For WSJF Rankings ADD:
-grep -E '^\*\*(Status|Priority|Effort|WSJF)\*\*:' docs/problems/<NNN>-*.open.md
-grep -E '^# Problem <NNN>:' docs/problems/<NNN>-*.open.md
+grep -E '^\*\*(Status|Priority|Effort|WSJF)\*\*:' docs/problems/open/<NNN>-*.md
+grep -E '^# Problem <NNN>:' docs/problems/open/<NNN>-*.md
 ```
 
 Render the WSJF Rankings row in the existing format:
@@ -82,7 +82,7 @@ Render the WSJF Rankings row in the existing format:
 For each `MISSING` Verification Queue entry, read the `## Fix Released` block:
 
 ```bash
-sed -n '/^## Fix Released/,/^## /p' docs/problems/<NNN>-*.verifying.md
+sed -n '/^## Fix Released/,/^## /p' docs/problems/verifying/<NNN>-*.md
 ```
 
 Render the Verification Queue row in the existing format. The `Likely verified?` cell carries an **evidence-first** value per P186 (supersedes the original P048 Candidate 4 14-day heuristic). <!-- LIKELY-VERIFIED-CELL-SHAPE: evidence-based per P186 --> When reconcile-readme synthesises a missing row, default the cell to `no — not observed` — the row is being added because some prior session committed the `.verifying.md` transition without staging the README refresh; reconcile-readme has no session-observed evidence to cite. Subsequent `/wr-itil:review-problems` Step 4 or `run-retro` Step 4a passes populate `yes — observed: <evidence>` when the user verifies. Drift on the cell shape re-opens P186.

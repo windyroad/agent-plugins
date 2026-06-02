@@ -140,29 +140,29 @@ Per destination, run the rename + edit + explicit re-stage sequence. The explici
 **Open → Known Error**:
 
 ```bash
-git mv docs/problems/<NNN>-<title>.open.md docs/problems/<NNN>-<title>.known-error.md
+git mv docs/problems/open/<NNN>-<title>.md docs/problems/known-error/<NNN>-<title>.md
 # ... use the Edit tool to update the Status field to "Known Error" ...
-git add docs/problems/<NNN>-<title>.known-error.md
+git add docs/problems/known-error/<NNN>-<title>.md
 ```
 
 **Known Error → Verification Pending** (per ADR-022, on release):
 
 **Seed `Release vehicle` reference BEFORE the rename (P330).** BEFORE the `git mv` to `.verifying.md`, edit the `.known-error.md` ticket body to append a `**Release vehicle**: .changeset/<name>.md` paragraph at the END of the `## Fix Strategy` section (create the section if absent). The `<name>.md` is the kebab-case slug of the changeset file the fix commit authored under `.changeset/` (e.g. `wr-itil-p330-option-b.md`). The seed makes the `wr-itil-derive-release-vehicle <NNN>` helper invocation below exit 0 deterministically on first call (the helper greps the ticket body for `.changeset/<name>.md` and exits 2 when absent — Option B-codified per P330 closes that exit-2 routing on standalone K→V iters). The exit-2 fallback in the routing table below remains as the legacy-ticket recovery path for tickets shipped before P330's codification. Mirrors the `/wr-itil:manage-problem` Step 7 seed step (copy-not-move per ADR-010 amended / P093).
 
-> **Two P057 staging-trap windows on K→V (seed + rename).** The seed Edit on `.known-error.md` is the FIRST P057 window; the Edit that updates Status / writes `## Fix Released` AFTER the `git mv` is the SECOND. Consolidate staging into a SINGLE `git add docs/problems/<NNN>-<title>.verifying.md` AFTER both Edits + the `git mv`. `git mv` operates on the index entry — the body content the index references at rename time is the post-seed content, so the seed Edit's content is carried across the rename automatically; the single final `git add` re-stages the post-rename file with the post-`Edit` Status + `## Fix Released` content. The seed step does NOT introduce a separate `git add` of the `.known-error.md` path — staging discipline stays single-call by riding the rename's index entry.
+> **Two P057 staging-trap windows on K→V (seed + rename).** The seed Edit on `.known-error.md` is the FIRST P057 window; the Edit that updates Status / writes `## Fix Released` AFTER the `git mv` is the SECOND. Consolidate staging into a SINGLE `git add docs/problems/verifying/<NNN>-<title>.md` AFTER both Edits + the `git mv`. `git mv` operates on the index entry — the body content the index references at rename time is the post-seed content, so the seed Edit's content is carried across the rename automatically; the single final `git add` re-stages the post-rename file with the post-`Edit` Status + `## Fix Released` content. The seed step does NOT introduce a separate `git add` of the `known-error/` path — staging discipline stays single-call by riding the rename's index entry.
 
 ```bash
 # Step 1 — seed `**Release vehicle**: .changeset/<name>.md` in the Fix Strategy section
-# ... use the Edit tool to append the seed paragraph to docs/problems/<NNN>-<title>.known-error.md ...
+# ... use the Edit tool to append the seed paragraph to docs/problems/known-error/<NNN>-<title>.md ...
 
 # Step 2 — rename
-git mv docs/problems/<NNN>-<title>.known-error.md docs/problems/<NNN>-<title>.verifying.md
+git mv docs/problems/known-error/<NNN>-<title>.md docs/problems/verifying/<NNN>-<title>.md
 
 # Step 3 — update Status to "Verification Pending" AND add the `## Fix Released` section
-# ... use the Edit tool on docs/problems/<NNN>-<title>.verifying.md ...
+# ... use the Edit tool on docs/problems/verifying/<NNN>-<title>.md ...
 
 # Step 4 — single re-stage covers both Edit windows (P057 + P330)
-git add docs/problems/<NNN>-<title>.verifying.md
+git add docs/problems/verifying/<NNN>-<title>.md
 ```
 
 The `## Fix Released` section contains: release marker (version, commit SHA, or date), one-sentence fix summary, "Awaiting user verification" line, and any exercise evidence from the releasing session. The `.verifying.md` suffix signals to every downstream consumer (work-problems classifier, review step 9d, README rendering) that the remaining work is user-side verification — no file-body scan needed.
@@ -199,9 +199,9 @@ Use the structured values verbatim when authoring the `## Fix Released` section'
 **Verification Pending → Closed**:
 
 ```bash
-git mv docs/problems/<NNN>-<title>.verifying.md docs/problems/<NNN>-<title>.closed.md
+git mv docs/problems/verifying/<NNN>-<title>.md docs/problems/closed/<NNN>-<title>.md
 # ... use the Edit tool to update the Status field to "Closed" ...
-git add docs/problems/<NNN>-<title>.closed.md
+git add docs/problems/closed/<NNN>-<title>.md
 ```
 
 ### 7. Refresh docs/problems/README.md (P062)

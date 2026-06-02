@@ -60,11 +60,11 @@ The `.verifying.md` suffix distinguishes "fix released, awaiting user verificati
 
 **Parked problems** are excluded from WSJF ranking and work selection. They are listed separately in review output so users can see them without them polluting the backlog. To park a problem:
 1. **If the park reason is `upstream-blocked`**, run the external-root-cause detection block at Step 7 first (see "External-root-cause detection (P063)"). Park without recording the upstream dependency in `## Related` would be the canonical audit-trail gap this block closes.
-2. `git mv docs/problems/<NNN>-<title>.<current>.md docs/problems/<NNN>-<title>.parked.md`
+2. `git mv docs/problems/<current>/<NNN>-<title>.md docs/problems/parked/<NNN>-<title>.md`
 3. Update the Status field to "Parked"
 4. Add a `## Parked` section with: reason for parking, expected trigger to un-park, date parked
 
-To un-park: `git mv` back to `.open.md` (or `.known-error.md` if root cause is confirmed), update Status, remove `## Parked` section.
+To un-park: `git mv` back to `docs/problems/open/<NNN>-<title>.md` (or `docs/problems/known-error/<NNN>-<title>.md` if root cause is confirmed), update Status, remove `## Parked` section.
 
 **Verification Pending problems** are also excluded from WSJF ranking — their remaining work is user-side verification, not dev effort. They appear in a dedicated "Verification Queue" section in review output so the user can see what's waiting on them without mixing with dev-work ranking. See step 9c for the queue layout.
 
@@ -465,7 +465,7 @@ Before writing the problem file, perform a concern-boundary analysis on the gath
 
 ### 5. For new problems: Write the problem file
 
-**File path**: `docs/problems/<NNN>-<kebab-case-title>.open.md`
+**File path**: `docs/problems/open/<NNN>-<kebab-case-title>.md`
 
 **Template**:
 
@@ -678,9 +678,9 @@ The work-problems orchestrator's `upstream-blocked` skip path (see `packages/iti
 > **Staging trap (P057).** `git mv` stages only the rename — it does NOT pick up subsequent `Edit`-tool content changes. After the `Edit` tool modifies the renamed file (Status field, `## Fix Released` section, etc.), re-stage it explicitly: `git add <new>`. Without the explicit re-stage, the transition commit captures the rename-only change and the content edit leaks into the next commit, corrupting the audit trail. This rule applies to every `git mv` block below (Open → Known Error, Known Error → Verification Pending, Verification Pending → Closed) and to the supersession rename in `create-adr` Step 6.
 
 ```bash
-git mv docs/problems/<NNN>-<title>.open.md docs/problems/<NNN>-<title>.known-error.md
+git mv docs/problems/open/<NNN>-<title>.md docs/problems/known-error/<NNN>-<title>.md
 # ... use the Edit tool to update the Status field ...
-git add docs/problems/<NNN>-<title>.known-error.md
+git add docs/problems/known-error/<NNN>-<title>.md
 ```
 
 Update the "Status" field in the file to "Known Error".
@@ -691,20 +691,20 @@ When the fix for a Known Error ships, transition the ticket in a single commit.
 
 **Seed `Release vehicle` reference BEFORE the rename (P330).** BEFORE the `git mv` to `.verifying.md`, edit the `.known-error.md` ticket body to append a `**Release vehicle**: .changeset/<name>.md` paragraph at the END of the `## Fix Strategy` section (create the section if absent). The `<name>.md` is the kebab-case slug of the changeset file the fix commit authored under `.changeset/` (e.g. `wr-itil-p330-option-b.md`). The seed eliminates the `wr-itil-derive-release-vehicle <NNN>` helper's exit-2 routing on standalone K→V iters — the helper greps the ticket body for `.changeset/<name>.md` and exits 2 when absent; seeding the reference at fix-ship time (when the changeset name is fresh in scope, since the fix commit just created it) makes the helper exit 0 deterministically on first call. The exit-2 recovery routing documented in `/wr-itil:transition-problem` Step 6 remains as the legacy-ticket fallback. Matches the user's documented workaround pattern across 3 of 4 standalone K→V dogfoods in the 2026-05-30 session (P316 / P281 / P302 — see P330 § Symptoms).
 
-> **Two P057 staging-trap windows on K→V (seed + rename).** The seed Edit on `.known-error.md` is the FIRST P057 window; the Edit that updates Status / writes `## Fix Released` AFTER the `git mv` is the SECOND. Consolidate staging into a SINGLE `git add docs/problems/<NNN>-<title>.verifying.md` AFTER both Edits + the `git mv`. `git mv` operates on the index entry — the body content the index references at rename time is the post-seed content, so the seed Edit's content is carried across the rename automatically; the single final `git add` re-stages the post-rename file with the post-`Edit` Status + `## Fix Released` content. The seed step does NOT introduce a separate `git add` of the `.known-error.md` path — staging discipline stays single-call by riding the rename's index entry.
+> **Two P057 staging-trap windows on K→V (seed + rename).** The seed Edit on `.known-error.md` is the FIRST P057 window; the Edit that updates Status / writes `## Fix Released` AFTER the `git mv` is the SECOND. Consolidate staging into a SINGLE `git add docs/problems/verifying/<NNN>-<title>.md` AFTER both Edits + the `git mv`. `git mv` operates on the index entry — the body content the index references at rename time is the post-seed content, so the seed Edit's content is carried across the rename automatically; the single final `git add` re-stages the post-rename file with the post-`Edit` Status + `## Fix Released` content. The seed step does NOT introduce a separate `git add` of the `known-error/` path — staging discipline stays single-call by riding the rename's index entry.
 
 ```bash
 # Step 1 — seed `**Release vehicle**: .changeset/<name>.md` in the Fix Strategy section
-# ... use the Edit tool to append the seed paragraph to docs/problems/<NNN>-<title>.known-error.md ...
+# ... use the Edit tool to append the seed paragraph to docs/problems/known-error/<NNN>-<title>.md ...
 
 # Step 2 — rename
-git mv docs/problems/<NNN>-<title>.known-error.md docs/problems/<NNN>-<title>.verifying.md
+git mv docs/problems/known-error/<NNN>-<title>.md docs/problems/verifying/<NNN>-<title>.md
 
 # Step 3 — update Status + add `## Fix Released` section
-# ... use the Edit tool on docs/problems/<NNN>-<title>.verifying.md ...
+# ... use the Edit tool on docs/problems/verifying/<NNN>-<title>.md ...
 
 # Step 4 — single re-stage covers both Edit windows
-git add docs/problems/<NNN>-<title>.verifying.md
+git add docs/problems/verifying/<NNN>-<title>.md
 ```
 
 Then edit the file:
@@ -720,9 +720,9 @@ Both the `git mv` and the file edits belong in the same commit as the fix implem
 Only the user can make this call. When they explicitly confirm the fix works in production:
 
 ```bash
-git mv docs/problems/<NNN>-<title>.verifying.md docs/problems/<NNN>-<title>.closed.md
+git mv docs/problems/verifying/<NNN>-<title>.md docs/problems/closed/<NNN>-<title>.md
 # ... use the Edit tool to update the Status field to "Closed" ...
-git add docs/problems/<NNN>-<title>.closed.md
+git add docs/problems/closed/<NNN>-<title>.md
 ```
 
 Update the "Status" field to "Closed". Reference the problem ID in the closure commit message (e.g., "Closes P008"). Step 9d's verification prompt is the structured path that fires this transition during `manage-problem review`. Re-stage the `.closed.md` file explicitly after the Edit (P057 staging trap).
@@ -809,7 +809,7 @@ Enumerate via dual-tolerant glob `docs/problems/*.open.md docs/problems/*.known-
 8. **Calculate WSJF** = (Severity × Status Multiplier) / Effort Divisor
 9. **Update the Priority line** in the problem file if the score changed
 10. **Auto-transition to Known Error**: If an open problem has confirmed root cause AND a workaround documented (even "feature disabled"), automatically transition it to known-error:
-    - `git mv docs/problems/<NNN>-<title>.open.md docs/problems/<NNN>-<title>.known-error.md`
+    - `git mv docs/problems/open/<NNN>-<title>.md docs/problems/known-error/<NNN>-<title>.md`
     - Update the Status field to "Known Error"
     - This happens automatically — do not ask the user
 
