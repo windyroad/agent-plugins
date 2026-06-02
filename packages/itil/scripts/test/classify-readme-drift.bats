@@ -132,6 +132,136 @@ EOF
   echo "$output" | grep -q "covered=1"
 }
 
+# ── P306: same-ID D+A pair coverage (substantial-body in-flight rename) ─────
+# When `git mv` is followed by a substantial body edit, git's rename-detection
+# may not match the old/new paths and emits a delete+add pair instead of an R
+# entry. The classifier must recognise a same-ID D+A pair as same-session
+# coverage — equivalent to an R/RM entry — and return INLINE_REFRESH.
+
+@test "classify-readme-drift: same-ID D+A pair (substantial-body rename) → INLINE_REFRESH" {
+  # Seed an open ticket, commit, then `git mv` + substantial-body edit. With
+  # rename-detection thresholds, git may emit `D ` + `A ` (or `??`) rather
+  # than `R `. We force the D+A shape by writing wholly different content to
+  # the destination path.
+  cat > docs/problems/306-foo.open.md <<'EOF'
+# Problem 306: Foo
+
+**Status**: Open
+
+Original body — short.
+EOF
+  git add docs/problems/306-foo.open.md
+  git commit -q -m "init"
+
+  # Create the new file at the verifying path with substantially different
+  # body BEFORE removing the old path (avoid empty-dir prune). git's
+  # rename-detection then sees delete + add as distinct entries rather than
+  # an R-rename, because the bodies are wholly different.
+  cat > docs/problems/306-foo.verifying.md <<'EOF'
+# Problem 306: Foo
+
+**Status**: Verification Pending
+
+Wholly rewritten body so git rename-detection does not match the source.
+This is a multi-paragraph substantive rewrite that exercises the D+A path.
+
+## Fix Released
+
+Deployed in vX.Y.Z. Adds a behavioural fixture that exercises the
+classifier across the D+A coverage gap that P306 captured.
+EOF
+  git rm -q docs/problems/306-foo.open.md
+  git add docs/problems/306-foo.verifying.md
+
+  cat > drift.txt <<'EOF'
+DRIFT    P306 wsjf-rankings: claims=open actual=verifying
+MISSING  P306 verification-queue: actual=verifying
+EOF
+
+  run "$SCRIPT" drift.txt docs/problems
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q "INLINE_REFRESH"
+  echo "$output" | grep -q "covered=1"
+}
+
+@test "classify-readme-drift: same-ID D+A pair with untracked add (D + ??) → INLINE_REFRESH" {
+  # Variant: the new path is untracked (not yet `git add`-ed). git status
+  # emits `D ` for the old path and `??` for the new path. The classifier
+  # must still recognise the same-ID pair as same-session coverage.
+  cat > docs/problems/307-bar.open.md <<'EOF'
+# Problem 307: Bar
+**Status**: Open
+EOF
+  git add docs/problems/307-bar.open.md
+  git commit -q -m "init"
+
+  cat > docs/problems/307-bar.verifying.md <<'EOF'
+# Problem 307: Bar
+
+**Status**: Verification Pending
+
+Untracked add side of the D+?? pair.
+EOF
+  git rm -q docs/problems/307-bar.open.md
+
+  cat > drift.txt <<'EOF'
+DRIFT    P307 wsjf-rankings: claims=open actual=verifying
+EOF
+
+  run "$SCRIPT" drift.txt docs/problems
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q "INLINE_REFRESH"
+  echo "$output" | grep -q "covered=1"
+}
+
+@test "classify-readme-drift: D-only (no matching A for same ID) → HALT_ROUTE_RECONCILE" {
+  # Negative case: a delete without a corresponding add for the same ID is
+  # NOT a rename — it is a genuine deletion. Must HALT.
+  cat > docs/problems/308-baz.open.md <<'EOF'
+# Problem 308: Baz
+**Status**: Open
+EOF
+  git add docs/problems/308-baz.open.md
+  git commit -q -m "init"
+
+  git rm -q docs/problems/308-baz.open.md
+
+  cat > drift.txt <<'EOF'
+DRIFT    P308 wsjf-rankings: claims=open actual=verifying
+EOF
+
+  run "$SCRIPT" drift.txt docs/problems
+  [ "$status" -eq 1 ]
+  echo "$output" | grep -q "HALT_ROUTE_RECONCILE"
+  echo "$output" | grep -q "uncovered=1"
+}
+
+@test "classify-readme-drift: mismatched D + A (different IDs) → HALT_ROUTE_RECONCILE" {
+  # Negative case: a delete for one ID + an add for a different ID is NOT a
+  # rename of either ticket — both are uncovered.
+  cat > docs/problems/309-alpha.open.md <<'EOF'
+# Problem 309: Alpha
+**Status**: Open
+EOF
+  git add docs/problems/309-alpha.open.md
+  git commit -q -m "init"
+
+  cat > docs/problems/310-beta.open.md <<'EOF'
+# Problem 310: Beta
+**Status**: Open
+EOF
+  git rm -q docs/problems/309-alpha.open.md
+  git add docs/problems/310-beta.open.md
+
+  cat > drift.txt <<'EOF'
+DRIFT    P309 wsjf-rankings: claims=open actual=verifying
+EOF
+
+  run "$SCRIPT" drift.txt docs/problems
+  [ "$status" -eq 1 ]
+  echo "$output" | grep -q "HALT_ROUTE_RECONCILE"
+}
+
 # ── Exit 1 (HALT_ROUTE_RECONCILE): committed cross-session drift ────────────
 
 @test "classify-readme-drift: single drift ID not covered by any rename → HALT_ROUTE_RECONCILE" {

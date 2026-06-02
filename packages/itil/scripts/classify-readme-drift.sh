@@ -75,21 +75,76 @@ if [ -z "$DRIFT_IDS" ]; then
   exit 2
 fi
 
-# ── Build set of IDs covered by staged renames in the working tree ──────────
-# `git status --porcelain` v1 emits rename lines as:
-#   R  <old-path> -> <new-path>
-#   RM <old-path> -> <new-path>   (rename + unstaged modification)
+# ── Build set of IDs covered by in-flight ticket renames in the working tree
+# `git status --porcelain` v1 emits same-session rename evidence in two shapes:
+#
+#   1. R / RM rename entries (git's rename-detection matched the old + new path)
+#        R  <old-path> -> <new-path>
+#        RM <old-path> -> <new-path>   (rename + unstaged modification)
+#
+#   2. Same-ID D + (A or ??) pair (substantial-body edit defeated rename-
+#      detection so the move renders as delete + add for the same ticket ID
+#      — P306). We treat such a pair as equivalent to an R entry for drift-
+#      coverage purposes: the in-flow P094/P062 refresh will reconcile the
+#      README in the upcoming commit per ADR-014.
+#
 # We match the destination path's ticket ID — the post-rename status is what
-# the in-flow P094/P062 refresh will reconcile in the upcoming commit.
+# the in-flow refresh will reconcile.
 RENAMED_IDS=""
 if git rev-parse --git-dir >/dev/null 2>&1; then
-  RENAMED_IDS="$(
-    git status --porcelain "$PROBLEMS_DIR" 2>/dev/null \
+  # `-u` (= `--untracked-files=all`) expands untracked directories so the
+  # `??` side of a D + `??` rename pair lists individual files, not the
+  # collapsed parent directory.
+  STATUS_LINES="$(git status --porcelain -u "$PROBLEMS_DIR" 2>/dev/null)"
+
+  # Shape 1: R / RM rename entries — extract destination-path ticket ID.
+  R_IDS="$(
+    printf '%s\n' "$STATUS_LINES" \
       | awk '/^R/' \
       | sed 's|.*-> ||' \
       | sed "s|^${PROBLEMS_DIR}/||" \
       | grep -oE '^[0-9]{3}' \
+      | awk '{ printf "P%s\n", $0 }'
+  )"
+
+  # Shape 2: same-ID D + (A or ??) pair — intersect deleted-IDs with added-
+  # IDs. `git status --porcelain` emits one entry per file:
+  #   ` D <path>`  staged delete (note: column 1 is space, column 2 is `D`)
+  #   `D  <path>`  staged delete (alternate form when also touched in index)
+  #   `A  <path>`  staged add
+  #   `?? <path>`  untracked add
+  # We treat any 3-char prefix line whose 1st-or-2nd column is `D`/`A`/`?`
+  # as candidate, then extract the leading `<NNN>` from the basename.
+  DELETED_IDS="$(
+    printf '%s\n' "$STATUS_LINES" \
+      | awk 'substr($0,1,2) ~ /D / || substr($0,1,2) ~ /^ D/' \
+      | sed 's|^...||' \
+      | sed "s|^${PROBLEMS_DIR}/||" \
+      | grep -oE '^[0-9]{3}' \
       | awk '{ printf "P%s\n", $0 }' \
+      | sort -u
+  )"
+  ADDED_IDS="$(
+    printf '%s\n' "$STATUS_LINES" \
+      | awk 'substr($0,1,2) ~ /A / || substr($0,1,2) == "??"' \
+      | sed 's|^...||' \
+      | sed "s|^${PROBLEMS_DIR}/||" \
+      | grep -oE '^[0-9]{3}' \
+      | awk '{ printf "P%s\n", $0 }' \
+      | sort -u
+  )"
+  DA_PAIR_IDS=""
+  if [ -n "$DELETED_IDS" ] && [ -n "$ADDED_IDS" ]; then
+    DA_PAIR_IDS="$(
+      comm -12 \
+        <(printf '%s\n' "$DELETED_IDS") \
+        <(printf '%s\n' "$ADDED_IDS")
+    )"
+  fi
+
+  RENAMED_IDS="$(
+    { printf '%s\n' "$R_IDS"; printf '%s\n' "$DA_PAIR_IDS"; } \
+      | grep -v '^$' \
       | sort -u
   )"
 fi
