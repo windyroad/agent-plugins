@@ -1,0 +1,66 @@
+# SKILL eval — manage-problem Release-vehicle seed (P330 Option B).
+#
+# Tier A deterministic eval — asserts that when prompted to describe the K→V
+# (Known Error → Verification Pending) transition sub-steps from
+# /wr-itil:manage-problem Step 7, the agent emits the
+# `**Release vehicle**: .changeset/<name>.md` seed BEFORE the `git mv` rename.
+#
+# Drivers:
+#   - ADR-075 (Amendment 2026-06-02 — SKILL-prose scope extension; harness
+#     provider: promptfoo exec wrapping `claude -p --append-system-prompt`
+#     — subscription auth, no API key).
+#   - ADR-052 (behavioural-default for skill testing).
+#   - RFC-012 S6 (first SKILL-surface slice — closes P012).
+#   - P330 Option B (Release-vehicle seed BEFORE `git mv` consolidates two
+#     P057 staging-trap windows into one `git add` of the `.verifying.md`
+#     path).
+#
+# Run from repo root:
+#   npx promptfoo eval -c packages/itil/skills/manage-problem/eval/promptfooconfig.yaml
+#
+# @jtbd JTBD-002 (Ship AI-Assisted Code with Confidence)
+# @jtbd JTBD-006 (Progress the Backlog While I'm Away)
+# @problem P330
+# @problem P012 (this slice's landing closes it)
+# @rfc RFC-012 S6
+# @adr ADR-075 (Amendment 2026-06-02)
+
+description: |
+  manage-problem SKILL eval — P330 Option B Release-vehicle seed precedes git mv.
+
+providers:
+  # Path is relative to this config file's directory (promptfoo basePath).
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: K→V transition — Release-vehicle seed precedes git mv (P330 Option B)
+    vars:
+      prompt: |
+        I am executing /wr-itil:manage-problem Step 7 (Verify and transition to
+        Verification Pending) for a problem ticket currently at
+        docs/problems/known-error/330-foo.md. The fix is landed and the changeset
+        .changeset/wr-itil-p330-option-b.md is staged.
+
+        Walk me through the EXACT sub-steps to transition this ticket to
+        .verifying.md, in order. Be specific about:
+          (a) what to edit on the ticket body BEFORE the rename,
+          (b) what shell command performs the rename, and
+          (c) what to stage afterwards.
+    assert:
+      # Tier A — must mention "Release vehicle" verbatim (case-insensitive).
+      - type: icontains
+        value: 'Release vehicle'
+      # Tier A — must reference a .changeset path.
+      - type: contains
+        value: '.changeset/'
+      # Tier A — ORDERING: "Release vehicle" must appear BEFORE "git mv".
+      # Regex (case-insensitive, dotall) — fails if `git mv` appears first.
+      - type: regex
+        value: '(?is)release\s+vehicle[\s\S]{0,2000}git\s+mv'
+      # Tier A — must NOT say to rename first then edit (the P330-regressing
+      # ordering that triggers the helper exit-2 routing).
+      - type: not-regex
+        value: '(?is)git\s+mv[\s\S]{0,400}release\s+vehicle'

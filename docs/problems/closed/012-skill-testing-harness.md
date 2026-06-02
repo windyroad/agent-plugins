@@ -1,11 +1,24 @@
 # Problem 012: Skill Testing Harness Scope Undefined
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-04-16
+**Closed**: 2026-06-02
 **Priority**: 6 (Medium) — Impact: Moderate (3) x Likelihood: Possible (2)
 **Effort**: XL — new companion ADR for skill testing strategy, per-skill test framework decisions, retrofit of existing skills across the entire suite (itil, retrospective, architect, risk-scorer, jtbd, voice-tone, style-guide, tdd, connect) (L → XL 2026-04-19 per P047: scope explicitly "undefined", suite-wide, new ADR required)
 **WSJF**: 0.75 — (6 × 1.0) / 8
 **Type**: technical
+
+## Closure (2026-06-02)
+
+**Closed via RFC-012 S6** — the first SKILL eval landing at `packages/itil/skills/manage-problem/eval/promptfooconfig.yaml` closes the harness gap this ticket was opened to track.
+
+**Closure mechanism**: ADR-037 (the original P012-driven decision — contract-assertion bats as the sanctioned skill-testing path with skill-creator reassessment triggers) was superseded 2026-05-03 by ADR-052 (behavioural-default). ADR-052 was then amended 2026-06-02 by **ADR-075** (promptfoo agent-prose verdict eval harness) extending behavioural-eval scope to **SKILL prose surfaces** at `packages/<plugin>/skills/<skill>/eval/promptfooconfig.yaml`. **RFC-012** (amended same date) is the build vehicle. The harness gap ADR-037's reassessment triggers (carried forward into ADR-052) had been waiting for is now closed — the harness exists, identical in shape to the agent-prose harness, with the first SKILL slice exercising the P330 Option B Release-vehicle-seed behaviour as Tier A deterministic backstop.
+
+**Lineage**: ADR-037 (contract-assertion default) → ADR-052 (behavioural-default) → ADR-075 (behavioural-harness primitive) → ADR-075 Amendment 2026-06-02 (SKILL-surface extension) → RFC-012 S6 (first SKILL eval landing) → this ticket closes.
+
+**Investigation Tasks resolution** (carried forward from the original ticket body below): the skill-creator-equivalent harness IS adopted, in the promptfoo shape decided in ADR-075 — exec provider wrapping `claude -p --append-system-prompt` (subscription auth, no API key). Retrofit across remaining skills proceeds incrementally under RFC-012 follow-up slices; this ticket closes on the first slice landing per the lineage above. The `<skill>-contract.bats` pattern ADR-037 sanctioned remains accepted under ADR-052 until each is touched + retrofitted (no big-bang retrofit obligation).
+
+**Evidence**: ADR-075 amended (`docs/decisions/075-promptfoo-agent-prose-verdict-eval-harness.proposed.md` § "Amendment 2026-06-02"); RFC-012 S6 task added (`docs/rfcs/RFC-012-promptfoo-agent-prose-verdict-eval-harness.proposed.md`); first SKILL eval at `packages/itil/skills/manage-problem/eval/promptfooconfig.yaml` + driver `run-skill-eval.sh`; ADR-037 supersession trail extended (`docs/decisions/037-skill-testing-strategy.superseded.md` § "Update 2026-06-02").
 
 ## Direction decision (2026-04-20, user — AFK loop stop-condition #2)
 

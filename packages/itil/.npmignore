@@ -1,0 +1,21 @@
+# Tarball exclusions for @windyroad/itil.
+# The package.json `files` field is the inclusion allowlist (bin/, agents/,
+# hooks/, skills/, scripts/, .claude-plugin/, lib/). This `.npmignore` denies
+# matches at finer granularity for paths that should not ship to adopters.
+#
+# Per ADR-075 (Amendment 2026-06-02) Confirmation criterion: SKILL eval
+# configs + fixtures must NOT ship in the published tarball. Verify with
+# `npm pack --dry-run` from packages/itil/ — no path matching skills/*/eval/
+# should appear.
+#
+# @adr ADR-075 (Amendment 2026-06-02)
+# @rfc RFC-012 S6
+skills/*/eval/
+
+# Hook + skill + agent test directories are dev-only too (already implicitly
+# excluded since `files` doesn't list `test/`, but stated explicitly for
+# clarity in case files/ allowlist is ever loosened).
+skills/*/test/
+hooks/test/
+agents/test/
+scripts/test/

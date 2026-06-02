@@ -18,6 +18,8 @@ superseded-by: [052-behavioural-tests-default-for-skill-testing]
 > The contract-assertion bats files that ADR-037 sanctioned remain accepted under ADR-052 until each is touched, at which point the editor retrofits to behavioural assertions OR attaches an in-file justification comment linking a harness-gap ticket. ADR-037's reassessment triggers for the Anthropic `skill-creator` harness carry forward into ADR-052's reassessment section unchanged.
 >
 > This file is preserved for audit-trail integrity; the decision it records is no longer in force. Read ADR-052 for the current contract.
+>
+> **Update 2026-06-02 — supersession trail extended (P012 closure path).** ADR-052 amended 2026-06-02 by **[ADR-075](./075-promptfoo-agent-prose-verdict-eval-harness.proposed.md)** (promptfoo agent-prose verdict eval harness) extending behavioural-eval scope to **SKILL prose surfaces** at `packages/<plugin>/skills/<skill>/eval/promptfooconfig.yaml`. **[RFC-012](../rfcs/RFC-012-promptfoo-agent-prose-verdict-eval-harness.proposed.md)** (amended same date) is the build vehicle. **P012 (the driver ticket this ADR was created to address) closes on the first SKILL eval landing** at `packages/itil/skills/manage-problem/eval/` — that landing IS the harness gap closure ADR-037's reassessment triggers (carried forward into ADR-052) had been waiting for. The cluster ADR-037 → ADR-052 → ADR-075 is the full lineage: contract-assertion default → behavioural-default → behavioural-harness primitive. ADR-037's "SKILL.md as contract document" framing remains the reversed premise (per ADR-052); this update is a forward pointer for readers chasing the harness lineage, not a re-amendment of ADR-037's outcome.
 
 ## Context and Problem Statement
 

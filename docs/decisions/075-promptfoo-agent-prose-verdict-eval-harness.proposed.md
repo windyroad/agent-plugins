@@ -2,12 +2,12 @@
 status: "proposed"
 date: 2026-05-28
 human-oversight: confirmed
-oversight-date: 2026-05-28
+oversight-date: 2026-06-02
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: []
 amends: [005-plugin-testing-strategy, 052-behavioural-tests-default-for-skill-testing]
-problems: [P324]
+problems: [P324, P012]
 reassessment-date: 2026-08-28
 ---
 
@@ -50,8 +50,9 @@ Chosen: **adopt promptfoo as the agent-prose eval harness, alongside (not replac
 
 ### Amendments
 
-- **ADR-052 (Behavioural-tests-default)** — *amended, not superseded.* The behavioural-default principle is unchanged; this fills its deferred **Layer B harness primitive** for the agent-prose facet. The **Surface-2 structural escape hatch is narrowed for agent-prose verdicts**: once a verdict has a promptfoo Tier-A eval, its `tdd-review: structural-permitted (justification: P176)` bats is removed (P290). ADR-052's promotion criterion (structural-permitted count < 5) is *advanced* by retiring the agent-prose entries (RFC-010, RFC-011).
+- **ADR-052 (Behavioural-tests-default)** — *amended, not superseded.* The behavioural-default principle is unchanged; this fills its deferred **Layer B harness primitive** for the agent-prose facet. The **Surface-2 structural escape hatch is narrowed for agent-prose verdicts**: once a verdict has a promptfoo Tier-A eval, its `tdd-review: structural-permitted (justification: P176)` bats is removed (P290). ADR-052's promotion criterion (structural-permitted count < 5) is *advanced* by retiring the agent-prose entries (RFC-010, RFC-011). **Amended 2026-06-02** — the Surface-2 narrowing now extends to **SKILL-prose verdicts** (per the Amendment 2026-06-02 sub-section below); the same retire-on-eval rule applies to SKILL-surface `tdd-review: structural-permitted` markers.
 - **ADR-005 (Plugin Testing Strategy)** — *amended, not superseded.* Its bats hook-testing authority is unchanged; this adds the agent-prose eval lane. The "Agent testing capability" reassessment criterion (line 207) gains a `[Reassessment Triggered 2026-05-28 per ADR-075]` flag — the named harness now exists.
+- **ADR-037 (Skill testing strategy — contract-assertion bats companion)** — *superseded 2026-05-03 by ADR-052; supersession trail extended 2026-06-02 by this ADR's SKILL-surface scope.* The 2026-06-02 amendment closes the named **harness gap** ADR-037 had deferred via the Anthropic skill-creator reassessment triggers — the harness now exists for SKILL surfaces, identical in shape to the agent-prose harness. **P012 (driver ticket for ADR-037) closes on the first SKILL eval landing** at `packages/itil/skills/manage-problem/eval/`.
 
 ## Consequences
 
@@ -64,6 +65,20 @@ Chosen: **adopt promptfoo as the agent-prose eval harness, alongside (not replac
 ### Amendment 2026-05-28 — provider is `claude -p` exec (subscription auth), not the Anthropic API provider
 
 As originally drafted, this ADR named promptfoo's **Anthropic API provider** (Decision Outcome §2/§6), which requires `ANTHROPIC_API_KEY` + per-token API billing. The user challenged that assumption ("Promptfoo needs an API key? It can't use the subscription auth??"). Verified in-session 2026-05-28: `claude -p` runs headless using the **Claude Code subscription/session credentials** with no `ANTHROPIC_API_KEY` and no OAuth env var, and faithfully reproduces agent behaviour — driving the jtbd agent (`--system-prompt "$(cat agent.md)"`) on a change citing the **unratified** JTBD-001 emitted `[Unratified Dependency]` (FAIL; the agent ran the predicate itself → exit 0), and on a change citing the **ratified-but-`proposed`** JTBD-008 emitted PASS with no flag (explicitly keying on the marker, not status). So the harness drives through **promptfoo's exec provider wrapping `claude -p`** — subscription-billed, no API key. This also matches how Anthropic's own skill-creator harness drives agents (`claude -p --output-format stream-json`). The two in-session proofs additionally satisfy RFC-011's ADR-061 Rule 4 evidence floor (verdict fires correctly + stays silent on a ratified cite), so RFC-011 graduates on demonstrated behavioural evidence rather than user-override.
+
+### Amendment 2026-06-02 — scope extension to SKILL prose surfaces
+
+As originally drafted (2026-05-28), this ADR scoped the harness to **agent-prose verdicts** only — the review agents at `packages/<plugin>/agents/` (architect / jtbd / voice-tone / risk-scorer). User direction 2026-06-02 (ratified in-session via `AskUserQuestion`, fifth of five ratifications closing the iter's final AskUserQuestion batch): **extend the harness scope to SKILL prose surfaces** — the markdown documents Claude interprets at runtime when invoking a skill. Same harness, same two-tier cadence, same exec-provider-wrapping-`claude -p` invocation shape; orthogonal surface.
+
+**Scope additions:**
+
+- **Per-skill eval location**: `packages/<plugin>/skills/<skill>/eval/promptfooconfig.yaml` (parallel to the existing `packages/<plugin>/agents/eval/` for agent prose). Same plugin-independence story (ADR-002), same exclude-from-tarball discipline. **Tarball-exclusion mechanism for `skills/*/eval/`**: per-plugin `.npmignore` at `packages/<plugin>/` with `skills/*/eval/` (npm `files` field's `"skills/"` allowlist is denied at this finer granularity by `.npmignore`). Verify with `npm pack --dry-run` and grep the output for `eval/` — no path should ship.
+- **Provider invocation shape for SKILL evals**: promptfoo's exec provider wrapping `claude -p --append-system-prompt "$(cat <path-to-skill>/SKILL.md)" "$PROMPT"` — `--append-system-prompt` (not `--system-prompt`) preserves the harness's own session context for skill-graph traversal (SKILL execution often delegates to sibling skills, which the harness's session can resolve). Within the eval prompt, the fixture may explicitly invoke the skill via `/<plugin>:<skill-name>` to trigger the SKILL execution path. Same subscription-auth posture as the agent-prose harness — no `ANTHROPIC_API_KEY`, no per-token billing.
+- **First retrofit slice — `packages/itil/skills/manage-problem/eval/promptfooconfig.yaml`**: asserts the **P330 Option B Release-vehicle seed behaviour** — the SKILL emits `**Release vehicle**: .changeset/<name>.md` into the `.known-error.md` ticket body BEFORE the `git mv` to `.verifying.md` (consolidating the two P057 staging-trap windows into one `git add` of the `.verifying.md` path). This is the behavioural backstop that lets P330's R009 residual class drop within appetite (8/25 → ~4 once Tier A passes) — same `the eval passing IS the behavioural evidence` graduation pattern as RFC-011 vs the agent-prose harness.
+
+**ADR-037 supersession trail extended.** ADR-037 (Skill testing strategy — contract-assertion bats companion) was superseded 2026-05-03 by ADR-052 (behavioural-default). The 2026-06-02 amendment closes the named **harness gap** ADR-037 had deferred via the Anthropic skill-creator reassessment triggers — the harness now exists for SKILL surfaces. **P012 (the driver ticket ADR-037 was created to address) closes on the first SKILL eval landing** at `packages/itil/skills/manage-problem/eval/`. The cluster ADR-037 → ADR-052 → ADR-075 is the full lineage: contract-assertion default → behavioural-default → behavioural-harness primitive.
+
+**RFC-012 amended scope.** A new **S6 task slice** covers the SKILL-surface eval retrofit; the driving-problem trace adds **P012 alongside P324**. RFC-012 remains the single build vehicle for the harness (both agent-prose and SKILL-prose surfaces) — sibling-RFC sprawl avoided per ADR-070 / ADR-060.
 
 ## Confirmation
 
@@ -79,6 +94,7 @@ As originally drafted, this ADR named promptfoo's **Anthropic API provider** (De
 - **Tier B promotion**: if a per-PR (not just release) semantic gate becomes affordable + non-flaky (pass-rate variance characterised), consider promoting Tier B to block PRs.
 - **Cost trip**: if Tier B release-eval token cost exceeds budget, revisit sample count N / rubric scope.
 - **Tool fit**: if promptfoo's exec provider wrapping `claude -p --system-prompt` proves unable to faithfully reproduce agent behaviour (vs a real subagent invocation), reassess the provider mechanism (e.g. `--output-format stream-json` parsing, or promptfoo's dedicated claude-code provider if it matures).
+- **SKILL-surface coverage** (added 2026-06-02 with the SKILL-prose scope extension): reassess if (a) the SKILL eval pattern proves unable to reach Tier-A/Tier-B parity with agent-prose evals; (b) skill-graph traversal (sibling-skill delegation under `--append-system-prompt`) introduces non-determinism the harness can't bound via pass^k; or (c) the per-skill eval surface count exceeds ~25 skills × 1 eval each, at which point a shared per-plugin eval-runner script may be warranted (vs the current `packages/*/skills/*/eval/` glob fan-out).
 - Reassess at 2026-08-28.
 
 ## Related
