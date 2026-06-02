@@ -1,6 +1,6 @@
 # Problem 330: derive-release-vehicle helper requires pre-edit of ticket changeset reference — three-touch when one-touch would suffice
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-30 (work-problems wrap retro)
 **Priority**: 6 (Medium) — Impact: 2 (Minor — adopter UX friction on every K→V transition; recoverable via documented exit-2 routing) × Likelihood: 3 (Possible — fires on every K→V where the changeset reference isn't already in the ticket body)
 **Effort**: S (small helper amendment OR manage-problem fix-ship-step seed; either path is single-file)
@@ -127,3 +127,11 @@ Recommended pick: **Option B**. Rationale:
 - 2026-05-30 work-problems wrap retro (P330 capture)
 - 2026-05-30 work-problems iter 10 retro (P302 K→V dogfood — this evidence append)
 - 2026-06-01 work-problems iter (this iter) — Fix Strategy refinement + Option B recommendation pending user ratification
+
+## Fix Released
+
+- **Release vehicle**: `@windyroad/itil@0.44.2` (npm: <https://www.npmjs.com/package/@windyroad/itil/v/0.44.2>)
+- **Fix commit**: `7d3bb80` — `fix(itil): P330 Option B — seed Release-vehicle reference before git mv on K→V transition (Open → Known Error)`
+- **Release commit**: `518a1bf` — Merge pull request #201 from windyroad/changeset-release/main
+- **Release date**: 2026-06-02
+- **Transition**: Known Error → Verification Pending per ADR-022. K→V completed inline from orchestrator main turn.

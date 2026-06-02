@@ -1,6 +1,6 @@
 # Problem 343: `/install-updates` refreshes the global plugin cache but does NOT fix PATH ordering — stale plugin-version shims stay first on PATH, so subsequent shim invocations run old code
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-31
 **Promoted to Known Error**: 2026-06-01
 **Priority**: 12 (High) — Impact: 3 (Moderate — directly blocked ~10 commits across session 9 from being shippable; caused entire CI test 2145 saga) × Likelihood: 4 (Likely — fires every session after a plugin release where the user does not also restart the shell to refresh PATH)
@@ -139,3 +139,13 @@ Ticket remains **Known Error** until ADR-080's implementation ships and verifies
 - References section anchors P343.
 - No behaviour change in install-updates Steps 1–4; no test changes required.
 - `.claude/skills/install-updates/SKILL.md` symlink intact per ADR-030 / P139.
+
+## Fix Released
+
+- **Release vehicle (structural fix per Option 3)**: ADR-080 highest-version-wins shim wrapper shipped in `@windyroad/itil@0.45.0` (npm: <https://www.npmjs.com/package/@windyroad/itil/v/0.45.0>), along with `@windyroad/architect`, `@windyroad/jtbd`, `@windyroad/retrospective`, `@windyroad/risk-scorer` minor bumps in the same cohort. All wr-* shims across 5 plugins now resolve to highest-version cached sibling at every invocation, closing P343 mid-session staleness window structurally.
+- **Fix commit**: `300d5da` — `feat: ADR-080 highest-version-wins shim wrapper — template + sync infra + retroactive patch across 5 plugins`
+- **Release commit**: `518a1bf` — Merge pull request #201 from windyroad/changeset-release/main
+- **Release date**: 2026-06-02
+- **Option 5 prose fix** (predecessor): shipped earlier in scripts/repo-local-skills/install-updates/SKILL.md (commit 2a03c90).
+- **Option 4 (ADR-081 SessionStart hook)**: REJECTED 2026-06-02 — superseded by ADR-080 wrapper which closes the failure mode at invoke time.
+- **Transition**: Known Error → Verification Pending per ADR-022. Orchestrator-main-turn inline transition.
