@@ -294,21 +294,18 @@ Satisfy the commit gate per ADR-014 — same two-path pattern as manage-problem 
 - **Primary**: delegate to subagent type `wr-risk-scorer:pipeline` via the Agent tool.
 - **Fallback**: invoke `/wr-risk-scorer:assess-release` via the Skill tool when the subagent type is unavailable in the current tool surface.
 
-Commit message — the body MUST carry the `RISK_BYPASS: capture-deferred-readme` trailer:
+Land the commit via the **`wr-risk-scorer-restage-commit`** helper — atomic re-stage + commit in a single bash call (P326 wrapper). The Agent-tool delegation above can silently clear the index; the helper re-adds the supplied path, asserts non-empty staging, then runs `git commit` with the supplied `-m` args. The `RISK_BYPASS: capture-deferred-readme` trailer rides as a second `-m` paragraph so the literal token appears in the resulting commit-message command string the PreToolUse hook inspects:
 
-```
-docs(problems): capture P<NNN> <title>
-
-RISK_BYPASS: capture-deferred-readme
+```bash
+wr-risk-scorer-restage-commit \
+  -m "docs(problems): capture P<NNN> <title>" \
+  -m "RISK_BYPASS: capture-deferred-readme" \
+  -- docs/problems/open/<NNN>-<kebab-title>.md
 ```
 
 The `capture` verb in the message is the audit signal that this ticket landed via the lightweight aside path (vs. `open` for manage-problem's full intake).
 
-**Why the trailer (P262)**: the P165 README-refresh-discipline hook (`packages/itil/hooks/itil-readme-refresh-discipline.sh`) treats any newly-staged ticket file as ranking-bearing and DENIES a `git commit` that does not also stage `docs/problems/README.md`. That enforcement is correct for `/wr-itil:manage-problem`'s full-intake path (P094 refresh-on-create) but conflicts with this skill's deliberate deferred-README-refresh contract. The `RISK_BYPASS: capture-deferred-readme` trailer is a registered allow-list token (P265 mechanism; registry of record is the ADR-014 commit-message bypass-token table) that clears the **README-refresh gate ONLY** — the commit is still risk-scored normally (`risk-score-commit-gate.sh` does not recognise this token). Emit the trailer via a second `-m` paragraph so the literal token appears in the `git commit` command string the PreToolUse hook inspects:
-
-```bash
-git commit -m "docs(problems): capture P<NNN> <title>" -m "RISK_BYPASS: capture-deferred-readme"
-```
+**Why the trailer (P262)**: the P165 README-refresh-discipline hook (`packages/itil/hooks/itil-readme-refresh-discipline.sh`) treats any newly-staged ticket file as ranking-bearing and DENIES a `git commit` that does not also stage `docs/problems/README.md`. That enforcement is correct for `/wr-itil:manage-problem`'s full-intake path (P094 refresh-on-create) but conflicts with this skill's deliberate deferred-README-refresh contract. The `RISK_BYPASS: capture-deferred-readme` trailer is a registered allow-list token (P265 mechanism; registry of record is the ADR-014 commit-message bypass-token table) that clears the **README-refresh gate ONLY** — the commit is still risk-scored normally (`risk-score-commit-gate.sh` does not recognise this token).
 
 Do NOT drop the trailer and stage the README instead — that would silently abandon the deferred-README-refresh contract (the capture-time-speed distinction this skill exists to provide per ADR-032). The README is reconciled at the next `/wr-itil:review-problems` per Step 7's trailing pointer.
 

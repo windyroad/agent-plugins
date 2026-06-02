@@ -236,6 +236,16 @@ Governance skills commit their own work. Transition commits include the renamed 
 - **Primary**: delegate to subagent type `wr-risk-scorer:pipeline` via the Agent tool.
 - **Fallback**: if `wr-risk-scorer:pipeline` is not available in the current tool set (e.g. this skill is running inside a spawned subagent), invoke `/wr-risk-scorer:assess-release` via the Skill tool. Per ADR-015 it wraps the same pipeline subagent and the `PostToolUse:Agent` hook writes an equivalent bypass marker. Do not silently skip the gate because the primary path is unavailable — the fallback exists specifically to close this gap (see P035).
 
+**Land the commit via `wr-risk-scorer-restage-commit`** — atomic re-stage + commit (P326 wrapper). The Agent-tool delegation above can silently clear the index; the helper re-adds the renamed + edited ticket file (plus `docs/problems/README.md` + `docs/problems/README-history.md` from Step 7's P134 rotation), asserts non-empty staging, then runs `git commit` with the supplied `-m` args:
+
+```bash
+wr-risk-scorer-restage-commit \
+  -m "<message per convention below>" \
+  -- docs/problems/<dest-state>/<NNN>-<title>.md docs/problems/README.md docs/problems/README-history.md
+```
+
+Omit `docs/problems/README-history.md` from the path list when the P134 rotation did NOT append (same-session same-verb near-duplicate suppression). When the transition is folded into a `fix(<scope>): ... (closes P<NNN>)` commit shipping the actual fix, include the source-tree paths the fix touched alongside the ticket file in the `--` path list.
+
 **Commit message conventions**:
 
 - Open → Known Error transition (standalone): `docs(problems): P<NNN> known error — <root cause summary>`

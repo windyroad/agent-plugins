@@ -952,14 +952,19 @@ Commit the completed work per ADR-014 (governance skills commit their own work):
 2. Satisfy the commit gate — two paths are valid (either produces a bypass marker):
    - **Primary**: delegate to the `wr-risk-scorer:pipeline` subagent-type via the Agent tool (subagent_type: `wr-risk-scorer:pipeline`)
    - **Fallback**: if the `wr-risk-scorer:pipeline` subagent-type is not available in the current tool set (e.g., this skill is itself running inside a spawned subagent), invoke the `/wr-risk-scorer:assess-release` skill via the Skill tool. Per ADR-015 it wraps the same pipeline subagent and the `PostToolUse:Agent` hook writes an equivalent bypass marker. Do not silently skip the gate because the primary path is unavailable — the fallback exists specifically to close this gap (see P035).
-3. `git commit -m "<message>"` using the convention for the operation type:
+3. Land the commit via the **`wr-risk-scorer-restage-commit`** helper — atomic re-stage + commit in a single bash call (P326 wrapper):
+   ```bash
+   wr-risk-scorer-restage-commit -m "<message>" -- <path1> [<path2>...]
+   ```
+   The Agent-tool delegation in step 2 can silently clear the parent index — a subsequent bare `git commit` then fails with `Changes not staged for commit`. The helper re-adds the supplied paths, asserts the cached diff is non-empty, then runs `git commit "${msg_args[@]}"` — eliminating the silent re-add round-trip P326 documents. Pass repeated `-m` flags for trailer paragraphs (e.g. `RISK_BYPASS:` allow-list tokens).
+4. Message conventions per operation type:
    - New problem: `docs(problems): open P<NNN> <title>`
    - Known Error transition: `docs(problems): P<NNN> known error — <root cause summary>`
    - Verification Pending transition: usually folded into the `fix(<scope>): ... (closes P<NNN>)` commit that ships the fix — the `git mv` to `.verifying.md` and the `## Fix Released` section land together. If transitioning without a fix commit, use `docs(problems): P<NNN> verification pending — <release marker>`.
    - Problem closed: `docs(problems): close P<NNN> <title>`
    - Review/re-rank: `docs(problems): review — re-rank priorities`
    - Fix implemented: `fix(<scope>): <description> (closes P<NNN>)` — include problem file changes (rename to `.verifying.md` + `## Fix Released` section) in the same commit per ADR-022
-4. If risk is above appetite: use `AskUserQuestion` to ask whether to commit anyway, remediate first, or park the work. If `AskUserQuestion` is unavailable, skip the commit and report the uncommitted state clearly (ADR-013 Rule 6 fail-safe). This applies only to the risk-above-appetite branch, not to the delegation-unavailable case above.
+5. If risk is above appetite: use `AskUserQuestion` to ask whether to commit anyway, remediate first, or park the work. If `AskUserQuestion` is unavailable, skip the commit and report the uncommitted state clearly (ADR-013 Rule 6 fail-safe). This applies only to the risk-above-appetite branch, not to the delegation-unavailable case above.
 
 **Multi-commit slice changeset discipline (P141 Phase 2)**: when a single logical fix lands across multiple ADR-014-grain commits targeting the same plugin (e.g. helper extraction in commit 1, callers wired in commit 2, SKILL note + transition in commit 3 — all `packages/<plugin>/`), author ONE changeset on the first commit in the slice. Subsequent same-plugin commits do NOT need their own changeset — the `itil-changeset-discipline.sh` hook's Check 2b recognises any `.changeset/*.md` (or held-window `docs/changesets-holding/*.md` entry) already in the unpushed slice scope (`origin/<base>..HEAD` + untracked + modified-not-staged) that targets `"@windyroad/<plugin>": <any-bump>` and allows. This eliminates the per-commit changeset ceremony that previously produced N redundant `.changeset/*.md` files for one logical release entry (changesets-action collapses bump-class at version-package time, so per-commit changesets rendered N near-identical CHANGELOG bullets for one release). Once a changeset hits `origin/<base>` (drained at release time), it no longer counts — a fresh changeset is required for the next slice. Cross-plugin coverage is NOT permitted: an `@windyroad/itil` changeset does not satisfy a `packages/voice-tone/` commit.
 
