@@ -284,15 +284,21 @@ EOF
 # the runtime consumes.
 # ---------------------------------------------------------------------------
 
-@test "capture-problem: allowed-tools omits AskUserQuestion (no interactive branches)" {
-  # The skill's contract is NO AskUserQuestion at all — duplicate-check,
-  # priority-default, effort-default are framework-mediated mechanical
-  # stages per ADR-044. AskUserQuestion in allowed-tools would let
-  # future drift sneak prompts back in.
+@test "capture-problem: allowed-tools includes AskUserQuestion (I12 derive-then-ratify dispatch — ADR-060 Amendment 2026-06-02)" {
+  # Amended 2026-06-02: the I12 derive-then-ratify contract (ADR-060
+  # Amendment 2026-06-02) requires AskUserQuestion for the derive-failure
+  # ratification fallback (REJECT / option-pick / free-text correction
+  # semantics). Pre-amendment contract was "no AskUserQuestion at all";
+  # the amendment promoted persona+JTBD anchoring from optional to
+  # required-via-ratification, applies to ALL problems (no type-keyed
+  # gating). The historical no-AskUserQuestion contract is preserved at
+  # the derive-success paths (silent-framework per ADR-044 cat 4); the
+  # AskUserQuestion fires only on derive-failure (ADR-044 cat 1
+  # direction-setting). See SKILL.md Step 1.5b dispatch + Rule 6 row.
   run grep -E '^allowed-tools:' "$SKILL_FILE"
   [ "$status" -eq 0 ]
   run grep -E '^allowed-tools:.*AskUserQuestion' "$SKILL_FILE"
-  [ "$status" -ne 0 ]
+  [ "$status" -eq 0 ]
 }
 
 @test "capture-problem: allowed-tools includes Bash (for create-gate marker write)" {
