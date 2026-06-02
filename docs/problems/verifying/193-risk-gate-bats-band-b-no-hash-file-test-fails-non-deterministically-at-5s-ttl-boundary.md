@@ -1,6 +1,6 @@
 # Problem 193: `risk-gate.bats:163` "Band B with no hash file" test fails non-deterministically at the 5s/5s TTL boundary
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-15
 **Priority**: 3 (Med) — Impact: 2 (Minor — test flakiness, not production correctness) x Likelihood: 2 (Possible — fires when load delays push elapsed past 5s) (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: S (deferred — re-rate at next /wr-itil:review-problems)
@@ -73,3 +73,11 @@ The test is right at the TTL boundary by design (it's testing Band B = `TTL/2 <=
 - Captured by `/wr-retrospective:run-retro` Step 4b Stage 1 + user direction "don't defer the stage 1 ticketing" (2026-05-15).
 
 **Recurrence 2026-05-28 — broke main CI on an unrelated docs-only commit (likelihood under-rated).** CI run `26549501237` (Quality Gates, push of commit `ec6cf9e`, a docs-only retro-artifact commit touching only `docs/problems/` + `docs/retros/`) failed with `not ok 572 Band B with no hash file: passes but does NOT slide (no invariance proof)` (`risk-gate.bats` assert_gate_allows line 55 / test line 178). The commit could not possibly affect `risk-score-commit-gate.sh` behaviour — this is the flake firing under CI-runner timing (CI runners are slower, so the push-elapsed more readily crosses the 5s boundary). Two implications: (1) the **Likelihood is higher than "2 Possible"** — it demonstrably reds main CI on commits with zero risk-gate relevance, so under CI load it's closer to Likely; (2) **it produces false-red on main** for any committer, eroding the green-CI signal. Bumps the case for the Effort-S deterministic-clock fix (inject the TTL clock / use a fixed fake-time rather than wall-clock elapsed). Re-rate up at next /wr-itil:review-problems.
+
+## Fix Released
+
+- **Release vehicle**: `@windyroad/risk-scorer` (released 2026-06-03 cohort)
+- **Fix commit**: `96fadc8` — `fix(risk-scorer): P193 risk-gate.bats Band B no-hash test — tighten elapsed budget (iter 24 salvage)`
+- **Release date**: 2026-06-03
+- **Fix**: single-line test edit `_backdate "$SCORE_FILE" 3` → `2` in `risk-gate.bats:174`. New elapsed at assertion ~3s; comfortably within Band B [TTL/2, TTL) = [2.5, 5). Production gate `age < TTL` strict-less-than rule (ADR-009) unchanged. 28/28 GREEN deterministic across 5 sequential runs.
+- **Transition**: Known Error → Verification Pending per ADR-022.

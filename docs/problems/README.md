@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-06-03 **P193 Open → Known Error** — `risk-gate.bats:174` flake fixed (option (b) test-only timing-margin tightening: `_backdate "$SCORE_FILE" 3` → `2`, elapsed ~3s comfortably inside Band B `[2.5, 5)` against TTL=5s; production gate `age < TTL` strict-less-than contract untouched per ADR-009). Verified 5/5 deterministic runs (full 28/28 each pass). Architect PASS + JTBD PASS. Changeset queued: `@windyroad/risk-scorer` patch. Verifying transition gated on release ship (helper exit 3 — changeset still in working tree per ADR-022). Prior fragment (P322 O→V fold-fix) rotated to README-history.md per P134.
+> Last reviewed: 2026-06-03 **P193 K→V transition** — `@windyroad/risk-scorer` released with `risk-gate.bats:174` flake fix (fix commit `96fadc8` salvaged from iter 24 stuck-before-emit). Mechanical K→V transition per ADR-022. Orchestrator-main-turn inline transition. Prior fragment (P193 Open → Known Error) rotated to README-history.md per P134.
 
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
@@ -19,7 +19,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 4.0 | P270 | Agent waits for human to initiate upstream report instead of filing on detect — feedback delay class | 8 Med | Open | M | 2026-05-18 |
 | 4.0 | P271 | `/wr-itil:review-problems` not auto-fired when needed — user has to remember to run it; framework should trigger on accumulated-placeholder threshold | 8 Med | Open | M | 2026-05-18 |
 | 4.0 | P315 | Agent implements dependent work on genuine new decisions before human-confirming their SUBSTANCE — surfaces only meta-questions (e.g. ADR grain), so load-bearing content rides unconfirmed until a post-hoc drain | 8 Med | Open | M | 2026-05-26 |
-| 3.0 | P193 | `risk-gate.bats:163` "Band B with no hash file" test fails non-deterministically at the 5s/5s TTL boundary | 3 Med | Known Error | S | 2026-05-15 |
 | 3.0 | P199 | capture-problem → manage-problem same-session halts at Step 0 reconcile (HALT_ROUTE_RECONCILE on deferred-refresh seam; upstream-mirror of #126 from bbstats P221) | 3 Med | Known Error | M | 2026-05-15 |
 | 3.0 | P200 | wr-voice-tone:agent returns blanket FAIL when docs/VOICE-AND-TONE.md is missing — **safe-high-fix-risk flag** (upstream-mirror of #124 from dry-aged-deps P005) | 3 Med | Known Error | M | 2026-05-15 |
 | 3.0 | P201 | @windyroad/tdd hook only recognises same-dir or __tests__/ test associations (upstream-mirror of #123) | 3 Med | Known Error | M | 2026-05-15 |
@@ -263,6 +262,7 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P328 | BSD `grep` / `sed` / `awk` on macOS multibyte UTF-8 friction — Option 3 CI lint shipped (advisory Phase 1): `check-locale-discipline.sh` warns on `grep`/`sed`/`awk` invocations without preceding `LC_ALL=en_US.UTF-8` export. 24/24 GREEN bats. Baseline: 372 violations across 152 scripts at ship-time | 2026-06-02 (`@windyroad/itil@0.47.1`, fix commit `4d5217b`) | no — not observed |
 | P348 | iter subprocesses set `human-oversight: confirmed` marker on ADRs / personas / JTBDs without an actual user-confirmation event — Option 1 structural guard shipped: PreToolUse:Edit/Write hooks deny marker writes lacking session-scoped evidence file; AFK iter contract = write `unconfirmed` explicitly; new enum value added; ADR-066 + ADR-068 amendments + 5 SKILL surfaces updated; 22/22 GREEN bats | 2026-06-02 (`@windyroad/architect` + `@windyroad/jtbd` + `@windyroad/itil` cohort, fix commit `4694239`) | no — not observed |
 | P322 | Tier-3 briefing-budget pass flags `*-archive*.md` sink files — basename-pattern exclusion shipped alongside the existing `README.md` exclusion in `check-briefing-budgets.sh` (archives are rotation sinks, loaded on-demand only, NOT session-start surface per ADR-040 Tier 3 intent). Three new bats fixtures pin the contract (archive ≥ threshold not flagged + date-suffixed variant not flagged + non-archive over-threshold still flagged alongside archive sibling). 23/23 GREEN. Architect verdict ALIGN-WITH-CONDITIONS — C1 (ADR-040 Confirmation field amend + ADR-077 compendium regen) queued as P349 per AFK no-ADR-edits constraint | 2026-06-03 (`@windyroad/retrospective` patch, fix commit this iter — P143 fold-fix per ADR-022) | no — not observed |
+| P193 | `risk-gate.bats:174` Band B no-hash test fails non-deterministically at 5s/5s TTL boundary — single-line test edit `_backdate "$SCORE_FILE" 3` → `2`, elapsed ~3s comfortably within Band B [2.5, 5). Production gate `age < TTL` strict-less-than rule (ADR-009) untouched. 28/28 GREEN deterministic across 5 sequential runs | 2026-06-03 (`@windyroad/risk-scorer` patch, fix commit `96fadc8`) | no — not observed |
 
 ## Inbound Upstream Reports
 
