@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 78 (71 in-force, 7 historical)
+**Total ADRs:** 79 (72 in-force, 7 historical)
 
 ---
 
 ## In-force decisions
 
-_71 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_72 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -352,6 +352,11 @@ _71 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed
 **Chosen:** Chosen option: **"Option A"**, because replacing each plugin scaffold-template shim with a wrapper script that, at invoke time, resolves to the highest-version sibling in its parent cache directory makes shim invocations always run the newe...
 **Related:** ADR-049, ADR-080, ADR-081
+
+### ADR-081 — SessionStart PATH refresh hook for plugin cache
+**Status:** proposed
+**Chosen:** Chosen option: **"Option A"**, because a SessionStart hook that recomputes PATH from current cache state at every session start eliminates the stale-PATH-on-next-session pattern without requiring a user-visible restart. This is a bounded ad...
+**Related:** ADR-040, ADR-080
 
 ---
 
