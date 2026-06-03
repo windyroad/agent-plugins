@@ -79,3 +79,9 @@ This mirrors the existing Step 0b inbound-discovery cache staleness pre-flight p
 - Future: `packages/itil/scripts/check-ticket-jtbd-ratification.sh` — predicate helper.
 - Future: `packages/itil/bin/wr-itil-check-ticket-jtbd-ratification` — ADR-049 shim.
 - `packages/itil/skills/work-problems/test/*.bats` — behavioural-coverage locus.
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-016 | proposed | P344 — `/wr-itil:work-problems` Step 3.5 JTBD ratification predicate-check (orchestrator-layer mirror of ADR-068 surface 3) |
