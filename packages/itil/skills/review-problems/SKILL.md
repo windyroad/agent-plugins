@@ -125,7 +125,39 @@ Per ADR-062 (peer of ADR-024). Polls configured upstream channels, runs each unm
 
 #### 4.5a. Read channel config + parse invocation flags
 
-Read `docs/problems/.upstream-channels.json`. If missing or malformed: log an advisory note (`channel config absent or malformed; inbound-discovery skipped this pass`) and skip Step 4.5 entirely. Adopters who don't ship this file inherit zero ceremony tax — the downstream-adopter non-obligation per ADR-062 § Downstream-adopter contract + JTBD-101.
+Read `docs/problems/.upstream-channels.json`. Branch on state:
+
+- **File exists and parses cleanly** → continue to 4.5b with the parsed `channels[]` list.
+- **File exists but is malformed JSON** → log an advisory note (`channel config malformed JSON; inbound-discovery skipped this pass — fix the file then re-invoke`) and skip Step 4.5. This is genuine fail-soft because the user already SHIPPED a config and the malformation is an editing artefact best resolved by the user reading the parse error; auto-rewriting their file would destroy their work.
+- **File does NOT exist** → run the **auto-bootstrap routine** below per P351 / JTBD-101 / JTBD-007. **Adopters who never want to configure inbound-discovery** can keep `.upstream-channels.json` absent by answering `decline` at the interactive prompt OR allowing the AFK-mode outstanding-question to lapse; the absence stays zero-ceremony-tax (ADR-062 § Downstream-adopter non-obligation), but the silent skip is replaced by an explicit one-time-per-session prompt so the adopter has a visible signal that the inbound-discovery capability exists. <!-- @jtbd JTBD-101 (Extend the Suite — deliver-installed-features signal) --> <!-- @jtbd JTBD-007 (Keep Plugins Current — process reports what configured) --> <!-- @problem P351 (auto-bootstrap on missing precondition config) -->
+
+**Auto-bootstrap routine (P351)**: replaces the prior "missing file → silent skip" behaviour. The routine branches on AskUserQuestion availability per ADR-013 Rule 6 + ADR-044 category 1 (direction-setting):
+
+- **Interactive mode** (AskUserQuestion available):
+  1. Fire **one** `AskUserQuestion` per skill invocation (NOT per pass — adopters who decline at run 1 are not re-prompted within the same session) with options: `Bootstrap now (recommended)` / `Decline (skip inbound-discovery this session)` / `Decline permanently (write empty channels stub)`.
+  2. On `Bootstrap now`: fire a second `AskUserQuestion` for channel-type (single-select: `github-issues` / `github-discussions` / `github-security-advisories`); then a third for the per-channel coordinates (repo `<owner>/<name>` for all three; `label` for github-issues; `category` for github-discussions). For the per-coordinate prompt fire ONE multi-part `AskUserQuestion` (multiple Question objects in a single call per ADR-013 Rule 1 batched ≤4) — do NOT serialise to N round-trips.
+  3. **Preview before write** (JTBD persona-fit constraint from review): emit the planned JSON contents to the agent's user-visible output so the adopter can read it before the write fires. Default `ttl_seconds: 86400` (24h — matches ADR-062's documented TTL). Channel schema mirrors the polled-channels list at 4.5c (`type` + `repo` + per-type identifier).
+  4. Write `docs/problems/.upstream-channels.json` with the bootstrapped channel + the defaulted TTL.
+  5. **Resume the original pass** at 4.5b with the freshly-written config.
+  - On `Decline (skip inbound-discovery this session)`: log advisory (`inbound-discovery bootstrap declined this session; will re-offer next invocation`) and skip Step 4.5.
+  - On `Decline permanently (write empty channels stub)`: write `{"channels": [], "ttl_seconds": 86400, "declined_at": "<ISO>"}` so future invocations parse cleanly + skip silently. Per ADR-062 § Downstream-adopter non-obligation — the empty-channels stub IS the documented "I never want this" surface.
+
+- **AFK mode** (AskUserQuestion unavailable, e.g. invoked from `/wr-itil:work-problems`):
+  1. Log advisory (`inbound-discovery: channel config absent; queued config-direction outstanding_question, skipping THIS pass to allow other passes to proceed`).
+  2. Queue a `direction` entry per `/wr-itil:work-problems` SKILL.md Step 5 `outstanding_questions` schema (ADR-044 category 1):
+
+     ```
+     {
+       category: "direction",
+       question: "Configure inbound-discovery channels in docs/problems/.upstream-channels.json? (channel-type: github-issues | github-discussions | github-security-advisories; per-channel: repo + label/category; ttl_seconds default 86400)",
+       context: "/wr-itil:review-problems Step 4.5a: precondition config missing — auto-bootstrap blocked by AFK AskUserQuestion unavailability per ADR-013 Rule 6; deferring to loop-end Step 2.5 batched AskUserQuestion",
+       ticket_id: "<the iter's ticket>"
+     }
+     ```
+
+  3. **Continue Step 4.5 for THIS pass** with the missing-channels skip (other passes in the review proceed normally per the Fail-soft contract at 4.5 head). Do NOT halt the iter — the loop-end Step 2.5 batched `AskUserQuestion` is the documented surfacing point per the AFK contract.
+
+The routine preserves the ADR-062 § Downstream-adopter non-obligation (adopters CAN decline) while honouring P351 (adopters can no longer be silently under-delivered). Phase 1 lint at `wr-itil-check-fail-soft-skip-discipline` flags this site's adjacent siblings for follow-on remediation.
 
 Parse `$ARGUMENTS` as a whitespace-separated token list. Recognised invocation flags for inbound-discovery:
 

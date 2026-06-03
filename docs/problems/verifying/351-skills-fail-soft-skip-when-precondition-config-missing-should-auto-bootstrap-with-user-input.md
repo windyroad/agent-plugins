@@ -1,6 +1,6 @@
 # Problem 351: skills fail-soft-skip when their precondition config is missing — should auto-bootstrap with user input as needed rather than silently skipping
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-06-03 (user direction with screenshot evidence — `/wr-itil:review-problems` Step 4.5 inbound-discovery pass output: *"No inbound-discovery pass — no docs/problems/.upstream-channels.json configured (Step 4.5 fail-soft skip)"*)
 **Priority**: 12 (High) — Impact: 4 (Significant — load-bearing pass silently bypassed; user has no visible signal that a desired capability is unavailable in their session; auto-bootstrap would close the gap with minimal user friction) × Likelihood: 3 (Possible — fires on every adopter install that has NOT yet configured the precondition file; class-of-pattern recurrence high across skills with config-file preconditions)
 **Origin**: internal
@@ -84,6 +84,38 @@ User reads skill output, recognises the skip, manually creates the config file (
 
 - 2026-06-03 user direction with screenshot evidence (this capture's authoring context): *"this is a problem. the skill should auto-bootstrap (with user input as needed) rather than skipping."*
 - Witnessed instance: `/wr-itil:review-problems` Step 4.5 inbound-discovery pass output line "No inbound-discovery pass — no docs/problems/.upstream-channels.json configured (Step 4.5 fail-soft skip)".
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-017 | proposed | P351 — auto-bootstrap on missing precondition config (witnessed instance + structural lint) |
+
+## Fix Released
+
+**Fix landed**: 2026-06-03 iter (AFK) — fold-fix per ADR-022 P143; ticket transitions `Open → Verification Pending` in the same commit as the fix.
+
+**What landed**:
+
+1. **Witnessed-instance fix** — `packages/itil/skills/review-problems/SKILL.md` Step 4.5a auto-bootstrap routine. Replaces the prior "missing file → silent skip" behaviour with a state-branched routine:
+   - Interactive mode: `AskUserQuestion` for channel-type + per-channel coordinates (single-batched ≤4-question call per ADR-013 Rule 1), preview the planned JSON contents to the agent's visible output (JTBD persona-fit constraint — don't surprise the user with a silent config write), write `docs/problems/.upstream-channels.json`, resume the original pass at 4.5b.
+   - AFK mode: queue a `direction` entry per `/wr-itil:work-problems` Step 5 `outstanding_questions` schema (ADR-044 category 1) with the missing-fields list inline; continue Step 4.5 for THIS pass with the documented skip; loop-end Step 2.5 batched `AskUserQuestion` surfaces the direction.
+   - Decline-permanently surface: writes `{"channels": [], "ttl_seconds": 86400, "declined_at": "<ISO>"}` so adopters who never want inbound-discovery keep zero ceremony tax (ADR-062 § Downstream-adopter non-obligation).
+   - Malformed-JSON branch preserved as genuine fail-soft (the adopter shipped a config; auto-rewriting would destroy their work).
+
+2. **Structural lint** — `packages/itil/scripts/check-fail-soft-skip-discipline.sh` (canonical) + `packages/itil/bin/wr-itil-check-fail-soft-skip-discipline` (ADR-049 PATH shim) walks `packages/*/skills/*/SKILL.md` for the tightened pattern set (`fail-soft skip|silently skip|skipping.*config|skipping.*not configured|not configured.*skip` — tightening per architect review `a6747bd57c7953b14` to avoid false-positives on legitimate per-channel skip prose). Phase 1 advisory (exit 0); promote to Phase 2 load-bearing via `WR_FAIL_SOFT_SKIP_WARN_ONLY=0` once every WARN'd file has been migrated.
+
+3. **Behavioural bats** — `packages/itil/scripts/test/check-fail-soft-skip-discipline.bats` covers existence + executable + Phase 1 advisory exit-0 + WARN-on-fixture (three pattern shapes) + CLEAN-on-fixture (including the architect-tightening negative: legitimate per-channel skip prose) + Phase 2 promotion exit-1 + usage-error exit-2.
+
+4. **CI wiring** — `.github/workflows/ci.yml` advisory step `Check fail-soft-skip discipline in SKILL.md surfaces (P351, advisory)` invokes the shim with `continue-on-error: true`.
+
+**What was DEFERRED**:
+- Remediation of the 17 sibling WARN sites the lint flagged in the source repo (mostly the inline-rotation `silently skip` directive class in `manage-problem` / `manage-rfc` / `manage-story` / `transition-problem` / `review-problems` + the `silently skip` literal in `work-problems` / `check-upstream-responses` / `run-retro`). Phase 1 advisory expectation: SKILL.md authors disambiguate per site; the noise floor is the documented promotion blocker.
+- Codification of the auto-bootstrap pattern itself (a generic helper or ADR). The user-ratified scope was "fix the witnessed instance + ship the lint"; pattern codification is captured below as a related-tickets follow-up.
+
+**Release**: pending `@windyroad/itil` patch changeset `p351-auto-bootstrap-fail-soft-skip` → on release, `Verifying → Closed-by-release-evidence` per ADR-022.
+
+**RFC trace**: `RFC-017-p351-auto-bootstrap-fail-soft-skip` (thin retro-fit per ADR-071 unconditional RFC-first; modelled on RFC-015's P333 retro-fit pattern; no independent architectural decisions).
 - **P065** (closed) — `/wr-itil:scaffold-intake` skill — sibling-pattern precedent for bootstrapping config artefacts at adopter install time. Different surface (intake templates vs runtime config) but same auto-bootstrap principle.
 - **JTBD-101** — plugin-developer "Extend the Suite" outcome; silent-skip violates the deliver-installed-features expectation.
 - **ADR-013** — AskUserQuestion as standardized user-input surface for config bootstrap.

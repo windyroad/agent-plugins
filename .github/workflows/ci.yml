@@ -100,6 +100,10 @@ jobs:
       - name: Check locale-discipline in bash scripts (P328, advisory)
         run: packages/itil/bin/wr-itil-check-locale-discipline .
 
+      - name: Check fail-soft-skip discipline in SKILL.md surfaces (P351, advisory)
+        run: packages/itil/bin/wr-itil-check-fail-soft-skip-discipline .
+        continue-on-error: true
+
       - name: Dry-run meta-installer
         run: node packages/agent-plugins/bin/install.mjs --dry-run
 
