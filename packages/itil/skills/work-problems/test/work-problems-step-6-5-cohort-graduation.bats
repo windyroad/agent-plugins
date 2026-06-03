@@ -88,19 +88,22 @@ setup() {
 
 # ── Three-status branching contract ───────────────────────────────────────
 
-@test "work-problems P246: pre-check branches on status=resolved → graduate" {
-  # The load-bearing positive contract: status=resolved means graduate
-  # via git mv + README append + ADR-042 Rule 3 amend.
-  run grep -nE '`status=resolved`.*graduate' "$SKILL_MD"
+@test "work-problems P246/P308: status=resolved routes to Rule 4 evidence-floor judgement (NOT auto-graduate)" {
+  # P308 amendment: status=resolved is necessary-but-not-sufficient.
+  # The evaluator script disclaims Rule 4 (LLM-owned). SKILL prose must
+  # surface Rule 4 evidence-floor judgement before any git mv.
+  run grep -nE '`status=resolved`.*route to.*Rule 4 evidence-floor judgement' "$SKILL_MD"
   [ "$status" -eq 0 ]
 }
 
-@test "work-problems P246: status=resolved branch performs git mv from holding to .changeset/" {
+@test "work-problems P308: Rule 4-ratified graduate path performs git mv from holding to .changeset/" {
+  # The git mv is downstream of the Rule 4 evidence-floor ratification,
+  # not directly on the evaluator's status=resolved.
   run grep -nE 'git mv docs/changesets-holding/<basename> \.changeset/<basename>' "$SKILL_MD"
   [ "$status" -eq 0 ]
 }
 
-@test "work-problems P246: status=resolved branch amends the iter commit per ADR-042 Rule 3" {
+@test "work-problems P308: Rule 4-ratified graduate path amends the iter commit per ADR-042 Rule 3" {
   run grep -nE 'Amend the iter.s main commit per ADR-042 Rule 3 amend-based folding' "$SKILL_MD"
   [ "$status" -eq 0 ]
 }
@@ -194,20 +197,46 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-# ── Policy authorisation (ADR-013 Rule 5 + ADR-061 Rule 5) ────────────────
+# ── Policy authorisation (ADR-013 Rules 1/5/6 + ADR-061 Rules 4/5 + P352) ─
 
-@test "work-problems P246: resolved-branch is policy-authorised silent proceed (no AskUserQuestion)" {
-  run grep -nE 'policy-authorised silent proceed.*no.*AskUserQuestion' "$SKILL_MD"
+@test "work-problems P308: pre-check cites ADR-061 Rule 4 as the LLM-owned evidence-floor surface" {
+  # Rule 4 evidence-floor judgement is class-specific and LLM-owned per
+  # ADR-044 framework-resolution boundary; surfacing it as AskUserQuestion
+  # (interactive) or queue (AFK) is the load-bearing delegation surface.
+  run grep -nE 'ADR-061 Rule 4' "$SKILL_MD"
   [ "$status" -eq 0 ]
 }
 
-@test "work-problems P246: pre-check cites ADR-013 Rule 5" {
-  run grep -nE 'ADR-013 Rule 5' "$SKILL_MD"
+@test "work-problems P308: pre-check cites ADR-013 Rule 6 as the AFK queue-and-continue fail-safe" {
+  # Per P352 user-ratified universal default: when AskUserQuestion is
+  # unavailable (AFK iter), queue the question + continue — do NOT halt,
+  # do NOT silently fail-soft, do NOT auto-default.
+  run grep -nE 'ADR-013 Rule 6.*P352|P352.*ADR-013 Rule 6' "$SKILL_MD"
   [ "$status" -eq 0 ]
 }
 
-@test "work-problems P246: pre-check cites ADR-061 Rule 5" {
+@test "work-problems P308: pre-check cites ADR-061 Rule 5 (graduation criterion authorises intent, gates authorise action)" {
   run grep -nE 'ADR-061 Rule 5' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "work-problems P308: interactive branch fires AskUserQuestion per-held-entry (not silent proceed)" {
+  # The amendment lifts the prior silent-proceed clause — Rule 4 judgement
+  # is LLM-owned; the user must ratify before the git mv.
+  run grep -nE 'interactive.*AskUserQuestion.*per[- ]held[- ]entry|per[- ]held[- ]entry.*AskUserQuestion' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "work-problems P308: AFK branch queues outstanding_question per held entry (queue-and-continue)" {
+  run grep -nE 'AFK.*queue.*outstanding_question.*per held entry|queue.*outstanding_question.*per held entry.*AFK|AFK.*queue.*outstanding_question|outstanding_question.*do NOT graduate' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "work-problems P308: AskUserQuestion option labels inline evidence + Rule 4 criterion (P350 brief-before-ID)" {
+  # P350 empathy-gap correction: AskUserQuestion text must inline the
+  # per-held-entry evidence summary + Rule 4 class-specific criterion;
+  # opaque P-ID / ADR-ID references alone are non-compliant.
+  run grep -nE 'P350|brief.*before.*ID|inline.*evidence' "$SKILL_MD"
   [ "$status" -eq 0 ]
 }
 
@@ -286,5 +315,12 @@ setup() {
 
 @test "work-problems P246: holding README self-identifies the Process amendment as P246's refined framing" {
   run grep -nE 'P246' "$HOLDING_README"
+  [ "$status" -eq 0 ]
+}
+
+# ── P308 self-identification (ticket-trace) ───────────────────────────────
+
+@test "work-problems P308: SKILL.md self-identifies the Rule 4 evidence-floor amendment as P308" {
+  run grep -nE 'P308' "$SKILL_MD"
   [ "$status" -eq 0 ]
 }

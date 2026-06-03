@@ -1,9 +1,23 @@
 # Problem 308: work-problems Step 6.5 cohort-graduation treats evaluator `status=resolved` as graduate-now, skipping the Rule 4 evidence-floor judgment the holding-README Process requires — AFK false-graduation hazard
 
-**Status**: Open
+**Status**: Verifying (Fix Released — pending behavioural verification)
 **Reported**: 2026-05-26
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+
+## Fix Released
+
+SKILL.md Step 6.5 cohort-graduation pre-check amended 2026-06-03 to route `status=resolved` to a **Rule 4 evidence-floor judgement** step (P308 amendment), instead of treating it as direct graduate-now. The judgement is LLM-owned per ADR-061 Rule 4 + ADR-044 framework-resolution boundary; surfacing is per-held-entry (NOT batched cohort, except class=3b atomic propagation).
+
+- **Interactive (`AskUserQuestion` available)**: per-held-entry `AskUserQuestion` with inline evidence summary (P350 brief-before-ID discipline) + 3 options (Graduate / Defer / Reject). On Graduate verdict: `git mv` from holding to `.changeset/`, README append, ADR-042 Rule 3 amend.
+- **AFK (`AskUserQuestion` forbidden — iter subprocess / non-interactive)**: per-held-entry `outstanding_question` queued to `.afk-run-state/outstanding-questions.jsonl` (P352 / ADR-013 Rule 6 universal queue-and-continue default). Do NOT graduate. Continue Drain for any pre-existing `.changeset/` entries.
+
+Files changed in fix:
+- `packages/itil/skills/work-problems/SKILL.md` (Step 6.5 cohort-graduation pre-check step 2 + step 2a + step 2b + Idempotency clause; Decision Making table `status=resolved` row; Mid-loop ask discipline framework-prescribed point list + Mid-loop ask between iters row).
+- `docs/changesets-holding/README.md` (Process step 5 — Rule 4 judgement-locus clarification paragraph).
+- `packages/itil/skills/work-problems/test/work-problems-step-6-5-cohort-graduation.bats` (regression assertions per P308).
+
+Verification path: ≥1 observation of `/wr-itil:work-problems` Step 6.5 cohort-graduation pre-check firing correctly on a held entry whose evaluator returns `status=resolved` — interactive path surfaces per-entry `AskUserQuestion` with evidence-inline question text; AFK path queues `outstanding_question` and does NOT graduate. Bats fixture (43 tests) green at source. Full work-problems suite (382 tests) green at source.
 
 ## Description
 
