@@ -292,6 +292,35 @@ Within the highest non-empty tier, select the problem with the highest WSJF scor
 
 The full selection order is therefore: **tier** (Critical-bypass → Inbound-reported → Internal), then the within-tier ladder `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)`. <!-- REPORTED-FIRST-TIER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 (ADR-076) -->
 
+### Step 3.5: JTBD ratification predicate-check (per RFC-016 / P344)
+
+After Step 3 selects a candidate ticket and before Step 4 classifies it for dispatch, predicate-check the cited JTBDs of the selected ticket. The per-iter JTBD review subagent (ADR-068 surface 3 — the `[Unratified Dependency]` verdict) catches the same class INSIDE the iter subprocess, but only after spending iter-dispatch cost (~$3-5 + 5-10 min per skip). This step shifts the predicate left to the orchestrator layer for the cost of one grep + per-JTBD shim call — analogous to how Step 0b pre-flights inbound-discovery staleness rather than letting iters discover it. Driving exemplar: 2026-05-31 session 9 iter 5 dispatched P082 against unratified JTBD-001 + JTBD-006; the iter correctly skipped per ADR-074 substance-confirm-before-build, but the per-dispatch cost was wasted.
+
+**Mechanism:**
+
+```bash
+wr-itil-check-ticket-jtbd-ratification "<selected-ticket-path>"
+predicate_exit=$?
+```
+
+`wr-itil-check-ticket-jtbd-ratification` is the ADR-049 / ADR-080 `$PATH` shim that dispatches `packages/itil/scripts/check-ticket-jtbd-ratification.sh`. The script extracts cited `JTBD-NNN` IDs from the ticket body (Decision Drivers / `**JTBD**:` / `**Persona**:` references) and delegates per-JTBD ratification to `wr-jtbd-is-job-or-persona-unconfirmed` (the ADR-068 surface 3 single-artifact predicate). Polarity is INVERTED vs the inner predicate — the outer script answers "are all cited JTBDs ratified?" rather than "is THIS one unconfirmed?". Behavioural contract asserted by `test/work-problems-step-3-5-jtbd-ratification-predicate.bats`.
+
+Exit-code routing:
+
+| `predicate_exit` | Meaning | Action |
+|---|---|---|
+| `0` | All cited JTBDs ratified, OR ticket cites no JTBDs, OR per-JTBD shim missing (ADR-031 silent-pass) | Proceed to Step 4 normally — the ticket is dispatchable. |
+| `1` | ≥1 cited JTBD unratified (or unresolved) — IDs on stdout, one per line; `JTBD-NNN (unresolved)` for inner exit-2 cases | Route the ticket to Step 4's user-answerable skip path (`skip_reason_category: user-answerable`). Queue an `outstanding_questions` entry (`category: "direction"`) naming the unratified JTBDs + ticket ID + remedy: *"Run `/wr-jtbd:confirm-jobs-and-personas` to ratify the cited jobs/personas, then re-invoke `/wr-itil:work-problems`."* Loop back to Step 3 to re-run the tier-first selection over the remaining backlog minus the skipped ticket. |
+| `2` | Ticket file missing / unreadable | Halt the loop with the structured Prior-Session State report — this is the same shape as the README-reconciliation Exit 2 halt at Step 0 (deeper repair needed, not mechanical reconciliation). |
+
+**Loopback tier preservation**: re-run the Step 3 tier-first selection over the remaining backlog minus the skipped ticket. Tier order (Critical-bypass → Inbound-reported → Internal) and within-tier WSJF ladder are preserved per ADR-076. If every actionable ticket is filtered out by Step 3.5, Step 2 stop-condition #1 (no actionable problems) fires naturally and the accumulated `outstanding_questions` entries surface at Step 2.4 gate (a) per the existing batched-`AskUserQuestion` contract.
+
+**Why orchestrator-layer, not iter-layer**: the inner per-iter JTBD subagent stays in place (defence-in-depth — the iter-layer is the authoritative second-source, not a replacement surface). The orchestrator predicate is the optimisation: cheap pre-check eliminates wasted dispatch when the answer is knowable from a `grep` + frontmatter read. The two surfaces are not redundant — they cover different failure modes (orchestrator: shift-left cost optimisation; iter: substance-confirm-before-build governance gate per ADR-074). When the orchestrator silent-passes (predicate-exit 0 via missing-shim degenerate case per ADR-031), the iter-layer still catches any unratified-dep correctly.
+
+**AFK authorisation per ADR-013 Rule 6**: this is a pure read-only predicate-check (no writes, no commits, no external comms). No `AskUserQuestion` at this step — the routing is deterministic per the table above. The user-answerable question accumulates in the queue file and surfaces at Step 2.4 gate (a) per the existing batched contract. Per ADR-044 framework-resolution boundary: routing is framework-resolved (mechanical); user input is preserved at the loop-end surface where it belongs.
+
+**Compose-with**: ADR-068 (surface 3 single-artifact predicate — mirrored to orchestrator), ADR-074 (substance-confirm-before-build — JTBD-as-driver symmetric sibling to ADR-as-driver), ADR-076 (tier-first selection preserved by the loopback), ADR-031 (degenerate adopter silent-pass when per-JTBD shim absent), ADR-049 / ADR-080 (PATH shim grammar + highest-version-wins wrapper), ADR-014 (no commit at this step — predicate is read-only). The sibling-class gap for ADRs cited as Decision Drivers (ADR-074 master class) is RFC-016 § Deferred item 1 — captured for follow-on after this Step 3.5 dogfoods.
+
 ### Step 4: Classify each problem
 
 Read the problem file and apply these deterministic rules:

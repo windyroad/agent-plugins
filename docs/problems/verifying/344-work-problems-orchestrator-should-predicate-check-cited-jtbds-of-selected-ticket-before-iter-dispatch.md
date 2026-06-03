@@ -1,6 +1,6 @@
 # Problem 344: `/wr-itil:work-problems` orchestrator should predicate-check the cited JTBDs of the selected ticket BEFORE dispatching the iter-worker — wasted-iter-dispatch class when JTBDs are unratified
 
-**Status**: Open
+**Status**: Verification Pending (fold-fix per ADR-022 P143; RFC-016 implemented in AFK iter 33 — Step 3.5 helper + shim + SKILL.md amendment + behavioural bats. Awaiting release-gated `proposed → verifying` transition on this RFC + user verification.)
 **Reported**: 2026-05-31
 **Priority**: 6 (Medium) — Impact: 2 (Minor — wasted-iter cost bounded per occurrence; orchestrator continues) × Likelihood: 3 (Possible — fires on any unratified-JTBD ticket selection; accumulates across sessions until predicate-check ships)
 **Origin**: internal
