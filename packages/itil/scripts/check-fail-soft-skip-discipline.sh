@@ -117,7 +117,7 @@ for file in "${TARGETS[@]}"; do
     # Derive which pattern hit. First-match-wins ordering.
     matched_pattern=''
     for pat in "${PATTERNS[@]}"; do
-      if echo "$line_text" | grep -E -q "$pat"; then
+      if echo "$line_text" | grep -E -i -q "$pat"; then
         matched_pattern="$pat"
         break
       fi
@@ -126,7 +126,7 @@ for file in "${TARGETS[@]}"; do
     snippet="${line_text:0:120}"
     echo "WARN  $rel:$line_no  $matched_pattern: $snippet" >&2
     violations=$((violations + 1))
-  done < <(grep -E -n "$PATTERN_RE" "$file" 2>/dev/null || true)
+  done < <(grep -E -i -n "$PATTERN_RE" "$file" 2>/dev/null || true)
 done
 
 if [ "$violations" -gt 0 ]; then
