@@ -10,6 +10,12 @@ Capture a problem ticket quickly during foreground work. Lightweight aside-invoc
 
 This skill is the foreground-lightweight-capture variant of `/wr-itil:manage-problem`'s new-problem path per ADR-032 (P155 amendment, 2026-05-03). The deferred background-capture variant named in ADR-032's original taxonomy remains deferred per P088 settlement.
 
+## Output Formatting
+
+When referencing problem, JTBD, ADR, or RFC IDs in prose output (stderr advisories, capture-report messages), always include the human-readable title or substance on first mention. Use the format `JTBD-001 (Enforce Governance Without Slowing Down)`, not bare `JTBD-001`.
+
+**Brief-before-ID discipline at the Step 1.5b derive-then-ratify `AskUserQuestion` surface (P350).** When the derive-then-ratify dispatch proposes persona/JTBD candidates to the user, the question text MUST inline what each proposed JTBD/persona asserts — the job statement, the user-need, the persona's key constraint — BEFORE naming it by `JTBD-NNN` / `persona-slug`. The user reads the prompt without project filesystem access (mobile clients, accessibility tooling, notification surfaces) and cannot follow links into `docs/jtbd/`. Acceptable option label: *"Developer persona — enforce governance automatically so manual-review safety comes without overhead."* Unacceptable: *"developer + JTBD-001"*. IDs may appear ONLY after a self-contained explanation. Mirrors the canonical `/wr-architect:create-adr` Step 5 § 5a Rule 3 ("No IDs as explainers"). See also session memory `feedback_brief_before_id.md`.
+
 ## When to invoke
 
 - **Mid-iter sibling-finding**: agent observes a tangential ticket-worthy issue while working on a different problem and cannot afford the 10-turn `/wr-itil:manage-problem` ceremony.

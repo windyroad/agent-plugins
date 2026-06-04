@@ -23,6 +23,12 @@ The `/wr-retrospective:capture-retro` background sibling listed in early ADR-032
 
 This anti-pattern clause does NOT forbid retro inside an AFK iteration subprocess (P086) — that surface is the `claude -p` row above, not the background-agent row. Those two surfaces are distinct: `claude -p` is a fresh main Claude Code session that loads its own context naturally; `Agent(run_in_background: true)` is a subagent spawned inside an existing session whose context is isolated from the parent.
 
+## Output Formatting
+
+When referencing problem IDs, ADR IDs, JTBD IDs, or RFC IDs in prose output (the retro report, the briefing rotation summary, the captured-problem dispatch advisories), always include the human-readable title on first mention. Use the format `P350 (Empathy gap on opaque IDs)`, not bare `P350`.
+
+**Brief-before-ID discipline at every `AskUserQuestion` surface this skill emits (P350).** Step 3 (briefing curation), Step 4a (verification-close-on-evidence), Step 4b (problem-capture from session-observed signal), and any other interactive surface MUST inline what each referenced artefact is and what is at stake BEFORE naming it by ID. The user reads the retro prompt without project filesystem access (mobile clients, accessibility tooling, notification surfaces) and cannot open the cited tickets/ADRs/briefing files to recall the substance. Acceptable: *"Close-on-evidence: the verification ticket about 'agent forgets to refresh the marketplace cache after release' — evidence is the new shared helper landed two releases ago and no recurrence observed. Close?"* Unacceptable: *"Close P289?"*. Every option's substance MUST be self-contained in the briefing prose + option `label` and `description`; IDs may appear ONLY after a self-contained explanation. Mirrors the canonical `/wr-architect:create-adr` Step 5 § 5a Rule 3 ("No IDs as explainers"). See also session memory `feedback_brief_before_id.md`.
+
 ## Steps
 
 ### 1. Read the current briefing

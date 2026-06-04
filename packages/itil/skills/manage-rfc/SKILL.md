@@ -10,6 +10,12 @@ Create, update, or transition RFC tickets following the Problem-RFC-Story framew
 
 **Related JTBDs**: JTBD-008 (primary — Decompose a Fix Into Coordinated Changes; this skill governs the lifecycle of decomposed work), JTBD-001 (extended scope — change-set-level governance), JTBD-101 (atomic-fix-adopter — every fix goes through an RFC per ADR-071; the RFC skills are invoked deliberately, not auto-fired, because RFC scope is direction-setting per ADR-073 — NOT because atomic fixes skip ceremony).
 
+## Output Formatting
+
+When referencing RFC IDs, problem IDs, ADR IDs, or JTBD IDs in prose output, always include the human-readable title on first mention. Use the format `RFC-006 (Decision homing implementation)`, not bare `RFC-006`. Tables with separate ID and Title columns are fine as-is.
+
+**Brief-before-ID discipline at `AskUserQuestion` surfaces (P350).** When this skill emits an `AskUserQuestion` (transition-trigger ambiguity, scope-expansion approval, problem-trace ratification), the question/option/description text MUST inline what each referenced artefact is and what is at stake BEFORE naming it by ID. `RFC-NNN` / `P-NNN` / `ADR-NNN` / `JTBD-NNN` references are audit-trail annotations, NEVER carriers of meaning — the user reads the prompt without project filesystem access (mobile clients, accessibility tooling, notification surfaces) and cannot follow links. Every option's substance MUST be self-contained in the briefing prose + option `label` and `description`; IDs may appear ONLY after a self-contained explanation. Mirrors the canonical `/wr-architect:create-adr` Step 5 § 5a Rule 3 ("No IDs as explainers"). See also session memory `feedback_brief_before_id.md`.
+
 ## RFC Lifecycle
 
 | Status | File suffix | Meaning | Entry criteria |

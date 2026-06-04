@@ -59,6 +59,8 @@ For each ADR in the ordered queue, surface the decision as an `AskUserQuestion` 
 
 The trailing clause exists for cross-reference value — it is optional, NOT a re-entry point for meta-leading. When the meta does not add load-bearing context for the confirm decision, omit it entirely.
 
+**Brief-before-ID discipline (P350).** The `question` and `options` text MUST inline what each referenced artefact is and what is at stake before naming it by ID. `ADR-NNN` / `P-NNN` / `JTBD-NNN` / `RFC-NNN` references are audit-trail annotations, NEVER carriers of meaning — the user reads this prompt without project filesystem access (mobile clients, accessibility tooling, notification surfaces) and cannot follow links. Acceptable: *"This ADR decides: five per-tool-call hook patterns + their budget bands (sibling of the UserPromptSubmit-pattern decision and the SessionStart-pattern decision)."* Unacceptable: *"This ADR decides: 5 patterns; sibling to ADR-038 and ADR-040."* The trailing parenthetical IDs are permitted ONLY after a self-contained explanation, never as the explanation itself. Mirrors the canonical `/wr-architect:create-adr` Step 5 § 5a Rule 3 ("No IDs as explainers"). See also session memory `feedback_brief_before_id.md`.
+
 This is a genuine human-decision surface (the whole point of P283) — `AskUserQuestion` is correct here and is NOT over-asking. Do not auto-confirm; do not prose-ask.
 
 ### Step 4: Apply the outcome

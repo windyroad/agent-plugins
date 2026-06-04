@@ -13,6 +13,8 @@ Create, update, or transition problem tickets following an ITIL-aligned problem 
 
 When referencing problem IDs, ADR IDs, or JTBD IDs in prose output, always include the human-readable title on first mention. Use the format `P029 (Edit gate overhead for governance docs)`, not bare `P029`. Tables with separate ID and Title columns are fine as-is.
 
+**Brief-before-ID discipline at `AskUserQuestion` surfaces (P350).** Title-on-first-mention is the minimum for prose output. For `AskUserQuestion` question/option/description text the rule is stricter: brief the artefact's purpose and substance BEFORE naming it by ID. `P-NNN` / `ADR-NNN` / `JTBD-NNN` / `RFC-NNN` references are audit-trail annotations, NEVER carriers of meaning — the user reads the prompt without project filesystem access (mobile clients, accessibility tooling, notification surfaces) and cannot follow links. Every option's substance MUST be self-contained in the briefing prose + the option `label` and `description`; IDs may appear ONLY after a self-contained explanation. Mirrors the canonical `/wr-architect:create-adr` Step 5 § 5a Rule 3 ("No IDs as explainers"). Applies to Step 4b's fix-strategy and verification dispatches and any other `AskUserQuestion` site emitted by this skill. See also session memory `feedback_brief_before_id.md`.
+
 ## First-run intake-scaffold pointer (P065 / ADR-036)
 
 This skill is one of the two host skills wired to surface the [`/wr-itil:scaffold-intake`](../scaffold-intake/SKILL.md) skill on first invocation in a project that has not yet adopted the OSS intake surface. The contract is documented in [ADR-036](../../../../docs/decisions/036-scaffold-downstream-oss-intake.proposed.md) (Scaffold downstream OSS intake — skill + layered triggers).

@@ -1,7 +1,8 @@
 # Problem 350: agent surfaces decisions to user using opaque IDs (P-numbers, ADR-numbers, JTBD-numbers) without explaining what they mean — empathy gap
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-06-03
+**Fix Released**: 2026-06-04 — memory artefact + SKILL prose amendments across 8 surfaces (review-decisions, confirm-jobs-and-personas, manage-problem, manage-rfc, capture-problem, capture-rfc, review-problems, run-retro). work-problems Step 6.5 and create-adr Step 5 § 5a Rule 3 were already in-place exemplars.
 **Priority**: 12 (High) — Impact: 4 (Significant — user cannot make informed decisions when surfaced questions reference IDs they have to look up; each opaque reference forces the user to either skip the question, ask for context, or open files; cumulative cost across multi-question batches is high) × Likelihood: 3 (Possible — observed repeatedly in this session: ADR-080 sub-decision surfacing 2026-06-02; ADR-081 surfacing 2026-06-02; this morning's P270/P349 surfacing)
 **Origin**: internal
 **Persona**: developer
@@ -53,10 +54,10 @@ User asks for brief; agent then explains; user then answers. Adds at least one r
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Catalogue all SKILL.md surfaces that emit AskUserQuestion with potential ID references (work-problems Step 2.5, review-decisions, confirm-jobs-and-personas, create-adr, manage-problem 4b, manage-rfc, capture-problem 1.5b)
-- [ ] Decide enforcement shape: (a) SKILL prose discipline + agent-side memory, (b) PreToolUse hook lint on AskUserQuestion text, (c) structural test (bats fixture that asserts question text doesn't contain bare ID references)
-- [ ] Memory artefact: add user-feedback memory under ~/.claude/projects/-Users-tomhoward-Projects-windyroad-claude-plugin/memory/ documenting the empathy-gap pattern + brief-before-ID rule
-- [ ] Pattern fix: define the "brief once per artefact, then surface sub-questions" template
+- [x] Catalogue all SKILL.md surfaces that emit AskUserQuestion with potential ID references (work-problems Step 2.5, review-decisions, confirm-jobs-and-personas, create-adr, manage-problem 4b, manage-rfc, capture-problem 1.5b) — JTBD agent + architect agent confirmed 8-surface catalogue 2026-06-04: review-decisions, confirm-jobs-and-personas, manage-problem, manage-rfc, capture-problem, capture-rfc, review-problems, run-retro (work-problems + create-adr already carried the discipline as in-place exemplars).
+- [x] Decide enforcement shape: chose option (a) SKILL prose discipline + agent-side memory per Fix Strategy recommendation. Architect review 2026-06-04 ALIGNED with no new ADR required (extension of ADR-013 + the P032 Output Formatting precedent + the create-adr Step 5 § 5a Rule 3 canonical pattern).
+- [x] Memory artefact: created `~/.claude/projects/-Users-tomhoward-Projects-windyroad-claude-plugin/memory/feedback_brief_before_id.md` (commit pending) + indexed in `MEMORY.md`.
+- [x] Pattern fix: brief-once-per-artefact template documented in the memory file (§ "How to apply" point 4) + canonical brief-before-ID prose stamp applied uniformly across the 8 SKILL surfaces.
 
 ## Fix Strategy
 

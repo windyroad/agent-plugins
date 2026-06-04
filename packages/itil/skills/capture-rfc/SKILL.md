@@ -12,6 +12,12 @@ This skill is one half of the capture-then-manage RFC framework introduced by AD
 
 **Related JTBDs**: JTBD-008 (primary — Decompose a Fix Into Coordinated Changes; this skill IS the capture-time decomposition surface), JTBD-001 (extended scope — change-set-level governance), JTBD-101 (atomic-fix-adopter — every fix goes through an RFC per ADR-071; capture-rfc is invoked deliberately, not auto-fired, because RFC scope is direction-setting per ADR-073 — NOT because atomic fixes skip ceremony).
 
+## Output Formatting
+
+When referencing RFC IDs, problem IDs, ADR IDs, JTBD IDs, or story IDs in prose output (stderr advisories, capture-report messages), always include the human-readable title or substance on first mention. Use the format `RFC-006 (Decision homing implementation)`, not bare `RFC-006`.
+
+**Brief-before-ID discipline at any `AskUserQuestion` surface this skill emits (P350).** When this skill surfaces an interactive question (e.g. ambiguous problem-trace selection, forward-referenced story confirmation), the question/option/description text MUST inline what each referenced artefact is and what is at stake BEFORE naming it by ID. `RFC-NNN` / `P-NNN` / `STORY-NNN` / `ADR-NNN` / `JTBD-NNN` references are audit-trail annotations, NEVER carriers of meaning — the user reads the prompt without project filesystem access (mobile clients, accessibility tooling, notification surfaces) and cannot follow links. Every option's substance MUST be self-contained in the briefing prose + option `label` and `description`; IDs may appear ONLY after a self-contained explanation. Mirrors the canonical `/wr-architect:create-adr` Step 5 § 5a Rule 3 ("No IDs as explainers"). See also session memory `feedback_brief_before_id.md`.
+
 ## When to invoke
 
 - **Multi-commit fix at the start of work**: agent / user observes that a problem fix decomposes into multiple coordinated changes (a refactor across packages, a phased migration, a framework evolution). Capture an RFC scoping the work *before* the first commit lands so each phase competes for WSJF attention as a first-class entity (per JTBD-008).

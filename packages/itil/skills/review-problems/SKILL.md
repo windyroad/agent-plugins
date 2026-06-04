@@ -10,6 +10,12 @@ Re-assess the problem backlog. This skill is a **batch operation** that reads ev
 
 This skill is the P071 phased-landing split of `/wr-itil:manage-problem review` per ADR-010 amended Skill Granularity rule: one skill per distinct user intent. The original `/wr-itil:manage-problem review` subcommand route remains as a thin-router forwarder during the deprecation window but is scheduled for removal in `@windyroad/itil`'s next major version.
 
+## Output Formatting
+
+When referencing problem IDs, ADR IDs, JTBD IDs, or RFC IDs in prose output (the Verification Queue summary, the WSJF re-rank report, stderr advisories), always include the human-readable title on first mention. Use the format `P350 (Empathy gap on opaque IDs)`, not bare `P350`. Tables with separate ID and Title columns are fine as-is.
+
+**Brief-before-ID discipline at `AskUserQuestion` surfaces (P350).** When this skill emits an `AskUserQuestion` — most notably the Step 4 verification prompts that propose `.verifying.md` tickets for Closed transition and any priority-rerate-confirmation surface — the question/option/description text MUST inline what each referenced ticket is about, the relevant verification evidence, and what is at stake BEFORE naming it by `P-NNN`. The user reads the prompt without project filesystem access (mobile clients, accessibility tooling, notification surfaces) and cannot open the ticket file to recall the substance. Acceptable: *"Verify and close: the Excel sheet-name reading-order ticket. Evidence cited: the fix landed in `@windyroad/document-a11y@1.4.2` two weeks ago and no regressions reported. Close as Verified?"* Unacceptable: *"Verify and close P192?"*. Every option's substance MUST be self-contained in the briefing prose + option `label` and `description`; IDs may appear ONLY after a self-contained explanation. Mirrors the canonical `/wr-architect:create-adr` Step 5 § 5a Rule 3 ("No IDs as explainers"). See also session memory `feedback_brief_before_id.md`.
+
 ## Scope
 
 **In scope** (RFC-002 migration window — each glob is dual-tolerant, covering BOTH the flat `docs/problems/<NNN>-<title>.<state>.md` filename-suffix layout AND the per-state subdir `docs/problems/<state>/<NNN>-<title>.md` layout):

@@ -1,0 +1,5 @@
+---
+"@windyroad/retrospective": patch
+---
+
+P350 fold-fix (`@windyroad/retrospective` side): apply the brief-before-ID discipline at the AskUserQuestion surfaces emitted by `/wr-retrospective:run-retro`. New `## Output Formatting` + Brief-before-ID prose added: at Step 3 (briefing curation), Step 4a (verification-close-on-evidence), Step 4b (problem-capture from session-observed signal), and any other interactive surface, the question/options text MUST inline what each referenced artefact is and what is at stake BEFORE naming it by `P-NNN` / `ADR-NNN` / `JTBD-NNN` / `RFC-NNN`. The user reads the retro prompt without project filesystem access on every device (mobile clients, accessibility tooling, notification surfaces) and cannot follow links into the cited tickets/ADRs/briefing files. Mirrors the canonical `/wr-architect:create-adr` Step 5 § 5a Rule 3 ("No IDs as explainers"). Companion patches in `@windyroad/itil`, `@windyroad/architect`, `@windyroad/jtbd` land the same discipline at their respective surfaces.
