@@ -1,5 +1,0 @@
----
-"@windyroad/risk-scorer": patch
----
-
-P355 RFC-019 fold-fix (`@windyroad/risk-scorer` side): extend the pipeline.md agent's R009 control vocabulary to credit promptfoo Tier-A/B as a likelihood-reducing control for SKILL/agent-prose surfaces (the previously-irreducible R009 "no behavioural harness for the LLM-prose surface" floor is discharged when a paired promptfoo eval exists for the changed prose AND `npx promptfoo eval` passes). New "R009 control vocabulary — SKILL/agent-prose surfaces (P355 / RFC-012 / ADR-075)" subsection under Control Discovery with: failure scenario exercised, how it catches before reaching the user, crediting rules (-1 with paired-and-passing eval; +1 without), subset-only credit (does not globally discharge R009 — only the prose-surface subset of the diff), and the discoverability rule (check for paired eval; cite `un-verified` rather than -1 when pass/fail can't be determined from pipeline state). Companion `@windyroad/itil` patch lands the first reference slice at `packages/itil/skills/report-upstream/eval/`; companion `docs/risks/R009-*.active.md` catalog amendment is governance-side and ships in the same commit grain.
