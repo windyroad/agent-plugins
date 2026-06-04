@@ -51,6 +51,20 @@ providers:
   # Path is relative to this config file's directory (promptfoo basePath).
   - id: 'exec:bash ./run-skill-eval.sh'
 
+# Tier-B (llm-rubric) grading provider. The report-upstream contract has
+# NEGATIVE clauses ("the orchestrator must NOT halt"; "must NOT cite the
+# superseded never-auto-report rule") that Tier-A regex cannot grade — a
+# not-regex for "halt the orchestrator" false-fails against the CORRECT
+# answer "the orchestrator does NOT halt" (forbidden substring inside a
+# negation). Those clauses use `type: llm-rubric`, graded by claude under
+# subscription auth (no API key) via grade-llm-rubric.sh. Distinctive
+# positive tokens (gh issue create, Queued Upstream Report, SECURITY.md,
+# the three impact axes) stay Tier-A. See P012 reopen findings (2026-06-04).
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-llm-rubric.sh'
+
 prompts:
   - '{{prompt}}'
 
@@ -67,18 +81,23 @@ tests:
         the skill do next? Name the specific gh command and the back-write
         section it writes to the local ticket.
     assert:
-      # Tier A — must reference the external-comms gate.
-      - type: icontains
-        value: 'external-comms'
       # Tier A — must proceed via gh issue create (the public-issue path).
       - type: icontains
         value: 'gh issue create'
       # Tier A — must mention the `## Reported Upstream` back-write section.
       - type: icontains
         value: 'Reported Upstream'
-      # Tier A — must NOT halt or queue when below-appetite on the public path.
-      - type: not-regex
-        value: '(?<!")[Hh]alt\s+the\s+[Oo]rchestrator'
+      # Tier B — below-appetite public path proceeds NOW; must not halt/queue.
+      # (Regex not-regex on "halt" false-fails the correct "does NOT halt".)
+      - type: llm-rubric
+        value: |
+          The response describes the skill PROCEEDING to file the upstream
+          report on this below-appetite public path (filing via gh issue
+          create now). PASS if it proceeds to file. FAIL if it says the
+          orchestrator HALTS, or that the report is QUEUED/DEFERRED for later
+          — below external-comms appetite means it files now, it does not
+          queue or halt. An output that merely says it does NOT halt (a
+          negation) still PASSES.
 
   - description: AFK above-appetite → risk-reduce + re-score, queue if still above
     vars:
@@ -99,15 +118,20 @@ tests:
       # Tier A — measures vocabulary is open-ended (per leaf (a) ratification).
       - type: regex
         value: '[Oo]pen[\s\-]?ended|[Jj]udgement|[Cc]ase[\s\-]?by[\s\-]?case|wr-risk-scorer:external-comms'
-      # Tier A — must NOT halt the orchestrator (P352 queue-and-continue).
-      - type: not-regex
-        value: '(?<!")[Hh]alt\s+the\s+[Oo]rchestrator'
-      # Tier A — must reference the queue-not-halt pattern.
-      - type: regex
-        value: '[Qq]ueue|outstanding_questions|[Cc]ontinue'
       # Tier A — content saves to `## Queued Upstream Report` (per leaf (c) rename).
       - type: icontains
         value: 'Queued Upstream Report'
+      # Tier B — above-appetite path is queue-and-continue, NOT halt (P352).
+      # (Regex not-regex on "halt" false-fails the correct "does NOT halt".)
+      - type: llm-rubric
+        value: |
+          The response describes the above-appetite path as: take
+          risk-reducing measures, re-score, and if STILL above appetite,
+          QUEUE the report (an outstanding_questions entry) and CONTINUE the
+          loop. PASS if it queues-and-continues without stopping the loop.
+          FAIL if it says the orchestrator HALTS / STOPS / BLOCKS the loop on
+          the above-appetite branch. An output that says it does NOT halt (a
+          negation) PASSES.
 
   - description: Security + SECURITY.md present + below-appetite → files via GHSA
     vars:
@@ -124,15 +148,24 @@ tests:
       # Tier A — must route via the SECURITY.md-declared channel (GHSA).
       - type: regex
         value: '[Ss]ecurity[\s\-]?[Aa]dvisor|[Ss]ecurity-advisories|GHSA|gh\s+api\s+[\s\S]*security'
-      # Tier A — must NOT halt or queue when SECURITY.md is present + below-appetite.
-      - type: not-regex
-        value: '(?<!")[Hh]alt\s+the\s+[Oo]rchestrator'
       # Tier A — must reference SECURITY.md routing.
       - type: icontains
         value: 'SECURITY.md'
-      # Tier A — must NOT cite the pre-amendment "never auto-report security" rule.
-      - type: not-regex
-        value: '[Nn]ever\s+auto[\s\-]?report'
+      # Tier B — files via the declared channel now; does not halt/queue; and
+      # does not treat the superseded "never auto-report security" rule as
+      # still in force. (Regex not-regex on those phrases false-fails the
+      # correct negated mentions.)
+      - type: llm-rubric
+        value: |
+          For an upstream repo that HAS a SECURITY.md and below-appetite
+          prose, the response describes FILING the advisory via the
+          SECURITY.md-declared channel (e.g. GitHub Security Advisories) NOW.
+          PASS if it files via the declared channel. FAIL if it (a) says the
+          orchestrator HALTS, or (b) cites a "never auto-report security
+          issues" rule as CURRENTLY in force (that pre-amendment rule was
+          superseded by the ADR-024 2026-06-04 amendment). Saying the old
+          never-auto-report rule NO LONGER applies, or saying it does NOT
+          halt, PASSES (those are negations of the forbidden clauses).
 
   - description: Security + missing SECURITY.md → external-comms-gated impact assessment (NOT always-queue)
     vars:
@@ -153,6 +186,23 @@ tests:
         value: 'reputation'
       - type: regex
         value: '[Rr]eported\s+party|party\s+we\s+are\s+reporting\s+to'
-      # Tier A — must NOT always-queue regardless of risk band (rejected option).
-      - type: not-regex
-        value: '[Aa]lways[\s\-]?queue\s+regardless'
+      # Tier B — routing is a risk-scored impact ASSESSMENT, not an
+      # unconditional always-queue. The prompt asks the model to NAME the
+      # impact axes (not to describe routing), so the rubric requires the
+      # axes be framed as inputs the external-comms gate SCORES/ASSESSES
+      # (inherently assessment-driven), and only FAILS on an explicit
+      # always-queue-regardless claim. (Regex not-regex false-fails a correct
+      # "it does NOT always queue regardless" negation.)
+      - type: llm-rubric
+        value: |
+          For an upstream repo with NO SECURITY.md but another disclosure
+          channel, the response frames the three impact axes (our repository,
+          our reputation, the reported party) as factors the
+          wr-risk-scorer:external-comms gate SCORES or ASSESSES (an
+          impact assessment), rather than as a fixed unconditional outcome.
+          PASS if the axes are described as inputs the gate weighs/scores.
+          FAIL only if the response explicitly says the skill ALWAYS queues
+          (or always halts) regardless of the risk band — the rejected
+          unconditional option. Merely naming the three axes as scoring
+          inputs is sufficient to PASS; an explicit "does NOT always queue"
+          also PASSES.
