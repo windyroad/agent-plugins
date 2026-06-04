@@ -10,6 +10,16 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/lib/review-gate.sh"
 
+# P191: resolve the project root from the session signal, not the hook's
+# runtime CWD. Claude Code may launch the hook with an actual working
+# directory that differs from the session/project dir while still exporting
+# CLAUDE_PROJECT_DIR (and a $PWD env var) pointing at the project. A relative
+# `[ -d "docs/jtbd" ]` then false-negatives even though docs/jtbd is present,
+# tripping the fail-closed "no JTBD documentation" deny on legitimate edits.
+# Anchor every project-relative check on PROJECT_DIR. Pattern mirrors
+# jtbd-oversight-nudge.sh.
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
+
 INPUT=$(cat)
 
 FILE_PATH=$(echo "$INPUT" | python3 -c "
@@ -44,7 +54,7 @@ fi
 case "$FILE_PATH" in
   /*)
     case "$FILE_PATH" in
-      "$PWD"/*) ;;
+      "$PROJECT_DIR"/*) ;;
       *) exit 0 ;;
     esac
     ;;
@@ -107,8 +117,8 @@ esac
 # Legacy docs/JOBS_TO_BE_DONE.md is NOT consulted at runtime; the gate is
 # inactive on projects that have not run /wr-jtbd:update-guide.
 JTBD_PATH=""
-if [ -d "docs/jtbd" ]; then
-  JTBD_PATH="docs/jtbd"
+if [ -d "$PROJECT_DIR/docs/jtbd" ]; then
+  JTBD_PATH="$PROJECT_DIR/docs/jtbd"
 fi
 
 # If no JTBD docs exist, block and direct to create skill

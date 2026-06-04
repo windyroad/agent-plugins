@@ -1,6 +1,6 @@
 # Problem 191: JTBD edit gate misfires "no JTBD documentation exists" branch on bats fixture edits despite `docs/jtbd/` being present in session CWD
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-15
 **Priority**: 6 (Med) — Impact: 3 (Moderate, friction blocks legitimate edits) x Likelihood: 2 (Possible — fires intermittently on specific path patterns) (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -38,13 +38,31 @@ Both workarounds add friction to long fix-implementation sessions where many bat
 
 ## Root Cause Analysis
 
-### Investigation Tasks
+### Confirmed root cause (2026-06-04)
 
-- [ ] Instrument `jtbd-enforce-edit.sh` to log `$PWD` and the result of `[ -d "docs/jtbd" ]` at fire time, comparing against the session CWD recorded in some session-scoped marker file.
-- [ ] Identify which Edit-tool transport paths trigger the misfire vs. which paths see the correct CWD (e.g. is it an Edit-after-Read-of-different-file pattern? An Edit-from-a-subagent context? An Edit during a paused tool sequence?).
-- [ ] Test fix: hard-code the hook to look at `${CLAUDE_PROJECT_DIR:-$PWD}` (or similar) and verify the misfire disappears.
-- [ ] Add behavioural bats fixture reproducing the misfire (the hardest part — the misfire is intermittent).
-- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems.
+**The activation check `[ -d "docs/jtbd" ]` (line 110) used a RELATIVE path resolved against the hook process's actual runtime CWD, not the session/project root.** Claude Code launches the PreToolUse hook with a working directory that can differ from the session/project dir while still exporting `CLAUDE_PROJECT_DIR` (and a `$PWD` env var) pointing at the project. The relative check then false-negatives even though `docs/jtbd/` is present at the project root, so `JTBD_PATH=""` and the fail-closed "no JTBD documentation exists" deny fires on a legitimate edit.
+
+This is confirmed by the membership-check evidence: the file_path matched `case "$FILE_PATH" in "$PWD"/*` (the hook reached the JTBD-detection block, so `$PWD` env var WAS the project root) yet `[ -d "docs/jtbd" ]` still failed — meaning the hook's real CWD ≠ the `$PWD` env value. Witnessed live 2026-06-04 (Edit to `packages/itil/skills/report-upstream/eval/promptfooconfig.yaml` blocked despite docs/jtbd present), reproducing the 2026-05-15 report. The Preliminary Hypothesis below was correct.
+
+### Fix (shipped — fold-fix per ADR-022 P143, carried by RFC-020)
+
+Anchor every project-relative check on `PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"` (mirrors `jtbd-oversight-nudge.sh:25`):
+
+- `jtbd-enforce-edit.sh` — membership check `"$PWD"/*` → `"$PROJECT_DIR"/*`; detection `[ -d "$PROJECT_DIR/docs/jtbd" ]`; `JTBD_PATH="$PROJECT_DIR/docs/jtbd"` (absolute). Drift-hash is content-based → no marker invalidation.
+- `jtbd-mark-reviewed.sh` — same anchor (marker-write symmetry: a false-negative there never stores the marker → enforce gate denies the next edit).
+- `jtbd-project-root.bats` — behavioural reproduction (fire from a divergent CWD with `CLAUDE_PROJECT_DIR` set; assert NOT "no JTBD documentation exists" + IS "without JTBD review") + a regression guard preserving fail-closed on genuine docs/jtbd absence. Full jtbd hook suite 79/79 green.
+
+Architect verdict `a86054e851a5d835a` PASS (routine bug-fix, no new ADR). JTBD verdict `a92d0229f592b7bd2` PASS.
+
+### Phase 2 — architect-gate sibling (same root-cause class, NOT fixed here)
+
+`packages/architect/hooks/architect-enforce-edit.sh` has the **identical** relative-path bug at line 28 (membership) + line 35 (`[ ! -d "docs/decisions" ]` activation) — but it fails **OPEN** (`exit 0`), so on the same CWD divergence the architect gate silently goes inactive and edits bypass architect review. This is a **governance hole strictly more severe** than P191's fail-closed nuisance (silent under-protection vs safe-but-annoying over-block). Folded into this ticket as Phase 2 per the same-root-cause-class principle (architect direction: track here, do not capture a sibling ticket).
+
+### Phase 2 Investigation Tasks
+
+- [ ] Apply the same `PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"` anchor to `architect-enforce-edit.sh` (lines 28 + 35) + `architect-mark-reviewed.sh` if it shares the pattern.
+- [ ] Behavioural reproduction in `architect-project-root.bats` (fail-OPEN variant: assert the gate stays ACTIVE — denies for missing marker — rather than silently exiting 0 — when CWD diverges but docs/decisions is present).
+- [ ] Re-rate Phase 2 Priority HIGHER than Phase 1 (fail-OPEN governance bypass > fail-closed nuisance).
 
 ### Preliminary Hypothesis
 
@@ -62,9 +80,14 @@ The hook's `JTBD_PATH=""` empty-branch is intentional graceful-degradation for a
 - **Blocked by**: (none)
 - **Composes with**: P004 (gate path resolution; ancestor concern), P107 (TTL extension; same class of hook-stability work), P173 (BYPASS env vars don't propagate; same CWD-context / env-context family — hooks see different runtime context than the session expects)
 
+## Verification
+
+Fold-fix per ADR-022 P143. Release vehicle: `.changeset/p191-jtbd-gate-project-root-resolution.md` (`@windyroad/jtbd` patch). On release this ticket transitions `Verification Pending → Closed` and RFC-020 transitions `proposed → verifying`. Behavioural evidence: `packages/jtbd/hooks/test/jtbd-project-root.bats` (CWD-divergence reproduction + fail-closed regression guard; 79/79 jtbd hook suite green). NOTE: Phase 2 (architect-gate fail-OPEN sibling) remains open under this ticket after Phase 1 closes — Phase 1 closure does not close Phase 2.
+
 ## Related
 
-- `~/.claude/plugins/cache/windyroad/wr-jtbd/0.7.3/hooks/jtbd-enforce-edit.sh` (line 80-82 — the empty-JTBD-PATH branch).
+- **RFC-020** (`docs/rfcs/RFC-020-p191-jtbd-gate-project-root-resolution.proposed.md`) — the RFC carrying this fix (ADR-071 unconditional RFC-first; thin, no independent decisions).
+- `packages/jtbd/hooks/jtbd-enforce-edit.sh` + `jtbd-mark-reviewed.sh` — the fixed hooks (source of truth; the cache copy at `~/.claude/plugins/cache/windyroad/wr-jtbd/<ver>/hooks/` refreshes via `/install-updates` + restart).
 - P004 (`docs/problems/closed/004-edit-gates-block-non-project-files.md`) — earlier work on gate path resolution; ancestor.
 - P107 (`docs/problems/closed/107-architect-jtbd-edit-gate-markers-expire-mid-batch.md`) — TTL stability; related hook-quirk class.
 - P173 — BYPASS env vars don't propagate from Bash subshell to PreToolUse hook context; same CWD/env-context family.

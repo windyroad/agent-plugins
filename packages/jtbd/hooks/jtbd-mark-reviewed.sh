@@ -7,6 +7,12 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/lib/review-gate.sh"
 
+# P191: anchor the docs/jtbd detection on the project root, not the hook's
+# runtime CWD (see jtbd-enforce-edit.sh for the full rationale). If this
+# marker-write side false-negatives on docs/jtbd it never stores the marker,
+# and the enforce gate then denies the next edit for lack of a marker.
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
+
 INPUT=$(cat)
 
 SUBAGENT=$(echo "$INPUT" | jq -r '.tool_input.subagent_type // empty') || true
@@ -19,10 +25,10 @@ fi
 # Canonical JTBD path — directory only (ADR-008 Option 3). If the
 # directory doesn't exist the marker is not stored; the gate will
 # surface a "run update-guide" recommendation on the next edit.
-if [ ! -d "docs/jtbd" ]; then
+if [ ! -d "$PROJECT_DIR/docs/jtbd" ]; then
   exit 0
 fi
-JTBD_PATH="docs/jtbd"
+JTBD_PATH="$PROJECT_DIR/docs/jtbd"
 
 case "$SUBAGENT" in
   *jtbd-lead*|*wr-jtbd*)
