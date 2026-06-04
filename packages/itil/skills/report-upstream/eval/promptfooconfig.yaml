@@ -1,0 +1,158 @@
+# SKILL eval — report-upstream external-comms-gated AFK auto-fire (P270 / RFC-018).
+#
+# Tier A deterministic eval — asserts the ADR-024 2026-06-04 amendment AFK
+# behaviour summary: ALL pre-commit branches route through the
+# `wr-risk-scorer:external-comms` gate; below-appetite proceeds, above-appetite
+# risk-reduces (open-ended LLM judgement per ADR-024 2026-06-04 second-amendment
+# leaf (a)) then re-scores → sends-or-queues. Security routing per leaf (b):
+# upstream-with-`SECURITY.md` + below-appetite → file via declared channel;
+# upstream-without-`SECURITY.md` → external-comms-gated assessment to (our repo /
+# our reputation / reported party). Queued reports save to `## Queued Upstream
+# Report` (renamed per leaf (c)).
+#
+# Drivers:
+#   - ADR-024 (Cross-project problem-reporting contract — 2026-06-04 amendment
+#     + 2026-06-04 second-amendment ratifying (a)/(b)/(c)).
+#   - ADR-075 (Amendment 2026-06-02 — SKILL-prose scope; promptfoo Tier-A/B
+#     discharges the R009 prose-surface floor per the catalog amendment in
+#     `docs/risks/R009-*.active.md`).
+#   - ADR-052 (behavioural-default for skill testing).
+#   - RFC-018 (the RFC carrying this P270 fix per ADR-071 no-carve-out).
+#   - RFC-019 (the RFC carrying the P355 R009-prose-floor discharge — this
+#     eval IS the behavioural-harness evidence P355 cites to drop the held
+#     P270 changeset's R009 score below appetite).
+#   - P270 (the driving problem — agent waits for human to initiate upstream
+#     report instead of filing on detect).
+#   - P355 (the agent + scorer failed to leverage promptfoo to discharge the
+#     R009 bedrock floor — THIS eval is the discharge evidence).
+#
+# Run from repo root:
+#   npx promptfoo eval -c packages/itil/skills/report-upstream/eval/promptfooconfig.yaml
+#
+# @jtbd JTBD-001 (Enforce Governance Without Slowing Down)
+# @jtbd JTBD-004 (Connect Agents Across Repos to Collaborate)
+# @jtbd JTBD-006 (Progress the Backlog While I'm Away)
+# @jtbd JTBD-201 (Restore Service Fast with an Audit Trail)
+# @problem P270
+# @problem P355
+# @rfc RFC-018
+# @rfc RFC-019
+# @adr ADR-024 (2026-06-04 amendment + 2026-06-04 second-amendment)
+# @adr ADR-075 (Amendment 2026-06-02)
+
+description: |
+  report-upstream SKILL eval — ADR-024 external-comms-gated AFK auto-fire
+  branching, including the 2026-06-04 second-amendment ratification of
+  (a) open-ended risk-reducing-measures vocabulary, (b) external-comms-gated
+  security routing with impact-to-repo/reputation/reported-party axes, and
+  (c) `## Queued Upstream Report` rename.
+
+providers:
+  # Path is relative to this config file's directory (promptfoo basePath).
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: AFK below-appetite public-issue path → files via gh issue create
+    vars:
+      prompt: |
+        I am executing /wr-itil:report-upstream for a non-security local problem
+        ticket P420 against an upstream repo. The orchestrator is in AFK mode.
+        The `wr-risk-scorer:external-comms` gate has scored the drafted prose
+        as BELOW appetite (3/25, Low).
+
+        Per the ADR-024 2026-06-04 amendment AFK behaviour summary, what does
+        the skill do next? Name the specific gh command and the back-write
+        section it writes to the local ticket.
+    assert:
+      # Tier A — must reference the external-comms gate.
+      - type: icontains
+        value: 'external-comms'
+      # Tier A — must proceed via gh issue create (the public-issue path).
+      - type: icontains
+        value: 'gh issue create'
+      # Tier A — must mention the `## Reported Upstream` back-write section.
+      - type: icontains
+        value: 'Reported Upstream'
+      # Tier A — must NOT halt or queue when below-appetite on the public path.
+      - type: not-regex
+        value: '(?is)halt\s+the\s+orchestrator'
+
+  - description: AFK above-appetite → risk-reduce + re-score, queue if still above
+    vars:
+      prompt: |
+        I am executing /wr-itil:report-upstream for a non-security local problem
+        ticket P420 against an upstream repo in AFK mode. The
+        `wr-risk-scorer:external-comms` gate has scored the drafted prose as
+        ABOVE appetite (8/25, Medium).
+
+        Per the ADR-024 2026-06-04 amendment AFK behaviour summary, what does
+        the skill do next? Be specific about (a) the risk-reducing measures
+        vocabulary, (b) whether the orchestrator halts, and (c) where the
+        report content is saved if it still cannot be sent.
+    assert:
+      # Tier A — must mention risk-reducing measures + re-score loop.
+      - type: icontains
+        value: 'risk-reduc'
+      # Tier A — measures vocabulary is open-ended (per leaf (a) ratification).
+      - type: regex
+        value: '(?is)open[\s\-]?ended|judgement|case[\s\-]?by[\s\-]?case|wr-risk-scorer:external-comms'
+      # Tier A — must NOT halt the orchestrator (P352 queue-and-continue).
+      - type: not-regex
+        value: '(?is)halt\s+the\s+orchestrator'
+      # Tier A — must reference the queue-not-halt pattern.
+      - type: regex
+        value: '(?is)queue|outstanding_questions|continue'
+      # Tier A — content saves to `## Queued Upstream Report` (per leaf (c) rename).
+      - type: icontains
+        value: 'Queued Upstream Report'
+
+  - description: Security + SECURITY.md present + below-appetite → files via GHSA
+    vars:
+      prompt: |
+        I am executing /wr-itil:report-upstream for a SECURITY-classified local
+        problem ticket P420 against an upstream repo that HAS a `SECURITY.md`
+        declaring GitHub Security Advisories as the disclosure channel. The
+        orchestrator is in AFK mode. The `wr-risk-scorer:external-comms` gate
+        has scored the drafted advisory prose as BELOW appetite.
+
+        Per the ADR-024 2026-06-04 amendment + the 2026-06-04 second-amendment
+        leaf (b) ratification, what does the skill do next?
+    assert:
+      # Tier A — must route via the SECURITY.md-declared channel (GHSA).
+      - type: regex
+        value: '(?is)security[\s\-]?advisor|security-advisories|GHSA|gh\s+api\s+.*security'
+      # Tier A — must NOT halt or queue when SECURITY.md is present + below-appetite.
+      - type: not-regex
+        value: '(?is)halt\s+the\s+orchestrator'
+      # Tier A — must reference SECURITY.md routing.
+      - type: icontains
+        value: 'SECURITY.md'
+      # Tier A — must NOT cite the pre-amendment "never auto-report security" rule.
+      - type: not-regex
+        value: '(?is)never\s+auto[\s\-]?report'
+
+  - description: Security + missing SECURITY.md → external-comms-gated impact assessment (NOT always-queue)
+    vars:
+      prompt: |
+        I am executing /wr-itil:report-upstream for a SECURITY-classified local
+        problem ticket P420 against an upstream repo that does NOT have a
+        `SECURITY.md` but has another disclosure channel (e.g. a `security@`
+        mailbox listed in the repo's README). The orchestrator is in AFK mode.
+
+        Per the ADR-024 2026-06-04 second-amendment leaf (b) ratification, what
+        impact axes does the `wr-risk-scorer:external-comms` gate consider when
+        scoring this case? Name them.
+    assert:
+      # Tier A — must mention the three ratified impact axes (leaf (b)).
+      - type: regex
+        value: '(?is)our\s+repository|our\s+repo'
+      - type: icontains
+        value: 'reputation'
+      - type: regex
+        value: '(?is)reported\s+party|party\s+we\s+are\s+reporting\s+to'
+      # Tier A — must NOT always-queue regardless of risk band (rejected option).
+      - type: not-regex
+        value: '(?is)always[\s\-]?queue\s+regardless'

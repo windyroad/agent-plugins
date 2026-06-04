@@ -360,6 +360,24 @@ readiness may be listed separately as "post-release follow-ups" outside the
 residual risk computation, but MUST NOT appear in a Controls list and MUST NOT
 reduce any inherent risk score.
 
+### R009 control vocabulary — SKILL/agent-prose surfaces (P355 / RFC-012 / ADR-075)
+
+For diffs touching `packages/*/skills/*/SKILL.md`, `packages/*/skills/*/REFERENCE.md`, or `packages/*/agents/*.md`, the **previously-irreducible R009 "no behavioural harness for the LLM-prose surface" floor is discharged** when a paired promptfoo Tier-A/B eval exists for the changed prose AND `npx promptfoo eval` passes on this commit. Credit it as a named likelihood-reducing control with the same evidence shape as behavioural bats:
+
+- **Control name**: `Promptfoo Tier-A/B SKILL/agent-prose eval` at `packages/<pkg>/skills/<name>/eval/promptfooconfig.yaml` (or `packages/<pkg>/agents/<name>/eval/...` for agent prose).
+- **Failure scenario exercised**: the LLM-prose surface emits the documented step ordering / vocabulary / refusal / classifier verdict. Pre-RFC-012, no test exercised this; defects landed in published SKILLs and ran in adopter sessions. Post-RFC-012, the eval's Tier-A deterministic assertions (icontains/contains/regex/not-regex) or Tier-B llm-rubric pass^k repro the prose surface behaviourally.
+- **How it catches before reaching the user**: the eval runs the actual SKILL.md (via `run-skill-eval.sh` exec provider wrapping `claude -p --append-system-prompt`); a behavioural regression in the prose surface fails the assertion. The held-changeset / dogfood-window catches some prose defects, but promptfoo catches edge-case defects that dogfood replays miss (per R009 Watch-out clause).
+- **Authority**: ADR-075 Amendment 2026-06-02 (scope extension to SKILL.md prose); RFC-012 (implementation); R009 standing-risk entry (`docs/risks/R009-*.active.md`) Controls table row 2 + per-action modulator + Residual risk Per-action quick path.
+
+**Crediting rule** (matches R009 modulator semantics):
+
+- **WITH paired promptfoo Tier-A/B eval AND tests pass on this commit** → `-1` likelihood for the prose-surface subset. Cite the eval config path + the assertion(s) that exercise the failure scenario in the Controls bullet.
+- **NO paired promptfoo Tier-A/B eval for the changed prose** → `+1` likelihood for the prose-surface subset (the pre-RFC-012 floor stands for this subset). Surface this as a remediation candidate: `add a promptfoo eval covering <the specific prose step> at packages/<pkg>/skills/<name>/eval/promptfooconfig.yaml`.
+
+**Do NOT credit promptfoo coverage as a global R009 discharge** — credit applies only to the prose-surface subset of the diff. A commit that changes a hook script AND a SKILL.md credits promptfoo only against the SKILL.md prose risk, not against the hook script's R009 score (which still requires behavioural bats per ADR-052).
+
+**Discoverability**: check for paired promptfoo coverage by listing `packages/<pkg>/skills/<name>/eval/promptfooconfig.yaml` (or the agent-prose analogue). The first reference slice is `packages/itil/skills/manage-problem/eval/promptfooconfig.yaml` — model new slices on its shape. If the eval exists but you can't determine pass/fail from pipeline state, cite the eval as `un-verified` rather than crediting the -1.
+
 ## User-Stated Preconditions Check
 
 A technical control list never substitutes for an explicit user warning. Before

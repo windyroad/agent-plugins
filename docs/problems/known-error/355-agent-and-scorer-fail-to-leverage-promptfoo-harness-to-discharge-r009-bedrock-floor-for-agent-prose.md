@@ -1,7 +1,8 @@
 # Problem 355: agent + risk-scorer fail to leverage the promptfoo behavioural harness (RFC-012/ADR-075) to discharge the R009 bedrock floor for agent/skill-prose changes
 
-**Status**: Open
+**Status**: Known Error (root cause confirmed; fix shipped in AFK iter 2026-06-04 via RFC-019 — R009 catalog amendment + `packages/risk-scorer/agents/pipeline.md` control-vocabulary extension + first reference slice `packages/itil/skills/report-upstream/eval/promptfooconfig.yaml` + the held P270 changeset reinstated from holding on the new discharge path; awaiting `@windyroad/itil` + `@windyroad/risk-scorer` patch release for `Verifying-by-release` transition per ADR-022 P143 fold-fix)
 **Reported**: 2026-06-04 (user correction, FFS-class: *"FFS we built the harness. Have you forgotten?"*)
+**Release vehicle**: `.changeset/wr-itil-p355-promptfoo-discharges-r009-prose-floor.md` (`@windyroad/itil` patch) + `.changeset/wr-risk-scorer-p355-pipeline-credits-promptfoo-for-r009.md` (`@windyroad/risk-scorer` patch)
 **Priority**: 12 (High) — Impact: 4 (Significant — the R009 "no behavioural harness for agent-prose" floor is the dominant above-appetite driver for every orchestrator-layer SKILL/ADR-prose change this session: P344, P351, P308, P270 all hit 8/25 and got moved-to-holding on a floor the project ELIMINATED when it shipped promptfoo. Every one of those holds may be unnecessary) × Likelihood: 4 (Likely — fires on every prose-surface risk assessment until the scorer + agent internalise the harness as the discharge path)
 **Origin**: internal
 **Persona**: developer
@@ -87,3 +88,9 @@ Write a promptfoo eval for the changed prose by hand; cite it as the R009 behavi
 - **P176** — agent-side I2 coverage gap; behavioural enforcement awaits the harness (now exists).
 - **P344 / P351 / P308 / P270** — the held cohort this session, all on the R009-no-harness floor that is now discharged. Candidates for reinstate-after-eval.
 - **R009** (`docs/risks/R009-functional-defects-in-shipped-behaviour.active.md`) — the standing risk entry whose floor justification is stale post-RFC-012.
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-019 | proposed | P355 — promptfoo Tier-A/B eval discharges the R009 bedrock floor for SKILL/agent-prose surfaces |
