@@ -39,8 +39,17 @@ You receive structured pipeline state context with these sections:
 
 - **UNCOMMITTED CHANGES**: Diff stat, untracked files, and categories
 - **UNPUSHED CHANGES**: Commits and cumulative diff between remote and HEAD
-- **UNRELEASED CHANGES**: Changeset count and cumulative diff
+- **UNRELEASED CHANGES**: Partitioned changeset counts (Pending vs Queued — see Layer 1 contract below) and cumulative diff
 - **STALE FILES**: Modified files uncommitted for over 24h
+
+### Layer 1 changeset partition (P202)
+
+The UNRELEASED CHANGES section emits TWO distinct changeset counts:
+
+- `Pending changesets (commits unpushed): N` — changesets whose introducing commit is in `origin/<base>..HEAD` (local) OR is untracked. These ARE pending consumer-facing changes at THIS commit's surface and count toward Layer 1 release risk as before.
+- `Queued changesets (commits already on origin): N` — changesets whose introducing commit is already on `origin/<base>`. The underlying code has already been pushed (and in the maintainer pipeline, reviewed); only the release-PR merge to npm is pending. These contribute **zero** release-risk at THIS commit's surface and MUST NOT count as pending consumer-facing changes in Layer 1.
+
+When computing Layer 1 release risk, score only the Pending count (plus any unreleased diff content). A Queued count > 0 with Pending = 0 and no other unreleased diff content is a within-appetite state — the queue is awaiting a release-PR merge, not a maintainer decision. Do NOT emit `RISK_REMEDIATIONS:` lines (such as `move-to-holding`) targeting queued-on-origin changesets; their commits have already shipped and `git mv`'ing them into `docs/changesets-holding/` would fragment the release without reducing actual risk.
 
 ## Catalog Consumption Protocol (ADR-059)
 

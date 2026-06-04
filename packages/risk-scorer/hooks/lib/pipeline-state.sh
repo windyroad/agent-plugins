@@ -248,10 +248,45 @@ fi
 if [ "$SHOW_UNRELEASED" = true ]; then
     echo "=== UNRELEASED CHANGES ==="
 
-    # Count pending changesets
+    # Partition changesets by introducing-commit provenance (P202):
+    #   - Queued: introducing commit is already on origin/<base>; awaiting
+    #     only the release-PR merge to npm. Zero release-risk at THIS
+    #     commit's surface — the underlying code has already shipped to
+    #     origin and (in the maintainer pipeline) been reviewed.
+    #   - Pending: introducing commit is NOT on origin/<base> (in
+    #     origin/<base>..HEAD), OR the file is untracked. Counts as a
+    #     pending consumer-facing change.
+    # Detection: for each .changeset/<name>.md (excluding README.md),
+    # run `git log <DEFAULT_BRANCH>..HEAD -- <file>`. Non-empty output OR
+    # untracked status => Pending. Empty output AND tracked => Queued.
+    # When DEFAULT_BRANCH is unset (no origin/main and no origin/master),
+    # nothing is on origin so all changesets are Pending.
     CHANGESET_COUNT=0
+    QUEUED_COUNT=0
+    PENDING_COUNT=0
     if [ -d ".changeset" ]; then
-        CHANGESET_COUNT=$(find .changeset -name '*.md' -not -name 'README.md' 2>/dev/null | wc -l | tr -d ' ')
+        CHANGESET_FILES=$(find .changeset -name '*.md' -not -name 'README.md' 2>/dev/null || true)
+        if [ -n "$CHANGESET_FILES" ]; then
+            CHANGESET_COUNT=$(echo "$CHANGESET_FILES" | wc -l | tr -d ' ')
+            while IFS= read -r CS_FILE; do
+                [ -z "$CS_FILE" ] && continue
+                CS_TRACKED=$(git ls-files --error-unmatch -- "$CS_FILE" 2>/dev/null || true)
+                if [ -z "$CS_TRACKED" ]; then
+                    PENDING_COUNT=$((PENDING_COUNT + 1))
+                    continue
+                fi
+                if [ -z "$DEFAULT_BRANCH" ]; then
+                    PENDING_COUNT=$((PENDING_COUNT + 1))
+                    continue
+                fi
+                CS_UNPUSHED=$(git log "$DEFAULT_BRANCH"..HEAD --oneline -- "$CS_FILE" 2>/dev/null || true)
+                if [ -n "$CS_UNPUSHED" ]; then
+                    PENDING_COUNT=$((PENDING_COUNT + 1))
+                else
+                    QUEUED_COUNT=$((QUEUED_COUNT + 1))
+                fi
+            done <<< "$CHANGESET_FILES"
+        fi
     fi
 
     # Check if origin/publish exists
@@ -269,7 +304,8 @@ if [ "$SHOW_UNRELEASED" = true ]; then
             echo "No unreleased changes."
         else
             if [ "$CHANGESET_COUNT" -gt 0 ]; then
-                echo "Pending changesets: ${CHANGESET_COUNT}"
+                echo "Pending changesets (commits unpushed): ${PENDING_COUNT}"
+                echo "Queued changesets (commits already on origin): ${QUEUED_COUNT}"
             fi
             if [ -n "$UNRELEASED_STAT" ]; then
                 echo "Accumulated unreleased diff (origin/publish..$DEFAULT_BRANCH):"
@@ -296,7 +332,8 @@ if [ "$SHOW_UNRELEASED" = true ]; then
     else
         echo "No publish branch (origin/publish not found)."
         if [ "$CHANGESET_COUNT" -gt 0 ]; then
-            echo "Pending changesets: ${CHANGESET_COUNT}"
+            echo "Pending changesets (commits unpushed): ${PENDING_COUNT}"
+            echo "Queued changesets (commits already on origin): ${QUEUED_COUNT}"
         fi
     fi
     echo ""

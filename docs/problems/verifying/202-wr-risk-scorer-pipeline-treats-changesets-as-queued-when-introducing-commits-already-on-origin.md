@@ -1,6 +1,6 @@
 # Problem 202: wr-risk-scorer:pipeline treats changesets as queued when introducing commits are already on origin
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-15
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -30,12 +30,28 @@ Manually inspect the changesets' git history before trusting the Layer 1 score. 
 
 ## Root Cause Analysis
 
+`pipeline-state.sh --unreleased` emitted a single `Pending changesets: N` line based purely on the count of `.changeset/*.md` files in the working tree. The script never partitioned changesets by introducing-commit provenance, so the pipeline agent received an undifferentiated count and treated every changeset as a pending consumer-facing change. The architectural signal "pending consumer-facing change at THIS commit's surface" should be `commits-introducing-changesets-that-are-NOT-on-origin/<base>`, not `changesets-in-working-tree`.
+
 ### Investigation Tasks
 
-- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Pipeline subagent: before counting a `.changeset/*.md` as "pending", check whether its containing commit is on `origin/<base>`. If on origin, treat it as already-released-pending-merge-PR (not pending-consumer-facing-change at THIS commit's surface).
-- [ ] Architectural call: where does the "pending consumer-facing change" signal live? Likely needs to be `commits-introducing-changesets-that-are-NOT-on-origin`, not `changesets-in-working-tree`.
-- [ ] Behavioural test: synthetic fixture with changesets on origin + working tree → assert Layer 1 score does NOT count them as queued.
+- [x] Re-rate Priority and Effort at next /wr-itil:review-problems
+- [x] Pipeline subagent: before counting a `.changeset/*.md` as "pending", check whether its containing commit is on `origin/<base>`. If on origin, treat it as already-released-pending-merge-PR (not pending-consumer-facing-change at THIS commit's surface).
+- [x] Architectural call: where does the "pending consumer-facing change" signal live? Likely needs to be `commits-introducing-changesets-that-are-NOT-on-origin`, not `changesets-in-working-tree`.
+- [x] Behavioural test: synthetic fixture with changesets on origin + working tree → assert Layer 1 score does NOT count them as queued.
+
+## Fix Strategy
+
+Two-surface refinement within the existing Layer-1 scoring contract (no new ADR; architect PASS + JTBD PASS 2026-06-05):
+
+1. **`packages/risk-scorer/hooks/lib/pipeline-state.sh`** — partition `.changeset/*.md` files by introducing-commit provenance. For each changeset, run `git log <DEFAULT_BRANCH>..HEAD -- <file>`: non-empty output OR untracked status ⇒ **Pending**; empty output AND tracked ⇒ **Queued**. Emit two distinct lines (`Pending changesets (commits unpushed): N` and `Queued changesets (commits already on origin): N`) so the agent receives the partition directly in structured context.
+
+2. **`packages/risk-scorer/agents/pipeline.md`** — amend the Layer-1 scoring contract with a `### Layer 1 changeset partition (P202)` subsection clarifying that Queued changesets contribute zero release-risk at this commit's surface. Score only the Pending count (plus any unreleased diff content). Forbid emitting `RISK_REMEDIATIONS:` lines (such as `move-to-holding`) targeting queued-on-origin changesets — their commits have already shipped and `git mv`'ing them into `docs/changesets-holding/` would fragment the release without reducing actual risk.
+
+3. **Behavioural test** (ADR-052) — `packages/risk-scorer/hooks/test/pipeline-state-changeset-partition.bats` with 5 fixtures covering: straddle (queued+pending), all-on-origin (Queued > 0, Pending = 0), all-local (Pending > 0, Queued = 0), untracked-counts-as-pending, and no-changesets-emits-no-breakdown.
+
+## Fix Released
+
+Fix committed and released as part of the work-problems AFK iteration on 2026-06-05. Awaiting user verification.
 
 ## Dependencies
 
