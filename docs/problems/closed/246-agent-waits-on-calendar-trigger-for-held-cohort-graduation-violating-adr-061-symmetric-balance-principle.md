@@ -1,6 +1,6 @@
 # Problem 246: Agent waits on calendar trigger for held-cohort graduation — violates ADR-061 symmetric balance principle
 
-**Status**: Verifying
+**Status**: Closed
 **Reported**: 2026-05-17
 **Root cause confirmed**: 2026-05-18
 **Fix released**: 2026-05-18 (`@windyroad/itil@0.33.0`, source commit `229539c`; consumed in version-packages commit `a032ca9` 2026-05-17 22:29:58 UTC, merged via PR #142 / merge commit `e243fc3` 2026-05-18 08:36:11 AEST; current ships at 0.35.2)

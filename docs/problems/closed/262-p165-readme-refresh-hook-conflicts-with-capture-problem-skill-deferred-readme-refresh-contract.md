@@ -1,6 +1,6 @@
 # Problem 262: P165 README-refresh hook conflicts with capture-problem SKILL's deferred-README-refresh contract — hook wins; SKILL needs update OR hook needs carve-out
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-05-18
 **Priority**: 6 (Medium) — Impact: 2 (Minor — capture commit denied until workaround applies; not destructive) x Likelihood: 3 (Likely — fires on every capture commit; observed 4× this session for P254/P255/P256/P257)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems; either SKILL.md amendment or hook carve-out, architect verdict)

@@ -812,3 +812,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-06-03 (P329/P333/P350 reconcile fragment rotated for 2026-06-04 reconcile)
 
 > Last reviewed: 2026-06-03 **README reconciled** — 3 drift entries corrected: P329 (Open→Verifying — already on-disk via commit `a1c2b62`), P333 (Open→Verifying — fold-fix per ADR-022 P143, RFC-015 trace per ADR-071), P350 (missing WSJF Rankings row — Severity 12 High / WSJF 6.0 / Effort M / Reported 2026-06-03). Reconciliation contract per P118 + ADR-014 ("Reconciliation as preflight robustness layer"). Prior fragment (P307 O→V fold-fix) rotated to `README-history.md` per P134.
+
+## 2026-06-04 (displaced by review-problems VQ drain)
+
+> **README reconciled** — 7 drift entries corrected: P308 (removed stale WSJF-Rankings row — already in VQ), P344 (removed stale WSJF-Rankings row + added VQ row — RFC-016 fold-fix), P351 (added VQ row — RFC-017 fold-fix), P352 (added WSJF-Rankings row — Severity 12 High / WSJF 6.0 / Effort M / Reported 2026-06-03), P353 (added WSJF-Rankings row — Severity 16 High / WSJF 8.0 / Effort M / Reported 2026-06-03), P354 (added WSJF-Rankings row — Severity 6 Med / WSJF 3.0 / Effort M / Reported 2026-06-03). Reconciliation contract per P118 + ADR-014. Preflight halt during P270 RFC-018 capture-rfc invocation. Prior fragment (P329/P333/P350 drift) rotated to `README-history.md` per P134.

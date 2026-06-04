@@ -1,6 +1,6 @@
 # Problem 250: work-problems Step 6.5 "≤3 within appetite — no drain" clause defers low-risk releases, encoding accumulation
 
-**Status**: Verifying
+**Status**: Closed
 **Reported**: 2026-05-17
 **Root cause confirmed**: 2026-05-18
 **Fix released**: 2026-05-18 (`@windyroad/itil@0.32.3`, commit `e9fb7f0`; consumed in version-packages commit `4a0e1b7` 2026-05-17 21:29 UTC, merged via PR #141 / merge commit `4df08ec`; current ships at 0.35.2)

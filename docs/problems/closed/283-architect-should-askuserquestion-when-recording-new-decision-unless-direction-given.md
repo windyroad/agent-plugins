@@ -1,6 +1,6 @@
 # Problem 283: Architect agent should always use AskUserQuestion to gather direction when recording a new decision — unless an explicit direction has already been given
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-05-23
 **Priority**: 9 (Med High) — Impact: 3 (Moderate — ADRs land with autocratically-chosen options that drift from user intent; user must re-direct in follow-up turns; degraded audit-trail of "why this option"; recurrent friction class) x Likelihood: 3 (Likely — affects every ADR-creation flow that lacks pre-pinned direction; sibling-class to P085 main-agent prose-ask pattern)
 **Effort**: XL — re-rated M → XL 2026-05-23 (P047) when the user folded the retroactive review of the 52 existing `.proposed.md` ADRs into scope as **prong 2** (user direction: *"two-pronged fix: 1) make the skill ask. 2) review the existing ADRs"*). **Prong 1** (architect Needs-Direction verdict + new ADR + `agent.md` edit + ADR-026 reparenting fold-in + create-adr/capture-adr handoff + confirm-gate + dual tests) is M-L on its own. **Prong 2** (read + `AskUserQuestion`-confirm 52 proposed ADRs; gate proposed→accepted on confirm) is a multi-day interactive sweep = XL on its own. Aggregate time-to-close = XL.

@@ -1,6 +1,6 @@
 # Problem 267: Codify `derive-release-vehicle.sh` helper for K→V release-cycle citation
 
-**Status**: Verifying
+**Status**: Closed
 **Reported**: 2026-05-18
 **Priority**: 6 (Medium) — Impact: 2 × Likelihood: 3
 **Effort**: M (re-estimated 2026-05-18 — script + bin shim + bats fixture + transition-problem integration)
