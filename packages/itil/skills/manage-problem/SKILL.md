@@ -276,6 +276,41 @@ This is a **preflight CHECK only** — manage-problem does NOT itself apply edit
 
 This step is a robustness layer ON TOP of P094 + P062, not a supersession of either — both per-operation contracts remain in force at Step 5 (creation refresh) and Step 7 (transition refresh).
 
+### 0.5. Deferred-placeholder + README-cadence advisory (per P271)
+
+After Step 0's README reconciliation preflight and before Step 1's request parsing, check whether the deferred-placeholder backlog has accumulated past threshold AND the `docs/problems/README.md` "Last reviewed" cadence has slipped. This is the **interactive** sibling of `/wr-itil:work-problems` Step 0c. At an interactive `manage-problem` surface the right shape per ADR-013 Rule 1 is **advisory not auto-dispatch** — the user is at the keyboard; the advisory is the surface; the user invokes `/wr-itil:review-problems` directly if they want the heavyweight re-rate pass. Auto-dispatching a heavyweight skill mid-interactive-session would break JTBD-001's "Reviews complete in under 60 seconds so they don't break flow" outcome.
+
+**Mechanism:**
+
+```bash
+preflight_reason="$(wr-itil-check-deferred-placeholder-staleness "$PWD")"
+```
+
+The helper is the same one Step 0c (work-problems) uses — single source of truth for the two-axis trigger rule (count ≥ 3 deferred placeholders AND README age > 7 days). See `/wr-itil:work-problems` SKILL.md Step 0c for the canonical contract; the threshold constants live in the helper. <!-- DEFERRED-PLACEHOLDER-STALENESS-CONTRACT-SOURCE: packages/itil/lib/check-deferred-placeholder-staleness.sh -->
+
+Routing on the helper's five-outcome enum:
+
+| `preflight_reason`                                       | Action                                                                                                |
+|----------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| `no-deferred-placeholders`                               | Silent-pass. Proceed to Step 1.                                                                       |
+| `below-threshold count=<N> threshold=3`                  | Silent-pass. Proceed to Step 1.                                                                       |
+| `fresh-readme count=<N> age=<X>s threshold=<Y>s`         | Silent-pass per ADR-013 Rule 5 — the cadence is in spec.                                              |
+| `no-readme count=<N>`                                    | Emit an **advisory note** to stdout (visible to the interactive maintainer) naming the placeholder count + a directive: *"`<N>` deferred-placeholder ticket(s) accumulated AND `docs/problems/README.md` is missing/malformed; run `/wr-itil:review-problems` to re-rate and rebuild the README."* Then proceed to Step 1. |
+| `stale-readme count=<N> age=<X>s threshold=<Y>s`         | Emit an **advisory note** naming the placeholder count + readable age: *"`<N>` deferred-placeholder ticket(s) accumulated AND the WSJF Rankings cadence is `<X>` days stale (> 7-day threshold); run `/wr-itil:review-problems` to re-rate and refresh."* Then proceed to Step 1. |
+
+**Why advisory not auto-dispatch at this surface** (ADR-013 Rule 1 + JTBD-001):
+- The interactive user is at the keyboard. The advisory IS the surface; auto-dispatching a heavyweight skill mid-interactive-session would force a flow break that JTBD-001 explicitly proscribes ("Reviews complete in under 60 seconds so they don't break flow").
+- The advisory preserves the user's authority to pick when to absorb the re-rate cost — at the next natural break, after a release, before the next session, etc.
+- `AskUserQuestion` would also be valid here (ADR-013 Rule 1 interactive surface), but for a single optional pre-flight directive the advisory shape carries less round-trip friction than a structured question. The advisory is a **directive**, not a decision — the user already knows to run review-problems if they want to.
+
+**ADR-079 composition note**: when the user follows the advisory and invokes `/wr-itil:review-problems`, that skill includes Step 4.6 relevance-close per ADR-079 — relevance-close fires as a side-effect of any review pass.
+
+**Fail-soft**: any error in this step (helper missing, malformed output) MUST NOT block manage-problem — log an advisory note and proceed to Step 1.
+
+<!-- @jtbd JTBD-001 (Enforce Governance Without Slowing Down — interactive advisory keeps the signal surfaced without forcing a flow break) -->
+
+After Step 0.5 completes (whether silent-pass or advisory emitted), proceed to Step 1.
+
 ### 1. Parse the request
 
 Determine the operation from `$ARGUMENTS`:

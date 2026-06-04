@@ -186,7 +186,57 @@ The annotation pre-empts the "surprise heavy iter" perception JTBD-006 expects a
 
 **Staleness contract drift**: the staleness comparison MUST stay symmetric with `/wr-itil:review-problems` Step 4.5b's branches (first-run / TTL-expiry / cache-fresh). Drift here re-opens the inbound-discovery staleness contract — any change to TTL semantics MUST update both this Step 0b helper and review-problems Step 4.5b in the same commit. <!-- INBOUND-CACHE-STALENESS-CONTRACT-SOURCE: packages/itil/skills/review-problems/SKILL.md Step 4.5b -->
 
-After Step 0b completes (whether dispatched or silent-passed), proceed to Step 1.
+After Step 0b completes (whether dispatched or silent-passed), proceed to Step 0c.
+
+### Step 0c: Deferred-placeholder + README-cadence pre-flight (per P271)
+
+After Step 0b's inbound-discovery pre-flight and before Step 1's backlog scan, check whether the deferred-placeholder backlog has accumulated past threshold AND the `docs/problems/README.md` "Last reviewed" cadence has slipped. This step closes the load-bearing gap P271 names: `/wr-itil:capture-problem` leaves deferred-placeholder Priority + Effort lines that `/wr-itil:review-problems` is the only authoritative re-rate path for; without an auto-fire trigger, placeholders accumulate silently across sessions (76 → 83 evidenced on the 2026-05-24 work-problems session) and the orchestrator dispatches iters against stale WSJF rankings.
+
+**Mechanism:**
+
+```bash
+preflight_reason="$(wr-itil-check-deferred-placeholder-staleness "$PWD")"
+```
+
+`wr-itil-check-deferred-placeholder-staleness` is the ADR-049 + ADR-080 `$PATH` shim (adopter-safe — resolves `lib/check-deferred-placeholder-staleness.sh` relative to the script, NOT cwd; P317/RFC-009) that internalises `should_promote_review_problems_dispatch "$PWD"` and echoes the result. NEVER `source packages/...` repo-relative from a SKILL — those paths only resolve in the source monorepo, not adopter installs.
+
+The helper returns one of five outcomes (contract documented at `packages/itil/lib/check-deferred-placeholder-staleness.sh` + asserted by `packages/itil/skills/work-problems/test/work-problems-step-0c-deferred-placeholder-staleness-behavioural.bats`):
+
+| `preflight_reason`                                       | Action                                                                                                |
+|----------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| `no-deferred-placeholders`                               | Silent-pass per ADR-013 Rule 5 + P132 mechanical-stage carve-out. Proceed to Step 1.                  |
+| `below-threshold count=<N> threshold=3`                  | Silent-pass — there is work to re-rate but not enough to be worth a heavyweight pass. Proceed to Step 1. |
+| `no-readme count=<N>`                                    | Dispatch `/wr-itil:review-problems` as a pre-flight iter via the standard `claude -p` subprocess wrapper (same shape as Step 0b / Step 5). README absent OR malformed line 3 → first-run dispatch. |
+| `fresh-readme count=<N> age=<X>s threshold=<Y>s`         | Silent-pass per ADR-013 Rule 5 — the cadence is in spec; today's captures are tomorrow's review.       |
+| `stale-readme count=<N> age=<X>s threshold=<Y>s`         | Dispatch `/wr-itil:review-problems` as a pre-flight iter. Both axes met — there is work AND the cadence has slipped. |
+
+**Two-axis AND rule (load-bearing per architect verdict on the P271 fix shape).** Both axes — count ≥ 3 AND README age > 7 days — must hold. Either axis alone over-fires:
+- Count ≥ 3 alone fires on a backlog where review-problems was run yesterday and 3 captures came in today (that's the in-spec deferred-placeholder behaviour, not a staleness signal).
+- Age > 7 days alone fires on quiet weeks where no captures occurred and there is nothing to re-rate.
+
+The intersection is the actual signal: "there is work to do AND the cadence has slipped".
+
+**Pre-flight dispatch shape**: when promoted (`no-readme` or `stale-readme`), dispatch a single `claude -p --permission-mode bypassPermissions --output-format json` subprocess that invokes `/wr-itil:review-problems` (per P084 + ADR-032 subprocess isolation). Reuse the Step 5 subprocess wrapper verbatim — same flag set, same idle-timeout SIGTERM poll loop, same retro-on-exit contract. The subprocess runs the full Step 2 + Step 2.5 + Step 4 + Step 5 re-rate + README refresh + commit; the orchestrator reads the freshly-refreshed README at Step 1.
+
+**ADR-079 composition note**: Step 0c dispatches `/wr-itil:review-problems` which includes Step 4.6 relevance-close per ADR-079 — relevance-close fires as a side-effect of the auto-dispatch. This is desirable: relevance closes accumulate the same way deferred placeholders do, and the AND-trigger reasonably gates both pieces of work.
+
+**Iter-summary annotation**:
+
+- No placeholders / below threshold: `Step 0c skipped — <N> deferred placeholders below threshold (3)`.
+- Fresh README cadence: `Step 0c skipped — README cadence fresh (age=<X>s within 7-day window)`.
+- Pre-flight ran: `Step 0c pre-flighted /wr-itil:review-problems — reason=<preflight_reason>, <N> placeholders re-rated, <M> tickets auto-transitioned, <K> tickets relevance-closed`.
+
+The annotation pre-empts the "surprise heavy iter" perception JTBD-006 expects auditability for — a maintainer running multiple short AFK loops with fresh-cache will see the silent-pass annotation, confirming the system's silent-pass discipline rather than wondering whether the check ran at all.
+
+**AFK authorisation per ADR-013 Rule 6**: review-problems is itself AFK-safe — branch decisions are mechanical per P132 / ADR-044 category 4 silent framework action; Step 4 verification prompts skip silently when `AskUserQuestion` is unavailable per the review-problems Step 4 AFK branch. No new user-attention surface introduced at the Step 0c promotion point.
+
+**Compose-with**: ADR-013 Rule 5/6 (silent-pass + AFK fail-safe), ADR-044 category 4 (silent-framework — the trigger is policy + observable evidence), ADR-014 (review-problems' commit grain holds — the pre-flight subprocess emits its own commit), ADR-049 / ADR-080 (PATH shim grammar + highest-version-wins wrapper), ADR-062 § Step 0b (precedent staleness-pre-flight shape), ADR-079 § Step 4.6 (relevance-close composition), P084 + P077 (subprocess isolation reuse — same `claude -p` wrapper as Step 5), P132 (mechanical-stage carve-out — no `AskUserQuestion` at the promotion point), P170 / RFC-002 (dual-tolerant glob — the helper handles both layouts), P317 / RFC-009 (adopter-safe PATH shim).
+
+**Staleness contract drift**: the two-axis trigger (count ≥ 3 AND age > 7 days) MUST stay symmetric across the four SKILL surfaces that read it — this Step 0c, `/wr-itil:manage-problem` Step 0.5 (advisory), `/wr-itil:capture-problem` Step 7 (conditional trailing pointer), AND the helper's threshold constants. Drift here re-opens P271. <!-- DEFERRED-PLACEHOLDER-STALENESS-CONTRACT-SOURCE: packages/itil/lib/check-deferred-placeholder-staleness.sh -->
+
+<!-- @jtbd JTBD-006 (Progress the Backlog While I'm Away — AFK orchestrator pre-flights review-problems so iters dispatch against fresh WSJF rankings) -->
+
+After Step 0c completes (whether dispatched or silent-passed), proceed to Step 1.
 
 ### Step 1: Scan the backlog
 

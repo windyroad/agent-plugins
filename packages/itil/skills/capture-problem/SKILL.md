@@ -321,9 +321,27 @@ After the commit, report:
 
 - The new ticket file path and ID.
 - The list of duplicate matches found (if any). If matches found, name them and remind the user to merge at next `/wr-itil:review-problems` if appropriate.
-- Trailing pointer: `Run /wr-itil:review-problems next to fold P<NNN> into the WSJF rankings, re-rate the deferred placeholders, and refresh docs/problems/README.md.`
+- **Trailing pointer (conditional shape per P271)**: invoke `wr-itil-check-deferred-placeholder-staleness "$PWD"` to read the deferred-placeholder + README-cadence staleness signal. The pointer shape switches on the helper's five-outcome enum:
 
-The trailing pointer is **not optional** — it is the user-visible signal that the README is transiently stale and how to reconcile it. Drift here re-opens the deferred-README-refresh contract gap.
+  ```bash
+  preflight_reason="$(wr-itil-check-deferred-placeholder-staleness "$PWD")"
+  ```
+
+  See `/wr-itil:work-problems` SKILL.md Step 0c for the canonical contract on the two-axis trigger (count ≥ 3 deferred placeholders AND README age > 7 days); the threshold constants live in the helper. <!-- DEFERRED-PLACEHOLDER-STALENESS-CONTRACT-SOURCE: packages/itil/lib/check-deferred-placeholder-staleness.sh -->
+
+  | `preflight_reason`                                | Trailing-pointer shape                                                                                |
+  |---------------------------------------------------|--------------------------------------------------------------------------------------------------------|
+  | `no-deferred-placeholders` / `below-threshold ...` / `fresh-readme ...` | Default (low-priority) pointer: *"Run `/wr-itil:review-problems` next to fold P\<NNN\> into the WSJF rankings, re-rate the deferred placeholders, and refresh `docs/problems/README.md`."* |
+  | `no-readme count=<N>`                              | **Highlighted (actionable) pointer**: *"⚠ `<N>` deferred-placeholder ticket(s) have accumulated AND `docs/problems/README.md` is missing/malformed — run `/wr-itil:review-problems` NOW to rebuild the README and re-rate placeholders."* |
+  | `stale-readme count=<N> age=<X>s threshold=<Y>s`   | **Highlighted (actionable) pointer**: *"⚠ `<N>` deferred-placeholder ticket(s) have accumulated AND the WSJF Rankings cadence is `<X>` days stale (> 7-day threshold) — run `/wr-itil:review-problems` NOW to re-rate placeholders and refresh `docs/problems/README.md`."* |
+
+  **Why conditional, not auto-dispatch** (ADR-032 + JTBD-001): capture-problem is intentionally lightweight per ADR-032 P155 amendment. Auto-dispatching review-problems from capture would re-introduce the ~10-turn ceremony the lightweight aside is engineered to avoid. The conditional pointer preserves the speed-of-capture contract while surfacing the signal "the README is now MORE than transiently stale" when both axes hit threshold. The user picks when to absorb the re-rate cost.
+
+  **Fail-soft**: any error in the helper invocation MUST NOT block the report — fall back to the default pointer shape.
+
+The trailing pointer is **not optional** — it is the user-visible signal that the README is transiently stale and how to reconcile it. The conditional highlight (P271) escalates the signal when the deferred-placeholder backlog AND the cadence axis both hit threshold. Drift here re-opens P271.
+
+<!-- @jtbd JTBD-001 (Enforce Governance Without Slowing Down — conditional highlight escalates the signal without forcing a flow break) -->
 
 ## Composition with manage-problem
 
