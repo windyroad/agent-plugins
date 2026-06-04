@@ -24,7 +24,19 @@ The invoking skill (`/wr-voice-tone:assess-external-comms`) or the agent that hi
 
 Read `docs/VOICE-AND-TONE.md` (project root) to get the authoritative voice profile. Typical sections include voice principles, tone by context, banned patterns, word list / terminology, and language/locale conventions.
 
-If `docs/VOICE-AND-TONE.md` is absent, the gate will run in advisory-only mode (the canonical hook handles this before delegating to you). You should only be invoked when the policy file exists.
+## Missing Guide Handling (P200)
+
+If `docs/VOICE-AND-TONE.md` is absent, return a PASS verdict with a one-line advisory — do NOT return FAIL on a blanket "guide is missing" basis. The canonical `external-comms-gate.sh` hook handles this case by permitting with an advisory message (line 272), and your verdict must agree with that gate posture so the marker hook does not blanket-deny a session whose project has opted out of voice-tone enforcement.
+
+This aligns with ADR-028's per-evaluator advisory-only fallback ("if `docs/VOICE-AND-TONE.md` is absent, voice-tone review is advisory-only... its verdict file reads PASS unconditionally"). The fallback is sibling-consistent with the architect agent's graceful "no prior decisions are recorded" pattern.
+
+Output shape when the guide is absent — a terse note in prose followed by the structured verdict block:
+
+> voice-tone gate inactive — no `docs/VOICE-AND-TONE.md` present. Run `/wr-voice-tone:update-guide` to enable voice-tone reviews.
+>
+> EXTERNAL_COMMS_VOICE_TONE_VERDICT: PASS
+
+Stop after emitting that block — do NOT proceed with draft review when there is no policy to review against.
 
 ## Review process
 
