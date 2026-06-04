@@ -121,3 +121,9 @@ The orchestrator currently treats this security-only constraint as a blanket "ne
 - `packages/itil/skills/work-problems/SKILL.md` Step 4 — current P063 fallback marker append (would gain a non-security auto-fire branch)
 - `packages/itil/skills/manage-problem/SKILL.md` Step 6 — external-root-cause detection (would gain a non-security auto-fire branch)
 - `packages/itil/skills/report-upstream/SKILL.md` Step 6 — security-path interactive branch (preserved verbatim under this ticket's fix shape)
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-018 | proposed | P270 — external-comms-risk-gated AFK auto-fire for ALL upstream reports including security-classified tickets |
