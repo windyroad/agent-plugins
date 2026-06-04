@@ -78,7 +78,7 @@ tests:
         value: 'Reported Upstream'
       # Tier A — must NOT halt or queue when below-appetite on the public path.
       - type: not-regex
-        value: '(?is)halt\s+the\s+orchestrator'
+        value: '(?<!")[Hh]alt\s+the\s+[Oo]rchestrator'
 
   - description: AFK above-appetite → risk-reduce + re-score, queue if still above
     vars:
@@ -98,13 +98,13 @@ tests:
         value: 'risk-reduc'
       # Tier A — measures vocabulary is open-ended (per leaf (a) ratification).
       - type: regex
-        value: '(?is)open[\s\-]?ended|judgement|case[\s\-]?by[\s\-]?case|wr-risk-scorer:external-comms'
+        value: '[Oo]pen[\s\-]?ended|[Jj]udgement|[Cc]ase[\s\-]?by[\s\-]?case|wr-risk-scorer:external-comms'
       # Tier A — must NOT halt the orchestrator (P352 queue-and-continue).
       - type: not-regex
-        value: '(?is)halt\s+the\s+orchestrator'
+        value: '(?<!")[Hh]alt\s+the\s+[Oo]rchestrator'
       # Tier A — must reference the queue-not-halt pattern.
       - type: regex
-        value: '(?is)queue|outstanding_questions|continue'
+        value: '[Qq]ueue|outstanding_questions|[Cc]ontinue'
       # Tier A — content saves to `## Queued Upstream Report` (per leaf (c) rename).
       - type: icontains
         value: 'Queued Upstream Report'
@@ -123,16 +123,16 @@ tests:
     assert:
       # Tier A — must route via the SECURITY.md-declared channel (GHSA).
       - type: regex
-        value: '(?is)security[\s\-]?advisor|security-advisories|GHSA|gh\s+api\s+.*security'
+        value: '[Ss]ecurity[\s\-]?[Aa]dvisor|[Ss]ecurity-advisories|GHSA|gh\s+api\s+[\s\S]*security'
       # Tier A — must NOT halt or queue when SECURITY.md is present + below-appetite.
       - type: not-regex
-        value: '(?is)halt\s+the\s+orchestrator'
+        value: '(?<!")[Hh]alt\s+the\s+[Oo]rchestrator'
       # Tier A — must reference SECURITY.md routing.
       - type: icontains
         value: 'SECURITY.md'
       # Tier A — must NOT cite the pre-amendment "never auto-report security" rule.
       - type: not-regex
-        value: '(?is)never\s+auto[\s\-]?report'
+        value: '[Nn]ever\s+auto[\s\-]?report'
 
   - description: Security + missing SECURITY.md → external-comms-gated impact assessment (NOT always-queue)
     vars:
@@ -148,11 +148,11 @@ tests:
     assert:
       # Tier A — must mention the three ratified impact axes (leaf (b)).
       - type: regex
-        value: '(?is)our\s+repository|our\s+repo'
+        value: '[Oo]ur\s+[Rr]epositor|[Oo]ur\s+[Rr]epo'
       - type: icontains
         value: 'reputation'
       - type: regex
-        value: '(?is)reported\s+party|party\s+we\s+are\s+reporting\s+to'
+        value: '[Rr]eported\s+party|party\s+we\s+are\s+reporting\s+to'
       # Tier A — must NOT always-queue regardless of risk band (rejected option).
       - type: not-regex
-        value: '(?is)always[\s\-]?queue\s+regardless'
+        value: '[Aa]lways[\s\-]?queue\s+regardless'

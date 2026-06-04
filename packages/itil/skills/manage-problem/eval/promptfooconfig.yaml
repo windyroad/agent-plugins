@@ -57,9 +57,14 @@ tests:
       - type: contains
         value: '.changeset/'
       # Tier A — ORDERING: "Release vehicle" must appear BEFORE "git mv".
-      # Regex (case-insensitive, dotall) — fails if `git mv` appears first.
+      # JS-compatible (promptfoo compiles `new RegExp(value)` — no inline flag
+      # groups like `(?is)` accepted; case-insensitivity expressed via char
+      # classes; dotall covered by `[\s\S]`). Iter-11 fix (2026-06-04, P012
+      # reopen): the original `(?is)release\s+vehicle...` errored as "Invalid
+      # group" under JS RegExp and was counted as FAIL by promptfoo despite
+      # behaviourally-correct responses. See P012 Investigation Tasks.
       - type: regex
-        value: '(?is)release\s+vehicle[\s\S]{0,2000}git\s+mv'
+        value: '[Rr]elease\s+[Vv]ehicle[\s\S]{0,2000}[Gg]it\s+[Mm]v'
       # Tier A — must NOT say to rename first then edit (the P330-regressing
       # ordering that triggers the helper exit-2 routing).
       #
@@ -67,11 +72,17 @@ tests:
       # — a line beginning with `git mv ` followed by at least one path
       # argument — rather than the bare substring. The bare substring matched
       # legitimate prose like "BEFORE `git mv`, edit the body to set Release
-      # vehicle..." as a false-positive regression. The line-anchor (multiline
-      # `^\s*git\s+mv\s+\S+`) requires the rename to appear as an actual
-      # command (typically inside a shell-fence indented or at column 0), so
-      # prose mentions in backticks no longer trip the not-regex while the
-      # genuine regression shape — rename emitted first, Release-vehicle
-      # mentioned afterwards as a fix-up — still fails the assertion.
+      # vehicle..." as a false-positive regression. The line-anchor `(^|\n)`
+      # requires the rename to appear as an actual command (typically inside
+      # a shell-fence indented or at column 0), so prose mentions in backticks
+      # no longer trip the not-regex while the genuine regression shape —
+      # rename emitted first, Release-vehicle mentioned afterwards as a fix-up
+      # — still fails the assertion.
+      #
+      # Iter-11 (2026-06-04, P012 reopen): rewritten to JS-compatible form.
+      # `(?ims)^...` → `(^|\n)...` for the line-anchor + char classes for
+      # case-insensitivity. Promptfoo compiles assertions with `new RegExp`
+      # which does NOT support PCRE inline-flag groups; the previous form
+      # errored and was counted as FAIL.
       - type: not-regex
-        value: '(?ims)^\s*git\s+mv\s+\S+[\s\S]{0,400}release\s+vehicle'
+        value: '(^|\n)\s*[Gg]it\s+[Mm]v\s+\S+[\s\S]{0,400}[Rr]elease\s+[Vv]ehicle'

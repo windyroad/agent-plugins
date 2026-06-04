@@ -109,3 +109,15 @@ This ticket (P012) remains **Open** as the execution tracker. Closes when:
 - JTBD-201 (`docs/jtbd/tech-lead/JTBD-201-restore-service-fast.proposed.md`) — auditability constraint
 - Anthropic official `skill-creator` eval harness — https://github.com/anthropics/claude-plugins-official/blob/main/plugins/skill-creator/skills/skill-creator/SKILL.md (substantial prior art for testing SKILL.md documents)
 - P034 (`docs/problems/034-centralise-risk-reports-for-cross-project-skill-improvement.open.md`) — centralised `~/.claude/skill-reports/<plugin>/` storage providing real-world output data as eval inputs for the skill-creator improvement cycle across all plugins (not just risk-scorer)
+
+## Findings 2026-06-04 (eval-calibration investigation)
+
+**Root cause of "never green" identified + partially fixed:**
+
+1. **Invalid JS regex (FIXED)**: the promptfoo regex/not-regex assertions used PCRE inline-flag groups `(?is)` / `(?ims)` which JavaScript `new RegExp(value)` rejects as "Invalid group" — the assertions ERRORED (counted as FAIL), they never actually evaluated. Both eval slices carried this. Fixed by converting to JS-compatible form: character classes for case-insensitivity (`[Rr]elease`), `[\s\S]` for dotall, `(^|\n)` for line-anchoring, quote negative-lookbehind `(?<!")` to exclude quoted/contrastive mentions. **manage-problem eval now 1/1 GREEN, stable across runs.**
+
+2. **better-sqlite3 / Node-version rebuild (RECURRING, not yet CI-fixed)**: `npx promptfoo eval` fails with `ERR_DLOPEN_FAILED` (NODE_MODULE_VERSION 137 vs 127) until `npm rebuild better-sqlite3` is run. The rebuild does not persist (reverts after subprocess npm operations). CI needs a guaranteed rebuild step before `npm run eval:skills`. STILL OPEN.
+
+3. **Non-deterministic Tier-A flakiness (STILL OPEN — the real remaining work)**: report-upstream's 4 multi-paragraph semantic tests fail *different* assertions on *different* runs — the LLM paraphrases its (correct) answer differently each time, tripping brittle Tier-A regexes (e.g. contrastive mentions of superseded "halt the orchestrator" / "never auto-report" phrases the not-regex catches). Got 0/4 → 3/4 → 2/4 across runs; never stable 4/4. Per ADR-075, semantic checks on non-deterministic multi-paragraph output are the **Tier-B `llm-rubric` (N-sample pass^k)** use case, not Tier-A deterministic regex. The report-upstream eval's semantic assertions ("does it halt?", "does it cite the impact axes?") should convert to llm-rubric; the deterministic Tier-A should retain only paraphrase-proof anchors (verbatim section names like `## Queued Upstream Report`, command shapes like `gh issue create`).
+
+**Remaining P012 close criteria**: (a) report-upstream eval stably GREEN via Tier-B llm-rubric for semantic assertions; (b) CI better-sqlite3 rebuild guaranteed; (c) the manage-problem-style stable-deterministic pattern documented as the reference for paraphrase-proof Tier-A anchors.
