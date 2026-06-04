@@ -1,13 +1,24 @@
 # Problem 012: Skill Testing Harness Scope Undefined
 
-**Status**: Closed
+**Status**: Open
 **Reported**: 2026-04-16
-**Closed**: 2026-06-02
 **Priority**: 6 (Medium) — Impact: Moderate (3) x Likelihood: Possible (2)
 **Effort**: XL — new companion ADR for skill testing strategy, per-skill test framework decisions, retrofit of existing skills across the entire suite (itil, retrospective, architect, risk-scorer, jtbd, voice-tone, style-guide, tdd, connect) (L → XL 2026-04-19 per P047: scope explicitly "undefined", suite-wide, new ADR required)
 **WSJF**: 0.75 — (6 × 1.0) / 8
 
-## Closure (2026-06-02)
+## REOPENED 2026-06-04 — closure was premature (evals never green)
+
+**User direction 2026-06-04**: reopen. The 2026-06-02 closure was on "infrastructure proven end-to-end", NOT "eval passes". Verified 2026-06-04: `npx promptfoo eval` against the manage-problem reference slice reports **0/1 passed**; the report-upstream slice (added by iter 37) reports **0/4 passed**. The harness *runs* (after a `better-sqlite3` rebuild for a local Node-version mismatch — NODE_MODULE_VERSION 137 vs 127, likely also a CI concern) but its assertions are **mis-calibrated** — correct agent responses are marked FAIL (e.g. report-upstream test emits the exact ratified leaf-decision "impact to our repository / reputation / reported party" and is marked FAIL).
+
+**Remaining work to truly close P012**:
+- Recalibrate the manage-problem + report-upstream eval assertions so they go GREEN against the correct responses (Tier-A deterministic icontains/contains/regex tuned to the actual SKILL-prose output shape).
+- Fix the `better-sqlite3` / Node-version rebuild so `npx promptfoo eval` runs cleanly in CI (not just after a manual `npm rebuild`).
+- Establish that the harness produces GREEN behavioural evidence — that is the actual P012 close criterion, superseding the "infra proven" closure.
+- Until green: the R009 prose-floor discharge mechanism (P355) cannot credit any eval (P355's own rule requires `npx promptfoo eval` PASSES); the held cohort (P270/P344/P351/P308) stays held on the R009 floor.
+
+**Why reopen rather than successor-ticket** (user direction 2026-06-04): the harness-gap this ticket tracks is NOT truly closed until the evals pass; a single ticket carries the full arc rather than splitting infra-shipped from evals-green.
+
+## Closure (2026-06-02) — SUPERSEDED by 2026-06-04 reopen above
 
 **Closed via RFC-012 S6** — the first SKILL eval landing at `packages/itil/skills/manage-problem/eval/promptfooconfig.yaml` closes the harness gap this ticket was opened to track.
 
