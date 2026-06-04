@@ -1,6 +1,6 @@
 # Problem 192: Risk-pipeline gate forces repeat rescoring round-trips when the working tree changes between scorer invocation and `git commit`
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-05-15
 **Priority**: 6 (Med) — Impact: 3 (Moderate — repeated subagent round-trips inflate session cost) x Likelihood: 2 (Possible — fires when iteratively staging + committing) (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -46,7 +46,23 @@ Two known workarounds:
 - [ ] Decide whether the conservative current behaviour is the correct default vs an opt-in "strict" mode.
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems.
 
-### Preliminary Hypothesis
+### Confirmed root cause (2026-06-04) — promoted to Known Error
+
+Code-read RCA of `packages/risk-scorer/hooks/risk-score-commit-gate.sh` + `lib/pipeline-state.sh` + `risk-score-mark.sh` identifies **two distinct mechanisms**, of which the original ticket's "over-conservative full-tree hash" hypothesis is now only partly accurate:
+
+1. **PRIMARY root cause — the within-appetite / risk-reducing bypass marker is SINGLE-USE.** `risk-score-commit-gate.sh` consumes the `reducing-commit` marker with `rm -f "${RDIR}/reducing-commit"` then `exit 0`. So each commit in a multi-commit session permits exactly ONE commit before the marker is gone; the next commit re-enters `check_risk_gate`, finds no marker, and forces a fresh `wr-risk-scorer:pipeline` round-trip — even when the work and its risk profile are unchanged. (Contrast: the `clean` marker is NOT removed, so clean-tree commits ride forward.) This is the dominant driver of the "3+ rescores per session" friction — observed again 2026-06-04: 5 commits this session each required a fresh scorer invocation purely to re-mint the consumed one-shot marker.
+
+2. **SECONDARY — drift hash is already much narrower than the ticket assumed.** `pipeline-state.sh --hash-inputs` uses a `git stash create` conceptual-tree hash that is (a) **commit/push-stable** (P054 — tree SHA invariant over commit and push) and (b) **doc-excluded** via `_doc_exclusions` (docs/, `.changeset/` body, governance paths). So docs-only additive stages do NOT trip drift, and the "stage retro + README + ticket in sequence" case the ticket worried about is already handled. The residual drift trigger is narrow: a *source-file* (non-doc) working-tree change between score and commit. The changeset COUNT line is the one doc-adjacent input that can still shift the hash when a `.changeset/*.md` is added/removed.
+
+**Net**: the friction is dominated by mechanism (1), not (2). The original "staged-set-only hash + additive-docs carve-out" fix proposal is largely already implemented for the hash; the unaddressed gap is the one-shot marker lifecycle.
+
+### Fix Strategy (for the RFC phase — NOT yet implemented)
+
+**Kind**: improve (marker lifecycle).
+
+**Shape (candidate, needs RFC)**: make the within-appetite/reducing bypass **session-scoped with drift-revalidation** rather than strictly one-shot — i.e. the marker survives multiple commits within the TTL window AS LONG AS the pipeline-state hash still matches what was scored (re-mint only on genuine drift or TTL expiry or threshold change). This preserves the "score reflects what's committed" contract (drift still forces a rescore) while eliminating the re-mint-per-commit round-trip when the risk profile is constant. Decision point for the RFC: does the reducing-bypass need per-commit granularity (current) or is hash-stable-within-TTL sufficient? The `clean` marker's persist-until-drift semantics are the in-repo precedent for the latter. Composes with P107 (TTL extension) + P090 (hard-cap) + P326 (staged-index interaction — verify the re-stage requirement is/ isn't a separate marker-side effect).
+
+### Preliminary Hypothesis (superseded by the confirmed root cause above)
 
 The drift detector hashes the full working-tree fingerprint and invalidates the score on any change. This is over-conservative for the common case where:
 - New files are staged additively (e.g. retro report + README update + ticket file all in sequence).
