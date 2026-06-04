@@ -157,6 +157,22 @@ tdd_find_test_for_impl() {
     return
   fi
 
+  # test/-mirror layout (P201): src/foo.js → test/foo.test.js, recursive for
+  # nested src/a/b/foo.js → test/a/b/foo.test.js, and workspace
+  # packages/<pkg>/src/foo.js → packages/<pkg>/test/foo.test.js.
+  # Compute the mirror once — depends only on DIR (the impl's directory).
+  # Replaces the LAST `src` path segment with `test`.
+  local MIRROR_DIR=""
+  case "$DIR" in
+    src)        MIRROR_DIR="test" ;;
+    src/*)      MIRROR_DIR="test/${DIR#src/}" ;;
+    */src)      MIRROR_DIR="${DIR%/src}/test" ;;
+    */src/*)
+      local _mirror_prefix="${DIR%/src/*}"
+      MIRROR_DIR="${_mirror_prefix}/test/${DIR#"${_mirror_prefix}"/src/}"
+      ;;
+  esac
+
   # Check tracked test files for a match
   # Priority: exact match in tracked files (any convention)
   while IFS= read -r tracked; do
@@ -187,6 +203,13 @@ tdd_find_test_for_impl() {
         esac
         ;;
     esac
+
+    # test/-mirror layout (P201): match when tracked_dir is the computed mirror
+    if [ -n "$MIRROR_DIR" ] && [ "$tracked_dir" = "$MIRROR_DIR" ]; then
+      case "$tracked_base" in
+        "${STEM}.test."*|"${STEM}.spec."*) echo "$tracked"; return ;;
+      esac
+    fi
 
     # Cucumber: features/step_definitions/foo.steps.js → features/foo.feature
     # If this impl is inside a step_definitions/ directory, look in the parent for a .feature file

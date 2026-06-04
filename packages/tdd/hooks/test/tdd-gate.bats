@@ -238,6 +238,61 @@ teardown() {
   [ -z "$result" ]
 }
 
+# --- tdd_find_test_for_impl: test/-mirror layout (P201) ---
+# Vitest default + many Jest setups mirror src/ under a sibling test/ tree.
+# A new behavioural rule: replace the LAST `src` path segment with `test`
+# to map an impl path to its mirrored test directory.
+
+@test "find_test_for_impl: test/-mirror at top level (src/foo.js → test/foo.test.js)" {
+  tdd_add_test_file "$TEST_SESSION" "test/foo.test.js"
+  result=$(tdd_find_test_for_impl "$TEST_SESSION" "src/foo.js")
+  [ "$result" = "test/foo.test.js" ]
+}
+
+@test "find_test_for_impl: test/-mirror with .spec variant (src/foo.js → test/foo.spec.js)" {
+  tdd_add_test_file "$TEST_SESSION" "test/foo.spec.js"
+  result=$(tdd_find_test_for_impl "$TEST_SESSION" "src/foo.js")
+  [ "$result" = "test/foo.spec.js" ]
+}
+
+@test "find_test_for_impl: test/-mirror preserves .tsx (src/Hero.tsx → test/Hero.test.tsx)" {
+  tdd_add_test_file "$TEST_SESSION" "test/Hero.test.tsx"
+  result=$(tdd_find_test_for_impl "$TEST_SESSION" "src/Hero.tsx")
+  [ "$result" = "test/Hero.test.tsx" ]
+}
+
+@test "find_test_for_impl: test/-mirror recursive nested (src/a/b/foo.js → test/a/b/foo.test.js)" {
+  tdd_add_test_file "$TEST_SESSION" "test/a/b/foo.test.js"
+  result=$(tdd_find_test_for_impl "$TEST_SESSION" "src/a/b/foo.js")
+  [ "$result" = "test/a/b/foo.test.js" ]
+}
+
+@test "find_test_for_impl: test/-mirror workspace layout (packages/foo/src/x.ts → packages/foo/test/x.test.ts)" {
+  tdd_add_test_file "$TEST_SESSION" "packages/foo/test/x.test.ts"
+  result=$(tdd_find_test_for_impl "$TEST_SESSION" "packages/foo/src/x.ts")
+  [ "$result" = "packages/foo/test/x.test.ts" ]
+}
+
+@test "find_test_for_impl: test/-mirror workspace nested (packages/foo/src/a/b/x.ts → packages/foo/test/a/b/x.test.ts)" {
+  tdd_add_test_file "$TEST_SESSION" "packages/foo/test/a/b/x.test.ts"
+  result=$(tdd_find_test_for_impl "$TEST_SESSION" "packages/foo/src/a/b/x.ts")
+  [ "$result" = "packages/foo/test/a/b/x.test.ts" ]
+}
+
+@test "find_test_for_impl: test/-mirror does NOT match wrong stem (src/foo.js + test/bar.test.js → empty)" {
+  tdd_add_test_file "$TEST_SESSION" "test/bar.test.js"
+  result=$(tdd_find_test_for_impl "$TEST_SESSION" "src/foo.js")
+  [ -z "$result" ]
+}
+
+@test "find_test_for_impl: test/-mirror does NOT match without src/ anchor (lib/foo.js + test/foo.test.js → empty)" {
+  # Ticket scope is explicitly src/-anchored mirror; lib/foo.js → test/foo.test.js
+  # is NOT a recognised pairing (the ticket frames it as "src/foo.js → test/foo.test.js").
+  tdd_add_test_file "$TEST_SESSION" "test/foo.test.js"
+  result=$(tdd_find_test_for_impl "$TEST_SESSION" "lib/foo.js")
+  [ -z "$result" ]
+}
+
 # --- State for impl files (via association) ---
 
 @test "read_state_for_impl: returns IDLE when no associated test" {

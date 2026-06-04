@@ -49,6 +49,20 @@ Once active, the workflow is enforced on every edit:
 
 Test files and config/doc files are always writable regardless of state.
 
+## Supported test layouts
+
+The hook associates an implementation file with its tracked test by matching one of the following path shapes (per [P201](../../docs/problems/verifying/201-windyroad-tdd-hook-only-recognises-same-dir-or-tests-test-associations.md)):
+
+| Shape | Impl path | Test path |
+|---|---|---|
+| Same-directory | `src/foo.js` | `src/foo.test.js` or `src/foo.spec.js` |
+| `__tests__/`-adjacent | `src/foo.js` | `src/__tests__/foo.test.js` |
+| Parent `__tests__/` | `src/components/Hero.tsx` | `src/__tests__/Hero.test.tsx` |
+| `test/`-mirror (Vitest default; many Jest setups) | `src/foo.js`, `src/a/b/foo.js`, `packages/<pkg>/src/foo.js` | `test/foo.test.js`, `test/a/b/foo.test.js`, `packages/<pkg>/test/foo.test.js` |
+| Cucumber step-definitions | `features/step_definitions/checkout.steps.js` | `features/checkout.feature` |
+
+The `test/`-mirror rule replaces the **last** `src` path segment with `test`, so it works at any nesting depth and for monorepo workspace layouts.
+
 ## How It Works
 
 | Hook | Trigger | What it does |
