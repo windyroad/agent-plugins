@@ -1,6 +1,6 @@
 ---
 name: wr-itil:capture-problem
-description: Lightweight problem-capture skill for aside-invocation during foreground work — minimal duplicate-check, skeleton ticket file, single commit per capture, no inline README refresh. Defers full duplicate analysis and README refresh to /wr-itil:review-problems. Use this when the user (or agent mid-iter) wants to capture an observation quickly without disrupting current task flow. For full-intake new-problem creation, use /wr-itil:manage-problem.
+description: Lightweight problem-capture skill for aside-invocation during foreground work — minimal duplicate-check, skeleton ticket file, single commit per capture (covers new ticket + inline README refresh per P094 per P199 Option 2 amendment 2026-06-05). Defers full duplicate analysis to /wr-itil:review-problems. Use this when the user (or agent mid-iter) wants to capture an observation quickly without disrupting current task flow. For full-intake new-problem creation, use /wr-itil:manage-problem.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, AskUserQuestion
 ---
 
@@ -287,12 +287,27 @@ The deferred-placeholder pattern is load-bearing — `/wr-itil:review-problems` 
 
 Single `Write` to `docs/problems/open/<NNN>-<kebab-title>.md` (per ADR-031 per-state-subdir layout). The P119 PreToolUse hook permits the Write because Step 2 set the marker.
 
-### 6. Commit per ADR-014 — single commit, no README refresh
+### 6. Commit per ADR-014 — single commit, inline README refresh (P094)
 
-**Stage list**: ONLY the new ticket file. **Do NOT** stage `docs/problems/README.md`. The deferred-README-refresh contract is the load-bearing distinction from `/wr-itil:manage-problem` — capture-time speed depends on skipping the regenerate-and-stage cycle.
+**P199 / Option 2 amendment (2026-06-05).** This step previously skipped the README refresh and emitted a `RISK_BYPASS: capture-deferred-readme` trailer to clear the P165 README-refresh gate. The user-directed Option 2 resolution (recorded 2026-05-31 on P199) kills the deferred-README-refresh contract: capture-problem now stages `docs/problems/README.md` inline, mirroring `/wr-itil:manage-problem` Step 5 P094 (refresh-on-create) + P134 (last-reviewed rotation). The trailer is dropped from the commit; the allow-list entry in `packages/itil/hooks/lib/readme-refresh-detect.sh::_README_REFRESH_BYPASS_TRAILERS` is retained as inert dead code (minimal-change discipline — future adopters that registered against the token continue to work). Authority: P199 Option 2 user direction + ADR-032 amendment + ADR-014 bypass-token-table amendment (same single coherent commit).
+
+#### README.md refresh on new ticket (P094)
+
+After writing the new `.open.md` file at Step 5, regenerate `docs/problems/README.md` to insert the new ticket's row into the WSJF Rankings, and stage the refreshed README in the same commit as the new ticket. The mechanism is **inline at this execution site per P331** — not deferred via cross-reference — so a single-pass agent reading Step 6 does not silently skip the archive step (the canonical P331 silent-skip regression).
+
+**Mechanism**: use the same rendering rules as `/wr-itil:manage-problem` Step 5 P094 / Step 7 P062 (glob `docs/problems/*.open.md` / `*.known-error.md` / `*.verifying.md` / `*.parked.md` AND the per-state-subdir layout `docs/problems/open/*.md` / `docs/problems/known-error/*.md` / `docs/problems/verifying/*.md` / `docs/problems/parked/*.md`; rank open/known-error by WSJF; list verifyings in the Verification Queue ordered by Released date ASC per P150; list parkeds in the Parked section). The refresh is a **render, not a re-rank** — existing WSJF values on the other ticket files are trusted per P062's established discipline. Only the new ticket's own (deferred-placeholder) WSJF is consumed from its freshly-written file. **WSJF Rankings tier + tie-break sort** (P138 + ADR-076) and **Verification Queue sort direction** (P150) and **Likely-verified cell shape** (P186) all follow the canonical render rules — see `/wr-itil:manage-problem` Step 5 P094 block for the full prose; drift here re-opens those tickets.
+
+**P134 last-reviewed rotation** — inline at this execution site (not deferred to a § subsection) per P331 silent-skip discipline. MUST execute IN ORDER:
+
+1. **Read** line 3 of `docs/problems/README.md`: `awk 'NR==3' docs/problems/README.md`.
+2. **Append-if-non-empty (BEFORE step 3, not after)** — if line 3 is non-empty AND not a same-session same-verb near-duplicate of the new fragment, append the existing line 3 verbatim to `docs/problems/README-history.md` under a `## YYYY-MM-DD` heading (creating the heading on first append for that date; subsequent same-day appends nest under the existing heading). Run this BEFORE the Edit-tool rewrite in step 3 — Edit's replace pattern destroys the displaced content otherwise.
+3. **Rewrite** line 3 of `docs/problems/README.md` with the new fragment of form `> Last reviewed: YYYY-MM-DD **P<NNN> captured** — <one-line title> (lightweight aside via /wr-itil:capture-problem)`. Soft cap ≤ 1024 bytes per fragment; hard ceiling 5120 bytes per ADR-040 Tier 3 envelope.
+4. **Stage all three** — `git add docs/problems/open/<NNN>-<kebab-title>.md docs/problems/README.md docs/problems/README-history.md` so the same single commit per ADR-014 captures the new ticket + refreshed README + (when line-3 displaced) history. Omit `README-history.md` from the stage list when no line-3 displacement occurred (no untracked diff). Canonical rationale anchor: `/wr-itil:manage-problem` § Last-reviewed line discipline (P134) subsection.
 
 ```bash
-git add docs/problems/open/<NNN>-<kebab-title>.md
+git add docs/problems/open/<NNN>-<kebab-title>.md docs/problems/README.md
+# If line-3 was rotated above, also:
+git add docs/problems/README-history.md
 ```
 
 Satisfy the commit gate per ADR-014 — same two-path pattern as manage-problem Step 11:
@@ -300,20 +315,17 @@ Satisfy the commit gate per ADR-014 — same two-path pattern as manage-problem 
 - **Primary**: delegate to subagent type `wr-risk-scorer:pipeline` via the Agent tool.
 - **Fallback**: invoke `/wr-risk-scorer:assess-release` via the Skill tool when the subagent type is unavailable in the current tool surface.
 
-Land the commit via the **`wr-risk-scorer-restage-commit`** helper — atomic re-stage + commit in a single bash call (P326 wrapper). The Agent-tool delegation above can silently clear the index; the helper re-adds the supplied path, asserts non-empty staging, then runs `git commit` with the supplied `-m` args. The `RISK_BYPASS: capture-deferred-readme` trailer rides as a second `-m` paragraph so the literal token appears in the resulting commit-message command string the PreToolUse hook inspects:
+Land the commit via the **`wr-risk-scorer-restage-commit`** helper — atomic re-stage + commit in a single bash call (P326 wrapper). The Agent-tool delegation above can silently clear the index; the helper re-adds the supplied paths, asserts non-empty staging, then runs `git commit` with the supplied `-m` args:
 
 ```bash
 wr-risk-scorer-restage-commit \
   -m "docs(problems): capture P<NNN> <title>" \
-  -m "RISK_BYPASS: capture-deferred-readme" \
-  -- docs/problems/open/<NNN>-<kebab-title>.md
+  -- docs/problems/open/<NNN>-<kebab-title>.md docs/problems/README.md
+# If README-history.md was modified, append it to the path list:
+#   -- docs/problems/open/<NNN>-<kebab-title>.md docs/problems/README.md docs/problems/README-history.md
 ```
 
-The `capture` verb in the message is the audit signal that this ticket landed via the lightweight aside path (vs. `open` for manage-problem's full intake).
-
-**Why the trailer (P262)**: the P165 README-refresh-discipline hook (`packages/itil/hooks/itil-readme-refresh-discipline.sh`) treats any newly-staged ticket file as ranking-bearing and DENIES a `git commit` that does not also stage `docs/problems/README.md`. That enforcement is correct for `/wr-itil:manage-problem`'s full-intake path (P094 refresh-on-create) but conflicts with this skill's deliberate deferred-README-refresh contract. The `RISK_BYPASS: capture-deferred-readme` trailer is a registered allow-list token (P265 mechanism; registry of record is the ADR-014 commit-message bypass-token table) that clears the **README-refresh gate ONLY** — the commit is still risk-scored normally (`risk-score-commit-gate.sh` does not recognise this token).
-
-Do NOT drop the trailer and stage the README instead — that would silently abandon the deferred-README-refresh contract (the capture-time-speed distinction this skill exists to provide per ADR-032). The README is reconciled at the next `/wr-itil:review-problems` per Step 7's trailing pointer.
+The `capture` verb in the message is the audit signal that this ticket landed via the lightweight aside path (vs. `open` for manage-problem's full intake). The P165 README-refresh-discipline hook now allows the commit naturally because the README is staged — no `RISK_BYPASS` trailer needed.
 
 ### 7. Report
 
@@ -331,15 +343,15 @@ After the commit, report:
 
   | `preflight_reason`                                | Trailing-pointer shape                                                                                |
   |---------------------------------------------------|--------------------------------------------------------------------------------------------------------|
-  | `no-deferred-placeholders` / `below-threshold ...` / `fresh-readme ...` | Default (low-priority) pointer: *"Run `/wr-itil:review-problems` next to fold P\<NNN\> into the WSJF rankings, re-rate the deferred placeholders, and refresh `docs/problems/README.md`."* |
-  | `no-readme count=<N>`                              | **Highlighted (actionable) pointer**: *"⚠ `<N>` deferred-placeholder ticket(s) have accumulated AND `docs/problems/README.md` is missing/malformed — run `/wr-itil:review-problems` NOW to rebuild the README and re-rate placeholders."* |
-  | `stale-readme count=<N> age=<X>s threshold=<Y>s`   | **Highlighted (actionable) pointer**: *"⚠ `<N>` deferred-placeholder ticket(s) have accumulated AND the WSJF Rankings cadence is `<X>` days stale (> 7-day threshold) — run `/wr-itil:review-problems` NOW to re-rate placeholders and refresh `docs/problems/README.md`."* |
+  | `no-deferred-placeholders` / `below-threshold ...` / `fresh-readme ...` | Default (low-priority) pointer: *"Run `/wr-itil:review-problems` next to re-rate the deferred Priority/Effort placeholders on P\<NNN\>."* (README is now refreshed inline at Step 6 per P199 Option 2 — the pointer no longer names a README-refresh action in the default shape.) |
+  | `no-readme count=<N>`                              | **Highlighted (actionable) pointer**: *"⚠ `<N>` deferred-placeholder ticket(s) have accumulated AND `docs/problems/README.md` is missing/malformed — run `/wr-itil:review-problems` NOW to rebuild the README and re-rate placeholders."* (Fires only when README is genuinely missing/malformed despite this skill's inline refresh — a drift class the helper still surfaces.) |
+  | `stale-readme count=<N> age=<X>s threshold=<Y>s`   | **Highlighted (actionable) pointer**: *"⚠ `<N>` deferred-placeholder ticket(s) have accumulated AND the WSJF Rankings cadence is `<X>` days stale (> 7-day threshold) — run `/wr-itil:review-problems` NOW to re-rate placeholders."* (Inline refresh at Step 6 freshens the README mtime on every capture, so this shape now fires only when captures are absent for > 7 days — a real cadence-stale signal, not capture-driven drift.) |
 
-  **Why conditional, not auto-dispatch** (ADR-032 + JTBD-001): capture-problem is intentionally lightweight per ADR-032 P155 amendment. Auto-dispatching review-problems from capture would re-introduce the ~10-turn ceremony the lightweight aside is engineered to avoid. The conditional pointer preserves the speed-of-capture contract while surfacing the signal "the README is now MORE than transiently stale" when both axes hit threshold. The user picks when to absorb the re-rate cost.
+  **Why conditional, not auto-dispatch** (ADR-032 + JTBD-001): capture-problem is intentionally lightweight per ADR-032 P155 amendment. Auto-dispatching review-problems from capture would re-introduce the ~10-turn ceremony the lightweight aside is engineered to avoid. The conditional pointer surfaces the signal "deferred-placeholder backlog has grown AND the cadence axis hit threshold" when both axes fire. The user picks when to absorb the re-rate cost.
 
   **Fail-soft**: any error in the helper invocation MUST NOT block the report — fall back to the default pointer shape.
 
-The trailing pointer is **not optional** — it is the user-visible signal that the README is transiently stale and how to reconcile it. The conditional highlight (P271) escalates the signal when the deferred-placeholder backlog AND the cadence axis both hit threshold. Drift here re-opens P271.
+The trailing pointer is **not optional** — it is the user-visible signal for deferred-placeholder re-rating cadence. The conditional highlight (P271) escalates the signal when the deferred-placeholder backlog AND the cadence axis both hit threshold. Drift here re-opens P271.
 
 <!-- @jtbd JTBD-001 (Enforce Governance Without Slowing Down — conditional highlight escalates the signal without forcing a flow break) -->
 
@@ -353,7 +365,7 @@ The trailing pointer is **not optional** — it is the user-visible signal that 
 | Type-tag prompt | RETIRED (P287, 2026-06-02) | RETIRED (P287, 2026-06-02) — the technical/user-business axis was removed as redundant with RFC/Story persona-anchoring per ADR-060 Phase 4 |
 | JTBD-trace + persona | Step 4-equivalent ingestion path | Step 1.5b I12 derive-then-ratify dispatch (ADR-060 Amendment 2026-06-02) — flag pre-resolution (`--jtbd=` / `--persona=`) silent-proceeds; lexical detection of JTBD-NNN citations silent-proceeds; cited-JTBD persona derivation silent-proceeds; derivation-failure → AskUserQuestion proposal with REJECT (= problem rejected; no ticket) / option-pick (acceptance) / free-text correction (correction-as-acceptance); AFK callers pre-resolve via flags or halt-with-stderr-directive when `--no-prompt` |
 | AskUserQuestion authority | Multiple branches (deviation-approval / direction-setting / taste / mechanical) | One direction-setting branch on the I12 derive-failure fallback (ADR-044 category 1); silent-framework (category 4) on derive-success paths; zero control-flow branches keyed on the answer's substance (REJECT/option-pick/correction are uniform handlers) |
-| README refresh | P094 inline (regenerate + stage in same commit) | Deferred to next `/wr-itil:review-problems` |
+| README refresh | P094 inline (regenerate + stage in same commit) | P094 inline (regenerate + stage in same commit) — P199 Option 2 amendment 2026-06-05; previously deferred to next `/wr-itil:review-problems` |
 | Status transitions | Step 7 owns Open → Known Error → Verifying → Closed | Out of scope (creation only) |
 | Commit grain | One commit per intake (or per split-concern set) | One commit per capture |
 | Use case | Full-intake new problem; user wants to walk the flow | Aside-invocation; capture-and-continue |
@@ -366,8 +378,9 @@ The two skills share the `/tmp/manage-problem-grep-${SESSION_ID}` create-gate ma
 - **P014** (`docs/problems/open/014-aside-invocation-for-governance-skills.md`) — parent / master tracker.
 - **P078** — capture-on-correction OFFER pattern; depends on capture-problem shipping.
 - **P119** — manage-problem create-gate hook; capture-problem composes with the same marker.
-- **P262** — the P165 README-refresh-discipline hook conflicted with this skill's deferred-README-refresh contract (Step 6 "do NOT stage README" was denied by the hook on every capture commit). Resolved by the `RISK_BYPASS: capture-deferred-readme` allow-list token (Step 6 trailer above); clears the README-refresh gate only, not the risk-score gate.
-- **P265** — the RISK_BYPASS-trailer allow-list mechanism in `readme-refresh-detect.sh` that P262's `capture-deferred-readme` token registers into.
+- **P199** (`docs/problems/verifying/199-...md`) — Option 2 amendment 2026-06-05: kill the deferred-README-refresh contract; Step 6 now stages README inline per P094. User direction recorded 2026-05-31 in the ticket. This SKILL change rides with the ADR-032 + ADR-014 amendments in the same coherent commit.
+- **P262** (closed) — the P165 README-refresh-discipline hook conflicted with this skill's previous deferred-README-refresh contract. The prior workaround was the `RISK_BYPASS: capture-deferred-readme` allow-list token. Superseded by P199 Option 2 (2026-06-05) — capture-problem now stages README inline and the trailer is no longer emitted. The allow-list entry in `packages/itil/hooks/lib/readme-refresh-detect.sh::_README_REFRESH_BYPASS_TRAILERS` is retained as inert dead code (minimal-change discipline; adopter compatibility).
+- **P265** — the RISK_BYPASS-trailer allow-list mechanism in `readme-refresh-detect.sh`. Still in force for the `adr-031-migration` token; the `capture-deferred-readme` entry is now inert (no live emitter) but registered for adopter compatibility.
 - **P170** (`docs/problems/known-error/170-problem-tickets-strain-as-fixes-decompose-into-multiple-coordinated-changes-need-rfc-framework.md`) — RFC framework driver; Slice 4 B7.T3 / item 8c historically authored the type-classification prompt at Step 1.5 (RETIRED by P287, 2026-06-02).
 - **P176** — agent-side I2 (no type-branching) coverage gap on the SKILL.md surface. P287 retires the type axis altogether; the regression guard is preserved under `packages/itil/scripts/test/no-type-regression-guard.bats` (asserting the `**Type**:` field is GONE from skeleton templates).
 - **P287** (`docs/problems/.../287-remove-technical-user-business-type-classification-from-problems-redundant-with-rfc-persona-anchoring.md`) — the user direction (twice-confirmed 2026-05-25 + 2026-06-02) that retired Step 1.5 Type classification; ADR-060 amendment substance (I12 replacement, Phase-4 rework) queued for user re-confirmation per ADR-074.

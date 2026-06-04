@@ -27,25 +27,27 @@ This is the structural rationale for:
 - **Title-only filename match** — body-content matches would be too noisy at the conservative threshold. Files whose filenames have zero overlap but whose bodies mention a keyword are almost always different tickets that happen to discuss similar topics. False-positive cost would dominate.
 - **No halt-on-match** — even when matches are found, capture proceeds. The duplicate gets resolved at next `/wr-itil:review-problems` (where the full-rank scan can detect and merge actual duplicates with the user in the loop).
 
-### Deferred-README-refresh contract
+### README refresh: inline (P199 Option 2 amendment, 2026-06-05)
 
-Capture-problem skips the P094 inline README refresh that `/wr-itil:manage-problem` Step 5 performs. The trade-off:
+Capture-problem stages `docs/problems/README.md` inline at Step 6, mirroring `/wr-itil:manage-problem` Step 5 P094 (refresh-on-create) + P134 (last-reviewed rotation). The previously-load-bearing "Deferred-README-refresh contract" was reversed by user direction recorded in P199 on 2026-05-31, then implemented on 2026-06-05.
 
-| Surface | Inline refresh (manage-problem) | Deferred refresh (capture-problem) |
-|---------|---------------------------------|-------------------------------------|
-| README authoritativeness | Always current at commit boundary | Lags new captures until next review |
-| Capture-time turn cost | +1-2 turns (regenerate + stage) | 0 turns |
-| WSJF ranking visibility | Immediate | Pending review |
-| Audit trail (commit) | One commit covers ticket + README | One commit covers ticket only |
-| README staleness window | None | Bounded by next review invocation |
+**Rationale for the reversal** (user direction):
+- The P165 README-refresh-discipline hook (shipped after the initial capture-problem design) blocks every capture commit that does not stage README. The P262 workaround (a `RISK_BYPASS: capture-deferred-readme` trailer) cleared the gate but kept the README transiently stale by design — a contract that always felt half-superseded by P165 reality.
+- Option 2 acknowledges reality: stage the README. The cost is one mechanical render-and-stage primitive (already proven in `/wr-itil:manage-problem`); the capture-time speed distinction from manage-problem comes from the wide-net duplicate grep + AskUserQuestion branches that capture-problem skips, not the README skip.
+- The `RISK_BYPASS: capture-deferred-readme` trailer is dropped from emission. The allow-list entry in `packages/itil/hooks/lib/readme-refresh-detect.sh::_README_REFRESH_BYPASS_TRAILERS` is retained as inert dead code for adopter compatibility (minimal-change discipline).
 
-The deferred contract is acceptable because:
+**Trade-off table (post-amendment)**:
 
-1. **The on-disk ticket inventory remains the source of truth**. README.md is a derived view — consumers that need WSJF rankings can re-derive from the ticket files (and `/wr-itil:list-problems` does exactly that on cache-stale fallback).
-2. **The trailing pointer in Step 7 is the user-visible signal** that the README is transiently stale. The user has explicit instructions for how to reconcile.
-3. **`/wr-itil:review-problems` Step 9b's auto-transition pass already re-rates deferred-placeholder tickets** (the literal string `(deferred — re-rate at next /wr-itil:review-problems)` is the keying signal). One review pass folds all captured-but-not-rated tickets into the ranking.
+| Surface | manage-problem | capture-problem (post-P199) |
+|---------|----------------|------------------------------|
+| README authoritativeness | Always current at commit boundary | Always current at commit boundary |
+| Capture-time turn cost | +1-2 turns (regenerate + stage) | +1-2 turns (same primitive) |
+| WSJF ranking visibility | Immediate (deferred-placeholder row) | Immediate (deferred-placeholder row) |
+| Audit trail (commit) | One commit covers ticket + README | One commit covers ticket + README |
+| README staleness window | None | None |
+| Distinguishing cost shape | Wide-net duplicate grep + multi-AskUserQuestion branches | Title-only 3-keyword grep + zero AskUserQuestion |
 
-The bound on the staleness window is "until the next `/wr-itil:review-problems` invocation". For sessions that capture and never review, the README stays stale — but the on-disk inventory is always correct, and the next session-start `wr-itil-reconcile-readme` preflight catches drift if it propagates beyond a single session.
+The on-disk ticket inventory remains the source of truth; `/wr-itil:list-problems` cache-stale fallback re-derives directly from ticket files when needed.
 
 ### No AskUserQuestion at all
 

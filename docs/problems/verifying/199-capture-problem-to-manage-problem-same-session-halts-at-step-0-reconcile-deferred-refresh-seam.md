@@ -1,6 +1,6 @@
 # Problem 199: capture-problem → manage-problem same-session halts at Step 0 reconcile (HALT_ROUTE_RECONCILE on deferred-refresh seam)
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-15
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -42,6 +42,26 @@ Three viable paths: (1) Run `/wr-itil:review-problems` between capture-problem a
 - **Blocks**: (none)
 - **Blocked by**: (none)
 - **Composes with**: P149 (uncommitted-rename carve-out — symmetric precedent), P165 (README-refresh-discipline hook — supersedes capture-problem Step 6 deferred-refresh in this monorepo), P094 (manage-problem inline README refresh), P062 (transition README refresh), P118 (README reconciliation preflight)
+
+## Fix Strategy
+
+Option 2 (user direction recorded 2026-05-31): kill the deferred-README-refresh contract; `/wr-itil:capture-problem` Step 6 stages `docs/problems/README.md` inline (mirroring `/wr-itil:manage-problem` Step 5 P094 refresh-on-create + P134 last-reviewed rotation). The `RISK_BYPASS: capture-deferred-readme` trailer is dropped from capture commits (no longer needed because the P165 README-refresh hook is satisfied by inline staging). ADR-032 § Foreground-lightweight-capture variant cost-shape amended to reflect inline refresh. ADR-014 bypass-token table row amended: trailer no longer emitted; allow-list entry retained as inert dead code for adopter compatibility per minimal-change discipline.
+
+**Why Option 2 (not Option 1 — keep deferred + waive P165 for capture commits)**: the P165 hook always felt half-superseded by the deferred-refresh contract. Option 2 acknowledges P165 reality and aligns capture-problem's commit shape with manage-problem's P094 path — the capture-time speed distinction comes from capture-problem skipping the wide-net duplicate grep + AskUserQuestion branches, not the README skip. The P262 workaround (allow-list trailer) is superseded — no longer emitted by capture-problem, but the inert allow-list entry stays for adopters that may have registered against it.
+
+**Surfaces touched** (single coherent commit per ADR-014):
+- `packages/itil/skills/capture-problem/SKILL.md` — frontmatter description + Step 6 body + Step 7 trailing pointer + composition table + Related section.
+- `packages/itil/skills/capture-problem/REFERENCE.md` — Deferred-README-refresh contract subsection rewritten as "README refresh: inline (P199 Option 2 amendment 2026-06-05)".
+- `docs/decisions/032-governance-skill-invocation-patterns.proposed.md` — Foreground-lightweight-capture variant cost-shape + deferred-README-refresh bullet amended.
+- `docs/decisions/014-governance-skills-commit-their-own-work.proposed.md` — bypass-token table row + paragraph amended (trailer-no-longer-emitted note + inert-entry-retained discipline).
+- `docs/decisions/README.md` — compendium regenerated.
+- `docs/problems/README.md` — P062 inline refresh covering P199 known-error → verifying transition.
+- `docs/problems/README-history.md` — line-3 rotation per P134.
+- `.changeset/<slug>.md` — `@windyroad/itil` patch.
+
+## Fix Released
+
+Awaiting release of `@windyroad/itil <next-patch>`. Capture-problem Step 6 now stages `docs/problems/README.md` inline (P094 mirror); the `RISK_BYPASS: capture-deferred-readme` trailer is dropped from capture commits; ADR-032 cost-shape amended; ADR-014 bypass-token-table row amended; inert allow-list entry retained in `readme-refresh-detect.sh`. Verification: invoke `/wr-itil:capture-problem <description>` and confirm (a) the resulting `docs(problems): capture P<NNN> <title>` commit lands without the P165 deny, (b) `docs/problems/README.md` is staged + committed alongside the new ticket file, (c) no `RISK_BYPASS: capture-deferred-readme` trailer in the commit message, (d) subsequent `/wr-itil:manage-problem` / `/wr-itil:work-problem` Step 0 reconcile does NOT halt on the just-captured ticket. Orchestrator Step 6.5 drains the release.
 
 ## Related
 
