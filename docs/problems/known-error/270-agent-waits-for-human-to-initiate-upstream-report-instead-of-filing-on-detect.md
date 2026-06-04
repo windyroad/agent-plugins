@@ -1,6 +1,6 @@
 # Problem 270: Agent waits for human to initiate upstream report instead of filing on detect — feedback delay class
 
-**Status**: Open
+**Status**: Known Error (root cause confirmed; fix shipped in AFK iter 2026-06-04 via RFC-018 + ADR-024 2026-06-04 (P270) amendment; awaiting `@windyroad/itil` patch release for `Verifying-by-release` transition per ADR-022 P143 fold-fix)
 **Reported**: 2026-05-18
 **Priority**: 8 (Medium) — Impact: 2 × Likelihood: 4
 **Effort**: M (re-estimated 2026-05-18 — AFK orchestrator Step 4 fallback amendment + security/non-security classifier + bats fixture)
@@ -115,12 +115,27 @@ The orchestrator currently treats this security-only constraint as a blanket "ne
 
 (captured via /wr-itil:capture-problem mid-loop — orchestrator main turn while iter 2 P269 was running in background subprocess; user-initiated capture per CLAUDE.md MANDATORY capture-on-correction rule; description shape matches strong-signal direction-setting via user explicit instruction "When the agent detects that the issue is upstream, it should report it ASAP")
 
-- P063 — closed; established `Upstream report pending` marker mechanism
+- RFC-018 — thin retro-fit RFC per ADR-071 carrying this fix; `proposed → verifying` on `@windyroad/itil` patch release per ADR-022 P143 fold-fix
+- ADR-024 — amended 2026-06-04 (P270) with the per-classification external-comms-gated AFK branching authorising auto-fire for ALL upstream reports including security
+- ADR-028 — `wr-risk-scorer:external-comms` agent (the load-bearing gate this fix wires to; the 2026-04-25 (P070) "interim static heuristic until the subagent ships" deferral is lifted)
+- ADR-042 — within-axis precedent generalised to the external-comms risk class
+- ADR-074 — substance-confirm-before-build (drives the 3 outstanding_questions queued below)
+- P063 — closed; established `Upstream report pending` marker mechanism (retained as detection substrate)
 - P070, P079, P080, P220, P249, P254 — sibling cluster on upstream report lifecycle
-- ADR-024 — `/wr-itil:report-upstream` contract; Consequences clause names the security-path interactive carve-out
-- `packages/itil/skills/work-problems/SKILL.md` Step 4 — current P063 fallback marker append (would gain a non-security auto-fire branch)
-- `packages/itil/skills/manage-problem/SKILL.md` Step 6 — external-root-cause detection (would gain a non-security auto-fire branch)
-- `packages/itil/skills/report-upstream/SKILL.md` Step 6 — security-path interactive branch (preserved verbatim under this ticket's fix shape)
+- P352 — queue-and-continue precedent (drives the above-appetite queue-not-halt branch)
+- `packages/itil/skills/work-problems/SKILL.md` Step 4 — classifier table `upstream-blocked` row + decision-table row re-cast as external-comms-gated routing through manage-problem Step 6 fallback (lands in same commit as this transition)
+- `packages/itil/skills/manage-problem/SKILL.md` Step 6 — external-root-cause-detection AFK fallback re-cast: auto-invoke `/wr-itil:report-upstream`, gated via `wr-risk-scorer:external-comms`; legacy marker-append semantics retained for backward compatibility
+- `packages/itil/skills/report-upstream/SKILL.md` Step 6 — security-path interactive branch retained; AFK behaviour summary table re-cast as external-comms-gated (security-path-halt + dedup-halt rows superseded — both now route via the gate; queue-not-halt per P352)
+
+## Outstanding Design Questions (per ADR-074 — queued 2026-06-04 by AFK iter shipping RFC-018)
+
+Three leaf-substance questions are NOT covered by the 2026-06-02 user-ratified principle and were deferred per ADR-074 substance-confirm-before-build. Return-presentation surfaces them as direction-setting decisions per ADR-044 category 1:
+
+1. **Risk-reducing measures vocabulary** — what constitutes a "risk-reducing measure" for an above-appetite upstream report? Alternative disclosure channel? Content redaction? Defer-to-security-advisory path? Bounded vocabulary (analogous to ADR-042's `move-to-holding` enumeration) or open-ended LLM judgement (analogous to the `wr-risk-scorer:external-comms` agent's own scoring)?
+2. **Security-disclosure-channel routing in AFK** — when auto-filing security AND below-appetite, route per existing Step 6: GitHub Security Advisories default if upstream has `SECURITY.md` declaring them; halt on missing-`SECURITY.md` per existing Step 6 prose; always-queue-for-review when classification is security regardless of risk band?
+3. **`## Drafted Upstream Report` section retention vs rename** — the section currently means "halt-and-save"; post-amendment it means "queued-report save". Same name + repurposed semantics, or rename to `## Queued Upstream Report` to reflect changed meaning?
+
+Until the user ratifies (1), (2), (3) explicitly, the orchestrator follows the conservative reading of the principle: (1) the report-upstream skill applies whatever risk-reducing measures its current implementation supports (initially: no measures — above-appetite directly queues); (2) the missing-`SECURITY.md` sub-case continues to save-and-queue rather than auto-route; (3) the section retains the existing `## Drafted Upstream Report` name. Each is reversible on user ratification.
 
 ## RFCs
 

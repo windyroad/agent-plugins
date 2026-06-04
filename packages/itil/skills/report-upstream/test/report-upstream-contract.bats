@@ -82,6 +82,56 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
+# ─── ADR-024 2026-06-04 (P270) amendment: external-comms-gated AFK auto-fire ──
+#
+# The 2026-06-04 amendment reverses the pre-amendment blanket-defer in AFK
+# (line 137 "AFK orchestrators should never auto-report a security-classified
+# ticket") to a per-classification external-comms gated branching. Below-
+# appetite proceeds; above-appetite risk-reduces then queues per P352.
+
+@test "report-upstream: SKILL.md AFK behaviour summary cites external-comms gate as authority (ADR-024 2026-06-04 P270 amendment)" {
+  # The external-comms gate must appear in the AFK summary table as the
+  # per-classification routing authority — at minimum on the public-issue,
+  # dedup, security-with-channel, and security-without-channel rows.
+  run grep -iE 'wr-risk-scorer:external-comms' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  # At least 4 occurrences in SKILL.md (one per AFK row in the summary plus
+  # at least one prose occurrence in Step 6 prose).
+  hits=$(grep -ic 'wr-risk-scorer:external-comms' "$SKILL_MD")
+  [ "$hits" -ge 4 ]
+}
+
+@test "report-upstream: SKILL.md AFK summary cites P270 amendment as authority (ADR-024 2026-06-04)" {
+  run grep -iE '2026-06-04.*P270|P270.*2026-06-04' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "report-upstream: SKILL.md AFK above-appetite branch queues per P352 queue-and-continue (P270 amendment)" {
+  # The above-appetite branch on ANY AFK row must reference queue-and-continue
+  # (P352) rather than halt-the-orchestrator semantics for the pre-amendment
+  # blanket-defer rule.
+  run grep -iE 'P352|queue-and-continue' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "report-upstream: SKILL.md marks the pre-amendment never-auto-public ban as superseded (P270 amendment)" {
+  # The legacy "Never auto-open a public issue for a security-classified
+  # ticket" prose is retained for traceability but must be marked as
+  # superseded by the 2026-06-04 amendment so readers do not act on the
+  # superseded rule.
+  run grep -iE 'superseded.*2026-06-04|2026-06-04.*supersed' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "report-upstream: SKILL.md drops the 'interim static heuristic' deferral on the dedup branch (P070 lift-condition met per P270 amendment)" {
+  # The 2026-04-25 (P070) amendment named the dedup-AFK as an "interim static
+  # heuristic in force until wr-risk-scorer:external-comms ships". The agent
+  # has shipped; the 2026-06-04 (P270) amendment lifts the deferral. The
+  # AFK summary's dedup-path row must cite the LIFT, not the deferral.
+  run grep -iE 'interim static heuristic.*lifted|deferral.*lifted|LIFTED' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
 # ─── ADR-033 problem-first classifier contract (P067) ──────────────────────────
 #
 # ADR-033 partially supersedes ADR-024 Decision Outcome Steps 3 + 5 with a
