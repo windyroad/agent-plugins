@@ -53,13 +53,15 @@ Single fold-fix commit (post the capture-rfc skeleton commit per ADR-014 capture
 3. **Above-appetite branching shape** — within-axis re-use of ADR-042's risk-reduce-then-halt pattern, generalised from commit/push/release risk to the external-comms risk axis (per ADR-042 open-vocabulary clause).
 4. **Queue-not-halt** — P352 queue-and-continue precedent + ADR-013 Rule 6 "defer the decision" branch (the queue IS the defer; not silent-choose).
 
-## Deferred substance (per ADR-074 — queue as outstanding_questions against P270)
+## Resolved substance (per ADR-074 — ratified 2026-06-04, same day as the queue)
 
-1. **Risk-reducing measures vocabulary** — what constitutes a "risk-reducing measure" for an above-appetite upstream report? Alternative disclosure channel? Content redaction? Defer-to-security-advisory path? Bounded vocabulary (analogous to ADR-042's `move-to-holding` enumeration) or open-ended LLM judgement (analogous to the `wr-risk-scorer:external-comms` agent's own scoring)?
-2. **Security-disclosure-channel routing in AFK** — when auto-filing security AND below-appetite, route per existing Step 6: GitHub Security Advisories default if upstream has `SECURITY.md` declaring them; halt on missing-`SECURITY.md`; always-queue-for-review when classification is security regardless of risk band?
-3. **`## Drafted Upstream Report` section retention vs rename** — the section currently means "halt-and-save"; post-amendment it means "queued-report save". Same name + repurposed semantics, or rename to `## Queued Upstream Report` to reflect changed meaning?
+All three leaf-substance questions were queued as `outstanding_questions` against P270 and **ratified verbatim by the user 2026-06-04**, BEFORE the dependent ADR-024 second-amendment + SKILL.md work landed — the canonical ADR-074 happy path.
 
-These three queue as `outstanding_questions` against P270 itself (recorded in the P270 ticket body) — return-presentation surfaces them as direction-setting decisions per ADR-044 category 1.
+1. **Risk-reducing measures vocabulary** — **RATIFIED: open-ended LLM judgement** (not bounded). `wr-risk-scorer:external-comms` agent's own scoring picks the remedy case-by-case. Within-axis precedent: ADR-042's open-vocabulary `action-class` clause.
+2. **Security-disclosure-channel routing in AFK** — **RATIFIED: external-comms-gated branching**, not always-queue-regardless. Upstream-with-`SECURITY.md` + below-appetite → file via the declared channel. Upstream-without-`SECURITY.md` but other disclosure channel exists → run the external-comms risk assessment considering impact to (i) our repository, (ii) our reputation, (iii) the party we are reporting to.
+3. **`## Drafted Upstream Report` section retention vs rename** — **RATIFIED: rename to `## Queued Upstream Report`**. Same shape; new name reflects queue-for-review-on-return semantics.
+
+These three ratifications land in the ADR-024 2026-06-04 **second-amendment** entry and the three SKILL.md surfaces (`report-upstream`, `manage-problem` Step 6 fallback, `work-problems` Step 4 classifier) in the same commit. P270 ticket body's `## Resolved Design Questions` section records the verbatim user direction for each.
 
 ## Tasks
 
