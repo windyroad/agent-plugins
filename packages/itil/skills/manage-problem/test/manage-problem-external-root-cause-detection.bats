@@ -45,11 +45,16 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "manage-problem: SKILL.md documents the AFK non-interactive fallback (option 2, append marker, no auto-invoke)" {
-  run grep -iE 'non-interactive.*afk|afk.*fallback' "$MP_SKILL"
+@test "manage-problem: SKILL.md documents the AFK non-interactive fallback (P270 — auto-invoke report-upstream via external-comms gate)" {
+  run grep -iE 'non-interactive.*afk|afk.*fallback|Non-interactive \(AFK\) branch' "$MP_SKILL"
   [ "$status" -eq 0 ]
-  # Explicit ban on auto-invoke
-  run grep -F 'Do NOT auto-invoke' "$MP_SKILL"
+  # P270 (ADR-024 2026-06-04 amendment): the AFK branch now auto-invokes
+  # report-upstream and routes the drafted prose through the
+  # wr-risk-scorer:external-comms gate, superseding the pre-2026-06-04
+  # "append marker, do NOT auto-invoke" default.
+  run grep -iE 'auto-invoke .*report-upstream' "$MP_SKILL"
+  [ "$status" -eq 0 ]
+  run grep -F 'external-comms' "$MP_SKILL"
   [ "$status" -eq 0 ]
 }
 
@@ -77,8 +82,12 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "work-problems: upstream-blocked skip row runs the AFK fallback before skipping" {
-  run grep -F 'append the pending-upstream-report marker' "$WP_SKILL"
+@test "work-problems: upstream-blocked skip row runs the AFK fallback before skipping (P270 — auto-invoke report-upstream)" {
+  # P270 (ADR-024 2026-06-04 amendment): the skip row auto-invokes
+  # report-upstream before skipping (superseding the old marker-only append).
+  run grep -iE 'Auto-invoke .*report-upstream' "$WP_SKILL"
+  [ "$status" -eq 0 ]
+  run grep -F 'Before skipping, run the manage-problem external-root-cause detection AFK fallback' "$WP_SKILL"
   [ "$status" -eq 0 ]
 }
 
