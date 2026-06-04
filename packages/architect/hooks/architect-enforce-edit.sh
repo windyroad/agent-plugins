@@ -6,6 +6,18 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/lib/architect-gate.sh"
 
+# P191 Phase 2: resolve the project root from the session signal, not the
+# hook's runtime CWD. Claude Code can launch the hook with a working directory
+# that differs from the session/project dir while still exporting
+# CLAUDE_PROJECT_DIR (and a $PWD env var) pointing at the project. A relative
+# `[ -d "docs/decisions" ]` then false-negatives even though docs/decisions is
+# present — and because this gate fails OPEN (exit 0) on a missing decisions
+# dir, the misfire silently DEACTIVATES the architect gate and edits bypass
+# review (a governance hole, strictly worse than the JTBD gate's fail-closed
+# nuisance fixed in P191 Phase 1). Anchor every project-relative check on
+# PROJECT_DIR. Pattern mirrors architect-oversight-nudge.sh.
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
+
 INPUT=$(cat)
 
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty') || true
@@ -25,14 +37,14 @@ fi
 case "$FILE_PATH" in
   /*)
     case "$FILE_PATH" in
-      "$PWD"/*) ;;
+      "$PROJECT_DIR"/*) ;;
       *) exit 0 ;;
     esac
     ;;
 esac
 
 # Only gate if the project has architecture decisions
-if [ ! -d "docs/decisions" ]; then
+if [ ! -d "$PROJECT_DIR/docs/decisions" ]; then
   exit 0
 fi
 

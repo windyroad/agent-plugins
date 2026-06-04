@@ -58,11 +58,21 @@ Architect verdict `a86054e851a5d835a` PASS (routine bug-fix, no new ADR). JTBD v
 
 `packages/architect/hooks/architect-enforce-edit.sh` has the **identical** relative-path bug at line 28 (membership) + line 35 (`[ ! -d "docs/decisions" ]` activation) — but it fails **OPEN** (`exit 0`), so on the same CWD divergence the architect gate silently goes inactive and edits bypass architect review. This is a **governance hole strictly more severe** than P191's fail-closed nuisance (silent under-protection vs safe-but-annoying over-block). Folded into this ticket as Phase 2 per the same-root-cause-class principle (architect direction: track here, do not capture a sibling ticket).
 
-### Phase 2 Investigation Tasks
+### Phase 2 — SHIPPED 2026-06-04 (fold-fix; `@windyroad/architect` patch)
 
-- [ ] Apply the same `PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"` anchor to `architect-enforce-edit.sh` (lines 28 + 35) + `architect-mark-reviewed.sh` if it shares the pattern.
-- [ ] Behavioural reproduction in `architect-project-root.bats` (fail-OPEN variant: assert the gate stays ACTIVE — denies for missing marker — rather than silently exiting 0 — when CWD diverges but docs/decisions is present).
-- [ ] Re-rate Phase 2 Priority HIGHER than Phase 1 (fail-OPEN governance bypass > fail-closed nuisance).
+Applied the `PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"` anchor across the FULL architect-gate project-root surface (the complete root-cause class — partial would leave the bug in some paths):
+
+- [x] `architect-enforce-edit.sh` — membership (`"$PWD"/*` → `"$PROJECT_DIR"/*`) + detection (`[ ! -d "$PROJECT_DIR/docs/decisions" ]`). The fail-OPEN governance hole.
+- [x] `architect-plan-enforce.sh` — detection (same fail-OPEN on ExitPlanMode plan review).
+- [x] `architect-detect.sh` — UserPromptSubmit detection (delegation-instruction injection).
+- [x] `architect-mark-reviewed.sh` — marker-write hash (consistency).
+- [x] `architect-refresh-hash.sh` — hash refresh (consistency).
+- [x] `lib/architect-gate.sh` — `check_architect_gate` drift-hash (consistency).
+- [x] Behavioural reproduction in `architect-project-root.bats` (fail-OPEN variant: gate stays ACTIVE / denies for missing marker when CWD diverges but docs/decisions present) + fail-open regression guard (genuine absence stays inactive). Full architect hook suite 77/77 green.
+
+Carried by RFC-020 (Phase 2 task in the same RFC). `@windyroad/architect` patch changeset `.changeset/p191-architect-gate-project-root-resolution.md`.
+
+**Related-but-distinct surface NOT fixed here**: `architect-oversight-marker-discipline.sh` (+ the jtbd sibling) use `"$PWD"/*` for membership but gate *oversight-marker edits*, not the main gate's activation — a tangential fail-open on a narrower surface. Noted for a future pass if it recurs; not part of the gate-activation root-cause class this ticket closes.
 
 ### Preliminary Hypothesis
 

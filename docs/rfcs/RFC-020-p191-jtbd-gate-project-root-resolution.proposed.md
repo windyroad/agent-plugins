@@ -73,7 +73,7 @@ The architect review flagged that `packages/architect/hooks/architect-enforce-ed
 - [x] P191 fold-fix transition (Open → Verification Pending) + Phase 2 architect-gate investigation task.
 - [x] `.changeset/p191-jtbd-gate-project-root-resolution.md` `@windyroad/jtbd` patch.
 - [ ] Release the changeset → P191 `Verifying → Closed` (release-gated; this RFC `proposed → verifying`).
-- [ ] **Phase 2**: apply the same fix to the architect gate (fail-OPEN governance hole) — separate change under P191 Phase 2.
+- [x] **Phase 2** (shipped 2026-06-04): applied the same `PROJECT_DIR` anchor across the full architect-gate project-root surface — `architect-enforce-edit.sh` (fail-OPEN hole), `architect-plan-enforce.sh` (fail-OPEN hole), `architect-detect.sh`, `architect-mark-reviewed.sh`, `architect-refresh-hash.sh`, `lib/architect-gate.sh`; behavioural reproduction + fail-open regression guard in `architect-project-root.bats` (architect hook suite 77/77 green); `@windyroad/architect` patch changeset `.changeset/p191-architect-gate-project-root-resolution.md`.
 
 ## Commits
 

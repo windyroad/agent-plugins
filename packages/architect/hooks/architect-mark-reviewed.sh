@@ -7,6 +7,11 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/lib/gate-helpers.sh"
 
+# P191 Phase 2: anchor docs/decisions on the project root, not the hook's
+# runtime CWD (see architect-enforce-edit.sh). A false-negative here never
+# stores the marker hash, desynchronising the enforce gate's drift check.
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
+
 _parse_input
 
 TOOL_NAME=$(_get_tool_name)
@@ -51,8 +56,8 @@ case "$SUBAGENT" in
 
     # Store decision hash for drift detection
     if [ -f "/tmp/architect-reviewed-${SESSION_ID}" ]; then
-      if [ -d "docs/decisions" ]; then
-        HASH=$(find docs/decisions -name '*.md' -not -name 'README.md' -print0 | sort -z | xargs -0 cat 2>/dev/null | _hashcmd | cut -d' ' -f1)
+      if [ -d "$PROJECT_DIR/docs/decisions" ]; then
+        HASH=$(find "$PROJECT_DIR/docs/decisions" -name '*.md' -not -name 'README.md' -print0 | sort -z | xargs -0 cat 2>/dev/null | _hashcmd | cut -d' ' -f1)
       else
         HASH="none"
       fi

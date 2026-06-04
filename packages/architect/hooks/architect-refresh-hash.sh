@@ -7,6 +7,11 @@
 # Portable hash: tries md5sum, falls back to md5 -r, then shasum
 _hashcmd() { md5sum 2>/dev/null || md5 -r 2>/dev/null || shasum 2>/dev/null; }
 
+# P191 Phase 2: anchor docs/decisions on the project root, not the hook's
+# runtime CWD (see architect-enforce-edit.sh). The refreshed hash must match
+# the enforce gate's drift-check hash, which is now project-root-anchored.
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
+
 INPUT=$(cat)
 
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty') || true
@@ -30,8 +35,8 @@ HASH_FILE="/tmp/architect-reviewed-${SESSION_ID}.hash"
 
 # Only refresh if a valid marker exists
 if [ -f "$MARKER" ] && [ -f "$HASH_FILE" ]; then
-  if [ -d "docs/decisions" ]; then
-    HASH=$(find docs/decisions -name '*.md' -not -name 'README.md' -print0 | sort -z | xargs -0 cat 2>/dev/null | _hashcmd | cut -d' ' -f1)
+  if [ -d "$PROJECT_DIR/docs/decisions" ]; then
+    HASH=$(find "$PROJECT_DIR/docs/decisions" -name '*.md' -not -name 'README.md' -print0 | sort -z | xargs -0 cat 2>/dev/null | _hashcmd | cut -d' ' -f1)
   else
     HASH="none"
   fi

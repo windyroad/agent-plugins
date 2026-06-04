@@ -5,6 +5,12 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/lib/architect-gate.sh"
 
+# P191 Phase 2: anchor docs/decisions on the project root, not the hook's
+# runtime CWD (see architect-enforce-edit.sh). This gate also fails OPEN on a
+# missing decisions dir, so the CWD misfire silently lets ExitPlanMode through
+# without architect plan review.
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
+
 INPUT=$(cat)
 
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty') || true
@@ -15,7 +21,7 @@ if [ -z "$SESSION_ID" ]; then
 fi
 
 # Only gate if the project has architecture decisions
-if [ ! -d "docs/decisions" ]; then
+if [ ! -d "$PROJECT_DIR/docs/decisions" ]; then
   exit 0
 fi
 

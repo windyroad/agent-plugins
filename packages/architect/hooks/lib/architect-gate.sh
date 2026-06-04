@@ -13,6 +13,9 @@ check_architect_gate() {
   local SESSION_ID="$1"
   local MARKER="/tmp/architect-reviewed-${SESSION_ID}"
   local TTL_SECONDS="${ARCHITECT_TTL:-3600}"
+  # P191 Phase 2: anchor the docs/decisions drift-hash on the project root,
+  # not the hook's runtime CWD (see architect-enforce-edit.sh for rationale).
+  local PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
 
   if [ -n "$SESSION_ID" ] && [ -f "$MARKER" ]; then
     local NOW=$(date +%s)
@@ -24,8 +27,8 @@ check_architect_gate() {
       if [ -f "$HASH_FILE" ]; then
         local STORED=$(cat "$HASH_FILE")
         local CURRENT
-        if [ -d "docs/decisions" ]; then
-          CURRENT=$(find docs/decisions -name '*.md' -not -name 'README.md' -print0 | sort -z | xargs -0 cat 2>/dev/null | _hashcmd | cut -d' ' -f1)
+        if [ -d "$PROJECT_DIR/docs/decisions" ]; then
+          CURRENT=$(find "$PROJECT_DIR/docs/decisions" -name '*.md' -not -name 'README.md' -print0 | sort -z | xargs -0 cat 2>/dev/null | _hashcmd | cut -d' ' -f1)
         else
           CURRENT="none"
         fi

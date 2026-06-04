@@ -16,7 +16,12 @@ source "$SCRIPT_DIR/lib/session-marker.sh"
 INPUT=$(cat)
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty' 2>/dev/null || echo "")
 
-if [ -d "docs/decisions" ]; then
+# P191 Phase 2: anchor docs/decisions on the project root, not the hook's
+# runtime CWD (see architect-enforce-edit.sh). A false-negative here silently
+# drops the delegation-instruction injection that primes the architect gate.
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
+
+if [ -d "$PROJECT_DIR/docs/decisions" ]; then
   if has_announced "architect" "$SESSION_ID"; then
     cat <<'HOOK_OUTPUT'
 MANDATORY architecture gate active (docs/decisions/ present). Delegate to wr-architect:agent before editing project files. See turn-1 instructions for full scope and exclusions.
