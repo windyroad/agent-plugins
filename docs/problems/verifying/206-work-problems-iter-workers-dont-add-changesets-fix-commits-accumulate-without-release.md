@@ -1,9 +1,11 @@
 # Problem 206: work-problems iter workers don't add changesets — fix commits accumulate without release
 
-**Status**: Known Error
+**Status**: Verifying
 **Reported**: 2026-05-15
+**Origin**: inbound-reported (bbstats#195)
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Release vehicle**: .changeset/wr-itil-p206-iter-prompt-changeset-required.md
 
 ## Description
 
@@ -26,9 +28,9 @@ Manually add changesets after AFK loops complete (defeats the AFK promise that r
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Extend `/wr-itil:work-problems` Step 5 iter dispatch prompt: require iter subprocesses to add a `.changeset/*.md` alongside any fix commit that touches `packages/*/{src,bin,hooks,skills,scripts,lib,agents}`. Doc-only commits and test-only commits don't need changesets.
-- [ ] Add a post-iter validator in Step 6 that detects "fix commit landed without companion changeset" and routes to an iter-fix-up step OR halts the loop with a clear directive.
-- [ ] Behavioural fixture: synthetic iter that lands a source-code fix; assert `.changeset/*.md` is present in the iter's commit.
+- [x] Extend `/wr-itil:work-problems` Step 5 iter dispatch prompt: require iter subprocesses to add a `.changeset/*.md` alongside any fix commit that touches `packages/*/{src,bin,hooks,skills,scripts,lib,agents}`. Doc-only commits and test-only commits don't need changesets. — landed in `packages/itil/skills/work-problems/SKILL.md` Step 5 iteration-prompt-body constraint #3 (2026-06-06).
+- [ ] Add a post-iter validator in Step 6 that detects "fix commit landed without companion changeset" and routes to an iter-fix-up step OR halts the loop with a clear directive. — Deferred. Hook P141 (`itil-changeset-discipline.sh`) already provides PreToolUse:Bash enforcement at `git commit` time; a post-iter validator is a third defence-in-depth layer whose value depends on cache-staleness scenarios where the hook is missing. Re-evaluate at next `/wr-itil:review-problems` if the prompt-discipline + hook layers prove insufficient.
+- [x] Behavioural fixture (doc-lint contract assertion variant): `packages/itil/skills/work-problems/test/work-problems-step-5-iter-changeset-required.bats` — structural-permitted per ADR-052 with tdd-review comment naming the synthetic-iter-dispatch harness gap as the behavioural-deferral justification.
 
 ## Dependencies
 
