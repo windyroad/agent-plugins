@@ -96,3 +96,22 @@ assert_path_allowed() {
 @test "architect: exempts docs/stories/README.md (P170 / ADR-060)" {
   assert_path_allowed "$PWD/docs/stories/README.md"
 }
+
+# --- Retros exemption (P203) ---
+# `docs/retros/*` is the ask-hygiene + run-retro narrative trail written
+# routinely by `/wr-retrospective:run-retro` Step 2d + Step 5. Routine
+# appends should not fire the architect gate — they are not load-bearing
+# architecture content. Mirrors the docs/problems and docs/jtbd peer-
+# plugin-policy exemptions.
+
+@test "architect: exempts docs/retros/ ask-hygiene file (P203)" {
+  assert_path_allowed "$PWD/docs/retros/2026-06-06-some-iter-ask-hygiene.md"
+}
+
+@test "architect: exempts docs/retros/ analyze-context file (P203)" {
+  assert_path_allowed "$PWD/docs/retros/2026-06-06-context-analysis.md"
+}
+
+@test "architect: exempts docs/retros/ retro narrative file (P203)" {
+  assert_path_allowed "$PWD/docs/retros/2026-06-06-session-wrap.md"
+}

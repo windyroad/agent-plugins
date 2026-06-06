@@ -1,9 +1,32 @@
 # Problem 203: architect-enforce-edit + jtbd-enforce-edit hooks should add docs/retros/ to their exclusion paths
 
-**Status**: Known Error
+**Status**: Verifying (Fix Released)
 **Reported**: 2026-05-15
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+
+## Fix
+
+`packages/architect/hooks/architect-enforce-edit.sh` and
+`packages/jtbd/hooks/jtbd-enforce-edit.sh` now include a `*/docs/retros/*` case
+in the exclusion list, mirroring the existing peer-plugin-policy pattern for
+`docs/problems/`, `docs/jtbd/`, `docs/briefing/`, `docs/story-maps/`, and
+`docs/stories/`. Behavioural bats coverage added in
+`packages/architect/hooks/test/architect-enforce-scope.bats` and
+`packages/jtbd/hooks/test/jtbd-enforce-scope.bats` — three cases per gate
+asserting `assert_path_allowed` for ask-hygiene / analyze-context /
+retro-narrative filename shapes. 41/41 bats pass.
+
+The voice-tone and style-guide enforce hooks are extension-gated
+(`.html`/`.jsx`/`.tsx`/`.vue`/`.svelte`/`.ejs`/`.hbs` for voice-tone, `.css` for
+style-guide) and do not fire on `.md` retros files — no change needed there.
+
+Changeset: `.changeset/p203-retros-exclusion.md` — patch bumps for both
+`@windyroad/architect` and `@windyroad/jtbd`.
+
+Verification: next retro write under `docs/retros/` lands without either gate
+firing BLOCKED on the receiving session (verifies after release + global cache
+refresh).
 
 ## Description
 
@@ -24,8 +47,8 @@ Tolerate the gate delegations on retro append writes (adds friction to ask-hygie
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Add `docs/retros/` to exclusion path lists in `packages/architect/hooks/architect-enforce-edit.sh` and `packages/jtbd/hooks/jtbd-enforce-edit.sh`.
-- [ ] Behavioural test asserting writes to `docs/retros/*.md` do not fire either gate.
+- [x] Add `docs/retros/` to exclusion path lists in `packages/architect/hooks/architect-enforce-edit.sh` and `packages/jtbd/hooks/jtbd-enforce-edit.sh`.
+- [x] Behavioural test asserting writes to `docs/retros/*.md` do not fire either gate.
 
 ## Dependencies
 

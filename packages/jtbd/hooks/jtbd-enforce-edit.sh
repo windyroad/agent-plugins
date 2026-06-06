@@ -111,6 +111,13 @@ case "$FILE_PATH" in
     exit 0 ;;
   */docs/stories/*|docs/stories/*)
     exit 0 ;;
+  # Retros — ask-hygiene + run-retro narrative trail written routinely by
+  # `/wr-retrospective:run-retro` (Step 2d + Step 5). Not user-job content;
+  # the gate firing on every retro append forces a subagent round-trip
+  # before a non-load-bearing narrative artefact can land. Mirrors the
+  # docs/problems and docs/jtbd peer-plugin-policy exemptions. P203.
+  */docs/retros/*|docs/retros/*)
+    exit 0 ;;
 esac
 
 # Determine JTBD path — canonical directory layout only (ADR-008 Option 3).
