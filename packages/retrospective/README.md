@@ -50,6 +50,7 @@ The plugin also triggers a reminder via a `Stop` hook when a session ends natura
 | ------- | --------- | --- |
 | `/wr-retrospective:run-retro` | Run a session retrospective; emits the briefing update, advisory detector outputs, and the Pipeline Instability section per Step 2b | Alpha |
 | `/wr-retrospective:analyze-context` | Deep on-demand context-usage analyser per ADR-043; produces per-turn attribution and trim suggestions | Experimental |
+| `/wr-retrospective:migrate-briefing` | One-time idempotent migration of a legacy single-file `docs/BRIEFING.md` into the per-topic `docs/briefing/` tree the session-start hook + Tier-3 rotation expect (ADR-040) | Experimental |
 
 ## Advisory scripts
 
