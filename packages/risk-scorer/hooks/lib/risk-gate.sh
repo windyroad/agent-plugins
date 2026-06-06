@@ -153,6 +153,148 @@ print(('yes' if score > N else 'no') + ' ' + str(N))
   return 0
 }
 
+# Check CI health for the current branch (P208).
+#
+# Returns 0 if push/release may proceed, 1 if denied. Sets CI_GATE_REASON
+# on deny with a human-readable message that names the CI conclusion and
+# the run URL. Sets CI_GATE_CATEGORY ∈ {bypass, no-history, allow, red,
+# pending, gh-error}.
+#
+# Consults `gh run list --branch <current-branch> --limit 1 --json
+# status,conclusion,databaseId,url` for the working branch's most recent
+# CI run.
+#
+# Decision table:
+#   - bypass marker present (${RDIR}/ci-bypass-${ACTION}) → allow, consume
+#   - gh failure (auth / timeout / API error) → DENY (fail-CLOSED, per
+#     P208 safe-high-fix-risk classifier — a buggy harden must NOT
+#     degrade to allow)
+#   - empty result `[]` → allow (no CI history yet; first push triggers
+#     CI naturally)
+#   - status ∈ {queued, in_progress, pending, requested, waiting} → deny
+#   - conclusion ∈ {failure, cancelled, timed_out, action_required,
+#     startup_failure} → deny
+#   - conclusion ∈ {success, skipped, neutral} or unknown → allow
+#
+# Usage: check_ci_status "$SESSION_ID" "push"   # or "release"
+check_ci_status() {
+  local SESSION_ID="$1"
+  local ACTION="$2"
+  local RDIR
+  RDIR=$(_risk_dir "$SESSION_ID")
+  local BYPASS_MARKER="${RDIR}/ci-bypass-${ACTION}"
+
+  CI_GATE_REASON=""
+  CI_GATE_CATEGORY=""
+
+  # One-shot bypass marker — consumed on use, same family as
+  # reducing-push / incident-release. Documented override for the
+  # legitimate "first push triggers CI" edge case and infra incidents.
+  if [ -f "$BYPASS_MARKER" ]; then
+    rm -f "$BYPASS_MARKER"
+    CI_GATE_CATEGORY="bypass"
+    return 0
+  fi
+
+  # Resolve current branch. If we're not in a git repo or HEAD is
+  # detached, skip the CI check (the surrounding push/release gate
+  # would itself fail at the git layer with a clearer error).
+  local BRANCH
+  BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+  if [ -z "$BRANCH" ] || [ "$BRANCH" = "HEAD" ]; then
+    CI_GATE_CATEGORY="allow"
+    return 0
+  fi
+
+  # Query GitHub. Bounded at 10s wall-clock so a network stall cannot
+  # hang push:watch indefinitely. `command -v timeout` because macOS
+  # default install does not ship GNU `timeout`.
+  local JSON GH_EXIT
+  if command -v timeout >/dev/null 2>&1; then
+    JSON=$(timeout 10s gh run list --branch "$BRANCH" --limit 1 \
+        --json status,conclusion,databaseId,url 2>/dev/null) || GH_EXIT=$?
+  else
+    JSON=$(gh run list --branch "$BRANCH" --limit 1 \
+        --json status,conclusion,databaseId,url 2>/dev/null) || GH_EXIT=$?
+  fi
+
+  if [ -n "${GH_EXIT:-}" ] && [ "$GH_EXIT" != "0" ]; then
+    CI_GATE_CATEGORY="gh-error"
+    CI_GATE_REASON="CI status check failed (gh exit ${GH_EXIT}: auth / timeout / API error). Fail-closed per P208 safe-high-fix-risk. Fix the underlying gh failure, or to override for a legitimate first-push-triggers-CI run, create the bypass marker: touch ${BYPASS_MARKER}"
+    return 1
+  fi
+
+  # Empty array = no CI history for this branch yet. Natural allow for
+  # the documented "first push triggers CI" case — no marker needed.
+  local TRIMMED
+  TRIMMED=$(printf '%s' "$JSON" | tr -d '[:space:]')
+  if [ -z "$TRIMMED" ] || [ "$TRIMMED" = "[]" ]; then
+    CI_GATE_CATEGORY="no-history"
+    return 0
+  fi
+
+  # Parse status, conclusion, url. Fail-closed on parse error.
+  local PARSED
+  PARSED=$(echo "$JSON" | python3 -c "
+import sys, json
+try:
+    runs = json.load(sys.stdin)
+    if not isinstance(runs, list) or not runs:
+        print('||')
+        sys.exit(0)
+    r = runs[0]
+    print('{}|{}|{}'.format(r.get('status') or '', r.get('conclusion') or '', r.get('url') or ''))
+except Exception:
+    print('PARSE_ERROR||')
+" 2>/dev/null || echo "PARSE_ERROR||")
+
+  local STATUS CONCLUSION URL
+  STATUS="${PARSED%%|*}"
+  local REST="${PARSED#*|}"
+  CONCLUSION="${REST%%|*}"
+  URL="${REST#*|}"
+
+  if [ "$STATUS" = "PARSE_ERROR" ]; then
+    CI_GATE_CATEGORY="gh-error"
+    CI_GATE_REASON="CI status check returned unparseable response. Fail-closed per P208 safe-high-fix-risk. To override for a legitimate first-push case, create the bypass marker: touch ${BYPASS_MARKER}"
+    return 1
+  fi
+
+  case "$STATUS" in
+    queued|in_progress|pending|requested|waiting)
+      CI_GATE_CATEGORY="pending"
+      CI_GATE_REASON="Latest CI run on branch '${BRANCH}' is still in flight (status: ${STATUS}). Wait for it to settle: ${URL}. To override, create the bypass marker: touch ${BYPASS_MARKER}"
+      return 1
+      ;;
+    completed)
+      case "$CONCLUSION" in
+        success|skipped|neutral|"")
+          CI_GATE_CATEGORY="allow"
+          return 0
+          ;;
+        failure|cancelled|timed_out|action_required|startup_failure)
+          CI_GATE_CATEGORY="red"
+          CI_GATE_REASON="Latest CI run on branch '${BRANCH}' concluded ${CONCLUSION}: ${URL}. Fix CI before pushing/releasing. To override for a legitimate first-push or infra-incident case, create the bypass marker: touch ${BYPASS_MARKER}"
+          return 1
+          ;;
+        *)
+          # Unknown conclusion — allow rather than block on a value we
+          # don't recognise. New GitHub conclusion values are infrequent.
+          CI_GATE_CATEGORY="allow"
+          return 0
+          ;;
+      esac
+      ;;
+    *)
+      # Unknown status — allow rather than block on a value we don't
+      # recognise. Conservative tilts toward the threshold check below
+      # catching the actual risk.
+      CI_GATE_CATEGORY="allow"
+      return 0
+      ;;
+  esac
+}
+
 # Emit fail-closed deny JSON for PreToolUse hooks.
 risk_gate_deny() {
   local REASON="$1"

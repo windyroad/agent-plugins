@@ -45,6 +45,16 @@ if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm run push:watch(\s|$)'; then
         if [ -f "${RDIR}/clean" ]; then
             exit 0
         fi
+        # CI-status precondition (P208): a within-appetite predicted-risk
+        # score is necessary but not sufficient — the lagging CI signal
+        # must also be green (or no-history-yet for the documented
+        # first-push case). Fail-closed on gh errors. Ordered AFTER the
+        # one-shot bypass markers and BEFORE the predicted-risk gate so
+        # incident workflows and clean-tree pushes are unaffected.
+        if ! check_ci_status "$SESSION_ID" "push"; then
+            risk_gate_deny "Push blocked: ${CI_GATE_REASON}"
+            exit 0
+        fi
         if ! check_risk_gate "$SESSION_ID" "push"; then
             if [ "$RISK_GATE_CATEGORY" = "threshold" ]; then
                 risk_gate_deny "Push blocked: Push risk score ${RISK_GATE_SCORE}/25 (Medium or above). To proceed: (1) release first via \`npm run release:watch\`, (2) split the push, or (3) add risk-reducing measures. If risk-neutral or risk-reducing, delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') — it will create a bypass marker."
@@ -83,6 +93,8 @@ if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm run release:watch(\s|$)'; the
         # Live-incident bypass: if an incident marker exists, allow release
         # regardless of risk score. Used when addressing outages, security
         # incidents, or information disclosure that requires immediate deployment.
+        # Per JTBD-201, this MUST short-circuit BEFORE the CI-status check
+        # so the hotfix path is unaffected by red CI on master.
         if [ -f "${RDIR}/incident-release" ]; then
             rm -f "${RDIR}/incident-release"
             exit 0
@@ -90,6 +102,12 @@ if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm run release:watch(\s|$)'; the
         # Risk-reducing bypass for release
         if [ -f "${RDIR}/reducing-release" ]; then
             rm -f "${RDIR}/reducing-release"
+            exit 0
+        fi
+        # CI-status precondition (P208): a green CI run on the target
+        # branch is required before shipping. Fail-closed on gh errors.
+        if ! check_ci_status "$SESSION_ID" "release"; then
+            risk_gate_deny "Release blocked: ${CI_GATE_REASON}"
             exit 0
         fi
         if ! check_risk_gate "$SESSION_ID" "release"; then
