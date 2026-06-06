@@ -401,9 +401,10 @@ Open the issue:
 gh issue create \
   --repo "${UPSTREAM_OWNER_REPO}" \
   --title "${TITLE_PREFIXED_BY_TEMPLATE}" \
-  --body "${FILLED_BODY}" \
-  --label "${MATCHED_TEMPLATE_LABEL_IF_ANY}"
+  --body "${FILLED_BODY}"
 ```
+
+Do **not** pass `--label` on this call (P207). Labels are supplied by the matched template's YAML `labels:` frontmatter and applied by GitHub when the issue form is submitted; passing `--label <name>` for a label that has not been pre-created on the upstream repo causes `gh issue create` to hard-fail with `could not add label: '<name>' not found`. The flag is redundant when the matched template carries `labels:` and a hard-fail surface when it does not. If the upstream has no matched template at all (structured-default body path, Step 3 preference order item 7), omit labels entirely — leave triage to the upstream maintainer's existing routing.
 
 Capture the returned issue URL. The voice-tone gate per ADR-028 may delegate-and-retry; treat this as expected (see "Voice-tone gate interaction" above). Proceed to Step 7 once the issue is created.
 
