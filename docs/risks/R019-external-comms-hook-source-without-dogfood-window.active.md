@@ -16,6 +16,28 @@ Hook source change replacing cached-key derivation across 2 plugins shipping sin
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
 > fields below carry the ADR-026 ungrounded-output sentinel until human curation.
 
+## Recogniser
+
+**Path patterns** (any match → consider this entry):
+
+- `packages/*/hooks/external-comms*.sh` (external-comms gate surface)
+- `packages/*/hooks/lib/*.sh` (shared cached-key derivation code consumed by external-comms hooks)
+- `.changeset/*.md` (when paired with external-comms source change AND no `docs/changesets-holding/` sibling)
+- Cross-plugin: ≥2 `packages/*/hooks/` directories touched in same commit
+
+**Diff-content keywords** (any match → consider):
+
+- `external-comms`, `external-comms-gate`
+- `cached-key`, `cache-key`, `cached_key`, key-derivation function names
+- `deny surface`, `PreToolUse:Bash`
+- absence of paired `docs/changesets-holding/external-comms*.md`
+
+**Anti-patterns** (looks like R019 but isn't):
+
+- External-comms-gate doc/test change only (no `.sh` source change) → score as **R009** coverage class
+- External-comms hook WITH paired held-changeset dogfood window → controls firing; routine R003
+- Single-plugin scope (one hook surface only, not cached-key shared library) → score as **R003** new-hook or modification; cross-plugin fan-out modulator absent
+
 ## Inherent Risk
 
 Impact × Likelihood *before* controls.

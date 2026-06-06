@@ -16,6 +16,27 @@ User-stated precondition "entire RFC-001 commit chain ships or doesn't" with hel
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
 > fields below carry the ADR-026 ungrounded-output sentinel until human curation.
 
+## Recogniser
+
+**Path patterns** (any match → consider this entry):
+
+- `docs/rfcs/RFC-001-*.md` (specifically RFC-001)
+- `docs/changesets-holding/*.md` (where bodies cite RFC-001 Slices 2 or 3)
+- `.changeset/*.md` (where bodies cite RFC-001 Slices 4 or 5 while siblings remain held)
+- `packages/*/{skills,agents,hooks}/*` files altering RFC-001 framework surfaces
+
+**Diff-content keywords** (any match → consider):
+
+- `RFC-001`, `Slice 2`, `Slice 3`, `Slice 4`, `Slice 5`
+- `framework code`, `paired capability`, `forward-dogfood`
+- `entire RFC-001 commit chain` (user-stated precondition phrasing)
+
+**Anti-patterns** (looks like R013 but isn't):
+
+- RFC-001 closed (post-Slice-5 graduation) → no longer applies; retire this entry
+- Other RFC chain (RFC-002+) → score as **R012** (general RFC chain atomicity), not RFC-001-specific R013
+- Single-Slice tweak that doesn't alter the framework surface → routine R005
+
 ## Inherent Risk
 
 Impact × Likelihood *before* controls.

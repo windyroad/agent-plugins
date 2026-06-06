@@ -1,6 +1,6 @@
 # Problem 169: Build recogniser-shape catalogue into @windyroad/risk-scorer plugin (automatic bootstrap + ongoing maintenance)
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-04
 **Priority**: 9 (Medium) — Impact: 3 x Likelihood: 3 (re-rated Likelihood 1→3 on 2026-05-26: the placeholder deferred to this review; the recogniser-shape re-derivation gap is exercised on every risk assessment, so Possible not Rare)
 **Effort**: M
@@ -62,10 +62,24 @@ Adopters can manually author catalogue entries in the recogniser shape using thi
 - [x] Decide: dual-parse contract shape for the pipeline.md update — **DECIDED 2026-05-31 (user direction)**: force a major bump and require adopter cache refresh (NO dual-parse). Cleaner long-term contract; one-time friction for adopters; stricter scorer prompt.
 - [x] Decide: consumption mechanics — **DECIDED 2026-05-31 (user direction)**: in-prompt LLM judgment only. Agent reads each `R*.active.md` catalogue entry and applies recogniser / controls / modulator logic via LLM reasoning. No deterministic pre-compute script; preserves ADR-015 pure-scorer architecture; consistent with ADR-059 hybrid-filter mechanism extension. Token surface tradeoff accepted.
 - [x] Decide: Phase 2 scope — **DECIDED 2026-05-31 (user direction)**: extend this ticket to cover both Phase 1 (pipeline.md update) and Phase 2 (starter catalogue + extractor update + bootstrap-catalog SKILL update + ADR-056 amendment). One ticket, both phases; close criteria covers both phases shipped.
-- [ ] Phase 1 implementation: pipeline.md update + bats coverage + held changeset
-- [ ] Phase 2 implementation: starter catalogue + extractor update + bootstrap-catalog SKILL.md update + ADR amendment + held changeset
-- [ ] Dogfood pass per phase: run pipeline scorer against this repo's commits with new shape; verify residual reconciliation against `.risk-reports/` history
-- [ ] Stress-test: pick a recent above-appetite report; re-derive risk-items consuming the new catalogue; check recogniser surfaces correct entries + modulators apply correctly + residual matches
+- [x] Phase 1 implementation: pipeline.md update + bats coverage + held changeset — **DONE** (shipped via ADR-059 Catalog Consumption Protocol; scorer reads `## Recogniser` slug-token-match + anti-patterns directly from `docs/risks/R*.active.md`)
+- [x] Phase 2 implementation: extractor bootstrap-shape skeleton + behavioural bats — **DONE 2026-06-06** (commits below; extractor heredoc now emits `## Recogniser` placeholder with Path-patterns / Diff-content keywords / Anti-patterns sub-blocks awaiting curation; 3 new bats; 20/20 tests pass). Starter-catalogue + bootstrap-catalog SKILL.md + ADR-056 amendment **deferred as out of scope** — adopters get the skeleton at bootstrap time; starter-catalogue belongs in a separate scope decision and bootstrap-catalog SKILL already consumes the skeleton via the extractor.
+- [x] Populate `## Recogniser` blocks for the 20 bare entries R011–R030 — **DONE 2026-06-06** (mirrors R002/R003/R009 shape with Path patterns / Diff-content keywords / Anti-patterns derived from each risk's nature; all 30 register entries now carry the shape).
+- [ ] Dogfood pass: run pipeline scorer against this repo's commits with new shape; verify residual reconciliation against `.risk-reports/` history — defer to next observed pipeline assessment; the scorer already consumes the shape, so this is ambient verification, not a separate iter
+- [ ] Stress-test: pick a recent above-appetite report; re-derive risk-items consuming the new catalogue — same as above; ambient verification on next pipeline run
+
+## Ratification
+
+**2026-06-06**: user ratified the residual scope — populate `## Recogniser` shapes for bare entries + bootstrap-script skeleton emission + paired behavioural bats. Phase 1 (scorer consumes catalogue) had already shipped via ADR-059's Catalog Consumption Protocol; this iteration closes the data-gap so the scorer's slug-match accuracy stops falling back to fuzzy judgement-matching.
+
+## Transition note (open → verifying, 2026-06-06)
+
+Core residual landed in one ADR-014 commit:
+- 20 `docs/risks/R*.active.md` entries (R011–R030) populated with `## Recogniser` blocks
+- `packages/risk-scorer/scripts/extract-risks-from-reports.sh` extended to emit the skeleton on new entries (bootstrap stops the bleeding)
+- 3 new behavioural bats in `packages/risk-scorer/scripts/test/extract-risks-from-reports.bats` asserting Recogniser-block presence + sub-block headers + pending-review placeholders; 20/20 tests pass
+
+Verification close criteria: next `wr-risk-scorer:pipeline` invocation reads at least one of the newly-populated R011–R030 recogniser blocks (slug-token-match against a report path / keyword) without falling back to fuzzy judgement-matching. Ambient — close on observation, not on a separate verification iter.
 
 ## Dependencies
 

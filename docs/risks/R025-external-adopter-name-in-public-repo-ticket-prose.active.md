@@ -16,6 +16,30 @@ P286 ticket body names a specific external adopter project ("exceeds 9" appetite
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
 > fields below carry the ADR-026 ungrounded-output sentinel until human curation.
 
+## Recogniser
+
+**Path patterns** (any match → consider this entry):
+
+- `docs/problems/*.md` (ticket prose written to disk — public repo)
+- `docs/risks/*.md` (register entries that might cite external project names)
+- `docs/decisions/*.md` (ADR bodies)
+- `docs/incidents/*.md`
+- `docs/rfcs/*.md`, `docs/stories/*.md`
+- `CHANGELOG.md`, `packages/*/CHANGELOG.md`
+- (any public-repo-bound `docs/**/*.md` that bypasses the external-comms hook gate)
+
+**Diff-content keywords** (any match → consider):
+
+- Specific external adopter / customer / employer names known to the project
+- `external adopter`, `adopter project`, `customer`
+- proper-noun project / company names that don't appear in this repo's public README
+
+**Anti-patterns** (looks like R025 but isn't):
+
+- Edit reuses a placeholder / redaction marker (`<adopter-redacted>`, `External Adopter A`, `$ADOPTER`) → controls applied
+- Outbound prose (gh issue body / PR body / changeset / advisory) — the external-comms hook DOES gate that surface → score as routine R001 with controls firing
+- Internal-only file (not in `docs/`, not published, not in `.changeset/`) → not in the disclosure path
+
 ## Inherent Risk
 
 Impact × Likelihood *before* controls.

@@ -16,6 +16,26 @@ New PreToolUse:Bash commit-gate hook landing direct to `.changeset/` instead of 
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
 > fields below carry the ADR-026 ungrounded-output sentinel until human curation.
 
+## Recogniser
+
+**Path patterns** (any match → consider this entry):
+
+- `packages/*/hooks/*.sh` (new file, not modification — git-add-newfile signal)
+- `packages/*/hooks/hooks.json` (new hook event registration)
+- `.changeset/*.md` (when paired with new-hook source change AND no `docs/changesets-holding/` sibling)
+
+**Diff-content keywords** (any match → consider):
+
+- `PreToolUse`, `PostToolUse`, `UserPromptSubmit`, `Stop`, `SessionStart`
+- new-file additions (`new file mode` markers in diff)
+- absence of paired `docs/changesets-holding/<hook>.md`
+
+**Anti-patterns** (looks like R015 but isn't):
+
+- Modification of existing hook → standard **R003** (no first-landing modulator)
+- New hook with paired `docs/changesets-holding/` dogfood window → controls firing; score as routine R003
+- New hook that only touches test fixtures (`packages/*/hooks/test/*.bats`) → score as **R009** test-coverage class
+
 ## Inherent Risk
 
 Impact × Likelihood *before* controls.

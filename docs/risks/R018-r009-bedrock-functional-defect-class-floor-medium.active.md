@@ -16,6 +16,23 @@ R009 bedrock class persistently sits at 8/25 Medium against 4/25 appetite; docum
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
 > fields below carry the ADR-026 ungrounded-output sentinel until human curation.
 
+## Recogniser
+
+This entry is a **register-level floor restatement**, not a per-action recogniser. R009 itself is the per-action catalogue entry — score every R009 instance directly against R009 and let the register floor surface here.
+
+**Path patterns** (mirrors R009 broadly):
+
+- All `packages/*/**` source surfaces (same as R009)
+
+**Diff-content keywords** (mirrors R009):
+
+- Any R009 keyword (branch logic, regex, numeric literals, exit/return codes)
+
+**Anti-patterns** (looks like R018 but score under R009 directly):
+
+- **All per-action R009 instances should score against R009 directly.** Use R018 only for register-level / release-cadence floor restatement (e.g., quarterly review citing the floor; not for scoring a specific commit).
+- If the entry seems to fire on a single action, that's the **R009 anti-pattern** — score against R009, not R018.
+
 ## Inherent Risk
 
 Impact × Likelihood *before* controls.

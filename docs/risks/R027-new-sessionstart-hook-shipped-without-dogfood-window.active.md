@@ -16,6 +16,27 @@ Graduating p283 oversight changeset ships architect-oversight-nudge.sh SessionSt
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
 > fields below carry the ADR-026 ungrounded-output sentinel until human curation.
 
+## Recogniser
+
+**Path patterns** (any match → consider this entry; release-stage sibling of R026):
+
+- `packages/*/hooks/*.sh` (SessionStart event, present in a graduating changeset)
+- `.changeset/*.md` referencing SessionStart hook source where the holding-area sibling has been **graduated** (file moved from `docs/changesets-holding/` to `.changeset/`)
+- `packages/*/hooks/hooks.json` (SessionStart registration present in graduating cohort)
+
+**Diff-content keywords** (any match → consider):
+
+- `SessionStart`
+- `graduated`, `graduating`, `held-changeset dogfood control deliberately removed`
+- `p283`, `oversight changeset` (canonical instance signals)
+- release-stage markers (`changesets-holding/` → `.changeset/` move)
+
+**Anti-patterns** (looks like R027 but isn't):
+
+- First-landing event (commit-stage R026 class) → score as **R026** instead
+- SessionStart hook held in `docs/changesets-holding/` (still dogfooding) → controls firing
+- Recommend per the prefill: consolidate this entry into **R003** per-action modulator table; consider retiring R027 as a duplicate of R015/R019/R021/R026
+
 ## Inherent Risk
 
 Impact × Likelihood *before* controls.

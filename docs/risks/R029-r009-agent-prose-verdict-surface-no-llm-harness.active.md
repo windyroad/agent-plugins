@@ -16,6 +16,29 @@ New jtbd `[Unratified Dependency]` verdict-prose ships at 8/25 Medium; LLM agent
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
 > fields below carry the ADR-026 ungrounded-output sentinel until human curation.
 
+## Recogniser
+
+**Path patterns** (any match → consider this entry; the R009 prose-surface specialisation):
+
+- `packages/*/agents/*.md` (any agent verdict surface)
+- `packages/*/skills/*/SKILL.md` (when SKILL prose itself drives a verdict — same harness gap)
+- Absence of paired `packages/*/agents/*/eval/promptfooconfig.yaml`
+- Absence of paired `packages/*/agents/test/*.bats` (or equivalent harness)
+
+**Diff-content keywords** (any match → consider):
+
+- `verdict`, `agent-prose`, `verdict surface`
+- `LLM judge`, `LLM-driven verdict`
+- `P176`, `P012` (driver tickets)
+- absence of paired `eval/`, `promptfoo`, harness signals
+
+**Anti-patterns** (looks like R029 but isn't):
+
+- Agent.md edit WITH paired `eval/promptfooconfig.yaml` AND `npx promptfoo eval` passes → R009 prose-floor discharged per ADR-075 + RFC-012; score normally
+- Pure structural prose change (formatting, heading) with no verdict-semantics shift → routine **R009** refactor modulator
+- Specifically jtbd build-upon-guard verdict → score as **R028** (specialisation)
+- Specifically architect verdict surface (RFC-010) → score against the architect-side instance
+
 ## Inherent Risk
 
 Impact × Likelihood *before* controls.

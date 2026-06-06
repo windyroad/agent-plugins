@@ -16,6 +16,26 @@ I002 declares release-pressure / WIP-limit controls failing to fire — 32-commi
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
 > fields below carry the ADR-026 ungrounded-output sentinel until human curation.
 
+## Recogniser
+
+**Path patterns** (any match → consider this entry; this is a process-state class rather than a file-edit class):
+
+- `.risk-reports/*-push.md` (push-stage reports where unpushed-commit count is the load-bearing signal)
+- `RISK-POLICY.md` (WIP-limit thresholds + appetite)
+- `docs/incidents/*.md` (I002 driver-incident class)
+
+**Diff-content keywords** (any match → consider):
+
+- `WIP-limit`, `release-pressure`, `unpushed backlog`
+- numeric thresholds in commit-count signals (e.g., `>20 unpushed`)
+- `I002`, `feedback_release_cadence`
+
+**Anti-patterns** (looks like R014 but isn't):
+
+- Single commit / small batch → no WIP-limit triggered; routine R005
+- Large batch graduated atomically by orchestrator (held cohort releasing intentionally) → controls firing; not WIP-limit failure
+- Commit-time view only (no push-cumulative lens) → score against R009/R003 inherent, not R014
+
 ## Inherent Risk
 
 Impact × Likelihood *before* controls.

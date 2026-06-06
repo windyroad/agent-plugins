@@ -16,6 +16,27 @@
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
 > fields below carry the ADR-026 ungrounded-output sentinel until human curation.
 
+## Recogniser
+
+**Path patterns** (any match → consider this entry; release-stage class — looks at the cohort, not a single file):
+
+- `.changeset/*.md` (count: ≥5 in the release batch)
+- `packages/*/skills/*/SKILL.md` (multiple in the same release cohort — concentration signal)
+- `packages/*/skills/*/REFERENCE.md`
+- `packages/*/agents/*.md` (when prose-rewrite shape)
+
+**Diff-content keywords** (any match → consider):
+
+- `skill-prose-rewrite`, `release batch`, `release cadence`
+- batch-size signals (≥5 changesets, ≥3 SKILL.md files)
+- load-bearing surface markers (`PreToolUse`, `gate`, `oversight`)
+
+**Anti-patterns** (looks like R016 but isn't):
+
+- Single SKILL.md edit (batch-size 1) → routine **R009** per-action; no concentration class
+- Release batch dominated by structural / refactor changes (not prose-rewrite) → score per-action against the relevant specialisation, not R016
+- SKILL/agent-prose with paired promptfoo Tier-A/B coverage across the cohort → R009 modulator firing; concentration class discharged
+
 ## Inherent Risk
 
 Impact × Likelihood *before* controls.

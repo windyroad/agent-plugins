@@ -264,6 +264,22 @@ while IFS=$'\t' read -r slug count reason_tag prefill source_files; do
 
 ${prefill}
 
+## Recogniser
+
+(pending review — recogniser shape to be authored during curation per ADR-059)
+
+**Path patterns** (file globs where this risk class typically applies):
+
+- pending review — list path globs derived from \`.risk-reports/\` evidence + the prose above
+
+**Diff-content keywords** (signals in the diff that suggest scoring against this entry):
+
+- pending review — list keywords drawn from the report prose and adjacent incident reports
+
+**Anti-patterns** (looks like this entry but should score under a different class):
+
+- pending review — list cases that should redirect to a specialisation or sibling
+
 ## Inherent Risk
 
 - **Impact**: not estimated — no prior data

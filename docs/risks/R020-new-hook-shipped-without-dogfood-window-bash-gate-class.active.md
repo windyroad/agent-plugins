@@ -16,6 +16,27 @@ P232 Bash polling-antipattern PreToolUse hook landing for first time without hel
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
 > fields below carry the ADR-026 ungrounded-output sentinel until human curation.
 
+## Recogniser
+
+**Path patterns** (any match → consider this entry):
+
+- `packages/*/hooks/*.sh` (new file, PreToolUse:Bash matcher)
+- `packages/*/hooks/hooks.json` (new `PreToolUse:Bash` registration)
+- `.changeset/*.md` (paired with new Bash-gate AND no `docs/changesets-holding/` sibling)
+
+**Diff-content keywords** (any match → consider):
+
+- `PreToolUse:Bash`, `"matcher": "Bash"`, `Bash|Write|Edit`
+- `polling-antipattern`, `polling`, `sleep`, `until`
+- new-file additions under `packages/*/hooks/` declaring `PreToolUse:Bash`
+
+**Anti-patterns** (looks like R020 but isn't):
+
+- Existing Bash-gate modification (no new-hook landing) → standard **R003**
+- SessionStart additionalContext hook → score as **R026/R027** (SessionStart class — exit-0-always envelope differs)
+- PreToolUse hook with non-Bash matcher (e.g. Write/Edit/Read) → score as **R015** generic new-hook class
+- New Bash-gate WITH paired `docs/changesets-holding/` dogfood window → controls firing; routine R003
+
 ## Inherent Risk
 
 Impact × Likelihood *before* controls.

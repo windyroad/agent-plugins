@@ -164,6 +164,55 @@ EOF
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
+# Recogniser-shape skeleton emission (P169 — bootstrap stops the bleeding)
+# ──────────────────────────────────────────────────────────────────────────────
+# Newly-scaffolded entries MUST carry a ## Recogniser section with the three
+# sub-blocks awaiting curation, so new risks stop landing without the shape
+# that the @windyroad/risk-scorer pipeline relies on for slug-token matching.
+
+@test "scaffolded entry includes ## Recogniser section" {
+  mkdir -p .risk-reports
+  cat > .risk-reports/r.md <<'EOF'
+RISK_REGISTER_HINT:
+- above-appetite-residual | recogniser-shape-test | Recogniser skeleton check
+EOF
+  run "$SCRIPT"
+  [ "$status" -eq 0 ]
+  entry=$(ls docs/risks/R*-recogniser-shape-test.active.md)
+  grep -q "^## Recogniser" "$entry"
+}
+
+@test "scaffolded Recogniser block has Path-patterns / Diff-content / Anti-patterns sub-blocks" {
+  mkdir -p .risk-reports
+  cat > .risk-reports/r.md <<'EOF'
+RISK_REGISTER_HINT:
+- above-appetite-residual | recogniser-subblock-test | Recogniser sub-block check
+EOF
+  run "$SCRIPT"
+  [ "$status" -eq 0 ]
+  entry=$(ls docs/risks/R*-recogniser-subblock-test.active.md)
+  grep -q "Path patterns" "$entry"
+  grep -q "Diff-content keywords" "$entry"
+  grep -q "Anti-patterns" "$entry"
+}
+
+@test "scaffolded Recogniser sub-blocks carry pending-review placeholders" {
+  mkdir -p .risk-reports
+  cat > .risk-reports/r.md <<'EOF'
+RISK_REGISTER_HINT:
+- above-appetite-residual | recogniser-pending-test | Recogniser pending check
+EOF
+  run "$SCRIPT"
+  [ "$status" -eq 0 ]
+  entry=$(ls docs/risks/R*-recogniser-pending-test.active.md)
+  # The skeleton uses the same ADR-026-style "pending review" sentinel
+  # so curators can grep for unfinished sections. Three pending-review
+  # markers (one per sub-block: paths / keywords / anti-patterns).
+  recog_lines=$(sed -n '/^## Recogniser/,/^## Inherent/p' "$entry" | grep -c "pending review" || true)
+  [ "$recog_lines" -ge 3 ]
+}
+
+# ──────────────────────────────────────────────────────────────────────────────
 # Idempotency / slug collision append
 # ──────────────────────────────────────────────────────────────────────────────
 

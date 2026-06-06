@@ -16,6 +16,30 @@ New SessionStart nudge hook (architect-oversight-nudge.sh) lands direct into pac
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
 > fields below carry the ADR-026 ungrounded-output sentinel until human curation.
 
+## Recogniser
+
+**Path patterns** (any match → consider this entry):
+
+- `packages/*/hooks/*.sh` (new file, SessionStart event)
+- `packages/*/hooks/*-nudge.sh`, `packages/*/hooks/*-oversight*.sh` (canonical SessionStart nudge naming)
+- `packages/*/hooks/hooks.json` (new SessionStart event registration)
+- `.changeset/*.md` paired with new SessionStart hook AND no `docs/changesets-holding/` sibling
+
+**Diff-content keywords** (any match → consider):
+
+- `SessionStart`
+- `additionalContext`, `hookSpecificOutput`
+- `nudge`, `oversight`
+- `exit 0` self-suppressing envelope on the SessionStart path
+- new-file additions under `packages/*/hooks/` declaring `SessionStart`
+
+**Anti-patterns** (looks like R026 but isn't):
+
+- PreToolUse:Bash matcher (not SessionStart) → score as **R020** Bash-gate class instead
+- PreToolUse:Edit/Write hook → score as **R015** generic new-hook class
+- Existing SessionStart hook *modification* → standard **R003** (no first-landing modulator)
+- New SessionStart hook WITH paired `docs/changesets-holding/` dogfood window → controls firing
+
 ## Inherent Risk
 
 Impact × Likelihood *before* controls.

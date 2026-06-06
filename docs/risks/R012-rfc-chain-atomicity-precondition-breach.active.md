@@ -16,6 +16,27 @@ Active changeset graduates ahead of held RFC-001 chain, breaching ADR-060 § Con
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
 > fields below carry the ADR-026 ungrounded-output sentinel until human curation.
 
+## Recogniser
+
+**Path patterns** (any match → consider this entry):
+
+- `.changeset/*.md` AND `docs/changesets-holding/*.md` simultaneously where the active changeset cites an RFC also represented in holding
+- `docs/rfcs/RFC-*.md` (Status: `accepted` / `in-progress` with chain-atomicity confirmation criteria)
+- `docs/rfcs/README.md` (Phase / Slice progression rows)
+
+**Diff-content keywords** (any match → consider):
+
+- `RFC-NNN`, `Phase N`, `Slice N`
+- `chain`, `atomicity`, `Confirmation criterion`
+- `precondition` (in changeset bodies)
+- `paired capability` (ADR-060 vocabulary)
+
+**Anti-patterns** (looks like R012 but isn't):
+
+- Standalone RFC (not chain-shaped — single-Slice scope) → routine release; no atomicity breach possible
+- All chain Slices in same active batch (atomic ship) → controls firing; score as routine R005 release coordination
+- RFC closed (post-final-Slice) with no held siblings → no longer in scope; ADR-060 atomicity not at risk
+
 ## Inherent Risk
 
 Impact × Likelihood *before* controls.

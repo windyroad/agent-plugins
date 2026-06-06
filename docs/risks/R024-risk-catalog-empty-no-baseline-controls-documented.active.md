@@ -16,6 +16,26 @@ docs/risks/ is empty while .risk-reports/ has accumulated corpus; bootstrap need
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
 > fields below carry the ADR-026 ungrounded-output sentinel until human curation.
 
+## Recogniser
+
+**Path patterns** (any match → consider this entry; this is an adopter-bootstrap-state class, not a per-edit class):
+
+- `docs/risks/` (empty or near-empty: zero or one `R*.active.md` file)
+- `.risk-reports/` (accumulated: ≥5 `*.md` reports)
+- `RISK-POLICY.md` (present — policy exists but no register)
+
+**Diff-content keywords** (any match → consider):
+
+- `catalog empty`, `register empty`, `no baseline`
+- `bootstrap`, `bootstrap-catalog`
+- `per-action`, `baseline controls`
+
+**Anti-patterns** (looks like R024 but isn't):
+
+- Register populated (≥ ~5 `R*.active.md` entries) → no longer applies; retire this entry for the adopter
+- Register present but `RISK-POLICY.md` absent → score as different bootstrap-state class (no appetite criteria)
+- Per-action assessment that grounds in catalog baselines → controls firing; not catalog-empty class
+
 ## Inherent Risk
 
 Impact × Likelihood *before* controls.

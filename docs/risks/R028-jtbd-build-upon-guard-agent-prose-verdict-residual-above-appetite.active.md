@@ -16,6 +16,26 @@ New jtbd [Unratified Dependency] agent-prose verdict (RFC-011/P323) carries R009
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
 > fields below carry the ADR-026 ungrounded-output sentinel until human curation.
 
+## Recogniser
+
+**Path patterns** (any match → consider this entry):
+
+- `packages/wr-jtbd/agents/*.md` (specifically the build-upon-guard / jtbd verdict surface)
+- `packages/*/agents/*.md` when the prose declares an `[Unratified Dependency]` verdict label
+- Adjacent `packages/wr-jtbd/skills/*/SKILL.md` calling the build-upon-guard verdict
+
+**Diff-content keywords** (any match → consider):
+
+- `[Unratified Dependency]`, `Unratified Dependency`
+- `build-upon-guard`, `verdict`, `verdict-prose`
+- `RFC-011`, `P323`, `P176`, `P012`
+
+**Anti-patterns** (looks like R028 but isn't):
+
+- Architect verdict surface (not jtbd) → twin **RFC-010 / different agent** — score against the architect-side instance, not R028
+- Agent with paired promptfoo Tier-A/B eval per ADR-075 / RFC-012 → R009 prose-floor discharged; controls firing
+- Pure refactor of agent.md prose (no verdict-semantics shift) → routine **R009** refactor modulator
+
 ## Inherent Risk
 
 Impact × Likelihood *before* controls.

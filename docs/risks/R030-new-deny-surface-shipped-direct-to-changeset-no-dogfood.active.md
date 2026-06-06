@@ -16,6 +16,28 @@ external-comms-gate adds `git commit -m` deny surface shipping direct-to-.change
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
 > fields below carry the ADR-026 ungrounded-output sentinel until human curation.
 
+## Recogniser
+
+**Path patterns** (any match → consider this entry):
+
+- `packages/*/hooks/*.sh` (PreToolUse, with new `permissionDecision: "deny"` matcher)
+- `packages/*/hooks/external-comms*.sh` (canonical instance — external-comms gate)
+- `.changeset/*.md` (paired with new deny-surface AND no `docs/changesets-holding/` sibling)
+
+**Diff-content keywords** (any match → consider):
+
+- `permissionDecision`, `"deny"`, `deny surface`
+- `git commit -m` (canonical instance matcher target)
+- `external-comms-gate`, `external-comms`
+- new-file additions OR new-matcher additions to existing hook adding deny semantics
+
+**Anti-patterns** (looks like R030 but isn't):
+
+- Existing deny-surface *modification* (e.g. expanding an allowlist) → standard **R003**
+- Deny surface WITH paired `docs/changesets-holding/` dogfood window → controls firing; routine R003
+- Advisory-only (no deny — `additionalContext` only) → score as **R026/R015** new-hook class, not deny-surface class
+- Deny surface scope narrowing / loosening (R003 reductions) → score as routine R003 modification
+
 ## Inherent Risk
 
 Impact × Likelihood *before* controls.

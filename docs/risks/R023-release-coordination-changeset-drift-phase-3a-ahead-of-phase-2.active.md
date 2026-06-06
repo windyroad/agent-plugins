@@ -16,6 +16,28 @@ Phase 3a release-coordination drift: dependent script ships before its NDJSON pr
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
 > fields below carry the ADR-026 ungrounded-output sentinel until human curation.
 
+## Recogniser
+
+**Path patterns** (any match → consider this entry; sibling specialisation of R022 — focus on R005 release coordination):
+
+- `.changeset/*.md` (with Phase markers in body — `Phase Na`, `Phase Nb`)
+- `docs/changesets-holding/*.md` (held siblings)
+- Dependent source files (`packages/*/scripts/populate-*.sh`) shipping while NDJSON producers stay held
+
+**Diff-content keywords** (any match → consider):
+
+- `Phase 2a`, `Phase 2b`, `Phase 3a` (Phase-marker phrasing)
+- `symmetric-cohort hold`, `cohort hold`
+- `release coordination`, `release queue`
+- `dependent script`, `producer`, `consumer`
+
+**Anti-patterns** (looks like R023 but isn't):
+
+- Pure dependency-graph violation INSIDE a Phase (no chain across Phases) → routine **R005**
+- Atomic-cohort ship (all dependencies in same active batch) → controls firing; symmetric-cohort hold applied
+- Dependent script + producers all in `docs/changesets-holding/` together → controls firing
+- Specifically RFC-001 chain context → score as **R012/R013** RFC chain atomicity instead
+
 ## Inherent Risk
 
 Impact × Likelihood *before* controls.

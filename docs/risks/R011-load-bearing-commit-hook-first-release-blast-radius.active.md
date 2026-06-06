@@ -16,6 +16,26 @@ First load-bearing commit-hook on wr-retrospective (P159) shipping with auto-fix
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
 > fields below carry the ADR-026 ungrounded-output sentinel until human curation.
 
+## Recogniser
+
+**Path patterns** (any match → consider this entry):
+
+- `packages/*/hooks/*.sh` (PreToolUse with `permissionDecision: "deny"` — load-bearing class)
+- `packages/wr-retrospective/hooks/*.sh` (P159 instance)
+- `.changeset/*.md` (when paired with a new load-bearing hook source change AND no `docs/changesets-holding/` sibling)
+
+**Diff-content keywords** (consider when the diff suggests load-bearing semantics):
+
+- `permissionDecision`, `"deny"`, `PreToolUse`
+- `auto-fix`, `load-bearing`
+- new-file additions under `packages/*/hooks/`
+
+**Anti-patterns** (looks like R011 but score under a different class):
+
+- Existing-hook *modification* (no first-landing semantics) → **R003**
+- Load-bearing hook with paired `docs/changesets-holding/` dogfood window → controls firing; score as standard R003 with held-changeset modulator
+- Hook prose change that also changes SKILL.md contract → also-flag **R010** (semver violation)
+
 ## Inherent Risk
 
 Impact × Likelihood *before* controls.

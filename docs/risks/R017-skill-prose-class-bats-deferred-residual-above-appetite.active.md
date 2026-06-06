@@ -16,6 +16,26 @@ R009 SKILL-prose-class registers above appetite on Slice C ship under architect+
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
 > fields below carry the ADR-026 ungrounded-output sentinel until human curation.
 
+## Recogniser
+
+**Path patterns** (any match → consider this entry):
+
+- `packages/*/skills/*/SKILL.md` (without paired `packages/*/skills/*/test/*.bats` change)
+- `packages/*/skills/*/REFERENCE.md` (same condition — no paired test)
+- `packages/*/agents/*.md` (when no paired `packages/*/agents/*/eval/promptfooconfig.yaml` or `packages/*/agents/test/*.bats`)
+
+**Diff-content keywords** (any match → consider):
+
+- `Slice C`, `deferred`, `bats deferred`
+- changeset body cites RFC + future-Slice for the paired test
+- SKILL.md edit ≥20 lines without matching `test/*.bats` edit
+
+**Anti-patterns** (looks like R017 but isn't):
+
+- SKILL.md edit WITH paired same-commit `test/*.bats` change → controls firing; routine R009
+- SKILL.md edit WITH paired promptfoo Tier-A/B eval (per ADR-075 / RFC-012) → R009 prose-floor discharged; score normally
+- Pure refactor SKILL.md edit (no semantic-content shift) → R009 refactor modulator applies; not concentrated-prose-class
+
 ## Inherent Risk
 
 Impact × Likelihood *before* controls.

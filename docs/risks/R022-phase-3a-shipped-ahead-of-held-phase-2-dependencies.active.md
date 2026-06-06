@@ -16,6 +16,26 @@ Phase 3a populate-script changeset authored into .changeset/ while its Phase 2a 
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
 > fields below carry the ADR-026 ungrounded-output sentinel until human curation.
 
+## Recogniser
+
+**Path patterns** (any match → consider this entry):
+
+- `.changeset/*.md` AND `docs/changesets-holding/*.md` simultaneously where the active bodies cite a later Phase than the held bodies
+- `.changeset/*.md` bodies citing `Phase N` while sibling holding bodies cite `Phase N-1`
+
+**Diff-content keywords** (any match → consider):
+
+- `Phase 2a`, `Phase 2b`, `Phase 3a`, `Phase 3b`
+- `precondition chain`, `precondition`
+- `NDJSON producer`, `producer`, `consumer`
+- `inverted at the release queue`
+
+**Anti-patterns** (looks like R022 but isn't):
+
+- Active Phase chain has NO held siblings (all Phases on the active path) → no inversion possible; routine **R005**
+- Single-Phase ticket (no chain semantics) → routine **R005**
+- Phase 3a + Phase 2 in same active batch (atomic ship) → controls firing; no inversion
+
 ## Inherent Risk
 
 Impact × Likelihood *before* controls.

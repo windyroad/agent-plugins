@@ -16,6 +16,29 @@ New user-facing diagnostic surface (`wr-itil-skill-invocations`) ships without i
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
 > fields below carry the ADR-026 ungrounded-output sentinel until human curation.
 
+## Recogniser
+
+**Path patterns** (any match → consider this entry):
+
+- `packages/*/scripts/*.sh` (new file — user-invokable diagnostic surface)
+- `packages/*/bin/*` (new shim wrapper)
+- `packages/itil/scripts/*.sh`, `packages/itil/bin/*` (the canonical instance class)
+- `.changeset/*.md` (paired with new user-facing shim AND no `docs/changesets-holding/` sibling)
+
+**Diff-content keywords** (any match → consider):
+
+- `wr-itil-*`, `wr-*-skill-invocations`, diagnostic shim names
+- `#!/usr/bin/env bash` on a new-file shim under `bin/`
+- `exit 0` self-suppressing envelope on the shim's outer path
+- new-file additions under `packages/*/{scripts,bin}/`
+
+**Anti-patterns** (looks like R021 but isn't):
+
+- Hook surface (under `packages/*/hooks/`) → score as **R015 / R020 / R026** (hook class) — different runtime envelope
+- Existing shim *modification* → standard **R009** (no first-landing modulator)
+- Internal-only helper script (not user-invokable, not shimmed in `bin/`) → routine **R009**
+- New user-facing shim WITH paired `docs/changesets-holding/` dogfood window → controls firing
+
 ## Inherent Risk
 
 Impact × Likelihood *before* controls.
