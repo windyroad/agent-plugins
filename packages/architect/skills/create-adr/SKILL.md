@@ -85,6 +85,8 @@ Before writing the ADR file, perform a decision-boundary analysis on the gathere
 
 **Non-interactive fallback**: When `AskUserQuestion` is unavailable (e.g., non-interactive/AFK mode), automatically split into separate ADRs with consecutive IDs and note the auto-split in output. Do not block creation.
 
+**ADR-013 Rule 6 carve-out audit (P352, 2026-06-06 amendment)**: the universal AFK default is **queue-and-continue**; this site is a documented **AUTO-DEFAULT** carve-out. Authorising principle: policy-authorised safe default per ADR-044 category 4 (silent framework). Splitting is fully reversible (manual combine via supersession), the framework's WSJF / lifecycle model rewards explicit per-decision ranking, and "split when in doubt" is the persona-correct safe heuristic for JTBD-006 (the loop progresses; over-splits are cheap to combine; halt would cost more loop throughput than the over-split risk). Note: the Step 5 substance-confirm HALT below is a separate carve-out authorised by ADR-074 — substance-confirm cannot AUTO-DEFAULT because the dependent work (Decision Outcome / Consequences / Confirmation / Pros and Cons drafting) is built ON the chosen option.
+
 **Split implementation**: When splitting, assign consecutive IDs. Cross-reference each ADR in the other's Related section or as a linked decision in the consequences.
 
 **Scope**: Scoped to new ADR creation only (steps 2–5). Does not apply to supersession handling (step 6), where the scope of the new decision is already known and bounded.
@@ -237,6 +239,8 @@ oversight-date: YYYY-MM-DD   # today
 ```
 
 The `wr-architect-mark-oversight-confirmed` call writes the session-scoped evidence marker (`/tmp/oversight-confirmed-<sha>-<sid>`) that the `architect-oversight-marker-discipline.sh` PreToolUse hook reads to authorise the subsequent Edit/Write — without the helper call, the hook will DENY the marker write. AFK iter subprocesses spawned via `claude -p` have no `AskUserQuestion` access; they MUST write `human-oversight: unconfirmed` instead (the AFK fallback enum value codified in ADR-066 amendment 2026-06-02), which the drain (`/wr-architect:review-decisions`) later promotes interactively. Calling the helper without a real user substance-confirm event is the P348 hollow-marker bug — every legitimate marker write traces back to an `AskUserQuestion` answer in the same turn.
+
+**ADR-013 Rule 6 carve-out audit (P352, 2026-06-06 amendment)**: the universal AFK default is queue-and-continue. This Step 5 substance-confirm HALT-and-write-`human-oversight: unconfirmed` shape is a documented carve-out, authorised by **ADR-074** (Confirm decision substance before building dependent work). Rationale: an ADR with `human-oversight: confirmed` enters the world born-confirmed (it does not appear in `/wr-architect:review-decisions`' unoversighted set), so dependent work — every implementation that cites this ADR as authority — would be built on substance that was never user-affirmed. AFK writing `human-oversight: unconfirmed` IS the queue-and-continue shape: the loop continues; the substance-confirm decision is queued to the next interactive drain. Persona-correct for JTBD-006 ("queued for my return, not guessed at"); the carve-out is from the auto-confirm shape, not from queue-and-continue itself.
 
 **Mismatch handling.** If the substance-confirm answer selects a DIFFERENT option than the draft was authored against:
 

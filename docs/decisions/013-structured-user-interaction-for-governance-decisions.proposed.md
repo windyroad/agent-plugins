@@ -87,7 +87,30 @@ Accept prose prompts as a cosmetic issue.
 
 5. **Policy-authorised decisions proceed silently.** When a decision outcome is pre-determined by policy (e.g., risk residual is below appetite per RISK-POLICY.md), the skill proceeds without prompting. No ceremonial "accept the risk?" for decisions the policy has already authorised.
 
-6. **Non-interactive fail-safe.** In non-interactive contexts (CI pipelines, scheduled triggers, scripted invocations where `AskUserQuestion` is unavailable), the skill MUST fail-safe — block or defer the decision rather than silently choosing an option on behalf of the user.
+6. **Non-interactive fail-safe — queue-and-continue is the universal default (2026-06-06 amendment).** In non-interactive contexts where `AskUserQuestion` is unavailable (AFK iter loops via `/wr-itil:work-problems` Step 5 iter dispatch, subagent invocations, CI pipelines, scheduled triggers, scripted invocations), the skill MUST **queue the question and continue** by default:
+
+   - **Queue**: append the decision (artefact, surface, candidate options, recommendation if any, and any operational context the orchestrator needs to surface the question intelligibly) to an outstanding-questions surface that the orchestrator main turn reads at loop end (e.g. `/wr-itil:work-problems` Step 2.5 batched AskUserQuestion). Skills may maintain a per-skill queue; the orchestrator main turn reads the union.
+   - **Continue**: proceed to the next step / iteration. Do NOT halt-with-stderr-directive. Do NOT silently fail-soft-skip. Do NOT auto-default to a guess.
+
+   **Halt-with-directive and silent-skip are DEVIATIONS that require an explicit, inline-cited carve-out justification** (the SKILL prose must name the authorising ADR or user-pinned protection). Documented carve-outs at the time of this amendment:
+
+   - `/wr-itil:capture-problem` Step 1.5b derive-then-ratify HALT — authorised by ADR-074 (Confirm decision substance before building dependent work). No-ticket-created is the user-pinned protection; auto-creating a ticket with derived-but-unratified substance would build dependent work on an unconfirmed decision.
+   - `/wr-architect:create-adr` Step 5 substance-confirm HALT — authorised by ADR-074 for the same reason: no-ADR-with-unconfirmed-substance.
+   - `/wr-itil:manage-problem` Step 0 / create-gate HALT — authorised by the create-gate's role as the substance-confirm boundary for new tickets (analogous to ADR-074).
+
+   **AUTO-DEFAULT** (the agent picks an option on the user's behalf without recording the choice as a queued question) is permitted ONLY when the decision is framework-resolved per ADR-044 (Decision-Delegation Contract) — the framework (RISK-POLICY / ADRs / JTBDs / WSJF / lifecycle / SKILL contracts) has already pre-decided the outcome and the agent is mechanically applying it. If the decision is NOT framework-resolved, AUTO-DEFAULT is a defect; the SKILL must queue.
+
+   **Rationale (anchored to JTBD-006 — Progress the Backlog While I'm Away):** the AFK persona expects routine decisions to be resolved with safe defaults AND judgment-call decisions to be queued for their return, never guessed at. Halt-with-directive prematurely truncates loop throughput; silent-skip silently under-delivers; auto-default makes calls the persona explicitly does not delegate. Queue-and-continue preserves both throughput AND audit trail: the AFK loop progresses, judgment calls accumulate as a typed batch the user returns to, and the carve-outs (capture-problem / create-adr / manage-problem create-gate) protect the narrow class of substance-confirm boundaries where building-on-unconfirmed-substance is the larger harm than the throughput cost.
+
+   **Cross-references:**
+   - **ADR-044** — Decision-Delegation Contract. AUTO-DEFAULT lives inside the framework-resolution boundary; queue-and-continue lives outside it.
+   - **ADR-074** — Confirm decision substance before building dependent work. Authorises the capture-problem / create-adr / manage-problem create-gate carve-outs.
+   - **JTBD-006** — Progress the Backlog While I'm Away. The Desired Outcome "queued for my return, not guessed at" is the persona-correct shape.
+   - **JTBD-001** — Enforce Governance Without Slowing Down. Queue-and-continue keeps governance enforcement *on* during AFK rather than degrading to HALT (skip-governance) or auto-decide (bypass-governance).
+   - **JTBD-002** — Ship AI-Assisted Code with Confidence. The queue artefact is the AFK audit surface (governance-was-followed evidence).
+   - **P352** — the originating problem ticket (closed 2026-06-06 via this amendment).
+
+   **Shared-helper extraction deferred (2026-06-06 follow-on).** Lifting the queue-file mechanism to `packages/itil/lib/outstanding-questions.sh` so any skill in any context can append to a single union surface is a follow-on (not in scope for the originating amendment). Per-skill queues + orchestrator-reads-union is the interim contract.
 
 ## Consequences
 
@@ -116,6 +139,7 @@ Accept prose prompts as a cosmetic issue.
 - Every `SKILL.md` with `AskUserQuestion` in `allowed-tools` uses it at all documented branch points (no prose fallback for decision prompts)
 - Scoring agents (`pipeline.md`, `wip.md`, `plan.md`) have `tools: [Read, Glob]` only — no `AskUserQuestion` grant
 - Below-appetite / policy-authorised paths produce no user prompt (silent proceed)
+- **2026-06-06 amendment confirmation** — every `SKILL.md` AFK fallback prose either (a) names queue-and-continue as the shape, OR (b) cites the authorising ADR / user-pinned protection for a HALT / SKIP / AUTO-DEFAULT carve-out. Behavioural / structural assertions per ADR-052 verify both: the ADR-013 amendment prose is present and each documented carve-out is inline-justified.
 
 ## Reassessment Triggers
 
@@ -126,9 +150,14 @@ Accept prose prompts as a cosmetic issue.
 ## Related
 
 - P021: `docs/problems/021-governance-skill-structured-prompts.known-error.md` — the problem this ADR resolves
+- P352: `docs/problems/verifying/352-afk-iter-default-when-skill-needs-to-ask-and-askuserquestion-unavailable-queue-and-continue.md` — the originating ticket for the 2026-06-06 Rule 6 amendment (universal queue-and-continue default)
 - ADR-011: `docs/decisions/011-manage-incident-skill.proposed.md` — positive exemplar, already compliant
 - ADR-010: `docs/decisions/010-rename-wr-problem-to-wr-itil.proposed.md` — naming pattern for ITIL skills covered by this standard
 - ADR-005: `docs/decisions/005-plugin-testing-strategy.proposed.md` — testing strategy for confirmation criteria
+- ADR-044: `docs/decisions/044-decision-delegation-contract.proposed.md` — framework-resolution boundary; Rule 6 AUTO-DEFAULT operates inside it, queue-and-continue outside it
+- ADR-052: ADR-052 (behavioural / structural assertions) — Rule 6 amendment is verified by bats checks per its norm
+- ADR-074: `docs/decisions/074-confirm-decision-substance-before-building-dependent-work.proposed.md` — authorises the capture-problem / create-adr / manage-problem create-gate HALT carve-outs in Rule 6
 - JTBD-001: `docs/jtbd/solo-developer/JTBD-001-enforce-governance.proposed.md`
 - JTBD-002: `docs/jtbd/solo-developer/JTBD-002-ship-with-confidence.proposed.md`
+- JTBD-006: Progress the Backlog While I'm Away — the AFK persona's "queued for my return, not guessed at" outcome is the persona-correct shape for Rule 6
 - RISK-POLICY.md — appetite threshold referenced by Rule 5

@@ -83,7 +83,7 @@ If the user chooses `Delete selected only` or `Review individually`, present sub
 
 **Tier 1 budget guard**: if promoting all score >= +3 entries would breach the 2 KB / ~10-bullet Critical Points budget (ADR-040), promote only the highest-scored entries until the budget is met and surface the remainder as a budget-overflow advisory in the retro summary.
 
-**Non-interactive / AFK fallback (ADR-013 Rule 6)**: when `AskUserQuestion` is unavailable, classify silently and defer the delete queue to the retro summary (Step 5). Do NOT auto-delete entries in AFK mode. The retro summary's "Signal-vs-Noise Pass" section lists each delete candidate with score and citation so the user can review on return. Same trust-boundary shape as Step 2b and Step 4a.
+**Non-interactive / AFK fallback (ADR-013 Rule 6)**: when `AskUserQuestion` is unavailable, classify silently and defer the delete queue to the retro summary (Step 5). Do NOT auto-delete entries in AFK mode. The retro summary's "Signal-vs-Noise Pass" section lists each delete candidate with score and citation so the user can review on return. Same trust-boundary shape as Step 2b and Step 4a. **ADR-013 Rule 6 universal default (P352, 2026-06-06 amendment)**: this IS queue-and-continue — the Step 5 retro summary section is the queued surface; classification proceeds, deletion is queued for user review. Not a carve-out — canonical default shape.
 
 **Anti-pattern: Do NOT skip the signal-vs-noise pass under any of the following rationalisations** (P332 / P148-class, 2026-05-30):
 

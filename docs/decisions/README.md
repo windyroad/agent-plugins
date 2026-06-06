@@ -61,8 +61,8 @@ _71 ADRs. These are the current rules. The architect agent reads this section fi
 
 ### ADR-013 — Structured User Interaction for Governance-Skill Decisions
 **Status:** proposed | **Oversight:** confirmed
-**Confirmation:** grep -rn "Options:.*\(a\)\|Your call:\|which would you like\|which way?" packages/*/skills/ returns zero match...; Every SKILL.md with AskUserQuestion in allowed-tools uses it at all documented branch points (no prose fallbac...; Scoring agents (pipeline.md, wip.md, plan.md) have tools: [Read, Glob] only — no AskUserQuestion grant; Below-appetite / policy-authorised paths produce no user prompt (silent proceed)
-**Related:** ADR-011, ADR-010, ADR-005
+**Confirmation:** grep -rn "Options:.*\(a\)\|Your call:\|which would you like\|which way?" packages/*/skills/ returns zero match...; Every SKILL.md with AskUserQuestion in allowed-tools uses it at all documented branch points (no prose fallbac...; Scoring agents (pipeline.md, wip.md, plan.md) have tools: [Read, Glob] only — no AskUserQuestion grant; Below-appetite / policy-authorised paths produce no user prompt (silent proceed); 2026-06-06 amendment confirmation — every SKILL.md AFK fallback prose either (a) names queue-and-continue as...
+**Related:** ADR-011, ADR-010, ADR-005, ADR-044, ADR-052, ADR-074
 
 ### ADR-014 — Governance Skills Commit Their Own Completed Work
 **Status:** proposed | **Oversight:** confirmed

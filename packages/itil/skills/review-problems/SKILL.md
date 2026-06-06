@@ -134,7 +134,7 @@ Per ADR-062 (peer of ADR-024). Polls configured upstream channels, runs each unm
 Read `docs/problems/.upstream-channels.json`. Branch on state:
 
 - **File exists and parses cleanly** → continue to 4.5b with the parsed `channels[]` list.
-- **File exists but is malformed JSON** → log an advisory note (`channel config malformed JSON; inbound-discovery skipped this pass — fix the file then re-invoke`) and skip Step 4.5. This is genuine fail-soft because the user already SHIPPED a config and the malformation is an editing artefact best resolved by the user reading the parse error; auto-rewriting their file would destroy their work.
+- **File exists but is malformed JSON** → log an advisory note (`channel config malformed JSON; inbound-discovery skipped this pass — fix the file then re-invoke`) and skip Step 4.5. **ADR-013 Rule 6 carve-out (P352, 2026-06-06 amendment)**: this is a documented SKIP carve-out (deviation from the universal queue-and-continue default). Authorising principle: user-shipped artefact protection — the user already SHIPPED a config and the malformation is an editing artefact best resolved by the user reading the parse error; auto-rewriting their file (queue-then-overwrite-on-return) would destroy their work. The advisory note IS the queued surface for user attention on next interactive session; the loop continues. Same shape as a parse-error halt at a user-owned file boundary.
 - **File does NOT exist** → run the **auto-bootstrap routine** below per P351 / JTBD-101 / JTBD-007. **Adopters who never want to configure inbound-discovery** can keep `.upstream-channels.json` absent by answering `decline` at the interactive prompt OR allowing the AFK-mode outstanding-question to lapse; the absence stays zero-ceremony-tax (ADR-062 § Downstream-adopter non-obligation), but the silent skip is replaced by an explicit one-time-per-session prompt so the adopter has a visible signal that the inbound-discovery capability exists. <!-- @jtbd JTBD-101 (Extend the Suite — deliver-installed-features signal) --> <!-- @jtbd JTBD-007 (Keep Plugins Current — process reports what configured) --> <!-- @problem P351 (auto-bootstrap on missing precondition config) -->
 
 **Auto-bootstrap routine (P351)**: replaces the prior "missing file → silent skip" behaviour. The routine branches on AskUserQuestion availability per ADR-013 Rule 6 + ADR-044 category 1 (direction-setting):
@@ -149,6 +149,9 @@ Read `docs/problems/.upstream-channels.json`. Branch on state:
   - On `Decline permanently (write empty channels stub)`: write `{"channels": [], "ttl_seconds": 86400, "declined_at": "<ISO>"}` so future invocations parse cleanly + skip silently. Per ADR-062 § Downstream-adopter non-obligation — the empty-channels stub IS the documented "I never want this" surface.
 
 - **AFK mode** (AskUserQuestion unavailable, e.g. invoked from `/wr-itil:work-problems`):
+
+  **ADR-013 Rule 6 universal default (P352, 2026-06-06 amendment)** — queue-and-continue. This branch is the canonical exemplar: P351 lifted this site from the prior "missing file → silent skip" anti-pattern to queue-and-continue. The pattern below is the model the rest of the suite follows.
+
   1. Log advisory (`inbound-discovery: channel config absent; queued config-direction outstanding_question, skipping THIS pass to allow other passes to proceed`).
   2. Queue a `direction` entry per `/wr-itil:work-problems` SKILL.md Step 5 `outstanding_questions` schema (ADR-044 category 1):
 

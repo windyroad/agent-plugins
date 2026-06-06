@@ -164,6 +164,8 @@ When all three checks pass, the host emits a one-shot `AskUserQuestion` prompt w
 
 **AFK fail-safe**: when the host is invoked from an AFK orchestrator, do NOT fire the prompt. Append a one-line "pending intake scaffold" note to the iteration report and continue. The user catches up on next interactive session.
 
+**ADR-013 Rule 6 universal default (P352, 2026-06-06 amendment)**: this IS queue-and-continue — the iteration-report note is the queued surface; the loop advances. Persona-correct for JTBD-006 ("queued for my return, not guessed at"). Not a carve-out — this is the canonical default shape.
+
 ### Trigger 2: Pre-publish PreToolUse gate (hard stop)
 
 `packages/itil/hooks/pre-publish-intake-gate.sh` matches `npm publish` and `gh pr merge ... changeset-release/*` and denies if any of the five intake files are missing AND the decline marker is absent AND `INTAKE_BYPASS` is not set.

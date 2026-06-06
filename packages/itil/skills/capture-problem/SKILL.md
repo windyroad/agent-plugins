@@ -46,6 +46,8 @@ This skill has **at most one direction-setting AskUserQuestion (the I12 derive-t
 
 Per ADR-013 Rule 6 fail-safe: every decision above resolves without interactive user input in non-interactive contexts. The derive-then-ratify AskUserQuestion fires only on derivation-failure (interactive surface) AND only when `--no-prompt` is absent (AFK callers pre-resolve via flags or halt-with-stderr-directive — never silently swallow the ratification gate).
 
+**ADR-013 Rule 6 carve-out audit (P352, 2026-06-06 amendment)**: the universal AFK default is **queue-and-continue** (queue the decision, continue the loop). The HALT-with-stderr-directive carve-outs in the Resolution table above (Empty `$ARGUMENTS`, AFK halt-without-flags) are documented deviations from the universal default, authorised by **ADR-074** (Confirm decision substance before building dependent work). Rationale: capture-problem creates a durable ticket artefact; auto-creating with derived-but-unratified persona/JTBD substance would build dependent work (the ticket file, the README row, the WSJF rank) on an unconfirmed decision — the precise harm ADR-074 prohibits. No-ticket-created is the user-pinned protection; the HALT is the persona-correct shape (JTBD-006's "queued for my return, not guessed at" is satisfied by the stderr directive surfacing on user return + the AFK loop continuing to the next problem).
+
 ## Steps
 
 ### 0. README reconciliation preflight (P118)
