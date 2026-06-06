@@ -22,13 +22,17 @@ check_architect_gate() {
     local MARKER_TIME=$(_mtime "$MARKER")
     local AGE=$(( NOW - MARKER_TIME ))
     if [ "$AGE" -lt "$TTL_SECONDS" ]; then
-      # TTL still valid -- check for decision drift
+      # TTL still valid -- check for decision drift via substance-aware hash
+      # (ADR-009 amendment 2026-06-06: trivial whitespace / line-ending /
+      # trailing-newline edits do NOT trigger drift; substantive policy
+      # changes DO. Conservative boundary — ambiguous edits stay
+      # substantive. See gate-helpers.sh::_substance_hash_path).
       local HASH_FILE="/tmp/architect-reviewed-${SESSION_ID}.hash"
       if [ -f "$HASH_FILE" ]; then
         local STORED=$(cat "$HASH_FILE")
         local CURRENT
         if [ -d "$PROJECT_DIR/docs/decisions" ]; then
-          CURRENT=$(find "$PROJECT_DIR/docs/decisions" -name '*.md' -not -name 'README.md' -print0 | sort -z | xargs -0 cat 2>/dev/null | _hashcmd | cut -d' ' -f1)
+          CURRENT=$(_substance_hash_path "$PROJECT_DIR/docs/decisions")
         else
           CURRENT="none"
         fi

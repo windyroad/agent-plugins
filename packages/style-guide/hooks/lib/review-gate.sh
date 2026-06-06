@@ -34,18 +34,15 @@ check_review_gate() {
     return 1
   fi
 
-  # 3. Drift detection — policy file hash must match
+  # 3. Drift detection — substance-aware policy hash must match
+  # (ADR-009 amendment 2026-06-06: trivial whitespace / line-ending /
+  # trailing-newline edits do NOT trigger drift; substantive policy
+  # changes DO. Conservative boundary — ambiguous edits stay substantive.
+  # See gate-helpers.sh::_substance_hash_path.)
   if [ -f "$HASH_FILE" ] && [ -n "$POLICY_FILE" ]; then
     local STORED_HASH=$(cat "$HASH_FILE")
-    local CURRENT_HASH=""
-    if [ -f "$POLICY_FILE" ]; then
-      CURRENT_HASH=$(cat "$POLICY_FILE" | _hashcmd | cut -d' ' -f1)
-    elif [ -d "$POLICY_FILE" ]; then
-      # Directory (e.g., docs/decisions/) — hash all .md files
-      CURRENT_HASH=$(find "$POLICY_FILE" -name '*.md' -not -name 'README.md' -print0 | sort -z | xargs -0 cat 2>/dev/null | _hashcmd | cut -d' ' -f1)
-    else
-      CURRENT_HASH="missing"
-    fi
+    local CURRENT_HASH
+    CURRENT_HASH=$(_substance_hash_path "$POLICY_FILE")
     if [ "$STORED_HASH" != "$CURRENT_HASH" ]; then
       rm -f "$MARKER" "$HASH_FILE"
       REVIEW_GATE_REASON="${SYSTEM} policy file changed since last review. Re-run the ${SYSTEM} agent."
@@ -59,24 +56,29 @@ check_review_gate() {
 }
 
 # Store policy file hash after a successful review.
+# Routes the marker + hash write through `_atomic_mark_with_hash` so a PASS
+# never silently fails to persist (ADR-009 amendment 2026-06-06: closes the
+# "marker doesn't land after PASS" failure mode P353 measured as ~12
+# subagent invocations + 3 BYPASS_RISK_GATE=1 uses per 3-filing session).
 # Usage: store_review_hash "$SESSION_ID" "style-guide" "docs/STYLE-GUIDE.md"
 store_review_hash() {
   local SESSION_ID="$1"
   local SYSTEM="$2"
   local POLICY_FILE="$3"
-  local HASH_FILE="/tmp/${SYSTEM}-reviewed-${SESSION_ID}.hash"
+  local MARKER="/tmp/${SYSTEM}-reviewed-${SESSION_ID}"
 
   if [ -n "$POLICY_FILE" ]; then
-    local HASH=""
-    if [ -f "$POLICY_FILE" ]; then
-      HASH=$(cat "$POLICY_FILE" | _hashcmd | cut -d' ' -f1)
-    elif [ -d "$POLICY_FILE" ]; then
-      HASH=$(find "$POLICY_FILE" -name '*.md' -not -name 'README.md' -print0 | sort -z | xargs -0 cat 2>/dev/null | _hashcmd | cut -d' ' -f1)
-    else
-      HASH="missing"
+    local HASH
+    HASH=$(_substance_hash_path "$POLICY_FILE")
+    # Atomic: marker + hash either both land or neither does.
+    if ! _atomic_mark_with_hash "$MARKER" "$HASH"; then
+      # Diagnostic on failure — surface the silent-fail mode the
+      # pre-amendment `touch + echo > .hash` pair hid.
+      echo "WARN: ${SYSTEM}-mark-reviewed atomic marker-write failed for ${MARKER}" >&2
+      return 1
     fi
-    echo "$HASH" > "$HASH_FILE"
   fi
+  return 0
 }
 
 # Emit fail-closed deny JSON for PreToolUse hooks.

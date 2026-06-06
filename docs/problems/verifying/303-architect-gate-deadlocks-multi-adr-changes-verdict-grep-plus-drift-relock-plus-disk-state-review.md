@@ -1,10 +1,31 @@
 # Problem 303: Architect gate deadlocks any multi-decision-file change — verdict-grep + drift-relock + disk-state-review compound into an unbreakable lock
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-25
-**Priority**: 9 (Med High) — Impact: 3 (Moderate — every change that touches ≥2 `docs/decisions/` files in one session is blocked from landing through the gate without manual marker recovery; supersessions, ADR re-home ripples, and cluster-rollout ADRs all hit it) × Likelihood: 3 (Likely — any non-trivial governance change is multi-ADR; P294 hit it on the first attempt)
-**Effort**: M — the three facets each have a sibling ticket; the fix is to make them compose (a single recovery path + per-decision-edit hash refresh on the held marker, or a "review-approved-this-session" marker that survives drift)
-**WSJF**: 9/2 = **4.5** (Open multiplier 1.0) — corrected 2026-05-26: Effort is M (divisor 2), prior 9/4 used the L divisor in error
+**Priority**: 9 (Med High) — Impact: 3 (Moderate) × Likelihood: 3 (Likely)
+**Effort**: M
+**WSJF**: 9/2 = **4.5** (Verification Pending multiplier 0.0; held for verification only)
+
+## Fix Released
+
+**Released**: 2026-06-06 — drift-relock facet (facet 3) closed.
+
+**Direction**: User ratified the substance-aware drift + atomic verdict-write design on 2026-06-06 during the AFK iteration that produced this fix. Architect (PASS) + JTBD (PASS) + WIP-risk (CONTINUE, 4/25 within appetite) confirmed the same day.
+
+**Fix**:
+- ADR-009 amendment 2026-06-06 ("Substance-aware drift + atomic verdict-write") records the ratified contract.
+- ADR-028 amendment 2026-06-06 records the external-comms cross-amendment.
+- `packages/<architect|jtbd|voice-tone|style-guide|risk-scorer>/hooks/lib/gate-helpers.sh` gains `_substance_hash_path` (normalises CRLF / trailing whitespace / trailing newlines before hashing) + `_atomic_mark_with_hash` (mktemp + atomic rename pair). All five lib copies kept byte-identical.
+- `packages/<jtbd|voice-tone|style-guide>/hooks/lib/review-gate.sh` and `packages/architect/hooks/lib/architect-gate.sh` route the drift check through the substance hash; `store_review_hash` and `architect-mark-reviewed.sh` route the verdict-write through the atomic helper.
+- `packages/architect/hooks/architect-refresh-hash.sh` uses the substance hash + atomic rename for the in-session hash refresh.
+- Behavioural bats at `packages/<architect|jtbd|voice-tone|style-guide>/hooks/test/substance-aware-drift.bats` cover (a) trivial-edit-no-refire, (b) substantive-edit-refires, (c) atomic-write persists, (d) conservative fallback (25 new bats, all green; existing 259 hook bats remain green).
+
+**Scope clarification** (per ADR-009 2026-06-06 amendment Out-of-scope list): this release closes the drift-relock facet specifically. The verdict-grep fragility (facet 1) is tracked by P181/P217. The disk-state-review deadlock (facet 2) remains tracked separately. Drift-relock alone resolves P303's primary failure mode — multi-decision-file changes can now land through the gate's happy path because trivial whitespace edits between decision-file writes no longer invalidate the marker.
+
+**Verification**:
+- A multi-ADR change lands without manual `/tmp/architect-reviewed-${SID}` surgery.
+- Behavioural bats exercises the failure-mode cases pre-release.
+- No `BYPASS_RISK_GATE=1` use required after a legitimate architect PASS for multi-ADR work.
 
 ## Description
 

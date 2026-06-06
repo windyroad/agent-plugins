@@ -3,9 +3,9 @@ status: "proposed"
 date: 2026-04-20
 human-oversight: confirmed
 oversight-date: 2026-05-25
-amended-date: 2026-05-25
+amended-date: 2026-06-06
 decision-makers: [tomhoward]
-consulted: [wr-architect:agent, wr-jtbd:agent]
+consulted: [wr-architect:agent, wr-jtbd:agent, wr-risk-scorer:wip]
 informed: [Windy Road plugin users, addressr maintainer, bbstats maintainer]
 reassessment-date: 2026-07-20
 ---
@@ -466,3 +466,38 @@ Net: gate hashes `sha256(normalize(full_content) + '\n' + surface)`; helper hash
 **ADR-045 silent-on-pass (preserved)**: no stdout change on the happy path.
 
 **Status**: stays `proposed`. Per the project's deliberation discipline (and the 2026-05-14 amendment's note, line 330), ADR-028 holds at `proposed` until observed in production for one release cycle.
+
+### 2026-06-06 — Inherit substance-aware drift + atomic verdict-write from ADR-009 (P353 close)
+
+Cross-amendment sibling to the 2026-06-06 ADR-009 amendment. Architect (PASS) + JTBD (PASS) + WIP-risk (CONTINUE, 4/25 within appetite) confirmed 2026-06-06.
+
+**Context:**
+
+The external-comms gate's per-evaluator marker scheme (2026-05-14 amendment) and the canonical normalisation helper `compute_external_comms_key` (2026-05-25 amendment) already establish a per-draft-content-bound marker — the marker is keyed on `sha256(normalize(draft_body, surface) + '\n' + surface)`. That key shape is unchanged by this amendment.
+
+The 2026-06-06 ADR-009 amendment introduces a SECOND substance-aware mechanism: `_substance_hash_path` + `_atomic_mark_with_hash` in `packages/<gate>/hooks/lib/gate-helpers.sh`. The external-comms gate inherits both helpers automatically — it sources the same `gate-helpers.sh` lib copy. The two normalisation mechanisms compose orthogonally:
+
+- **`compute_external_comms_key`** (ADR-028, per-draft) — normalises a draft body for the per-evaluator marker key. Frontmatter-strip on changeset-author + rstrip on all surfaces. The marker is content-bound to the specific draft.
+- **`_substance_hash_path`** (ADR-009, per-policy-file) — normalises a policy file or directory for the drift-check hash. CRLF + trailing-whitespace + trailing-newline normalisation. The hash detects when the policy itself drifted between review and check.
+
+External-comms gates do not consume `_substance_hash_path` directly today (no policy-file drift check on the external-comms surface — the gate is per-draft, not per-policy). The atomic verdict-write helper `_atomic_mark_with_hash` IS consumed: external-comms mark hooks now route the per-evaluator marker write through the same atomic-rename pattern as the architect / jtbd / voice-tone / style-guide mark hooks. This closes the "marker doesn't land after PASS" failure mode P353 measured as ~12 subagent invocations + 3 `BYPASS_RISK_GATE=1` uses per 3-filing session.
+
+**Implementation:**
+
+- `packages/voice-tone/hooks/external-comms-mark-reviewed.sh` and `packages/risk-scorer/hooks/risk-score-mark.sh` (external-comms branch) — per-evaluator marker write routes through the `_atomic_mark_with_hash` helper from `gate-helpers.sh` (or a per-evaluator equivalent that follows the same `mktemp` + `mv` pattern when the marker is a presence-only file without a paired hash file). Diagnostic emitted on write failure; silent-on-success.
+- No change to `compute_external_comms_key` — the canonical normalisation contract from the 2026-05-25 amendment is preserved.
+- No change to the per-evaluator marker key shape — `sha256(normalize(draft, surface) + '\n' + surface)` unchanged.
+- No change to ADR-017 sync targets — the shared helpers already ship via `gate-helpers.sh`'s byte-identity invariant across packages.
+
+**Confirmation criteria delta:**
+
+- External-comms mark hooks (`{voice-tone,risk-scorer}/hooks/external-comms-mark-reviewed.sh`, `risk-score-mark.sh` external-comms branch) route through `_atomic_mark_with_hash` for the per-evaluator marker write.
+- Post-PASS verdict reliably persists; the next gate check on the same `(draft, surface)` permits without re-review (closes the "marker doesn't land" facet of P353).
+- A behavioural bats covers: PASS → atomic-write succeeds → marker present → next gate check permits. PASS → atomic-write fails (forced FS error) → marker absent → next gate check denies (no half-state).
+
+**Out of scope (deferred):**
+
+- Adding a policy-file drift check to the external-comms surface (would consume `_substance_hash_path` directly). Not justified today — the per-draft marker key already content-binds the verdict.
+- Removing the 2026-05-16 backward-compatibility fallback to agent-emitted `EXTERNAL_COMMS_<EVAL>_KEY`. Tracked as a follow-up amendment.
+
+**Status**: stays `proposed`. The substance-aware contract is observed in production for one release cycle before any status flip per the existing ADR-006-vintage deliberation discipline.

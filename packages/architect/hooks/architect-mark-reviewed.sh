@@ -41,28 +41,31 @@ case "$SUBAGENT" in
       VERDICT="FAIL"
     fi
 
+    # Substance-aware drift hash + atomic verdict-write (ADR-009 amendment
+    # 2026-06-06). The marker + hash file are written as an atomic pair via
+    # `_atomic_mark_with_hash` so a PASS never silently fails to persist
+    # (closes the "marker doesn't land after PASS" failure mode P353
+    # measured as ~12 subagent invocations + 3 BYPASS_RISK_GATE=1 uses
+    # per 3-filing session).
+    MARKER="/tmp/architect-reviewed-${SESSION_ID}"
     case "$VERDICT" in
-      PASS)
-        touch "/tmp/architect-reviewed-${SESSION_ID}"
+      PASS|"")
+        # PASS or unparseable verdict — allow with marker (the empty case
+        # preserves the pre-amendment "could not parse verdict" backward-
+        # compat allow-with-marker behaviour to avoid lockout).
+        if [ -d "$PROJECT_DIR/docs/decisions" ]; then
+          HASH=$(_substance_hash_path "$PROJECT_DIR/docs/decisions")
+        else
+          HASH="none"
+        fi
+        if ! _atomic_mark_with_hash "$MARKER" "$HASH"; then
+          echo "WARN: architect-mark-reviewed atomic marker-write failed for ${MARKER}" >&2
+        fi
         ;;
       FAIL)
         # Do NOT create marker — review found issues
         ;;
-      *)
-        # Could not parse verdict — allow with marker to avoid lockout
-        touch "/tmp/architect-reviewed-${SESSION_ID}"
-        ;;
     esac
-
-    # Store decision hash for drift detection
-    if [ -f "/tmp/architect-reviewed-${SESSION_ID}" ]; then
-      if [ -d "$PROJECT_DIR/docs/decisions" ]; then
-        HASH=$(find "$PROJECT_DIR/docs/decisions" -name '*.md' -not -name 'README.md' -print0 | sort -z | xargs -0 cat 2>/dev/null | _hashcmd | cut -d' ' -f1)
-      else
-        HASH="none"
-      fi
-      echo "$HASH" > "/tmp/architect-reviewed-${SESSION_ID}.hash"
-    fi
 
     # Plan review marker
     touch "/tmp/architect-plan-reviewed-${SESSION_ID}"

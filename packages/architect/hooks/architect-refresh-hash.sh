@@ -4,8 +4,8 @@
 # This prevents drift detection from invalidating the marker when creating
 # new decision files that the architect just approved.
 
-# Portable hash: tries md5sum, falls back to md5 -r, then shasum
-_hashcmd() { md5sum 2>/dev/null || md5 -r 2>/dev/null || shasum 2>/dev/null; }
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+source "$SCRIPT_DIR/lib/gate-helpers.sh"
 
 # P191 Phase 2: anchor docs/decisions on the project root, not the hook's
 # runtime CWD (see architect-enforce-edit.sh). The refreshed hash must match
@@ -33,14 +33,24 @@ esac
 MARKER="/tmp/architect-reviewed-${SESSION_ID}"
 HASH_FILE="/tmp/architect-reviewed-${SESSION_ID}.hash"
 
-# Only refresh if a valid marker exists
+# Only refresh if a valid marker exists. Uses substance-aware hash
+# (ADR-009 amendment 2026-06-06) and atomic-rename write (mktemp + mv).
 if [ -f "$MARKER" ] && [ -f "$HASH_FILE" ]; then
   if [ -d "$PROJECT_DIR/docs/decisions" ]; then
-    HASH=$(find "$PROJECT_DIR/docs/decisions" -name '*.md' -not -name 'README.md' -print0 | sort -z | xargs -0 cat 2>/dev/null | _hashcmd | cut -d' ' -f1)
+    HASH=$(_substance_hash_path "$PROJECT_DIR/docs/decisions")
   else
     HASH="none"
   fi
-  echo "$HASH" > "$HASH_FILE"
+  htmp="${HASH_FILE}.tmp.$$.${RANDOM:-0}"
+  if printf '%s\n' "$HASH" > "$htmp" 2>/dev/null; then
+    if ! mv -f "$htmp" "$HASH_FILE" 2>/dev/null; then
+      rm -f "$htmp"
+      echo "WARN: architect-refresh-hash atomic rename failed for ${HASH_FILE}" >&2
+    fi
+  else
+    rm -f "$htmp"
+    echo "WARN: architect-refresh-hash tempfile write failed for ${HASH_FILE}" >&2
+  fi
 fi
 
 exit 0

@@ -47,7 +47,7 @@ _71 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-009 — Gate Marker Lifecycle: TTL + Drift, Not Stop-Hook Reset
 **Status:** proposed | **Oversight:** confirmed
 **Confirmation:** architect-reset-marker.sh removed and its Stop hook entry removed from architect/hooks/hooks.json; Same for jtbd-reset.sh, voice-tone-reset-marker.sh, style-guide-reset-marker.sh; grep -rn "reset-marker\|-reset\.sh" packages/ returns only TDD and test references; BATS tests verify that: marker persists when no drift occurs, marker is invalidated by policy file change (exi...; Existing BATS tests for each plugin's gate continue to pass (113/113 baseline)
-**Related:** ADR-005, ADR-032
+**Related:** ADR-005, ADR-028, ADR-032
 
 ### ADR-010 — Rename `wr-problem` Plugin to `wr-itil`
 **Status:** proposed | **Oversight:** confirmed

@@ -13,6 +13,111 @@ _mtime() { stat -c%Y "$1" 2>/dev/null || /usr/bin/stat -f%m "$1" 2>/dev/null || 
 # Portable hash: tries md5sum, falls back to md5 -r, then shasum
 _hashcmd() { md5sum 2>/dev/null || md5 -r 2>/dev/null || shasum 2>/dev/null; }
 
+# ---------------------------------------------------------------------------
+# Substance-aware drift hash + atomic verdict-write (ADR-009 amendment
+# 2026-06-06, P353 + P303 close).
+#
+# `_substance_hash_path` normalises trivial/no-op edits BEFORE hashing so a
+# PASS marker survives whitespace / CRLF / trailing-newline edits while still
+# detecting substantive policy changes. Conservative boundary: when in doubt
+# whether an edit is trivial vs substantive, this helper treats it as
+# substantive (re-review fires). Only whitespace + line-ending + trailing-
+# newline are normalised in this iteration — single-numeral edits and
+# frontmatter-key changes are intentionally NOT normalised. See ADR-009
+# 2026-06-06 amendment for the ratified contract.
+#
+# `_atomic_mark_with_hash` writes the marker + hash file as an atomic pair
+# (mktemp + mv) so a PASS NEVER silently fails to persist (the empirically-
+# measured P353 failure mode that forced BYPASS_RISK_GATE=1 on every
+# external-comms gate clearance). Either both files land, or neither does.
+# Non-zero exit on failure so callers can emit a diagnostic.
+# ---------------------------------------------------------------------------
+
+# Substance-aware hash of a file or directory path.
+# For directories: hashes the concatenated content of all *.md files
+# (excluding README.md) in sorted order.
+# For files: hashes the file content.
+# Normalisation BEFORE hashing: CRLF → LF, strip trailing whitespace per
+# line, normalise trailing whitespace to a single \n.
+# Echoes "missing" for paths that do not exist (drop-in equivalence with the
+# pre-amendment `cat | _hashcmd | cut -d' ' -f1` site behaviour).
+# Echoes a hex sha256 of the normalised content on success.
+_substance_hash_path() {
+    local path="$1"
+    if [ -z "$path" ]; then
+        echo "missing"
+        return 0
+    fi
+    if [ -f "$path" ]; then
+        cat "$path" 2>/dev/null | _substance_normalize_then_hash
+    elif [ -d "$path" ]; then
+        find "$path" -name '*.md' -not -name 'README.md' -print0 \
+            | sort -z \
+            | xargs -0 cat 2>/dev/null \
+            | _substance_normalize_then_hash
+    else
+        echo "missing"
+    fi
+}
+
+# Internal: reads from stdin, normalises whitespace + line endings, emits a
+# hex sha256 of the normalised content. Conservative boundary documented in
+# ADR-009 2026-06-06 amendment: ambiguous edits stay substantive.
+_substance_normalize_then_hash() {
+    python3 -c "
+import sys, hashlib
+data = sys.stdin.buffer.read().decode('utf-8', errors='replace')
+# CRLF / CR -> LF
+data = data.replace('\r\n', '\n').replace('\r', '\n')
+# Strip trailing whitespace per line.
+lines = [line.rstrip() for line in data.split('\n')]
+# Re-join and normalise trailing whitespace to a single \n.
+normalised = '\n'.join(lines).rstrip() + '\n'
+print(hashlib.sha256(normalised.encode('utf-8')).hexdigest())
+" 2>/dev/null || echo "missing"
+}
+
+# Atomically write a presence marker + its paired hash file. Either both
+# files land or neither does. Returns 0 on success, 1 on failure. On failure
+# any partial state is rolled back.
+# Usage: _atomic_mark_with_hash "/tmp/architect-reviewed-${SID}" "$HASH"
+_atomic_mark_with_hash() {
+    local marker="$1"
+    local hash="$2"
+    local hash_file="${marker}.hash"
+
+    if [ -z "$marker" ]; then
+        return 1
+    fi
+
+    local htmp="${hash_file}.tmp.$$.${RANDOM:-0}"
+    local mtmp="${marker}.tmp.$$.${RANDOM:-0}"
+
+    # Write hash to tempfile.
+    if ! printf '%s\n' "$hash" > "$htmp" 2>/dev/null; then
+        rm -f "$htmp"
+        return 1
+    fi
+    # Write empty marker to tempfile.
+    if ! : > "$mtmp" 2>/dev/null; then
+        rm -f "$htmp" "$mtmp"
+        return 1
+    fi
+    # Atomic rename: hash file first.
+    if ! mv -f "$htmp" "$hash_file" 2>/dev/null; then
+        rm -f "$htmp" "$mtmp"
+        return 1
+    fi
+    # Atomic rename: marker second. If this fails, roll back the hash file
+    # so we never observe a hash-without-marker half-state.
+    if ! mv -f "$mtmp" "$marker" 2>/dev/null; then
+        rm -f "$mtmp"
+        rm -f "$hash_file"
+        return 1
+    fi
+    return 0
+}
+
 # Paths excluded from pipeline state hashing and docs-only detection.
 _doc_exclusions() {
     echo ':!docs/' ':!.risk-reports/' ':!.changeset/' ':!governance/' ':!.claude/plans/' ':!CLAUDE.md' ':!AGENTS.md' ':!PRINCIPLES.md' ':!DECISION-MANAGEMENT.md' ':!AGENTIC_RISK_REGISTER.md' ':!PROBLEM-MANAGEMENT.md'

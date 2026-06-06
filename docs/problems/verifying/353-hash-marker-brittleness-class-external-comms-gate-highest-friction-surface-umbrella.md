@@ -1,13 +1,44 @@
 # Problem 353: hash-marker brittleness class — external-comms gate is the highest-friction surface in the project (umbrella ticket tying P276 + P303 + P181 sibling-instances + upstream #125)
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-06-03 (user direction with screenshot evidence quoting a sibling-session's retro observation; user direction: *"these have been reported (you'll need to look), but there is important verbatim in this image worth considering"*)
-**Priority**: 16 (High) — Impact: 4 (Significant — measured friction tax: ~12 subagent invocations across 3 upstream filings in a single session JUST for gate clearance, plus 3 BYPASS_RISK_GATE=1 workarounds after legitimate PASS reviews; external-comms gate identified as the highest-friction surface in the project) × Likelihood: 4 (Likely — fires on every external-comms surface in every session that touches one; instances accumulate across all sibling members of the class)
+**Priority**: 16 (High) — Impact: 4 (Significant) × Likelihood: 4 (Likely)
 **Origin**: internal
 **Persona**: developer
 **JTBD**: JTBD-001
-**Effort**: M (umbrella covers existing sub-tickets; this ticket's own work is the umbrella analysis + scoping the structural fix that resolves the class root cause, not re-implementing per-instance fixes)
-**WSJF**: 8.0 (16 × 1.0 / 2)
+**Effort**: M
+**WSJF**: 8.0 (Verification Pending multiplier 0.0; held for verification only)
+
+## Fix Released
+
+**Released**: 2026-06-06 — class root cause closed (substance-aware marker + atomic verdict-write).
+
+**Direction**: User ratified the substance-aware design on 2026-06-06. The user-approved contract explicitly addresses the three class-level failure modes the umbrella captured:
+
+- **"Marker doesn't land after PASS"** (sub-cause 1) — closed by the atomic verdict-write helper `_atomic_mark_with_hash`. The mark hook now writes the marker + hash file as a single atomic mktemp + rename pair; either both land or neither does. No more silent failure → no more `BYPASS_RISK_GATE=1` after a legitimate PASS.
+- **"Marker invalidated by body-edit"** (sub-cause 2) — closed for the policy-file-drift surface by the substance-aware `_substance_hash_path` (normalises CRLF / trailing whitespace / trailing newlines before hashing). Trivial PASS-class edits (whitespace, line-ending) no longer invalidate the marker. Conservative boundary preserved: single-numeral edits and frontmatter-key changes are still treated as substantive (re-review fires).
+- **"Drift-relock compound"** (sub-cause 3) — closed by the same substance-aware hash applied per-gate. Multi-file commits where each file's policy hash is computed independently no longer compound trivial-edit invalidations.
+
+**Fix**:
+- ADR-009 amendment 2026-06-06 ("Substance-aware drift + atomic verdict-write") records the ratified contract.
+- ADR-028 amendment 2026-06-06 records the external-comms inheritance.
+- `packages/<architect|jtbd|voice-tone|style-guide|risk-scorer>/hooks/lib/gate-helpers.sh` gains the two shared helpers — byte-identical across all five copies per ADR-017.
+- `packages/<jtbd|voice-tone|style-guide>/hooks/lib/review-gate.sh` + `packages/architect/hooks/lib/architect-gate.sh` route drift detection through `_substance_hash_path`.
+- `packages/architect/hooks/architect-mark-reviewed.sh` + `architect-refresh-hash.sh` route the verdict-write through `_atomic_mark_with_hash`.
+- Behavioural bats at `packages/<architect|jtbd|voice-tone|style-guide>/hooks/test/substance-aware-drift.bats` exercise (a) trivial-edit-no-refire, (b) substantive-edit-refires, (c) atomic-write persists, (d) conservative fallback. 25 new bats; existing 259 hook bats remain green.
+
+**Sub-instance status**:
+- **P276** (Open — body-edit marker invalidation) — class root cause closed by this release; sibling-ticket may still ship the per-instance whitespace normalisation in `compute_external_comms_key` independently. Mark for re-rank.
+- **P303** (Verification Pending — sibling release in the same commit) — drift-relock facet closed. Sibling P181/P217 still tracks the verdict-grep facet.
+- **P181** (Verifying) — independent fix already released.
+- **#125 upstream** — out of scope (Claude Code SDK-level marker propagation); local class root cause closed without dependency on upstream resolution.
+
+**Friction-tax recovery target**: the next 3-filing AFK session should fire 3 subagent invocations (one per filing) with 0 `BYPASS_RISK_GATE=1` uses — down from the measured ~12 invocations + 3 BYPASS uses. Confirms the class root cause closure.
+
+**Verification**:
+- Run the behavioural bats: `node_modules/.bin/bats packages/{architect,jtbd,voice-tone,style-guide}/hooks/test/substance-aware-drift.bats` → 25/25 PASS.
+- Observe an AFK session authoring external comms — marker persists after PASS; no fallback to BYPASS required.
+- Trivial whitespace edits on ADR / JTBD / VOICE-AND-TONE / STYLE-GUIDE files between successive gated edits no longer re-fire the review.
 
 ## Description
 
