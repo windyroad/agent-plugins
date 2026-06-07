@@ -7,6 +7,8 @@
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 
 > **new-jtbd-flag** (per JTBD classifier): the proposed skill addresses **adopter-artefact-layout-currency** — a third currency dimension not covered by JTBD-007 today (which scopes code-currency + README-content-currency only). Maintainer decision: amend JTBD-007 to extend currency scope (recommended) OR add new JTBD-009 (Migrate Adopter Artefacts When a Plugin's Layout Evolves).
+>
+> **Q1 ratified 2026-06-07** — user chose "Add new JTBD-009" over extending JTBD-007 a third time. JTBD-009 created at `docs/jtbd/developer/JTBD-009-migrate-adopter-artefacts.proposed.md` (`human-oversight: confirmed`, `oversight-date: 2026-06-07`) as the trace home; the migrate-briefing skill is JTBD-009's first concrete realisation. SKILL.md annotated with `<!-- @jtbd JTBD-009 -->` and "See also" updated. Sibling JTBD-007 retained for the code-currency + README-content-currency + maturity-band-currency dimensions.
 
 ## Description
 
@@ -29,7 +31,7 @@ Manually split `docs/BRIEFING.md` into topic files under `docs/briefing/` per th
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Architect call: amend JTBD-007 (recommended — extend currency scope a third time: code + README + artefact-layout) OR new JTBD-009 (Migrate Adopter Artefacts). **Queued to outstanding_questions** by P204 work-iter 2026-06-06 (AFK orchestrator constraint: no AskUserQuestion in iteration; goal requires user-ratified JTBD amendment/creation first).
+- [x] Architect call: amend JTBD-007 (recommended — extend currency scope a third time: code + README + artefact-layout) OR new JTBD-009 (Migrate Adopter Artefacts). **Ratified 2026-06-07**: user chose "Add new JTBD-009"; created at `docs/jtbd/developer/JTBD-009-migrate-adopter-artefacts.proposed.md` (`human-oversight: confirmed`) with the migrate-briefing skill named as its first concrete realisation. SKILL.md "See also" updated to dual-trace JTBD-009 (primary) + JTBD-007 (sibling) and HTML-comment `<!-- @jtbd JTBD-009 -->` annotation added per ADR-008 + matched convention in `packages/itil/skills/{work-problems,manage-problem}/SKILL.md`. Architect + jtbd-lead reviews on the SKILL.md edit APPROVED 2026-06-07.
 - [x] Ship `/wr-retrospective:migrate-briefing` skill: parse legacy `docs/BRIEFING.md`, split by section headings (`## ` H2 markers, code-fence-aware), write per-topic files under `docs/briefing/<topic>.md`, generate README index, retire legacy file as `docs/BRIEFING.md.migrated-<date>`. Foreground-synchronous (ADR-032); self-commits (ADR-014); ships behavioural fixture + contract bats (ADR-052); script invoked via `wr-retrospective-migrate-briefing` PATH shim (ADR-049/ADR-080). Landed 2026-06-06.
 - [x] Behavioural fixture: 10 fixture bats + 17 contract bats covering both idempotency directions (tree-present, no-legacy), three-section migration, slug collision (`-2` suffix), code-fence-protected H2, `--dry-run`, `--force`. All 27 pass.
 
@@ -51,7 +53,7 @@ Ticket moves to Closed once `@windyroad/retrospective` ships the next release ca
 
 ## Dependencies
 
-- **Composes with**: P100 slice 2 (dual-tolerant SessionStart hook), ADR-040 (per-topic rotation), ADR-051 (README-content-currency), JTBD-007 (Keep Plugins Current).
+- **Composes with**: P100 slice 2 (dual-tolerant SessionStart hook), ADR-040 (per-topic rotation), ADR-051 (README-content-currency), JTBD-009 (Migrate Adopter Artefacts — primary trace, ratified 2026-06-07), JTBD-007 (Keep Plugins Current — sibling).
 
 ## Related
 

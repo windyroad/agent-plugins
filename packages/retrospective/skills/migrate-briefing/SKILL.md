@@ -8,6 +8,8 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 
 Adopters who carried a legacy monolithic `docs/BRIEFING.md` from an older `@windyroad/retrospective` release have no automation path to the per-topic `docs/briefing/` tree the current Tier-3 rotation contract (ADR-040) expects. The dual-tolerant SessionStart hook (`packages/retrospective/hooks/session-start-briefing.sh`) keeps adopters working while the legacy file remains, but per-topic-rotation only fires once the tree exists. This skill closes the loop.
 
+<!-- @jtbd JTBD-009 (Migrate Adopter Artefacts When a Plugin Layout Evolves — primary trace; the migrate-briefing skill is JTBD-009's first concrete realisation per P204 Q1 ratification 2026-06-07) -->
+
 See `REFERENCE.md` in this directory for the heading-extraction algorithm, slug-collision handling, code-fence-aware parsing, recovery semantics, and scope exclusions (progressive disclosure per ADR-038).
 
 ## Pattern
@@ -130,4 +132,5 @@ If a future enhancement adds direction-setting choices (e.g. user-supplied topic
 - ADR-040 — per-topic briefing surface contract (target shape)
 - ADR-038 — progressive disclosure pattern (SKILL/REFERENCE split)
 - ADR-052 — behavioural tests by default
-- JTBD-007 — Keep Plugins Current (adopter currency — pending amendment to extend currency scope to adopter-artefact-layout; see P204 new-jtbd-flag)
+- JTBD-009 — Migrate Adopter Artefacts When a Plugin Layout Evolves (primary trace — P204 Q1 ratified 2026-06-07; the migrate-briefing skill is JTBD-009's first concrete realisation)
+- JTBD-007 — Keep Plugins Current Across Projects (sibling on the same developer persona; code-currency + README-content-currency + maturity-band-currency; JTBD-009 carries the artefact-layout-currency dimension carved out from JTBD-007 by P204 Q1)

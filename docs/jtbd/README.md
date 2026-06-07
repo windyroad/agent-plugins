@@ -18,6 +18,7 @@ Developer using AI coding agents — solo, small-team, or within a larger softwa
 | JTBD-006 | Progress the Backlog While I'm Away | [JTBD-006-work-backlog-afk.proposed.md](developer/JTBD-006-work-backlog-afk.proposed.md) |
 | JTBD-007 | Keep Plugins Current Across Projects | [JTBD-007-keep-plugins-current.proposed.md](developer/JTBD-007-keep-plugins-current.proposed.md) |
 | JTBD-008 | Decompose a Fix Into Coordinated Changes | [JTBD-008-decompose-fix-into-coordinated-changes.proposed.md](developer/JTBD-008-decompose-fix-into-coordinated-changes.proposed.md) |
+| JTBD-009 | Migrate Adopter Artefacts When a Plugin Layout Evolves | [JTBD-009-migrate-adopter-artefacts.proposed.md](developer/JTBD-009-migrate-adopter-artefacts.proposed.md) |
 
 ## Tech Lead / Consultant
 
