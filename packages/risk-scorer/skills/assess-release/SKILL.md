@@ -64,14 +64,14 @@ Build a self-contained prompt for the pipeline subagent that includes:
 
 ### 5. Delegate to wr-risk-scorer:pipeline
 
-Invoke the pipeline subagent via the `Skill` tool:
+Invoke the pipeline scorer via the `Skill` tool. The `wr-risk-scorer:pipeline` SKILL is a thin wrapper around the pipeline agent (per ADR-015 — see `packages/risk-scorer/skills/pipeline/SKILL.md`):
 
 ```
-subagent_type: wr-risk-scorer:pipeline
+skill: wr-risk-scorer:pipeline
 prompt: <constructed assessment prompt from step 4>
 ```
 
-Wait for the subagent to complete. The subagent will output a structured `RISK_SCORES:` block. The `PostToolUse:Agent` hook (`risk-score-mark.sh`) reads that output and writes the bypass marker files automatically.
+Wait for the wrapper to return. The wrapper invokes the pipeline agent internally; the agent's structured `RISK_SCORES:` block flows back through the wrapper verbatim. The `PostToolUse:Agent` hook (`risk-score-mark.sh`) fires on the wrapper's inner Agent invocation and writes the bypass marker files automatically.
 
 **Do not write to `$TMPDIR/claude-risk-*` yourself.** The hook is the only correct mechanism.
 

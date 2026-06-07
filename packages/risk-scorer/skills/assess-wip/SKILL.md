@@ -42,14 +42,14 @@ Build a self-contained prompt for the wip subagent that includes:
 
 ### 3. Delegate to wr-risk-scorer:wip
 
-Invoke the wip subagent via the `Skill` tool:
+Invoke the WIP scorer via the `Skill` tool. The `wr-risk-scorer:wip` SKILL is a thin wrapper around the wip agent (per ADR-015 — see `packages/risk-scorer/skills/wip/SKILL.md`):
 
 ```
-subagent_type: wr-risk-scorer:wip
+skill: wr-risk-scorer:wip
 prompt: <constructed assessment prompt from step 2>
 ```
 
-Wait for the subagent to complete.
+Wait for the wrapper to return. The wrapper invokes the wip agent internally and returns the agent's verdict verbatim.
 
 ### 4. Present results
 

@@ -78,8 +78,15 @@ agent-plugins/
 │   │   ├── hooks/
 │   │   └── skills/
 │   │       ├── update-policy/SKILL.md
-│   │       ├── assess-release/SKILL.md
-│   │       └── assess-wip/SKILL.md
+│   │       ├── assess-release/SKILL.md         (end-user surface)
+│   │       ├── assess-wip/SKILL.md             (end-user surface)
+│   │       ├── assess-external-comms/SKILL.md  (end-user surface)
+│   │       ├── assess-inbound-report/SKILL.md  (end-user surface)
+│   │       ├── bootstrap-catalog/SKILL.md
+│   │       ├── create-risk/SKILL.md
+│   │       ├── pipeline/SKILL.md               (ADR-015 Skill-tool wrapper for pipeline agent — internal)
+│   │       ├── wip/SKILL.md                    (ADR-015 Skill-tool wrapper for wip agent — internal)
+│   │       └── external-comms/SKILL.md         (ADR-015 Skill-tool wrapper for external-comms agent — internal)
 │   ├── tdd/                      @windyroad/tdd
 │   │   ├── package.json
 │   │   ├── hooks/

@@ -79,6 +79,16 @@ The plugin includes six specialised agents:
 | `/wr-risk-scorer:bootstrap-catalog` | Bootstrap `docs/risks/` register from existing `.risk-reports/` corpus per ADR-059 — walks reports, dedupes by ADR-056 slug, emits one `R<NNN>-<slug>.active.md` per unique slug. Idempotent. Auto-triggers from `/install-updates` Step 6.5.1 when register is empty + `RISK-POLICY.md` present + `.risk-reports/` non-empty |
 | `/wr-risk-scorer:update-policy` | Generate or update `RISK-POLICY.md` |
 
+### Internal-use wrapper skills
+
+These wrappers exist so consumer SKILLs can invoke the scoring agents via the Skill tool with `skill: wr-risk-scorer:<name>` per ADR-015's Confirmation literal phrasing. End users should invoke the `/wr-risk-scorer:assess-*` skills above; the wrappers are internal plumbing.
+
+| Wrapper skill | Purpose |
+|---------------|---------|
+| `wr-risk-scorer:pipeline` | Skill-tool wrapper around the `wr-risk-scorer:pipeline` agent (consumer: `/wr-risk-scorer:assess-release`) |
+| `wr-risk-scorer:wip` | Skill-tool wrapper around the `wr-risk-scorer:wip` agent (consumer: `/wr-risk-scorer:assess-wip`) |
+| `wr-risk-scorer:external-comms` | Skill-tool wrapper around the `wr-risk-scorer:external-comms` agent (consumer: `/wr-risk-scorer:assess-external-comms`) |
+
 ## External-comms gate
 
 The `external-comms-gate.sh` hook intercepts outbound prose tool calls and the

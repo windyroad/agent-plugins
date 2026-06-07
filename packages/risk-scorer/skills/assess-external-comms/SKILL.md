@@ -72,14 +72,14 @@ The orchestrator does NOT pre-compute the key — the hook derives it from the p
 
 ### 4. Delegate to wr-risk-scorer:external-comms
 
-Invoke the subagent via the `Skill` tool:
+Invoke the external-comms reviewer via the `Skill` tool. The `wr-risk-scorer:external-comms` SKILL is a thin wrapper around the external-comms agent (per ADR-015 — see `packages/risk-scorer/skills/external-comms/SKILL.md`):
 
 ```
-subagent_type: wr-risk-scorer:external-comms
+skill: wr-risk-scorer:external-comms
 prompt: <constructed review prompt from step 3>
 ```
 
-Wait for the subagent to complete. The subagent outputs a structured verdict block (`EXTERNAL_COMMS_RISK_VERDICT: PASS|FAIL` + optional `EXTERNAL_COMMS_RISK_REASON: ...` on FAIL). The `PostToolUse:Agent` hook (`risk-score-mark.sh`) parses the verdict, derives the marker key from the prompt's `SURFACE:` + `<draft>` structure, and writes the marker automatically on PASS.
+Wait for the wrapper to return. The wrapper invokes the external-comms agent internally; the agent's structured verdict block (`EXTERNAL_COMMS_RISK_VERDICT: PASS|FAIL` + optional `EXTERNAL_COMMS_RISK_REASON: ...` on FAIL) flows back verbatim. The `PostToolUse:Agent` hook (`risk-score-mark.sh`) fires on the wrapper's inner Agent invocation, derives the marker key from the prompt's `SURFACE:` + `<draft>` structure, and writes the marker automatically on PASS.
 
 **Do not write to `${TMPDIR:-/tmp}/claude-risk-*` yourself.** The hook is the only correct mechanism.
 
