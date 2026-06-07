@@ -112,21 +112,23 @@ fi
 
 Detection is intentionally **strict** (explicit label or scoped-npm package only) to avoid prompt fatigue (P063 Direction decision). A passing reference to a bare package name (`gh`, `npm`) does NOT trigger the prompt.
 
-**Already-noted check** — before firing the prompt, grep the ticket for the stable marker `- **Upstream report pending** —` (written by option 2 / the AFK fallback below) or `- **Reported Upstream:**` / a `## Reported Upstream` section (written by `/wr-itil:report-upstream` Step 7 back-write per ADR-024 Confirmation criterion 3a). If any of those are already present, skip the prompt — the detection has already fired on a prior run.
+**Already-noted check** — before firing the prompt, grep the ticket for the stable marker `- **Upstream report pending** --` (canonical ASCII form per P210) or the legacy em-dash variant `- **Upstream report pending** —` (written by option 2 / the AFK fallback below; the grep MUST match BOTH variants for backward compatibility) or `- **Reported Upstream:**` / a `## Reported Upstream` section (written by `/wr-itil:report-upstream` Step 7 back-write per ADR-024 Confirmation criterion 3a). If any of those are already present, skip the prompt — the detection has already fired on a prior run.
 
 **If the detection fires and nothing has been noted yet** (per ADR-044 framework-resolution boundary): the agent applies the AFK fallback default WITHOUT firing `AskUserQuestion`. Per ADR-044, this decision IS framework-resolved — the safe action is "defer and note marker", and the user can correct via authentic-correction (ADR-044 category 6) if a manual `/wr-itil:report-upstream` invocation is wanted instead. Per-transition `AskUserQuestion` for upstream-detection is sub-contracting framework-resolved decisions back to the user (lazy deferral per Step 2d Ask Hygiene Pass classification).
 
 **Default behaviour (silent agent action, per ADR-044)**: append the pending-upstream-report line to the ticket's `## Related` section using the stable marker:
 
 ```
-- **Upstream report pending** — external dependency identified; invoke /wr-itil:report-upstream when ready
+- **Upstream report pending** -- external dependency identified; invoke /wr-itil:report-upstream when ready
 ```
+
+ASCII `--` per P210 — ASCII-only in machine-parseable identifiers; em-dash permitted in pure narrative prose. The legacy em-dash variant is matched by the already-noted check for backward compatibility.
 
 The marker wording is fixed so subsequent runs (and the work-problems `upstream-blocked` skip path) can detect "already noted" without re-firing. The transition proceeds normally after the marker is appended.
 
 **Recovery / override paths** (user-initiated, not asked-per-transition):
 
-- If the detection misfired (false positive — not actually upstream), user appends `- **Upstream report pending** — false positive; detection misfire` directly to the ticket's `## Related` section. The next detection-pass observes the marker and skips firing again.
+- If the detection misfired (false positive — not actually upstream), user appends `- **Upstream report pending** -- false positive; detection misfire` directly to the ticket's `## Related` section (ASCII `--` per P210; legacy em-dash variant remains matched for backward compatibility). The next detection-pass observes the marker and skips firing again.
 - If the user wants to invoke `/wr-itil:report-upstream` immediately rather than deferring, they invoke it directly (`/wr-itil:report-upstream <NNN> <upstream-repo-url>`). The skill writes the `## Reported Upstream` appendage per ADR-024.
 
 **AFK and interactive modes use identical behaviour** — the silent-default-with-recovery-path shape is the framework-resolution boundary application; there's no `AskUserQuestion`-vs-fallback differentiation.

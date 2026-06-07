@@ -120,12 +120,12 @@ if grep -iE '\b(upstream|third-party|external|vendor)\b|@[[:alnum:]_-]+/[[:alnum
 fi
 ```
 
-**Already-noted check** — before firing, grep for `- **Upstream report pending** —` or `- **Reported Upstream:**` or a `## Reported Upstream` section. If present, skip the prompt for this pair.
+**Already-noted check** — before firing, grep for `- **Upstream report pending** --` (canonical ASCII per P210) or the legacy em-dash variant `- **Upstream report pending** —` (the grep MUST match BOTH variants for backward compatibility) or `- **Reported Upstream:**` or a `## Reported Upstream` section. If present, skip the prompt for this pair.
 
 **Branch on interactivity (per ADR-013 Rule 1 / Rule 6):**
 
 - **Interactive** (`AskUserQuestion` available): use the same three-option prompt the singular's Step 5 documents (invoke /wr-itil:report-upstream / defer-and-note / not-actually-upstream).
-- **AFK / non-interactive** (orchestrator markers — "AFK", "work-problems", "batch-work", "ALL_DONE" — present in the invoking context): default to defer-and-note. Append `- **Upstream report pending** — external dependency identified; invoke /wr-itil:report-upstream when ready` to the ticket's `## Related` section. Do NOT auto-invoke `/wr-itil:report-upstream` (its Step 6 security branch is interactive — per ADR-024).
+- **AFK / non-interactive** (orchestrator markers — "AFK", "work-problems", "batch-work", "ALL_DONE" — present in the invoking context): default to defer-and-note. Append `- **Upstream report pending** -- external dependency identified; invoke /wr-itil:report-upstream when ready` (canonical ASCII per P210) to the ticket's `## Related` section. Do NOT auto-invoke `/wr-itil:report-upstream` (its Step 6 security branch is interactive — per ADR-024).
 
 The detection is per-pair; each Open → Known Error pair runs its own check independently.
 

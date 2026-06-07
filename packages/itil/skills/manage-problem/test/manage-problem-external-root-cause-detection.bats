@@ -6,9 +6,12 @@
 #
 # Doc-lint structural test (Permitted Exception per ADR-005) — asserts
 # SKILL.md wording for detection tokens, AskUserQuestion three-option
-# prompt, AFK fallback, and the stable `- **Upstream report pending** —`
-# marker. Mirrors work-problems-release-cadence.bats and
-# report-upstream-contract.bats patterns.
+# prompt, AFK fallback, and the stable `- **Upstream report pending** --`
+# marker (canonical ASCII form per P210; the legacy em-dash variant is
+# still matched by the SKILL's already-noted check for backward
+# compatibility, but is not the canonical-write target). Mirrors
+# work-problems-release-cadence.bats and report-upstream-contract.bats
+# patterns.
 
 setup() {
   REPO_ROOT="$(cd "$(dirname "$BATS_TEST_FILENAME")/../../../../.." && pwd)"
@@ -40,8 +43,17 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "manage-problem: SKILL.md defines the stable Upstream report pending marker with fixed wording" {
-  run grep -F -- '- **Upstream report pending** — external dependency identified; invoke /wr-itil:report-upstream when ready' "$MP_SKILL"
+@test "manage-problem: SKILL.md defines the stable Upstream report pending marker with fixed wording (canonical ASCII per P210)" {
+  run grep -F -- '- **Upstream report pending** -- external dependency identified; invoke /wr-itil:report-upstream when ready' "$MP_SKILL"
+  [ "$status" -eq 0 ]
+}
+
+@test "manage-problem: SKILL.md still references the legacy em-dash marker variant for backward compatibility (P210)" {
+  # P210: canonical write form is ASCII `--`, but the already-noted
+  # check MUST still match the legacy em-dash variant so tickets
+  # written in prior sessions are detected correctly. Asserts the
+  # legacy form remains documented in the SKILL prose.
+  run grep -F -- '- **Upstream report pending** —' "$MP_SKILL"
   [ "$status" -eq 0 ]
 }
 
@@ -101,7 +113,7 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "work-problems: uses the same stable marker wording as manage-problem" {
-  run grep -F -- '- **Upstream report pending** — external dependency identified; invoke /wr-itil:report-upstream when ready' "$WP_SKILL"
+@test "work-problems: uses the same stable marker wording as manage-problem (canonical ASCII per P210)" {
+  run grep -F -- '- **Upstream report pending** -- external dependency identified; invoke /wr-itil:report-upstream when ready' "$WP_SKILL"
   [ "$status" -eq 0 ]
 }
