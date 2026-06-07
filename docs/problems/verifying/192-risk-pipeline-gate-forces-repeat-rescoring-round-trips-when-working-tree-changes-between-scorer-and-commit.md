@@ -1,6 +1,6 @@
 # Problem 192: Risk-pipeline gate forces repeat rescoring round-trips when the working tree changes between scorer invocation and `git commit`
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-15
 **Priority**: 6 (Med) — Impact: 3 (Moderate — repeated subagent round-trips inflate session cost) x Likelihood: 2 (Possible — fires when iteratively staging + committing) (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -84,3 +84,20 @@ A staged-set-only hash + a "score survives additive docs-only stages" carve-out 
 - `packages/risk-scorer/hooks/lib/pipeline-state.sh` — the pipeline-state hashing implementation.
 - ADR-009 — gate marker lifecycle; the drift detector composes with the marker lifecycle.
 - Captured by `/wr-retrospective:run-retro` Step 4b Stage 1 + user direction "don't defer the stage 1 ticketing" (2026-05-15).
+
+## Fix Released
+
+2026-06-08 (`@windyroad/risk-scorer` patch pending — AFK work-problems iter this session; P143 fold-fix per ADR-022).
+
+Reducing-bypass markers (`reducing-commit` / `reducing-push` / `reducing-release`) made session-scoped with drift-revalidation rather than strictly one-shot. The marker now survives multiple commits/pushes/releases within the standard `RISK_TTL` window AS LONG AS the pipeline-state hash still matches what was scored — eliminating the per-commit re-mint round-trip observed 3+ times per multi-commit session. Drift (tree changed) or TTL expiry consumes the marker and forces a fresh `wr-risk-scorer:pipeline` rescore — the drift-detection safety contract is preserved. `incident-release` retained as single-use (deliberate one-time override; out of scope; regression-guarded).
+
+Affected files:
+
+- `packages/risk-scorer/hooks/risk-score-commit-gate.sh` — `reducing-commit` lifecycle.
+- `packages/risk-scorer/hooks/git-push-gate.sh` — `reducing-push` + `reducing-release` lifecycle (`incident-release` untouched).
+
+10 new behavioural bats in `packages/risk-scorer/hooks/test/reducing-marker-persistence.bats` covering: marker persists when tree hash matches; back-to-back commits without rescore round-trip; marker consumed on drift; marker consumed on TTL expiry; marker consumed when no state-hash exists (no invariance proof); push + release symmetric coverage; incident-release single-use regression guard. Full risk-scorer hook suite 142/142 green (was 132; +10 new).
+
+Architect PASS (no new ADR — extends ADR-009 clean-marker persist-until-drift precedent to the within-appetite/reducing family; ADR-014 / ADR-042 Rule 3 / ADR-074 unaffected). JTBD PASS (JTBD-001 + JTBD-006 direct fit; JTBD-002 safety property preserved via the same drift signal; JTBD-201 incident path explicitly out of scope and untouched).
+
+User verifies on next multi-commit session in this monorepo: a single `wr-risk-scorer:pipeline` PASS now governs the entire same-tree-state slice of commits within the TTL window (no per-commit rescore prompt); the second and subsequent commits succeed without re-delegation when the working tree hasn't drifted beyond P054 tree-stable + doc-excluded changes. Recovery path if rollback needed: `/wr-itil:transition-problem 192 known-error` and revert the gate-script edits.

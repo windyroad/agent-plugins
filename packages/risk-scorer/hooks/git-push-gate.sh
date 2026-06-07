@@ -36,10 +36,23 @@ fi
 if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm run push:watch(\s|$)'; then
     if [ -n "$SESSION_ID" ]; then
         RDIR=$(_risk_dir "$SESSION_ID")
-        # Risk-reducing/neutral bypass for push
+        # Risk-reducing/neutral bypass for push — session-scoped, drift-
+        # revalidated (P192). Persists across multiple push attempts while
+        # pipeline-state hash matches and TTL is unexpired; consumed on
+        # drift or TTL expiry. Symmetric with the commit-gate change above.
         if [ -f "${RDIR}/reducing-push" ]; then
+            NOW=$(date +%s)
+            MARK_TIME=$(_mtime "${RDIR}/reducing-push")
+            AGE=$(( NOW - MARK_TIME ))
+            TTL_SECONDS="${RISK_TTL:-3600}"
+            if [ "$AGE" -lt "$TTL_SECONDS" ] && [ -f "${RDIR}/state-hash" ]; then
+                STORED_HASH=$(cat "${RDIR}/state-hash")
+                CURRENT_HASH=$("$SCRIPT_DIR/lib/pipeline-state.sh" --hash-inputs 2>/dev/null | _hashcmd | cut -d' ' -f1)
+                if [ "$STORED_HASH" = "$CURRENT_HASH" ]; then
+                    exit 0
+                fi
+            fi
             rm -f "${RDIR}/reducing-push"
-            exit 0
         fi
         # Clean tree bypass: if no uncommitted changes, pushing existing commits is safe
         if [ -f "${RDIR}/clean" ]; then
@@ -99,10 +112,21 @@ if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm run release:watch(\s|$)'; the
             rm -f "${RDIR}/incident-release"
             exit 0
         fi
-        # Risk-reducing bypass for release
+        # Risk-reducing bypass for release — session-scoped, drift-
+        # revalidated (P192). Same lifecycle as reducing-push above.
         if [ -f "${RDIR}/reducing-release" ]; then
+            NOW=$(date +%s)
+            MARK_TIME=$(_mtime "${RDIR}/reducing-release")
+            AGE=$(( NOW - MARK_TIME ))
+            TTL_SECONDS="${RISK_TTL:-3600}"
+            if [ "$AGE" -lt "$TTL_SECONDS" ] && [ -f "${RDIR}/state-hash" ]; then
+                STORED_HASH=$(cat "${RDIR}/state-hash")
+                CURRENT_HASH=$("$SCRIPT_DIR/lib/pipeline-state.sh" --hash-inputs 2>/dev/null | _hashcmd | cut -d' ' -f1)
+                if [ "$STORED_HASH" = "$CURRENT_HASH" ]; then
+                    exit 0
+                fi
+            fi
             rm -f "${RDIR}/reducing-release"
-            exit 0
         fi
         # CI-status precondition (P208): a green CI run on the target
         # branch is required before shipping. Fail-closed on gh errors.

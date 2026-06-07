@@ -64,10 +64,25 @@ if [ -f "${RDIR}/clean" ]; then
     exit 0
 fi
 
-# Risk-reducing/neutral bypass
+# Risk-reducing/neutral bypass — session-scoped, drift-revalidated (P192).
+# Preserved across multiple commits while pipeline-state hash matches and
+# TTL is unexpired; consumed on drift or TTL expiry so a genuine risk-
+# profile change forces a fresh wr-risk-scorer:pipeline rescore. Mirrors
+# the clean-marker persist-until-drift precedent (above) — distinct from
+# incident-release / ci-bypass, which remain deliberate one-time overrides.
 if [ -f "${RDIR}/reducing-commit" ]; then
+    NOW=$(date +%s)
+    MARK_TIME=$(_mtime "${RDIR}/reducing-commit")
+    AGE=$(( NOW - MARK_TIME ))
+    TTL_SECONDS="${RISK_TTL:-3600}"
+    if [ "$AGE" -lt "$TTL_SECONDS" ] && [ -f "${RDIR}/state-hash" ]; then
+        STORED_HASH=$(cat "${RDIR}/state-hash")
+        CURRENT_HASH=$("$SCRIPT_DIR/lib/pipeline-state.sh" --hash-inputs 2>/dev/null | _hashcmd | cut -d' ' -f1)
+        if [ "$STORED_HASH" = "$CURRENT_HASH" ]; then
+            exit 0
+        fi
+    fi
     rm -f "${RDIR}/reducing-commit"
-    exit 0
 fi
 
 # Gate check: existence, TTL, drift, threshold
