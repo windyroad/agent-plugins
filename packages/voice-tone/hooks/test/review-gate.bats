@@ -47,3 +47,35 @@ teardown() {
   result=$(echo "test" | _hashcmd)
   [ -n "$result" ]
 }
+
+# P215 / RFC-021 — REVIEW_GATE_REASON must carry an explicit recovery
+# directive naming the subagent_type and Agent tool, parallel to the
+# architect-gate ARCHITECT_GATE_REASON shape.
+
+@test "REVIEW_GATE_REASON names re-delegate directive when no marker" {
+  REVIEW_GATE_REASON=""
+  check_review_gate "$TEST_SESSION" "voice-tone" "docs/VOICE-AND-TONE.md" || true
+  [[ "$REVIEW_GATE_REASON" == *"wr-voice-tone:agent"* ]]
+  [[ "$REVIEW_GATE_REASON" == *"Agent tool"* ]]
+}
+
+@test "REVIEW_GATE_REASON names refresh-the-marker directive when TTL expired" {
+  touch "/tmp/voice-tone-reviewed-${TEST_SESSION}"
+  REVIEW_GATE_REASON=""
+  REVIEW_TTL=0 check_review_gate "$TEST_SESSION" "voice-tone" "docs/VOICE-AND-TONE.md" || true
+  [[ "$REVIEW_GATE_REASON" == *"expired"* ]]
+  [[ "$REVIEW_GATE_REASON" == *"wr-voice-tone:agent"* ]]
+  [[ "$REVIEW_GATE_REASON" == *"refresh the marker"* ]]
+}
+
+@test "REVIEW_GATE_REASON names drift directive when policy hash differs" {
+  POLICY_FILE="$TMPDIR_ORIG/VOICE-AND-TONE.md"
+  echo "# policy v1" > "$POLICY_FILE"
+  touch "/tmp/voice-tone-reviewed-${TEST_SESSION}"
+  echo "stale-hash" > "/tmp/voice-tone-reviewed-${TEST_SESSION}.hash"
+  REVIEW_GATE_REASON=""
+  check_review_gate "$TEST_SESSION" "voice-tone" "$POLICY_FILE" || true
+  [[ "$REVIEW_GATE_REASON" == *"changed"* ]] || [[ "$REVIEW_GATE_REASON" == *"drift"* ]]
+  [[ "$REVIEW_GATE_REASON" == *"wr-voice-tone:agent"* ]]
+  [[ "$REVIEW_GATE_REASON" == *"refresh the marker"* ]]
+}

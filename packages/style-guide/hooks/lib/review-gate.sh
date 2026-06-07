@@ -20,7 +20,7 @@ check_review_gate() {
 
   # 1. Marker must exist
   if [ ! -f "$MARKER" ]; then
-    REVIEW_GATE_REASON="No ${SYSTEM} review marker found. The ${SYSTEM} agent must review first."
+    REVIEW_GATE_REASON="No ${SYSTEM} review marker found. Delegate to wr-${SYSTEM}:agent via the Agent tool (subagent_type: 'wr-${SYSTEM}:agent') so the agent can review and create the marker."
     return 1
   fi
 
@@ -30,7 +30,7 @@ check_review_gate() {
   local AGE=$(( NOW - MARKER_TIME ))
   if [ "$AGE" -ge "$TTL_SECONDS" ]; then
     rm -f "$MARKER" "$HASH_FILE"
-    REVIEW_GATE_REASON="${SYSTEM} review expired (${AGE}s old, TTL ${TTL_SECONDS}s). Re-run the ${SYSTEM} agent."
+    REVIEW_GATE_REASON="${SYSTEM} review expired (${AGE}s old, TTL ${TTL_SECONDS}s). Re-delegate to wr-${SYSTEM}:agent via the Agent tool (subagent_type: 'wr-${SYSTEM}:agent') to refresh the marker."
     return 1
   fi
 
@@ -45,7 +45,7 @@ check_review_gate() {
     CURRENT_HASH=$(_substance_hash_path "$POLICY_FILE")
     if [ "$STORED_HASH" != "$CURRENT_HASH" ]; then
       rm -f "$MARKER" "$HASH_FILE"
-      REVIEW_GATE_REASON="${SYSTEM} policy file changed since last review. Re-run the ${SYSTEM} agent."
+      REVIEW_GATE_REASON="${SYSTEM} policy file changed since last review. Re-delegate to wr-${SYSTEM}:agent via the Agent tool (subagent_type: 'wr-${SYSTEM}:agent') to refresh the marker."
       return 1
     fi
   fi

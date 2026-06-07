@@ -8,6 +8,12 @@ _ARCHITECT_GATE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$_ARCHITECT_GATE_DIR/gate-helpers.sh"
 
 # Check architect gate marker. Returns 0 if marker is valid (allow), 1 if invalid (deny).
+# Sets ARCHITECT_GATE_REASON on failure with an explicit recovery directive
+# naming the wr-architect:agent subagent_type (P215 / RFC-021 — mirrors the
+# sibling REVIEW_GATE_REASON pattern in review-gate.sh). Downstream
+# enforcement hooks (architect-enforce-edit.sh, architect-plan-enforce.sh)
+# append this reason to their BLOCKED deny message so the agent sees a clear
+# recovery affordance without having to read source.
 # Usage: check_architect_gate "$SESSION_ID"
 check_architect_gate() {
   local SESSION_ID="$1"
@@ -38,6 +44,7 @@ check_architect_gate() {
         fi
         if [ "$STORED" != "$CURRENT" ]; then
           rm -f "$MARKER" "$HASH_FILE"
+          ARCHITECT_GATE_REASON="Decision drift detected — docs/decisions/ changed substantively since the last architect review. Re-delegate to wr-architect:agent via the Agent tool (subagent_type: 'wr-architect:agent') to refresh the marker."
           return 1  # Drift detected, deny
         else
           touch "$MARKER"  # Slide TTL window forward
@@ -49,10 +56,12 @@ check_architect_gate() {
       fi
     else
       rm -f "$MARKER"
+      ARCHITECT_GATE_REASON="Architect review expired (${AGE}s old, TTL ${TTL_SECONDS}s). Re-delegate to wr-architect:agent via the Agent tool (subagent_type: 'wr-architect:agent') to refresh the marker."
       return 1  # TTL expired, deny
     fi
   fi
 
+  ARCHITECT_GATE_REASON="No architect review marker found for this session. Delegate to wr-architect:agent via the Agent tool (subagent_type: 'wr-architect:agent') so the architect can review and create the marker."
   return 1  # No marker, deny
 }
 

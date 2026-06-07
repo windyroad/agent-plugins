@@ -35,7 +35,7 @@ cat <<EOF
   "hookSpecificOutput": {
     "hookEventName": "PreToolUse",
     "permissionDecision": "deny",
-    "permissionDecisionReason": "BLOCKED: Architect must review the plan file before exiting plan mode. You MUST first delegate to wr-architect:agent using the Agent tool (subagent_type: 'wr-architect:agent') to review the plan against existing decisions in docs/decisions/. After the review completes, this will be unblocked automatically."
+    "permissionDecisionReason": "BLOCKED: Architect must review the plan file before exiting plan mode. You MUST first delegate to wr-architect:agent using the Agent tool (subagent_type: 'wr-architect:agent') to review the plan against existing decisions in docs/decisions/. After the review completes, this will be unblocked automatically. ${ARCHITECT_GATE_REASON}"
   }
 }
 EOF
