@@ -236,7 +236,50 @@ The annotation pre-empts the "surprise heavy iter" perception JTBD-006 expects a
 
 <!-- @jtbd JTBD-006 (Progress the Backlog While I'm Away — AFK orchestrator pre-flights review-problems so iters dispatch against fresh WSJF rankings) -->
 
-After Step 0c completes (whether dispatched or silent-passed), proceed to Step 1.
+After Step 0c completes (whether dispatched or silent-passed), proceed to Step 0d.
+
+### Step 0d: Outbound upstream-responses pre-flight (per JTBD-006 AFK driver + JTBD-004 cross-repo coordination)
+
+After Step 0c's deferred-placeholder pre-flight and before Step 1's backlog scan, check whether the outbound-responses cache is fresh. P249 Phase 1 shipped `/wr-itil:check-upstream-responses` as a manual skill (the outbound symmetric counterpart to Step 0b's inbound pipeline); P220 names the cadence gap that without an auto-fire trigger, upstream responses to issues we filed via `/wr-itil:report-upstream` go unread until the maintainer remembers to invoke the skill. This step closes that gap with the same pre-flight shape Step 0b uses for the inbound axis.
+
+**Mechanism:**
+
+```bash
+preflight_reason="$(wr-itil-check-outbound-responses-staleness "$PWD")"
+```
+
+`wr-itil-check-outbound-responses-staleness` is the ADR-049 + ADR-080 `$PATH` shim (adopter-safe — resolves `lib/check-outbound-responses-staleness.sh` relative to the script, NOT cwd; P317/RFC-009) that internalises `should_promote_outbound_responses_preflight "$PWD"` and echoes the result. NEVER `source packages/...` repo-relative from a SKILL — those paths only resolve in the source monorepo, not adopter installs.
+
+The helper returns one of five outcomes (contract documented at `packages/itil/lib/check-outbound-responses-staleness.sh` + asserted by `packages/itil/skills/work-problems/test/work-problems-step-0d-outbound-responses-staleness-behavioural.bats`):
+
+| `preflight_reason`                | Action                                                                                                |
+|-----------------------------------|--------------------------------------------------------------------------------------------------------|
+| `no-back-link-tickets`            | Silent-pass. No local tickets carry a `## Reported Upstream` section; nothing to poll. Downstream-adopter non-obligation analogue to Step 0b's `no-channels-config`. Proceed to Step 1. |
+| `first-run-cache-absent`          | Dispatch `/wr-itil:check-upstream-responses` as a pre-flight iter via the standard `claude -p` subprocess wrapper (same shape as Step 0b / Step 0c / Step 5). |
+| `first-run-last-checked-null`     | Same as `first-run-cache-absent` — cache schema present but never populated.                          |
+| `ttl-expiry age=<N>s ttl=<M>s`    | Dispatch `/wr-itil:check-upstream-responses` as a pre-flight iter. Cache stale; the skill polls each back-linked upstream URL, diffs against the cache, and emits STATE / NEW / LABEL / NONE / FAIL per back-link ticket. |
+| `fresh-within-ttl`                | Silent-pass per ADR-013 Rule 5 + P132 mechanical-stage carve-out. Proceed to Step 1.                  |
+
+**Pre-flight dispatch shape**: when promoted, dispatch a single `claude -p --permission-mode bypassPermissions --output-format json` subprocess that invokes `/wr-itil:check-upstream-responses` (per P084 + ADR-032 subprocess isolation). Reuse the Step 5 subprocess wrapper verbatim — same flag set, same idle-timeout SIGTERM poll loop. The subprocess runs the full check-upstream-responses Step 1 + Step 2 + Step 3 pipeline; the cache file `docs/problems/.outbound-responses-cache.json` + audit-log `docs/audits/outbound-responses-log.md` are refreshed in its own commit per ADR-014 (check-upstream-responses' SKILL.md Step 3 commit grain). After the subprocess completes, the orchestrator proceeds to Step 1.
+
+**Iter-summary annotation**:
+
+- No back-link tickets: `Step 0d skipped — no tickets carry ## Reported Upstream (downstream-adopter non-obligation)`.
+- Cache fresh: `Step 0d skipped — outbound-responses cache fresh within TTL`.
+- Pre-flight ran: `Step 0d pre-flighted /wr-itil:check-upstream-responses — reason=<preflight_reason>, <N> back-link tickets polled, <M> STATE/NEW deltas surfaced`.
+
+The annotation pre-empts the "surprise heavy iter" perception JTBD-006 expects auditability for — a maintainer running multiple short AFK loops within a 24h window will hit `fresh-within-ttl` on subsequent invocations and see the cache-fresh annotation, confirming the system's silent-pass discipline rather than wondering whether the check ran at all.
+
+**AFK authorisation per ADR-013 Rule 6**: check-upstream-responses is itself AFK-safe by construction — read-only externally (`gh issue view` only; no `gh issue comment` / `gh issue create`), so does NOT trip ADR-028's external-comms gate; zero `AskUserQuestion` calls (flag-based knobs per CLAUDE.md P085); partial-failure exit code 2 distinguishes "some upstream URLs unreachable" from "everything broke" so AFK orchestrators can branch correctly. No new user-attention surface introduced at the Step 0d promotion point.
+
+**Compose-with**: ADR-013 Rule 5/6 (silent-pass + AFK fail-safe), ADR-044 category 4 (silent-framework — the trigger is policy + observable evidence), ADR-014 (check-upstream-responses' commit grain holds — the pre-flight subprocess emits its own commit), ADR-024 (back-link `## Reported Upstream` section is the source-of-truth scanned by the helper and read by the dispatched skill), ADR-049 / ADR-080 (PATH shim grammar + highest-version-wins wrapper), ADR-062 § Step 0b (precedent staleness-pre-flight shape — Step 0d is the outbound symmetric counterpart), P084 + P077 (subprocess isolation reuse — same `claude -p` wrapper as Step 5), P132 (mechanical-stage carve-out — no `AskUserQuestion` at the promotion point), P170 / RFC-002 (dual-tolerant glob — the helper handles both layouts), P317 / RFC-009 (adopter-safe PATH shim), P249 Phase 1 (the manual skill this step wires into a cadence).
+
+**Staleness contract drift**: the staleness comparison MUST stay symmetric with the check-upstream-responses SKILL's Confirmation surface (TTL semantics + outcome shape). Drift here re-opens the outbound-responses staleness contract — any change to TTL semantics MUST update this Step 0d, the lib helper, AND the check-upstream-responses SKILL.md Confirmation section in the same commit. <!-- OUTBOUND-RESPONSES-STALENESS-CONTRACT-SOURCE: packages/itil/skills/check-upstream-responses/SKILL.md ## Confirmation -->
+
+<!-- @jtbd JTBD-006 (Progress the Backlog While I'm Away — AFK orchestrator pre-flights check-upstream-responses so outbound STATE/NEW deltas surface without manual polling) -->
+<!-- @jtbd JTBD-004 (Connect Agents Across Repos to Collaborate — closes the outbound symmetric feedback loop) -->
+
+After Step 0d completes (whether dispatched or silent-passed), proceed to Step 1.
 
 ### Step 1: Scan the backlog
 

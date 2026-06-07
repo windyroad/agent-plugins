@@ -37,7 +37,7 @@ Out of scope:
   [--force-recheck]        ignore cache; treat all as new
 ```
 
-Future iter will wire `/wr-itil:work-problems` Step 0c pre-flight to invoke this skill when the outbound cache is stale (sibling to Step 0b inbound cache check per ADR-062 Confirmation #5). Phase 1 ships manual-invocation only.
+`/wr-itil:work-problems` Step 0d pre-flights this skill when the outbound-responses cache is stale or missing AND back-link tickets exist (sibling to Step 0b inbound cache check per ADR-062 Confirmation #5; P220 closed the cadence gap). Direct user invocation remains a first-class surface.
 
 ## AFK behaviour
 
@@ -101,10 +101,12 @@ If the cumulative pipeline risk lands above appetite and `AskUserQuestion` is un
 Three invocation surfaces:
 
 1. **Direct user invocation** — `/wr-itil:check-upstream-responses` (or with flags). The default user-facing surface.
-2. **AFK orchestrator pre-flight** (future iter) — `/wr-itil:work-problems` Step 0c will invoke this skill when the outbound cache is stale, mirroring Step 0b's inbound staleness check per ADR-062 Confirmation #5. This wiring is deferred to a future iter; Phase 1 ships manual only.
+2. **AFK orchestrator pre-flight** — `/wr-itil:work-problems` Step 0d invokes this skill when the outbound-responses cache is stale, missing, or has `last_checked: null` AND back-link tickets exist, mirroring Step 0b's inbound staleness check per ADR-062 Confirmation #5. Cache TTL defaults to 86400s (24h) symmetric with the inbound axis. P220 closed the cadence gap.
 3. **Manual investigation during a problem-management session** — when a maintainer wants to see if any upstream reports moved before transitioning a `verifying` ticket back to `closed`. Foreground synchronous; the maintainer reads the inline summary and decides next steps.
 
 ## Confirmation
+
+<!-- OUTBOUND-RESPONSES-STALENESS-CONTRACT-SOURCE: packages/itil/skills/check-upstream-responses/SKILL.md ## Confirmation -->
 
 This skill's contract holds when:
 
@@ -114,6 +116,7 @@ This skill's contract holds when:
 4. After a successful pass, the audit-log file exists and has a new `## YYYY-MM-DDTHH:MM:SSZ` heading appended.
 5. The skill is AFK-safe: zero `AskUserQuestion` calls, zero external-comms gate triggers.
 6. The exit code distinguishes success (0), error (1), and partial failure (2) so AFK orchestrators can branch correctly.
+7. **Staleness contract (P220)**: TTL defaults to 86400s (24h) symmetric with the inbound axis. Override via `ttl_seconds` field in the cache file. The Step 0d pre-flight helper at `packages/itil/lib/check-outbound-responses-staleness.sh` MUST stay symmetric with this contract — any change to TTL semantics MUST update the helper, the Step 0d SKILL block in `/wr-itil:work-problems`, and this Confirmation #7 in the same commit.
 
 ## ADR alignment
 
