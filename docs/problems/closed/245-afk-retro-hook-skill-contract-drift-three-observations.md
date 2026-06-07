@@ -1,7 +1,8 @@
 # Problem 245: AFK iter retro surfaces three hook-vs-SKILL-contract drift observations (external-comms key derivation; P165 README refresh on capture; P141 changeset-discipline held-area awareness)
 
-**Status**: Known Error
+**Status**: Closed
 **Reported**: 2026-05-17
+**Closed**: 2026-06-08 (work-problems AFK iter — superseded; all three observations addressed by subsequent fixes)
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 
@@ -70,3 +71,15 @@ Three hooks were authored at different times against different SKILL contract su
 - ADR-052 — behavioural-tests-default for hook amendments
 
 (captured via /wr-itil:capture-problem; expand at next investigation)
+
+## Closure
+
+Closed 2026-06-08 (work-problems AFK iter — superseded; all three bundled observations addressed by subsequent fixes shipped this session and earlier). ADR-079 Phase 2 shape 3 (sibling-fix-supersedes).
+
+**Observation 1 (external-comms key derivation byte-equality)** — addressed by **P010 / ADR-028 amended 2026-05-25**. `packages/risk-scorer/hooks/lib/external-comms-key.sh::compute_external_comms_key` (lines 48-61) is the SINGLE canonical normalization shared byte-identically between the gate (PreToolUse) and the mark hook (PostToolUse). For `changeset-author` surface it strips the leading YAML frontmatter block (`re.sub(r'^---\n.*?\n---\n\n?', '', draft, count=1, flags=re.DOTALL)`) and for all surfaces it rstrips trailing whitespace. Whether the agent wraps body-only or includes the frontmatter inside `<draft>`, both sides hash to byte-equal keys — the gate sees the FULL Write content and strips frontmatter; the mark hook sees the `<draft>` body and strips frontmatter if present. The retry-loop symptom from the ticket (≥3 invocations of the external-comms agent per gated Write) cannot recur. The deny message in `external-comms-gate.sh:311` also explicitly instructs the agent on body scope: *"for the changeset-author surface the body is the changeset summary WITHOUT the leading `---` frontmatter block — the gate strips frontmatter before hashing the marker key"*.
+
+**Observation 2 (P165 README refresh on capture)** — addressed by **P262 / P265** (`@windyroad/itil` ≥ 0.35.x; sibling `capture-deferred-readme` RISK_BYPASS trailer). `packages/itil/hooks/lib/readme-refresh-detect.sh` line 149 registers `capture-deferred-readme` in `_README_REFRESH_BYPASS_TRAILERS`; lines 195-197 clear the gate when a registered trailer is present. The `/wr-itil:capture-problem` Step 6 commit subject (`docs(problems): capture P<NNN> ...`) carries `RISK_BYPASS: capture-deferred-readme` in its message body per ADR-014 commit-message bypass-token table. The SKILL's deferred-refresh contract is preserved — no inline README refresh required at capture time, deferred to the next `/wr-itil:review-problems` per ADR-032.
+
+**Observation 3 (P141 changeset-discipline held-area awareness)** — addressed by **P177** (`packages/itil/hooks/lib/changeset-detect.sh` lines 209-223). The hook now explicitly recognises `docs/changesets-holding/*.md` as a held-window changeset per ADR-042 Rule 7 held-window blessing (`has_changeset=1` on this path; `docs/changesets-holding/README.md` excluded as meta-doc mirroring the `.changeset/README.md` exclusion). A commit shipping `packages/<plugin>/` source + a `git mv` of a changeset to the held-area clears the gate in one operation — no 2-commit decomposition required. Release/drain semantics unchanged (the Release workflow reads `.changeset/` only).
+
+All three Investigation Tasks satisfied at verification — each by a sibling fix landed without requiring P245's own coordinating-ticket Phase 2/3 amendments. KE→Closed direct per ADR-079 lifecycle extension. No code change at this closure. Reversible via `/wr-itil:transition-problem 245 known-error`.
