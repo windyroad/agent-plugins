@@ -20,6 +20,36 @@ Net effect: every commit that routes through the risk-scorer delegation pays an 
 
 Fired again 3+ times during the ADR-076 / ADR-077 session: Slice 1 ADR-077 commit `846b5f2`, README reconcile `1da2ef5`, Slice 2 ADR-077 commit `9832593`. Each required a re-`git add` after the RISK-POLICY-staleness gate denial cleared the index. Wrapper-helper fix-strategy (e.g. `wr-risk-scorer-commit` that encapsulates `git add` + delegate + re-add + `git commit`) would eliminate the round-trip; route via Step 4b Stage 2 Option 3.
 
+### New symptom — `wr-risk-scorer-restage-commit` rejects rename-source path (P222 closure iter, 2026-06-08)
+
+The Verifying wrapper landed by Option C above carries a NEW failure mode that the existing test fixture does not cover: when the caller passes BOTH the rename-source AND rename-destination paths in the `-- <paths>` list (mirroring the SKILL Step 11 prose at line 995 "git add all created/modified files — **including any file renamed via `git mv` that was then modified by the `Edit` tool**"), the helper's Step 1 `git add -- <paths>` propagates the `git add` exit on the source path because `git mv` already removed the source from the working tree.
+
+**Reproduction in P222 closure iter (2026-06-08)**:
+
+```
+$ wr-risk-scorer-restage-commit -m "<msg>" -- \
+    docs/problems/README-history.md \
+    docs/problems/README.md \
+    docs/problems/closed/222-manage-problem-skill-should-auto-commit-ticket-file-changes.md \
+    docs/problems/known-error/222-manage-problem-skill-should-auto-commit-ticket-file-changes.md
+fatal: pathspec 'docs/problems/known-error/222-manage-problem-skill-should-auto-commit-ticket-file-changes.md' did not match any files
+$ # Recovered by removing the deleted source path from the -- list:
+$ wr-risk-scorer-restage-commit -m "<msg>" -- \
+    docs/problems/README-history.md \
+    docs/problems/README.md \
+    docs/problems/closed/222-manage-problem-skill-should-auto-commit-ticket-file-changes.md
+[main 7be3cc0] docs(problems): close P222 — superseded by ADR-014
+```
+
+**SKILL-prose-vs-wrapper-contract gap**: `packages/itil/skills/manage-problem/SKILL.md` Step 11 line 995 instructs the agent to `git add` "all created/modified files — **including any file renamed via `git mv` that was then modified by the `Edit` tool**" — implying both rename endpoints. The wrapper instead requires ONLY the rename-destination because `git mv` already staged the source's deletion in the index. Agents reading the SKILL prose without prior `wr-risk-scorer-restage-commit` experience hit this on first try.
+
+**Mitigation options for the next iter on this ticket** (do not pre-commit; capture for evidence-based prioritisation):
+- (a) Amend SKILL.md Step 11 line 995 to clarify "rename-destination only; the rename-source is already staged for deletion by `git mv` and MUST be omitted from the wrapper's `-- <paths>` list". One-sentence clarification; touches only one SKILL file.
+- (b) Amend the wrapper to detect rename-source paths via `git diff --cached --diff-filter=R --name-status --raw` and silently filter them out of the `git add -- <paths>` call. Wrapper-side handling; covers all callers without per-SKILL prose maintenance burden.
+- (c) Add a behavioural fixture to `packages/risk-scorer/scripts/test/restage-commit.bats` covering the "rename-source + rename-destination both passed → wrapper handles gracefully" case to pin whichever option is chosen.
+
+**Impact**: low (single-iter recoverable in one retry) but the SKILL-prose-vs-wrapper-contract gap is structural — any KE→Closed-direct iter passing both rename endpoints hits the same wall. This iter is the second KE→Closed-direct in 24 hours with the same shape (P218 closure iter `46d5d56` had the same git-mv pattern). Either the SKILL prose is misleading or the wrapper is over-strict; the evidence-based reassessment is the next P326 iter's call.
+
 ## Workaround
 
 Re-`git add` the exact paths immediately before `git commit`, after the scorer delegation returns. (This session applied it ~3-4×.)
