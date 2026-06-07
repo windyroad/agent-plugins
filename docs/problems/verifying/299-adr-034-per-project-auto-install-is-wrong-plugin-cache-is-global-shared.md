@@ -1,7 +1,8 @@
 # Problem 299: ADR-034 per-project auto-install is the wrong mechanism — the plugin install cache is global/shared, so one update propagates to all projects
 
-**Status**: Open
+**Status**: Verifying
 **Reported**: 2026-05-25
+**Transitioned to Verifying**: 2026-06-08 — ADR-034 superseded by ADR-030 amendment 2026-05-25 (in-place via `.superseded.md` rename + supersession blockquote + frontmatter `status: superseded` + `superseded-by: "ADR-030"`); ADR-030 line 153 dangling reference annotated; decisions compendium regenerated; no hook/script/SKILL code references ADR-034 (architect confirmed grep zero hits in packages/ + scripts/). All four Investigation Tasks satisfied.
 **Priority**: 6 (Medium) — Impact: 2 (Minor — a per-project SessionStart auto-install is redundant work, not a correctness break; updates still propagate via the shared cache; but the redundancy + the per-project consent gate add friction and model the wrong thing) × Likelihood: 3 (Possible — fires per project per session)
 **Effort**: M — ADR-034 rework (drop the per-project auto-install model; define the update trigger against the global cache) + reconcile with /install-updates (ADR-030) which is the actual cache-refresh surface
 **WSJF**: 6/2 = **3.0** (Open multiplier 1.0)
@@ -29,10 +30,16 @@ ADR-034 is **left unoversighted** (P283/ADR-066 marker withheld) until reworked.
 
 ### Investigation Tasks
 
-- [ ] Rework ADR-034 given the global/shared cache: the update should be triggered ONCE (from the plugin-dev repo post-release via `/install-updates` per ADR-030, or from any single project) and propagate to all; there is no need for a per-project auto-install. Decide whether ADR-034 is superseded entirely (the `/install-updates` chain per P233 already covers post-release cache refresh) or reduced to a "global cache is stale → refresh once" check.
-- [ ] Reconcile with ADR-030 (`/install-updates` repo-local skill) + P233 (post-release cache refresh chain) — those are the real cache-refresh surfaces; ADR-034 may be redundant with them.
-- [ ] If any session-start check survives, it should detect global-cache staleness (shared state), not per-project install need.
-- [ ] Re-confirm the reworked ADR-034 via `/wr-architect:review-decisions` (or supersede it).
+- [x] Rework ADR-034 given the global/shared cache — **superseded entirely**. ADR-034 retired in place via `.proposed.md` → `.superseded.md` rename + top-of-body `> **SUPERSEDED by ADR-030 amendment 2026-05-25**` blockquote + frontmatter `status: superseded` + `superseded-by: "ADR-030"`. The `/install-updates` chain (ADR-030 + amendment 2026-05-25 + P233 post-release refresh) already covers the post-release cache refresh; no separate session-start check is needed because the global cache shared across projects means one refresh propagates to all.
+- [x] Reconcile with ADR-030 + P233 — done. ADR-030 line 153 dangling `.claude/.auto-install-consent` reference annotated inline with `[ADR-034 superseded by this ADR's amendment 2026-05-25 per P299 — the marker contract was never implemented and no longer has a referent]`. P233 unchanged (its post-release refresh chain already terminates at `/install-updates` per ADR-030).
+- [x] Session-start check question — moot under supersession. No session-start surface survives; manual `/install-updates` invocation at end-of-release-session covers the trigger.
+- [x] Re-confirm the reworked ADR — `/wr-architect:review-decisions` not needed. ADR-066's post-supersede pattern (Amendment 2026-05-30) explicitly says: *"when the supersede ADR eventually lands and the original transitions to `*.superseded.md`, the existing superseded-name skip takes over"* — the `.superseded.md` filename suffix is the signal both detectors honour. Architect confirmed 2026-06-08 that the supersession itself was pre-authorised by ADR-034's prior `human-oversight: rejected-pending-supersede` + `supersede-ticket: P299` markers, and this work executes that authorisation.
+
+### Verification criteria (P057/P062/P094)
+
+- [ ] `docs/decisions/README.md` lists ADR-034 in the **Historical decisions** section, not In-force. (Compendium regenerated in this commit; `bash packages/architect/scripts/generate-decisions-compendium.sh` reports "70 in-force, 9 historical".)
+- [ ] No remaining `ADR-034` references in `packages/` or `scripts/` that would mislead a reader into looking for a live ADR-034 marker contract.
+- [ ] `/wr-architect:review-decisions` does not re-surface ADR-034 for oversight (superseded ADRs skip the drain per ADR-066).
 
 ## Dependencies
 

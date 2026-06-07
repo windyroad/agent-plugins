@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 79 (71 in-force, 8 historical)
+**Total ADRs:** 79 (70 in-force, 9 historical)
 
 ---
 
 ## In-force decisions
 
-_71 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_70 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -154,11 +154,6 @@ _71 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed
 **Confirmation:** packages/itil/skills/report-upstream/SKILL.md Step 3 rewritten with the problem-first preference order; bug/fe...; packages/itil/skills/report-upstream/SKILL.md Step 5 default body has a problem-shaped template (as above) AND...; Template-discovery step (ADR-024 Step 1 extended) searches for problem-report.yml and problem.yml before bug-r...; packages/itil/skills/report-upstream/SKILL.md cites this ADR (ADR-033) as the authority for Steps 3 and 5.; docs/decisions/024-cross-project-problem-reporting-contract.proposed.md carries an ## Amendments section near ...
 **Related:** ADR-024, ADR-022, ADR-028, ADR-031, ADR-013, ADR-014, ADR-002
-
-### ADR-034 — Auto-install on next session start — SessionStart hook + per-project consent gate
-**Status:** proposed | **Oversight:** rejected-pending-supersede (P299)
-**Confirmation:** packages/itil/hooks/session-start-update-check.sh exists and ships with @windyroad/itil.; packages/itil/.claude-plugin/plugin.json declares the SessionStart hook.; .claude/skills/install-updates/SKILL.md (repo-local per ADR-030) gains an "Auto-install consent grant" step at...; Consent marker file format documented in the ADR and the skill.; AFK-launch detection uses the envvar name documented in ADR-019 (or established in P045 execution if not yet s...
-**Related:** ADR-030, ADR-032, ADR-013, ADR-004, ADR-018, ADR-019, ADR-026, ADR-031, ADR-005, ADR-025, ADR-009
 
 ### ADR-035 — Centralised review reports for cross-project skill improvement — JSONL at `~/.claude/review-reports/`
 **Status:** proposed | **Oversight:** confirmed
@@ -357,7 +352,7 @@ _71 ADRs. These are the current rules. The architect agent reads this section fi
 
 ## Historical decisions
 
-_8 ADRs. These were tried and superseded, rejected, or deprecated. Read them as direction for what NOT to do, or to understand the lineage of an in-force decision. Do not enforce them as current rules._
+_9 ADRs. These were tried and superseded, rejected, or deprecated. Read them as direction for what NOT to do, or to understand the lineage of an in-force decision. Do not enforce them as current rules._
 
 ### ADR-001 — Unified Install Experience via npm Package
 **Status:** superseded
@@ -371,6 +366,11 @@ _8 ADRs. These were tried and superseded, rejected, or deprecated. Read them as 
 **Status:** superseded
 **Chosen:** Chosen option: **Option 1 — Step-0 auto-delegation to `general-purpose` subagent for all named governance skills.**
 **Related:** ADR-013, ADR-014, ADR-015, ADR-027, ADR-018, ADR-019, ADR-024
+
+### ADR-034 — Auto-install on next session start — SessionStart hook + per-project consent gate
+**Status:** superseded
+**Confirmation:** packages/itil/hooks/session-start-update-check.sh exists and ships with @windyroad/itil.; packages/itil/.claude-plugin/plugin.json declares the SessionStart hook.; .claude/skills/install-updates/SKILL.md (repo-local per ADR-030) gains an "Auto-install consent grant" step at...; Consent marker file format documented in the ADR and the skill.; AFK-launch detection uses the envvar name documented in ADR-019 (or established in P045 execution if not yet s...
+**Related:** ADR-030, ADR-032, ADR-013, ADR-004, ADR-018, ADR-019, ADR-026, ADR-031, ADR-005, ADR-025, ADR-009
 
 ### ADR-037 — Skill testing strategy — contract-assertion bats companion to ADR-005
 **Status:** superseded

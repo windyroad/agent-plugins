@@ -1,7 +1,7 @@
 ---
-status: "proposed"
+status: "superseded"
 date: 2026-04-21
-human-oversight: rejected-pending-supersede
+superseded-by: "ADR-030"
 supersede-ticket: P299
 oversight-date: 2026-05-26
 decision-makers: [Tom Howard]
@@ -11,6 +11,23 @@ reassessment-date: 2026-07-21
 ---
 
 # Auto-install on next session start — SessionStart hook + per-project consent gate
+
+> **SUPERSEDED by [ADR-030 amendment 2026-05-25](030-repo-local-skills-for-workflow-tooling.proposed.md)** (P299, 2026-06-08). The per-project SessionStart auto-install model was the wrong mechanism: the plugin install cache at `~/.claude/plugins/cache/windyroad/<key>/<version>/` is **global/shared** across all projects on the machine — there is no per-project copy of the plugin code. Refreshing the cache from any single project (uninstall + reinstall, to defeat the P106 install-no-op) advances the active version for **every** project that enables those plugins. All six Considered Options below assumed a per-project install model that does not match reality.
+>
+> The hook contract (`packages/itil/hooks/session-start-update-check.sh`), per-project consent marker (`.claude/.auto-install-consent`), `/install-updates` consent-grant AskUserQuestion, AFK carve-out, and receipt artefact path were never implemented — the ADR remained `proposed` while P045 work shifted to the global-cache surface. The post-supersession plugin-currency surface is `/install-updates` (ADR-030 + ADR-030 amendment 2026-05-25): a single global-cache refresh run from the current project, no sibling-tree write, no consent gate, safe to run non-interactively.
+>
+> **JTBD trace under supersession.** This ADR originally cited JTBD-001/003/005/006/101/201 with JTBD-001's "under 60 seconds" as primary driver. The post-supersession `/install-updates` chain preserves all six:
+> - **JTBD-007** (Keep Plugins Current Across Projects, created 2026-04-23 post-this-ADR) is the canonical home of the plugin-currency job and is explicitly satisfied by `/install-updates`'s one-command-refreshes-all-projects behaviour.
+> - **JTBD-001** "under 60 seconds" governance-review SLA is unaffected (plugin install is not a governance review).
+> - **JTBD-005** "must not leave task context" is *better* served — manual end-of-session invocation never interrupts task context, whereas this ADR's SessionStart hook would have surfaced systemMessages at turn 0 of every session.
+> - **JTBD-006** (AFK) is *better* served — the AFK carve-out engineered here to prevent AFK-launched sessions from triggering installs is moot under manual invocation.
+> - **JTBD-003** (composability) is preserved — `/install-updates` still operates only on already-enabled plugins.
+> - **JTBD-101** (plugin-developer release-cycle) is preserved — adopters still pick up releases with one command.
+> - **JTBD-201** (audit trail) is preserved — `/install-updates` Step 5 reports per-plugin status.
+>
+> The implicit "don't silently mutate sibling projects" guard derived here from ADR-004 + ADR-013 Rule 6 is *strengthened* by the supersession rather than weakened: no sibling-tree write occurs at all under the global-cache surface, so there is no surface for silent mutation. See ADR-030 amendment 2026-05-25 for the preserved invariant.
+>
+> This document is retained for historical context and cross-reference integrity. All active guidance has moved to ADR-030 amendment 2026-05-25 + `/install-updates` SKILL.md.
 
 ## Context and Problem Statement
 
