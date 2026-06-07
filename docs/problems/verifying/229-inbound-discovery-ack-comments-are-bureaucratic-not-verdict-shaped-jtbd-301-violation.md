@@ -1,9 +1,17 @@
 # Problem 229: Inbound-discovery ack comments are bureaucratic, not verdict-shaped (JTBD-301 violation)
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-15
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+
+## Fix Released
+
+- **Release vehicle**: `.changeset/p229-jtbd-301-verdict-shape-ack.md` (`@windyroad/itil` patch)
+- **Released in**: queued in `.changeset/` — releases on next `release:watch` drain
+- **Fix summary**: added `#### 4.5e-comment-shape — JTBD-301 verdict-shape contract (P229)` subsection at the head of Step 4.5e in `packages/itil/skills/review-problems/SKILL.md`, briefing the four-verdict contract (fix-released / parked / duplicate / won't-fix) + fifth implicit policy-violation-close verdict. Amended the four ack-comment branches (4.5d matched-local-ticket cross-reference + 4.5e step 4 above-threshold-pushback + step 5 clear-malicious + step 6 safe-and-valid) to point at the new contract subsection and replace bureaucratic framework-vocab boilerplate with plain-language verdict-shaped templates. Maintainer-side audit-log classification tokens (`safe-and-valid-local-ticket-created`, `above-threshold-pushback`, `clear-malicious-closed`, `matched-local-ticket`) preserved at 4.5f + cache-entry classification column at 4.5g (architect condition A2). Per-branch gate-denial sub-branches preserved (architect condition A1). Behavioural bats at `packages/itil/skills/review-problems/test/jtbd-301-verdict-shape-contract.bats` 19/19 GREEN. Existing `inbound-discovery-contract.bats` 36/36 GREEN — no regression.
+- **Awaiting user verification**: next inbound-discovery pass that fires the safe-and-valid branch (or any of the other three branches) — confirm the posted ack comment uses plain-language verdict-shape and no framework vocab leaks. The 31 historical leaked comments stand (workaround: `gh issue comment --edit` per the original ticket Workaround section); the structural fix prevents future leaks.
+- **Exercise evidence (this session)**: SKILL.md prose change verified via 19-case behavioural bats covering all four branches + contract briefing subsection + architect conditions C1-C4 + A1 + A2. Architect APPROVED-WITH-CONDITIONS (all four C1-C4 honoured in commit). JTBD-301 PASS.
 
 ## Description
 
@@ -53,6 +61,12 @@ Inbound-discovery shipped in slices A-G (RFC-004) earlier this session; the inau
 3. **JTBD-301 acceptance test**: a behavioural test fixture posts a synthetic ack via the pipeline and asserts the comment body matches the JTBD-301 verdict-shape regex; gates the next pipeline release.
 
 Combination probably right: (1) ships the immediate fix; (3) prevents regression.
+
+## Fix Strategy
+
+Add a new `#### 4.5e-comment-shape — JTBD-301 verdict-shape contract (P229)` subsection at the head of Step 4.5e in `packages/itil/skills/review-problems/SKILL.md` that briefs the JTBD-301 four-verdict contract (fix-released / parked / duplicate / won't-fix) plus the fifth implicit policy-violation-close verdict, names the report-upstream symmetry (ADR-024 / ADR-036), and explicitly forbids framework-vocab leakage in reporter-facing comment bodies. Amend the four ack-comment branches (4.5d matched-local-ticket + 4.5e steps 4 pushback / 5 clear-malicious / 6 safe-and-valid) to point at the contract subsection and to substitute plain-language verdict-shaped templates for the bureaucratic boilerplate. Preserve all four gate-denial sub-branches (architect A1) and audit-log classification tokens at 4.5f (architect A2). Ship behavioural bats at `packages/itil/skills/review-problems/test/jtbd-301-verdict-shape-contract.bats` per ADR-052 Permitted Exception (same justification class as `inbound-discovery-contract.bats`).
+
+**Release vehicle**: .changeset/p229-jtbd-301-verdict-shape-ack.md
 
 ## Dependencies
 
