@@ -1,5 +1,0 @@
----
-"@windyroad/itil": patch
----
-
-Add Conditional-deferral check pre-flight to K→V (Known Error → Verification Pending) transition in both `/wr-itil:manage-problem` Step 7 and `/wr-itil:transition-problem` Step 4. The check scans the `.known-error.md` body for phase-tracking sections (`### Phase N` / `### Slice N` / `### Tier N`) with unticked `- [ ]` checkboxes paired with conditional-deferral markers ("deferred to post-X-graduation" / "deferred-pending-Y"), resolves whether the gating condition has lifted, and halts the transition with a three-option `AskUserQuestion` (interactive) or `outstanding_questions` queue (AFK per P352) when in-scope work remains. Closes P184 (Agent treats conditionally-deferred work as permanently out of scope — prematurely transitions parent ticket when X graduates) — driver case P170 Phase 2 silent-loss prevented. Paired promptfoo eval extension at `packages/itil/skills/manage-problem/eval/promptfooconfig.yaml` asserts the agent emits the conditional-deferral check before the `git mv` rename for tickets carrying the P184 trigger pattern.
