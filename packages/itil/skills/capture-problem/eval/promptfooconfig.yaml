@@ -1,0 +1,487 @@
+# SKILL eval — capture-problem behavioural contracts on the foreground-
+# lightweight-capture surface (P324 / P012 / RFC-012 / ADR-075 Amendment
+# 2026-06-02).
+#
+# Tier A deterministic regex + Tier B llm-rubric coverage for 6 contracts on
+# the capture-problem SKILL.md surface — each contract corresponds to a held
+# changeset in `docs/changesets-holding/` whose Reinstate criterion (per
+# ADR-061 Rule 4 evidence-floor) names this exact eval path:
+#
+#   - Step 6 P199 Option 2 inline README staging: `docs/problems/README.md`
+#     stages inline in the same single ADR-014-grain commit as the new
+#     ticket; the `RISK_BYPASS: capture-deferred-readme` trailer is NOT
+#     emitted (P199).
+#   - Step 1.5b P350 brief-before-ID at AskUserQuestion: when the
+#     derive-then-ratify dispatch proposes persona/JTBD candidates, the
+#     option labels MUST inline the artefact's purpose + substance BEFORE
+#     naming it by `JTBD-NNN` / persona-slug; IDs are audit-trail
+#     annotations only (P350).
+#   - Step 1.5b P352 AFK halt-with-stderr-directive carve-out: under
+#     `--no-prompt` (AFK mode marker) AND derivation-failure AND no
+#     `--persona=` / `--jtbd=` flags supplied, capture HALTS with
+#     stderr-directive + exits non-zero — documented carve-out from the
+#     ADR-013 Rule 6 amended queue-and-continue universal AFK default,
+#     authorised by ADR-074 (substance-confirm-before-build) because
+#     capture-problem creates a durable ticket artefact (P352).
+#   - Step 1.5b derive-success silent-framework path (ADR-044 cat 4):
+#     when the description carries explicit `JTBD-NNN` lexical citations
+#     OR `--jtbd=` / `--persona=` flags pre-resolve the values, the
+#     dispatch silent-proceeds with a stderr advisory and does NOT fire
+#     AskUserQuestion.
+#   - Step 2a title-only duplicate-check list-only behaviour: the 3-keyword
+#     title-only filename grep is conservative by design (P155 line 24);
+#     matches are listed in the final report but capture proceeds — does
+#     NOT halt, does NOT branch via AskUserQuestion.
+#   - Step 2b hang-off-check subagent dispatch (P346 Phase 3 / ADR-032 5th
+#     invocation pattern): when the mechanical pre-filter surfaces ≤5
+#     candidates sharing ≥1 signal, capture delegates to the fresh-context
+#     `wr-itil:hang-off-check` subagent. HANG_OFF: P<NNN> halts capture +
+#     routes orchestrator to amend parent; PROCEED_NEW continues + appends
+#     rationale to `## Related`.
+#
+# Drivers:
+#   - ADR-075 (Amendment 2026-06-02) — SKILL-prose harness scope; per-skill
+#     `packages/<plugin>/skills/<skill>/eval/promptfooconfig.yaml`
+#     location; exec:bash provider; Tier-A regex + Tier-B llm-rubric.
+#   - ADR-061 (Rule 4 evidence-floor) — paired promptfoo Tier-A/B GREEN IS
+#     the per-class evidence for SKILL-prose surfaces; flips the R009
+#     modulator +1 → -1 for this surface, dropping P199 + P350-itil
+#     capture-problem-portion + P352-itil capture-problem-portion atomically
+#     per cohort-graduation pre-check (ADR-061 Rule 3b).
+#   - ADR-014 (single-commit grain) — this eval file ships in the same
+#     commit as its companion runners (no `.changeset/*.md` — eval test
+#     infrastructure excluded from the tarball via packages/itil/.npmignore
+#     line 13: `skills/*/eval/`).
+#   - ADR-032 (foreground-lightweight-capture variant; 5th invocation
+#     pattern — fresh-context-subagent-as-decision-arbiter under P346
+#     amendment 2026-05-31).
+#   - ADR-031 (per-state-subdir layout) — capture-problem writes to
+#     `docs/problems/open/<NNN>-<kebab-title>.md`.
+#   - ADR-044 (decision-delegation contract) — Step 1.5b derive-success
+#     paths route to silent-framework category 4; derive-failure
+#     AskUserQuestion fallback is direction-setting category 1; brief-
+#     before-ID discipline at the option-label surface (P350).
+#   - ADR-060 (Amendment 2026-06-02) — I12 hard-block replaced with
+#     derive-then-ratify; type-classification axis retired.
+#   - ADR-074 (substance-confirm-before-build) — authorises the
+#     capture-problem AFK halt-with-stderr-directive carve-out from the
+#     ADR-013 Rule 6 amended queue-and-continue universal default
+#     (P352).
+#   - RFC-012 — single build vehicle for the harness.
+#   - P324 (driving problem — agent-prose verdict harness gap).
+#   - P199 / P350 / P352 (held changesets this eval discharges per
+#     ADR-061 Rule 4).
+#
+# Tier-B (llm-rubric) grader: the capture-problem contracts contain heavy
+# NEGATIVE clauses ("does NOT halt"; "does NOT branch"; "MUST NOT leak the
+# bare ID"; "MUST NOT emit the bypass trailer"; "MUST NOT fire
+# AskUserQuestion on derive-success"). Tier-A `not-regex` on those clauses
+# false-fails against behaviourally-correct negated answers — same pattern
+# the work-problems + review-problems evals encountered, resolved via the
+# Tier-B claude-grader (P012 reopen findings 2026-06-04). Distinctive
+# positive tokens stay Tier-A.
+#
+# Run from repo root:
+#   npx promptfoo eval -c packages/itil/skills/capture-problem/eval/promptfooconfig.yaml
+#
+# @jtbd JTBD-001 (Enforce Governance Without Slowing Down)
+# @jtbd JTBD-006 (Progress the Backlog While I'm Away)
+# @jtbd JTBD-007 (Keep Plugins Current Across Projects)
+# @jtbd JTBD-101 (Extend the Suite with New Plugins)
+# @problem P324
+# @problem P012
+# @problem P199
+# @problem P350
+# @problem P352
+# @rfc RFC-012
+# @adr ADR-075 (Amendment 2026-06-02)
+# @adr ADR-061 (Rule 4 evidence-floor)
+# @adr ADR-032 (5th invocation pattern — fresh-context-subagent arbiter)
+# @adr ADR-031 (per-state-subdir layout)
+# @adr ADR-044 (decision-delegation contract)
+# @adr ADR-060 (Amendment 2026-06-02 — I12 derive-then-ratify)
+# @adr ADR-074 (substance-confirm-before-build)
+# @adr ADR-014 (single-commit grain)
+
+description: |
+  capture-problem SKILL eval — Tier-A regex + Tier-B llm-rubric coverage for
+  6 foreground-lightweight-capture behavioural contracts on the
+  capture-problem SKILL surface. Each test case asserts one held-changeset
+  Reinstate criterion per ADR-061 Rule 4 evidence-floor: passing eval flips
+  the R009 prose-surface modulator +1 → -1 for `capture-problem`, dropping
+  the held cohort (P199 + P350 capture-problem-portion + P352
+  capture-problem-portion) within appetite atomically per cohort-graduation
+  pre-check.
+
+providers:
+  # Path is relative to this config file's directory (promptfoo basePath).
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+# Tier-B (llm-rubric) grading provider. Same shape as work-problems +
+# review-problems: distinctive positive tokens (file paths, advisory
+# strings, command names, classification tokens) stay Tier-A; semantic
+# NEGATIVE clauses route to llm-rubric, graded by claude under subscription
+# auth (no API key) via grade-llm-rubric.sh.
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  # --- P199: Step 6 inline README staging (Option 2 amendment 2026-06-05) ---
+
+  - description: Step 6 inline README staging — README.md staged in same commit; no RISK_BYPASS trailer
+    vars:
+      prompt: |
+        I am the /wr-itil:capture-problem Step 6 commit step. I just wrote
+        the new ticket file `docs/problems/open/420-example-ticket.md` at
+        Step 5 and now need to land the commit per ADR-014.
+
+        Per the P199 Option 2 amendment 2026-06-05 (recorded in Step 6),
+        what files do I stage in the commit alongside the new ticket file?
+        Does my commit body emit the `RISK_BYPASS: capture-deferred-readme`
+        trailer, or is the P165 README-refresh-discipline hook satisfied
+        another way? Is this a single commit or split across two?
+    assert:
+      # Tier A — must stage the README inline.
+      - type: icontains
+        value: 'docs/problems/README.md'
+      # Tier A — must reference the single ADR-014 commit grain.
+      - type: regex
+        value: 'single\s+commit|same\s+commit|ADR-014|one\s+commit'
+      # Tier A — must reference the inline / not-deferred semantic.
+      - type: regex
+        value: 'inline|not\s+deferred|in[\s\-]?same[\s\-]?commit|alongside'
+      # NOTE: The Tier-A `not-icontains 'RISK_BYPASS: capture-deferred-readme'`
+      # check was removed — behaviourally-correct responses quote the trailer
+      # name to say it's DROPPED under P199 Option 2, false-failing the
+      # substring check (the exact pattern the eval header comment block
+      # predicts; same routing decision as Phase 2 for negative clauses).
+      # The Tier-B llm-rubric below is the authoritative check for the
+      # no-bypass-trailer semantic.
+      # Tier B — semantic invariant: README staged inline; bypass trailer
+      # dropped; single ADR-014 commit grain; mirrors manage-problem Step 5
+      # P094 + P134.
+      - type: llm-rubric
+        value: |
+          The response describes capture-problem Step 6 staging
+          `docs/problems/README.md` INLINE in the same single ADR-014-grain
+          commit as the new ticket file (NOT deferred to a follow-on
+          /wr-itil:review-problems pass), and does NOT emit a
+          `RISK_BYPASS: capture-deferred-readme` trailer in the commit
+          body — the P165 README-refresh-discipline hook is satisfied by
+          the inline staging itself. PASS if both the inline staging AND
+          the no-bypass-trailer are stated. FAIL if the response says
+          README refresh is deferred to /wr-itil:review-problems, OR says
+          the bypass trailer is still required, OR splits the new ticket
+          and the README into separate commits. Saying the commit does NOT
+          emit the bypass trailer PASSES.
+
+  # --- P350: Step 1.5b brief-before-ID at the AskUserQuestion option labels ---
+
+  - description: Step 1.5b brief-before-ID — option labels inline JTBD substance BEFORE the JTBD-NNN ID
+    vars:
+      prompt: |
+        I am the /wr-itil:capture-problem Step 1.5b derive-then-ratify
+        dispatch. Lexical detection found NO `JTBD-NNN` citations in the
+        description and no `--jtbd=` flag was supplied. I need to propose
+        up to 3 candidate JTBDs to the user via `AskUserQuestion`.
+
+        Three candidate JTBDs I want to surface:
+          - JTBD-001 (Enforce Governance Without Slowing Down) — developer
+            persona; job statement: enforce governance gates automatically
+            so manual review safety lands without overhead.
+          - JTBD-006 (Progress the Backlog While I'm Away) — developer
+            persona; job statement: progress problem-backlog work while
+            user is AFK with safe defaults on non-direction-setting calls.
+          - JTBD-101 (Extend the Suite with New Plugins) — plugin-developer
+            persona; job statement: extend the plugin suite with new
+            governance plugins that match the established patterns.
+
+        Per the P350 brief-before-ID discipline (recorded in capture-problem
+        SKILL.md `## Output Formatting`), draft the 3 AskUserQuestion option
+        LABELS that the dispatch would surface. Output ONLY the 3 labels
+        (one per line). The 4th Reject option is out of scope for this
+        prompt.
+    assert:
+      # Tier A — must inline plain-language job/persona substance.
+      - type: regex
+        value: 'governance|enforce|gate'
+      - type: regex
+        value: 'AFK|backlog|away|progress'
+      - type: regex
+        value: 'extend|plugin\s+suite|new\s+plugin'
+      # NOTE: The Tier-A `not-regex` patterns enforcing "no bare ID at line
+      # start/end" were removed — they used Perl-style inline flags `(?im)`
+      # which JavaScript regex (promptfoo's engine) does not support
+      # ("Invalid group" parse error). Even with corrected JS-flag syntax,
+      # behaviourally-correct responses that wrap the bare ID in parens
+      # AFTER the substance (the P350 acceptable shape) are hard to
+      # distinguish from leading-with-ID anti-shapes via regex alone.
+      # The Tier-B llm-rubric below is the authoritative check for the
+      # brief-before-ID discipline semantic.
+      # Tier B — semantic invariant: each option label inlines the JTBD's
+      # purpose + the persona's key constraint BEFORE the bare ID; IDs are
+      # audit-trail annotations only.
+      - type: llm-rubric
+        value: |
+          Each of the three option labels inlines a plain-language gloss of
+          the JTBD's job statement AND the persona's key constraint BEFORE
+          the bare `JTBD-NNN` ID appears. Acceptable shape (per P350):
+          *"Developer persona — enforce governance automatically so manual
+          review safety lands without overhead (JTBD-001)."* Unacceptable:
+          *"developer + JTBD-001"*, *"JTBD-001 — governance"* (ID first),
+          *"JTBD-001"* alone. The user reads the prompt without project
+          filesystem access on every device (mobile clients, accessibility
+          tooling, notification surfaces) and cannot follow links into
+          `docs/jtbd/`. PASS if all three labels self-explain via the
+          inlined substance before any bare ID. FAIL if any label leads
+          with the ID, OR uses only a bare ID/persona-slug without
+          inlining the job statement.
+
+  # --- P352: Step 1.5b AFK halt-with-stderr carve-out from queue-and-continue ---
+
+  - description: Step 1.5b AFK halt-with-stderr-directive — documented ADR-074 carve-out from P352 universal queue-and-continue
+    vars:
+      prompt: |
+        I am the /wr-itil:capture-problem Step 1.5b derive-then-ratify
+        dispatch. The skill was invoked with `--no-prompt` (the AFK-mode
+        marker per ADR-060 Amendment 2026-06-02). The description has NO
+        `JTBD-NNN` citations, NO `--persona=` flag, NO `--jtbd=` flag, and
+        the lexical detector found nothing. The AskUserQuestion fallback
+        would normally fire on this derivation-failure path.
+
+        Per ADR-013 Rule 6 amended (P352, queue-and-continue universal AFK
+        default), what does capture-problem do? Is the behaviour
+        queue-and-continue, halt, skip-silently, or auto-default? Cite the
+        specific ADR that authorises any carve-out from the universal
+        default. Be specific about whether a local ticket is created.
+    assert:
+      # Tier A — must HALT, not queue-and-continue.
+      - type: regex
+        value: '\bhalt\b|halts|halt-with-stderr|halt[\s\-]?with[\s\-]?stderr|exit\s+non[\s\-]?zero'
+      # Tier A — must cite ADR-074 explicitly.
+      - type: regex
+        value: 'ADR-074|substance[\s\-]?confirm|confirm[\s\-]?decision[\s\-]?substance'
+      # Tier A — must reference the stderr-directive surface.
+      - type: regex
+        value: 'stderr|directive|cannot\s+derive'
+      # Tier A — no local ticket created.
+      - type: regex
+        value: 'no\s+(?:local\s+)?ticket|no\s+ticket\s+created|capture\s+refused'
+      # Tier B — semantic invariant: AFK halt-with-stderr-directive is a
+      # documented ADR-074 carve-out from the universal queue-and-continue
+      # default; rationale is that capture-problem creates a durable
+      # ticket artefact and auto-creating with derived-but-unratified
+      # persona/JTBD would build dependent work on an unconfirmed decision;
+      # the stderr directive surfaces on user return + AFK loop continues
+      # to the next problem.
+      - type: llm-rubric
+        value: |
+          The response identifies the capture-problem AFK halt-with-stderr-
+          directive as a DOCUMENTED CARVE-OUT from the ADR-013 Rule 6
+          amended queue-and-continue universal AFK default, AUTHORISED BY
+          ADR-074 (substance-confirm-before-build). The rationale named:
+          capture-problem creates a durable ticket artefact, and
+          auto-creating with derived-but-unratified persona/JTBD substance
+          would build dependent work (the ticket file, the README row,
+          the WSJF rank) on an unconfirmed decision — precisely the harm
+          ADR-074 prohibits. No local ticket is created on the halt path;
+          the stderr directive surfaces on user return; the AFK loop
+          continues to the next problem (JTBD-006-compatible). PASS if
+          HALT-with-stderr is named, ADR-074 is cited as the authorising
+          carve-out, AND no-ticket-created is stated. FAIL if the response
+          says capture should queue-and-continue (missing the ADR-074
+          carve-out), OR says it should auto-default persona/JTBD without
+          ratification, OR says a ticket IS created with derived-but-
+          unratified values, OR cites the wrong ADR as authority. Saying
+          capture does NOT queue-and-continue / does NOT auto-default
+          PASSES when ADR-074 carve-out is correctly cited.
+
+  # --- ADR-044 cat 4: Step 1.5b derive-success silent-framework path -----------
+
+  - description: Step 1.5b derive-success — lexical-detected JTBD-NNN silent-proceeds with stderr advisory
+    vars:
+      prompt: |
+        I am the /wr-itil:capture-problem Step 1.5b derive-then-ratify
+        dispatch. The description body verbatim contains the literal phrase
+        `JTBD-007 (Keep Plugins Current Across Projects)`. No `--jtbd=`
+        flag was supplied (the lexical detector is responsible for the
+        resolution). No `--no-prompt` flag was supplied either.
+
+        Per the Step 1.5b derive-then-ratify dispatch contract, what does
+        capture-problem do on this derive-success path? Does Step 1.5b fire
+        `AskUserQuestion` to ratify the lexically-detected JTBD trace? What
+        ADR-044 category does the silent-proceed path fall under? Be
+        specific about the stderr advisory string emitted.
+    assert:
+      # Tier A — must silent-proceed (not fire AskUserQuestion).
+      - type: regex
+        value: 'silent[\s\-]?proceed|silent[\s\-]?framework|does\s+not\s+(?:fire|prompt)|no\s+AskUserQuestion|skip(?:s)?\s+the\s+AskUserQuestion'
+      # Tier A — must name lexical detection as the resolution mechanism.
+      - type: regex
+        value: 'lexical\s+(?:detect|JTBD-trace|grep)|grep\s+-oE'
+      # Tier A — must name JTBD-007 as the detected ID.
+      - type: regex
+        value: 'JTBD-007'
+      # Tier A — must reference the stderr advisory shape.
+      - type: regex
+        value: 'stderr\s+advisory|derived\s+jtbd|advisory'
+      # Tier A — must name ADR-044 category 4 as silent-framework.
+      - type: regex
+        value: 'silent[\s\-]?framework|category\s+4|ADR-044'
+      # Tier B — semantic invariant: lexical detection silent-proceeds with
+      # a stderr advisory; ADR-044 category 4 silent-framework path; the
+      # AskUserQuestion fallback fires only on derive-failure.
+      - type: llm-rubric
+        value: |
+          The response describes Step 1.5b silent-proceeding on the
+          lexical-detection-success path: the `grep -oE '\bJTBD-[0-9]+\b'`
+          detector pulls `JTBD-007` from the description body, assigns the
+          jtbd_trace_value silently, emits a stderr advisory of the shape
+          `capture-problem: derived jtbd-trace=JTBD-007 from description
+          JTBD-NNN citations; re-invoke with --jtbd= to override`, and
+          does NOT fire `AskUserQuestion`. The path falls under ADR-044
+          category 4 (silent-framework) per the documented
+          derive-then-ratify contract. PASS if the response identifies
+          silent-proceed + stderr advisory + ADR-044 category 4. FAIL if
+          the response says Step 1.5b fires `AskUserQuestion` on the
+          derive-success path (would re-introduce friction Step 1.5b is
+          engineered to remove), OR says the dispatch routes through the
+          AFK halt-with-stderr branch (only fires under `--no-prompt`
+          AND derive-failure). Saying it does NOT fire AskUserQuestion
+          PASSES.
+
+  # --- P155 / Step 2a: title-only duplicate-check list-only behaviour ---------
+
+  - description: Step 2a title-only dup-check — matches listed; capture proceeds; no halt; no AskUserQuestion branch
+    vars:
+      prompt: |
+        I am the /wr-itil:capture-problem Step 2a duplicate-check. The
+        description's 3 kebab-cased keywords are `webview`, `crash`,
+        `iframe`. The title-only grep across `docs/problems/*.md` +
+        `docs/problems/<state>/*.md` filenames returned 2 matches:
+        `docs/problems/open/180-webview-crash-on-load.md` and
+        `docs/problems/closed/045-iframe-crash.md`.
+
+        Per the Step 2a contract, what does capture-problem do with these
+        matches? Does it halt? Does it branch via `AskUserQuestion` to
+        confirm whether the new capture is a duplicate? Or does it proceed
+        regardless? Be specific about where (if anywhere) the matches
+        surface, and where duplicate resolution actually happens.
+    assert:
+      # Tier A — must proceed (not halt, not branch).
+      - type: regex
+        value: 'proceed|continue(?:s)?|does\s+not\s+halt|no\s+halt'
+      # Tier A — must reference reporting matches.
+      - type: regex
+        value: 'list(?:ed)?|report|final\s+report|surface(?:d)?'
+      # Tier A — must reference review-problems as the resolution surface.
+      - type: regex
+        value: '/wr-itil:review-problems|review-problems|next\s+review|cluster\s+pass'
+      # Tier A — must reference the title-only / conservative shape.
+      - type: regex
+        value: 'title[\s\-]?only|filename|conservative|3[\s\-]?keyword'
+      # Tier B — semantic invariant: title-only grep is conservative by
+      # design (P155 line 24); matches are listed in the final report but
+      # capture proceeds; user can resolve duplicates at the next
+      # /wr-itil:review-problems invocation.
+      - type: llm-rubric
+        value: |
+          The response describes Step 2a proceeding with capture
+          regardless of the 2 matches: the matches are LISTED in the final
+          report (Step 7), but capture-problem does NOT halt, does NOT
+          fire AskUserQuestion to branch on duplicate confirmation, and
+          does NOT silently swallow the matches. Resolution of the
+          duplicate (if it is one) is deferred to the next
+          `/wr-itil:review-problems` invocation (or the user can invoke
+          `/wr-itil:manage-problem` directly for a structured
+          duplicate-check branch). The title-only / 3-keyword cap shape is
+          intentional (P155 line 24 conservative threshold) — false-
+          positives are cheaper than false-negatives on the lightweight-
+          aside surface. PASS if proceed + list-only + review-problems
+          resolution surface are all stated. FAIL if the response says
+          capture halts on title-match, OR fires AskUserQuestion to
+          confirm-or-deny the duplicate, OR silently swallows the matches.
+          Saying capture does NOT halt / does NOT branch PASSES.
+
+  # --- P346 Phase 3: Step 2b hang-off-check subagent dispatch ----------------
+
+  - description: Step 2b hang-off-check subagent — ≤5 signal-sharing candidates → dispatch wr-itil:hang-off-check; HANG_OFF halts; PROCEED_NEW continues
+    vars:
+      prompt: |
+        I am the /wr-itil:capture-problem Step 2b hang-off-check. The
+        description cites `ADR-052` and `RFC-012`. The mechanical
+        pre-filter walked `docs/problems/open/*.md` + `docs/problems/
+        verifying/*.md` bodies and found 3 candidate tickets that share at
+        least 1 signal token with the description: P291, P305, P324.
+
+        Per the Step 2b contract (P346 Phase 3 amendment 2026-05-31; ADR-032
+        5th invocation pattern), what does capture-problem do next? Name
+        the subagent dispatched. What are the two possible verdicts the
+        subagent can return, and what does capture do on each? Where does
+        the subagent run (parent-session context or fresh isolated
+        context)? Why is fresh-context required?
+    assert:
+      # Tier A — must dispatch the hang-off-check subagent.
+      - type: icontains
+        value: 'wr-itil:hang-off-check'
+      # Tier A — must reference fresh-context (not parent-session bias).
+      - type: regex
+        value: 'fresh[\s\-]?context|fresh\s+session|isolated|no\s+parent[\s\-]?session'
+      # Tier A — must name HANG_OFF verdict.
+      - type: regex
+        value: 'HANG_OFF:?\s*P|HANG[\s\-]?OFF'
+      # Tier A — must name PROCEED_NEW verdict.
+      - type: regex
+        value: 'PROCEED_NEW|PROCEED\s+NEW'
+      # Tier A — must halt on HANG_OFF.
+      - type: regex
+        value: 'halt|halts\s+capture|halts?\s+the\s+capture'
+      # Tier A — must continue on PROCEED_NEW (and append to ## Related).
+      - type: regex
+        value: 'Related|append|continue|proceed'
+      # Tier A — must reference the 5th invocation pattern / ADR-032.
+      - type: regex
+        value: 'ADR-032|5th\s+invocation|fresh[\s\-]?context[\s\-]?subagent'
+      # Tier B — semantic invariant: hang-off-check is the fresh-context-
+      # subagent-as-decision-arbiter pattern (ADR-032 5th invocation);
+      # HANG_OFF: P<NNN> halts capture + emits structured directive to
+      # calling orchestrator naming the parent ticket file path / new scope
+      # / where-to-absorb; PROCEED_NEW continues + appends per-candidate
+      # explanation to the new ticket's ## Related section; fresh-context
+      # required to avoid the parent-agent's session-context bias (the
+      # P347-as-sibling-of-P346 regression).
+      - type: llm-rubric
+        value: |
+          The response describes Step 2b delegating to the
+          `wr-itil:hang-off-check` subagent via the Agent tool with the
+          structured candidate payload. The subagent runs in FRESH-CONTEXT
+          isolation (no parent-session context inheritance — required to
+          avoid the main-agent's session-context bias that caused the
+          P347-as-sibling-of-P346 regression on 2026-05-31). The two
+          documented verdict-shapes:
+            (a) `HANG_OFF: P<NNN>` — capture HALTS; emits a structured
+                halt directive to the calling orchestrator agent naming
+                the parent ticket file path, the new scope to amend in,
+                and the `Where to absorb` directive from the subagent
+                verdict. The orchestrator owns the parent-ticket edit per
+                the standard ticket-edit flow (capture-problem does NOT
+                amend parent tickets — that is manage-problem's surface).
+            (b) `PROCEED_NEW` — capture CONTINUES; appends the subagent's
+                rationale + per-candidate explanation to the new ticket's
+                `## Related` section so the next reviewer sees what was
+                considered.
+          The pattern is documented as ADR-032's 5th invocation pattern
+          (foreground fresh-context-subagent-as-decision-arbiter under the
+          P346 Phase 3 amendment 2026-05-31). PASS if subagent + both
+          verdicts + halt/continue acts + fresh-context rationale are all
+          named correctly. FAIL if the response says capture-problem
+          amends the parent ticket directly (manage-problem's surface,
+          not capture-problem's), OR runs the hang-off check in
+          parent-session context (re-introduces the session-context bias),
+          OR conflates the two verdicts. Saying capture does NOT amend
+          parent / does NOT inherit parent context PASSES.
