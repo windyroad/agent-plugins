@@ -33,14 +33,14 @@ The highest-value entries across the briefing — the handful of rules that save
 | [plugin-distribution-cache-mechanics.md](./plugin-distribution-cache-mechanics.md) | Marketplace cache, install/uninstall/refresh patterns, manifest validator, worktree shadowing, TUI vs agent enumerator | Plugin install / refresh / publish work, `/install-updates` debugging, broken-manifest recovery. |
 | [agent-interaction-patterns.md](./agent-interaction-patterns.md) | Framing validation, re-stage traps, user-frustration signals | Before asking the user solution-detail questions; ticket-framing checks. |
 
-> **Archive siblings** (Tier 3 budget rotations per P145, multi-pass 2026-05-11 / 13 / 17): topic files have date-stratified archives. Load alongside the primary file when full historical context is needed.
-> - `hooks-and-gates-archive.md` (2026-05-04/05) + `hooks-and-gates-archive-pre-2026-05-04.md` (2026-04-19 through 04-26)
-> - `governance-workflow-archive.md` (2026-05-04/05/12) + `governance-workflow-archive-mid.md` (2026-04-23/24/25) + `governance-workflow-archive-pre-2026-04-23.md` (2026-04-19 through 04-22)
+> **Archive siblings** (Tier 3 budget rotations per P145, multi-pass 2026-05-11 / 13 / 17 / 26 / 31, 2026-06-08): topic files have date-stratified archives. Load alongside the primary file when full historical context is needed.
+> - `hooks-and-gates-archive.md` (2026-05-04/05, then 2026-05-18 added 2026-06-08) + `hooks-and-gates-archive-pre-2026-05-04.md` (2026-04-19 through 04-26)
+> - `governance-workflow-archive.md` (2026-05-04/05/12 + 2026-05-26 added 2026-06-08) + `governance-workflow-archive-mid.md` (2026-04-23/24/25) + `governance-workflow-archive-pre-2026-04-23.md` (2026-04-19 through 04-22)
 > - `governance-workflow-surprises.md` (sibling brief — ADR mechanics, JTBD reviewer behaviour, README-refresh reconciliation)
-> - `releases-and-ci-archive.md` (older release-pipeline entries)
-> - `afk-subprocess-mechanics.md` + `afk-subprocess-recovery.md` (sibling briefs split out 2026-05-03) + `afk-subprocess-recovery-archive.md` (oldest recovery entries, 2026-05-26)
+> - `releases-and-ci-archive.md` (older release-pipeline entries + 2026-05-26 entries added 2026-06-08)
+> - `afk-subprocess-mechanics.md` + `afk-subprocess-recovery.md` (sibling briefs split out 2026-05-03) + `afk-subprocess-recovery-archive.md` (oldest recovery entries, 2026-05-26) + `afk-subprocess-archive.md` (2026-05-17/18 entries archived 2026-06-08)
 > - `agent-hook-gate-quirks.md` (sibling brief — hook-gate quirks)
-> - `agent-interaction-patterns-archive.md` (settled/codified entries split out 2026-05-26 — P057 re-stage, P014 framing, P121 Fix-Strategy-premise)
+> - `agent-interaction-patterns-archive.md` (settled/codified entries split out 2026-05-26/31 — P057 re-stage, P014 framing, P121 Fix-Strategy-premise + P302 decision-confirmation-substance-first added 2026-06-08)
 
 ## How to Use
 
