@@ -16,7 +16,7 @@ The deprecated `/wr-itil:manage-problem <NNN> known-error` subcommand route rema
 
 - `<NNN>` — the ticket ID (data parameter, e.g. `042`). Required.
 - `<status>` — the destination status. One of:
-  - `known-error` — Open → Known Error (root cause confirmed, fix path clear, fix not yet released).
+  - `known-error` — Open → Known Error (root cause identified AND workaround documented; fix not yet proposed — per ADR-022 corrected semantics, fix proposal produces the RFC per ADR-072).
   - `verifying` — Known Error → Verification Pending (fix released, awaiting user verification per ADR-022).
   - `close` — Verification Pending → Closed (user has confirmed the fix works in production).
 

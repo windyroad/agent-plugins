@@ -65,14 +65,33 @@ The **design** rework is done (committed this session); the gate **implementatio
 
 **Remaining (not this ticket — RFC-005 scope):** build the propose-fix gate + auto-create mechanism (RFC-005 B2–B10), which rides the held-changeset window. This ticket's design-rework is complete.
 
+### Phase 1 follow-up (2026-06-08) — upstream-prose alignment
+
+The 2026-05-26 design rework above corrected the substantive ADRs (ADR-072 / ADR-073) + the framework invariant (ADR-060 I13) + the implementation RFCs (RFC-005 / RFC-006) but left an inconsistency in the **upstream lifecycle ADR** (ADR-022) and the **operator-facing SKILL.md prose** that still encoded the pre-correction "root cause confirmed, fix path clear" framing. A `/wr-itil:work-problems` iter sweep on 2026-06-08 closed this gap:
+
+- **ADR-022** — Known Error definition aligned (line 18 Context + line 70 Scope), added an `## Amendment 2026-06-08 (P314) — Known Error semantics corrected` block citing the user correction verbatim + the composition with the P143 fold-fix amendment, flipped `human-oversight: confirmed` → `unconfirmed` per ADR-066 substance-change marker clearance (Decision Outcome literal unchanged; Scope sub-section reframed).
+- **`packages/itil/skills/manage-problem/SKILL.md`** — Known Error prose aligned at lines 51 (Closing problems), 58 (Problem Lifecycle table), 85 (WSJF Status Multiplier rationale), 170 (Known Error work-flow header), 667 (Step 7 transition prose). No Step or behavioural changes.
+- **`packages/itil/skills/transition-problem/SKILL.md`** — `known-error` destination description aligned at line 19.
+- **`docs/decisions/029-diagnose-before-implement.proposed.md`** — two quoted citations of ADR-022's prior framing aligned (lines 111 + 246) with `(amended 2026-06-08 per P314)` tags. ADR-029 Decision Outcome unchanged; oversight marker preserved.
+- **`docs/decisions/README.md`** — compendium regenerated per ADR-077 (picks up the ADR-022 oversight flip + new related-ADR cross-references).
+
+**Phase 2 (still deferred — RFC-005 B-tasks scope, held-changeset window):**
+
+- Implement the propose-fix gate relocation (move RFC-trace gate from `Open → Known Error` to the propose-fix step on a Known Error).
+- Implement the auto-create-on-missing-RFC mechanism, everywhere the gate fires.
+- Behavioural bats asserting both invariants.
+
+**Architect re-review carve-out for this iter (advisory).** The 2026-06-08 iter incorporated the architect's first-pass scope-completeness findings — `transition-problem/SKILL.md` line 19 and `029-diagnose-before-implement.proposed.md` lines 111 + 246 were lifted into the same commit so the operator-facing prose lands consistent in one transition, avoiding the documentation-drift class the rework exists to close.
+
 ## Root Cause Analysis
 
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems.
-- [ ] **Open design question — exact gate placement**: where does "a fix is proposed / fix work commences on a Known Error" sit in the `Open → Known Error → Verifying → Closed` lifecycle? Options to weigh: (a) a new `Known Error → In Progress (fixing)` transition the gate fires on; (b) the first fix commit referencing a Known Error problem; (c) a "fix proposed" marker/action in manage-problem. The original F1 "Known Error → Fix Released" was rejected as too-late under the WRONG model — re-evaluate under the corrected model (the RFC must exist before fix work, not at fix-release).
-- [ ] **Auto-create design**: when the gate fires with no RFC, auto-create a problem-traced RFC (skeleton tracing the problem; scope = the fix). Confirm composition with ADR-070 (RFCs hold no decisions — a skeleton is fine) + ADR-071 (every fix via RFC) + whether the auto-created RFC needs any user touch.
-- [ ] Rework artifacts: rewrite/supersede ADR-072 (placement) + ADR-073 (auto-create everywhere) — both are `proposed` + unoversighted + unimplemented, so in-place rewrite is likely cheaper than formal supersede; rewrite ADR-060 I13; adjust RFC-005 F1/F3/F4/F5 + B-tasks. Route through the architect + JTBD gates.
+- [x] **Open design question — exact gate placement**: ANSWERED — propose-fix step on a Known Error (no new lifecycle state). Recorded in ADR-072. User-ratified 2026-05-26.
+- [x] **Auto-create design**: ANSWERED — auto-create a problem-traced RFC if missing, **everywhere the gate fires** (interactive + AFK). Recorded in ADR-073 (composes with ADR-070 no-decisions + ADR-071 every-fix-via-RFC; the auto-created RFC is a problem-traced skeleton with `stories: []` and no `## Considered Options` block). User-ratified 2026-05-26.
+- [x] Rework artifacts: ADR-072 rewritten + renamed (2026-05-26); ADR-073 rewritten + renamed (2026-05-26); ADR-060 I13 rewritten (2026-05-26); RFC-005 + RFC-006 updated (2026-05-26). Phase 1 follow-up (2026-06-08) added: ADR-022 + manage-problem/SKILL.md + transition-problem/SKILL.md + ADR-029 alignment with the corrected Known Error definition (architect + JTBD gates passed).
+- [ ] **Phase 2 (deferred)** — implement the propose-fix gate relocation + auto-create mechanism + behavioural bats (RFC-005 B-tasks, held-changeset window).
 
 ## Dependencies
 

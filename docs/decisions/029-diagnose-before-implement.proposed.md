@@ -108,7 +108,7 @@ Rationale:
 
 - **ADR-025 cross-check**: the RED test written in the diagnose phase MUST satisfy ADR-025's traceability invariant. Since `docs/problems/` exists in this project, traceability is blocking; the test must include `@problem:P<NNN>` annotation for the ticket being worked. ADR-025's concreteness layer applies independently. This ADR does NOT relax ADR-025; it REINFORCES it by giving the test a concrete citation to satisfy the traceability layer.
 
-- **ADR-022 interaction**: the diagnose-phase output IS the evidence that satisfies ADR-022 Step 7's "root cause confirmed, fix path clear" precondition for the Open → Known Error transition. `manage-problem`'s transition mechanic at step 7 is unchanged; ADR-029 gives it the upstream guarantee that the Root Cause Analysis section has been populated with structured evidence before the transition fires.
+- **ADR-022 interaction**: the diagnose-phase output IS the evidence that satisfies ADR-022 Step 7's "root cause identified AND workaround documented" precondition for the Open → Known Error transition **(amended 2026-06-08 per P314 — previously cited as "root cause confirmed, fix path clear"; the corrected ADR-022 framing is upstream)**. `manage-problem`'s transition mechanic at step 7 is unchanged; ADR-029 gives it the upstream guarantee that the Root Cause Analysis section has been populated with structured evidence before the transition fires.
 
 - **ADR-013 Rule 6 authorisation**: skipping the user-ack at the diagnose→implement boundary is a policy-authorised action per ADR-013 Rule 6 on two grounds:
   - The self-check is structural (mechanical citation match), not a judgement call that requires user input.
@@ -243,7 +243,7 @@ Revisit this decision if:
 - **ADR-014** (Governance skills commit their own work) — the iteration still commits per ADR-014; ADR-029 is pre-commit reasoning.
 - **ADR-018** (Inter-iteration release cadence) — orthogonal; runs post-iteration.
 - **ADR-019** (AFK orchestrator preflight) — orthogonal; runs at loop start.
-- **ADR-022** (Problem lifecycle Verification Pending) — reinforced: the diagnose-phase output IS the evidence for Step 7's "root cause confirmed, fix path clear" precondition.
+- **ADR-022** (Problem lifecycle Verification Pending) — reinforced: the diagnose-phase output IS the evidence for Step 7's "root cause identified AND workaround documented" precondition **(amended 2026-06-08 per P314 — citation aligned with the corrected ADR-022 framing)**.
 - **ADR-025** (Test content quality review) — cross-coupled: the RED test written during diagnose carries the `@problem:P<NNN>` annotation required by ADR-025's traceability layer.
 - **ADR-027** (Governance skill auto-delegation) — nested: the subagent that runs manage-problem also runs the diagnose phase. ADR-027's summary-verbatim contract preserves the diagnose output back to the caller.
 - **JTBD-001**, **JTBD-002**, **JTBD-006**, **JTBD-101**, **JTBD-201** — personas whose needs drive this ADR.

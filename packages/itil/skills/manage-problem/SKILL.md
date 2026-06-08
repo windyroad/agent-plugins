@@ -48,14 +48,14 @@ The preamble check is a one-shot; the `.intake-scaffold-done` and `.intake-scaff
 2. When the user explicitly confirms ("it's fixed", "verified", "working"): `git mv` from `.verifying.md` to `.closed.md`, update the Status field to "Closed", and reference the problem in the commit message (e.g., "Closes P008").
 3. Never assume the fix works — always wait for explicit user confirmation before closing.
 
-The `.verifying.md` suffix distinguishes "fix released, awaiting user verification" from "root cause confirmed, fix not yet implemented" (the Known Error meaning pre-release). See ADR-022 for rationale.
+The `.verifying.md` suffix distinguishes "fix released, awaiting user verification" from "root cause identified AND workaround documented; fix not yet proposed" (the Known Error meaning per ADR-022 corrected semantics, 2026-06-08 amendment; the fix proposal happens AFTER Known Error and produces the RFC per ADR-072). See ADR-022 for rationale.
 
 ## Problem Lifecycle
 
 | Status | File suffix | Meaning | Entry criteria |
 |--------|-----------|---------|----------------|
 | **Open** | `.open.md` | Reported, under investigation | New problem identified |
-| **Known Error** | `.known-error.md` | Root cause confirmed, fix path clear, **fix NOT yet released** | Root cause documented, reproduction test exists, workaround in place |
+| **Known Error** | `.known-error.md` | Root cause identified AND workaround documented; **fix not yet proposed** (fix proposal produces the RFC per ADR-072) | Root cause documented, reproduction test exists, workaround in place |
 | **Verification Pending** | `.verifying.md` | Fix released, awaiting user verification (ADR-022) | Fix shipped; `## Fix Released` section written; user action remaining |
 | **Parked** | `.parked.md` | Blocked on upstream or suspended by user decision | Upstream blocker identified, or user explicitly suspends; reason and un-park trigger documented |
 | **Closed** | `.closed.md` | Fix verified in production OR ticket determined no longer relevant via evidence | (a) User explicitly confirms the released fix works (canonical Verifying → Closed path), OR (b) auto-closed by `/wr-itil:review-problems` Step 4.6 relevance-close pass per ADR-079 Phase 1 + Phase 2 evidence shapes — `file-no-longer-exists` / `ADR-shipped-confirmed` / `named-skill-or-feature-exists` / `self-marker-in-body` / `driver-child-ticket-closed` (cumulative; multi-shape matches emit comma-joined) with `## Closed as no longer relevant` audit section per ADR-026 grounding (extends ADR-022 lifecycle: Open\|Known Error → Closed bypasses Verifying when no fix was released). Partial-scope umbrellas emit `CLOSE-CANDIDATE-WITH-CAVEAT` and ride the maintainer's `AskUserQuestion` surface-batch-confirm path. |
@@ -82,7 +82,7 @@ Problems are ranked using Weighted Shortest Job First (WSJF):
 
 **Severity** = Impact × Likelihood (1-25) from `RISK-POLICY.md`. Read the impact levels, likelihood levels, and risk matrix from the policy — do not hardcode them here.
 
-**Status Multiplier** (known-errors have confirmed root cause and clear fix path — higher value per unit of work):
+**Status Multiplier** (known-errors have identified root cause AND documented workaround — ready for fix proposal; higher value per unit of work because the diagnostic uncertainty is resolved):
 
 | Status | Multiplier |
 |--------|-----------|
@@ -167,7 +167,7 @@ What "work" means depends on the problem's status:
 7. **Transition to Known Error immediately** — once root cause and workaround are documented, `git mv` the file to `.known-error.md` and update the Status field. Do not wait for a separate review.
 8. If the fix is small enough, continue straight to implementing it (becoming a Known Error → Closed flow in one session)
 
-**Known Error (root cause confirmed, fix path clear):**
+**Known Error (root cause identified AND workaround documented; ready for fix proposal):**
 
 **Substance-confirm-before-build guard (ADR-074 — propose-fix surface, ADR-060 I13).** BEFORE implementing any fix step below, check whether the fix builds on a genuine decision whose **substance is unconfirmed**. This closes P315 (dependent work built on a born-`proposed` decision the user later rejects):
 
@@ -664,7 +664,7 @@ If the edit touched only `## Root Cause Analysis`, `## Symptoms`, `## Workaround
 
 **Open → Known Error** (rename file, update content):
 
-Known Error means "root cause confirmed, fix path clear, fix NOT yet released" (per ADR-022). Releasing the fix is a separate Known Error → Verification Pending transition — do NOT stay on `.known-error.md` after the fix ships.
+Known Error means "root cause identified AND workaround documented; fix not yet proposed" (per ADR-022 corrected semantics, 2026-06-08 amendment). The fix is proposed AFTER Known Error and produces the RFC (per ADR-072). Releasing the fix is a separate Known Error → Verification Pending transition — do NOT stay on `.known-error.md` after the fix ships.
 
 Pre-flight checks before allowing transition:
 - [ ] Root cause is documented (not just "Preliminary Hypothesis")

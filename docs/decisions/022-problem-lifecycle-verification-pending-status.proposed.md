@@ -1,12 +1,12 @@
 ---
 status: "proposed"
 date: 2026-04-19
-human-oversight: confirmed
-oversight-date: 2026-05-25
+human-oversight: unconfirmed
 decision-makers: [tomhoward]
 consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: [Windy Road plugin users]
 reassessment-date: 2026-07-19
+problems: [P049, P314]
 ---
 
 # Problem lifecycle — add a Verification Pending status between Known Error and Closed
@@ -15,7 +15,7 @@ reassessment-date: 2026-07-19
 
 ## Context and Problem Statement
 
-The problem lifecycle today uses four statuses — Open, Known Error, Parked, Closed — mapped to file suffixes `.open.md`, `.known-error.md`, `.parked.md`, `.closed.md`. Known Error is defined as "root cause confirmed, fix path clear". The closure workflow appends a `## Fix Released` section to the same `.known-error.md` file when the fix ships, keeping the status and suffix unchanged until the user explicitly verifies.
+The problem lifecycle today uses four statuses — Open, Known Error, Parked, Closed — mapped to file suffixes `.open.md`, `.known-error.md`, `.parked.md`, `.closed.md`. Known Error is defined as "root cause identified AND workaround documented" — the entry semantics for the `.known-error.md` state (per ADR-072's corrected framing; fix proposal happens AFTER Known Error and produces the RFC). The closure workflow appends a `## Fix Released` section to the same `.known-error.md` file when the fix ships, keeping the status and suffix unchanged until the user explicitly verifies. **(amended 2026-06-08 per P314 — Known Error definition was "root cause confirmed, fix path clear" before the corrective rework; see Amendment block below for context.)**
 
 This overloads Known Error with two distinct sub-states:
 
@@ -67,7 +67,7 @@ Chosen option: **"Verification Pending" status with `.verifying.md` suffix and W
 - Update `manage-problem review` step 9c: present a dedicated "Verification Queue" section (ranked by release age, not WSJF) in parallel to the main ranked table.
 - Update `manage-problem review` step 9d: target `*.verifying.md` files directly via glob instead of scanning `.known-error.md` bodies.
 - Update `manage-problem work` step 3 classifier rule (Known Error with `## Fix Released` → Skip) to Skip all `.verifying.md` files for dev-work selection — the match becomes suffix-based.
-- Update the Open → Known Error pre-flight (step 7): clarify that Known Error is for "root cause confirmed AND fix not yet shipped". Releasing the fix is a second transition (Known Error → Verification Pending), not an edit in place.
+- Update the Open → Known Error pre-flight (step 7): clarify that Known Error is for "root cause identified AND workaround documented; fix proposal happens AFTER Known Error and produces the RFC (ADR-072)". Releasing the fix is a second transition (Known Error → Verification Pending), not an edit in place. **(amended 2026-06-08 per P314 — previously read "root cause confirmed AND fix not yet shipped"; see Amendment block below.)**
 - Update `packages/itil/skills/work-problems/SKILL.md` classifier table (`Known Error with ## Fix Released | Skip`) to use the suffix.
 - Update `packages/itil/skills/manage-incident/SKILL.md` linked-problem close gating (step 9): `.known-error.md`, `.verifying.md`, and `.closed.md` all permit incident close; `.open.md` still blocks.
 - Update `docs/problems/README.md` template: replace the hand-maintained "Known Errors (Fix Released — pending verification)" table with a "Verification Queue" section sourced from `.verifying.md` files.
@@ -202,9 +202,34 @@ Revisit this decision if:
 - `manage-incident` gains its own analogous sub-state — parallel status could be inherited from this ADR or go its own way.
 - The WSJF framework moves toward a two-queue model explicitly (e.g. grounded estimates from P022), at which point multiplier 0 may become redundant with an explicit queue field.
 
+## Amendment 2026-06-08 (P314) — Known Error semantics corrected
+
+**Context.** The original ADR-022 (2026-04-19) defined Known Error as *"root cause confirmed, fix path clear"* — wording carried forward from the pre-existing lifecycle table. This framing was **wrong** in a way that did not surface until ADR-072 (RFC required at the propose-fix step on a Known Error) tried to attach a fix-time RFC-trace gate to the `Open → Known Error` transition under the assumption that "fix path clear" meant the fix work was real-enough to require an RFC.
+
+**User correction 2026-05-26 (verbatim).** *"You've got the process wrong. A problem becomes a known error when we have a documented workaround and root cause. Once it's known error then we can propose a fix which would result in an RFC."*
+
+**Corrected definition.** Known Error = **root cause identified AND workaround documented**. No fix proposed, no RFC required yet. The fix is **proposed AFTER Known Error**, and proposing the fix is what **produces the RFC** (per ADR-072's rewritten gate placement: the propose-fix step on a Known Error). Releasing the fix is the existing `Known Error → Verification Pending` transition (this ADR, unchanged).
+
+**Composition with the P143 fold-fix amendment.** The "fold Open → Verification Pending in one commit" P143 amendment (above) requires the Open ticket to already document root cause + fix strategy + workaround + effort + the fix implementation in the same commit. Under the corrected Known Error semantics, the fold continues to work: the same commit instantiates the Known Error state (root cause + workaround), proposes the fix (producing the RFC per ADR-072), and ships the fix — all the pre-flight checks remain in force, and per ADR-072 the RFC is the fix-proposal artifact that the fold-fix commit must carry.
+
+**Sibling artefacts corrected in the same pass (this commit).**
+
+- `packages/itil/skills/manage-problem/SKILL.md` (lines 51, 58, 85, 170, 667) — Known Error prose aligned with the corrected definition.
+- `packages/itil/skills/transition-problem/SKILL.md` (line 19) — `known-error` destination description aligned.
+- `docs/decisions/029-diagnose-before-implement.proposed.md` (lines 111, 246) — quoted citations of ADR-022's prior framing aligned.
+- ADR-072 + ADR-073 — already rewritten in-place on 2026-05-26 to reflect the corrected semantics (born-confirmed via direct user ratification).
+- ADR-060 invariant I13 + RFC-005 / RFC-006 — already corrected on 2026-05-26 per P314 ticket Resolution.
+
+**`human-oversight` flip.** Per ADR-066 substance-change marker clearance, this Amendment block reframes the Scope sub-section (line 70) — Scope is part of the Decision Outcome surface. The frontmatter `human-oversight` is flipped from `confirmed` → `unconfirmed` for re-ratification at the next `/wr-architect:review-decisions` drain. The Decision Outcome literal (Verification Pending status + `.verifying.md` suffix + WSJF multiplier 0) is unchanged.
+
+**Phase 2 (deferred — not this commit).** The propose-fix gate relocation (ADR-072) + auto-create-everywhere mechanism (ADR-073) + behavioural bats ride RFC-005's B-tasks (held-changeset window).
+
 ## Related
 
 - P049: `docs/problems/049-known-error-status-overloaded-with-fix-released-substate.open.md` — the problem ticket this ADR resolves.
+- P314: `docs/problems/open/314-rework-i13-gate-placement-and-auto-create-per-corrected-known-error-semantics.md` — the corrective rework ticket that drove the 2026-06-08 Amendment block above; also drove the ADR-072 + ADR-073 in-place rewrites (2026-05-26).
+- ADR-072: `docs/decisions/072-rfc-required-at-fix-proposal-on-a-known-error.proposed.md` — RFC required at the propose-fix step on a Known Error (the corrected gate placement; load-bearing for the Known Error semantics in this ADR).
+- ADR-073: `docs/decisions/073-fix-time-gate-auto-creates-missing-rfc.proposed.md` — fix-time gate auto-creates a missing RFC (everywhere).
 - P048: `docs/problems/048-manage-problem-does-not-detect-verification-candidates.open.md` — follow-up; this ADR simplifies its fix surface from file-body scan to glob.
 - P047: `docs/problems/047-wsjf-effort-bucket-accuracy-gaps.open.md` — sibling theme (skill's static model doesn't track reality at the effort dimension; this ADR addresses the status dimension).
 - P030: `docs/problems/030-manage-problem-verification-prompts-lack-fix-summary.closed.md` — predecessor fix for the verification prompt content.

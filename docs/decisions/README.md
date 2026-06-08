@@ -103,9 +103,9 @@ _70 ADRs. These are the current rules. The architect agent reads this section fi
 **Related:** ADR-002, ADR-014, ADR-018
 
 ### ADR-022 — Problem lifecycle — add a Verification Pending status between Known Error and Closed
-**Status:** proposed | **Oversight:** confirmed
+**Status:** proposed | **Oversight:** unconfirmed
 **Chosen:** Chosen option: **"Verification Pending" status with `.verifying.md` suffix and WSJF multiplier 0 (excluded from dev ranking)**, because it names the blocked role clearly (the user must verify), produces a concise suffix that round-trips thr...
-**Related:** ADR-011, ADR-014, ADR-020, ADR-031
+**Related:** ADR-072, ADR-073, ADR-011, ADR-014, ADR-020, ADR-031
 
 ### ADR-023 — wr-architect agent performance review scope — prompt amendment + performance-budget ADR template
 **Status:** proposed | **Oversight:** confirmed
