@@ -35,14 +35,32 @@ ADR-047 is **left unoversighted** (P283/ADR-066 marker withheld) until amended (
 - [x] `/install-updates` path retired (already done per the 2026-05-25 stale-reference cleanup in ADR-047 body — the inline step was already removed when install-updates was narrowed to a single global-cache refresh).
 - [ ] Re-confirm amended ADR-047 via `/wr-architect:review-decisions` — **deferred to next interactive session**: AFK iter subprocess wrote `human-oversight: unconfirmed` per ADR-066 P348 (no AskUserQuestion access). The drain promotes once a human runs `/wr-architect:review-decisions` and substance-confirms via AskUserQuestion. User direction quote in the amendment body IS the substance, so the drain answer will be a one-step confirm.
 
-### Investigation Tasks — Phase 2 (deferred)
+### Investigation Tasks — Phase 2 (investigated 2026-06-08, awaiting user direction)
 
-- [ ] Generalise the scaffold-nudge pattern to sibling plugins where a policy-file → artefact-directory pair exists:
-  - voice-tone (`docs/VOICE-AND-TONE.md` → `docs/voice-tone/`?) — scope confirmation needed; the pair may not be the right shape because voice-tone artefacts are typically inline in the policy file itself.
-  - style-guide (`docs/STYLE-GUIDE.md` → `docs/style-guide/`?) — same scope confirmation.
-  - architect (`docs/decisions/`) and jtbd (`docs/jtbd/`) do NOT need a scaffold-nudge: decisions/jobs live IN the directory with no separate policy file; ADR-066/068 oversight nudges cover the analogous gap for ratification, not scaffolding.
-- [ ] If sibling pairs are confirmed in scope, extract a shared scaffold-nudge helper (e.g. `packages/shared/hooks/lib/scaffold-nudge.sh`) to avoid drift across plugin instances. The Phase 1 risk-scorer hook is a candidate template for the helper extraction.
-- [ ] Decide whether a sibling ADR should generalise the pattern, or whether ADR-047 should grow further amendments to cover each pair.
+- [x] Inventory sibling plugin reactive surfaces for the policy-missing case:
+  - `packages/voice-tone/hooks/voice-tone-enforce-edit.sh:71-73` — hard-BLOCKS UI edits when `docs/VOICE-AND-TONE.md` missing, directs to `/wr-voice-tone:update-guide`.
+  - `packages/style-guide/hooks/style-guide-enforce-edit.sh:70` — same reactive BLOCK shape.
+  - `packages/jtbd/hooks/jtbd-enforce-edit.sh:198-201` — same reactive BLOCK shape.
+  - `packages/architect/hooks/architect-enforce-edit.sh:48-49` — silently exits 0 when `docs/decisions/` missing (no reactive surface).
+- [x] Architect review (this iter, 2026-06-08 P297 Phase 2 architect verdict): the Phase 1 trigger shape `POLICY-FILE × ARTEFACT-DIR pair-missing` is **risk-scorer-specific**. None of voice-tone / style-guide / jtbd replicate the two-surface shape — for them the policy IS the artefact. architect has no policy-file analog at all (decisions ARE the artefact). The pair shape Phase 1 codified does NOT generalise.
+- [x] Empirical conclusion: voice-tone / style-guide / jtbd are covered by their existing **reactive enforce-edit BLOCK** gates — a strictly stronger UX than an advisory SessionStart stderr nudge. Adding a SessionStart pre-warning would be redundant noise (fires in every UI-bearing project pre-policy authoring) without coverage gain.
+- [x] Helper-extraction decision: NOT extracting `packages/shared/hooks/lib/scaffold-nudge.sh` — single Phase 1 instance is not duplication per ADR-017 / YAGNI. Re-evaluate if/when a second matching pair is identified.
+- [x] Sibling-ADR decision: ADR-047 Amendment 2026-06-08 does NOT cleanly generalise (it is risk-scorer-shaped with `RISK-POLICY.md` + `docs/risks/` literals + an `Install-updates scaffolds...` title that is now stale). Under the empirical lean (no further plugins in scope), no new ADR is needed.
+
+### Phase 2 substance question — direction-setting, awaiting user
+
+Architect surfaced three viable options. **Architect advisory lean: Option A.** Substance ownership belongs to the user — queued as outstanding_question for next interactive session per [[feedback_run_decisions_by_user_before_drafting]] + [[feedback_confirm_decision_substance_before_building]].
+
+- **Option A (architect lean) — Phase 2 = no further plugins in scope.** risk-scorer is the only POLICY-FILE × ARTEFACT-DIR pair in the suite. Sibling plugins covered by existing reactive enforce-edit BLOCK gates. architect has no policy-file analog. Close Phase 2 as investigated-no-build. No new hooks, no helper extraction, no sibling ADR.
+- **Option B — Ship voice-tone + style-guide SessionStart pre-warnings anyway.** Cheaper UX than discovering the enforce-edit BLOCK on first relevant edit. Accept some redundancy with the reactive gate. Extract shared helper. Write a sibling ADR generalising the pattern (the ADR-047 amendment is risk-scorer-shaped, not pattern-shaped).
+- **Option C — Architect-only Phase 2.** Add a SessionStart nudge for projects with NO `docs/decisions/` directory (the genuine silent-fail-open gap in `architect-enforce-edit.sh:48-49`). Re-shape the trigger from `POLICY × DIR-MISSING` to `PLUGIN-CONFIGURED × ARTEFACT-DIR-MISSING`. Different trigger shape from Phase 1; warrants its own ADR. Risk: fires noisily on every project without ADRs where the user may not want architect governance.
+
+### Investigation Tasks — Phase 3 (conditional on user direction)
+
+- [ ] If user picks **Option A**: transition Open → Verifying. Mark all Phase 2 investigation tasks complete. ADR-047 re-confirmation (Phase 1 outstanding task) remains the only blocker to ticket closure.
+- [ ] If user picks **Option B**: implement SessionStart scaffold-nudges + bats for voice-tone + style-guide; extract `packages/shared/hooks/lib/scaffold-nudge.sh`; author sibling ADR (`Scaffold-nudge pattern for policy-file × artefact-directory pairs across the plugin suite`).
+- [ ] If user picks **Option C**: implement SessionStart scaffold-nudge for architect on `docs/decisions/` missing; author ADR for the `PLUGIN-CONFIGURED × ARTEFACT-DIR-MISSING` trigger shape.
+- [ ] Dependency: ADR-047 Phase 1 amendment remains `human-oversight: unconfirmed` — Phase 3 hook work that explicitly cites ADR-047 should wait until `/wr-architect:review-decisions` ratifies the amendment (or be queued behind it).
 
 ## Phase 1 deliverables (2026-06-08)
 
@@ -51,6 +69,13 @@ ADR-047 is **left unoversighted** (P283/ADR-066 marker withheld) until amended (
 - `packages/risk-scorer/hooks/test/risk-scorer-scaffold-nudge.bats` — 7-case behavioural fixture.
 - `docs/decisions/047-install-updates-scaffolds-governance-artefacts.proposed.md` — Amendment 2026-06-08 (P297) section + frontmatter flipped to `human-oversight: unconfirmed` pending drain promotion.
 - `docs/decisions/README.md` — compendium regenerated.
+
+## Phase 2 deliverables (2026-06-08, investigated-no-build pending direction)
+
+- Empirical sibling-plugin reactive-surface inventory (above).
+- Architect verdict: Phase 1 pair shape does not generalise; sibling plugins covered by reactive enforce-edit BLOCK gates; architect lacks policy-file analog.
+- Three viable options (A / B / C) surfaced for user direction; substance question queued as outstanding_question for next interactive session.
+- No code shipped in Phase 2. No new ADR. No helper extraction. Investigation findings persisted in this ticket body so the next iter (or next interactive session) does not repeat the analysis.
 
 ## Dependencies
 
