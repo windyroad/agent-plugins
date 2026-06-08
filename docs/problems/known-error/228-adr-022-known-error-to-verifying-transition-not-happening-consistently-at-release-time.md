@@ -38,9 +38,16 @@ Two viable surfaces — selection is a load-bearing decision that must be ratifi
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
 - [x] Identify the missing trigger surface: confirmed gap; two viable surfaces named above (review-problems Step 2 item 11 vs work-problems Step 6.5 post-release callback). Surface selection is a load-bearing decision deferred to user ratification per substance-confirm-before-building.
-- [ ] (deferred — pending user surface ratification) Extend the detection: shipped commit `Closes P<NNN>` OR ticket body `## Fix Released` populated → auto-transition Known Error → Verifying.
-- [ ] (deferred — pending user surface ratification) Behavioural test for the auto-transition.
-- [ ] (deferred — pending user surface ratification) Compose with ADR-079 Phase 3 shape that distinguishes "Release vehicle cited AND release shipped" (K → V) from "no release shipped, ticket no longer relevant" (K → Closed-direct).
+- [x] **User-ratified 2026-06-08**: Option B — work-problems Step 6.5 post-release callback. Picked over Option A (review-problems ~24h-lag) and Option C (close-as-superseded by ADR-079). Tight coupling = zero K→V lag.
+- [x] **Implemented 2026-06-08 (session 11 iter)**: new helper `packages/itil/lib/enumerate-postrelease-kv-candidates.sh` (mirrors the helper-in-lib pattern of `check-deferred-placeholder-staleness.sh`), script wrapper `packages/itil/scripts/run-enumerate-postrelease-kv-candidates.sh`, ADR-080 bin shim `packages/itil/bin/wr-itil-enumerate-postrelease-kv-candidates`. SKILL.md Step 6.5 Drain action renumbered: step 4 = K→V auto-transition (new), step 5 = cache refresh (renumbered from 4). Per-`KV_CANDIDATE` line dispatches `/wr-itil:transition-problem <NNN> verifying` via the Skill tool (per ADR-010 amended P093 — transition-problem is the authoritative executor). Non-blocking on individual failure, AFK-safe, V→C remains a maintainer surface.
+- [x] **Behavioural test landed**: `packages/itil/skills/work-problems/test/work-problems-step-6-5-postrelease-kv-callback.bats` — 9 cases (absent dir / empty dir / shipped → emit / no vehicle → skip / unreleased → skip / mixed cohort / README excluded / unknown exit). All PASS locally.
+- [ ] (deferred — composes-not-blocks) Compose with ADR-079 Phase 3 shape that distinguishes "Release vehicle cited AND release shipped" (K → V) from "no release shipped, ticket no longer relevant" (K → Closed-direct). Tracked separately; not in scope for the P228 fix.
+
+## Fix Strategy
+
+**Release vehicle**: `.changeset/wr-itil-p228-postrelease-kv-auto-transition.md` (P330 seed reference — input signal for the post-release K→V callback this ticket implements; dogfoods itself by transitioning P228 K→V on the first release after this iter ships).
+
+Fix shape (landed this iter): new helper `packages/itil/lib/enumerate-postrelease-kv-candidates.sh` + script wrapper + ADR-080 bin shim `wr-itil-enumerate-postrelease-kv-candidates`. SKILL.md Step 6.5 Drain action renumbered: step 4 = K→V auto-transition (new), step 5 = cache refresh (renumbered from 4). The enumerator dispatches `/wr-itil:transition-problem <NNN> verifying` per emitted `KV_CANDIDATE` line, non-blocking on individual failure, AFK-safe. V→C remains a maintainer-only surface. Status remains Known Error until the next release ships, at which point the new callback fires the K→V transition automatically (this is the dogfooding verification path).
 
 ## Related
 
@@ -54,3 +61,4 @@ Two viable surfaces — selection is a load-bearing decision that must be ratifi
 
 - **2026-05-15**: Captured. Placeholder Priority/Effort pending review-problems re-rate.
 - **2026-06-08** (session 11 iter): Investigation pass — gap confirmed empirically (P220 witness); ADR-022 amendments since report date reviewed (no K → V release-time wiring landed); ADR-079 partial-overlap analysed (Phase 2 shape 4 contributory but K → Closed-direct ≠ K → V); two candidate fix surfaces named; surface selection deferred to user ratification per substance-confirm-before-building. Status remains Known Error.
+- **2026-06-08** (session 11 iter follow-up): User ratified Option B (work-problems Step 6.5 post-release callback). Fix landed: new `enumerate-postrelease-kv-candidates` helper lib + script + ADR-080 bin shim + 9-case behavioural bats + SKILL.md Step 6.5 K→V auto-transition subsection + Non-Interactive Decision Making table row + changeset. Architect + JTBD gates both passed. Status remains Known Error — the new callback dogfoods on the first release after this iter ships (will auto-transition P228 K→V).
