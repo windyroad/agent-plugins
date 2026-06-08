@@ -1,6 +1,7 @@
 # Problem 206: work-problems iter workers don't add changesets — fix commits accumulate without release
 
-**Status**: Verifying
+**Status**: Closed
+**Closed**: 2026-06-09 — closed-on-evidence via run-retro Step 4a: P175 iter (commit b7bd3a9) authored `.changeset/wr-itil-p175-scope-pin-word-semantics.md` in the same single ADR-014-grain commit as the SKILL.md edit + paired eval extension. `itil-changeset-discipline.sh` hook did NOT deny the commit. Contract held: shippable-code fix (SKILL.md edit at `packages/itil/skills/work-problems/`) paired with changeset in same commit by the worker iter subprocess. Recovery path if close was wrong: `/wr-itil:transition-problem 206 known-error`.
 **Reported**: 2026-05-15
 **Origin**: inbound-reported (bbstats#195)
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
