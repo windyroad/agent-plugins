@@ -1,5 +1,19 @@
 # @windyroad/problem
 
+## 0.49.1
+
+### Patch Changes
+
+- 3eabb9b: `/wr-itil:reconcile-readme` now commits the reconciled README unconditionally — interactive and AFK invocations behave identically. The skill's Step 6 previously carved out interactive mode (`When invoked interactively, do NOT auto-commit — present a diff summary to the user and let them stage + commit`), which directly contradicted ADR-014 (`governance skills commit their own work`) and produced uncommitted reconciliations across months of AFK-equivalent sessions before the carve-out surfaced as a defect. The carve-out is removed; the dedicated `chore(problems): reconcile README against filesystem (P118)` commit now lands regardless of invocation mode.
+
+  Why it changed. The commit decision for governance skills is **framework-mediated** per ADR-014 — the policy already decided governance skills commit their own work; it is not a per-invocation user direction-setting decision per ADR-044's authority taxonomy. A per-invocation `do you want to commit?` surface re-asks a decision the framework has already resolved (lazy-AskUserQuestion). The mode-gated carve-out was the documented defect; the unconditional commit aligns the skill with ADR-014 and ADR-044.
+
+  Behaviour adopters see. After running `/wr-itil:reconcile-readme` interactively, the reconciled `docs/problems/README.md` is staged and committed in a single dedicated commit. There is no prior `present a diff summary; you stage + commit` interactive step — the commit fires automatically. The Confirmation criterion 4 now reads `regardless of invocation mode`; the ADR-013 alignment bullet now correctly attributes Rule 6 to the parse-error halt in Step 1 (the non-interactive fail-safe is risk-gated, not mode-gated, and reconciliation has no risk-above-appetite branch because it is pure mechanical README refresh).
+
+  Coverage. 3 new P172-tagged contract assertions in `packages/itil/skills/reconcile-readme/test/reconcile-readme-contract.bats` (21/21 contract bats GREEN; 30/30 script-level bats GREEN, no regression). The new assertions lock the unconditional-commit shape — a negative check (Step 6 carries no mode-gated carve-out phrasing) plus two positive checks (Step 6 cites ADR-014 as the commit authority; SKILL.md states interactive and AFK behave identically).
+
+  Traces: closes the named anti-pattern instance in `docs/problems/open/172-skill-contract-interactive-vs-afk-commit-gating-anti-pattern-contradicts-adr-014.md` Phase 1; reconciles the skill with ADR-014 (`governance skills commit their own work` — already-ratified, Reconciliation sub-rule); reconciles the ADR-013 alignment with Rule 6's risk-gated framing; consumes ADR-044 (framework-resolution boundary) to classify the commit decision as framework-mediated. Phase 2 (sweep + remove other instances of the same anti-pattern shape across sibling skills) is deliberately deferred to a separate iteration per the orchestrator's narrow-scope boundary — Phase 1 confirmed reconcile-readme as the only unconditional mode-gated instance; risk-gated fail-safe sites in `transition-problem`, `transition-problems`, `report-upstream`, `update-upstream`, `check-upstream-responses`, and `analyze-context` are POLICY-CORRECT per ADR-013 Rule 6 and explicitly excluded from sweep.
+
 ## 0.49.0
 
 ### Minor Changes
