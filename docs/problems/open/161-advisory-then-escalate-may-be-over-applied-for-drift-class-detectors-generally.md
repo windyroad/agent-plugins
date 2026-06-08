@@ -47,12 +47,47 @@ Advisory-then-escalate is the right default for **design-question** signals (whe
 
 ### Investigation Tasks (deferred — observation-only ticket)
 
-- [ ] Wait for 2-3 more drift-class detectors to arrive following the load-bearing-from-the-start shape (the originating instance is P159; the meta-rule needs at least 2-3 instances to confirm the pattern).
-- [ ] At that point: architect review on whether to codify a meta-rule. Possible shapes:
+- [x] Wait for 2-3 more drift-class detectors to arrive following the load-bearing-from-the-start shape (the originating instance is P159; the meta-rule needs at least 2-3 instances to confirm the pattern). **Threshold met 2026-06-08**: empirical audit found 5+ additional drift-class invariant-enforcement gates shipped load-bearing-from-the-start since 2026-05-04 — see Observation Log 2026-06-08 below.
+- [ ] Architect review on whether to codify a meta-rule. Possible shapes:
   - **Option M1**: A new ADR amending ADR-013 Rule 6 to carve out drift-class from advisory-then-escalate.
   - **Option M2**: A new ADR-NNN "Drift-class detectors default to load-bearing-from-the-start" with the empirically-derived class definition (mechanical detection + no socialisation period + gradualism re-creates failure mode).
   - **Option M3**: No meta-ADR — keep the per-detector decision in each ADR, with the load-bearing-from-the-start direction explicitly named as precedent in each new drift-class ADR's Decision Drivers.
 - [ ] If M1 or M2 chosen: revisit existing advisory-only drift-class detectors (P099 / P134 / P145 / P148) and decide whether each needs a Phase 2 escalation push earlier than the current "drift_instances ≥ N across M consecutive windows" trigger.
+
+### Observation Log 2026-06-08 — empirical audit findings
+
+Audit of drift-class invariant-enforcement gates shipped since 2026-05-04 (when P161 was filed). Looking for instances that match P161's three-axis drift-class definition (mechanical detection + no socialisation period + gradualism re-creates failure mode) AND ship the load-bearing-from-the-start shape rather than advisory-then-escalate.
+
+**Originating instance** (the one P159 surfaced):
+
+1. **ADR-051 → ADR-069: skill-inventory-drift commit-hook** (`packages/retrospective/hooks/retrospective-readme-jtbd-currency.sh`). Pre-commit gate denies when a `packages/<plugin>/skills/<name>/` directory is missing from that plugin's README. Mechanical detection (directory naming); no socialisation period (the rule is "don't ship inconsistent inventory"); gradualism would re-create the failure (advisory consumed at retro means drift already shipped). ADR-069 supersession 2026-05-25 narrowed scope from JTBD-ID anchor to skill-inventory only but retained the load-bearing-from-the-start gate shape — and explicitly named principle (b) "Load-bearing-from-the-start for drift class" as a carried-forward Decision Driver. **The principle is now a binding precedent live in ADR-069 line 22.**
+
+**Subsequent instances since 2026-05-04** (load-bearing-from-the-start, drift-class shape):
+
+2. **ADR-060 I1 (trace-to-problem at capture-rfc)** (accepted 2026-05-12; load-bearing PreToolUse gate on `/wr-itil:capture-rfc`). Hard-block when an RFC is captured without a `--problem` flag; bounded-escape at irreversible lifecycle transitions. Mechanical detection (frontmatter `problems:` array presence); no socialisation period (orphan RFCs are structurally meaningless); gradualism would re-create the failure (an advisory consumed at retro would let orphan RFCs accumulate). ADR-060 line 58 explicitly cites ADR-069 (carrying forward ADR-051) as the precedent for "load-bearing-from-the-start for drift class".
+
+3. **ADR-060 I13 (RFC required at fix-proposal on a Known Error)** (added 2026-05-26; load-bearing structural auto-create at fix-proposal). Rather than block on missing RFC, the framework auto-creates a problem-traced skeleton RFC — structural elimination of drift. Mechanical detection (RFC presence at fix-proposal); no socialisation period (rule is unconditional per ADR-071); gradualism would re-create the failure (an advisory would let unmediated fixes ship).
+
+4. **ADR-078 + `architect-compendium-refresh-discipline.sh`** (PreToolUse pre-commit pairing-assertion). Every commit that edits a `docs/decisions/*.md` body MUST also edit `docs/decisions/README.md`. Mechanical detection (staged-file pairing); no socialisation period (compendium drift was empirically demonstrated by P337 at 57% of the corpus); gradualism re-creates the failure (a drift-detector CI run after merge means the inconsistency already shipped). ADR-078 line 57 explicitly chose Option 9 because "it eliminates drift by structural construction (every body edit triggers a same-hook README write)". The "drift by structural construction" framing is the same principle.
+
+5. **P165 + `itil-readme-refresh-discipline.sh`** (PreToolUse commit-gate). Denies a commit that updates a ticket body without staging the matching `docs/problems/README.md` refresh. Mechanical detection (staged-file pairing — ticket body + README); no socialisation period (the README is the WSJF surface, drift means stale rankings); gradualism re-creates the failure (drift accumulates faster than retro cadence catches it).
+
+6. **ADR-066 + `architect-oversight-marker-discipline.sh`** (PreToolUse Edit-gate). Denies an Edit that writes `human-oversight: confirmed` to an ADR file without a session-local substance-confirm evidence marker. Mechanical detection (frontmatter field write paired with `/tmp` marker presence); no socialisation period (substance-confirmation evidence is binary); gradualism would re-create the P340-class "born-confirmed marker without substance" failure mode (P339/P340 captured the case where a marker was written on draft-acceptance without substance-confirm).
+
+7. **ADR-068 + `jtbd-oversight-marker-discipline.sh`** (PreToolUse Edit-gate; sibling shape). Same shape applied to JTBDs and personas. Same drift-class fit (mechanical pairing detection; binary substance-confirm; gradualism re-creates the over-marker-write failure).
+
+**Pattern observation**: the load-bearing-from-the-start shape appears to be the systematic choice for drift-class invariants where the cost of advisory-then-escalate is "shipped-then-detected" — which IS the failure mode the gate exists to prevent. Two distinct mechanism shapes emerge:
+
+- **Structural elimination** (ADR-060 I13 auto-create; ADR-078 pre-commit pairing): the framework prevents the drift state from being representable rather than detecting after the fact.
+- **Pre-commit deny** (ADR-051/ADR-069; ADR-060 I1; P165; ADR-066; ADR-068): the gate blocks the commit that would introduce drift; recovery is to fix-and-retry.
+
+Both are load-bearing-from-the-start. Both are appropriate. The choice between them appears driven by whether the drift state can be auto-corrected (favours structural elimination) or requires human input (favours pre-commit deny).
+
+**Counter-cases checked**: advisory-only detectors shipped since 2026-05-04 — `itil-fictional-defer-detect.sh` (P234), `itil-mid-loop-ask-detect.sh` (P132 Phase 2b), `itil-bash-polling-antipattern-detect.sh` (P232), `risk-scorer-scaffold-nudge.sh` (P297 Phase 1), `architect-oversight-nudge.sh` (ADR-066 nudge layer), `jtbd-oversight-nudge.sh` (ADR-068 nudge layer). These are NOT drift-class under P161's definition — they are **behavioural-pattern detectors** (fictional defer, mid-loop ask, polling antipattern) or **scaffold nudges** that signal a missing setup step. They sit in the design-question / policy class — socialisation matters; advisory-then-escalate is the right shape. The contrast supports P161's hypothesis: the class boundary holds empirically.
+
+**Conclusion / next interactive turn**: the meta-rule is now empirically validated. The class boundary holds. The meta-ADR codification options (M1 / M2 / M3) need substance-confirm from the user before drafting per ADR-074 (confirm-decision-substance-before-building-dependent-work). This iter does NOT mint a meta-ADR autonomously — the chosen shape is queued as an outstanding_question for the next interactive turn.
+
+**Recommendation** (architect-class judgment, NOT a chosen direction): **M2** (new dedicated ADR-NNN with the empirically-derived class definition) appears the cleanest fit because (a) the class definition is non-trivial and earns its own anchor, (b) carving out ADR-013 Rule 6 (M1) loses the Rule 6 fail-safe semantics for the design-question class that still needs it, (c) per-detector citation (M3) re-creates the inertia failure mode P161 surfaced — new authors default to the precedent they have rather than the one they should look up. But the choice is genuinely the user's per ADR-074.
 
 ## Fix Strategy
 
@@ -83,3 +118,4 @@ Phase 3: retroactive review of advisory-only drift-class detectors (deferred —
 ## Change Log
 
 - 2026-05-04: Initial filing. Surfaced as the sibling out-of-scope observation P159's Phase 1 iter explicitly carved out per orchestrator framing. Observation-only ticket; deferred resolution until 2-3 more drift-class detectors arrive following the load-bearing-from-the-start shape.
+- 2026-06-08: Empirical audit run during `/wr-itil:work-problems` AFK iter. Threshold met: 5+ drift-class invariant-enforcement gates (ADR-060 I1, ADR-060 I13, ADR-078, ADR-066, ADR-068, P165) shipped load-bearing-from-the-start since 2026-05-04, plus the carry-forward ADR-051→ADR-069 originating instance. Two distinct mechanism shapes identified (structural elimination vs pre-commit deny). Counter-cases checked: advisory-only detectors shipped in the same window are behavioural-pattern / scaffold-nudge class, not drift-class — the class boundary holds. Meta-rule codification queued for next interactive turn (M1 / M2 / M3 substance-confirm per ADR-074); architect-class recommendation **M2** logged but choice deferred to user. No meta-ADR drafted this iter.
