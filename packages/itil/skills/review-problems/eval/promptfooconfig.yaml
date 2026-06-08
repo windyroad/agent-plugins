@@ -1,0 +1,406 @@
+# SKILL eval — review-problems behavioural contracts on the Step 4.5
+# inbound-discovery + assessment-pipeline surface (P324 / P012 / RFC-012 /
+# ADR-075 Amendment 2026-06-02).
+#
+# Tier A deterministic regex + Tier B llm-rubric coverage for 6 contracts on
+# the review-problems SKILL.md surface — each contract corresponds to a held
+# changeset in `docs/changesets-holding/` whose Reinstate criterion (per
+# ADR-061 Rule 4 evidence-floor) names this exact eval path:
+#
+#   - Step 4.5e JTBD-301 verdict-shape contract: four documented verdicts
+#     (fix-released / accepted-into-backlog / duplicate / won't-fix) +
+#     fifth implicit policy-violation-close verdict (P229).
+#   - Step 4.5e safe-and-valid branch: posts accepted-into-backlog ack at
+#     local-ticket creation; framework-vocab leakage refusal in
+#     reporter-facing comment bodies — no "Step 4.5e safe-and-valid branch"
+#     phrase, no `safe-low-fix-risk` classification-token leak, no
+#     `docs/problems/<state>/<NNN>-<title>.md` framework-path syntax (P229).
+#   - Step 4.5d matched-local-ticket cross-reference: posts duplicate-verdict
+#     ack referencing the matched local ticket P-id — no legacy boilerplate
+#     "Tracked locally as docs/problems/..." (P229).
+#   - Step 4.5e Step 4 above-threshold-pushback: posts won't-fix verdict ack
+#     with plain-language reason gloss — raw classification token stays on
+#     audit-log surface 4.5f, not in reporter-facing comment body (P229).
+#   - Step 4.5e Step 5 clear-malicious: posts policy-violation-close verdict
+#     ack with plain-language gloss of the policy class — raw
+#     `wr-risk-scorer:inbound-report` verdict token does NOT substitute into
+#     the reporter-facing body (P229).
+#   - Step 4.5 § 6 AFK-marker / I12 derive-then-ratify: `--no-prompt` flag
+#     is the AFK mode marker; capture-problem derives persona + JTBD from
+#     the report body; on derivation-failure with no `--persona=` / `--jtbd=`
+#     flags supplied → halts-with-stderr-directive + records
+#     `cache_audit_note: gate-denied-safe-and-valid-derive-failure` (P287).
+#
+# Drivers:
+#   - ADR-075 (Amendment 2026-06-02) — SKILL-prose harness scope; per-skill
+#     `packages/<plugin>/skills/<skill>/eval/promptfooconfig.yaml`
+#     location; exec:bash provider; Tier-A regex + Tier-B llm-rubric.
+#   - ADR-061 (Rule 4 evidence-floor) — paired promptfoo Tier-A/B GREEN IS
+#     the per-class evidence for SKILL-prose surfaces; flips the R009
+#     modulator +1 → -1 for this surface, dropping P229 + P287 atomically.
+#   - ADR-014 (single-commit grain) — this eval file ships in the same
+#     commit as its companion runners (no `.changeset/*.md` — eval test
+#     infrastructure excluded from the tarball via packages/itil/.npmignore
+#     line 13: `skills/*/eval/`).
+#   - ADR-062 — inbound-discovery + assessment-pipeline (the surface under
+#     test); § Audit-log surface shape carves out maintainer-internal
+#     classification tokens from reporter-facing comment bodies.
+#   - JTBD-301 — Desired Outcome row 6: "Submitted reports receive a
+#     predictable acknowledgement: labelled, routed into the maintainers'
+#     problem-management queue, and eventually responded to with a verdict
+#     (fix released / parked / duplicate / won't-fix)". Note: the SKILL.md
+#     4.5e-comment-shape table uses "accepted into backlog" in place of
+#     "parked" — both names tag the same post-intake outcome; the SKILL.md
+#     contract is the substrate under test, so the eval pins
+#     "accepted into backlog".
+#   - RFC-012 — single build vehicle for the harness.
+#   - P324 (driving problem — agent-prose verdict harness gap).
+#   - P229 / P287 (held changesets this eval discharges per ADR-061 Rule 4).
+#
+# Tier-B (llm-rubric) grader: the review-problems contracts contain heavy
+# NEGATIVE clauses ("MUST NOT contain maintainer-internal framework vocab";
+# "do NOT post the legacy boilerplate"; "silent close is forbidden"; "the
+# raw token does NOT substitute into the reporter-facing body"). Tier-A
+# `not-regex` on those clauses false-fails against behaviourally-correct
+# negated answers — same pattern the work-problems eval encountered,
+# resolved via the Tier-B claude-grader (P012 reopen findings 2026-06-04).
+# Distinctive positive tokens stay Tier-A.
+#
+# Run from repo root:
+#   npx promptfoo eval -c packages/itil/skills/review-problems/eval/promptfooconfig.yaml
+#
+# @jtbd JTBD-001 (Enforce Governance Without Slowing Down)
+# @jtbd JTBD-006 (Progress the Backlog While I'm Away)
+# @jtbd JTBD-007 (Keep Plugins Current Across Projects)
+# @jtbd JTBD-101 (Extend the Suite with New Plugins)
+# @jtbd JTBD-301 (Report a Problem Without Pre-Classifying It)
+# @problem P324
+# @problem P012
+# @problem P229
+# @problem P287
+# @rfc RFC-012
+# @adr ADR-075 (Amendment 2026-06-02)
+# @adr ADR-061 (Rule 4 evidence-floor)
+# @adr ADR-062 (inbound-discovery + assessment-pipeline)
+# @adr ADR-014 (single-commit grain)
+
+description: |
+  review-problems SKILL eval — Tier-A regex + Tier-B llm-rubric coverage for
+  6 Step 4.5 inbound-discovery + assessment-pipeline behavioural contracts
+  on the review-problems SKILL surface. Each test case asserts one
+  held-changeset Reinstate criterion per ADR-061 Rule 4 evidence-floor:
+  passing eval flips the R009 prose-surface modulator +1 → -1 for
+  `review-problems`, dropping the held cohort (P229 + P287) within appetite
+  atomically per cohort-graduation pre-check.
+
+providers:
+  # Path is relative to this config file's directory (promptfoo basePath).
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+# Tier-B (llm-rubric) grading provider. Same shape as work-problems +
+# report-upstream: distinctive positive tokens (verdict names, gh command
+# names, file paths, classification token names) stay Tier-A; semantic
+# NEGATIVE clauses route to llm-rubric, graded by claude under subscription
+# auth (no API key) via grade-llm-rubric.sh.
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  # --- P229: Step 4.5e safe-and-valid branch — accepted-into-backlog ack ---
+
+  - description: Step 4.5e safe-and-valid branch posts accepted-into-backlog verdict with no framework-vocab leakage
+    vars:
+      prompt: |
+        I am the /wr-itil:review-problems Step 4.5e safe-and-valid branch.
+        The inbound report on upstream GitHub issue #42 in repo
+        bbstats/bbstats has passed JTBD-alignment + dual-axis risk; I have
+        just invoked /wr-itil:capture-problem --no-prompt and the freshly
+        allocated local ticket is P420.
+
+        Per the 4.5e-comment-shape JTBD-301 verdict-shape contract, draft
+        the reporter-facing acknowledgement comment body I should pass to
+        `gh issue comment 42 --repo bbstats/bbstats --body "<draft>"`.
+        Output ONLY the comment body, no surrounding prose, no markdown
+        code fences.
+    assert:
+      # Tier A — must reference the freshly allocated local ticket ID.
+      - type: icontains
+        value: 'P420'
+      # Tier A — must NOT leak the maintainer-internal classification token.
+      - type: not-icontains
+        value: 'safe-low-fix-risk'
+      # Tier A — must NOT leak the maintainer-internal classification token.
+      - type: not-icontains
+        value: 'safe-and-valid-local-ticket-created'
+      # Tier A — must NOT leak the framework-internal path syntax.
+      - type: not-icontains
+        value: 'docs/problems/'
+      # Tier A — must NOT leak the framework-internal Step ID.
+      - type: not-icontains
+        value: 'Step 4.5e'
+      # Tier B — must satisfy JTBD-301 row 6 acknowledgement contract:
+      # plain-language verdict, watch-this-issue expectation, no
+      # maintainer-internal jargon.
+      - type: llm-rubric
+        value: |
+          The comment body acknowledges the report in plain language a
+          plugin-user persona can act on without reading ADRs or source.
+          It names the freshly allocated local ticket (P420), states the
+          report is being tracked as a real bug accepted into the
+          maintainers' backlog, and gives the reporter an actionable
+          expectation (watch the issue / check release notes — the
+          maintainers will comment when the fix lands). PASS if all three
+          are present in plain language. FAIL if the body contains
+          maintainer-internal framework vocabulary like "Step 4.5e",
+          "safe-and-valid branch", "safe-low-fix-risk", or
+          `docs/problems/<state>/<NNN>-<title>.md` framework-path syntax.
+
+  # --- P229: Step 4.5d matched-local-ticket cross-reference ---
+
+  - description: Step 4.5d matched-local-ticket cross-reference posts duplicate verdict ack referencing matched P-id
+    vars:
+      prompt: |
+        I am the /wr-itil:review-problems Step 4.5d branch. The
+        semantic-comparator just hit a match between inbound report on
+        upstream GitHub issue #58 in repo bbstats/bbstats and an existing
+        local ticket P138.
+
+        Per the 4.5e-comment-shape JTBD-301 verdict-shape contract,
+        draft the reporter-facing acknowledgement comment body I should
+        pass to `gh issue comment 58 --repo bbstats/bbstats --body
+        "<draft>"`. Output ONLY the comment body, no surrounding prose.
+    assert:
+      # Tier A — must reference the matched local ticket ID.
+      - type: icontains
+        value: 'P138'
+      # Tier A — must use the duplicate-verdict language.
+      - type: regex
+        value: 'duplicate|already tracking|same'
+      # Tier A — must NOT leak the legacy P229 boilerplate "Tracked locally as docs/problems/..."
+      - type: not-icontains
+        value: 'Tracked locally as'
+      # Tier A — must NOT leak the framework-internal classification token.
+      - type: not-icontains
+        value: 'matched-local-ticket'
+      # Tier A — must NOT leak the framework-internal path syntax.
+      - type: not-icontains
+        value: 'docs/problems/'
+      # Tier B — semantic invariant: duplicate verdict, P-id reference, no
+      # framework vocab.
+      - type: llm-rubric
+        value: |
+          The comment body names the duplicate verdict (tracked as
+          duplicate of / already tracking as P138) in plain language a
+          plugin-user persona can act on, and tells the reporter that
+          future updates will appear on this upstream issue when the
+          local ticket transitions. PASS if both are present in plain
+          language. FAIL if the body contains the legacy P229 boilerplate
+          "Tracked locally as `docs/problems/<state>/<NNN>-<title>.md`"
+          phrasing, OR leaks `matched-local-ticket` classification token,
+          OR uses framework-path syntax. Saying the body does NOT contain
+          framework vocab PASSES.
+
+  # --- P229: Step 4.5e Step 4 above-threshold-pushback won't-fix verdict ---
+
+  - description: Step 4.5e above-threshold-pushback posts won't-fix verdict with plain-language reason gloss
+    vars:
+      prompt: |
+        I am the /wr-itil:review-problems Step 4.5e Step 4
+        above-threshold-pushback branch. The JTBD-alignment classifier
+        returned `not-aligned` with reason
+        `out-of-scope-for-documented-personas`. The inbound report is on
+        upstream GitHub issue #71 in repo bbstats/bbstats.
+
+        Per the 4.5e-comment-shape JTBD-301 verdict-shape contract,
+        draft the reporter-facing acknowledgement comment body I should
+        pass to `gh issue comment 71 --repo bbstats/bbstats --body
+        "<draft>"`. Output ONLY the comment body, no surrounding prose.
+    assert:
+      # Tier A — must declare the won't-fix verdict (or equivalent plain-language phrasing).
+      - type: regex
+        value: "won't fix|won't be fixing|do not plan to fix|don't plan to fix|not going to fix|outside (?:our|the) scope|out of scope"
+      # Tier A — must NOT leak the raw classification token.
+      - type: not-icontains
+        value: 'out-of-scope-for-documented-personas'
+      # Tier A — must NOT leak the framework-internal classification token.
+      - type: not-icontains
+        value: 'above-threshold-pushback'
+      # Tier A — must NOT leak the framework-internal Step ID.
+      - type: not-icontains
+        value: 'Step 4.5'
+      # Tier B — semantic invariant: plain-language reason gloss + the
+      # raw token stays on the audit-log surface only.
+      - type: llm-rubric
+        value: |
+          The comment body declares the won't-fix verdict in plain
+          language a plugin-user persona can act on, provides a
+          plain-language gloss of WHY (e.g. "this request falls outside
+          the scope of what we plan to maintain"), and does NOT contain
+          the raw classification token `out-of-scope-for-documented-personas`,
+          framework Step IDs ("Step 4.5", "Step 4.5e"), branch names
+          ("above-threshold-pushback"), or `docs/problems/` path syntax.
+          PASS if the body satisfies the plain-language won't-fix shape
+          without leaking maintainer-internal vocab. FAIL if any
+          framework-vocab token leaks into the reporter-facing body.
+
+  # --- P229: Step 4.5e Step 5 clear-malicious policy-violation-close verdict ---
+
+  - description: Step 4.5e clear-malicious branch posts policy-violation-close verdict (5th implicit) with plain-language gloss
+    vars:
+      prompt: |
+        I am the /wr-itil:review-problems Step 4.5e Step 5
+        clear-malicious branch. The dual-axis risk classifier
+        `wr-risk-scorer:inbound-report` returned
+        `clear-malicious-request` with the raw verdict token
+        `disclosure-bypass-attempt`. The inbound report is on upstream
+        GitHub issue #99 in repo bbstats/bbstats.
+
+        Per the 4.5e-comment-shape JTBD-301 fifth-implicit
+        policy-violation-close verdict, draft the reporter-facing
+        acknowledgement comment body I should pass to `gh issue comment
+        99 --repo bbstats/bbstats --body "<draft>"`. Output ONLY the
+        comment body, no surrounding prose.
+    assert:
+      # Tier A — must declare an immediate close (not deliberated decline).
+      - type: regex
+        value: "closing this report|we are closing|we['’]re closing"
+      # Tier A — must offer a misclassification escape (per SKILL contract).
+      - type: regex
+        value: 'mistake|file a new report|file another'
+      # Tier A — must NOT leak the raw verdict-class token.
+      - type: not-icontains
+        value: 'disclosure-bypass-attempt'
+      # Tier A — must NOT leak the framework-internal classification token.
+      - type: not-icontains
+        value: 'clear-malicious-closed'
+      # Tier A — must NOT leak the framework-internal Step ID.
+      - type: not-icontains
+        value: 'Step 4.5e'
+      # Tier B — semantic invariant: plain-language gloss; raw verdict
+      # token stays on audit-log; immediate close (not won't-fix).
+      - type: llm-rubric
+        value: |
+          The comment body declares an immediate close (not a deliberated
+          won't-fix decline — clear-malicious is the stronger fifth
+          implicit verdict per the 4.5e-comment-shape table), provides a
+          plain-language gloss of the policy class (e.g. "this matches
+          behaviour we've classified as disclosure-bypass / spam /
+          off-topic"), offers a misclassification escape ("if you
+          believe this is a mistake, please file a new report describing
+          what you're trying to accomplish"), and does NOT contain the
+          raw `wr-risk-scorer:inbound-report` verdict token
+          `disclosure-bypass-attempt`, framework Step IDs, or
+          classification tokens like `clear-malicious-closed`. PASS if
+          all four are satisfied without raw-token leak. FAIL if the
+          body leaks the raw verdict token verbatim OR reads as a
+          deliberated won't-fix rather than an immediate
+          policy-violation close. Saying the body does NOT contain raw
+          verdict tokens PASSES.
+
+  # --- P229: JTBD-301 four-documented-verdict contract briefing ---
+
+  - description: Step 4.5e contract briefing — name all four documented JTBD-301 verdicts + fifth implicit policy-violation-close
+    vars:
+      prompt: |
+        I am drafting a maintainer-facing summary of the
+        /wr-itil:review-problems Step 4.5e JTBD-301 verdict-shape
+        contract that governs reporter-facing acknowledgement comment
+        bodies in the inbound-discovery assessment pipeline.
+
+        Name ALL the documented JTBD-301 verdicts the contract requires
+        the SKILL to emit. Be specific about which branch fires each one
+        (4.5d matched-local-ticket; 4.5e Step 4 above-threshold-pushback;
+        4.5e Step 5 clear-malicious; 4.5e Step 6 safe-and-valid; and the
+        future Known Error → Verifying transition surface for fix-released).
+        Include the fifth implicit verdict that is stronger than
+        won't-fix.
+    assert:
+      # Tier A — must name the four documented verdicts.
+      - type: regex
+        value: 'fix[\s\-]?released'
+      - type: regex
+        value: 'accepted into backlog|accepted-into-backlog'
+      - type: icontains
+        value: 'duplicate'
+      - type: regex
+        value: "won't[\\s\\-]?fix|wont[\\s\\-]?fix"
+      # Tier A — must name the fifth implicit verdict.
+      - type: regex
+        value: 'policy[\s\-]?violation[\s\-]?close|policy-violation close'
+      # Tier B — semantic completeness: all five verdicts + branches named.
+      - type: llm-rubric
+        value: |
+          The response names all five verdicts in the JTBD-301
+          verdict-shape contract: (1) fix released, (2) accepted into
+          backlog, (3) duplicate, (4) won't-fix, AND (5) the fifth
+          implicit policy-violation-close verdict explicitly identified
+          as STRONGER than won't-fix (clear-malicious is an immediate
+          close, not a deliberated decline). PASS if all five are named
+          and the fifth is correctly characterised as stronger than
+          won't-fix. FAIL if any verdict is missing, OR if
+          clear-malicious is conflated with won't-fix as the same
+          deliberation outcome.
+
+  # --- P287: Step 4.5 § 6 AFK-marker / I12 derive-then-ratify contract ---
+
+  - description: Step 4.5 § 6 AFK-marker / I12 derive-then-ratify — derivation-failure halts with cache_audit_note
+    vars:
+      prompt: |
+        I am the /wr-itil:review-problems Step 4.5e Step 6
+        safe-and-valid branch. The inbound report is on upstream GitHub
+        issue #84 in repo bbstats/bbstats. The report body is verbatim
+        plain-text and does NOT cite any `JTBD-NNN` IDs anywhere. I am
+        invoking `/wr-itil:capture-problem --no-prompt <report-body>`
+        with no `--persona=` flag and no `--jtbd=` flag supplied.
+
+        Per the Step 4.5 § 6 AFK-marker / I12 derive-then-ratify
+        contract reference, what happens? Be specific about: (a) what
+        the `--no-prompt` flag signifies in this dispatch context;
+        (b) what capture-problem attempts to derive from the report
+        body; (c) what happens on derivation-failure when no
+        `--persona=` / `--jtbd=` flags are supplied; (d) what
+        `cache_audit_note` value (if any) gets stamped on the cache
+        entry; (e) whether a local ticket is created.
+    assert:
+      # Tier A — must reference the AFK marker meaning.
+      - type: regex
+        value: 'AFK[\s\-]?(?:mode\s+)?marker|AFK mode|non-interactive'
+      # Tier A — must reference derivation of persona + JTBD from body.
+      - type: regex
+        value: 'derive|deriv(?:es|ed|ation)'
+      # Tier A — must reference persona AND JTBD derivation.
+      - type: icontains
+        value: 'persona'
+      - type: regex
+        value: 'JTBD|job[\s\-]?to[\s\-]?be[\s\-]?done'
+      # Tier A — must reference the halt-with-stderr-directive shape on failure.
+      - type: regex
+        value: 'halt|stderr|directive'
+      # Tier A — must name the cache_audit_note token.
+      - type: icontains
+        value: 'gate-denied-safe-and-valid-derive-failure'
+      # Tier B — semantic invariant: derive-then-ratify; AFK-mode marker;
+      # halt-on-derive-failure; no silent fallback to type=technical.
+      - type: llm-rubric
+        value: |
+          The response identifies: (a) `--no-prompt` as the AFK-mode
+          marker for I12 derive-then-ratify dispatch per ADR-060
+          Amendment 2026-06-02; (b) capture-problem deriving persona +
+          JTBD from the report body content; (c) on derivation-failure
+          with no `--persona=` / `--jtbd=` flags supplied, capture
+          halts-with-stderr-directive and no local ticket is created;
+          (d) the cache entry is stamped with
+          `cache_audit_note: gate-denied-safe-and-valid-derive-failure`;
+          (e) NO silent fallback to a `type=technical` default (the
+          type-classification axis was retired per twice-confirmed user
+          direction). PASS if all five points are present. FAIL if the
+          response says capture defaults to `type=technical` on
+          derivation-failure, OR creates a local ticket with a default
+          persona/JTBD, OR says the AFK-mode dispatch suppresses the
+          derive-then-ratify gate. Saying the contract does NOT default
+          to type=technical PASSES.
