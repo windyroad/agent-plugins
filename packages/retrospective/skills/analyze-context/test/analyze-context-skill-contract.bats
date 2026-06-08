@@ -69,8 +69,38 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "analyze-context: AFK never-auto-fires discipline declared" {
+@test "analyze-context: auto-fires from run-retro Step 2c per ADR-043 Amendment 2026-06-08 (P295)" {
+  # P295 settlement: deep layer auto-fires from cheap-layer Step 2c when the
+  # combined trigger holds. Replaces the prior 'never auto-invoked' clause.
+  run grep -iF 'auto-fires from run-retro Step 2c' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'Amendment 2026-06-08' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "analyze-context: SKILL.md no longer asserts 'never auto-invoked' / 'never auto-fires' (P295 supersedes)" {
+  # The supersession discipline: the post-P295 SKILL.md MUST NOT carry the
+  # contradicting 'never auto-fires' / 'never auto-invoked' prose, or future
+  # agents will read it as still-authoritative and revert the wiring.
   run grep -F 'never auto-invoked' "$SKILL_MD"
+  [ "$status" -ne 0 ]
+  run grep -F 'Never auto-fires' "$SKILL_MD"
+  [ "$status" -ne 0 ]
+}
+
+@test "analyze-context: cites the combined-trigger threshold values (14 days + 20%)" {
+  # ADR-043 Amendment 2026-06-08 chosen initial thresholds per ADR-026
+  # grounding rule (concrete numerics + no-prior-data sentinel).
+  run grep -F '14 days' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F '20%' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "analyze-context: cites the once-per-day guard via TODAY snapshot file presence" {
+  run grep -F 'once-per-day guard' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F '<TODAY>-context-analysis.md' "$SKILL_MD"
   [ "$status" -eq 0 ]
 }
 

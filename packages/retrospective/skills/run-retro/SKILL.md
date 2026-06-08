@@ -229,20 +229,31 @@ Per **ADR-043** (Progressive context-usage measurement and reporting for retrosp
    - A per-bucket table (one row per script-emitted bucket, sorted by bytes descending). Columns: `Bucket | Bytes | % of total | Δ vs prior`.
    - A top-5 offenders block when ≥ 5 buckets carry non-zero byte counts. Top-5 cites the bucket name + byte count + measurement-method (per ADR-026).
    - A one-line affordance: `Per-plugin breakdown available in /wr-retrospective:analyze-context (deep layer).`
-   - When the deep layer's last run is older than 14 days OR a bucket's delta exceeds +20% since prior snapshot, append the one-line note: `Deep analysis recommended — invoke /wr-retrospective:analyze-context.` This is a non-blocking advisory, never a prompt.
 
-4. **Forbidden phrases (ADR-026)**: the cheap-layer report MUST NOT contain qualitative-only phrases. Banned: `load is negligible`, `microseconds only`, `minimal`, `small change`, `trim X to reduce bloat` (without comparable prior). Concrete byte counts + measurement-method citations are mandatory; ungrounded fields use the explicit `not measured — <reason>` sentinel.
+4. **Auto-invoke the deep layer when the combined trigger holds (ADR-043 Amendment 2026-06-08, settles P295)**. After rendering the cheap-layer report, evaluate the combined whichever-comes-first trigger:
 
-5. **Defensive trip (fail-open)**: if the script exits non-zero or the rendered report exceeds the `THRESHOLD bytes=<N>` ceiling at runtime, skip the bucket table and emit the one-line pointer `cheap layer disabled — invoke /wr-retrospective:analyze-context for context measurement`. Log the trip in Step 2b's Pipeline Instability section so the regression is captured as a ticket candidate per the existing flow.
+   - **Calendar-elapse**: the most recent `docs/retros/*-context-analysis.md` (lex-desc sort on date in filename) is older than 14 days, OR no prior report exists.
+   - **Delta-breach**: any bucket's byte total in the just-rendered report has changed by more than 20% versus the prior snapshot (HTML-comment trailer from step 2).
+   - **Once-per-day guard**: if `docs/retros/<TODAY>-context-analysis.md` already exists (where `<TODAY>` is the current ISO date), treat the trigger as already-satisfied and skip auto-invocation. The snapshot artefact itself is the state; no new persistent state file is needed.
 
-6. **AFK behaviour (ADR-013 Rule 6)**: identical to interactive mode. The cheap layer is silent (no `AskUserQuestion`); the bucket table + advisory line ride the retro summary. AFK orchestrators read the summary on iteration close.
+   When the trigger holds AND the once-per-day guard is not satisfied, invoke `/wr-retrospective:analyze-context` via the Skill tool. The deep layer is silent (never invokes `AskUserQuestion`) and produces a committed `docs/retros/<TODAY>-context-analysis.md` report. Record the auto-invocation outcome in the cheap-layer section: `Deep analysis auto-fired — see docs/retros/<TODAY>-context-analysis.md.` Identical behaviour in interactive and AFK modes per ADR-013 Rule 6 + ADR-044 framework-resolution boundary — auto-invocation is framework-resolved mechanical action, not a user-decided surface.
+
+   When the trigger does NOT hold (no calendar elapse AND no delta breach), emit a one-line note: `Cadence trigger inactive — next auto-fire when calendar-elapse >14 days OR delta >20% any bucket.` This is non-blocking and never a prompt.
+
+   When the trigger holds but the once-per-day guard fires (today's report already exists), emit: `Cadence trigger holds; auto-fire skipped — docs/retros/<TODAY>-context-analysis.md already present.`
+
+5. **Forbidden phrases (ADR-026)**: the cheap-layer report MUST NOT contain qualitative-only phrases. Banned: `load is negligible`, `microseconds only`, `minimal`, `small change`, `trim X to reduce bloat` (without comparable prior). Concrete byte counts + measurement-method citations are mandatory; ungrounded fields use the explicit `not measured — <reason>` sentinel.
+
+6. **Defensive trip (fail-open)**: if the script exits non-zero or the rendered report exceeds the `THRESHOLD bytes=<N>` ceiling at runtime, skip the bucket table and emit the one-line pointer `cheap layer disabled — invoke /wr-retrospective:analyze-context for context measurement`. Log the trip in Step 2b's Pipeline Instability section so the regression is captured as a ticket candidate per the existing flow.
+
+7. **AFK behaviour (ADR-013 Rule 6)**: identical to interactive mode. The cheap layer is silent (no `AskUserQuestion`); the bucket table + the auto-fire / cadence-trigger line ride the retro summary. The deep layer (when auto-fired per step 4) is also silent and produces a committed report — never blocks. AFK orchestrators read the summary on iteration close.
 
 **Interaction with other surfaces:**
 
 - **`P099` Tier 3 advisory** (`check-briefing-budgets.sh`) — measures **per-topic-file** budget on `docs/briefing/<topic>.md`. The cheap layer aggregates this into a single `briefing` bucket row; the per-file detail is drillable via P099's existing surface. No double-counting.
 - **`P105` signal-vs-noise pass** (Step 1.5 of this skill) — measures **per-entry** signal scores on briefing entries. The cheap layer's `briefing` bucket is upstream of the per-entry signal scores; deep layer cites both as evidence sources.
-- **Step 4 / 4b — codification flow**: when the cheap layer surfaces a delta-from-prior anomaly that the user wants to investigate, the deep layer (`/wr-retrospective:analyze-context`) is the correct routing target — it produces a `docs/retros/<date>-context-analysis.md` report with per-turn attribution and suggestion generation. The cheap layer never auto-routes.
-- **`/wr-retrospective:analyze-context` (deep layer)** — invoked only by explicit user direction. Never auto-fires from this step. Deep-layer report writes the HTML-comment-trailer snapshot that subsequent runs of this step read.
+- **Step 4 / 4b — codification flow**: the deep layer (`/wr-retrospective:analyze-context`) produces a `docs/retros/<date>-context-analysis.md` report with per-turn attribution and suggestion generation. Per the Amendment 2026-06-08 settlement (P295), the cheap layer **auto-routes** to the deep layer when the combined trigger holds (see step 4 above) — formerly "never auto-routes" prose is superseded.
+- **`/wr-retrospective:analyze-context` (deep layer)** — auto-fires from this step (Step 2c step 4 above) when the combined trigger holds (calendar-elapse >14 days OR delta >20% any bucket, once-per-day guard) per ADR-043 Amendment 2026-06-08. Also remains user-invokable on demand. Deep-layer report writes the HTML-comment-trailer snapshot that subsequent runs of this step read.
 - **ADR-032 supersession note** (was: ADR-027 compatibility note): no Step-0 subagent migration applies — under ADR-032's foreground-synchronous pattern the script invocation runs in main-agent context as written. The migration shape this note previously discussed is obviated by the supersession.
 
 ### 2d. Ask Hygiene Pass (P135 Phase 5 / ADR-044)

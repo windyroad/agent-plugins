@@ -96,3 +96,61 @@ setup() {
   [ "$step_2b_line" -lt "$step_2c_line" ]
   [ "$step_2c_line" -lt "$step_3_line" ]
 }
+
+# --- P295 (ADR-043 Amendment 2026-06-08) — auto-invoke wiring ---
+
+@test "run-retro: Step 2c cites ADR-043 Amendment 2026-06-08 and P295 settlement" {
+  run grep -F 'Amendment 2026-06-08' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'P295' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "run-retro: Step 2c declares the combined whichever-comes-first trigger (calendar + delta)" {
+  run grep -F 'combined whichever-comes-first trigger' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'Calendar-elapse' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'Delta-breach' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "run-retro: Step 2c declares the 14-day calendar threshold and 20% delta threshold" {
+  run grep -F 'older than 14 days' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'more than 20%' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "run-retro: Step 2c declares the once-per-day guard via TODAY snapshot file presence" {
+  run grep -F 'Once-per-day guard' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F '<TODAY>-context-analysis.md' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "run-retro: Step 2c auto-invokes /wr-retrospective:analyze-context via the Skill tool" {
+  run grep -F 'invoke `/wr-retrospective:analyze-context` via the Skill tool' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "run-retro: Step 2c declares identical interactive + AFK auto-fire behaviour (silent deep layer)" {
+  run grep -F 'Identical behaviour in interactive and AFK modes' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'never invokes `AskUserQuestion`' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "run-retro: Step 2c no longer carries the superseded 'never auto-routes' / 'Never auto-fires' prose (P295 supersession)" {
+  # The 'never auto-routes' / 'Never auto-fires from this step' clauses were
+  # the on-demand-only design now reversed by ADR-043 Amendment 2026-06-08.
+  # The Step 2c block MUST NOT carry both the new auto-fire wiring AND the
+  # contradicting "never" prose — or future agents read it as still-canonical
+  # and revert the wiring. Bound the regex to the Step 2c block by checking
+  # the original on-demand-only sentinel phrases are absent from the whole
+  # SKILL.md (they appeared nowhere else).
+  run grep -F 'The cheap layer never auto-routes.' "$SKILL_MD"
+  [ "$status" -ne 0 ]
+  run grep -F 'Never auto-fires from this step.' "$SKILL_MD"
+  [ "$status" -ne 0 ]
+}

@@ -1,6 +1,6 @@
 ---
 name: wr-retrospective:analyze-context
-description: Deep on-demand context-usage analyzer. Runs richer heuristics than run-retro Step 2c — per-turn attribution, per-plugin decomposition, suggestion generation, policy-breach detection. Produces a markdown report at docs/retros/<date>-context-analysis.md with an HTML-comment trailer carrying the bucket-snapshot for delta-from-prior comparison. User-invoked only; never auto-fires.
+description: Deep context-usage analyzer. Runs richer heuristics than run-retro Step 2c — per-turn attribution, per-plugin decomposition, suggestion generation, policy-breach detection. Produces a markdown report at docs/retros/<date>-context-analysis.md with an HTML-comment trailer carrying the bucket-snapshot for delta-from-prior comparison. Auto-fires from run-retro Step 2c when the combined trigger holds (calendar-elapse >14 days OR delta >20% any bucket, once-per-day guard) per ADR-043 Amendment 2026-06-08; also user-invokable on demand.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Skill
 ---
 
@@ -13,11 +13,11 @@ This skill is the **deep layer** of the two-layer design in **ADR-043** (Progres
 ## When to use
 
 - The user invokes `/wr-retrospective:analyze-context` directly.
-- The cheap layer (run-retro Step 2c) surfaced a delta anomaly (>+20% in any bucket since prior snapshot) and the user wants the per-turn / per-plugin decomposition.
+- **Auto-fired by run-retro Step 2c** when the combined trigger holds (calendar-elapse >14 days OR delta >20% any bucket since prior snapshot) and the once-per-day guard is not satisfied (no `docs/retros/<TODAY>-context-analysis.md` exists). Per ADR-043 Amendment 2026-06-08 (P295 settlement).
 - The user is preparing to trim context — e.g. before a release that introduces new hooks or skills, or after observing early compaction in long-running AFK loops.
 - The user wants a baseline snapshot at a known-good moment (e.g. immediately after a P091-cluster fix lands).
 
-**Never auto-fires.** Per ADR-043 + ADR-013 Rule 6 (AFK fallback), this skill is invoked only by explicit user direction. AFK orchestrators that observe anomalies via the cheap layer surface them in iteration summaries; the user runs this skill on return.
+**Auto-fires from run-retro Step 2c, silent in interactive and AFK modes.** Per ADR-043 Amendment 2026-06-08 + ADR-044 framework-resolution boundary, this skill auto-fires from the cheap layer when the combined trigger condition holds (calendar-elapse OR delta breach, capped at once per day). The skill never invokes `AskUserQuestion` — it writes a committed `docs/retros/<TODAY>-context-analysis.md` report and exits. AFK orchestrators read the resulting report on iteration close; the user reviews on return.
 
 ## Output Formatting
 
@@ -227,11 +227,11 @@ After the commit lands, report:
 - The number of policy breaches detected.
 - A pointer to run-retro Step 2c: *"Subsequent `/wr-retrospective:run-retro` invocations will read this report's HTML-comment trailer for delta comparison."*
 
-## Non-interactive / AFK behaviour (ADR-013 Rule 6)
+## Non-interactive / AFK behaviour (ADR-013 Rule 6 + ADR-043 Amendment 2026-06-08)
 
-This skill is **never auto-invoked** in AFK or non-interactive mode. The cheap layer (run-retro Step 2c) surfaces anomalies in the iteration summary; the user runs `/wr-retrospective:analyze-context` on return.
+This skill is **auto-invoked from run-retro Step 2c** when the combined trigger holds (calendar-elapse >14 days OR delta >20% any bucket, once-per-day guard) per ADR-043 Amendment 2026-06-08 (P295 settlement). The skill is silent (never invokes `AskUserQuestion`) and produces a committed `docs/retros/<TODAY>-context-analysis.md` report; identical behaviour in interactive and AFK modes per ADR-044 framework-resolution boundary — auto-invocation is framework-resolved mechanical action, not a user-decided surface.
 
-If invoked in a non-interactive context with `AskUserQuestion` unavailable AND the commit gate flags above-appetite risk: skip the commit, report the uncommitted report path clearly, and let the user resolve on return. The report file itself is still written — it is the evidence the user reviews.
+If invoked in a non-interactive context AND the commit gate flags above-appetite risk: skip the commit, report the uncommitted report path clearly, and let the user resolve on return. The report file itself is still written — it is the evidence the user reviews.
 
 ## Further reading (REFERENCE.md — lazy-loaded per ADR-054)
 
