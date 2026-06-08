@@ -127,6 +127,6 @@ Behavioural where a deterministic surface exists, split per the ADR-013 Rule 2 /
 - **ADR-013** (structured user interaction) — Option A = Shape A (rejected); Rules 2-3 = the agent-purity parent.
 - **ADR-044** (decision-delegation contract) — 6-class taxonomy (Needs Direction = class 1; carve-out = framework-mediated surface); Reassessment clause pre-authorises this sibling ADR.
 - **ADR-026** (agent output grounding) — candidate options grounded per ADR-026.
-- **ADR-052** (behavioural-tests-default) — suite-wide reviewer-subagent verdict-emitter precedent (exemplar `packages/tdd/agents/review-test.md`); Surface 2 `structural-justified` framing for the agent.md doc-lint.
+- **ADR-052** (behavioural-tests-default) — suite-wide reviewer-subagent verdict-emitter precedent (exemplar `packages/tdd/agents/review-test.md`).
 - **P085** (assistant prose-asks vs AskUserQuestion master class) — main-agent sibling of this architect-surface case.
 - **P176** (skill-invocation behavioural-test harness gap) — blocks the behavioural form of Confirmation items 2-3.

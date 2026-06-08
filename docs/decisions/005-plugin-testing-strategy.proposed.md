@@ -1,8 +1,8 @@
 ---
 status: "proposed"
 date: 2026-04-12
-human-oversight: confirmed
-oversight-date: 2026-05-25
+human-oversight: unconfirmed
+oversight-date: 2026-06-09
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent]
 informed: [Windy Road plugin users]
@@ -115,17 +115,21 @@ the hook's exclusion patterns that the source-greps had missed.
   structural contract on the hook script's prologue, not a behavioural
   claim about the hook's runtime path.
 
-**Excluded from this clause (per [ADR-052](./052-behavioural-tests-default-for-skill-testing.proposed.md))**:
+**Excluded from this clause (per [ADR-052](./052-behavioural-tests-default-for-skill-testing.proposed.md), as amended 2026-06-09)**:
 prose-document content greps — `SKILL.md`, agent definition files
 (`agent.md` / `<name>.md` under `packages/<plugin>/agents/`), proposed
 or accepted decision files (`*.proposed.md`, `*.accepted.md`),
-`RISK-POLICY.md`, and similar prose contracts. ADR-052 (Behavioural-
-tests-default for skill testing) supersedes ADR-037's contract-
-assertion default and governs prose-document test strategy.
-Behavioural tests of the skill / agent / decision-bound behaviour are
-the default; structural assertions on prose are permitted only with a
-`tdd-review: structural-permitted (justification: …)` comment linking
-a specific harness-gap ticket per ADR-052.
+`RISK-POLICY.md`, and similar prose contracts. ADR-052 supersedes
+ADR-037's contract-assertion default and governs prose-document test
+strategy. **Per the ADR-052 amendment 2026-06-09 (P290), structural
+assertions on prose are not permitted under any justification — the
+prior `tdd-review: structural-permitted (justification: …)` comment
+escape hatch is removed.** Behavioural tests of the skill / agent /
+decision-bound behaviour are the only permitted kind; structural
+assertions on prose are forbidden. Tests that cannot yet be expressed
+behaviourally because of a missing Layer B harness primitive (P324,
+P176, P012-descendants) BLOCK on the relevant harness-gap ticket — they
+do not ship as structural with a permission marker.
 
 **Functional pattern**:
 
@@ -204,6 +208,6 @@ P004 project-root check resolves correctly).
 
 ## Reassessment Criteria
 
-- **Agent testing capability** **[Reassessment Triggered 2026-04-21 per ADR-037]** **[Reassessment Triggered 2026-05-03 per ADR-052]**: If Claude Code adds a way to test agent behavior programmatically (mock sessions), consider adding agent integration tests. As of 2026-04-21, Anthropic's upstream `skill-creator` harness meets a subset of this criterion (dual-run with-skill/without-skill grader subagent pattern). ADR-037 evaluates the harness and defers adoption with named reassessment triggers of its own. As of 2026-05-03, ADR-052 (Behavioural-tests-default for skill testing) supersedes ADR-037 and narrows ADR-005's Permitted-Exception scope to exclude prose-document content greps; ADR-005's hook-testing authority is unchanged but the cross-ADR boundary now sits at the prose-document / executable-bash dividing line. ADR-005's Considered Options and Confirmation sections should be re-read on the next natural review to decide whether ADR-005 itself needs amendment or supersession.
+- **Agent testing capability** **[Reassessment Triggered 2026-04-21 per ADR-037]** **[Reassessment Triggered 2026-05-03 per ADR-052]** **[Reassessment Triggered 2026-06-09 per ADR-052 amendment (P290)]**: If Claude Code adds a way to test agent behavior programmatically (mock sessions), consider adding agent integration tests. As of 2026-04-21, Anthropic's upstream `skill-creator` harness meets a subset of this criterion (dual-run with-skill/without-skill grader subagent pattern). ADR-037 evaluates the harness and defers adoption with named reassessment triggers of its own. As of 2026-05-03, ADR-052 (Behavioural-tests-default for skill testing) supersedes ADR-037 and narrows ADR-005's Permitted-Exception scope to exclude prose-document content greps; ADR-005's hook-testing authority is unchanged but the cross-ADR boundary now sits at the prose-document / executable-bash dividing line. **As of 2026-06-09 (P290 amendment), ADR-052's escape-hatch surface is removed — structural assertions on prose are not permitted under any justification.** ADR-005's Considered Options and Confirmation sections should be re-read on the next natural review to decide whether ADR-005 itself needs amendment or supersession.
 - **Plugin count grows**: If the suite grows beyond 15 plugins, consider whether test infrastructure needs tooling (test runner scripts, parallel execution).
 - **CI run time**: If bats tests exceed 60 seconds, consider splitting into per-package test jobs.

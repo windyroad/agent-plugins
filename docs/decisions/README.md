@@ -32,7 +32,7 @@ _70 ADRs. These are the current rules. The architect agent reads this section fi
 **Confirmation:** The installPlugin function always passes --scope project unless the caller explicitly overrides; Help text documents the --scope user escape hatch; claude plugin list shows project-scoped entries after install
 
 ### ADR-005 — Plugin Testing Strategy
-**Status:** proposed | **Oversight:** confirmed
+**Status:** proposed | **Oversight:** unconfirmed
 **Chosen:** Chosen option: **"Option 1 -- bats-core for Hook Unit Tests + CI Integration"**, because hooks are bash scripts and bats-core tests them natively without translation overhead. There's already a precedent in the repo (`risk-gate.bats`), and ...
 **Confirmation:** bats command runs all .bats files in the repo and exits 0; CI quality gate includes a "Run hook tests" step that fails on test failure; Each package with hooks has at least one .bats file in hooks/test/; The risk-scorer's existing risk-gate.bats passes
 
@@ -210,7 +210,7 @@ _70 ADRs. These are the current rules. The architect agent reads this section fi
 **Related:** ADR-048, ADR-038, ADR-045, ADR-037, ADR-017, ADR-009, ADR-044, ADR-023
 
 ### ADR-052 — Behavioural-tests-default for skill testing
-**Status:** proposed | **Oversight:** confirmed | **Supersedes:** [037-skill-testing-strategy]
+**Status:** proposed | **Oversight:** unconfirmed | **Supersedes:** [037-skill-testing-strategy]
 **Related:** ADR-037, ADR-005, ADR-013, ADR-014, ADR-026, ADR-035, ADR-044, ADR-045
 
 ### ADR-053 — `@windyroad/*` plugin / skill / agent / hook maturity taxonomy
