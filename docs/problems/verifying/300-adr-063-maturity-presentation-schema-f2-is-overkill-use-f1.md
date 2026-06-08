@@ -1,10 +1,11 @@
 # Problem 300: ADR-063 maturity-presentation schema — F2 (rich-record per-surface) is overkill; F1 is sufficient to begin with
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-25
+**Verifying since**: 2026-06-08
 **Priority**: 4 (Low-Med) — Impact: 2 (Minor — over-engineering the plugin.json maturity schema adds build + maintenance cost for capability not yet needed; not shipped, so caught before the cost lands) × Likelihood: 2 (Unlikely — affects the Phase-3 maturity-presentation build only)
 **Effort**: S — amend ADR-063's chosen schema option F2 → F1; the implementation simplifies (less to build)
-**WSJF**: 4/1 = **4.0** (Open multiplier 1.0)
+**WSJF**: 4/1 = **4.0** (Verifying multiplier — release-verification queue)
 
 ## Description
 
@@ -29,11 +30,21 @@ ADR-063 is **left unoversighted** (P283/ADR-066 marker withheld) until amended.
 
 ### Investigation Tasks
 
-- [ ] Amend ADR-063: change the chosen schema option F2 → F1 (the simpler schema). Confirm what F1's exact shape is (re-read ADR-063 Considered Options) and that the badge + F9 (display shim) still compose with F1.
-- [ ] Amend ADR-063 badge rendering F5 → **Shields.io URL badge**: the README maturity badge is a hosted `https://img.shields.io/badge/<label>-<band>-<color>` image badge (links to maturity detail), not an inline markdown text badge. Pick the per-band colour mapping (Experimental/Alpha/Beta/Stable/Deprecated → shield colours) and the label scheme.
-- [ ] Reconcile with ADR-053 (the maturity taxonomy) + ADR-058 (the measurement mechanism feeding the schema) — F1 must still carry enough to render the five-band badge + rollup.
-- [ ] Note the YAGNI reassessment trigger: enrich F1 → F2 only when a concrete consumer needs the per-surface rich record.
-- [ ] Re-confirm amended ADR-063 via `/wr-architect:review-decisions`.
+- [x] Amend ADR-063: change the chosen schema option F2 → F1 (the simpler schema). Confirm what F1's exact shape is (re-read ADR-063 Considered Options) and that the badge + F9 (display shim) still compose with F1. **Landed 2026-06-08 — §Amendment 2026-06-08 (P300) defines the F1 string-only per-surface shape.**
+- [x] Amend ADR-063 badge rendering F5 → **Shields.io URL badge**: the README maturity badge is a hosted `https://img.shields.io/badge/<label>-<band>-<color>` image badge, not an inline markdown text badge. Per-band colour mapping picked: Experimental=orange, Alpha=yellow, Beta=blue, Stable=brightgreen, Deprecated=red. URL shape: `https://img.shields.io/badge/maturity-<band-lowercase>-<colour>`. **Landed 2026-06-08.**
+- [x] Reconcile with ADR-053 (the maturity taxonomy) + ADR-058 (the measurement mechanism feeding the schema) — F1 must still carry enough to render the five-band badge + rollup. **ADR-053 §Bootstrapping clause sunsetted 2026-06-06 (sixty days after 2026-04-07); compound-rendering requirement is dormant; band-only F3 rendering is compliant under steady-state. ADR-058 Phase 2 NDJSON output unchanged — F1 is downstream-of-Phase-2 schema simplification only.**
+- [x] Note the YAGNI reassessment trigger: enrich F1 → F2 only when a concrete consumer needs the per-surface rich record. **Captured in ADR-063 §Reassessment Triggers (P300 amendment 2026-06-08).**
+- [x] Re-confirm amended ADR-063 via human-oversight marker (architect-mark-oversight-confirmed shim per ADR-066) using verbatim user direction as substance-confirm evidence. `human-oversight: confirmed`, `oversight-date: 2026-06-08`.
+
+### Verification
+
+The ADR amendment landed 2026-06-08 (this iter). Verification follows on the Phase 3 build-side implementation:
+
+- [ ] Sibling Phase 3a iter: re-simplify `packages/itil/scripts/plugin-maturity-populate.sh` to write F1 (band-string per surface) instead of F2 (rich-record per surface).
+- [ ] Sibling Phase 3b iter: re-simplify `packages/itil/scripts/plugin-maturity-render.sh` to write a Shields.io URL badge (F3) instead of prose-woven text (F5).
+- [ ] Sibling Phase 3c iter: re-simplify per-plugin bats fixtures to assert F1 shape + F3 badge URL.
+- [ ] Touch up ADR-069 lines 76 + 109 to drop stale "prose-weaving citations" phrasing (low-priority; not load-bearing — captured here as follow-up).
+- [ ] Verify the F1 + F3 implementation through a release of `@windyroad/itil` (and the other 10 plugins consuming the maturity pipeline).
 
 ## Dependencies
 

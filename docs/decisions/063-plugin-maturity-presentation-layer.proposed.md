@@ -1,9 +1,8 @@
 ---
 status: "proposed"
 date: 2026-05-17
-human-oversight: rejected-pending-supersede
-supersede-ticket: P300
-oversight-date: 2026-05-26
+human-oversight: confirmed
+oversight-date: 2026-06-08
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent (YELLOW-with-adjustments; 4 adjustments folded in), wr-jtbd:agent (YELLOW-with-adjustments; 5 adjustments + 4 JTBD outcome amendments folded in)]
 informed: [Windy Road plugin users, plugin-developer persona, plugin-user persona, addressr maintainer, bbstats maintainer]
@@ -177,7 +176,91 @@ The §155 commentary *"Computing an aggregated `evidence:` record on the rollup 
 - New §Confirmation #14 (Phase 3b AND-gated compound predicate): the renderer emits the compound form `*Maturity: <Band> (suite-bootstrap window; <N> invocations / 30d).*` iff `bootstrapping == true` AND `rollup_invocations_30d` is a positive integer; falls through to bare-band `*Maturity: <Band>.*` otherwise. Bats fixtures: `packages/itil/scripts/test/plugin-maturity-render.bats` covers compound-positive (window + integer), bootstrapping=true + null-invocations → bare-band (hook-only), bootstrapping=false + integer → bare-band (post-sunset).
 - New §Confirmation #15 (Phase 3c doc-lint shape-when-present): the lint asserts `rollup_invocations_30d` is `int | null` and `bootstrapping` is `bool` when present on the rollup; tolerates absence for plugins that haven't been re-populated since the P269 amendment (shape-when-present semantics per §23-25 of `plugin-maturity-doc-lint.bats` header).
 
+### Amendment 2026-06-08 (P300 — schema F2 → F1; badge F5 → F3 Shields.io URL)
+
+**Forcing function**: P300 captures verbatim user direction delivered 2026-05-25 during the P283/ADR-066 ADR-oversight drain. Two axes simplify under YAGNI: the `plugin.json` schema reduces from F2 (rich-record per-surface + string rollup) to **F1 (string-only `maturity: "<band>"` per surface)**, and the README badge rendering moves from F5 (markdown text, prose-woven) to **F3 (Shields.io URL badge)**. Start minimal; enrich only if a concrete consumer need emerges.
+
+**User direction verbatim (2026-05-25, P283/ADR-066 drain)**:
+
+> *"option F2 is overkill. F1 is sufficient to begin with."*
+> *"badge F5 → Shields.io URL badge"*
+
+**Bootstrapping clause sunset (resolves the apparent F3 ↔ ADR-053 conflict)**: ADR-053 §Bootstrapping clause Phase 3 rendering requirement mandated compound rendering ("Experimental (suite-bootstrap window; 796 invocations / 30d)") *during the bootstrapping window* and explicitly noted the sunset trigger — the day the suite-oldest surface crosses sixty days shipped, anticipated 2026-06-06 (sixty days after the monorepo's first commit 2026-04-07). **This amendment lands 2026-06-08, two days after the anticipated sunset**. The Bootstrapping clause's Phase 3 rendering requirement is therefore dormant under its own sunset criterion; band-only rendering by an F3 Shields.io URL badge is compliant with the post-sunset steady-state rule (which renders the band designation alone). The Phase 3a population script's first post-sunset re-run recomputes bands under steady-state thresholds per the Bootstrapping clause's own provisions. **No sibling amendment to ADR-053 is required** — its sunset triggered before this amendment landed; the §Bootstrapping clause is now historical context.
+
+**Schema simplification (F2 → F1)**: per-surface entry becomes a string only.
+
+```jsonc
+{
+  "name": "@windyroad/itil",
+  "version": "0.35.2",
+  "description": "...",
+  "maturity": {
+    "band": "Experimental",
+    "skills": {
+      "manage-problem": "Beta",
+      "mitigate-incident": "Experimental"
+    },
+    "hooks":    { "<name>": "<band>" },
+    "agents":   { "<name>": "<band>" },
+    "commands": { "<name>": "<band>" }
+  }
+}
+```
+
+The rollup carries `band` (worst-case across constituent surfaces per ADR-053 §granularity contract). Per-surface entries carry a band string only — no `schema_version` per record, no `computed_at`, no `evidence:` block, no `rollup_invocations_30d`, no `bootstrapping` snapshot. **The §Amendment 2026-05-18 (P0 hotfix)** path-relocation (records nest under top-level `maturity:` not under top-level `skills:`/`hooks:`/`agents:`/`commands:`) **remains binding** — the F1 simplification narrows the per-record content but does NOT re-introduce the validator-rejected top-level-key layout. **The §Amendment 2026-05-18 (P269) rollup compound-evidence fields** (`rollup_invocations_30d`, `bootstrapping`) **become unused under F1** and are no longer written; this is sound because the Bootstrapping clause they served is post-sunset, so the renderer's compound-form predicate is dormant.
+
+The Phase 2 NDJSON (`wr-itil-skill-invocations` + `wr-itil-plugin-exercise-index`) remains the source-of-truth evidence surface for audit-trail queries (e.g. tech-lead asking *"why is `mitigate-incident` Experimental?"*); the answer comes from re-running Phase 2 measurement scripts on demand, not from a frozen-at-publish-time `evidence:` block embedded in `plugin.json`. This is the JTBD-201 reconciliation — JTBD-201's audit-trail outcome is incident-response-time, not plugin-publish-time; the rich-record `evidence:` block was a convenience for plugin-publish-time audit, not a load-bearing JTBD-201 requirement (the previous Decision Driver paragraph over-stated this).
+
+**README badge rendering (F5 → F3 Shields.io URL)**: the rollup badge is a hosted Shields.io image badge:
+
+```markdown
+![Maturity: Experimental](https://img.shields.io/badge/maturity-experimental-orange)
+```
+
+**Per-band colour mapping** (Shields.io named colours):
+
+| Band         | Shields.io colour |
+|--------------|-------------------|
+| Experimental | `orange`          |
+| Alpha        | `yellow`          |
+| Beta         | `blue`            |
+| Stable       | `brightgreen`     |
+| Deprecated   | `red`             |
+
+URL shape: `https://img.shields.io/badge/maturity-<band-lowercase>-<colour>`. The badge image lands at the top of the README lead-prose region (above the value-framing paragraph). Per-skill / per-agent / per-hook tables retain the `Maturity` column with the band name as a string (unchanged from §"README badge rendering format" below — F1 still carries per-surface band strings).
+
+**Trade-offs accepted per user direction (override of original F3 rejection rationale)**:
+
+- *External-dependency blast radius (shields.io uptime + cache staleness)*: accepted. Shields.io is the OSS-README standard badge host; the dependency is bounded and well-understood. Cache-staleness is bounded by shields.io's documented `cacheSeconds` and the Phase 3a populate cadence.
+- *ADR-002 boundary tension (every plugin README inherits the external dep)*: accepted as a documented inheritance trade-off; status badges are a standard OSS-README convention adopters already encounter elsewhere.
+- *Compound-rendering impossibility for bootstrapping-window text*: moot post-sunset (see above).
+
+**§Option F3 rejection rationale (lines 68) is hereby withdrawn** by this amendment. The reject-then-reverse is recorded in this amendment block for audit-trail clarity; the §Considered Options F3 paragraph remains in-place as historical context for the original 2026-05-17 reasoning. Readers consulting §Considered Options should consult this amendment for the current outcome.
+
+**§Option F5 prose-weaving guidance** (the original chosen rendering) **is hereby un-chosen**. The §"README badge rendering format" section that follows reads as F5-anchored prose-weaving guidance; per this amendment, that section is **superseded for the rollup badge** (F3 Shields.io URL replaces prose-weaving). The per-skill table column guidance in that section remains current (per-skill `Maturity` column with band string is unchanged under F1).
+
+**ADR-069 composition (no parallel amendment required)**: ADR-069 §Normative rule 5 says *"Maturity badge and JTBD-derived prose both ship to the README's lead-prose region and compose"*. Image badge (F3) and value-framing prose still co-occupy the lead-prose region — that's the standard OSS-README pattern, not a violation of ADR-069. ADR-069 line 76 + line 109 carry stale "prose-weaving citations" phrasing that will read inconsistently with this amendment; cleanup deferred as a follow-up touch-up (low-priority — not load-bearing).
+
+**JTBD outcome amendments queued for Phase 3 follow-on (re-examined)**:
+
+1. **JTBD-302** — KEEP QUEUED but edit under F3: replace the compound-evidence phrasing with band-only; the post-sunset rendering naturally simplifies anyway.
+2. **JTBD-007** — KEEP QUEUED unchanged. Maturity-band-currency third axis is unchanged under F1.
+3. **JTBD-101** — KEEP QUEUED unchanged. Promotion criteria documentation closure is unchanged.
+4. **JTBD-003** — KEEP QUEUED unchanged. At-glance stability outcome is satisfied by per-surface band string.
+
+**Confirmation criteria additions**:
+
+- New §Confirmation #16 (F1 schema shape): each top-level entry under `maturity.<kind>` is a band string (not an object). The plugin root `maturity.band` is a band string. No `schema_version` / `computed_at` / `evidence` / `rollup_invocations_30d` / `bootstrapping` fields appear under F1.
+- New §Confirmation #17 (F3 badge URL shape): the rollup badge in `packages/<plugin>/README.md` is a Shields.io image badge of shape `![Maturity: <Band>](https://img.shields.io/badge/maturity-<band-lowercase>-<colour>)` where `<colour>` matches the per-band colour mapping above.
+- New §Confirmation #18 (no prose-woven rollup): the rollup band is NOT rendered as prose-woven text. The per-skill table column remains a string under F1.
+
+**Sub-iter scope (Phase 3a / 3b / 3c) re-simplifies**: the Phase 3a populate writer simplifies to writing band strings; the Phase 3b renderer simplifies to writing a Shields.io image badge URL; the Phase 3c bats coverage re-targets F1 + F3 shape assertions. The simplifications are tracked under a sibling Phase 3 build iter (not landed in this amendment — the amendment is ADR-only).
+
+**Schema-version contract (sunsets the §Amendment 2026-05-18 P0 hotfix `"2.0"` stamp)**: under F1, the per-surface entries do not carry a `schema_version` field (they are bare strings). The rollup likewise does not carry a `schema_version` field. The eventual Phase 3a populate writer under F1 produces the F1 shape directly; downstream consumers (Phase 3b renderer, Phase 3c bats) read against the F1 shape. The §Confirmation #12 schema-version requirement is hereby narrowed to "shape-when-present" semantics — if a stale `schema_version: "2.0"` field remains from a pre-amendment populate run, downstream consumers tolerate it (forward-compatible read).
+
 ### `plugin.json` `maturity:` field schema
+
+> **Note (P300 amendment 2026-06-08)**: the schema shown in this section reflects the **original F2 design** captured 2026-05-17 and the additive amendments through 2026-05-18 (P0 hotfix + P269). It is superseded by the F1 shape shown in §Amendment 2026-06-08 (P300) above. This section is retained as historical context; canonical reference is the F1 shape.
 
 Per surface (skill / agent / hook / command / sub-skill entry):
 
@@ -217,6 +300,8 @@ The rollup carries `schema_version` + `band` (worst-case across constituent surf
 **Deprecated band carries an additional `supersededBy:` field** per ADR-053 §promotion criteria + ADR-010 precedent. The `supersededBy:` pointer is the only field on the maturity record that may be hand-authored; all other fields are written exclusively by the Phase 3a population script. Hand-edits to other fields are advisory-detectable by the Phase 3b drift detector and warrant follow-up.
 
 ### README badge rendering format
+
+> **Note (P300 amendment 2026-06-08)**: this section reflects the **original F5 prose-woven design** captured 2026-05-17. The rollup-badge guidance is superseded by F3 Shields.io URL badge per §Amendment 2026-06-08 (P300) above. The per-skill `Maturity` table column guidance below remains current under F1. This section is retained as historical context; canonical reference for the rollup badge is the §Amendment 2026-06-08 (P300) block.
 
 **Markdown text only**. No shields.io URL. No inline SVG.
 
@@ -405,4 +490,6 @@ This ADR is reassessed when ANY of the following occur:
 - **Bootstrapping clause sunset fires (anticipated 2026-06-06 per ADR-053 §Bootstrapping clause)**: verify Phase 3a script handles the sunset transition correctly; verify the compound rendering simplifies to band-only post-sunset; verify no `plugin.json` `maturity:` records carry stale bootstrapping-window evidence post-sunset.
 - **The prose-weaving rendering proves brittle in practice** (e.g. plugin authors restructure value-framing prose in ways that break the renderer's anchor): reassess whether the renderer should accept structured anchors (HTML comment delimiters? markdown extensions?) or whether the prose-weaving should be hand-authored with the Phase 3b advisory drift detector catching divergence.
 - **A second cluster of cross-cutting plugin-suite-observability presentation work emerges**: promote presentation-layer concerns into a new dedicated plugin / ADR family if the maturity surface ends up co-evolving with licence / vulnerability / dependency-currency surfaces.
+- **F1 schema enrichment trigger (P300 amendment 2026-06-08)**: enrich F1 (string-only per-surface) → F2 (rich-record per-surface with `evidence:` block) only when a concrete consumer materialises that cannot serve its outcome by re-running Phase 2 NDJSON on demand. Candidate concrete consumers: a release-time CI gate that fails the build when band-changes lack a paired changeset bump; an adopter-facing `claude plugin browse` UI that needs `computed_at` freshness signals without re-running measurement; a regulatory audit-trail requirement that pins evidence at publish time. Until such a consumer exists, F1 holds.
+- **Shields.io availability degrades (P300 amendment 2026-06-08)**: if shields.io accumulates significant uptime incidents OR rate-limits Windy Road plugin badge requests, reassess F3 → F4 (inline static SVG committed under `packages/<plugin>/assets/maturity-badge.svg`) or back to F5 (markdown text). The F3 trade-off accepted shields.io's external-dep risk per user direction; if the bounded risk surfaces, this trigger fires.
 - **Reassessment date 2026-11-17** — six-month review per the standard ADR cadence; verify the Phase 3 contract is still load-bearing after Phase 3a / 3b / 3c have shipped.

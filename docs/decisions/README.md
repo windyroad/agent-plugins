@@ -255,7 +255,7 @@ _70 ADRs. These are the current rules. The architect agent reads this section fi
 **Related:** ADR-024, ADR-028, ADR-029, ADR-031, ADR-033, ADR-036, ADR-037, ADR-044, ADR-046
 
 ### ADR-063 — `@windyroad/*` plugin maturity presentation layer — `plugin.json` schema, prose-woven README badge, in-suite `wr-itil-plugin-maturity-list` display shim
-**Status:** proposed | **Oversight:** rejected-pending-supersede (P300)
+**Status:** proposed | **Oversight:** confirmed
 
 ### ADR-064 — ADR-064: Architect emits a Needs-Direction verdict; the main agent owns the AskUserQuestion
 **Status:** proposed | **Oversight:** confirmed
