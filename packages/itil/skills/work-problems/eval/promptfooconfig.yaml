@@ -1,0 +1,428 @@
+# SKILL eval — work-problems AFK orchestrator behavioural contracts
+# (P324 / P012 / RFC-012 / ADR-075 Amendment 2026-06-02).
+#
+# Tier A deterministic regex + Tier B llm-rubric coverage for 7 contracts on
+# the work-problems SKILL.md surface — each contract corresponds to a held
+# changeset in `docs/changesets-holding/` whose Reinstate criterion (per
+# ADR-061 Rule 4 evidence-floor) names this exact eval path:
+#
+#   - Step 0d outbound-responses pre-flight TTL-staleness branch
+#     dispatches /wr-itil:check-upstream-responses (P220).
+#   - Step 5 iter-prompt re-grounding — per-iter reset; no Fix Strategy
+#     inline; no prior-iter content leak (P211).
+#   - Step 5 changeset-required — fixes touching shippable code MUST
+#     author `.changeset/*.md` in same commit; doc/test-only exempt (P206).
+#   - Step 5 is_error transient HALT — ordered check exit → is_error →
+#     ITERATION_SUMMARY; 529/429/401 advisory mapping (P214).
+#   - Step 5 retro-on-exit iter-owned BRIEFING commit — iter (not
+#     run-retro, not orchestrator main turn) emits the
+#     `chore(briefing): refresh from iter retro (P<NNN>)` commit (P212).
+#   - Step 6.5 K→V post-release auto-transition callback — Drain action
+#     step 4 dispatches /wr-itil:transition-problem <NNN> verifying per
+#     just-shipped changeset (P228).
+#   - Step 0 / Step 5 queue-and-continue universal AFK default —
+#     ADR-013 Rule 6 amended default (P352, @windyroad/itil portion).
+#
+# Drivers:
+#   - ADR-075 (Amendment 2026-06-02) — SKILL-prose harness scope; per-skill
+#     `packages/<plugin>/skills/<skill>/eval/promptfooconfig.yaml`
+#     location; exec:bash provider; Tier-A regex + Tier-B llm-rubric.
+#   - ADR-061 (Rule 4 evidence-floor) — paired promptfoo Tier-A/B GREEN IS
+#     the per-class evidence for SKILL-prose surfaces; flips the R009
+#     modulator +1 → -1 for this surface.
+#   - ADR-014 (single-commit grain) — this eval file ships in the same
+#     commit as its paired changeset.
+#   - RFC-012 — single build vehicle for the harness.
+#   - P324 (driving problem — agent-prose verdict harness gap).
+#   - P206 / P211 / P212 / P214 / P220 / P228 / P352 (held changesets
+#     this eval discharges per ADR-061 Rule 4).
+#
+# Tier-B (llm-rubric) grader: the work-problems contracts contain heavy
+# NEGATIVE clauses ("the orchestrator MUST NOT release above appetite";
+# "never call AskUserQuestion mid-loop"; "do NOT halt"; "iter does NOT
+# auto-deviate"). Tier-A `not-regex` on those clauses false-fails against
+# behaviourally-correct negated answers — same pattern the report-upstream
+# eval encountered, resolved via the Tier-B claude-grader (P012 reopen
+# findings 2026-06-04). Distinctive positive tokens stay Tier-A.
+#
+# Run from repo root:
+#   npx promptfoo eval -c packages/itil/skills/work-problems/eval/promptfooconfig.yaml
+#
+# @jtbd JTBD-001 (Enforce Governance Without Slowing Down)
+# @jtbd JTBD-006 (Progress the Backlog While I'm Away)
+# @jtbd JTBD-007 (Keep Plugins Current Across Projects)
+# @jtbd JTBD-101 (Extend the Suite with New Plugins)
+# @problem P324
+# @problem P012
+# @problem P206
+# @problem P211
+# @problem P212
+# @problem P214
+# @problem P220
+# @problem P228
+# @problem P352
+# @rfc RFC-012
+# @adr ADR-075 (Amendment 2026-06-02)
+# @adr ADR-061 (Rule 4 evidence-floor)
+# @adr ADR-014 (single-commit grain)
+
+description: |
+  work-problems SKILL eval — Tier-A regex + Tier-B llm-rubric coverage for
+  7 AFK-orchestrator behavioural contracts on the work-problems SKILL
+  surface. Each test case asserts one held-changeset Reinstate criterion
+  per ADR-061 Rule 4 evidence-floor: passing eval flips the R009 prose-
+  surface modulator +1 → -1 for `work-problems`, dropping the held cohort
+  (P206 + P211 + P212 + P214 + P220 + P228 + P352 itil-portion) within
+  appetite atomically per cohort-graduation pre-check.
+
+providers:
+  # Path is relative to this config file's directory (promptfoo basePath).
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+# Tier-B (llm-rubric) grading provider. Same shape as report-upstream:
+# distinctive positive tokens (gh command names, file paths, advisory
+# strings, specific verdict shapes) stay Tier-A; semantic NEGATIVE clauses
+# route to llm-rubric, graded by claude under subscription auth (no API
+# key) via grade-llm-rubric.sh.
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  # --- P220: Step 0d outbound-responses pre-flight ----------------------------
+
+  - description: Step 0d TTL-expired outbound-responses cache → dispatch check-upstream-responses
+    vars:
+      prompt: |
+        I am the AFK orchestrator running /wr-itil:work-problems. Step 0d's
+        helper `wr-itil-check-outbound-responses-staleness` returned the
+        outcome `ttl-expiry age=90000s ttl=86400s` — the outbound-responses
+        cache `docs/problems/.outbound-responses-cache.json` is stale and
+        the local repo carries at least one ticket with a `## Reported
+        Upstream` back-link section.
+
+        Per the Step 0d contract, what does the orchestrator do next?
+        Name the specific skill it dispatches and the subprocess wrapper.
+    assert:
+      # Tier A — must dispatch the outbound-responses polling skill.
+      - type: icontains
+        value: 'check-upstream-responses'
+      # Tier A — must use the standard claude -p subprocess wrapper.
+      - type: regex
+        value: 'claude\s+-p|subprocess|--permission-mode\s+bypassPermissions'
+      # Tier B — confirm the orchestrator proceeds with dispatch (does NOT
+      # silent-pass on a stale-cache outcome).
+      - type: llm-rubric
+        value: |
+          The response describes the work-problems orchestrator DISPATCHING
+          /wr-itil:check-upstream-responses as a pre-flight iteration on a
+          ttl-expiry outcome. PASS if it dispatches the skill. FAIL if it
+          says the orchestrator silent-passes (skips dispatch despite
+          stale cache) OR halts the loop. An output that explicitly says
+          it does NOT silent-pass / does NOT halt PASSES (negation
+          satisfies a must-not rubric).
+
+  - description: Step 0d cache-fresh → silent-pass per ADR-013 Rule 5 + P132
+    vars:
+      prompt: |
+        I am the AFK orchestrator running /wr-itil:work-problems. Step 0d's
+        helper `wr-itil-check-outbound-responses-staleness` returned the
+        outcome `fresh-within-ttl`.
+
+        Per the Step 0d contract, what does the orchestrator do next?
+        Should it dispatch any skill, fire AskUserQuestion, or proceed
+        silently?
+    assert:
+      # Tier A — must mention silent-pass behaviour.
+      - type: regex
+        value: 'silent[\s\-]?pass|proceed\s+to\s+Step\s+1|skip|no\s+dispatch'
+      # Tier B — confirm the orchestrator does NOT dispatch and does NOT
+      # call AskUserQuestion on a fresh-cache outcome.
+      - type: llm-rubric
+        value: |
+          On a `fresh-within-ttl` Step 0d outcome, the response describes
+          the orchestrator silent-passing and proceeding to Step 1 without
+          dispatching check-upstream-responses and without firing
+          AskUserQuestion. PASS if it silent-passes. FAIL if it dispatches
+          the skill anyway, halts the loop, or fires an AskUserQuestion
+          for the mechanical fresh-cache outcome. Saying the orchestrator
+          does NOT dispatch / does NOT halt PASSES.
+
+  # --- P211: Step 5 iter-prompt re-grounding ----------------------------------
+
+  - description: Step 5 iter-prompt re-grounding — no Fix Strategy inline; no prior-iter content leak
+    vars:
+      prompt: |
+        I am the orchestrator's main turn constructing the iteration prompt
+        body for iter 5 of an AFK /wr-itil:work-problems loop. The selected
+        ticket for this iter is P420. The prior iter worked P415 and had a
+        substantial Fix Strategy section in its prompt.
+
+        Per the Step 5 "Re-ground per iter (P211 — orchestrator-side
+        construction invariant)" paragraph, what content from the prior
+        iter MUST NOT carry across into iter 5's prompt body, and what does
+        the orchestrator do with the new ticket's `## Fix Strategy`
+        section?
+    assert:
+      # Tier A — must reference the re-grounding invariant by name.
+      - type: regex
+        value: 're[\s\-]?ground|re-grounding|reset[\s\-]?per[\s\-]?iter|template[\s\-]?driven'
+      # Tier A — Fix Strategy is NOT inlined verbatim by the orchestrator;
+      # the subprocess reads it from disk via manage-problem.
+      - type: regex
+        value: 'Fix\s+Strategy|fix[\s\-]?strategy'
+      # Tier B — semantic invariant: per-iter reset; no prior-iter content
+      # leak (prior ticket ID, prior commit SHA, prior outcome reason,
+      # prior retro findings, prior outstanding-question entries).
+      - type: llm-rubric
+        value: |
+          The response describes per-iter re-grounding: iter 5's prompt is
+          constructed from a template against P420's identity ONLY (ID +
+          title); prior iter's Fix Strategy / commit SHA / outcome reason
+          / retro findings / outstanding-question entries do NOT carry
+          across the iter boundary; AND the new ticket's Fix Strategy is
+          NOT inlined verbatim by the orchestrator — the subprocess reads
+          it from disk via manage-problem inside its own context. PASS if
+          both invariants are stated. FAIL if the response says the
+          orchestrator inlines Fix Strategy verbatim, OR says prior-iter
+          content carries across into iter N+1's prompt. Saying it does
+          NOT inline / does NOT carry across PASSES.
+
+  # --- P206: Step 5 changeset-required ---------------------------------------
+
+  - description: Step 5 changeset-required — fix touching shippable code MUST author .changeset/*.md
+    vars:
+      prompt: |
+        I am an AFK /wr-itil:work-problems iter subprocess. I have
+        implemented a fix that edits `packages/itil/hooks/itil-readme-refresh.sh`
+        — a path under `packages/<plugin>/hooks/` that ships in the
+        published tarball.
+
+        Per the Step 5 iteration prompt body's changeset-required
+        constraint, do I need to author a `.changeset/*.md` entry alongside
+        the fix commit? Is it the same single ADR-014-grain commit or a
+        separate commit?
+    assert:
+      # Tier A — must affirm changeset required.
+      - type: icontains
+        value: '.changeset'
+      # Tier A — must mention same single ADR-014-grain commit.
+      - type: regex
+        value: 'same\s+(single\s+)?(ADR-014[\s\-]grain\s+)?commit|single\s+commit|ADR-014'
+      # Tier B — semantic: shippable-code fix REQUIRES changeset; doc-only
+      # and test-only changes MAY omit; the contract is load-bearing for
+      # JTBD-006 + JTBD-007 audit + closure outcomes.
+      - type: llm-rubric
+        value: |
+          For a fix touching shippable code at packages/<plugin>/hooks/
+          (or src, bin, skills, scripts, lib, agents — excluding test
+          paths and excluding README.md / docs/*.md), the response
+          requires the iter to author a paired `.changeset/*.md` entry
+          in the SAME single ADR-014-grain commit as the fix. PASS if it
+          requires the changeset AND names same-commit grain. FAIL if it
+          says the changeset can land in a separate commit OR says
+          shippable-code fixes can omit the changeset. Mentioning that
+          doc-only or test-only changes MAY omit the changeset is allowed
+          (correct narrowing).
+
+  - description: Step 5 changeset-required — doc-only / test-only fix MAY omit changeset
+    vars:
+      prompt: |
+        I am an AFK /wr-itil:work-problems iter subprocess. I have
+        implemented a fix that edits ONLY `docs/decisions/052-behavioural-tests-default.proposed.md`
+        and `packages/itil/skills/work-problems/test/work-problems-step-5.bats`
+        — no source paths under packages/*/{src,bin,hooks,skills/<skill>/SKILL.md,scripts,lib,agents}
+        are touched.
+
+        Per the Step 5 changeset-required constraint, do I MUST author a
+        `.changeset/*.md` entry, or MAY I omit it for this doc-only +
+        test-only commit?
+    assert:
+      # Tier A — must reference the exempt category.
+      - type: regex
+        value: 'MAY\s+omit|may\s+omit|exempt|doc[\s\-]?only|test[\s\-]?only'
+      # Tier B — semantic narrowing: doc-only + test-only changes that
+      # ship no behaviour MAY omit the changeset; the orchestrator must
+      # not require a changeset for them.
+      - type: llm-rubric
+        value: |
+          For a fix touching ONLY docs/ paths and test/ paths (no source
+          paths under packages/<plugin>/{src,bin,hooks,scripts,lib,agents}
+          or SKILL.md surfaces), the response says the iter MAY omit the
+          `.changeset/*.md` entry — doc-only and test-only changes that
+          ship no behaviour are exempt from the changeset-required
+          constraint. PASS if it says MAY omit / exempt. FAIL if it says
+          a changeset is still required for doc-only + test-only changes.
+
+  # --- P214: Step 5 is_error transient HALT ----------------------------------
+
+  - description: Step 5 is_error transient HALT — 529 Overloaded → halt with advisory
+    vars:
+      prompt: |
+        I am the AFK /wr-itil:work-problems orchestrator. The iter
+        subprocess exited 0 with `--output-format json` body containing
+        `is_error: true` and `.result` substring "529 Overloaded". The
+        working tree shows `git diff --cached --name-only` empty (nothing
+        staged).
+
+        Per the Step 5 ordered exit-code semantics check (P214 amendment),
+        what does the orchestrator do next? Be specific about which
+        ordered check fires, whether the loop halts or continues, and the
+        advisory string in the final summary.
+    assert:
+      # Tier A — must halt the loop.
+      - type: regex
+        value: 'halt|stop|do\s+NOT\s+spawn'
+      # Tier A — must mention the overloaded advisory string.
+      - type: regex
+        value: 'overloaded|API\s+overloaded|retry\s+when\s+service\s+recovers'
+      # Tier A — must NOT route to ITERATION_SUMMARY parse path.
+      - type: regex
+        value: 'is_error|ordered\s+check|HALT\s+branch|transient'
+      # Tier B — must clearly distinguish HALT branch (nothing staged) from
+      # SALVAGE branch (staged + bats passing); on the empty-staged
+      # 529 case this is HALT, not SALVAGE, not ITERATION_SUMMARY parse.
+      - type: llm-rubric
+        value: |
+          On an exit-0 + is_error:true + nothing-staged + "529 Overloaded"
+          iter result, the response routes to the P214 HALT branch (NOT
+          the P261 SALVAGE branch, NOT the normal ITERATION_SUMMARY parse
+          path), emits the "API overloaded; retry when service recovers"
+          advisory in the final summary, and does NOT spawn the next
+          iteration. PASS if it halts with the overloaded advisory. FAIL
+          if it routes to SALVAGE despite nothing-staged, OR proceeds to
+          parse ITERATION_SUMMARY despite is_error:true, OR spawns the
+          next iter. Saying it does NOT spawn / does NOT salvage PASSES.
+
+  # --- P212: Step 5 retro-on-exit iter-owned BRIEFING commit ------------------
+
+  - description: Step 5 retro-on-exit — iter (NOT run-retro, NOT orchestrator) commits dirty BRIEFING
+    vars:
+      prompt: |
+        I am an AFK /wr-itil:work-problems iter subprocess approaching
+        ITERATION_SUMMARY emission. I just invoked /wr-retrospective:run-retro
+        per the Step 5 retro-on-exit clause. After retro completed,
+        `git status --porcelain docs/BRIEFING.md docs/briefing/` shows
+        `docs/briefing/sessions.md` modified — retro edited the file but
+        did not commit it.
+
+        Per the Step 5 retro-on-exit clause #4 (P212 amendment), which
+        layer commits the dirty BRIEFING state — run-retro itself, the iter
+        subprocess, or the orchestrator main turn (via Step 6.75)? What is
+        the exact commit subject?
+    assert:
+      # Tier A — must name the iter subprocess as the committer.
+      - type: regex
+        value: 'iter\s+subprocess|iter\s+(commits|owns|emits)|the\s+iter\s+(?:itself|commits)'
+      # Tier A — must name the exact commit subject template.
+      - type: regex
+        value: 'chore\(briefing\)|refresh\s+from\s+iter\s+retro'
+      # Tier B — semantic invariant: run-retro is out-of-scope for
+      # self-commit per ADR-014; orchestrator main-turn no longer absorbs
+      # dirty BRIEFING via Step 6.75 hand-off; the iter is the committer.
+      - type: llm-rubric
+        value: |
+          The response identifies the ITER SUBPROCESS (not run-retro
+          itself, not the orchestrator main turn) as the layer responsible
+          for committing the dirty BRIEFING state after retro completes,
+          with the commit subject in the shape
+          `chore(briefing): refresh from iter retro (P<NNN>)`. PASS if
+          the iter subprocess is named as committer AND the commit
+          subject template matches. FAIL if the response says run-retro
+          self-commits the BRIEFING dirty state, OR says the orchestrator
+          main turn commits it via a Step 6.75 hand-off (the pre-P212
+          behaviour). Saying run-retro does NOT self-commit / saying
+          the orchestrator does NOT absorb the dirty state at 6.75 PASSES.
+
+  # --- P228: Step 6.5 K→V post-release auto-transition ------------------------
+
+  - description: Step 6.5 K→V callback — release shipped, K-ticket cites changeset → dispatch transition-problem verifying
+    vars:
+      prompt: |
+        I am the AFK /wr-itil:work-problems orchestrator. Step 6.5 Drain
+        action just completed: `release:watch` shipped a new
+        `@windyroad/itil` patch version to npm. The just-shipped release
+        contained `.changeset/wr-itil-p228-postrelease-kv-auto-transition.md`.
+        A `docs/problems/known-error/228-...md` ticket carries a
+        `**Release vehicle**: .changeset/wr-itil-p228-postrelease-kv-auto-transition.md`
+        reference.
+
+        Per the Step 6.5 Drain action step 4 + the Post-release K→V
+        auto-transition subsection (P228 amendment), what does the
+        orchestrator do for P228 specifically? Be precise about which
+        skill is dispatched, which transition direction, and whether the
+        orchestrator re-implements transition mechanics or delegates.
+    assert:
+      # Tier A — must dispatch the transition skill.
+      - type: regex
+        value: '/wr-itil:transition-problem|transition-problem'
+      # Tier A — must transition to verifying (K → V), not to closed.
+      - type: regex
+        value: 'verifying|known[\s\-]?error\s+(?:to|→)\s+verifying|K[\s\-]?(?:to|→)[\s\-]?V'
+      # Tier A — must NOT auto-fire V→C closure (maintainer surface).
+      - type: regex
+        value: 'V[\s\-]?(?:to|→)[\s\-]?C|verify|maintainer|user\s+(?:confirm|verifies)'
+      # Tier B — semantic invariant: orchestrator DISPATCHES (does not
+      # re-implement mechanics); V→C closure stays a maintainer-only
+      # surface; callback fires ONLY when release:watch actually shipped.
+      - type: llm-rubric
+        value: |
+          The response describes the orchestrator dispatching
+          /wr-itil:transition-problem 228 verifying via the Skill tool —
+          delegating to transition-problem as the authoritative executor
+          per ADR-010 amended P093 — and does NOT auto-fire V→C closure
+          (that remains a maintainer-only surface per JTBD-006 persona
+          constraint). PASS if it dispatches transition-problem for
+          K→V AND preserves V→C as maintainer-only. FAIL if it
+          re-implements the transition mechanics directly in the
+          orchestrator, OR auto-fires V→C closure, OR fires the K→V
+          callback when release:watch was a no-op (empty .changeset/).
+          Saying the orchestrator does NOT re-implement / does NOT
+          auto-V→C PASSES.
+
+  # --- P352: queue-and-continue universal AFK default -------------------------
+
+  - description: AFK default — direction-class question surfaces mid-iter → queue and continue (NOT halt, NOT auto-default)
+    vars:
+      prompt: |
+        I am an AFK /wr-itil:work-problems iter subprocess working ticket
+        P420. Mid-iter I encounter a direction-class question (e.g. choose
+        between two architectural shapes for the fix) that meets the
+        ADR-044 direction category — genuinely user-judgment-bound. I am
+        in non-interactive AFK mode; `AskUserQuestion` would not surface
+        to the user.
+
+        Per ADR-013 Rule 6 amended (P352 — queue-and-continue universal
+        AFK default), what does the iter do with this direction-class
+        question? Be specific about queueing surface and whether the iter
+        halts or continues.
+    assert:
+      # Tier A — must reference the outstanding_questions queue.
+      - type: regex
+        value: 'outstanding_questions|\.afk-run-state/outstanding-questions|ITERATION_SUMMARY'
+      # Tier A — must reference category tagging per ADR-044 taxonomy.
+      - type: regex
+        value: '"?direction"?|deviation-approval|category'
+      # Tier A — must continue (not halt), per the queue-and-continue default.
+      - type: regex
+        value: 'continue|queue[\s\-]?and[\s\-]?continue|proceed|do\s+NOT\s+halt|skip|action:\s*skipped'
+      # Tier B — semantic invariant: queue-and-continue is the universal
+      # AFK default; HALT / SKIP-silently / AUTO-DEFAULT are carve-out-
+      # justified deviations that need explicit documentation. Calling
+      # AskUserQuestion mid-loop is forbidden in AFK.
+      - type: llm-rubric
+        value: |
+          On a genuine direction-class question surfacing mid-iter under
+          AFK mode, the response describes the iter QUEUEING the question
+          to outstanding_questions (with category tag per ADR-044) and
+          CONTINUING — the loop does not halt, the question is not
+          silently dropped, no auto-default is invented, AskUserQuestion
+          is not fired mid-loop. PASS if the iter queues-and-continues.
+          FAIL if the iter halts the loop on the direction question, OR
+          fires AskUserQuestion mid-loop, OR invents an auto-default
+          answer without queueing. Saying the iter does NOT halt /
+          does NOT fire AskUserQuestion / does NOT auto-default PASSES.
