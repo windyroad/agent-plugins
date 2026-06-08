@@ -149,3 +149,53 @@ setup() {
   run grep -iE "re-run.*script|re.run.*reconcile-readme|re-run.*reconcile" "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }
+
+# ── Step 6 unconditional-commit contract (P172) ─────────────────────────────
+
+@test "reconcile-readme: Step 6 does NOT carry an interactive-vs-AFK commit-gating carve-out (P172)" {
+  # P172: prior Step 6 prose carved out "When invoked interactively, do
+  # NOT auto-commit — present a diff summary to the user and let them
+  # stage + commit". This contradicts ADR-014 ("governance skills commit
+  # their own work") which is framework-mediated, not user direction-
+  # setting. User pinned FFS-grade: "I haven't committed anything for
+  # months. You do all the commits". The contract holds when the prose
+  # does NOT re-introduce the mode-gated suppression on the Step 6 commit.
+  #
+  # Negative assertion: no "do NOT auto-commit", "do not auto-commit",
+  # or "let.*user.*stage" phrasings that would re-introduce the carve-out.
+  # Risk-gated phrasing (above appetite, AskUserQuestion unavailable) is
+  # policy-correct (ADR-013 Rule 6) and excluded — but reconcile-readme
+  # has no risk-above-appetite branch (pure mechanical README refresh).
+  run grep -iE "do NOT auto-commit|do not auto-commit|let (the|them|user).{0,20}stage.*commit|when invoked interactively.{0,30}(commit|stage)" "$SKILL_FILE"
+  [ "$status" -ne 0 ]
+}
+
+@test "reconcile-readme: Step 6 names ADR-014 as the unconditional-commit authority (P172)" {
+  # Positive assertion: Step 6 must cite ADR-014 ("governance skills
+  # commit their own work") as the authority for the unconditional
+  # commit. The prose must also explicitly state the commit fires
+  # regardless of invocation mode so the contract is discoverable.
+  #
+  # Extract Step 6 region: from the line AFTER "### Step 6." through to
+  # the next H2/H3 heading. Awk range patterns where start and end can
+  # match the same line collapse to one line, so we advance start past
+  # the heading line via a flag.
+  STEP6="$(awk '
+    /^### Step 6\./ { in_step=1; next }
+    in_step && /^(### |## )/ { in_step=0 }
+    in_step { print }
+  ' "$SKILL_FILE")"
+  [ -n "$STEP6" ]
+  # ADR-014 cited inside Step 6.
+  echo "$STEP6" | grep -F "ADR-014"
+  # Unconditional / regardless-of-mode phrasing inside Step 6.
+  echo "$STEP6" | grep -iE "unconditional|regardless of (invocation )?mode|framework-mediated"
+}
+
+@test "reconcile-readme: Step 6 names interactive and AFK commit behaviour as identical (P172)" {
+  # The Confirmation criterion 4 (or Step 6 prose) must explicitly assert
+  # interactive and AFK commit behaviour are identical. This is the
+  # behavioural contract that the unified commit shape obeys.
+  run grep -iE "interactive and AFK behave identically|regardless of invocation mode|interactive.*AFK.*identical|identical.*interactive.*AFK" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}

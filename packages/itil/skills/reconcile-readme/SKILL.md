@@ -119,16 +119,18 @@ Keep the new fragment ≤ 1024 bytes (soft cap) and certainly ≤ 5120 bytes (ha
 
 **Rationale (P134)**: this skill previously documented the line as "an ever-growing prose paragraph". That convention is what produced the 76-KB line-3 that broke the Read tool entirely. The reconcile path was a load-bearing site of the bloat — every reconcile that happened under the old convention re-wrote line 3 unbounded. The new discipline closes the surface for reconcile parity with `manage-problem` Step 5 P094, Step 6 P094, Step 7 P062, and the sibling `transition-problem`, `transition-problems`, `review-problems` skills.
 
-### Step 6. Commit (when invoked from an AFK orchestrator subprocess)
+### Step 6. Commit
 
-In AFK mode (per ADR-013 Rule 6), commit the reconciled README in a dedicated single-purpose commit:
+Commit the reconciled README in a dedicated single-purpose commit — unconditionally, regardless of interactive vs AFK invocation mode, per ADR-014 ("governance skills commit their own work"):
 
 ```bash
 git add docs/problems/README.md
 git commit -m "chore(problems): reconcile README against filesystem (P118)"
 ```
 
-When invoked interactively, do NOT auto-commit — present a diff summary to the user and let them stage + commit. The reconciled state should always be staged together (no partial reconciliation) — when the agent has applied N edits in Step 4, all N belong in the same commit.
+The reconciled state should always be staged together (no partial reconciliation) — when the agent has applied N edits in Step 4, all N belong in the same commit. Interactive and AFK invocations behave identically: the commit decision is **framework-mediated** per ADR-014 (the policy already decided governance skills commit their own work), NOT user direction-setting per ADR-044's authority taxonomy. A per-invocation consent surface here would re-ask a decision the framework has already resolved (P172 + lazy-AskUserQuestion under ADR-044).
+
+The ADR-013 Rule 6 fail-safe is **risk-gated** (above-appetite + `AskUserQuestion` unavailable → skip commit), not **mode-gated** (interactive vs AFK). Reconciliation is pure mechanical README refresh with no risk-above-appetite branch, so Rule 6 simply does not fire here.
 
 ## ADR alignment
 
@@ -136,7 +138,7 @@ When invoked interactively, do NOT auto-commit — present a diff summary to the
 - **ADR-022** (Verification Pending lifecycle status conventions) — Confirmation criterion 3 extended to "and matches the Verification Queue table in `README.md` modulo narrative content".
 - **ADR-038** (Progressive disclosure for governance tooling context) — script output is per-row terse (≤150 bytes per drift entry); the agent expands narrative-aware edits on demand.
 - **ADR-005** (Plugin testing strategy) — script-level bats lives at `packages/itil/scripts/test/reconcile-readme.bats`; ADR-037 (skill testing) governs this skill's own contract bats.
-- **ADR-013** (Structured interaction) — Rule 6 (non-interactive fail-safe) governs the AFK auto-apply branch.
+- **ADR-013** (Structured interaction) — Rule 6 (non-interactive fail-safe) governs the parse-error halt in Step 1 (exit code 2). Rule 6 is risk-gated, not mode-gated; reconciliation's Step 6 commit fires unconditionally per ADR-014 (P172). Rule 6 does NOT carve out the Step 6 commit on mode grounds.
 
 ## Confirmation
 
@@ -144,7 +146,7 @@ This skill's contract holds when:
 1. The script `packages/itil/scripts/reconcile-readme.sh` is read-only — no live README mutation in the script layer (mutation only in this skill's Step 4, via the Edit tool).
 2. Each agent-applied edit preserves the README's narrative content (prose paragraph at top, Closed section free text).
 3. After Step 4 + Step 5, a re-run of the script reports exit 0 (clean).
-4. In AFK mode, the reconciled README rides a single commit (Step 6 single-purpose commit).
+4. The reconciled README rides a single commit (Step 6 single-purpose commit) regardless of invocation mode — interactive and AFK behave identically per ADR-014 governance-skill commit contract (P172).
 5. The skill is invoked from `/wr-itil:manage-problem` Step 0, `/wr-itil:work-problems` Step 0, AND direct user invocation — no other invocation surface (e.g., `/wr-itil:transition-problem` does NOT call this skill; per architect verdict P062 already covers transition-time refresh inside the same commit, redundant preflight here would pay the cost on every transition).
 
 ## Related
@@ -158,3 +160,5 @@ This skill's contract holds when:
 - `docs/decisions/022-problem-lifecycle-verification-pending-status.proposed.md` — Confirmation criterion 3 extension.
 - **P094** (`docs/problems/094-...closed.md`) — refresh-on-create. Composes; this skill is robustness on top, not supersession.
 - **P062** (`docs/problems/062-...closed.md`) — refresh-on-transition. Composes; same.
+- **P172** (`docs/problems/open/172-skill-contract-interactive-vs-afk-commit-gating-anti-pattern-contradicts-adr-014.md`) — removed the Step 6 interactive-vs-AFK commit-gating carve-out 2026-06-09. The carve-out contradicted ADR-014 and produced uncommitted reconciliations across months of AFK-equivalent sessions before the FFS-grade correction surfaced it.
+- `docs/decisions/044-decision-delegation-contract.proposed.md` — framework-resolution boundary; the commit decision is framework-mediated (ADR-014), not user direction-setting.
