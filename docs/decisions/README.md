@@ -88,9 +88,9 @@ _70 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **"Risk-driven cadence"**, because it reuses the existing
 
-### ADR-019 — AFK orchestrator preflight: fetch-origin and divergence handling
-**Status:** proposed | **Oversight:** confirmed
-**Chosen:** Chosen option: **"Mandatory fetch + ff-only on trivial divergence"**,
+### ADR-019 — AFK orchestrator preflight: get the repo into a clean state before starting
+**Status:** proposed | **Oversight:** unconfirmed
+**Chosen:** Chosen option: **"Three-branch clean-state preflight"**, because it is
 
 ### ADR-020 — Governance skills auto-release when changesets are queued
 **Status:** proposed | **Oversight:** confirmed
