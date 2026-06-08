@@ -1,6 +1,6 @@
 # Problem 315: Agent implements dependent work on genuine new decisions before human-confirming their SUBSTANCE — surfaces only meta-questions
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-26
 **Priority**: 8 (Medium) — Impact: 4 x Likelihood: 2 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -56,6 +56,15 @@ The contract substance was human-confirmed BEFORE any artifact was built — dog
 - [x] Decide the contract: substance must be human-confirmed before dependent work; born-`proposed` is fine for the MARKER only. → **ADR-074** (decided + confirmed 2026-05-27).
 - [x] Where does the contract live: new ADR + thin amend ADR-064 + carve-out ADR-066, enforced at architect-verdict layer + propose-fix/I13 process guard. → **Option A confirmed** via AskUserQuestion 2026-05-27.
 - [x] Distinguish from lazy-AskUserQuestion (ADR-044 Step 2d): recorded in ADR-074 as the cat-1 lazy-count exclusion + narrow build-on trigger (inverse-P078 guard).
+
+## Fix Released
+
+- **Released**: 2026-05-26 (version-packages commit `6a03115`) — shipped as `@windyroad/architect@0.15.6`, `@windyroad/itil@0.47.12`, `@windyroad/retrospective@0.23.2`.
+- **Design layer**: ADR-074 (Confirm a decision's substance before building dependent work) — born `human-oversight: confirmed`, commit `fdb9eb9`. ADR-064 grain-vs-substance amend + ADR-066 marker-≠-licence carve-out land in the same commit.
+- **Implementation layer (RFC-008)**: commit `476e419`. T1 architect Needs-Direction prompt sharpened (name SUBSTANCE not grain); T2 `check-ask-hygiene.sh` excludes substance-confirm asks from the lazy-count; T3 manage-problem propose-fix guard at the ADR-060 I13 surface; T4 work-problems orchestrator queues to `outstanding_questions` (`category: direction`); T5 `wr-architect-is-decision-unconfirmed` predicate + ADR-049 PATH shim. All testable surfaces GREEN (46 bats); T3/T4 skill-flow assertions deferred to the P176 harness per ADR-052 Surface 2.
+- **Canonical-surface embedding (also released)**: `create-adr` Step 5a `## Substance-confirm fire` is the load-bearing born-confirmed marker gate (option-shaped AskUserQuestion, briefing in main-turn prose, no IDs as explainers, each option carries actual considered-options substance) — refs P340. `review-decisions` Step 1 lead-with-Decision-Outcome rule (P302) is ADR-074 grain-vs-substance applied at the confirm surface. Architect `agents/agent.md` Needs-Direction prompt enforces "name the SUBSTANCE not the grain" + emits `[Unratified Dependency]` (ADR-074 surface 3) when a change/plan cites an unratified ADR.
+- **In-session dogfood (2026-06-08)**: ADR-079 (evidence-based relevance-close-pass) ratification this session followed the substance-confirm pattern verbatim — main-turn briefing of the four substantive options (Confirm / Amend / Reject / different chosen option) preceded the option-shaped AskUserQuestion; user picked Confirm; only then was the `human-oversight: confirmed` marker written; 10 dependent retroactive close-pass cases ratified off the confirmed ADR. The exact failure mode P315 names (substance-rides-unconfirmed-into-dependent-work) is now structurally precluded.
+- **Awaiting user verification.**
 
 ## Dependencies
 
