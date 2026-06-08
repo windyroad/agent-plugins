@@ -1,0 +1,514 @@
+# SKILL eval — scaffold-intake behavioural contracts on the foreground-
+# synchronous scaffold surface (P324 / P012 / RFC-012 / ADR-075 Amendment
+# 2026-06-02).
+#
+# Tier A deterministic regex + Tier B llm-rubric coverage for 7 contracts on
+# the scaffold-intake SKILL.md surface. Each contract corresponds to a
+# load-bearing invariant of the downstream-project OSS intake scaffolder
+# surface — verifying SKILL-prose behaviour underwrites JTBD-301 (downstream-
+# project intake coverage) and JTBD-101 (extend the suite with new plugins).
+#
+#   - Step 3 foreground in-skill AskUserQuestion 4-option set: when the
+#     skill is invoked interactively and at least one intake file is missing,
+#     the dispatch fires AskUserQuestion with the documented options
+#     (Scaffold all missing / Scaffold with review / Dry-run / Cancel) per
+#     ADR-013 Rule 1 — distinct from the Trigger 1 host-emitted 3-option
+#     first-run prompt.
+#   - Step 4 mustache-style token substitution: the 5 documented tokens
+#     ({{project_name}}, {{project_url}}, {{plugin_list}},
+#     {{security_contact}}, {{year}}) are substituted by sed at scaffold
+#     time — no runtime templating dependency, no $VAR drift.
+#   - Step 5 marker write `.claude/.intake-scaffold-done`: ADR-009 marker
+#     semantics — persistent (no TTL), file-presence is the policy signal,
+#     suppresses Trigger 1 first-run prompts in subsequent
+#     /wr-itil:manage-problem and /wr-itil:work-problems invocations.
+#   - Step 6 commit per ADR-014 single-commit grain: stages the four intake
+#     paths + the marker in ONE commit with gpgsign=false, triggers the
+#     wr-risk-scorer:pipeline gate per ADR-014.
+#   - Idempotency: present-and-current files report "already present —
+#     skipped" without modification; re-running the skill on a fully-
+#     scaffolded project produces no diff.
+#   - Trigger 1 AFK fail-safe (ADR-013 Rule 6 universal queue-and-continue
+#     default per P352 2026-06-06 amendment): when the host skill is
+#     invoked from an AFK orchestrator, do NOT fire AskUserQuestion + do
+#     NOT auto-scaffold; append one-line "pending intake scaffold" note to
+#     iteration report; loop continues. NOT a carve-out — this IS the
+#     canonical universal-default queue-and-continue shape (scaffold-intake
+#     does not create durable substance-bearing artefacts at the queue
+#     point; the marker write happens AFTER the user interactive scaffold).
+#   - `--dry-run` no-write invariant: under `--dry-run`, NO files are
+#     written to disk — including the four intake files, the
+#     .claude/.intake-scaffold-done marker, and the commit. Preview-only.
+#
+# Drivers:
+#   - ADR-075 (Amendment 2026-06-02) — SKILL-prose harness scope; per-skill
+#     `packages/<plugin>/skills/<skill>/eval/promptfooconfig.yaml`
+#     location; exec:bash provider; Tier-A regex + Tier-B llm-rubric.
+#   - ADR-061 (Rule 4 evidence-floor) — paired promptfoo Tier-A/B GREEN IS
+#     the per-class evidence for SKILL-prose surfaces; flips the R009
+#     modulator +1 → -1 for this surface, dropping the P352-scaffold-intake
+#     cohort portion atomically per cohort-graduation pre-check (ADR-061
+#     Rule 3b).
+#   - ADR-014 (single-commit grain) — this eval file ships in the same
+#     commit as its companion runners (no `.changeset/*.md` — eval test
+#     infrastructure excluded from the tarball via packages/itil/.npmignore
+#     line 13: `skills/*/eval/` + the `files: ["!skills/*/eval/"]`
+#     negation in package.json discovered load-bearing during P324 Phase 4).
+#   - ADR-032 (foreground-synchronous pattern) — scaffold-intake is
+#     foreground-synchronous; Step 3 in-skill AskUserQuestion sits inside
+#     that pattern; the wrapped-pattern subagent shape would defeat the
+#     user's review-before-commit expectation for scaffolded files.
+#   - ADR-013 (Rule 1 + Rule 6 universal default) — Step 3 in-skill prompt
+#     fires under Rule 1; Trigger 1 AFK fail-safe queue-and-continue is
+#     the universal-default shape under the 2026-06-06 amendment, NOT a
+#     carve-out (distinct from capture-problem Step 1.5b + create-adr
+#     Step 5a ADR-074 carve-outs that DO create durable substance at queue
+#     time).
+#   - ADR-009 (marker lifecycle) — `.intake-scaffold-done` is persistent,
+#     no-TTL, deletable to reset.
+#   - ADR-036 (scaffold downstream OSS intake contract) — driving design
+#     record; the four intake paths + layered trigger surfaces.
+#   - RFC-012 — single build vehicle for the harness.
+#   - P324 (driving problem — agent-prose verdict harness gap).
+#   - P352 (held changeset this eval discharges per ADR-061 Rule 4 for the
+#     scaffold-intake surface portion).
+#
+# Tier-B (llm-rubric) grader: the scaffold-intake contracts contain heavy
+# NEGATIVE clauses ("does NOT fire AskUserQuestion under AFK"; "does NOT
+# auto-scaffold"; "MUST NOT write any files under --dry-run"; "MUST NOT
+# modify present-and-current files"). Tier-A `not-regex` on those clauses
+# false-fails against behaviourally-correct negated answers — same pattern
+# the Phase 1-3 evals encountered, resolved via the Tier-B claude-grader
+# (P012 reopen findings 2026-06-04). Distinctive positive tokens stay
+# Tier-A.
+#
+# Run from repo root:
+#   npx promptfoo eval -c packages/itil/skills/scaffold-intake/eval/promptfooconfig.yaml
+#
+# @jtbd JTBD-001 (Enforce Governance Without Slowing Down)
+# @jtbd JTBD-006 (Progress the Backlog While I'm Away)
+# @jtbd JTBD-007 (Keep Plugins Current Across Projects)
+# @jtbd JTBD-101 (Extend the Suite with New Plugins)
+# @jtbd JTBD-301 (Report a Problem Without Pre-Classifying It)
+# @problem P324
+# @problem P012
+# @problem P352
+# @rfc RFC-012
+# @adr ADR-075 (Amendment 2026-06-02)
+# @adr ADR-061 (Rule 4 evidence-floor)
+# @adr ADR-036 (scaffold downstream OSS intake contract)
+# @adr ADR-032 (foreground-synchronous pattern)
+# @adr ADR-013 (Rule 1 + Rule 6 universal default)
+# @adr ADR-009 (marker lifecycle)
+# @adr ADR-014 (single-commit grain)
+
+description: |
+  scaffold-intake SKILL eval — Tier-A regex + Tier-B llm-rubric coverage for
+  7 foreground-synchronous behavioural contracts on the scaffold-intake
+  SKILL surface. Each test case asserts one load-bearing invariant per
+  ADR-061 Rule 4 evidence-floor: passing eval flips the R009 prose-surface
+  modulator +1 → -1 for `scaffold-intake`, dropping the held P352-scaffold-
+  intake cohort portion within appetite per cohort-graduation pre-check.
+
+providers:
+  # Path is relative to this config file's directory (promptfoo basePath).
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+# Tier-B (llm-rubric) grading provider. Same shape as Phase 1-3 evals:
+# distinctive positive tokens (file paths, advisory strings, command names,
+# classification tokens) stay Tier-A; semantic NEGATIVE clauses route to
+# llm-rubric, graded by claude under subscription auth (no API key) via
+# grade-llm-rubric.sh.
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  # --- Step 3: foreground in-skill AskUserQuestion 4-option set --------------
+
+  - description: Step 3 in-skill AskUserQuestion — 4-option set on missing intake files
+    vars:
+      prompt: |
+        I am the /wr-itil:scaffold-intake Step 3 dispatch. The skill was
+        invoked interactively (no `--dry-run`, no `--force`, no `--ci`).
+        Step 2 enumerated the five required intake paths and classified
+        three as MISSING: `.github/ISSUE_TEMPLATE/config.yml`,
+        `.github/ISSUE_TEMPLATE/problem-report.yml`, and `SECURITY.md`.
+        The other two (`SUPPORT.md`, `CONTRIBUTING.md`) are
+        present-and-current.
+
+        Per the Step 3 contract, the dispatch fires `AskUserQuestion` per
+        ADR-013 Rule 1. What are the four options surfaced in that prompt?
+        Are the options scoped to the MISSING set or the full required set?
+        Be specific about each option label.
+    assert:
+      # Tier A — must name each of the four documented options.
+      - type: regex
+        value: 'Scaffold\s+all\s+missing'
+      - type: regex
+        value: 'Scaffold\s+with\s+review|with\s+review'
+      - type: icontains
+        value: 'Dry-run'
+      - type: icontains
+        value: 'Cancel'
+      # Tier A — must reference scoping to the missing set.
+      - type: regex
+        value: 'missing\s+set|scoped\s+to\s+(?:the\s+)?missing|absent|MISSING'
+      # Tier B — semantic invariant: 4-option set, scoped to missing files,
+      # foreground-synchronous via ADR-013 Rule 1.
+      - type: llm-rubric
+        value: |
+          The response describes Step 3 firing `AskUserQuestion` with the
+          four documented options: (1) Scaffold all missing — write every
+          absent template, skip present files; (2) Scaffold with review —
+          preview each substituted template before writing; (3) Dry-run —
+          preview only, no writes; (4) Cancel — exit without action. The
+          prompt is scoped to the MISSING set (the three absent files in
+          this scenario), not the full required set. The prompt fires
+          under ADR-013 Rule 1 because the skill is foreground-synchronous
+          per ADR-032. PASS if all four options + scoping to missing set
+          are stated. FAIL if any option is omitted, OR if the response
+          says the prompt fires on all five files (not scoped to missing),
+          OR if the response says the prompt is suppressed in foreground
+          mode.
+
+  # --- Step 4: mustache-style token substitution -----------------------------
+
+  - description: Step 4 token substitution — 5 mustache tokens substituted by sed at scaffold time
+    vars:
+      prompt: |
+        {% raw %}I am the /wr-itil:scaffold-intake Step 4 dispatch. Step 3 returned
+        "Scaffold all missing". I now need to substitute templates for the
+        missing files and write them to disk.
+
+        Per the Step 4 contract, what is the syntax of the template tokens
+        (mustache `{{...}}` or shell `$VAR` or something else)? Name each
+        of the 5 documented tokens. Where do the token values come from
+        (auto-detection, flag override, fallback)? What tool performs the
+        substitution? Is there a runtime templating dependency?{% endraw %}
+    assert:
+      # Tier A — must name mustache `{{...}}` syntax.
+      - type: regex
+        value: '\{\{|mustache|double[\s\-]?brace'
+      # Tier A — must name each of the 5 tokens.
+      - type: icontains
+        value: 'project_name'
+      - type: icontains
+        value: 'project_url'
+      - type: icontains
+        value: 'plugin_list'
+      - type: icontains
+        value: 'security_contact'
+      - type: icontains
+        value: 'year'
+      # Tier A — must name `sed` as the substitution tool.
+      - type: regex
+        value: '\bsed\b'
+      # Tier A — must reference no-runtime-dependency.
+      - type: regex
+        value: 'no\s+runtime|no\s+dependency|no\s+templating\s+dep|without\s+(?:a\s+)?runtime'
+      # Tier B — semantic invariant: mustache `{{...}}` shape; sed
+      # substitution; no runtime templating dep; flag overrides on top of
+      # auto-detection; year is `date +%Y` at scaffold time.
+      - type: llm-rubric
+        value: |
+          {% raw %}The response describes Step 4 using mustache-style `{{...}}` token
+          syntax substituted by `sed` at scaffold time with NO runtime
+          templating dependency. The five documented tokens are named:
+          `{{project_name}}`, `{{project_url}}`, `{{plugin_list}}`,
+          `{{security_contact}}`, `{{year}}`. Value sources are correct:
+          project_name from `package.json` `name` (override via
+          `--project-name`); project_url from `package.json` `repository.url`
+          via sed-stripped `git+`/`.git` (override via `--project-url`);
+          plugin_list enumerated from `.claude-plugin/plugin.json` or
+          dev-dependencies; security_contact detected or `--security-contact`
+          flag with fallback `Use GitHub Security Advisories`; year from
+          `date +%Y` at scaffold time. PASS if mustache + sed + no-runtime-
+          dep + all 5 tokens are named. FAIL if the response invents a
+          `$VAR` shell-style shape, OR adds a runtime templating dep, OR
+          omits a documented token.{% endraw %}
+
+  # --- Step 5: marker write `.claude/.intake-scaffold-done` ------------------
+
+  - description: Step 5 marker write — `.claude/.intake-scaffold-done` ADR-009 persistent no-TTL
+    vars:
+      prompt: |
+        I am the /wr-itil:scaffold-intake Step 5 dispatch. Step 4 wrote the
+        substituted templates to the missing intake paths successfully.
+
+        Per the Step 5 contract, what marker file does the skill write?
+        What are the marker's lifecycle semantics — persistent or TTL'd,
+        what is the policy signal, and can the user reset it? Which ADR
+        documents the marker lifecycle? What downstream hosts read the
+        marker, and what behaviour does the marker suppress?
+    assert:
+      # Tier A — must name the marker path.
+      - type: icontains
+        value: '.claude/.intake-scaffold-done'
+      # Tier A — must reference persistent / no-TTL.
+      - type: regex
+        value: 'persistent|no[\s\-]?TTL|no\s+expiry|never\s+expires'
+      # Tier A — must cite ADR-009.
+      - type: icontains
+        value: 'ADR-009'
+      # Tier A — must reference file-presence as the policy signal.
+      - type: regex
+        value: 'file[\s\-]?presence|presence[\s\-]?is\s+the\s+(?:policy\s+)?signal|presence\s+of\s+the\s+(?:marker\s+)?file'
+      # Tier A — must reference deletable to reset.
+      - type: regex
+        value: 'delet(?:e|able|ing)|remove|rm\s+'
+      # Tier A — must name the downstream hosts.
+      - type: regex
+        value: 'manage-problem|work-problems|first[\s\-]?run\s+prompt|Trigger[\s\-]?1'
+      # Tier B — semantic invariant: persistent no-TTL marker; ADR-009
+      # lifecycle; deletable to reset; suppresses Trigger 1 first-run
+      # prompts in manage-problem + work-problems hosts.
+      - type: llm-rubric
+        value: |
+          The response identifies the Step 5 marker as
+          `.claude/.intake-scaffold-done` with ADR-009 marker semantics:
+          PERSISTENT (no TTL — does not expire), file-presence is the
+          policy signal, deletable to reset (`rm
+          .claude/.intake-scaffold-done` resets the scaffold-done state).
+          The marker suppresses Trigger 1 first-run prompts in subsequent
+          `/wr-itil:manage-problem` and `/wr-itil:work-problems`
+          invocations — those hosts check for the marker's presence and
+          skip the host-emitted "Scaffold now?" prompt when it exists.
+          PASS if all of: marker path + persistent/no-TTL + ADR-009 cited
+          + deletable-to-reset + suppresses-Trigger-1-host-prompts. FAIL
+          if the response says the marker has a TTL, OR cannot be reset,
+          OR if the response confuses this marker with the
+          `.claude/.intake-scaffold-declined` opt-out marker (distinct
+          ADR-009 marker — decline records a separate "never prompt"
+          policy).
+
+  # --- Step 6: commit per ADR-014 single-commit grain ------------------------
+
+  - description: Step 6 commit — single ADR-014 commit grain with gpgsign=false
+    vars:
+      prompt: |
+        I am the /wr-itil:scaffold-intake Step 6 dispatch. Steps 4 and 5
+        completed: three new intake files written to disk and
+        `.claude/.intake-scaffold-done` marker created.
+
+        Per the Step 6 contract, what files are staged in the commit?
+        Is the work split across multiple commits or landed in a single
+        commit? Which ADR governs the commit grain? Is gpg signing applied
+        or disabled? What gate fires on the commit?
+    assert:
+      # Tier A — must reference single-commit grain.
+      - type: regex
+        value: 'single\s+commit|one\s+commit|ADR-014\s+(?:single|grain|commit)|single[\s\-]?commit[\s\-]?grain'
+      # Tier A — must cite ADR-014.
+      - type: icontains
+        value: 'ADR-014'
+      # Tier A — must reference the staged paths.
+      - type: regex
+        value: '\.github/ISSUE_TEMPLATE'
+      - type: icontains
+        value: 'SECURITY.md'
+      - type: icontains
+        value: 'SUPPORT.md'
+      - type: icontains
+        value: 'CONTRIBUTING.md'
+      - type: icontains
+        value: '.claude/.intake-scaffold-done'
+      # Tier A — must reference gpgsign=false.
+      - type: regex
+        value: 'gpgsign\s*=\s*false|--no-gpg-sign|gpg[\s\-]?sign\s+(?:false|disabled|off)|commit\.gpgsign\s*false'
+      # Tier A — must reference the wr-risk-scorer:pipeline gate.
+      - type: regex
+        value: 'wr-risk-scorer:pipeline|risk[\s\-]?scorer|pipeline\s+gate|commit\s+gate'
+      # Tier B — semantic invariant: single ADR-014 commit grain; stages
+      # all four intake paths + marker; gpgsign=false; triggers
+      # wr-risk-scorer:pipeline; ADR-042 remediation suggestions apply if
+      # residual exceeds appetite.
+      - type: llm-rubric
+        value: |
+          The response describes Step 6 landing the work in a SINGLE
+          commit per ADR-014 grain (NOT split across multiple commits),
+          staging all five paths: `.github/ISSUE_TEMPLATE/` (both
+          config.yml and problem-report.yml), `SECURITY.md`, `SUPPORT.md`,
+          `CONTRIBUTING.md`, and `.claude/.intake-scaffold-done`. The
+          commit uses `git -c commit.gpgsign=false commit -m "..."` to
+          disable gpg signing inline. The commit triggers the
+          `wr-risk-scorer:pipeline` commit gate per ADR-014, and
+          ADR-042 remediation suggestions apply if the residual risk
+          exceeds appetite. PASS if single-commit + ADR-014 + all five
+          paths + gpgsign-false + risk-scorer gate are stated. FAIL if
+          the response splits the work across multiple commits, OR omits
+          the marker from the stage list, OR signs with gpg.
+
+  # --- Idempotency: present-and-current files report skipped; no-diff re-run -
+
+  - description: Idempotency — present-and-current files "already present — skipped"; re-run produces no diff
+    vars:
+      prompt: |
+        I am the /wr-itil:scaffold-intake skill. The user runs the skill a
+        SECOND time on a project that already has all five intake files
+        scaffolded from a previous run. Every file matches the template-
+        substituted output exactly (present-and-current). The user did
+        NOT pass `--force`.
+
+        Per the idempotency contract, what does the skill do? Does it
+        modify any files? Does it write a commit? Does it produce a diff?
+        What does the per-file report look like for each present-and-
+        current file? Be specific about the absence-of-action.
+    assert:
+      # Tier A — must reference "already present — skipped".
+      - type: regex
+        value: 'already\s+present|already[\s\-]?present[\s\-]?(?:—|--|-)?\s*skipped|skipped'
+      # Tier A — must reference no-diff / no-modification.
+      - type: regex
+        value: 'no\s+diff|produces\s+no\s+diff|no[\s\-]?op|no\s+modification|no\s+changes|unchanged'
+      # Tier A — must reference idempotency or idempotent.
+      - type: regex
+        value: 'idempoten[ct]'
+      # Tier A — must reference present-and-current classification.
+      - type: regex
+        value: 'present[\s\-]?and[\s\-]?current|present-and-current'
+      # Tier B — semantic invariant: skill is idempotent by construction;
+      # re-run on fully-scaffolded project produces no diff, no commit, no
+      # writes; per-file report is "already present — skipped"; the done
+      # marker also prevents the host first-run prompt from re-firing.
+      - type: llm-rubric
+        value: |
+          The response describes the skill being IDEMPOTENT by
+          construction: on a re-run with all files present-and-current
+          and without `--force`, the skill does NOT modify any files,
+          does NOT write a commit, and produces NO DIFF. Each present-
+          and-current file is reported as "already present — skipped"
+          (the SKILL.md exact phrasing) without modification. The done
+          marker (`.claude/.intake-scaffold-done`) prevents the host
+          first-run prompt from re-firing on subsequent
+          `/wr-itil:manage-problem` / `/wr-itil:work-problems`
+          invocations. PASS if no-diff + no-commit + "already present —
+          skipped" report + idempotent characterisation are all stated.
+          FAIL if the response says re-run modifies files, OR creates a
+          commit even when nothing changed, OR re-fires the host prompt
+          despite the marker.
+
+  # --- Trigger 1 AFK fail-safe — ADR-013 Rule 6 universal queue-and-continue -
+
+  - description: Trigger 1 AFK fail-safe — queue-and-continue per ADR-013 Rule 6 universal default; NOT an ADR-074 carve-out
+    vars:
+      prompt: |
+        I am the host `/wr-itil:work-problems` AFK orchestrator. My
+        preamble detected that `.github/ISSUE_TEMPLATE/` is missing AND
+        `.claude/.intake-scaffold-declined` is absent AND
+        `.claude/.intake-scaffold-done` is absent — the three Trigger 1
+        conditions all hold. The orchestrator is running AFK (no
+        interactive session).
+
+        Per the Trigger 1 contract, what does the host do? Does it fire
+        `AskUserQuestion`? Does it auto-scaffold the intake files? Where
+        does the user discover that the scaffold is pending? Is this an
+        ADR-074 substance-confirm-before-build carve-out from the
+        ADR-013 Rule 6 universal queue-and-continue default, or is it
+        the canonical universal-default shape itself? Be specific about
+        the framing.
+    assert:
+      # NOTE: The Tier-A regex assertions for "does not fire" and "does not
+      # auto-scaffold" were removed — they false-fail against
+      # behaviourally-correct responses that answer the prompt's framed
+      # Yes/No questions with a bare "**Does it fire AskUserQuestion?** No."
+      # / "**Does it auto-scaffold?** No." shape (the model's natural reply
+      # form). The required substring appears inside the question, not in
+      # the answer, so the regex can't distinguish "answer is No"
+      # (behaviourally correct) from "answer is Yes" (incorrect). Same
+      # routing decision as capture-problem Step 1.5b derive-success +
+      # P199 Step 6 negative Tier-A patterns. The Tier-B llm-rubric below
+      # is the authoritative check for the no-fire / no-auto-scaffold
+      # semantics.
+      # Tier A — must reference the iteration-report note.
+      - type: regex
+        value: 'iteration[\s\-]?report|pending\s+intake\s+scaffold|append|one[\s\-]?line\s+note'
+      # Tier A — must cite ADR-013 Rule 6 universal default.
+      - type: regex
+        value: 'ADR-013\s+Rule\s+6|Rule\s+6|queue[\s\-]?and[\s\-]?continue|universal\s+default'
+      # Tier A — must reference "continues" or "advances" for the loop.
+      - type: regex
+        value: 'continues?|advances?|next\s+(?:problem|iteration)|loop\s+(?:continues|advances)'
+      # Tier B — semantic invariant: AFK fail-safe IS the canonical
+      # universal-default queue-and-continue shape per ADR-013 Rule 6
+      # 2026-06-06 amendment; NOT an ADR-074 carve-out (scaffold-intake
+      # doesn't create durable substance-bearing artefacts at the queue
+      # point — the marker write happens AFTER user interactive scaffold).
+      # Distinct from capture-problem Step 1.5b + create-adr Step 5a
+      # carve-outs that DO create durable substance at queue time.
+      - type: llm-rubric
+        value: |
+          The response describes Trigger 1 AFK fail-safe as: the host
+          does NOT fire `AskUserQuestion` and does NOT auto-scaffold;
+          instead it appends a single one-line "pending intake scaffold"
+          note to the orchestrator's iteration report and the loop
+          continues to the next problem. The user catches up on next
+          interactive session. The framing is correct: this IS the
+          canonical ADR-013 Rule 6 universal queue-and-continue default
+          (per the 2026-06-06 amendment) — NOT an ADR-074 substance-
+          confirm-before-build carve-out. The reason: scaffold-intake
+          does not create durable substance-bearing artefacts at the
+          AFK-queue point (the marker write happens AFTER the user
+          interactive scaffold), so the universal-default shape applies
+          unchanged. PASS if no-AskUserQuestion + no-auto-scaffold +
+          iteration-report-note + loop-continues + Rule-6-universal-
+          default-NOT-carve-out are all stated. FAIL if the response
+          says the host fires AskUserQuestion under AFK, OR
+          auto-scaffolds without consent, OR mis-frames the behaviour
+          as an ADR-074 carve-out (it is not — distinct from
+          capture-problem Step 1.5b and create-adr Step 5a).
+
+  # --- `--dry-run` no-write invariant ----------------------------------------
+
+  - description: --dry-run no-write invariant — no intake files written, no marker, no commit
+    vars:
+      prompt: |
+        I am the /wr-itil:scaffold-intake skill. The user invoked it with
+        `--dry-run`. Three intake files are missing and would normally be
+        scaffolded.
+
+        Per the `--dry-run` contract, what does the skill do? Does it
+        write any of the missing intake files to disk? Does it write the
+        `.claude/.intake-scaffold-done` marker? Does it create a commit?
+        What does the user see on stdout? Be specific about the absence-
+        of-writes.
+    assert:
+      # Tier A — must reference preview-only / no-writes.
+      - type: regex
+        value: 'preview|no\s+writes|no\s+files\s+written|no\s+modification|does\s+not\s+write'
+      # Tier A — must explicitly name the marker as not written under
+      # dry-run. Broadened to also match "No done marker" (sentence-cap N),
+      # "marker is not created" (passive voice with "is"), and unbraced
+      # "marker is not" patterns the model emits naturally; JS regex engine
+      # has no `(?i)` flag (per Phase 3 finding), so case-variants are
+      # enumerated explicitly via `[Nn]` character class.
+      - type: regex
+        value: '[Nn]o\s+(?:done\s+)?marker|marker\s+(?:is\s+)?not\s+(?:created|written)|does\s+not\s+(?:create|write)\s+(?:the\s+)?marker|marker\s+(?:is\s+)?not\s+(?:created|written|emitted|set)'
+      # Tier A — must reference no commit.
+      - type: regex
+        value: 'no\s+commit|does\s+not\s+commit|no\s+changes\s+to\s+commit|skips?\s+the\s+commit'
+      # Tier A — must reference dry-run.
+      - type: regex
+        value: 'dry[\s\-]?run|--dry-run'
+      # Tier B — semantic invariant: --dry-run gates ALL writes including
+      # the marker and the commit; preview output goes to stdout; no
+      # side effects on disk or in git.
+      - type: llm-rubric
+        value: |
+          The response describes `--dry-run` as a PREVIEW-ONLY mode that
+          gates ALL writes. Specifically: NO intake files are written to
+          disk, the `.claude/.intake-scaffold-done` marker is NOT written
+          (Step 5 is skipped), NO commit is created (Step 6 is skipped),
+          and there are NO side effects on disk or in git. The user sees
+          the substituted template preview output on stdout for each
+          file that would be scaffolded, but nothing is written. PASS if
+          no-file-writes + no-marker + no-commit + preview-on-stdout are
+          all stated. FAIL if the response says `--dry-run` still writes
+          the marker (a common drift — the marker is a "scaffold-done"
+          signal and writing it on a dry-run would falsely report the
+          scaffold as complete), OR writes a commit, OR partially writes
+          some files but not others.
