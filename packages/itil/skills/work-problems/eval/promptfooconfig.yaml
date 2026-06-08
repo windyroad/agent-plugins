@@ -22,6 +22,11 @@
 #     just-shipped changeset (P228).
 #   - Step 0 / Step 5 queue-and-continue universal AFK default —
 #     ADR-013 Rule 6 amended default (P352, @windyroad/itil portion).
+#   - Step 7 / Mid-loop ask discipline scope-pin-word semantics —
+#     scope-pin words (just/only/first/merely/simply + ticket-ref) are
+#     SCOPE FILTERS over Step 1 WSJF selection; they do NOT alter
+#     loop control; orchestrator MUST NOT emit ALL_DONE from
+#     natural-language modifier interpretation (P175).
 #
 # Drivers:
 #   - ADR-075 (Amendment 2026-06-02) — SKILL-prose harness scope; per-skill
@@ -61,6 +66,7 @@
 # @problem P220
 # @problem P228
 # @problem P352
+# @problem P175
 # @rfc RFC-012
 # @adr ADR-075 (Amendment 2026-06-02)
 # @adr ADR-061 (Rule 4 evidence-floor)
@@ -383,6 +389,66 @@ tests:
           callback when release:watch was a no-op (empty .changeset/).
           Saying the orchestrator does NOT re-implement / does NOT
           auto-V→C PASSES.
+
+  # --- P175: scope-pin-word semantics ----------------------------------------
+
+  - description: Scope-pin invocation — iter 1 partial-progress → orchestrator dispatches iter 2 (does NOT emit ALL_DONE)
+    vars:
+      prompt: |
+        I am the AFK /wr-itil:work-problems orchestrator. The user
+        invoked me with the args `just work P170` (a scope-pin word
+        paired with a ticket reference). Iter 1 dispatched on P170,
+        completed at a clean commit, and returned an ITERATION_SUMMARY
+        with `outcome: partial-progress`, `action: worked`, the iter's
+        `notes` field naming remaining slices (B7.T2-T4, Slice 5, Slice
+        6) as actionable on the same pinned ticket, and a non-empty
+        `outstanding_questions` array.
+
+        Step 2's stop conditions are not yet satisfied — the pinned
+        ticket has named actionable remaining work (so #1 doesn't fire),
+        no remaining interactive-only tickets in scope (so #2 doesn't
+        fire), nothing blocked (so #3 doesn't fire). Quota is fine. No
+        halt path is firing.
+
+        Per the Step 7 + Mid-loop ask discipline "Scope-pin-word
+        semantics (P175)" paragraph, what does the orchestrator do
+        next? Be specific about (a) whether `ALL_DONE` emits now, (b)
+        whether the next dispatched iter targets the pinned ticket P170
+        or a WSJF-selected different ticket, and (c) how the scope-pin
+        word `just` is interpreted (count constraint vs scope filter).
+    assert:
+      # Tier A — must dispatch iter 2 (loop continues; does NOT emit ALL_DONE here).
+      - type: regex
+        value: 'iter\s*2|next\s+iter|dispatch|continue|loop[\s\-]?back|Step\s+1|Step\s+7'
+      # Tier A — must classify scope-pin word as scope filter / selection override (NOT count constraint).
+      - type: regex
+        value: 'scope\s*filter|selection\s+override|SCOPE\s+FILTER|override\s+Step\s+1|override\s+WSJF|pin\s+the\s+loop|pinned\s+ticket'
+      # Tier A — must reference framework-resolved loop control / ADR-044.
+      - type: regex
+        value: 'framework[\s\-]?resolved|framework[\s\-]?prescribed|ADR-044|Step\s+2\.4|stop[\s\-]?condition'
+      # Tier B — semantic invariant: orchestrator dispatches iter 2 on the same pinned
+      # ticket (because Step 1's WSJF selection is overridden to the pinned ticket, not
+      # because the orchestrator invented a halt), the scope-pin word is interpreted as
+      # SCOPE FILTER not count constraint, and ALL_DONE is NOT emitted from
+      # natural-language modifier interpretation.
+      - type: llm-rubric
+        value: |
+          On a scope-pin invocation (`just`/`only`/`first`/`merely`/
+          `simply` + ticket-ref) where iter 1 returned
+          `outcome: partial-progress` with named remaining slices AND
+          no framework-prescribed Step 2 stop-condition has fired, the
+          response describes the orchestrator (a) NOT emitting
+          `ALL_DONE`, (b) dispatching iter 2 against the same pinned
+          ticket, AND (c) interpreting the scope-pin word as a SCOPE
+          FILTER / selection override (not a count constraint or
+          one-iter directive). PASS if all three are clearly stated.
+          FAIL if the response says the orchestrator emits `ALL_DONE`
+          after iter 1 because the user said `just`, OR says `just`
+          means "exactly one iter", OR says the orchestrator should
+          stop the loop because the natural-language modifier implies
+          a single-iter scope. Saying the orchestrator does NOT emit
+          `ALL_DONE` / does NOT halt / does NOT interpret `just` as a
+          count constraint PASSES.
 
   # --- P352: queue-and-continue universal AFK default -------------------------
 

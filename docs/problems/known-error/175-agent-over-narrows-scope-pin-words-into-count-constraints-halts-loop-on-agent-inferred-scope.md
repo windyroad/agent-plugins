@@ -1,9 +1,10 @@
 # Problem 175: Agent over-narrows scope-pin words ("just", "only", "first") into count constraints — halts AFK loop on agent-inferred scope rather than framework-prescribed stop conditions
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-05-06
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Release vehicle**: `.changeset/wr-itil-p175-scope-pin-word-semantics.md`
 
 ## Description
 
@@ -47,14 +48,32 @@ A defensive workaround at orchestrator dispatch time: re-emit the loop-control r
 
 ## Root Cause Analysis
 
-### Investigation Tasks
+### Confirmed Root Cause (2026-06-09)
 
-- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Investigate root cause: is this a SKILL.md gap (stop conditions don't explicitly disclaim scope-pin-word interpretation) or an agent-prior gap (training-data over-association of "just" with "exactly one")? Likely both — SKILL.md amendment + worked-example call-out is the load-bearing fix per ADR-051.
-- [ ] Create reproduction test: behavioural bats fixture asserting orchestrator does NOT emit `ALL_DONE` after one iter when (a) iter returned `outcome: partial-progress` AND (b) the same ticket appears in the Remaining Backlog AND (c) no Step 2 stop condition is documented in the halt summary. Negative test: orchestrator DOES emit `ALL_DONE` when stop-condition #1/#2/#3 fires legitimately.
-- [ ] Sweep ADR-044 framework-resolution boundary worked examples — does P175 belong in the inverse-P132 lazy-deferral worked-example list (currently P130 transient-user is the only inverse-failure entry)? If so, surface in `run-retro` Step 1.5 silent classification + Step 2d Ask Hygiene Pass criteria.
-- [ ] Check whether the same misreading appears in non-AFK orchestrator surfaces — `/wr-itil:work-problem` (singular) might exhibit the same class when called with scope-pin args.
-- [ ] Consider symmetric-inverse work: if "just" is misread as count constraint, are "every", "all", "each" misread as count expansion (e.g. user says "work every P170 sub-task" and agent dispatches N parallel iters)? Probably not — the natural-language asymmetry favours under-narrowing more than over-broadening.
+Dual-layer root cause confirmed:
+
+1. **SKILL.md gap (load-bearing)**: prior to this fix, `/wr-itil:work-problems` SKILL.md Step 7 ("Loop. Go back to step 1") was two lines naming no semantics for natural-language modifiers in the invocation args, and the "Mid-loop ask discipline" subsection's "No mid-iter ask points" paragraph enumerated framework-resolved loop continuation without explicitly disclaiming agent-inferred halts from scope-pin words. The SKILL surface did not codify that scope-pin words (`just`/`only`/`first`/`merely`/`simply` + ticket-ref) are SCOPE FILTERS over Step 1's WSJF selection — they pin the ticket selection but do NOT alter loop control. This gap is the load-bearing one because the SKILL is the agent-facing contract; framework-resolution boundary citations in ADR-044 are too high-up the abstraction stack to be salient when the agent is reading the work-problems SKILL specifically.
+
+2. **Agent-prior gap (composing)**: training-data over-association of "just" / "only" with "exactly one" / "single occurrence". Cannot fix in the prior directly; closed by structurally enforcing the contract via SKILL prose + paired Tier-A/B promptfoo eval (per ADR-061 Rule 4 evidence-floor — paired eval GREEN is the per-class evidence the framework relies on).
+
+### Fix Strategy
+
+Phase 1 (this iter, narrow): codify the contract in SKILL.md + paired promptfoo eval, single commit per ADR-014.
+
+- SKILL.md Step 7 — add brief forward-pointer to the "Mid-loop ask discipline" subsection.
+- SKILL.md "Mid-loop ask discipline" subsection — new labelled paragraph "**Scope-pin-word semantics (P175).**" naming the vocabulary, classifying as SCOPE FILTER (selection override), explicitly disclaiming loop-control effect, citing ADR-044 framework-resolution boundary's "Continue / stop loops" mediation, and pointing to Step 2.4 gate (c) as the canonical `ALL_DONE` emit position.
+- SKILL.md Related — new P175 entry naming the bug shape + fix + behavioural second-source pointer.
+- `eval/promptfooconfig.yaml` — paired Tier-A regex + Tier-B llm-rubric test asserting orchestrator (a) does NOT emit `ALL_DONE` after iter 1 on scope-pin-word invocation with named remaining slices, (b) dispatches iter 2 against the pinned ticket, (c) interprets the scope-pin word as SCOPE FILTER not count constraint.
+- Changeset entry citing P175 + named the four-surface change (Step 7 forward-pointer, Mid-loop ask discipline paragraph, Related entry, eval test).
+- `@jtbd JTBD-006` (load-bearing) + `@jtbd JTBD-001` (secondary) markers above the new paragraph (per JTBD review verdict 2026-06-09).
+- R009 (prose-surface harness evidence-floor risk) discharged in-commit by the paired eval extension — passing the eval flips R009 -1 for the work-problems surface.
+
+Phase 2+ (deferred — separate iters / no auto-roll-up to this ticket):
+
+- [ ] Sweep ADR-044 framework-resolution boundary worked examples — does P175 belong in the inverse-P132 lazy-deferral worked-example list? Codify as one-line addition to ADR-044's `Continue / stop loops` mediation entry. (Multi-ADR-file deadlock risk per P303; defer to a dedicated iter.)
+- [ ] Check non-AFK orchestrator surfaces — `/wr-itil:work-problem` (singular) might exhibit the same class. Audit + extend SKILL prose if needed.
+- [ ] Consider symmetric-inverse work: misreading of "every" / "all" / "each" as count expansion. Likely not real; investigate empirically.
+- [ ] Re-rate Priority and Effort at next `/wr-itil:review-problems` (deferred placeholder still present).
 
 ## Dependencies
 
