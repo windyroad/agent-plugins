@@ -1,10 +1,11 @@
 # Problem 129: P079 inbound assessment pipeline lacks version-aware classification — already-fixed-in-newer / recurred / still-active branches
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-26
+**Origin**: internal
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
-**Effort**: L — assessment-pipeline classifier extension + recurrence-class lifecycle semantics + integration with closed-ticket history search + bats coverage. Marginal estimate.
-**WSJF**: 3.0 — (12 × 1.0) / max(L=4, P079=4) = 12/4 — re-rated 2026-05-23: P038/P064 closed, P128 verifying→0; bounded by P079/marginal L
+**Effort**: L — assessment-pipeline classifier extension + recurrence-class lifecycle semantics + integration with closed-ticket history search + bats coverage. Marginal estimate. Phase 1 LANDED 2026-06-09 (already-fixed-in-newer branch only); Phase 2 (recurrence-class lifecycle) remains DEFERRED — effort revises down to M when Phase 2 is the only outstanding work.
+**WSJF**: 3.0 — (12 × 1.0) / max(L=4, P079=4) = 12/4 — re-rated 2026-05-23: P038/P064 closed, P128 verifying→0; bounded by P079/marginal L. Phase 1 closes the "already-fixed leak" symptom; "recurrence-class invisibility" + "triage skew" symptoms remain open under Phase 2.
 
 ## Description
 
@@ -112,16 +113,26 @@ When a recurrence is detected, the pipeline needs somewhere to record the recurr
 
 ### Investigation Tasks
 
-- [ ] Architect review: confirm Option A pipeline-step shape + Option B-2 recurrence-lifecycle shape (lean) at implementation time. Confirm closed-ticket matcher infrastructure (P070-style two-stage vs. simpler heuristic).
-- [ ] Compose with P128's schema: confirm the `## Versions` section's parse surface gives the classifier enough info to extract reporter-version reliably. If P128's schema fields turn out insufficient, surface the requirement back to P128 BEFORE either ticket implements.
-- [ ] Compose with P079's pipeline: integrate the version-comparison step at the JTBD-alignment ↔ risk-assessment seam. Confirm the comment-gate plumbing (P064 + P038) handles the pushback-comment path the same way as P079's existing pushback-comment path for above-threshold-risk.
-- [ ] Build the closed-ticket-history matcher (per the matcher-options decision in the candidate fix). The matcher needs: closed-ticket glob (`docs/problems/*.closed.md` or `docs/problems/closed/*.md` per ADR-031 future); body-section parser for `## Fix Released` (extract version marker); semantic comparator (P070-shape or simpler).
-- [ ] Implement the version-comparison classifier. Three-way output: `already-fixed` / `recurred` / `still-active`. Each output routes to a distinct downstream branch.
-- [ ] Document the recurrence-lifecycle decision (B-1 vs B-2) and ship the implementation. If B-2 (lean), the chosen shape extends ADR-022's "Allowed optional appendages" enumeration with the new `## Recurrences` section. If B-1, ADR-022 amends the suffix vocabulary; weight that risk before choosing.
-- [ ] End-to-end test: file a synthetic inbound report against a synthetic adopter project; confirm each of the three classification outcomes routes correctly. Cover regression-of-recurrence (a recurred ticket later closed and recurred again).
-- [ ] Bats coverage per ADR-037 + P081 (behavioural over structural — test the classifier's three outputs on synthetic inputs, not the implementation's internal data structures).
-- [ ] Compose-with-but-don't-bundle: defer to architect at implementation time on whether to extract a shared classifier component for `/wr-itil:report-upstream`'s outbound-side dedup-on-existing-issues (P070). The cross-skill sharing has surface; it does NOT belong in P129's scope (architect verdict 2026-04-26).
-- [ ] Update P079's pipeline documentation to reference the carve-out + the integration seam.
+**Phase 1 — already-fixed-in-newer branch (LANDED 2026-06-09 in `packages/itil/skills/review-problems/SKILL.md` Step 4.5e Step 1 + new Step 4b)**:
+
+- [x] Architect review: Phase 1 shape confirmed 2026-06-09 — Step 4b sub-branch is correct wiring locus; `already-fixed-in-newer` cache classification token is within SKILL-prose scope per ADR-014 (no ADR-062 amendment required); upgrade-pushback is a **sub-shape of the existing `fix released` verdict** (not a 6th verdict-shape row) surfaced at inbound-discovery time; version-extraction stays inline in SKILL.md prose under ADR-075 SKILL-prose harness scope (no premature helper-script extraction).
+- [x] JTBD review: Phase 1 PASS 2026-06-09 — JTBD-301 outcome row 6 satisfied (upgrade-pushback IS the predictable verdict, sub-shape of "fix released"; no local ticket is correct because no investigation is needed); persona-fit confirmed for plugin-user (concrete `@windyroad/<pkg>@<fix-version>` upgrade target + "file a new report" escape hatch + reporter-readable `P<NNN>` audit-trail anchor symmetric with 4.5d duplicate verdict); heuristic-miss fallback safe for JTBD-001 (no silent loss).
+- [x] Compose with P128's schema: `## Versions` section parse surface (`- Local plugin: @windyroad/<pkg>@<version>`) gives the classifier enough info; fail-soft `cache_audit_note: phase1-version-missing` handles unparseable / absent rows.
+- [x] Compose with P079's pipeline: Step 4b integration seam wired at the JTBD-alignment ↔ risk-assessment seam (between Step 1 and Step 2); comment-gate plumbing (P064 + P038) rides the same path as Step 4 above-threshold-pushback.
+- [x] Closed-ticket-history matcher: reuses P070 semantic-comparator infrastructure (the same comparator invoked at 4.5d) walked against `docs/problems/closed/*.md`. Best-effort fix-version extraction from `## Fix Released` section in priority order (a) explicit `@windyroad/<pkg>@X.Y.Z`, (b) `vX.Y.Z` adjacent to "released" / "shipped" / "fixed in", (c) commit SHA → first publishing changeset. Fail-soft via `cache_audit_note: phase1-fix-version-extraction-failed-P<NNN>`.
+- [x] Phase 1 classifier shipped: Step 1's three outcomes wired — `already-fixed-in-newer` → Step 4b upgrade-pushback; `recurred-in-newer-version` → DEFERRED to Phase 2 via `cache_audit_note: phase2-recurrence-deferred-bug-shape-match-against-P<NNN>` (Phase 2 backfill anchor); `still-active` → continue to step 2.
+- [x] Bats coverage extended per ADR-037 + P081: 9 new behavioural anchors added to `packages/itil/skills/review-problems/test/inbound-discovery-contract.bats` covering Phase 1 contract, fail-soft fallbacks, Step 4b upgrade-pushback, anti-leakage (P229), gate-denial sub-branch.
+- [x] Promptfoo eval extended per ADR-075 SKILL-prose harness: new test case in `packages/itil/skills/review-problems/eval/promptfooconfig.yaml` covering Step 4b upgrade-pushback comment body (Tier A regex + Tier B llm-rubric on concrete upgrade target naming, matched closed-ticket P-id disclosure, escape-hatch preservation, framework-vocab anti-leakage).
+
+**Phase 2 — recurrence-class lifecycle (DEFERRED — separate iter):**
+
+- [ ] Architect: confirm Option B-2 (`## Recurrences` appendage section on closed tickets) vs. B-1 (new `.recurred.md` suffix). Lean per 2026-04-26 architect verdict: B-2 (doesn't expand ADR-022 suffix vocabulary; composes cleanly with ADR-031; mirrors ADR-024 Step 7 `## Reported Upstream` appendage shape).
+- [ ] Implement recurrence-class branch: when Step 1 detects matched closed-ticket + reporter-version ≥ fix-version (regression), route to recurrence-handling path; append to matched closed ticket's `## Recurrences` section AND open a fresh `.open.md` ticket marked as recurrence in `## Description`.
+- [ ] Drain `phase2-recurrence-deferred-bug-shape-match-against-P<NNN>` cache_audit_note entries accumulated during Phase 1; backfill as recurrence entries on the matched closed tickets.
+- [ ] Triage skew remediation: regression-class WSJF Likelihood bump per the "regressions are higher-likelihood-of-recurrence than net-new bugs" rationale.
+- [ ] End-to-end test: synthetic inbound report against synthetic adopter project; cover regression-of-recurrence (a recurred ticket later closed and recurred again).
+- [ ] Compose-with-but-don't-bundle: defer to architect on whether to extract a shared classifier component for `/wr-itil:report-upstream`'s outbound-side dedup (P070). Cross-skill sharing has surface but does NOT belong in P129's scope (architect verdict 2026-04-26 unchanged).
+- [ ] Update P079's pipeline documentation (P079 already closed; this becomes ADR-062 § Reassessment cross-reference if Phase 2 lands after ADR-062 ratifies).
 
 ## Dependencies
 

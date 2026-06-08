@@ -138,8 +138,86 @@ setup() {
 # Six pipeline outcomes (4.5e steps 1-6)
 # ──────────────────────────────────────────────────────────────────────────────
 
-@test "Pipeline step 1 — version-aware classification stub seam (P129 carve-out)" {
-  run grep -inE 'version-aware classification.*P129|P129.*stub seam' "$SKILL_FILE"
+@test "Pipeline step 1 — version-aware classification (P129 Phase 1 already-fixed-in-newer; Phase 2 recurrence deferred)" {
+  # Phase 1 landed: SKILL.md Step 1 now carries the version-aware classifier
+  # for the already-fixed-in-newer branch. Phase 2 (recurrence-class lifecycle)
+  # remains deferred and is captured via the cache_audit_note Phase 2 token.
+  run grep -inE 'version-aware classification.*P129.*Phase 1|P129.*Phase 1.*already-fixed-in-newer' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "Pipeline step 1 — already-fixed-in-newer classification token present (P129 Phase 1)" {
+  run grep -nE 'already-fixed-in-newer' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "Pipeline step 1 — Phase 2 recurrence deferred with cache_audit_note phase2-recurrence-deferred token" {
+  # Phase 2 deferral is recorded as a strictly additive cache_audit_note so
+  # Phase 2 can backfill the recurrence-link when it lands; the matched
+  # closed-ticket ID is named on the note so Phase 2 has a backfill anchor.
+  run grep -nE 'phase2-recurrence-deferred-bug-shape-match' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "Pipeline step 1 — Versions section parse per ADR-033 amendment / P128 schema" {
+  # The classifier inputs depend on the inbound report carrying a parsable
+  # `## Versions` section per P128's schema (`- Local plugin: @windyroad/<pkg>@<version>`).
+  # If P128's schema regresses, this anchor surfaces the dependency.
+  run grep -inE 'Versions section.*P128|## Versions.*P128|Local plugin.*@windyroad' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "Pipeline step 1 — missing-version fail-soft fallback (phase1-version-missing)" {
+  # When the reporter's `## Versions` section is absent or `Local plugin` is
+  # unparseable, Step 1 logs `cache_audit_note: phase1-version-missing` and
+  # proceeds to step 2 (treats as still-active). Required by the fail-soft
+  # contract at 4.5 head; protects JTBD-301 acknowledgement.
+  run grep -nE 'phase1-version-missing' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "Pipeline step 1 — fix-version-extraction-failed fail-soft fallback" {
+  # When fix-version extraction from the matched closed ticket's
+  # `## Fix Released` section fails (best-effort heuristic miss), Step 1
+  # logs `cache_audit_note: phase1-fix-version-extraction-failed-P<NNN>`
+  # and proceeds to step 2. Maintainer re-discovers the duplication via
+  # the next /wr-itil:review-problems re-rank; no silent loss.
+  run grep -nE 'phase1-fix-version-extraction-failed' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "Pipeline step 4b — upgrade-pushback branch (P129 Phase 1 fix-released sub-shape)" {
+  # New sub-branch wired by Step 1's already-fixed-in-newer outcome.
+  # Posts a gated upgrade-pushback comment under the fix-released verdict
+  # row of the 4.5e-comment-shape contract. Architect verdict 2026-06-09
+  # confirmed this as a sub-shape (not a 6th verdict-shape row) to
+  # preserve the JTBD-301 four-verdict contract.
+  run grep -inE '4b\..*Upgrade-pushback|Upgrade-pushback branch.*P129' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "Pipeline step 4b — no local ticket created on already-fixed-in-newer (Phase 1 contract)" {
+  # JTBD verdict 2026-06-09: the absence-of-ticket is correct because no
+  # new investigation is needed; the "file a new report" escape hatch
+  # preserves the plugin-user persona's agency.
+  run grep -inE 'Do NOT open a local ticket|absence-of-ticket is correct' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "Pipeline step 4b — anti-leakage (P229) preserved on upgrade-pushback body" {
+  # Comment bodies MUST NOT carry framework-internal vocab — Step IDs,
+  # branch names, classification tokens, or path syntax. The only
+  # structured tokens permitted are the plain-language upgrade target
+  # `@windyroad/<pkg>@<fix-version>` + the reporter-readable `P<NNN>` anchor.
+  run grep -inE 'Anti-leakage \(P229\).*4b|MUST NOT contain framework-internal vocab' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "Pipeline step 4b — gate-denial sub-branch records gate-denied-already-fixed-in-newer-upgrade-pushback" {
+  # Symmetry with the existing gate-denial sub-branches on Steps 4 / 5 / 6.
+  # The upgrade-pushback comment retries on next discovery pass —
+  # JTBD-301 acknowledgement is preserved across gate denials.
+  run grep -nE 'gate-denied-already-fixed-in-newer-upgrade-pushback' "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }
 

@@ -346,6 +346,93 @@ tests:
           clear-malicious is conflated with won't-fix as the same
           deliberation outcome.
 
+  # --- P129 Phase 1: Step 4b upgrade-pushback (fix-released sub-shape at inbound-discovery time) ---
+
+  - description: Step 4b upgrade-pushback (P129 Phase 1) posts fix-released-sub-shape ack naming concrete upgrade target + matched closed P-id
+    vars:
+      prompt: |
+        I am the /wr-itil:review-problems Step 4.5e Step 4b
+        upgrade-pushback branch. Step 1's version-aware classifier
+        (P129 Phase 1) just returned `already-fixed-in-newer`: the
+        inbound report on upstream GitHub issue #173 in repo
+        bbstats/bbstats parsed `## Versions: - Local plugin:
+        @windyroad/itil@0.18.0` and the P070 semantic-comparator hit
+        the closed local ticket P140 whose `## Fix Released` section
+        carries the version anchor `@windyroad/itil@0.20.0`.
+
+        Per the 4.5e-comment-shape JTBD-301 verdict-shape contract row
+        (b) — fix-released sub-shape at inbound-discovery time — draft
+        the reporter-facing upgrade-pushback comment body I should
+        pass to `gh issue comment 173 --repo bbstats/bbstats --body
+        "<draft>"`. Output ONLY the comment body, no surrounding
+        prose, no markdown code fences.
+    assert:
+      # Tier A — must name the concrete upgrade target version anchor
+      # (NOT just "the latest" — JTBD verdict 2026-06-09 requires the
+      # precise version the fix shipped in so the reporter has a
+      # specific upgrade target).
+      - type: regex
+        value: '@windyroad/itil@0\.20\.0|0\.20\.0|v0\.20\.0'
+      # Tier A — must reference the matched closed local ticket P-id
+      # so JTBD-301 audit-trail symmetry with the 4.5d duplicate
+      # verdict is preserved (P140 is the verdict anchor, not
+      # framework vocab per P229).
+      - type: icontains
+        value: 'P140'
+      # Tier A — must communicate the "file a new report if still
+      # seeing it after upgrade" escape hatch per the JTBD verdict
+      # 2026-06-09 persona-fit constraint.
+      - type: regex
+        value: 'file a new report|file another|still see (?:this|the issue|it) after|after upgrad'
+      # Tier A — must NOT leak the maintainer-internal classification
+      # token (P229 anti-leakage).
+      - type: not-icontains
+        value: 'already-fixed-in-newer'
+      # Tier A — must NOT leak the framework-internal Step ID.
+      - type: not-icontains
+        value: 'Step 4b'
+      - type: not-icontains
+        value: 'Step 4.5'
+      # Tier A — must NOT leak the framework-internal classification
+      # phrase or branch name.
+      - type: not-icontains
+        value: 'fix-released sub-shape'
+      - type: not-icontains
+        value: 'upgrade-pushback'
+      # Tier A — must NOT leak the framework-internal path syntax.
+      - type: not-icontains
+        value: 'docs/problems/'
+      # Tier B — semantic invariant: plain-language fix-released
+      # verdict surfaced at inbound-discovery time; concrete upgrade
+      # target named; matched closed-ticket P-id disclosed for audit
+      # trail symmetry; "file a new report" escape hatch preserved;
+      # no framework-internal vocab leakage.
+      - type: llm-rubric
+        value: |
+          The comment body satisfies the P129 Phase 1 upgrade-pushback
+          contract: (a) acknowledges the report in plain language a
+          plugin-user persona can act on without reading ADRs or
+          source; (b) names the concrete upgrade target version
+          `@windyroad/itil@0.20.0` (NOT just "the latest" — the
+          reporter needs the precise version the fix shipped in);
+          (c) discloses the matched closed local ticket `P140` as a
+          verdict-trail anchor (this is NOT framework-vocab leakage
+          per P229 — P-ids are reporter-readable verdict anchors,
+          symmetric with the 4.5d duplicate verdict which also
+          discloses the matched P-id); (d) preserves the "if you
+          still see this after upgrade, please file a new report"
+          escape hatch so the reporter retains agency; (e) does NOT
+          contain maintainer-internal framework vocabulary like
+          `already-fixed-in-newer`, `upgrade-pushback`, `Step 4b`,
+          `Step 4.5e`, `fix-released sub-shape`, or
+          `docs/problems/<state>/<NNN>-<title>.md` path syntax. PASS
+          if all five are satisfied. FAIL if the body uses
+          imprecise upgrade language like "upgrade to the latest"
+          (no concrete version), OR leaks framework-vocab, OR
+          opens a fresh local ticket (the contract says no local
+          ticket is created because no investigation is needed). Saying
+          the body does NOT contain framework vocab PASSES.
+
   # --- P287: Step 4.5 § 6 AFK-marker / I12 derive-then-ratify contract ---
 
   - description: Step 4.5 § 6 AFK-marker / I12 derive-then-ratify — derivation-failure halts with cache_audit_note
