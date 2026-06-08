@@ -1,6 +1,6 @@
 # Problem 313: Pre-edit governance-gate catch-22 — review agent withholds PASS because edits "aren't applied yet", but the gate blocks the edits
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-26
 **Priority**: 4 (Medium) — Impact: 2 x Likelihood: 2 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -47,3 +47,22 @@ Re-run the gate agent with an explicit pre-edit-review framing preamble (used su
 ## Related
 
 (captured via /wr-retrospective:run-retro Step 2b pipeline-instability scan, 2026-05-26 ADR-070/071 implementation session — repeat-work category, observed on both architect and jtbd gates; expand at next investigation)
+
+## Fix Released
+
+Fix landed 2026-06-08 by amending both reviewer prompts (`packages/architect/agents/agent.md`, `packages/jtbd/agents/agent.md`) with an explicit **Review Mode: Pre-edit / proposed-change vs. Post-edit / applied** section immediately after **Your Role**. The amendment:
+
+- Names the two modes and the recognition signals for each (calling-prompt language: "PRE-EDIT", "proposed", "plan to", AFK iter dispatch, RFC/story body context).
+- Embeds the verbatim core sentence per the workaround framing — *"classify alignment of the PROPOSAL itself. Not-yet-applied state of the proposed change is the EXPECTED baseline of a pre-edit gate. Do NOT treat 'edits aren't applied yet' / 'the residual old state is still live' / 'the change isn't on disk yet' as ISSUES FOUND — that is the gate's design intent (P313 closes this catch-22)"*.
+- Cites the JTBD-specific manifestation: a re-review fired by a marker-invalidation after a same-session JTBD-policy edit must classify the proposal that re-amends the policy, NOT withhold PASS because the prior policy text is still live on disk (the slice-2 README write vector from the original capture).
+- Sets the safer fail-mode default: when mode is ambiguous, treat as pre-edit (a true post-edit drift still surfaces on substance; a true pre-edit proposal mis-classified as post-edit fires the catch-22).
+- Constraints on the carve-out scope: pre-edit mode does NOT relax any substantive check (Decision Compliance / Confirmation Criteria / Unratified Dependency / Needs Direction / Job Alignment / Persona Fit). It constrains only the verdict-grammar around not-yet-applied baseline.
+
+Structural bats guards (P176 / ADR-052 Surface 2 pattern, marked `tdd-review: structural-permitted` per the existing `architect-needs-direction-verdict.bats` precedent):
+
+- `packages/architect/agents/test/architect-pre-edit-review-mode.bats` — 5 assertions on the heading + verbatim core sentence + P313 cite.
+- `packages/jtbd/agents/test/jtbd-pre-edit-review-mode.bats` — same shape for the JTBD agent.
+
+Composes with P181 (verdict-grep fragility — orthogonal: P181 lives in the hook surface, P313 in the agent surface) and P303 (multi-decision-file deadlock — orthogonal: P303 is hash-drift re-locking, P313 is verdict-substance mis-classification).
+
+Verification requires the next pre-edit gate firing to PASS on the first call rather than the second, on both architect and jtbd surfaces. The two architect + JTBD invocations during this iter's own work (P313 work-problems iter, 2026-06-08) already exhibit the proper PASS-on-first-call behaviour when the framing preamble is explicit — but that explicit framing was provided by the iter dispatch prompt, not by the agent's own prompt parsing. Genuine cross-validation requires a subsequent session-internal gate firing WITHOUT explicit "PRE-EDIT" preamble in the caller's prompt. Awaiting user verification.
