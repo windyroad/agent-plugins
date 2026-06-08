@@ -1,0 +1,543 @@
+# SKILL eval — create-adr behavioural contracts on the ADR-authoring surface
+# (P324 Phase 4 / P012 / RFC-012 / ADR-075 Amendment 2026-06-02).
+#
+# Tier-A deterministic regex + Tier-B llm-rubric coverage for 6 contracts on
+# the create-adr SKILL.md surface — discharges TWO held changesets in
+# `docs/changesets-holding/` whose Reinstate criteria (per ADR-061 Rule 4
+# evidence-floor) name this exact eval path:
+#
+#   - Step 2 derive-first dispatch for Title (silent-framework, ADR-044
+#     category 4): the Title field resolves silently via the shared helper's
+#     `derive_kebab_slug` function, emits a single I2-isomorphic stderr
+#     advisory, and does NOT fire `AskUserQuestion`. Mirrors the load-bearing
+#     pattern across the 4-surface set (capture-problem / manage-incident /
+#     manage-problem / create-adr) per the helper at
+#     `packages/shared/derive-first-dispatch.sh`.
+#   - Step 5 / 5a two-fire split (P339 / P340 — substance-confirm precedes
+#     draft-quality review): Step 5 fires TWO separate `AskUserQuestion`
+#     passes — substance-confirm GATES the born-confirmed marker write;
+#     draft-quality review fires AFTER 5a passes and does NOT gate the
+#     marker. Bundling them re-introduces the ADR-078 ratification gap.
+#   - Step 5a brief-before-ID at the option-shape AskUserQuestion (P350-
+#     architect): the question text + every option label inline the
+#     substance of the option (chosen-option short name + self-contained
+#     trade-off summary) BEFORE any bare `ADR-NNN` / `P-NNN` / `JTBD-NNN`
+#     / `RFC-NNN` annotation. IDs are audit-trail annotations only; the
+#     user does NOT have project filesystem access on every device.
+#   - Step 5a born-confirmed marker write (ADR-074 + ADR-066 amended P340
+#     + P348): the marker writes ONLY when the substance-confirm answer
+#     selects a substantive option from the considered-options set AND
+#     that option matches the option the draft was authored against; on
+#     mismatch, re-draft and re-fire — DO NOT write the marker. AFK iter
+#     subprocesses spawned via `claude -p` MUST write
+#     `human-oversight: unconfirmed` instead — documented ADR-074 carve-out
+#     from the ADR-013 Rule 6 universal queue-and-continue default.
+#   - Step 5a retitle-after-decision (P354 — ADR-044 category-4 silent-
+#     framework): after the marker write, if the on-disk slug matches a
+#     question-shape pattern (`-vs-`, `should-`, `whether-`, `-or-`), the
+#     skill mechanically derives the outcome slug from the chosen-option
+#     short name, edits the H1, then `git mv` — in that order to preserve
+#     `architect-oversight-marker-discipline.sh` hook semantics (the
+#     marker-introducing Edit lands BEFORE `git mv`). Does NOT fire
+#     `AskUserQuestion` (P132 inverse-P078 guard).
+#   - Step 2b multi-decision split AUTO-DEFAULT (ADR-013 Rule 6 carve-out
+#     authorised by ADR-044 cat 4): under non-interactive / AFK mode, when
+#     decision-boundary analysis detects ≥2 distinct decisions, the skill
+#     AUTO-SPLITS into separate ADRs with consecutive IDs and notes the
+#     auto-split in output — does NOT halt. Documented carve-out from the
+#     universal queue-and-continue default: the framework can safely apply
+#     the over-split heuristic because manual combine via supersession is
+#     fully reversible.
+#
+# Drivers:
+#   - ADR-075 (Amendment 2026-06-02) — SKILL-prose harness scope; per-skill
+#     `packages/<plugin>/skills/<skill>/eval/promptfooconfig.yaml`
+#     location; exec:bash provider; Tier-A regex + Tier-B llm-rubric.
+#   - ADR-061 (Rule 4 evidence-floor) — paired promptfoo Tier-A/B GREEN IS
+#     the per-class evidence for SKILL-prose surfaces; flips the R009
+#     modulator +1 → -1 for this surface, dropping P350-architect +
+#     P354-architect-portion within appetite atomically per cohort-
+#     graduation pre-check (ADR-061 Rule 3b).
+#   - ADR-014 (single-commit grain) — this eval file ships in the same
+#     commit as its companion runners (no `.changeset/*.md` — eval test
+#     infrastructure excluded from the tarball via packages/architect/
+#     .npmignore: `skills/*/eval/`).
+#   - ADR-074 (substance-confirm-before-build) — authorises the create-adr
+#     Step 5 substance-confirm HALT carve-out from the ADR-013 Rule 6
+#     amended queue-and-continue universal default; AFK fallback writes
+#     `human-oversight: unconfirmed` so the loop continues.
+#   - ADR-066 (born-confirmed marker write) — amended P340 (substance-
+#     confirm precondition) + P348 (structurally-gated marker write via
+#     the `wr-architect-mark-oversight-confirmed` helper).
+#   - ADR-044 (decision-delegation contract) — Step 2 derive-first paths
+#     route to silent-framework category 4; Step 5a retitle is silent-
+#     framework category 4; Step 2b auto-split fallback is silent-framework
+#     category 4; brief-before-ID discipline at the option-label surface
+#     (P350-architect).
+#   - RFC-012 — single build vehicle for the harness.
+#   - P324 (driving problem — agent-prose verdict harness gap; Phase 4).
+#   - P350-architect (held changeset — brief-before-ID discipline at the
+#     architect-plugin SKILLs) + P354-architect-portion (held changeset
+#     — title-as-outcome convention).
+#
+# Tier-B (llm-rubric) grader: the create-adr contracts contain heavy
+# NEGATIVE clauses ("does NOT fire AskUserQuestion for Title"; "marker MUST
+# NOT write on mismatch"; "MUST NOT lead with bare ID"; "retitle MUST NOT
+# fire AskUserQuestion"; "MUST NOT halt on auto-split"). Tier-A `not-regex`
+# on those clauses false-fails against behaviourally-correct negated
+# answers — same pattern the work-problems + review-problems +
+# capture-problem evals encountered, resolved via the Tier-B claude-grader
+# (P012 reopen findings 2026-06-04). Distinctive positive tokens stay
+# Tier-A.
+#
+# Run from repo root:
+#   npx promptfoo eval -c packages/architect/skills/create-adr/eval/promptfooconfig.yaml
+#
+# @jtbd JTBD-001 (Enforce Governance Without Slowing Down)
+# @jtbd JTBD-006 (Progress the Backlog While I'm Away)
+# @jtbd JTBD-007 (Keep Plugins Current Across Projects)
+# @jtbd JTBD-101 (Extend the Suite with New Plugins)
+# @problem P324
+# @problem P012
+# @problem P350
+# @problem P354
+# @rfc RFC-012
+# @adr ADR-075 (Amendment 2026-06-02)
+# @adr ADR-061 (Rule 4 evidence-floor)
+# @adr ADR-074 (substance-confirm-before-build)
+# @adr ADR-066 (born-confirmed marker write; amended P340 + P348)
+# @adr ADR-044 (decision-delegation contract)
+# @adr ADR-013 (Rule 6 amended queue-and-continue universal default)
+# @adr ADR-014 (single-commit grain)
+
+description: |
+  create-adr SKILL eval — Tier-A regex + Tier-B llm-rubric coverage for 6
+  ADR-authoring behavioural contracts on the create-adr SKILL surface. Each
+  test case asserts one held-changeset Reinstate criterion per ADR-061
+  Rule 4 evidence-floor: passing eval flips the R009 prose-surface modulator
+  +1 → -1 for `create-adr`, dropping the held architect-plugin cohort
+  (P350-architect + P354-architect-portion) within appetite atomically per
+  cohort-graduation pre-check.
+
+providers:
+  # Path is relative to this config file's directory (promptfoo basePath).
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+# Tier-B (llm-rubric) grading provider. Same shape as work-problems +
+# review-problems + capture-problem: distinctive positive tokens (file
+# paths, advisory strings, command names, classification tokens) stay
+# Tier-A; semantic NEGATIVE clauses route to llm-rubric, graded by claude
+# under subscription auth (no API key) via grade-llm-rubric.sh.
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  # --- Step 2 derive-first dispatch for Title (silent-framework) -----------
+
+  - description: Step 2 Title derivation — silent-framework via derive_kebab_slug; stderr advisory; no AskUserQuestion
+    vars:
+      prompt: |
+        I am the /wr-architect:create-adr Step 2 dispatch. The user invoked
+        the skill with this `$ARGUMENTS` prose problem-statement:
+
+          "We need to decide whether the eval-harness runs in CI on every
+          PR or sampled nightly. The full-CI path costs more but catches
+          regressions earlier; the sampled-nightly path is cheaper but
+          delays detection by up to 24 hours."
+
+        Per the Step 2 derive-first dispatch contract, what does
+        create-adr do with the Title field? Does Step 2 fire
+        `AskUserQuestion` to ask the user for a title? What helper
+        function is used to derive the slug? Where is the advisory
+        emitted (stdout, stderr, or ADR body)? What ADR-044 category does
+        this path fall under? Be specific about the advisory string shape.
+    assert:
+      # Tier A — must silent-proceed (not fire AskUserQuestion for Title).
+      - type: regex
+        value: 'silent[\s\-]?proceed|silent[\s\-]?framework|does\s+not\s+(?:fire|prompt|ask)|no\s+AskUserQuestion|without\s+AskUserQuestion'
+      # Tier A — must name the derive_kebab_slug helper.
+      - type: regex
+        value: 'derive_kebab_slug|kebab[\s\-]?case'
+      # Tier A — must emit advisory to stderr (NOT stdout, NOT ADR body).
+      - type: regex
+        value: 'stderr|standard\s+error'
+      # Tier A — must reference the I2-isomorphic advisory shape.
+      - type: regex
+        value: "create-adr:\\s+derived\\s+title|derived\\s+title='"
+      # Tier A — must name ADR-044 category 4 as silent-framework.
+      - type: regex
+        value: 'category[\s\-]?4|silent[\s\-]?framework|ADR-044'
+      # Tier B — semantic invariant: Title derivation is silent-framework;
+      # uses shared helper; stderr advisory; no AskUserQuestion fire.
+      - type: llm-rubric
+        value: |
+          The response describes Step 2 silent-proceeding on the Title
+          derivation: the shared helper's `derive_kebab_slug` function
+          kebab-cases the first 8-10 non-stopword tokens of the user's
+          problem-statement, assigns the title value silently, emits a
+          single stderr advisory of the shape `create-adr: derived
+          title='<slug>' from problem-statement; re-invoke with the
+          desired title or rename the file if the slug is wrong`, and
+          does NOT fire `AskUserQuestion` for Title. The path falls
+          under ADR-044 category 4 (silent-framework) per the documented
+          derive-first dispatch contract. The advisory MUST go to stderr
+          (not stdout, not the ADR body) — stdout-embedding would risk
+          machine-readers parsing it as an ADR-body line; ADR-body
+          embedding would violate the MADR 4.0 schema. PASS if the
+          response identifies silent-proceed + derive_kebab_slug helper +
+          stderr advisory channel + ADR-044 category 4. FAIL if the
+          response says Step 2 fires `AskUserQuestion` for Title (would
+          re-introduce friction Step 2 derive-first is engineered to
+          remove), OR says the advisory goes to stdout or into the ADR
+          body, OR says the framework cannot derive the title from
+          observable evidence. Saying it does NOT fire AskUserQuestion
+          PASSES.
+
+  # --- Step 5 / 5a two-fire split (P339 / P340) -----------------------------
+
+  - description: Step 5 two-fire split — substance-confirm precedes draft-quality review; substance-confirm gates marker; draft-quality does NOT
+    vars:
+      prompt: |
+        I am the /wr-architect:create-adr Step 5 confirm-with-user step.
+        The Step 4 ADR draft is on disk with three Considered Options
+        (Option A / Option B / Option C). I need to confirm with the user
+        before any born-confirmed marker writes.
+
+        Per the Step 5 contract (P339 + P340 amendment 2026-05-31), how
+        many separate `AskUserQuestion` passes does Step 5 fire? What is
+        the order? Which of the two fires GATES the born-confirmed
+        marker write? Which does NOT gate the marker? What happens if I
+        bundle them into a single "review pass" question?
+    assert:
+      # Tier A — must name TWO separate fires. Pattern handles markdown-
+      # code-span insertions between adjectives (e.g. "two separate
+      # `AskUserQuestion` passes" which inserts a code span between
+      # "separate" and "passes") + step-naming shapes (5a/5b).
+      - type: regex
+        value: '[Tt]wo\s+separate|[Tt]wo\s+(?:AskUserQuestion\s+)?(?:fires?|passes?)|2\s+(?:separate\s+)?(?:fires?|passes?)|TWO\s+|5a\s+(?:and|\+|/)\s+5b|Step\s+5a|substance-confirm\s+fire\s+\(5a\)'
+      # Tier A — must name substance-confirm as the gating fire. Case-
+      # insensitive char-class on the leading S because LLM responses
+      # often title-case the contract name in headings.
+      - type: regex
+        value: '[Ss]ubstance[\s\-]?[Cc]onfirm'
+      # Tier A — must name draft-quality review as the non-gating fire.
+      - type: regex
+        value: '[Dd]raft[\s\-]?[Qq]uality'
+      # Tier A — must reference the P339 / P340 / ADR-078 origin.
+      - type: regex
+        value: 'P339|P340|ADR-078|bundled\s+(?:review[\s\-]?)?pass|ratification\s+gap'
+      # Tier A — must name marker write semantics.
+      - type: regex
+        value: 'born[\s\-]?confirmed|marker\s+write|human[\s\-]?oversight|gate(?:s)?\s+the\s+marker'
+      # Tier B — semantic invariant: substance-confirm precedes
+      # draft-quality; substance-confirm gates the marker write; bundling
+      # re-introduces the ADR-078 ratification gap.
+      - type: llm-rubric
+        value: |
+          The response describes Step 5 firing TWO SEPARATE
+          `AskUserQuestion` passes in this order:
+            (1) the substance-confirm fire (Step 5a) — the user picks the
+                chosen option from the considered-options set; THIS fire
+                GATES the born-confirmed marker write.
+            (2) the draft-quality review fire (Step 5b, optional) — narrow
+                questions on prose quality / consulted-informed list / edge
+                cases; fires AFTER substance-confirm passes; does NOT
+                gate the marker.
+          Bundling the two into a single "review pass" question (the
+          ADR-078 commit 5196e3d in-session exemplar that motivated P339 +
+          P340) re-introduces the ratification gap: a "Yes" answer is
+          treated as substance-ratification when in practice the user is
+          confirming draft quality alone, landing the human-oversight
+          marker on substance the user never explicitly affirmed. PASS if
+          the response identifies the two-fire split + correct order +
+          substance-confirm-gates-marker semantics + draft-quality-does-NOT-
+          gate-marker semantics. FAIL if the response says Step 5 fires
+          ONE bundled AskUserQuestion that asks both substance + draft
+          quality, OR says draft-quality gates the marker, OR says
+          substance-confirm and draft-quality are interchangeable. Saying
+          draft-quality does NOT gate the marker PASSES.
+
+  # --- Step 5a brief-before-ID at the option-shape AskUserQuestion ---------
+
+  - description: Step 5a brief-before-ID — option labels inline self-contained trade-off summary BEFORE the bare ADR-NNN audit-trail annotation
+    vars:
+      prompt: |
+        I am the /wr-architect:create-adr Step 5a substance-confirm fire.
+        The ADR draft on disk has three Considered Options:
+
+          - Option A: Marketplace-only distribution — adopters install via
+            `claude plugin install` from the windyroad marketplace.
+            Single distribution path; consistent install surface; harder
+            to develop against (cache refresh round-trip).
+          - Option B: Direct git-source distribution — adopters install
+            via `claude plugin install <git-url>`. Faster dev iteration;
+            two distribution paths to maintain; more support surface.
+          - Option C: Hybrid (marketplace for stable, git-source for dev)
+            — production users get marketplace; contributors get git.
+            Best of both; more complex documentation; risk of dev/prod
+            drift.
+
+        Per the P350-architect brief-before-ID discipline (recorded in
+        create-adr SKILL.md § 5a Rule 3 "No IDs as explainers"), draft
+        the 3 AskUserQuestion option LABELS that the substance-confirm
+        fire would surface. Output ONLY the 3 labels (one per line). Each
+        label MUST inline the substance of the option BEFORE any bare ID
+        annotation; IDs are audit-trail only.
+    assert:
+      # Tier A — must inline plain-language substance.
+      - type: regex
+        value: 'marketplace|install|distribution'
+      - type: regex
+        value: 'direct|git[\s\-]?source|git[\s\-]?url'
+      - type: regex
+        value: 'hybrid|stable|dev'
+      # Tier B — semantic invariant: each option label inlines the option's
+      # self-contained trade-off summary BEFORE any bare ID annotation; IDs
+      # are audit-trail annotations only.
+      - type: llm-rubric
+        value: |
+          Each of the three option labels inlines a plain-language gloss
+          of the option's chosen direction + its key trade-off BEFORE any
+          bare `ADR-NNN` / `P-NNN` annotation appears. Acceptable shape
+          (per P350-architect § 5a Rule 3): *"Marketplace-only
+          distribution — single install path via `claude plugin install`;
+          consistent surface but cache-refresh round-trip on dev iteration
+          (Option A)."* Unacceptable: *"Option A (marketplace)"* (ID
+          first), *"Option A"* alone (bare ID with no substance), *"see
+          Option A in the ADR draft"* (defers substance to external
+          document). The user reads the prompt without project filesystem
+          access on every device (mobile clients, accessibility tooling,
+          notification surfaces) and cannot follow links into
+          `docs/decisions/`. PASS if all three labels self-explain via
+          inlined substance BEFORE any bare ID annotation. FAIL if any
+          label leads with the bare ID, OR uses only a bare label
+          ("Option A") without inlining the trade-off, OR defers the
+          substance to an external document the user must open.
+
+  # --- Step 5a born-confirmed marker write (ADR-074 + ADR-066) -------------
+
+  - description: "Step 5a marker write — fires ONLY on substantive match between substance-confirm answer and draft; AFK writes `human-oversight: unconfirmed`"
+    vars:
+      prompt: |
+        I am the /wr-architect:create-adr Step 5a substance-confirm step.
+        The Step 4 draft was authored against Option B (Direct git-source
+        distribution). The user's substance-confirm `AskUserQuestion`
+        answer just came back: the user selected Option A
+        (Marketplace-only distribution).
+
+        Per the Step 5a contract (ADR-074 + ADR-066 P340 + P348
+        amendments), what does create-adr do next? Does the
+        `wr-architect-mark-oversight-confirmed` helper fire? Does the
+        `human-oversight: confirmed` line get inserted into the
+        frontmatter? What if instead this were running under AFK
+        orchestration (a `claude -p` iter subprocess with no
+        `AskUserQuestion` access)?
+    assert:
+      # Tier A — must indicate marker NOT written on mismatch. Pattern
+      # handles diverse phrasings: "does NOT fire", "are NOT inserted",
+      # "ONLY writes when", "marker is NOT inserted", "hollow-marker bug",
+      # "no marker is written", etc.
+      - type: regex
+        value: 'does\s+(?:NOT|not)\s+(?:fire|write|insert)|are\s+(?:NOT|not)\s+(?:inserted|written)|is\s+(?:NOT|not)\s+(?:inserted|written|fired)|(?:NOT|not)\s+inserted|(?:NOT|not)\s+written|(?:NOT|not)\s+fire(?:d)?|(?:ONLY|only)\s+writes?\s+when|hollow[\s\-]?marker|skip(?:s)?\s+the\s+marker|no\s+marker|[Dd]o\s+[Nn]ot\s+write'
+      # Tier A — must re-draft the dependent sections.
+      - type: regex
+        value: '[Rr]e[\s\-]?draft|[Rr]edraft|[Rr]e[\s\-]?author|[Rr]e[\s\-]?fire|[Rr]e-?write\s+(?:Decision[\s\-]?Outcome|Consequences|Confirmation|Pros)'
+      # Tier A — must cite ADR-074 / ADR-066 as authority.
+      - type: regex
+        value: 'ADR-074|ADR-066|[Ss]ubstance[\s\-]?[Cc]onfirm|[Bb]orn[\s\-]?[Cc]onfirmed'
+      # Tier A — must name the AFK fallback enum value.
+      - type: regex
+        value: 'unconfirmed|human-oversight:\s*unconfirmed'
+      # Tier A — must reference queue-and-continue / drain semantics.
+      - type: regex
+        value: 'queue[\s\-]?and[\s\-]?continue|drain|review-decisions|interactive\s+(?:drain|session)|/wr-architect:review-decisions'
+      # Tier B — semantic invariant: marker writes ONLY on substantive
+      # match; mismatch is a re-draft trigger, not an override; AFK
+      # subprocesses write `human-oversight: unconfirmed`.
+      - type: llm-rubric
+        value: |
+          The response describes Step 5a NOT WRITING the
+          `human-oversight: confirmed` marker on the mismatch path: the
+          draft was authored against Option B but the user selected
+          Option A, so the substantive match precondition fails. The
+          correct action is to:
+            (1) DO NOT write the marker, DO NOT call
+                `wr-architect-mark-oversight-confirmed`,
+            (2) re-draft the Decision Outcome + Consequences +
+                Confirmation + Pros-and-Cons sections (and Reassessment
+                Criteria if affected) against the newly-chosen Option A,
+            (3) re-fire the substance-confirm AskUserQuestion against
+                the re-drafted text so the marker only ever writes when
+                the on-disk draft encodes the user's substantive pick.
+          The mismatch is a re-draft trigger, NOT a "warn and proceed"
+          override. The authorising ADR is ADR-074 (substance-confirm-
+          before-build) plus the ADR-066 P340 + P348 amendments
+          (structurally-gated marker write via the helper).
+          Under AFK orchestration (a `claude -p` iter subprocess with no
+          `AskUserQuestion` access), the skill MUST write
+          `human-oversight: unconfirmed` instead — the AFK fallback enum
+          value codified in the ADR-066 amendment 2026-06-02 — so the
+          `/wr-architect:review-decisions` drain later promotes the
+          decision interactively on the next user-session. This is the
+          documented ADR-074 carve-out from the ADR-013 Rule 6 universal
+          queue-and-continue default: AFK writing `unconfirmed` IS the
+          queue-and-continue shape (the loop continues; the substance-
+          confirm decision is queued to the drain). PASS if the response
+          identifies (a) marker NOT written on mismatch + re-draft path +
+          re-fire path, AND (b) AFK writes `human-oversight: unconfirmed`
+          as the queue-and-continue equivalent. FAIL if the response says
+          the marker IS written on mismatch ("the user picked something
+          so the marker fires"), OR says the helper proceeds anyway with
+          a softer warning, OR says AFK auto-writes `confirmed` (the
+          P348 hollow-marker bug), OR says AFK halts and refuses to
+          create the ADR (would block JTBD-006).
+
+  # --- Step 5a retitle-after-decision (P354 — silent-framework) ------------
+
+  - description: Step 5a retitle-after-decision — mechanical no-AskUserQuestion; Edit H1 BEFORE git mv to preserve marker-discipline hook semantics
+    vars:
+      prompt: |
+        I am the /wr-architect:create-adr Step 5a substance-confirm step.
+        The substance-confirm fire just passed; the
+        `wr-architect-mark-oversight-confirmed` helper has run; the
+        `human-oversight: confirmed` line is on disk. The on-disk
+        filename is `docs/decisions/079-marketplace-vs-git-source-distribution.proposed.md`
+        (the slug is question-shaped — matches the `-vs-` pattern). The
+        user picked "Marketplace-only distribution" as the chosen option.
+
+        Per the Step 5a retitle-after-decision contract (P354 — ADR-044
+        category-4 silent-framework), what does create-adr do next? Does
+        the retitle fire `AskUserQuestion` to confirm the new slug? What
+        helper derives the new outcome slug? What is the ORDER of
+        operations (Edit the H1 vs `git mv` the file)? Why does the
+        order matter?
+    assert:
+      # Tier A — must be mechanical / no AskUserQuestion.
+      - type: regex
+        value: '[Mm]echanical|[Ss]ilent[\s\-]?[Ff]ramework|[Nn]o\s+AskUserQuestion|does\s+not\s+fire|without\s+AskUserQuestion|P132'
+      # Tier A — must name derive_kebab_slug as the helper.
+      - type: regex
+        value: 'derive_kebab_slug'
+      # Tier A — must indicate Edit H1 happens BEFORE git mv. LLMs phrase
+      # this many ways: "Edit-before-git mv", "Edit the H1 first", "before
+      # the git mv", numbered list ordering, "load-bearing", "order
+      # matters", "matters because the marker-introducing Edit must land
+      # BEFORE".
+      - type: regex
+        value: 'Edit[\s\-]+before|edit[\s\-]+before|before\s+(?:the\s+)?(?:`?git\s+mv|mv)|H1\s+(?:Edit\s+|edit\s+)?(?:first|FIRST|before|BEFORE)|[Ee]dit\s+(?:the\s+)?H1[\s\S]{0,100}(?:then|before|first)|order\s+(?:matters|is\s+load[\s\-]?bearing)|load[\s\-]?bearing|[Mm]ust\s+land\s+(?:BEFORE|before)'
+      # Tier A — must name git mv as the rename mechanism.
+      - type: regex
+        value: 'git\s+mv'
+      # Tier A — must reference the marker-discipline hook semantics.
+      - type: regex
+        value: 'architect-oversight-marker-discipline|marker-?discipline|marker-?introducing\s+Edit|old\s+content\s+already\s+had\s+the\s+marker'
+      # Tier B — semantic invariant: retitle is mechanical (category-4
+      # silent-framework); ordering preserves marker-discipline hook
+      # semantics; derive_kebab_slug derives the new outcome slug.
+      - type: llm-rubric
+        value: |
+          The response describes Step 5a's retitle-after-decision as a
+          MECHANICAL operation (ADR-044 category-4 silent-framework) —
+          no `AskUserQuestion` fires (per the P132 inverse-P078 guard,
+          the chosen option is already known from the substance-confirm
+          answer just above). The new outcome slug is derived from the
+          chosen-option short name ("Marketplace-only distribution") via
+          the shared helper's `derive_kebab_slug` function — the same
+          helper Step 2's Title derivation uses. The ORDER of operations
+          is load-bearing:
+            (1) Edit the H1 in the on-disk file to the new outcome shape
+                FIRST (the `human-oversight: confirmed` line is already
+                in OLD_CONTENT so the `architect-oversight-marker-
+                discipline.sh` PreToolUse hook allows this Edit per its
+                "old content already had the marker" branch).
+            (2) THEN `git mv` the file from the old question-shape
+                filename to the new outcome-shape filename (Bash command
+                — no Edit/Write hook fires; rename is captured as a
+                rename in git history).
+            (3) THEN emit the I2-isomorphic stderr advisory.
+          The order matters because the marker-introducing Edit must
+          land BEFORE the `git mv` — otherwise the post-rename Edit
+          would be the first Edit on the new path, OLD_CONTENT would not
+          contain the marker, and the marker-discipline hook would DENY
+          the Edit. PASS if the response identifies mechanical +
+          derive_kebab_slug helper + H1-Edit-before-git-mv ordering +
+          marker-discipline hook rationale. FAIL if the response says
+          the retitle fires `AskUserQuestion` to confirm the new slug,
+          OR says `git mv` happens FIRST then Edit H1 (would trip the
+          marker-discipline hook), OR says the slug is hand-typed rather
+          than derived. Saying it does NOT fire AskUserQuestion PASSES.
+
+  # --- Step 2b multi-decision split AUTO-DEFAULT (ADR-013 Rule 6 carve-out) -
+
+  - description: Step 2b multi-decision auto-split — non-interactive AFK auto-splits into separate ADRs with consecutive IDs; does NOT halt
+    vars:
+      prompt: |
+        I am the /wr-architect:create-adr Step 2b decision-boundary
+        analysis step. The Step 2 context-gather just completed. Reading
+        the gathered context, I detect TWO distinct decisions:
+          (a) which test framework to adopt (vitest vs jest)
+          (b) which CI surface runs the eval (every PR vs nightly sampled)
+        Each could be independently accepted, rejected, or superseded
+        without affecting the other.
+
+        I was invoked from an AFK orchestrator — `AskUserQuestion` is
+        unavailable on this code path. Per the Step 2b multi-decision
+        split contract (ADR-013 Rule 6 amended P352, the
+        queue-and-continue universal AFK default), what does
+        create-adr do? Does it halt? Does it queue and continue? Does
+        it auto-default? Cite the authorising ADR for any carve-out.
+        Be specific about whether ADR files are created and how they
+        are numbered.
+    assert:
+      # Tier A — must auto-split (not halt).
+      - type: regex
+        value: 'auto[\s\-]?split|automatic(?:ally)?\s+split|split\s+(?:into\s+)?(?:separate\s+)?ADRs?'
+      # Tier A — must NOT halt.
+      - type: regex
+        value: 'does\s+not\s+halt|not\s+halt|continue(?:s)?|proceed(?:s)?|do(?:es)?\s+not\s+block'
+      # Tier A — must reference consecutive IDs.
+      - type: regex
+        value: 'consecutive\s+IDs?|consecutive\s+numbers?|sequential\s+IDs?|two\s+ADRs?|2\s+ADRs?'
+      # Tier A — must cite ADR-044 category 4 or the silent-framework carve-out.
+      - type: regex
+        value: 'ADR-044|category[\s\-]?4|silent[\s\-]?framework|safe\s+default|policy[\s\-]?authorised'
+      # Tier A — must reference the reversibility rationale.
+      - type: regex
+        value: 'reversibl|supersession|combine|safe\s+heuristic|cheap'
+      # Tier B — semantic invariant: AFK auto-split is a documented
+      # ADR-044 cat-4 carve-out; framework-safe-default heuristic;
+      # reversible via supersession; JTBD-006 persona-correct.
+      - type: llm-rubric
+        value: |
+          The response describes Step 2b AUTO-SPLITTING into separate
+          ADRs (one per distinct decision) with CONSECUTIVE IDs under
+          the AFK / non-interactive code path. The skill does NOT halt
+          and does NOT queue the multi-decision question to the drain;
+          it AUTO-DEFAULTS to the split path. The authorising rationale:
+          this site is a documented ADR-013 Rule 6 AUTO-DEFAULT carve-out
+          authorised by ADR-044 category 4 (silent-framework / policy-
+          authorised safe default). The carve-out is sound because:
+            (a) splitting is fully reversible via manual combine through
+                supersession,
+            (b) the framework's WSJF / lifecycle model rewards explicit
+                per-decision ranking,
+            (c) "split when in doubt" is the persona-correct safe
+                heuristic for JTBD-006 (the loop progresses; over-splits
+                are cheap to combine; halting would cost more loop
+                throughput than the over-split risk).
+          The auto-split is noted in output so the user sees what
+          happened. PASS if the response identifies auto-split +
+          consecutive IDs + no-halt + ADR-044 cat-4 carve-out
+          authority + reversibility rationale. FAIL if the response says
+          the skill halts and waits for the user to choose, OR says it
+          queues the multi-decision question to the drain (the queue-
+          and-continue universal default), OR says it picks one
+          decision and silently swallows the other, OR conflates this
+          carve-out with the Step 5 substance-confirm carve-out (those
+          have different authorising ADRs — Step 5 is ADR-074, Step 2b
+          is ADR-044 cat 4). Saying the skill does NOT halt PASSES.

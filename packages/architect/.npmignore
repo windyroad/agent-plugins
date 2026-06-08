@@ -1,0 +1,20 @@
+# Tarball exclusions for @windyroad/architect.
+# The package.json `files` field is the inclusion allowlist (bin/, agents/,
+# hooks/, skills/, scripts/, .claude-plugin/, lib/). This `.npmignore` denies
+# matches at finer granularity for paths that should not ship to adopters.
+#
+# Per ADR-075 (Amendment 2026-06-02) Confirmation criterion: SKILL eval
+# configs + fixtures must NOT ship in the published tarball. Verify with
+# `npm pack --dry-run` from packages/architect/ — no path matching
+# skills/*/eval/ should appear. Mirrors packages/itil/.npmignore precedent
+# (Phase 3 capture-problem SKILL eval).
+#
+# NOTE: the load-bearing exclusion is the `"!skills/*/eval/"` negation in
+# package.json `files:` array — npm honours `files:` negation patterns
+# before consulting .npmignore. This `.npmignore` is the belt-and-braces
+# safety net for any future per-directory drift.
+#
+# @adr ADR-075 (Amendment 2026-06-02)
+# @rfc RFC-012 S6
+# @problem P324 (Phase 4 — create-adr SKILL eval)
+skills/*/eval/
