@@ -229,6 +229,30 @@ The refresh uses the same rendering rules as `/wr-itil:review-problems` Step 9e 
 
    Canonical rationale anchor: `manage-problem` SKILL.md Step 5 § Last-reviewed line discipline (P134). The cross-reference is preserved for the "why"; the "what" is inlined above for execution-time legibility per P331.
 
+### 7b. Bidirectional upstream lifecycle update (P080 — advisory)
+
+After the rename + README refresh land but BEFORE the Step 8 commit, fire the bidirectional lifecycle-update sibling skill so the upstream issue (if any) receives the lifecycle update comment in the SAME commit as the transition per ADR-014 single-commit grain. This is the **outbound-lifecycle-update leg** of the reporter loop (the inbound-discovery leg is owned by ADR-062's assessment pipeline; together they close the reporter relationship per JTBD-301 + JTBD-201).
+
+The trigger is **unconditional** — fire on every transition regardless of whether the ticket carries `## Reported Upstream`. The sibling skill's no-op exit (Step 1 of `/wr-itil:update-upstream`) absorbs the misses cheaply; per-transition decision cost is bounded.
+
+Invoke via the Skill tool:
+
+```
+/wr-itil:update-upstream <NNN>
+```
+
+Behaviour matrix:
+
+- **No `## Reported Upstream` section on the local ticket** → the sibling skill no-op-exits with a one-line `Nothing to update` message. Proceed to Step 8.
+- **`## Reported Upstream` present AND both gates within appetite** → the sibling skill posts via `gh issue comment` (and on Verifying → Closed, also `gh issue close`), back-writes to `## Upstream Lifecycle Updates`, and stages the back-write into the index. The Step 8 commit captures the back-write alongside the transition.
+- **`## Reported Upstream` present AND above-appetite (after silent risk-reduce + re-score)** → the sibling skill saves the drafted comment to `## Queued Upstream Update` and queues an `outstanding_questions` entry. The Step 8 commit captures the `## Queued Upstream Update` appendage alongside the transition. **The orchestrator continues per P352 queue-and-continue** — do NOT halt the transition on an above-appetite upstream update.
+
+If `/wr-itil:update-upstream` is not installed (the `@windyroad/itil` package version pre-dates P080 shipping), the Skill tool returns a not-found error. Log a one-line warning (`update-upstream skill not available; skipping upstream lifecycle update`) and proceed to Step 8 — do NOT halt the transition.
+
+Per [ADR-013 Rule 6](../../../docs/decisions/013-structured-user-interaction-for-governance-decisions.proposed.md) (AFK fail-safe), AFK orchestrators MUST NOT halt this transition path on a queued upstream-update — the queued entry surfaces at the existing batched-`AskUserQuestion` end-of-loop gate.
+
+Authority: [ADR-024](../../../docs/decisions/024-cross-project-problem-reporting-contract.proposed.md) amendment (P080) — bidirectional lifecycle-update sibling skill. Per [ADR-010](../../../docs/decisions/010-rename-wr-problem-to-wr-itil.proposed.md) amended "Split-skill execution ownership" (P093), an equivalent advisory subsection ALSO lives in `/wr-itil:manage-problem`'s in-skill Step 7 block ("copy, not move") so the in-skill callers (Step 9b auto-transition, Step 9d closure inside review, the Parked path) fire the same lifecycle update.
+
 ### 8. Commit per ADR-014
 
 Governance skills commit their own work. Transition commits include the renamed ticket file + any content edits + the refreshed `docs/problems/README.md`.

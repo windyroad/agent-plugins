@@ -1,0 +1,239 @@
+# SKILL eval — update-upstream bidirectional lifecycle update contract
+# (P080 / ADR-024 amendment / ADR-075 Amendment 2026-06-02).
+#
+# Tier-A deterministic + Tier-B llm-rubric coverage for the bidirectional
+# lifecycle-update contract: (a) the skill auto-fires from
+# transition-problem Step 7 when ## Reported Upstream is present; (b) the
+# drafted comment composes through external-comms + voice-tone gates;
+# (c) below-appetite proceeds via gh issue comment + back-write; (d)
+# above-appetite silent risk-reduces then queues per P352 queue-and-continue
+# (does NOT halt the orchestrator); (e) Verifying→Closed also runs
+# gh issue close to keep upstream state in sync; (f) the no-op exit fires
+# when the local ticket has no ## Reported Upstream section.
+#
+# Pairing with the bats contract test discharges the R009 prose-floor for
+# this new SKILL surface atomically per ADR-061 Rule 4 evidence-floor —
+# without this paired eval, ADR-042 Rule 2 move-to-holding would apply per
+# the P080 iter contract.
+#
+# Drivers:
+#   - ADR-024 (P080 amendment — bidirectional lifecycle updates, sibling
+#     skill, transition-template shape, gate composition).
+#   - ADR-028 (voice-tone gate on `gh issue comment` / `gh issue close`).
+#   - ADR-013 (Rule 1 AskUserQuestion; Rule 6 AFK fail-safe).
+#   - ADR-014 (single-commit grain — transition + back-write + upstream
+#     post when triggered from transition-problem Step 7).
+#   - ADR-044 (framework-resolution boundary — gate verdict IS the framework;
+#     no per-transition AskUserQuestion for the gate firing itself).
+#   - ADR-061 (Rule 4 evidence-floor — paired Tier-A/B GREEN IS the per-class
+#     evidence for SKILL-prose surfaces; drops the R009 +1 modulator -> -1).
+#   - ADR-075 (Amendment 2026-06-02 — SKILL-prose harness scope; per-skill
+#     packages/<plugin>/skills/<skill>/eval/promptfooconfig.yaml location;
+#     exec:bash provider; Tier-A regex + Tier-B llm-rubric).
+#   - P080 (driving problem — no bidirectional update of upstream-reported
+#     problems).
+#   - P352 (queue-and-continue — above-appetite does NOT halt the orchestrator).
+#
+# Run from repo root:
+#   npx promptfoo eval -c packages/itil/skills/update-upstream/eval/promptfooconfig.yaml
+#
+# @jtbd JTBD-301 (Report a Problem Without Pre-Classifying It)
+# @jtbd JTBD-001 (Enforce Governance Without Slowing Down)
+# @jtbd JTBD-201 (Restore Service Fast with an Audit Trail)
+# @jtbd JTBD-101 (Extend the Suite with Clear Patterns)
+# @problem P080
+# @adr ADR-024 (P080 amendment)
+# @adr ADR-075 (Amendment 2026-06-02)
+# @adr ADR-061 (Rule 4)
+
+description: |
+  update-upstream SKILL eval — bidirectional lifecycle update contract
+  per the ADR-024 amendment (P080). Asserts gate composition, the three
+  transition templates, queue-and-continue on above-appetite, the closing-
+  upstream behaviour on Verifying→Closed, and the no-op exit when the
+  local ticket has no ## Reported Upstream.
+
+providers:
+  # Path is relative to this config file's directory (promptfoo basePath).
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+# Tier-B (llm-rubric) grading provider. The update-upstream contract has
+# NEGATIVE clauses ("the orchestrator must NOT halt"; "must NOT invent
+# technical claims") that Tier-A regex cannot grade — a not-regex for
+# "halt the orchestrator" false-fails against the CORRECT answer "the
+# orchestrator does NOT halt" (forbidden substring inside a negation).
+# Those clauses use `type: llm-rubric`, graded by claude under
+# subscription auth (no API key) via grade-llm-rubric.sh.
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: AFK below-appetite KE→Verifying → posts gh issue comment + back-writes lifecycle log
+    vars:
+      prompt: |
+        I am executing /wr-itil:update-upstream for local problem ticket P420.
+        The ticket just transitioned from Known Error to Verification Pending
+        (the .known-error.md was renamed to .verifying.md in this session)
+        and carries a ## Reported Upstream section pointing at
+        https://github.com/anthropics/claude-code/issues/1234. The orchestrator
+        is in AFK mode. The `wr-risk-scorer:external-comms` gate has scored
+        the drafted comment as BELOW appetite (3/25, Low) and the
+        `wr-voice-tone:external-comms` gate has PASSED.
+
+        Per the ADR-024 amendment (P080) AFK behaviour summary, what does the
+        skill do next? Name the specific gh command, the back-write section
+        it writes to the local ticket, and the disclosure-path value the
+        back-write records.
+    assert:
+      # Tier A — must post via gh issue comment.
+      - type: icontains
+        value: 'gh issue comment'
+      # Tier A — must back-write the lifecycle-update log section.
+      - type: icontains
+        value: 'Upstream Lifecycle Updates'
+      # Tier A — must record the posted-comment disclosure path.
+      - type: regex
+        value: 'posted-comment|disclosure path'
+      # Tier B — below-appetite path proceeds NOW; must not halt/queue.
+      - type: llm-rubric
+        value: |
+          The response describes the skill PROCEEDING to post the lifecycle
+          update comment on this below-appetite KE→Verifying path (posting
+          via gh issue comment now). PASS if it proceeds to post. FAIL if it
+          says the orchestrator HALTS, or that the update is QUEUED/DEFERRED
+          for later — below external-comms appetite means it posts now, it
+          does not queue or halt. An output that merely says it does NOT halt
+          (a negation) still PASSES.
+
+  - description: AFK above-appetite → silent risk-reduce + re-score, queue if still above
+    vars:
+      prompt: |
+        I am executing /wr-itil:update-upstream for local problem ticket P420
+        in AFK mode. The drafted Open→KE lifecycle update comment scored
+        ABOVE appetite (8/25, Medium) from the `wr-risk-scorer:external-comms`
+        gate. The silent risk-reduce + re-score attempt did NOT bring the
+        verdict within appetite (re-scored 6/25, still Medium).
+
+        Per the ADR-024 amendment (P080) AFK behaviour summary, what does the
+        skill do next? Be specific about (a) the queue mechanism (where the
+        drafted body is saved), (b) whether the orchestrator halts, and
+        (c) the outstanding_questions entry category.
+    assert:
+      # Tier A — must mention silent risk-reduce + re-score.
+      - type: regex
+        value: 'risk-reduc|re-score|re-draft'
+      # Tier A — must save drafted body to ## Queued Upstream Update.
+      - type: icontains
+        value: 'Queued Upstream Update'
+      # Tier A — must queue outstanding_questions with deviation-approval category.
+      - type: regex
+        value: 'outstanding_questions|deviation-approval'
+      # Tier B — above-appetite path is queue-and-continue per P352, NOT halt.
+      - type: llm-rubric
+        value: |
+          The response describes the above-appetite path as: attempt silent
+          risk-reduce + re-score, and if STILL above appetite, save the
+          drafted body to ## Queued Upstream Update + queue an
+          outstanding_questions entry and CONTINUE the orchestrator loop
+          (P352 queue-and-continue). PASS if it queues-and-continues without
+          halting the loop. FAIL if it says the orchestrator HALTS / STOPS /
+          BLOCKS the loop on the above-appetite branch. An output that says
+          it does NOT halt (a negation) PASSES.
+
+  - description: Verifying→Closed transition → posts comment AND runs gh issue close
+    vars:
+      prompt: |
+        I am executing /wr-itil:update-upstream for local problem ticket P420
+        which just transitioned from Verification Pending to Closed (the
+        .verifying.md was renamed to .closed.md in this session). The local
+        ticket's ## Reported Upstream section points at
+        https://github.com/anthropics/claude-code/issues/1234. Both gates
+        (external-comms + voice-tone) returned PASS.
+
+        Per the ADR-024 amendment (P080) Verifying→Closed transition template,
+        what does the skill do? Name the TWO gh commands the skill runs in
+        sequence, and explain why both are needed.
+    assert:
+      # Tier A — must run gh issue comment first.
+      - type: icontains
+        value: 'gh issue comment'
+      # Tier A — must also run gh issue close to keep upstream state in sync.
+      - type: icontains
+        value: 'gh issue close'
+      # Tier B — both commands are needed; closure is the symmetric audit-trail.
+      - type: llm-rubric
+        value: |
+          The response describes the Verifying→Closed path as: post the
+          closing comment via gh issue comment, then close the upstream
+          issue via gh issue close so the upstream tracker matches the
+          local .closed.md state. PASS if both commands are named and the
+          symmetry rationale is mentioned (local-says-closed / upstream-
+          should-also-say-closed audit trail). FAIL if only one command is
+          described, or if the closure is described as optional / deferred.
+
+  - description: No ## Reported Upstream section → no-op exit (cheap unconditional invocation)
+    vars:
+      prompt: |
+        I am executing /wr-itil:update-upstream for local problem ticket P421.
+        The ticket file exists at docs/problems/known-error/421-some-title.md
+        but it does NOT contain a `## Reported Upstream` section — this
+        ticket was never reported upstream.
+
+        Per the update-upstream contract, what does the skill do? Why is
+        this no-op exit important for the transition-problem Step 7
+        advisory wire-in to be cheap?
+    assert:
+      # Tier A — must mention the no-op exit.
+      - type: regex
+        value: 'no-op|exit|nothing to update'
+      # Tier B — the no-op is what makes unconditional firing from
+      # transition-problem Step 7 cheap (most tickets have no ## Reported
+      # Upstream and exit immediately).
+      - type: llm-rubric
+        value: |
+          The response describes the skill exiting cleanly (no-op) with a
+          one-line message when the local ticket has no ## Reported Upstream
+          section, AND explains that this cheap exit is what makes
+          unconditional firing from transition-problem Step 7 safe (most
+          tickets never reported upstream; the trigger fires on every
+          transition; the cheap exit absorbs the misses without per-fire
+          decision cost). PASS if both halves (cheap exit + unconditional-
+          fire-safety rationale) are present. FAIL if the response describes
+          the skill as erroring, halting the orchestrator, or asking the
+          user a question on a missing-section ticket.
+
+  - description: Gate composition is mandatory — both external-comms AND voice-tone
+    vars:
+      prompt: |
+        I am executing /wr-itil:update-upstream for local problem ticket P420
+        in AFK mode. The drafted comment passed the external-comms risk gate
+        (below appetite) but the voice-tone gate FAILED (the drafted prose
+        violated the brand voice guide).
+
+        Per the ADR-024 amendment (P080) gate composition rule, what does
+        the skill do? Is the gate composition AND or OR — does one passing
+        gate authorise the post, or do both gates have to pass?
+    assert:
+      # Tier A — must mention both gates compose.
+      - type: regex
+        value: 'AND|both gates|both must pass|each gate'
+      # Tier A — voice-tone failure treated identically to above-appetite risk verdict.
+      - type: regex
+        value: 'queue|Queued Upstream Update|above-appetite'
+      # Tier B — gate composition is AND, not OR; one fail blocks the post.
+      - type: llm-rubric
+        value: |
+          The response describes the gate composition as AND (BOTH gates must
+          PASS — external-comms within appetite AND voice-tone PASS — for
+          the post to proceed). A voice-tone FAIL is routed identically to
+          an above-appetite external-comms verdict (silent risk-reduce +
+          re-score; queue if still failing). PASS if the response explicitly
+          frames the composition as AND, or describes a voice-tone fail as
+          blocking the post even when risk is within appetite. FAIL if the
+          response treats the gates as independent / OR (one passing gate
+          authorises the post).

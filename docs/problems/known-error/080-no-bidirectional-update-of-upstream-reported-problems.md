@@ -1,6 +1,6 @@
 # Problem 080: No bidirectional update of upstream-reported problems — local lifecycle transitions never propagate back to the reporter
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-04-21
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: M (marginal) — new sibling skill `/wr-itil:update-upstream` (per user direction 2026-04-26) that fires from `manage-problem`/`transition-problem` Step 7 transitions, drafts the lifecycle-update comment, runs it through the P064 risk gate + P038 voice-tone gate, and auto-posts when both gates pass within appetite. Above-appetite triggers `AskUserQuestion` (interactive) or halt-with-report (AFK).
@@ -135,16 +135,17 @@ Architect call required at implementation time to:
 
 ### Investigation Tasks
 
-- [ ] Architect review: pick Option A / B / C. ADR shape (amend ADR-024 vs new ADR).
-- [ ] Draft the `update-upstream` SKILL.md (or the ADR-024 amendment per architect).
-- [ ] Define the update-template shape for each transition type (Open→KE, KE→Verifying, Verifying→Closed).
-- [ ] Compose with P064 + ADR-028 amended external-comms gate (voice-tone + risk). Architect review decides gate ordering.
-- [ ] Integrate with `manage-problem` Step 7 transition blocks: each transition checks for `## Reported Upstream`; if present, invokes `update-upstream`.
-- [ ] Integrate with `work-problems` AFK orchestrator: transitions fired by iteration subagents should still post upstream updates (non-interactive default per ADR-013 Rule 6 when the risk gate passes).
-- [ ] Bats doc-lint assertions per ADR-037: skill contract, template presence per transition, risk-gate composition, policy-decision traceability.
-- [ ] Reuse P070's maintainer-annoyance risk evaluator — confirm composability; architect review decides whether extract-to-shared-lib or copy-adapt.
-- [ ] Historical catch-up: one-shot migration pass OR runtime first-fire detection. Architect decides.
-- [ ] End-to-end test: transition a test ticket with a synthetic `## Reported Upstream`; confirm the upstream issue receives a comment matching the transition template.
+- [x] Architect review: pick Option A / B / C. ADR shape (amend ADR-024 vs new ADR). **Resolved 2026-06-09 (Phase 1 iter)**: Option B (new sibling skill `/wr-itil:update-upstream`); amend ADR-024 (no new ADR) — matches the post-P270 / 2026-04-25 / 2026-04-21 amendment lineage shape. Architect PASS verdict on the Phase 1 plan.
+- [x] Draft the `update-upstream` SKILL.md (or the ADR-024 amendment per architect). **Done 2026-06-09**: `packages/itil/skills/update-upstream/SKILL.md` shipped. Cross-references ADR-024 amendment (P080), ADR-028 (voice-tone gate), ADR-013 (Rule 1 + Rule 6), ADR-014 (single-commit grain), ADR-010 amended (sibling-skill split), ADR-044 (framework-resolution boundary), ADR-042 (within-axis precedent), ADR-075 Amendment 2026-06-02 (paired-eval R009 discharge), ADR-061 Rule 4 (evidence-floor).
+- [x] Define the update-template shape for each transition type (Open→KE, KE→Verifying, Verifying→Closed). **Done 2026-06-09**: three transition templates encoded in SKILL.md Step 4 — root-cause-identified investigation findings (Open→KE), release-info + upgrade-and-verify (KE→Verifying), closure-thanks (Verifying→Closed). No-invention rule pinned per template-filling discipline.
+- [x] Compose with P064 + ADR-028 amended external-comms gate (voice-tone + risk). Architect review decides gate ordering. **Done 2026-06-09**: SKILL.md Step 5 — risk gate (5a) first, voice-tone gate (5b) second; gates compose AND (one fail blocks); above-appetite handling (5c) silent risk-reduces + re-scores then queues per P352. Same composition shape as the post-P270 amendment's initial-filing path.
+- [x] Integrate with `manage-problem` Step 7 transition blocks: each transition checks for `## Reported Upstream`; if present, invokes `update-upstream`. **Done 2026-06-09**: advisory subsection added to `/wr-itil:transition-problem` Step 7b AND `/wr-itil:manage-problem` in-skill Step 7 (copy-not-move per ADR-010 amended P093). Trigger fires unconditionally — sibling skill's no-op exit absorbs the misses.
+- [x] Integrate with `work-problems` AFK orchestrator: transitions fired by iteration subagents should still post upstream updates (non-interactive default per ADR-013 Rule 6 when the risk gate passes). **Done 2026-06-09**: Step 7b's advisory inherits from the transition-problem trigger surface that work-problems iters already invoke; AFK behaviour summary table in update-upstream SKILL.md encodes the queue-and-continue per P352.
+- [x] Bats doc-lint assertions per ADR-037: skill contract, template presence per transition, risk-gate composition, policy-decision traceability. **Done 2026-06-09**: `packages/itil/skills/update-upstream/test/update-upstream-contract.bats` ships 23 tests covering the contract surface; all GREEN locally. Structural-permitted carve-out per ADR-052 Migration clause; behavioural Tier-A/B coverage rides on the paired promptfoo eval per ADR-075 Amendment 2026-06-02.
+- [x] **Paired promptfoo eval — R009 prose-floor discharge.** **Done 2026-06-09**: `packages/itil/skills/update-upstream/eval/{promptfooconfig.yaml,run-skill-eval.sh,grade-llm-rubric.sh}` ship in the same commit as the SKILL prose per ADR-061 Rule 4 evidence-floor (mirrors the P324 Phase 6 / RFC-019 P355 pattern). Tier-A regex + Tier-B llm-rubric coverage for gate composition, queue-and-continue, Verifying→Closed dual-command behaviour, no-op exit, gate-AND vs gate-OR semantics.
+- [ ] Reuse P070's maintainer-annoyance risk evaluator — confirm composability; architect review decides whether extract-to-shared-lib or copy-adapt. **Phase 2 (out of scope this iter)** — the `wr-risk-scorer:external-comms` agent already shipped per the post-P270 amendment; the update-upstream SKILL uses the same evaluator surface. No extract-to-shared-lib needed at Phase 1.
+- [ ] Historical catch-up: one-shot migration pass OR runtime first-fire detection. **Phase 2 deferred** — per SKILL.md Scope's `--catchup` note; the Phase 1 contract is per-ticket invocation only. A future amendment may add `--catchup` mode.
+- [ ] End-to-end test: transition a test ticket with a synthetic `## Reported Upstream`; confirm the upstream issue receives a comment matching the transition template. **Phase 2 deferred** — Phase 1 verification rides on the paired promptfoo eval (Tier-A/B behavioural coverage); end-to-end against a live upstream is a verification-pending step after release.
 
 ## Related
 

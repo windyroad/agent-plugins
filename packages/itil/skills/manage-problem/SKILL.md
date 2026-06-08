@@ -802,6 +802,32 @@ The refresh uses the same rendering rules as Step 9e (dual-tolerant glob per RFC
 
 **Fast-path interaction**: the Step 9 fast-path freshness check (`git log -1 --format=%H -- docs/problems/README.md` followed by `git log --oneline "${readme_commit}..HEAD" -- 'docs/problems/*.md'`) remains the authoritative staleness test. When this refresh fires on every transition, that check should return empty on any subsequent invocation — the cache stays fresh by construction. If the check still reports "stale", something skipped the refresh (bug) and the slow-path is the correct recovery.
 
+#### Bidirectional upstream lifecycle update (P080 — advisory, copy-not-move from transition-problem Step 7b)
+
+After the rename + README refresh land but BEFORE the Step 11 commit, fire the bidirectional lifecycle-update sibling skill so the upstream issue (if any) receives the lifecycle update comment in the SAME commit as the transition per ADR-014 single-commit grain. This is the **outbound-lifecycle-update leg** of the reporter loop (the inbound-discovery leg is owned by ADR-062's assessment pipeline; together they close the reporter relationship per JTBD-301 + JTBD-201).
+
+This subsection is the **copy-not-move sibling** of `transition-problem` SKILL.md Step 7b per [ADR-010](../../../docs/decisions/010-rename-wr-problem-to-wr-itil.proposed.md) amended "Split-skill execution ownership" rule (P093). The user-initiated transition path lives in `/wr-itil:transition-problem`; the in-skill callers (Step 9b auto-transition, Step 9d closure inside review, the Parked path) need the same lifecycle-update trigger and carry their own scoped copy. Drift between the two copies re-opens P080's bidirectional gap on the in-skill paths.
+
+The trigger is **unconditional** — fire on every transition regardless of whether the ticket carries `## Reported Upstream`. The sibling skill's no-op exit (Step 1 of `/wr-itil:update-upstream`) absorbs the misses cheaply; per-transition decision cost is bounded.
+
+Invoke via the Skill tool:
+
+```
+/wr-itil:update-upstream <NNN>
+```
+
+Behaviour matrix:
+
+- **No `## Reported Upstream` section on the local ticket** → the sibling skill no-op-exits with a one-line `Nothing to update` message. Proceed to Step 11.
+- **`## Reported Upstream` present AND both gates within appetite** → the sibling skill posts via `gh issue comment` (and on Verifying → Closed, also `gh issue close`), back-writes to `## Upstream Lifecycle Updates`, and stages the back-write into the index. The Step 11 commit captures the back-write alongside the transition.
+- **`## Reported Upstream` present AND above-appetite (after silent risk-reduce + re-score)** → the sibling skill saves the drafted comment to `## Queued Upstream Update` and queues an `outstanding_questions` entry. The Step 11 commit captures the `## Queued Upstream Update` appendage alongside the transition. **The orchestrator continues per P352 queue-and-continue** — do NOT halt the transition on an above-appetite upstream update.
+
+If `/wr-itil:update-upstream` is not installed (the `@windyroad/itil` package version pre-dates P080 shipping), the Skill tool returns a not-found error. Log a one-line warning (`update-upstream skill not available; skipping upstream lifecycle update`) and proceed to Step 11 — do NOT halt the transition.
+
+Per [ADR-013 Rule 6](../../../docs/decisions/013-structured-user-interaction-for-governance-decisions.proposed.md) (AFK fail-safe), AFK orchestrators MUST NOT halt this transition path on a queued upstream-update — the queued entry surfaces at the existing batched-`AskUserQuestion` end-of-loop gate.
+
+Authority: [ADR-024](../../../docs/decisions/024-cross-project-problem-reporting-contract.proposed.md) amendment (P080) — bidirectional lifecycle-update sibling skill. The advisory ALSO lives in `/wr-itil:transition-problem` Step 7b per ADR-010 amended "copy, not move" (P093) — both copies must move in lockstep.
+
 ### 8. For list: Show summary
 
 Read all open + known-error tickets via the dual-tolerant glob `ls docs/problems/*.open.md docs/problems/*.known-error.md docs/problems/open/*.md docs/problems/known-error/*.md 2>/dev/null` (RFC-002 migration window). Extract ID, title, priority, and status. Sort by priority (highest first). Display as a markdown table.
