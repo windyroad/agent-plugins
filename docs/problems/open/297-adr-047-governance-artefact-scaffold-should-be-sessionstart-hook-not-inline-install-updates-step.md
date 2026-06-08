@@ -27,13 +27,30 @@ ADR-047 is **left unoversighted** (P283/ADR-066 marker withheld) until amended (
 
 ## Root Cause Analysis
 
-### Investigation Tasks
+### Investigation Tasks — Phase 1 (landed 2026-06-08)
 
-- [ ] Amend ADR-047: change the mechanism from "inline /install-updates step" to a **SessionStart hook** (the relevant plugin's hooks.json gains a SessionStart `startup` entry; the hook checks policy-file-present-but-artefact-missing and scaffolds). Confirm the owning plugin (risk-scorer for RISK-POLICY→docs/risks; itil for intake; etc.) or a shared mechanism.
-- [ ] Reconcile with ADR-040 (SessionStart surface precedent) + the ADR-066/068 SessionStart nudges (same event; ensure they compose, not collide) + ADR-045 (hook budget — scaffold is a side-effect-only-silent hook).
-- [ ] Decide the scaffold's interactivity: silent auto-scaffold vs nudge-then-scaffold-on-confirm (consider the human-oversight principle — auto-scaffolding a governance artefact may itself warrant a confirm, per [[feedback_lift_auto_decisions_to_human]]).
-- [ ] Keep an /install-updates path too if useful for the sibling-push case, but the SessionStart hook is the load-bearing per-project trigger.
-- [ ] Re-confirm amended ADR-047 via `/wr-architect:review-decisions`.
+- [x] Amend ADR-047: changed chosen option from Option 1 (inline /install-updates step) to Option 3 (SessionStart hook nudge). In-place amendment under `## Amendment 2026-06-08 (P297)` heading; original Decision Outcome retained as historical.
+- [x] Reconcile with ADR-040 / ADR-066 / ADR-068 / ADR-045: the new hook shape is read-only stderr nudge (not silent write), satisfying ADR-040's read-mostly contract. Hook mirrors the established ADR-066/068 nudge shape; ADR-045 Pattern 1 (silent-on-pass) + Pattern 5 (once-per-session) satisfied.
+- [x] Scaffold interactivity decided: **nudge-then-scaffold-on-confirm**. The SessionStart hook emits a one-line stderr advisory pointing at `/wr-risk-scorer:bootstrap-catalog`; the scaffold write happens only when the user invokes the consumer skill. The hook never writes — respects [[feedback_lift_auto_decisions_to_human]] (governance artefact creation requires explicit user action).
+- [x] `/install-updates` path retired (already done per the 2026-05-25 stale-reference cleanup in ADR-047 body — the inline step was already removed when install-updates was narrowed to a single global-cache refresh).
+- [ ] Re-confirm amended ADR-047 via `/wr-architect:review-decisions` — **deferred to next interactive session**: AFK iter subprocess wrote `human-oversight: unconfirmed` per ADR-066 P348 (no AskUserQuestion access). The drain promotes once a human runs `/wr-architect:review-decisions` and substance-confirms via AskUserQuestion. User direction quote in the amendment body IS the substance, so the drain answer will be a one-step confirm.
+
+### Investigation Tasks — Phase 2 (deferred)
+
+- [ ] Generalise the scaffold-nudge pattern to sibling plugins where a policy-file → artefact-directory pair exists:
+  - voice-tone (`docs/VOICE-AND-TONE.md` → `docs/voice-tone/`?) — scope confirmation needed; the pair may not be the right shape because voice-tone artefacts are typically inline in the policy file itself.
+  - style-guide (`docs/STYLE-GUIDE.md` → `docs/style-guide/`?) — same scope confirmation.
+  - architect (`docs/decisions/`) and jtbd (`docs/jtbd/`) do NOT need a scaffold-nudge: decisions/jobs live IN the directory with no separate policy file; ADR-066/068 oversight nudges cover the analogous gap for ratification, not scaffolding.
+- [ ] If sibling pairs are confirmed in scope, extract a shared scaffold-nudge helper (e.g. `packages/shared/hooks/lib/scaffold-nudge.sh`) to avoid drift across plugin instances. The Phase 1 risk-scorer hook is a candidate template for the helper extraction.
+- [ ] Decide whether a sibling ADR should generalise the pattern, or whether ADR-047 should grow further amendments to cover each pair.
+
+## Phase 1 deliverables (2026-06-08)
+
+- `packages/risk-scorer/hooks/risk-scorer-scaffold-nudge.sh` — new SessionStart hook.
+- `packages/risk-scorer/hooks/hooks.json` — registers the new hook under `SessionStart` matcher `"startup"`.
+- `packages/risk-scorer/hooks/test/risk-scorer-scaffold-nudge.bats` — 7-case behavioural fixture.
+- `docs/decisions/047-install-updates-scaffolds-governance-artefacts.proposed.md` — Amendment 2026-06-08 (P297) section + frontmatter flipped to `human-oversight: unconfirmed` pending drain promotion.
+- `docs/decisions/README.md` — compendium regenerated.
 
 ## Dependencies
 

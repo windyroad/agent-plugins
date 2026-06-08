@@ -1,9 +1,8 @@
 ---
 status: "proposed"
 date: 2026-04-28
-human-oversight: rejected-pending-supersede
-supersede-ticket: P297
-oversight-date: 2026-05-26
+human-oversight: unconfirmed
+oversight-date: 2026-06-08
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: [Windy Road plugin users, addressr maintainer, addressr-mcp maintainer, addressr-react maintainer, very-fetching maintainer]
@@ -43,7 +42,71 @@ User's load-bearing direction (verbatim, 2026-04-28 mid-investigation): *"for ea
 4. **Defer scaffolding entirely; rely on manual user action** — current state. Rejected: this is exactly what produced the 99%-miss-rate regression. The user has explicitly directed that scaffolding NOT be left to manual action.
 5. **Embed scaffolding inside `/wr-risk-scorer:create-risk`** — only scaffolds when the user invokes create-risk. Rejected: conflates two surfaces (create-a-risk and create-the-register-that-holds-risks) and still leaves 99% miss rate when create-risk is never invoked.
 
+## Amendment 2026-06-08 (P297) — chosen option changed to SessionStart hook nudge
+
+**The chosen option is now Option 3** (SessionStart hook scaffold), reshaped from the rejected `silent write` framing to a `read-only stderr nudge` framing. The remainder of the original Decision Outcome below documents the now-superseded Option 1 mechanism (inline `/install-updates` step) and is retained for historical traceability.
+
+### User direction (verbatim, 2026-05-25 P283/ADR-066 drain)
+
+> *"Inline scaffold step in `/install-updates` is the wrong choice. That happens from within this project for sibling projects. It would completely miss other projects on other machines. SessionStart hook scaffold unless you have a better option."*
+
+This is a substance-confirm answer per ADR-074 (P314) — the option is named explicitly ("SessionStart hook scaffold") and the conditional clause ("unless you have a better option") is the option-shaped permission. P297 captured the rework; this amendment closes it.
+
+### Why Option 3's original rejection rationale no longer holds
+
+The 2026-04-28 Considered Options block rejected Option 3 on the grounds that *"SessionStart is read-mostly per ADR-040, and silent writes at session start violate the user's session-start trust contract."* That rationale assumed a write-on-session-start design. The Phase 1 mechanism shipped under this amendment **does not write at session start** — the SessionStart hook is a read-only stderr nudge (one-line advisory pointing at the on-demand `/wr-risk-scorer:bootstrap-catalog` skill); the scaffold write happens only when the user invokes that skill. The hook is the discovery surface; the skill is the consent + write surface. This is the established ADR-066 / ADR-068 nudge shape applied to a scaffold-class concern rather than an oversight-class concern.
+
+### Mechanism — Phase 1 (this iter, risk-scorer plugin)
+
+1. New hook script `packages/risk-scorer/hooks/risk-scorer-scaffold-nudge.sh`. Modelled on `packages/architect/hooks/architect-oversight-nudge.sh` (ADR-066 shape).
+2. Registered in `packages/risk-scorer/hooks/hooks.json` under `SessionStart` matcher `"startup"` (ADR-040 lifecycle).
+3. Detection: `<project>/RISK-POLICY.md` exists AND `<project>/docs/risks/` is absent. Silent on every other state.
+4. Emission on positive detection: a single stderr line —
+   `[wr-risk-scorer] RISK-POLICY.md present but docs/risks/ is missing — run /wr-risk-scorer:bootstrap-catalog to scaffold the standing-risk register.`
+5. AFK self-suppress: respects `WR_SUPPRESS_OVERSIGHT_NUDGE=1` per ADR-068 (the suite-wide guard variable). One env var silences every oversight-class nudge, scaffold-class included — extending ADR-068's "do NOT split into per-plugin guard vars" principle to the category axis.
+6. Behavioural bats fixture at `packages/risk-scorer/hooks/test/risk-scorer-scaffold-nudge.bats` exercises the four-state matrix plus the AFK-guard semantics.
+7. Hook budget: silent-on-no-condition per ADR-045 Pattern 1; SessionStart's once-per-session lifecycle satisfies Pattern 5 for free.
+
+### Mechanism — Phase 2 (deferred to follow-on iter)
+
+Generalise the scaffold-nudge pattern across the plugin suite where a policy-file → artefact-directory pair exists:
+
+- `docs/VOICE-AND-TONE.md` → `docs/voice-tone/` (voice-tone plugin — needs scope confirmation; the policy-file → directory pair may not be the right shape for voice-tone).
+- `docs/STYLE-GUIDE.md` → `docs/style-guide/` (style-guide plugin — same scope confirmation).
+- Architect (`docs/decisions/`) and JTBD (`docs/jtbd/`) **do not need a scaffold-nudge** — decisions live IN the directory, there is no separate policy file pointing AT it, and oversight nudges (ADR-066 / ADR-068) already cover the analogous gap for ratification, not scaffolding.
+
+Phase 2 lands when the policy/artefact-pair semantics are confirmed for voice-tone and style-guide (likely a sibling ADR generalising the pattern, with a shared scaffold-nudge helper extracted from this Phase 1 implementation).
+
+### Drivers (amendment-time)
+
+- **ADR-040** (SessionStart surface) — lifecycle host; the nudge respects ADR-040's read-mostly contract because no write happens in the hook.
+- **ADR-066 / ADR-068** (oversight-nudge shape precedents) — the canonical one-line stderr + silent-on-no-content + AFK-guard shape this hook follows.
+- **ADR-045** (hook injection budget) — Pattern 1 (silent-on-pass) + Pattern 5 (once-per-session) compliance.
+- **ADR-013** Rule 5 / Rule 6 — policy-authorised silent proceed semantics. The hook does not write, so Rule 5/6 apply to the consumer skill (`/wr-risk-scorer:bootstrap-catalog`), not to the hook itself.
+- **ADR-059** (consume-catalog + bootstrap-from-reports) — the on-demand consumer skill the nudge points at. Already-ratified scaffold surface; this amendment is the missing trigger.
+- **ADR-049** (PATH shim grammar) — the hook is invoked via `${CLAUDE_PLUGIN_ROOT}/hooks/...` per the suite's standard registration grammar; no new PATH shim is needed for Phase 1.
+- **JTBD-001** (Enforce Governance Without Slowing Down) — primary fit. The hook surfaces the documented 99%-miss-rate gap (4/6 surveyed adopters lacked `docs/risks/`).
+- **JTBD-006** (Progress the Backlog While I'm Away) — `WR_SUPPRESS_OVERSIGHT_NUDGE=1` honour clause.
+- **P297** — driver ticket.
+
+### Frontmatter
+
+`human-oversight: unconfirmed` set on this amendment commit because the amendment was applied by an AFK iter subprocess under `/wr-itil:work-problems` and the substance-confirm marker pipeline (`wr-architect-mark-oversight-confirmed`) requires an AskUserQuestion-shaped event the AFK subprocess cannot produce. The user direction quote above carries the substance, but the marker write is deferred to the next interactive session's `/wr-architect:review-decisions` drain pass per ADR-066 P348. `supersede-ticket: P297` is removed because the supersede has been applied in-place by this amendment.
+
+### Confirmation (amendment-time)
+
+> The original Confirmation block below (Source review + Bats fixture test + Behavioural replay) is **historical** per the 2026-05-25 stale-reference cleanup note and is retained for traceability. The amendment-time Confirmation criteria are:
+
+- `packages/risk-scorer/hooks/risk-scorer-scaffold-nudge.sh` — exists, is executable, follows the `architect-oversight-nudge.sh` shape (AFK-guard short-circuit at the top, silent-on-no-condition, one-line stderr on positive detection).
+- `packages/risk-scorer/hooks/hooks.json` — registers the hook under `SessionStart` matcher `"startup"`.
+- `packages/risk-scorer/hooks/test/risk-scorer-scaffold-nudge.bats` — behavioural fixture exercising: (a) emits on policy-present + dir-absent, (b) silent on policy-present + dir-present, (c) silent on policy-absent (with and without dir), (d) AFK-guard suppression, (e) guard value other than 1 does not suppress, (f) silent on non-existent CLAUDE_PROJECT_DIR.
+- `docs/decisions/README.md` — compendium regenerated to reflect this amendment per ADR-077.
+
+---
+
 ## Decision Outcome
+
+**[Historical — superseded by Amendment 2026-06-08 above. The original Option 1 mechanism is retired; the SessionStart hook nudge per Option 3 is now in force.]**
 
 **Chosen option: Option 1** — inline scaffold step in `/install-updates`.
 

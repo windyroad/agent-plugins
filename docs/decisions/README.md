@@ -195,7 +195,7 @@ _70 ADRs. These are the current rules. The architect agent reads this section fi
 **Related:** ADR-046, ADR-024, ADR-014, ADR-017, ADR-022, ADR-029, ADR-030, ADR-037, ADR-044
 
 ### ADR-047 — Install-updates scaffolds governance artefacts when policy file is present but artefact is missing
-**Status:** proposed | **Oversight:** rejected-pending-supersede (P297)
+**Status:** proposed | **Oversight:** unconfirmed
 **Confirmation:** .claude/skills/install-updates/SKILL.md — Step 6.5 "Scaffold governance artefacts (per-sibling)" exists betw...; .claude/skills/install-updates/REFERENCE.md — new section "Governance-artefact scaffold (P033)" present with...; .claude/skills/install-updates/templates/risk-register-README.md.tmpl — present; adopter-flavoured (no R001 ...; .claude/skills/install-updates/templates/risk-register-TEMPLATE.md.tmpl — present; verbatim copy of this rep...; docs/problems/033-no-persistent-risk-register.known-error.md — Phase 1 marked complete with ADR-047 citation...
 **Related:** ADR-036, ADR-030, ADR-013, ADR-014, ADR-038, ADR-040, ADR-004
 

@@ -1,5 +1,8 @@
 {
   "hooks": {
+    "SessionStart": [
+      { "matcher": "startup", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/risk-scorer-scaffold-nudge.sh" }] }
+    ],
     "UserPromptSubmit": [
       { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/risk-score.sh" }] }
     ],
