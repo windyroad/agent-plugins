@@ -5,6 +5,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/lib/architect-gate.sh"
+source "$SCRIPT_DIR/lib/marker-only-diff.sh"
 
 # P191 Phase 2: resolve the project root from the session signal, not the
 # hook's runtime CWD. Claude Code can launch the hook with a working directory
@@ -22,6 +23,7 @@ INPUT=$(cat)
 
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty') || true
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty') || true
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty') || true
 
 if [ -z "$SESSION_ID" ]; then
   architect_gate_parse_error
@@ -112,6 +114,41 @@ case "$FILE_PATH" in
   # Mirrors docs/problems and docs/jtbd peer-plugin-policy exemptions. P203.
   */docs/retros/*|docs/retros/*)
     exit 0 ;;
+esac
+
+# P301: marker-only-diff exemption for docs/decisions/*.md ADRs. An
+# Edit/Write that adds or updates ONLY the narrow oversight-marker
+# frontmatter grammar (`human-oversight:`, `oversight-date:`,
+# `decision-makers:`, `supersede-ticket:`) is the mechanical output of a
+# decision the user already substance-confirmed via AskUserQuestion
+# (ADR-066 contract); the architect review has nothing substantive to
+# assess. The architect-oversight-marker-discipline.sh hook remains the
+# safety net: marker-only diffs that introduce `human-oversight:
+# confirmed` still require the per-ADR session evidence marker (P348 /
+# ADR-066 amendment 2026-06-02). Mixed marker+body diffs, status:/date:
+# changes, and pure body changes fall through to the normal gate.
+case "$FILE_PATH" in
+  */docs/decisions/*.md|docs/decisions/*.md)
+    case "$TOOL_NAME" in
+      Edit)
+        _OLD=$(echo "$INPUT" | jq -r '.tool_input.old_string // empty') || _OLD=""
+        _NEW=$(echo "$INPUT" | jq -r '.tool_input.new_string // empty') || _NEW=""
+        if [ -n "$_OLD$_NEW" ] && is_marker_only_diff "$_OLD" "$_NEW"; then
+          exit 0
+        fi
+        ;;
+      Write)
+        _NEW=$(echo "$INPUT" | jq -r '.tool_input.content // empty') || _NEW=""
+        _OLD=""
+        if [ -f "$FILE_PATH" ]; then
+          _OLD=$(cat "$FILE_PATH" 2>/dev/null) || _OLD=""
+        fi
+        if [ -n "$_OLD$_NEW" ] && is_marker_only_diff "$_OLD" "$_NEW"; then
+          exit 0
+        fi
+        ;;
+    esac
+    ;;
 esac
 
 # Check gate

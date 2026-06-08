@@ -9,6 +9,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/lib/review-gate.sh"
+source "$SCRIPT_DIR/lib/marker-only-diff.sh"
 
 # P191: resolve the project root from the session signal, not the hook's
 # runtime CWD. Claude Code may launch the hook with an actual working
@@ -36,6 +37,15 @@ import sys, json
 try:
     data = json.load(sys.stdin)
     print(data.get('session_id', ''))
+except:
+    print('')
+" 2>/dev/null || echo "")
+
+TOOL_NAME=$(echo "$INPUT" | python3 -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    print(data.get('tool_name', ''))
 except:
     print('')
 " 2>/dev/null || echo "")
@@ -118,6 +128,62 @@ case "$FILE_PATH" in
   # docs/problems and docs/jtbd peer-plugin-policy exemptions. P203.
   */docs/retros/*|docs/retros/*)
     exit 0 ;;
+esac
+
+# P301: marker-only-diff exemption for docs/decisions/*.md ADRs. The JTBD
+# gate fires on docs/decisions/ writes (not in its exclusion list), so a
+# multi-batch `/wr-architect:review-decisions` drain pays one JTBD review
+# round-trip per batch on top of the architect one — the ticket's
+# observed "Batch 8 (ADR-020): blocked on architect review (`jtbd policy
+# file changed since last review`)" symptom is precisely that. Same
+# rationale + safety-net as the architect-side exemption: oversight
+# marker writes are mechanical output of a substance-confirmed decision
+# (ADR-066 contract); the jtbd-oversight-marker-discipline.sh hook
+# continues to enforce per-ADR session evidence for `confirmed`
+# introductions.
+case "$FILE_PATH" in
+  */docs/decisions/*.md|docs/decisions/*.md)
+    case "$TOOL_NAME" in
+      Edit)
+        _OLD=$(echo "$INPUT" | python3 -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    print(data.get('tool_input', {}).get('old_string', ''))
+except:
+    print('')
+" 2>/dev/null || echo "")
+        _NEW=$(echo "$INPUT" | python3 -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    print(data.get('tool_input', {}).get('new_string', ''))
+except:
+    print('')
+" 2>/dev/null || echo "")
+        if [ -n "$_OLD$_NEW" ] && is_marker_only_diff "$_OLD" "$_NEW"; then
+          exit 0
+        fi
+        ;;
+      Write)
+        _NEW=$(echo "$INPUT" | python3 -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    print(data.get('tool_input', {}).get('content', ''))
+except:
+    print('')
+" 2>/dev/null || echo "")
+        _OLD=""
+        if [ -f "$FILE_PATH" ]; then
+          _OLD=$(cat "$FILE_PATH" 2>/dev/null) || _OLD=""
+        fi
+        if [ -n "$_OLD$_NEW" ] && is_marker_only_diff "$_OLD" "$_NEW"; then
+          exit 0
+        fi
+        ;;
+    esac
+    ;;
 esac
 
 # Determine JTBD path — canonical directory layout only (ADR-008 Option 3).
