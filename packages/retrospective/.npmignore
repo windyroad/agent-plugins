@@ -1,0 +1,22 @@
+# Tarball exclusions for @windyroad/retrospective.
+# The package.json `files` field is the inclusion allowlist (bin/, agents/,
+# hooks/, skills/, scripts/, .claude-plugin/, lib/). This `.npmignore` denies
+# matches at finer granularity for paths that should not ship to adopters.
+#
+# Per ADR-075 (Amendment 2026-06-02) Confirmation criterion: SKILL eval
+# configs + fixtures must NOT ship in the published tarball. Verify with
+# `npm pack --dry-run` from packages/retrospective/ — no path matching
+# skills/*/eval/ should appear. Mirrors packages/architect/.npmignore +
+# packages/itil/.npmignore precedent (Phase 4 create-adr + Phase 1-3 itil
+# SKILL evals).
+#
+# NOTE: the load-bearing exclusion is the `"!skills/*/eval/"` negation in
+# package.json `files:` array — npm honours `files:` negation patterns
+# before consulting .npmignore. This `.npmignore` is the belt-and-braces
+# safety net for any future per-directory drift.
+#
+# @adr ADR-075 (Amendment 2026-06-02)
+# @rfc RFC-012
+# @problem P324 (Phase 6 — run-retro SKILL eval; first eval-bearing release
+#                for @windyroad/retrospective)
+skills/*/eval/

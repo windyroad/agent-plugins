@@ -1,0 +1,611 @@
+# SKILL eval — run-retro behavioural contracts on the retro silent-stage surface
+# (P324 Phase 6 / P012 / RFC-012 / ADR-075 Amendment 2026-06-02).
+#
+# Tier-A deterministic regex + Tier-B llm-rubric coverage for 6 contracts on
+# the run-retro SKILL.md surface — first eval-bearing release for
+# `@windyroad/retrospective`. Each test case asserts one load-bearing
+# silent-stage carve-out (P132 / inverse-P078 / ADR-044 framework-resolution
+# boundary) so that future drift toward "ask the user about every
+# classification / removal / rotation / close / ticket / fix-strategy" gets
+# caught by the harness BEFORE it ships to adopters:
+#
+#   - Step 1.5 silent classification (briefing signal-vs-noise pass): agent
+#     owns silent classification per ADR-013 Rule 5; no per-entry
+#     AskUserQuestion; delete-queue AskUserQuestion fires ONLY for entries
+#     scoring <= -3 (batched). The pass IS the framework-mediated action;
+#     declaring "Deferred to next interactive retro" without scan evidence
+#     is a P332 / P148-class silent skip.
+#   - Step 2c context-usage cheap-layer auto-invoke (ADR-043 Amendment
+#     2026-06-08): combined whichever-comes-first trigger — calendar-elapse
+#     > 14 days OR delta > 20% any bucket — with once-per-day guard
+#     (`docs/retros/<TODAY>-context-analysis.md` exists → skip).
+#     Mechanical: identical behaviour in interactive and AFK modes per
+#     ADR-013 Rule 6 + ADR-044 framework-resolution boundary — never fires
+#     AskUserQuestion.
+#   - Step 3 Tier-3 budget rotation silent agent-picked pass (P135 /
+#     ADR-044): rotation is silent agent judgement applied to each `OVER`
+#     line. Branch B fall-through is **split-by-date safe default** when no
+#     subtopic boundary + no date stratification + no >=3 noise entries; no
+#     per-file AskUserQuestion (surfacing 4 options x 6 over-budget files
+#     trains the user to pick "defer" 6 times — recurring-defer-cascade
+#     anti-pattern P145 closes).
+#   - Step 4a close-on-evidence silent dispatch (P135 / ADR-044): delegates
+#     to `/wr-itil:transition-problem <NNN> close` WITHOUT firing
+#     AskUserQuestion per close-candidate; ADR-026-grounded citation in the
+#     Step 5 Verification Candidates table; documented Recovery path =
+#     `/wr-itil:transition-problem <NNN> known-error` makes the close
+#     reversible. Cross-plugin dispatch-failed / dispatch-unavailable
+#     outcomes are recorded in the Decision column (no silent swallow).
+#   - Step 4b Stage 1 mechanical-auto-ticket (P342 trust-boundary
+#     asymmetry): every codify-worthy observation becomes a ticket via
+#     `/wr-itil:capture-problem` (or manage-problem fallback) WITHOUT
+#     per-observation AskUserQuestion. Only `cause: skill_unavailable`
+#     is a valid Tickets-Deferred fallback gate. Ambiguous classification
+#     DEFAULTS to mechanical-auto-ticket (defaulting to queue would
+#     re-introduce the silent-queue-accumulation hazard P342 closes).
+#   - Step 4b Stage 2 silent fix-strategy pick (P135 / ADR-044): agent
+#     picks shape silently from the catalog (skill-create / skill-improve /
+#     other-codification / self-contained); writes to ticket's
+#     `## Fix Strategy` section; user corrects via direct edit on the
+#     ticket if shape is wrong (shape choices are reversible — per-ticket
+#     AskUserQuestion is the inverse-correctness anti-pattern P132 +
+#     ADR-044 captures).
+#
+# Drivers:
+#   - ADR-075 (Amendment 2026-06-02) — SKILL-prose harness scope; per-skill
+#     `packages/<plugin>/skills/<skill>/eval/promptfooconfig.yaml`
+#     location; exec:bash provider; Tier-A regex + Tier-B llm-rubric.
+#   - ADR-061 (Rule 4 evidence-floor) — paired promptfoo Tier-A/B GREEN IS
+#     the per-class evidence for SKILL-prose surfaces; flips the R009
+#     modulator +1 -> -1 for this surface, dropping the run-retro
+#     prose-class within appetite atomically per cohort-graduation
+#     pre-check (ADR-061 Rule 3b).
+#   - ADR-014 (single-commit grain) — this eval file ships in the same
+#     commit as its companion runners (no `.changeset/*.md` — eval test
+#     infrastructure excluded from the tarball via packages/retrospective/
+#     .npmignore: `skills/*/eval/`).
+#   - ADR-044 (decision-delegation contract) — silent-stage carve-outs at
+#     Step 1.5 (cat 4 silent-framework / cat 5 policy-authorised), Step 3
+#     rotation (cat 4), Step 4a close-on-evidence (cat 4 framework-mediated
+#     close from evidence), Step 4b Stage 1 mechanical-auto-ticket (cat 4
+#     P342 trust-boundary), Step 4b Stage 2 silent fix-strategy pick (cat 4).
+#   - ADR-013 (Rule 5 policy-authorised silent proceed; Rule 6
+#     queue-and-continue universal default).
+#   - ADR-026 (grounding requirement — citations on every classification).
+#   - ADR-043 (progressive context-usage measurement; Amendment 2026-06-08
+#     combined trigger for cheap-layer -> deep-layer auto-invoke).
+#   - RFC-012 — single build vehicle for the harness.
+#   - P324 (driving problem — agent-prose verdict harness gap; Phase 6 =
+#     run-retro SKILL surface, first eval-bearing release for
+#     @windyroad/retrospective).
+#
+# Tier-B (llm-rubric) grader: the run-retro contracts contain heavy
+# NEGATIVE clauses ("does NOT fire AskUserQuestion per entry"; "removals
+# are silent"; "no per-file AskUserQuestion"; "agent picks WITHOUT firing
+# AskUserQuestion"; "auto-ticket WITHOUT per-observation AskUserQuestion").
+# Tier-A `not-regex` on those clauses false-fails against behaviourally-
+# correct negated answers — same pattern Phases 1-5 encountered, resolved
+# via the Tier-B claude-grader (P012 reopen findings 2026-06-04).
+# Distinctive positive tokens stay Tier-A.
+#
+# Run from repo root:
+#   npx promptfoo eval -c packages/retrospective/skills/run-retro/eval/promptfooconfig.yaml
+#
+# @jtbd JTBD-001 (Enforce Governance Without Slowing Down)
+# @jtbd JTBD-006 (Progress the Backlog While I'm Away)
+# @jtbd JTBD-007 (Keep Plugins Current Across Projects)
+# @jtbd JTBD-101 (Extend the Suite with New Plugins)
+# @problem P324
+# @problem P012
+# @rfc RFC-012
+# @adr ADR-075 (Amendment 2026-06-02)
+# @adr ADR-061 (Rule 4 evidence-floor)
+# @adr ADR-044 (decision-delegation contract)
+# @adr ADR-013 (Rule 5 policy-authorised silent proceed; Rule 6 queue-and-continue)
+# @adr ADR-026 (grounding requirement)
+# @adr ADR-043 (progressive context-usage measurement; Amendment 2026-06-08)
+# @adr ADR-014 (single-commit grain)
+
+description: |
+  run-retro SKILL eval — Tier-A regex + Tier-B llm-rubric coverage for 6
+  silent-stage behavioural contracts on the run-retro SKILL surface. Each
+  test case asserts one ADR-044 framework-resolution carve-out per ADR-061
+  Rule 4 evidence-floor: passing eval flips the R009 prose-surface modulator
+  +1 -> -1 for `run-retro`, dropping the retrospective-plugin prose class
+  within appetite. First eval-bearing release for @windyroad/retrospective.
+
+providers:
+  # Path is relative to this config file's directory (promptfoo basePath).
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+# Tier-B (llm-rubric) grading provider. Same shape as Phases 1-5:
+# distinctive positive tokens (file paths, advisory strings, command names,
+# classification tokens) stay Tier-A; semantic NEGATIVE clauses route to
+# llm-rubric, graded by claude under subscription auth (no API key) via
+# grade-llm-rubric.sh.
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  # --- Step 1.5 silent classification (briefing signal-vs-noise pass) ------
+
+  - description: Step 1.5 briefing signal-vs-noise — agent owns silent classification; no per-entry AskUserQuestion; delete is silent per P135/ADR-044/CLAUDE.md MANDATORY (Step 3 + CLAUDE.md supersede the Step 1.5 stale batched-confirm prose)
+    vars:
+      prompt: |
+        I am the /wr-retrospective:run-retro Step 1.5 briefing
+        signal-vs-noise pass. After reading the briefing tree, I have a
+        topic file `docs/briefing/hooks-and-gates.md` with 12 entries.
+        This session, I observed:
+
+          - 3 entries were cited or paraphrased in tool calls (signal +2 each).
+          - 7 entries were loaded into context but not cited (noise -1 each).
+          - 2 entries were not loaded into context this retro cycle
+            (decay -1 only).
+          - 1 entry already had signal-score -2 from prior retro and just
+            picked up another -1 this cycle (would land at -3, the delete
+            threshold).
+
+        Per the Step 1.5 contract (ADR-013 Rule 5 policy-authorised silent
+        proceed + ADR-026 grounding) — AND noting Step 3's load-bearing
+        clarification + CLAUDE.md's MANDATORY P132 worked-example list
+        explicitly naming Step 1.5 silent classification + Step 3 briefing
+        removals — how does the pass classify these entries? Does it fire
+        `AskUserQuestion` for each individual promote / demote / keep
+        decision? When (if ever) does it fire `AskUserQuestion` for delete
+        action on the score <= -3 entry? Be specific about the score
+        thresholds, the load-bearing direction, and the ownership boundary.
+    assert:
+      # Tier A — must name silent classification as agent-owned.
+      - type: regex
+        value: '[Ss]ilent[\s\-]?[Cc]lassification|[Ss]ilent\s+(?:proceed|agent)|agent\s+owns|silently\s+(?:classif|appl)|policy[\s\-]?authorised|ADR-013\s+Rule\s+5|Rule\s+5'
+      # Tier A — must indicate no per-entry AskUserQuestion fires.
+      - type: regex
+        value: 'No\s+AskUserQuestion|does\s+not\s+fire|does\s+NOT\s+fire|without\s+AskUserQuestion|no\s+individual\s+AskUserQuestion|silently|per-entry\s+AskUserQuestion'
+      # Tier A — must name the <= -3 delete-queue threshold.
+      - type: regex
+        value: '-3|<=\s*-3|<=-3|score\s+(?:of\s+)?-3|delete\s+(?:queue|threshold)|score\s+(?:reaches?|drops?\s+(?:to|below))\s+-3'
+      # Tier A — must indicate silent delete (load-bearing direction per
+      # Step 3 + CLAUDE.md MANDATORY P132 + ADR-044 — the Step 1.5
+      # "batched confirmation" prose is stale supersession-target prose
+      # that the load-bearing direction overrides). Tolerant of either
+      # "silent delete" or "step 5 summary" or "removes without asking".
+      - type: regex
+        value: '[Ss]ilent(?:ly)?\s+(?:remove|delete|drop|trim)|removes?\s+(?:.{0,20}\s+)?without\s+asking|without\s+(?:firing\s+)?AskUserQuestion|Step\s+5\s+(?:retro\s+)?summary|surfac(?:e|es|ing|ed)\s+(?:the\s+)?(?:action|removal|delete)|MANDATORY\s+(?:P132|clause)|CLAUDE\.md'
+      # Tier A — must cite a grounding requirement (citation / record /
+      # surface in summary). Tolerant of "citation" / "record" / "trailer".
+      - type: regex
+        value: 'ADR-026|grounding|citation|tool\s+invocation|HTML[\s\-]?comment|trailer|signal[\s\-]?score|last[\s\-]?classified|record(?:s|ed|ing)?\s+(?:in\s+)?(?:the\s+)?Step\s+5'
+      # Tier B — semantic invariant: silent classification AND silent
+      # delete under the load-bearing P135/ADR-044/CLAUDE.md direction;
+      # NO per-entry AskUserQuestion at any score band; user-correction
+      # via P078 authentic-correction after Step 5 summary surface.
+      - type: llm-rubric
+        value: |
+          The response describes Step 1.5 SILENTLY classifying each entry
+          per the ADR-013 Rule 5 policy-authorised silent proceed (the
+          agent owns the classification — no `AskUserQuestion` fires for
+          individual promotions, demotions, or keep decisions). The
+          score-based actions are: >= +3 promote to Critical Points
+          candidate; 0..+2 keep in topic file; <= -3 route to delete.
+
+          **Load-bearing direction (silent delete)**: Step 3's clarification
+          + CLAUDE.md's MANDATORY P132 worked-example list + ADR-044
+          framework-resolution boundary supersede any Step 1.5 prose that
+          describes a batched delete-queue AskUserQuestion. The
+          load-bearing direction is that the <= -3 delete is ALSO silent
+          — the agent removes the entry, surfaces the action in the
+          Step 5 retro summary's Signal-vs-Noise Pass table, and the user
+          corrects via P078 authentic-correction on next turn if a removal
+          was wrong (removals are reversible from git). Per-entry
+          `AskUserQuestion` at any score band — including delete — is
+          lazy deferral (sub-contracting framework-resolved decisions back
+          to the user; lazy classification per Step 2d Ask Hygiene Pass).
+
+          PASS if the response identifies (a) silent classification per
+          ADR-013 Rule 5 — agent-owned, no AskUserQuestion per entry —
+          AND (b) silent delete at <= -3 with the action surfaced in
+          the Step 5 retro summary (NOT a batched AskUserQuestion). It is
+          also PASS if the response identifies the contract tension /
+          supersession explicitly and correctly resolves to silent delete
+          as the load-bearing direction. FAIL if the response says the
+          pass fires `AskUserQuestion` for each entry's keep/promote
+          decision, OR says the delete <= -3 fires a batched
+          `AskUserQuestion` as the load-bearing direction (the stale
+          Step 1.5 prose is superseded by Step 3 + CLAUDE.md MANDATORY +
+          ADR-044). Saying delete is silent + surfaced in Step 5 PASSES.
+
+  # --- Step 2c context-usage cheap-layer auto-invoke -----------------------
+
+  - description: Step 2c cheap-layer auto-invoke — combined trigger (calendar-elapse >14 days OR delta >20%) + once-per-day guard; mechanical no AskUserQuestion
+    vars:
+      prompt: |
+        I am the /wr-retrospective:run-retro Step 2c context-usage cheap
+        layer. After rendering the bucket table from the diagnostic
+        script `wr-retrospective-measure-context-budget`, I need to
+        decide whether to auto-fire the deep layer
+        `/wr-retrospective:analyze-context`.
+
+        Current state:
+          - The most recent `docs/retros/*-context-analysis.md` is
+            `docs/retros/2026-05-20-context-analysis.md` (20 days ago,
+            today is 2026-06-09).
+          - The `briefing` bucket changed by 35% versus the snapshot
+            trailer in that prior report.
+          - `docs/retros/2026-06-09-context-analysis.md` does NOT
+            currently exist on disk.
+
+        Per the Step 2c contract (ADR-043 Amendment 2026-06-08, settles
+        P295), what does the cheap layer do? Does the auto-invocation
+        fire? Does it fire `AskUserQuestion` to confirm before invoking
+        the deep layer? Is the behaviour different in AFK vs interactive
+        mode? What if today's report already existed?
+    assert:
+      # Tier A — must name the calendar-elapse >14 days trigger.
+      - type: regex
+        value: '>\s*14\s+days?|14[\s\-]?day|calendar[\s\-]?elapse|older\s+than\s+14'
+      # Tier A — must name the delta >20% trigger.
+      - type: regex
+        value: '>\s*20%|20\s*%|delta[\s\-]?breach|delta\s+(?:of\s+)?(?:>\s*)?20|20\s+percent|byte\s+total\s+(?:has\s+)?changed'
+      # Tier A — must name the once-per-day guard / today-report-exists check.
+      - type: regex
+        value: 'once[\s\-]?per[\s\-]?day|already[\s\-]?satisfied|today.{0,40}(?:exists?|already)|<TODAY>|already\s+present|skip\s+(?:auto[\s\-]?)?invocation|once-per-day\s+guard'
+      # Tier A — must indicate mechanical / silent / no AskUserQuestion.
+      - type: regex
+        value: '[Mm]echanical|[Ss]ilent|[Nn]o\s+AskUserQuestion|does\s+not\s+(?:fire|invoke)\s+AskUserQuestion|never\s+(?:invokes?|fires?)\s+AskUserQuestion|framework[\s\-]?resolved'
+      # Tier A — must indicate identical behaviour in AFK + interactive.
+      - type: regex
+        value: '[Ii]dentical|[Ss]ame\s+behaviour|both\s+(?:modes|paths)|interactive\s+(?:and|\+|or)\s+AFK|AFK\s+(?:and|\+|or)\s+interactive|ADR-013\s+Rule\s+6'
+      # Tier B — semantic invariant: combined trigger + once-per-day guard +
+      # mechanical (no AskUserQuestion) + identical AFK/interactive.
+      - type: llm-rubric
+        value: |
+          The response describes Step 2c the cheap-layer auto-invoking the
+          deep layer `/wr-retrospective:analyze-context` because the
+          combined whichever-comes-first trigger holds (calendar-elapse
+          > 14 days AND/OR delta > 20% any bucket — either is sufficient;
+          both hold in this case) AND the once-per-day guard does NOT fire
+          (today's `docs/retros/<TODAY>-context-analysis.md` does not
+          exist). The auto-invocation is MECHANICAL (framework-resolved
+          per ADR-013 Rule 6 + ADR-044 framework-resolution boundary) —
+          the skill does NOT fire `AskUserQuestion` to confirm before
+          invoking the deep layer. Behaviour is IDENTICAL in interactive
+          and AFK modes (the deep layer is silent and produces a committed
+          report — never blocks). If today's report already existed, the
+          once-per-day guard would fire and auto-invocation would be
+          skipped with the recorded line `Cadence trigger holds; auto-fire
+          skipped — docs/retros/<TODAY>-context-analysis.md already
+          present.` PASS if the response identifies (a) the combined
+          trigger semantics (either condition alone is sufficient), (b)
+          mechanical / no AskUserQuestion, (c) identical interactive +
+          AFK behaviour, AND (d) once-per-day guard short-circuits the
+          fire when today's report exists. FAIL if the response says the
+          cheap layer fires `AskUserQuestion` to confirm before invoking
+          the deep layer, OR says the trigger requires BOTH conditions
+          (it's whichever-comes-first OR), OR says behaviour differs
+          between interactive and AFK modes, OR says the once-per-day
+          guard does not apply. Saying it does NOT fire AskUserQuestion
+          PASSES.
+
+  # --- Step 3 Tier-3 budget rotation silent agent-picked -------------------
+
+  - description: "Step 3 Tier-3 rotation Branch B — silent agent-picked; split-by-date safe default when boundary unclear; no per-file AskUserQuestion"
+    vars:
+      prompt: |
+        I am the /wr-retrospective:run-retro Step 3 Tier-3 budget rotation
+        pass. The diagnostic `check-briefing-budgets.sh` just emitted:
+
+          OVER hooks-and-gates.md bytes=6800 threshold=5120
+
+        (single `OVER` line, no `MUST_SPLIT` — ratio is 1.33x, between 1x
+        and 2x ceiling.) I scanned `docs/briefing/hooks-and-gates.md`:
+          - No coherent sub-topic boundary >= 1 KB exists (the prose is
+            interleaved across all sub-areas; no single sub-section
+            stands alone).
+          - There are NO HTML-comment `first-written` fields that would
+            support a date-stratified split.
+          - Step 1.5 surfaced only 1 noise-classified entry in this file
+            this retro (below the >=3 threshold for trim-noise).
+
+        Per the Step 3 Tier-3 rotation contract (P135 / ADR-044
+        framework-resolution boundary; Branch B fall-through; P246/P247
+        evidence-based no-fictional-defer discipline), what rotation
+        shape does the pass pick? Does it fire `AskUserQuestion` to ask
+        the user to choose? What is the safe default when no subtopic
+        boundary, no date stratification, and no >=3 noise entries are
+        present? Why is per-file `AskUserQuestion` not the right answer?
+    assert:
+      # Tier A — must name split-by-date as the safe default.
+      - type: regex
+        value: 'split[\s\-]?by[\s\-]?date|split\s+by\s+date|safe\s+default|mtime[\s\-]?sort|archive\s+(?:the\s+)?oldest|archive\s+sibling'
+      # Tier A — must indicate silent agent pick / no AskUserQuestion.
+      - type: regex
+        value: '[Ss]ilent|[Aa]gent[\s\-]?picked|[Aa]gent\s+(?:picks?|owns?\s+the\s+choice)|[Nn]o\s+(?:per[\s\-]?file\s+)?AskUserQuestion|without\s+AskUserQuestion|does\s+not\s+(?:fire|prompt|ask)'
+      # Tier A — must reference framework-resolution boundary / ADR-044 / Rule 5.
+      - type: regex
+        value: 'ADR-044|framework[\s\-]?resolution|framework[\s\-]?mediated|Rule\s+5|policy[\s\-]?authorised'
+      # Tier A — must reference zero-false-split / reversibility rationale.
+      - type: regex
+        value: 'zero\s+false[\s\-]?split|false[\s\-]?split\s+risk|reversibl|`git\s+mv`|git\s+mv|cheap\s+to\s+combine|recover|undo'
+      # Tier A — must reference the recurring-defer cascade anti-pattern (P145).
+      - type: regex
+        value: 'P145|recurring[\s\-]?defer|4\s+options?\s+x\s+\d+|surfacing\s+4\s+options?|defer\s+\d+\s+times|cascade|train(?:s|ed|ing)?\s+the\s+user'
+      # Tier B — semantic invariant: split-by-date safe default + silent
+      # agent pick + per-file AskUserQuestion is anti-pattern.
+      - type: llm-rubric
+        value: |
+          The response describes Step 3 SILENTLY picking **split-by-date**
+          as the safe default rotation when no coherent sub-topic boundary
+          exists, no date-stratified entries are present, and Step 1.5
+          surfaced < 3 noise entries in the file. The agent owns the
+          choice (per ADR-044 framework-resolution boundary + ADR-013
+          Rule 5 policy-authorised silent proceed) — NO `AskUserQuestion`
+          fires per `OVER` file. Per-file `AskUserQuestion` is the
+          recurring-defer-cascade anti-pattern P145 closes: surfacing 4
+          options across N over-budget files trains the user to pick
+          "defer" N times to escape the cascade, which is worse than no
+          rotation. The split-by-date safe default has ZERO false-split
+          risk because it is mechanical (mtime-sort + archive oldest
+          entries to `docs/briefing/<topic>-archive.md`) and fully
+          REVERSIBLE via `git mv` of the archive sibling back. The user
+          reads the Step 5 summary's `Topic File Rotation` section and
+          corrects via authentic-correction (ADR-044 category 6) if the
+          rotation was wrong. PASS if the response identifies (a)
+          split-by-date as the safe default, (b) silent agent pick / no
+          per-file AskUserQuestion, AND (c) reversibility / cheap-combine
+          rationale (recovery via git mv). FAIL if the response says the
+          pass fires `AskUserQuestion` to ask the user to pick the
+          rotation shape, OR says "leave-as-is" / "wait for more signal"
+          is acceptable in Branch B, OR says split-by-subtopic should be
+          forced when the boundary is unclear (risk of false split), OR
+          conflates Branch B with Branch A's >=2x narrowed option set.
+          Saying it does NOT fire per-file AskUserQuestion PASSES.
+
+  # --- Step 4a close-on-evidence silent dispatch ---------------------------
+
+  - description: "Step 4a close-on-evidence — agent delegates to /wr-itil:transition-problem close WITHOUT AskUserQuestion; ADR-026 citation; recovery path documented"
+    vars:
+      prompt: |
+        I am the /wr-retrospective:run-retro Step 4a verification-close
+        housekeeping pass. I just scanned `docs/problems/*.verifying.md`
+        and `docs/problems/verifying/*.md`. For ticket P289, I found
+        specific in-session evidence: at session position turn 47, I
+        invoked `npx bats packages/itil/skills/manage-problem/test/p289-cache-refresh-helper.bats` and it returned exit 0 (14/14
+        passed). The fix's contract — the new shared helper landed two
+        releases ago — observably held.
+
+        Per the Step 4a close-on-evidence contract (P135 / ADR-044
+        framework-resolution boundary + ADR-026 grounding), what does the
+        pass do with P289? Does it fire `AskUserQuestion` to confirm
+        before closing? What skill does it delegate to for the rename +
+        Status edit + commit? What is recorded in the Step 5 summary
+        Verification Candidates table? What is the recovery path if the
+        close was wrong? What happens if the delegated skill returns
+        non-zero?
+    assert:
+      # Tier A — must name the dispatch target skill.
+      - type: regex
+        value: '/wr-itil:transition-problem|transition-problem'
+      # Tier A — must indicate silent dispatch / no AskUserQuestion.
+      - type: regex
+        value: '[Ss]ilent|WITHOUT\s+(?:firing\s+)?AskUserQuestion|does\s+not\s+fire|without\s+firing|[Nn]o\s+per[\s\-]?candidate\s+AskUserQuestion|no\s+AskUserQuestion'
+      # Tier A — must reference ADR-026 citation grounding.
+      - type: regex
+        value: 'ADR-026|specific\s+citation|tool\s+invocation|grounding|observable\s+outcome'
+      # Tier A — must name the recovery path (known-error reverse).
+      - type: regex
+        value: 'known[\s\-]?error|`?/wr-itil:transition-problem\s+(?:P\d+\s+)?known[\s\-]?error`?|reopen|reversibl|recover(?:y)?\s+path'
+      # Tier A — must name the dispatch-failed / dispatch-unavailable
+      # handling in the Decision column.
+      - type: regex
+        value: 'dispatch[\s\-]?failed|dispatch[\s\-]?unavailable|non[\s\-]?zero|graceful\s+fallback|Decision\s+column|do\s+(?:NOT|not)\s+mark\s+closed|left\s+as\s+(?:Verification\s+)?Pending'
+      # Tier B — semantic invariant: silent dispatch + ADR-026 grounding +
+      # documented recovery path + dispatch-failure handling.
+      - type: llm-rubric
+        value: |
+          The response describes Step 4a SILENTLY delegating to
+          `/wr-itil:transition-problem P289 close` via the Skill tool — NO
+          `AskUserQuestion` fires per close-candidate. The framework has
+          resolved this decision: `.verifying.md` files with specific
+          in-session evidence (tool invocation + observable outcome per
+          ADR-026 grounding) ARE verified per ADR-022 evidence semantics;
+          per-candidate confirmation is sub-contracting framework-resolved
+          decisions back to the user (lazy deferral per Step 2d Ask
+          Hygiene Pass classification). The Step 5 summary's
+          `## Verification Candidates` table records each close with the
+          citation that triggered it and the documented recovery path:
+          `Recovery: rerun /wr-itil:transition-problem P289 known-error to
+          reopen` (close is reversible via a single-skill invocation).
+          If the dispatch returns non-zero, the Decision column records
+          `dispatch-failed: <one-line>` and the ticket is NOT marked
+          closed in the summary table — the failure is surfaced for user
+          attention. If `transition-problem` is not registered in this
+          project's plugin set, the Decision column records
+          `dispatch-unavailable: ticket left as Verification Pending` —
+          graceful fallback, no silent swallow. PASS if the response
+          identifies (a) silent dispatch to `/wr-itil:transition-problem
+          close` without AskUserQuestion, (b) ADR-026 specific-citation
+          grounding, (c) documented recovery path via
+          `/wr-itil:transition-problem known-error`, AND (d)
+          dispatch-failed / dispatch-unavailable surface handling. FAIL
+          if the response says Step 4a fires `AskUserQuestion` per
+          close-candidate to confirm before delegating, OR says the close
+          is irreversible, OR says dispatch-failure is silently swallowed,
+          OR says run-retro renames `.verifying.md` -> `.closed.md`
+          itself (ownership-boundary violation — manage-problem /
+          transition-problem owns the rename + commit per ADR-014).
+          Saying it does NOT fire AskUserQuestion PASSES.
+
+  # --- Step 4b Stage 1 mechanical-auto-ticket ------------------------------
+
+  - description: "Step 4b Stage 1 mechanical-auto-ticket — every codify-worthy observation tickets via /wr-itil:capture-problem; only cause: skill_unavailable is valid deferral"
+    vars:
+      prompt: |
+        I am the /wr-retrospective:run-retro Step 4b Stage 1 codification
+        flow. From Step 2's reflection, I identified 3 codify-worthy
+        observations:
+
+          1. (Recurring class-of-behaviour observation) The work-problems
+             AFK loop hit the same `git add` re-stage after `git mv` six
+             times this session (P057 surface).
+          2. (Direction-setting observation) A genuine new design choice:
+             whether to add ratification gating to the JTBD-update path,
+             which would constrain future user actions in a load-bearing
+             way (user-judgment-bound).
+          3. (Ambiguous observation) A SKILL-prose pattern I can't
+             cleanly classify as either recurring-class or direction-
+             setting.
+
+        Per the Step 4b Stage 1 contract (P342 trust-boundary asymmetry +
+        ADR-044 framework-resolution boundary), how does the pass handle
+        each observation? Does it fire `AskUserQuestion` per observation
+        to ask the user whether to ticket? Where does the
+        direction-setting observation route in AFK mode? What is the
+        ONLY valid Tickets-Deferred fallback cause? What does the
+        ambiguous observation default to and why?
+    assert:
+      # Tier A — must name the ticketing dispatch target.
+      - type: regex
+        value: '/wr-itil:capture-problem|capture-problem|/wr-itil:manage-problem|manage-problem'
+      # Tier A — must indicate mechanical / no per-observation AskUserQuestion.
+      - type: regex
+        value: '[Mm]echanical|[Nn]o\s+(?:per[\s\-]?observation\s+)?AskUserQuestion|does\s+not\s+fire|without\s+(?:firing\s+)?AskUserQuestion|silent(?:ly)?|no\s+user\s+decision'
+      # Tier A — must name the only valid Tickets-Deferred cause.
+      - type: regex
+        value: 'cause:\s*skill_unavailable|skill_unavailable|skill\s+unavailable|ONLY\s+(?:valid\s+)?(?:cause|fallback)|graceful[\s\-]?degradation'
+      # Tier A — must name the outstanding_questions queue routing for
+      # direction-setting in AFK.
+      - type: regex
+        value: 'outstanding_questions|ITERATION_SUMMARY|queue|surface(?:s|d)?\s+at\s+(?:retro[\s\-]?end|loop[\s\-]?end)'
+      # Tier A — must indicate ambiguous defaults to mechanical-auto-ticket.
+      - type: regex
+        value: '[Aa]mbiguous|default\s+to\s+(?:mechanical[\s\-]?)?auto[\s\-]?ticket|conservative|defaults?\s+to\s+(?:the\s+)?ticket|silent[\s\-]?queue[\s\-]?accumulation|zero\s+observation[\s\-]?drop'
+      # Tier B — semantic invariant: mechanical-auto-ticket + only
+      # skill_unavailable cause + ambiguous-defaults-to-ticket per P342.
+      - type: llm-rubric
+        value: |
+          The response describes Step 4b Stage 1 MECHANICALLY ticketing
+          observations 1 and 3 via `/wr-itil:capture-problem` (or
+          manage-problem fallback) WITHOUT firing `AskUserQuestion` per
+          observation — ticketing is mechanical, not a user decision.
+          Observation 2 (direction-setting) routes to the
+          `outstanding_questions` queue in the orchestrator's
+          `ITERATION_SUMMARY` schema (when retro runs inside an AFK iter)
+          OR surfaces at retro-end interactively (when retro runs
+          standalone in main turn) — these observations preserve the
+          user's authority surface and MUST NOT auto-ticket. The ONLY
+          valid `Tickets-Deferred` fallback cause is
+          `cause: skill_unavailable` (Skill tool gated out / manage-problem
+          not registered in this project / `docs/problems/` unreachable);
+          any other deferral cause is a Step 4b Stage 1 violation per
+          P148 anti-pattern enumeration. Observation 3 (ambiguous)
+          DEFAULTS to mechanical-auto-ticket per the P342 trust-boundary
+          asymmetry — defaulting to queue would re-introduce the
+          silent-queue-accumulation hazard; defaulting to ticket has zero
+          observation-drop risk because the ticket lifecycle
+          (`/wr-itil:review-problems`, `manage-problem` Step 9d) will
+          surface any embedded direction-setting question later. PASS if
+          the response identifies (a) mechanical-auto-ticket for
+          recurring-class without AskUserQuestion, (b)
+          outstanding_questions queue routing for direction-setting in
+          AFK, (c) `cause: skill_unavailable` as the only valid deferral
+          gate, AND (d) ambiguous defaults to auto-ticket per P342. FAIL
+          if the response says Stage 1 fires `AskUserQuestion` per
+          observation to ask whether to ticket, OR says direction-setting
+          observations should be auto-ticketed (would lose the user's
+          authority surface), OR says "session is long" / "context is at
+          N tokens" / "user might want to wrap up" is a valid
+          Tickets-Deferred cause (P148 anti-pattern), OR says ambiguous
+          defaults to queue (silent-queue-accumulation hazard). Saying it
+          does NOT fire per-observation AskUserQuestion PASSES.
+
+  # --- Step 4b Stage 2 silent fix-strategy pick ----------------------------
+
+  - description: "Step 4b Stage 2 silent fix-strategy pick — agent picks shape from catalog WITHOUT per-ticket AskUserQuestion; user corrects via direct edit"
+    vars:
+      prompt: |
+        I am the /wr-retrospective:run-retro Step 4b Stage 2 fix-strategy
+        pass. Stage 1 just ticketed three observations. For each ticket,
+        I need to pick the proposed fix strategy (codification shape)
+        and record it on the ticket's `## Fix Strategy` section.
+
+        Observation A: "I keep doing fetch-check-score-commit-push-release
+        manually after each work-problem iter — the same multi-step
+        sequence, six times this session."
+
+        Observation B: "manage-problem Step 9d's Likely-Verified heuristic
+        false-fires when the .verifying.md was written < 7 days ago AND
+        the ticket has no `## Fix Released` section — needs a targeted
+        edit to packages/itil/skills/manage-problem/SKILL.md."
+
+        Observation C: "A bounded one-shot edit fixing a typo in
+        run-retro Step 3 — no recurring-pattern signal observed."
+
+        Per the Stage 2 contract (P135 / ADR-044 framework-resolution
+        boundary; P132 inverse-correctness), does Stage 2 fire
+        `AskUserQuestion` per ticket to ask the user to pick the shape?
+        What shape would the agent pick for each? Where is the record
+        written? If the agent picks wrong, how does the user correct it?
+        What makes per-ticket `AskUserQuestion` here the anti-pattern?
+    assert:
+      # Tier A — must indicate silent agent pick / no per-ticket AskUserQuestion.
+      - type: regex
+        value: '[Ss]ilent\s+agent|[Aa]gent\s+(?:picks?|owns?)|WITHOUT\s+(?:firing\s+)?AskUserQuestion|does\s+not\s+fire|no\s+per[\s\-]?ticket\s+AskUserQuestion|without\s+per[\s\-]?ticket'
+      # Tier A — must name Skill — create stub for Observation A (recurring sequence).
+      - type: regex
+        value: '[Ss]kill[\s\-]?(?:create|stub)|[Ss]kill\s*[—\-]\s*create\s+stub|new\s+skill|create\s+(?:a\s+)?skill\s+stub|wr[\s\-]?itil:ship[\s\-]?fix'
+      # Tier A — must name Skill — improvement stub for Observation B (targeted edit).
+      - type: regex
+        value: '[Ss]kill[\s\-]?(?:improve|improvement|edit)|[Ss]kill\s*[—\-]\s*improvement|targeted\s+edit|existing\s+SKILL|improvement\s+stub'
+      # Tier A — must name self-contained / Option 4 for Observation C.
+      - type: regex
+        value: '[Ss]elf[\s\-]?contained|[Oo]ption\s+4|no\s+codification|bounded\s+one[\s\-]?shot|no\s+stub'
+      # Tier A — must reference user-correction-via-direct-edit recovery path.
+      - type: regex
+        value: 'user\s+edits?|direct\s+edit|edits?\s+the\s+ticket|reversibl|edit\s+the\s+(?:ticket|Fix\s+Strategy)|cheap\s+(?:per[\s\-]?ticket\s+)?correction'
+      # Tier A — must reference Fix Strategy section as the durable record.
+      - type: regex
+        value: '##\s*Fix\s+Strategy|`?Fix\s+Strategy`?\s+section|ticket(?:\s+is\s+the\s+durable\s+record)?|travels?\s+with\s+the\s+problem'
+      # Tier B — semantic invariant: silent shape pick + per-shape
+      # heuristics + per-ticket AskUserQuestion is inverse-correctness.
+      - type: llm-rubric
+        value: |
+          The response describes Stage 2 SILENTLY picking the obvious-fit
+          codification shape per ticket WITHOUT firing `AskUserQuestion`.
+          The shape catalog has been resolved by the framework (skill /
+          agent / hook / settings / script / CI / ADR / JTBD / guide /
+          test fixture / memory / internal-code); applying it per
+          observation is mechanical. For Observation A (recurring
+          multi-step user-invoked sequence), the agent picks
+          **Skill — create stub** (Option 1). For Observation B
+          (targeted flaw in an existing SKILL.md with a specific edit),
+          the agent picks **Skill — improvement stub** (Option 2). For
+          Observation C (bounded one-shot edit, no recurring-pattern
+          signal), the agent picks **Self-contained work — no
+          codification stub** (Option 4). Each pick is recorded in the
+          ticket's `## Fix Strategy` section (not the retro summary —
+          the strategy travels with the problem through its lifecycle).
+          If the agent picks wrong, the user CORRECTS VIA DIRECT EDIT on
+          the ticket — no orchestrator turn-around needed; the per-ticket
+          correction is cheap. The Step 5 retro summary's `Codification
+          Candidates` table records each picked shape so the user can
+          scan all picks at once and correct any wrong ones in one
+          editing pass. Per-ticket `AskUserQuestion` is the
+          inverse-correctness anti-pattern P132 + ADR-044 capture: high
+          friction (one prompt per ticket) for low decision-irreversibility
+          (just re-edit the ticket). PASS if the response identifies (a)
+          silent shape pick / no per-ticket AskUserQuestion, (b)
+          per-shape heuristics matched correctly to A / B / C, (c) the
+          `## Fix Strategy` section as the durable record, AND (d)
+          user-correction-via-direct-edit recovery path. FAIL if the
+          response says Stage 2 fires `AskUserQuestion` per ticket to
+          confirm the shape, OR matches the shapes incorrectly (e.g.
+          picks Option 4 for Observation A's recurring sequence), OR
+          says the agent writes the strategy to the Step 5 summary
+          instead of the ticket, OR says user correction requires a
+          full orchestrator turn. Saying it does NOT fire per-ticket
+          AskUserQuestion PASSES.
