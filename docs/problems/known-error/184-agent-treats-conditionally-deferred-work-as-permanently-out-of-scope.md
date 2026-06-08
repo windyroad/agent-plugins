@@ -1,9 +1,10 @@
 # Problem 184: Agent treats conditionally-deferred work (deferred-pending-X-graduation) as permanently out of scope — prematurely transitions parent ticket when X graduates
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-05-12
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Origin**: internal
 
 ## Description
 
@@ -45,14 +46,41 @@ Currently (until a load-bearing fix lands):
 
 ## Root Cause Analysis
 
+**Root cause confirmed 2026-06-09**: The `/wr-itil:manage-problem` Step 7 K→V (Known Error → Verification Pending) block and the `/wr-itil:transition-problem` Step 4 pre-flight checks both had no scan for unticked phase-tracking sections (`### Phase N` / `### Slice N` / `### Tier N`) carrying conditional-deferral markers ("deferred to post-X-graduation" / "deferred-pending-Y"). The agent's NLP parsed the language "deferred" as terminal (= "permanently out of scope") without resolving whether the gating dependency had since lifted. When the gating phase/RFC reached `.closed.md` / `.verifying.md`, the conditionally-deferred work was back IN SCOPE — but neither SKILL surface ran any check before allowing the K→V rename.
+
+The P170 driver case: ADR-060 amendment 2026-05-10 stated "Phase 2 SHIP deferred to post-Phase-1-graduation per Out of Scope". Phase 1 graduated 2026-05-12 (commits `880c9a5` → `8799f7b`). The agent then transitioned P170 K→V in commit `aa08fca`, treating the Phase 2 deferral as still in force. Reverted in commit `606336a` after user correction.
+
 ### Investigation Tasks
 
+- [x] Investigate whether the manage-problem skill's transition step can adopt a "deferred-work audit" subroutine that surfaces conditionally-deferred work for explicit acknowledgement before transitioning. **Resolved 2026-06-09**: implemented as the new "Conditional-deferral check BEFORE the rename (P184)" subsection in `packages/itil/skills/manage-problem/SKILL.md` Step 7 + symmetric copy-not-move into `packages/itil/skills/transition-problem/SKILL.md` Step 4 per ADR-010 P093 split-skill execution ownership.
+- [x] Investigate whether ADR-022 (Verification Pending lifecycle) Confirmation criteria should explicitly require "no unticked phase-bounded work in body" before allowing the transition. **Deferred to outstanding_questions** — architect verdict 2026-06-09 surfaces two codification options (amend ADR-022 in-place vs sibling ADR); pinned for user direction at orchestrator main turn.
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems.
 - [ ] Sweep `docs/problems/` for tickets that have transitioned to verifying with unticked phase-tracking checkboxes still in body — base-rate measurement.
-- [ ] Investigate whether ADR-022 (Verification Pending lifecycle) Confirmation criteria should explicitly require "no unticked phase-bounded work in body" before allowing the transition.
 - [ ] Investigate composition with P179 (defer discipline) — both surface in the same agent-reasoning class; consider whether the manage-problem heuristic should compose with P179's per-commit phase-detection.
-- [ ] Investigate whether the manage-problem skill's transition step can adopt a "deferred-work audit" subroutine that surfaces conditionally-deferred work for explicit acknowledgement before transitioning.
-- [ ] Investigate whether a memory entry "conditional deferrals lift when their condition fires; re-check before transition" should be added as durable user-feedback to prevent recurrence at the agent layer.
+- [ ] Investigate whether a memory entry "conditional deferrals lift when their condition fires; re-check before transition" should be added as durable user-feedback to prevent recurrence at the agent layer. (Note: a session-memory entry on this pattern is already present at `feedback_no_shortcuts_no_softening.md` adjacent class; consider adding a dedicated `feedback_conditional_deferrals_lift_when_condition_fires.md` if recurrence persists.)
+
+## Fix Strategy
+
+**SKILL-prose change** — add a pre-flight "Conditional-deferral check" to both K→V transition surfaces (`/wr-itil:manage-problem` Step 7 + `/wr-itil:transition-problem` Step 4 — copy-not-move per ADR-010 P093). The check:
+
+1. Greps the `.known-error.md` body for phase-tracking section headers (`^### (Phase|Slice|Tier) [0-9]+`).
+2. Counts unticked `- [ ]` checkboxes inside each detected section.
+3. Greps the body for conditional-deferral markers (`deferred (?:to|pending|until) ...`, `Phase [0-9]+ (?:SHIP )?deferred`, `deferred-pending-...`).
+4. For each conditional-deferral, resolves whether the **gating condition** has fired (referenced phase/ticket/RFC reached `.closed.md` / `.verifying.md` / `closed`).
+5. **Halts the transition** when any conditional deferral has lifted with unticked work remaining — surfaces three options (re-open Phase N; confirm permanently OOS with marker; split into new ticket) via `AskUserQuestion` (interactive) or `outstanding_questions` queue-and-continue (AFK per P352).
+
+**Paired promptfoo eval extension** — `packages/itil/skills/manage-problem/eval/promptfooconfig.yaml` gains a new behavioural test case asserting the agent emits "conditional-deferral" / "halt" / "phase-tracking" language BEFORE describing the `git mv` rename when prompted with a K→V scenario carrying the P184 trigger pattern (a Phase 2 SHIP deferred to post-Phase-1-graduation ticket whose Phase 1 has just graduated).
+
+**Per architect verdict 2026-06-09 (ADR-052 advisory)**: no structural bats test added — the promptfoo behavioural eval covers the surface; a SKILL.md prose-grep bats test would be the exact anti-pattern ADR-052 supersedes (P081).
+
+**Release vehicle**: .changeset/wr-itil-p184-conditional-deferral-check.md
+
+## Reassessment Criteria
+
+The SKILL-prose check should be reassessed if:
+- A second class of conditional-deferral language surfaces that the regex set doesn't capture (extend the regex AND add a regression case to the eval).
+- The halt-and-route shape produces false positives the user dismisses repeatedly (threshold candidate per architect Q4 Option C hybrid — phase-tracking with N ≥ 3 unticked tasks gets halt; below threshold gets silent-marker per P063 shape).
+- The codification locus question (Q3 — amend ADR-022 vs sibling ADR) is resolved at the orchestrator main turn surface; SKILL prose should cite the chosen authority.
 
 ## Dependencies
 

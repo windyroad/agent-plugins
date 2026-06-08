@@ -86,3 +86,69 @@ tests:
       # errored and was counted as FAIL.
       - type: not-regex
         value: '(^|\n)\s*[Gg]it\s+[Mm]v\s+\S+[\s\S]{0,400}[Rr]elease\s+[Vv]ehicle'
+
+  # P184 paired behavioural assertion — Conditional-deferral check BEFORE git mv.
+  #
+  # Driver: P184 (Agent treats conditionally-deferred work as permanently out
+  # of scope — prematurely transitions parent ticket when X graduates). When
+  # a K→V transition is proposed for a ticket whose body still carries a
+  # `### Phase N` section with unticked `- [ ]` tasks AND surrounding prose
+  # names a CONDITIONAL deferral whose gating dependency has now lifted
+  # (e.g. "Phase 2 SHIP deferred to post-Phase-1-graduation" where Phase 1
+  # has shipped), the agent MUST surface a halt-and-route option before
+  # describing the `git mv` rename.
+  #
+  # Behavioural shape per ADR-052: prompts a realistic K→V scenario carrying
+  # the P184 trigger pattern; asserts that the agent's response surfaces the
+  # conditional-deferral check (named verbatim per the SKILL prose anchor)
+  # and proposes halt-and-route language ahead of the rename command.
+  #
+  # @problem P184 (closes the SKILL-prose gap)
+  # @adr ADR-044 (category 2 deviation-approval surface)
+  - description: K→V transition — Conditional-deferral check precedes git mv (P184)
+    vars:
+      prompt: |
+        I am executing /wr-itil:manage-problem Step 7 (Known Error →
+        Verification Pending) for a problem ticket at
+        docs/problems/known-error/170-rfc-002-story-map-framework.md.
+
+        Ticket body excerpt:
+
+          ## Fix Strategy
+          Phase 1: ship story-map framework. **Phase 2 SHIP deferred to
+          post-Phase-1-graduation per Out of Scope**.
+
+          ### Phase 2 implementation tasks
+          - [ ] Add backbone/ribs/slices renderer
+          - [ ] Wire docs/story-maps/README.md refresh
+          - [ ] Migrate existing story maps to new shape
+
+        Phase 1 has just graduated — RFC-002 reached `.closed.md` and the
+        changeset `.changeset/wr-itil-phase1-ship.md` is staged.
+
+        Walk me through the EXACT sub-steps to transition this ticket to
+        .verifying.md, in order. Be specific about whether any pre-flight
+        checks fire BEFORE the `git mv` rename, and what to do if they fire.
+    assert:
+      # Tier A — must mention the conditional-deferral check anchor by name.
+      - type: regex
+        value: '[Cc]onditional[- ]deferral'
+      # Tier A — must reference P184 by ID OR the substantive language
+      # ("phase-tracking", "deferred-pending", "deferral lifted").
+      - type: regex
+        value: 'P184|phase[- ]tracking|deferred[- ]pending|deferral\s+lifted|conditionally[- ]deferred'
+      # Tier A — must surface halt-and-route language (the SKILL's named
+      # shape) rather than silent-proceed.
+      - type: regex
+        value: '[Hh]alt|[Aa]sk[Uu]ser[Qq]uestion|outstanding_questions|re-?open\s+[Pp]hase|[Pp]hase\s+[0-9]+.*in[- ]scope'
+      # Tier A — ORDERING: conditional-deferral check must appear BEFORE
+      # `git mv` so the user sees the halt option before the rename command.
+      # JS RegExp compat per Iter-11 — char classes for case-insensitivity,
+      # `[\s\S]` for dotall.
+      - type: regex
+        value: '[Cc]onditional[- ]deferral[\s\S]{0,3000}[Gg]it\s+[Mm]v'
+      # Tier A — must NOT describe the rename as the first step (the P184
+      # regressing shape — agent dispatches the K→V transition without
+      # noticing the unticked Phase 2 tasks + lifted gating condition).
+      - type: not-regex
+        value: '(^|\n)\s*[Gg]it\s+[Mm]v\s+\S+[\s\S]{0,400}[Cc]onditional[- ]deferral'

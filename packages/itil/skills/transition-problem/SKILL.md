@@ -88,6 +88,33 @@ Destination-specific pre-flight checks gate the transition. If any check fails, 
 
 - [ ] The fix has been implemented (the transition typically rides with the `fix(<scope>): ... (closes P<NNN>)` commit)
 - [ ] A release marker is available (version, commit SHA, or date) so the `## Fix Released` section can name it
+- [ ] **Conditional-deferral check (P184)** — see the dedicated subsection below; halt the transition if any conditional deferral has lifted with unticked work remaining
+
+#### Conditional-deferral check on K→V (P184) — copy-not-move sibling
+
+This subsection is the **copy-not-move sibling** of `/wr-itil:manage-problem` SKILL.md Step 7's "Conditional-deferral check BEFORE the rename (P184)" block per [ADR-010](../../../docs/decisions/010-rename-wr-problem-to-wr-itil.proposed.md) amended "Split-skill execution ownership" rule (P093). Both surfaces must carry the check; drift between the two copies re-opens P184's silent-loss failure mode on whichever surface lacks the check.
+
+BEFORE the `git mv` to `.verifying.md`, scan the `.known-error.md` ticket body for **phase-tracking sections with unticked checkboxes whose deferral conditions have now lifted**. Conditional-deferral language ("Phase N SHIP deferred to post-Phase-M-graduation" / "deferred-pending-X-graduation" / "Phase N deferred until Y") names a CONDITION — it is NOT terminal. When the gating condition fires (Phase M graduates, dependency Y ships), the conditionally-deferred work is back IN SCOPE; transitioning K→V while it remains unticked silently loses the work. P184's driver case (P170 Phase 2 SHIP deferred to post-Phase-1-graduation) is the canonical regression — the agent's NLP parsed "deferred" as terminal without checking the conditional clause and would have lost the Phase 2 work if the user hadn't asked an orthogonal question.
+
+**Detection** (run in order):
+
+1. Grep the ticket body for phase-tracking section headers — regex `^### (Phase|Slice|Tier) [0-9]+` covers the canonical shapes.
+2. For each detected section, count the unticked `- [ ]` checkboxes inside it (up to the next `^### ` boundary or EOF).
+3. Grep the body for conditional-deferral markers: `deferred (?:to|pending|until) (?:post-)?[A-Za-z0-9-]+(?:-graduation)?`, `Phase [0-9]+ (?:SHIP )?deferred`, `deferred-pending-[a-z-]+`.
+4. For each conditional-deferral marker, resolve whether the **gating condition** has fired — check whether the named phase/ticket/RFC has reached `.closed.md` / `.verifying.md` (for tickets) or `closed` lifecycle (for RFCs / stories per ADR-060).
+
+**Halt-and-route** (when ANY conditional deferral has lifted with unticked work remaining):
+
+Emit a structured report naming each deferred section + the lifted condition + the unticked task count, then **halt the transition**. Per ADR-044 category 2 (deviation-approval), this is NOT a per-transition lazy ask — it is a class-of-behaviour deviation surface that the user owns.
+
+- **Interactive**: fire `AskUserQuestion` with `header: "Conditional deferral lifted"` + three options: (1) re-open Phase N and work the deferred tasks now (recommended; revert to Known Error); (2) confirm Phase N is permanently out of scope (proceed with K→V; append `<!-- P184: user-confirmed Phase N permanently OOS -->` marker to suppress re-detection); (3) split Phase N into a new ticket (halt K→V; route to `/wr-itil:capture-problem`).
+- **AFK** (per ADR-013 Rule 6 + P352 queue-and-continue): queue an `outstanding_questions` entry naming the local ticket ID + the lifted-condition citation + the unticked task count + the three options. **Do NOT auto-transition.** Brief the substance BEFORE referencing IDs per `feedback_brief_before_id.md`.
+
+**Proceed silently** (no halt) when no phase-tracking sections exist, every task in such sections is ticked, the deferral marker explicitly states "permanently out of scope" / "won't fix" / "rejected" without a conditional clause, OR the section carries the `<!-- P184: user-confirmed Phase N permanently OOS -->` marker from a prior surfacing.
+
+**Why halt-and-route not silent-default-with-marker**: P184's failure mode is "work silently lost if user doesn't notice"; the halt-and-route shape catches the failure at the transition surface where the loss occurs. Driver: user direction in P184 Workaround section — *"explicitly ask the user 'is Phase N still deferred or is it now in-scope?' before transitioning when the ticket body shows phase-tracking sections."*
+
+This check fires BEFORE the P330 Release-vehicle seed step in Step 6 — halt-on-conditional-deferral is the outer gate, seed-and-rename is the inner mechanic.
 
 **Verification Pending → Closed** (`<status>` = `close`) requires:
 

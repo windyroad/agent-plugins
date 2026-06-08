@@ -733,6 +733,40 @@ Update the "Status" field in the file to "Known Error".
 
 When the fix for a Known Error ships, transition the ticket in a single commit.
 
+#### Conditional-deferral check BEFORE the rename (P184)
+
+BEFORE the `git mv` to `.verifying.md`, scan the `.known-error.md` ticket body for **phase-tracking sections with unticked checkboxes whose deferral conditions have now lifted**. Conditional-deferral language ("Phase N SHIP deferred to post-Phase-M-graduation" / "deferred-pending-X-graduation" / "Phase N deferred until Y") names a CONDITION — it is NOT terminal. When the gating condition fires (Phase M graduates, dependency Y ships), the conditionally-deferred work is back IN SCOPE; transitioning K→V while it remains unticked silently loses the work. P184's driver case (P170 Phase 2 SHIP deferred to post-Phase-1-graduation) is the canonical regression — the agent's NLP parsed "deferred" as terminal without checking the conditional clause, transitioned the parent ticket, and would have lost the Phase 2 work if the user hadn't asked an orthogonal question that surfaced the misreading.
+
+**Detection** (run in order):
+
+1. Grep the ticket body for phase-tracking section headers — regex `^### (Phase|Slice|Tier) [0-9]+` covers the canonical shapes.
+2. For each detected section, count the unticked `- [ ]` checkboxes inside it (up to the next `^### ` boundary or EOF).
+3. Grep the body (any section, not just the phase-tracking one) for conditional-deferral markers:
+   - `deferred (?:to|pending|until) (?:post-)?[A-Za-z0-9-]+(?:-graduation)?`
+   - `Phase [0-9]+ (?:SHIP )?deferred`
+   - `deferred-pending-[a-z-]+`
+4. For each conditional-deferral marker, resolve whether the **gating condition** has fired. The gating condition typically names another phase, ticket, or RFC — check whether that artefact has reached `.closed.md` / `.verifying.md` (for tickets), or `closed` lifecycle (for RFCs / stories per ADR-060).
+
+**Halt-and-route** (when ANY conditional deferral has lifted with unticked work remaining):
+
+Emit a structured report naming each deferred section + the lifted condition + the unticked task count, then **halt the transition**:
+
+- **Interactive**: fire `AskUserQuestion` with `header: "Conditional deferral lifted"` + options:
+  1. `Re-open Phase N — work the deferred tasks now (Recommended)` — halt the K→V transition; route to working the deferred Phase N tasks; revert to Known Error.
+  2. `Confirm Phase N permanently out of scope — proceed with K→V` — user explicit acknowledgement that the deferral was misclassified as conditional and is in fact terminal; proceed with the K→V transition; append `<!-- P184: user-confirmed Phase N permanently OOS -->` marker to the deferred section so re-detection skips it.
+  3. `Split Phase N into a new ticket — proceed with K→V on this one` — halt the K→V transition; route to `/wr-itil:capture-problem` for a new ticket carrying the Phase N scope; once captured, resume the K→V transition on the original ticket.
+- **AFK** (per ADR-013 Rule 6 + P352 queue-and-continue universal default): queue an `outstanding_questions` entry naming the local ticket ID + the lifted-condition citation + the unticked task count + the three options above. **Do NOT auto-transition.** The orchestrator main turn surfaces the queued question at loop end via the existing batched-`AskUserQuestion` end-of-loop gate. Brief the substance BEFORE referencing IDs per `feedback_brief_before_id.md` — the user reads the prompt without project filesystem access.
+
+**Proceed silently** (no halt) when:
+- No phase-tracking sections exist in the ticket body (the common case).
+- Phase-tracking sections exist but every task is ticked.
+- Phase-tracking sections exist with unticked tasks BUT the deferral marker explicitly states "permanently out of scope" / "won't fix" / "rejected" without a conditional clause.
+- The conditional-deferral marker carries the `<!-- P184: user-confirmed Phase N permanently OOS -->` marker from a prior surfacing.
+
+**Why halt-and-route not silent-default-with-marker**: P184's failure mode is "work silently lost if user doesn't notice"; the P063 silent-default-with-marker shape leaves the lost-work-detection burden on the user reading the marker in the Verification Queue. The halt-and-route shape catches the failure at the transition surface where the loss occurs. Authority: ADR-044 category 2 (deviation-approval) — the agent surfaces a deviation candidate with citations + evidence + a proposed shape; user picks. Driver: user direction in P184 Workaround line 37 — *"explicitly ask the user 'is Phase N still deferred or is it now in-scope?' before transitioning when the ticket body shows phase-tracking sections."*
+
+This check fires BEFORE the P330 Release-vehicle seed below — halt-on-conditional-deferral is the outer gate, seed-and-rename is the inner mechanic.
+
 **Seed `Release vehicle` reference BEFORE the rename (P330).** BEFORE the `git mv` to `.verifying.md`, edit the `.known-error.md` ticket body to append a `**Release vehicle**: .changeset/<name>.md` paragraph at the END of the `## Fix Strategy` section (create the section if absent). The `<name>.md` is the kebab-case slug of the changeset file the fix commit authored under `.changeset/` (e.g. `wr-itil-p330-option-b.md`). The seed eliminates the `wr-itil-derive-release-vehicle <NNN>` helper's exit-2 routing on standalone K→V iters — the helper greps the ticket body for `.changeset/<name>.md` and exits 2 when absent; seeding the reference at fix-ship time (when the changeset name is fresh in scope, since the fix commit just created it) makes the helper exit 0 deterministically on first call. The exit-2 recovery routing documented in `/wr-itil:transition-problem` Step 6 remains as the legacy-ticket fallback. Matches the user's documented workaround pattern across 3 of 4 standalone K→V dogfoods in the 2026-05-30 session (P316 / P281 / P302 — see P330 § Symptoms).
 
 > **Two P057 staging-trap windows on K→V (seed + rename).** The seed Edit on `.known-error.md` is the FIRST P057 window; the Edit that updates Status / writes `## Fix Released` AFTER the `git mv` is the SECOND. Consolidate staging into a SINGLE `git add docs/problems/verifying/<NNN>-<title>.md` AFTER both Edits + the `git mv`. `git mv` operates on the index entry — the body content the index references at rename time is the post-seed content, so the seed Edit's content is carried across the rename automatically; the single final `git add` re-stages the post-rename file with the post-`Edit` Status + `## Fix Released` content. The seed step does NOT introduce a separate `git add` of the `known-error/` path — staging discipline stays single-call by riding the rename's index entry.
