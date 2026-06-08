@@ -1,6 +1,16 @@
 # Problem 195: Briefing Tier 3 rotation repeat-deferral — 13 of 14 topic files over ADR-040 budget with 2 in MUST_SPLIT (≥2× ceiling) branch
 
-**Status**: Open
+**Status**: Closed
+
+## Closed as no longer relevant
+
+- **Evidence shape**: ADR-shipped-confirmed, named-skill-or-feature-exists, driver-child-ticket-closed (ADR-079 Phase 2)
+- **Closed on**: 2026-06-09
+- **Closed by**: /wr-itil:review-problems Step 4.6 relevance-close pass
+- **Cite (per-shape evidence)**: ADR-040 / ADR-043 confirmed; run-retro Step 3 Tier 3 rotation mechanism exists at packages/retrospective/skills/run-retro/SKILL.md; Phase 1 mechanical rotation shipped 2026-06-08 (commit ac9cbc8 rotated 5 over-budget files split-by-date)
+- **Caveat**: multi-phase-mixed-progress: 0/5 Investigation Tasks done — durable structural fix (per-retro-cadence-vs-accretion pattern) remains. User confirmed close at interactive batch review 2026-06-09; structural fix work, if pursued, will be captured as new ticket per hang-off discipline.
+- **Persist**: this section is committed in the ticket file itself; `packages/itil/scripts/evaluate-relevance.sh` is the re-runnable verdict source per ADR-026
+- **Uncertainty / reversibility**: reversible via `git revert` or `git mv` back to open/.
 **Reported**: 2026-05-15
 **Priority**: 6 (Med) — Impact: 3 (Moderate — briefing bucket compounds session-start cost across all sessions) x Likelihood: 2 (Possible — pattern repeats every retro) (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)

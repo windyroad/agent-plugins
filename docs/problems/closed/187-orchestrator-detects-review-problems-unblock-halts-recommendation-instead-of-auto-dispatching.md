@@ -1,6 +1,16 @@
 # Problem 187: AFK orchestrator detects `/wr-itil:review-problems` would unblock its preflight but halts with a "recommended next step" instead of auto-dispatching the unblock
 
-**Status**: Open
+**Status**: Closed
+
+## Closed as no longer relevant
+
+- **Evidence shape**: ADR-shipped-confirmed, named-skill-or-feature-exists, driver-child-ticket-closed (ADR-079 Phase 2)
+- **Closed on**: 2026-06-09
+- **Closed by**: /wr-itil:review-problems Step 4.6 relevance-close pass
+- **Cite (per-shape evidence)**: ADRs human-oversight-confirmed: ADR-013; feature surfaces exist: packages/itil/skills/review-problems/SKILL.md, work-problem/SKILL.md, work-problems/SKILL.md + /wr-itil: slash commands; drivers closed: P183
+- **Caveat**: multi-phase-mixed-progress: 0/7 Investigation Tasks done — confirm umbrella scope before close. User confirmed close at interactive batch review 2026-06-09 (review-problems Step 4.6 surface-batch-confirm).
+- **Persist**: this section is committed in the ticket file itself; `packages/itil/scripts/evaluate-relevance.sh` is the re-runnable verdict source per ADR-026
+- **Uncertainty / reversibility**: reversible via `git revert` or `git mv` back to open/.
 **Reported**: 2026-05-12
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)

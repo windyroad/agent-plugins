@@ -1,6 +1,16 @@
 # Problem 189: Agent invents "deferred" framing on tracked phases without user-deferral direction — projects fictional out-of-scope onto in-scope work
 
-**Status**: Open
+**Status**: Closed
+
+## Closed as no longer relevant
+
+- **Evidence shape**: named-skill-or-feature-exists (ADR-079 Phase 2); sibling of P184 (just shipped K→V conditional-deferral check this session)
+- **Closed on**: 2026-06-09
+- **Closed by**: /wr-itil:review-problems Step 4.6 relevance-close pass
+- **Cite (per-shape evidence)**: feature surfaces exist: packages/itil/skills/manage-problem/SKILL.md (Step 7 conditional-deferral check shipped P184, commit d2ec5b2 / @windyroad/itil@0.49.2 2026-06-09); /wr-itil: slash commands
+- **Caveat**: multi-phase-mixed-progress: 0/5 Investigation Tasks done — confirm umbrella scope before close. User confirmed close at interactive batch review 2026-06-09.
+- **Persist**: this section is committed in the ticket file itself; `packages/itil/scripts/evaluate-relevance.sh` is the re-runnable verdict source per ADR-026
+- **Uncertainty / reversibility**: reversible via `git revert` or `git mv` back to open/.
 **Reported**: 2026-05-13
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
