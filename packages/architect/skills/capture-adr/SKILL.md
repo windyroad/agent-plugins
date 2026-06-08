@@ -49,6 +49,24 @@ Empty `$ARGUMENTS` halts per the Rule 6 audit above.
 
 Derive a kebab-case title slug from the first 8-10 non-stopword tokens of the Title (matching the existing `create-adr` slug derivation pattern).
 
+#### Title-as-outcome convention (P354)
+
+ADR titles must name the **decision outcome** as a short noun phrase, not the question being decided. The title is the skim-surface for `docs/decisions/` and the ADR-077 compendium — readers should resolve what was decided from the title alone, without opening the file. User direction 2026-06-03 (P354): *"ADR titles are supposed to be the short version of what was decided, so they are skimmable."*
+
+**GOOD** (outcome — short noun phrase; drawn from corpus): `marketplace-only-distribution`, `monorepo-per-plugin-packages`, `behavioural-tests-default-for-skill-testing`, `plugin-script-resolution-via-bin-on-path`, `every-fix-goes-through-an-rfc`.
+
+**BAD** (question / option-pair / deliberation): `<X>-vs-<Y>` (option-pair), `should-<Z>` (deliberation), `whether-<Z>` (open question), `<X>-or-<Y>` (pure option-set).
+
+In `capture-adr` the chosen Decision is pinned in `$ARGUMENTS` at invocation, so the caller SHOULD supply a Title already in outcome shape — the framework does not retitle here (the canonical-outcome short-name is the caller's to author, not the framework's to derive). If the parsed Title slug matches a question-shape pattern (`-vs-`, `should-`, `whether-`, `-or-`), emit an advisory in the I2-isomorphic shape via the shared `emit_stderr_advisory` helper:
+
+```
+capture-adr: derived title='<slug>' from $ARGUMENTS — slug appears question-shaped (matched <pattern>); the Decision is pinned in $ARGUMENTS so an outcome-shaped Title is recommended; re-invoke with an outcome-shaped Title or rename the file at canonical expansion.
+```
+
+The advisory is **advisory-only** (no halt, no retitle). The caller may proceed with the question-shaped slug if they choose; the subsequent `/wr-architect:create-adr <NNN>` canonical-expansion pass picks up the retitle in its Step 5a mechanical retitle-after-decision check.
+
+(Serves JTBD-001 — skimmable titles on the on-disk record; ADR-044 category-4 silent-framework — advisory, not ask.)
+
 ### 2. Compute the next ADR ID
 
 Same P056-safe `local_max + origin_max + 1` formula as `/wr-architect:create-adr` Step 3:

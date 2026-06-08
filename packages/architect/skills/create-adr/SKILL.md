@@ -34,7 +34,7 @@ Resolve each field via the following dispatch. **The order is load-bearing** —
 
 | Field | Dispatch | ADR-044 category |
 |-------|----------|------------------|
-| **Title** | Derive silently. Kebab-case the first 8-10 non-stopword tokens of the user's prose problem-statement (same slug derivation as `/wr-itil:capture-problem` Step 1.4, `/wr-itil:manage-incident` Step 4, and `/wr-itil:manage-problem` Step 4 — uses the shared helper's `derive_kebab_slug` function). Emit stderr advisory: `create-adr: derived title='<slug>' from problem-statement; re-invoke with the desired title or rename the file if the slug is wrong`. Do NOT fire AskUserQuestion. | category-4 silent-framework |
+| **Title** | Derive silently. Kebab-case the first 8-10 non-stopword tokens of the user's prose problem-statement (same slug derivation as `/wr-itil:capture-problem` Step 1.4, `/wr-itil:manage-incident` Step 4, and `/wr-itil:manage-problem` Step 4 — uses the shared helper's `derive_kebab_slug` function). At intake the derived slug typically encodes the **question** (the problem-statement is question-shaped); the title-as-outcome convention in Step 2a below names the GOOD/BAD shapes, and Step 5a's mechanical retitle-after-decision check renames the file to the chosen-option's outcome shape after substance-confirm passes. Emit stderr advisory: `create-adr: derived title='<slug>' from problem-statement; re-invoke with the desired title or rename the file if the slug is wrong`. Do NOT fire AskUserQuestion. | category-4 silent-framework |
 | **status** (frontmatter) | Always `proposed` for new ADRs per Step 4 template convention. No ask, no advisory needed — SKILL convention is unambiguous. | category-4 silent-framework |
 | **date** (frontmatter) | Today's date (`date +%Y-%m-%d`) per Step 4 template. No ask, no advisory needed — wall-clock derivation is unambiguous. | category-4 silent-framework |
 | **reassessment-date** (frontmatter) | Today + 3 months (`date -v+3m +%Y-%m-%d` on BSD-date / `date -d '+3 months' +%Y-%m-%d` on GNU-date) per Step 4 template. Emit stderr advisory: `create-adr: derived reassessment-date='<YYYY-MM-DD>' from today+3-months default; re-invoke with --reassessment-date= or edit the frontmatter to override`. | category-4 silent-framework |
@@ -66,6 +66,30 @@ The advisory text shape is I2-isomorphic — same sentence structure across all 
 **Cross-skill consistency note**: this is the **fourth declaration-skill surface** to ship the derive-first dispatch (after `/wr-itil:capture-problem` Step 1.5, `/wr-itil:manage-incident` Step 4, and `/wr-itil:manage-problem` Step 4 in commits b7cc645 / 43255d2 / 30fd22b). Phase 2a-iii-B (2026-05-16) closes Phase 2a's full 4-surface scope — the I2-isomorphic stderr advisory format is now locked-in across `capture-problem`, `manage-incident`, `manage-problem`, AND `create-adr` via the shared helper at `packages/shared/derive-first-dispatch.sh` with synced per-package lib/ copies. Per ADR-017, drift between copies is caught by `npm run check:derive-first-dispatch` in CI.
 
 If the user has already provided context in `$ARGUMENTS` or earlier conversation, use what they've given and only fire AskUserQuestion for the cat-1 fields still missing.
+
+### 2a. Title-as-outcome convention (P354)
+
+ADR titles must name the **decision outcome** as a short noun phrase, not the question / option-pair being decided. The title is the skim-surface — a reader scanning `docs/decisions/` or the ADR-077 compendium should resolve what was decided from the title alone, without opening the file. User direction 2026-06-03 (P354): *"ADR titles are supposed to be the short version of what was decided, so they are skimmable. Titles like this force the reader to read the document to find the details of what was decided."*
+
+**GOOD** (outcome — short noun phrase naming the decided thing; drawn from corpus):
+
+- `marketplace-only-distribution`
+- `monorepo-per-plugin-packages`
+- `progressive-disclosure-for-governance-tooling-context`
+- `behavioural-tests-default-for-skill-testing`
+- `plugin-script-resolution-via-bin-on-path`
+- `every-fix-goes-through-an-rfc`
+
+**BAD** (question / option-pair / deliberation — reader must open file to learn outcome):
+
+- `npm-release-auth-stored-token-vs-oidc` (option-pair pattern `-vs-`)
+- `should-we-adopt-oidc-for-npm-release-auth` (deliberation pattern `should-`)
+- `whether-to-monorepo-or-polyrepo` (open-question pattern `whether-`)
+- `marketplace-or-direct-distribution` (pure option-set pattern `-or-`)
+
+**At intake the derived title is acceptable in either shape**: Step 2's `derive_kebab_slug` runs against the problem-statement, which is typically question-shaped. The title-as-outcome convention is enforced at Step 5a's mechanical retitle-after-decision check (post substance-confirm, when the chosen option is locked in). The title need not be outcome-shaped before the decision is made.
+
+(Serves JTBD-001 — skimmable titles speed the read path for the governance-enforcement persona.)
 
 ### 2b. Decision-boundary analysis (multi-decision check)
 
@@ -252,6 +276,20 @@ The `wr-architect-mark-oversight-confirmed` call writes the session-scoped evide
 This is NOT a soft "warn and proceed" path — the marker only ever writes when the draft on disk encodes the user's substantive pick. Mismatch is a re-draft trigger, not an override.
 
 **What the marker means.** This is the load-bearing born-confirmed gate: an ADR recorded through create-adr enters the world already human-oversighted (it does not appear in `/wr-architect:review-decisions`' unoversighted set) ONLY because the substance-confirm fire above explicitly affirmed the chosen option. Do NOT write the marker if the user has not confirmed substance (rejected / still-iterating ADRs stay unmarked). The marker is orthogonal to `status:` — a `proposed` ADR can be `human-oversight: confirmed`.
+
+**Retitle-after-decision check (P354 — ADR-044 category-4 silent-framework).** After the marker write lands, check the on-disk filename slug for a question-shape pattern (`-vs-`, `should-`, `whether-`, `-or-`). If matched, the title was derived at intake against a question-shaped problem-statement and must be retitled to the chosen-option's outcome shape now that the substance is locked in. The convention is named in Step 2a above.
+
+This step is **mechanical — no AskUserQuestion fires** (per P132 inverse-P078 guard). The chosen option is now known from the substance-confirm answer just above; derive the outcome slug from the chosen-option short name via the same `derive_kebab_slug` helper Step 2's Title derivation uses (`packages/architect/lib/derive-first-dispatch.sh`). Sequence (ordered to preserve marker-discipline hook semantics — the marker-introducing Edit must land BEFORE `git mv`):
+
+1. Derive `new_slug = derive_kebab_slug "<chosen option short name>"`.
+2. Edit the H1 in the on-disk file to the new outcome shape (H1 stays human-readable Title Case; the slug is for the filename). The `human-oversight: confirmed` line is already in `OLD_CONTENT` so `architect-oversight-marker-discipline.sh` allows this Edit per its "old content already had the marker" branch.
+3. `git mv docs/decisions/<NNN>-<old-slug>.proposed.md docs/decisions/<NNN>-<new-slug>.proposed.md` (Bash command — no Edit/Write hook fires; rename is captured as a rename in git history).
+4. Emit the I2-isomorphic stderr advisory: `create-adr: retitled <NNN>-<old-slug>.proposed.md -> <NNN>-<new-slug>.proposed.md from chosen-option '<short-name>'; git mv reversible via inverse rename.`
+5. The subsequent compendium regen below picks up the new filename automatically.
+
+If the on-disk slug does NOT match a question-shape pattern (already outcome-shaped at intake), skip this step silently — no advisory needed.
+
+(Serves JTBD-001 — outcome-shaped on-disk title; category-4 silent-framework per ADR-044.)
 
 #### 5b. Draft-quality review fire (optional, after 5a passes)
 

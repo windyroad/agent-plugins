@@ -1,6 +1,6 @@
 # Problem 354: ADR titles state the question / options being decided, not the decision outcome — not skimmable
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-06-03 (user direction with screenshot evidence — ADR-006 created as `006-npm-release-auth-stored-token-vs-oidc.proposed.md`)
 **Priority**: 6 (Medium) — Impact: 3 (Moderate — every ADR reader scanning the compendium or `docs/decisions/` listing must open the file to learn what was actually decided; defeats the skimmability the title is supposed to provide; compounds with ADR-077 compendium token-cheap-load goal) × Likelihood: 3 (Possible — fires whenever an ADR is titled as a question/option-pair rather than an outcome; recurring authoring habit)
 **Origin**: internal
@@ -46,11 +46,11 @@ Reader opens each question-shaped-title ADR to learn the outcome. Tedious; defea
 
 ### Investigation Tasks
 
-- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Audit the existing ADR corpus for question-shaped titles (grep `docs/decisions/*-vs-*.md`, `*should*`, `*whether*`, `*-or-*`).
-- [ ] Amend create-adr + capture-adr SKILL prose: name the title-as-outcome convention + a "retitle after decision" step (if the title was drafted at the question stage).
-- [ ] Decide: structural lint flagging question-shaped title patterns (optional).
-- [ ] Cadence-driven retitle of existing question-shaped ADRs (e.g. ADR-006 → outcome-shaped) — or a one-pass sweep.
+- [x] Re-rate Priority and Effort at next /wr-itil:review-problems
+- [x] Audit the existing ADR corpus for question-shaped titles (grep `docs/decisions/*-vs-*.md`, `*should*`, `*whether*`, `*-or-*`) — **corpus is currently clean** (zero hits across all four patterns as of 2026-06-08). The witnessed instance in the original capture (`006-npm-release-auth-stored-token-vs-oidc`) was hypothetical / from a different session; the actual on-disk ADR-006 is `006-connect-plugin` (outcome-shaped).
+- [x] Amend create-adr + capture-adr SKILL prose: name the title-as-outcome convention + a "retitle after decision" step (if the title was drafted at the question stage). **Shipped 2026-06-08** — Phase 1 commit per ADR-014 amends both `packages/architect/skills/create-adr/SKILL.md` (new Step 2a convention prose with GOOD/BAD examples drawn from corpus + Step 5a mechanical retitle-after-decision check, ADR-044 category-4 silent-framework) and `packages/architect/skills/capture-adr/SKILL.md` (Step 1 convention prose + I2-isomorphic stderr advisory for question-shaped Titles).
+- [ ] Decide: structural lint flagging question-shaped title patterns (optional) — **deferred** to Phase 2 along with bats coverage. Architect verdict (PASS-WITH-NOTES) Note 6 recommends three behavioural bats cases (`create-adr-outcome-shaped-retitle.bats`, `capture-adr-question-shape-advisory.bats`, `check-adr-title-shape.bats`); architect Note 7 recommends the optional structural lint at `packages/architect/scripts/check-adr-title-shape.sh`. Both deferred per user direction 2026-06-08 narrow-scope-this-iter constraint.
+- [ ] Cadence-driven retitle of existing question-shaped ADRs (e.g. ADR-006 → outcome-shaped) — or a one-pass sweep — **N/A as of 2026-06-08** because the audit above found zero question-shaped titles in the current corpus. The convention guard (Step 5a mechanical retitle) prevents future drift; no historical sweep needed. Re-open this task if a future audit surfaces question-shaped titles that escaped the guard.
 
 ## Fix Strategy
 
@@ -71,6 +71,28 @@ Reader opens each question-shaped-title ADR to learn the outcome. Tedious; defea
 - **Blocks**: skimmability of `docs/decisions/` + the ADR-077 compendium.
 - **Blocked by**: (none).
 - **Composes with**: ADR-077 (compendium token-cheap-load — non-skimmable titles partially defeat it), P337 (compendium Decision-Outcome extraction — sibling skimmability concern at the body level; this ticket is the title level), the create-adr + capture-adr authoring SKILLs, MADR 4.0 title convention.
+
+## Phase 1 Progress (2026-06-08)
+
+**Shipped this iter (Open → Known Error transition):**
+
+- `packages/architect/skills/create-adr/SKILL.md`:
+  - Step 2 dispatch table Title row amended to point at Step 2a convention + Step 5a retitle check.
+  - New Step 2a "Title-as-outcome convention (P354)" prose subsection — GOOD/BAD examples drawn from corpus; explicit anchor in MADR 4.0 + user direction 2026-06-03.
+  - New Step 5a mechanical retitle-after-decision check — ADR-044 category-4 silent-framework (no AskUserQuestion fire per P132 inverse-P078 guard); ordered to preserve `architect-oversight-marker-discipline.sh` marker-discipline-hook semantics (marker-introducing Edit lands BEFORE `git mv`; subsequent H1 Edit allowed by hook's "old content already had marker" branch); emits I2-isomorphic stderr advisory.
+- `packages/architect/skills/capture-adr/SKILL.md`:
+  - Step 1 amended with "Title-as-outcome convention (P354)" prose + I2-isomorphic stderr advisory for question-shaped Titles supplied in `$ARGUMENTS`. Advisory-only at capture surface (the canonical-outcome short-name is the caller's to author, not the framework's to derive).
+
+**Deferred (Phase 2 / future iters):**
+
+- Structural lint at `packages/architect/scripts/check-adr-title-shape.sh` (advisory-only). Corpus currently has zero hits; lint would ship green.
+- Three behavioural bats cases (architect Note 6) covering retitle-after-decision, capture-advisory, and lint-pattern-match.
+- Bulk retitle of existing question-shaped ADRs — N/A as of 2026-06-08 (corpus clean).
+
+**Confirmation criteria (Verifying transition):**
+
+- Next ADR created via `/wr-architect:create-adr` against a question-shaped problem-statement is observed to retitle to outcome-shape after substance-confirm (mechanical, no user ask).
+- Next ADR captured via `/wr-architect:capture-adr` with a question-shaped Title in `$ARGUMENTS` emits the stderr advisory.
 
 ## Related
 
