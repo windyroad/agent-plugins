@@ -1,5 +1,5 @@
 #!/bin/bash
-# JTBD - PostToolUse:Agent|Bash slide-marker hook (P111).
+# JTBD - PostToolUse:Agent|Bash|Skill slide-marker hook (P111 + P213).
 # Slides the parent session's existing jtbd-reviewed marker forward on
 # subprocess return, treating subprocess wall-clock as continuous parent-
 # session work for TTL purposes. Only TOUCHES an existing marker — never

@@ -16,7 +16,7 @@
       { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/wip-risk-mark.sh" }] },
       { "matcher": "Agent", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/risk-score-mark.sh" }] },
       { "matcher": "Bash", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/risk-hash-refresh.sh" }] },
-      { "matcher": "Agent|Bash", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/risk-slide-marker.sh" }] }
+      { "matcher": "Agent|Bash|Skill", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/risk-slide-marker.sh" }] }
     ]
   }
 }

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Voice & Tone - PostToolUse:Agent|Bash slide-marker hook (P111).
+# Voice & Tone - PostToolUse:Agent|Bash|Skill slide-marker hook (P111 + P213).
 # Slides the parent session's existing voice-tone-reviewed marker forward
 # on subprocess return, treating subprocess wall-clock as continuous parent-
 # session work for TTL purposes. Only TOUCHES an existing marker — never

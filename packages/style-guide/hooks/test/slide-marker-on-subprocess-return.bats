@@ -98,3 +98,21 @@ _backdate() {
   # Fail-safe: when the hook input cannot be parsed, treat as error and skip
   [ "$BEFORE" = "$AFTER" ]
 }
+
+@test "slide: triggers correctly on Skill tool_response shape (P213, ADR-009 2026-06-08 amendment)" {
+  # hooks.json matcher expansion Agent|Bash → Agent|Bash|Skill (P213 Option D)
+  # widens slide-marker coverage to PostToolUse:Skill completions (e.g. the
+  # /wr-risk-scorer:assess-* sibling assessor SKILLs run as long subprocesses
+  # by the AFK orchestrator). The Skill tool_response shape is identical to
+  # Agent|Bash (Claude Code's uniform PostToolUse contract), so the matcher-
+  # agnostic helper composes without code changes. This test documents that
+  # contract explicitly so a future hook_input shape divergence regression
+  # surfaces here rather than at the gate-denial site.
+  touch "$MARKER"
+  _backdate "$MARKER" 60
+  BEFORE=$(_mtime "$MARKER")
+  _HOOK_INPUT='{"tool_name":"Skill","tool_response":{"content":[{"type":"text","text":"OK"}]}}'
+  slide_marker_on_subprocess_return "$MARKER"
+  AFTER=$(_mtime "$MARKER")
+  [ "$AFTER" -gt "$BEFORE" ]
+}

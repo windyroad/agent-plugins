@@ -1,5 +1,5 @@
 #!/bin/bash
-# Risk Scorer - PostToolUse:Agent|Bash slide-marker hook (P111).
+# Risk Scorer - PostToolUse:Agent|Bash|Skill slide-marker hook (P111 + P213).
 # Slides the parent session's existing risk score files forward on
 # subprocess return, treating subprocess wall-clock as continuous parent-
 # session work for TTL purposes. Only TOUCHES existing score files — never

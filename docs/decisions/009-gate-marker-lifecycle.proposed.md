@@ -3,7 +3,7 @@ status: "proposed"
 date: 2026-04-15
 human-oversight: confirmed
 oversight-date: 2026-05-25
-amended-date: 2026-06-06
+amended-date: 2026-06-08
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent, wr-jtbd:agent, wr-risk-scorer:wip]
 informed: [Windy Road plugin users]
@@ -104,6 +104,8 @@ The fix is **subprocess-completion refresh**: a new PostToolUse hook (`*-slide-m
 - `packages/risk-scorer/hooks/risk-slide-marker.sh` — slides the score files `${RDIR}/{commit,push,release}` only. The `*-born` markers, `state-hash`, presence-only `{plan,wip,policy}-reviewed`, and bypass markers (`{reducing,incident}-*`) are deliberately NOT slid (see file header for rationale).
 
 **Behavioural test contract.** Each plugin's `hooks/test/slide-marker-on-subprocess-return.bats` asserts the helper contract. The architect plugin additionally carries `hooks/test/architect-slide-marker.bats` as a hook-level integration test. The canonical P111 reproduction case — a marker backdated to 50 minutes (within default 60-min TTL but close) followed by a successful subprocess return — must leave the marker mtime ≈ NOW so the next `PreToolUse` check sees a fresh marker.
+
+**Matcher coverage (P213 amendment 2026-06-08 — see Amendments section).** Each slide hook is registered on the `Agent|Bash|Skill` PostToolUse matcher list. `Skill` was added 2026-06-08 to cover the sibling-assessor SKILL completion pattern (`/wr-risk-scorer:assess-{release,wip,external-comms,inbound-report}` and adjacent skills run as long-running subprocesses by the `/wr-itil:work-problems` AFK orchestrator). The helper is matcher-agnostic — Skill, Agent, and Bash all emit the same `tool_response` JSON shape.
 
 ## Plugin Scope
 
@@ -277,3 +279,57 @@ ADR-028 (external-comms gate) carries a sibling amendment recording that the per
 - Disk-state-review deadlock (P303 facet 2). Sibling work; not addressed here. P303 closes on the drift-relock facet specifically — the architect verdict-grep + disk-state facets are tracked by P181/P217 and their downstream verification cycle.
 
 **Status**: stays `proposed`. Per the project's deliberation discipline, ADR-009 holds at `proposed` until the substance-aware contract is observed in production for one release cycle.
+
+### 2026-06-08 — PostToolUse:Skill matcher coverage (P213 Option D)
+
+Ratifies the matcher-coverage expansion the user approved 2026-06-08 after weighing four options on P213 (`docs/problems/known-error/213-risk-scorer-30-min-ttl-expired-during-long-running-orchestrator-turns.md`). Architect (PASS) + JTBD (PASS) reviews confirmed 2026-06-08. Closes the P213 known-error ticket on the substance dimension; verification moves to the next AFK orchestrator session.
+
+**Problem being addressed:**
+
+The 2026-04-25 "Subprocess-boundary refresh" implementation (line 83 above) registered `*-slide-marker.sh` hooks on the `Agent|Bash` PostToolUse matcher list. This covers two of the three load-bearing long-subprocess patterns:
+
+- Agent-tool delegation (`subagent_type` agents — the architect-review, jtbd-review, risk-scorer-pipeline, etc. patterns)
+- Bash subprocesses (including the canonical `claude -p` iteration dispatch pattern of ADR-032)
+
+It does NOT cover the third pattern that has since become load-bearing under the ADR-060 Problem-RFC-Story framework and the `/wr-itil:work-problems` AFK orchestrator: **SKILL completions**. A SKILL like `/wr-risk-scorer:assess-release` or `/wr-risk-scorer:assess-external-comms` wraps an inner Agent call but is itself a long-running orchestrator (multi-turn parsing, file writes, drift checks). The inner Agent fires PostToolUse:Agent during the SKILL run, but the outer SKILL completion is a separate PostToolUse:Skill event the slide hook never sees. For SKILL chains that span 20+ minutes (the typical /wr-itil:work-problems iter end-of-loop sequence: `assess-release` → `release:watch` → `install-updates`), parent markers can still age past TTL between SKILL boundaries even with the existing Agent|Bash slide coverage.
+
+P213 evidence: long AFK sessions empirically exhaust the 2×TTL hard-cap (2h) and force rescore turns. P353 evidence: external-comms gate friction class (12 invocations + 3 BYPASS uses per 3-filing session in the measured baseline). Wider matcher coverage is the architecturally cleanest of the four P213 options (the others — Band A slide unification, RISK_HARDCAP_MULT env knob, status quo — either pile on TTL knobs or accept the friction).
+
+**Ratified expansion (user direction 2026-06-08 — implement exactly this):**
+
+- Add `Skill` to the PostToolUse matcher list for every slide-marker hook registration across the five review plugins. New matcher value: `Agent|Bash|Skill`.
+- The helper `slide_marker_on_subprocess_return` (`packages/<gate>/hooks/lib/gate-helpers.sh:287-309`) is matcher-agnostic — it reads `tool_response.is_error` and `tool_response.content` from `_HOOK_INPUT`, both of which are present in Claude Code's uniform PostToolUse JSON contract regardless of which tool fired. No helper change required; byte-identity of `gate-helpers.sh` across the four lib copies (ADR-017) preserved.
+- The 2×TTL hard-cap from `<action>-born` continues to bound total marker life. The wider matcher coverage does NOT defeat the hard-cap; it only makes the marker freshness more reliable within the cap window.
+- The `Skill` matcher is a real PostToolUse matcher already in production use: `packages/tdd/hooks/hooks.json:12` registers `tdd-setup-marker.sh` on PostToolUse:Skill. The Claude Code SDK guarantee that all PostToolUse events emit the same `{session_id, tool_name, tool_input, tool_response}` JSON contract is the basis for the helper's matcher-agnostic shape.
+
+**Implementation (mechanical, byte-aligned across five plugins):**
+
+- `packages/{architect,jtbd,style-guide,voice-tone,risk-scorer}/hooks/hooks.json` — change the PostToolUse slide-marker matcher from `"matcher": "Agent|Bash"` to `"matcher": "Agent|Bash|Skill"`. One line per file, five files total.
+- Hook script comment headers updated to reflect the new matcher coverage (`# PostToolUse:Agent|Bash slide-marker hook (P111).` → `# PostToolUse:Agent|Bash|Skill slide-marker hook (P111 + P213).`). No code changes in the slide-marker scripts; the existing `slide_marker_on_subprocess_return` calls remain unchanged.
+- `gate-helpers.sh` unchanged (matcher-agnostic). ADR-017 byte-identity invariant preserved across the four shared lib copies.
+
+**Behavioural test contract (bats — additive, no existing test changes):**
+
+Each plugin's `hooks/test/slide-marker-on-subprocess-return.bats` gains one new test case:
+
+- **slide triggers correctly on Skill tool_response shape** — asserts `slide_marker_on_subprocess_return` slides a backdated marker forward when `_HOOK_INPUT` carries a Skill-shaped tool_response (`{tool_name:"Skill", tool_response:{content:[...]}}`). The test documents the matcher-coverage assumption explicitly so a future Claude Code SDK divergence in Skill tool_response shape surfaces here rather than at a gate-denial site in production.
+
+`packages/architect/hooks/test/architect-slide-marker.bats` additionally gains one hook-level integration test:
+
+- **hook P213 — slides on Skill tool_name (Agent|Bash|Skill matcher expansion)** — asserts the architect-slide-marker.sh script handles a Skill-shaped PostToolUse JSON input identically to Agent|Bash. Exercises the same script path the hooks.json matcher expansion routes to.
+
+Existing 6 tests per slide bats file + 6 tests in architect-slide-marker.bats remain unchanged (no regression risk). Total new tests: 6 (1 per shared bats × 5 plugins + 1 architect-specific hook-level test).
+
+**Composition with prior subsections:**
+
+- **Three-band TTL refinement (P090, line 73 above).** Orthogonal. Band A/B/C policy still governs WHEN the gate denies; matcher expansion governs WHEN the slide hook fires on the existing-but-aged marker. The Skill matcher fires alongside the Band B in-band slide; both touch the same `<action>` mtime; the 2×TTL hard-cap still bounds total marker life via the deliberately-not-slid `<action>-born` marker.
+- **Subprocess-boundary refresh (P111, line 83 above).** Direct extension. The original 2026-04-25 implementation enumerated `Agent|Bash` as the matcher list; this amendment extends it to `Agent|Bash|Skill`. Same mechanism, wider coverage, same isolation invariant (the parent's PostToolUse:Skill hook touches the parent's OWN marker; the Skill subprocess never sees it — identical shape to Agent|Bash).
+- **Substance-aware drift + atomic verdict-write (2026-06-06, line 204 above).** Orthogonal. The slide helper only `touch`es an existing marker — it does NOT write hash files, does NOT invoke `_atomic_mark_with_hash`, does NOT call `_substance_hash_path`. Matcher expansion does not alter the helper's contract or its file-write surface.
+
+**Out of scope (deferred):**
+
+- WebFetch / WebSearch matcher coverage — also long-running but not in the P213 evidence base. Track as a possible adjacent amendment if real evidence appears (matcher list is cheap to extend further). Conservatively keeps this amendment within the user's ratified Option D scope.
+- Configurable hard-cap multiplier (RISK_HARDCAP_MULT env knob, P213 Option C) — user did not ratify. Wider matcher coverage is expected to reduce the rate of 2×TTL exhaustion enough to defer the knob.
+- Band A slide unification (P213 Option B, architect lean) — user did not ratify. Same expected friction-reduction from Option D may make Option B unnecessary; revisit at the next /wr-itil:review-problems pass if evidence shows residual TTL friction.
+
+**Status**: stays `proposed`. Per the project's deliberation discipline, ADR-009 holds at `proposed` until the matcher expansion is observed in production for one release cycle (verification target: the next AFK `/wr-itil:work-problems` session should fire fewer gate-denial-on-TTL-expiry events than the pre-amendment baseline).

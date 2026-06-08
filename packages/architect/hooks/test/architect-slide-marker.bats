@@ -76,3 +76,17 @@ _backdate() {
   AGE=$((NOW - AFTER))
   [ "$AGE" -lt 5 ]
 }
+
+@test "hook: P213 — slides on Skill tool_name (Agent|Bash|Skill matcher expansion)" {
+  # Confirms hooks.json matcher expansion (Agent|Bash → Agent|Bash|Skill)
+  # composes correctly with the existing hook script. The hook script does
+  # not filter on tool_name; the matcher in hooks.json gates which tool
+  # completions fire the script. This test asserts the script handles the
+  # Skill-shaped tool_response identically to Agent|Bash.
+  touch "$REVIEW_MARKER"
+  _backdate "$REVIEW_MARKER" 60
+  BEFORE=$(stat -c%Y "$REVIEW_MARKER" 2>/dev/null || /usr/bin/stat -f%m "$REVIEW_MARKER")
+  echo '{"session_id":"'"$TEST_SESSION"'","tool_name":"Skill","tool_input":{"skill":"wr-risk-scorer:assess-release"},"tool_response":{"content":[{"type":"text","text":"OK"}]}}' | "$HOOK"
+  AFTER=$(stat -c%Y "$REVIEW_MARKER" 2>/dev/null || /usr/bin/stat -f%m "$REVIEW_MARKER")
+  [ "$AFTER" -gt "$BEFORE" ]
+}

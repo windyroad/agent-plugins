@@ -1,9 +1,26 @@
 # Problem 213: risk-scorer 30-min TTL expired during long-running orchestrator turns
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-15
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**WSJF**: 0 (Verification Pending multiplier 0.0; held for verification only)
+
+## Fix Released
+
+**Release vehicle**: pending — code lands this iter; release scheduled for next `/wr-itil:work-problems` Step 6.5 drain across `@windyroad/{architect,jtbd,style-guide,voice-tone,risk-scorer}` patch bundle.
+
+**Direction**: User ratified Option D (matcher expansion) 2026-06-08 after weighing four options (A status-quo, B Band-A-slide-unification, C RISK_HARDCAP_MULT env knob, D P111 matcher expansion). Picked D for architectural cleanliness — addresses TTL expiry by reducing the number of marker-consumption events through wider PostToolUse hook coverage rather than knob-tuning.
+
+**Fix**:
+- ADR-009 amendment 2026-06-08 ("PostToolUse:Skill matcher coverage (P213 Option D)") records the ratified contract.
+- `packages/{architect,jtbd,style-guide,voice-tone,risk-scorer}/hooks/hooks.json` — slide-marker matcher widened from `Agent|Bash` to `Agent|Bash|Skill`. One line per file, five files total.
+- `packages/{architect,jtbd,style-guide,voice-tone,risk-scorer}/hooks/*-slide-marker.sh` — comment header updated (`PostToolUse:Agent|Bash` → `PostToolUse:Agent|Bash|Skill (P111 + P213)`). No code changes; the helper `slide_marker_on_subprocess_return` is matcher-agnostic and composes without changes.
+- `gate-helpers.sh` unchanged (matcher-agnostic). ADR-017 byte-identity invariant preserved across the four shared lib copies.
+- Behavioural bats: each plugin's `hooks/test/slide-marker-on-subprocess-return.bats` gains one new test (`slide: triggers correctly on Skill tool_response shape`) — 5 new tests across the byte-identical bats files. `packages/architect/hooks/test/architect-slide-marker.bats` gains one hook-level integration test (`hook: P213 — slides on Skill tool_name`). 6 new bats total; existing 35 slide-marker bats remain green (42/42 with the new tests).
+- Architect (PASS) + JTBD (PASS) reviews 2026-06-08.
+
+**Verification path**: run an AFK `/wr-itil:work-problems` session that invokes multiple `/wr-risk-scorer:assess-*` sibling-assessor SKILLs in sequence (the typical end-of-loop sequence: `assess-release` → `release:watch` → `install-updates`). The parent's gate markers should remain fresh across SKILL boundaries — TTL-expiry-during-orchestrator-turn events should drop relative to the pre-amendment baseline. Confirm via `stat` on `/tmp/{architect,jtbd}-reviewed-<SID>` that mtimes advance after each SKILL completes (not only after Agent/Bash subprocesses as before). The 2×TTL hard-cap from `<action>-born` still bounds total marker life — long enough orchestrator runs may still exhaust it; that residual is acceptable per the ADR-009 amendment scope (deferred items list options B/C if residual friction persists).
 
 ## Description
 

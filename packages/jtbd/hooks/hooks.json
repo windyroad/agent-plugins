@@ -12,7 +12,7 @@
     ],
     "PostToolUse": [
       { "matcher": "Agent", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/jtbd-mark-reviewed.sh" }] },
-      { "matcher": "Agent|Bash", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/jtbd-slide-marker.sh" }] }
+      { "matcher": "Agent|Bash|Skill", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/jtbd-slide-marker.sh" }] }
     ]
   }
 }
