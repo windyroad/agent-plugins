@@ -2,6 +2,45 @@
 
 Deep context for the `/install-updates` skill. Load on demand when the runtime steps in `SKILL.md` do not give you enough to act. Progressive-disclosure companion per ADR-038 pattern applied to skill bodies (reference implementation of the pattern P097 is expected to generalise).
 
+## Why current-project-only is sufficient (global cache)
+
+The plugin install cache at `~/.claude/plugins/cache/windyroad/<key>/<version>/` is shared across all projects on this machine — there is NO per-project copy of the plugin code. Refreshing it from the current project (uninstall + reinstall, to defeat the P106 install-no-op) advances the active version for EVERY project that enables those plugins. No sibling-project tree is written, so there is no cross-project side effect to discover or consent to.
+
+Historical note: earlier versions ran a per-sibling install loop behind an `AskUserQuestion` consent gate; both were retired 2026-05-25 once the global-cache fact was confirmed (ADR-030 amendment 2026-05-25). The retirement removed the multi-project enumeration, the consent cache file (`.claude/.install-updates-consent`), and the sibling-bucket P061 fallback. See ADR-030 amendment for the chain of reasoning.
+
+## npm view returns empty — name is wrong, not private
+
+`@windyroad/*` packages are PUBLIC on the npm registry (e.g. <https://www.npmjs.com/package/@windyroad/itil>). If Step 3 emits empty `npm view` output with exit 0 for every plugin, the skill is using the wrong naming transformation — stop and fix before concluding "nothing to install," otherwise Step 4 will silently skip real updates.
+
+Naming transform (ADR-002): the plugin/marketplace side uses the `wr-` prefix; the npm package omits it. `plugin_key="wr-itil"` → `npm_name="@windyroad/itil"`. The Step 3 loop applies this stripping inline; treat any empty result as a derivation bug, not a privacy hint (P092).
+
+## Step 4 result interpretation (lost / restored / snapshot recovery)
+
+The Step 4 batch reports a per-plugin status; do not abort the batch on a single failure — report and continue.
+
+- **`✓ installed`** — first or retry install landed inside the retry budget.
+- **`✓ restored (rollback)`** — three install attempts exhausted; marketplace-cache refresh + one rollback install succeeded.
+- **`✗ lost (rollback failed)`** — retries AND rollback exhausted; the plugin is absent from the project and the user must reinstall manually. The post-loop snapshot restore (P259) re-adds the lost plugin's `.claude/settings.json` enablement so the project is not left gutted — but the plugin code is still un-refreshed; user must re-run after the upstream cause (e.g. a broken manifest) is hotfixed.
+- **`✗ failed`** — pre-install step (e.g. uninstall) errored; the plugin is left in original state.
+
+If the snapshot itself is unavailable (settings.json untracked and no snapshot captured), recover enablement manually with `git checkout HEAD -- .claude/settings.json` (settings.json is git-tracked in this repo). `--scope project` is invariant per ADR-004. The refresh runs in the current project; because the install cache is global, a single current-project refresh advances the active version for every project that enables the plugin.
+
+## Restart-required mechanism (P343 PATH-stale-shim)
+
+The Final report's restart instruction is load-bearing. Without a Claude Code restart, shim invocations (e.g. `wr-architect-generate-decisions-compendium`) may still resolve to the PREVIOUS plugin version's `/bin` directory and run OLD code — the global cache refresh advances `~/.claude/plugins/cache/windyroad/<plugin>/<version>/` but does NOT mutate the parent shell's `$PATH`. PATH was frozen at session-init from cache state at that time; subsequent `/install-updates` calls add new versions to cache but leave the stale `<plugin>/<old-version>/bin` first on PATH, so shim lookups continue to find the old version (P343).
+
+**Workaround without restart**: invoke shims by absolute path of the desired version:
+
+```
+~/.claude/plugins/cache/windyroad/<plugin>/<latest>/bin/<shim-name>
+```
+
+Auto-restart was explicitly rejected per P045 direction 2026-04-20. Structural fixes (highest-version-wins shim wrapper, SessionStart PATH-refresh hook) deferred as ADR-class follow-ups (P343).
+
+## Status vocabulary (P112) — extended rationale
+
+The retry+rollback chain is not atomic: if uninstall succeeds and install fails, the plugin is gone (P112). The four status tokens (`installed` / `restored` / `lost` / `failed`) encode the distinct outcome paths so users can interpret the final report without re-reading the function source. `restored` carries a parenthetical `(rollback)` annotation in the report table to mark that the marketplace-cache refresh fired and a different cache state may now be present than at the start of the refresh.
+
 ## Contract (per ADR-030)
 
 - **Repo-local skill.** Not published. Lives in `.claude/skills/install-updates/` and is versioned by repo git history.

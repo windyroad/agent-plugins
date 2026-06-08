@@ -1,7 +1,8 @@
 # Problem 242: ADR-054 sibling-REFERENCE.md extraction — `install-updates` (project-local)
 
-**Status**: Open
+**Status**: Verifying
 **Reported**: 2026-05-17
+**Fix landed**: 2026-06-08
 **Priority**: 6 (Medium) — Impact: 2 x Likelihood: 3 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 **WSJF**: 3.0 — (6 × 1.0) / 2 — re-rated 2026-05-23: P081 verifying→0; transitive = marginal M (was 1.5)
@@ -49,10 +50,22 @@ If coupling is low enough that simple `grep` retargeting to SKILL.md + REFERENCE
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Enumerate `.claude/skills/install-updates/test/` bats coupling — list each `*.bats` file by structural-grep count + asserted phrases
-- [ ] Decide Path A (bats-grep-update) vs Path B (behavioural retrofit) per architect review at the touch-point
-- [ ] Apply ADR-054 sibling-REFERENCE.md pattern: extract `[reference]`-tagged content; add lazy-load pointers per ADR-054 § 84; verify SKILL.md drops below MUST_SPLIT (16,384 bytes)
-- [ ] Re-run `wr-retrospective-check-skill-md-budgets` and confirm `.claude/install-updates` row drops from MUST_SPLIT to OVER-only (or below WARN)
+- [x] Enumerate `.claude/skills/install-updates/test/` bats coupling — done 2026-06-08; six bats files: `regex-matches-digits`, `settings-restore-on-loss` (behavioural — extracts `restore_settings_on_loss`), `step-3-zsh-portable-discovery` (P320 structural + behavioural mix), `step-7-retry-rollback` (behavioural — extracts `install_with_retry_rollback`), `symlink-contract`, `uninstall-before-install`
+- [x] Decide Path A (bats-grep-update) vs Path B (behavioural retrofit) per architect review at the touch-point — Path A (preserve existing bats; extract only prose, not bats-coupled code); architect APPROVED 2026-06-08
+- [x] Apply ADR-054 sibling-REFERENCE.md pattern: extract `[reference]`-tagged content; add lazy-load pointers per ADR-054 § 84; verify SKILL.md drops below MUST_SPLIT (16,384 bytes) — landed 2026-06-08; SKILL.md 16,132 → 13,070 bytes (-19%); REFERENCE.md 17,004 → 21,556 bytes; 7 REFERENCE.md pointers, well below ADR-054 § 92 ceiling of 20
+- [x] Re-run `wr-retrospective-check-skill-md-budgets` and confirm `.claude/install-updates` row drops from MUST_SPLIT to OVER-only (or below WARN) — confirmed 2026-06-08; row now reports only `OVER bytes=13070 threshold=8192` (no MUST_SPLIT). Remains in WARN-band per ADR-054 § 102 (deferrable rotation candidate, opportunistic-as-touched).
+
+## Resolution
+
+Extraction landed 2026-06-08 in single commit per ADR-014. Architect + JTBD reviewed before edit (both APPROVE; no new ADR needed — execution against existing ratified ADR-054).
+
+Prose paragraphs moved to REFERENCE.md under new sections: "Why current-project-only is sufficient (global cache)", "npm view returns empty — name is wrong, not private", "Step 4 result interpretation (lost / restored / snapshot recovery)", "Restart-required mechanism (P343 PATH-stale-shim)", "Status vocabulary (P112) — extended rationale".
+
+Bats-coupled content (functions `install_with_retry_rollback` + `restore_settings_on_loss`, semver pre-filter, regex pattern, `while IFS= read -r` loop, `--scope project` invariant, uninstall-before-install ordering, snapshot-loop-restore ordering, status tokens) remained inline. All 39 baseline bats pass post-extraction. The "Restart Claude Code REQUIRED" imperative kept inline per architect advisory.
+
+Path A (preserve existing bats, no behavioural retrofit) chosen because the existing coupling is to code constructs that MUST stay runtime-inline anyway; only prose moved, so no bats retargeting was required.
+
+**Verification basis**: bats green (39/39), `check-skill-md-budgets.sh` confirms MUST_SPLIT escape.
 
 ## Fix Strategy
 
