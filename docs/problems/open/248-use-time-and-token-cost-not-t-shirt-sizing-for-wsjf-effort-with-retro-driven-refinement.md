@@ -48,12 +48,179 @@ Currently manual: user reads cost summaries, mentally calibrates t-shirt estimat
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
 - [ ] Investigate root cause — why was t-shirt sizing chosen originally? (Cross-reference P047 closed-ticket history for the prior accuracy attempt and what closed it.)
-- [ ] Design the schema change — how does Open vs Known Error effort split work? (per Description: Open = RCA effort estimate; Known Error = RFC implementation effort estimate; both in time AND tokens.)
-- [ ] Design the tally accumulation mechanism — `.afk-run-state/iter*.json` per-iter data is the source; what aggregates per-ticket? (Likely a `## Effort Tally` section on the ticket body, appended per relevant iter; sums of time+tokens for RCA phase and separately for RFC implementation phase.)
-- [ ] Design the retro-driven refinement — what does the retro do with the data? (Compare estimate vs actual per closed/transitioned ticket; compute RMS over recent N tickets; surface trend in retro summary; potentially auto-adjust default-effort heuristic per pattern type.)
-- [ ] Create reproduction test — bats fixture: ticket created with estimated_time + estimated_tokens; iter logs actual; retro computes RMS over closed tickets.
-- [ ] Schema migration plan — how do existing tickets (with t-shirt sizes) migrate? Both-axes coexistence vs hard cutover?
-- [ ] WSJF formula change — current `WSJF = Priority / Effort-divisor` (divisor 1/2/3/5 per S/M/L/XL); new formula needs to consume time-or-token-cost as the effort denominator. Both axes (time AND tokens) suggests EITHER use one as primary + report the other, OR compose them.
+- [x] Design the schema change — how does Open vs Known Error effort split work? (per Description: Open = RCA effort estimate; Known Error = RFC implementation effort estimate; both in time AND tokens.) → captured in Phase 1 Design Outcome below.
+- [x] Design the tally accumulation mechanism — `.afk-run-state/iter*.json` per-iter data is the source; what aggregates per-ticket? (Likely a `## Effort Tally` section on the ticket body, appended per relevant iter; sums of time+tokens for RCA phase and separately for RFC implementation phase.) → captured in Phase 1 Design Outcome below.
+- [x] Design the retro-driven refinement — what does the retro do with the data? (Compare estimate vs actual per closed/transitioned ticket; compute RMS over recent N tickets; surface trend in retro summary; potentially auto-adjust default-effort heuristic per pattern type.) → captured in Phase 1 Design Outcome below.
+- [ ] (Phase 2) Create reproduction test — bats fixture: ticket created with estimated_time + estimated_tokens; iter logs actual; retro computes RMS over closed tickets.
+- [ ] (Phase 2) Schema migration plan — how do existing tickets (with t-shirt sizes) migrate? Both-axes coexistence vs hard cutover? (Phase 1 outstanding question Q3 below.)
+- [ ] (Phase 2) WSJF formula change — current `WSJF = Priority / Effort-divisor` (divisor 1/2/3/5 per S/M/L/XL); new formula needs to consume time-or-token-cost as the effort denominator. Both axes (time AND tokens) suggests EITHER use one as primary + report the other, OR compose them. (Phase 1 outstanding question Q1 below.)
+
+## Phase 1 Design Outcome (2026-06-08)
+
+Phase 1 narrow scope: spec only; Phase 2 implements. The user direction is pinned (verbatim, 2026-06-08): *"effort should be time/tokens for open problems (RCA estimate) and for known errors (RFC implementation estimate); system tallies time/tokens spent; retro refines RMS estimation error over time."* Spec below; outstanding sub-questions surfaced for user ratification BEFORE Phase 2 build (substance-confirm-before-build per ADR-074 / `feedback_confirm_decision_substance_before_building`).
+
+### Design (1) — Schema extension: where the estimates and tallies live
+
+**(a) Per-iter source artefact** — `.afk-run-state/iter*.json` already carries the per-iter actuals via the work-problems Step 5 cost-metadata extraction contract:
+
+- `.duration_ms` — wall-clock duration (authoritative)
+- `.total_cost_usd` — dollar cost (authoritative per P089 Gap 2 authority hierarchy)
+- `.usage.input_tokens` / `.usage.output_tokens` / `.usage.cache_creation_input_tokens` / `.usage.cache_read_input_tokens` — token totals (best-effort per P089 Gap 2 — final-turn API envelope; can undercount on background-ack exits)
+- `.session_id` — Claude session UUID (already present)
+- `.result` — embeds the `ITERATION_SUMMARY` block which carries `ticket_id` (and `outcome` / `transition` discriminators)
+
+**No new fields are required on the iter*.json schema** — the existing fields suffice. The single addition Phase 2 needs is an authoritative `ticket_id` field at the JSON top-level, written by the work-problems Step 5 dispatch wrapper (already known to the dispatcher at fan-out time — it's the iter's selected ticket). Filename parsing (`iter-N-pNNN[-phase][-extra].json`) is heuristic-only and breaks on multi-ticket iters (`iter-afk1-session9-p340-p339.json`); the ITERATION_SUMMARY block in `.result` is authoritative but requires `.result` parse to extract. Lifting `ticket_id` to the JSON top-level closes both gaps cheaply.
+
+**Optional Phase 2 additions** (cleaner attribution, not strictly required):
+- `phase`: when the iter explicitly tags a phase (e.g. `phase3c`), write it alongside `ticket_id` so the tally can separate RCA-phase from RFC-phase actuals on the same ticket.
+- `lifecycle_phase`: explicit discriminator `rca` | `rfc` derived from the ticket's status at iter-start (Open → `rca`; Known Error → `rfc`). Makes the tally bucketing deterministic without requiring filename phase tags.
+
+**(b) Per-ticket schema — estimate fields on the ticket body**. Add to the ticket frontmatter-like header block (the existing `**Effort**: M (...)` line):
+
+```
+**Effort-Estimate-RCA-Time**: <minutes>             # set on capture; refined at investigation passes
+**Effort-Estimate-RCA-Tokens**: <K tokens>          # set on capture; refined at investigation passes
+**Effort-Estimate-RFC-Time**: <minutes>             # set on transition Open → Known Error
+**Effort-Estimate-RFC-Tokens**: <K tokens>          # set on transition Open → Known Error
+```
+
+The existing `**Effort**: <S|M|L|XL>` line is retained during the migration window for backward compatibility with un-migrated tickets and for WSJF formula transition (Phase 2 design Q1 below). The new fields are additive — old tickets continue to function under the legacy t-shirt formula until re-rated.
+
+**(c) Per-ticket schema — actuals as `## Effort Tally` section**. New section appended after `## Workaround` (before `## Impact Assessment` for visibility during re-rate):
+
+```markdown
+## Effort Tally
+
+<!-- AUTO-GENERATED by wr-itil-tally-effort; do not hand-edit -->
+
+### RCA Phase (Open-status iters)
+
+| Iter | Date | Duration (s) | Cost (USD) | Total Tokens (K) | Outcome |
+|---|---|---|---|---|---|
+| iter-1-p248 | 2026-06-08 | 240 | 2.40 | 850 | investigated |
+| ... | | | | | |
+| **Total** | | **240** | **$2.40** | **850K** | |
+
+### RFC Phase (Known-Error-status iters)
+
+| Iter | Date | Duration (s) | Cost (USD) | Total Tokens (K) | Outcome |
+|---|---|---|---|---|---|
+| (none yet — ticket still Open) | | | | | |
+| **Total** | | **0** | **$0.00** | **0K** | |
+
+### Estimation Accuracy
+
+| Phase | Estimate-Time | Actual-Time | Time Error % | Estimate-Tokens | Actual-Tokens | Tokens Error % |
+|---|---|---|---|---|---|---|
+| RCA | 60 min | 4 min | -93.3% | 1000K | 850K | -15.0% |
+| RFC | — | — | — | — | — | — |
+```
+
+Append-only per relevant iter; `wr-itil-tally-effort <ticket-id>` refreshes the section. The Estimation Accuracy sub-table feeds the retro calibration step (Design 3 below).
+
+### Design (2) — Per-ticket tally aggregation
+
+**(a) Aggregation script** — `packages/itil/scripts/tally-effort.sh` (PATH-shimmed as `wr-itil-tally-effort` per ADR-049):
+
+```
+wr-itil-tally-effort <ticket-id>           # refresh tally for one ticket
+wr-itil-tally-effort --all                 # refresh all open/known-error tickets
+wr-itil-tally-effort --since <date>        # refresh tickets touched since date
+```
+
+Mechanism:
+1. Scan `.afk-run-state/iter*.json`.
+2. For each iter file, extract `ticket_id` (from top-level field once Phase 2 adds it; fall back to `.result` ITERATION_SUMMARY parse during migration window; final fallback to filename heuristic).
+3. Determine lifecycle phase (`rca` | `rfc`) from the iter's `lifecycle_phase` field (Phase 2) OR from the ticket's status AT ITER-COMMIT-TIME (re-derive by git-log on the ticket file: the suffix at commit time of `commit_sha` discriminates). Closure-by-construction approach: every iter is one of RCA (Open) or RFC (Known Error) per the ticket's status at dispatch time.
+4. Sum `duration_ms`, `total_cost_usd`, and `usage.*` token totals into per-phase buckets.
+5. Rewrite the ticket's `## Effort Tally` section (replace-section idempotent edit).
+
+**(b) Trigger surfaces** (no auto-write at iter end — read-only tally script keeps iter dispatch path lean):
+- `/wr-itil:review-problems` Step 4.X — refresh tallies for every open/known-error ticket BEFORE WSJF re-rate (so re-rate consumes current actuals).
+- On-demand CLI invocation by the user.
+- `/wr-retrospective:run-retro` Step 2e calibration (Design 3 below) — refresh before computing RMS.
+
+**(c) Why read-only vs write-on-iter-end**: keeps the iter Step 6 finalisation path lean; avoids tally-write contention under `/wr-itil:work-problems` orchestrator concurrent iter dispatch (P305 root cause class); makes the tally idempotent (re-runnable, deterministic from .afk-run-state corpus). Trade-off: between review passes the tally section is stale — acceptable because consumers (review + retro) refresh first.
+
+### Design (3) — Retro calibration feedback step
+
+**(a) New step in `/wr-retrospective:run-retro` SKILL.md**: `### 2e. Effort Estimation Calibration (P248)` — fires after Step 2d Ask Hygiene, before Step 3 briefing update.
+
+**Mechanism:**
+
+1. Run `wr-itil-tally-effort --since <last-retro-date>` to refresh tallies for tickets touched since the prior retro.
+2. For each ticket transitioned (`open → known-error`, `known-error → verifying`, `verifying → closed`) since the prior retro:
+   - Read `Effort-Estimate-{RCA|RFC}-{Time|Tokens}` (estimate) and the matching tally Total (actual) for the phase that just closed.
+   - Compute relative error: `(actual - estimate) / estimate` per dimension.
+3. Compute RMS error across the closed-since-prior-retro cohort:
+   - `RMS-Time = sqrt(mean(error_time_i^2))`
+   - `RMS-Tokens = sqrt(mean(error_tokens_i^2))`
+   - Separately per phase (RCA closures vs RFC closures) — RCA effort patterns are not RFC effort patterns.
+4. Append to retro output `### Effort Estimation Calibration` section:
+
+```markdown
+### Effort Estimation Calibration (P248)
+
+| Phase | Closed in window | RMS Time Error | RMS Tokens Error | Trend vs prior retro |
+|---|---|---|---|---|
+| RCA | 3 | 42% | 35% | -8% / -12% (improving) |
+| RFC | 1 | 120% | 95% | first sample |
+```
+
+5. Store the RMS values + cohort size in a calibration-history file (`docs/retros/.effort-calibration-history.jsonl`) — append-only JSONL, one record per retro per phase. Trend-vs-prior-retro reads the last record from this file.
+
+**(b) Phase 2+ extensions (deferred, surfaced as outstanding questions Q4/Q5 below):**
+- Auto-adjust default-effort heuristic per pattern (e.g. "ADR-only changes default to X min / Y K tokens").
+- Per-pattern bucketing (docs-only vs code+test vs cross-package) so the heuristic refines per work-type.
+- Confidence interval rendering — `±RMS` annotation on new ticket effort estimates.
+
+### Outstanding Questions (substance-confirm-before-build per ADR-074)
+
+Phase 2 build is BLOCKED on these. Queue for the user's next interactive turn per ADR-013 Rule 6 + ADR-044 category-1 direction-setting.
+
+**Q1 — WSJF scalar choice (direction-setting):** WSJF needs a single Effort denominator. With both time AND tokens captured, which is primary?
+- Option A: **Time-as-primary** (minutes). Tokens captured for observability only; WSJF denominator is time-only.
+- Option B: **Cost-as-primary** (USD). Wraps time × hourly-rate-equivalent + token-cost; single dollar scalar.
+- Option C: **Composite scalar** (e.g. `max(time_norm, tokens_norm)` where each is normalised against a project-baseline). Captures both dimensions in one WSJF rank.
+- Option D: **Dual WSJF** (rank tickets two ways and present both — Time-WSJF and Tokens-WSJF). User picks which to action.
+
+**Q2 — RCA-and-RFC estimate coexistence (deviation-approval):** Open tickets carry RCA estimate; transitioning to Known Error adds RFC estimate. Two sub-questions:
+- (a) Does the RCA estimate stay on the ticket after transition (for retrospective calibration) or get archived?
+- (b) Does WSJF on a Known-Error ticket use `RFC-estimate` only, or `RCA-estimate (remaining) + RFC-estimate`? (Most RCA work is done by Known-Error transition; remaining-RCA is typically 0; but cases where the Known-Error transition is partial (some RCA still pending) need a rule.)
+
+**Q3 — Migration of existing t-shirt-sized tickets (direction-setting):**
+- Option A: **Hard cutover** — re-estimate every open/known-error ticket in time+tokens at Phase 2 ship; legacy `**Effort**:` field removed.
+- Option B: **Dual-axis coexistence** — new tickets carry time+tokens; legacy tickets continue under t-shirt buckets via fallback table (`S=30min, M=120min, L=480min, XL=1440min` derived from the existing divisor 1/2/4/8 anchor); migrate opportunistically at next manage-problem touch.
+- Option C: **Auto-derive from history** — for closed tickets with tally data, back-compute estimates from actuals + tag confidence. Open/Known-Error tickets without history fall back to Option B coexistence.
+
+**Q4 — RMS error metric scope (taste / deviation-approval):**
+- Window: rolling-N-tickets vs since-last-retro vs all-time? Recommend rolling N=20 most-recent closures per phase to balance stability vs responsiveness.
+- Bucketing: global vs per-effort-bucket (S/M/L/XL legacy) vs per-pattern (docs-only / code-impl / cross-pkg)? Recommend global initially; per-pattern is Phase 2+.
+- Closed-ticket scope: only `closed.md` transitions, or include `verifying.md` and `known-error.md` transitions too (each transition is a calibration signal — Open→KE measures RCA-estimate accuracy; KE→VP measures RFC-estimate accuracy)? Recommend all three transitions feed calibration; closure isn't required.
+
+**Q5 — Token-cost composability (taste):** Tokens come in 4 dimensions (input + output + cache_creation + cache_read). For the estimate-and-tally:
+- Option A: **Simple sum** — total = input + output + cache_creation + cache_read.
+- Option B: **Cost-weighted sum** — weight each by per-token USD price (gives a token-equivalent scalar that tracks dollar cost).
+- Option C: **Report all four** in the tally; estimate against the simple sum (Option A) for WSJF.
+
+Recommend Option C (full disclosure in tally, simple sum for estimate matching) — preserves observability, simple to estimate against.
+
+**Q6 — `ticket_id` JSON top-level addition (silent-framework per ADR-074 category-4):** Phase 2 needs `ticket_id` written at JSON top-level by the work-problems Step 5 dispatch wrapper. This is a mechanical change with one decision-point: the existing `.result` ITERATION_SUMMARY `ticket_id` field is the canonical source; the top-level is a hoist for cheap jq access. No user direction required — framework-resolves to "hoist on next work-problems edit pass".
+
+### Phase 2 work (deferred to follow-on iters)
+
+Once Q1–Q5 are answered:
+- Implement `wr-itil-tally-effort` script + PATH shim.
+- Add `lifecycle_phase` + `ticket_id` top-level fields to work-problems Step 5 dispatch JSON write contract.
+- Add Step 2e to `/wr-retrospective:run-retro`.
+- Migrate `.afk-run-state/iter*.json` corpus (back-fill `ticket_id` from filename or .result parse for historic files; new iters write the field forward).
+- Migrate existing tickets per Q3 chosen strategy.
+- Update WSJF formula per Q1 chosen strategy; update SKILL.md WSJF section in `manage-problem` accordingly.
+- Add bats fixture: ticket created with estimated_time + estimated_tokens; synthetic iter logs actual; retro computes RMS over closed tickets.
+
+### Phase 1 outcome
+
+**Spec captured; Phase 2 BLOCKED on Q1–Q5 direction.** Single AskUserQuestion (sequential 4+2 per ADR-013 Rule 1) once user is interactive. Spec is internally consistent and ships in this iter's commit; no implementation files were touched; risk envelope = docs-only Low.
 
 ## Dependencies
 
