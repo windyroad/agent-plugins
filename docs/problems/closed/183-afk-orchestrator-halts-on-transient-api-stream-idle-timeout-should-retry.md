@@ -1,7 +1,8 @@
 # Problem 183: AFK orchestrator halts on transient API stream-idle-timeout — should classify is_error reason and retry transient classes instead of halting the whole loop
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-05-11
+**Closed**: 2026-06-09 (work-problems AFK iter — superseded by P214; the retry-policy work P183 names IS P214 Phase 2)
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 
@@ -94,3 +95,21 @@ The architectural parallel is Step 6.5's P140 "Failure handling" amendment: the 
 - P147 (`docs/problems/*p147-*.md`) — SIGTERM stuck-before-emit subclass; related metadata-loss surface.
 - `.afk-run-state/iter3-p162.json` — concrete incident JSON envelope (preserved for the SKILL Step 5 classifier-design investigation task).
 - Captured via /wr-itil:capture-problem; expand at next investigation.
+
+## Closed as no longer relevant
+
+**Closed**: 2026-06-09 (work-problems AFK iter — superseded by **P214**; the retry-policy work this ticket names IS P214's deferred Phase 2 Investigation Task).
+
+**Evidence shape**: ADR-079 Phase 2 shape 3 (duplicate-of-X — P183 ⊆ P214 Phase 2 scope). Cumulative shape: also shape 2 (work-shipped-via-different-surface — P214 Phase 1 already shipped the classification + advisory infrastructure P183 names).
+
+**Resolution path**:
+
+- **P214 Phase 1 (shipped 2026-06-09, `@windyroad/itil@0.47.13`)** — `packages/itil/skills/work-problems/SKILL.md` Step 5 amended with ordered check (exit-code → `is_error` → `ITERATION_SUMMARY`) + `is_error: true` class taxonomy explicit (SALVAGE = stream-timeout per P261; HALT = transient-API-error per P214) + class-substring-matched advisory map (529 → overloaded; 429 → rate-limited; 401 → auth-expired; else → generic). This is the classification half of P183's Investigation Task #2 ("Catalog observed `is_error: true` reason strings ... Classify each into retryable-transient vs unrecoverable. Document the closed allow-list in SKILL Step 5"). Behavioural fixtures: `packages/itil/skills/work-problems/test/work-problems-step-5-is-error-transient-halt.bats` (11/11 green; 6 behavioural + 5 doc-lint).
+- **P214 Phase 2 (deferred Investigation Task on P214)** — *"Phase 2 — add a retry policy for known-transient classes (529 Overloaded → exponential backoff, max 3 retries; 401 auth-expired → halt-with-prompt). Deferred to a separate iter per the narrow-scope P214 Phase 1 split."* This is the retry half of P183's Investigation Tasks #3 ("Design the retry mechanism: backoff schedule (1min / 5min / 15min?), retry cap (3 per iter per session-of-work-problems), retry-budget accounting") + #4 ("Decide retry-vs-skip routing: does a retried iter that fails 3x in a row halt the whole loop or skip to the next ticket?") + #5 ("Update SKILL Step 5 with the new classifier + retry path") + #6 ("Add behavioural bats coverage: fake `claude -p` shim that emits each retryable-transient reason; assert orchestrator retries").
+- **P261 SALVAGE branch (shipped earlier)** — the specific stream-idle-timeout class P183's concrete incident hit (`API Error: Stream idle timeout - partial response received` in iter3-p162.json with staged work surviving) is routed to the salvage path when staged files exist — the orchestrator main-turn commits the staged work with iter-attribution rather than discarding it. This is a stronger remedy than the retry P183 originally proposed for the same class.
+
+**Hang-off direction (per `feedback_hang_off_existing_ticket_before_capturing_new`)**: the deferred retry-policy work owns its tracking on P214's Phase 2 Investigation Task, NOT on a separate P183 ticket. P183's Investigation Tasks fold into P214's already-deferred Phase 2 plan without re-design — same architectural shape (closed allow-list of retryable `is_error` reason classes with retry-with-backoff + bounded retry cap; halt for everything else), same SKILL Step 5 surface, same P140 sibling pattern as architectural precedent.
+
+**Audit of related skills (P183 Investigation Task #7)** — `/wr-itil:manage-problem`, `/wr-itil:transition-problems`, `/wr-itil:work-problem` are NOT subprocess-dispatching skills (they run inline in the orchestrator's main turn or are invoked directly by the user); the `is_error: true` subprocess-class conflation is structurally specific to `/wr-itil:work-problems` Step 5. No symmetric gap to address; task moot at closure.
+
+**No code change** at this close; P214 Phase 1 already shipped, Phase 2 deferred-task tracked on P214. ADR-079 lifecycle extension applies (Open → Closed bypasses Verifying — no fix was released against P183 specifically). Reversible via `/wr-itil:transition-problem 183 known-error`.
