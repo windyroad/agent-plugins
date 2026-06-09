@@ -1,6 +1,16 @@
 # Problem 241: ADR-054 sibling-REFERENCE.md extraction — MUST_SPLIT cohort (9 skills + 1 risk-scorer skill)
 
-**Status**: Open
+**Status**: Closed
+
+## Closed as no longer relevant
+
+- **Evidence shape**: ADR-shipped-confirmed, named-skill-or-feature-exists (ADR-079 Phase 2); pattern proven by sibling P242 just shipped
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4.6 relevance-close pass (batch 3)
+- **Cite**: ADR-054 progressive-disclosure pattern confirmed; install-updates SKILL.md split shipped this session (16,132 → 13,070 bytes, MUST_SPLIT escape) via P242; same extraction pattern + helper-script approach now proven and trivially repeatable per skill
+- **Caveat**: multi-phase-mixed-progress: 0/6 Investigation Tasks done. User confirmed close at interactive batch review 2026-06-10 — the pattern is proven; remaining SKILL.md splits become per-skill maintenance touched opportunistically (per ADR-054 § Phase 2-3 sequencing: opportunistic-as-touched), not an active backlog umbrella.
+- **Persist**: `packages/itil/scripts/evaluate-relevance.sh` is the re-runnable verdict source per ADR-026
+- **Uncertainty / reversibility**: reversible via `git revert` or `git mv` back to open/.
 **Reported**: 2026-05-17
 **Priority**: 9 (Medium-High) — Impact: 3 x Likelihood: 3 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: XL (deferred — re-rate at next /wr-itil:review-problems)

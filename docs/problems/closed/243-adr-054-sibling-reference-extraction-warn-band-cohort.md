@@ -1,6 +1,16 @@
 # Problem 243: ADR-054 sibling-REFERENCE.md extraction — WARN-band cohort (OVER but not MUST_SPLIT)
 
-**Status**: Open
+**Status**: Closed
+
+## Closed as no longer relevant
+
+- **Evidence shape**: ADR-shipped-confirmed, named-skill-or-feature-exists (ADR-079 Phase 2); sibling of P241 just closed
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4.6 relevance-close pass (batch 3)
+- **Cite**: same as P241 — ADR-054 progressive-disclosure pattern + install-updates split precedent (P242 shipped this session). WARN-band tier has lower urgency than MUST_SPLIT so per-skill maintenance is even more clearly the right shape.
+- **Caveat**: multi-phase-mixed-progress: 0/4 Investigation Tasks done. User confirmed close at interactive batch review 2026-06-10 — same rationale as P241.
+- **Persist**: `packages/itil/scripts/evaluate-relevance.sh` is the re-runnable verdict source per ADR-026
+- **Uncertainty / reversibility**: reversible via `git revert` or `git mv` back to open/.
 **Reported**: 2026-05-17
 **Priority**: 4 (Low-Medium) — Impact: 2 x Likelihood: 2 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: L (deferred — re-rate at next /wr-itil:review-problems)
