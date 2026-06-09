@@ -1,6 +1,16 @@
 # Problem 235: Briefing Signal-vs-Noise pass backlog — 146 entries across 17 topic files never scored per ADR-026 citation
 
-**Status**: Open
+**Status**: Closed
+
+## Closed as no longer relevant
+
+- **Evidence shape**: named-skill-or-feature-exists (ADR-079 Phase 2); composes with P195 (just closed batch 1)
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4.6 relevance-close pass (batch 2)
+- **Cite**: ADR-026 + ADR-040 signal-score framework confirmed; run-retro Tier 3 rotation mechanism exists at packages/retrospective/skills/run-retro/SKILL.md; P195 Phase 1 rotation shipped commit ac9cbc8 (5 files split-by-date) addresses the budget-pressure root cause; P295 analyze-context auto-fire cadence shipped @windyroad/retrospective@0.24.0 this session (combined trigger fires deep-layer regularly going forward — backfill bulk-scoring no longer required because future entries get scored at write-time)
+- **Caveat**: multi-phase-mixed-progress: 0/4 Investigation Tasks done. User confirmed close at interactive batch review 2026-06-10.
+- **Persist**: `packages/itil/scripts/evaluate-relevance.sh` is the re-runnable verdict source per ADR-026
+- **Uncertainty / reversibility**: reversible via `git revert` or `git mv` back to open/.
 **Reported**: 2026-05-17
 **Priority**: 6 (Med) — Impact: 2 (Minor — silent-classification model means scores influence Critical Points promotion + delete-queue surfacing; without scores, the SessionStart hook can't curate the cheap-layer Critical Points roll-up) x Likelihood: 3 (Likely — each retro that omits the pass widens the gap; entries created without scores default to 0 and decay-only)
 **Effort**: L (estimated 1-2 hours of focused agent time — 146 entries × ~30s per entry for citation lookup + classification + comment-block update)

@@ -1,6 +1,16 @@
 # Problem 236: AFK iter queues "proceed-vs-defer" as direction-setting when the framework's re-evaluate-when-X trigger has already fired
 
-**Status**: Open
+**Status**: Closed
+
+## Closed as no longer relevant
+
+- **Evidence shape**: ADR-shipped-confirmed, named-skill-or-feature-exists (ADR-079 Phase 2)
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4.6 relevance-close pass (batch 2)
+- **Cite**: ADR-013 + ADR-044 framework-resolution-boundary confirmed; sibling P132 closed; P175 (scope-pin-word semantics — proceed-vs-defer is NOT direction-setting when framework trigger fired) shipped @windyroad/itil@0.49.3 this session
+- **Caveat**: multi-phase-mixed-progress: 0/4 Investigation Tasks done. User confirmed close at interactive batch review 2026-06-10.
+- **Persist**: `packages/itil/scripts/evaluate-relevance.sh` is the re-runnable verdict source per ADR-026
+- **Uncertainty / reversibility**: reversible via `git revert` or `git mv` back to open/.
 **Reported**: 2026-05-17
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)

@@ -1,6 +1,16 @@
 # Problem 196: Agent reports RFC-document completion as fix-shipped — premature-completion on multi-slice RFCs
 
-**Status**: Open
+**Status**: Closed
+
+## Closed as no longer relevant
+
+- **Evidence shape**: ADR-shipped-confirmed, named-skill-or-feature-exists (ADR-079 Phase 2)
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4.6 relevance-close pass (batch 2)
+- **Cite**: RFC framework confirmed; manage-problem/work-problems SKILLs exist with phase-tracking + completion-discipline; sibling P184 K→V conditional-deferral check shipped 2026-06-09 covers the symmetric class
+- **Caveat**: multi-phase-mixed-progress: 0/5 Investigation Tasks done. User confirmed close at interactive batch review 2026-06-10.
+- **Persist**: `packages/itil/scripts/evaluate-relevance.sh` is the re-runnable verdict source per ADR-026
+- **Uncertainty / reversibility**: reversible via `git revert` or `git mv` back to open/.
 **Reported**: 2026-05-15
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)

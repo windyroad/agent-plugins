@@ -1,6 +1,16 @@
 # Problem 197: Agent proposes bypassing documented processes when work feels large or expensive (contract-bypass-reflex class-of-behaviour)
 
-**Status**: Open
+**Status**: Closed
+
+## Closed as no longer relevant
+
+- **Evidence shape**: ADR-shipped-confirmed, named-skill-or-feature-exists (ADR-079 Phase 2)
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4.6 relevance-close pass (batch 2)
+- **Cite**: ADR-074 substance-confirm-before-build confirmed; ADR-013 + ADR-044 framework-resolution-boundary confirmed; sibling P324 substance-confirm engagement live (architect routinely surfaces options for ratification before build); P132 mid-loop-ask detector + P175 scope-pin-word semantics shipped this session — all address the contract-bypass-reflex class
+- **Caveat**: multi-phase-mixed-progress: 0/3 Investigation Tasks done. User confirmed close at interactive batch review 2026-06-10.
+- **Persist**: `packages/itil/scripts/evaluate-relevance.sh` is the re-runnable verdict source per ADR-026
+- **Uncertainty / reversibility**: reversible via `git revert` or `git mv` back to open/.
 **Reported**: 2026-05-15
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
