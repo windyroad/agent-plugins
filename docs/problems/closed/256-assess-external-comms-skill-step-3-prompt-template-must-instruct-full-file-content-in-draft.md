@@ -1,6 +1,16 @@
 # Problem 256: assess-external-comms SKILL.md Step 3 prompt template must instruct that <draft> wraps FULL file content (frontmatter + body) for Write-surfaced drafts
 
-**Status**: Open
+**Status**: Closed
+
+## Closed as no longer relevant
+
+- **Evidence shape**: ADR-shipped-confirmed (ADR-079 Phase 2)
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4.6 relevance-close pass (batch 4)
+- **Cite (fix link)**: P010/ADR-028 external-comms key derivation amended 2026-05-25 to strip frontmatter from changeset-author surface + rstrip trailing whitespace — gate-side and mark-hook-side hashes now byte-equal regardless of whether agent wraps body-only or includes frontmatter in `<draft>`. Already cited as closing P245 (commit `4887a94` 2026-06-08).
+- **Caveat**: multi-phase-mixed-progress: 0/3 Investigation Tasks done. User confirmed close at interactive batch review 2026-06-10.
+- **Persist**: `packages/itil/scripts/evaluate-relevance.sh` is the re-runnable verdict source per ADR-026
+- **Uncertainty / reversibility**: reversible via `git revert` or `git mv` back to open/.
 **Reported**: 2026-05-18
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)

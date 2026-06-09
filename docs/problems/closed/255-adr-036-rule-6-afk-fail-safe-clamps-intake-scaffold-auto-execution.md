@@ -1,6 +1,16 @@
 # Problem 255: ADR-036 Rule 6 AFK fail-safe clamps intake-scaffold auto-execution — sibling-class to P254 at the intake-scaffold surface; external-comms risk assessment is the actual protection layer
 
-**Status**: Open
+**Status**: Closed
+
+## Closed as no longer relevant
+
+- **Evidence shape**: ADR-shipped-confirmed, named-skill-or-feature-exists (ADR-079 Phase 2); sibling of P254 just closed
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4.6 relevance-close pass (batch 4)
+- **Cite (fix link)**: same RFC-018 ship via commits `b351fcf` + `c124bd9` 2026-06-04 — ADR-036 Rule 6 amended in lockstep with the upstream-report fix; external-comms risk assessment is now the single protection layer at the intake-scaffold surface too.
+- **Caveat**: multi-phase-mixed-progress: 0/4 Investigation Tasks done. User confirmed close at interactive batch review 2026-06-10.
+- **Persist**: `packages/itil/scripts/evaluate-relevance.sh` is the re-runnable verdict source per ADR-026
+- **Uncertainty / reversibility**: reversible via `git revert` or `git mv` back to open/.
 **Reported**: 2026-05-18
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
