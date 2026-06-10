@@ -123,3 +123,29 @@ The catalogue is self-pruning: when a class stops surfacing in `.risk-reports/` 
 | [R028](R028-jtbd-build-upon-guard-agent-prose-verdict-residual-above-appetite.active.md) | Jtbd Build Upon Guard Agent Prose Verdict Residual Above Appetite | pending | — | — | pending | pending | 2026-05-31 |
 | [R029](R029-r009-agent-prose-verdict-surface-no-llm-harness.active.md) | R009 Agent Prose Verdict Surface No Llm Harness | pending | — | — | pending | pending | 2026-05-31 |
 | [R030](R030-new-deny-surface-shipped-direct-to-changeset-no-dogfood.active.md) | New Deny Surface Shipped Direct To Changeset No Dogfood | pending | — | — | pending | pending | 2026-05-31 |
+| [R031](R031-review-problems-skill-auto-bootstrap-direct-to-changeset-no-dogfood.active.md) | Review Problems Skill Auto Bootstrap Direct To Changeset No Dogfood | pending | — | — | pending | pending | 2026-06-10 |
+| [R032](R032-orchestrator-layer-graduation-gate-prose-no-dogfood-window.active.md) | Orchestrator Layer Graduation Gate Prose No Dogfood Window | pending | — | — | pending | pending | 2026-06-10 |
+| [R033](R033-r009-bedrock-skill-prose-recast-no-dogfood-window.active.md) | R009 Bedrock Skill Prose Recast No Dogfood Window | pending | — | — | pending | pending | 2026-06-10 |
+| [R034](R034-r009-bedrock-orchestrator-skill-prose-recast-no-in-source-dogfood.active.md) | R009 Bedrock Orchestrator Skill Prose Recast No In Source Dogfood | pending | — | — | pending | pending | 2026-06-10 |
+| [R035](R035-r009-prose-surface-floor-un-verified-eval-run.active.md) | R009 Prose Surface Floor Un Verified Eval Run | pending | — | — | pending | pending | 2026-06-10 |
+| [R036](R036-p350-skill-prose-brief-before-id-no-promptfoo-coverage.active.md) | P350 Skill Prose Brief Before Id No Promptfoo Coverage | pending | — | — | pending | pending | 2026-06-10 |
+| [R037](R037-capture-problem-skill-prose-no-promptfoo-eval.active.md) | Capture Problem Skill Prose No Promptfoo Eval | pending | — | — | pending | pending | 2026-06-10 |
+| [R038](R038-skill-prose-amendment-multi-surface-promptfoo-coverage-gap.active.md) | Skill Prose Amendment Multi Surface Promptfoo Coverage Gap | pending | — | — | pending | pending | 2026-06-10 |
+| [R039](R039-skill-prose-r009-floor-migrate-briefing-no-promptfoo.active.md) | Skill Prose R009 Floor Migrate Briefing No Promptfoo | pending | — | — | pending | pending | 2026-06-10 |
+| [R040](R040-work-problems-skill-prose-floor-without-paired-promptfoo-eval.active.md) | Work Problems Skill Prose Floor Without Paired Promptfoo Eval | pending | — | — | pending | pending | 2026-06-10 |
+| [R041](R041-external-project-handle-in-public-repo-ticket-origin-stamp.active.md) | External Project Handle In Public Repo Ticket Origin Stamp | pending | — | — | pending | pending | 2026-06-10 |
+| [R042](R042-hook-source-change-direct-to-changeset-no-dogfood-window.active.md) | Hook Source Change Direct To Changeset No Dogfood Window | pending | — | — | pending | pending | 2026-06-10 |
+| [R043](R043-r009-wrapper-skill-prose-no-paired-promptfoo-eval.active.md) | R009 Wrapper Skill Prose No Paired Promptfoo Eval | pending | — | — | pending | pending | 2026-06-10 |
+| [R044](R044-work-problems-skill-prose-no-promptfoo-coverage.active.md) | Work Problems Skill Prose No Promptfoo Coverage | pending | — | — | pending | pending | 2026-06-10 |
+| [R045](R045-r009-skill-prose-work-problems-no-promptfoo-eval.active.md) | R009 Skill Prose Work Problems No Promptfoo Eval | pending | — | — | pending | pending | 2026-06-10 |
+| [R046](R046-r009-skill-prose-floor-work-problems-no-promptfoo-coverage.active.md) | R009 Skill Prose Floor Work Problems No Promptfoo Coverage | pending | — | — | pending | pending | 2026-06-10 |
+| [R047](R047-work-problems-skill-prose-floor-no-paired-promptfoo.active.md) | Work Problems Skill Prose Floor No Paired Promptfoo | pending | — | — | pending | pending | 2026-06-10 |
+| [R048](R048-r009-work-problems-skill-prose-floor-untenably-deep-hold-cohort.active.md) | R009 Work Problems Skill Prose Floor Untenably Deep Hold Cohort | pending | — | — | pending | pending | 2026-06-10 |
+| [R049](R049-review-problems-skill-prose-floor-without-paired-promptfoo.active.md) | Review Problems Skill Prose Floor Without Paired Promptfoo | pending | — | — | pending | pending | 2026-06-10 |
+| [R050](R050-work-problems-skill-prose-cohort-depth-7-binding-on-single-eval-slice.active.md) | Work Problems Skill Prose Cohort Depth 7 Binding On Single Eval Slice | pending | — | — | pending | pending | 2026-06-10 |
+| [R051](R051-work-problems-eval-paired-capability-unmet-7th-time.active.md) | Work Problems Eval Paired Capability Unmet 7Th Time | pending | — | — | pending | pending | 2026-06-10 |
+| [R052](R052-review-problems-skill-prose-no-promptfoo-eval.active.md) | Review Problems Skill Prose No Promptfoo Eval | pending | — | — | pending | pending | 2026-06-10 |
+| [R053](R053-adr-skill-prose-amendment-no-paired-changeset-or-promptfoo.active.md) | Adr Skill Prose Amendment No Paired Changeset Or Promptfoo | pending | — | — | pending | pending | 2026-06-10 |
+| [R054](R054-architect-jtbd-agent-prose-verdict-grammar-no-promptfoo-eval.active.md) | Architect Jtbd Agent Prose Verdict Grammar No Promptfoo Eval | pending | — | — | pending | pending | 2026-06-10 |
+| [R055](R055-r009-review-problems-skill-prose-bedrock-floor.active.md) | R009 Review Problems Skill Prose Bedrock Floor | pending | — | — | pending | pending | 2026-06-10 |
+| [R056](R056-reconcile-readme-prose-no-promptfoo-eval.active.md) | Reconcile Readme Prose No Promptfoo Eval | pending | — | — | pending | pending | 2026-06-10 |
