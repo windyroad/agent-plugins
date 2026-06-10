@@ -45,10 +45,13 @@ Manually check `gh issue view <id>` for each upstream-bound ticket periodically,
 
 **Release pending**: K → V transition deferred until `@windyroad/itil` next release per ADR-022 P143 fold-fix amendment. Recovery path: `/wr-itil:transition-problem 220 known-error` after reverting this commit.
 
+**Update 2026-06-11 (AFK iter evidence note)**: the fix is **de facto released** — published `@windyroad/itil@0.49.3` tarball verified (via `npm pack`) to contain all Phase 1 files (Step 0d SKILL prose ×9 mentions, `lib/check-outbound-responses-staleness.sh`, `scripts/run-check-outbound-responses-staleness.sh`, `bin/wr-itil-check-outbound-responses-staleness`, behavioural bats). Changeset holding withholds changelog/version attribution only, not code — the 0.48.0/0.49.x releases (2026-06-08) published main's package contents including commit 0f58210c. The held changeset's **reinstate criterion is also met**: paired work-problems promptfoo Tier-A/B eval landed in 0.47.15 (P324 Phase 1, 9/9 GREEN), flipping the R009 modulator +1 → -1 for the whole 6-changeset work-problems cohort. K→V transition + changeset graduation remain staged through the orchestrator's Step 6.5 cohort-graduation pre-check (Rule 4 evidence floor — orchestrator-owned, not iter-owned); this note exists so the lifted deferral condition is not mis-parsed as still-pending (P184 class).
+
 ## Change Log
 
 - **2026-05-15**: Captured. Placeholder Priority/Effort pending review-problems re-rate.
 - **2026-06-08** (session 11 iter): Phase 1 fix implemented. Step 0d wired into `/wr-itil:work-problems` via PATH shim + sourceable lib + behavioural bats (10/10 GREEN). Architect verdict APPROVED-WITH-CONDITIONS (ADR-062 Confirmation amendment + drift-source markers honoured). JTBD verdict PASS (JTBD-006 + JTBD-004 anchors). Status remains Known Error until release per ADR-022 P143 fold-fix amendment.
+- **2026-06-11** (AFK iter 2): Verification-pending classification confirmed; no Phase 2 scope remains (sole unticked Investigation Task is sibling P063's scope, explicitly a separate iter). Evidence note added to Fix Released: fix de-facto released in published 0.49.x (tarball-verified); held changeset reinstate criterion met via 0.47.15 eval (P324 Phase 1). Graduation + K→V left to orchestrator Step 6.5 cohort pre-check per Rule 4 evidence floor.
 
 ## Related
 
