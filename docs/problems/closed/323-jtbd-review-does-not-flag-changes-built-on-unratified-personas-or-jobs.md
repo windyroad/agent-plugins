@@ -1,6 +1,16 @@
 # Problem 323: JTBD review (file edits + plans) does not flag changes built on an UNRATIFIED persona or job — no build-upon guard exists on the JTBD surface at all (twin of P318 on the ADR surface)
 
-**Status**: Open
+**Status**: Closed
+
+## Closed as no longer relevant
+
+- **Evidence shape**: ADR-shipped-confirmed, named-skill-or-feature-exists, driver-child-ticket-closed (ADR-079 Phase 2); P318 just closed batch 6
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4.6 relevance-close pass (batch 7)
+- **Cite (fix link)**: Twin of P318 (just closed). `[Unratified Dependency]` flag emitted by wr-jtbd:agent multiple times this session (P175 iter; P324 Phase 4 iter). Build-upon guard fires at edit-time gate review on the JTBD surface on a par with architect.
+- **Caveat**: multi-phase-mixed-progress per evaluator; user confirmed close at interactive batch review 2026-06-10.
+- **Persist**: `packages/itil/scripts/evaluate-relevance.sh` is the re-runnable verdict source per ADR-026
+- **Uncertainty / reversibility**: reversible via `git revert` or `git mv` back to open/.
 **Reported**: 2026-05-27
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)

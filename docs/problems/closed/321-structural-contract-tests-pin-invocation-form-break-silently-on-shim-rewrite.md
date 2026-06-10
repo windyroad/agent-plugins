@@ -1,6 +1,16 @@
 # Problem 321: Structural contract tests pin the invocation FORM (`update-*-section.sh`) — rewriting it to a shim breaks them with no heads-up, costing CI round-trips
 
-**Status**: Open
+**Status**: Closed
+
+## Closed as no longer relevant
+
+- **Evidence shape**: ADR-shipped-confirmed (ADR-079 Phase 2)
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4.6 relevance-close pass (batch 7)
+- **Cite (fix link)**: ADR-052 hardened to Option 1A (behavioural-only, no escape hatch) this session via P290 Phase 1 commit 28bae82. Structural-test escape hatch removed; new structural tests can no longer pin invocation form because they can't be added under the amended policy.
+- **Caveat**: multi-phase-mixed-progress per evaluator; user confirmed close at interactive batch review 2026-06-10.
+- **Persist**: `packages/itil/scripts/evaluate-relevance.sh` is the re-runnable verdict source per ADR-026
+- **Uncertainty / reversibility**: reversible via `git revert` or `git mv` back to open/.
 **Reported**: 2026-05-27
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)

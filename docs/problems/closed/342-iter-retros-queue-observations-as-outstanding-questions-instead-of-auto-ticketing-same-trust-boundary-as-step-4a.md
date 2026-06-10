@@ -1,6 +1,16 @@
 # Problem 342: Iter retros queue their own observations as `outstanding-questions.jsonl` entries for user-direction triage instead of auto-ticketing — same trust-boundary as `/wr-retrospective:run-retro` Step 4a
 
-**Status**: Known Error
+**Status**: Closed
+
+## Closed as no longer relevant
+
+- **Evidence shape**: ADR-shipped-confirmed, named-skill-or-feature-exists (ADR-079 Phase 2)
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4.6 relevance-close pass (batch 7)
+- **Cite (fix link)**: Mechanical-stage carve-out + Step 4b mirror shipped 2026-05-31 (iter 6). `@windyroad/itil` + `@windyroad/retrospective` minor changeset queued (held with P341 batch — release-trigger pending). Behavioural fix shipped; the held changeset is the audit-trail surface awaiting release-batch graduation.
+- **Caveat**: multi-phase-mixed-progress per evaluator; user confirmed close at interactive batch review 2026-06-10. Closure does not depend on release graduation — the held changeset rides the P341 cohort for release timing.
+- **Persist**: `packages/itil/scripts/evaluate-relevance.sh` is the re-runnable verdict source per ADR-026
+- **Uncertainty / reversibility**: reversible via `git revert` or `git mv` back to known-error/.
 **Reported**: 2026-05-31
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next `/wr-itil:review-problems`; HIGH in practice — retros are the system designed to mechanically observe recurring patterns; routing those observations through user-direction triage instead of mechanical-ticket capture inverts the trust-boundary the run-retro skill already encodes)
 
