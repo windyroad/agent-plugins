@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-06-11 **P361 captured** — derive-release-vehicle exit-3 unreleased false positive on graduated holding changesets (lightweight aside via /wr-itil:capture-problem)
+> Last reviewed: 2026-06-11 **P362 captured** — unconditional update-upstream Skill dispatch pays full SKILL.md context load for common no-op (lightweight aside via /wr-itil:capture-problem)
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -52,6 +52,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 1.5 | P359 | Changeset holding does not withhold shipment — held code ships with any sibling release; ADR-042 hold is attribution-only, not a shipment control (witnessed: P220 held changeset's full fix in published 0.49.3 tarball; ~27 held changesets class-wide) (captured 2026-06-11 via /wr-itil:capture-problem; deferred re-rate) | 3 Med | Open | M | 2026-06-11 | internal |
 | 1.5 | P360 | Voice-tone gate demands review of commit messages the policy doc explicitly excludes — every commit-message voice-tone review is a guaranteed-PASS no-op (~19K tokens each, ×2 witnessed); gate also discovers unmet evaluators serially; Step 4a regression flag for P082 verification (captured 2026-06-11 via /wr-itil:capture-problem; deferred re-rate) | 3 Med | Open | M | 2026-06-11 | internal |
 | 1.5 | P361 | wr-itil-derive-release-vehicle exit-3 "unreleased" false positive on ADR-061 graduated holding changesets — helper conflates "changelog entry not yet drained" with "code not yet released"; K→V on de-facto-released tickets gets wrong signal (witnessed P211 this iter; composes P330/P359) (captured 2026-06-11 via /wr-itil:capture-problem; deferred re-rate) | 3 Med | Open | M | 2026-06-11 | internal |
+| 1.5 | P362 | Unconditional update-upstream Skill dispatch pays full SKILL.md context load (~14 KB) for the common no-op case — add grep pre-check for ## Reported Upstream at both call sites (manage-problem Step 7 P080 block + transition-problem Step 7b); ADR-038 alignment (captured 2026-06-11 via /wr-itil:capture-problem; deferred re-rate) | 3 Med | Open | M | 2026-06-11 | internal |
 | 1.25 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory/blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 10 High | Open | XL | 2026-05-03 | internal |
 | 1.13 | P298 | Published artifacts should NOT reference internal IDs at all — ADR-055 chose prefixing; user wants them stripped (meaningless to adopters, ~2,880 refs/81 files). Express substance inline. Sibling of P294; composes with P296. Surfaced during the P283 drain. Blocks ADR-055 oversight confirmation | 9 Med High | Open | XL | 2026-05-25 | internal |
 | 1.0 | P338 | P082 Phase 2 cognitive-accessibility evaluator on the 4 external-comms surfaces, shipped as a NEW `@windyroad/cognitive-a11y` plugin (sibling of P082; design pinned 2026-05-30 = new plugin) | 4 Low | Open | L | 2026-05-30 | internal |
