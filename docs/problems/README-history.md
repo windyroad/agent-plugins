@@ -975,3 +975,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 
 > Last reviewed: 2026-06-10 **P357 captured** — user-direction-is-not-substance-ratification (agent must brief-and-ratify AFTER changes complete; sibling-class to P340 on the user-direction code path that bypasses the create-adr Step 5 substance-confirm AskUserQuestion gate). Lightweight aside via /wr-itil:capture-problem. Prior fragment (verification queue batch 1 narrative) rotated to README-history.md per P134.
 
+
+## 2026-06-10 (Verification Queue batch 2 fragment rotated for P358 captured)
+
+> Last reviewed: 2026-06-10 **Verification Queue batch 2** — /wr-itil:review-problems pass 2 closed 4 more verifying tickets with yes-observed session evidence: P165 (README-refresh enforcement hook observed denying drift + allowing inline-staged commits across 30+ iters), P202 (release-risk scorer's queued-changeset distinction observed correct across 12 releases this session), P212 (iter-owned-retro-commit contract held across 30+ iters; P195 explicit commit d093bc7), P299 (ADR-034 superseded in commit 0a58fa5 + global-cache assumption held across 10+ plugin refreshes this session). Cumulative pass 2: 0 relevance-closes (caveat candidates all filtered as active/recurring/multi-phase work) + 4 verification-closes = 4 closures. Prior fragment (P357 capture narrative) rotated to README-history.md per P134.
