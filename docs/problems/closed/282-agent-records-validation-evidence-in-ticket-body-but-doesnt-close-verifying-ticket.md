@@ -1,6 +1,7 @@
 # Problem 282: Agent records validation evidence in ticket body but doesn't close verifying ticket — V→Closed transition skipped when validation lands inline
 
-**Status**: Verification Pending
+**Status**: Closed
+**Closed**: 2026-06-10 — close-on-evidence per run-retro Step 4a sub-steps 4-5: this iter exercised the P282 fix end-to-end. The shipped sub-step 9 prior-session evidence drain (run-retro SKILL cache 0.24.1) executed during the P211 AFK iter retro: parsed the README Verification Queue `Likely verified?` cells, correctly filtered 3 prose-only `yes — observed:` substring matches down to the single true evidence-bearing row (P287), passed the sub-step 8 same-session git-log rename exclusion, dispatched `/wr-itil:transition-problem 287 close`, and landed commit `8a9518b5` — the exact V→Closed-on-inline-evidence behaviour this ticket reported as skipped. Recovery: `/wr-itil:transition-problem 282 known-error`.
 **Reported**: 2026-05-19
 **Priority**: 12 (High) — Impact: 3 (Moderate — Verification Queue accumulates effectively-closed tickets; audit-trail decoupled from validation-work record; cross-ticket lifecycle reasoning degraded) x Likelihood: 4 (Almost Certain — affects every session where any agent edits a `.verifying.md` body to add Fix Direction / Validation Note / Confirmation Log content; pattern observable in this very session — 94 verifying tickets and growing)
 **Effort**: M — define evidence-keyword vocabulary + add body-content scan to `/wr-itil:transition-problem` SKILL + optional PostToolUse hook on `.verifying.md` Edit; architect verdict on trigger surface (SKILL vs hook vs hybrid)
