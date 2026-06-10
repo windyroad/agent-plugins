@@ -1,6 +1,7 @@
 # Problem 287: Remove the technical/user-business type classification from problems — redundant with RFC/Story persona-anchoring (amends ADR-060)
 
-**Status**: Verification Pending
+**Status**: Closed
+**Closed**: 2026-06-10 — prior-session README-cell evidence drain per run-retro Step 4a sub-step 9 (P282): VQ `Likely verified?` cell recorded "yes — observed: regression-guard bats 6/6 green; ADR-060 amendment substance verified in-place; SKILL surface clean of type-axis; zero `**Type**:` body fields" from the 2026-06-02 release session. Recovery: `/wr-itil:transition-problem 287 known-error`.
 **Reported**: 2026-05-25
 **Known Error**: 2026-06-02 — root cause identified; SKILL/lib/bats removal landing per twice-confirmed user direction (2026-05-25 + 2026-06-02). ADR-060 amendment substance (I12 replacement shape, Phase-4 rework) queued as outstanding_question for user re-confirmation per ADR-074. Verifying transition follows next release.
 **Verifying**: 2026-06-08 — all 8 Investigation Tasks closed (SKILL surface clean of type-axis, scripts/lib clean of `lexical_classify_two_sided`, regression-guard bats 6/6 green, ADR-060 amendment substance landed + `human-oversight: confirmed` retained, 347-ticket bulk strip released). Residual `review-problems/SKILL.md` Step 4.5 § 6 prose drift (P287-stale `--no-prompt` defaults-to-type=technical rationale) fixed in this transition commit.
