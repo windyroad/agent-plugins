@@ -1,6 +1,12 @@
 # Problem 299: ADR-034 per-project auto-install is the wrong mechanism — the plugin install cache is global/shared, so one update propagates to all projects
 
-**Status**: Verifying
+**Status**: Closed
+
+## Closed — verification confirmed
+
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4 verification queue batch 2 — user-confirmed
+- **Observed evidence**: `/install-updates` skill invoked multiple times this session across multiple plugin refreshes (architect 0.15.5→0.15.7, itil 0.47.13→0.49.3 across 10 versions, jtbd 0.12.6, risk-scorer 0.12.8, style-guide 0.4.6, voice-tone 0.5.10, retrospective 0.24.0→0.24.1). The global-cache assumption held: single-project refresh advanced versions for all enabled projects without per-project bootstrap. ADR-034 marked superseded in commit `0a58fa5` this session.
 **Reported**: 2026-05-25
 **Transitioned to Verifying**: 2026-06-08 — ADR-034 superseded by ADR-030 amendment 2026-05-25 (in-place via `.superseded.md` rename + supersession blockquote + frontmatter `status: superseded` + `superseded-by: "ADR-030"`); ADR-030 line 153 dangling reference annotated; decisions compendium regenerated; no hook/script/SKILL code references ADR-034 (architect confirmed grep zero hits in packages/ + scripts/). All four Investigation Tasks satisfied.
 **Priority**: 6 (Medium) — Impact: 2 (Minor — a per-project SessionStart auto-install is redundant work, not a correctness break; updates still propagate via the shared cache; but the redundancy + the per-project consent gate add friction and model the wrong thing) × Likelihood: 3 (Possible — fires per project per session)

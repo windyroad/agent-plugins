@@ -1,6 +1,12 @@
 # Problem 212: work-problems iteration boundary leaves run-retro BRIEFING.md edits uncommitted
 
-**Status**: Verification Pending
+**Status**: Closed
+
+## Closed — verification confirmed
+
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4 verification queue batch 2 — user-confirmed
+- **Observed evidence**: every iter dispatched this session (~30+) committed its retro inline; no dirty BRIEFING at iter boundary observed across the full AFK loop. P195 iter explicitly emitted retro + briefing refresh commit (d093bc7) per the P212 iter-owned-retro-commit contract.
 **Reported**: 2026-05-15
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)

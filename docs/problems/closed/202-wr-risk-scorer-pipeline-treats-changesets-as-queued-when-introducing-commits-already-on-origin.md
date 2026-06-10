@@ -1,6 +1,12 @@
 # Problem 202: wr-risk-scorer:pipeline treats changesets as queued when introducing commits are already on origin
 
-**Status**: Verification Pending
+**Status**: Closed
+
+## Closed — verification confirmed
+
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4 verification queue batch 2 — user-confirmed
+- **Observed evidence**: every release-risk scoring this session (~12 releases including P213 5-package patch + P301 + P293 + P295 + P314 + P324 phases 1-6 + P080 + P129 + P172 + P184 + P175) correctly distinguished pending changesets (in `.changeset/`) from already-published. No false-positive "queued" counts blocking releases observed across the full release cadence.
 **Reported**: 2026-05-15
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)

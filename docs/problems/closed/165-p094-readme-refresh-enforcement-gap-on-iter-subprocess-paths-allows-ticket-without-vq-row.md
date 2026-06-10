@@ -1,6 +1,12 @@
 # Problem 165: P094 README-refresh enforcement gap — iter subprocess commits can land a `.verifying.md` rename without staging the corresponding Verification Queue row in `docs/problems/README.md`
 
-**Status**: Verification Pending — fix released awaiting user verification (per ADR-022)
+**Status**: Closed
+
+## Closed — verification confirmed
+
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4 verification queue batch 2 — user-confirmed
+- **Observed evidence**: every iter dispatched this session (~30+) committed README inline alongside ticket transitions; the P165 hook denied commits ONLY when correctly detecting genuine drift (the P262/P265 capture-deferred-readme bypass path, now superseded by P199 Option 2 inline staging). Hook is doing its job: detecting drift, allowing legitimate staged commits, denying gap-creating commits.
 **Reported**: 2026-05-04
 **Released**: 2026-05-12 (this commit; pending `@windyroad/itil` patch — ships `itil-readme-refresh-discipline.sh` PreToolUse:Bash commit-gate hook + `lib/readme-refresh-detect.sh` helper + 22-test ADR-052 behavioural bats fixture)
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Likely (3)
