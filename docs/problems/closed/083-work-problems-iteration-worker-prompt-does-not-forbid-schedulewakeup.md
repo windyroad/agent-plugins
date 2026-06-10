@@ -1,6 +1,13 @@
 # Problem 083: work-problems Step 5 iteration-worker prompt does not forbid ScheduleWakeup / time-deferring primitives — subagent can abandon synchronous-completion contract
 
-**Status**: Verification Pending
+**Status**: Closed
+
+## Closed — verification confirmed
+
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4 verification queue, user-confirmed batch close
+- **Observed evidence**: 30+ iter dispatches across session 6baf518b this conversation; explicit "Do NOT use ScheduleWakeup" prompt clause held end-to-end across every dispatched subprocess. No iter invoked ScheduleWakeup; synchronous-completion contract held.
+- **Persists in**: `packages/itil/skills/work-problems/SKILL.md` Step 5 iteration-prompt-body constraints.
 **Reported**: 2026-04-21
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: S — single-file edit to `packages/itil/skills/work-problems/SKILL.md` Step 5 prompt template: add an explicit "Do NOT call `ScheduleWakeup`, `CronCreate`, or any tool that defers completion past the current turn — the iteration worker is synchronous; it must either complete the work and return `ITERATION_SUMMARY`, OR return a well-formed `action: skipped` summary" constraint. Plus a bats assertion (behavioural per P081 direction) that greps the Step 5 prompt for the forbidding language. Small + bounded + clear edit — S.

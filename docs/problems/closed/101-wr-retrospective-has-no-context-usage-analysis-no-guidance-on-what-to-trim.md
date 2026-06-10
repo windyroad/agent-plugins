@@ -1,6 +1,13 @@
 # Problem 101: `wr-retrospective` has no context-usage analysis — opaque where session tokens are consumed; no guidance on what to trim
 
-**Status**: Verification Pending
+**Status**: Closed
+
+## Closed — verification confirmed
+
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4 verification queue, user-confirmed batch close
+- **Observed evidence**: `/wr-retrospective:analyze-context` deep layer shipped. This session's just-released P295 auto-fire cadence (commit d093bc7) actually fired the deep layer in iter 52 (P195) producing the docs/retros/2026-06-08-context-analysis.md report with cheap-layer + deep-layer cohort breakdown.
+- **Persists in**: `packages/retrospective/skills/analyze-context/SKILL.md` + run-retro Step 2c cadence trigger + `packages/retrospective/skills/run-retro/eval/promptfooconfig.yaml` (P324 Phase 6 paired eval shipped this session).
 **Reported**: 2026-04-22
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: XL (re-rated 2026-04-26 — architect verdict expanded scope from L to XL: new sibling ADR-043 + amendments to ADR-026 / ADR-014 + new skill + new diagnostic script + 2 bats fixtures + Step 2c block in run-retro SKILL.md)

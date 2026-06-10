@@ -1,6 +1,13 @@
 # Problem 078: Assistant does not offer to capture a problem ticket when the user delivers strong-signal correction
 
-**Status**: Verification Pending
+**Status**: Closed
+
+## Closed — verification confirmed
+
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4 verification queue, user-confirmed batch close
+- **Observed evidence**: correction-detection hook fired 4+ times in conversation 6baf518b this session — system-reminder `MANDATORY: correction signal detected` injected per Bash detector match, agent prompted to offer ticket capture before addressing operational request. Mechanism working as designed.
+- **Persists in**: `packages/itil/hooks/lib/detectors.sh::CORRECTION_SIGNAL_PATTERNS` + `packages/itil/hooks/itil-correction-detect.sh` + session memory `feedback_capture_on_correction.md`.
 **Reported**: 2026-04-21
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: M — requires one of: (1) a repo-local hook on `UserPromptSubmit` that detects strong-signal correction patterns (profanity, all-caps directives like "DO NOT", "FFS", "for f***'s sake", "stop", "no", "wrong", direct-contradiction phrasing) and injects a systemMessage reminding the assistant to offer a `capture-problem` invocation before continuing; (2) a CLAUDE.md rule that lists the correction patterns as mandatory-capture triggers; (3) a user-memory entry (`feedback_capture_on_correction.md`) that codifies the expectation. Architect review at implementation time to decide between the three shapes. Scope modest but cross-cutting because it affects every interactive session.

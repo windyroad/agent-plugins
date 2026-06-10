@@ -1,6 +1,13 @@
 # Problem 088: run-retro cannot see the full session context when invoked as a subagent, subprocess, or from any non-parent-session surface — P086's fix is partially blind
 
-**Status**: Verification Pending
+**Status**: Closed
+
+## Closed — verification confirmed
+
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4 verification queue, user-confirmed batch close
+- **Observed evidence**: every iter dispatched this session (~30+) ran `/wr-retrospective:run-retro` inline (subprocess context, not subagent) per iter contract; retros generated full Pipeline Instability + Ask Hygiene tables with rich session context, confirming the SKILL contract's "invoke inline not as background subagent" rule holds end-to-end.
+- **Persists in**: `packages/retrospective/skills/run-retro/SKILL.md` "When to use" preamble + anti-pattern clause + `packages/retrospective/skills/run-retro/test/run-retro-anti-pattern-clause.bats`.
 **Reported**: 2026-04-21 (user observation post-AFK-iter-7, mid-direction-update commit)
 **Fix Released**: 2026-04-26 — `@windyroad/retrospective` patch bump. Settles the user direction's in-scope items (a)-(c): ADR-032 amendment marks `/wr-retrospective:capture-retro` as deferred at both enumeration sites with cross-reference to P088 (lines 26, 80, plus a Related-list entry); `packages/retrospective/skills/run-retro/SKILL.md` gains a "When to use" preamble naming the supported invocation surfaces (foreground `/wr-retrospective:run-retro` + `claude -p` subprocess per P086) and an explicit anti-pattern clause forbidding `Agent(run_in_background: true)` invocation; `docs/problems/086-*.closed.md` ticket gains a settlement note clarifying retro-inside-`claude -p`-subprocess remains correct and distinct from the deferred background-agent surface. New behavioural-contract bats fixture `packages/retrospective/skills/run-retro/test/run-retro-anti-pattern-clause.bats` (six structural assertions) covers the SKILL.md clause; ADR-037 fallback path documented in the fixture's docstring per architect verdict (P081 follow-up tracks the behavioural-test infrastructure that would replace structural assertions). Item (d) (session-log parser to reach into `~/.claude/projects/*/*.jsonl`) is OUT OF SCOPE per the ticket's "potentially" hedge — deferred under the "context-marshalling problem" framing the deferral itself names. Verification path: user runs the next AFK loop or invokes `/wr-retrospective:run-retro` and confirms (a) capture-retro is visibly deferred in ADR-032, (b) the run-retro SKILL.md preamble carries the anti-pattern clause and is encountered before Step 1, (c) bats fixture passes (`./node_modules/.bin/bats packages/retrospective/skills/run-retro/test/run-retro-anti-pattern-clause.bats`).
 **Priority**: 12 (High) — Impact: Significant (3) x Likelihood: Almost Certain (4)
