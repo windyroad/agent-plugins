@@ -1,6 +1,16 @@
 # Problem 291: ADRs accumulate in `proposed` status despite heavy production use — the acceptance transition never fires
 
-**Status**: Open
+**Status**: Closed
+
+## Closed as no longer relevant
+
+- **Evidence shape**: ADR-shipped-confirmed, named-skill-or-feature-exists (ADR-079 Phase 2)
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4.6 relevance-close pass (batch 6)
+- **Cite (fix link)**: ADR-066 human-oversight mechanism shipped (wr-architect-detect-unoversighted shim + /wr-architect:review-decisions drain skill); ADR-079 promoted via that exact path 2026-06-09 this session — first canonical ratification through the new mechanism. Future ADR promotions run through review-decisions.
+- **Caveat**: multi-phase-mixed-progress per evaluator; user confirmed close at interactive batch review 2026-06-10.
+- **Persist**: `packages/itil/scripts/evaluate-relevance.sh` is the re-runnable verdict source per ADR-026
+- **Uncertainty / reversibility**: reversible via `git revert` or `git mv` back to open/.
 **Reported**: 2026-05-25
 **Priority**: 6 (Medium) — Impact: 2 (Minor — the `status:` axis is supposed to signal production-validation; with ~54 of ~57 ADRs stuck at `proposed` despite their implementations shipping and being used for weeks/months, the axis carries almost no signal — a reader can't tell which decisions are battle-tested vs freshly-drafted; degraded audit/handover value, no functional breakage) × Likelihood: 3 (Possible — affects nearly the entire ADR corpus and every new ADR, which is born `proposed` and never transitioned)
 **Effort**: L — define the acceptance criterion + (ideally) automate/prompt the transition so ADRs stop accumulating, then reconcile the ~50 production-validated ADRs

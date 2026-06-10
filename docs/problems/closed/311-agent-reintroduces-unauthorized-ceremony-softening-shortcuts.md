@@ -1,6 +1,16 @@
 # Problem 311: Agent re-introduces unauthorized ceremony-softening shortcuts (same class as the disavowed carve-out)
 
-**Status**: Open
+**Status**: Closed
+
+## Closed as no longer relevant
+
+- **Evidence shape**: named-skill-or-feature-exists (ADR-079 Phase 2)
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4.6 relevance-close pass (batch 6)
+- **Cite (fix link)**: Class-of-behaviour captured in session memory `feedback_no_shortcuts_no_softening.md` (canonical pinned correction: "No. Same RFC. Not scaled down. No short cuts." from P311). Memory file IS the durable artefact for agent-prior shaping; no codified hook/SKILL prose target.
+- **Caveat**: multi-phase-mixed-progress per evaluator; user confirmed close at interactive batch review 2026-06-10.
+- **Persist**: `packages/itil/scripts/evaluate-relevance.sh` is the re-runnable verdict source per ADR-026
+- **Uncertainty / reversibility**: reversible via `git revert` or `git mv` back to open/.
 **Reported**: 2026-05-26
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)

@@ -1,6 +1,16 @@
 # Problem 296: ADR-054 — the retroactive SKILL.md extraction should NOT be deferred behind P081 Layer B; do it
 
-**Status**: Open
+**Status**: Closed
+
+## Closed as no longer relevant
+
+- **Evidence shape**: named-skill-or-feature-exists (ADR-079 Phase 2)
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4.6 relevance-close pass (batch 6)
+- **Cite (fix link)**: install-updates SKILL.md split shipped this session via P242 (commit b707325) — 16,132 → 13,070 bytes, MUST_SPLIT escape confirmed. Same evidence as P241+P243 closure. Opportunistic per-skill maintenance replaces the deferred umbrella per ADR-054 § Phase 2-3 sequencing.
+- **Caveat**: multi-phase-mixed-progress per evaluator; user confirmed close at interactive batch review 2026-06-10.
+- **Persist**: `packages/itil/scripts/evaluate-relevance.sh` is the re-runnable verdict source per ADR-026
+- **Uncertainty / reversibility**: reversible via `git revert` or `git mv` back to open/.
 **Reported**: 2026-05-25
 **Priority**: 6 (Medium) — Impact: 2 (Minor — SKILL.md runtime bloat persists indefinitely while the extraction sits deferred; the declarative-first policy + advisory detector are in place but the existing bloated SKILLs never get cleaned; context-budget cost, not breakage) × Likelihood: 3 (Likely — every SKILL.md invocation pays the bloat; the deferral guarantees zero cleanup)
 **Effort**: L — retroactive extraction of maintainer-rationale from runtime-necessary content across the existing SKILL.md corpus, per the ADR-054 content-classification taxonomy

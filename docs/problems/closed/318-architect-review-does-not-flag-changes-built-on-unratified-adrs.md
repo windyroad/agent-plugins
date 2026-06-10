@@ -1,6 +1,16 @@
 # Problem 318: Architect review (file edits + plans) does not flag changes built on an UNRATIFIED ADR — the build-upon guard only fires at the ITIL propose-fix surface
 
-**Status**: Open
+**Status**: Closed
+
+## Closed as no longer relevant
+
+- **Evidence shape**: ADR-shipped-confirmed, named-skill-or-feature-exists (ADR-079 Phase 2)
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4.6 relevance-close pass (batch 6)
+- **Cite (fix link)**: `[Unratified Dependency]` flag emitted by both wr-architect:agent and wr-jtbd:agent multiple times this session (P324 Phase 4 architect verdict flagged ADR-052 cite as unratified; P175 unratified-dependency flag for ADR-052 amendment). Build-upon guard fires at edit-time gate review now, not just propose-fix. Mechanism shipped over recent weeks via review-agent prose updates.
+- **Caveat**: multi-phase-mixed-progress per evaluator; user confirmed close at interactive batch review 2026-06-10.
+- **Persist**: `packages/itil/scripts/evaluate-relevance.sh` is the re-runnable verdict source per ADR-026
+- **Uncertainty / reversibility**: reversible via `git revert` or `git mv` back to open/.
 **Reported**: 2026-05-27
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
