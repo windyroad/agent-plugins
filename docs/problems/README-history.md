@@ -979,3 +979,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-06-10 (Verification Queue batch 2 fragment rotated for P358 captured)
 
 > Last reviewed: 2026-06-10 **Verification Queue batch 2** — /wr-itil:review-problems pass 2 closed 4 more verifying tickets with yes-observed session evidence: P165 (README-refresh enforcement hook observed denying drift + allowing inline-staged commits across 30+ iters), P202 (release-risk scorer's queued-changeset distinction observed correct across 12 releases this session), P212 (iter-owned-retro-commit contract held across 30+ iters; P195 explicit commit d093bc7), P299 (ADR-034 superseded in commit 0a58fa5 + global-cache assumption held across 10+ plugin refreshes this session). Cumulative pass 2: 0 relevance-closes (caveat candidates all filtered as active/recurring/multi-phase work) + 4 verification-closes = 4 closures. Prior fragment (P357 capture narrative) rotated to README-history.md per P134.
+
+## 2026-06-10 (P358 capture fragment rotated for review-problems Step 0b pre-flight pass)
+
+> Last reviewed: 2026-06-10 **P358 captured** — claude-p subprocess dispatch fails with API "socket connection closed unexpectedly" — no staged work survives, P261 salvage path does not apply (recurring class-of-behaviour observed twice this session, auto-ticketed from run-retro Step 4b Stage 1 per P342 mechanical-stage carve-out). Lightweight aside via /wr-itil:capture-problem. Prior fragment (Verification Queue batch 2 narrative) rotated to README-history.md per P134.

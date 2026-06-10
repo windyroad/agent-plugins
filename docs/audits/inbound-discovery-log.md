@@ -178,3 +178,28 @@ Triggered by `/wr-itil:work-problems` Step 0b preflight dispatch running `/wr-it
 - Fail-soft contract held: the 2 skipped channels did not block the pass (discussions HTTP 410 + security-advisories gate-block both preserve their prior skip status).
 - Step 4.5 invoked as part of `/wr-itil:work-problems` Step 0b preflight robustness layer — orchestrator dispatched this subprocess to refresh the inbound-discovery cache before re-entering the work-loop, so the work-loop sees fresh discovery state. Self-healing TTL-expiry pattern continues to hold.
 - `AskUserQuestion` not called for the discovery step OR the relevance-close observation (subprocess context per orchestrator instruction — mechanical-stage carve-out per P132 / ADR-062 § 4.5 AFK behaviour). P229/P263 false-positive observation recorded here for the next interactive review surface (NOT silently actioned per `feedback_if_you_see_something_broken_fix_it` discipline — silent close of clearly-active tickets would be observably broken).
+
+## 2026-06-10T13:21:08Z — Discovery pass
+
+Invoked from `/wr-itil:work-problems` Step 0b pre-flight (AFK orchestrator) via `/wr-itil:review-problems` Step 4.5. TTL-expiry auto-recheck branch: cache age ~9 days (last_checked 2026-06-01T05:04:00Z) exceeded `ttl_seconds: 86400`.
+
+| Channel | Status | Reports |
+|---------|--------|---------|
+| `github-issues:windyroad/agent-plugins` (title_prefix=`[problem]`) | OK | 48 active (open upstream) + 1 retained closed-upstream historical entry (#149) |
+| `github-discussions:windyroad/agent-plugins` (category=`Q&A`) | skipped | 0 — Discussions disabled for repo (HTTP 410); status carried forward |
+| `github-security-advisories:windyroad/agent-plugins` | skipped | 0 — read-only LIST call still blocked by the external-comms gate (fresh poll attempted this pass, denied; fail-soft skip per Step 4.5 contract) |
+
+**Set delta vs prior cache (2026-06-01T05:04:00Z)**: **6 new, 0 newly-closed** — #202, #217, #218, #219, #236, #241 (all maintainer-authored `[problem]`-prefixed reports filed from downstream sessions between 2026-06-02 and 2026-06-08). 12 non-prefixed open issues excluded by the channel `title_prefix` filter (outbound-filed mirrors / non-template issues; tracked via /wr-itil:check-upstream-responses where back-linked).
+
+**Pipeline outcomes**: 0 new pipeline classifications. All 48 active reports remain `pending-pipeline-processing`. The JTBD-alignment + dual-axis-risk classifiers, semantic-comparator matching, branch routing, and per-report acknowledgement comments remain **deferred** per the standing 2026-05-15 user direction (external-comms-gate sha bug blocks ack-comment posting).
+
+**Cache refresh confirmation**: `docs/problems/.upstream-cache.json` rewritten with `last_checked: 2026-06-10T13:21:08Z`; per-channel `fetched_at` refreshed (github-issues + github-discussions; security-advisories carried forward); 6 new report entries appended with body_hash; `$last_pass_note` updated.
+
+**Step 4.6 relevance-close pass (evaluated, 0 closes)**: evaluator ran across 45 open/known-error tickets — 1 plain `CLOSE-CANDIDATE` (P211), 35 `CLOSE-CANDIDATE-WITH-CAVEAT`, 6 `KEEP-WITH-NOTE`, 3 `SKIP`. P211 preserved against auto-close as an observed false-positive: ticket is fixed-awaiting-release (fix landed 2026-06-07, awaiting Known Error → Verifying at release); the `driver-child-ticket-closed` shape matched local P194, but the ticket's P194 reference is the *downstream bbstats* P194 — same false-positive class the 2026-06-01 pass recorded for P229/P263 ("active K-state body cites shipped ADR" vs "ticket driven by shipped ADR"). The 35 caveat candidates route to the next interactive review's AskUserQuestion surface per the AFK contract.
+
+**Step 2 actions this pass**: auto-transitions P314 + P337 Open → Known Error (root cause + workaround documented; fix paths ratified in ADR-072/073 and ADR-078). Re-rates: P129 Effort L → M (Phase-1-landed revision condition lifted) + Known-Error multiplier correction → WSJF 12.0; P080 WSJF corrected to 12.0 (ticket Effort M; README had rendered L); P358 WSJF corrected 3.0 → 1.5. ADR-076 Origin stamped: P211 (#97), P220 (#63), P228 (#42) → Tier 1 inbound-reported; rankings table re-rendered tier-first with Origin column.
+
+**Audit notes**:
+
+- Fail-soft contract held: 2 skipped channels did not block the pass.
+- `AskUserQuestion` not called (AFK subprocess context; mechanical-stage carve-out per ADR-062 § 4.5 AFK behaviour). Verification Queue untouched (ADR-013 Rule 6 — no auto-close of verifying tickets).

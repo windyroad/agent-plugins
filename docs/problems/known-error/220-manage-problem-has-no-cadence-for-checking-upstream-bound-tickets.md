@@ -2,6 +2,7 @@
 
 **Status**: Known Error
 **Reported**: 2026-05-15
+**Origin**: inbound-reported (#63)
 **Phase 1 fix landed**: 2026-06-08 — `/wr-itil:work-problems` Step 0d pre-flights `/wr-itil:check-upstream-responses` when the outbound-responses cache is stale or missing AND back-link tickets exist (symmetric to Step 0b's inbound pre-flight). K → V transition deferred to release per ADR-022 P143 fold-fix amendment.
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)

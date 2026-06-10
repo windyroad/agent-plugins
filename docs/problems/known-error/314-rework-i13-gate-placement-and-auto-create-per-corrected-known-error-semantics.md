@@ -1,9 +1,11 @@
 # Problem 314: Rework the fix-time RFC-trace gate — wrong lifecycle placement (ADR-072) + hard-block should be auto-create (ADR-073), per corrected Known Error semantics
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-05-26
-**Priority**: 8 (Medium) — Impact: 4 x Likelihood: 2 (deferred — re-rate at next /wr-itil:review-problems)
-**Effort**: L (deferred — re-rate at next /wr-itil:review-problems)
+**Origin**: internal
+**Priority**: 8 (Medium) — Impact: 4 x Likelihood: 2 (re-rated 2026-06-10 — design rework + Phase 1 prose alignment landed; residual exposure is Phase 2 implementation riding the held-changeset window)
+**Effort**: L (re-rated 2026-06-10 — Phase 2 RFC-005 B-tasks: propose-fix gate relocation + auto-create mechanism + behavioural bats; significant single-plugin change)
+**WSJF**: 4.0 ((Severity 8 × Status 2.0) / Effort L (4))
 
 ## Description
 
@@ -87,7 +89,7 @@ The 2026-05-26 design rework above corrected the substantive ADRs (ADR-072 / ADR
 
 ### Investigation Tasks
 
-- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems.
+- [x] Re-rate Priority and Effort at next /wr-itil:review-problems. — re-rated 2026-06-10 (8 Medium / L held); auto-transitioned Open → Known Error per corrected semantics (root cause + corrected design recorded in user-ratified ADR-072/073/060; workaround documented — enforcement code not yet shipped so no live behaviour is wrong)
 - [x] **Open design question — exact gate placement**: ANSWERED — propose-fix step on a Known Error (no new lifecycle state). Recorded in ADR-072. User-ratified 2026-05-26.
 - [x] **Auto-create design**: ANSWERED — auto-create a problem-traced RFC if missing, **everywhere the gate fires** (interactive + AFK). Recorded in ADR-073 (composes with ADR-070 no-decisions + ADR-071 every-fix-via-RFC; the auto-created RFC is a problem-traced skeleton with `stories: []` and no `## Considered Options` block). User-ratified 2026-05-26.
 - [x] Rework artifacts: ADR-072 rewritten + renamed (2026-05-26); ADR-073 rewritten + renamed (2026-05-26); ADR-060 I13 rewritten (2026-05-26); RFC-005 + RFC-006 updated (2026-05-26). Phase 1 follow-up (2026-06-08) added: ADR-022 + manage-problem/SKILL.md + transition-problem/SKILL.md + ADR-029 alignment with the corrected Known Error definition (architect + JTBD gates passed).

@@ -4,8 +4,8 @@
 **Reported**: 2026-04-26
 **Origin**: internal
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
-**Effort**: L — assessment-pipeline classifier extension + recurrence-class lifecycle semantics + integration with closed-ticket history search + bats coverage. Marginal estimate. Phase 1 LANDED 2026-06-09 (already-fixed-in-newer branch only); Phase 2 (recurrence-class lifecycle) remains DEFERRED — effort revises down to M when Phase 2 is the only outstanding work.
-**WSJF**: 3.0 — (12 × 1.0) / max(L=4, P079=4) = 12/4 — re-rated 2026-05-23: P038/P064 closed, P128 verifying→0; bounded by P079/marginal L. Phase 1 closes the "already-fixed leak" symptom; "recurrence-class invisibility" + "triage skew" symptoms remain open under Phase 2.
+**Effort**: M (L → M re-rated 2026-06-10 per the ticket's own revision condition — Phase 1 LANDED 2026-06-09, Phase 2 recurrence-class lifecycle is now the only outstanding work) — assessment-pipeline classifier extension + recurrence-class lifecycle semantics + integration with closed-ticket history search + bats coverage.
+**WSJF**: 12.0 — (12 × 2.0 Known Error) / M (2) — re-rated 2026-06-10: P079 no longer active (contributes 0 transitive); prior 2026-05-23 rating used Open multiplier 1.0 + L bound by P079. Phase 1 closed the "already-fixed leak" symptom; "recurrence-class invisibility" + "triage skew" symptoms remain open under Phase 2.
 
 ## Description
 

@@ -1,11 +1,11 @@
 # Problem 337: Decisions compendium omits Decision Outcome for 57% of ADRs — generator only extracts the `Chosen option:` tag, not the Decision Outcome section body
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-05-30
 **Priority**: 12 (High) — Impact: 3 (Moderate — defeats ADR-077 token-cheap-load-surface goal; 43/75 ADRs render with no statement of what was decided) × Likelihood: 4 (Likely — fires for every ADR lacking a MADR `Chosen option:` tag — currently 57% of corpus)
 **Origin**: internal
 **Effort**: L (re-rated 2026-06-01 — architect verdict on 2026-06-01 work-problems iteration redirected the fix path from "extend the programmatic extractor" to ADR-078 Phase 1: new `architect-compendium-update-entry.sh` PostToolUse hook + `architect-readme-pairing-check.sh` pre-commit hook + retire bats test 2145 + retire `architect-compendium-refresh-discipline.sh` PreToolUse hook + cadence-driven migration of 43 non-canonical ADRs. RFC-scope per ADR-060. Was M when scoped as a regex extension; superseded.)
-**WSJF**: 3.0 (re-rated 2026-06-01 — (Severity 12 × Status 1.0) / Effort L (4) = 3.0; was 6.0 under the M-effort regex-extension scope.)
+**WSJF**: 6.0 (re-rated 2026-06-10 — (Severity 12 × Status 2.0) / Effort L (4) = 6.0; auto-transitioned Open → Known Error: root cause confirmed at two layers, workaround documented (open the per-ADR file), fix path ratified in ADR-078 (`human-oversight: confirmed`) — only implementation outstanding)
 
 ## Description
 
