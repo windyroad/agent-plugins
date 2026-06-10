@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-06-10 **Relevance-close pass batch 4** — /wr-itil:review-problems Step 4.6 closed 4 more tickets with explicit fix-commit links (per P350 brief-before-ID + user direction on linking): P253 (no house-cleaning cadence for cruft+deprecations — ADR-079 evaluator IS the cadence; ratified 2026-06-08), P254 (report-upstream automation blocks clamp agent feedback — fixed by RFC-018 ship commits b351fcf + c124bd9 2026-06-04), P255 (ADR-036 Rule 6 AFK fail-safe clamps intake-scaffold — same RFC-018 ship), P256 (assess-external-comms `<draft>` frontmatter discipline — fixed by P010/ADR-028 amendment 2026-05-25 already cited via commit 4887a94). Cumulative this run: 14 closes, 43 candidates remain. Prior fragment (batch 3 partial-close narrative) rotated to README-history.md per P134.
+> Last reviewed: 2026-06-10 **Relevance-close pass batch 5 (partial)** — /wr-itil:review-problems Step 4.6 closed only P285 (install-updates stale references — addressed via ADR-030 amendment 2026-05-25 + P242 split commit b707325 this session). 3 other candidates filtered out before surfacing (P276 actively-recurring external-comms gate, P288 JTBD-oversight-drain open work, P290 Phase 2 blocked on P324) — surfacing them would have been lazy-AskUserQuestion per user correction. Cumulative this run: 15 closes, 42 candidates remain (3 filtered). Prior fragment (batch 4 narrative) rotated to README-history.md per P134.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -44,7 +44,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 1.5 | P251 | RFC-first trace invariant not enforced — fixes start without RFC, story map, or JTBD trace (symmetric gap to ADR-060 I1; JTBD-008 trace; solo-developer persona) | 3 Med | Open | M | 2026-05-17 |
 | 1.5 | P257 | voice-tone hook should adopt risk-scorer's prompt-derivation pattern for EXTERNAL_COMMS_VOICE_TONE_KEY — closes the evaluator-hook asymmetry; user-approved deviation at session 6 loop-end (captured via /wr-itil:capture-problem; Priority/Effort deferred to next /wr-itil:review-problems) | 3 Med | Open | M | 2026-05-18 |
 | 1.5 | P276 | external-comms gate marker over-fires on PASS-class content edits (P073 surface) (captured 2026-05-19 via /wr-itil:capture-problem; deferred re-rate) | 3 Med | Open | M | 2026-05-19 |
-| 1.5 | P285 | install-updates global-cache-refresh simplification left stale references to the retired consent gate + Step 6.5 bootstrap across downstream surfaces (deferred re-rate) | 3 Med | Open | M | 2026-05-25 |
 | 1.5 | P310 | RFCs carry independent decisions invisible to the ADR-066 human-oversight net | 3 Med | Open | M | 2026-05-26 |
 | 1.5 | P311 | Agent re-introduces unauthorized ceremony-softening shortcuts (same class as the disavowed carve-out) | 3 Med | Open | M | 2026-05-26 |
 | 1.5 | P317 | capture-problem / capture-rfc / manage-problem Step 2 create-gate marker step sources repo-relative `packages/itil/hooks/lib/*.sh` — fails in adopter installs (recurring published-path class: P151/P153/P219) | 3 Med | Open | M | 2026-05-27 |

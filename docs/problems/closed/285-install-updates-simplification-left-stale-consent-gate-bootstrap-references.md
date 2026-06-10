@@ -1,6 +1,16 @@
 # Problem 285: install-updates global-cache-refresh simplification left stale references to the retired consent gate + Step 6.5 bootstrap across downstream surfaces
 
-**Status**: Open
+**Status**: Closed
+
+## Closed as no longer relevant
+
+- **Evidence shape**: ADR-shipped-confirmed, named-skill-or-feature-exists (ADR-079 Phase 2)
+- **Closed on**: 2026-06-10
+- **Closed by**: /wr-itil:review-problems Step 4.6 relevance-close pass (batch 5)
+- **Cite (fix link)**: ADR-030 amendment 2026-05-25 retired the per-sibling consent gate + bootstrap-auto-trigger; downstream prose references cleaned up incrementally across multiple commits since. install-updates SKILL.md split (P242, this session, commit b707325) confirms the simplified architecture is the canonical surface adopters see.
+- **Caveat**: multi-phase-mixed-progress per evaluator; user confirmed close at interactive batch review 2026-06-10.
+- **Persist**: `packages/itil/scripts/evaluate-relevance.sh` is the re-runnable verdict source per ADR-026
+- **Uncertainty / reversibility**: reversible via `git revert` or `git mv` back to open/.
 **Reported**: 2026-05-25
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
