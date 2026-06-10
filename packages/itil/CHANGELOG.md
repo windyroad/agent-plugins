@@ -1,5 +1,166 @@
 # @windyroad/problem
 
+## 0.49.4
+
+### Patch Changes
+
+- 4459d38: fix(itil): work-problems iter owns BRIEFING commit instead of orchestrator hand-off (closes P212)
+
+  `packages/itil/skills/work-problems/SKILL.md` Step 5 retro-on-exit clause #4 replaces the factually-wrong "run-retro commits its own work per ADR-014" assertion with the correct contract: run-retro is explicitly out-of-scope per ADR-014's Scope section, so the iter subprocess (not run-retro, not the orchestrator main turn) is responsible for committing any `docs/BRIEFING.md` / `docs/briefing/*.md` edits run-retro makes — staged + scored via `wr-risk-scorer:pipeline` + committed as `chore(briefing): refresh from iter retro (P<NNN>)`. Step 6.75's dirty-state classification table is amended in parallel: dirty BRIEFING-at-iter-exit is now a bug class, not an expected hand-off the orchestrator absorbs.
+
+  Same number of commits per iter — the audit trail is preserved. The second `wr-risk-scorer:pipeline` invocation MOVES from expensive orchestrator-main-turn context to cheaper iter-subprocess context, eliminating the per-iter main-turn cost the ticket flagged. SKILL-prose only — no changes to run-retro SKILL.md, no changes to manage-problem, no ADR amendment.
+
+- 4459d38: P206: work-problems Step 5 iteration-prompt-body now EXPLICITLY requires
+  AFK iter subprocesses to author a `.changeset/*.md` alongside any fix
+  commit that ships shippable code (anything under
+  `packages/<plugin>/{src,bin,hooks,skills,scripts,lib,agents}` excluding
+  test paths). Doc-only and test-only changes that ship no behaviour MAY
+  omit the changeset.
+
+  Composes defence-in-depth with hook P141
+  (`itil-changeset-discipline.sh`) which enforces the same rule at
+  `git commit` time. The prompt-time constraint is load-bearing because
+  plugin-hook execution depends on the marketplace cache carrying the
+  current hook version — a fresh-cache adopter without P141 still gets
+  the constraint via the prompt.
+
+  Inbound-reported by downstream consumer **bbstats** as their P195
+  (`**Origin**: inbound-reported (bbstats#195)` per ADR-076 sort tier).
+
+  Also adds `test/work-problems-step-5-iter-changeset-required.bats`
+  (structural-permitted per ADR-052 with tdd-review justification comment)
+  asserting the SKILL.md carries the changeset-required clause, doc/test
+  exemption, P141 cite, P206 cite, and bbstats#195 inbound-source cite.
+
+  JTBD: JTBD-006 (Progress the Backlog While I'm Away) — load-bearing;
+  JTBD-007 (Keep Plugins Current Across Projects) — closure depends on
+  fixes actually shipping to npm.
+
+- 4459d38: P211: work-problems Step 5 "Iteration prompt body" section now carries an
+  explicit "Re-ground per iter (P211 — orchestrator-side construction
+  invariant)" paragraph immediately after the "self-contained" opener. The
+  paragraph names: (a) per-iter re-ground against current ticket ID + title
+  only; (b) explicit prohibition on inlining the target ticket's
+  `## Fix Strategy` section verbatim into the dispatch prompt (the subprocess
+  reads it from disk via `/wr-itil:manage-problem` inside its own context,
+  where the design rationale stays anchored to the correct ticket);
+  (c) the cross-iter leakage class (prior ticket ID, prior Fix Strategy
+  text, prior outcome reason, prior commit SHA, prior retro findings, prior
+  outstanding-questions) that MUST NOT carry across the iter boundary;
+  (d) template-driven construction, reset per iter, no global accumulator.
+  The "self-contained" opener is named as the subprocess-side property
+  (the subprocess has no prior conversation context); re-grounding is the
+  symmetric orchestrator-side property (the orchestrator main turn does not
+  carry prior-iter prompt content into the next iter's dispatch
+  construction).
+
+  Without this invariant, an AFK iter inherits a stale design-rationale
+  frame and may land fixes anchored on the wrong ticket's intent —
+  degrading the JTBD-006 audit trail and the workaround burden the AFK loop
+  is meant to eliminate (the prior workaround was user-in-the-loop
+  verification after each iter, reading the subprocess's commit and
+  checking whether it cites the correct ticket's design rationale).
+
+  Behavioural second-source: `packages/itil/skills/work-problems/test/work-problems-step-5-prompt-body-re-grounding.bats`
+  (7 structural assertions; ADR-052 Surface 2 / structural-permitted with
+  `tdd-review: structural-permitted` justification comment citing P012 as
+  the harness-gap ticket — synthetic `claude -p` iter dispatch harness sits
+  outside the skill layer; same pattern as
+  `work-problems-step-5-iter-changeset-required.bats:14-21`).
+
+  Composes with P084 (subprocess-boundary dispatch — re-grounding is the
+  symmetric orchestrator-side property of the subprocess's "no prior
+  conversation context"), ADR-032 (AFK iteration-isolation wrapper —
+  re-grounding clarifies the wrapper's isolation intent on the orchestrator
+  side), JTBD-006 (load-bearing — audit trail and AFK trust degrade if
+  iters work the wrong ticket's design rationale).
+
+  Inbound-reported by downstream consumer **bbstats** as their P194
+  (`**Origin**: inbound-reported (bbstats#194)` per ADR-076 sort tier;
+  upstream tracking https://github.com/windyroad/agent-plugins/issues/97).
+
+- 4459d38: P228: work-problems Step 6.5 post-release K→V auto-transition callback —
+  closes the ADR-022 K→V auto-fire gap empirically witnessed by P220.
+
+  Driving incident: 2026-06-08 P220 — Phase 1 fix shipped in commit 0f58210
+  with `## Fix Released` populated, but the K→V transition was deferred
+  citing a misapplied P143 amendment. The ticket stranded in `.known-error/`
+  with no auto-fire surface to back-fill the transition. Investigation
+  (commit 4d4d0be) confirmed the gap empirically + named two viable fix
+  surfaces; user ratified Option B (work-problems Step 6.5 post-release
+  callback — tight coupling, zero K→V lag) over Option A (review-problems
+  ~24h-lag) and Option C (close-as-superseded by ADR-079).
+
+  Ships:
+
+  - `packages/itil/lib/enumerate-postrelease-kv-candidates.sh` — new helper
+    exporting `enumerate_postrelease_kv_candidates`. Walks
+    `docs/problems/known-error/*.md`, invokes
+    `wr-itil-derive-release-vehicle <NNN>` per ticket, emits
+    `KV_CANDIDATE: P<NNN> | <changeset>` per shipped ticket (derive exit 0)
+    and `KV_CANDIDATES_SUMMARY: total=<N>`. Skips legacy (exit 2 — no
+    `**Release vehicle**` reference) and unreleased (exit 3 — changeset
+    still in working tree) silently. Composes with P267's
+    `derive-release-vehicle` helper as the deterministic filter.
+  - `packages/itil/scripts/run-enumerate-postrelease-kv-candidates.sh` —
+    adopter-safe wrapper (sources lib relative to script per P317/RFC-009).
+  - `packages/itil/bin/wr-itil-enumerate-postrelease-kv-candidates` —
+    ADR-049/ADR-080 PATH shim regenerated from the canonical template at
+    `packages/shared/lib/shim-wrapper-template.sh`.
+  - `packages/itil/skills/work-problems/SKILL.md` Step 6.5 — new
+    "Post-release K→V auto-transition (P228)" subsection wired as new
+    Drain action step 4 (existing cache refresh renumbered to step 5).
+    Per-`KV_CANDIDATE` line dispatches `/wr-itil:transition-problem
+<NNN> verifying` via the Skill tool. Non-blocking on individual
+    failure; logs per-ticket; persistent failures route to Step 2.5b
+    accumulated questions per existing discipline.
+  - `packages/itil/skills/work-problems/test/work-problems-step-6-5-postrelease-kv-callback.bats`
+    — 9 behavioural test cases (absent dir / empty dir / shipped emit /
+    no-vehicle skip / unreleased skip / mixed cohort / README excluded /
+    unknown derive exit). Stubbed derive helper for fixture isolation.
+
+  Architectural posture (architect APPROVED 2026-06-08):
+
+  - ADR-022 (Verifying lifecycle) — implements the auto-fire surface
+    ADR-022 contemplates but didn't wire.
+  - ADR-018 (release-cadence) — Drain action step ordering preserved;
+    cache-refresh subsection renumbered to step 5; no ADR-018 amendment
+    needed.
+  - ADR-010 amended P093 (split-skill execution ownership) — orchestrator
+    dispatches transition-problem as the authoritative executor; documented
+    forwarder pattern, not a round-trip.
+  - ADR-014 (per-transition commit grain) — each dispatched
+    `/wr-itil:transition-problem` rides its own ADR-014 commit through
+    architect / JTBD / risk-scorer gates per its existing contract.
+  - ADR-013 Rule 5 (policy-authorised silent-proceed) — callback rides
+    the same authorisation as `push:watch` / `release:watch` /
+    `/install-updates`; derive-helper-citation match is deterministic
+    (filename equality), not a judgment call.
+  - ADR-044 (framework-resolution boundary) — per-candidate routing is
+    framework-resolved; mid-loop `AskUserQuestion` forbidden per P130.
+
+  JTBD posture (jtbd-lead ALIGNED 2026-06-08):
+
+  - Primary: JTBD-006 (Progress the Backlog While I'm Away) — closes the
+    manual loopback that previously stranded K→V transitions across AFK
+    iterations.
+  - Persona constraint: V→C remains a maintainer-only surface; this
+    callback fires K→V only — the maintainer's judgment-reserved "fix
+    actually works" closure remains untouched.
+  - Adjacent: JTBD-001 (audit trail preserved by dispatching through
+    transition-problem rather than inline state mutation).
+
+  P228 transitions Known Error → Verification Pending on this release.
+
+  @problem P228
+  @problem P220 (empirical witness)
+  @problem P267 (composed helper)
+  @problem P330 (input signal)
+  @adr ADR-022 ADR-018 ADR-010 ADR-014 ADR-013 ADR-044 ADR-049 ADR-080
+  @jtbd JTBD-006 JTBD-001 JTBD-101
+
+- 4459d38: P270 RFC-018 fold-fix: `/wr-itil:report-upstream` AFK auto-fire is now external-comms-risk-gated for ALL classifications including security. The pre-amendment blanket-defer ("AFK orchestrators should never auto-report a security-classified ticket") is superseded by per-classification routing through the `wr-risk-scorer:external-comms` agent. Below-appetite → auto-file. Above-appetite → risk-reduce then re-score → file-or-queue (queue-and-continue per P352; the orchestrator does NOT halt). Three SKILL.md surfaces updated: `report-upstream` AFK behaviour summary, `manage-problem` Step 6 external-root-cause-detection AFK fallback, `work-problems` Step 4 `upstream-blocked` classifier row + decision-table row. ADR-024 amended (2026-06-04 P270 entry) with 3 leaf-substance questions queued as outstanding_questions against P270 per ADR-074 substance-confirm-before-build. The 2026-04-25 (P070) "interim static heuristic until `wr-risk-scorer:external-comms` ships" deferral is lifted (the agent has shipped). 5 new behavioural bats assertions; 35/35 green. User-ratified principle 2026-06-02 (verbatim in RFC-018 + ADR-024 amendment). Fold-fix per ADR-022 P143 — ticket transitions Open → Known Error in the same commit.
+
 ## 0.49.3
 
 ### Patch Changes

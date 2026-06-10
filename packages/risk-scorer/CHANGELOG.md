@@ -1,5 +1,66 @@
 # @windyroad/risk-scorer
 
+## 0.13.0
+
+### Minor Changes
+
+- 4459d38: Add SessionStart scaffold-nudge hook for `docs/risks/` (P297 Phase 1).
+
+  When `RISK-POLICY.md` is present in an adopter project but `docs/risks/` (the
+  ISO 31000 / ISO 27001 standing-risk register directory) is missing, the new
+  `risk-scorer-scaffold-nudge.sh` SessionStart hook emits a one-line stderr
+  advisory pointing at `/wr-risk-scorer:bootstrap-catalog` to scaffold the
+  register. The hook is read-only — the scaffold write happens only when the
+  user invokes the consumer skill.
+
+  Why: ADR-047's original chosen mechanism (inline `/install-updates` step)
+  only fires for sibling projects reachable from the source repo's manual
+  `/install-updates` run, missing every adopter on every other machine.
+  SessionStart fires in every project on every machine, closing the
+  discovery gap.
+
+  The hook respects the suite-wide AFK guard `WR_SUPPRESS_OVERSIGHT_NUDGE=1`
+  per ADR-068, so AFK orchestrators never see the interactive prompt fire
+  into an absent-user subprocess.
+
+  No breaking change. Adopters with `RISK-POLICY.md` and an existing
+  `docs/risks/` see no behaviour change — the hook is silent on every state
+  except the gap it surfaces.
+
+### Patch Changes
+
+- 4459d38: P192: reducing-bypass markers become session-scoped with drift-revalidation
+
+  The risk-scorer pipeline previously consumed `reducing-commit`,
+  `reducing-push`, and `reducing-release` bypass markers on first use
+  (`rm -f` then `exit 0`), so every commit / push / release in a
+  multi-step session had to re-invoke `wr-risk-scorer:pipeline` to re-mint
+  the marker — even when the work and its risk profile were unchanged.
+  Three or more rescore round-trips per session were the norm in iterative
+  work.
+
+  The reducing markers now persist across multiple gate invocations within
+  the standard `RISK_TTL` window AS LONG AS the pipeline-state hash still
+  matches what was scored. Drift (tree changed beyond the P054 tree-stable
+
+  - doc-excluded inputs) or TTL expiry consumes the marker and forces a
+    fresh rescore — the drift-detection safety contract is preserved.
+
+  `incident-release` is intentionally left single-use — it remains a
+  deliberate one-time override, regression-guarded by a new bats fixture
+  asserting it is consumed on use even when the tree hash matches.
+
+  This mirrors the in-repo precedent of the `clean` marker, which already
+  persists until drift. The change extends ADR-009's marker lifecycle
+  contract to the within-appetite / reducing family.
+
+  10 new behavioural bats in
+  `packages/risk-scorer/hooks/test/reducing-marker-persistence.bats` cover
+  the full lifecycle (persistence on hash match, consumption on drift,
+  consumption on TTL expiry, consumption when no state-hash exists, and
+  the incident-release single-use regression guard). Full risk-scorer
+  hook suite green at 142/142 (was 132).
+
 ## 0.12.8
 
 ### Patch Changes
