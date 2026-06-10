@@ -1,6 +1,6 @@
 # Problem 331: transition-problem SKILL Step 7 P134 Last-reviewed rotation silently skipped across iters
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-05-30 (work-problems wrap retro — defers from iter 9 retro deferred-ticket observation per iter 10 retro carry-forward)
 **Priority**: 6 (Medium) — Impact: 2 (Minor — line 3 staleness propagates across multiple iters; README-history.md misses entries; audit trail decoupled) × Likelihood: 3 (Likely — recurred 2 consecutive iters before iter-9 retro caught it)
 **Effort**: S (SKILL.md prose amendment across 8 call sites + structural bats; mechanical edits, no new lib code)
