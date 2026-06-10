@@ -32,7 +32,7 @@ _70 ADRs. These are the current rules. The architect agent reads this section fi
 **Confirmation:** The installPlugin function always passes --scope project unless the caller explicitly overrides; Help text documents the --scope user escape hatch; claude plugin list shows project-scoped entries after install
 
 ### ADR-005 — Plugin Testing Strategy
-**Status:** proposed | **Oversight:** unconfirmed
+**Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **"Option 1 -- bats-core for Hook Unit Tests + CI Integration"**, because hooks are bash scripts and bats-core tests them natively without translation overhead. There's already a precedent in the repo (`risk-gate.bats`), and ...
 **Confirmation:** bats command runs all .bats files in the repo and exits 0; CI quality gate includes a "Run hook tests" step that fails on test failure; Each package with hooks has at least one .bats file in hooks/test/; The risk-scorer's existing risk-gate.bats passes
 
@@ -89,7 +89,7 @@ _70 ADRs. These are the current rules. The architect agent reads this section fi
 **Chosen:** Chosen option: **"Risk-driven cadence"**, because it reuses the existing
 
 ### ADR-019 — AFK orchestrator preflight: get the repo into a clean state before starting
-**Status:** proposed | **Oversight:** unconfirmed
+**Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **"Three-branch clean-state preflight"**, because it is
 
 ### ADR-020 — Governance skills auto-release when changesets are queued
@@ -103,7 +103,7 @@ _70 ADRs. These are the current rules. The architect agent reads this section fi
 **Related:** ADR-002, ADR-014, ADR-018
 
 ### ADR-022 — Problem lifecycle — add a Verification Pending status between Known Error and Closed
-**Status:** proposed | **Oversight:** unconfirmed
+**Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **"Verification Pending" status with `.verifying.md` suffix and WSJF multiplier 0 (excluded from dev ranking)**, because it names the blocked role clearly (the user must verify), produces a concise suffix that round-trips thr...
 **Related:** ADR-072, ADR-073, ADR-011, ADR-014, ADR-020, ADR-031
 
@@ -195,7 +195,7 @@ _70 ADRs. These are the current rules. The architect agent reads this section fi
 **Related:** ADR-046, ADR-024, ADR-014, ADR-017, ADR-022, ADR-029, ADR-030, ADR-037, ADR-044
 
 ### ADR-047 — Install-updates scaffolds governance artefacts when policy file is present but artefact is missing
-**Status:** proposed | **Oversight:** unconfirmed
+**Status:** proposed | **Oversight:** confirmed
 **Confirmation:** .claude/skills/install-updates/SKILL.md — Step 6.5 "Scaffold governance artefacts (per-sibling)" exists betw...; .claude/skills/install-updates/REFERENCE.md — new section "Governance-artefact scaffold (P033)" present with...; .claude/skills/install-updates/templates/risk-register-README.md.tmpl — present; adopter-flavoured (no R001 ...; .claude/skills/install-updates/templates/risk-register-TEMPLATE.md.tmpl — present; verbatim copy of this rep...; docs/problems/033-no-persistent-risk-register.known-error.md — Phase 1 marked complete with ADR-047 citation...
 **Related:** ADR-036, ADR-030, ADR-013, ADR-014, ADR-038, ADR-040, ADR-004
 
@@ -210,7 +210,7 @@ _70 ADRs. These are the current rules. The architect agent reads this section fi
 **Related:** ADR-048, ADR-038, ADR-045, ADR-037, ADR-017, ADR-009, ADR-044, ADR-023
 
 ### ADR-052 — Behavioural-tests-default for skill testing
-**Status:** proposed | **Oversight:** unconfirmed | **Supersedes:** [037-skill-testing-strategy]
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** [037-skill-testing-strategy]
 **Related:** ADR-037, ADR-005, ADR-013, ADR-014, ADR-026, ADR-035, ADR-044, ADR-045
 
 ### ADR-053 — `@windyroad/*` plugin / skill / agent / hook maturity taxonomy
