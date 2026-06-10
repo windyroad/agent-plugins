@@ -4,9 +4,8 @@ Cross-session learnings about push:watch, release:watch, changesets, npm publish
 
 ## What You Need to Know
 
-- **Atomic-cohort full graduation scales empirically to 13 changesets / 5 packages with no false-positives** (ADR-060 finding 12). Graduate a held cluster atomically (`git mv docs/changesets-holding/*.md .changeset/`) on user-comfort signal, not elapsed time. (verifying P162)
-- **`.changeset/` empty + `docs/changesets-holding/` non-empty can self-reinforce a release-pressure stall**: ADR-042 auto-moves every changeset to holding, so the ADR-018/020 drain (needs `.changeset/` non-empty) never fires — commits accumulate unpushed AND nothing publishes. Only manual graduation recovers it. Monitor held-cluster size + last-push age proactively. (verifying P162)
-- **Dogfood criterion is positive-evidence-of-working, NOT elapsed time.** Graduate a held entry when its surface fired correctly with no false-positive; KEEP HELD when it has negative evidence (e.g. hook misfired), regardless of days. Per-entry evidence beats sibling-cohort piggybacking. (verifying P246)
+> **Sibling brief**: held-changeset / graduation mechanics (atomic-cohort graduation, holding-stall hazard, evidence-based dogfood criterion, holding-does-NOT-stop-shipment surprise) split out 2026-06-11 to [`changeset-holding-graduation.md`](./changeset-holding-graduation.md) per Tier 3 budget rotation. Load it when graduating, holding, or reasoning about held changesets.
+
 - **The `push:watch` script** in root `package.json` is the sanctioned way to push — it runs `git push` then watches the CI run. The git-push-gate hook blocks bare `git push`.
 - **Never run `changeset version` locally.** The release pipeline handles versioning. To release: push with `npm run push:watch`, the pipeline creates a release PR, merge it with `npm run release:watch`.
 - **Pre-2026-05-05 entries archived to [`releases-and-ci-archive.md`](./releases-and-ci-archive.md)** (rotated 2026-05-13 per Tier 3 MUST_SPLIT; further 2026-05-26 entries added 2026-06-08 — `push:watch false-green`, `.changeset/*.md external-comms gate`, `patchy network watch retry`). Load the archive when investigating older release / CI behaviour.

@@ -1,0 +1,13 @@
+# Changeset Holding and Graduation
+
+Cross-session learnings about `docs/changesets-holding/` (ADR-042 Rule 7), held-cohort graduation, and what holding does and does not control. Split out of `releases-and-ci.md` 2026-06-11 per Tier 3 budget rotation.
+
+## What You Need to Know
+
+- **Atomic-cohort full graduation scales empirically to 13 changesets / 5 packages with no false-positives** (ADR-060 finding 12). Graduate a held cluster atomically (`git mv docs/changesets-holding/*.md .changeset/`) on user-comfort signal, not elapsed time. (verifying P162)
+- **`.changeset/` empty + `docs/changesets-holding/` non-empty can self-reinforce a release-pressure stall**: ADR-042 auto-moves every changeset to holding, so the ADR-018/020 drain (needs `.changeset/` non-empty) never fires — commits accumulate unpushed AND nothing publishes. Only manual graduation recovers it. Monitor held-cluster size + last-push age proactively. (verifying P162)
+- **Dogfood criterion is positive-evidence-of-working, NOT elapsed time.** Graduate a held entry when its surface fired correctly with no false-positive; KEEP HELD when it has negative evidence (e.g. hook misfired), regardless of days. Per-entry evidence beats sibling-cohort piggybacking. (verifying P246) <!-- signal-score: 1 | last-classified: 2026-06-11 | first-written: 2026-06-11 -->
+
+## What Will Surprise You
+
+- **Moving a changeset to `docs/changesets-holding/` does NOT keep the code from shipping — it only withholds version attribution + CHANGELOG entry.** npm publishes main's package directory contents; any sibling-changeset-driven release ships ALL committed code, held or not. Witnessed 2026-06-11 (P220 AFK iter): the P220 Step 0d fix's changeset was held 2026-06-08, yet `npm pack @windyroad/itil@0.49.3` contains every fix file (SKILL prose + lib + script + bin shim) because 0.48.0/0.49.x released sibling changesets after the fix commit landed on main. The ADR-042 hold is changelog/attribution governance, NOT a shipment control — an above-appetite change held "out of the release queue" still reaches adopters on the next sibling release. Ticket captured 2026-06-11 for the framework gap. <!-- signal-score: 0 | last-classified: 2026-06-11 | first-written: 2026-06-11 -->

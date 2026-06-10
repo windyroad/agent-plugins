@@ -16,7 +16,7 @@ When implementing a ratified **unconditional / no-carve-out / no-exemption** dec
 
 > Two older 2026-05-26 entries (`Known Error semantics: root cause + workaround` and `reconcile-rfcs false-flags reverse-traces`) archived 2026-06-08 to `governance-workflow-archive.md` for Tier 3 budget rotation. Load alongside this file for full history.
 
-- **Risk appetite is Low (4)**. Changes scoring Medium (5+) need explicit acknowledgement. See `RISK-POLICY.md`.
+- **Risk appetite is Low (4)**. Changes scoring Medium (5+) need explicit acknowledgement. See `RISK-POLICY.md`. <!-- signal-score: 1 | last-classified: 2026-06-11 | first-written: 2026-06-11 -->
 - **All ADRs in `docs/decisions/` are still `.proposed.md`** — none ratified. Amendments are cheap: prefer amending over superseding. When a P-problem intersects a proposed ADR, revise the ADR rather than adding a compatibility clause.
 - **ADR-002 plugin dependency graph lists `@windyroad/tdd` as standalone.** Cross-plugin features must update the graph explicitly; don't silently add deps.
 - **Pre-2026-04-26 entries archived to [`governance-workflow-archive.md`](./governance-workflow-archive.md)** (most recently rotated 2026-05-13 per Tier 3 budget MUST_SPLIT). Load the archive alongside this file when full historical context is needed.
