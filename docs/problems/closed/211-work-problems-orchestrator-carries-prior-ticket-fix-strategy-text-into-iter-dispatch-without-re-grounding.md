@@ -1,6 +1,6 @@
 # Problem 211: work-problems orchestrator carries prior-ticket Fix Strategy text into iter dispatch without re-grounding in design intent
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-05-15
 **Origin**: inbound-reported (#97)
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
@@ -60,6 +60,10 @@ SKILL-prose surface (R009 floor — no ADR signals; pure contract clarification 
 ## Fix Released
 
 De-facto released in @windyroad/itil@0.49.3 — fix commit 796c9c86 (2026-06-07) is an ancestor of the 0.49.3 version-bump commit 34d6a8f8 (2026-06-08), published on npm (verified `npm view @windyroad/itil version` = 0.49.3 on 2026-06-11). The queued `.changeset/wr-itil-p211-iter-prompt-re-grounding.md` is the ADR-061 holding-graduation entry for changelog attribution in the next release; it does not withhold code shipment (P359 precedent, same shape as P220). Fix: SKILL.md Step 5 "Re-ground per iter" orchestrator-side construction invariant + behavioural second-source bats fixture. Exercise evidence: `work-problems-step-5-prompt-body-re-grounding.bats` 7/7 green in-session 2026-06-11. Awaiting user verification.
+
+## Closed on evidence
+
+Closed 2026-06-11 (P220 AFK iter retro — prior-session README-cell evidence drain per run-retro Step 4a sub-step 9 / P282). VQ `Likely verified?` cell carried `yes — observed: this iter's own dispatch carried ID+title only (no Fix Strategy inline) + bats 7/7 green, 2026-06-11` from iter 1's session — genuine post-release exercise (fix shipped 2026-06-08 in 0.49.3; evidence observed 2026-06-11). Rename not in current session (sub-step 9c same-session git-log exclusion passed — iter 1's rename commit ed2937a8 pre-dates this subprocess). Recovery via `/wr-itil:transition-problem 211 known-error`.
 
 ## Related
 
