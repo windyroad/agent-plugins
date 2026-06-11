@@ -1,5 +1,0 @@
----
-"@windyroad/itil": patch
----
-
-P287: review-problems SKILL.md Step 4.5 § 6 prose cleanup — replace the P287-stale "—no-prompt flag defaults to type=technical" rationale and "a default of user-business would mis-classify security-advisory-channel reports" justification with the correct AFK-marker / I12 derive-then-ratify contract reference (capture-problem derives persona + JTBD from the report body; on derivation-failure with no `--persona` / `--jtbd` flags supplied, halts-with-stderr-directive and records `cache_audit_note: gate-denied-safe-and-valid-derive-failure`). The type-classification axis was retired across the codebase per twice-confirmed user direction (2026-05-25 + 2026-06-02 "GET RID OF IT"); ADR-060 amendment landed in commit `54ecf83`; the SKILL prose drift was the residue this iter closes alongside the P287 Known Error → Verification Pending transition. Architect PASS + JTBD PASS on the prose fix (both gate verdicts in-session). No control-flow change to the SKILL contract; pure documentation hygiene. Verbatim-body-preservation rationale (JTBD-301 + JTBD-201 fidelity language) preserved unchanged.
