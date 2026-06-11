@@ -1,6 +1,6 @@
 # Problem 228: ADR-022 .known-error.md → .verifying.md transition not happening consistently at release time
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-15
 **Origin**: inbound-reported (#42)
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
@@ -50,6 +50,10 @@ Two viable surfaces — selection is a load-bearing decision that must be ratifi
 
 Fix shape (landed this iter): new helper `packages/itil/lib/enumerate-postrelease-kv-candidates.sh` + script wrapper + ADR-080 bin shim `wr-itil-enumerate-postrelease-kv-candidates`. SKILL.md Step 6.5 Drain action renumbered: step 4 = K→V auto-transition (new), step 5 = cache refresh (renumbered from 4). The enumerator dispatches `/wr-itil:transition-problem <NNN> verifying` per emitted `KV_CANDIDATE` line, non-blocking on individual failure, AFK-safe. V→C remains a maintainer-only surface. Status remains Known Error until the next release ships, at which point the new callback fires the K→V transition automatically (this is the dogfooding verification path).
 
+## Fix Released
+
+Released in @windyroad/itil@0.49.4 (changeset `wr-itil-p228-postrelease-kv-auto-transition.md` drained in release commit 333e24fc, 2026-06-11). Fix: post-release K→V auto-transition callback — `enumerate-postrelease-kv-candidates` helper lib + script + ADR-080 bin shim, wired as work-problems Step 6.5 Drain step 4. **Dogfood verification evidence (in-session, 2026-06-11)**: `wr-itil-enumerate-postrelease-kv-candidates docs/problems` exited 0 and emitted `KV_CANDIDATE` lines for P175, P184, and P228 itself (`KV_CANDIDATES_SUMMARY: total=3`) — this very K→V transition batch is the enumerator's output being executed, including catching up the two tickets (P175, P184) stranded by earlier releases that pre-dated the callback. Exactly the failure class this ticket describes, now self-healing. Awaiting user verification.
+
 ## Related
 
 - **Reported Upstream**: https://github.com/windyroad/agent-plugins/issues/42
@@ -63,3 +67,12 @@ Fix shape (landed this iter): new helper `packages/itil/lib/enumerate-postreleas
 - **2026-05-15**: Captured. Placeholder Priority/Effort pending review-problems re-rate.
 - **2026-06-08** (session 11 iter): Investigation pass — gap confirmed empirically (P220 witness); ADR-022 amendments since report date reviewed (no K → V release-time wiring landed); ADR-079 partial-overlap analysed (Phase 2 shape 4 contributory but K → Closed-direct ≠ K → V); two candidate fix surfaces named; surface selection deferred to user ratification per substance-confirm-before-building. Status remains Known Error.
 - **2026-06-08** (session 11 iter follow-up): User ratified Option B (work-problems Step 6.5 post-release callback). Fix landed: new `enumerate-postrelease-kv-candidates` helper lib + script + ADR-080 bin shim + 9-case behavioural bats + SKILL.md Step 6.5 K→V auto-transition subsection + Non-Interactive Decision Making table row + changeset. Architect + JTBD gates both passed. Status remains Known Error — the new callback dogfoods on the first release after this iter ships (will auto-transition P228 K→V).
+- **2026-06-11** (AFK iter 3): Fix released in @windyroad/itil@0.49.4 (release commit 333e24fc). Dogfood executed: enumerator emitted KV_CANDIDATE for P175/P184/P228; batch K→V transition via /wr-itil:transition-problems covered all three (P175 + P184 were the stranded-by-earlier-release class this ticket describes). Status → Verification Pending.
+
+## Upstream Lifecycle Updates
+
+- **2026-06-11** — Known Error → Verification Pending
+  - **Target URL**: https://github.com/windyroad/agent-plugins/issues/42
+  - **Comment URL**: https://github.com/windyroad/agent-plugins/issues/42#issuecomment-4676712085
+  - **Disclosure path**: posted-comment
+  - **Gate verdict**: external-comms PASS (no confidential-information class matched) + voice-tone PASS

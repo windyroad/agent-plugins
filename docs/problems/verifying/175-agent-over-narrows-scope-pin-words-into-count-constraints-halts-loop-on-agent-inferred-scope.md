@@ -1,6 +1,6 @@
 # Problem 175: Agent over-narrows scope-pin words ("just", "only", "first") into count constraints — halts AFK loop on agent-inferred scope rather than framework-prescribed stop conditions
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-06
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -74,6 +74,10 @@ Phase 2+ (deferred — separate iters / no auto-roll-up to this ticket):
 - [ ] Check non-AFK orchestrator surfaces — `/wr-itil:work-problem` (singular) might exhibit the same class. Audit + extend SKILL prose if needed.
 - [ ] Consider symmetric-inverse work: misreading of "every" / "all" / "each" as count expansion. Likely not real; investigate empirically.
 - [ ] Re-rate Priority and Effort at next `/wr-itil:review-problems` (deferred placeholder still present).
+
+## Fix Released
+
+Released in @windyroad/itil@0.49.3 (changeset `wr-itil-p175-scope-pin-word-semantics.md` drained in version-packages commit 34d6a8f8, 2026-06-08). Fix: SKILL prose codifies scope-pin words (`just`/`only`/`first`) as SCOPE FILTERS over work-problems Step 1 selection — not count constraints or loop-control — plus paired Tier-A/B promptfoo eval. Transitioned K→V 2026-06-11 by the P228 post-release KV enumerator (`wr-itil-enumerate-postrelease-kv-candidates` emitted `KV_CANDIDATE: P175`). Awaiting user verification.
 
 ## Dependencies
 

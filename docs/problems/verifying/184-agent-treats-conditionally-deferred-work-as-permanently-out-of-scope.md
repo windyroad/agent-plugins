@@ -1,6 +1,6 @@
 # Problem 184: Agent treats conditionally-deferred work (deferred-pending-X-graduation) as permanently out of scope — prematurely transitions parent ticket when X graduates
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-12
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -74,6 +74,10 @@ The P170 driver case: ADR-060 amendment 2026-05-10 stated "Phase 2 SHIP deferred
 **Per architect verdict 2026-06-09 (ADR-052 advisory)**: no structural bats test added — the promptfoo behavioural eval covers the surface; a SKILL.md prose-grep bats test would be the exact anti-pattern ADR-052 supersedes (P081).
 
 **Release vehicle**: .changeset/wr-itil-p184-conditional-deferral-check.md
+
+## Fix Released
+
+Released in @windyroad/itil@0.49.2 (changeset `wr-itil-p184-conditional-deferral-check.md` drained in version-packages commit a0781215, 2026-06-08). Fix: pre-flight "Conditional-deferral check" added to both K→V transition surfaces (`/wr-itil:manage-problem` Step 7 + `/wr-itil:transition-problem` Step 4) with halt-and-route on lifted deferrals, plus paired promptfoo eval. Transitioned K→V 2026-06-11 by the P228 post-release KV enumerator (`wr-itil-enumerate-postrelease-kv-candidates` emitted `KV_CANDIDATE: P184`). **Exercise evidence**: the check was executed in-session this transition batch — all three candidate tickets were scanned for phase-tracking sections + conditional-deferral markers before their K→V renames (P175's "Phase 2+ (deferred — separate iters / no auto-roll-up)" correctly classified as terminal-for-this-ticket; no halt fired). Awaiting user verification.
 
 ## Reassessment Criteria
 
