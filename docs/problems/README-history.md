@@ -996,3 +996,4 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-06-11 **P211 verification pending** — work-problems iter-prompt re-grounding fix de-facto released in @windyroad/itil@0.49.3 (commit 796c9c86 ancestor of 0.49.3 bump; bats 7/7 green in-session); K→V transition via AFK work-problems iter 1
 > Last reviewed: 2026-06-11 **batch transition** — P326 close, P331 close (run-retro Step 4a close-on-evidence: restage-commit wrapper landed ed2937a8 first-call; P134 rotation executed in-order this iter)
 > Last reviewed: 2026-06-11 **P361 captured** — derive-release-vehicle exit-3 unreleased false positive on graduated holding changesets (lightweight aside via /wr-itil:capture-problem)
+> Last reviewed: 2026-06-11 **P362 captured** — unconditional update-upstream Skill dispatch pays full SKILL.md context load for common no-op (lightweight aside via /wr-itil:capture-problem)
