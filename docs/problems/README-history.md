@@ -998,3 +998,4 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-06-11 **P361 captured** — derive-release-vehicle exit-3 unreleased false positive on graduated holding changesets (lightweight aside via /wr-itil:capture-problem)
 > Last reviewed: 2026-06-11 **P362 captured** — unconditional update-upstream Skill dispatch pays full SKILL.md context load for common no-op (lightweight aside via /wr-itil:capture-problem)
 > Last reviewed: 2026-06-11 **P220 verification pending** — work-problems Step 0d outbound-responses cadence fix released in @windyroad/itil@0.49.4 (code tarball-verified from 0.49.3; held changeset is attribution-only per P359); K→V transition via AFK work-problems iter 2
+> Last reviewed: 2026-06-11 **close P211** — work-problems iter-prompt re-grounding closed on prior-session evidence (run-retro Step 4a sub-step 9 drain; iter 1's observed re-grounded dispatch + bats 7/7 green); AFK work-problems iter 2 retro
