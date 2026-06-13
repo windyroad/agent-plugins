@@ -1001,3 +1001,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-06-11 **close P211** — work-problems iter-prompt re-grounding closed on prior-session evidence (run-retro Step 4a sub-step 9 drain; iter 1's observed re-grounded dispatch + bats 7/7 green); AFK work-problems iter 2 retro
 > Last reviewed: 2026-06-11 **P363 captured** — inbound-reported tickets never receive fix-released verdict on originating issue (JTBD-301 verdict leg; witnessed P220 #63 + P211 #97 this iter; lightweight aside via /wr-itil:capture-problem)
 > Last reviewed: 2026-06-11 **batch transition** — P175 verifying, P184 verifying, P228 verifying (P228 post-release K→V enumerator dogfood: `wr-itil-enumerate-postrelease-kv-candidates` emitted all three as KV_CANDIDATE; fixes shipped in @windyroad/itil@0.49.3 / 0.49.2 / 0.49.4; AFK work-problems iter 3)
+
+## 2026-06-14
+
+> Last reviewed: 2026-06-11 **P364 captured** — external-comms gate marker key mismatch on backtick-bearing gh bodies (PASS-reviewed draft never unlocks the escaped `--body` post; lightweight aside via /wr-itil:capture-problem, AFK iter 3 retro)

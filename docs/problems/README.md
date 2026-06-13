@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-06-11 **P364 captured** — external-comms gate marker key mismatch on backtick-bearing gh bodies (PASS-reviewed draft never unlocks the escaped `--body` post; lightweight aside via /wr-itil:capture-problem, AFK iter 3 retro)
+> Last reviewed: 2026-06-11 **P365 captured** — external-comms risk-scorer gate must NOT fire on git-commit-message surface in private repos (lightweight aside via /wr-itil:capture-problem)
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -51,6 +51,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 1.5 | P362 | Unconditional update-upstream Skill dispatch pays full SKILL.md context load (~14 KB) for the common no-op case — add grep pre-check for ## Reported Upstream at both call sites (manage-problem Step 7 P080 block + transition-problem Step 7b); ADR-038 alignment (captured 2026-06-11 via /wr-itil:capture-problem; deferred re-rate) | 3 Med | Open | M | 2026-06-11 | internal |
 | 1.5 | P363 | Inbound-reported tickets never receive fix-released verdict on originating issue — ADR-062 pipeline is intake-time only; update-upstream owns outbound axis only; JTBD-301 fix-released verdict leg has no executing surface (witnessed P220 #63 + P211 #97, 2026-06-11) (captured via /wr-itil:capture-problem; deferred re-rate) | 3 Med | Open | M | 2026-06-11 | internal |
 | 1.5 | P364 | External-comms gate marker key mismatch on backtick-bearing gh bodies — PASS-reviewed draft never unlocks the post because the escaped --body argument hashes differently from the reviewed draft; workaround: backtick-free bodies (witnessed P228 upstream comment, 2026-06-11) (captured via /wr-itil:capture-problem; deferred re-rate) | 3 Med | Open | M | 2026-06-11 | internal |
+| 1.5 | P365 | External-comms risk-scorer gate must NOT fire on git-commit-message surface in private repos — false-positive scope class (sibling of P364 hash-drift class) witnessed in a separate private adopter repo (captured 2026-06-11 via /wr-itil:capture-problem; deferred re-rate) | 3 Med | Open | M | 2026-06-11 | internal |
 | 1.25 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory/blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 10 High | Open | XL | 2026-05-03 | internal |
 | 1.13 | P298 | Published artifacts should NOT reference internal IDs at all — ADR-055 chose prefixing; user wants them stripped (meaningless to adopters, ~2,880 refs/81 files). Express substance inline. Sibling of P294; composes with P296. Surfaced during the P283 drain. Blocks ADR-055 oversight confirmation | 9 Med High | Open | XL | 2026-05-25 | internal |
 | 1.0 | P338 | P082 Phase 2 cognitive-accessibility evaluator on the 4 external-comms surfaces, shipped as a NEW `@windyroad/cognitive-a11y` plugin (sibling of P082; design pinned 2026-05-30 = new plugin) | 4 Low | Open | L | 2026-05-30 | internal |
