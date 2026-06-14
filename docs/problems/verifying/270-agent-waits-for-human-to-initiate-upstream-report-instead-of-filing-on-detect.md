@@ -1,6 +1,6 @@
 # Problem 270: Agent waits for human to initiate upstream report instead of filing on detect — feedback delay class
 
-**Status**: Known Error (root cause confirmed; fix shipped in AFK iter 2026-06-04 via RFC-018 + ADR-024 2026-06-04 (P270) amendment; awaiting `@windyroad/itil` patch release for `Verifying-by-release` transition per ADR-022 P143 fold-fix)
+**Status**: Verification Pending (RFC-018 fold-fix released — first shipped in `@windyroad/itil@0.47.9`, present in current `0.49.5`; awaiting user verification per ADR-022)
 **Reported**: 2026-05-18
 **Priority**: 8 (Medium) — Impact: 2 × Likelihood: 4
 **Effort**: M (re-estimated 2026-05-18 — AFK orchestrator Step 4 fallback amendment + security/non-security classifier + bats fixture)
@@ -93,6 +93,20 @@ The orchestrator currently treats this security-only constraint as a blanket "ne
 **If no**: P270 stays Open with the documented over-restriction acknowledged as intentional conservative default; sibling P254 (report-upstream automation blocks) may need its own re-scope to not depend on this fix.
 
 **If amend differently**: user redirects (e.g. "auto-invoke for ALL paths including security in AFK"; "keep current blanket halt + add a separate batch-disclosure path for security per ADR-024 Reassessment Criteria #4(b)"; or some other shape).
+
+## Fix Strategy
+
+RFC-018 (external-comms-risk-gated AFK auto-fire for ALL upstream reports including security-classified tickets) carries the fix per ADR-071 thin-retro-fit. The orchestrator-side over-restriction (manage-problem Step 6 + work-problems Step 4 classifier reading ADR-024's security-path-scoped AFK constraint as a blanket "never auto-invoke") is reversed: the AFK fallback now auto-invokes `/wr-itil:report-upstream` gated through `wr-risk-scorer:external-comms` (ADR-028), with open-ended risk-reducing measures and queue-not-halt (P352) on the above-appetite path. The three leaf-substance decisions were ratified verbatim by the user 2026-06-04 (see `## Resolved Design Questions`) BEFORE the dependent SKILL.md + ADR-024 second-amendment work landed — the canonical ADR-074 happy path.
+
+**Release vehicle**: `.changeset/wr-itil-p270-external-comms-gated-upstream-report-afk-auto-fire.md` (held under `docs/changesets-holding/` per ADR-042 Rule 2 while the R009 prose-surface floor was load-bearing; discharged by P355/RFC-019; graduated + reinstated via `4459d38b` bulk-reinstate per ADR-061 Rule 5; drained at release).
+
+## Fix Released
+
+Released — RFC-018 fold-fix first shipped in **`@windyroad/itil@0.47.9`** and is present in the current `0.49.5` (confirmed by tag-ancestry: fix commits `b351fcfa` external-comms-gated AFK auto-fire, `c124bd93` leaf-substance ratification + reinstate-from-holding, `84d727e9` work-problems Non-Interactive table + contract-bats alignment, `4459d38b` held-changeset graduation — all ancestors of `@windyroad/itil@0.49.5`).
+
+Fix summary: the AFK orchestrator now auto-files non-security AND security upstream reports on external-root-cause detect (external-comms-risk-gated, queue-not-halt above appetite) instead of appending a static `Upstream report pending` marker and waiting for a human turn that often never came.
+
+Awaiting user verification — observe whether the next AFK iteration that detects an external root cause auto-fires the upstream report (or queues it above-appetite) rather than leaving a stale pending marker.
 
 ## Dependencies
 
