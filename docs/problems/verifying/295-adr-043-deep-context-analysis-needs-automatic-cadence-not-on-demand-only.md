@@ -1,8 +1,8 @@
 # Problem 295: ADR-043 deep layer (`analyze-context`) needs an automatic cadence — on-demand-only means it never runs
 
-**Status**: Known Error
+**Status**: Verification Pending (ADR-043 Amendment 2026-06-08 fix released — first shipped in `@windyroad/retrospective@0.24.0`, present in current `0.24.1`; awaiting user verification per ADR-022)
 **Reported**: 2026-05-25
-**Root cause confirmed**: 2026-06-08 (this commit lands the fix; pending release)
+**Root cause confirmed**: 2026-06-08 (fix landed `9045cadc`, released in `@windyroad/retrospective@0.24.0`)
 **Priority**: 6 (Medium) — Impact: 2 (Minor — the deep context analysis exists but, being on-demand-only, effectively never fires; the cheap layer carries all the load and the deep insights are never realised; no breakage, just an un-exercised capability) × Likelihood: 3 (Likely — every retro runs the cheap layer; the deep layer's zero-cadence means zero runs)
 **Effort**: M — ADR-043 amendment (add a proactive lower-frequency cadence to the deep layer) + run-retro trigger wiring + the analyze-context skill
 **WSJF**: 6/2 × 2.0 = **6.0** (Known Error multiplier 2.0)
@@ -53,9 +53,15 @@ Settled mechanism (architect + JTBD reviewed PASS, 2026-06-08):
 - [ ] Re-confirm amended ADR-043 via `/wr-architect:review-decisions` after this commit lands.
 - [ ] Reconcile with the general cadence principle — consider whether other on-demand-only governance surfaces (oversight drains' deep passes, maturity assessment per ADR-053, etc.) need the same treatment (separate ticket per surface — out of scope here).
 
-## Fix Status
+## Fix Released
 
-Fix implemented and landed in this commit. Awaiting release — on next `push:watch` + `release:watch` cycle the ticket transitions Known Error → Verification Pending per ADR-022 (file renamed to `.verifying.md`, `## Fix Released` section added with version + commit SHA).
+Released — ADR-043 Amendment 2026-06-08 (deep `analyze-context` layer now auto-fires from `run-retro` Step 2c on the combined whichever-comes-first trigger) first shipped in **`@windyroad/retrospective@0.24.0`** and is present in the current `0.24.1` (confirmed by tag-ancestry: fix commit `9045cadc` "docs(decisions): ADR-043 amendment + run-retro Step 2c auto-fire wiring (P295)" is an ancestor of tag `@windyroad/retrospective@0.24.0`; the 0.24.0 CHANGELOG entry explicitly cites "ADR-043 Amendment 2026-06-08 (P295)"; npm `@windyroad/retrospective` is published at `0.24.1`).
+
+Fix summary: the on-demand-only deep layer is lifted to auto-invocation. `run-retro` Step 2c auto-invokes `/wr-retrospective:analyze-context` when the trigger holds — calendar-elapse >14 days since the most recent `docs/retros/*-context-analysis.md` (or no prior report) OR delta >20% in any bucket since the prior snapshot — guarded once-per-day by `docs/retros/<TODAY>-context-analysis.md` presence. Identical behaviour interactive and AFK (the deep layer is silent — never invokes `AskUserQuestion`). Settles the user-pinned principle "if there is no automatic cadence, it does not happen."
+
+Awaiting user verification — observe whether the next retro whose trigger holds auto-fires `/wr-retrospective:analyze-context` and writes a committed `docs/retros/<date>-context-analysis.md` without manual invocation.
+
+**Residual follow-up** (does NOT block this verification — tracked as open investigation tasks): re-confirm the amended ADR-043 via `/wr-architect:review-decisions` (the held P283/ADR-066 oversight marker), and the broader cadence-principle reconciliation across other on-demand-only governance surfaces (separate ticket per surface).
 
 ## Dependencies
 
