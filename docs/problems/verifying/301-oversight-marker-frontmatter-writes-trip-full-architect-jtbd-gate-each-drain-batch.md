@@ -1,10 +1,10 @@
 # Problem 301: ADR-066/068 oversight-marker frontmatter writes trip the full architect+JTBD edit-gate each drain batch
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-25
 **Priority**: 6 (Medium) — Impact: 2 (Minor — re-review round-trips slow the drain but don't break it; the markers still land) × Likelihood: 3 (Likely — every `/wr-architect:review-decisions` + `/wr-jtbd:confirm-jobs-and-personas` drain batch, plus every adopter running the drains; recurs ~per-batch on a multi-batch drain)
 **Effort**: M — define a gate-light path for oversight-marker-only frontmatter writes to docs/decisions/ + docs/jtbd/ (the architect/JTBD enforce-edit hooks gain an exemption for a diff that adds only `human-oversight: confirmed` + `oversight-date`)
-**WSJF**: 6/2 × 2.0 = **6.0** (Known Error multiplier 2.0 — fix implemented; awaiting release)
+**WSJF**: n/a (Verification Pending — multiplier 0, excluded from dev-work ranking per ADR-022)
 
 ## Description
 
@@ -45,6 +45,16 @@ Both `architect-enforce-edit.sh` and `jtbd-enforce-edit.sh` source the helper an
 3. `is_marker_only_diff OLD NEW` returns 0.
 
 The architect-oversight-marker-discipline.sh hook (PreToolUse, separate from the enforce-edit gate) continues to enforce per-ADR session evidence for `human-oversight: confirmed` introductions (P348 / ADR-066 amendment 2026-06-02 contract preserved).
+
+**Release vehicle**: .changeset/p301-marker-only-diff-exemption.md
+
+## Fix Released
+
+Released in **@windyroad/architect@0.15.6** (CHANGELOG: "Closes P301") and **@windyroad/jtbd@0.12.6** (CHANGELOG cites P301, commit `6197434`). Both currently published on npm (architect at 0.16.0 ≥ 0.15.6; jtbd at 0.12.6). Fix commit `61974347` is an ancestor of HEAD (landed 2026-06-08).
+
+Shared `is_marker_only_diff` predicate at `lib/marker-only-diff.sh` is present, sourced, and invoked in both `architect-enforce-edit.sh` (lines 8/136/146) and `jtbd-enforce-edit.sh` (lines 12/164/181); oversight-marker-only ADR diffs short-circuit the enforce-edit gates to exit 0. Behavioural coverage green at release: 12/12 (marker-only-exempt bats) + 198/198 (full hook suite).
+
+Awaiting user verification — confirm by running a `/wr-architect:review-decisions` or `/wr-jtbd:confirm-jobs-and-personas` oversight drain and observing that marker-only frontmatter writes no longer trip the architect/JTBD edit-gate round-trips.
 
 ## Dependencies
 
