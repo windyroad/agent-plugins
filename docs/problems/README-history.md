@@ -1009,3 +1009,4 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-06-15
 
 > Last reviewed: 2026-06-11 **P365 captured** — external-comms risk-scorer gate must NOT fire on git-commit-message surface in private repos (lightweight aside via /wr-itil:capture-problem)
+> Last reviewed: 2026-06-15 **P080 verifying** — Phase 1 (/wr-itil:update-upstream sibling skill) de-facto released in @windyroad/itil@0.48.0 (present in published 0.49.5); K→V per ADR-022, Phase 2 catchup/e2e deferred (no fired conditional-deferral per P184); AFK work-problems iter 4

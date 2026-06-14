@@ -1,6 +1,6 @@
 # Problem 228: ADR-022 .known-error.md → .verifying.md transition not happening consistently at release time
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-05-15
 **Origin**: inbound-reported (#42)
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
