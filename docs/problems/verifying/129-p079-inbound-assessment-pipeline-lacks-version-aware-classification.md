@@ -1,6 +1,6 @@
 # Problem 129: P079 inbound assessment pipeline lacks version-aware classification — already-fixed-in-newer / recurred / still-active branches
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-04-26
 **Origin**: internal
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
@@ -133,6 +133,22 @@ When a recurrence is detected, the pipeline needs somewhere to record the recurr
 - [ ] End-to-end test: synthetic inbound report against synthetic adopter project; cover regression-of-recurrence (a recurred ticket later closed and recurred again).
 - [ ] Compose-with-but-don't-bundle: defer to architect on whether to extract a shared classifier component for `/wr-itil:report-upstream`'s outbound-side dedup (P070). Cross-skill sharing has surface but does NOT belong in P129's scope (architect verdict 2026-04-26 unchanged).
 - [ ] Update P079's pipeline documentation (P079 already closed; this becomes ADR-062 § Reassessment cross-reference if Phase 2 lands after ADR-062 ratifies).
+
+## Fix Strategy
+
+**Phase 1 — already-fixed-in-newer branch (SHIPPED).** Implemented as `/wr-itil:review-problems` Step 4.5e Step 1 version-aware classifier + new Step 4b upgrade-pushback sub-branch (commit `46e562fe`, 2026-06-09). Extends the ADR-062 step-1 inbound-discovery carve-out; consumes P128's `## Versions` schema (`- Local plugin: @windyroad/<pkg>@<version>`); rides the ADR-028 external-comms gates; preserves the ADR-044 category-4 mechanical-stage carve-out (classifier + verdict comment fire silently; user attention surfaces only at the external-comms gate). 9 behavioural bats + 1 promptfoo eval; architect + JTBD PASS 2026-06-09.
+
+**Phase 2 — recurrence-class lifecycle (DEFERRED — separate iter).** Recurrence detection (regression of a prior closed-ticket fix) + the Option B-2 `## Recurrences` appendage shape remains carved out as future work — see `### Investigation Tasks` Phase 2 above. This K→V transition covers **Phase 1 only**; Phase 2 is a future amendment, not in scope of this verification.
+
+**Release vehicle**: .changeset/p129-phase1-already-fixed-in-newer.md (Phase 1; shipped in `@windyroad/itil@0.49.0`).
+
+## Fix Released
+
+**Phase 1 — already-fixed-in-newer branch** shipped in **`@windyroad/itil@0.49.0`** (Minor Change; Phase 1 commit `46e562fe` 2026-06-09, version-packages commit `57d2b12d`; published on npm and present in current `@windyroad/itil@0.49.5`). The `/wr-itil:review-problems` Step 4.5e classifier now recognises a downstream report filed against a version older than the one that already fixed the bug and posts an upgrade-pushback comment (concrete `@windyroad/<pkg>@X.Y.Z` target + matched closed-ticket `P-id`) instead of opening a duplicate local ticket; it falls through to the standard pipeline when the reporter version or the matched fix-version cannot be parsed (no reports silently dropped).
+
+**Scope of this verification: Phase 1 ONLY.** Phase 2 — recurrence-class lifecycle (regression detection + the Option B-2 `## Recurrences` appendage) — remains **DEFERRED future work**. Do **NOT** close this ticket on Phase 1 verification alone: Phase 2 must either ship or be re-captured as standalone scope before closure (P184 lost-work guard). The `cache_audit_note: phase2-recurrence-deferred-bug-shape-match-against-P<NNN>` entries accumulating during Phase 1 are the Phase 2 backfill anchor.
+
+Awaiting user verification: on the next `/wr-itil:review-problems` pass over inbound reports, an already-fixed-in-newer report should produce an upgrade-pushback comment naming the concrete fix-version and matched closed-ticket P-id, and NO fresh local ticket.
 
 ## Dependencies
 
