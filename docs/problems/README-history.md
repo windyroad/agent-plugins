@@ -1005,3 +1005,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-06-14
 
 > Last reviewed: 2026-06-11 **P364 captured** — external-comms gate marker key mismatch on backtick-bearing gh bodies (PASS-reviewed draft never unlocks the escaped `--body` post; lightweight aside via /wr-itil:capture-problem, AFK iter 3 retro)
+
+## 2026-06-15
+
+> Last reviewed: 2026-06-11 **P365 captured** — external-comms risk-scorer gate must NOT fire on git-commit-message surface in private repos (lightweight aside via /wr-itil:capture-problem)

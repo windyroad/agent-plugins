@@ -1,6 +1,6 @@
 # Problem 080: No bidirectional update of upstream-reported problems — local lifecycle transitions never propagate back to the reporter
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-04-21
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: M (marginal) — new sibling skill `/wr-itil:update-upstream` (per user direction 2026-04-26) that fires from `manage-problem`/`transition-problem` Step 7 transitions, drafts the lifecycle-update comment, runs it through the P064 risk gate + P038 voice-tone gate, and auto-posts when both gates pass within appetite. Above-appetite triggers `AskUserQuestion` (interactive) or halt-with-report (AFK).
@@ -146,6 +146,22 @@ Architect call required at implementation time to:
 - [ ] Reuse P070's maintainer-annoyance risk evaluator — confirm composability; architect review decides whether extract-to-shared-lib or copy-adapt. **Phase 2 (out of scope this iter)** — the `wr-risk-scorer:external-comms` agent already shipped per the post-P270 amendment; the update-upstream SKILL uses the same evaluator surface. No extract-to-shared-lib needed at Phase 1.
 - [ ] Historical catch-up: one-shot migration pass OR runtime first-fire detection. **Phase 2 deferred** — per SKILL.md Scope's `--catchup` note; the Phase 1 contract is per-ticket invocation only. A future amendment may add `--catchup` mode.
 - [ ] End-to-end test: transition a test ticket with a synthetic `## Reported Upstream`; confirm the upstream issue receives a comment matching the transition template. **Phase 2 deferred** — Phase 1 verification rides on the paired promptfoo eval (Tier-A/B behavioural coverage); end-to-end against a live upstream is a verification-pending step after release.
+
+## Fix Strategy
+
+Phase 1 (Option B — new sibling skill `/wr-itil:update-upstream`) shipped 2026-06-09 per the Investigation Tasks above: SKILL.md + three transition templates + dual-gate (risk + voice-tone) composition + paired promptfoo eval (R009 discharge) + 23 bats + ADR-024 amendment + `transition-problem` Step 7b / `manage-problem` Step 7 advisory wire-in.
+
+**Release vehicle**: .changeset/wr-itil-p080-update-upstream-sibling-skill.md
+
+## Fix Released
+
+**Phase 1 released in `@windyroad/itil@0.48.0`** (version-packages commit `43e164fe`, PR #248, merge commit `2571d9da`, released 2026-06-09). Present in the current published `@windyroad/itil@0.49.5` tree (feat commit `5a4f8b1c` is an ancestor of the latest release bump `0449bc7f`). <!-- no-changeset-reference --> (release-vehicle helper resolved a full citation after the P330 seed above; the original ticket body carried no `.changeset/` reference.)
+
+Phase 1 shipped the new sibling skill `/wr-itil:update-upstream` (bidirectional lifecycle-update leg of the reporter loop): drafts a transition-specific comment (Open→KE / KE→Verifying / Verifying→Closed templates), composes it through the external-comms risk gate + voice-tone gate (AND composition — both must pass), auto-posts via `gh issue comment` within appetite, queues `outstanding_questions` above appetite (P352 queue-and-continue, never halts), and runs `gh issue close` on Verifying→Closed. Wired into `transition-problem` Step 7b + `manage-problem` Step 7 advisory (copy-not-move). ADR-024 amended (P080 entry). R009 prose-floor discharged via the paired promptfoo eval (Tier-A/B); 23 contract bats all green.
+
+**Awaiting user verification** — confirm the bidirectional update fires correctly on a real upstream-reported ticket transition (the deferred Phase 2 end-to-end test against a live upstream issue IS this verification step). On confirmation, close P080 Phase 1.
+
+**Phase 2 remains deferred (not blocking this transition per the P184 conditional-deferral check — no fired gating condition):** `--catchup` migration mode for retroactive coverage of existing `.verifying.md` / `.closed.md` tickets with `## Reported Upstream` sections is genuine future dev work ("a future amendment may add"). If pursued it should re-surface in the WSJF queue rather than be lost in this ticket's verifying state — see the loop-end outstanding question.
 
 ## Related
 
