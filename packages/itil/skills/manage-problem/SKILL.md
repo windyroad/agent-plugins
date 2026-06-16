@@ -853,9 +853,9 @@ After the rename + README refresh land but BEFORE the Step 11 commit, fire the b
 
 This subsection is the **copy-not-move sibling** of `transition-problem` SKILL.md Step 7b per [ADR-010](../../../docs/decisions/010-rename-wr-problem-to-wr-itil.proposed.md) amended "Split-skill execution ownership" rule (P093). The user-initiated transition path lives in `/wr-itil:transition-problem`; the in-skill callers (Step 9b auto-transition, Step 9d closure inside review, the Parked path) need the same lifecycle-update trigger and carry their own scoped copy. Drift between the two copies re-opens P080's bidirectional gap on the in-skill paths.
 
-The trigger is **unconditional** — fire on every transition regardless of whether the ticket carries `## Reported Upstream`. The sibling skill's no-op exit (Step 1 of `/wr-itil:update-upstream`) absorbs the misses cheaply; per-transition decision cost is bounded.
+The trigger fires **whenever the ticket carries a `## Reported Upstream` section** — gate the Skill-tool dispatch behind a one-line mechanical pre-check rather than dispatching on every transition. Dispatching unconditionally pays the full `/wr-itil:update-upstream` SKILL.md context load (~14 KB into the calling agent's context) just to hit the sibling skill's no-op exit; the common case is a ticket with no upstream section, so the load is wasted (P362). The grep IS the trigger: it preserves the fire-whenever-the-section-exists semantics — an upstream comment posts iff the section is present — while eliminating the context load for the common no-op case. Authority: [ADR-054](../../../docs/decisions/054-skill-md-runtime-budget-policy.proposed.md) (SKILL.md runtime-budget policy; [ADR-038](../../../docs/decisions/038-progressive-disclosure-for-governance-tooling-context.proposed.md) progressive-disclosure as the ancestor principle).
 
-Invoke via the Skill tool:
+**Pre-check first** (mechanical — no user decision): run `grep -q '^## Reported Upstream' <ticket-file>`. If it does NOT match, skip the Skill dispatch entirely, log one line (`no ## Reported Upstream section; skipping upstream lifecycle update`), and proceed to Step 11. Only when it matches, invoke the sibling skill via the Skill tool:
 
 ```
 /wr-itil:update-upstream <NNN>
@@ -863,7 +863,7 @@ Invoke via the Skill tool:
 
 Behaviour matrix:
 
-- **No `## Reported Upstream` section on the local ticket** → the sibling skill no-op-exits with a one-line `Nothing to update` message. Proceed to Step 11.
+- **No `## Reported Upstream` section on the local ticket** → the grep pre-check skips the Skill dispatch (no context load); log `no ## Reported Upstream section; skipping upstream lifecycle update` and proceed to Step 11. (The sibling skill retains its own Step 1 no-op exit as defence-in-depth for any path that reaches it directly.)
 - **`## Reported Upstream` present AND both gates within appetite** → the sibling skill posts via `gh issue comment` (and on Verifying → Closed, also `gh issue close`), back-writes to `## Upstream Lifecycle Updates`, and stages the back-write into the index. The Step 11 commit captures the back-write alongside the transition.
 - **`## Reported Upstream` present AND above-appetite (after silent risk-reduce + re-score)** → the sibling skill saves the drafted comment to `## Queued Upstream Update` and queues an `outstanding_questions` entry. The Step 11 commit captures the `## Queued Upstream Update` appendage alongside the transition. **The orchestrator continues per P352 queue-and-continue** — do NOT halt the transition on an above-appetite upstream update.
 

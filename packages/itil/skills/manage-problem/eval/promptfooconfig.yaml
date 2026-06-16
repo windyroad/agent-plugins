@@ -152,3 +152,66 @@ tests:
       # noticing the unticked Phase 2 tasks + lifted gating condition).
       - type: not-regex
         value: '(^|\n)\s*[Gg]it\s+[Mm]v\s+\S+[\s\S]{0,400}[Cc]onditional[- ]deferral'
+
+  # P362 paired behavioural assertion — grep pre-check gates the
+  # update-upstream dispatch.
+  #
+  # Driver: P362 (unconditional `/wr-itil:update-upstream` dispatch paid the
+  # full sibling SKILL.md context load (~14 KB) on every transition just to
+  # reach the no-op exit, when the common case is a ticket with no
+  # `## Reported Upstream` section). The Step 7 P080 bidirectional-upstream
+  # block now gates the Skill-tool dispatch behind a caller-side
+  # `grep -q '^## Reported Upstream'` pre-check: dispatch only when the
+  # section exists; skip-with-log otherwise. The grep IS the trigger,
+  # preserving the fire-whenever-the-section-exists semantics while
+  # eliminating the wasted context load. Discharges the R009 prose-surface
+  # floor for the P080 trigger paragraph (the pre-existing eval cases cover
+  # only the K→V Release-vehicle / conditional-deferral prose).
+  #
+  # Behavioural shape per ADR-052: prompts a realistic Step 7 transition for
+  # a ticket WITHOUT a `## Reported Upstream` section; asserts the agent
+  # describes the grep pre-check and the skip-the-dispatch outcome ahead of
+  # the `/wr-itil:update-upstream` invocation, rather than dispatching
+  # unconditionally.
+  #
+  # @problem P362 (closes the SKILL-prose gap)
+  # @adr ADR-024 (P362 mechanism-refinement amendment) + ADR-054 (runtime budget)
+  - description: Step 7 upstream lifecycle — grep pre-check gates update-upstream dispatch (P362)
+    vars:
+      prompt: |
+        I am executing /wr-itil:manage-problem Step 7's "Bidirectional
+        upstream lifecycle update (P080)" sub-block for a problem ticket at
+        docs/problems/known-error/211-foo.md that I am transitioning to
+        Verification Pending. The ticket has a `**Reported Upstream**` bullet
+        in its `## Related` section but NO `## Reported Upstream` section
+        header.
+
+        Before I reach the Step 11 commit, do I dispatch
+        /wr-itil:update-upstream, and if so what exactly runs first? Be
+        specific about any mechanical check that decides whether the Skill
+        tool is invoked at all.
+    assert:
+      # Tier A — must describe the grep pre-check on the section header.
+      - type: regex
+        value: 'grep[\s\S]{0,80}Reported\s+Upstream'
+      # Tier A — must reference the `## Reported Upstream` section anchor.
+      - type: contains
+        value: '## Reported Upstream'
+      # Tier A — must name the skill being gated.
+      - type: contains
+        value: 'update-upstream'
+      # Tier A — must surface the skip-the-dispatch outcome for the
+      # no-section case (the common no-op the pre-check short-circuits).
+      - type: regex
+        value: '[Ss]kip|do\s+not\s+(dispatch|invoke)|no[- ]op|don.t\s+(dispatch|invoke)'
+      # Tier A — ORDERING: the grep pre-check must appear BEFORE the
+      # /wr-itil:update-upstream dispatch. JS RegExp compat (char classes for
+      # case-insensitivity, `[\s\S]` for dotall).
+      - type: regex
+        value: 'grep[\s\S]{0,1200}update-upstream'
+      # Tier A — must NOT describe an unconditional dispatch as the first
+      # action (the P362-regressing shape — fire update-upstream on every
+      # transition, then rely on the sibling no-op exit). The pre-check must
+      # precede the invocation.
+      - type: not-regex
+        value: '(^|\n)\s*/wr-itil:update-upstream[\s\S]{0,400}grep[\s\S]{0,80}Reported\s+Upstream'

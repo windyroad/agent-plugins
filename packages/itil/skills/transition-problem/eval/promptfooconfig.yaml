@@ -1,0 +1,80 @@
+# SKILL eval — transition-problem Step 7b grep pre-check (P362).
+#
+# Tier A deterministic eval — asserts that when prompted to describe the
+# Step 7b "Bidirectional upstream lifecycle update (P080)" sub-step from
+# /wr-itil:transition-problem, the agent gates the `/wr-itil:update-upstream`
+# Skill-tool dispatch behind a caller-side `grep -q '^## Reported Upstream'`
+# pre-check — dispatching only when the section exists and skipping-with-log
+# otherwise — rather than dispatching unconditionally.
+#
+# Drivers:
+#   - ADR-075 (Amendment 2026-06-02 — SKILL-prose scope extension; harness
+#     provider: promptfoo exec wrapping `claude -p --append-system-prompt`
+#     — subscription auth, no API key).
+#   - ADR-052 (behavioural-default for skill testing).
+#   - ADR-024 (P362 mechanism-refinement amendment — caller-side grep gate
+#     replaces sibling-skill no-op absorption as the common-case short-circuit).
+#   - ADR-054 (SKILL.md runtime-budget policy — the ~14 KB context-load this
+#     pre-check elides on the common no-section case).
+#   - P362 (this slice's landing discharges its R009 prose-surface floor).
+#
+# This is the first eval slice for transition-problem; it covers the Step 7b
+# lockstep copy of the same P080 trigger paragraph evaluated for manage-problem
+# Step 7 (ADR-010 P093 copy-not-move pair).
+#
+# Run from repo root:
+#   npx promptfoo eval -c packages/itil/skills/transition-problem/eval/promptfooconfig.yaml
+#
+# @jtbd JTBD-001 (Enforce Governance Without Slowing Down)
+# @jtbd JTBD-006 (Progress the Backlog While I'm Away)
+# @problem P362
+# @adr ADR-024 (P362 amendment) + ADR-054 + ADR-075 (Amendment 2026-06-02)
+
+description: |
+  transition-problem SKILL eval — P362 grep pre-check gates update-upstream dispatch.
+
+providers:
+  # Path is relative to this config file's directory (promptfoo basePath).
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: Step 7b upstream lifecycle — grep pre-check gates update-upstream dispatch (P362)
+    vars:
+      prompt: |
+        I am executing /wr-itil:transition-problem Step 7b "Bidirectional
+        upstream lifecycle update (P080)" for a problem ticket at
+        docs/problems/known-error/211-foo.md that I am transitioning to
+        Verification Pending. The ticket has NO `## Reported Upstream` section
+        header.
+
+        Before I reach the Step 8 commit, do I dispatch
+        /wr-itil:update-upstream, and if so what exactly runs first? Be
+        specific about any mechanical check that decides whether the Skill
+        tool is invoked at all.
+    assert:
+      # Tier A — must describe the grep pre-check on the section header.
+      - type: regex
+        value: 'grep[\s\S]{0,80}Reported\s+Upstream'
+      # Tier A — must reference the `## Reported Upstream` section anchor.
+      - type: contains
+        value: '## Reported Upstream'
+      # Tier A — must name the skill being gated.
+      - type: contains
+        value: 'update-upstream'
+      # Tier A — must surface the skip-the-dispatch outcome for the
+      # no-section case (the common no-op the pre-check short-circuits).
+      - type: regex
+        value: '[Ss]kip|do\s+not\s+(dispatch|invoke)|no[- ]op|don.t\s+(dispatch|invoke)'
+      # Tier A — ORDERING: the grep pre-check must appear BEFORE the
+      # /wr-itil:update-upstream dispatch. JS RegExp compat (char classes for
+      # case-insensitivity, `[\s\S]` for dotall).
+      - type: regex
+        value: 'grep[\s\S]{0,1200}update-upstream'
+      # Tier A — must NOT describe an unconditional dispatch as the first
+      # action (the P362-regressing shape — fire update-upstream on every
+      # transition, then rely on the sibling no-op exit).
+      - type: not-regex
+        value: '(^|\n)\s*/wr-itil:update-upstream[\s\S]{0,400}grep[\s\S]{0,80}Reported\s+Upstream'
