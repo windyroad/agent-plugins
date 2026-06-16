@@ -1,6 +1,6 @@
 # Problem 179: Agent defers requested work into untracked phases — phases are fine, but unticketed phases never get implemented
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-05-10
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -63,12 +63,35 @@ A SKILL-side fix: introduce a **deferral discipline** — every "out of scope" /
 
 ## Root Cause Analysis
 
+### RCA reconciliation finding (2026-06-16, AFK work-problems iter 18)
+
+Root cause confirmed and the deferral class reconciled against shipped sibling fixes. **Open → Known Error**: the root cause is identified, a workaround is in active operational use, and the remaining permanent-fix work is blocked on a single unmade framework-position decision (queued below).
+
+**1. The deferral class is heavily worked; P179's adjacent surfaces are shipped or closed.**
+
+| Sibling | Surface | Status |
+|---|---|---|
+| **P175** | scope-pin-word semantics (`just`/`only`/`first` are scope filters, not count/loop constraints) | Verification Pending — shipped `@windyroad/itil@0.49.3` (changeset drained in `34d6a8f8`) |
+| **P184** | conditional-deferral → permanently-out-of-scope at K→V transition (Step 7 check) | shipped `@windyroad/itil@0.49.2` (commit `d2ec5b2`) |
+| **P189** | fictional "deferred" framing invented on already-tracked phases (authoring surface) | Closed 2026-06-09 (relevance-close, cited P184) |
+| **P234** | defers framework-required mechanical work to fictional "next retro/session" | Closed |
+| **P236** | iter queues proceed-vs-defer as direction when framework trigger already fired | Closed 2026-06-10 (relevance-close, cited P175/P132) |
+| **P296** | ADR-054 retroactive SKILL.md extraction wrongly deferred | Closed |
+
+**2. P179's principle is already operationally adopted as the framework's deferral-discipline authority.** A repo sweep finds **13 problem-ticket files + 2 ADRs (060, 062)** citing P179 as the "deferral-discipline / scheduled-future-surface / carve-out" authority — e.g. P247 and P249 both justify their Phase-2 deferrals with "remains deferred with this ticket as scheduled-future-surface per P179 carve-out", and P097 cites "P179 umbrella-per-cohort" for the P241/P242/P243 split. The cultural rule (*every deferral must cite a tracking ticket OR a scheduled future surface*) is the **de-facto active discipline** — the framework has effectively defaulted to **Option D (cultural rule)** without ever ratifying the choice.
+
+**3. The unenforced surface is real.** Investigation-Task survey grep (`grep -rlE 'Phase [0-9]+ \(deferred|Out of Scope|deferred to' docs/decisions/`) finds **26 ADR files** carrying `Phase N (deferred)` / `Out of Scope` / `deferred to` annotations. No SKILL, hook, or behavioural test currently requires those annotations to cite a tracking ticket or user-direction (`grep` for any deferral-citation invariant across `packages/*/skills/` and `docs/decisions/` returns nothing). So the de-facto Option-D discipline relies entirely on agent-prior + the cultural P179 citation habit — no enforcement backstop.
+
+**4. P189's relevance-close does NOT cover P179's residual surface.** P189 was closed citing P184's *transition-surface* fix (Step 7 conditional-deferral check). P179's residual surface is **authoring + authorization + tracking** (one step earlier in the chain) — distinct cure site. P179 is therefore NOT relevance-closeable on the P184 basis; its enforcement surface is genuinely open.
+
+**Residual permanent-fix work (the only remaining blocker): the framework-position decision below.** Per ADR-074 substance-confirm-before-build + this AFK loop's "queue + skip on born-proposed unconfirmed decisions" constraint, the Option A/B/C/D choice is genuinely user-judgment-bound (it is a MANDATORY-rule *enforcement-form* decision — hard test vs soft guidance vs process-gate vs cultural — squarely in ADR-044's direction-setting / taste taxonomy). **Not picked unilaterally; queued for user confirmation.** See the "Decide framework position on deferral discipline" Investigation Task (Options A–D) below. The de-facto state is Option D; the open question is whether to ratify D as-is or escalate to A (hard rule + behavioural test per ADR-051/ADR-052).
+
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Investigate root cause: is this a SKILL.md gap (no skill explicitly forbids unauthorised deferral or requires deferral citation), an ADR-template gap (ADR templates have an "Out of Scope" section that invites unauthorised scope-narrowing), an agent-prior gap (training-data conditioning to "phased implementation = safer"), or all three? Likely all three; fix at all three surfaces per ADR-051 load-bearing-from-the-start.
-- [ ] Survey existing ADRs for unauthorised "Phase N (deferred)" / "Out of Scope" entries that lack sibling-ticket citations. Suggested grep: `grep -lE 'Phase [0-9]+ \(deferred|Out of Scope|deferred to' docs/decisions/`. Cross-reference each "deferred" mention against `docs/problems/` for a tracking ticket. Expected high false-positive rate; manual triage.
-- [ ] Decide framework position on deferral discipline:
+- [x] Investigate root cause (2026-06-16 RCA): confirmed all-three-surface gap — SKILL.md (no deferral-citation invariant), ADR-template ("Out of Scope" section invites unauthorised scope-narrowing; 26 ADRs carry the pattern), agent-prior (phased-implementation conditioning). De-facto enforcement is Option D (cultural P179-citation habit) with no test backstop. See RCA reconciliation finding above.
+- [x] Survey existing ADRs for unauthorised "Phase N (deferred)" / "Out of Scope" entries (2026-06-16): `grep -lE 'Phase [0-9]+ \(deferred|Out of Scope|deferred to' docs/decisions/` → **26 ADR files**. None gated by any deferral-citation invariant. Confirms the unenforced surface is real.
+- [ ] **Decide framework position on deferral discipline** (QUEUED for user — born-proposed unmade decision; ADR-074 substance-confirm-before-build; not picked unilaterally under AFK):
   - **Option A** — Hard rule: every deferral MUST cite a tracking ticket (existing or newly-captured). Behavioural test enforces.
   - **Option B** — Soft rule: every deferral SHOULD cite a tracking ticket; SKILL.md authoring guidance + retro Step N audit catches gaps.
   - **Option C** — Process rule: every "out-of-scope" / "deferred" agent decision triggers AskUserQuestion mid-flow asking whether to ticket or proceed.
