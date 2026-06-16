@@ -1,6 +1,6 @@
 # Problem 367: `architect-compendium-update-entry` hook truncates `docs/decisions/README.md` tail when re-authoring an edited ADR's entry
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-06-16
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: internal
@@ -39,13 +39,26 @@ The `architect-compendium-update-entry.sh` PostToolUse hook (ADR-078 Option 9 / 
 
 ## Root Cause Analysis
 
+### Findings (2026-06-17, iter-38)
+
+**Root cause confirmed by empirical reproduction.** Investigation isolated the hook's two awk passes from the `claude -p` subprocess and exercised them directly against the live 79-ADR `docs/decisions/README.md`:
+
+1. **The awk cannot truncate well-formed input.** Pass 1 (block deletion) was brute-tested for *every* one of the 79 ADR ids — each deletes exactly one block, no anomaly. Pass 2 (insertion) routes every input line to `print` — it is **purely additive and structurally incapable of dropping a line**. So a clean single ADR body Edit → hook fire on a clean README **does not truncate** (refuting the deterministic-awk-bug hypothesis and confirming the ticket's stated uncertainty: the witnessed tail loss in iters 24/35/36 came from the confounding deprecated-generator regen + tree-reset sequence run in the same sessions, not a clean single hook fire).
+2. **But a malformed subprocess emit DOES corrupt the compendium.** Feeding the real hook a pathological `claude -p` result (an entry that also embeds an unrelated `### ADR-999` header and a spurious `## ` section) injected both into the compendium — additive pollution. A wrong-id emit (entry for ADR-049 while editing ADR-050) duplicates 049 and silently drops the edited id. These are the *real, reproducible* data-integrity hazards on the hook's write path.
+
+**The data-loss class is therefore: the hook stages whatever the awk produces with no post-condition check.** Whether the corruption originates from a truncating backstop interaction, a malformed/wrong-id LLM emit, or a future awk regression, the hook had no invariant guard before staging.
+
+### Fix (2026-06-17, iter-38) — committed, pending release verification
+
+Added a **fail-closed structural post-condition guard** to `architect-compendium-update-entry.sh` (investigation task #4, generalised from count-preservation to set+section preservation). Before Pass 1 the hook snapshots the ADR-id set, the `## ` section-header count, and a full backup of the README. After Pass 2, before `git add`, it asserts: the post-state ADR-id set equals the pre-state set (plus exactly the edited id when the ADR is new), the edited id appears exactly once, and the `## ` section count is unchanged. On *any* deviation it restores the original README from the backup, emits a degraded-mode stderr warning, and does **not** stage — the same contract as the existing subprocess-failure path (ADR-078 criterion l): exit 0, never block the body edit; Story B's pre-commit pairing check surfaces the stale README for manual recovery via `wr-architect-generate-decisions-compendium`. A legitimate cross-section status move (e.g. `proposed` → `superseded`) preserves both the id-set and the `## ` count, so it is not misread as corruption (confirmed by the migration bats + architect review).
+
 ### Investigation Tasks
 
-- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] **Reproduce** a clean single ADR body Edit → `architect-compendium-update-entry.sh` fire → inspect the staged `docs/decisions/README.md` for completeness (79 ADRs) vs truncation. Confirm or refute the hook-truncation hypothesis before asserting root cause.
-- [ ] If confirmed: investigate whether the `claude -p` re-author subprocess regenerates the whole file (and can truncate on long output / token limits) vs surgically patching the single entry. A surgical sed/awk patch of only the target entry would eliminate the whole-file-regeneration truncation risk.
-- [ ] Consider a hook-side post-condition guard: assert the re-authored README still contains the same ADR-entry count as before the edit (±1 for the edited entry); fail-closed (do not stage) if the count drops.
-- [ ] Create reproduction test.
+- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems (Impact likely **High** — silent governance-artifact data loss on the architect's primary read surface — but Likelihood low given clean-input awk is sound)
+- [x] **Reproduce** a clean single ADR body Edit → `architect-compendium-update-entry.sh` fire → inspect completeness — DONE: clean input is preserved (79→79); truncation not reproducible from clean state; malformed/wrong-id emit corruption IS reproducible.
+- [x] Investigate whole-file-regen vs surgical-patch — DONE: the hook already surgically patches the single entry (claude -p re-authors only one entry; awk patches in place). The whole-file-regeneration risk lives only in the deprecated `wr-architect-generate-decisions-compendium` backstop (P334), not this hook.
+- [x] Hook-side post-condition guard — DONE: implemented as a fail-closed set+section preservation guard (stronger than count-only); fail-closed restore-and-degrade, no staging on deviation.
+- [x] Create reproduction test — DONE: two behavioural bats added to `architect-compendium-update-entry.bats` (spurious-injection restore + wrong-id restore), RED before the guard, GREEN after; all 14 hook tests pass.
 
 ## Dependencies
 

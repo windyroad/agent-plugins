@@ -234,6 +234,64 @@ run_hook() {
   [ "$status" -eq 0 ]
 }
 
+@test "fail-closed guard: rejects a subprocess entry that injects spurious ADR ids/sections — restores README, degraded, unstaged (P367)" {
+  mk_readme
+  ( cd "$PROJ" && git add -A && git commit -q -m init )
+  before=$(cat "$PROJ/docs/decisions/README.md")
+  fp=$(mk_adr "049" "accepted" "FortyNine")
+  # Malformed shim: valid header for the edited id, but ALSO injects an
+  # unrelated ADR-999 header and a spurious '## ' section — the additive
+  # corruption shape empirically reproduced for P367.
+  BADDIR="$(mktemp -d)"
+  cat > "$BADDIR/claude" <<'SHIM'
+#!/usr/bin/env bash
+cat >/dev/null
+entry="### ADR-049 — Hijacked
+**Status:** accepted | **Oversight:** confirmed
+**Decides:** body.
+
+## Injected section
+
+### ADR-999 — Sneaky"
+jq -cn --arg r "$entry" '{result:$r}'
+SHIM
+  chmod +x "$BADDIR/claude"
+  export PATH="$BADDIR:$ORIG_PATH"
+  run run_hook "$fp"
+  [ "$status" -eq 0 ]                                          # never blocks the body edit
+  [ "$before" = "$(cat "$PROJ/docs/decisions/README.md")" ]    # restored unchanged
+  ! grep -q 'ADR-999' "$PROJ/docs/decisions/README.md"         # no injected id survives
+  [[ "$output" == *"guard"* ]]                                 # observable degraded signal
+  # README left in its committed state — no corrupted blob staged.
+  ( cd "$PROJ" && git diff --cached --quiet -- docs/decisions/README.md )
+  rm -rf "$BADDIR"
+}
+
+@test "fail-closed guard: rejects an emit for the wrong ADR id (edited id absent) — restores, degraded (P367)" {
+  mk_readme
+  before=$(cat "$PROJ/docs/decisions/README.md")
+  fp=$(mk_adr "050" "proposed" "Fifty")          # NEW adr — not yet in the compendium
+  # Shim emits an entry for the WRONG id (049, which already exists) instead of
+  # the edited 050: the edited id never lands and 049 is duplicated.
+  WRONGDIR="$(mktemp -d)"
+  cat > "$WRONGDIR/claude" <<'SHIM'
+#!/usr/bin/env bash
+cat >/dev/null
+entry="### ADR-049 — WrongId
+**Status:** proposed | **Oversight:** confirmed
+**Decides:** body."
+jq -cn --arg r "$entry" '{result:$r}'
+SHIM
+  chmod +x "$WRONGDIR/claude"
+  export PATH="$WRONGDIR:$ORIG_PATH"
+  run run_hook "$fp"
+  [ "$status" -eq 0 ]
+  [ "$before" = "$(cat "$PROJ/docs/decisions/README.md")" ]    # restored unchanged
+  ! grep -q '^### ADR-050' "$PROJ/docs/decisions/README.md"    # edited id never landed
+  [[ "$output" == *"guard"* ]]
+  rm -rf "$WRONGDIR"
+}
+
 @test "registered in hooks.json on PostToolUse Edit|Write (criterion 9)" {
   HOOKS_JSON="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)/hooks.json"
   run jq -e '.hooks.PostToolUse[] | select(.matcher | test("Edit")) | .hooks[] | select(.command | test("architect-compendium-update-entry"))' "$HOOKS_JSON"

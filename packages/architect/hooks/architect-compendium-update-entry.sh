@@ -169,10 +169,22 @@ if [ -z "$new_entry" ] || ! printf '%s' "$new_entry" | grep -qE '^### ADR-[0-9]+
     exit 0
 fi
 
+# --- Capture pre-modification invariants for the fail-closed guard (P367) ---
+# A single-entry re-author must change ONLY the edited ADR's entry. Snapshot the
+# set of all ADR ids and the count of `## ` section headers, plus a backup of
+# the whole file, so the post-condition guard below can detect (and reject) any
+# silent tail truncation or spurious-id/section injection from the subprocess.
+before_ids=$(grep -oE '^### ADR-[0-9]+' "$readme" | grep -oE '[0-9]+' | sed 's/^0*//' | sort -n -u)
+before_sections=$(grep -cE '^## ' "$readme")
+entry_existed=0
+[ -n "$current_entry" ] && entry_existed=1
+
 # --- Apply the entry: delete any existing block, then insert sorted ---------
 tmp_entry=$(mktemp -t architect-entry.XXXXXX)
 tmp_readme=$(mktemp -t architect-readme.XXXXXX)
-trap 'rm -f "$tmp_entry" "$tmp_readme"' EXIT
+backup_readme=$(mktemp -t architect-readme-orig.XXXXXX)
+trap 'rm -f "$tmp_entry" "$tmp_readme" "$backup_readme"' EXIT
+cp "$readme" "$backup_readme"
 printf '%s\n' "$new_entry" > "$tmp_entry"
 
 # Pass 1 — remove any existing block for this ADR-ID (and the single blank line
@@ -217,6 +229,26 @@ awk -v id="$adr_id" -v section="$target_section" -v entryfile="$tmp_entry" '
     }
     END { if (!done) { print ""; print entry } }
 ' "$tmp_readme" > "$readme"
+
+# --- Fail-closed post-condition guard (P367, ADR-078 criterion l) -----------
+# The rewrite must preserve every OTHER ADR's entry and the section structure;
+# only the edited ADR's entry may change (it may be newly added). If the result
+# dropped a pre-existing entry (silent tail truncation) or injected spurious ids
+# or sections (malformed subprocess emit), restore the original and degrade —
+# never stage a corrupted compendium. Same contract as the subprocess-failure
+# path: exit 0, do not block the body edit; Story B's pairing check surfaces it.
+after_ids=$(grep -oE '^### ADR-[0-9]+' "$readme" | grep -oE '[0-9]+' | sed 's/^0*//' | sort -n -u)
+after_sections=$(grep -cE '^## ' "$readme")
+expected_ids="$before_ids"
+if [ "$entry_existed" -eq 0 ]; then
+    expected_ids=$(printf '%s\n%s\n' "$before_ids" "$adr_id" | sed '/^$/d' | sort -n -u)
+fi
+edited_count=$(grep -oE '^### ADR-[0-9]+' "$readme" | grep -oE '[0-9]+' | sed 's/^0*//' | grep -cxF "$adr_id")
+if [ "$after_ids" != "$expected_ids" ] || [ "$after_sections" != "$before_sections" ] || [ "$edited_count" -ne 1 ]; then
+    cp "$backup_readme" "$readme"
+    echo "architect-compendium-update-entry: post-condition guard tripped for ADR-${adr_id} (compendium entry-set or section drift — possible truncation or spurious injection); restored README unchanged (degraded mode), not staged. Recover with wr-architect-generate-decisions-compendium && git add docs/decisions/README.md" >&2
+    exit 0
+fi
 
 # Stage the compendium so it lands in the same commit as the ADR body change.
 ( cd "$project_dir" && git add docs/decisions/README.md 2>/dev/null ) || \
