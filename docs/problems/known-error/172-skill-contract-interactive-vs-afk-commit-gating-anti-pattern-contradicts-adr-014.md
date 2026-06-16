@@ -1,6 +1,6 @@
 # Problem 172: Skill contract "interactive vs AFK" commit-gating anti-pattern contradicts ADR-014
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-05-05
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -45,7 +45,7 @@ Per-invocation: agent commits anyway when the user signals via correction. Not d
 - [x] Sweep all skills under `packages/*/skills/` for "interactive" / "AFK" / "auto-commit" carve-outs in commit-relevant steps — done 2026-06-09 Phase 1 iter
 - [x] For each carve-out: classify per ADR-044 authority taxonomy. If the commit decision is framework-mediated (governance commits per ADR-014, OR policy-within-appetite per RISK-POLICY.md), remove the carve-out. If genuinely user direction-setting, keep but document the ADR-044 category. — done 2026-06-09 (only one unconditional carve-out found: `reconcile-readme/SKILL.md` Step 6)
 - [x] Author behavioural test (per ADR-052) asserting interactive vs AFK commit behaviour is identical for governance skills — done 2026-06-09 (3 new tests in `packages/itil/skills/reconcile-readme/test/reconcile-readme-contract.bats`)
-- [ ] Cross-reference with P132 verification — same family, opposite direction
+- [x] Cross-reference with P132 verification — same family, opposite direction — done 2026-06-16: P132 reached **Closed** (`docs/problems/closed/132-…md`). The inverse-cousin family is fully resolved on both sides — P132 closed the agent-side over-asking; P172 closes the skill-contract-side over-carving-out.
 
 ## Phase 1 outcome — 2026-06-09
 
@@ -53,28 +53,40 @@ Removed the named anti-pattern instance in `packages/itil/skills/reconcile-readm
 
 Test surface: extended `reconcile-readme-contract.bats` with 3 P172-tagged assertions — Step 6 carries no mode-gated carve-out (negative); Step 6 cites ADR-014 as commit authority (positive, scoped to Step 6 region); SKILL.md states interactive and AFK behave identically (positive). All 21 contract tests green; 30 script-level bats green (no regression).
 
-## Phase 2 sweep targets — DEFERRED
+## Phase 2 sweep — COMPLETE 2026-06-16
 
 Phase 2 sweep — remove other instances of the **unconditional mode-gated commit-gating anti-pattern**. Excluded: **risk-gated** fail-safe phrasing (above-appetite + `AskUserQuestion` unavailable → skip commit) which is policy-correct per ADR-013 Rule 6 + ADR-014 § Non-Interactive Fail-Safe.
 
-Grep targets for Phase 2 (mode-gated only, exclude risk-gated):
+**Outcome: zero residual instances.** Two sweeps run across `packages/*/skills/`:
+
+1. **Narrow mode-only grep** (the five targets below) — only hits were in `reconcile-readme/test/reconcile-readme-contract.bats` (the Phase 1 *negative* assertions that prove the carve-out is absent). No production `SKILL.md` matched.
+2. **Broad co-occurrence sweep** — every `SKILL.md` mentioning both `interactive` and `commit`, filtered to lines gating commit/stage on interactive mode while excluding any `appetite` / `risk` / `Rule 6` / `AskUserQuestion unavailable` predicate. The single residual hit was a P132 cross-reference line in `manage-incident/SKILL.md` (prose, not a commit gate). No actionable carve-out found.
+
+Conclusion: Phase 1 removed the **only** unconditional mode-gated commit carve-out in the corpus (`reconcile-readme/SKILL.md` Step 6). The anti-pattern class is now eliminated; the sweep confirms no sibling instance was missed. No ADR-044 re-classification was needed because no surviving finding gates commit on mode grounds.
+
+Narrow grep targets used (mode-gated only, risk-gated excluded):
 - `interactively.*do NOT.*commit`
 - `When invoked interactively`
 - `interactive mode.*skip.*commit`
 - `let (the |them |user).{0,20}stage.*commit`
 - any "interactive: do NOT commit / AFK: commit" prose without an `above appetite` / `AskUserQuestion.*unavailable` predicate
 
-Risk-gated sibling sites (POLICY-CORRECT, do NOT touch):
-- `packages/itil/skills/transition-problem/SKILL.md` L282 — risk-above-appetite branch
-- `packages/itil/skills/transition-problems/SKILL.md` L215 — risk-above-appetite branch
-- `packages/itil/skills/report-upstream/SKILL.md` L504 — risk-above-appetite branch
-- `packages/itil/skills/update-upstream/SKILL.md` L296 — risk-above-appetite branch
-- `packages/itil/skills/check-upstream-responses/SKILL.md` L97 — risk-above-appetite branch
-- `packages/retrospective/skills/analyze-context/SKILL.md` L234 — risk-above-appetite branch
+Risk-gated sibling sites (POLICY-CORRECT — confirmed untouched, correctly excluded from the sweep):
+- `packages/itil/skills/transition-problem/SKILL.md` — risk-above-appetite branch
+- `packages/itil/skills/transition-problems/SKILL.md` — risk-above-appetite branch
+- `packages/itil/skills/report-upstream/SKILL.md` — risk-above-appetite branch
+- `packages/itil/skills/update-upstream/SKILL.md` — risk-above-appetite branch
+- `packages/itil/skills/check-upstream-responses/SKILL.md` — risk-above-appetite branch
+- `packages/retrospective/skills/analyze-context/SKILL.md` — risk-above-appetite branch
 
-Phase 2 candidates (need re-grep with mode-only filter): unknown until the grep runs in Phase 2. Phase 1 sweep found ONLY reconcile-readme as the unconditional mode-gated instance; Phase 2 should confirm via narrower grep + a per-finding ADR-044 classification.
+## Transition — Open → Known Error 2026-06-16
 
-Once Phase 2 runs, classify each finding per ADR-044 authority taxonomy and either remove (framework-mediated) or document (user direction-setting).
+Root cause confirmed, fix implemented + **released**, sweep clean:
+- **Root cause**: SKILL contracts codifying a user-decision commit surface where ADR-014 has already framework-resolved the call (governance skills commit their own work). Mode-gated (interactive vs AFK), not risk-gated.
+- **Fix**: Phase 1 removed the only instance (`reconcile-readme/SKILL.md` Step 6), commit `3eabb9ba` — **released** in `@windyroad/itil@0.49.1`+ (current `0.50.0`).
+- **Verification surface**: 3 P172-tagged contract tests green (Phase 1) + Phase 2 corpus sweep null (this iter) + P132 inverse-cousin Closed.
+
+Closure-ready: all Investigation Tasks resolved except the deferred WSJF re-rate (owned by `/wr-itil:review-problems`). Advance Known Error → Verification Pending → Closed at the next review pass once the released-fix verification window is acknowledged per ADR-022.
 
 ## Dependencies
 
