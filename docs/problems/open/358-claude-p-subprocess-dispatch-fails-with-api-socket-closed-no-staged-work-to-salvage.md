@@ -83,3 +83,9 @@ Related framework references in the description (not duplicate candidates — ci
 - **P288** — the iter 1 target that failed.
 - **/wr-itil:review-problems**, **/wr-itil:work-problems**, **/wr-retrospective:run-retro** — affected skill surfaces.
 - **JTBD-006** (Progress the Backlog While I'm Away) — anchor JTBD; subprocess instability degrades AFK throughput.
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-024 | proposed | work-problems pre-flight subprocess failure handling — non-blocking revert-and-proceed |
