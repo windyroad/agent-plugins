@@ -61,9 +61,23 @@ print(json.dumps({
 " "$file_path" "$content"
 }
 
+# Mock `gh repo view --json visibility` for the git-commit-message surface
+# repo-visibility precondition (P365). vis ∈ {PUBLIC,PRIVATE,INTERNAL}; pass the
+# literal "FAIL" to simulate gh absent / unauthenticated (non-zero exit).
+mock_gh_visibility() {
+  local vis="$1"
+  mkdir -p "$TEST_PROJECT_DIR/mockbin"
+  if [ "$vis" = "FAIL" ]; then
+    printf '#!/usr/bin/env bash\nexit 1\n' > "$TEST_PROJECT_DIR/mockbin/gh"
+  else
+    printf '#!/usr/bin/env bash\necho %s\n' "$vis" > "$TEST_PROJECT_DIR/mockbin/gh"
+  fi
+  chmod +x "$TEST_PROJECT_DIR/mockbin/gh"
+}
+
 run_hook() {
   local input="$1"
-  run bash -c "cd '$TEST_PROJECT_DIR' && printf '%s' \"\$1\" | '$HOOK'" _ "$input"
+  run bash -c "cd '$TEST_PROJECT_DIR' && export PATH='$TEST_PROJECT_DIR/mockbin':\$PATH && printf '%s' \"\$1\" | '$HOOK'" _ "$input"
 }
 
 # ---------- Tests ----------
@@ -242,6 +256,7 @@ run_hook() {
 # ---------------------------------------------------------------------------
 
 @test "P082: git commit -m with literal -m body denies and delegates to voice-tone evaluator" {
+  mock_gh_visibility PUBLIC
   INPUT=$(build_bash_input "git commit -m \"I've implemented the feature\"")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
@@ -251,6 +266,7 @@ run_hook() {
 }
 
 @test "P082: git commit --message with literal body denies and delegates" {
+  mock_gh_visibility PUBLIC
   INPUT=$(build_bash_input "git commit --message \"happy to help further with this fix\"")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
@@ -259,6 +275,7 @@ run_hook() {
 }
 
 @test "P082: git commit --amend -m is intercepted (P082 SC2)" {
+  mock_gh_visibility PUBLIC
   INPUT=$(build_bash_input "git commit --amend -m \"rewritten subject\"")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
@@ -270,6 +287,7 @@ run_hook() {
   # Build a HEREDOC-shaped command. The hook regex pulls the body BETWEEN
   # the <<'EOF' opener and the closing EOF marker — the extracted DRAFT is
   # the inner text, NOT the literal `$(cat <<'EOF' ... EOF)` wrapper.
+  mock_gh_visibility PUBLIC
   BODY=$'feat(foo): add bar\n\nWe observed a build failure on Node 20.'
   CMD=$'git commit -m "$(cat <<\'EOF\'\n'"$BODY"$'\nEOF\n)"'
   INPUT=$(build_bash_input "$CMD")
@@ -312,6 +330,7 @@ run_hook() {
 }
 
 @test "P082: per-evaluator marker keyed on (body, git-commit-message) permits the call" {
+  mock_gh_visibility PUBLIC
   BODY="docs(retro): close iter 3 ask-hygiene trail"
   SURFACE="git-commit-message"
   KEY=$(printf '%s\n%s' "$BODY" "$SURFACE" | shasum -a 256 | cut -d' ' -f1)
@@ -321,6 +340,59 @@ run_hook() {
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
   [ -z "$output" ]
+}
+
+# ---------------------------------------------------------------------------
+# P365 — repo-visibility precondition on the git-commit-message surface.
+# Shared canonical hook (ADR-017 sync), so the precondition applies to the
+# voice-tone evaluator too: a commit message is external-facing prose ONLY in
+# a PUBLIC repo. In private/internal repos — or any indeterminate gh result —
+# the marker-review deny is a pure false-positive (user direction 2026-06-11:
+# "this MUST NOT fire for private repos"). Scoped to the git-commit-message
+# surface only; the gh-issue/pr/npm/changeset surfaces are inherently external
+# and stay gated regardless of repo visibility.
+# ---------------------------------------------------------------------------
+
+@test "P365: git commit -m in a PRIVATE repo silent-passes (no external-comms deny)" {
+  mock_gh_visibility PRIVATE
+  INPUT=$(build_bash_input "git commit -m \"I've implemented the feature\"")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "P365: git commit -m in an INTERNAL repo silent-passes" {
+  mock_gh_visibility INTERNAL
+  INPUT=$(build_bash_input "git commit -m \"I've implemented the feature\"")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "P365: git commit -m when gh is unavailable/indeterminate silent-passes (fail-non-public)" {
+  mock_gh_visibility FAIL
+  INPUT=$(build_bash_input "git commit -m \"I've implemented the feature\"")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "P365: git commit -m in a PUBLIC repo still denies+delegates (gate intact, precondition surface-scoped)" {
+  mock_gh_visibility PUBLIC
+  INPUT=$(build_bash_input "git commit -m \"I've implemented the feature\"")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"deny"* ]]
+  [[ "$output" == *"git-commit-message"* ]]
+}
+
+@test "P365: PRIVATE visibility does NOT short-circuit the gh-issue surface (still denies+delegates)" {
+  mock_gh_visibility PRIVATE
+  INPUT=$(build_bash_input "gh issue create --title x --body 'a clean issue body'")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"deny"* ]]
+  [[ "$output" == *"gh-issue-create"* ]]
 }
 
 # ---------------------------------------------------------------------------

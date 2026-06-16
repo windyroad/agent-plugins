@@ -129,7 +129,9 @@ _70 ADRs. These are the current rules. The architect agent reads this section fi
 
 ### ADR-028 — External-comms gate — voice-tone + risk/leak evaluators on shared PreToolUse surface
 **Status:** proposed | **Oversight:** confirmed
-**Related:** ADR-002, ADR-017, ADR-008, ADR-009, ADR-013, ADR-015, ADR-020, ADR-024, ADR-025, ADR-026, ADR-027
+**Decides:** One PreToolUse gate guards every external-text surface (gh issue/PR comments, npm README, `.changeset/*.md`, commit messages) by firing two independent evaluators — voice-tone (AI-tell drift) and risk/leak (confidential-info per RISK-POLICY.md) — chosen over sibling ADRs because a single gate shape with per-evaluator plugs keeps the surface inventory in one place. Distributed via ADR-017 duplicate-script sync so each of voice-tone and risk-scorer ships a byte-identical copy running only its own evaluator; per-evaluator markers compose at the gate-firing level, so either package alone gives partial coverage and both give full coverage.
+**Confirmation:** Canonical `packages/shared/hooks/external-comms-gate.sh` + byte-identical synced copies pass `check:external-comms-gate`; deny-plus-marker (ADR-009) with per-evaluator key `sha256(normalize(draft, surface) + '\n' + surface)` derived hook-side via shared `compute_external_comms_key`; advisory-only when a policy doc is absent; bats suites green; behavioural replay covers AI-voice/leak/age denies, changeset frontmatter-strip equivalence, double-quote unescape symmetry, and non-public-repo silent-pass on the commit-message surface.
+**Related:** ADR-002, ADR-008, ADR-009, ADR-013, ADR-015, ADR-017, ADR-020, ADR-024, ADR-025, ADR-026, ADR-027, ADR-006, ADR-023, ADR-045, ADR-062
 
 ### ADR-029 — Diagnose before implement — structured hypothesis + evidence + RED-for-the-right-reason gate
 **Status:** proposed | **Oversight:** confirmed
@@ -306,7 +308,7 @@ _70 ADRs. These are the current rules. The architect agent reads this section fi
 
 ### ADR-073 — Fix-time gate auto-creates a missing RFC (everywhere)
 **Status:** proposed | **Oversight:** confirmed
-**Chosen:** Chosen option: **"Auto-create a problem-traced RFC if missing, everywhere the gate fires"** (user-ratified). When the propose-fix gate (ADR-072) fires on a Known Error with no RFC trace, the framework **auto-creates a problem-traced RFC** �...
+**Chosen:** Chosen option: **"Auto-create a problem-traced RFC if missing, everywhere the gate fires"** (user-ratified). When the propose-fix gate (ADR-072) fires on a Known Error with no RFC trace, the framework **auto-creates a problem-traced RFC** �...
 **Confirmation:** The propose-fix gate (interactive + AFK) auto-creates a problem-traced skeleton RFC when none exists; it never...; The auto-created RFC carries no "Considered Options" block (passes the ADR-052 lint) and traces the driving pr...; A behavioural test asserts auto-create fires at both the interactive and AFK surfaces.
 **Related:** ADR-071, ADR-072, ADR-070, ADR-044, ADR-060
 

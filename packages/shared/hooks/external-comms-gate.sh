@@ -318,6 +318,28 @@ if [ "$EXTERNAL_COMMS_LEAK_PREFILTER" = "yes" ]; then
     fi
 fi
 
+# ---------- Repo-visibility precondition: git-commit-message surface (P365) ----------
+# A commit message only becomes external-facing prose when it lands in a PUBLIC
+# GitHub repo (git log / PR commits tab / release-page auto-notes / CHANGELOG).
+# In private or internal repos the marker-review delegation deny below is a pure
+# false-positive (P365 — user direction 2026-06-11: "this MUST NOT fire for
+# private repos"). Confirm visibility authoritatively via gh and silent-pass the
+# marker gate on any non-PUBLIC result. Any INDETERMINATE result (gh absent,
+# unauthenticated, no remote, API error → empty $REPO_VISIBILITY) is treated as
+# non-public: a commit message is only demonstrably external when the repo is
+# confirmably PUBLIC, so the conservative direction for THIS surface is to not
+# fire. This is a fail-open on the voice/tone-and-prose review ONLY — the
+# leak-pattern pre-filter above (credentials / prod-URLs) has already run for
+# every surface in every repo, so the high-stakes secrecy net is unaffected.
+# Scoped to git-commit-message only; the gh-issue/pr/api, npm-publish, and
+# changeset-author surfaces are inherently external and stay gated regardless.
+if [ "$SURFACE" = "git-commit-message" ]; then
+    REPO_VISIBILITY=$(gh repo view --json visibility -q .visibility 2>/dev/null || echo "")
+    if [ "$REPO_VISIBILITY" != "PUBLIC" ]; then
+        exit 0
+    fi
+fi
+
 # ---------- Marker-based gate (per-evaluator marker per ADR-028 amended 2026-05-14) ----------
 SESSION_DIR="${TMPDIR:-/tmp}/claude-risk-${SESSION_ID}"
 mkdir -p "$SESSION_DIR"
