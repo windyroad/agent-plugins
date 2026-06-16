@@ -1,7 +1,8 @@
 # Problem 354: ADR titles state the question / options being decided, not the decision outcome — not skimmable
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-06-03 (user direction with screenshot evidence — ADR-006 created as `006-npm-release-auth-stored-token-vs-oidc.proposed.md`)
+**Released**: 2026-06-10 (`@windyroad/architect@0.16.0`, Phase 1 commit `b5e6ec1b`, changeset `4459d38`; published on npm — `npm view @windyroad/architect version` → 0.16.0; commit ancestor of HEAD; CHANGELOG 0.16.0 entry documents Step 2a convention + Step 5a retitle-after-decision + capture-adr Step 1 advisory). Phase 2 (structural lint + behavioural bats) deferred — future amendment, does not gate K→V per P184 conditional-deferral.
 **Priority**: 6 (Medium) — Impact: 3 (Moderate — every ADR reader scanning the compendium or `docs/decisions/` listing must open the file to learn what was actually decided; defeats the skimmability the title is supposed to provide; compounds with ADR-077 compendium token-cheap-load goal) × Likelihood: 3 (Possible — fires whenever an ADR is titled as a question/option-pair rather than an outcome; recurring authoring habit)
 **Origin**: internal
 **Persona**: developer
