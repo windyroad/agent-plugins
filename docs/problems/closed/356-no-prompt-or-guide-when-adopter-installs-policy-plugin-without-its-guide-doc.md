@@ -1,12 +1,34 @@
 # Problem 356: No prompt or guide when an adopter installs a policy-plugin without its guide doc (silent no-op instead of guided onboarding)
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-06-08
+**Closed**: 2026-06-16 (duplicate-of-P297 — folded into P297 Phase 2 as Option D + JTBD-302 lens)
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: internal
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 **JTBD**: JTBD-302
 **Persona**: plugin-user
+
+## Closed as no longer relevant — duplicate of P297 (same decision-space; investigation subsumed by P297 Phase 2)
+
+**Closure date**: 2026-06-16 (AFK work-problems iter-28, agent-consolidated backlog hygiene — the SUBSTANCE decision stays queued for the user in P297, only the ticket home is consolidated)
+
+**Closure reason**: duplicate-of-P297. P356 and P297 Phase 2 (both captured 2026-06-08) occupy the **same decision-space** — what onboarding surface, if any, should fire when an adopter has a policy-plugin installed but has not authored its guide doc, across the four policy-plugins (voice-tone / style-guide / jtbd / architect). P356's two Investigation Tasks — *audit the four sibling plugins for a missing-guide → update-guide surface* and *decide where the prompt/guide should fire* — were **already completed in P297 Phase 2** (investigated 2026-06-08). Maintaining two open tickets for one user decision is the inflow-discipline anti-pattern [[feedback_hang_off_existing_ticket_before_capturing_new]]; P356 is hung off P297 as the wider-framing input rather than persisting as a sibling.
+
+**Relevance evidence shape**: `duplicate-of` (P356's guided-onboarding decision IS P297 Phase 2's A/B/C decision — surfaced by reading P297's body, exactly the discipline the narrow title-only dup-check misses; cf. P347→P346 precedent). Nothing lost: P356's distinct contribution is **preserved in P297** as a new **Option D** (strengthen existing reactive surfaces into guided invocations) plus the **JTBD-302 framing lens** (README-describes-the-plugin trust outcome). The single Phase 2 user decision (Option A/B/C/D) now resolves both tickets.
+
+**Empirical correction to P356's premise (verified iter-28):** P356's "silent no-op" framing is accurate for only **one** of four plugins. Three of four actively BLOCK the edit and name the update-guide skill in the deny message:
+- voice-tone — `packages/voice-tone/hooks/voice-tone-enforce-edit.sh:71-72` (BLOCK + "Run /wr-voice-tone:update-guide"); voice-tone agent also emits P200 PASS-with-advisory naming the skill.
+- style-guide — `packages/style-guide/hooks/style-guide-enforce-edit.sh:69-70` (BLOCK + "Run /wr-style-guide:update-guide").
+- jtbd — `packages/jtbd/hooks/jtbd-enforce-edit.sh:197-199` (BLOCK + "Run /wr-jtbd:update-guide").
+- architect — `packages/architect/hooks/architect-enforce-edit.sh:48-49` fails **OPEN** (exit 0) when `docs/decisions/` is missing — the **one genuine silent gap** (= P297 Phase 2 Option C).
+
+So the gap P356 raises is narrower than its title suggests: not "silent no-op across four plugins" but "(a) architect alone is silently fail-open, and (b) the other three surface the skill in **prose** rather than as a **guided invocation**." Both are folded into P297's decision (Option C covers (a); Option D covers (b)).
+
+**Recovery**: `/wr-itil:transition-problem 356 open` if the consolidation is judged wrong; the operative decision lives in P297 Phase 2 either way.
+
+---
+
 
 ## Description
 
