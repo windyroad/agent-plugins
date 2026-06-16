@@ -33,14 +33,24 @@ There is no behavioural test harness for **agent-prose verdicts** — the LLM-ge
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems; re-rate P012's WSJF up given its recurring-blocker leverage.
-- [ ] **Evaluate the solution space** (record an ADR amending ADR-052):
-  - **(A) `@windyroad/skill-creator` eval/benchmark capability** — it already does LLM-in-the-loop skill evals (triggering accuracy, variance analysis). Determine whether its harness pattern extends from skill-triggering to agent-verdict-correctness (feed the agent a fixture change → assert the verdict). Closest existing in-repo tooling; investigate first.
-  - **(B) LLM-as-judge** — run the real agent against a fixture diff, have a second model grade verdict correctness against a rubric. Industry-standard (promptfoo, deepeval, OpenAI/Anthropic evals, Braintrust). Non-deterministic → needs pass-rate thresholds + variance bounds, not binary asserts.
-  - **(C) Golden-transcript / snapshot** — record canonical agent outputs on fixtures, assert structural invariants of the verdict (verdict line present, correct artifact named, marker file written). Cheaper, deterministic, but weaker than (B) on semantic correctness.
-  - **(D) Live-agent-in-CI** — invoke the agent in CI on fixtures. Most faithful, but network + cost + flake; needs a gating policy (sampled, not every PR).
-  - Likely shape: a thin first slice — (C)-style deterministic invariants for cheap CI coverage + a (B)-style sampled eval for semantic correctness — leveraging (A) if its harness fits.
-- [ ] Decide CI integration (which surfaces run live vs. recorded; cost/flake budget).
-- [ ] Once a behavioural alternative exists, unblock `P290` (remove the ADR-052 structural escape hatch) and back-fill behavioural tests for the architect (RFC-010) + jtbd (RFC-011) verdicts.
+- [x] **Evaluate the solution space** (record an ADR amending ADR-052) — **DONE: `ADR-075` (born-confirmed 2026-05-28; scope-extended + re-confirmed 2026-06-02; `human-oversight: confirmed`).** Full options A–E evaluation recorded there; the design choice below is **not an open question — it is a ratified decision.**
+  - **(A) `@windyroad/skill-creator` eval/benchmark capability** — it already does LLM-in-the-loop skill evals (triggering accuracy, variance analysis). Determine whether its harness pattern extends from skill-triggering to agent-verdict-correctness (feed the agent a fixture change → assert the verdict). Closest existing in-repo tooling; investigate first. → **Verdict (ADR-075): reuse the grader+variance *pattern*, reject as the *tool*** — its turnkey path scores only "did the skill trigger", and its output-quality path is an interactive human-in-the-loop loop, not a headless CI gate.
+  - **(B) LLM-as-judge** — run the real agent against a fixture diff, have a second model grade verdict correctness against a rubric. Industry-standard (promptfoo, deepeval, OpenAI/Anthropic evals, Braintrust). Non-deterministic → needs pass-rate thresholds + variance bounds, not binary asserts. → **CHOSEN (ADR-075): promptfoo**, exec provider wrapping `claude -p --system-prompt "$(cat agent.md)"` (subscription auth, no API key — verified in-session 2026-05-28). Becomes **Tier B** (`llm-rubric`, N-sample pass^k, release-gated).
+  - **(C) Golden-transcript / snapshot** — record canonical agent outputs on fixtures, assert structural invariants of the verdict (verdict line present, correct artifact named, marker file written). Cheaper, deterministic, but weaker than (B) on semantic correctness. → **Adopted as Tier A's spirit (ADR-075)**: deterministic `contains`/`regex`/`is-json` assertions, CI + pre-commit/pre-push gated.
+  - **(D) Live-agent-in-CI** — invoke the agent in CI on fixtures. Most faithful, but network + cost + flake; needs a gating policy (sampled, not every PR). → **Rejected as default cadence (ADR-075); kept as the conceptual driver behind Tier B (release-only, sampled).**
+  - Likely shape: a thin first slice — (C)-style deterministic invariants for cheap CI coverage + a (B)-style sampled eval for semantic correctness — leveraging (A) if its harness fits. → **Confirmed: two-tier (Tier A deterministic / Tier B llm-rubric), per-package `packages/<plugin>/agents/eval/`, tarball-excluded.**
+- [x] Decide CI integration (which surfaces run live vs. recorded; cost/flake budget) — **DONE (ADR-075 + `RFC-012`): Tier A blocks the CI pipeline + a pre-commit/pre-push hook (deterministic, secret-free); Tier B blocks the release pipeline (sampled pass^k, `CLAUDE_CODE_OAUTH_TOKEN` subscription OAuth, where the R009 adopter-facing risk materialises).**
+- [ ] Once a behavioural alternative exists, unblock `P290` (remove the ADR-052 structural escape hatch) and back-fill behavioural tests for the architect (RFC-010) + jtbd (RFC-011) verdicts. → **This is the BUILD, tracked as `RFC-012` S1–S5 (S6 SKILL-prose slice already landed, closing P012). Implementation work — queued, not done in this RCA pass.**
+
+### Investigation status (updated 2026-06-16, P324 iter-14 RCA pass)
+
+The solution-space investigation this ticket was opened to do is **complete and human-ratified** — there is **no outstanding design question**:
+
+- **Solution space evaluated** → `ADR-075` (promptfoo, two-tier, per-package configs; amends ADR-052 + ADR-005; `human-oversight: confirmed` 2026-06-02). The chosen option, provider mechanism, location, cadence, and auth posture are all user-confirmed via AskUserQuestion (2026-05-28) — re-surfacing them as an open choice would re-ask a decision already made.
+- **CI integration decided** → Tier A (CI + pre-commit/pre-push) / Tier B (release) — recorded in ADR-075 §Decision Outcome and `RFC-012` Tasks.
+- **Build vehicle** → `RFC-012` (single RFC for both agent-prose and SKILL-prose surfaces, per ADR-070/ADR-060 sprawl-avoidance). **S6** (SKILL-prose first slice, `packages/itil/skills/manage-problem/eval/`) **has landed** (commit `04e73336`, closes P012). **S1–S5** (agent-prose harness build → P290 unblock → RFC-010/RFC-011 graduation) **remain pending**.
+
+**Remaining P324 work is implementation, not investigation** — the RFC-012 S1–S5 build (L effort: root devDependency, per-package eval configs, Tier-A/Tier-B CI + release wiring, structural-bats retirement). Per the AFK no-implement scope (ADR-074 substance-confirm is already satisfied by ADR-075's confirmed oversight; the gate here is build-effort/release-class, not missing direction), this is **queued for a dedicated RFC-012 build session**, not progressed in an RCA iteration. P324 stays Open until the S1–S5 harness build retires the agent-prose escape hatch and graduates the agent-verdict release class within appetite.
 
 ## Dependencies
 
@@ -50,7 +60,8 @@ There is no behavioural test harness for **agent-prose verdicts** — the LLM-ge
 ## Related
 
 - captured via /wr-itil:capture-problem + P078 capture-on-correction (user: *"structural tests are not ok and circumvent the desired outcome"* + *"why aren't you implementing P176/P012"*), 2026-05-27.
-- **ADR-052** — behavioural-tests-default; its Surface-2 structural escape hatch (the selected line) is what this harness would let P290 remove.
+- **ADR-075** — the adoption decision this ticket's investigation produced (promptfoo, two-tier, per-package; amends ADR-052 + ADR-005; `human-oversight: confirmed` 2026-06-02). Built via RFC-012.
+- **ADR-052** — behavioural-tests-default; its Surface-2 structural escape hatch (the selected line) is what this harness would let P290 remove. **Narrowed by ADR-075** for agent-prose (and, per the 2026-06-02 amendment, SKILL-prose) verdicts.
 - **R009** (`docs/risks/`) — the 8/25 agent-prose residual class this harness reduces.
 - RFC-010 / RFC-011 — the two in-session instances that paid the escape-hatch + override tax.
 
