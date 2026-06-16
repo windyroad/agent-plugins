@@ -47,13 +47,28 @@ Currently manual: user reads cost summaries, mentally calibrates t-shirt estimat
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Investigate root cause — why was t-shirt sizing chosen originally? (Cross-reference P047 closed-ticket history for the prior accuracy attempt and what closed it.)
+- [x] Investigate root cause — why was t-shirt sizing chosen originally? (Cross-reference P047 closed-ticket history for the prior accuracy attempt and what closed it.) → finding captured below (2026-06-16).
 - [x] Design the schema change — how does Open vs Known Error effort split work? (per Description: Open = RCA effort estimate; Known Error = RFC implementation effort estimate; both in time AND tokens.) → captured in Phase 1 Design Outcome below.
 - [x] Design the tally accumulation mechanism — `.afk-run-state/iter*.json` per-iter data is the source; what aggregates per-ticket? (Likely a `## Effort Tally` section on the ticket body, appended per relevant iter; sums of time+tokens for RCA phase and separately for RFC implementation phase.) → captured in Phase 1 Design Outcome below.
 - [x] Design the retro-driven refinement — what does the retro do with the data? (Compare estimate vs actual per closed/transitioned ticket; compute RMS over recent N tickets; surface trend in retro summary; potentially auto-adjust default-effort heuristic per pattern type.) → captured in Phase 1 Design Outcome below.
 - [ ] (Phase 2) Create reproduction test — bats fixture: ticket created with estimated_time + estimated_tokens; iter logs actual; retro computes RMS over closed tickets.
 - [ ] (Phase 2) Schema migration plan — how do existing tickets (with t-shirt sizes) migrate? Both-axes coexistence vs hard cutover? (Phase 1 outstanding question Q3 below.)
 - [ ] (Phase 2) WSJF formula change — current `WSJF = Priority / Effort-divisor` (divisor 1/2/3/5 per S/M/L/XL); new formula needs to consume time-or-token-cost as the effort denominator. Both axes (time AND tokens) suggests EITHER use one as primary + report the other, OR compose them. (Phase 1 outstanding question Q1 below.)
+
+### Root Cause Finding — why t-shirt sizing, and what P047 left open (2026-06-16)
+
+T-shirt sizing (S/M/L/XL) was chosen for **low cardinality + human legibility at ranking time** — a WSJF denominator a human can set without instrumentation, readable directly from `docs/problems/README.md`. The cost is exactly what this ticket targets: it is a *subjective, set-once-ish scalar with no calibration loop*.
+
+**P047** (closed 2026-05-12, `docs/problems/closed/047-wsjf-effort-bucket-accuracy-gaps.md`) was the prior accuracy attempt. It did **not** abandon t-shirt sizing — it patched the two most acute symptoms while keeping the scheme:
+
+1. **Granularity** — added the **XL** bucket (divisor 8) because the open-ended L bucket conflated "one sitting" with "multi-week" work; re-rated 5 tickets L→XL.
+2. **Staleness** — added an explicit **effort re-rate pre-flight** to the Open→Known Error transition (Step 7) + reworded Step 9b to "Re-estimate Effort", so the estimate is no longer purely set-once.
+
+Crucially, P047 **explicitly deferred actuals-grounding** to its sibling **P022** (the "agents must not fabricate time estimates" rule): *"P047 ships static-bucket granularity + re-rating; P022 will later add actuals-grounded bucket selection on top."* Neither P047 nor P022 closed the remaining gap — replacing the *subjective* scalar with a *measured* one and adding a feedback loop.
+
+**Therefore P248 is the actuals-grounded successor that closes what P047/P022 punted.** It does not supersede P047 — it builds on P047's two surviving hooks: the lifecycle-transition re-rate point (where the RFC estimate is set) and P022's grounding principle (estimates must be backed by data). The novel mechanism P248 adds is the **per-ticket actuals tally** (already-captured `.afk-run-state/iter*.json` data attributed back to source tickets) feeding a **retro RMS-of-estimation-error calibration loop** — the calibration loop is precisely the thing P047 lacked when it observed "estimates were mostly right per-ticket but the bucket scheme is the aggregate limiting factor."
+
+This confirms the design direction is sound; it does **not** resolve the Q1–Q5 parameter choices below, which remain genuine user-direction-setting decisions (substance-confirm-before-build per ADR-074). RCA is complete; the fix path is documented but parameter-blocked, so the ticket stays **Open** (no Known Error transition this iter — transitioning would imply a locked fix path the Q1–Q5 gate contradicts).
 
 ## Phase 1 Design Outcome (2026-06-08)
 
@@ -232,7 +247,7 @@ Once Q1–Q5 are answered:
 
 (captured via /wr-itil:capture-problem; expand at next investigation)
 
-- **P047** (closed, `docs/problems/closed/047-wsjf-effort-bucket-accuracy-gaps.md`) — prior ticket about t-shirt effort bucket accuracy. Cross-reference its closure rationale; this ticket may be the sibling-or-supersede of P047's resolution.
+- **P047** (closed, `docs/problems/closed/047-wsjf-effort-bucket-accuracy-gaps.md`) — prior ticket about t-shirt effort bucket accuracy. **Cross-ref resolved 2026-06-16** (see Root Cause Finding above): P047 patched granularity (XL bucket) + staleness (re-rate pre-flight) but kept t-shirt sizing and explicitly deferred actuals-grounding to P022. P248 is the **actuals-grounded successor** that closes what P047/P022 punted — it builds on, not supersedes, P047's re-rate hook + P022's grounding principle.
 - **P076** (verifying) — WSJF does not model transitive dependencies; different dimension but same WSJF-refinement axis.
 - **P138** (verifying) — README WSJF row order; tangential.
 - **P162** — codify dogfood-graduation criteria (sibling: effort estimation is one input to the symmetric balance principle).
