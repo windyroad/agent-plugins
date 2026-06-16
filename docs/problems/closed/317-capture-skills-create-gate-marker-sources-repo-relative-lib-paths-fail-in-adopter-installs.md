@@ -1,7 +1,8 @@
 # Problem 317: capture-problem / capture-rfc / manage-problem Step 2 create-gate marker step sources repo-relative `packages/itil/hooks/lib/*.sh` — fails in adopter installs (recurring published-path class: P151/P153/P219)
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-05-27
+**Closed**: 2026-06-16 (AFK work-problems iter 27 — fix released + verified in-session)
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 
@@ -61,6 +62,20 @@ These `packages/itil/hooks/lib/...` paths exist **only in this plugin-source mon
 ## Resolution (2026-05-27 — RFC-009)
 
 Fix-complete. 24 broken refs eliminated; the screenshotted create-gate marker bug (capture-problem/capture-rfc/manage-problem) is fixed; structural-prevention lint is live (15 bats GREEN). Design dogfooded ADR-074 (architect Needs-Direction → user confirmed Option C). 105 affected bats GREEN. **Close to Verifying when RFC-009 releases** (this session's changeset). The P151/P153/P219 merge-vs-distinct decision is deferred to /wr-itil:review-problems (the lint now structurally covers all of them).
+
+## Closure (2026-06-16 — AFK work-problems iter 27)
+
+Open → Closed direct (Known Error + Verifying both satisfied and documented inline; fix released 20 days before this close, then verified in-session). All verification from own observation (memory `feedback_verify_from_own_observation`); user transient (AFK):
+
+1. **Fix released.** `fix(itil): adopter-safe path resolution in shipped SKILLs (RFC-009, P317)` (commit `77605999`, 2026-05-27) is an ancestor of `main` and shipped in `@windyroad/itil@0.50.1` (npm current = 0.50.1; CHANGELOG line 927 cites `7760599`). No pending changesets — fully released, not awaiting a release window.
+2. **Failure mode eliminated in source.** Zero executable repo-relative refs remain in shipped SKILLs — `grep "source packages/"` and `grep "|| echo packages/"` over `packages/*/skills/` return only prose-documentation hits ("NEVER `source packages/...`"). The four shim commands exist + are executable (`wr-itil-mark-create-gate`, `wr-itil-mark-rfc-capture-gate`, `wr-itil-migrate-problems-layout`, `wr-itil-check-upstream-cache-staleness`).
+3. **Structural-prevention lint live + GREEN.** `packages/shared/test/no-repo-relative-script-paths-in-skills.bats` 15/15 pass, including test 4 (no SKILL sources a repo-relative library at runtime — P317) and test 5 (no `|| echo packages/...` fallback — P317). Any future regression of this class fails CI ("never happens again" requirement met).
+4. **Adopter-tree behaviour confirmed by simulation.** Ran the actual fixed code path — `wr-itil-mark-create-gate` — from `/tmp` (a cwd with no `packages/itil/`, replicating an adopter install). The original screenshot failure (`source: no such file or directory: packages/itil/hooks/lib/session-id.sh` / `create-gate.sh`) did **not** reproduce; the shim resolves its `hooks/lib` siblings relative to the script (now via the ADR-080 highest-version-wins wrapper, layered over the RFC-009 fix). This is direct observation of the fixed behaviour, not a proxy.
+5. **ADR-074 clear.** The one genuine design decision (directory-resolver shim vs PATH-invoked standalone — see Scope finding below) was user-confirmed during the original session (architect Needs-Direction → user confirmed Option C, per Resolution). No born-proposed unconfirmed decision to queue.
+
+The P151/P153/P219 merge-vs-keep-distinct decision and the deferred Priority/Effort re-rate remain owned by `/wr-itil:review-problems` (the lint now structurally covers all siblings of this class).
+
+Recovery: `/wr-itil:transition-problem 317 open`.
 
 ## Scope finding (2026-05-27 investigation)
 
