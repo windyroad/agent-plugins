@@ -247,60 +247,75 @@ run_hook() {
 }
 
 # ---------------------------------------------------------------------------
-# P082 Phase 1 — git commit message surface (voice-tone evaluator).
-# Commit messages reach git log / PR commits tab / release notes / CHANGELOG;
-# voice-tone evaluator gates the message body for AI-tells, hedging,
-# em-dashes, banned-phrase drift before the commit lands. Editor flow
-# (bare `git commit`) is out of scope per P082 SC1 — the message is
-# written to .git/COMMIT_EDITMSG AFTER PreToolUse fires.
+# P360 — voice-tone evaluator disclaims the git-commit-message surface.
+# docs/VOICE-AND-TONE.md § Scope explicitly excludes commit messages ("It does
+# NOT apply to: ... Commit messages (covered by ADR-014 + ADR-018)"), so a
+# voice-tone review of a commit-message body is a guaranteed-PASS no-op
+# (~19K tokens per round-trip). external-comms-evaluator.conf sets
+# EXTERNAL_COMMS_SKIP_SURFACES=git-commit-message, so the gate silent-passes the
+# prose-review delegation on this surface in EVERY repo — visibility-independent
+# (the P360 skip is placed ahead of the P365 visibility precondition). The
+# risk-scorer evaluator, whose .conf leaves the skip list empty, still gates
+# this surface (its leak check is meaningful) — covered by
+# packages/risk-scorer/hooks/test/external-comms-gate.bats.
+#
+# Supersedes the original P082 Phase 1 voice-tone commit-message tests, which
+# asserted DENY on PUBLIC — that gate fire was the no-op P360 removes.
 # ---------------------------------------------------------------------------
 
-@test "P082: git commit -m with literal -m body denies and delegates to voice-tone evaluator" {
+@test "P360: git commit -m silent-passes (voice-tone disclaims commit messages)" {
   mock_gh_visibility PUBLIC
   INPUT=$(build_bash_input "git commit -m \"I've implemented the feature\"")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
-  [[ "$output" == *"git-commit-message"* ]]
-  [[ "$output" == *"wr-voice-tone:external-comms"* ]]
+  [ -z "$output" ]
 }
 
-@test "P082: git commit --message with literal body denies and delegates" {
+@test "P360: git commit --message silent-passes with no marker round-trip" {
   mock_gh_visibility PUBLIC
   INPUT=$(build_bash_input "git commit --message \"happy to help further with this fix\"")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
-  [[ "$output" == *"git-commit-message"* ]]
+  [ -z "$output" ]
 }
 
-@test "P082: git commit --amend -m is intercepted (P082 SC2)" {
+@test "P360: git commit --amend -m silent-passes" {
   mock_gh_visibility PUBLIC
   INPUT=$(build_bash_input "git commit --amend -m \"rewritten subject\"")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
-  [[ "$output" == *"git-commit-message"* ]]
+  [ -z "$output" ]
 }
 
-@test "P082: git commit HEREDOC body is intercepted and the body becomes the marker key" {
-  # Build a HEREDOC-shaped command. The hook regex pulls the body BETWEEN
-  # the <<'EOF' opener and the closing EOF marker — the extracted DRAFT is
-  # the inner text, NOT the literal `$(cat <<'EOF' ... EOF)` wrapper.
+@test "P360: git commit HEREDOC body silent-passes without a marker" {
   mock_gh_visibility PUBLIC
   BODY=$'feat(foo): add bar\n\nWe observed a build failure on Node 20.'
   CMD=$'git commit -m "$(cat <<\'EOF\'\n'"$BODY"$'\nEOF\n)"'
   INPUT=$(build_bash_input "$CMD")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
-  [[ "$output" == *"git-commit-message"* ]]
+  [ -z "$output" ]
+}
 
-  # Pre-place the per-evaluator marker keyed on the extracted HEREDOC body
-  # + the git-commit-message surface; the second run must permit silently.
-  SURFACE="git-commit-message"
-  KEY=$(printf '%s\n%s' "$BODY" "$SURFACE" | shasum -a 256 | cut -d' ' -f1)
-  touch "${RDIR}/external-comms-voice-tone-reviewed-${KEY}"
+@test "P360: commit-message skip is visibility-independent (PRIVATE silent-passes)" {
+  mock_gh_visibility PRIVATE
+  INPUT=$(build_bash_input "git commit -m \"I've implemented the feature\"")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "P360: commit-message skip is visibility-independent (INTERNAL silent-passes)" {
+  mock_gh_visibility INTERNAL
+  INPUT=$(build_bash_input "git commit -m \"I've implemented the feature\"")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "P360: commit-message skip is visibility-independent (indeterminate gh silent-passes)" {
+  mock_gh_visibility FAIL
+  INPUT=$(build_bash_input "git commit -m \"I've implemented the feature\"")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
   [ -z "$output" ]
@@ -329,61 +344,16 @@ run_hook() {
   [ -z "$output" ]
 }
 
-@test "P082: per-evaluator marker keyed on (body, git-commit-message) permits the call" {
+@test "P360: the skip is surface-scoped — gh-issue is NOT skipped (still denies+delegates)" {
+  # EXTERNAL_COMMS_SKIP_SURFACES lists only git-commit-message; the inherently
+  # external gh-issue surface stays gated. Guards against the skip list over-
+  # matching (e.g. a substring or blanket-skip regression).
   mock_gh_visibility PUBLIC
-  BODY="docs(retro): close iter 3 ask-hygiene trail"
-  SURFACE="git-commit-message"
-  KEY=$(printf '%s\n%s' "$BODY" "$SURFACE" | shasum -a 256 | cut -d' ' -f1)
-  touch "${RDIR}/external-comms-voice-tone-reviewed-${KEY}"
-
-  INPUT=$(build_bash_input "git commit -m \"$BODY\"")
-  run_hook "$INPUT"
-  [ "$status" -eq 0 ]
-  [ -z "$output" ]
-}
-
-# ---------------------------------------------------------------------------
-# P365 — repo-visibility precondition on the git-commit-message surface.
-# Shared canonical hook (ADR-017 sync), so the precondition applies to the
-# voice-tone evaluator too: a commit message is external-facing prose ONLY in
-# a PUBLIC repo. In private/internal repos — or any indeterminate gh result —
-# the marker-review deny is a pure false-positive (user direction 2026-06-11:
-# "this MUST NOT fire for private repos"). Scoped to the git-commit-message
-# surface only; the gh-issue/pr/npm/changeset surfaces are inherently external
-# and stay gated regardless of repo visibility.
-# ---------------------------------------------------------------------------
-
-@test "P365: git commit -m in a PRIVATE repo silent-passes (no external-comms deny)" {
-  mock_gh_visibility PRIVATE
-  INPUT=$(build_bash_input "git commit -m \"I've implemented the feature\"")
-  run_hook "$INPUT"
-  [ "$status" -eq 0 ]
-  [ -z "$output" ]
-}
-
-@test "P365: git commit -m in an INTERNAL repo silent-passes" {
-  mock_gh_visibility INTERNAL
-  INPUT=$(build_bash_input "git commit -m \"I've implemented the feature\"")
-  run_hook "$INPUT"
-  [ "$status" -eq 0 ]
-  [ -z "$output" ]
-}
-
-@test "P365: git commit -m when gh is unavailable/indeterminate silent-passes (fail-non-public)" {
-  mock_gh_visibility FAIL
-  INPUT=$(build_bash_input "git commit -m \"I've implemented the feature\"")
-  run_hook "$INPUT"
-  [ "$status" -eq 0 ]
-  [ -z "$output" ]
-}
-
-@test "P365: git commit -m in a PUBLIC repo still denies+delegates (gate intact, precondition surface-scoped)" {
-  mock_gh_visibility PUBLIC
-  INPUT=$(build_bash_input "git commit -m \"I've implemented the feature\"")
+  INPUT=$(build_bash_input "gh issue create --title x --body 'a clean issue body'")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
   [[ "$output" == *"deny"* ]]
-  [[ "$output" == *"git-commit-message"* ]]
+  [[ "$output" == *"wr-voice-tone:external-comms"* ]]
 }
 
 @test "P365: PRIVATE visibility does NOT short-circuit the gh-issue surface (still denies+delegates)" {

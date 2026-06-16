@@ -385,6 +385,21 @@ run_hook() {
   [[ "$output" == *"git-commit-message"* ]]
 }
 
+@test "P360: empty EXTERNAL_COMMS_SKIP_SURFACES leaves the risk evaluator gating commit messages (divergence guard)" {
+  # The voice-tone evaluator skips git-commit-message (its policy disclaims it);
+  # the risk evaluator's .conf leaves EXTERNAL_COMMS_SKIP_SURFACES empty, so its
+  # leak check on commit bodies stays meaningful. Guards against a regression
+  # that accidentally skips this surface for risk-scorer (e.g. defaulting the
+  # knob non-empty, or syncing voice-tone's value into the shared gate body).
+  grep -qE '^EXTERNAL_COMMS_SKIP_SURFACES=$' "$HOOKS_DIR/external-comms-evaluator.conf"
+  mock_gh_visibility PUBLIC
+  INPUT=$(build_bash_input "git commit -m \"fix(foo): handle null input\"")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"deny"* ]]
+  [[ "$output" == *"git-commit-message"* ]]
+}
+
 @test "P365: leak-shaped credential in a PRIVATE-repo commit body still hard-fails (security net survives)" {
   mock_gh_visibility PRIVATE
   INPUT=$(build_bash_input "git commit -m \"docs: token=${GH_TOKEN_LIKE}\"")

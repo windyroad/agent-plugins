@@ -78,6 +78,10 @@ source "$SCRIPT_DIR/lib/external-comms-key.sh"
 #   EXTERNAL_COMMS_ASSESS_SKILL    — on-demand skill path for manual delegation
 #   EXTERNAL_COMMS_POLICY_FILE     — policy doc whose absence triggers advisory-only
 #   EXTERNAL_COMMS_LEAK_PREFILTER  — yes|no — whether to run leak-detect pre-filter
+#   EXTERNAL_COMMS_SKIP_SURFACES   — space-separated surface list this evaluator's
+#                                    policy disclaims; the marker-review delegation
+#                                    silent-passes on those surfaces (P360). Default
+#                                    empty (gate every detected surface).
 # Fail-closed if absent: this hook cannot operate without a configured evaluator.
 CONF_FILE="$SCRIPT_DIR/external-comms-evaluator.conf"
 if [ ! -f "$CONF_FILE" ]; then
@@ -91,6 +95,7 @@ source "$CONF_FILE"
 : "${EXTERNAL_COMMS_ASSESS_SKILL:?assess-skill missing from $CONF_FILE}"
 EXTERNAL_COMMS_POLICY_FILE="${EXTERNAL_COMMS_POLICY_FILE:-RISK-POLICY.md}"
 EXTERNAL_COMMS_LEAK_PREFILTER="${EXTERNAL_COMMS_LEAK_PREFILTER:-yes}"
+EXTERNAL_COMMS_SKIP_SURFACES="${EXTERNAL_COMMS_SKIP_SURFACES:-}"
 
 # ---------- Bypass ----------
 if [ "${BYPASS_RISK_GATE:-0}" = "1" ]; then
@@ -316,6 +321,26 @@ if [ "$EXTERNAL_COMMS_LEAK_PREFILTER" = "yes" ]; then
         deny_with_reason "$REASON"
         exit 0
     fi
+fi
+
+# ---------- Per-evaluator surface skip (P360) ----------
+# Some surfaces are explicitly disclaimed by THIS evaluator's policy doc, so the
+# marker-review delegation below would be a guaranteed-PASS no-op (the subagent
+# reads the policy, declares the surface out of scope, emits PASS — ~19K tokens
+# per round-trip). EXTERNAL_COMMS_SKIP_SURFACES (per-package .conf) lists those
+# surfaces; the gate silent-passes the prose-review delegation when the detected
+# surface is on the list. Voice-tone sets this to `git-commit-message` because
+# docs/VOICE-AND-TONE.md § Scope excludes commit messages ("covered by ADR-014 +
+# ADR-018"); risk-scorer leaves it empty (its leak check on commit messages is
+# meaningful). Placed AFTER the leak pre-filter so a skipped surface still gets
+# credential/prod-URL scanning — this silences ONLY the prose-review deny, the
+# same conservative shape as the P365 repo-visibility precondition below.
+if [ -n "$EXTERNAL_COMMS_SKIP_SURFACES" ]; then
+    case " $EXTERNAL_COMMS_SKIP_SURFACES " in
+        *" $SURFACE "*)
+            exit 0
+            ;;
+    esac
 fi
 
 # ---------- Repo-visibility precondition: git-commit-message surface (P365) ----------
