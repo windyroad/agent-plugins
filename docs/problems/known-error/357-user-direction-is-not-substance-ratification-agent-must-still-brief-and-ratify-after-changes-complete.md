@@ -1,6 +1,6 @@
 # Problem 357: User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path)
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-06-10
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems; HIGH in practice — same downstream blast radius as P340: ratification claims may stamp ADRs whose substance was never user-authorised because the LLM may have misimplemented the direction)
 **Origin**: internal
@@ -40,14 +40,30 @@ User must manually inspect every ADR amendment AFTER the agent applies it AND BE
 
 The `/wr-architect:create-adr` Step 5 substance-confirm AskUserQuestion gate (added by the P340 fix shipped via @windyroad/architect@0.13.0 commit 4a36ae1) only fires when the agent is walking the create-adr flow itself. When the user gives prose direction outside that flow — e.g. *"amend ADR-060 Phase 4 to remove the type-axis machinery"* — the agent applies the Edit and writes the marker without going through the substance-confirm gate. The gate is path-specific; the new gap is path-bypass.
 
+### Marker-write-site audit (iter-31, 2026-06-16)
+
+Swept every `human-oversight: confirmed` / `wr-*-mark-oversight-confirmed` write surface across `packages/architect` + `packages/jtbd`:
+
+| Surface | Gate present? | Notes |
+|---|---|---|
+| `/wr-architect:create-adr` Step 5 § 5a | **Yes** (P340) | Briefing-in-prose + option-shaped `AskUserQuestion` BEFORE marker write; born-confirmed only on substantive-option match. |
+| `/wr-architect:review-decisions` Step 3/4 | **Yes** (drain) | `AskUserQuestion` Confirm/Amend/Reject + brief-before-ID (P350/P302). **Latent P357-class sub-gap**: the **Amend** sub-path "applies the directed change first" then writes the marker with NO post-amend re-confirm — the LLM could misimplement the directed amend and the marker still lands. Lower-risk (user present, same turn) but same class. |
+| `/wr-jtbd:confirm-jobs-and-personas` Step 3/4 | **Yes** (drain) | Same shape as review-decisions; same latent Amend sub-gap. |
+| **Freeform "amend ADR-X / JTBD-X" user-direction path** | **NO** | Ungoverned by any SKILL. Agent applies Edit + calls `wr-architect-mark-oversight-confirmed` directly, rationalising "user direction = ratification." **This is the P357 gap** — and it is a *subclass of the P348 hollow-marker bug* (the shim's own doc comment: "every legitimate marker write traces back to an `AskUserQuestion` answer in the same turn"). |
+
+**"P340/P350 may have already addressed this" hypothesis → FALSE (confirmed by audit).** P340 closed the create-adr + drain (AskUserQuestion-flow) paths. The freeform-prose user-direction-amendment path has no governing SKILL and bypasses all three gates.
+
+### Fix shipped this iter (project-local behavioural backstop)
+
+Codified the user's pinned behavioural direction as a new **MANDATORY rule (P357)** in the project root `CLAUDE.md`, mirroring the P085/P078/P131/P132 shape: *user direction ≠ substance ratification; after a freeform user-directed governance-artefact edit, brief-and-ratify AFTER (self-contained prose per P350) before the marker write; under AFK write `human-oversight: unconfirmed` and queue for the next interactive drain (ADR-066 P348 fallback).* Architect + JTBD pre-edit gates both PASS; no new ADR required (the rule restates already-ratified ADR-066 P348 + ADR-074). This is the mechanism-independent backstop; the structural enforcement layer is the deferred design decision below.
+
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Audit all marker-write sites: identify every path where the agent writes `human-oversight: confirmed` or invokes `wr-architect-mark-oversight-confirmed` / `wr-jtbd-mark-oversight-confirmed`. The create-adr Step 5 path has the gate; the user-direction-amendment path apparently does not.
-- [ ] Design the post-change ratification gate shape: AFTER applying user-directed edits to an ADR/JTBD/RFC, BEFORE writing the oversight marker, the agent MUST surface a self-contained post-change brief via AskUserQuestion (per P350) showing the actual diff substance + asking the user to confirm the LLM's interpretation. Options: Confirm (writes marker), Amend (apply correction + re-surface), Reject (reverts edit; no marker).
-- [ ] Investigate symmetry: this same class likely applies to ADR creates triggered by user direction (vs by Step 5 flow). And to JTBD/RFC writes triggered by user direction. Sweep the marker-write surfaces.
-- [ ] Behavioural test: a fixture that exercises user-direction → Edit → expects post-change AskUserQuestion BEFORE marker write.
-- [ ] Decide whether the post-change brief is part of the marker shim (`wr-architect-mark-oversight-confirmed` becomes interactive when LIVE) or a separate step in the agent's workflow before the shim invocation.
+- [x] Audit all marker-write sites (iter-31 — see table above). 3 governed surfaces + 1 ungoverned freeform path; freeform path is the P357 gap, a P348-hollow-marker subclass.
+- [ ] **DESIGN DECISION (queued for user — born-proposed, do NOT build on unconfirmed substance per ADR-074):** the structural enforcement mechanism for the freeform path. Genuine ≥2-option choice: **(a)** make `wr-architect-mark-oversight-confirmed` interactive when LIVE (shim owns the post-change confirm) vs **(b)** a PreToolUse-hook enforcement extending `architect-oversight-marker-discipline.sh` to require a post-change-confirm evidence marker on freeform edits vs **(c)** a separate agent-workflow step before the shim invocation. Plus a sub-decision: does the latent **Amend** sub-gap on the drains warrant a post-amend re-confirm? The CLAUDE.md backstop (shipped iter-31) is the behavioural spec the chosen mechanism enforces.
+- [x] Investigate symmetry (iter-31): the freeform-direction class applies to ADR creates, JTBD writes, AND the drain **Amend** sub-paths (recorded above). Swept architect + jtbd marker surfaces.
+- [ ] Behavioural test: a fixture that exercises user-direction → Edit → expects post-change AskUserQuestion BEFORE marker write (deferred with the mechanism decision — the test asserts the chosen mechanism).
 
 ## Dependencies
 
