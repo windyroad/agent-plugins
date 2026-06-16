@@ -21,10 +21,11 @@
 #     release-date: <YYYY-MM-DD>
 #
 # Exit codes:
-#   0 = OK (full citation emitted)
+#   0 = OK (full citation emitted, OR de-facto-released graduated-holding
+#       changeset whose code already shipped with a sibling release — P361)
 #   1 = ticket file not found
 #   2 = no changeset reference in ticket body
-#   3 = changeset not yet deleted (unreleased)
+#   3 = changeset still present AND not de-facto-released (genuinely unreleased)
 #   4 = deletion commit found but no merge PR / merge commit resolvable
 #
 # @adr ADR-049 (bin/ on PATH shim — adopter-safe script resolution)
@@ -122,6 +123,102 @@ EOF
   run "$SCRIPT" P101 docs/problems
   [ "$status" -eq 3 ]
   echo "$output" | grep -qi "unreleased\|not.*delet"
+}
+
+# ── Exit 0: de-facto-released graduated-holding changeset (P361) ─────────────
+
+@test "derive-release-vehicle: graduated holding changeset whose code shipped with a sibling release → exit 0 de-facto-released" {
+  # P361 / ADR-061 Rule 5 + P359: a changeset can be reinstated to
+  # .changeset/ awaiting changelog attribution AFTER its code already shipped
+  # with a sibling release. Present-in-tree must NOT read as unreleased.
+  cat > .changeset/p211-graduated.md <<'EOF'
+---
+'@windyroad/itil': patch
+---
+
+P211 fix — held then graduated.
+EOF
+  cat > docs/problems/verifying/211-graduated.md <<'EOF'
+# Problem 211: Graduated
+
+**Status**: Known Error
+
+## Fix Strategy
+
+Ship via `.changeset/p211-graduated.md`.
+EOF
+  git add .
+  git commit -q -m "feat(itil): P211 fix + changeset"   # commit A — the fix
+
+  # Hold it out of the active release queue (ADR-042 Rule 7).
+  mkdir -p docs/changesets-holding
+  git mv .changeset/p211-graduated.md docs/changesets-holding/p211-graduated.md
+  git commit -q -m "chore(itil): hold P211 changeset (above-appetite)"
+
+  # A sibling release ships AFTER the fix landed (P359: code ships regardless).
+  cat > .changeset/p999-sibling.md <<'EOF'
+---
+'@windyroad/itil': patch
+---
+
+Sibling fix.
+EOF
+  git add .changeset/p999-sibling.md
+  git commit -q -m "feat(itil): sibling fix + changeset"
+  git rm -q .changeset/p999-sibling.md
+  git commit -q -m "chore: version packages"   # the published release bump
+
+  # Graduate the held changeset back to .changeset/ awaiting attribution.
+  mkdir -p .changeset
+  git mv docs/changesets-holding/p211-graduated.md .changeset/p211-graduated.md
+  git commit -q -m "chore(itil): graduate P211 changeset"
+
+  run "$SCRIPT" P211 docs/problems
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -qi "de-facto-released"
+  echo "$output" | grep -q "changeset: .changeset/p211-graduated.md"
+}
+
+@test "derive-release-vehicle: fresh changeset added AFTER the last release → still exit 3 (not a false de-facto-released)" {
+  # Guard: a prior release exists, but THIS changeset was added afterwards —
+  # its code has NOT shipped. Its add-commit is a DESCENDANT of the last
+  # version bump, so the is-ancestor discriminator must keep it at exit 3.
+  cat > .changeset/p888-old.md <<'EOF'
+---
+'@windyroad/itil': patch
+---
+
+Old fix that did ship.
+EOF
+  git add .changeset/p888-old.md
+  git commit -q -m "feat(itil): old fix + changeset"
+  git rm -q .changeset/p888-old.md
+  git commit -q -m "chore: version packages"   # prior release
+
+  # Now add a NEW changeset AFTER the release — genuinely unreleased.
+  mkdir -p .changeset
+  cat > .changeset/p889-fresh.md <<'EOF'
+---
+'@windyroad/itil': patch
+---
+
+Fresh fix, not yet released.
+EOF
+  cat > docs/problems/known-error/889-fresh.md <<'EOF'
+# Problem 889: Fresh
+
+**Status**: Known Error
+
+## Fix Strategy
+
+Ship via `.changeset/p889-fresh.md`.
+EOF
+  git add .
+  git commit -q -m "feat(itil): fresh fix + changeset"
+
+  run "$SCRIPT" P889 docs/problems
+  [ "$status" -eq 3 ]
+  echo "$output" | grep -qi "unreleased"
 }
 
 # ── Exit 0: happy path — full citation emitted ──────────────────────────────

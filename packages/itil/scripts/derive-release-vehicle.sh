@@ -24,11 +24,23 @@
 #     merge-commit: <SHA>
 #     release-date: <YYYY-MM-DD>
 #
+# De-facto-released variant (P361, exit 0) when the changeset is present in
+# .changeset/ but its code already shipped with a sibling release:
+#   RELEASE_VEHICLE:
+#     changeset: .changeset/<name>.md
+#     status: de-facto-released (attribution pending)
+#     fix-commit: <SHA>
+#     shipped-with-version-packages-commit: <SHA>
+#     release-date: <YYYY-MM-DD>
+#     note: ...
+#
 # Exit codes:
-#   0 = OK (full citation emitted)
+#   0 = OK (full citation emitted, OR de-facto-released graduated-holding
+#       changeset whose code already shipped with a sibling release — P361)
 #   1 = ticket file not found
 #   2 = no changeset reference in ticket body
-#   3 = changeset still present in working tree (unreleased)
+#   3 = changeset present in working tree AND not de-facto-released
+#       (genuinely unreleased)
 #   4 = deletion commit found but no merge PR / merge commit resolvable
 #
 # @problem P267 — Codify derive-release-vehicle.sh helper for K→V release-
@@ -36,6 +48,14 @@
 #                 fragile to wrong-release-cited errors when sessions
 #                 pre-apply transitions across sibling tickets (observed
 #                 2026-05-18 P250 K→V cited P247's release refs).
+# @problem P361 — exit-3 "unreleased" false positive on ADR-061 graduated
+#                 holding changesets; helper now distinguishes "attribution
+#                 pending" (de-facto-released, exit 0) from "code unreleased"
+#                 (exit 3) via an add-commit ancestry test against the latest
+#                 version-packages commit.
+# @adr ADR-061 (dogfood graduation criteria — held changeset reinstated to
+#               .changeset/ awaiting attribution after its code shipped; the
+#               de-facto-released exit-0 path)
 # @adr ADR-049 (bin/ on PATH shim — adopter-safe script resolution; helper
 #               is invoked as `wr-itil-derive-release-vehicle`)
 # @adr ADR-022 (Verifying lifecycle — citation supports the K→V transition's
@@ -58,10 +78,10 @@ USAGE: derive-release-vehicle.sh <ticket-id> [<problems-dir>]
   <problems-dir> — defaults to ./docs/problems
 
 Exit codes:
-  0  ok (full citation emitted)
+  0  ok (full citation, OR de-facto-released graduated-holding changeset — P361)
   1  ticket file not found
   2  no changeset reference in ticket body
-  3  changeset still present in working tree (unreleased)
+  3  changeset present in working tree AND not de-facto-released (unreleased)
   4  deletion commit found but no merge PR / merge commit resolvable
 EOF
 }
@@ -112,7 +132,55 @@ fi
 
 # ── Released?  Changeset must be ABSENT from working tree (deleted by
 #    chore: version packages) AND have a deletion commit in git history. ────
+# Exception (P361 / ADR-061 Rule 5 + P359): a changeset can be reinstated to
+# .changeset/ awaiting changelog attribution AFTER its code already de-facto
+# shipped with a sibling release (held code ships with any sibling release —
+# P359). Present-in-tree therefore does NOT always mean unreleased. Before
+# exiting 3, test whether the commit that originally ADDED this changeset is
+# an ancestor of the latest published "chore: version packages" commit; if so
+# the fix code shipped → emit a de-facto-released citation (exit 0). A
+# genuinely-unreleased fresh changeset has its add-commit NEWER than the last
+# bump, so the is-ancestor test is false and it correctly stays exit 3.
 if [ -f "$CHANGESET_PATH" ]; then
+  # Oldest Add of the path = the original fix commit. Robust to the
+  # hold→graduate `git mv`, which (without rename detection) records a later
+  # Add at the same path; `tail -1` selects the original.
+  ADD_SHA="$(
+    git log --diff-filter=A --format='%H' -- "$CHANGESET_PATH" 2>/dev/null \
+      | tail -1
+  )"
+
+  # Resolve the published-history ref (same ladder used for merge resolution).
+  DEFACTO_REF=""
+  for ref in origin/main main HEAD; do
+    if git rev-parse --verify "$ref" >/dev/null 2>&1; then
+      DEFACTO_REF="$ref"
+      break
+    fi
+  done
+
+  LATEST_VERSION_BUMP=""
+  if [ -n "$DEFACTO_REF" ]; then
+    LATEST_VERSION_BUMP="$(
+      git log --grep='^chore: version packages' --format='%H' -1 "$DEFACTO_REF" 2>/dev/null
+    )"
+  fi
+
+  if [ -n "$ADD_SHA" ] && [ -n "$LATEST_VERSION_BUMP" ] \
+     && git merge-base --is-ancestor "$ADD_SHA" "$LATEST_VERSION_BUMP" 2>/dev/null; then
+    RELEASE_DATE="$(git log -1 --format='%cs' "$LATEST_VERSION_BUMP" 2>/dev/null)"
+    cat <<EOF
+RELEASE_VEHICLE:
+  changeset: $CHANGESET_PATH
+  status: de-facto-released (attribution pending)
+  fix-commit: $ADD_SHA
+  shipped-with-version-packages-commit: $LATEST_VERSION_BUMP
+  release-date: $RELEASE_DATE
+  note: changeset present in .changeset/ awaiting changelog attribution (ADR-061 holding-graduation); code already shipped with a sibling release (P359).
+EOF
+    exit 0
+  fi
+
   echo "ERROR: changeset $CHANGESET_PATH still present in working tree (unreleased)" >&2
   exit 3
 fi
