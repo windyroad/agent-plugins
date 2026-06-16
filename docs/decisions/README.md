@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 79 (70 in-force, 9 historical)
+**Total ADRs:** 80 (71 in-force, 9 historical)
 
 ---
 
 ## In-force decisions
 
-_70 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_71 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -126,11 +126,10 @@ _70 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **Option 1 — Cite + persist + uncertainty, measurement surface on `.closed.md` tickets, WSJF buckets with comparable-prior citation, explicit `not estimated` marker when ungrounded.**
 **Related:** ADR-026, ADR-023, ADR-022, ADR-015, ADR-005
+
 ### ADR-028 — External-comms gate — voice-tone + risk/leak evaluators on shared PreToolUse surface
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** One PreToolUse gate guards every external-text surface (gh issue/PR/api comments, npm README, `.changeset/*.md`, commit messages) by firing two independent evaluators — voice-tone (AI-tell drift) and risk/leak (confidential info per RISK-POLICY.md) — chosen over sibling ADRs because a single gate shape with per-evaluator plugs keeps the surface inventory in one place. Distributed via ADR-017 duplicate-script sync so each of voice-tone and risk-scorer ships a byte-identical copy running only its own evaluator; per-evaluator markers compose at the gate-firing level, so either package alone gives partial coverage and both give full coverage.
-**Confirmation:** Canonical `packages/shared/hooks/external-comms-gate.sh` + byte-identical synced copies pass `check:external-comms-gate`; deny-plus-marker (ADR-009) with per-evaluator key `sha256(normalize(draft, surface) + '\n' + surface)` derived hook-side via shared `compute_external_comms_key`; advisory-only when a policy doc is absent; bats suites green; behavioural replay covers AI-voice/leak/age denies, changeset frontmatter-strip equivalence, double-quote unescape symmetry, non-public-repo silent-pass on commit messages, and voice-tone's per-evaluator skip of the commit-message surface (ADR-014/ADR-018 own that surface).
-**Related:** ADR-002, ADR-006, ADR-008, ADR-009, ADR-013, ADR-014, ADR-015, ADR-017, ADR-018, ADR-020, ADR-023, ADR-024, ADR-025, ADR-026, ADR-027, ADR-045, ADR-062
+**Related:** ADR-002, ADR-017, ADR-008, ADR-009, ADR-013, ADR-015, ADR-020, ADR-024, ADR-025, ADR-026, ADR-027
 
 ### ADR-029 — Diagnose before implement — structured hypothesis + evidence + RED-for-the-right-reason gate
 **Status:** proposed | **Oversight:** confirmed
@@ -307,7 +306,7 @@ _70 ADRs. These are the current rules. The architect agent reads this section fi
 
 ### ADR-073 — Fix-time gate auto-creates a missing RFC (everywhere)
 **Status:** proposed | **Oversight:** confirmed
-**Chosen:** Chosen option: **"Auto-create a problem-traced RFC if missing, everywhere the gate fires"** (user-ratified). When the propose-fix gate (ADR-072) fires on a Known Error with no RFC trace, the framework **auto-creates a problem-traced RFC** �...
+**Chosen:** Chosen option: **"Auto-create a problem-traced RFC if missing, everywhere the gate fires"** (user-ratified). When the propose-fix gate (ADR-072) fires on a Known Error with no RFC trace, the framework **auto-creates a problem-traced RFC** �...
 **Confirmation:** The propose-fix gate (interactive + AFK) auto-creates a problem-traced skeleton RFC when none exists; it never...; The auto-created RFC carries no "Considered Options" block (passes the ADR-052 lint) and traces the driving pr...; A behavioural test asserts auto-create fires at both the interactive and AFK surfaces.
 **Related:** ADR-071, ADR-072, ADR-070, ADR-044, ADR-060
 
@@ -348,6 +347,10 @@ _70 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **"Option A — Shim wrapper resolves to highest-version sibling at invoke time"**, because it closes the mid-session staleness window that motivated P343 (the dominant cost driver of session 9), aligns with the existing ADR-...
 **Related:** ADR-049, ADR-081, ADR-040, ADR-080, ADR-002, ADR-003, ADR-014, ADR-066, ADR-074
+
+### ADR-082 — Changeset holding semantics — attribution-only governance vs a real shipment control
+**Status:** proposed | **Oversight:** unconfirmed
+**Related:** ADR-042, ADR-070, ADR-066, ADR-074
 
 ---
 
