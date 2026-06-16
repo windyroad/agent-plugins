@@ -68,3 +68,9 @@ The framework then compounds the gap by *describing* the hold as a shipment cont
 - **ADR-082** (`docs/decisions/082-changeset-holding-semantics-attribution-only-vs-shipment-control.proposed.md`) — born-proposed going-forward decision; options (a)/(b)/(c) deferred to user ratification.
 - ADR-042 (auto-apply scorer remediations; Rule 7 holding convention), R009 (SKILL-prose floor standing risk), P220 (witnessing case — de-facto-released held changeset), P162 (graduation criteria — verifying), P228 (K→V enumerator keys on deleted-from-tree changesets — same blind spot).
 - Hang-off pre-filter (capture Step 2b): 25 candidates shared ≥1 signal (ADR-042 / changesets-holding) — above the 5-candidate dispatch cap, so the hang-off-check subagent was skipped per the candidate-cap short-circuit; re-evaluate absorption at next `/wr-itil:review-problems`. Title-grep matches (list-only): P162, P177 (holding-dir 2-commit pattern), P330 (release-vehicle helper), P141, P073 (closed), P202 (closed), P206 (closed).
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-025 | proposed | Real shipment control via build-time feature toggles |
