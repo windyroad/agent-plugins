@@ -1,11 +1,24 @@
 # Problem 251: RFC-first trace invariant not enforced — fixes start without RFC, story map, or JTBD trace
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-05-17
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 **JTBD**: JTBD-008
 **Persona**: solo-developer
+**RFCs**: RFC-005 (accepted — the fix vehicle)
+
+## Reconcile (AFK work-problems iter 21, 2026-06-16) — Open → Known Error
+
+Root cause **confirmed** and core fix mechanism **released**, so this ticket advances Open → Known Error per ADR-022 (root cause + workaround documented + fix in progress).
+
+- **Root cause confirmed**: the asymmetry in ADR-060's I-series. I1 enforced the RFC→Problem trace at *capture* time; the inverse Problem→RFC trace at *fix* time was never added. That gap was closed by the **I13 invariant** (ADR-060, added under RFC-006 slice 4, corrected under P314) — RFC required at the propose-fix step on a Known Error.
+- **Core gate released**: P314 iter 11 / RFC-005 **B3/B4/B5** shipped in `@windyroad/itil@0.50.0`:
+  - **B3** — `packages/itil/scripts/check-fix-rfc-trace.sh` (+ `bin/wr-itil-check-fix-rfc-trace` ADR-049 shim): deterministic predicate scanning `docs/rfcs/` for any RFC whose `problems:` array claims the PID; emits a `no-rfc-trace: P<NNN>` auto-create directive when none does; **exits 0 unconditionally — never blocks** (ADR-073 auto-create-not-block).
+  - **B4** — `/wr-itil:manage-problem` Known-Error fix traversal runs the predicate as an I13 propose-fix gate preamble (auto-create via `/wr-itil:capture-rfc`, no consent gate per P132).
+  - **B5** — `/wr-itil:work-problems` covers the AFK surface transitively (fix dispatched *through* manage-problem) + structured-logs the auto-create event.
+- **Carve-out repudiated**: ADR-071 made RFC-first **unconditional** (no effort threshold, no override hatch — the original F2 atomic-fix carve-out is removed, not relocated). ADR-071/072/073 are user-ratified (P314 oversight drain), so no born-proposed decision blocks this transition (ADR-074 clear).
+- **Why Known Error and not Verifying**: the full fix is not yet released. RFC-005 remaining slices: **B2** (problem-ticket `rfcs: []` frontmatter schema + template/capture-problem/manage-problem population), **B6** (auto-create-fires SKILL-orchestration bats — partial; harness-gap honestly recorded), **B7** (migration survey), **B8** (forward dogfood), **B9** (retro reassessment-criterion wiring), **B10** (held-changeset graduation). Full closure rides RFC-005 completion — tracked there, not lost (P184 conditional-deferral discipline). These slices are RFC-005-scoped and are best worked when RFC-005 is the iter target; not pulled into this P251 reconcile iter (B8/B10 are release-gated under AFK).
 
 ## Description
 
@@ -48,11 +61,11 @@ Possible interim workarounds (to validate):
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Investigate root cause — likely candidates: (1) `/wr-itil:manage-problem` Step 7 transition does not require RFC trace; (2) AFK orchestrator iter prompts do not enforce RFC-first on dispatch; (3) ticket template carries `### Investigation Tasks` + `### Fix Strategy` sections, encoding the "task list in ticket body" anti-pattern as the default shape; (4) ADR-060 Phase 3 / Phase 4 may have shipped one direction of the trace invariant (RFC→Problem) without the symmetric direction (Problem→RFC at fix-time).
-- [ ] Identify which lifecycle transition should require the RFC trace — Open → Known Error (when fix strategy is known)? Open → In Progress (a new state)? Known Error → Fix Released (when commit lands)?
-- [ ] Identify the atomic-fix carve-out shape — Effort ≤ M may not need RFC ceremony per JTBD-008 § Persona Constraints, but the carve-out should be explicit at the gate.
-- [ ] Survey current Open / Known Error tickets — how many would need retroactive RFC authoring? Cost-of-retrofit informs the scope of the fix.
-- [ ] Create reproduction test — likely an `i7-rfc-trace-at-fix-time` behavioural bats test asserting `/wr-itil:work-problems` Step 5 dispatch refuses to dispatch a fix iter on an RFC-less problem above the Effort carve-out.
+- [x] Investigate root cause — **confirmed (iter 21)**: candidate (4) is the root cause — ADR-060 shipped the RFC→Problem direction (I1) without the symmetric Problem→RFC-at-fix-time direction. Closed by I13 (ADR-060, RFC-006 slice 4 / P314). Candidates (1)/(2) are the surfaces the gate now fires at (manage-problem propose-fix + work-problems dispatch, RFC-005 B4/B5). Candidate (3) ticket-body-task-list shape is addressed by RFC-005 B2 (pending).
+- [x] Identify which lifecycle transition should require the RFC trace — **decided (ADR-072, P314)**: the **propose-fix step on a Known Error**, NOT `Open → Known Error` and NOT a new state. Conforms to ADR-022 Known Error semantics.
+- [x] Identify the atomic-fix carve-out shape — **decided (ADR-071, P314)**: **no carve-out**. RFC-first is unconditional; no effort threshold, no override hatch. The original F2 / JTBD-101 carve-out is removed.
+- [ ] Survey current Open / Known Error tickets — how many would need retroactive RFC authoring? **= RFC-005 B7 (migration survey, pending).**
+- [ ] Create reproduction test — predicate behaviour covered by `packages/itil/scripts/test/check-fix-rfc-trace.bats` (RFC-005 B6 done); auto-create-fires SKILL-orchestration assertion is the documented harness-gap (RFC-005 B6 partial / B8 dogfood).
 
 ## Dependencies
 
