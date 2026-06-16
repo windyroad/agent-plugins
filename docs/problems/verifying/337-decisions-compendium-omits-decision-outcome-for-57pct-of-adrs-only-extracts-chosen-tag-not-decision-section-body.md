@@ -1,6 +1,6 @@
 # Problem 337: Decisions compendium omits Decision Outcome for 57% of ADRs — generator only extracts the `Chosen option:` tag, not the Decision Outcome section body
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-30
 **Priority**: 12 (High) — Impact: 3 (Moderate — defeats ADR-077 token-cheap-load-surface goal; 43/75 ADRs render with no statement of what was decided) × Likelihood: 4 (Likely — fires for every ADR lacking a MADR `Chosen option:` tag — currently 57% of corpus)
 **Origin**: internal
@@ -95,6 +95,8 @@ This commit stages NO `docs/decisions/*.md` files (only `packages/architect/`), 
 
 **Direction question queued for human ratification** (outstanding_questions in this iteration's summary): RFC capture for ADR-078 Phase 1 implementation, decomposed into the 5 stories above. The AFK orchestrator will not capture the RFC or implement the stories without explicit user direction (this work is RFC-grain per ADR-060 + carries a ratified ADR substance dependency).
 
+**Release vehicle**: .changeset/p337-rfc014-phase1-architect-on-edit-compendium.md
+
 ## Dependencies
 
 - **Blocks**: ADR-077's load-surface goal for routine architect-agent compliance review on 57% of ADRs.
@@ -117,3 +119,15 @@ This commit stages NO `docs/decisions/*.md` files (only `packages/architect/`), 
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-014 | proposed | ADR-078 Phase 1 — architect-on-edit compendium entries |
+
+## Fix Released
+
+**Released in `@windyroad/architect@0.17.0`** — PR #259, merge commit `efd857b6`, version-packages commit `9a47d199`, released 2026-06-16. Changeset: `.changeset/p337-rfc014-phase1-architect-on-edit-compendium.md`. Implementing feat commit: `0e7222be` (work-problems iter 10).
+
+**Fix summary**: RFC-014 Phase 1 replaces the programmatic generator-based compendium mechanism (ADR-078 Option 9) — a `PostToolUse:Edit|Write` hook (`architect-compendium-update-entry.sh`, Story A) now re-authors each edited ADR's README compendium entry via `claude -p`/`wr-architect:agent` (emitting a `**Decides:**` semantic TL;DR derived from `## Decision Outcome`), paired by a `PreToolUse:Bash` pairing-check hook (`architect-readme-pairing-check.sh`, Story B) that denies committing an ADR body without its README entry. The incompatible `architect-compendium-refresh-discipline.sh` hook was retired atomically (Story D). The Decision-Outcome-omission gap closes per-entry as each ADR is touched (opportunistic-batch migration per SQ-014-4 — the ratified design, not a mass backfill).
+
+**Awaiting user verification.** Suggested verification: after the next `@windyroad/architect` cache refresh, edit any `docs/decisions/<NNN>-*.md` body and confirm (a) the PostToolUse hook re-authors that ADR's `docs/decisions/README.md` entry with a `**Decides:**` line, and (b) a commit staging the ADR body without the README is denied by the pairing check.
+
+**Release-session exercise evidence**: 20 new behavioural bats GREEN (Story A 9 + Story B 6 + registration/portability 5); full architect hooks+scripts suite 162/164 GREEN (the 2 pre-existing failures are unrelated oversight-nudge-count tests). Hook files `architect-compendium-update-entry.sh` + `architect-readme-pairing-check.sh` confirmed present in the 0.17.0 source; `architect-compendium-refresh-discipline.sh` confirmed deleted. Note: this is **release-verification of Phase 1 shipping**, not user-verification of the live behaviour — the latter requires a post-cache-refresh session and remains the open verification task.
+
+**Scope note — remaining RFC-014 work (NOT lost; tracked under RFC-014, `status: proposed`)**: Story C full removal of `generate-decisions-compendium.sh` + bats test 2145 is gated on the one-minor-version backstop window (SQ-014-2 — not yet elapsed; 0.17.0 is the release *containing* Phase 1). **Story E** (verify-and-tighten ADR-077 confirmation criteria) was deferred pending "A/B/D in production" — that condition has now **LIFTED** with the 0.17.0 release, so Story E is unblocked for a future RFC-014 iteration (surfaced in this iteration's summary per P184 spirit).
