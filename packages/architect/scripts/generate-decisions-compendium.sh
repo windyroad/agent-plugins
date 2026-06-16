@@ -34,11 +34,25 @@ set -uo pipefail
 # truncation — both halves are needed to close P334.
 export LC_ALL=C
 
+# --- ADR-078 (Option 9) deprecation notice (Confirmation criterion j) -------
+# ADR-078 retires this generator as the load-bearing primary path. The
+# compendium is now architect-authored per-edit by the PostToolUse hook
+# `architect-compendium-update-entry.sh` (RFC-014 Story A); body↔compendium
+# pairing is enforced at commit by `architect-readme-pairing-check.sh`
+# (Story B). This script remains a one-release-cycle backstop / bootstrap +
+# offline-reproducibility tool only, to be removed after one
+# @windyroad/architect minor-version cycle (RFC-014 Story C). The notice fires
+# on every invocation per ADR-078 Confirmation criterion (j).
+echo "generate-decisions-compendium: DEPRECATED per ADR-078 (Option 9) — the compendium is now architect-authored on every ADR edit (architect-compendium-update-entry.sh PostToolUse hook). This script is a backstop/bootstrap tool only and will be removed after one @windyroad/architect minor-version cycle (RFC-014 Story C)." >&2
+
 # --- Flag parsing ----------------------------------------------------------
 # `--check` (no write): generate to a temp file and diff against the on-disk
 # compendium. Exit 0 if byte-identical, 1 if drift, 2 if directory missing.
-# Used by the architect-compendium-refresh-discipline.sh enforcement hook
-# (Slice 2) to verify the staged compendium matches the working-tree ADRs.
+# Formerly used by the retired architect-compendium-refresh-discipline.sh
+# enforcement hook (Story D, ADR-078) to verify the staged compendium matched
+# the working-tree ADRs. Under Option 9 the compendium is architect-authored,
+# so --check no longer has a live caller; it is retained for the backstop /
+# offline-reproducibility window only.
 CHECK_MODE=0
 case "${1:-}" in
     --check)

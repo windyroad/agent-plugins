@@ -79,13 +79,19 @@ Per ADR-078 Phase 1 (single phase — architect-on-edit hook), the fix is RFC-sc
 6. **Cadence-driven migration**: existing 43 non-canonical ADRs migrate naturally the next time each is touched (the new hook fires on every edit; no mass backfill).
 7. **Amend ADR-077** confirmation criteria (b), (g), (h) per ADR-078 § "Architectural relationship between body and README under Option 9".
 
-**Scope warrants RFC capture** per ADR-060 framework — multi-hook implementation + retirement schedule + ADR-077 amendment. Stories:
+**Scope warrants RFC capture** per ADR-060 framework — multi-hook implementation + retirement schedule + ADR-077 amendment. Captured as **RFC-014** (`human-oversight: confirmed` 2026-06-02; SQ-014-1..4 substance ratified). Stories:
 
-- Story A: implement + test architect-compendium-update-entry.sh (PostToolUse hook + claude -p invocation + Edit application + staging).
-- Story B: implement + test architect-readme-pairing-check.sh (pre-commit pairing assertion).
-- Story C: retire generate-decisions-compendium.sh + bats (deferred to release cycle N+1 per ADR-078 backstop guidance).
-- Story D: retire architect-compendium-refresh-discipline.sh (gated on Story A landing).
-- Story E: ADR-077 confirmation-criteria amendment commit.
+- Story A: implement + test architect-compendium-update-entry.sh (PostToolUse hook + claude -p invocation + Edit application + staging). **— IMPLEMENTED 2026-06-16** (9 behavioural bats criteria green).
+- Story B: implement + test architect-readme-pairing-check.sh (pre-commit pairing assertion). **— IMPLEMENTED 2026-06-16** (6 behavioural bats criteria green).
+- Story C: retire generate-decisions-compendium.sh + bats (deferred to release cycle N+1 per ADR-078 backstop guidance). **— PARTIAL 2026-06-16**: stderr deprecation notice added (criterion j) + drift-gate bats test 2145 marked `skip`; script kept as backstop, final deletion deferred to post-backstop-window.
+- Story D: retire architect-compendium-refresh-discipline.sh (gated on Story A landing). **— DONE 2026-06-16** (file deleted + hooks.json registration removed). NOTE: landed atomically with A+B this iter, NOT after a dogfood window — see implementation note below.
+- Story E: ADR-077 confirmation-criteria amendment commit. **— DEFERRED** (touches an ADR body; gated on A/B/D being *in production* per RFC-014 sequencing; also avoids the architect multi-ADR-edit deadlock this iter).
+
+### Implementation note (2026-06-16, work-problems iter 10)
+
+Phase 1 Stories A + B + D + C-partial implemented in one commit (architect + jtbd gates PASS). **Critical sequencing finding**: RFC-014's stated order — "dogfood A+B before retiring D" — is *technically infeasible*. The retired `architect-compendium-refresh-discipline.sh` runs `generate-decisions-compendium --check` at commit time, comparing the staged README to **programmatic generator output**. Under Option 9, Story A writes **LLM-authored** entries that will never byte-match generator output, so the old hook would DENY every ADR-editing commit while it remains registered. Therefore A cannot be dogfooded with D still live — the A+B+D swap must be atomic. The architect agent independently confirmed this finding. This deviation from the ratified RFC-014 sequence is surfaced as an outstanding_question for human ratification (the substance — Stories A–E content — is unchanged; only the inter-story ordering of D relative to the dogfood window changed, driven by the `--check` incompatibility).
+
+This commit stages NO `docs/decisions/*.md` files (only `packages/architect/`), so neither the OLD cached refresh-discipline hook nor the new pairing check fires on its own landing commit. The new hooks go live only after the next `@windyroad/architect` release + cache refresh — at which point the dogfood window (one in-repo session exercising A+B) opens before Story E lands.
 
 **Direction question queued for human ratification** (outstanding_questions in this iteration's summary): RFC capture for ADR-078 Phase 1 implementation, decomposed into the 5 stories above. The AFK orchestrator will not capture the RFC or implement the stories without explicit user direction (this work is RFC-grain per ADR-060 + carries a ratified ADR substance dependency).
 

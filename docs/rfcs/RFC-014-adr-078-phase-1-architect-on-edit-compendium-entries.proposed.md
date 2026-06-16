@@ -177,13 +177,17 @@ Populate `jtbd: [JTBD-001, JTBD-008]` at `/wr-itil:manage-rfc 014 accepted`; con
 
 ## Tasks
 
-- [ ] **Story A** — Implement `packages/architect/hooks/architect-compendium-update-entry.sh` + `packages/architect/hooks/test/architect-compendium-update-entry.bats` + register in `packages/architect/hooks/hooks.json` (PostToolUse:Edit + PostToolUse:Write on `docs/decisions/*.md` excluding `README.md`). Acceptance criteria 1–9 above.
-- [ ] **Story B** — Implement `packages/architect/hooks/architect-readme-pairing-check.sh` + `packages/architect/hooks/test/architect-readme-pairing-check.bats` + register in `packages/architect/hooks/hooks.json` (PreToolUse:Bash on `git commit`). Acceptance criteria 1–6 above.
-- [ ] **Dogfood window** — one full in-repo session exercising Stories A + B without manual recovery. Document on the RFC's commit trail.
-- [ ] **Story D** — Delete `packages/architect/hooks/architect-compendium-refresh-discipline.sh` + remove from `hooks.json` + remove `packages/architect/hooks/test/architect-compendium-refresh-discipline.bats`. Acceptance criteria 1–4 above.
-- [ ] **Story E** — Amend ADR-077 Confirmation criteria (b), (g), (h) + bump `amended:` frontmatter. Acceptance criteria 1–3 above.
+- [x] **Story A** — Implement `packages/architect/hooks/architect-compendium-update-entry.sh` + `packages/architect/hooks/test/architect-compendium-update-entry.bats` + register in `packages/architect/hooks/hooks.json` (PostToolUse:Edit + PostToolUse:Write on `docs/decisions/*.md` excluding `README.md`). Acceptance criteria 1–9 above. **DONE 2026-06-16 — 9 behavioural bats criteria green.**
+- [x] **Story B** — Implement `packages/architect/hooks/architect-readme-pairing-check.sh` + `packages/architect/hooks/test/architect-readme-pairing-check.bats` + register in `packages/architect/hooks/hooks.json` (PreToolUse:Bash on `git commit`). Acceptance criteria 1–6 above. **DONE 2026-06-16 — 6 behavioural bats criteria green.**
+- [x] **Story D** — Delete `packages/architect/hooks/architect-compendium-refresh-discipline.sh` + remove from `hooks.json` (no dedicated `.bats` existed). Acceptance criteria 1–4 above. **DONE 2026-06-16 — landed ATOMICALLY with A+B, not post-dogfood (see sequencing-correction note below).**
+- [ ] **Dogfood window** — one full in-repo session exercising Stories A + B without manual recovery. Document on the RFC's commit trail. **Opens after the next `@windyroad/architect` release + cache refresh makes A+B live.**
+- [ ] **Story E** — Amend ADR-077 Confirmation criteria (b), (g), (h) + bump `amended:` frontmatter. Acceptance criteria 1–3 above. **DEFERRED — gated on A/B/D in production; also avoids the architect multi-ADR-edit deadlock.**
 - [ ] **Backstop window** — one minor-version release cycle of `@windyroad/architect` with Stories A + B in production.
-- [ ] **Story C** — Add stderr deprecation notice to `packages/architect/scripts/generate-decisions-compendium.sh` + mark bats test 2145 `skip` + (post-backstop) delete script + bats + CHANGELOG entry. Acceptance criteria 1–4 above.
+- [~] **Story C** — Add stderr deprecation notice to `packages/architect/scripts/generate-decisions-compendium.sh` + mark bats test 2145 `skip` + (post-backstop) delete script + bats + CHANGELOG entry. Acceptance criteria 1–4 above. **PARTIAL 2026-06-16 — deprecation notice (criterion j) + test 2145 `skip` DONE; script retained as backstop, final deletion deferred to post-backstop-window.**
+
+### Sequencing correction (2026-06-16 — surfaced for human ratification)
+
+The original sequence above ("dogfood A+B before retiring D") is **technically infeasible** and was corrected during the implementation iter: the retired `architect-compendium-refresh-discipline.sh` runs `generate-decisions-compendium --check` at commit time, asserting the staged README byte-matches **programmatic generator output**. Under Option 9, Story A writes **LLM-authored** entries that never match generator output, so the old hook would DENY every ADR-editing commit while still registered. A therefore cannot be dogfooded with D live — the A+B+D swap is atomic. The architect agent independently confirmed this. Substance of Stories A–E is unchanged; only the ordering of D relative to the dogfood window moved. This deviation from the ratified sequence is queued as an outstanding_question.
 
 ## Commits
 

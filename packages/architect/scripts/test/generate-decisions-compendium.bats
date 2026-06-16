@@ -53,10 +53,15 @@ mk_adr() {
 # --- ADR-077 (g) drift-detection contract on the live committed state -------
 
 @test "committed compendium matches generator output (CI drift gate)" {
-  # This is the load-bearing assertion from ADR-077 (g): the committed
-  # docs/decisions/README.md MUST match what the generator produces from
-  # the current docs/decisions/<NNN>-*.md bodies. If this fails in CI, the
-  # safety-net hook either failed open or was bypassed.
+  # RETIRED per ADR-078 (Option 9) / RFC-014 Story C (test 2145). Under
+  # architect-on-edit authoring the committed docs/decisions/README.md is
+  # LLM-authored and intentionally no longer byte-matches programmatic
+  # generator output, so this idempotency/drift assertion no longer holds.
+  # Replacement enforcement: the architect-readme-pairing-check.sh pre-commit
+  # hook (Story B) asserts body↔README pairing at commit time. Removed entirely
+  # with the generator script after the backstop window (ADR-078 reassessment
+  # 2026-08-30).
+  skip "test 2145 retired per ADR-078 Option 9 — compendium is architect-authored, not generator-derived (RFC-014 Story C; pairing enforced by architect-readme-pairing-check.sh)"
   cd "$REPO_ROOT"
   run bash "$SCRIPT" --check docs/decisions
   [ "$status" -eq 0 ]
