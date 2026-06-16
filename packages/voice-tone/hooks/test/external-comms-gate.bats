@@ -322,3 +322,37 @@ run_hook() {
   [ "$status" -eq 0 ]
   [ -z "$output" ]
 }
+
+# ---------------------------------------------------------------------------
+# P364 — backtick-bearing double-quoted --body marker-key mismatch.
+# The voice-tone gate shares the byte-identical canonical external-comms-gate.sh
+# (ADR-017 sync), so the P364 shell-unescape fix applies here too: a body with
+# backslash-escaped backticks in --body "..." must unescape to the logical
+# <draft> body the PostToolUse mark hook hashes, or the PASS marker never
+# permits. DISTINCT from P276 / P010 (whitespace / frontmatter).
+# ---------------------------------------------------------------------------
+
+@test "P364: backtick-bearing double-quoted --body permits when marker keyed on the unescaped logical body" {
+  LOGICAL='Tidied the wording in `external-comms-gate` for the patch.'
+  SURFACE="gh-issue-comment"
+  KEY=$(printf '%s\n%s' "$LOGICAL" "$SURFACE" | shasum -a 256 | cut -d' ' -f1)
+  touch "${RDIR}/external-comms-voice-tone-reviewed-${KEY}"
+
+  CMD='gh issue comment 42 --body "Tidied the wording in \`external-comms-gate\` for the patch."'
+  INPUT=$(build_bash_input "$CMD")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "P364: single-quoted --body with literal backticks stays literal (no unescaping applied)" {
+  LOGICAL='Tidied the wording in `plain_span` here.'
+  SURFACE="gh-issue-comment"
+  KEY=$(printf '%s\n%s' "$LOGICAL" "$SURFACE" | shasum -a 256 | cut -d' ' -f1)
+  touch "${RDIR}/external-comms-voice-tone-reviewed-${KEY}"
+
+  INPUT=$(build_bash_input "gh issue comment 42 --body 'Tidied the wording in \`plain_span\` here.'")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}

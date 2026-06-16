@@ -185,28 +185,59 @@ except Exception:
         DRAFT=$(printf '%s' "$COMMAND" | python3 -c "
 import sys, re
 cmd = sys.stdin.read()
-# (pattern, flags) — first match wins.
+# P364: bash double-quote unescape. The double-quoted body capture groups
+# carry RAW shell-escaped command text — an orchestrator must backslash-escape
+# backticks (and \$, \", \\) inside \"...\" to survive bash parsing, e.g.
+# --body \"Fixed in \\\`code\\\` ...\". The PostToolUse mark hook hashes the
+# LOGICAL <draft> body (plain backticks), so the gate must undo those escapes
+# or the two marker keys diverge → permanent deny-after-PASS. Inside double
+# quotes a backslash is special ONLY before \$ \` \" \\ or a newline (line
+# continuation); single-quoted and <<'EOF' forms are literal and need none.
+# Single left-to-right pass so an escaped backslash adjacent to another escape
+# (\\\\\` -> backslash + backtick) is NOT mis-collapsed. chr() literals keep
+# this source free of the very metacharacters the surrounding shell double
+# quotes would otherwise eat.
+def unescape_dq(s):
+    out = []
+    i = 0
+    n = len(s)
+    special = set([chr(36), chr(96), chr(34), chr(92), chr(10)])
+    while i < n:
+        if s[i] == chr(92) and i + 1 < n and s[i + 1] in special:
+            if s[i + 1] != chr(10):
+                out.append(s[i + 1])
+            i += 2
+        else:
+            out.append(s[i])
+            i += 1
+    return ''.join(out)
+# (pattern, flags, unescape) — first match wins. unescape=True for the
+# double-quoted forms only (P364).
 patterns = [
     # HEREDOC body — matches a here-doc with EOF delimiter (quoted or
     # unquoted). The literal '<<' is written as the char-class pair
     # [<][<] so bash's command-substitution parser does NOT mis-parse
     # this regex as a real here-doc operator (P082 implementation note).
-    # DOTALL so the body can span newlines.
-    (r\"[<][<]\s*['\\\"]?EOF['\\\"]?\s*\n(.*?)\nEOF\", re.DOTALL),
+    # DOTALL so the body can span newlines. Left literal: the AI-canonical
+    # form is the quoted <<'EOF' heredoc, whose body bash does not unescape.
+    (r\"[<][<]\s*['\\\"]?EOF['\\\"]?\s*\n(.*?)\nEOF\", re.DOTALL, False),
     # gh issue/pr + npm publish --body 'TEXT' / --body \"TEXT\" (existing).
-    (r\"--body[= ]'([^']*)'\", 0),
-    (r'--body[= ]\"([^\"]*)\"', 0),
+    (r\"--body[= ]'([^']*)'\", 0, False),
+    (r'--body[= ]\"([^\"]*)\"', 0, True),
     # gh api --field summary='TEXT' / --field summary=\"TEXT\" (existing).
-    (r\"--field [a-zA-Z_]+='([^']*)'\", 0),
-    (r'--field [a-zA-Z_]+=\"([^\"]*)\"', 0),
+    (r\"--field [a-zA-Z_]+='([^']*)'\", 0, False),
+    (r'--field [a-zA-Z_]+=\"([^\"]*)\"', 0, True),
     # git commit -m / --message single-line literal forms (P082 Phase 1).
-    (r\"(?:-m|--message)[= ]'([^']*)'\", 0),
-    (r'(?:-m|--message)[= ]\"([^\"]*)\"', 0),
+    (r\"(?:-m|--message)[= ]'([^']*)'\", 0, False),
+    (r'(?:-m|--message)[= ]\"([^\"]*)\"', 0, True),
 ]
-for pat, flags in patterns:
+for pat, flags, unescape in patterns:
     m = re.search(pat, cmd, flags)
     if m:
-        print(m.group(1))
+        body = m.group(1)
+        if unescape:
+            body = unescape_dq(body)
+        print(body)
         break
 " 2>/dev/null || echo "")
         ;;

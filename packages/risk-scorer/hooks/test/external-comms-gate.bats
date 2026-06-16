@@ -316,3 +316,68 @@ run_hook() {
   [ "$status" -eq 0 ]
   [ -z "$output" ]
 }
+
+# ---------------------------------------------------------------------------
+# P364 — backtick-bearing double-quoted --body marker-key mismatch.
+# When an outbound body contains markdown backticks (a code span), the
+# orchestrator must backslash-escape them to survive bash double quotes:
+# `gh issue comment 42 --body "Fixed in \`foo\` ..."`. Before the fix the
+# gate extracted the RAW shell-escaped body (literal `\`` with backslash)
+# from the command text, while the PostToolUse mark hook hashed the LOGICAL
+# <draft> body (plain backticks). The two sha256 keys diverged → the PASS
+# marker landed at a key the gate never re-read → permanent deny-after-PASS.
+# After the fix the gate unescapes bash double-quote backslash-escapes on
+# the captured double-quoted body so its DRAFT is byte-equal to the logical
+# reviewed draft and the body-keyed marker permits. DISTINCT from P276 /
+# P010 (whitespace / frontmatter) — this is a shell-escaping-layer fix.
+# ---------------------------------------------------------------------------
+
+@test "P364: backtick-bearing double-quoted --body permits when marker keyed on the unescaped logical body" {
+  # Logical draft body (plain backticks) — what the agent wraps in <draft>
+  # and what the mark hook hashes via compute_external_comms_key.
+  LOGICAL='Fixed in `compute_external_comms_key` per the patch on Node 20.'
+  SURFACE="gh-issue-comment"
+  KEY=$(printf '%s\n%s' "$LOGICAL" "$SURFACE" | shasum -a 256 | cut -d' ' -f1)
+  touch "${RDIR}/external-comms-risk-reviewed-${KEY}"
+
+  # The orchestrator backslash-escapes the backticks to survive bash double
+  # quotes — this is the byte-different command text the gate actually sees.
+  CMD='gh issue comment 42 --body "Fixed in \`compute_external_comms_key\` per the patch on Node 20."'
+  INPUT=$(build_bash_input "$CMD")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "P364: escaped backslash adjacent to escaped backtick (\\\\\\\`) unescapes to literal backslash + backtick (single left-to-right pass)" {
+  # Adjacency edge case (architect note): \\\` is escaped-backslash THEN
+  # escaped-backtick and must unescape to a literal backslash followed by a
+  # literal backtick — NOT mis-collapsed. The logical body therefore carries
+  # one backslash then one backtick.
+  LOGICAL=$'edge: \\`token here'
+  SURFACE="gh-issue-comment"
+  KEY=$(printf '%s\n%s' "$LOGICAL" "$SURFACE" | shasum -a 256 | cut -d' ' -f1)
+  touch "${RDIR}/external-comms-risk-reviewed-${KEY}"
+
+  # Command text carries \\\` (escaped backslash + escaped backtick).
+  CMD='gh issue comment 42 --body "edge: \\\`token here"'
+  INPUT=$(build_bash_input "$CMD")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "P364: single-quoted --body with literal backticks stays literal (no unescaping applied)" {
+  # Inside single quotes bash does NOT process backslashes or backticks, so
+  # the orchestrator writes plain backticks and the captured body already
+  # equals the logical draft. The fix must NOT alter the single-quote path.
+  LOGICAL='Fixed in `plain_span` here.'
+  SURFACE="gh-issue-comment"
+  KEY=$(printf '%s\n%s' "$LOGICAL" "$SURFACE" | shasum -a 256 | cut -d' ' -f1)
+  touch "${RDIR}/external-comms-risk-reviewed-${KEY}"
+
+  INPUT=$(build_bash_input "gh issue comment 42 --body 'Fixed in \`plain_span\` here.'")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
