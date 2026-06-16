@@ -20,37 +20,37 @@ teardown() {
 }
 
 @test "detect: scope text mentions problem files exemption (P029)" {
-  run bash "$HOOK"
+  run bash "$HOOK" </dev/null
   [ "$status" -eq 0 ]
   [[ "$output" == *"docs/problems/"* ]] || [[ "$output" == *"problem tickets"* ]]
 }
 
 @test "detect: scope text mentions BRIEFING.md exemption (P029)" {
-  run bash "$HOOK"
+  run bash "$HOOK" </dev/null
   [ "$status" -eq 0 ]
   [[ "$output" == *"BRIEFING"* ]]
 }
 
 @test "detect: scope text mentions docs/briefing/ exemption (P100)" {
-  run bash "$HOOK"
+  run bash "$HOOK" </dev/null
   [ "$status" -eq 0 ]
   [[ "$output" == *"docs/briefing/"* ]]
 }
 
 @test "detect: scope text mentions RISK-POLICY exemption (P029)" {
-  run bash "$HOOK"
+  run bash "$HOOK" </dev/null
   [ "$status" -eq 0 ]
   [[ "$output" == *"RISK-POLICY"* ]]
 }
 
 @test "detect: scope text mentions changeset exemption (P029)" {
-  run bash "$HOOK"
+  run bash "$HOOK" </dev/null
   [ "$status" -eq 0 ]
   [[ "$output" == *"changeset"* ]]
 }
 
 @test "detect: scope text mentions memory files exemption (P029)" {
-  run bash "$HOOK"
+  run bash "$HOOK" </dev/null
   [ "$status" -eq 0 ]
   [[ "$output" == *"memory"* ]] || [[ "$output" == *"MEMORY"* ]]
 }

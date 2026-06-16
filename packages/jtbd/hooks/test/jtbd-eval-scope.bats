@@ -21,25 +21,25 @@ teardown() {
 }
 
 @test "eval: scope text mentions problem files exemption (P029)" {
-  run bash "$HOOK"
+  run bash "$HOOK" </dev/null
   [ "$status" -eq 0 ]
   [[ "$output" == *"docs/problems/"* ]] || [[ "$output" == *"problem tickets"* ]]
 }
 
 @test "eval: scope text mentions BRIEFING.md exemption (P029)" {
-  run bash "$HOOK"
+  run bash "$HOOK" </dev/null
   [ "$status" -eq 0 ]
   [[ "$output" == *"BRIEFING"* ]]
 }
 
 @test "eval: scope text mentions docs/briefing/ exemption (P100)" {
-  run bash "$HOOK"
+  run bash "$HOOK" </dev/null
   [ "$status" -eq 0 ]
   [[ "$output" == *"docs/briefing/"* ]]
 }
 
 @test "eval: scope text mentions RISK-POLICY exemption (P029)" {
-  run bash "$HOOK"
+  run bash "$HOOK" </dev/null
   [ "$status" -eq 0 ]
   [[ "$output" == *"RISK-POLICY"* ]]
 }
