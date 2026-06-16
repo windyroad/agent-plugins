@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
 
-# P268 / P275 / ADR-017: command-detect.sh duplicated across consumer
-# plugins (itil, retrospective). Drift check — every
+# P268 / P275 / P366 / ADR-017: command-detect.sh duplicated across consumer
+# plugins (itil, retrospective, architect). Drift check — every
 # packages/*/hooks/lib/command-detect.sh copy must match the canonical
 # packages/shared/hooks/lib/command-detect.sh. The sync script is the
 # remediation; this test is the CI guard. Mirrors sync-session-marker.bats
@@ -22,7 +22,7 @@ setup() {
 }
 
 @test "sync-command-detect: all consumer copies exist" {
-  for plugin in itil retrospective; do
+  for plugin in itil retrospective architect; do
     [ -f "$REPO_ROOT/packages/$plugin/hooks/lib/command-detect.sh" ] || {
       echo "MISSING: packages/$plugin/hooks/lib/command-detect.sh"
       return 1
@@ -42,9 +42,10 @@ setup() {
   mkdir -p "$tmp/packages/shared/hooks/lib" \
            "$tmp/packages/itil/hooks/lib" \
            "$tmp/packages/retrospective/hooks/lib" \
+           "$tmp/packages/architect/hooks/lib" \
            "$tmp/scripts"
   cp "$SHARED_SRC" "$tmp/packages/shared/hooks/lib/command-detect.sh"
-  for plugin in itil retrospective; do
+  for plugin in itil retrospective architect; do
     cp "$SHARED_SRC" "$tmp/packages/$plugin/hooks/lib/command-detect.sh"
   done
   echo "# drift" >> "$tmp/packages/itil/hooks/lib/command-detect.sh"
@@ -64,9 +65,10 @@ setup() {
   mkdir -p "$tmp/packages/shared/hooks/lib" \
            "$tmp/packages/itil/hooks/lib" \
            "$tmp/packages/retrospective/hooks/lib" \
+           "$tmp/packages/architect/hooks/lib" \
            "$tmp/scripts"
   cp "$SHARED_SRC" "$tmp/packages/shared/hooks/lib/command-detect.sh"
-  for plugin in itil retrospective; do
+  for plugin in itil retrospective architect; do
     cp "$SHARED_SRC" "$tmp/packages/$plugin/hooks/lib/command-detect.sh"
   done
   rm "$tmp/packages/retrospective/hooks/lib/command-detect.sh"

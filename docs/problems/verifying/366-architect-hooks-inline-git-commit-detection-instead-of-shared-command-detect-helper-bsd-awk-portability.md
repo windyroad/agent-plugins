@@ -1,7 +1,8 @@
 # Problem 366: Architect hooks inline `git commit` leading-token detection in awk instead of the shared `command_invokes_git_commit` helper — BSD-awk `\b` portability bug propagated via template-copy
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-06-16
+**Resolved**: 2026-06-17 (fix committed; awaiting `@windyroad/architect` release)
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: internal
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -35,12 +36,18 @@ By contrast itil's `itil-readme-refresh-discipline.sh` delegates to `packages/it
 
 ## Root Cause Analysis
 
-### Investigation Tasks
+### Root cause
 
+Architect commit-detecting hooks each re-implemented `git commit` leading-token detection inline in awk (a copy-from-template artefact), rather than delegating to the shared `command_invokes_git_commit` helper the itil/retrospective P268 family already uses and regression-tests. The duplication is the defect-amplifier: it lets each copy re-introduce bugs the helper solved once (the BSD-awk `\b` portability bug, and the `cd <path> &&` prefix-strip gap).
+
+### Resolution (2026-06-17, P366 work-problems iter 37)
+
+Adopted **duplicate-and-sync** (ADR-017 convention) over a premature `packages/shared/` bundler extraction — P304/RFC-023 tracks the bundler migration as future work; ADR-017 remains the operative convention until then. Architect now reuses the same canonical helper as itil/retrospective. Confirmed COMPLIANT by both the architect and JTBD pre-edit gates (no new ADR warranted).
+
+- [x] Decide extract-vs-sync → **duplicate-and-sync**: added `architect` to `CONSUMERS` in `scripts/sync-command-detect.sh`; created byte-identical `packages/architect/hooks/lib/command-detect.sh` synced from `packages/shared/hooks/lib/command-detect.sh`; covered by the existing `npm run check:command-detect` CI drift gate (now reports 3 copies).
+- [x] Refactor `architect-readme-pairing-check.sh` → replaced the inline `awk '...^git[[:space:]]+commit...'` block with `source "$SCRIPT_DIR/lib/command-detect.sh"; command_invokes_git_commit "$command" || exit 0` (the itil `itil-readme-refresh-discipline.sh` pattern). No other architect hook inlines commit detection.
+- [x] Add deny-path bats regression guards → 4 new tests in `architect-readme-pairing-check.bats`: `cd <repo> && git commit` now **denies** (the inline awk silently permitted it — the latent prefix-strip gap the helper closes; this was the RED test), `VAR=1 git commit` denies, substring-mention permits, `git commit-tree` plumbing permits. Extended `packages/shared/test/sync-command-detect.bats` consumer loops to include `architect`.
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Decide whether to extract/promote a shared command-detect helper to `packages/shared/` (cross-plugin) or duplicate-and-sync the itil `lib/command-detect.sh` into architect's `hooks/lib/` (composes with P304 — `packages/shared/` bundler approach)
-- [ ] Refactor `architect-readme-pairing-check.sh` (and any other architect commit-detecting hook) to use the shared `command_invokes_git_commit` helper
-- [ ] Add a deny-path bats fixture as the regression guard (permit-path-only coverage is what let the `\b` bug hide)
 
 ## Dependencies
 

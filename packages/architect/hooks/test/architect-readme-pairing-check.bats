@@ -83,6 +83,42 @@ run_commit_hook() {
   [ "$status" -eq 0 ]
 }
 
+# --- P366 leading-token detection regression guards ---
+# These exercise the shared command_invokes_git_commit helper that the hook
+# now sources (replacing inline awk). Permit-path-only coverage is what let
+# the original BSD-awk `\b` bug hide; these are the deny-path / mention-path
+# guards the ticket asks for.
+
+@test "denies 'cd <repo> && git commit' with an unpaired ADR (P366 cd-prefix)" {
+  echo "# adr 049 edited" > docs/decisions/049-x.proposed.md
+  git add docs/decisions/049-x.proposed.md
+  run run_commit_hook "cd $REPO && git commit -m wip"
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"deny"* ]]
+}
+
+@test "denies 'VAR=1 git commit' with an unpaired ADR (P366 env-prefix)" {
+  echo "# adr 049 edited" > docs/decisions/049-x.proposed.md
+  git add docs/decisions/049-x.proposed.md
+  run run_commit_hook "GIT_AUTHOR_NAME=x git commit -m wip"
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"deny"* ]]
+}
+
+@test "permits a command that merely MENTIONS 'git commit' as a substring (P366 mention-path)" {
+  echo "# adr 049 edited" > docs/decisions/049-x.proposed.md
+  git add docs/decisions/049-x.proposed.md
+  run run_commit_hook "grep -r 'git commit' docs/"
+  [ "$status" -eq 0 ]
+}
+
+@test "permits 'git commit-tree' plumbing (P366 token-boundary)" {
+  echo "# adr 049 edited" > docs/decisions/049-x.proposed.md
+  git add docs/decisions/049-x.proposed.md
+  run run_commit_hook "git commit-tree HEAD"
+  [ "$status" -eq 0 ]
+}
+
 @test "registered in hooks.json as PreToolUse Bash (criterion 6)" {
   HOOKS_JSON="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)/hooks.json"
   run jq -e '.hooks.PreToolUse[] | select(.matcher=="Bash") | .hooks[] | select(.command | test("architect-readme-pairing-check"))' "$HOOKS_JSON"

@@ -31,6 +31,10 @@
 
 set -uo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/command-detect.sh
+source "$SCRIPT_DIR/lib/command-detect.sh"
+
 # PreToolUse input arrives on stdin as JSON.
 input=$(cat)
 
@@ -40,20 +44,15 @@ tool_name=$(printf '%s' "$input" | jq -r '.tool_name // ""' 2>/dev/null)
 command=$(printf '%s' "$input" | jq -r '.tool_input.command // ""' 2>/dev/null)
 [ -n "$command" ] || exit 0
 
-# Only fire on `git commit` invocations. Leading-executable check (P268
-# pattern): a bare substring match would catch unrelated commands that mention
-# "git commit" (grep/sed/cat). Strip leading whitespace + env assignments, then
-# require the first effective tokens to be `git commit`.
-echo "$command" | awk '
-    {
-        sub(/^[[:space:]]+/, "")
-        while ($0 ~ /^[A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+/) {
-            sub(/^[A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+/, "")
-        }
-        if ($0 ~ /^git[[:space:]]+commit([[:space:]]|$)/) exit 0
-        exit 1
-    }
-' || exit 0
+# Only fire on `git commit` invocations. Delegates to the shared
+# command_invokes_git_commit helper (P268 family; synced from
+# packages/shared/hooks/lib/command-detect.sh per ADR-017) rather than
+# re-implementing leading-token detection inline — a bare substring match would
+# catch unrelated commands that mention "git commit" (grep/sed/cat), and an
+# inline awk re-implementation risks re-introducing the BSD/GNU portability bugs
+# (P366 `\b`) and prefix-stripping gaps (`cd <path> &&`) the helper already
+# solved and regression-tests.
+command_invokes_git_commit "$command" || exit 0
 
 # Allow-list bypass token (parity with the retired refresh-discipline hook and
 # ADR-014 commit-message bypass shape).

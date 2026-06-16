@@ -38,7 +38,8 @@ fi
 #   itil-readme-refresh-discipline.sh, itil-changeset-discipline.sh,
 #   p057-staging-trap-detect.sh, itil-rfc-trailer-advisory.sh.
 # retrospective consumers (P275): retrospective-readme-jtbd-currency.sh.
-CONSUMERS=(itil retrospective)
+# architect consumers (P366): architect-readme-pairing-check.sh.
+CONSUMERS=(itil retrospective architect)
 
 DIVERGED=0
 SYNCED=0
