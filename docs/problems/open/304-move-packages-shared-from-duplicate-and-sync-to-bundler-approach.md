@@ -25,7 +25,7 @@ The current duplicate-and-sync overhead: every shared helper is copied into each
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems.
-- [ ] Design the bundler approach (likely an RFC per ADR-060): single-source shared helpers + a build/bundle step that produces the self-contained per-plugin artefact at publish time, replacing the sync-script + CI-drift-gate machinery. MUST preserve the adopter-installs-a-single-self-contained-plugin guarantee (no runtime cross-plugin dependency).
+- [~] Design the bundler approach (likely an RFC per ADR-060): single-source shared helpers + a build/bundle step that produces the self-contained per-plugin artefact at publish time, replacing the sync-script + CI-drift-gate machinery. MUST preserve the adopter-installs-a-single-self-contained-plugin guarantee (no runtime cross-plugin dependency). **RFC-023 opened 2026-06-16** (born proposed, `human-oversight: unconfirmed`) as the design vehicle. The bundler-MECHANISM choice (esbuild / rollup / tsup / custom build step + build-time wiring) is a genuine multi-option decision DEFERRED to human confirmation at the `/wr-itil:manage-rfc accepted` transition per ADR-074 — implementation is queued behind that confirmation, NOT auto-built in the AFK loop.
 - [ ] Reconcile with ADR-017 — amend or supersede it once the bundler design lands (record the reassessment outcome + the new convention).
 - [ ] Subsume P026 (install-utils.mjs duplicated across all packages) — that is a specific instance of this duplicate-and-sync overhead; the bundler approach closes it.
 
@@ -42,3 +42,9 @@ The current duplicate-and-sync overhead: every shared helper is copied into each
 - ADR-017 — cross-package shared-code sync convention; its >5-module reassessment trigger fired.
 - P279 — ADR-017 § Consequences housekeeping (the two coexisting clustering conventions).
 - P026 — install-utils.mjs duplicated across all packages (subsumed instance).
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-023 | proposed | Bundler-based shared-code approach replacing duplicate-and-sync |
