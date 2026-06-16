@@ -54,8 +54,21 @@ surface = os.environ.get('EXTCOMMS_SURFACE', '')
 # changeset-author: strip the leading YAML frontmatter block + blank line.
 if surface == 'changeset-author':
     draft = re.sub(r'^---\n.*?\n---\n\n?', '', draft, count=1, flags=re.DOTALL)
-# Single canonical newline normalization: strip all trailing whitespace.
-draft = draft.rstrip()
+# Substance-aware whitespace normalization (P276 / ADR-009 + ADR-028 amended
+# 2026-06-06). Tolerate trivial PASS-class reformatting so a marker survives
+# interior CRLF/CR line endings and per-line trailing whitespace — the same
+# normalization _substance_normalize_then_hash (gate-helpers.sh) applies to
+# the policy-file-drift gates. Conservative boundary preserved: single-numeral
+# edits and frontmatter-key changes stay substantive (key changes → review
+# re-fires), so the leak-detection guarantee is never weakened.
+#   1. CRLF / CR -> LF
+#   2. strip trailing whitespace per line
+#   3. strip trailing whitespace of the whole draft (subsumes the prior
+#      single-canonical rstrip; NO trailing '\n' is appended here so the key
+#      shape sha256(normalize(draft) + '\n' + surface) is byte-stable for
+#      already-clean drafts — existing markers and keys do not shift).
+draft = draft.replace('\r\n', '\n').replace('\r', '\n')
+draft = '\n'.join(line.rstrip() for line in draft.split('\n')).rstrip()
 print(hashlib.sha256((draft + '\n' + surface).encode('utf-8')).hexdigest())
 " 2>/dev/null
 }

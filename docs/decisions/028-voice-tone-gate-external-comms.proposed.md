@@ -485,9 +485,20 @@ External-comms gates do not consume `_substance_hash_path` directly today (no po
 **Implementation:**
 
 - `packages/voice-tone/hooks/external-comms-mark-reviewed.sh` and `packages/risk-scorer/hooks/risk-score-mark.sh` (external-comms branch) — per-evaluator marker write routes through the `_atomic_mark_with_hash` helper from `gate-helpers.sh` (or a per-evaluator equivalent that follows the same `mktemp` + `mv` pattern when the marker is a presence-only file without a paired hash file). Diagnostic emitted on write failure; silent-on-success.
-- No change to `compute_external_comms_key` — the canonical normalisation contract from the 2026-05-25 amendment is preserved.
-- No change to the per-evaluator marker key shape — `sha256(normalize(draft, surface) + '\n' + surface)` unchanged.
+- No change to `compute_external_comms_key` — the canonical normalisation contract from the 2026-05-25 amendment is preserved. **(Superseded 2026-06-16 — see the P276 follow-on amendment below.)**
+- No change to the per-evaluator marker key shape — `sha256(normalize(draft, surface) + '\n' + surface)` unchanged. (Still true: the key SHAPE is unchanged; the 2026-06-16 follow-on changes only the internals of `normalize()`.)
 - No change to ADR-017 sync targets — the shared helpers already ship via `gate-helpers.sh`'s byte-identity invariant across packages.
+
+### Amendment 2026-06-16 — P276 follow-on: substance-aware draft normalisation in `compute_external_comms_key`
+
+The P353 closure note (2026-06-06) pre-authorised this follow-on: P276 "may still ship the per-instance whitespace normalisation in `compute_external_comms_key` independently." This amendment records that ship.
+
+`compute_external_comms_key`'s draft normalisation is brought to parity with the ratified `_substance_normalize_then_hash` (ADR-009 2026-06-06): after the existing changeset-author frontmatter strip, the lone whole-string `rstrip()` is replaced with (1) CRLF/CR → LF, (2) per-line trailing-whitespace strip, (3) whole-draft trailing-whitespace strip. This supersedes the "No change to `compute_external_comms_key`" bullet above — that bullet was correct for the 2026-06-06 atomic-write-only scope but the per-draft whitespace normalisation was explicitly deferred to P276, not foreclosed.
+
+- **Key shape unchanged.** The marker key is still `sha256(normalize(draft, surface) + '\n' + surface)` with NO trailing `\n` appended to the normalised draft, so the key value is byte-stable for already-clean drafts — existing session markers and all prior key computations are unaffected (64/64 external-comms gate + key bats green, incl. the prior P010 / P082 marker-equivalence tests).
+- **Conservative boundary preserved.** Single-numeral edits and frontmatter-key changes remain SUBSTANTIVE (the key changes → review re-fires), identical to the ADR-009 2026-06-06 boundary. The leak-detection guarantee is never weakened — only interior CRLF / per-line trailing-whitespace reformatting (semantically PASS-class) now survives without a redundant re-review.
+- **Both gate sides stay symmetric.** `compute_external_comms_key` is the single shared function for the PreToolUse gate and the PostToolUse mark hook, so the change applies identically to both (the P198 byte-symmetry property holds).
+- **ADR-017 sync.** Canonical edit at `packages/shared/hooks/lib/external-comms-key.sh`, propagated byte-identically to `packages/{risk-scorer,voice-tone}/hooks/lib/` via `scripts/sync-external-comms-gate.sh` (`--check` green).
 
 **Confirmation criteria delta:**
 
