@@ -77,11 +77,13 @@ The 2026-05-26 design rework above corrected the substantive ADRs (ADR-072 / ADR
 - **`docs/decisions/029-diagnose-before-implement.proposed.md`** — two quoted citations of ADR-022's prior framing aligned (lines 111 + 246) with `(amended 2026-06-08 per P314)` tags. ADR-029 Decision Outcome unchanged; oversight marker preserved.
 - **`docs/decisions/README.md`** — compendium regenerated per ADR-077 (picks up the ADR-022 oversight flip + new related-ADR cross-references).
 
-**Phase 2 (still deferred — RFC-005 B-tasks scope, held-changeset window):**
+**Phase 2 (RFC-005 B-tasks scope, held-changeset window):**
 
-- Implement the propose-fix gate relocation (move RFC-trace gate from `Open → Known Error` to the propose-fix step on a Known Error).
-- Implement the auto-create-on-missing-RFC mechanism, everywhere the gate fires.
-- Behavioural bats asserting both invariants.
+- [x] Implement the propose-fix gate relocation (RFC-trace gate at the propose-fix step on a Known Error, not `Open → Known Error`). **Done 2026-06-16 (iter 11)** — `wr-itil:manage-problem` Known Error fix-implementation traversal runs the I13 gate as a preamble (RFC-005 B4).
+- [x] Implement the auto-create-on-missing-RFC mechanism, everywhere the gate fires. **Done 2026-06-16 (iter 11)** — load-bearing predicate `check-fix-rfc-trace.sh` (+ bin shim) detects a missing trace + emits an auto-create directive (never blocks, exit 0); the create delegates to `/wr-itil:capture-rfc` (RFC-005 B3); covers both interactive (manage-problem) and AFK (work-problems delegates through manage-problem; second carve-out added to the no-`capture-*`-mid-iter prohibition) — RFC-005 B5.
+- [~] Behavioural bats asserting both invariants. **Partial 2026-06-16 (iter 11)** — predicate fully covered by `check-fix-rfc-trace.bats` (RFC-005 B6 partial); the skill-orchestrated auto-create-fires assertion is not bats-testable (capture-rfc is a Claude skill, not a shell unit) and defers to the B8 forward-dogfood.
+
+**Phase 2 remaining (RFC-005 B-tasks):** B2 (`rfcs:` frontmatter schema — largely subsumed by the already-shipped derived `## RFCs` section / `update-problem-rfcs-section.sh`; confirm reconciliation), B6 auto-create-fires dogfood assertion, B7 (migration sweep `docs/audits/i13-rollout-survey-*.md`), B8 (forward-dogfood), B9 (wire reassessment criterion into run-retro Step 2b), B10 (held-changeset graduation).
 
 **Architect re-review carve-out for this iter (advisory).** The 2026-06-08 iter incorporated the architect's first-pass scope-completeness findings — `transition-problem/SKILL.md` line 19 and `029-diagnose-before-implement.proposed.md` lines 111 + 246 were lifted into the same commit so the operator-facing prose lands consistent in one transition, avoiding the documentation-drift class the rework exists to close.
 
@@ -93,7 +95,7 @@ The 2026-05-26 design rework above corrected the substantive ADRs (ADR-072 / ADR
 - [x] **Open design question — exact gate placement**: ANSWERED — propose-fix step on a Known Error (no new lifecycle state). Recorded in ADR-072. User-ratified 2026-05-26.
 - [x] **Auto-create design**: ANSWERED — auto-create a problem-traced RFC if missing, **everywhere the gate fires** (interactive + AFK). Recorded in ADR-073 (composes with ADR-070 no-decisions + ADR-071 every-fix-via-RFC; the auto-created RFC is a problem-traced skeleton with `stories: []` and no `## Considered Options` block). User-ratified 2026-05-26.
 - [x] Rework artifacts: ADR-072 rewritten + renamed (2026-05-26); ADR-073 rewritten + renamed (2026-05-26); ADR-060 I13 rewritten (2026-05-26); RFC-005 + RFC-006 updated (2026-05-26). Phase 1 follow-up (2026-06-08) added: ADR-022 + manage-problem/SKILL.md + transition-problem/SKILL.md + ADR-029 alignment with the corrected Known Error definition (architect + JTBD gates passed).
-- [ ] **Phase 2 (deferred)** — implement the propose-fix gate relocation + auto-create mechanism + behavioural bats (RFC-005 B-tasks, held-changeset window).
+- [~] **Phase 2 (in progress)** — propose-fix gate relocation + auto-create mechanism shipped 2026-06-16 (iter 11): predicate `check-fix-rfc-trace.sh` + bin shim + bats (RFC-005 B3), manage-problem propose-fix gate (B4), work-problems carve-out (B5). Remaining: B2 reconciliation, B6 dogfood assertion, B7 migration sweep, B8 forward-dogfood, B9 retro wiring, B10 held-changeset graduation.
 
 ## Dependencies
 
