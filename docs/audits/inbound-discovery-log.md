@@ -203,3 +203,25 @@ Invoked from `/wr-itil:work-problems` Step 0b pre-flight (AFK orchestrator) via 
 
 - Fail-soft contract held: 2 skipped channels did not block the pass.
 - `AskUserQuestion` not called (AFK subprocess context; mechanical-stage carve-out per ADR-062 § 4.5 AFK behaviour). Verification Queue untouched (ADR-013 Rule 6 — no auto-close of verifying tickets).
+
+## 2026-06-17T12:32:15Z — Discovery pass
+
+Invoked from `/wr-itil:work-problems` Step 0b pre-flight (AFK orchestrator) via `/wr-itil:review-problems` Step 4.5. TTL-expiry auto-recheck branch: cache age ~7 days (last_checked 2026-06-10T13:15:56Z) exceeded `ttl_seconds: 86400`.
+
+| Channel | Status | Reports |
+|---------|--------|---------|
+| `github-issues:windyroad/agent-plugins` (title_prefix=`[problem]`) | OK | 50 active (open upstream) + 1 retained closed-upstream historical entry (#149) |
+| `github-discussions:windyroad/agent-plugins` (category=`Q&A`) | skipped | 0 — Discussions disabled for repo (HTTP 410); status carried forward |
+| `github-security-advisories:windyroad/agent-plugins` | skipped | 0 — read-only LIST call still blocked by the external-comms gate (fresh poll attempted this pass, denied with `BLOCKED (external-comms gate / voice-tone evaluator)`; fail-soft skip per Step 4.5 contract) |
+
+**Set delta vs prior cache (2026-06-10T13:15:56Z)**: **2 new, 0 newly-closed** — #257 (itil-correction-detect UserPromptSubmit hook false-positives on orchestrator/AFK prompt text) and #256 (`/wr-itil:update-upstream` Step 1 ticket-lookup glob silently false-no-ops under zsh), both filed 2026-06-14 by tompahoward. The remaining 48 active `[problem]`-prefixed open issues match the prior cache set exactly. #149 remains closed upstream (preserved as historical entry).
+
+**Pipeline outcomes**: 0 new pipeline classifications. All 50 active reports remain `pending-pipeline-processing`. The JTBD-alignment + dual-axis-risk classifiers, semantic-comparator matching, branch routing, and per-report acknowledgement comments remain **deferred** per the standing 2026-05-15 user direction (external-comms-gate sha bug blocks ack-comment posting). No external comments posted (pipeline deferred + AFK subprocess).
+
+**Cache refresh confirmation**: `docs/problems/.upstream-cache.json` rewritten with `last_checked: 2026-06-17T12:32:15Z`; github-issues `fetched_at` refreshed; discussions + security-advisories `fetched_at` carried forward (channels skipped); 2 new report entries appended with body_hash; `$last_pass_note` updated.
+
+**Audit notes**:
+
+- Fail-soft contract held: the 2 skipped channels did not block the pass (discussions HTTP 410 + security-advisories gate-block both preserve their prior skip status; security-advisories LIST re-probed this pass and re-confirmed the gate-block).
+- Step 4.5 invoked as part of `/wr-itil:work-problems` Step 0b preflight robustness layer — orchestrator dispatched this subprocess to refresh the inbound-discovery cache before re-entering the work-loop. Self-healing TTL-expiry pattern continues to hold (7-day inter-pass gap auto-rechecked without an explicit `--force-upstream-recheck` flag).
+- `AskUserQuestion` not called (AFK subprocess context per orchestrator instruction; mechanical-stage carve-out per P132 / ADR-062 § 4.5 AFK behaviour). Per-ticket re-scoring, dependency-graph traversal, relevance-close auto-actions, and the Verification Queue prompt were not run this pass — scope was the inbound-discovery cache + audit-log + README inbound-section refresh per the Step 0b directive.

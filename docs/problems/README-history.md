@@ -1028,3 +1028,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-06-17 **P368 captured** — wr-architect-mark-oversight-confirmed cannot discover session-id when CLAUDE_SESSION_ID empty and no announce markers (lightweight aside via /wr-itil:capture-problem)
 
 > Last reviewed: 2026-06-17 **P369 captured** — Plugin removes hook file but adopter session still invokes it via stale binding — `architect-compendium-refresh-discipline.sh` case (recurring "bad paths" class; lightweight aside via /wr-itil:capture-problem)
+
+> Last reviewed: 2026-06-17 **P370 captured** — Iter subprocess ends turn waiting on a backgrounded task with no auto-resume; commit-bearing work lost ($8.02 / 17 min iter 11 evidence); turn-end-mid-background class sibling of P083/P146/P232 (lightweight aside via /wr-itil:capture-problem)

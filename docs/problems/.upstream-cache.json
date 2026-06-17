@@ -1,14 +1,32 @@
 {
  "$schema": "https://windyroad.github.io/agent-plugins/schemas/upstream-cache.json",
  "$comment": "Cache file for inbound report discovery (P079 / ADR-062). Written by /wr-itil:review-problems Step 8.5 after each discovery pass.",
- "last_checked": "2026-06-10T13:15:56Z",
- "$last_pass_note": "2026-06-10 review-problems discovery pass (work-problems Step 0b preflight, TTL-expiry auto-recheck; cache age ~9 days exceeded ttl_seconds 86400). github-issues: 48 active [problem] reports — 6 NEW vs 2026-06-01 cache (#241, #236, #219, #218, #217, #202); zero newly-closed; #149 retained as historical closed-upstream entry. 12 non-prefixed open issues excluded by channel title_prefix filter (outbound-filed mirrors, tracked via check-upstream-responses). discussions skipped (HTTP 410 — disabled for repo); security-advisories poll skipped (external-comms gate misclassification of read-only gh api call — preserved per prior-pass evidence, fail-soft per Step 4.5). Pipeline classification for all pending reports remains deferred per 2026-05-15 user direction (external-comms-gate ack-comment bottleneck not yet cleared).",
+ "last_checked": "2026-06-17T12:32:15Z",
+ "$last_pass_note": "2026-06-17 review-problems discovery pass (work-problems Step 0b preflight, TTL-expiry auto-recheck; cache age ~7 days exceeded ttl_seconds 86400). github-issues: 50 active [problem] reports — 2 NEW vs 2026-06-10 cache (#257, #256, both filed 2026-06-14); zero newly-closed; #149 retained as historical closed-upstream entry. discussions skipped (HTTP 410 — disabled for repo); security-advisories poll skipped (external-comms gate still blocks read-only gh api LIST call — reconfirmed this pass, fail-soft per Step 4.5). Pipeline classification for all pending reports remains deferred per 2026-05-15 user direction (external-comms-gate ack-comment bottleneck not yet cleared).",
  "channels": {
   "github-issues:windyroad/agent-plugins": {
-   "fetched_at": "2026-06-10T13:15:56Z",
+   "fetched_at": "2026-06-17T12:32:15Z",
    "filter": "title_prefix=[problem] (label filter removed; see channels-config $filter-note)",
    "status": "ok",
    "reports": [
+    {
+     "number": 257,
+     "title": "[problem] itil-correction-detect UserPromptSubmit hook false-positives on orchestrator/AFK prompt text",
+     "author": "tompahoward",
+     "createdAt": "2026-06-14T15:30:54Z",
+     "body_hash": "84503d6d73f72447",
+     "classification": "pending-pipeline-processing",
+     "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-06-17"
+    },
+    {
+     "number": 256,
+     "title": "[problem] /wr-itil:update-upstream Step 1 ticket-lookup glob silently false-no-ops under zsh",
+     "author": "tompahoward",
+     "createdAt": "2026-06-14T15:30:49Z",
+     "body_hash": "b22e7cc4f4bdbfe8",
+     "classification": "pending-pipeline-processing",
+     "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-06-17"
+    },
     {
      "number": 149,
      "title": "[problem] external-comms gate friction + commit/push/release threshold drift (composed P010+P007)",
