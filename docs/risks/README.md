@@ -153,3 +153,4 @@ The catalogue is self-pruning: when a class stops surfacing in `.risk-reports/` 
 | [R058](R058-work-problems-skill-prose-floor-no-paired-promptfoo-p358.active.md) | Work Problems Skill Prose Floor No Paired Promptfoo P358 | pending | — | — | pending | pending | 2026-06-17 |
 | [R059](R059-skill-prose-surface-push-without-paired-eval.active.md) | Skill Prose Surface Push Without Paired Eval | pending | — | — | pending | pending | 2026-06-17 |
 | [R060](R060-skill-prose-upstream-dispatch-no-promptfoo-coverage.active.md) | Skill Prose Upstream Dispatch No Promptfoo Coverage | pending | — | — | pending | pending | 2026-06-17 |
+| [R061](R061-catchup-migration-mode-skill-prose-no-promptfoo-coverage.active.md) | Catchup Migration Mode Skill Prose No Promptfoo Coverage | pending | — | — | pending | pending | 2026-06-17 |
