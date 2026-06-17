@@ -237,6 +237,17 @@ Once Q1–Q5 are answered:
 
 **Spec captured; Phase 2 BLOCKED on Q1–Q5 direction.** Single AskUserQuestion (sequential 4+2 per ADR-013 Rule 1) once user is interactive. Spec is internally consistent and ships in this iter's commit; no implementation files were touched; risk envelope = docs-only Low.
 
+### Phase 2 Direction Ratified 2026-06-17
+
+User ratified during the 2026-06-17 outstanding-questions drain:
+
+- **Q1 — WSJF scalar choice: Option B (Cost-as-primary, USD).** WSJF Effort denominator is the USD scalar wrapping time × hourly-rate-equivalent + token-cost. Aligns WSJF with budget framing; couples to the hourly-rate assumption (the assumption itself becomes a Phase 2 design choice — pick a sensible default and let it be tunable).
+- **Q3 — Migration: Option B (Dual-axis coexistence).** New tickets carry time + tokens (and the derived USD scalar); legacy tickets continue under the t-shirt fallback table (S=30min, M=120min, L=480min, XL=1440min) with token-cost imputed from time × baseline-rate until next `/wr-itil:manage-problem` touch. Opportunistic migration; no mass re-estimate commit.
+
+Q2 (RCA+RFC estimate coexistence), Q4 (RMS metric scope), Q5 (token-cost composability) remain unratified BUT framework-resolvable: the recommended defaults in the question text above stand as the silent-framework choices (Q2: keep RCA estimate; WSJF uses remaining-RCA + RFC. Q4: rolling N=20 closures, global bucketing, all three transitions feed calibration. Q5: Option C — full disclosure in tally, simple sum for WSJF). Q6 is mechanical (hoist on next work-problems edit pass).
+
+Phase 2 build unblocked. Next step: implement `wr-itil-tally-effort` per Phase 2 work list above with Cost-as-primary WSJF formula + Dual-axis migration table.
+
 ## Dependencies
 
 - **Blocks**: any future WSJF estimation accuracy improvement work (this is the foundation)

@@ -74,6 +74,29 @@ The empirical RCA is now substantially complete (root cause confirmed at both su
 
 **Queued for user (single decision, surfaces at next interactive checkpoint):** *When a problem ticket's fix is shaped by an ADR rather than code-level diagnosis, should an architect-PASS verdict on the driving ADR be allowed to substitute for empirical RCA at the Open→Known-Error gate?* — **(a) Carve-out**: yes, for architecture-driven problems whose fix value is independent of base-rate, with the Known Error transition gated on ADR acceptance (mirrors ADR-060's bounded-escape pattern); **(b) Hard-block**: no, every problem completes empirical RCA before Known Error (strict ITIL). Whichever is chosen then drives a load-bearing precondition gate at manage-problem Step 9 + work-problems Step 5 + iter-dispatch, an ADR-022 amendment or new ADR, and the behavioural bats fixture — all per ADR-051 (ship enforcement with the discipline, not advisory-then-escalate).
 
+## Fix Strategy — ratified 2026-06-17
+
+User ratified **Hard-block** position via AskUserQuestion during the 2026-06-17 outstanding-questions drain: every problem completes empirical RCA before the Open → Known Error transition regardless of architect verdict. Architect-PASS does NOT substitute for RCA.
+
+**Framework implication**: uniform state-machine — no carve-out for architecture-driven problems. The Open → Known Error gate requires:
+
+1. Empirical reproduction of the failure mode (a test that goes RED, a session that exercises the path, a citation per ADR-026 of the observable failure).
+2. Root-cause analysis ON THE PROBLEM TICKET (Root Cause Analysis section populated; not just "see linked ADR").
+3. Fix Strategy section populated on the problem ticket (the chosen approach + rationale).
+
+Architect-PASS at ADR acceptance is INDEPENDENT of the problem ticket's lifecycle. An ADR can be accepted while the originating problem ticket stays Open until empirical RCA lands.
+
+**Implementation sketch**:
+
+1. Amend `/wr-itil:manage-problem` Step 7 (Open → Known Error transition) prose: require empirical RCA evidence even when an accepted ADR exists. Architect-PASS markers do NOT bypass.
+2. Cross-reference in `/wr-itil:transition-problem` Step 4 pre-flight: similar wording.
+3. Behavioural bats: fixture exercises "ADR accepted + problem ticket Open without RCA — transition denied".
+4. Cross-link with P179 enforcement (the no-unauthorized-defer rule applies here too).
+
+The carve-out option is rejected. Compose with P179's hard-rule enforcement: both can ship together as a discipline-rule pair.
+
+Next step: capture an RFC per ADR-060 tracing this ticket + P179; defer build under ADR-074 until RFC scope ratified.
+
 ## Dependencies
 
 - **Blocks**: (none — this ticket is friction-reduction / discipline-strengthening; pre-existing implementation work continues)

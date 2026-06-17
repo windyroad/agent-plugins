@@ -1,6 +1,6 @@
 # Problem 080: No bidirectional update of upstream-reported problems — local lifecycle transitions never propagate back to the reporter
 
-**Status**: Verification Pending
+**Status**: Known Error
 **Reported**: 2026-04-21
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: M (marginal) — new sibling skill `/wr-itil:update-upstream` (per user direction 2026-04-26) that fires from `manage-problem`/`transition-problem` Step 7 transitions, drafts the lifecycle-update comment, runs it through the P064 risk gate + P038 voice-tone gate, and auto-posts when both gates pass within appetite. Above-appetite triggers `AskUserQuestion` (interactive) or halt-with-report (AFK).
@@ -152,6 +152,32 @@ Architect call required at implementation time to:
 Phase 1 (Option B — new sibling skill `/wr-itil:update-upstream`) shipped 2026-06-09 per the Investigation Tasks above: SKILL.md + three transition templates + dual-gate (risk + voice-tone) composition + paired promptfoo eval (R009 discharge) + 23 bats + ADR-024 amendment + `transition-problem` Step 7b / `manage-problem` Step 7 advisory wire-in.
 
 **Release vehicle**: .changeset/wr-itil-p080-update-upstream-sibling-skill.md
+
+### Phase 2 reopened 2026-06-17 — `--catchup` migration mode
+
+User direction during the 2026-06-17 outstanding-questions drain: **"reopen P080 so phase 2 can be implemented"**. P080 transitioned Verifying → Known Error to surface Phase 2 in the WSJF queue rather than splitting into a sibling ticket.
+
+**Phase 2 scope**: a one-shot `--catchup` migration mode on `/wr-itil:update-upstream` that walks every existing `.verifying.md` / `.closed.md` ticket carrying a `## Reported Upstream` section and retroactively posts the appropriate lifecycle update to the upstream issue. Backfills history for tickets reported upstream BEFORE Phase 1 shipped OR transitioned outside Phase 1's path.
+
+**Phase 2 acceptance criteria**:
+
+1. New invocation surface: `/wr-itil:update-upstream --catchup` (or equivalent flag).
+2. Walks the `.verifying.md` + `.closed.md` corpus; per-ticket: read `## Reported Upstream`, derive lifecycle state from filename + Status field, dispatch the appropriate transition template comment.
+3. Idempotent: a ticket whose upstream issue already received the lifecycle comment (detected via prior comment from the bot account / a marker on the ticket body) is skipped silently.
+4. Dual-gate composition: each catchup comment passes through risk + voice-tone gates per Phase 1.
+5. Above-appetite triggers `AskUserQuestion` (interactive) or halt-with-report (AFK) — same shape as Phase 1.
+6. Behavioural bats: fixture exercises catchup on a synthetic verifying/closed corpus + asserts idempotency.
+7. End-to-end test against a live upstream: confirms the comment lands. This is also P080's overall verification step.
+8. Closes P363's root-cause finding (the inbound-reported-tickets-never-receive-fix-released-verdict gap); once catchup runs on the existing corpus, P363 can transition Known Error → Verifying (composing fix).
+
+**Implementation order**:
+
+1. SKILL.md amendment to `/wr-itil:update-upstream`: add `--catchup` mode + invocation surface + idempotency contract.
+2. Behavioural bats: catchup fixture + idempotency guard.
+3. Live-upstream end-to-end test execution (one-shot; result documented on this ticket).
+4. Transition Known Error → Verifying once 1-3 land + a fresh release goes out.
+
+Composes with P363 (the inbound-reported-tickets-never-receive-fix-released-verdict ticket whose fix this Phase 2 closes).
 
 ## Fix Released
 

@@ -63,6 +63,18 @@ The accepted RFC's chosen mechanism MUST satisfy all of:
   of this duplicate-and-sync overhead that the bundler approach closes.
 - Reconcile ADR-017 — amend or supersede it once the mechanism lands (record the
   reassessment outcome + the new convention). ADR-017 stays operative until then.
+- **Coordinate with RFC-025 markdown-toggle tool choice (user direction 2026-06-17 drain).**
+  RFC-025 is selecting a `markdown source → variant markdown` tool (leading candidate:
+  `remark` / `unified` ecosystem with `remark-directive`) for build-time feature
+  toggling on SKILL.md and other shipped markdown. This RFC's JS/TS bundler choice
+  and RFC-025's markdown-toolchain choice operate on different source surfaces but
+  ship into the same `@windyroad/*` plugin tarballs — they MUST coexist in one
+  coherent build pipeline per plugin. Therefore: defer this RFC's bundler-mechanism
+  pick until RFC-025 Slice 1 produces its tool-comparison matrix (or jointly with it),
+  and reject any bundler whose plugin ecosystem cannot compose with RFC-025's chosen
+  markdown toolchain. User direction verbatim: *"didn't we end up picking a tool
+  for feature flagging? Can we use it here too or at the very least, don't they need
+  to work well together?"*
 
 ## Scope
 

@@ -100,6 +100,23 @@ Root cause confirmed and the deferral class reconciled against shipped sibling f
 - [ ] Behavioural test: a bats fixture asserting that ADR / RFC / problem-ticket / iter-prompt artefacts authored by skills do NOT contain `(deferred|Out of Scope|Phase [0-9]+ \(deferred)` patterns without an adjacent ticket-ID citation. Fixture exercises the manage-problem / capture-problem / capture-rfc / manage-rfc / create-adr / amendment paths.
 - [ ] Reverse-engineer the 6 in-session deferral instances (story-map design, ADR-022/016/024 amendments, T6, T7-T11, Phase 2.5 WSJF, Phase 2.5 INVEST) — for each, identify where in the agent's reasoning chain the deferral decision fired and whether the user had explicit input. Calibrates whether the fix targets the agent-prior layer or the SKILL.md layer.
 
+## Fix Strategy — ratified 2026-06-17
+
+User ratified **Option A — Hard rule + behavioural test per ADR-051 / ADR-052** via AskUserQuestion during the 2026-06-17 outstanding-questions drain.
+
+**Shape**: codify the no-unauthorized-defer principle as a hard SKILL.md / agent-prose rule + ship behavioural bats (or promptfoo eval per ADR-075) that exercises the rule. Strongest enforcement at agent-prose time.
+
+**Implementation sketch** (defer detailed design to RFC):
+
+1. Identify the canonical authoring location for the rule (likely `packages/itil/skills/work-problem/SKILL.md` and the AFK orchestrator `work-problems`; possibly also `manage-problem` if the defer pattern recurs at investigation time).
+2. Draft prose-rule text: "Do not defer requested work into phases unless (a) the user explicitly authorised the split OR (b) a ticket exists that tracks the deferred phase. Phases without authorization or tracking are P179-class violations."
+3. Add behavioural test: bats fixture OR promptfoo eval that exercises a session-shape where the agent is asked for a complete solution and the test asserts the response does not contain a deferral without an accompanying ticket-capture invocation.
+4. Cross-reference the 13 existing tickets that cite the principle so they trace into the enforcement test.
+
+Options B (soft retro-audit), C (mid-flow ask), and D (ratify de-facto) are rejected.
+
+Next step: capture an RFC per ADR-060 tracing this ticket + the locus list above; defer build under ADR-074 substance-confirm-before-build until the RFC has scope ratified.
+
 ## Dependencies
 
 - **Blocks**: (none directly — but the longer this is deferred, the more accumulated unauthorised deferrals pile up across the framework's ADRs)

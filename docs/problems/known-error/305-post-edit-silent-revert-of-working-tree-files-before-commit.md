@@ -81,6 +81,12 @@ Three candidate fix surfaces, all requiring ADR ratification before implementati
 
 **Recommendation (architect FLAG, not ratified)**: Option A is the simplest mechanical correction with the smallest blast radius and clearest invariant (no parallel iters = no race). Wall-clock cost is real but bounded; Options B + C add complexity without strictly eliminating the underlying mechanism. Surface for user ratification.
 
+### User ratification 2026-06-17 — Option B (per-iter git worktree) chosen
+
+User ratified **Option B (per-iter git worktree)** via AskUserQuestion during the 2026-06-17 outstanding-questions drain. Rationale: full isolation gives true parallelism without shared-tree race; complexity is accepted as worth the correctness envelope. The bundler-class change (P304/RFC-023) is sympathetic to per-worktree builds — they can coordinate.
+
+Next step: capture an RFC (per ADR-060) tracing P305 + the orchestrator changes — per-iter worktree setup, branch creation per iter, merge-back protocol, plugin-cache divergence handling (each worktree may bind a different cached plugin version unless explicitly aligned). Options A and C are now rejected as the going-forward shape.
+
 ## Dependencies
 
 - **Blocks**: any future AFK iter that edits shared files in parallel (the recurrence class).

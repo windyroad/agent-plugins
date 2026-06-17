@@ -81,6 +81,23 @@ Architect surfaced three viable options (A/B/C). **P356 folded in 2026-06-16 (it
 - Three viable options (A / B / C) surfaced for user direction; substance question queued as outstanding_question for next interactive session.
 - No code shipped in Phase 2. No new ADR. No helper extraction. Investigation findings persisted in this ticket body so the next iter (or next interactive session) does not repeat the analysis.
 
+## Phase 2 direction ratified 2026-06-17 — Option D
+
+User ratified **Option D (P356-driven) — Strengthen reactive surfaces into guided invocations** via AskUserQuestion during the 2026-06-17 outstanding-questions drain. Options A (architect-lean close-as-investigated-no-build), B (ship voice-tone + style-guide SessionStart pre-warnings), and C (architect-only Phase 2) are rejected.
+
+**Phase 3 scope** (now unblocked):
+
+1. **voice-tone** — `voice-tone-enforce-edit.sh:71-72` already BLOCKs with "Run `/wr-<plugin>:update-guide`" prose-direction; the P200 PASS-with-advisory also names the skill. Upgrade BOTH surfaces from "name the skill in prose" into a stronger guided-invocation affordance (e.g. structured `SUGGESTED_NEXT: /wr-voice-tone:update-guide` tag that the agent can act on as a one-step call-to-action, or a marker the SessionStart layer reads to surface as a guided prompt at next session start).
+2. **style-guide** — `style-guide-enforce-edit.sh:69-70` carries the same BLOCK-and-name-prose pattern; same upgrade.
+3. **jtbd** — `jtbd-enforce-edit.sh:197-199` carries the same pattern; same upgrade.
+4. **architect** — close the silent-fail-open gap at `architect-enforce-edit.sh:48-49` (projects with NO `docs/decisions/`) by adding a guided-invocation surface that walks the user into authoring an ADR (or scaffolding the directory).
+5. **Sibling ADR** — author an ADR codifying the "guided-onboarding pattern" — the cross-plugin convention for when a plugin's policy file / artefact directory is missing AND its enforce-edit gate would fire on the first relevant edit. Trace P297 + P356 + JTBD-302.
+6. **Measurement against JTBD-302** — the README-implies-governance-enforcement / installed-plugin-no-ops outcome is the metric this Phase 3 closes; the ADR should cite the JTBD-302 outcome it serves.
+
+**Implementation order**: define the guided-invocation tag/marker shape first (cross-plugin coherence); then apply to voice-tone / style-guide / jtbd (cheap delta — three reactive surfaces already exist); then close the architect gap (net-new surface); then author the ADR.
+
+Next step: capture an RFC per ADR-060 tracing this ticket + P356 + the four plugin loci + the new ADR. Defer build under ADR-074 until RFC scope ratified.
+
 ## Dependencies
 
 - **Blocks**: ADR-047 human-oversight confirmation (held until amended).
