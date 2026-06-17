@@ -60,6 +60,31 @@ Adopter-side: restart the Claude Code session in the affected project (forces re
 - [ ] Decide whether this is an RFC-class scope (a real shipment-hygiene mechanism per ADR-082 territory) or a tightly-scoped prose-correction (deprecation-cycle discipline in maintainer SKILL/CONTRIBUTING docs).
 - [ ] Cross-check with P368 (sibling captured 2026-06-16): `wr-architect-mark-oversight-confirmed` cannot discover session-id under cold-path conditions on macOS — the same shim's bash-tool sees `/tmp` differently than the hook does. The plugin-distribution-hygiene class spans multiple surfaces (path resolution, registration lifecycle, session binding) — may warrant an umbrella problem ticket if more sibling observations accumulate.
 
+## Fix Strategy
+
+(Step 4b Stage 2 — proposed fix strategy recorded at capture time; not yet ratified by user.)
+
+**Option 3 — Other codification shape.**
+
+**Shape**: CI step + test fixture (the existing controls layer per ADR-049 + `check-tarball-shipped-shims.sh`).
+
+**Suggested name / locus**: a sibling discipline check next to `packages/retrospective/scripts/check-tarball-shipped-shims.sh` — e.g. `check-tarball-hooks-resolve.sh`.
+
+**Mechanism candidates** (direction-setting; user picks at re-rate / RFC):
+
+- (a) **Pre-publish CI check**: every `hooks/hooks.json` registration entry must resolve to a file present in the published tarball / marketplace snapshot. Run as a CI step on the release PR.
+- (b) **PostPublish drift detector**: at session start, when a plugin's cache version updates, scan its `hooks.json` for entries referencing files-that-no-longer-exist relative to the new version's tree. Warn the user via the SessionStart hook surface.
+- (c) **Deprecation-cycle discipline ADR**: when removing a hook, deprecate it to a no-op shim for one minor-version cycle BEFORE deleting the file — buffers adopter sessions across the transition. Codify as an ADR or as a maintainer's CONTRIBUTING note.
+- (d) **`/install-updates` invariant**: post-install, force a session restart whenever a plugin's hook surface changes significantly (additions / removals / renames). Heavyweight but closes the live-session gap.
+
+The cleanest first cut is (a) + (c): a CI check that asserts the invariant + a documented deprecation-cycle discipline. (b) and (d) are richer but add cross-session machinery that requires its own design pass.
+
+**Triggers**: any commit that modifies `packages/<plugin>/hooks/hooks.json` or removes a file under `packages/<plugin>/hooks/`.
+
+**Evidence (this session)**: 1 user-reported observation (2026-06-17 screenshot from an adopter project showing the orphan-hook PreToolUse:Bash error). Class history covers P151 / P153 / P219 / P317.
+
+**Routing target**: when ratified, capture an RFC (per ADR-060) since the mechanism involves a cross-cutting check + a deprecation-cycle convention — multi-phase scope likely warrants RFC framing rather than direct skill/hook ship.
+
 ## Dependencies
 
 - **Blocks**: adopter trust in plugin stability across `wr-architect` retirements. Until the gap closes, every hook surface refactor risks repeating this failure mode.

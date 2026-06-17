@@ -46,12 +46,65 @@ Sibling-class to P260 / ADR-050 Option C candidate-SID enumeration — same root
 
 ## Root Cause Analysis
 
+### Root cause identified 2026-06-17 (retro on the same-day session)
+
+**The actual root cause is NOT "no announce markers exist" — announce markers DO exist on disk; the helper script's `find` invocation cannot see them on macOS.**
+
+Investigation evidence from the 2026-06-17 retro session:
+
+1. `mark-oversight-confirmed.sh` enumerates candidate session IDs via:
+   ```bash
+   find "$MARKER_DIR" -maxdepth 1 -name '*-announced-*' -mmin "-${WINDOW_MINS}"
+   ```
+   where `MARKER_DIR=/tmp` (default).
+
+2. On macOS, `/tmp` is a symlink to `private/tmp`:
+   ```bash
+   $ ls -la /tmp
+   lrwxr-xr-x 1 root 11 Feb  5 16:13 /tmp -> private/tmp
+   ```
+
+3. `find /tmp -maxdepth 1 -name 'PATTERN'` (without trailing slash) does NOT traverse the symlink and returns ZERO results, even when matching files clearly exist:
+   ```bash
+   $ find /tmp -maxdepth 1 -name 'architect-announced-*'
+   # (empty)
+   $ ls /tmp/architect-announced-* | head -3
+   /tmp/architect-announced-112badc1-875f-411f-92eb-0e0bd6eb7b52
+   /tmp/architect-announced-ca5a4c11-a0ed-4c48-9212-9de60c063641
+   $ find /tmp/ -maxdepth 1 -name 'architect-announced-*'  # trailing slash
+   /tmp/architect-announced-e79c229a-8397-4ad7-936c-e82418a5ae38
+   ...
+   ```
+
+4. Workaround that succeeded in the 2026-06-17 retro session: invoke the helper with `SESSION_MARKER_DIR=/tmp/` (trailing slash):
+   ```bash
+   SESSION_MARKER_DIR=/tmp/ wr-architect-mark-oversight-confirmed docs/decisions/082-...proposed.md
+   ```
+   This wrote 60 markers across all candidate session IDs the helper enumerated. The subsequent Edit succeeded.
+
+**Real fix locus narrowed:** revise the helper's `find` invocation to be macOS-symlink-safe. Two viable changes (sibling fix options to the original a/b/c above):
+
+- (d) Use trailing-slash form unconditionally: `find "${MARKER_DIR%/}/" -maxdepth 1 -name ...`.
+- (e) Use `-L` (follow-symlinks) on the find invocation: `find -L "$MARKER_DIR" -maxdepth 1 -name ...`.
+
+The hook side (`architect-oversight-marker-discipline.sh`) writes to `${SESSION_MARKER_DIR:-/tmp}/oversight-confirmed-...` — that write goes THROUGH the symlink fine via shell open(2) semantics, so only the helper's discovery path needs the symlink-safe form.
+
+**Class generalisation:** this is a portable-shell hygiene issue any helper using `find /tmp -name ...` faces on macOS. Sibling helpers + hooks doing similar enumeration likely carry the same bug. Recommend a grep audit:
+```bash
+grep -rn 'find /tmp ' packages/*/scripts/ packages/*/hooks/ 2>/dev/null
+grep -rn 'find "$MARKER_DIR"' packages/*/scripts/ packages/*/hooks/ 2>/dev/null
+```
+
+The original a/b/c options (caller-supplies-SID / fail-loudly-on-empty / session-agnostic-marker) remain valid design-improvement axes but are now optional — option (d) or (e) closes the immediate failure mode with a single-line change.
+
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Investigate root cause: confirm the helper-script + hook contract; map where `$CLAUDE_SESSION_ID` is expected to come from (env var? stdin JSON? other?)
-- [ ] Pick fix locus (a / b / c above) — direction-setting per ADR-074
-- [ ] Create reproduction test: fresh-session scenario where no announce markers exist + capture/drain ADR in one turn
+- [x] Investigate root cause: confirmed 2026-06-17 in retro session — macOS /tmp symlink + find-without-trailing-slash; announce markers DO exist; find cannot see them.
+- [ ] Audit sibling helpers + hooks for the same `find /tmp -name` pattern via the grep above.
+- [ ] Apply fix (d) or (e) — single-line change, no architectural decision needed.
+- [ ] Create reproduction test: bats fixture asserting `mark-oversight-confirmed` writes markers when announce markers exist under a `/tmp` symlink (use a temp-dir symlink-fixture instead of the real `/tmp`).
+- [ ] Decide whether the original a/b/c options stay in scope for separate tickets or close as resolved-by (d)/(e).
 
 ## Dependencies
 
