@@ -149,3 +149,7 @@ The catalogue is self-pruning: when a class stops surfacing in `.risk-reports/` 
 | [R054](R054-architect-jtbd-agent-prose-verdict-grammar-no-promptfoo-eval.active.md) | Architect Jtbd Agent Prose Verdict Grammar No Promptfoo Eval | pending | — | — | pending | pending | 2026-06-10 |
 | [R055](R055-r009-review-problems-skill-prose-bedrock-floor.active.md) | R009 Review Problems Skill Prose Bedrock Floor | pending | — | — | pending | pending | 2026-06-10 |
 | [R056](R056-reconcile-readme-prose-no-promptfoo-eval.active.md) | Reconcile Readme Prose No Promptfoo Eval | pending | — | — | pending | pending | 2026-06-10 |
+| [R057](R057-feat-commit-without-paired-changeset-phase-1-ambiguity.active.md) | Feat Commit Without Paired Changeset Phase 1 Ambiguity | pending | — | — | pending | pending | 2026-06-17 |
+| [R058](R058-work-problems-skill-prose-floor-no-paired-promptfoo-p358.active.md) | Work Problems Skill Prose Floor No Paired Promptfoo P358 | pending | — | — | pending | pending | 2026-06-17 |
+| [R059](R059-skill-prose-surface-push-without-paired-eval.active.md) | Skill Prose Surface Push Without Paired Eval | pending | — | — | pending | pending | 2026-06-17 |
+| [R060](R060-skill-prose-upstream-dispatch-no-promptfoo-coverage.active.md) | Skill Prose Upstream Dispatch No Promptfoo Coverage | pending | — | — | pending | pending | 2026-06-17 |
