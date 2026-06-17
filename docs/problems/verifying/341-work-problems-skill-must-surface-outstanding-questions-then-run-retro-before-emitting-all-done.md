@@ -98,6 +98,35 @@ Implemented session 9 iter 6 (2026-05-31). SKILL.md amendments + behavioural bat
 
 Released 2026-06-01 in **@windyroad/itil@0.43.0** + **@windyroad/retrospective@0.22.0** (fix commit `63e0f27`, packaged via `1d1d6a8 chore: version packages`). The new Step 2.4 Pre-ALL_DONE gate sequence fires unconditionally before every `ALL_DONE` emit: gate (a) outstanding-questions surface via Step 2.5b + gate (b) session-level retro via `/wr-retrospective:run-retro` + gate (c) `ALL_DONE` emit ONLY after both complete. Hard-fail halts with directive when either gate cannot complete cleanly. Awaiting user verification: next `/wr-itil:work-problems` AFK loop's `ALL_DONE` should not fire until both gates run; observable evidence is the orchestrator main-turn output showing the gate sequence execution before any `ALL_DONE` line.
 
+## Verification Failed Observation 2026-06-17
+
+Verification failed in interactive session 2026-06-17. Direct user observation: *"there should be a natural way that these get surfaced, rather than me having to ask. I suggested previously that they should be surfaced just before the ALL_DONE on the work-problems skill, but that hasn't been implemented"*.
+
+**Evidence:**
+
+- `.afk-run-state/outstanding-questions.jsonl` last write: **2026-06-16 21:24** (yesterday's AFK loop's last queueing event).
+- Post-ALL_DONE retro committed today: `57ff6512 docs(retros): post-ALL_DONE extension retro 2026-06-17` (2026-06-17 08:52). The retro's existence is observable evidence that `ALL_DONE` fired today, AND that gate (b) (session-level retro) ran.
+- Despite gate (a) (outstanding-questions surface) being prescribed UNCONDITIONALLY before `ALL_DONE` per Step 2.4, the queue at `.afk-run-state/outstanding-questions.jsonl` retained **15 unsurfaced entries** spanning `iter-1-p211` through `iter-31-p357`, accumulated across **multiple prior sessions** (iter ids span weeks of AFK work).
+- The user discovered the queue today by directly pointing at the file (`'.../outstanding-questions.jsonl' ???`) — not via any orchestrator surface. This is precisely the failure mode the original P341 capture (2026-05-31) named.
+
+**Verification verdict:** P341's Step 2.4 SKILL prose amendment + 11 GREEN behavioural bats are NOT sufficient to enforce the gate at runtime. Either:
+
+1. The Step 2.4 prose is being silently skipped by the orchestrator at `ALL_DONE` emission time (SKILL prose drift class — bats assert PROSE PRESENCE, not RUNTIME EXECUTION), OR
+2. Step 2.4 fires but only surfaces questions queued *during the current session*, not the accumulated cross-session queue (drain-scope-too-narrow class), OR
+3. Step 2.4 fires AND the queue is drained on `ALL_DONE`, but a subsequent fault re-populates it AFTER `ALL_DONE` — unlikely given the queue mtime is yesterday, but possible if cross-session staging differs from same-session drain.
+
+Hypothesis 1 is the most likely class given P341's bats assert SKILL.md prose, not behavioural orchestrator output. Sibling class: P332 (run-retro skips mandatory steps under session-length rationalization — same "prose says A, runtime does B" drift surface).
+
+**Re-investigation scope (deferred to next /wr-itil:review-problems re-rate + RCA pass):**
+
+- Determine whether gate (a) fired on the 2026-06-17 `ALL_DONE` (instrumentation evidence: orchestrator main-turn output for that loop, if recoverable from session transcript).
+- If gate (a) did fire, determine why the queue retained its 15 entries (drain-scope-too-narrow vs append-after-drain).
+- If gate (a) did NOT fire, determine the structural mechanism that allowed `ALL_DONE` to emit without the gate (Step 2.4 prose-only enforcement vs hook-enforced ordering — hook option was listed as opportunistic-deferred in P341's Investigation Tasks line 64).
+- Hypothesis 1 implies the original P341 fix was insufficient as designed: prose-only enforcement of a load-bearing gate against a model that may silently skip the prose is structurally unsound. The Investigation Tasks line 64 deferred decision (hook-enforced ordering) likely needs to land.
+- Status field SHOULD transition from `Verification Pending` to `Known Error` to reflect verification failure. The transition is deferred to `/wr-itil:transition-problem` or the next `/wr-itil:review-problems` cluster pass — recorded here per the user's "just record the problem" directive.
+
+**User direction recorded:** *"I don't want to focus on the solution, I just wan to record the problem right now"* — the observation IS the record; no fix design proposed here.
+
 ## Dependencies
 
 - **Blocks**: trustworthy AFK loop completion. Until the gates are structurally enforced, `ALL_DONE` semantically means "loop terminated" but says NOTHING about whether the accumulated direction-class observations and session-level learnings were surfaced/captured.
