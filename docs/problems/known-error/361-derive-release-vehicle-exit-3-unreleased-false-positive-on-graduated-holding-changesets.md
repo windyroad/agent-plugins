@@ -56,3 +56,9 @@ The exit-3 guard tested only `[ -f "$CHANGESET_PATH" ]` — presence of the chan
 (captured via /wr-itil:capture-problem; expand at next investigation)
 
 - **Hang-off-check candidate-cap short-circuit (P346 Phase 3)**: mechanical pre-filter surfaced 6 candidates sharing the ADR-061 signal (>5 cap) — subagent dispatch skipped per the capture-problem sub-step 2b latency bound; re-evaluate absorption at next /wr-itil:review-problems. Candidates: P082, P162, P211, P247, P308, P350 (ADR-061 body matches in open/+verifying/). Strongest semantic parents: P359 (open — changeset holding does not withhold shipment; this ticket is the helper-surface consequence of that insight) and P330 (verifying — the derive-release-vehicle helper + seed contract; cannot absorb new scope while verifying).
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-026 | proposed | derive-release-vehicle de-facto-released exit-0 path for graduated holding changesets |
