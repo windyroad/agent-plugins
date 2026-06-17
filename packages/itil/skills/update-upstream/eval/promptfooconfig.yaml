@@ -9,7 +9,10 @@
 # above-appetite silent risk-reduces then queues per P352 queue-and-continue
 # (does NOT halt the orchestrator); (e) Verifying→Closed also runs
 # gh issue close to keep upstream state in sync; (f) the no-op exit fires
-# when the local ticket has no ## Reported Upstream section.
+# when the local ticket has no ## Reported Upstream section; (g) the
+# `--catchup` migration mode (P080 Phase 2) iterates the read-only worklist
+# and routes EACH entry through the same gated per-ticket loop (does NOT
+# bypass the gates) and is idempotent (skips already-logged tickets).
 #
 # Pairing with the bats contract test discharges the R009 prose-floor for
 # this new SKILL surface atomically per ADR-061 Rule 4 evidence-floor —
@@ -237,3 +240,48 @@ tests:
           blocking the post even when risk is within appetite. FAIL if the
           response treats the gates as independent / OR (one passing gate
           authorises the post).
+
+  - description: --catchup migration mode iterates the worklist through the SAME gated loop, idempotently
+    vars:
+      prompt: |
+        I am executing /wr-itil:update-upstream --catchup (the P080 Phase 2
+        batch-retroactive migration mode) in AFK mode. The read-only worklist
+        scanner (wr-itil-catchup-scan) returned three lines:
+          CATCHUP P113 https://github.com/anthropics/claude-code/issues/52831 state=closed transition=Verifying->Closed
+          SKIP    P090 https://github.com/o/r/issues/9 reason=already-logged
+          CATCHUP P114 https://github.com/o/r/issues/6 state=verifying transition=KE->Verifying
+
+        Per the update-upstream catchup migration mode (ADR-024 P080 Phase 2
+        amendment), what does the skill do with these three lines? Be specific
+        about (a) which entries get a comment posted and which is skipped and
+        why, (b) whether each posted comment still passes the external-comms +
+        voice-tone gates or whether catchup bypasses them, and (c) whether an
+        above-appetite catchup entry halts the migration or queues-and-continues.
+    assert:
+      # Tier A — the already-logged entry is skipped (idempotency).
+      - type: regex
+        value: 'already-logged|skip|idempoten'
+      # Tier A — posted entries still run the gh issue surface.
+      - type: icontains
+        value: 'gh issue'
+      # Tier A — gates still apply to each catchup comment.
+      - type: regex
+        value: 'external-comms|voice-tone|gate'
+      # Tier B — catchup reuses the gated per-ticket loop, is idempotent,
+      # and queue-and-continues on above-appetite (does NOT bypass gates).
+      - type: llm-rubric
+        value: |
+          The response describes the --catchup mode as: (1) posting a
+          lifecycle comment for the two CATCHUP entries (P113 Verifying→Closed
+          and P114 KE→Verifying) and SKIPPING the SKIP/already-logged entry
+          (P090) because its lifecycle log already records the target state
+          (idempotency — re-running is safe); (2) routing EACH posted comment
+          through the SAME external-comms + voice-tone gate composition as the
+          per-ticket path — catchup does NOT bypass the gates; (3) on an
+          above-appetite catchup entry, queue-and-continue per P352 (queue
+          that one entry, keep processing the rest) rather than halting the
+          whole migration. PASS if it (a) skips the already-logged entry, (b)
+          keeps the gates on every post, and (c) does not bypass gates or halt
+          the migration on one above-appetite entry. FAIL if it says catchup
+          bypasses the gates for speed, re-posts the already-logged entry, or
+          halts the entire migration on a single above-appetite entry.

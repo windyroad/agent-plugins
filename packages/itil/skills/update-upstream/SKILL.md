@@ -10,7 +10,8 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Skill, Agen
   @jtbd JTBD-201 (Restore Service Fast with an Audit Trail — symmetric local/upstream audit trail)
   @jtbd JTBD-101 (Extend the Suite with Clear Patterns — downstream adopters inherit bidirectional contract)
   @problem P080
-  @adr ADR-024 (amended P080 — bidirectional lifecycle updates)
+  @adr ADR-024 (amended P080 — bidirectional lifecycle updates; Phase 2 — --catchup migration mode + idempotency)
+  @adr ADR-049 (catchup worklist scanner invoked via wr-itil-catchup-scan bin shim)
   @adr ADR-028 (voice-tone gate on `gh issue comment` / `gh issue close`)
   @adr ADR-013 (Rule 1 AskUserQuestion; Rule 6 AFK fail-safe)
   @adr ADR-014 (single-commit grain — transition + back-write + upstream comment)
@@ -31,12 +32,14 @@ This skill implements the bidirectional extension to ADR-024's outbound contract
 ## Invocation
 
 ```
-/wr-itil:update-upstream <NNN>
+/wr-itil:update-upstream <NNN>          # single-ticket lifecycle update
+/wr-itil:update-upstream --catchup      # batch-retroactive migration (Phase 2)
 ```
 
 - `<NNN>`: the three-digit local ticket ID (e.g. `080`). The ticket file is discovered via the same dual-tolerant lookup as [`/wr-itil:report-upstream`](../report-upstream/SKILL.md) (flat layout + per-state subdir per RFC-002 migration window).
+- `--catchup`: one-shot batch-retroactive migration mode (P080 Phase 2 — see [§ Catchup migration mode](#catchup-migration-mode-phase-2)). Walks the existing `.verifying.md` + `.closed.md` corpus and posts the lifecycle update each ticket should have received but did not (because it was reported upstream / transitioned before the per-ticket auto-update path shipped). Idempotent — already-updated tickets are skipped.
 
-The skill is typically invoked from `/wr-itil:transition-problem` Step 7's advisory subsection when the transitioning ticket carries a `## Reported Upstream` section (per ADR-024 Confirmation criterion 3a — the back-write that `/wr-itil:report-upstream` Step 7 writes). User-initiated invocation is also supported for retroactive catch-up on existing `.verifying.md` / `.closed.md` tickets that pre-date this skill landing.
+The single-ticket form is typically invoked from `/wr-itil:transition-problem` Step 7's advisory subsection when the transitioning ticket carries a `## Reported Upstream` section (per ADR-024 Confirmation criterion 3a — the back-write that `/wr-itil:report-upstream` Step 7 writes). User-initiated single-ticket invocation is also supported. The `--catchup` form is user-initiated only (a deliberate one-shot migration, never auto-fired from a transition).
 
 ## Scope
 
@@ -48,10 +51,10 @@ The skill is typically invoked from `/wr-itil:transition-problem` Step 7's advis
 - Within appetite → post via `gh issue comment <n>`; on Verifying→Closed also run `gh issue close <n>`.
 - Above appetite → AskUserQuestion (interactive) / queue `outstanding_questions` (AFK, per P352 queue-and-continue).
 - Back-write a `## Upstream Lifecycle Updates` log entry to the local ticket recording the transition, the matched URL, the posted comment URL, and the disclosure path.
+- **Historical catch-up migration (`--catchup`, P080 Phase 2)** — one-shot retroactive scan of the existing `.verifying.md` + `.closed.md` corpus; posts the lifecycle update each linked-upstream ticket should already carry. Idempotent — re-running is safe. See [§ Catchup migration mode](#catchup-migration-mode-phase-2).
 
 **Out of scope:**
 - Initial upstream filing — that's `/wr-itil:report-upstream`.
-- Historical catch-up migration (one-shot retroactive scan of all closed/verifying tickets with `## Reported Upstream`) — that's a separate orchestration concern; per-ticket invocation suffices for the Phase 1 contract. A future amendment may add a `--catchup` mode.
 - Cross-tracker propagation (linking the upstream update back into a different upstream's parallel issue) — out of scope; one local ticket → N upstream URLs is supported, but each URL update is independent.
 
 ## Step-0 deferral (ADR-027)
@@ -295,6 +298,57 @@ When invoked user-initiatedly (no transition in this session, e.g. retroactive c
 
 If the cumulative pipeline risk lands above appetite and `AskUserQuestion` is unavailable, apply the [ADR-013 Rule 6](../../../docs/decisions/013-structured-user-interaction-for-governance-decisions.proposed.md) non-interactive fail-safe: skip the commit and report the uncommitted state. Do NOT auto-commit above appetite without the user's call.
 
+## Catchup migration mode (Phase 2)
+
+`/wr-itil:update-upstream --catchup` runs a one-shot batch-retroactive migration. It exists because the per-ticket auto-update path (Phase 1) only fires on transitions that happen *after* it shipped — every ticket reported upstream and transitioned *before* Phase 1 silently missed its lifecycle update, leaving upstream issues looking abandoned. Catchup back-fills that history. Authority: [ADR-024](../../../docs/decisions/024-cross-project-problem-reporting-contract.proposed.md) amendment (P080 Phase 2).
+
+This mode is **user-initiated only** — it is never auto-fired from a transition. It is a deliberate corpus-wide migration the maintainer runs once (or re-runs safely, thanks to idempotency).
+
+### C1. Build the worklist (read-only scan)
+
+Invoke the worklist scanner via its [ADR-049](../../../docs/decisions/049-plugin-script-resolution-via-bin-on-path.proposed.md) `$PATH` shim — **never** via a repo-relative `packages/...` path (that path does not resolve in adopter trees):
+
+```bash
+wr-itil-catchup-scan
+```
+
+The scanner (`packages/itil/scripts/catchup-scan.sh`, dispatched by the `wr-itil-catchup-scan` bin shim) is **read-only and local** — it makes no `gh` calls and writes nothing. It walks the `.verifying.md` + `.closed.md` corpus (dual-tolerant flat + per-state subdir per RFC-002), filters to tickets carrying a `## Reported Upstream` section, applies marker-based idempotency, and prints a worklist:
+
+```
+CATCHUP P<NNN> <url> state=<verifying|closed> transition=<KE->Verifying|Verifying->Closed>
+SKIP    P<NNN> <url> reason=already-logged
+SKIP    P<NNN> <url> reason=out-of-band
+```
+
+plus a `SUMMARY scanned=… catchup=… skip-logged=… skip-out-of-band=…` line on stderr. Tickets with no `## Reported Upstream` section produce no line (the common case). Open / Known-Error / Parked tickets are out of the catchup corpus — only post-fix states (Verifying, Closed) carry the lifecycle updates a reporter most wants retroactively.
+
+### C2. Idempotency contract
+
+Catchup is **idempotent** (P080 Phase 2 acceptance criterion 3). The scanner skips a ticket whose `## Upstream Lifecycle Updates` log already records an entry for the current target state:
+
+- `.verifying.md` → already-logged iff the log contains a `→ Verification Pending` entry.
+- `.closed.md` → already-logged iff the log contains a `→ Closed` entry.
+
+The append-only log (written by Step 6 on every post) is the source of truth — the same marker the per-ticket path writes. Re-running `--catchup` therefore never double-posts. As defence-in-depth, before posting each `CATCHUP` entry the SKILL MAY also scan the upstream issue for a prior `Update from …` comment authored by the posting account (`gh issue view <n> --json comments`); if one already matches the target transition, treat it as already-logged, back-write the log entry to reconcile, and skip the post. The body-marker check is primary (cheap, no `gh` round-trip); the comment scan is the belt-and-braces fallback for tickets whose log predates Phase 1's back-write.
+
+### C3. Process each CATCHUP entry
+
+For each `CATCHUP` line, run the **existing per-ticket flow** (Steps 4–6) against that ticket ID:
+
+1. Draft the transition template (Step 4) for the entry's transition (`KE->Verifying` → Known Error → Verification Pending template; `Verifying->Closed` → Verification Pending → Closed template, which also runs `gh issue close`).
+2. Compose through the external-comms + voice-tone gates (Step 5) — **identical** dual-gate composition as the per-ticket path. Above-appetite handling (Step 5c) is unchanged: silent risk-reduce + re-score, then queue to `## Queued Upstream Update` + `outstanding_questions` (category `deviation-approval`) per P352 if still above. Catchup does NOT bypass the gates.
+3. Post within appetite (Step 5b final) and back-write the `## Upstream Lifecycle Updates` log (Step 6).
+
+Process entries one at a time so a single above-appetite entry queues only itself; the rest proceed. There is no batch-cap on the number of catchup posts — the gate composition is the rate-limit, and the corpus is bounded (one pass over local tickets).
+
+### C4. Commit per ADR-014
+
+The catchup migration is user-initiated, so it owns its commit per the Step 7 user-initiated path: stage every touched ticket's back-write (and any `## Queued Upstream Update` appendage), score commit/push/release risk via `wr-risk-scorer:pipeline`, and commit once covering the whole pass — `docs(problems): upstream lifecycle catchup migration — <N> tickets (P080 Phase 2)`. Above-appetite-and-no-AskUserQuestion → ADR-013 Rule 6 fail-safe (report the uncommitted state, do not auto-commit).
+
+### C5. Verification
+
+The live-upstream end-to-end confirmation (P080 acceptance criterion 7 — a catchup comment actually lands on a real upstream issue) is the overall P080 verification step. Running `--catchup` against the real corpus (e.g. P113's `https://github.com/anthropics/claude-code/issues/52831`) and confirming the comment posts is what closes P080 to Verifying once a fresh release ships the mode.
+
 ## AFK behaviour summary
 
 Four distinct AFK branches. Per the [ADR-024](../../../docs/decisions/024-cross-project-problem-reporting-contract.proposed.md) amendment (P080) — same composition shape as the post-P270 initial-filing path — ALL pre-post branches route through the `wr-risk-scorer:external-comms` + `wr-voice-tone:external-comms` gates. Below-appetite proceeds; above-appetite silent risk-reduces + re-scores; if still above, queues per P352 queue-and-continue without halting the loop.
@@ -322,7 +376,9 @@ The skill's no-op exit (Step 1) means firing the trigger unconditionally on ever
 
 ## References
 
-- [ADR-024](../../../docs/decisions/024-cross-project-problem-reporting-contract.proposed.md) — primary contract this skill extends. The P080 amendment in `## Amendments` authorises the bidirectional lifecycle-update sibling skill, the transition-template shape, and the external-comms + voice-tone gate composition.
+- [ADR-024](../../../docs/decisions/024-cross-project-problem-reporting-contract.proposed.md) — primary contract this skill extends. The P080 amendment in `## Amendments` authorises the bidirectional lifecycle-update sibling skill, the transition-template shape, and the external-comms + voice-tone gate composition; the **P080 Phase 2 amendment** authorises the `--catchup` migration mode, the read-only worklist scanner, and the marker-based idempotency contract.
+- [ADR-049](../../../docs/decisions/049-plugin-script-resolution-via-bin-on-path.proposed.md) — the catchup worklist scanner is invoked as `wr-itil-catchup-scan` ($PATH shim), never via a repo-relative `packages/...` path.
+- [`packages/itil/scripts/catchup-scan.sh`](../../scripts/catchup-scan.sh) — read-only local worklist scanner for `--catchup`; behavioural bats at `packages/itil/scripts/test/catchup-scan.bats`.
 - [ADR-028](../../../docs/decisions/028-voice-tone-gate-external-comms.proposed.md) — voice-tone gate on `gh issue comment` and `gh issue close`.
 - [ADR-013](../../../docs/decisions/013-structured-user-interaction-for-governance-decisions.proposed.md) — interaction policy; Rule 1 governs the interactive above-appetite path; Rule 6 governs the AFK fail-safe.
 - [ADR-014](../../../docs/decisions/014-governance-skills-commit-their-own-work.proposed.md) — single-commit grain for transition + back-write + upstream post.

@@ -144,8 +144,8 @@ Architect call required at implementation time to:
 - [x] Bats doc-lint assertions per ADR-037: skill contract, template presence per transition, risk-gate composition, policy-decision traceability. **Done 2026-06-09**: `packages/itil/skills/update-upstream/test/update-upstream-contract.bats` ships 23 tests covering the contract surface; all GREEN locally. Structural-permitted carve-out per ADR-052 Migration clause; behavioural Tier-A/B coverage rides on the paired promptfoo eval per ADR-075 Amendment 2026-06-02.
 - [x] **Paired promptfoo eval — R009 prose-floor discharge.** **Done 2026-06-09**: `packages/itil/skills/update-upstream/eval/{promptfooconfig.yaml,run-skill-eval.sh,grade-llm-rubric.sh}` ship in the same commit as the SKILL prose per ADR-061 Rule 4 evidence-floor (mirrors the P324 Phase 6 / RFC-019 P355 pattern). Tier-A regex + Tier-B llm-rubric coverage for gate composition, queue-and-continue, Verifying→Closed dual-command behaviour, no-op exit, gate-AND vs gate-OR semantics.
 - [ ] Reuse P070's maintainer-annoyance risk evaluator — confirm composability; architect review decides whether extract-to-shared-lib or copy-adapt. **Phase 2 (out of scope this iter)** — the `wr-risk-scorer:external-comms` agent already shipped per the post-P270 amendment; the update-upstream SKILL uses the same evaluator surface. No extract-to-shared-lib needed at Phase 1.
-- [ ] Historical catch-up: one-shot migration pass OR runtime first-fire detection. **Phase 2 deferred** — per SKILL.md Scope's `--catchup` note; the Phase 1 contract is per-ticket invocation only. A future amendment may add `--catchup` mode.
-- [ ] End-to-end test: transition a test ticket with a synthetic `## Reported Upstream`; confirm the upstream issue receives a comment matching the transition template. **Phase 2 deferred** — Phase 1 verification rides on the paired promptfoo eval (Tier-A/B behavioural coverage); end-to-end against a live upstream is a verification-pending step after release.
+- [x] Historical catch-up: one-shot migration pass OR runtime first-fire detection. **Done 2026-06-18 (Phase 2 iter)**: `--catchup` mode added to `/wr-itil:update-upstream` (SKILL.md § Catchup migration mode). Read-only/local worklist scanner `packages/itil/scripts/catchup-scan.sh` (invoked via `wr-itil-catchup-scan` ADR-049 shim) walks the `.verifying.md` + `.closed.md` corpus, filters to `## Reported Upstream`-carrying tickets, applies marker-based idempotency (skips tickets whose `## Upstream Lifecycle Updates` log already records the target state), and emits a `CATCHUP`/`SKIP` worklist; the SKILL loops the existing per-ticket gate+post+back-write (Steps 4-6) for each `CATCHUP`. ADR-024 amended (P080 Phase 2 entry). 14 behavioural bats at `packages/itil/scripts/test/catchup-scan.bats` (fixture corpus + idempotency assertions) — all green; existing 23 contract bats still green. Architect PASS + jtbd PASS pre-edit.
+- [ ] End-to-end test: transition a test ticket with a synthetic `## Reported Upstream`; confirm the upstream issue receives a comment matching the transition template. **Deferred to post-release** — the live-upstream confirmation IS P080's overall verification step. The real corpus has one catchup target (P113 → `https://github.com/anthropics/claude-code/issues/52831`); running `--catchup` against it post-release and confirming the comment lands closes P080 to Verifying. Cannot run pre-release (the orchestrator owns release; the `--catchup` mode is not yet on the published `@windyroad/itil`).
 
 ## Fix Strategy
 
@@ -172,12 +172,14 @@ User direction during the 2026-06-17 outstanding-questions drain: **"reopen P080
 
 **Implementation order**:
 
-1. SKILL.md amendment to `/wr-itil:update-upstream`: add `--catchup` mode + invocation surface + idempotency contract.
-2. Behavioural bats: catchup fixture + idempotency guard.
-3. Live-upstream end-to-end test execution (one-shot; result documented on this ticket).
-4. Transition Known Error → Verifying once 1-3 land + a fresh release goes out.
+1. ~~SKILL.md amendment to `/wr-itil:update-upstream`: add `--catchup` mode + invocation surface + idempotency contract.~~ **Done 2026-06-18** — also shipped the read-only worklist scanner `catchup-scan.sh` + `wr-itil-catchup-scan` shim + ADR-024 Phase 2 amendment + changeset (`.changeset/wr-itil-p080-phase2-update-upstream-catchup.md`, `@windyroad/itil` minor).
+2. ~~Behavioural bats: catchup fixture + idempotency guard.~~ **Done 2026-06-18** — 14 bats at `packages/itil/scripts/test/catchup-scan.bats`, all green.
+3. Live-upstream end-to-end test execution (one-shot; result documented on this ticket). **Post-release** — needs `--catchup` on the published tree; orchestrator owns release.
+4. Transition Known Error → Verifying once 1-3 land + a fresh release goes out. **Post-release.**
 
 Composes with P363 (the inbound-reported-tickets-never-receive-fix-released-verdict ticket whose fix this Phase 2 closes).
+
+**Phase 2 iter progress (2026-06-18)**: items 1-2 shipped (code + tests + ADR amendment + changeset, committed this iter). Items 3-4 are post-release (the orchestrator owns the release; the live-upstream confirmation is P080's overall verification step). One queued ratification: the ADR-024 Phase 2 amendment's implementation-interpretation confirmation (P357/ADR-066 AFK fallback — direction-traced from the 2026-06-17 drain, substance-confirm queued for the next interactive drain).
 
 ## Fix Released
 
