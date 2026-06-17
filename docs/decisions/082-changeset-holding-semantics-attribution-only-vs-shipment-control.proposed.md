@@ -1,7 +1,8 @@
 ---
 status: "proposed"
 date: 2026-06-17
-human-oversight: unconfirmed
+human-oversight: confirmed
+oversight-date: 2026-06-17
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: [Windy Road plugin users]
@@ -42,33 +43,40 @@ Options (a)/(b) are mutually exclusive on the *primary* question (is holding a s
 
 ## Decision Outcome
 
-**DEFERRED — pending user ratification at `/wr-architect:review-decisions`; no option selected by the agent (ADR-074).**
+Chosen option: **"(b) Real shipment control + (c) Reconcile K→V release lifecycle — riding together in a single RFC-first fix path"**, confirmed by the user via `AskUserQuestion` 2026-06-17 (`/wr-architect:review-decisions` drain across two ratification calls: primary a/b, then orthogonal c), because the user's 2026-06-11 direction "if we need to hold then we need a mechanism that's gonna work" rejects option (a)'s attribution-only acceptance of the governance-integrity gap, and the K→V lifecycle reconciliation rides in the same RFC because the misclassification symptom (P220 misclassified 3 days) shares the same shipment-vs-attribution root cause.
 
-This ADR was authored born-`proposed` by an AFK `/wr-itil:work-problems` iteration (no `AskUserQuestion` access per ADR-066 Amendment 2026-06-02 / P348). The primary question — whether changeset holding should be redefined as attribution-only governance (a) or rebuilt as a real shipment control (b), and whether the K→V lifecycle reconciliation (c) rides along — is a genuine ≥2-viable-option judgment call the user must own. The iteration deliberately did **not** tentatively select a default (doing so would be the P340 bogus-ratification class). No dependent work (the ADR-042 amendment, the risk-scorer prose correction, or any new mechanism) is built until an option is ratified (ADR-074 build-upon gate). The substance-confirm is queued for the next interactive drain.
+Option (a) — attribution-only governance + prose correction — is **rejected** as the going-forward shape: it would accept the governance-integrity gap (the false "holding is a shipment control" self-description) rather than close it. JTBD-002's *"agent cannot bypass governance"* outcome is non-negotiable; a hold that does not withhold IS the governance-bypass JTBD-002 names. The interim discipline (release-often + within-appetite-drain) remains in force until (b) ships.
 
-This is structurally incomplete against the MADR "Decision Outcome chooses an option" shape **by design** for a deferred born-proposed ADR.
+For (b), the going-forward mechanism for "changeset holding" must actually withhold code from shipping — not merely defer version attribution and CHANGELOG entry. The implementation shape (hold code off main on a feature branch, revert-on-main-until-evidence, gate `npm publish` to exclude held slices, or a different mechanism) is the next RFC's design space; this ADR records only that the framework's self-description must match reality and that "a mechanism that's gonna work" — per the user's 2026-06-11 prose direction — is the required shape. Adopter portability via ADR-049 PATH shims is a load-bearing constraint on whatever mechanism the RFC builds.
+
+For (c), problem-ticket lifecycle must stop keying "release" to changeset graduation when code is de-facto shipped on main; the witnessing case (P220 misclassified for 3 days) is in scope. P228 is the sibling problem ticket this rolls up.
+
+Next step: an RFC-first fix path (per ADR-060) tracing this ADR, P359 (driving), and P228 (sibling). No dependent work outside that RFC is built ahead of it (ADR-074 build-upon gate).
 
 ## Consequences
 
 ### Good
 
 - The going-forward decision is recorded in `docs/decisions/` where the ADR-066 oversight detector (and the `/wr-architect:review-decisions` drain) can surface it — closing the P310 RFC-decision-invisibility hole that ADR-070 exists to prevent.
-- The false "holding is a shipment control" self-description is now flagged as a known governance-integrity gap with a documented root cause, even before the prose is corrected.
+- Option (b) makes the framework's holding self-description match reality: the developer persona's *"plugins must carry the guardrails regardless"* constraint becomes load-bearing rather than advisory — an above-appetite hold actually withholds the code, so the never-release-above-appetite invariant (ADR-042 Rule 1) is enforced in mechanism, not in prose.
+- Option (c) closes the secondary problem-ticket-misclassification symptom in the same RFC, so AFK iterations don't continue to accumulate Known-Error → Verifying entries that read as pending when the code is de-facto shipped.
 
 ### Neutral
 
-- Until ratified, the framework prose (ADR-042 Rule 7, risk-scorer remediation descriptions, holding-area README) still describes holding as a shipment control. Agents reading it may continue to "hold to remediate above-appetite risk" expecting it to withhold code; the de-facto mitigation in the interim is the release-often + within-appetite-drain discipline. The P359 ticket workaround documents this.
+- Until the follow-up RFC builds (b), the framework prose (ADR-042 Rule 7, risk-scorer remediation descriptions, holding-area README) still describes holding as a shipment control. Agents reading the existing prose may continue to "hold to remediate above-appetite risk" expecting it to withhold code; the de-facto mitigation in the interim is the release-often + within-appetite-drain discipline. The P359 ticket workaround documents this. The prose correction is dependent work that rides with the RFC (it is NOT a separate prose-only change — option (a) is rejected).
 
 ### Bad
 
-- The above-appetite never-release invariant has been silently unenforced for held changesets whose code is on main. No remediation lands until an option here is ratified and built. Mitigation: the user has ratified the current state and the interim discipline; this is a recorded known error (P359 → Known Error), not a hidden one.
+- The above-appetite never-release invariant has been silently unenforced for held changesets whose code is on main. The remediation lands when the RFC ships, not at this ratification. Mitigation: the user has ratified the current state and the interim discipline; this is a recorded known error (P359 → Known Error), not a hidden one.
+- Option (b) is higher-cost than (a) and carries mechanism risk; the follow-up RFC must satisfy adopter portability (ADR-049 PATH shims) or the mechanism will not resolve in adopter installs. Mitigation: RFC-first design path (per ADR-060) surfaces the design constraints before mechanism work begins.
 
 ## Confirmation
 
 Compliance is verified by:
 
-1. A human ratifies one of options (a)/(b)/(c) via `/wr-architect:review-decisions` (or directs a different resolution), flipping `human-oversight` to `confirmed` with the chosen option recorded in Decision Outcome.
-2. The chosen option's dependent work (prose correction and/or mechanism and/or lifecycle reconciliation) is then proposed via the ADR-060 RFC-first fix path tracing this ADR and P359.
+1. ~~A human ratifies one of options (a)/(b)/(c)~~ — **satisfied 2026-06-17**: ratified options (b) + (c) via `/wr-architect:review-decisions`, recorded in Decision Outcome; `human-oversight: confirmed`.
+2. The dependent work — the real shipment-control mechanism (b) and the K→V lifecycle reconciliation (c) — is proposed via an ADR-060 RFC-first fix path tracing this ADR, P359 (driving), and P228 (sibling). The RFC carries the ADR-042 Rule 7 prose correction and any risk-scorer remediation prose updates as part of its scope.
+3. After the RFC ships and the mechanism is validated in production, this ADR's `status:` may be promoted from `proposed` to `accepted` (the oversight marker is orthogonal to status per ADR-066; status flip is gated on dependent-work landing per ADR-074).
 
 ## Reassessment Triggers
 

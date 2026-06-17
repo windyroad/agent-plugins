@@ -349,7 +349,8 @@ _71 ADRs. These are the current rules. The architect agent reads this section fi
 **Related:** ADR-049, ADR-081, ADR-040, ADR-080, ADR-002, ADR-003, ADR-014, ADR-066, ADR-074
 
 ### ADR-082 — Changeset holding semantics — attribution-only governance vs a real shipment control
-**Status:** proposed | **Oversight:** unconfirmed
+**Status:** proposed | **Oversight:** confirmed
+**Chosen:** Chosen option: **"(b) Real shipment control + (c) Reconcile K→V release lifecycle — riding together in a single RFC-first fix path"**, confirmed by the user via `AskUserQuestion` 2026-06-17 (`/wr-architect:review-decisions` drain across...
 **Related:** ADR-042, ADR-070, ADR-066, ADR-074
 
 ---
