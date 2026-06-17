@@ -193,6 +193,21 @@ Drift-hint vocabulary: `skill-inventory-drift` (inventory-only per ADR-069). Alw
 
 **Already load-bearing (ADR-069)**: the commit-hook `retrospective-readme-jtbd-currency.sh` denies `git commit` when `drift_instances ≥ 1` (skill-inventory-drift), per the carried-forward load-bearing-from-the-start-for-drift-class driver. This Step 2b advisory is the backup / cross-cutting surface — it catches drift in sessions that bypass the commit-hook (`BYPASS_JTBD_CURRENCY=1`) and summarises across packages; it is not the gate.
 
+**ADR-073 auto-create-RFC reassessment advisory (RFC-005 B9, P314).** Step 2b also feeds the ADR-073 reassessment loop. The I13 fix-time RFC-trace gate (ADR-072 placement / ADR-073 auto-create-not-block) auto-creates problem-traced **skeleton** RFCs via `/wr-itil:capture-rfc` whenever a fix is proposed on an RFC-less Known Error. ADR-073's Reassessment Criteria say to revisit the auto-create decision "if auto-created RFCs are systematically under-scoped (a recurring 'the auto-RFC didn't capture the real fix' signal)". The auto-create event is otherwise only logged ephemerally to the `/wr-itil:work-problems` iter-summary `notes`; this advisory makes the reassessment signal durable by reading the auto-created RFCs left on disk and surfacing the ones whose traced problem's fix has already shipped while the RFC scope was never fleshed out. The surfacing channel is the retro summary's Pipeline Instability section (same trust-boundary as the README advisory above — surface the evidence; defer the reassessment to the human).
+
+**Mechanism**: invoke `wr-retrospective-check-autocreate-rfc-scope` (resolves on `$PATH` to the plugin-bundled detector per ADR-049/ADR-080 — invoke by the `wr-retrospective-…` shim name, never a repo-relative `packages/…` path). The detector scans `docs/rfcs/*.proposed.md` for skeleton RFCs (whose `## Scope` still carries the capture-rfc placeholder `(deferred — populate at /wr-itil:manage-rfc accepted transition)`) whose `problems:` frontmatter traces at least one **fix-shipped** problem (located under `docs/problems/verifying/` or `…/closed/`, OR carrying a `## Fix Released` heading, OR carrying a populated `## Fix Strategy` section). It emits:
+
+- Per under-scoped candidate: `AUTOCREATE-RFC under-scoped rfc=<RFC-NNN> problems=<csv> shipped=<pid:basis>`
+- Trailing summary: `TOTAL proposed_skeletons=<N> under_scoped=<K>`
+
+Always exits 0 — advisory per ADR-013 Rule 6 / ADR-040 declarative-first; there is no load-bearing gate counterpart (unlike the README inventory advisory, the reassessment signal informs a future human decision, not a blocking commit-hook).
+
+**Interpretation**:
+
+1. **`under_scoped == 0`** — emit a one-line `ADR-073 auto-create-RFC scope: clean (<N> proposed skeletons, 0 under-scoped)` to the retro summary's Pipeline Instability section.
+2. **`under_scoped ≥ 1`** — emit each `AUTOCREATE-RFC under-scoped …` candidate line into the Pipeline Instability section. Each names a skeleton RFC whose fix has shipped but whose scope was never written — the ADR-073 under-scoped signal. Per ADR-013 Rule 6, the user reviews on return: a one-off is the expected living-RFC pattern (flesh the RFC out via `/wr-itil:manage-rfc accepted`); a **recurring** under-scoped population across retros is the ADR-073 reassessment trigger (revisit whether auto-create produces useful vehicles or noise). Same trust-boundary as the categorical detection above — surface the evidence; defer the decision.
+3. **Detector failure** — if the detector exits non-zero (missing `docs/rfcs/`, runtime exception), log the failure inline as `ADR-073 auto-create-RFC advisory failed: <stderr>` but do NOT halt the retro. Same fail-open contract as the README advisory and Step 3's `check-briefing-budgets.sh` defensive trip — the cheap layer degrades to a one-line pointer rather than blocking.
+
 **Interaction with other surfaces:**
 
 - **Step 4a (Verification-close housekeeping, P068)** — same evidence-scan shape applied to a different surface. Both share the glob / scan / categorise / specific-citation / interactive-or-AFK pattern. Step 4a scans for successful exercise of `.verifying.md` fixes; Step 2b scans for tool-level friction. They fire independently and produce independent retro-summary sections.
