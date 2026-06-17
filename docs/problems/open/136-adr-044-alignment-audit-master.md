@@ -62,6 +62,7 @@ P135 Phase 2 amended only the 4 SKILLs the implementer touched. ADR-044 is proje
 - [x] Phase 2: audit manage-incident SKILL.md. (2026-04-28) — 7 raw mentions reduced to 4 distinct call surfaces: Surface 1 = duplicate-check prompt (line 133-134) = keep — direction-setting cat-1, **REFACTORED** (closes ADR-013 Confirmation #1 regression: removed `would you like to (a)/(b)/(c)` prose-ask vocabulary; lifted into AskUserQuestion options[]); Surface 2 = gather-new-incident info (line 151) = keep — direction-setting cat-1 (cosmetic cross-ref); Surface 3 = evidence-first gate on hypothesis updates (line 208) = keep — deviation-approval cat-2, **REFACTORED** (aligned with mitigate-incident's 3-option Add/Record-anyway/Cancel pattern; explicit `Evidence-gate bypassed by user — reason: <justification>` audit-trail marker); Surface 4 = risk-above-appetite commit (line 274) = keep — one-time-override cat-3 (cosmetic cross-ref). Audit found **0 lazy-deferrals** — manage-incident is fundamentally interactive (incident declaration requires user-knowledge inputs); all 4 surfaces are genuine user-authority. Architect + JTBD reviews PASS. Bats: 11 new (companion file `manage-incident-adr-044-contract.bats` with `tdd-review: structural-permitted` marker) + 14 existing assertions green; full itil suite green. Changeset: `@windyroad/itil` patch. **Phase 2 is now 3/3 done.**
 - [x] Phase 3: audit medium-ask SKILLs (review-jobs, analyze-context). (2026-06-08) — `review-jobs` = COSMETIC (2 cat-1 call sites; stale ADR-013 Rule 1 cross-ref at line 93). `analyze-context` = ALIGNED (zero call sites; explicit "never invokes `AskUserQuestion`" policy; ADR-044 cited inline). Findings: `docs/audits/2026-06-08-p136-adr-044-alignment-audit.md` § Phase 3a.
 - [x] Phase 3: audit low-ask SKILL sweep (44 surfaces inventoried; 8 deferred). (2026-06-08) — 17 ALIGNED, 12 NO-CALLS, 18 COSMETIC, 1 SUBSTANTIVE (`restore-incident` line 21 ID-arg backfill = lazy-deferral, same shape as mitigate-incident Surface 1 precedent), 8 UNAUDITED (deferred to dedicated sessions: connect/{send,setup}, itil/manage-story-map, itil/review-problems, risk-scorer/{assess-wip,update-policy}, style-guide/update-guide, tdd/setup-tests, voice-tone/update-guide). Findings: `docs/audits/2026-06-08-p136-adr-044-alignment-audit.md` § Phase 3b.
+- [x] Phase 3c: audit 3 of the 9 deferred UNAUDITED SKILLs — `review-problems`, `manage-story-map`, `update-policy`. (2026-06-18) — 1 SUBSTANTIVE (`review-problems` Step 4 verification prompt over-asks on the `yes — observed:` evidence-backed subset = lazy-deferral, inconsistent with the P135-Phase-2-audited run-retro Step 4a close-on-evidence precedent + ADR-044 framework-mediated verification-close), 2 COSMETIC (`manage-story-map` already aligned via its Rule 6 audit table, needs ADR-044 cat-5/framework-mediated cross-refs; `update-policy` Step 6 ask is genuine cat-1 direction-setting + cat-5 taste, needs ADR-044 cross-ref). Findings: § "Phase 3c Investigation Findings" below. **6 UNAUDITED SKILLs remain**: connect/{send,setup}, risk-scorer/assess-wip, style-guide/update-guide, tdd/setup-tests, voice-tone/update-guide.
 - [x] Phase 4: audit 4 critical hooks (itil-assistant-output-gate, itil-assistant-output-review, manage-problem-enforce-create, voice-tone-eval). (2026-06-08) — 3 COSMETIC, 1 NO-CALLS. **Notable**: `itil-assistant-output-gate.sh` + `itil-assistant-output-review.sh` ARE the ADR-044 enforcement surface, written in P085/P132 vocabulary; recommended remediation is to add explicit ADR-044 cross-refs without behavioural change. Findings: `docs/audits/2026-06-08-p136-adr-044-alignment-audit.md` § Phase 4.
 - [ ] Phase 4: sweep remaining 65 hooks (single audit-log entry on this ticket). — Phase 1 inventory confirms most are PreToolUse gates / UserPromptSubmit / Stop / PostToolUse with no ask-prose; expected bundled NO-CHANGE entry per Fix Strategy.
 - [x] Phase 5: inventory + spot-check 14 agents + ~49 ADRs + 14 JTBDs + 14 READMEs. (2026-06-08) — Agents: 9 NO-CALLS, 3 COSMETIC, 2 ALIGNED. ADRs: bulk NO-CHANGE (operational/orthogonal); ~5-6 COSMETIC. JTBDs: 8 NO-CHANGE, 4 COSMETIC (JTBD-001/006/101/201 — ADR-044 cites them; should reciprocate), 2 ALIGNED. READMEs: 14 NO-CHANGE per ADR-069 (READMEs market persona/problem, not framework-internal contracts). Findings: `docs/audits/2026-06-08-p136-adr-044-alignment-audit.md` § Phase 5.
@@ -69,6 +70,53 @@ P135 Phase 2 amended only the 4 SKILLs the implementer touched. ADR-044 is proje
 ## Phase 1 Investigation Findings — 2026-06-08
 
 Full audit findings: [`docs/audits/2026-06-08-p136-adr-044-alignment-audit.md`](../../audits/2026-06-08-p136-adr-044-alignment-audit.md). 151 surfaces inventoried; 1 SUBSTANTIVE amendment candidate (`restore-incident`), ~28 COSMETIC cross-ref upgrades, balance NO-CALLS / NO-CHANGE / ALIGNED. 8 SKILLs deferred to dedicated audit sessions. Per-surface remediation flow (ADR-044 deviation-approval `AskUserQuestion` at retro end) deferred to interactive work per Fix Strategy + ticket line 178 ("NOT picked up automatically by `/wr-itil:work-problems` AFK loop").
+
+## Phase 3c Investigation Findings — 2026-06-18 (3 deferred SKILLs audited)
+
+Bounded-scope AFK iter (work-problems iter 9). Audited 3 of the 9 Phase-3b-deferred UNAUDITED SKILLs, picked by decision-density. Investigation evidence only; per-surface remediation rides the interactive ADR-044 deviation-approval `AskUserQuestion` at retro end per the Fix Strategy (AFK orchestrators MUST NOT auto-amend SKILL prose).
+
+### Surface A — `packages/itil/skills/review-problems/SKILL.md` (511 lines, 21 raw asks) — SUBSTANTIVE
+
+Highest decision-density of the deferred set. Steps 2.5, 4.5, 4.6 are **exemplary** ADR-044 alignment — they cite ADR-044 by category throughout and carry explicit mechanical-stage carve-outs.
+
+| Call site | Line | ADR-044 class | Verdict |
+|-----------|------|---------------|---------|
+| Step 2.5 dependency-graph transitive re-rate | 62 | framework-mediated (prioritisation) | ALIGNED — explicit "no `AskUserQuestion` required" |
+| **Step 4 verification prompt (Known Error → Closed)** | 112-122 | **verification-close (framework-mediated)** | **LAZY-DEFERRAL on the evidence-backed subset** — see below |
+| Step 4.5a auto-bootstrap (interactive) | 140-167 | cat-1 direction-setting | ALIGNED — cites ADR-044 cat-1; AFK queues a `direction` outstanding_question |
+| Step 4.5 inbound-pipeline branch decisions | 128, 252, 267, 287 | cat-4 silent-framework | ALIGNED — explicit "do NOT use `AskUserQuestion`" carve-outs, ADR-044 cited |
+| Step 4.6 relevance-close batch | 337-338, 395 | cat-4 silent-framework | ALIGNED — "ask per-batch not per-ticket"; AFK closes clean candidates silently; ADR-044 cited |
+| Step 6 commit (risk-above-appetite skip) | 471 | framework-mediated (release/appetite) | ALIGNED — within-appetite is mechanical; only fail-safe halt |
+
+**Finding 3c-1 (SUBSTANTIVE — actionable):** Step 4 fires `AskUserQuestion` for **every** `.verifying.md` ticket — including the rows Step 3 has already computed as `yes — observed: <evidence>` under the P186 evidence-first cell. Per ADR-044's framework-mediated verification-close surface (*"close-on-evidence + report … the agent's specific in-session citations are sufficient evidence; per-candidate ask is lazy deferral"*) and the P135-Phase-2-audited sibling `run-retro` Step 4a (which **does** close-on-evidence), the evidence-backed subset should close mechanically (agent acts + reports), not route through a consent gate. The current prose surfaces the `yes — observed:` rows first *"so the user can batch-close them"* but still asks.
+- **Suggested re-classification:** scope the Step 4 `AskUserQuestion` to the `no — not observed` rows only (where the user may hold out-of-band production knowledge the agent cannot observe = genuine user input). Close the `yes — observed:` rows on evidence, mirroring `run-retro` Step 4a, and report the closures. The `no — observed regression` rows already correctly bypass batch-close.
+- **Locus:** `packages/itil/skills/review-problems/SKILL.md` Step 4 (lines 112-122) + the README Verification-Queue render note co-located at Step 5.
+- **COSMETIC rider:** line 122 cites ADR-013 Rule 6 only for the AFK branch; add an ADR-044 framework-mediated-verification-close cross-ref.
+
+### Surface B — `packages/itil/skills/manage-story-map/SKILL.md` (158 lines, 4 asks) — COSMETIC
+
+Substantively **ALIGNED**. The skill already carries a `## Rule 6 audit` table (lines 46-56) that classifies every decision by authority class — story-map ID resolution / lifecycle validation / `<meta>` updates / README refresh / reverse-trace = silent-mechanical; backbone/ribs/slices authoring = taste. The 4 `AskUserQuestion` mentions (lines 52, 84, 139, 155) all refer to the **same** backbone-authoring-at-accepted surface, correctly classified as taste. **0 lazy-deferrals, 0 under-asks.**
+
+**Finding 3c-2 (COSMETIC):** the Rule 6 audit table's authority-class column uses informal labels (`silent-mechanical`, `taste`) and carries 0 ADR-044 refs. Map them to ADR-044's taxonomy explicitly — `taste` → cat-5; `silent-mechanical` → framework-mediated surface — so the table is anchored to the canonical contract rather than a parallel vocabulary.
+- **Locus:** `packages/itil/skills/manage-story-map/SKILL.md` § Rule 6 audit (lines 46-56).
+
+### Surface C — `packages/risk-scorer/skills/update-policy/SKILL.md` (178 lines, 3 asks) — COSMETIC
+
+Substantively **ALIGNED**. The single ask surface is Step 6 "Confirm with the user" (lines 122-131), which presents drafted impact levels + risk-appetite threshold + missing-business-context. This is genuine **cat-1 direction-setting** (impact levels describe business consequences only the user knows) **+ cat-5 taste** (appetite threshold by project maturity). `RISK-POLICY.md` is itself a user-owned framework artefact; authoring it is exactly the kind of decision ADR-044 reserves for the user. **0 lazy-deferrals.**
+
+**Finding 3c-3 (COSMETIC):** Step 6 carries 0 ADR-044 refs; add a cat-1/cat-5 cross-ref so the user-authority is anchored to the contract.
+- **Minor advisory (NOT a finding):** Step 6 mandates `AskUserQuestion` with no ADR-013 Rule 6 non-interactive fallback branch. For a skill whose purpose is authoring a user-owned policy, blocking-without-the-user is correct (you cannot author someone's risk appetite for them) — so the absence is intentional, not a gap. No action.
+- **Locus:** `packages/risk-scorer/skills/update-policy/SKILL.md` Step 6 (lines 122-131).
+
+### Phase 3c summary
+
+| Surface | Tier | Lazy-deferrals | Action |
+|---------|------|----------------|--------|
+| review-problems | SUBSTANTIVE | 1 (Step 4 evidence-backed subset) | re-scope Step 4 ask + ADR-044 cross-ref |
+| manage-story-map | COSMETIC | 0 | ADR-044 cross-ref on Rule 6 audit table |
+| update-policy | COSMETIC | 0 | ADR-044 cat-1/cat-5 cross-ref on Step 6 |
+
+Remediation deferred to interactive work per the Fix Strategy. Finding 3c-1 is the actionable one (behavioural re-scope, not just a cross-ref); it folds naturally into the existing `restore-incident` SUBSTANTIVE remediation session as a second per-skill amendment, and its shape (close-on-evidence for the evidence-backed subset) is a direct application of the already-shipped `run-retro` Step 4a precedent.
 
 ## Fix Strategy
 
