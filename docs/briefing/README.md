@@ -41,7 +41,7 @@ The highest-value entries across the briefing — the handful of rules that save
 > - `governance-workflow-surprises.md` (sibling brief — ADR mechanics, JTBD reviewer behaviour, README-refresh reconciliation)
 > - `releases-and-ci-archive.md` (older release-pipeline entries + 2026-05-26 entries added 2026-06-08 + P284 E404/2FA ladder archived 2026-06-10)
 > - `afk-subprocess-mechanics.md` + `afk-subprocess-recovery.md` (sibling briefs split out 2026-05-03) + `afk-subprocess-recovery-archive.md` (oldest recovery entries, 2026-05-26) + `afk-subprocess-archive.md` (2026-05-17/18 entries archived 2026-06-08)
-> - `agent-hook-gate-quirks.md` (sibling brief — hook-gate quirks)
+> - `agent-hook-gate-quirks.md` (sibling brief — hook-gate quirks) + `agent-hook-gate-quirks-archive.md` (2026-04-25/26 + 2026-05-03 entries rotated 2026-06-17 — duplicate-bypass warning, persona-vs-runtime-mode rule, runtime-SID instrumentation, architect-agent re-invoke)
 > - `agent-interaction-patterns-archive.md` (settled/codified entries split out 2026-05-26/31 — P057 re-stage, P014 framing, P121 Fix-Strategy-premise + P302 decision-confirmation-substance-first added 2026-06-08)
 
 ## How to Use
