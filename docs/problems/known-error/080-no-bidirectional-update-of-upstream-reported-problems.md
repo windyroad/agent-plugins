@@ -205,6 +205,17 @@ Neither shipped gate guards factual closure-validity — `wr-risk-scorer:externa
 
 **Effect on the Phase 2 close:** acceptance criterion 7 (a catchup comment lands cleanly on a real upstream issue) **cannot be satisfied against the current corpus** without posting incorrect content — the sole CATCHUP target is precisely the worked-around-locally case G1 describes. P080 therefore **stays in Known Error** (not transitioned to Verifying this iter): the migration plumbing is correct, but the close-template SEMANTIC MODEL needs a Phase 3 fix (or explicit user direction to post a corrected one-off) before verification can complete. P363's close (criterion 8) likewise stays — it composes on a real catchup post. G1/G2 surfaced for retro capture per the P342 carve-out.
 
+## Phase 2 Ratification + Phase 3 Direction (2026-06-18)
+
+User-ratified at work-problems Step 2.4 gate (a) loop-end drain:
+
+- **Phase 2 implementation ratified (Q1, P357 brief-after-change confirm)**: the `--catchup` flag on the existing update-upstream skill + new `catchup-scan.sh` worklist scanner + loop-the-existing-gated-flow shape matches the original 2026-06-17 direction to reopen Phase 2. ADR-024 P080 entry's amendment substance is confirmed; the formal `human-oversight: confirmed` marker write on ADR-024 is deferred to the next interactive `/wr-architect:review-decisions` drain (canonical surface; queueing it here rather than mid-AFK avoids the architect-compendium-refresh-discipline cycle).
+- **Phase 3 direction set (Q2)**: **fix G1 + G2 close-template semantics FIRST**, then re-run catchup on the real corpus. Phase 3 work breakdown:
+  - G1 fix: extend the catchup-scan classifier to distinguish "upstream bug fixed" (post the Verifying→Closed template) from "we worked around our local symptom" (post a different template that explicitly says the upstream bug is unresolved + our local mitigation, OR skip the close-comment entirely and only run `gh issue close --reason completed=false` if appropriate).
+  - G2 fix: invert the `## Reported Upstream` lifecycle templates for the outbound case — when WE are the reporter, the message is "Closing my own filing — local mitigation in place" not "Thanks for the report".
+  - Re-run catchup on real corpus after G1+G2 ship; the P113 → claude-code#52831 case becomes a clean dogfood once the close-template handles "local-workaround on already-NOT_PLANNED-closed upstream issue" correctly.
+- **Phase 2 transition deferred**: P080 stays Known Error per the strict Phase 2 verification gate (criterion 7 needs a clean real-corpus post). Phase 3 completion → re-run → satisfies criterion 7 → transition KE → Verifying.
+
 ## Fix Released
 
 **Phase 1 released in `@windyroad/itil@0.48.0`** (version-packages commit `43e164fe`, PR #248, merge commit `2571d9da`, released 2026-06-09). Present in the current published `@windyroad/itil@0.49.5` tree (feat commit `5a4f8b1c` is an ancestor of the latest release bump `0449bc7f`). <!-- no-changeset-reference --> (release-vehicle helper resolved a full citation after the P330 seed above; the original ticket body carried no `.changeset/` reference.)
