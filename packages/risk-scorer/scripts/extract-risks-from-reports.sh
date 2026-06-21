@@ -214,7 +214,7 @@ TODAY=$(date -u '+%Y-%m-%d')
 # slate. Filesystem-only is correct for the bootstrap case; ADR-019 still applies to
 # /wr-risk-scorer:create-risk for incremental adds post-bootstrap.
 LOCAL_MAX=$(ls "$TARGET_DIR/"R*.active.md "$TARGET_DIR/"R*.retired.md 2>/dev/null | sed 's|.*/R||' | grep -oE '^[0-9]+' | sort -n | tail -1 || true)
-NEXT_ID=$(( ${LOCAL_MAX:-0} + 1 ))
+NEXT_ID=$(( 10#${LOCAL_MAX:-0} + 1 ))
 
 CREATED=0
 APPENDED=0

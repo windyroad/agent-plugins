@@ -314,3 +314,36 @@ EOF
   ls docs/risks/R*-derived-slug.active.md >/dev/null 2>&1
   rm -f /tmp/derived.tsv
 }
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Octal-eval regression (P164 Phase 2 — #273 witness)
+# ──────────────────────────────────────────────────────────────────────────────
+# Bash arithmetic $(( ... )) parses a leading-zero operand as octal; 008/009 are
+# invalid octal literals → `bash: 008: value too great for base`. The next-ID
+# compute (LOCAL_MAX from zero-padded R<NNN> filenames) must force base-10 with
+# 10#. Pre-seed an R008 entry so LOCAL_MAX="008" and assert the script allocates
+# R009 cleanly without the octal error.
+
+@test "allocates R009 cleanly when an R008 entry already exists (octal-eval regression, P164 Phase 2)" {
+  mkdir -p docs/risks
+  # Pre-existing zero-padded entry that drives LOCAL_MAX="008". Carries the
+  # full field shape the README generator reads (Category/Status/Curation) so
+  # the regression isolates the octal-eval boundary, not fixture malformation.
+  cat > docs/risks/R008-pre-existing.active.md <<'EOF'
+# Risk R008: Pre Existing
+**Status**: Active
+**Category**: operational
+**Curation**: (human-curated)
+EOF
+  mkdir -p .risk-reports
+  cat > .risk-reports/octal.md <<'EOF'
+RISK_REGISTER_HINT:
+- above-appetite-residual | octal-boundary-slug | New risk past the 008 boundary
+EOF
+  run "$SCRIPT"
+  [ "$status" -eq 0 ]
+  # No octal-base error in output
+  [[ "$output" != *"value too great for base"* ]]
+  # New entry allocated as R009, not a corrupted/duplicate ID
+  [ -f docs/risks/R009-octal-boundary-slug.active.md ]
+}
