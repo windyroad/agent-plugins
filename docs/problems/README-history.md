@@ -1034,3 +1034,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-06-17 **inbound-discovery cache refreshed** (work-problems Step 0b pre-flight) — TTL-expiry auto-recheck (cache ~7 days stale vs 24h TTL); github-issues poll: 50 active `[problem]` reports, **2 NEW vs 2026-06-10: #257, #256** (both filed 2026-06-14), zero newly-closed; discussions HTTP 410 + security-advisories external-comms-gate-block both fail-soft-preserved; pipeline classification stays deferred per 2026-05-15 user direction. Scope this pass = cache + audit-log + Inbound Upstream Reports section refresh only (no per-ticket re-score / VQ prompt — AFK Step-0b directive)
 
 > Last reviewed: 2026-06-17 **P371 captured** — manage-problem I13 propose-fix gate auto-creates a new RFC instead of wiring an existing fix-vehicle's trace edge (surfaced working P314 Phase 2 RFC-005 B2; lightweight aside via /wr-itil:capture-problem)
+
+> Last reviewed: 2026-06-17 **P372 captured** — ADR-043 context-budget delta>20% auto-fire trigger lacks an absolute-byte floor; fires deep-layer analyze-context on negligible deltas to small buckets (surfaced during P314 iter 3 run-retro Step 2c; lightweight aside via /wr-itil:capture-problem)
+
+## 2026-06-21
