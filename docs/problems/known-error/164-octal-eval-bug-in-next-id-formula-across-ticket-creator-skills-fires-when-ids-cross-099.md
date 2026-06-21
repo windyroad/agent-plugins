@@ -1,12 +1,12 @@
 # Problem 164: Latent octal-eval bug in next-ID formula across all 4 ticket-creator skills — `$(( $local_max + 1 ))` fails with "value too great for base" when local_max reaches 099
 
-**Status**: Verifying
-**Reported**: 2026-05-04
-**Fix Released**: 2026-05-11 (committed; awaiting next plugin release for field verification)
-**Priority**: 16 (High) — Impact: Significant (4) x Likelihood: Almost certain (4)
-**Effort**: S — one-line fix per skill across 6 skills (scope expanded from 4 to 6 after grep verification per Investigation Task; ≈ 6 SKILL.md edits + 2 bats fixture updates + 2 new regression tests)
+**Status**: Known Error
+**Origin**: inbound-reported (#273) — Phase 2 scope-expansion surfaced 2026-06-21 by external user report. Phase 1 was internal capture 2026-05-04.
+**Reported**: 2026-05-04 (Phase 1) · 2026-06-21 (Phase 2 reopen — Verifying → Known Error)
+**Fix Released**: Phase 1 — 2026-05-11 (committed; awaiting next plugin release for field verification of the 6 ticket-creator SKILL.md formulas). Phase 2 — pending: extends fix to script-surface formulas of the same class that Phase 1's `\$\(\(\s*\$\(echo` grep pattern missed.
+**Priority**: 16 (High) — Impact: Significant (4) x Likelihood: Almost certain (4) — preserved from Phase 1; Phase 2 re-rate deferred to next /wr-itil:review-problems
 
-**WSJF**: (16 × 1.0) / 1 = **16.0**
+**WSJF**: (16 × 1.0) / 1 = **16.0** (Phase 1 baseline; Phase 2 may revise once Effort is re-rated)
 
 > Captured 2026-05-04 by `/wr-itil:work-problems` AFK loop iter 7 surfacing pass per user direction "capture all four now". Sibling finding from iter 3 P156 commit. **Latent — currently masked because ADR-NNN and P-NNN counts are below 099. Will fire when first ticket-creator skill's local_max reaches 099 and the bash arithmetic interpreter parses `099` as octal.**
 
@@ -103,3 +103,26 @@ $ bash -c 'local_max=099; echo $(( 10#$(echo -e "${local_max}\n0" | sort -n | ta
 
 - **2026-05-04** — Opened by orchestrator's main turn at end of `/wr-itil:work-problems` AFK loop iter 7 per user direction "capture all four now". Sibling finding from iter 3 P156 commit. Skeleton ticket; one-line fix scope plus bats fixture.
 - **2026-05-11** — Fix applied by `/wr-itil:work-problems` AFK iter. Scope expanded from 4 → 6 SKILL.md after grep verification (added `capture-rfc` and `create-risk` to the originally-named 4). All 6 SKILL.md formulas now use `10#` base-10 prefix. Two regression bats tests added (`capture-adr` + `capture-problem`, exercising the `099 → 100` boundary). All 28 bats tests pass. Manual sanity check confirms unfixed formula fires `bash: 099: value too great for base` and fixed formula returns `100`. Architect + JTBD reviews PASS. Status: Open → Verifying (awaiting field verification on next plugin release per ADR-014).
+- **2026-06-21** — Verifying → Known Error per user direction during inbound-discovery routing of #273. Phase 2 scope-expansion: external user reported `bash: 008: value too great for base` from `scripts/extract-risks-from-reports.sh:217` — `NEXT_ID=$(( ${LOCAL_MAX:-0} + 1 ))`. Same root cause class as Phase 1 (bash arithmetic + leading-zero-as-octal interpretation), but Phase 1's `\$\(\(\s*\$\(echo` grep pattern missed this simpler shape (no echo pipe). Phase 1's "all 6 SKILL.md" scope was the same survey-too-narrow class that Phase 1 itself scope-expanded once (4 → 6 SKILL.md); Phase 2 extends to all script-surface formulas. Reproduce: have `docs/risks/R008-*.active.md` present, run `/wr-risk-scorer:bootstrap-catalog` re-run, observe `LOCAL_MAX=008` trips the bash octal evaluator. Origin field set to `inbound-reported (#273)`. Reported field updated to dual-date. Phase 2 Investigation Tasks added below.
+
+### Phase 2 Investigation Tasks (added 2026-06-21)
+
+- [ ] Re-rate Phase 2 Effort and Priority at next /wr-itil:review-problems (currently inheriting Phase 1's 16 High; Phase 2 may revise).
+- [ ] **Broaden the survey grep pattern** from `\$\(\(\s*\$\(echo` to ALL bash arithmetic over zero-padded ID strings. Candidate patterns:
+  - `\$\(\(\s*\$\{[A-Z_]+:?-?0?\}\s*\+` — captures `$(( ${LOCAL_MAX:-0} + 1 ))` (the #273 witness shape).
+  - `\$\(\(\s*\$\{[A-Z_]+\}\s*[+\-*/]` — captures any bare-variable arithmetic.
+  - Anything mixing `$((` with a variable that could carry a leading-zero string (filename glob extraction, padded ID, etc.)
+- [ ] **Survey scope expansion**: grep all `packages/**/scripts/*.sh` AND `scripts/*.sh` (repo-root) for the broader pattern; identify all surfaces beyond the 6 SKILL.md formulas Phase 1 covered.
+- [ ] **Apply `10#` fix** to each identified surface (same standard fix shape Phase 1 used).
+- [ ] **Regression bats** — extend the existing `099 → 100` regression to cover the `008 → 009` boundary on each script surface. Witness fixture: synthetic `R008-*.active.md` + assert `extract-risks-from-reports.sh` allocates `R009` cleanly without bash error.
+- [ ] **Optional**: shared helper `lib/next-id.sh` was deferred in Phase 1 Investigation Tasks (line 76) — re-evaluate at Phase 2 close given the now-7th + Nth surface (scripts) raise the DRY benefit-vs-sourcing-risk balance.
+
+### Phase 2 Fix Strategy (deferred)
+
+Likely shape: same `10#` prefix applied to each identified script-surface formula. Single commit per ADR-014. Behavioural bats per ADR-052. The shared-helper deferral may be revisited (Phase 1 deferred it at 6 surfaces; Phase 2 may push the count to 8-10 surfaces and tip the balance).
+
+## Reported Upstream
+
+- **#273** (https://github.com/windyroad/agent-plugins/issues/273) — filed 2026-06-21T10:38:33Z by external user. Reports two defects in `scripts/extract-risks-from-reports.sh`:
+  1. **Octal eval bug at line 217** (`LOCAL_MAX` keeps zero-padded id; `$(( 008 + 1 ))` fails) — folded into THIS ticket (P164 Phase 2). Suggested fix matches the canonical Phase 1 shape: `$(( 10#${LOCAL_MAX:-0} + 1 ))`.
+  2. **Hardcoded suite name in adopter README** (heredoc line 350) — captured as separate ticket P374 (different class: published-artefacts-reference-repo-internal-text; not octal-eval).

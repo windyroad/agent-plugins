@@ -1,11 +1,11 @@
 {
   "$schema": "https://windyroad.github.io/agent-plugins/schemas/upstream-cache.json",
   "$comment": "Cache file for inbound report discovery (P079 / ADR-062). Written by /wr-itil:review-problems Step 8.5 after each discovery pass.",
-  "last_checked": "2026-06-21T10:52:28Z",
-  "$last_pass_note": "Step 4.5 refresh 2026-06-21T10:52:28Z: TTL-expired auto-recheck; 0 new reports since 2026-06-17T12:32:15Z; 1 upstream-closed (#149, classification preserved). 50 problem-prefixed issues open; 36 acknowledged + classified previously, 14 in pending-pipeline-processing per 2026-05-15 direction. No assessment-pipeline runs this pass.",
+  "last_checked": "2026-06-21T13:26:29Z",
+  "$last_pass_note": "Manual cache update 2026-06-21T13:26:29Z during /wr-itil:review-problems Step 4 routing of #273: added entry for issue #273 (filed 2026-06-21T10:38, no [problem] prefix \u2014 bypassed today's title_prefix filter; class P373); matched to P164 (Phase 2 octal-bug reopen V\u2192KE) + P374 (new hardcoded-suite-name capture); ack comment posted to #273 via gated gh issue comment with both cross-references.",
   "channels": {
     "github-issues:windyroad/agent-plugins": {
-      "fetched_at": "2026-06-21T10:52:28Z",
+      "fetched_at": "2026-06-21T13:26:29Z",
       "filter": "title_prefix=[problem] (label filter removed; see channels-config $filter-note)",
       "status": "ok",
       "reports": [
@@ -467,6 +467,17 @@
           "body_hash": "b66ba6368d1d0dae",
           "classification": "pending-pipeline-processing",
           "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
+        },
+        {
+          "number": 273,
+          "title": "wr-risk-scorer bootstrap-catalog: ID allocation fails once R008+ exists; README hardcodes the suite name",
+          "author": "tompahoward",
+          "createdAt": "2026-06-21T10:38:33Z",
+          "body_hash": "f77ce3edb76d3a11",
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P164, P374",
+          "cache_audit_note": "discovered 2026-06-21 manually after channel filter missed it (P373 captures the filter defect); routed by user direction: octal eval bug \u2192 P164 Phase 2 reopen V\u2192KE; hardcoded suite name \u2192 P374 new ticket; #273 ack comment posted with cross-references. Title prefix '[problem]' absent \u2014 would have been missed by the title_prefix filter; surfaces P373 as the filter-too-narrow class.",
+          "discovered_at": "2026-06-21T13:26:29Z"
         }
       ]
     },
