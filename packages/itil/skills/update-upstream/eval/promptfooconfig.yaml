@@ -285,3 +285,194 @@ tests:
           the migration on one above-appetite entry. FAIL if it says catchup
           bypasses the gates for speed, re-posts the already-logged entry, or
           halts the entire migration on a single above-appetite entry.
+
+  - description: Inbound-only ticket (Origin field, no ## Reported Upstream) → inbound verdict dispatch fires
+    vars:
+      prompt: |
+        I am executing /wr-itil:update-upstream for local problem ticket P374
+        which just transitioned from Known Error to Verification Pending. The
+        ticket carries `**Origin**: inbound-reported (#273)` but has NO
+        `## Reported Upstream` section — it was reported AGAINST us by an
+        external user on our own repo (issue #273), not reported by us to
+        someone else. The fix shipped in `@windyroad/risk-scorer@0.13.5`.
+
+        Per the ADR-024 amendment (P363) inbound-origin verdict dispatch leg,
+        what does the skill do? Does it no-op exit (because there is no
+        ## Reported Upstream section), or does it post a fix-released verdict?
+        Where does the comment get posted — an external upstream repo or our
+        own repo — and how is the issue number resolved?
+    assert:
+      # Tier A — the inbound leg posts a comment, does not no-op exit.
+      - type: icontains
+        value: 'gh issue comment'
+      # Tier A — comment posts on our OWN repo (issue filed against us).
+      - type: regex
+        value: 'own repo|gh repo view|filed against us'
+      # Tier A — the released package@version is the verdict content.
+      - type: icontains
+        value: 'risk-scorer@0.13.5'
+      # Tier B — inbound dispatch fires off the Origin field, NOT a no-op.
+      - type: llm-rubric
+        value: |
+          The response describes the skill DISPATCHING the inbound verdict
+          leg (posting a fix-released verdict comment on the originating
+          own-repo issue #273) because the ticket carries
+          `**Origin**: inbound-reported (#273)` — even though it has NO
+          `## Reported Upstream` section. PASS if it posts the verdict via the
+          inbound leg and resolves #273 as living on our own repo. FAIL if it
+          says the skill no-op exits because there is no ## Reported Upstream
+          section (that is the OLD broken behaviour P363 fixes), or if it
+          posts to an external upstream repo.
+
+  - description: Inbound idempotency — existing matching comment → skip the re-post
+    vars:
+      prompt: |
+        I am executing /wr-itil:update-upstream for local problem ticket P374
+        (Verification Pending, `**Origin**: inbound-reported (#273)`, fix
+        shipped in `@windyroad/risk-scorer@0.13.5`). Before posting, the
+        idempotency guard ran `gh issue view 273 --json comments` and found
+        an existing comment that already contains the string
+        `@windyroad/risk-scorer@0.13.5` — the verdict was already posted on a
+        prior run.
+
+        Per the inbound-origin verdict dispatch contract, what does the skill
+        do with this match? Does it post a second comment, or skip?
+    assert:
+      # Tier A — idempotency guard skips the re-post.
+      - type: regex
+        value: 'skip|already.posted|already-posted-inbound'
+      # Tier B — idempotent on re-runs: no duplicate comment posted.
+      - type: llm-rubric
+        value: |
+          The response describes the skill SKIPPING the post (no second
+          gh issue comment) because the idempotency guard found an existing
+          comment carrying the verdict marker (@windyroad/risk-scorer@0.13.5),
+          and back-writing an already-posted reconciliation entry instead.
+          PASS if it skips the re-post (idempotent). FAIL if it posts a second
+          duplicate verdict comment despite the existing match.
+
+  - description: Inbound verdict body anti-leakage — reporter-facing prose, no framework-internal vocab (P229)
+    vars:
+      prompt: |
+        I am executing /wr-itil:update-upstream for an inbound-reported ticket
+        (Origin #273, fix in `@windyroad/risk-scorer@0.13.5`) and am about to
+        draft the fix-released verdict comment that will be posted on our own
+        public repo issue #273, visible to the external reporter.
+
+        Per the P363 anti-leakage rule, what may and may NOT appear in that
+        comment body? Specifically: may it cite the internal problem ticket
+        ID (e.g. P374), ADR numbers, the review-problems Step 4.5e branch
+        name, or docs/problems/ paths? What is the one permitted structured
+        token?
+    assert:
+      # Tier A — names the anti-leakage rule and the permitted token.
+      - type: regex
+        value: 'anti-leakage|P229|reporter-facing|reporter-surface'
+      # Tier A — the released package@version is the permitted token.
+      - type: icontains
+        value: '@windyroad/'
+      # Tier B — no internal vocab leaks; only the upgrade target is permitted.
+      - type: llm-rubric
+        value: |
+          The response states that the inbound reporter-facing comment body
+          MUST NOT contain framework-internal vocabulary — Step IDs, branch
+          names (e.g. safe-and-valid / Step 4.5e), classification tokens, or
+          P-NNN / ADR-NNN / JTBD-NNN / RFC-NNN IDs and docs/problems/ paths as
+          carriers of meaning — and that the released
+          @windyroad/<pkg>@<version> upgrade target is the only permitted
+          structured token. PASS if it forbids the internal IDs/branch names
+          and permits the package@version. FAIL if it says the internal ticket
+          ID or ADR/branch references may appear in the reporter-facing body.
+
+  - description: Both-direction ticket (## Reported Upstream AND inbound Origin) → both legs fire independently
+    vars:
+      prompt: |
+        I am executing /wr-itil:update-upstream for a local ticket that just
+        transitioned Known Error → Verification Pending and carries BOTH:
+        (1) a `## Reported Upstream` section pointing at an external repo
+        https://github.com/anthropics/claude-code/issues/1234 (we reported it
+        up to them), AND (2) `**Origin**: inbound-reported (#88)` (a different
+        user also reported it against us on our own repo). The fix shipped in
+        `@windyroad/itil@0.36.0`.
+
+        Per the ADR-024 amendment (P363), how does the skill handle a ticket
+        with both surfaces? Does it pick one, or fire both? Are the two
+        dispatches gated and logged together or independently?
+    assert:
+      # Tier A — both directions get a comment.
+      - type: icontains
+        value: 'gh issue comment'
+      # Tier A — independent dispatch per leg.
+      - type: regex
+        value: 'independent|separately|each leg'
+      # Tier B — both legs fire independently, each gate-composed + logged.
+      - type: llm-rubric
+        value: |
+          The response describes the skill firing BOTH legs INDEPENDENTLY for
+          a both-direction ticket: the outbound leg posts the lifecycle update
+          on the external repo issue #1234, and the inbound leg posts the
+          fix-released verdict on the own-repo issue #88 — each routed through
+          its own external-comms + voice-tone gate composition and each
+          back-written separately, so one above-appetite leg queues only
+          itself while the other proceeds. PASS if both legs fire
+          independently. FAIL if it says only one leg fires, or that the two
+          are bundled into a single gate/post/log.
+
+  - description: Dual-absence no-op — neither ## Reported Upstream nor inbound Origin → clean no-op exit
+    vars:
+      prompt: |
+        I am executing /wr-itil:update-upstream for local problem ticket P421
+        which just transitioned Known Error → Verification Pending. The ticket
+        has NO `## Reported Upstream` section AND its `**Origin**` field is
+        `internal` (not `inbound-reported`). It was neither reported by us to
+        an upstream nor reported against us by an external user.
+
+        Per the P363 dual-direction no-op exit, what does the skill do? Does
+        it post anything, error, or exit cleanly?
+    assert:
+      # Tier A — clean no-op exit, no post.
+      - type: regex
+        value: 'no-op|nothing to update|exit clean'
+      # Tier B — both surfaces absent → clean no-op, neither leg fires.
+      - type: llm-rubric
+        value: |
+          The response describes the skill exiting cleanly (no-op) with a
+          one-line message because NEITHER the outbound ## Reported Upstream
+          section NOR the inbound **Origin**: inbound-reported (#NN) field is
+          present — so neither the outbound nor the inbound leg fires. PASS if
+          it exits cleanly with no post. FAIL if it posts a comment, errors,
+          or fires either leg on a ticket that has neither surface.
+
+  - description: Inbound back-write direction-tagged — logs to ## Upstream Lifecycle Updates, NOT ## Reported Upstream (P249 non-contamination)
+    vars:
+      prompt: |
+        I am executing /wr-itil:update-upstream for an inbound-reported ticket
+        (`**Origin**: inbound-reported (#273)`) that just reached Verification
+        Pending; the inbound verdict comment posted on our own repo issue
+        #273. Now the skill must record the audit-trail back-write.
+
+        Per the P363 contract, WHICH section does the inbound back-write go
+        into, and why does it specifically NOT go into ## Reported Upstream?
+        What would break if an inbound own-repo issue were written into
+        ## Reported Upstream?
+    assert:
+      # Tier A — back-write goes to the lifecycle log, not Reported Upstream.
+      - type: icontains
+        value: 'Upstream Lifecycle Updates'
+      # Tier A — names the P249 poller / contamination risk.
+      - type: regex
+        value: 'P249|check-upstream-responses|contaminat'
+      # Tier B — direction-tagged lifecycle log; Reported Upstream is the
+      # outbound poll target P249 reads, so inbound must not land there.
+      - type: llm-rubric
+        value: |
+          The response states the inbound back-write lands in the
+          ## Upstream Lifecycle Updates log (direction-tagged for inbound),
+          and explicitly NOT in ## Reported Upstream — because
+          /wr-itil:check-upstream-responses (P249) polls ## Reported Upstream
+          as OUTBOUND issues we filed on OTHER repos, so writing an inbound
+          own-repo issue there would make P249 poll our own issue as if it
+          were a foreign upstream (contamination). PASS if it names the
+          lifecycle-log destination AND the P249 contamination rationale for
+          avoiding ## Reported Upstream. FAIL if it says the inbound issue
+          should be recorded in ## Reported Upstream.

@@ -6,7 +6,12 @@
 #   structural retrofit-via-justification when the linked harness-gap ticket
 #   has not yet shipped the primitives. The paired promptfoo eval at
 #   packages/itil/skills/update-upstream/eval/promptfooconfig.yaml carries
-#   the behavioural Tier-A/B coverage per ADR-075 Amendment 2026-06-02.)
+#   the behavioural Tier-A/B coverage per ADR-075 Amendment 2026-06-02.
+#   Provenance: P080 (original bidirectional contract) + P363 / ADR-024
+#   amendment 2026-06-22 (inbound-origin verdict dispatch leg — tests 21-30,
+#   behaviourally paired by the inbound eval cases in promptfooconfig.yaml).
+#   The lockstep transition-problem/manage-problem grep check is an inherent
+#   copy-not-move drift detector (ADR-010/P362) with no behavioural form.)
 #
 # Doc-lint structural test (Permitted Exception per ADR-005 — structural
 # SKILL.md content checks, not behavioural). Mirrors the doc-lint pattern
@@ -29,6 +34,8 @@ setup() {
   REPO_ROOT="$(cd "$(dirname "$BATS_TEST_FILENAME")/../../../../.." && pwd)"
   SKILL_MD="$REPO_ROOT/packages/itil/skills/update-upstream/SKILL.md"
   EVAL_CONFIG="$REPO_ROOT/packages/itil/skills/update-upstream/eval/promptfooconfig.yaml"
+  TRANSITION_MD="$REPO_ROOT/packages/itil/skills/transition-problem/SKILL.md"
+  MANAGE_MD="$REPO_ROOT/packages/itil/skills/manage-problem/SKILL.md"
 }
 
 @test "update-upstream: SKILL.md exists" {
@@ -193,6 +200,91 @@ setup() {
   # when ## Reported Upstream is present. The SKILL.md must reference the
   # trigger surface so adopters understand the invocation contract.
   run grep -iE 'transition-problem.*Step 7|Step 7.*transition-problem|fired from.*transition' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+# ─── Inbound-origin verdict dispatch leg (P363 / ADR-024 amendment 2026-06-22) ─
+
+@test "update-upstream: SKILL.md documents the inbound-origin verdict dispatch leg (P363)" {
+  # The skill reads the **Origin**: inbound-reported (#NN) field (ADR-076)
+  # in addition to ## Reported Upstream, so inbound reporters get a verdict.
+  run grep -iE 'Inbound-origin verdict dispatch' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'inbound-reported (#NN)' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "update-upstream: SKILL.md no-op exit requires BOTH surfaces absent (section AND inbound Origin)" {
+  # The dual-direction no-op exit fires only when NEITHER the outbound
+  # ## Reported Upstream section NOR the inbound **Origin** field is present.
+  run grep -iE 'no inbound Origin|NEITHER .*Reported Upstream.*Origin|both are absent' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "update-upstream: SKILL.md inbound leg resolves the originating issue on OUR OWN repo (not external upstream)" {
+  # Inbound issues are filed AGAINST us — the comment posts on our own repo,
+  # resolved via gh default / gh repo view, NOT an external upstream owner/repo.
+  run grep -iE 'gh repo view|our own repo|own repo' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "update-upstream: SKILL.md inbound leg has an idempotency guard (gh issue view --json comments)" {
+  # Before posting, scan existing comments for the verdict marker
+  # (package@version + commit SHA) and skip if already posted.
+  run grep -F 'gh issue view' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -iE 'idempoten' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "update-upstream: SKILL.md inbound templates carry the P229 anti-leakage rule (reporter-facing, no internal vocab)" {
+  # Reporter-facing comment bodies on our own repo MUST NOT leak Step IDs,
+  # branch names, classification tokens, or P/ADR/JTBD IDs as carriers of
+  # meaning. The released @windyroad/<pkg>@<version> is the only permitted
+  # structured token. Mirrors ADR-062 safe-and-valid acknowledgement shape.
+  run grep -iE 'anti-leakage|reporter-surface prose|reporter-facing' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'P229' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "update-upstream: SKILL.md inbound leg keeps the SAME dual gate composition (no weaker path)" {
+  # The inbound comment routes through the SAME external-comms + voice-tone
+  # dual gate as the outbound path — no weaker path for inbound.
+  run grep -iE 'SAME .*external-comms .*voice-tone|same.*dual gate' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "update-upstream: SKILL.md inbound Verifying→Closed also closes the own-repo issue (addresses #97-unclosed witness)" {
+  # P211 #97 was silent AND unclosed. The inbound leg runs gh issue close
+  # on the own repo on the Verifying→Closed transition.
+  run grep -iE 'posted-inbound-comment-and-closed|gh issue close .*OWN' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "update-upstream: SKILL.md both-direction tickets fire both legs independently" {
+  # A ticket reported upstream AND reported against us inbound fires both
+  # dispatches independently — one above-appetite leg queues only itself.
+  run grep -iE 'Both-direction|both.*legs.*independent|fire .*independently' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "update-upstream: SKILL.md back-writes inbound entries direction-tagged so P249 poller is uncontaminated" {
+  # Inbound entries log to ## Upstream Lifecycle Updates (NOT ## Reported
+  # Upstream) so /wr-itil:check-upstream-responses (P249) is not contaminated.
+  run grep -F 'P249' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -iE 'inbound.*disclosure path|posted-inbound-comment' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "transition-problem + manage-problem Step 7 greps match the inbound Origin alternation in LOCKSTEP (P363/P362)" {
+  # Both lockstep pre-checks must match ^## Reported Upstream OR
+  # ^\*\*Origin\*\*: inbound-reported \(# — drift re-opens the P363 gap on
+  # whichever surface lacks the alternation (ADR-010 copy-not-move / P362).
+  run grep -F 'inbound-reported \(#' "$TRANSITION_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'inbound-reported \(#' "$MANAGE_MD"
   [ "$status" -eq 0 ]
 }
 

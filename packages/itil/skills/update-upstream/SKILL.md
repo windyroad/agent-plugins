@@ -44,7 +44,8 @@ The single-ticket form is typically invoked from `/wr-itil:transition-problem` S
 ## Scope
 
 **In scope:**
-- Read the local ticket's `## Reported Upstream` section and extract each upstream URL + matched template + disclosure path recorded there.
+- Read the local ticket's `## Reported Upstream` section and extract each upstream URL + matched template + disclosure path recorded there (**outbound** direction).
+- Read the local ticket's `**Origin**: inbound-reported (#NN)` field and dispatch a reporter-facing fix-released / closed verdict comment on the originating own-repo issue (**inbound** direction, P363). See [§ Inbound-origin verdict dispatch (P363)](#inbound-origin-verdict-dispatch-p363).
 - Determine the local ticket's current Status from the filename suffix.
 - Draft a transition-specific lifecycle-update comment per the templates below (Open→KE / KE→Verifying / Verifying→Closed).
 - Compose the drafted prose through `wr-risk-scorer:external-comms` + `wr-voice-tone:external-comms` gates.
@@ -87,11 +88,12 @@ LOCAL_TICKET=$(ls docs/problems/${LOCAL_ID}-*.{open,known-error,verifying,closed
 Extract:
 - Title (from H1).
 - Current Status (from filename suffix — `.open.md` / `.known-error.md` / `.verifying.md` / `.closed.md` / `.parked.md`).
-- The `## Reported Upstream` section (zero or more upstream entries, each with URL + disclosure path).
+- The `## Reported Upstream` section (zero or more **outbound** upstream entries, each with URL + disclosure path) — the **outbound** direction (a ticket *we* reported up to someone else).
+- The `**Origin**: inbound-reported (#NN)` field (the [ADR-076](../../../docs/decisions/076-inbound-reported-problems-rank-ahead-via-sort-tier.proposed.md) rank-authoritative on-ticket field) — the **inbound** direction (a ticket someone else reported *against us* on our own repo, `#NN` being the originating issue). Drives the inbound dispatch leg below (P363).
 - For `.verifying.md` tickets: the `## Fix Released` section (release marker, version, commit SHA, PR number).
 - For `.known-error.md` tickets: the `## Fix Strategy` section (planned fix path; cited in KE updates so the reporter knows the direction).
 
-If the ticket has no `## Reported Upstream` section, exit cleanly with a one-line message: `No ## Reported Upstream section in P${LOCAL_ID}; nothing to update.` This is the **no-op exit** — most local tickets never reported upstream, and the skill's invocation from `transition-problem` Step 7 is unconditional; a missing section is the common case, not an error.
+**No-op exit (dual-direction).** If the ticket has NEITHER a `## Reported Upstream` section NOR an `**Origin**: inbound-reported (#NN)` field, exit cleanly with a one-line message: `No ## Reported Upstream section and no inbound Origin in P${LOCAL_ID}; nothing to update.` This is the **no-op exit** — most local tickets are neither reported upstream nor inbound-originated, and the skill's invocation from `transition-problem` Step 7 is unconditional; a missing surface is the common case, not an error. When EITHER surface is present, proceed: the outbound entries route through Steps 2–6; the inbound Origin field routes through the [§ Inbound-origin verdict dispatch (P363)](#inbound-origin-verdict-dispatch-p363) leg below. When BOTH are present, the two legs fire **independently** (each gate-composed, posted, and logged separately).
 
 ### 2. Parse each upstream entry
 
@@ -286,6 +288,93 @@ Append a log entry to the local ticket's `## Upstream Lifecycle Updates` section
 
 The log is append-only — each transition adds an entry; earlier entries are never overwritten. The log is the audit trail per JTBD-201's symmetric-audit-trail outcome and per ADR-024 Confirmation criterion 3a's `## Reported Upstream` back-write pattern (extended for the bidirectional case).
 
+### Inbound-origin verdict dispatch (P363)
+
+<!-- @jtbd JTBD-301 (Report a Problem Without Pre-Classifying It — inbound reporter feedback loop: the fix-released verdict leg for tickets someone else filed against us) -->
+
+This leg runs **in addition to** Steps 2–6 (the outbound `## Reported Upstream` path), keyed off the `**Origin**: inbound-reported (#NN)` field Step 1 extracted. It closes the JTBD-301 fix-released-verdict promise for the **inbound** direction — a plugin-user filed a `problem-report` issue *against us* (recorded at intake by ADR-062's safe-and-valid branch, which stamps the on-ticket `**Origin**` field per [ADR-076](../../../docs/decisions/076-inbound-reported-problems-rank-ahead-via-sort-tier.proposed.md)) and never heard the fix shipped because the outbound machinery only reads `## Reported Upstream`. Authority: [ADR-024](../../../docs/decisions/024-cross-project-problem-reporting-contract.proposed.md) amendment (P363, inbound-verdict dispatch leg).
+
+**Why the Origin field, not `## Reported Upstream` (P363 design):** the inbound issue lives on OUR OWN repo (it was filed against us). Writing it into `## Reported Upstream` would contaminate `/wr-itil:check-upstream-responses` (P249), which polls that section as OUTBOUND issues we filed *elsewhere*. Consuming the `**Origin**` field — distinct by construction — keeps the inbound and outbound data shapes separate and P249 uncontaminated.
+
+#### I1. Parse the inbound origin
+
+From the `**Origin**: inbound-reported (#NN)` field, extract the originating issue number `NN`. Resolve the repo it lives on as **our own repo** — the `gh` default for the current working tree (`gh repo view --json nameWithOwner -q .nameWithOwner`), NOT an external upstream owner/repo. If the `**Origin**` field is `internal` or absent, this leg does not run (the no-op is already handled at Step 1 when both surfaces are absent).
+
+#### I2. Determine the transition (same suffix logic as Step 3)
+
+Reuse Step 3's transition table (filename-suffix vs last-logged Status) — it is direction-agnostic. The inbound leg fires verdict comments for the **fix-released** and **closed** transitions (the verdicts a reporter most wants); Open → Known Error fires an optional progress comment only when the reporter explicitly asked for status. If the suffix matches the last logged inbound entry, exit no-op (`No inbound transition since last update; nothing to post.`).
+
+#### I3. Draft the inbound verdict comment (reporter-facing)
+
+Per-transition templates, filled from the local ticket per Step 1's extraction. **Anti-leakage (P229/P350) — load-bearing:** these bodies are reporter-facing on our own repo and MUST carry reporter-surface prose only. Do NOT emit framework-internal vocabulary — no Step IDs, branch names, classification tokens (`safe-and-valid`, `inbound-reported`, …), `P<NNN>` / `ADR-NNN` / `JTBD-NNN` / `RFC-NNN` as carriers of meaning, or `docs/problems/...` path syntax. The released `@windyroad/<pkg>@<version>` upgrade target is the only permitted structured token. This mirrors ADR-062's safe-and-valid acknowledgement shape (Decision Outcome step 6). The same **no-invention rule** as Step 4's outbound templates applies — if a cited section is absent, write the explicit "absent" phrasing, never synthesise technical claims.
+
+**Known Error → Verification Pending (fix released) template:**
+
+```markdown
+Thanks again for the report. The fix has shipped in `@windyroad/<pkg>@<version>`.
+
+**What changed**: <one-sentence reporter-readable summary from the ## Fix Released section>
+
+Please upgrade to that version (or later) and let us know if you still see this. If anything looks off after upgrading, just reply here.
+```
+
+**Verification Pending → Closed template:**
+
+```markdown
+Closing the loop — this is fixed in `@windyroad/<pkg>@<version>` and we've confirmed it on our side. Thanks for taking the time to report it; your filing is what got it fixed. Reopen or reply here if it resurfaces.
+```
+
+**Open → Known Error (optional progress) template** (only when the reporter asked for interim status):
+
+```markdown
+Quick update: we've found the cause and a fix is on the way. We'll comment here again when it ships in a release.
+```
+
+#### I4. Idempotency guard (before posting)
+
+Inbound dispatch may re-fire (re-run on a later transition, or a stale-grep re-dispatch). Before posting, scan the originating issue's existing comments:
+
+```bash
+gh issue view "${NN}" --repo "${OWN_OWNER_REPO}" --json comments \
+  -q '.comments[].body' | grep -F "@windyroad/${PKG}@${VERSION}"
+```
+
+The verdict marker is the released `@windyroad/<pkg>@<version>` string (plus the commit SHA carried in `## Fix Released` when present) — unique enough that a prior matching comment means the verdict already posted. If a matching comment is found, **skip the post**, back-write an `already-posted-inbound` reconciliation entry to the lifecycle log (I6), and continue. This makes the inbound leg idempotent on re-runs.
+
+#### I5. Compose through gates + post (same composition as Step 5)
+
+Route the drafted comment through the SAME `wr-risk-scorer:external-comms` + `wr-voice-tone:external-comms` dual gate (AND composition) as Step 5 — no weaker path for inbound. Above-appetite handling is identical to Step 5c (silent risk-reduce + re-score; if still above, save to `## Queued Upstream Update` + queue an `outstanding_questions` entry; the orchestrator continues per P352 — do NOT halt). Within appetite, post on our own repo:
+
+```bash
+gh issue comment "${NN}" --repo "${OWN_OWNER_REPO}" --body "${INBOUND_BODY}"
+```
+
+On the **Verification Pending → Closed** transition, after the comment, also close the originating issue so our own tracker matches the local `.closed.md` state (this addresses the P211 #97 *silent-and-unclosed* witness):
+
+```bash
+gh issue close "${NN}" --repo "${OWN_OWNER_REPO}" --comment "" --reason completed
+```
+
+If the issue is already closed (someone closed it manually), `gh issue close` returns a benign error — record `closed-already` in the disclosure path and continue.
+
+#### I6. Back-write to the lifecycle log
+
+Append to the same `## Upstream Lifecycle Updates` log (Step 6 shape), tagged for the inbound direction so the audit trail stays unified:
+
+```markdown
+- **<YYYY-MM-DD>** — Known Error → Verification Pending (inbound)
+  - **Target**: inbound #<NN> (own repo <OWN_OWNER_REPO>)
+  - **Comment URL**: <posted-comment-url> (or "skipped — already-posted-inbound" when the idempotency guard matched, or "queued — see ## Queued Upstream Update" when above-appetite)
+  - **Disclosure path**: posted-inbound-comment | posted-inbound-comment-and-closed (Verifying → Closed) | already-posted-inbound | queued-above-appetite | closed-already
+  - **Gate verdict**: external-comms <band/score> + voice-tone <pass|fail>
+```
+
+The log stays append-only and direction-tagged; `/wr-itil:check-upstream-responses` (P249) does NOT read this section, so logging inbound entries here cannot contaminate the outbound poller.
+
+#### I7. Both-direction tickets
+
+A ticket may carry BOTH a `## Reported Upstream` section AND an inbound `**Origin**` field (we reported it upstream *and* someone reported it against us). The two legs are **independent**: the outbound entries run Steps 2–6 against their external URLs; the inbound leg runs I1–I6 against the own-repo issue. Each gate-composes, posts, and logs separately — one above-appetite leg queues only itself; the other proceeds.
+
 ### 7. Commit per ADR-014
 
 When invoked from `transition-problem` Step 7's advisory subsection, the upstream comment + back-write + the ticket rename + the README refresh all join the **same single commit** per ADR-014's single-commit grain — never split across commits. The transition-problem skill owns the commit; this skill's edits ride that commit as additional staged changes.
@@ -359,6 +448,7 @@ Four distinct AFK branches. Per the [ADR-024](../../../docs/decisions/024-cross-
 | Above-appetite — silent risk-reduce + re-score within appetite | Re-draft with tighter source-citation + shorter prose; re-invoke `wr-risk-scorer:external-comms`. If within → post per the below-appetite branch. | ADR-024 amendment (P080); ADR-044 framework-resolution boundary; ADR-042 within-axis precedent (open-vocabulary risk-reducing measures) |
 | Above-appetite — silent risk-reduce did not bring within appetite | Save drafted comment to `## Queued Upstream Update` + queue `outstanding_questions` entry (category: `deviation-approval`). Orchestrator continues per P352. | ADR-024 amendment (P080); ADR-013 Rule 6; P352 |
 | Above-appetite commit (Step 7) | Skip the commit, report uncommitted state. | ADR-013 Rule 6 |
+| **Inbound-origin verdict (P363)** | When the ticket carries `**Origin**: inbound-reported (#NN)`, run the [§ Inbound-origin verdict dispatch](#inbound-origin-verdict-dispatch-p363) leg (I1–I6): idempotency-guard, then route through the SAME external-comms + voice-tone dual gate, post `gh issue comment` on our own repo (and `gh issue close` on Verifying → Closed), back-write a direction-tagged lifecycle log entry. Above-appetite queues per the rows above (does NOT halt). Reporter-facing prose only — no framework-internal vocab (P229). | ADR-024 amendment (P363); ADR-076 (Origin field); ADR-028; P352 |
 
 The pre-amendment "halt-the-orchestrator on above-appetite" semantics are **superseded** by queue-and-continue per P352 — same shape as the post-P270 initial-filing path.
 
@@ -388,6 +478,9 @@ The skill's no-op exit (Step 1) means firing the trigger unconditionally on ever
 - [ADR-075](../../../docs/decisions/075-promptfoo-agent-prose-verdict-eval-harness.proposed.md) Amendment 2026-06-02 — paired promptfoo Tier-A/B eval discharges the R009 prose-floor for SKILL surfaces.
 - [ADR-061](../../../docs/decisions/061-dogfood-graduation-criteria.proposed.md) Rule 4 — evidence-floor; the paired eval ships in the same commit as this SKILL prose for atomic R009 discharge.
 - **P080** — driving problem ticket (No bidirectional update of upstream-reported problems).
+- **P363** — driving problem ticket for the [§ Inbound-origin verdict dispatch](#inbound-origin-verdict-dispatch-p363) leg (inbound-reported tickets never received a fix-released verdict on the originating issue). Fix option (b) — consume the `**Origin**` field — user-ratified 2026-06-22.
+- [ADR-076](../../../docs/decisions/076-inbound-reported-problems-rank-ahead-via-sort-tier.proposed.md) — owns the `**Origin**: inbound-reported (#NN)` on-ticket field this leg consumes.
+- [ADR-062](../../../docs/decisions/062-inbound-upstream-report-discovery-assessment-pipeline.proposed.md) — inbound intake-time pipeline; its safe-and-valid branch is the Origin-field writer this leg reads at fix-released time.
 - **P079** — sibling problem (inbound-discovery leg); together P079 + P080 close the reporter-loop end-to-end.
 - **P078** — capture-on-correction; the manage-problem trap this skill closes (manual upstream-update step gets forgotten under load).
 - [`packages/itil/skills/report-upstream/SKILL.md`](../report-upstream/SKILL.md) — reciprocal sibling (initial-filing path); shares the `## Reported Upstream` contract this skill consumes.
