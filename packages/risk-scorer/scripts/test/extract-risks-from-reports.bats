@@ -259,6 +259,23 @@ EOF
   grep -q "ADR-059" docs/risks/README.md
 }
 
+@test "emitted README does NOT leak the publishing-suite brand name (P374 published-artefacts)" {
+  # The README heredoc must use project-neutral phrasing so an adopter's
+  # generated docs/risks/README.md never carries the source monorepo's
+  # brand into adopter-controlled prose. Witness substring from #273.
+  mkdir -p .risk-reports
+  cat > .risk-reports/r.md <<'EOF'
+RISK_REGISTER_HINT:
+- above-appetite-residual | brand-leak-test | Brand-leak absence check
+EOF
+  run "$SCRIPT"
+  [ "$status" -eq 0 ]
+  [ -f docs/risks/README.md ]
+  ! grep -q "Windy Road Agent Plugins suite" docs/risks/README.md
+  # Positive assertion: the neutral phrasing is present
+  grep -q "persistent risk register\*\* for this project" docs/risks/README.md
+}
+
 @test "README does NOT cite TEMPLATE.md (per user direction 2026-05-04)" {
   mkdir -p .risk-reports
   cat > .risk-reports/r.md <<'EOF'

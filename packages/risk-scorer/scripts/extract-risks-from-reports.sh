@@ -347,7 +347,7 @@ cat > "$TARGET_DIR/README.md" <<README_HEADER
 
 ## Purpose
 
-This directory is the **persistent risk register** for the Windy Road Agent Plugins suite. It is distinct from:
+This directory is the **persistent risk register** for this project. It is distinct from:
 
 - \`RISK-POLICY.md\` — defines the *criteria* (impact/likelihood scales, appetite, treatment principles).
 - \`.risk-reports/\` — ephemeral **per-change** pipeline risk reports produced by the risk-scorer on each commit/push/release. Auto-deleted after 7 days.

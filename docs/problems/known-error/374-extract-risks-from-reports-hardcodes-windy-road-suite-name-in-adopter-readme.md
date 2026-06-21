@@ -1,6 +1,6 @@
 # Problem 374: `extract-risks-from-reports.sh` hardcodes "Windy Road Agent Plugins suite" branding in the adopter-generated `docs/risks/README.md`
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-06-21
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: inbound-reported (#273)
@@ -50,16 +50,20 @@ Adopter maintainer manually edits `docs/risks/README.md` after each `bootstrap-c
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Decide fix candidate (a) / (b) / (c) — likely (b) per published-artefacts-no-repo-internal-text discipline
-- [ ] Survey the broader `scripts/extract-risks-from-reports.sh` heredoc for any other source-monorepo-only language (the line-350 sentence is the witness; sweep the full script for the class)
-- [ ] Create reproduction test — bats fixture asserts no `Windy Road Agent Plugins suite` substring appears in the generated README under any project root
-- [ ] Audit other bootstrap scripts in the suite for the same class (any `scripts/*-bootstrap*` or `scripts/extract-*` helper that emits prose to an adopter-installed location)
+- [x] Decide fix candidate (a) / (b) / (c) — **(b) project-neutral phrasing chosen** (2026-06-22). Architect/JTBD/voice-tone/style-guide gates all PASS; no substitution code, reads correctly in both source-monorepo and adopter contexts.
+- [x] Survey the broader `scripts/extract-risks-from-reports.sh` heredoc for any other source-monorepo-only language — **done** (2026-06-22). `grep -niE "windy road|windyroad|agent plugins suite|this suite"` over the script returns only line 350. The other README-body references (`docs/problems/`, `docs/decisions/ADR-<NNN>`, `per ADR-059`) are generic-shape framework references, not brand leaks — left as-is.
+- [x] Create reproduction test — **done** (2026-06-22). Behavioural bats test `emitted README does NOT leak the publishing-suite brand name (P374 published-artefacts)` in `packages/risk-scorer/scripts/test/extract-risks-from-reports.bats` asserts the `Windy Road Agent Plugins suite` substring is absent from the emitted README and the neutral phrasing is present.
+- [x] Audit other bootstrap scripts in the suite for the same class — **done** (2026-06-22). `grep -rliE "windy road agent plugins|windy road technology"` over `packages/*/scripts/` + `scripts/` (excluding tests) returns no matches. No sibling defects.
 
 ## Fix Strategy
 
-(deferred to investigation — depends on (a)/(b)/(c) decision)
+**Applied (2026-06-22) — option (b) project-neutral phrasing.**
 
-Likely shape per option (b): single one-line Edit of `scripts/extract-risks-from-reports.sh:350` to replace the suite-naming sentence with neutral phrasing. Add a behavioural bats fixture asserting the brand-name substring does not appear in the emitted README. Single commit per ADR-014. No ADR amendment needed (existing published-artefacts discipline covers the substantive policy; the fix is mechanical).
+Root cause: `packages/risk-scorer/scripts/extract-risks-from-reports.sh` line 350 hardcoded the publishing suite's brand string in the README heredoc emitted into adopter-controlled `docs/risks/README.md`. Source-repo dogfooding masked it (in the source monorepo the brand name is accurate).
+
+Fix: single one-line Edit of the heredoc — `for the Windy Road Agent Plugins suite.` → `for this project.`. No substitution code; reads correctly in both source-monorepo and adopter contexts. Behavioural bats test added asserting the brand substring is absent from (and the neutral phrasing present in) the emitted README. Sibling-script audit clean. Single commit per ADR-014. No ADR amendment needed (existing published-artefacts discipline — P317's structural-prevention precedent — covers the substantive policy; the fix is mechanical conformance).
+
+All four edit gates (architect / JTBD / voice-tone / style-guide) returned PASS for the change.
 
 ## Dependencies
 
@@ -87,3 +91,4 @@ Likely shape per option (b): single one-line Edit of `scripts/extract-risks-from
 ## Change Log
 
 - **2026-06-21** — Opened during `/wr-itil:review-problems` Step 4 routing of inbound issue #273 per user direction. Skeleton ticket; fix strategy deferred to investigation ((a) derive / (b) neutral phrasing / (c) env-var override ladder). Captured via `/wr-itil:capture-problem` with `--jtbd=JTBD-101 --persona=plugin-developer` pre-resolution.
+- **2026-06-22** — AFK `/wr-itil:work-problems` iter. Applied option (b) project-neutral phrasing: edited `extract-risks-from-reports.sh:350` heredoc to drop the brand string, added a behavioural bats absence test (suite now 22 tests, all green), swept the full script + sibling bootstrap/extract scripts for the class (only line 350 affected; no sibling defects). Architect/JTBD/voice-tone/style-guide gates all PASS. Transitioned Open → Known Error (root cause confirmed, workaround documented, fix applied). Verification pending release of `@windyroad/risk-scorer`.
