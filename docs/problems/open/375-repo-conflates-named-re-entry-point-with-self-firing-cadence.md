@@ -2,9 +2,9 @@
 
 **Status**: Open
 **Reported**: 2026-06-23
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 16 (High) — Impact: 4 (High) × Likelihood: 4 (Likely). **Rated at capture from observed evidence, NOT deferred** (re-rating this ticket "at next /wr-itil:review-problems" would itself be the bug — nothing self-fires review-problems). Impact 4: defeats the repo's central value proposition (feedback loops that build intelligence) AND ships the rot-generator into adopter projects via the deferral-emitting skills. Likelihood 4: ~12 observed instances (see Related cluster); structural and recurring.
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: L — cross-package design (authoring-time enforcement check spanning architect/itil/retrospective) + rollup-parent decision + capture-skill default fix. WSJF = (16 × 1.0) / 4 = 4.0.
 **JTBD**: JTBD-001
 **Persona**: developer
 
@@ -20,7 +20,7 @@ Surfaced 2026-06-23 when the agent defended these deferrals as "names the next e
 
 - Captured-but-never-expanded RFCs/ADRs sit with `(deferred to …)` placeholders indefinitely.
 - The same uncadenced-deferral failure has been re-discovered ~12+ times as single-instance tickets (see `## Related`) rather than fixed once as a class.
-- This very ticket's own capture flow defers Priority/Effort to "next `/wr-itil:review-problems`" — which is itself on-demand unless something self-fires it (the bug is self-demonstrating).
+- This very ticket's capture flow **defaulted** Priority/Effort to `Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)` — an uncadenced deferral *and* a false-low that buried the meta-ticket at WSJF 1.5. The capture skill is a rot-generator. Re-rated by hand at capture (the correct behaviour); fixing the skill default is an Investigation Task below.
 
 ## Workaround
 
@@ -37,10 +37,11 @@ Surfaced 2026-06-23 when the agent defended these deferrals as "names the next e
 
 ### Investigation Tasks
 
-- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
+- [x] Rate Priority and Effort — done at capture (Impact 4 × Likelihood 4, Effort L, WSJF 4.0); NOT deferred
 - [ ] Audit every deferral in shipped skills/hooks/agents: classify as self-firing-reachable / on-demand-only / ticket-backed (the 2026-06-23 audit — attach results here)
 - [ ] Design the authoring-time enforcement: a check (hook or retro-step) that flags any deferral whose trigger chain is NOT transitively reachable from a self-firing event. Compare with existing `itil-fictional-defer-detect.sh`.
 - [ ] Decide whether P375 becomes a rollup PARENT for the instance cluster (P295/P271/P234/P236/P184/P189/P110/P220/P253/P148) or a sibling that supersedes them.
+- [ ] Fix the capture-problem (and manage-problem) deferred-placeholder default — `Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)` is both an uncadenced deferral and a false-low that buries captures; either rate at capture or make review-problems self-firing
 - [ ] Create reproduction test (behavioural: a SKILL with an on-demand-only deferral fails the check; one with a self-firing trigger passes)
 
 ## Dependencies
