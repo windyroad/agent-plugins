@@ -351,38 +351,99 @@ tests:
           PASS if it skips the re-post (idempotent). FAIL if it posts a second
           duplicate verdict comment despite the existing match.
 
-  - description: Inbound verdict body anti-leakage — reporter-facing prose, no framework-internal vocab (P229)
+  - description: Inbound anti-leakage (PUBLIC repo) — titled+linked refs permitted, bare IDs + classification tokens banned (P363 Directive 3)
     vars:
       prompt: |
         I am executing /wr-itil:update-upstream for an inbound-reported ticket
-        (Origin #273, fix in `@windyroad/risk-scorer@0.13.5`) and am about to
-        draft the fix-released verdict comment that will be posted on our own
-        public repo issue #273, visible to the external reporter.
+        (Origin #273, fix in `@windyroad/risk-scorer@0.13.5`) on our own repo,
+        which `gh repo view --json visibility` reports as PUBLIC. I am about to
+        draft the fix-released verdict comment posted on issue #273, visible to
+        the external reporter.
 
-        Per the P363 anti-leakage rule, what may and may NOT appear in that
-        comment body? Specifically: may it cite the internal problem ticket
-        ID (e.g. P374), ADR numbers, the review-problems Step 4.5e branch
-        name, or docs/problems/ paths? What is the one permitted structured
-        token?
+        Per the P363 revised anti-leakage rule for PUBLIC repos, how may the
+        comment refer to a related problem or ADR — as a bare ID like "P374",
+        or some other way? May classification tokens (safe-and-valid), internal
+        step IDs (Step 4.5e), or docs/problems/ path strings appear?
     assert:
-      # Tier A — names the anti-leakage rule and the permitted token.
+      # Tier A — names the title+link discipline and the permitted token.
       - type: regex
-        value: 'anti-leakage|P229|reporter-facing|reporter-surface'
-      # Tier A — the released package@version is the permitted token.
+        value: 'title.*link|linked|permalink'
       - type: icontains
         value: '@windyroad/'
-      # Tier B — no internal vocab leaks; only the upgrade target is permitted.
+      # Tier B — PUBLIC: titled+linked permitted; bare IDs + jargon still banned.
       - type: llm-rubric
         value: |
-          The response states that the inbound reporter-facing comment body
-          MUST NOT contain framework-internal vocabulary — Step IDs, branch
-          names (e.g. safe-and-valid / Step 4.5e), classification tokens, or
-          P-NNN / ADR-NNN / JTBD-NNN / RFC-NNN IDs and docs/problems/ paths as
-          carriers of meaning — and that the released
-          @windyroad/<pkg>@<version> upgrade target is the only permitted
-          structured token. PASS if it forbids the internal IDs/branch names
-          and permits the package@version. FAIL if it says the internal ticket
-          ID or ADR/branch references may appear in the reporter-facing body.
+          The response states that on a PUBLIC repo a related problem / ADR /
+          RFC / JTBD MAY be referenced but ONLY by its TITLE and as a LINK
+          (permalink) — NEVER as a bare ID like "P374" or "ADR-024". It must
+          also state that classification tokens (safe-and-valid), internal step
+          IDs (Step 4.5e), agent-internal vocabulary, and docs/problems/ path
+          strings remain BANNED regardless of visibility, and the released
+          @windyroad/<pkg>@<version> upgrade target is permitted. PASS if it
+          permits titled+linked refs AND forbids bare IDs + classification
+          tokens/step IDs/paths. FAIL if it permits a bare ID, or if it forbids
+          titled+linked references entirely (that is the OLD strict-ban rule
+          P363 revised for public repos).
+
+  - description: Inbound anti-leakage (PRIVATE/indeterminate repo) — strict ban, omit problem/ADR refs entirely (P363 Directive 3)
+    vars:
+      prompt: |
+        I am executing /wr-itil:update-upstream for an inbound-reported ticket
+        (Origin #88, fix in `@windyroad/itil@0.36.0`). `gh repo view --json
+        visibility` reports the repo as PRIVATE (or the visibility could not be
+        determined). I am about to draft the fix-released verdict comment.
+
+        Per the P363 anti-leakage rule, on a PRIVATE or indeterminate-visibility
+        repo, may the comment include titled+linked references to internal
+        problems or ADRs, or must it omit them? Why does visibility change the
+        rule?
+    assert:
+      - type: regex
+        value: 'strict ban|omit|must not|exclude'
+      # Tier B — PRIVATE/indeterminate: strict ban, omit refs entirely.
+      - type: llm-rubric
+        value: |
+          The response states that on a PRIVATE / INTERNAL / indeterminate-
+          visibility repo the strict ban applies: the comment must OMIT
+          problem / ADR / RFC / JTBD references entirely (NOT titled+linked),
+          because the permalink URLs would be unreachable by external readers
+          so a link is worse than no reference. PASS if it requires omitting
+          the references on private/indeterminate repos. FAIL if it permits
+          titled+linked references on a private/indeterminate repo (that shape
+          is PUBLIC-only).
+
+  - description: O→KE inbound verdict shares the workaround with reporter-provenance credit (P363 Directive 2/4)
+    vars:
+      prompt: |
+        I am executing /wr-itil:update-upstream for an inbound-reported ticket
+        (Origin #273) that just transitioned Open → Known Error, and the
+        reporter explicitly asked for interim status. The local ticket's
+        ## Workaround section contains a validated workaround. Scanning the
+        originating issue #273 with `gh issue view 273 --json comments,body`
+        shows the reporter themselves proposed that exact workaround in their
+        original issue body.
+
+        Per the P363 inbound O→KE generation prompt, what does the generated
+        comment include about the root cause and the workaround? Since the
+        reporter is the one who proposed the workaround we confirmed, how does
+        the comment attribute it?
+    assert:
+      - type: regex
+        value: 'workaround'
+      - type: regex
+        value: 'credit|thank|your workaround|exactly right'
+      # Tier B — shares the workaround AND credits the reporter AND confirms exact.
+      - type: llm-rubric
+        value: |
+          The response describes the generated O→KE comment as: (1) conveying
+          the root cause in plain reporter-readable terms, (2) SHARING the
+          workaround (not just the root cause), and (3) CREDITING the reporter
+          because they proposed the workaround we confirmed (e.g. "your
+          workaround in the original report turned out to be exactly right"),
+          then confirming the EXACT validated workaround details. PASS if it
+          shares the workaround AND credits the reporter for providing it AND
+          confirms the exact details. FAIL if it omits the workaround, invents
+          one when none exists, or fails to credit the reporter who provided it.
 
   - description: Both-direction ticket (## Reported Upstream AND inbound Origin) → both legs fire independently
     vars:

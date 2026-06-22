@@ -8,8 +8,10 @@
 #   packages/itil/skills/update-upstream/eval/promptfooconfig.yaml carries
 #   the behavioural Tier-A/B coverage per ADR-075 Amendment 2026-06-02.
 #   Provenance: P080 (original bidirectional contract) + P363 / ADR-024
-#   amendment 2026-06-22 (inbound-origin verdict dispatch leg — tests 21-30,
-#   behaviourally paired by the inbound eval cases in promptfooconfig.yaml).
+#   amendment 2026-06-22 (inbound-origin verdict dispatch leg) + P363 rework
+#   2026-06-23 (four user directives — LLM-generated verdict, workaround
+#   provenance-credit, visibility-gated anti-leakage, cog-a11y gate),
+#   behaviourally paired by the inbound eval cases in promptfooconfig.yaml.
 #   The lockstep transition-problem/manage-problem grep check is an inherent
 #   copy-not-move drift detector (ADR-010/P362) with no behavioural form.)
 #
@@ -276,6 +278,62 @@ setup() {
   [ "$status" -eq 0 ]
   run grep -iE 'inbound.*disclosure path|posted-inbound-comment' "$SKILL_MD"
   [ "$status" -eq 0 ]
+}
+
+# ─── P363 rework 2026-06-23 — four user directives ────────────────────────────
+
+@test "update-upstream: SKILL.md inbound verdict is LLM-generated per-context, not templated (Directive 1)" {
+  # Directive 1 — templates produce cold, patterned prose; the inbound verdict
+  # is GENERATED from ticket context via per-transition generation prompts the
+  # agent reads at runtime, NOT filled from canned template bodies.
+  run grep -iE 'LLM-generated|generated from the local ticket|generation prompt' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'no templates' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "update-upstream: SKILL.md O→KE prompt shares the workaround + scans issue comments for provenance (Directive 2/4)" {
+  # Directive 2 — a Known Error comment shares the WORKAROUND, not just root
+  # cause. Directive 4 — provenance: read ## Workaround AND scan the originating
+  # issue's body+comments (gh issue view --json comments,body) to attribute it.
+  run grep -F 'share it with correct PROVENANCE' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'comments,body' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F '## Workaround' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "update-upstream: SKILL.md O→KE prompt names four provenance branches + credit shape + confirm-exact (Directive 4)" {
+  # The prompt must branch on who provided the workaround and credit per branch,
+  # always confirming the exact validated details.
+  run grep -F 'MAINTAINER-AUTHORED' "$SKILL_MD"; [ "$status" -eq 0 ]
+  run grep -F 'REPORTER-PROVIDED' "$SKILL_MD"; [ "$status" -eq 0 ]
+  run grep -F 'COMMENTER-PROVIDED' "$SKILL_MD"; [ "$status" -eq 0 ]
+  run grep -F 'BOTH-SOURCE' "$SKILL_MD"; [ "$status" -eq 0 ]
+  run grep -iE 'credit the reporter|credit them by @handle|credit.*both' "$SKILL_MD"; [ "$status" -eq 0 ]
+  run grep -iE 'CONFIRM THE EXACT|Confirmed the details|confirm the details' "$SKILL_MD"; [ "$status" -eq 0 ]
+}
+
+@test "update-upstream: SKILL.md inbound anti-leakage is visibility-gated — PUBLIC titled+linked, PRIVATE strict ban (Directive 3)" {
+  # Directive 3 — for PUBLIC repos refer to problems/ADRs/RFCs by title AND link
+  # (never bare ID); for PRIVATE/INTERNAL/indeterminate fall back to strict ban.
+  run grep -F 'gh repo view --json visibility' "$SKILL_MD"; [ "$status" -eq 0 ]
+  run grep -iE 'title AND as a link|titled\+linked' "$SKILL_MD"; [ "$status" -eq 0 ]
+  run grep -iE 'PRIVATE / INTERNAL / indeterminate|strict ban' "$SKILL_MD"; [ "$status" -eq 0 ]
+  # classification tokens / step IDs / internal vocab stay banned regardless.
+  run grep -iE 'Always banned' "$SKILL_MD"; [ "$status" -eq 0 ]
+  # grounded in ADR-055's permalink-progressive-enhancement.
+  run grep -F 'ADR-055' "$SKILL_MD"; [ "$status" -eq 0 ]
+}
+
+@test "update-upstream: SKILL.md inbound gate chain rides cog-a11y first (when-available, P338-gated, do-not-block)" {
+  # Directive 1's "run cog-a11y, risk, voice and tone" — cog-a11y rides FIRST,
+  # gated on P338 (plugin not yet shipped); the chain degrades to the dual gate
+  # today and does NOT block on P338.
+  run grep -iE 'cog-a11y → risk → voice-tone|cognitive-accessibility → external-comms' "$SKILL_MD"; [ "$status" -eq 0 ]
+  run grep -F 'P338' "$SKILL_MD"; [ "$status" -eq 0 ]
+  run grep -iE 'do NOT block|when-available' "$SKILL_MD"; [ "$status" -eq 0 ]
 }
 
 @test "transition-problem + manage-problem Step 7 greps match the inbound Origin alternation in LOCKSTEP (P363/P362)" {

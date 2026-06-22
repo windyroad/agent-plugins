@@ -217,7 +217,7 @@ Revisit this decision if:
 - **False-positive rate on either evaluator exceeds ~5%** — measured via user-overridden rewrites. Signals the evaluator's prompt needs tightening.
 - **Composite-marker failure mode emerges** — e.g. a PASS-PASS-but-marker-not-written bug leaks through. Trigger: bats regression-suite expansion.
 - **Age-check loop-stopping in AFK**: if AFK orchestrators hit the age-check deny on a significant fraction of external posts, consider a `EXTERNAL_COMMS_AFK_AGE_BYPASS` envvar.
-- **A third evaluator emerges** (licence-compliance, claim-accuracy). Amend this ADR's evaluator list and the `evaluator_set` key component. Expected amendment, not a new ADR.
+- **A third evaluator emerges** (licence-compliance, claim-accuracy). Amend this ADR's evaluator list and the `evaluator_set` key component. Expected amendment, not a new ADR. **(Done 2026-06-23 — cognitive-accessibility declared as the third evaluator; see `## Amendments`. Wiring is P338-gated until `@windyroad/cognitive-a11y` ships.)**
 - **ADR-017 changes scope**: if the sync pattern moves to a different mechanism (e.g. workspace-linking instead of script-sync), this ADR's distribution clause follows.
 - **ADR-027 is superseded** (P014): the "reviewer agents, not governance skills" note stays correct; the replacement ADR should still recognise reviewer agents as distinct from user-invoked workflow skills.
 - **Hook→subagent architecture changes** in Claude Code. Trigger: reconsideration of direct-invocation Option from pre-amendment.
@@ -553,3 +553,20 @@ This is **distinct from** P365: P365 keys on repo *visibility* (a public-repo co
 - **ADR-017 sync.** Canonical edit at `packages/shared/hooks/external-comms-gate.sh`, propagated byte-identically to both consumers via `scripts/sync-external-comms-gate.sh` (`--check` green). Behavioural bats: voice-tone asserts silent-pass on `git-commit-message` across PUBLIC / PRIVATE / INTERNAL / indeterminate-gh and a surface-scoping guard (gh-issue still denies); risk-scorer adds an empty-skip-list divergence guard asserting it still denies + delegates on PUBLIC commit messages.
 
 **Status**: stays `proposed`. The scope fix is observed in production for one release cycle before any status flip, consistent with the deliberation discipline above.
+
+### 2026-06-23 — Cognitive-accessibility as the third external-comms evaluator (P338-gated; P363 driver)
+
+Records the **third evaluator** the Reassessment Criteria (line 220) anticipated — *"A third evaluator emerges … Amend this ADR's evaluator list … Expected amendment, not a new ADR."* The new evaluator class is **cognitive-accessibility** (plain-language / reading-level review of reporter-facing prose), declared here so the evaluator-membership decision lives in ADR-028 (its owning ADR) rather than in a consumer SKILL.
+
+**Driver.** The P363 inbound-verdict-dispatch rework (ADR-024 amendment 2026-06-23, Directive 1's *"then we need to run cog-a11y, risk, voice and tone"*) wires a cognitive-accessibility gate ahead of the existing risk + voice-tone legs on the generated reporter-facing verdict prose in `/wr-itil:update-upstream`. The architect ruling (2026-06-23) was that the evaluator-membership half of that wiring belongs here (ADR-028), with the consumer SKILL carrying only the leg-local wiring note and cross-referencing this entry.
+
+**Declaration.**
+- **Evaluator id**: `cog-a11y` (the per-package `external-comms-evaluator.conf` `EXTERNAL_COMMS_EVALUATOR_ID` for the future `@windyroad/cognitive-a11y` package); subagent type `wr-cognitive-a11y:external-comms` (to be created when the plugin lands).
+- **Composition**: rides the same per-evaluator marker scheme (2026-05-14 amendment) — its own `external-comms-cog-a11y-reviewed-<KEY>` marker, order-independent with the `risk` + `voice-tone` markers (gates compose at firing level, not via shared state). On reporter-facing prose the natural read order is **cog-a11y → risk → voice-tone**, but no canonical sequence is enforced (per-evaluator markers make it order-free).
+- **Single/absent-evaluator correctness by construction**: until `@windyroad/cognitive-a11y` ships, its gate is simply not registered, so the surface degrades to the existing risk + voice-tone dual gate with no code change — exactly the single-evaluator-install path the 2026-05-14 amendment already handles.
+
+**P338-gated — do NOT block.** `@windyroad/cognitive-a11y` does not exist yet ([P338](../problems/open/338-p082-phase-2-cognitive-a11y-evaluator-on-external-comms-surfaces-new-windyroad-cognitive-a11y-plugin.md) Open). This amendment **declares** the evaluator class and reserves the wiring; it does NOT block any current surface on P338. Consumers (the P363 inbound leg today) ride the dual gate and treat the cog-a11y leg as when-available.
+
+**Reassessment Criterion.** When `@windyroad/cognitive-a11y` ships (P338 closes), finalise: the package's `external-comms-evaluator.conf`, its `wr-cognitive-a11y:external-comms` agent + PostToolUse mark hook, and the per-evaluator gate registration; then wire it into the reporter-facing surfaces (starting with the ADR-024 P363 inbound dispatch) and assert the three-evaluator composition in the affected bats/promptfoo suites. Until then this entry is the standing declaration.
+
+**Status**: stays `proposed`. Declaration-only; no behaviour change until P338 ships the plugin.

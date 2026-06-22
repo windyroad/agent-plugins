@@ -304,30 +304,99 @@ From the `**Origin**: inbound-reported (#NN)` field, extract the originating iss
 
 Reuse Step 3's transition table (filename-suffix vs last-logged Status) — it is direction-agnostic. The inbound leg fires verdict comments for the **fix-released** and **closed** transitions (the verdicts a reporter most wants); Open → Known Error fires an optional progress comment only when the reporter explicitly asked for status. If the suffix matches the last logged inbound entry, exit no-op (`No inbound transition since last update; nothing to post.`).
 
-#### I3. Draft the inbound verdict comment (reporter-facing)
+#### I3. Generate the inbound verdict comment (reporter-facing, LLM-generated — no templates)
 
-Per-transition templates, filled from the local ticket per Step 1's extraction. **Anti-leakage (P229/P350) — load-bearing:** these bodies are reporter-facing on our own repo and MUST carry reporter-surface prose only. Do NOT emit framework-internal vocabulary — no Step IDs, branch names, classification tokens (`safe-and-valid`, `inbound-reported`, …), `P<NNN>` / `ADR-NNN` / `JTBD-NNN` / `RFC-NNN` as carriers of meaning, or `docs/problems/...` path syntax. The released `@windyroad/<pkg>@<version>` upgrade target is the only permitted structured token. This mirrors ADR-062's safe-and-valid acknowledgement shape (Decision Outcome step 6). The same **no-invention rule** as Step 4's outbound templates applies — if a cited section is absent, write the explicit "absent" phrasing, never synthesise technical claims.
+These comments are **generated from the local ticket's context, not filled from canned templates** (P363 rework, Directive 1). Templates produce cold, patterned prose that reporters recognise as form-letters; instead the agent reads the source-of-truth sections below and GENERATES each comment per the per-transition prompt, then rides the gate chain in [I5](#i5-compose-through-gates--post-same-composition-as-step-5) (cog-a11y → risk → voice-tone).
 
-**Known Error → Verification Pending (fix released) template:**
+**Source-of-truth sections** (read from the local ticket before generating): `## Description` (the reporter's original symptom report), `## Workaround`, `## Root Cause Analysis`, `## Fix Released` (the release marker, version, commit SHA — the released `@windyroad/<pkg>@<version>` upgrade target comes from here).
 
-```markdown
-Thanks again for the report. The fix has shipped in `@windyroad/<pkg>@<version>`.
+**No-invention rule (load-bearing, carried from Step 4):** if a cited section is absent or empty, say so honestly ("we don't have a workaround to share yet") — NEVER synthesise technical claims. The gates cannot catch invented facts; the no-invention rule does. This mirrors ADR-062's safe-and-valid acknowledgement shape (Decision Outcome step 6).
 
-**What changed**: <one-sentence reporter-readable summary from the ## Fix Released section>
+**Anti-leakage discipline (P229/P350 — REVISED per repo visibility, Directive 3):** these bodies are reporter-facing on our own repo. Determine repo visibility once: `gh repo view --json visibility -q .visibility` → `PUBLIC` / `PRIVATE` / `INTERNAL`.
 
-Please upgrade to that version (or later) and let us know if you still see this. If anything looks off after upgrading, just reply here.
+- **PUBLIC** — you MAY refer to a problem / ADR / RFC / JTBD / Story, but ALWAYS by its **title AND as a link**, never a bare ID:
+  - Bad (bare ID, opaque): `Tracked locally as P164.`
+  - Bad (title only, no link): `Tracked as the octal-eval bug.`
+  - Good (title + linked ID): `Tracked as [Latent octal-eval bug in next-ID formula](https://github.com/windyroad/agent-plugins/blob/main/docs/problems/known-error/164-octal-eval-bug-in-next-id-formula-across-ticket-creator-skills-fires-when-ids-cross-099.md) (P164).`
+  - Resolve the link: ADR / RFC / JTBD / Story canonical paths live on `main`; for a problem ticket the filename carries the state suffix + slug — resolve the actual filename via `ls docs/<class>/<NNN>-*` (or `gh search code`) before linking. Grounded in [ADR-055](../../../docs/decisions/055-plugin-published-namespace-prefixed-internal-ids.proposed.md)'s permalink-progressive-enhancement shape and P229's jargon-vs-link distinction.
+- **PRIVATE / INTERNAL / indeterminate** — strict ban (the prior P229 rule): omit problem / ADR / RFC / JTBD / Story references entirely. External readers can't reach the URLs, so a link is worse than no reference.
+
+**Always banned (regardless of visibility):** classification tokens (`safe-and-valid`, `inbound-reported`, `clear-malicious`, `above-threshold-pushback`), internal step IDs (`Step 4.5e`, `step 6`), agent-internal vocabulary (`framework-resolution boundary`, `mechanical-stage carve-out`), runtime-detail prose (`marker-vs-file deadlock`, `subprocess-boundary contract`), and absolute `docs/problems/...` path strings (always prefer the rendered link). The released `@windyroad/<pkg>@<version>` upgrade target is always permitted.
+
+**Open → Known Error generation prompt** (only when the reporter explicitly asked for interim status — otherwise skip O→KE and wait for the fix-released verdict):
+
+```text
+GOAL: convey the root cause in plain, reporter-readable terms, AND share the
+WORKAROUND so the reporter is unblocked while the fix is in flight (Directive 2).
+
+READ: ## Description (their symptom report), ## Root Cause Analysis, ## Workaround.
+
+ROOT CAUSE: explain what's actually going wrong in terms the reporter can act
+on — no internal mechanism jargon.
+
+WORKAROUND — share it with correct PROVENANCE (Directive 4):
+  1. ## Workaround empty / "(deferred to investigation)": be honest — "we don't
+     have a workaround to share yet" — do NOT fabricate one.
+  2. Otherwise determine WHO first provided it. Read the originating issue's
+     body + comments:
+       gh issue view <NN> --repo <OWN_OWNER_REPO> --json comments,body \
+         --jq '.body, .comments[].body'
+     and semantically match (your judgement, not strict-string) the local
+     ## Workaround against the issue body and each commenter's prose:
+       - MAINTAINER-AUTHORED (no match in issue body or any comment): share the
+         workaround in our own voice.
+       - REPORTER-PROVIDED (matches the issue body / the reporter's own comment):
+         credit the reporter — e.g. "Thanks again — your workaround in the
+         original report turned out to be exactly right. To confirm the details:"
+         then the exact ## Workaround prose (we've validated it).
+       - COMMENTER-PROVIDED (matches a comment by someone other than the
+         reporter): credit them by @handle — e.g. "@<handle> — your workaround
+         upthread turned out to be the right path. Confirmed the details:" then
+         the exact ## Workaround prose.
+       - BOTH-SOURCE (reporter proposed X, a commenter refined to X'): credit
+         both per their contribution.
+     Honour @handles via standard GitHub-flavoured markdown so the credited
+     person is notified.
+  3. Always CONFIRM THE EXACT workaround details (the validated ## Workaround
+     prose) — never paraphrase a confirmed workaround into vagueness.
+
+LENGTH: concise — usually 3–6 sentences. Bullet list ONLY for a genuine
+multi-step workaround. Apply the anti-leakage discipline above. Voice/tone per
+docs/VOICE-AND-TONE.md (the voice-tone gate runs anyway).
 ```
 
-**Verification Pending → Closed template:**
+**Known Error → Verification Pending (fix released) generation prompt:**
 
-```markdown
-Closing the loop — this is fixed in `@windyroad/<pkg>@<version>` and we've confirmed it on our side. Thanks for taking the time to report it; your filing is what got it fixed. Reopen or reply here if it resurfaces.
+```text
+GOAL: tell the reporter the fix shipped, name the upgrade target, invite verify.
+
+READ: ## Fix Released (release marker, version, commit SHA), ## Workaround.
+
+INCLUDE:
+  - What changed, in one reporter-readable sentence (from ## Fix Released) — no
+    invented detail.
+  - The upgrade target: `@windyroad/<pkg>@<version>` (or later).
+  - If ## Workaround had a workaround: note it's no longer needed after upgrade.
+  - An invitation to upgrade and confirm, and "reply here if it persists".
+
+LENGTH: concise — usually 3–5 sentences. Apply the anti-leakage discipline
+above. Voice/tone per docs/VOICE-AND-TONE.md.
 ```
 
-**Open → Known Error (optional progress) template** (only when the reporter asked for interim status):
+**Verification Pending → Closed generation prompt:**
 
-```markdown
-Quick update: we've found the cause and a fix is on the way. We'll comment here again when it ships in a release.
+```text
+GOAL: close the loop warmly, thank the reporter, give the reopen path.
+
+READ: ## Fix Released (the released version).
+
+INCLUDE:
+  - The fix is confirmed on our side and shipped in `@windyroad/<pkg>@<version>`.
+  - A genuine thank-you — their report is what got it fixed.
+  - The reopen path: reply or reopen if it resurfaces.
+
+LENGTH: concise — usually 2–4 sentences. Apply the anti-leakage discipline
+above. Voice/tone per docs/VOICE-AND-TONE.md.
 ```
 
 #### I4. Idempotency guard (before posting)
@@ -343,7 +412,11 @@ The verdict marker is the released `@windyroad/<pkg>@<version>` string (plus the
 
 #### I5. Compose through gates + post (same composition as Step 5)
 
-Route the drafted comment through the SAME `wr-risk-scorer:external-comms` + `wr-voice-tone:external-comms` dual gate (AND composition) as Step 5 — no weaker path for inbound. Above-appetite handling is identical to Step 5c (silent risk-reduce + re-score; if still above, save to `## Queued Upstream Update` + queue an `outstanding_questions` entry; the orchestrator continues per P352 — do NOT halt). Within appetite, post on our own repo:
+Route the GENERATED comment through the reporter-facing gate chain — **cognitive-accessibility → external-comms (risk) → voice-tone** (Directive 1's "run cog-a11y, risk, voice and tone"). The risk + voice-tone legs are the SAME `wr-risk-scorer:external-comms` + `wr-voice-tone:external-comms` dual gate (AND composition) as Step 5 — no weaker path for inbound.
+
+**Cog-a11y gate (when-available, P338-gated — do NOT block):** the cognitive-accessibility evaluator rides FIRST so reporter-facing prose is checked for plain-language / reading-level before the risk + voice-tone legs. `@windyroad/cognitive-a11y` does not exist yet ([P338](../../../docs/problems/open/338-p082-phase-2-cognitive-a11y-evaluator-on-external-comms-surfaces-new-windyroad-cognitive-a11y-plugin.md) Open) — until it lands the chain degrades to the existing external-comms + voice-tone dual gate, exactly as ADR-028's per-evaluator marker scheme handles an uninstalled evaluator (an absent evaluator's gate is simply not registered → the remaining legs' PASS unblocks the retry). The cog-a11y-as-third-external-comms-evaluator declaration is recorded in [ADR-028](../../../docs/decisions/028-voice-tone-gate-external-comms.proposed.md)'s `## Amendments` (the locus ADR-028's own Reassessment Criteria designate for a third evaluator); this leg is the consumer-side wiring note only. **Do NOT block this iteration's inbound dispatch on P338** — ship the wiring, ride the dual gate today.
+
+Above-appetite handling is identical to Step 5c (silent risk-reduce + re-score; if still above, save to `## Queued Upstream Update` + queue an `outstanding_questions` entry; the orchestrator continues per P352 — do NOT halt). Within appetite, post on our own repo:
 
 ```bash
 gh issue comment "${NN}" --repo "${OWN_OWNER_REPO}" --body "${INBOUND_BODY}"
@@ -448,7 +521,7 @@ Four distinct AFK branches. Per the [ADR-024](../../../docs/decisions/024-cross-
 | Above-appetite — silent risk-reduce + re-score within appetite | Re-draft with tighter source-citation + shorter prose; re-invoke `wr-risk-scorer:external-comms`. If within → post per the below-appetite branch. | ADR-024 amendment (P080); ADR-044 framework-resolution boundary; ADR-042 within-axis precedent (open-vocabulary risk-reducing measures) |
 | Above-appetite — silent risk-reduce did not bring within appetite | Save drafted comment to `## Queued Upstream Update` + queue `outstanding_questions` entry (category: `deviation-approval`). Orchestrator continues per P352. | ADR-024 amendment (P080); ADR-013 Rule 6; P352 |
 | Above-appetite commit (Step 7) | Skip the commit, report uncommitted state. | ADR-013 Rule 6 |
-| **Inbound-origin verdict (P363)** | When the ticket carries `**Origin**: inbound-reported (#NN)`, run the [§ Inbound-origin verdict dispatch](#inbound-origin-verdict-dispatch-p363) leg (I1–I6): idempotency-guard, then route through the SAME external-comms + voice-tone dual gate, post `gh issue comment` on our own repo (and `gh issue close` on Verifying → Closed), back-write a direction-tagged lifecycle log entry. Above-appetite queues per the rows above (does NOT halt). Reporter-facing prose only — no framework-internal vocab (P229). | ADR-024 amendment (P363); ADR-076 (Origin field); ADR-028; P352 |
+| **Inbound-origin verdict (P363)** | When the ticket carries `**Origin**: inbound-reported (#NN)`, run the [§ Inbound-origin verdict dispatch](#inbound-origin-verdict-dispatch-p363) leg (I1–I7): idempotency-guard, then **GENERATE** the verdict comment from ticket context (no templates; O→KE shares the workaround with provenance-credit), route through the cog-a11y → external-comms → voice-tone gate chain (cog-a11y when-available per P338; dual gate today), post `gh issue comment` on our own repo (and `gh issue close` on Verifying → Closed), back-write a direction-tagged lifecycle log entry. Above-appetite queues per the rows above (does NOT halt). Reporter-facing prose; anti-leakage visibility-gated (PUBLIC → titled+linked refs; PRIVATE/indeterminate → strict ban; classification tokens / step IDs / internal vocab always banned — P229/P350). | ADR-024 amendment (P363); ADR-028 (cog-a11y third evaluator, P338); ADR-055 (linked-title); ADR-076 (Origin field); P352 |
 
 The pre-amendment "halt-the-orchestrator on above-appetite" semantics are **superseded** by queue-and-continue per P352 — same shape as the post-P270 initial-filing path.
 
@@ -478,7 +551,8 @@ The skill's no-op exit (Step 1) means firing the trigger unconditionally on ever
 - [ADR-075](../../../docs/decisions/075-promptfoo-agent-prose-verdict-eval-harness.proposed.md) Amendment 2026-06-02 — paired promptfoo Tier-A/B eval discharges the R009 prose-floor for SKILL surfaces.
 - [ADR-061](../../../docs/decisions/061-dogfood-graduation-criteria.proposed.md) Rule 4 — evidence-floor; the paired eval ships in the same commit as this SKILL prose for atomic R009 discharge.
 - **P080** — driving problem ticket (No bidirectional update of upstream-reported problems).
-- **P363** — driving problem ticket for the [§ Inbound-origin verdict dispatch](#inbound-origin-verdict-dispatch-p363) leg (inbound-reported tickets never received a fix-released verdict on the originating issue). Fix option (b) — consume the `**Origin**` field — user-ratified 2026-06-22.
+- **P363** — driving problem ticket for the [§ Inbound-origin verdict dispatch](#inbound-origin-verdict-dispatch-p363) leg (inbound-reported tickets never received a fix-released verdict on the originating issue). Fix option (b) — consume the `**Origin**` field — user-ratified 2026-06-22. **Rework 2026-06-23** (four user directives): the inbound verdict is LLM-generated per-context (not templated); O→KE shares the workaround with reporter/commenter provenance-credit; anti-leakage is visibility-gated (PUBLIC → titled+linked refs); the gate chain gains a cog-a11y leg first (P338-gated).
+- [ADR-055](../../../docs/decisions/055-plugin-published-namespace-prefixed-internal-ids.proposed.md) — grounds the PUBLIC-repo titled+linked reference discipline (permalink-progressive-enhancement; cures the bare-ID collision failure mode).
 - [ADR-076](../../../docs/decisions/076-inbound-reported-problems-rank-ahead-via-sort-tier.proposed.md) — owns the `**Origin**: inbound-reported (#NN)` on-ticket field this leg consumes.
 - [ADR-062](../../../docs/decisions/062-inbound-upstream-report-discovery-assessment-pipeline.proposed.md) — inbound intake-time pipeline; its safe-and-valid branch is the Origin-field writer this leg reads at fix-released time.
 - **P079** — sibling problem (inbound-discovery leg); together P079 + P080 close the reporter-loop end-to-end.
