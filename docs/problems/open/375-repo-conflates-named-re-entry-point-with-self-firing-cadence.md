@@ -38,11 +38,29 @@ Surfaced 2026-06-23 when the agent defended these deferrals as "names the next e
 ### Investigation Tasks
 
 - [x] Rate Priority and Effort — done at capture (Impact 4 × Likelihood 4, Effort L, WSJF 4.0); NOT deferred
-- [ ] Audit every deferral in shipped skills/hooks/agents: classify as self-firing-reachable / on-demand-only / ticket-backed (the 2026-06-23 audit — attach results here)
+- [x] Audit every deferral in shipped skills/hooks/agents — done 2026-06-23 (4-agent reachability sweep); results in `## Audit` below
 - [ ] Design the authoring-time enforcement: a check (hook or retro-step) that flags any deferral whose trigger chain is NOT transitively reachable from a self-firing event. Compare with existing `itil-fictional-defer-detect.sh`.
 - [ ] Decide whether P375 becomes a rollup PARENT for the instance cluster (P295/P271/P234/P236/P184/P189/P110/P220/P253/P148) or a sibling that supersedes them.
 - [ ] Fix the capture-problem (and manage-problem) deferred-placeholder default — `Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)` is both an uncadenced deferral and a false-low that buries captures; either rate at capture or make review-problems self-firing
 - [ ] Create reproduction test (behavioural: a SKILL with an on-demand-only deferral fails the check; one with a self-firing trigger passes)
+
+## Audit (2026-06-23 — 4-agent reachability sweep)
+
+**Self-firing inventory** (the ONLY things that run without a human typing a command): SessionStart hooks (all *surfacers* — oversight nudges count unconfirmed markers, briefing surfaces Critical Points, pending-questions surfaces the AFK queue); PreToolUse write/commit gates (block bad writes); Stop hooks (the retro Stop hook only *reminds*, does not run a retro); the AFK `/wr-itil:work-problems` loop (the only thing that *executes* deferred backlog work — and it is user-initiated). **No cron exists.**
+
+**Class A (self-executing) — correct, keep**: in-flow README refresh (same invocation); release-cadence defer to work-problems Step 6.5 (within a loop run); PreToolUse `retrospective-readme-jtbd-currency.sh` commit gate.
+
+**Class B (self-surfacing — THE FIX TEMPLATE THAT ALREADY WORKS)**: exactly three — `jtbd-oversight-nudge.sh`, `architect-oversight-nudge.sh`, `itil-pending-questions-surface.sh`. Each counts *content/marker state* and re-surfaces it every SessionStart so it cannot silently rot. jtbd is the model (SKILL even says reject cases are "intentionally re-asked so it doesn't silently rot").
+
+**Class C (ON-DEMAND-ONLY = ROT)** — the bulk:
+- **itil**: RFC/story/story-map README staleness (only `docs/problems/README.md` has an auto-fire path); RFC `## Scope`/`## Tasks` deferred to `manage-rfc accepted`; story INVEST fields + `estimated-effort: deferred`; problem `(deferred to investigation)` placeholders; **Phase-N conditional deferral with lifted gating condition — highest severity, failure mode is silent work LOSS not just staleness (P184)**; the **capture-problem priority/effort default — largest rot generator by volume** (the very bug this ticket hit); upstream defer-and-note markers; check-upstream Phase 2; work-problems Branch 2 auto-commit; REFERENCE.md splits (ADR-054); stale "deferred until X ships" prose that has already shipped (report-upstream); review-problems P129 Phase 2.
+- **architect**: capture-adr defers Considered Options/Drivers/Consequences/Confirmation to `create-adr` via a literal `(deferred to …)` pointer whose detecting consumer **was never built**; reassessment-date passing has no cadence. **The oversight nudge actively MASKS this**: `review-decisions` writes `human-oversight: confirmed` from frontmatter+title+Decision-Outcome alone, silencing the nudge forever while leaving the deferred sections frozen.
+- **retrospective**: **HEADLINE — `run-retro`, the engine of the feedback loop, has no self-firing cadence; only the (user-initiated) AFK loop runs it.** Tier-3 briefing rotation; tickets-deferred (P148 lost-observation hazard); skill-md / briefing budget rotations; auto-created skeleton RFCs. Five policing scripts (`check-tickets-deferred-cause.sh`, `check-briefing-budgets.sh`, etc.) are wired to NO hook — they run only inside run-retro.
+- **risk-scorer**: standing-risk register entries born `Curation: pending review` with all scoring deferred; the named `/wr-risk-scorer:review-register` drain **does not exist**; `risk-scorer-scaffold-nudge.sh` only checks directory *existence* (goes silent once stubs exist) — it stopped one step short of the jtbd pattern it cites as its model.
+
+**Clean (0 live deferrals)**: style-guide, c4, wardley, connect, tdd, shared.
+
+**The fix the repo already designed for and never wired**: clone the class-B pattern — a SessionStart "deferral census" that greps the repo for deferred markers (`(deferred …)`, `pending review`, stale READMEs) and re-surfaces a count + worst offenders every session. One such hook converts most of the class-C list C→B. Targeted siblings: build the architect `(deferred to …)` pointer detector; extend risk-scorer's nudge to count pending-review content; resolve run-retro's missing cadence.
 
 ## Dependencies
 
