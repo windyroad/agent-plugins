@@ -352,17 +352,16 @@ _72 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **"(b) Real shipment control + (c) Reconcile K→V release lifecycle — riding together in a single RFC-first fix path"**, confirmed by the user via `AskUserQuestion` 2026-06-17 (`/wr-architect:review-decisions` drain across...
 **Related:** ADR-042, ADR-070, ADR-066, ADR-074
-
 ### ADR-083 — Codex CLI as second runtime
-**Status:** proposed | **Oversight:** unconfirmed
-**Chosen:** Chosen option: **"Option A"**, because the shape matches ADR-002's explicit forward-looking note ("the per-plugin package structure should extend naturally — each package adds its tool-specific install logic") and ADR-017's sync-script + ...
+**Status:** proposed | **Oversight:** confirmed
+**Decides:** Add OpenAI Codex CLI as a second supported runtime alongside Claude Code via dual-runtime support in shared `install-utils.mjs` (`--runtime claude|codex|both`), with each plugin shipping a `.codex-plugin/plugin.json` mirror of its `.claude-plugin/plugin.json` and reusing its existing `agents/agent.md` as source of truth — chosen because it matches ADR-002's forward-looking per-plugin-extension note and ADR-017's sync-script + drift-check discipline, and was verified end-to-end with codex-cli 0.137.0. Rollout grain is architect-as-pilot, other 12 packages follow per-iter.
+**Related:** ADR-002, ADR-003, ADR-017, ADR-032
 
 ### ADR-084 — Self-firing deferral census so deferred governance work cannot silently rot
-**Status:** proposed | **Oversight:** unconfirmed
-**Chosen:** Option 2 — shared marker vocabulary (single source of truth in `lib/deferral-markers.sh`) + scan `docs/` + `packages/` `.md` only, because it catches the shipped-skill rot adopters inherit and `.md`-only handles in-source code-comment false positives (user-pinned via AskUserQuestion). Implemented as the `retrospective-deferral-census.sh` SessionStart hook cloning the class-B oversight-nudge shape (silent-on-zero, fail-open, ADR-040 ≤2KB budget, archival-excluded, `WR_SUPPRESS_DEFERRAL_CENSUS=1` AFK guard).
-**Drivers:** automatic-cadence-or-it-never-happens (P291/P295); the class-B cure already exists in-repo (ADR-066/068); ADR-040 lineage; single-source-of-truth on marker vocabulary.
-**Closes:** the first immune-system brick of P375 (repo conflates named re-entry with self-firing cadence).
-**Relates:** ADR-040, ADR-066, ADR-038; composes with `itil-fictional-defer-detect.sh` (vocabulary convergence is a P375 follow-up).
+**Status:** proposed | **Oversight:** confirmed
+**Decides:** Add a `retrospective-deferral-census.sh` SessionStart hook that scans `docs/` + `packages/` `.md` files for deferral markers (vocabulary single-sourced in `lib/deferral-markers.sh`) and re-surfaces the worst offenders every session — cloning the proven class-B oversight-nudge shape so deferred governance work has a self-firing trigger instead of rotting on named-but-uncadenced re-entry points (P375). `.md`-only scope and `docs/`+`packages/` reach were user-pinned to catch shipped-skill rot adopters inherit while avoiding source code-comment false positives.
+**Confirmation:** census hook exists + registered as 3rd SessionStart `startup` entry; `lib/deferral-markers.sh` exports `DEFERRAL_MARKER_RE` as single vocabulary source; 11 behavioural bats green (count emission, worst-offender list, both-dirs scanned, silent-on-zero, fail-open, AFK guard, ADR-040 ≤2048-byte budget, archival exclusion, P375 citation); advisory-only/fail-open/never-blocks envelope (exit 0 every path); `itil-fictional-defer-detect.sh` vocabulary convergence recorded as a P375 follow-up, not done here.
+**Related:** ADR-040, ADR-066, ADR-038, ADR-002, ADR-003
 
 ---
 
