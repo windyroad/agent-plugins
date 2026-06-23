@@ -39,7 +39,10 @@ Surfaced 2026-06-23 when the agent defended these deferrals as "names the next e
 
 - [x] Rate Priority and Effort — done at capture (Impact 4 × Likelihood 4, Effort L, WSJF 4.0); NOT deferred
 - [x] Audit every deferral in shipped skills/hooks/agents — done 2026-06-23 (4-agent reachability sweep); results in `## Audit` below
-- [ ] Design the authoring-time enforcement: a check (hook or retro-step) that flags any deferral whose trigger chain is NOT transitively reachable from a self-firing event. Compare with existing `itil-fictional-defer-detect.sh`.
+- [x] **First immune-system brick SHIPPED 2026-06-23** — `retrospective-deferral-census.sh` SessionStart hook (ADR-084) clones the class-B self-surfacing pattern: greps docs/+packages/ .md for deferred-work markers and re-surfaces a bounded census every session so the bulk of the class-C rot becomes durably visible. 11/11 bats green; commit `0e8a2787`; ADR-084 commit `0b540e06` (human-oversight: unconfirmed — needs canonical ratification per P357).
+- [ ] Converge `itil-fictional-defer-detect.sh` onto the shared `lib/deferral-markers.sh` vocabulary (the authoring-time / write-time half — the census is the surfacing half). Deliberately NOT done in the ADR-084 change to avoid cross-plugin coupling (ADR-002/003).
+- [ ] Surface the census count in the AFK return summary (work-problems / run-retro) so it's visible on return, not just per-iter (the JTBD-006 reviewer note).
+- [ ] Add the same class-B self-surfacer to the other rot surfaces the audit found: risk-scorer pending-review register (extend scaffold-nudge to count content not just dir-existence); RFC/story/story-map README staleness; the architect `(deferred to …)` pointer detector + un-mask the oversight-nudge confirm-vs-expand conflation.
 - [ ] Decide whether P375 becomes a rollup PARENT for the instance cluster (P295/P271/P234/P236/P184/P189/P110/P220/P253/P148) or a sibling that supersedes them.
 - [ ] Fix the capture-problem (and manage-problem) deferred-placeholder default — `Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)` is both an uncadenced deferral and a false-low that buries captures; either rate at capture or make review-problems self-firing
 - [ ] Create reproduction test (behavioural: a SKILL with an on-demand-only deferral fails the check; one with a self-firing trigger passes)
