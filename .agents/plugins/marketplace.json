@@ -1,0 +1,20 @@
+{
+  "name": "windyroad-local",
+  "interface": {
+    "displayName": "Windy Road Local"
+  },
+  "plugins": [
+    {
+      "name": "wr-architect",
+      "source": {
+        "source": "local",
+        "path": "./packages/architect"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

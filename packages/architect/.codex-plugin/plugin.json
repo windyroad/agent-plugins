@@ -1,0 +1,43 @@
+{
+  "name": "wr-architect",
+  "version": "0.17.3",
+  "description": "Architecture decision enforcement for AI coding agents",
+  "author": {
+    "name": "Windy Road Technology",
+    "url": "https://windyroad.com.au"
+  },
+  "homepage": "https://github.com/windyroad/agent-plugins/tree/main/packages/architect",
+  "repository": "https://github.com/windyroad/agent-plugins",
+  "license": "MIT",
+  "keywords": [
+    "architecture",
+    "adr",
+    "decisions",
+    "governance",
+    "codex",
+    "claude-code"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Windy Road Architect",
+    "shortDescription": "Review changes against architecture decisions",
+    "longDescription": "Architecture decision enforcement for AI coding agents. Create ADRs, review recorded decisions, and check proposed changes against docs/decisions/.",
+    "developerName": "Windy Road Technology",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://windyroad.com.au",
+    "privacyPolicyURL": "https://windyroad.com.au/privacy",
+    "termsOfServiceURL": "https://windyroad.com.au/terms",
+    "defaultPrompt": [
+      "Review this change against the architecture decisions",
+      "Create an ADR for this design decision",
+      "Review decisions that lack human oversight"
+    ],
+    "brandColor": "#0F766E",
+    "screenshots": []
+  }
+}

@@ -69,16 +69,27 @@ Build a self-contained prompt for the architect subagent that includes:
 
 The architect's verdict taxonomy includes **[Unratified Dependency]** (ADR-074 surface 3): if the plan/change explicitly cites or implements an ADR that lacks `human-oversight: confirmed` (unratified, non-superseded), the architect flags ISSUES FOUND with a "ratify via /wr-architect:review-decisions first" action. This applies to plan review exactly as to edit review — a plan built on an unratified decision should not proceed until that decision's substance is ratified. No extra prompt wiring is needed (the agent owns the check); this note records that the surface-3 check is in-scope for plan review.
 
-### 5. Delegate to wr-architect:agent
+### 5. Delegate to the architect agent
 
-Invoke the architect subagent via the `Skill` tool:
+Use the runtime-native architect agent path with the constructed prompt.
+
+Claude Code invocation:
 
 ```
 subagent_type: wr-architect:agent
 prompt: <constructed review prompt from step 4>
 ```
 
-Wait for the subagent to complete.
+Codex invocation:
+
+```
+agent: wr-architect:agent
+prompt: <constructed review prompt from step 4>
+```
+
+Codex auto-discovers the agent from the installed plugin's `agents/agent.md` and registers it as `wr-architect:agent` (plugin name + agent frontmatter name). Adopter projects do not need to ship any `.codex/agents/*.toml` themselves — `codex plugin add wr-architect@windyroad` is enough. The repo-local `.codex/agents/wr-architect.toml`, kept in sync from `packages/architect/agents/agent.md` by `scripts/sync-codex-agents.mjs`, only supports in-repo dogfooding before the plugin is installed into `CODEX_HOME`; it registers a short-name alias `wr-architect` for source-repo developers. If a non-interactive `codex exec` validation harness cannot spawn the custom agent directly, perform the review inline using the same generated agent instructions and name that fallback in the output.
+
+Wait for the agent to complete.
 
 ### 6. Present results
 
@@ -87,7 +98,7 @@ Present the full compliance report to the user. The architect subagent will repo
 - FLAGGED: specific violations or compliance questions with ADR references
 - NEW ADR NEEDED: decisions that should be recorded before proceeding
 
-If violations are flagged, use `AskUserQuestion` to ask how the user wants to proceed:
+If violations are flagged, use the runtime's structured question mechanism to ask how the user wants to proceed:
 - (a) Address the violations before continuing
 - (b) Proceed with a documented exception
 - (c) Draft a new or amended ADR to legitimise the approach

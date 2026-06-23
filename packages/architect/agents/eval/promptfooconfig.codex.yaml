@@ -1,0 +1,56 @@
+description: |
+  Codex wr-architect agent verdict eval. Exercises the generated
+  .codex/agents/wr-architect.toml path and the Codex plugin install surface.
+
+providers:
+  - id: 'exec:bash ./run-codex-agent-eval.sh'
+
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-codex-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: PASS for aligned pre-edit proposal
+    vars:
+      prompt: |
+        PRE-EDIT review: proposed change updates comments only. No
+        architecture-bearing files, dependencies, hooks, workflows, or ADRs
+        change. Return the architect verdict.
+    assert:
+      - type: regex
+        value: 'Architecture Review:\s*PASS|PASS'
+
+  - description: ISSUES FOUND for undocumented dependency
+    vars:
+      prompt: |
+        PRE-EDIT review: proposed change adds a new npm dependency named
+        fast-queue to package.json for core task scheduling. No existing ADR
+        covers this dependency choice. Return the architect verdict.
+    assert:
+      - type: regex
+        value: 'ISSUES FOUND|Undocumented Decision|new decision'
+
+  - description: NEEDS DIRECTION when viable options are unpinned
+    vars:
+      prompt: |
+        PRE-EDIT review: proposed change must choose whether plugin
+        distribution uses a remote marketplace only or also a repo-local
+        marketplace, and the prompt does not pin a direction. Return the
+        architect verdict.
+    assert:
+      - type: regex
+        value: 'NEEDS DIRECTION'
+
+  - description: Unratified Dependency flags unconfirmed ADR dependency
+    vars:
+      prompt: |
+        PRE-EDIT review: proposed change explicitly implements ADR-074, but
+        the ADR frontmatter lacks human-oversight: confirmed. Return the
+        architect verdict and action.
+    assert:
+      - type: regex
+        value: 'Unratified Dependency|ratify|review-decisions'

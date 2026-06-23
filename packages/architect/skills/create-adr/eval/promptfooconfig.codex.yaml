@@ -1,0 +1,48 @@
+description: |
+  Codex create-adr SKILL smoke eval. This intentionally sits beside the
+  Claude promptfooconfig.yaml and exercises the Codex plugin install path via
+  run-codex-skill-eval.sh.
+
+providers:
+  - id: 'exec:bash ./run-codex-skill-eval.sh'
+
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-codex-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: Codex create-adr keeps mechanical title derivation silent
+    vars:
+      prompt: |
+        I am validating /wr-architect:create-adr under Codex. The user asks
+        to record a decision about running the eval harness on every PR versus
+        sampled nightly. Explain how the skill derives the ADR title/slug and
+        whether it should ask the user for the title.
+    assert:
+      - type: regex
+        value: 'silent|mechanical|does\s+not\s+(?:ask|prompt)|without\s+asking'
+      - type: regex
+        value: 'derive|slug|kebab'
+      - type: llm-rubric
+        value: |
+          The response says title/slug derivation is a mechanical silent path
+          and does not ask the user for a title.
+
+  - description: Codex create-adr preserves human oversight fallback
+    vars:
+      prompt: |
+        I am validating /wr-architect:create-adr under non-interactive
+        codex exec. A draft ADR is produced in an AFK run and the user cannot
+        ratify the substance in the same turn. What human-oversight marker
+        should be written?
+    assert:
+      - type: contains
+        value: 'human-oversight: unconfirmed'
+      - type: llm-rubric
+        value: |
+          The response says non-interactive Codex runs must not invent
+          ratification and should leave or write human-oversight: unconfirmed.
