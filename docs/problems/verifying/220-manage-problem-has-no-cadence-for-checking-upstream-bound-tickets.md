@@ -66,3 +66,12 @@ Phase 1 (shipped): wire `/wr-itil:work-problems` Step 0d outbound-responses pre-
 - **Pipeline classification**: safe-low-fix-risk; route=safe-and-valid.
 - **Affected plugin**: @windyroad/itil.
 - **Composes with**: P063 (external-root-cause lineage marker; Step 0d's STATE output is natural P063 input), P070 (semantic-comparator infrastructure), P249 Phase 1 (the manual skill this step wires into a cadence), P271 (Step 0c sibling — deferred-placeholder pre-flight), P317/RFC-009 (adopter-safe PATH shim grammar), ADR-014 (commit grain), ADR-022 P143 fold-fix amendment (K → V on release), ADR-024 (back-link `## Reported Upstream` is source-of-truth scanned by the helper), ADR-049 (PATH shim), ADR-062 (inbound discovery — Confirmation amended for outbound symmetric counterpart), ADR-080 (highest-version-wins shim wrapper).
+
+## Upstream Lifecycle Updates
+
+- **2026-06-23** — Known Error → Verification Pending (inbound)
+  - **Target**: inbound #63 (own repo windyroad/agent-plugins)
+  - **Comment URL**: https://github.com/windyroad/agent-plugins/issues/63#issuecomment-4775050591
+  - **Disclosure path**: posted-inbound-comment
+  - **Gate verdict**: external-comms PASS + voice-tone PASS
+  - **Retroactive catchup**: dispatched via per-ticket invocation in the 2026-06-23 update-upstream catchup session (the bundled --catchup scanner only scans the outbound `## Reported Upstream` surface; inbound `**Origin**: inbound-reported (#NN)` catchup scope is the scanner's extension gap, captured separately).

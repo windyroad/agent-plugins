@@ -76,3 +76,13 @@ Released in @windyroad/itil@0.49.4 (changeset `wr-itil-p228-postrelease-kv-auto-
   - **Comment URL**: https://github.com/windyroad/agent-plugins/issues/42#issuecomment-4676712085
   - **Disclosure path**: posted-comment
   - **Gate verdict**: external-comms PASS (no confidential-information class matched) + voice-tone PASS
+
+## Upstream Lifecycle Updates
+
+- **2026-06-23** — Verification Pending → Closed (inbound, retroactive catchup, state-sync only)
+  - **Target**: inbound #42 (own repo windyroad/agent-plugins)
+  - **Comment URL**: skipped — already-posted-inbound (existing 2026-06-11 comment cites `@windyroad/itil@0.49.4` per the I4 idempotency guard); no fresh K→V or V→Closed verdict comment posted
+  - **Issue closed**: `gh issue close 42 --reason completed` succeeded (V→Closed state-sync; the 2026-06-11 comment only carried the K→V update and the issue stayed open)
+  - **Disclosure path**: already-posted-inbound + closed (state-sync)
+  - **Gate verdict**: idempotency-guard short-circuit (no fresh prose to gate)
+  - **Retroactive catchup**: dispatched via per-ticket invocation in the 2026-06-23 update-upstream catchup session.

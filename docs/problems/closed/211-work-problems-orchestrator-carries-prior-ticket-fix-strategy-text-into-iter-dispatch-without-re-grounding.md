@@ -71,3 +71,13 @@ Closed 2026-06-11 (P220 AFK iter retro — prior-session README-cell evidence dr
 - **Pipeline classification**: JTBD-aligned (JTBD-006); safe-low-fix-risk; route=safe-and-valid.
 - **Affected plugin**: @windyroad/itil.
 - **Composes-with**: ADR-032 (AFK iteration-isolation wrapper — re-grounding clarifies the orchestrator-side property of that isolation), P084 (subprocess-boundary dispatch — re-grounding is the symmetric orchestrator-side property of the subprocess's "no prior conversation context"), ADR-052 Surface 2 (structural-permitted bats fixture with `tdd-review` justification).
+
+## Upstream Lifecycle Updates
+
+- **2026-06-23** — Verification Pending → Closed (inbound, retroactive catchup)
+  - **Target**: inbound #97 (own repo windyroad/agent-plugins; relayed from bbstats P194)
+  - **Comment URL**: https://github.com/windyroad/agent-plugins/issues/97#issuecomment-4775056130
+  - **Issue closed**: `gh issue close 97 --reason completed` succeeded
+  - **Disclosure path**: posted-inbound-comment-and-closed
+  - **Gate verdict**: external-comms PASS + voice-tone PASS
+  - **Retroactive catchup**: dispatched via per-ticket invocation in the 2026-06-23 update-upstream catchup session.
