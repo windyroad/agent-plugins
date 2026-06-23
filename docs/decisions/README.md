@@ -306,7 +306,7 @@ _72 ADRs. These are the current rules. The architect agent reads this section fi
 
 ### ADR-073 — Fix-time gate auto-creates a missing RFC (everywhere)
 **Status:** proposed | **Oversight:** confirmed
-**Chosen:** Chosen option: **"Auto-create a problem-traced RFC if missing, everywhere the gate fires"** (user-ratified). When the propose-fix gate (ADR-072) fires on a Known Error with no RFC trace, the framework **auto-creates a problem-traced RFC** �...
+**Chosen:** Chosen option: **"Auto-create a problem-traced RFC if missing, everywhere the gate fires"** (user-ratified). When the propose-fix gate (ADR-072) fires on a Known Error with no RFC trace, the framework **auto-creates a problem-traced RFC** �...
 **Confirmation:** The propose-fix gate (interactive + AFK) auto-creates a problem-traced skeleton RFC when none exists; it never...; The auto-created RFC carries no "Considered Options" block (passes the ADR-052 lint) and traces the driving pr...; A behavioural test asserts auto-create fires at both the interactive and AFK surfaces.
 **Related:** ADR-071, ADR-072, ADR-070, ADR-044, ADR-060
 
@@ -356,6 +356,13 @@ _72 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-083 — Codex CLI as second runtime
 **Status:** proposed | **Oversight:** unconfirmed
 **Chosen:** Chosen option: **"Option A"**, because the shape matches ADR-002's explicit forward-looking note ("the per-plugin package structure should extend naturally — each package adds its tool-specific install logic") and ADR-017's sync-script + ...
+
+### ADR-084 — Self-firing deferral census so deferred governance work cannot silently rot
+**Status:** proposed | **Oversight:** unconfirmed
+**Chosen:** Option 2 — shared marker vocabulary (single source of truth in `lib/deferral-markers.sh`) + scan `docs/` + `packages/` `.md` only, because it catches the shipped-skill rot adopters inherit and `.md`-only handles in-source code-comment false positives (user-pinned via AskUserQuestion). Implemented as the `retrospective-deferral-census.sh` SessionStart hook cloning the class-B oversight-nudge shape (silent-on-zero, fail-open, ADR-040 ≤2KB budget, archival-excluded, `WR_SUPPRESS_DEFERRAL_CENSUS=1` AFK guard).
+**Drivers:** automatic-cadence-or-it-never-happens (P291/P295); the class-B cure already exists in-repo (ADR-066/068); ADR-040 lineage; single-source-of-truth on marker vocabulary.
+**Closes:** the first immune-system brick of P375 (repo conflates named re-entry with self-firing cadence).
+**Relates:** ADR-040, ADR-066, ADR-038; composes with `itil-fictional-defer-detect.sh` (vocabulary convergence is a P375 follow-up).
 
 ---
 
