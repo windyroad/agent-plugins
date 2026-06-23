@@ -28,3 +28,11 @@ logs/
 
 # Editor config (user-specific)
 .vscode/
+
+# Per-iter retro stragglers — kept local by default. Session-level retros
+# (`docs/retros/YYYY-MM-DD-<name>.md` without an `-iter` suffix) are still
+# tracked; force-add a tracked iter retro with `git add -f` when needed.
+docs/retros/*-iter.md
+docs/retros/*-iter-ask-hygiene.md
+docs/retros/*-iter[0-9].md
+docs/retros/*-iter[0-9]-ask-hygiene.md
