@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 80 (71 in-force, 9 historical)
+**Total ADRs:** 81 (72 in-force, 9 historical)
 
 ---
 
 ## In-force decisions
 
-_71 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_72 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -352,6 +352,10 @@ _71 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **"(b) Real shipment control + (c) Reconcile K→V release lifecycle — riding together in a single RFC-first fix path"**, confirmed by the user via `AskUserQuestion` 2026-06-17 (`/wr-architect:review-decisions` drain across...
 **Related:** ADR-042, ADR-070, ADR-066, ADR-074
+
+### ADR-083 — Codex CLI as second runtime
+**Status:** proposed | **Oversight:** unconfirmed
+**Chosen:** Chosen option: **"Option A"**, because the shape matches ADR-002's explicit forward-looking note ("the per-plugin package structure should extend naturally — each package adds its tool-specific install logic") and ADR-017's sync-script + ...
 
 ---
 
