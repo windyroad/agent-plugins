@@ -307,7 +307,7 @@ Omit `docs/problems/README-history.md` from the path list when the P134 rotation
 - Known Error → Verification Pending (standalone, no fix riding with it): `docs(problems): P<NNN> verification pending — <release marker>`
 - Verification Pending → Closed: `docs(problems): close P<NNN> <title>`
 
-If risk is above appetite and `AskUserQuestion` is available: ask whether to commit anyway, remediate first, or park the work. If `AskUserQuestion` is unavailable (AFK), skip the commit and report the uncommitted state (ADR-013 Rule 6 fail-safe). This applies only to the risk-above-appetite branch, not to the delegation-unavailable case above.
+If commit risk is above appetite: auto-apply scorer remediations per **ADR-042 Rule 1** until residual risk is within appetite, OR halt per ADR-042 Rule 5 if the scorer cannot converge. **MUST NOT commit above appetite; MUST NOT call `AskUserQuestion` to ask whether to commit anyway** (P377/RFC-029 — above-appetite is framework-mediated, not a one-time-override). If `AskUserQuestion` is unavailable (AFK), the ADR-013 Rule 6 fail-safe applies as the terminal fallback: skip the commit and report the uncommitted state. This applies only to the risk-above-appetite branch, not to the delegation-unavailable case above.
 
 ### 9. Report the outcome
 

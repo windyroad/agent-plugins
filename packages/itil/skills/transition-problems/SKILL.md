@@ -212,7 +212,7 @@ ONE commit covers: every surviving renamed ticket file + every Status edit + eve
 - Mixed-destination batch: `docs(problems): batch transition — P063 close, P070 known-error, P094 verifying (3 tickets)`
 - If the batch destination is `verifying` and rides with a fix commit, the commit-message scope follows the singular's pattern: `fix(<scope>): <description> (closes P063, P067)` — but the batch surface is unusual in the riding-with-fix shape; the canonical caller is verification-close housekeeping, not fix-release.
 
-If risk is above appetite and `AskUserQuestion` is available: ask whether to commit anyway, remediate first, or park. If `AskUserQuestion` is unavailable (AFK), skip the commit and report the uncommitted state per ADR-013 Rule 6 fail-safe — apply the same rule the singular does at the same gate.
+If commit risk is above appetite: auto-apply scorer remediations per **ADR-042 Rule 1** until within appetite, OR halt per ADR-042 Rule 5. **MUST NOT commit above appetite; MUST NOT call `AskUserQuestion` to ask whether to commit anyway** (P377/RFC-029 — framework-mediated, not a one-time-override). If `AskUserQuestion` is unavailable (AFK), the ADR-013 Rule 6 fail-safe applies — skip the commit and report the uncommitted state — apply the same rule the singular does at the same gate.
 
 ### 5. Report the outcome
 

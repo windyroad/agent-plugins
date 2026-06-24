@@ -137,7 +137,7 @@ Per ADR-014, governance skills commit their own work.
 1. `git add` the renamed / modified incident file.
 2. Delegate to `wr-risk-scorer:pipeline` (subagent_type: `wr-risk-scorer:pipeline`) to assess the staged changes and create a bypass marker. If the subagent type is not available (spawned subagent surface), invoke `/wr-risk-scorer:assess-release` via the Skill tool instead — per ADR-015 it wraps the same pipeline subagent.
 3. `git commit -m "docs(incidents): I<NNN> restored — <verification signal summary>"`.
-4. If risk is above appetite: use `AskUserQuestion` to ask whether to commit anyway, remediate first, or park the work. If `AskUserQuestion` is unavailable, skip the commit and report the uncommitted state clearly.
+4. If commit risk is above appetite: **framework-mediated, no ask** (P377/RFC-029 — no incident carve-out). Per **ADR-042 Rule 1b**: score the restore action against the live realised-risk baseline (incident Likelihood already 5) — net risk-reducing actions take the risk-reducing path (`RISK_BYPASS: reducing`) and proceed; otherwise auto-remediate (Rule 1) or halt (Rule 5). **MUST NOT commit above appetite; MUST NOT `AskUserQuestion` "commit anyway".** If `AskUserQuestion` is unavailable, ADR-013 Rule 6 fail-safe — skip the commit and report the uncommitted state.
 
 ### 9. Auto-release when changesets are queued (ADR-020)
 

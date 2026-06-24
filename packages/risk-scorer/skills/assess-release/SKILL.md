@@ -82,11 +82,6 @@ Present the full risk report to the user. Highlight:
 - Any risks above appetite (score ≥ 5 per RISK-POLICY.md)
 - Whether the gate is now pre-satisfied for the current session (i.e., a subsequent `git commit` will reuse the bypass marker without re-triggering the scorer)
 
-If any score is above appetite, use `AskUserQuestion` to ask whether the user wants to:
-- (a) Proceed anyway (bypass)
-- (b) Remediate the identified risks first
-- (c) Cancel
-
-Do not make the decision unilaterally — per ADR-013 Rule 1, all above-appetite risk decisions are the user's.
+If any score is above appetite, the action is **framework-mediated, not a user decision** (P377/RFC-029; ADR-044 category-3 explicitly excludes above-appetite). Per **ADR-042 Rule 1**: auto-apply scorer remediations incrementally until residual risk is within appetite, OR halt per ADR-042 Rule 5 if the scorer cannot converge. **MUST NOT commit/push/release above appetite, and MUST NOT use `AskUserQuestion` to ask whether to proceed anyway** — there is no "proceed anyway (bypass)" option; the answer is always reduce-risk-or-halt. The only sanctioned non-blocking path is the risk-reducing path (a genuinely risk-reducing change clears via the `reducing` bypass). Under non-interactive contexts the ADR-013 Rule 6 fail-safe is the terminal fallback: skip the action and report the uncommitted/unreleased state.
 
 $ARGUMENTS
