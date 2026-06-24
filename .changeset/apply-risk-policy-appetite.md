@@ -1,6 +1,7 @@
 ---
 "@windyroad/itil": minor
 "@windyroad/risk-scorer": minor
+"@windyroad/voice-tone": minor
 ---
 
 Risk gates apply your RISK-POLICY appetite faithfully — no above-appetite commit prompt, no hidden overrides.
