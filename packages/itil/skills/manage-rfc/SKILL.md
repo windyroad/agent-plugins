@@ -135,6 +135,10 @@ git add docs/rfcs/RFC-<NNN>-<slug>.<new-status>.md
 
 **P057 staging trap rule**: re-stage explicitly after the Edit tool runs. `git mv` alone stages only the rename, not subsequent content edits.
 
+#### Auto-transition detection (P378/RFC-030 Piece 2; ADR-060 line 292)
+
+`proposed → in-progress` is **detected** by `itil-commit-trailer-transition-advisory.sh` (PostToolUse:Bash; the shared RFC+story commit-trailer trigger): when the first non-capture commit carrying `Refs: RFC-<NNN>` lands while the RFC is still `proposed`/`accepted`, the hook emits a stderr advisory. Per ADR-014 the hook does NOT perform the `git mv` (that would land outside the commit grain) — this skill (or an AFK orchestrator acting on the advisory) performs the transition. Mirrors the manage-story draft→in-progress trigger; both share the one hook. (This closes the "future commit-trailer-trigger hook (deferred)" that manage-rfc and manage-story both named but never built.)
+
 #### Render the `## Commits` section (P378/RFC-030 Piece 1; ADR-085)
 
 On every transition AND every `review` (Step 9), render the affected RFC's `## Commits` section from git history — it is a derived view (`git log --grep "Refs: RFC-NNN"`), NOT stored per-commit, so it must be regenerated skill-side (a PostToolUse hook can't write it without breaking the ADR-014 commit grain). Invoke the helper before staging the RFC file:

@@ -116,7 +116,7 @@ For any transition `<from> → <to>`:
 
 The auto-transition logic fires in two contexts:
 
-- **`draft → in-progress`**: when the FIRST commit AFTER the story's capture commit lands with a `Refs: STORY-<NNN>` trailer AND a commit subject NOT prefixed with `feat(itil): capture STORY-`. Detected by a future commit-trailer-trigger hook (deferred to a hook-source slice); manual `manage-story <NNN> in-progress` invocation works in the interim.
+- **`draft → in-progress`**: when the FIRST commit AFTER the story's capture commit lands with a `Refs: STORY-<NNN>` trailer AND a commit subject NOT prefixed with `feat(itil): capture STORY-`. **Detected by `itil-commit-trailer-transition-advisory.sh`** (PostToolUse:Bash; the shared RFC+story commit-trailer trigger — P378/RFC-030 Piece 2, no longer "a future deferred hook"). Per ADR-014 the hook DETECTS + emits a stderr advisory; it does NOT perform the `git mv` itself (that would land outside the commit grain). The transition is performed by `manage-story <NNN> in-progress` (run on the advisory) or by an AFK orchestrator acting on it.
 
 - **`in-progress → done`**: when all `- [ ]` lines in `## Acceptance criteria` are ticked AND the linked RFC is `closed`. Detected at manage-rfc close-fire (the RFC's transition triggers a sweep of its `stories:` array; each in-progress story with all-criteria-ticked auto-transitions to `done`). Manual `manage-story <NNN> done` invocation works in the interim.
 
