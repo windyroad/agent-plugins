@@ -36,3 +36,9 @@ After implementing RFC-029 (6 slices, all commits carrying `Refs: RFC-029` trail
 - **RFC-029** — the RFC whose empty `## Commits` + manual lifecycle surfaced this.
 
 (captured via direct write — rated at capture per the P375 rate-at-capture rule)
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-030 | proposed | RFC lifecycle self-maintenance |
