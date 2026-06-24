@@ -146,7 +146,7 @@ print(('yes' if score > N else 'no') + ' ' + str(N))
   if [ "$DENIED" = "yes" ]; then
     RISK_GATE_CATEGORY="threshold"
     RISK_GATE_SCORE="$SCORE"
-    RISK_GATE_REASON="${ACTION} risk score ${SCORE}/25 exceeds the project appetite of ${APPETITE}/25 (RISK-POLICY.md). To proceed: (1) split the ${ACTION}, (2) add risk-reducing measures, or (3) for a LIVE INCIDENT, delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') with incident context for an incident bypass."
+    RISK_GATE_REASON="${ACTION} risk score ${SCORE}/25 exceeds the project appetite of ${APPETITE}/25 (RISK-POLICY.md). Reduce risk or halt — there is no proceed-anyway path (P377/RFC-029). To proceed within appetite: (1) split the ${ACTION}, (2) add risk-reducing measures and re-score, or (3) if this is incident response, delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') with incident context — it scores the change against the live realised-risk baseline (ADR-042 Rule 1b) and clears it via the risk-reducing path if it is net-risk-reducing."
     return 1
   fi
 

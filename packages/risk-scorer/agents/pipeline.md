@@ -26,7 +26,7 @@ If the action is risk-reducing or risk-neutral, add on a separate line:
 RISK_BYPASS: reducing
 ```
 
-For live incidents, use:
+For a live-outage restore-service release that must proceed despite red/unreadable CI (the narrow CI-gate short-circuit case — see Incident-context scoring below; the change must still be net-risk-reducing per ADR-042 Rule 1b, no appetite carve-out):
 ```
 RISK_BYPASS: incident
 ```
@@ -164,11 +164,11 @@ Acceptable `RISK_BYPASS_REASON:` values cite the ticket ID closed, the prior
 risk report remediated, or the removed risk — matching one of the three
 criteria above.
 
-For live incidents (outage, security, information disclosure), include `RISK_BYPASS: incident`.
+**Incident-context scoring (ADR-042 Rule 1b; P377/RFC-029 — no incident carve-out).** An active incident is a risk being realised (Likelihood already 5). Score the incident-response change against that live realised-risk baseline: weigh P(it increases impact) vs P(it reduces impact & likelihood / restores service) + P(it introduces a new incident). When net risk-reducing, emit `RISK_BYPASS: reducing` (the incident path collapses into the risk-reducing path — no separate appetite carve-out). `RISK_BYPASS: incident` is retained ONLY for the narrow operational case where a restore-service release must proceed despite red/unreadable CI during a live outage (it short-circuits the CI-status gate, which `reducing` does not); emit it only for a genuine live outage requiring immediate deployment AND only when the change is net-risk-reducing per the baseline scoring above.
 
 ## Below-Appetite Output Rule (ADR-013 Rule 5)
 
-When ALL cumulative scores are within appetite (≤ 4 per RISK-POLICY.md), your output MUST contain ONLY:
+When ALL cumulative scores are within appetite (≤ the appetite threshold in `RISK-POLICY.md` § Risk Appetite — read it; `Threshold: N`, default 4/Low when absent; do NOT hardcode 4), your output MUST contain ONLY:
 1. The Pipeline Risk Report structure (layers, risk items, summary table)
 2. `RISK_SCORES: commit=N push=N release=N`
 3. `RISK_BYPASS: reducing` (if applicable)
@@ -177,7 +177,7 @@ Do NOT emit: "Suggested Actions", "Your call:", advisory warnings, back-pressure
 
 ## Above-Appetite Remediations
 
-When ANY cumulative score exceeds appetite (> 4), the verbal verdict is **STOP**.
+When ANY cumulative score exceeds appetite (> the RISK-POLICY.md appetite threshold, default 4 — read it, do NOT hardcode), the verbal verdict is **STOP**.
 The scorer is not the primary decision-maker — the hook gate will block the
 action — but the scorer's verdict must match the structured score so the agent
 does not waste tool calls acting on an ambiguous nudge.
@@ -214,7 +214,7 @@ When a pipeline run identifies a **register-worthy risk shape**, emit a structur
 
 ### Trigger conditions (emit a hint when ANY fire)
 
-1. **Above-appetite residual** — any cumulative residual score exceeds appetite (> 4 per `RISK-POLICY.md`). A risk that breaches appetite on this change is a standing-risk candidate, not just a one-off remediation target.
+1. **Above-appetite residual** — any cumulative residual score exceeds the appetite threshold declared in `RISK-POLICY.md` § Risk Appetite (default 4; read it, do NOT hardcode). A risk that breaches appetite on this change is a standing-risk candidate, not just a one-off remediation target.
 2. **Confidentiality disclosure** — the Confidential Information Disclosure check (below) flagged business metrics (revenue, user counts, pricing, client names, traffic volumes) in the diff. Confidentiality leaks are standing-risk-shaped even after the immediate remediation.
 3. **User-stated precondition** — the User-Stated Preconditions Check (below) flagged an unmet paired capability as a standalone Risk item. Unmet preconditions are standing-risk-shaped because the dependency gap persists until the paired capability ships.
 

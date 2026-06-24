@@ -32,9 +32,17 @@ if [ -n "$SESSION_ID" ] && [ -f "$RELEASE_SCORE_FILE" ]; then
 fi
 
 # --- Read appetite from RISK-POLICY.md ---
-APPETITE="5"
+# Default 4 (Low) — MUST match the canonical gate parser default in
+# packages/risk-scorer/hooks/lib/risk-gate.sh (P377/RFC-029: a default of 5
+# here was an ADR-065 confirmation violation — the canonical default is 4).
+# The authoritative parser lives in risk-gate.sh; this guidance script mirrors
+# its 3 tolerated phrasings (Threshold: N | exceeds N | N / Low appetite).
+APPETITE="4"
 if [ -f "RISK-POLICY.md" ]; then
-  EXTRACTED=$(grep -oP 'Threshold:\s*\K[0-9]+' RISK-POLICY.md 2>/dev/null | head -1 || echo "")
+  EXTRACTED=$(grep -oP '(?:Threshold:\s*|exceeds\s+)\K[0-9]+' RISK-POLICY.md 2>/dev/null | head -1 || echo "")
+  if [ -z "$EXTRACTED" ]; then
+    EXTRACTED=$(grep -oP '[0-9]+(?=\s*/\s*Low appetite)' RISK-POLICY.md 2>/dev/null | head -1 || echo "")
+  fi
   if [ -n "$EXTRACTED" ]; then
     APPETITE="$EXTRACTED"
   fi
