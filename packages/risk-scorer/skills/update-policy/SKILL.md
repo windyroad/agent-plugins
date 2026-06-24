@@ -162,6 +162,11 @@ Write the policy using the structure derived from the agent contract (step 1). T
 - The impact levels with project-specific descriptions from step 5
 - The likelihood levels (universal 1-5 scale)
 - The risk matrix (Impact × Likelihood table) and label bands
+- **An `## Authorized Bypass Scenarios` section** (P377/RFC-029) stating exactly which gate bypasses are sanctioned — and that nothing else is. The canonical text to write:
+  - **Risk-reducing / risk-neutral changes** proceed via the risk-reducing path (a change that lowers or holds residual risk is not blocked by the gate). The scorer emits `RISK_BYPASS: reducing`; the gate honours a drift-revalidated, TTL-bounded `reducing-*` marker.
+  - **Incident response** is NOT a separate carve-out — an active incident is a risk already being realised (Likelihood 5), so an incident-response change is scored against that live baseline and proceeds only if net-risk-reducing (per ADR-042 Rule 1b). The `incident-release` marker exists only to let a net-reducing restore-service release proceed despite red/unreadable CI during a live outage.
+  - **Above appetite is never bypassable by a prompt or an env var.** There is no "commit/release anyway" question and no `BYPASS_RISK_GATE` / `ci-bypass` override (removed P377/RFC-029) — above appetite, the action auto-remediates to within appetite or halts (ADR-042 Rule 1).
+  - **Default-permitted-when-silent**: a project whose RISK-POLICY.md predates this section still permits the risk-reducing and incident paths above; this section makes the policy the explicit single source of truth and SHOULD be added at the next review.
 - A note that both the risk-scorer agent and problem management process reference this policy
 
 ## Updating an existing policy
