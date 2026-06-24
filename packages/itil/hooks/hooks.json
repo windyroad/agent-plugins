@@ -5,6 +5,10 @@
       {
         "matcher": "startup",
         "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/itil-pending-questions-surface.sh" }]
+      },
+      {
+        "matcher": "startup",
+        "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/itil-rfc-oversight-nudge.sh" }]
       }
     ],
     "UserPromptSubmit": [
