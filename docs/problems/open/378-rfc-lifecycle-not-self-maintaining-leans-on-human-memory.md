@@ -19,12 +19,12 @@ After implementing RFC-029 (6 slices, all commits carrying `Refs: RFC-029` trail
 ### Investigation Tasks
 
 - [x] Rated at capture (Impact 4 × Likelihood 4, Effort M)
-- [ ] Build the Refs-trailer **executor** (upgrade `itil-rfc-trailer-advisory.sh` or a sibling): on a commit carrying `Refs: RFC-NNN`, append the commit to that RFC's `## Commits` section. Closes ADR-060 item 12 / the deferred B5.T9.
-- [ ] Add `manage-rfc` **auto-transition** mirroring `manage-story`: proposed→in-progress on first slice commit; →verifying/done on completion. Self-firing, not memory.
-- [ ] Add an **RFC-oversight nudge** (class-B self-surfacer, mirror architect/jtbd oversight-nudge) so unconfirmed RFCs surface at SessionStart for ratification — the human decision is surfaced, not remembered.
-- [ ] Fix the false "maintained automatically" claim wherever the executor isn't yet wired (don't claim automation that doesn't exist — P234 fictional-defer class).
-- [ ] **Folds to [[P375]]**: extend the deferral-census vocabulary (`packages/retrospective/hooks/lib/deferral-markers.sh`) to catch "lands in Slice N / future slice / Phase N / B<NNN>.T<NNN>" markers — the census missed THIS deferred-and-unbuilt hook because its vocabulary doesn't include slice/phase-deferral phrasing.
-- [ ] RFC-mandated (ADR-071): this fix goes through its own RFC.
+- [x] **FIXED via RFC-030 (2026-06-25)** — architect design-reviewed, all 3 pieces built + tested:
+  - **Piece 3 (RFC-oversight nudge)** `2863308e` — `itil-rfc-oversight-nudge.sh` + `detect-unoversighted-rfcs.sh`; SessionStart class-B clone of ADR-066/068; surfaces unconfirmed RFCs (dogfood: flushed out 30). Ratification auto-surfaced, not remembered. 7/7 bats.
+  - **Piece 1 (`## Commits` derived view)** — `update-rfc-commits-section.sh` + shim + ADR-085; manage-rfc renders `## Commits` from `git log --grep` (Option A, no ADR-014 grain issue); closes the never-built ADR-060 item 12; capture-rfc false claim fixed; RFC-029/030 now accurate. 5/5 bats.
+  - **Piece 2 (shared auto-transition trigger)** `d9ee0721` — `itil-commit-trailer-transition-advisory.sh` (PostToolUse) detects first non-capture `Refs: RFC-NNN`/`STORY-NNN` commit → advises the in-progress transition (hook detects, skill commits per ADR-014); closes the "future hook (deferred)" BOTH manage-rfc and manage-story named but never built; both false-auto claims corrected. 6/6 bats.
+  - **Census-vocab fold to [[P375]]** `64182ac3` — deferral census now catches "lands in Slice N" / "future slice" / "hook-source slice" markers (the blind spot that let this hide). 12/12 bats.
+- [ ] Lifecycle: ratify RFC-030 + ADR-085 (both born `unconfirmed`) — now AUTO-SURFACED by the very nudge this RFC shipped + the architect-oversight nudge; no memory needed.
 
 ## Related
 
