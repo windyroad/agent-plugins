@@ -198,30 +198,30 @@ EOF
 }
 
 # ---------------------------------------------------------------------------
-# Skeleton-fill ticket shape — capture-problem writes a deferred-placeholder
-# ticket. Default Priority and Effort are flagged for re-rate at next review.
+# Skeleton-fill ticket shape — capture-problem DERIVES the Priority/Effort
+# rating at capture (P375 / ADR-032 amendment 2026-06-24). NO deferred false-
+# low placeholder. The ADR-026 sentinel `not estimated — no prior data` is the
+# residual re-rate signal, emitted only when no comparable prior grounds the
+# rating.
 # ---------------------------------------------------------------------------
 
-@test "capture-problem: skeleton-filled ticket carries the deferred-placeholder pattern" {
-  # Fixture mirrors the SKILL.md Step 4-5 prescribed write target — per
-  # ADR-031 per-state-subdir layout (`docs/problems/open/<NNN>-<slug>.md`),
-  # NOT the pre-ADR-031 flat shape (`docs/problems/<NNN>-<slug>.open.md`).
-  # P281 (template-refresh sub-shape) corrected the SKILL.md drift; this
-  # fixture exercises the now-canonical write path.
+@test "capture-problem: skeleton ticket carries a DERIVED rating, not a deferred false-low" {
   mkdir -p "$TMPROOT/docs/problems/open"
   TITLE="example-aside-finding"
   ID="200"
   TODAY=$(date -u +%Y-%m-%d)
   DESCRIPTION="Quick observation worth a ticket but not blocking."
 
-  # Mirror the SKILL.md skeleton-fill template.
+  # Mirror the SKILL.md Step 4a + Step 4 template: a derived rating (real
+  # Impact × Likelihood) — a real best-effort value, NO deferral marker of
+  # any kind (no "deferred — re-rate", no "not estimated" sentinel).
   cat > "$TMPROOT/docs/problems/open/${ID}-${TITLE}.md" <<EOF
 # Problem ${ID}: ${TITLE}
 
 **Status**: Open
 **Reported**: ${TODAY}
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 6 (Medium) — Impact: 3 × Likelihood: 2
+**Effort**: M
 
 ## Description
 
@@ -231,49 +231,42 @@ ${DESCRIPTION}
 
 (deferred to investigation)
 
-## Workaround
-
-(deferred to investigation)
-
-## Impact Assessment
-
-- **Who is affected**: (deferred to investigation)
-- **Frequency**: (deferred to investigation)
-- **Severity**: (deferred to investigation)
-- **Analytics**: (deferred to investigation)
-
 ## Root Cause Analysis
 
 ### Investigation Tasks
 
-- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
 - [ ] Investigate root cause
 - [ ] Create reproduction test
-
-## Dependencies
-
-- **Blocks**: (none)
-- **Blocked by**: (none)
-- **Composes with**: (none)
 
 ## Related
 
 (captured via /wr-itil:capture-problem; expand at next investigation)
 EOF
 
-  # Behavioural assertions: ticket file has the load-bearing fields.
   TICKET="$TMPROOT/docs/problems/open/${ID}-${TITLE}.md"
   [ -f "$TICKET" ]
   run grep -F '**Status**: Open' "$TICKET"
   [ "$status" -eq 0 ]
-  # Description survives verbatim
   run grep -F "$DESCRIPTION" "$TICKET"
   [ "$status" -eq 0 ]
-  # Deferred placeholders flag re-rating
+
+  # The dropped false-low default MUST NOT appear.
   run grep -F 'deferred — re-rate at next /wr-itil:review-problems' "$TICKET"
-  [ "$status" -eq 0 ]
-  # Investigation Tasks nudges user to re-rate
+  [ "$status" -ne 0 ]
   run grep -F 'Re-rate Priority and Effort at next /wr-itil:review-problems' "$TICKET"
+  [ "$status" -ne 0 ]
+  run grep -F 'Likelihood: 1 (deferred' "$TICKET"
+  [ "$status" -ne 0 ]
+  # No "not estimated" sentinel either — that is just another deferral
+  # (user correction 2026-06-24). Every capture carries a real value.
+  run grep -F 'not estimated' "$TICKET"
+  [ "$status" -ne 0 ]
+
+  # A real derived Impact × Likelihood is present (not the buried false-low).
+  run grep -E 'Impact: [1-5] (×|x) Likelihood: [1-5]' "$TICKET"
+  [ "$status" -eq 0 ]
+  # And a real Effort bucket with no trailing deferral marker.
+  run grep -E '^\*\*Effort\*\*: (S|M|L|XL)$' "$TICKET"
   [ "$status" -eq 0 ]
 }
 

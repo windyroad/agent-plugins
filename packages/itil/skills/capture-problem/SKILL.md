@@ -35,8 +35,8 @@ This skill has **at most one direction-setting AskUserQuestion (the I12 derive-t
 |----------|-----------|
 | Duplicate-check | Mechanical 3-keyword title-only grep; matches listed in report; capture proceeds regardless. False-positives are cheaper than false-negatives (P155 line 24). |
 | Hang-off arbitration (P346 Phase 3) | Mechanical pre-filter (≤5 candidates by shared ADR/RFC/SKILL/file signal) + fresh-context `wr-itil:hang-off-check` subagent dispatch (ADR-032 5th invocation pattern). Verdict-acts: `HANG_OFF: P<NNN>` halts capture + routes orchestrator to amend parent; `PROCEED_NEW` continues + appends rationale to `## Related`. AFK safe-default: ambiguous → PROCEED_NEW per subagent Rule 6 contract. JTBD-301 firewall: maintainer-side only. |
-| Priority default | Framework-policy: `3 (Medium) — Impact 3 × Likelihood 1` flagged "deferred — re-rate at next /wr-itil:review-problems". |
-| Effort default | Framework-policy: `M` flagged "deferred — re-rate at next /wr-itil:review-problems". |
+| Priority (Impact × Likelihood) | **Derived at capture** silently from the description per Step 4a (ADR-067 silent-derivation + ADR-026 grounding/sentinel; ADR-076 honest-likelihood). No deferred placeholder, no false-low. Category-4 silent-framework per ADR-044. |
+| Effort | **Derived at capture** silently per Step 4a (ADR-067 t-shirt buckets + ADR-026 grounding/sentinel). No deferred placeholder. |
 | Multi-concern split | Out of scope: capture-problem creates one ticket per invocation. Multi-concern observations route to `/wr-itil:manage-problem` (its Step 4b owns the split). |
 | Empty `$ARGUMENTS` | Halt-with-stderr-directive: print "capture-problem requires a description in $ARGUMENTS — invoke /wr-itil:manage-problem instead for the full intake flow" and exit. AFK orchestrators MUST NOT invoke capture-problem with empty arguments — caller-side contract. |
 | JTBD-trace + persona derivation (I12 derive-then-ratify — ADR-060 Amendment 2026-06-02) | **Derive-then-ratify per ADR-044 category 1 (direction-setting) on the AskUserQuestion fallback path; silent-framework category 4 on the derive-success path.** Step 1.5b runs lexical detection (`\bJTBD-[0-9]+\b`) + flag pre-resolution (`--jtbd=` / `--persona=`) + cited-JTBD persona derivation. **Derive-success** → silent-proceed with derived values + stderr advisory. **Derive-failure or ambiguity** → AskUserQuestion proposes up-to-3 candidate persona+JTBD pairs + a Reject option (4-option cap per ADR-044 Rule 1). User response semantics: **REJECT** → halt-with-stderr-directive + exit non-zero (REJECT of proposed persona/JTBD = REJECT of the problem; no ticket created). **Option-pick** (acceptance of a proposed candidate as-is) → silent-proceed with picked values. **Free-text correction** → silent-proceed with corrected values (correction-as-acceptance). |
@@ -239,9 +239,9 @@ Log the renumber decision in the operation report if origin and local diverged.
 
 **Status**: Open
 **Reported**: <YYYY-MM-DD>
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: <Severity = Impact × Likelihood> (<band>) — Impact: <1-5> × Likelihood: <1-5> — derived at capture from the description per Step 4a
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: <S|M|L|XL> — derived at capture per Step 4a
 **JTBD**: <jtbd_trace_value_as_comma_separated_list_OR_omit_line_when_empty>
 **Persona**: <persona_value_OR_omit_line_when_empty>
 
@@ -268,7 +268,6 @@ Log the renumber decision in the operation report if origin and local diverged.
 
 ### Investigation Tasks
 
-- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
 - [ ] Investigate root cause
 - [ ] Create reproduction test
 
@@ -283,7 +282,17 @@ Log the renumber decision in the operation report if origin and local diverged.
 (captured via /wr-itil:capture-problem; expand at next investigation)
 ```
 
-The deferred-placeholder pattern is load-bearing — `/wr-itil:review-problems` keys off the literal string `(deferred — re-rate at next /wr-itil:review-problems)` to surface captured tickets for re-rating.
+**Rate at capture, do not defer (P375 / ADR-032 amendment 2026-06-24).** The Priority (Impact × Likelihood) and Effort fields are **derived at capture** per Step 4a below — a real best-effort rating, ALWAYS. No `(deferred — re-rate…)` placeholder and **no "not estimated" / "no prior data" marker** — those are deferrals wearing a different hat (user correction 2026-06-24: *"that's just another deferral"*). The old deferred-placeholder default was the single largest uncadenced-deferral rot generator (P375): nothing self-fired `review-problems`, and the `Likelihood: 1` false-low buried every capture at the bottom of WSJF. Estimation under uncertainty produces an estimate, not a deferral: a thin description still gets a real number (rough is fine). `/wr-itil:review-problems` re-rates the whole backlog when it runs — captures need no per-ticket re-rate flag.
+
+### 4a. Derive the rating at capture (P375 / ADR-032 amendment; ADR-067 + ADR-026 + ADR-076)
+
+Derive Priority and Effort from the description **silently** — NO `AskUserQuestion` (ADR-067 item 1 silent-derivation, category-4 silent-framework per ADR-044; preserves the lightweight 3-4-turn capture cost shape). This is one inference over text the agent has already read, NOT the `/wr-itil:manage-problem` ceremony.
+
+1. **Impact (1-5)** and **Likelihood (1-5)** — read the description against `RISK-POLICY.md`'s impact bands and assess how often / how broadly the harm manifests. `Severity = Impact × Likelihood`; `Priority` band follows the standard matrix. Likelihood is **honest field-risk only** — never inflate it to lift WSJF rank (ADR-076).
+2. **Effort (S/M/L/XL)** — derive from the described scope (files touched, cross-package, migration-heavy → larger), per ADR-067's t-shirt buckets.
+3. **Always a real value (ADR-026 grounding without deferral)** — when a comparable prior ticket informs the estimate, cite it inline (e.g. `— cf. P<NNN>`). When no comparable prior exists, **still commit to a real best-effort number** grounded in the description's own signals — do NOT append "not estimated" / "no prior data" or any other re-rate flag (that is a deferral; user correction 2026-06-24). A rough estimate from a thin description is honest estimation; a marker that says "I didn't really estimate this" is the rot this brick removes.
+
+Write the derived values into the template's `**Priority**` and `**Effort**` lines (replacing the `<…>` placeholders). Every captured ticket leaves Step 4a with a real Impact × Likelihood and a real Effort bucket — never a placeholder, never a deferral marker.
 
 ### 5. Write the file
 
@@ -341,19 +350,19 @@ After the commit, report:
   preflight_reason="$(wr-itil-check-deferred-placeholder-staleness "$PWD")"
   ```
 
-  See `/wr-itil:work-problems` SKILL.md Step 0c for the canonical contract on the two-axis trigger (count ≥ 3 deferred placeholders AND README age > 7 days); the threshold constants live in the helper. <!-- DEFERRED-PLACEHOLDER-STALENESS-CONTRACT-SOURCE: packages/itil/lib/check-deferred-placeholder-staleness.sh -->
+  See `/wr-itil:work-problems` SKILL.md Step 0c for the canonical contract on the two-axis trigger (count ≥ 3 ungrounded-rating tickets — the ADR-026 `not estimated` sentinel — AND README age > 7 days); the threshold constants live in the helper. <!-- DEFERRED-PLACEHOLDER-STALENESS-CONTRACT-SOURCE: packages/itil/lib/check-deferred-placeholder-staleness.sh -->
 
   | `preflight_reason`                                | Trailing-pointer shape                                                                                |
   |---------------------------------------------------|--------------------------------------------------------------------------------------------------------|
-  | `no-deferred-placeholders` / `below-threshold ...` / `fresh-readme ...` | Default (low-priority) pointer: *"Run `/wr-itil:review-problems` next to re-rate the deferred Priority/Effort placeholders on P\<NNN\>."* (README is now refreshed inline at Step 6 per P199 Option 2 — the pointer no longer names a README-refresh action in the default shape.) |
-  | `no-readme count=<N>`                              | **Highlighted (actionable) pointer**: *"⚠ `<N>` deferred-placeholder ticket(s) have accumulated AND `docs/problems/README.md` is missing/malformed — run `/wr-itil:review-problems` NOW to rebuild the README and re-rate placeholders."* (Fires only when README is genuinely missing/malformed despite this skill's inline refresh — a drift class the helper still surfaces.) |
-  | `stale-readme count=<N> age=<X>s threshold=<Y>s`   | **Highlighted (actionable) pointer**: *"⚠ `<N>` deferred-placeholder ticket(s) have accumulated AND the WSJF Rankings cadence is `<X>` days stale (> 7-day threshold) — run `/wr-itil:review-problems` NOW to re-rate placeholders."* (Inline refresh at Step 6 freshens the README mtime on every capture, so this shape now fires only when captures are absent for > 7 days — a real cadence-stale signal, not capture-driven drift.) |
+  | `no-deferred-placeholders` / `below-threshold ...` / `fresh-readme ...` | Default (low-priority) pointer: *"Run `/wr-itil:review-problems` next to re-rate the ungrounded (`not estimated — no prior data`) ratings."* (README is now refreshed inline at Step 6 per P199 Option 2 — the pointer no longer names a README-refresh action in the default shape.) |
+  | `no-readme count=<N>`                              | **Highlighted (actionable) pointer**: *"⚠ `<N>` ungrounded-rating ticket(s) (ADR-026 `not estimated` sentinel) have accumulated AND `docs/problems/README.md` is missing/malformed — run `/wr-itil:review-problems` NOW to rebuild the README and re-rate placeholders."* (Fires only when README is genuinely missing/malformed despite this skill's inline refresh — a drift class the helper still surfaces.) |
+  | `stale-readme count=<N> age=<X>s threshold=<Y>s`   | **Highlighted (actionable) pointer**: *"⚠ `<N>` ungrounded-rating ticket(s) (ADR-026 `not estimated` sentinel) have accumulated AND the WSJF Rankings cadence is `<X>` days stale (> 7-day threshold) — run `/wr-itil:review-problems` NOW to re-rate placeholders."* (Inline refresh at Step 6 freshens the README mtime on every capture, so this shape now fires only when captures are absent for > 7 days — a real cadence-stale signal, not capture-driven drift.) |
 
-  **Why conditional, not auto-dispatch** (ADR-032 + JTBD-001): capture-problem is intentionally lightweight per ADR-032 P155 amendment. Auto-dispatching review-problems from capture would re-introduce the ~10-turn ceremony the lightweight aside is engineered to avoid. The conditional pointer surfaces the signal "deferred-placeholder backlog has grown AND the cadence axis hit threshold" when both axes fire. The user picks when to absorb the re-rate cost.
+  **Why conditional, not auto-dispatch** (ADR-032 + JTBD-001): capture-problem is intentionally lightweight per ADR-032 P155 amendment. Auto-dispatching review-problems from capture would re-introduce the ~10-turn ceremony the lightweight aside is engineered to avoid. The conditional pointer surfaces the signal "ungrounded-rating backlog has grown AND the cadence axis hit threshold" when both axes fire. The user picks when to absorb the re-rate cost.
 
   **Fail-soft**: any error in the helper invocation MUST NOT block the report — fall back to the default pointer shape.
 
-The trailing pointer is **not optional** — it is the user-visible signal for deferred-placeholder re-rating cadence. The conditional highlight (P271) escalates the signal when the deferred-placeholder backlog AND the cadence axis both hit threshold. Drift here re-opens P271.
+The trailing pointer is **not optional** — it is the user-visible signal for ungrounded-rating re-rating cadence (P375 re-point: the count is now ADR-026 `not estimated` sentinels, not blanket deferred placeholders). The conditional highlight (P271) escalates the signal when the ungrounded-rating backlog AND the cadence axis both hit threshold. Drift here re-opens P271.
 
 <!-- @jtbd JTBD-001 (Enforce Governance Without Slowing Down — conditional highlight escalates the signal without forcing a flow break) -->
 

@@ -1,0 +1,82 @@
+# SKILL eval — capture-story behavioural contract on the rate-at-capture
+# surface (P375 / ADR-032 amendment 2026-06-24; ADR-075 SKILL-prose harness).
+#
+# Covers the P375 rate-at-capture contract for capture-story: the
+# Estimated-effort field is DERIVED at capture as a real best-effort value
+# (ADR-067 silent-derivation) — NOT a `deferred` default and NOT a "not
+# estimated" / "no prior data" sentinel (a sentinel is just another deferral,
+# user correction 2026-06-24). The User-value / Acceptance-criteria
+# human-judgment fields stay deferred-to-accepted by design (I7/I8/I10) and
+# are NOT in scope for derive-at-capture.
+#
+# Tier-A regex for the positive tokens; Tier-B llm-rubric for the negative
+# "no deferral marker" clause (Tier-A not-regex false-fails on negated
+# answers — same harness pattern as the capture-problem eval).
+#
+# Run from repo root:
+#   npx promptfoo eval -c packages/itil/skills/capture-story/eval/promptfooconfig.yaml
+#
+# @jtbd JTBD-001 (Enforce Governance Without Slowing Down)
+# @problem P375
+# @adr ADR-032 (rate-at-capture amendment 2026-06-24)
+# @adr ADR-067 (silent-derivation of estimate fields at capture)
+# @adr ADR-075 (SKILL-prose harness)
+# @adr ADR-060 (capture-story I7/I8/I10 gates)
+
+description: |
+  capture-story SKILL eval — Tier-A regex + Tier-B llm-rubric coverage for
+  the P375 rate-at-capture contract: Estimated-effort is derived at capture
+  as a real value, never a `deferred` default or "not estimated" sentinel.
+
+providers:
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: rate-at-capture — Estimated-effort derived as a real bucket; NO deferred/sentinel marker
+    vars:
+      prompt: |
+        I am the /wr-itil:capture-story capture step. The story description
+        is verbatim:
+
+          "As a maintainer I want the release script to fail loudly when
+          NPM_TOKEN is missing, so a silent no-op release never ships."
+
+        There is no comparable prior story to ground the estimate. Per the
+        capture-story template (P375 / ADR-032 amendment 2026-06-24), what
+        do I write on the `**Estimated effort**` line and the frontmatter
+        `estimated-effort:` field? Do I write `deferred`, or a "not
+        estimated — no prior data" marker, or a real value? Be specific
+        about the actual bucket.
+    assert:
+      # Tier A — a real Effort bucket is present.
+      - type: regex
+        value: '\b(S|M|L|XL)\b'
+      # Tier B — semantic invariant: real best-effort bucket, no deferral
+      # marker (the negative clause routes to llm-rubric).
+      - type: llm-rubric
+        value: |
+          The response gives a REAL best-effort Estimated-effort bucket
+          (one of S / M / L / XL) derived from the story description. It
+          does NOT write `deferred` and does NOT append a "not estimated" /
+          "no prior data" / "populate at accepted" re-rate marker on the
+          effort field. Per P375 (and the 2026-06-24 user correction
+          *"that's just another deferral"*), a rough estimate from a thin
+          description is honest estimation; a marker saying the effort is
+          not really estimated is a deferral and is forbidden. The effort
+          is confirmed/refined later at the `accepted` transition per I10,
+          but it carries a real value NOW. PASS if a real S/M/L/XL bucket
+          is committed AND no deferral/sentinel marker is on the effort
+          field. FAIL if the response writes `deferred`, or appends a "not
+          estimated" / "no prior data" marker, or says the effort is
+          populated only at the accepted transition with no value now.
+          (Note: the User-value and Acceptance-criteria sections legitimately
+          DO stay deferred to the accepted transition — that is correct and
+          does NOT fail this rubric, which is only about the effort field.)

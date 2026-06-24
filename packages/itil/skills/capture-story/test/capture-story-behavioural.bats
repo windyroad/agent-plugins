@@ -198,7 +198,7 @@ problems: [P170]
 jtbd: [JTBD-008]
 rfcs: []
 story-maps: []
-estimated-effort: deferred
+estimated-effort: M
 ---
 
 # STORY-${next_id}: ${description}

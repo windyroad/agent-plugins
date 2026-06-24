@@ -201,7 +201,7 @@ problems: [P<NNN>, P<NNN>, ...]
 jtbd: [JTBD-<NNN>, JTBD-<NNN>, ...]
 rfcs: [<RFC-<NNN>, ...> or empty]
 story-maps: [<STORY-MAP-<NNN>, ...> or empty]
-estimated-effort: deferred
+estimated-effort: <S|M|L|XL — derived at capture per ADR-067 (real best-effort value, no deferral marker)>
 ---
 
 # STORY-<NNN>: <Title>
@@ -212,7 +212,7 @@ estimated-effort: deferred
 **JTBD**: <JTBD-<NNN> [, ...]>
 **RFCs**: <RFC-<NNN> [, ...]> or (none — populate at accepted transition per I7)
 **Story Maps**: <STORY-MAP-<NNN> [, ...]> or (none — populate at accepted transition per I8)
-**Estimated effort**: deferred (populate at accepted transition per I10 INVEST Estimable)
+**Estimated effort**: <S|M|L|XL> — derived at capture as a real best-effort value (P375 / ADR-032 amendment 2026-06-24; ADR-067 silent-derivation). NO `deferred` default and no "not estimated" marker — those are deferrals (user correction 2026-06-24). Confirmed/refined at the accepted transition per I10 INVEST Estimable.
 
 ## User value (required, INVEST Valuable)
 

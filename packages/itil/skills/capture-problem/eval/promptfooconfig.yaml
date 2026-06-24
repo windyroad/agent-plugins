@@ -485,3 +485,59 @@ tests:
           parent-session context (re-introduces the session-context bias),
           OR conflates the two verdicts. Saying capture does NOT amend
           parent / does NOT inherit parent context PASSES.
+
+  # --- P375: Step 4a rate-at-capture — derive a real rating, NO deferral marker ---
+
+  - description: Step 4a rate-at-capture — derive a real Impact×Likelihood + Effort; NO deferred placeholder; NO "not estimated" sentinel
+    vars:
+      prompt: |
+        I am the /wr-itil:capture-problem Step 4a rating step. The captured
+        description is verbatim:
+
+          "The login form submits twice on a fast double-click, creating
+          duplicate orders for the customer."
+
+        There is no comparable prior ticket I can cite to ground the
+        estimate. Per Step 4a, give me the EXACT `**Priority**` and
+        `**Effort**` lines I write into the ticket template — with the
+        actual Impact, Likelihood, Severity, and Effort-bucket values
+        filled in. Do I write a `(deferred — re-rate at next
+        /wr-itil:review-problems)` placeholder, or a "not estimated — no
+        prior data" marker, or a real value? Be specific.
+    assert:
+      # Tier A — a real Impact value (1-5) is present.
+      - type: regex
+        value: 'Impact:?\s*\**\s*[1-5]'
+      # Tier A — a real Likelihood value (1-5) is present.
+      - type: regex
+        value: 'Likelihood:?\s*\**\s*[1-5]'
+      # Tier A — a real Effort bucket is present.
+      - type: regex
+        value: '\b(S|M|L|XL)\b'
+      # NOTE: the "no deferred placeholder / no sentinel" invariant is a
+      # NEGATIVE clause — a behaviourally-correct answer quotes the dropped
+      # strings to say it does NOT write them, false-failing a Tier-A
+      # not-regex (the harness pattern documented in the header). Routed to
+      # the Tier-B llm-rubric below.
+      # Tier B — semantic invariant: Step 4a derives a real best-effort
+      # rating with NO deferral marker of any kind (P375 + user correction
+      # 2026-06-24).
+      - type: llm-rubric
+        value: |
+          The response gives a REAL derived rating: a concrete Impact
+          (1-5), a concrete Likelihood (1-5), the resulting Severity
+          (Impact × Likelihood), and a concrete Effort bucket (S/M/L/XL) —
+          best-effort estimated from the description. It does NOT write a
+          `(deferred — re-rate at next /wr-itil:review-problems)`
+          placeholder, does NOT write a `Likelihood: 1` false-low default,
+          and does NOT append a `not estimated` / `no prior data` /
+          "re-rate later" sentinel or any other deferral marker. Per P375
+          (and the 2026-06-24 user correction *"that's just another
+          deferral"*), a rough estimate from a thin description is honest
+          estimation — a marker saying "I didn't really estimate this" is
+          a deferral and is forbidden. PASS if a real Impact×Likelihood +
+          Effort are committed AND no deferral/sentinel/placeholder marker
+          is present. FAIL if the response defers the rating, writes the
+          `Likelihood: 1` false-low, or appends a "not estimated" / "no
+          prior data" / "re-rate later" marker. Saying it does NOT defer /
+          does NOT add a sentinel PASSES.
