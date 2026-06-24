@@ -50,3 +50,9 @@ Surfaced 2026-06-24 by user: *"I am NEVER going to give above-appetite permissio
 - **RISK-POLICY.md** § Risk Appetite — the authority being overridden.
 
 (captured via direct write — rated at capture per the P375 rate-at-capture rule)
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-029 | proposed | Apply RISK-POLICY appetite faithfully across all surfaces |
