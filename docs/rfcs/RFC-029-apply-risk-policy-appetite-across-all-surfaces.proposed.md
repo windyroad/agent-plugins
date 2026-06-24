@@ -45,7 +45,7 @@ P377 found that skills, agents, and hooks **override** RISK-POLICY appetite inst
 
 ## Commits
 
-(maintained automatically via the commit-message RFC trailer)
+NOT auto-maintained — the commit-message-trailer executor (ADR-060 item 12) was never built; this is the defect P378 fixes. Until then, this RFC's commits are discoverable via `git log --grep "Refs: RFC-029"`. Slices 1-6 landed 2026-06-24 (commits f91aad4d, 1268747c, 6cd909b2, 70862540, 7f10bd17, ce149bd7) + this RFC 61eadd30. (Listed by hand precisely because the automation P378 will build does not yet exist.)
 
 ## Related
 

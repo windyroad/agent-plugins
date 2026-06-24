@@ -1054,3 +1054,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-06-24
 
 > Last reviewed: 2026-06-23 **P376 captured** — Catchup scanner misses the inbound direction; outbound templates carry the same structural defect the P363 rework fixed inbound — cross-direction parity gap surfaced during the 2026-06-23 retroactive `/wr-itil:update-upstream --catchup` session. Sibling-of P363; child-of P080 Phase 2. (lightweight aside via /wr-itil:capture-problem)
+
+## 2026-06-25
+
+> Last reviewed: 2026-06-24 **P377 captured** — Skills/agents/hooks override RISK-POLICY appetite instead of applying it: above-appetite COMMIT asks the user (policy says block/halt), pipeline/wip agents hardcode appetite, and unauthorised BYPASS_RISK_GATE + ci-bypass exist. Root cause behind the repeated above-appetite-permission asks. RFC-mandated fix planned. (rated at capture)
