@@ -210,7 +210,7 @@ stories: [<from --stories flag — ordered execution sequence; or [] if --storie
 
 ## Commits
 
-(maintained automatically — populated by the commit-message RFC trailer hook per ADR-060 Phase 1 item 12; lands in Slice 3 task B5.T9)
+(rendered from `git log --grep "Refs: RFC-<NNN>"` by `/wr-itil:manage-rfc` + `wr-itil-reconcile-rfcs` per ADR-085 — a git-log-derived view, not stored per-commit. At capture there are no commits yet.)
 
 ## Related
 

@@ -364,6 +364,12 @@ _72 ADRs. These are the current rules. The architect agent reads this section fi
 **Confirmation:** census hook exists + registered as 3rd SessionStart `startup` entry; `lib/deferral-markers.sh` exports `DEFERRAL_MARKER_RE` as single vocabulary source; 11 behavioural bats green (count emission, worst-offender list, both-dirs scanned, silent-on-zero, fail-open, AFK guard, ADR-040 ≤2048-byte budget, archival exclusion, P375 citation); advisory-only/fail-open/never-blocks envelope (exit 0 every path); `itil-fictional-defer-detect.sh` vocabulary convergence recorded as a P375 follow-up, not done here.
 **Related:** ADR-040, ADR-066, ADR-038, ADR-002, ADR-003
 
+### ADR-085 — The RFC `## Commits` section is a git-log-derived view, rendered skill-side
+**Status:** proposed | **Oversight:** unconfirmed
+**Decides:** `## Commits` is a projection of `git log --grep "Refs: RFC-NNN"` rendered skill-side by `update-rfc-commits-section.sh` (invoked by `manage-rfc` on every transition/review and by `reconcile-rfcs`), not stored per-commit — so there is no ADR-014 grain violation and the section is honestly stale between renders rather than falsely "maintained automatically". Closes the never-built ADR-060 item 12; the SessionStart drift-detector (Option 3) is deferred pending evidence of rot.
+**Confirmation:** `update-rfc-commits-section.sh` renders from `git log --grep` idempotently, preserving other sections (behavioural bats green); `manage-rfc` invokes it on transition/review and `reconcile-rfcs` renders/checks it; false "(maintained automatically)" / deferred-auto claims in capture-rfc + manage-story corrected.
+**Related:** ADR-060, ADR-031, ADR-014, ADR-084
+
 ---
 
 ## Historical decisions

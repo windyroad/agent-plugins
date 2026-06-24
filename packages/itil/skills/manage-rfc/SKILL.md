@@ -135,6 +135,17 @@ git add docs/rfcs/RFC-<NNN>-<slug>.<new-status>.md
 
 **P057 staging trap rule**: re-stage explicitly after the Edit tool runs. `git mv` alone stages only the rename, not subsequent content edits.
 
+#### Render the `## Commits` section (P378/RFC-030 Piece 1; ADR-085)
+
+On every transition AND every `review` (Step 9), render the affected RFC's `## Commits` section from git history — it is a derived view (`git log --grep "Refs: RFC-NNN"`), NOT stored per-commit, so it must be regenerated skill-side (a PostToolUse hook can't write it without breaking the ADR-014 commit grain). Invoke the helper before staging the RFC file:
+
+```bash
+wr-itil-update-rfc-commits-section docs/rfcs/RFC-<NNN>-<slug>.<status>.md
+git add docs/rfcs/RFC-<NNN>-<slug>.<status>.md
+```
+
+`wr-itil-update-rfc-commits-section` is the ADR-049 `$PATH` shim for `packages/itil/scripts/update-rfc-commits-section.sh` (idempotent — a current section is a byte-stable no-op, so the `git add` is a no-op when nothing changed). This closes the never-built ADR-060 item 12; the section is honestly rendered-as-of-this-skill-run, never a false "maintained automatically" claim.
+
 #### README refresh on every transition (P062 mirror)
 
 After renaming + Editing + `git add`-ing the transitioned RFC file, regenerate `docs/rfcs/README.md` in-place reflecting the new filename set and the transitioned RFC's new Status. Stage the refreshed README with the same commit.

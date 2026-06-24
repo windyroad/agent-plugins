@@ -42,7 +42,8 @@ Make the RFC framework self-maintaining so updating an RFC never leans on human 
 
 ## Commits
 
-NOT auto-maintained yet (that is Piece 1 of this very RFC). Discoverable via `git log --grep "Refs: RFC-030"`.
+- `2863308e` feat(itil): RFC-030 Piece 3 — RFC-oversight SessionStart nudge (P378) — 2026-06-25
+- `96b0c903` docs(rfcs): capture RFC-030 RFC lifecycle self-maintenance — 2026-06-25
 
 ## Related
 

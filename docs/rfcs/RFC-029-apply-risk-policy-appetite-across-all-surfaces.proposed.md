@@ -45,7 +45,13 @@ P377 found that skills, agents, and hooks **override** RISK-POLICY appetite inst
 
 ## Commits
 
-NOT auto-maintained — the commit-message-trailer executor (ADR-060 item 12) was never built; this is the defect P378 fixes. Until then, this RFC's commits are discoverable via `git log --grep "Refs: RFC-029"`. Slices 1-6 landed 2026-06-24 (commits f91aad4d, 1268747c, 6cd909b2, 70862540, 7f10bd17, ce149bd7) + this RFC 61eadd30. (Listed by hand precisely because the automation P378 will build does not yet exist.)
+- `ce149bd7` docs(problems): RFC-029 Slice 6 — record enforcement-floor coverage + close P377 implementation — 2026-06-24
+- `7f10bd17` feat(risk-scorer): RFC-029 Slice 5 — update-policy writes an Authorized Bypass Scenarios clause (P377) — 2026-06-24
+- `70862540` feat(risk-scorer): RFC-029 Slice 4 — remove unauthorised BYPASS_RISK_GATE + ci-bypass (P377) — 2026-06-24
+- `6cd909b2` feat(risk-scorer): RFC-029 Slice 3 — agents read appetite from policy; propagate incident framing (P377) — 2026-06-24
+- `1268747c` feat(itil,risk-scorer): RFC-029 Slice 2 — remove above-appetite-commit AskUserQuestion from skills (P377) — 2026-06-24
+- `f91aad4d` docs(decisions): RFC-029 Slice 1 — extend never-above-appetite to commit; no incident carve-out (P377) — 2026-06-24
+- `61eadd30` docs(rfcs): capture RFC-029 apply RISK-POLICY appetite across all surfaces — 2026-06-24
 
 ## Related
 
