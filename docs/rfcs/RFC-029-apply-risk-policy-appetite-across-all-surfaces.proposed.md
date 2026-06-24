@@ -2,7 +2,8 @@
 status: proposed
 rfc-id: apply-risk-policy-appetite-across-all-surfaces
 reported: 2026-06-24
-human-oversight: unconfirmed
+human-oversight: confirmed
+oversight-date: 2026-06-25
 decision-makers: [Tom Howard]
 problems: [P377]
 adrs: []

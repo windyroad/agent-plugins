@@ -2,7 +2,8 @@
 status: proposed
 rfc-id: rfc-lifecycle-self-maintenance
 reported: 2026-06-25
-human-oversight: unconfirmed
+human-oversight: confirmed
+oversight-date: 2026-06-25
 decision-makers: [Tom Howard]
 problems: [P378]
 adrs: []

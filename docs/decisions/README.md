@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 81 (72 in-force, 9 historical)
+**Total ADRs:** 83 (74 in-force, 9 historical)
 
 ---
 
 ## In-force decisions
 
-_72 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_74 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -363,10 +363,9 @@ _72 ADRs. These are the current rules. The architect agent reads this section fi
 **Decides:** Add a `retrospective-deferral-census.sh` SessionStart hook that scans `docs/` + `packages/` `.md` files for deferral markers (vocabulary single-sourced in `lib/deferral-markers.sh`) and re-surfaces the worst offenders every session — cloning the proven class-B oversight-nudge shape so deferred governance work has a self-firing trigger instead of rotting on named-but-uncadenced re-entry points (P375). `.md`-only scope and `docs/`+`packages/` reach were user-pinned to catch shipped-skill rot adopters inherit while avoiding source code-comment false positives.
 **Confirmation:** census hook exists + registered as 3rd SessionStart `startup` entry; `lib/deferral-markers.sh` exports `DEFERRAL_MARKER_RE` as single vocabulary source; 11 behavioural bats green (count emission, worst-offender list, both-dirs scanned, silent-on-zero, fail-open, AFK guard, ADR-040 ≤2048-byte budget, archival exclusion, P375 citation); advisory-only/fail-open/never-blocks envelope (exit 0 every path); `itil-fictional-defer-detect.sh` vocabulary convergence recorded as a P375 follow-up, not done here.
 **Related:** ADR-040, ADR-066, ADR-038, ADR-002, ADR-003
-
 ### ADR-085 — The RFC `## Commits` section is a git-log-derived view, rendered skill-side
-**Status:** proposed | **Oversight:** unconfirmed
-**Decides:** `## Commits` is a projection of `git log --grep "Refs: RFC-NNN"` rendered skill-side by `update-rfc-commits-section.sh` (invoked by `manage-rfc` on every transition/review and by `reconcile-rfcs`), not stored per-commit — so there is no ADR-014 grain violation and the section is honestly stale between renders rather than falsely "maintained automatically". Closes the never-built ADR-060 item 12; the SessionStart drift-detector (Option 3) is deferred pending evidence of rot.
+**Status:** proposed | **Oversight:** confirmed
+**Decides:** RFC `## Commits` is a projection of `git log --grep "Refs: RFC-NNN"` rendered skill-side by `update-rfc-commits-section.sh` (invoked by `manage-rfc` on every transition/review and by `reconcile-rfcs`), never stored per-commit — so there is no ADR-014 single-commit grain violation and the section is honestly stale between renders rather than falsely "maintained automatically". Closes the never-built ADR-060 item 12; the SessionStart drift-detector (Option 3) is deferred pending observed rot.
 **Confirmation:** `update-rfc-commits-section.sh` renders from `git log --grep` idempotently, preserving other sections (behavioural bats green); `manage-rfc` invokes it on transition/review and `reconcile-rfcs` renders/checks it; false "(maintained automatically)" / deferred-auto claims in capture-rfc + manage-story corrected.
 **Related:** ADR-060, ADR-031, ADR-014, ADR-084
 
