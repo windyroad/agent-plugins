@@ -69,7 +69,8 @@ fi
 # TTL is unexpired; consumed on drift or TTL expiry so a genuine risk-
 # profile change forces a fresh wr-risk-scorer:pipeline rescore. Mirrors
 # the clean-marker persist-until-drift precedent (above) — distinct from
-# incident-release / ci-bypass, which remain deliberate one-time overrides.
+# incident-release, which remains the one-shot live-outage override
+# (ci-bypass was removed per P377/RFC-029).
 if [ -f "${RDIR}/reducing-commit" ]; then
     NOW=$(date +%s)
     MARK_TIME=$(_mtime "${RDIR}/reducing-commit")

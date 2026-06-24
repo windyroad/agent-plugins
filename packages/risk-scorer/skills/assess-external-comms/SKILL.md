@@ -100,7 +100,7 @@ If the verdict is FAIL, do NOT auto-rewrite the draft. Use `AskUserQuestion`:
 - options:
   1. `Rewrite the draft and re-review` — return to step 1 with the rewritten body.
   2. `Move to a private channel` — direct the user to a non-public surface (vendor private email, internal Slack, etc.) where the leak does not apply.
-  3. `Override anyway` — set `BYPASS_RISK_GATE=1` for the next gated tool call. Reserved for cases where the user has confirmed the content is safe to publish (e.g. the "client name" is actually their own org).
+  3. `Re-review with context` — if the flag is a false positive (e.g. the "client name" is actually the user's own org), give that context to the `wr-risk-scorer:external-comms` reviewer and let it re-judge; a PASS verdict clears the gate via the review marker. There is no `BYPASS_RISK_GATE` env override (removed P377/RFC-029) — the reviewer's judgement, not an env knob, is the clearance path.
   4. `Cancel` — abandon the post.
 
 Do not make the decision unilaterally — per ADR-013 Rule 1, all leak/no-leak judgement calls outside the regex pre-filter belong to the user.

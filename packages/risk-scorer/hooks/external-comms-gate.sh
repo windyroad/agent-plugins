@@ -24,7 +24,7 @@
 #                                                  PreToolUse, nothing to read.)
 #
 # Gate behaviour:
-#   1. BYPASS_RISK_GATE=1 short-circuits the gate (consistent with git-push-gate.sh).
+#   1. (removed P377/RFC-029) — BYPASS_RISK_GATE env override no longer exists; the gate is cleared only by delegating to the reviewer.
 #   2. POLICY_FILE absent → advisory-only mode (permits with systemMessage).
 #   3. Hybrid leak-pattern pre-filter (lib/leak-detect.sh) hard-fails on
 #      credentials, prod-URL prefixes, business-context-paired financial figures,
@@ -97,10 +97,11 @@ EXTERNAL_COMMS_POLICY_FILE="${EXTERNAL_COMMS_POLICY_FILE:-RISK-POLICY.md}"
 EXTERNAL_COMMS_LEAK_PREFILTER="${EXTERNAL_COMMS_LEAK_PREFILTER:-yes}"
 EXTERNAL_COMMS_SKIP_SURFACES="${EXTERNAL_COMMS_SKIP_SURFACES:-}"
 
-# ---------- Bypass ----------
-if [ "${BYPASS_RISK_GATE:-0}" = "1" ]; then
-    exit 0
-fi
+# P377/RFC-029: the BYPASS_RISK_GATE=1 env override is REMOVED (never
+# authorised). There is no env escape from the external-comms gate — clear it
+# by delegating to the wr-risk-scorer:external-comms reviewer (the gate marks
+# the draft reviewed on a PASS verdict). A genuine gate misfire is recovered
+# per ADR-048 (documented recovery), not an env bypass.
 
 INPUT=$(cat)
 
@@ -316,7 +317,7 @@ fi
 # EXTERNAL_COMMS_LEAK_PREFILTER=yes (risk) or =no (voice-tone).
 if [ "$EXTERNAL_COMMS_LEAK_PREFILTER" = "yes" ]; then
     if ! leak_detect_scan "$DRAFT"; then
-        REASON=$(printf 'BLOCKED (external-comms gate / %s evaluator): %s on %s. Remove the leak before retrying. Override only if intentional (pre-session env): BYPASS_RISK_GATE=1.' \
+        REASON=$(printf 'BLOCKED (external-comms gate / %s evaluator): %s on %s. Remove the leak before retrying. There is no env override (P377/RFC-029 — BYPASS_RISK_GATE removed).' \
             "$EXTERNAL_COMMS_EVALUATOR_ID" "$LEAK_DETECT_REASON" "$SURFACE")
         deny_with_reason "$REASON"
         exit 0
@@ -386,7 +387,7 @@ fi
 # PostToolUse mark hook can derive the canonical marker key locally
 # (sha256(DRAFT + '\n' + SURFACE)). Single fire per gate cycle.
 VERDICT_PREFIX="${EXTERNAL_COMMS_VERDICT_PREFIX:-EXTERNAL_COMMS_${EXTERNAL_COMMS_EVALUATOR_ID^^}}"
-REASON=$(printf 'BLOCKED (external-comms gate / %s evaluator): %s draft has not been reviewed by %s. Delegate to %s (subagent_type: '"'"'%s'"'"') with a prompt that starts with the line `SURFACE: %s` and wraps the draft body verbatim inside `<draft>...</draft>` markers (for the changeset-author surface the body is the changeset summary WITHOUT the leading `---` frontmatter block — the gate strips frontmatter before hashing the marker key). The PostToolUse hook derives the marker key from that structure and marks the draft reviewed when the subagent emits %s_VERDICT: PASS — single fire suffices. Use %s for an interactive walkthrough. Override only when intentional (pre-session env): BYPASS_RISK_GATE=1.' \
+REASON=$(printf 'BLOCKED (external-comms gate / %s evaluator): %s draft has not been reviewed by %s. Delegate to %s (subagent_type: '"'"'%s'"'"') with a prompt that starts with the line `SURFACE: %s` and wraps the draft body verbatim inside `<draft>...</draft>` markers (for the changeset-author surface the body is the changeset summary WITHOUT the leading `---` frontmatter block — the gate strips frontmatter before hashing the marker key). The PostToolUse hook derives the marker key from that structure and marks the draft reviewed when the subagent emits %s_VERDICT: PASS — single fire suffices. Use %s for an interactive walkthrough. There is no env override (P377/RFC-029 — BYPASS_RISK_GATE removed).' \
     "$EXTERNAL_COMMS_EVALUATOR_ID" "$SURFACE" "$EXTERNAL_COMMS_SUBAGENT_TYPE" "$EXTERNAL_COMMS_SUBAGENT_TYPE" "$EXTERNAL_COMMS_SUBAGENT_TYPE" "$SURFACE" "$VERDICT_PREFIX" "$EXTERNAL_COMMS_ASSESS_SKILL")
 deny_with_reason "$REASON"
 exit 0

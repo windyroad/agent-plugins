@@ -164,8 +164,7 @@ print(('yes' if score > N else 'no') + ' ' + str(N))
 # status,conclusion,databaseId,url` for the working branch's most recent
 # CI run.
 #
-# Decision table:
-#   - bypass marker present (${RDIR}/ci-bypass-${ACTION}) → allow, consume
+# Decision table (no override — ci-bypass removed P377/RFC-029):
 #   - gh failure (auth / timeout / API error) → DENY (fail-CLOSED, per
 #     P208 safe-high-fix-risk classifier — a buggy harden must NOT
 #     degrade to allow)
@@ -182,19 +181,16 @@ check_ci_status() {
   local ACTION="$2"
   local RDIR
   RDIR=$(_risk_dir "$SESSION_ID")
-  local BYPASS_MARKER="${RDIR}/ci-bypass-${ACTION}"
 
   CI_GATE_REASON=""
   CI_GATE_CATEGORY=""
 
-  # One-shot bypass marker — consumed on use, same family as
-  # reducing-push / incident-release. Documented override for the
-  # legitimate "first push triggers CI" edge case and infra incidents.
-  if [ -f "$BYPASS_MARKER" ]; then
-    rm -f "$BYPASS_MARKER"
-    CI_GATE_CATEGORY="bypass"
-    return 0
-  fi
+  # P377/RFC-029: the `ci-bypass-${ACTION}` one-shot override is REMOVED
+  # (never authorised). The CI-status gate is fail-closed per P208 with NO
+  # escape — red/unreadable CI hard-fails; fix the underlying CI / gh failure.
+  # The "first push triggers CI" case is handled by the empty-history natural
+  # allow below (no marker needed). Live-outage releases use the separate
+  # `incident-release` marker (git-push-gate.sh), justified by ADR-042 Rule 1b.
 
   # Resolve current branch. If we're not in a git repo or HEAD is
   # detached, skip the CI check (the surrounding push/release gate
@@ -220,7 +216,7 @@ check_ci_status() {
 
   if [ -n "${GH_EXIT:-}" ] && [ "$GH_EXIT" != "0" ]; then
     CI_GATE_CATEGORY="gh-error"
-    CI_GATE_REASON="CI status check failed (gh exit ${GH_EXIT}: auth / timeout / API error). Fail-closed per P208 safe-high-fix-risk. Fix the underlying gh failure, or to override for a legitimate first-push-triggers-CI run, create the bypass marker: touch ${BYPASS_MARKER}"
+    CI_GATE_REASON="CI status check failed (gh exit ${GH_EXIT}: auth / timeout / API error). Fail-closed per P208 safe-high-fix-risk. Fix the underlying gh / CI failure before pushing/releasing — there is no override (P377/RFC-029; the ci-bypass marker was removed)."
     return 1
   fi
 
@@ -256,14 +252,14 @@ except Exception:
 
   if [ "$STATUS" = "PARSE_ERROR" ]; then
     CI_GATE_CATEGORY="gh-error"
-    CI_GATE_REASON="CI status check returned unparseable response. Fail-closed per P208 safe-high-fix-risk. To override for a legitimate first-push case, create the bypass marker: touch ${BYPASS_MARKER}"
+    CI_GATE_REASON="CI status check returned unparseable response. Fail-closed per P208 safe-high-fix-risk. Fix the gh / CI failure before pushing/releasing — there is no override (P377/RFC-029)."
     return 1
   fi
 
   case "$STATUS" in
     queued|in_progress|pending|requested|waiting)
       CI_GATE_CATEGORY="pending"
-      CI_GATE_REASON="Latest CI run on branch '${BRANCH}' is still in flight (status: ${STATUS}). Wait for it to settle: ${URL}. To override, create the bypass marker: touch ${BYPASS_MARKER}"
+      CI_GATE_REASON="Latest CI run on branch '${BRANCH}' is still in flight (status: ${STATUS}). Wait for it to settle before pushing/releasing: ${URL} (no override — P377/RFC-029)."
       return 1
       ;;
     completed)
@@ -274,7 +270,7 @@ except Exception:
           ;;
         failure|cancelled|timed_out|action_required|startup_failure)
           CI_GATE_CATEGORY="red"
-          CI_GATE_REASON="Latest CI run on branch '${BRANCH}' concluded ${CONCLUSION}: ${URL}. Fix CI before pushing/releasing. To override for a legitimate first-push or infra-incident case, create the bypass marker: touch ${BYPASS_MARKER}"
+          CI_GATE_REASON="Latest CI run on branch '${BRANCH}' concluded ${CONCLUSION}: ${URL}. Fix CI before pushing/releasing — there is no override (P377/RFC-029; ci-bypass removed). A live-outage restore-service release uses the separate incident-release path."
           return 1
           ;;
         *)

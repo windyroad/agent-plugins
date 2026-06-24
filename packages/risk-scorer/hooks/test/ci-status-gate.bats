@@ -129,25 +129,19 @@ _run_check() {
   export FAKE_GH_EXIT=1
   result=$(_run_check "push")
   [[ "$result" == DENY:* ]]
-  # Must point at the ci-bypass marker for the documented override path.
-  [[ "$result" == *"ci-bypass-push"* ]]
+  # P377/RFC-029: ci-bypass removed — the deny states there is no override
+  # and does not instruct the user to create/touch a bypass marker.
+  [[ "$result" == *"no override"* ]]
+  [[ "$result" != *"touch "* ]]
 }
 
-@test "check_ci_status allows when ci-bypass marker is present and consumes it" {
+@test "P377/RFC-029: a ci-bypass marker is IGNORED — red CI still denies (override removed)" {
   : > "$RDIR/ci-bypass-push"
   export FAKE_GH_OUTPUT='[{"status":"completed","conclusion":"failure","databaseId":7,"url":"https://github.com/x/y/actions/runs/7"}]'
   result=$(_run_check "push")
-  [[ "$result" == "ALLOW" ]]
-  # Bypass markers are one-shot — same family as reducing-push / incident-release.
-  [ ! -f "$RDIR/ci-bypass-push" ]
-}
-
-@test "check_ci_status bypass marker is action-scoped (push marker does not bypass release)" {
-  : > "$RDIR/ci-bypass-push"
-  export FAKE_GH_OUTPUT='[{"status":"completed","conclusion":"failure","databaseId":8,"url":"https://github.com/x/y/actions/runs/8"}]'
-  result=$(_run_check "release")
+  # The marker no longer short-circuits; red CI is fail-closed regardless.
   [[ "$result" == DENY:* ]]
-  # push bypass must not have been consumed by a release check
+  # And the gate does not consume / act on the marker.
   [ -f "$RDIR/ci-bypass-push" ]
 }
 

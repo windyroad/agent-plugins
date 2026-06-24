@@ -113,8 +113,10 @@ Behaviour:
 3. If `RISK-POLICY.md` is absent, the gate runs in advisory-only mode and
    permits the call (graceful adoption).
 
-Override: `BYPASS_RISK_GATE=1` short-circuits the gate (consistent with
-`git-push-gate.sh`). Reserved for cases the user has confirmed safe.
+There is no env override of the gate (the `BYPASS_RISK_GATE` knob was removed —
+P377/RFC-029). Clear the gate by reducing risk to within appetite, or — for a
+false-positive leak flag — by letting the reviewer re-judge. A genuine gate
+misfire is recovered per ADR-048 (documented recovery), not an env bypass.
 
 The canonical hook lives at `packages/shared/hooks/external-comms-gate.sh` and
 is synced into each consumer plugin via `scripts/sync-external-comms-gate.sh`
