@@ -96,6 +96,15 @@ mk() { mkdir -p "$(dirname "$DIR/$1")"; printf '%s\n' "$2" > "$DIR/$1"; }
   [ -z "$output" ]
 }
 
+@test "catches slice/phase-deferral phrasing (P378 fold) — 'lands in Slice N' etc." {
+  mk "packages/itil/skills/foo/SKILL.md" "the executor lands in Slice 3 task B5.T9"
+  mk "packages/itil/skills/bar/SKILL.md" "deferred to a hook-source slice"
+  run env CLAUDE_PROJECT_DIR="$DIR" CLAUDE_PLUGIN_ROOT="$PLUGIN_ROOT" bash "$HOOK"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"deferred-work marker"* ]]
+  [[ "$output" == *"SKILL.md"* ]]
+}
+
 @test "points at a drain path (run-retro / backlog) and cites P375" {
   mk "docs/problems/001-x.md" "(deferred to investigation)"
   run env CLAUDE_PROJECT_DIR="$DIR" CLAUDE_PLUGIN_ROOT="$PLUGIN_ROOT" bash "$HOOK"
