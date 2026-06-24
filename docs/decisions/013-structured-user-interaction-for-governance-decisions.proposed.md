@@ -85,7 +85,7 @@ Accept prose prompts as a cosmetic issue.
 
 4. **Plan mode for multi-step remediations.** When a decision produces a multi-step remediation plan (e.g., above-appetite risk with concrete remediation items), the calling skill enters plan mode before presenting options.
 
-5. **Policy-authorised decisions proceed silently.** When a decision outcome is pre-determined by policy (e.g., risk residual is below appetite per RISK-POLICY.md), the skill proceeds without prompting. No ceremonial "accept the risk?" for decisions the policy has already authorised.
+5. **Policy-authorised decisions proceed silently.** When a decision outcome is pre-determined by policy (e.g., risk residual is below appetite per RISK-POLICY.md), the skill proceeds without prompting. No ceremonial "accept the risk?" for decisions the policy has already authorised. **This extends to the ABOVE-appetite case (P377/RFC-029 amendment 2026-06-24): an above-appetite commit/push/release is equally policy-determined — the policy says reduce-to-within-appetite or halt (ADR-042 Rule 1), never "ask the user to proceed anyway".** There is no above-appetite AskUserQuestion surface at any pipeline stage; above-appetite is framework-mediated (auto-remediate or halt), not a one-time-override ask (ADR-044 category-3 explicitly excludes it).
 
 6. **Non-interactive fail-safe — queue-and-continue is the universal default (2026-06-06 amendment).** In non-interactive contexts where `AskUserQuestion` is unavailable (AFK iter loops via `/wr-itil:work-problems` Step 5 iter dispatch, subagent invocations, CI pipelines, scheduled triggers, scripted invocations), the skill MUST **queue the question and continue** by default:
 

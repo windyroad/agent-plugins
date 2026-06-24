@@ -58,11 +58,11 @@ _72 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed
 **Confirmation:** docs/decisions/011-manage-incident-skill.proposed.md created with all MADR 4.0 sections present.; docs/jtbd/tech-lead/JTBD-201-restore-service-fast.proposed.md created; tech-lead persona.md and JTBD README.md...; packages/itil/skills/manage-incident/SKILL.md created. The SKILL.md documents that it invokes wr-itil:manage-p...; packages/itil/skills/manage-incident/test/*.bats exists and is functional per ADR-005/P011 — assertions exec...; ADR-002 inventory (lines 95–98) lists the new skill.
 **Related:** ADR-010, ADR-002, ADR-008, ADR-005, ADR-011
-
 ### ADR-013 — Structured User Interaction for Governance-Skill Decisions
 **Status:** proposed | **Oversight:** confirmed
-**Confirmation:** grep -rn "Options:.*\(a\)\|Your call:\|which would you like\|which way?" packages/*/skills/ returns zero match...; Every SKILL.md with AskUserQuestion in allowed-tools uses it at all documented branch points (no prose fallbac...; Scoring agents (pipeline.md, wip.md, plan.md) have tools: [Read, Glob] only — no AskUserQuestion grant; Below-appetite / policy-authorised paths produce no user prompt (silent proceed); 2026-06-06 amendment confirmation — every SKILL.md AFK fallback prose either (a) names queue-and-continue as...
-**Related:** ADR-011, ADR-010, ADR-005, ADR-044, ADR-052, ADR-074
+**Decides:** Chose Option B — scoring/analysis agents stay pure output-only (`[Read, Glob]`, machine-readable verdicts), while the calling skill (or primary agent when no skill wraps it) owns `AskUserQuestion` and plan-mode entry; structured options replace prose `(a)/(b)/(c)` prompts at genuine branch points, but framework-resolved and policy-authorised decisions (including above-appetite, which auto-remediates or halts — never asks) proceed silently, and non-interactive/AFK contexts queue-and-continue by default rather than halting, skipping, or guessing.
+**Confirmation:** no `Options:.*(a)`/`Your call:`/`which would you like?` prose prompts outside test fixtures; every `SKILL.md` granting `AskUserQuestion` uses it at all documented branch points; scoring agents (`pipeline/wip/plan.md`) stay `tools: [Read, Glob]`; below-appetite/policy paths produce no prompt; per the 2026-06-06 amendment every AFK fallback either names queue-and-continue or inline-cites the authorising ADR for a HALT/SKIP/AUTO-DEFAULT carve-out (verified per ADR-052)
+**Related:** ADR-005, ADR-010, ADR-011, ADR-042, ADR-044, ADR-052, ADR-074
 
 ### ADR-014 — Governance Skills Commit Their Own Completed Work
 **Status:** proposed | **Oversight:** confirmed
@@ -172,19 +172,20 @@ _72 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-040 — Session-start briefing surface — SessionStart hook over tiered directory + indexed README
 **Status:** proposed | **Oversight:** confirmed
 **Confirmation:** docs/briefing/ tree exists and docs/briefing/README.md has a ## Critical Points (Session-Start Surface) sectio...; packages/retrospective/hooks/session-start-briefing.sh exists, extracts the Critical Points section cleanly, e...; packages/retrospective/hooks/hooks.json contains a SessionStart entry with "matcher": "startup" targeting the ...; docs/BRIEFING.md is deleted.; @windyroad/retrospective@0.7.0 published to npm. Adopter projects installing the new version and starting a Cl...
-
 ### ADR-042 — Auto-apply scorer remediations to reach within appetite — open action-class vocabulary
 **Status:** proposed | **Oversight:** confirmed | **Supersedes:** ADR-041
-**Chosen:** Chosen option: **"Liberal auto-apply with open vocabulary and halt-on-exhaustion"**, because the never-release-above-appetite invariant is the primary constraint and liberal auto-apply is the only mechanism that reliably honours it across A...
-**Related:** ADR-041, ADR-013, ADR-014, ADR-032, ADR-015, ADR-018, ADR-020, ADR-022, ADR-037, ADR-042
+**Decides:** Never commit, push, or release above appetite; when residual risk exceeds appetite the orchestrator reads the scorer's free-form `RISK_REMEDIATIONS:` prose as input, decides and applies remediations itself (gated per commit per Rule 3), and re-scores until within appetite — halting the loop/skill on exhaustion (treated as a scorer-gap signal) rather than ever releasing above appetite. Replaces ADR-041's closed action-class enumeration with an open vocabulary to unblock scorer innovation. Amended 2026-06-24 (P377/RFC-029): the invariant covers commit too (no above-appetite commit-ask surface), and incidents are not a carve-out — incident response is scored against the live realised-risk baseline, so legitimate hotfixes take the risk-reducing path and `RISK_BYPASS: incident` collapses into `reducing`.
+**Confirmation:** Source review — each in-scope SKILL.md carries the above-appetite branch (Rules 1–7) + ADR-042 citation; bats contract assertions on load-bearing strings; behavioural auto-apply-then-drain without AskUserQuestion; halt emits `outcome: halted-above-appetite`; novel-class read-decide-apply.
+**Related:** ADR-041, ADR-013, ADR-014, ADR-015, ADR-018, ADR-020, ADR-022, ADR-032, ADR-037
 
 ### ADR-043 — Progressive context-usage measurement and reporting for retrospective sessions
 **Status:** proposed | **Oversight:** confirmed
 **Related:** ADR-038, ADR-040, ADR-026, ADR-014, ADR-013, ADR-009, ADR-022, ADR-005, ADR-037
-
-### ADR-044 — ADR-044 — Decision-Delegation Contract: when agents act on the framework vs ask the user
+### ADR-044 — Decision-Delegation Contract: when agents act on the framework vs ask the user
 **Status:** proposed | **Oversight:** confirmed
-**Related:** ADR-013, ADR-044, ADR-014, ADR-022, ADR-026, ADR-032, ADR-040, ADR-042, ADR-043
+**Decides:** The framework (ADRs, JTBDs, RISK-POLICY, WSJF, lifecycle, SKILL contracts) is a decision-delegation contract: agents read it, apply it, act, and report by default. `AskUserQuestion` is reserved for a six-class authority taxonomy — new-work direction, deviation approvals, strategic one-time overrides, genuinely-silent-framework cases, taste on novel artefacts, and authentic correction; everything else (commits/pushes/releases, external comms, prioritisation, verification close, codification shape, briefing, lifecycle, splits, loop stop) is framework-mediated. Chosen via sibling ADR-044 + amending ADR-013 Rule 1 in place (not superseding), plus an anti-BUFD clause: surface deviation candidates with citations rather than auto-deviating or blindly following stale decisions. Amendment 2026-06-24 (P377/RFC-029): above-appetite commit is framework-mediated like push/release per ADR-042 — never a one-time-override ask, since risk breaches are always "reduce risk or halt".
+**Confirmation:** named bats coverage lands and stays green; lazy-AskUserQuestion count from Step 2d "Ask Hygiene Pass" trends toward 0 across retros; deviation-candidate behavioural assertions hold (required citation fields, no-auto-deviate, loop-end 5-option ask, jsonl persistence, queueing-when-evidence-present is mandatory).
+**Related:** ADR-013, ADR-014, ADR-022, ADR-026, ADR-032, ADR-040, ADR-042, ADR-043
 
 ### ADR-045 — Hook injection budget policy for PreToolUse and PostToolUse hooks
 **Status:** proposed | **Oversight:** confirmed

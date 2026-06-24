@@ -62,7 +62,7 @@ Human input via `AskUserQuestion` is reserved for these categories. Everything e
 
 1. **Direction-setting for new work** — what to add to the suite (new tickets, new ADRs, new SKILLs, new gaps to close). Only the user knows the goals that haven't been written down yet.
 2. **Deviation approvals from existing design decisions** — existing decisions are point-in-time, made under the context of work done so far. As reality changes, existing decisions may become wrong. The agent surfaces deviation candidates (citing the existing decision + the contradicting evidence per ADR-026 grounding + a proposed shape: amend / supersede / one-time-override) and the user approves the shape. **Never auto-deviate; never blindly follow against evidence.**
-3. **Strategic one-time override** — the rule still stands; this specific case warrants an exception (not a rule-change). Distinct from deviation-approval (which requests rule-change).
+3. **Strategic one-time override** — the rule still stands; this specific case warrants an exception (not a rule-change). Distinct from deviation-approval (which requests rule-change). **NOT for above-appetite commit/push/release** (P377/RFC-029 amendment 2026-06-24): risk-appetite breaches are framework-resolved (RISK-POLICY appetite + ADR-042 auto-remediate-or-halt), never a one-time-override ask — the answer is always "reduce risk or halt", so there is no exception to grant. Category-3 remains for genuine non-risk one-time exceptions.
 4. **Genuinely-silent-framework cases** — no ADR / JTBD / policy / WSJF / risk-score / SKILL contract applies. By definition rare; the framework's coverage grows over time as deviation-approvals + new direction land.
 5. **Taste on novel artefacts** — naming, voice, design aesthetics where no `VOICE-AND-TONE.md` / `STYLE-GUIDE.md` / `RISK-POLICY.md` settles the case.
 6. **Authentic correction** — the P078 surface. Agent went wrong; user catches it. The framework can't pre-encode every wrongness shape; the user uniquely sees the gaps.
@@ -71,7 +71,7 @@ Human input via `AskUserQuestion` is reserved for these categories. Everything e
 
 The agent reads the framework and acts. Reporting is the oversight surface (user reads what the agent did and corrects via category 6 if wrong).
 
-- **Releases** — `RISK-POLICY.md` appetite + ADR-042 auto-apply. Within appetite (≤4) drain. Above appetite converge or halt. Never per-release ask.
+- **Commits, pushes, and releases** — `RISK-POLICY.md` appetite + ADR-042 auto-apply. Within appetite (≤4) proceed. Above appetite auto-remediate or halt. **Never per-action ask** — including commit. (Amendment 2026-06-24, P377/RFC-029: previously named "Releases" only, which left above-appetite *commit* as a category-3 one-time-override AskUserQuestion surface; that surface is removed — above-appetite commit is framework-mediated like push/release per ADR-042 Rule 1 as amended.)
 - **External comms** (upstream issues, comments, advisories) — P064 risk-scoring gate + P038 voice-tone gate (when both ship). Same risk-framework discipline. Never per-comment ask.
 - **Prioritisation** — WSJF formula + documented tie-breaks (Known Error > Open; smaller effort first; older reported date). Pick + work.
 - **Verification close** — close-on-evidence + report. Reversible if wrong. The framework's `## Fix Released` section + the agent's specific in-session citations are sufficient evidence; per-candidate ask is lazy deferral.

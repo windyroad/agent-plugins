@@ -80,9 +80,11 @@ Halt-on-exhaustion is the safety valve: if the scorer cannot find a reduction pa
 
 ### Rules
 
-#### Rule 1 — Work to reduce risk above appetite; never release above
+#### Rule 1 — Work to reduce risk above appetite; never commit, push, or release above
 
-When residual push or release risk is above appetite (≥ 5/25 per `RISK-POLICY.md`), the orchestrator MUST take action to reduce risk until residual risk is within appetite (≤ 4/25). The orchestrator MUST NOT release above appetite under any circumstance. The orchestrator MUST NOT escalate to `AskUserQuestion` as a shortcut — the agent is the decision surface, not the user.
+When residual **commit, push, or release** risk is above appetite (≥ 5/25 per `RISK-POLICY.md`), the orchestrator MUST take action to reduce risk until residual risk is within appetite (≤ 4/25). The orchestrator MUST NOT **commit, push, or** release above appetite under any circumstance. The orchestrator MUST NOT escalate to `AskUserQuestion` as a shortcut — the agent is the decision surface, not the user.
+
+**Amendment 2026-06-24 (P377 / RFC-029): the invariant covers COMMIT, not just push/release.** The original Rule 1 named "push or release"; this left the commit gate as the one place a skill could lawfully surface an above-appetite `AskUserQuestion` ("commit anyway / remediate / park") — an ADR-044 category-3 one-time-override. P377 found that surface is an *override* of RISK-POLICY (§ Risk Appetite says above appetite → block/halt, not ask) and the root cause of repeated above-appetite-permission asks. The never-above-appetite + auto-remediate + never-ask invariant applies identically at commit. There is no above-appetite-commit user-ask surface; above-appetite commit auto-remediates (Rules 2–4) or halts (Rule 5).
 
 The orchestrator MAY use scorer remediations as input, but is NOT bound to follow them. It MAY:
 - Apply a scorer-suggested remediation (Rule 2a).
@@ -90,6 +92,16 @@ The orchestrator MAY use scorer remediations as input, but is NOT bound to follo
 - Combine scorer input with its own judgment.
 
 Rule 1 is policy-authorised per ADR-013 Rule 5: `RISK-POLICY.md` appetite + this ADR's eligibility rules constitute the policy. No interactive authorisation is required for any action inside Rules 2–7.
+
+##### Rule 1b — Incident-context scoring; no incident carve-out (P377 / RFC-029, 2026-06-24)
+
+Incidents are NOT an exception to Rule 1. There is no separate "incident bypass" and no above-appetite incident commit-ask. Instead, an incident is correctly scored as **a risk being realised right now**: an active incident's Likelihood is already 5 (it is happening; it cannot go higher), so with significant impact the incident itself sits far above appetite *by virtue of existing*. An incident-response change (the fix/rollback/flag) is therefore scored **against that live realised-risk baseline**, where the counterfactual of doing nothing is the incident continuing at its realised risk. The scorer weighs three things:
+
+1. P(the change **increases** impact) — makes the incident worse;
+2. P(the change **reduces** impact & likelihood) — restores service / ends the incident (it cannot raise likelihood — already 5);
+3. the risk the change **introduces a new incident** (a fresh, separate risk).
+
+If, on balance, the change **reduces net realised risk**, it IS a risk-reducing change and takes the existing risk-reducing path (Rule 2a / the `reducing` bypass) — allowed, no ask. If it net-increases risk or spawns a new above-appetite incident, it is blocked like anything else. Consequently **`RISK_BYPASS: incident` collapses into `RISK_BYPASS: reducing`** — legitimate incident response is risk-reducing when scored against the live baseline. This is *more* aligned with JTBD-201 (restore-service-fast, reversible mitigations preferred) than a blanket carve-out: genuine hotfixes clear directly via scoring, with no user consent gate mid-outage. The `incident-release` marker is retained as the operational mechanism but its justification is the reducing-path scoring above, not a standing exception.
 
 #### Rule 2 — Use scorer input; agent decides; re-score after each
 
