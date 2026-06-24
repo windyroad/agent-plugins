@@ -35,11 +35,14 @@ Surfaced 2026-06-24 by user: *"I am NEVER going to give above-appetite permissio
 
 - [x] Rated at capture (Impact 4 × Likelihood 4, Effort L)
 - [x] Audit complete (2026-06-24 — taxonomy A-D above)
-- [ ] **Governance fix (ADR-level)**: remove/narrow the ADR-013/ADR-044 category-3 "above-appetite commit" surface; extend ADR-042 (auto-remediate, never above appetite, never ask) to cover COMMIT not just push/release. Architect + user substance-confirm.
-- [ ] Fix the clear bugs (Class A non-incident + assess-release): replace the above-appetite-commit AskUserQuestion with ADR-042 auto-remediate language (mirror the release branch already in the same files).
-- [ ] Fix Class B: pipeline.md + wip.md read the appetite from RISK-POLICY.md, not a hardcoded `4`.
-- [ ] Resolve Class A incident carve-out + Class C/D bypass disposition (user decisions) and apply.
-- [ ] Behavioural tests / promptfoo coverage for the corrected above-appetite behaviour.
+- [x] **FIXED via RFC-029 (2026-06-24)** — 6 slices, all committed; architect + risk-scorer plan review PASS; user decisions locked + ADR substance P357-confirmed:
+  - **Slice 1** `f91aad4d` — ADR-042 Rule 1 extended to commit + Rule 1b (incident-as-risk-reducing, no carve-out); ADR-044 cat-3 excludes above-appetite commit; ADR-013 Rule 5 extended.
+  - **Slice 2** `1268747c` — above-appetite-commit AskUserQuestion removed from manage-problem, transition-problem(s), 3 incident skills, assess-release.
+  - **Slice 3** `6cd909b2` — pipeline.md + wip.md read appetite from RISK-POLICY.md (Class B); incident framing propagated; plan-risk-guidance.sh default 5→4 (ADR-065 fix).
+  - **Slice 4** `70862540` — BYPASS_RISK_GATE (Class D) + ci-bypass removed; reducing-*/incident-release kept; gate bats flipped (48/48 green).
+  - **Slice 5** `7f10bd17` — update-policy writes an `## Authorized Bypass Scenarios` clause (Class C policy-anchoring; default-permitted-when-silent).
+  - **Slice 6** — behavioural-enforcement floor verified: 166 risk-scorer hook bats + 315 changed-itil-skill contract bats green. The guarantee (never above appetite, no ask, appetite-from-policy, no bypasses) is enforced by the gate HOOKS (risk-gate.bats cases 23-28 + the Slice-4 flips), so it holds even if advisory prose drifts. SKILL-prose promptfoo not added: risk-scorer has no prose-eval harness and manage-problem's is Tier-A-only (no Tier-B grader for the negative no-ask clause) — a prose-eval-harness extension is a separate consideration (revisit only if prose drift is observed), NOT a silent deferral.
+- [ ] Lifecycle: transition RFC-029 proposed → accepted/closed once released; ratify the RFC's human-oversight marker at /wr-itil:manage-rfc accepted.
 
 ## Related
 
