@@ -17,7 +17,7 @@
     "promptfoo": "^0.120.19"
   },
   "scripts": {
-    "test": "bats --recursive packages/*/hooks/test/ packages/*/skills/*/test/ packages/*/agents/test/ packages/*/scripts/test/ packages/shared/test/ .claude/skills/*/test/",
+    "test": "LC_ALL=C bats --recursive packages/*/hooks/test/ packages/*/skills/*/test/ packages/*/agents/test/ packages/*/scripts/test/ packages/shared/test/ .claude/skills/*/test/",
     "eval:skills": "for cfg in packages/*/skills/*/eval/promptfooconfig.yaml; do echo \"--- $cfg ---\"; npx promptfoo eval -c \"$cfg\" || exit 1; done",
     "eval:architect:claude": "npx promptfoo eval -c packages/architect/skills/create-adr/eval/promptfooconfig.yaml",
     "eval:architect:codex": "npx promptfoo eval -c packages/architect/skills/create-adr/eval/promptfooconfig.codex.yaml && npx promptfoo eval -c packages/architect/agents/eval/promptfooconfig.codex.yaml",
