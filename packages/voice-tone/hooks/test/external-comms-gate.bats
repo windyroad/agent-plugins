@@ -98,16 +98,15 @@ run_hook() {
   [[ "$output" == *"wr-voice-tone:external-comms"* ]]
 }
 
-# P173: the BYPASS_RISK_GATE override is clarified as pre-session — it only
-# takes effect when set in Claude Code's process env before the session
-# started, not via a mid-session Bash export. The in-flight escape-hatch is
-# delegation to the external-comms subagent (already named in the deny).
-@test "P173 marker-absent deny clarifies the env override is pre-session" {
+# P377/RFC-029: the BYPASS_RISK_GATE env override was removed. The only
+# clearance path named in the deny is delegation to the external-comms subagent.
+@test "marker-absent deny names the reviewer and offers no env override (P377/RFC-029)" {
   INPUT=$(build_bash_input "gh issue create --title T --body 'we observed a build failure on Node 20'")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
   [[ "$output" == *"deny"* ]]
-  [[ "$output" == *"pre-session"* ]]
+  [[ "$output" == *"wr-voice-tone:external-comms"* ]]
+  [[ "$output" != *"BYPASS_RISK_GATE=1"* ]]
 }
 
 @test "voice-tone evaluator skips leak pre-filter (EXTERNAL_COMMS_LEAK_PREFILTER=no)" {
@@ -125,11 +124,14 @@ run_hook() {
   [[ "$output" != *"financial"* ]]
 }
 
-@test "BYPASS_RISK_GATE=1 short-circuits the deny" {
+@test "BYPASS_RISK_GATE=1 does NOT bypass the gate (removed P377/RFC-029)" {
   INPUT=$(build_bash_input "gh issue create --title T --body 'we observed a build failure'")
   run bash -c "cd '$TEST_PROJECT_DIR' && BYPASS_RISK_GATE=1 printf '%s' \"\$1\" | BYPASS_RISK_GATE=1 '$HOOK'" _ "$INPUT"
   [ "$status" -eq 0 ]
-  [ -z "$output" ]
+  # The env override no longer short-circuits — the gate still denies the
+  # unreviewed external-comms draft.
+  [[ "$output" == *"deny"* ]]
+  [[ "$output" == *"wr-voice-tone:external-comms"* ]]
 }
 
 @test "per-evaluator marker (external-comms-voice-tone-reviewed-<KEY>) allows the call" {
@@ -337,11 +339,15 @@ run_hook() {
   [ -z "$output" ]
 }
 
-@test "P082: BYPASS_RISK_GATE=1 short-circuits the git commit gate" {
-  INPUT=$(build_bash_input "git commit -m \"I've implemented the feature\"")
+@test "P082→P377/RFC-029: BYPASS_RISK_GATE=1 is inert — does not short-circuit the gate" {
+  # gh-issue is an unconditionally-gated external surface (no visibility
+  # precondition). Setting BYPASS_RISK_GATE=1 has no effect: the unreviewed
+  # draft still denies, identically to the no-env-var case.
+  INPUT=$(build_bash_input "gh issue create --title T --body 'we observed a build failure on Node 20'")
   run bash -c "cd '$TEST_PROJECT_DIR' && BYPASS_RISK_GATE=1 printf '%s' \"\$1\" | BYPASS_RISK_GATE=1 '$HOOK'" _ "$INPUT"
   [ "$status" -eq 0 ]
-  [ -z "$output" ]
+  [[ "$output" == *"deny"* ]]
+  [[ "$output" == *"wr-voice-tone:external-comms"* ]]
 }
 
 @test "P360: the skip is surface-scoped — gh-issue is NOT skipped (still denies+delegates)" {
