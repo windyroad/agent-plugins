@@ -1058,3 +1058,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-06-25
 
 > Last reviewed: 2026-06-24 **P377 captured** — Skills/agents/hooks override RISK-POLICY appetite instead of applying it: above-appetite COMMIT asks the user (policy says block/halt), pipeline/wip agents hardcode appetite, and unauthorised BYPASS_RISK_GATE + ci-bypass exist. Root cause behind the repeated above-appetite-permission asks. RFC-mandated fix planned. (rated at capture)
+
+## 2026-06-26
+
+> Last reviewed: 2026-06-25 **P378 captured** — RFC lifecycle is not self-maintaining: the `## Commits` auto-population hook (ADR-060 item 12) was deferred-and-never-built, manage-rfc has no auto-transition (manage-story does), and there's no RFC-oversight nudge — so updating an RFC leans on human memory. Same P375/P377 class, in the framework that tracks everything else. (rated at capture)
