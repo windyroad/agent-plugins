@@ -113,7 +113,7 @@ Use the Risk Matrix from `RISK-POLICY.md`:
 
 - **Inherent Score** = Impact × Likelihood
 - **Residual Score** = Impact × Likelihood (after controls)
-- **Band** (for each) per the Label Bands table: 1-2 Very Low · 3-4 Low · 5-9 Medium · 10-16 High · 17-25 Very High
+- **Band** (for each) per the Label Bands table (ADR-086): 1-2 Very Low · 3-5 Low · 6-9 Medium · 10-16 High · 17-25 Very High
 - **Within appetite?** = residual score ≤ `RISK-POLICY.md`'s appetite threshold (read the threshold at runtime; do not hardcode)
 
 ### 5. Write the risk file

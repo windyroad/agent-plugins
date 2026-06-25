@@ -442,4 +442,4 @@ They outrank the technical assessment.
 | 4 Significant | 4 | 8 | 12 | 16 | 20 |
 | 5 Severe | 5 | 10 | 15 | 20 | 25 |
 
-Label Bands: 1-2 Very Low, 3-4 Low, 5-9 Medium, 10-16 High, 17-25 Very High.
+Label Bands (ADR-086, supersedes ADR-065): 1-2 Very Low, 3-5 Low, 6-9 Medium, 10-16 High, 17-25 Very High. Only `score = 5` differs from the prior bands — now Low (was Medium), restoring feasibility for severe-but-rare residuals.

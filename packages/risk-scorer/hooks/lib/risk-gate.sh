@@ -101,23 +101,26 @@ check_risk_gate() {
   fi
 
   # 5. Threshold check — block when the score EXCEEDS the project's
-  #    RISK-POLICY.md risk appetite (P007 / ADR-065). The threshold is the
-  #    adopter's documented appetite, not a code constant: a project whose
-  #    policy sets a higher appetite (e.g. "exceeds 9") must not have its
-  #    within-appetite changes gate-rejected.
+  #    RISK-POLICY.md risk appetite (P007 / ADR-086 supersedes ADR-065). The
+  #    threshold is the adopter's documented appetite, not a code constant: a
+  #    project whose policy sets a higher appetite (e.g. "exceeds 9") must not
+  #    have its within-appetite changes gate-rejected.
   #    Precedence: RISK_APPETITE env override > RISK-POLICY.md § Risk Appetite
-  #    parse > default 4. Default 4 reproduces the prior hardcoded `score >= 5`
-  #    behaviour exactly for integer scores (5 blocks, 4 passes) when the
-  #    policy is absent or unparseable. The parse is tolerant of the phrasings
-  #    "Threshold: N", "exceeds N", and "N/Low appetite", scoped to the
-  #    "## Risk Appetite" section. Cost ~3-8ms/invocation (ADR-065 § Consequences).
+  #    parse > default 5 (ADR-086). Default 5 tracks the new Low ceiling so
+  #    the no-policy adopter's default fallback admits residual=5 (the
+  #    Impact=5/Likelihood=1 floor for severe-but-rare risks). The normal
+  #    path is /wr-risk-scorer:update-policy interviewing the user to build
+  #    the policy; the default fallback is defensive.
+  #    The parse is tolerant of the phrasings "Threshold: N", "exceeds N",
+  #    and "N/Low appetite", scoped to the "## Risk Appetite" section.
+  #    Cost ~3-8ms/invocation (ADR-065 § Consequences carries forward).
   local DECISION
   DECISION=$(RISK_SCORE_VAL="$SCORE" RISK_APPETITE_ENV="${RISK_APPETITE:-}" python3 -c "
 import os, re, sys
 try:
     score = float(os.environ['RISK_SCORE_VAL'])
 except Exception:
-    print('no 4'); sys.exit(0)
+    print('no 5'); sys.exit(0)
 N = None
 override = os.environ.get('RISK_APPETITE_ENV', '').strip()
 if override.isdigit():
@@ -137,9 +140,9 @@ else:
             if m:
                 N = int(m.group(1)); break
 if N is None:
-    N = 4
+    N = 5
 print(('yes' if score > N else 'no') + ' ' + str(N))
-" 2>/dev/null || echo "no 4")
+" 2>/dev/null || echo "no 5")
   local DENIED="${DECISION%% *}"
   local APPETITE="${DECISION##* }"
 

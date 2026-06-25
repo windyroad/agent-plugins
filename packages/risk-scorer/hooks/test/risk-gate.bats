@@ -237,10 +237,12 @@ _write_matching_hash() {
 
 # ---------------------------------------------------------------------------
 # P007 / ADR-065 — the block threshold is the project's RISK-POLICY.md risk
-# appetite (block when score > N), not a hardcoded 5. Default N=4 when the
-# policy is absent or unparseable, which reproduces the prior `score >= 5`
-# behaviour exactly for integer scores. Precedence: RISK_APPETITE env >
-# RISK-POLICY.md parse > default 4. (Behavioural fixtures per ADR-052.)
+# appetite (block when score > N), not a hardcoded 5. Default N=5 per ADR-086
+# (was 4 under superseded ADR-065) when the policy is absent or unparseable,
+# which tracks the new Low ceiling so the default fallback admits residual=5
+# (the Impact=5/Likelihood=1 floor for severe-but-rare risks). Precedence:
+# RISK_APPETITE env > RISK-POLICY.md parse > default 5. (Behavioural fixtures
+# per ADR-052.)
 # ---------------------------------------------------------------------------
 
 @test "appetite 9 (exceeds 9): score 7 within the 5-9 band PASSES" {
@@ -275,29 +277,38 @@ _write_matching_hash() {
   assert_gate_denies "$TEST_SESSION" "commit" "appetite of 4/25"
 }
 
-@test "absent RISK-POLICY.md: defaults to appetite 4 (4 PASSES, 5 FAILS)" {
+@test "absent RISK-POLICY.md: defaults to appetite 5 per ADR-086 (5 PASSES, 6 FAILS)" {
   _use_policy ''   # no RISK-POLICY.md in the temp dir
   rm -f "$HASH_FILE"
-  printf '4' > "$SCORE_FILE"
-  assert_gate_allows "$TEST_SESSION" "commit"
   printf '5' > "$SCORE_FILE"
-  assert_gate_denies "$TEST_SESSION" "commit" "appetite of 4/25"
+  assert_gate_allows "$TEST_SESSION" "commit"
+  printf '6' > "$SCORE_FILE"
+  assert_gate_denies "$TEST_SESSION" "commit" "appetite of 5/25"
 }
 
-@test "unparseable RISK-POLICY.md (no appetite integer): defaults to appetite 4" {
+@test "unparseable RISK-POLICY.md (no appetite integer): defaults to appetite 5 per ADR-086" {
   _use_policy 'We are conservative about risk but state no number here.'
   rm -f "$HASH_FILE"
-  printf '4' > "$SCORE_FILE"
-  assert_gate_allows "$TEST_SESSION" "commit"
   printf '5' > "$SCORE_FILE"
-  assert_gate_denies "$TEST_SESSION" "commit" "appetite of 4/25"
+  assert_gate_allows "$TEST_SESSION" "commit"
+  printf '6' > "$SCORE_FILE"
+  assert_gate_denies "$TEST_SESSION" "commit" "appetite of 5/25"
 }
 
-@test "fractional score 4.5 FAILS under default appetite 4 (4.5 > 4)" {
+@test "fractional score 5.5 FAILS under default appetite 5 (5.5 > 5) per ADR-086" {
   _use_policy ''
   rm -f "$HASH_FILE"
-  printf '4.5' > "$SCORE_FILE"
-  assert_gate_denies "$TEST_SESSION" "commit" "4.5/25"
+  printf '5.5' > "$SCORE_FILE"
+  assert_gate_denies "$TEST_SESSION" "commit" "5.5/25"
+}
+
+@test "appetite via 'Threshold: 5' phrasing (ADR-086 new Low ceiling): score 5 PASSES, score 6 FAILS" {
+  _use_policy '**Threshold: 5 (Low)**'
+  rm -f "$HASH_FILE"
+  printf '5' > "$SCORE_FILE"
+  assert_gate_allows "$TEST_SESSION" "commit"
+  printf '6' > "$SCORE_FILE"
+  assert_gate_denies "$TEST_SESSION" "commit" "appetite of 5/25"
 }
 
 @test "RISK_APPETITE env override takes precedence over RISK-POLICY.md parse" {

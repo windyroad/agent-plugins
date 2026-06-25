@@ -108,26 +108,51 @@ Reference specific product features, user workflows, and infrastructure by name.
 - **Likely (4)**: High complexity, many code paths, or limited controls. Expected to occur without intervention.
 - **Almost certain (5)**: Known gap, no controls in place, or previously observed failure mode.
 
-**Risk matrix**: Include the Impact × Likelihood multiplication table (5×5 = scores 1-25) and the label bands:
+**Risk matrix**: Include the Impact × Likelihood multiplication table (5×5 = scores 1-25) and the label bands per ADR-086 (supersedes ADR-065):
 
 | Score Range | Label |
 |-------------|-------|
-| 1-4 | Low |
-| 5-9 | Medium |
-| 10-14 | High |
-| 15-25 | Critical |
+| 1-2 | Very Low |
+| 3-5 | Low |
+| 6-9 | Medium |
+| 10-16 | High |
+| 17-25 | Very High |
+
+The bands match the risk-scorer agent's authoritative source at `packages/risk-scorer/agents/pipeline.md` and the create-risk SKILL — single source of truth across the plugin. The Low ceiling at 5 admits residual=5 (Impact=5×Likelihood=1, the floor for severe-but-rare risks) within Low so an appetite of 5 is reachable for that class.
 
 The risk matrix is used by both the **risk-scorer agent** (pipeline risk assessment) and the **problem management process** (problem severity via `/problem` skill).
 
 ### 6. Confirm with the user
 
-You MUST use the AskUserQuestion tool (not plain text output) to collect user confirmation. Do not proceed to step 7 until you have received answers via AskUserQuestion.
+You MUST use the AskUserQuestion tool (not plain text output) to collect user confirmation. Do not proceed to step 6a or step 7 until you have received answers via AskUserQuestion.
 
 Call AskUserQuestion with a single message that presents:
 
 1. The drafted impact levels (as a table) and asks whether they accurately reflect what matters most
 2. The risk appetite threshold -- present the label bands from the agent contract (step 1) and recommend a threshold based on project maturity. Ask the user to confirm or adjust. A prototype with no real users may tolerate higher risk than a production system with paying users or compliance requirements
 3. Whether any business context is missing (e.g., compliance requirements, SLAs, user base size)
+
+### 6a. Tight-appetite warning when threshold < 5 (ADR-086)
+
+If the user picked an appetite threshold below 5 in step 6, fire a second `AskUserQuestion` confirm-with-warning before proceeding. The Low band's ceiling under ADR-086 is 5; an appetite below 5 means a class of risks (those with Impact=5/Severe and no impact-reducing control available) can never be within appetite — the policy is mathematically infeasible for that class. The user can still set the tighter threshold (some domains genuinely want to prohibit severe-impact activities), but the consequence must be a conscious choice, not a quiet trap.
+
+**Build the warning's example list** (cite concrete activity-classes the user is about to prohibit):
+
+1. Glob `docs/risks/R*.active.md`. For each file, read the `## Inherent Risk` and `## Residual Risk` sections and extract the numeric `Impact` value. Collect entries whose Inherent Impact = 5 OR Residual Impact = 5.
+2. If 1+ entries match: pick up to three. Format each as a kebab-case activity-class derived from the entry's filename slug (the part after `R<NNN>-` and before `.active.md`), followed by its R-ID as the audit pointer. Brief-before-ID per P350 — activity-class FIRST, R-ID in parentheses, never the R-ID alone as the carrier of meaning.
+3. If 0 entries match (empty register OR no Impact=5 entries): fall back to citing the policy's own Impact=5 row from the Impact Levels table just drafted — the user has it in working memory and it's the right surface for "what kind of thing would be prohibited."
+
+**The warning question**:
+
+> *"You've chosen appetite N. Under the rebalanced label bands (ADR-086) the Low ceiling is 5, so an appetite of N means residual-5 risks like `<activity-class>` ({R-ID}) and `<activity-class>` ({R-ID}) can never be within appetite under this policy — those activities become effectively prohibited (no amount of control work brings their residual below 5 because Impact=5 is fixed). Continue with appetite N, or revise?"*
+
+(Substitute the register-derived example list or the policy-row fallback as appropriate.)
+
+**Options**:
+- **Confirm: appetite N, with severe-impact activities prohibited** — the user explicitly accepts the trade-off. Proceed to step 7.
+- **Revise the appetite** — return to step 6 with the appetite question only.
+
+**Non-interactive (AFK) fallback** per ADR-013 Rule 6: if `AskUserQuestion` is unavailable, do NOT proceed — the warning is load-bearing (prohibits an entire risk class) and silently consuming it would normalise the prohibition. Halt with a clear "appetite < 5 selected interactively required" message for the orchestrator to drain later.
 
 ### 7. Validate draft with risk-scorer agent
 

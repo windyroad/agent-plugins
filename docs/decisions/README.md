@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 83 (74 in-force, 9 historical)
+**Total ADRs:** 84 (75 in-force, 9 historical)
 
 ---
 
 ## In-force decisions
 
-_74 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_75 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -58,11 +58,11 @@ _74 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed
 **Confirmation:** docs/decisions/011-manage-incident-skill.proposed.md created with all MADR 4.0 sections present.; docs/jtbd/tech-lead/JTBD-201-restore-service-fast.proposed.md created; tech-lead persona.md and JTBD README.md...; packages/itil/skills/manage-incident/SKILL.md created. The SKILL.md documents that it invokes wr-itil:manage-p...; packages/itil/skills/manage-incident/test/*.bats exists and is functional per ADR-005/P011 — assertions exec...; ADR-002 inventory (lines 95–98) lists the new skill.
 **Related:** ADR-010, ADR-002, ADR-008, ADR-005, ADR-011
+
 ### ADR-013 — Structured User Interaction for Governance-Skill Decisions
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** Chose Option B — scoring/analysis agents stay pure output-only (`[Read, Glob]`, machine-readable verdicts), while the calling skill (or primary agent when no skill wraps it) owns `AskUserQuestion` and plan-mode entry; structured options replace prose `(a)/(b)/(c)` prompts at genuine branch points, but framework-resolved and policy-authorised decisions (including above-appetite, which auto-remediates or halts — never asks) proceed silently, and non-interactive/AFK contexts queue-and-continue by default rather than halting, skipping, or guessing.
-**Confirmation:** no `Options:.*(a)`/`Your call:`/`which would you like?` prose prompts outside test fixtures; every `SKILL.md` granting `AskUserQuestion` uses it at all documented branch points; scoring agents (`pipeline/wip/plan.md`) stay `tools: [Read, Glob]`; below-appetite/policy paths produce no prompt; per the 2026-06-06 amendment every AFK fallback either names queue-and-continue or inline-cites the authorising ADR for a HALT/SKIP/AUTO-DEFAULT carve-out (verified per ADR-052)
-**Related:** ADR-005, ADR-010, ADR-011, ADR-042, ADR-044, ADR-052, ADR-074
+**Confirmation:** grep -rn "Options:.*\(a\)\|Your call:\|which would you like\|which way?" packages/*/skills/ returns zero match...; Every SKILL.md with AskUserQuestion in allowed-tools uses it at all documented branch points (no prose fallbac...; Scoring agents (pipeline.md, wip.md, plan.md) have tools: [Read, Glob] only — no AskUserQuestion grant; Below-appetite / policy-authorised paths produce no user prompt (silent proceed); 2026-06-06 amendment confirmation — every SKILL.md AFK fallback prose either (a) names queue-and-continue as...
+**Related:** ADR-011, ADR-010, ADR-005, ADR-044, ADR-052, ADR-074
 
 ### ADR-014 — Governance Skills Commit Their Own Completed Work
 **Status:** proposed | **Oversight:** confirmed
@@ -144,11 +144,11 @@ _74 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** accepted | **Oversight:** confirmed
 **Confirmation:** All five state subdirectories (open/, known-error/, verifying/, parked/, closed/) exist as directories under d...; Every ticket file lives under one of those subdirectories with filename matching ^[0-9]{3}-[a-z0-9-]+\.md$ (no...; Every problem-ticket file's in-body Status: field matches its containing directory name (case-insensitive, kno...; SKILL.md globs in manage-problem, work-problems, manage-incident, report-upstream, run-retro accept BOTH docs/...; Bats fixture path-assertions are dual-tolerant; assertions against "this glob MUST match at least one file" ar...
 **Related:** ADR-022, ADR-016, ADR-024, ADR-014
+
 ### ADR-032 — Governance skill invocation patterns — foreground + background with deferred-question resumption
-**Status:** proposed | **Oversight:** confirmed | **Supersedes:** 027-governance-skill-auto-delegation
-**Decides:** Supersedes ADR-027's synchronous Step-0 delegation mandate with a five-pattern governance-invocation taxonomy — foreground synchronous (incl. the AFK `claude -p` iteration-isolation wrapper: backgrounded poll-loop + idle-timeout SIGTERM, `is_error:true` stream-timeout salvage vs transient-API halt, and non-blocking pre-flight revert-and-proceed), background capture, foreground edit-gate, foreground commit-gate, and fresh-context-subagent-as-decision-arbiter — so mid-task asides ("log Y, keep working on X", P014) capture without blocking. Ships lightweight foreground `capture-*` siblings (capture-problem / capture-adr) that derive real ratings at capture instead of deferring them (P375), a deferred-question resumption contract (persistent pending-questions artefacts surfaced via UserPromptSubmit + a SessionStart JSONL-queue hook), an AFK carve-out, and a Rule-6 audit requirement per skill.
-**Confirmation:** ADR-027 renamed to `.superseded.md` (status superseded; superseded-by ADR-032) with a forward-pointer body section; Step-0 delegation language removed from manage-problem/create-adr/run-retro/manage-incident SKILLs; new `capture-*` SKILL.md files each naming the pattern + Rule-6 audit + ADR-032 cite; `pending-questions-surface.sh` UserPromptSubmit hook detects `docs/problems/open/*-pending-background-skill-questions-*.md`; plugin.json lists the new skills; bats doc-lint + behavioural-replay coverage.
-**Related:** ADR-009, ADR-013, ADR-014, ADR-018, ADR-019, ADR-020, ADR-024, ADR-026, ADR-027, ADR-028, ADR-031, ADR-038, ADR-040, ADR-041, ADR-042, ADR-044, ADR-052, ADR-060, ADR-061, ADR-062, ADR-066, ADR-067, ADR-071, ADR-072, ADR-074, ADR-076, ADR-084
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** [027-governance-skill-auto-delegation]
+**Confirmation:** 027-governance-skill-auto-delegation.proposed.md renamed to .superseded.md; status: superseded; superseded-by:...; manage-problem / create-adr / run-retro / manage-incident SKILL.md files have their Step-0 subagent-delegation...; Three new SKILL.md files at packages/itil/skills/capture-problem/SKILL.md, packages/retrospective/skills/captu...; packages/itil/hooks/pending-questions-surface.sh UserPromptSubmit hook exists; detects docs/problems/open/*-pe...; .claude-plugin/plugin.json entries for @windyroad/itil, @windyroad/retrospective, @windyroad/architect list th...
+**Related:** ADR-027, ADR-009, ADR-013, ADR-014, ADR-018, ADR-019, ADR-020, ADR-024, ADR-026, ADR-028, ADR-031
 
 ### ADR-033 — Report-upstream classifier is problem-first — supersedes ADR-024 Decision Outcome Steps 3 + 5
 **Status:** proposed | **Oversight:** confirmed
@@ -172,20 +172,19 @@ _74 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-040 — Session-start briefing surface — SessionStart hook over tiered directory + indexed README
 **Status:** proposed | **Oversight:** confirmed
 **Confirmation:** docs/briefing/ tree exists and docs/briefing/README.md has a ## Critical Points (Session-Start Surface) sectio...; packages/retrospective/hooks/session-start-briefing.sh exists, extracts the Critical Points section cleanly, e...; packages/retrospective/hooks/hooks.json contains a SessionStart entry with "matcher": "startup" targeting the ...; docs/BRIEFING.md is deleted.; @windyroad/retrospective@0.7.0 published to npm. Adopter projects installing the new version and starting a Cl...
+
 ### ADR-042 — Auto-apply scorer remediations to reach within appetite — open action-class vocabulary
 **Status:** proposed | **Oversight:** confirmed | **Supersedes:** ADR-041
-**Decides:** Never commit, push, or release above appetite; when residual risk exceeds appetite the orchestrator reads the scorer's free-form `RISK_REMEDIATIONS:` prose as input, decides and applies remediations itself (gated per commit per Rule 3), and re-scores until within appetite — halting the loop/skill on exhaustion (treated as a scorer-gap signal) rather than ever releasing above appetite. Replaces ADR-041's closed action-class enumeration with an open vocabulary to unblock scorer innovation. Amended 2026-06-24 (P377/RFC-029): the invariant covers commit too (no above-appetite commit-ask surface), and incidents are not a carve-out — incident response is scored against the live realised-risk baseline, so legitimate hotfixes take the risk-reducing path and `RISK_BYPASS: incident` collapses into `reducing`.
-**Confirmation:** Source review — each in-scope SKILL.md carries the above-appetite branch (Rules 1–7) + ADR-042 citation; bats contract assertions on load-bearing strings; behavioural auto-apply-then-drain without AskUserQuestion; halt emits `outcome: halted-above-appetite`; novel-class read-decide-apply.
-**Related:** ADR-041, ADR-013, ADR-014, ADR-015, ADR-018, ADR-020, ADR-022, ADR-032, ADR-037
+**Chosen:** Chosen option: **"Liberal auto-apply with open vocabulary and halt-on-exhaustion"**, because the never-release-above-appetite invariant is the primary constraint and liberal auto-apply is the only mechanism that reliably honours it across A...
+**Related:** ADR-041, ADR-013, ADR-014, ADR-032, ADR-015, ADR-018, ADR-020, ADR-022, ADR-037, ADR-042
 
 ### ADR-043 — Progressive context-usage measurement and reporting for retrospective sessions
 **Status:** proposed | **Oversight:** confirmed
 **Related:** ADR-038, ADR-040, ADR-026, ADR-014, ADR-013, ADR-009, ADR-022, ADR-005, ADR-037
-### ADR-044 — Decision-Delegation Contract: when agents act on the framework vs ask the user
+
+### ADR-044 — ADR-044 — Decision-Delegation Contract: when agents act on the framework vs ask the user
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** The framework (ADRs, JTBDs, RISK-POLICY, WSJF, lifecycle, SKILL contracts) is a decision-delegation contract: agents read it, apply it, act, and report by default. `AskUserQuestion` is reserved for a six-class authority taxonomy — new-work direction, deviation approvals, strategic one-time overrides, genuinely-silent-framework cases, taste on novel artefacts, and authentic correction; everything else (commits/pushes/releases, external comms, prioritisation, verification close, codification shape, briefing, lifecycle, splits, loop stop) is framework-mediated. Chosen via sibling ADR-044 + amending ADR-013 Rule 1 in place (not superseding), plus an anti-BUFD clause: surface deviation candidates with citations rather than auto-deviating or blindly following stale decisions. Amendment 2026-06-24 (P377/RFC-029): above-appetite commit is framework-mediated like push/release per ADR-042 — never a one-time-override ask, since risk breaches are always "reduce risk or halt".
-**Confirmation:** named bats coverage lands and stays green; lazy-AskUserQuestion count from Step 2d "Ask Hygiene Pass" trends toward 0 across retros; deviation-candidate behavioural assertions hold (required citation fields, no-auto-deviate, loop-end 5-option ask, jsonl persistence, queueing-when-evidence-present is mandatory).
-**Related:** ADR-013, ADR-014, ADR-022, ADR-026, ADR-032, ADR-040, ADR-042, ADR-043
+**Related:** ADR-013, ADR-044, ADR-014, ADR-022, ADR-026, ADR-032, ADR-040, ADR-042, ADR-043
 
 ### ADR-045 — Hook injection budget policy for PreToolUse and PostToolUse hooks
 **Status:** proposed | **Oversight:** confirmed
@@ -307,7 +306,7 @@ _74 ADRs. These are the current rules. The architect agent reads this section fi
 
 ### ADR-073 — Fix-time gate auto-creates a missing RFC (everywhere)
 **Status:** proposed | **Oversight:** confirmed
-**Chosen:** Chosen option: **"Auto-create a problem-traced RFC if missing, everywhere the gate fires"** (user-ratified). When the propose-fix gate (ADR-072) fires on a Known Error with no RFC trace, the framework **auto-creates a problem-traced RFC** �...
+**Chosen:** Chosen option: **"Auto-create a problem-traced RFC if missing, everywhere the gate fires"** (user-ratified). When the propose-fix gate (ADR-072) fires on a Known Error with no RFC trace, the framework **auto-creates a problem-traced RFC** �...
 **Confirmation:** The propose-fix gate (interactive + AFK) auto-creates a problem-traced skeleton RFC when none exists; it never...; The auto-created RFC carries no "Considered Options" block (passes the ADR-052 lint) and traces the driving pr...; A behavioural test asserts auto-create fires at both the interactive and AFK surfaces.
 **Related:** ADR-071, ADR-072, ADR-070, ADR-044, ADR-060
 
@@ -353,21 +352,27 @@ _74 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **"(b) Real shipment control + (c) Reconcile K→V release lifecycle — riding together in a single RFC-first fix path"**, confirmed by the user via `AskUserQuestion` 2026-06-17 (`/wr-architect:review-decisions` drain across...
 **Related:** ADR-042, ADR-070, ADR-066, ADR-074
+
 ### ADR-083 — Codex CLI as second runtime
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** Add OpenAI Codex CLI as a second supported runtime alongside Claude Code via dual-runtime support in shared `install-utils.mjs` (`--runtime claude|codex|both`), with each plugin shipping a `.codex-plugin/plugin.json` mirror of its `.claude-plugin/plugin.json` and reusing its existing `agents/agent.md` as source of truth — chosen because it matches ADR-002's forward-looking per-plugin-extension note and ADR-017's sync-script + drift-check discipline, and was verified end-to-end with codex-cli 0.137.0. Rollout grain is architect-as-pilot, other 12 packages follow per-iter.
-**Related:** ADR-002, ADR-003, ADR-017, ADR-032
+**Chosen:** Chosen option: **"Option A"**, because the shape matches ADR-002's explicit forward-looking note ("the per-plugin package structure should extend naturally — each package adds its tool-specific install logic") and ADR-017's sync-script + ...
 
-### ADR-084 — Self-firing deferral census so deferred governance work cannot silently rot
+### ADR-084 — Self-firing deferral census — a SessionStart surfacer so deferred governance work cannot silently rot
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** Add a `retrospective-deferral-census.sh` SessionStart hook that scans `docs/` + `packages/` `.md` files for deferral markers (vocabulary single-sourced in `lib/deferral-markers.sh`) and re-surfaces the worst offenders every session — cloning the proven class-B oversight-nudge shape so deferred governance work has a self-firing trigger instead of rotting on named-but-uncadenced re-entry points (P375). `.md`-only scope and `docs/`+`packages/` reach were user-pinned to catch shipped-skill rot adopters inherit while avoiding source code-comment false positives.
-**Confirmation:** census hook exists + registered as 3rd SessionStart `startup` entry; `lib/deferral-markers.sh` exports `DEFERRAL_MARKER_RE` as single vocabulary source; 11 behavioural bats green (count emission, worst-offender list, both-dirs scanned, silent-on-zero, fail-open, AFK guard, ADR-040 ≤2048-byte budget, archival exclusion, P375 citation); advisory-only/fail-open/never-blocks envelope (exit 0 every path); `itil-fictional-defer-detect.sh` vocabulary convergence recorded as a P375 follow-up, not done here.
-**Related:** ADR-040, ADR-066, ADR-038, ADR-002, ADR-003
+**Chosen:** Chosen option: **Option 2 — shared marker vocabulary + scan `docs/` + `packages/` (`.md` only)** (user-pinned via `AskUserQuestion`, 2026-06-23). It honours P375's "composes with `itil-fictional-defer-detect.sh`" intent (single vocabulary...
+**Confirmation:** (a) packages/retrospective/hooks/retrospective-deferral-census.sh exists, registered as a 3rd SessionStart sta...; (b) packages/retrospective/hooks/lib/deferral-markers.sh exports DEFERRAL_MARKER_RE as the single vocabulary s...; (c) Behavioural bats (test/retrospective-deferral-census.bats, 11 cases) assert: count emission, worst-offende...; (d) Advisory-only / fail-open / never-blocks envelope (exit 0 on every path).; (e) itil-fictional-defer-detect.sh vocabulary convergence recorded as a P375 follow-up (not done here, by desi...
+**Related:** ADR-040, ADR-066, ADR-038, ADR-014
+
 ### ADR-085 — The RFC `## Commits` section is a git-log-derived view, rendered skill-side
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** RFC `## Commits` is a projection of `git log --grep "Refs: RFC-NNN"` rendered skill-side by `update-rfc-commits-section.sh` (invoked by `manage-rfc` on every transition/review and by `reconcile-rfcs`), never stored per-commit — so there is no ADR-014 single-commit grain violation and the section is honestly stale between renders rather than falsely "maintained automatically". Closes the never-built ADR-060 item 12; the SessionStart drift-detector (Option 3) is deferred pending observed rot.
-**Confirmation:** `update-rfc-commits-section.sh` renders from `git log --grep` idempotently, preserving other sections (behavioural bats green); `manage-rfc` invokes it on transition/review and `reconcile-rfcs` renders/checks it; false "(maintained automatically)" / deferred-auto claims in capture-rfc + manage-story corrected.
+**Chosen:** Chosen option: **Option 2 — derived view, rendered skill-side** (user-pinned via AskUserQuestion, 2026-06-25). The commit log is the source of truth; the `## Commits` section is a projection rendered by `packages/itil/scripts/update-rfc-c...
+**Confirmation:** packages/itil/scripts/update-rfc-commits-section.sh renders ## Commits from git log --grep, idempotently, pres...; manage-rfc invokes it on transition/review; reconcile-rfcs renders/checks it.; capture-rfc + manage-story false "(maintained automatically)" / deferred-auto claims corrected (P234).
 **Related:** ADR-060, ADR-031, ADR-014, ADR-084
+
+### ADR-086 — Risk label bands rebalanced for severe-rare feasibility; default appetite 4 → 5
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** [065-pipeline-gate-threshold-from-risk-policy-appetite]
+**Confirmation:** RISK-POLICY.md absent → default appetite 5; score 5 PASSES, score 6 FAILS.; RISK-POLICY.md "Threshold: 5" parse → score 5 PASSES, score 6 FAILS.; RISK-POLICY.md "exceeds 4" — explicit-policy override of default-5 → score 4 PASSES, score 5 FAILS.; Fractional score = 5.5 → FAILS under default 5 (integer-only-equivalence delta carried forward from ADR-065,...; RISK_APPETITE env override still takes precedence over the policy parse.
+**Related:** ADR-065, ADR-013, ADR-042, ADR-014, ADR-052, ADR-026, ADR-077
 
 ---
 

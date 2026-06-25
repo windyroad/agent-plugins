@@ -67,13 +67,15 @@ Every FAIL verdict cites the specific class violated (verbatim — copy the bull
 
 ## Risk Appetite
 
-**Threshold: 4 (Low)**
+**Threshold: 5 (Low)**
 
-Pipeline gates block when cumulative residual risk exceeds 4. This means:
-- Very Low (1-2) and Low (3-4) risk changes proceed without intervention
-- Medium (5-9) and above require explicit acknowledgement or risk reduction
+Pipeline gates block when cumulative residual risk exceeds 5. This means:
+- Very Low (1-2) and Low (3-5) risk changes proceed without intervention
+- Medium (6-9) and above require explicit acknowledgement or risk reduction
 
 This conservative threshold reflects that these packages are installed into users' development environments and promote a professional services brand. Broken installs or misbehaving hooks directly damage user trust and brand reputation.
+
+The threshold tracks the new Low ceiling under ADR-086's rebalanced label bands (was 4 under superseded ADR-065). The shift admits residual=5 (the Impact=5/Likelihood=1 floor for severe-but-rare risks like R008-credentials-in-committed-files) within appetite, with the residual control being the post-incident rotation-runbook readiness named in those risks' Treatment sections.
 
 ## Risk Catalog
 
@@ -82,7 +84,7 @@ The persistent catalog of per-action risks for this project lives in `docs/risks
 The catalog is consumed by **per-action risk assessments** (commit / push / release / external-comms / etc.):
 
 1. The assessing agent reads `docs/risks/` and filters to risks that apply to THIS action.
-2. For each applicable risk, it assesses whether the documented controls are in effect for this action and computes residual against the **same 4/Low appetite**.
+2. For each applicable risk, it assesses whether the documented controls are in effect for this action and computes residual against the **same 5/Low appetite**.
 3. If residual exceeds appetite, the agent applies additional controls, or blocks/halts the action per the gate-specific rules.
 4. If the agent conceives a new risk class during assessment that is not yet documented, it adds an entry to `docs/risks/` so it carries forward to the next assessment.
 
@@ -90,7 +92,7 @@ The catalog eliminates the wasted effort of re-deriving the same risk classes on
 
 A catalog-documented residual above appetite is a **real signal** — it means baseline controls are not sufficient for the typical action that triggers this risk class. Either add more controls (drop baseline residual into appetite) or accept that per-action assessments must add specific controls each time.
 
-Same appetite (4/Low). Same risk-matrix scoring. The catalog is the persistent record; per-action assessments are the live application.
+Same appetite (5/Low). Same risk-matrix scoring. The catalog is the persistent record; per-action assessments are the live application.
 
 ## Impact Levels
 
@@ -127,10 +129,12 @@ Same appetite (4/Low). Same risk-matrix scoring. The catalog is the persistent r
 | Score Range | Label |
 |-------------|-------|
 | 1-2 | Very Low |
-| 3-4 | Low |
-| 5-9 | Medium |
+| 3-5 | Low |
+| 6-9 | Medium |
 | 10-16 | High |
 | 17-25 | Very High |
+
+Boundaries per ADR-086. Only `score = 5` differs from the superseded ADR-065 bands: previously Medium, now Low — restoring feasibility for severe-but-rare residuals (Impact=5 × Likelihood=1).
 
 This risk matrix is referenced by both the **risk-scorer agent** (pipeline risk assessment) and the **problem management process** (`/wr:problem` skill for problem severity classification).
 

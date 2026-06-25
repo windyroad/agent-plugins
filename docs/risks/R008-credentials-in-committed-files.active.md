@@ -75,9 +75,9 @@ Residual reflects controls firing-and-passing (per-action lens):
 
 - **Likelihood after controls**: 1 (Rare) — gate + gitignore + CI second-line stack to capped reduction.
 - **Residual score**: 5
-- **Residual band**: Medium — above appetite.
+- **Residual band**: Low (ADR-086 rebalanced bands; was Medium under superseded ADR-065) — within appetite (`Threshold: 5`).
 
-**Above appetite** because Impact 5 (Severe) caps residual at 5 even with Likelihood 1. No additional detection control will drop residual below 5 (the Impact floor caps it). Treatment is post-incident: rotation-runbook readiness for WHEN-not-IF the gate's false-negative rate eventually fires.
+**Within appetite** under the rebalanced bands: Impact 5 (Severe) caps residual at 5 even with Likelihood 1 (the Impact floor — no detection control drops residual below 5), and the new Low ceiling at 5 reaches that floor. The named residual control bringing this within appetite is the post-incident rotation-runbook readiness: WHEN — not IF — the gate's false-negative rate eventually fires, the rotation runbook ensures impact is contained without a manual scramble. Under the prior bands (superseded ADR-065) this same residual was framed as an above-appetite acceptance rationalized by the impossibility of further pre-event reduction; under ADR-086 the framing aligns with the math — the rotation runbook IS the residual control, not a workaround for an unreachable appetite.
 
 ## Watch-out
 
