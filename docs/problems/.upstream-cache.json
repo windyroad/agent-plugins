@@ -1,14 +1,54 @@
 {
   "$schema": "https://windyroad.github.io/agent-plugins/schemas/upstream-cache.json",
   "$comment": "Cache file for inbound report discovery (P079 / ADR-062). Written by /wr-itil:review-problems Step 8.5 after each discovery pass.",
-  "last_checked": "2026-06-21T13:26:29Z",
-  "$last_pass_note": "Manual cache update 2026-06-21T13:26:29Z during /wr-itil:review-problems Step 4 routing of #273: added entry for issue #273 (filed 2026-06-21T10:38, no [problem] prefix \u2014 bypassed today's title_prefix filter; class P373); matched to P164 (Phase 2 octal-bug reopen V\u2192KE) + P374 (new hardcoded-suite-name capture); ack comment posted to #273 via gated gh issue comment with both cross-references.",
+  "last_checked": "2026-06-26T06:16:55Z",
+  "$last_pass_note": "/wr-itil:review-problems Step 4.5 discovery pass 2026-06-26 (TTL-expiry auto-recheck; cache was 5d stale). 4 fresh inbound reports captured as Tier-1 local tickets (Origin: inbound-reported): #274->P382 (work-problems iter subprocesses miss project-scoped plugins, need --plugin-dir), #282->P383 (capture-problem --persona enum rejects adopter personas), #283->P384 (external-comms agent no credibility/self-own axis), #284->P385 (work-problems pre-dispatch relevance-close). All four lack the [problem] title prefix and were only surfaced because this pass polled --state open unfiltered (class P373: the title_prefix filter would have discarded them). Per the 2026-05-15 discovery-only direction, ack comments deferred (external-comms-gate sha-bug bottleneck) AND these are the maintainer's own issues, so reporter-ack adds no value. JTBD-alignment + dual-axis-risk: all safe-and-valid (well-formed adopter-sourced reports, plugin-developer persona, no Axis-1/Axis-2 risk).",
   "channels": {
     "github-issues:windyroad/agent-plugins": {
-      "fetched_at": "2026-06-21T13:26:29Z",
-      "filter": "title_prefix=[problem] (label filter removed; see channels-config $filter-note)",
+      "fetched_at": "2026-06-26T06:16:55Z",
+      "filter": "title_prefix=[problem] (label filter removed; see channels-config $filter-note). NOTE 2026-06-26 pass polled --state open UNFILTERED to catch non-prefixed inbound (P373)",
       "status": "ok",
       "reports": [
+        {
+          "number": 274,
+          "title": "work-problems: claude -p iter subprocesses miss project-scoped governance plugins (need --plugin-dir in dispatch)",
+          "author": "tompahoward",
+          "createdAt": "2026-06-21T12:53:16Z",
+          "body_hash": "b45cea1ca522a50f",
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P382",
+          "cache_audit_note": "no [problem] prefix; captured 2026-06-26; ack deferred (discovery-only)"
+        },
+        {
+          "number": 282,
+          "title": "capture-problem: --persona enum hardcoded to home-repo personas; rejects valid adopter personas (+ JTBD-M-NNN predicate gap)",
+          "author": "tompahoward",
+          "createdAt": "2026-06-26T01:33:14Z",
+          "body_hash": "5413f05ffffe95d8",
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P383",
+          "cache_audit_note": "no [problem] prefix; captured 2026-06-26; ack deferred (discovery-only)"
+        },
+        {
+          "number": 283,
+          "title": "wr-risk-scorer:external-comms agent has no credibility / self-own review axis",
+          "author": "tompahoward",
+          "createdAt": "2026-06-26T01:33:15Z",
+          "body_hash": "4b8f6b392be42abd",
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P384",
+          "cache_audit_note": "no [problem] prefix; captured 2026-06-26; ack deferred (discovery-only)"
+        },
+        {
+          "number": 284,
+          "title": "work-problems: re-dispatches already-fixed tickets at full iter cost; add a cheap pre-dispatch relevance-close",
+          "author": "tompahoward",
+          "createdAt": "2026-06-26T01:33:16Z",
+          "body_hash": "bb6763bbc5e9d1e7",
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P385",
+          "cache_audit_note": "no [problem] prefix; captured 2026-06-26; ack deferred (discovery-only)"
+        },
         {
           "number": 257,
           "title": "[problem] itil-correction-detect UserPromptSubmit hook false-positives on orchestrator/AFK prompt text",

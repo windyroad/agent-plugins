@@ -1062,3 +1062,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-06-26
 
 > Last reviewed: 2026-06-25 **P378 captured** — RFC lifecycle is not self-maintaining: the `## Commits` auto-population hook (ADR-060 item 12) was deferred-and-never-built, manage-rfc has no auto-transition (manage-story does), and there's no RFC-oversight nudge — so updating an RFC leans on human memory. Same P375/P377 class, in the framework that tracks everything else. (rated at capture)
+
+> Last reviewed: 2026-06-26 **P379-P381 captured** — three follow-ups from ADR-086 release: (P379) no SessionStart nudge when RISK-POLICY.md is missing — user intent (policy-absent → auto-interview-and-create) needs an enforcement surface; (P380) wr-architect-mark-oversight-confirmed shim's `find /tmp` doesn't follow macOS /tmp → /private/tmp symlink — silent no-op on every macOS adopter; (P381) update-policy Step 6a SKILL prose lacks paired promptfoo Tier-A/B eval (R009 prose-surface floor 9/25, above appetite). (lightweight aside via /wr-itil:capture-problem)
