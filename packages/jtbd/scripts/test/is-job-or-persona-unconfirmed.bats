@@ -95,6 +95,37 @@ mk_job() {
   [[ "$output" == *"JTBD-002-ship-with-confidence.md"* ]]
 }
 
+# P383: maintainer JTBD-M-NNN alpha-infix scheme. The old number-only
+# extraction dropped the `M` and globbed JTBD-NNN-*.md (wrong / no match).
+@test "a maintainer JTBD-M-NNN job ref resolves (exit 0, preserves M infix)" {
+  mk_job "maintainer" "M-101" "release-plugins" "no"
+  run bash "$SCRIPT" "JTBD-M-101" "$DIR/docs/jtbd"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"JTBD-M-101-release-plugins.md"* ]]
+}
+
+@test "a confirmed maintainer JTBD-M-NNN job is confirmed (exit 1)" {
+  mk_job "maintainer" "M-202" "audit-suite" "yes"
+  run bash "$SCRIPT" "JTBD-M-202" "$DIR/docs/jtbd"
+  [ "$status" -eq 1 ]
+}
+
+@test "a bare M-NNN job ref variant resolves" {
+  mk_job "maintainer" "M-303" "scaffold-intake" "no"
+  run bash "$SCRIPT" "M-303" "$DIR/docs/jtbd"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"JTBD-M-303-scaffold-intake.md"* ]]
+}
+
+# Boundary lock (architect P383 review): a hyphenated persona NAME must still
+# route to the persona branch, not the job branch — it has no trailing -NNN.
+@test "a hyphenated persona name (smb-owner) routes to the persona branch" {
+  mk_persona "smb-owner" "no"
+  run bash "$SCRIPT" "smb-owner" "$DIR/docs/jtbd"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"smb-owner/persona.md"* ]]
+}
+
 @test "a direct path ref resolves" {
   mk_persona "plugin-user" "no"
   run bash "$SCRIPT" "$DIR/docs/jtbd/plugin-user/persona.md"

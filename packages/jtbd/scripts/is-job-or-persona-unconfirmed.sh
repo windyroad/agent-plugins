@@ -44,12 +44,16 @@ JTBD_DIR="${2:-docs/jtbd}"
 file=""
 if [ -f "$REF" ]; then
   file="$REF"
-elif printf '%s' "$REF" | grep -qiE 'JTBD-?[0-9]+|^[0-9]+$'; then
-  # Job ref: JTBD-NNN or a bare numeric. Match the per-persona job file.
-  num="$(printf '%s' "$REF" | grep -oE '[0-9]+' | head -1)"
-  [ -n "$num" ] || { echo "is-job-or-persona-unconfirmed: cannot parse job id from '$REF'" >&2; exit 2; }
+elif printf '%s' "$REF" | grep -qiE '^JTBD-|^[0-9]+$|^[A-Za-z]+-[0-9]+$'; then
+  # Job ref: JTBD-NNN | JTBD-M-NNN (maintainer alpha-infix scheme, P383) |
+  # M-NNN | bare NNN. Strip an optional JTBD- prefix to get the filename stem,
+  # PRESERVING any alpha infix (extracting only the numeric run would drop the
+  # `M` and mis-glob JTBD-NNN-*.md). Glob both the JTBD-prefixed and bare-stem
+  # filename shapes, first match wins.
+  stem="$(printf '%s' "$REF" | sed -E 's/^[Jj][Tt][Bb][Dd]-//')"
+  [ -n "$stem" ] || { echo "is-job-or-persona-unconfirmed: cannot parse job id from '$REF'" >&2; exit 2; }
   shopt -s nullglob
-  for cand in "$JTBD_DIR"/*/JTBD-"$num"-*.md "$JTBD_DIR"/*/"$num"-*.md; do
+  for cand in "$JTBD_DIR"/*/JTBD-"$stem"-*.md "$JTBD_DIR"/*/"$stem"-*.md; do
     file="$cand"; break
   done
   shopt -u nullglob
