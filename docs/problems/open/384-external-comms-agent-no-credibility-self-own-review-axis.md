@@ -47,3 +47,9 @@ Manual operator review of outbound prose for credibility errors.
 - **Upstream**: windyroad/agent-plugins#283 — an adopter has authored the matching policy locally (a credibility / self-own section covering outbound customer/prospect prose); the agent needs the corresponding review axis to score it.
 - `packages/risk-scorer/agents/external-comms.md` — the locus.
 - **RISK-POLICY.md** `## Confidential Information` — current outbound axis; credibility axis would sit alongside.
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-032 | proposed | External-comms credibility / self-own review axis |
