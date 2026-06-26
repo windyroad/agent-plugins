@@ -70,9 +70,9 @@ assert_gate_allows() {
   assert_gate_allows "$TEST_SESSION" "commit"
 }
 
-@test "score 5 denies (at threshold)" {
+@test "score 5 allows (at threshold per ADR-086)" {
   printf '5' > "$SCORE_FILE"
-  assert_gate_denies "$TEST_SESSION" "commit" "5/25"
+  assert_gate_allows "$TEST_SESSION" "commit"
 }
 
 @test "score 8 denies (above threshold)" {
