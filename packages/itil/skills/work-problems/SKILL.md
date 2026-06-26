@@ -436,6 +436,41 @@ Exit-code routing:
 
 **Compose-with**: ADR-068 (surface 3 single-artifact predicate — mirrored to orchestrator), ADR-074 (substance-confirm-before-build — JTBD-as-driver symmetric sibling to ADR-as-driver), ADR-076 (tier-first selection preserved by the loopback), ADR-031 (degenerate adopter silent-pass when per-JTBD shim absent), ADR-049 / ADR-080 (PATH shim grammar + highest-version-wins wrapper), ADR-014 (no commit at this step — predicate is read-only). The sibling-class gap for ADRs cited as Decision Drivers (ADR-074 master class) is RFC-016 § Deferred item 1 — captured for follow-on after this Step 3.5 dogfoods.
 
+### Step 3.6: Pre-dispatch relevance gate (per P385)
+
+After Step 3.5's JTBD predicate-check and before Step 4 classifies the selected ticket, run the cheap deterministic relevance evaluator on the **selected ticket only**. On a mature backlog a meaningful fraction of "open" / known-error tickets have already been fixed by later work but never transitioned (observed: 3 of 6 worked tickets in one session). A full Step 5 `manage-problem` dispatch (~$3-5 + 5-10 min) against such a ticket only rediscovers the shipped fix and transitions it — the conclusion is correct but the rediscovery is expensive. This step shifts that conclusion left to a millisecond shell check, exactly as Step 3.5 shifts the JTBD-ratification predicate left and Step 0c pre-flights the backlog-wide relevance-close.
+
+**Mechanism:**
+
+```bash
+wr-itil-evaluate-relevance "<selected-ticket-path>"
+relevance_exit=$?
+```
+
+`wr-itil-evaluate-relevance` is the ADR-049 `$PATH` shim dispatching `packages/itil/scripts/evaluate-relevance.sh` — the **same evaluator** `/wr-itil:review-problems` Step 4.6 uses for its relevance-close pass (ADR-079). It emits one verdict line and carries a built-in ≥7-day age gate (a freshly-reported ticket SKIPs and falls through to normal work — no self-close paradox). Behavioural coverage of the verdict shapes is the existing `packages/itil/scripts/test/evaluate-relevance.bats`; Step 3.6 adds no new computational surface, only routing, so it carries no separate behavioural script of its own (a SKILL.md-prose grep would be a structural test, rejected per P081 / ADR-052).
+
+Exit-code routing:
+
+| `relevance_exit` / verdict | Meaning | Action |
+|---|---|---|
+| `0` `CLOSE-CANDIDATE` (no caveat) | cited fix shipped — clean evidence per ADR-079 shapes | Do **not** dispatch a full iter. Dispatch ONE `/wr-itil:review-problems` relevance-close sweep reusing the Step 0c `claude -p` pre-flight shape (see Step 0c / Step 5). Its Step 4.6 batch-closes the selected ticket **and any sibling CLOSE-CANDIDATEs** in one ADR-014 commit. Set the once-per-session sweep sentinel. Loop back to **Step 1** (the sweep changed the backlog + refreshed the README — re-scan re-applies the ADR-076 tier partition from the refreshed rankings). |
+| `0` `CLOSE-CANDIDATE-WITH-CAVEAT` | partial / mixed-phase evidence | Do **not** auto-close — a caveat is the maintainer's decision input, not a mechanical close (review-problems 4.6b/4.6d route AFK caveats to the next interactive confirm). Route to Step 4's user-answerable skip (`skip_reason_category: user-answerable`); queue an `outstanding_questions` entry (`category: "direction"`) carrying the **caveat short-tag + one-line verbatim** from the verdict (P350 brief-before-ID — surface the close-confirmation question, not a bare ID) + the remedy *"Run `/wr-itil:review-problems` to confirm/close this ticket."* Loop back to **Step 3** (minus the skipped ticket). |
+| `1` `KEEP` / `KEEP-WITH-NOTE` | still relevant (paths present, or Phase-1 false-positive class) | Proceed to Step 4 — dispatch the full iter normally. |
+| `2` `SKIP` | age gate (<7 d) OR no extractable evidence | Proceed to Step 4 — the evaluator gives no close signal; default to work. |
+| `3` error | evaluator failed | Proceed to Step 4 — fail-soft, non-blocking (mirrors review-problems Step 4.6 exit-3 "do not abort the pass" + the Step 0 P358 pre-flight failure contract). |
+
+**Why the sweep, not an inline close**: ADR-079 constraint #1 forbids a standalone relevance-close — the close MUST run inside `/wr-itil:review-problems`. The orchestrator main turn holds no Edit/Write surface (allowed-tools), so it dispatches the sweep rather than closing inline; Step 3.6 must never grow an inline `git mv` to Closed. The dispatched sweep runs as a `claude -p` subprocess that is **AFK-by-construction** — the Step 5 dispatch constraint forbids `AskUserQuestion` in the worker, so review-problems Step 4.6's surface-batch-confirm flow takes the silent-close branch automatically, identical to the existing Step 0c side-effect path ("Step 0c dispatches `/wr-itil:review-problems` which includes Step 4.6 relevance-close"). The sweep is structurally a pre-flight subprocess (backlog refresh it owns end-to-end), so it inherits the **Step 0 pre-flight subprocess failure handling (P358)** non-blocking revert-and-proceed contract — a failed sweep does NOT halt the loop; fall through to Step 4 normal dispatch and let the full iter rediscover-and-transition (status-quo correctness).
+
+**Sweep sentinel (bounded re-dispatch)**: a single review-problems sweep closes every clean CLOSE-CANDIDATE ≥7 d in one pass, so after it commits no clean CLOSE-CANDIDATE should survive the Step 1 re-scan. If a clean CLOSE-CANDIDATE is selected again **after the sentinel is set** (the sweep failed to close it — e.g. review-problems errored), do NOT re-dispatch the sweep (avoids an unbounded sweep loop) and do NOT dispatch a full iter against the already-fixed ticket (the P385 anti-goal). Route it to Step 4's user-answerable skip + queue an `outstanding_questions` entry (`category: "direction"`) naming the ticket + *"clean CLOSE-CANDIDATE survived a relevance-close sweep — confirm/close manually"*, then loop back to Step 3. This keeps the higher-tier ticket visible (ADR-076) rather than silently re-worked or silently dropped.
+
+**Loopback tier preservation**: the Step 1 re-scan (clean-close branch) and the Step 3 loopback (caveat / sentinel-survivor branches) both re-apply the ADR-076 tier-first selection (Critical-bypass → Inbound-reported → Internal) and within-tier WSJF ladder over the remaining backlog. If every actionable ticket is filtered out, Step 2 stop-condition #1 fires naturally and the accumulated `outstanding_questions` surface at the Step 2.4 gate.
+
+**AFK authorisation per ADR-013 Rule 6**: the evaluator is read-only (no writes, no commits, no external comms); routing is deterministic per the table above — no `AskUserQuestion` at this step (ADR-044 framework-resolution boundary + P132 mechanical-stage carve-out, identical posture to Step 3.5). User input is preserved at the loop-end Step 2.4 surface where the caveat / survivor questions accumulate. The dispatched sweep's own commit grain is ADR-014 (the orchestrator main turn does not commit at Step 3.6).
+
+**Compose-with**: ADR-079 (relevance-close evaluator + constraint #1 sweep-not-standalone), ADR-076 (tier-first selection preserved on every loopback), ADR-026 (evidence-grounded verdict + structured caveat field), ADR-013 Rule 5/6 (silent-pass + AFK fail-safe), ADR-044 cat 4 + P132 (mechanical-stage carve-out — no AskUserQuestion), ADR-014 (sweep owns its commit), ADR-032 + P084 (subprocess isolation — AFK-by-construction silent-close), ADR-049 (PATH shim), ADR-052 / P081 (behavioural coverage via the reused evaluator's bats; no structural SKILL-prose test), P358 (pre-flight subprocess failure → non-blocking revert-and-proceed), P271 / Step 0c (dispatch-shape reuse), P344 / RFC-016 / Step 3.5 (sibling shift-left orchestrator predicate), P346 / P347 (relevance-close drivers).
+
+<!-- @jtbd JTBD-006 (Progress the Backlog While I'm Away — pre-dispatch relevance gate closes already-shipped tickets cheaply instead of rediscovering the fix at full iter cost) -->
+
 ### Step 4: Classify each problem
 
 Read the problem file and apply these deterministic rules:
