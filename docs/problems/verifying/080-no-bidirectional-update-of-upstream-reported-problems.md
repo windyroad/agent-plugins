@@ -1,6 +1,6 @@
 # Problem 080: No bidirectional update of upstream-reported problems — local lifecycle transitions never propagate back to the reporter
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-04-21
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: M (marginal) — new sibling skill `/wr-itil:update-upstream` (per user direction 2026-04-26) that fires from `manage-problem`/`transition-problem` Step 7 transitions, drafts the lifecycle-update comment, runs it through the P064 risk gate + P038 voice-tone gate, and auto-posts when both gates pass within appetite. Above-appetite triggers `AskUserQuestion` (interactive) or halt-with-report (AFK).

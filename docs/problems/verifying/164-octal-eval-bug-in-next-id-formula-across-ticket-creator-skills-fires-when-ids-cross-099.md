@@ -1,9 +1,9 @@
 # Problem 164: Latent octal-eval bug in next-ID formula across all 4 ticket-creator skills — `$(( $local_max + 1 ))` fails with "value too great for base" when local_max reaches 099
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Origin**: inbound-reported (#273) — Phase 2 scope-expansion surfaced 2026-06-21 by external user report. Phase 1 was internal capture 2026-05-04.
 **Reported**: 2026-05-04 (Phase 1) · 2026-06-21 (Phase 2 reopen — Verifying → Known Error)
-**Fix Released**: Phase 1 — 2026-05-11 (committed; awaiting next plugin release for field verification of the 6 ticket-creator SKILL.md formulas). Phase 2 — pending: extends fix to script-surface formulas of the same class that Phase 1's `\$\(\(\s*\$\(echo` grep pattern missed.
+**Fix Released**: Phase 1 — 2026-05-11 (committed; awaiting next plugin release for field verification of the 6 ticket-creator SKILL.md formulas). Phase 2 — released 2026-06-27 in `@windyroad/risk-scorer@0.14.1` (release vehicle `.changeset/p164-phase2-octal-eval-script-surface.md`; the script-surface `10#` fix shipped earlier in 0.13.5/0.14.0 and this changeset documents it; re-survey clean, 22/22 bats GREEN). Awaiting field verification that no ticket-creator surface fires the octal eval at the 008→009 boundary.
 **Priority**: 16 (High) — Impact: Significant (4) x Likelihood: Almost certain (4) — preserved from Phase 1; Phase 2 re-rate deferred to next /wr-itil:review-problems
 
 **WSJF**: (16 × 1.0) / 1 = **16.0** (Phase 1 baseline; Phase 2 may revise once Effort is re-rated)

@@ -1,6 +1,6 @@
 # Problem 361: wr-itil-derive-release-vehicle exit-3 "unreleased" false positive on ADR-061 graduated holding changesets
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-06-11
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: internal
@@ -44,6 +44,12 @@ The exit-3 guard tested only `[ -f "$CHANGESET_PATH" ]` — presence of the chan
 
 - **Release vehicle**: `.changeset/wr-itil-p361-derive-release-vehicle-defacto-released.md`
 - Implemented in `packages/itil/scripts/derive-release-vehicle.sh` (de-facto-released exit-0 branch) + 2 new behavioural bats cases in `packages/itil/scripts/test/derive-release-vehicle.bats`. Full 15-test suite green. Architect + JTBD pre-edit reviews PASS.
+
+## Fix Released
+
+Released in `@windyroad/itil` (release vehicle `.changeset/wr-itil-p361-derive-release-vehicle-defacto-released.md`; de-facto-released exit-0 branch shipped in the published `derive-release-vehicle.sh`). Transitioned K→V 2026-06-27 by the `/wr-itil:work-problems` Step 6.5 post-release auto-transition callback (P228). The helper now performs the `git merge-base --is-ancestor` ancestry check internally; the manual override workaround (commit ed2937a8) is obsolete. 15/15 derive-release-vehicle.bats GREEN at ship.
+
+**Awaiting user verification** — confirm a K→V transition on a ticket whose changeset was held-then-graduated no longer reports the spurious exit-3 "unreleased" signal.
 
 ## Dependencies
 
