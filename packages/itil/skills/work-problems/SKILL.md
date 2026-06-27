@@ -538,9 +538,22 @@ export WR_SUPPRESS_PENDING_QUESTIONS=1
 # pending-questions guard above (JTBD-006 friction guard).
 export WR_SUPPRESS_OVERSIGHT_NUDGE=1
 
+# Project-scoped governance plugins are NOT loaded by headless `claude -p`
+# (P382): it activates only USER-scoped enabledPlugins, and project activation
+# is trust-gated (headless skips trust), so `--setting-sources user,project`
+# alone does not attach them. Without this, the iter subprocess has no
+# windyroad architect/jtbd/risk-scorer/voice-tone agents or gate hooks — it
+# commits ungated and cannot run retro-on-exit. Pass each governance plugin
+# explicitly via `--plugin-dir`, resolved portably from the installed
+# marketplace cache (highest-version-wins, ADR-080; adopter-safe via the
+# ADR-049 bin-on-PATH shim, NOT a repo-relative path). Unresolvable plugins are
+# skipped silently. <!-- @jtbd JTBD-001 (iter commits ship gated) @jtbd JTBD-006 (full governance surface inside AFK iters) -->
+mapfile -t PLUGIN_DIR_ARGS < <(wr-itil-resolve-governance-plugin-dirs)
+
 claude -p \
   --permission-mode bypassPermissions \
   --output-format json \
+  "${PLUGIN_DIR_ARGS[@]}" \
   "$ITERATION_PROMPT" \
   < /dev/null \
   > "$ITER_JSON" 2>&1 &
@@ -595,6 +608,7 @@ rm -f "$ITER_JSON"
 
 - `--permission-mode bypassPermissions` — handles non-interactive permission prompts. Without this, Bash/Edit/Write calls inside the subprocess halt on approval prompts (no TTY). Alternative modes (`acceptEdits`, `auto`, `dontAsk`) are acceptable if adopters need narrower permission scopes; `bypassPermissions` is the broadest and the empirically-verified path.
 - `--output-format json` — deterministic structured output. The subprocess's final agent message lands in the JSON response's `.result` field; orchestrator extracts `ITERATION_SUMMARY` from that field. Plain-text output would require fragile scraping.
+- `"${PLUGIN_DIR_ARGS[@]}"` — `--plugin-dir <root>` pairs for each governance plugin, emitted by `wr-itil-resolve-governance-plugin-dirs` (the `mapfile` line above). **Load-bearing (P382).** Headless `claude -p` activates only USER-scoped `enabledPlugins`; project-scoped plugins stay inactive because project-plugin activation is trust-gated and headless skips the trust prompt. Empirically (verified 2026-06-21) `--setting-sources user,project` does NOT fix this — only `--plugin-dir` makes a project-scoped plugin's agents/hooks/skills available. Without these args an iter in a project-scope adopter tree commits ungated (architect/jtbd/risk-scorer/voice-tone agents resolve to "not found") and cannot run retro-on-exit. The resolver derives each plugin's root from its `bin/` dir on `$PATH` (ADR-049 — present in adopter marketplace-cache trees and source-dev alike) and selects the highest-semver cached version (ADR-080 — `$PATH` order is frozen at session init and goes stale mid-session, so it is NOT trusted for version selection). Behavioural second-source: `packages/itil/scripts/test/resolve-governance-plugin-dirs.bats`. The expansion is empty (no-op) when no governance plugins resolve, so source-repo dev sessions and minimal adopters degrade gracefully.
 - `< /dev/null` — explicit stdin-closed redirect (P089 Gap 1). Without this, `claude -p` waits up to 3s for stdin data in non-TTY contexts and then prints `Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: < /dev/null to skip, or wait longer.` to stderr. The warning is on stderr — if the caller separates stderr and stdout streams, the warning is harmless. But the orchestrator captures via `2>&1` (required because the CLI emits progress prose on stderr that must not interleave between JSON responses when multiple invocations chain). Under the `2>&1` merge the stderr warning prefixes the stdout JSON and breaks `jq` / `json.load` / `JSON.parse` extraction at "line 1, column 1: Expecting value". The redirect suppresses the warning at source. First observed AFK-iter-7 iter 1 (2026-04-21); workaround is the Anthropic CLI help's own suggestion.
 
 **No per-iteration budget cap.** The dispatch deliberately omits `--max-budget-usd`. Per user direction 2026-04-21: the natural stop condition for an AFK loop is quota exhaustion, not an arbitrary per-iteration dollar cap. A cap would halt iterations before quota is actually exhausted, wasting remaining budget. Runaway-iteration risk is bounded by quota + the orchestrator's Step 6.75 halt on unexpected dirty state + exit-code handling below.
