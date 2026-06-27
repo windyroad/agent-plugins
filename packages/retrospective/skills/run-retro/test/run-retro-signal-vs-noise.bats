@@ -74,13 +74,21 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "run-retro: Step 1.5 delete queue uses single batched AskUserQuestion (ADR-013 Rule 1)" {
+@test "run-retro: Step 1.5 delete queue is silent — no AskUserQuestion (ADR-044 / P132; reconciled by P393)" {
+  # Step 1.5 deletes are SILENT (framework-mediated per ADR-044 "Briefing add/remove/rotate"
+  # + the CLAUDE.md P132 worked-example "run-retro Step 1.5 silent classification, Step 3
+  # briefing removals"). The superseded "single batched AskUserQuestion to confirm deletes"
+  # prose was a self-contradiction against Step 3's "Removals are silent" clause; reconciled
+  # to silent-delete by P393. This asserts the reconciled contract.
+  run grep -F 'Silent removal' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'Delete handling — silent' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'do NOT reintroduce it' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  # negative: the superseded delete-confirmation prompt must NOT return
   run grep -F 'Delete briefing entries?' "$SKILL_MD"
-  [ "$status" -eq 0 ]
-  run grep -F 'Confirm all deletions' "$SKILL_MD"
-  [ "$status" -eq 0 ]
-  run grep -F 'Keep all (defer to next retro)' "$SKILL_MD"
-  [ "$status" -eq 0 ]
+  [ "$status" -ne 0 ]
 }
 
 @test "run-retro: Step 1.5 AFK fallback defers delete queue to retro summary (ADR-013 Rule 6)" {
