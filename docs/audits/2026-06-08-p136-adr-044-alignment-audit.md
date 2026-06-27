@@ -130,6 +130,39 @@ Recommended remediation: NONE.
 
 **Phase 4 summary**: 3 COSMETIC, 1 NO-CALLS. Two of the four critical hooks ARE the ADR-044 enforcement surface in P085/P132 vocabulary; recommended remediation is to add explicit ADR-044 cross-refs without behavioural changes. The remaining 65 hooks (Pre/PostToolUse / Stop / UserPromptSubmit) carry no ask-prose and would aggregate into a single "audited — no change needed" sweep entry per the P136 Fix Strategy bundling pattern.
 
+## Phase 4 — Remaining 65 hooks sweep — 2026-06-27 (bundled NO-CHANGE)
+
+`/wr-itil:work-problems` AFK iter. Completes the second Phase 4 sub-task (ticket line 67): sweep the **65 non-critical hooks** (69 total hook scripts under `packages/*/hooks/*.sh`, excluding `lib/` + test dirs, minus the 4 critical ask-emitters audited 2026-06-08). Investigation + audit-log only — no SKILL/hook prose amended (AFK loop must not auto-amend per ticket lines 67/190/217/230).
+
+### Method
+
+Grepped all 65 for `AskUserQuestion` mentions and ask-prose nudge vocabulary (`ask the user` / `would you like` / `should I` / `(a)/(b)` / `prose-ask` / `consent gate`). Five hooks reference `AskUserQuestion`; all five reference it as **enforcement / discipline / surfacing prose**, not as a lazy-deferral emission requiring reclassification. The other 60 carry zero ask surface.
+
+### The 5 `AskUserQuestion`-referencing hooks
+
+| Hook | Role | Tier | Notes |
+|------|------|------|-------|
+| `itil/itil-pending-questions-surface.sh` | Surfaces queued `outstanding_questions` for batched `AskUserQuestion` per the ADR-044 6-class taxonomy | **ALIGNED** | Already cites ADR-044 (lines 8/45/96); this IS the framework-mediated surfacing mechanism, not a lazy emitter |
+| `itil/itil-mid-loop-ask-detect.sh` | Detects mid-loop orchestrator `AskUserQuestion` (P130 / over-ask enforcement) | **ALIGNED** | Already cites ADR-044 framework-resolution boundary (lines 32/33/138) |
+| `architect/architect-oversight-marker-discipline.sh` | Blocks `human-oversight: confirmed` without a substance-confirm marker (P348 / ADR-066) | **COSMETIC** | Cites ADR-013; an ADR-044 cross-ref would anchor it. Enforcement gate — **no behavioural change** |
+| `jtbd/jtbd-oversight-marker-discipline.sh` | Same shape for JTBD/persona markers (P348 / ADR-068) | **COSMETIC** | Cites ADR-013; ADR-044 cross-ref would anchor it. Enforcement gate — **no behavioural change** |
+| `architect/architect-enforce-edit.sh` | Pre-edit architecture gate | **NO-CALLS** | Single passing-comment mention (line 123, "decision the user already substance-confirmed via AskUserQuestion"); no ask surface |
+
+### The other 60 hooks
+
+Zero `AskUserQuestion` references, zero ask-prose nudges. All are PreToolUse gates (architect / jtbd / risk-scorer / style-guide / voice-tone / tdd enforce-edit + commit/push/secret/changeset gates), detectors (correction-detect, fictional-defer-detect, staging-trap, bash-polling-antipattern), markers (mark-reviewed, hash-refresh, slide-marker, runtime-sid-marker, setup-marker), advisories (commit-trailer, rfc-trailer), and session-start / Stop / PostToolUse surfaces. None emit a user-facing decision prompt — they enforce, detect, mark, or inform mechanically. **NO-CALLS / NO-CHANGE.**
+
+### Phase 4 sweep summary
+
+| Tier | Count | Action |
+|------|-------|--------|
+| NO-CALLS / NO-CHANGE | 61 | none |
+| ALIGNED (already cite ADR-044) | 2 | none |
+| COSMETIC (ADR-013 → add ADR-044 cross-ref) | 2 | deferred to interactive cosmetic-cross-ref bundle |
+| SUBSTANTIVE / lazy-deferral | **0** | — |
+
+**Outcome:** the expected bundled NO-CHANGE finding holds. Zero lazy-deferrals across the 65 non-critical hooks — consistent with the Phase 1 inventory prediction (ticket line 67) and the Fix Strategy bundling pattern (lines 190/222). The only remediation is the 2 COSMETIC ADR-044 cross-refs on the two oversight-marker-discipline gates; these fold into the existing interactive cosmetic-cross-ref bundle (audit-log "Recommended Per-Surface Remediation Sequence" item 1 / 3) and are NOT applied in the AFK loop. **Phase 4 is now complete (both sub-tasks done).**
+
 ## Phase 5 — Agents (14 inventoried)
 
 | Agent | Asks | ADR-044 | ADR-013 | Tier | Notes |
