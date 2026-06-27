@@ -101,3 +101,9 @@ Next step: capture an RFC (per ADR-060) tracing P305 + the orchestrator changes 
 - ADR-074 — Confirm a decision's substance before building dependent work. The propose-fix surface here defers implementation until the user ratifies one of A / B / C.
 
 (captured 2026-05-26 during the P283 prong-2 drain surfacing — user-directed "capture an investigation ticket"; investigation completed 2026-06-08 during the P305 work-problems iter)
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-033 | proposed | Per-iter git worktree isolation for AFK iter dispatch (P305 Option B) |
