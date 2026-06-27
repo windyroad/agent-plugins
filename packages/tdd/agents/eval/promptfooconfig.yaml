@@ -1,0 +1,182 @@
+# Agent-prose verdict eval — review-test classification agent (P290 / P324 / RFC-012).
+#
+# The agent-prose twin of the architect + jtbd review-agent evals
+# (packages/{architect,jtbd}/agents/eval/) — exercises the REAL review-test
+# agent (`claude -p --system-prompt "$(cat ../review-test.md)"`, subscription
+# auth) against fixture test-file sources and asserts on the emitted verdict
+# (behavioural / mixed / structural / unclear). This is the behavioural guard
+# that the P290 Phase-2 hardening (collapse the verdict vocabulary to four
+# values; STRUCTURAL becomes a failing classification; remove the
+# structural-justified / structural-permitted escape hatch) needs — replacing
+# the structural-grep that would otherwise assert on review-test.md prose.
+#
+# Two tiers (ADR-075):
+#   - Tier A: deterministic `icontains` positive anchor on the verdict token.
+#   - Tier B: `llm-rubric` for the negative-clause / semantic checks that a
+#     regex cannot grade without false-failing (the P270 not-regex lesson —
+#     a not-icontains for "structural" fires on the CORRECT answer "this is
+#     BEHAVIOURAL, NOT structural"). See docs/briefing/promptfoo-eval-
+#     authoring.md.
+#
+# Three fixtures pin the load-bearing properties of the hardened vocabulary:
+#   1. a behavioural bats test (exercises a hook, asserts exit + output) →
+#      BEHAVIOURAL;
+#   2. a prose-document grep test (greps SKILL.md content) → STRUCTURAL, and
+#      treated as FAILING — no escape-hatch / structural-permitted offer;
+#   3. the ADR-005 preserved-exception carve-out guard — a safety-construct
+#      grep on an executable bash hook must NOT be failed as structural
+#      (inverse over-fire guard: the hardening narrows prose-document greps,
+#      not artefact/executable-state checks).
+#
+# Run from repo root:
+#   npx promptfoo eval -c packages/tdd/agents/eval/promptfooconfig.yaml
+#
+# @jtbd JTBD-001 (Enforce Governance Without Slowing Down)
+# @jtbd JTBD-002 (Ship AI-Assisted Code with Confidence)
+# @jtbd JTBD-101 (Extend the Suite with New Plugins)
+# @problem P290
+# @problem P324
+# @rfc RFC-012
+# @adr ADR-075 (per-package agent eval; Tier-A/Tier-B)
+# @adr ADR-052 (behavioural-only; four-value verdict vocabulary)
+
+description: |
+  review-test agent verdict eval — BEHAVIOURAL classification on a hook-
+  exercising bats test, STRUCTURAL (failing, no escape hatch) on a prose-
+  document grep, and the ADR-005 preserved-exception over-fire guard (a
+  safety-construct grep on an executable bash hook must not be failed as
+  structural).
+
+providers:
+  # Path is relative to this config file's directory (promptfoo basePath).
+  - id: 'exec:bash ./run-agent-eval.sh'
+
+# Tier-B (llm-rubric) grading provider — claude under subscription auth (no
+# API key) via grade-llm-rubric.sh. Negative-clause semantics route here.
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: BEHAVIOURAL — bats test exercises a hook, asserts exit + output
+    vars:
+      prompt: |
+        Classify the following test file. Its source is shown inline below
+        (treat the inline source as the file content; you do not need to read
+        a path). Emit your prose summary and the JSON verdict block.
+
+        File: hooks/test/example-gate.bats
+        ```bash
+        @test "hook denies edit when gate fresh and verdict is REJECT" {
+          run bash -c 'echo "{\"tool_input\":{\"file_path\":\"x.ts\"},\"session_id\":\"t\"}" | bash "$HOOK"'
+          [ "$status" -eq 2 ]
+          [[ "$output" == *"BLOCKED"* ]]
+        }
+
+        @test "hook passes edit when verdict is APPROVE" {
+          run bash -c 'echo "{\"tool_input\":{\"file_path\":\"x.ts\"},\"session_id\":\"t\"}" | bash "$HOOK"'
+          [ "$status" -eq 0 ]
+        }
+        ```
+    assert:
+      # Tier A — must emit the BEHAVIOURAL verdict token. (Distinctive verdict
+      # name; reliable in both prose-summary and JSON-block stdout.)
+      - type: icontains
+        value: 'behavioural'
+      # Tier B — verdict is behavioural and does NOT mis-flag the hook-
+      # exercising test as structural. The negation makes this Tier-B-only
+      # (the P270 not-regex lesson).
+      - type: llm-rubric
+        value: |
+          The final JSON verdict is "behavioural" (NOT structural, mixed, or
+          unclear). The test exercises an executable hook via a subprocess and
+          asserts on its exit status and output text — the canonical
+          behavioural shape. PASS only if the verdict is behavioural. FAIL if
+          the verdict is structural, mixed, or unclear.
+
+  - description: STRUCTURAL (failing, no escape hatch) — grep on SKILL.md prose
+    vars:
+      prompt: |
+        Classify the following test file. Its source is shown inline below
+        (treat the inline source as the file content; you do not need to read
+        a path). Emit your prose summary and the JSON verdict block.
+
+        File: skills/manage-thing/test/manage-thing-contract.bats
+        ```bash
+        @test "SKILL cites P081 in its rationale" {
+          run grep -F "P081" "$SKILL_MD"
+          [ "$status" -eq 0 ]
+        }
+
+        @test "SKILL.md documents Step 5 review pass" {
+          run grep -F "Step 5" "$SKILL_MD"
+          [ "$status" -eq 0 ]
+        }
+        ```
+    assert:
+      # Tier A — must emit the STRUCTURAL verdict token. Both cases grep
+      # SKILL.md prose content, the canonical failing-structural shape.
+      - type: icontains
+        value: 'structural'
+      # Tier B — the verdict is structural AND treated as a FAILING
+      # classification, NOT a permitted one. The hardened agent must offer no
+      # structural-permitted / structural-justified escape and must not invent
+      # an in-file-comment or env-var skip as a remedy.
+      - type: llm-rubric
+        value: |
+          Two conditions, BOTH required: (1) the final JSON verdict is
+          "structural"; AND (2) the agent treats structural as a FAILING
+          classification — it does NOT classify the file as permitted,
+          justified, or acceptable, does NOT emit a "structural-permitted" or
+          "structural-justified" verdict (those vocabulary values were removed),
+          and does NOT suggest adding an in-file "tdd-review: structural-
+          permitted" justification comment or setting WR_TDD_REVIEW_TEST=skip
+          as a remedy. A suggestion to convert the assertions to behavioural,
+          or to BLOCK on a harness-gap ticket, satisfies (2). FAIL if the
+          verdict is not structural, OR if any escape-hatch / permitted /
+          justified framing is offered.
+
+  - description: Over-fire guard — ADR-005 safety-construct grep on executable hook is NOT failed
+    vars:
+      prompt: |
+        Classify the following test file. Its source is shown inline below
+        (treat the inline source as the file content; you do not need to read
+        a path). Emit your prose summary and the JSON verdict block.
+
+        File: hooks/test/example-gate-safety.bats
+        ```bash
+        @test "hook prologue sets euo pipefail" {
+          run grep -nE '^set -euo pipefail' "$HOOK"
+          [ "$status" -eq 0 ]
+        }
+
+        @test "hook script exists and is executable" {
+          [ -x "$HOOK" ]
+        }
+        ```
+    assert:
+      # Tier A — must emit the BEHAVIOURAL verdict token (ADR-005's preserved
+      # exceptions fold into BEHAVIOURAL, not failing-structural).
+      - type: icontains
+        value: 'behavioural'
+      # Tier B — the over-fire guard. A safety-construct presence grep and a
+      # file-executable check on an executable bash hook are ADR-005 preserved
+      # exceptions; the hardening narrows PROSE-document greps, not artefact/
+      # executable-state checks. The agent must NOT fail these as structural.
+      # not-icontains on "structural" false-fails the correct "NOT structural"
+      # — so Tier-B only.
+      - type: llm-rubric
+        value: |
+          The final JSON verdict is "behavioural" (NOT structural). The two
+          assertions check an executable bash hook's safety-construct presence
+          (set -euo pipefail) and its executable/file-existence state — these
+          are ADR-005's preserved exceptions, which the behavioural-only
+          hardening explicitly retains as BEHAVIOURAL (they observe
+          artefact/executable/filesystem state, not prose-document content).
+          PASS if the verdict is behavioural. FAIL if the agent fails the file
+          as structural, treating an ADR-005 preserved exception as a
+          prose-document violation.
