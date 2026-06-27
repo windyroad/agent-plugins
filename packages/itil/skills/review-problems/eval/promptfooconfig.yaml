@@ -78,6 +78,7 @@
 # @problem P012
 # @problem P229
 # @problem P287
+# @problem P373
 # @rfc RFC-012
 # @adr ADR-075 (Amendment 2026-06-02)
 # @adr ADR-061 (Rule 4 evidence-floor)
@@ -491,3 +492,81 @@ tests:
           persona/JTBD, OR says the AFK-mode dispatch suppresses the
           derive-then-ratify gate. Saying the contract does NOT default
           to type=technical PASSES.
+
+  # --- P373: Step 4.5c github-issues poll is NON-discarding (title_prefix soft) ---
+
+  - description: Step 4.5c polls all open issues — a non-[problem]-prefixed issue is discovered, not discarded at the channel boundary
+    vars:
+      prompt: |
+        I am the /wr-itil:review-problems Step 4.5c github-issues channel
+        poll. The channel config is:
+        { "type": "github-issues", "repo": "bbstats/bbstats",
+          "title_prefix": "[problem]" }
+        (no `strict_title_prefix` key is set).
+
+        Open issue #273 in bbstats/bbstats has the PLAIN title
+        "wr-risk-scorer bootstrap-catalog fails when R008+ exists" — it
+        does NOT start with the `[problem]` prefix.
+
+        (a) What exact `gh issue list` command do I run for this channel?
+        (b) Is issue #273 discovered and routed into the assessment
+        pipeline (Step 4.5d/4.5e), or is it discarded at the channel
+        boundary because it lacks the `[problem]` prefix? Explain why.
+    assert:
+      # Tier A — the poll fetches all open issues.
+      - type: icontains
+        value: '--state open'
+      # Tier A — the default poll must NOT hard-filter by title in:title search.
+      - type: not-icontains
+        value: 'in:title'
+      # Tier A — #273 is discovered, not dropped.
+      - type: regex
+        value: 'discovered|polled|included|routed|not discard|is not discarded|will be discovered'
+      # Tier B — semantic invariant: non-prefixed issue is discovered;
+      # title_prefix is a soft signal; classifiers are the de-facto filter.
+      - type: llm-rubric
+        value: |
+          The response states that issue #273 IS discovered / polled and
+          routed into the Step 4.5d/4.5e assessment pipeline — it is NOT
+          discarded at the channel boundary for lacking the `[problem]`
+          prefix. The `gh issue list` command fetches all open issues
+          (`--state open`) with no title-prefix `--search "... in:title"`
+          hard filter. The response explains that `title_prefix` is now a
+          SOFT signal (rank/annotate only, not a discard gate) and that
+          the Step 4.5d semantic-comparator + Step 4.5e classifiers are
+          the de-facto filter that emits a verdict for every report
+          (JTBD-301 / ADR-062). PASS if the issue is discovered and the
+          poll is non-discarding by default. FAIL if the response says
+          #273 is skipped/dropped/filtered out because it lacks the
+          `[problem]` prefix, OR if the default poll applies a title
+          `in:title` search filter.
+
+  - description: Step 4.5c strict_title_prefix opt-in restores the hard channel-boundary filter
+    vars:
+      prompt: |
+        I am the /wr-itil:review-problems Step 4.5c github-issues channel
+        poll. The channel config is:
+        { "type": "github-issues", "repo": "bbstats/bbstats",
+          "title_prefix": "[problem]", "strict_title_prefix": true }
+
+        An adopter has explicitly set `strict_title_prefix: true`. Open
+        issue #273 has the plain title "bootstrap fails" with no
+        `[problem]` prefix. Is #273 discovered, or filtered out at the
+        channel boundary? Explain what `strict_title_prefix: true` does.
+    assert:
+      # Tier A — strict mode applies a title-prefix pre-filter.
+      - type: regex
+        value: 'in:title|filtered out|discard|excluded|not polled|skipped'
+      # Tier B — semantic invariant: strict opt-in restores hard filter.
+      - type: llm-rubric
+        value: |
+          The response states that with `strict_title_prefix: true` the
+          channel poll applies a HARD pre-filter that keeps only issues
+          whose title starts with `[problem]`, so the non-prefixed issue
+          #273 IS filtered out / discarded at the channel boundary. This
+          is the documented adopter opt-in to the old strict behaviour
+          (default is non-discarding). PASS if the response says #273 is
+          excluded under strict mode and correctly characterises
+          `strict_title_prefix: true` as the opt-in hard filter. FAIL if
+          the response says #273 is still discovered under strict mode,
+          OR conflates strict mode with the permissive default.

@@ -1,10 +1,10 @@
 # Problem 373: github-issues upstream-channel filter discards non-`[problem]`-prefixed issues — ALL issues are potential problems
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-06-21
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: corrective-feedback (this session, /wr-itil:review-problems Step 4.5c)
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: M (confirmed — SKILL.md Step 4.5c + channels config + paired eval cases)
 **JTBD**: JTBD-301
 **Persona**: plugin-user
 
@@ -43,11 +43,33 @@ JTBD-301's acknowledgement contract is the load-bearing concern: inbound reports
 
 ## Root Cause Analysis
 
+The `/wr-itil:review-problems` Step 4.5c github-issues poll discarded any open issue whose title did not start with `[problem]`. Two compounding defects:
+
+1. **Filter-too-narrow at the channel boundary.** ALL open issues are potential problem reports (JTBD-301: the plugin-user persona has low context on repo internals and must not pre-classify). A one-shot reporter who hits "New Issue" and writes plain prose never adds the `[problem]` template prefix (it is a maintainer convention auto-inserted by `problem-report.yml`), so their report was dropped before reaching the assessment pipeline — never cached, never acknowledged (breaks the ADR-062 / JTBD-301 row-6 contract that every submitted report receives a verdict). Witness: #273.
+
+2. **Stale poll command.** SKILL.md line 197 read `gh issue list --repo <repo> --label <label> --state open ...`, but the `label` field was removed from `.upstream-channels.json` on 2026-05-15 — the config carries `title_prefix` instead. The SKILL command was internally inconsistent with its own config schema.
+
+The `$filter-note` already in `.upstream-channels.json` (2026-05-15) had foreshadowed this with the placeholder ticket "missing-labels-and-channels-config-drift" that never materialised; P373 is the materialisation.
+
+### Fix Strategy
+
+Option (a) (remove the hard filter) + adopter opt-in, per the captured option ladder:
+
+- **Step 4.5c**: poll `gh issue list --repo <repo> --state open --json number,title,author,createdAt,body,labels --limit 100` — no title-prefix/label hard discard. `title_prefix` demoted to a SOFT rank/annotate signal; the Step 4.5d semantic-comparator + Step 4.5e JTBD-alignment + dual-axis-risk classifiers are the de-facto filter at the assessment-pipeline boundary.
+- **Adopter opt-in**: `"strict_title_prefix": true` on a channel restores the hard channel-boundary pre-filter (`--search "<title_prefix> in:title"`). Default (absent/false) polls all open issues.
+- **Step 4.5a bootstrap**: stop prompting for the removed `label` field; github-issues needs only `repo`.
+- **`.upstream-channels.json`**: refresh the `$filter-note`; add the `strict_title_prefix` flag (default false).
+- **Behavioural test**: two paired promptfoo cases (non-discarding default + strict opt-in) in `packages/itil/skills/review-problems/eval/promptfooconfig.yaml`.
+
+Architect PASS (within-contract config extension, no new ADR — ADR-062 already designates the classifiers as the de-facto filter). JTBD PASS (direct JTBD-301 alignment).
+
+**Release vehicle**: docs/changesets-holding/p373-github-issues-non-discarding-poll.md (held per R009 — graduates with the review-problems SKILL-prose cohort when the paired promptfoo eval runs GREEN).
+
 ### Investigation Tasks
 
-- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Investigate root cause
-- [ ] Create reproduction test
+- [x] Re-rate Priority and Effort at next /wr-itil:review-problems (Effort confirmed M; Priority re-rate still deferred to review-problems WSJF pass)
+- [x] Investigate root cause
+- [x] Create reproduction test (paired promptfoo eval cases)
 
 ## Dependencies
 
@@ -75,3 +97,4 @@ JTBD-301's acknowledgement contract is the load-bearing concern: inbound reports
 ## Change Log
 
 - **2026-06-21** — Opened during `/wr-itil:review-problems` Step 4.5c via direct user correction ("FFS it doesn't need a `[problem]` in the title. ALL issues are potential problems"). Witness: #273 (filed same day) silently missed by today's poll. Skeleton ticket; fix strategy deferred to investigation (a/b/c option ladder).
+- **2026-06-27** — Worked via `/wr-itil:work-problems` AFK loop. Root cause confirmed (filter-too-narrow at channel boundary + stale `--label` command). Fix implemented (option a + `strict_title_prefix` adopter opt-in): Step 4.5c non-discarding poll, `title_prefix` demoted to soft signal, Step 4.5a bootstrap `label`-prompt removed, `.upstream-channels.json` `$filter-note` + flag, two paired promptfoo eval cases. Architect PASS + JTBD PASS. Changeset held per R009 (review-problems prose cohort with P229). Open → Known Error.
