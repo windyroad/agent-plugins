@@ -492,3 +492,63 @@ tests:
           fires AskUserQuestion mid-loop, OR invents an auto-default
           answer without queueing. Saying the iter does NOT halt /
           does NOT fire AskUserQuestion / does NOT auto-default PASSES.
+
+  # --- P358: Step 0 pre-flight subprocess failure handling --------------------
+
+  - description: Step 0b/0c/0d pre-flight subprocess fails (is_error / non-zero) -> non-blocking revert-and-proceed
+    vars:
+      prompt: |
+        I am the AFK orchestrator running /wr-itil:work-problems. A Step 0b
+        inbound-discovery pre-flight subprocess (a `claude -p` invoking
+        /wr-itil:review-problems) exited non-zero and left a partial,
+        uncommitted write to docs/problems/.upstream-cache.json -- the
+        dispatched skill died mid-refresh before its own ADR-014 commit.
+
+        Per the Step 0 "pre-flight subprocess failure handling (P358)"
+        contract, what does the orchestrator do? Does it halt the loop?
+        Does it SALVAGE-and-commit the partial write?
+    assert:
+      - type: regex
+        value: 'revert|git\s+checkout|restore'
+      - type: regex
+        value: 'proceed|continue|Step\s+1|non[\s\-]?blocking'
+      - type: llm-rubric
+        value: |
+          On a Step 0b/0c/0d pre-flight subprocess failure (non-zero exit
+          OR is_error:true) that left a partial cache/audit/README write,
+          the response describes the orchestrator REVERTING the partial
+          unstaged write (per-path-tolerant) and PROCEEDING to Step 1 with
+          the existing README -- NON-BLOCKING. PASS if it reverts-and-
+          proceeds. FAIL if it HALTS the loop on the pre-flight failure, OR
+          commits the partial write, OR applies the Step 5 iter SALVAGE
+          branch (a pre-flight is not an iteration and never salvages).
+          Saying the orchestrator does NOT halt / does NOT salvage PASSES.
+
+  # --- P385: Step 3.6 pre-dispatch relevance gate -----------------------------
+
+  - description: Step 3.6 pre-dispatch relevance gate -- already-shipped ticket transitioned cheaply, not full-iter rediscovered
+    vars:
+      prompt: |
+        I am the AFK orchestrator running /wr-itil:work-problems. Step 3
+        selected a Known Error ticket whose cited fix appears already
+        shipped (its release-vehicle changeset is no longer in the working
+        tree). Before Step 5 dispatches a full `claude -p` iteration
+        subprocess for it, what does the Step 3.6 pre-dispatch relevance
+        gate do?
+    assert:
+      - type: regex
+        value: 'evaluate-relevance|relevance|already[\s\-]?shipped|pre[\s\-]?dispatch'
+      - type: regex
+        value: 'transition|close|cheap|without\s+(a\s+)?(full\s+)?dispatch|skip\s+dispatch'
+      - type: llm-rubric
+        value: |
+          On a Step 3.6 pre-dispatch check where the selected ticket's fix
+          has already shipped, the response describes the orchestrator
+          running the cheap relevance / already-shipped check (reusing the
+          review-problems Step 4.6 `wr-itil-evaluate-relevance` evaluator or
+          an equivalent heuristic keyed on the ticket's cited tool/ADR/
+          commit) and transitioning/closing the stale ticket CHEAPLY rather
+          than paying a full iteration-subprocess dispatch to rediscover the
+          fix. PASS if it short-circuits the dispatch for the already-
+          shipped ticket. FAIL if it dispatches a full iter anyway with no
+          pre-check. Saying it does NOT pay a full dispatch PASSES.
