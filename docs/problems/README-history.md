@@ -1069,6 +1069,8 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 
 > Last reviewed: 2026-06-27 **batch transition** — P164 verifying, P080 verifying, P361 verifying (post-release K→V auto-transition per work-problems Step 6.5 / P228 after @windyroad/risk-scorer@0.14.1 shipped; P080+P361 caught up from prior releases).
 
-## 2026-06-27 (P391 captured; prior P386 capture fragment rotated)
+## 2026-06-27 (P392 captured; prior P391 capture fragment rotated)
 
 > Last reviewed: 2026-06-27 **P386 captured** — review-problems Step 4.6 AFK-silent relevance-close contract cites a dangling "work-problems Step 6.5" cross-reference (that step is the Release-cadence check); relevance-close is actually reached via the Step 0c/Step 3.6 review-problems pre-flight dispatch. Doc-only fix; caught at P385 architect review. (lightweight aside via /wr-itil:capture-problem)
+
+> Last reviewed: 2026-06-27 **P391 captured** — oversight-nudge bats suites (jtbd + architect siblings) are non-hermetic against an inherited WR_SUPPRESS_OVERSIGHT_NUDGE=1: the AFK work-problems orchestrator exports that guard, so the count-emitting tests self-suppress and false-red inside AFK iters (CI green — guard unset there). Fix: unset the guard in each suite's setup(). Surfaced during the P288 verify-and-transition iter. (lightweight aside via /wr-itil:capture-problem)
