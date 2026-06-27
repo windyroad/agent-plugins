@@ -55,7 +55,7 @@ After reading the briefing tree, score every entry in `docs/briefing/*.md` to de
 |-------------|--------|
 | >= +3 | Promote to Critical Points candidate. The agent adds the entry to the Critical Points roll-up in `docs/briefing/README.md` during Step 3. |
 | 0 .. +2 | Keep in the topic file. No roll-up change. |
-| <= -3 | Route to the **delete queue**. These entries are surfaced for user confirmation in a single batched `AskUserQuestion` at the end of this step. |
+| <= -3 | **Silent removal** — no `AskUserQuestion`. The agent removes / trims the entry as part of Step 3 briefing curation and surfaces each removal in the Step 5 retro summary's Signal-vs-Noise Pass table with its score + ADR-026 citation; the user audits there and corrects via P078 authentic-correction if a removal was wrong (removals are reversible from git). See **Delete handling** below. |
 
 **Per-entry persistence format**: each briefing entry carries a trailing HTML comment block:
 
@@ -68,18 +68,9 @@ The comment block is appended to the list item (or heading) that contains the en
 
 **Classification ownership (policy-authorised per ADR-013 Rule 5)**: the agent owns silent classification. No `AskUserQuestion` is fired for individual entry promotions, demotions, or keep decisions. The agent applies the ADR-026 heuristic directly: entry cited in a tool call (or paraphrased in reasoning) during the session = signal; never loaded or loaded-but-unused = noise; ambiguous cases still classify but with a tentative flag the next retro resolves.
 
-**Delete queue confirmation**: after scoring all entries, if any entries have a score <= -3:
+**Delete handling — silent (no `AskUserQuestion`)**: entries scored <= -3 are handled SILENTLY. NO `AskUserQuestion` fires to confirm deletes, at any score band, in interactive OR AFK mode. This is the load-bearing direction every other authority already states: ADR-044's framework-resolution boundary lists "Briefing add / remove / rotate" as a framework-mediated NOT-an-`AskUserQuestion` surface; Step 3's "Removals are silent (P135 / ADR-044)" clause; CLAUDE.md MANDATORY P132 worked-example list (which names "run-retro Step 1.5 silent classification, Step 3 briefing removals"); and ADR-013 Rules 1/5. The agent classifies, the deletes are applied during Step 3 briefing curation, and each removal surfaces in the Step 5 retro summary's "Signal-vs-Noise Pass" table (each candidate with its score + the ADR-026 citation that led to the noise classification). The user audits the Step 5 table and corrects via P078 authentic-correction if a removal was wrong (removals are reversible from git). The AFK queue-and-continue surfacing is specified in the fallback paragraph below (P352).
 
-1. Present a single `AskUserQuestion` with `header: "Delete briefing entries?"` and `multiSelect: false`.
-2. The question body lists each delete candidate with its score and the ADR-026 citation that led to the noise classification.
-3. Options (up to 4 per prompt, sequential if > 4):
-   1. `Confirm all deletions` — description: "Remove all listed entries from their topic files."
-   2. `Delete selected only` — description: "The agent will present a follow-up with per-entry checkboxes."
-   3. `Keep all (defer to next retro)` — description: "Leave entries in place; scores remain unchanged."
-   4. `Review individually` — description: "Present each entry one at a time for keep/delete decision."
-4. If the queue is empty, skip the prompt entirely.
-
-If the user chooses `Delete selected only` or `Review individually`, present subsequent `AskUserQuestion` calls as needed, respecting the 4-option cap per ADR-013 Rule 1.
+Firing a batched `AskUserQuestion` to confirm deletes is the inverse-P078 lazy-deferral trap — sub-contracting a framework-resolved decision back to the user (lazy classification per the Step 2d Ask Hygiene Pass). It is superseded prose; do NOT reintroduce it.
 
 **Tier 1 budget guard**: if promoting all score >= +3 entries would breach the 2 KB / ~10-bullet Critical Points budget (ADR-040), promote only the highest-scored entries until the budget is met and surface the remainder as a budget-overflow advisory in the retro summary.
 
@@ -92,7 +83,7 @@ If the user chooses `Delete selected only` or `Review individually`, present sub
 - "Weaker evidence so defer to user pick" — the pass IS the evidence-gathering step. Citing "weaker evidence" without running the pass is circular.
 - Fabricating "wrap-mode vs mid-session" exemptions that do not exist in this SKILL — Step 1.5 fires uniformly regardless of when run-retro is invoked.
 
-Per ADR-044 framework-resolution boundary: Step 1.5 is mechanical (silent classification + AFK queue surfacing). The pass MUST emit a populated Signal-vs-Noise table in Step 5 (or, in interactive mode, the delete-queue prompt). An empty / "Deferred" emit without scan evidence is a Step 1.5 violation per P332. Same lost-observation hazard P148 captures: the silent skip has zero recovery affordance, while the populated table preserves the agent's judgement on disk for user audit.
+Per ADR-044 framework-resolution boundary: Step 1.5 is mechanical (silent classification + AFK queue surfacing). The pass MUST emit a populated Signal-vs-Noise table in Step 5. An empty / "Deferred" emit without scan evidence is a Step 1.5 violation per P332. Same lost-observation hazard P148 captures: the silent skip has zero recovery affordance, while the populated table preserves the agent's judgement on disk for user audit.
 
 **See also**: P148 (Step 4b Stage 1 anti-pattern driver — same class, different step); P332 (run-retro meta-surface recurrence driver).
 

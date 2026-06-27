@@ -1,0 +1,5 @@
+---
+"@windyroad/retrospective": patch
+---
+
+Reconcile the run-retro Step 1.5 briefing signal-vs-noise pass to the load-bearing silent-delete direction (P393). The Step 1.5 prose contradicted itself on `<= -3` briefing-entry deletes: the threshold table plus a "Delete queue confirmation" block described a batched interactive `AskUserQuestion`, while Step 3's "Removals are silent (P135 / ADR-044)" clause, the P352 AFK queue-and-continue amendment, CLAUDE.md MANDATORY P132, and ADR-044's framework-resolution boundary (which lists "Briefing add / remove / rotate" as a framework-mediated, not-an-`AskUserQuestion` surface) all state deletes are silent. The stale batched-confirmation prose is removed: `<= -3` deletes are now silent in both interactive and AFK mode, applied during Step 3 curation, surfaced in the Step 5 retro summary's Signal-vs-Noise Pass table with score plus ADR-026 citation, and corrected by the user via P078 authentic-correction if a removal was wrong (removals are reversible from git). No per-delete `AskUserQuestion` fires at any score band.
