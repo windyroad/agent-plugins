@@ -248,6 +248,28 @@ Q2 (RCA+RFC estimate coexistence), Q4 (RMS metric scope), Q5 (token-cost composa
 
 Phase 2 build unblocked. Next step: implement `wr-itil-tally-effort` per Phase 2 work list above with Cost-as-primary WSJF formula + Dual-axis migration table.
 
+### Phase 2 progress — `## Effort Tally` render + idempotent inject (2026-06-27)
+
+Data-layer slice landed (ADR-067 Decision Outcome item 2 + the item 2a `source:` provenance flag). Builds directly on the already-shipped aggregation core (commit 8152f8ab).
+
+**What landed** — `packages/itil/scripts/effort-tally.sh` gained two modes alongside the unchanged legacy list mode:
+- `--render [--source <afk-backfill|live-iter>] <ticket-file> [AFK_DIR]` — prints the `## Effort Tally` markdown section for one ticket (cost authoritative, time reliable, tokens `~`-flagged best-effort per the P089 Gap 2 hierarchy).
+- `--write …` — idempotently injects/replaces that section in the ticket body (lazy-empty: zero iters → section removed), mirroring the blessed `update-problem-references-section.sh` replace-section idiom.
+- Phase bucketing (RCA vs RFC) derived from the ticket's `**Status**` line — `Open` → RCA, else → RFC. Deliberate single-phase ceiling (named in the AUTO-GENERATED marker); per-iter git-log phase discrimination is the upgrade path.
+- 7 new behavioural bats (render, RCA/RFC bucketing, source-flag flip, idempotent write, lazy-empty, stale-section removal) — `effort-tally.bats` now 15/15 green; full itil scripts suite 491/491.
+
+Architect APPROVED (reuse the single script; current-status bucketing is an acceptable transitional ceiling under ADR-067 item 2; body-section write is the blessed pattern). JTBD PASS (serves JTBD-006 AFK audit trail + JTBD-202 structured auditable output).
+
+**What remains (next slices, unblocked):**
+- ADR-067 item 1 — `**Estimated time**` + `**Estimated tokens**` body fields, derived silently in capture/manage-problem (SKILL prose → promptfoo-paired).
+- ADR-067 item 4 — retro RMS-of-estimation-error step in `/wr-retrospective:run-retro` (needs item 1 estimates to compute error).
+- SKILL wiring — call `wr-itil-effort-tally --write` from `/wr-itil:review-problems` Step 4.X + the retro (ADR-049 shim dispatch required at that point, not this slice).
+- Real-ticket backfill — bulk `--source afk-backfill` pass over the 75-ticket / 120-iter historical corpus (larger, noisier commit; held as its own slice).
+
+**Re-score:** Priority unchanged at 6. Remaining Phase-2 scope (estimate fields + retro RMS + wiring + backfill) is still ≈ M. **WSJF 6/2 = 3.0 unchanged; ticket stays Open (partial-progress).**
+
+**Release vehicle**: `.changeset/p248-effort-tally-render-write.md` (`@windyroad/itil` patch) — to be resolved to PR + release-date at next `/wr-itil:transition-problem` touch via `wr-itil-derive-release-vehicle P248`.
+
 ## Dependencies
 
 - **Blocks**: any future WSJF estimation accuracy improvement work (this is the foundation)

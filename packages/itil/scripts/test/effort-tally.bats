@@ -77,3 +77,94 @@ EOF
   [ "$status" -eq 0 ]
   [ -z "$output" ]
 }
+
+# --- render / write modes (ADR-067 item 2 + 2a source flag) ---
+
+mk_ticket() { # mk_ticket <filename> <status>   e.g. mk_ticket 087-foo.md Open
+  cat > "$DIR/$1" <<EOF
+# Problem 087: Example
+
+**Status**: $2
+**Priority**: 6 (Medium)
+**Effort**: M
+
+## Description
+
+Body.
+
+## Related
+
+- none
+EOF
+}
+
+@test "--render prints an Effort Tally section with authoritative cost + best-effort tokens" {
+  mk_ticket "087-foo.md" Open
+  mk_iter "iter1-p087.json" 12.50 600000 2000000
+  run bash "$SCRIPT" --render "$DIR/087-foo.md" "$DIR/.afk-run-state"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"## Effort Tally"* ]]
+  [[ "$output" == *"AUTO-GENERATED"* ]]
+  [[ "$output" == *'$12.50'* ]]
+  [[ "$output" == *"~2.0M"* ]]
+}
+
+@test "--render buckets an Open ticket under RCA" {
+  mk_ticket "087-foo.md" Open
+  mk_iter "iter1-p087.json" 5.00 60000 100000
+  run bash "$SCRIPT" --render "$DIR/087-foo.md" "$DIR/.afk-run-state"
+  [[ "$output" == *"RCA"* ]]
+  [[ "$output" != *"| RFC |"* ]]
+}
+
+@test "--render buckets a Known Error ticket under RFC" {
+  mk_ticket "087-foo.md" "Known Error"
+  mk_iter "iter1-p087.json" 5.00 60000 100000
+  run bash "$SCRIPT" --render "$DIR/087-foo.md" "$DIR/.afk-run-state"
+  [[ "$output" == *"RFC"* ]]
+  [[ "$output" != *"| RCA |"* ]]
+}
+
+@test "--render defaults source to afk-backfill; --source live-iter flips it" {
+  mk_ticket "087-foo.md" Open
+  mk_iter "iter1-p087.json" 5.00 60000 100000
+  run bash "$SCRIPT" --render "$DIR/087-foo.md" "$DIR/.afk-run-state"
+  [[ "$output" == *"source: afk-backfill"* ]]
+  run bash "$SCRIPT" --render --source live-iter "$DIR/087-foo.md" "$DIR/.afk-run-state"
+  [[ "$output" == *"source: live-iter"* ]]
+}
+
+@test "--write injects the section into the ticket and is idempotent" {
+  mk_ticket "087-foo.md" Open
+  mk_iter "iter1-p087.json" 5.00 60000 100000
+  run bash "$SCRIPT" --write "$DIR/087-foo.md" "$DIR/.afk-run-state"
+  [ "$status" -eq 0 ]
+  grep -q "## Effort Tally" "$DIR/087-foo.md"
+  # original body preserved
+  grep -q "^## Description" "$DIR/087-foo.md"
+  # idempotent: second run produces no diff
+  cp "$DIR/087-foo.md" "$DIR/087-foo.before"
+  run bash "$SCRIPT" --write "$DIR/087-foo.md" "$DIR/.afk-run-state"
+  run diff "$DIR/087-foo.before" "$DIR/087-foo.md"
+  [ "$status" -eq 0 ]
+  # exactly one section (no duplication)
+  [ "$(grep -c '^## Effort Tally' "$DIR/087-foo.md")" -eq 1 ]
+}
+
+@test "--write lazy-empties: a ticket with zero iters gets no section" {
+  mk_ticket "099-bar.md" Open
+  run bash "$SCRIPT" --write "$DIR/099-bar.md" "$DIR/.afk-run-state"
+  [ "$status" -eq 0 ]
+  ! grep -q "## Effort Tally" "$DIR/099-bar.md"
+}
+
+@test "--write removes a stale section when iters disappear (lazy-empty on re-run)" {
+  mk_ticket "087-foo.md" Open
+  mk_iter "iter1-p087.json" 5.00 60000 100000
+  bash "$SCRIPT" --write "$DIR/087-foo.md" "$DIR/.afk-run-state"
+  grep -q "## Effort Tally" "$DIR/087-foo.md"
+  rm "$DIR/.afk-run-state/iter1-p087.json"
+  run bash "$SCRIPT" --write "$DIR/087-foo.md" "$DIR/.afk-run-state"
+  [ "$status" -eq 0 ]
+  ! grep -q "## Effort Tally" "$DIR/087-foo.md"
+}
