@@ -7,6 +7,16 @@
 # scaffolds the register on-demand via /wr-risk-scorer:bootstrap-catalog
 # (ADR-059); this hook is the discovery surface — it does NOT write.
 #
+# P375 (2026-06-27): once docs/risks/ exists, the hook no longer goes
+# silent — it counts entries still carrying the `**Curation**: pending
+# review` marker and re-surfaces the count every session. This closes the
+# audit's "one step short of the jtbd pattern" gap: the scaffold check
+# alone went quiet once stubs existed, so the pending-review backlog
+# (auto-scaffolded entries whose controls + Impact×Likelihood scoring are
+# not yet human-curated) rotted invisibly. Counting content state and
+# re-surfacing until drained is the class-B self-surfacing pattern that
+# jtbd-oversight-nudge.sh / architect-oversight-nudge.sh already use.
+#
 # Read-only, side-effect-free. Modelled on
 # packages/architect/hooks/architect-oversight-nudge.sh (ADR-066) and
 # packages/jtbd/hooks/jtbd-oversight-nudge.sh (ADR-068). Per ADR-040 the
@@ -36,8 +46,24 @@ REGISTER_DIR="$PROJECT_DIR/docs/risks"
 # it, the absence of docs/risks/ is not a governance gap.
 [ -f "$POLICY_FILE" ] || exit 0
 
-# Silent when the register directory already exists — the scaffold has
-# either already happened or the user has populated it manually.
-[ -d "$REGISTER_DIR" ] && exit 0
+# Register directory missing — nudge to scaffold it.
+if [ ! -d "$REGISTER_DIR" ]; then
+  echo "[wr-risk-scorer] RISK-POLICY.md present but docs/risks/ is missing — run /wr-risk-scorer:bootstrap-catalog to scaffold the standing-risk register."
+  exit 0
+fi
 
-echo "[wr-risk-scorer] RISK-POLICY.md present but docs/risks/ is missing — run /wr-risk-scorer:bootstrap-catalog to scaffold the standing-risk register."
+# Register exists: count entries still carrying the curation marker so the
+# pending-review backlog self-surfaces every session (class-B, P375)
+# instead of going silent once stubs exist. Token-cheap grep over the
+# register dir — no body reads, no per-file LLM call (matches the
+# jtbd-oversight-nudge.sh cost profile).
+PENDING="$(grep -rlE '^\*\*Curation\*\*: pending review' "$REGISTER_DIR" 2>/dev/null | grep -c . || true)"
+PENDING="${PENDING:-0}"
+
+[ "$PENDING" -gt 0 ] 2>/dev/null || exit 0
+
+if [ "$PENDING" -eq 1 ]; then
+  echo "[wr-risk-scorer] 1 standing-risk entry is pending review — curate it in docs/risks/ (enumerate controls + Impact×Likelihood scoring)."
+else
+  echo "[wr-risk-scorer] $PENDING standing-risk entries are pending review — curate them in docs/risks/ (enumerate controls + Impact×Likelihood scoring)."
+fi
