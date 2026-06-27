@@ -1,7 +1,8 @@
 # Problem 390: agent ends the work-problems loop (emits ALL_DONE) prematurely while actionable Tier-2 backlog remains, by rationalising the remainder as out-of-scope / interactive-gated
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-06-27
+**Transitioned to Known Error**: 2026-06-28 (root cause confirmed; fix implemented — Step 2.4 Gate (0) objective backlog-empty assertion; changeset held pending work-problems promptfoo eval GREEN per ADR-061 Rule 4 / ADR-042 Rule 2)
 **Priority**: 12 (High) — Impact: 3 x Likelihood: 4
 **Origin**: internal
 **Effort**: M
@@ -39,9 +40,20 @@ The orchestrator conflated "the highest-leverage / most-salient remaining work i
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Strengthen the Step 2.4 pre-ALL_DONE gate: before emitting ALL_DONE, assert that Step 2 stop-condition #1/#2/#3 OBJECTIVELY holds — i.e. re-scan the backlog and confirm zero Tier-0/1/2 tickets are dispatchable (not just "the salient remainder is gated"). A non-empty actionable backlog forbids ALL_DONE.
-- [ ] Add a behavioural assertion / eval case: ALL_DONE is NOT emitted when the WSJF backlog has ≥1 actionable (non-held, non-verifying, non-interactive-gated) ticket.
-- [ ] Cross-check the loop-back coverage: a user-directed pivot (eval cohort) must not consume the loop's Tier-exhaustion obligation — after the pivot, the loop resumes Tier selection rather than terminating.
+- [x] Strengthen the Step 2.4 pre-ALL_DONE gate: before emitting ALL_DONE, assert that Step 2 stop-condition #1/#2/#3 OBJECTIVELY holds — i.e. re-scan the backlog and confirm zero Tier-0/1/2 tickets are dispatchable (not just "the salient remainder is gated"). A non-empty actionable backlog forbids ALL_DONE. — DONE 2026-06-28: Step 2.4 **Gate (0) — Objective backlog-empty assertion** prepended ahead of gate (a) (see Fix Implemented below).
+- [x] Add a behavioural assertion / eval case: ALL_DONE is NOT emitted when the WSJF backlog has ≥1 actionable (non-held, non-verifying, non-interactive-gated) ticket. — DONE 2026-06-28: paired promptfoo Tier-A/B case added to `packages/itil/skills/work-problems/eval/promptfooconfig.yaml` (`Step 2.4 gate (0) — dispatchable Tier-2 backlog remains → loop back, do NOT emit ALL_DONE`).
+- [x] Cross-check the loop-back coverage: a user-directed pivot (eval cohort) must not consume the loop's Tier-exhaustion obligation — after the pivot, the loop resumes Tier selection rather than terminating. — DONE 2026-06-28: Gate (0) "Why gate (0) fires first" prose explicitly states a user-directed mid-loop pivot does NOT discharge the Tier-exhaustion obligation; the re-scan resumes tier selection (also catches the P382 skip).
+
+## Fix Implemented
+
+**2026-06-28 (Known Error)** — Step 2.4 (Pre-`ALL_DONE` gate sequence, P341) amended in `packages/itil/skills/work-problems/SKILL.md`:
+
+- **New Gate (0) — Objective backlog-empty assertion** prepended ahead of gate (a). Before `ALL_DONE`, the orchestrator re-scans the live open/known-error backlog (fresh dual-tolerant glob — NOT the Step 1 cache or agent recollection) and classifies each ticket dispatchable/non-dispatchable OBJECTIVELY by recorded marker only: non-dispatchable iff verifying / `## Fix Released`; upstream-blocked; recorded-blocked dead-end; Step 3.5/3.6 durable per-session skip record (`.afk-run-state/outstanding-questions.jsonl`); or held changeset with unmet reinstate criterion. Every other open/known-error ticket is dispatchable.
+- **≥1 dispatchable ticket FORBIDS `ALL_DONE`** — the orchestrator loops back to Step 3 tier-first selection (ADR-076) and dispatches the next iter rather than proceeding to gate (a)/(b)/(c). Loopback, not halt (productive → not a Hard-fail trigger).
+- Step 2.4 intro ("four parts"; `ALL_DONE` after (0) AND (a) AND (b)) + gate (c) cross-reference updated; P390 driver entry added to the SKILL reference list.
+- The subjective "this is a natural stopping point" judgement that drove the P390 stop is explicitly disavowed; a user-directed pivot does not discharge the Tier-exhaustion obligation (catches the P382 coverage miss too).
+
+**R009 prose-floor discharge**: paired promptfoo case authored in the same commit; the @windyroad/itil patch changeset is HELD at `docs/changesets-holding/wr-itil-p390-step-2-4-gate-0-objective-backlog-empty.md` (ADR-042 Rule 2) — 9th hold in the work-problems-surface cohort, reinstated atomically when the work-problems promptfoo eval goes GREEN (ADR-061 Rule 4). Awaiting that evidence to ship → Verifying.
 
 ## Dependencies
 

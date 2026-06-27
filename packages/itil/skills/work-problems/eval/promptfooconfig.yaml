@@ -27,6 +27,11 @@
 #     SCOPE FILTERS over Step 1 WSJF selection; they do NOT alter
 #     loop control; orchestrator MUST NOT emit ALL_DONE from
 #     natural-language modifier interpretation (P175).
+#   - Step 2.4 gate (0) objective backlog-empty assertion — before
+#     ALL_DONE, re-scan the open/known-error backlog and forbid ALL_DONE
+#     while ≥1 dispatchable ticket remains (objective per-ticket marker
+#     classification, NOT subjective "salient remainder is gated"); loop
+#     back to Step 3 tier-first selection instead (P390).
 #
 # Drivers:
 #   - ADR-075 (Amendment 2026-06-02) — SKILL-prose harness scope; per-skill
@@ -67,6 +72,7 @@
 # @problem P228
 # @problem P352
 # @problem P175
+# @problem P390
 # @rfc RFC-012
 # @adr ADR-075 (Amendment 2026-06-02)
 # @adr ADR-061 (Rule 4 evidence-floor)
@@ -585,3 +591,51 @@ tests:
           if it names --plugin-dir as required and does not claim --setting-sources
           alone suffices. FAIL if it relies on --setting-sources alone, or omits
           --plugin-dir. Saying --setting-sources is NOT enough PASSES.
+
+  # --- P390: Step 2.4 gate (0) objective backlog-empty assertion ---------------
+
+  - description: Step 2.4 gate (0) — dispatchable Tier-2 backlog remains → loop back, do NOT emit ALL_DONE
+    vars:
+      prompt: |
+        I am the AFK /wr-itil:work-problems orchestrator. I just finished a
+        user-directed eval-cohort pivot and worked the Tier-1 inbound tickets.
+        The most salient remaining work (eval-cohort graduations, RISK-POLICY
+        / JTBD items) is interactive-gated. BUT the dual-tolerant
+        open/known-error glob still lists a dozen ordinary Tier-2 internal
+        tickets (P378, P305, P288, P297, P375, ...) that have NO `## Fix
+        Released` / verifying marker, NO upstream-blocked marker, NO held
+        changeset, and were NOT filtered by Step 3.5 / Step 3.6 this session —
+        they are ordinary autonomous fix-and-commit work.
+
+        Per the Step 2.4 gate (0) objective backlog-empty assertion (P390),
+        am I allowed to emit ALL_DONE now because the *salient* remainder is
+        interactive-gated? Or must I do something else first? Be specific
+        about (a) whether ALL_DONE emits, (b) what the re-scan classification
+        rule is, and (c) what the orchestrator does with the dispatchable
+        Tier-2 tickets.
+    assert:
+      # Tier A — must reference the gate's loop-back / continue action.
+      - type: regex
+        value: 'loop[\s\-]?back|Step\s+3|dispatch|continue|next\s+iter|tier[\s\-]?first'
+      # Tier A — must reference the objective per-ticket classification surface.
+      - type: regex
+        value: 'dispatchable|re[\s\-]?scan|objective|per[\s\-]?ticket|marker'
+      # Tier B — semantic invariant: ≥1 dispatchable ticket FORBIDS ALL_DONE;
+      # classification is objective/marker-bound not subjective salience; a
+      # user-directed pivot does not discharge the Tier-exhaustion obligation.
+      - type: llm-rubric
+        value: |
+          On a Step 2.4 gate (0) check where the backlog re-scan still lists
+          ≥1 dispatchable Tier-2 ticket (no verifying / Fix Released marker,
+          no upstream-block, no held changeset, not Step 3.5/3.6-filtered
+          this session), the response says the orchestrator MUST NOT emit
+          ALL_DONE — a non-empty dispatchable backlog forbids it — and
+          instead loops back to Step 3 tier-first selection to dispatch the
+          next iter. It states the classification is OBJECTIVE / per-ticket /
+          marker-bound, NOT a subjective "the salient remainder is
+          interactive-gated" judgement, and that a user-directed pivot does
+          not discharge the Tier-exhaustion obligation. PASS if it forbids
+          ALL_DONE and loops back. FAIL if it says ALL_DONE may emit because
+          the salient remainder is gated, OR treats the subjective salience
+          judgement as sufficient to stop. Saying the orchestrator does NOT
+          emit ALL_DONE / does NOT stop PASSES.
