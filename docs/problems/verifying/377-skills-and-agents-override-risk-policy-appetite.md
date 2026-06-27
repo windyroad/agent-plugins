@@ -1,7 +1,13 @@
 # Problem 377: Skills, agents, and hooks override RISK-POLICY appetite instead of applying it
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-06-24
+
+## Fix Released
+
+Fix shipped via RFC-029 (6 slices, all committed 2026-06-24; Wave 1 "P377 gate cohort" released to npm — `apply-risk-policy-appetite` changeset). The appetite-faithful behaviour is live: the risk-gate now reads the RISK-POLICY appetite (default 5 per ADR-086) rather than a hardcoded threshold, and the unauthorised `BYPASS_RISK_GATE` + ci-bypass paths were removed (verified this session — risk-gate.bats test "score 5 allows at threshold" green; the gate applies appetite 5, not an override). Transitioned Open→Verifying 2026-06-27 by the work-problems orchestrator (stranded-shipped; the only remaining task was the RFC-029 lifecycle transition + oversight ratification, which is interactive governance — queued for /wr-itil:manage-rfc accepted).
+
+**Awaiting user verification** — confirm no skill/agent/hook surface overrides the RISK-POLICY appetite (all apply it), and ratify the RFC-029 human-oversight marker at the `manage-rfc accepted` transition.
 **Priority**: 16 (High) — Impact: 4 (High) × Likelihood: 4 (Likely). Rated at capture from observed evidence. Impact 4: RISK-POLICY is the safety bound; surfaces that override it let above-appetite work ship and defeat the policy's purpose, and it ships to adopters. Likelihood 4: fires on every above-appetite commit; structural across 8+ surfaces.
 **Origin**: internal
 **Effort**: L — multi-ADR (013/042/044) + ~8 skills + 2 scoring agents + hooks + RISK-POLICY.md. WSJF = (16 × 1.0) / 4 = 4.0. Likely warrants an RFC.
