@@ -1084,3 +1084,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-06-28 **P394 captured** — release publishes a new version of every package, not just the changed ones (lightweight aside via /wr-itil:capture-problem).
 
 > Last reviewed: 2026-06-28 **batch transition** — P373 verifying, P383 verifying (post-release K→V after the cohort graduation shipped @windyroad/itil@0.54.6 + jtbd; manual transition per P389 — the graduated changesets carried no Release-vehicle seed so the enumerator skipped them).
+
+> Last reviewed: 2026-06-28 **P395 captured** — external-comms agent silently dormant on the credibility axis; no nudge to author the missing RISK-POLICY section (lightweight aside via /wr-itil:capture-problem).
