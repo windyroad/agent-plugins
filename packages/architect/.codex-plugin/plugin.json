@@ -1,6 +1,6 @@
 {
   "name": "wr-architect",
-  "version": "0.18.0",
+  "version": "0.18.1",
   "description": "Architecture decision enforcement for AI coding agents",
   "author": {
     "name": "Windy Road Technology",
