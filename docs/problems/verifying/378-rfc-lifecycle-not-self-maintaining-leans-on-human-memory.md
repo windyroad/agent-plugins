@@ -1,10 +1,24 @@
 # Problem 378: RFC lifecycle is not self-maintaining — it leans on human memory
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-06-25
 **Priority**: 16 (High) — Impact: 4 (High) × Likelihood: 4 (Likely). Rated at capture. Impact 4: the RFC framework is the thing that tracks all other work, yet it offloads its own upkeep onto the user's memory — the precise anti-pattern the repo exists to prevent (P375/P377), and it ships to adopters. Likelihood 4: every RFC, every slice commit.
 **Origin**: internal
 **Effort**: M — upgrade the existing advisory trailer hook to an executor + add manage-rfc auto-transition (mirror manage-story) + an RFC-oversight nudge. WSJF = (16 × 1.0) / 2 = 8.0.
+**Release vehicle**: `.changeset/rfc-lifecycle-self-maintenance.md` (consumed) — released in `@windyroad/itil@0.54.0` (version-packages `731e78a6`, 0.53.0→0.54.0; npm latest 0.54.2).
+
+## Fix Released
+
+Released in `@windyroad/itil@0.54.0`. All three pieces of RFC-030 are built, behaviourally tested, committed (ancestors of HEAD), and published; RFC-029/030 + ADR-085 ratified (`a3b7f44f`):
+
+- **Piece 3 (RFC-oversight nudge)** `2863308e` — `itil-rfc-oversight-nudge.sh` + `detect-unoversighted-rfcs.sh`. SessionStart class-B clone of ADR-066/068; surfaces `human-oversight: unconfirmed` RFCs. 7/7 bats green; live detector confirmed surfacing unconfirmed RFCs in-repo.
+- **Piece 1 (`## Commits` derived view)** `60a53e62` — `update-rfc-commits-section.sh` + shim + ADR-085; `manage-rfc` renders `## Commits` from `git log --grep` (Option A, no ADR-014 grain issue); capture-rfc false "maintained automatically" claim fixed. 5/5 bats green; RFC-030's `## Commits` confirmed rendering real SHAs (`2863308e`, `96b0c903`) live.
+- **Piece 2 (shared auto-transition trigger)** `d9ee0721` — `itil-commit-trailer-transition-advisory.sh` (PostToolUse) detects first non-capture `Refs: RFC-NNN`/`STORY-NNN` commit → advises the in-progress transition. 6/6 bats green.
+- **Census-vocab fold to [[P375]]** `64182ac3` — deferral census catches "lands in Slice N" / "future slice" markers. 12/12 bats green.
+
+Transitioned Open→Verifying 2026-06-27 by the work-problems orchestrator — the ticket was mis-filed as Open after the fix shipped (the "fixed-by-later-work, never transitioned" class, P385). All four behavioural suites re-run green this iter; Pieces 1 & 3 additionally spot-checked live against the repo.
+
+**Awaiting user verification** — confirm next RFC lifecycle (capture → ratify → release) no longer hands the user a memory checklist: the oversight nudge auto-surfaces unconfirmed RFCs, `## Commits` renders from trailers, and the auto-transition advisory fires on the first non-capture `Refs:` commit.
 
 ## Description
 
