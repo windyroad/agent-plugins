@@ -71,7 +71,7 @@ Calibrated 6 cases per the P270/P393 pattern: demoted the paraphrasable semantic
 - [x] Re-run the eval 2-3× to rule out grader non-determinism — **flake confirmed**: a different case failed each run (P350, then 2 cases, then Step 2b), all behaviourally-correct outputs.
 - [x] Inspect the brittle Tier-A; re-scope per the P270 fix pattern — demoted semantic alternations to Tier-B across 6 cases; Tier-A keeps distinctive anchors only.
 - [x] Confirm 8/8 GREEN (incl. the committed P383 case) — 3× consecutive 8/8 GREEN.
-- [ ] Then graduate the capture-problem held cohort (P199 / P350 / P352 / P383) — eval-floor now met; graduate within appetite per ADR-061 Rule 4 + ADR-042.
+- [x] Eval-floor evidence recorded + graduation queued for the entries whose SOLE reinstate criterion is "capture-problem eval GREEN" — **only `wr-itil-p199` + `p383`** (both solo Rule 3a, exact-surface match). The P350 4-changeset cohort (8 surfaces across 4 packages) and P352 (5 surfaces) are NOT discharged by capture-problem alone — their other surfaces' evals remain uncovered, so they stay held. Per P308 (holding-README line 24) AFK records evidence-met + queues the Rule 4 Graduate/Defer/Reject decision; it does NOT auto-graduate (the P270 precedent). Queued to `.afk-run-state/outstanding-questions.jsonl`.
 
 ## Dependencies
 
