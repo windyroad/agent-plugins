@@ -1,9 +1,16 @@
 # Problem 374: `extract-risks-from-reports.sh` hardcodes "Windy Road Agent Plugins suite" branding in the adopter-generated `docs/risks/README.md`
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-06-21
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: inbound-reported (#273)
+**Release vehicle**: fix commit `9b3d1389` (no dedicated changeset; rode a sibling risk-scorer release)
+
+## Fix Released
+
+Released in `@windyroad/risk-scorer` — fix commit `9b3d1389` ("fix(risk-scorer): P374 — project-neutral risk-register README phrasing") is an ancestor of the latest published version-packages bump (de-facto-released per P359). The heredoc at `packages/risk-scorer/scripts/extract-risks-from-reports.sh:350` now reads "for this project." (brand string removed); behavioural absence-test present. Transitioned K→V manually 2026-06-27 by the work-problems orchestrator — the post-release K→V enumerator missed it because the ticket carried no `**Release vehicle**` seed (the P389 class; seed now backfilled above).
+
+**Awaiting user verification** — confirm an adopter-generated `docs/risks/README.md` no longer carries the publishing-suite brand string.
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 **JTBD**: JTBD-101
 **Persona**: plugin-developer
