@@ -17,11 +17,16 @@
 #     is a P332 / P148-class silent skip.
 #   - Step 2c context-usage cheap-layer auto-invoke (ADR-043 Amendment
 #     2026-06-08): combined whichever-comes-first trigger — calendar-elapse
-#     > 14 days OR delta > 20% any bucket — with once-per-day guard
+#     > 14 days OR delta-breach — with once-per-day guard
 #     (`docs/retros/<TODAY>-context-analysis.md` exists → skip).
 #     Mechanical: identical behaviour in interactive and AFK modes per
 #     ADR-013 Rule 6 + ADR-044 framework-resolution boundary — never fires
-#     AskUserQuestion.
+#     AskUserQuestion. Two test cases assert this one contract: the
+#     combined-trigger/guard case, and the delta-breach absolute-floor
+#     case (ADR-043 Amendment 2026-06-17, P372 — delta-breach requires
+#     BOTH > 20% relative AND > 10 KB absolute; suppresses tiny-bucket
+#     20%-wobble noise without losing large-but-stable coverage, which
+#     the calendar-elapse axis already re-fires every 14 days).
 #   - Step 3 Tier-3 budget rotation silent agent-picked pass (P135 /
 #     ADR-044): rotation is silent agent judgement applied to each `OVER`
 #     line. Branch B fall-through is **split-by-date safe default** when no
@@ -103,8 +108,9 @@
 # @adr ADR-044 (decision-delegation contract)
 # @adr ADR-013 (Rule 5 policy-authorised silent proceed; Rule 6 queue-and-continue)
 # @adr ADR-026 (grounding requirement)
-# @adr ADR-043 (progressive context-usage measurement; Amendment 2026-06-08)
+# @adr ADR-043 (progressive context-usage measurement; Amendments 2026-06-08 + 2026-06-17 absolute-floor gate)
 # @adr ADR-014 (single-commit grain)
+# @problem P372 (delta-breach absolute-floor gate)
 
 description: |
   run-retro SKILL eval — Tier-A regex + Tier-B llm-rubric coverage for 6
@@ -290,6 +296,76 @@ tests:
           between interactive and AFK modes, OR says the once-per-day
           guard does not apply. Saying it does NOT fire AskUserQuestion
           PASSES.
+
+  # --- Step 2c absolute-floor gate on the delta-breach axis (P372) ----------
+
+  - description: Step 2c delta-breach absolute floor — a small bucket tripping >20% but below the 10 KB absolute floor does NOT fire; a large delta clearing both gates does (ADR-043 Amendment 2026-06-17, P372)
+    vars:
+      prompt: |
+        I am the /wr-retrospective:run-retro Step 2c context-usage cheap
+        layer, deciding whether to auto-fire the deep layer
+        `/wr-retrospective:analyze-context`.
+
+        Current state:
+          - The most recent `docs/retros/*-context-analysis.md` is
+            `docs/retros/2026-06-12-context-analysis.md` (5 days ago,
+            today is 2026-06-17) — so the calendar-elapse axis does NOT
+            fire (< 14 days).
+          - The `project-claude-md` bucket changed from 4277 bytes to
+            5897 bytes versus the snapshot trailer: +37.9% relative, but
+            only +1620 bytes absolute.
+          - Every other bucket changed by less than 20%.
+          - `docs/retros/2026-06-17-context-analysis.md` does NOT exist.
+
+        Per the Step 2c delta-breach contract (ADR-043 Amendment
+        2026-06-17, P372 — the delta-breach axis now requires BOTH a >20%
+        relative change AND a >10 KB / >10240-byte absolute change), does
+        the auto-invocation fire for this `project-claude-md` change? Why
+        or why not? Separately: if instead the `problems` bucket had grown
+        by +150 KB (+30%), would the trigger fire? Be specific about which
+        gate disqualifies the small-bucket case.
+    assert:
+      # Tier A — must name the 10 KB / 10240 absolute floor.
+      - type: regex
+        value: '10\s*KB|10240|10[\s\-]?KB\s+(?:absolute\s+)?floor|absolute[\s\-]?(?:byte[\s\-]?)?floor|minimum[\s\-]?delta'
+      # Tier A — must indicate the small-bucket case does NOT fire.
+      - type: regex
+        value: 'does\s+not\s+fire|does\s+NOT\s+fire|no(?:t|n)[\s\-]?fir|trigger\s+(?:does\s+not|inactive)|below\s+(?:the\s+)?(?:10\s*KB|floor|threshold)|suppress|disqualif'
+      # Tier A — must name BOTH gates required (AND).
+      - type: regex
+        value: 'both|AND|>\s*20%\s+(?:and|AND|&)|relative\s+(?:and|AND)\s+absolute|two\s+gates|requires?\s+both'
+      # Tier A — must indicate the +150 KB case DOES fire (clears both gates).
+      - type: regex
+        value: '150\s*KB|would\s+fire|does\s+fire|fires?\b|clears?\s+both|exceeds?\s+(?:both|the\s+(?:10\s*KB|floor))'
+      # Tier B — semantic invariant: floor is an AND-gate suppressing
+      # tiny-bucket noise; large delta clearing both gates still fires.
+      - type: llm-rubric
+        value: |
+          The response correctly applies the ADR-043 Amendment 2026-06-17
+          (P372) absolute-floor gate on the delta-breach axis. The
+          delta-breach trigger now requires BOTH (a) >20% relative change
+          AND (b) >10 KB (>10240 bytes) absolute change versus the prior
+          snapshot. For the `project-claude-md` case (4277→5897 = +37.9%
+          relative but only +1620 bytes absolute): the trigger does NOT
+          fire — the +1620-byte absolute change is below the 10 KB floor,
+          so the delta-breach axis is disqualified, AND the calendar-elapse
+          axis does not fire either (5 days < 14 days). Step 2c emits the
+          `Cadence trigger inactive` note (non-blocking, no AskUserQuestion)
+          and does not auto-invoke the deep layer. For the contrasting
+          `problems` +150 KB (+30%) case: the trigger DOES fire — +150 KB
+          clears the 10 KB absolute floor AND +30% clears the 20% relative
+          gate, so both gates pass and the delta-breach axis fires. PASS if
+          the response identifies (a) the small-bucket case does NOT fire
+          because the absolute change is below the 10 KB floor, (b) both
+          gates (relative AND absolute) are required, AND (c) the +150 KB
+          case DOES fire because it clears both gates. FAIL if the response
+          says the `project-claude-md` +37.9% change fires the deep layer
+          (ignoring the floor), OR says only the 20% relative gate matters,
+          OR says the +150 KB case does not fire, OR introduces a separate
+          "absolute-size firing axis" that fires on bucket size regardless
+          of delta (the floor is a noise-suppression AND-gate on the delta
+          axis, NOT a new firing axis — the large-but-stable bucket is
+          covered by the calendar-elapse axis).
 
   # --- Step 3 Tier-3 budget rotation silent agent-picked -------------------
 

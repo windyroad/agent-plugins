@@ -1,6 +1,6 @@
 ---
 name: wr-retrospective:analyze-context
-description: Deep context-usage analyzer. Runs richer heuristics than run-retro Step 2c — per-turn attribution, per-plugin decomposition, suggestion generation, policy-breach detection. Produces a markdown report at docs/retros/<date>-context-analysis.md with an HTML-comment trailer carrying the bucket-snapshot for delta-from-prior comparison. Auto-fires from run-retro Step 2c when the combined trigger holds (calendar-elapse >14 days OR delta >20% any bucket, once-per-day guard) per ADR-043 Amendment 2026-06-08; also user-invokable on demand.
+description: Deep context-usage analyzer. Runs richer heuristics than run-retro Step 2c — per-turn attribution, per-plugin decomposition, suggestion generation, policy-breach detection. Produces a markdown report at docs/retros/<date>-context-analysis.md with an HTML-comment trailer carrying the bucket-snapshot for delta-from-prior comparison. Auto-fires from run-retro Step 2c when the combined trigger holds (calendar-elapse >14 days OR a bucket changes >20% AND >10 KB, once-per-day guard) per ADR-043 Amendments 2026-06-08 / 2026-06-17; also user-invokable on demand.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Skill
 ---
 
@@ -13,11 +13,11 @@ This skill is the **deep layer** of the two-layer design in **ADR-043** (Progres
 ## When to use
 
 - The user invokes `/wr-retrospective:analyze-context` directly.
-- **Auto-fired by run-retro Step 2c** when the combined trigger holds (calendar-elapse >14 days OR delta >20% any bucket since prior snapshot) and the once-per-day guard is not satisfied (no `docs/retros/<TODAY>-context-analysis.md` exists). Per ADR-043 Amendment 2026-06-08 (P295 settlement).
+- **Auto-fired by run-retro Step 2c** when the combined trigger holds (calendar-elapse >14 days OR a bucket's byte total changes by >20% AND by more than the 10 KB absolute minimum-delta floor since prior snapshot) and the once-per-day guard is not satisfied (no `docs/retros/<TODAY>-context-analysis.md` exists). Per ADR-043 Amendment 2026-06-08 (P295 settlement) + Amendment 2026-06-17 (P372 absolute-floor gate on the delta axis).
 - The user is preparing to trim context — e.g. before a release that introduces new hooks or skills, or after observing early compaction in long-running AFK loops.
 - The user wants a baseline snapshot at a known-good moment (e.g. immediately after a P091-cluster fix lands).
 
-**Auto-fires from run-retro Step 2c, silent in interactive and AFK modes.** Per ADR-043 Amendment 2026-06-08 + ADR-044 framework-resolution boundary, this skill auto-fires from the cheap layer when the combined trigger condition holds (calendar-elapse OR delta breach, capped at once per day). The skill never invokes `AskUserQuestion` — it writes a committed `docs/retros/<TODAY>-context-analysis.md` report and exits. AFK orchestrators read the resulting report on iteration close; the user reviews on return.
+**Auto-fires from run-retro Step 2c, silent in interactive and AFK modes.** Per ADR-043 Amendment 2026-06-08 + ADR-044 framework-resolution boundary, this skill auto-fires from the cheap layer when the combined trigger condition holds (calendar-elapse OR a delta breach clearing both the 20% and the 10 KB absolute floor, capped at once per day). The skill never invokes `AskUserQuestion` — it writes a committed `docs/retros/<TODAY>-context-analysis.md` report and exits. AFK orchestrators read the resulting report on iteration close; the user reviews on return.
 
 ## Output Formatting
 

@@ -1,10 +1,10 @@
 # Problem 372: ADR-043 context-budget delta-trigger lacks an absolute-byte floor — fires deep-layer on negligible deltas
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-06-17
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: S (was M; the fix is a prose AND-gate on the existing delta axis + a one-line ADR amendment + one eval case — no script change)
 **JTBD**: JTBD-001
 **Persona**: plugin-developer
 
@@ -35,11 +35,27 @@ Note: this run still produced value (the deep layer surfaced 4 P097 SKILL.md >50
 
 ## Root Cause Analysis
 
+**Root cause (confirmed 2026-06-27):** ADR-043's `run-retro` Step 2c delta-breach trigger axis tests only a *relative* threshold (`>20%` change in any bucket vs the prior snapshot). Relative-only is scale-blind: a small bucket's absolute size makes a 20% swing trivially reachable on a single edit (`project-claude-md` 4277→5897 = +37.9% on a +1620-byte CLAUDE.md addition), so the axis fires the deep layer (a committed report + subagent calls) on absolute deltas too small to be a dominant context cost. The trigger evaluation is SKILL-prose (the LLM reads the HTML-comment snapshot trailer and compares) — there is no script computing the delta — so the fix is a prose refinement, not a script change.
+
+**Fix (implemented 2026-06-27):** AND-gate an absolute minimum-delta floor of 10 KB (`|current − prior| > 10240` bytes) onto the existing 20% relative gate. A delta-breach now fires only when it clears BOTH gates. This suppresses the tiny-bucket noise while preserving every fire on a bucket large enough that a 20% delta is a real bloat signal.
+
+The capture-time framing also raised the inverse concern — "a large-but-stable bucket (multi-MB `docs/problems`) never re-fires." That concern needs **no** code: the **calendar-elapse axis** (`>14 days`) already re-fires every bucket regardless of delta, so dominant context cost is re-analysed at least fortnightly. Adding a third "absolute-size firing axis" would only *increase* fires and cannot fix an over-fire — explicitly rejected (YAGNI; architect-confirmed).
+
+**Surfaces changed (one commit):**
+- `packages/retrospective/skills/run-retro/SKILL.md` Step 2c step 4 — Delta-breach bullet gains the 10 KB AND-gate; "trigger does NOT hold" note updated.
+- `packages/retrospective/skills/analyze-context/SKILL.md` — 3 trigger-description lines updated in lockstep (cross-doc consistency).
+- `docs/decisions/043-*.md` — Amendment 2026-06-08 block gains a dated sub-note (Amendment 2026-06-17) recording the floor + the rejected-third-axis rationale; threshold-grounding line lists `>10 KB` as an initial value per ADR-026.
+- `packages/retrospective/skills/run-retro/eval/promptfooconfig.yaml` — second test case on the Step 2c contract asserting the floor gate (small-bucket-does-not-fire / large-delta-does-fire), Tier-A regex + Tier-B rubric (ADR-061 Rule 4 evidence-floor; R009 prose-surface coverage maintained).
+
 ### Investigation Tasks
 
-- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Investigate root cause
-- [ ] Create reproduction test
+- [x] Re-rate Priority and Effort at next /wr-itil:review-problems (Effort re-rated M→S this iter; Priority left at 3 pending full review-problems re-rate)
+- [x] Investigate root cause — relative-only delta axis is scale-blind (confirmed)
+- [x] Create reproduction test — promptfoo eval case (small-bucket-no-fire / large-delta-fire) on the Step 2c contract
+
+### Next step
+
+Fix is committed but **not yet released**. On the next `@windyroad/retrospective` release, transition Known Error → Verifying and verify via the paired promptfoo eval (`npx promptfoo eval -c packages/retrospective/skills/run-retro/eval/promptfooconfig.yaml`, Step 2c floor case GREEN).
 
 ## Dependencies
 
