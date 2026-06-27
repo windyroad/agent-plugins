@@ -221,10 +221,13 @@ get_candidate_session_ids() {
     # Concurrent-session SIDs: every recent announce marker across all
     # systems, within the mtime window. `*-announced-*` is system-agnostic
     # (picks up any present or future announcing plugin). `-maxdepth 1` and
-    # `-mmin -N` are portable across BSD (macOS) and GNU find. The sed strips
-    # the leading path then the `<system>-announced-` prefix, leaving the
-    # trailing UUID (UUIDs never contain the literal "-announced-").
-    find "$marker_dir" -maxdepth 1 -name '*-announced-*' -mmin "-${window_mins}" 2>/dev/null \
+    # `-mmin -N` are portable across BSD (macOS) and GNU find. `-L` follows the
+    # start-point symlink — on macOS marker_dir defaults to /tmp, a symlink to
+    # /private/tmp, which `find` would otherwise refuse to descend, silently
+    # enumerating zero candidates (no-op on Linux where /tmp is a real dir). P380.
+    # The sed strips the leading path then the `<system>-announced-` prefix,
+    # leaving the trailing UUID (UUIDs never contain the literal "-announced-").
+    find -L "$marker_dir" -maxdepth 1 -name '*-announced-*' -mmin "-${window_mins}" 2>/dev/null \
       | sed 's|.*/||; s/.*-announced-//'
   } | awk 'NF && !seen[$0]++'
 }

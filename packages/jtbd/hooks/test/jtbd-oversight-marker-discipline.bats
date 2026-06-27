@@ -175,6 +175,23 @@ mk_existing_artefact() {
   [[ "$output" != *"BLOCKED"* ]]
 }
 
+# P380: on macOS SESSION_MARKER_DIR defaults to /tmp, a symlink to /private/tmp.
+# `find <symlink> -maxdepth 1` in default (-P) mode refuses to descend the
+# start-point symlink, so candidate enumeration returns empty and the script
+# writes ZERO markers (silent cold-path exit 0). The `-L` flag follows it. This
+# test points SESSION_MARKER_DIR at a SYMLINK to the marker dir (reproducing the
+# macOS /tmp shape on any platform); RED without `-L`, GREEN with it.
+@test "mark-oversight-confirmed.sh enumerates candidates when SESSION_MARKER_DIR is a symlink (P380)" {
+  mk_existing_artefact "developer/JTBD-341-symlink.proposed.md"
+  art="$DIR/docs/jtbd/developer/JTBD-341-symlink.proposed.md"
+  : > "$MARK_DIR/jtbd-announced-$SID"
+  link_dir="${MARK_DIR}.link"
+  ln -s "$MARK_DIR" "$link_dir"
+  SESSION_MARKER_DIR="$link_dir" bash "$MARK_SCRIPT" "$art"
+  rm -f "$link_dir"
+  [ -f "$(expected_marker "$art")" ]
+}
+
 @test "tool_name=Bash exits 0 silently regardless of file path" {
   json=$(jq -nc --arg s "$SID" \
     '{tool_name:"Bash",session_id:$s,tool_input:{command:"echo human-oversight: confirmed"}}')

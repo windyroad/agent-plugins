@@ -85,7 +85,10 @@ candidates=$(
     if [ -n "${CLAUDE_SESSION_ID:-}" ]; then
       echo "$CLAUDE_SESSION_ID"
     fi
-    find "$MARKER_DIR" -maxdepth 1 -name '*-announced-*' -mmin "-${WINDOW_MINS}" 2>/dev/null \
+    # `-L` follows the start-point symlink — on macOS MARKER_DIR defaults to /tmp,
+    # a symlink to /private/tmp, which `find` would otherwise refuse to descend
+    # (no-op on Linux where /tmp is a real dir). P380.
+    find -L "$MARKER_DIR" -maxdepth 1 -name '*-announced-*' -mmin "-${WINDOW_MINS}" 2>/dev/null \
       | sed 's|.*/||; s/.*-announced-//'
   } | awk 'NF && !seen[$0]++'
 )

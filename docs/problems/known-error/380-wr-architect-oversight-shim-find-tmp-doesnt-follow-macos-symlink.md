@@ -1,12 +1,13 @@
 # Problem 380: wr-architect-mark-oversight-confirmed shim's find /tmp doesn't follow macOS /tmp → /private/tmp symlink
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-06-26
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: internal
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 **JTBD**: JTBD-001
 **Persona**: developer
+**Release vehicle**: `.changeset/p380-oversight-shim-find-tmp-macos-symlink.md` (patch bump @windyroad/architect + @windyroad/jtbd + @windyroad/itil). Deterministic shell fix — ships within appetite, no R009 eval-floor hold. Transition Known Error → Verifying once the version PR releases.
 
 ## Description
 
@@ -44,15 +45,19 @@ Same shim shape is used for the analogous `wr-jtbd-mark-oversight-confirmed` (P2
 
 ## Root Cause Analysis
 
+**Confirmed (2026-06-27).** `find <dir> -maxdepth 1` runs in `find`'s default `-P` (never-follow-symlinks) mode. When the start-point `<dir>` is *itself* a symlink to a directory, `-P` mode does not descend it — `find` treats the symlink as a leaf and emits nothing inside it. On macOS the marker dir defaults to `/tmp`, a symlink to `/private/tmp`, so `find "$MARKER_DIR" -maxdepth 1 -name '*-announced-*'` returned zero rows and the candidate-SID enumeration was silently empty. Verified empirically on Darwin: `find linkdir -maxdepth 1 -name '*-announced-*'` → empty; `find -L linkdir ...` → finds the marker. The `-L` flag (follow symlinks) fixes it portably — no-op on Linux (real `/tmp`), resolves the symlink on macOS.
+
+Note: `get_current_session_id` in `session-id.sh` uses a *shell glob* (`ls -t "${marker_dir}/${system}-announced-"*`), which the shell resolves through the symlink fine — so the single-SID discovery was unaffected. The bug bit only the `find`-based *multi-candidate* enumeration (`get_candidate_session_ids`, ADR-050 Option C) and the two inlined copies in the mark-oversight shims.
+
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Fix candidate: change `find "$MARKER_DIR" -maxdepth 1 ...` to `find -L "$MARKER_DIR" -maxdepth 1 ...` (follow-symlink flag) — minimal portable fix; works on Linux (no-op) AND macOS (resolves /tmp → /private/tmp). Alternative: `find "$MARKER_DIR"/ ...` (trailing slash forces symlink resolution on macOS). The `-L` flag is the canonical POSIX answer.
-- [ ] Sweep sibling shims for the same pattern: `wr-jtbd-mark-oversight-confirmed`, any other ADR-049 PATH shim that enumerates `/tmp/*-announced-*`. Apply the same fix.
-- [ ] Update the shim-wrapper template at `packages/shared/lib/shim-wrapper-template.sh` if the pattern appears there.
-- [ ] Behavioural bats fixture on macOS (run under TMPDIR=/tmp simulation): announce marker exists → enumeration finds it → marker written under candidate SID. Without the fix, the fixture FAILs; with the fix, PASSes.
-- [ ] Sibling concern: when the shim cold-paths (no candidate SIDs), should it print a stderr diagnostic instead of silent exit 0? The cold-path silent exit was designed for "before any hook has fired" but masks the symlink bug. Consider a stderr advisory under VERBOSE / debug env-var.
-- [ ] Create reproduction test
+- [x] Fix candidate: change `find "$MARKER_DIR" -maxdepth 1 ...` to `find -L "$MARKER_DIR" -maxdepth 1 ...` (follow-symlink flag) — **applied**. The `-L` flag is the canonical POSIX answer; works on Linux (no-op) AND macOS.
+- [x] Sweep sibling shims for the same pattern. **Three sites fixed**: `packages/architect/scripts/mark-oversight-confirmed.sh`, `packages/jtbd/scripts/mark-oversight-confirmed.sh`, `packages/itil/hooks/lib/session-id.sh` (`get_candidate_session_ids`). The two mark-oversight scripts are NOT synced (independent inlined copies per ADR-002 self-containment); each edited directly. `session-id.sh` is itil-only. No shared canonical exists for these — confirmed no sync-script governs them.
+- [x] Update the shim-wrapper template at `packages/shared/lib/shim-wrapper-template.sh` if the pattern appears there. **Not affected** — its `find` is `-type d` over `$CACHE_PARENT` (a real dir, not `/tmp`). `session-marker.sh` (the synced canonical) has no `find -announced-` enumeration. No template/synced-canonical change needed.
+- [x] Behavioural bats fixture. **Added 3** — point `SESSION_MARKER_DIR` at a symlink to the marker dir (reproduces the macOS `/tmp` shape on any platform): `session-id.bats` (concurrent-marker enumeration), `architect-oversight-marker-discipline.bats` + `jtbd-oversight-marker-discipline.bats` (end-to-end marker write). Verified RED without `-L`, GREEN with it. The session-id fixture needs a *second* concurrent marker because `get_current_session_id`'s glob masks the bug for the primary SID.
+- [ ] Sibling concern: when the shim cold-paths (no candidate SIDs), should it print a stderr diagnostic instead of silent exit 0? **Deferred — out of M scope.** Separate small enhancement; the silent exit no longer masks *this* bug now that enumeration works on macOS, but a VERBOSE/debug stderr advisory would still aid the genuine no-marker cold path (P368 territory). Re-rank at next /wr-itil:review-problems or fold into P368.
+- [x] Create reproduction test — covered by the three behavioural fixtures above.
 
 ## Dependencies
 

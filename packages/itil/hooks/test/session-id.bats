@@ -349,3 +349,22 @@ candidates() {
   # The concurrent announce marker is still enumerated alongside the env SID.
   [[ "$output" == *"$other_uuid"* ]]
 }
+
+# P380: on macOS /tmp is a symlink to /private/tmp. The `find <symlink>
+# -maxdepth 1` enumeration in get_candidate_session_ids in default (-P) mode
+# refuses to descend the start-point symlink, so it silently adds zero
+# concurrent SIDs; the `-L` flag follows it. (get_current_session_id uses a
+# shell glob (`ls`), which traverses the symlink regardless — so this test
+# needs a SECOND concurrent marker whose SID is reachable ONLY via the find
+# enumeration to isolate the bug.) RED without `-L`, GREEN with it.
+@test "candidates: enumerates concurrent markers when SESSION_MARKER_DIR is a symlink (P380 macOS /tmp)" {
+  primary_uuid="aabbccdd-0000-1111-2222-symlinkprim0"   # picked by get_current_session_id glob
+  concurrent_uuid="eeff0011-0000-1111-2222-symlinkconc0" # reachable only via the find enum
+  mark_announced "architect" "$primary_uuid"
+  mark_announced "jtbd" "$concurrent_uuid"
+  link_tmp="${SANDBOX_TMP}.link"
+  ln -s "$SANDBOX_TMP" "$link_tmp"
+  output=$(SESSION_MARKER_DIR="$link_tmp" bash -c "source '$HELPER'; get_candidate_session_ids")
+  rm -f "$link_tmp"
+  [[ "$output" == *"$concurrent_uuid"* ]]
+}
