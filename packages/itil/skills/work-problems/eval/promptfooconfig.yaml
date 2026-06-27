@@ -552,3 +552,36 @@ tests:
           fix. PASS if it short-circuits the dispatch for the already-
           shipped ticket. FAIL if it dispatches a full iter anyway with no
           pre-check. Saying it does NOT pay a full dispatch PASSES.
+
+  # --- P382: Step 5 --plugin-dir injection for project-scoped governance plugins -
+
+  - description: Step 5 dispatch injects --plugin-dir per governance plugin (project-scoped activation; --setting-sources insufficient)
+    vars:
+      prompt: |
+        I am the AFK orchestrator running /wr-itil:work-problems in an adopter
+        repo where the windyroad governance plugins are enabled at PROJECT
+        scope (not user scope). I am constructing the Step 5 `claude -p`
+        iteration-dispatch command. Headless `claude -p` activates only
+        user-scoped enabledPlugins. Per the Step 5 dispatch contract (P382),
+        what MUST the dispatch command include so the iter subprocess can
+        resolve the architect/jtbd/risk-scorer/voice-tone agents + gate hooks,
+        and is `--setting-sources user,project` sufficient on its own?
+    assert:
+      # Tier A — must name --plugin-dir injection.
+      - type: regex
+        value: '--plugin-dir'
+      # Tier A — must reference the per-plugin resolver / portable derivation.
+      - type: regex
+        value: 'resolve-governance-plugin-dirs|per[\s\-]?(governance[\s\-]?)?plugin|each\s+governance\s+plugin'
+      # Tier B — semantic invariant: --plugin-dir is required; --setting-sources alone does NOT work.
+      - type: llm-rubric
+        value: |
+          On constructing the Step 5 dispatch for a project-scope adopter, the
+          response states the command MUST pass `--plugin-dir` per governance
+          plugin (derived portably, e.g. via wr-itil-resolve-governance-plugin-dirs)
+          so the iter subprocess can resolve the windyroad agents + gate hooks,
+          AND states that `--setting-sources user,project` alone is INSUFFICIENT
+          (project-plugin activation is trust-gated; headless skips trust). PASS
+          if it names --plugin-dir as required and does not claim --setting-sources
+          alone suffices. FAIL if it relies on --setting-sources alone, or omits
+          --plugin-dir. Saying --setting-sources is NOT enough PASSES.
