@@ -118,12 +118,13 @@
 # repo with no remotes), Check 2b returns 1 (no in-range scope to
 # inspect) — Phase 1 strict-deny behaviour is preserved.
 #
-# Returns: 0 (an in-scope changeset covers the plugin → allow)
+# Returns: 0 (≥1 in-scope changeset targets the plugin → paths echoed on
+#            stdout, newline-separated, for the caller's change-scope check)
 #          1 (no covering changeset found → caller falls through)
 _changeset_in_scope_covers_plugin() {
   local slug="$1"
   local base
-  local candidates path
+  local candidates path found=""
 
   base=$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null) \
     || base="origin/main"
@@ -159,25 +160,55 @@ _changeset_in_scope_covers_plugin() {
     # awk scoping prevents false positives from prose body mentions.
     if awk '/^---[[:space:]]*$/ { c++; if (c == 1) next; if (c == 2) exit } c == 1 { print }' "$path" 2>/dev/null \
         | grep -qE "^\"@windyroad/${slug}\":[[:space:]]"; then
-      return 0
+      found="${found}${path}
+"
     fi
   done <<EOF
 $candidates
 EOF
 
-  return 1
+  [ -n "$found" ] || return 1
+  printf '%s' "$found"
+  return 0
+}
+
+# P387 helper — echo the space-separated, upper-cased, de-duplicated set of
+# work-item IDs found in the text passed as $1. Work-item identity = problem
+# ticket (`P<NNN>`), RFC (`RFC-<NNN>`), or story (`STORY-<NNN>`). ADR refs are
+# deliberately excluded — an ADR is cross-cutting context cited in passing, not
+# the identity of the change a changeset documents.
+#
+# Used to compare a committing change's ticket reference(s) (from the
+# git-commit COMMAND string) against an in-scope changeset's reference(s)
+# (filename + body). Matching is inclusive and case-insensitive: extracting a
+# spurious extra ID only widens the overlap (the allow direction) and can never
+# manufacture a false deny, which keeps Check 2b conservative.
+_work_item_ids() {
+  printf '%s' "$1" \
+    | grep -oiE '\b(P[0-9]+|RFC-[0-9]+|STORY-[0-9]+)\b' 2>/dev/null \
+    | tr '[:lower:]' '[:upper:]' \
+    | sort -u \
+    | tr '\n' ' '
 }
 
 # Detect whether the current staged set requires a changeset that is
 # not satisfied by either staged Check 2a or in-scope Check 2b.
 #
+# $1 (optional) — the git-commit COMMAND string (or commit message). Its
+#   work-item ID(s) are matched against in-scope changesets for the P387
+#   change-scoped Check 2b. Empty / omitted → Check 2b falls back to the
+#   pre-P387 plugin-scoped behaviour (any covering changeset allows), which
+#   is the conservative choice when no commit context is available.
+#
 # Echoes the offending plugin slug on stdout when detected.
 #
 # Returns:
 #   0 — no change required, BYPASS env set, fail-open, or an in-scope
-#       changeset covers the plugin (Phase 2 Check 2b)
-#   1 — change required + no covering changeset (caller should deny)
+#       changeset covers the plugin AND is change-scoped to it (Check 2b)
+#   1 — change required + no covering (or only unrelated-sibling) changeset
+#       (caller should deny)
 detect_changeset_required() {
+  local commit_msg="${1:-}"
   # Bypass via env var — single most-common legitimate escape.
   if [ "${BYPASS_CHANGESET_GATE:-}" = "1" ]; then
     return 0
@@ -270,12 +301,54 @@ EOF
     return 0
   fi
 
-  # Check 2b (P141 Phase 2) — in-scope changeset targeting the plugin
-  # satisfies. Scope = unpushed-range commits + untracked + modified-
-  # not-staged working-tree files. Once consumed onto origin, the
-  # changeset is gone and a fresh one is required.
-  if _changeset_in_scope_covers_plugin "$plugin_source_slug"; then
-    return 0
+  # Check 2b (P141 Phase 2 + P387 change-scoped) — an in-scope changeset
+  # targeting the plugin satisfies, but only when it is change-scoped to
+  # THIS commit. Scope = unpushed-range commits + untracked + modified-
+  # not-staged working-tree files. Once consumed onto origin, the changeset
+  # is gone and a fresh one is required.
+  local covering
+  if covering=$(_changeset_in_scope_covers_plugin "$plugin_source_slug"); then
+    # P387: tighten plugin-scoped → change-scoped. A plugin can carry a
+    # changeset for an unrelated change; before P387 that wrongly covered
+    # THIS commit, shipping it to npm with no CHANGELOG record of its own
+    # (witnessed: P164's fix rode P374's changeset). Deny only on positive
+    # evidence the covering changeset(s) belong to a DIFFERENT change: the
+    # commit cites work-item ID(s), EVERY covering changeset cites work-item
+    # ID(s), and none overlap. Any ambiguity allows — a ticket-less commit,
+    # a prose-only changeset, or an ID overlap — so the ADR-014 batch-grain
+    # (same-slice commits share a ticket) and prose-only / adopter changesets
+    # are never over-fired.
+    local commit_ids cs_path cs_ids id has_idless=0 overlap=0
+    commit_ids=$(_work_item_ids "$commit_msg")
+
+    # Commit cites no work-item ID → cannot change-scope; allow (pre-P387).
+    [ -n "$commit_ids" ] || return 0
+
+    while IFS= read -r cs_path; do
+      [ -n "$cs_path" ] || continue
+      cs_ids=$(_work_item_ids "${cs_path}
+$(cat "$cs_path" 2>/dev/null)")
+      if [ -z "$cs_ids" ]; then
+        has_idless=1
+        continue
+      fi
+      for id in $commit_ids; do
+        case " $cs_ids " in
+          *" $id "*) overlap=1; break ;;
+        esac
+      done
+      [ "$overlap" -eq 1 ] && break
+    done <<EOF
+$covering
+EOF
+
+    # Overlapping ID (same change) or a prose-only covering changeset
+    # (cannot prove it is for a different change) → allow.
+    if [ "$overlap" -eq 1 ] || [ "$has_idless" -eq 1 ]; then
+      return 0
+    fi
+    # Else: every covering changeset cites work-item ID(s), none matching
+    # the commit → unrelated-sibling signature → fall through to deny.
   fi
 
   printf '%s\n' "$plugin_source_slug"

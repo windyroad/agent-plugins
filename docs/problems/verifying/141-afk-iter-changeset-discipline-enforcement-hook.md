@@ -203,6 +203,10 @@ Full `packages/itil/hooks/test/` suite green: 153/153 (132 prior + 21 new). No r
 
 Full `packages/itil/hooks/test/` suite green: 377/377 (369 prior + 8 new). No regressions to Phase 1 / P177 / P272 fixtures.
 
+## Phase 3 — Check 2b change-scoped, not merely plugin-scoped (P387, 2026-06-27)
+
+Phase 2's in-range branch was **plugin-scoped**: any in-scope changeset targeting the plugin satisfied Check 2b — even one authored for an unrelated change. A plugin-source commit could therefore ship to npm with no CHANGELOG record of its own, riding a sibling changeset's coattails (witnessed: P164's octal-eval fix shipped undocumented under P374's changeset, `@windyroad/risk-scorer` 0.13.5/0.14.0). **P387** narrows that over-broad slice: Check 2b now keys on the committing change's **work-item ID** (`P<NNN>`/`RFC-<NNN>`/`STORY-<NNN>`, extracted from the `git commit` command the hook already parses) versus each covering changeset's IDs (filename + body), denying only on positive evidence of an unrelated sibling — the commit cites an ID, every covering changeset cites ID(s), and none overlap. Allow-on-ambiguity (ticket-less commit, prose-only changeset, or overlapping ID) preserves the ADR-014 batch-grain and never over-fires on prose-only / adopter changesets. Architect verdict 2026-06-27: same enforcement surface, no new ADR — symmetric to the Phase 1→2 "no new ADR" verdict (Phase 2 widened the allow path; Phase 3 narrows an over-broad slice of it). Resolution and the change-scoped-vs-file-intersection design rationale live in `docs/problems/open/387-*.md`.
+
 **Self-application**: the Phase 2 amendment itself was committed as a single ADR-014-grain commit (hook + bats + SKILL note + changeset + ticket transition + README refresh) in iter 7 of the 2026-05-31 AFK loop — the OLD Phase 1 cache was still active during this iter, so single-commit grain avoided needing `BYPASS_CHANGESET_GATE=1` for a second commit. Verification of the new Phase 2 behaviour requires release + marketplace cache refresh per P106 (`uninstall + install`).
 
 **Awaiting user verification**:

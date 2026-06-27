@@ -574,3 +574,87 @@ mark_origin_at_head() {
   [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
   [[ "$output" == *"P141"* ]]
 }
+
+# --- P387: Check 2b is change-scoped, not merely plugin-scoped ---
+#
+# P141 Phase 2's Check 2b passed a plugin-source commit if ANY in-scope
+# changeset targeted the plugin — even one authored for a DIFFERENT change.
+# So a change shipped to npm with no CHANGELOG record of its own, riding a
+# sibling changeset's coattails (witnessed: P164's octal fix shipped
+# undocumented under P374's changeset, @windyroad/risk-scorer 0.13.5/0.14.0).
+#
+# P387 tightens Check 2b to change-scoped via conservative work-item-ID
+# (ticket) keying. The commit's work-item IDs (P<NNN> / RFC-<NNN> /
+# STORY-<NNN>, extracted from the git-commit COMMAND string passed into the
+# helper) are compared against each in-scope covering changeset's work-item
+# IDs (extracted from its filename + body). Check 2b DENIES only on positive
+# evidence of an unrelated sibling: the commit cites work-item ID(s), EVERY
+# covering changeset cites work-item ID(s), and none overlap. Any ambiguity
+# allows — a ticket-less commit, a prose-only changeset, or an ID overlap.
+# This preserves the ADR-014 batch-grain (same-slice commits share a ticket,
+# so the slice's changeset still covers them) and never over-fires on
+# adopter/prose-only changesets that carry no ticket ref.
+
+@test "P387 deny: plugin-source commit citing a DIFFERENT ticket than the only in-scope changeset (unrelated sibling) denies" {
+  mark_origin_at_head
+  # Commit 1: P374's changeset + its source.
+  echo "p374 work" > packages/itil/skills/foo/SKILL.md
+  printf -- '---\n"@windyroad/itil": patch\n---\nP374 work. Refs: P374.\n' > .changeset/wr-itil-p374.md
+  git add packages/itil/skills/foo/SKILL.md .changeset/wr-itil-p374.md
+  git -c commit.gpgsign=false commit --quiet -m "fix(itil): P374 work (P374)"
+  # Commit 2: P164's UNRELATED fix — stages itil source, authors NO changeset.
+  # The only in-scope changeset is P374's. Change-scoped Check 2b must DENY.
+  echo "octal fix" > packages/itil/scripts/extract.sh
+  git add packages/itil/scripts/extract.sh
+  run run_bash_hook "git commit -m 'fix(itil): octal eval (P164)'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
+  [[ "$output" == *"P141"* ]]
+  [[ "$output" == *"itil"* ]]
+}
+
+@test "P387 allow: plugin-source commit citing the SAME ticket as the in-scope changeset (same change) allows" {
+  mark_origin_at_head
+  # Commit 1: P347's changeset + slice-1 source.
+  echo "p347 slice 1" > packages/itil/skills/foo/SKILL.md
+  printf -- '---\n"@windyroad/itil": patch\n---\nP347 slice. Refs: P347.\n' > .changeset/wr-itil-p347.md
+  git add packages/itil/skills/foo/SKILL.md .changeset/wr-itil-p347.md
+  git -c commit.gpgsign=false commit --quiet -m "feat(itil): P347 slice 1 (P347)"
+  # Commit 2: same P347 slice — no new changeset; the in-range P347 changeset
+  # shares the commit's ticket, so the ADR-014 batch is preserved. Allow.
+  echo "p347 slice 2" > packages/itil/skills/foo/SKILL.md
+  git add packages/itil/skills/foo/SKILL.md
+  run run_bash_hook "git commit -m 'feat(itil): P347 slice 2 (P347)'"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
+  [ "${#output}" -eq 0 ]
+}
+
+@test "P387 allow: plugin-source commit with NO work-item ID falls back to plugin-scoped allow (conservative)" {
+  mark_origin_at_head
+  # In-range changeset cites P374; the new commit cites no ticket at all —
+  # we cannot prove it is a DIFFERENT change, so we must not over-fire.
+  printf -- '---\n"@windyroad/itil": patch\n---\nsome fix. Refs: P374.\n' > .changeset/wr-itil-p374.md
+  git add .changeset/wr-itil-p374.md
+  git -c commit.gpgsign=false commit --quiet -m "chore: add changeset"
+  echo "skill body" > packages/itil/skills/foo/SKILL.md
+  git add packages/itil/skills/foo/SKILL.md
+  run run_bash_hook "git commit -m 'feat without a ticket ref'"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
+}
+
+@test "P387 allow: prose-only in-scope changeset (no work-item ID) does not over-fire even when the commit cites a ticket" {
+  mark_origin_at_head
+  # An adopter (or a plain) changeset with no ticket ref in filename or body.
+  # The commit cites P164, but we cannot prove the prose-only changeset is for
+  # a different change, so Check 2b allows (no over-fire on prose changesets).
+  printf -- '---\n"@windyroad/itil": patch\n---\nfix the thing\n' > .changeset/wr-itil-feature.md
+  git add .changeset/wr-itil-feature.md
+  git -c commit.gpgsign=false commit --quiet -m "chore: add changeset"
+  echo "skill body" > packages/itil/skills/foo/SKILL.md
+  git add packages/itil/skills/foo/SKILL.md
+  run run_bash_hook "git commit -m 'fix(itil): a thing (P164)'"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
+}

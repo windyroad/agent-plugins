@@ -1,12 +1,13 @@
 # Problem 387: changeset-discipline Check 2b is plugin-scoped not change-scoped — plugin-source commits ship undocumented when a sibling changeset already targets the plugin
 
-**Status**: Open
+**Status**: Verifying
 **Reported**: 2026-06-27
 **Priority**: 9 (Medium) — Impact: 3 x Likelihood: 3
 **Origin**: internal
 **Effort**: M
 **JTBD**: JTBD-006
 **Persona**: plugin-developer
+**Release vehicle**: `.changeset/wr-itil-p387-change-scoped-changeset-check.md` → `@windyroad/itil` patch (pending next release)
 
 ## Description
 
@@ -36,10 +37,10 @@ Check 2b answers "does this plugin have a changeset?" not "does THIS change have
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Tighten Check 2b in `changeset-detect.sh` to **change-scoped**: require a changeset whose covered files (or whose linked ticket's release-vehicle) intersect the commit's changed plugin-source files — not merely a changeset targeting the plugin
-- [ ] Weigh against the ADR-014 batch-grain tradeoff: legitimate batched commits may intentionally group changes under one changeset; the tighter check must not over-fire on those. Consider keying on linked-ticket / release-vehicle rather than raw file intersection
-- [ ] Behavioural bats: plugin-source commit with a sibling-but-unrelated changeset DENIES; commit covered by its own (or a genuinely-covering) changeset PASSES
-- [ ] Decide canonical vs synced hook locus (edit packages/shared canonical + sync per the synced-hook discipline)
+- [x] Tighten Check 2b in `changeset-detect.sh` to **change-scoped** — keyed on **linked work-item ID** (`P<NNN>`/`RFC-<NNN>`/`STORY-<NNN>`), NOT raw file intersection. Rationale: a changeset declares no file manifest, so file-set intersection would deny later same-slice commits that touch different files than the changeset-introducing commit (over-fire on legitimate ADR-014 batches). The commit's work-item ID (from the `git commit` command the hook already parses) is matched against each in-scope covering changeset's IDs (filename + body). Deny only on positive evidence of an unrelated sibling: commit cites an ID, every covering changeset cites ID(s), none overlap.
+- [x] Weigh against the ADR-014 batch-grain tradeoff — resolved by allow-on-ambiguity: a ticket-less commit, a prose-only changeset, or an overlapping ID all ALLOW. Same-slice multi-commit batches share the slice's ticket, so one changeset still covers them; prose-only / adopter changesets that carry no ticket ref are never over-fired.
+- [x] Behavioural bats: unrelated-sibling DENIES; same-ticket allows; ticket-less commit allows; prose-only changeset allows (4 fixtures added; full suite 48/48 green)
+- [x] Decide canonical vs synced hook locus — `changeset-detect.sh` is NOT synced (single copy in `packages/itil/hooks/lib/`); edited in place, no sync script needed.
 
 ## Dependencies
 

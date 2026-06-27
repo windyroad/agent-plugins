@@ -97,8 +97,10 @@ command_invokes_git_commit "$COMMAND" || exit 0
 
 # Run detection. Helper echoes offending plugin slug on stdout when
 # detected; returns 1 in that case. Returns 0 (allow) on no-trap,
-# bypass env, or fail-open (non-git tree, parse error).
-TRAPPED_SLUG=$(detect_changeset_required 2>/dev/null) && exit 0
+# bypass env, or fail-open (non-git tree, parse error). The COMMAND is
+# passed so Check 2b can change-scope to the commit's work-item ID (P387):
+# an in-scope changeset for an UNRELATED ticket no longer covers this commit.
+TRAPPED_SLUG=$(detect_changeset_required "$COMMAND" 2>/dev/null) && exit 0
 
 # Trap detected — emit deny with terse recovery.
 # Voice-tone budget per ADR-045 deny-band ≤300 bytes total. Names the
