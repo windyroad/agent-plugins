@@ -1,7 +1,13 @@
 # Problem 372: ADR-043 context-budget delta-trigger lacks an absolute-byte floor — fires deep-layer on negligible deltas
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-06-17
+
+## Fix Released
+
+Released 2026-06-27 in `@windyroad/retrospective` (changeset `p372-context-budget-delta-absolute-floor.md`). Step 2c's ADR-043 delta-breach trigger now requires `>20% delta AND >10240 bytes` (absolute-byte AND-gate), so a tiny bucket's 20% wobble no longer fires the deep layer; ADR-043 amended with the floor; paired run-retro promptfoo case GREEN (the suite went 7/7 after P393's calibration). Reinstated from holding by P393's iter once the run-retro eval suite was green, then released. Transitioned K→V in the post-release batch.
+
+**Awaiting user verification** — confirm the deep-context analysis no longer auto-fires on a negligible-byte bucket delta.
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: internal
 **Effort**: S (was M; the fix is a prose AND-gate on the existing delta axis + a one-line ADR amendment + one eval case — no script change)

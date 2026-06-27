@@ -1,7 +1,13 @@
 # Problem 393: run-retro promptfoo eval — Step 4b Stage 2 fix-strategy case is mis-calibrated (6 brittle Tier-A regexes), blocks suite green
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-06-27
+
+## Fix Released
+
+Released 2026-06-27 in `@windyroad/retrospective` (changeset `p393-run-retro-silent-delete-reconcile.md`). All 7 run-retro eval cases were recalibrated (brittle multi-part Tier-A regexes demoted to Tier-B `llm-rubric` per P270); the recalibrated Tier-B rubric also caught + reconciled a genuine Step 1.5 silent-delete self-contradiction in the SKILL prose (the delete queue is silent per ADR-044/P132, not a batched AskUserQuestion). Suite now 3× consecutive 7/7 GREEN. The stale structural test 2389 was repointed to the silent-delete contract (fix-and-continue, architect PASS). Discharging the run-retro R009 prose-floor unblocked + released P372.
+
+**Awaiting user verification** — confirm `npx promptfoo eval` on the run-retro suite stays GREEN and the Step 1.5 silent-delete contract holds.
 **Priority**: 6 (Medium) — Impact: 2 x Likelihood: 3
 **Origin**: internal
 **Effort**: M
