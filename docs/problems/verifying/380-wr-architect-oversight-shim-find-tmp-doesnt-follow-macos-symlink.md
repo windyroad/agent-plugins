@@ -1,7 +1,13 @@
 # Problem 380: wr-architect-mark-oversight-confirmed shim's find /tmp doesn't follow macOS /tmp → /private/tmp symlink
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-06-26
+
+## Fix Released
+
+Released 2026-06-27 in `@windyroad/{architect,jtbd,itil}` patches (release vehicle `.changeset/p380-oversight-shim-find-tmp-macos-symlink.md`). The `find` → `find -L` follow-symlink fix landed at 3 candidate-SID enumeration sites (architect + jtbd mark-oversight-confirmed shims + itil session-id.sh); 3 behavioural bats red→green. Transitioned Known Error → Verifying by the work-problems Step 6.5 post-release K→V enumerator (seeded release-vehicle resolved cleanly — the P389 seed-discipline working).
+
+**Awaiting user verification** — confirm on macOS that the oversight-marker enumeration now resolves under the /tmp→/private/tmp symlink (markers written under candidate SIDs, not silently zero).
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: internal
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
