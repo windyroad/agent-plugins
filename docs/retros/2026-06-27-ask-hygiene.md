@@ -15,3 +15,9 @@
 **Correction-followup count: 0**
 
 Note: a single batched AskUserQuestion (3 questions) fired during the user's stated 2-minute window — all three were genuine framework-unresolvable direction/deviation-approval per ADR-044. No lazy asks.
+
+---
+
+## P373 AFK iter (github-issues non-discarding poll)
+
+0 `AskUserQuestion` calls (AFK; constraints forbid AskUserQuestion — queue to outstanding_questions). Lazy count: 0. All decisions framework-resolved (manage-problem SKILL contract, R009 hold, ADR-014 commit grain) or delegated to architect/JTBD/risk-scorer agents.
