@@ -52,6 +52,16 @@ The solution-space investigation this ticket was opened to do is **complete and 
 
 **Remaining P324 work is implementation, not investigation** — the RFC-012 S1–S5 build (L effort: root devDependency, per-package eval configs, Tier-A/Tier-B CI + release wiring, structural-bats retirement). Per the AFK no-implement scope (ADR-074 substance-confirm is already satisfied by ADR-075's confirmed oversight; the gate here is build-effort/release-class, not missing direction), this is **queued for a dedicated RFC-012 build session**, not progressed in an RCA iteration. P324 stays Open until the S1–S5 harness build retires the agent-prose escape hatch and graduates the agent-verdict release class within appetite.
 
+### Build progress (2026-06-27 — RFC-012 S1 landed)
+
+**Release vehicle (S1 slice)**: .changeset/wr-jtbd-p324-agent-prose-eval-s1.md (`@windyroad/jtbd` patch). P324 stays Open — this ships S1 only, not the full S1–S5 close.
+
+**S1 (jtbd agent eval primitive) is GREEN and committed.** `packages/jtbd/agents/eval/` now carries the FIRST behavioural harness for an agent-prose verdict surface — the real jtbd review agent (`claude -p --system-prompt "$(cat agent.md)"`, subscription auth) exercised against two fixtures, Tier-A `icontains` + Tier-B `llm-rubric`, eval GREEN ×3 consecutive. Tarball-excluded via `files`-field `!agents/eval/`. This is the agent-prose twin of the S6 SKILL-eval and the existence proof that ADR-075's two-tier harness works for agents.
+
+**Drain-state finding (re-rate the RFC fixture spec):** both governance oversight drains have CLOSED — **0 unratified jtbd jobs/personas** (P288 complete) and **0 unratified ADRs**. So the canonical positive-fire `[Unratified Dependency]` fixture the RFC-012 S1 spec called for cannot be built against live docs; it is split out to **RFC-012 S1b** (synthetic fixture corpus). agent.md line 78's "the P288 drain is in progress" premise is now stale (cosmetic; not blocking).
+
+**Remaining for P324 close:** S1b (synthetic-corpus positive-fire), S2 (root test glob + CI wiring — Tier A), S3 (release-gate Tier B + `CLAUDE_CODE_OAUTH_TOKEN`), S4 (retire the architect RFC-010 + jtbd RFC-011 structural escape-hatch bats → advance P290), S5 (graduate RFC-011 within appetite on Tier-B-at-release evidence). The architect-surface agent eval (the other S1 candidate) is also still to build.
+
 ## Dependencies
 
 - **Blocks**: `P290` (remove ADR-052 structural escape hatch — needs a behavioural alternative first); within-appetite release of every agent-verdict change (RFC-010, RFC-011, and future).

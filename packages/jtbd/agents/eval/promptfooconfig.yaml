@@ -1,0 +1,138 @@
+# Agent-prose verdict eval — jtbd review agent (RFC-012 S1 / P324).
+#
+# The FIRST behavioural harness for an agent-prose verdict surface (the jtbd
+# review agent's PASS / ISSUES FOUND / [Unratified Dependency] verdicts). It
+# exercises the REAL agent (`claude -p --system-prompt "$(cat ../agent.md)"`,
+# subscription auth) against fixture proposed-changes and asserts on the
+# emitted verdict — the behavioural alternative to the ADR-052 Surface-2
+# structural-grep escape hatch that RFC-010/RFC-011 shipped under. This is the
+# agent-prose twin of the SKILL evals (packages/itil/skills/*/eval/).
+#
+# Two tiers (ADR-075):
+#   - Tier A: deterministic `icontains` positive anchors on verdict tokens.
+#   - Tier B: `llm-rubric` for the negative-clause / semantic checks that a
+#     regex cannot grade without false-failing (the P270 not-regex lesson —
+#     a not-regex for "Unratified Dependency" fires on the CORRECT answer
+#     "does NOT raise an [Unratified Dependency] flag"). See
+#     docs/briefing/promptfoo-eval-authoring.md.
+#
+# COVERAGE NOTE (RFC-012 S1, drain state 2026-06-27): the canonical
+# positive-fire [Unratified Dependency] fixture ("cite an unratified job →
+# expect the flag") is NOT included here. The P288 jtbd oversight drain has
+# completed — all 18 jtbd jobs/personas are `human-oversight: confirmed`, so
+# no live unratified artifact exists to cite, and the shim resolves only the
+# live docs/jtbd root. The positive-fire branch needs a synthetic fixture
+# corpus and is tracked as RFC-012 S1b (do NOT let it rot into prose-only).
+# The two fixtures below pin the drain-INDEPENDENT properties: correct PASS
+# classification, and the inverse-P078/P132 over-fire guard (which still
+# exercises the ratification decision path — the agent must decide NOT to
+# fire). See P324 + RFC-012.
+#
+# Run from repo root:
+#   npx promptfoo eval -c packages/jtbd/agents/eval/promptfooconfig.yaml
+#
+# @jtbd JTBD-001 (Enforce Governance Without Slowing Down)
+# @jtbd JTBD-002 (Ship AI-Assisted Code with Confidence)
+# @jtbd JTBD-006 (Progress the Backlog While I'm Away)
+# @problem P324
+# @rfc RFC-012 S1
+# @adr ADR-075 (per-package agent eval; Tier-A/Tier-B)
+# @adr ADR-052 (behavioural-tests-default; Surface-2 narrowing)
+
+description: |
+  jtbd review-agent verdict eval — correct PASS classification on a ratified
+  job citation, and the inverse-P078/P132 over-fire guard ([Unratified
+  Dependency] must NOT fire on ambient alignment with no explicit dependency).
+
+providers:
+  # Path is relative to this config file's directory (promptfoo basePath).
+  - id: 'exec:bash ./run-agent-eval.sh'
+
+# Tier-B (llm-rubric) grading provider — claude under subscription auth (no
+# API key) via grade-llm-rubric.sh. Negative-clause semantics route here.
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: PASS on a proposal citing a ratified job (JTBD-006), no over-fire
+    vars:
+      prompt: |
+        PRE-EDIT alignment gate. Review this PROPOSED change against the
+        documented jobs and personas in docs/jtbd/.
+
+        Proposed change: edit `packages/itil/skills/work-problems/SKILL.md`
+        to improve the AFK orchestrator loop that drains the problem backlog
+        by WSJF priority while the user is away. The change adds an
+        `@jtbd JTBD-006` annotation marking the file as serving that job.
+        Nothing else in the jtbd corpus changes.
+
+        Classify the alignment of this proposal and give your verdict inline,
+        beginning with the `JTBD Review:` verdict line.
+    assert:
+      # Tier A — must emit the PASS verdict outcome token. (Distinctive verdict
+      # name; reliable in both full-template and terse-summary stdout. The job
+      # ID and verdict-template citation are variance-prone in agent stdout —
+      # the agent sometimes writes the full verdict only to the marker file —
+      # so they route to the Tier-B rubric, per the promptfoo-eval-authoring
+      # briefing.)
+      - type: icontains
+        value: 'PASS'
+      # Tier B — verdict is PASS, names JTBD-006, and does NOT over-fire the
+      # build-upon guard (JTBD-006 is ratified). The negation makes this a
+      # Tier-B-only check.
+      - type: llm-rubric
+        value: |
+          Two conditions, BOTH required: (1) the verdict is PASS — it says
+          "JTBD Review: PASS" or clearly classifies the proposal as
+          aligned/passing/proceed; AND (2) it does NOT raise an [Unratified
+          Dependency] flag (JTBD-006 carries human-oversight: confirmed, so
+          the build-upon guard must not fire). An output that explicitly says
+          it does NOT raise the flag satisfies (2) (a negation PASSES).
+          Naming JTBD-006 (Progress the Backlog While I'm Away) as the served
+          job strengthens the answer but is NOT required to pass — headless
+          stdout is sometimes terse. FAIL only if the verdict is not PASS, OR
+          if an [Unratified Dependency] flag is raised against this
+          ratified-job-citing change.
+
+  - description: Over-fire guard — ambient change, no explicit cite, no [Unratified Dependency]
+    vars:
+      prompt: |
+        PRE-EDIT alignment gate. Review this PROPOSED change against the
+        documented jobs and personas in docs/jtbd/.
+
+        Proposed change: a small formatting-only refactor to
+        `packages/itil/skills/list-problems/SKILL.md` that adjusts the column
+        widths of the read-only backlog table it prints. The change adds NO
+        `@jtbd` annotation and cites no persona or job. It is a purely
+        presentational tweak with no new user flow.
+
+        Classify the alignment of this proposal and give your verdict inline,
+        beginning with the `JTBD Review:` verdict line. State explicitly
+        whether you raise an [Unratified Dependency] flag.
+    assert:
+      # Tier A — verdict-outcome token (a presentational no-flow change is a
+      # PASS per agent.md's structural carve-out). Reliable in terse + full
+      # stdout; the over-fire-guard semantics route to Tier-B.
+      - type: icontains
+        value: 'PASS'
+      # Tier B — the over-fire guard: a change citing NO explicit persona/job
+      # dependency must NOT trip the build-upon guard (inverse-P078/P132,
+      # agent.md). not-regex on "[Unratified Dependency]" false-fails the
+      # correct "does NOT raise [Unratified Dependency]" — so Tier-B only.
+      - type: llm-rubric
+        value: |
+          The response does NOT raise an [Unratified Dependency] flag. The
+          proposed change cites no explicit `@jtbd` annotation, persona, or
+          job, so the build-upon guard must not fire on it (ambient alignment
+          alone must never trip the guard — the inverse-P078/P132 over-fire
+          guard). PASS if no [Unratified Dependency] flag is raised (a verdict
+          of PASS, or any other verdict that does not include an Unratified
+          Dependency finding, satisfies this). An output that explicitly says
+          it does NOT raise the flag PASSES. FAIL only if the response raises
+          an [Unratified Dependency] finding against this dependency-free
+          change.
