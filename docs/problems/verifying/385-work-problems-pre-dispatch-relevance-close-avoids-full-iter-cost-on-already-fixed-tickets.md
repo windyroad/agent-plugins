@@ -1,9 +1,16 @@
 # Problem 385: work-problems re-dispatches already-fixed tickets at full iter cost; add a cheap pre-dispatch relevance-close
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-06-26
 **Priority**: 8 (Medium) — Impact: 2 x Likelihood: 4
 **Origin**: inbound-reported (#284)
+**Release vehicle**: .changeset/work-problems-pre-dispatch-relevance-gate.md
+
+## Fix Released
+
+Released in `@windyroad/itil` patch 2026-06-27 (release vehicle `.changeset/work-problems-pre-dispatch-relevance-gate.md`, shipped this `/wr-itil:work-problems` session alongside the work-problems eval cohort-coverage extension). The Step 3.6 pre-dispatch relevance gate is now in the published SKILL; its behaviour is covered GREEN by the work-problems promptfoo eval (12/12, P385 case). Transitioned K→V manually because the iter omitted the P330 release-vehicle seed (now backfilled above), so the post-release K→V enumerator skipped it (derive exit 2).
+
+**Awaiting user verification** — confirm a real AFK work-problems run short-circuits an already-shipped selected ticket at Step 3.6 (cheap relevance-close) instead of paying a full iteration dispatch.
 **Effort**: M
 **JTBD**: JTBD-001
 **Persona**: plugin-developer
