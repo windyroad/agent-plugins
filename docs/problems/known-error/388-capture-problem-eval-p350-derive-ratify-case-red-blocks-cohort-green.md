@@ -1,6 +1,6 @@
 # Problem 388: capture-problem promptfoo eval — P350 derive-ratify brief-before-ID case is red, blocking the P199/P350/P383 cohort from green
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-06-27
 **Priority**: 6 (Medium) — Impact: 2 x Likelihood: 3
 **Origin**: internal
@@ -60,14 +60,18 @@ None — the cohort stays held until the case goes green.
 
 ## Root Cause Analysis
 
-Likely a mis-calibrated Tier-B `llm-rubric` (same class as the P270 / P012-reopen 2026-06-04 finding — `not-regex` on negative clauses / grader strictness false-failing correct brief-before-ID outputs). Could also be a grader non-determinism flake. Needs a focused calibration pass.
+**Confirmed (2026-06-27) — flaky multi-part/semantic Tier-A regexes, NOT a stable red and NOT a SKILL defect (the P393 sibling pattern exactly).** Re-running the suite 3× surfaced a *different* case red each run (run 1: the P350 brief-before-ID case; run 2: 2 cases; run 3: the Step 2b hang-off-check case on the compound `ADR-032|5th invocation|fresh-context-subagent` token). The model answered every case behaviourally-correctly — it just phrased the substance outside the brittle alternation ~1-in-3 (e.g. "fresh-context isolation" instead of the compound `fresh-context-subagent` token; "documented as ADR-032's pattern" missing the literal). Per P(all green) ≈ (2/3)^N across N flaky cases, the suite was rarely fully green by chance. Same class as P270 / P393 — over-brittle positive Tier-A on free-form prose — but here it is PURELY a calibration issue: unlike P393, no genuine capture-problem SKILL self-contradiction was found (the SKILL prose is correct; the eval mis-read it).
+
+## Fix Implemented (2026-06-27)
+
+Calibrated 6 cases per the P270/P393 pattern: demoted the paraphrasable semantic Tier-A alternations to the already-comprehensive Tier-B `llm-rubric` in each case, keeping Tier-A ONLY for distinctive paraphrase-proof anchors — file paths (`docs/problems/README.md`, `docs/jtbd`), command/subagent names (`wr-itil:hang-off-check`, `/wr-itil:review-problems`), citation/classification/verdict tokens (`ADR-014`, `ADR-074`, `ADR-044`/`category 4`, `JTBD-007`, `HANG_OFF`, `PROCEED_NEW`), and structural format lines (`Impact: [1-5]`, `Likelihood: [1-5]`, `(S|M|L|XL)` — P375 case left intact, those are paraphrase-proof). The Tier-B rubric was already authoritative for every demoted clause. Also appended the drafted P383 `--persona` adopter-corpus case (calibrated to its `docs/jtbd` anchor). Suite went **3× consecutive 8/8 GREEN**. Tarball-excluded test-infra (`skills/*/eval/` per packages/itil/.npmignore) — no `.changeset/` entry.
 
 ### Investigation Tasks
 
-- [ ] Re-run the eval 2-3× to rule out grader non-determinism (flake vs stable red)
-- [ ] Inspect the P350 case's Tier-B llm-rubric; re-scope per the P270 fix pattern (positive Tier-A anchors + paraphrase-proof rubric; avoid not-regex on negated clauses)
-- [ ] Confirm 8/8 GREEN (incl. the committed P383 case)
-- [ ] Then graduate the capture-problem held cohort (P199 / P350 / P383) via interactive Step 6.5 Rule 4
+- [x] Re-run the eval 2-3× to rule out grader non-determinism — **flake confirmed**: a different case failed each run (P350, then 2 cases, then Step 2b), all behaviourally-correct outputs.
+- [x] Inspect the brittle Tier-A; re-scope per the P270 fix pattern — demoted semantic alternations to Tier-B across 6 cases; Tier-A keeps distinctive anchors only.
+- [x] Confirm 8/8 GREEN (incl. the committed P383 case) — 3× consecutive 8/8 GREEN.
+- [ ] Then graduate the capture-problem held cohort (P199 / P350 / P352 / P383) — eval-floor now met; graduate within appetite per ADR-061 Rule 4 + ADR-042.
 
 ## Dependencies
 

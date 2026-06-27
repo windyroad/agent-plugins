@@ -146,15 +146,16 @@ tests:
         trailer, or is the P165 README-refresh-discipline hook satisfied
         another way? Is this a single commit or split across two?
     assert:
-      # Tier A — must stage the README inline.
+      # Tier A — distinctive anchors only (P393/P270 calibration 2026-06-27):
+      # the README path the answer must name + the ADR-014 grain citation. The
+      # "single commit" / "inline / not-deferred" semantic alternations were
+      # DEMOTED to the Tier-B rubric below — paraphrasable, and they flaked
+      # when the model said "both go in the one commit" / "staged together".
+      # The rubric asserts inline staging + single ADR-014 grain + no bypass.
       - type: icontains
         value: 'docs/problems/README.md'
-      # Tier A — must reference the single ADR-014 commit grain.
       - type: regex
-        value: 'single\s+commit|same\s+commit|ADR-014|one\s+commit'
-      # Tier A — must reference the inline / not-deferred semantic.
-      - type: regex
-        value: 'inline|not\s+deferred|in[\s\-]?same[\s\-]?commit|alongside'
+        value: 'ADR-014'
       # NOTE: The Tier-A `not-icontains 'RISK_BYPASS: capture-deferred-readme'`
       # check was removed — behaviourally-correct responses quote the trailer
       # name to say it's DROPPED under P199 Option 2, false-failing the
@@ -207,13 +208,14 @@ tests:
         (one per line). The 4th Reject option is out of scope for this
         prompt.
     assert:
-      # Tier A — must inline plain-language job/persona substance.
-      - type: regex
-        value: 'governance|enforce|gate'
-      - type: regex
-        value: 'AFK|backlog|away|progress'
-      - type: regex
-        value: 'extend|plugin\s+suite|new\s+plugin'
+      # Tier A — DEMOTED (P393/P270 calibration 2026-06-27). The three
+      # substance-word regexes (governance / AFK / extend-plugin-suite) are
+      # paraphrasable glosses of the JTBD job statements, not distinctive
+      # anchors — a behaviourally-correct label that briefs the same substance
+      # in different words (e.g. "ship governance checks without manual
+      # overhead") flaked the alternation ~1-in-3. The Tier-B rubric below is
+      # the authoritative brief-before-ID check and already asserts each
+      # label inlines the job statement + persona constraint before any ID.
       # NOTE: The Tier-A `not-regex` patterns enforcing "no bare ID at line
       # start/end" were removed — they used Perl-style inline flags `(?im)`
       # which JavaScript regex (promptfoo's engine) does not support
@@ -260,18 +262,15 @@ tests:
         specific ADR that authorises any carve-out from the universal
         default. Be specific about whether a local ticket is created.
     assert:
-      # Tier A — must HALT, not queue-and-continue.
+      # Tier A — distinctive citation anchor only (P393/P270 calibration
+      # 2026-06-27): ADR-074 is the authorising decision the prompt asks the
+      # model to cite by ID — paraphrase-proof. The halt / stderr-directive /
+      # no-ticket clauses were DEMOTED to the Tier-B rubric below; they are
+      # semantic and flaked when the model phrased the same behaviour
+      # differently ("refuses the capture", "exits without writing a ticket").
+      # The rubric asserts HALT-with-stderr + ADR-074 carve-out + no-ticket.
       - type: regex
-        value: '\bhalt\b|halts|halt-with-stderr|halt[\s\-]?with[\s\-]?stderr|exit\s+non[\s\-]?zero'
-      # Tier A — must cite ADR-074 explicitly.
-      - type: regex
-        value: 'ADR-074|substance[\s\-]?confirm|confirm[\s\-]?decision[\s\-]?substance'
-      # Tier A — must reference the stderr-directive surface.
-      - type: regex
-        value: 'stderr|directive|cannot\s+derive'
-      # Tier A — no local ticket created.
-      - type: regex
-        value: 'no\s+(?:local\s+)?ticket|no\s+ticket\s+created|capture\s+refused'
+        value: 'ADR-074'
       # Tier B — semantic invariant: AFK halt-with-stderr-directive is a
       # documented ADR-074 carve-out from the universal queue-and-continue
       # default; rationale is that capture-problem creates a durable
@@ -318,21 +317,17 @@ tests:
         ADR-044 category does the silent-proceed path fall under? Be
         specific about the stderr advisory string emitted.
     assert:
-      # Tier A — must silent-proceed (not fire AskUserQuestion).
-      - type: regex
-        value: 'silent[\s\-]?proceed|silent[\s\-]?framework|does\s+not\s+(?:fire|prompt)|no\s+AskUserQuestion|skip(?:s)?\s+the\s+AskUserQuestion'
-      # Tier A — must name lexical detection as the resolution mechanism.
-      - type: regex
-        value: 'lexical\s+(?:detect|JTBD-trace|grep)|grep\s+-oE'
-      # Tier A — must name JTBD-007 as the detected ID.
+      # Tier A — distinctive anchors only (P393/P270 calibration 2026-06-27):
+      # the detected ID the model must echo + the ADR-044 category citation
+      # the prompt explicitly asks for. The silent-proceed / lexical-detector
+      # / stderr-advisory clauses were DEMOTED to the Tier-B rubric below —
+      # paraphrasable, and they flaked when the model said "proceeds without
+      # prompting" / "the regex detector pulls the trace". The rubric asserts
+      # silent-proceed + stderr advisory + ADR-044 category 4.
       - type: regex
         value: 'JTBD-007'
-      # Tier A — must reference the stderr advisory shape.
       - type: regex
-        value: 'stderr\s+advisory|derived\s+jtbd|advisory'
-      # Tier A — must name ADR-044 category 4 as silent-framework.
-      - type: regex
-        value: 'silent[\s\-]?framework|category\s+4|ADR-044'
+        value: 'category\s+4|ADR-044'
       # Tier B — semantic invariant: lexical detection silent-proceeds with
       # a stderr advisory; ADR-044 category 4 silent-framework path; the
       # AskUserQuestion fallback fires only on derive-failure.
@@ -373,18 +368,14 @@ tests:
         regardless? Be specific about where (if anywhere) the matches
         surface, and where duplicate resolution actually happens.
     assert:
-      # Tier A — must proceed (not halt, not branch).
+      # Tier A — distinctive command anchor only (P393/P270 calibration
+      # 2026-06-27): review-problems is the named resolution surface. The
+      # proceed / list-matches / title-only-shape clauses were DEMOTED to the
+      # Tier-B rubric below — paraphrasable, and they flaked when the model
+      # said "capture goes ahead" / "the hits are recorded in the report".
+      # The rubric asserts proceed + list-only + review-problems resolution.
       - type: regex
-        value: 'proceed|continue(?:s)?|does\s+not\s+halt|no\s+halt'
-      # Tier A — must reference reporting matches.
-      - type: regex
-        value: 'list(?:ed)?|report|final\s+report|surface(?:d)?'
-      # Tier A — must reference review-problems as the resolution surface.
-      - type: regex
-        value: '/wr-itil:review-problems|review-problems|next\s+review|cluster\s+pass'
-      # Tier A — must reference the title-only / conservative shape.
-      - type: regex
-        value: 'title[\s\-]?only|filename|conservative|3[\s\-]?keyword'
+        value: '/wr-itil:review-problems|review-problems'
       # Tier B — semantic invariant: title-only grep is conservative by
       # design (P155 line 24); matches are listed in the final report but
       # capture proceeds; user can resolve duplicates at the next
@@ -426,27 +417,21 @@ tests:
         the subagent run (parent-session context or fresh isolated
         context)? Why is fresh-context required?
     assert:
-      # Tier A — must dispatch the hang-off-check subagent.
+      # Tier A — distinctive paraphrase-proof anchors only (P393/P270
+      # calibration 2026-06-27): the subagent name + the two verdict tokens
+      # the prompt explicitly asks the model to NAME. The semantic clauses
+      # (fresh-context / halt / continue / ADR-032 "5th invocation") were
+      # DEMOTED to the Tier-B rubric below — they are paraphrasable and
+      # flaked ~1-in-3 (the model answers correctly but phrases "fresh-context
+      # isolation" / "documented as ADR-032's pattern" outside the alternation;
+      # the compound `fresh-context-subagent` token in particular missed). The
+      # rubric already asserts every one of those substance dimensions.
       - type: icontains
         value: 'wr-itil:hang-off-check'
-      # Tier A — must reference fresh-context (not parent-session bias).
-      - type: regex
-        value: 'fresh[\s\-]?context|fresh\s+session|isolated|no\s+parent[\s\-]?session'
-      # Tier A — must name HANG_OFF verdict.
       - type: regex
         value: 'HANG_OFF:?\s*P|HANG[\s\-]?OFF'
-      # Tier A — must name PROCEED_NEW verdict.
       - type: regex
         value: 'PROCEED_NEW|PROCEED\s+NEW'
-      # Tier A — must halt on HANG_OFF.
-      - type: regex
-        value: 'halt|halts\s+capture|halts?\s+the\s+capture'
-      # Tier A — must continue on PROCEED_NEW (and append to ## Related).
-      - type: regex
-        value: 'Related|append|continue|proceed'
-      # Tier A — must reference the 5th invocation pattern / ADR-032.
-      - type: regex
-        value: 'ADR-032|5th\s+invocation|fresh[\s\-]?context[\s\-]?subagent'
       # Tier B — semantic invariant: hang-off-check is the fresh-context-
       # subagent-as-decision-arbiter pattern (ADR-032 5th invocation);
       # HANG_OFF: P<NNN> halts capture + emits structured directive to
@@ -541,3 +526,36 @@ tests:
           `Likelihood: 1` false-low, or appends a "not estimated" / "no
           prior data" / "re-rate later" marker. Saying it does NOT defer /
           does NOT add a sentinel PASSES.
+
+  # --- P383: Step 1.5b --persona accepts an adopter-corpus dir name ----------
+
+  - description: Step 1.5b --persona accepts a valid adopter-corpus persona dir name; enum is fallback only
+    vars:
+      prompt: |
+        I am invoking /wr-itil:capture-problem in an ADOPTER repo whose
+        persona corpus is docs/jtbd/{smb-owner,advisor,maintainer}/ (none
+        of the plugin home-repo names). The caller passed
+        `--persona=maintainer`, and docs/jtbd/maintainer/ exists on disk
+        with a JTBD whose frontmatter names that persona. Is `maintainer`
+        accepted or rejected, and what is the validation source of truth?
+        When does the hardcoded home-repo enum apply?
+    assert:
+      # Tier A — distinctive path anchor only (P393/P270 calibration
+      # 2026-06-27): the corpus dir the validation reads. The accept /
+      # fallback semantic clause was DEMOTED to the Tier-B rubric below —
+      # paraphrasable. The rubric asserts on-disk acceptance + enum-as-fallback.
+      - type: regex
+        value: 'docs/jtbd'
+      # Tier B — semantic invariant: a --persona value naming a real
+      # docs/jtbd/<persona>/ dir is ACCEPTED by validating against the
+      # adopter's docs/jtbd/*/ dir names; the hardcoded home-repo enum is a
+      # FALLBACK only when no docs/jtbd/*/ dirs exist.
+      - type: llm-rubric
+        value: |
+          On a --persona value naming a real docs/jtbd/<persona>/ dir in an
+          adopter repo, the response ACCEPTS it by validating against the
+          adopter's docs/jtbd/*/ dir names, treating the hardcoded enum as a
+          FALLBACK only when no docs/jtbd/*/ dirs exist. PASS if it accepts
+          the on-disk adopter persona. FAIL if it rejects `maintainer` for
+          not being in the enum. Saying it does NOT reject a valid on-disk
+          persona PASSES.
