@@ -1,7 +1,13 @@
 # Problem 373: github-issues upstream-channel filter discards non-`[problem]`-prefixed issues — ALL issues are potential problems
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-06-21
+
+## Fix Released
+
+Released 2026-06-28 in `@windyroad/itil@0.54.6` (changeset `p373-github-issues-non-discarding-poll.md`, graduated from holding + shipped this session — version PR #297). Step 4.5c now polls `--state open` with no `[problem]`-prefix discard; `title_prefix` demoted to a soft rank/annotate signal; the Step 4.5d/4.5e classifiers are the de-facto filter (verdict per report). Adopters opt back into the hard channel-boundary filter via `"strict_title_prefix": true`. Paired promptfoo cases (non-discarding-default + strict-opt-in) are GREEN (review-problems suite 9/9). Transitioned K→V manually (P389 — the changeset carried no `**Release vehicle**` seed so the post-release enumerator skipped it).
+
+**Awaiting user verification** — confirm Step 4.5c surfaces a non-`[problem]`-prefixed real inbound issue (e.g. the missed #273) and routes it to a verdict rather than discarding it.
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: corrective-feedback (this session, /wr-itil:review-problems Step 4.5c)
 **Effort**: M (confirmed — SKILL.md Step 4.5c + channels config + paired eval cases)

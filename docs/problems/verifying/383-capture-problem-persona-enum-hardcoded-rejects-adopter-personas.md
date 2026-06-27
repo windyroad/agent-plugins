@@ -1,7 +1,14 @@
 # Problem 383: capture-problem `--persona` enum hardcoded to home-repo personas; rejects valid adopter personas (+ JTBD-M-NNN predicate gap)
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-06-26
+
+## Fix Released
+
+Released 2026-06-28 in `@windyroad/{itil,jtbd}` patches (`itil@0.54.6`; changeset `p383-persona-adopter-corpus-and-jtbd-m-resolution.md`, graduated from holding + shipped this session — version PR #297). capture-problem Step 1.5b `--persona` now validates against the adopter's `docs/jtbd/*/` corpus, falling back to the hardcoded home-repo enum only when no `docs/jtbd/` dirs exist; the `is-job-or-persona-unconfirmed.sh` resolver preserves the `JTBD-M-NNN` alpha-infix ID that was being dropped fail-open. Inbound-reported #282. Paired promptfoo `--persona` adopter-corpus case GREEN (capture-problem suite 8/8). Transitioned K→V manually (P389 — no `**Release vehicle**` seed → post-release enumerator skipped it).
+
+**Awaiting user verification** — confirm that on an adopter repo `--persona=maintainer` (with `docs/jtbd/maintainer/` present) is accepted, and the home-repo enum applies only when no `docs/jtbd/` dirs exist.
+
 **Priority**: 12 (High) — Impact: 4 x Likelihood: 3
 **Origin**: inbound-reported (#282)
 **Effort**: M

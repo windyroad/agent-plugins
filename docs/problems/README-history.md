@@ -1080,3 +1080,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-06-27 **batch transition** — P372 verifying, P393 verifying (post-release K→V after the @windyroad/retrospective patch shipped: P393 run-retro eval recalibration + Step 1.5 silent-delete reconciliation; P372 ADR-043 byte-floor, reinstated from holding once the eval suite went 7/7 GREEN).
 
 > Last reviewed: 2026-06-27 **P388 Known Error** — capture-problem promptfoo eval calibrated to 3× consecutive 8/8 GREEN (flaky multi-part Tier-A demoted to Tier-B per P270/P393; P383 `--persona` case added). Eval-floor evidence met for held `wr-itil-p199` + `p383`; their Rule 4 graduation queued to outstanding-questions per P308 (interactive-only, not auto-graduated). P350 8-surface cohort + P352 5-surface stay held (other surfaces uncovered).
+
+> Last reviewed: 2026-06-28 **P394 captured** — release publishes a new version of every package, not just the changed ones (lightweight aside via /wr-itil:capture-problem).
