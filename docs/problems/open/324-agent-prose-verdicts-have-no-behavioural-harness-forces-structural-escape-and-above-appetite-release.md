@@ -60,7 +60,15 @@ The solution-space investigation this ticket was opened to do is **complete and 
 
 **Drain-state finding (re-rate the RFC fixture spec):** both governance oversight drains have CLOSED — **0 unratified jtbd jobs/personas** (P288 complete) and **0 unratified ADRs**. So the canonical positive-fire `[Unratified Dependency]` fixture the RFC-012 S1 spec called for cannot be built against live docs; it is split out to **RFC-012 S1b** (synthetic fixture corpus). agent.md line 78's "the P288 drain is in progress" premise is now stale (cosmetic; not blocking).
 
-**Remaining for P324 close:** S1b (synthetic-corpus positive-fire), S2 (root test glob + CI wiring — Tier A), S3 (release-gate Tier B + `CLAUDE_CODE_OAUTH_TOKEN`), S4 (retire the architect RFC-010 + jtbd RFC-011 structural escape-hatch bats → advance P290), S5 (graduate RFC-011 within appetite on Tier-B-at-release evidence). The architect-surface agent eval (the other S1 candidate) is also still to build.
+### Build progress (2026-06-27 — RFC-012 architect agent eval landed)
+
+**Release vehicle (architect slice)**: .changeset/wr-architect-p324-agent-prose-eval-architect.md (`@windyroad/architect` patch). P324 stays Open — this ships the architect twin of S1, not the full S1–S5 close.
+
+**Architect agent eval is GREEN and committed.** `packages/architect/agents/eval/` now mirrors the jtbd slice verbatim in shape — the real architect review agent (`claude -p --system-prompt "$(cat agent.md)"`, subscription auth) exercised against two fixtures: (F1) a proposal aligned with ratified `ADR-052` → Tier-A `icontains PASS` + Tier-B rubric (PASS, no `[Unratified Dependency]` over-fire); (F2) inverse-P078/P132 over-fire guard — a cosmetic change citing no specific unratified ADR → must NOT raise `[Unratified Dependency]` (Tier-B negative-clause per the P270 not-regex lesson). Tarball-excluded via `files`-field `!agents/eval/`. Eval GREEN ×3 consecutive (`--no-cache`). This **completes the agent-prose harness pair** (architect + jtbd) — the two surfaces whose structural escape-hatch bats P290 must retire.
+
+**P290 unblock status:** P290 (remove the ADR-052 structural escape hatch) was half-blocked because only jtbd had a behavioural alternative. With the architect twin landed, **both** RFC-010 (architect) and RFC-011 (jtbd) verdict surfaces now have behavioural evals — the S4 retirement (replace both structural-permitted bats with these promptfoo evals) is no longer blocked on missing harness for either surface. P290 is now **fully unblocked at the harness layer**; the remaining S4 work is the bats retirement + ADR-052 Surface-2 narrowing record (not a missing-harness blocker).
+
+**Remaining for P324 close:** S1b (jtbd synthetic-corpus positive-fire) + an architect synthetic-corpus positive-fire twin (cite an unratified ADR → expect the flag — steady-state drain means no live unratified ADR to cite), S2 (root test glob + CI wiring — Tier A), S3 (release-gate Tier B + `CLAUDE_CODE_OAUTH_TOKEN`), S4 (retire the architect RFC-010 + jtbd RFC-011 structural escape-hatch bats → advance P290), S5 (graduate RFC-011 within appetite on Tier-B-at-release evidence).
 
 ## Dependencies
 

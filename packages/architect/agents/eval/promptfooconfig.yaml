@@ -1,0 +1,144 @@
+# Agent-prose verdict eval — architect review agent (RFC-012 / P324).
+#
+# The agent-prose twin of the jtbd review-agent eval (packages/jtbd/agents/
+# eval/) — exercises the REAL architect agent (`claude -p --system-prompt
+# "$(cat ../agent.md)"`, subscription auth) against fixture proposed-changes
+# and asserts on the emitted verdict (PASS / ISSUES FOUND / NEEDS DIRECTION /
+# [Unratified Dependency]). The behavioural alternative to the ADR-052
+# Surface-2 structural-grep escape hatch that RFC-010 shipped under; completes
+# the architect+jtbd harness pair and unblocks P290 (remove the structural
+# escape hatch — was half-blocked while only jtbd had a behavioural twin).
+#
+# Two tiers (ADR-075):
+#   - Tier A: deterministic `icontains` positive anchor on the verdict token.
+#   - Tier B: `llm-rubric` for the negative-clause / semantic checks that a
+#     regex cannot grade without false-failing (the P270 not-regex lesson —
+#     a not-regex for "Unratified Dependency" fires on the CORRECT answer
+#     "does NOT raise an [Unratified Dependency] flag"). See
+#     docs/briefing/promptfoo-eval-authoring.md.
+#
+# COVERAGE NOTE (RFC-012 architect slice, drain state 2026-06-27): the
+# positive-fire [Unratified Dependency] fixture ("cite an UNRATIFIED ADR →
+# expect the flag") is NOT included here. In steady state nearly every ADR is
+# `human-oversight: confirmed` (born-confirmed via create-adr + the
+# review-decisions drain), so no stable live unratified ADR exists to cite,
+# and the agent reads the live docs/decisions root. The positive-fire branch
+# needs a synthetic fixture corpus (a fixture ADR with human-oversight:
+# unconfirmed, isolated from live docs/decisions/) and is the architect twin
+# of the jtbd RFC-012 S1b slice (do NOT let it rot into prose-only). The two
+# fixtures below pin the drain-INDEPENDENT properties: correct PASS
+# classification on a ratified-decision-aligned change, and the
+# inverse-P078/P132 over-fire guard (the agent must decide NOT to fire on an
+# ambient/cosmetic change citing no specific unratified ADR). See P324 + RFC-012.
+#
+# Run from repo root:
+#   npx promptfoo eval -c packages/architect/agents/eval/promptfooconfig.yaml
+#
+# @jtbd JTBD-001 (Enforce Governance Without Slowing Down)
+# @jtbd JTBD-002 (Ship AI-Assisted Code with Confidence)
+# @jtbd JTBD-006 (Progress the Backlog While I'm Away)
+# @problem P324
+# @rfc RFC-012
+# @adr ADR-075 (per-package agent eval; Tier-A/Tier-B)
+# @adr ADR-052 (behavioural-tests-default; Surface-2 narrowing)
+
+description: |
+  architect review-agent verdict eval — correct PASS classification on a
+  proposal aligned with a ratified decision (no [Unratified Dependency]
+  over-fire), and the inverse-P078/P132 over-fire guard ([Unratified
+  Dependency] must NOT fire on a cosmetic/ambient change citing no specific
+  unratified ADR).
+
+providers:
+  # Path is relative to this config file's directory (promptfoo basePath).
+  - id: 'exec:bash ./run-agent-eval.sh'
+
+# Tier-B (llm-rubric) grading provider — claude under subscription auth (no
+# API key) via grade-llm-rubric.sh. Negative-clause semantics route here.
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: PASS on a proposal aligned with ratified ADR-052, no over-fire
+    vars:
+      prompt: |
+        PRE-EDIT architecture gate. Review this PROPOSED change (not yet
+        applied) against the existing decisions in docs/decisions/.
+
+        Proposed change: add a new behavioural test for an existing shell hook
+        under `packages/itil/scripts/test/`, following the established
+        `*.bats` behavioural-test pattern. The change cites `ADR-052`
+        (behavioural-tests-default) as the governing decision it conforms to,
+        adds no new dependency, and introduces no new architectural pattern —
+        it is a straightforward application of the already-accepted
+        behavioural-tests-default decision.
+
+        Classify the alignment of this proposal and give your verdict inline,
+        beginning with the `Architecture Review:` verdict line. State
+        explicitly whether you raise an [Unratified Dependency] flag.
+    assert:
+      # Tier A — must emit the PASS verdict outcome token. (Distinctive verdict
+      # name; reliable in both full-template and terse-summary stdout. The
+      # exact decision citation and verdict-template wording are variance-prone
+      # in agent stdout, so they route to the Tier-B rubric, per the
+      # promptfoo-eval-authoring briefing.)
+      - type: icontains
+        value: 'PASS'
+      # Tier B — verdict is PASS and does NOT over-fire the build-upon guard
+      # (ADR-052 is ratified — human-oversight: confirmed). The negation makes
+      # this a Tier-B-only check (the P270 not-regex lesson).
+      - type: llm-rubric
+        value: |
+          Two conditions, BOTH required: (1) the verdict is PASS — it says
+          "Architecture Review: PASS" or clearly classifies the proposal as
+          aligned/compliant/passing/proceed with no new decision required; AND
+          (2) it does NOT raise an [Unratified Dependency] flag (ADR-052
+          carries human-oversight: confirmed, so the build-upon guard must not
+          fire on a change citing it). An output that explicitly says it does
+          NOT raise the flag satisfies (2) (a negation PASSES). FAIL only if
+          the verdict is not PASS (e.g. ISSUES FOUND or NEEDS DIRECTION), OR if
+          an [Unratified Dependency] flag is raised against this
+          ratified-ADR-citing change.
+
+  - description: Over-fire guard — cosmetic change, no cite, no [Unratified Dependency]
+    vars:
+      prompt: |
+        PRE-EDIT architecture gate. Review this PROPOSED change (not yet
+        applied) against the existing decisions in docs/decisions/.
+
+        Proposed change: a formatting-only refactor to an existing shell hook
+        — it re-indents a `case` block to align the branch arms and fixes a
+        typo in a code comment. There is NO behaviour change, NO new
+        dependency, and the change cites no ADR and implements no specific
+        decision. It is a purely cosmetic tidy-up.
+
+        Classify the alignment of this proposal and give your verdict inline,
+        beginning with the `Architecture Review:` verdict line. State
+        explicitly whether you raise an [Unratified Dependency] flag.
+    assert:
+      # Tier A — verdict-outcome token (a purely cosmetic change is a PASS per
+      # agent.md's "purely cosmetic ... report PASS" constraint). Reliable in
+      # terse + full stdout; the over-fire-guard semantics route to Tier-B.
+      - type: icontains
+        value: 'PASS'
+      # Tier B — the over-fire guard: a cosmetic change citing NO specific
+      # unratified ADR must NOT trip the build-upon guard (inverse-P078/P132,
+      # agent.md). not-regex on "[Unratified Dependency]" false-fails the
+      # correct "does NOT raise [Unratified Dependency]" — so Tier-B only.
+      - type: llm-rubric
+        value: |
+          The response does NOT raise an [Unratified Dependency] flag. The
+          proposed change is purely cosmetic and cites no specific ADR, so the
+          build-upon guard must not fire on it (ambient/transitive dependence
+          on governed code must never trip the guard — the inverse-P078/P132
+          over-fire guard). PASS if no [Unratified Dependency] flag is raised
+          (a verdict of PASS, or any other verdict that does not include an
+          Unratified Dependency finding, satisfies this). An output that
+          explicitly says it does NOT raise the flag PASSES. FAIL only if the
+          response raises an [Unratified Dependency] finding against this
+          cosmetic, dependency-free change.

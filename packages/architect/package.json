@@ -27,6 +27,7 @@
     ".claude-plugin/",
     ".codex-plugin/",
     "lib/",
-    "!skills/*/eval/"
+    "!skills/*/eval/",
+    "!agents/eval/"
   ]
 }
