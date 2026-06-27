@@ -1,5 +1,17 @@
 # @windyroad/retrospective
 
+## 0.26.1
+
+### Patch Changes
+
+- 9e108be: Add an absolute-byte floor to the ADR-043 context-budget delta-breach trigger (P372). The `run-retro` Step 2c deep-layer auto-fire trigger has a delta-breach axis that fired `/wr-retrospective:analyze-context` (a committed report plus subagent calls) whenever any bucket changed by more than 20% versus the prior snapshot. Relative-only is scale-blind: a small bucket trips 20% on a trivial edit — observed when the `project-claude-md` bucket grew 4277→5897 bytes (+37.9%) on a single CLAUDE.md addition, a +1620-byte change that does not warrant the deep layer's cost.
+
+  The delta-breach axis now requires both a more-than-20% relative change AND a more-than-10 KB absolute change (`|current − prior| > 10240` bytes). Both gates are required, suppressing tiny-bucket noise while preserving every fire on a bucket large enough for a 20% delta to be a real bloat signal. The inverse concern — a large-but-stable bucket never re-firing — is already covered by the existing calendar-elapse axis (more than 14 days re-fires every bucket regardless of delta), so no separate firing axis is added.
+
+  Surfaces: `run-retro` Step 2c step 4 (Delta-breach bullet plus the trigger-inactive note), `analyze-context/SKILL.md` trigger-description lines, ADR-043 (Amendment 2026-06-17 sub-note plus threshold grounding), and a second paired promptfoo eval case on the Step 2c contract asserting the floor gate (small-bucket-does-not-fire, large-delta-does-fire).
+
+- 9e108be: Reconcile the run-retro Step 1.5 briefing signal-vs-noise pass to the load-bearing silent-delete direction (P393). The Step 1.5 prose contradicted itself on `<= -3` briefing-entry deletes: the threshold table plus a "Delete queue confirmation" block described a batched interactive `AskUserQuestion`, while Step 3's "Removals are silent (P135 / ADR-044)" clause, the P352 AFK queue-and-continue amendment, CLAUDE.md MANDATORY P132, and ADR-044's framework-resolution boundary (which lists "Briefing add / remove / rotate" as a framework-mediated, not-an-`AskUserQuestion` surface) all state deletes are silent. The stale batched-confirmation prose is removed: `<= -3` deletes are now silent in both interactive and AFK mode, applied during Step 3 curation, surfaced in the Step 5 retro summary's Signal-vs-Noise Pass table with score plus ADR-026 citation, and corrected by the user via P078 authentic-correction if a removal was wrong (removals are reversible from git). No per-delete `AskUserQuestion` fires at any score band.
+
 ## 0.26.0
 
 ### Minor Changes
