@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-06-28 **batch transition** — P373 verifying, P383 verifying (post-release K→V after the cohort graduation shipped @windyroad/itil@0.54.6 + jtbd; manual transition per P389 — the graduated changesets carried no Release-vehicle seed so the enumerator skipped them).
+> Last reviewed: 2026-06-28 **P395 captured** — external-comms agent silently dormant on the credibility axis; no nudge to author the missing RISK-POLICY section (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -10,6 +10,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
+| 1.5 | P395 | external-comms agent silently goes dormant on the Outbound Credibility / Self-Own axis when RISK-POLICY.md lacks the `## Outbound Credibility / Self-Own` section — no nudge to author it, so the shipped capability stays invisible (P375 rot-class). Blocks P384's eval-floor. Fix: extend risk-scorer-scaffold-nudge.sh to detect the missing-section predicate. | 3 Medium | Open | M | 2026-06-28 | internal |
 | 1.5 | P394 | Release publishes a new version of EVERY @windyroad/* package, not just the changed ones — likely `updateInternalDependencies: patch` cascading bumps across the 13-package internal dependency graph; floods the adopter version stream + dilutes the change audit-trail. | 3 Medium | Open | M | 2026-06-28 | internal |
 | 9.0 | P384 | wr-risk-scorer:external-comms agent has no credibility / self-own review axis — a leak-clean message can still ask for already-held info, restate what the recipient told us as new, or carry a careless error (wrong name/company, stale account claim). Agent-prose axis added (RFC-032): `asks-for-already-held-info` / `restates-prior-as-new` / `plainly-careless-error` composing with the existing confidential-leak axis; home-repo RISK-POLICY section + paired promptfoo eval deferred. **Tier 1: Inbound-reported** (#283). | 9 Medium | Known Error | M | 2026-06-26 | inbound-reported (#283) |
 | 6.0 | P305 | Post-Edit silent revert of working-tree files before commit — root cause confirmed 2026-06-08 as parallel `claude -p` iter dispatch race on shared working tree (P228-fix + P213-fix iters overlapped 13:58 → 14:41 on 2026-06-08; 14:28 mystery revert sits inside the parallel window; Edit tool's read-modify-write is not atomic across processes — last-writer-wins clobbers sibling iter's edits). Workaround: re-apply edit + immediate `git add`. Fix strategy: three candidate options (A serialize iter dispatch / B per-iter `git worktree` / C post-Edit verification helper) queued substance-confirm to outstanding_questions per ADR-074 — DO NOT build before user ratifies | 6 Med | Known Error | M | 2026-05-26 | internal |
