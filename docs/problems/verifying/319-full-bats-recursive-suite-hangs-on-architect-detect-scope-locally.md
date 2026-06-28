@@ -1,11 +1,17 @@
 # Problem 319: Full `bats --recursive` suite hangs locally on architect-detect-scope.bats — no timeout, wedges the whole run
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-27
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: internal
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 **Root cause identified**: 2026-06-16 (AFK work-problems iter 25). Fix landed; pending release verification.
+
+## Fix Released
+
+Resolved 2026-06-16 — the local-only hang was a missing-stdin-redirect test-fixture defect: `architect-detect.sh` reads `INPUT=$(cat)`, and the scope tests invoked the hook as bare `run bash "$HOOK"` with no stdin redirect, so under a full local `bats --recursive` sweep `cat` blocked on the inherited TTY. Fixed at source by redirecting stdin from `/dev/null` in the affected fixtures (`architect-detect-scope.bats` — all 6 hook invocations now carry `</dev/null`, verified in-file — plus the same-class siblings `jtbd-eval.bats` / `jtbd-eval-scope.bats`). Release marker: **test-infra only** (`hooks/test/*.bats`, tarball-excluded — no npm changeset); verifiable in-repo by running the full `bats --recursive` sweep to completion.
+
+**Awaiting user verification** — confirm the full local `bats --recursive` sweep runs to completion without wedging on `architect-detect-scope.bats`.
 
 ## Description
 

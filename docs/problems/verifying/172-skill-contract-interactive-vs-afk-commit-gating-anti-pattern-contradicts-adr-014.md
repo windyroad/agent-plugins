@@ -1,10 +1,16 @@
 # Problem 172: Skill contract "interactive vs AFK" commit-gating anti-pattern contradicts ADR-014
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-05
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: internal
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+
+## Fix Released
+
+Released in `@windyroad/itil@0.49.1`+ (current line ≥ `0.50.0`; commit `3eabb9ba`): Phase 1 removed the only instance of the interactive-vs-AFK commit-gating carve-out (`reconcile-readme/SKILL.md` Step 6), aligning it with ADR-014 (governance skills commit their own work) — no "interactive: let the user stage + commit" branch remains. A repo sweep confirmed no surviving instances of the anti-pattern.
+
+**Awaiting user verification** — confirm no skill still gates its own commit behind an interactive-vs-AFK branch (the contract is now unconditional self-commit per ADR-014).
 
 ## Description
 
