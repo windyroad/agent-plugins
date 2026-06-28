@@ -31,14 +31,28 @@
 #   0 = success (zero or more worklist lines on stdout)
 #   1 = error (problems-dir missing, malformed CLI args)
 #
+# Two surfaces are walked (P376 — cross-direction parity):
+#   OUTBOUND — tickets with a `## Reported Upstream` section (issues WE filed
+#     against an upstream we depend on).
+#   INBOUND  — tickets with an `**Origin**: inbound-reported (#NN)` field
+#     (ADR-076 — issues someone else filed *against us* on our own repo, which
+#     the P363 rework made dispatchable). Without this leg the inbound catchup
+#     candidates were a manual `grep -lE '^\*\*Origin\*\*:\s*inbound-reported'`
+#     surface the maintainer had to remember after every `--catchup` run.
+# A ticket carrying BOTH surfaces emits BOTH an outbound and an inbound line
+# (the two legs are independent, mirroring the update-upstream SKILL).
+#
 # Structured stdout (one per actionable upstream entry; <= 150 bytes per
 # line per ADR-038). ASCII `->` for the transition arrow per the P334
 # awk/script portability lesson (no Unicode in machine-read output):
 #   CATCHUP P<NNN> <url> state=<state> transition=<KE->Verifying|Verifying->Closed>
+#   CATCHUP P<NNN> inbound-<ref> state=<state> transition=<…> direction=inbound
 #   SKIP    P<NNN> <url> reason=already-logged
+#   SKIP    P<NNN> inbound-<ref> reason=already-logged
 #   SKIP    P<NNN> <url> reason=out-of-band
-# Tickets with no `## Reported Upstream` section are skipped silently (the
-# common case — most tickets were never reported upstream).
+# Tickets with neither surface (and inbound tickets whose Origin ref carries no
+# actionable `#NN`, e.g. `inbound-reported (relayed from other projects)`) are
+# skipped silently — the common case.
 #
 # Trailing summary line (stderr) for the SKILL / human reader:
 #   SUMMARY scanned=<N> catchup=<N> skip-logged=<N> skip-out-of-band=<N>
@@ -49,6 +63,9 @@
 # @adr ADR-038 (progressive disclosure — per-row byte budget)
 # @adr ADR-049 (invoked via wr-itil-catchup-scan bin shim, never repo-relative path)
 # @adr ADR-032 (foreground synchronous skill)
+# @adr ADR-076 (reads the `**Origin**: inbound-reported (#NN)` field for the inbound leg)
+# @problem P376 — catchup scanner misses the inbound direction (cross-direction parity)
+# @rfc RFC-028 (consume the Origin field for inbound-reported verdict — extended to the catchup surface)
 # @jtbd JTBD-301 (reporter feedback loop — the catchup's primary job)
 # @jtbd JTBD-006 (AFK-safe worklist scanner)
 # @jtbd JTBD-004 (cross-repo coordination — reconcile local corpus vs upstream trackers)
@@ -148,6 +165,37 @@ extract_ticket_id() {
   echo "P${base%%-*}"
 }
 
+# Extract the actionable inbound issue ref from the `**Origin**:
+# inbound-reported (<ref>)` field (ADR-076). Returns the `#NN` /
+# `<repo>#NN` token, or empty when the Origin is not inbound-reported OR
+# carries no actionable issue number (e.g. "relayed from other projects").
+extract_inbound_ref() {
+  local line ref
+  line="$(grep -m1 -E '^\*\*Origin\*\*:[[:space:]]*inbound-reported' "$1" 2>/dev/null)"
+  [ -z "$line" ] && return 0
+  # First parenthesised group after `inbound-reported`.
+  ref="$(printf '%s\n' "$line" | sed -n 's/.*inbound-reported[[:space:]]*(\([^)]*\)).*/\1/p')"
+  [ -z "$ref" ] && return 0
+  # Must contain an actionable `#NN` (optionally repo-qualified). Emit the
+  # normalised `<repo>#<num>` token; drop trailing prose / spaces.
+  printf '%s\n' "$ref" | grep -oE '[A-Za-z0-9._/-]*#[0-9]+' | head -1
+}
+
+# Does the `## Upstream Lifecycle Updates` log already record an
+# `(inbound)`-tagged entry for the target transition? Distinct from
+# log_has_target: the inbound leg's idempotency must NOT be satisfied by an
+# outbound-tagged entry for the same target (a ticket reported BOTH ways may
+# have posted its outbound verdict but not its inbound one).
+log_has_inbound_target() {
+  local file="$1" target="$2"
+  awk -v target="$target" '
+    /^## Upstream Lifecycle Updates/ { in_section = 1; next }
+    /^## / && in_section { in_section = 0 }
+    in_section && index($0, "(inbound)") > 0 && index($0, target) > 0 { found = 1 }
+    END { exit(found ? 0 : 1) }
+  ' "$file"
+}
+
 # ── Per-ticket scan loop ────────────────────────────────────────────────────
 
 SCANNED=0
@@ -173,14 +221,20 @@ for ticket_file in "${TICKET_FILES[@]}"; do
   fi
   SEEN_IDS[$ticket_id]="$ticket_file"
 
-  # Filter to tickets carrying a `## Reported Upstream` section.
-  if ! grep -q '^## Reported Upstream' "$ticket_file"; then
+  # Detect both surfaces. Outbound = `## Reported Upstream` section;
+  # inbound = an actionable `**Origin**: inbound-reported (#NN)` ref.
+  has_outbound=0
+  grep -q '^## Reported Upstream' "$ticket_file" && has_outbound=1
+  inbound_ref="$(extract_inbound_ref "$ticket_file")"
+
+  # Neither surface → silent skip (the common case).
+  if [ "$has_outbound" -eq 0 ] && [ -z "$inbound_ref" ]; then
     continue
   fi
 
   SCANNED=$((SCANNED + 1))
 
-  # Derive the transition the current suffix implies.
+  # Derive the transition the current suffix implies (direction-agnostic).
   case "$ticket_file" in
     *.verifying.md|*/verifying/*)
       state="verifying"
@@ -194,28 +248,40 @@ for ticket_file in "${TICKET_FILES[@]}"; do
       continue ;;
   esac
 
-  upstream_url="$(extract_upstream_url "$ticket_file")"
-  disclosure="$(extract_disclosure_path "$ticket_file")"
+  # ── Outbound leg (`## Reported Upstream`) ──────────────────────────────────
+  if [ "$has_outbound" -eq 1 ]; then
+    upstream_url="$(extract_upstream_url "$ticket_file")"
+    disclosure="$(extract_disclosure_path "$ticket_file")"
 
-  # Out-of-band / non-gh disclosure path, or no actionable URL → SKIP.
-  if [ -z "$upstream_url" ] \
-     || [[ "$disclosure" == *out-of-band* ]] \
-     || [[ "$disclosure" == *mailbox* ]]; then
-    printf "SKIP    %s %s reason=out-of-band\n" "$ticket_id" "${upstream_url:-none}"
-    SKIP_OUT_OF_BAND=$((SKIP_OUT_OF_BAND + 1))
-    continue
+    if [ -z "$upstream_url" ] \
+       || [[ "$disclosure" == *out-of-band* ]] \
+       || [[ "$disclosure" == *mailbox* ]]; then
+      # Out-of-band / non-gh disclosure path, or no actionable URL → SKIP.
+      printf "SKIP    %s %s reason=out-of-band\n" "$ticket_id" "${upstream_url:-none}"
+      SKIP_OUT_OF_BAND=$((SKIP_OUT_OF_BAND + 1))
+    elif log_has_target "$ticket_file" "$log_target"; then
+      # Idempotency: the lifecycle log already records this target → SKIP.
+      printf "SKIP    %s %s reason=already-logged\n" "$ticket_id" "$upstream_url"
+      SKIP_LOGGED=$((SKIP_LOGGED + 1))
+    else
+      printf "CATCHUP %s %s state=%s transition=%s\n" \
+        "$ticket_id" "$upstream_url" "$state" "$transition"
+      CATCHUP_COUNT=$((CATCHUP_COUNT + 1))
+    fi
   fi
 
-  # Idempotency: the lifecycle log already records this target → SKIP.
-  if log_has_target "$ticket_file" "$log_target"; then
-    printf "SKIP    %s %s reason=already-logged\n" "$ticket_id" "$upstream_url"
-    SKIP_LOGGED=$((SKIP_LOGGED + 1))
-    continue
+  # ── Inbound leg (`**Origin**: inbound-reported (#NN)`) ─────────────────────
+  if [ -n "$inbound_ref" ]; then
+    if log_has_inbound_target "$ticket_file" "$log_target"; then
+      # Idempotency: an (inbound)-tagged log entry already records this target.
+      printf "SKIP    %s inbound-%s reason=already-logged\n" "$ticket_id" "$inbound_ref"
+      SKIP_LOGGED=$((SKIP_LOGGED + 1))
+    else
+      printf "CATCHUP %s inbound-%s state=%s transition=%s direction=inbound\n" \
+        "$ticket_id" "$inbound_ref" "$state" "$transition"
+      CATCHUP_COUNT=$((CATCHUP_COUNT + 1))
+    fi
   fi
-
-  printf "CATCHUP %s %s state=%s transition=%s\n" \
-    "$ticket_id" "$upstream_url" "$state" "$transition"
-  CATCHUP_COUNT=$((CATCHUP_COUNT + 1))
 done
 
 printf "SUMMARY scanned=%s catchup=%s skip-logged=%s skip-out-of-band=%s\n" \

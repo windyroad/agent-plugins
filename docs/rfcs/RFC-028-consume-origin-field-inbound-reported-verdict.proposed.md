@@ -4,7 +4,7 @@ rfc-id: consume-origin-field-inbound-reported-verdict
 reported: 2026-06-22
 human-oversight: unconfirmed
 decision-makers: [Tom Howard]
-problems: [P363]
+problems: [P363, P376]
 adrs: [ADR-024]
 jtbd: [JTBD-301]
 stories: []
@@ -14,7 +14,7 @@ stories: []
 
 **Status**: proposed
 **Reported**: 2026-06-22
-**Problems**: P363
+**Problems**: P363; P376 (catchup-scanner extension — trace edge wired per ADR-060 I13 existing-vehicle branch, P371: Gap 1 extends the same Origin-field consumption to the `--catchup` worklist scanner surface; no new RFC minted)
 **ADRs**: ADR-024 (amendment 2026-06-22 — inbound-verdict dispatch leg)
 **JTBD**: JTBD-301
 
@@ -34,12 +34,17 @@ Implemented this iteration (ADR-024 amendment 2026-06-22 authorises the contract
 - `/wr-itil:transition-problem` Step 7b + `/wr-itil:manage-problem` Step 7 — both grep pre-checks extended in lockstep to match `^## Reported Upstream` OR `^\*\*Origin\*\*: inbound-reported \(#`.
 - Tests — extended `update-upstream-contract.bats` (structural-permitted) + paired promptfoo behavioural cases (inbound-only dispatch, idempotency-skip, anti-leakage, both-present, dual-absence no-op, P249 non-contamination).
 
+Extended later (P376 — catchup-scanner surface, 2026-06-28):
+
+- `packages/itil/scripts/catchup-scan.sh` — the `--catchup` worklist scanner now ALSO enumerates inbound-reported tickets (`**Origin**: inbound-reported (#NN)`, ADR-076) alongside the outbound `## Reported Upstream` surface, emitting direction-tagged `CATCHUP P<NNN> inbound-<ref> … direction=inbound` lines with `(inbound)`-tagged-log idempotency. Closes the manual `grep -lE '^\*\*Origin\*\*:\s*inbound-reported'` discovery toil. Behavioural bats in `catchup-scan.bats`.
+
 ## Tasks
 
 - [x] ADR-024 amendment recording the inbound-verdict dispatch leg + anti-leakage Confirmation criterion
 - [x] update-upstream SKILL.md inbound dispatch branch
 - [x] transition-problem + manage-problem grep pre-checks extended in lockstep
 - [x] Behavioural eval cases + structural bats coverage
+- [x] (P376) catchup-scan.sh enumerates the inbound direction; behavioural bats added
 - [ ] Live verification: next inbound-reported ticket's K→V transition auto-posts the fix-released verdict on its originating issue (deferred to a real transition post-release)
 
 ## Commits

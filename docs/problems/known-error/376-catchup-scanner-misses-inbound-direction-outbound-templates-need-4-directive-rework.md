@@ -1,6 +1,6 @@
 # Problem 376: Catchup scanner misses the inbound direction; outbound templates carry the same structural defect the P363 rework fixed on the inbound side — cross-direction parity gap
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-06-23
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: internal
@@ -78,18 +78,37 @@ The outbound templates in Step 4 of `update-upstream/SKILL.md` carry the concept
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Investigate fix shape: single coordinating ticket vs split into P376-A (scanner) + P376-B (templates) per P016 concern-boundary
-- [ ] Decide whether outbound-template rework warrants its own ADR-024 amendment (likely yes — symmetric to the 2026-06-23 inbound amendment)
-- [ ] Apply the four P363 rework directives to outbound templates; preserve outbound-specific purpose (test-confirm / report-outcome-with-thanks / respond-to-info-request) per user clarification 2026-06-23
-- [ ] Extend `catchup-scan.sh` to walk inbound `**Origin**` field alongside outbound `## Reported Upstream`; emit direction-tagged `CATCHUP P<NNN> inbound-#<NN>` lines; idempotency contract re-checks `## Upstream Lifecycle Updates` for `(inbound)`-tagged entries
-- [ ] Behavioural bats: scanner produces both outbound + inbound candidate lines on a corpus carrying both surfaces
-- [ ] Update `update-upstream/SKILL.md` § Catchup migration mode to reflect dual-direction scope
+- [x] Investigate fix shape: single coordinating ticket vs split into P376-A (scanner) + P376-B (templates) per P016 concern-boundary — **resolved 2026-06-28**: kept ONE ticket; the two gaps share a root cause but split on lifecycle (Gap 1 is clean shippable script code → done this iter; Gap 2 is design-bearing → deferred). The WORK split rides RFC vehicles, not separate tickets.
+- [x] Decide whether outbound-template rework warrants its own ADR-024 amendment (likely yes — symmetric to the 2026-06-23 inbound amendment) — **yes**; recorded as a PROPOSED skeleton amendment in ADR-024 (2026-06-28 entry, `human-oversight: unconfirmed`); ratification queued (see Resolution).
+- [ ] **(Gap 2 — deferred, design-bearing)** Apply the four P363 rework directives to outbound templates; preserve outbound-specific purpose (test-confirm / report-outcome-with-thanks / respond-to-info-request) per user clarification 2026-06-23 — NOT built; gated on the queued `category: direction` ratification (substance-confirm-before-build, ADR-074).
+- [x] Extend `catchup-scan.sh` to walk inbound `**Origin**` field alongside outbound `## Reported Upstream`; emit direction-tagged `CATCHUP P<NNN> inbound-#<NN>` lines; idempotency contract re-checks `## Upstream Lifecycle Updates` for `(inbound)`-tagged entries — **done 2026-06-28** (Gap 1).
+- [x] Behavioural bats: scanner produces both outbound + inbound candidate lines on a corpus carrying both surfaces — **done** (`catchup-scan.bats` tests 15–23, incl. the both-surface case).
+- [ ] **(Gap 2 / Gap 1 follow-up)** Update `update-upstream/SKILL.md` § Catchup migration mode to reflect dual-direction scope — deferred; the scanner header comment + RFC-028 already document the dual-direction scope, and the SKILL § rewrite is bundled with the Gap 2 outbound-template rework (avoids a second R009 prose-floor cycle on the same SKILL for a doc-only line). Tracked here for the Gap 2 build.
 
 ## Fix Strategy
 
-(deferred to investigation)
+**Resolved into two lifecycle-split deliverables (2026-06-28):**
 
-Likely shape: ADR-024 amendment 2026-06-24+ recording the four-directive outbound rework + the scanner inbound-extension + the user's 2026-06-23 clarification on outbound update purpose. Implementation rides one or two commits depending on the concern-split decision.
+### Gap 1 — catchup scanner inbound extension — SHIPPED (pending release)
+
+Clean, additive shell-script change to `packages/itil/scripts/catchup-scan.sh` (the `wr-itil-catchup-scan` PATH shim — NOT a `packages/shared` synced canonical, so edited directly). The scanner now walks the inbound surface (`**Origin**: inbound-reported (#NN)`, ADR-076) alongside the existing outbound `## Reported Upstream` surface and emits direction-tagged lines:
+
+```
+CATCHUP P<NNN> inbound-<ref> state=<state> transition=<KE->Verifying|Verifying->Closed> direction=inbound
+```
+
+- `(inbound)`-tagged-log idempotency (`log_has_inbound_target`) — distinct from the outbound idempotency so a both-direction ticket that posted only its outbound verdict still surfaces the inbound one.
+- Non-actionable Origins (`relayed from other projects`) emit no line (symmetric to the no-`## Reported Upstream` silent skip); cross-repo refs (`<repo>#NN`) preserved.
+- Outbound line shape + `SUMMARY` format UNCHANGED (backward-compatible).
+- Verified against the real corpus: surfaces P211 #97, P228 #42 (two of the three the maintainer hand-grepped 2026-06-23) + 6 others; P220 #63 correctly idempotency-skipped (already carries an `(inbound)` log entry); P327 `relayed from other projects` correctly silent.
+- TDD: 9 behavioural bats added (`catchup-scan.bats` tests 15–23), RED-first confirmed, all 23 green. TDD-review verdict: BEHAVIOURAL.
+- Trace: wired into **RFC-028** (consume the Origin field) `problems:` array via the ADR-060 I13 existing-vehicle branch (P371) — NOT a new RFC. Changeset: `@windyroad/itil` patch.
+
+### Gap 2 — outbound template symmetric rework — DEFERRED (design-bearing)
+
+The outbound update-upstream templates carry the same defect P363 fixed inbound, inverted in direction. The fix is the four P363 directives applied symmetrically + the user's 2026-06-23 outbound-purpose clarification (test-confirm / report-outcome-with-thanks / respond-to-info-request). This is a ≥2-option decision (template-rework shape; transition-axis vs new outbound-update taxonomy; share generation-prompt infra with the inbound leg or not). Per P357/ADR-066 a PROPOSED skeleton amendment is recorded in ADR-024 (2026-06-28 entry, `human-oversight: unconfirmed`) and a `category: direction` outstanding_question is queued for the next interactive drain. Implementation is gated on that ratification (ADR-074 substance-confirm-before-build) — NOT built this iteration.
+
+**Lifecycle**: ticket → Known Error. Gap 1's fix verifies at the next `@windyroad/itil` release; the ticket stays Known Error tracking Gap 2's remaining (ratification-gated) design work rather than going to Verifying, because Gap 2 is unresolved.
 
 ## Dependencies
 
@@ -113,4 +132,11 @@ Likely shape: ADR-024 amendment 2026-06-24+ recording the four-directive outboun
 
 ## Change Log
 
+- **2026-06-28** — Open → Known Error during an AFK `/wr-itil:work-problems` iteration. **Gap 1 shipped** (catchup-scan.sh inbound-direction extension + 9 behavioural bats, all green; wired into RFC-028 via the I13 existing-vehicle branch; `@windyroad/itil` patch changeset authored, clean — functional script code, R009 prose-floor N/A). **Gap 2 deferred** (design-bearing outbound-template rework): PROPOSED skeleton amendment recorded in ADR-024 (`human-oversight: unconfirmed`); `category: direction` ratification queued. Architect + JTBD + TDD-review + external-comms (risk) + voice-tone gates all PASS. Ticket stays Known Error tracking Gap 2; Gap 1 verifies at next release.
 - **2026-06-23** — Opened during the retroactive `/wr-itil:update-upstream --catchup` session per user-confirmed scope. The catchup invocation surfaced both gaps as direct observations: (a) scanner emitted only the outbound P113 candidate while 3 inbound candidates needed manual identification + per-ticket routing; (b) the outbound P113 catchup was skipped entirely because the templates didn't fit the reality (closed-for-inactivity upstream + we-are-the-reporter shape). Captured per CLAUDE.md P078 capture-on-correction discipline. Two-concern observation (scanner + templates) recorded as one ticket with the P016 concern-boundary split decision deferred to investigation (the two concerns share the same root cause: P363 rework was applied only to one direction).
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-028 | proposed | Consume the `**Origin**` field for inbound-reported fix-released verdict |
