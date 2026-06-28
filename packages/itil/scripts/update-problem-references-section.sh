@@ -263,10 +263,20 @@ mv "$tmp_file2" "$tmp_file"
 if [ -n "$new_section" ]; then
   if grep -q '^## Fix Released' "$tmp_file"; then
     tmp_file2="$(mktemp)"
-    awk -v section="$new_section" '
-      /^## Fix Released/ { printf "%s\n", section; print; next }
+    # Pass the multi-line section via a file: awk -v rejects embedded newlines
+    # on BSD awk (macOS), so getline keeps it portable across BSD awk + gawk
+    # (proven in effort-tally.sh --write, commit 1c967ba0; P392). new_section
+    # ends in a single \n, matching the prior `printf "%s\n", section` output.
+    section_file="$(mktemp)"
+    printf '%s' "$new_section" > "$section_file"
+    awk -v sf="$section_file" '
+      /^## Fix Released/ {
+        while ((getline ln < sf) > 0) print ln
+        close(sf); print ""; print; next
+      }
       { print }
     ' "$tmp_file" > "$tmp_file2"
+    rm -f "$section_file"
     mv "$tmp_file2" "$tmp_file"
   else
     # Ensure file ends with exactly one blank line before section

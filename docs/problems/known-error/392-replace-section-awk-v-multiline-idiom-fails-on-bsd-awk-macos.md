@@ -1,7 +1,8 @@
 # Problem 392: Blessed replace-section `awk -v section="$multiline"` idiom fails on BSD awk (macOS)
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-06-27
+**Transitioned to Known Error**: 2026-06-28 (root cause confirmed empirically — host BSD awk 20200816 aborts `awk -v section="$multiline"` with `awk: newline in string`; single live site fixed + behavioural bats added + committed. Awaits release → Verifying.)
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: internal
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -44,9 +45,9 @@ awk -v sf="$section_file" -v anchor="$anchor" '
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Audit all section-updater scripts for the `awk -v <multiline>` idiom (`update-problem-references-section.sh`, `update-problem-rfcs-section.sh` shim, `update-rfc-*-section.sh`, `update-story-references-section.sh`, `update-jtbd-references-section.sh`).
-- [ ] Apply the getline-from-tempfile fix (proven in effort-tally.sh) to each affected site, OR extract a single shared replace-section helper so the idiom is fixed once (Fix Strategy below).
-- [ ] Create a behavioural bats asserting the multi-line section insert works under the host awk (guards regression on both BSD + GNU).
+- [x] Audit all section-updater scripts for the `awk -v <multiline>` idiom. **Result: exactly ONE live defect** — `update-problem-references-section.sh:266` (the insert-before-`## Fix Released` branch). The siblings `update-{jtbd,rfc,story}-references-section.sh` insert the multi-line section via `printf '\n%s' "$new_section" >> "$tmp_file"` (EOF append), NOT via `awk -v`, so they are NOT affected. `effort-tally.sh` and `update-rfc-commits-section.sh` already use the getline-from-tempfile pattern. The remaining `awk -v sec="## $SECTION_NAME"` uses across the siblings pass a SINGLE-LINE section header — portable, not affected.
+- [x] Apply the getline-from-tempfile fix (proven in effort-tally.sh) to the affected site. Done at `update-problem-references-section.sh:266`. **Shared-helper extraction (Fix Strategy part 2) deferred** — the strip+normalise+insert awk is duplicated across 6 scripts but with divergent placement rules (problem inserts-before-`## Fix Released`; siblings EOF-append; effort-tally inserts-at-anchor), so a clean shared helper is unbounded scope above the single-site bug's Low(5) appetite. Architect confirmed deferral is correct (ADR-017 is cross-package-only; ADR-074 — substance-confirm-before-build — reinforces not doing the ad-hoc extraction). The structural "shared tested helper" thesis stays tracked under [[P366]]. **Follow-up: extract a shared `replace-section` helper** if/when a 3rd insert-before-anchor site appears or P366 is scheduled.
+- [x] Create a behavioural bats asserting the multi-line section insert works under the host awk (guards regression on both BSD + GNU). Done: `update-problem-references-section.bats` test "multi-line section inserts before ## Fix Released under host awk" — proven RED against the pre-fix `-v` idiom on host BSD awk, GREEN with the getline fix.
 
 ## Fix Strategy
 

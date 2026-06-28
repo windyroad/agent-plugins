@@ -183,6 +183,53 @@ EOF
   [ "$first_body" = "$second_body" ]
 }
 
+@test "helper: multi-line section inserts before ## Fix Released under host awk (P392 BSD-awk getline fix)" {
+  # P392 — the insert-before-## Fix Released branch passed the multi-line
+  # new_section via `awk -v section=...`; BSD awk (macOS) rejects embedded
+  # newlines in a -v assignment and aborts (`awk: newline in string`),
+  # silently dropping the section refresh. This exercises that branch under
+  # the host awk: it must exit 0 AND place the rendered ## RFCs table
+  # immediately before ## Fix Released with the table rows intact.
+  cd "$WORKSPACE"
+  cat > docs/problems/open/202-released-problem.md <<'EOF'
+# Problem 202: Released problem ticket
+
+**Status**: Verifying
+
+## Description
+
+Sample description.
+
+## Fix Released
+
+Released in v1.2.3.
+EOF
+  # RFC tracing problem 202 so a non-empty multi-line section is rendered
+  cat > docs/rfcs/RFC-100-sample-rfc.in-progress.md <<'EOF'
+---
+status: in-progress
+rfc-id: sample-rfc
+problems: [P202]
+adrs: []
+jtbd: []
+---
+
+# RFC-100: Sample RFC
+EOF
+  run bash "$SCRIPT" docs/problems/open/202-released-problem.md RFCs
+  [ "$status" -eq 0 ]
+  grep -q '^## RFCs$' docs/problems/open/202-released-problem.md
+  grep -q 'RFC-100' docs/problems/open/202-released-problem.md
+  grep -q '^## Fix Released$' docs/problems/open/202-released-problem.md
+  # ## RFCs must precede ## Fix Released (inserted at the anchor, not at EOF)
+  local rfcs_line fix_line
+  rfcs_line=$(grep -n '^## RFCs$' docs/problems/open/202-released-problem.md | cut -d: -f1)
+  fix_line=$(grep -n '^## Fix Released$' docs/problems/open/202-released-problem.md | cut -d: -f1)
+  [ "$rfcs_line" -lt "$fix_line" ]
+  # The multi-line table row must survive intact
+  grep -q '| RFC-100 |' docs/problems/open/202-released-problem.md
+}
+
 @test "helper: body does NOT contain a per-section-name branch (architect finding 4)" {
   # Structural test (tdd-review: structural-permitted —
   # justification: P176 SKILL.md I-invariant harness gap is the
