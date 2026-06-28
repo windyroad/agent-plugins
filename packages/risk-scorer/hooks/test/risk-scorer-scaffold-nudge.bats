@@ -20,6 +20,11 @@ setup() {
   HOOK="$REPO_ROOT/packages/risk-scorer/hooks/risk-scorer-scaffold-nudge.sh"
   PLUGIN_ROOT="$REPO_ROOT/packages/risk-scorer"
   DIR="$(mktemp -d)"
+  # Hermeticity (P391): the AFK work-problems orchestrator exports
+  # WR_SUPPRESS_OVERSIGHT_NUDGE=1, which the hook self-suppresses on. Unset it so
+  # nudge-emitting tests assert real behaviour; guard-specific tests set it
+  # per-invocation via `run env WR_SUPPRESS_OVERSIGHT_NUDGE=...`.
+  unset WR_SUPPRESS_OVERSIGHT_NUDGE
 }
 
 teardown() {

@@ -1,10 +1,11 @@
 # Problem 391: oversight-nudge bats suites are non-hermetic against an inherited WR_SUPPRESS_OVERSIGHT_NUDGE — false reds inside AFK iters
 
-**Status**: Open
+**Status**: Verifying
 **Reported**: 2026-06-27
+**Fix applied**: 2026-06-28 (test-only, no release)
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: internal
-**Effort**: S (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: S (confirmed — 4 one-line `unset` additions to bats `setup()`)
 **JTBD**: JTBD-001
 **Persona**: developer
 
@@ -41,10 +42,24 @@ Run with `env -u WR_SUPPRESS_OVERSIGHT_NUDGE` (or run the suites outside an AFK 
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Add `unset WR_SUPPRESS_OVERSIGHT_NUDGE` to the `setup()` of `packages/jtbd/hooks/test/jtbd-oversight-nudge.bats` so the guard is test-controlled (count tests stop self-suppressing under inherited guard).
-- [ ] Apply the identical fix to the architect sibling `packages/architect/hooks/test/architect-oversight-nudge.bats`.
-- [ ] Confirm the guard-specific tests (which set `WR_SUPPRESS_OVERSIGHT_NUDGE=1` and `=0` explicitly) still pass after the setup() unset.
-- [ ] Generalise: audit other hook bats suites whose hook branches on an env guard the AFK orchestrator exports; neutralise the guard in setup(). Brief in `afk-subprocess.md` / `governance-workflow.md`.
+- [x] Add `unset WR_SUPPRESS_OVERSIGHT_NUDGE` to the `setup()` of `packages/jtbd/hooks/test/jtbd-oversight-nudge.bats` so the guard is test-controlled (count tests stop self-suppressing under inherited guard).
+- [x] Apply the identical fix to the architect sibling `packages/architect/hooks/test/architect-oversight-nudge.bats`.
+- [x] Confirm the guard-specific tests (which set `WR_SUPPRESS_OVERSIGHT_NUDGE=1` and `=0` explicitly) still pass after the setup() unset.
+- [x] Generalise: audit other hook bats suites whose hook branches on an env guard the AFK orchestrator exports; neutralise the guard in setup(). **Audit result**: the four oversight/scaffold-nudge suites below all branch on `WR_SUPPRESS_OVERSIGHT_NUDGE` and lacked the unset — all fixed. The fifth candidate `packages/itil/hooks/test/itil-pending-questions-surface.bats` already `unset`s its guard (`WR_SUPPRESS_PENDING_QUESTIONS`) in `setup()` + `teardown()` — it is the reference pattern this fix generalises. No further suites are exposed (grep for `WR_SUPPRESS_*` across `packages/*/hooks/test/*.bats` returns exactly these five). Brief in `afk-subprocess.md` / `governance-workflow.md` deferred to retro Tier-3.
+
+## Resolution
+
+Added `unset WR_SUPPRESS_OVERSIGHT_NUDGE` to the `setup()` of all four affected suites:
+- `packages/jtbd/hooks/test/jtbd-oversight-nudge.bats`
+- `packages/architect/hooks/test/architect-oversight-nudge.bats`
+- `packages/itil/hooks/test/itil-rfc-oversight-nudge.bats`
+- `packages/risk-scorer/hooks/test/risk-scorer-scaffold-nudge.bats`
+
+**Verification (in-session, 2026-06-28)** — reproduced the exact AFK-iter failing condition by exporting `WR_SUPPRESS_OVERSIGHT_NUDGE=1 WR_SUPPRESS_PENDING_QUESTIONS=1` into the bats environment:
+- Pre-fix: `not ok` on the six count-emitting tests (jtbd 1/2, architect 7/8, itil-rfc 13/14, risk-scorer 20/23/24).
+- Post-fix: **30 ok / 0 not ok** under the exported guard (the AFK condition) AND 30/30 under `env -u` (the CI condition). Guard-specific tests (`run env WR_SUPPRESS_OVERSIGHT_NUDGE=1/0/yes`) unaffected — per-invocation env overrides the `setup()` unset.
+
+Test-only change — no shipped hook modified, no changeset, no release. None of the four are `packages/shared` synced copies (package-local hooks), so no sync-script run owed.
 
 ## Fix Strategy
 

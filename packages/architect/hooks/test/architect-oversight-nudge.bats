@@ -12,6 +12,11 @@ setup() {
   PLUGIN_ROOT="$REPO_ROOT/packages/architect"
   DIR="$(mktemp -d)"
   mkdir -p "$DIR/docs/decisions"
+  # Hermeticity (P391): the AFK work-problems orchestrator exports
+  # WR_SUPPRESS_OVERSIGHT_NUDGE=1, which the hook self-suppresses on. Unset it so
+  # count-emitting tests assert real behaviour; guard-specific tests set it
+  # per-invocation via `run env WR_SUPPRESS_OVERSIGHT_NUDGE=...`.
+  unset WR_SUPPRESS_OVERSIGHT_NUDGE
 }
 
 teardown() {
