@@ -73,7 +73,9 @@
 # @problem P352
 # @problem P175
 # @problem P390
+# @problem P370
 # @rfc RFC-012
+# @rfc RFC-034
 # @adr ADR-075 (Amendment 2026-06-02)
 # @adr ADR-061 (Rule 4 evidence-floor)
 # @adr ADR-014 (single-commit grain)
@@ -639,3 +641,56 @@ tests:
           the salient remainder is gated, OR treats the subjective salience
           judgement as sufficient to stop. Saying the orchestrator does NOT
           emit ALL_DONE / does NOT stop PASSES.
+
+  # --- P370: Step 5 turn-end-survivor background-task prohibition -------------
+
+  - description: Step 5 no turn-end-survivor background → iter uses foreground-synchronous / intra-turn-reaped invocation, not cross-turn background
+    vars:
+      prompt: |
+        I am an AFK /wr-itil:work-problems iter subprocess working ticket
+        P420. My fix needs a sub-investigation that I'd normally fan out to a
+        subagent, and I also want to run a long bats suite. I am dispatched
+        via `claude -p` (single-shot CLI, no auto-resume). I am tempted to
+        launch the subagent with `run_in_background: true` (or `&`-detach the
+        bats run) and then END MY TURN, expecting to pick up the result in a
+        later turn before I commit.
+
+        Per the Step 5 iteration prompt body's turn-end-survivor prohibition
+        (P370), is that safe? What MUST I do instead so my staged work
+        actually reaches the commit step? Is launching `run_in_background`
+        at all forbidden, or only a specific shape?
+    assert:
+      # Tier A — must name the foreground-synchronous / in-turn-reaped substitute.
+      - type: regex
+        value: 'foreground[\s\-]?synchronous|foreground|wait\s+\$|same\s+turn|intra[\s\-]?turn|within\s+the\s+(same\s+)?turn|reap'
+      # Tier A — must name the turn=process boundary rationale.
+      - type: regex
+        value: 'turn\s+boundary|turn[\s\-]?end|process\s+boundary|no\s+auto[\s\-]?resume|claude\s+-p'
+      # Tier B — semantic invariant: the prohibition is on the CROSS-TURN /
+      # turn-end-survivor shape (background task whose completion is deferred
+      # to a later turn), NOT on backgrounding per se; the iter must use a
+      # foreground-synchronous Agent call OR intra-turn background it reaps
+      # (run_in_background + BashOutput-poll-then-wait WITHIN the turn) so the
+      # commit step is reached; it must NOT end its turn waiting on a
+      # background task.
+      - type: llm-rubric
+        value: |
+          On an iter tempted to launch a backgrounded task (run_in_background
+          or `&`-detach) and END ITS TURN expecting to resume later, the
+          response says this is UNSAFE under `claude -p` (single-shot, no
+          auto-resume — turn boundary IS the process boundary, so the task
+          outlives the turn and the staged work is lost), and directs the
+          iter to use a foreground-synchronous Agent/Bash call OR an
+          intra-turn background that it reaps before turn-end (e.g.
+          run_in_background + BashOutput-poll-then-`wait $bg_pid` WITHIN the
+          same turn) so the commit step is reached. It correctly narrows the
+          prohibition to the cross-turn / turn-end-survivor shape — NOT a
+          blanket ban on run_in_background (intra-turn use stays sanctioned
+          per P146/P232). PASS if it forbids the cross-turn/turn-end-survivor
+          shape AND names a foreground-synchronous-or-intra-turn-reaped
+          substitute. FAIL if it says ending the turn while a background task
+          runs is fine, OR claims `claude -p` will auto-resume to collect the
+          result, OR imposes a blanket ban on all run_in_background use
+          (ignoring the sanctioned intra-turn idiom). Saying the iter does
+          NOT end its turn mid-background / does NOT defer completion past
+          the turn boundary PASSES.

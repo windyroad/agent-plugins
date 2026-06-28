@@ -1,6 +1,6 @@
 # Problem 370: Iter subprocess ends its turn waiting on a backgrounded task and never resumes — `claude -p` has no auto-resume; commit-bearing work is lost
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-06-17
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next `/wr-itil:review-problems`)
 **Origin**: internal
@@ -53,9 +53,9 @@ The common root cause is: `claude -p` IS the agent's whole session — its turn 
 
 - [ ] Re-rate Priority and Effort at next `/wr-itil:review-problems`.
 - [ ] Survey: which iters across the `.afk-run-state/iter*.json` corpus show non-empty staged work but no commit_sha? Count + characterise.
-- [ ] Document the prohibition: amend `/wr-itil:work-problem(s)` SKILL.md iter-prompt-body prose to explicitly forbid `run_in_background: true` (and equivalent background-launch tool surfaces) inside iter dispatch contexts.
-- [ ] Behavioural test: bats fixture exercises a SKILL-prose surface that asserts the prohibition prose exists; promptfoo eval that exercises an iter-shape and asserts no background-fan-out tool-call appears in the response.
-- [ ] Recovery path: codify the orchestrator main-turn salvage protocol (carry-over from P261) into a SKILL.md sub-step so the salvage is mechanical rather than ad-hoc.
+- [x] Document the prohibition: amend `/wr-itil:work-problem(s)` SKILL.md iter-prompt-body prose to explicitly forbid `run_in_background: true` (and equivalent background-launch tool surfaces) inside iter dispatch contexts. **DONE 2026-06-28** — Step 5 Constraints clause added to `packages/itil/skills/work-problems/SKILL.md`, scoped to the cross-turn / turn-end-survivor shape (carves out the P146/P232-sanctioned intra-turn `run_in_background` + `BashOutput`-poll-then-`wait` idiom per architect coherence review). Singular `work-problem/SKILL.md` is OUT of scope — it has no iter-prompt-body (selection-and-delegate execution unit, not the `claude -p` prompt builder); the hazard exists only on the plural orchestrator's `claude -p` dispatch path. See RFC-034 for the supersession of this ticket's over-broad locus list.
+- [x] Behavioural test: ~~bats fixture~~ promptfoo eval that exercises an iter-shape and asserts no turn-end-survivor background-fan-out tool-call appears in the response. **DONE 2026-06-28** — case added to `packages/itil/skills/work-problems/eval/promptfooconfig.yaml` (`@problem P370`), GREEN. NOT a structural bats fixture: ADR-052's 2026-06-09 amendment deleted the structural escape hatch ("not permitted under any justification"), so a SKILL-prose grep fixture would be a net-new violation. Behavioural promptfoo per ADR-052/ADR-075; also discharges the R009 in-source floor for the prose change.
+- [ ] **Deferred follow-on** — Recovery path: codify the orchestrator main-turn salvage protocol (carry-over from P261) into a SKILL.md sub-step so the salvage is mechanical rather than ad-hoc. Tracked in RFC-034 Tasks as a separable, heavier concern; out of scope for the prohibition slice.
 - [ ] Cross-reference P083 / P146 / P232 in the prohibition prose so the sibling-class trace is visible.
 
 ## Dependencies
@@ -91,3 +91,9 @@ The common root cause is: `claude -p` IS the agent's whole session — its turn 
 - Behavioural test: `packages/itil/skills/work-problem/test/work-problem-no-background-fanout-in-iter.bats` + a promptfoo eval that exercises an iter-shape.
 
 **Routing target**: when ratified for build, capture an RFC per ADR-060 tracing this ticket + the SKILL loci + the test fixture. Implementation is foreground-lightweight (prose + bats) — likely a single iter once the RFC scope lands.
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-034 | proposed | Forbid backgrounded-task launches inside `claude -p` AFK iter dispatch contexts |
