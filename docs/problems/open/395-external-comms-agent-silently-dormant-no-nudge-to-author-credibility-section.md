@@ -5,8 +5,8 @@
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: corrective-feedback (user, 2026-06-28)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
-**JTBD**: JTBD-101
-**Persona**: plugin-developer
+**JTBD**: JTBD-302 (re-anchored from JTBD-101 per the wr-jtbd:agent gate, 2026-06-28 — JTBD-101 is a plugin-author authoring/CI job; this serves adopter discoverability of a shipped-but-dormant capability, which is JTBD-302 "Trust That the README Describes the Plugin I Just Installed")
+**Persona**: plugin-user (re-anchored from plugin-developer to match JTBD-302)
 
 ## Description
 
@@ -34,12 +34,28 @@ The fix should NUDGE the adopter to author the section — e.g. extend the exist
 
 ## Root Cause Analysis
 
-(deferred to investigation — leading hypothesis: the agent contract treats dormancy as benign degradation with no surfacing obligation; no SessionStart/gate-fire advisory detects the missing-section predicate.)
+**Confirmed (2026-06-28 work-problems iter):** two compounding causes —
+
+1. The agent contract (`packages/risk-scorer/agents/external-comms.md` lines 45, 88) frames the credibility axis as **dormant** when `RISK-POLICY.md` lacks the `## Outbound Credibility / Self-Own` section ("no class to cite per ADR-026 grounding … dormant, not lenient"). The framing is technically correct but carries **no surfacing obligation** — nothing tells the adopter the axis exists.
+2. No SessionStart/gate-fire advisory detects the `POLICY_FILE_EXISTS AND !CREDIBILITY_SECTION_PRESENT` predicate. The existing `risk-scorer-scaffold-nudge.sh` covers only `POLICY × MISSING-DIR` (`docs/risks/`) and `Curation: pending review` content-state — neither the missing-section shape.
+
+**Intended fix (mechanically validated, AFK-safe):** add the third predicate to `risk-scorer-scaffold-nudge.sh` — a read-only, every-session, class-B self-surfacing nudge advising the adopter to author the section, reusing the `WR_SUPPRESS_OVERSIGHT_NUDGE` AFK guard, with a bats four-state matrix test. The architect confirmed the *mechanics* are compliant (ADR-040 read-mostly PASS, ADR-068 guard PASS, ADR-052 test PASS) and the external-comms contract framing is consistent (the nudge surfaces dormancy, does not assert the axis is active).
+
+**BLOCKED on a direction decision (queued to the iter's outstanding_questions — do not build on it unconfirmed, per ADR-074):** the architect flagged that the missing-**section** shape diverges from every predicate ADR-047 ratified (all `policy-file × missing-DIRECTORY`). ADR-047's 2026-06-08 amendment explicitly reserved this generalisation for a **confirmed Phase 2** ("the policy/artefact-pair semantics … likely a sibling ADR generalising the pattern") and flagged the shape as not-yet-confirmed-to-generalise. This is a genuine ≥2-option home/ADR decision not pinned by any accepted ADR:
+
+- **Option A** — Extend ADR-047's predicate matrix in-place to add the `policy-file × missing-SECTION` shape; amend ADR-047 + re-confirm its oversight marker. (Cheapest; stretches a register-scaffold ADR to cover a different-plugin axis-activation concern.)
+- **Option B** — Record a sibling generalisation ADR for "policy-file → governance-surface-activation nudges" (the Phase-2 vehicle ADR-047 itself anticipated); implement the section predicate under it. Cleaner separation; matches ADR-047's stated reassessment path. *(Architect's advisory lean.)*
+- **Option C** — Home the nudge on the external-comms / ADR-028 surface (the axis it actually activates) rather than the risk-scorer scaffold hook. Co-locates nudge with the contract it serves; spreads SessionStart nudges across two hooks.
+
+**Voice-tone phrasing (gate-approved, for whichever home wins):**
+> `[wr-risk-scorer] RISK-POLICY.md present but has no '## Outbound Credibility / Self-Own' section — author it in RISK-POLICY.md to activate the external-comms credibility/self-own review axis.`
 
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Investigate root cause — decide nudge surface (extend `risk-scorer-scaffold-nudge.sh` SessionStart vs one-time gate-fire advisory)
+- [x] Investigate root cause — confirmed (agent-contract no-surfacing-obligation + no missing-section predicate detector)
+- [ ] **User decision required:** pick the nudge home/ADR — Option A (extend ADR-047) / B (sibling ADR, architect lean) / C (external-comms surface). Blocks implementation per ADR-074.
+- [ ] Implement the chosen predicate in `risk-scorer-scaffold-nudge.sh` + four-state bats test (mechanics pre-validated by architect)
 - [ ] Create reproduction test
 
 ## Dependencies
