@@ -694,3 +694,85 @@ tests:
           (ignoring the sanctioned intra-turn idiom). Saying the iter does
           NOT end its turn mid-background / does NOT defer completion past
           the turn boundary PASSES.
+
+  # --- P399: Step 5 I13 fix-time RFC auto-create authors the FULL RFC ----------
+  #
+  # Driver: P399 (ADR-073's I13 fix-time auto-create originally emitted a
+  # SKELETON RFC with an empty `## Scope` placeholder, on the rationale that
+  # scope is fleshed out later via /wr-itil:manage-rfc. The "flesh out later"
+  # step never self-fired — P375 cadence-rot — so 6/7 auto-created skeletons on
+  # 2026-06-28 stayed under-scoped while their fixes shipped. ADR-073 amended:
+  # the fix-time auto-create AUTHORS the full RFC — populated `## Scope` + real
+  # `## Tasks` from the traced problem's RCA + Fix Strategy — via the new
+  # `--fix-time` flag on /wr-itil:capture-rfc, invoked by the work-problems
+  # Step 5 auto-create clause). This is the work-problems-surface paired case;
+  # the manage-problem-surface case lives in that skill's eval. Discharges the
+  # R009 prose-surface floor for the full-authoring change on the work-problems
+  # SKILL surface per ADR-061 Rule 4.
+  #
+  # Tier-A calibration (P270 / P393): the paraphrase-proof anchor is the
+  # `--fix-time` flag — a deterministic command token taken ONLY on the
+  # full-authoring branch (the skeleton branch omits it) — plus the canonical
+  # `capture-rfc` skill name. Semantic clauses (full-scope-not-skeleton,
+  # framework-mediated / NO AskUserQuestion, loop never blocked) route to the
+  # Tier-B rubric.
+  #
+  # @problem P399 (closes the skeleton-under-scoping gap on the work-problems surface)
+  # @adr ADR-073 (auto-create authors the full RFC, P399 amendment)
+  # @adr ADR-071 (every fix goes through an RFC) + ADR-070 (no Considered-Options block)
+  - description: Step 5 I13 fix-time auto-create — author the full RFC via capture-rfc --fix-time, not a skeleton (P399)
+    vars:
+      prompt: |
+        I am an AFK /wr-itil:work-problems iter subprocess inside the delegated
+        /wr-itil:manage-problem traversal for the selected ticket P399 (a Known
+        Error). At the propose-fix step the gate predicate
+        `wr-itil-check-fix-rfc-trace` emitted a `no-rfc-trace:` directive and I
+        confirmed there is NO existing RFC cited in the ticket as its fix
+        vehicle — a genuine no-vehicle case. The ticket has a populated
+        `## Root Cause Analysis` and `## Fix Strategy`.
+
+        Per the Step 5 I13 fix-time RFC auto-create clause (the AFK carve-out
+        exception (b)), what EXACTLY do I do before proceeding with the fix?
+        Name the exact command I run, say what its created RFC's `## Scope` and
+        `## Tasks` sections contain, and whether I pause to ask the user.
+    assert:
+      # Tier A — must invoke capture-rfc with the --fix-time flag (the
+      # paraphrase-proof full-authoring mechanism; taken ONLY on this branch).
+      - type: contains
+        value: '--fix-time'
+      # Tier A — must name the canonical capture-rfc vehicle.
+      - type: contains
+        value: 'capture-rfc'
+      # Tier A — must describe the authored RFC carrying a real Scope + Tasks
+      # (not a deferred placeholder). JS RegExp compat (char classes, [\s\S]).
+      - type: regex
+        value: '[Ss]cope[\s\S]{0,500}[Tt]asks'
+      # Tier B — semantic invariant: the fix-time auto-create AUTHORS the full
+      # RFC (populated Scope + real Tasks derived from the problem's RCA + Fix
+      # Strategy), NOT an empty skeleton/deferred-placeholder; it is
+      # framework-mediated (NO AskUserQuestion mid-loop — the scope is derived
+      # from the already-pinned problem + ADR-071, not direction-setting per
+      # P132); and the loop is NEVER blocked/skipped for the missing RFC
+      # (ADR-073 auto-create-everywhere). The RFC carries NO Considered-Options
+      # block (ADR-070, chosen-path prose only).
+      - type: llm-rubric
+        value: |
+          On a no-vehicle RFC-less Known Error at the Step 5 I13 fix-time gate,
+          the response directs the iter to auto-create the missing RFC by
+          invoking /wr-itil:capture-rfc with the --fix-time flag, and the
+          created RFC carries a FULLY-AUTHORED `## Scope` (the fix being
+          proposed + implementation approach) and a real `## Tasks`
+          decomposition DERIVED FROM the traced problem's Root Cause Analysis
+          + Fix Strategy — NOT an empty skeleton or a "flesh out / populate
+          later" deferred placeholder. The action is framework-mediated: the
+          iter does NOT call AskUserQuestion mid-loop (the scope is derived
+          from the already-pinned problem + ADR-071, not new direction-setting
+          — P132), and the loop is NEVER skipped or blocked for the missing
+          RFC (it proceeds with the fix after authoring). PASS if it (a) names
+          the --fix-time auto-create, (b) says the RFC is fully authored from
+          the problem (not a skeleton), AND (c) says no mid-loop user ask /
+          loop proceeds. FAIL if it says the auto-create emits a skeleton /
+          deferred placeholder, OR that the iter must ask the user / pause /
+          block the loop for the RFC, OR that it should enumerate rejected
+          alternatives / add a Considered-Options block. Saying it does NOT
+          ask the user / does NOT emit a skeleton PASSES.

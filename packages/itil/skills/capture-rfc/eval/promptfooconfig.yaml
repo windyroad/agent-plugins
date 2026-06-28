@@ -1,0 +1,185 @@
+# SKILL eval — capture-rfc --fix-time full-authoring behavioural contract
+# (P399 / ADR-073 / RFC-005 / ADR-075 Amendment 2026-06-02).
+#
+# Tier-A deterministic regex + Tier-B llm-rubric coverage for the capture-rfc
+# SKILL.md `--fix-time` branch. This eval is the second of the two paired
+# surfaces whose GREEN result discharges the R009 prose-surface release-floor
+# for P399 (the first is the work-problems Step 5 case in
+# `packages/itil/skills/work-problems/eval/`; the manage-problem surface case
+# lives in `packages/itil/skills/manage-problem/eval/`). Per ADR-061 Rule 4
+# evidence-floor, a passing Tier-A/Tier-B eval IS the per-class evidence for a
+# SKILL-prose surface — it flips the R009 modulator +1 → -1 for this surface.
+#
+# Contract under test (ADR-073 P399 amendment):
+#   - `--fix-time` switches Step 5 from the deferred-placeholder skeleton
+#     template to FULL authoring: capture-rfc reads the traced problem
+#     ticket(s) and authors a populated `## Scope` (the fix being proposed +
+#     chosen implementation approach as prose) and a real `## Tasks`
+#     decomposition from the problem's `## Root Cause Analysis` + `## Fix
+#     Strategy`, instead of `(deferred — populate at manage-rfc accepted)`
+#     placeholders. NO Considered-Options block (ADR-070, chosen-path prose
+#     only). Born `human-oversight: unconfirmed` (ratified at manage-rfc
+#     accepted). Framework-mediated — NO AskUserQuestion (the scope is derived
+#     from the already-pinned problem + ADR-071, not direction-setting; P132).
+#   - The DEFAULT (no `--fix-time`, user-aside path) still writes the deferred
+#     skeleton placeholders. The contrast case proves the flag is the
+#     load-bearing branch selector.
+#
+# Drivers:
+#   - ADR-075 (Amendment 2026-06-02) — SKILL-prose harness scope; per-skill
+#     `packages/<plugin>/skills/<skill>/eval/promptfooconfig.yaml` location;
+#     exec:bash provider; Tier-A regex + Tier-B llm-rubric.
+#   - ADR-061 (Rule 4 evidence-floor) — paired promptfoo Tier-A/B GREEN IS the
+#     per-class evidence for SKILL-prose surfaces; discharges the R009 floor.
+#   - ADR-073 (P399 amendment) — fix-time auto-create authors the full RFC.
+#   - ADR-070 — chosen-path prose only, NO Considered-Options block.
+#   - ADR-071 — every fix goes through an RFC (the mandatory vehicle).
+#   - ADR-044 — cat-1 reclassification: full-scope authoring of the pinned
+#     vehicle is framework-mediated, not direction-setting (silent-framework).
+#   - ADR-014 (single-commit grain) — this eval ships in the same commit as
+#     the reinstated P399 changeset.
+#   - RFC-005 — the fix vehicle P399 was wired into.
+#   - P399 (driving problem — skeleton-under-scoping cadence-rot).
+#
+# Tier-A calibration (P270 / P393): paraphrase-proof anchors only — the
+# literal `--fix-time` flag, the `## Scope` / `## Tasks` structural headings,
+# `capture-rfc`. All semantic / judgement clauses (full-authoring-not-skeleton,
+# derived-from-the-problem, framework-mediated / NO AskUserQuestion, default
+# stays skeleton) route to the Tier-B llm-rubric — a `not-regex` on negative
+# clauses false-fails against behaviourally-correct negated answers.
+#
+# Run from repo root (absolute path — exec-provider cwd resets):
+#   npx promptfoo eval -c "$PWD/packages/itil/skills/capture-rfc/eval/promptfooconfig.yaml"
+#
+# @jtbd JTBD-008 (Decompose a Fix Into Coordinated Changes)
+# @jtbd JTBD-006 (Progress the Backlog While I'm Away)
+# @jtbd JTBD-101 (Extend the Suite with New Plugins)
+# @problem P399
+# @rfc RFC-005
+# @adr ADR-075 (Amendment 2026-06-02)
+# @adr ADR-061 (Rule 4 evidence-floor)
+# @adr ADR-073 (P399 amendment)
+# @adr ADR-070 (no Considered-Options block)
+# @adr ADR-014 (single-commit grain)
+
+description: |
+  capture-rfc SKILL eval — Tier-A regex + Tier-B llm-rubric coverage for the
+  --fix-time full-authoring contract (ADR-073 P399). Asserts that --fix-time
+  authors a populated ## Scope + real ## Tasks derived from the traced
+  problem (NOT a deferred-placeholder skeleton), and that the default
+  user-aside path still writes the skeleton. Passing eval flips the R009
+  prose-surface modulator +1 → -1 for capture-rfc per ADR-061 Rule 4,
+  discharging the held P399 changeset's reinstate floor.
+
+providers:
+  # Path is relative to this config file's directory (promptfoo basePath).
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+# Tier-B (llm-rubric) grading provider. Distinctive positive tokens (the
+# --fix-time flag, the ## Scope / ## Tasks headings, capture-rfc) stay Tier-A;
+# semantic NEGATIVE clauses (not-a-skeleton, no AskUserQuestion, no
+# Considered-Options block) route to llm-rubric, graded by claude under
+# subscription auth (no API key) via grade-llm-rubric.sh.
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  # --- P399: --fix-time authors the FULL RFC ----------------------------------
+
+  - description: --fix-time authors a populated Scope + Tasks from the traced problem, NOT a skeleton (P399)
+    vars:
+      prompt: |
+        I am invoking /wr-itil:capture-rfc with the --fix-time flag for a new
+        RFC traced to a Known Error problem ticket P399. The traced ticket has
+        a fully populated `## Root Cause Analysis` (the skeleton-emitting
+        auto-create left RFCs under-scoped) and a fully populated `## Fix
+        Strategy` (add a --fix-time flag; author Scope + Tasks from the
+        problem; wire the I13 gate prose to invoke it).
+
+        On the --fix-time path, what do I write into the new RFC's `## Scope`
+        and `## Tasks` sections at capture time — the deferred "populate at
+        manage-rfc accepted" placeholders, or fully-authored content? Where do
+        I derive that content from? Do I pause to ask the user to choose the
+        scope, and do I add a Considered-Options / alternatives-rejected block?
+    assert:
+      # Tier A — must reference the --fix-time flag (the branch selector).
+      - type: contains
+        value: '--fix-time'
+      # Tier A — must name both structural headings being authored.
+      - type: regex
+        value: '##?\s*Scope'
+      - type: regex
+        value: '##?\s*Tasks'
+      # NOTE: deliberately NO `contains capture-rfc` anchor here — the response
+      # is answering from INSIDE the capture-rfc invocation, so it describes the
+      # --fix-time path without re-naming the skill (P270 brittleness). The
+      # --fix-time flag + the ## Scope/## Tasks headings are the distinctive
+      # paraphrase-proof anchors; the skill name adds nothing here.
+      # Tier B — semantic invariant: --fix-time AUTHORS populated Scope + Tasks
+      # DERIVED FROM the traced problem's RCA + Fix Strategy (NOT a deferred
+      # placeholder / skeleton); framework-mediated (NO AskUserQuestion — scope
+      # derived from the already-pinned problem + ADR-071, not direction-setting
+      # per P132); NO Considered-Options / alternatives-rejected block (ADR-070,
+      # chosen-path prose only); born human-oversight: unconfirmed (ratified at
+      # manage-rfc accepted).
+      - type: llm-rubric
+        value: |
+          On the --fix-time path, the response says capture-rfc AUTHORS a
+          fully-populated `## Scope` (the fix being proposed + its
+          implementation approach as prose) and a real `## Tasks`
+          decomposition — DERIVED FROM the traced problem ticket's `## Root
+          Cause Analysis` + `## Fix Strategy` — at capture time, NOT the
+          deferred "populate at manage-rfc accepted" placeholder / skeleton.
+          The authoring is framework-mediated: it does NOT call AskUserQuestion
+          / does NOT pause to ask the user to choose the scope (the scope is
+          derived from the already-pinned problem + ADR-071, not new
+          direction-setting — P132), and it does NOT add a Considered-Options
+          / alternatives-rejected block (ADR-070 — chosen-path prose only).
+          PASS if it says (a) Scope + Tasks are fully authored (not a
+          skeleton/placeholder) AND (b) derived from the traced problem AND
+          (c) no user ask / no Considered-Options block. FAIL if it says
+          --fix-time writes the deferred placeholders / a skeleton, OR that it
+          must ask the user to choose the scope, OR that it enumerates rejected
+          alternatives / adds a Considered-Options block. Saying it does NOT
+          write a skeleton / does NOT ask the user PASSES. (Mentioning the RFC
+          is born human-oversight: unconfirmed and ratified at manage-rfc
+          accepted is correct and allowed.)
+
+  # --- Contrast: default (no flag) user-aside path stays skeleton -------------
+
+  - description: Default path (no --fix-time) writes the deferred skeleton placeholders (P399 contrast)
+    vars:
+      prompt: |
+        I am invoking /wr-itil:capture-rfc WITHOUT the --fix-time flag — the
+        ordinary user-aside capture path — for a new RFC traced to problem
+        P420. The user wants to record the RFC quickly and flesh out its scope
+        later.
+
+        On this default path, what do I write into the new RFC's `## Scope` and
+        `## Tasks` sections at capture time — fully-authored content, or the
+        deferred placeholders? When does the full scope get authored?
+    assert:
+      # Tier A — must reference the deferred / later authoring.
+      - type: regex
+        value: 'deferred|placeholder|later|skeleton|manage-rfc\s+accepted'
+      # Tier B — semantic invariant: the DEFAULT (no --fix-time) path writes
+      # the deferred-placeholder skeleton; full scope is authored later at the
+      # manage-rfc accepted transition. This proves --fix-time is the
+      # load-bearing branch selector (the default does NOT fully author).
+      - type: llm-rubric
+        value: |
+          On the default user-aside capture path (NO --fix-time flag), the
+          response says capture-rfc writes the DEFERRED placeholder / skeleton
+          content into `## Scope` and `## Tasks` at capture time (e.g.
+          "(deferred — populate at manage-rfc accepted)"), and the full scope
+          + task decomposition is authored LATER, at the /wr-itil:manage-rfc
+          accepted transition — NOT fully authored at capture time. PASS if it
+          says the default path writes deferred placeholders / a skeleton and
+          defers full authoring to manage-rfc accepted. FAIL if it says the
+          default path fully authors Scope + Tasks at capture time (that is the
+          --fix-time behaviour, not the default).
