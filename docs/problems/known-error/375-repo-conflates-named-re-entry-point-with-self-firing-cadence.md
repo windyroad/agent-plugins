@@ -51,7 +51,16 @@ Surfaced 2026-06-23 when the agent defended these deferrals as "names the next e
 - [ ] **P271 per-capture re-rate cadence is now obsolete** (every capture is rated; nothing to re-rate). Decide: (a) retire the `check-deferred-placeholder-staleness.sh` machinery as dead, or (b) replace with a genuine periodic full-backlog re-rate heartbeat (the separate "review-problems/run-retro has no self-firing cadence" problem). Do NOT fake it with a marker. Helper currently left unchanged + inert.
 - [ ] Decide whether P375 becomes a rollup PARENT for the instance cluster (P295/P271/P234/P236/P184/P189/P110/P220/P253/P148) or a sibling that supersedes them.
 - [ ] Fix the capture-problem (and manage-problem) deferred-placeholder default — `Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)` is both an uncadenced deferral and a false-low that buries captures; either rate at capture or make review-problems self-firing
-- [ ] Create reproduction test (behavioural: a SKILL with an on-demand-only deferral fails the check; one with a self-firing trigger passes)
+- [x] Create reproduction test (behavioural: a SKILL with an on-demand-only deferral fails the check; one with a self-firing trigger passes) — DONE 2026-06-28: `packages/itil/hooks/test/itil-deferral-cadence-gate.bats`, 15 green tests incl. the load-bearing case (a deferral citing a bare on-demand skill / bare ticket ID fires; one citing a self-firing `.sh`/SessionStart/CI passes).
+
+### Fix progress (2026-06-28 — Option C core slice BUILT, advisory rollout)
+
+The ratified Option-C authoring-time enforcement gate's **core slice** landed this session (RFC-035 B1–B5; ADR-087 records the contract design):
+
+- **`packages/itil/hooks/itil-deferral-cadence-gate.sh`** — PostToolUse:Write|Edit|MultiEdit advisory. Diff-aware (scans the newly-authored text only); scoped to shipped authoring surfaces (SKILL.md / ADR / RFC / hook `.sh`) with `docs/problems/` excluded; emits a stderr advisory when a deferral phrasing is authored WITHOUT a cadence annotation naming a **self-firing-CLASS** trigger (`.sh` hook / SessionStart / Pre-PostToolUse / `.github/workflows/` / cron / work-problems pre-flight) in the +/-5 line window. **The load-bearing P375 refinement**: a bare on-demand skill (`/wr-foo:bar`) or bare ticket ID does NOT satisfy the cadence — that bare-naming is the conflation this ticket captures. Registered in `packages/itil/hooks/hooks.json`; changeset seeded.
+- **Architect verdict** (2026-06-28): the cadence-annotation contract (require an explicit self-firing-CLASS citation, DON'T compute the reachability graph) is the right tractable shape. **Recommended advisory-first (PostToolUse) over a hard block** per ADR-040/045 declarative-first + ADR-057 staged rollout + the false-positive density of this repo's deferral-saturated governance corpus, and judged the user's loop-end ratification was at the *mechanism-class* grain (Option C vs A), leaving block-vs-advisory unratified at the *rollout-mode* grain → queued as Outstanding Question 3 below. JTBD verdict PASS (JTBD-001/006).
+
+**Deferred tail** (RFC-035 B6–B9, each carrying a cadence annotation to the SessionStart census so it cannot rot): B6 transitive-reachability graph validation (validate the cited trigger ACTUALLY fires, not just names a self-firing class — the core slice checks class, not existence); B7 converge `itil-fictional-defer-detect.sh` onto the stricter vocabulary; B8 retrofit cadence annotations onto the ~12 existing uncadenced deferrals (census backlog); B9 the rollout-mode decision below.
 
 ## Audit (2026-06-23 — 4-agent reachability sweep)
 
@@ -103,6 +112,7 @@ The class needs a generic mechanism so the rot is fixed once, not re-discovered 
 
 1. **`category:direction` — generic-mechanism choice.** Which rung(s) of the A/B/C/D ladder above do we commit to? A is partially shipped; the open call is whether to invest in C (authoring-time enforcement gate, root-cause) now, add B (loop pre-flight execute-gap) as an interim, or stop at A (surfacing-only). Warrants a `/wr-architect:create-adr` once chosen. *Trade-offs briefed in the option-ladder above.*
 2. **`category:direction` — rollup-parent decision.** Should P375 become a rollup PARENT for the `## Related` cluster (P295/P271/P234/P236/P189/P184/P110/P220/P253/P148/P291), or a sibling that supersedes them? Plus: fold P379 in as the next risk-scorer-nudge arm (sibling survey above). Affects backlog accounting (closing children vs leaving them as tracked instances).
+3. **`category:direction` — rollout mode for the authoring-time gate (NEW 2026-06-28, surfaced by the architect review).** The core slice shipped as an **advisory** (PostToolUse stderr, non-blocking) — it fires the moment an uncadenced deferral is authored and tells the author to add a cadence annotation, but does not stop the write. The alternative is a **hard block** (PreToolUse `permissionDecision: deny`) that refuses the write until the deferral is cadenced or removed. The ratified Option-C text said "REJECTS authoring" (block), but the architect judged that ratification was at the mechanism-class grain (authoring-time gate vs surfacing census), not the rollout-mode grain, and recommended advisory-first per the ADR-057 declarative→block staging pattern because this repo's governance corpus is saturated with descriptive deferral prose (a hard block risks false-blocking legitimate new ADR/RFC/SKILL authoring that quotes or narrates the deferral class). **Decide once the advisory's false-positive rate is observed over a few authoring sessions**: stay advisory, or escalate to a PreToolUse hard block (RFC-035 task B9). Warrants no new ADR — the rollout-mode amendment lands on ADR-087.
 
 ## Dependencies
 
@@ -129,3 +139,9 @@ This is the **systemic / meta** ticket for a class previously captured only as s
 - `packages/itil/hooks/itil-fictional-defer-detect.sh` — existing partial enforcement; the authoring-time check likely extends this.
 
 (captured via /wr-itil:capture-problem; expand at next investigation)
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-035 | proposed | Authoring-time deferral-cadence enforcement gate |

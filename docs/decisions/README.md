@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 84 (75 in-force, 9 historical)
+**Total ADRs:** 85 (76 in-force, 9 historical)
 
 ---
 
 ## In-force decisions
 
-_75 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_76 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -305,9 +305,9 @@ _75 ADRs. These are the current rules. The architect agent reads this section fi
 **Related:** ADR-071, ADR-073, ADR-022, ADR-072, ADR-070, ADR-060
 
 ### ADR-073 — Fix-time gate auto-creates a missing RFC (everywhere)
-**Status:** proposed | **Oversight:** confirmed
-**Chosen:** Chosen option: **"Auto-create a problem-traced RFC if missing, everywhere the gate fires"** (user-ratified). When the propose-fix gate (ADR-072) fires on a Known Error with no RFC trace, the framework **auto-creates a problem-traced RFC** �...
-**Confirmation:** The propose-fix gate (interactive + AFK) auto-creates a problem-traced skeleton RFC when none exists; it never...; The auto-created RFC carries no "Considered Options" block (passes the ADR-052 lint) and traces the driving pr...; A behavioural test asserts auto-create fires at both the interactive and AFK surfaces.
+**Status:** proposed | **Oversight:** unconfirmed
+**Chosen:** Chosen option: **"Auto-create a problem-traced RFC if missing, everywhere the gate fires — authoring the full RFC, not a skeleton"** (user-ratified). When the propose-fix gate (ADR-072) fires on a Known Error with no RFC trace, the framew...
+**Confirmation:** The propose-fix gate (interactive + AFK) auto-creates a problem-traced RFC when none exists; it never hard-blo...; The auto-created RFC carries a populated, non-placeholder ## Scope (the fix being proposed) and a real ## Task...; The authored RFC carries no "Considered Options" block (passes the ADR-052 lint) and traces the driving proble...; A behavioural test asserts the fix-time auto-create authors a non-placeholder ## Scope + task list (not a skel...
 **Related:** ADR-071, ADR-072, ADR-070, ADR-044, ADR-060
 
 ### ADR-074 — ADR-074: Confirm a decision's substance before building dependent work on it
@@ -373,6 +373,10 @@ _75 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed | **Supersedes:** [065-pipeline-gate-threshold-from-risk-policy-appetite]
 **Confirmation:** RISK-POLICY.md absent → default appetite 5; score 5 PASSES, score 6 FAILS.; RISK-POLICY.md "Threshold: 5" parse → score 5 PASSES, score 6 FAILS.; RISK-POLICY.md "exceeds 4" — explicit-policy override of default-5 → score 4 PASSES, score 5 FAILS.; Fractional score = 5.5 → FAILS under default 5 (integer-only-equivalence delta carried forward from ADR-065,...; RISK_APPETITE env override still takes precedence over the policy parse.
 **Related:** ADR-065, ADR-013, ADR-042, ADR-014, ADR-052, ADR-026, ADR-077
+
+### ADR-087 — Authoring-time cadence-annotation contract — how a deferral declares the self-firing trigger that will fire it
+**Status:** proposed | **Oversight:** unconfirmed
+**Chosen:** Chosen option: **Option 2 — explicit cadence-annotation contract naming a self-firing CLASS.** It is checkable in a per-edit hook (no graph walk), it directly rejects the P375 conflation (Option 3's defect), and it leaves the genuinely-ha...
 
 ---
 
