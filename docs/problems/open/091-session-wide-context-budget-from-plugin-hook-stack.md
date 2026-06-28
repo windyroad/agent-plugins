@@ -3,6 +3,7 @@
 **Status**: Open
 **Reported**: 2026-04-22
 **Priority**: 15 (High) — Impact: Moderate (3) x Likelihood: Almost certain (5)
+**Origin**: internal
 **Effort**: XL (meta ticket — actionable work lives on P095/P096/P097/P098; this ticket owns framing, measurement, and the unifying ADR)
 **WSJF**: (15 × 1.0) / 8 = **1.875**
 

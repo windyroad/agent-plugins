@@ -3,6 +3,7 @@
 **Status**: Open
 **Reported**: 2026-04-27
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Possible (3) — friction is suite-wide but per-surface bounded
+**Origin**: internal
 **Effort**: L — ~5+ sessions across 26 edit-bearing surfaces (3 high-ask SKILLs + 4-6 medium/low-ask SKILLs + 4 critical hooks + ~2 ADR amendments). Per-surface release cadence drains projected risk to one surface at a time per P135 R1.
 **WSJF**: (9 × 1.0) / 4 = **2.25**
 

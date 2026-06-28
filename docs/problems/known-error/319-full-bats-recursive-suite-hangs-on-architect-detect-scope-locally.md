@@ -3,6 +3,7 @@
 **Status**: Known Error
 **Reported**: 2026-05-27
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Origin**: internal
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 **Root cause identified**: 2026-06-16 (AFK work-problems iter 25). Fix landed; pending release verification.
 

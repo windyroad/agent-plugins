@@ -3,6 +3,7 @@
 **Status**: Open
 **Reported**: 2026-05-26
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Origin**: internal
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems; likely L/XL — touches every plugin's build + sync + CI)
 
 ## Description

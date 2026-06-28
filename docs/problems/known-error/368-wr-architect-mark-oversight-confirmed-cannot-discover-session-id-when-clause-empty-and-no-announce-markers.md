@@ -1,6 +1,6 @@
 # Problem 368: wr-architect-mark-oversight-confirmed cannot discover session-id when CLAUDE_SESSION_ID empty AND no announce markers
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-06-17
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: internal

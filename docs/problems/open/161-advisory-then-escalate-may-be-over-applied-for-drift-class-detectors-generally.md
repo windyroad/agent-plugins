@@ -3,6 +3,7 @@
 **Status**: Open
 **Reported**: 2026-05-04
 **Priority**: 6 (Moderate) — Impact: Moderate (3) x Likelihood: Possible (2)
+**Origin**: internal
 **Effort**: M — observation-only ticket; no immediate fix. Required work is *waiting* for 2-3 more drift-class detectors to arrive following the load-bearing-from-the-start shape, then deciding whether a meta-rule / meta-ADR is warranted.
 
 **WSJF**: (6 × 1.0) / 2 = **3.0**

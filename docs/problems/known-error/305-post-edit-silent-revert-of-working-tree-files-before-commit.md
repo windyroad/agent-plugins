@@ -3,6 +3,7 @@
 **Status**: Known Error
 **Reported**: 2026-05-26
 **Priority**: 6 (Med) — Impact: 3 (Moderate) x Likelihood: 2 (Possible) — re-rated 2026-06-08 from earlier deferred 3
+**Origin**: internal
 **Effort**: M (ticket update; substantive fix M-L pending fix-strategy ratification)
 
 ## Description

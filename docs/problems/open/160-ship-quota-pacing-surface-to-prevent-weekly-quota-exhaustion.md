@@ -3,6 +3,7 @@
 **Status**: Open
 **Reported**: 2026-05-03
 **Priority**: 10 (High) — Impact: Minor (2) x Likelihood: Almost certain (5)
+**Origin**: internal
 **Effort**: XL — new plugin or sibling surface; ADR required for policy semantics (advisory vs blocking, scope boundary against existing statusline read-surface, AFK-orchestrator interaction); cross-cutting with hooks (PreToolUse cadence gate?), statusline (already reads quota state — see `~/.claude/statusline-command.sh`), and a quota-policy schema analogous to `RISK-POLICY.md`. Multi-day, cross-package work.
 
 **WSJF**: (10 × 1.0) / 8 = **1.25**
