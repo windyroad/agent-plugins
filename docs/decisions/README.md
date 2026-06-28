@@ -297,12 +297,12 @@ _76 ADRs. These are the current rules. The architect agent reads this section fi
 **Chosen:** Chosen option: **"Every problem is fixed only via an RFC — no carve-out, no effort threshold"**, ratified by the user via clear direction on 2026-05-26 (*"Each problem may ONLY be fixed via an RFC"*).
 **Confirmation:** A Problem→RFC fix-time gate enforces RFC-first with no effort carve-out (a problem fix cannot commence/commi...; JTBD-008 (lines 21/26/44) + JTBD-101 (line 30) no longer contain the atomic-fix carve-out; both edits route th...; RFC-005's F2/F7/I13 carve-out is removed under the implementation RFC.; JTBD-008 + JTBD-101 document that atomic fixes go through the same RFC as any fix — explicitly NOT a thin / ...
 **Related:** ADR-070, ADR-060, ADR-066, ADR-068
-
 ### ADR-072 — RFC required at the propose-fix step on a Known Error
-**Status:** proposed | **Oversight:** confirmed
-**Chosen:** Chosen option: **"The RFC is created/required at the propose-fix step on a Known Error"** (user-ratified). When a fix is proposed on a Known Error (the `/wr-itil:manage-problem` propose-fix action), an RFC tracing the problem must exist; th...
-**Confirmation:** ADR-060 I13 names the propose-fix step on a Known Error as the gate placement and cites this ADR + ADR-022.; /wr-itil:manage-problem's propose-fix surface requires/creates the RFC (auto-create per ADR-073).; A behavioural test asserts the gate fires at propose-fix, not at Open → Known Error.
-**Related:** ADR-071, ADR-073, ADR-022, ADR-072, ADR-070, ADR-060
+**Status:** proposed | **Oversight:** unconfirmed
+**Decides:** The mandatory Problem→RFC trace is required at the propose-fix step on a Known Error (the `/wr-itil:manage-problem` propose-fix action) — after root cause + workaround, before fix work — with no new lifecycle state, conforming to ADR-022's Known Error semantics. Per ADR-073's RFC-first lockstep the RFC must already exist: propose-fix checks it as a precondition rather than creating it; a missing RFC is authored first then implemented (retrospective RFC prohibited).
+**Confirmation:** ADR-060 I13 names propose-fix on a Known Error as the gate placement, citing this ADR + ADR-022; `/wr-itil:manage-problem`'s propose-fix surface requires a pre-existing RFC and routes to RFC authoring if none exists; a behavioural test asserts the gate fires at propose-fix, not at Open → Known Error.
+**Related:** ADR-071, ADR-073, ADR-022, ADR-070, ADR-060
+
 ### ADR-073 — RFC-first: a problem's fix implements its RFC; no implementation without a pre-existing RFC
 **Status:** proposed | **Oversight:** confirmed
 **Decides:** A problem must have an RFC (stories in a user story map, ADR-060) *before* fix work starts — implementing the fix *is* implementing that RFC, so retrospective implement-then-document RFCs are prohibited. At the propose-fix gate: RFC exists → implement it; no RFC → don't start, author the RFC first; a fix choice already covered by existing ADRs → the RFC cites them and proceeds; a genuine ≥2-option choice *outside* existing ADR coverage → escalates to a new ADR ratified before implementation. The orchestrator may autonomously derive the story decomposition for an unambiguous or already-covered fix, but never pick an uncovered option. Reverses the earlier same-ADR auto-create-never-block stances (P314 skeleton, P399 fix-time authoring) as hollow after-the-fact traces; the P399 `capture-rfc --fix-time` mechanism is held pending rework, with lockstep amendments owed by ADR-072 and ADR-060's I13.

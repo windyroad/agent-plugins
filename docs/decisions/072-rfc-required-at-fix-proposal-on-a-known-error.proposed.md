@@ -1,8 +1,9 @@
 ---
 status: "proposed"
 date: 2026-05-26
-human-oversight: confirmed
+human-oversight: unconfirmed
 oversight-date: 2026-05-26
+oversight-downgraded: "2026-06-29 — ADR-073 RFC-first lockstep: the missing-RFC-response characterization changed (auto-create → RFC-first precondition); the gate-PLACEMENT decision is unchanged. P357 re-ratification queued."
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent]
 informed: []
@@ -12,13 +13,15 @@ problems: [P251, P314]
 
 # RFC required at the propose-fix step on a Known Error
 
-> **Rewritten 2026-05-26 (P314).** The original ADR-072 placed this gate at the `Open → Known Error` transition, on the framing "Known Error = fix is now real." That framing was **wrong** and the decision was **rejected** at the `/wr-architect:review-decisions` drain (user correction: *"A problem becomes a known error when we have a documented workaround and root cause. Once it's known error then we can propose a fix which would result in an RFC."*). The original gate placement also latently contradicted ADR-022's accepted Known Error semantics. This rewrite records the corrected placement and is **born-confirmed** via direct user ratification this session (AskUserQuestion — the user confirmed the propose-fix placement). Sibling **ADR-073** (rewritten in the same pass) records that a missing RFC is auto-created rather than blocked.
+> **Rewritten 2026-05-26 (P314).** The original ADR-072 placed this gate at the `Open → Known Error` transition, on the framing "Known Error = fix is now real." That framing was **wrong** and the decision was **rejected** at the `/wr-architect:review-decisions` drain (user correction: *"A problem becomes a known error when we have a documented workaround and root cause. Once it's known error then we can propose a fix which would result in an RFC."*). The original gate placement also latently contradicted ADR-022's accepted Known Error semantics. This rewrite records the corrected placement and was **born-confirmed** via direct user ratification (AskUserQuestion — the user confirmed the propose-fix placement). Sibling **ADR-073** records the missing-RFC *response*.
+>
+> **Amended 2026-06-29 (ADR-073 RFC-first lockstep).** ADR-073 was corrected from "auto-create the RFC at fix-time and never block" to **RFC-first** (the RFC must pre-exist; no fix work without it; retrospective RFC prohibited). The **gate-placement decision here is unchanged** — the gate still fires at the propose-fix step on a Known Error. What changed is this ADR's *characterization of the missing-RFC response*: every "auto-creates / produces the RFC / RFC is the fix-proposal artifact" framing below is corrected to "the RFC must **pre-exist**; a missing RFC is authored first, then implemented" (per ADR-073). Because that is a substance change, `human-oversight` is downgraded `confirmed → unconfirmed` pending P357 re-ratification.
 
 ## Context and Problem Statement
 
 ADR-071 makes the Problem→RFC trace mandatory and unconditional. **Where in the problem lifecycle is the RFC required?**
 
-Per ADR-022, the lifecycle is `Open → Known Error → Verifying → Closed`. A problem reaches **Known Error** when its **root cause is identified and a workaround is documented** — there is no fix and no RFC yet. Only *after* Known Error do we **propose a fix**, and proposing the fix is what **produces the RFC**. Releasing the fix is the `Known Error → Verifying` transition (ADR-022) — "Fix Released" is not a separate state.
+Per ADR-022, the lifecycle is `Open → Known Error → Verifying → Closed`. A problem reaches **Known Error** when its **root cause is identified and a workaround is documented** — there is no fix and no RFC yet. Only *after* Known Error do we **propose a fix** — and proposing a fix requires an RFC to **already exist** (RFC-first, ADR-073); the propose-fix act does not produce the RFC. Releasing the fix is the `Known Error → Verifying` transition (ADR-022) — "Fix Released" is not a separate state.
 
 So the RFC must be required at the moment a fix is **proposed** on a Known Error — not earlier (a problem reaches Known Error with no fix) and not at fix-release (the RFC must exist *before* fix work, or the inline `## Root Cause → ## Fix Strategy` body-drift the invariant prevents has already happened).
 
@@ -32,15 +35,15 @@ So the RFC must be required at the moment a fix is **proposed** on a Known Error
 
 (Evaluated against the **corrected** Known Error model — the original ADR-072's options were evaluated against a wrong model and are discarded.)
 
-1. **The RFC is created/required at the propose-fix step on a Known Error** — a `/wr-itil:manage-problem` propose-fix action; no new lifecycle state.
+1. **The RFC is required (must pre-exist) at the propose-fix step on a Known Error** — a `/wr-itil:manage-problem` propose-fix action; no new lifecycle state.
 2. **A new `Known Error → In Progress (fixing)` lifecycle state** — gate the new transition.
 3. **At the first fix commit** for a Known Error problem — a commit-time gate.
 
 ## Decision Outcome
 
-Chosen option: **"The RFC is created/required at the propose-fix step on a Known Error"** (user-ratified). When a fix is proposed on a Known Error (the `/wr-itil:manage-problem` propose-fix action), an RFC tracing the problem must exist; the RFC **is** the fix-proposal artifact. No new lifecycle state — `Known Error` stays, and the existing `Known Error → Verifying` (fix-released) transition is unchanged (ADR-022).
+Chosen option: **"The RFC is required (must pre-exist) at the propose-fix step on a Known Error"** (user-ratified placement). When a fix is proposed on a Known Error (the `/wr-itil:manage-problem` propose-fix action), an RFC tracing the problem must **already exist** — the RFC is the **precondition checked** at propose-fix, not an artifact the propose act creates. No new lifecycle state — `Known Error` stays, and the existing `Known Error → Verifying` (fix-released) transition is unchanged (ADR-022).
 
-This placement is silent on whether a *missing* RFC blocks or is auto-created — that is **ADR-073**'s axis (auto-create, everywhere). The combined behaviour: proposing a fix on a Known Error auto-creates a problem-traced RFC if one doesn't exist.
+Whether a *missing* RFC blocks or is authored-first is **ADR-073**'s axis (**RFC-first**: the RFC must pre-exist; if none exists, fix work does not begin and the required next action is to author the RFC first, then implement). The combined behaviour: proposing a fix on a Known Error **requires a pre-existing RFC**; no RFC → author it first (per ADR-073), then implement — never auto-create as a byproduct of the fix.
 
 This ADR records the placement decision. ADR-060's I13 invariant (rewritten under P314) cites this ADR; the propose-fix enforcement ships as RFC-005's (corrected) task decomposition.
 
@@ -63,7 +66,7 @@ This ADR records the placement decision. ADR-060's I13 invariant (rewritten unde
 ## Confirmation
 
 - ADR-060 I13 names the propose-fix step on a Known Error as the gate placement and cites this ADR + ADR-022.
-- `/wr-itil:manage-problem`'s propose-fix surface requires/creates the RFC (auto-create per ADR-073).
+- `/wr-itil:manage-problem`'s propose-fix surface requires a **pre-existing** RFC (RFC-first per ADR-073); if none exists, it routes to RFC authoring before implementation rather than auto-creating one.
 - A behavioural test asserts the gate fires at propose-fix, not at `Open → Known Error`.
 
 ## Pros and Cons of the Options
@@ -90,9 +93,9 @@ Revisit if "propose fix" proves hard to pin to a single manage-problem surface i
 ## Related
 
 - **ADR-071** — every fix goes through an RFC (the unconditional parent this placement serves).
-- **ADR-073** — fix-time gate auto-creates a missing RFC, everywhere (sibling; the block-vs-create axis, rewritten in the same pass).
+- **ADR-073** — RFC-first: an RFC is a precondition for fix implementation; a missing RFC is authored-first, not auto-created as a byproduct (sibling; the missing-RFC-response axis).
 - **ADR-022** — problem lifecycle / Verification Pending semantics: Known Error = root cause + workaround; fix-release IS the `Known Error → Verifying` transition. **The lifecycle authority this placement conforms to** (the original ADR-072 omitted this reference, which let the wrong-model placement land).
-- **ADR-070** — RFCs hold no independent decisions (the auto-created RFC is a problem-traced skeleton, no decisions).
+- **ADR-070** — RFCs hold no independent decisions; the pre-existing RFC is a story-map decomposition, and an option-choice uncovered by existing ADRs goes to a ratified ADR (per ADR-073).
 - **ADR-060** — Problem-RFC-Story framework; its I13 invariant (rewritten under P314) cites this ADR for the gate placement.
 - **P251** — RFC-first trace invariant not enforced at fix-time (driving problem).
 - **P314** — the rework ticket that corrected this ADR's placement.
