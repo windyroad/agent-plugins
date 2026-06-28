@@ -284,7 +284,7 @@ The `## Inbound Upstream Reports` README section (ADR-062 § Step 9e renderer pe
 
 #### 4.5 AFK-loop behaviour
 
-When invoked from `/wr-itil:work-problems` Step 6.5 (AFK orchestrator), Step 4.5 runs silently per the mechanical-stage carve-out. The only user-attention surface during AFK is the existing external-comms gate UX (a known interrupt class per ADR-028 amended); per-branch `AskUserQuestion` would re-introduce the friction P132 was engineered to remove.
+When invoked from `/wr-itil:work-problems` as a `claude -p` pre-flight subprocess (the Step 0b inbound-discovery pre-flight dispatch; AFK-by-construction per the Step 5 dispatch constraint + ADR-032 subprocess isolation), Step 4.5 runs silently per the mechanical-stage carve-out. The only user-attention surface during AFK is the existing external-comms gate UX (a known interrupt class per ADR-028 amended); per-branch `AskUserQuestion` would re-introduce the friction P132 was engineered to remove.
 
 ### 4.6. Relevance-close pass (P346 / P347 / ADR-079 Phase 1 + Phase 2)
 
@@ -335,7 +335,7 @@ Exit-code routing (one verdict line per ticket on stdout):
 
 1. **Surface a batch** — run the evaluator across the dual-tolerant glob in 4.6a; group all `CLOSE-CANDIDATE` and `CLOSE-CANDIDATE-WITH-CAVEAT` verdicts as a batch.
 2. **Interactive surface (`AskUserQuestion`)** — present each batch of ~5 candidates with their shape annotations + caveats; user confirms close / amend / defer. Surface caveat tickets adjacent to their clean-close siblings so the maintainer sees the full batch class together. The interactive batch is the one-and-only `AskUserQuestion` per relevance-close pass (mechanical-stage carve-out per ADR-044 cat 4 + P132 — do NOT ask per-ticket; ask per-batch).
-3. **AFK (`/wr-itil:work-problems` Step 6.5)** — close clean `CLOSE-CANDIDATE` verdicts silently per ADR-013 Rule 5 + ADR-044 cat 4 (file existence + frontmatter inspection + line-anchored grep are empirical). Route `CLOSE-CANDIDATE-WITH-CAVEAT` verdicts to the next interactive review's `AskUserQuestion` surface — the caveat short-tag is the maintainer's decision input.
+3. **AFK (dispatched as a `claude -p` subprocess that is AFK-by-construction)** — when `/wr-itil:review-problems` is reached via the `/wr-itil:work-problems` side-effect dispatch path (Step 0b/0c/0d pre-flight or Step 3.6 pre-dispatch relevance gate), it runs in a subprocess whose Step 5 dispatch constraint forbids `AskUserQuestion` in the worker (ADR-032 subprocess isolation), so this surface-batch-confirm flow takes the silent-close branch automatically. Close clean `CLOSE-CANDIDATE` verdicts silently per ADR-013 Rule 5 + ADR-044 cat 4 (file existence + frontmatter inspection + line-anchored grep are empirical). Route `CLOSE-CANDIDATE-WITH-CAVEAT` verdicts to the next interactive review's `AskUserQuestion` surface — the caveat short-tag is the maintainer's decision input.
 4. **Batched closure commit per ADR-014** — all relevance-closes from one review pass batch into ONE commit (mirroring `/wr-itil:transition-problems` P139 batch grain).
 
 Real-backlog smoke test 2026-05-31 against today's labeled fixtures: P012 → `CLOSE-CANDIDATE-WITH-CAVEAT` (shapes 2 + 5 + multi-phase-mixed-progress caveat); P136 → `KEEP-WITH-NOTE` (sibling-file class); P303/P326 → `SKIP` (age gate, recent observations).
@@ -392,7 +392,7 @@ Step 5's README refresh rides the same commit per ADR-014 single-commit grain �
 
 #### 4.6d. AFK-policy-authorised silent proceed (ADR-013 Rule 5 / ADR-044 category 4)
 
-The relevance-close pass runs **unconditionally** during AFK orchestration (`/wr-itil:work-problems` Step 6.5). File existence is empirical, not user-judgment — the mechanical-stage carve-out (P132) applies per ADR-044 category-4 silent framework action. Do NOT fire `AskUserQuestion` per CLOSE-CANDIDATE; the framework has already resolved the close-on-empirical-evidence question.
+The relevance-close pass runs **unconditionally** during AFK orchestration: when `/wr-itil:work-problems` reaches `/wr-itil:review-problems` via its side-effect dispatch path (Step 0b/0c/0d pre-flight or Step 3.6 pre-dispatch relevance gate), the dispatched `claude -p` subprocess is AFK-by-construction — the Step 5 dispatch constraint forbids `AskUserQuestion` in the worker (ADR-032 subprocess isolation), so this pass takes the silent-close branch automatically. File existence is empirical, not user-judgment — the mechanical-stage carve-out (P132) applies per ADR-044 category-4 silent framework action. Do NOT fire `AskUserQuestion` per CLOSE-CANDIDATE; the framework has already resolved the close-on-empirical-evidence question.
 
 **Worked example (Phase 1 smoke test, 2026-05-31)**: across 143 open / known-error tickets, Phase 1 surfaced 6 CLOSE-CANDIDATEs (4.2%) — but the post-batch-1 verification showed 60% of those were false-positives (state-suffix / sibling-file / rename class). Phase 2's false-positive fixes route those to `KEEP-WITH-NOTE`. The same-day foreground relevance-scan that used the broader Phase 2 shape vocabulary produced 14 actual closes across 5 batches — empirically calibrating the Phase 2 shape set.
 

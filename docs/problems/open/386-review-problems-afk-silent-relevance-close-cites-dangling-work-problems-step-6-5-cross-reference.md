@@ -35,9 +35,9 @@ None needed — the runtime behaviour is correct; only the documented authority 
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Re-anchor review-problems SKILL.md lines ~338/395 on subprocess-AFK-by-construction + Step 0c/Step 3.6 side-effect path
-- [ ] Audit review-problems for any other "work-problems Step 6.5" relevance-close references
-- [ ] Behavioural/structural check that the cited anchor resolves to a step that implements relevance-close dispatch
+- [x] Re-anchor review-problems SKILL.md lines ~338/395 on subprocess-AFK-by-construction + Step 0c/Step 3.6 side-effect path — done; both relevance-close refs re-anchored on the `claude -p` AFK-by-construction subprocess mechanism (Step 5 dispatch constraint + ADR-032) reached via the Step 0b/0c/0d pre-flight + Step 3.6 pre-dispatch path, mirroring work-problems Step 3.6 line 477 canonical phrasing.
+- [x] Audit review-problems for any other "work-problems Step 6.5" relevance-close references — done; line 475 is a *correct* Step 6.5 release-cadence ref (left intact). Found one adjacent non-relevance-close ref (line 287, Step 4.5 inbound-discovery) carrying the identical dangling-pointer defect — corrected in the same commit (re-anchored on the Step 0b pre-flight dispatch).
+- [x] Behavioural/structural check that the cited anchor resolves to a step that implements relevance-close dispatch — verified against work-problems SKILL.md: Step 0b/0c (lines 174–227) and Step 3.6 (lines 454–477) are the real side-effect dispatch surfaces; Step 6.5 (line 850) is the Release-cadence check with no relevance-close. The review-problems promptfoo eval (`eval/promptfooconfig.yaml`) guards the Step 4.5 inbound-discovery surface (the line-287 edit landed there) — re-run GREEN as the regression check + R009 −1 modulator evidence. The Step 4.6 relevance-close re-anchors (lines 338/395) are non-behavioural prose; runtime silent-close behaviour is unchanged.
 
 ## Fix Strategy
 
