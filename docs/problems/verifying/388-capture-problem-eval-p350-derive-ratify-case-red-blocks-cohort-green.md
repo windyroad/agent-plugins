@@ -1,12 +1,19 @@
 # Problem 388: capture-problem promptfoo eval — P350 derive-ratify brief-before-ID case is red, blocking the P199/P350/P383 cohort from green
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-06-27
 **Priority**: 6 (Medium) — Impact: 2 x Likelihood: 3
 **Origin**: internal
 **Effort**: M
 **JTBD**: JTBD-001
 **Persona**: plugin-developer
+
+## Fix Released
+
+Resolved 2026-06-27/28 — the `packages/itil/skills/capture-problem/eval/promptfooconfig.yaml` suite was calibrated per the P270/P393 pattern: 6 cases had their brittle/paraphrasable Tier-A semantic alternations demoted to the already-authoritative Tier-B `llm-rubric`, keeping Tier-A only for paraphrase-proof anchors (file paths, command/subagent names, citation/classification/verdict tokens, structural format lines); the drafted P383 `--persona` adopter-corpus case was appended. The suite then ran **3× consecutive 8/8 GREEN**, discharging the red P350 derive-ratify case that was blocking the P199/P350/P383 holding cohort (all three since graduated + shipped this session). Release marker: the calibration is **test-infra only** (`skills/*/eval/` is tarball-excluded per `.npmignore`) — no npm changeset; the fix is verifiable in-repo by re-running the suite.
+
+**Awaiting user verification** — confirm the capture-problem eval is stably GREEN across runs (no recurrence of the single-case flakiness).
+<!-- no-changeset-reference: test-infra eval calibration, tarball-excluded; verified via 3× 8/8 GREEN runs -->
 
 ## Description
 

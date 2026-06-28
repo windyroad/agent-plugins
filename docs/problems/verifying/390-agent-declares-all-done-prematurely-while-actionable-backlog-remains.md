@@ -1,6 +1,6 @@
 # Problem 390: agent ends the work-problems loop (emits ALL_DONE) prematurely while actionable Tier-2 backlog remains, by rationalising the remainder as out-of-scope / interactive-gated
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-06-27
 **Transitioned to Known Error**: 2026-06-28 (root cause confirmed; fix implemented — Step 2.4 Gate (0) objective backlog-empty assertion; changeset held pending work-problems promptfoo eval GREEN per ADR-061 Rule 4 / ADR-042 Rule 2)
 **Priority**: 12 (High) — Impact: 3 x Likelihood: 4
@@ -8,6 +8,13 @@
 **Effort**: M
 **JTBD**: JTBD-006
 **Persona**: plugin-developer
+
+## Fix Released
+
+Released 2026-06-28 in `@windyroad/itil@0.55.0` (changeset `wr-itil-p390-step-2-4-gate-0-objective-backlog-empty.md`, graduated from holding once the work-problems promptfoo eval went 3× consecutive 14/14 GREEN — the ADR-061 Rule 4 reinstate criterion — then shipped via version PR #299). The work-problems Step 2.4 **Gate (0) — Objective backlog-empty assertion** is now live: before `ALL_DONE`, the orchestrator re-scans the live open/known-error backlog (fresh glob, not cache/recollection) and classifies each ticket dispatchable/non-dispatchable by recorded marker only; ≥1 dispatchable ticket FORBIDS `ALL_DONE` and loops back to Step 3.
+
+**Awaiting user verification** — confirm the orchestrator no longer emits `ALL_DONE` while objectively-dispatchable Tier-2 backlog remains.
+<!-- no-changeset-reference: shipped via graduated holding changeset wr-itil-p390-step-2-4-gate-0-objective-backlog-empty.md (PR #299) -->
 
 ## Description
 
