@@ -1,11 +1,25 @@
 # Problem 314: Rework the fix-time RFC-trace gate — wrong lifecycle placement (ADR-072) + hard-block should be auto-create (ADR-073), per corrected Known Error semantics
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-26
 **Origin**: internal
 **Priority**: 8 (Medium) — Impact: 4 x Likelihood: 2 (re-rated 2026-06-10 — design rework + Phase 1 prose alignment landed; residual exposure is Phase 2 implementation riding the held-changeset window)
 **Effort**: L (re-rated 2026-06-10 — Phase 2 RFC-005 B-tasks: propose-fix gate relocation + auto-create mechanism + behavioural bats; significant single-plugin change)
 **WSJF**: 4.0 ((Severity 8 × Status 2.0) / Effort L (4))
+
+## Fix Released
+
+<!-- no-changeset-reference -->
+Released across the held-changeset window; the P314 fix shipped incrementally over multiple `@windyroad/itil` versions rather than a single changeset, so `wr-itil-derive-release-vehicle` has no single `.changeset/<name>.md` to cite (exit 2 — manual citation per ADR-049 routing).
+
+- **Core gate** (RFC-005 B3/B4/B5 — the I13 propose-fix RFC-trace gate that auto-creates a missing RFC, the two corrections this ticket scopes): released in `@windyroad/itil@0.50.3` (commit `d6447b3`).
+- **Phase 1 prose alignment** (Known Error semantics): commit `8a2fb20`.
+- **B9 retro-wiring** (`check-autocreate-rfc-scope.sh` advisory): released in `@windyroad/retrospective@0.25.0`.
+- **B10 held-changeset graduation**: empirically complete — `ls .changeset` clean (no held changesets), local `@windyroad/itil` == published `0.55.0`. Both transition-readiness conditions the ticket named are now met (B2-followup landed 2026-06-27; B10 graduated).
+
+**Fix summary**: the fix-time RFC-trace gate now fires at the propose-fix step on a Known Error (ADR-072, not `Open → Known Error`) and auto-creates a problem-traced RFC when one is missing, everywhere the gate fires (ADR-073, never hard-blocks). Predicate `check-fix-rfc-trace.sh` (exit-0-never-block) + bin shim + 11/11 green bats; gate wired into both `manage-problem` and `work-problems` SKILLs; auto-create branch dogfooded end-to-end on P361 (RFC-026↔P361).
+
+Awaiting user verification.
 
 ## Description
 
@@ -102,7 +116,7 @@ With B6 closed this iter, the **core P314 fix is functionally complete and user-
 - [x] **Open design question — exact gate placement**: ANSWERED — propose-fix step on a Known Error (no new lifecycle state). Recorded in ADR-072. User-ratified 2026-05-26.
 - [x] **Auto-create design**: ANSWERED — auto-create a problem-traced RFC if missing, **everywhere the gate fires** (interactive + AFK). Recorded in ADR-073 (composes with ADR-070 no-decisions + ADR-071 every-fix-via-RFC; the auto-created RFC is a problem-traced skeleton with `stories: []` and no `## Considered Options` block). User-ratified 2026-05-26.
 - [x] Rework artifacts: ADR-072 rewritten + renamed (2026-05-26); ADR-073 rewritten + renamed (2026-05-26); ADR-060 I13 rewritten (2026-05-26); RFC-005 + RFC-006 updated (2026-05-26). Phase 1 follow-up (2026-06-08) added: ADR-022 + manage-problem/SKILL.md + transition-problem/SKILL.md + ADR-029 alignment with the corrected Known Error definition (architect + JTBD gates passed).
-- [~] **Phase 2 (in progress)** — propose-fix gate relocation + auto-create mechanism shipped 2026-06-16 (iter 11): predicate `check-fix-rfc-trace.sh` + bin shim + bats (RFC-005 B3), manage-problem propose-fix gate (B4), work-problems carve-out (B5). B2 reconciled 2026-06-17 (iter 2 — superseded by derived `## RFCs` section; P314 dogfooded into RFC-005 `problems:`). B7 migration sweep done 2026-06-17 (iter 3 — survey at `docs/audits/i13-rollout-survey-2026-06-17.md`; 5 gate-firing tickets, B8 candidate P361, no bulk back-fill). B8 forward-dogfood done 2026-06-18 (iter 4 — RFC-026↔P361 end-to-end). B9 retro wiring done 2026-06-18 (iter 5 — `check-autocreate-rfc-scope.sh` advisory in run-retro Step 2b; @windyroad/retrospective@0.25.0 shipped). B6 behavioural bats done 2026-06-18 (iter 6 — predicate bats 11/11 green + B8 dogfood discharges the auto-create-fires harness-gap). B2-followup done 2026-06-27 (this iter — ADR-060 I13 prose aligned to the derived `## RFCs` section; architect + JTBD PASS; marker kept confirmed as documentation-reality alignment). Remaining: B10 held-changeset graduation only (orchestrator RELEASE/graduation confirmation — changesets already published 0.50.3/0.25.0).
+- [x] **Phase 2 (complete — transitioned Known Error → Verifying 2026-06-28)** — propose-fix gate relocation + auto-create mechanism shipped 2026-06-16 (iter 11): predicate `check-fix-rfc-trace.sh` + bin shim + bats (RFC-005 B3), manage-problem propose-fix gate (B4), work-problems carve-out (B5). B2 reconciled 2026-06-17 (iter 2 — superseded by derived `## RFCs` section; P314 dogfooded into RFC-005 `problems:`). B7 migration sweep done 2026-06-17 (iter 3 — survey at `docs/audits/i13-rollout-survey-2026-06-17.md`; 5 gate-firing tickets, B8 candidate P361, no bulk back-fill). B8 forward-dogfood done 2026-06-18 (iter 4 — RFC-026↔P361 end-to-end). B9 retro wiring done 2026-06-18 (iter 5 — `check-autocreate-rfc-scope.sh` advisory in run-retro Step 2b; @windyroad/retrospective@0.25.0 shipped). B6 behavioural bats done 2026-06-18 (iter 6 — predicate bats 11/11 green + B8 dogfood discharges the auto-create-fires harness-gap). B2-followup done 2026-06-27 (iter — ADR-060 I13 prose aligned to the derived `## RFCs` section; architect + JTBD PASS; marker kept confirmed as documentation-reality alignment). B10 held-changeset graduation confirmed complete 2026-06-28 — `ls .changeset` clean, local `@windyroad/itil` == published `0.55.0`; both transition-readiness conditions met (B2-followup landed + B10 graduated), so transitioned Known Error → Verifying. All B-tasks discharged.
 
 ## Dependencies
 

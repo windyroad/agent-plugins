@@ -1088,3 +1088,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-06-28
 
 > Last reviewed: 2026-06-28 **P395 captured** — external-comms agent silently dormant on the credibility axis; no nudge to author the missing RISK-POLICY section (lightweight aside via /wr-itil:capture-problem).
+
+> Last reviewed: 2026-06-28 **P398 captured + 16 shipped-code changeset holds graduated** — the ADR-061 Rule 2 VP carve-out strands changelog changesets for already-shipped (verifying) code indefinitely; per user direction all 16 vp-blocked shipped-code holds graduated to `.changeset/` for release (only p384, genuinely unshipped, stays held).
