@@ -1,4 +1,4 @@
-# Problem 396: the VP carve-out holds changesets for already-shipped (verifying) code indefinitely — pointless changelog stranding
+# Problem 398: the VP carve-out holds changesets for already-shipped (verifying) code indefinitely — pointless changelog stranding
 
 **Status**: Open
 **Reported**: 2026-06-28
