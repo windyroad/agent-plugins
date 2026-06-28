@@ -12,3 +12,9 @@ AFK iteration; `AskUserQuestion` unavailable by construction. Zero calls fired.
 **Silent-framework count: 0**
 **Taste count: 0**
 **Correction-followup count: 0**
+
+## P367 transition iter (AFK)
+
+No AskUserQuestion calls this iteration (AFK work-problems; queue-and-continue per ADR-013 Rule 6).
+
+**Lazy count: 0**
