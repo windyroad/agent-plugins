@@ -69,6 +69,20 @@ jobs:
 
             [ -z "$name" ] && continue
 
+            # Only preview-publish packages this release actually changed.
+            # On the changeset-release/main branch the Version Packages PR has
+            # already bumped the version of every CHANGED package; unchanged
+            # packages still carry the version already on npm `latest`. Skipping
+            # version==latest stops the workflow from republishing a fresh
+            # `-preview.N` of every unchanged package on every release run (the
+            # flood of "successfully published" emails — P394). A package not yet
+            # on npm (empty latest) is new → still previews.
+            npm_latest=$(npm view "$name" version 2>/dev/null || echo "")
+            if [ -n "$npm_latest" ] && [ "$version" = "$npm_latest" ]; then
+              echo "Skipping $name@$version — already on npm latest, not part of this release"
+              continue
+            fi
+
             # Append pre-release suffix to avoid colliding with the real release version
             preview_version="${version}-preview.${RUN_NUMBER}"
             node -e "

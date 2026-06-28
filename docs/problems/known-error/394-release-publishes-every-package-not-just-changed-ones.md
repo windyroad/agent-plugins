@@ -2,13 +2,20 @@
 
 **Status**: Known Error
 **Reported**: 2026-06-28
-**Root cause identified**: 2026-06-28 (hypothesis REFUTED; real mechanism = P359 held-changeset batch-drain — see Root Cause Analysis)
-**Going-forward decision**: remedy contract (accept-as-correct vs reduce-batch-cadence) deferred to user ratification — see Remedy option-ladder
-**Priority**: 4 (Low) — Impact: 2 x Likelihood: 2 (re-rated this iter: no functional defect — bumps are correct; cosmetic/legibility only)
-**Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Root cause CONFIRMED (corrected)**: 2026-06-28 — the REAL mechanism is `.github/workflows/release-preview.yml` publishing EVERY package as a `-preview.N` on every release run (NOT the `latest` changeset path, and NOT the P359 held-changeset batch). Two prior diagnoses on this ticket were WRONG — see Root Cause Analysis.
+**Priority**: 12 (High) — Impact: 4 x Likelihood: 3 (re-rated 2026-06-28 — real defect: every package floods npm + the maintainer inbox with no-op `-preview.N` publishes on every release; user-reported, emphatic, twice)
+**Origin**: corrective-feedback (user, 2026-06-28 — screenshot of npm "Successfully published" emails for unchanged packages)
+**Effort**: S (single workflow-loop guard)
 **JTBD**: JTBD-002
 **Persona**: plugin-developer
+
+## Fix Implemented
+
+`.github/workflows/release-preview.yml` step "Publish preview packages" looped over ALL `packages/*/package.json` and published each as `${version}-preview.${RUN_NUMBER}` with `--tag preview` on every Release-workflow completion — unconditionally, regardless of whether the package changed. Evidence: `@windyroad/wardley` reached `0.1.7-preview.840` and `@windyroad/tdd` `0.4.5-preview.840` (both published 2026-06-28T06:16Z) despite no source change since 2026-05-18 / 2026-06-27 respectively; the user's npm "Successfully published" emails were these preview publishes, not `latest` releases.
+
+**Fix**: added a guard in the loop — query npm `latest` for each package and `continue` (skip) when the on-branch `package.json` version equals the published `latest` (the package is unchanged by this release; the Version PR only bumps CHANGED packages, so unchanged ones still carry the npm-latest version). A package not yet on npm (empty latest) still previews (genuinely new). Result: only the packages a release actually changes get a `-preview.N` publish + email. CI-infra change (`.github/workflows/`), no npm package affected → no changeset.
+
+**Awaiting user verification** — confirm that the next release preview-publishes ONLY the changed package(s) (e.g. an itil-only release no longer emails a wardley/tdd/voice-tone preview).
 
 ## Description
 
@@ -22,7 +29,7 @@ When we cut a release, it appears that a new version of **every** `@windyroad/*`
 
 ## Workaround
 
-**The behaviour is correct — there is no over-publish to work around.** Each bumped package maps 1:1 to a changeset that names a genuinely-changed package, and `changeset publish` only publishes packages whose `package.json` version exceeds npm (the unbumped packages are skipped). To see *why* a given package bumped in a multi-package release, read its `CHANGELOG.md` entry or the drained `.changeset/*.md` frontmatter — the apparent "everything bumped" is the **P359 held-changeset backlog draining in one batch** (e.g. commit `24e46d19` graduated 16 held changesets at once). If release legibility matters, graduate held changesets in smaller cohorts / release more frequently (a P359 / ADR-082 cadence knob, not a `.changeset/config.json` knob).
+**CORRECTION (2026-06-28): the earlier "behaviour is correct — no over-publish" conclusion on this ticket was WRONG.** It analysed only the `latest` changeset-publish layer (which IS correct — `changeset publish` bumps only changed packages) and missed the `release-preview.yml` workflow, which DID over-publish every package as a `-preview.N` on every run. The user's evidence (npm emails for unchanged `wardley`/`tdd`) was correct; the prior investigation looked at the wrong layer. No workaround needed now — fixed at source (see Fix Implemented). Pre-fix, the only mitigation was an npm email filter on `-preview` versions.
 
 ## Impact Assessment
 
