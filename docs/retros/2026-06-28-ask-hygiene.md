@@ -18,3 +18,14 @@ AFK iteration; `AskUserQuestion` unavailable by construction. Zero calls fired.
 No AskUserQuestion calls this iteration (AFK work-problems; queue-and-continue per ADR-013 Rule 6).
 
 **Lazy count: 0**
+
+## P391 iter (AFK) — oversight-nudge bats hermeticity
+
+No AskUserQuestion calls this iteration (AFK work-problems; gate reviews + risk scoring delegated to subagents, not user; all decisions framework-resolved or mechanical).
+
+**Lazy count: 0**
+**Direction count: 0**
+**Override count: 0**
+**Silent-framework count: 0**
+**Taste count: 0**
+**Correction-followup count: 0**
