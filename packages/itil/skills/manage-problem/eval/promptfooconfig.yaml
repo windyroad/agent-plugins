@@ -284,3 +284,67 @@ tests:
       # an auto-create command shape appearing BEFORE any wire mention.
       - type: not-regex
         value: '(^|\n)\s*([Dd]elegate|[Rr]un|[Cc]all|[Ii]nvoke)[^\n]{0,40}capture-rfc[\s\S]{0,600}([Ww]ire|[Aa]dd)'
+
+  # P399 paired behavioural assertion — I13 no-vehicle auto-create authors a
+  # FULLY-SCOPED RFC, not a skeleton.
+  #
+  # Driver: P399 (ADR-073's auto-create originally emitted a SKELETON RFC with
+  # an empty `## Scope` placeholder, on the rationale that scope is fleshed out
+  # later via /wr-itil:manage-rfc. The "flesh out later" step never self-fired
+  # — P375 cadence-rot — so 6/7 auto-created skeletons on 2026-06-28 stayed
+  # under-scoped while their fixes shipped. ADR-073 amended: the fix-time
+  # auto-create AUTHORS the full RFC — populated `## Scope` + real `## Tasks`
+  # from the traced problem's RCA + Fix Strategy — via the new `--fix-time`
+  # flag on /wr-itil:capture-rfc). This is the no-vehicle sub-case (b), distinct
+  # from the P371 existing-vehicle wire case above. Discharges the R009 prose-
+  # surface floor for the full-authoring change.
+  #
+  # Behavioural shape per ADR-052: prompts a propose-fix scenario where the
+  # predicate fired `no-rfc-trace: P<NNN>` AND no existing RFC is the fix
+  # vehicle; asserts the agent invokes capture-rfc with `--fix-time` (the
+  # load-bearing full-authoring mechanism) and authors a real Scope/Tasks
+  # rather than a deferred-placeholder skeleton.
+  #
+  # Tier-A calibration (P270 / P393): the paraphrase-proof anchor is the
+  # `--fix-time` flag — a deterministic command token taken ONLY on the
+  # full-authoring branch (the skeleton branch omits it). Mirrors the P371
+  # case's `wr-itil-update-problem-rfcs-section` anchor discipline. No tight
+  # negation window (the P270 brittleness lesson) — the positive flag anchor
+  # already proves the authoring branch was chosen.
+  #
+  # @problem P399 (closes the skeleton-under-scoping gap)
+  # @adr ADR-073 (auto-create authors the full RFC, P399 amendment) + ADR-070 (no Considered-Options block)
+  - description: I13 no-vehicle auto-create — author a fully-scoped RFC via capture-rfc --fix-time, not a skeleton (P399)
+    vars:
+      prompt: |
+        I am at the /wr-itil:manage-problem propose-fix step (the I13 gate before
+        the Phase 2 traversal) for a Known Error at
+        docs/problems/known-error/399-foo.md. I ran the gate predicate
+        `wr-itil-check-fix-rfc-trace docs/problems/known-error/399-foo.md` and it
+        emitted on stdout:
+
+          no-rfc-trace: P399 — auto-create a problem-traced RFC via /wr-itil:capture-rfc before fix work, then proceed
+
+        I checked the ticket's `## Fix Strategy`, `## Related`, and `## Dependencies`
+        sections: NO existing RFC is cited as this ticket's fix vehicle — this is a
+        genuine no-vehicle case, not an existing-vehicle-untraced one. The ticket
+        has a populated `## Root Cause Analysis` and `## Fix Strategy` describing
+        the fix being proposed.
+
+        Given that predicate output and the absence of any existing fix vehicle,
+        what EXACTLY do I do before proceeding with the fix? Name the exact command
+        I run and be specific about what the created RFC's `## Scope` and `## Tasks`
+        sections contain.
+    assert:
+      # Tier A — must invoke capture-rfc with the --fix-time flag (the
+      # paraphrase-proof full-authoring mechanism; taken ONLY on this branch).
+      - type: contains
+        value: '--fix-time'
+      # Tier A — must name the canonical capture-rfc vehicle.
+      - type: contains
+        value: 'capture-rfc'
+      # Tier A — must describe the authored RFC carrying a real Scope authored
+      # from the problem (not a deferred placeholder). Anchors on Scope + Tasks
+      # both being populated/authored. JS RegExp compat (char classes, [\s\S]).
+      - type: regex
+        value: '[Ss]cope[\s\S]{0,500}[Tt]asks'
