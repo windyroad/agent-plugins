@@ -30,7 +30,7 @@ The user's invariant (2026-06-29): **a problem must have an RFC before any fix w
 
 - **Process integrity over loop velocity.** The RFC (story map) is the *plan*; implementation *executes the plan*. A plan authored after the fact is not a plan — it is a hollow trace. The user has explicitly prioritised this correctness over the AFK loop's "never stall" (JTBD-006).
 - **The trace must be genuine.** ADR-071's "every fix goes through an RFC" means the fix is *driven by* its RFC, not retro-fitted to one. A skeleton or fix-time-fabricated RFC satisfies the trace structurally while being hollow.
-- **Options are direction-setting.** When a fix approach has ≥2 viable options, choosing among them is a cat-1 decision (ADR-044) and an independent decision (ADR-070) — it belongs in an **ADR ratified before implementation**, not silently picked by the orchestrator.
+- **The RFC leans on existing ADRs; a new decision is the exception, not the rule.** The RFC should derive its plan from the already-decided corpus wherever it can. A new ADR is needed **if and only if** the fix requires a decision that existing ADRs do not cover. An *uncovered* choice among ≥2 viable approaches is a cat-1 decision (ADR-044) and an independent decision (ADR-070) — it belongs in a new **ADR ratified before implementation**, not silently picked by the orchestrator; a *covered* choice is settled direction the RFC simply cites.
 - **An RFC is stories in a user story map** (ADR-060) — its content is a story decomposition, not free-prose scope.
 
 ## Considered Options
@@ -47,9 +47,11 @@ When fix work is proposed on a Known Error (ADR-072's gate point):
 
 1. **If an RFC already traces the problem** → proceed to implement it. Implementing the fix *is* implementing the RFC's stories.
 2. **If no RFC exists** → fix implementation MUST NOT begin. The required next action is to **author the RFC first** — a user-story-map decomposition of the fix, derived from the problem's Root Cause Analysis. Only once the RFC exists does implementation (of its stories) begin.
-3. **If authoring the RFC surfaces genuine options** for the fix approach (≥2 viable paths) → those are captured in an **ADR**, and that ADR **must be ratified before implementation**. The orchestrator does **not** pick among options; it surfaces them for ratification.
+3. **The RFC leans on existing ADRs; a new ADR is needed IFF the decision is outside their coverage.** When authoring the RFC surfaces a genuine choice for the fix approach (≥2 viable paths), first check the existing decision corpus:
+   - **If existing ADRs already resolve the choice** → the RFC **cites them and proceeds**. No new ADR — minting one would re-decide a settled question (the P132 / inverse-P078 anti-pattern). This is the common case and should be the default reflex: lean on what's already decided.
+   - **If and only if the decision falls outside the coverage of existing ADRs** (a genuinely new decision) → it is captured in a **new ADR, ratified before implementation**. The orchestrator does **not** make an out-of-coverage decision itself; it surfaces it for ratification.
 
-**Authorship.** The agent/orchestrator MAY author the RFC's story-map decomposition when the fix is unambiguous — this is framework-mediated *derivation of the agreed fix's plan*, done as a deliberate pre-implementation step (NOT a byproduct emitted during/after the fix). It MUST NOT author past a genuine option-choice: that escalates to a ratified ADR first. **Retrospective RFC creation (implement-then-document) is prohibited.**
+**Authorship.** The agent/orchestrator MAY author the RFC's story-map decomposition when the fix is unambiguous *or* when its choices are already covered by existing ADRs — this is framework-mediated *derivation of the agreed fix's plan* (the direction is pinned by ADR-071 and any cited ADRs), done as a deliberate pre-implementation step (NOT a byproduct emitted during/after the fix). It MUST NOT author past a genuine, **uncovered** decision: that escalates to a new ratified ADR first. **Retrospective RFC creation (implement-then-document) is prohibited.**
 
 This **supersedes** both the "skeleton auto-create" (P314) and the "full-scope fix-time authoring" (P399) stances. The `capture-rfc --fix-time` mechanism shipped under P399 is held pending rework to author the RFC as a pre-implementation story map (not a fix-time Scope/Tasks byproduct), and to route option-bearing fixes through a ratified ADR.
 
@@ -57,10 +59,10 @@ This **supersedes** both the "skeleton auto-create" (P314) and the "full-scope f
 
 The P399 amendment asserted that auto-creating AND fully authoring the RFC is **all** framework-mediated, and that the authored RFC "carries no Considered-Options block precisely to stay on the framework-mediated side." That over-broad claim is **retracted**. The correct split:
 
-- Authoring the RFC's **story decomposition for an unambiguous fix** (ordering already-decided work) = **framework-mediated**. The orchestrator may do this autonomously, as a pre-implementation step.
-- **Choosing among ≥2 viable fix approaches** = **cat-1 direction-setting** (ADR-044) and an **independent decision** (ADR-070) → an ADR, **ratified before implementation**. The orchestrator may NOT decide this.
+- Authoring the RFC's **story decomposition for a fix that is unambiguous OR whose choices are already covered by existing ADRs** (ordering already-decided work) = **framework-mediated**. The orchestrator may do this autonomously, as a pre-implementation step, **citing the ADRs it leans on**.
+- **Choosing among ≥2 viable fix approaches that existing ADRs do NOT cover** = **cat-1 direction-setting** (ADR-044) and an **independent decision** (ADR-070) → a **new** ADR, **ratified before implementation**. The orchestrator may NOT decide this.
 
-This is the same boundary test ADR-070 already draws (choice among ≥2 viable options → ADR; ordering of already-decided work → stays in the RFC). ADR-044's six-class taxonomy is unchanged (no `amends:`); this ADR corrects *where* it previously placed the cat-1 line.
+The pivot is **coverage by the existing decision corpus**, not merely "are there options." A choice that existing ADRs already resolve is settled direction the RFC *derives from* (framework-mediated — cite and proceed); a new ADR is needed **if and only if** the decision lies outside existing coverage. This is the same boundary test ADR-070 already draws (an *independent, uncovered* choice among ≥2 viable options → ADR; ordering of already-decided work → stays in the RFC) and the same "don't re-ask a decision the framework already made" discipline (P132). ADR-044's six-class taxonomy is unchanged (no `amends:`); this ADR corrects *where* it previously placed the cat-1 line.
 
 ## Consequences
 
@@ -81,8 +83,8 @@ This is the same boundary test ADR-070 already draws (choice among ≥2 viable o
 
 - The propose-fix gate (interactive + AFK) refuses to begin fix implementation when no RFC traces the problem; the required next action is RFC authoring (a user-story-map decomposition), not fix code.
 - An authored RFC is comprised of stories in a user story map (ADR-060), not a `Scope`+`Tasks` prose blob.
-- A fix that involves ≥2 viable approach options has a ratified ADR before implementation; the orchestrator does not pick.
-- A behavioural test asserts: (a) implementation of a fix on an RFC-less Known Error is refused / routed to RFC authoring; (b) an option-bearing fix blocks for a ratified ADR before implementation.
+- A fix whose approach-choice is **not covered** by existing ADRs has a **new** ratified ADR before implementation; a fix whose choice **is covered** proceeds, citing the existing ADRs, with **no new ADR**. The orchestrator does not make an uncovered decision.
+- A behavioural test asserts: (a) implementation of a fix on an RFC-less Known Error is refused / routed to RFC authoring; (b) a fix with an **uncovered** approach-choice blocks for a **new** ratified ADR; (c) a fix whose choice is **covered** by existing ADRs proceeds (RFC cites them, no new ADR).
 
 ## Pros and Cons of the Options
 
