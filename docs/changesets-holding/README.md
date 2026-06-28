@@ -27,6 +27,8 @@ A changeset is a candidate for holding in either of two cases:
 
 ## Currently held
 
+- `wr-itil-p399-fix-time-rfc-full-authoring.md` — `@windyroad/itil` patch (P399 fix-time full-RFC authoring). **RE-HELD 2026-06-29** (was briefly reinstated 2026-06-28 after its evals went GREEN). The user corrected the underlying decision (ADR-073) on 2026-06-29: the RFC must exist BEFORE fix work (RFC-first), authored as stories in a user story map, with options routed to a ratified ADR — NOT auto-authored at fix-time as a Scope/Tasks byproduct. So the P399 `capture-rfc --fix-time` mechanism this changeset ships is itself superseded and must be reworked to the RFC-first model before it can ship. **Reinstate criterion**: the `--fix-time` mechanism is reworked to author the RFC as a pre-implementation story map (per the corrected ADR-073) AND the ADR-073 RFC-first correction is human-ratified. NOT the prior eval-GREEN criterion (that discharged the R009 floor but the mechanism's behaviour is now wrong).
+
 (P165 README-refresh-discipline patch reinstated 2026-05-17 per user direction — positive evidence threshold met; see Recently reinstated section.)
 (P170 Phase 3 + Phase 4 atomic-cohort reinstated 2026-05-18 by the orchestrator's new Step 6.5 cohort-graduation pre-check — both members `status=resolved` per ADR-061 Rule 3b atomic-cohort propagation; see Recently reinstated section.)
 (p166-p163-external-comms-hook-side-sha256.md reinstated 2026-05-30 by orchestrator Step 6.5 cohort-graduation pre-check — original NEGATIVE evidence rationale retired (P163 + P198 both closed; P166 in Verifying with Fix Released); see Recently reinstated section.)
