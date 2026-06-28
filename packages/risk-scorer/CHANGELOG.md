@@ -1,5 +1,81 @@
 # @windyroad/risk-scorer
 
+## 0.14.3
+
+### Patch Changes
+
+- 24e46d1: P082 Phase 1: extends `external-comms-gate.sh` to intercept `git commit -m / --message` (including HEREDOC `$(cat <<'EOF'…EOF)` body form) as a fourth surface alongside the existing gh / npm / changeset surfaces. Commit messages reach `git log`, the GitHub PR commits tab, release-page auto-notes, CHANGELOG, and `git shortlog`. The voice-tone evaluator gates the message body for AI-tells, hedging, and banned-phrase drift; the risk evaluator gates for credential leaks and confidential-content patterns. Editor flow (bare `git commit`) is out of scope per P082 SC1: the message is written to `.git/COMMIT_EDITMSG` after PreToolUse fires, so the gate cannot read the body at firing time. Per-evaluator marker scheme reused unchanged (no new evaluator domain); Phase 2 cognitive-accessibility evaluator is captured separately as P338. Closes P082.
+- 24e46d1: P205 slice 1 (risk-scorer trio): wrap-as-Skill pattern lands for the on-demand assessment scoring agents per ADR-015's Confirmation literal phrasing.
+
+  Three new invokable wrapper SKILLs ship under `packages/risk-scorer/skills/`:
+
+  - `pipeline/SKILL.md` — namespaced `wr-risk-scorer:pipeline`, wraps the pipeline scoring agent.
+  - `wip/SKILL.md` — namespaced `wr-risk-scorer:wip`, wraps the wip nudge agent.
+  - `external-comms/SKILL.md` — namespaced `wr-risk-scorer:external-comms`, wraps the external-comms leak-review agent.
+
+  Each wrapper is a thin pass-through that internally invokes the corresponding agent via the Agent tool — wrappers exist purely to expose the Skill-tool surface ADR-015 names. PostToolUse `risk-score-mark.sh` continues to fire on the inner Agent invocation and write the bypass markers as before.
+
+  Consumer SKILL prose flipped from `subagent_type:` (Agent tool) to `skill:` (Skill tool):
+
+  - `assess-release/SKILL.md` step 5 — now `skill: wr-risk-scorer:pipeline`.
+  - `assess-wip/SKILL.md` step 3 — now `skill: wr-risk-scorer:wip`.
+  - `assess-external-comms/SKILL.md` step 4 — now `skill: wr-risk-scorer:external-comms`.
+
+  Wrapper descriptions disambiguate from end-user surfaces — they direct end users to `/wr-risk-scorer:assess-*` for the gate-satisfying flow and reserve direct wrapper invocation for internal SKILL composition.
+
+  18 new behavioural bats at `packages/risk-scorer/skills/assess-release/test/assess-skills-delegate-via-skill-tool.bats` guard the contract surfaces (consumer→skill, wrapper→agent, description disambiguation). All green.
+
+  Phase 2 queued (not in this slice): `wr-risk-scorer:inbound-report` wrapper + `wr-architect:agent` (review-design) wrapper + `wr-jtbd:agent` (review-jobs) wrapper. The four other agents named in ADR-015's Scope table will adopt the same pattern in a follow-on iter. Mixed steady state in the interim: the three risk-scorer trio consumer SKILLs now match ADR-015 Confirmation verbatim; the three Phase 2 consumer SKILLs still use the historical Agent-tool path with the prose contradiction P205 documents.
+
+  Closes the P205 root cause for the risk-scorer trio surfaces; verifying transition recorded in `docs/problems/verifying/205-*.md`.
+
+  ***
+
+  **Held in `docs/changesets-holding/` per ADR-042 Rule 2** — scored 6/25 (Medium) at commit time with `RISK_BYPASS: reducing` (closes P205 Known Error). Above appetite (Low=4) on Layer 1 because:
+
+  - R009 prose-surface modulator: no paired promptfoo eval covers the 3 new wrapper SKILLs (+1 likelihood for the prose subset).
+  - R002 documentation/index drift: multi-file lifecycle transition (ticket rename + README WSJF/Verification Queue moves + README-history rotation + ADR-002 inventory refresh) — atomically tracked in this commit but high-likelihood class.
+  - R021 new user-facing surface without dogfood window: the wrappers are discoverable via `/wr-risk-scorer:pipeline` etc.
+
+  **Reinstate criterion** (move back to `.changeset/` once any of these is true):
+
+  - Phase 2 of P205 (wrapping `wr-risk-scorer:inbound-report` + `wr-architect:agent` + `wr-jtbd:agent`) lands AND the cohort dogfood window has observed any wrapper invocation surface in-session at least once with the structured PASS verdict propagating end-to-end (consumer SKILL → wrapper SKILL → agent → PostToolUse hook → marker write); OR
+  - A paired promptfoo Tier-A/B eval slice at `packages/risk-scorer/skills/{pipeline,wip,external-comms}/eval/promptfooconfig.yaml` ships per RFC-012/ADR-075 floor (discharges the R009 prose-surface modulator); OR
+  - The user explicitly directs reinstate at retro time (e.g. "ship slice 1 standalone — Phase 2 is decoupled").
+
+  Tracked in P205 verifying ticket under "Outstanding sub-decisions queued".
+
+- 24e46d1: P208: push/release gate now consults CI status before scoring risk
+
+  `git-push-gate.sh` previously gated `npm run push:watch` and
+  `npm run release:watch` on the predicted risk score alone, so a low-risk
+  push could land on a CI-red master and a low-risk release could ship
+  broken code to npm.
+
+  A new `check_ci_status` helper in `lib/risk-gate.sh` queries
+  `gh run list --branch <current> --limit 1` for the working branch's most
+  recent CI run and denies when:
+
+  - `conclusion` is `failure`, `cancelled`, `timed_out`,
+    `action_required`, or `startup_failure`
+  - `status` is `queued`, `in_progress`, `pending`, `requested`, or
+    `waiting`
+  - the `gh` call fails (auth / timeout / API error) — fail-CLOSED per the
+    P208 safe-high-fix-risk classifier so a buggy harden cannot degrade to
+    bypass
+
+  Empty CI history (no prior runs on the branch) is allowed — the
+  documented "first push triggers CI" case requires no marker.
+
+  A one-shot `${RDIR}/ci-bypass-${ACTION}` marker provides an override
+  for the rare legitimate cases (infra incident, fresh branch with no
+  prior run). The `incident-release` bypass continues to short-circuit
+  the entire release gate, including the new CI check, so the JTBD-201
+  hotfix path is unaffected.
+
+  Ordering in `git-push-gate.sh`: existing bypass markers → CI status →
+  predicted-risk threshold.
+
 ## 0.14.2
 
 ### Patch Changes

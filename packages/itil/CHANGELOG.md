@@ -1,5 +1,84 @@
 # @windyroad/problem
 
+## 0.55.0
+
+### Minor Changes
+
+- 24e46d1: P220: wire `/wr-itil:work-problems` Step 0d to pre-flight `/wr-itil:check-upstream-responses` when the outbound-responses cache is stale, missing, or has `last_checked: null` AND back-link tickets carrying `## Reported Upstream` sections exist. Outbound symmetric counterpart to Step 0b's inbound-discovery pre-flight per ADR-062 § JTBD-006 driver. Cache TTL defaults to 86400s (24h) symmetric with the inbound axis; per-cache override via `ttl_seconds` field. Adopter-portable via the `wr-itil-check-outbound-responses-staleness` ADR-049/080 PATH shim. Closes the cadence-wiring gap P249 Phase 1 explicitly deferred ("Phase 1 ships manual-invocation only"). Behavioural bats covers 10 cases (5 outcomes × dual-tolerant layout + custom-TTL + default-TTL). ADR-062 Confirmation #5 amended with the Step 0d clause; `check-upstream-responses` SKILL Confirmation #7 added with drift-source contract marker symmetric across helper / Step 0d / Confirmation round-trip.
+
+### Patch Changes
+
+- 24e46d1: P214: amend `/wr-itil:work-problems` Step 5 exit-code semantics with an explicit ordered check (exit-code, `is_error`, `ITERATION_SUMMARY`) so transient API failures (529 Overloaded / 429 rate-limit / 401 auth-expired) HALT the loop with a class-appropriate advisory rather than silently routing exit-0 + `is_error: true` + `total_cost_usd: 0` to the `ITERATION_SUMMARY` parse path and miscounting the failure as success. The P261 carve-out's ELSE branch already routed `is_error: true` + nothing-staged to HALT, but the prose framed `is_error: true` as the stream-timeout class only and left the check-order implicit. P214 makes the `is_error: true` **class taxonomy** explicit: SALVAGE = stream-timeout (staged work + bats green per P261); HALT = transient-API-error (nothing staged) with a `.result`-substring-matched advisory (overloaded / rate-limited / auth expired). Phase 1 is HALT-with-advisory only; retry policy for transient classes (exponential backoff on 529, etc.) is deferred to a Phase 2 amendment per P214's Investigation Tasks. Behavioural bats `work-problems-step-5-is-error-transient-halt.bats` covers 11 cases — 6 behavioural (the 3 transient classes + ordered-check invariant + non-zero-exit precedence + SALVAGE-branch deferral) and 5 doc-lint structural assertions per ADR-052 Permitted Exception. ADR-032 P261 section extended with the P214 class-taxonomy note + cross-references. Existing P261 stream-timeout-salvage fixture stays 13/13 green (no regression on the SALVAGE branch).
+- 24e46d1: P308: work-problems Step 6.5 cohort-graduation now routes evaluator `status=resolved` through a Rule 4 evidence-floor judgement step (necessary-but-not-sufficient) instead of treating it as graduate-now. Interactive surfaces per-held-entry AskUserQuestion (Graduate/Defer/Reject with inline evidence summary per P350 brief-before-ID); AFK queues a per-held-entry outstanding_question and does NOT graduate (P352 queue-and-continue default). Closes the AFK false-graduation hazard.
+- 24e46d1: P351 fold-fix — `/wr-itil:review-problems` Step 4.5a auto-bootstraps on missing
+  `.upstream-channels.json` instead of silently skipping the inbound-discovery
+  pass. Interactive mode prompts for channel-type + per-channel coordinates
+  (single batched `AskUserQuestion` ≤4 questions per ADR-013 Rule 1), previews
+  the planned JSON before writing (don't surprise the adopter with a silent
+  config write), writes the config, resumes the original pass. AFK mode queues
+  a `direction` outstanding_question per `/wr-itil:work-problems` Step 5 schema
+  (ADR-044 category 1) so loop-end Step 2.5 surfaces it as batched
+  `AskUserQuestion`; the iter continues other passes for THIS run.
+  Decline-permanently surface writes an empty-channels stub so adopters who
+  never want inbound-discovery keep zero ceremony tax per ADR-062 §
+  Downstream-adopter non-obligation. Malformed-JSON branch preserved as genuine
+  fail-soft (the adopter shipped a config; auto-rewriting would destroy their
+  work).
+
+  Ships a structural lint at `wr-itil-check-fail-soft-skip-discipline` (Phase 1
+  advisory; promoted to load-bearing via `WR_FAIL_SOFT_SKIP_WARN_ONLY=0` once
+  sibling SKILL.md surfaces have been migrated) that flags any other
+  `fail-soft skip` / `silently skip` / `skipping.*config` /
+  `skipping.*not configured` / `not configured.*skip` prose across
+  `packages/*/skills/*/SKILL.md`. Wired into CI as a `continue-on-error`
+  advisory step.
+
+  Trace: RFC-017 (thin retro-fit per ADR-071 unconditional RFC-first; no
+  independent architectural decisions, architect-resolved on prior review).
+
+  Closes P351 once this changeset releases.
+
+- 24e46d1: P352: ADR-013 Rule 6 amended (2026-06-06) — queue-and-continue is the universal AFK default when a skill needs to ask but AskUserQuestion is unavailable. HALT/SKIP/AUTO-DEFAULT become deviations requiring inline-cited carve-out justification. Documented carve-outs preserved: capture-problem derive-then-ratify HALT (ADR-074); create-adr Step 5 substance-confirm HALT (ADR-074); create-adr Step 1 + manage-problem Step 4b multi-decision/multi-concern AUTO-DEFAULT (ADR-044 cat 4); review-problems Step 4.5a malformed-JSON SKIP (user-shipped artefact protection). SKILL.md sweep added carve-out audit annotations at capture-problem / create-adr / manage-problem / review-problems / scaffold-intake / run-retro. 19 new structural bats green asserting amendment prose + per-SKILL audit annotations. Shared-helper extraction (packages/itil/lib/outstanding-questions.sh) deferred to follow-on per the ratified design.
+- 24e46d1: work-problems: document Step 0b/0c/0d pre-flight subprocess failure handling (P358)
+
+  A pre-flight subprocess (`/wr-itil:review-problems` or `/wr-itil:check-upstream-responses` dispatched by Step 0b/0c/0d) that exits non-zero or returns `is_error: true` is now contractually NON-BLOCKING: the orchestrator reverts any dirty partial cache/audit/README write (per-path tolerant so an absent `docs/audits/` on a fresh adopter repo does not block the revert), unstages any staged residue (ADR-009), logs a one-line annotation, and proceeds to Step 1 with the existing README. Previously the "same shape as Step 5" prose left the failure semantics implicit, so a literal reading of Step 5's "non-zero → halt the loop" would halt the whole AFK loop on a non-load-bearing cache-refresh hiccup. This is orthogonal to the Step 5 iter SALVAGE/HALT taxonomy (P261/P214), which classifies an iter's `is_error: true` — the new contract classifies the pre-flight role, which never salvages and never halts the loop. ADR-032 amended; behavioural fixture added.
+
+- 24e46d1: work-problems Step 3.5 — orchestrator-layer JTBD ratification predicate-check (P344, RFC-016)
+
+  Adds a new Step 3.5 between Step 3 (selection) and Step 4 (classification) that
+  predicate-checks the cited JTBDs of the selected ticket BEFORE dispatching the
+  iter-subprocess. The per-iter JTBD review subagent (ADR-068 surface 3) still
+  catches the same class INSIDE the iter, but only after spending dispatch cost
+  (~$3-5 + 5-10 min per skip). The new orchestrator-layer predicate shifts the
+  check left for the cost of one grep + per-JTBD shim call.
+
+  Driving exemplar: 2026-05-31 session 9 iter 5 dispatched P082 against unratified
+  JTBD-001 + JTBD-006; iter correctly skipped per ADR-074 substance-confirm-before-
+  build, but the dispatch cost was wasted.
+
+  On unratified-JTBD detection, the ticket routes to Step 4's user-answerable skip
+
+  - queues an `outstanding_questions` entry (category: "direction") naming the
+    unratified JTBDs + remedy. The loop re-runs Step 3 tier-first selection over the
+    remaining backlog. Loopback preserves ADR-076 tier ordering.
+
+  Ships:
+
+  - `packages/itil/scripts/check-ticket-jtbd-ratification.sh` (helper)
+  - `packages/itil/bin/wr-itil-check-ticket-jtbd-ratification` (ADR-049/080 PATH shim)
+  - `packages/itil/skills/work-problems/SKILL.md` Step 3.5 amendment
+  - `packages/itil/skills/work-problems/test/work-problems-step-3-5-jtbd-ratification-predicate.bats` (behavioural fixture, 8 cases)
+
+  Closes the wasted-iter-dispatch class. P344 transitions Open → Verification
+  Pending (fold-fix per ADR-022 P143); RFC-016 transitions proposed → verifying on
+  release.
+
+  @rfc RFC-016
+  @problem P344
+
+- 24e46d1: P350 fold-fix (`@windyroad/itil` side): apply the brief-before-ID discipline at the AskUserQuestion surfaces emitted by the ITIL skills. New `## Output Formatting` + Brief-before-ID prose added to `manage-problem` / `manage-rfc` / `capture-problem` / `capture-rfc` / `review-problems` (5 SKILL surfaces; `manage-problem` already carried the P032 title-on-first-mention prose so its section is extended rather than added). At every `AskUserQuestion` emission site — Step 4b fix-strategy + verification dispatches in manage-problem, transition/scope-expansion in manage-rfc, the I12 derive-then-ratify persona+JTBD proposer in capture-problem, the problem-trace selection in capture-rfc, and the Step 4 verification-close prompts in review-problems — the question/option/description text MUST inline the artefact's purpose and substance BEFORE naming it by `P-NNN` / `ADR-NNN` / `JTBD-NNN` / `RFC-NNN`. IDs are audit-trail annotations only; the user reads prompts without project filesystem access on every device (mobile clients, accessibility tooling, notification surfaces) and cannot follow links. Mirrors the canonical `/wr-architect:create-adr` Step 5 § 5a Rule 3 ("No IDs as explainers") and the work-problems Step 6.5 in-place exemplar. Companion patches in `@windyroad/architect` (review-decisions), `@windyroad/jtbd` (confirm-jobs-and-personas), `@windyroad/retrospective` (run-retro) land the same discipline at their respective surfaces.
+- 967821d: P390: prepend Step 2.4 **Gate (0) — Objective backlog-empty assertion** to the `/wr-itil:work-problems` Pre-`ALL_DONE` gate sequence. Before emitting `ALL_DONE`, the orchestrator MUST re-scan the live open/known-error backlog (fresh dual-tolerant glob, NOT the Step 1 cache or agent recollection) and classify each ticket dispatchable/non-dispatchable OBJECTIVELY by recorded marker — non-dispatchable ONLY when verifying / `## Fix Released`, upstream-blocked, recorded-blocked dead-end, Step 3.5/3.6-filtered this session (keyed off the durable `.afk-run-state/outstanding-questions.jsonl` skip record), or held-changeset-with-unmet-reinstate. ≥1 dispatchable ticket FORBIDS `ALL_DONE`: the orchestrator loops back to Step 3 tier-first selection (ADR-076) and dispatches the next iter rather than proceeding to gate (a)/(b)/(c). Closes the P390 failure where the orchestrator generalised "the salient remainder is interactive-gated" to "Step 2 stop-condition #2 holds" and stopped with a dozen dispatchable Tier-2 tickets remaining (also skipping the Tier-1 sev-16 ticket P382 entirely). Gate (0) finding work is a loopback, not a halt — productive, so NOT a Hard-fail halt trigger; a user-directed mid-loop pivot does not discharge the Tier-exhaustion obligation. Sibling agent-invented-loop-control-stop class: P332 (run-retro skip rationalisation), P148 (Stage-1 ticketing skip), P175 (scope-pin loop-control inference); hardens the P341 Step 2.4 precondition. Per ADR-044 "Continue / stop loops" framework-resolution (the natural stop is concrete — `ALL_DONE` conditions objectively met — not "this feels done"). Paired promptfoo Tier-A/B case added to `packages/itil/skills/work-problems/eval/promptfooconfig.yaml`.
+
 ## 0.54.6
 
 ### Patch Changes
