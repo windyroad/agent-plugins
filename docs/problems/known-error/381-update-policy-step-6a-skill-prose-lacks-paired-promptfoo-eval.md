@@ -1,6 +1,6 @@
 # Problem 381: update-policy Step 6a SKILL prose lacks paired promptfoo Tier-A/B eval (R009 prose-surface floor)
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-06-26
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: internal
@@ -44,15 +44,23 @@ This is a Tier-A/B eval (deterministic assertions where possible — `icontains`
 
 ## Root Cause Analysis
 
+**Root cause**: ADR-086 landed Step 6a (the tight-appetite confirm-with-warning) as new SKILL prose without a paired behavioural eval, because no eval harness existed under `packages/risk-scorer/skills/` — update-policy had zero prior evals. The R009 prose-surface floor therefore held un-discharged for this surface.
+
+**Resolution** (commit `3b8b3608`, 2026-06-28): authored `packages/risk-scorer/skills/update-policy/eval/promptfooconfig.yaml` modelled on the `capture-problem` Tier-A/B reference shape, with the generic `run-skill-eval.sh` runner (copied from manage-problem) + `grade-llm-rubric.sh` grader (copied from capture-problem). Four test cases cover the four Step 6a behaviours (appetite<5 trigger, P350 activity-class-first register formatting, policy-row fallback, confirm-vs-revise options). Tier-A holds only paraphrase-proof anchors; all semantic/negative judgement routes to Tier-B llm-rubric (P270/P393 calibration). **3/3 calibration runs GREEN, 4/4 cases each** — no flakiness.
+
+**Harness-scaffold finding (reusable)**: this was the FIRST eval under `packages/risk-scorer/skills/`. The tarball-exclusion mechanism that actually works in this repo's npm 10.9 + workspaces setup is the **`package.json` `files`-array negation `"!skills/*/eval/"`** — NOT the `.npmignore`. Empirically verified: adding `packages/risk-scorer/.npmignore` with `skills/*/eval/` did NOT exclude the eval from `npm pack`, and moving `packages/itil/.npmignore` aside did NOT make itil's eval start shipping (itil excludes via its own `files`-negation at `package.json` line 30). The `.npmignore` was kept for parity with itil + ADR-075 documentation, but it is inert for exclusion here. `npm pack --dry-run` from `packages/risk-scorer/` confirms no `skills/*/eval/` path ships while `SKILL.md` still ships. This trap is easy to miss — the architect gate itself initially mis-attributed the mechanism to the `.npmignore`.
+
 ### Investigation Tasks
 
-- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Author `packages/risk-scorer/skills/update-policy/eval/promptfooconfig.yaml` modelled on `packages/itil/skills/manage-problem/eval/promptfooconfig.yaml` reference slice
-- [ ] Cover the four Step 6a behaviours enumerated above (trigger, formatting, fallback, options)
-- [ ] Verify locally with `npx promptfoo eval` against the SKILL via the `run-skill-eval.sh` exec provider wrapping `claude -p --append-system-prompt`
-- [ ] Discharge R009 prose-surface floor for the update-policy SKILL per ADR-075 amendment 2026-06-02 + RFC-012 — credit the eval as a named likelihood-reducing control once tests pass on the next risk assessment of the file
-- [ ] Cross-check: does the update-policy SKILL have ANY existing eval, or is this the first slice? If first, the harness scaffold (eval/ directory, config shape, exec provider wiring) lands with this work
-- [ ] Create reproduction test (the eval IS the reproduction test in this case)
+- [x] Re-rate Priority and Effort at next /wr-itil:review-problems — left to orchestrator/review-problems; Effort confirmed M (5 files, mechanical copy + 1 new config + mechanism discovery)
+- [x] Author `packages/risk-scorer/skills/update-policy/eval/promptfooconfig.yaml` modelled on the reference slice (used `capture-problem` Tier-A/B shape rather than `manage-problem` — capture-problem is the canonical Tier-A-anchors + Tier-B-llm-rubric pattern post P270/P393 calibration)
+- [x] Cover the four Step 6a behaviours enumerated above (trigger, formatting, fallback, options)
+- [x] Verify locally with `npx promptfoo eval` against the SKILL via the `run-skill-eval.sh` exec provider wrapping `claude -p --append-system-prompt` — 3/3 runs GREEN
+- [x] Discharge R009 prose-surface floor for the update-policy SKILL per ADR-075 amendment 2026-06-02 + RFC-012 — eval GREEN; the −1 prose-surface modulator is now claimable on the next risk assessment of `update-policy/SKILL.md` Step 6a prose
+- [x] Cross-check: does the update-policy SKILL have ANY existing eval, or is this the first slice? — FIRST slice; harness scaffold (eval/ dir, config shape, exec provider wiring, `files`-negation tarball-exclusion) landed with this work
+- [x] Create reproduction test (the eval IS the reproduction test in this case) — GREEN
+
+**Verification**: the eval (reproduction + verification in one) is GREEN in-session across 3 runs. No release is required (eval is tarball-excluded test infra), so there is no post-release confirmation window — verification is satisfied by the in-session GREEN. Ready to close at the orchestrator's next verification pass / retro Step 4a.
 
 ## Dependencies
 
