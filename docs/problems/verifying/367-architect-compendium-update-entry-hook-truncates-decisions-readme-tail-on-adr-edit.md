@@ -1,12 +1,18 @@
 # Problem 367: `architect-compendium-update-entry` hook truncates `docs/decisions/README.md` tail when re-authoring an edited ADR's entry
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-06-16
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: internal
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 **JTBD**: JTBD-001
 **Persona**: developer
+
+## Fix Released
+
+Released in `@windyroad/architect@0.18.3` (version-packages commit `1955577`, PR #269, merge commit `8953fbc`, released 2026-06-17). Fix commit `bac08b14` added a fail-closed structural post-condition guard to `architect-compendium-update-entry.sh`: before staging, it asserts the post-rewrite ADR-id set equals the pre-rewrite set (plus exactly the edited id when new), the edited id appears exactly once, and the `## ` section-header count is unchanged; on any deviation it restores the README from backup and degrades (exit 0, unstaged) rather than shipping a corrupted compendium.
+
+Awaiting user verification in real-world ADR-edit flow. Session-observed evidence (2026-06-28): all 14 `architect-compendium-update-entry.bats` pass against the live hook, including the two P367 reproduction tests (spurious-id/section injection restore; wrong-id emit restore) that were RED before the guard and GREEN after.
 
 ## Description
 
@@ -47,6 +53,16 @@ The `architect-compendium-update-entry.sh` PostToolUse hook (ADR-078 Option 9 / 
 2. **But a malformed subprocess emit DOES corrupt the compendium.** Feeding the real hook a pathological `claude -p` result (an entry that also embeds an unrelated `### ADR-999` header and a spurious `## ` section) injected both into the compendium — additive pollution. A wrong-id emit (entry for ADR-049 while editing ADR-050) duplicates 049 and silently drops the edited id. These are the *real, reproducible* data-integrity hazards on the hook's write path.
 
 **The data-loss class is therefore: the hook stages whatever the awk produces with no post-condition check.** Whether the corruption originates from a truncating backstop interaction, a malformed/wrong-id LLM emit, or a future awk regression, the hook had no invariant guard before staging.
+
+### Verification (2026-06-28) — released + behavioural reproduction GREEN
+
+Fix shipped in **`@windyroad/architect@0.18.3`** (current published version; `packages/architect/CHANGELOG.md` line: `bac08b1: fix(architect): fail-closed post-condition guard on the compendium-update-entry hook (P367)`). All 14 `architect-compendium-update-entry.bats` pass, including the two P367 reproduction tests that were RED before the guard:
+- test 12 — *rejects a subprocess entry that injects spurious ADR ids/sections — restores README, degraded, unstaged*
+- test 13 — *rejects an emit for the wrong ADR id (edited id absent) — restores, degraded*
+
+The guard asserts (before `git add`): post-state ADR-id set == pre-state set (+ exactly the edited id when new), edited id appears exactly once, and `## ` section-header count unchanged — covering the full data-loss class (dropped tail entries, dropped historical section, spurious injection, wrong-id emit). On any deviation it restores from backup and degrades (exit 0, unstaged). Legitimate in-force→historical status flips preserve both invariants (test 6 GREEN). Transitioning Known Error → Verifying.
+
+**Release vehicle**: .changeset/p367-compendium-guard.md
 
 ### Fix (2026-06-17, iter-38) — committed, pending release verification
 
