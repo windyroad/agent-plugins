@@ -1,0 +1,269 @@
+# SKILL eval — update-policy Step 6a tight-appetite confirm-with-warning
+# (ADR-086) behavioural contracts on the /wr-risk-scorer:update-policy SKILL
+# prose surface (P381 / R009 prose-surface floor / ADR-075 / RFC-012).
+#
+# ADR-086 (band rebalance + default appetite 4→5) landed a new Step 6a: an
+# interactive second `AskUserQuestion` confirm-with-warning that fires when
+# the user picks appetite < 5, scans `docs/risks/R*.active.md` for Impact=5
+# entries, and cites them by activity-class-first per P350 brief-before-ID.
+# The prose landed without a paired behavioural eval — the precise hole
+# ADR-086 closes can reopen silently if the prose mis-fires, mis-cites the
+# register, or fumbles the fallback. The `risk-gate.bats` suite covers the
+# gate CODE; this eval covers the SKILL PROSE EXECUTION surface.
+#
+# Four contracts on SKILL.md Step 6a (lines 135-155):
+#   1. Appetite<5 trigger — the second AskUserQuestion confirm-with-warning
+#      fires when the user picks appetite < 5; does NOT fire at appetite >= 5
+#      (the Low ceiling under ADR-086 is 5).
+#   2. Register-derived example formatting (P350) — Impact=5 entries are cited
+#      activity-class-FIRST (kebab-case slug after `R<NNN>-`) with the R-ID in
+#      parentheses as the audit pointer, never the bare R-ID alone.
+#   3. Policy-row fallback — when `docs/risks/` is empty or has no Impact=5
+#      entry, the warning falls back to the policy's own Impact=5 (Severe) row
+#      from the just-drafted Impact Levels table.
+#   4. Confirm-vs-revise option semantics — the two option labels are clear;
+#      the revise path returns to step 6 (appetite question only).
+#
+# Tier-A = paraphrase-proof anchors only (file paths, ADR-086 / R009 / R008
+# slug / appetite tokens, SKILL option vocabulary). All semantic + NEGATIVE
+# judgement ("does NOT fire at appetite>=5"; "never the bare R-ID alone";
+# "does NOT invent register entries") routes to a Tier-B llm-rubric graded by
+# claude under subscription auth (no API key) via grade-llm-rubric.sh. This
+# honours the P270/P393 calibration lesson (2026-06-27): brittle multi-part /
+# negative Tier-A regexes false-fail behaviourally-correct free-form answers.
+#
+# Drivers:
+#   - ADR-086 (band rebalance + default appetite 4→5 — landed Step 6a;
+#     commit 5c90fdf8 flagged this eval as the follow-up).
+#   - ADR-075 (Amendment 2026-06-02 — SKILL-prose harness scope; exec:bash
+#     provider wrapping `claude -p --append-system-prompt`; Tier-A regex +
+#     Tier-B llm-rubric; eval tarball-excluded via packages/risk-scorer/
+#     .npmignore `skills/*/eval/`).
+#   - ADR-052 (behavioural-default for skill testing — this eval IS the
+#     behavioural alternative, not a structural grep on SKILL.md).
+#   - ADR-014 (single-commit grain — ships with its runner + grader + the
+#     new packages/risk-scorer/.npmignore; no `.changeset/*.md`).
+#   - RFC-012 (single build vehicle for the SKILL-eval harness).
+#   - P381 (driving problem — Step 6a prose lacks paired eval).
+#   - P350 (brief-before-ID discipline at the register-derived example list).
+#
+# Run from repo root:
+#   npx promptfoo eval -c packages/risk-scorer/skills/update-policy/eval/promptfooconfig.yaml
+#
+# @jtbd JTBD-101 (Extend the Suite with New Plugins)
+# @persona plugin-developer
+# @problem P381
+# @problem P012
+# @rfc RFC-012
+# @adr ADR-086 (Step 6a tight-appetite warning)
+# @adr ADR-075 (Amendment 2026-06-02)
+# @adr ADR-052 (behavioural-default)
+# @adr ADR-014 (single-commit grain)
+
+description: |
+  update-policy SKILL eval — Tier-A regex + Tier-B llm-rubric coverage for the
+  4 Step 6a tight-appetite confirm-with-warning behavioural contracts (ADR-086).
+  Discharges the R009 prose-surface floor for the update-policy SKILL per
+  ADR-075 + RFC-012.
+
+providers:
+  # Path is relative to this config file's directory (promptfoo basePath).
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+# Tier-B (llm-rubric) grading provider. Same shape as capture-problem:
+# distinctive positive tokens (file paths, slugs, ADR/appetite tokens, option
+# vocabulary) stay Tier-A; semantic + NEGATIVE clauses route to llm-rubric,
+# graded by claude under subscription auth (no API key) via grade-llm-rubric.sh.
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  # --- 1. Appetite<5 trigger fires the second AskUserQuestion ---------------
+
+  - description: Step 6a trigger — second AskUserQuestion confirm-with-warning fires at appetite<5, not at appetite>=5
+    vars:
+      prompt: |
+        I am executing /wr-risk-scorer:update-policy. At Step 6 the user just
+        confirmed an appetite threshold of 3. Walk me through what Step 6a
+        does next, BEFORE I proceed to Step 7 (validate draft with the
+        risk-scorer agent).
+
+        Be specific about: (a) what interactive mechanism Step 6a uses, if
+        any; (b) which ADR rebalanced the label bands that make this warning
+        load-bearing; and (c) whether Step 6a would do the same thing if the
+        user had instead confirmed an appetite of 5.
+    assert:
+      # Tier A — distinctive paraphrase-proof anchors only: the interactive
+      # mechanism the prompt asks the agent to name, and the ADR the prompt
+      # asks it to cite. Both are SKILL.md Step 6a vocabulary (the agent loads
+      # SKILL.md as its system prompt, so these tokens are reliably present).
+      - type: icontains
+        value: 'AskUserQuestion'
+      - type: regex
+        value: 'ADR-086'
+      # NOTE: the "fires at <5 / does NOT fire at >=5" trigger semantic is a
+      # mixed positive+NEGATIVE clause — a behaviourally-correct answer says
+      # the warning does NOT fire at appetite 5, false-failing any Tier-A
+      # not-regex on "fire". Routed to the Tier-B rubric below.
+      # Tier B — semantic invariant: confirm-with-warning fires at appetite<5;
+      # does NOT fire at appetite>=5; the warning is load-bearing because the
+      # Low ceiling under ADR-086 is 5.
+      - type: llm-rubric
+        value: |
+          The response describes Step 6a firing a second interactive
+          AskUserQuestion confirm-with-warning BECAUSE the confirmed appetite
+          (3) is below 5. It correctly states this warning would NOT fire if
+          the user had confirmed an appetite of 5 (5 is the Low-band ceiling
+          under ADR-086 — at appetite>=5 there is no tight-appetite trap to
+          warn about). The warning is load-bearing: an appetite below 5 means
+          a class of Impact=5/Severe risks can never be within appetite, so
+          the consequence must be a conscious choice rather than a quiet trap.
+          PASS if: the warning fires at appetite 3, AND the response states it
+          would NOT fire at appetite 5, AND the load-bearing rationale (Low
+          ceiling is 5 / severe-impact class becomes prohibited) is conveyed.
+          FAIL if the response says the warning fires regardless of appetite,
+          OR says it would still fire at appetite 5, OR omits that appetite<5
+          is the trigger condition. Saying the warning does NOT fire at
+          appetite 5 SATISFIES this rubric.
+
+  # --- 2. Register-derived example formatting — activity-class-first (P350) --
+
+  - description: Step 6a register-derived example — activity-class-first formatting, R-ID in parens (P350 brief-before-ID)
+    vars:
+      prompt: |
+        I am executing /wr-risk-scorer:update-policy Step 6a. The user picked
+        appetite 3, so the tight-appetite confirm-with-warning must fire. I
+        globbed `docs/risks/R*.active.md` and read the Impact values. Exactly
+        ONE entry has Impact=5:
+
+          - file: docs/risks/R008-credentials-in-committed-files.active.md
+            ## Inherent Risk -> Impact: 5 (Severe)
+            ## Residual Risk  -> Impact: 5 (Severe)
+
+        Per Step 6a's "Build the warning's example list" instructions, write
+        the exact example-list fragment the warning question would embed to
+        cite this prohibited activity-class. Output ONLY that fragment.
+    assert:
+      # Tier A — distinctive paraphrase-proof anchors: the activity-class slug
+      # derived from the filename (the part after `R008-` and before
+      # `.active.md`) and the R-ID audit pointer. Both must appear verbatim.
+      - type: icontains
+        value: 'credentials-in-committed-files'
+      - type: regex
+        value: 'R008'
+      # NOTE: the "activity-class FIRST, never the bare R-ID alone" discipline
+      # is the P350 brief-before-ID ordering invariant — a regex cannot
+      # reliably distinguish "credentials-in-committed-files (R008)" (correct)
+      # from "R008 (credentials-in-committed-files)" (anti-shape) without a
+      # brittle ordering regex that false-fails on benign phrasings. Routed to
+      # the Tier-B rubric below.
+      # Tier B — semantic invariant: the example cites the kebab-case activity-
+      # class FIRST as the carrier of meaning, with the R-ID in parentheses as
+      # the audit pointer; never the bare R-ID alone (P350).
+      - type: llm-rubric
+        value: |
+          The example-list fragment cites the prohibited activity-class as the
+          kebab-case slug `credentials-in-committed-files` (derived from the
+          filename between `R008-` and `.active.md`) FIRST as the carrier of
+          meaning, with the R-ID `R008` following in parentheses as the
+          audit pointer — e.g. `credentials-in-committed-files (R008)`. The
+          R-ID never appears alone as the carrier of meaning, and never leads
+          ahead of the activity-class. This is the P350 brief-before-ID
+          discipline: a reader without project filesystem access (mobile
+          clients, notification surfaces) must understand WHAT is being
+          prohibited from the slug, not be handed a bare opaque ID. PASS if
+          the slug leads and the R-ID is a parenthetical pointer. FAIL if the
+          fragment leads with `R008` ahead of the slug, OR cites `R008` alone
+          without the activity-class, OR invents a different activity-class
+          not derivable from the filename. Saying the R-ID must NOT appear
+          alone SATISFIES this rubric.
+
+  # --- 3. Policy-row fallback when register has no Impact=5 entry ------------
+
+  - description: Step 6a fallback — empty/no-Impact=5 register falls back to the policy's own Impact=5 (Severe) row
+    vars:
+      prompt: |
+        I am executing /wr-risk-scorer:update-policy Step 6a. The user picked
+        appetite 2, so the tight-appetite confirm-with-warning must fire. I
+        globbed `docs/risks/R*.active.md` and read every entry's Impact value:
+        the register is sparse and NO entry has an Inherent or Residual
+        Impact of 5.
+
+        Per Step 6a's example-list instructions, what does the warning cite as
+        the prohibited activity-class when zero register entries match? Be
+        specific about the source surface the fallback draws from, and confirm
+        whether I should invent or guess example risks to fill the gap.
+    assert:
+      # Tier A — distinctive paraphrase-proof anchor: the named source surface
+      # the fallback draws from (the just-drafted Impact Levels table) is
+      # SKILL.md Step 6a vocabulary. `Severe` is the Impact=5 label the
+      # fallback row carries.
+      - type: regex
+        value: '[Ii]mpact[\s-]?[Ll]evels?'
+      # NOTE: "do NOT invent / do NOT guess example risks" is a NEGATIVE clause
+      # — a behaviourally-correct answer that says "do not fabricate entries"
+      # false-fails a Tier-A not-regex on "invent". Routed to Tier-B below.
+      # Tier B — semantic invariant: the fallback cites the policy's own
+      # Impact=5 (Severe) row from the just-drafted Impact Levels table; does
+      # NOT invent or fabricate register entries.
+      - type: llm-rubric
+        value: |
+          The response states that when zero register entries have Impact=5,
+          Step 6a falls back to citing the policy's OWN Impact=5 (Severe) row
+          from the Impact Levels table the user just drafted in this same
+          update-policy run — the right surface because the user has it in
+          working memory and it concretely answers "what kind of thing would
+          be prohibited." The response confirms the agent should NOT invent,
+          guess, or fabricate example risks to fill the gap. PASS if the
+          fallback source is the just-drafted policy Impact Levels table
+          (Impact=5 / Severe row) AND fabricating example risks is rejected.
+          FAIL if the response invents placeholder risks, OR draws the
+          fallback from some other surface (e.g. a hardcoded example list),
+          OR says the warning is skipped entirely when the register is empty
+          (the warning still fires — only the example SOURCE changes). Saying
+          the agent must NOT fabricate entries SATISFIES this rubric.
+
+  # --- 4. Confirm-vs-revise option semantics --------------------------------
+
+  - description: Step 6a options — confirm-accepts-tradeoff vs revise-returns-to-step-6 semantics
+    vars:
+      prompt: |
+        I am executing /wr-risk-scorer:update-policy Step 6a. The
+        tight-appetite confirm-with-warning has fired for a chosen appetite of
+        3. Draft the EXACT two option labels the AskUserQuestion presents, and
+        for each one state precisely what happens when the user selects it —
+        in particular, where the flow goes next.
+    assert:
+      # Tier A — distinctive paraphrase-proof anchors: the two option-label
+      # verbs from SKILL.md Step 6a ("Confirm" / "Revise"). The agent loads
+      # SKILL.md as its system prompt, so these labels are reliably present.
+      - type: icontains
+        value: 'Confirm'
+      - type: icontains
+        value: 'Revise'
+      # NOTE: the per-option outcome semantics (confirm proceeds to step 7 with
+      # severe-impact activities prohibited; revise returns to step 6 with the
+      # appetite question only) are paraphrasable prose — routed to Tier-B.
+      # Tier B — semantic invariant: confirm accepts the trade-off and proceeds
+      # to step 7; revise returns to step 6 (appetite question only).
+      - type: llm-rubric
+        value: |
+          The response presents two clear option labels and their outcomes:
+          (a) a CONFIRM option — the user explicitly accepts the trade-off
+          (appetite 3, with severe/Impact=5 activities effectively prohibited)
+          and the flow proceeds to Step 7 (validate the draft with the
+          risk-scorer agent); and (b) a REVISE option — the flow returns to
+          Step 6 with the appetite question only (not the full Step 6
+          confirmation again), so the user can pick a different threshold.
+          The labels are self-explaining about the consequence, not bare
+          "yes/no". PASS if both options are present AND confirm→step 7 (accept
+          trade-off) AND revise→step 6 (appetite question only) are correctly
+          stated. FAIL if the revise path is described as proceeding anyway, OR
+          as returning to the full Step 6 (re-asking impact levels + business
+          context), OR if the confirm path is described as bypassable / as
+          offering a "proceed without accepting the trade-off" escape.
