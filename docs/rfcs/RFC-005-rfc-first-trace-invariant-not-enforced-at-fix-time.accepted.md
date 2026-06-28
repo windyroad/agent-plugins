@@ -3,7 +3,7 @@ status: accepted
 rfc-id: rfc-first-trace-invariant-not-enforced-at-fix-time
 reported: 2026-05-17
 decision-makers: [Tom Howard]
-problems: [P251, P314]
+problems: [P251, P314, P371]
 adrs: [ADR-071, ADR-072, ADR-073, ADR-070, ADR-060, ADR-022, ADR-051, ADR-052, ADR-042, ADR-044]
 jtbd: [JTBD-008, JTBD-001, JTBD-006, JTBD-101]
 stories: []
@@ -13,7 +13,7 @@ stories: []
 
 **Status**: accepted
 **Reported**: 2026-05-17
-**Problems**: P251 (driving — trace invariant not enforced at fix-time), P314 (co-driver — the gate-design rework whose Phase 2 fix IS this RFC's B-tasks; added 2026-06-17 to satisfy the I13 fix-time RFC-trace gate on P314 — the vehicle already exists, so the trace edge is wired rather than auto-creating a redundant RFC)
+**Problems**: P251 (driving — trace invariant not enforced at fix-time), P314 (co-driver — the gate-design rework whose Phase 2 fix IS this RFC's B-tasks; added 2026-06-17 to satisfy the I13 fix-time RFC-trace gate on P314 — the vehicle already exists, so the trace edge is wired rather than auto-creating a redundant RFC), P371 (follow-on — the I13 gate-directive gap in B4's prose: the gate had no existing-vehicle-untraced branch, so it would auto-create a redundant RFC instead of wiring an existing fix vehicle's trace edge; the B4 fix IS this RFC's deliverable; added 2026-06-28 by dogfooding the very third branch P371 ships — the vehicle exists, so the edge is wired, not auto-created)
 **ADRs**: ADR-071 (unconditional RFC-first — the governing decision), ADR-072 (RFC required at the propose-fix step on a Known Error), ADR-073 (fix-time gate auto-creates a missing RFC, everywhere), ADR-070 (RFCs hold no independent decisions — why this RFC carries none), ADR-060 (parent framework; I13 invariant added under RFC-006), ADR-022 (Known Error lifecycle semantics the gate placement conforms to), ADR-051 (load-bearing structural enforcement), ADR-052 (behavioural-test coverage), ADR-042 (held-changeset graduation), ADR-044 (decision-delegation contract)
 **JTBD**: JTBD-008 (primary — decompose-fix-into-coordinated-changes), JTBD-001 (governance composition), JTBD-006 (AFK orchestrator throughput), JTBD-101 (atomic-fix-adopter — the carve-out is removed; atomic fixes go through the same RFC per ADR-071)
 

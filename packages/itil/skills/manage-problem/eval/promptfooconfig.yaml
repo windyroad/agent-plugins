@@ -215,3 +215,72 @@ tests:
       # precede the invocation.
       - type: not-regex
         value: '(^|\n)\s*/wr-itil:update-upstream[\s\S]{0,400}grep[\s\S]{0,80}Reported\s+Upstream'
+
+  # P371 paired behavioural assertion — I13 propose-fix gate wires an existing
+  # fix vehicle's trace edge instead of auto-creating a redundant RFC.
+  #
+  # Driver: P371 (the I13 propose-fix RFC-trace gate's non-empty-stdout branch
+  # had only ONE response — auto-create a skeleton RFC via /wr-itil:capture-rfc.
+  # It had no branch for the case where an existing RFC is already the ticket's
+  # fix vehicle but simply hasn't wired the problem's trace edge into its
+  # `problems:` frontmatter array, so following the directive literally produced
+  # a redundant duplicate RFC that fragmented the fix). The Step 7 / propose-fix
+  # I13 gate now splits the non-empty-stdout branch into (a) existing-vehicle-
+  # untraced → wire the trace edge into the cited fix vehicle's `problems:`
+  # array (+ wr-itil-update-problem-rfcs-section + re-run the predicate) vs
+  # (b) no-vehicle → auto-create (unchanged). ADR-073 auto-create is scoped to
+  # the no-vehicle case only. Distinguishing fix-vehicle from merely-related is
+  # a judgement read of citation context kept skill-side per ADR-060 I1.
+  # Discharges the R009 prose-surface floor for the new branch.
+  #
+  # Behavioural shape per ADR-052: prompts a propose-fix scenario where the
+  # predicate fired `no-rfc-trace: P<NNN>` AND an existing RFC cited in the
+  # ticket is the fix vehicle; asserts the agent wires the trace edge into that
+  # RFC's `problems:` array (not auto-create a duplicate).
+  #
+  # @problem P371 (closes the SKILL-prose gap)
+  # @adr ADR-073 (auto-create scoped to the no-vehicle case) + ADR-060 (I1 locus)
+  - description: I13 propose-fix gate — wire existing fix vehicle's trace edge, not auto-create duplicate (P371)
+    vars:
+      prompt: |
+        I am at the /wr-itil:manage-problem propose-fix step (the I13 gate before
+        the Phase 2 traversal) for a Known Error at
+        docs/problems/known-error/371-foo.md. I ran the gate predicate
+        `wr-itil-check-fix-rfc-trace docs/problems/known-error/371-foo.md` and it
+        emitted on stdout:
+
+          no-rfc-trace: P371 — auto-create a problem-traced RFC via /wr-itil:capture-rfc before fix work, then proceed
+
+        The ticket's `## Fix Strategy` and `## Related` sections cite RFC-005 as
+        the fix vehicle: the fix IS RFC-005's B4 task (RFC-005 ships the very gate
+        mechanism this fix amends), but RFC-005's frontmatter `problems:` array
+        currently names only P251 and P314 — not P371.
+
+        Given that predicate output and that cited RFC, what EXACTLY do I do
+        before proceeding with the fix? Be specific about whether I auto-create a
+        brand-new RFC or do something else, and name any command I run.
+    assert:
+      # Tier A — must choose to WIRE / add the trace edge into the existing RFC's
+      # `problems:` array (JS RegExp compat — char classes, [\s\S] dotall).
+      - type: regex
+        value: '([Ww]ire|[Aa]dd|[Aa]ppend|[Ii]nclude|[Pp]ut)[\s\S]{0,160}problems'
+      # Tier A — must name the derived-section refresh helper.
+      - type: contains
+        value: 'wr-itil-update-problem-rfcs-section'
+      # Tier A — must identify RFC-005 as the existing fix vehicle to wire into.
+      - type: contains
+        value: 'RFC-005'
+      # NOTE (P270 brittleness lesson): an explicit "not auto-create" Tier-A
+      # regex was removed — its tight negation-window false-failed on phrasing
+      # variance ("do not create a second RFC" / "skip the auto-create" / etc.).
+      # The wire-path is already proven paraphrase-proof by the positive anchors
+      # above: running `wr-itil-update-problem-rfcs-section` AND wiring into the
+      # `problems:` array are actions taken ONLY on the wire branch, never on the
+      # auto-create branch. The not-regex below additionally guards against
+      # leading with auto-create.
+      # Tier A — must NOT lead with auto-create as the first action (the P371
+      # regressing shape — dispatch capture-rfc unconditionally on the
+      # no-rfc-trace directive, ignoring the existing cited vehicle). Anchored on
+      # an auto-create command shape appearing BEFORE any wire mention.
+      - type: not-regex
+        value: '(^|\n)\s*([Dd]elegate|[Rr]un|[Cc]all|[Ii]nvoke)[^\n]{0,40}capture-rfc[\s\S]{0,600}([Ww]ire|[Aa]dd)'
