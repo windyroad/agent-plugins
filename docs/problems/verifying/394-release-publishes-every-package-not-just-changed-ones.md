@@ -1,6 +1,6 @@
 # Problem 394: Release publishes a new version of every package, not just the ones that changed
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-06-28
 **Root cause CONFIRMED (corrected)**: 2026-06-28 — the REAL mechanism is `.github/workflows/release-preview.yml` publishing EVERY package as a `-preview.N` on every release run (NOT the `latest` changeset path, and NOT the P359 held-changeset batch). Two prior diagnoses on this ticket were WRONG — see Root Cause Analysis.
 **Priority**: 12 (High) — Impact: 4 x Likelihood: 3 (re-rated 2026-06-28 — real defect: every package floods npm + the maintainer inbox with no-op `-preview.N` publishes on every release; user-reported, emphatic, twice)
@@ -16,6 +16,12 @@
 **Fix**: added a guard in the loop — query npm `latest` for each package and `continue` (skip) when the on-branch `package.json` version equals the published `latest` (the package is unchanged by this release; the Version PR only bumps CHANGED packages, so unchanged ones still carry the npm-latest version). A package not yet on npm (empty latest) still previews (genuinely new). Result: only the packages a release actually changes get a `-preview.N` publish + email. CI-infra change (`.github/workflows/`), no npm package affected → no changeset.
 
 **Awaiting user verification** — confirm that the next release preview-publishes ONLY the changed package(s) (e.g. an itil-only release no longer emails a wardley/tdd/voice-tone preview).
+
+## Fix Released
+
+CI-infra fix in `.github/workflows/release-preview.yml` (no npm artefact) — the preview-publish loop now skips any package whose on-branch `package.json` version equals the published npm `latest`, so only the packages a release actually changes get a `-preview.N` publish + email. **VERIFIED LIVE this session**: two consecutive releases (risk-scorer, then itil) each preview-published ONLY the changed package — wardley/tdd/voice-tone stayed at `-preview.840`, not republished.
+
+**Awaiting user verification** — confirm the next release preview-publishes ONLY the changed package(s) (e.g. an itil-only release no longer emails a wardley/tdd/voice-tone `-preview`).
 
 ## Description
 

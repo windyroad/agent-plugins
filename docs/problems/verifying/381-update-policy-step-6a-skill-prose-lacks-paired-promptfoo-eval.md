@@ -1,12 +1,18 @@
 # Problem 381: update-policy Step 6a SKILL prose lacks paired promptfoo Tier-A/B eval (R009 prose-surface floor)
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-06-26
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: internal
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 **JTBD**: JTBD-001
 **Persona**: developer
+
+## Fix Released
+
+Test-infra fix (commit `3b8b3608`) — `packages/risk-scorer/skills/update-policy/eval/promptfooconfig.yaml` authored covering the four Step 6a behaviours (appetite<5 trigger, P350 brief-before-ID register formatting, policy-row fallback, confirm-vs-revise options); **4/4 cases GREEN across 3 calibration runs**. Tarball-excluded via the `package.json` `files`-negation `"!skills/*/eval/"` (no npm artefact), so there is no post-release window — the fix is verifiable in-repo. Discharges the R009 prose-surface floor for this SKILL per ADR-075 + RFC-012.
+
+**Awaiting user verification** — run `npx promptfoo eval` in `packages/risk-scorer/skills/update-policy/eval/` and confirm 4/4 cases GREEN.
 
 ## Description
 

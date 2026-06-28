@@ -1,12 +1,18 @@
 # Problem 370: Iter subprocess ends its turn waiting on a backgrounded task and never resumes — `claude -p` has no auto-resume; commit-bearing work is lost
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-06-17
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next `/wr-itil:review-problems`)
 **Origin**: internal
 **Effort**: M (deferred — re-rate at next `/wr-itil:review-problems`)
 **JTBD**: JTBD-006
 **Persona**: developer
+
+## Fix Released
+
+Shipped in **@windyroad/itil@0.55.3** (RFC-034 vehicle). The `work-problems/SKILL.md` Step 5 iter-prompt-body now forbids the cross-turn / turn-end-survivor background-task shape (carving out the P146/P232-sanctioned intra-turn `run_in_background` + `BashOutput`-poll-then-`wait` idiom) and names the foreground-synchronous substitute. Paired `work-problems` promptfoo eval case (`@problem P370`) GREEN per ADR-052 behavioural-only.
+
+**Awaiting user verification** — confirm a future AFK `/wr-itil:work-problems` iter does not exit at turn-end with a turn-end-survivor background task and staged-but-uncommitted work.
 
 ## Description
 

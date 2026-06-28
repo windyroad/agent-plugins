@@ -1,6 +1,6 @@
 # Problem 392: Blessed replace-section `awk -v section="$multiline"` idiom fails on BSD awk (macOS)
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-06-27
 **Transitioned to Known Error**: 2026-06-28 (root cause confirmed empirically — host BSD awk 20200816 aborts `awk -v section="$multiline"` with `awk: newline in string`; single live site fixed + behavioural bats added + committed. Awaits release → Verifying.)
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
@@ -8,6 +8,12 @@
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 **JTBD**: JTBD-001
 **Persona**: developer
+
+## Fix Released
+
+Shipped in **@windyroad/itil@0.55.1**. The single live BSD-awk defect (`update-problem-references-section.sh:266`, insert-before-`## Fix Released` branch) is fixed via the getline-from-tempfile pattern proven in `effort-tally.sh`; behavioural bats proven RED→GREEN on host BSD awk. Sibling section-updaters confirmed not affected (EOF-append). Shared-helper extraction deferred (P366 tracks the thesis).
+
+**Awaiting user verification** — on macOS (BSD awk), run a multi-line `## RFCs` / `## Stories` section refresh through `update-problem-references-section.sh` and confirm no `awk: newline in string` abort.
 
 ## Description
 

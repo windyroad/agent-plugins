@@ -1,6 +1,6 @@
 # Problem 379: No SessionStart nudge fires when RISK-POLICY.md is missing
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-06-26
 **Fix implemented**: 2026-06-28 (held changeset — see Root Cause Analysis)
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
@@ -8,6 +8,12 @@
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 **JTBD**: JTBD-003
 **Persona**: developer
+
+## Fix Released
+
+Shipped in **@windyroad/risk-scorer@0.15.0**. `risk-scorer-scaffold-nudge.sh` gains a project-dir guard + policy-absent arm that emits a one-line SessionStart advisory citing `/wr-risk-scorer:update-policy`; read-only, honours `WR_SUPPRESS_OVERSIGHT_NUDGE=1`. 12/12 bats GREEN. Recorded as ADR-047 Amendment 2026-06-28; the architect's Option B `.risk-reports/`-evidence narrowing is queued to the next `/wr-architect:review-decisions` drain (ratification pending).
+
+**Awaiting user verification** — in an adopter project (or an in-repo fixture) with no `RISK-POLICY.md`, confirm SessionStart emits the advisory citing `/wr-risk-scorer:update-policy`.
 
 ## Description
 

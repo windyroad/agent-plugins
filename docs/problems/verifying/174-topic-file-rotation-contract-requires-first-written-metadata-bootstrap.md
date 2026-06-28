@@ -1,10 +1,16 @@
 # Problem 174: Topic-file rotation contract requires `first-written` HTML metadata that doesn't exist on most briefing entries — Step 3 Branch A unenforceable in practice
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-06
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: internal
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+
+## Fix Released
+
+No dedicated P174 code change — the Step 3 Tier-3 unenforceability is **superseded** by the released P145→P246→P247 evidence-based-rotation rework in **@windyroad/retrospective@0.24.1+** (npm latest 0.27.0). Split-by-date is now a metadata-independent mechanical safe default (mtime-sort + median-age, "zero false-split risk", SKILL line 362), so Branch A always has a feasible non-defer action and the `first-written`-metadata precondition is gone.
+
+**Awaiting user verification** — confirm no recurrence of the Step 3 Tier-3 unenforceability trap across ≥1 further `/wr-retrospective:run-retro` cycle on the released contract.
 
 ## Description
 
