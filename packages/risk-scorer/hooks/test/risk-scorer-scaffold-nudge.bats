@@ -13,6 +13,11 @@
 # pending-review backlog self-surfaces (class-B) instead of rotting
 # silently once stubs exist (the audit's "one step short of the jtbd
 # pattern" gap).
+#
+# P379 (2026-06-28): inverse predicate of the register-missing arm — when
+# RISK-POLICY.md is ABSENT ENTIRELY the hook nudges the adopter to author
+# one via /wr-risk-scorer:update-policy (the gates otherwise run at the
+# default appetite silently). Same AFK-suppress envelope (ADR-068).
 # Behavioural — exercises the hook against fixture trees and asserts on stdout.
 
 setup() {
@@ -86,15 +91,23 @@ teardown() {
   [ -z "$output" ]
 }
 
-@test "silent when RISK-POLICY.md is absent (no policy file = no register expectation)" {
+@test "emits a policy-authoring nudge when RISK-POLICY.md is absent (P379 inverse predicate)" {
   run env CLAUDE_PROJECT_DIR="$DIR" CLAUDE_PLUGIN_ROOT="$PLUGIN_ROOT" bash "$HOOK"
   [ "$status" -eq 0 ]
-  [ -z "$output" ]
+  [[ "$output" == *"No RISK-POLICY.md"* ]]
+  [[ "$output" == *"/wr-risk-scorer:update-policy"* ]]
 }
 
-@test "silent when RISK-POLICY.md is absent even if docs/risks/ exists" {
+@test "policy-absent nudge fires even when docs/risks/ exists (policy-absence wins, P379)" {
   mkdir -p "$DIR/docs/risks"
   run env CLAUDE_PROJECT_DIR="$DIR" CLAUDE_PLUGIN_ROOT="$PLUGIN_ROOT" bash "$HOOK"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"No RISK-POLICY.md"* ]]
+  [[ "$output" == *"/wr-risk-scorer:update-policy"* ]]
+}
+
+@test "AFK guard suppresses the policy-absent nudge too (P379)" {
+  run env WR_SUPPRESS_OVERSIGHT_NUDGE=1 CLAUDE_PROJECT_DIR="$DIR" CLAUDE_PLUGIN_ROOT="$PLUGIN_ROOT" bash "$HOOK"
   [ "$status" -eq 0 ]
   [ -z "$output" ]
 }

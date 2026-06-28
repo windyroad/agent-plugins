@@ -41,10 +41,23 @@ PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 POLICY_FILE="$PROJECT_DIR/RISK-POLICY.md"
 REGISTER_DIR="$PROJECT_DIR/docs/risks"
 
-# Silent when the project does not have a risk policy. The policy file
-# presence is the user authorisation for the register to exist; without
-# it, the absence of docs/risks/ is not a governance gap.
-[ -f "$POLICY_FILE" ] || exit 0
+# Silent when the project dir itself does not exist — no adopter project
+# to nudge (e.g. a stale CLAUDE_PROJECT_DIR).
+[ -d "$PROJECT_DIR" ] || exit 0
+
+# Policy file absent entirely (P379, inverse predicate of the
+# register-missing arm below). Without a RISK-POLICY.md the risk-scorer
+# gates run at their default appetite (5 per ADR-086) silently, and the
+# capability sits dormant with no surfacing that a policy can be authored.
+# Nudge the adopter to author one via /wr-risk-scorer:update-policy. The
+# original guard treated bare policy-absence as a non-gap; the P379 review
+# (ADR-047 Amendment 2026-06-28) records the predicate reversal. Read-only
+# — the hook never writes; the policy authoring is gated behind the user
+# invoking the on-demand skill.
+if [ ! -f "$POLICY_FILE" ]; then
+  echo "[wr-risk-scorer] No RISK-POLICY.md in this project — run /wr-risk-scorer:update-policy to author one so the risk-scorer gates score against your appetite instead of the default."
+  exit 0
+fi
 
 # Register directory missing — nudge to scaffold it.
 if [ ! -d "$REGISTER_DIR" ]; then

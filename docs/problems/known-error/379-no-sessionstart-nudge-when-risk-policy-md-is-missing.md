@@ -1,7 +1,8 @@
 # Problem 379: No SessionStart nudge fires when RISK-POLICY.md is missing
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-06-26
+**Fix implemented**: 2026-06-28 (held changeset — see Root Cause Analysis)
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: internal
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -35,14 +36,22 @@ Closest existing ticket is **P297** — "ADR-047 governance-artefact scaffold sh
 
 ## Root Cause Analysis
 
+**Root cause**: `risk-scorer-scaffold-nudge.sh` short-circuited on bare policy-absence (`[ -f "$POLICY_FILE" ] || exit 0`) by design — the Phase 1 (P297) rationale "policy presence is the user authorisation for the register to exist" is correct for the *register* concern but left the *capability-discoverability* concern uncovered. An adopter who installs the plugin and never authors a `RISK-POLICY.md` runs the gate at its default appetite (5 per ADR-086) with no signal that the capability exists or how to activate it.
+
+**Fix (implemented 2026-06-28, proceed-new resolved as Option A)**: extended the same hook with a project-dir-exists guard followed by a policy-absent arm that emits a one-line stderr advisory citing `/wr-risk-scorer:update-policy`. Read-only; respects `WR_SUPPRESS_OVERSIGHT_NUDGE=1`. Recorded as ADR-047 Amendment 2026-06-28 (P379). The architect's Option B narrowing (gate the nudge on `.risk-reports/`-usage evidence to avoid firing every session on deliberately-policy-free adopters) is queued to the next `/wr-architect:review-decisions` drain.
+
+**Release risk**: the pipeline scorer rated commit/push/release at **4/25 (Low) — within appetite (5 per ADR-086)**: the new arm is a read-only stderr advisory (Minor impact, not a blocking gate), the behavioural bats cover both predicate directions, and this is an existing-hook *modification* (no first-landing modulator). The changeset ships **clean** — no ADR-042 Rule 2 hold triggered.
+
+**Verification status**: stays Known Error pending release + a first nudge-fire observation. This monorepo HAS a `RISK-POLICY.md`, so the new arm cannot fire in-repo; verification needs an adopter session with no policy file (or a deliberate in-repo fixture run) to observe the advisory. Known Error → Verifying on release; → Closed on the first observed fire.
+
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Decide hang-off vs proceed: absorb into P297 as Phase 2.5 / Phase 3 (P297's SessionStart-scaffold pair-shape POLICY-FILE × ARTEFACT-DIR explicitly identifies this as a complementary case), or keep as standalone tracking the inverse-coverage gap?
-- [ ] If proceed-new: design the SessionStart nudge for policy-absent — symmetric to `risk-scorer-scaffold-nudge.sh` but firing on `!POLICY_FILE_EXISTS` instead of `POLICY_FILE_EXISTS AND !REGISTER_DIR_EXISTS`. Cite `/wr-risk-scorer:update-policy` as the action.
-- [ ] AFK self-suppress via `WR_SUPPRESS_OVERSIGHT_NUDGE=1` per ADR-068 (suite-wide oversight-nudge suppress env var) — same envelope as the sibling nudges.
-- [ ] Behavioural bats fixture: project tree without `RISK-POLICY.md` → hook fires the nudge; project tree with `RISK-POLICY.md` → hook silent; AFK marker present → silent.
-- [ ] Create reproduction test
+- [x] Decide hang-off vs proceed → **proceed-new** (Step 2b hang-off-check short-circuited; P297 Phase 2 is parked on a different sibling-plugin axis). Recorded as ADR-047 amendment rather than a new ADR.
+- [x] Design the SessionStart nudge for policy-absent — fires on `!POLICY_FILE_EXISTS`, cites `/wr-risk-scorer:update-policy`. Done.
+- [x] AFK self-suppress via `WR_SUPPRESS_OVERSIGHT_NUDGE=1` per ADR-068 — inherited from the top-of-file guard. Done.
+- [x] Behavioural bats: policy-absent → nudge cites update-policy; policy-absent + register-dir present → nudge wins; AFK guard → silent; non-existent dir → silent. 12/12 green.
+- [x] Create reproduction test — done (the bats above, RED-then-GREEN).
 
 ## Dependencies
 
