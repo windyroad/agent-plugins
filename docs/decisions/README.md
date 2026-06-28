@@ -240,10 +240,11 @@ _76 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed
 **Confirmation:** packages/risk-scorer/agents/test/pipeline-consume-catalog.bats — 6 cases:; packages/risk-scorer/skills/create-risk/test/create-risk-flag-driven.bats — 4 cases:; packages/risk-scorer/skills/bootstrap-catalog/test/bootstrap-catalog.bats — 6 cases:; scripts/repo-local-skills/install-updates/test/install-updates-bootstrap-trigger.bats — 4 cases:
 **Related:** ADR-059, ADR-047, ADR-056, ADR-013, ADR-014, ADR-015, ADR-022, ADR-026, ADR-036, ADR-038, ADR-040, ADR-042, ADR-044, ADR-049, ADR-052, ADR-053, ADR-054, ADR-055
-
 ### ADR-060 — Problem-RFC-Story framework with mandatory problem-trace and unified problem ontology
-**Status:** accepted | **Oversight:** confirmed
-**Related:** ADR-032
+**Status:** accepted | **Oversight:** unconfirmed
+**Decides:** Adopt a four-tier artefact ontology (Problem → ADR → RFC → Story) with the canonical execution spine Problem → RFC → story map(s) → stories, under two non-ITIL invariants — every RFC traces to a problem (I1, no orphan RFCs) and technical and user/business problems are handled uniformly (I2). Every fix ships through an RFC that must pre-exist at propose-fix (RFC-first per ADR-073 — a missing RFC is authored-first, never blocked or auto-created; I13 unconditional per ADR-071); RFCs hold no independent decisions, every ≥2-option choice becomes an ADR (ADR-070). The `type` axis is retired (P287/ADR-074) in favour of a derive-then-ratify persona+JTBD contract on every problem capture (I12).
+**Confirmation:** capture-rfc hard-blocks without `--problem`; manage-rfc hard-blocks irreversible transitions on missing trace, advisory at `→closed`; problem `## RFCs` reverse-trace driven off commit trailer; P168 retro-migrates to RFC-001 with no semantic loss; held changeset graduates atomically; I12 derive-then-ratify (cited/flagged → silent, derivation-fail → AskUserQuestion, REJECT = no ticket, AFK without flags halts); behavioural bats cover I1/I2/I12/I13 + no-type regression guard; forward-dogfood gate before adopter release.
+**Related:** ADR-010, ADR-013, ADR-014, ADR-019, ADR-022, ADR-031, ADR-032, ADR-038, ADR-040, ADR-042, ADR-044, ADR-049, ADR-051, ADR-052, ADR-053, ADR-059, ADR-064, ADR-066, ADR-069, ADR-070, ADR-071, ADR-072, ADR-073, ADR-074
 
 ### ADR-061 — Dogfood graduation criteria for held changesets — symmetric risk balance drives the reinstate decision
 **Status:** proposed | **Oversight:** confirmed
