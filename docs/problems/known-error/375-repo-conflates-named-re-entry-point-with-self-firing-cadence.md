@@ -1,7 +1,8 @@
 # Problem 375: Repo conflates a "named re-entry point" with a self-firing cadence — deferrals not transitively reachable from an automatic trigger rot
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-06-23
+**Transitioned to Known Error**: 2026-06-28 (root cause documented via the 2026-06-23 4-agent reachability audit; workaround now recorded — ADR-084 SessionStart deferral census re-surfaces the rot every session. Generic-mechanism choice + rollup-parent decision queued as outstanding design questions per ADR-074.)
 **Priority**: 16 (High) — Impact: 4 (High) × Likelihood: 4 (Likely). **Rated at capture from observed evidence, NOT deferred** (re-rating this ticket "at next /wr-itil:review-problems" would itself be the bug — nothing self-fires review-problems). Impact 4: defeats the repo's central value proposition (feedback loops that build intelligence) AND ships the rot-generator into adopter projects via the deferral-emitting skills. Likelihood 4: ~12 observed instances (see Related cluster); structural and recurring.
 **Origin**: internal
 **Effort**: L — cross-package design (authoring-time enforcement check spanning architect/itil/retrospective) + rollup-parent decision + capture-skill default fix. WSJF = (16 × 1.0) / 4 = 4.0.
@@ -24,7 +25,9 @@ Surfaced 2026-06-23 when the agent defended these deferrals as "names the next e
 
 ## Workaround
 
-(deferred to investigation)
+**In place now (partial mitigation, surfacing-only):** ADR-084 `retrospective-deferral-census.sh` (SessionStart hook, shipped 2026-06-23, commit `0e8a2787`) greps `docs/` + `packages/` markdown for deferred-work markers and re-surfaces a bounded census every session. This clones the proven class-B self-surfacing pattern (`jtbd-oversight-nudge.sh` etc.) and converts the bulk of the silent class-C rot into visible-every-session backlog — so a stranded deferral can no longer rot *invisibly*. The risk-scorer arm (`risk-scorer-scaffold-nudge.sh` now counts `**Curation**: pending review` entries, 2026-06-27) extends the same pattern to a second rot surface.
+
+**What the workaround does NOT do:** the census *surfaces* but does not *execute* — it is a louder reminder, not a self-draining mechanism, and it does not stop new uncadenced deferrals being *authored* (the rot-generator at source). Those gaps are the open design decisions below. Until they land, the operating discipline is: rate at capture (never `Likelihood: 1 (deferred — re-rate …)`), and treat every census line as actionable backlog on the next AFK drain.
 
 ## Impact Assessment
 
@@ -66,6 +69,39 @@ Surfaced 2026-06-23 when the agent defended these deferrals as "names the next e
 **Clean (0 live deferrals)**: style-guide, c4, wardley, connect, tdd, shared.
 
 **The fix the repo already designed for and never wired**: clone the class-B pattern — a SessionStart "deferral census" that greps the repo for deferred markers (`(deferred …)`, `pending review`, stale READMEs) and re-surfaces a count + worst offenders every session. One such hook converts most of the class-C list C→B. Targeted siblings: build the architect `(deferred to …)` pointer detector; extend risk-scorer's nudge to count pending-review content; resolve run-retro's missing cadence.
+
+## Sibling Survey (2026-06-28 — orchestrator-named tickets vs the true class)
+
+The AFK orchestrator named P370/P371/P376/P379/P381/P386/P391/P392 as candidate rollup children. Applying the rot-test (a deferral is a class member only if it strands work whose trigger chain never reaches a SELF-FIRING event) shows **only ONE of the eight is a genuine class member.** The other seven are simply co-captured tickets from the same recent AFK sessions — ordinary defects, not self-firing-cadence rot. The *real* cluster is the one already enumerated in `## Related` (P295/P271/P234/P236/P189/P184/P110/P220/P253/P148/P291).
+
+| Ticket | What's deferred / broken | Self-fires? | Class member? |
+|--------|--------------------------|-------------|----------------|
+| **P379** | Adopter with no `RISK-POLICY.md` is never auto-interviewed; `risk-scorer-scaffold-nudge.sh` silent-skips the policy-absent case. Intent ("auto-interview if policy missing") has **no self-firing surface**. Ticket itself defers the absorb/sibling call "at review time via review-problems" — an uncadenced deferral. | **No** | **YES — direct class member.** Same shape as the risk-scorer arm already fixed under this ticket (count content, don't silent-skip). Fix = extend the nudge to the policy-absent predicate. |
+| P370 | `claude -p` iter ends turn waiting on a backgrounded task, no auto-resume → staged work lost. | Loop self-fires, but the failure is single-shot-CLI non-resumption, not deferred-marker rot. | No — adjacent (work-loss), different root cause. |
+| P371 | I13 gate has no branch for "existing RFC is the fix vehicle but trace edge unwired" → auto-creates duplicate RFC. | n/a — gate-branch logic bug. | No. |
+| P376 | Catchup scanner is outbound-only; misses the inbound `Origin: inbound-reported` direction. | n/a — scanner coverage/parity gap. | No. |
+| P381 | update-policy Step 6a SKILL prose lacks a paired promptfoo eval (R009 floor). | n/a — test-coverage gap. | No. |
+| P386 | review-problems Step 4.6 cites a dangling `work-problems Step 6.5` cross-reference. | n/a — broken doc cross-reference. | No. |
+| P391 | oversight-nudge bats non-hermetic against inherited `WR_SUPPRESS_OVERSIGHT_NUDGE`. | n/a — test-hermeticity flake. | No. |
+| P392 | `awk -v section="$multiline"` fails on BSD awk (macOS). | n/a — shell portability bug. | No. |
+
+**Finding:** the orchestrator's sibling list is mostly noise — recapture risk if it drives a rollup. Fold **P379** under this ticket's class (or wire it as the next risk-scorer-nudge arm); leave the other seven as independent tickets. The authoritative child cluster remains `## Related`.
+
+## Remedy option-ladder — generic self-firing-cadence mechanism (DESIGN DECISION — queued, not built per ADR-074)
+
+The class needs a generic mechanism so the rot is fixed once, not re-discovered per instance. Four rungs, cheapest-first:
+
+- **Option A — SessionStart "deferral census" surfacer (class-B clone).** *Already partially shipped* (ADR-084 census + risk-scorer-nudge arm). Greps the repo for deferred markers and re-surfaces a count + worst offenders every session. **Pro:** zero new infra; proven pattern; adopter-portable; converts silent C→B. **Con:** surfaces but does not execute — a louder reminder, still relies on a human/AFK loop to act; does not stop new deferrals being authored. *Mitigates rot-invisibility, not rot.*
+- **Option B — work-problems Step 0x "drain stranded-deferrals" pre-flight.** A loop pre-flight that scans for named-but-uncadenced re-entry points and enqueues them as actionable backlog. **Pro:** self-*executing* within the AFK loop (closes the execute-gap Option A leaves). **Con:** only fires when the loop runs (still user-initiated, not a true cron); pre-flight latency; false-positive scan risk.
+- **Option C — authoring-time enforcement gate (PreToolUse / converge `itil-fictional-defer-detect.sh` onto shared `lib/deferral-markers.sh`).** A write-time check that REJECTS a new deferral whose trigger chain is not transitively reachable from a self-firing trigger. **Pro:** the only option that attacks the root cause — stops new C-class deferrals at source. **Con:** hardest to build (needs a reachability model of the trigger graph); false-block risk on legitimate class-A self-executing deferrals; cross-plugin coupling concern (ADR-002/003).
+- **Option D — true cron / scheduled cadence.** A real scheduler that periodically fires review-problems / run-retro / census drains. **Pro:** the only genuinely self-firing-without-any-human option. **Con:** no cron infra exists; adopter-environment portability concern (adopters may lack a scheduler); heaviest lift; the repo has a standing ban on ScheduleWakeup-style self-scheduling for AFK iters.
+
+**Leaning (for the human's decision, not committed):** A is the visible-every-session floor and is already live; C is the durable root-cause fix and is where the remaining design effort belongs (with B as a cheaper interim execute-gap closer). D is out of appetite/infra. The A+C pair is the likely shape, but the choice is a genuine ≥2-option decision → see Outstanding Questions.
+
+## Outstanding Questions (queued per ADR-074 — do NOT build until ratified)
+
+1. **`category:direction` — generic-mechanism choice.** Which rung(s) of the A/B/C/D ladder above do we commit to? A is partially shipped; the open call is whether to invest in C (authoring-time enforcement gate, root-cause) now, add B (loop pre-flight execute-gap) as an interim, or stop at A (surfacing-only). Warrants a `/wr-architect:create-adr` once chosen. *Trade-offs briefed in the option-ladder above.*
+2. **`category:direction` — rollup-parent decision.** Should P375 become a rollup PARENT for the `## Related` cluster (P295/P271/P234/P236/P189/P184/P110/P220/P253/P148/P291), or a sibling that supersedes them? Plus: fold P379 in as the next risk-scorer-nudge arm (sibling survey above). Affects backlog accounting (closing children vs leaving them as tracked instances).
 
 ## Dependencies
 
