@@ -6,7 +6,7 @@ decision-makers: [Tom Howard]
 problems: [P251, P314, P371, P399]
 adrs: [ADR-071, ADR-072, ADR-073, ADR-070, ADR-060, ADR-022, ADR-051, ADR-052, ADR-042, ADR-044]
 jtbd: [JTBD-008, JTBD-001, JTBD-006, JTBD-101]
-stories: []
+stories: [STORY-008, STORY-009, STORY-010, STORY-011, STORY-012, STORY-013]
 ---
 
 # RFC-005: RFC-first trace invariant not enforced at fix-time
@@ -41,6 +41,27 @@ RFC-005 extends ADR-060's I-series with the symmetric Problem→RFC trace at fix
 - **Story-map shape** — the authored RFC is **stories in a user story map** (ADR-060), not a `Scope`+`Tasks` prose blob; I13 enforces the RFC trace + RFC-first ordering, and the decomposition is the RFC's content. Story-map *presence* is further assured by ADR-060 I7/I8.
 
 The problem→RFC reverse-trace is the auto-maintained derived `## RFCs` body section on the problem ticket (single source of truth = the RFC's `problems:` array per ADR-060 I1; the literal `rfcs:` problem frontmatter originally proposed here is superseded — B2 reconciled 2026-06-17, dual-source rejected as split drift). Cardinality `0..N`: empty until a fix is proposed on the Known Error; `≥ 1` once a fix is proposed (the RFC is **authored first / pre-exists**, never auto-created as a byproduct).
+
+## User Story Map
+
+> **Dogfood note (2026-06-29).** RFC-005 previously carried only the `## Tasks` B-slice checklist with `stories: []` — a task list, not the "stories in a user story map" an RFC is per ADR-060. Per the RFC-first ratification (ADR-072/073) — *the only avenue to fix a problem is through an RFC, and an RFC is a user story map* — the RFC-first rework is now expressed as a story map below. We author this map **by discipline** ahead of building the enforcement that will require it (no enforcement needed to dogfood it). The B12–B17 tasks remain as each story's implementation breakdown.
+
+**Backbone** (the maintainer's / orchestrator's journey when a fix is proposed on a Known Error):
+
+`Detect the RFC precondition` → `Propose the fix interactively` → `Propose the fix under AFK` → `Author RFCs as story maps` → `Prove it behaviourally` → `Clear the legacy debt`
+
+**Stories** (each a vertical, INVEST slice; persona: plugin-developer / AFK orchestrator; primary JTBD-008):
+
+| Story | Backbone step | User value (one line) | Ships (was) |
+|-------|---------------|-----------------------|-------------|
+| [STORY-008](../stories/draft/STORY-008-rfc-first-precondition-predicate.md) | Detect | The predicate **refuses / routes to authoring** when no RFC traces the problem (not auto-create) | B12 (was B3) |
+| [STORY-009](../stories/draft/STORY-009-author-first-manage-problem-gate.md) | Propose (interactive) | manage-problem **authors the RFC first**; escalates an **uncovered** approach-choice to a ratified ADR | B13 (was B4) |
+| [STORY-010](../stories/draft/STORY-010-author-first-work-problems-afk.md) | Propose (AFK) | work-problems authors-first for covered fixes; **lawfully halts** for an uncovered decision | B14 (was B5) |
+| [STORY-011](../stories/draft/STORY-011-rfc-authoring-is-pre-implementation-story-map.md) | Author RFCs | capture-rfc/manage-rfc author a **pre-implementation story map**; the `--fix-time` byproduct path retired | B15 (was B8 + held B11) |
+| [STORY-012](../stories/draft/STORY-012-rfc-first-behavioural-bats.md) | Prove | behavioural bats: RFC-less → refused/routed; uncovered → blocks for ADR; covered → proceeds | B16 (was B6) |
+| [STORY-013](../stories/draft/STORY-013-backfill-skeleton-rfcs.md) | Clear debt | backfill-or-supersede the skeleton RFCs the repudiated mechanism left behind | B17 (was B11 backfill) |
+
+Walking skeleton / suggested order: STORY-008 → STORY-009 → STORY-010 (the gate, in / out), then STORY-011 (authoring path) and STORY-012 (proof) in parallel, then STORY-013 (debt). RFC-005 B10 (held-changeset graduation) fires once STORY-011 + STORY-012 land.
 
 ## Tasks
 
