@@ -48,11 +48,11 @@ The problem→RFC reverse-trace is the auto-maintained derived `## RFCs` body se
 
 **Canonical story map**: [`docs/story-maps/draft/STORY-MAP-002-rfc-first-enforcement.html`](../story-maps/draft/STORY-MAP-002-rfc-first-enforcement.html) (STORY-MAP-002).
 
-**Backbone** — the *maintainer's user-activity journey* fixing a problem under RFC-first (left → right; the AFK orchestrator walks the same spine and lawfully halts where a human decides):
+**Backbone** — the *maintainer's user-activity journey* fixing a problem under RFC-first, ending in **adopter value** (left → right; the AFK orchestrator walks the same spine and lawfully halts where a human decides):
 
-`A1 · Propose a fix & hit the gate` → `A2 · Author the RFC (or escalate a new decision)` → `A3 · Implement the RFC's stories` → `A4 · Land the fix`
+`A1 · Propose a fix & hit the gate` → `A2 · Author the RFC (or escalate a new decision)` → `A3 · Implement the RFC's stories` → `A4 · Land the fix → adopter gets a real-plan-backed fix`
 
-A3 and A4 reuse **existing** capabilities (the work-the-problem traversal, RFC-003/STORY-005; the ADR-022 lifecycle) — no new build. The bats are a **quality rib** that cuts across A1–A2, not a backbone step; the skeleton-RFC backfill is an **off-journey migration side-rail**.
+**Two layers (per Patton — the backbone is user activities, NOT developer tasks).** Each card below states the *user-observable capability* the step gains; the linked STORY-NNN ticket *implements* it (the build work lives in the ticket, not on the spine). A3 and A4 reuse **existing** capabilities (work-the-problem traversal RFC-003/STORY-005; ADR-022 lifecycle) — no new build. Bats are a **quality rib** cutting across the activities, not a backbone step; the skeleton-RFC backfill is an **off-journey migration side-rail** (whose pain: a future maintainer/agent trusting a structurally-present but hollow trace — P375 cadence-rot).
 
 **Stories** (each an INVEST slice; primary JTBD-008) mapped onto the backbone — index of STORY-MAP-002's slices:
 
@@ -65,9 +65,9 @@ A3 and A4 reuse **existing** capabilities (the work-the-problem traversal, RFC-0
 | [STORY-016](../stories/draft/STORY-016-rfc-first-behavioural-bats.md) | quality rib (cross-cuts A1–A2) | maintainer | behavioural bats: RFC-less → refused/routed; uncovered → blocks for ADR; covered → proceeds | B16 (was B6) |
 | [STORY-017](../stories/draft/STORY-017-backfill-skeleton-rfcs.md) | migration side-rail (off-journey) | maintainer | backfill-or-supersede the skeleton RFCs the repudiated mechanism left behind | B17 (was B11 backfill) |
 
-**Variations under A2** (the unhappy paths — see the map's dashed cards): *covered* approach → cite existing ADRs & proceed, no new ADR (P132); *uncovered* approach → STOP, author a new ADR, ratify before implementation (ADR-070/073) — the AFK actor halts here.
+**Variations / unhappy paths** (the map's dashed cards): under **A2** — *covered* approach → cite existing ADRs & proceed, no new ADR (P132); *uncovered* approach → STOP, author a new ADR, ratify before implementation (ADR-070/073), the AFK actor halts here. Under **A4** — *verification fails* → the fix bounces back to A2/A3 (re-author / re-implement) before it can close.
 
-**Release slices** (depth, not new activities): **Release 1 — walking skeleton** is the thinnest thread that crosses *every* backbone activity and is *proven* by its bats — STORY-012 (core detect/refuse/route) + STORY-015 (author one minimal RFC, covered path) + existing implement (STORY-005) + existing land (ADR-022) + STORY-016 (core bats). A maintainer can already fix a covered problem RFC-first end-to-end. **Release 2 — deepen** the *same* activities: full gates (STORY-013/014), the AFK halt, the uncovered→ADR unhappy path, richer authoring, fuller bats. **Side-rail**: STORY-017 backfill. RFC-005 B10 (held-changeset graduation) fires once the Release-1 thread + its bats land.
+**Release slices** (depth, not new activities), each with a target outcome: **Release 1 — walking skeleton** (outcome: a maintainer can fix a *covered* problem RFC-first, end-to-end and proven) is the thinnest *operable* thread that crosses *every* backbone activity — **STORY-012 (predicate signal) + a thin slice of STORY-013 (the gate that *acts on* the signal and routes to authoring — together operable)** + STORY-015 (author one minimal covered-path RFC) + existing implement (STORY-005) + existing land → adopter value (ADR-022), proven by STORY-016 core bats (predicate / refuse-route layer) + the STORY-015 forward-dogfood (the author-first SKILL-orchestration half — an honest harness-gap, not a regression test). The walking skeleton is *operable*, not just present — the routing consumer (thin STORY-013) ships with the predicate, not a release later. **Release 2 — deepen** the *same* activities (outcome: the gate is complete): full + AFK gate (STORY-013/014), the AFK lawful-halt, the uncovered→ADR path, the verify-fail loop, richer authoring, fuller bats. **Side-rail**: STORY-017 backfill. RFC-005 B10 (held-changeset graduation) fires once the Release-1 thread + its bats land.
 
 ## Tasks
 

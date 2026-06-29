@@ -38,6 +38,10 @@ As a maintainer authoring an RFC for a fix, I want `/wr-itil:capture-rfc` (and t
 
 **JTBD-008** — Decompose a Fix Into Coordinated Changes. The story map IS the decomposition; authoring it before implementation is the dogfood of RFC-first.
 
+## Release split (per STORY-MAP-002)
+
+This story spans two releases on the map. **Release 1 (walking skeleton)** ships the **thin covered-path slice**: `/wr-itil:capture-rfc` authors one minimal pre-implementation story map for a fix whose approach existing ADRs already cover. **Release 2** ships the **deepening**: the heavyweight `/wr-itil:manage-rfc` richer authoring path, and retirement of the held `--fix-time` byproduct path.
+
 ## Dependencies
 
 - **Blocks**: STORY-017 (backfill reuses the pre-implementation story-map authoring path), RFC-005 B10 (held-changeset graduation gated on this + STORY-016).

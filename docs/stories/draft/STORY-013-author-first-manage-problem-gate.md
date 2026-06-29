@@ -39,6 +39,10 @@ As a maintainer proposing a fix in `/wr-itil:manage-problem`, I want the propose
 
 **JTBD-008** — Decompose a Fix Into Coordinated Changes (the RFC story-map IS the decomposition). **JTBD-001** — Enforce Governance Without Slowing Down (covered choices proceed autonomously; only genuinely-new decisions stop for ratification).
 
+## Release split (per STORY-MAP-002)
+
+This story spans two releases on the map. **Release 1 (walking skeleton)** ships only the **thin routing slice**: consume the STORY-012 predicate signal and route the maintainer to author-first on a *covered* fix — the minimum that makes R1 operable end-to-end. **Release 2** ships the **full gate**: the pre-existing-RFC → implement branch, and the uncovered-approach → escalate-to-ratified-ADR branch.
+
 ## Dependencies
 
 - **Blocks**: STORY-016 (bats assert this gate's behaviour).
