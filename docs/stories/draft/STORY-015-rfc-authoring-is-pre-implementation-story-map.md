@@ -6,10 +6,11 @@ decision-makers: [Tom Howard]
 problems: [P251, P399]
 jtbd: [JTBD-008]
 rfcs: [RFC-005]
+story-maps: [STORY-MAP-002]
 estimated-effort: M
 ---
 
-# STORY-011: RFC authoring produces a pre-implementation story map; the --fix-time byproduct path is retired
+# STORY-015: RFC authoring produces a pre-implementation story map; the --fix-time byproduct path is retired
 
 **Status**: draft
 **Reported**: 2026-06-29
@@ -39,8 +40,8 @@ As a maintainer authoring an RFC for a fix, I want `/wr-itil:capture-rfc` (and t
 
 ## Dependencies
 
-- **Blocks**: STORY-013 (backfill reuses the pre-implementation story-map authoring path), RFC-005 B10 (held-changeset graduation gated on this + STORY-012).
-- **Blocked by**: STORY-009 (the author-first gate invokes this authoring path).
+- **Blocks**: STORY-017 (backfill reuses the pre-implementation story-map authoring path), RFC-005 B10 (held-changeset graduation gated on this + STORY-016).
+- **Blocked by**: STORY-013 (the author-first gate invokes this authoring path).
 
 ## Related
 

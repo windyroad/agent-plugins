@@ -6,10 +6,11 @@ decision-makers: [Tom Howard]
 problems: [P251, P314]
 jtbd: [JTBD-008, JTBD-001]
 rfcs: [RFC-005]
+story-maps: [STORY-MAP-002]
 estimated-effort: M
 ---
 
-# STORY-009: manage-problem propose-fix gate authors the RFC first, escalates uncovered choices to an ADR
+# STORY-013: manage-problem propose-fix gate authors the RFC first, escalates uncovered choices to an ADR
 
 **Status**: draft
 **Reported**: 2026-06-29
@@ -40,8 +41,8 @@ As a maintainer proposing a fix in `/wr-itil:manage-problem`, I want the propose
 
 ## Dependencies
 
-- **Blocks**: STORY-012 (bats assert this gate's behaviour).
-- **Blocked by**: STORY-008 (consumes the refuse/route predicate signal).
+- **Blocks**: STORY-016 (bats assert this gate's behaviour).
+- **Blocked by**: STORY-012 (consumes the refuse/route predicate signal).
 
 ## Related
 

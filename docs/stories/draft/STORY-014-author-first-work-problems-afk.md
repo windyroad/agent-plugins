@@ -6,10 +6,11 @@ decision-makers: [Tom Howard]
 problems: [P251, P314]
 jtbd: [JTBD-008, JTBD-006]
 rfcs: [RFC-005]
+story-maps: [STORY-MAP-002]
 estimated-effort: M
 ---
 
-# STORY-010: work-problems AFK clause authors the RFC first, lawfully halts on an uncovered decision
+# STORY-014: work-problems AFK clause authors the RFC first, lawfully halts on an uncovered decision
 
 **Status**: draft
 **Reported**: 2026-06-29
@@ -39,8 +40,8 @@ As the AFK `/wr-itil:work-problems` orchestrator dispatching a fix on an RFC-les
 
 ## Dependencies
 
-- **Blocks**: STORY-012 (bats assert the AFK behaviour at every effort level).
-- **Blocked by**: STORY-008 (predicate signal), STORY-009 (work-problems delegates fix work through the manage-problem traversal).
+- **Blocks**: STORY-016 (bats assert the AFK behaviour at every effort level).
+- **Blocked by**: STORY-012 (predicate signal), STORY-013 (work-problems delegates fix work through the manage-problem traversal).
 
 ## Related
 

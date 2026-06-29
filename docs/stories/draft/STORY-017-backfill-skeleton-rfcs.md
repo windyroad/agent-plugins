@@ -6,10 +6,11 @@ decision-makers: [Tom Howard]
 problems: [P399, P375]
 jtbd: [JTBD-008]
 rfcs: [RFC-005]
+story-maps: [STORY-MAP-002]
 estimated-effort: M
 ---
 
-# STORY-013: Backfill-or-supersede the skeleton RFCs the repudiated mechanism left behind
+# STORY-017: Backfill-or-supersede the skeleton RFCs the repudiated mechanism left behind
 
 **Status**: draft
 **Reported**: 2026-06-29
@@ -26,7 +27,7 @@ As a maintainer, I want the skeleton RFCs auto-created under the now-repudiated 
 
 - [ ] Each skeleton RFC (RFC-026/028/029/030/032/033/034 + any flagged by `check-autocreate-rfc-scope.sh`) is either authored as a real story map or superseded with a recorded reason.
 - [ ] The repurposed B9 scope detector reports **zero** under-scoped skeletons after the backfill (the backfill-progress signal reaches clean).
-- [ ] No new skeleton is created in the process (the authoring uses the STORY-011 pre-implementation story-map path).
+- [ ] No new skeleton is created in the process (the authoring uses the STORY-015 pre-implementation story-map path).
 
 ## Driving problem trace (I6)
 
@@ -39,7 +40,7 @@ As a maintainer, I want the skeleton RFCs auto-created under the now-repudiated 
 ## Dependencies
 
 - **Blocks**: (none — this is the debt-clearing tail).
-- **Blocked by**: STORY-011 (reuses the pre-implementation story-map authoring path).
+- **Blocked by**: STORY-015 (reuses the pre-implementation story-map authoring path).
 
 ## Related
 

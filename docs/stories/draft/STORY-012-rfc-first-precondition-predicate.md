@@ -6,10 +6,11 @@ decision-makers: [Tom Howard]
 problems: [P251, P314]
 jtbd: [JTBD-008]
 rfcs: [RFC-005]
+story-maps: [STORY-MAP-002]
 estimated-effort: S
 ---
 
-# STORY-008: The propose-fix predicate refuses (routes to authoring), it does not auto-create
+# STORY-012: The propose-fix predicate refuses (routes to authoring), it does not auto-create
 
 **Status**: draft
 **Reported**: 2026-06-29
@@ -40,7 +41,7 @@ As a maintainer (or the AFK orchestrator) proposing a fix on a Known Error, I wa
 
 ## Dependencies
 
-- **Blocks**: STORY-009, STORY-010 (the manage-problem + work-problems gates consume this predicate's signal), STORY-012 (predicate bats).
+- **Blocks**: STORY-013, STORY-014 (the manage-problem + work-problems gates consume this predicate's signal), STORY-016 (predicate bats).
 - **Blocked by**: (none — the ADRs it enforces, ADR-071/072/073, are ratified).
 
 ## Related

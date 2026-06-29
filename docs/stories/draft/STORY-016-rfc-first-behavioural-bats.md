@@ -6,10 +6,11 @@ decision-makers: [Tom Howard]
 problems: [P251]
 jtbd: [JTBD-008]
 rfcs: [RFC-005]
+story-maps: [STORY-MAP-002]
 estimated-effort: S
 ---
 
-# STORY-012: RFC-first behaviour is proven by behavioural bats
+# STORY-016: RFC-first behaviour is proven by behavioural bats
 
 **Status**: draft
 **Reported**: 2026-06-29
@@ -28,11 +29,11 @@ As a maintainer, I want behavioural bats (ADR-052 behavioural-only) that prove t
 - [ ] A fix whose approach-choice is **uncovered** by existing ADRs **blocks for a new ratified ADR**.
 - [ ] A fix whose approach-choice **is covered** by existing ADRs **proceeds** (RFC cites the ADRs, no new ADR).
 - [ ] Retained assertions: no-duplicate (RFC already traces → no-op) + ADR-060 I2 uniformity (behaviour identical regardless of `type:`).
-- [ ] Behavioural-only (no structural grep on SKILL/ADR prose); the predicate-half bats are rewritten under STORY-008.
+- [ ] Behavioural-only (no structural grep on SKILL/ADR prose); the predicate-half bats are rewritten under STORY-012.
 
 ## Driving problem trace (I6)
 
-**P251.** The shipped bats assert auto-create-fires (repudiated behaviour). This story rewrites them to assert refuse/route + escalate-uncovered + proceed-covered. Supersedes RFC-005 B6 (rework slice B16). The author-first / escalate SKILL-orchestration half is discharged by the STORY-011 dogfood (harness-gap recorded honestly, no silent cap).
+**P251.** The shipped bats assert auto-create-fires (repudiated behaviour). This story rewrites them to assert refuse/route + escalate-uncovered + proceed-covered. Supersedes RFC-005 B6 (rework slice B16). The author-first / escalate SKILL-orchestration half is discharged by the STORY-015 dogfood (harness-gap recorded honestly, no silent cap).
 
 ## JTBD trace (I9)
 
@@ -41,7 +42,7 @@ As a maintainer, I want behavioural bats (ADR-052 behavioural-only) that prove t
 ## Dependencies
 
 - **Blocks**: RFC-005 B10 (held-changeset graduation gated on green bats).
-- **Blocked by**: STORY-008, STORY-009, STORY-010 (the behaviours under test).
+- **Blocked by**: STORY-012, STORY-013, STORY-014 (the behaviours under test).
 
 ## Related
 
