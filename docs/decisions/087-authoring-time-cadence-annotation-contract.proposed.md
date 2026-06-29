@@ -1,7 +1,8 @@
 ---
 status: "proposed"
 date: 2026-06-28
-human-oversight: unconfirmed
+human-oversight: confirmed
+oversight-confirmed-date: "2026-06-29 — ratified via AskUserQuestion: self-firing-trigger cadence-annotation contract (±5-line window; advisory-first rollout; trigger-CLASS-not-existence + tickets-excluded limits named) confirmed as written"
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: []

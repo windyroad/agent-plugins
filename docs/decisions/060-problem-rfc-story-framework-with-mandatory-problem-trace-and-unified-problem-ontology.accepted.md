@@ -1,7 +1,8 @@
 ---
 status: "accepted"
-human-oversight: unconfirmed
+human-oversight: confirmed
 oversight-date: 2026-05-26
+oversight-confirmed-date: "2026-06-29 — P357 re-ratification via AskUserQuestion: the I13 RFC-first invariant (RFC must pre-exist at propose-fix; missing RFC authored-first as a story map; uncovered option-choice → ratified ADR; retrospective prohibited) confirmed as written"
 oversight-downgraded: "2026-06-29 — ADR-073 RFC-first lockstep: the I13 missing-RFC response changed (auto-create-skeleton-rather-than-block → RFC-first precondition); the gate PLACEMENT + the unconditional ADR-071 mandate are unchanged. status stays accepted (the invariant remains in force); only the human-ratification marker resets. P357 re-ratification queued."
 date: 2026-05-04
 accepted-date: 2026-05-05

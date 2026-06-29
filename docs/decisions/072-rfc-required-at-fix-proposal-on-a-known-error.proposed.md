@@ -1,9 +1,10 @@
 ---
 status: "proposed"
 date: 2026-05-26
-human-oversight: unconfirmed
+human-oversight: confirmed
 oversight-date: 2026-05-26
-oversight-downgraded: "2026-06-29 — ADR-073 RFC-first lockstep: the missing-RFC-response characterization changed (auto-create → RFC-first precondition); the gate-PLACEMENT decision is unchanged. P357 re-ratification queued."
+oversight-confirmed-date: "2026-06-29 — P357 re-ratification via AskUserQuestion: missing-RFC response corrected to RFC-first (pre-exist / authored-first) AND Context reframed (the RFC is the only avenue through which a problem is fixed; fixing = implementing the RFC). Gate placement unchanged. Architect PASS (framing-only)."
+oversight-downgraded: "2026-06-29 — ADR-073 RFC-first lockstep: the missing-RFC-response characterization changed (auto-create → RFC-first precondition); the gate-PLACEMENT decision is unchanged. P357 re-ratification queued. [Resolved same day — re-confirmed via AskUserQuestion.]"
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent]
 informed: []
@@ -19,7 +20,7 @@ problems: [P251, P314]
 
 ## Context and Problem Statement
 
-ADR-071 makes the Problem→RFC trace mandatory and unconditional. **Where in the problem lifecycle is the RFC required?**
+ADR-071 makes the Problem→RFC trace mandatory and unconditional — **the RFC is the only avenue through which a problem is fixed**: fixing a problem *is* implementing its RFC (ADR-073), not conceiving a fix independently and bolting an RFC onto it. Given that, **where in the problem lifecycle is the RFC required?**
 
 Per ADR-022, the lifecycle is `Open → Known Error → Verifying → Closed`. A problem reaches **Known Error** when its **root cause is identified and a workaround is documented** — there is no fix and no RFC yet. Only *after* Known Error do we **propose a fix** — and proposing a fix requires an RFC to **already exist** (RFC-first, ADR-073); the propose-fix act does not produce the RFC. Releasing the fix is the `Known Error → Verifying` transition (ADR-022) — "Fix Released" is not a separate state.
 
