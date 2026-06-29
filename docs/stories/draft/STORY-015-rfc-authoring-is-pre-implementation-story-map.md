@@ -10,7 +10,7 @@ story-maps: [STORY-MAP-002]
 estimated-effort: M
 ---
 
-# STORY-015: RFC authoring produces a pre-implementation story map; the --fix-time byproduct path is retired
+# STORY-015: The RFC lists its stories before any code is written
 
 **Status**: draft
 **Reported**: 2026-06-29

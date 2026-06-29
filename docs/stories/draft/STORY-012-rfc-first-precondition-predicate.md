@@ -10,7 +10,7 @@ story-maps: [STORY-MAP-002]
 estimated-effort: S
 ---
 
-# STORY-012: The propose-fix predicate refuses (routes to authoring), it does not auto-create
+# STORY-012: Can't start coding without an RFC — the gate makes me create one first
 
 **Status**: draft
 **Reported**: 2026-06-29

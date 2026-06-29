@@ -10,7 +10,7 @@ story-maps: [STORY-MAP-002]
 estimated-effort: S
 ---
 
-# STORY-016: RFC-first behaviour is proven by behavioural bats
+# STORY-016: Every step is regression-proven
 
 **Status**: draft
 **Reported**: 2026-06-29

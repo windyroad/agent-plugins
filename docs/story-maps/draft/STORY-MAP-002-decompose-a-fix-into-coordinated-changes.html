@@ -14,20 +14,18 @@
   <style>
     /* Layout + colour-by-layer only, per docs/STYLE-GUIDE.md + the
        docs/story-maps/README.md Prohibition: NO inline style="" on .slice /
-       .rib-header / any data-*-bearing element. The only inline attribute on a
-       container is --cols (layout). Column placement + colour/status are all
-       driven from CSS classes and data-* attribute selectors below. */
+       .rib-header / any data-*-bearing element. Column placement + colour/status
+       are driven from CSS classes and data-* attribute selectors. */
     :root {
-      --col: 230px;            /* fixed column width — wide view, scroll sideways */
-      --gap: 16px;
-      --pitch: 246px;          /* --col + --gap, for the column-lane background */
+      --col: 230px; --gap: 16px; --pitch: 246px;
       --ink: #1c2330; --muted: #5a6678; --line: #c9d2de;
       --activity: #1d3557; --lane: rgba(29,53,87,0.045);
       --cap: #eaf1f9; --cap-edge: #6b8fc0;
       --r1: #1b7f5c; --r2: #b06a00; --var: #b0143c;
       --done: #1b7f5c; --inprogress: #b06a00; --draft: #8a94a3;
     }
-    body { font-family: system-ui, -apple-system, sans-serif; color: var(--ink); margin: 1rem; line-height: 1.4; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { font-family: system-ui, -apple-system, sans-serif; color: var(--ink); margin: 1rem; line-height: 1.4; -webkit-user-select: text; user-select: text; }
     h1 { font-size: 1.45rem; margin: 0 0 0.2rem; }
     .sub { color: var(--muted); margin: 0 0 1rem; font-size: 0.92rem; }
 
@@ -46,18 +44,10 @@
     .chip.empty { background: repeating-linear-gradient(45deg,#f4f6f9,#f4f6f9 4px,#e4e9f0 4px,#e4e9f0 8px); }
     .hint { color: var(--muted); font-size: 0.78rem; margin: 0.2rem 0 0.6rem; }
 
-    /* ---- the scrollable wall ---- */
     .scroll { overflow-x: auto; padding-bottom: 1rem; border: 1px solid var(--line); border-radius: 8px; }
-    .map {
-      width: max-content; min-width: 100%;
-      padding: 0.75rem;
-      /* faint vertical lane per column so alignment is obvious */
-      background:
-        repeating-linear-gradient(to right,
-          var(--lane) 0 var(--col),
-          transparent var(--col) var(--pitch));
-      background-position: 0.75rem 0; background-origin: content-box;
-    }
+    .map { width: max-content; min-width: 100%; padding: 0.75rem;
+      background: repeating-linear-gradient(to right, var(--lane) 0 var(--col), transparent var(--col) var(--pitch));
+      background-position: 0.75rem 0; background-origin: content-box; }
     .row { display: grid; grid-template-columns: repeat(6, var(--col)); gap: var(--gap); margin-bottom: var(--gap); }
 
     .activity-card { background: var(--activity); color: #fff; border-radius: 7px 7px 0 0; padding: 0.55rem 0.6rem; }
@@ -69,17 +59,20 @@
     .band .badge { background: rgba(255,255,255,0.25); border-radius: 4px; padding: 0.05rem 0.4rem; font-size: 0.7rem; font-weight: 700; }
     .band .metric { margin-left: auto; font-weight: 400; opacity: 0.95; font-size: 0.78rem; }
 
-    .slice { border: 1px solid var(--cap-edge); border-left-width: 5px; background: var(--cap); border-radius: 5px; padding: 0.45rem 0.5rem; text-decoration: none; color: var(--ink); display: block; font-size: 0.82rem; min-height: 2.6rem; }
+    /* Cards: text is selectable; the ID is shown so we can refer to it. */
+    .slice { border: 1px solid var(--cap-edge); border-left-width: 5px; background: var(--cap); border-radius: 5px; padding: 0.45rem 0.5rem; text-decoration: none; color: var(--ink); display: block; font-size: 0.82rem; min-height: 2.6rem; -webkit-user-select: text; user-select: text; }
     .slice:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
-    .slice .st { display: block; font-size: 0.66rem; font-weight: 700; color: var(--muted); margin-top: 0.25rem; letter-spacing: 0.02em; }
+    .slice .id { display: block; font-size: 0.66rem; font-weight: 700; color: var(--muted); letter-spacing: 0.02em; margin-bottom: 0.22rem; }
+    .slice .cap { display: block; }
     .slice[data-status="done"] { border-left-color: var(--done); }
     .slice[data-status="in-progress"] { border-left-color: var(--inprogress); }
     .slice[data-status="draft"] { border-left-color: var(--draft); }
-    .slice[data-status="done"] .st::after { content: "shipped"; color: var(--done); }
-    .slice[data-status="in-progress"] .st::after { content: "in progress"; color: var(--inprogress); }
-    .slice[data-status="draft"] .st::after { content: "to build"; color: var(--draft); }
-    .slice[data-layer="variation"] { background: #fbe9ee; border: 1px dashed var(--var); border-left: 5px solid var(--var); font-style: italic; }
-    .quality { background: #efeaf7; border: 1px solid var(--persona, #8a6fc0); border-left: 5px solid #6a3d9a; }
+    .slice[data-status="done"] .id::after { content: " · shipped"; color: var(--done); }
+    .slice[data-status="in-progress"] .id::after { content: " · in progress"; color: var(--inprogress); }
+    .slice[data-status="draft"] .id::after { content: " · to build"; color: var(--draft); }
+    .slice[data-layer="variation"] { background: #fbe9ee; border: 1px dashed var(--var); border-left: 5px solid var(--var); }
+    .slice[data-layer="variation"] .cap { font-style: italic; }
+    .slice.quality { background: #efeaf7; border: 1px solid #8a6fc0; border-left: 5px solid #6a3d9a; }
 
     .empty { border: 1px dashed var(--line); border-radius: 5px; background: repeating-linear-gradient(45deg,#f7f9fc,#f7f9fc 5px,#eef2f7 5px,#eef2f7 10px); color: var(--muted); font-size: 0.72rem; display: flex; align-items: center; justify-content: center; min-height: 2.6rem; font-style: italic; }
   </style>
@@ -90,7 +83,7 @@
 
   <div class="goal-banner">
     <p class="job">When my fix to a problem spreads across multiple coordinated changes, I want the work shaped, time-boxed, and traced above the commit level — so each piece is a first-class entity, not buried in a ticket body.</p>
-    <p class="end">End: the adopter who hit the problem gets a coordinated fix in a published release, with a durable trace from problem → plan → change.</p>
+    <p class="end">End: the adopter who hit the problem gets a coordinated fix in a published release, with a durable trace from problem → RFC → change.</p>
   </div>
 
   <div class="legend">
@@ -104,7 +97,7 @@
     <span class="sw"><span class="chip draft"></span> to build</span>
     <span class="sw"><span class="chip empty"></span> under-explored</span>
   </div>
-  <p class="hint">Read left → right across the top (the journey); each card sits in its activity's column. Releases are the coloured horizontal bands. Scroll sideways to see the whole wall. Cards link to the work that builds them.</p>
+  <p class="hint">Read left → right across the top (the journey); each card sits in its activity's column. Releases are the coloured horizontal bands. Scroll sideways to see the whole wall. Each card shows its ID and links to the work that builds it; its text matches that item's title.</p>
 
   <div class="scroll">
     <div class="map">
@@ -120,14 +113,14 @@
       </div>
 
       <!-- RELEASE 1 -->
-      <div class="band r1"><span class="badge">RELEASE 1</span> Walking skeleton — thinnest path that crosses every step <span class="metric">A1/A2/A5/A6 reuse shipped plumbing · A3 is the new, load-bearing step (to build)</span></div>
+      <div class="band r1"><span class="badge">RELEASE 1</span> Walking skeleton — thinnest path that crosses every step <span class="metric">A1/A2/A5/A6 reuse shipped plumbing · A3 is the new, load-bearing step</span></div>
       <div class="row">
-        <a class="slice" data-status="done" href="../../../packages/itil/skills/capture-problem/SKILL.md">Capture the problem in seconds, mid-flow<span class="st"></span></a>
-        <a class="slice" data-status="done" href="../../decisions/022-problem-lifecycle-verification-pending-status.proposed.md">Record root cause + workaround → Known Error<span class="st"></span></a>
-        <a class="slice" data-status="draft" href="../../stories/draft/STORY-012-rfc-first-precondition-predicate.md">Can't start coding without an RFC — the gate sends me to create one first<span class="st"></span></a>
-        <a class="slice" data-status="in-progress" href="../../../packages/itil/skills/capture-story-map/SKILL.md">Reuse this journey's existing stories; add any new one the fix needs<span class="st"></span></a>
-        <a class="slice" data-status="done" href="../../stories/done/STORY-005-working-the-problem-traversal.md">Work the plan, story by story<span class="st"></span></a>
-        <a class="slice" data-status="done" href="../../decisions/022-problem-lifecycle-verification-pending-status.proposed.md">Ship → verify → problem closes with a real trace; adopter gets the fix<span class="st"></span></a>
+        <a class="slice" data-status="done" href="../../../packages/itil/skills/capture-problem/SKILL.md"><span class="id">/wr-itil:capture-problem</span><span class="cap">Capture the problem in seconds, mid-flow</span></a>
+        <a class="slice" data-status="done" href="../../decisions/022-problem-lifecycle-verification-pending-status.proposed.md"><span class="id">ADR-022</span><span class="cap">Record root cause + workaround → Known Error</span></a>
+        <a class="slice" data-status="draft" href="../../stories/draft/STORY-012-rfc-first-precondition-predicate.md"><span class="id">STORY-012</span><span class="cap">Can't start coding without an RFC — the gate makes me create one first</span></a>
+        <a class="slice" data-status="in-progress" href="../../../packages/itil/skills/capture-story-map/SKILL.md"><span class="id">/wr-itil:capture-story-map</span><span class="cap">Reuse this journey's existing stories; add any new one the fix needs</span></a>
+        <a class="slice" data-status="done" href="../../stories/done/STORY-005-working-the-problem-traversal.md"><span class="id">STORY-005</span><span class="cap">Working-the-problem traversal rewrite (manage-problem + work-problem)</span></a>
+        <a class="slice" data-status="done" href="../../decisions/022-problem-lifecycle-verification-pending-status.proposed.md"><span class="id">ADR-022</span><span class="cap">Ship → verify → problem closes with a real trace; adopter gets the fix</span></a>
       </div>
       <div class="row">
         <div class="empty">—</div>
@@ -135,24 +128,24 @@
         <div class="empty">—</div>
         <div class="empty">—</div>
         <div class="empty">—</div>
-        <a class="slice quality" data-status="draft" href="../../stories/draft/STORY-016-rfc-first-behavioural-bats.md">Quality (every step): the journey is regression-proven<span class="st"></span></a>
+        <a class="slice quality" data-status="draft" href="../../stories/draft/STORY-016-rfc-first-behavioural-bats.md"><span class="id">STORY-016 · quality (every step)</span><span class="cap">Every step is regression-proven</span></a>
       </div>
 
       <!-- RELEASE 2 -->
       <div class="band r2"><span class="badge">RELEASE 2</span> Deepen the same steps — variations, the AFK actor, the unhappy paths <span class="metric">no new backbone steps</span></div>
       <div class="row">
         <div class="empty">under-explored</div>
-        <a class="slice" data-layer="variation" data-status="draft" href="#">Can't reproduce / external cause → workaround &amp; report upstream, or park</a>
-        <a class="slice" data-status="draft" href="../../stories/draft/STORY-013-author-first-manage-problem-gate.md">Full gate: an RFC exists → proceed; none → create it first<span class="st"></span></a>
-        <a class="slice" data-status="draft" href="../../stories/draft/STORY-015-rfc-authoring-is-pre-implementation-story-map.md">The RFC lists its stories (from this map) before any code is written<span class="st"></span></a>
-        <a class="slice" data-status="draft" href="../../stories/draft/STORY-014-author-first-work-problems-afk.md">Unattended, the agent works the plan &amp; pauses for real decisions<span class="st"></span></a>
-        <a class="slice" data-layer="variation" data-status="draft" href="#">Verification fails → bounce back to re-plan / re-implement</a>
+        <a class="slice" data-layer="variation" data-status="draft" href="#"><span class="id">variation</span><span class="cap">Can't reproduce / external cause → workaround &amp; report upstream, or park</span></a>
+        <a class="slice" data-status="draft" href="../../stories/draft/STORY-013-author-first-manage-problem-gate.md"><span class="id">STORY-013</span><span class="cap">Full gate: an RFC exists → I proceed; none → I create it first</span></a>
+        <a class="slice" data-status="draft" href="../../stories/draft/STORY-015-rfc-authoring-is-pre-implementation-story-map.md"><span class="id">STORY-015</span><span class="cap">The RFC lists its stories before any code is written</span></a>
+        <a class="slice" data-status="draft" href="../../stories/draft/STORY-014-author-first-work-problems-afk.md"><span class="id">STORY-014</span><span class="cap">Unattended, the agent works the plan and pauses for real decisions</span></a>
+        <a class="slice" data-layer="variation" data-status="draft" href="#"><span class="id">variation</span><span class="cap">Verification fails → bounce back to re-plan / re-implement</span></a>
       </div>
       <div class="row">
         <div class="empty">under-explored</div>
         <div class="empty">under-explored</div>
-        <a class="slice" data-layer="variation" data-status="draft" href="#">Even a one-line fix still needs an RFC — no shortcut, no carve-out</a>
-        <a class="slice" data-layer="variation" data-status="draft" href="#">Hit a genuinely new decision → pause &amp; decide it deliberately first</a>
+        <a class="slice" data-layer="variation" data-status="draft" href="#"><span class="id">variation</span><span class="cap">Even a one-line fix still needs an RFC — no shortcut, no carve-out</span></a>
+        <a class="slice" data-layer="variation" data-status="draft" href="#"><span class="id">variation</span><span class="cap">Hit a genuinely new decision → pause &amp; decide it deliberately first</span></a>
         <div class="empty">—</div>
         <div class="empty">—</div>
       </div>
@@ -160,7 +153,7 @@
         <div class="empty">under-explored</div>
         <div class="empty">under-explored</div>
         <div class="empty">—</div>
-        <a class="slice" data-layer="variation" data-status="draft" href="#">Scope creep mid-flight → re-scope deliberately, stay time-boxed</a>
+        <a class="slice" data-layer="variation" data-status="draft" href="#"><span class="id">variation</span><span class="cap">Scope creep mid-flight → re-scope deliberately, stay time-boxed</span></a>
         <div class="empty">—</div>
         <div class="empty">—</div>
       </div>

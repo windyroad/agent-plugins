@@ -10,7 +10,7 @@ story-maps: [STORY-MAP-002]
 estimated-effort: M
 ---
 
-# STORY-013: manage-problem propose-fix gate authors the RFC first, escalates uncovered choices to an ADR
+# STORY-013: Full gate: an RFC exists → I proceed; none → I create it first
 
 **Status**: draft
 **Reported**: 2026-06-29

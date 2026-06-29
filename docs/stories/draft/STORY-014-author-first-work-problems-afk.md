@@ -10,7 +10,7 @@ story-maps: [STORY-MAP-002]
 estimated-effort: M
 ---
 
-# STORY-014: work-problems AFK clause authors the RFC first, lawfully halts on an uncovered decision
+# STORY-014: Unattended, the agent works the plan and pauses for real decisions
 
 **Status**: draft
 **Reported**: 2026-06-29
