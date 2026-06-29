@@ -32,6 +32,12 @@ The human is involved only for substance, never to bless an ID: (a) the intervie
 
 This is the same `covered → agent proceeds / uncovered → human ratifies a new artefact` boundary that ADR-073 (RFC-first) draws for the fix-**approach** axis, applied here to the **who/why** axis.
 
+### The interview is also the legitimate scope-rejection gate (user clarification 2026-06-29)
+
+The corrected rule also handles the **externally-reported** problem (plugin-user / inbound report) cleanly. When an external report does not match an existing persona/JTBD, the agent interviews the human to elicit the real who/why; **through that interview** the human may determine that the elicited persona/JTBD is one **we do not want to support**, and reject the problem on that substantive **scope/strategy** ground.
+
+This is the CORRECT form of "reject = reject the problem": rejection is a deliberate decision about the *elicited* who/why, reached *through* the interview — NOT the old broken "reject the proposed ID-mapping = discard the problem" (which discarded legitimate problems over anchoring uncertainty). The interview surfaces the true persona/job first; the human then decides support-vs-reject on the merits. So the rejection path survives, but only as a real product-scope call, never as a side-effect of an unsure ID guess.
+
 ## Symptoms
 
 - The "is it JTBD-XXXX?" ID-centric ratification prompt (violates brief-before-ID / P350 and derive-or-eliminate / P190).
