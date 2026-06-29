@@ -48,22 +48,26 @@ The problem→RFC reverse-trace is the auto-maintained derived `## RFCs` body se
 
 **Canonical story map**: [`docs/story-maps/draft/STORY-MAP-002-rfc-first-enforcement.html`](../story-maps/draft/STORY-MAP-002-rfc-first-enforcement.html) (STORY-MAP-002).
 
-**Backbone** (the maintainer's / orchestrator's journey when a fix is proposed on a Known Error):
+**Backbone** — the *maintainer's user-activity journey* fixing a problem under RFC-first (left → right; the AFK orchestrator walks the same spine and lawfully halts where a human decides):
 
-`Detect the RFC precondition` → `Propose the fix interactively` → `Propose the fix under AFK` → `Author RFCs as story maps` → `Prove it behaviourally` → `Clear the legacy debt`
+`A1 · Propose a fix & hit the gate` → `A2 · Author the RFC (or escalate a new decision)` → `A3 · Implement the RFC's stories` → `A4 · Land the fix`
 
-**Stories** (each a vertical, INVEST slice; persona: plugin-developer / AFK orchestrator; primary JTBD-008) — index of STORY-MAP-002's slices:
+A3 and A4 reuse **existing** capabilities (the work-the-problem traversal, RFC-003/STORY-005; the ADR-022 lifecycle) — no new build. The bats are a **quality rib** that cuts across A1–A2, not a backbone step; the skeleton-RFC backfill is an **off-journey migration side-rail**.
 
-| Story | Backbone step | User value (one line) | Ships (was) |
-|-------|---------------|-----------------------|-------------|
-| [STORY-012](../stories/draft/STORY-012-rfc-first-precondition-predicate.md) | Detect | The predicate **refuses / routes to authoring** when no RFC traces the problem (not auto-create) | B12 (was B3) |
-| [STORY-013](../stories/draft/STORY-013-author-first-manage-problem-gate.md) | Propose (interactive) | manage-problem **authors the RFC first**; escalates an **uncovered** approach-choice to a ratified ADR | B13 (was B4) |
-| [STORY-014](../stories/draft/STORY-014-author-first-work-problems-afk.md) | Propose (AFK) | work-problems authors-first for covered fixes; **lawfully halts** for an uncovered decision | B14 (was B5) |
-| [STORY-015](../stories/draft/STORY-015-rfc-authoring-is-pre-implementation-story-map.md) | Author RFCs | capture-rfc/manage-rfc author a **pre-implementation story map**; the `--fix-time` byproduct path retired | B15 (was B8 + held B11) |
-| [STORY-016](../stories/draft/STORY-016-rfc-first-behavioural-bats.md) | Prove | behavioural bats: RFC-less → refused/routed; uncovered → blocks for ADR; covered → proceeds | B16 (was B6) |
-| [STORY-017](../stories/draft/STORY-017-backfill-skeleton-rfcs.md) | Clear debt | backfill-or-supersede the skeleton RFCs the repudiated mechanism left behind | B17 (was B11 backfill) |
+**Stories** (each an INVEST slice; primary JTBD-008) mapped onto the backbone — index of STORY-MAP-002's slices:
 
-Walking skeleton / suggested order: STORY-012 → STORY-013 → STORY-014 (the gate, in / out), then STORY-015 (authoring path) and STORY-016 (proof) in parallel, then STORY-017 (debt). RFC-005 B10 (held-changeset graduation) fires once STORY-015 + STORY-016 land.
+| Story | Backbone activity | Actor | User value (one line) | Ships (was) |
+|-------|-------------------|-------|-----------------------|-------------|
+| [STORY-012](../stories/draft/STORY-012-rfc-first-precondition-predicate.md) | A1 · hit the gate | maintainer + AFK | the gate detects no RFC traces the problem and **refuses / routes to authoring** (not auto-create) | B12 (was B3) |
+| [STORY-013](../stories/draft/STORY-013-author-first-manage-problem-gate.md) | A1 · hit the gate (interactive, full) | maintainer | full propose-fix gate: pre-existing RFC → implement; none → author-first | B13 (was B4) |
+| [STORY-014](../stories/draft/STORY-014-author-first-work-problems-afk.md) | A1 · hit the gate (AFK) | AFK orchestrator | author-first for covered fixes; **lawfully halts** on an uncovered decision | B14 (was B5) |
+| [STORY-015](../stories/draft/STORY-015-rfc-authoring-is-pre-implementation-story-map.md) | A2 · author the RFC | maintainer | author a **pre-implementation story map** from the RCA; retire the `--fix-time` byproduct path | B15 (was B8 + held B11) |
+| [STORY-016](../stories/draft/STORY-016-rfc-first-behavioural-bats.md) | quality rib (cross-cuts A1–A2) | maintainer | behavioural bats: RFC-less → refused/routed; uncovered → blocks for ADR; covered → proceeds | B16 (was B6) |
+| [STORY-017](../stories/draft/STORY-017-backfill-skeleton-rfcs.md) | migration side-rail (off-journey) | maintainer | backfill-or-supersede the skeleton RFCs the repudiated mechanism left behind | B17 (was B11 backfill) |
+
+**Variations under A2** (the unhappy paths — see the map's dashed cards): *covered* approach → cite existing ADRs & proceed, no new ADR (P132); *uncovered* approach → STOP, author a new ADR, ratify before implementation (ADR-070/073) — the AFK actor halts here.
+
+**Release slices** (depth, not new activities): **Release 1 — walking skeleton** is the thinnest thread that crosses *every* backbone activity and is *proven* by its bats — STORY-012 (core detect/refuse/route) + STORY-015 (author one minimal RFC, covered path) + existing implement (STORY-005) + existing land (ADR-022) + STORY-016 (core bats). A maintainer can already fix a covered problem RFC-first end-to-end. **Release 2 — deepen** the *same* activities: full gates (STORY-013/014), the AFK halt, the uncovered→ADR unhappy path, richer authoring, fuller bats. **Side-rail**: STORY-017 backfill. RFC-005 B10 (held-changeset graduation) fires once the Release-1 thread + its bats land.
 
 ## Tasks
 

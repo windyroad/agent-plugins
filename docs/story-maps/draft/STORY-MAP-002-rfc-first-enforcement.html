@@ -8,7 +8,7 @@
   <meta name="problems" content="P251,P314,P371,P399">
   <meta name="rfcs" content="RFC-005">
   <meta name="jtbd" content="JTBD-008,JTBD-001,JTBD-006">
-  <meta name="adrs" content="ADR-071,ADR-072,ADR-073,ADR-060,ADR-070">
+  <meta name="adrs" content="ADR-071,ADR-072,ADR-073,ADR-060,ADR-070,ADR-022">
   <meta name="reported" content="2026-06-29">
   <meta name="decision-makers" content="Tom Howard">
   <style>
@@ -17,20 +17,21 @@
        prose rather than inline style. */
     body {
       font-family: system-ui, sans-serif;
-      max-width: 1200px;
+      max-width: 1280px;
       margin: 1rem auto;
       padding: 0 1rem;
     }
     h1 { font-size: 1.5rem; }
-    h2 { font-size: 1.125rem; margin-top: 1.5rem; }
+    h2 { font-size: 1.05rem; margin-top: 1.5rem; }
     .backbone {
       display: grid;
       grid-template-columns: repeat(var(--cols), 1fr);
       gap: 1rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
-    .rib-header { grid-column: 1 / -1; border-bottom: 1px solid #ccc; padding-bottom: 0.25rem; }
+    .rib-header { grid-column: 1 / -1; border-bottom: 2px solid #333; padding-bottom: 0.25rem; }
     .rib { display: contents; }
+    .activity-header { font-weight: 600; border: 2px solid #333; padding: 0.5rem; background: #f3f3f3; }
     .slice {
       border: 1px solid #ccc;
       padding: 0.5rem;
@@ -39,90 +40,105 @@
       display: block;
     }
     .slice:hover { border-color: #666; }
-    .activity { font-weight: 600; }
+    .variation { border: 1px dashed #999; padding: 0.5rem; font-style: italic; }
+    .existing { border: 1px solid #ccc; padding: 0.5rem; background: #fafafa; }
+    .actor { font-weight: 600; }
+    .colref { color: #555; font-size: 0.85em; }
+    .siderail .rib-header { border-bottom-color: #999; }
   </style>
 </head>
 <body>
   <h1>STORY-MAP-002: RFC-first enforcement at fix-time</h1>
 
-  <p>Story map for the RFC-first rework (RFC-005). It decomposes the work that makes <em>the only avenue to fix a problem the implementation of its RFC</em> — the gate refuses fix-work without a pre-existing RFC, routes to authoring, and escalates a genuinely-new decision to a ratified ADR. Backbone &times; ribs &times; slices layout per Patton, <em>User Story Mapping</em> (O'Reilly, 2014).</p>
+  <p>This maps <strong>the maintainer's journey fixing a problem once RFC-first is enforced</strong> — and slices the build (RFC-005) so the thinnest first release delivers a usable, <em>proven</em> RFC-first loop end-to-end. Backbone (user activities) &times; release ribs &times; slices per Patton, <em>User Story Mapping</em> (O'Reilly, 2014).</p>
 
-  <p><strong>Backbone</strong> (the maintainer's / AFK orchestrator's journey when a fix is proposed on a Known Error, left&nbsp;&rarr;&nbsp;right):
-  <span class="activity">Detect the RFC precondition</span> &rarr;
-  <span class="activity">Propose the fix (interactive)</span> &rarr;
-  <span class="activity">Propose the fix (AFK)</span> &rarr;
-  <span class="activity">Author RFCs as story maps</span> &rarr;
-  <span class="activity">Prove it behaviourally</span> &rarr;
-  <span class="activity">Clear the legacy debt</span>.</p>
+  <p><strong>Primary user</strong>: the plugin maintainer fixing a problem. <strong>Second actor</strong>: the AFK orchestrator agent (<code>/wr-itil:work-problems</code>), which walks the same journey unattended and <em>lawfully halts</em> where a human would decide. Each slice names its <span class="actor">actor</span>. Cards link their INVEST story; <span class="variation">dashed</span> cards are path variations (no separate story); <span class="existing">grey</span> cards are existing capabilities RFC-first reuses (no new build).</p>
 
-  <p>The ribs below are <strong>release slices</strong> (walking skeleton first); each slice links its INVEST story card. All slices are <code>draft</code> — authored ahead of the enforcement that will require them (dogfooding RFC-first: no enforcement needed to dogfood it).</p>
-
-  <section class="backbone" style="--cols: 3">
-    <header class="rib-header">
-      <h2 data-rib="release-1-the-gate">Release 1 — the gate (walking skeleton: detect &rarr; propose in / out)</h2>
-    </header>
+  <!-- ============ BACKBONE: the user-activity spine ============ -->
+  <section class="backbone" style="--cols: 4">
+    <header class="rib-header"><h2 data-rib="backbone">Backbone &mdash; what the maintainer does to fix a problem (left &rarr; right)</h2></header>
     <div class="rib">
-      <a class="slice" href="../draft/STORY-012-rfc-first-precondition-predicate.md"
-         data-story-id="STORY-012"
-         data-rfc="RFC-005"
-         data-jtbd="JTBD-008"
-         data-status="draft">
-        Detect &mdash; STORY-012: predicate refuses / routes to authoring (not auto-create) [was B12/B3]
-      </a>
-      <a class="slice" href="../draft/STORY-013-author-first-manage-problem-gate.md"
-         data-story-id="STORY-013"
-         data-rfc="RFC-005"
-         data-jtbd="JTBD-008"
-         data-status="draft">
-        Propose (interactive) &mdash; STORY-013: manage-problem authors RFC first; uncovered choice &rarr; ratified ADR [was B13/B4]
-      </a>
-      <a class="slice" href="../draft/STORY-014-author-first-work-problems-afk.md"
-         data-story-id="STORY-014"
-         data-rfc="RFC-005"
-         data-jtbd="JTBD-006"
-         data-status="draft">
-        Propose (AFK) &mdash; STORY-014: work-problems authors first; lawfully halts on an uncovered decision [was B14/B5]
-      </a>
+      <div class="activity-header">A1 &middot; Propose a fix &amp; hit the gate</div>
+      <div class="activity-header">A2 &middot; Author the RFC (or escalate a new decision)</div>
+      <div class="activity-header">A3 &middot; Implement the RFC's stories</div>
+      <div class="activity-header">A4 &middot; Land the fix</div>
     </div>
   </section>
 
-  <section class="backbone" style="--cols: 2">
-    <header class="rib-header">
-      <h2 data-rib="release-2-author-and-prove">Release 2 — author + prove</h2>
-    </header>
+  <!-- ============ RELEASE 1: walking skeleton ============ -->
+  <section class="backbone" style="--cols: 4">
+    <header class="rib-header"><h2 data-rib="release-1-walking-skeleton">Release 1 &mdash; walking skeleton (thin, <em>proven</em>, end-to-end: hit the gate &rarr; routed to author &rarr; author one RFC &rarr; implement a story &rarr; land)</h2></header>
     <div class="rib">
+      <a class="slice" href="../draft/STORY-012-rfc-first-precondition-predicate.md"
+         data-story-id="STORY-012" data-rfc="RFC-005" data-jtbd="JTBD-008" data-status="draft">
+        <span class="colref">A1</span> <span class="actor">maintainer + AFK</span> &mdash; STORY-012 (core): the gate detects no RFC traces the problem and <strong>refuses / routes to authoring</strong>.
+      </a>
       <a class="slice" href="../draft/STORY-015-rfc-authoring-is-pre-implementation-story-map.md"
-         data-story-id="STORY-015"
-         data-rfc="RFC-005"
-         data-jtbd="JTBD-008"
-         data-status="draft">
-        Author RFCs &mdash; STORY-015: capture-rfc/manage-rfc author a pre-implementation story map; retire --fix-time [was B15/B8+B11]
+         data-story-id="STORY-015" data-rfc="RFC-005" data-jtbd="JTBD-008" data-status="draft">
+        <span class="colref">A2</span> <span class="actor">maintainer</span> &mdash; STORY-015 (core): author <strong>one minimal RFC as a story map</strong> from the problem's RCA (happy path: fix is covered by existing ADRs).
       </a>
-      <a class="slice" href="../draft/STORY-016-rfc-first-behavioural-bats.md"
-         data-story-id="STORY-016"
-         data-rfc="RFC-005"
-         data-jtbd="JTBD-008"
-         data-status="draft">
-        Prove &mdash; STORY-016: behavioural bats (RFC-less &rarr; refused; uncovered &rarr; blocks for ADR; covered &rarr; proceeds) [was B16/B6]
+      <a class="existing" href="../../stories/done/STORY-005-working-the-problem-traversal.md"
+         data-story-id="STORY-005" data-rfc="RFC-003" data-jtbd="JTBD-008" data-status="done">
+        <span class="colref">A3</span> <span class="actor">maintainer</span> &mdash; (existing) implement the RFC's first not-done story via the work-the-problem traversal (RFC-003 / STORY-005). RFC-first reuses it.
       </a>
+      <div class="existing">
+        <span class="colref">A4</span> <span class="actor">maintainer</span> &mdash; (existing lifecycle, ADR-022) the fix lands: Known&nbsp;Error &rarr; Verifying &rarr; Closed. <strong>The payoff RFC-first delivers</strong>: the problem is now fixed by a real, pre-existing RFC (a genuine plan with traced stories) instead of a hollow ad-hoc <code>## Fix Strategy</code> checklist. No new build &mdash; this verified, closed-with-a-real-plan outcome is the value the whole gate exists to protect.
+      </div>
     </div>
   </section>
 
   <section class="backbone" style="--cols: 1">
-    <header class="rib-header">
-      <h2 data-rib="release-3-clear-the-debt">Release 3 — clear the legacy debt</h2>
-    </header>
+    <header class="rib-header"><h2 data-rib="quality-rib-r1">Quality rib (cuts across A1&ndash;A4) &mdash; Release 1</h2></header>
     <div class="rib">
-      <a class="slice" href="../draft/STORY-017-backfill-skeleton-rfcs.md"
-         data-story-id="STORY-017"
-         data-rfc="RFC-005"
-         data-jtbd="JTBD-008"
-         data-status="draft">
-        Clear debt &mdash; STORY-017: backfill-or-supersede the skeleton RFCs the repudiated mechanism left behind [was B17/B11-backfill]
+      <a class="slice" href="../draft/STORY-016-rfc-first-behavioural-bats.md"
+         data-story-id="STORY-016" data-rfc="RFC-005" data-jtbd="JTBD-008" data-status="draft">
+        STORY-016 (core): behavioural bats prove the R1 thread &mdash; an RFC-less Known Error is refused / routed end-to-end. (R1 ships a <em>proven</em> gate, not an unproven one.)
       </a>
     </div>
   </section>
 
-  <p>Driving problems: <strong>P251</strong> (trace invariant not enforced at fix-time), <strong>P314</strong> (gate-design rework), <strong>P371</strong> (existing-vehicle branch), <strong>P399</strong> (skeleton-RFC repudiation). Decisions: ADR-071/072/073 (RFC-first), ADR-060 (RFC = story map), ADR-070 (uncovered option &rarr; ADR). Sibling map: STORY-MAP-001 (RFC framework bootstrap).</p>
+  <!-- ============ RELEASE 2: deepen the gate + the unhappy paths ============ -->
+  <section class="backbone" style="--cols: 2">
+    <header class="rib-header"><h2 data-rib="release-2-deepen">Release 2 &mdash; deepen the gate; the variations &amp; unhappy paths (breadth under A1 / A2)</h2></header>
+    <div class="rib">
+      <a class="slice" href="../draft/STORY-013-author-first-manage-problem-gate.md"
+         data-story-id="STORY-013" data-rfc="RFC-005" data-jtbd="JTBD-008" data-status="draft">
+        <span class="colref">A1</span> <span class="actor">maintainer</span> &mdash; STORY-013: full interactive propose-fix gate (pre-existing RFC &rarr; implement; none &rarr; author-first).
+      </a>
+      <a class="slice" href="../draft/STORY-014-author-first-work-problems-afk.md"
+         data-story-id="STORY-014" data-rfc="RFC-005" data-jtbd="JTBD-006" data-status="draft">
+        <span class="colref">A1</span> <span class="actor">AFK orchestrator</span> &mdash; STORY-014: author-first for covered fixes; <strong>lawfully HALT</strong> the loop on an uncovered decision (the agent's divergence from the human).
+      </a>
+      <div class="variation">
+        <span class="colref">A2</span> <span class="actor">maintainer / AFK</span> &mdash; variation (happy): fix approach is <strong>covered</strong> by existing ADRs &rarr; cite them &amp; proceed, no new ADR (P132). (Acceptance in STORY-013/014.)
+      </div>
+      <div class="variation">
+        <span class="colref">A2</span> <span class="actor">maintainer</span> &mdash; variation (<strong>unhappy / richest path</strong>): fix approach is <strong>uncovered</strong> by existing ADRs &rarr; STOP, author a new ADR, ratify it before implementation (ADR-070/073). The AFK actor halts here.
+      </div>
+      <a class="slice" href="../draft/STORY-015-rfc-authoring-is-pre-implementation-story-map.md"
+         data-story-id="STORY-015" data-rfc="RFC-005" data-jtbd="JTBD-008" data-status="draft">
+        <span class="colref">A2</span> <span class="actor">maintainer</span> &mdash; STORY-015 (deepen): richer authoring via <code>manage-rfc</code>; retire the <code>--fix-time</code> byproduct path entirely.
+      </a>
+      <a class="slice" href="../draft/STORY-016-rfc-first-behavioural-bats.md"
+         data-story-id="STORY-016" data-rfc="RFC-005" data-jtbd="JTBD-008" data-status="draft">
+        <span class="colref">quality</span> &mdash; STORY-016 (deepen): bats for the unhappy paths &mdash; uncovered &rarr; blocks for ADR; covered &rarr; proceeds; refused at every effort level (S/M/L/XL).
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ MIGRATION SIDE-RAIL (off the journey) ============ -->
+  <section class="backbone siderail" style="--cols: 1">
+    <header class="rib-header"><h2 data-rib="migration-side-rail">Migration side-rail &mdash; NOT on the maintainer's journey (one-off cleanup, runs independently)</h2></header>
+    <div class="rib">
+      <a class="slice" href="../draft/STORY-017-backfill-skeleton-rfcs.md"
+         data-story-id="STORY-017" data-rfc="RFC-005" data-jtbd="JTBD-008" data-status="draft">
+        STORY-017: backfill-or-supersede the skeleton RFCs the repudiated auto-create mechanism left behind (RFC-026/028/029/030/032/033/034). A debt sweep, not a step any maintainer walks.
+      </a>
+    </div>
+  </section>
+
+  <p><strong>How to read the releases (depth, not new activities):</strong> Release&nbsp;1 is the thinnest thread that crosses <em>every</em> backbone activity and is proven by its bats &mdash; a maintainer can already fix a covered problem RFC-first end-to-end. Release&nbsp;2 deepens the <em>same</em> activities (full gates, the AFK halt, the uncovered&rarr;ADR unhappy path, richer authoring). The migration side-rail is off the journey entirely.</p>
+
+  <p>Driving problems: <strong>P251</strong> (trace invariant not enforced), <strong>P314</strong> (gate-design rework), <strong>P371</strong> (existing-vehicle branch), <strong>P399</strong> (skeleton-RFC repudiation). Decisions: ADR-071/072/073 (RFC-first), ADR-060 (RFC = story map), ADR-070 (uncovered option &rarr; ADR), ADR-022 (lifecycle). Sibling map: STORY-MAP-001 (RFC framework bootstrap).</p>
 </body>
 </html>
