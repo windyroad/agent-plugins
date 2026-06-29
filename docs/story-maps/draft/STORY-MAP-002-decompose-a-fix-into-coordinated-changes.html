@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>STORY-MAP-002: Decompose a Fix Into Coordinated Changes</title>
+  <meta name="story-map-id" content="STORY-MAP-002">
+  <meta name="status" content="draft">
+  <meta name="problems" content="P170,P251,P314,P371,P399">
+  <meta name="rfcs" content="RFC-003,RFC-005">
+  <meta name="jtbd" content="JTBD-008,JTBD-001,JTBD-006,JTBD-101">
+  <meta name="adrs" content="ADR-060,ADR-022,ADR-071,ADR-072,ADR-073,ADR-042">
+  <meta name="reported" content="2026-06-29">
+  <meta name="decision-makers" content="Tom Howard">
+  <style>
+    /* Layout + colour-by-layer only, per docs/STYLE-GUIDE.md and the
+       docs/story-maps/README.md Prohibition: NO inline style="" on
+       .slice / .rib-header / any data-*-bearing element. The only inline
+       attribute permitted on a container is the --cols custom property
+       (layout, not data). All colour/treatment is driven from CSS classes
+       and the data-status / data-layer attributes resolved here. */
+
+    :root {
+      --ink: #1c2330;
+      --muted: #5a6678;
+      --line: #c9d2de;
+      --activity: #1d3557;     /* deep navy — backbone activities */
+      --activity-ink: #ffffff;
+      --capability: #e8eef6;   /* pale blue — built capabilities */
+      --capability-edge: #6b8fc0;
+      --release1: #1b7f5c;     /* green — walking skeleton band */
+      --release2: #b06a00;     /* amber — deepening release */
+      --persona: #6a3d9a;      /* purple — persona / actor lane */
+      --variation: #b0143c;    /* red — unhappy paths / variations */
+      --siderail: #6b7280;     /* slate — off-journey side-rail */
+      --done: #1b7f5c;
+      --inprogress: #b06a00;
+      --draft: #8a94a3;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--ink);
+      max-width: 1280px;
+      margin: 1rem auto;
+      padding: 0 1.25rem 4rem;
+      line-height: 1.45;
+    }
+
+    h1 { font-size: 1.55rem; margin-bottom: 0.25rem; }
+    h2 { font-size: 1.05rem; }
+    .subtitle { color: var(--muted); margin-top: 0; }
+
+    /* ---- Goal / outcome banner ---- */
+    .goal-banner {
+      background: linear-gradient(95deg, var(--activity), #2a4d7a);
+      color: #fff;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0 1.75rem;
+      box-shadow: 0 2px 10px rgba(29,53,87,0.25);
+    }
+    .goal-banner .job { font-size: 1.05rem; font-weight: 600; margin: 0 0 0.5rem; }
+    .goal-banner .flow { font-size: 0.92rem; opacity: 0.95; margin: 0; }
+    .goal-banner .outcome {
+      margin-top: 0.65rem; padding-top: 0.55rem;
+      border-top: 1px solid rgba(255,255,255,0.3);
+      font-size: 0.92rem;
+    }
+    .goal-banner code { background: rgba(255,255,255,0.15); padding: 0.05rem 0.3rem; border-radius: 4px; }
+
+    /* ---- Legend ---- */
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem;
+      border: 1px solid var(--line); border-radius: 8px;
+      padding: 0.75rem 1rem; margin-bottom: 2rem;
+      font-size: 0.82rem;
+    }
+    .legend .group { display: flex; flex-direction: column; gap: 0.3rem; }
+    .legend .group-title { font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.72rem; }
+    .swatch { display: inline-flex; align-items: center; gap: 0.4rem; }
+    .swatch .chip { width: 0.9rem; height: 0.9rem; border-radius: 3px; border: 1px solid rgba(0,0,0,0.2); display: inline-block; }
+    .chip.activity { background: var(--activity); }
+    .chip.capability { background: var(--capability); border-color: var(--capability-edge); }
+    .chip.release1 { background: var(--release1); }
+    .chip.release2 { background: var(--release2); }
+    .chip.persona { background: var(--persona); }
+    .chip.variation { background: var(--variation); }
+    .chip.siderail { background: var(--siderail); }
+    .chip.s-done { background: var(--done); }
+    .chip.s-inprogress { background: var(--inprogress); }
+    .chip.s-draft { background: var(--draft); }
+    .chip.empty { background: repeating-linear-gradient(45deg, #f4f6f9, #f4f6f9 4px, #e4e9f0 4px, #e4e9f0 8px); }
+
+    /* ---- The map ---- */
+    .map { margin-top: 0.5rem; }
+
+    /* Backbone activity header row */
+    .backbone {
+      display: grid;
+      grid-template-columns: repeat(var(--cols), 1fr);
+      gap: 0.75rem;
+      align-items: stretch;
+    }
+    .activities { margin-bottom: 0.4rem; }
+    .activity-card {
+      background: var(--activity);
+      color: var(--activity-ink);
+      border-radius: 8px 8px 0 0;
+      padding: 0.65rem 0.75rem;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.15);
+    }
+    .activity-card .step { font-size: 0.72rem; opacity: 0.8; letter-spacing: 0.05em; }
+    .activity-card h2 { margin: 0.1rem 0 0; font-size: 0.98rem; color: #fff; }
+    .activity-card .who { font-size: 0.74rem; opacity: 0.85; margin-top: 0.25rem; }
+
+    /* Release band — a strong horizontal lane label */
+    .release-band {
+      display: flex; align-items: center; gap: 0.6rem;
+      border-radius: 6px;
+      padding: 0.4rem 0.85rem;
+      margin: 1.1rem 0 0.5rem;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .release-band.r1 { background: var(--release1); }
+    .release-band.r2 { background: var(--release2); }
+    .release-band .badge {
+      background: rgba(255,255,255,0.22); border-radius: 4px;
+      padding: 0.1rem 0.45rem; font-size: 0.74rem; font-weight: 700;
+    }
+    .release-band .metric { font-weight: 400; opacity: 0.95; font-size: 0.82rem; margin-left: auto; }
+
+    /* Rib (one release row of slices, left→right under each activity) */
+    .rib { display: contents; }
+    .rib-row {
+      display: grid;
+      grid-template-columns: repeat(var(--cols), 1fr);
+      gap: 0.75rem;
+      margin-bottom: 0.25rem;
+    }
+
+    /* Slices — coloured by data-status + data-layer (CSS attribute selectors,
+       NOT inline style — honours the README Prohibition) */
+    .slice {
+      border: 1px solid var(--capability-edge);
+      background: var(--capability);
+      border-left-width: 5px;
+      border-radius: 5px;
+      padding: 0.5rem 0.55rem;
+      text-decoration: none;
+      color: var(--ink);
+      display: block;
+      font-size: 0.82rem;
+      min-height: 3.4rem;
+    }
+    .slice:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+    .slice .ref {
+      display: inline-block; font-size: 0.68rem; font-weight: 700;
+      color: var(--muted); letter-spacing: 0.02em; margin-bottom: 0.2rem;
+    }
+    .slice .title { display: block; }
+
+    /* status drives the left border + a small dot via ::before */
+    .slice[data-status="done"] { border-left-color: var(--done); }
+    .slice[data-status="in-progress"] { border-left-color: var(--inprogress); }
+    .slice[data-status="draft"] { border-left-color: var(--draft); }
+    .slice[data-status="done"] .ref::after { content: " · done"; color: var(--done); }
+    .slice[data-status="in-progress"] .ref::after { content: " · in progress"; color: var(--inprogress); }
+    .slice[data-status="draft"] .ref::after { content: " · draft"; color: var(--draft); }
+
+    /* layer treatments */
+    .slice[data-layer="variation"] {
+      background: #fbe9ee;
+      border-style: dashed;
+      border-color: var(--variation);
+      border-left-color: var(--variation);
+    }
+    .slice[data-layer="capability-unbuilt"] {
+      background: #f4f6f9;
+      border-style: dashed;
+    }
+
+    /* Empty cell — visible, hatched, so sparse activities read as under-explored */
+    .empty-cell {
+      border: 1px dashed var(--line);
+      border-radius: 5px;
+      min-height: 3.4rem;
+      background: repeating-linear-gradient(45deg, #f7f9fb, #f7f9fb 5px, #eef1f6 5px, #eef1f6 10px);
+      display: flex; align-items: center; justify-content: center;
+      color: #9aa6b6; font-size: 0.72rem; font-style: italic;
+    }
+
+    /* Side-rail (off-journey work) */
+    .siderail {
+      border: 2px solid var(--siderail);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      margin-top: 2rem;
+      background: #f6f7f9;
+    }
+    .siderail h2 { margin-top: 0; color: var(--siderail); }
+    .siderail .who { font-size: 0.8rem; color: var(--muted); margin: 0.25rem 0 0.75rem; }
+    .siderail .rail-cards { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+    .siderail .slice { max-width: 22rem; }
+
+    /* Persona lane */
+    .persona-lane {
+      border-left: 5px solid var(--persona);
+      background: #f4eefb;
+      border-radius: 6px;
+      padding: 0.6rem 0.9rem;
+      margin: 0.5rem 0 1.5rem;
+      font-size: 0.85rem;
+    }
+    .persona-lane strong { color: var(--persona); }
+
+    .note { font-size: 0.85rem; color: var(--muted); }
+    .footnote { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--line); margin-top: 2.5rem; padding-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>STORY-MAP-002: Decompose a Fix Into Coordinated Changes</h1>
+  <p class="subtitle">A Jeff Patton user story map for <strong>JTBD-008</strong> — the developer's full end-to-end journey, from "something hurts" to "the adopter gets a real, coordinated fix." Backbone &times; ribs &times; slices per Patton, <em>User Story Mapping</em> (O'Reilly, 2014).</p>
+
+  <!-- ===================== GOAL / OUTCOME BANNER ===================== -->
+  <section class="goal-banner" aria-label="Job and outcome">
+    <p class="job">When my fix to a problem decomposes into multiple coordinated changes, I want the work scoped, time-boxed, and traced to its driving problem <em>above</em> the commit level — so each sub-workstream competes for WSJF attention as a first-class entity, not buried in a ticket body.</p>
+    <p class="flow"><strong>Persona:</strong> developer (solo developer using AI agents to investigate, fix, and ship end-to-end) &middot; secondary: tech-lead.</p>
+    <p class="outcome"><strong>End outcome (where the backbone lands):</strong> the adopter who hit the problem receives a coordinated, RFC-backed fix in a published <code>@windyroad/*</code> release — with a durable problem &rarr; RFC &rarr; story trace anyone can re-derive later.</p>
+  </section>
+
+  <!-- ===================== LEGEND ===================== -->
+  <section class="legend" aria-label="Legend">
+    <div class="group">
+      <span class="group-title">Layer</span>
+      <span class="swatch"><span class="chip activity"></span> Backbone activity (what the user does)</span>
+      <span class="swatch"><span class="chip capability"></span> Capability card (user-observable)</span>
+      <span class="swatch"><span class="chip variation"></span> Variation / unhappy path</span>
+      <span class="swatch"><span class="chip siderail"></span> Off-journey side-rail</span>
+    </div>
+    <div class="group">
+      <span class="group-title">Release</span>
+      <span class="swatch"><span class="chip release1"></span> Release 1 — walking skeleton</span>
+      <span class="swatch"><span class="chip release2"></span> Release 2 — deepen the same activities</span>
+    </div>
+    <div class="group">
+      <span class="group-title">Status</span>
+      <span class="swatch"><span class="chip s-done"></span> done (shipped)</span>
+      <span class="swatch"><span class="chip s-inprogress"></span> in progress</span>
+      <span class="swatch"><span class="chip s-draft"></span> draft / not built</span>
+      <span class="swatch"><span class="chip empty"></span> empty cell = activity under-explored</span>
+    </div>
+  </section>
+
+  <p class="persona-lane">
+    <strong>Actor note.</strong> The backbone is <strong>one persona's user activities</strong> (the developer), left&rarr;right as a narrative with a beginning, middle, and end. The AFK orchestrator (JTBD-006) walks the <em>same</em> spine and lawfully halts at the activities where a human decides (scoping, uncovered-decision escalation, verification). Cards are user-observable capabilities; the implementing STORY / RFC / ADR is a small reference on the card, never its headline.
+  </p>
+
+  <!-- ===================== THE MAP ===================== -->
+  <main class="map">
+
+    <!-- Backbone activity header row -->
+    <section class="backbone activities" style="--cols: 6" aria-label="Backbone activities">
+      <header class="activity-card">
+        <span class="step">ACTIVITY 1</span>
+        <h2>Notice &amp; capture what hurts</h2>
+        <p class="who">developer · "this is a problem"</p>
+      </header>
+      <header class="activity-card">
+        <span class="step">ACTIVITY 2</span>
+        <h2>Find root cause &amp; reach Known Error</h2>
+        <p class="who">developer · RCA + workaround</p>
+      </header>
+      <header class="activity-card">
+        <span class="step">ACTIVITY 3</span>
+        <h2>Propose the fix &rarr; it goes through an RFC; decide if it needs stories / a story map</h2>
+        <p class="who">developer · hits the RFC gate</p>
+      </header>
+      <header class="activity-card">
+        <span class="step">ACTIVITY 4</span>
+        <h2>Scope &amp; map the coordinated work</h2>
+        <p class="who">developer · author RFC + story map</p>
+      </header>
+      <header class="activity-card">
+        <span class="step">ACTIVITY 5</span>
+        <h2>Implement the coordinated changes</h2>
+        <p class="who">developer + AFK · work the stories</p>
+      </header>
+      <header class="activity-card">
+        <span class="step">ACTIVITY 6</span>
+        <h2>Land, release &amp; verify &rarr; adopter value</h2>
+        <p class="who">developer · publish + close</p>
+      </header>
+    </section>
+
+    <!-- ============ RELEASE 1 — WALKING SKELETON ============ -->
+    <div class="release-band r1">
+      <span class="badge">RELEASE 1</span>
+      Walking skeleton — thinnest thread across every activity (A1/A2/A5/A6 reuse shipped plumbing; the new RFC-first step A3 is the load-bearing piece)
+      <span class="metric">Target (once A3 lands): one coordinated fix goes problem &rarr; RFC &rarr; stories &rarr; released &rarr; verified, end-to-end · Metric: a closed problem whose trace re-derives cleanly · Status: NOT yet operable — A3 (STORY-012) is draft</span>
+    </div>
+
+    <section class="backbone" style="--cols: 6" aria-label="Release 1 slices">
+      <div class="rib">
+        <div class="rib-row">
+          <!-- A1 -->
+          <a class="slice" href="../../../packages/itil/skills/capture-problem/SKILL.md"
+             data-layer="capability" data-jtbd="JTBD-008" data-status="done">
+            <span class="ref">capture-problem</span>
+            <span class="title">Capture a problem ticket in one aside, with a dup-check</span>
+          </a>
+          <!-- A2 -->
+          <a class="slice" href="../../decisions/022-problem-lifecycle-verification-pending-status.proposed.md"
+             data-adr="ADR-022" data-layer="capability" data-jtbd="JTBD-008" data-status="done">
+            <span class="ref">ADR-022 lifecycle</span>
+            <span class="title">RCA recorded; ticket reaches Known Error (root cause + workaround)</span>
+          </a>
+          <!-- A3 -->
+          <a class="slice" href="../../stories/draft/STORY-012-rfc-first-precondition-predicate.md"
+             data-story-id="STORY-012" data-rfc="RFC-005" data-jtbd="JTBD-008" data-status="draft">
+            <span class="ref">STORY-012</span>
+            <span class="title">Propose-fix hits the gate: no RFC traces this problem &rarr; refused / routed to authoring</span>
+          </a>
+          <!-- A4 -->
+          <a class="slice" href="../../../packages/itil/skills/capture-story-map/SKILL.md"
+             data-layer="capability" data-jtbd="JTBD-008" data-status="in-progress">
+            <span class="ref">capture-story-map</span>
+            <span class="title">Author a minimal RFC + story map (one covered-path fix) from the RCA</span>
+          </a>
+          <!-- A5 -->
+          <a class="slice" href="../../stories/done/STORY-005-working-the-problem-traversal.md"
+             data-story-id="STORY-005" data-rfc="RFC-003" data-jtbd="JTBD-008" data-status="done">
+            <span class="ref">STORY-005</span>
+            <span class="title">Work the problem: traverse the RFC's stories and implement them</span>
+          </a>
+          <!-- A6 -->
+          <a class="slice" href="../../decisions/022-problem-lifecycle-verification-pending-status.proposed.md"
+             data-adr="ADR-022" data-layer="capability" data-jtbd="JTBD-008" data-status="done">
+            <span class="ref">ADR-022 verify</span>
+            <span class="title">Fix released &rarr; Known Error &rarr; Verifying &rarr; Closed; adopter gets the fix</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ RELEASE 2 — DEEPEN ============ -->
+    <div class="release-band r2">
+      <span class="badge">RELEASE 2</span>
+      Deepen the SAME activities (no new backbone steps) — the gate &amp; the journey become complete
+      <span class="metric">Target: full + AFK gate, real authoring, verify-fail loop · Metric: gate fires identically interactive vs AFK</span>
+    </div>
+
+    <section class="backbone" style="--cols: 6" aria-label="Release 2 slices">
+      <div class="rib">
+        <div class="rib-row">
+          <!-- A1 -->
+          <a class="slice" href="../../../packages/itil/skills/list-problems/SKILL.md"
+             data-layer="capability" data-jtbd="JTBD-008" data-status="done">
+            <span class="ref">WSJF backlog</span>
+            <span class="title">Ticket competes for WSJF attention as a first-class entity</span>
+          </a>
+          <!-- A2 -->
+          <a class="slice" href="../../decisions/060-problem-rfc-story-framework-with-mandatory-problem-trace-and-unified-problem-ontology.accepted.md"
+             data-adr="ADR-060" data-layer="capability" data-jtbd="JTBD-008" data-status="done">
+            <span class="ref">ADR-060 trace</span>
+            <span class="title">Derived <code>## RFCs</code> reverse-trace section keeps problem&rarr;RFC visible</span>
+          </a>
+          <!-- A3 -->
+          <a class="slice" href="../../stories/draft/STORY-013-author-first-manage-problem-gate.md"
+             data-story-id="STORY-013" data-rfc="RFC-005" data-jtbd="JTBD-008" data-status="draft">
+            <span class="ref">STORY-013</span>
+            <span class="title">Full interactive propose-fix gate in manage-problem: pre-existing RFC &rarr; implement; none &rarr; author-first</span>
+          </a>
+          <!-- A4 -->
+          <a class="slice" href="../../stories/draft/STORY-015-rfc-authoring-is-pre-implementation-story-map.md"
+             data-story-id="STORY-015" data-rfc="RFC-005" data-jtbd="JTBD-008" data-status="draft">
+            <span class="ref">STORY-015</span>
+            <span class="title">Author the RFC as a pre-implementation story map (retire the fix-time byproduct path)</span>
+          </a>
+          <!-- A5 -->
+          <a class="slice" href="../../stories/draft/STORY-014-author-first-work-problems-afk.md"
+             data-story-id="STORY-014" data-rfc="RFC-005" data-jtbd="JTBD-006" data-status="draft">
+            <span class="ref">STORY-014</span>
+            <span class="title">AFK orchestrator implements covered fixes; lawfully halts on an uncovered decision</span>
+          </a>
+          <!-- A6 -->
+          <a class="slice" href="../../decisions/042-auto-apply-scorer-remediations-open-vocabulary.proposed.md"
+             data-adr="ADR-042" data-layer="capability" data-jtbd="JTBD-008" data-status="done">
+            <span class="ref">ADR-042 graduate</span>
+            <span class="title">Held-changeset window graduates atomically once the slice + bats land</span>
+          </a>
+        </div>
+
+        <!-- Second depth row in Release 2: sequencing + quality + variations -->
+        <div class="rib-row">
+          <!-- A1 -->
+          <div class="empty-cell">under-explored</div>
+          <!-- A2 — variation: RCA unhappy paths -->
+          <a class="slice" href="#"
+             data-layer="variation" data-jtbd="JTBD-008" data-status="draft">
+            <span class="ref">variation · A2</span>
+            <span class="title">Can't reproduce / external root cause (P063) &rarr; document workaround &amp; report upstream, or park — not every problem reaches a local fix</span>
+          </a>
+          <!-- A3 — variation -->
+          <a class="slice" href="../../rfcs/RFC-005-rfc-first-trace-invariant-not-enforced-at-fix-time.accepted.md"
+             data-rfc="RFC-005" data-layer="variation" data-jtbd="JTBD-101" data-status="draft">
+            <span class="ref">variation</span>
+            <span class="title">Atomic fix? Still goes through the SAME RFC — no carve-out, no lighter path (ADR-071)</span>
+          </a>
+          <!-- A4 — variation: covered vs uncovered decision -->
+          <a class="slice" href="../../decisions/073-fix-time-gate-auto-creates-missing-rfc.proposed.md"
+             data-adr="ADR-073" data-layer="variation" data-jtbd="JTBD-008" data-status="draft">
+            <span class="ref">variation · A4</span>
+            <span class="title">Uncovered approach &rarr; STOP, author a new ADR &amp; ratify before implementing (covered &rarr; cite &amp; proceed)</span>
+          </a>
+          <!-- A5 — sequencing capability (genuinely new) -->
+          <a class="slice" href="#"
+             data-story-id="STORY-018" data-rfc="RFC-005" data-jtbd="JTBD-008" data-status="draft">
+            <span class="ref">STORY-018</span>
+            <span class="title">Phases ordered explicitly; deferred phases stay first-class WSJF entities, not TODO bullets</span>
+          </a>
+          <!-- A6 — variation: verify fails -->
+          <a class="slice" href="#"
+             data-layer="variation" data-jtbd="JTBD-008" data-status="draft">
+            <span class="ref">variation · A6</span>
+            <span class="title">Verification fails &rarr; fix bounces back to A4/A5 (re-author / re-implement) before it can close</span>
+          </a>
+        </div>
+
+        <!-- Third row: behavioural-quality rib (cross-cuts A3-A5) + time-box variation -->
+        <div class="rib-row">
+          <!-- A1 -->
+          <div class="empty-cell">under-explored</div>
+          <!-- A2 -->
+          <div class="empty-cell">under-explored</div>
+          <!-- A3-A5 quality rib: bats -->
+          <a class="slice" href="../../stories/draft/STORY-016-rfc-first-behavioural-bats.md"
+             data-story-id="STORY-016" data-rfc="RFC-005" data-jtbd="JTBD-008" data-status="draft">
+            <span class="ref">STORY-016 · quality rib</span>
+            <span class="title">Behavioural bats: RFC-less &rarr; refused/routed; uncovered &rarr; blocks for ADR; covered &rarr; proceeds</span>
+          </a>
+          <!-- A4 — time-box variation -->
+          <a class="slice" href="../../jtbd/developer/JTBD-008-decompose-fix-into-coordinated-changes.proposed.md"
+             data-jtbd="JTBD-008" data-layer="variation" data-status="draft">
+            <span class="ref">variation · A4</span>
+            <span class="title">Mid-flight scope expansion &rarr; structured re-evaluation (AskUserQuestion), not silent body-drift</span>
+          </a>
+          <!-- A5 -->
+          <div class="empty-cell">under-explored</div>
+          <!-- A6 -->
+          <div class="empty-cell">under-explored</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================== SIDE-RAIL (off-journey) ===================== -->
+  <aside class="siderail" aria-label="Off-journey side-rail">
+    <h2>Side-rail — migration &amp; debt (off the happy-path journey)</h2>
+    <p class="who"><strong>Who:</strong> maintainer. <strong>Why:</strong> the repudiated "auto-create a skeleton RFC at fix-time" mechanism left hollow traces behind. <strong>Pain if ignored:</strong> a future maintainer or agent trusts a structurally-present but empty RFC trace (P375 cadence-rot). This work does not advance any backbone activity — it cleans up after a superseded approach.</p>
+    <div class="rail-cards">
+      <a class="slice" href="../../stories/draft/STORY-017-backfill-skeleton-rfcs.md"
+         data-story-id="STORY-017" data-rfc="RFC-005" data-layer="siderail" data-jtbd="JTBD-008" data-status="draft">
+        <span class="ref">STORY-017</span>
+        <span class="title">Backfill-or-supersede the skeleton RFCs the auto-create mechanism left behind</span>
+      </a>
+      <a class="slice" href="../../decisions/031-problem-ticket-directory-layout.accepted.md"
+         data-adr="ADR-031" data-layer="siderail" data-jtbd="JTBD-101" data-status="done">
+        <span class="ref">ADR-031 migration</span>
+        <span class="title">Adopter <code>docs/problems/</code> flat &rarr; per-state-subdir auto-migration (composes with JTBD-101)</span>
+      </a>
+    </div>
+  </aside>
+
+  <p class="footnote">
+    <strong>Where RFC-005 sits.</strong> RFC-005 (RFC-first enforcement) and its STORY-012..017 are <em>one slice cluster</em> within Activities 3&ndash;4 of this journey — the part that guarantees the fix actually goes through a real, pre-existing RFC before any code is written. They are not the whole job; the backbone spans capture &rarr; root cause &rarr; propose &rarr; scope &rarr; implement &rarr; release &amp; verify. RFC-003 / STORY-001..007 built the framework plumbing (capture-story, manage-story, work-the-problem traversal) that Activities 4&ndash;5 reuse.
+    <br><br>
+    <strong>New STORY id introduced:</strong> STORY-018 (explicit phase-ordering capability under Activity 5). Collision check: <code>grep -rho 'data-story-id="[^"]*"' docs/story-maps/</code> reserved STORY-001..011 (STORY-MAP-001); STORY-012..017 exist as files under <code>docs/stories/draft/</code>. STORY-018 is the next free id. All other not-yet-built cards are descriptive capability cards (no story file spawned).
+    <br><br>
+    <strong>Cross-reference note.</strong> RFC-005's body currently points its "canonical map" at <code>STORY-MAP-002-rfc-first-enforcement.html</code> (the narrower, now-superseded scoping). This map reuses the freed STORY-MAP-002 id for the whole-job scope per the authoring brief; the parent agent reconciles the RFC-005 back-reference afterward.
+  </p>
+</body>
+</html>
