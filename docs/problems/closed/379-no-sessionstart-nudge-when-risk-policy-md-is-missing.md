@@ -1,6 +1,7 @@
 # Problem 379: No SessionStart nudge fires when RISK-POLICY.md is missing
 
-**Status**: Verification Pending
+**Status**: Closed
+**Closed**: 2026-07-01
 **Reported**: 2026-06-26
 **Fix implemented**: 2026-06-28 (held changeset — see Root Cause Analysis)
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
@@ -75,3 +76,15 @@ Closest existing ticket is **P297** — "ADR-047 governance-artefact scaffold sh
 - `packages/risk-scorer/skills/update-policy/SKILL.md` — the action the nudge would cite.
 - **Step 2b hang-off-check** result: short-circuit fired (>5 broad candidates on `RISK-POLICY.md` signal); subagent dispatch skipped per ADR-032 5th invocation pattern. P297 carries the highest semantic overlap; review-problems re-evaluation is the canonical absorb-vs-proceed surface.
 - Captured via /wr-itil:capture-problem; expand at next investigation.
+
+## Verified 2026-07-01
+
+Verified in-session via `npx bats packages/risk-scorer/hooks/test/risk-scorer-scaffold-nudge.bats` — the post-fix bats fixtures explicitly cover the policy-absent arm:
+
+- **case 8**: `policy-absent nudge fires even when docs/risks/ exists (policy-absence wins, P379)` — PASS
+- **case 9**: `AFK guard suppresses the policy-absent nudge too (P379)` — PASS
+- **case 10**: `AFK guard WR_SUPPRESS_OVERSIGHT_NUDGE=1 suppresses the nudge entirely` — PASS
+- **case 11**: `guard value other than 1 does not suppress` — PASS
+- **case 12**: `silent when CLAUDE_PROJECT_DIR points at a non-existent path` — PASS
+
+12/12 bats green. Shipped in `@windyroad/risk-scorer@0.15.0`. ADR-047 Amendment 2026-06-28 recorded; the architect's Option B `.risk-reports/`-evidence narrowing remains queued for `/wr-architect:review-decisions` (does not block ticket closure — orthogonal ratification surface). Closed as Verified via `/wr-itil:review-problems` Step 4 on user batch-confirm.

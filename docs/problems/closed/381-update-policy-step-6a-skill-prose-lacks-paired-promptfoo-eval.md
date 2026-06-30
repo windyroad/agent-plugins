@@ -1,6 +1,7 @@
 # Problem 381: update-policy Step 6a SKILL prose lacks paired promptfoo Tier-A/B eval (R009 prose-surface floor)
 
-**Status**: Verification Pending
+**Status**: Closed
+**Closed**: 2026-07-01
 **Reported**: 2026-06-26
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: internal
@@ -87,3 +88,16 @@ This is a Tier-A/B eval (deterministic assertions where possible — `icontains`
 - `packages/risk-scorer/skills/update-policy/SKILL.md` — Step 6a is the locus.
 - **Step 2b hang-off-check** result: short-circuit fired (>5 broad candidates on `promptfoo` / `R009` / `update-policy` signals); subagent dispatch skipped per ADR-032 5th invocation pattern. P324 / P290 carry the closest semantic overlap (R009 prose-surface family); review-problems re-evaluation is the canonical absorb-vs-proceed surface.
 - Captured via /wr-itil:capture-problem; expand at next investigation.
+
+## Verified 2026-07-01
+
+Verified in-session via `npx promptfoo eval -c packages/risk-scorer/skills/update-policy/eval/promptfooconfig.yaml --max-concurrency 4` — Results: `✓ 4 passed, 0 failed, 0 errors (100%)`, Duration: 45s (eval ID `eval-o4f-2026-06-28T13:05:31`).
+
+The four cases cover the Step 6a behaviours that the prose surface must exhibit:
+
+- **appetite<5 trigger** — verify the second AskUserQuestion fires when adopter selects appetite < 5 in step 6
+- **P350 brief-before-ID register formatting** — verify Impact=5 register entries are cited activity-class-first (e.g. `credentials-in-committed-files (R008)`, not bare `R008`)
+- **policy-row fallback** — verify the warning falls back to the Impact=5 row from the policy's Impact Levels table when `docs/risks/` is empty
+- **confirm-vs-revise options** — verify the option semantics (explicit accept vs return to step 6)
+
+Discharges the R009 prose-surface floor for `/wr-risk-scorer:update-policy` SKILL per ADR-075 + RFC-012. Tarball-excluded via `package.json` `"!skills/*/eval/"` so the eval is verifiable in-repo at any time. Closed as Verified via `/wr-itil:review-problems` Step 4 on user batch-confirm.

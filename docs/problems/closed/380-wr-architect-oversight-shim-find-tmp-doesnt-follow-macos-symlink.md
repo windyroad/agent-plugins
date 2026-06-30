@@ -1,6 +1,7 @@
 # Problem 380: wr-architect-mark-oversight-confirmed shim's find /tmp doesn't follow macOS /tmp → /private/tmp symlink
 
-**Status**: Verification Pending
+**Status**: Closed
+**Closed**: 2026-07-01
 **Reported**: 2026-06-26
 
 ## Fix Released
@@ -83,3 +84,13 @@ Note: `get_current_session_id` in `session-id.sh` uses a *shell glob* (`ls -t "$
 - `packages/shared/lib/shim-wrapper-template.sh` — shim-wrapper template (may need same fix if it has the pattern).
 - **Step 2b hang-off-check** result: short-circuit fired (>5 broad candidates on `wr-architect-mark-oversight-confirmed` / `oversight-marker` signals); subagent dispatch skipped per ADR-032 5th invocation pattern. P368 is the strongest semantic overlap; review-problems re-evaluation is the canonical absorb-vs-proceed surface.
 - Captured via /wr-itil:capture-problem; expand at next investigation.
+
+## Verified 2026-07-01
+
+Verified in-session by grep against each enumeration site — `find -L` follow-symlinks present at all three loci:
+
+- `packages/architect/scripts/mark-oversight-confirmed.sh:95` — `find -L "$MARKER_DIR" -maxdepth 1 -name '*-announced-*' -mmin "-${WINDOW_MINS}" 2>/dev/null \`
+- `packages/itil/hooks/lib/session-id.sh:230` — `find -L "$marker_dir" -maxdepth 1 -name '*-announced-*' -mmin "-${window_mins}" 2>/dev/null \`
+- `packages/jtbd/scripts/mark-oversight-confirmed.sh:91` — `find -L "$MARKER_DIR" -maxdepth 1 -name '*-announced-*' -mmin "-${WINDOW_MINS}" 2>/dev/null \`
+
+`find -L` follows the macOS `/tmp → /private/tmp` symlink during candidate-SID enumeration so announce markers in `/private/tmp` are now visible from `/tmp` queries — closing the bug witnessed mid-ADR-086 session 2026-06-25. Released across `@windyroad/{architect,jtbd,itil}` patches 2026-06-27 (release vehicle `.changeset/p380-oversight-shim-find-tmp-macos-symlink.md`). Closed as Verified via `/wr-itil:review-problems` Step 4 on user batch-confirm.
