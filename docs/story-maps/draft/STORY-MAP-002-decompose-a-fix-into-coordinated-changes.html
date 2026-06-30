@@ -42,7 +42,7 @@
     .chip.r1 { background: var(--r1); } .chip.r2 { background: var(--r2); }
     .chip.done { background: var(--done); } .chip.inprogress { background: var(--inprogress); } .chip.draft { background: var(--draft); }
     .chip.empty { background: repeating-linear-gradient(45deg,#f4f6f9,#f4f6f9 4px,#e4e9f0 4px,#e4e9f0 8px); }
-    .hint { color: var(--muted); font-size: 0.78rem; margin: 0.2rem 0 0.6rem; }
+    .hint { color: var(--muted); font-size: 0.78rem; margin: 0.2rem 0 0.6rem; max-width: 1000px; }
 
     .scroll { overflow-x: auto; padding-bottom: 1rem; border: 1px solid var(--line); border-radius: 8px; }
     .map { width: max-content; min-width: 100%; padding: 0.75rem;
@@ -59,9 +59,11 @@
     .band .badge { background: rgba(255,255,255,0.25); border-radius: 4px; padding: 0.05rem 0.4rem; font-size: 0.7rem; font-weight: 700; }
     .band .metric { margin-left: auto; font-weight: 400; opacity: 0.95; font-size: 0.78rem; }
 
-    /* Cards: text is selectable; the ID is shown so we can refer to it. */
+    /* Cards: text selectable; each shows its ID. A card is a STORY; it links to a
+       STORY file when one exists, and is unlinked (file to be created) otherwise.
+       Cards never link out to skills/ADRs — that trace lives inside the story. */
     .slice { border: 1px solid var(--cap-edge); border-left-width: 5px; background: var(--cap); border-radius: 5px; padding: 0.45rem 0.5rem; text-decoration: none; color: var(--ink); display: block; font-size: 0.82rem; min-height: 2.6rem; -webkit-user-select: text; user-select: text; }
-    .slice:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+    a.slice:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
     .slice .id { display: block; font-size: 0.66rem; font-weight: 700; color: var(--muted); letter-spacing: 0.02em; margin-bottom: 0.22rem; }
     .slice .cap { display: block; }
     .slice[data-status="done"] { border-left-color: var(--done); }
@@ -88,7 +90,7 @@
 
   <div class="legend">
     <span class="sw"><span class="chip activity"></span> activity (backbone)</span>
-    <span class="sw"><span class="chip cap"></span> capability</span>
+    <span class="sw"><span class="chip cap"></span> story</span>
     <span class="sw"><span class="chip var"></span> variation / unhappy path</span>
     <span class="sw"><span class="chip r1"></span> Release 1</span>
     <span class="sw"><span class="chip r2"></span> Release 2</span>
@@ -97,7 +99,7 @@
     <span class="sw"><span class="chip draft"></span> to build</span>
     <span class="sw"><span class="chip empty"></span> under-explored</span>
   </div>
-  <p class="hint">Read left → right across the top (the journey); each card sits in its activity's column. Releases are the coloured horizontal bands. Scroll sideways to see the whole wall. Each card shows its ID and links to the work that builds it; its text matches that item's title.</p>
+  <p class="hint">Read left → right across the top (the journey); each card is a story sitting in its activity's column. Cards with a STORY-NNN id link to that story's file; cards marked "(story · to file)" are existing capabilities whose story files we'll create next. Releases are the coloured horizontal bands. Scroll sideways to see the whole wall.</p>
 
   <div class="scroll">
     <div class="map">
@@ -112,48 +114,40 @@
         <div class="activity-card"><span class="step">A6</span><h2>Land, release &amp; verify</h2></div>
       </div>
 
-      <!-- RELEASE 1 -->
-      <div class="band r1"><span class="badge">RELEASE 1</span> Walking skeleton — thinnest path that crosses every step <span class="metric">A1/A2/A5/A6 reuse shipped plumbing · A3 is the new, load-bearing step</span></div>
+      <!-- RELEASE 1 — the journey as it exists today -->
+      <div class="band r1"><span class="badge">RELEASE 1</span> The journey as it works today — end-to-end, mostly shipped <span class="metric">what's missing is the RFC-first enforcement — that's Release 2</span></div>
       <div class="row">
-        <a class="slice" data-status="done" href="../../../packages/itil/skills/capture-problem/SKILL.md"><span class="id">/wr-itil:capture-problem</span><span class="cap">Capture the problem in seconds, mid-flow</span></a>
-        <a class="slice" data-status="done" href="../../decisions/022-problem-lifecycle-verification-pending-status.proposed.md"><span class="id">ADR-022</span><span class="cap">Record root cause + workaround → Known Error</span></a>
-        <a class="slice" data-status="draft" href="../../stories/draft/STORY-012-rfc-first-precondition-predicate.md"><span class="id">STORY-012</span><span class="cap">Can't start coding without an RFC — the gate makes me create one first</span></a>
-        <a class="slice" data-status="in-progress" href="../../../packages/itil/skills/capture-story-map/SKILL.md"><span class="id">/wr-itil:capture-story-map</span><span class="cap">Reuse this journey's existing stories; add any new one the fix needs</span></a>
+        <div class="slice" data-status="done"><span class="id">story · to file</span><span class="cap">Capture the problem in seconds, mid-flow</span></div>
+        <div class="slice" data-status="done"><span class="id">story · to file</span><span class="cap">Record root cause + workaround → Known Error</span></div>
+        <div class="slice" data-status="done"><span class="id">story · to file</span><span class="cap">Create the RFC for this fix</span></div>
+        <div class="slice" data-status="in-progress"><span class="id">story · to file</span><span class="cap">Reuse the journey's stories; add any the fix newly needs</span></div>
         <a class="slice" data-status="done" href="../../stories/done/STORY-005-working-the-problem-traversal.md"><span class="id">STORY-005</span><span class="cap">Working-the-problem traversal rewrite (manage-problem + work-problem)</span></a>
-        <a class="slice" data-status="done" href="../../decisions/022-problem-lifecycle-verification-pending-status.proposed.md"><span class="id">ADR-022</span><span class="cap">Ship → verify → problem closes with a real trace; adopter gets the fix</span></a>
-      </div>
-      <div class="row">
-        <div class="empty">—</div>
-        <div class="empty">—</div>
-        <div class="empty">—</div>
-        <div class="empty">—</div>
-        <div class="empty">—</div>
-        <a class="slice quality" data-status="draft" href="../../stories/draft/STORY-016-rfc-first-behavioural-bats.md"><span class="id">STORY-016 · quality (every step)</span><span class="cap">Every step is regression-proven</span></a>
+        <div class="slice" data-status="done"><span class="id">story · to file</span><span class="cap">Ship → verify → problem closes with a real trace; adopter gets the fix</span></div>
       </div>
 
-      <!-- RELEASE 2 -->
-      <div class="band r2"><span class="badge">RELEASE 2</span> Deepen the same steps — variations, the AFK actor, the unhappy paths <span class="metric">no new backbone steps</span></div>
+      <!-- RELEASE 2 — RFC-005 extends the journey -->
+      <div class="band r2"><span class="badge">RELEASE 2</span> RFC-005 extends the journey — enforce RFC-first, the AFK actor, proof, unhappy paths <span class="metric">new stories that strengthen A3–A5</span></div>
       <div class="row">
-        <div class="empty">under-explored</div>
-        <a class="slice" data-layer="variation" data-status="draft" href="#"><span class="id">variation</span><span class="cap">Can't reproduce / external cause → workaround &amp; report upstream, or park</span></a>
-        <a class="slice" data-status="draft" href="../../stories/draft/STORY-013-author-first-manage-problem-gate.md"><span class="id">STORY-013</span><span class="cap">Full gate: an RFC exists → I proceed; none → I create it first</span></a>
+        <div class="empty">—</div>
+        <div class="slice" data-layer="variation" data-status="draft"><span class="id">variation</span><span class="cap">Can't reproduce / external cause → workaround &amp; report upstream, or park</span></div>
+        <a class="slice" data-status="draft" href="../../stories/draft/STORY-012-rfc-first-precondition-predicate.md"><span class="id">STORY-012</span><span class="cap">Can't start coding without an RFC — the gate makes me create one first</span></a>
         <a class="slice" data-status="draft" href="../../stories/draft/STORY-015-rfc-authoring-is-pre-implementation-story-map.md"><span class="id">STORY-015</span><span class="cap">The RFC lists its stories before any code is written</span></a>
         <a class="slice" data-status="draft" href="../../stories/draft/STORY-014-author-first-work-problems-afk.md"><span class="id">STORY-014</span><span class="cap">Unattended, the agent works the plan and pauses for real decisions</span></a>
-        <a class="slice" data-layer="variation" data-status="draft" href="#"><span class="id">variation</span><span class="cap">Verification fails → bounce back to re-plan / re-implement</span></a>
+        <div class="slice" data-layer="variation" data-status="draft"><span class="id">variation</span><span class="cap">Verification fails → bounce back to re-plan / re-implement</span></div>
       </div>
       <div class="row">
-        <div class="empty">under-explored</div>
-        <div class="empty">under-explored</div>
-        <a class="slice" data-layer="variation" data-status="draft" href="#"><span class="id">variation</span><span class="cap">Even a one-line fix still needs an RFC — no shortcut, no carve-out</span></a>
-        <a class="slice" data-layer="variation" data-status="draft" href="#"><span class="id">variation</span><span class="cap">Hit a genuinely new decision → pause &amp; decide it deliberately first</span></a>
         <div class="empty">—</div>
+        <div class="empty">—</div>
+        <a class="slice" data-status="draft" href="../../stories/draft/STORY-013-author-first-manage-problem-gate.md"><span class="id">STORY-013</span><span class="cap">Full gate: an RFC exists → I proceed; none → I create it first</span></a>
+        <div class="slice" data-layer="variation" data-status="draft"><span class="id">variation</span><span class="cap">Hit a genuinely new decision → pause &amp; decide it deliberately first</span></div>
+        <a class="slice quality" data-status="draft" href="../../stories/draft/STORY-016-rfc-first-behavioural-bats.md"><span class="id">STORY-016 · quality (every step)</span><span class="cap">Every step is regression-proven</span></a>
         <div class="empty">—</div>
       </div>
       <div class="row">
-        <div class="empty">under-explored</div>
-        <div class="empty">under-explored</div>
         <div class="empty">—</div>
-        <a class="slice" data-layer="variation" data-status="draft" href="#"><span class="id">variation</span><span class="cap">Scope creep mid-flight → re-scope deliberately, stay time-boxed</span></a>
+        <div class="empty">—</div>
+        <div class="slice" data-layer="variation" data-status="draft"><span class="id">variation</span><span class="cap">Even a one-line fix still needs an RFC — no shortcut, no carve-out</span></div>
+        <div class="slice" data-layer="variation" data-status="draft"><span class="id">variation</span><span class="cap">Scope creep mid-flight → re-scope deliberately, stay time-boxed</span></div>
         <div class="empty">—</div>
         <div class="empty">—</div>
       </div>
