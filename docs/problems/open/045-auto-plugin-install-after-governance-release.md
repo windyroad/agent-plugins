@@ -1,13 +1,20 @@
 # Problem 045: Auto plugin install on user's machine after governance release
 
-**Status**: Closed
+**Status**: Open
 **Reported**: 2026-04-19
-**Closed**: 2026-05-31
-**Priority**: 6 (Medium) — Impact: Minor (2) x Likelihood: Possible (3)
-**Effort**: L
-**WSJF**: 1.5 — (6 × 1.0) / 4
+**Reopened**: 2026-07-02
+**Priority**: 12 (High) — Impact: 3 × Likelihood: 4 (Likely) = 12. **Re-rated at reopen from observed evidence, NOT deferred.** Impact 3 (up from 2): the gap does not merely delay a fix — it silently **re-introduces already-closed bugs** into a live session (witnessed 2026-07-01: a stale 0.51.0 cache ran the pre-ADR-067 capture-problem template and leaked the exact uncadenced deferred-placeholder default P375 had retired → P402). Likelihood 4 (up from 3): occurs on every session that starts before picking up a release; concretely witnessed.
+**Effort**: L — cross-plugin shared SessionStart hook (packages/shared, synced to all `@windyroad/*` plugins) + tests + release. WSJF = (12 × 1.0) / 4 = 3.0.
 
-## Closed as no longer relevant
+## Reopened 2026-07-02 — closed on a P375-antipattern
+
+**Why reopened (user direction, 2026-07-02):** the 2026-05-31 closure substituted the **on-demand** `/install-updates` skill (+ the AFK-loop Step 6.5 refresh) for the **self-firing startup check** this ticket's own Direction decision (2026-04-20) and ADR-034 specify. Both substitutes are on-demand — neither self-fires — so by the [[feedback_named_re_entry_is_not_self_firing_cadence]] / P375 rot test the closure was invalid: it credited a named-but-uncadenced re-entry as "handled." The startup-check hook `packages/itil/hooks/session-start-update-check.sh` that this ticket says it "closes when [it] ships" **was never shipped** (verified 2026-07-02: no SessionStart hook surfaces plugin staleness anywhere in `packages/*/hooks`).
+
+**Consequence that forced the reopen:** P402 (`docs/problems/open/402-*.md`) — a session silently running stale plugin code re-introduced a retired bug. This ticket is the structural fix; P375 is the class.
+
+**Landing:** RFC-framed per ADR-071 (Problem→RFC trace) — see `## RFCs` — building on the existing ADR-034 design (SessionStart hook + consent gate), refined to the network-free class-B surfacer shape (each plugin's hook reads its own version from its script path, compares to highest-installed cache, surfaces a one-line "restart to pick up X" nudge when behind).
+
+## Prior closure (SUPERSEDED 2026-07-02 — see Reopened section above)
 
 **Closure date**: 2026-05-31 (foreground relevance-scan session, user-confirmed)
 **Closure reason**: implementation-shipped — `/install-updates` skill exists and is the operational path for picking up new plugin code; wired into the work-problems Step 6.5 post-release cache refresh (P233).
