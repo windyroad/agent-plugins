@@ -379,6 +379,12 @@ _76 ADRs. These are the current rules. The architect agent reads this section fi
 **Confirmation:** 15 behavioural bats in `packages/itil/hooks/test/itil-deferral-cadence-gate.bats` (ADR-052 — assert emitted stderr, never source-grep).
 **Related:** ADR-084, ADR-057, ADR-040, ADR-045, ADR-013, ADR-052, ADR-002, ADR-003
 
+### ADR-088 — SessionStart plugin-staleness surfacer — per-plugin hook, surface-not-install, network-free
+**Status:** proposed | **Oversight:** unconfirmed
+**Decides:** Each windyroad plugin ships its own network-free SessionStart hook that infers its running version from its script path, compares it to the highest semver-named cache directory, and surfaces (never auto-installs) one aggregated advisory when the session is behind — chosen over a single cross-plugin walker to preserve ADR-002/003 self-containment, with a race-free single-emitter de-dup so N plugins emit one line, not N.
+**Confirmation:** behavioural bats — version-behind → advisory emitted; version-current → silent; detector error → fail-open silent; AFK session → suppressed; README compendium regenerated per ADR-077.
+**Related:** ADR-002, ADR-003, ADR-013, ADR-017, ADR-023, ADR-034, ADR-038, ADR-040, ADR-045, ADR-049, ADR-052, ADR-077, ADR-080, ADR-081, ADR-084, ADR-087
+
 ---
 
 ## Historical decisions
