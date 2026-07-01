@@ -108,3 +108,9 @@ This ticket (P045) remains **Open** as the execution tracker. Closes when:
 - JTBD-001: `docs/jtbd/solo-developer/JTBD-001-enforce-governance.proposed.md` — "under 60 seconds" target; auto-install is the final mile
 - JTBD-005: `docs/jtbd/solo-developer/JTBD-005-assess-on-demand.proposed.md` — must not leave task context
 - JTBD-003: `docs/jtbd/solo-developer/JTBD-003-compose-guardrails.proposed.md` — composition may also benefit from seamless install
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-036 | proposed | SessionStart plugin-staleness surfacer |

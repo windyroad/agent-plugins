@@ -145,3 +145,4 @@ This is the **systemic / meta** ticket for a class previously captured only as s
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-035 | proposed | Authoring-time deferral-cadence enforcement gate |
+| RFC-036 | proposed | SessionStart plugin-staleness surfacer |
