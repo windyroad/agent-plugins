@@ -7,6 +7,7 @@
   <meta name="status" content="draft">
   <meta name="human-oversight" content="confirmed">
   <meta name="oversight-date" content="2026-07-02">
+  <meta name="oversight-note" content="re-ratified 2026-07-02 via AskUserQuestion after the full inbound variation (capture/acknowledge/triage + per-beat touchpoints) was placed">
   <meta name="problems" content="P170,P251,P314,P371,P399">
   <meta name="rfcs" content="RFC-003,RFC-005">
   <meta name="jtbd" content="JTBD-008,JTBD-001,JTBD-006">
@@ -73,7 +74,10 @@
     .slice[data-status="in-progress"] .id::after { content: " · in progress"; color: var(--inprogress); }
     .slice[data-status="draft"] .id::after { content: " · to build"; color: var(--draft); }
     /* column placement (class-based, not inline style) for depth rows */
-    .c3 { grid-column: 3; }
+    .c1 { grid-column: 1; } .c2 { grid-column: 2; } .c3 { grid-column: 3; } .c4 { grid-column: 4; } .c5 { grid-column: 5; }
+    .band.inbound-band { background: #6b4fa0; }
+    .slice.inbound { background: #f2ecfb; }
+    .chip.inbound { background: #f2ecfb; border-color: #b9a3d6; }
   </style>
 </head>
 <body>
@@ -93,8 +97,9 @@
     <span class="sw"><span class="chip done"></span> shipped</span>
     <span class="sw"><span class="chip inprogress"></span> in progress</span>
     <span class="sw"><span class="chip draft"></span> to build</span>
+    <span class="sw"><span class="chip inbound"></span> inbound variation</span>
   </div>
-  <p class="hint">Read left → right across the top (the activities); each card is a story in its activity's column. Every card links to its story file (markdown — each story links back here and to its siblings). The coloured horizontal bands are the release slices — Release 1 is the walking skeleton. A3 is the one genuinely-new activity; the rest of the journey mostly exists. Scroll sideways to see the whole wall.</p>
+  <p class="hint">Read left → right across the top (the activities); each card is a story in its activity's column. Every card links to its story file (markdown — each story links back here and to its siblings). The coloured horizontal bands are the release slices — Release 1 is the walking skeleton. A3 is the one genuinely-new activity; the rest of the journey mostly exists. Scroll sideways to see the whole wall. The purple <strong>inbound</strong> band is the external-reporter variation — capturing a reported problem and posting back to the reporter at each beat.</p>
 
   <div class="scroll">
     <div class="map">
@@ -134,6 +139,21 @@
       </div>
       <div class="row">
         <a class="slice c3" data-status="draft" href="../../stories/draft/STORY-025-slice-the-fixs-stories-into-releases.md" data-story-id="STORY-025"><span class="id">STORY-025 · slice releases</span><span class="cap">Slice the fix's stories into releases (MVP first; later phases stay first-class)</span></a>
+      </div>
+
+      <!-- INBOUND — external-reporter variation (per-beat touchpoints under A1 / A2 / A4 / A5) -->
+      <div class="band inbound-band"><span class="badge">INBOUND</span> A problem reported through an external channel — capture it, and keep the reporter posted at each beat <span class="metric">variation of the internal path</span></div>
+      <div class="row">
+        <a class="slice c1 inbound" data-status="done" href="../../stories/draft/STORY-027-capture-a-problem-from-an-inbound-channel.md" data-story-id="STORY-027"><span class="id">STORY-027 · inbound</span><span class="cap">Capture a problem reported through an inbound channel</span></a>
+        <a class="slice c2 inbound" data-status="draft" href="../../stories/draft/STORY-029-share-the-workaround-with-the-reporter.md" data-story-id="STORY-029"><span class="id">STORY-029 · inbound</span><span class="cap">Share the workaround with the reporter</span></a>
+        <a class="slice c4 inbound" data-status="draft" href="../../stories/draft/STORY-030-tell-the-reporter-a-fix-is-underway.md" data-story-id="STORY-030"><span class="id">STORY-030 · inbound</span><span class="cap">Tell the reporter a fix is underway</span></a>
+        <a class="slice c5 inbound" data-status="draft" href="../../stories/draft/STORY-031-tell-the-reporter-released-and-close-the-loop.md" data-story-id="STORY-031"><span class="id">STORY-031 · inbound</span><span class="cap">Tell the reporter it's released → verify → close the loop</span></a>
+      </div>
+      <div class="row">
+        <a class="slice c1 inbound" data-status="draft" href="../../stories/draft/STORY-028-acknowledge-the-inbound-report.md" data-story-id="STORY-028"><span class="id">STORY-028 · inbound</span><span class="cap">Acknowledge the report on capture</span></a>
+      </div>
+      <div class="row">
+        <a class="slice c1 inbound" data-status="draft" href="../../stories/draft/STORY-032-triage-an-inbound-reports-disposition.md" data-story-id="STORY-032"><span class="id">STORY-032 · inbound</span><span class="cap">Triage the report's disposition: accept, elicit a new job, or decline</span></a>
       </div>
 
     </div>
