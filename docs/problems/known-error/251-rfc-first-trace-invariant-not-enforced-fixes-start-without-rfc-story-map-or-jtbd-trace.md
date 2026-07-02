@@ -2,9 +2,9 @@
 
 **Status**: Known Error
 **Reported**: 2026-05-17
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3 = 9. Rated at review 2026-07-02: RFC-first design still queued for user direction.
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: L. WSJF = (9 × 1.0) / 4 = 1.5.
 **JTBD**: JTBD-008
 **Persona**: solo-developer
 **RFCs**: RFC-005 (accepted — the fix vehicle)

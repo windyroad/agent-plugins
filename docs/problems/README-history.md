@@ -1112,3 +1112,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 
 > Last reviewed: 2026-07-01 **P402 captured** — external-comms gate PostToolUse mark hook does not fire for background-launched review agents, so no marker persists to the live session dir despite PASS (lightweight aside via /wr-itil:capture-problem)
 > Last reviewed: 2026-07-02 **P403 captured** — Agent frames skill-mandatory mechanical steps as user-optional ("your call whether to drain", "skipped to stay within context budget"), reintroducing friction the P132 mechanical-stage carve-out was engineered to remove. Two evidence instances this session (Steps 2/4.5/4.6 skip; Step 7 auto-release skip). Rated at capture per the `.changeset/rate-captures-at-capture.md` IDE-hinted direction: Impact 3 × Likelihood 4 = 12 High / Effort M / WSJF 3.0. Composes with P179 + P234 (closed direct predecessor).
+
+## 2026-07-02 (review)
+
+> Last reviewed: 2026-07-02 **P404 captured** — Implement ADR-089 (every RFC has ≥1 story; atomic = one full story; remove the empty-stories fallback + flip 4 green bats) + ADR-090 (story-map/story drift-invalidated ratification marker + RFC-references-only-ratified-stories gate) in the skills/tests. Deferred ripple from this session's ratification (lightweight aside via /wr-itil:capture-problem).

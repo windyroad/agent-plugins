@@ -2,9 +2,9 @@
 
 **Status**: Known Error
 **Reported**: 2026-06-10
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems; HIGH in practice — same downstream blast radius as P340: ratification claims may stamp ADRs whose substance was never user-authorised because the LLM may have misimplemented the direction)
+**Priority**: 12 (High) — Impact: 4 × Likelihood: 3 = 12. Rated at review 2026-07-02: user flagged HIGH in practice; ratification-drift blast radius.
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: M. WSJF = (12 × 1.0) / 2 = 3.0.
 **JTBD**: JTBD-001
 **Persona**: developer
 

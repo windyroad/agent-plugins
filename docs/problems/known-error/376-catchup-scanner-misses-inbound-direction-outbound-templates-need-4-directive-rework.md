@@ -2,9 +2,9 @@
 
 **Status**: Known Error
 **Reported**: 2026-06-23
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 12 (High) — Impact: 3 × Likelihood: 4 = 12. Rated at review 2026-07-02: catchup outbound-only; retroactive inbound is manual.
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: M. WSJF = (12 × 1.0) / 2 = 3.0.
 **JTBD**: JTBD-001
 **Persona**: plugin-developer
 

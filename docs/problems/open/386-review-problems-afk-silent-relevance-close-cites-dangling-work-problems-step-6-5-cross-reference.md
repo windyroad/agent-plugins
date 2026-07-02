@@ -2,9 +2,9 @@
 
 **Status**: Open
 **Reported**: 2026-06-27
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 5 (Low) — Impact: 1 × Likelihood: 5 = 5. Rated at review 2026-07-02: dangling cross-ref; small doc fix.
 **Origin**: internal
-**Effort**: S (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: S. WSJF = (5 × 1.0) / 1 = 2.5.
 **JTBD**: JTBD-006
 **Persona**: developer
 

@@ -2,9 +2,9 @@
 
 **Status**: Open
 **Reported**: 2026-07-02
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 12 (High) — Impact: 3 × Likelihood: 4 = 12. Rated at review 2026-07-02: implement ADR-089+090 in skills+tests.
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: L. WSJF = (12 × 1.0) / 4 = 1.5.
 **JTBD**: JTBD-008
 **Persona**: plugin-developer
 

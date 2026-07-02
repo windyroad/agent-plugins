@@ -2,9 +2,9 @@
 
 **Status**: Open
 **Reported**: 2026-06-28
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 12 (High) — Impact: 3 × Likelihood: 4 = 12. Rated at review 2026-07-02: shipped capability invisible without policy section.
 **Origin**: corrective-feedback (user, 2026-06-28)
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: M. WSJF = (12 × 1.0) / 2 = 3.0.
 **JTBD**: JTBD-302 (re-anchored from JTBD-101 per the wr-jtbd:agent gate, 2026-06-28 — JTBD-101 is a plugin-author authoring/CI job; this serves adopter discoverability of a shipped-but-dormant capability, which is JTBD-302 "Trust That the README Describes the Plugin I Just Installed")
 **Persona**: plugin-user (re-anchored from plugin-developer to match JTBD-302)
 

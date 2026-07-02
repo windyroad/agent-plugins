@@ -4,9 +4,9 @@
 **Reported**: 2026-06-11
 **Root cause identified**: 2026-06-17 (P359 RCA, this iter — see Root Cause Analysis)
 **Going-forward decision**: ADR-082 (born-proposed, `human-oversight: unconfirmed`) — resolution deferred to user ratification
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 15 (High) — Impact: 3 × Likelihood: 5 = 15. Rated at review 2026-07-02: all ~27 held changesets leaking; holds fail their purpose.
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: L. WSJF = (15 × 1.0) / 4 = 1.875.
 **JTBD**: JTBD-002
 **Persona**: developer
 

@@ -2,9 +2,9 @@
 
 **Status**: Open
 **Reported**: 2026-06-28
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3 = 9. Rated at review 2026-07-02: SendMessage-resume mark hook doesn't fire; event-binding fix.
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: S. WSJF = (9 × 1.0) / 1 = 4.5.
 **JTBD**: JTBD-001
 **Persona**: plugin-developer
 

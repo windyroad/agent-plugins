@@ -2,10 +2,9 @@
 
 **Status**: Open
 **Reported**: 2026-05-26
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3 = 9. Rated at review 2026-07-02: bundler cutover; touches every plugin + CI.
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems; likely L/XL — touches every plugin's build + sync + CI)
-
+**Effort**: XL. WSJF = (9 × 1.0) / 8 = 1.125.
 ## Description
 
 Surfaced by the P283 prong-2 human-oversight drain (2026-05-26). When ADR-017 (cross-package shared-code sync convention) was presented for oversight confirmation, its own **reassessment trigger** — "revisit the shared-code storage approach when shared-module volume grows >5 modules" — was found **objectively met**: ~8 canonical shared helpers now live under `packages/shared/` (install-utils, derive-first-dispatch, session-marker, leak-detect, command-detect, external-comms-key, external-comms-gate, migrate-problems-layout).
