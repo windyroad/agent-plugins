@@ -34,6 +34,30 @@ teardown() { rm -rf "$TMPD"; }
   [ "$before" != "$(oversight_content_hash "$TMPD/f")" ]
 }
 
+@test "oversight_content_hash: ticking an acceptance-criterion checkbox does NOT drift (lifecycle progress)" {
+  printf -- '---\nstatus: accepted\n---\n- [ ] a criterion\n' > "$TMPD/f"; before="$(oversight_content_hash "$TMPD/f")"
+  printf -- '---\nstatus: accepted\n---\n- [x] a criterion\n' > "$TMPD/f"
+  [ "$before" = "$(oversight_content_hash "$TMPD/f")" ]
+}
+
+@test "oversight_content_hash: advancing frontmatter status: does NOT drift (lifecycle)" {
+  printf -- '---\nstatus: accepted\n---\n# body\n' > "$TMPD/f"; before="$(oversight_content_hash "$TMPD/f")"
+  printf -- '---\nstatus: done\n---\n# body\n' > "$TMPD/f"
+  [ "$before" = "$(oversight_content_hash "$TMPD/f")" ]
+}
+
+@test "oversight_content_hash: changing criterion TEXT DOES drift (substance)" {
+  printf -- '---\nstatus: accepted\n---\n- [ ] original\n' > "$TMPD/f"; before="$(oversight_content_hash "$TMPD/f")"
+  printf -- '---\nstatus: accepted\n---\n- [ ] a DIFFERENT criterion\n' > "$TMPD/f"
+  [ "$before" != "$(oversight_content_hash "$TMPD/f")" ]
+}
+
+@test "oversight_content_hash: advancing slice data-status does NOT drift (HTML map lifecycle)" {
+  printf '<a class="slice" data-story-id="STORY-1" data-status="draft">x</a>\n' > "$TMPD/m.html"; before="$(oversight_content_hash "$TMPD/m.html")"
+  printf '<a class="slice" data-story-id="STORY-1" data-status="done">x</a>\n' > "$TMPD/m.html"
+  [ "$before" = "$(oversight_content_hash "$TMPD/m.html")" ]
+}
+
 @test "is_story_map_ratified: confirmed + matching hash → ratified (md)" {
   printf -- '---\nstatus: accepted\n---\n# body\n' > "$TMPD/f"
   h="$(oversight_content_hash "$TMPD/f")"

@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: verifying
 rfc-id: implement-adr-089-090-story-map-oversight-and-one-story-per-rfc
 reported: 2026-07-02
 decision-makers: [Tom Howard]
@@ -44,9 +44,11 @@ Each story is on STORY-MAP-002; the marker + gate ride the tooling that builds t
 
 ## Confirmation
 
-- ADR-089: a behavioural test asserts an RFC can't reach `accepted` with `stories: []`; the four flipped bats are green under the new model, shipped in the same slice.
-- ADR-090: a story-map/story with an edit newer than its `oversight-date` reads `unconfirmed`; `capture-rfc`/`manage-rfc` refuse an unratified story; the detector surfaces unratified maps.
-- **Golden exemplar:** the tooling can (re)produce an artefact of STORY-MAP-002's shape + quality (P404 investigation task).
+**Status: implementation complete (2026-07-03) — awaiting P404 verification to close.** All five stories (STORY-020/021/022/024/025) are `done` and ratified.
+
+- ADR-089 ✅ — `wr-itil-check-rfc-has-stories` (behavioural bats) hard-blocks an `accepted` RFC with `stories: []` at the `manage-rfc` accept gate; the empty-stories fallback was removed from the work-problem/manage-problem traversal; the coupled `working-the-problem-traversal` bat was flipped in the same slice, and the other three verified green under the new model. Commits `3e3300a3`, `d2eb97d5`, `af49f7e6`.
+- ADR-090 ✅ — story maps + stories carry a drift-invalidated `human-oversight` marker fingerprinted by `oversight-hash`; any **substance** edit re-opens ratification (lifecycle progress — status, checkbox ticks, slice `data-status` — does not); `wr-itil-check-rfc-stories-ratified` refuses an RFC referencing an unratified story; `wr-itil-detect-unratified-stories-maps` surfaces unratified maps + stories into the work-problems Step 2.4 drain; the ratify UX (map-first → stories) lives in `manage-story-map` / `manage-story`; new maps/stories are born `unconfirmed`.
+- **Golden exemplar** ✅ — `capture-story-map` / `capture-story` now birth `unconfirmed` artefacts and the ratify flow reproduces STORY-MAP-002's shape (backbone × ribs × slices, INVEST value-first stories, drift-invalidated oversight); the hand-authored STORY-MAP-002 is the reference the tooling matches.
 
 ## Related
 

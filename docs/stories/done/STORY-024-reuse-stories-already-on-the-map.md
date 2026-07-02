@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: done
 story-id: reuse-stories-already-on-the-map
 reported: 2026-07-02
 decision-makers: [Tom Howard]
@@ -10,7 +10,7 @@ story-maps: [STORY-MAP-002]
 estimated-effort: M
 oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass)"
 human-oversight: confirmed
-oversight-hash: 6ffb4bd4e3ff07dde19aed6de51948d7faed5f39fd520fa888aaa123e9f73ba8
+oversight-hash: 9f87d90cf7281c1d8dc2c012d2c21a829f129348a8dd4352672cc3143e3dc74e
 ---
 
 # STORY-024: Reuse stories already on the map
@@ -24,9 +24,9 @@ In order that the map keeps telling the truth — one story per capability, not 
 
 ## Acceptance criteria (INVEST Testable)
 
-- [ ] When decomposing, existing map stories the fix touches are offered for reuse (referenced, not duplicated).
-- [ ] A reused story's `rfcs:`/reverse-trace picks up the new RFC without a duplicate file.
-- [ ] Reuse only offers **ratified** stories (per [ratify](022-ratify-the-story-map-and-its-stories.md) + ADR-090).
+- [x] When decomposing, existing map stories the fix touches are offered for reuse (referenced, not duplicated).
+- [x] A reused story's `rfcs:`/reverse-trace picks up the new RFC without a duplicate file.
+- [x] Reuse only offers **ratified** stories (per [ratify](022-ratify-the-story-map-and-its-stories.md) + ADR-090).
 
 ## Driving problem trace (I6)
 

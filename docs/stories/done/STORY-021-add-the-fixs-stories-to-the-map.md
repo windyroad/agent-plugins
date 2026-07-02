@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: done
 story-id: add-the-fixs-stories-to-the-map
 reported: 2026-07-02
 decision-makers: [Tom Howard]
@@ -10,7 +10,7 @@ story-maps: [STORY-MAP-002]
 estimated-effort: M
 oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass)"
 human-oversight: confirmed
-oversight-hash: 3c7f17ebfdb041baf27f084ba8d3383761b3dfd8c9ecb2579b7a25aa6dd6cf72
+oversight-hash: 3c662bdcd47c25cf47b29f3513c0eac42a0c0ae27a57713849ef2822fa1fc5f7
 ---
 
 # STORY-021: Add the fix's new stories to the map
@@ -24,10 +24,10 @@ In order that no part of a coordinated fix slips through the cracks — each cha
 
 ## Acceptance criteria (INVEST Testable)
 
-- [ ] New stories are added to the job's existing map (each a full INVEST story with `problems`/`jtbd`/`rfcs`/`story-maps` traces, per ADR-089).
-- [ ] Every RFC carries **≥1 story** — an atomic fix adds exactly one story (never an empty `stories:` list, per ADR-089).
-- [ ] Added stories are born `human-oversight: unconfirmed`; the map re-opens to unconfirmed on the change (per [ratify](022-ratify-the-story-map-and-its-stories.md)).
-- [ ] A card on the map links to each added story's file.
+- [x] New stories are added to the job's existing map (each a full INVEST story with `problems`/`jtbd`/`rfcs`/`story-maps` traces, per ADR-089).
+- [x] Every RFC carries **≥1 story** — an atomic fix adds exactly one story (never an empty `stories:` list, per ADR-089).
+- [x] Added stories are born `human-oversight: unconfirmed`; the map re-opens to unconfirmed on the change (per [ratify](022-ratify-the-story-map-and-its-stories.md)).
+- [x] A card on the map links to each added story's file.
 
 ## Driving problem trace (I6)
 

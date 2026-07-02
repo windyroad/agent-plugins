@@ -1,6 +1,6 @@
 # Problem 404: Implement ADR-089 + ADR-090 in the skills and tests (≥1-story-per-RFC + story-map/story ratification)
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-07-02
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 = 12. Rated at review 2026-07-02: implement ADR-089+090 in skills+tests.
 **Origin**: internal
@@ -76,3 +76,12 @@ Implement via **RFC-037** (authored 2026-07-02; traces `problems: [P404]`; archi
 - **ADR-089** (every RFC has ≥1 story) + **ADR-090** (story-map/story drift-invalidated oversight) — the authorities, both confirmed 2026-07-02.
 - **STORY-MAP-002** / **RFC-005** — the RFC-first vehicle this may land within as new stories (per the ADRs' "consider hanging off" note); the A3 ratify/create/add/reuse stories on the map are the natural home. **STORY-MAP-002 is also the hand-authored exemplar** — the golden reference for what a good, ratified USM + its INVEST stories look like (see the Investigation Task above).
 - Hang-off pre-filter (skipped subagent, >5 candidates) surfaced the RFC-first cluster for review-time consolidation: **P399** (author full RFC not skeleton), **P314** (I13 gate rework), **P310** (RFCs carry independent decisions), **P315**, **P312**. A reviewer should decide whether Phase 1/2 fold into RFC-005's implementation or that cluster rather than standing alone.
+
+## Fix Released
+
+**Implementation complete 2026-07-03 via RFC-037 (all 5 stories done + ratified); release queued via `.changeset/` (publishes on the next release drain).**
+
+Phase 1 (ADR-089): commits `3e3300a3` (has-stories accept gate + predicate), `d2eb97d5` (traversal fallback removal), `af49f7e6` (framing + legacy back-fill decision).
+Phase 2 (ADR-090): the ratified-stories reference gate, the unratified detector, the lazy-fingerprint drift-invalidation (substance-only, refined 2026-07-03), the born-`unconfirmed` markers + ratify UX across capture/manage-story(-map), and the work-problems drain wiring.
+
+Awaiting user verification that the shipped tooling behaves as intended, then → Closed. Legacy `stories: []` back-fill (RFC-036/RFC-003) is a separately-tracked, low-urgency follow-up (not a Confirmation criterion).

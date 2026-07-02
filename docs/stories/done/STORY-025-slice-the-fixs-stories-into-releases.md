@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: done
 story-id: slice-the-fixs-stories-into-releases
 reported: 2026-07-02
 decision-makers: [Tom Howard]
@@ -10,7 +10,7 @@ story-maps: [STORY-MAP-002]
 estimated-effort: M
 oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass)"
 human-oversight: confirmed
-oversight-hash: 35cc176e70e74bddd680e96ffa84a1924617be9e3662da2ca9f30dd4b33d5b17
+oversight-hash: 27fff01e1fe51ed59ac070e910217869ab978ef64701b555f1a5995058307f6c
 ---
 
 # STORY-025: Slice the fix's stories into releases
@@ -24,9 +24,9 @@ In order that users get the important part sooner, and work I defer stays visibl
 
 ## Acceptance criteria (INVEST Testable)
 
-- [ ] Stories on the map can be grouped into ordered release slices (Release 1 walking skeleton → Release 2 …).
-- [ ] Deferred phases stay first-class (visible on the map, competing for priority), not buried.
-- [ ] The release-slice grouping is a map change → re-opens ratification (per [ratify](022-ratify-the-story-map-and-its-stories.md)).
+- [x] Stories on the map can be grouped into ordered release slices (Release 1 walking skeleton → Release 2 …).
+- [x] Deferred phases stay first-class (visible on the map, competing for priority), not buried.
+- [x] The release-slice grouping is a map change → re-opens ratification (per [ratify](022-ratify-the-story-map-and-its-stories.md)).
 
 ## Driving problem trace (I6)
 

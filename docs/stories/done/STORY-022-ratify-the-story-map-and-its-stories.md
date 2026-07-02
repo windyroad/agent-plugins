@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: done
 story-id: ratify-the-story-map-and-its-stories
 reported: 2026-07-02
 decision-makers: [Tom Howard]
@@ -11,7 +11,7 @@ adrs: [ADR-090]
 estimated-effort: L
 oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass); acceptance amended to encode the map-first, two-option ratification UX the user pinned"
 human-oversight: confirmed
-oversight-hash: c0efe087ba742b211f94aa46929c8fed7a309258ff9641d420b2b7f2ca401ff1
+oversight-hash: adcd7b2c5defc6f8362b73e1b478fc2f0195da24e50ce96ef23becd9ff314958
 ---
 
 # STORY-022: Ratify the story map and its stories after any change
@@ -25,11 +25,11 @@ In order to trust that a fix is built on a map a human actually reviewed — not
 
 ## Acceptance criteria (INVEST Testable)
 
-- [ ] A story map and each story carry a `human-oversight:` marker (`unconfirmed`/`confirmed`), orthogonal to the `status:` lifecycle.
-- [ ] **Any change** to a map or a story (add / edit / re-slice / reuse / retitle) re-opens its marker to `unconfirmed` — drift-invalidated, not write-once (ADR-009 lineage).
-- [ ] An RFC may reference **only ratified** stories — [create RFC](015-rfc-authoring-is-pre-implementation-story-map.md) is gated on this.
-- [ ] An unratified-map detector surfaces them (mirroring the ADR/JTBD oversight drains).
-- [ ] **Ratification UX**: the **map (USM) is ratified first** — present its URL + context, then an AskUserQuestion with exactly two options: **Ratify** or free-text ("type something"). Only once the map is ratified are the **stories** ratified — one at a time, each briefed then offered the same **Ratify / type-something** choice.
+- [x] A story map and each story carry a `human-oversight:` marker (`unconfirmed`/`confirmed`), orthogonal to the `status:` lifecycle.
+- [x] **Any change** to a map or a story (add / edit / re-slice / reuse / retitle) re-opens its marker to `unconfirmed` — drift-invalidated, not write-once (ADR-009 lineage).
+- [x] An RFC may reference **only ratified** stories — [create RFC](015-rfc-authoring-is-pre-implementation-story-map.md) is gated on this.
+- [x] An unratified-map detector surfaces them (mirroring the ADR/JTBD oversight drains).
+- [x] **Ratification UX**: the **map (USM) is ratified first** — present its URL + context, then an AskUserQuestion with exactly two options: **Ratify** or free-text ("type something"). Only once the map is ratified are the **stories** ratified — one at a time, each briefed then offered the same **Ratify / type-something** choice.
 
 ## Driving problem trace (I6)
 

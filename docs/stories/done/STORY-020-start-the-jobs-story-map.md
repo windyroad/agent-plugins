@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: done
 story-id: start-the-jobs-story-map
 reported: 2026-07-02
 decision-makers: [Tom Howard]
@@ -10,7 +10,7 @@ story-maps: [STORY-MAP-002]
 estimated-effort: M
 oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass; reworked to the map's whole-picture value before ratifying)"
 human-oversight: confirmed
-oversight-hash: 3d204eadb4791fe6dbd894b279ddf5496883d15919ca29477de001c6f155d3b1
+oversight-hash: de3bd164fbe962c48770125d8382ed53ae491291aa0cebcb9ab060d3ed35d1dd
 ---
 
 # STORY-020: Start the job's story map
@@ -24,10 +24,10 @@ In order to see and reason about a coordinated fix as one coherent picture — i
 
 ## Acceptance criteria (INVEST Testable)
 
-- [ ] When a fix is being decomposed for a JTBD that has no `STORY-MAP-NNN` yet, a new story map is created (correct filename grammar, `draft` lifecycle, meta block wired to the JTBD).
-- [ ] The new map's `jtbd:` trace points at the driving job; its `problems:`/`rfcs:` are populated as the fix firms up.
-- [ ] When the job already has a map, this story does NOT fire — the fix routes to [add to map](021-add-the-fixs-stories-to-the-map.md) instead.
-- [ ] The new map is born `human-oversight: unconfirmed` and must be ratified before an RFC references its stories (per [ratify](022-ratify-the-story-map-and-its-stories.md)).
+- [x] When a fix is being decomposed for a JTBD that has no `STORY-MAP-NNN` yet, a new story map is created (correct filename grammar, `draft` lifecycle, meta block wired to the JTBD).
+- [x] The new map's `jtbd:` trace points at the driving job; its `problems:`/`rfcs:` are populated as the fix firms up.
+- [x] When the job already has a map, this story does NOT fire — the fix routes to [add to map](021-add-the-fixs-stories-to-the-map.md) instead.
+- [x] The new map is born `human-oversight: unconfirmed` and must be ratified before an RFC references its stories (per [ratify](022-ratify-the-story-map-and-its-stories.md)).
 
 ## Driving problem trace (I6)
 

@@ -20,7 +20,13 @@
 #   - markdown: `human-oversight:` / `oversight-hash:` frontmatter lines
 #   - HTML:     <meta name="human-oversight" ...> / <meta name="oversight-hash" ...>
 oversight_content_hash() {
-  grep -vE '^(human-oversight|oversight-hash):|<meta[^>]*name="(human-oversight|oversight-hash)"' "$1" \
+  # Exclude the marker + lifecycle-`status` lines, and normalize lifecycle-PROGRESS
+  # state — acceptance-criterion checkbox ticks and slice `data-status` — so that
+  # ONLY a SUBSTANCE change re-opens ratification. Ticking a criterion or advancing
+  # status/slice-progress is progress, not a change to what the user ratified; the
+  # value statement, criterion TEXT, and structure still drift the hash.
+  grep -vE '^(human-oversight|oversight-hash|status):|<meta[^>]*name="(human-oversight|oversight-hash|status)"' "$1" \
+    | sed -E 's/- \[[ xX]\]/- [ ]/g; s/data-status="[^"]*"/data-status=""/g' \
     | shasum -a 256 | awk '{print $1}'
 }
 
