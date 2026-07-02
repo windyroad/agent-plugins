@@ -127,6 +127,7 @@ Same shape as capture-story Step 4 — silent-default when unavailable.
   <meta name="adrs" content="">
   <meta name="reported" content="<YYYY-MM-DD>">
   <meta name="decision-makers" content="<git config user.name>">
+  <meta name="human-oversight" content="unconfirmed">
   <style>
     body { font-family: system-ui, sans-serif; max-width: 1200px; margin: 1rem auto; padding: 0 1rem; }
     h1 { font-size: 1.5rem; }
@@ -160,6 +161,8 @@ Same shape as capture-story Step 4 — silent-default when unavailable.
 ```
 
 Per `docs/STYLE-GUIDE.md`: NO inline `style=""` on `<a class="slice">` or `<h2 data-rib>` data-bearing elements; embedded `<style>` block in `<head>` is the only permitted styling source; `--cols` custom-property on `.backbone` is the layout-container exception.
+
+**Born `human-oversight: unconfirmed` (ADR-090).** A new map is created with `<meta name="human-oversight" content="unconfirmed">` — orthogonal to the `status:` lifecycle. It is NOT ratified until a human confirms it via `/wr-itil:manage-story-map <NNN> ratify` (which writes `confirmed` + an `oversight-hash` fingerprint via `wr-itil-mark-story-oversight-confirmed`). Until then `wr-itil-detect-unratified-stories-maps` surfaces it and an RFC may not reference its stories (`wr-itil-check-rfc-stories-ratified`). Any later content edit drifts the fingerprint and silently re-opens ratification (lazy-fingerprint, ADR-009 lineage). Do NOT hand-write `confirmed` here — born-unconfirmed is the load-bearing default.
 
 ### 6. Single commit — `## Story Maps` reverse-trace refresh
 

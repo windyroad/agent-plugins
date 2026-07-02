@@ -41,6 +41,7 @@ Per ADR-060 Phase 2 amendment 2026-05-10 lines 200-253:
 /wr-itil:manage-story <STORY-NNN> in-progress         # Manual transition (auto-fires on first non-capture commit)
 /wr-itil:manage-story <STORY-NNN> done                # Transition in-progress → done (gates all-criteria-ticked + RFC closed)
 /wr-itil:manage-story <STORY-NNN> archived            # Close without completion
+/wr-itil:manage-story <STORY-NNN> ratify              # ADR-090: confirm this story (usually via manage-story-map ratify)
 /wr-itil:manage-story review                          # Re-rank all stories + refresh README
 ```
 
@@ -172,6 +173,15 @@ done
 ```
 
 The helpers are idempotent + lazy-empty per the Slice 2a/2b/Slice 11 contract.
+
+### 7.5. Ratification flow (`ratify`) — ADR-090 / STORY-022
+
+`ratify` confirms human oversight of a single story — **orthogonal to the `status:` lifecycle** and drift-invalidated (any later content edit re-opens it via the `oversight-hash` fingerprint). The primary ratification surface is `/wr-itil:manage-story-map <NNN> ratify` (map first, then its stories); this per-story form is for ratifying a story on its own.
+
+1. **Born-confirmed discipline (P348):** `export CLAUDE_SESSION_ID` first (the marker shim no-ops on an empty SID). Never write `confirmed` without the same-turn confirm below.
+2. **Brief + confirm:** present the story's `## User value` + `## Acceptance criteria` — substance BEFORE the ID (P350) — then `AskUserQuestion` with two options: **Ratify** / **(type something)**. On **Ratify**: run `wr-itil-mark-story-oversight-confirmed <story-file>` (writes `confirmed` + fingerprint). On free-text: apply the correction as a story edit and re-present (the edit re-opens ratification).
+3. **AFK (ADR-013 Rule 6):** if `AskUserQuestion` is unavailable, do NOT auto-ratify (hollow marker, P348) — leave it unratified for the `/wr-itil:work-problems` Step 2.4 drain.
+4. **Single commit** per ADR-014.
 
 ### 8. List flow (`list`)
 

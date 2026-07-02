@@ -202,6 +202,7 @@ jtbd: [JTBD-<NNN>, JTBD-<NNN>, ...]
 rfcs: [<RFC-<NNN>, ...> or empty]
 story-maps: [<STORY-MAP-<NNN>, ...> or empty]
 estimated-effort: <S|M|L|XL — derived at capture per ADR-067 (real best-effort value, no deferral marker)>
+human-oversight: unconfirmed
 ---
 
 # STORY-<NNN>: <Title>
@@ -243,6 +244,8 @@ estimated-effort: <S|M|L|XL — derived at capture per ADR-067 (real best-effort
 
 (captured via /wr-itil:capture-story; expand at next /wr-itil:manage-story invocation)
 ```
+
+**Born `human-oversight: unconfirmed` (ADR-090).** A new story is created with `human-oversight: unconfirmed` in its frontmatter — orthogonal to the `status:` lifecycle. It is NOT ratified until a human confirms it via `/wr-itil:manage-story <NNN> ratify` (which writes `confirmed` + an `oversight-hash` fingerprint via `wr-itil-mark-story-oversight-confirmed`). Until then `wr-itil-detect-unratified-stories-maps` surfaces it and an RFC may not reference it (`wr-itil-check-rfc-stories-ratified`). Adding a story also drifts its parent map's fingerprint, re-opening the map's ratification (lazy-fingerprint, ADR-009 lineage). Do NOT hand-write `confirmed` — born-unconfirmed is the load-bearing default.
 
 The deferred-section pattern matches `capture-rfc`'s placeholder approach — the captured story is intentionally minimal; full INVEST shape lands at the manage-story accepted-transition step.
 
