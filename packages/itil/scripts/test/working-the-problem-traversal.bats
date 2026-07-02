@@ -56,12 +56,19 @@ setup() {
 }
 
 # ---------------------------------------------------------------------------
-# Surface 2: manage-problem names BOTH fallback paths
+# Surface 2: manage-problem — empty stories: [] is a legacy/back-fill state,
+# NOT a legitimate atomic fallback (ADR-089: every RFC has >=1 story). The old
+# JTBD-101-friction-guard atomic-RFC-empty-stories fallback is removed; the
+# legacy no-RFC direct-implementation fallback (a distinct path) stays.
 # ---------------------------------------------------------------------------
 
-@test "traversal: manage-problem names the atomic-RFC empty stories: [] fallback (JTBD-101 friction guard)" {
-  run grep -E 'atomic-RFC fallback|atomic RFC.*JTBD-101.*friction guard|stories: \[\].*atomic' "$MANAGE_PROBLEM"
+@test "traversal: manage-problem treats empty stories: [] as legacy/back-fill, not a legitimate atomic fallback (ADR-089)" {
+  # Positive: the ADR-089 model (>=1 story; back-fill the legacy empty-stories RFC) is named.
+  run grep -iE 'ADR-089|back-fill' "$MANAGE_PROBLEM"
   [ "$status" -eq 0 ]
+  # Negative: the old atomic-RFC empty-stories fallback legitimation is gone.
+  run grep -iE 'atomic-RFC fallback|atomic RFC.*JTBD-101.*friction guard' "$MANAGE_PROBLEM"
+  [ "$status" -ne 0 ]
 }
 
 @test "traversal: manage-problem names the legacy no-RFC direct-implementation fallback" {
@@ -89,7 +96,7 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "traversal: manage-problem names Refs: RFC-NNN trailer for atomic-RFC fallback" {
+@test "traversal: manage-problem names Refs: RFC-NNN trailer for cross-cutting RFC work (no single story)" {
   run grep -E 'Refs: RFC-' "$MANAGE_PROBLEM"
   [ "$status" -eq 0 ]
 }
