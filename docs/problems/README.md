@@ -12,7 +12,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 |------|-----|-------|----------|--------|--------|----------|--------|
 | 9.0 | P384 | wr-risk-scorer:external-comms agent has no credibility / self-own review axis | 9 Medium | Known Error | M | 2026-06-26 | inbound-reported (#283) |
 | 18.0 | P368 | wr-architect-mark-oversight-confirmed cannot discover session-id when CLAUDE_SESSION_ID empty AND no announce markers | 9 Medium | Known Error | S | 2026-06-17 | internal |
-| 15.0 | P405 | External-comms gate false-positives on `gh api` security-advisories read path | 15 High | Open | S | 2026-07-02 | internal |
+| 15.0 | P405 | External-comms gate false-positives on `gh api` security-advisories read path | 15 High | Known Error | S | 2026-07-02 | internal |
 | 12.0 | P179 | Agent defers requested work into untracked phases — phases are fine, but unticketed phases never get implemented | 12 High | Known Error | M | 2026-05-10 | internal |
 | 12.0 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 High | Known Error | M | 2026-06-10 | internal |
 | 12.0 | P376 | Catchup scanner misses the inbound direction; outbound templates carry the same structural defect the P363 rework fixed on the inbound side — cross-direction parity gap | 12 High | Known Error | M | 2026-06-23 | internal |

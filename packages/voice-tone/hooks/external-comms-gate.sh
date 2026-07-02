@@ -125,6 +125,19 @@ except Exception:
 # Permit silently when session_id is absent; the gate cannot key a marker.
 [ -n "$SESSION_ID" ] || exit 0
 
+# P405: `gh api` defaults to a read (GET). It only carries an outbound prose
+# body — the thing this gate reviews — when a request-body flag is supplied
+# (-f/--field, -F/--raw-field, --input; any of these flips gh api's default to
+# POST). Read-only polls carry none — e.g. `/wr-itil:review-problems` Step 4.5c's
+# security-advisories discovery poll `gh api repos/O/R/security-advisories --jq ...`
+# — and must NOT trip the gate. Used to narrow the two `gh api` surfaces
+# (security-advisories + comments) to writes only; every other surface
+# (gh issue/pr create|comment|edit, npm publish, changeset, git commit) is
+# inherently a write and stays gated unconditionally.
+_gh_api_has_body() {
+    printf '%s' "$1" | grep -qE '(^|[[:space:]])(--field|--raw-field|--input|-f|-F)([[:space:]]|=)'
+}
+
 # ---------- Surface detection ----------
 SURFACE=""
 DRAFT=""
@@ -153,9 +166,19 @@ except Exception:
         elif echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*gh pr edit(\s|$)'; then
             SURFACE="gh-pr-edit"
         elif echo "$COMMAND" | grep -qE 'gh api .*security-advisories'; then
-            SURFACE="gh-api-security-advisories"
+            # P405: gate only advisory-DRAFT writes; read-only polls (no body flag) skip.
+            if _gh_api_has_body "$COMMAND"; then
+                SURFACE="gh-api-security-advisories"
+            else
+                exit 0
+            fi
         elif echo "$COMMAND" | grep -qE 'gh api .*/comments'; then
-            SURFACE="gh-api-comments"
+            # P405: gate only comment-body writes; read-only polls (no body flag) skip.
+            if _gh_api_has_body "$COMMAND"; then
+                SURFACE="gh-api-comments"
+            else
+                exit 0
+            fi
         elif echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm publish(\s|$)'; then
             SURFACE="npm-publish"
         elif echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*git commit(\s|$)'; then

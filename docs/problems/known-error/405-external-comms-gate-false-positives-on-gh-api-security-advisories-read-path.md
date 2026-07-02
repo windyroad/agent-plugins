@@ -1,12 +1,15 @@
 # Problem 405: External-comms gate false-positives on `gh api` security-advisories read path
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-07-02
 **Priority**: 15 (High) — Impact: 3 (Moderate — silently blocks 1 of 3 channels every `/wr-itil:review-problems` Step 4.5c poll; fail-soft branch fires; no security-advisories discovery until fixed) × Likelihood: 5 (Almost certain — deterministic pattern-match; fires every run).
 **Origin**: internal
 **Effort**: S — regex tighten in the gate: distinguish read-only `gh api` invocations from outbound-draft body writes. WSJF = 15 / 2 = 7.5.
-**JTBD**: JTBD-007
+**JTBD**: JTBD-006
 **Persona**: developer
+
+<!-- JTBD re-anchored JTBD-007 → JTBD-006 (2026-07-03, jtbd gate, doc-only): the header cited the AFK auto-capture default; JTBD-006 (Progress the Backlog While I'm Away) owns the upstream inbound-discovery channel this gate blocked. Persona `developer` unchanged. -->
+
 
 ## Description
 
@@ -38,10 +41,18 @@ Same defect class as P402 (mark hook doesn't fire on background-launched agents)
 
 ### Investigation Tasks
 
-- [ ] Locate the external-comms gate hook's pattern-match regex; identify which token fires on the read path.
-- [ ] Distinguish read-only invocations: presence of `--jq` (query-only), absence of `--method POST/PATCH/PUT`, absence of `--input`/`-f` body flags.
-- [ ] Add a positive-exclusion: `gh api ... --jq ...` without body-input flags → skip the gate.
-- [ ] Behavioural bats: fixture that pipes each of the three Step 4.5c invocations through the gate; assert issues + discussions + advisories all PASS on read-only shape.
+- [x] Locate the external-comms gate hook's pattern-match regex; identify which token fires on the read path.
+- [x] Distinguish read-only invocations: presence of `--jq` (query-only), absence of `--method POST/PATCH/PUT`, absence of `--input`/`-f` body flags.
+- [x] Add a positive-exclusion: `gh api ... --jq ...` without body-input flags → skip the gate.
+- [x] Behavioural bats: fixture that pipes each of the three Step 4.5c invocations through the gate; assert issues + discussions + advisories all PASS on read-only shape.
+
+### Confirmed root cause (2026-07-03)
+
+`packages/shared/hooks/external-comms-gate.sh` (synced to the risk-scorer + voice-tone consumer copies per ADR-017) detects the `gh-api-security-advisories` surface with `grep -qE 'gh api .*security-advisories'` and `gh-api-comments` with `grep -qE 'gh api .*/comments'`. Both match on the endpoint substring, not the invocation's read/write semantics — so a read-only `gh api repos/O/R/security-advisories --jq ...` GET (which carries no outbound prose) is denied identically to an advisory-draft POST. `gh api` defaults to GET; it becomes a prose-bearing write only when a request-body flag (`-f`/`--field`, `-F`/`--raw-field`, `--input`) is supplied.
+
+## Fix Strategy
+
+Tracked by **RFC-039** (External-comms gate discriminates read-only `gh api` polls from body-bearing draft writes). Add a `_gh_api_has_body` predicate to the canonical hook and gate the two `gh api` surfaces ONLY when a body flag is present; read-only invocations `exit 0` (skip) at surface-detection time. All inherently-write surfaces (`gh issue`/`gh pr` create/comment/edit, `npm publish`, changeset, git-commit-message) stay gated unconditionally. Bug-fix within ADR-028's existing contract (architect verdict 2026-07-03 — no new ADR). Implemented + behavioural bats added to both consumer test files 2026-07-03; awaiting release before Verifying.
 
 ## Dependencies
 
@@ -55,3 +66,9 @@ Same defect class as P402 (mark hook doesn't fire on background-launched agents)
 - **ADR-028** — external-comms gate contract.
 - `.upstream-channels.json` — the config that triggers the poll.
 - Captured via `/wr-itil:capture-problem`; rated at capture per the `.changeset/rate-captures-at-capture.md` direction.
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-039 | proposed | External-comms gate discriminates read-only `gh api` polls from body-bearing draft writes |

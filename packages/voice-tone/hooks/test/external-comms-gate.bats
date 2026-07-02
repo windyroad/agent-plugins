@@ -196,6 +196,44 @@ run_hook() {
   [[ "$output" == *"wr-voice-tone:external-comms"* ]]
 }
 
+# ---------------------------------------------------------------------------
+# P405 — read-only `gh api` polls must NOT trip the gate. `gh api` defaults to
+# GET; it only carries an outbound prose body (the thing this gate reviews)
+# when a request-body flag (-f/--field, -F/--raw-field, --input) is present.
+# The `/wr-itil:review-problems` Step 4.5c security-advisories discovery poll
+# is read-only (`--jq` filter, no body flag) and was being denied as if it
+# were an advisory draft, silently blacking out one discovery channel.
+# ---------------------------------------------------------------------------
+
+@test "P405: read-only gh api security-advisories poll (--jq, no body flag) is not gated" {
+  INPUT=$(build_bash_input "gh api repos/foo/bar/security-advisories --jq '.[].ghsa_id'")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "P405: bare gh api security-advisories read (no flags) is not gated" {
+  INPUT=$(build_bash_input "gh api repos/foo/bar/security-advisories")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "P405: read-only gh api comments poll (--jq, no body flag) is not gated" {
+  INPUT=$(build_bash_input "gh api repos/foo/bar/issues/1/comments --jq '.[].body'")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "P405: gh api security-advisories write with -f body flag still triggers the gate" {
+  INPUT=$(build_bash_input "gh api repos/foo/bar/security-advisories -f summary='new advisory'")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"deny"* ]]
+  [[ "$output" == *"wr-voice-tone:external-comms"* ]]
+}
+
 @test "npm publish triggers the gate" {
   INPUT=$(build_bash_input "npm publish")
   run_hook "$INPUT"
