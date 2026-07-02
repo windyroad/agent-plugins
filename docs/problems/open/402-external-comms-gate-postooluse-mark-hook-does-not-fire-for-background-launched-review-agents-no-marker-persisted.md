@@ -4,7 +4,7 @@
 **Reported**: 2026-07-01
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 (Likely) = 12. **Rated at capture from in-session evidence (5/5 PASS, 0 markers), NOT deferred** — re-rating "at next /wr-itil:review-problems" would itself be the P375 bug (nothing self-fires review-problems). Impact 3: blocks every external-facing commit and forces habitual `BYPASS_RISK_GATE=1`, eroding a load-bearing leak gate (workaround exists). Likelihood 4: reproduces on every background-launched review this session.
 **Origin**: internal
-**Effort**: M — single-package fix to the external-comms mark-hook persistence path (a foreground/sync review path the PostToolUse hook can observe, OR a bounded multi-SID marker write per P260 Option-C). WSJF = (12 × 1.0) / 2 = 6.0.
+**Effort**: M — **fix direction corrected 2026-07-02** (see ## Corrected diagnosis): NOT a mark-hook persistence fix (the marker lands correctly under the live SID in `$TMPDIR`). Residual is the draft≠commit key mismatch (P356 class); likely re-scope/close after the one-shot end-to-end isolation test. Priority/Likelihood pending that test — the load-bearing-gate-bug framing (Impact 3 × Likelihood 4) is likely an overstatement now that the gate is shown to work when draft==commit. WSJF = (12 × 1.0) / 2 = 6.0 (to be re-rated).
 **JTBD**: JTBD-001
 **Persona**: developer
 
@@ -19,6 +19,29 @@ Root cause as observed: **the PostToolUse mark hook isn't firing for background-
 3. **Foreground skill-wrapper path** (`/wr-risk-scorer:external-comms` / `/wr-risk-scorer:assess-external-comms`) — also forced async; no marker persisted.
 
 Net effect: the leak review passes (5/5 PASS), but the gate cannot see a marker, so it continues to deny. The only escape is `BYPASS_RISK_GATE=1` after a legitimate PASS — re-introducing the exact friction tax P353 was meant to retire.
+
+## Corrected diagnosis (2026-07-02 — supersedes the "mark hook doesn't fire" claim above)
+
+The original "zero markers / hook doesn't fire" evidence was a **`/tmp`-vs-`$TMPDIR` checking error**, not a hook bug. On macOS `$TMPDIR` is `/var/folders/.../T/`; both the mark hook AND the gate write/read `${TMPDIR:-/tmp}/claude-risk-<SID>/`. The Symptoms probe ("`/tmp/<external-comms-marker>-<LIVE_SESSION_ID>` absent") looked in `/tmp` — the wrong directory.
+
+Verified 2026-07-02 in the correct location (`$TMPDIR`):
+
+- The mark hook (`risk-score-mark.sh` external-comms branch) **DOES fire for background-launched agents** and writes `${TMPDIR}/claude-risk-<SID>/external-comms-risk-reviewed-<key>` **under the live session SID** — a real background probe this session wrote its marker under this session's own SID (`4dc555f3…`). Traced the `touch` succeeding; `_get_tool_output` correctly reads the harness `tool_response.content[].text` shape. There is **no SID mismatch and no firing failure**.
+- The gate and mark hook share `lib/external-comms-key.sh`: `key = sha256(normalize(draft) + '\n' + surface)`. Keys match **iff the reviewed `<draft>` equals the commit message** the gate extracts (modulo documented frontmatter-strip / single-newline normalization).
+
+**Real residual (NOT "hook doesn't fire", NOT multi-SID):** the gate denies when the reviewed draft ≠ the actual commit message — a **key mismatch**, the P356 class ("send the verbatim commit body incl. trailer to the reviewer"). This session's own bypass cycle was self-inflicted: reviewing draft D, then committing `D + a "BYPASS/PASS" note` → different key → deny → bypass → repeat.
+
+**`Approach A` (bounded multi-SID marker write, named in the Effort line) is WITHDRAWN** — the marker already lands under the live SID.
+
+### Controlled end-to-end test result (2026-07-02)
+
+Ran the clean test: reviewed the exact commit message verbatim (single `-m`, draft byte-identical to commit incl. trailer — **key controlled**), confirmed the review returned PASS, then attempted the commit unchanged.
+
+- [x] **Verbatim `draft == commit` review → gate STILL DENIED.** So the residual is **NOT** a key mismatch (the key was held identical) and **NOT** multi-SID.
+- [x] **Root residual = PostToolUse:Agent mark firing/timing.** Checked `$TMPDIR/claude-risk-<live-SID>/` immediately after the PASS: the expected-key marker was **absent**, and no external-comms marker was written by this review within a 4-min window — yet an *earlier* review's marker (`0578761e…`) persists under the same live SID. So the mark hook **fires only sometimes / too late** for review-agent completions in this harness; when the marker hasn't landed by commit time, the gate correctly denies.
+- [ ] Still open: WHY firing is inconsistent (backgrounded-agent completion not always emitting PostToolUse:Agent? a race between completion-notification and the mark hook? harness-specific). This is a **harness-interaction** question, not a plugin key/SID bug.
+
+**Revised fix direction (supersedes Approach A entirely):** the marker mechanism (logic + SID + key) is sound; the gap is *reliable marking on review completion*. Candidate fixes are a **design decision for the user**: (a) an orchestrator-writes-the-marker path after a read PASS (pragmatic, but trades away independent-hook verification); (b) a marking trigger that fires reliably in this harness instead of PostToolUse:Agent; (c) accept `BYPASS_RISK_GATE=1`-after-PASS as the documented workflow. NOT a multi-SID marker write.
 
 ## Symptoms
 
