@@ -1121,3 +1121,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 
 > Last reviewed: 2026-07-02 **P404 → Known Error** — documented root cause (ADR-089/090 ratified but unimplemented; 4 green empty-stories bats + RFC-036's `stories:[]` are the live evidence) + Fix Strategy (RFC-037, the RFC-first fix) + workaround (none — governance gap, not a break); WSJF 1.5 → 6.0 on the Known-Error multiplier. Implementation (RFC-037's Phase 1 empty-stories removal + Phase 2 story-map/story tooling) is the Effort-L dev work ahead.
 
+## 2026-07-03
+
+> Last reviewed: 2026-07-03 **P404 → Verification Pending** — RFC-037 complete (ADR-089 + ADR-090 implemented; all 5 stories done + ratified); moved from WSJF Rankings to the Verification Queue. Release queued via `.changeset/`.
+

@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-03 **P404 → Verification Pending** — RFC-037 complete (ADR-089 + ADR-090 implemented; all 5 stories done + ratified); moved from WSJF Rankings to the Verification Queue. Release queued via `.changeset/`.
+> Last reviewed: 2026-07-03 **P409 captured** — back-fill legacy RFCs with empty `stories: []` for ADR-089 consistency (lightweight aside via /wr-itil:capture-problem; deferred follow-up from RFC-037).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -52,6 +52,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 1.125 | P298 | Plugin-published artifacts should NOT reference internal IDs at all (ADR-055 chose prefixing; strip them instead — they're meaningless to adopters) | 9 Med High | Open | XL | 2026-05-25 | internal |
 | 1.125 | P304 | Move `packages/shared/` from duplicate-and-sync to a bundler-based shared-code approach (ADR-017 reassessment outcome) | 9 Medium | Open | XL | 2026-05-26 | internal |
 | 1.0 | P338 | P082 Phase 2 — cognitive-accessibility evaluator on the 4 external-comms surfaces (gh / npm / changeset / git commit), shipped as a NEW `@windyroad/cognitive-a11y` plugin | 4 Low | Open | L | 2026-05-30 | internal |
+| 1.5 | P409 | Back-fill legacy RFCs still carrying empty `stories: []` | 3 Medium | Open | M | 2026-07-03 | internal |
 | 0.75 | P012 | Skill Testing Harness Scope Undefined | 6 Medium | Open | XL | 2026-04-16 | internal |
 
 ## Verification Queue
