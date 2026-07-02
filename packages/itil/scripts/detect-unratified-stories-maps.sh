@@ -1,21 +1,27 @@
 #!/usr/bin/env bash
 # detect-unratified-stories-maps.sh — ADR-090 detector.
 #
-# Token-cheap detection of story maps + stories lacking the ratified
-# `human-oversight: confirmed` marker. Mirrors wr-architect detect-unoversighted.sh
-# but spans two artefact types with different marker encodings:
-#   - stories:    markdown YAML frontmatter  `human-oversight: confirmed`
-#   - story-maps: HTML meta tag              `<meta name="human-oversight" content="confirmed">`
-#
-# ADR-090's marker is DRIFT-INVALIDATED (unlike ADR-066 write-once): an edit
-# re-opens it to `unconfirmed`, so this detector surfaces both the never-ratified
-# (no marker) and the drift-reopened (`unconfirmed`) cases as the drain queue.
+# Token-cheap detection of story maps + stories that are NOT ratified. Mirrors
+# wr-architect detect-unoversighted.sh but spans two artefact types and is
+# DRIFT-AWARE via the shared lazy-fingerprint helper: an artefact is ratified
+# only when it carries a `confirmed` human-oversight marker AND a stored
+# oversight-hash matching its current content. This surfaces three cases as the
+# drain queue:
+#   - never ratified   (no marker)
+#   - drift-reopened   (marker says confirmed, but content changed → hash mismatch)
+#   - legacy confirmed  (confirmed but no fingerprint yet — needs one re-ratify)
 #
 # Usage: detect-unratified-stories-maps.sh [STORIES_DIR=docs/stories] [MAPS_DIR=docs/story-maps]
-# Output: one unratified artefact path per line, sorted. Empty = all confirmed.
+# Output: one unratified artefact path per line, sorted. Empty = all ratified.
 # Always exits 0 (detector, not a gate). Consumed by the work-problems Step 2.4
-# oversight-unconfirmed drain (mirror of the architect/jtbd detectors).
+# oversight-unconfirmed drain.
 set -euo pipefail
+
+# Adopter-safe: source the shared hash lib RELATIVE TO THIS SCRIPT (P317).
+LIB="$(cd "$(dirname "${BASH_SOURCE[0]}")/../lib" 2>/dev/null && pwd)" || {
+  echo "detect-unratified-stories-maps: cannot locate lib dir" >&2; exit 0; }
+# shellcheck source=/dev/null
+source "$LIB/story-oversight.sh"
 
 STORIES_DIR="${1:-docs/stories}"
 MAPS_DIR="${2:-docs/story-maps}"
@@ -23,20 +29,15 @@ MAPS_DIR="${2:-docs/story-maps}"
 shopt -s nullglob
 
 {
-  # Stories — markdown YAML frontmatter.
   if [ -d "$STORIES_DIR" ]; then
     for f in "$STORIES_DIR"/*.md "$STORIES_DIR"/*/*.md; do
       [ "$(basename "$f")" = "README.md" ] && continue
-      fm="$(awk 'NR==1 && $0 != "---" { exit } NR==1 { next } /^---[[:space:]]*$/ { exit } { print }' "$f")"
-      printf '%s\n' "$fm" | grep -qiE '^human-oversight:[[:space:]]*confirmed[[:space:]]*$' && continue
-      echo "$f"
+      is_story_map_ratified "$f" || echo "$f"
     done
   fi
-  # Story maps — HTML meta tag.
   if [ -d "$MAPS_DIR" ]; then
     for f in "$MAPS_DIR"/*.html "$MAPS_DIR"/*/*.html; do
-      grep -qiE '<meta[^>]*name="human-oversight"[^>]*content="confirmed"' "$f" && continue
-      echo "$f"
+      is_story_map_ratified "$f" || echo "$f"
     done
   fi
 } | sort

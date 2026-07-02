@@ -8,8 +8,9 @@ jtbd: [JTBD-008]
 rfcs: [RFC-005]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
-human-oversight: confirmed
 oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass; reworked to the map's whole-picture value before ratifying)"
+human-oversight: confirmed
+oversight-hash: 3d204eadb4791fe6dbd894b279ddf5496883d15919ca29477de001c6f155d3b1
 ---
 
 # STORY-020: Start the job's story map

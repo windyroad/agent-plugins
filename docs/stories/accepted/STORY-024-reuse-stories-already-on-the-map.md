@@ -8,8 +8,9 @@ jtbd: [JTBD-008]
 rfcs: [RFC-005]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
-human-oversight: confirmed
 oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass)"
+human-oversight: confirmed
+oversight-hash: 6ffb4bd4e3ff07dde19aed6de51948d7faed5f39fd520fa888aaa123e9f73ba8
 ---
 
 # STORY-024: Reuse stories already on the map

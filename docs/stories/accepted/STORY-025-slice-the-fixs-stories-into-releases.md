@@ -8,8 +8,9 @@ jtbd: [JTBD-008]
 rfcs: [RFC-005]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
-human-oversight: confirmed
 oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass)"
+human-oversight: confirmed
+oversight-hash: 35cc176e70e74bddd680e96ffa84a1924617be9e3662da2ca9f30dd4b33d5b17
 ---
 
 # STORY-025: Slice the fix's stories into releases

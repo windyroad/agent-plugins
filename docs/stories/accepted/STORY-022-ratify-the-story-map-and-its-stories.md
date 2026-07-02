@@ -9,8 +9,9 @@ rfcs: [RFC-005]
 story-maps: [STORY-MAP-002]
 adrs: [ADR-090]
 estimated-effort: L
-human-oversight: confirmed
 oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass); acceptance amended to encode the map-first, two-option ratification UX the user pinned"
+human-oversight: confirmed
+oversight-hash: c0efe087ba742b211f94aa46929c8fed7a309258ff9641d420b2b7f2ca401ff1
 ---
 
 # STORY-022: Ratify the story map and its stories after any change

@@ -17,6 +17,12 @@
 # Authority: ADR-090. Driver: P404 Phase 2. Test: check-rfc-stories-ratified.bats.
 set -euo pipefail
 
+# Adopter-safe: source the shared lazy-fingerprint lib RELATIVE TO THIS SCRIPT (P317).
+LIB="$(cd "$(dirname "${BASH_SOURCE[0]}")/../lib" 2>/dev/null && pwd)" || {
+  echo "check-rfc-stories-ratified: cannot locate lib dir" >&2; exit 2; }
+# shellcheck source=/dev/null
+source "$LIB/story-oversight.sh"
+
 rfc="${1:-}"
 stories_root="${2:-docs/stories}"
 if [ -z "$rfc" ]; then
@@ -45,7 +51,7 @@ for id in $ids; do
     unratified="$unratified $id(missing)"
     continue
   fi
-  if ! grep -qE '^human-oversight:[[:space:]]*confirmed([[:space:]]|$)' "$f"; then
+  if ! is_story_map_ratified "$f"; then
     unratified="$unratified $id(unratified)"
   fi
 done
