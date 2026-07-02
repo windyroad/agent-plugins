@@ -8,7 +8,8 @@ jtbd: [JTBD-008]
 rfcs: [RFC-005]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
-human-oversight: unconfirmed
+human-oversight: confirmed
+oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass)"
 ---
 
 # STORY-021: Add the fix's new stories to the map
@@ -18,7 +19,7 @@ human-oversight: unconfirmed
 
 ## User value (INVEST Valuable)
 
-In order that no piece of a coordinated fix gets forgotten and I can see the whole shape of the work at a glance, as a developer decomposing a fix, I want to **add the fix's new stories to the job's story map**.
+In order that no part of a coordinated fix slips through the cracks — each change captured as its own trackable, prioritisable, reviewable piece rather than lost in a blob — as a developer decomposing a fix, I want to **add the fix's stories to the job's story map**.
 
 ## Acceptance criteria (INVEST Testable)
 

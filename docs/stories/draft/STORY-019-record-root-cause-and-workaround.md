@@ -8,22 +8,24 @@ jtbd: [JTBD-008]
 adrs: [ADR-022]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
-human-oversight: unconfirmed
+human-oversight: confirmed
+oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story ratification pass; reworked record→find-via-RCA before ratifying)"
 ---
 
-# STORY-019: Record root cause + workaround → Known Error
+# STORY-019: Find the root cause and a workaround → Known Error
 
 **Story map:** [← STORY-MAP-002: Decompose a Fix Into Coordinated Changes](../../story-maps/draft/STORY-MAP-002-decompose-a-fix-into-coordinated-changes.html) · A2 (Release 1)
 **Backbone:** [A1 capture](018-capture-the-problem-mid-flow.md) · A2 root cause · A3 decompose ([start map](020-start-the-jobs-story-map.md) …) · [A4 work the stories](014-author-first-work-problems-afk.md) · [A5 ship](023-ship-verify-and-close-with-a-real-trace.md)
 
 ## User value (INVEST Valuable)
 
-In order that the fix targets the real cause instead of a symptom — and users aren't left blocked while it's built — as a developer, I want to record a problem's root cause and a documented workaround and move the ticket to Known Error.
+In order to know what to actually fix — the *root cause*, not a symptom — and to mitigate the impact while that fix is built, as a developer, I want to use RCA techniques (like 5 Whys) to find a problem's root cause and a workaround, reaching Known Error.
 
-## Acceptance criteria (INVEST Testable) — SHIPPED
+## Acceptance criteria (INVEST Testable)
 
-- [x] Root cause analysis + a documented workaround are recorded on the ticket.
-- [x] The ticket transitions `Open → Known Error` (per ADR-022 — Known Error = root cause + workaround; the fix is *proposed* after).
+- [x] The ticket transitions `Open → Known Error` with a documented root cause + workaround (per ADR-022; the fix is *proposed* after) — shipped.
+- [ ] The flow guides an **RCA technique** (e.g. 5 Whys) to find the *cause*, not a symptom — verify current behaviour (likely a refinement, not yet actively prompted).
+- [x] A workaround is identified that mitigates impact while the root-cause fix is built.
 - [x] No fix or RFC is required to reach Known Error (that's A3's job).
 
 ## Driving problem trace (I6)

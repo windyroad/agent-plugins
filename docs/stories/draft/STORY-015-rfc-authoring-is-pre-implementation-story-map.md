@@ -8,6 +8,8 @@ jtbd: [JTBD-008]
 rfcs: [RFC-005]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
+human-oversight: confirmed
+oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass; value reworked to the RFC-as-traceable-catalogue-of-the-fix)"
 ---
 
 # STORY-015: The RFC lists its stories before any code is written
@@ -25,7 +27,7 @@ estimated-effort: M
 
 ## User value (INVEST Valuable)
 
-In order that a fix is a deliberate, reviewable plan rather than something improvised at the keyboard, as a maintainer authoring an RFC for a fix, I want `/wr-itil:capture-rfc` (and the heavyweight `/wr-itil:manage-rfc`) to author the RFC as a **pre-implementation user story map** (ADR-060), not a fix-time `## Scope`+`## Tasks` blob.
+In order to fix the problem — and keep a single, traceable catalogue of the work that fix takes, tied back to the problem it solves — as a maintainer authoring an RFC, I want `/wr-itil:capture-rfc` (and heavyweight `/wr-itil:manage-rfc`) to write it as a **pre-implementation user story map** (ADR-060), not a fix-time `## Scope`+`## Tasks` blob.
 
 ## Acceptance criteria (INVEST Testable)
 

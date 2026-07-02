@@ -8,7 +8,8 @@ jtbd: [JTBD-008]
 rfcs: [RFC-005]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
-human-oversight: unconfirmed
+human-oversight: confirmed
+oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass; reworked to the map's whole-picture value before ratifying)"
 ---
 
 # STORY-020: Start the job's story map
@@ -18,7 +19,7 @@ human-oversight: unconfirmed
 
 ## User value (INVEST Valuable)
 
-In order that a missing map never blocks me from tracking a coordinated fix — even the very first one on a job — as a developer, I want the flow to **start the job's story map for me** automatically.
+In order to see and reason about a coordinated fix as one coherent picture — its whole shape at a glance, what's MVP versus later, where the gaps are — instead of a scattered pile of changes buried in a ticket, as a developer taking on the first coordinated fix for a job that has no map yet, I want a story map **started for it**.
 
 ## Acceptance criteria (INVEST Testable)
 

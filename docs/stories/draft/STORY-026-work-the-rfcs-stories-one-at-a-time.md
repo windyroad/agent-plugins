@@ -8,7 +8,8 @@ jtbd: [JTBD-008, JTBD-006]
 rfcs: [RFC-005]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
-human-oversight: unconfirmed
+human-oversight: confirmed
+oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass; value reworked to delivering each INVEST story's value)"
 ---
 
 # STORY-026: Work the RFC's stories one at a time
@@ -18,7 +19,7 @@ human-oversight: unconfirmed
 
 ## User value (INVEST Valuable)
 
-In order to make safe, steady progress I can trust — catching a mistake while it's small and cheap instead of untangling one giant half-finished change — as a developer implementing a decomposed fix, I want to work the RFC's stories one at a time.
+In order to deliver the value of each story in turn — every one an INVEST-valuable increment that moves the problem toward fixed — as a developer implementing a decomposed fix, I want to work the RFC's stories one at a time.
 
 ## Acceptance criteria (INVEST Testable) — SHIPPED (traversal)
 

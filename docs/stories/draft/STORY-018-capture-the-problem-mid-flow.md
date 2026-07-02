@@ -7,7 +7,8 @@ problems: [P155]
 jtbd: [JTBD-008, JTBD-006]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
-human-oversight: unconfirmed
+human-oversight: confirmed
+oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story ratification pass)"
 ---
 
 # STORY-018: Capture the problem in seconds, mid-flow
@@ -19,10 +20,10 @@ human-oversight: unconfirmed
 
 In order to keep a problem from being lost when I hit it mid-flow, as a developer, I want to capture it in seconds — with a real trace — without breaking my current task.
 
-## Acceptance criteria (INVEST Testable) — SHIPPED
+## Acceptance criteria (INVEST Testable) — core SHIPPED; one refinement pending
 
 - [x] `/wr-itil:capture-problem` files a ticket from a one-line description without the full intake ceremony.
-- [x] Persona + JTBD are derived (or elicited), not shoehorned (P401).
+- [ ] Persona + JTBD are derived (or elicited), **not shoehorned** — **pending P401** (still shoehorns today; the fix is captured, not yet shipped).
 - [x] The capture rides the lightweight aside path; the loop/flow continues.
 
 ## Driving problem trace (I6)

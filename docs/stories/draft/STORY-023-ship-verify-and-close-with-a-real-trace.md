@@ -8,7 +8,8 @@ jtbd: [JTBD-008, JTBD-001]
 adrs: [ADR-022]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
-human-oversight: unconfirmed
+human-oversight: confirmed
+oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass; value reworked to the reporter actually getting the problem solved)"
 ---
 
 # STORY-023: Ship → verify → problem closes with a real trace; adopter gets the fix
@@ -18,7 +19,7 @@ human-oversight: unconfirmed
 
 ## User value (INVEST Valuable)
 
-In order to close the problem with a durable trace from problem → RFC → change and get the fix to the adopter in a published release, as the developer (and the adopter who hit the problem), I want the coordinated fix to land, release, and verify.
+In order that the person who hit the problem actually gets it solved — a verified fix in a published release, not just merged code — as the developer, I want the coordinated fix to land, release, and be verified, closing the problem.
 
 ## Acceptance criteria (INVEST Testable) — SHIPPED
 
