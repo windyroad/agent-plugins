@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-02 **review-problems AFK pre-flight** — inbound-discovery cache refreshed (TTL auto-recheck; +4 new github-issues #296/#304/#306/#307 as pending discovery-only; discussions HTTP-410 + advisories gate-block skipped fail-soft). Relevance-close pass: 25 CLOSE-CANDIDATE-WITH-CAVEAT queued for interactive review, 0 auto-closes. No WSJF drift (corpus + RISK-POLICY unchanged since last review); 0 auto-transitions.
+> Last reviewed: 2026-07-03 **P410 captured** — install-updates leaves stale cached plugin versions on disk; no prune step (lightweight aside via /wr-itil:capture-problem)
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -54,6 +54,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 1.125 | P304 | Move `packages/shared/` from duplicate-and-sync to a bundler-based shared-code approach (ADR-017 reassessment outcome) | 9 Medium | Open | XL | 2026-05-26 | internal |
 | 1.0 | P338 | P082 Phase 2 — cognitive-accessibility evaluator on the 4 external-comms surfaces (gh / npm / changeset / git commit), shipped as a NEW `@windyroad/cognitive-a11y` plugin | 4 Low | Open | L | 2026-05-30 | internal |
 | 1.5 | P409 | Back-fill legacy RFCs still carrying empty `stories: []` | 3 Medium | Open | M | 2026-07-03 | internal |
+| 1.5 | P410 | install-updates leaves stale cached plugin versions on disk — no prune step | 3 Medium | Open | M | 2026-07-03 | internal |
 | 0.75 | P012 | Skill Testing Harness Scope Undefined | 6 Medium | Open | XL | 2026-04-16 | internal |
 
 ## Verification Queue
