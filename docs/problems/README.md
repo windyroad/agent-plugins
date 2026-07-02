@@ -22,6 +22,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 9.0 | P400 | architect-mark-reviewed PostToolUse never fires on a SendMessage resume of an architect agent | 9 Medium | Open | S | 2026-06-28 | internal |
 | 8.0 | P345 | Fix-titled commits do not transition the ticket lifecycle in the same commit grain — ticket stays Open across release + CI-verify + multiple intervening commits | 8 Medium | Known Error | M | 2026-05-31 | internal |
 | 8.0 | P375 | Repo conflates a "named re-entry point" with a self-firing cadence — deferrals not transitively reachable from an automatic trigger rot | 16 High | Known Error | L | 2026-06-23 | internal |
+| 8.0 | P408 | risk-score-commit-gate hardcodes a 14-day RISK-POLICY staleness threshold, ignoring the policy's stated review cadence (flagged a quarterly policy stale at 16 days); affects all adopters. Fix options a/b/c recorded (a: gate derives threshold from stated cadence, recommended). | 8 Medium | Open | S | 2026-07-02 | internal |
 | 7.5 | P359 | Changeset holding does not withhold shipment — held code ships with any sibling release | 15 High | Known Error | L | 2026-06-11 | internal |
 | 6.0 | P305 | Post-Edit silent revert of working-tree files before commit — potential silent-work-loss hazard | 6 Med | Known Error | M | 2026-05-26 | internal |
 | 6.0 | P395 | external-comms agent silently goes dormant on the credibility axis — no nudge to author the missing RISK-POLICY section | 12 High | Open | M | 2026-06-28 | corrective-feedback (user, 2026-06-28) |
@@ -35,6 +36,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 4.5 | P297 | ADR-047 — governance-artefact scaffolding should be a SessionStart hook (per-project, automatic), not an inline `/install-updates` step | 9 Med High | Open | M | 2026-05-25 | internal |
 | 4.5 | P369 | Plugin removes hook file but adopter session still invokes it via stale binding — `architect-compendium-refresh-discipline.sh` case 2026-06-17 | 9 Medium | Open | M | 2026-06-17 | internal |
 | 4.5 | P398 | the VP carve-out holds changesets for already-shipped (verifying) code indefinitely — pointless changelog stranding | 9 High | Open | M | 2026-06-28 | corrective-feedback (user, 2026-06-28) |
+| 4.0 | P407 | /wr-*:assess-external-comms skills should instruct synchronous reviewer dispatch (P402 follow-up; deny-message half already shipped 16c180e8) | 4 Low | Open | S | 2026-07-02 | internal |
 | 3.0 | P178 | Agent skips ITIL state-machine gates on architecture-driven problems — treats architect-PASS verdict as substitute for empirical RCA + skips Open → Known Error transition | 3 Medium | Known Error | M | 2026-05-10 | internal |
 | 3.0 | P161 | Advisory-then-escalate may be over-applied as the default for drift-class detectors generally; load-bearing-from-the-start may be the better default | 6 Moderate | Open | M | 2026-05-04 | internal |
 | 3.0 | P176 | Agent-side I2 (no type-branching) coverage gap — SKILL.md type-branching invariant not behaviourally testable until skill-invocation harness lands | 6 Medium | Open | M | 2026-05-06 | internal |
