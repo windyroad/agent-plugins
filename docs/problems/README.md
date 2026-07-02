@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-02 **review pass** — captured P405 (external-comms gate false-positives on read-only `gh api security-advisories` path; WSJF 7.5) + P406 (github-discussions channel returns HTTP 410 for windyroad/agent-plugins; WSJF 2.5), then re-rated 18 deferred-placeholder tickets against RISK-POLICY.md and regenerated the WSJF Rankings table from source-of-truth ticket frontmatter (43 rows; reconcile clean). Notable top-of-queue shifts: P368 SID discovery bug jumped to WSJF 18.0 (Effort S / KE), P400 mark-reviewed resume gap 9.0/S/Open, P368 was previously deferred. Full details in the ticket bodies.
+> Last reviewed: 2026-07-02 **P404 → Known Error** — documented root cause (ADR-089/090 ratified but unimplemented; 4 green empty-stories bats + RFC-036's `stories:[]` are the live evidence) + Fix Strategy (RFC-037, the RFC-first fix) + workaround (none — governance gap, not a break); WSJF 1.5 → 6.0 on the Known-Error multiplier. Implementation (RFC-037's Phase 1 empty-stories removal + Phase 2 story-map/story tooling) is the Effort-L dev work ahead.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -25,6 +25,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 8.0 | P408 | risk-score-commit-gate hardcodes a 14-day RISK-POLICY staleness threshold, ignoring the policy's stated review cadence (flagged a quarterly policy stale at 16 days); affects all adopters. Fix options a/b/c recorded (a: gate derives threshold from stated cadence, recommended). | 8 Medium | Open | S | 2026-07-02 | internal |
 | 7.5 | P359 | Changeset holding does not withhold shipment — held code ships with any sibling release | 15 High | Known Error | L | 2026-06-11 | internal |
 | 6.0 | P305 | Post-Edit silent revert of working-tree files before commit — potential silent-work-loss hazard | 6 Med | Known Error | M | 2026-05-26 | internal |
+| 6.0 | P404 | Implement ADR-089 + ADR-090 in the skills and tests (≥1-story-per-RFC + story-map/story ratification) | 12 High | Known Error | L | 2026-07-02 | internal |
 | 6.0 | P395 | external-comms agent silently goes dormant on the credibility axis — no nudge to author the missing RISK-POLICY section | 12 High | Open | M | 2026-06-28 | corrective-feedback (user, 2026-06-28) |
 | 6.0 | P399 | ADR-073 fix-time auto-create emits a SKELETON RFC; it should author the RFC fully | 12 High | Open | M | 2026-06-28 | corrective-feedback (user, 2026-06-28 — ratified at the work-problems loop-end decision surface) |
 | 6.0 | P401 | Capture/RFC persona-JTBD anchoring shoehorns (or discards the problem) instead of interviewing the human to elicit the real who/why | 12 High | Open | M | 2026-06-29 | corrective-feedback (user, 2026-06-29 — during the RFC-first ADR-072/060/087 ratification walkthrough) |
@@ -42,9 +43,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3.0 | P176 | Agent-side I2 (no type-branching) coverage gap — SKILL.md type-branching invariant not behaviourally testable until skill-invocation harness lands | 6 Medium | Open | M | 2026-05-06 | internal |
 | 3.0 | P248 | Use time and token cost (not t-shirt sizing) for WSJF effort, with retro-driven estimation refinement | 6 Medium | Open | M | 2026-05-17 | internal |
 | 3.0 | P389 | work iters omit the `**Release vehicle**` seed on Open→Known Error, so the post-release K→V auto-enumerator silently skips them | 6 Medium | Open | M | 2026-06-27 | internal |
-| 3.0 | P045 | Auto plugin install on user's machine after governance release | 12 High | Open | L | 2026-04-19 | internal |
-| 3.0 | P404 | Implement ADR-089 + ADR-090 in the skills and tests (≥1-story-per-RFC + story-map/story ratification) | 12 High | Open | L | 2026-07-02 | internal |
-| 2.25 | P136 | ADR-044 alignment audit — sweep all unaudited skills/hooks/agents/ADRs/JTBDs/READMEs against the framework-resolution boundary (master ticket) | 9 Med | Open | L | 2026-04-27 | internal |
+| 3.0 | P045 | Auto plugin install on user's machine after governance release | 12 High | Open | L | 2026-04-19 | internal || 2.25 | P136 | ADR-044 alignment audit — sweep all unaudited skills/hooks/agents/ADRs/JTBDs/READMEs against the framework-resolution boundary (master ticket) | 9 Med | Open | L | 2026-04-27 | internal |
 | 2.25 | P290 | Harden ADR-052 to behavioural-only — remove the structural-test escape hatch entirely | 9 Med High | Open | L | 2026-05-25 | internal |
 | 2.25 | P324 | Agent-prose verdicts have no behavioural test harness — forcing the ADR-052 structural-test escape hatch + above-appetite release workarounds, perpetuating the structural tests the user has rejected | 9 Med-High | Open | L | 2026-05-27 | internal |
 | 2.0 | P170 | Problem tickets strain as fixes decompose into multiple coordinated changes — need an RFC framework that ties all changes back to problems (and unifies technical with user/business problems) | 8 Medium | Known Error | XL | 2026-05-04 | internal |

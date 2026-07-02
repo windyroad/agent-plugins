@@ -1,10 +1,10 @@
 # Problem 404: Implement ADR-089 + ADR-090 in the skills and tests (≥1-story-per-RFC + story-map/story ratification)
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-07-02
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 = 12. Rated at review 2026-07-02: implement ADR-089+090 in skills+tests.
 **Origin**: internal
-**Effort**: L. WSJF = (12 × 1.0) / 4 = 1.5.
+**Effort**: L. WSJF = (12 × 2.0) / 4 = 6.0 (Known Error multiplier 2.0).
 **JTBD**: JTBD-008
 **Persona**: plugin-developer
 
@@ -33,7 +33,7 @@ The deferred implementation ripple from the 2026-07-02 ratification of **ADR-089
 
 ## Workaround
 
-(deferred to investigation)
+None needed — this is a governance-implementation gap, not a runtime break. The framework runs on the pre-ADR model (RFCs may carry `stories: []`; the story tier has no oversight axis) until the fix ships; existing behaviour is unaffected. The gap is the *absence* of the newly-ratified enforcement — nothing to work around, only to build.
 
 ## Impact Assessment
 
@@ -44,14 +44,22 @@ The deferred implementation ripple from the 2026-07-02 ratification of **ADR-089
 
 ## Root Cause Analysis
 
+**Root cause:** ADR-089 + ADR-090 were ratified this session (both `human-oversight: confirmed`) but never implemented. `capture-rfc`/`manage-rfc`/`work-problem`/`manage-problem` still encode the empty-`stories: []` atomic-RFC fallback, and the story-map/story tier has no `human-oversight` marker, drift-invalidation trigger, RFC-reference gate, or detector.
+
+**Evidence (reproduction):** four bats are green *asserting the empty-stories fallback is legal* — they must flip. RFC-036 shipped this session with `stories: []`, the live artifact of the un-fixed model. Story maps/stories carry no oversight axis (STORY-MAP-002's markers were added by hand this session, not by tooling).
+
 ### Investigation Tasks
 
-- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Decide the implementation vehicle: hang off RFC-005 / STORY-MAP-002 as new stories, or a standalone RFC per ADR-071
+- [x] Re-rate Priority and Effort (2026-07-02: Impact 3 × Likelihood 4 = 12 High; Effort L; WSJF now (12 × 2.0)/4 = 6.0 as Known Error)
+- [x] Decide the implementation vehicle: **standalone RFC-037** (P404 is distinct from RFC-005's P251/P399; architect PASS 2026-07-02)
 - [ ] Phase 1: remove empty-stories fallback + require ≥1 story + flip the 4 bats (same slice)
 - [ ] Phase 1: resolve the legacy `stories: []` back-fill question
 - [ ] Phase 2: marker field + drift-invalidation trigger + reference gate + detector + bats
 - [ ] **Use STORY-MAP-002 as the golden exemplar**: its hand-authored, fully-ratified map + 16 stories (built + ratified end-to-end this session) are the worked example of the *output* the implemented map/story-authoring tooling must produce — same shape, INVEST value-first statements, per-beat/release structure, and drift-invalidated oversight. Assert the tooling can (re)produce an artefact of this quality.
+
+## Fix Strategy
+
+Implement via **RFC-037** (authored 2026-07-02; traces `problems: [P404]`; architect + JTBD PASS). Two-phase catalogue — Phase 1 ADR-089 enforcement (cross-cutting) + Phase 2 ADR-090 story-map/story tooling. Its `stories:` are STORY-MAP-002's A3 tooling stories (STORY-020/021/022/024/025), which must transition `draft → accepted` (INVEST gate via `manage-story`) before implementation. STORY-MAP-002 + its stories are the golden exemplar the tooling must reproduce.
 
 ## Dependencies
 
