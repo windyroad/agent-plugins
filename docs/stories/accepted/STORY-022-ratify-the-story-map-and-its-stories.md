@@ -1,5 +1,5 @@
 ---
-status: draft
+status: accepted
 story-id: ratify-the-story-map-and-its-stories
 reported: 2026-07-02
 decision-makers: [Tom Howard]

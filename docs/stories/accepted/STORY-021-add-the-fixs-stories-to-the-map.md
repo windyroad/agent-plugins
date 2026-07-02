@@ -1,5 +1,5 @@
 ---
-status: draft
+status: accepted
 story-id: add-the-fixs-stories-to-the-map
 reported: 2026-07-02
 decision-makers: [Tom Howard]

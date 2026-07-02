@@ -1,5 +1,5 @@
 ---
-status: draft
+status: accepted
 story-id: slice-the-fixs-stories-into-releases
 reported: 2026-07-02
 decision-makers: [Tom Howard]

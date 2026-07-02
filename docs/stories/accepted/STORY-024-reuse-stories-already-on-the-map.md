@@ -1,5 +1,5 @@
 ---
-status: draft
+status: accepted
 story-id: reuse-stories-already-on-the-map
 reported: 2026-07-02
 decision-makers: [Tom Howard]
