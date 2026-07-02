@@ -126,10 +126,11 @@ _79 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **Option 1 — Cite + persist + uncertainty, measurement surface on `.closed.md` tickets, WSJF buckets with comparable-prior citation, explicit `not estimated` marker when ungrounded.**
 **Related:** ADR-026, ADR-023, ADR-022, ADR-015, ADR-005
-
 ### ADR-028 — External-comms gate — voice-tone + risk/leak evaluators on shared PreToolUse surface
 **Status:** proposed | **Oversight:** confirmed
-**Related:** ADR-002, ADR-017, ADR-008, ADR-009, ADR-013, ADR-015, ADR-020, ADR-024, ADR-025, ADR-026, ADR-027
+**Decides:** One combined PreToolUse gate fires two independent evaluators — voice-tone and risk/leak — over every external-text surface (gh issues/PRs/advisories, npm README, changeset bodies, commit messages), distributed as byte-identical copies into `@windyroad/voice-tone` and `@windyroad/risk-scorer` via the ADR-017 sync pattern so each package runs only its own evaluator and stays independently installable. Chosen over sibling ADRs / base-plus-sub-ADRs / hard-coupled hooks because it reuses the deny-plus-marker convention and keeps partial coverage working when only one package is present.
+**Confirmation:** canonical + per-package byte-identical gate copies present with CI drift check; per-evaluator marker key `sha256(normalize(draft,surface) + '\n' + surface)` computed by the shared `compute_external_comms_key` and hook-derived from the prompt; atomic marker write via `_atomic_mark_with_hash`; per-evaluator advisory-only fallback when a policy file is absent; age-check + private-repo + voice-tone-commit-message surface skips; reviewer dispatched synchronously so the PostToolUse mark hook fires; behavioural bats cover both-PASS/one-FAIL/neither, changeset frontmatter-strip, shell-unescape symmetry, and leak-still-fails guards.
+**Related:** ADR-002, ADR-008, ADR-009, ADR-013, ADR-014, ADR-015, ADR-017, ADR-018, ADR-020, ADR-023, ADR-024, ADR-025, ADR-026, ADR-027, ADR-045, ADR-062
 
 ### ADR-029 — Diagnose before implement — structured hypothesis + evidence + RED-for-the-right-reason gate
 **Status:** proposed | **Oversight:** confirmed
