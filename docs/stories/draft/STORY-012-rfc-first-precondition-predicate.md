@@ -1,5 +1,5 @@
 ---
-status: draft
+status: superseded
 story-id: rfc-first-precondition-predicate
 reported: 2026-06-29
 decision-makers: [Tom Howard]
@@ -12,7 +12,9 @@ estimated-effort: S
 
 # STORY-012: Can't start coding without an RFC — the gate makes me create one first
 
-**Status**: draft
+> **Superseded 2026-07-02.** The MVP dropped the *blocking-gate / refuse-route predicate* approach in favour of **`wr-itil:work-problem` directing RFC creation** as part of the decompose flow (see [STORY-015 create-RFC](015-rfc-authoring-is-pre-implementation-story-map.md) + STORY-MAP-002 A3). A hard blocking gate is optional later hardening (may be never). Retained for history; not on the MVP path.
+
+**Status**: superseded (was: draft)
 **Reported**: 2026-06-29
 **Problems**: P251, P314
 **JTBD**: JTBD-008

@@ -8,7 +8,7 @@
   <meta name="problems" content="P170,P251,P314,P371,P399">
   <meta name="rfcs" content="RFC-003,RFC-005">
   <meta name="jtbd" content="JTBD-008,JTBD-001,JTBD-006">
-  <meta name="adrs" content="ADR-060,ADR-022,ADR-031,ADR-071">
+  <meta name="adrs" content="ADR-060,ADR-022,ADR-031,ADR-071,ADR-089,ADR-090">
   <meta name="reported" content="2026-06-29">
   <meta name="decision-makers" content="Tom Howard">
   <style>
@@ -92,7 +92,7 @@
     <span class="sw"><span class="chip inprogress"></span> in progress</span>
     <span class="sw"><span class="chip draft"></span> to build</span>
   </div>
-  <p class="hint">Read left → right across the top (the activities); each card is a story in its activity's column. Cards with a STORY-NNN id link to that story's file; cards marked just "story" are stories whose files we'll create next. The coloured horizontal bands are the release slices — Release 1 is the walking skeleton. A3 is the one genuinely-new activity; the rest of the journey mostly exists. Scroll sideways to see the whole wall.</p>
+  <p class="hint">Read left → right across the top (the activities); each card is a story in its activity's column. Every card links to its story file (markdown — each story links back here and to its siblings). The coloured horizontal bands are the release slices — Release 1 is the walking skeleton. A3 is the one genuinely-new activity; the rest of the journey mostly exists. Scroll sideways to see the whole wall.</p>
 
   <div class="scroll">
     <div class="map">
@@ -109,29 +109,29 @@
       <!-- RELEASE 1 — walking skeleton -->
       <div class="band r1"><span class="badge">RELEASE 1</span> Walking skeleton — the thinnest fix, end-to-end (the first run has no map, so it creates one) <span class="metric">A3 is the new work; A1/A2/A4/A5 mostly exist</span></div>
       <div class="row">
-        <div class="slice" data-status="done"><span class="id">story</span><span class="cap">Capture the problem in seconds, mid-flow</span></div>
-        <div class="slice" data-status="done"><span class="id">story</span><span class="cap">Record root cause + workaround → Known Error</span></div>
-        <div class="slice" data-status="draft"><span class="id">story · create map</span><span class="cap">Start the job's story map (create it if the job has none)</span></div>
-        <div class="slice" data-status="done"><span class="id">story</span><span class="cap">Work the RFC's stories one at a time</span></div>
-        <div class="slice" data-status="done"><span class="id">story</span><span class="cap">Ship → verify → problem closes with a real trace; adopter gets the fix</span></div>
+        <a class="slice" data-status="done" href="../../stories/draft/STORY-018-capture-the-problem-mid-flow.md" data-story-id="STORY-018"><span class="id">STORY-018</span><span class="cap">Capture the problem in seconds, mid-flow</span></a>
+        <a class="slice" data-status="done" href="../../stories/draft/STORY-019-record-root-cause-and-workaround.md" data-story-id="STORY-019"><span class="id">STORY-019</span><span class="cap">Record root cause + workaround → Known Error</span></a>
+        <a class="slice" data-status="draft" href="../../stories/draft/STORY-020-start-the-jobs-story-map.md" data-story-id="STORY-020"><span class="id">STORY-020 · create map</span><span class="cap">Start the job's story map (create it if the job has none)</span></a>
+        <a class="slice" data-status="done" href="../../stories/draft/STORY-026-work-the-rfcs-stories-one-at-a-time.md" data-story-id="STORY-026"><span class="id">STORY-026</span><span class="cap">Work the RFC's stories one at a time</span></a>
+        <a class="slice" data-status="done" href="../../stories/draft/STORY-023-ship-verify-and-close-with-a-real-trace.md" data-story-id="STORY-023"><span class="id">STORY-023</span><span class="cap">Ship → verify → problem closes with a real trace; adopter gets the fix</span></a>
       </div>
       <div class="row">
-        <div class="slice c3" data-status="draft"><span class="id">story · add to map</span><span class="cap">Add the fix's new stories to the job's story map</span></div>
+        <a class="slice c3" data-status="draft" href="../../stories/draft/STORY-021-add-the-fixs-stories-to-the-map.md" data-story-id="STORY-021"><span class="id">STORY-021 · add to map</span><span class="cap">Add the fix's new stories to the job's story map</span></a>
       </div>
       <div class="row">
-        <div class="slice c3" data-status="draft"><span class="id">story · ratify</span><span class="cap">Ratify the story map and its stories after any change (human oversight) before they're used</span></div>
+        <a class="slice c3" data-status="draft" href="../../stories/draft/STORY-022-ratify-the-story-map-and-its-stories.md" data-story-id="STORY-022"><span class="id">STORY-022 · ratify</span><span class="cap">Ratify the story map and its stories after any change (human oversight) before they're used</span></a>
       </div>
       <div class="row">
-        <div class="slice c3" data-status="draft"><span class="id">story · create RFC</span><span class="cap">Create the RFC, traced to the problem, listing only ratified USM stories</span></div>
+        <a class="slice c3" data-status="draft" href="../../stories/draft/STORY-015-rfc-authoring-is-pre-implementation-story-map.md" data-story-id="STORY-015"><span class="id">STORY-015 · create RFC</span><span class="cap">Create the RFC, traced to the problem, listing only ratified USM stories</span></a>
       </div>
 
       <!-- RELEASE 2 — the harder cases (deepen A3) -->
       <div class="band r2"><span class="badge">RELEASE 2</span> The harder cases — deepen A3 <span class="metric">reuse existing stories, release-slicing</span></div>
       <div class="row">
-        <div class="slice c3" data-status="draft"><span class="id">story · reuse</span><span class="cap">Reuse stories already on the map (the fix touches existing ones)</span></div>
+        <a class="slice c3" data-status="draft" href="../../stories/draft/STORY-024-reuse-stories-already-on-the-map.md" data-story-id="STORY-024"><span class="id">STORY-024 · reuse</span><span class="cap">Reuse stories already on the map (the fix touches existing ones)</span></a>
       </div>
       <div class="row">
-        <div class="slice c3" data-status="draft"><span class="id">story · slice releases</span><span class="cap">Slice the fix's stories into releases (MVP first; later phases stay first-class)</span></div>
+        <a class="slice c3" data-status="draft" href="../../stories/draft/STORY-025-slice-the-fixs-stories-into-releases.md" data-story-id="STORY-025"><span class="id">STORY-025 · slice releases</span><span class="cap">Slice the fix's stories into releases (MVP first; later phases stay first-class)</span></a>
       </div>
 
     </div>

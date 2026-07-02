@@ -12,6 +12,10 @@ estimated-effort: M
 
 # STORY-015: The RFC lists its stories before any code is written
 
+**Story map:** [← STORY-MAP-002: Decompose a Fix Into Coordinated Changes](../../story-maps/draft/STORY-MAP-002-decompose-a-fix-into-coordinated-changes.html) · A3 (Release 1) — the *create-RFC* card
+**Siblings (A3):** [start the map](020-start-the-jobs-story-map.md) · [add to map](021-add-the-fixs-stories-to-the-map.md) · [ratify](022-ratify-the-story-map-and-its-stories.md) · [reuse](024-reuse-stories-already-on-the-map.md) · [slice](025-slice-the-fixs-stories-into-releases.md)
+**Note (ADR-089/090):** the RFC lists **≥1 story** (never empty) and only **ratified** stories.
+
 **Status**: draft
 **Reported**: 2026-06-29
 **Problems**: P251, P399
