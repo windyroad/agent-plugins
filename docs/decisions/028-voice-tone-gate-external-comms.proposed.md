@@ -570,3 +570,14 @@ Records the **third evaluator** the Reassessment Criteria (line 220) anticipated
 **Reassessment Criterion.** When `@windyroad/cognitive-a11y` ships (P338 closes), finalise: the package's `external-comms-evaluator.conf`, its `wr-cognitive-a11y:external-comms` agent + PostToolUse mark hook, and the per-evaluator gate registration; then wire it into the reporter-facing surfaces (starting with the ADR-024 P363 inbound dispatch) and assert the three-evaluator composition in the affected bats/promptfoo suites. Until then this entry is the standing declaration.
 
 **Status**: stays `proposed`. Declaration-only; no behaviour change until P338 ships the plugin.
+
+### Amendment 2026-07-02 — P402: synchronous reviewer dispatch required (the mark hook does not fire for background agents)
+
+The external-comms mark hook (`risk-score-mark.sh` / `external-comms-mark-reviewed.sh`) is a `PostToolUse:Agent` hook. Empirically (2026-07-02, isolated end-to-end): **it fires only when the reviewer agent is dispatched SYNCHRONOUSLY (`run_in_background: false`); a background-launched reviewer never fires it, so the per-evaluator marker never persists and the gate correctly re-blocks.** A synchronous review's marker landed under the live session SID and the gate then passed with no bypass; the paired background review left no marker. (The earlier P402 "zero markers" symptom was compounded by a `/tmp`-vs-`$TMPDIR` mis-check — the markers write to `${TMPDIR:-/tmp}/claude-risk-<SID>/`, which on macOS is `/var/folders/…/T/`, not `/tmp`.)
+
+- **Decision**: make synchronous dispatch an explicit, load-bearing requirement of the gate contract. The marker mechanism (SID + key derivation) is sound; only the *dispatch mode* was implicit.
+- **Fix locus**: one sentence added to the canonical deny `REASON` string (`packages/shared/hooks/external-comms-gate.sh`) instructing synchronous dispatch, propagated byte-identically to both consumers via `scripts/sync-external-comms-gate.sh` (ADR-017). Canonical bats (`external-comms-gate-canonical.bats`) asserts the deny message references synchronous dispatch.
+- **NOT** a multi-SID marker write (the withdrawn "Approach A") — there is no SID mismatch; the background hook simply never runs.
+- **Follow-up (named)**: the two `/wr-*:assess-external-comms` skills' Step 3 should carry the same synchronous-dispatch note (secondary manual-walkthrough surface; the deny message is the primary agent-in-the-loop surface).
+
+**Status**: stays `proposed`.

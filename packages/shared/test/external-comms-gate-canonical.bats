@@ -48,6 +48,14 @@ setup() {
   grep -qE 'BYPASS_RISK_GATE' "$CANONICAL"
 }
 
+@test "canonical deny message instructs synchronous reviewer dispatch (P402)" {
+  # P402: a background-launched reviewer's PostToolUse mark hook never fires,
+  # so the marker never persists and the gate re-blocks. The deny message must
+  # tell the agent to dispatch the reviewer synchronously.
+  grep -qE 'run_in_background: false' "$CANONICAL"
+  grep -qi 'SYNCHRONOUSLY' "$CANONICAL"
+}
+
 @test "canonical hook sources per-package external-comms-evaluator.conf (ADR-028 amended 2026-05-14)" {
   # Per-evaluator marker scheme: canonical no longer hard-codes a subagent type;
   # each consumer plugin's .conf names its evaluator id + subagent + verdict prefix.
