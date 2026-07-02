@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-02 **P403 captured** — Agent frames skill-mandatory mechanical steps as user-optional ("your call whether to drain", "skipped to stay within context budget"), reintroducing friction the P132 mechanical-stage carve-out was engineered to remove. Two evidence instances this session (Steps 2/4.5/4.6 skip; Step 7 auto-release skip). Rated at capture per the `.changeset/rate-captures-at-capture.md` IDE-hinted direction: Impact 3 × Likelihood 4 = 12 High / Effort M / WSJF 3.0. Composes with P179 + P234 (closed direct predecessor).
+> Last reviewed: 2026-07-02 **P404 captured** — Implement ADR-089 (every RFC has ≥1 story; atomic = one full story; remove the empty-stories fallback + flip 4 green bats) + ADR-090 (story-map/story drift-invalidated ratification marker + RFC-references-only-ratified-stories gate) in the skills/tests. Deferred ripple from this session's ratification (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -50,6 +50,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 1.0 | P338 | P082 Phase 2 cognitive-accessibility evaluator on the 4 external-comms surfaces, shipped as a NEW `@windyroad/cognitive-a11y` plugin (sibling of P082; design pinned 2026-05-30 = new plugin) | 4 Low | Open | L | 2026-05-30 | internal |
 | 0.75 | P012 | Skill testing harness scope undefined — REOPENED 2026-06-04 (closure was premature; promptfoo evals never green until the Tier-B llm-rubric grader landed). Criterion (a) report-upstream eval stably green now MET; remaining: (b) better-sqlite3 CI rebuild for clean-install `npm run eval:skills` | 6 Med | Open | XL | 2026-04-16 | internal |
 | 0.75 | P176 | Agent-side I2 (no type-branching) coverage gap — SKILL.md type-branching invariant not behaviourally testable until skill-invocation harness lands (P012-descendant; surfaced by P170 Slice 4 iter 2) | 6 Med | Open | XL | 2026-05-06 | internal |
+| 0.75 | P404 | Implement ADR-089 + ADR-090 in skills/tests — every RFC has ≥1 story (remove empty-stories fallback, flip 4 green bats) + story-map/story drift-invalidated ratification marker + RFC-references-only-ratified-stories gate (deferred — re-rate at next /wr-itil:review-problems) | 3 Med | Open | M | 2026-07-02 | internal |
 
 ## Verification Queue
 
