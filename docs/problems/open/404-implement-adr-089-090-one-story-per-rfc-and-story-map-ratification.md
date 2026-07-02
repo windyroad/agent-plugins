@@ -59,6 +59,10 @@ The deferred implementation ripple from the 2026-07-02 ratification of **ADR-089
 - **Blocked by**: (none — ADR-089/090 are ratified; this is their implementation)
 - **Composes with**: RFC-005 / STORY-MAP-002 (the RFC-first work this may land within)
 
+## RFCs
+
+- **RFC-037** — the RFC-first fix for this problem (authored 2026-07-02). Implements ADR-089/090 in two phases; its `stories:` are STORY-MAP-002's A3 tooling stories (020/021/022/024/025). This is the RFC we should have created *before* decomposing — dogfood gap closed.
+
 ## Related
 
 - **ADR-089** (every RFC has ≥1 story) + **ADR-090** (story-map/story drift-invalidated oversight) — the authorities, both confirmed 2026-07-02.
