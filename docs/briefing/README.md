@@ -26,6 +26,7 @@ The highest-value entries across the briefing — the handful of rules that save
 | File | Topic | When to load |
 |---|---|---|
 | [hooks-and-gates.md](./hooks-and-gates.md) | PreToolUse / PostToolUse gates, marker TTLs, exemptions, per-prompt terse reminders | Any edit-gate friction, hook-script work, understanding why a write was blocked. |
+| [external-comms-gate.md](./external-comms-gate.md) | External-comms review gate — changeset/gh/PR leak-review, marker hashing, background-agent non-persistence (P402), inline-BYPASS behaviour | Changeset / outbound-draft gate friction, external-comms marker debugging. |
 | [releases-and-ci.md](./releases-and-ci.md) | push:watch, release:watch, changesets, npm publish, GitHub Actions pipeline | Any release work, CI debugging, workflow authoring, bypass-marker behaviour. |
 | [changeset-holding-graduation.md](./changeset-holding-graduation.md) | `docs/changesets-holding/` mechanics, cohort graduation, holding-does-NOT-stop-shipment | Graduating, holding, or reasoning about held changesets (split 2026-06-11). |
 | [governance-workflow.md](./governance-workflow.md) | ADRs, architect/JTBD reviews, risk scoring, voice-tone, canonical+sync, SKILL+REFERENCE | ADR drafting, governance skill work, session-wide pattern application. |
