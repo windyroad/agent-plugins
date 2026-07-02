@@ -6,9 +6,13 @@ secondary-persona: tech-lead
 date-created: 2026-05-05
 human-oversight: confirmed
 oversight-date: 2026-05-26
+oversight-confirmed-date: "2026-07-02 — re-ratified via AskUserQuestion (P357 batched pass) after the ADR-089/090 amendment"
+oversight-downgraded: "2026-07-02 — ADR-089 lockstep: 'atomic = empty stories:[]' → 'atomic = exactly one full story' (an RFC always has ≥1 story); + ADR-090 story-map drift-invalidated ratification. P357 re-ratification batched this session."
 ---
 
 # JTBD-008: Decompose a Fix Into Coordinated Changes
+
+> **Amendment 2026-07-02 (ADR-089 + ADR-090).** ADR-089: the "atomic fix = same RFC with an empty `stories:` array" framing below (Desired Outcomes / Persona Constraints) is **superseded** — an RFC always has **≥1 story**; an atomic fix carries **exactly one full story**. The coordination surface (multiple stories / a story map) scales *up* when the work needs it; the RFC never scales below one story. ADR-090: the story maps this job produces carry a **drift-invalidated human-oversight marker** (re-ratify on any change), and an RFC may reference only ratified stories. `human-oversight` downgraded to `unconfirmed` pending P357 re-ratify (batched this session).
 
 ## Job Statement
 

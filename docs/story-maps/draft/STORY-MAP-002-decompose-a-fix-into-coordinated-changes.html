@@ -8,20 +8,20 @@
   <meta name="problems" content="P170,P251,P314,P371,P399">
   <meta name="rfcs" content="RFC-003,RFC-005">
   <meta name="jtbd" content="JTBD-008,JTBD-001,JTBD-006">
-  <meta name="adrs" content="ADR-060,ADR-022,ADR-031">
+  <meta name="adrs" content="ADR-060,ADR-022,ADR-031,ADR-071">
   <meta name="reported" content="2026-06-29">
   <meta name="decision-makers" content="Tom Howard">
   <style>
     /* Layout + colour-by-layer only, per docs/STYLE-GUIDE.md + the
        docs/story-maps/README.md Prohibition: NO inline style="" on .slice /
-       .rib-header / any data-*-bearing element. Column placement + colour/status
+       .rib-header / any data-*-bearing element. Colour/status/column-placement
        are driven from CSS classes and data-* attribute selectors. */
     :root {
-      --col: 230px; --gap: 16px; --pitch: 246px;
+      --col: 240px; --gap: 16px; --pitch: 256px;
       --ink: #1c2330; --muted: #5a6678; --line: #c9d2de;
       --activity: #1d3557; --lane: rgba(29,53,87,0.045);
       --cap: #eaf1f9; --cap-edge: #6b8fc0;
-      --r1: #1b7f5c; --r2: #b06a00; --var: #b0143c;
+      --r1: #1b7f5c; --r2: #b06a00;
       --done: #1b7f5c; --inprogress: #b06a00; --draft: #8a94a3;
     }
     html { -webkit-text-size-adjust: 100%; }
@@ -38,17 +38,15 @@
     .chip { width: 0.85rem; height: 0.85rem; border-radius: 3px; border: 1px solid rgba(0,0,0,0.2); display: inline-block; }
     .chip.activity { background: var(--activity); }
     .chip.cap { background: var(--cap); border-color: var(--cap-edge); }
-    .chip.var { background: #fbe9ee; border: 1px dashed var(--var); }
     .chip.r1 { background: var(--r1); } .chip.r2 { background: var(--r2); }
     .chip.done { background: var(--done); } .chip.inprogress { background: var(--inprogress); } .chip.draft { background: var(--draft); }
-    .chip.empty { background: repeating-linear-gradient(45deg,#f4f6f9,#f4f6f9 4px,#e4e9f0 4px,#e4e9f0 8px); }
     .hint { color: var(--muted); font-size: 0.78rem; margin: 0.2rem 0 0.6rem; max-width: 1000px; }
 
     .scroll { overflow-x: auto; padding-bottom: 1rem; border: 1px solid var(--line); border-radius: 8px; }
     .map { width: max-content; min-width: 100%; padding: 0.75rem;
       background: repeating-linear-gradient(to right, var(--lane) 0 var(--col), transparent var(--col) var(--pitch));
       background-position: 0.75rem 0; background-origin: content-box; }
-    .row { display: grid; grid-template-columns: repeat(6, var(--col)); gap: var(--gap); margin-bottom: var(--gap); }
+    .row { display: grid; grid-template-columns: repeat(5, var(--col)); gap: var(--gap); margin-bottom: var(--gap); }
 
     .activity-card { background: var(--activity); color: #fff; border-radius: 7px 7px 0 0; padding: 0.55rem 0.6rem; }
     .activity-card .step { font-size: 0.68rem; opacity: 0.75; letter-spacing: 0.06em; }
@@ -72,11 +70,8 @@
     .slice[data-status="done"] .id::after { content: " · shipped"; color: var(--done); }
     .slice[data-status="in-progress"] .id::after { content: " · in progress"; color: var(--inprogress); }
     .slice[data-status="draft"] .id::after { content: " · to build"; color: var(--draft); }
-    .slice[data-layer="variation"] { background: #fbe9ee; border: 1px dashed var(--var); border-left: 5px solid var(--var); }
-    .slice[data-layer="variation"] .cap { font-style: italic; }
-    .slice.quality { background: #efeaf7; border: 1px solid #8a6fc0; border-left: 5px solid #6a3d9a; }
-
-    .empty { border: 1px dashed var(--line); border-radius: 5px; background: repeating-linear-gradient(45deg,#f7f9fc,#f7f9fc 5px,#eef2f7 5px,#eef2f7 10px); color: var(--muted); font-size: 0.72rem; display: flex; align-items: center; justify-content: center; min-height: 2.6rem; font-style: italic; }
+    /* column placement (class-based, not inline style) for depth rows */
+    .c3 { grid-column: 3; }
   </style>
 </head>
 <body>
@@ -91,65 +86,52 @@
   <div class="legend">
     <span class="sw"><span class="chip activity"></span> activity (backbone)</span>
     <span class="sw"><span class="chip cap"></span> story</span>
-    <span class="sw"><span class="chip var"></span> variation / unhappy path</span>
     <span class="sw"><span class="chip r1"></span> Release 1</span>
     <span class="sw"><span class="chip r2"></span> Release 2</span>
     <span class="sw"><span class="chip done"></span> shipped</span>
     <span class="sw"><span class="chip inprogress"></span> in progress</span>
     <span class="sw"><span class="chip draft"></span> to build</span>
-    <span class="sw"><span class="chip empty"></span> under-explored</span>
   </div>
-  <p class="hint">Read left → right across the top (the journey); each card is a story sitting in its activity's column. Cards with a STORY-NNN id link to that story's file; cards marked "(story · to file)" are existing capabilities whose story files we'll create next. Releases are the coloured horizontal bands. Scroll sideways to see the whole wall.</p>
+  <p class="hint">Read left → right across the top (the activities); each card is a story in its activity's column. Cards with a STORY-NNN id link to that story's file; cards marked just "story" are stories whose files we'll create next. The coloured horizontal bands are the release slices — Release 1 is the walking skeleton. A3 is the one genuinely-new activity; the rest of the journey mostly exists. Scroll sideways to see the whole wall.</p>
 
   <div class="scroll">
     <div class="map">
 
-      <!-- BACKBONE -->
+      <!-- BACKBONE (5 beats) -->
       <div class="row">
         <div class="activity-card"><span class="step">A1</span><h2>Notice &amp; capture the problem</h2></div>
-        <div class="activity-card"><span class="step">A2</span><h2>Find root cause → Known Error</h2></div>
-        <div class="activity-card"><span class="step">A3</span><h2>Create an RFC to fix the problem</h2></div>
-        <div class="activity-card"><span class="step">A4</span><h2>List the fix's stories in the RFC (extend this journey map if it needs new ones)</h2></div>
-        <div class="activity-card"><span class="step">A5</span><h2>Implement the coordinated changes</h2></div>
-        <div class="activity-card"><span class="step">A6</span><h2>Land, release &amp; verify</h2></div>
+        <div class="activity-card"><span class="step">A2</span><h2>Find root cause &amp; workaround → Known Error</h2></div>
+        <div class="activity-card"><span class="step">A3</span><h2>Create the RFC &amp; decompose the fix into stories</h2></div>
+        <div class="activity-card"><span class="step">A4</span><h2>Implement the coordinated changes</h2></div>
+        <div class="activity-card"><span class="step">A5</span><h2>Land, release &amp; verify → adopter value</h2></div>
       </div>
 
-      <!-- RELEASE 1 — the journey as it exists today -->
-      <div class="band r1"><span class="badge">RELEASE 1</span> The journey as it works today — end-to-end, mostly shipped <span class="metric">what's missing is the RFC-first enforcement — that's Release 2</span></div>
+      <!-- RELEASE 1 — walking skeleton -->
+      <div class="band r1"><span class="badge">RELEASE 1</span> Walking skeleton — the thinnest fix, end-to-end (the first run has no map, so it creates one) <span class="metric">A3 is the new work; A1/A2/A4/A5 mostly exist</span></div>
       <div class="row">
-        <div class="slice" data-status="done"><span class="id">story · to file</span><span class="cap">Capture the problem in seconds, mid-flow</span></div>
-        <div class="slice" data-status="done"><span class="id">story · to file</span><span class="cap">Record root cause + workaround → Known Error</span></div>
-        <div class="slice" data-status="done"><span class="id">story · to file</span><span class="cap">Create the RFC for this fix</span></div>
-        <div class="slice" data-status="in-progress"><span class="id">story · to file</span><span class="cap">Reuse the journey's stories; add any the fix newly needs</span></div>
-        <a class="slice" data-status="done" href="../../stories/done/STORY-005-working-the-problem-traversal.md"><span class="id">STORY-005</span><span class="cap">Working-the-problem traversal rewrite (manage-problem + work-problem)</span></a>
-        <div class="slice" data-status="done"><span class="id">story · to file</span><span class="cap">Ship → verify → problem closes with a real trace; adopter gets the fix</span></div>
+        <div class="slice" data-status="done"><span class="id">story</span><span class="cap">Capture the problem in seconds, mid-flow</span></div>
+        <div class="slice" data-status="done"><span class="id">story</span><span class="cap">Record root cause + workaround → Known Error</span></div>
+        <div class="slice" data-status="draft"><span class="id">story · create map</span><span class="cap">Start the job's story map (create it if the job has none)</span></div>
+        <div class="slice" data-status="done"><span class="id">story</span><span class="cap">Work the RFC's stories one at a time</span></div>
+        <div class="slice" data-status="done"><span class="id">story</span><span class="cap">Ship → verify → problem closes with a real trace; adopter gets the fix</span></div>
+      </div>
+      <div class="row">
+        <div class="slice c3" data-status="draft"><span class="id">story · add to map</span><span class="cap">Add the fix's new stories to the job's story map</span></div>
+      </div>
+      <div class="row">
+        <div class="slice c3" data-status="draft"><span class="id">story · ratify</span><span class="cap">Ratify the story map and its stories after any change (human oversight) before they're used</span></div>
+      </div>
+      <div class="row">
+        <div class="slice c3" data-status="draft"><span class="id">story · create RFC</span><span class="cap">Create the RFC, traced to the problem, listing only ratified USM stories</span></div>
       </div>
 
-      <!-- RELEASE 2 — RFC-005 extends the journey -->
-      <div class="band r2"><span class="badge">RELEASE 2</span> RFC-005 extends the journey — enforce RFC-first, the AFK actor, proof, unhappy paths <span class="metric">new stories that strengthen A3–A5</span></div>
+      <!-- RELEASE 2 — the harder cases (deepen A3) -->
+      <div class="band r2"><span class="badge">RELEASE 2</span> The harder cases — deepen A3 <span class="metric">reuse existing stories, release-slicing</span></div>
       <div class="row">
-        <div class="empty">—</div>
-        <div class="slice" data-layer="variation" data-status="draft"><span class="id">variation</span><span class="cap">Can't reproduce / external cause → workaround &amp; report upstream, or park</span></div>
-        <a class="slice" data-status="draft" href="../../stories/draft/STORY-012-rfc-first-precondition-predicate.md"><span class="id">STORY-012</span><span class="cap">Can't start coding without an RFC — the gate makes me create one first</span></a>
-        <a class="slice" data-status="draft" href="../../stories/draft/STORY-015-rfc-authoring-is-pre-implementation-story-map.md"><span class="id">STORY-015</span><span class="cap">The RFC lists its stories before any code is written</span></a>
-        <a class="slice" data-status="draft" href="../../stories/draft/STORY-014-author-first-work-problems-afk.md"><span class="id">STORY-014</span><span class="cap">Unattended, the agent works the plan and pauses for real decisions</span></a>
-        <div class="slice" data-layer="variation" data-status="draft"><span class="id">variation</span><span class="cap">Verification fails → bounce back to re-plan / re-implement</span></div>
+        <div class="slice c3" data-status="draft"><span class="id">story · reuse</span><span class="cap">Reuse stories already on the map (the fix touches existing ones)</span></div>
       </div>
       <div class="row">
-        <div class="empty">—</div>
-        <div class="empty">—</div>
-        <a class="slice" data-status="draft" href="../../stories/draft/STORY-013-author-first-manage-problem-gate.md"><span class="id">STORY-013</span><span class="cap">Full gate: an RFC exists → I proceed; none → I create it first</span></a>
-        <div class="slice" data-layer="variation" data-status="draft"><span class="id">variation</span><span class="cap">Hit a genuinely new decision → pause &amp; decide it deliberately first</span></div>
-        <a class="slice quality" data-status="draft" href="../../stories/draft/STORY-016-rfc-first-behavioural-bats.md"><span class="id">STORY-016 · quality (every step)</span><span class="cap">Every step is regression-proven</span></a>
-        <div class="empty">—</div>
-      </div>
-      <div class="row">
-        <div class="empty">—</div>
-        <div class="empty">—</div>
-        <div class="slice" data-layer="variation" data-status="draft"><span class="id">variation</span><span class="cap">Even a one-line fix still needs an RFC — no shortcut, no carve-out</span></div>
-        <div class="slice" data-layer="variation" data-status="draft"><span class="id">variation</span><span class="cap">Scope creep mid-flight → re-scope deliberately, stay time-boxed</span></div>
-        <div class="empty">—</div>
-        <div class="empty">—</div>
+        <div class="slice c3" data-status="draft"><span class="id">story · slice releases</span><span class="cap">Slice the fix's stories into releases (MVP first; later phases stay first-class)</span></div>
       </div>
 
     </div>

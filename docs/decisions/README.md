@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 85 (76 in-force, 9 historical)
+**Total ADRs:** 88 (79 in-force, 9 historical)
 
 ---
 
 ## In-force decisions
 
-_76 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_79 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -240,11 +240,10 @@ _76 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed
 **Confirmation:** packages/risk-scorer/agents/test/pipeline-consume-catalog.bats — 6 cases:; packages/risk-scorer/skills/create-risk/test/create-risk-flag-driven.bats — 4 cases:; packages/risk-scorer/skills/bootstrap-catalog/test/bootstrap-catalog.bats — 6 cases:; scripts/repo-local-skills/install-updates/test/install-updates-bootstrap-trigger.bats — 4 cases:
 **Related:** ADR-059, ADR-047, ADR-056, ADR-013, ADR-014, ADR-015, ADR-022, ADR-026, ADR-036, ADR-038, ADR-040, ADR-042, ADR-044, ADR-049, ADR-052, ADR-053, ADR-054, ADR-055
+
 ### ADR-060 — Problem-RFC-Story framework with mandatory problem-trace and unified problem ontology
-**Status:** accepted | **Oversight:** unconfirmed
-**Decides:** Adopt a four-tier artefact ontology (Problem → ADR → RFC → Story) with the canonical execution spine Problem → RFC → story map(s) → stories, under two non-ITIL invariants — every RFC traces to a problem (I1, no orphan RFCs) and technical and user/business problems are handled uniformly (I2). Every fix ships through an RFC that must pre-exist at propose-fix (RFC-first per ADR-073 — a missing RFC is authored-first, never blocked or auto-created; I13 unconditional per ADR-071; retrospective RFC prohibited); RFCs hold no independent decisions, every ≥2-option choice becomes an ADR (ADR-070). The `type` axis is retired (P287/ADR-074) in favour of a derive-then-ratify persona+JTBD contract on every problem capture (I12). Story cardinality (0..N + empty-stories fallback) is superseded by ADR-089 (1..N; atomic = one full story), and the story-map/story tier gains a drift-invalidated oversight marker + RFC-references-only-ratified-stories gate per ADR-090.
-**Confirmation:** capture-rfc hard-blocks without `--problem`; manage-rfc hard-blocks irreversible transitions on missing trace, advisory at `→closed`; problem `## RFCs` reverse-trace driven off commit trailer; P168 retro-migrates to RFC-001 with no semantic loss; held changeset graduates atomically; I12 derive-then-ratify (cited/flagged → silent, derivation-fail → AskUserQuestion, REJECT = no ticket, AFK without flags halts); I13 RFC must pre-exist at fix-proposal (implementation on RFC-less Known Error refused/routed to authoring-first); behavioural bats cover I1/I2/I12/I13 + no-type regression guard; forward-dogfood gate before adopter release.
-**Related:** ADR-010, ADR-013, ADR-014, ADR-019, ADR-022, ADR-031, ADR-032, ADR-038, ADR-040, ADR-042, ADR-044, ADR-049, ADR-051, ADR-052, ADR-053, ADR-059, ADR-064, ADR-066, ADR-069, ADR-070, ADR-071, ADR-072, ADR-073, ADR-074, ADR-089, ADR-090
+**Status:** accepted | **Oversight:** confirmed
+**Related:** ADR-032
 
 ### ADR-061 — Dogfood graduation criteria for held changesets — symmetric risk balance drives the reinstate decision
 **Status:** proposed | **Oversight:** confirmed
@@ -292,23 +291,24 @@ _76 ADRs. These are the current rules. The architect agent reads this section fi
 **Chosen:** Chosen option: **"RFCs hold no independent decisions"**, because it is the only option that places every decision under the oversight + ratification machinery that already exists (ADR-064 confirm gate + ADR-066 born-confirmed marker), rathe...
 **Confirmation:** ADR-060 line 97's permissive clause is deleted; its protective clause ("pure sequencing/breakdown of already-d...; A behavioural test (per ADR-052) asserts no RFC body in docs/rfcs/ contains a "Considered Options / Alternativ...; The RFC template + /wr-itil:capture-rfc + /wr-itil:manage-rfc carry no "Considered Options" section.; RFC-005's F1–F7 decisions are extracted to ADR(s); RFC-005 is reduced to scope + decomposition + traces.
 **Related:** ADR-071, ADR-060, ADR-066, ADR-064, ADR-052, ADR-069, ADR-051
+
 ### ADR-071 — Every fix goes through an RFC
-**Status:** proposed | **Oversight:** unconfirmed
-**Decides:** Every problem is fixed only via an RFC — no atomic-fix carve-out and no effort threshold — repudiating the unratified RFC-005 F2/F7/I13 carve-out the user disavowed (*"No short cuts. Same RFC."*); an atomic single-commit fix is a full RFC like any other, now carrying exactly one full story per ADR-089 (not the old empty `stories: []` shape), never a lighter or "thin" path. Amends ADR-060 to make the Problem→RFC trace unconditional at fix-time.
-**Confirmation:** A Problem→RFC fix-time gate enforces RFC-first with no effort carve-out; JTBD-008 + JTBD-101 no longer carry the carve-out (edits routed through the ADR-068 oversight flow); RFC-005's F2/F7/I13 carve-out removed under the implementation RFC; both JTBDs document that atomic fixes use the same RFC, explicitly not a thin/scaled-down path.
-**Related:** ADR-070, ADR-060, ADR-068, ADR-089, ADR-066
+**Status:** proposed | **Oversight:** confirmed
+**Chosen:** Chosen option: **"Every problem is fixed only via an RFC — no carve-out, no effort threshold"**, ratified by the user via clear direction on 2026-05-26 (*"Each problem may ONLY be fixed via an RFC"*).
+**Confirmation:** A Problem→RFC fix-time gate enforces RFC-first with no effort carve-out (a problem fix cannot commence/commi...; JTBD-008 (lines 21/26/44) + JTBD-101 (line 30) no longer contain the atomic-fix carve-out; both edits route th...; RFC-005's F2/F7/I13 carve-out is removed under the implementation RFC.; JTBD-008 + JTBD-101 document that atomic fixes go through the same RFC as any fix — explicitly NOT a thin / ...
+**Related:** ADR-070, ADR-060, ADR-066, ADR-068
 
 ### ADR-072 — RFC required at the propose-fix step on a Known Error
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** The mandatory Problem→RFC trace is required at the propose-fix step on a Known Error (the `/wr-itil:manage-problem` propose-fix action) — after root cause + workaround, before fix work — with no new lifecycle state, conforming to ADR-022's Known Error semantics. Per ADR-073's RFC-first lockstep the RFC must already exist: propose-fix checks it as a precondition rather than creating it; a missing RFC is authored first then implemented (retrospective RFC prohibited, since fixing a problem *is* implementing its RFC).
-**Confirmation:** ADR-060 I13 names propose-fix on a Known Error as the gate placement, citing this ADR + ADR-022; `/wr-itil:manage-problem`'s propose-fix surface requires a pre-existing RFC and routes to RFC authoring if none exists; a behavioural test asserts the gate fires at propose-fix, not at Open → Known Error.
-**Related:** ADR-071, ADR-073, ADR-022, ADR-070, ADR-060
+**Chosen:** Chosen option: **"The RFC is required (must pre-exist) at the propose-fix step on a Known Error"** (user-ratified placement). When a fix is proposed on a Known Error (the `/wr-itil:manage-problem` propose-fix action), an RFC tracing the pro...
+**Confirmation:** ADR-060 I13 names the propose-fix step on a Known Error as the gate placement and cites this ADR + ADR-022.; /wr-itil:manage-problem's propose-fix surface requires a pre-existing RFC (RFC-first per ADR-073); if none exi...; A behavioural test asserts the gate fires at propose-fix, not at Open → Known Error.
+**Related:** ADR-071, ADR-073, ADR-022, ADR-072, ADR-070, ADR-060
 
 ### ADR-073 — RFC-first: a problem's fix implements its RFC; no implementation without a pre-existing RFC
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** A problem must have an RFC (stories in a user story map, ADR-060) *before* fix work starts — implementing the fix *is* implementing that RFC, so retrospective implement-then-document RFCs are prohibited. At the propose-fix gate: RFC exists → implement it; no RFC → don't start, author the RFC first; a fix choice already covered by existing ADRs → the RFC cites them and proceeds; a genuine ≥2-option choice *outside* existing ADR coverage → escalates to a new ADR ratified before implementation. The orchestrator may autonomously derive the story decomposition for an unambiguous or already-covered fix, but never pick an uncovered option. Reverses the earlier same-ADR auto-create-never-block stances (P314 skeleton, P399 fix-time authoring) as hollow after-the-fact traces; the P399 `capture-rfc --fix-time` mechanism is held pending rework, with lockstep amendments owed by ADR-072 and ADR-060's I13.
-**Confirmation:** propose-fix gate (interactive + AFK) refuses fix implementation when no RFC traces the problem and routes to RFC authoring; an authored RFC is a user-story-map decomposition, not a `Scope`+`Tasks` prose blob; an uncovered option-bearing fix blocks for a new ratified ADR while a covered choice proceeds citing existing ADRs (no new ADR); behavioural test asserts (a) RFC-less Known Error refused/routed to RFC authoring, (b) uncovered-choice fix blocks for a ratified ADR, (c) covered-choice fix proceeds.
-**Related:** ADR-060, ADR-070, ADR-071, ADR-072, ADR-044, ADR-074, ADR-031
+**Chosen:** Chosen option: **RFC-first — an RFC is a hard precondition for fix implementation.**
+**Confirmation:** The propose-fix gate (interactive + AFK) refuses to begin fix implementation when no RFC traces the problem; t...; An authored RFC is comprised of stories in a user story map (ADR-060), not a Scope+Tasks prose blob.; A fix whose approach-choice is not covered by existing ADRs has a new ratified ADR before implementation; a fi...; A behavioural test asserts: (a) implementation of a fix on an RFC-less Known Error is refused / routed to RFC ...
+**Related:** ADR-071, ADR-072, ADR-070, ADR-060, ADR-044, ADR-074
 
 ### ADR-074 — ADR-074: Confirm a decision's substance before building dependent work on it
 **Status:** proposed | **Oversight:** confirmed
@@ -373,28 +373,27 @@ _76 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed | **Supersedes:** [065-pipeline-gate-threshold-from-risk-policy-appetite]
 **Confirmation:** RISK-POLICY.md absent → default appetite 5; score 5 PASSES, score 6 FAILS.; RISK-POLICY.md "Threshold: 5" parse → score 5 PASSES, score 6 FAILS.; RISK-POLICY.md "exceeds 4" — explicit-policy override of default-5 → score 4 PASSES, score 5 FAILS.; Fractional score = 5.5 → FAILS under default 5 (integer-only-equivalence delta carried forward from ADR-065,...; RISK_APPETITE env override still takes precedence over the policy parse.
 **Related:** ADR-065, ADR-013, ADR-042, ADR-014, ADR-052, ADR-026, ADR-077
+
 ### ADR-087 — Authoring-time cadence-annotation contract — how a deferral declares the self-firing trigger that will fire it
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** Chose the explicit cadence-annotation contract (Option 2): a shipped deferral is legal only if a self-firing-CLASS trigger — a hook `*.sh`, `SessionStart`, `PreToolUse`/`PostToolUse`, CI workflow, `cron`, or a `work-problems` pre-flight — is cited within its ±5-line window; a bare on-demand skill or ticket ID does not count (that bare-naming is the P375 conflation). Checkable in a per-edit hook with no graph walk; ships advisory (PostToolUse, exit 0) over `SKILL.md`/ADRs/RFCs/hooks with `docs/problems/` excluded; the harder transitive-reachability check is honestly deferred to RFC-035 B6.
-**Confirmation:** 15 behavioural bats in `packages/itil/hooks/test/itil-deferral-cadence-gate.bats` (ADR-052 — assert emitted stderr, never source-grep).
-**Related:** ADR-084, ADR-057, ADR-040, ADR-045, ADR-013, ADR-052, ADR-002, ADR-003
+**Chosen:** Chosen option: **Option 2 — explicit cadence-annotation contract naming a self-firing CLASS.** It is checkable in a per-edit hook (no graph walk), it directly rejects the P375 conflation (Option 3's defect), and it leaves the genuinely-ha...
+
 ### ADR-088 — Plugin-staleness surfacer — per-plugin, per-turn (UserPromptSubmit), surface-not-install, network-free
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** Each windyroad plugin ships its own network-free `UserPromptSubmit` hook that re-checks every turn — inferring its running version from its script path and comparing it to the highest semver-named cache directory — and surfaces (never auto-installs) a one-line advisory when the session is behind. Chosen over SessionStart-only (misses the prevalent mid-session-install case) and over a single cross-plugin walker (breaks ADR-002/003 self-containment); output is throttled once per newly-detected version, and each hook emits its own line independently — no shared marker — so the P260 race class is eliminated.
-**Confirmation:** version-behind → advisory emitted once; unchanged turns → silent; version advances mid-session → re-emitted once; detector error → fail-open silent; AFK session → suppressed; README compendium regenerated per ADR-077.
-**Related:** ADR-002, ADR-003, ADR-013, ADR-017, ADR-023, ADR-034, ADR-038, ADR-040, ADR-049, ADR-052, ADR-077, ADR-080, ADR-081, ADR-084, ADR-087
+**Chosen:** Chosen: **Option 2 — UserPromptSubmit per-turn, per-plugin, surface-not-install, network-free.** User-ratified 2026-07-02 (per-turn trigger to catch mid-session installs; per-plugin shape; surface-not-install; network-free; run-very-often...
+**Related:** ADR-038, ADR-040, ADR-080, ADR-034, ADR-081, ADR-084, ADR-087, ADR-017, ADR-002, ADR-003
 
 ### ADR-089 — Every RFC has at least one story
-**Status:** proposed | **Oversight:** unconfirmed
-**Decides:** An RFC's `stories:` list is never empty — cardinality is 1..N once a fix is proposed, and an atomic single-commit fix is an RFC carrying exactly one full INVEST-traced story (not `stories: []`, not a thin/auto-generated variant); chosen because it removes the last empty-stories residue of the P311-disavowed friction guard without re-introducing a shaped reduced-ceremony exemption. Amends ADR-060 (`0..N`→`1..N`, removes the empty-stories work-problem fallback) and ADR-071 (reframes the atomic representation).
-**Confirmation:** a fix-RFC cannot reach `accepted` with an empty `stories:` list (rejected, not fallback-dispatched); the four bats asserting the empty-stories fallback is legal are flipped to assert rejection; ADR-060/ADR-071 cardinality clauses read "≥1 / exactly one story" with no surviving "empty `stories: []`" language.
-**Related:** ADR-060, ADR-070, ADR-071
+**Status:** proposed | **Oversight:** confirmed
+**Chosen:** Chosen option: **"The atomic singleton is a full story"** (Option 1), because it is the only option that removes the empty-stories residue *without* re-introducing a shaped exemption. Option 2 re-creates the exact reduced-ceremony carve-out...
+**Confirmation:** A behavioural test (per ADR-052) asserts an RFC proposed for a fix cannot reach accepted with an empty stories...; The four bats that currently assert the empty-stories fallback is legal (rfc-stories-extension.bats, working-t...; ADR-060's cardinality clauses and ADR-071's atomic-representation clauses read "≥1 / exactly one story," wit...
+**Related:** ADR-071, ADR-060, ADR-070
 
 ### ADR-090 — Story maps and stories carry a drift-invalidated human-oversight marker
-**Status:** proposed | **Oversight:** unconfirmed
-**Decides:** Story maps and their stories gain a `human-oversight:` marker (orthogonal to the `status:` lifecycle) that is drift-invalidated — any change (add/edit/re-slice/reuse/retitle) resets `confirmed`→`unconfirmed`, forcing re-ratification before the map is relied on; an RFC may reference only ratified stories. Chosen over ADR-066 write-once parity because a living artefact must not read as ratified after a silent edit.
-**Confirmation:** a map/story edited after its `oversight-date` reads `unconfirmed` (behavioural test); `capture-rfc`/`manage-rfc` refuse to list an unratified story (behavioural test); a detector surfaces unratified maps mirroring `wr-architect-detect-unoversighted`.
-**Related:** ADR-060, ADR-066, ADR-068, ADR-074, ADR-009
+**Status:** proposed | **Oversight:** confirmed
+**Chosen:** Chosen option: **"Drift-invalidated marker"** (Option 1), because it is what the user's "ratify after **any** change" literally requires and what the stated purpose demands — you must not rely on a story map that changed since it was rati...
+**Confirmation:** A story map / story with an edit newer than its oversight-date reads as unconfirmed (drift-invalidation fires)...; capture-rfc / manage-rfc refuse to list an unratified story in an RFC's stories: — asserted by a behavioural...; A detector surfaces unratified story maps (mirroring wr-architect-detect-unoversighted for decisions).
+**Related:** ADR-066, ADR-068, ADR-060, ADR-074, ADR-009
 
 ---
 

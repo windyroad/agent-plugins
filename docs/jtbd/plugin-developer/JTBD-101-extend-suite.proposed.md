@@ -5,9 +5,13 @@ persona: plugin-developer
 date-created: 2026-04-14
 human-oversight: confirmed
 oversight-date: 2026-05-26
+oversight-confirmed-date: "2026-07-02 — re-ratified via AskUserQuestion (P357 batched pass) after the ADR-089 atomic-representation amendment"
+oversight-downgraded: "2026-07-02 — ADR-089 lockstep: the atomic-fix-adopter framing is reframed — an RFC always has ≥1 story; the coordination surface scales up, the RFC never scales below one story; no atomic-fix exemption. P357 re-ratification batched this session."
 ---
 
 # JTBD-101: Extend the Suite with New Plugins
+
+> **Amendment 2026-07-02 (ADR-089 — every RFC has ≥1 story).** Any clause below framing atomic/single-commit fixes as paying *less* RFC/story ceremony is **superseded**: an RFC always has **≥1 story**. The multi-commit *coordination* surface (multiple stories / a story map) scales **up** when the work needs it; the RFC never scales **down** below one story, and there is no atomic-fix exemption. `human-oversight` downgraded to `unconfirmed` pending P357 re-ratify (batched this session).
 
 ## Job Statement
 

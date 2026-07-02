@@ -3,6 +3,8 @@ status: "proposed"
 date: 2026-05-26
 human-oversight: confirmed
 oversight-date: 2026-05-26
+oversight-confirmed-date: "2026-07-02 — re-ratified via AskUserQuestion (P357 batched pass) after the ADR-089 atomic-representation amendment"
+oversight-downgraded: "2026-07-02 — ADR-089 lockstep: the atomic-fix representation changes from empty `stories: []` to exactly one full story; the empty-stories clauses below are superseded by ADR-089. P357 re-ratification batched this session."
 decision-makers: [Tom Howard]
 consulted: []
 informed: []
@@ -12,6 +14,8 @@ problems: [P251]
 ---
 
 # Every fix goes through an RFC
+
+> **Amendment 2026-07-02 (ADR-089 — every RFC has ≥1 story).** This ADR kept the empty `stories: []` shape as its atomic-fix representation ("its `stories:` array is simply empty when the work is not decomposed" — clauses below). **ADR-089 supersedes that**: an RFC's `stories:` list is **never empty**; an atomic single-commit fix is an RFC carrying **exactly one full story** (same INVEST shape + traces), not `stories: []`. This *completes* this ADR's no-carve-out / no-thin-path intent — the empty-stories shape was the disavowed atomic-fix friction guard's last structural residue. Read every "empty `stories: []`" clause below as "exactly one story." `human-oversight` downgraded to `unconfirmed` pending P357 re-ratify (batched this session).
 
 ## Context and Problem Statement
 
