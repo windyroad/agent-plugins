@@ -18,7 +18,7 @@ human-oversight: unconfirmed
 
 ## User value (INVEST Valuable)
 
-As the developer (and the adopter who hit the problem), I want the coordinated fix to land, release, and verify — so the problem closes with a durable trace from problem → RFC → change, and the adopter gets the fix in a published release.
+In order to close the problem with a durable trace from problem → RFC → change and get the fix to the adopter in a published release, as the developer (and the adopter who hit the problem), I want the coordinated fix to land, release, and verify.
 
 ## Acceptance criteria (INVEST Testable) — SHIPPED
 

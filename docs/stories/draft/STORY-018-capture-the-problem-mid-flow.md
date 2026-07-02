@@ -17,7 +17,7 @@ human-oversight: unconfirmed
 
 ## User value (INVEST Valuable)
 
-As a developer who hits a problem mid-flow, I want to capture it in seconds without breaking my current task — so the problem enters the backlog with a real trace instead of being lost.
+In order to keep a problem from being lost when I hit it mid-flow, as a developer, I want to capture it in seconds — with a real trace — without breaking my current task.
 
 ## Acceptance criteria (INVEST Testable) — SHIPPED
 

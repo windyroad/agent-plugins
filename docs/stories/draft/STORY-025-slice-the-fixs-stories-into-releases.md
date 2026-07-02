@@ -18,7 +18,7 @@ human-oversight: unconfirmed
 
 ## User value (INVEST Valuable)
 
-As a developer, I want to **slice the fix's stories into releases** (MVP first, later phases stay first-class) — so a thin walking skeleton ships first and deferred phases remain visible, ranked entities rather than forgotten.
+In order that users get the important part sooner, and work I defer stays visible instead of being quietly dropped, as a developer, I want to **slice the fix's stories into releases** (MVP first).
 
 ## Acceptance criteria (INVEST Testable)
 

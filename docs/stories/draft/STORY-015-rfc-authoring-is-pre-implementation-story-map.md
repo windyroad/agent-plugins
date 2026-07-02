@@ -25,7 +25,7 @@ estimated-effort: M
 
 ## User value (INVEST Valuable)
 
-As a maintainer authoring an RFC for a fix, I want `/wr-itil:capture-rfc` (and the heavyweight `/wr-itil:manage-rfc`) to author the RFC as a **pre-implementation user story map** (ADR-060) — not a fix-time `## Scope`+`## Tasks` blob emitted as a byproduct of the fix — so that the RFC is a real plan that precedes implementation, and the held `--fix-time` changeset's repudiated mechanism is retired.
+In order that a fix is a deliberate, reviewable plan rather than something improvised at the keyboard, as a maintainer authoring an RFC for a fix, I want `/wr-itil:capture-rfc` (and the heavyweight `/wr-itil:manage-rfc`) to author the RFC as a **pre-implementation user story map** (ADR-060), not a fix-time `## Scope`+`## Tasks` blob.
 
 ## Acceptance criteria (INVEST Testable)
 

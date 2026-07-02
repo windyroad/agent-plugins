@@ -18,7 +18,7 @@ human-oversight: unconfirmed
 
 ## User value (INVEST Valuable)
 
-As a developer decomposing a later fix on a job that already has a map, I want to **reuse stories already on the map** the fix touches — so I don't re-author a story that exists, and the RFC references the existing one.
+In order that the map keeps telling the truth — one story per capability, not confusing near-duplicates — and I don't redo work already captured, as a developer decomposing a later fix, I want to **reuse the stories on the map** the fix touches.
 
 ## Acceptance criteria (INVEST Testable)
 

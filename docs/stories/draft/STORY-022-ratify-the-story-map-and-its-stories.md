@@ -19,7 +19,7 @@ human-oversight: unconfirmed
 
 ## User value (INVEST Valuable)
 
-As a maintainer, I want the story map **and each story on it** to require **human ratification after any change** before they're relied on — so an RFC can never reference an unratified (possibly drifted) map or story, and the coordination surface stays trustworthy.
+In order to keep the coordination surface trustworthy — so an RFC can never reference an unratified, possibly drifted map or story — as a maintainer, I want the story map **and each story on it** to require **human ratification after any change** before they're relied on.
 
 ## Acceptance criteria (INVEST Testable)
 

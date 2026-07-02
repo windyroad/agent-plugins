@@ -18,7 +18,7 @@ human-oversight: unconfirmed
 
 ## User value (INVEST Valuable)
 
-As a developer implementing a decomposed fix, I want to work the RFC's stories one at a time — so each coordinated change is dispatched, implemented, and traced individually rather than as one undifferentiated blob.
+In order to make safe, steady progress I can trust — catching a mistake while it's small and cheap instead of untangling one giant half-finished change — as a developer implementing a decomposed fix, I want to work the RFC's stories one at a time.
 
 ## Acceptance criteria (INVEST Testable) — SHIPPED (traversal)
 

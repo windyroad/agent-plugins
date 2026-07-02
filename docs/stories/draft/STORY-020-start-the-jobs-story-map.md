@@ -18,7 +18,7 @@ human-oversight: unconfirmed
 
 ## User value (INVEST Valuable)
 
-As a developer decomposing my first coordinated fix for a job that has no story map yet, I want the flow to **start the job's story map for me** — so the very first run of the process has somewhere to put the fix's stories, without me hand-bootstrapping the HTML.
+In order that a missing map never blocks me from tracking a coordinated fix — even the very first one on a job — as a developer, I want the flow to **start the job's story map for me** automatically.
 
 ## Acceptance criteria (INVEST Testable)
 

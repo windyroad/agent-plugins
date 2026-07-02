@@ -18,7 +18,7 @@ human-oversight: unconfirmed
 
 ## User value (INVEST Valuable)
 
-As a developer investigating a problem, I want to record the root cause and a documented workaround and move the ticket to Known Error — so the problem is understood and the fix can be proposed against a stable baseline.
+In order that the fix targets the real cause instead of a symptom — and users aren't left blocked while it's built — as a developer, I want to record a problem's root cause and a documented workaround and move the ticket to Known Error.
 
 ## Acceptance criteria (INVEST Testable) — SHIPPED
 

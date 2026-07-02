@@ -18,7 +18,7 @@ human-oversight: unconfirmed
 
 ## User value (INVEST Valuable)
 
-As a developer decomposing a fix, I want to **add the fix's new stories to the job's story map** — so the coordinated changes become first-class, traceable entities on the wall rather than a list buried in a ticket body.
+In order that no piece of a coordinated fix gets forgotten and I can see the whole shape of the work at a glance, as a developer decomposing a fix, I want to **add the fix's new stories to the job's story map**.
 
 ## Acceptance criteria (INVEST Testable)
 
