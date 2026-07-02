@@ -124,13 +124,15 @@ EOF
 }
 
 # ---------------------------------------------------------------------------
-# Surface 2b: helper applies lazy-empty discipline (empty stories: [])
+# Surface 2b: renderer tolerates empty stories: [] on a DRAFT RFC
 # ---------------------------------------------------------------------------
 
-@test "rfc-stories-extension: helper does not reject empty stories: [] (atomic-RFC JTBD-101 friction guard)" {
-  # Atomic RFC ships with stories: []; the helper must not reject this
-  # shape (it represents a legitimate atomic-fix-adopter RFC per
-  # ADR-060 line 262 JTBD-101 friction guard).
+@test "rfc-stories-extension: renderer tolerates empty stories: [] on a draft RFC (ADR-089: enforced >=1 at accept, not at render)" {
+  # Per ADR-089 every RFC has >=1 story, but empty stories: [] is a legal
+  # TRANSIENT state on a draft/proposed RFC before the fix is scoped. The
+  # renderer must not reject it (that would block drafting); the >=1-story
+  # requirement is enforced at the manage-rfc accept gate by the
+  # check-rfc-has-stories predicate, not by this renderer.
   cat > docs/rfcs/RFC-002-atomic.proposed.md <<'EOF'
 ---
 status: proposed

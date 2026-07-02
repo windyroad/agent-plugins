@@ -52,8 +52,8 @@ None needed — this is a governance-implementation gap, not a runtime break. Th
 
 - [x] Re-rate Priority and Effort (2026-07-02: Impact 3 × Likelihood 4 = 12 High; Effort L; WSJF now (12 × 2.0)/4 = 6.0 as Known Error)
 - [x] Decide the implementation vehicle: **standalone RFC-037** (P404 is distinct from RFC-005's P251/P399; architect PASS 2026-07-02)
-- [ ] Phase 1: remove empty-stories fallback + require ≥1 story + flip the 4 bats (same slice)
-- [ ] Phase 1: resolve the legacy `stories: []` back-fill question
+- [x] Phase 1: require ≥1 story + remove empty-stories fallback (2026-07-03). Accept gate = `check-rfc-has-stories` predicate wired into `manage-rfc` proposed→accepted (commit 3e3300a3); empty-stories atomic fallback removed from the `manage-problem`/`work-problem` Known-Error traversal (commit d2eb97d5). Bats: only `working-the-problem-traversal.bats` actually needed flipping (it was coupled to the removed prose); `rfc-stories-extension` / `check-rfc-rejected-alternatives` / `list-stories-contract` verified green — their empty-stories references are draft-legal renderer behaviour + incidental fixtures, NOT the removed fallback. `rfc-stories-extension` title/comment reframed to ADR-089. 36/36 green.
+- [x] Phase 1: legacy `stories: []` back-fill — **DECISION (2026-07-03): back-fill for ADR-089 consistency, but low-urgency.** Existing accepted RFCs (RFC-036, RFC-003) with `stories: []` never re-fire the transition-time accept gate, and `check-rfc-has-stories` surfaces them at any future `manage-rfc accepted`. Deferred to a follow-up slice (real INVEST-story authoring per RFC, not mechanical).
 - [ ] Phase 2: marker field + drift-invalidation trigger + reference gate + detector + bats
 - [ ] **Use STORY-MAP-002 as the golden exemplar**: its hand-authored, fully-ratified map + 16 stories (built + ratified end-to-end this session) are the worked example of the *output* the implemented map/story-authoring tooling must produce — same shape, INVEST value-first statements, per-beat/release structure, and drift-invalidated oversight. Assert the tooling can (re)produce an artefact of this quality.
 
