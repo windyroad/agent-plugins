@@ -24,3 +24,7 @@
 
 > Last reviewed: 2026-05-26 **`@windyroad/itil@0.35.14` released; RFC-007 in-progress → verifying** — the ADR-070/071 implementation (RFC-006) + the P260 ADR-050 Option-C create-gate fix (RFC-007) shipped (release commit `bf1ebdd`); the held P260 changeset cleared the new unconditional ADR-071 gate via its RFC-007 retro-fit. Both RFC-006 + RFC-007 are now in the Verification Queue (multiplier 0). RFC-005 remains accepted (its B2–B10 I13 hook/skill enforcement chain ships separately under the held-changeset window). Prior RFC-006→verifying fragment rotated to `docs/rfcs/README-history.md` per P134.
 > Last reviewed: 2026-07-02 **RFC-036 proposed → accepted — Plugin-staleness surfacer** — per-plugin, per-turn (UserPromptSubmit) staleness check (decision held in ADR-088); warn-only, network-free, catches mid-session installs a once-at-boot check misses. Traces P045 (reopened) + P375. WSJF 8.0 (top of rankings). Prior RFC-005-era fragment rotated to `docs/rfcs/README-history.md` per P134.
+## 2026-07-02
+
+> Last reviewed: 2026-07-02 **RFC-037 proposed — Implement ADR-089/090 (every RFC ≥1 story + story-map/story oversight)** — the RFC-first fix for P404, hand-authored as a pre-implementation story map listing STORY-MAP-002's A3 stories (020/021/022/024/025); dogfoods ADR-089 (non-empty `stories:`). Not yet in WSJF Rankings (accepted RFCs only). Prior RFC-036 fragment rotated to `docs/rfcs/README-history.md` per P134.
+

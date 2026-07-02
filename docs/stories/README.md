@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-07-03 — **STORY-020/021/022/024/025 accepted** — RFC-037 Phase-2 cohort transitioned draft→accepted (INVEST gate I7 RFC-005 + I8 STORY-MAP-002 + I10 shape all passed); ready for implementation. Rankings-table build + parent reverse-trace deferred to a reconcile pass (README is scaffold-state; STORY-MAP-002 is HTML).
+> Last reviewed: 2026-07-03 **STORY-020/021/022/024/025 done** — RFC-037's five tooling stories implemented, ratified, and transitioned to done (all acceptance criteria met).
 >
 > Run `/wr-itil:manage-story review` to refresh once the manage-story skill ships.
 

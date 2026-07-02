@@ -1117,3 +1117,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 
 > Last reviewed: 2026-07-02 **P404 captured** — Implement ADR-089 (every RFC has ≥1 story; atomic = one full story; remove the empty-stories fallback + flip 4 green bats) + ADR-090 (story-map/story drift-invalidated ratification marker + RFC-references-only-ratified-stories gate) in the skills/tests. Deferred ripple from this session's ratification (lightweight aside via /wr-itil:capture-problem).
 > Last reviewed: 2026-07-02 **review pass** — captured P405 (external-comms gate false-positives on read-only `gh api security-advisories` path; WSJF 7.5) + P406 (github-discussions channel returns HTTP 410 for windyroad/agent-plugins; WSJF 2.5), then re-rated 18 deferred-placeholder tickets against RISK-POLICY.md and regenerated the WSJF Rankings table from source-of-truth ticket frontmatter (43 rows; reconcile clean). Notable top-of-queue shifts: P368 SID discovery bug jumped to WSJF 18.0 (Effort S / KE), P400 mark-reviewed resume gap 9.0/S/Open, P368 was previously deferred. Full details in the ticket bodies.
+## 2026-07-02
+
+> Last reviewed: 2026-07-02 **P404 → Known Error** — documented root cause (ADR-089/090 ratified but unimplemented; 4 green empty-stories bats + RFC-036's `stories:[]` are the live evidence) + Fix Strategy (RFC-037, the RFC-first fix) + workaround (none — governance gap, not a break); WSJF 1.5 → 6.0 on the Known-Error multiplier. Implementation (RFC-037's Phase 1 empty-stories removal + Phase 2 story-map/story tooling) is the Effort-L dev work ahead.
+

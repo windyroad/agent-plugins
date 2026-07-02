@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-02 **P404 → Known Error** — documented root cause (ADR-089/090 ratified but unimplemented; 4 green empty-stories bats + RFC-036's `stories:[]` are the live evidence) + Fix Strategy (RFC-037, the RFC-first fix) + workaround (none — governance gap, not a break); WSJF 1.5 → 6.0 on the Known-Error multiplier. Implementation (RFC-037's Phase 1 empty-stories removal + Phase 2 story-map/story tooling) is the Effort-L dev work ahead.
+> Last reviewed: 2026-07-03 **P404 → Verification Pending** — RFC-037 complete (ADR-089 + ADR-090 implemented; all 5 stories done + ratified); moved from WSJF Rankings to the Verification Queue. Release queued via `.changeset/`.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -25,7 +25,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 8.0 | P408 | risk-score-commit-gate hardcodes a 14-day RISK-POLICY staleness threshold, ignoring the policy's stated review cadence (flagged a quarterly policy stale at 16 days); affects all adopters. Fix options a/b/c recorded (a: gate derives threshold from stated cadence, recommended). | 8 Medium | Open | S | 2026-07-02 | internal |
 | 7.5 | P359 | Changeset holding does not withhold shipment — held code ships with any sibling release | 15 High | Known Error | L | 2026-06-11 | internal |
 | 6.0 | P305 | Post-Edit silent revert of working-tree files before commit — potential silent-work-loss hazard | 6 Med | Known Error | M | 2026-05-26 | internal |
-| 6.0 | P404 | Implement ADR-089 + ADR-090 in the skills and tests (≥1-story-per-RFC + story-map/story ratification) | 12 High | Known Error | L | 2026-07-02 | internal |
 | 6.0 | P395 | external-comms agent silently goes dormant on the credibility axis — no nudge to author the missing RISK-POLICY section | 12 High | Open | M | 2026-06-28 | corrective-feedback (user, 2026-06-28) |
 | 6.0 | P399 | ADR-073 fix-time auto-create emits a SKELETON RFC; it should author the RFC fully | 12 High | Open | M | 2026-06-28 | corrective-feedback (user, 2026-06-28 — ratified at the work-problems loop-end decision surface) |
 | 6.0 | P401 | Capture/RFC persona-JTBD anchoring shoehorns (or discards the problem) instead of interviewing the human to elicit the real who/why | 12 High | Open | M | 2026-06-29 | corrective-feedback (user, 2026-06-29 — during the RFC-first ADR-072/060/087 ratification walkthrough) |
@@ -258,6 +257,7 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P370 | Iter subprocess exits turn on a turn-end-survivor background task; commit-bearing work lost — prohibition clause + foreground-synchronous substitute shipped | @windyroad/itil@0.55.3 (RFC-034; `work-problems` Step 5 iter-prompt clause + paired promptfoo eval GREEN) | no — not observed |
 | P392 | replace-section `awk -v section="$multiline"` aborts on BSD awk (macOS) — getline-from-tempfile fix at `update-problem-references-section.sh:266` | @windyroad/itil@0.55.1 (behavioural bats RED→GREEN on host BSD awk) | yes — observed: behavioural bats RED→GREEN on host BSD awk in-session |
 | P394 | Release preview-publishes every package, not just changed ones — `release-preview.yml` skip-unchanged guard (version == npm latest → skip) | CI-infra, `.github/workflows/release-preview.yml` (no npm artefact) | yes — observed: two consecutive releases (risk-scorer, itil) each preview-published ONLY the changed package; wardley/tdd/voice-tone stayed at `-preview.840` |
+| P404 | Implement ADR-089 + ADR-090 in the skills and tests (≥1-story-per-RFC + story-map/story ratification) | `@windyroad/itil` — RFC-037 complete (all 5 stories done + ratified); release queued via `.changeset/` | no — not observed |
 
 ## Inbound Upstream Reports
 

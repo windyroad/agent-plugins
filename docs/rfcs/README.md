@@ -1,6 +1,6 @@
 # RFC Backlog
 
-> Last reviewed: 2026-07-02 **RFC-037 proposed — Implement ADR-089/090 (every RFC ≥1 story + story-map/story oversight)** — the RFC-first fix for P404, hand-authored as a pre-implementation story map listing STORY-MAP-002's A3 stories (020/021/022/024/025); dogfoods ADR-089 (non-empty `stories:`). Not yet in WSJF Rankings (accepted RFCs only). Prior RFC-036 fragment rotated to `docs/rfcs/README-history.md` per P134.
+> Last reviewed: 2026-07-03 **RFC-037 → verifying** — implementation complete (ADR-089/090; STORY-020/021/022/024/025 done + ratified); Confirmation met with commit evidence; awaiting P404 verification to close.
 > Run `/wr-itil:manage-rfc review` to refresh once the manage-rfc skill ships.
 
 ## Status
