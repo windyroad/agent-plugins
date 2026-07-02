@@ -1125,3 +1125,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 
 > Last reviewed: 2026-07-03 **P404 → Verification Pending** — RFC-037 complete (ADR-089 + ADR-090 implemented; all 5 stories done + ratified); moved from WSJF Rankings to the Verification Queue. Release queued via `.changeset/`.
 
+
+> Last reviewed: 2026-07-03 **P409 captured** — back-fill legacy RFCs with empty `stories: []` for ADR-089 consistency (lightweight aside via /wr-itil:capture-problem; deferred follow-up from RFC-037).

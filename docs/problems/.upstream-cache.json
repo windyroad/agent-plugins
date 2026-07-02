@@ -1,12 +1,12 @@
 {
   "$schema": "https://windyroad.github.io/agent-plugins/schemas/upstream-cache.json",
   "$comment": "Cache file for inbound report discovery (P079 / ADR-062). Written by /wr-itil:review-problems Step 8.5 after each discovery pass.",
-  "last_checked": "2026-06-26T06:16:55Z",
-  "$last_pass_note": "/wr-itil:review-problems Step 4.5 discovery pass 2026-06-26 (TTL-expiry auto-recheck; cache was 5d stale). 4 fresh inbound reports captured as Tier-1 local tickets (Origin: inbound-reported): #274->P382 (work-problems iter subprocesses miss project-scoped plugins, need --plugin-dir), #282->P383 (capture-problem --persona enum rejects adopter personas), #283->P384 (external-comms agent no credibility/self-own axis), #284->P385 (work-problems pre-dispatch relevance-close). All four lack the [problem] title prefix and were only surfaced because this pass polled --state open unfiltered (class P373: the title_prefix filter would have discarded them). Per the 2026-05-15 discovery-only direction, ack comments deferred (external-comms-gate sha-bug bottleneck) AND these are the maintainer's own issues, so reporter-ack adds no value. JTBD-alignment + dual-axis-risk: all safe-and-valid (well-formed adopter-sourced reports, plugin-developer persona, no Axis-1/Axis-2 risk).",
+  "last_checked": "2026-07-02T16:43:14Z",
+  "$last_pass_note": "/wr-itil:review-problems Step 4.5 discovery pass 2026-07-02 (AFK pre-flight from work-problems Step 0b; TTL-expiry auto-recheck, cache was 6d stale). github-issues polled --state open unfiltered: 4 new issues appended as pending-pipeline-processing discovery-only entries (#296, #304, #306, #307). All maintainer self-filed; per the 2026-05-15 discovery-only direction + AFK safe-default (ADR-013 Rule 6): no acks posted, no local tickets auto-created (each overlaps existing backlog tickets - matching deferred to interactive triage). discussions channel skipped fail-soft (HTTP 410, P406). advisories channel skipped fail-soft (external-comms gate false-positive on read path, P405).",
   "channels": {
     "github-issues:windyroad/agent-plugins": {
-      "fetched_at": "2026-06-26T06:16:55Z",
-      "filter": "title_prefix=[problem] (label filter removed; see channels-config $filter-note). NOTE 2026-06-26 pass polled --state open UNFILTERED to catch non-prefixed inbound (P373)",
+      "fetched_at": "2026-07-02T16:43:14Z",
+      "filter": "polled --state open UNFILTERED (P373); title_prefix soft signal only",
       "status": "ok",
       "reports": [
         {
@@ -74,7 +74,7 @@
           "createdAt": "2026-05-18T11:55:37Z",
           "body_hash": "bfda21a42bc40001",
           "classification": "closed-upstream",
-          "cache_audit_note": "CLOSED upstream as of 2026-05-26 poll \u2014 P010 fixed by 56bae5f (released risk-scorer 0.11.0, mirrored locally as P198) and P007 fixed by 3c732ba (released risk-scorer 0.11.0, mirrored as P286). No pipeline action needed."
+          "cache_audit_note": "CLOSED upstream as of 2026-05-26 poll — P010 fixed by 56bae5f (released risk-scorer 0.11.0, mirrored locally as P198) and P007 fixed by 3c732ba (released risk-scorer 0.11.0, mirrored as P286). No pipeline action needed."
         },
         {
           "number": 202,
@@ -114,7 +114,7 @@
         },
         {
           "number": 236,
-          "title": "[problem] wr-risk-scorer:external-comms gate fires on private-repo git commit messages \u2014 git commits aren't external comms on private repos",
+          "title": "[problem] wr-risk-scorer:external-comms gate fires on private-repo git commit messages — git commits aren't external comms on private repos",
           "author": "tompahoward",
           "createdAt": "2026-06-08T04:22:53Z",
           "body_hash": "0a7ed3e9c3154667",
@@ -123,7 +123,7 @@
         },
         {
           "number": 241,
-          "title": "[problem] @windyroad/risk-scorer@0.12.7 \u2014 appetite-from-policy parser regex too narrow + subagent prompt hardcodes \u22644 with false RISK-POLICY citation (follow-up to closed #149)",
+          "title": "[problem] @windyroad/risk-scorer@0.12.7 — appetite-from-policy parser regex too narrow + subagent prompt hardcodes ≤4 with false RISK-POLICY citation (follow-up to closed #149)",
           "author": "tompahoward",
           "createdAt": "2026-06-08T11:54:20Z",
           "body_hash": "d740c14bfea5bd3c",
@@ -204,7 +204,7 @@
         },
         {
           "number": 139,
-          "title": "[problem] migrate-problems-layout.sh helper uses bashisms but /wr-itil:work-problems Step 0a SKILL.md does not specify bash \u2014 sourcing fails under zsh",
+          "title": "[problem] migrate-problems-layout.sh helper uses bashisms but /wr-itil:work-problems Step 0a SKILL.md does not specify bash — sourcing fails under zsh",
           "author": "tompahoward",
           "createdAt": "2026-05-17T20:51:10Z",
           "body_hash": "4718c55fe9f0c267",
@@ -231,7 +231,7 @@
         },
         {
           "number": 126,
-          "title": "[problem] capture-problem \u2192 manage-problem same-session halts at Step 0 reconcile (HALT_ROUTE_RECONCILE on deferred-refresh seam)",
+          "title": "[problem] capture-problem → manage-problem same-session halts at Step 0 reconcile (HALT_ROUTE_RECONCILE on deferred-refresh seam)",
           "author": "tompahoward",
           "createdAt": "2026-05-13T20:13:45Z",
           "body_hash": "43eeab2af47e1acb",
@@ -240,7 +240,7 @@
         },
         {
           "number": 125,
-          "title": "[problem] external-comms gate marker key cannot be computed by the reviewer agent (Read/Glob/Grep tool surface \u2014 no shasum); hash-scope ambiguity adds three recurrences",
+          "title": "[problem] external-comms gate marker key cannot be computed by the reviewer agent (Read/Glob/Grep tool surface — no shasum); hash-scope ambiguity adds three recurrences",
           "author": "tompahoward",
           "createdAt": "2026-05-13T20:12:24Z",
           "body_hash": "8e2fa16bdf660e46",
@@ -285,7 +285,7 @@
         },
         {
           "number": 117,
-          "title": "[problem] No /wr-retrospective:migrate-briefing skill \u2014 legacy docs/BRIEFING.md \u2192 docs/briefing/ topic-tree migration is manual per-adopter",
+          "title": "[problem] No /wr-retrospective:migrate-briefing skill — legacy docs/BRIEFING.md → docs/briefing/ topic-tree migration is manual per-adopter",
           "author": "tompahoward",
           "createdAt": "2026-05-10T20:10:01Z",
           "body_hash": "1761465715adefe1",
@@ -303,7 +303,7 @@
         },
         {
           "number": 98,
-          "title": "[problem] work-problems iter workers don't add changesets \u2014 fix commits accumulate without release path",
+          "title": "[problem] work-problems iter workers don't add changesets — fix commits accumulate without release path",
           "author": "tompahoward",
           "createdAt": "2026-04-28T02:31:57Z",
           "body_hash": "b2c16163511e0421",
@@ -501,7 +501,7 @@
         },
         {
           "number": 42,
-          "title": "[problem] ADR-022 .known-error.md \u2192 .verifying.md transition not happening consistently at release time",
+          "title": "[problem] ADR-022 .known-error.md → .verifying.md transition not happening consistently at release time",
           "author": "tompahoward",
           "createdAt": "2026-04-21T00:20:36Z",
           "body_hash": "b66ba6368d1d0dae",
@@ -516,22 +516,62 @@
           "body_hash": "f77ce3edb76d3a11",
           "classification": "safe-and-valid-local-ticket-created",
           "matched_local_ticket": "P164, P374",
-          "cache_audit_note": "discovered 2026-06-21 manually after channel filter missed it (P373 captures the filter defect); routed by user direction: octal eval bug \u2192 P164 Phase 2 reopen V\u2192KE; hardcoded suite name \u2192 P374 new ticket; #273 ack comment posted with cross-references. Title prefix '[problem]' absent \u2014 would have been missed by the title_prefix filter; surfaces P373 as the filter-too-narrow class.",
+          "cache_audit_note": "discovered 2026-06-21 manually after channel filter missed it (P373 captures the filter defect); routed by user direction: octal eval bug → P164 Phase 2 reopen V→KE; hardcoded suite name → P374 new ticket; #273 ack comment posted with cross-references. Title prefix '[problem]' absent — would have been missed by the title_prefix filter; surfaces P373 as the filter-too-narrow class.",
           "discovered_at": "2026-06-21T13:26:29Z"
+        },
+        {
+          "number": 296,
+          "title": "[problem] manage-problem per-session create-gate marker lets bulk-Write paths bypass per-ticket P094 README refresh",
+          "author": "tompahoward",
+          "createdAt": "2026-06-27T13:59:48Z",
+          "body_hash": "469527d91390c963",
+          "classification": "pending-pipeline-processing",
+          "matched_local_ticket": null,
+          "cache_audit_note": "discovered 2026-07-02 (TTL-expiry auto-recheck, cache 6d stale); discovery-only (maintainer self-filed in own repo); semantic match against existing local backlog pending interactive triage; no ack posted, no local ticket auto-created (AFK safe-default per ADR-013 Rule 6 - avoids duplicating overlapping existing tickets)"
+        },
+        {
+          "number": 304,
+          "title": "wr-itil README render rules leave three archive surfaces unbounded - problems/README.md outgrows the read-tool token cap",
+          "author": "tompahoward",
+          "createdAt": "2026-06-28T10:38:44Z",
+          "body_hash": "0fe9dbd3459b878b",
+          "classification": "pending-pipeline-processing",
+          "matched_local_ticket": null,
+          "cache_audit_note": "discovered 2026-07-02 (TTL-expiry auto-recheck, cache 6d stale); discovery-only (maintainer self-filed in own repo); semantic match against existing local backlog pending interactive triage; no ack posted, no local ticket auto-created (AFK safe-default per ADR-013 Rule 6 - avoids duplicating overlapping existing tickets)"
+        },
+        {
+          "number": 306,
+          "title": "wr-itil evaluate-relevance over-fires CLOSE-CANDIDATE on tickets that merely cite a shipped ADR",
+          "author": "tompahoward",
+          "createdAt": "2026-06-28T12:59:52Z",
+          "body_hash": "956d1aa2cb45adc8",
+          "classification": "pending-pipeline-processing",
+          "matched_local_ticket": null,
+          "cache_audit_note": "discovered 2026-07-02 (TTL-expiry auto-recheck, cache 6d stale); discovery-only (maintainer self-filed in own repo); semantic match against existing local backlog pending interactive triage; no ack posted, no local ticket auto-created (AFK safe-default per ADR-013 Rule 6 - avoids duplicating overlapping existing tickets)"
+        },
+        {
+          "number": 307,
+          "title": "wr-risk-scorer external-comms gate cannot read 'gh issue create --body-file' - empty draft, marker key never matches, call blocked in a loop",
+          "author": "tompahoward",
+          "createdAt": "2026-06-28T13:24:09Z",
+          "body_hash": "cc7616ce2b74b6f5",
+          "classification": "pending-pipeline-processing",
+          "matched_local_ticket": null,
+          "cache_audit_note": "discovered 2026-07-02 (TTL-expiry auto-recheck, cache 6d stale); discovery-only (maintainer self-filed in own repo); semantic match against existing local backlog pending interactive triage; no ack posted, no local ticket auto-created (AFK safe-default per ADR-013 Rule 6 - avoids duplicating overlapping existing tickets)"
         }
       ]
     },
     "github-discussions:windyroad/agent-plugins": {
-      "fetched_at": "2026-06-10T13:15:56Z",
-      "reports": [],
-      "status": "skipped",
-      "skip_reason": "discussions-disabled-for-repo (HTTP 410) \u2014 reconfirmed 2026-06-01 (preserved status from prior 2026-05-31 poll; channel-skip status carried forward per fail-soft contract)"
+      "fetched_at": "2026-07-02T16:43:14Z",
+      "status": "skipped-failsoft",
+      "skip_reason": "HTTP 410 - Discussions are disabled for this repo (P406); fail-soft skip per Step 4.5 contract",
+      "reports": []
     },
     "github-security-advisories:windyroad/agent-plugins": {
-      "fetched_at": "2026-06-01T05:04:00Z",
-      "reports": [],
-      "status": "skipped",
-      "skip_reason": "external-comms-gate-misclassifies-read-only-list-as-outbound (gate bug P276/P198/#125; preserved per fail-soft contract \u2014 no fresh poll attempted this pass to avoid retriggering the gate-denial cycle; the gate-bug landing in @windyroad/risk-scorer is the unblock path)"
+      "fetched_at": "2026-07-02T16:43:14Z",
+      "status": "skipped-failsoft",
+      "skip_reason": "external-comms gate false-positived on the read-only advisories poll (P405); fail-soft skip per Step 4.5 contract",
+      "reports": []
     }
   }
 }

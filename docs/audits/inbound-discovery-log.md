@@ -237,3 +237,22 @@ Invoked from `/wr-itil:work-problems` Step 0b pre-flight (AFK orchestrator) via 
   - All 49 polled issues are self-filed by the repo maintainer (`tompahoward`) — not third-party inbound. JTBD-301 firewall still applies; comparator matches would still land in the cache correctly if run.
   - github-discussions unreachable channel: worth investigating whether the discussion category "Q&A" was renamed/removed, or whether Discussions are intentionally disabled for the repo now. Adjust `docs/problems/.upstream-channels.json` if so.
   - Advisories-channel gate hit: the read-only path is currently pattern-matched by the external-comms gate. Likely a false-positive class worth capturing.
+
+## 2026-07-02T16:43:14Z — Discovery pass
+
+Invoked as `/wr-itil:review-problems` Step 4.5 from the `/wr-itil:work-problems` AFK Step 0b pre-flight. TTL-expiry auto-recheck (cache was ~6d stale vs the 86400s TTL; no `--force-upstream-recheck` flag needed — self-healing cadence held).
+
+- **Channels polled: 1 of 3 successful.**
+  - `github-issues:windyroad/agent-plugins` — ok. Polled `--state open` UNFILTERED (P373). 69 open issues surfaced; 4 new since the last cache snapshot appended (#296, #304, #306, #307).
+  - `github-discussions:windyroad/agent-plugins` (Q&A) — **skipped fail-soft**. HTTP 410 "Discussions are disabled for this repo" (P406). Channel remains unreachable; `docs/problems/.upstream-channels.json` still lists it.
+  - `github-security-advisories:windyroad/agent-plugins` — **skipped fail-soft**. The read-only advisories LIST call is still pattern-matched and blocked by the external-comms gate (P405 false-positive); fail-soft skip per the Step 4.5 contract.
+
+- **Pipeline outcomes**: 0 new pipeline classifications. The 4 new reports appended as `pending-pipeline-processing`, `matched_local_ticket: null`. All 4 are maintainer-self-filed and overlap existing local backlog tickets; per the standing 2026-05-15 discovery-only direction + AFK safe-default (ADR-013 Rule 6): no acknowledgement comments posted, no local tickets auto-created (semantic match against the existing backlog deferred to interactive triage to avoid duplicate capture). Notable: #306 ("evaluate-relevance over-fires CLOSE-CANDIDATE on tickets that merely cite a shipped ADR") is corroborated by this pass — all 25 relevance-close candidates carried the multi-phase-mixed-progress caveat driven by shipped-ADR citation, correctly held back from auto-close.
+
+- **Cache refresh confirmation**: `docs/problems/.upstream-cache.json` rewritten with `last_checked: 2026-07-02T16:43:14Z`; github-issues `fetched_at` refreshed; 4 new report entries appended with body_hash; discussions + advisories channel entries stamped `skipped-failsoft` with skip_reason; `$last_pass_note` updated.
+
+- **Audit notes**:
+  - Fail-soft contract held: the 2 skipped channels did not block the pass.
+  - `AskUserQuestion` not called (AFK context per orchestrator instruction; mechanical-stage carve-out per P132 / ADR-062 § 4.5 AFK behaviour).
+  - Relevance-close pass (Step 4.6) ran: 25 CLOSE-CANDIDATE-WITH-CAVEAT, 0 plain CLOSE-CANDIDATE → 0 auto-closes (AFK closes only clean candidates; caveated ones route to the next interactive review's AskUserQuestion surface). 5 KEEP-WITH-NOTE, 15 SKIP.
+  - Verification Queue prompt (Step 4) not fired — AFK non-interactive branch per ADR-013 Rule 6; the 199-ticket queue is preserved for the next interactive invocation.

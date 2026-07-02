@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-03 **P409 captured** — back-fill legacy RFCs with empty `stories: []` for ADR-089 consistency (lightweight aside via /wr-itil:capture-problem; deferred follow-up from RFC-037).
+> Last reviewed: 2026-07-02 **review-problems AFK pre-flight** — inbound-discovery cache refreshed (TTL auto-recheck; +4 new github-issues #296/#304/#306/#307 as pending discovery-only; discussions HTTP-410 + advisories gate-block skipped fail-soft). Relevance-close pass: 25 CLOSE-CANDIDATE-WITH-CAVEAT queued for interactive review, 0 auto-closes. No WSJF drift (corpus + RISK-POLICY unchanged since last review); 0 auto-transitions.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -42,7 +42,8 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3.0 | P176 | Agent-side I2 (no type-branching) coverage gap — SKILL.md type-branching invariant not behaviourally testable until skill-invocation harness lands | 6 Medium | Open | M | 2026-05-06 | internal |
 | 3.0 | P248 | Use time and token cost (not t-shirt sizing) for WSJF effort, with retro-driven estimation refinement | 6 Medium | Open | M | 2026-05-17 | internal |
 | 3.0 | P389 | work iters omit the `**Release vehicle**` seed on Open→Known Error, so the post-release K→V auto-enumerator silently skips them | 6 Medium | Open | M | 2026-06-27 | internal |
-| 3.0 | P045 | Auto plugin install on user's machine after governance release | 12 High | Open | L | 2026-04-19 | internal || 2.25 | P136 | ADR-044 alignment audit — sweep all unaudited skills/hooks/agents/ADRs/JTBDs/READMEs against the framework-resolution boundary (master ticket) | 9 Med | Open | L | 2026-04-27 | internal |
+| 3.0 | P045 | Auto plugin install on user's machine after governance release | 12 High | Open | L | 2026-04-19 | internal |
+| 2.25 | P136 | ADR-044 alignment audit — sweep all unaudited skills/hooks/agents/ADRs/JTBDs/READMEs against the framework-resolution boundary (master ticket) | 9 Med | Open | L | 2026-04-27 | internal |
 | 2.25 | P290 | Harden ADR-052 to behavioural-only — remove the structural-test escape hatch entirely | 9 Med High | Open | L | 2026-05-25 | internal |
 | 2.25 | P324 | Agent-prose verdicts have no behavioural test harness — forcing the ADR-052 structural-test escape hatch + above-appetite release workarounds, perpetuating the structural tests the user has rejected | 9 Med-High | Open | L | 2026-05-27 | internal |
 | 2.0 | P170 | Problem tickets strain as fixes decompose into multiple coordinated changes — need an RFC framework that ties all changes back to problems (and unifies technical with user/business problems) | 8 Medium | Known Error | XL | 2026-05-04 | internal |
@@ -315,6 +316,10 @@ Reports discovered by `/wr-itil:review-problems` Step 4.5 inbound-discovery pipe
 | #241 | github-issues:windyroad/agent-plugins | `@windyroad/risk-scorer@0.12.7` — appetite-from-policy parser regex too narrow + subagent prompt hardcodes ≤4 with false RISK-POLICY citation (follow-up to closed #149) | tompahoward | 2026-06-08 | pending-pipeline-processing | — |
 | #256 | github-issues:windyroad/agent-plugins | `/wr-itil:update-upstream` Step 1 ticket-lookup glob silently false-no-ops under zsh | tompahoward | 2026-06-14 | pending-pipeline-processing | — |
 | #257 | github-issues:windyroad/agent-plugins | `itil-correction-detect` UserPromptSubmit hook false-positives on orchestrator/AFK prompt text | tompahoward | 2026-06-14 | pending-pipeline-processing | — |
+| #296 | github-issues:windyroad/agent-plugins | manage-problem per-session create-gate marker lets bulk-Write paths bypass per-ticket P094 README refresh | tompahoward | 2026-06-27 | pending-pipeline-processing | — |
+| #304 | github-issues:windyroad/agent-plugins | wr-itil README render rules leave three archive surfaces unbounded — problems/README.md outgrows the read-tool token cap | tompahoward | 2026-06-28 | pending-pipeline-processing | — |
+| #306 | github-issues:windyroad/agent-plugins | wr-itil evaluate-relevance over-fires CLOSE-CANDIDATE on tickets that merely cite a shipped ADR | tompahoward | 2026-06-28 | pending-pipeline-processing | — |
+| #307 | github-issues:windyroad/agent-plugins | wr-risk-scorer external-comms gate cannot read `gh issue create --body-file` — empty draft, marker key never matches | tompahoward | 2026-06-28 | pending-pipeline-processing | — |
 
 ## Closed
 
