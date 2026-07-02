@@ -120,3 +120,9 @@ The original a/b/c options (caller-supplies-SID / fail-loudly-on-empty / session
 - P348 — substance-confirm marker contract (ADR-066 amendment)
 - ADR-082 — the ADR whose drain witnessed this gap
 - ADR-066 — human-oversight marker mechanism
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-038 | proposed | Loud cold-path diagnostic for oversight-marker shims when no session-id is discoverable |
