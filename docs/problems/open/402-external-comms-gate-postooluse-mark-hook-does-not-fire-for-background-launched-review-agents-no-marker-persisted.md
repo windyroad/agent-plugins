@@ -41,7 +41,20 @@ Ran the clean test: reviewed the exact commit message verbatim (single `-m`, dra
 - [x] **Root residual = PostToolUse:Agent mark firing/timing.** Checked `$TMPDIR/claude-risk-<live-SID>/` immediately after the PASS: the expected-key marker was **absent**, and no external-comms marker was written by this review within a 4-min window — yet an *earlier* review's marker (`0578761e…`) persists under the same live SID. So the mark hook **fires only sometimes / too late** for review-agent completions in this harness; when the marker hasn't landed by commit time, the gate correctly denies.
 - [ ] Still open: WHY firing is inconsistent (backgrounded-agent completion not always emitting PostToolUse:Agent? a race between completion-notification and the mark hook? harness-specific). This is a **harness-interaction** question, not a plugin key/SID bug.
 
-**Revised fix direction (supersedes Approach A entirely):** the marker mechanism (logic + SID + key) is sound; the gap is *reliable marking on review completion*. Candidate fixes are a **design decision for the user**: (a) an orchestrator-writes-the-marker path after a read PASS (pragmatic, but trades away independent-hook verification); (b) a marking trigger that fires reliably in this harness instead of PostToolUse:Agent; (c) accept `BYPASS_RISK_GATE=1`-after-PASS as the documented workflow. NOT a multi-SID marker write.
+**Revised fix direction (supersedes Approach A entirely):** the marker mechanism (logic + SID + key) is sound; the gap is *reliable marking on review completion*. NOT a multi-SID marker write.
+
+### ROOT CAUSE isolated (2026-07-02) — background vs synchronous agent dispatch
+
+Mapped which past reviews actually wrote their marker (by key, in `$TMPDIR/claude-risk-<live-SID>/`):
+
+| Review probe | Dispatch | Marker present? |
+|---|---|---|
+| probe1 | **background** (default `Agent`) | **ABSENT** |
+| probe3 | **synchronous** (`run_in_background: false`) | **PRESENT** under the live SID |
+
+**PostToolUse:Agent fires reliably for a SYNCHRONOUS agent and does NOT fire (in time / at all) for a background-launched one.** That is the whole bug: the external-comms reviewer is dispatched in the background by default, so its mark hook never runs before the commit → gate denies → habitual `BYPASS`. Every "no marker" symptom traces here (compounded by the original `/tmp`-vs-`$TMPDIR` mis-check).
+
+**Fix (user-chosen option b — a reliable trigger):** dispatch the external-comms reviewer **synchronously** (`run_in_background: false`), so its PostToolUse:Agent mark hook fires in the live session and writes the marker before the commit. Enforcement surfaces: (1) the gate DENY message should instruct synchronous dispatch; (2) `/wr-risk-scorer:assess-external-comms` (+ voice-tone peer) should launch the reviewer synchronously; harness-specific but harmless where `run_in_background` is absent.
 
 ## Symptoms
 
