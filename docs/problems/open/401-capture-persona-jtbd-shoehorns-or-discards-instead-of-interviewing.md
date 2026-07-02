@@ -38,6 +38,12 @@ The corrected rule also handles the **externally-reported** problem (plugin-user
 
 This is the CORRECT form of "reject = reject the problem": rejection is a deliberate decision about the *elicited* who/why, reached *through* the interview — NOT the old broken "reject the proposed ID-mapping = discard the problem" (which discarded legitimate problems over anchoring uncertainty). The interview surfaces the true persona/job first; the human then decides support-vs-reject on the merits. So the rejection path survives, but only as a real product-scope call, never as a side-effect of an unsure ID guess.
 
+### Internal vs external — the rejection path is external-only (2026-07-02 sharpening)
+
+The scope-rejection path applies **only to externally-reported** problems. A problem the **maintainer** flags always relates to a job we already have, or one we simply haven't captured yet — so it always anchors (to an existing or a new job) and is **never** rejected. Rejection-on-scope is solely for **external** reports, where whether we want the software to support the elicited need is genuinely a maintainer product-scope decision (Yes → create the job + accept; No → decline, nicely).
+
+Surfaced during the STORY-032 (inbound triage-disposition) ratification on 2026-07-02, where the agent **over-applied P401** — treating "never discard over anchoring uncertainty" as "never reject *any* report," and missing that external reports legitimately reject on scope. Captured on STORY-MAP-002's inbound band (STORY-032). The `never discard over anchoring uncertainty` rule and the `external reports may reject on scope` rule are complementary, not in tension — the first bars *anchoring-uncertainty* discards, the second permits *deliberate-scope* declines.
+
 ## Symptoms
 
 - The "is it JTBD-XXXX?" ID-centric ratification prompt (violates brief-before-ID / P350 and derive-or-eliminate / P190).
