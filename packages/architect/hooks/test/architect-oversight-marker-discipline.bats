@@ -217,6 +217,23 @@ mk_existing_adr() {
   [ -f "$(expected_marker "$adr")" ]
 }
 
+# P368: genuine cold path — no CLAUDE_SESSION_ID and no announce markers at all.
+# The shim correctly writes zero markers (nothing to key on) but must NOT do so
+# SILENTLY: a loud stderr diagnostic explains why the subsequent discipline-hook
+# deny happens, breaking the confusing "you didn't run the shim" loop the shim's
+# prior silent exit 0 produced. Exit stays 0 (documented contract: do not crash
+# SKILL flows before any hook has fired this session).
+@test "mark-oversight-confirmed.sh emits a loud stderr diagnostic on the no-candidate cold path (P368)" {
+  mk_existing_adr "252-coldpath.proposed.md"
+  adr="$DIR/docs/decisions/252-coldpath.proposed.md"
+  # MARK_DIR is empty (no *-announced-* markers); unset the env SID fast-path too.
+  run env -u CLAUDE_SESSION_ID bash "$MARK_SCRIPT" "$adr"
+  [ "$status" -eq 0 ]                              # contract: cold path still exits 0
+  [ ! -f "$(expected_marker "$adr")" ]             # no marker written
+  [[ "$output" == *"no candidate session id"* ]]   # loud, not silent
+  [[ "$output" == *"P368"* ]]
+}
+
 # ── Non-Edit/Write tool calls always exit 0 silently ────────────────────
 
 @test "tool_name=Bash exits 0 silently regardless of file path" {

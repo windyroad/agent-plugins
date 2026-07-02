@@ -7,7 +7,7 @@ decision-makers: [Tom Howard]
 problems: [P368]
 adrs: []
 jtbd: []
-stories: []
+stories: [STORY-033]
 ---
 
 # RFC-038: Loud cold-path diagnostic for oversight-marker shims when no session-id is discoverable
@@ -43,13 +43,13 @@ Replace the silent `exit 0` cold path in the two `mark-oversight-confirmed.sh` s
 
 ## Tasks
 
-- [ ] Add a behavioural bats cold-path test to `packages/architect/hooks/test/architect-oversight-marker-discipline.bats`: empty marker dir + `CLAUDE_SESSION_ID` unset → shim exit 0, no `oversight-confirmed-*` file written, stderr contains the diagnostic (RED before the fix, GREEN after; ADR-052 behavioural).
-- [ ] Add the mirror cold-path test to `packages/jtbd/hooks/test/jtbd-oversight-marker-discipline.bats`.
-- [ ] Apply the cold-path diagnostic in `packages/architect/scripts/mark-oversight-confirmed.sh` + update its header/inline comments.
-- [ ] Apply the identical diagnostic in `packages/jtbd/scripts/mark-oversight-confirmed.sh` + update its header/inline comments.
-- [ ] Run both bats files green.
-- [ ] Changeset: patch bump `@windyroad/architect` + `@windyroad/jtbd` (shippable hook/script change).
-- [ ] Transition P368 Known Error → Verification Pending with a `## Fix Released` section.
+- [x] Add a behavioural bats cold-path test to `packages/architect/hooks/test/architect-oversight-marker-discipline.bats`: empty marker dir + `CLAUDE_SESSION_ID` unset → shim exit 0, no `oversight-confirmed-*` file written, stderr contains the diagnostic (RED before the fix, GREEN after; ADR-052 behavioural).
+- [x] Add the mirror cold-path test to `packages/jtbd/hooks/test/jtbd-oversight-marker-discipline.bats`.
+- [x] Apply the cold-path diagnostic in `packages/architect/scripts/mark-oversight-confirmed.sh` + update its header/inline comments.
+- [x] Apply the identical diagnostic in `packages/jtbd/scripts/mark-oversight-confirmed.sh` + update its header/inline comments.
+- [x] Run both bats files green (14/14 architect, 12/12 jtbd; no regressions).
+- [x] Changeset: patch bump `@windyroad/architect` + `@windyroad/jtbd` (shippable hook/script change).
+- [ ] Transition P368 Known Error → Verification Pending once the changeset releases (AFK: fix committed with release vehicle; the work-problems post-release K→V enumerator moves it, per P380 precedent).
 
 ## Commits
 
@@ -64,3 +64,10 @@ Replace the silent `exit 0` cold path in the two `mark-oversight-confirmed.sh` s
 - **ADR-002** — plugin self-containment (why the two shims are unsynced independent copies).
 - **ADR-052** — behavioural-tests default.
 - Captured via /wr-itil:capture-rfc (fix-time, I13 ADR-072/073); expand at next /wr-itil:manage-rfc invocation.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-033 | STORY-033: Loud cold-path diagnostic for oversight-marker shims | draft |

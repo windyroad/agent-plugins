@@ -101,10 +101,16 @@ The original a/b/c options (caller-supplies-SID / fail-loudly-on-empty / session
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
 - [x] Investigate root cause: confirmed 2026-06-17 in retro session — macOS /tmp symlink + find-without-trailing-slash; announce markers DO exist; find cannot see them.
-- [ ] Audit sibling helpers + hooks for the same `find /tmp -name` pattern via the grep above.
-- [ ] Apply fix (d) or (e) — single-line change, no architectural decision needed.
-- [ ] Create reproduction test: bats fixture asserting `mark-oversight-confirmed` writes markers when announce markers exist under a `/tmp` symlink (use a temp-dir symlink-fixture instead of the real `/tmp`).
-- [ ] Decide whether the original a/b/c options stay in scope for separate tickets or close as resolved-by (d)/(e).
+- [x] Audit sibling helpers + hooks for the same `find /tmp -name` pattern — done by **P380** (3 sites swept: architect + jtbd mark-oversight shims + itil session-id.sh).
+- [x] Apply fix (d) or (e) — the macOS-symlink half shipped via **P380** (option (e) `find -L`, released 2026-06-27). This ticket's residuum is P368 option (b): the genuine cold path (no candidate SID at all) still exited 0 silently, producing the confusing deny loop. Applied 2026-07-03 — both `mark-oversight-confirmed.sh` shims now emit a loud stderr diagnostic on the cold path (exit stays 0). Vehicle: **RFC-038** / **STORY-033**.
+- [x] Create reproduction test — symlink fixture shipped with P380; cold-path diagnostic bats added 2026-07-03 to `architect-oversight-marker-discipline.bats` + `jtbd-oversight-marker-discipline.bats` (RED→GREEN).
+- [x] Decide whether a/b/c options stay in scope — option (b) implemented this iter; options (a) caller-supplies-SID and (c) session-agnostic marker closed out of scope (YAGNI — the failure mode is closed by (e)+(b); no witnessed need for the larger re-architecture). Recorded in RFC-038 § Scope "Out of scope".
+
+## Fix Committed (awaiting release)
+
+Fix committed 2026-07-03 via **RFC-038** / **STORY-033** — both `mark-oversight-confirmed.sh` shims emit a loud stderr diagnostic on the no-candidate cold path instead of a silent `exit 0`, so the follow-on oversight-marker-discipline hook deny is self-explanatory. Exit code preserved (0). Behavioural cold-path bats added to both discipline suites (RED→GREEN; 14/14 architect, 12/12 jtbd, no regressions).
+
+**Release vehicle**: `.changeset/p368-oversight-shim-cold-path-diagnostic.md` (patch bump @windyroad/architect + @windyroad/jtbd). Stays Known Error until the changeset releases; the work-problems post-release Known Error → Verifying enumerator moves it (P380 precedent — release cadence owned by the orchestrator, not this iter).
 
 ## Dependencies
 

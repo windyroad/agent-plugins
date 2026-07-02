@@ -36,7 +36,10 @@
 #
 # Exit codes:
 #   0 — marker(s) written for at least one candidate SID, OR no candidate
-#       SID was discoverable (cold-path: no announce markers yet).
+#       SID was discoverable (cold path: no announce markers yet). The latter
+#       writes no marker and prints a loud stderr diagnostic (P368) explaining
+#       the downstream hook deny, then exits 0 so SKILL flows do not crash
+#       before any hook has fired in the session.
 #   2 — bad argument (missing or empty artefact-path).
 #
 # @adr ADR-068 (JTBD/persona human-oversight marker)
@@ -93,7 +96,23 @@ candidates=$(
   } | awk 'NF && !seen[$0]++'
 )
 
-[ -n "$candidates" ] || exit 0
+# No candidate SID — cold path. Emit a loud stderr diagnostic (P368) and still
+# exit 0. Exit 0 preserves the documented contract (do not crash SKILL flows
+# before any announce marker has fired this session); the diagnostic replaces the
+# prior SILENT no-op, which masqueraded as success and left the caller to hit the
+# oversight-marker-discipline hook's deny with no idea why — the confusing loop
+# P368 documents (the deny points back at this shim, which the caller already ran).
+if [ -z "$candidates" ]; then
+  {
+    echo "wr-jtbd-mark-oversight-confirmed: no candidate session id discoverable"
+    echo "  (CLAUDE_SESSION_ID empty and no *-announced-* markers in ${MARKER_DIR} within ${WINDOW_MINS}min)."
+    echo "  NO oversight marker was written for: ${ABS_PATH}"
+    echo "  The oversight-marker-discipline hook will DENY the 'human-oversight: confirmed' Edit"
+    echo "  until a session announce marker exists. Start a fresh session, or point SESSION_MARKER_DIR"
+    echo "  at a dir containing a *-announced-<sid> file, then re-run this shim (P368)."
+  } >&2
+  exit 0
+fi
 
 while IFS= read -r sid; do
   [ -n "$sid" ] || continue

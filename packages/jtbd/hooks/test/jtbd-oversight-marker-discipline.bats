@@ -192,6 +192,21 @@ mk_existing_artefact() {
   [ -f "$(expected_marker "$art")" ]
 }
 
+# P368: genuine cold path — no CLAUDE_SESSION_ID and no announce markers at all.
+# The shim correctly writes zero markers but must NOT do so SILENTLY: a loud
+# stderr diagnostic explains why the subsequent discipline-hook deny happens,
+# breaking the confusing "you didn't run the shim" loop. Exit stays 0 (contract:
+# do not crash SKILL flows before any hook has fired this session).
+@test "mark-oversight-confirmed.sh emits a loud stderr diagnostic on the no-candidate cold path (P368)" {
+  mk_existing_artefact "developer/JTBD-342-coldpath.proposed.md"
+  art="$DIR/docs/jtbd/developer/JTBD-342-coldpath.proposed.md"
+  run env -u CLAUDE_SESSION_ID bash "$MARK_SCRIPT" "$art"
+  [ "$status" -eq 0 ]                              # contract: cold path still exits 0
+  [ ! -f "$(expected_marker "$art")" ]             # no marker written
+  [[ "$output" == *"no candidate session id"* ]]   # loud, not silent
+  [[ "$output" == *"P368"* ]]
+}
+
 @test "tool_name=Bash exits 0 silently regardless of file path" {
   json=$(jq -nc --arg s "$SID" \
     '{tool_name:"Bash",session_id:$s,tool_input:{command:"echo human-oversight: confirmed"}}')
