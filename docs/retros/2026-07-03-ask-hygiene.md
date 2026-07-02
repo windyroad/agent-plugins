@@ -31,3 +31,20 @@ No `AskUserQuestion` calls this iteration — every decision was framework-resol
 **Silent-framework count: 0**
 **Taste count: 0**
 **Correction-followup count: 0**
+
+---
+
+# Ask Hygiene — 2026-07-03 (P405 iter, work-problems)
+
+No `AskUserQuestion` calls this iteration — completed killed-mid-work P405 external-comms gate read-path fix. Every decision framework-resolved (hook-sync per ADR-017, external-comms/risk gates, architect+jtbd PASS, ADR-014 commit grain). AFK loop; AskUserQuestion forbidden per task contract.
+
+| Call # | Header | Classification | Citation |
+|--------|--------|----------------|----------|
+| — | (none) | — | — |
+
+**Lazy count: 0**
+**Direction count: 0**
+**Override count: 0**
+**Silent-framework count: 0**
+**Taste count: 0**
+**Correction-followup count: 0**
