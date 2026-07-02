@@ -1,6 +1,6 @@
 # RFC Backlog
 
-> Last reviewed: 2026-05-26 **`@windyroad/itil@0.35.14` released; RFC-007 in-progress → verifying** — the ADR-070/071 implementation (RFC-006) + the P260 ADR-050 Option-C create-gate fix (RFC-007) shipped (release commit `bf1ebdd`); the held P260 changeset cleared the new unconditional ADR-071 gate via its RFC-007 retro-fit. Both RFC-006 + RFC-007 are now in the Verification Queue (multiplier 0). RFC-005 remains accepted (its B2–B10 I13 hook/skill enforcement chain ships separately under the held-changeset window). Prior RFC-006→verifying fragment rotated to `docs/rfcs/README-history.md` per P134.
+> Last reviewed: 2026-07-02 **RFC-036 proposed → accepted — Plugin-staleness surfacer** — per-plugin, per-turn (UserPromptSubmit) staleness check (decision held in ADR-088); warn-only, network-free, catches mid-session installs a once-at-boot check misses. Traces P045 (reopened) + P375. WSJF 8.0 (top of rankings). Prior RFC-005-era fragment rotated to `docs/rfcs/README-history.md` per P134.
 > Run `/wr-itil:manage-rfc review` to refresh once the manage-rfc skill ships.
 
 ## Status
@@ -134,7 +134,10 @@ One row per RFC in `proposed` / `accepted` / `in-progress` status. RFC-level WSJ
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported |
 |------|-----|-------|----------|--------|--------|----------|
+| 8.0 | RFC-036 | Plugin-staleness surfacer | 16 High | accepted | L | 2026-07-02 |
 | 3.0 | RFC-005 | RFC-first trace invariant not enforced at fix-time | 3 Med | accepted | M | 2026-05-17 |
+
+WSJF for RFC-036: Severity inherited from highest-severity traced problem (P375 = 16 High); Status multiplier `accepted` = 2.0; Effort L divisor = 4; WSJF = (16 × 2.0) / 4 = 8.0.
 
 WSJF for RFC-005: Severity inherited from highest-severity traced problem (P251 = 3 Med); Status multiplier `accepted` = 2.0; Effort M divisor = 2; WSJF = (3 × 2.0) / 2 = 3.0.
 

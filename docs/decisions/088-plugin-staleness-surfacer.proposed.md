@@ -1,7 +1,8 @@
 ---
 status: "proposed"
 date: 2026-07-02
-human-oversight: unconfirmed
+human-oversight: confirmed
+oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion: per-turn (UserPromptSubmit) trigger to catch mid-session installs, per-plugin (each hook its own line, no coordination), surface-not-install, network-free, fail-open, confirmed as written after two user amendments (trigger + de-dup removal)"
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: []

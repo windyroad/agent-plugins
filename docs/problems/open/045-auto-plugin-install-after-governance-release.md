@@ -113,4 +113,4 @@ This ticket (P045) remains **Open** as the execution tracker. Closes when:
 
 | RFC | Status | Title |
 |-----|--------|-------|
-| RFC-036 | proposed | SessionStart plugin-staleness surfacer |
+| RFC-036 | accepted | Plugin-staleness surfacer |
