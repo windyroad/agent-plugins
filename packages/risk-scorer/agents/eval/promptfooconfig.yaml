@@ -1,0 +1,137 @@
+# Agent-prose verdict eval — external-comms review agent (RFC-012 S1b / P384).
+#
+# The behavioural harness for the external-comms agent's NEW credibility /
+# self-own axis (P384). It exercises the REAL agent
+# (`claude -p --system-prompt "$(cat ../external-comms.md)"`, subscription auth)
+# against fixture outbound drafts and asserts on the emitted
+# EXTERNAL_COMMS_RISK_VERDICT — the behavioural alternative to a disavowed
+# structural grep of the agent prose (ADR-052 / P290). This discharges the
+# R009 prose-surface floor for the credibility-axis change (commit 6353b267):
+# per the R009 modulator, a prose-surface change WITH a paired-and-passing
+# promptfoo Tier-A/B eval drops residual likelihood by 1 → within appetite.
+#
+# SYNTHETIC-FIXTURE-CORPUS pattern (RFC-012 S1b): the agent reads RISK-POLICY.md
+# from cwd; the live home-repo policy has no `## Outbound Credibility /
+# Self-Own` section yet (deferred interactive Task 5), so against it the
+# credibility axis is dormant (agent.md line 88: "dormant, not lenient") and F1
+# could never fire. run-agent-eval.sh stages fixtures/risk-policy.fixture.md —
+# which carries the credibility section — as RISK-POLICY.md in an isolated temp
+# cwd. Same shape the jtbd eval used for its unratified-job positive-fire branch.
+#
+# Two tiers (ADR-075):
+#   - Tier A: deterministic `icontains` on the distinctive verdict token.
+#   - Tier B: `llm-rubric` for the axis / class / negation semantics that a
+#     regex cannot grade without false-failing (the P270 not-regex lesson — a
+#     not-regex for "credibility" fires on the CORRECT "does NOT FAIL the
+#     credibility axis"). See docs/briefing/promptfoo-eval-authoring.md.
+#
+# Run from repo root:
+#   npx promptfoo eval -c packages/risk-scorer/agents/eval/promptfooconfig.yaml
+#
+# @jtbd JTBD-101 (Extend the Suite with New Plugins — hardening the least-exercised agent surface)
+# @jtbd JTBD-006 (Progress the Backlog While I'm Away)
+# @problem P384
+# @rfc RFC-012 S1b
+# @adr ADR-075 (per-package agent eval; Tier-A/Tier-B)
+# @adr ADR-052 (behavioural-tests-default; Surface-2 narrowing)
+# @adr ADR-026 (grounding — the fixture policy IS the class list the agent cites)
+
+description: |
+  external-comms review-agent verdict eval — credibility-axis positive-fire (a
+  leak-clean self-own draft that asks for already-held info must FAIL citing the
+  Outbound Credibility / Self-Own axis) and the over-fire guard (a leak-free,
+  credible draft must PASS — the credibility axis must not over-fire).
+
+providers:
+  # Path is relative to this config file's directory (promptfoo basePath).
+  - id: 'exec:bash ./run-agent-eval.sh'
+
+# Tier-B (llm-rubric) grading provider — claude under subscription auth (no
+# API key) via grade-llm-rubric.sh. Axis/class/negation semantics route here.
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: F1 credibility positive-fire — leak-clean self-own (asks for already-held info) must FAIL
+    vars:
+      prompt: |
+        SURFACE: gh-issue-comment
+
+        Review this outbound draft against RISK-POLICY.md's outbound-risk
+        classes and return your structured verdict.
+
+        Destination: a public issue thread the recipient opened.
+
+        <draft>
+        Thanks for flagging this — you mentioned above that you're running
+        Node 20 and that the build fails at the esbuild bundling step. To help
+        us reproduce on our side, could you let us know which Node version
+        you're on and roughly where in the build it's failing?
+        </draft>
+    assert:
+      # Tier A — must emit the FAIL verdict token. (Distinctive; reliable in
+      # both full-block and terse stdout. The axis + class citation are
+      # variance-prone in agent stdout, so they route to the Tier-B rubric per
+      # the promptfoo-eval-authoring briefing.)
+      - type: icontains
+        value: 'EXTERNAL_COMMS_RISK_VERDICT: FAIL'
+      # Tier B — verdict is FAIL AND it is the CREDIBILITY axis (not a
+      # confidential-leak class) that failed, specifically asks-for-already-held-info.
+      - type: llm-rubric
+        value: |
+          Two conditions, BOTH required: (1) the verdict is FAIL — it emits
+          "EXTERNAL_COMMS_RISK_VERDICT: FAIL"; AND (2) the failure is on the
+          Outbound Credibility / Self-Own axis, specifically the
+          "asks-for-already-held-info" class — the draft asks the recipient for
+          the Node version and build-failure location that the recipient
+          already stated in the thread. It is NOT a Confidential Information /
+          leak failure. FAIL this rubric if the verdict is PASS, OR if the only
+          cited failure is a Confidential Information / leak class rather than
+          the credibility axis. Naming the exact class string strengthens the
+          answer but a clear description of the asks-for-already-held-info
+          self-own on the credibility axis also passes.
+
+  - description: F2 over-fire guard — leak-free, credible draft must PASS (credibility axis must not over-fire)
+    vars:
+      prompt: |
+        SURFACE: gh-issue-create
+
+        Review this outbound draft against RISK-POLICY.md's outbound-risk
+        classes and return your structured verdict.
+
+        Destination: a public upstream repository we are filing a bug against.
+
+        <draft>
+        We hit a regression where the esbuild bundling step fails under
+        Node 20. We reproduced it against a minimal repo and traced it to a
+        change in the module-resolution order. A patch is in review and will
+        ship in the next release. Filing here so other users who hit the same
+        failure can find the workaround: pin esbuild to the prior minor until
+        the patch lands.
+        </draft>
+    assert:
+      # Tier A — verdict-outcome token. Reliable in terse + full stdout; the
+      # over-fire-guard semantics route to Tier-B.
+      - type: icontains
+        value: 'EXTERNAL_COMMS_RISK_VERDICT: PASS'
+      # Tier B — the over-fire guard: a leak-free, credible draft must clear
+      # BOTH axes. The credibility axis must not fabricate a self-own on a
+      # clean draft, and no Confidential Information class applies. not-regex on
+      # "credibility"/"FAIL" false-fails the correct "does NOT FAIL the
+      # credibility axis" — so Tier-B only.
+      - type: llm-rubric
+        value: |
+          The verdict is PASS ("EXTERNAL_COMMS_RISK_VERDICT: PASS"). The draft
+          neither leaks a Confidential Information class nor commits a self-own:
+          it does not ask the recipient for anything it already holds, does not
+          restate their words as new, and carries no wrong name or stale claim.
+          PASS if the verdict is PASS and no credibility or confidential class
+          is flagged. An output that explicitly says the credibility axis does
+          NOT fire (or that no class matched) PASSES — a negation satisfies the
+          rubric. FAIL only if the verdict is FAIL, i.e. the agent over-fired a
+          credibility or leak class against this clean draft.
