@@ -225,3 +225,15 @@ Invoked from `/wr-itil:work-problems` Step 0b pre-flight (AFK orchestrator) via 
 - Fail-soft contract held: the 2 skipped channels did not block the pass (discussions HTTP 410 + security-advisories gate-block both preserve their prior skip status; security-advisories LIST re-probed this pass and re-confirmed the gate-block).
 - Step 4.5 invoked as part of `/wr-itil:work-problems` Step 0b preflight robustness layer — orchestrator dispatched this subprocess to refresh the inbound-discovery cache before re-entering the work-loop. Self-healing TTL-expiry pattern continues to hold (7-day inter-pass gap auto-rechecked without an explicit `--force-upstream-recheck` flag).
 - `AskUserQuestion` not called (AFK subprocess context per orchestrator instruction; mechanical-stage carve-out per P132 / ADR-062 § 4.5 AFK behaviour). Per-ticket re-scoring, dependency-graph traversal, relevance-close auto-actions, and the Verification Queue prompt were not run this pass — scope was the inbound-discovery cache + audit-log + README inbound-section refresh per the Step 0b directive.
+
+## 2026-07-02T01:11:22Z — Discovery pass (partial)
+
+- Channels polled: 1 of 3 successful.
+  - github-issues @ windyroad/agent-plugins — 49 open issues surfaced.
+  - github-discussions @ windyroad/agent-plugins Q&A — HTTP 410 "Discussions are disabled for this repo" (channel unreachable; skipped per fail-soft).
+  - github-advisories @ windyroad/agent-plugins — external-comms gate blocked the read-only API invocation (pattern-match on the path string). Poll deferred; not fresh-processed this pass.
+- Assessment pipeline (Steps 4.5d/e): deferred for the 49 polled open issues per Step 4.5 fail-soft contract. Cache last_checked (2026-06-26T06:16:55Z) was NOT refreshed — next review pass with the recheck flag (or after 24h natural TTL re-expiry) will re-poll cleanly.
+- Notes:
+  - All 49 polled issues are self-filed by the repo maintainer (`tompahoward`) — not third-party inbound. JTBD-301 firewall still applies; comparator matches would still land in the cache correctly if run.
+  - github-discussions unreachable channel: worth investigating whether the discussion category "Q&A" was renamed/removed, or whether Discussions are intentionally disabled for the repo now. Adjust `docs/problems/.upstream-channels.json` if so.
+  - Advisories-channel gate hit: the read-only path is currently pattern-matched by the external-comms gate. Likely a false-positive class worth capturing.
