@@ -55,4 +55,5 @@ This story spans two releases on the map. **Release 1 (walking skeleton)** ships
 
 ## Related
 
+- **Implementation exemplar:** this map (STORY-MAP-002), hand-authored + ratified end-to-end this session, is the golden reference for the RFC-as-pre-implementation-story-map output this capability should reproduce (see P404).
 - RFC-005 B15; supersedes B8 + held B11. ADR-073 (RFC-first), ADR-060 (RFC = story map), P399 (the held --fix-time changeset).

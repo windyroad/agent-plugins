@@ -40,5 +40,6 @@ In order to trust that a fix is built on a map a human actually reviewed — not
 
 ## Related
 
+- **Implementation exemplar:** this map (STORY-MAP-002), hand-authored + ratified end-to-end this session (through two drift-invalidation cycles), is the golden reference for the output this capability should reproduce (see P404).
 - **STORY-MAP-002** A3 "ratify" card. **ADR-090** — the authority (drift-invalidated marker; RFC references only ratified stories).
 - Implementation tracked in **P404** (Phase 2).

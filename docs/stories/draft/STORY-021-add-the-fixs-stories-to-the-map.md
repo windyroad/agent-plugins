@@ -38,6 +38,7 @@ In order that no part of a coordinated fix slips through the cracks — each cha
 
 ## Related
 
+- **Implementation exemplar:** this map (STORY-MAP-002), hand-authored + ratified end-to-end this session, is the golden reference for the output this capability should reproduce (see P404).
 - **STORY-MAP-002** A3 "add-to-map" card.
 - **ADR-089** (every RFC has ≥1 story) · **ADR-090** (added stories carry a drift-invalidated oversight marker).
 - Implementation tracked in **P404**.

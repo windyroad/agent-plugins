@@ -37,4 +37,5 @@ In order that users get the important part sooner, and work I defer stays visibl
 
 ## Related
 
+- **Implementation exemplar:** this map (STORY-MAP-002), hand-authored + ratified end-to-end this session, is the golden reference for the output this capability should reproduce (see P404).
 - **STORY-MAP-002** A3 "slice" card (Release 2). This map's own R1/R2 bands are the dogfood. Implementation tracked in **P404**.

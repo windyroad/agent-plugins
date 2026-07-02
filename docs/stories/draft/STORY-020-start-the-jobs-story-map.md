@@ -38,6 +38,7 @@ In order to see and reason about a coordinated fix as one coherent picture — i
 
 ## Related
 
+- **Implementation exemplar:** this map (STORY-MAP-002), hand-authored + ratified end-to-end this session, is the golden reference for the output this capability should reproduce (see P404).
 - **STORY-MAP-002** A3 "start-the-map" card (Release 1 walking skeleton — the first run has no map, so it creates one).
 - **ADR-090** — the new map is born unconfirmed and carries a drift-invalidated oversight marker.
 - Implementation tracked in **P404** (Phase 2 story-map skills).
