@@ -27,6 +27,14 @@ This is a **public repository**. The following must never appear in committed fi
 
 Use generic descriptions (e.g., "users", "clients") instead of specific names. If confidential information is accidentally committed, treat it as a Moderate impact incident requiring immediate remediation (git history rewrite).
 
+## Outbound Credibility / Self-Own
+
+Outbound prose must not make the sender look careless or untrustworthy to the recipient, independent of any leak. The `wr-risk-scorer:external-comms` agent reads these classes to review outbound drafts (gh issues/PRs, npm publish content, `.changeset/*.md` bodies, commit messages); a draft that matches any class FAILs the credibility axis. These are reputational, not disclosure, risks — they compose with the `## Confidential Information` leak axis, and a draft must clear both.
+
+- **asks-for-already-held-info** — the draft asks the recipient for something the sender already holds (present elsewhere in the same thread, in the account record, or even visible in the draft itself).
+- **restates-prior-as-new** — the draft restates what the recipient told us, or work already delivered, as if it were new information or a fresh ask.
+- **plainly-careless-error** — a wrong name, wrong company, or a stale claim about the recipient's account/status that a careful sender would catch.
+
 ## Inbound Report Risk Classes
 
 Inbound reports filed against this repo's intake (`problem-report.yml` issues, Q&A discussions, security-advisory submissions) are reviewed by the `wr-risk-scorer:inbound-report` subagent (per ADR-062 § Sibling subagent — sibling of `:external-comms`, NOT extension). The subagent classifies each report against two axes; a match on either axis routes the report away from the safe-and-valid branch.
