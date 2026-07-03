@@ -52,13 +52,33 @@ Adopter-side: restart the Claude Code session in the affected project (forces re
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next `/wr-itil:review-problems`
-- [ ] Determine exact stale-binding mechanism: is the adopter session reading `hooks.json` from cache, from marketplace, or from a snapshot taken at session-start? (Read Claude Code's plugin-loading source / docs.)
-- [ ] Investigate whether the marketplace-vs-cache plugin distribution model has an inherent version-skew window where one surface (file system) is updated faster than the other (settings registration).
-- [ ] Identify the existing controls the user references ("I thought we put controls in place to prevent this!!!"): likely ADR-049 PATH shims + `check-tarball-shipped-shims.sh`. Document the gap: those controls guard against repo-relative paths INSIDE scripts, NOT against stale registrations referencing files-that-no-longer-exist.
-- [ ] Design a control that closes the gap. Candidates: (a) plugin-side test asserting that every entry in `hooks.json` has a corresponding file on disk in the same tarball / marketplace snapshot; (b) harness-side check at session-start that warns when a registered hook file is missing; (c) plugin-side deprecation-cycle for hook removal (1 minor cycle with hook re-pointing to a no-op shim before file deletion); (d) `/install-updates` invariant: force-restart adopter sessions after major hook surface changes.
-- [ ] Create reproduction test: scaffolded adopter project + plugin version downgrade-then-upgrade sequence reproducing the stale-binding observation.
-- [ ] Decide whether this is an RFC-class scope (a real shipment-hygiene mechanism per ADR-082 territory) or a tightly-scoped prose-correction (deprecation-cycle discipline in maintainer SKILL/CONTRIBUTING docs).
+- [x] Determine exact stale-binding mechanism — **done (2026-07-04)**: the observed error resolved the *marketplace* tree path with the file removed, i.e. a stale *registration snapshot* vs *live file tree* skew (sub-mechanism 5b). The precise snapshot source (session-start vs cache) is harness-internal and not determinable from the plugin side — and not load-bearing for the control design. See "Fresh RCA evidence" below.
+- [x] Investigate whether the marketplace-vs-cache plugin distribution model has an inherent version-skew window — **done (2026-07-04)**: yes. A live session binds a `hooks.json` registration at snapshot time; the harness does NOT re-validate registered hook-file existence when the underlying marketplace/cache tree advances. Removing a hook file in a later version strands every live session still holding the old registration. See "Fresh RCA evidence" below.
+- [x] Identify the existing controls + document the gap — **done (2026-07-04)**: ADR-049 PATH shims + `check-tarball-shipped-shims.sh` guard against repo-relative paths INSIDE shipped scripts. Neither guards against a stale registration referencing a file the current tree no longer contains. Critically, proposed control (a) does NOT close this gap either — see "Fresh RCA evidence" below.
+- [ ] Design a control that closes the gap. Candidates: (a) plugin-side test asserting that every entry in `hooks.json` has a corresponding file on disk in the same tarball / marketplace snapshot; (b) harness-side check at session-start that warns when a registered hook file is missing; (c) plugin-side deprecation-cycle for hook removal (1 minor cycle with hook re-pointing to a no-op shim before file deletion); (d) `/install-updates` invariant: force-restart adopter sessions after major hook surface changes. **Narrowed 2026-07-04**: (a) is ruled OUT for this failure mode (published versions were internally consistent); (c) is the only candidate that actually prevents the stranding. The pick is direction-setting / RFC-class — queued for user ratification. See "Fresh RCA evidence" below.
+- [ ] Create reproduction test: scaffolded adopter project + plugin version downgrade-then-upgrade sequence reproducing the stale-binding observation. **Not done (2026-07-04)**: a faithful repro drives Claude Code's live snapshot-binding behaviour across a version transition — integration-scope, not a unit test. Deferred to the ratified fix's story.
+- [ ] Decide whether this is an RFC-class scope (a real shipment-hygiene mechanism per ADR-082 territory) or a tightly-scoped prose-correction (deprecation-cycle discipline in maintainer SKILL/CONTRIBUTING docs). **Leaning RFC-class (2026-07-04)**: even the narrowed (c) is a cross-cutting release-hygiene convention (deprecation cycle) plus optional detector — multi-phase. Queued as the direction-setting decision.
 - [ ] Cross-check with P368 (sibling captured 2026-06-16): `wr-architect-mark-oversight-confirmed` cannot discover session-id under cold-path conditions on macOS — the same shim's bash-tool sees `/tmp` differently than the hook does. The plugin-distribution-hygiene class spans multiple surfaces (path resolution, registration lifecycle, session binding) — may warrant an umbrella problem ticket if more sibling observations accumulate.
+
+### Fresh RCA evidence (2026-07-04 AFK work-iter)
+
+Re-verified source / marketplace / cache state directly (not re-asserting the capture-time claims):
+
+| Surface | Retired hook file | `hooks.json` registers it |
+|---|---|---|
+| Source repo (`packages/architect/hooks/`) | absent | no |
+| Marketplace (`~/.claude/plugins/marketplaces/windyroad/…/architect/hooks/`) | absent | no |
+| Cache `wr-architect/0.16.0/` | **present** | **yes** |
+| Cache `wr-architect/0.17.0`–`0.18.5/` | absent | no |
+
+**Refined findings:**
+
+1. **Retirement boundary is 0.16.0 → 0.17.0**, not 0.15.6. The specific 0.15.6 cache the capture cited has since been pruned — but **0.16.0 is still on disk and still ships the retired hook + its registration**, so the failure mode remains live for any session bound against 0.16.0-or-earlier.
+2. **Skew is registration-snapshot vs live-file-tree, not intra-tarball.** The observed error resolved the *marketplace* path (`…/marketplaces/windyroad/…/architect-compendium-refresh-discipline.sh: No such file or directory`) — the harness held a `hooks.json` registration pointing into the marketplace tree, and a later version removed the file from that tree without the live session re-validating the binding. Every *published* version was internally consistent (0.17.0 dropped file **and** registration together).
+3. **Control (a) would NOT catch this class.** An intra-tarball "every `hooks.json` entry resolves to a file in the same snapshot" check passes on every published version here — the inconsistency only exists *across* snapshots in a live session. (a) is fine hygiene but addresses a failure that did not occur.
+4. **Control (c) is the mechanism that actually prevents the stranding.** Had 0.17.0 kept the file as a no-op shim for one minor cycle before deleting it, the stale-bound session would still resolve the path and silently no-op — no orphan-hook error — buying every live session a restart window. (b) [session-start drift warning] surfaces but does not prevent; (d) [force-restart on hook-surface change] is heavyweight cross-session machinery.
+
+**Direction-setting decision (queued, not built this iter):** picking the control shape — (c) deprecation-cycle discipline as the primary, optionally paired with (b) as a detector — and whether to codify it as an ADR + RFC-scoped mechanism vs a maintainer CONTRIBUTING convention. Per the ticket's own routing ("when ratified, capture an RFC") and the ADR-074 substance-confirm-before-build guard, this iter records the analysis and defers the pick to user ratification rather than unilaterally shipping an RFC-class control.
 
 ## Fix Strategy
 
