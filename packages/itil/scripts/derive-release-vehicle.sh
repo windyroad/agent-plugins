@@ -38,7 +38,8 @@
 #   0 = OK (full citation emitted, OR de-facto-released graduated-holding
 #       changeset whose code already shipped with a sibling release — P361)
 #   1 = ticket file not found
-#   2 = no changeset reference in ticket body
+#   2 = no changeset reference in ticket body AND no co-committed changeset
+#       derivable from the ticket's git history (P389 fallback)
 #   3 = changeset present in working tree AND not de-facto-released
 #       (genuinely unreleased)
 #   4 = deletion commit found but no merge PR / merge commit resolvable
@@ -80,7 +81,7 @@ USAGE: derive-release-vehicle.sh <ticket-id> [<problems-dir>]
 Exit codes:
   0  ok (full citation, OR de-facto-released graduated-holding changeset — P361)
   1  ticket file not found
-  2  no changeset reference in ticket body
+  2  no changeset reference in body AND no co-committed changeset in ticket history (P389)
   3  changeset present in working tree AND not de-facto-released (unreleased)
   4  deletion commit found but no merge PR / merge commit resolvable
 EOF
@@ -125,8 +126,34 @@ CHANGESET_PATH="$(
     | head -1
 )"
 
+# ── Fallback (P389): body has no changeset reference — recover via co-commit ─
+# An iter that fixes a Known Error sometimes ships the fix + changeset but omits
+# the P330 `**Release vehicle**` seed, leaving the ticket body with no
+# `.changeset/` reference. derive would exit 2 and the post-release K→V
+# enumerator (P228) silently skips the ticket even though its fix shipped. Under
+# ADR-014's one-commit grain the fix commit that authored the changeset also
+# edited this ticket, so a `.changeset/*.md` ADDED by a commit that also touched
+# the ticket file is this ticket's release vehicle. Walk the ticket's commits
+# (newest first, across state renames) and take the first co-committed changeset.
+# ponytail: co-commit join. False negative — the P141 multi-slice case (changeset
+# on an earlier commit that did NOT touch the ticket) still needs the manual P330
+# seed. False positive — a later commit touching the ticket AND adding an
+# unrelated changeset would be picked first; acceptable for a mechanical fallback.
 if [ -z "$CHANGESET_PATH" ]; then
-  echo "ERROR: no .changeset/<name>.md reference in $TICKET_FILE" >&2
+  while IFS= read -r _commit; do
+    [ -z "$_commit" ] && continue
+    CHANGESET_PATH="$(
+      git show "$_commit" --diff-filter=A --name-only --format='' -- .changeset/ 2>/dev/null \
+        | grep -E '\.changeset/[a-z0-9._-]+\.md$' \
+        | grep -v -i 'README\.md' \
+        | head -1
+    )"
+    [ -n "$CHANGESET_PATH" ] && break
+  done < <(git log --follow --format='%H' -- "$TICKET_FILE" 2>/dev/null)
+fi
+
+if [ -z "$CHANGESET_PATH" ]; then
+  echo "ERROR: no .changeset/<name>.md reference in $TICKET_FILE (and no co-committed changeset in ticket history — P389)" >&2
   exit 2
 fi
 

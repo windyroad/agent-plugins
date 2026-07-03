@@ -98,6 +98,39 @@ EOF
   echo "$output" | grep -qiE "no .?changeset|changeset.*reference"
 }
 
+@test "derive-release-vehicle: P389 fallback — body has no ref but a co-committed changeset in ticket history is recovered (not a false exit 2)" {
+  # An iter shipped the fix + changeset in ONE commit (ADR-014 grain) but omitted
+  # the P330 **Release vehicle** seed, so the ticket body has no .changeset ref.
+  # Pre-P389 this exited 2 and the K→V enumerator (P228) silently skipped the
+  # ticket. The fallback walks the ticket's own commits for a co-committed
+  # changeset. Here the changeset is still in the working tree (unreleased), so
+  # recovery lands on exit 3 (found-but-unreleased) — NOT exit 2 (not found).
+  cat > docs/problems/known-error/101-co-commit-no-seed.md <<'EOF'
+# Problem 101: Fix shipped, seed omitted
+
+**Status**: Known Error
+
+## Description
+
+The fix landed but the **Release vehicle** seed line was never written, so this
+body references no .changeset filename.
+EOF
+  mkdir -p .changeset
+  cat > .changeset/p101-co-commit-fix.md <<'EOF'
+---
+"@windyroad/itil": patch
+---
+
+P101 fix.
+EOF
+  git add docs/problems/known-error/101-co-commit-no-seed.md .changeset/p101-co-commit-fix.md
+  git commit -q -m "fix(itil): P101 fix + changeset (co-committed, no seed)"
+
+  run "$SCRIPT" P101 docs/problems
+  [ "$status" -eq 3 ]
+  echo "$output" | grep -qiE "p101-co-commit-fix|unreleased|working tree"
+}
+
 # ── Exit 3: changeset still present (unreleased) ────────────────────────────
 
 @test "derive-release-vehicle: changeset still in working tree (unreleased) → exit 3" {
