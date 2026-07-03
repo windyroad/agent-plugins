@@ -91,3 +91,9 @@ Requires the adopter to already know the skills exist.
 - **ADR-060** — Problem-RFC-Story framework (the tiers in question).
 - **ADR-071** — every-fix-through-an-RFC (windyroad-internal; the enforcement this ticket explicitly does NOT extend to adopters).
 - **Origin evidence:** bbstats (`/Users/tomhoward/Projects/bbstats`) — itil 0.56.0, problems/jtbd/decisions populated, rfcs/stories/story-maps absent; problem 001 carries a dangling `Create INVEST story` task.
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-040 | proposed | Feature discoverability / adoption-surface invariant — prevent shipping capabilities adopters can't find or activate |
