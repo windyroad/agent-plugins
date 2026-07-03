@@ -51,3 +51,8 @@ Same family as **P294** (README should market from JTBD, not cite JTBD IDs): ado
 - **P287 / P289 / P290 / P291 / P292 / P293 / P295 / P297** — sibling drain-surfaced reworks.
 - **ADR-055** (`docs/decisions/055-plugin-published-namespace-prefixed-internal-ids.proposed.md`) — the decision to supersede.
 - **P137** — the internal-ID-leak driver behind ADR-055.
+
+
+## Human decision — 2026-07-03 (outstanding-questions drain)
+
+**Confirmed**: supersede ADR-055's ID-prefix mechanism via the asking-flow, sequenced AFTER the SKILL-extraction ticket (P296) lands first. Enforcement-detector flip is P296-gated. Author the supersede ADR once P296 completes.

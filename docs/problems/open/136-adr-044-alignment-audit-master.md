@@ -261,3 +261,12 @@ P136 stays at WSJF 2.25 in the queue; it is **NOT picked up automatically by `/w
 - **JTBD-101** (`docs/jtbd/plugin-developer/JTBD-101-extend-the-suite-with-new-plugins.proposed.md`) — composes via per-surface SKILL.md edits that ship to adopters.
 - **JTBD-201** (audit trail) — composes via Step 2d "Ask Hygiene Pass" lazy-count metric trend across consecutive retros as Phases land.
 - 2026-04-27 session evidence: P135 implementation completed; user surfaced the audit gap directly: *"we should also do an audit of all the files (hooks, skills, agents, etc) to make sure they align with the clarified direction and make sure CLAUDE.md and other files don't contradict"*. /plan workflow opened; Plan agent designed 6-phase plan; risk-scorer:plan PASS at 3/3/4; user approved.
+
+
+## Human decision — 2026-07-03 (outstanding-questions drain)
+
+Audit 13/13 done; **the remaining interactive remediation is the live scope of this ticket** (kept OPEN so work-problems picks it up — do NOT leave it stranded in the outstanding-questions queue). Remaining tasks:
+- [ ] Substantive: restore-incident ID-arg backfill
+- [ ] Substantive: review-problems Step 4 evidence-backed-subset over-ask fix
+- [ ] Cosmetic: ~28 ADR-044 cross-refs (bundle as itil / risk-scorer / jtbd doc patches)
+- [ ] Audit the 6 unaudited SKILLs

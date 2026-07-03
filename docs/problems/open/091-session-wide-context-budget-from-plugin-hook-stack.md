@@ -146,3 +146,8 @@ Worked examples (one per cluster):
 ### ADR anchor
 
 - **Proposed ADR**: "Progressive disclosure for governance tooling context" (renamed from earlier "Hook injection budget policy" framing). Single ADR covering the four axes and the conventions each cluster adopts. Authored against this meta ticket after children's audits inform the budget numbers.
+
+
+## Human decision — 2026-07-03 (outstanding-questions drain)
+
+This is a **coordination umbrella** — its own tasks (context-measurement harness, progressive-disclosure ADR-038) shipped. **Close when the child tickets close**; do not re-scope, do not close early. Child-gated.

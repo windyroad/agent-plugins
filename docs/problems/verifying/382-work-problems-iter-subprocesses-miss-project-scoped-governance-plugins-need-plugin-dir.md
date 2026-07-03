@@ -63,3 +63,8 @@ Headless `claude -p` does not activate project-scoped plugins (project-plugin ac
 - **ADR-032** — Step 5 `claude -p` dispatch contract is the locus.
 - `packages/itil/skills/work-problems/SKILL.md` — Step 5 dispatch.
 - Inbound-reported from a downstream consumer (tracked as P244 in that downstream project — distinct from the local P244 maturity-shim ticket).
+
+
+## Human decision — 2026-07-03 (outstanding-questions drain)
+
+**Ratify** the agent-applied ADR-032 amendment (--plugin-dir project-scoped plugin injection in the AFK dispatch step) — substance matches intent (P357). Action: re-confirm ADR-032 oversight-date. ALSO: **add the promptfoo eval-coverage case** for the new dispatch contract (behavioural bats exist; end-to-end eval missing).

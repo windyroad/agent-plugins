@@ -134,3 +134,8 @@ With B6 closed this iter, the **core P314 fix is functionally complete and user-
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-005 | accepted | RFC-first trace invariant not enforced at fix-time |
+
+
+## Human decision — 2026-07-03 (outstanding-questions drain)
+
+**Graduate the held changeset (B10)** — user-ratified interactive release call (ADR-061 Rule 4). ADR-073 reassessment: the ~7 under-scoped skeleton RFCs traced to already-shipped problems should be **transitioned to reflect shipped state** (accepted/closed), NOT fleshed out; the RFC-creation process change prevents recurrence, so no policy revisit needed.

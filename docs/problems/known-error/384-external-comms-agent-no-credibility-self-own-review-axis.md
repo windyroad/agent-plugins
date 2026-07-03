@@ -61,3 +61,8 @@ Traced by **RFC-032** (External-comms credibility / self-own review axis). The a
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-032 | proposed | External-comms credibility / self-own review axis |
+
+
+## Human decision — 2026-07-03 (outstanding-questions drain)
+
+**Activate the credibility/self-own axis**: run /wr-risk-scorer:update-policy to add the '## Outbound Credibility / Self-Own' section to live RISK-POLICY.md; a green eval then graduates the held changeset. Sequence AFTER the P395 sibling generalisation ADR lands. NOTE: the claimed orphaned-background-task failure mode was NOT captured — no evidence found (git shows clean commit 00cc417c; no abandoned iter artefact in run-state).

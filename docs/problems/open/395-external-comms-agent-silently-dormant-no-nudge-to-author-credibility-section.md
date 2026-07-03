@@ -72,3 +72,8 @@ Captured via /wr-itil:capture-problem; PROCEED_NEW per the fresh-context `wr-iti
 - **P384** (external-comms credibility/self-own axis) — same axis, *opposite stance* on dormancy: P384 ships the agent-prose axis + a deferred author-the-section dogfood task that treats absent-section as benign; this capture asserts that benign framing IS the bug (nothing surfaces the dormant capability). The nudge is a blocker-*sibling* upstream of P384's eval-floor, not internal P384 scope. P384 is in Known Error / held-changeset lifecycle, not absorbing fresh mechanisms.
 - **P297** (ADR-047 scaffold-nudge → SessionStart) — the *pattern source* to extend, not the absorber: its Phase-2 architect verdict concluded the `POLICY × ARTEFACT-DIR` pair shape is risk-scorer-specific and doesn't generalise; this rides a different shape (missing *section*) + a different surface (the external-comms gate). "Use the same template," not "Phase N of P297."
 - **P375** (named-re-entry vs self-firing cadence meta) — this is a textbook *instance* of P375's "capability exists but nothing surfaces it" class; P375 tracks instances as rollup children in its `## Related` cluster, not absorbed into its body. PROCEED_NEW is how P375's other instances were handled.
+
+
+## Human decision — 2026-07-03 (outstanding-questions drain)
+
+Dormancy-nudge home = **Option B**: a sibling generalisation ADR for 'policy-file-presence → governance-surface-activation' nudges (architect lean). Do NOT extend the ADR-047 predicate matrix in place. This ADR must land before P384's live activation.

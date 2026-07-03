@@ -65,3 +65,8 @@ Surfaced 2026-06-24 by user: *"I am NEVER going to give above-appetite permissio
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-029 | proposed | Apply RISK-POLICY appetite faithfully across all surfaces |
+
+
+## Human decision — 2026-07-03 (outstanding-questions drain)
+
+RFC-029 (apply RISK-POLICY appetite faithfully) is still 'proposed' but its fix shipped. **Transition RFC-029 proposed → accepted/closed and ratify its human-oversight marker** via /wr-itil:manage-rfc. Pending action.

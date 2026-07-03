@@ -114,3 +114,8 @@ Next step: capture an RFC per ADR-060 tracing this ticket + P356 + the four plug
 - **JTBD-302** (plugin-user — Trust That the README Describes the Plugin I Just Installed) — the load-bearing Job P356 anchors on; now a framing lens for the Phase 2 decision.
 - **ADR-047** (`docs/decisions/047-install-updates-scaffolds-governance-artefacts.proposed.md`) — amendment target.
 - **ADR-040** (SessionStart surface), **ADR-045** (hook budget), **ADR-066/068** (SessionStart oversight nudges) — the SessionStart neighbours to compose with.
+
+
+## Human decision — 2026-07-03 (outstanding-questions drain)
+
+Phase 2 shape = **Option D**: strengthen the reactive BLOCK deny-hooks into guided invocations that walk the user into the right skill, framed around the plugin-adopter's job (JTBD-302). Folds in the P356 adopter-framing work.

@@ -75,3 +75,8 @@ Architect APPROVED (within-decision SKILL-prose refinement; ADR-073-compliant â€
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-005 | accepted | RFC-first trace invariant not enforced at fix-time |
+
+
+## Human decision â€” 2026-07-03 (outstanding-questions drain)
+
+**Graduate BOTH held changesets** (evidence floor met, P308 Rule 4 ratified): wr-itil-p371-i13-existing-vehicle-trace-branch.md (priority 9) and wr-itil-p399-fix-time-rfc-full-authoring.md (priority 12). Release both.

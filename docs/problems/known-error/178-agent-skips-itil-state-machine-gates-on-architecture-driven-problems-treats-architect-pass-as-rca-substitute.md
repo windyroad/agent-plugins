@@ -124,3 +124,8 @@ Next step: capture an RFC per ADR-060 tracing this ticket + P179; defer build un
 - /wr-itil:work-problems SKILL.md — Step 5 iter prompt template (precondition-check gap)
 - /wr-itil:manage-problem SKILL.md — Step 9 work-the-fix (precondition-check gap)
 - Session evidence — 2026-05-06 to 2026-05-10, 8 iters / 26 commits against P170 at `Open` status; user-correction 2026-05-10 "it looks like work on fixing P170 has commenced before RCA is complete and before it's become a known error".
+
+
+## Human decision — 2026-07-03 (outstanding-questions drain)
+
+Framework position: **an ADR must always serve a problem or an RFC.** So architect-PASS substitutes for empirical RCA before Known Error ONLY when the driving ADR traces to a problem/RFC — neither a blanket carve-out (A) nor a blanket hard-block (B). Fix shape: gate the Known-Error precondition on the driving ADR's problem/RFC trace, not on architect approval alone.
