@@ -3,7 +3,7 @@
 **Status**: Known Error
 **Reported**: 2026-06-11
 **Root cause identified**: 2026-06-17 (P359 RCA, this iter — see Root Cause Analysis)
-**Going-forward decision**: ADR-082 (born-proposed, `human-oversight: unconfirmed`) — resolution deferred to user ratification
+**Going-forward decision**: ADR-082 (`human-oversight: confirmed` 2026-06-17) — options **(b) real shipment control + (c) reconcile K→V lifecycle** ratified; fix vehicle is RFC-025. Status stays `proposed` (status-flip gated on dependent work landing per ADR-074).
 **Priority**: 15 (High) — Impact: 3 × Likelihood: 5 = 15. Rated at review 2026-07-02: all ~27 held changesets leaking; holds fail their purpose.
 **Origin**: internal
 **Effort**: L. WSJF = (15 × 1.0) / 4 = 1.875.
@@ -46,14 +46,15 @@ The defect traces to a wording-vs-implementation gap in ADR-042: the user's dire
 
 The framework then compounds the gap by *describing* the hold as a shipment control ("out of the active release queue") in ADR-042 Rule 7, the risk-scorer remediation prose, and the holding-area README — so agents auto-apply holding as an above-appetite remediation expecting it to withhold code.
 
-**Going-forward resolution: deferred to ADR-082** (born-proposed, `human-oversight: unconfirmed`). Three options recorded for user ratification: (a) accept attribution-only + correct the misleading prose; (b) build a real shipment control (hold the CODE off main, or gate publish); (c) reconcile the K→V "release" lifecycle semantics (secondary symptom). Per ADR-074 no dependent work (the ADR-042 amendment, prose correction, or new mechanism) is built until an option is ratified.
+**Going-forward resolution: ADR-082, `human-oversight: confirmed` 2026-06-17.** The user ratified options **(b) real shipment control** (hold the CODE off main / gate publish — option (a) attribution-only-acceptance was rejected because a hold that does not withhold IS the JTBD-002 governance bypass) **+ (c) reconcile the K→V "release" lifecycle semantics** (secondary symptom), riding together in a single RFC-first fix path. The fix vehicle is **RFC-025** (Real shipment control via build-time feature toggles, `proposed`): Slice 1 = tool-comparison investigation (recommendation ratification-gated), Slice 2 = per-skill `features.json` render + test-matrix, Slice 3 = retire holding-area as a shipment control / amend ADR-042 Rule 7, Slice 4 = K→V lifecycle reconciliation. Per ADR-074 the ADR-042 Rule 7 prose correction + mechanism build ride with RFC-025 (not built ahead of it); the interim above-appetite mitigation remains the release-often + within-appetite-drain discipline until RFC-025 ships.
 
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
 - [x] Investigate root cause — done 2026-06-17; changeset-move ≠ code-move (see above)
-- [ ] Create reproduction test — deferred to the chosen-option's fix RFC (test shape depends on whether holding becomes a real shipment control)
-- [ ] Ratify ADR-082 option (a)/(b)/(c) at `/wr-architect:review-decisions`, then propose the fix via the ADR-060 RFC-first path
+- [ ] Create reproduction test — carried by RFC-025 Slice 2 (paired ON/OFF test-matrix over a dogfooded held slice); test shape resolved now that option (b) real-shipment-control is the chosen shape
+- [x] Ratify ADR-082 option at `/wr-architect:review-decisions` — done 2026-06-17: options (b)+(c) ratified; fix proposed via RFC-025 (ADR-060 RFC-first path)
+- [ ] Next actionable: RFC-025 Slice 1 tool-comparison investigation (remark/unified vs pandoc vs Sphinx vs MkDocs vs generic preprocessor) → recommendation for user ratification; run via `/wr-itil:manage-rfc` as its own iteration (dedicated deliverable + commit grain)
 
 ## Dependencies
 
@@ -65,7 +66,8 @@ The framework then compounds the gap by *describing* the hold as a shipment cont
 
 (captured via /wr-itil:capture-problem; expand at next investigation)
 
-- **ADR-082** (`docs/decisions/082-changeset-holding-semantics-attribution-only-vs-shipment-control.proposed.md`) — born-proposed going-forward decision; options (a)/(b)/(c) deferred to user ratification.
+- **ADR-082** (`docs/decisions/082-changeset-holding-semantics-attribution-only-vs-shipment-control.proposed.md`) — going-forward decision, `human-oversight: confirmed` 2026-06-17: options (b) real shipment control + (c) K→V lifecycle reconciliation ratified; option (a) attribution-only-acceptance rejected. RFC-025 is the build vehicle.
+- **RFC-025** (`docs/rfcs/RFC-025-real-shipment-control-via-build-time-feature-toggles.proposed.md`) — the ADR-082-(b) build vehicle: build-time feature toggles rendering shipped tarballs from templated source, with paired ON/OFF test matrices. Slices 1–4 decompose the mechanism build + holding-area retirement + K→V reconciliation.
 - ADR-042 (auto-apply scorer remediations; Rule 7 holding convention), R009 (SKILL-prose floor standing risk), P220 (witnessing case — de-facto-released held changeset), P162 (graduation criteria — verifying), P228 (K→V enumerator keys on deleted-from-tree changesets — same blind spot).
 - Hang-off pre-filter (capture Step 2b): 25 candidates shared ≥1 signal (ADR-042 / changesets-holding) — above the 5-candidate dispatch cap, so the hang-off-check subagent was skipped per the candidate-cap short-circuit; re-evaluate absorption at next `/wr-itil:review-problems`. Title-grep matches (list-only): P162, P177 (holding-dir 2-commit pattern), P330 (release-vehicle helper), P141, P073 (closed), P202 (closed), P206 (closed).
 
