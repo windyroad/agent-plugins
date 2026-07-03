@@ -61,3 +61,9 @@ Manually graduate the vp-blocked shipped-code holds (overriding ADR-061 Rule 2 p
 - **ADR-061** Rule 2 — the VP carve-out being amended.
 - `packages/risk-scorer/scripts/evaluate-graduation.sh` — the evaluator emitting `vp-blocked`.
 - (captured via /wr-itil:capture-problem; PROCEED_NEW — distinct framework-fix from P359's observation + P375's cadence meta.)
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-040 | proposed | Narrow the ADR-061 Rule 2 VP carve-out so shipped-verifying changesets graduate |
