@@ -3,7 +3,7 @@ status: proposed
 rfc-id: p270-external-comms-gated-upstream-report-afk-auto-fire
 reported: 2026-06-04
 decision-makers: [Tom Howard]
-problems: [P270]
+problems: [P270, P413]
 adrs: [ADR-024, ADR-028, ADR-042, ADR-013, ADR-014, ADR-074, ADR-071, ADR-044, ADR-076, ADR-077]
 jtbd: [JTBD-006, JTBD-001, JTBD-004, JTBD-201]
 stories: []
@@ -28,6 +28,7 @@ The fix reverses the blanket-defer for ALL classifications including security, g
 ## Driving problem trace
 
 - **P270** (`docs/problems/open/270-agent-waits-for-human-to-initiate-upstream-report-instead-of-filing-on-detect.md`) — agent waits for human to initiate upstream report instead of filing on detect; feedback-delay class. Status: Open → Known Error in the same commit as this RFC's fold-fix per ADR-022 P143.
+- **P413** (`docs/problems/.../413-work-problems-defers-upstream-reporting-as-manual-batch-report-choice-instead-of-auto-filing.md`) — follow-on regression in this same P270 contract at the `/wr-itil:work-problems` **Output Format** surface: a loop deferred 16 upstream-blocked filings to a wrap-time "re-run and choose batch-report upstream" nudge instead of the per-iter auto-fire this RFC mandates. Trace edge wired here (I13 sub-case a, existing-vehicle-untraced) because RFC-018's `## Scope` already names the `work-problems` SKILL Step 4 classifier as its edit surface — P413's fix is a follow-on within this vehicle's scope, not a distinct RFC. No new decision introduced.
 
 ## User-ratified principle (verbatim, 2026-06-02)
 

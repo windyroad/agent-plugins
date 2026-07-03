@@ -1142,6 +1142,17 @@ The skill should produce a final summary when the loop ends:
 |---------|---------------------|--------|
 | P016 (Multi-concern splitting) | user-answerable (verification) | Awaiting user verification |
 
+### Reported Upstream
+
+<!-- @jtbd JTBD-006 (Progress the Backlog While I'm Away — the summary reports ACTUAL upstream filings so the AFK audit trail is honest, never a re-run-to-file checklist) -->
+
+(Renders when ≥1 upstream-blocked ticket was auto-filed or queued this loop by the Step 4 `upstream-blocked` row's per-iter auto-invoke of `/wr-itil:report-upstream`. Reports ACTUAL filings and queued drafts — never a to-do list of "re-run to file". Omitted entirely when no ticket was upstream-reported this loop.)
+
+| Ticket | Upstream action | Result |
+|--------|-----------------|--------|
+| P067 (adopter hook path bug) | Filed to windyroad/agent-plugins#142 | Sent (below appetite) |
+| P071 (security-classified regression) | Queued to `## Queued Upstream Report` | Above appetite — surfaced as outstanding question |
+
 ### Outstanding Design Questions
 
 (Emitted only when stop-condition #2 fires AND at least one skipped ticket has a `user-answerable (design/direction/pacing/scope)` skip-reason. Populated by Step 2.5 in non-interactive / AFK mode per ADR-013 Rule 6.)
@@ -1181,6 +1192,8 @@ ALL_DONE
 **`ALL_DONE` position (P341 Step 2.4).** The `ALL_DONE` sentinel is the FINAL line of the rendered summary, emitted at Step 2.4 gate (c) — AFTER Step 2.4 gate (a) (outstanding-questions surface via Step 2.5b) AND AFTER Step 2.4 gate (b) (session-level retro via `/wr-retrospective:run-retro`) BOTH complete cleanly. The session-level retro's own commit + any tickets it creates land BEFORE the `ALL_DONE` emit. External scripts watching for AFK-loop completion can rely on `ALL_DONE` as an honest sentinel: when it appears, both gates have completed. Hard-fail mode (halt with directive) replaces `ALL_DONE` when either gate cannot complete — adopters should treat the absence of `ALL_DONE` paired with a halt-directive line as the recoverable-pause shape (user satisfies the gate on return; re-invocation emits `ALL_DONE` cleanly).
 
 When every skipped ticket is in the `upstream-blocked` category (stop-condition #3) or there are no skipped tickets (stop-condition #1), omit the Outstanding Design Questions section entirely rather than rendering an empty heading. The Session Cost section always renders when at least one iteration ran.
+
+**Upstream reports are auto-filed per-iter, never deferred to a wrap-time batch choice (P413).** The `### Reported Upstream` section reports ACTUAL filings and queued drafts produced by the Step 4 `upstream-blocked` row's per-iter auto-invoke of `/wr-itil:report-upstream` (below-appetite → sent during the loop; above-appetite → risk-reduced then sent-or-queued per P352). There is **no "batch-report upstream" mode** and no wrap-time reporting decision: the summary MUST NOT emit a "N upstream-blocked tickets are unreported — re-run `/wr-itil:work-problems` and choose batch-report upstream" nudge. That nudge is an agent-invented permission gate the framework did not authorise — the same class as P390 / P341 / P175 (agent-invented loop-control the framework already resolved per ADR-044), and it directly contradicts the ADR-024 2026-06-04 (P270) auto-fire contract the Step 4 row (lines 503 / 511) and decision table (line 1077) mandate. A below-appetite report just sends during the loop; an above-appetite report queues to `## Queued Upstream Report` and surfaces at Step 2.4 gate (a) as an `outstanding_questions` entry — never as a "re-run to report" instruction the user must action. If the loop ends with upstream-blocked tickets that were NOT reported, that is a bug (the auto-fire did not fire), not a batch the user should be asked to trigger.
 
 ## Related
 

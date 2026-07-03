@@ -27,7 +27,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 4.5 | P251 | RFC-first trace invariant not enforced — fixes start without RFC, story map, or JTBD trace | 9 Medium | Known Error | L | 2026-05-17 | internal |
 | 4.5 | P297 | ADR-047 — governance-artefact scaffolding should be a SessionStart hook (per-project, automatic), not an inline `/install-updates` step | 9 Med High | Open | M | 2026-05-25 | internal |
 | 4.5 | P369 | Plugin removes hook file but adopter session still invokes it via stale binding — `architect-compendium-refresh-discipline.sh` case 2026-06-17 | 9 Medium | Open | M | 2026-06-17 | internal |
-| 4.0 | P413 | work-problems defers upstream reporting as a manual "batch-report upstream" choice instead of auto-filing upstream-blocked tickets | 8 Medium | Open | M | 2026-07-03 | internal |
 | 3.0 | P178 | Agent skips ITIL state-machine gates on architecture-driven problems — treats architect-PASS verdict as substitute for empirical RCA + skips Open → Known Error transition | 3 Medium | Known Error | M | 2026-05-10 | internal |
 | 3.0 | P161 | Advisory-then-escalate may be over-applied as the default for drift-class detectors generally; load-bearing-from-the-start may be the better default | 6 Moderate | Open | M | 2026-05-04 | internal |
 | 3.0 | P176 | Agent-side I2 (no type-branching) coverage gap — SKILL.md type-branching invariant not behaviourally testable until skill-invocation harness lands | 6 Medium | Open | M | 2026-05-06 | internal |
@@ -263,6 +262,7 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P407 | /wr-*:assess-external-comms skills instruct synchronous reviewer dispatch (P402 follow-up; resolved same commit via RFC-041) | pending — @windyroad/risk-scorer + @windyroad/voice-tone patch committed, ships next release | no — not observed |
 | P403 | Agent frames skill-mandatory mechanical steps as user-optional (detect_mechanical_optional Stop-hook detector; fix vehicle RFC-042) | pending — @windyroad/itil patch committed, ships next release | no — not observed |
 | P386 | review-problems Step 4.5/4.6 AFK-silent relevance-close refs re-anchored off dangling work-problems Step 6.5 pointer onto subprocess-AFK-by-construction mechanism (doc-only prose fix) | 2026-07-04 (`@windyroad/itil` patch, commit `3bf91f0c`, pending release) | no — not observed |
+| P413 | work-problems defers upstream reporting as a manual "batch-report upstream" choice instead of auto-filing upstream-blocked tickets — Output Format invariant + `### Reported Upstream` summary subsection forbid the wrap-time deferral nudge (traced under RFC-018) | 2026-07-04 (`@windyroad/itil` patch, pending release) | no — not observed |
 
 ## Inbound Upstream Reports
 

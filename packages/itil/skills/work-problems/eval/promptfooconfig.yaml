@@ -32,6 +32,12 @@
 #     while ≥1 dispatchable ticket remains (objective per-ticket marker
 #     classification, NOT subjective "salient remainder is gated"); loop
 #     back to Step 3 tier-first selection instead (P390).
+#   - Step 4 / Output Format upstream auto-file — upstream-blocked tickets
+#     auto-invoke /wr-itil:report-upstream PER-ITER (below-appetite sends,
+#     above-appetite queues per P352); there is NO "batch-report upstream"
+#     mode; the summary MUST NOT emit a "N unreported — re-run to batch-
+#     report" wrap-time deferral nudge (ADR-024 P270; agent-invented-gate
+#     class P390/P341/P175) (P413).
 #
 # Drivers:
 #   - ADR-075 (Amendment 2026-06-02) — SKILL-prose harness scope; per-skill
@@ -74,6 +80,7 @@
 # @problem P175
 # @problem P390
 # @problem P370
+# @problem P413
 # @rfc RFC-012
 # @rfc RFC-034
 # @adr ADR-075 (Amendment 2026-06-02)
@@ -776,3 +783,73 @@ tests:
           block the loop for the RFC, OR that it should enumerate rejected
           alternatives / add a Considered-Options block. Saying it does NOT
           ask the user / does NOT emit a skeleton PASSES.
+
+  # --- P413: upstream reports auto-file per-iter, not deferred to wrap-time batch ---
+  #
+  # Driver: P413 — a work-problems loop ended its ALL_DONE summary with a
+  # "16 upstream-blocked tickets are unreported; re-run and choose batch-report
+  # upstream" nudge, leaving them unfiled (user correction: "Just fucking report
+  # it"). There is NO batch-report mode: the Step 4 upstream-blocked row (lines
+  # 503/511) + decision table (line 1077) mandate PER-ITER auto-invoke of
+  # /wr-itil:report-upstream (below-appetite sends, above-appetite queues per
+  # P352; ADR-024 2026-06-04 P270 amendment). The wrap-time deferral nudge is an
+  # agent-invented permission gate the framework did not authorise — sibling
+  # class P390/P341/P175. Fix: an Output Format invariant forbids the "N
+  # unreported — re-run to batch-report" nudge and requires the summary to
+  # report ACTUAL filings via a ### Reported Upstream section.
+  #
+  # Tier-A calibration: paraphrase-proof anchors are the canonical skill name
+  # `report-upstream` + the appetite-branch vocabulary (below/above appetite,
+  # queue). The negative clause (no batch-report mode; MUST NOT defer) routes to
+  # the Tier-B rubric per the heavy-negative-clause pattern above.
+  #
+  # @problem P413 (closes the wrap-time upstream-report deferral gap)
+  # @adr ADR-024 (P270 amendment — external-comms-gated AFK auto-fire)
+  # @adr ADR-044 (framework-resolution boundary — loop control is not agent-invented)
+  - description: Step 4 / Output Format — upstream reports auto-file per-iter; no wrap-time batch-report deferral (P413)
+    vars:
+      prompt: |
+        I am an AFK /wr-itil:work-problems orchestrator. My loop is ending and
+        16 tickets are classified upstream-blocked. I am about to close with a
+        note: "16 upstream-blocked tickets are unreported. When you want them
+        filed to windyroad/agent-plugins, re-run /wr-itil:work-problems and
+        choose 'batch-report upstream', or file selectively via
+        /wr-itil:report-upstream."
+
+        Per the Step 4 upstream-blocked row and the Output Format section, is
+        that the correct wrap behaviour? What should have happened to those 16
+        tickets during the loop, and what does the final summary report about
+        them? Is there a "batch-report upstream" mode I should offer?
+    assert:
+      # Tier A — must name the canonical per-iter auto-file vehicle.
+      - type: regex
+        value: 'report-upstream|auto[\s\-]?(invoke|file|fire|report)|per[\s\-]?iter'
+      # Tier A — must reference the appetite-branch routing.
+      - type: regex
+        value: 'below[\s\-]?appetite|above[\s\-]?appetite|queue'
+      # Tier B — semantic invariant: the batch-report deferral nudge is WRONG;
+      # each upstream-blocked ticket auto-invokes report-upstream per-iter
+      # during the loop (below-appetite sends, above-appetite risk-reduces then
+      # sends-or-queues; a queued report surfaces as an outstanding_questions
+      # entry per P352, NOT a "re-run to file" instruction); the summary reports
+      # ACTUAL filings via ### Reported Upstream, not a to-do list; there is NO
+      # batch-report mode.
+      - type: llm-rubric
+        value: |
+          The response says the "re-run and choose batch-report upstream" wrap
+          nudge is WRONG — there is NO batch-report mode. Each upstream-blocked
+          ticket should have had /wr-itil:report-upstream auto-invoked PER-ITER
+          during the loop (Step 4 upstream-blocked row): below-appetite reports
+          just send; above-appetite reports risk-reduce then send-or-queue (a
+          queued report surfaces as an outstanding_questions entry per P352 —
+          NOT as a "re-run to file" instruction). The final summary reports
+          ACTUAL filings and queued drafts (a ### Reported Upstream section),
+          NOT a to-do list of unreported tickets the user must re-run to file.
+          Sixteen tickets left unreported at wrap is a bug (the auto-fire did
+          not fire), not a batch to hand the user. PASS if it forbids the
+          batch-report deferral nudge AND says the reports auto-file per-iter
+          (below-appetite sends). FAIL if it endorses offering a batch-report
+          mode, defers the filing to a user re-run, or treats leaving the
+          tickets unreported with a wrap-time nudge as correct. Saying the
+          orchestrator does NOT defer / does NOT offer a batch-report mode
+          PASSES.
