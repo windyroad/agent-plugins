@@ -1123,6 +1123,8 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 
 ## 2026-07-03
 
+> Last reviewed: 2026-07-03 **release + batch K to V** — shipped @windyroad/risk-scorer@0.16.0 (P384 credibility axis), itil@0.56.0, architect@0.18.4; P368/P384/P405 transitioned Known Error to Verification Pending (post-release K to V per ADR-022/P228). P384 eval GREEN 2/2.
+
 > Last reviewed: 2026-07-03 **P411 captured** — no interactive oversight-drain skill for pending-review risk-register entries (lightweight aside via /wr-itil:capture-problem; cross-refs risk-register cluster P102/P110/P171/P309)
 
 > Last reviewed: 2026-07-03 **review pass** — relevance eval over 46 open/KE tickets → 0 clean auto-closes; 26 CLOSE-CANDIDATE-WITH-CAVEAT (all active umbrellas with outstanding tasks) surfaced and kept open per user decision (outstanding-Q#23 resolved). Inbound-discovery within-TTL skip (cache polled 2026-07-02; discussions HTTP-410 per P406). No WSJF drift; 0 auto-transitions; VQ current (199 verifying).

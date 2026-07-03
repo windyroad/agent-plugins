@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-03 **release + batch K to V** — shipped @windyroad/risk-scorer@0.16.0 (P384 credibility axis), itil@0.56.0, architect@0.18.4; P368/P384/P405 transitioned Known Error to Verification Pending (post-release K to V per ADR-022/P228). P384 eval GREEN 2/2.
+> Last reviewed: 2026-07-03 **P412 captured** — RFC/Story/Story-map framework tiers invisible to adopters (no scaffold/nudge/entry-point); surfaced via bbstats using the plugin without them (lightweight aside via /wr-itil:capture-problem)
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -39,6 +39,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3.0 | P176 | Agent-side I2 (no type-branching) coverage gap — SKILL.md type-branching invariant not behaviourally testable until skill-invocation harness lands | 6 Medium | Open | M | 2026-05-06 | internal |
 | 3.0 | P248 | Use time and token cost (not t-shirt sizing) for WSJF effort, with retro-driven estimation refinement | 6 Medium | Open | M | 2026-05-17 | internal |
 | 3.0 | P389 | work iters omit the `**Release vehicle**` seed on Open→Known Error, so the post-release K→V auto-enumerator silently skips them | 6 Medium | Open | M | 2026-06-27 | internal |
+| 3.0 | P412 | RFC / Story / Story-map framework tiers are invisible to adopters — no scaffold, no nudge, no discoverable entry point | 6 Medium | Open | M | 2026-07-03 | internal |
 | 3.0 | P045 | Auto plugin install on user's machine after governance release | 12 High | Open | L | 2026-04-19 | internal |
 | 2.25 | P136 | ADR-044 alignment audit — sweep all unaudited skills/hooks/agents/ADRs/JTBDs/READMEs against the framework-resolution boundary (master ticket) | 9 Med | Open | L | 2026-04-27 | internal |
 | 2.25 | P290 | Harden ADR-052 to behavioural-only — remove the structural-test escape hatch entirely | 9 Med High | Open | L | 2026-05-25 | internal |
