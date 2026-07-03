@@ -38,7 +38,7 @@ check_risk_gate() {
   # 1. Score file must exist (fail-closed)
   if [ ! -f "$SCORE_FILE" ]; then
     RISK_GATE_CATEGORY="missing"
-    RISK_GATE_REASON="No ${ACTION} risk score found. Delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') to assess cumulative pipeline risk."
+    RISK_GATE_REASON="No ${ACTION} risk score found. Delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') to assess cumulative pipeline risk. Dispatch the scorer SYNCHRONOUSLY (run_in_background: false): a background-launched scorer does not fire its PostToolUse:Agent mark hook, so no marker persists and this gate re-blocks despite a within-appetite score (P402)."
     return 1
   fi
 

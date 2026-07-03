@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-03 **P415 captured** — external-comms commit-msg gate reviews only the first `-m` of a multi-`-m` git commit, hashing the subject-only key while the reviewer keys the full message → deny-after-PASS; workaround is a single inlined `-m` (lightweight aside via /wr-itil:capture-problem; sibling of P353/P364, origin gate P082)
+> Last reviewed: 2026-07-03 **P402 + P407 fix-released** — codify synchronous dispatch (`run_in_background: false`) of every marker-writing review agent (external-comms + pipeline commit/push gates + assess/wrapper skills) via RFC-041, so the `PostToolUse:Agent` mark hook fires and persists the gate marker before the gated action; both transitioned Open → Verification Pending. Prior: **P415 captured** — external-comms commit-msg gate reviews only the first `-m` of a multi-`-m` git commit, hashing the subject-only key while the reviewer keys the full message → deny-after-PASS; workaround is a single inlined `-m` (lightweight aside via /wr-itil:capture-problem; sibling of P353/P364, origin gate P082)
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -23,14 +23,12 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6.0 | P395 | external-comms agent silently goes dormant on the credibility axis — no nudge to author the missing RISK-POLICY section | 12 High | Open | M | 2026-06-28 | corrective-feedback (user, 2026-06-28) |
 | 6.0 | P399 | ADR-073 fix-time auto-create emits a SKELETON RFC; it should author the RFC fully | 12 High | Open | M | 2026-06-28 | corrective-feedback (user, 2026-06-28 — ratified at the work-problems loop-end decision surface) |
 | 6.0 | P401 | Capture/RFC persona-JTBD anchoring shoehorns (or discards the problem) instead of interviewing the human to elicit the real who/why | 12 High | Open | M | 2026-06-29 | corrective-feedback (user, 2026-06-29 — during the RFC-first ADR-072/060/087 ratification walkthrough) |
-| 6.0 | P402 | external-comms gate — PostToolUse mark hook does not fire for background-launched (forced-async) review agents, so no marker is persisted to the live session dir despite PASS | 12 High | Open | M | 2026-07-01 | internal |
 | 6.0 | P403 | Agent frames skill-mandatory mechanical steps as user-optional | 12 High | Open | M | 2026-07-02 | internal |
 | 5.0 | P386 | review-problems Step 4.6 AFK-silent relevance-close contract cites a dangling work-problems Step 6.5 cross-reference | 5 Low | Open | S | 2026-06-27 | internal |
 | 5.0 | P406 | `github-discussions` channel in `.upstream-channels.json` returns HTTP 410 | 5 Low | Open | S | 2026-07-02 | internal |
 | 4.5 | P251 | RFC-first trace invariant not enforced — fixes start without RFC, story map, or JTBD trace | 9 Medium | Known Error | L | 2026-05-17 | internal |
 | 4.5 | P297 | ADR-047 — governance-artefact scaffolding should be a SessionStart hook (per-project, automatic), not an inline `/install-updates` step | 9 Med High | Open | M | 2026-05-25 | internal |
 | 4.5 | P369 | Plugin removes hook file but adopter session still invokes it via stale binding — `architect-compendium-refresh-discipline.sh` case 2026-06-17 | 9 Medium | Open | M | 2026-06-17 | internal |
-| 4.0 | P407 | /wr-*:assess-external-comms skills should instruct synchronous reviewer dispatch (P402 follow-up; deny-message half already shipped 16c180e8) | 4 Low | Open | S | 2026-07-02 | internal |
 | 4.0 | P413 | work-problems defers upstream reporting as a manual "batch-report upstream" choice instead of auto-filing upstream-blocked tickets | 8 Medium | Open | M | 2026-07-03 | internal |
 | 3.0 | P178 | Agent skips ITIL state-machine gates on architecture-driven problems — treats architect-PASS verdict as substitute for empirical RCA + skips Open → Known Error transition | 3 Medium | Known Error | M | 2026-05-10 | internal |
 | 3.0 | P161 | Advisory-then-escalate may be over-applied as the default for drift-class detectors generally; load-bearing-from-the-start may be the better default | 6 Moderate | Open | M | 2026-05-04 | internal |
@@ -267,6 +265,8 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P405 | External-comms gate skips read-only advisory-endpoint polls | @windyroad/risk-scorer@0.16.0 (2026-07-03) | no — not observed |
 | P400 | architect-mark-reviewed PostToolUse never fires on a SendMessage resume of an architect agent | pending — committed on main, ships next @windyroad/architect release | no — not observed |
 | P398 | the VP carve-out holds changesets for already-shipped (verifying) code indefinitely — pointless changelog stranding | pending — @windyroad/risk-scorer patch committed, ships next release | no — not observed |
+| P402 | external-comms/pipeline gate marker not persisted for background-launched review agents — codify synchronous dispatch (RFC-041) | pending — @windyroad/risk-scorer + @windyroad/voice-tone patch committed, ships next release | no — not observed |
+| P407 | /wr-*:assess-external-comms skills instruct synchronous reviewer dispatch (P402 follow-up; resolved same commit via RFC-041) | pending — @windyroad/risk-scorer + @windyroad/voice-tone patch committed, ships next release | no — not observed |
 
 ## Inbound Upstream Reports
 

@@ -79,7 +79,7 @@ skill: wr-risk-scorer:external-comms
 prompt: <constructed review prompt from step 3>
 ```
 
-Wait for the wrapper to return. The wrapper invokes the external-comms agent internally; the agent's structured verdict block (`EXTERNAL_COMMS_RISK_VERDICT: PASS|FAIL` + optional `EXTERNAL_COMMS_RISK_REASON: ...` on FAIL) flows back verbatim. The `PostToolUse:Agent` hook (`risk-score-mark.sh`) fires on the wrapper's inner Agent invocation, derives the marker key from the prompt's `SURFACE:` + `<draft>` structure, and writes the marker automatically on PASS.
+Wait for the wrapper to return. The wrapper invokes the external-comms agent internally **synchronously** (`run_in_background: false`) — the `PostToolUse:Agent` mark hook fires reliably only for a synchronous agent, so a background-launched reviewer never persists its marker and the gate re-blocks despite a PASS verdict (P402 / P407). The agent's structured verdict block (`EXTERNAL_COMMS_RISK_VERDICT: PASS|FAIL` + optional `EXTERNAL_COMMS_RISK_REASON: ...` on FAIL) flows back verbatim. The `PostToolUse:Agent` hook (`risk-score-mark.sh`) fires on the wrapper's inner Agent invocation, derives the marker key from the prompt's `SURFACE:` + `<draft>` structure, and writes the marker automatically on PASS.
 
 **Do not write to `${TMPDIR:-/tmp}/claude-risk-*` yourself.** The hook is the only correct mechanism.
 

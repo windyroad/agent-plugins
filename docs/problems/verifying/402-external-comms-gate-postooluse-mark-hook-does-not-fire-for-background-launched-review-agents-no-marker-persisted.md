@@ -1,12 +1,31 @@
 # Problem 402: external-comms gate — PostToolUse mark hook does not fire for background-launched (forced-async) review agents, so no marker is persisted to the live session dir despite PASS
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-07-01
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 (Likely) = 12. **Rated at capture from in-session evidence (5/5 PASS, 0 markers), NOT deferred** — re-rating "at next /wr-itil:review-problems" would itself be the P375 bug (nothing self-fires review-problems). Impact 3: blocks every external-facing commit and forces habitual `BYPASS_RISK_GATE=1`, eroding a load-bearing leak gate (workaround exists). Likelihood 4: reproduces on every background-launched review this session.
 **Origin**: internal
 **Effort**: M — **fix direction corrected 2026-07-02** (see ## Corrected diagnosis): NOT a mark-hook persistence fix (the marker lands correctly under the live SID in `$TMPDIR`). Residual is the draft≠commit key mismatch (P356 class); likely re-scope/close after the one-shot end-to-end isolation test. Priority/Likelihood pending that test — the load-bearing-gate-bug framing (Impact 3 × Likelihood 4) is likely an overstatement now that the gate is shown to work when draft==commit. WSJF = (12 × 1.0) / 2 = 6.0 (to be re-rated).
 **JTBD**: JTBD-001
 **Persona**: developer
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-041 | proposed | Dispatch marker-writing review agents synchronously so the mark hook fires before the gated action |
+
+## Fix Released
+
+Fix implemented 2026-07-03 via **RFC-041** (user-chosen option b — codify synchronous dispatch of every marker-writing reviewer). The root cause is a harness-interaction limitation, not a plugin key/SID bug: the `PostToolUse:Agent` mark hook fires reliably **only** for a synchronously-dispatched review agent (`run_in_background: false`); a background-launched reviewer's mark hook does not fire in time, so no marker persists and the gate re-blocks despite a PASS/within-appetite verdict. Synchronous dispatch is the reliable trigger.
+
+Codified at four surfaces (the `external-comms-gate.sh` DENY message already carried the instruction — shipped precedent):
+
+1. `packages/risk-scorer/hooks/lib/risk-gate.sh` — the "No `<ACTION>` risk score found" DENY (commit/push/release marker-absent case) now instructs synchronous scorer dispatch, with behavioural coverage in `risk-gate.bats`.
+2. `packages/risk-scorer/skills/pipeline/SKILL.md` — Agent-tool dispatch block sets `run_in_background: false`.
+3. `packages/risk-scorer/skills/external-comms/SKILL.md` — same.
+4. `packages/voice-tone/skills/assess-external-comms/SKILL.md` — same on the reviewer dispatch block.
+
+Releases in the next `@windyroad/risk-scorer` + `@windyroad/voice-tone` version (orchestrator owns release cadence). **Awaiting user verification**: a subsequent filing/commit session should see gated commits proceed with **zero** `BYPASS_RISK_GATE` uses when the reviewer/scorer is dispatched synchronously.
 
 ## Description
 

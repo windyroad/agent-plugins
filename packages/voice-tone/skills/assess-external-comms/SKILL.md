@@ -74,10 +74,11 @@ The orchestrator does NOT pre-compute the key — the hook derives it from the p
 
 ### 4. Delegate to wr-voice-tone:external-comms
 
-Invoke the subagent via the `Skill` tool:
+Invoke the subagent via the Agent tool. Dispatch it **synchronously** (`run_in_background: false`) — the `PostToolUse:Agent` mark hook (`external-comms-mark-reviewed.sh`) fires reliably only for a synchronous agent; a background-launched reviewer's mark hook does not fire in time, so no marker persists and the voice-tone gate re-blocks despite a PASS verdict (P402):
 
 ```
 subagent_type: wr-voice-tone:external-comms
+run_in_background: false
 prompt: <constructed review prompt from step 3>
 ```
 

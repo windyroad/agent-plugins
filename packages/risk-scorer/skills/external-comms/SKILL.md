@@ -23,10 +23,11 @@ This SKILL is an **invokable wrapper** around the `wr-risk-scorer:external-comms
 
 ### 1. Pass-through to the external-comms agent
 
-Invoke the external-comms subagent via the Agent tool with the caller's `$ARGUMENTS` verbatim. The `SURFACE:` line and `<draft>...</draft>` markers MUST be preserved exactly — the PostToolUse hook depends on the prompt structure for marker-key derivation:
+Invoke the external-comms subagent via the Agent tool with the caller's `$ARGUMENTS` verbatim. The `SURFACE:` line and `<draft>...</draft>` markers MUST be preserved exactly — the PostToolUse hook depends on the prompt structure for marker-key derivation. Dispatch it **synchronously** (`run_in_background: false`) — the `PostToolUse:Agent` mark hook (`risk-score-mark.sh`) fires reliably only for a synchronous agent; a background-launched reviewer's mark hook does not fire in time, so no marker persists and the external-comms gate re-blocks despite a PASS verdict (P402):
 
 ```
 subagent_type: wr-risk-scorer:external-comms
+run_in_background: false
 prompt: $ARGUMENTS
 ```
 

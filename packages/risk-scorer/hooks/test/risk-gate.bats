@@ -60,6 +60,13 @@ assert_gate_allows() {
   assert_gate_denies "$TEST_SESSION" "commit" "No commit risk score found"
 }
 
+@test "missing-score deny instructs synchronous scorer dispatch (P402)" {
+  # A background-launched scorer's PostToolUse:Agent mark hook does not fire, so
+  # no marker persists and the gate re-blocks. The deny must tell the agent to
+  # dispatch synchronously. Mirrors external-comms-gate-canonical.bats.
+  assert_gate_denies "$TEST_SESSION" "commit" "run_in_background: false"
+}
+
 @test "score file with PENDING denies (non-numeric)" {
   printf 'PENDING' > "$SCORE_FILE"
   assert_gate_denies "$TEST_SESSION" "commit" "invalid value"

@@ -20,10 +20,11 @@ This SKILL is an **invokable wrapper** around the `wr-risk-scorer:pipeline` agen
 
 ### 1. Pass-through to the pipeline agent
 
-Invoke the pipeline subagent via the Agent tool with the caller's `$ARGUMENTS` verbatim:
+Invoke the pipeline subagent via the Agent tool with the caller's `$ARGUMENTS` verbatim. Dispatch it **synchronously** (`run_in_background: false`) — the `PostToolUse:Agent` mark hook that writes the risk-gate marker fires reliably only for a synchronous agent; a background-launched scorer's mark hook does not fire in time, so no marker persists and the commit/push gate re-blocks despite a within-appetite score (P402):
 
 ```
 subagent_type: wr-risk-scorer:pipeline
+run_in_background: false
 prompt: $ARGUMENTS
 ```
 
