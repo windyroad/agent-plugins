@@ -1141,3 +1141,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 
 
 > Last reviewed: 2026-07-02 **review-problems AFK pre-flight** — inbound-discovery cache refreshed (TTL auto-recheck; +4 new github-issues #296/#304/#306/#307 as pending discovery-only; discussions HTTP-410 + advisories gate-block skipped fail-soft). Relevance-close pass: 25 CLOSE-CANDIDATE-WITH-CAVEAT queued for interactive review, 0 auto-closes. No WSJF drift (corpus + RISK-POLICY unchanged since last review); 0 auto-transitions.
+
+> Last reviewed: 2026-07-03 **P363 Known Error → Verifying** — inbound-verdict fix confirmed present in all three source surfaces AND released (`@windyroad/itil@0.56.0`, past the `0.54.6` working leg); transitioned to the Verification Queue per ADR-022 / ADR-049. Sole open gate is live verification (next inbound K→V auto-post). (AFK work-problems iter)

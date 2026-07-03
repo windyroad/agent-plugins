@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-03 **P363 Known Error → Verifying** — inbound-verdict fix confirmed present in all three source surfaces AND released (`@windyroad/itil@0.56.0`, past the `0.54.6` working leg); transitioned to the Verification Queue per ADR-022 / ADR-049. Sole open gate is live verification (next inbound K→V auto-post). (AFK work-problems iter)
+> Last reviewed: 2026-07-03 **P415 captured** — external-comms commit-msg gate reviews only the first `-m` of a multi-`-m` git commit, hashing the subject-only key while the reviewer keys the full message → deny-after-PASS; workaround is a single inlined `-m` (lightweight aside via /wr-itil:capture-problem; sibling of P353/P364, origin gate P082)
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -55,6 +55,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 1.5 | P409 | Back-fill legacy RFCs still carrying empty `stories: []` | 3 Medium | Open | M | 2026-07-03 | internal |
 | 1.5 | P410 | install-updates leaves stale cached plugin versions on disk — no prune step | 3 Medium | Open | M | 2026-07-03 | internal |
 | 1.5 | P411 | No interactive oversight-drain skill for pending-review risk-register entries | 3 Medium | Open | M | 2026-07-03 | internal |
+| 1.5 | P415 | External-comms commit-msg gate reviews only the first `-m` of a multi-`-m` git commit, causing deny-after-PASS on multi-paragraph commits | 3 Medium | Open | M | 2026-07-03 | internal |
 | 0.75 | P012 | Skill Testing Harness Scope Undefined | 6 Medium | Open | XL | 2026-04-16 | internal |
 
 ## Verification Queue
