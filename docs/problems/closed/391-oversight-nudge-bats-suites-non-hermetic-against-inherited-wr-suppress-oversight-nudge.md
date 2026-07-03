@@ -1,6 +1,6 @@
 # Problem 391: oversight-nudge bats suites are non-hermetic against an inherited WR_SUPPRESS_OVERSIGHT_NUDGE — false reds inside AFK iters
 
-**Status**: Verifying
+**Status**: Closed
 **Reported**: 2026-06-27
 **Fix applied**: 2026-06-28 (test-only, no release)
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)

@@ -1,6 +1,6 @@
 # Problem 392: Blessed replace-section `awk -v section="$multiline"` idiom fails on BSD awk (macOS)
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-06-27
 **Transitioned to Known Error**: 2026-06-28 (root cause confirmed empirically — host BSD awk 20200816 aborts `awk -v section="$multiline"` with `awk: newline in string`; single live site fixed + behavioural bats added + committed. Awaits release → Verifying.)
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)

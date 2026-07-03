@@ -1,6 +1,6 @@
 # Problem 394: Release publishes a new version of every package, not just the ones that changed
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-06-28
 **Root cause CONFIRMED (corrected)**: 2026-06-28 — the REAL mechanism is `.github/workflows/release-preview.yml` publishing EVERY package as a `-preview.N` on every release run (NOT the `latest` changeset path, and NOT the P359 held-changeset batch). Two prior diagnoses on this ticket were WRONG — see Root Cause Analysis.
 **Priority**: 12 (High) — Impact: 4 x Likelihood: 3 (re-rated 2026-06-28 — real defect: every package floods npm + the maintainer inbox with no-op `-preview.N` publishes on every release; user-reported, emphatic, twice)

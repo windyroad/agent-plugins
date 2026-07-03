@@ -1,6 +1,6 @@
 # Problem 384: wr-risk-scorer:external-comms agent has no credibility / self-own review axis
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-06-26
 **Priority**: 9 (Medium) — Impact: 3 x Likelihood: 3
 **Origin**: inbound-reported (#283)
