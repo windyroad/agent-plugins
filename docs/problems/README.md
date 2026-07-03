@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-03 **review pass** — relevance eval over 46 open/KE tickets → 0 clean auto-closes; 26 CLOSE-CANDIDATE-WITH-CAVEAT (all active umbrellas with outstanding tasks) surfaced and kept open per user decision (outstanding-Q#23 resolved). Inbound-discovery within-TTL skip (cache polled 2026-07-02; discussions HTTP-410 per P406). No WSJF drift; 0 auto-transitions; VQ current (199 verifying).
+> Last reviewed: 2026-07-03 **P411 captured** — no interactive oversight-drain skill for pending-review risk-register entries (lightweight aside via /wr-itil:capture-problem; cross-refs risk-register cluster P102/P110/P171/P309)
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -55,6 +55,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 1.0 | P338 | P082 Phase 2 — cognitive-accessibility evaluator on the 4 external-comms surfaces (gh / npm / changeset / git commit), shipped as a NEW `@windyroad/cognitive-a11y` plugin | 4 Low | Open | L | 2026-05-30 | internal |
 | 1.5 | P409 | Back-fill legacy RFCs still carrying empty `stories: []` | 3 Medium | Open | M | 2026-07-03 | internal |
 | 1.5 | P410 | install-updates leaves stale cached plugin versions on disk — no prune step | 3 Medium | Open | M | 2026-07-03 | internal |
+| 1.5 | P411 | No interactive oversight-drain skill for pending-review risk-register entries | 3 Medium | Open | M | 2026-07-03 | internal |
 | 0.75 | P012 | Skill Testing Harness Scope Undefined | 6 Medium | Open | XL | 2026-04-16 | internal |
 
 ## Verification Queue
