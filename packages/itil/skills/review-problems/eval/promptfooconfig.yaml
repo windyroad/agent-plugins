@@ -246,7 +246,7 @@ tests:
         value: "closing this report|we are closing|we['’]re closing"
       # Tier A — must offer a misclassification escape (per SKILL contract).
       - type: regex
-        value: 'mistake|file a new report|file another'
+        value: 'mistake|misread|(?:file|open) a new report|(?:file|open) another'
       # Tier B — semantic invariant: plain-language gloss; raw verdict
       # token stays on audit-log; immediate close (not won't-fix).
       - type: llm-rubric
