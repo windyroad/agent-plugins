@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-03 **P410 captured** — install-updates leaves stale cached plugin versions on disk; no prune step (lightweight aside via /wr-itil:capture-problem)
+> Last reviewed: 2026-07-03 **review pass** — relevance eval over 46 open/KE tickets → 0 clean auto-closes; 26 CLOSE-CANDIDATE-WITH-CAVEAT (all active umbrellas with outstanding tasks) surfaced and kept open per user decision (outstanding-Q#23 resolved). Inbound-discovery within-TTL skip (cache polled 2026-07-02; discussions HTTP-410 per P406). No WSJF drift; 0 auto-transitions; VQ current (199 verifying).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 

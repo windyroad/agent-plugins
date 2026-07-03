@@ -1129,4 +1129,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-07-03 **P409 captured** — back-fill legacy RFCs with empty `stories: []` for ADR-089 consistency (lightweight aside via /wr-itil:capture-problem; deferred follow-up from RFC-037).
 
 
+> Last reviewed: 2026-07-03 **P410 captured** — install-updates leaves stale cached plugin versions on disk; no prune step (lightweight aside via /wr-itil:capture-problem)
+
+
 > Last reviewed: 2026-07-02 **review-problems AFK pre-flight** — inbound-discovery cache refreshed (TTL auto-recheck; +4 new github-issues #296/#304/#306/#307 as pending discovery-only; discussions HTTP-410 + advisories gate-block skipped fail-soft). Relevance-close pass: 25 CLOSE-CANDIDATE-WITH-CAVEAT queued for interactive review, 0 auto-closes. No WSJF drift (corpus + RISK-POLICY unchanged since last review); 0 auto-transitions.
