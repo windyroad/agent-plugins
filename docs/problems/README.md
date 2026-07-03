@@ -15,7 +15,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 12.0 | P376 | Catchup scanner misses the inbound direction; outbound templates carry the same structural defect the P363 rework fixed on the inbound side — cross-direction parity gap | 12 High | Known Error | M | 2026-06-23 | internal |
 | 9.0 | P180 | Agent defers mitigation selection to user during active incident — surfaces mitigation choice as user-authority when SKILL contract empowers agent-driven reversible mitigations | 9 Medium | Known Error | M | 2026-05-10 | internal |
 | 9.0 | P371 | manage-problem I13 propose-fix gate auto-creates a new RFC instead of wiring an existing fix-vehicle's trace edge | 9 Medium | Known Error | M | 2026-06-17 | internal |
-| 9.0 | P400 | architect-mark-reviewed PostToolUse never fires on a SendMessage resume of an architect agent | 9 Medium | Open | S | 2026-06-28 | internal |
 | 8.0 | P345 | Fix-titled commits do not transition the ticket lifecycle in the same commit grain — ticket stays Open across release + CI-verify + multiple intervening commits | 8 Medium | Known Error | M | 2026-05-31 | internal |
 | 8.0 | P375 | Repo conflates a "named re-entry point" with a self-firing cadence — deferrals not transitively reachable from an automatic trigger rot | 16 High | Known Error | L | 2026-06-23 | internal |
 | 8.0 | P408 | risk-score-commit-gate hardcodes a 14-day RISK-POLICY staleness threshold, ignoring the policy's stated review cadence (flagged a quarterly policy stale at 16 days); affects all adopters. Fix options a/b/c recorded (a: gate derives threshold from stated cadence, recommended). | 8 Medium | Open | S | 2026-07-02 | internal |
@@ -267,6 +266,7 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P368 | wr-architect-mark-oversight-confirmed cannot discover session-id when CLAUDE_SESSION_ID empty AND no announce markers | @windyroad/architect@0.18.4 (2026-07-03) | no — not observed |
 | P384 | wr-risk-scorer:external-comms agent gains Outbound Credibility / Self-Own review axis | @windyroad/risk-scorer@0.16.0 (2026-07-03) | yes — observed: promptfoo eval 2/2 GREEN 2026-07-03 |
 | P405 | External-comms gate skips read-only advisory-endpoint polls | @windyroad/risk-scorer@0.16.0 (2026-07-03) | no — not observed |
+| P400 | architect-mark-reviewed PostToolUse never fires on a SendMessage resume of an architect agent | pending — committed on main, ships next @windyroad/architect release | no — not observed |
 
 ## Inbound Upstream Reports
 

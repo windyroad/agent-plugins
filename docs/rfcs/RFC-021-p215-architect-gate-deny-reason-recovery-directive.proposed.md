@@ -4,7 +4,7 @@ rfc-id: p215-architect-gate-deny-reason-recovery-directive
 reported: 2026-06-07
 human-oversight: unconfirmed
 decision-makers: [Tom Howard]
-problems: [P215]
+problems: [P215, P400]
 adrs: [ADR-009, ADR-052, ADR-071, ADR-014]
 jtbd: [JTBD-001, JTBD-006]
 stories: []
@@ -14,7 +14,7 @@ stories: []
 
 **Status**: proposed
 **Reported**: 2026-06-07
-**Problems**: P215
+**Problems**: P215, P400 — P400's trace edge was wired here (ADR-073 I13 sub-case (a), existing-vehicle-untraced) because RFC-021 is already the architect-gate deny-reason recovery-directive vehicle; P400 adds a recovery directive for one more failure mode (the SendMessage-resume-marker-never-written case) on the identical `architect-gate.sh::ARCHITECT_GATE_REASON` no-marker branch. Auto-creating a second RFC would fragment the same deny-reason-recovery fix across two vehicles (P371).
 **ADRs**: ADR-009 (gate marker lifecycle — TTL + drift unchanged by this fix), ADR-052 (behavioural-tests-default — bats assertions on deny-message contents), ADR-071 (every fix goes through an RFC — why this RFC exists), ADR-014 (governance skills commit their own work)
 **JTBD**: JTBD-001 (Enforce Governance Without Slowing Down — clear recovery affordance reduces blocked-edit friction), JTBD-006 (Progress the Backlog While I'm Away — AFK iter doesn't stall on opaque deny)
 

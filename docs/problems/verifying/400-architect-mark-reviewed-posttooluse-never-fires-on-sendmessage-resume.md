@@ -1,12 +1,12 @@
 # Problem 400: architect-mark-reviewed PostToolUse never fires on a SendMessage resume of an architect agent
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-06-28
 **Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3 = 9. Rated at review 2026-07-02: SendMessage-resume mark hook doesn't fire; event-binding fix.
 **Origin**: internal
 **Effort**: S. WSJF = (9 × 1.0) / 1 = 4.5.
 **JTBD**: JTBD-001
-**Persona**: plugin-developer
+**Persona**: developer (re-anchored from plugin-developer 2026-07-03 per wr-jtbd:agent — JTBD-001 is a developer-persona job; AFK auto-capture default was provisional)
 
 ## Description
 
@@ -38,9 +38,9 @@ Manual marker assertion after a genuine PASS: `touch /tmp/architect-reviewed-$SI
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Investigate whether a PostToolUse (or other) hook surface fires on SendMessage-resume completion of an architect agent — if so, wire architect-mark-reviewed to also fire there (fix candidate a).
-- [ ] Else: document in the architect gate flow + the deny message that verdict upgrades must be a fresh Agent spawn or the manual marker assertion, never a SendMessage resume (fix candidate b).
-- [ ] Create reproduction test
+- [x] Investigate whether a PostToolUse (or other) hook surface fires on SendMessage-resume completion of an architect agent — if so, wire architect-mark-reviewed to also fire there (fix candidate a). **Finding (2026-07-03)**: no confirmed SendMessage-resume completion hook surface exists that also carries reliable subagent identity (`_get_subagent_type` is empty on a SendMessage tool call — the hook cannot tell the resumed agent is an architect, and keying the marker-write on any SendMessage whose reply contains the PASS heading would mis-fire for non-architect agents, exceeding the Low risk appetite). Fix candidate (a) rejected on that basis; took candidate (b).
+- [x] Else: document in the architect gate flow + the deny message that verdict upgrades must be a fresh Agent spawn or the manual marker assertion, never a SendMessage resume (fix candidate b). Done: `architect-gate.sh` no-marker deny reason now carries the SendMessage-resume caveat + manual marker-assertion recovery; the briefing (`docs/briefing/agent-hook-gate-quirks.md`) already documented it.
+- [x] Create reproduction test — behavioural bats `architect-gate.bats` "ARCHITECT_GATE_REASON documents SendMessage-resume recovery when no marker" asserts the deny reason carries the caveat + recovery.
 
 ## Fix Strategy
 
@@ -55,3 +55,13 @@ Manual marker assertion after a genuine PASS: `touch /tmp/architect-reviewed-$SI
 ## Related
 
 Captured via /wr-itil:capture-problem during the P399 iter retro (2026-06-28). Hang-off-check arbiter verdict: PROCEED_NEW — the event-binding root cause (PostToolUse:Agent not firing on SendMessage-resume) is named by none of P181/P353/P215/P303, all of which concern what the hook does *when it fires*. `/wr-itil:review-problems` may cluster this with the P353 umbrella later if a class-level event-binding facet emerges.
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-021 | proposed | P215 — architect-gate deny-reason recovery directive |
+
+## Fix Released
+
+Fix candidate (b) implemented 2026-07-03: `packages/architect/hooks/lib/architect-gate.sh` no-marker `ARCHITECT_GATE_REASON` now documents the SendMessage-resume recovery path (a verdict upgrade after an ISSUES FOUND review must be a FRESH `Agent` spawn — a `SendMessage` resume does not fire the `PostToolUse:Agent` marker hook — or the manual `touch /tmp/architect-reviewed-$SID && rm -f $SID.hash` assertion). Traced to RFC-021 (existing architect-gate deny-reason recovery-directive vehicle) per ADR-073 I13 sub-case (a). Behavioural bats coverage added. Committed on `main`; ships in the next `@windyroad/architect` release (orchestrator-owned cadence per this AFK loop — not yet released). Awaiting live verification that a blocked edit's deny message shows the SendMessage-resume guidance.

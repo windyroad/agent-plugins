@@ -44,6 +44,20 @@ teardown() {
   [[ "$ARCHITECT_GATE_REASON" == *"Agent tool"* ]]
 }
 
+# P400 — the no-marker reason must also document the SendMessage-resume
+# recovery path: a verdict upgrade after ISSUES FOUND is a FRESH Agent spawn
+# (a SendMessage resume does NOT fire the marker hook), or the manual marker
+# assertion. Without this directive the deny message is a dead-end for the
+# most common recovery flow.
+@test "ARCHITECT_GATE_REASON documents SendMessage-resume recovery when no marker" {
+  ARCHITECT_GATE_REASON=""
+  check_architect_gate "$TEST_SESSION" || true
+  [[ "$ARCHITECT_GATE_REASON" == *"SendMessage"* ]]
+  [[ "$ARCHITECT_GATE_REASON" == *"FRESH Agent spawn"* ]]
+  [[ "$ARCHITECT_GATE_REASON" == *"touch /tmp/architect-reviewed-"* ]]
+  [[ "$ARCHITECT_GATE_REASON" == *"rm -f /tmp/architect-reviewed-"* ]]
+}
+
 @test "ARCHITECT_GATE_REASON names re-delegate directive when TTL expired" {
   touch "/tmp/architect-reviewed-${TEST_SESSION}"
   ARCHITECT_GATE_REASON=""
