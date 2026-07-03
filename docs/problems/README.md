@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-03 **P412 captured** — RFC/Story/Story-map framework tiers invisible to adopters (no scaffold/nudge/entry-point); surfaced via bbstats using the plugin without them (lightweight aside via /wr-itil:capture-problem)
+> Last reviewed: 2026-07-03 **P413+P414 captured** — work-problems defers upstream-reporting behind a manual batch-report choice (16 unreported); retro/wrap defers over-5K briefing rotation as a recommendation instead of doing it. Same meta-class (wrap hands the user a to-do list instead of acting). (lightweight aside via /wr-itil:capture-problem)
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -34,6 +34,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 4.5 | P369 | Plugin removes hook file but adopter session still invokes it via stale binding — `architect-compendium-refresh-discipline.sh` case 2026-06-17 | 9 Medium | Open | M | 2026-06-17 | internal |
 | 4.5 | P398 | the VP carve-out holds changesets for already-shipped (verifying) code indefinitely — pointless changelog stranding | 9 High | Open | M | 2026-06-28 | corrective-feedback (user, 2026-06-28) |
 | 4.0 | P407 | /wr-*:assess-external-comms skills should instruct synchronous reviewer dispatch (P402 follow-up; deny-message half already shipped 16c180e8) | 4 Low | Open | S | 2026-07-02 | internal |
+| 4.0 | P413 | work-problems defers upstream reporting as a manual "batch-report upstream" choice instead of auto-filing upstream-blocked tickets | 8 Medium | Open | M | 2026-07-03 | internal |
 | 3.0 | P178 | Agent skips ITIL state-machine gates on architecture-driven problems — treats architect-PASS verdict as substitute for empirical RCA + skips Open → Known Error transition | 3 Medium | Known Error | M | 2026-05-10 | internal |
 | 3.0 | P161 | Advisory-then-escalate may be over-applied as the default for drift-class detectors generally; load-bearing-from-the-start may be the better default | 6 Moderate | Open | M | 2026-05-04 | internal |
 | 3.0 | P176 | Agent-side I2 (no type-branching) coverage gap — SKILL.md type-branching invariant not behaviourally testable until skill-invocation harness lands | 6 Medium | Open | M | 2026-05-06 | internal |
@@ -46,6 +47,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 2.25 | P324 | Agent-prose verdicts have no behavioural test harness — forcing the ADR-052 structural-test escape hatch + above-appetite release workarounds, perpetuating the structural tests the user has rejected | 9 Med-High | Open | L | 2026-05-27 | internal |
 | 2.0 | P170 | Problem tickets strain as fixes decompose into multiple coordinated changes — need an RFC framework that ties all changes back to problems (and unifies technical with user/business problems) | 8 Medium | Known Error | XL | 2026-05-04 | internal |
 | 2.0 | P244 | Phase 3 (F9) `wr-itil-plugin-maturity-list` in-suite display shim — reads installed plugins' plugin.json maturity field, emits NDJSON-per-surface + rollup-per-plugin | 4 Low | Open | M | 2026-05-17 | internal |
+| 2.0 | P414 | retro/wrap defers over-threshold briefing Tier-3 rotation as a recommendation instead of performing the split | 6 Medium | Open | S | 2026-07-03 | internal |
 | 1.875 | P091 | Session-wide context budget — Claude Code consumes substantial context before and during every session across all contributor surfaces (meta) | 15 High | Open | XL | 2026-04-22 | internal |
 | 1.25 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 10 High | Open | XL | 2026-05-03 | internal |
 | 1.125 | P298 | Plugin-published artifacts should NOT reference internal IDs at all (ADR-055 chose prefixing; strip them instead — they're meaningless to adopters) | 9 Med High | Open | XL | 2026-05-25 | internal |
