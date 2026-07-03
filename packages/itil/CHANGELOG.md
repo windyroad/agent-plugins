@@ -1,5 +1,34 @@
 # @windyroad/problem
 
+## 0.56.1
+
+### Patch Changes
+
+- 3b33a8c: Detect mechanical-step-framed-as-user-optional in the itil assistant-output-review Stop hook (P403). When a skill contract mandates a mechanical step, re-surfacing it as a user decision — or skipping it on budget-caution grounds — in end-of-turn prose reintroduces the friction the mechanical-stage carve-out (P132 / ADR-044) removes. A new detect_mechanical_optional detector fires a non-blocking nudge only when a step-skip signal, a step reference, and an offloaded-justification closer all co-occur.
+- 3b33a8c: Align `restore-incident` and `review-problems` with the ADR-044 decision-delegation contract (P136).
+
+  - `/wr-itil:restore-incident` now fails fast with a usage message when the incident ID argument is missing or malformed, instead of opening an interactive prompt to backfill it. This matches the `mitigate-incident`, `transition-problem`, and `work-problem` pattern — an argument-shape typo is a re-type, not a decision. The genuine prompts (verification signal, problem handoff) are unchanged.
+  - `/wr-itil:review-problems` Step 4 now closes verification-pending tickets that already carry cited in-session evidence automatically, mirroring the `run-retro` close-on-evidence path, and reserves the confirmation prompt for tickets with no observed evidence yet. Tickets showing a regression still flip back to known-error and are never batch-closed.
+
+- 3b33a8c: capture-problem: interview on low-confidence persona/JTBD instead of shoehorning or discarding (P401). Step 1.5b now elicits the real who/why when derivation confidence is low, never discards the problem, and ratifies only the creation. Held pending a GREEN paired promptfoo eval run (R009 prose-surface floor) — the capture-problem eval was updated this iter but not yet verified green.
+- 3b33a8c: manage-problem I13 propose-fix RFC-trace gate: add the existing-vehicle-untraced branch (P371)
+
+  The I13 fix-time RFC-trace gate previously offered only two responses to the predicate: empty stdout → proceed; `no-rfc-trace: P<NNN>` → auto-create a skeleton RFC. It had no branch for the case where an existing RFC is already the ticket's fix vehicle but simply hasn't wired the problem's trace edge into its `problems:` array — so following the directive literally produced a redundant duplicate RFC that fragmented the fix.
+
+  `manage-problem` SKILL.md now splits the non-empty-stdout branch into (a) existing-vehicle-untraced → wire the trace edge into the cited fix vehicle's `problems:` array (then `wr-itil-update-problem-rfcs-section` + re-run the predicate), and (b) no-vehicle → auto-create (unchanged). Distinguishing fix-vehicle from merely-related is a judgement read of citation context, kept skill-side per ADR-060 I1 (the deterministic membership predicate is unchanged). `work-problems` SKILL.md constraint #3 carries the matching AFK carve-out clause. ADR-073 auto-create is hereby scoped to the no-vehicle case only.
+
+- 3b33a8c: work-problems: forbid the wrap-time "batch-report upstream" deferral nudge (P413)
+
+  The AFK `/wr-itil:work-problems` orchestrator was ending loops with a "N
+  upstream-blocked tickets are unreported — re-run and choose batch-report
+  upstream" nudge, leaving tickets unfiled. There is no batch-report mode:
+  upstream-blocked tickets already auto-invoke `/wr-itil:report-upstream`
+  per-iter at Step 4 (below-appetite sends, above-appetite queues per P352;
+  ADR-024 P270). The Output Format section now carries a `### Reported Upstream`
+  summary subsection that reports ACTUAL filings and an invariant forbidding the
+  wrap-time deferral nudge (agent-invented loop-control class P390/P341/P175).
+  Behavioural second-source added to the work-problems promptfoo eval.
+
 ## 0.56.0
 
 ### Minor Changes
