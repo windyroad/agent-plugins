@@ -165,3 +165,4 @@ The catalogue is self-pruning: when a class stops surfacing in `.risk-reports/` 
 | [R070](R070-work-problems-skill-prose-r009-floor-cohort-depth-nine-held-on-single-eval.active.md) | Work Problems Skill Prose R009 Floor Cohort Depth Nine Held On Single Eval | pending | — | — | pending | pending | 2026-07-03 |
 | [R071](R071-r009-i13-existing-vehicle-trace-branch-no-promptfoo-eval.active.md) | R009 I13 Existing Vehicle Trace Branch No Promptfoo Eval | pending | — | — | pending | pending | 2026-07-03 |
 | [R072](R072-skill-prose-gate-invocation-floor-no-paired-promptfoo-for-changed-branch.active.md) | Skill Prose Gate Invocation Floor No Paired Promptfoo For Changed Branch | pending | — | — | pending | pending | 2026-07-03 |
+| [R073](R073-adopter-name-and-usage-detail-in-public-repo-rfc-prose.active.md) | Adopter Name And Usage Detail In Public Repo Rfc Prose | pending | — | — | pending | pending | 2026-07-03 |
