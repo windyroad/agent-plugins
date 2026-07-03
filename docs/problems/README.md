@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-03 **P411 captured** — no interactive oversight-drain skill for pending-review risk-register entries (lightweight aside via /wr-itil:capture-problem; cross-refs risk-register cluster P102/P110/P171/P309)
+> Last reviewed: 2026-07-03 **release + batch K to V** — shipped @windyroad/risk-scorer@0.16.0 (P384 credibility axis), itil@0.56.0, architect@0.18.4; P368/P384/P405 transitioned Known Error to Verification Pending (post-release K to V per ADR-022/P228). P384 eval GREEN 2/2.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -10,9 +10,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
-| 9.0 | P384 | wr-risk-scorer:external-comms agent has no credibility / self-own review axis | 9 Medium | Known Error | M | 2026-06-26 | inbound-reported (#283) |
-| 18.0 | P368 | wr-architect-mark-oversight-confirmed cannot discover session-id when CLAUDE_SESSION_ID empty AND no announce markers | 9 Medium | Known Error | S | 2026-06-17 | internal |
-| 15.0 | P405 | External-comms gate false-positives on `gh api` security-advisories read path | 15 High | Known Error | S | 2026-07-02 | internal |
 | 12.0 | P179 | Agent defers requested work into untracked phases — phases are fine, but unticketed phases never get implemented | 12 High | Known Error | M | 2026-05-10 | internal |
 | 12.0 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 High | Known Error | M | 2026-06-10 | internal |
 | 12.0 | P376 | Catchup scanner misses the inbound direction; outbound templates carry the same structural defect the P363 rework fixed on the inbound side — cross-direction parity gap | 12 High | Known Error | M | 2026-06-23 | internal |
@@ -262,6 +259,10 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P392 | replace-section `awk -v section="$multiline"` aborts on BSD awk (macOS) — getline-from-tempfile fix at `update-problem-references-section.sh:266` | @windyroad/itil@0.55.1 (behavioural bats RED→GREEN on host BSD awk) | yes — observed: behavioural bats RED→GREEN on host BSD awk in-session |
 | P394 | Release preview-publishes every package, not just changed ones — `release-preview.yml` skip-unchanged guard (version == npm latest → skip) | CI-infra, `.github/workflows/release-preview.yml` (no npm artefact) | yes — observed: two consecutive releases (risk-scorer, itil) each preview-published ONLY the changed package; wardley/tdd/voice-tone stayed at `-preview.840` |
 | P404 | Implement ADR-089 + ADR-090 in the skills and tests (≥1-story-per-RFC + story-map/story ratification) | `@windyroad/itil` — RFC-037 complete (all 5 stories done + ratified); release queued via `.changeset/` | no — not observed |
+
+| P368 | wr-architect-mark-oversight-confirmed cannot discover session-id when CLAUDE_SESSION_ID empty AND no announce markers | @windyroad/architect@0.18.4 (2026-07-03) | no — not observed |
+| P384 | wr-risk-scorer:external-comms agent gains Outbound Credibility / Self-Own review axis | @windyroad/risk-scorer@0.16.0 (2026-07-03) | yes — observed: promptfoo eval 2/2 GREEN 2026-07-03 |
+| P405 | External-comms gate skips read-only advisory-endpoint polls | @windyroad/risk-scorer@0.16.0 (2026-07-03) | no — not observed |
 
 ## Inbound Upstream Reports
 

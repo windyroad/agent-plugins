@@ -1,12 +1,18 @@
 # Problem 368: wr-architect-mark-oversight-confirmed cannot discover session-id when CLAUDE_SESSION_ID empty AND no announce markers
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-06-17
 **Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3 = 9. Rated at review 2026-07-02: shim needs SID passthrough; one-line env fix.
 **Origin**: internal
 **Effort**: S. WSJF = (9 × 1.0) / 1 = 4.5.
 **JTBD**: JTBD-001, JTBD-006
 **Persona**: plugin-developer
+
+## Fix Released
+
+- **Released**: 2026-07-03 in `@windyroad/architect@0.18.4` (+ `@windyroad/jtbd`)
+- **Fix**: loud cold-path diagnostic for the oversight-marker shims — the shim now surfaces a clear diagnostic when it cannot discover the session-id (`CLAUDE_SESSION_ID` empty AND no announce markers) instead of silently no-opping (commit aa21ca10).
+- Awaiting user verification.
 
 ## Description
 

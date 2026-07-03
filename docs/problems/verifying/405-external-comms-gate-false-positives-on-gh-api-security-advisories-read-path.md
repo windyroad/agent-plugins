@@ -1,6 +1,6 @@
 # Problem 405: External-comms gate false-positives on `gh api` security-advisories read path
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-07-02
 **Priority**: 15 (High) — Impact: 3 (Moderate — silently blocks 1 of 3 channels every `/wr-itil:review-problems` Step 4.5c poll; fail-soft branch fires; no security-advisories discovery until fixed) × Likelihood: 5 (Almost certain — deterministic pattern-match; fires every run).
 **Origin**: internal
@@ -10,6 +10,12 @@
 
 <!-- JTBD re-anchored JTBD-007 → JTBD-006 (2026-07-03, jtbd gate, doc-only): the header cited the AFK auto-capture default; JTBD-006 (Progress the Backlog While I'm Away) owns the upstream inbound-discovery channel this gate blocked. Persona `developer` unchanged. -->
 
+
+## Fix Released
+
+- **Released**: 2026-07-03 in `@windyroad/risk-scorer@0.16.0` (+ `@windyroad/voice-tone`)
+- **Fix**: the external-comms risk + voice-tone gates now skip read-only `gh api` security-advisories polls, eliminating the false-positive block on the read path (commit d8b6c456).
+- Awaiting user verification.
 
 ## Description
 

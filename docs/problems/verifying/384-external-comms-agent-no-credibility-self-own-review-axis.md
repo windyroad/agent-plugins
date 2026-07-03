@@ -1,12 +1,18 @@
 # Problem 384: wr-risk-scorer:external-comms agent has no credibility / self-own review axis
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-06-26
 **Priority**: 9 (Medium) — Impact: 3 x Likelihood: 3
 **Origin**: inbound-reported (#283)
 **Effort**: M
 **JTBD**: JTBD-101
 **Persona**: plugin-developer
+
+## Fix Released
+
+- **Released**: 2026-07-03 in `@windyroad/risk-scorer@0.16.0`
+- **Fix**: the `wr-risk-scorer:external-comms` agent gains an Outbound Credibility / Self-Own review axis (`asks-for-already-held-info` / `restates-prior-as-new` / `plainly-careless-error`) composing with the confidential-leak axis (agent prose commit 6353b267). The `## Outbound Credibility / Self-Own` section was authored into the home-repo RISK-POLICY.md, activating the axis (commit eaf03549), and the paired promptfoo eval ran GREEN (2/2) graduating the held changeset (commit 7ce59523).
+- Awaiting user verification.
 
 ## Description
 

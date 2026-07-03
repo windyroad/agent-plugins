@@ -1123,6 +1123,8 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 
 ## 2026-07-03
 
+> Last reviewed: 2026-07-03 **P411 captured** — no interactive oversight-drain skill for pending-review risk-register entries (lightweight aside via /wr-itil:capture-problem; cross-refs risk-register cluster P102/P110/P171/P309)
+
 > Last reviewed: 2026-07-03 **review pass** — relevance eval over 46 open/KE tickets → 0 clean auto-closes; 26 CLOSE-CANDIDATE-WITH-CAVEAT (all active umbrellas with outstanding tasks) surfaced and kept open per user decision (outstanding-Q#23 resolved). Inbound-discovery within-TTL skip (cache polled 2026-07-02; discussions HTTP-410 per P406). No WSJF drift; 0 auto-transitions; VQ current (199 verifying).
 
 > Last reviewed: 2026-07-03 **P404 → Verification Pending** — RFC-037 complete (ADR-089 + ADR-090 implemented; all 5 stories done + ratified); moved from WSJF Rankings to the Verification Queue. Release queued via `.changeset/`.
