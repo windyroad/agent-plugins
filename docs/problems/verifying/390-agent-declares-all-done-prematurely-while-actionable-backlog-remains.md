@@ -62,6 +62,14 @@ The orchestrator conflated "the highest-leverage / most-salient remaining work i
 
 **R009 prose-floor discharge**: paired promptfoo case authored in the same commit; the @windyroad/itil patch changeset is HELD at `docs/changesets-holding/wr-itil-p390-step-2-4-gate-0-objective-backlog-empty.md` (ADR-042 Rule 2) — 9th hold in the work-problems-surface cohort, reinstated atomically when the work-problems promptfoo eval goes GREEN (ADR-061 Rule 4). Awaiting that evidence to ship → Verifying.
 
+## Proposed follow-up mechanism — persistent goal anchor (user, 2026-07-03)
+
+User proposal: the singular `/wr-itil:work-problem` and the plural `/wr-itil:work-problems` orchestrator could anchor the loop to an explicit, persistent **goal** (via a "slash goal" command / durable goal marker) that the agent must justify any stop against — e.g. goal = "drain the actionable WSJF backlog". Under such an anchor, `ALL_DONE` (or a singular-worker stop) is only permitted when the stated goal is objectively met; a subjective "this feels like a natural stopping point" cannot discharge it.
+
+This **reinforces** the shipped Gate (0) objective-backlog-empty assertion (Fix Implemented above) rather than replacing it: Gate (0) is a per-emit re-scan; a persistent goal anchor would keep the objective in the agent's frame for the whole loop, so the stop-justification is measured against a stated goal instead of momentary salience. Same failure-class coverage as the P332 / P148 / P175 siblings (agent invents an unauthorised loop-control stop).
+
+Candidate to investigate — NOT yet designed. Open questions: is `/goal` an existing Claude Code affordance or a new marker to build; where the goal is stored (`.afk-run-state/`?); how the stop-gate reads it; whether it generalises to run-retro / manage-incident loops. Surface for design if the shipped Gate (0) fix proves insufficient during verification, or fold into the P341 pre-`ALL_DONE` gate-sequence master.
+
 ## Dependencies
 
 - **Blocks**: trustworthy AFK backlog drain (JTBD-006)
