@@ -1,6 +1,6 @@
 # Problem 398: the VP carve-out holds changesets for already-shipped (verifying) code indefinitely — pointless changelog stranding
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-06-28
 **Priority**: 9 (High) — Impact: 3 x Likelihood: 3
 **Origin**: corrective-feedback (user, 2026-06-28)
@@ -44,10 +44,14 @@ Manually graduate the vp-blocked shipped-code holds (overriding ADR-061 Rule 2 p
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Amend ADR-061 Rule 2: vp-blocked only when fix NOT yet shipped; shipped-code verifying → graduate the changelog changeset (architect review + user ratification per P357)
-- [ ] Update `wr-risk-scorer-evaluate-graduation` (`packages/risk-scorer/scripts/evaluate-graduation.sh`) to read `## Fix Released` and classify shipped-code verifying as resolved
-- [ ] Behavioural test for the shipped-code-graduates / unshipped-verifying-holds split
-- [ ] Decide the verifying→closed cadence gap (P375 sibling) so holds don't re-strand
+- [x] Amend ADR-061 Rule 2: vp-blocked only when fix NOT yet shipped; shipped-code verifying → graduate the changelog changeset (architect review done; frontmatter → `human-oversight: unconfirmed`, user ratification queued per P357)
+- [x] Update `wr-risk-scorer-evaluate-graduation` (`packages/risk-scorer/scripts/evaluate-graduation.sh`) to read `## Fix Released` and classify shipped-code verifying as resolved — `fix_shipped()` mechanical predicate added
+- [x] Behavioural test for the shipped-code-graduates / unshipped-verifying-holds split — cases (h.1)–(h.4) in `evaluate-graduation.bats`, all green (33/33)
+- [ ] Decide the verifying→closed cadence gap (P375 sibling) so holds don't re-strand — out of scope here; owned by P375 ([[feedback_named_re_entry_is_not_self_firing_cadence]])
+
+## Fix Strategy
+
+Fix vehicle: **RFC-040** (Narrow the ADR-061 Rule 2 VP carve-out so shipped-verifying changesets graduate). The graduation evaluator (`packages/risk-scorer/scripts/evaluate-graduation.sh`) gained a mechanical `fix_shipped(ticket_path)` predicate (ADR-015 deterministic detection, not prose judgement): a verifying ticket with a populated `## Fix Released` section (≥1 non-blank, non-placeholder line) classes `resolved` (graduate the changelog attribution — code already live); a verifying ticket with no such section, or a placeholder-only one (`(pending)`/`(deferred)`/`TBD`/`(none)`), stays `vp-blocked`. ADR-061 Rule 2 amended to match, with the five "symmetric to ADR-042 Rule 2b" sites reconciled to the now-intentional asymmetry and an ADR-082 forward-compatibility frame (interim slice of option (c); RFC-025 is the eventual authority). Behavioural bats cases (h.1)–(h.4) cover the shipped/unshipped split + shipped-cohort rollup.
 
 ## Dependencies
 
@@ -55,9 +59,14 @@ Manually graduate the vp-blocked shipped-code holds (overriding ADR-061 Rule 2 p
 - **Blocked by**: (none)
 - **Composes with**: P359 (the originating observation — changesets-holding holds only changelog for shipped code), P375 (nothing-triggers-the-work — the verifying→closed no-cadence that strands holds), ADR-061 (Rule 2 VP carve-out — the decision to amend), ADR-042 (Rule 2b sibling revert carve-out)
 
+## Fix Released
+
+Fixed in the AFK `/wr-itil:work-problems` iter of 2026-07-03 (`@windyroad/risk-scorer` patch — changeset `risk-scorer-p398-graduate-shipped-verifying-changesets.md`, pending the orchestrator's release cadence). The evaluator now graduates already-shipped verifying changesets and ADR-061 Rule 2 is narrowed to match. Awaiting user verification that the next graduation pass classes shipped-verifying holds as `resolved` (not `vp-blocked`) and the CHANGELOG picks up the previously-stranded attributions. Note: the ADR-061 amendment is `human-oversight: unconfirmed` pending the P357 post-change ratification (queued for the next interactive drain).
+
 ## Related
 
 - **P359** — sibling/originating observation; this ticket is the framework-fix for the class.
+- **RFC-040** — fix vehicle (ADR-061 Rule 2 narrowing).
 - **ADR-061** Rule 2 — the VP carve-out being amended.
 - `packages/risk-scorer/scripts/evaluate-graduation.sh` — the evaluator emitting `vp-blocked`.
 - (captured via /wr-itil:capture-problem; PROCEED_NEW — distinct framework-fix from P359's observation + P375's cadence meta.)

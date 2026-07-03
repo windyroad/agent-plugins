@@ -41,7 +41,10 @@
 #   - Resolves the ticket file via dual-tolerant glob (ADR-031 + RFC-002):
 #       docs/problems/<NNN>-*.md (flat) AND docs/problems/*/<NNN>-*.md (per-state)
 #   - Extracts the Priority value from the ticket's `**Priority**: N (...)` line.
-#   - Detects Rule 2 VP carve-out (ticket file ends in .verifying.md).
+#   - Detects Rule 2 VP carve-out (ticket file ends in .verifying.md) — narrowed
+#     per P398: a verifying ticket graduates (resolved) when its `## Fix Released`
+#     section is populated (code already shipped, only the changelog is held);
+#     it stays vp-blocked only while the fix is not yet shipped.
 #   - Parses docs/changesets-holding/README.md "Currently held" section and
 #     groups entries by normalised reinstate-trigger prose (Phase 2b).
 #   - Multi-member groups emit class=3b + cohort=<id> with cohort-level
@@ -121,6 +124,12 @@ held_files = sys.argv[3:]
 FILENAME_TICKET_RE = re.compile(r'-p(\d+)-', re.IGNORECASE)
 BODY_TICKET_RE = re.compile(r'\bP(\d+)\b')
 PRIORITY_LINE_RE = re.compile(r'^\*\*Priority\*\*:\s*(\d+)\b')
+FIX_RELEASED_HEADING_RE = re.compile(r'^##\s+Fix Released\s*$', re.IGNORECASE)
+# Placeholder-only tokens that do NOT count as a populated `## Fix Released`
+# section (a fix that is scaffolded-but-not-shipped). Kept mechanical per
+# ADR-015 — this is deterministic detection, not prose judgement.
+FIX_RELEASED_PLACEHOLDERS = frozenset({'tbd', 'n/a', 'na', 'pending', '(pending)',
+                                       '(deferred)', 'deferred', '(none)', 'none'})
 
 # Phase 2b — README "Currently held" bullet parser.
 # Matches `- \`<filename>\` ... **Reinstate trigger**: <trigger-text>`.
@@ -166,6 +175,39 @@ def extract_priority(ticket_path: str):
     except (OSError, IOError):
         return None
     return None
+
+
+def fix_shipped(ticket_path: str) -> bool:
+    """True when the ticket carries a populated `## Fix Released` section.
+
+    A verifying ticket whose fix has shipped carries real prose under
+    `## Fix Released` (per ADR-022 / manage-problem closing contract); an
+    absent, empty, or placeholder-only section means the fix has not actually
+    shipped yet. Mechanical predicate per ADR-015 (ADR-061 Rule 2 amended,
+    P398): section present AND ≥1 non-blank line that is not a placeholder
+    token counts as shipped.
+    """
+    try:
+        with open(ticket_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+    except (OSError, IOError):
+        return False
+    in_section = False
+    for line in lines:
+        if FIX_RELEASED_HEADING_RE.match(line.strip()):
+            in_section = True
+            continue
+        if not in_section:
+            continue
+        stripped = line.strip()
+        if stripped.startswith('## '):
+            break  # next section reached with no real content
+        if not stripped:
+            continue
+        if stripped.lower() in FIX_RELEASED_PLACEHOLDERS:
+            continue
+        return True  # real content under the heading
+    return False
 
 
 def resolve_ticket_ids(changeset_path: str):
@@ -325,7 +367,7 @@ for changeset_path in held_files:
         priority = extract_priority(path)
         if priority is None:
             continue
-        resolutions.append((tid, priority, suffix))
+        resolutions.append((tid, priority, suffix, path))
 
     if not resolutions:
         per_changeset[basename] = {
@@ -336,14 +378,20 @@ for changeset_path in held_files:
         continue
 
     resolutions.sort(key=lambda r: r[1], reverse=True)
-    chosen_tid, chosen_priority, chosen_suffix = resolutions[0]
-    if chosen_suffix == 'verifying':
+    chosen_tid, chosen_priority, chosen_suffix, chosen_path = resolutions[0]
+    if chosen_suffix == 'verifying' and not fix_shipped(chosen_path):
+        # ADR-061 Rule 2 (narrowed per P398): the VP carve-out holds a changeset
+        # only while its fix is NOT yet shipped. A verifying ticket with no
+        # populated `## Fix Released` section is still mid-flight — hold it.
         per_changeset[basename] = {
             'ticket_label': f'P{chosen_tid}',
             'priority': chosen_priority,
             'status': 'vp-blocked',
         }
         continue
+    # A verifying ticket whose `## Fix Released` is populated means the code is
+    # already live on npm; only the changelog-attribution changeset is held, so
+    # it graduates as `resolved` rather than stranding indefinitely (P398).
 
     per_changeset[basename] = {
         'ticket_label': f'P{chosen_tid}',

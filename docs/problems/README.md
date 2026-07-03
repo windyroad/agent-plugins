@@ -30,7 +30,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 4.5 | P251 | RFC-first trace invariant not enforced — fixes start without RFC, story map, or JTBD trace | 9 Medium | Known Error | L | 2026-05-17 | internal |
 | 4.5 | P297 | ADR-047 — governance-artefact scaffolding should be a SessionStart hook (per-project, automatic), not an inline `/install-updates` step | 9 Med High | Open | M | 2026-05-25 | internal |
 | 4.5 | P369 | Plugin removes hook file but adopter session still invokes it via stale binding — `architect-compendium-refresh-discipline.sh` case 2026-06-17 | 9 Medium | Open | M | 2026-06-17 | internal |
-| 4.5 | P398 | the VP carve-out holds changesets for already-shipped (verifying) code indefinitely — pointless changelog stranding | 9 High | Open | M | 2026-06-28 | corrective-feedback (user, 2026-06-28) |
 | 4.0 | P407 | /wr-*:assess-external-comms skills should instruct synchronous reviewer dispatch (P402 follow-up; deny-message half already shipped 16c180e8) | 4 Low | Open | S | 2026-07-02 | internal |
 | 4.0 | P413 | work-problems defers upstream reporting as a manual "batch-report upstream" choice instead of auto-filing upstream-blocked tickets | 8 Medium | Open | M | 2026-07-03 | internal |
 | 3.0 | P178 | Agent skips ITIL state-machine gates on architecture-driven problems — treats architect-PASS verdict as substitute for empirical RCA + skips Open → Known Error transition | 3 Medium | Known Error | M | 2026-05-10 | internal |
@@ -267,6 +266,7 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P384 | wr-risk-scorer:external-comms agent gains Outbound Credibility / Self-Own review axis | @windyroad/risk-scorer@0.16.0 (2026-07-03) | yes — observed: promptfoo eval 2/2 GREEN 2026-07-03 |
 | P405 | External-comms gate skips read-only advisory-endpoint polls | @windyroad/risk-scorer@0.16.0 (2026-07-03) | no — not observed |
 | P400 | architect-mark-reviewed PostToolUse never fires on a SendMessage resume of an architect agent | pending — committed on main, ships next @windyroad/architect release | no — not observed |
+| P398 | the VP carve-out holds changesets for already-shipped (verifying) code indefinitely — pointless changelog stranding | pending — @windyroad/risk-scorer patch committed, ships next release | no — not observed |
 
 ## Inbound Upstream Reports
 

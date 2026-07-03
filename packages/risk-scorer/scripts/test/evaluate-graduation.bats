@@ -202,6 +202,66 @@ EOF
   echo "$output" | grep -q 'GRADUATION_SUMMARY: total=1 resolved=0 vp_blocked=1 halts=0'
 }
 
+# ----- P398: Rule 2 narrowed — shipped verifying graduates, unshipped holds -----
+
+# Case (h.1) — verifying ticket WITH populated `## Fix Released` graduates (code shipped)
+@test "case (h.1): shipped verifying (populated Fix Released) → resolved (P398)" {
+  seed_problem "310" "verifying" "9" "## Fix Released
+
+Deployed in v0.42.0. Awaiting user verification."
+  seed_changeset "wr-itil-p310-shipped.md"
+  run bash "$SCRIPT" "$WORK_DIR"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q 'changeset=wr-itil-p310-shipped.md'
+  echo "$output" | grep -q 'ticket=P310'
+  echo "$output" | grep -q 'status=resolved'
+  echo "$output" | grep -q 'GRADUATION_SUMMARY: total=1 resolved=1 vp_blocked=0 halts=0'
+}
+
+# Case (h.2) — verifying ticket with placeholder-only `## Fix Released` stays held
+@test "case (h.2): unshipped verifying (placeholder Fix Released) → vp-blocked (P398)" {
+  seed_problem "311" "verifying" "9" "## Fix Released
+
+(pending)"
+  seed_changeset "wr-itil-p311-pending.md"
+  run bash "$SCRIPT" "$WORK_DIR"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q 'ticket=P311'
+  echo "$output" | grep -q 'status=vp-blocked'
+}
+
+# Case (h.3) — verifying ticket with NO `## Fix Released` section stays held (case (e) invariant)
+@test "case (h.3): verifying with no Fix Released section → vp-blocked (P398 unshipped branch)" {
+  seed_problem "312" "verifying" "9"
+  seed_changeset "wr-itil-p312-no-section.md"
+  run bash "$SCRIPT" "$WORK_DIR"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q 'ticket=P312'
+  echo "$output" | grep -q 'status=vp-blocked'
+}
+
+# Case (h.4) — an all-shipped-verifying cohort rolls up to resolved and graduates atomically
+@test "case (h.4): cohort of all-shipped-verifying members rolls up to resolved (P398)" {
+  seed_problem "320" "verifying" "9" "## Fix Released
+
+Shipped in v0.50.0."
+  seed_problem "321" "verifying" "12" "## Fix Released
+
+Shipped in v0.50.0."
+  seed_changeset "wr-itil-p320-slice-a.md"
+  seed_changeset "wr-itil-p321-slice-b.md"
+  seed_holding_readme \
+    "- \`wr-itil-p320-slice-a.md\` — patch. **Reinstate trigger**: shipped cohort graduates." \
+    "- \`wr-itil-p321-slice-b.md\` — patch. **Reinstate trigger**: shipped cohort graduates."
+  run bash "$SCRIPT" "$WORK_DIR"
+  [ "$status" -eq 0 ]
+  # Both members class=3b, both resolved (shipped), cohort priority = max(9,12) = 12
+  echo "$output" | grep 'changeset=wr-itil-p320-slice-a.md' | grep -q 'class=3b'
+  echo "$output" | grep 'changeset=wr-itil-p320-slice-a.md' | grep -q 'status=resolved'
+  echo "$output" | grep 'changeset=wr-itil-p321-slice-b.md' | grep -q 'status=resolved'
+  echo "$output" | grep 'changeset=wr-itil-p320-slice-a.md' | grep -q 'priority=12'
+}
+
 # Case (f) — status-agnostic Priority lookup (open, known-error, closed all resolve)
 @test "case (f.1): open ticket resolves" {
   seed_problem "400" "open" "8"

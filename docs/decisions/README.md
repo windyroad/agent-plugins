@@ -245,11 +245,11 @@ _79 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-060 — Problem-RFC-Story framework with mandatory problem-trace and unified problem ontology
 **Status:** accepted | **Oversight:** confirmed
 **Related:** ADR-032
-
 ### ADR-061 — Dogfood graduation criteria for held changesets — symmetric risk balance drives the reinstate decision
-**Status:** proposed | **Oversight:** confirmed
-**Chosen:** Chosen option: **Sibling ADR codifying symmetric-balance graduation (Option 1) with Phase 1b Option A drain-condition amendment.**
-**Related:** ADR-042, ADR-018, ADR-020, ADR-022, ADR-026, ADR-052, ADR-060, ADR-014, ADR-013, ADR-015, ADR-044
+**Status:** proposed | **Oversight:** unconfirmed
+**Decides:** A held changeset graduates from `docs/changesets-holding/` back to `.changeset/` when its hypothetically-reinstated release-risk ≤ its originating problem ticket's `Priority` — the symmetric outflow counterpart to ADR-042's inflow contract, reusing the existing Priority rather than building a new evidence pipeline. Adds two evaluation units (orthogonal-gate / atomic-cohort), per-class grounded evidence floors, and an ADR-018/020 drain-condition amendment so drain wakes on graduatable held entries. Per P398 the Verification-Pending carve-out narrows: an unshipped fix stays held, but a held changeset whose ticket has a populated `## Fix Released` is only changelog-attribution for already-live code and graduates (status `resolved`) — an interim slice of ADR-082 option (c) pending RFC-025.
+**Confirmation:** Source review of Rules 1–8; Phase-2 behavioural bats on the risk-scorer join surface (filename/body-grep join, max-Priority, halt-and-prompt, VP-unshipped exclusion vs shipped-code graduation, atomic-cohort, evidence-floor citation); I001/I002 manual graduations as clean empirical baseline; Phase-4 drain-condition amendment landed with load-bearing-string bats.
+**Related:** ADR-042, ADR-018, ADR-020, ADR-022, ADR-026, ADR-052, ADR-060, ADR-082, ADR-014, ADR-013, ADR-015, ADR-044
 
 ### ADR-062 — Inbound upstream-report discovery + assessment pipeline (peer of ADR-024)
 **Status:** proposed | **Oversight:** confirmed
