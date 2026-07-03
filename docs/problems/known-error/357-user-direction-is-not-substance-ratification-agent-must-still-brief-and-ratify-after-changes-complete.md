@@ -85,6 +85,18 @@ Options (a) helper-becomes-interactive and (c) dedicated agent workflow step are
 
 Next step: capture an RFC per ADR-060 tracing this ticket + the hook locus list above; defer build under ADR-074 until RFC scope ratified.
 
+### Fix-time RFC creation blocked on ADR-073 lockstep amendment (iter 2026-07-03)
+
+Attempted the I13 propose-fix path this iter: `wr-itil-check-fix-rfc-trace` emitted `no-rfc-trace: P357` (sub-case (b) no-vehicle), so per the still-shipped ADR-072/ADR-060-I13 gate code I drafted a fix-time RFC (RFC-040) tracing P357 with authored `## Scope` + `## Tasks`. **The architect gate rejected the form (ISSUES FOUND), and the rejection is correct**:
+
+- **ADR-073 was rewritten and re-confirmed 2026-06-29** and now states verbatim: *"An authored RFC is comprised of stories in a user story map (ADR-060), not a `Scope`+`Tasks` prose blob."* It **rejects** "auto-create at fix-time and never block" and **holds the P399 `capture-rfc --fix-time` mechanism** (author Scope/Tasks as a byproduct of the fix) **"pending rework to author the RFC as a pre-implementation story map."**
+- ADR-073 explicitly flags the **lockstep gap**: *"ADR-072 (gate placement, currently `confirmed`) and ADR-060's I13 invariant (currently `accepted`) still encode the rejected auto-create/never-block stance and require matching amendment."* The `wr-itil-check-fix-rfc-trace` gate + the manage-problem/work-problems I13 SKILL text that dispatched this iter are that **un-amended superseded code** — they carry the old characterization, which is *not* license to author in the old form.
+- **ADR-089** (every RFC ≥1 story, enforced by `wr-itil-check-rfc-has-stories` at the `manage-rfc accepted` gate — shipped, RFC-037 verifying) means a `stories: []` RFC cannot reach `accepted`, which is exactly where this ticket's build was to unblock. **ADR-090** requires the story map + stories to be born `unconfirmed` and ratified before the RFC references them.
+
+**Consequence for P357's fix path**: the fix must be authored as a **pre-implementation story map** (hand-authored HTML under `docs/story-maps/draft/` per convention) with ≥1 story, NOT a Scope+Tasks RFC. P357's option choice was **already ratified 2026-06-17** (Option b, hook-side fresh-marker), so no *new* ADR is required — but authoring the story map + stories and ratifying them (and thereby the RFC) at `accepted` is an **interactive** step, and the shipped auto-author mechanism for it is held pending the ADR-073 rework. This iter therefore did NOT create the RFC or build the hook; it recorded this finding and queued the reconciliation for the user (see outstanding questions). No architect marker was consumed for a landed edit (the RFC write was blocked before it landed).
+
+- [ ] **BLOCKED — author P357's fix as an ADR-060/073/089/090 story map** (backbone/ribs/slices HTML + ≥1 story, born `unconfirmed`), replacing the drafted `Scope`+`Tasks` RFC-040 form. Depends on the ADR-073 lockstep amendment (ADR-072 + ADR-060 I13 + the `wr-itil-check-fix-rfc-trace` gate code) landing so the fix-time creation path is no longer superseded.
+
 ## Dependencies
 
 - **Blocks**: (none — observation-class ticket; the fix is additive)
