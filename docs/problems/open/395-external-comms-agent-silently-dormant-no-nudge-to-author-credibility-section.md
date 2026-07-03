@@ -78,8 +78,3 @@ Captured via /wr-itil:capture-problem; PROCEED_NEW per the fresh-context `wr-iti
 
 Dormancy-nudge home = **Option B**: a sibling generalisation ADR for 'policy-file-presence → governance-surface-activation' nudges (architect lean). Do NOT extend the ADR-047 predicate matrix in place. This ADR must land before P384's live activation.
 
-## RFCs
-
-| RFC | Status | Title |
-|-----|--------|-------|
-| RFC-040 | proposed | Feature discoverability / adoption-surface invariant — prevent shipping capabilities adopters can't find or activate |

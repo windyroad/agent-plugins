@@ -92,8 +92,36 @@ Requires the adopter to already know the skills exist.
 - **ADR-071** — every-fix-through-an-RFC (windyroad-internal; the enforcement this ticket explicitly does NOT extend to adopters).
 - **Origin evidence:** bbstats (`/Users/tomhoward/Projects/bbstats`) — itil 0.56.0, problems/jtbd/decisions populated, rfcs/stories/story-maps absent; problem 001 carries a dangling `Create INVEST story` task.
 
-## RFCs
 
-| RFC | Status | Title |
-|-----|--------|-------|
-| RFC-040 | proposed | Feature discoverability / adoption-surface invariant — prevent shipping capabilities adopters can't find or activate |
+## Reframe — folded into the ADR-073/P399 work-problems rework (2026-07-03)
+
+**User correction (2026-07-03):** *"The work problems process is supposed to
+create the RFC and the story map if it's missing... RFC and USM creation should
+not need 'activation'. Just follow the fucking work problems process."*
+
+The initial fix attempt (RFC-040 — a build-time "declare-discoverability-surface"
+invariant + a runtime governance-surface-activation nudge) was **over-engineered
+and withdrawn** (`git rm`, 2026-07-03). It invented a new mechanism instead of
+following/fixing the existing process.
+
+**Root cause (confirmed by investigation):** the `/wr-itil:work-problems` process
+IS already supposed to create the RFC — **and an RFC is stories in a user story
+map** (ADR-060/089/090) — when a fix begins on an RFC-less Known Error (ADR-071 +
+the I13 propose-fix gate). But that auto-create mechanism is **HELD, not shipped**:
+ADR-073 was rewritten + re-confirmed 2026-06-29 ("an RFC is stories in a user
+story map, NOT a Scope+Tasks blob; 'auto-create at fix-time and never block' is
+rejected; the P399 `capture-rfc --fix-time` mechanism is held pending rework"),
+and the lockstep amendment (ADR-072 gate placement + ADR-060 I13 + the
+`wr-itil-check-fix-rfc-trace` gate code) has NOT landed. So bbstats ran
+work-problems but the RFC/story-map auto-create could not fire — that is why its
+`docs/rfcs/`, `docs/stories/`, `docs/story-maps/` are empty. Same path the P357
+iter hit this session.
+
+**Fix vehicle (folded per user direction, option B):** complete the held
+**ADR-073 / P399** rework so the work-problems process reliably creates the RFC
+(as a story map) when missing. P412 is the adopter-facing symptom of that same
+gap — NOT a separate discoverability feature. No new invariant, no activation
+nudge.
+
+- **Composes with**: P399 (ADR-073 auto-create emits skeleton RFC — should author full RFC / story map), P357 (I13 fix-time RFC blocked on the ADR-073 story-map lockstep), the ADR-072/ADR-060-I13 lockstep amendment.
+- **Superseded approach**: RFC-040 (withdrawn 2026-07-03).

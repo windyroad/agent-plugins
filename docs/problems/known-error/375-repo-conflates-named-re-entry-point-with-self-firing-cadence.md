@@ -144,10 +144,3 @@ This is the **systemic / meta** ticket for a class previously captured only as s
 
 Scaffold-nudge surfaces ~51 pending-review risk-register entries but points at MANUAL curation with no self-firing drain (a textbook P375 instance). **Ticket to capture** (via /wr-itil:capture-problem): a /wr-risk-scorer:review-register drain skill. ALSO (ADR-047 honesty note): verify ADR-056/ADR-059 do not already cover the 'risk-register pending-review' nudge trigger; if not, add the one-liner to ADR-047 reconciling text with shipped behaviour + re-confirm oversight.
 
-## RFCs
-
-| RFC | Status | Title |
-|-----|--------|-------|
-| RFC-035 | proposed | Authoring-time deferral-cadence enforcement gate |
-| RFC-036 | accepted | Plugin-staleness surfacer |
-| RFC-040 | proposed | Feature discoverability / adoption-surface invariant — prevent shipping capabilities adopters can't find or activate |

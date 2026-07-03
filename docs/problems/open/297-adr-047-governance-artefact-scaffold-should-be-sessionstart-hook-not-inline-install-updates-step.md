@@ -120,8 +120,3 @@ Next step: capture an RFC per ADR-060 tracing this ticket + P356 + the four plug
 
 Phase 2 shape = **Option D**: strengthen the reactive BLOCK deny-hooks into guided invocations that walk the user into the right skill, framed around the plugin-adopter's job (JTBD-302). Folds in the P356 adopter-framing work.
 
-## RFCs
-
-| RFC | Status | Title |
-|-----|--------|-------|
-| RFC-040 | proposed | Feature discoverability / adoption-surface invariant — prevent shipping capabilities adopters can't find or activate |
