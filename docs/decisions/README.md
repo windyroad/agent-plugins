@@ -194,11 +194,11 @@ _79 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-046 — ADR-046 — Blocked-reporters persistence: per-repo, hashed-ID, audit-log-first
 **Status:** accepted | **Oversight:** confirmed
 **Related:** ADR-046, ADR-024, ADR-014, ADR-017, ADR-022, ADR-029, ADR-030, ADR-037, ADR-044
-
 ### ADR-047 — Install-updates scaffolds governance artefacts when policy file is present but artefact is missing
 **Status:** proposed | **Oversight:** confirmed
-**Confirmation:** .claude/skills/install-updates/SKILL.md — Step 6.5 "Scaffold governance artefacts (per-sibling)" exists betw...; .claude/skills/install-updates/REFERENCE.md — new section "Governance-artefact scaffold (P033)" present with...; .claude/skills/install-updates/templates/risk-register-README.md.tmpl — present; adopter-flavoured (no R001 ...; .claude/skills/install-updates/templates/risk-register-TEMPLATE.md.tmpl — present; verbatim copy of this rep...; docs/problems/033-no-persistent-risk-register.known-error.md — Phase 1 marked complete with ADR-047 citation...
-**Related:** ADR-036, ADR-030, ADR-013, ADR-014, ADR-038, ADR-040, ADR-004
+**Decides:** Originally chose an inline `/install-updates` scaffold step; superseded 2026-06-08 by a read-only SessionStart stderr nudge (`risk-scorer-scaffold-nudge.sh`) that surfaces the 99%-miss-rate governance gap without writing — the scaffold write happens only when the adopter invokes the skill the nudge points at. The one hook now carries three AFK-guarded arms: register-dir-absent → `/wr-risk-scorer:bootstrap-catalog` (P297), policy-absent → `/wr-risk-scorer:update-policy` (P379), and pending-review-count self-surfacer that re-nudges every session until the curation backlog drains (P375).
+**Confirmation:** hook exists, executable, follows `architect-oversight-nudge.sh` shape (AFK-guard short-circuit, silent-on-no-condition, one-line stderr); registered in `hooks.json` under SessionStart matcher `"startup"`; behavioural bats fixture exercises the state matrix + `WR_SUPPRESS_OVERSIGHT_NUDGE` guard across all three arms; README compendium regenerated per ADR-077.
+**Related:** ADR-036, ADR-030, ADR-013, ADR-014, ADR-038, ADR-040, ADR-004, ADR-066, ADR-068, ADR-045, ADR-059, ADR-049, ADR-056, ADR-086, ADR-084
 
 ### ADR-049 — Plugin-bundled scripts invoked from SKILL.md resolve via `bin/` on `$PATH`
 **Status:** proposed | **Oversight:** confirmed
