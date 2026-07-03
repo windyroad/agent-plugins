@@ -1,6 +1,6 @@
 # Problem 386: review-problems Step 4.6 AFK-silent relevance-close contract cites a dangling work-problems Step 6.5 cross-reference
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-06-27
 **Priority**: 5 (Low) — Impact: 1 × Likelihood: 5 = 5. Rated at review 2026-07-02: dangling cross-ref; small doc fix.
 **Origin**: internal
@@ -47,6 +47,10 @@ None needed — the runtime behaviour is correct; only the documented authority 
 - **Observed flaw**: AFK silent-close branch cites "work-problems Step 6.5" which is the Release-cadence check, not a relevance-close surface.
 - **Edit summary**: replace the "work-problems Step 6.5" anchor with the subprocess-AFK-by-construction mechanism (Step 5 dispatch constraint + ADR-032) and the Step 0c/Step 3.6 side-effect dispatch path.
 - **Evidence**: surfaced 2026-06-27 during P385 architect review (first-pass ISSUES FOUND, issue 1); architect explicitly requested capture rather than silent in-P385 fix since it predates P385.
+
+## Fix Released
+
+Fixed in commit `3bf91f0c` (`@windyroad/itil` patch, pending orchestrator release cadence). `packages/itil/skills/review-problems/SKILL.md` re-anchored at three surfaces: Step 4.5 inbound-discovery (line 287), Step 4.6b (line 338), and Step 4.6d (line 395) — all now cite the `claude -p` subprocess-AFK-by-construction mechanism (Step 5 dispatch constraint + ADR-032 subprocess isolation) reached via the Step 0b/0c/0d pre-flight + Step 3.6 pre-dispatch dispatch path, replacing the dangling "work-problems Step 6.5" relevance-close pointer. Line 475 (the *correct* Step 6.5 release-cadence reference) left intact. Doc-only prose correction; no runtime behaviour change — verification is source-resolvable: grep confirms no relevance-close reference resolves to work-problems Step 6.5, and the review-problems promptfoo eval guards the Step 4.5 surface where the line-287 edit landed. Awaiting release + user confirmation on next `/wr-itil:review-problems` audit that the AFK-silent-close authority chain resolves to an implementing step.
 
 ## Dependencies
 
