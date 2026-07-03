@@ -205,3 +205,31 @@ setup() {
   run grep -inE "Effort.*→.*transitive via|transitive via.*P[0-9]" "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }
+
+# --- P136 ADR-044 alignment: Step 4 close-on-evidence bucket routing ---
+# tdd-review: structural-permitted — P081 bridge per the P136 Fix Strategy.
+# Pins the Step 4 lazy-ask removal (close the evidence-backed subset
+# mechanically; ask only the unobserved subset) so a future reword cannot
+# silently revert to a per-ticket AskUserQuestion (the exact P136 regression
+# class). Behavioural retrofit owned by P081 Phase 2.
+
+@test "SKILL.md Step 4 closes the yes-observed subset on evidence without AskUserQuestion (P136 / ADR-044 + run-retro Step 4a)" {
+  run grep -inE "close-on-evidence" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  run grep -inE "Do NOT fire one .AskUserQuestion. per ticket" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  run grep -inE "ADR-044" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "SKILL.md Step 4 keeps the three-way split — ask no-not-observed, flip-back regressions (P136)" {
+  # Bucket 2 (no — not observed) still asks; Bucket 3 (no — observed
+  # regression) still flips back and is never batch-closed. Do not collapse
+  # the three-way routing to a two-way one (JTBD-201 audit-trail invariant).
+  run grep -inE "no — not observed" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  run grep -inE "no — observed regression" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  run grep -inE "flip-back" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}

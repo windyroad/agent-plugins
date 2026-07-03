@@ -266,7 +266,9 @@ P136 stays at WSJF 2.25 in the queue; it is **NOT picked up automatically by `/w
 ## Human decision — 2026-07-03 (outstanding-questions drain)
 
 Audit 13/13 done; **the remaining interactive remediation is the live scope of this ticket** (kept OPEN so work-problems picks it up — do NOT leave it stranded in the outstanding-questions queue). Remaining tasks:
-- [ ] Substantive: restore-incident ID-arg backfill
-- [ ] Substantive: review-problems Step 4 evidence-backed-subset over-ask fix
+- [x] Substantive: restore-incident ID-arg backfill — **DONE 2026-07-04** (work-problems AFK iter). `<I###>` argument-shape backfill AskUserQuestion (Arguments section + Step 1) replaced with fail-fast usage block + exit, mirroring the shipped `mitigate-incident` Surface 1 (ADR-044 Framework-Mediated Surface). Genuine user-authority asks retained (verification-signal pre-flight cat-2, problem-handoff cat-1). ADR-044 cross-ref added to Related. Architect + JTBD reviews PASS. 2 structural-permitted regression bats added (restore-incident-contract.bats).
+- [x] Substantive: review-problems Step 4 evidence-backed-subset over-ask fix — **DONE 2026-07-04** (same iter). Step 4 restructured into a three-way bucket split: `yes — observed: <evidence>` rows close **on evidence** mechanically without `AskUserQuestion` (mirrors the shipped `run-retro` Step 4a step 5 close-on-evidence; ADR-044 framework-mediated-verification-close), `no — not observed` rows route to the verification ask (genuine user-authority), `no — observed regression` rows flip-back (never batch-closed). AFK branch reconciled — Bucket-1 closes fire in AFK too, only Bucket-2 defers (per architect + JTBD must-fold). Step-3 cell-shape drift-tripwire reconciled. Architect + JTBD reviews PASS. 2 structural-permitted regression bats added (review-problems-contract.bats).
 - [ ] Cosmetic: ~28 ADR-044 cross-refs (bundle as itil / risk-scorer / jtbd doc patches)
-- [ ] Audit the 6 unaudited SKILLs
+- [ ] Audit the 6 unaudited SKILLs: connect/{send,setup}, risk-scorer/assess-wip, style-guide/update-guide, tdd/setup-tests, voice-tone/update-guide
+
+**Both substantive amendments landed in one `@windyroad/itil` patch (per-surface release cadence R1 — both surfaces are in the itil package).** P136 stays Open — the two cosmetic-bundle tasks + 6-unaudited-SKILL sweep remain the live remediation backlog.

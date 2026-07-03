@@ -518,3 +518,33 @@ tests:
           `strict_title_prefix: true` as the opt-in hard filter. FAIL if
           the response says #273 is still discovered under strict mode,
           OR conflates strict mode with the permissive default.
+
+  - description: Step 4 verification — yes-observed subset closes on evidence WITHOUT AskUserQuestion; only no-not-observed asks (P136 / ADR-044 close-on-evidence)
+    vars:
+      prompt: |
+        I am executing /wr-itil:review-problems Step 4 (Verification prompt,
+        Verification Pending → Closed). The Verification Queue has three
+        `.verifying.md` tickets, whose Step-3 `Likely verified?` cells read:
+          - P210: `yes — observed: bats manage-problem/test/foo.bats 14/14 green this session`
+          - P211: `no — not observed`
+          - P212: `no — observed regression — the fix's test went red at commit abc123`
+        For EACH of the three, what does Step 4 do — do I fire AskUserQuestion
+        for it, close it, or something else? Be specific about which tickets
+        get an interactive prompt and which are handled mechanically.
+    assert:
+      # Tier A — the yes-observed ticket closes on evidence (mechanical).
+      - type: regex
+        value: 'close[\s\S]{0,60}(on\s+)?evidence|close-on-evidence|mechanical'
+      # Tier A — the yes-observed ticket is NOT routed through AskUserQuestion.
+      - type: regex
+        value: '(without|no|not)\s+[\s\S]{0,40}AskUserQuestion|do\s+NOT\s+fire'
+      # Tier A — the no-not-observed ticket DOES get the verification ask.
+      - type: regex
+        value: 'no\s*[—-]\s*not\s+observed[\s\S]{0,200}(ask|AskUserQuestion|prompt|confirm)'
+      # Tier A — the regression ticket flips back / is never batch-closed.
+      - type: regex
+        value: 'flip[- ]?back|known[- ]error|not\s+(batch[- ])?closed|never\s+(batch[- ])?close'
+      # Tier A — must NOT describe firing one AskUserQuestion per ticket for
+      # all three (the P136-regressing lazy-deferral shape).
+      - type: not-regex
+        value: 'fire\s+`?AskUserQuestion`?\s+for\s+(each|every|all)\s+[\s\S]{0,40}(ticket|verifying)'

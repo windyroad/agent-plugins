@@ -140,3 +140,31 @@ setup() {
   run grep -inE "If arguments start with \"(list|mitigate|restore|close|link)\"|If arguments contain \"(list|mitigate|restore|close|link)\"" "$SKILL_FILE"
   [ "$status" -ne 0 ]
 }
+
+# --- P136 ADR-044 alignment: argument-backfill fail-fast ---
+# tdd-review: structural-permitted — P081 bridge per the P136 Fix Strategy.
+# Pins the lazy-AskUserQuestion removal so a future reword cannot silently
+# reintroduce the typo-class <I###> argument-backfill ask (the exact P136
+# regression class). Behavioural retrofit owned by P081 Phase 2.
+
+@test "SKILL.md fails fast on missing/malformed <I###> — no AskUserQuestion for ID backfill (P136 / ADR-044 Surface 1)" {
+  # ADR-044 framework-mediated: argument shape is a typo-class signal resolved
+  # by fail-fast + usage block, NOT a user decision. Mirrors mitigate-incident
+  # Surface 1. Regression guard: the old "ask via AskUserQuestion for the
+  # incident ID" backfill prose must NOT return.
+  run grep -inE "ask via .AskUserQuestion. for the incident ID" "$SKILL_FILE"
+  [ "$status" -ne 0 ]
+  run grep -inE "fail-fast|emit the usage block below and exit" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  run grep -inE "fire .AskUserQuestion. for argument backfill" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "SKILL.md keeps the genuine user-authority asks after the fail-fast scope-down (P136 / ADR-044)" {
+  # The fail-fast scopes to the <I###> ID ONLY. The cat-2 evidence pre-flight
+  # and cat-1 problem-handoff asks remain interactive — do not over-remove.
+  run grep -inE "ADR-044" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  run grep -nE "^allowed-tools:.*AskUserQuestion" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}

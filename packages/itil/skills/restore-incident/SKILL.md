@@ -18,7 +18,7 @@ This skill is the P071 phased-landing split of `/wr-itil:manage-incident <I> res
 
 - `<I###>` — the incident ID (e.g. `I007` or bare `007`). Resolves to `docs/incidents/<I###>-*.mitigating.md` (primary path) or `docs/incidents/<I###>-*.restored.md` (idempotent re-invocation).
 
-If `$ARGUMENTS` is empty or malformed, ask via `AskUserQuestion` for the incident ID.
+If `$ARGUMENTS` is empty or malformed, fail-fast with a usage message and exit (per ADR-044 Framework-Mediated Surface; matches the `mitigate-incident` Surface 1 / `transition-problem` / `work-problem` precedent). Argument malformation is a typo-class signal, not a decision — the slash command is the input contract; re-typing is faster than a multi-turn `AskUserQuestion` dialogue, and the user-memory direction `feedback_act_on_obvious_decisions.md` pins this. This scopes to the `<I###>` ID only — the verification signal (Pre-flight / Step 3) and the problem-handoff decision (Step 5) remain genuine interactive user-authority surfaces. The exact usage block is in Step 1.
 
 ## Pre-flight (ADR-011)
 
@@ -31,12 +31,21 @@ If either pre-flight fails, block the transition and ask via `AskUserQuestion` w
 
 ## Steps
 
-### 1. Parse arguments
+### 1. Parse arguments (fail-fast on typos — ADR-044 Surface 1)
 
 Extract `<I###>` from `$ARGUMENTS`. Normalise:
 
 - Accept `I007`, `i007`, `007`, `7` → canonicalise to `I007` (uppercase I + zero-padded 3 digits).
-- If missing, ask via `AskUserQuestion`.
+- If missing, malformed, or unrecognisable, emit the usage block below and exit. **Do not** fire `AskUserQuestion` for argument backfill — argument shape is a typo-class signal, not a decision. The framework-mediated answer per ADR-044 is fail-fast + exit; the user re-types in 1 second. Matches the `mitigate-incident` Step 1 + `transition-problem` Step 1 + `work-problem` singular precedent for consistency across the suite (JTBD-101 — clear patterns).
+
+**Usage block** (emitted on any malformed-argument case; copy verbatim so adopters get a consistent shape):
+
+```
+Usage: /wr-itil:restore-incident <I###>
+  <I###>  — incident ID (e.g. I007 or bare 007); must resolve to docs/incidents/<I###>-*.{mitigating,restored}.md
+
+Run /wr-itil:list-incidents to see active incidents if you don't know the ID.
+```
 
 ### 2. Locate the incident file
 
@@ -181,6 +190,7 @@ If the user wants any of the above, the skill reports the appropriate sibling an
 - **ADR-011** (`docs/decisions/011-manage-incident-skill.proposed.md`) — incident lifecycle file-suffix conventions (`.investigating.md` / `.mitigating.md` / `.restored.md` / `.closed.md`) + Decision Outcome point 4 (direct Skill-tool invocation of `/wr-itil:manage-problem` for problem handoff).
 - **ADR-013** Rule 1 — structured user interaction (verification-signal and handoff prompts use AskUserQuestion; deprecation notice uses systemMessage).
 - **ADR-013** Rule 6 — policy-within-appetite non-interactive actions (release drain).
+- **ADR-044** (`docs/decisions/044-decision-delegation-contract.proposed.md`) — Framework-Mediated Surface: `<I###>` argument-shape backfill is a typo-class signal resolved by fail-fast + exit (Arguments + Step 1), NOT a user decision. The genuine user-authority asks remain interactive per the 6-class taxonomy: verification-signal + mitigation-attempts pre-flight (cat-2 deviation-approval), problem-handoff + no-problem justification (cat-1 direction-setting). P136 Phase-remediation surface (mirrors the shipped `mitigate-incident` Surface 1).
 - **ADR-014** — governance skills commit their own work.
 - **ADR-015** — release scorer delegation pattern.
 - **ADR-020** — auto-release when changesets are queued.

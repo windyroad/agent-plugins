@@ -1,0 +1,79 @@
+# SKILL eval — restore-incident argument-backfill fail-fast (P136 / ADR-044 Surface 1).
+#
+# Tier A deterministic eval — asserts that when /wr-itil:restore-incident is
+# invoked with a missing or malformed incident ID, the agent FAILS FAST with a
+# usage block and exits, rather than firing AskUserQuestion to backfill the
+# argument. This is the P136 ADR-044-alignment behavioural contract: an
+# argument-shape typo is a framework-mediated typo-class signal (re-type), not
+# a user decision. Mirrors the shipped mitigate-incident Surface 1 pattern.
+#
+# Drivers:
+#   - ADR-044 (Decision-Delegation Contract — Framework-Mediated Surface).
+#   - ADR-075 (Amendment 2026-06-02 — SKILL-prose scope; promptfoo exec
+#     provider wrapping `claude -p --append-system-prompt` — subscription auth).
+#   - ADR-052 (behavioural-default for skill testing).
+#   - P136 (this slice's landing discharges its R009 prose-surface floor).
+#
+# Run from repo root:
+#   npx promptfoo eval -c packages/itil/skills/restore-incident/eval/promptfooconfig.yaml
+#
+# @jtbd JTBD-001 (Enforce Governance Without Slowing Down)
+# @jtbd JTBD-101 (Extend the Suite with New Plugins — clear patterns)
+# @jtbd JTBD-201 (Restore Service Fast with an Audit Trail)
+# @problem P136
+# @adr ADR-044 + ADR-075 (Amendment 2026-06-02)
+
+description: |
+  restore-incident SKILL eval — P136 argument-backfill fail-fast (ADR-044 Surface 1).
+
+providers:
+  # Path is relative to this config file's directory (promptfoo basePath).
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: Missing incident ID — fail-fast with usage block, NO AskUserQuestion backfill (P136 / ADR-044 Surface 1)
+    vars:
+      prompt: |
+        I invoked /wr-itil:restore-incident with no arguments at all — I did
+        not supply an incident ID. What does the skill do about the missing
+        `<I###>` argument? Be specific about the exact mechanical response and
+        whether it opens any interactive prompt to collect the ID.
+    assert:
+      # Tier A — must describe the fail-fast + usage-block-and-exit response.
+      - type: regex
+        value: 'fail[- ]fast|usage\s+block|usage\s+message'
+      # Tier A — must state it exits rather than continuing.
+      - type: regex
+        value: 'exit|exits|abort|stop'
+      # Tier A — positively confirm no interactive backfill prompt is opened.
+      - type: regex
+        value: '(no|not|without|does\s+not|doesn.t|never)[\s\S]{0,60}(interactive\s+prompt|AskUserQuestion|backfill|prompt\b)'
+      # Tier A — precise regression guard: must NOT reproduce the OLD lazy
+      # phrasing "ask via AskUserQuestion for the incident ID" (the P136
+      # lazy-deferral shape this fix removed).
+      - type: not-regex
+        value: 'ask\s+via\s+`?AskUserQuestion`?\s+for\s+the\s+incident\s+ID'
+      # Tier A — must frame the argument shape as a typo-class / framework-
+      # mediated signal, not a user decision.
+      - type: regex
+        value: 'typo|framework[- ]mediated|not a decision|re-?type'
+
+  - description: Retained user-authority asks survive the scope-down — verification signal + problem handoff stay interactive (P136 anti-over-removal)
+    vars:
+      prompt: |
+        Under /wr-itil:restore-incident, which decision points still ask the
+        user via AskUserQuestion after a valid incident ID is supplied? List
+        the genuine user-authority prompts the skill retains.
+    assert:
+      # Tier A — the verification-signal / mitigation pre-flight ask is retained.
+      - type: regex
+        value: 'verification\s+signal|mitigation'
+      # Tier A — the problem-handoff decision is retained.
+      - type: regex
+        value: 'problem|handoff|Linked Problem|No Problem'
+      # Tier A — AskUserQuestion is still a live surface for these (not removed).
+      - type: contains
+        value: 'AskUserQuestion'
