@@ -114,13 +114,19 @@ setup() {
 # Per-SKILL carve-out audit annotations
 # ----------------------------------------------------------------------
 
-@test "capture-problem SKILL.md carries the P352 carve-out audit (HALT per ADR-074)" {
+@test "capture-problem SKILL.md carries the P352 carve-out audit (P401-corrected: conforms to queue-and-continue; ADR-074 preserved via downstream gating)" {
   SKILL="${REPO_ROOT}/packages/itil/skills/capture-problem/SKILL.md"
   [ -f "$SKILL" ]
   run grep -nE "ADR-013 Rule 6 carve-out audit \(P352" "$SKILL"
   [ "$status" -eq 0 ]
-  # And the carve-out must name its authorising ADR
-  run grep -nE "authorised by \*\*ADR-074" "$SKILL"
+  # Post-P401 (2026-06-29/2026-07-02) the AFK low-confidence path no longer
+  # HALTs — it CONFORMS to the queue-and-continue default: capture the
+  # ticket with the unconfirmed-anchoring sentinel + queue the elicitation.
+  run grep -niE "conform.*queue-and-continue|unconfirmed — elicitation queued" "$SKILL"
+  [ "$status" -eq 0 ]
+  # ADR-074 is still named as the honoured constraint (preserved by
+  # downstream oversight gating, not by a no-ticket halt).
+  run grep -nE "ADR-074" "$SKILL"
   [ "$status" -eq 0 ]
 }
 

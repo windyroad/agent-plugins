@@ -11,17 +11,23 @@
 #   silent-resolve jtbd_trace_value to the matched IDs.
 # - --jtbd=JTBD-NNN[,...] flag pre-resolves jtbd_trace_value silently.
 # - --persona=<value> flag pre-resolves persona_value silently.
-# - Derive-failure (no flag + no lexical detection + no cited-JTBD
-#   agreement) → AskUserQuestion proposal with REJECT/option-pick/
-#   free-text correction semantics (REJECT = problem rejected; no
-#   ticket; option-pick = acceptance; correction = correction-as-
-#   acceptance).
-# - --no-prompt + derive-failure → halt-with-stderr-directive (AFK
-#   callers MUST pre-resolve via flags).
+# - Low-confidence (no flag + no lexical detection + no cited-JTBD
+#   agreement) → P401 CORRECTED shape (user direction 2026-06-29,
+#   sharpened 2026-07-02): INTERVIEW the human to elicit the real
+#   who/why (NOT propose an ID) → agent classifies existing-vs-new →
+#   existing:map+proceed autonomously / no-fit:human-ratifies-CREATION
+#   of a new persona/JTBD (ADR-068/P288). A real problem is NEVER
+#   discarded over anchoring uncertainty. Scope-rejection (elicited
+#   who/why out of scope) is EXTERNAL-report-only, at manage-problem
+#   ingestion — never here.
+# - --no-prompt + low-confidence → preserve the finding: CREATE the
+#   ticket with the `(unconfirmed — elicitation queued)` anchoring
+#   sentinel + queue the elicitation (P401 never-discard + JTBD-006
+#   save-and-continue). It no longer halt-refuses.
 # - Skeleton template carries **JTBD**: and **Persona**: body fields.
 #
-# i12_should_halt_afk predicate (NEW per ADR-060 Amendment 2026-06-02)
-# encodes the AFK halt-without-flags branch. The historical
+# afk_low_confidence_action predicate (P401 2026-06-29) encodes the AFK
+# create-with-unconfirmed-sentinel branch. The historical
 # i12_should_block predicate is preserved as a regression guard
 # (never returns 0) against re-introduction of the type-keyed hard-block.
 #
@@ -56,49 +62,65 @@ i12_should_block() {
   return 1
 }
 
-# ADR-060 Amendment 2026-06-02 — NEW positive predicate for I12 derive-
-# then-ratify AFK halt-without-flags branch. Returns 0 (halt) when:
-#   - --no-prompt is set AND
-#   - derivation failed (no flag pre-resolution + no lexical detection
-#     + no cited-JTBD agreement).
-# Returns 1 (proceed) otherwise. Inputs:
+# P401 (2026-06-29 / 2026-07-02) — AFK low-confidence action. The
+# corrected shape PRESERVES THE FINDING: under --no-prompt + low-
+# confidence, capture the ticket with the unconfirmed-anchoring sentinel
+# and queue the elicitation. It NO LONGER halt-refuses (that discarded
+# legitimate problems over anchoring uncertainty). Returns the action.
+# Inputs:
 #   $1: no_prompt_flag      ("1" if --no-prompt set, "" otherwise)
 #   $2: derivation_resolved ("1" if persona+JTBD resolved by any of
 #                            flag/lexical/cited-JTBD path; "" otherwise)
-i12_should_halt_afk() {
+AFK_SENTINEL="(unconfirmed — elicitation queued)"
+afk_low_confidence_action() {
   local no_prompt="$1"
   local derivation_resolved="$2"
   if [ "$no_prompt" = "1" ] && [ -z "$derivation_resolved" ]; then
-    return 0  # halt
+    echo "CREATE_UNCONFIRMED_QUEUE_ELICITATION"
+  else
+    echo "PROCEED"  # derivation succeeded, or interactive interview fires
   fi
-  return 1  # proceed (interactive ratification fires, or derivation succeeded)
 }
 
-# ADR-060 Amendment 2026-06-02 — reference impl for AskUserQuestion
-# response semantics in the I12 derive-then-ratify dispatch. Returns:
-#   "REJECT"     when user picked the Reject option
-#   "ACCEPT:<v>" when user picked a proposed option <v> as-is
-#   "CORRECT:<v>" when user supplied free-text correction <v>
-# Behaviourally the SKILL must treat REJECT as halt-with-stderr-directive
-# (no ticket); ACCEPT and CORRECT both yield ticket-with-value.
-classify_ratification_response() {
-  local response="$1"
-  case "$response" in
-    REJECT) echo "REJECT" ;;
-    OPTION:*) echo "ACCEPT:${response#OPTION:}" ;;
-    FREETEXT:*) echo "CORRECT:${response#FREETEXT:}" ;;
-    *) echo "UNKNOWN:$response" ;;
+# P401 — reference impl for the corrected low-confidence resolution of a
+# MAINTAINER-INTERNAL capture. The agent interviews to elicit who/why,
+# then classifies the elicited fit. Returns the resolution action:
+#   "MAP_EXISTING"       elicited job/persona matches an existing artefact
+#                        → map autonomously (ADR-068 boundary is creation-only)
+#   "RATIFY_CREATE_NEW"  no existing fit → human ratifies the CREATION of a
+#                        new persona/JTBD (ADR-068/P288), then map
+# The problem is NEVER discarded over anchoring uncertainty.
+resolve_low_confidence_internal() {
+  local elicited_fit="$1"
+  case "$elicited_fit" in
+    existing) echo "MAP_EXISTING" ;;
+    none)     echo "RATIFY_CREATE_NEW" ;;
+    *)        echo "INTERVIEW" ;;  # elicit who/why first
   esac
 }
 
-# Returns 0 when the response yields a ticket; 1 when it halts capture.
-ratification_creates_ticket() {
-  local classified="$1"
-  case "$classified" in
-    REJECT) return 1 ;;        # no ticket; capture halts
-    ACCEPT:*|CORRECT:*) return 0 ;;  # ticket created
+# P401 — every maintainer-internal low-confidence resolution yields a
+# ticket (never discard). CREATE_UNCONFIRMED is the AFK sentinel path.
+internal_resolution_creates_ticket() {
+  case "$1" in
+    MAP_EXISTING|RATIFY_CREATE_NEW|CREATE_UNCONFIRMED_QUEUE_ELICITATION) return 0 ;;
     *) return 1 ;;
   esac
+}
+
+# P401 — scope-rejection is EXTERNAL-report-only (at manage-problem
+# ingestion, NOT capture-problem). Through the elicitation interview the
+# maintainer may decide the elicited who/why is out of scope to support
+# and decline. This is the ONLY path that yields no ticket, and only for
+# external reports. A maintainer-internal capture ALWAYS anchors.
+# Inputs: $1 origin ("internal"|"external"); $2 in_scope ("yes"|"no").
+external_scope_disposition() {
+  local origin="$1" in_scope="$2"
+  if [ "$origin" = "external" ] && [ "$in_scope" = "no" ]; then
+    echo "DECLINE_SCOPE"   # deliberate product-scope decline; no ticket
+  else
+    echo "ANCHOR"          # internal always anchors; external in-scope anchors
+  fi
 }
 
 # Reference implementation of --jtbd= flag parser. Accepts CSV; returns
@@ -217,75 +239,94 @@ parse_no_prompt_flag() {
 }
 
 # ---------------------------------------------------------------------------
-# ADR-060 Amendment 2026-06-02 — I12 derive-then-ratify positive controls.
-# These exercise the new contract: AskUserQuestion fires on derivation-
-# failure with REJECT/option-pick/free-text-correction semantics; AFK
-# callers pre-resolve via flags or halt-with-stderr-directive on
-# --no-prompt + derive-failure.
+# P401 (2026-06-29 / 2026-07-02) — corrected low-confidence contract.
+# Low-confidence INTERVIEWS to elicit who/why (never proposes an ID); the
+# agent classifies existing-vs-new; existing→map+proceed, no-fit→human-
+# ratifies-CREATION; a real problem is NEVER discarded over anchoring;
+# scope-rejection is external-report-only; AFK captures with the
+# unconfirmed-anchoring sentinel + queues the elicitation.
 # ---------------------------------------------------------------------------
 
-@test "I12 derive-then-ratify: i12_should_halt_afk halts on --no-prompt + derive-failure" {
-  # AFK caller passed --no-prompt; derivation failed (no flag pre-resolution,
-  # no lexical detection, no cited-JTBD agreement). MUST halt.
-  i12_should_halt_afk "1" ""
+@test "P401 low-confidence interviews (elicits who/why) rather than proposing an ID" {
+  # Before classification, the resolution action is INTERVIEW — the agent
+  # elicits the real who/why, NOT a candidate JTBD-NNN to ratify.
+  result=$(resolve_low_confidence_internal "unknown")
+  [ "$result" = "INTERVIEW" ]
 }
 
-@test "I12 derive-then-ratify: i12_should_halt_afk proceeds when --no-prompt set but derivation succeeded" {
-  # AFK caller passed --no-prompt AND pre-resolved via flags. Derivation
-  # succeeded; proceed silently with derived values.
-  ! i12_should_halt_afk "1" "1"
+@test "P401 elicited who/why matching an existing artefact maps autonomously" {
+  # Classification: elicited job matches an existing JTBD/persona → map and
+  # proceed with no further human ratification (ADR-068 boundary is
+  # creation-only). Yields a ticket.
+  result=$(resolve_low_confidence_internal "existing")
+  [ "$result" = "MAP_EXISTING" ]
+  internal_resolution_creates_ticket "$result"
 }
 
-@test "I12 derive-then-ratify: i12_should_halt_afk proceeds when no --no-prompt (interactive mode)" {
-  # Interactive caller; derivation failed; AskUserQuestion fires (proceed
-  # past the AFK halt gate, into the ratification dispatch).
-  ! i12_should_halt_afk "" ""
+@test "P401 elicited who/why with no existing fit routes to human-ratified new-artefact creation" {
+  # No existing fit → a new persona/JTBD is warranted → human ratifies the
+  # CREATION (ADR-068/P288), then map. Still yields a ticket (never discard).
+  result=$(resolve_low_confidence_internal "none")
+  [ "$result" = "RATIFY_CREATE_NEW" ]
+  internal_resolution_creates_ticket "$result"
 }
 
-@test "I12 derive-then-ratify: i12_should_halt_afk proceeds when interactive AND derivation succeeded" {
-  ! i12_should_halt_afk "" "1"
+@test "P401 a maintainer-internal problem is NEVER discarded over anchoring uncertainty" {
+  # Every internal low-confidence resolution — map-existing, ratify-new, or
+  # the AFK create-with-unconfirmed-sentinel — yields a ticket.
+  internal_resolution_creates_ticket "MAP_EXISTING"
+  internal_resolution_creates_ticket "RATIFY_CREATE_NEW"
+  internal_resolution_creates_ticket "CREATE_UNCONFIRMED_QUEUE_ELICITATION"
 }
 
-@test "I12 derive-then-ratify: REJECT response halts capture (no ticket created)" {
-  classified=$(classify_ratification_response "REJECT")
-  [ "$classified" = "REJECT" ]
-  ! ratification_creates_ticket "$classified"
+@test "P401 AFK low-confidence creates ticket with unconfirmed sentinel + queues elicitation (not halt-refuse)" {
+  # --no-prompt + derivation-failure → preserve the finding.
+  result=$(afk_low_confidence_action "1" "")
+  [ "$result" = "CREATE_UNCONFIRMED_QUEUE_ELICITATION" ]
+  # The AFK sentinel is a real (non-empty) anchoring value written to the
+  # ticket — the finding is preserved, not discarded.
+  [ -n "$AFK_SENTINEL" ]
+  internal_resolution_creates_ticket "$result"
 }
 
-@test "I12 derive-then-ratify: option-pick (ACCEPTANCE) yields ticket with proposed values" {
-  classified=$(classify_ratification_response "OPTION:developer")
-  [ "$classified" = "ACCEPT:developer" ]
-  ratification_creates_ticket "$classified"
-}
-
-@test "I12 derive-then-ratify: free-text correction (CORRECTION-AS-ACCEPTANCE) yields ticket with corrected values" {
-  classified=$(classify_ratification_response "FREETEXT:plugin-user")
-  [ "$classified" = "CORRECT:plugin-user" ]
-  ratification_creates_ticket "$classified"
-}
-
-@test "I12 derive-then-ratify: parse_no_prompt_flag detects --no-prompt anywhere in args" {
-  result=$(parse_no_prompt_flag "--persona=developer" "--no-prompt" "description text")
-  [ "$result" = "1" ]
-}
-
-@test "I12 derive-then-ratify: parse_no_prompt_flag empty when --no-prompt absent" {
-  result=$(parse_no_prompt_flag "--persona=developer" "description text")
-  [ -z "$result" ]
-}
-
-@test "I12 derive-then-ratify: flag pre-resolution short-circuits derive-failure (AFK-safe path)" {
+@test "P401 AFK proceeds normally when derivation succeeded (flags pre-resolved)" {
   # AFK orchestrator pattern: pass --no-prompt PLUS --persona + --jtbd to
-  # avoid the AFK halt. Verifies the load-bearing caller-side contract.
+  # skip the sentinel path entirely.
   no_prompt=$(parse_no_prompt_flag "--persona=developer" "--jtbd=JTBD-006" "--no-prompt" "fix work-problems iter halt")
   [ "$no_prompt" = "1" ]
   persona=$(validate_persona "developer")
   [ "$persona" = "developer" ]
   jtbd=$(parse_jtbd_flag "--jtbd=JTBD-006")
   [ "$jtbd" = "JTBD-006" ]
-  # Derivation resolved (both flags present); halt predicate proceeds.
-  derivation_resolved="1"
-  ! i12_should_halt_afk "$no_prompt" "$derivation_resolved"
+  result=$(afk_low_confidence_action "$no_prompt" "1")
+  [ "$result" = "PROCEED" ]
+}
+
+@test "P401 interactive low-confidence proceeds into the interview (no --no-prompt)" {
+  result=$(afk_low_confidence_action "" "")
+  [ "$result" = "PROCEED" ]
+}
+
+@test "P401 scope-rejection is external-report-only; maintainer-internal always anchors" {
+  # External report whose elicited who/why we do NOT want to support →
+  # deliberate scope decline (no ticket) — the ONLY no-ticket path.
+  [ "$(external_scope_disposition external no)" = "DECLINE_SCOPE" ]
+  # External report in scope → anchors.
+  [ "$(external_scope_disposition external yes)" = "ANCHOR" ]
+  # Maintainer-internal ALWAYS anchors, regardless of scope signal —
+  # internal captures are never scope-rejected.
+  [ "$(external_scope_disposition internal no)" = "ANCHOR" ]
+  [ "$(external_scope_disposition internal yes)" = "ANCHOR" ]
+}
+
+@test "P401 parse_no_prompt_flag detects --no-prompt anywhere in args" {
+  result=$(parse_no_prompt_flag "--persona=developer" "--no-prompt" "description text")
+  [ "$result" = "1" ]
+}
+
+@test "P401 parse_no_prompt_flag empty when --no-prompt absent" {
+  result=$(parse_no_prompt_flag "--persona=developer" "description text")
+  [ -z "$result" ]
 }
 
 @test "SKILL.md: Step 1.5b section header exists for JTBD-trace + persona dispatch" {
@@ -328,18 +369,30 @@ parse_no_prompt_flag() {
   grep -qE '\| `--no-prompt`' "$SKILL_FILE"
 }
 
-@test "SKILL.md: Step 1.5b names REJECT-as-problem-rejection semantics" {
-  grep -qE 'REJECT.*=.*[Rr]ejection of the problem|rejection of proposed persona/JTBD = (rejection|REJECT) of the problem' "$SKILL_FILE"
+@test "SKILL.md: Step 1.5b names P401 never-discard-over-anchoring rule" {
+  grep -qiE 'never discarded over anchoring uncertainty' "$SKILL_FILE"
 }
 
-@test "SKILL.md: Step 1.5b names AFK halt-with-stderr-directive on --no-prompt + derive-failure" {
-  grep -qE 'halt-with-stderr-directive.*AFK|AFK.*halt-with-stderr-directive|cannot derive .* under AFK' "$SKILL_FILE"
+@test "SKILL.md: Step 1.5b names interview-to-elicit-who/why (not propose an ID)" {
+  grep -qiE '[Ii]nterview.*(who|why|elicit)|elicit the real who/why' "$SKILL_FILE"
 }
 
-@test "SKILL.md: allowed-tools includes AskUserQuestion (for I12 ratification dispatch)" {
+@test "SKILL.md: Step 1.5b names scope-rejection as external-report-only" {
+  grep -qiE 'external-report-only' "$SKILL_FILE"
+}
+
+@test "SKILL.md: Step 1.5b names AFK unconfirmed-anchoring sentinel + queued elicitation" {
+  grep -qiE 'unconfirmed — elicitation queued|unconfirmed-anchoring sentinel' "$SKILL_FILE"
+}
+
+@test "SKILL.md: Step 1.5b routes new persona/JTBD creation to ADR-068/P288 human ratify" {
+  grep -qE 'ratif.*(creation|CREATION).*(ADR-068|P288)|(ADR-068|P288).*creation' "$SKILL_FILE"
+}
+
+@test "SKILL.md: allowed-tools includes AskUserQuestion (for the low-confidence interview)" {
   grep -qE '^allowed-tools:.*AskUserQuestion' "$SKILL_FILE"
 }
 
-@test "SKILL.md: ADR-044 authority taxonomy names direction-setting (category 1) for ratification fallback" {
+@test "SKILL.md: ADR-044 authority taxonomy names direction-setting (category 1) for interview + creation-ratify" {
   grep -qE 'direction-setting.*category 1|category 1.*direction-setting' "$SKILL_FILE"
 }

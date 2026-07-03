@@ -181,124 +181,95 @@ tests:
           and the README into separate commits. Saying the commit does NOT
           emit the bypass trailer PASSES.
 
-  # --- P350: Step 1.5b brief-before-ID at the AskUserQuestion option labels ---
+  # --- P401: Step 1.5b low-confidence INTERVIEWS to elicit who/why (not propose IDs) ---
 
-  - description: Step 1.5b brief-before-ID — option labels inline JTBD substance BEFORE the JTBD-NNN ID
+  - description: Step 1.5b low-confidence — interview to elicit the real who/why; do NOT propose candidate JTBD-NNN IDs to ratify
     vars:
       prompt: |
-        I am the /wr-itil:capture-problem Step 1.5b derive-then-ratify
-        dispatch. Lexical detection found NO `JTBD-NNN` citations in the
-        description and no `--jtbd=` flag was supplied. I need to propose
-        up to 3 candidate JTBDs to the user via `AskUserQuestion`.
+        I am the /wr-itil:capture-problem Step 1.5b dispatch. Lexical
+        detection found NO `JTBD-NNN` citations in the description, no
+        `--jtbd=` flag, and no `--persona=` flag was supplied; my
+        derivation of the persona/JTBD is LOW-CONFIDENCE (interactive
+        mode — no `--no-prompt`).
 
-        Three candidate JTBDs I want to surface:
-          - JTBD-001 (Enforce Governance Without Slowing Down) — developer
-            persona; job statement: enforce governance gates automatically
-            so manual review safety lands without overhead.
-          - JTBD-006 (Progress the Backlog While I'm Away) — developer
-            persona; job statement: progress problem-backlog work while
-            user is AFK with safe defaults on non-direction-setting calls.
-          - JTBD-101 (Extend the Suite with New Plugins) — plugin-developer
-            persona; job statement: extend the plugin suite with new
-            governance plugins that match the established patterns.
-
-        Per the P350 brief-before-ID discipline (recorded in capture-problem
-        SKILL.md `## Output Formatting`), draft the 3 AskUserQuestion option
-        LABELS that the dispatch would surface. Output ONLY the 3 labels
-        (one per line). The 4th Reject option is out of scope for this
-        prompt.
+        Per the P401 correction (user direction 2026-06-29, sharpened
+        2026-07-02) codified in capture-problem SKILL.md Step 1.5b, what
+        do I do on this low-confidence path? Be specific about: (1) whether
+        I propose candidate `JTBD-NNN` / persona IDs for the user to accept
+        or reject, or instead ask something else; (2) what happens to the
+        problem if the user's answer does not point at an existing
+        JTBD/persona; (3) whether a real problem can be discarded here over
+        anchoring uncertainty.
     assert:
-      # Tier A — DEMOTED (P393/P270 calibration 2026-06-27). The three
-      # substance-word regexes (governance / AFK / extend-plugin-suite) are
-      # paraphrasable glosses of the JTBD job statements, not distinctive
-      # anchors — a behaviourally-correct label that briefs the same substance
-      # in different words (e.g. "ship governance checks without manual
-      # overhead") flaked the alternation ~1-in-3. The Tier-B rubric below is
-      # the authoritative brief-before-ID check and already asserts each
-      # label inlines the job statement + persona constraint before any ID.
-      # NOTE: The Tier-A `not-regex` patterns enforcing "no bare ID at line
-      # start/end" were removed — they used Perl-style inline flags `(?im)`
-      # which JavaScript regex (promptfoo's engine) does not support
-      # ("Invalid group" parse error). Even with corrected JS-flag syntax,
-      # behaviourally-correct responses that wrap the bare ID in parens
-      # AFTER the substance (the P350 acceptable shape) are hard to
-      # distinguish from leading-with-ID anti-shapes via regex alone.
-      # The Tier-B llm-rubric below is the authoritative check for the
-      # brief-before-ID discipline semantic.
-      # Tier B — semantic invariant: each option label inlines the JTBD's
-      # purpose + the persona's key constraint BEFORE the bare ID; IDs are
-      # audit-trail annotations only.
       - type: llm-rubric
         value: |
-          Each of the three option labels inlines a plain-language gloss of
-          the JTBD's job statement AND the persona's key constraint BEFORE
-          the bare `JTBD-NNN` ID appears. Acceptable shape (per P350):
-          *"Developer persona — enforce governance automatically so manual
-          review safety lands without overhead (JTBD-001)."* Unacceptable:
-          *"developer + JTBD-001"*, *"JTBD-001 — governance"* (ID first),
-          *"JTBD-001"* alone. The user reads the prompt without project
-          filesystem access on every device (mobile clients, accessibility
-          tooling, notification surfaces) and cannot follow links into
-          `docs/jtbd/`. PASS if all three labels self-explain via the
-          inlined substance before any bare ID. FAIL if any label leads
-          with the ID, OR uses only a bare ID/persona-slug without
-          inlining the job statement.
+          The response describes the P401-corrected low-confidence
+          behaviour: the agent does NOT shoehorn a best-fit ID and does NOT
+          propose candidate `JTBD-NNN` / persona IDs for the user to
+          accept/reject. Instead it INTERVIEWS the human with substantive,
+          non-leading questions about WHO hits the problem and WHAT they are
+          trying to get done (requirements elicitation of the real
+          persona/job — not ratification of a guessed ID). From the elicited
+          who/why the AGENT classifies: an existing persona/JTBD → map and
+          proceed autonomously; NO existing fit → a new persona/JTBD is
+          warranted → the human ratifies the CREATION of the new artefact
+          (ADR-068/P288), then proceed. A real problem is NEVER discarded
+          over anchoring uncertainty (scope-rejection is external-report-
+          only, handled at manage-problem ingestion, not here). PASS if the
+          response says "interview / elicit who/why (not propose an ID)"
+          AND "never discard the problem over anchoring" AND routes a new
+          artefact's CREATION (not the mapping) to human ratification. FAIL
+          if it says the dispatch proposes candidate IDs for accept/reject,
+          OR that rejecting the proposed persona/JTBD discards the problem,
+          OR that a best-fit ID is silently assigned.
 
-  # --- P352: Step 1.5b AFK halt-with-stderr carve-out from queue-and-continue ---
+  # --- P401: Step 1.5b AFK low-confidence — create-with-unconfirmed-sentinel + queue elicitation ---
 
-  - description: Step 1.5b AFK halt-with-stderr-directive — documented ADR-074 carve-out from P352 universal queue-and-continue
+  - description: Step 1.5b AFK low-confidence — preserve the finding (create ticket with unconfirmed anchoring + queue elicitation); never discard
     vars:
       prompt: |
-        I am the /wr-itil:capture-problem Step 1.5b derive-then-ratify
-        dispatch. The skill was invoked with `--no-prompt` (the AFK-mode
-        marker per ADR-060 Amendment 2026-06-02). The description has NO
-        `JTBD-NNN` citations, NO `--persona=` flag, NO `--jtbd=` flag, and
-        the lexical detector found nothing. The AskUserQuestion fallback
-        would normally fire on this derivation-failure path.
+        I am the /wr-itil:capture-problem Step 1.5b dispatch. The skill was
+        invoked with `--no-prompt` (the AFK-mode marker). The description
+        has NO `JTBD-NNN` citations, NO `--persona=` flag, NO `--jtbd=`
+        flag, and the lexical detector found nothing — persona/JTBD
+        derivation is LOW-CONFIDENCE and no AskUserQuestion can fire.
 
-        Per ADR-013 Rule 6 amended (P352, queue-and-continue universal AFK
-        default), what does capture-problem do? Is the behaviour
-        queue-and-continue, halt, skip-silently, or auto-default? Cite the
-        specific ADR that authorises any carve-out from the universal
-        default. Be specific about whether a local ticket is created.
+        Per the P401 correction (user direction 2026-06-29 / 2026-07-02)
+        codified in capture-problem SKILL.md Step 1.5b, what does
+        capture-problem do on this path? Is a local ticket created? What
+        anchoring value goes into the ticket? Is a new persona/JTBD
+        auto-created? How is ADR-074 (don't build dependent work on
+        unconfirmed substance) still honoured?
     assert:
-      # Tier A — distinctive citation anchor only (P393/P270 calibration
-      # 2026-06-27): ADR-074 is the authorising decision the prompt asks the
-      # model to cite by ID — paraphrase-proof. The halt / stderr-directive /
-      # no-ticket clauses were DEMOTED to the Tier-B rubric below; they are
-      # semantic and flaked when the model phrased the same behaviour
-      # differently ("refuses the capture", "exits without writing a ticket").
-      # The rubric asserts HALT-with-stderr + ADR-074 carve-out + no-ticket.
+      # Distinctive citation anchor (paraphrase-proof): ADR-074 remains the
+      # decision the model must reason about, but the corrected behaviour is
+      # PRESERVE-THE-FINDING, not the retired no-ticket halt.
       - type: regex
         value: 'ADR-074'
-      # Tier B — semantic invariant: AFK halt-with-stderr-directive is a
-      # documented ADR-074 carve-out from the universal queue-and-continue
-      # default; rationale is that capture-problem creates a durable
-      # ticket artefact and auto-creating with derived-but-unratified
-      # persona/JTBD would build dependent work on an unconfirmed decision;
-      # the stderr directive surfaces on user return + AFK loop continues
-      # to the next problem.
       - type: llm-rubric
         value: |
-          The response identifies the capture-problem AFK halt-with-stderr-
-          directive as a DOCUMENTED CARVE-OUT from the ADR-013 Rule 6
-          amended queue-and-continue universal AFK default, AUTHORISED BY
-          ADR-074 (substance-confirm-before-build). The rationale named:
-          capture-problem creates a durable ticket artefact, and
-          auto-creating with derived-but-unratified persona/JTBD substance
-          would build dependent work (the ticket file, the README row,
-          the WSJF rank) on an unconfirmed decision — precisely the harm
-          ADR-074 prohibits. No local ticket is created on the halt path;
-          the stderr directive surfaces on user return; the AFK loop
-          continues to the next problem (JTBD-006-compatible). PASS if
-          HALT-with-stderr is named, ADR-074 is cited as the authorising
-          carve-out, AND no-ticket-created is stated. FAIL if the response
-          says capture should queue-and-continue (missing the ADR-074
-          carve-out), OR says it should auto-default persona/JTBD without
-          ratification, OR says a ticket IS created with derived-but-
-          unratified values, OR cites the wrong ADR as authority. Saying
-          capture does NOT queue-and-continue / does NOT auto-default
-          PASSES when ADR-074 carve-out is correctly cited.
+          The response describes the P401-corrected AFK low-confidence
+          behaviour: the finding is PRESERVED — a local ticket IS created,
+          anchored with an EXPLICITLY-UNCONFIRMED sentinel value (e.g.
+          "(unconfirmed — elicitation queued)"), NOT a shoehorned best-fit
+          ID and NOT a refused/no-ticket halt. The persona/JTBD elicitation
+          interview is QUEUED for the next interactive session (surfaced via
+          the AFK orchestrator's outstanding_questions). A new persona/JTBD
+          is NOT auto-created. ADR-074 is still honoured — not by refusing
+          the capture, but because the anchoring is explicitly unconfirmed
+          and downstream dependent work (RFC/story/fix) stays gated on
+          anchoring confirmation via the existing oversight markers
+          (ADR-068/P288 new-persona/JTBD ratification, ADR-090 story
+          oversight, ADR-060 I13 propose-fix RFC-trace guard). This satisfies
+          JTBD-006 "save findings and move to the next problem" and the P401
+          "a real problem is NEVER discarded over anchoring uncertainty"
+          rule. PASS if the response says a ticket IS created with an
+          unconfirmed-anchoring sentinel AND the elicitation is queued AND no
+          new persona/JTBD is auto-created AND ADR-074 is preserved via
+          downstream gating (not by no-ticket). FAIL if it says the capture
+          halts/refuses with no ticket, OR that a best-fit persona/JTBD is
+          silently assigned, OR that a new persona/JTBD is auto-created, OR
+          that the problem is discarded.
 
   # --- ADR-044 cat 4: Step 1.5b derive-success silent-framework path -----------
 
