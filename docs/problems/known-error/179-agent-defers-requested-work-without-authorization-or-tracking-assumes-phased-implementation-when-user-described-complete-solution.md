@@ -86,8 +86,21 @@ Root cause confirmed and the deferral class reconciled against shipped sibling f
 
 **Residual permanent-fix work (the only remaining blocker): the framework-position decision below.** Per ADR-074 substance-confirm-before-build + this AFK loop's "queue + skip on born-proposed unconfirmed decisions" constraint, the Option A/B/C/D choice is genuinely user-judgment-bound (it is a MANDATORY-rule *enforcement-form* decision — hard test vs soft guidance vs process-gate vs cultural — squarely in ADR-044's direction-setting / taste taxonomy). **Not picked unilaterally; queued for user confirmation.** See the "Decide framework position on deferral discipline" Investigation Task (Options A–D) below. The de-facto state is Option D; the open question is whether to ratify D as-is or escalate to A (hard rule + behavioural test per ADR-051/ADR-052).
 
+### RCA reconciliation finding (2026-07-03, AFK work-problems iter)
+
+**A shipped sibling gate now overlaps P179's tracking axis — but with a contract in DIRECT TENSION with P179's ratified Option A, and it does not touch P179's authorization axis.** Since the 2026-06-17 Option-A ratification, RFC-035 (`authoring-time-deferral-cadence-gate`, proposed) shipped its core slice: `packages/itil/hooks/itil-deferral-cadence-gate.sh` (2026-06-28, `@windyroad/itil` hook, 15 green bats) — a PostToolUse:Write|Edit|MultiEdit gate firing on deferral phrasings introduced into the exact authoring surfaces P179 targets (`SKILL.md`, `docs/decisions/*.md`, `docs/rfcs/*.md`, hook `*.sh`; `docs/problems/` excluded), requiring a citation within a +/-5-line window.
+
+Two findings materially change P179's fix landscape:
+
+1. **Contract conflict on the tracking axis.** RFC-035's cadence contract (ADR-087) DELIBERATELY OMITS ticket-ID citations (`Pnnn/RFC-nnn/ADR-nnn`) and skill-invocations from its satisfying vocabulary — a bare tracking-ticket citation does NOT satisfy the gate (source: `itil-deferral-cadence-gate.sh` L73-75 `CADENCE_RE`, "those are the P375 conflation"). But P179's **ratified Option A** makes a tracking-ticket citation *the* legitimizer of a deferral ("deferral legal iff cites a tracking ticket OR user-direction"). P375's stricter position (per `feedback_named_re_entry_is_not_self_firing_cadence`: a backlog ticket with no self-firing surface still rots) is a genuine refinement/supersession of P179's Option A — the two ratified positions disagree on whether a ticket-ID citation is sufficient. This is a framework-position reconciliation only the user can make.
+
+2. **Authorization axis untouched.** P179 has TWO concerns — (1) explicit user *authorization* for the ship-now/defer split, and (2) *tracking* of the deferred work. RFC-035's gate addresses only axis (2), and even there with a conflicting contract. P179's axis (1) — the agent inferring the scope boundary without user direction — is not covered by any shipped gate. This is P179's genuine residual surface.
+
+**Consequence for the fix vehicle:** the 2026-06-17 "capture a new RFC tracing this ticket" next-step is now superseded — RFC-035 is the existing authoring-time-deferral-gate vehicle; capturing a second RFC would duplicate it (hang-off discipline). P179's fix should either (a) fold into RFC-035's B7 convergence as the authorization-axis + ticket-citation-reconciliation slice, or (b) narrow to the residual authorization axis, or (c) relevance-close if the reconciliation lands on "P375's cadence rule supersedes P179 wholesale." All three are user-judgment-bound. Build stays blocked under ADR-074 (RFC-035's ADR-087 contract carries a born-`unconfirmed` substance-ratification queued per P357; and the reconciliation itself is unmade).
+
 ### Investigation Tasks
 
+- [ ] **Reconcile P179 Option A against shipped RFC-035/ADR-087 cadence contract** (QUEUED for user — 2026-07-03): P179's ratified rule says a tracking-ticket citation legitimizes a deferral; the shipped `itil-deferral-cadence-gate.sh` deliberately rejects ticket-ID citations (P375 says a backlog ticket with no self-firing cadence still rots). Decide: (a) fold P179 into RFC-035 as the authorization-axis + ticket-vs-cadence reconciliation slice; (b) narrow P179 to the residual user-authorization axis only (uncovered by any shipped gate); (c) relevance-close P179 as superseded by P375/RFC-035's stricter cadence rule.
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
 - [x] Investigate root cause (2026-06-16 RCA): confirmed all-three-surface gap — SKILL.md (no deferral-citation invariant), ADR-template ("Out of Scope" section invites unauthorised scope-narrowing; 26 ADRs carry the pattern), agent-prior (phased-implementation conditioning). De-facto enforcement is Option D (cultural P179-citation habit) with no test backstop. See RCA reconciliation finding above.
 - [x] Survey existing ADRs for unauthorised "Phase N (deferred)" / "Out of Scope" entries (2026-06-16): `grep -lE 'Phase [0-9]+ \(deferred|Out of Scope|deferred to' docs/decisions/` → **26 ADR files**. None gated by any deferral-citation invariant. Confirms the unenforced surface is real.
@@ -115,7 +128,7 @@ User ratified **Option A — Hard rule + behavioural test per ADR-051 / ADR-052*
 
 Options B (soft retro-audit), C (mid-flow ask), and D (ratify de-facto) are rejected.
 
-Next step: capture an RFC per ADR-060 tracing this ticket + the locus list above; defer build under ADR-074 substance-confirm-before-build until the RFC has scope ratified.
+**Superseded next-step (2026-07-03):** the original "capture a new RFC tracing this ticket" step is stale — RFC-035 (`authoring-time-deferral-cadence-gate`) shipped a gate on the same authoring surfaces on 2026-06-28, and its ADR-087 cadence contract *conflicts* with Option A on whether a ticket-ID citation legitimizes a deferral (it does not, per P375). Before any P179 build: resolve the "Reconcile P179 Option A against shipped RFC-035/ADR-087" Investigation Task above. Do NOT capture a second RFC (would duplicate RFC-035); fold into RFC-035 or narrow to the residual authorization axis. See the 2026-07-03 RCA reconciliation finding.
 
 ## Dependencies
 
@@ -138,6 +151,9 @@ Next step: capture an RFC per ADR-060 tracing this ticket + the locus list above
 - ADR-051 — load-bearing-from-the-start
 - ADR-052 — behavioural-tests-default
 - ADR-060 — RFC framework (drove the unauthorised "Phase 2 deferral" of story-map design that surfaced this pattern)
+- ADR-087 — authoring-time cadence-annotation contract; its satisfying vocabulary rejects ticket-ID citations, in tension with P179 Option A (2026-07-03 reconciliation)
+- RFC-035 — shipped authoring-time-deferral-cadence-gate; overlaps P179's tracking axis, candidate fold-in vehicle
+- P375 — sibling: uncadenced-deferral rot; its "named re-entry ≠ self-firing cadence" refinement supersedes P179 Option A's ticket-citation sufficiency
 - P078 — capture-on-correction OFFER pattern
 - P175 — sibling inferential failure class (loop-control)
 - P178 — sibling inferential failure class (state-machine)
