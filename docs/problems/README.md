@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-03 **P413+P414 captured** — work-problems defers upstream-reporting behind a manual batch-report choice (16 unreported); retro/wrap defers over-5K briefing rotation as a recommendation instead of doing it. Same meta-class (wrap hands the user a to-do list instead of acting). (lightweight aside via /wr-itil:capture-problem)
+> Last reviewed: 2026-07-03 **P363 Known Error → Verifying** — inbound-verdict fix confirmed present in all three source surfaces AND released (`@windyroad/itil@0.56.0`, past the `0.54.6` working leg); transitioned to the Verification Queue per ADR-022 / ADR-049. Sole open gate is live verification (next inbound K→V auto-post). (AFK work-problems iter)
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -14,7 +14,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 12.0 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 High | Known Error | M | 2026-06-10 | internal |
 | 12.0 | P376 | Catchup scanner misses the inbound direction; outbound templates carry the same structural defect the P363 rework fixed on the inbound side — cross-direction parity gap | 12 High | Known Error | M | 2026-06-23 | internal |
 | 9.0 | P180 | Agent defers mitigation selection to user during active incident — surfaces mitigation choice as user-authority when SKILL contract empowers agent-driven reversible mitigations | 9 Medium | Known Error | M | 2026-05-10 | internal |
-| 9.0 | P363 | Inbound-reported tickets never receive fix-released verdict on originating issue | 9 Medium | Known Error | M | 2026-06-11 | internal |
 | 9.0 | P371 | manage-problem I13 propose-fix gate auto-creates a new RFC instead of wiring an existing fix-vehicle's trace edge | 9 Medium | Known Error | M | 2026-06-17 | internal |
 | 9.0 | P400 | architect-mark-reviewed PostToolUse never fires on a SendMessage resume of an architect agent | 9 Medium | Open | S | 2026-06-28 | internal |
 | 8.0 | P345 | Fix-titled commits do not transition the ticket lifecycle in the same commit grain — ticket stays Open across release + CI-verify + multiple intervening commits | 8 Medium | Known Error | M | 2026-05-31 | internal |
@@ -262,6 +261,7 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P392 | replace-section `awk -v section="$multiline"` aborts on BSD awk (macOS) — getline-from-tempfile fix at `update-problem-references-section.sh:266` | @windyroad/itil@0.55.1 (behavioural bats RED→GREEN on host BSD awk) | yes — observed: behavioural bats RED→GREEN on host BSD awk in-session |
 | P394 | Release preview-publishes every package, not just changed ones — `release-preview.yml` skip-unchanged guard (version == npm latest → skip) | CI-infra, `.github/workflows/release-preview.yml` (no npm artefact) | yes — observed: two consecutive releases (risk-scorer, itil) each preview-published ONLY the changed package; wardley/tdd/voice-tone stayed at `-preview.840` |
 | P404 | Implement ADR-089 + ADR-090 in the skills and tests (≥1-story-per-RFC + story-map/story ratification) | `@windyroad/itil` — RFC-037 complete (all 5 stories done + ratified); release queued via `.changeset/` | no — not observed |
+| P363 | Inbound-reported tickets never receive fix-released verdict on originating issue — consume `**Origin**` field | `@windyroad/itil@0.51.1` (inbound leg, `ddb47521`) → reworked `0.54.6` (`4e3f2bfb`); present in `0.56.0` | no — not observed (2026-06-28 live-verify failed on stale cache, not leg-correctness; awaiting post-refresh inbound K→V) |
 
 | P368 | wr-architect-mark-oversight-confirmed cannot discover session-id when CLAUDE_SESSION_ID empty AND no announce markers | @windyroad/architect@0.18.4 (2026-07-03) | no — not observed |
 | P384 | wr-risk-scorer:external-comms agent gains Outbound Credibility / Self-Own review axis | @windyroad/risk-scorer@0.16.0 (2026-07-03) | yes — observed: promptfoo eval 2/2 GREEN 2026-07-03 |
