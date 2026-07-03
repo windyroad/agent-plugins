@@ -1,5 +1,29 @@
 # @windyroad/risk-scorer
 
+## 0.16.0
+
+### Minor Changes
+
+- 7ce5952: external-comms agent: add an outbound credibility / self-own review axis
+
+  The `wr-risk-scorer:external-comms` agent now reviews outbound prose on two
+  composing axes instead of one. Alongside the existing confidential-information
+  leak axis it checks for credibility / self-own errors: asking the recipient for
+  something the sender already holds (`asks-for-already-held-info`), restating what
+  the recipient told us as if new (`restates-prior-as-new`), and plainly careless
+  mistakes like a wrong name, wrong company, or stale account claim
+  (`plainly-careless-error`). The axes are independent — a leak-clean draft can
+  still fail credibility, and a FAIL on either axis is a FAIL verdict.
+
+  The agent reads its class list from `RISK-POLICY.md` at runtime, so the credibility
+  axis activates wherever an `## Outbound Credibility / Self-Own` policy section is
+  present and stays dormant where it is absent. The PASS/FAIL verdict contract and
+  the marker-key derivation are unchanged.
+
+### Patch Changes
+
+- d8b6c45: The external-comms gate now distinguishes read-only `gh api` polls from body-bearing draft writes. Previously any command containing `gh api ... security-advisories` or `gh api ... /comments` was treated as an outbound draft and blocked — including the read-only `--jq` discovery poll that `/wr-itil:review-problems` uses, which carries no outbound prose. A new `_gh_api_has_body` predicate gates those two surfaces only when a request-body flag (`-f`/`--field`, `-F`/`--raw-field`, `--input`) is present; read-only invocations skip the gate. Every inherently-write surface (`gh issue`/`gh pr` create/comment/edit, `npm publish`, changeset, commit message) stays gated unconditionally (P405).
+
 ## 0.15.1
 
 ### Patch Changes
