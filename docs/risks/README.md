@@ -154,3 +154,14 @@ The catalogue is self-pruning: when a class stops surfacing in `.risk-reports/` 
 | [R059](R059-skill-prose-surface-push-without-paired-eval.active.md) | Skill Prose Surface Push Without Paired Eval | pending | — | — | pending | pending | 2026-06-17 |
 | [R060](R060-skill-prose-upstream-dispatch-no-promptfoo-coverage.active.md) | Skill Prose Upstream Dispatch No Promptfoo Coverage | pending | — | — | pending | pending | 2026-06-17 |
 | [R061](R061-catchup-migration-mode-skill-prose-no-promptfoo-coverage.active.md) | Catchup Migration Mode Skill Prose No Promptfoo Coverage | pending | — | — | pending | pending | 2026-06-17 |
+| [R062](R062-rate-at-capture-skill-prose-no-paired-promptfoo-coverage.active.md) | Rate At Capture Skill Prose No Paired Promptfoo Coverage | pending | — | — | pending | pending | 2026-07-03 |
+| [R063](R063-minor-bump-shipped-under-unconfirmed-oversight-adr.active.md) | Minor Bump Shipped Under Unconfirmed Oversight Adr | pending | — | — | pending | pending | 2026-07-03 |
+| [R064](R064-adr-ratification-precondition-unmet-before-release.active.md) | Adr Ratification Precondition Unmet Before Release | pending | — | — | pending | pending | 2026-07-03 |
+| [R065](R065-update-policy-skill-step-6a-r009-prose-floor-no-promptfoo.active.md) | Update Policy Skill Step 6A R009 Prose Floor No Promptfoo | pending | — | — | pending | pending | 2026-07-03 |
+| [R066](R066-capture-problem-persona-adopter-corpus-prose-no-dedicated-eval.active.md) | Capture Problem Persona Adopter Corpus Prose No Dedicated Eval | pending | — | — | pending | pending | 2026-07-03 |
+| [R067](R067-agent-prose-verdict-axis-shipped-without-promptfoo-harness.active.md) | Agent Prose Verdict Axis Shipped Without Promptfoo Harness | pending | — | — | pending | pending | 2026-07-03 |
+| [R068](R068-work-problems-skill-prose-plugin-dir-dispatch-no-promptfoo.active.md) | Work Problems Skill Prose Plugin Dir Dispatch No Promptfoo | pending | — | — | pending | pending | 2026-07-03 |
+| [R069](R069-r009-skill-prose-floor-undischarged-until-promptfoo-green-verified.active.md) | R009 Skill Prose Floor Undischarged Until Promptfoo Green Verified | pending | — | — | pending | pending | 2026-07-03 |
+| [R070](R070-work-problems-skill-prose-r009-floor-cohort-depth-nine-held-on-single-eval.active.md) | Work Problems Skill Prose R009 Floor Cohort Depth Nine Held On Single Eval | pending | — | — | pending | pending | 2026-07-03 |
+| [R071](R071-r009-i13-existing-vehicle-trace-branch-no-promptfoo-eval.active.md) | R009 I13 Existing Vehicle Trace Branch No Promptfoo Eval | pending | — | — | pending | pending | 2026-07-03 |
+| [R072](R072-skill-prose-gate-invocation-floor-no-paired-promptfoo-for-changed-branch.active.md) | Skill Prose Gate Invocation Floor No Paired Promptfoo For Changed Branch | pending | — | — | pending | pending | 2026-07-03 |
