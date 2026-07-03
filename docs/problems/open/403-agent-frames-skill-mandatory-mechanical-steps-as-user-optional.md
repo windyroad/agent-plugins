@@ -60,13 +60,28 @@ The memories capture the pattern but rely on the agent reading and applying them
 
 ## Root Cause Analysis
 
+### Confirmed root cause (2026-07-03)
+
+The `feedback_*` standing memories capture the anti-pattern but rely on the agent **reading and applying them each turn** — an unreliable enforcement surface (the memories explicitly flag their own recurrence). No **structural** detector exists for the specific closer-framing where a *skipped/deferred mechanical step* is re-surfaced as a *user decision*. The existing itil Stop hook `packages/itil/hooks/itil-assistant-output-review.sh` already scans the last assistant turn for prose-ask phrasings via `detect_prose_ask` (in `packages/itil/hooks/lib/detectors.sh`) and emits a non-blocking `stopReason` nudge — but its pattern registry has no entry for the mechanical-step-as-optional shape. Root cause = **missing detector in an already-existing detection surface**, not a missing surface.
+
 ### Investigation Tasks
 
-- [ ] Enumerate skill contracts with explicit mechanical-step carve-outs and their "skip if" conditions (Step 7 ADR-020, Step 4.6 4.6d, Step 4.5 mechanical-stage carve-out, Step 6.5 within-appetite drain in work-problems, etc.).
-- [ ] Decide detection locus (P132 recurrences): review agent scanning end-of-turn prose, PostToolUse hook grepping specific closer phrases, or SKILL.md contract-prose amendment naming the anti-framing explicitly.
-- [ ] Consider a lightweight regex hook that pattern-matches "your call" / "up to you" / "worth doing" / "user's call" adjacent to a skill-step reference in agent output — would flag rather than block per ADR-045 hook injection budget.
-- [ ] Cross-check whether the `.changeset/rate-captures-at-capture.md` IDE-hinted draft changeset covers a parallel class-of-behavior fix — if so, this ticket composes with that work.
-- [ ] Create reproduction test: bats fixture that pipes a skill-step end-of-turn prose sample through the detection surface and asserts a flag/PASS.
+- [x] Enumerate skill contracts with explicit mechanical-step carve-outs and their "skip if" conditions (Step 7 ADR-020, Step 4.6 4.6d, Step 4.5 mechanical-stage carve-out, Step 6.5 within-appetite drain in work-problems, etc.). — feed the STEP_SKIP signal vocabulary.
+- [x] Decide detection locus (P132 recurrences): **extend the existing `itil-assistant-output-review.sh` Stop hook** (not a new PostToolUse hook, not a SKILL.md prose amendment). Chosen because it is already the ADR-013-Rule-1 end-of-turn-prose scanning surface, is ADR-045-budget-neutral (no new hook registration), and ADR-044's own Reassessment already names a Phase-4 enforcement hook as the intended mechanism — this is a slice of that.
+- [x] Lightweight regex detector that fires on "your call" / "up to you" / "worth doing" / "user's call" closers **AND** a co-occurring step-skip signal (the AND-discriminator prevents over-fire on legitimately user-owned decisions) — flags via `stopReason` rather than blocking, per ADR-045.
+- [x] Cross-check `.changeset/rate-captures-at-capture.md` — that draft targets capture-time scoring (a different class); no overlap with this detector. Not composed.
+- [x] Reproduction test: behavioural bats in `itil-assistant-output-review.bats` piping the two evidence phrasings through the hook and asserting the nudge fires; plus a negative case proving the AND-discriminator (optional closer without a step-skip signal → no fire).
+
+## Fix Strategy
+
+Extend the existing detector registry + Stop hook (minimal, ADR-045-budget-neutral):
+
+1. `packages/itil/hooks/lib/detectors.sh` — add `MECHANICAL_OPTIONAL_PATTERNS` (optional-framing closers) + `STEP_SKIP_PATTERNS` (step-skip signals) arrays and a `detect_mechanical_optional()` function that fires **only when both a step-skip signal and an optional-framing closer co-occur** in the turn text. Mirrors the existing `detect_prose_ask` shape.
+2. `packages/itil/hooks/itil-assistant-output-review.sh` — after the prose-ask scan, run `detect_mechanical_optional` on the same last-turn text; on match emit a distinct `stopReason` nudge citing P132 / ADR-044 (act on the framework-resolved step; do not re-surface it as a user decision).
+3. Behavioural bats tests in `packages/itil/hooks/test/itil-assistant-output-review.bats`, including an ADR-045 byte-budget assertion on the new nudge.
+4. `@windyroad/itil` patch changeset.
+
+Fix vehicle: RFC auto-created at fix-time per I13 (ADR-072 placement / ADR-073 auto-create).
 
 ## Dependencies
 
@@ -87,3 +102,9 @@ The memories capture the pattern but rely on the agent reading and applying them
 - **`.changeset/rate-captures-at-capture.md`** — IDE-hinted draft changeset (2026-07-02) targets a parallel class-of-behavior fix (rate scores at capture rather than defer to review). Composes-with candidate.
 - **Step 2b hang-off-check** result: short-circuit fired (>5 broad-signal candidates on `mechanical`/`defer`/`optional`/`skip` tokens); subagent dispatch skipped per ADR-032 5th invocation pattern. P234 (closed) is the strongest predecessor; P179 is the strongest live sibling. Review-problems re-evaluation is the canonical absorb-vs-proceed surface.
 - Captured via /wr-itil:capture-problem; scored at capture rather than deferred to next review, per the IDE-hinted `rate-captures-at-capture.md` direction.
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-042 | proposed | Detect mechanical-step-framed-as-user-optional in agent end-of-turn prose |
