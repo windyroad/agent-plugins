@@ -1,7 +1,13 @@
 # Problem 389: work iters omit the `**Release vehicle**` seed on Open→Known Error, so the post-release K→V auto-enumerator silently skips them
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-06-27
+
+## Fix Released
+
+- **Release vehicle**: `.changeset/p389-derive-release-vehicle-cocommit-fallback.md` → `@windyroad/itil@0.56.2` (2026-07-04)
+- **Fix**: `derive-release-vehicle.sh` gains a co-commit fallback — when a ticket body lacks the `**Release vehicle**` seed, it walks the ticket's own commits (newest first, across renames) and recovers the first co-committed `.changeset/*.md` as the release vehicle. This means the post-release K→V auto-enumerator (P228) no longer silently skips a seed-less ticket whose fix shipped (the P384 failure mode). Behavioural bats added (fails without the fallback / passes with it; 16/16 green). Note: the *upstream* fix (making iters WRITE the seed on O→KE) is a separate concern; this closes the downstream detection gap so a missing seed is recoverable.
+- **Awaiting user verification.**
 **Priority**: 6 (Medium) — Impact: 2 x Likelihood: 3
 **Origin**: internal
 **Effort**: M
