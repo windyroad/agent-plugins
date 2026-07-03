@@ -23,7 +23,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6.0 | P395 | external-comms agent silently goes dormant on the credibility axis — no nudge to author the missing RISK-POLICY section | 12 High | Open | M | 2026-06-28 | corrective-feedback (user, 2026-06-28) |
 | 6.0 | P399 | ADR-073 fix-time auto-create emits a SKELETON RFC; it should author the RFC fully | 12 High | Open | M | 2026-06-28 | corrective-feedback (user, 2026-06-28 — ratified at the work-problems loop-end decision surface) |
 | 6.0 | P401 | Capture/RFC persona-JTBD anchoring shoehorns (or discards the problem) instead of interviewing the human to elicit the real who/why | 12 High | Open | M | 2026-06-29 | corrective-feedback (user, 2026-06-29 — during the RFC-first ADR-072/060/087 ratification walkthrough) |
-| 6.0 | P403 | Agent frames skill-mandatory mechanical steps as user-optional | 12 High | Open | M | 2026-07-02 | internal |
 | 5.0 | P386 | review-problems Step 4.6 AFK-silent relevance-close contract cites a dangling work-problems Step 6.5 cross-reference | 5 Low | Open | S | 2026-06-27 | internal |
 | 5.0 | P406 | `github-discussions` channel in `.upstream-channels.json` returns HTTP 410 | 5 Low | Open | S | 2026-07-02 | internal |
 | 4.5 | P251 | RFC-first trace invariant not enforced — fixes start without RFC, story map, or JTBD trace | 9 Medium | Known Error | L | 2026-05-17 | internal |
@@ -267,6 +266,7 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P398 | the VP carve-out holds changesets for already-shipped (verifying) code indefinitely — pointless changelog stranding | pending — @windyroad/risk-scorer patch committed, ships next release | no — not observed |
 | P402 | external-comms/pipeline gate marker not persisted for background-launched review agents — codify synchronous dispatch (RFC-041) | pending — @windyroad/risk-scorer + @windyroad/voice-tone patch committed, ships next release | no — not observed |
 | P407 | /wr-*:assess-external-comms skills instruct synchronous reviewer dispatch (P402 follow-up; resolved same commit via RFC-041) | pending — @windyroad/risk-scorer + @windyroad/voice-tone patch committed, ships next release | no — not observed |
+| P403 | Agent frames skill-mandatory mechanical steps as user-optional (detect_mechanical_optional Stop-hook detector; fix vehicle RFC-042) | pending — @windyroad/itil patch committed, ships next release | no — not observed |
 
 ## Inbound Upstream Reports
 

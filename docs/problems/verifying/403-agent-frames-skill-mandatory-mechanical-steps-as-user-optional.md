@@ -1,6 +1,6 @@
 # Problem 403: Agent frames skill-mandatory mechanical steps as user-optional
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-07-02
 **Priority**: 12 (High) — Impact: 3 (Moderate — friction the mechanical-stage carve-out was engineered to remove; per-invocation slowdown; structurally counter to the framework's goals) × Likelihood: 4 (Likely — observed 2 instances in this session alone; per-session pattern per prior memory captures)
 **Origin**: internal
@@ -81,7 +81,19 @@ Extend the existing detector registry + Stop hook (minimal, ADR-045-budget-neutr
 3. Behavioural bats tests in `packages/itil/hooks/test/itil-assistant-output-review.bats`, including an ADR-045 byte-budget assertion on the new nudge.
 4. `@windyroad/itil` patch changeset.
 
-Fix vehicle: RFC auto-created at fix-time per I13 (ADR-072 placement / ADR-073 auto-create).
+Fix vehicle: RFC auto-created at fix-time per I13 (ADR-072 placement / ADR-073 auto-create) — RFC-042.
+
+## Fix Released
+
+Fix implemented and committed alongside this transition (fix vehicle RFC-042). Ships in the next `@windyroad/itil` patch release.
+
+- `packages/itil/hooks/lib/detectors.sh` — added `MECHANICAL_STEP_SKIP_PATTERNS`, `MECHANICAL_STEP_REF_PATTERNS`, `MECHANICAL_OPTIONAL_PATTERNS`, and `detect_mechanical_optional()` (three-way AND: step-skip signal + step reference + offloaded-justification closer).
+- `packages/itil/hooks/itil-assistant-output-review.sh` — after the prose-ask scan, runs `detect_mechanical_optional` and emits a distinct non-blocking `stopReason` nudge citing P132 / ADR-044.
+- `packages/itil/hooks/test/itil-assistant-output-review.bats` — behavioural coverage: both P403 evidence phrasings fire; two AND-discriminator negatives (optional-closer-only, skipped-with-real-reason) stay silent; ADR-045 byte-budget assertion.
+
+**Awaiting user verification**: confirm the Stop-hook nudge fires when an end-of-turn turn frames a mandated mechanical step as user-optional or budget-caution-skipped, and stays silent on legitimately user-owned decisions.
+
+Note: the detector nudges after the fact (Stop hooks cannot rewrite the emitted turn); it biases the next turn, same as the existing prose-ask nudge. It does not detect the budget-caution shape when phrased without a `context budget` / `to stay within` closer — a follow-on can widen the closer vocabulary if recurrence shows other phrasings.
 
 ## Dependencies
 

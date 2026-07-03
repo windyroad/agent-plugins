@@ -174,3 +174,51 @@ JSON
   [ "$status" -eq 0 ]
   [[ "$output" == *"stopReason"* ]]
 }
+
+# P403: mechanical-step-framed-as-user-optional. When a skill contract
+# mandates a mechanical step, the agent must not re-surface it as a user
+# decision (or a budget-caution skip) in end-of-turn prose. The detector
+# fires only when a step-skip signal, a step/mechanical-pass reference,
+# AND an offloaded-justification closer all co-occur (the AND-discriminator).
+
+@test "review: P403 evidence 1 — 'Step 7 auto-release skipped — your call' triggers stopReason" {
+  write_transcript "review the backlog" "Done. Step 7 auto-release skipped — your call whether to drain via /wr-risk-scorer:assess-release."
+  run run_hook
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"stopReason"* ]]
+  [[ "$output" == *"mechanical"* ]]
+}
+
+@test "review: P403 evidence 2 — 'Skipped the full re-rank (Step 2) ... to stay within context budget' triggers stopReason" {
+  write_transcript "review problems" "Skipped the full 40-ticket re-rank (Step 2), inbound-discovery pipeline (Step 4.5), and relevance-close pass (Step 4.6) to stay within context budget."
+  run run_hook
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"stopReason"* ]]
+}
+
+@test "review: AND-discriminator — optional closer WITHOUT a step-skip does not trigger stopReason" {
+  # "up to you" is a legitimately user-owned decision with no skipped
+  # mechanical step in context — must NOT fire (the inverse-P078 guard).
+  write_transcript "which theme" "Both palettes meet contrast AA. It is up to you which one reads better for your brand."
+  run run_hook
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"stopReason"* ]]
+}
+
+@test "review: AND-discriminator — skipped step with a real reason (no offload) does not trigger stopReason" {
+  # A skipped step reported with a substantive reason (not offloaded to the
+  # user, not budget-caution) is a legitimate report, not the P403 defect.
+  write_transcript "run it" "Step 2 skipped because its precondition is already satisfied by Step 1. Proceeding to Step 3."
+  run run_hook
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"stopReason"* ]]
+}
+
+@test "review: P403 nudge stays within the ADR-045 hook injection budget" {
+  write_transcript "review the backlog" "Done. Step 7 auto-release skipped — your call whether to drain."
+  run run_hook
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"stopReason"* ]]
+  # ADR-045 advisory band: keep the injected nudge well under 1000 bytes.
+  [ "${#output}" -lt 1000 ]
+}

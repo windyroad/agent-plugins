@@ -79,6 +79,84 @@ CORRECTION_SIGNAL_PATTERNS=(
   '\bno\b.*\bwrong\b'
 )
 
+# P403: mechanical-step-framed-as-user-optional detection. When a skill
+# contract mandates a mechanical step (review-problems Step 7 auto-release,
+# a full re-rank, etc.), the agent must not re-surface the step as a user
+# decision — or as a budget-caution skip — in end-of-turn prose. That
+# reintroduces the exact friction the mechanical-stage carve-out (P132 /
+# ADR-044 category 4 silent-framework) was engineered to remove.
+#
+# The detector fires only when ALL THREE co-occur in the turn text: a
+# step-skip verb, a step / mechanical-pass reference, AND an
+# offloaded-justification closer. The three-way AND is the anti-over-fire
+# guard (inverse-P078 / P132): a legitimately user-owned decision, or a
+# skipped step reported with a substantive reason, does not fire. Same
+# accepted false-positive posture as CORRECTION_SIGNAL_PATTERNS above — a
+# rare over-fire costs only a non-blocking next-turn nudge.
+#
+# Case-insensitive (grep -Eqi). grep matches per line; the two P403
+# evidence phrasings are single-line, so per-line matching is sufficient.
+
+# 1. Step-skip verbs — the step was not run.
+MECHANICAL_STEP_SKIP_PATTERNS=(
+  '\bskip(ped|ping|s)?\b'
+  '\bdefer(red|ring|s)?\b'
+  '\bomit(ted|ting|s)?\b'
+  '\bleft out\b'
+)
+
+# 2. Step / mechanical-pass reference — the skipped thing is a skill step.
+MECHANICAL_STEP_REF_PATTERNS=(
+  '\bstep[[:space:]]+[0-9]+'
+  '\bre-rank\b'
+  '\bauto-release\b'
+  '\binbound-discovery\b'
+  '\brelevance-close\b'
+  '\bverification queue\b'
+)
+
+# 3. Offloaded-justification closer — the mandate handed back to the user
+# ("your call") or self-authorised away on budget grounds ("context budget").
+MECHANICAL_OPTIONAL_PATTERNS=(
+  'your call'
+  'up to you'
+  'worth doing'
+  "user'?s call"
+  'if you (want|prefer|would like)'
+  'feel free to'
+  'context budget'
+  'to stay within'
+  'budget[- ]?caution'
+)
+
+# detect_mechanical_optional: scans text on stdin. Exits 0 (and echoes the
+# matched optional-closer phrase) only when a step-skip verb, a step
+# reference, AND an offloaded-justification closer ALL match somewhere in
+# the text. Exits 1 otherwise. Mirrors detect_prose_ask's shape.
+detect_mechanical_optional() {
+  local text
+  text=$(cat)
+  local pattern
+  local skip_hit="" ref_hit="" opt_hit=""
+  for pattern in "${MECHANICAL_STEP_SKIP_PATTERNS[@]}"; do
+    if echo "$text" | grep -Eqi -- "$pattern"; then skip_hit=1; break; fi
+  done
+  [ -n "$skip_hit" ] || return 1
+  for pattern in "${MECHANICAL_STEP_REF_PATTERNS[@]}"; do
+    if echo "$text" | grep -Eqi -- "$pattern"; then ref_hit=1; break; fi
+  done
+  [ -n "$ref_hit" ] || return 1
+  for pattern in "${MECHANICAL_OPTIONAL_PATTERNS[@]}"; do
+    if echo "$text" | grep -Eqi -- "$pattern"; then
+      echo "$pattern"
+      opt_hit=1
+      break
+    fi
+  done
+  [ -n "$opt_hit" ] || return 1
+  return 0
+}
+
 # detect_prose_ask: scans text on stdin for canonical prose-ask
 # phrasings. Exits 0 if any pattern matches, 1 otherwise. Writes the
 # first matched phrase to stdout (for observability in the Stop hook

@@ -51,22 +51,37 @@ if [ -z "$ASSISTANT_TEXT" ]; then
   exit 0
 fi
 
-# Scan for prose-ask patterns. If none match, exit silently.
+# Scan for prose-ask patterns. If one matches, emit the prose-ask nudge.
 MATCH=$(echo "$ASSISTANT_TEXT" | detect_prose_ask 2>/dev/null) || true
-if [ -z "$MATCH" ]; then
+if [ -n "$MATCH" ]; then
+  # Emit stopReason. Structured JSON so Claude Code injects the nudge
+  # into the next assistant context. The user does not see this — the
+  # next turn does.
+  jq -n --arg match "$MATCH" '{
+    stopReason: (
+      "PROSE-ASK DETECTED in your last turn (pattern: \"" + $match + "\"). " +
+      "If the decision is obvious from direction / policy / session context, ACT — do not ask. " +
+      "If genuinely ambiguous, re-emit via the AskUserQuestion tool. " +
+      "Never prose-ask. See ADR-013 Rule 1 + feedback_act_on_obvious_decisions.md."
+    )
+  }'
   exit 0
 fi
 
-# Emit stopReason. Structured JSON so Claude Code injects the nudge
-# into the next assistant context. The user does not see this — the
-# next turn does.
-jq -n --arg match "$MATCH" '{
-  stopReason: (
-    "PROSE-ASK DETECTED in your last turn (pattern: \"" + $match + "\"). " +
-    "If the decision is obvious from direction / policy / session context, ACT — do not ask. " +
-    "If genuinely ambiguous, re-emit via the AskUserQuestion tool. " +
-    "Never prose-ask. See ADR-013 Rule 1 + feedback_act_on_obvious_decisions.md."
-  )
-}'
+# P403: scan for mechanical-step-framed-as-user-optional. When a skill
+# contract mandates a mechanical step, re-surfacing it as a user decision
+# (or a budget-caution skip) reintroduces the friction the mechanical-stage
+# carve-out (P132 / ADR-044) was engineered to remove.
+MECH_MATCH=$(echo "$ASSISTANT_TEXT" | detect_mechanical_optional 2>/dev/null) || true
+if [ -n "$MECH_MATCH" ]; then
+  jq -n --arg match "$MECH_MATCH" '{
+    stopReason: (
+      "MECHANICAL-STEP-FRAMED-AS-OPTIONAL detected in your last turn (closer: \"" + $match + "\"). " +
+      "A skill contract that mandates a mechanical step has already resolved that decision — do not re-surface it as a user choice or skip it on budget-caution grounds. " +
+      "Run the step, then report it done. See P132 / ADR-044 mechanical-stage carve-out."
+    )
+  }'
+  exit 0
+fi
 
 exit 0
