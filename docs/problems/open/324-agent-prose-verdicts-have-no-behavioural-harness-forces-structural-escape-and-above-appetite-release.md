@@ -71,6 +71,16 @@ The solution-space investigation this ticket was opened to do is **complete and 
 
 **Remaining for P324 close:** S1b (jtbd synthetic-corpus positive-fire) + an architect synthetic-corpus positive-fire twin (cite an unratified ADR → expect the flag — steady-state drain means no live unratified ADR to cite), S2 (root test glob + CI wiring — Tier A), S3 (release-gate Tier B + `CLAUDE_CODE_OAUTH_TOKEN`), S4 (retire the architect RFC-010 + jtbd RFC-011 structural escape-hatch bats → advance P290), S5 (graduate RFC-011 within appetite on Tier-B-at-release evidence).
 
+### Build progress (2026-07-04 — RFC-012 S2 root fan-out script landed)
+
+**Release vehicle**: none — root `package.json` devscript only (no plugin package under `packages/<plugin>/{src,bin,hooks,skills,scripts,lib,agents}` changed; the eval configs it fans over already shipped). P324 stays Open.
+
+**S2 root fan-out script (the "root test glob" half) is DONE.** `package.json` gains `eval:agents` — `for cfg in packages/*/agents/eval/promptfooconfig.yaml; do npx promptfoo eval -c "$cfg" || exit 1; done` — mirroring the existing `eval:skills` verbatim. It fans over the four landed agent-prose eval configs (architect, jtbd, risk-scorer, tdd — all `promptfoo validate` clean this iter). Before this there was NO single command to run the agent-prose evals under `claude` (only the SKILL evals via `eval:skills`, and the codex variants via `eval:codex`); `eval:agents` closes that gap.
+
+**Deferred (still S2/S3):** the `ci.yml` wiring + pre-commit/pre-push hook. Both need the CI/release OAuth secret (`CLAUDE_CODE_OAUTH_TOKEN`, ADR-075 §6) provisioned first — wiring live `claude -p` agent evals into `ci.yml` before the token exists would red every PR. Folded into **S3** (architect PASS + advisory 2026-07-04; the local pre-push hook is secret-free but carries per-push live-agent latency, so it rides S3 for cohesion).
+
+**Remaining for P324 close (unchanged):** S1b + architect synthetic-corpus positive-fire, S2 ci.yml + hook (with S3 token), S3 Tier-B release gate, S4 (retire the RFC-010/RFC-011 structural escape-hatch bats → advance P290), S5 (graduate RFC-011 within appetite).
+
 ## Dependencies
 
 - **Blocks**: `P290` (remove ADR-052 structural escape hatch — needs a behavioural alternative first); within-appetite release of every agent-verdict change (RFC-010, RFC-011, and future).

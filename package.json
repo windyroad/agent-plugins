@@ -19,6 +19,7 @@
   "scripts": {
     "test": "LC_ALL=C bats --recursive packages/*/hooks/test/ packages/*/skills/*/test/ packages/*/agents/test/ packages/*/scripts/test/ packages/shared/test/ .claude/skills/*/test/",
     "eval:skills": "for cfg in packages/*/skills/*/eval/promptfooconfig.yaml; do echo \"--- $cfg ---\"; npx promptfoo eval -c \"$cfg\" || exit 1; done",
+    "eval:agents": "for cfg in packages/*/agents/eval/promptfooconfig.yaml; do echo \"--- $cfg ---\"; npx promptfoo eval -c \"$cfg\" || exit 1; done",
     "eval:architect:claude": "npx promptfoo eval -c packages/architect/skills/create-adr/eval/promptfooconfig.yaml",
     "eval:architect:codex": "npx promptfoo eval -c packages/architect/skills/create-adr/eval/promptfooconfig.codex.yaml && npx promptfoo eval -c packages/architect/agents/eval/promptfooconfig.codex.yaml",
     "eval:codex": "for cfg in packages/*/skills/*/eval/promptfooconfig.codex.yaml packages/*/agents/eval/promptfooconfig.codex.yaml; do [ -f \"$cfg\" ] || continue; echo \"--- $cfg ---\"; npx promptfoo eval -c \"$cfg\" || exit 1; done",
