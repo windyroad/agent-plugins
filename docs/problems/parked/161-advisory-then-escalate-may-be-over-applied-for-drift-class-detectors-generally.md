@@ -1,6 +1,6 @@
 # Problem 161: Advisory-then-escalate may be over-applied as the default for drift-class detectors generally; load-bearing-from-the-start may be the better default
 
-**Status**: Open
+**Status**: Parked
 **Reported**: 2026-05-04
 **Priority**: 6 (Moderate) — Impact: Moderate (3) x Likelihood: Possible (2)
 **Origin**: internal
@@ -9,6 +9,18 @@
 **WSJF**: (6 × 1.0) / 2 = **3.0**
 
 > Surfaced 2026-05-04 by P159's amendment to ADR-051. Filed as the sibling out-of-scope observation P159 explicitly carved out (per the orchestrator framing for P159's Phase 1 iter). Captures the broader question P159 surfaced but did not resolve.
+
+## Parked
+
+**Parked**: 2026-07-04 (AFK work-problems iter).
+
+**Reason** — the investigation is **complete** (2026-06-08 empirical audit: the drift-class boundary holds against a 7-instance evidence base; see Observation Log below). The only remaining work is the genuine **direction** decision — codify a meta-rule via M1 / M2 / M3 — which the framework cannot resolve and ADR-074 forbids building on without user substance-confirm. No `**Blocked by**` dependency edge can suppress the rank because the blocker is a user decision, not a ticket, so WSJF stays at 3.0 and the AFK loop keeps re-selecting it. It has been selected as top-actionable and queued+skipped **3×** — 2026-06-08 (audit completed, M1/M2/M3 queued for "next interactive turn"), 2026-06-27 (re-queued through `outstanding_questions`), 2026-07-04 (this iter) — each deferring to a re-entry point that is **not a self-firing cadence**, so the decision has sat ~2 months. Parking removes it from work-selection until the decision is made (Parked tickets are excluded from WSJF ranking per ADR-022). The M1/M2/M3 decision is surfaced via this iter's `outstanding_questions` to reach the user at loop end.
+
+**Un-park trigger** — the user chooses a codification direction (M1 / M2 / M3, defined in Investigation Tasks below). On decision:
+- **M1 or M2** → un-park, then draft the meta-ADR via `/wr-architect:create-adr`, reusing the empirically-derived drift-class definition (mechanical detection + no socialisation period + gradualism re-creates the failure mode) and the 7-instance evidence base already captured in the 2026-06-08 Observation Log.
+- **M3** → un-park, record the "no meta-ADR; per-detector citation named as precedent in each new drift-class ADR" resolution, then close (the audit already documents the precedent to cite).
+
+Un-park mechanic: `git mv docs/problems/parked/161-*.md docs/problems/open/161-*.md`, set Status back to Open, remove this section.
 
 ## Description
 
@@ -127,3 +139,4 @@ Phase 3: retroactive review of advisory-only drift-class detectors (deferred —
 - 2026-05-04: Initial filing. Surfaced as the sibling out-of-scope observation P159's Phase 1 iter explicitly carved out per orchestrator framing. Observation-only ticket; deferred resolution until 2-3 more drift-class detectors arrive following the load-bearing-from-the-start shape.
 - 2026-06-08: Empirical audit run during `/wr-itil:work-problems` AFK iter. Threshold met: 5+ drift-class invariant-enforcement gates (ADR-060 I1, ADR-060 I13, ADR-078, ADR-066, ADR-068, P165) shipped load-bearing-from-the-start since 2026-05-04, plus the carry-forward ADR-051→ADR-069 originating instance. Two distinct mechanism shapes identified (structural elimination vs pre-commit deny). Counter-cases checked: advisory-only detectors shipped in the same window are behavioural-pattern / scaffold-nudge class, not drift-class — the class boundary holds. Meta-rule codification queued for next interactive turn (M1 / M2 / M3 substance-confirm per ADR-074); architect-class recommendation **M2** logged but choice deferred to user. No meta-ADR drafted this iter.
 - 2026-06-27: Re-surfaced during `/wr-itil:work-problems` AFK iter. Freshness check confirms the audit is still current (no M1/M2/M3 meta-ADR exists; newest ADR is 086; ticket untouched since the audit). Investigation remains complete — nothing to add. The blocker is the genuine direction decision (M1/M2/M3), un-resolvable by the framework per ADR-074. Recognised that "next interactive turn" is a named re-entry point, not a self-firing cadence, so the decision sat ~19 days; re-queued through the AFK loop's `outstanding_questions` surface to reach the user at loop end. No fix forced; no meta-rule invented.
+- 2026-07-04: **Parked** during `/wr-itil:work-problems` AFK iter (3rd selection: 2026-06-08 / 2026-06-27 / 2026-07-04, all queued+skipped). Same class as P244: the ticket is blocked solely on a user-answerable direction decision (M1/M2/M3) that no `**Blocked by**` edge can suppress, so WSJF stays 3.0 and the loop keeps re-selecting it while it cannot progress non-interactively. Moved to `docs/problems/parked/`, Status → Parked (excluded from WSJF ranking per ADR-022), un-park trigger documented in the new `## Parked` section. README refreshed (P161 moved from WSJF Rankings to Parked). M1/M2/M3 decision surfaced via this iter's `outstanding_questions`. No fix forced; no meta-rule invented.
