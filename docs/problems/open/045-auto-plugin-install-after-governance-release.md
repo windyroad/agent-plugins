@@ -14,6 +14,21 @@
 
 **Landing:** RFC-framed per ADR-071 (Problem→RFC trace) — see `## RFCs` — building on the existing ADR-034 design (SessionStart hook + consent gate), refined to the network-free class-B surfacer shape (each plugin's hook reads its own version from its script path, compares to highest-installed cache, surfaces a one-line "restart to pick up X" nudge when behind).
 
+## Progress 2026-07-04 — RFC-036 core landed (self-firing check now ships)
+
+The named-but-never-shipped self-firing staleness check is now implemented per RFC-036 / ADR-088 (per-plugin, per-turn `UserPromptSubmit`, surface-not-install, network-free):
+
+- **Canonical hook** `packages/shared/hooks/staleness-check.sh` — infers its own version + plugin key from its script path, compares to the highest semver-named cache dir, emits ONE `<key>: this session is on <v>, <highest> installed — restart to pick it up` line when behind. Fail-open, silent-when-current, emit-once-per-newly-detected-version (version-keyed ADR-038 marker), AFK-suppressed.
+- **Sync + CI drift guard** — `scripts/sync-staleness-check.sh` + `sync:/check:staleness-check` npm scripts + `.github/workflows/ci.yml` step (ADR-017).
+- **Wired into 7 governance plugins** — architect, itil, jtbd, tdd, risk-scorer, style-guide, voice-tone (those already carrying a `UserPromptSubmit` array). itil (the P402 witness) is covered.
+- **Behavioural bats** — `packages/shared/test/staleness-check.bats` (10 cases, no cache mocking).
+- **Changeset** — 7-plugin patch bump.
+
+**Still open (does NOT close yet):**
+- Release pending — the fix must publish to npm before it takes effect; orchestrator owns release cadence. Moves to `verifying` post-release.
+- Deferred wiring (RFC-036 Task 3b) — connect, retrospective, c4, wardley, agent-plugins remain surfacer-blind (need a `UserPromptSubmit` array / new `hooks.json`).
+- RFC-036 Tasks 5 & 6 — ADR-080 + ADR-038 `## Related` back-references (deferred to avoid the multi-decision-file architect-gate deadlock).
+
 ## Prior closure (SUPERSEDED 2026-07-02 — see Reopened section above)
 
 **Closure date**: 2026-05-31 (foreground relevance-scan session, user-confirmed)
