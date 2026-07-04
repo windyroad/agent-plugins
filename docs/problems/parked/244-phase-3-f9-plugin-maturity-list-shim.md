@@ -1,10 +1,23 @@
 # Problem 244: Phase 3 (F9) `wr-itil-plugin-maturity-list` in-suite display shim — reads installed plugins' plugin.json maturity field, emits NDJSON-per-surface + rollup-per-plugin
 
-**Status**: Open
+**Status**: Parked
 **Reported**: 2026-05-17
 **Priority**: 4 (Low) — Impact: 2 × Likelihood: 2 = 4. Rated at review 2026-07-02: deferred F9 renderer; low-signal display shim.
 **Origin**: internal
 **Effort**: M. WSJF = (4 × 1.0) / 2 = 1.0.
+
+## Parked
+
+**Parked**: 2026-07-04 (AFK work-problems iter).
+
+**Reason** — blocked by two non-ticket-dependency conditions, so the ticket cannot be worked but keeps being re-selected as top-WSJF-actionable and skipped (iters 14–19 + 2026-07-04 = 7 selections, all queued+skipped; see Root Cause Analysis). Only the P300 edge is expressible as a `**Blocked by**` dependency, and P300 is in `verifying/` so it contributes 0 to the transitive-effort suppression — WSJF never drops. The binding blocker (b) is an architect reconciliation of ADR-063, which is not a ticket at all, so no dependency edge can suppress the rank. Parking removes it from work-selection until the blockers clear (Parked tickets are excluded from WSJF ranking per ADR-022).
+
+**Un-park trigger** (both required, unchanged from the iter-19 / 2026-07-04 reconciliation):
+- (a) P300's F1 writer re-simplification lands + `plugin.json` is re-populated to F1 across all plugins (on-disk `plugin.json` currently still F2/v2.0), AND
+- (b) ADR-063's §Option F9 + §`wr-itil-plugin-maturity-list` bin shim contract + §Confirmation #7/#9 are architect-reconciled to the F1 output shape (currently still F2-era, contradicting confirmed §Confirmation #16).
+
+Un-park: `git mv docs/problems/parked/244-*.md docs/problems/open/244-*.md`, set Status back to Open (or Known Error if root cause is confirmed), remove this section.
+
 ## Description
 
 Phase 3 (F9) `wr-itil-plugin-maturity-list` in-suite display shim — reads installed plugins' plugin.json maturity field via marketplace-cached path per ADR-003, emits NDJSON-per-surface + rollup-per-plugin. ADR-063 §F9 names this as a Phase 3 contract (NOT a deferred follow-on) per architect adjustment A2 to ADR-063 itself. P087 iter-9 architect review (2026-05-17) reaffirmed Phase 3a scope as strict per ADR-014 commit-grain and explicitly carved out F9 as a separate sibling ticket — this ticket — so the deliverable does not get lost. Sibling to P237 (Phase 3a — population script), P238 (Phase 3b — renderer + drift detector), P239 (Phase 3c — bats doc-lint), P240 (Phase 3d — JTBD amendments). Captured per architect adjustment E in P087 iter-9.
