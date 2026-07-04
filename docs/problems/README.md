@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-04 **batch transition — close P384, P391, P392, P394 (4 tickets)** — run-retro Step 4a sub-step 9 (P282) prior-session evidence drain: each carried a durable `yes — observed:` ADR-026-grounded Verification-Queue cell written in a prior session (P384 promptfoo 2/2 GREEN + `@windyroad/risk-scorer@0.16.0`; P391 30/30 GREEN under exported guard + `env -u`, test-only; P392 BSD-awk bats RED→GREEN + `@windyroad/itil@0.55.1`; P394 two consecutive releases preview-published only the changed package, CI-infra). Verifying → Closed, silent close-on-evidence per ADR-022. (AFK work-problems iter, P386)
+> Last reviewed: 2026-07-04 **README reconciled** — 1 drift entry corrected: P389 moved from WSJF Rankings (stale claims=open) to the Verification Queue (actual=verifying; `@windyroad/itil@0.56.2`, 2026-07-04) — committed transition eefd5222 shipped without a README refresh (P062 gap). Reconciliation contract per P118 + ADR-014. (AFK work-problems iter, P178 retro side-fix)
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -31,7 +31,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3.0 | P161 | Advisory-then-escalate may be over-applied as the default for drift-class detectors generally; load-bearing-from-the-start may be the better default | 6 Moderate | Open | M | 2026-05-04 | internal |
 | 3.0 | P176 | Agent-side I2 (no type-branching) coverage gap — SKILL.md type-branching invariant not behaviourally testable until skill-invocation harness lands | 6 Medium | Open | M | 2026-05-06 | internal |
 | 3.0 | P248 | Use time and token cost (not t-shirt sizing) for WSJF effort, with retro-driven estimation refinement | 6 Medium | Open | M | 2026-05-17 | internal |
-| 3.0 | P389 | work iters omit the `**Release vehicle**` seed on Open→Known Error, so the post-release K→V auto-enumerator silently skips them | 6 Medium | Open | M | 2026-06-27 | internal |
 | 3.0 | P412 | RFC / Story / Story-map framework tiers are invisible to adopters — no scaffold, no nudge, no discoverable entry point | 6 Medium | Open | M | 2026-07-03 | internal |
 | 3.0 | P045 | Auto plugin install on user's machine after governance release | 12 High | Open | L | 2026-04-19 | internal |
 | 2.25 | P136 | ADR-044 alignment audit — sweep all unaudited skills/hooks/agents/ADRs/JTBDs/READMEs against the framework-resolution boundary (master ticket) | 9 Med | Open | L | 2026-04-27 | internal |
@@ -262,6 +261,7 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P407 | /wr-*:assess-external-comms skills instruct synchronous reviewer dispatch (P402 follow-up; resolved same commit via RFC-041) | pending — @windyroad/risk-scorer + @windyroad/voice-tone patch committed, ships next release | no — not observed |
 | P403 | Agent frames skill-mandatory mechanical steps as user-optional (detect_mechanical_optional Stop-hook detector; fix vehicle RFC-042) | pending — @windyroad/itil patch committed, ships next release | no — not observed |
 | P386 | review-problems Step 4.5/4.6 AFK-silent relevance-close refs re-anchored off dangling work-problems Step 6.5 pointer onto subprocess-AFK-by-construction mechanism (doc-only prose fix) | 2026-07-04 (`@windyroad/itil` patch, commit `3bf91f0c`, pending release) | no — not observed |
+| P389 | work iters omit the `**Release vehicle**` seed on Open→Known Error, so the post-release K→V auto-enumerator silently skips them | @windyroad/itil@0.56.2 (2026-07-04) | no — not observed |
 | P413 | work-problems defers upstream reporting as a manual "batch-report upstream" choice instead of auto-filing upstream-blocked tickets — Output Format invariant + `### Reported Upstream` summary subsection forbid the wrap-time deferral nudge (traced under RFC-018) | 2026-07-04 (`@windyroad/itil` patch, pending release) | no — not observed |
 
 ## Inbound Upstream Reports
