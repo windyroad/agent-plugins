@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-04 **README reconciled** — 1 drift entry corrected: P389 moved from WSJF Rankings (stale claims=open) to the Verification Queue (actual=verifying; `@windyroad/itil@0.56.2`, 2026-07-04) — committed transition eefd5222 shipped without a README refresh (P062 gap). Reconciliation contract per P118 + ADR-014. (AFK work-problems iter, P178 retro side-fix)
+> Last reviewed: 2026-07-04 **P416 captured** — outstanding-questions drain appends a superseding `## Human decision` without reconciling the stale `## Fix Strategy` it overrides, leaving tickets internally contradictory (surfaced reconciling P178's 2026-06-17 hard-block vs 2026-07-03 trace-based decision; ticket 136 same pattern). WSJF 1.5 deferred placeholder. (lightweight aside via /wr-itil:capture-problem, P178 retro)
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -48,6 +48,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 1.5 | P410 | install-updates leaves stale cached plugin versions on disk — no prune step | 3 Medium | Open | M | 2026-07-03 | internal |
 | 1.5 | P411 | No interactive oversight-drain skill for pending-review risk-register entries | 3 Medium | Open | M | 2026-07-03 | internal |
 | 1.5 | P415 | External-comms commit-msg gate reviews only the first `-m` of a multi-`-m` git commit, causing deny-after-PASS on multi-paragraph commits | 3 Medium | Open | M | 2026-07-03 | internal |
+| 1.5 | P416 | Outstanding-questions drain appends a superseding human decision without reconciling the stale Fix Strategy section it overrides | 3 Medium | Open | M | 2026-07-04 | internal |
 | 0.75 | P012 | Skill Testing Harness Scope Undefined | 6 Medium | Open | XL | 2026-04-16 | internal |
 
 ## Verification Queue
