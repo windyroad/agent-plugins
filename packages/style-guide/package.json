@@ -1,6 +1,6 @@
 {
   "name": "@windyroad/style-guide",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "description": "Style guide enforcement for CSS and UI components",
   "bin": {
     "windyroad-style-guide": "./bin/install.mjs"
