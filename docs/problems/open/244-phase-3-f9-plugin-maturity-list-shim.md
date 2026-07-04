@@ -44,6 +44,15 @@ AFK work-problems iter-19 selected this ticket as an implementation candidate. R
 
 ADR-074 substance-confirm is **not clear** for the F9 output contract until (b) reconciles the confirmed-but-self-contradictory ADR. Queued + skipped per iter-14–18 discipline.
 
+### Re-verification (AFK iter, 2026-07-04) — both blockers still hold; queued + skipped
+
+An AFK `/wr-itil:work-problems` iter re-selected this ticket (orchestrator framing: "self-contained build, no decision dependency"). Empirical re-check against on-disk state confirms the iter-19 (2026-06-16) reconciliation is **still binding** — the ticket remains NOT actionable:
+
+- **Blocker (a) — F1 re-population has NOT landed on disk.** `packages/*/.claude-plugin/plugin.json` still carries the full **F2/v2.0** shape (`schema_version: "2.0"`, `computed_at`, `evidence: {...}`, `bootstrapping`, `rollup_invocations_30d`). P300 sits in `docs/problems/verifying/`; its ADR-063 §Amendment 2026-06-08 (F2→F1) is doc-only — the Phase 3a writer re-simplification + `plugin.json` re-populate to F1 has not run. The F9 shim reads `maturity:`, so the shape it would parse is still F2.
+- **Blocker (b) — ADR-063's F9 output contract is still F2-era, unreconciled to F1.** §Option F9 (line 73), §`wr-itil-plugin-maturity-list` bin shim contract (lines 338–342), and §Confirmation #7 (line 416) + #9 (lines 418–419) all still specify NDJSON `schema_version: "1.0"` on every record — the F2-era shape. This directly contradicts the **confirmed** §Confirmation #16 (line 253, added by the P300 F1 amendment): "No `schema_version` / `computed_at` / `evidence` / `rollup_invocations_30d` / `bootstrapping` fields appear under F1." The F9 NDJSON *output* record shape under F1 (bare `{axis, plugin, surface, kind, band}` + rollup, and whether the output `schema_version` is retained for consumer-contract stability or dropped for F1 consistency) is an **undecided architect-owned reconciliation**. Building the shim now would mint that contract mid-transition — the P314/P315 built-on-then-rejected trap.
+
+Un-block trigger (unchanged from iter-19): (a) P300's F1 writer re-simplification lands + `plugin.json` re-populated to F1 across all plugins, AND (b) ADR-063's §F9 shim contract + §Confirmation #7/#9 are architect-reconciled to the F1 output shape.
+
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
