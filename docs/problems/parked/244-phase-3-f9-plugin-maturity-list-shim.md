@@ -97,3 +97,8 @@ Un-block trigger (unchanged from iter-19): (a) P300's F1 writer re-simplificatio
 - P238 — Phase 3b (README renderer + drift detector); sibling.
 - P239 — Phase 3c (bats doc-lint per plugin); sibling.
 - P240 — Phase 3d (JTBD outcome amendments); sibling.
+
+
+## Ratified Direction - 2026-07-04 interactive decision drain
+
+**Drop** schema_version from the F9 plugin-maturity-list shim output (F1-consistent). Amend ADR-063 F9/#7/#9 to define F1-era output (no schema_version/computed_at/evidence fields). Then build the shim + bats + changeset.

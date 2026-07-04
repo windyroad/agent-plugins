@@ -59,3 +59,8 @@ Not causing harm — fail-soft absorbs the error — but the config lies about t
 - **`docs/problems/.upstream-channels.json`** — the channel entry.
 - **ADR-062** — inbound discovery mechanism.
 - Captured via `/wr-itil:capture-problem`; rated at capture.
+
+
+## Ratified Direction - 2026-07-04 interactive decision drain
+
+**DROP** the github-discussions channel from THIS repo's .upstream-channels.json, but keep it an opt-in capability for adopters (do NOT remove channel support from shared/default config). Discussions stay off for windyroad/agent-plugins.

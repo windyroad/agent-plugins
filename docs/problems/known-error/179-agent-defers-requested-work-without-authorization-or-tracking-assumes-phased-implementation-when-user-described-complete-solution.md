@@ -162,3 +162,8 @@ Options B (soft retro-audit), C (mid-flow ask), and D (ratify de-facto) are reje
 - /wr-itil:manage-problem SKILL.md — Step 9 work-the-fix (deferral-discipline gap)
 - /wr-architect:create-adr SKILL.md — ADR template's "Out of Scope" section invites unauthorised deferral
 - Session evidence — 2026-05-10 user correction "you have a habit of deferring work that has been requested … 1) it surprises me (not good), 2) unless we do something to track it, it never gets implemented until I notice that it's missing".
+
+
+## Ratified Direction - 2026-07-04 interactive decision drain
+
+**Relevance-close** as superseded - the shipped authoring-time cadence gate (2026-06-28, rejects ticket-ID citations, requires self-firing cadence) is the stricter/better rule that supersedes P179's Option-A ticket-citation-is-enough rule.

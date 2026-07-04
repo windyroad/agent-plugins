@@ -152,3 +152,8 @@ Scaffold-nudge surfaces ~51 pending-review risk-register entries but points at M
 
 Cross-refs surfaced by the 2026-07-03 retro (both already ticketed — recorded here so the class inventory is complete): **P411** (review-register drain skill, open) and **P415** (external-comms commit gate reviews only the first `-m` of a multi-`-m` git commit, open) — the latter is not a P375 class member (a gate body-extraction defect, not a self-firing-cadence rot), noted only because this iter re-hit it during the commit gate.
 
+
+
+## Ratified Direction - 2026-07-04 interactive decision drain
+
+**Confirm** the ADR-087/RFC-035 cadence-annotation contract substance (advisory-first PostToolUse gate, self-firing-CLASS check, comment-or-prose carrier within +/-5 lines; bare ticket-ID / on-demand-skill does NOT satisfy). Born-confirm ADR-087 + RFC-035; unblocks the B6-B9 tail (reachability-existence validation, fictional-defer-detect, retrofit existing deferrals).

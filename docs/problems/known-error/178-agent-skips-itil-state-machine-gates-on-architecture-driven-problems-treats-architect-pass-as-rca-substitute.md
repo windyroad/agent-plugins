@@ -143,3 +143,8 @@ The 2026-07-03 outstanding-questions drain overrode both the born-proposed carve
 ## Human decision — 2026-07-03 (outstanding-questions drain)
 
 Framework position: **an ADR must always serve a problem or an RFC.** So architect-PASS substitutes for empirical RCA before Known Error ONLY when the driving ADR traces to a problem/RFC — neither a blanket carve-out (A) nor a blanket hard-block (B). Fix shape: gate the Known-Error precondition on the driving ADR's problem/RFC trace, not on architect approval alone.
+
+
+## Ratified Direction - 2026-07-04 interactive decision drain
+
+**Author the RFC** (tracing P178 + P179): scope the trace-based RCA-substitution precondition gate (architect-PASS substitutes for empirical RCA at O->KE ONLY when the driving ADR traces to a problem/RFC) + ADR-022 amendment + behavioural test. Ratify RFC scope at manage-rfc accepted.

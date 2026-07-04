@@ -124,3 +124,8 @@ This question is queued in `outstanding_questions` for the user's next interacti
 - **ADR-052** (`docs/decisions/052-behavioural-tests-default-for-skill-testing.proposed.md`) — amendment target.
 - **ADR-005** + **P011** — the structural Permitted Exception this supersedes.
 - `packages/tdd/agents/review-test.md` — the `review-test` verdict surface.
+
+
+## Ratified Direction - 2026-07-04 interactive decision drain
+
+**Provision a CI claude-auth secret** (USER ACTION), then wire the promptfoo behavioural checks to gate CI merges, THEN delete the structural grep-the-prose tests. Also unblocks P324 (agent-prose harness S3). Do NOT delete structural tests before CI-wiring exists.

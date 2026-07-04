@@ -117,3 +117,8 @@ Attempted the I13 propose-fix path this iter: `wr-itil-check-fix-rfc-trace` emit
 - **`/wr-architect:review-decisions`** Step 4 (the drain surface — Confirm/Amend/Reject options exist there; the proposed fix for this ticket extends a similar Confirm/Amend/Reject surface to the user-direction edit path).
 - Memory `feedback_run_decisions_by_user_before_drafting.md` (the BEFORE-drafting case; this ticket captures the AFTER-drafting case).
 - Memory `feedback_brief_before_id.md` (P350; the post-change brief discipline this ticket requires).
+
+
+## Ratified Direction - 2026-07-04 interactive decision drain
+
+**Approve** the ADR-073 lockstep rework (with P399/P412): reconcile ADR-072 (gate placement) + ADR-060 I13 + the wr-itil-check-fix-rfc-trace gate code to the re-confirmed RFC-first model - STOP the Scope+Tasks auto-create at fix-time. Exact gate behaviour (block vs nudge vs author-real-story-map) pinned at RFC-draft ratification time.

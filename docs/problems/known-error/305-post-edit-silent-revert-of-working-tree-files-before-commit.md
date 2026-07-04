@@ -108,3 +108,8 @@ Next step: capture an RFC (per ADR-060) tracing P305 + the orchestrator changes 
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-033 | proposed | Per-iter git worktree isolation for AFK iter dispatch (P305 Option B) |
+
+
+## Ratified Direction - 2026-07-04 interactive decision drain
+
+**Confirm** the ADR-032 amendment (git-worktree-per-iter replaces process-per-iter isolation) + accept RFC-033 (decompose scope into ordered stories) + build branch-per-iter + merge-back + cache-divergence handling. Parallel iters ARE wanted.

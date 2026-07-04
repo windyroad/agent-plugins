@@ -97,3 +97,8 @@ The load-bearing behavioural surface — `/wr-itil:capture-problem` Step 1.5b �
 - **ADR-060** — Problem→RFC→Story framework; the I12 derive-then-ratify contract to be amended.
 - **ADR-068 / ADR-074** — auto-made artefacts lifted to human / substance-confirm-before-build (the creation-side oversight this rule keeps).
 - Hang-off pre-filter surfaced >5 shared-signal candidates (JTBD/ADR-060 references are widely cited); per the capture-problem candidate-cap rule the subagent dispatch was skipped and the candidates recorded here for review-time re-evaluation.
+
+
+## Ratified Direction - 2026-07-04 interactive decision drain
+
+**Yes** - update the two decision docs (ADR-060 2026-06-02 I12 amendment + ADR-073 symmetric-escalation note) to describe the shipped interview-on-low-confidence + never-discard + ratify-only-new-persona behaviour, and mark them human-confirmed (P357 post-change ratification satisfied by this drain).

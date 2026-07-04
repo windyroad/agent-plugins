@@ -76,3 +76,8 @@ The framework then compounds the gap by *describing* the hold as a shipment cont
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-025 | proposed | Real shipment control via build-time feature toggles |
+
+
+## Ratified Direction - 2026-07-04 interactive decision drain
+
+**SUPERSEDE the changeset-holding mechanism entirely + retire ADR-061** (user decision, 2026-07-04). Holding is theatre - held code ships on the next sibling release regardless, so a hold only strips changelog attribution. Either withhold PROPERLY (revert the code) or release. Remove docs/changesets-holding/, retire ADR-061 (dogfood-graduation-criteria), and rework ADR-042 Rule 2 (above-appetite move-to-holding) to a real resolution (revert / block-until-eval-green / release-with-authorisation). This is P359's ratified fix direction.

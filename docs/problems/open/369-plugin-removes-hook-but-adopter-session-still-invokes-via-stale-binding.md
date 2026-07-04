@@ -146,3 +146,8 @@ Memory references:
 - `feedback_no_repo_relative_paths_in_published_artifacts.md` — recurring-class memory note; this ticket is a new failure mode (deletion-without-deregistration) in the same family.
 - `feedback_verify_cache_refresh_by_version_dir.md` — workaround mechanism (cache refresh + session restart).
 - `feedback_automatic_cadence_or_it_doesnt_happen.md` — applies: a control without automatic enforcement is a control that doesn't happen.
+
+
+## Ratified Direction - 2026-07-04 interactive decision drain
+
+Build the **full RFC-scoped mechanism**: one-cycle no-op-shim deprecation convention PLUS a dedicated session-start drift-warning detector for retired-hook bindings. Capture the RFC.
