@@ -1,6 +1,8 @@
 # Problem 166: Precomputed-sha256 helper for `wr-risk-scorer:external-comms` agent invocations to eliminate double-invocation cost
 
-**Status**: Verification Pending
+**Status**: Closed
+
+**Closed**: 2026-07-05 (run-retro Step 4a close-on-evidence, P345 AFK iter) — the single-fire contract was exercised seven times this session: five git-commit-message reviews + one changeset-author review under BOTH evaluators (risk-scorer + voice-tone), each dispatched once with the structured `SURFACE:` + `<draft>` prompt; every PostToolUse mark hook derived the matching key and every subsequent gated action (commits 56478af4, c41579f5, 2b1a7529, 337ef18a, d7082517; changeset Write) passed first-try with zero gate re-blocks and zero double invocations. Recovery: `/wr-itil:transition-problem 166 known-error`.
 **Reported**: 2026-05-04
 **Priority**: 3 (Low) — Impact: Minor (1) x Likelihood: Almost certain (4)
 **Effort**: S (deferred — re-rate at next /wr-itil:review-problems)
