@@ -74,10 +74,10 @@ Per the same load-bearing-decision discipline P228 applied (surface selection de
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems (re-rate guidance recorded under Investigation Findings: Impact 2 × Likelihood 2 = 4 Low; placeholder left intact per defer-to-review-problems contract)
 - [x] Investigate root cause — confirmed (2026-06-16): no commit-title→lifecycle surface exists; gap survives P228 (K→V only) + P314 (RFC-trace only); review-problems item 10 is body-documented not commit-triggered
-- [ ] Create reproduction test — defer to build (rides the ratified surface)
+- [x] Create reproduction test — done 2026-07-05: behavioural bats `packages/itil/hooks/test/itil-fix-title-lifecycle-advisory.bats` (13/13 GREEN, RED-first; test 1 IS the reproduction — fix-titled commit + still-Open ticket)
 - [x] Reconcile scope with P228 belt-and-braces direction (sibling K→V seam); decide unified-vs-separate fix surface — **separate** surface confirmed (O→KE = knowledge assertion ≠ K→V observable-fact; not unifiable into one mechanical rule)
 - [x] Confirm whether P234's `itil-fictional-defer-detect.sh` advisory hook should be extended to cover this O→KE seam or whether a sibling hook is correct — **sibling** (different matcher/surface/signal; pattern transfers, hook should not be overloaded)
-- [ ] **QUEUED for user ratification (ADR-074)**: pick the fix surface — (a) advisory hook [recommended by semantic finding] / (b) release-time O→KE auto-fire / (c) hard commit gate / (d) co-locate with P314 fix-RFC-trace gate. Then build under the ratified surface.
+- [x] **QUEUED for user ratification (ADR-074)**: pick the fix surface — (a) advisory hook [recommended by semantic finding] / (b) release-time O→KE auto-fire / (c) hard commit gate / (d) co-locate with P314 fix-RFC-trace gate — **ratified 2026-07-04 interactive drain: surface (a)** (§ Ratified Direction below; recorded as ADR-092); built 2026-07-05 under RFC-044 / STORY-038.
 
 ## Dependencies
 
@@ -100,8 +100,19 @@ Per the same load-bearing-decision discipline P228 applied (surface selection de
 ## Change Log
 
 - **2026-05-31**: Captured (work-problems AFK iter 1 retro). Placeholder Priority/Effort; fix-strategy candidates (a)/(b)/(c) deferred to investigation.
+- **2026-07-05** (work-problems AFK iter): **Fix built** under the 2026-07-04 ratified direction (surface (a)). ADR-092 records the advisory-only posture (born-unconfirmed per P348, queued for drain); RFC-044 + STORY-038 trace the fix; hook `itil-fix-title-lifecycle-advisory.sh` + 13 behavioural bats (RED-first GREEN) + hooks.json wiring + `@windyroad/itil` minor changeset landed. Ticket STAYS Known Error pre-release per architect direction (no Verifying claim before the release ships); `## Fix Released` below feeds P228's post-release K→V enumerator at the orchestrator's release step.
 - **2026-06-16** (work-problems AFK iter 26): Investigation pass + **Open → Known Error**. Root cause confirmed — no `fix(<pkg>): P<NNN>` commit-title → lifecycle surface exists; the gap survives both fixes that shipped since capture (P228 K→V `@windyroad/itil@0.49.4` acts only on `.known-error/`; P314 RFC-trace `0.50.0` gates RFC presence not lifecycle); review-problems item 10 keys off body-documented root-cause+workaround, not commit titles. Load-bearing semantic finding recorded: O→KE asserts root-cause-known (a knowledge claim) and is NOT mechanically inferable from a fix-titled commit the way K→V (an observable release fact) is — this tilts the surface toward advisory (a) and confirms a *separate* (non-unified) fix surface from P228, and a *sibling* (not extended) hook from P234. Surface selection (a/b/c + newly-surfaced d) **QUEUED for user ratification** (ADR-074 substance-confirm; born-proposed, not built under AFK). Re-rate guidance recorded (Impact 2 × Likelihood 2 = 4 Low) but placeholder left intact per the ticket's defer-to-review-problems contract. O→KE justified by review-problems item-10 criteria now met (root cause confirmed + workaround documented). Recovery: `/wr-itil:transition-problem 345 open`.
 
+
+## Fix Strategy
+
+Ship ratified surface (a): sibling advisory hook `packages/itil/hooks/itil-fix-title-lifecycle-advisory.sh` (copy-and-retarget of the P378 detect-then-advise precedent), per [RFC-044](../../rfcs/RFC-044-fix-title-lifecycle-drift-advisory-hook.proposed.md) / STORY-038 / ADR-092.
+
+**Release vehicle**: .changeset/wr-itil-p345-fix-title-lifecycle-advisory.md (HELD at `docs/changesets-holding/` since 2026-07-05 per the commit scorer's ADR-042 R1 auto-apply — first-landing hook, zero field evidence; reinstates to `.changeset/` on the ADR-061 Rule 4 evidence criterion in the holding README)
+
+## Fix Released
+
+Implemented 2026-07-05 (AFK work-problems iter; fix commit on main). New PostToolUse:Bash hook `itil-fix-title-lifecycle-advisory.sh` parses fix-typed HEAD subjects for `P<NNN>` tokens and emits a ≤300-byte stderr advisory when a named ticket is still `docs/problems/open/` — advisory-only, exit 0 always, bypass `BYPASS_FIX_TITLE_LIFECYCLE_ADVISORY=1` (ADR-092). Exercise evidence: behavioural suite `itil-fix-title-lifecycle-advisory.bats` 13/13 GREEN (RED-first TDD). Release vehicle: `.changeset/wr-itil-p345-fix-title-lifecycle-advisory.md` (`@windyroad/itil` minor). Ticket held at Known Error until the release ships (orchestrator-owned cadence); P228's post-release enumerator performs the K→V transition. Awaiting release, then user verification.
 
 ## Ratified Direction - 2026-07-04 interactive decision drain
 

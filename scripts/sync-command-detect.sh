@@ -34,9 +34,11 @@ fi
 # invocations. Each gets a byte-identical copy at
 # packages/<plugin>/hooks/lib/command-detect.sh.
 #
-# itil consumers (P268 / P272 / P273 / P274):
+# itil consumers (P268 / P272 / P273 / P274 / P378 / P345):
 #   itil-readme-refresh-discipline.sh, itil-changeset-discipline.sh,
-#   p057-staging-trap-detect.sh, itil-rfc-trailer-advisory.sh.
+#   p057-staging-trap-detect.sh, itil-rfc-trailer-advisory.sh,
+#   itil-commit-trailer-transition-advisory.sh,
+#   itil-fix-title-lifecycle-advisory.sh.
 # retrospective consumers (P275): retrospective-readme-jtbd-currency.sh.
 # architect consumers (P366): architect-readme-pairing-check.sh.
 CONSUMERS=(itil retrospective architect)

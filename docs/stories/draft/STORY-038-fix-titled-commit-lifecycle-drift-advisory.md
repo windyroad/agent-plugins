@@ -26,12 +26,12 @@ In order to trust that the problem backlog reflects lifecycle reality when I ret
 
 ## Acceptance criteria (accepted-gate, INVEST Testable)
 
-- [ ] A `git commit` whose HEAD subject is `fix(<pkg>): ... P<NNN> ...` while `docs/problems/open/<NNN>-*.md` exists emits a stderr advisory naming the ticket and the transition path, exit 0.
-- [ ] The same commit shape is silent when the named ticket is in `known-error/` / `verifying/` / `closed/` / `parked/` or does not exist.
-- [ ] Non-`fix`-typed subjects naming a `P<NNN>` are silent (the signal is the fix type, not the token).
-- [ ] Total stderr emission stays ≤300 bytes even when the subject names multiple still-Open tickets (ADR-045).
-- [ ] `BYPASS_FIX_TITLE_LIFECYCLE_ADVISORY=1` suppresses the advisory; every path (including malformed input, missing docs/problems, non-git cwd) exits 0.
-- [ ] The hook is registered in `packages/itil/hooks/hooks.json` under PostToolUse matcher `Bash`.
+- [x] A `git commit` whose HEAD subject is `fix(<pkg>): ... P<NNN> ...` while `docs/problems/open/<NNN>-*.md` exists emits a stderr advisory naming the ticket and the transition path, exit 0.
+- [x] The same commit shape is silent when the named ticket is in `known-error/` / `verifying/` / `closed/` / `parked/` or does not exist.
+- [x] Non-`fix`-typed subjects naming a `P<NNN>` are silent (the signal is the fix type, not the token).
+- [x] Total stderr emission stays ≤300 bytes even when the subject names multiple still-Open tickets (ADR-045).
+- [x] `BYPASS_FIX_TITLE_LIFECYCLE_ADVISORY=1` suppresses the advisory; every path (including malformed input, missing docs/problems, non-git cwd) exits 0.
+- [x] The hook is registered in `packages/itil/hooks/hooks.json` under PostToolUse matcher `Bash`.
 
 ## Driving problem trace (required — I6 invariant)
 

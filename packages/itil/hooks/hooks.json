@@ -60,6 +60,10 @@
         "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/itil-commit-trailer-transition-advisory.sh" }]
       },
       {
+        "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/itil-fix-title-lifecycle-advisory.sh" }]
+      },
+      {
         "matcher": "Write|Edit|MultiEdit",
         "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/itil-fictional-defer-detect.sh" }]
       },
