@@ -37,9 +37,9 @@ Fresh instances this session (2026-07-06):
 
 ### Investigation Tasks
 
-- [ ] Determine the enforcement/detection surface beyond memory (P311 memory-only failed). Candidate: a Stop/PostToolUse detector that flags when the agent's output describes a scoped-down/softened deviation ("advisory instead of", "held some", "smaller version", a magic-number hedge on a trust-the-mechanism directive) without a preceding AskUserQuestion; OR a SKILL/CLAUDE.md contract line: "when tempted to deviate from an explicit request, do X or AskUserQuestion — never silently ship X-prime."
+- [ ] Ship the fix as an ADOPTER-FACING plugin surface, NOT memory (per P423). Memory-only failed for P311; project-local memory reaches no plugin user. Determine the shipped enforcement/detection surface: Candidate: a Stop/PostToolUse detector that flags when the agent's output describes a scoped-down/softened deviation ("advisory instead of", "held some", "smaller version", a magic-number hedge on a trust-the-mechanism directive) without a preceding AskUserQuestion; OR a SKILL/CLAUDE.md contract line: "when tempted to deviate from an explicit request, do X or AskUserQuestion — never silently ship X-prime."
 - [ ] Reconcile with P085 (act-on-obvious) + inverse-P078: the boundary is — obvious → do X; deviation-considered → ASK; never silent-X-prime.
-- [ ] Update `feedback_no_shortcuts_no_softening.md` memory with the sharpened "ask-don't-silently-substitute" nuance (asking is fine; silent substitution is the defect).
+- [ ] (Done, but NOT the fix — P423): `feedback_no_shortcuts_no_softening.md` updated with the sharpened rule as agent-private reinforcement. The actual fix is the shipped surface above; memory is not adopter-facing.
 
 ## Dependencies
 
