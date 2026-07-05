@@ -52,7 +52,7 @@ The orchestrator conflated "the highest-leverage / most-salient remaining work i
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] **(reopened fix)** Implement the `/goal` loop-anchor per ## Fix Strategy — set a `/goal` completion condition at work-problems / work-problem loop start; likely a short ADR for the shared loop-control contract change + eval coverage
+- [x] **(reopened fix)** Implement the `/goal` loop-anchor per ## Fix Strategy — set a `/goal` completion condition at work-problems / work-problem loop start; likely a short ADR for the shared loop-control contract change + eval coverage — DONE 2026-07-06: ADR-094 + RFC-047 + STORY-040 + work-problems Step 0e + Gate (0) printed-evidence amendment + singular-skill note + paired promptfoo cases (see ## Fix Implemented (reopened) below).
 - [x] Strengthen the Step 2.4 pre-ALL_DONE gate: before emitting ALL_DONE, assert that Step 2 stop-condition #1/#2/#3 OBJECTIVELY holds — i.e. re-scan the backlog and confirm zero Tier-0/1/2 tickets are dispatchable (not just "the salient remainder is gated"). A non-empty actionable backlog forbids ALL_DONE. — DONE 2026-06-28: Step 2.4 **Gate (0) — Objective backlog-empty assertion** prepended ahead of gate (a) (see Fix Implemented below).
 - [x] Add a behavioural assertion / eval case: ALL_DONE is NOT emitted when the WSJF backlog has ≥1 actionable (non-held, non-verifying, non-interactive-gated) ticket. — DONE 2026-06-28: paired promptfoo Tier-A/B case added to `packages/itil/skills/work-problems/eval/promptfooconfig.yaml` (`Step 2.4 gate (0) — dispatchable Tier-2 backlog remains → loop back, do NOT emit ALL_DONE`).
 - [x] Cross-check the loop-back coverage: a user-directed pivot (eval cohort) must not consume the loop's Tier-exhaustion obligation — after the pivot, the loop resumes Tier selection rather than terminating. — DONE 2026-06-28: Gate (0) "Why gate (0) fires first" prose explicitly states a user-directed mid-loop pivot does NOT discharge the Tier-exhaustion obligation; the re-scan resumes tier selection (also catches the P382 skip).
@@ -67,6 +67,18 @@ The orchestrator conflated "the highest-leverage / most-salient remaining work i
 - The subjective "this is a natural stopping point" judgement that drove the P390 stop is explicitly disavowed; a user-directed pivot does not discharge the Tier-exhaustion obligation (catches the P382 coverage miss too).
 
 **R009 prose-floor discharge**: paired promptfoo case authored in the same commit; the @windyroad/itil patch changeset is HELD at `docs/changesets-holding/wr-itil-p390-step-2-4-gate-0-objective-backlog-empty.md` (ADR-042 Rule 2) — 9th hold in the work-problems-surface cohort, reinstated atomically when the work-problems promptfoo eval goes GREEN (ADR-061 Rule 4). Awaiting that evidence to ship → Verifying.
+
+## Fix Implemented (reopened) — 2026-07-06
+
+Implemented per the Fix Strategy below, decision authority **ADR-094** (`docs/decisions/094-afk-loops-anchor-completion-with-native-goal-evaluator.proposed.md`), traced **RFC-047 → STORY-040** (placed on STORY-MAP-002):
+
+- **work-problems Step 0e — `/goal` loop-anchor**: canonical goal condition (verbatim, coupled to the Gate (0) table shape), anchor-guaranteed headless launch one-liner (`claude -p "/goal <condition carrying the skill invocation>"`), interactive nudge-and-proceed fallback (one line, never halts, no `AskUserQuestion`), goal on the orchestrator session only (never iter subprocesses).
+- **Step 2.4 Gate (0) amendment**: the dispatchable/non-dispatchable classification MUST be PRINTED as a table in turn output — the `/goal` external evaluator judges only surfaced transcript evidence (ADR-026). New "Gate (0) × Step 0e" paragraph: under an active goal, `ALL_DONE` is independently confirmed per turn; the anchor is one-directional (a cleared/absent goal never relaxes Gate (0)).
+- **work-problem (singular)**: headless anchor shape documented for single-ticket runs.
+- **Open questions resolved**: goal lives on the orchestrator session (iters end naturally after one ticket per ADR-032/P077/P084); the turn-bound clause ("or stop after 100 turns") does not conflict with P160/ADR-093 quota pacing (pacing stretches wall-clock within turns, not turn count); eval coverage = two paired promptfoo Tier-A/Tier-B cases (unanchored-start nudge-and-proceed; printed-evidence requirement).
+- **Empirical grounding (ADR-026)**: probed 2026-07-06 on v2.1.201 — no `--goal` CLI flag; Skill tool rejects it ("goal is a UI command, not a skill... cannot be invoked via the Skill tool"); headless `claude -p "/goal"` recognized. The agent cannot set the goal mid-session; the anchor is launch-set or user-set.
+
+Ratification of ADR-094 / RFC-047 / STORY-040 / STORY-MAP-002 drift-reopen queued to the interactive drain (ADR-066/ADR-090, `human-oversight: unconfirmed`). Changeset ships with the paired eval evidence per ADR-061 Rule 4.
 
 ## Fix Strategy — anchor the loop with Claude Code's native `/goal`
 

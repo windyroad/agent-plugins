@@ -121,6 +121,10 @@ After the delegated `/wr-itil:manage-problem <NNN>` completes:
 - Loop over multiple tickets — that's `/wr-itil:work-problems` (plural).
 - Commit the ranking refresh or the per-ticket work — delegated skills commit per ADR-014.
 
+## Goal anchor for headless runs (P390 / ADR-094)
+
+A headless single-ticket run can anchor its completion with Claude Code's native `/goal` external evaluator (≥ v2.1.139), so a fresh model — not the working agent — judges whether the ticket genuinely reached an end state: `claude -p "/goal Run /wr-itil:work-problem to work the top ticket. Complete when the report printed in the conversation shows a committed outcome (with commit SHA) or a recorded blocker for the selected ticket. Or stop after 30 turns."` There is no programmatic mid-session surface for setting a goal (probed 2026-07-06, v2.1.201) — interactive users type `/goal` themselves; the skill proceeds identically either way. The plural orchestrator's anchor contract (canonical condition, printed-evidence rule, one-directional semantics) lives at `/wr-itil:work-problems` Step 0e.
+
 ## Related
 
 - **P071** (`docs/problems/071-argument-based-skill-subcommands-are-not-discoverable.open.md`) — originating ticket. This skill is phase 3 of the P071 phased-landing plan (list-problems was phase 1; review-problems was phase 2).

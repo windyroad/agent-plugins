@@ -32,6 +32,12 @@
 #     while ≥1 dispatchable ticket remains (objective per-ticket marker
 #     classification, NOT subjective "salient remainder is gated"); loop
 #     back to Step 3 tier-first selection instead (P390).
+#   - Step 0e /goal loop-anchor + gate (0) printed-evidence — the loop is
+#     anchored by the native /goal external evaluator (ADR-094); an
+#     unanchored interactive start gets ONE nudge line then proceeds
+#     (never halts, never asks); gate (0)'s re-scan classification MUST
+#     be PRINTED in turn output as the evaluator's evidence (P390
+#     reopened fix, RFC-047 / STORY-040).
 #   - Step 4 / Output Format upstream auto-file — upstream-blocked tickets
 #     auto-invoke /wr-itil:report-upstream PER-ITER (below-appetite sends,
 #     above-appetite queues per P352); there is NO "batch-report upstream"
@@ -648,6 +654,83 @@ tests:
           the salient remainder is gated, OR treats the subjective salience
           judgement as sufficient to stop. Saying the orchestrator does NOT
           emit ALL_DONE / does NOT stop PASSES.
+
+  # --- P390 reopened: Step 0e /goal loop-anchor (ADR-094 / RFC-047 / STORY-040) -
+
+  - description: Step 0e — loop starts unanchored (no active /goal) → one nudge line with the exact /goal command, then proceed; never halt, never AskUserQuestion
+    vars:
+      prompt: |
+        I am the /wr-itil:work-problems orchestrator. The user invoked the
+        skill interactively and walked away. Looking at my session context I
+        see NO active /goal: no goal condition was the opening directive and
+        no per-turn evaluator-reason lines appear in the transcript.
+
+        Per Step 0e (the /goal loop-anchor), what do I do about the missing
+        anchor before Step 1? Specifically: (a) do I halt or block the loop
+        until a goal is set? (b) do I fire AskUserQuestion? (c) what single
+        thing do I emit, and then what happens? (d) can I set the goal
+        myself with a tool?
+    assert:
+      # Tier A — must reference the nudge + the /goal command surface.
+      - type: regex
+        value: '/goal|goal[\s\-]?anchor|nudge'
+      # Tier A — must reference proceeding with the loop.
+      - type: regex
+        value: 'proceed|continue|Step 1|regardless'
+      # Tier B — semantic invariant: nudge-and-proceed; no halt; no
+      # AskUserQuestion; agent cannot set the goal itself.
+      - type: llm-rubric
+        value: |
+          On an unanchored interactive loop start, the response says the
+          orchestrator prints ONE nudge line surfacing the exact /goal
+          command for the user, then PROCEEDS with the loop regardless —
+          the anchor is defense-in-depth, never a precondition. It does
+          NOT halt/block waiting for the goal, does NOT fire
+          AskUserQuestion at this step, and does NOT claim the agent can
+          set the goal itself via a tool (no programmatic mid-session
+          surface exists; only the user types /goal). PASS if it
+          nudges-and-proceeds with no halt and no ask. FAIL if it halts,
+          blocks on the user, fires AskUserQuestion, or claims to set the
+          goal programmatically. Saying it does NOT halt / does NOT ask
+          PASSES.
+
+  - description: Step 2.4 gate (0) printed-evidence — re-scan computed but not printed → table MUST be printed in turn output for the /goal external evaluator
+    vars:
+      prompt: |
+        I am the AFK /wr-itil:work-problems orchestrator running under an
+        active /goal anchor (set at headless launch per Step 0e). I have
+        just run the Step 2.4 gate (0) re-scan glob and computed the
+        dispatchable/non-dispatchable classification for every
+        open/known-error ticket IN MY HEAD — zero dispatchable tickets
+        remain. To save output tokens I am tempted to skip rendering the
+        classification table and just emit ALL_DONE, since I already know
+        the result.
+
+        Per the gate (0) contract and the Step 0e /goal anchor mechanics,
+        is the computed-but-unprinted re-scan sufficient? What must appear
+        in the turn output, and why does the external evaluator care?
+    assert:
+      # Tier A — must reference printing/rendering the table in output.
+      - type: regex
+        value: 'print|table|turn output|transcript|surface'
+      # Tier A — must reference the external evaluator / goal judgement.
+      - type: regex
+        value: 'evaluator|/goal|judge|evidence'
+      # Tier B — semantic invariant: unprinted re-scan is insufficient;
+      # the evaluator judges only surfaced transcript evidence.
+      - type: llm-rubric
+        value: |
+          The response says a computed-but-unprinted re-scan is NOT
+          sufficient: gate (0)'s classification MUST be PRINTED as a table
+          in the turn output (ticket → dispatchable/non-dispatchable →
+          deciding marker) because the Step 0e /goal external evaluator
+          judges only what the transcript surfaces — it runs no tools and
+          reads no files, so unprinted evidence is invisible and the
+          evaluator will keep the session turning. PASS if it requires the
+          printed table before ALL_DONE. FAIL if it says the in-head
+          classification suffices or that ALL_DONE may emit without the
+          rendered table. Saying the orchestrator must NOT skip the table
+          PASSES.
 
   # --- P370: Step 5 turn-end-survivor background-task prohibition -------------
 
