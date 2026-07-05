@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-05 **P408 verifying** — commit gate now derives the RISK-POLICY staleness threshold from the policy's stated `> Reviewed <cadence>` line per ADR-091 (weekly=7/fortnightly=14/monthly=30/quarterly=90/annually=365; fallback 14), deny message names the derived threshold; the 2026-07-04 drain-ratified fix shipped via RFC-043/STORY-037, behavioural bats 6/6 GREEN, `@windyroad/risk-scorer` patch changeset queued. (AFK work-problems iter)
+> Last reviewed: 2026-07-05 **P419 captured** — capture-story's mechanical reverse-trace edit to a docs/jtbd file re-locks the JTBD edit gate mid-session via policy-hash drift, forcing a wr-jtbd:agent re-review round-trip per story capture with zero review value (witnessed in the P408 iter after the STORY-037 back-link). WSJF 1.5 deferred placeholder. (lightweight aside via /wr-itil:capture-problem, P408 retro)
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -48,6 +48,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 1.5 | P416 | Outstanding-questions drain appends a superseding human decision without reconciling the stale Fix Strategy section it overrides | 3 Medium | Open | M | 2026-07-04 | internal |
 | 1.5 | P417 | docs/stories/README.md Rankings/Done never reconciled — stale for the whole story corpus | 3 Medium | Open | M | 2026-07-04 | internal |
 | 1.5 | P418 | Reviewer-agent marker hooks do not fire on SendMessage-resumed agents — ISSUES FOUND cannot be continued to a marker-writing PASS, forcing a full fresh re-review | 3 Medium | Open | M | 2026-07-05 | internal |
+| 1.5 | P419 | capture-story's mechanical reverse-trace edit to a docs/jtbd file re-locks the JTBD edit gate mid-session, forcing a wr-jtbd:agent re-review round-trip per story capture | 3 Medium | Open | M | 2026-07-05 | internal |
 | 0.75 | P012 | Skill Testing Harness Scope Undefined | 6 Medium | Open | XL | 2026-04-16 | internal |
 
 ## Verification Queue
