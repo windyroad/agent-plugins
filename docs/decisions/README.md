@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 89 (79 in-force, 10 historical)
+**Total ADRs:** 92 (83 in-force, 9 historical)
 
 ---
 
 ## In-force decisions
 
-_79 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_83 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -126,11 +126,10 @@ _79 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **Option 1 — Cite + persist + uncertainty, measurement surface on `.closed.md` tickets, WSJF buckets with comparable-prior citation, explicit `not estimated` marker when ungrounded.**
 **Related:** ADR-026, ADR-023, ADR-022, ADR-015, ADR-005
+
 ### ADR-028 — External-comms gate — voice-tone + risk/leak evaluators on shared PreToolUse surface
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** One combined PreToolUse gate fires two independent evaluators — voice-tone and risk/leak — over every external-text surface (gh issues/PRs/advisories, npm README, changeset bodies, commit messages), distributed as byte-identical copies into `@windyroad/voice-tone` and `@windyroad/risk-scorer` via the ADR-017 sync pattern so each package runs only its own evaluator and stays independently installable. Chosen over sibling ADRs / base-plus-sub-ADRs / hard-coupled hooks because it reuses the deny-plus-marker convention and keeps partial coverage working when only one package is present.
-**Confirmation:** canonical + per-package byte-identical gate copies present with CI drift check; per-evaluator marker key `sha256(normalize(draft,surface) + '\n' + surface)` computed by the shared `compute_external_comms_key` and hook-derived from the prompt; atomic marker write via `_atomic_mark_with_hash`; per-evaluator advisory-only fallback when a policy file is absent; age-check + private-repo + voice-tone-commit-message surface skips; reviewer dispatched synchronously so the PostToolUse mark hook fires; behavioural bats cover both-PASS/one-FAIL/neither, changeset frontmatter-strip, shell-unescape symmetry, and leak-still-fails guards.
-**Related:** ADR-002, ADR-008, ADR-009, ADR-013, ADR-014, ADR-015, ADR-017, ADR-018, ADR-020, ADR-023, ADR-024, ADR-025, ADR-026, ADR-027, ADR-045, ADR-062
+**Related:** ADR-002, ADR-017, ADR-008, ADR-009, ADR-013, ADR-015, ADR-020, ADR-024, ADR-025, ADR-026, ADR-027
 
 ### ADR-029 — Diagnose before implement — structured hypothesis + evidence + RED-for-the-right-reason gate
 **Status:** proposed | **Oversight:** confirmed
@@ -145,11 +144,11 @@ _79 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** accepted | **Oversight:** confirmed
 **Confirmation:** All five state subdirectories (open/, known-error/, verifying/, parked/, closed/) exist as directories under d...; Every ticket file lives under one of those subdirectories with filename matching ^[0-9]{3}-[a-z0-9-]+\.md$ (no...; Every problem-ticket file's in-body Status: field matches its containing directory name (case-insensitive, kno...; SKILL.md globs in manage-problem, work-problems, manage-incident, report-upstream, run-retro accept BOTH docs/...; Bats fixture path-assertions are dual-tolerant; assertions against "this glob MUST match at least one file" ar...
 **Related:** ADR-022, ADR-016, ADR-024, ADR-014
+
 ### ADR-032 — Governance skill invocation patterns — foreground + background with deferred-question resumption
 **Status:** proposed | **Oversight:** confirmed | **Supersedes:** [027-governance-skill-auto-delegation]
-**Decides:** Supersedes ADR-027's mandatory Step-0 subagent delegation with a per-invocation pattern taxonomy: foreground skills run Steps 1–N in main-agent context; sibling `capture-*` skills serve mid-task asides (shipped as foreground-lightweight-capture that derives full substance at capture — no deferred placeholders, ratings rated-at-capture); interactive branches in background contexts pause via persistent pending-questions artefacts surfaced at the next natural pause; a fresh-context subagent arbiter handles bias-prone in-skill decisions. AFK iterations are carved out and dispatch via backgrounded `claude -p` subprocesses (poll-loop SIGTERM, is_error salvage/halt taxonomy, non-blocking pre-flight revert, `--plugin-dir` governance injection).
-**Confirmation:** ADR-027 renamed `.superseded.md` with superseded status + superseded-by frontmatter; Step-0 delegation language removed from manage-problem / create-adr / run-retro / manage-incident SKILL.md; capture-* SKILL.md files exist with Rule 6 audit sections citing the resumption contract; `pending-questions-surface.sh` UserPromptSubmit hook detects pending-questions artefacts; plugin.json manifests list the new skills; contract + hook bats fixtures; behavioural replay of capture, resumption, interrupt, AFK carve-out, and TTL-expiry paths
-**Related:** ADR-009, ADR-013, ADR-014, ADR-018, ADR-019, ADR-020, ADR-024, ADR-026, ADR-027, ADR-028, ADR-031, ADR-038, ADR-040, ADR-041, ADR-042, ADR-044, ADR-049, ADR-052, ADR-061, ADR-064, ADR-066, ADR-067, ADR-071, ADR-072, ADR-074, ADR-076, ADR-079, ADR-080, ADR-083, ADR-084
+**Confirmation:** 027-governance-skill-auto-delegation.proposed.md renamed to .superseded.md; status: superseded; superseded-by:...; manage-problem / create-adr / run-retro / manage-incident SKILL.md files have their Step-0 subagent-delegation...; Three new SKILL.md files at packages/itil/skills/capture-problem/SKILL.md, packages/retrospective/skills/captu...; packages/itil/hooks/pending-questions-surface.sh UserPromptSubmit hook exists; detects docs/problems/open/*-pe...; .claude-plugin/plugin.json entries for @windyroad/itil, @windyroad/retrospective, @windyroad/architect list th...
+**Related:** ADR-027, ADR-009, ADR-013, ADR-014, ADR-018, ADR-019, ADR-020, ADR-024, ADR-026, ADR-028, ADR-031
 
 ### ADR-033 — Report-upstream classifier is problem-first — supersedes ADR-024 Decision Outcome Steps 3 + 5
 **Status:** proposed | **Oversight:** confirmed
@@ -194,11 +193,11 @@ _79 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-046 — ADR-046 — Blocked-reporters persistence: per-repo, hashed-ID, audit-log-first
 **Status:** accepted | **Oversight:** confirmed
 **Related:** ADR-046, ADR-024, ADR-014, ADR-017, ADR-022, ADR-029, ADR-030, ADR-037, ADR-044
+
 ### ADR-047 — Install-updates scaffolds governance artefacts when policy file is present but artefact is missing
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** Originally chose an inline `/install-updates` scaffold step; superseded 2026-06-08 by a read-only SessionStart stderr nudge (`risk-scorer-scaffold-nudge.sh`) that surfaces the 99%-miss-rate governance gap without writing — the scaffold write happens only when the adopter invokes the skill the nudge points at. The one hook now carries three AFK-guarded arms: register-dir-absent → `/wr-risk-scorer:bootstrap-catalog` (P297), policy-absent → `/wr-risk-scorer:update-policy` (P379), and pending-review-count self-surfacer that re-nudges every session until the curation backlog drains (P375).
-**Confirmation:** hook exists, executable, follows `architect-oversight-nudge.sh` shape (AFK-guard short-circuit, silent-on-no-condition, one-line stderr); registered in `hooks.json` under SessionStart matcher `"startup"`; behavioural bats fixture exercises the state matrix + `WR_SUPPRESS_OVERSIGHT_NUDGE` guard across all three arms; README compendium regenerated per ADR-077.
-**Related:** ADR-036, ADR-030, ADR-013, ADR-014, ADR-038, ADR-040, ADR-004, ADR-066, ADR-068, ADR-045, ADR-059, ADR-049, ADR-056, ADR-086, ADR-084
+**Confirmation:** .claude/skills/install-updates/SKILL.md — Step 6.5 "Scaffold governance artefacts (per-sibling)" exists betw...; .claude/skills/install-updates/REFERENCE.md — new section "Governance-artefact scaffold (P033)" present with...; .claude/skills/install-updates/templates/risk-register-README.md.tmpl — present; adopter-flavoured (no R001 ...; .claude/skills/install-updates/templates/risk-register-TEMPLATE.md.tmpl — present; verbatim copy of this rep...; docs/problems/033-no-persistent-risk-register.known-error.md — Phase 1 marked complete with ADR-047 citation...
+**Related:** ADR-036, ADR-030, ADR-013, ADR-014, ADR-038, ADR-040, ADR-004
 
 ### ADR-049 — Plugin-bundled scripts invoked from SKILL.md resolve via `bin/` on `$PATH`
 **Status:** proposed | **Oversight:** confirmed
@@ -245,10 +244,10 @@ _79 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-060 — Problem-RFC-Story framework with mandatory problem-trace and unified problem ontology
 **Status:** accepted | **Oversight:** confirmed
 **Related:** ADR-032
+
 ### ADR-061 — Dogfood graduation criteria for held changesets — symmetric risk balance drives the reinstate decision
 **Status:** proposed | **Oversight:** unconfirmed
-**Decides:** A held changeset graduates from `docs/changesets-holding/` back to `.changeset/` when its hypothetically-reinstated release-risk ≤ its originating problem ticket's `Priority` — the symmetric outflow counterpart to ADR-042's inflow contract, reusing the existing Priority rather than building a new evidence pipeline. Adds two evaluation units (orthogonal-gate / atomic-cohort), per-class grounded evidence floors, and an ADR-018/020 drain-condition amendment so drain wakes on graduatable held entries. Per P398 the Verification-Pending carve-out narrows: an unshipped fix stays held, but a held changeset whose ticket has a populated `## Fix Released` is only changelog-attribution for already-live code and graduates (status `resolved`) — an interim slice of ADR-082 option (c) pending RFC-025.
-**Confirmation:** Source review of Rules 1–8; Phase-2 behavioural bats on the risk-scorer join surface (filename/body-grep join, max-Priority, halt-and-prompt, VP-unshipped exclusion vs shipped-code graduation, atomic-cohort, evidence-floor citation); I001/I002 manual graduations as clean empirical baseline; Phase-4 drain-condition amendment landed with load-bearing-string bats.
+**Chosen:** Chosen option: **Sibling ADR codifying symmetric-balance graduation (Option 1) with Phase 1b Option A drain-condition amendment.**
 **Related:** ADR-042, ADR-018, ADR-020, ADR-022, ADR-026, ADR-052, ADR-060, ADR-082, ADR-014, ADR-013, ADR-015, ADR-044
 
 ### ADR-062 — Inbound upstream-report discovery + assessment pipeline (peer of ADR-024)
@@ -262,6 +261,11 @@ _79 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen: **Shape B + a thin slice of Shape C; Shape A rejected.**
 **Related:** ADR-013, ADR-044, ADR-026, ADR-052
+
+### ADR-065 — Pipeline gate block threshold is derived from RISK-POLICY.md appetite, not hardcoded
+**Status:** proposed | **Oversight:** confirmed
+**Confirmation:** RISK-POLICY.md with "exceeds 9" → score 7 PASSES, score 10 FAILS.; "Threshold: 9" phrasing → score 9 PASSES, score 10 FAILS.; "exceeds 4" → score 4 PASSES, score 5 FAILS.; Absent RISK-POLICY.md → default appetite 4 (4 PASSES, 5 FAILS).; Unparseable RISK-POLICY.md (no appetite integer) → default appetite 4.
+**Related:** ADR-009, ADR-014, ADR-023, ADR-028, ADR-042, ADR-052
 
 ### ADR-066 — ADR-066: Human-oversight marker + `/wr-architect:review-decisions` drain for recorded decisions
 **Status:** proposed | **Oversight:** confirmed
@@ -311,11 +315,11 @@ _79 ADRs. These are the current rules. The architect agent reads this section fi
 **Chosen:** Chosen option: **"Option 3 — New ADR + thin amend to ADR-064 + carve-out clause in ADR-066"**, confirmed by the user via `AskUserQuestion` 2026-05-27, because it is the only option that closes all three surfaces P315 names (the architect ...
 **Confirmation:** A Needs-Direction verdict from wr-architect:agent names the substantive options (not a grain/meta question); b...; The propose-fix guard in /wr-itil:work-problems and /wr-itil:manage-problem halts (interactive) or queues to o...; ADR-064 carries the grain-vs-substance clause; ADR-066 carries the marker-≠-licence carve-out.; The lazy-AskUserQuestion regression metric (packages/retrospective/scripts/check-ask-hygiene.sh) excludes subs...
 **Related:** ADR-072, ADR-064, ADR-066, ADR-044, ADR-060, ADR-070
-### ADR-075 — promptfoo as the behavioural test harness for agent-prose verdicts
+
+### ADR-075 — ADR-075: promptfoo as the behavioural test harness for agent-prose verdicts
 **Status:** proposed | **Oversight:** unconfirmed
-**Decides:** Adopts promptfoo (exec provider wrapping `claude -p`, subscription auth — no API key) as the behavioural eval harness for agent-prose and SKILL-prose verdicts, alongside bats, closing the P324 gap that forced ADR-052's structural-test escape hatch. Amended 2026-07-05: both tiers (Tier A deterministic + Tier B llm-rubric N-sample pass^k) now gate every CI run via an `eval-agents` job whose token-guard step lets secret-less fork PRs skip green — superseding the original release-only Tier-B cadence; this cadence delta is the sole pending-ratification item (base decision user-confirmed 2026-05-28/2026-06-02).
-**Confirmation:** promptfoo root devDependency with per-package evals excluded from published tarballs; Tier A blocks CI + pre-commit/pre-push; Tier B blocks release (superseded by the 2026-07-05 CI-merge amendment); first slice covers the jtbd `[Unratified Dependency]` verdict (fires on unratified cite, silent on ratified); ADR-052 Surface-2 narrowing + ADR-005 reassessment flag recorded; oversight marker carried
-**Related:** ADR-002, ADR-005, ADR-026, ADR-037, ADR-052, ADR-060, ADR-061, ADR-066, ADR-070, ADR-071
+**Chosen:** Chosen: **adopt promptfoo as the agent-prose eval harness, alongside (not replacing) bats.**
+**Related:** ADR-052, ADR-005, ADR-002, ADR-071, ADR-066
 
 ### ADR-076 — Inbound-reported problems rank ahead of internally-discovered problems via a sort tier
 **Status:** proposed | **Oversight:** confirmed
@@ -393,26 +397,27 @@ _79 ADRs. These are the current rules. The architect agent reads this section fi
 
 ### ADR-091 — Commit-gate staleness threshold derives from RISK-POLICY.md's stated review cadence
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** The risk-scorer commit gate derives its policy-staleness threshold from the cadence word on RISK-POLICY.md's own `> Reviewed <cadence>` line (weekly=7, fortnightly/biweekly=14, monthly=30, quarterly=90, annually/yearly=365; fallback 14 when absent/unrecognised), making the policy the single source of truth for its own staleness and eliminating P408's false-positive commit blocks — extends ADR-086's derive-from-policy principle to the remaining hardcoded constant.
-**Confirmation:** Behavioural bats with fixture RISK-POLICY.md variants — monthly cadence reviewed 16 days ago allowed (P408 case); no cadence line reviewed 16 days ago denied (14-day fallback); capital-`R` `Reviewed` cadence line parses, never the `Last reviewed:` date line; elapsed cadence denied with deny message naming the derived threshold and cadence word.
-**Related:** ADR-052, ADR-065, ADR-073, ADR-086
+**Chosen:** Chosen option: **derive from the stated cadence**, because it makes `RISK-POLICY.md` the single source of truth for its own staleness — the doc and the gate can never disagree — and it is the option the user ratified in the 2026-07-04 i...
 
 ### ADR-092 — Fix-titled-commit lifecycle drift surfaces as an advisory, never an auto-fire or hard gate
 **Status:** proposed | **Oversight:** unconfirmed
-**Decides:** Lifecycle drift on `fix(<pkg>): P<NNN>` commits is surfaced by a PostToolUse advisory hook that emits a stderr nudge when the named ticket is still Open with no paired transition — advisory-only, never blocks, not auto-fire, not a hard gate — because Open→Known-Error rests on a knowledge claim (root cause known), not an observable fact. Binding rule: any future surface acting on this signal stays advisory unless it asserts only observable facts; upgrading requires superseding this ADR.
-**Confirmation:** Behavioural bats exercise the hook end-to-end: advisory on fix-titled commit with Open ticket; silent when ticket is known-error/absent; silent on non-fix titles; exit 0 on every path including bypass and malformed input.
-**Related:** ADR-013, ADR-014, ADR-040, ADR-045, ADR-052, ADR-066, ADR-073
+**Chosen:** Chosen option: **post-commit advisory hook**, because **a lifecycle transition may only be automated on observable facts, and O→KE rests on a knowledge claim** — so the strongest honest surface for the fix-titled-commit signal is an adv...
+
 ### ADR-093 — Mechanical quota-pace throttle — frequently-firing PreToolUse hook, calculated sleep, never blocks
 **Status:** proposed | **Oversight:** unconfirmed
-**Decides:** AFK and interactive work alike are pace-throttled by a canonical shared PreToolUse hook (no matcher — every tool call) synced to all seven published plugins: it reads a statusline-written `~/.claude/quota-state.json` cache, compares cumulative usage against the elapsed fraction of the 5-hour and 7-day rate-limit windows (5-pt headroom on the 7-day axis for other surfaces), and sleeps the calculated catch-up time capped at 60s per firing — mechanical with zero prompts, cheap when behind pace via a shared recent-check marker, and fail-open on every abnormal path (missing/stale cache, kill-switch, no jq) so it never blocks work. Supersedes the stale compendium-only shape (itil-sibling scripts, between-iter-only pacing) per user Correction 2.
-**Confirmation:** Behavioural bats — behind-pace fast no-op; ahead-of-pace sleeps the calculated amount (incl. one real capped-sleep wall-clock case); 7d headroom violation throttles even when raw usage < elapsed; recent-check marker short-circuits the parse; missing/stale cache, kill-switch, and past `resets_at` all fast no-op; exit 0 + empty stdout on every path; sync-script `--check` drift gate in CI
-**Related:** ADR-002, ADR-003, ADR-013, ADR-017, ADR-023, ADR-038, ADR-045, ADR-057, ADR-066, ADR-077
+**Chosen:** Chosen option 3, distributed per option 4's mitigation: canonical hook `packages/shared/hooks/quota-pace-throttle.sh`, synced to the seven published plugins (architect, itil, jtbd, tdd, risk-scorer, style-guide, voice-tone) by `scripts/sync...
+
+### ADR-094 — AFK loops anchor completion with the native `/goal` external evaluator
+**Status:** proposed | **Oversight:** unconfirmed
+**Chosen:** Chosen option: **native `/goal` external evaluator**, because it moves the stop decision to an independent per-turn evaluator — the only option that structurally breaks the same-actor conflation — and it is the mechanism the user pinned...
+**Confirmation:** packages/itil/skills/work-problems/SKILL.md contains a Step 0e (/goal loop-anchor) section carrying the canoni...; Step 2.4 Gate (0) prose requires the re-scan classification be PRINTED in turn output.; Paired promptfoo Tier-A/Tier-B eval cases in packages/itil/skills/work-problems/eval/promptfooconfig.yaml asse...; Empirical probe results (Skill-tool rejection message, headless recognition JSON) recorded in this ADR and in ...
+**Related:** ADR-032, ADR-044, ADR-026, ADR-061, ADR-075, ADR-093
 
 ---
 
 ## Historical decisions
 
-_10 ADRs. These were tried and superseded, rejected, or deprecated. Read them as direction for what NOT to do, or to understand the lineage of an in-force decision. Do not enforce them as current rules._
+_9 ADRs. These were tried and superseded, rejected, or deprecated. Read them as direction for what NOT to do, or to understand the lineage of an in-force decision. Do not enforce them as current rules._
 
 ### ADR-001 — Unified Install Experience via npm Package
 **Status:** superseded
@@ -451,11 +456,6 @@ _10 ADRs. These were tried and superseded, rejected, or deprecated. Read them as
 **Status:** superseded
 **Chosen:** Chosen option: **"Option D2 — Plugin README MUST cite at least one current JTBD job ID; value framing SHOULD derive from JTBD"**, because it (a) creates a stable, structurally-simple drift-detection anchor (JTBD ID grep + filesystem resol...
 **Related:** ADR-002, ADR-003, ADR-008, ADR-013, ADR-014, ADR-051, ADR-021, ADR-040, ADR-053, ADR-044, ADR-049
-
-### ADR-065 — Pipeline gate block threshold is derived from RISK-POLICY.md appetite, not hardcoded
-**Status:** superseded (by ADR-086)
-**Confirmation:** RISK-POLICY.md with "exceeds 9" → score 7 PASSES, score 10 FAILS.; "Threshold: 9" phrasing → score 9 PASSES, score 10 FAILS.; "exceeds 4" → score 4 PASSES, score 5 FAILS.; Absent RISK-POLICY.md → default appetite 4 (4 PASSES, 5 FAILS).; Unparseable RISK-POLICY.md (no appetite integer) → default appetite 4.
-**Related:** ADR-009, ADR-014, ADR-023, ADR-028, ADR-042, ADR-052
 
 ### ADR-081 — SessionStart PATH refresh hook for plugin cache
 **Status:** rejected | **Oversight:** confirmed
