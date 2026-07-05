@@ -145,3 +145,13 @@ The mechanism is **automatic and mechanical** — zero human decision, zero nudg
 3. If a delay is needed, it **sleeps for exactly that amount** (blocking the next expensive unit), then proceeds. If no delay is needed (behind pace, headroom available), it proceeds immediately at full speed.
 
 So the loop self-throttles into an even burn that lands at each window's reset WITH headroom, instead of sprinting into a mid-iter hard-stop. No status-line glance, no "you're burning fast" message, no user-in-the-loop — the hook computes the sleep and takes it. This is the load-bearing design change: enforcement by calculated sleep, not surfacing by advisory.
+
+### CORRECTION 2 (user, 2026-07-05) — a FREQUENTLY-FIRING HOOK across ALL work, not just work-problems iters
+
+Verbatim: *"it shouldn't be just between work-problems iters. Other work too. It should fire on hooks quite frequently."*
+
+Scope broadened: the throttle is NOT limited to the AFK `/wr-itil:work-problems` between-iter boundary. It is a **hook that fires frequently on ALL work** — interactive foreground sessions AND AFK loops alike. The natural carrier is a high-frequency hook event (e.g. **PreToolUse**, which fires before every tool call), so pace is checked continuously across every kind of work, not just at loop boundaries.
+
+Mechanism per firing (unchanged calc, broader trigger): read the live 5h/7d window state → compute `required_sleep` (usage% vs elapsed% over the tighter window; 0 when behind pace/headroom) → if >0, **sleep that amount** before the tool call proceeds. When behind pace, it's a fast no-op check (no sleep) so it adds negligible latency; only when ahead-of-pace does it insert the calculated sleep. This paces the ENTIRE token burn evenly — every tool call self-throttles — so no work (loop or interactive) sprints into a mid-flight quota hard-stop.
+
+Design note: PreToolUse-on-every-call means the check must be CHEAP (a fast read of the cached window state + arithmetic), with the sleep only on the ahead-of-pace branch. The between-iter work-problems call from Correction 1 remains as a coarser complementary checkpoint, but the load-bearing surface is the frequent hook.

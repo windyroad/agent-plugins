@@ -403,6 +403,11 @@ _79 ADRs. These are the current rules. The architect agent reads this section fi
 **Confirmation:** Behavioural bats exercise the hook end-to-end: advisory on fix-titled commit with Open ticket; silent when ticket is known-error/absent; silent on non-fix titles; exit 0 on every path including bypass and malformed input.
 **Related:** ADR-013, ADR-014, ADR-040, ADR-045, ADR-052, ADR-066, ADR-073
 
+### ADR-093 — Mechanical quota-pace sleep for AFK loops
+**Status:** proposed | **Oversight:** unconfirmed
+**Decides:** AFK loops throttle via a mechanical hook-calculated pace-sleep, not advisory nudges or blocking gates: a script compares cumulative quota usage against the proportional elapsed fraction of both the 5-hour and 7-day rate-limit windows (larger required sleep wins, 5-pt headroom on the 7-day axis only) and sleeps exactly the catch-up time — no prompts, fail-open when the `~/.claude/quota-state.json` cache (written by the statusline helper) is missing, stale, or malformed. Ships as sibling scripts in `@windyroad/itil`, first slice wired into `/wr-itil:work-problems` Step 6.6; per-tool-use pacing and cross-surface quota reads deferred to the P160 fix-time RFC.
+**Related:** ADR-032, ADR-044, ADR-049, ADR-066, ADR-070, ADR-073, ADR-087
+
 ---
 
 ## Historical decisions
