@@ -11,7 +11,7 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 88 (79 in-force, 9 historical)
+**Total ADRs:** 89 (79 in-force, 10 historical)
 
 ---
 
@@ -263,11 +263,6 @@ _79 ADRs. These are the current rules. The architect agent reads this section fi
 **Chosen:** Chosen: **Shape B + a thin slice of Shape C; Shape A rejected.**
 **Related:** ADR-013, ADR-044, ADR-026, ADR-052
 
-### ADR-065 — Pipeline gate block threshold is derived from RISK-POLICY.md appetite, not hardcoded
-**Status:** proposed | **Oversight:** confirmed
-**Confirmation:** RISK-POLICY.md with "exceeds 9" → score 7 PASSES, score 10 FAILS.; "Threshold: 9" phrasing → score 9 PASSES, score 10 FAILS.; "exceeds 4" → score 4 PASSES, score 5 FAILS.; Absent RISK-POLICY.md → default appetite 4 (4 PASSES, 5 FAILS).; Unparseable RISK-POLICY.md (no appetite integer) → default appetite 4.
-**Related:** ADR-009, ADR-014, ADR-023, ADR-028, ADR-042, ADR-052
-
 ### ADR-066 — ADR-066: Human-oversight marker + `/wr-architect:review-decisions` drain for recorded decisions
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen: **Option 1 (flat scalars)** — confirmed by the user via `AskUserQuestion` 2026-05-25, on the token-cheap-grep and orthogonal-axis drivers.
@@ -396,11 +391,17 @@ _79 ADRs. These are the current rules. The architect agent reads this section fi
 **Confirmation:** A story map / story with an edit newer than its oversight-date reads as unconfirmed (drift-invalidation fires)...; capture-rfc / manage-rfc refuse to list an unratified story in an RFC's stories: — asserted by a behavioural...; A detector surfaces unratified story maps (mirroring wr-architect-detect-unoversighted for decisions).
 **Related:** ADR-066, ADR-068, ADR-060, ADR-074, ADR-009
 
+### ADR-091 — Commit-gate staleness threshold derives from RISK-POLICY.md's stated review cadence
+**Status:** proposed | **Oversight:** confirmed
+**Decides:** The risk-scorer commit gate derives its policy-staleness threshold from the cadence word on RISK-POLICY.md's own `> Reviewed <cadence>` line (weekly=7, fortnightly/biweekly=14, monthly=30, quarterly=90, annually/yearly=365; fallback 14 when absent/unrecognised), making the policy the single source of truth for its own staleness and eliminating P408's false-positive commit blocks — extends ADR-086's derive-from-policy principle to the remaining hardcoded constant.
+**Confirmation:** Behavioural bats with fixture RISK-POLICY.md variants — monthly cadence reviewed 16 days ago allowed (P408 case); no cadence line reviewed 16 days ago denied (14-day fallback); capital-`R` `Reviewed` cadence line parses, never the `Last reviewed:` date line; elapsed cadence denied with deny message naming the derived threshold and cadence word.
+**Related:** ADR-052, ADR-065, ADR-073, ADR-086
+
 ---
 
 ## Historical decisions
 
-_9 ADRs. These were tried and superseded, rejected, or deprecated. Read them as direction for what NOT to do, or to understand the lineage of an in-force decision. Do not enforce them as current rules._
+_10 ADRs. These were tried and superseded, rejected, or deprecated. Read them as direction for what NOT to do, or to understand the lineage of an in-force decision. Do not enforce them as current rules._
 
 ### ADR-001 — Unified Install Experience via npm Package
 **Status:** superseded
@@ -439,6 +440,11 @@ _9 ADRs. These were tried and superseded, rejected, or deprecated. Read them as 
 **Status:** superseded
 **Chosen:** Chosen option: **"Option D2 — Plugin README MUST cite at least one current JTBD job ID; value framing SHOULD derive from JTBD"**, because it (a) creates a stable, structurally-simple drift-detection anchor (JTBD ID grep + filesystem resol...
 **Related:** ADR-002, ADR-003, ADR-008, ADR-013, ADR-014, ADR-051, ADR-021, ADR-040, ADR-053, ADR-044, ADR-049
+
+### ADR-065 — Pipeline gate block threshold is derived from RISK-POLICY.md appetite, not hardcoded
+**Status:** superseded (by ADR-086)
+**Confirmation:** RISK-POLICY.md with "exceeds 9" → score 7 PASSES, score 10 FAILS.; "Threshold: 9" phrasing → score 9 PASSES, score 10 FAILS.; "exceeds 4" → score 4 PASSES, score 5 FAILS.; Absent RISK-POLICY.md → default appetite 4 (4 PASSES, 5 FAILS).; Unparseable RISK-POLICY.md (no appetite integer) → default appetite 4.
+**Related:** ADR-009, ADR-014, ADR-023, ADR-028, ADR-042, ADR-052
 
 ### ADR-081 — SessionStart PATH refresh hook for plugin cache
 **Status:** rejected | **Oversight:** confirmed
