@@ -157,3 +157,11 @@ Cross-refs surfaced by the 2026-07-03 retro (both already ticketed — recorded 
 ## Ratified Direction - 2026-07-04 interactive decision drain
 
 **Confirm** the ADR-087/RFC-035 cadence-annotation contract substance (advisory-first PostToolUse gate, self-firing-CLASS check, comment-or-prose carrier within +/-5 lines; bare ticket-ID / on-demand-skill does NOT satisfy). Born-confirm ADR-087 + RFC-035; unblocks the B6-B9 tail (reachability-existence validation, fictional-defer-detect, retrofit existing deferrals).
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-035 | proposed | Authoring-time deferral-cadence enforcement gate |
+| RFC-036 | accepted | Plugin-staleness surfacer |
+| RFC-045 | proposed | capture-adr derives full ADR substance at capture |
