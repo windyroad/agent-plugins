@@ -161,3 +161,24 @@ Design note: PreToolUse-on-every-call means the check must be CHEAP (a fast read
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-046 | proposed | Quota-pace throttle hook — frequently-firing PreToolUse calculated-sleep pacing across all work |
+
+## Fix Released — code slice (2026-07-06)
+
+The throttle CODE is built, tested (8/8 behavioural bats), and RELEASED across all
+7 plugins (itil 0.57.1, architect 0.19.0, jtbd, tdd, risk-scorer 0.16.5, style-guide,
+voice-tone 0.6.6): `packages/shared/hooks/quota-pace-throttle.sh` — a PreToolUse hook
+that reads the statusline-written `~/.claude/quota-state.json`, compares 5h/7d
+usage% vs elapsed%, and sleeps a calculated catch-up (cap 60s/firing, 5pp weekly
+headroom) when ahead of pace; fast no-op behind pace; never blocks/prompts; fail-open.
+Statusline cache-writer added to `~/.claude/statusline-command.sh` (maintainer) +
+`QUOTA-THROTTLE-SETUP.md` for adopters.
+
+**Ratification-block (per the goal):** the governance artefacts authored for this fix
+are born `human-oversight: unconfirmed` (AFK fallback, ADR-066/P348) and need the
+maintainer's ratification at `/wr-architect:review-decisions` + `/wr-itil:manage-rfc`:
+- **ADR-093** — mechanical quota-pace throttle (decision).
+- **RFC-046** — quota-pace throttle hook, frequently-firing PreToolUse across all work.
+- **STORY-* / RFC-045** — capture-adr-derives-full-substance (shipped architect 0.19.0, the drifted-but-real skeleton-rot fix; P375-adjacent).
+
+Awaiting: (1) user verification that pacing behaves as intended over a real window;
+(2) governance ratification of ADR-093/RFC-046. The code path is live meanwhile.
