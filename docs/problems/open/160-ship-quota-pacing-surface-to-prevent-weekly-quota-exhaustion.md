@@ -155,3 +155,9 @@ Scope broadened: the throttle is NOT limited to the AFK `/wr-itil:work-problems`
 Mechanism per firing (unchanged calc, broader trigger): read the live 5h/7d window state → compute `required_sleep` (usage% vs elapsed% over the tighter window; 0 when behind pace/headroom) → if >0, **sleep that amount** before the tool call proceeds. When behind pace, it's a fast no-op check (no sleep) so it adds negligible latency; only when ahead-of-pace does it insert the calculated sleep. This paces the ENTIRE token burn evenly — every tool call self-throttles — so no work (loop or interactive) sprints into a mid-flight quota hard-stop.
 
 Design note: PreToolUse-on-every-call means the check must be CHEAP (a fast read of the cached window state + arithmetic), with the sleep only on the ahead-of-pace branch. The between-iter work-problems call from Correction 1 remains as a coarser complementary checkpoint, but the load-bearing surface is the frequent hook.
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-046 | proposed | Quota-pace throttle hook — frequently-firing PreToolUse calculated-sleep pacing across all work |
