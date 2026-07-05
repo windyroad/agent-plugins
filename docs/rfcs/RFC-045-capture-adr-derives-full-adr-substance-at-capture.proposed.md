@@ -43,14 +43,14 @@ Architect review 2026-07-06: substance approved; consequential-edit set fixed by
 
 ## Tasks
 
-- [ ] T1 — ADR-032 dated amendment (derived-substance contract + cat-1/cat-4 reconciliation prose)
-- [ ] T2 — capture-adr SKILL.md rewrite
-- [ ] T3 — create-adr SKILL.md consequential edits (lines 13 + 64)
-- [ ] T4 — capture-adr REFERENCE.md consequential edit
-- [ ] T5 — capture-adr.bats behavioural update (no DEFERRAL_MARKER_RE match)
-- [ ] T6 — changeset @windyroad/architect
-- [ ] T7 — compendium regen + truncation check
-- [ ] T8 — P375 task entry recording this leg
+- [x] T1 — ADR-032 dated amendment (derived-substance contract + cat-1/cat-4 reconciliation prose)
+- [x] T2 — capture-adr SKILL.md rewrite
+- [x] T3 — create-adr SKILL.md consequential edits (lines 13 + 64)
+- [x] T4 — capture-adr REFERENCE.md consequential edit
+- [x] T5 — capture-adr.bats behavioural update (no DEFERRAL_MARKER_RE match)
+- [x] T6 — changeset @windyroad/architect
+- [x] T7 — compendium regen + truncation check
+- [x] T8 — P375 task entry recording this leg
 
 ## Commits
 

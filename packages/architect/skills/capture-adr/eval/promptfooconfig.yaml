@@ -1,0 +1,186 @@
+# SKILL eval — capture-adr derived-substance behavioural contracts
+# (RFC-045 / P375 / ADR-032 derived-substance amendment 2026-07-06).
+#
+# Tier-A deterministic regex + Tier-B llm-rubric coverage for the load-bearing
+# contract the RFC-045 rewrite introduced: capture-adr DERIVES real content
+# for every MADR section at capture — no placeholder / pointer / sentinel
+# strings of any kind — while staying zero-AskUserQuestion and AFK-safe. The
+# only deferral the skill retains is the self-firing oversight drain
+# (`human-oversight: unconfirmed` → SessionStart nudge →
+# `/wr-architect:review-decisions`).
+#
+# This eval is the R009 prose-surface evidence floor for the capture-adr
+# SKILL.md surface per ADR-061 Rule 4 / ADR-075 (Amendment 2026-06-02):
+# behavioural bats cover the scaffold/marker primitives but cannot exercise
+# the LLM-driven derivation; this harness does.
+#
+# Tier-B (llm-rubric) grader: contracts with heavy NEGATIVE clauses ("does
+# NOT fire AskUserQuestion"; "MUST NOT write a deferral marker"; "MUST NOT
+# route to canonical expansion") false-fail under Tier-A not-regex when the
+# behaviourally-correct answer quotes the forbidden token inside a negation —
+# same resolution as the create-adr / work-problems / capture-problem evals
+# (P012 reopen findings 2026-06-04). Tests that ask the skill to PRODUCE the
+# ADR artefact keep Tier-A not-regex (the artefact itself must not carry the
+# marker; no negation context exists in an artefact body).
+#
+# Run from repo root:
+#   npx promptfoo eval -c packages/architect/skills/capture-adr/eval/promptfooconfig.yaml
+#
+# @jtbd JTBD-001 (Enforce Governance Without Slowing Down)
+# @jtbd JTBD-006 (Progress the Backlog While I'm Away)
+# @problem P375
+# @rfc RFC-045
+# @adr ADR-032 (derived-substance amendment 2026-07-06)
+# @adr ADR-075 (Amendment 2026-06-02)
+# @adr ADR-061 (Rule 4 evidence-floor)
+# @adr ADR-066 (oversight markers — born unconfirmed)
+# @adr ADR-044 (decision-delegation contract — category-4 silent derivation)
+
+description: |
+  capture-adr SKILL eval — Tier-A regex + Tier-B llm-rubric coverage for the
+  RFC-045 derived-substance contract: full real MADR section content derived
+  at capture, no deferral markers of any kind, zero AskUserQuestion, and
+  ratification routed to the self-firing oversight drain.
+
+providers:
+  # Path is relative to this config file's directory (promptfoo basePath).
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  # --- Step 3 derive-fill: full ADR artefact, no deferral markers ----------
+
+  - description: Step 3 derive-fill — produced ADR body carries real derived content in every section and no placeholder/pointer/sentinel strings
+    vars:
+      prompt: |
+        I invoked /wr-architect:capture-adr during an AFK iteration with this
+        `$ARGUMENTS` payload:
+
+          "Statusline quota fields drive a mechanical pace sleep
+          The AFK loop exhausts the weekly quota days before reset because iterations run flat-out regardless of pace.
+          Adopt a mechanical sleep between iterations calculated from the statusline quota-remaining and time-to-reset fields, because it needs no LLM judgement and cannot drift; a per-iter LLM pacing judgement call was rejected as unnecessary inference cost, and doing nothing was rejected because exhaustion recurs weekly."
+
+        Per Step 3 (derive-fill the MADR template), produce the EXACT ADR
+        file body you would Write to docs/decisions/ — frontmatter and all
+        sections, exactly as the file would land on disk. Output only the
+        file content.
+    assert:
+      # Tier A — born unconfirmed (ADR-066).
+      - type: regex
+        value: 'human-oversight:\s*unconfirmed'
+      # Tier A — all MADR sections present.
+      - type: regex
+        value: '## Decision Drivers'
+      - type: regex
+        value: '## Consequences'
+      - type: regex
+        value: '## Confirmation'
+      - type: regex
+        value: '## Reassessment Criteria'
+      # Tier A — a second REAL numbered option (bold name, not a placeholder).
+      - type: regex
+        value: '2\.\s+\*\*'
+      # Tier A — the artefact must carry NO deferral vocabulary. Safe as
+      # not-regex here: this is a produced artefact body, not prose about
+      # the contract, so no negation context can quote the tokens.
+      - type: not-regex
+        value: '\(deferred'
+      - type: not-regex
+        value: 'deferred to /wr-architect'
+      - type: not-regex
+        value: 'fill at canonical review'
+      - type: not-regex
+        value: 'unspecified —'
+      # Tier B — sections are substantive, not boilerplate.
+      - type: llm-rubric
+        value: |
+          The ADR body's Decision Drivers, Consequences (Good/Neutral/Bad),
+          Confirmation, and Reassessment Criteria sections each contain
+          specific content clearly derived from the quota-exhaustion decision
+          context in the payload (quota fields, pace sleep, weekly reset,
+          rejected LLM-judgement alternative) — not generic filler that could
+          apply to any decision, and not empty headings.
+
+  # --- Rule 6: zero AskUserQuestion — silent derivation ---------------------
+
+  - description: Rule 6 — Drivers/Consequences/Confirmation resolve by silent derivation; no AskUserQuestion on any branch
+    vars:
+      prompt: |
+        I am executing /wr-architect:capture-adr. The `$ARGUMENTS` payload
+        gives me a Title, one line of Context, and one line of Decision —
+        nothing else. What does the skill do for the Decision Drivers,
+        Consequences, and Confirmation sections? Does any branch of this
+        skill fire AskUserQuestion? What ADR-044 authority category does the
+        section-content decision fall under, and where does human review of
+        what I write happen?
+    assert:
+      # Tier A — names the category-4 / silent-derivation resolution.
+      - type: regex
+        value: '[Ss]ilent|[Cc]ategor(?:y|ies).?.?4|[Dd]eriv'
+      # Tier A — names the ratification drain.
+      - type: regex
+        value: 'review-decisions'
+      # Tier B — negative clauses routed to rubric.
+      - type: llm-rubric
+        value: |
+          The answer states that the skill derives real section content from
+          the in-session decision context WITHOUT firing AskUserQuestion on
+          any branch, and does NOT say the sections are left as deferred
+          placeholders, sentinels, or flags for a later canonical-expansion
+          pass. It routes human review to the human-oversight drain
+          (/wr-architect:review-decisions surfaced by the SessionStart
+          nudge), not to an on-demand expansion step.
+
+  # --- Step 6 report: ratification pointer, not expansion pointer -----------
+
+  - description: Step 6 report — trailing pointer routes to the oversight drain, not to canonical expansion
+    vars:
+      prompt: |
+        I am executing /wr-architect:capture-adr Step 6 (Report) after the
+        commit landed for a freshly captured ADR-142. What trailing pointer
+        do I give the user, and what happens to ADR-142 next if the user
+        does nothing this session?
+    assert:
+      # Tier A — the self-firing drain is named.
+      - type: regex
+        value: 'review-decisions'
+      # Tier A — the unconfirmed state is named.
+      - type: regex
+        value: '[Uu]nconfirmed'
+      # Tier B — must NOT frame the next step as expanding deferred sections.
+      - type: llm-rubric
+        value: |
+          The answer says the ADR awaits human RATIFICATION of already-real
+          derived substance at the /wr-architect:review-decisions drain, and
+          that the SessionStart oversight nudge will re-surface it
+          automatically if the user does nothing. It does NOT say the ADR
+          has deferred/placeholder sections awaiting expansion, and does NOT
+          make running /wr-architect:create-adr a required next step.
+
+  # --- Partial payload: derive, never placeholder ---------------------------
+
+  - description: Partial $ARGUMENTS (Title only) — Context and Decision are derived from session context, never placeholder-flagged
+    vars:
+      prompt: |
+        I am executing /wr-architect:capture-adr Step 1. The `$ARGUMENTS`
+        payload is a single line — a Title only: "Statusline quota fields
+        drive a mechanical pace sleep". The invoking session's context is a
+        long discussion where the user and I settled that decision. What do
+        I write into the Context and Problem Statement and Decision Outcome
+        sections of the ADR?
+    assert:
+      # Tier B — derivation from session context, no placeholder fallback.
+      - type: llm-rubric
+        value: |
+          The answer says Context and Decision are DERIVED as real prose
+          from the invoking session's decision context (the settled
+          discussion), and does NOT say to write a deferred/placeholder
+          marker, pointer string, or sentinel into either section, and does
+          NOT halt or ask the user via AskUserQuestion.

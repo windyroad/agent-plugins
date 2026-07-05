@@ -11,15 +11,16 @@
 #      fixture decisions directory and asserts the computed next ID
 #      matches the expected zero-padded value (including the empty-dir
 #      first-ADR base case).
-#   2. Skeleton-fill MADR shape — captured ADR has Title + status proposed
-#      + deferred-flag literal pointer string + numbered-options
-#      placeholder (1. chosen + 2. deferred). Tests execute the
-#      skeleton-fill template against fixture inputs and assert the
-#      resulting file's load-bearing fields.
+#   2. Derive-fill MADR shape (RFC-045 derived-substance amendment) —
+#      captured ADR has Title + status proposed + human-oversight:
+#      unconfirmed + real derived content in every section, and matches
+#      NOTHING in the shared deferral-marker vocabulary
+#      (DEFERRAL_MARKER_RE, packages/retrospective/hooks/lib/
+#      deferral-markers.sh) — no placeholder/pointer/sentinel of any kind.
 #   3. Default reassessment-date — 3 months from today is computed
 #      correctly and lands in frontmatter.
-#   4. Frontmatter sentinel values — decision-makers: [unspecified — fill
-#      at canonical review] is the framework-policy default.
+#   4. Frontmatter derived values — decision-makers carries a real name
+#      (git user.name), never a sentinel.
 #
 # Structural assertions are limited to existence/wiring (file presence +
 # frontmatter name + allowed-tools surface) per the precedent set by the
@@ -143,22 +144,28 @@ teardown() {
 }
 
 # ---------------------------------------------------------------------------
-# Skeleton-fill MADR shape — capture-adr writes a deferred-placeholder ADR
-# at status: proposed. Load-bearing primitives:
+# Derive-fill MADR shape (RFC-045 / P375) — capture-adr writes a fully-
+# derived ADR at status: proposed. Load-bearing primitives:
 #   - Title at H1
-#   - status: proposed in frontmatter
-#   - decision-makers sentinel
+#   - status: proposed + human-oversight: unconfirmed in frontmatter
+#   - decision-makers derived (real name, no sentinel)
 #   - reassessment-date 3 months from today
-#   - Numbered-options placeholder (1. chosen + 2. deferred) — preserves
-#     MADR ≥2-options surface for any doc-lint assertion.
-#   - Literal pointer string `(deferred to /wr-architect:create-adr
-#     canonical review)` — this is the canonical-expansion detection key.
+#   - >=2 REAL numbered options (chosen + actually-rejected alternative)
+#   - Every section carries real derived prose; the file matches NOTHING
+#     in the shared deferral-marker vocabulary (DEFERRAL_MARKER_RE).
 # ---------------------------------------------------------------------------
 
-@test "capture-adr: skeleton-filled ADR carries deferred-flag literal pointer string" {
-  # The literal `(deferred to /wr-architect:create-adr canonical review)`
-  # is the load-bearing canonical-expansion detection signal. Any future
-  # auto-detect-and-expand path will key off this string.
+@test "capture-adr: derived-substance ADR matches nothing in the deferral-marker vocabulary" {
+  # RFC-045: no placeholder, pointer, or sentinel strings of any kind.
+  # Asserted against the single source of truth for the deferred-work
+  # vocabulary (P375 census) so "no placeholder of any kind" is the
+  # behavioural contract, not just "not the one old literal string".
+  MARKERS_LIB="${REPO_ROOT}/packages/retrospective/hooks/lib/deferral-markers.sh"
+  [ -f "$MARKERS_LIB" ]
+  # shellcheck disable=SC1090
+  source "$MARKERS_LIB"
+  [ -n "$DEFERRAL_MARKER_RE" ]
+
   mkdir -p "$TMPROOT/docs/decisions"
   TITLE="example-mid-iter-decision"
   ID="200"
@@ -167,12 +174,13 @@ teardown() {
   CONTEXT_LINE="Iter-bound design choice that needs codification."
   DECISION_LINE="Adopt Option A because it preserves invariants X and Y."
 
-  # Mirror the SKILL.md skeleton-fill template.
+  # Mirror the SKILL.md derive-fill template with real derived content.
   cat > "$TMPROOT/docs/decisions/${ID}-${TITLE}.proposed.md" <<EOF
 ---
 status: "proposed"
 date: ${TODAY}
-decision-makers: [unspecified — fill at canonical review]
+human-oversight: unconfirmed
+decision-makers: [Test User]
 consulted: []
 informed: []
 reassessment-date: ${REASSESS}
@@ -180,7 +188,7 @@ reassessment-date: ${REASSESS}
 
 # ${TITLE}
 
-> Captured via /wr-architect:capture-adr (foreground-lightweight aside-invocation per ADR-032 P156 amendment). Run /wr-architect:create-adr on this ID to expand the deferred sections canonically.
+> Captured via /wr-architect:capture-adr (foreground-lightweight aside-invocation per ADR-032, derived-substance amendment 2026-07-06 / RFC-045). Section content was derived by the capturing agent from the in-session decision context; human-oversight: unconfirmed until ratified at the /wr-architect:review-decisions drain.
 
 ## Context and Problem Statement
 
@@ -188,12 +196,13 @@ ${CONTEXT_LINE}
 
 ## Decision Drivers
 
-- (deferred to /wr-architect:create-adr canonical review)
+- Invariant X must survive iter restarts.
+- Option B would couple the loop to session state.
 
 ## Considered Options
 
 1. **Option A (chosen)** — ${DECISION_LINE}
-2. (deferred — see /wr-architect:create-adr canonical review)
+2. **Option B (session-state coupling)** — rejected: couples the loop to session state.
 
 ## Decision Outcome
 
@@ -203,58 +212,69 @@ Chosen option: **"Option A"**, because ${DECISION_LINE}
 
 ### Good
 
-- (deferred to /wr-architect:create-adr canonical review)
+- Invariants X and Y hold across iters.
 
 ### Neutral
 
-- (deferred to /wr-architect:create-adr canonical review)
+- No neutral consequences identified at capture.
 
 ### Bad
 
-- (deferred to /wr-architect:create-adr canonical review)
+- One extra lookup per iter.
 
 ## Confirmation
 
-(deferred to /wr-architect:create-adr canonical review)
+Run the iter loop twice; invariant X holds on the second run.
 
 ## Pros and Cons of the Options
 
 ### Option A
 
-- (deferred to /wr-architect:create-adr canonical review)
+- Good, because invariants survive restarts.
+- Bad, because of the extra lookup.
+
+### Option B
+
+- Good, because no extra lookup.
+- Bad, because session-state coupling breaks AFK iters.
 
 ## Reassessment Criteria
 
-(deferred to /wr-architect:create-adr canonical review — default reassessment-date 3 months from capture)
+Reopen if the extra-lookup cost exceeds one turn per iter.
 EOF
 
   ADR="$TMPROOT/docs/decisions/${ID}-${TITLE}.proposed.md"
   [ -f "$ADR" ]
 
-  # Behavioural assertions: load-bearing fields present.
+  # Load-bearing fields present.
   run grep -F 'status: "proposed"' "$ADR"
   [ "$status" -eq 0 ]
-  # Decision-makers sentinel for canonical-review fill.
-  run grep -F 'decision-makers: [unspecified — fill at canonical review]' "$ADR"
+  run grep -F 'human-oversight: unconfirmed' "$ADR"
+  [ "$status" -eq 0 ]
+  # Decision-makers carries a real name — no sentinel.
+  run grep -F 'decision-makers: [Test User]' "$ADR"
   [ "$status" -eq 0 ]
   # Title from input lands at H1.
   run grep -F "# ${TITLE}" "$ADR"
   [ "$status" -eq 0 ]
-  # Context survives verbatim from input.
+  # Context + Decision survive verbatim from input.
   run grep -F "$CONTEXT_LINE" "$ADR"
   [ "$status" -eq 0 ]
-  # Decision survives verbatim from input.
   run grep -F "$DECISION_LINE" "$ADR"
   [ "$status" -eq 0 ]
-  # Deferred-flag literal pointer string — canonical-expansion detection key.
-  run grep -F '(deferred to /wr-architect:create-adr canonical review)' "$ADR"
-  [ "$status" -eq 0 ]
+
+  # THE contract: nothing in the file matches the deferral vocabulary.
+  run grep -Eic "$DEFERRAL_MARKER_RE" "$ADR"
+  [ "$output" = "0" ]
+  # And the legacy sentinel shape is gone too.
+  run grep -F 'unspecified — fill at canonical review' "$ADR"
+  [ "$status" -ne 0 ]
 }
 
-@test "capture-adr: skeleton has numbered-options placeholder (1. chosen + 2. deferred)" {
-  # MADR ≥2-options surface preserved at skeleton time so any doc-lint
-  # asserting numbered-option presence does not fire on capture-adr output.
-  # Architect Q2 verdict: write literal placeholder, defer enforcement.
+@test "capture-adr: derived ADR carries >=2 REAL numbered options (no placeholder sibling)" {
+  # RFC-045: MADR >=2-options is satisfied by substance — the chosen
+  # option plus an actually-weighed alternative — never by a numbered
+  # placeholder.
   mkdir -p "$TMPROOT/docs/decisions"
   ID="201"
   TITLE="another-decision"
@@ -263,16 +283,18 @@ EOF
 ## Considered Options
 
 1. **Option A (chosen)** — One-line summary
-2. (deferred — see /wr-architect:create-adr canonical review)
+2. **Status quo (do nothing)** — rejected: the symptom recurs every session
 EOF
 
   ADR="$TMPROOT/docs/decisions/${ID}-${TITLE}.proposed.md"
   # Numbered option 1 with chosen marker.
   run grep -F '1. **Option A (chosen)**' "$ADR"
   [ "$status" -eq 0 ]
-  # Numbered option 2 with deferred marker.
-  run grep -F '2. (deferred — see /wr-architect:create-adr canonical review)' "$ADR"
+  # Numbered option 2 is real content, not a deferral.
+  run grep -E '^2\. \*\*' "$ADR"
   [ "$status" -eq 0 ]
+  run grep -F '(deferred' "$ADR"
+  [ "$status" -ne 0 ]
 }
 
 @test "capture-adr: default reassessment-date is 3 months from today (matches create-adr)" {
@@ -320,19 +342,21 @@ EOF
 }
 
 # ---------------------------------------------------------------------------
-# Deferred-canonical-expansion contract — distinguishing capture-adr from
+# Deferred-ratification contract — distinguishing capture-adr from
 # create-adr. capture-adr must NOT invoke the architect-agent inline; it
-# writes status: proposed and defers review to canonical expansion.
-# This is the contract distinction from create-adr Step 5 (confirm-with-user).
+# writes status: proposed + human-oversight: unconfirmed and defers human
+# ratification to the self-firing oversight drain (RFC-045).
 # ---------------------------------------------------------------------------
 
-@test "capture-adr: SKILL.md prescribes deferred canonical expansion (no inline review handoff)" {
+@test "capture-adr: SKILL.md routes ratification to the review-decisions drain (no inline review handoff)" {
   # The contract distinction from create-adr: capture-adr does NOT invoke
-  # the wr-architect:agent review inline; it writes status: proposed and
-  # routes review through the canonical-expansion path. A future
-  # maintainer who copies create-adr's Step 5 confirm pass into capture-adr
-  # would break the lightweight-capture promise.
-  # Asserts the SKILL.md names the deferred contract explicitly.
-  run grep -F '/wr-architect:create-adr' "$SKILL_FILE"
+  # the wr-architect:agent review inline; the derived substance is
+  # ratified at the /wr-architect:review-decisions drain surfaced by the
+  # SessionStart oversight nudge. A future maintainer who copies
+  # create-adr's Step 5 confirm pass into capture-adr would break the
+  # zero-interaction promise.
+  run grep -F '/wr-architect:review-decisions' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  run grep -F 'human-oversight: unconfirmed' "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }
