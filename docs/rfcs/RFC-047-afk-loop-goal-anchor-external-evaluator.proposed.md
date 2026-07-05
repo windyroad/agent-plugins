@@ -7,7 +7,7 @@ decision-makers: [Tom Howard]
 problems: [P390]
 adrs: [ADR-094]
 jtbd: [JTBD-006]
-stories: [STORY-039]
+stories: [STORY-040]
 ---
 
 # RFC-047: AFK loop `/goal` anchor — external evaluator judges the stop
@@ -36,7 +36,7 @@ Anchor `/wr-itil:work-problems` (and headless single-ticket `/wr-itil:work-probl
 
 ## Tasks
 
-- [ ] STORY-039 — work-problems Step 0e `/goal` loop-anchor + Gate (0) printed-evidence amendment + singular note + paired evals + changeset (single-story decomposition; the scope is one coordinated SKILL-prose change).
+- [ ] STORY-040 — work-problems Step 0e `/goal` loop-anchor + Gate (0) printed-evidence amendment + singular note + paired evals + changeset (single-story decomposition; the scope is one coordinated SKILL-prose change).
 
 ## Commits
 
@@ -54,4 +54,4 @@ Anchor `/wr-itil:work-problems` (and headless single-ticket `/wr-itil:work-probl
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-039 | STORY-039: AFK loop anchored with the native `/goal` external evaluator | draft |
+| STORY-040 | STORY-040: AFK loop anchored with the native `/goal` external evaluator | draft |

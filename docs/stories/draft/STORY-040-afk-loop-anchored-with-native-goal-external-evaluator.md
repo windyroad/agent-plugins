@@ -2,22 +2,23 @@
 status: draft
 story-id: afk-loop-anchored-with-native-goal-external-evaluator
 reported: 2026-07-06
+human-oversight: unconfirmed
 decision-makers: [Tom Howard]
 problems: [P390]
 jtbd: [JTBD-006]
 rfcs: [RFC-047]
-story-maps: []
+story-maps: [STORY-MAP-002]
 estimated-effort: M
 ---
 
-# STORY-039: AFK loop anchored with the native `/goal` external evaluator
+# STORY-040: AFK loop anchored with the native `/goal` external evaluator
 
 **Status**: draft
 **Reported**: 2026-07-06
 **Problems**: P390
 **JTBD**: JTBD-006
 **RFCs**: RFC-047
-**Story Maps**: (none — populate at accepted transition per I8)
+**Story Maps**: STORY-MAP-002 (Decompose a Fix Into Coordinated Changes — Release 2, A4 implement beat)
 **Estimated effort**: M
 
 ## User value (required, INVEST Valuable)

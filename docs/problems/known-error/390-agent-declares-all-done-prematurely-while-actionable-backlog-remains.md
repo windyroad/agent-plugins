@@ -111,4 +111,4 @@ Use the built-in [`/goal`](https://code.claude.com/docs/en/goal) command (Claude
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-039 | STORY-039: AFK loop anchored with the native `/goal` external evaluator | draft |
+| STORY-040 | STORY-040: AFK loop anchored with the native `/goal` external evaluator | draft |

@@ -51,4 +51,4 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 | STORY-026 | STORY-026: Work the RFC's stories one at a time | done |
 | STORY-036 | STORY-036: Write the create-gate marker under every candidate session id | draft |
 | STORY-038 | STORY-038: Fix-titled commits surface a lifecycle-drift advisory | draft |
-| STORY-039 | STORY-039: AFK loop anchored with the native `/goal` external evaluator | draft |
+| STORY-040 | STORY-040: AFK loop anchored with the native `/goal` external evaluator | draft |
