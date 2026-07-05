@@ -397,6 +397,12 @@ _79 ADRs. These are the current rules. The architect agent reads this section fi
 **Confirmation:** Behavioural bats with fixture RISK-POLICY.md variants — monthly cadence reviewed 16 days ago allowed (P408 case); no cadence line reviewed 16 days ago denied (14-day fallback); capital-`R` `Reviewed` cadence line parses, never the `Last reviewed:` date line; elapsed cadence denied with deny message naming the derived threshold and cadence word.
 **Related:** ADR-052, ADR-065, ADR-073, ADR-086
 
+### ADR-092 — Fix-titled-commit lifecycle drift surfaces as an advisory, never an auto-fire or hard gate
+**Status:** proposed | **Oversight:** unconfirmed
+**Decides:** Lifecycle drift on `fix(<pkg>): P<NNN>` commits is surfaced by a PostToolUse advisory hook that emits a stderr nudge when the named ticket is still Open with no paired transition — advisory-only, never blocks, not auto-fire, not a hard gate — because Open→Known-Error rests on a knowledge claim (root cause known), not an observable fact. Binding rule: any future surface acting on this signal stays advisory unless it asserts only observable facts; upgrading requires superseding this ADR.
+**Confirmation:** Behavioural bats exercise the hook end-to-end: advisory on fix-titled commit with Open ticket; silent when ticket is known-error/absent; silent on non-fix titles; exit 0 on every path including bypass and malformed input.
+**Related:** ADR-013, ADR-014, ADR-040, ADR-045, ADR-052, ADR-066, ADR-073
+
 ---
 
 ## Historical decisions
