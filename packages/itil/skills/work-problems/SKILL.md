@@ -310,10 +310,10 @@ The loop's stop decision is anchored by Claude Code's native [`/goal`](https://c
 **Canonical goal condition** (owned here; the Step 2.4 Gate (0) table shape and this condition are a coupled contract — reshape both in the same commit):
 
 ```
-The /wr-itil:work-problems AFK backlog drain is complete: the final summary printed in the conversation contains a Step 2.4 Gate (0) re-scan table (fresh open/known-error glob) classifying every ticket and showing ZERO dispatchable tickets, followed by the ALL_DONE sentinel — or the session ends with a Hard-fail halt directive naming the gate that could not complete — or the summary reports quota exhaustion. Or stop after 100 turns.
+The /wr-itil:work-problems AFK backlog drain is complete: the final summary printed in the conversation contains a Step 2.4 Gate (0) re-scan table (fresh open/known-error glob) classifying every ticket and showing ZERO dispatchable tickets, followed by the ALL_DONE sentinel — or the session ends with a Hard-fail halt directive naming the gate that could not complete — or the summary reports quota exhaustion.
 ```
 
-The turn-bound clause is deliberately generous: quota pacing (P160 / ADR-093) stretches wall-clock *within* turns, not turn count, so pacing never burns the bound.
+There is no turn-bound: the loop runs until a real end state (printed Gate (0) zero-dispatchable + ALL_DONE, a Hard-fail halt, or quota exhaustion). Trust the goal — a turn cap would just re-create the premature stop this anchor exists to prevent (P422). P160/ADR-093 quota pacing throttles token burn so an honest ALL_DONE is reachable within the window.
 
 **Placement — orchestrator session ONLY.** The goal lives on the orchestrator session, never on the `claude -p` iter subprocesses: iters end naturally after one ticket (ADR-032 / P077 / P084), and a backlog-empty goal there would push an iter past its one-ticket carve-out.
 
@@ -322,14 +322,14 @@ The turn-bound clause is deliberately generous: quota pacing (P160 / ADR-093) st
 - **Headless AFK launch (the anchor-guaranteed path)** — start the orchestrator with the goal set. Copy-paste-complete one-liner:
 
   ```bash
-  claude -p --permission-mode bypassPermissions "/goal Run /wr-itil:work-problems to drain the problem backlog. The drain is complete only when the final summary printed in the conversation contains a Step 2.4 Gate (0) re-scan table showing zero dispatchable open/known-error tickets followed by the ALL_DONE sentinel, or a Hard-fail halt directive, or reported quota exhaustion. Or stop after 100 turns."
+  claude -p --permission-mode bypassPermissions "/goal Run /wr-itil:work-problems to drain the problem backlog. The drain is complete only when the final summary printed in the conversation contains a Step 2.4 Gate (0) re-scan table showing zero dispatchable open/known-error tickets followed by the ALL_DONE sentinel, or a Hard-fail halt directive, or reported quota exhaustion."
   ```
 
   (The condition text itself carries the skill invocation, so the anchored session enters the loop — a bare condition would set a goal over an empty session.)
 
 - **Interactive invocation (nudge-and-proceed)** — when the loop starts without an active goal (no `/goal` directive or evaluator-reason lines visible in the session context), print ONE nudge line surfacing the exact command for the user to type — `/goal <canonical condition above>` — then **proceed with the loop regardless**. The anchor is defense-in-depth over Gate (0), never a precondition: halting an AFK loop for a missing anchor would itself defeat JTBD-006. No `AskUserQuestion` fires here (mechanical stage; ADR-044 category 4).
 
-**One-directional anchor.** The goal forces continuation; it never authorises a stop. A goal cleared via the turn-bound clause (or never set) does NOT discharge Gate (0) — `ALL_DONE` still requires the full Step 2.4 sequence. Requirements floor: `/goal` needs workspace trust + hooks enabled; below the floor the loop degrades honestly to Gate (0)-only behaviour.
+**One-directional anchor.** The goal forces continuation; it never authorises a stop. A goal that is cleared (or was never set) does NOT discharge Gate (0) — `ALL_DONE` still requires the full Step 2.4 sequence. Requirements floor: `/goal` needs workspace trust + hooks enabled; below the floor the loop degrades honestly to Gate (0)-only behaviour.
 
 ### Step 1: Scan the backlog
 
@@ -374,7 +374,7 @@ Before the orchestrator emits the final `ALL_DONE` sentinel for the AFK loop, it
 
 **Why gate (0) fires first**: gates (a)/(b)/(c) (surface questions → retro → emit) presume the loop is genuinely done; running the retro and emitting `ALL_DONE` while dispatchable work remains prematurely ends the AFK drain (P390), forcing the user to re-prompt "keep working the backlog" and defeating JTBD-006. Gate (0) makes "the backlog is objectively empty of dispatchable tickets" a hard, re-verified precondition of the whole sequence rather than a subjective agent judgement. A user-directed mid-loop pivot (e.g. an eval-cohort detour) does NOT discharge the Tier-exhaustion obligation: after the pivot, gate (0)'s re-scan resumes tier selection rather than terminating — which also catches the P390 coverage miss where a Tier-1 ticket (P382) was skipped entirely. Sibling class: P332 (run-retro skip rationalisation), P148 (Stage-1 ticketing skip), P175 (scope-pin loop-control inference) — all agent-invented loop-control stops the framework did not authorise (ADR-044 "Continue / stop loops" is framework-resolved: the natural stop is concrete — `ALL_DONE` conditions objectively met — not "this feels done").
 
-**Gate (0) × Step 0e `/goal` anchor (ADR-094).** Under an active goal, the `ALL_DONE` emit does not by itself end the session — the Step 0e external evaluator reads the printed gate (0) table + sentinel and independently confirms the condition holds; a premature emit just triggers a "keep working" turn with the evaluator's reason as guidance. The anchor is one-directional: a goal cleared via its turn-bound clause (or a loop that was never anchored) does NOT relax this gate — gate (0) fires unconditionally either way.
+**Gate (0) × Step 0e `/goal` anchor (ADR-094).** Under an active goal, the `ALL_DONE` emit does not by itself end the session — the Step 0e external evaluator reads the printed gate (0) table + sentinel and independently confirms the condition holds; a premature emit just triggers a "keep working" turn with the evaluator's reason as guidance. The anchor is one-directional: a cleared goal (or a loop that was never anchored) does NOT relax this gate — gate (0) fires unconditionally either way.
 
 **Gate (a) — Outstanding-questions surface + oversight-unconfirmed drain (P348 amendment 2026-06-02).** Two sub-surfaces, both fire in this gate:
 
