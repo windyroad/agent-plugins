@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-04 **P417 captured** — `docs/stories/README.md` Rankings/Done sections still carry the bootstrap placeholder, stale for the whole ~30-story corpus: no refresh-on-create/transition path was wired for the stories tier the way P094/P062 wire the problems and RFC tiers. WSJF 1.5 deferred placeholder. (lightweight aside via /wr-itil:capture-problem, P409 retro)
+> Last reviewed: 2026-07-05 **P418 captured** — reviewer-agent marker hooks do not fire on SendMessage-resumed agents: an ISSUES FOUND gate review continued via SendMessage re-verdicts PASS as a background task-notification, no PostToolUse mark hook fires, the edit gate re-blocks, and a full fresh synchronous re-review is required (RESUME variant of P402's launch-variant class; observed in the P324 iter). WSJF 1.5 deferred placeholder. (lightweight aside via /wr-itil:capture-problem, P324 retro)
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -48,6 +48,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 1.5 | P415 | External-comms commit-msg gate reviews only the first `-m` of a multi-`-m` git commit, causing deny-after-PASS on multi-paragraph commits | 3 Medium | Open | M | 2026-07-03 | internal |
 | 1.5 | P416 | Outstanding-questions drain appends a superseding human decision without reconciling the stale Fix Strategy section it overrides | 3 Medium | Open | M | 2026-07-04 | internal |
 | 1.5 | P417 | docs/stories/README.md Rankings/Done never reconciled — stale for the whole story corpus | 3 Medium | Open | M | 2026-07-04 | internal |
+| 1.5 | P418 | Reviewer-agent marker hooks do not fire on SendMessage-resumed agents — ISSUES FOUND cannot be continued to a marker-writing PASS, forcing a full fresh re-review | 3 Medium | Open | M | 2026-07-05 | internal |
 | 0.75 | P012 | Skill Testing Harness Scope Undefined | 6 Medium | Open | XL | 2026-04-16 | internal |
 
 ## Verification Queue

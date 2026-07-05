@@ -1155,3 +1155,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-07-04 **README reconciled** — 1 drift entry corrected: P389 moved from WSJF Rankings (stale claims=open) to the Verification Queue (actual=verifying; `@windyroad/itil@0.56.2`, 2026-07-04) — committed transition eefd5222 shipped without a README refresh (P062 gap). Reconciliation contract per P118 + ADR-014. (AFK work-problems iter, P178 retro side-fix)
 
 > Last reviewed: 2026-07-04 **P416 captured** — outstanding-questions drain appends a superseding `## Human decision` without reconciling the stale `## Fix Strategy` it overrides, leaving tickets internally contradictory (surfaced reconciling P178's 2026-06-17 hard-block vs 2026-07-03 trace-based decision; ticket 136 same pattern). WSJF 1.5 deferred placeholder. (lightweight aside via /wr-itil:capture-problem, P178 retro)
+
+## 2026-07-05
+
+> Last reviewed: 2026-07-04 **P417 captured** — `docs/stories/README.md` Rankings/Done sections still carry the bootstrap placeholder, stale for the whole ~30-story corpus: no refresh-on-create/transition path was wired for the stories tier the way P094/P062 wire the problems and RFC tiers. WSJF 1.5 deferred placeholder. (lightweight aside via /wr-itil:capture-problem, P409 retro)
