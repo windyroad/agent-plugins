@@ -99,3 +99,9 @@ Use the built-in [`/goal`](https://code.claude.com/docs/en/goal) command (Claude
 - **P341** (`docs/problems/.../341-...`) — the Step 2.4 pre-ALL_DONE gate sequence; this ticket adds the objective-backlog-empty precondition to it.
 - **P332 / P148 / P175** — sibling loop-control / skip-rationalisation class.
 - User correction 2026-06-27 (work-problems session): "Really? Really all done? There's no other problems in the backlog that you can work?"
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-047 | proposed | AFK loop `/goal` anchor — external evaluator judges the stop |
