@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-05 **P260 closed** — create-gate marker race between concurrent Claude sessions: closed on run-retro Step 4a evidence (P408 iter exercised the exact concurrency shape — Option-C candidate-set marker writes, then RFC-043/STORY-037/P419/P420 Writes all passed the P119 gate with zero denies). Recovery: `/wr-itil:transition-problem 260 known-error`. (close-on-evidence, P408 retro)
+> Last reviewed: 2026-07-05 **P421 captured** — Reference-section awk helpers destructively truncate governance files containing invalid UTF-8; witnessed on the P345 ticket during the P345 fix iter, recovered via restore + byte repair (lightweight aside via /wr-itil:capture-problem)
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -37,6 +37,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 2.0 | P170 | Problem tickets strain as fixes decompose into multiple coordinated changes — need an RFC framework that ties all changes back to problems (and unifies technical with user/business problems) | 8 Medium | Known Error | XL | 2026-05-04 | internal |
 | 2.0 | P414 | retro/wrap defers over-threshold briefing Tier-3 rotation as a recommendation instead of performing the split | 6 Medium | Open | S | 2026-07-03 | internal |
 | 1.875 | P091 | Session-wide context budget — Claude Code consumes substantial context before and during every session across all contributor surfaces (meta) | 15 High | Open | XL | 2026-04-22 | internal |
+| 1.5 | P421 | Reference-section awk helpers destructively truncate governance files containing invalid UTF-8 | 3 Medium | Open | M | 2026-07-05 | internal |
 | 1.25 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 10 High | Open | XL | 2026-05-03 | internal |
 | 1.125 | P298 | Plugin-published artifacts should NOT reference internal IDs at all (ADR-055 chose prefixing; strip them instead — they're meaningless to adopters) | 9 Med High | Open | XL | 2026-05-25 | internal |
 | 1.125 | P304 | Move `packages/shared/` from duplicate-and-sync to a bundler-based shared-code approach (ADR-017 reassessment outcome) | 9 Medium | Open | XL | 2026-05-26 | internal |
