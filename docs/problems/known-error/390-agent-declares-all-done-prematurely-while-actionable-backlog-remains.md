@@ -105,3 +105,10 @@ Use the built-in [`/goal`](https://code.claude.com/docs/en/goal) command (Claude
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-047 | proposed | AFK loop `/goal` anchor — external evaluator judges the stop |
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-039 | STORY-039: AFK loop anchored with the native `/goal` external evaluator | draft |

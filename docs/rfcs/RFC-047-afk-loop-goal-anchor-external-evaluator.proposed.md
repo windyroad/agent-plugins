@@ -49,3 +49,9 @@ Anchor `/wr-itil:work-problems` (and headless single-ticket `/wr-itil:work-probl
 - **JTBD-006** — Progress the Backlog While I'm Away.
 - Claude Code `/goal` docs: https://code.claude.com/docs/en/goal
 
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-039 | STORY-039: AFK loop anchored with the native `/goal` external evaluator | draft |
