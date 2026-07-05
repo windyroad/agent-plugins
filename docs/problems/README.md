@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-05 **P166 closed** — external-comms single-fire helper verified by seven in-session gate cycles (5 commit-message + 2 changeset-evaluator reviews; every marker matched, zero re-blocks, zero double invocations) — run-retro Step 4a close-on-evidence, P345 iter. Recovery: `/wr-itil:transition-problem 166 known-error`.
+> Last reviewed: 2026-07-05 **P390 reopened** — Verifying → Known Error (WSJF 12.0); shipped Gate (0) self-assessment insufficient, fix strategy now anchors work-problems / work-problem loops with Claude Code's native `/goal` (independent per-turn Stop-hook evaluator). Recovery: `/wr-itil:transition-problem 390 verifying`.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -13,6 +13,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 12.0 | P179 | Agent defers requested work into untracked phases — phases are fine, but unticketed phases never get implemented | 12 High | Known Error | M | 2026-05-10 | internal |
 | 12.0 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 High | Known Error | M | 2026-06-10 | internal |
 | 12.0 | P376 | Catchup scanner misses the inbound direction; outbound templates carry the same structural defect the P363 rework fixed on the inbound side — cross-direction parity gap | 12 High | Known Error | M | 2026-06-23 | internal |
+| 12.0 | P390 | work-problems emits ALL_DONE prematurely while dispatchable backlog remains — reopened; fix strategy now anchors the loop with native `/goal` (independent per-turn evaluator) | 12 High | Known Error | M | 2026-06-27 | internal |
 | 9.0 | P180 | Agent defers mitigation selection to user during active incident — surfaces mitigation choice as user-authority when SKILL contract empowers agent-driven reversible mitigations | 9 Medium | Known Error | M | 2026-05-10 | internal |
 | 9.0 | P371 | manage-problem I13 propose-fix gate auto-creates a new RFC instead of wiring an existing fix-vehicle's trace edge | 9 Medium | Known Error | M | 2026-06-17 | internal |
 | 8.0 | P345 | Fix-titled commits do not transition the ticket lifecycle in the same commit grain — ticket stays Open across release + CI-verify + multiple intervening commits | 8 Medium | Known Error | M | 2026-05-31 | internal |
@@ -246,7 +247,6 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P373 | review-problems Step 4.5c github-issues poll made non-discarding — polls all open issues, `[problem]`-prefix demoted to a soft signal; adopters opt back in via `strict_title_prefix`. | 2026-06-28 (`@windyroad/itil@0.54.6`) | no — not observed |
 | P383 | capture-problem `--persona` validates against the adopter `docs/jtbd/*/` corpus (enum fallback only when no jtbd dirs) + preserves `JTBD-M-NNN`. Inbound #282. | 2026-06-28 (`@windyroad/{itil,jtbd}`) | no — not observed |
 | P388 | capture-problem promptfoo eval flakiness (P350 derive-ratify case) — eval calibrated 3× 8/8 GREEN; discharged the P199/P350/P383 holding cohort | 2026-06-28 | no — not observed |
-| P390 | work-problems emits ALL_DONE prematurely while dispatchable backlog remains — Step 2.4 Gate-0 objective backlog-empty assertion shipped @windyroad/itil@0.55.0 | 2026-06-28 | no — not observed |
 | P172 | interactive-vs-AFK commit-gating anti-pattern contradicts ADR-014 — carve-out removed from reconcile-readme Step 6 | 2026-05-15 | no — not observed |
 | P319 | full bats --recursive sweep hangs locally on architect-detect-scope — missing-stdin-redirect test fixture fixed (</dev/null) | 2026-06-16 | no — not observed |
 | P174 | Topic-file rotation `first-written` precondition unenforceable (Step 3 Branch A) — superseded by the P145→P246→P247 evidence-based-rotation rework; split-by-date now a metadata-free mechanical safe default | @windyroad/retrospective@0.24.1+ (npm latest 0.27.0) — no dedicated P174 code change; supersession reconcile | no — not observed |

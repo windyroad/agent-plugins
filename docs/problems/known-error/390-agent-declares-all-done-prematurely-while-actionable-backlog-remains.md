@@ -1,19 +1,24 @@
 # Problem 390: agent ends the work-problems loop (emits ALL_DONE) prematurely while actionable Tier-2 backlog remains, by rationalising the remainder as out-of-scope / interactive-gated
 
-**Status**: Verification Pending
+**Status**: Known Error
 **Reported**: 2026-06-27
 **Transitioned to Known Error**: 2026-06-28 (root cause confirmed; fix implemented — Step 2.4 Gate (0) objective backlog-empty assertion; changeset held pending work-problems promptfoo eval GREEN per ADR-061 Rule 4 / ADR-042 Rule 2)
+**Reopened**: 2026-07-05 (Verifying → Known Error — the shipped Gate (0) self-assessment is insufficient; user directs pursuing Claude Code's native `/goal` as the fix mechanism. See ## Reopened and the rewritten ## Fix Strategy below.)
 **Priority**: 12 (High) — Impact: 3 x Likelihood: 4
 **Origin**: internal
 **Effort**: M
 **JTBD**: JTBD-006
 **Persona**: plugin-developer
 
-## Fix Released
+## Reopened (2026-07-05)
 
-Released 2026-06-28 in `@windyroad/itil@0.55.0` (changeset `wr-itil-p390-step-2-4-gate-0-objective-backlog-empty.md`, graduated from holding once the work-problems promptfoo eval went 3× consecutive 14/14 GREEN — the ADR-061 Rule 4 reinstate criterion — then shipped via version PR #299). The work-problems Step 2.4 **Gate (0) — Objective backlog-empty assertion** is now live: before `ALL_DONE`, the orchestrator re-scans the live open/known-error backlog (fresh glob, not cache/recollection) and classifies each ticket dispatchable/non-dispatchable by recorded marker only; ≥1 dispatchable ticket FORBIDS `ALL_DONE` and loops back to Step 3.
+Reopened Verifying → Known Error at user direction. The Gate (0) fix (below, shipped in `@windyroad/itil@0.55.0`) is a **self-assessment** mechanism: the same agent that is prone to inventing a subjective stop is also the one asked to re-scan the backlog and honestly forbid its own `ALL_DONE`. That is structurally the same actor deciding both "should I stop?" and "is stopping justified?" — the exact conflation named in the Root Cause. An independent evaluator is the stronger fix.
 
-**Awaiting user verification** — confirm the orchestrator no longer emits `ALL_DONE` while objectively-dispatchable Tier-2 backlog remains.
+User direction (verbatim, 2026-07-05): *"can you reopen the P390. the goal skill does exist https://code.claude.com/docs/en/goal. Fucking use it"* — and the agent's prior-session assertion that `/goal` "does not exist" was wrong (searched only the local plugin cache + repo, never the product docs; recurrence of the "assert a blocker without empirical verification" class, memory `feedback_verify_infra_constraints_before_asserting_blocker`).
+
+## Prior fix attempt — Gate (0) self-assessment (shipped 0.55.0, insufficient)
+
+Released 2026-06-28 in `@windyroad/itil@0.55.0` (changeset `wr-itil-p390-step-2-4-gate-0-objective-backlog-empty.md`, graduated from holding once the work-problems promptfoo eval went 3× consecutive 14/14 GREEN — the ADR-061 Rule 4 reinstate criterion — then shipped via version PR #299). The work-problems Step 2.4 **Gate (0) — Objective backlog-empty assertion**: before `ALL_DONE`, the orchestrator re-scans the live open/known-error backlog (fresh glob, not cache/recollection) and classifies each ticket dispatchable/non-dispatchable by recorded marker only; ≥1 dispatchable ticket FORBIDS `ALL_DONE` and loops back to Step 3. Retained as a first-line objective check, but insufficient on its own (self-assessment; see ## Reopened).
 <!-- no-changeset-reference: shipped via graduated holding changeset wr-itil-p390-step-2-4-gate-0-objective-backlog-empty.md (PR #299) -->
 
 ## Description
@@ -47,6 +52,7 @@ The orchestrator conflated "the highest-leverage / most-salient remaining work i
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
+- [ ] **(reopened fix)** Implement the `/goal` loop-anchor per ## Fix Strategy — set a `/goal` completion condition at work-problems / work-problem loop start; likely a short ADR for the shared loop-control contract change + eval coverage
 - [x] Strengthen the Step 2.4 pre-ALL_DONE gate: before emitting ALL_DONE, assert that Step 2 stop-condition #1/#2/#3 OBJECTIVELY holds — i.e. re-scan the backlog and confirm zero Tier-0/1/2 tickets are dispatchable (not just "the salient remainder is gated"). A non-empty actionable backlog forbids ALL_DONE. — DONE 2026-06-28: Step 2.4 **Gate (0) — Objective backlog-empty assertion** prepended ahead of gate (a) (see Fix Implemented below).
 - [x] Add a behavioural assertion / eval case: ALL_DONE is NOT emitted when the WSJF backlog has ≥1 actionable (non-held, non-verifying, non-interactive-gated) ticket. — DONE 2026-06-28: paired promptfoo Tier-A/B case added to `packages/itil/skills/work-problems/eval/promptfooconfig.yaml` (`Step 2.4 gate (0) — dispatchable Tier-2 backlog remains → loop back, do NOT emit ALL_DONE`).
 - [x] Cross-check the loop-back coverage: a user-directed pivot (eval cohort) must not consume the loop's Tier-exhaustion obligation — after the pivot, the loop resumes Tier selection rather than terminating. — DONE 2026-06-28: Gate (0) "Why gate (0) fires first" prose explicitly states a user-directed mid-loop pivot does NOT discharge the Tier-exhaustion obligation; the re-scan resumes tier selection (also catches the P382 skip).
@@ -62,13 +68,25 @@ The orchestrator conflated "the highest-leverage / most-salient remaining work i
 
 **R009 prose-floor discharge**: paired promptfoo case authored in the same commit; the @windyroad/itil patch changeset is HELD at `docs/changesets-holding/wr-itil-p390-step-2-4-gate-0-objective-backlog-empty.md` (ADR-042 Rule 2) — 9th hold in the work-problems-surface cohort, reinstated atomically when the work-problems promptfoo eval goes GREEN (ADR-061 Rule 4). Awaiting that evidence to ship → Verifying.
 
-## Proposed follow-up mechanism — persistent goal anchor (user, 2026-07-03)
+## Fix Strategy — anchor the loop with Claude Code's native `/goal`
 
-User proposal: the singular `/wr-itil:work-problem` and the plural `/wr-itil:work-problems` orchestrator could anchor the loop to an explicit, persistent **goal** (via a "slash goal" command / durable goal marker) that the agent must justify any stop against — e.g. goal = "drain the actionable WSJF backlog". Under such an anchor, `ALL_DONE` (or a singular-worker stop) is only permitted when the stated goal is objectively met; a subjective "this feels like a natural stopping point" cannot discharge it.
+Use the built-in [`/goal`](https://code.claude.com/docs/en/goal) command (Claude Code ≥ v2.1.139) as the loop-continuation mechanism. This is the right primitive precisely because it removes the self-assessment conflation the Gate (0) fix could not:
 
-This **reinforces** the shipped Gate (0) objective-backlog-empty assertion (Fix Implemented above) rather than replacing it: Gate (0) is a per-emit re-scan; a persistent goal anchor would keep the objective in the agent's frame for the whole loop, so the stop-justification is measured against a stated goal instead of momentary salience. Same failure-class coverage as the P332 / P148 / P175 siblings (agent invents an unauthorised loop-control stop).
+**Verified mechanics** (from the docs):
+- `/goal <condition>` sets a session-scoped completion condition and starts a turn immediately with the condition as the directive.
+- `/goal` is a **wrapper around a prompt-based Stop hook**. After *every* turn, the condition + conversation-so-far are sent to the configured small fast model (Haiku by default) — a **separate evaluator, not the working agent** — which returns yes/no + a short reason. A "no" forces another turn with the reason as guidance; a "yes" clears the goal.
+- The evaluator **does not run tools**; it judges only what the agent has surfaced in the transcript. So the condition must be provable from the agent's own output.
+- Works non-interactively: `claude -p "/goal <condition>"` runs the loop to completion in one invocation. Requires the workspace trust dialog accepted and hooks enabled (unavailable under `disableAllHooks` / `allowManagedHooksOnly`).
 
-Candidate to investigate — NOT yet designed. Open questions: is `/goal` an existing Claude Code affordance or a new marker to build; where the goal is stored (`.afk-run-state/`?); how the stop-gate reads it; whether it generalises to run-retro / manage-incident loops. Surface for design if the shipped Gate (0) fix proves insufficient during verification, or fold into the P341 pre-`ALL_DONE` gate-sequence master.
+**Why this fixes P390**: the stop decision moves from the working agent (which invents subjective stops — the Root Cause) to an independent per-turn evaluator. The agent can no longer rationalise `ALL_DONE`; it must surface transcript evidence that the goal condition holds, and a fresh model judges it. Gate (0) becomes the objective *self*-check the agent runs each turn; `/goal` is the *external* check that the agent actually keeps turning until Gate (0) genuinely passes.
+
+**Design sketch** (to be worked — not yet implemented):
+1. When `/wr-itil:work-problems` (and singular `/wr-itil:work-problem`) starts the loop, set a `/goal` whose condition is provable from a backlog re-scan the agent surfaces each turn — e.g. *"a fresh `docs/problems/{open,known-error}/` WSJF re-scan printed in the transcript shows zero dispatchable tickets (each remaining ticket is verifying / upstream-blocked / recorded-blocked / durably-skipped / held), OR stop after N turns."* Include the turn-bound clause the docs recommend.
+2. The agent's per-turn output must include the Gate (0) re-scan table so the evaluator has evidence to judge against — tie the condition to that surfaced artefact.
+3. Decide storage/ownership: `/goal` is session-scoped native state (restored on `--resume`/`--continue`), so no new `.afk-run-state/` marker is needed for the goal itself; the SKILL just issues the `/goal` set at loop start and `/goal clear` is implicit on completion.
+4. Generalisation candidates once proven here: the run-retro loop (P332) and any other AFK drain loop in the same failure-class (P148, P175).
+
+**Open questions**: interaction with the existing `claude -p` per-iter subprocess dispatch (does the goal live on the orchestrator session, the iter subprocess, or both?); whether the turn-bound clause conflicts with quota-pacing (P160); eval coverage for the `/goal` path. Resolve during fix work; likely wants a short ADR for "AFK loops set a `/goal` completion condition" since it changes the loop-control contract shared across skills.
 
 ## Dependencies
 
