@@ -1,6 +1,6 @@
 # Problem 404: Implement ADR-089 + ADR-090 in the skills and tests (≥1-story-per-RFC + story-map/story ratification)
 
-**Status**: Verification Pending
+**Status**: Known Error (reopened 2026-07-05 — verification FAILED, see § Verification Failed below)
 **Reported**: 2026-07-02
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 = 12. Rated at review 2026-07-02: implement ADR-089+090 in skills+tests.
 **Origin**: internal
@@ -84,4 +84,24 @@ Implement via **RFC-037** (authored 2026-07-02; traces `problems: [P404]`; archi
 Phase 1 (ADR-089): commits `3e3300a3` (has-stories accept gate + predicate), `d2eb97d5` (traversal fallback removal), `af49f7e6` (framing + legacy back-fill decision).
 Phase 2 (ADR-090): the ratified-stories reference gate, the unratified detector, the lazy-fingerprint drift-invalidation (substance-only, refined 2026-07-03), the born-`unconfirmed` markers + ratify UX across capture/manage-story(-map), and the work-problems drain wiring.
 
-Awaiting user verification that the shipped tooling behaves as intended, then → Closed. Legacy `stories: []` back-fill (RFC-036/RFC-003) is a separately-tracked, low-urgency follow-up (not a Confirmation criterion).
+~~Awaiting user verification that the shipped tooling behaves as intended, then → Closed.~~ **Verification FAILED 2026-07-05 — see below.** Legacy `stories: []` back-fill (RFC-036/RFC-003) is separately tracked as P409.
+
+## Verification Failed — reopened 2026-07-05 (user observation, corrective feedback)
+
+The user observed the live AFK flow (P160 iter, session 2026-07-05) producing exactly the artefacts the shipped fix was supposed to make impossible:
+
+1. **Task-based RFC.** RFC-045 (quota-pace throttle) was authored with a `## Tasks` work-breakdown (T1–T6) plus "deferred follow-on stories" as free checkbox items (D1–D3) — no story decomposition. Its only story linkage was STORY-039 buried in `## Related`. User: *"WTF is this task based RFC??? It's supposed to be story based."*
+2. **Story without a story map.** STORY-039 was captured with `story-maps: []` and header prose "(none — populate at accepted transition per I8)". User-pinned invariant: **a story MUST belong to a story map** — membership is mandatory at capture, not deferrable to the accepted transition.
+3. **No story maps ever created.** The tooling has never authored a story map: the only two on disk (STORY-MAP-001, STORY-MAP-002) are hand-authored. Post-fix tool-captured stories STORY-037 and STORY-038 also sit at `story-maps: []`.
+
+(RFC-045 and STORY-039 were discarded uncommitted when the user killed iter36; the evidence is the user's 2026-07-05 screenshots and the surviving STORY-037/038 frontmatter.)
+
+**Why the shipped fix didn't bind:** all Phase 1/2 enforcement was hung off `accepted`-transition gates (`check-rfc-has-stories` at `manage-rfc` proposed→accepted; I8 story→map membership at story accepted). The AFK flow authors RFCs and stories that sit in `proposed`/`draft` indefinitely — the gates never fire on the path that actually produces the artefacts. Capture-time surfaces (`capture-rfc`, `capture-story`) still scaffold task-based bodies and mapless stories, and nothing anywhere authors or extends a story map. Same class as P251 (invariant not enforced at the time work actually happens).
+
+### Phase 3 — capture-time enforcement + story-map authoring (reopen scope)
+
+- [ ] `capture-story` / `manage-story`: story-map membership is **mandatory at capture** — `story-maps: []` is invalid. If no suitable map exists, the flow must create/extend one (delegate to `capture-story-map` / `manage-story-map`), not emit an empty list. Kill the "(populate at accepted transition per I8)" deferral prose; amend I8 (ADR-060) accordingly — architect review required.
+- [ ] `capture-rfc` / `manage-rfc`: RFC work-breakdown is **stories, not tasks** — stop scaffolding `## Tasks` for new RFCs; the `stories:` list is populated at authoring time with stories that live on a story map. Update `docs/rfcs/README.md` template guidance (line ~86 still says "Tasks (Phase 1 placeholder; 'story' reserved for Phase 2)").
+- [ ] Story-map authoring wired into the fix flow: `work-problems` / `work-problem` / I13 fix-vehicle creation must produce (or extend) a story map whose stories the RFC references — STORY-MAP-002 is the golden exemplar of the output shape.
+- [ ] Behavioural bats proving the capture-time gates fire on the AFK path (not just the accepted transition): a `capture-story` without a resolvable map is rejected; a new RFC with a `## Tasks` body / empty `stories:` is rejected at authoring.
+- [ ] Back-fill/repair the mapless survivors: STORY-037, STORY-038 (assign to a map or fold into one).

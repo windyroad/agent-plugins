@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-05 **P390 reopened** — Verifying → Known Error (WSJF 12.0); shipped Gate (0) self-assessment insufficient, fix strategy now anchors work-problems / work-problem loops with Claude Code's native `/goal` (independent per-turn Stop-hook evaluator). Recovery: `/wr-itil:transition-problem 390 verifying`.
+> Last reviewed: 2026-07-05 **P404 reopened** — Verifying → Known Error (WSJF 6.0); verification FAILED on user observation: AFK flow authored a task-based RFC (RFC-045 `## Tasks` T1–T6) and a mapless story (STORY-039 `story-maps: []`), and the tooling has never created a story map. User-pinned: a story MUST belong to a story map at capture; RFC breakdown is stories, not tasks. Phase 3 (capture-time enforcement + map authoring) added to the ticket. Also this review: **P390 reopened** — Verifying → Known Error (WSJF 12.0); fix strategy now anchors work-problems / work-problem loops with Claude Code's native `/goal`.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -20,6 +20,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 8.0 | P375 | Repo conflates a "named re-entry point" with a self-firing cadence — deferrals not transitively reachable from an automatic trigger rot | 16 High | Known Error | L | 2026-06-23 | internal |
 | 7.5 | P359 | Changeset holding does not withhold shipment — held code ships with any sibling release | 15 High | Known Error | L | 2026-06-11 | internal |
 | 6.0 | P305 | Post-Edit silent revert of working-tree files before commit — potential silent-work-loss hazard | 6 Med | Known Error | M | 2026-05-26 | internal |
+| 6.0 | P404 | Implement ADR-089 + ADR-090 (≥1-story-per-RFC + story-map/story ratification) — reopened; gates only fire at accepted transitions, so AFK flow still authors task-based RFCs and mapless stories, and nothing ever creates a story map (story MUST belong to a map at capture) | 12 High | Known Error | L | 2026-07-02 | corrective-feedback (user, 2026-07-05 reopen) |
 | 6.0 | P395 | external-comms agent silently goes dormant on the credibility axis — no nudge to author the missing RISK-POLICY section | 12 High | Open | M | 2026-06-28 | corrective-feedback (user, 2026-06-28) |
 | 6.0 | P399 | ADR-073 fix-time auto-create emits a SKELETON RFC; it should author the RFC fully | 12 High | Open | M | 2026-06-28 | corrective-feedback (user, 2026-06-28 — ratified at the work-problems loop-end decision surface) |
 | 6.0 | P401 | Capture/RFC persona-JTBD anchoring shoehorns (or discards the problem) instead of interviewing the human to elicit the real who/why | 12 High | Open | M | 2026-06-29 | corrective-feedback (user, 2026-06-29 — during the RFC-first ADR-072/060/087 ratification walkthrough) |
@@ -251,7 +252,6 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P319 | full bats --recursive sweep hangs locally on architect-detect-scope — missing-stdin-redirect test fixture fixed (</dev/null) | 2026-06-16 | no — not observed |
 | P174 | Topic-file rotation `first-written` precondition unenforceable (Step 3 Branch A) — superseded by the P145→P246→P247 evidence-based-rotation rework; split-by-date now a metadata-free mechanical safe default | @windyroad/retrospective@0.24.1+ (npm latest 0.27.0) — no dedicated P174 code change; supersession reconcile | no — not observed |
 | P370 | Iter subprocess exits turn on a turn-end-survivor background task; commit-bearing work lost — prohibition clause + foreground-synchronous substitute shipped | @windyroad/itil@0.55.3 (RFC-034; `work-problems` Step 5 iter-prompt clause + paired promptfoo eval GREEN) | no — not observed |
-| P404 | Implement ADR-089 + ADR-090 in the skills and tests (≥1-story-per-RFC + story-map/story ratification) | `@windyroad/itil` — RFC-037 complete (all 5 stories done + ratified); release queued via `.changeset/` | no — not observed |
 | P363 | Inbound-reported tickets never receive fix-released verdict on originating issue — consume `**Origin**` field | `@windyroad/itil@0.51.1` (inbound leg, `ddb47521`) → reworked `0.54.6` (`4e3f2bfb`); present in `0.56.0` | no — not observed (2026-06-28 live-verify failed on stale cache, not leg-correctness; awaiting post-refresh inbound K→V) |
 
 | P368 | wr-architect-mark-oversight-confirmed cannot discover session-id when CLAUDE_SESSION_ID empty AND no announce markers | @windyroad/architect@0.18.4 (2026-07-03) | no — not observed |
