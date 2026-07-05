@@ -316,11 +316,11 @@ _79 ADRs. These are the current rules. The architect agent reads this section fi
 **Chosen:** Chosen option: **"Option 3 — New ADR + thin amend to ADR-064 + carve-out clause in ADR-066"**, confirmed by the user via `AskUserQuestion` 2026-05-27, because it is the only option that closes all three surfaces P315 names (the architect ...
 **Confirmation:** A Needs-Direction verdict from wr-architect:agent names the substantive options (not a grain/meta question); b...; The propose-fix guard in /wr-itil:work-problems and /wr-itil:manage-problem halts (interactive) or queues to o...; ADR-064 carries the grain-vs-substance clause; ADR-066 carries the marker-≠-licence carve-out.; The lazy-AskUserQuestion regression metric (packages/retrospective/scripts/check-ask-hygiene.sh) excludes subs...
 **Related:** ADR-072, ADR-064, ADR-066, ADR-044, ADR-060, ADR-070
-
-### ADR-075 — ADR-075: promptfoo as the behavioural test harness for agent-prose verdicts
-**Status:** proposed | **Oversight:** confirmed
-**Chosen:** Chosen: **adopt promptfoo as the agent-prose eval harness, alongside (not replacing) bats.**
-**Related:** ADR-052, ADR-005, ADR-002, ADR-071, ADR-066
+### ADR-075 — promptfoo as the behavioural test harness for agent-prose verdicts
+**Status:** proposed | **Oversight:** unconfirmed
+**Decides:** Adopts promptfoo (exec provider wrapping `claude -p`, subscription auth — no API key) as the behavioural eval harness for agent-prose and SKILL-prose verdicts, alongside bats, closing the P324 gap that forced ADR-052's structural-test escape hatch. Amended 2026-07-05: both tiers (Tier A deterministic + Tier B llm-rubric N-sample pass^k) now gate every CI run via an `eval-agents` job whose token-guard step lets secret-less fork PRs skip green — superseding the original release-only Tier-B cadence; this cadence delta is the sole pending-ratification item (base decision user-confirmed 2026-05-28/2026-06-02).
+**Confirmation:** promptfoo root devDependency with per-package evals excluded from published tarballs; Tier A blocks CI + pre-commit/pre-push; Tier B blocks release (superseded by the 2026-07-05 CI-merge amendment); first slice covers the jtbd `[Unratified Dependency]` verdict (fires on unratified cite, silent on ratified); ADR-052 Surface-2 narrowing + ADR-005 reassessment flag recorded; oversight marker carried
+**Related:** ADR-002, ADR-005, ADR-026, ADR-037, ADR-052, ADR-060, ADR-061, ADR-066, ADR-070, ADR-071
 
 ### ADR-076 — Inbound-reported problems rank ahead of internally-discovered problems via a sort tier
 **Status:** proposed | **Oversight:** confirmed

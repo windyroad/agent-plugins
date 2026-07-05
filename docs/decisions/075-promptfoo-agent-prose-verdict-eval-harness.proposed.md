@@ -1,7 +1,7 @@
 ---
 status: "proposed"
 date: 2026-05-28
-human-oversight: confirmed
+human-oversight: unconfirmed
 oversight-date: 2026-06-02
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent, wr-jtbd:agent]
@@ -80,6 +80,12 @@ As originally drafted (2026-05-28), this ADR scoped the harness to **agent-prose
 
 **RFC-012 amended scope.** A new **S6 task slice** covers the SKILL-surface eval retrofit; the driving-problem trace adds **P012 alongside P324**. RFC-012 remains the single build vehicle for the harness (both agent-prose and SKILL-prose surfaces) — sibling-RFC sprawl avoided per ADR-070 / ADR-060.
 
+### Amendment 2026-07-05 — CI-merge gating (both tiers) with token-guard fork skip; supersedes the release-only Tier-B cadence
+
+Per the 2026-07-04 interactive decision drain (ratified direction recorded on P290: provision the CI claude-auth secret — now done, `CLAUDE_CODE_OAUTH_TOKEN` repo secret maintainer-confirmed set — then "wire the promptfoo behavioural checks to gate CI merges", THEN delete the structural grep-the-prose tests): `.github/workflows/ci.yml` gains an **`eval-agents` job** running `npm run eval:agents` — the per-package agent-prose eval configs, which carry BOTH Tier-A (`icontains`) and Tier-B (`llm-rubric`) assertions in a single promptfooconfig — on **every CI run** (push/PR), gated on token presence. This **supersedes the Decision Outcome's "Tier B blocks the release pipeline, does not gate every PR" split**. The fork-PR secret-exposure rationale behind that split is preserved by a different mechanism: secrets are unreadable in job-level `if:` conditions, so a guard STEP (`id: token`) probes the secret and writes `present=true|false` to `GITHUB_OUTPUT`; every subsequent step gates on it — fork PRs (no secret) skip GREEN with a one-line advisory; token-bearing runs treat an eval failure as merge-blocking. Structural-test retirement (P290) still waits behind this job being proven green on a real run, which is also the ADR-026 measurement point for per-CI-run eval cost.
+
+**Oversight status of this amendment (P357 / ADR-066 P348 AFK fallback):** this amendment changes the Decision Outcome (§4 cadence), so per ADR-066's amend rule the file-level `human-oversight:` marker is cleared to `unconfirmed` pending interactive ratification via `/wr-architect:review-decisions`. The **base decision is not in question** — promptfoo adoption, exec-provider `claude -p`, per-package eval location, and the subscription-auth posture were user-confirmed 2026-05-28 and 2026-06-02 (the retained `oversight-date: 2026-06-02` refers to that base); only this cadence delta is pending. The interpretation to confirm: the ratified direction says "wire the promptfoo behavioural checks to gate CI merges" without distinguishing tiers; because the landed configs mix both tiers per file, this amendment reads it as **both-tiers-per-CI-run (release-only Tier-B cadence retired)**. On ratification: restore `human-oversight: confirmed`, refresh `oversight-date`, regenerate the decisions compendium. If amended to Tier-A-only-per-PR instead, the `eval-agents` job narrows accordingly (config tier split); P290's retirement sequencing is unaffected either way.
+
 ## Confirmation
 
 1. promptfoo is a **root devDependency**; eval configs + fixtures live per-package at `packages/<plugin>/agents/eval/` and are **excluded from every published tarball** (`files` field) — assert no eval path ships in `npm pack` output.
@@ -91,8 +97,8 @@ As originally drafted (2026-05-28), this ADR scoped the harness to **agent-prose
 
 ## Reassessment Criteria
 
-- **Tier B promotion**: if a per-PR (not just release) semantic gate becomes affordable + non-flaky (pass-rate variance characterised), consider promoting Tier B to block PRs.
-- **Cost trip**: if Tier B release-eval token cost exceeds budget, revisit sample count N / rubric scope.
+- **Tier B promotion**: ~~if a per-PR (not just release) semantic gate becomes affordable + non-flaky (pass-rate variance characterised), consider promoting Tier B to block PRs.~~ **[Realised 2026-07-05 per the CI-merge-gating amendment — Tier B now runs per CI run; ratification pending.]**
+- **Cost trip**: if per-CI-run eval cost (4 configs × N samples per push/PR, subscription-billed via `claude -p`) exceeds budget or adds unacceptable merge latency, revisit sample count N / rubric scope / a Tier-A-only per-PR split. No per-run data yet — the first proven-green `eval-agents` run is the measurement point; record it (ADR-026 grounding).
 - **Tool fit**: if promptfoo's exec provider wrapping `claude -p --system-prompt` proves unable to faithfully reproduce agent behaviour (vs a real subagent invocation), reassess the provider mechanism (e.g. `--output-format stream-json` parsing, or promptfoo's dedicated claude-code provider if it matures).
 - **SKILL-surface coverage** (added 2026-06-02 with the SKILL-prose scope extension): reassess if (a) the SKILL eval pattern proves unable to reach Tier-A/Tier-B parity with agent-prose evals; (b) skill-graph traversal (sibling-skill delegation under `--append-system-prompt`) introduces non-determinism the harness can't bound via pass^k; or (c) the per-skill eval surface count exceeds ~25 skills × 1 eval each, at which point a shared per-plugin eval-runner script may be warranted (vs the current `packages/*/skills/*/eval/` glob fan-out).
 - Reassess at 2026-08-28.

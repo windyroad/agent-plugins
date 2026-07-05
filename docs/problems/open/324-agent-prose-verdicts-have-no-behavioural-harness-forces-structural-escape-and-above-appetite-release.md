@@ -81,6 +81,16 @@ The solution-space investigation this ticket was opened to do is **complete and 
 
 **Remaining for P324 close (unchanged):** S1b + architect synthetic-corpus positive-fire, S2 ci.yml + hook (with S3 token), S3 Tier-B release gate, S4 (retire the RFC-010/RFC-011 structural escape-hatch bats → advance P290), S5 (graduate RFC-011 within appetite).
 
+### Build progress (2026-07-05 — RFC-012 S3 CI wiring landed; token provisioned)
+
+**Release vehicle**: none — `.github/workflows/ci.yml` + doc updates only (no `packages/<plugin>/{src,bin,hooks,skills,scripts,lib,agents}` shippable code changed).
+
+**The `CLAUDE_CODE_OAUTH_TOKEN` repo secret is provisioned (maintainer, confirmed set) and the CI wiring is DONE.** `ci.yml` gains an `eval-agents` job running `npm run eval:agents` (the 4 landed agent-prose eval configs — architect, jtbd, risk-scorer, tdd — Tier-A `icontains` + Tier-B `llm-rubric` via `claude -p` subscription OAuth). Because job-level `if:` cannot read secrets, a guard STEP (`id: token`) probes the secret and writes `present=true|false` to `GITHUB_OUTPUT`; every subsequent step gates on it — fork PRs (no secret) skip GREEN with a one-line advisory; with the token present, an eval failure fails the job and gates the merge. This implements the 2026-07-04 ratified direction recorded on P290 ("wire the promptfoo behavioural checks to gate CI merges") — the cadence change (both tiers per CI run, superseding ADR-075's release-only Tier-B split) is recorded as an ADR-075 amendment, oversight-queued for interactive ratification per P357/ADR-066 AFK fallback.
+
+**Structural tests NOT deleted** (P290 sequencing: retirement waits until this job is proven green on a real run — the first green run is also the per-CI-run cost measurement point).
+
+**Remaining for P324 close:** S1b + architect synthetic-corpus positive-fire, S2/S3 residue (local pre-commit/pre-push Tier-A hook), S4 (after a proven-green CI run: retire the RFC-010/RFC-011 structural escape-hatch bats → advance P290), S5 (graduate RFC-011 within appetite on gate-passing evidence).
+
 ## Dependencies
 
 - **Blocks**: `P290` (remove ADR-052 structural escape hatch — needs a behavioural alternative first); within-appetite release of every agent-verdict change (RFC-010, RFC-011, and future).
