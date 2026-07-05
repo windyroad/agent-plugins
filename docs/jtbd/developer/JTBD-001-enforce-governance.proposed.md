@@ -29,3 +29,17 @@ When I'm using an AI agent to write code, I want architecture decisions, risk sc
 ## Current Solutions
 
 Manual code review, PR review checklists, hoping the agent follows CLAUDE.md instructions
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-002 | STORY-002: /wr-itil:capture-story lightweight aside skill | done |
+| STORY-005 | STORY-005: Working-the-problem traversal rewrite (manage-problem + work-problem) | done |
+| STORY-006 | STORY-006: /wr-itil:reconcile-stories trio (skill + script + bin shim) | done |
+| STORY-007 | STORY-007: /wr-itil:manage-story heavyweight story lifecycle skill | done |
+| STORY-013 | STORY-013: Full gate: an RFC exists → I proceed; none → I create it first | draft |
+| STORY-023 | STORY-023: Ship → verify → problem closes with a real trace; adopter gets the fix | done |
+| STORY-033 | STORY-033: Loud cold-path diagnostic for oversight-marker shims | draft |
+| STORY-037 | STORY-037: Commit gate honours the RISK-POLICY stated review cadence for staleness | draft |

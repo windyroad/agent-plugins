@@ -52,3 +52,9 @@ Single-story atomic fix, scoped by ADR-091's machine-read contract:
 - P408 — driving problem (`docs/problems/`).
 - STORY-037 — the single story (forward-referenced at capture; ADR-089 ≥1-story shape).
 
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-037 | STORY-037: Commit gate honours the RISK-POLICY stated review cadence for staleness | draft |

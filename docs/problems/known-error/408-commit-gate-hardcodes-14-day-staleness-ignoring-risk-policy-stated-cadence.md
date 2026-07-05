@@ -73,7 +73,6 @@ This repo's doc was set to **monthly** (2026-07-02, commit 60cdb04c) pending thi
 - `packages/risk-scorer/hooks/risk-score-commit-gate.sh` — the hardcoded-14-day staleness branch.
 - **60cdb04c** — the RISK-POLICY.md monthly-cadence refresh that surfaced this.
 
-
 ## Ratified Direction - 2026-07-04 interactive decision drain
 
 Confirm fix option (a): derive the RISK-POLICY staleness threshold from the policy's stated review cadence (weekly=7/monthly=30/quarterly=90/annually=365, fallback=14 when absent). Born-confirm the anchor ADR, author fix-time RFC tracing P408 (>=1 story), implement hook + bats + changeset.
@@ -83,3 +82,10 @@ Confirm fix option (a): derive the RISK-POLICY staleness threshold from the poli
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-043 | proposed | Derive the commit-gate RISK-POLICY staleness threshold from the policy's stated review cadence |
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-037 | STORY-037: Commit gate honours the RISK-POLICY stated review cadence for staleness | draft |
