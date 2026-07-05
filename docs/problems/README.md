@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-05 **P418 captured** — reviewer-agent marker hooks do not fire on SendMessage-resumed agents: an ISSUES FOUND gate review continued via SendMessage re-verdicts PASS as a background task-notification, no PostToolUse mark hook fires, the edit gate re-blocks, and a full fresh synchronous re-review is required (RESUME variant of P402's launch-variant class; observed in the P324 iter). WSJF 1.5 deferred placeholder. (lightweight aside via /wr-itil:capture-problem, P324 retro)
+> Last reviewed: 2026-07-05 **P408 verifying** — commit gate now derives the RISK-POLICY staleness threshold from the policy's stated `> Reviewed <cadence>` line per ADR-091 (weekly=7/fortnightly=14/monthly=30/quarterly=90/annually=365; fallback 14), deny message names the derived threshold; the 2026-07-04 drain-ratified fix shipped via RFC-043/STORY-037, behavioural bats 6/6 GREEN, `@windyroad/risk-scorer` patch changeset queued. (AFK work-problems iter)
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -10,7 +10,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
-| 16.0 | P408 | risk-score-commit-gate hardcodes a 14-day RISK-POLICY staleness threshold, ignoring the policy's stated review cadence (flagged a quarterly policy stale at 16 days); affects all adopters. Root cause confirmed; fix option (a) designed; blocked on anchor-ADR ratification (queued). | 8 Medium | Known Error | S | 2026-07-02 | internal |
 | 12.0 | P179 | Agent defers requested work into untracked phases — phases are fine, but unticketed phases never get implemented | 12 High | Known Error | M | 2026-05-10 | internal |
 | 12.0 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 High | Known Error | M | 2026-06-10 | internal |
 | 12.0 | P376 | Catchup scanner misses the inbound direction; outbound templates carry the same structural defect the P363 rework fixed on the inbound side — cross-direction parity gap | 12 High | Known Error | M | 2026-06-23 | internal |
@@ -264,6 +263,7 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P386 | review-problems Step 4.5/4.6 AFK-silent relevance-close refs re-anchored off dangling work-problems Step 6.5 pointer onto subprocess-AFK-by-construction mechanism (doc-only prose fix) | 2026-07-04 (`@windyroad/itil` patch, commit `3bf91f0c`, pending release) | no — not observed |
 | P389 | work iters omit the `**Release vehicle**` seed on Open→Known Error, so the post-release K→V auto-enumerator silently skips them | @windyroad/itil@0.56.2 (2026-07-04) | no — not observed |
 | P413 | work-problems defers upstream reporting as a manual "batch-report upstream" choice instead of auto-filing upstream-blocked tickets — Output Format invariant + `### Reported Upstream` summary subsection forbid the wrap-time deferral nudge (traced under RFC-018) | 2026-07-04 (`@windyroad/itil` patch, pending release) | no — not observed |
+| P408 | risk-score-commit-gate hardcodes a 14-day RISK-POLICY staleness threshold, ignoring the policy's stated review cadence — gate now derives the threshold from the stated `> Reviewed <cadence>` line per ADR-091 (fallback 14 when absent/unrecognised) | 2026-07-05 (`@windyroad/risk-scorer` patch, pending release) | no — not observed |
 
 ## Inbound Upstream Reports
 

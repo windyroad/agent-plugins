@@ -1,6 +1,6 @@
 # Problem 408: `risk-score-commit-gate` hardcodes a 14-day RISK-POLICY staleness threshold, ignoring the policy's stated review cadence
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-07-02
 **Priority**: 8 (Medium) — Impact: 2 × Likelihood: 4 (Likely). Impact 2: spurious commit-blocking friction (a refresh/re-review clears it; no data or safety impact), but it fires for **every adopter**, not just this repo. Likelihood 4: the gate reliably flags the policy stale at 14 days regardless of the stated cadence, so any project whose stated cadence exceeds 14 days hits it routinely.
 **Origin**: internal
@@ -36,9 +36,9 @@ Run `/wr-risk-scorer:update-policy` to re-review and bump the date (resets the 1
 ### Investigation Tasks
 
 - [x] Confirm root cause — hardcoded `> 14` in the `POLICY_STALE` block; cadence line unread. (2026-07-03)
-- [ ] **BLOCKED on ratification** — ratify the anchor ADR (sibling to ADR-065/086) recording the cadence-derivation mechanism + the `RISK-POLICY.md` cadence-line machine-read contract. Then auto-create the fix-time RFC tracing P408 (I13 gate fired `no-rfc-trace`; no existing fix vehicle) with ≥1 story per ADR-089.
-- [ ] Implement the fix per `## Fix Strategy` below (fallback threshold when the cadence line is absent/unrecognised).
-- [ ] Behavioural bats: stated-cadence longer than default → not-stale within cadence; missing cadence line → default threshold; **both `Last reviewed:` and `Reviewed <cadence>` lines present → cadence parses from the capital-R line, NOT the lowercase date line** (regression guard on the regex).
+- [x] Ratification — substance ratified in the 2026-07-04 interactive decision drain (§ Ratified Direction below); anchor ADR-091 born-confirmed (commit 311baa52). Fix-time RFC-043 + STORY-037 auto-created per the I13 `no-rfc-trace` directive (commits d1dafaa1 + 90c7f3b7). (2026-07-05)
+- [x] Implement the fix per `## Fix Strategy` below (fallback threshold when the cadence line is absent/unrecognised). (2026-07-05)
+- [x] Behavioural bats: `packages/risk-scorer/hooks/test/risk-score-commit-gate-cadence-staleness.bats` — 6 cases GREEN incl. the capital-R vs lowercase `Last reviewed:` regex-collision regression guard; 37 adjacent gate tests still pass. (2026-07-05)
 
 ## Fix Strategy (designed 2026-07-03 — implement post-ratification)
 
@@ -53,6 +53,8 @@ In `risk-score-commit-gate.sh`, extend the `POLICY_STALE` python block to parse 
 The `deny` message should name the derived threshold (e.g. "stale — reviewed over 30 days ago per the policy's stated monthly cadence") instead of the hardcoded "over 2 weeks ago" string, so the reason matches the doc.
 
 Shippable code under `packages/risk-scorer/hooks` → the implementing commit must carry a `.changeset/*.md` bumping `@windyroad/risk-scorer` **patch**, and a `Refs: STORY-<NNN>` trailer once the RFC/story exist.
+
+**Release vehicle**: .changeset/wr-risk-scorer-p408-cadence-staleness.md
 
 ## Fix options (option (a) selected 2026-07-03; substance-of-anchor-ADR ratification queued at loop end)
 
@@ -72,6 +74,10 @@ This repo's doc was set to **monthly** (2026-07-02, commit 60cdb04c) pending thi
 
 - `packages/risk-scorer/hooks/risk-score-commit-gate.sh` — the hardcoded-14-day staleness branch.
 - **60cdb04c** — the RISK-POLICY.md monthly-cadence refresh that surfaced this.
+
+## Fix Released
+
+Implemented 2026-07-05 (AFK work-problems iter; fix commit on main, rides with this transition). The `POLICY_STALE` block in `packages/risk-scorer/hooks/risk-score-commit-gate.sh` now derives the staleness threshold from the policy's stated `> Reviewed <cadence>` line per ADR-091 (weekly=7, fortnightly/biweekly=14, monthly=30, quarterly=90, annually/yearly=365; fallback 14 when absent/unrecognised), and the deny message names the derived threshold + cadence word. Exercise evidence: new behavioural suite `risk-score-commit-gate-cadence-staleness.bats` 6/6 GREEN (RED-first TDD; the witnessed 16-days-under-monthly case now passes the gate); 37 adjacent gate tests unaffected. Release vehicle: `.changeset/wr-risk-scorer-p408-cadence-staleness.md` (`@windyroad/risk-scorer` patch). Awaiting user verification.
 
 ## Ratified Direction - 2026-07-04 interactive decision drain
 

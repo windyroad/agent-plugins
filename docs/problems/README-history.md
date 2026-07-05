@@ -1159,3 +1159,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-07-05
 
 > Last reviewed: 2026-07-04 **P417 captured** — `docs/stories/README.md` Rankings/Done sections still carry the bootstrap placeholder, stale for the whole ~30-story corpus: no refresh-on-create/transition path was wired for the stories tier the way P094/P062 wire the problems and RFC tiers. WSJF 1.5 deferred placeholder. (lightweight aside via /wr-itil:capture-problem, P409 retro)
+
+> Last reviewed: 2026-07-05 **P418 captured** — reviewer-agent marker hooks do not fire on SendMessage-resumed agents: an ISSUES FOUND gate review continued via SendMessage re-verdicts PASS as a background task-notification, no PostToolUse mark hook fires, the edit gate re-blocks, and a full fresh synchronous re-review is required (RESUME variant of P402's launch-variant class; observed in the P324 iter). WSJF 1.5 deferred placeholder. (lightweight aside via /wr-itil:capture-problem, P324 retro)

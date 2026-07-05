@@ -34,7 +34,10 @@ fi
 SESSION_ID=$(_get_session_id)
 [ -n "$SESSION_ID" ] || exit 0
 
-# RISK-POLICY.md must exist and not be stale (>14 days)
+# RISK-POLICY.md must exist and not be stale by its own stated review
+# cadence (`> Reviewed <cadence> ...` line; ADR-091 machine-read
+# contract). Fallback threshold 14 days when the cadence line is absent
+# or the word unrecognised. P408.
 if [ ! -f "RISK-POLICY.md" ] || [ ! -s "RISK-POLICY.md" ]; then
     risk_gate_deny "Commit blocked: RISK-POLICY.md is missing. Run /risk-policy to create it before committing."
     exit 0
@@ -42,19 +45,32 @@ fi
 POLICY_STALE=$(python3 -c "
 from datetime import date
 import re
+CADENCE_DAYS = {'weekly': 7, 'fortnightly': 14, 'biweekly': 14,
+                'monthly': 30, 'quarterly': 90, 'annually': 365, 'yearly': 365}
 try:
     text = open('RISK-POLICY.md').read()
     m = re.search(r'Last reviewed:\*{0,2}\s*(\d{4}-\d{2}-\d{2})', text)
+    # Case-sensitive capital-R match so the cadence line is never
+    # confused with the lowercase 'Last reviewed: <date>' line (ADR-091).
+    c = re.search(r'(?m)^>?\s*Reviewed\s+([A-Za-z]+)', text)
+    cadence = c.group(1) if c else ''
+    threshold = CADENCE_DAYS.get(cadence, 14)
+    if cadence not in CADENCE_DAYS:
+        cadence = ''
     if m:
         reviewed = date.fromisoformat(m.group(1))
-        print('yes' if (date.today() - reviewed).days > 14 else 'no')
+        if (date.today() - reviewed).days > threshold:
+            reason = ('per the policy\'s stated %s cadence' % cadence) if cadence else '(default threshold; no stated cadence)'
+            print('over %d days ago %s' % (threshold, reason))
+        else:
+            print('no')
     else:
         print('no')
 except:
     print('no')
 " 2>/dev/null || echo "no")
-if [ "$POLICY_STALE" = "yes" ]; then
-    risk_gate_deny "Commit blocked: RISK-POLICY.md is stale (last reviewed over 2 weeks ago). Run /risk-policy to update it before committing."
+if [ "$POLICY_STALE" != "no" ]; then
+    risk_gate_deny "Commit blocked: RISK-POLICY.md is stale (last reviewed ${POLICY_STALE}). Run /risk-policy to update it before committing."
     exit 0
 fi
 

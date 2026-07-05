@@ -26,11 +26,11 @@ In order to stop the commit gate blocking commits against a risk policy that is 
 
 ## Acceptance criteria (accepted-gate, INVEST Testable)
 
-- [ ] A policy stating `Reviewed monthly`, last reviewed 16 days ago, is NOT flagged stale — the commit is allowed (the P408 witnessed case).
-- [ ] A policy with no cadence line keeps the existing 14-day fallback threshold — behaviour unchanged for adopters who state no cadence.
-- [ ] When both `> Last reviewed: <date>` and `> Reviewed <cadence>` lines are present, the cadence parses from the capital-R line, never the date line (regex-collision regression guard).
-- [ ] A policy whose stated cadence HAS elapsed is denied, and the deny message names the derived threshold and cadence word.
-- [ ] Behavioural bats cover the four cases above (ADR-052).
+- [x] A policy stating `Reviewed monthly`, last reviewed 16 days ago, is NOT flagged stale — the commit is allowed (the P408 witnessed case).
+- [x] A policy with no cadence line keeps the existing 14-day fallback threshold — behaviour unchanged for adopters who state no cadence.
+- [x] When both `> Last reviewed: <date>` and `> Reviewed <cadence>` lines are present, the cadence parses from the capital-R line, never the date line (regex-collision regression guard).
+- [x] A policy whose stated cadence HAS elapsed is denied, and the deny message names the derived threshold and cadence word.
+- [x] Behavioural bats cover the four cases above (ADR-052).
 
 ## Driving problem trace (required — I6 invariant)
 

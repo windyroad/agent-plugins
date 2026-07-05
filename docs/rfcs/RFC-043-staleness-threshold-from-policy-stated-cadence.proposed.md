@@ -37,9 +37,9 @@ Single-story atomic fix, scoped by ADR-091's machine-read contract:
 
 ## Tasks
 
-- [ ] Implement the cadence-derivation in `packages/risk-scorer/hooks/risk-score-commit-gate.sh` (STORY-037)
-- [ ] Behavioural bats: `packages/risk-scorer/hooks/test/risk-score-commit-gate-cadence-staleness.bats` (STORY-037)
-- [ ] Changeset: `@windyroad/risk-scorer` patch (STORY-037)
+- [x] Implement the cadence-derivation in `packages/risk-scorer/hooks/risk-score-commit-gate.sh` (STORY-037, 2026-07-05)
+- [x] Behavioural bats: `packages/risk-scorer/hooks/test/risk-score-commit-gate-cadence-staleness.bats` (STORY-037, 2026-07-05 — 6/6 GREEN, RED-first)
+- [x] Changeset: `@windyroad/risk-scorer` patch (STORY-037, 2026-07-05 — `.changeset/wr-risk-scorer-p408-cadence-staleness.md`)
 
 ## Commits
 
