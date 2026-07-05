@@ -1,5 +1,15 @@
 # @windyroad/architect
 
+## 0.19.0
+
+### Minor Changes
+
+- b23401d: `/wr-architect:capture-adr` now derives full ADR substance at capture (RFC-045). The deferred-placeholder pattern — `(deferred to /wr-architect:create-adr canonical review)` written into Decision Drivers, Considered Options, Consequences, Confirmation, Pros/Cons, and Reassessment sections — is gone: nothing self-firing ever triggered the canonical expansion, so placeholder sections rotted (P375). The skill now derives real content for every MADR section at capture — genuine drivers, at least two real considered options, Good/Neutral/Bad consequences, testable confirmation criteria, and reassessment criteria — while staying zero-interaction and AFK-safe. Derived substance is recorded `human-oversight: unconfirmed` and ratified at the `/wr-architect:review-decisions` drain surfaced by the SessionStart oversight nudge. `/wr-architect:create-adr` remains the interactive full-intake surface; its role expanding capture skeletons is retired.
+
+### Patch Changes
+
+- 3683cac: Add the quota-pace throttle (P160 / ADR-093 / RFC-046). Every plugin now ships a `quota-pace-throttle.sh` PreToolUse hook that, before each tool call, compares cumulative 5h/7d rate-limit usage against elapsed time and — when ahead of the proportional pace — sleeps a calculated catch-up (capped 60s per firing, 5pp weekly headroom). Behind pace it is a fast no-op (recent-check marker dedups the per-plugin firing). It never blocks, never prompts, and fails open when the `~/.claude/quota-state.json` cache (written by the statusline) is absent/malformed. This paces token burn evenly across ALL work — interactive and AFK — so an overnight loop lands at each quota reset with headroom instead of a mid-flight hard-stop. See `packages/shared/hooks/QUOTA-THROTTLE-SETUP.md` for the one-line statusline cache-writer adopters add.
+
 ## 0.18.6
 
 ### Patch Changes
