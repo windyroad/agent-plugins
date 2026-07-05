@@ -88,6 +88,10 @@ jobs:
       - name: Check staleness-check.sh copies in sync (P045, RFC-036, ADR-088)
         run: npm run check:staleness-check
 
+
+      - name: Check suota-pace-throttle-copies-check.sh copies in sync (P045, RFC-036, ADR-088)
+        run: npm run check:quota-pace-throttle
+
       - name: Check derive-first-dispatch.sh copies in sync (P132 Phase 2a-iii-B, ADR-017)
         run: npm run check:derive-first-dispatch
 

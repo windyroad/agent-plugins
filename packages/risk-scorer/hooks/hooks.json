@@ -8,6 +8,10 @@
       { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/staleness-check.sh" }] }
     ],
     "PreToolUse": [
+      {
+        "matcher": "Bash|Write|Edit|Read|Glob|Grep|Task|WebFetch|WebSearch",
+        "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/quota-pace-throttle.sh" }]
+      },
       { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/secret-leak-gate.sh" }, { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/wip-risk-gate.sh" }] },
       { "matcher": "Bash", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/git-push-gate.sh" }] },
       { "matcher": "Bash", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/risk-score-commit-gate.sh" }] },

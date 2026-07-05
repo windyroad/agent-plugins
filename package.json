@@ -31,6 +31,8 @@
     "check:external-comms-gate": "bash scripts/sync-external-comms-gate.sh --check",
     "sync:staleness-check": "bash scripts/sync-staleness-check.sh",
     "check:staleness-check": "bash scripts/sync-staleness-check.sh --check",
+    "sync:quota-pace-throttle": "bash scripts/sync-quota-pace-throttle.sh",
+    "check:quota-pace-throttle": "bash scripts/sync-quota-pace-throttle.sh --check",
     "sync:derive-first-dispatch": "bash scripts/sync-derive-first-dispatch.sh",
     "check:derive-first-dispatch": "bash scripts/sync-derive-first-dispatch.sh --check",
     "sync:command-detect": "bash scripts/sync-command-detect.sh",
