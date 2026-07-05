@@ -2,7 +2,7 @@
 
 **Status**: Open
 **Reported**: 2026-05-03
-**Priority**: 10 (High) — Impact: Minor (2) x Likelihood: Almost certain (5)
+**Priority**: 20 (Critical) — Impact: Significant (4) x Likelihood: Almost certain (5) — RE-RATED UP 2026-07-05 (was Minor 2): hitting the quota does NOT just "wait for reset" — it HALTS work mid-loop, breaks the running `/wr-itil:work-problems` loops, and forces an effortful manual resume. User-pinned TOP PRIORITY 2026-07-05.
 **Origin**: internal
 **Effort**: XL — new plugin or sibling surface; ADR required for policy semantics (advisory vs blocking, scope boundary against existing statusline read-surface, AFK-orchestrator interaction); cross-cutting with hooks (PreToolUse cadence gate?), statusline (already reads quota state — see `~/.claude/statusline-command.sh`), and a quota-policy schema analogous to `RISK-POLICY.md`. Multi-day, cross-package work.
 
@@ -111,3 +111,37 @@ The fix is a new pacing surface, not a tweak to an existing one. Open design que
 - JTBD-001 (`docs/jtbd/solo-developer/JTBD-001-enforce-governance.proposed.md`) — load-bearing dependency.
 - JTBD-006 (`docs/jtbd/solo-developer/JTBD-006-work-backlog-afk.proposed.md`) — load-bearing dependency.
 - JTBD-302 (`docs/jtbd/plugin-user/JTBD-302-trust-readme-describes-installed-behaviour.proposed.md`) — adopter-side concern (installed governance surfaces must not silently exhaust user quota).
+
+## New evidence + ratified solution direction (2026-07-05)
+
+**User-pinned TOP PRIORITY.** Verbatim: *"hitting the quota limit has negative issues beyond having to wait for the tokens to reset. It also stops work midway, which needs effort to resume later, especially the work-problems loop. For instance, I'm going to have to restart all the various work-problems loops after 11pm, but I would like to go to bed, but that would mean wasting time between now and the morning. So I have to stay up, which sucks."*
+
+Live evidence (screenshot 2026-07-05): `You've hit your session limit · resets 11pm (Australia/Sydney)`; status-line `5h: 100% behind (resets 29m)`, `7d: 31% behind (resets 5d 16h)`. The session limit stopped work mid-flight.
+
+**The stop is the harm, not the wait.** Three compounding costs beyond "wait for reset":
+1. **Mid-loop halt** — the AFK `/wr-itil:work-problems` loops break partway through an iter; in-flight subprocess work strands (ADR-019 Step 0 dirty-state recovery cost on resume).
+2. **Effortful resume** — restarting all the loops after reset is manual work; state has to be re-established.
+3. **Forced-waking / wasted-window** — the user can't safely set an overnight loop and go to bed: either stay up to babysit the reset (bad) or waste the hours between now and morning (bad). This is the JTBD-006 "set an AFK loop and walk away" promise breaking.
+
+### Ratified solution direction (user, 2026-07-05) — AUTOMATIC PROPORTIONAL-WINDOW THROTTLE
+
+An automatic throttle that **paces** the work so we never exceed the proportional share of quota for the current window. It is a **balancing act**: use as many tokens as possible WITHOUT hitting the quota (hitting it breaks the loops).
+
+- **Rule**: at any point, cumulative usage must not exceed the fraction of the window elapsed. E.g. **1hr into a 5hr window → ≤20% of the 5h quota used**; **75% through the week → ≤70% of the weekly quota used** (leave headroom). Applies to BOTH windows simultaneously (the 5h window AND the 7d window) — pace against whichever is tighter.
+- **Behaviour when ahead of pace** (burning too fast): the AFK loop (and any heavy work) should slow/pause/defer the next expensive unit until elapsed-time catches up to usage — rather than sprinting into the wall and hard-stopping mid-iter. A brief scheduled sleep-until-back-on-pace between iters is preferable to a hard quota-stop.
+- **Behaviour when behind pace** (headroom available): run at full speed / spawn expensive iters freely.
+- **Cross-window + cross-surface**: the weekly axis must leave headroom for non-Claude-Code surfaces (chat, cowork) — don't spend the whole week's quota in Claude Code.
+- **Data source**: the status-line already reads the 5h/7d quota state (`~/.claude/statusline-command.sh`); the throttle converts that diagnostic into a pacing gate (a PreToolUse/between-iter cadence check + a `ScheduleWakeup`-style pace-sleep in the work-problems loop). Analogous to how `RISK-POLICY.md` converts impact/likelihood into commit gates — a `QUOTA-POLICY`-style pacing surface.
+
+**Fix strategy**: this reframes P160's XL "new plugin" scope toward a concrete, prioritisable first slice — a between-iter pacing check in `/wr-itil:work-problems` (and `/loop`) that reads the window state and inserts a pace-sleep when usage% > elapsed%, so an overnight loop self-throttles to land the user at reset WITH headroom instead of hard-stopped mid-iter. Re-estimate Effort at build (the first-slice pacing gate is likely M/L, not the full XL cross-plugin surface).
+
+### CORRECTION (user, 2026-07-05) — mechanical hook-calculated sleep, NOT advise/nudge
+
+The ticket's original "advisory or blocking nudge" framing (title + Description) is **SUPERSEDED**. Verbatim user direction: *"it shouldn't advise or nudge, it should use hooks to calculate if a delay is needed and if so, sleep for that amount of time."*
+
+The mechanism is **automatic and mechanical** — zero human decision, zero nudge:
+1. A **hook** (between-iter in the AFK loop, and/or PreToolUse on expensive units) reads the current window state (5h + 7d usage% and elapsed%).
+2. It **calculates** whether we are ahead of the proportional pace, and if so, **by how much** — i.e. the delay needed for elapsed-time to catch up to usage (`required_sleep = time until on-pace = f(usage%, elapsed%, window_reset)`), taking the tighter of the 5h / 7d windows.
+3. If a delay is needed, it **sleeps for exactly that amount** (blocking the next expensive unit), then proceeds. If no delay is needed (behind pace, headroom available), it proceeds immediately at full speed.
+
+So the loop self-throttles into an even burn that lands at each window's reset WITH headroom, instead of sprinting into a mid-iter hard-stop. No status-line glance, no "you're burning fast" message, no user-in-the-loop — the hook computes the sleep and takes it. This is the load-bearing design change: enforcement by calculated sleep, not surfacing by advisory.
