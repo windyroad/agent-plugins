@@ -402,11 +402,11 @@ _79 ADRs. These are the current rules. The architect agent reads this section fi
 **Decides:** Lifecycle drift on `fix(<pkg>): P<NNN>` commits is surfaced by a PostToolUse advisory hook that emits a stderr nudge when the named ticket is still Open with no paired transition — advisory-only, never blocks, not auto-fire, not a hard gate — because Open→Known-Error rests on a knowledge claim (root cause known), not an observable fact. Binding rule: any future surface acting on this signal stays advisory unless it asserts only observable facts; upgrading requires superseding this ADR.
 **Confirmation:** Behavioural bats exercise the hook end-to-end: advisory on fix-titled commit with Open ticket; silent when ticket is known-error/absent; silent on non-fix titles; exit 0 on every path including bypass and malformed input.
 **Related:** ADR-013, ADR-014, ADR-040, ADR-045, ADR-052, ADR-066, ADR-073
-
-### ADR-093 — Mechanical quota-pace sleep for AFK loops
+### ADR-093 — Mechanical quota-pace throttle — frequently-firing PreToolUse hook, calculated sleep, never blocks
 **Status:** proposed | **Oversight:** unconfirmed
-**Decides:** AFK loops throttle via a mechanical hook-calculated pace-sleep, not advisory nudges or blocking gates: a script compares cumulative quota usage against the proportional elapsed fraction of both the 5-hour and 7-day rate-limit windows (larger required sleep wins, 5-pt headroom on the 7-day axis only) and sleeps exactly the catch-up time — no prompts, fail-open when the `~/.claude/quota-state.json` cache (written by the statusline helper) is missing, stale, or malformed. Ships as sibling scripts in `@windyroad/itil`, first slice wired into `/wr-itil:work-problems` Step 6.6; per-tool-use pacing and cross-surface quota reads deferred to the P160 fix-time RFC.
-**Related:** ADR-032, ADR-044, ADR-049, ADR-066, ADR-070, ADR-073, ADR-087
+**Decides:** AFK and interactive work alike are pace-throttled by a canonical shared PreToolUse hook (no matcher — every tool call) synced to all seven published plugins: it reads a statusline-written `~/.claude/quota-state.json` cache, compares cumulative usage against the elapsed fraction of the 5-hour and 7-day rate-limit windows (5-pt headroom on the 7-day axis for other surfaces), and sleeps the calculated catch-up time capped at 60s per firing — mechanical with zero prompts, cheap when behind pace via a shared recent-check marker, and fail-open on every abnormal path (missing/stale cache, kill-switch, no jq) so it never blocks work. Supersedes the stale compendium-only shape (itil-sibling scripts, between-iter-only pacing) per user Correction 2.
+**Confirmation:** Behavioural bats — behind-pace fast no-op; ahead-of-pace sleeps the calculated amount (incl. one real capped-sleep wall-clock case); 7d headroom violation throttles even when raw usage < elapsed; recent-check marker short-circuits the parse; missing/stale cache, kill-switch, and past `resets_at` all fast no-op; exit 0 + empty stdout on every path; sync-script `--check` drift gate in CI
+**Related:** ADR-002, ADR-003, ADR-013, ADR-017, ADR-023, ADR-038, ADR-045, ADR-057, ADR-066, ADR-077
 
 ---
 
