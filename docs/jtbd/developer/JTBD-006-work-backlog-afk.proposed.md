@@ -38,3 +38,16 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 
 - Manually running `/wr-itil:manage-problem work` repeatedly
 - Writing a bash script that calls `claude --print` in a loop (fragile, no progress visibility)
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-003 | STORY-003: /wr-itil:list-stories read-only display skill | done |
+| STORY-005 | STORY-005: Working-the-problem traversal rewrite (manage-problem + work-problem) | done |
+| STORY-014 | STORY-014: Unattended, the agent works the plan and pauses for real decisions | draft |
+| STORY-018 | STORY-018: Capture the problem in seconds, mid-flow | done |
+| STORY-026 | STORY-026: Work the RFC's stories one at a time | done |
+| STORY-036 | STORY-036: Write the create-gate marker under every candidate session id | draft |
+| STORY-038 | STORY-038: Fix-titled commits surface a lifecycle-drift advisory | draft |

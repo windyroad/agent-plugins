@@ -52,3 +52,9 @@ Supplementary prose (the story is the load-bearing decomposition per ADR-089):
 - P228 / P234 / P378 — sibling lifecycle seams and the detect-then-advise hook precedent.
 - Captured via /wr-itil:capture-rfc (fix-time path) on 2026-07-05, AFK work-problems iter; expand at next /wr-itil:manage-rfc invocation.
 
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-038 | STORY-038: Fix-titled commits surface a lifecycle-drift advisory | draft |

@@ -64,7 +64,7 @@ In active use: (1) `review-problems` Step 2 item 10 auto-transitions O→KE once
 Per the same load-bearing-decision discipline P228 applied (surface selection deferred to user ratification before SKILL/hook prose is authored), the surface below is **not built this iter**. The semantic finding above narrows the recommendation but does not authorise an unratified build under AFK.
 
 1. **(a) Post-commit advisory hook (RECOMMENDED by the semantic finding)** — a PostToolUse:Bash hook mirroring `itil-rfc-trailer-advisory.sh`: parse `fix(<pkg>): P<NNN>` commit titles in the just-run `git commit`, look up each named ticket's on-disk state dir, and emit a stderr advisory when the ticket is still `.open/` with no paired transition in the same commit. Advisory-only (never blocks), consistent with ADR-040 declarative-first + ADR-013 Rule 6 fail-open. Pros: respects the semantic finding (surfaces drift without asserting Known-Error semantics or fabricating root cause under commit pressure); copy-and-retarget of an existing precedent; AFK-safe. Cons: advisory can be ignored; needs a per-commit title parse.
-2. **(b) Extend P228's release-time belt-and-braces** — add an Open-ticket scan to `enumerate-postrelease-kv-candidates` (or a sibling enumerator) that fires O→KE for Open tickets named in release-drained `fix(...): P<NNN>` commits. **Weakened by the semantic finding**: O→��KE asserts root-cause-known, which a fix-titled commit does not establish — mechanically auto-firing it risks a semantically empty Known Error. Distinct fix surface from P228's K→V (the two seams are NOT unifiable into one mechanical rule — K→V is observable-fact, O→KE is a knowledge assertion).
+2. **(b) Extend P228's release-time belt-and-braces** — add an Open-ticket scan to `enumerate-postrelease-kv-candidates` (or a sibling enumerator) that fires O→KE for Open tickets named in release-drained `fix(...): P<NNN>` commits. **Weakened by the semantic finding**: O→KE asserts root-cause-known, which a fix-titled commit does not establish — mechanically auto-firing it risks a semantically empty Known Error. Distinct fix surface from P228's K→V (the two seams are NOT unifiable into one mechanical rule — K→V is observable-fact, O→KE is a knowledge assertion).
 3. **(c) Hard commit gate requiring a paired transition** — PreToolUse:Bash gate that blocks a `fix(...): P<NNN>` commit unless it also `git mv`s the ticket. **Weakened by the semantic finding** (same reason as b) plus ADR-040 (prefer advisory over hard block) and the risk of forcing fabricated root-cause under commit pressure.
 4. **(d) Co-locate with the P314 fix-time RFC-trace gate** (newly surfaced this iter) — the propose-fix gate (`check-fix-rfc-trace.sh` + manage-problem/work-problems wiring) already fires at the propose-fix step and already parses the fix context. A sibling predicate there could remind/require the lifecycle transition pre-commit. Pros: reuses an existing fire point; pre-commit timing. Cons: only fires inside manage-problem/work-problems (misses direct `fix(...)` commits outside those skills — exactly the residual class); couples two concerns on one gate.
 
@@ -112,3 +112,9 @@ Build fix surface **(a)**: a PostToolUse:Bash post-commit ADVISORY hook that par
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-044 | proposed | Fix-title lifecycle-drift advisory hook |
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-038 | STORY-038: Fix-titled commits surface a lifecycle-drift advisory | draft |
