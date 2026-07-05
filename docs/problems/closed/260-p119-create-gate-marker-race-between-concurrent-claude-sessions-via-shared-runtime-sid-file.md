@@ -1,6 +1,6 @@
 # Problem 260: P119 create-gate marker race between concurrent Claude sessions via shared runtime-sid file
 
-**Status**: Verifying
+**Status**: Closed
 **Reported**: 2026-05-18
 **Priority**: 6 (Medium) — Impact: 2 (Minor — capture-problem Write is blocked until workaround applies; not destructive) x Likelihood: 3 (Likely — fires whenever orchestrator main turn captures a ticket while an iter subprocess is also active, which is the standard /wr-itil:work-problems shape)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems; per-PID/per-session runtime-sid file naming)
@@ -16,6 +16,10 @@
 Released in **`@windyroad/itil@0.35.14`** (release commit `bf1ebdd`, 2026-05-26) — the Option-C bounded multi-UUID create-gate marker-write shipped to adopters. Brought under the RFC framework as **RFC-007** (retro-fit per ADR-071 — every fix goes through an RFC) so the held changeset could release under the new unconditional gate. Transitioned `Known Error → Verifying` on release per ADR-022.
 
 **User verification gate**: the concurrent-session create-gate deny no longer fires during `/wr-itil:work-problems` AFK loops (the behavioural bats negative control already reproduces the pre-fix deny vs the fixed candidate-set path). Verifying → Closed on user confirmation.
+
+## Closed on evidence — 2026-07-05
+
+Closed by the run-retro Step 4a close-on-evidence pass (P408 AFK iter). In-session exercise of the exact P260 failure shape: a `claude -p` iteration subprocess running concurrently with the work-problems orchestrator main turn invoked `wr-itil-mark-create-gate` and `wr-itil-mark-rfc-capture-gate` (both exit 0, Option-C candidate-set writes) and the subsequent Writes of a new RFC (RFC-043), a new story (STORY-037), and two new problem tickets (P419, P420) all passed the P119 create-gate with ZERO denies. Recovery if this close is wrong: `/wr-itil:transition-problem 260 known-error`.
 
 ## Description
 
