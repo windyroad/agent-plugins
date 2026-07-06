@@ -1,12 +1,28 @@
 # Problem 363: Inbound-reported tickets never receive fix-released verdict on originating issue
 
-**Status**: Verification Pending
+**Status**: Known Error
 **Reported**: 2026-06-11
 **Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3 = 9. Rated at review 2026-07-02: inbound verdict leg unimplemented; JTBD-301 breach.
 **Origin**: internal
 **Effort**: M. WSJF = (9 × 1.0) / 2 = 2.25.
 **JTBD**: JTBD-301
 **Persona**: plugin-user
+
+## Reopened — 2026-07-06 (Verification Pending → Known Error): live verification failed again at scale
+
+A full title-based reconciliation of every OPEN GitHub issue on `windyroad/agent-plugins` against the local ticket corpus (2026-07-06, user-directed) found the status-sync loop this ticket tracks is **still not firing** — the 2026-07-03 K→V transition was premature. Of 96 open issues, **41 were "fixed-but-open upstream"**: their local ticket had already reached `verifying`/`closed` (fix shipped) yet the originating GitHub issue was never commented or closed. **Zero** open issues cleanly mapped to a still-active local ticket — the entire cleanly-matchable open backlog was stale-fixed.
+
+Both directions are implicated, so this reopen widens P363's effective scope to the whole status-sync loop (cross-ref its outbound sibling **P080** — no-bidirectional-update-of-upstream-reported-problems, also verifying):
+- **Inbound leg (P363 proper)**: #274→P382, #282→P383, #283→P384, #284→P385 all shipped but their issues stayed open — the inbound-verdict dispatch did not auto-fire.
+- **Outbound leg (P080)**: the whole #56–#126 block (→ P198–P227, mostly closed months ago) never got closed back upstream via `/wr-itil:update-upstream`.
+
+**All 40 were manually closed with a status comment this session** (the manual workaround again — #348 kept open deliberately as live evidence of the gap; 26 further issues remain untriaged).
+
+**Root cause is unchanged and structural**: the fix mechanism exists but has **no automatic cadence** (the `feedback_automatic_cadence_or_it_doesnt_happen` class) — it fires only at transition time, only when the active session runs a fresh-enough plugin cache (repeatedly defeated by P343 stale-cache in AFK loops), and there is **no back-fill/reconciliation surface** for tickets that transitioned before the fix shipped or on a stale cache. Transition-time dispatch alone cannot close this; a periodic reconciliation (diff local lifecycle state vs originating-issue state, post/close the delta) is required.
+
+**New investigation task (added at reopen):**
+
+- [ ] Ship an automatic reconciliation cadence that back-fills the status-sync delta (local ticket verifying/closed AND originating issue still open → post verdict / close), independent of the transition-time dispatch. Candidate home: a `/wr-itil:check-upstream-responses`-adjacent periodic pass (it already walks issue state) or a work-problems/review-problems Step-0 preflight reconciler. This is the missing cadence, not another transition-time hook. Covers BOTH the inbound (P363) and outbound (P080) legs — coordinate scope with P080.
 
 ## Description
 

@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-05 **P404 reopened** — Verifying → Known Error (WSJF 6.0); verification FAILED on user observation: AFK flow authored a task-based RFC (RFC-045 `## Tasks` T1–T6) and a mapless story (STORY-039 `story-maps: []`), and the tooling has never created a story map. User-pinned: a story MUST belong to a story map at capture; RFC breakdown is stories, not tasks. Phase 3 (capture-time enforcement + map authoring) added to the ticket. Also this review: **P390 reopened** — Verifying → Known Error (WSJF 12.0); fix strategy now anchors work-problems / work-problem loops with Claude Code's native `/goal`.
+> Last reviewed: 2026-07-06 **README reconciled** — 4 drift entries corrected: P363 (Verifying → Known Error reopen; removed from Verification Queue, added to WSJF Rankings), P422 + P423 (missing WSJF Rankings rows added). Reconciliation per P118 + ADR-014. Context: a full title-based audit of open upstream issues found 40 fixed-but-open — all manually closed with a status comment this session — and P363 reopened for the missing automatic status-sync back-fill cadence (sibling P080); 26 issues remain untriaged.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -10,10 +10,12 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
+| 16.0 | P423 | Agent "fixes" recurring behavioural corrections via project-local memory instead of shipping an adopter-facing plugin surface | 16 Critical | Open | M | 2026-07-06 | internal |
 | 12.0 | P179 | Agent defers requested work into untracked phases — phases are fine, but unticketed phases never get implemented | 12 High | Known Error | M | 2026-05-10 | internal |
 | 12.0 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 High | Known Error | M | 2026-06-10 | internal |
 | 12.0 | P376 | Catchup scanner misses the inbound direction; outbound templates carry the same structural defect the P363 rework fixed on the inbound side — cross-direction parity gap | 12 High | Known Error | M | 2026-06-23 | internal |
 | 12.0 | P390 | work-problems emits ALL_DONE prematurely while dispatchable backlog remains — reopened; fix strategy now anchors the loop with native `/goal` (independent per-turn evaluator) | 12 High | Known Error | M | 2026-06-27 | internal |
+| 12.0 | P422 | Agent silently ships X-prime (a hedged/lesser version of the requested X) instead of asking before deviating | 12 High | Open | M | 2026-07-06 | internal |
 | 9.0 | P180 | Agent defers mitigation selection to user during active incident — surfaces mitigation choice as user-authority when SKILL contract empowers agent-driven reversible mitigations | 9 Medium | Known Error | M | 2026-05-10 | internal |
 | 9.0 | P371 | manage-problem I13 propose-fix gate auto-creates a new RFC instead of wiring an existing fix-vehicle's trace edge | 9 Medium | Known Error | M | 2026-06-17 | internal |
 | 8.0 | P345 | Fix-titled commits do not transition the ticket lifecycle in the same commit grain — ticket stays Open across release + CI-verify + multiple intervening commits | 8 Medium | Known Error | M | 2026-05-31 | internal |
@@ -33,6 +35,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3.0 | P248 | Use time and token cost (not t-shirt sizing) for WSJF effort, with retro-driven estimation refinement | 6 Medium | Open | M | 2026-05-17 | internal |
 | 3.0 | P412 | RFC / Story / Story-map framework tiers are invisible to adopters — no scaffold, no nudge, no discoverable entry point | 6 Medium | Open | M | 2026-07-03 | internal |
 | 3.0 | P045 | Auto plugin install on user's machine after governance release | 12 High | Open | L | 2026-04-19 | internal |
+| 2.25 | P363 | Inbound-reported tickets never receive fix-released verdict on originating issue — reopened 2026-07-06: status-sync loop still failing at scale (40 fixed-but-open issues manually closed); needs an automatic back-fill reconciliation cadence (sibling P080) | 9 Medium | Known Error | M | 2026-06-11 | internal |
 | 2.25 | P136 | ADR-044 alignment audit — sweep all unaudited skills/hooks/agents/ADRs/JTBDs/READMEs against the framework-resolution boundary (master ticket) | 9 Med | Open | L | 2026-04-27 | internal |
 | 2.25 | P290 | Harden ADR-052 to behavioural-only — remove the structural-test escape hatch entirely | 9 Med High | Open | L | 2026-05-25 | internal |
 | 2.25 | P324 | Agent-prose verdicts have no behavioural test harness — forcing the ADR-052 structural-test escape hatch + above-appetite release workarounds, perpetuating the structural tests the user has rejected | 9 Med-High | Open | L | 2026-05-27 | internal |
@@ -252,8 +255,6 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P319 | full bats --recursive sweep hangs locally on architect-detect-scope — missing-stdin-redirect test fixture fixed (</dev/null) | 2026-06-16 | no — not observed |
 | P174 | Topic-file rotation `first-written` precondition unenforceable (Step 3 Branch A) — superseded by the P145→P246→P247 evidence-based-rotation rework; split-by-date now a metadata-free mechanical safe default | @windyroad/retrospective@0.24.1+ (npm latest 0.27.0) — no dedicated P174 code change; supersession reconcile | no — not observed |
 | P370 | Iter subprocess exits turn on a turn-end-survivor background task; commit-bearing work lost — prohibition clause + foreground-synchronous substitute shipped | @windyroad/itil@0.55.3 (RFC-034; `work-problems` Step 5 iter-prompt clause + paired promptfoo eval GREEN) | no — not observed |
-| P363 | Inbound-reported tickets never receive fix-released verdict on originating issue — consume `**Origin**` field | `@windyroad/itil@0.51.1` (inbound leg, `ddb47521`) → reworked `0.54.6` (`4e3f2bfb`); present in `0.56.0` | no — not observed (2026-06-28 live-verify failed on stale cache, not leg-correctness; awaiting post-refresh inbound K→V) |
-
 | P368 | wr-architect-mark-oversight-confirmed cannot discover session-id when CLAUDE_SESSION_ID empty AND no announce markers | @windyroad/architect@0.18.4 (2026-07-03) | no — not observed |
 | P405 | External-comms gate skips read-only advisory-endpoint polls | @windyroad/risk-scorer@0.16.0 (2026-07-03) | no — not observed |
 | P400 | architect-mark-reviewed PostToolUse never fires on a SendMessage resume of an architect agent | pending — committed on main, ships next @windyroad/architect release | no — not observed |
