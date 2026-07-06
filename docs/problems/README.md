@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-06 **README reconciled** — 4 drift entries corrected: P363 (Verifying → Known Error reopen; removed from Verification Queue, added to WSJF Rankings), P422 + P423 (missing WSJF Rankings rows added). Reconciliation per P118 + ADR-014. Context: a full title-based audit of open upstream issues found 40 fixed-but-open — all manually closed with a status comment this session — and P363 reopened for the missing automatic status-sync back-fill cadence (sibling P080); 26 issues remain untriaged.
+> Last reviewed: 2026-07-06 **inbound backlog triaged** — 26 untriaged inbound issues classified via a title-based reconciliation: 18 new tickets captured (P424–P441, `Origin: inbound-reported`, rated at capture, same-class clusters folded — em-dash emission → P424, capture-writes-unverified-claims → P434, risk-scorer-home-repo-gates → P435, work-problems-pre-dispatch-filter → P441), #314 closed as a P137 adopter witness. New tickets render in the Tier-1 (inbound-reported) block above internal rows per the tier-first ordering. WSJF values estimated at capture; `/wr-itil:review-problems` re-rates.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -10,6 +10,24 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
+| 12.0 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | 12 High | Open | S | 2026-07-06 | inbound-reported (#169) |
+| 9.0 | P428 | work-problems Step 5 dispatch heredoc-in-command-substitution unparseable under macOS bash 3.2 | 9 Medium | Open | S | 2026-07-06 | inbound-reported (#345) |
+| 9.0 | P437 | wr-wardley exposes no version-stable invocation path for its owm-to-svg converter — consumers pin the cache version and break on bump | 9 Medium | Open | S | 2026-07-06 | inbound-reported (#325) |
+| 8.0 | P429 | manage-problem commit-message examples fail @commitlint subject-case in adopter projects | 8 Medium | Open | S | 2026-07-06 | inbound-reported (#137) |
+| 8.0 | P430 | itil-correction-detect hook false-positives on orchestrator/AFK prompt text | 8 Medium | Open | S | 2026-07-06 | inbound-reported (#257) |
+| 6.0 | P431 | check-upstream-cache-staleness helper misfires on a declined-permanently (empty channels) config | 6 Medium | Open | S | 2026-07-06 | inbound-reported (#341) |
+| 6.0 | P436 | Issue templates declare labels ('problem','needs-triage') that don't exist; scaffold-intake should provision them | 6 Medium | Open | S | 2026-07-06 | inbound-reported (#170) |
+| 6.0 | P438 | Assistant routes free-text collection through AskUserQuestion instead of per-item copyable blocks | 6 Medium | Open | S | 2026-07-06 | inbound-reported (#324) |
+| 6.0 | P439 | External-review round-trips waste cycles on stale repo artifacts (unpushed commits + stale IDE buffer) | 6 Medium | Open | S | 2026-07-06 | inbound-reported (#326) |
+| 6.0 | P424 | Governance tooling emits U+2014 em-dashes in generated output, breaking adopter no-em-dash Edit/Write hooks | 12 High | Open | M | 2026-07-06 | inbound-reported (#185,#186,#219,#223,#319) |
+| 6.0 | P433 | transition/review/run-retro lack a sibling-family completeness scan before close | 12 High | Open | M | 2026-07-06 | inbound-reported (#187) |
+| 6.0 | P434 | Capture flows write unverified claims (premise + root-cause mechanism) as established fact | 12 High | Open | M | 2026-07-06 | inbound-reported (#202,#339) |
+| 4.5 | P425 | wr-architect edit-gate re-litigates its own same-session PASS — [Unratified Dependency] over-fires on agent-prescribed born-proposed ADRs | 9 Medium | Open | M | 2026-07-06 | inbound-reported (#342) |
+| 4.5 | P432 | Assistant does not auto-close the feedback loop on inbound-feedback conversion (channel-agnostic) | 9 Medium | Open | M | 2026-07-06 | inbound-reported (#347) |
+| 4.5 | P435 | wr-risk-scorer gates hardcoded to home-repo shape — push-gate over-fires on non-npm repos, external-comms under-fires on static-site/deck | 9 Medium | Open | M | 2026-07-06 | inbound-reported (#235,#253) |
+| 4.5 | P441 | work-problems pre-dispatch selection filter misses committed-but-unpushed KE (#312) and direction-blocked/interactive-only (#318) states | 9 Medium | Open | M | 2026-07-06 | inbound-reported (#312,#318) |
+| 3.0 | P427 | work-problems Step 5 can double-dispatch the same ticket to concurrent iters — no per-ticket lock/liveness/dirty-tree preflight | 6 Medium | Open | M | 2026-07-06 | inbound-reported (#343) |
+| 3.0 | P440 | wr-voice-tone:agent has no project-idiom oracle beyond the guide — passes phrases that violate the author's voice | 6 Medium | Open | M | 2026-07-06 | inbound-reported (#316) |
 | 16.0 | P423 | Agent "fixes" recurring behavioural corrections via project-local memory instead of shipping an adopter-facing plugin surface | 16 Critical | Open | M | 2026-07-06 | internal |
 | 12.0 | P179 | Agent defers requested work into untracked phases — phases are fine, but unticketed phases never get implemented | 12 High | Known Error | M | 2026-05-10 | internal |
 | 12.0 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 High | Known Error | M | 2026-06-10 | internal |
