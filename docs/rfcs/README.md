@@ -83,19 +83,15 @@ Explicit prose linking each `problems:` entry to the symptom or RCA finding the 
 
 Bounded scope statement. What this RFC ships; explicit boundaries against neighbouring concerns.
 
-## Tasks (Phase 1 placeholder; "story" reserved for Phase 2)
+## Tasks (SUPERSEDED by Stories per ADR-089 — legacy Phase-1 RFCs only)
 
-Ordered work-items. Each task is an ADR-014-grain commit candidate. Phase 1 uses **task** / **step** terminology; "story" is reserved for Phase 2's INVEST-shaped + JTBD-anchored shape (per ADR-060 § Decision Outcome amendment 13).
-
-- [ ] Task 1 — <description>
-- [ ] Task 2 — <description>
-- ...
+**Superseded.** Since ADR-089 (every RFC has ≥1 story) + ADR-090, RFC work-breakdown is **stories, not tasks** — the ordered `stories:` frontmatter array (see `## Stories` below) is the work-breakdown, and every story lives on a story map (ADR-060 I8). New RFCs MUST NOT scaffold a `## Tasks` body: author INVEST stories on a story map and populate `stories:` instead. This section persists only on pre-ADR-089 legacy RFCs; it is not written on new captures. (P404 Phase 3.)
 
 ## Stories (Phase 2 — maintained from frontmatter `stories:` array)
 
 Ordered list of stories implementing this RFC, rendered in execution sequence from the frontmatter `stories:` array per ADR-060 line 270. Auto-refreshed on RFC frontmatter edits via `update-rfc-references-section.sh <rfc-file> "Stories"` (Slice 2b helper); manually rendered by `/wr-itil:manage-rfc <NNN>` at lifecycle transitions; load-bearing for `/wr-itil:work-problem <NNN>`'s per-story dispatch traversal.
 
-The section is **lazy-empty** — when `stories:` is empty (an RFC not decomposed into stories), the section is absent rather than rendered as an empty header. `/wr-itil:work-problem <NNN>` reads the absence as a signal to fall back to Phase 1 per-RFC iter dispatch (Tasks section + commit-message trailer parsing).
+Per ADR-089 every RFC has **≥1 story** — an empty `stories: []` is invalid and cannot reach `accepted` (enforced by `wr-itil-check-rfc-has-stories` at the `manage-rfc` proposed→accepted gate). The former "lazy-empty → fall back to Phase-1 per-RFC task dispatch" path is **removed** (P404 Phase 1, commit `d2eb97d5`); `/wr-itil:work-problem <NNN>` always traverses the story list. Each story lives on ≥1 story map (ADR-060 I8).
 
 ```markdown
 1. [STORY-001](../stories/draft/STORY-001-foo.md) — Foo (draft)
