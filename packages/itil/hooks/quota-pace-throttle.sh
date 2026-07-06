@@ -69,20 +69,36 @@ five_used_i=${five_used%%.*}; week_used_i=${week_used%%.*}
 five_elapsed=$(elapsed_pct "$five_reset" "$FIVE_WINDOW")
 week_elapsed=$(elapsed_pct "$week_reset" "$WEEK_WINDOW")
 
-# pace gap per window (positive = ahead of pace = burning too fast).
-# weekly target leaves headroom, so effective gap = used - (elapsed - headroom).
-gap5=$(( five_used_i - five_elapsed ))
-gap7=$(( week_used_i - (week_elapsed - WEEK_HEADROOM_PP) ))
+# Smart glide-path pacing (P160 refinement 2026-07-06). Rather than a fixed
+# catch-up sleep that snaps back to the ideal line, throttle PROPORTIONALLY to
+# how far over the glide-path to the window reset we are, easing off as we
+# converge — like a runner who is ahead of pace slowing down to drift back,
+# not stopping dead. The "safe rate" for the remainder of a window =
+# budget-left / time-left (x1000 fixed-point; 1000 = on pace, 0 = budget blown
+# with time still on the clock). When safe_rate < 1 we must burn slower, so we
+# sleep CAP*(1 - safe_rate). As we slow, wall-clock advances, time-left shrinks,
+# safe_rate climbs back toward 1, and the sleep eases to zero exactly as we
+# rejoin pace — converging BEFORE the quota is consumed, while still letting
+# work through the whole time (never a hard stop; at worst one call per CAP).
+safe_rate_x1000() { # used_i elapsed_pct headroom_pp
+  local budget=$(( 100 - $3 - $1 )) rem=$(( 100 - $2 ))
+  [ "$rem" -le 0 ] && { printf '1000'; return; }   # window reset → unconstrained
+  [ "$budget" -le 0 ] && { printf '0'; return; }    # budget blown → max throttle
+  printf '%s' $(( budget * 1000 / rem ))
+}
 
-# Take the tighter (larger-gap) window and its window length.
-if [ "$gap5" -ge "$gap7" ]; then gap="$gap5"; win="$FIVE_WINDOW"; else gap="$gap7"; win="$WEEK_WINDOW"; fi
-[ "$gap" -le 0 ] && emit_ok   # behind/on pace → fast no-op
+s5=$(safe_rate_x1000 "$five_used_i" "$five_elapsed" 0)
+s7=$(safe_rate_x1000 "$week_used_i" "$week_elapsed" "$WEEK_HEADROOM_PP")
 
-# Catch-up sleep: elapsed% rises at 100/win per second, so closing `gap` pp of
-# lead needs gap/100 * win seconds. Cap per firing so no single call stalls long.
-sleep_secs=$(( gap * win / 100 ))
-[ "$sleep_secs" -gt "$CAP_SECONDS" ] && sleep_secs="$CAP_SECONDS"
+# Tighter window governs = smaller safe_rate.
+safe="$s5"; [ "$s7" -lt "$safe" ] && safe="$s7"
+[ "$safe" -ge 1000 ] && emit_ok   # on/under pace on both windows → fast no-op
+
+# Proportional ease-back: far over → near CAP (slow, but still one call per CAP);
+# slightly over → a short sleep; on pace → zero. The smooth glide, not a stop.
+sleep_secs=$(( CAP_SECONDS * (1000 - safe) / 1000 ))
 [ "$sleep_secs" -le 0 ] && emit_ok
+[ "$sleep_secs" -gt "$CAP_SECONDS" ] && sleep_secs="$CAP_SECONDS"
 
 sleep "$sleep_secs" 2>/dev/null
 emit_ok

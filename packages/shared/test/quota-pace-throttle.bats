@@ -42,13 +42,30 @@ write_cache() { # five_used five_reset week_used week_reset
   [ ! -f "$TMP/slept" ]
 }
 
-@test "the tighter (larger-gap) window wins" {
-  # 5h barely ahead (30% used ~25% elapsed → gap 5), 7d far ahead (80% used ~10% elapsed → gap ~65)
+@test "the tighter (over-budget) window governs, and glides below the cap" {
+  # 5h under pace (30% used, ~25% elapsed → safe ~933); 7d well over pace
+  # (80% used, ~10% elapsed → budget 15, time-left 90 → safe ~166). The
+  # over-budget week governs: sleep = 60*(1000-166)/1000 ≈ 50 — a proportional
+  # glide, NOT the 60s cap (bang-bang would have hit the cap here).
   write_cache 30 $((NOW+13500)) 80 $((NOW+540000))
   run bash "$HOOK" </dev/null
   [ "$status" -eq 0 ]
-  # week gap dominates → sleep hits the 60s cap
-  [ "$(slept)" -eq 60 ]
+  [ "$(slept)" -ge 45 ]
+  [ "$(slept)" -lt 60 ]
+}
+
+@test "throttle eases off proportionally as pace converges (glide, not bang-bang)" {
+  # Far over pace → a long sleep near the cap.
+  write_cache 5 $((NOW+9000)) 90 $((NOW+560000))   # 7d: budget 5, time-left ~93 → safe ~53
+  run bash "$HOOK" </dev/null
+  far="$(slept)"; rm -f "$TMP/slept" "$TMP/marker"
+  # Mildly over pace → a much shorter sleep (bang-bang would sleep the same 60 for both).
+  write_cache 5 $((NOW+9000)) 40 $((NOW+400000))   # 7d: elapsed ~34, budget 55, time-left 66 → safe ~833
+  run bash "$HOOK" </dev/null
+  mild="$(slept)"
+  [ "$far" -gt "$mild" ]     # further over pace → longer sleep (proportional)
+  [ "$mild" -gt 0 ]          # but still throttling when mildly over
+  [ "$far" -le 60 ]          # never exceeds the per-firing cap
 }
 
 @test "weekly headroom throttles a lead that would otherwise read as on-pace" {

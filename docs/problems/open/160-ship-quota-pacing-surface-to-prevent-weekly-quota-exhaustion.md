@@ -82,15 +82,15 @@ The fix is a new pacing surface, not a tweak to an existing one. Open design que
 
 ### Investigation Tasks
 
-- [ ] Architect review — resolve Q1 (plugin home), Q2 (read surface), Q3 (enforcement mode), Q4 (policy schema). Decide whether a new ADR is warranted (likely yes — policy semantics + cross-plugin coupling).
-- [ ] JTBD review — confirm impact on JTBD-001 + JTBD-006 + plugin-user persona JTBD-302 (trust README describes installed behaviour — installed plugins must not silently exhaust quota).
-- [ ] Investigate `~/.claude/statusline-command.sh` to understand the quota-state read surface. Document the API / file / IPC the statusline uses; this is the candidate read source for Q2 option (b).
-- [ ] Investigate Anthropic upstream surface — is there an `Anthropic-Account-Quota` HTTP header on responses? A `claude usage` CLI command? An account-API endpoint? This drives Q6 + Q7.
-- [ ] `/wr-itil:report-upstream` to Claude Code with feature request shape, per Q7. Defer until architect review confirms the gap is downstream-buildable rather than a missing upstream surface.
-- [ ] Implement the agreed design — either as a new plugin (with full release surface: `package.json`, hooks, skills, ADRs, bats, install-updates wiring) or as a sibling addition to `@windyroad/itil` / `@windyroad/risk-scorer`.
-- [ ] Wire AFK orchestrator integration (Q5) — `/wr-itil:work-problems` Step 6.5 / 6.6 quota-pacing check.
-- [ ] Behavioural bats per ADR-026 grounding + P081 behavioural-test discipline — exercise the pacing surface against a synthetic burn-rate fixture; assert advisory / blocking / hard-halt thresholds fire correctly.
-- [ ] Document in BRIEFING.md as a session-wide unifying constraint (sibling to ADR-038 progressive disclosure for context budget — this is progressive disclosure for **token budget**).
+- [x] Architect review — Q1–Q4 resolved by ADR-093 (born `human-oversight: unconfirmed`, ratification pending): Q1 plugin-home = shared hook synced across all 7 plugins (`packages/shared/hooks/`); Q2 read-surface = the statusline-written cache `~/.claude/quota-state.json` (option b — the ONLY surface Claude Code passes `.rate_limits.{five_hour,seven_day}` to; PreToolUse hooks don't receive it directly); Q3 enforcement = mechanical calculated-sleep (NOT advisory — per the 2026-07-05 correction); Q4 schema = inline headroom constants (5pp weekly, 60s/firing cap), no separate QUOTA-POLICY.md needed for the first slice.
+- [x] JTBD review — serves JTBD-001 (governance must not starve the user of tokens) + JTBD-006 (AFK loops self-throttle to land at reset with headroom, so "set a loop and walk away" holds) + JTBD-302 (adopters get the same pacing via the synced hook + `QUOTA-THROTTLE-SETUP.md`).
+- [x] Investigate `~/.claude/statusline-command.sh` — done: it is the only surface Claude Code passes rate-limit percentages + `resets_at` to. Wired it to write `~/.claude/quota-state.json` as the throttle's read source (Q2 option b).
+- [x] Investigate Anthropic upstream surface — done: no `Anthropic-Account-Quota` header / `claude usage` CLI / account endpoint is available to a PreToolUse hook; the statusline is the only rate-limit-bearing surface, hence the statusline-cache design.
+- [ ] `/wr-itil:report-upstream` to Claude Code with a native-quota-pacing feature request (follow-on; does NOT block verification — the downstream throttle already ships).
+- [x] Implement the agreed design — SHIPPED as `packages/shared/hooks/quota-pace-throttle.sh`, synced to all 7 plugins, released (itil 0.57.1 + siblings). Reframed from the superseded XL "new plugin + advisory" scope to the shipped M "calculated-sleep PreToolUse hook" per the 2026-07-05 corrections.
+- [x] ~~Wire AFK orchestrator between-iter integration (Q5)~~ — SUPERSEDED by Correction 2: the throttle is a **frequently-firing PreToolUse hook across ALL work** (interactive + AFK), which subsumes the narrower between-iter checkpoint.
+- [x] Behavioural bats — SHIPPED: `packages/shared/test/quota-pace-throttle.bats`, 8/8 green (ahead-of-pace sleeps capped; behind-pace fast no-op; tighter-window-wins; weekly-headroom; fail-open on missing/malformed cache; recent-check no-op; never emits deny).
+- [ ] Document in BRIEFING.md as the token-budget analogue of ADR-038's context budget (follow-on; does NOT block verification).
 
 ## Dependencies
 
@@ -155,6 +155,20 @@ Scope broadened: the throttle is NOT limited to the AFK `/wr-itil:work-problems`
 Mechanism per firing (unchanged calc, broader trigger): read the live 5h/7d window state → compute `required_sleep` (usage% vs elapsed% over the tighter window; 0 when behind pace/headroom) → if >0, **sleep that amount** before the tool call proceeds. When behind pace, it's a fast no-op check (no sleep) so it adds negligible latency; only when ahead-of-pace does it insert the calculated sleep. This paces the ENTIRE token burn evenly — every tool call self-throttles — so no work (loop or interactive) sprints into a mid-flight quota hard-stop.
 
 Design note: PreToolUse-on-every-call means the check must be CHEAP (a fast read of the cached window state + arithmetic), with the sleep only on the ahead-of-pace branch. The between-iter work-problems call from Correction 1 remains as a coarser complementary checkpoint, but the load-bearing surface is the frequent hook.
+
+### REFINEMENT 3 (user, 2026-07-06) — SMART GLIDE-PATH, not "sleep until back on the line"
+
+Verbatim: *"with the pacing, we need to be smart. … we are currently well over the pace for our weekly quota. Instead of just stopping all usage for a few days, it should use some sort of smart algo, so it still lets us progress a bit, while getting back to the pace. It's like if you were doing a race and had to hit a pace, if you found out you were 20min ahead, you wouldn't just stop for 20min, you would instead slow down so that eventually you are back on pace. In our case that eventually has to be before the quota is consumed."* (Live evidence: `7d: 62% behind (resets 4d 23h)` — well over the weekly pace.)
+
+**The defect in the first-slice algorithm**: the shipped v1 computed `sleep = (used% − elapsed%) × window / 100` capped at 60s. Because that raw catch-up is enormous (a 20pp weekly lead ≈ 1.4 days), the cap dominated → effectively **bang-bang**: a flat 60s sleep on every call while over pace, then zero once back on the ideal line. It slowed rather than fully stopped, but it (a) was not proportional (no smooth ease-off as it converged) and (b) aimed to snap back to the ideal `used% == elapsed%` line rather than glide to the reset.
+
+**The fix — proportional glide-path controller** (shipped 2026-07-06):
+- Per window, compute a `safe_rate = budget_left / time_left` (fixed-point ×1000; `1000` = on pace, `0` = budget blown with time still on the clock). Weekly budget subtracts the 5pp headroom. The tighter (smaller `safe_rate`) window governs.
+- `sleep = CAP × (1 − safe_rate)`. Far over pace (safe_rate → 0) → sleep approaches the CAP (slow hard, but still one call per CAP — never a hard stop); mildly over → a short sleep; on/under pace (safe_rate ≥ 1) → zero (fast no-op).
+- **Self-converging**: as the throttle slows the burn, wall-clock advances, `time_left` shrinks, `safe_rate` climbs back toward 1, and the sleep eases to zero exactly as the burn rejoins the sustainable pace — the runner drifting back, not stopping dead. Because `safe_rate` is derived from `budget_left / time_left`, the target is to land at the reset **with headroom intact**, i.e. convergence happens BEFORE the quota is consumed, by construction.
+- The one inherent tension (guaranteed non-exhaustion vs "still make progress"): the CAP bounds per-call latency, so if the user keeps working right at the wire the slowdown is strong (near-CAP per call) but not infinite — progress continues, exhaustion is heavily delayed rather than hard-prevented. This matches the user's explicit "still lets us progress a bit." CAP is tunable (`CAP_SECONDS`, default 60).
+
+Shipped: `packages/shared/hooks/quota-pace-throttle.sh` glide-path rewrite + `packages/shared/test/quota-pace-throttle.bats` 9/9 (added a proportional-ease-back test asserting far-over sleeps strictly longer than mildly-over — the property bang-bang lacked). Synced to all 7 plugins. ADR-093 / RFC-046 (born unconfirmed) to be updated with the glide-path law at their ratification drain.
 
 ## RFCs
 
