@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-06 **tier separators added** — WSJF Rankings now renders explicit `### Tier 1 — Inbound-reported (prioritised)` / `### Tier 2 — Internal` sub-headers so the adopter-priority partition is legible (was ordering + Origin-column only). Captured P442 to make the visual tier headers a durable render-site convention (interim README headers are dropped by the next full re-render). Follows this session's inbound triage: 18 new tickets P424–P441 (`Origin: inbound-reported`) + #314 closed as a P137 witness.
+> Last reviewed: 2026-07-06 **P160 + P390 → Verification Pending** — both fixes shipped and released. P160 (quota-pacing): the frequently-firing calculated-sleep throttle + the smart glide-path controller (over-pace work slows proportionally and eases back onto pace before quota exhaustion, per user refinement) released across 7 plugins (itil 0.57.3). P390 (premature ALL_DONE): the `/goal` external-evaluator loop-anchor released (itil 0.57.2). Both moved from Rankings → Verification Queue; awaiting live verification + ratification of ADR-093/094 + RFC-046/047 (born unconfirmed).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -41,9 +41,7 @@ Internally-reported tickets (`Origin: internal` / `corrective-feedback`). Ranked
 | 16.0 | P423 | Agent "fixes" recurring behavioural corrections via project-local memory instead of shipping an adopter-facing plugin surface | 16 Critical | Open | M | 2026-07-06 | internal |
 | 12.0 | P179 | Agent defers requested work into untracked phases — phases are fine, but unticketed phases never get implemented | 12 High | Known Error | M | 2026-05-10 | internal |
 | 12.0 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 High | Known Error | M | 2026-06-10 | internal |
-| 12.0 | P376 | Catchup scanner misses the inbound direction; outbound templates carry the same structural defect the P363 rework fixed on the inbound side — cross-direction parity gap | 12 High | Known Error | M | 2026-06-23 | internal |
-| 12.0 | P390 | work-problems emits ALL_DONE prematurely while dispatchable backlog remains — reopened; fix strategy now anchors the loop with native `/goal` (independent per-turn evaluator) | 12 High | Known Error | M | 2026-06-27 | internal |
-| 12.0 | P422 | Agent silently ships X-prime (a hedged/lesser version of the requested X) instead of asking before deviating | 12 High | Open | M | 2026-07-06 | internal |
+| 12.0 | P376 | Catchup scanner misses the inbound direction; outbound templates carry the same structural defect the P363 rework fixed on the inbound side — cross-direction parity gap | 12 High | Known Error | M | 2026-06-23 | internal || 12.0 | P422 | Agent silently ships X-prime (a hedged/lesser version of the requested X) instead of asking before deviating | 12 High | Open | M | 2026-07-06 | internal |
 | 9.0 | P180 | Agent defers mitigation selection to user during active incident — surfaces mitigation choice as user-authority when SKILL contract empowers agent-driven reversible mitigations | 9 Medium | Known Error | M | 2026-05-10 | internal |
 | 9.0 | P371 | manage-problem I13 propose-fix gate auto-creates a new RFC instead of wiring an existing fix-vehicle's trace edge | 9 Medium | Known Error | M | 2026-06-17 | internal |
 | 8.0 | P345 | Fix-titled commits do not transition the ticket lifecycle in the same commit grain — ticket stays Open across release + CI-verify + multiple intervening commits | 8 Medium | Known Error | M | 2026-05-31 | internal |
@@ -71,9 +69,7 @@ Internally-reported tickets (`Origin: internal` / `corrective-feedback`). Ranked
 | 2.0 | P170 | Problem tickets strain as fixes decompose into multiple coordinated changes — need an RFC framework that ties all changes back to problems (and unifies technical with user/business problems) | 8 Medium | Known Error | XL | 2026-05-04 | internal |
 | 2.0 | P414 | retro/wrap defers over-threshold briefing Tier-3 rotation as a recommendation instead of performing the split | 6 Medium | Open | S | 2026-07-03 | internal |
 | 1.875 | P091 | Session-wide context budget — Claude Code consumes substantial context before and during every session across all contributor surfaces (meta) | 15 High | Open | XL | 2026-04-22 | internal |
-| 1.5 | P421 | Reference-section awk helpers destructively truncate governance files containing invalid UTF-8 | 3 Medium | Open | M | 2026-07-05 | internal |
-| 1.25 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 10 High | Open | XL | 2026-05-03 | internal |
-| 1.125 | P298 | Plugin-published artifacts should NOT reference internal IDs at all (ADR-055 chose prefixing; strip them instead — they're meaningless to adopters) | 9 Med High | Open | XL | 2026-05-25 | internal |
+| 1.5 | P421 | Reference-section awk helpers destructively truncate governance files containing invalid UTF-8 | 3 Medium | Open | M | 2026-07-05 | internal || 1.125 | P298 | Plugin-published artifacts should NOT reference internal IDs at all (ADR-055 chose prefixing; strip them instead — they're meaningless to adopters) | 9 Med High | Open | XL | 2026-05-25 | internal |
 | 1.125 | P304 | Move `packages/shared/` from duplicate-and-sync to a bundler-based shared-code approach (ADR-017 reassessment outcome) | 9 Medium | Open | XL | 2026-05-26 | internal |
 | 1.0 | P338 | P082 Phase 2 — cognitive-accessibility evaluator on the 4 external-comms surfaces (gh / npm / changeset / git commit), shipped as a NEW `@windyroad/cognitive-a11y` plugin | 4 Low | Open | L | 2026-05-30 | internal |
 | 1.5 | P409 | Back-fill legacy RFCs still carrying empty `stories: []` | 3 Medium | Open | M | 2026-07-03 | internal |
@@ -295,6 +291,8 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P389 | work iters omit the `**Release vehicle**` seed on Open→Known Error, so the post-release K→V auto-enumerator silently skips them | @windyroad/itil@0.56.2 (2026-07-04) | no — not observed |
 | P413 | work-problems defers upstream reporting as a manual "batch-report upstream" choice instead of auto-filing upstream-blocked tickets — Output Format invariant + `### Reported Upstream` summary subsection forbid the wrap-time deferral nudge (traced under RFC-018) | 2026-07-04 (`@windyroad/itil` patch, pending release) | no — not observed |
 | P408 | risk-score-commit-gate hardcodes a 14-day RISK-POLICY staleness threshold, ignoring the policy's stated review cadence — gate now derives the threshold from the stated `> Reviewed <cadence>` line per ADR-091 (fallback 14 when absent/unrecognised) | 2026-07-05 (`@windyroad/risk-scorer` patch, pending release) | no — not observed |
+| P160 | Ship quota-pacing surface — frequently-firing PreToolUse calculated-sleep throttle with a smart glide-path controller (slows over-pace work proportionally, eases back onto pace before quota exhaustion) across all work | `@windyroad/itil@0.57.3` (2026-07-06, glide-path) + `0.57.1` (initial throttle) + 6 sibling plugins | no — not observed |
+| P390 | agent emits ALL_DONE prematurely while actionable backlog remains — `/goal` external-evaluator loop-anchor (ADR-094/RFC-047), turn-bound removed | `@windyroad/itil@0.57.2` (2026-07-06, PR #337) | no — not observed |
 
 ## Inbound Upstream Reports
 

@@ -1,6 +1,6 @@
 # Problem 160: Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-05-03
 **Priority**: 20 (Critical) — Impact: Significant (4) x Likelihood: Almost certain (5) — RE-RATED UP 2026-07-05 (was Minor 2): hitting the quota does NOT just "wait for reset" — it HALTS work mid-loop, breaks the running `/wr-itil:work-problems` loops, and forces an effortful manual resume. User-pinned TOP PRIORITY 2026-07-05.
 **Origin**: internal

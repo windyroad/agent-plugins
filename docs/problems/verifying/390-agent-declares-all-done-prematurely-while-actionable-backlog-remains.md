@@ -1,6 +1,6 @@
 # Problem 390: agent ends the work-problems loop (emits ALL_DONE) prematurely while actionable Tier-2 backlog remains, by rationalising the remainder as out-of-scope / interactive-gated
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-06-27
 **Transitioned to Known Error**: 2026-06-28 (root cause confirmed; fix implemented — Step 2.4 Gate (0) objective backlog-empty assertion; changeset held pending work-problems promptfoo eval GREEN per ADR-061 Rule 4 / ADR-042 Rule 2)
 **Reopened**: 2026-07-05 (Verifying → Known Error — the shipped Gate (0) self-assessment is insufficient; user directs pursuing Claude Code's native `/goal` as the fix mechanism. See ## Reopened and the rewritten ## Fix Strategy below.)
@@ -99,6 +99,12 @@ Use the built-in [`/goal`](https://code.claude.com/docs/en/goal) command (Claude
 4. Generalisation candidates once proven here: the run-retro loop (P332) and any other AFK drain loop in the same failure-class (P148, P175).
 
 **Open questions**: interaction with the existing `claude -p` per-iter subprocess dispatch (does the goal live on the orchestrator session, the iter subprocess, or both?); whether the turn-bound clause conflicts with quota-pacing (P160); eval coverage for the `/goal` path. Resolve during fix work; likely wants a short ADR for "AFK loops set a `/goal` completion condition" since it changes the loop-control contract shared across skills.
+
+## Fix Released
+
+Released in `@windyroad/itil@0.57.2` (2026-07-06, PR #337). The work-problem / work-problems `/goal` external-evaluator loop-anchor (ADR-094 / RFC-047): a fresh per-turn evaluator — not the working agent — judges completion via the printed Step 2.4 Gate(0) re-scan evidence, breaking the same-actor "agent grades its own homework" conflation that let ALL_DONE fire early. One-directional (forces continuation, never authorises a stop). The arbitrary turn-bound was removed entirely (trust the goal) per the 2026-07-05 user direction. 3/3 promptfoo behavioural cases GREEN.
+
+**Awaiting live verification**: a real AFK `/wr-itil:work-problems` run under the `/goal` anchor does not emit ALL_DONE while dispatchable Tier-2 backlog remains. ADR-094 / RFC-047 are born `human-oversight: unconfirmed` — ratification pending at `/wr-architect:review-decisions` + `/wr-itil:manage-rfc`.
 
 ## Dependencies
 
