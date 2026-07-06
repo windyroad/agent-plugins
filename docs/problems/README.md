@@ -1,12 +1,16 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-06 **inbound backlog triaged** — 26 untriaged inbound issues classified via a title-based reconciliation: 18 new tickets captured (P424–P441, `Origin: inbound-reported`, rated at capture, same-class clusters folded — em-dash emission → P424, capture-writes-unverified-claims → P434, risk-scorer-home-repo-gates → P435, work-problems-pre-dispatch-filter → P441), #314 closed as a P137 adopter witness. New tickets render in the Tier-1 (inbound-reported) block above internal rows per the tier-first ordering. WSJF values estimated at capture; `/wr-itil:review-problems` re-rates.
+> Last reviewed: 2026-07-06 **tier separators added** — WSJF Rankings now renders explicit `### Tier 1 — Inbound-reported (prioritised)` / `### Tier 2 — Internal` sub-headers so the adopter-priority partition is legible (was ordering + Origin-column only). Captured P442 to make the visual tier headers a durable render-site convention (interim README headers are dropped by the next full re-render). Follows this session's inbound triage: 18 new tickets P424–P441 (`Origin: inbound-reported`) + #314 closed as a P137 witness.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
 
 Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) and Parked (`.parked.md`, multiplier 0) tickets are excluded per ADR-022 — surfaced in their own sections below. Rows render **tier-first** (Tier 0 Critical-bypass [Severity Very High ≥17 OR security-classified OR incident-linked — currently empty] → Tier 1 Inbound-reported [`**Origin**: inbound-reported`] → Tier 2 Internal), then within each tier by `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)` so top-to-bottom order matches `/wr-itil:work-problems` Step 3 selection 1:1 (P138 + ADR-076). The `Reported` and `Origin` columns make the third tie-break input and the Tier 1 partition visible. <!-- REPORTED-FIRST-TIER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 (ADR-076) -->
+
+### Tier 1 — Inbound-reported (prioritised above internal per ADR-076)
+
+Reports from adopters / downstream projects (`Origin: inbound-reported`). These rank **above all internal tickets regardless of WSJF** — an adopter waiting on a fix is a stronger cost-of-delay signal than any internal item. Ordered within the tier by `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)`.
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
@@ -28,6 +32,12 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 4.5 | P441 | work-problems pre-dispatch selection filter misses committed-but-unpushed KE (#312) and direction-blocked/interactive-only (#318) states | 9 Medium | Open | M | 2026-07-06 | inbound-reported (#312,#318) |
 | 3.0 | P427 | work-problems Step 5 can double-dispatch the same ticket to concurrent iters — no per-ticket lock/liveness/dirty-tree preflight | 6 Medium | Open | M | 2026-07-06 | inbound-reported (#343) |
 | 3.0 | P440 | wr-voice-tone:agent has no project-idiom oracle beyond the guide — passes phrases that violate the author's voice | 6 Medium | Open | M | 2026-07-06 | inbound-reported (#316) |
+### Tier 2 — Internal
+
+Internally-reported tickets (`Origin: internal` / `corrective-feedback`). Ranked by `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)`.
+
+| WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
+|------|-----|-------|----------|--------|--------|----------|--------|
 | 16.0 | P423 | Agent "fixes" recurring behavioural corrections via project-local memory instead of shipping an adopter-facing plugin surface | 16 Critical | Open | M | 2026-07-06 | internal |
 | 12.0 | P179 | Agent defers requested work into untracked phases — phases are fine, but unticketed phases never get implemented | 12 High | Known Error | M | 2026-05-10 | internal |
 | 12.0 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 High | Known Error | M | 2026-06-10 | internal |
@@ -48,6 +58,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 4.5 | P251 | RFC-first trace invariant not enforced — fixes start without RFC, story map, or JTBD trace | 9 Medium | Known Error | L | 2026-05-17 | internal |
 | 4.5 | P297 | ADR-047 — governance-artefact scaffolding should be a SessionStart hook (per-project, automatic), not an inline `/install-updates` step | 9 Med High | Open | M | 2026-05-25 | internal |
 | 4.5 | P369 | Plugin removes hook file but adopter session still invokes it via stale binding — `architect-compendium-refresh-discipline.sh` case 2026-06-17 | 9 Medium | Open | M | 2026-06-17 | internal |
+| 4.0 | P442 | WSJF Rankings render convention has no visual tier separator — inbound-reported (top priority) vs internal not legible | 8 Medium | Open | M | 2026-07-06 | corrective-feedback |
 | 3.0 | P178 | Agent skips ITIL state-machine gates on architecture-driven problems — treats architect-PASS verdict as substitute for empirical RCA + skips Open → Known Error transition | 3 Medium | Known Error | M | 2026-05-10 | internal |
 | 3.0 | P176 | Agent-side I2 (no type-branching) coverage gap — SKILL.md type-branching invariant not behaviourally testable until skill-invocation harness lands | 6 Medium | Open | M | 2026-05-06 | internal |
 | 3.0 | P248 | Use time and token cost (not t-shirt sizing) for WSJF effort, with retro-driven estimation refinement | 6 Medium | Open | M | 2026-05-17 | internal |
