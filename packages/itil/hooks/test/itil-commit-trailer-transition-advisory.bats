@@ -2,7 +2,7 @@
 
 # P378/RFC-030 Piece 2: itil-commit-trailer-transition-advisory.sh — the shared
 # RFC+story commit-trailer auto-transition DETECTOR. Advises (ADR-014: does not
-# perform) proposed/accepted RFC → in-progress and draft story → in-progress on
+# perform) proposed/accepted RFC → in-progress and ACCEPTED story → in-progress on
 # the first non-capture commit carrying the Refs trailer. Behavioural.
 
 setup() {
@@ -46,13 +46,23 @@ commit() { git commit -q --allow-empty -m "$1"; }
   [ -z "$output" ]
 }
 
-@test "advises draft story → in-progress on a non-capture Refs commit" {
-  echo "---" > docs/stories/draft/STORY-201-y.md; git add -A; commit "$(printf 'feat(itil): capture STORY-201 y\n\nRefs: STORY-201')"
+@test "advises accepted story → in-progress on a non-capture Refs commit (ADR-096: draft is blocked, accepted is advised)" {
+  mkdir -p docs/stories/accepted
+  echo "---" > docs/stories/accepted/STORY-201-y.md; git add -A; commit "$(printf 'feat(itil): capture STORY-201 y\n\nRefs: STORY-201')"
   commit "$(printf 'feat(itil): implement\n\nRefs: STORY-201')"
   run run_hook
   [ "$status" -eq 0 ]
   [[ "$output" == *"STORY-201"* ]]
   [[ "$output" == *"manage-story"* ]]
+}
+
+@test "silent for a DRAFT story on a non-capture Refs commit (ADR-096: draft is gate-blocked, not advised to advance)" {
+  mkdir -p docs/stories/draft
+  echo "---" > docs/stories/draft/STORY-202-z.md; git add -A; commit "$(printf 'feat(itil): capture STORY-202 z\n\nRefs: STORY-202')"
+  commit "$(printf 'feat(itil): implement\n\nRefs: STORY-202')"
+  run run_hook
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"STORY-202"* ]]
 }
 
 @test "bypass env var suppresses the advisory" {

@@ -116,8 +116,11 @@ setup() {
 # Surface 4: Auto-transition triggers
 # ---------------------------------------------------------------------------
 
-@test "manage-story: SKILL.md names draft → in-progress auto-transition on first non-capture commit" {
-  run grep -iE 'draft.*in-progress.*first.*non-capture|first commit.*non-capture|first.*after.*capture' "$SKILL_FILE"
+@test "manage-story: SKILL.md names accepted → in-progress on the first implementing commit (ADR-096: draft blocked, not auto-advanced)" {
+  run grep -iE 'accepted → in-progress' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  # ADR-096: the old draft → in-progress auto-transition is removed.
+  run grep -iE 'NO .draft → in-progress. transition|never implementable' "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }
 
