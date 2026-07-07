@@ -1,12 +1,20 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-07 **P443 captured** — quota-pacing (P160/RFC-046/ADR-093) shipped without a grounded JTBD→persona→USM→RFC→story lineage: wrong/narrow JTBD-006 (AFK) anchor with no general quota-sustainability job, orphaned STORY-039 + STORY-MAP-003 references, RFC-046 `proposed` while P160 `verifying`, and consequent mis-placement as a 7-plugin synced hook instead of its own plugin. Lineage-repair ticket (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-07-07 **P160 reopened → Known Error (Severity 20, Tier 0)** — quota-pacing verification FAILED (user audit): the throttle works for one hand-wired maintainer machine but is INERT for every adopter (the `~/.claude/quota-state.json` producer is user-owned statusline config no plugin can ship — authoritative Claude Code constraint) and is mis-placed across 7 governance plugins. Severity kept at 20 because the pain is undiminished for everyone not on that one machine. Grounding JTBD-010 authored (born unconfirmed); ratified fix = extract `@windyroad/quota-pacing` + SessionStart absent-cache nudge + repair lineage (P443).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
 
-Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) and Parked (`.parked.md`, multiplier 0) tickets are excluded per ADR-022 — surfaced in their own sections below. Rows render **tier-first** (Tier 0 Critical-bypass [Severity Very High ≥17 OR security-classified OR incident-linked — currently empty] → Tier 1 Inbound-reported [`**Origin**: inbound-reported`] → Tier 2 Internal), then within each tier by `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)` so top-to-bottom order matches `/wr-itil:work-problems` Step 3 selection 1:1 (P138 + ADR-076). The `Reported` and `Origin` columns make the third tie-break input and the Tier 1 partition visible. <!-- REPORTED-FIRST-TIER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 (ADR-076) -->
+Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) and Parked (`.parked.md`, multiplier 0) tickets are excluded per ADR-022 — surfaced in their own sections below. Rows render **tier-first** (Tier 0 Critical-bypass [Severity Very High ≥17 OR security-classified OR incident-linked — currently: P160] → Tier 1 Inbound-reported [`**Origin**: inbound-reported`] → Tier 2 Internal), then within each tier by `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)` so top-to-bottom order matches `/wr-itil:work-problems` Step 3 selection 1:1 (P138 + ADR-076). The `Reported` and `Origin` columns make the third tie-break input and the Tier 1 partition visible. <!-- REPORTED-FIRST-TIER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 (ADR-076) -->
+
+### Tier 0 — Critical-bypass (Severity ≥17 OR security-classified OR incident-linked)
+
+Ranks above all other tiers regardless of WSJF (ADR-076).
+
+| WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
+|------|-----|-------|----------|--------|--------|----------|--------|
+| 5.0 | P160 | Ship quota-pacing surface — throttle shipped but INERT for adopters (producer is user-owned statusline config no plugin can ship) + mis-placed across 7 plugins + broken lineage (P443); reopened 2026-07-07, pain undiminished for everyone not on the one hand-wired machine | 20 Critical | Known Error | XL | 2026-05-03 | internal |
 
 ### Tier 1 — Inbound-reported (prioritised above internal per ADR-076)
 
@@ -291,9 +299,7 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P386 | review-problems Step 4.5/4.6 AFK-silent relevance-close refs re-anchored off dangling work-problems Step 6.5 pointer onto subprocess-AFK-by-construction mechanism (doc-only prose fix) | 2026-07-04 (`@windyroad/itil` patch, commit `3bf91f0c`, pending release) | no — not observed |
 | P389 | work iters omit the `**Release vehicle**` seed on Open→Known Error, so the post-release K→V auto-enumerator silently skips them | @windyroad/itil@0.56.2 (2026-07-04) | no — not observed |
 | P413 | work-problems defers upstream reporting as a manual "batch-report upstream" choice instead of auto-filing upstream-blocked tickets — Output Format invariant + `### Reported Upstream` summary subsection forbid the wrap-time deferral nudge (traced under RFC-018) | 2026-07-04 (`@windyroad/itil` patch, pending release) | no — not observed |
-| P408 | risk-score-commit-gate hardcodes a 14-day RISK-POLICY staleness threshold, ignoring the policy's stated review cadence — gate now derives the threshold from the stated `> Reviewed <cadence>` line per ADR-091 (fallback 14 when absent/unrecognised) | 2026-07-05 (`@windyroad/risk-scorer` patch, pending release) | no — not observed |
-| P160 | Ship quota-pacing surface — frequently-firing PreToolUse calculated-sleep throttle with a smart glide-path controller (slows over-pace work proportionally, eases back onto pace before quota exhaustion) across all work | `@windyroad/itil@0.57.3` (2026-07-06, glide-path) + `0.57.1` (initial throttle) + 6 sibling plugins | no — not observed |
-| P390 | agent emits ALL_DONE prematurely while actionable backlog remains — `/goal` external-evaluator loop-anchor (ADR-094/RFC-047), turn-bound removed | `@windyroad/itil@0.57.2` (2026-07-06, PR #337) | no — not observed |
+| P408 | risk-score-commit-gate hardcodes a 14-day RISK-POLICY staleness threshold, ignoring the policy's stated review cadence — gate now derives the threshold from the stated `> Reviewed <cadence>` line per ADR-091 (fallback 14 when absent/unrecognised) | 2026-07-05 (`@windyroad/risk-scorer` patch, pending release) | no — not observed || P390 | agent emits ALL_DONE prematurely while actionable backlog remains — `/goal` external-evaluator loop-anchor (ADR-094/RFC-047), turn-bound removed | `@windyroad/itil@0.57.2` (2026-07-06, PR #337) | no — not observed |
 
 ## Inbound Upstream Reports
 
