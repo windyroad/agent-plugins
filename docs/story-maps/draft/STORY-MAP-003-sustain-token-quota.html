@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta name="human-oversight" content="confirmed">
+  <meta name="oversight-hash" content="8f426b49d7eb57ca52d9cf37445fc0a67feff765d806b23d5d5b1a76a0d2ae9f">
   <meta charset="UTF-8">
-  <title>STORY-MAP-003: Sustain My Token Quota Across the Week and Across Surfaces</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>STORY-MAP-003: Sustain my token quota across the week and across surfaces</title>
   <meta name="story-map-id" content="STORY-MAP-003">
   <meta name="status" content="draft">
-  <meta name="human-oversight" content="unconfirmed">
+  <meta name="persona" content="developer">
   <meta name="problems" content="P160,P443">
   <meta name="rfcs" content="RFC-046">
   <meta name="jtbd" content="JTBD-010">
@@ -13,103 +16,124 @@
   <meta name="reported" content="2026-07-08">
   <meta name="decision-makers" content="Tom Howard">
   <style>
-    /* Layout-only rules per docs/STYLE-GUIDE.md.
-       No styling on data-bearing elements; status conveyed by neighbour
-       prose rather than inline style. */
-    body {
-      font-family: system-ui, sans-serif;
-      max-width: 1200px;
-      margin: 1rem auto;
-      padding: 0 1rem;
+    :root {
+      --bg: #ffffff; --fg: #1a1a1a; --muted: #565656; --line: #c4c4c4;
+      --card: #f6f6f6; --card-line: #cfcfcf;
+      --live-fg: #0b5d1e; --live-bg: #e4f4e8; --live-line: #0b5d1e;
+      --next-fg: #0b3a66; --next-bg: #e2eefb; --next-line: #0b3a66;
+      --later-fg: #6b3a00; --later-bg: #f6ead6; --later-line: #6b3a00;
+      --focus: #0b3a66;
     }
-    h1 { font-size: 1.5rem; }
-    h2 { font-size: 1.125rem; margin-top: 1.5rem; }
-    .backbone {
-      display: grid;
-      grid-template-columns: repeat(var(--cols), 1fr);
-      gap: 1rem;
-      margin-bottom: 2rem;
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #16181c; --fg: #f2f3f5; --muted: #b6bac2; --line: #3a3f47;
+        --card: #1f2228; --card-line: #3a3f47;
+        --live-fg: #7fe0a0; --live-bg: #123020; --live-line: #7fe0a0;
+        --next-fg: #97c6f5; --next-bg: #10263c; --next-line: #97c6f5;
+        --later-fg: #f0c58a; --later-bg: #33260f; --later-line: #f0c58a;
+        --focus: #97c6f5;
+      }
     }
-    .rib-header { grid-column: 1 / -1; border-bottom: 1px solid #ccc; padding-bottom: 0.25rem; }
-    .rib { display: contents; }
-    .activity { font-weight: 600; border-bottom: 2px solid #999; padding-bottom: 0.25rem; }
-    .slice {
-      border: 1px solid #ccc;
-      padding: 0.5rem;
-      text-decoration: none;
-      color: inherit;
-      display: block;
-    }
-    .slice:hover { border-color: #666; }
-    .note { padding: 0.5rem; color: #555; }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; color: var(--fg); background: var(--bg);
+           max-width: 1400px; margin: 0 auto; padding: 1.5rem 1rem 3rem; line-height: 1.5; }
+    h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
+    h2 { font-size: 1rem; margin: 0 0 .5rem; }
+    p { max-width: 70ch; }
+    .lead { color: var(--muted); }
+    a { color: var(--focus); }
+    a:focus-visible, .task:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+    .legend { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin: 1rem 0 1.5rem; padding: 0; list-style: none; }
+    .legend li { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .9rem; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; font-size: .72rem; font-weight: 700;
+             padding: .1rem .45rem; border-radius: 999px; border: 1px solid; white-space: nowrap; }
+    .badge::before { font-weight: 900; }
+    .b-live  { color: var(--live-fg);  background: var(--live-bg);  border-color: var(--live-line); }
+    .b-live::before  { content: "\2713"; }
+    .b-next  { color: var(--next-fg);  background: var(--next-bg);  border-color: var(--next-line); }
+    .b-next::before  { content: "\2192"; }
+    .b-later { color: var(--later-fg); background: var(--later-bg); border-color: var(--later-line); }
+    .b-later::before { content: "\25C7"; }
+    .scroll { overflow-x: auto; padding-bottom: .5rem; }
+    .backbone { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(250px, 1fr); gap: .75rem; align-items: start; }
+    .activity { border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+    .activity > h2 { padding: .6rem .7rem; margin: 0; border-bottom: 2px solid var(--fg); }
+    .activity .jtbd { display: block; font-weight: 400; color: var(--muted); font-size: .78rem; margin-top: .2rem; }
+    .tasks { list-style: none; margin: 0; padding: .55rem; display: flex; flex-direction: column; gap: .55rem; }
+    .task { border: 1px solid var(--card-line); border-radius: 6px; background: var(--card); padding: .5rem .55rem; }
+    .task .t-title { font-size: .86rem; }
+    a.slice { text-decoration: none; color: inherit; display: block; }
+    a.slice:hover .t-title { text-decoration: underline; }
+    .task .t-meta { margin-top: .35rem; display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; }
+    .ref { font-size: .7rem; color: var(--muted); }
+    .step-no { font-variant-numeric: tabular-nums; color: var(--muted); font-size: .78rem; }
+    .trace { margin-top: 2rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .trace h2 { font-size: 1.05rem; }
+    @media (max-width: 640px) { .backbone { grid-auto-columns: 82vw; } }
   </style>
 </head>
 <body>
-  <h1>STORY-MAP-003: Sustain My Token Quota Across the Week and Across Surfaces</h1>
+  <h1>Sustain my token quota across the week and across surfaces</h1>
+  <p class="lead">A user story map for the <strong>developer</strong> (JTBD-010) whose Claude Code, chat, and Cowork all draw on one shared weekly quota. Read left to right as what I get: I lean on Claude all week, my work paces itself, I stay in flow even when I'm over budget, I keep enough for my other surfaces, and it all protects me from the moment I install it — so I can set an overnight run and go to bed instead of getting hard-stopped mid-task. Each card is a value I get, in my own voice; the linked STORY / ADR is the implementer. Ratified 2026-07-08 (ADR-090); further refined at the <code>/wr-itil:manage-story-map</code> accepted transition.</p>
 
-  <p>User-story map for <strong>JTBD-010</strong> (Sustain My Token Quota Across the Week and Across Surfaces), grounding the reopened <strong>P160</strong> and its lineage-repair ticket <strong>P443</strong>. Backbone (the developer's journey across a week on one shared account quota) &times; ribs (releases) &times; slices (stories), per Patton, <em>User Story Mapping</em> (O'Reilly, 2014). Born <code>human-oversight: unconfirmed</code> per ADR-090 &mdash; awaiting ratification via <code>/wr-itil:manage-story-map</code>.</p>
+  <ul class="legend" aria-label="Status legend">
+    <li><span class="badge b-live">Live</span> I get this today</li>
+    <li><span class="badge b-next">Next</span> decided (2026-07-08), not yet built</li>
+    <li><span class="badge b-later">Later</span> known gap or proposal, not yet decided</li>
+  </ul>
 
-  <p>This map exists to make the extraction argument concrete: quota-pacing shares <strong>no backbone activity</strong> with the two existing story maps (STORY-MAP-001 and STORY-MAP-002, both JTBD-008 "decompose a fix into coordinated changes"). It is an independent journey, which is why the capability belongs in its own plugin (<code>@windyroad/quota-pacing</code>, ratified 2026-07-08) rather than synced across the seven governance plugins. Release 1 (the throttle) shipped 2026-07-06; Release 2 (own plugin + self-installing producer) is the fix that closes the P160/P443 adopter-inert and mis-placement gaps.</p>
+  <div class="scroll">
+    <div class="backbone">
 
-  <section class="backbone" style="--cols: 5">
-    <header class="rib-header">
-      <h2 data-rib="backbone">Backbone &mdash; the developer's journey across a week on one shared quota</h2>
-    </header>
-    <div class="rib">
-      <div class="activity" data-activity="1-quota-state-reaches-tooling">1. Quota state reaches my tooling</div>
-      <div class="activity" data-activity="2-every-call-self-paces">2. Every tool call self-paces</div>
-      <div class="activity" data-activity="3-ease-back-when-ahead">3. Ease back when ahead, don't stop</div>
-      <div class="activity" data-activity="4-keep-weekly-headroom">4. Keep weekly headroom for chat/Cowork</div>
-      <div class="activity" data-activity="5-works-without-hidden-setup">5. Works without hidden setup</div>
+      <section class="activity" aria-labelledby="a1">
+        <h2 id="a1"><span class="step-no">1.</span> I lean on Claude all week<span class="jtbd">JTBD-010 — one shared quota across Code, chat &amp; Cowork</span></h2>
+        <ul class="tasks">
+          <li class="task"><span class="t-title">I want to use Claude across the whole week and not run dry mid-week and lose the chat and Cowork I still need</span><span class="t-meta"><span class="badge b-live">Live</span> <span class="ref">the need</span></span></li>
+        </ul>
+      </section>
+
+      <section class="activity" aria-labelledby="a2">
+        <h2 id="a2"><span class="step-no">2.</span> My work paces itself<span class="jtbd">I don't babysit a status line</span></h2>
+        <ul class="tasks">
+          <li class="task"><a class="slice" href="../../stories/draft/STORY-039-throttle-token-burn.md" data-story-id="STORY-039" data-jtbd="JTBD-010" data-status="done"><span class="t-title">I keep working all week without slamming into the quota wall, because my work quietly slows itself when I'm burning too fast — no nudge, no decision, I barely notice</span></a><span class="t-meta"><span class="badge b-live">Live</span> <span class="ref">STORY-039 · ADR-093</span></span></li>
+          <li class="task"><span class="t-title">I can kick off an overnight AFK loop and actually go to bed — it paces itself to the reset instead of breaking mid-run and needing an effortful restart</span><span class="t-meta"><span class="badge b-live">Live</span> <span class="ref">JTBD-010 · P160</span></span></li>
+          <li class="task"><span class="t-title">I never have to watch a status line or hand-switch to a smaller model to stretch my quota</span><span class="t-meta"><span class="badge b-live">Live</span></span></li>
+        </ul>
+      </section>
+
+      <section class="activity" aria-labelledby="a3">
+        <h2 id="a3"><span class="step-no">3.</span> I stay in flow even when I'm over budget<span class="jtbd">it slows me, it doesn't stop me</span></h2>
+        <ul class="tasks">
+          <li class="task"><span class="t-title">When I'm well over pace it eases me back gently instead of freezing me out — I still make progress and drift back onto budget before I'd have run out</span><span class="t-meta"><span class="badge b-live">Live</span> <span class="ref">STORY-039 glide-path</span></span></li>
+        </ul>
+      </section>
+
+      <section class="activity" aria-labelledby="a4">
+        <h2 id="a4"><span class="step-no">4.</span> I keep enough for my other surfaces<span class="jtbd">chat &amp; Cowork stay funded</span></h2>
+        <ul class="tasks">
+          <li class="task"><span class="t-title">I still have tokens for chat and Cowork late in the week, because Code holds back a weekly reserve instead of spending the whole pool</span><span class="t-meta"><span class="badge b-live">Live</span></span></li>
+          <li class="task"><span class="t-title">I want my pacing to count my chat and Cowork burn too, not just Code, so the reserve reflects everything I'm actually spending</span><span class="t-meta"><span class="badge b-later">Later</span> <span class="ref">P160 Q6 — account-wide read</span></span></li>
+        </ul>
+      </section>
+
+      <section class="activity" aria-labelledby="a5">
+        <h2 id="a5"><span class="step-no">5.</span> It protects me the moment I install it<span class="jtbd">no setup tax — the adopter gap (P160/P443)</span></h2>
+        <ul class="tasks">
+          <li class="task"><a class="slice" href="../../stories/draft/STORY-043-self-installing-quota-producer.md" data-story-id="STORY-043" data-jtbd="JTBD-010" data-status="draft"><span class="t-title">I get pacing the moment I install it — it sets itself up because I installed it, with no hidden step to wire by hand, and I can turn it off whenever I want</span></a><span class="t-meta"><span class="badge b-next">Next</span> <span class="ref">STORY-043 · P443</span></span></li>
+          <li class="task"><a class="slice" href="../../stories/draft/STORY-042-extract-quota-pacing-plugin.md" data-story-id="STORY-042" data-jtbd="JTBD-010" data-status="draft"><span class="t-title">I add just quota-pacing on purpose, without dragging in governance plugins I don't want</span></a><span class="t-meta"><span class="badge b-next">Next</span> <span class="ref">STORY-042 · P443</span></span></li>
+        </ul>
+      </section>
+
     </div>
-  </section>
+  </div>
 
-  <section class="backbone" style="--cols: 5">
-    <header class="rib-header">
-      <h2 data-rib="release-1-shipped">Release 1 &mdash; the shipped throttle (released 2026-07-06)</h2>
-    </header>
-    <div class="rib">
-      <div class="note" data-activity="1">Statusline writes <code>~/.claude/quota-state.json</code> (maintainer hand-wired &mdash; the adopter-inert gap).</div>
-      <a class="slice" href="../../stories/draft/STORY-039-throttle-token-burn.md"
-         data-story-id="STORY-039" data-rfc="RFC-046" data-jtbd="JTBD-010" data-status="draft"
-         style="grid-column: 2 / 5;">
-        STORY-039: Throttle token burn against the quota windows (mechanical PreToolUse calculated sleep + glide-path ease-back + 5pp weekly headroom). Code shipped; story back-documented (draft).
-      </a>
-      <div class="note" data-activity="5">Gap: inert for adopters until the statusline snippet is wired.</div>
-    </div>
-  </section>
-
-  <section class="backbone" style="--cols: 5">
-    <header class="rib-header">
-      <h2 data-rib="release-2-the-fix">Release 2 &mdash; the fix: own plugin + self-installing producer</h2>
-    </header>
-    <div class="rib">
-      <a class="slice" href="../../stories/draft/STORY-043-self-installing-quota-producer.md"
-         data-story-id="STORY-043" data-rfc="RFC-046" data-jtbd="JTBD-010" data-status="draft"
-         style="grid-column: 1 / 2;">
-        STORY-043: Self-install the quota-state producer (SessionStart hook; implied-at-install consent + opt-out; mechanism ADR at build).
-      </a>
-      <a class="slice" href="../../stories/draft/STORY-042-extract-quota-pacing-plugin.md"
-         data-story-id="STORY-042" data-rfc="RFC-046" data-jtbd="JTBD-010" data-status="draft"
-         style="grid-column: 2 / 5;">
-        STORY-042: Extract into <code>@windyroad/quota-pacing</code> (opt-in; retire the 7-plugin sync; rework the recent-check marker for concurrent-session grip).
-      </a>
-      <a class="slice" href="../../stories/draft/STORY-043-self-installing-quota-producer.md"
-         data-story-id="STORY-043" data-rfc="RFC-046" data-jtbd="JTBD-010" data-status="draft"
-         style="grid-column: 5 / 6;">
-        STORY-043: Producer self-installs &mdash; closes the "works without hidden setup" gap (JTBD-010 outcome #7).
-      </a>
-    </div>
-  </section>
-
-  <section class="backbone" style="--cols: 5">
-    <header class="rib-header">
-      <h2 data-rib="release-3-future">Release 3 &mdash; future (deferred)</h2>
-    </header>
-    <div class="rib">
-      <div class="note" data-activity="1" style="grid-column: 1 / 2;">Cross-surface, account-wide quota read (beyond the statusline cache) &mdash; P160 Q6; deferred, no story yet.</div>
-      <div class="note" data-activity="4" style="grid-column: 4 / 5;">Tunable weekly headroom per adopter &mdash; deferred.</div>
-    </div>
+  <section class="trace" aria-labelledby="trace-h">
+    <h2 id="trace-h">Traces</h2>
+    <p><strong>Persona:</strong> developer — shares one Claude account quota across Code, chat, and Cowork; wants pacing to be mechanical and silent, not a status line to babysit.</p>
+    <p><strong>Job mapped:</strong> JTBD-010 (Sustain My Token Quota Across the Week and Across Surfaces) across the five activities above.</p>
+    <p><strong>Independence:</strong> none of these five activities appear on STORY-MAP-001 or STORY-MAP-002 (both JTBD-008, "decompose a fix"). Zero shared backbone → quota-pacing is its own journey → its own <code>@windyroad/quota-pacing</code> plugin (ADR-093 amendment, 2026-07-08).</p>
+    <p><strong>Open gaps (Later / Next):</strong> it protects only a hand-wired machine, not adopters (P160/P443); pacing counts only Code burn, not chat/Cowork (P160 Q6); own opt-in plugin not yet built (STORY-042); self-installing producer + its recorded consent/mechanism decision (STORY-043 · a dedicated ADR).</p>
+    <p><strong>Decisions the journey rests on:</strong> ADR-093 (mechanical quota-pace throttle; amended 2026-07-08 → own opt-in plugin + self-installing producer, implied-at-install consent + opt-out); grounded in JTBD-010; problems P160 (reopened Known Error, Sev 20) + P443 (lineage repair).</p>
   </section>
 </body>
 </html>
