@@ -64,12 +64,13 @@ The JTBD + USM discipline (problem → correct JTBD/persona → user-story-map �
 
 - **Blocks**: P160 (honest verification — cannot close while its lineage is broken).
 - **Blocked by**: (none — buildable now; several sub-tasks are ratification-gated on the user).
-- **Composes with**: P160 (folded implementation gaps: adopter-inert producer + own-plugin extraction), P444 (systemic gate-gap sibling — why no invariant caught this), ADR-060 (Problem-RFC-Story lineage invariants), ADR-090 (story/story-map oversight markers).
+- **Composes with**: P160 (folded implementation gaps: adopter-inert producer + own-plugin extraction), P404 (systemic gate-gap parent — the lineage invariants only fire at accepted transitions, so the AFK flow shipped this broken lineage; the new dangling-reference + lifecycle-inversion sub-gaps this audit surfaced are folded there), ADR-060 (Problem-RFC-Story lineage invariants), ADR-090 (story/story-map oversight markers).
 
 ## Related
 
 - **P160** (`docs/problems/verifying/160-...md`) — the driver capability; its implementation gaps (adopter-inert producer, own-plugin extraction) are folded there per user direction 2026-07-07; this ticket owns the lineage/grounding repair.
-- **P444** — systemic sibling: the ADR-060 lineage invariants did not gate the release on lineage integrity (orphaned story/story-map refs, RFC-proposed-while-problem-verifying, build-on-unratified-JTBD).
+- **P404** (`docs/problems/known-error/404-...md`) — systemic gate-gap parent. Reopened 2026-07-05 citing THIS quota-pace iter (RFC-045 task-based + STORY-039 mapless); its ADR-095/096 capture-time gates landed 2026-07-07. The newly-discovered sub-gaps this audit surfaced (dangling story/story-map **reference** validation; RFC-`proposed`-while-linked-problem-`verifying` lifecycle-inversion detection; build-on-unratified-JTBD-at-ship) are folded into P404's Phase-3 residual, not minted as a duplicate sibling.
+- **P251** (`docs/problems/known-error/251-...md`) — same class: RFC-first trace invariant not enforced where work actually happens.
 - **RFC-046** (`docs/rfcs/RFC-046-...proposed.md`) — the broken RFC (proposed; orphaned STORY-039 + STORY-MAP-003; JTBD-006 anchor).
 - **ADR-093** (`docs/decisions/093-mechanical-quota-pace-throttle.proposed.md`) — the throttle mechanics decision (also born `human-oversight: unconfirmed`).
 - **JTBD-006** (`docs/jtbd/developer/JTBD-006-work-backlog-afk.proposed.md`) — the wrong/narrow anchor (AFK-only).
