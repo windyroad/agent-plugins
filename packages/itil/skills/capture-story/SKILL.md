@@ -1,12 +1,12 @@
 ---
 name: wr-itil:capture-story
-description: Lightweight story-capture skill for aside-invocation during foreground work — mandatory leading problem-trace AND JTBD-trace per ADR-060 I6 + I9 invariants, optional `--rfc` and `--story-map` flag args (I7 + I8 enforce at `accepted` transition not at capture), skeleton story file at `docs/stories/draft/STORY-NNN-<slug>.md`, single commit per capture, no inline README refresh. Defers full INVEST shape + acceptance transition to /wr-itil:manage-story. Use when the user (or agent) wants to capture a story quickly with clear problem + JTBD anchoring. For full lifecycle management, use /wr-itil:manage-story.
+description: Lightweight story-capture skill for aside-invocation during foreground work — mandatory leading problem-trace AND JTBD-trace per ADR-060 I6 + I9 invariants, mandatory `--story-map` trace (I8 enforced AT CAPTURE per ADR-095, refuse-and-route if absent) + optional `--rfc` (I7 at accepted) + real user-value + >=1 acceptance criterion at capture (I10 content subset / ADR-095), skeleton story file at `docs/stories/draft/STORY-NNN-<slug>.md`, single commit per capture, no inline README refresh. Defers full INVEST shape + acceptance transition to /wr-itil:manage-story. Use when the user (or agent) wants to capture a story quickly with clear problem + JTBD anchoring. For full lifecycle management, use /wr-itil:manage-story.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
 # Capture Story Skill
 
-Capture an INVEST-shaped story ticket quickly during foreground work. Lightweight aside-invocation surface that complements the heavyweight `/wr-itil:manage-story` flow. Mirrors `/wr-itil:capture-rfc` shape per ADR-032 lightweight + heavyweight skill split, extended for the story tier's stricter trace-mandate (both problem AND JTBD at capture; RFC AND story-map deferred to accepted).
+Capture an INVEST-shaped story ticket quickly during foreground work. Lightweight aside-invocation surface that complements the heavyweight `/wr-itil:manage-story` flow. Mirrors `/wr-itil:capture-rfc` shape per ADR-032 lightweight + heavyweight skill split, extended for the story tier's stricter trace-mandate (problem, JTBD, AND story-map at capture — I8 enforced at capture per ADR-095; RFC deferred to accepted).
 
 This skill is one half of the capture-then-manage story framework introduced by ADR-060 (Problem-RFC-Story framework with mandatory problem-trace and unified problem ontology, accepted 2026-05-05; Phase 2 amendment 2026-05-12 introducing the story tier). The other half is `/wr-itil:manage-story` (heavyweight intake + INVEST-gated lifecycle management).
 
@@ -15,8 +15,8 @@ This skill is one half of the capture-then-manage story framework introduced by 
 ## When to invoke
 
 - **Slicing an RFC into INVEST-shaped sub-workstreams**: agent / user has captured an RFC and is now decomposing its scope into the ordered `stories:` array per ADR-060's working-the-problem flow (line 300-320). Each slice on a story-map's backbone → ribs → slices grid becomes one story.
-- **Capturing a story before its placement on a story-map**: per ADR-060 line 291, RFC + story-map traces are optional at capture; I7 / I8 enforce only at the `draft → accepted` transition. Draft stories may exist with NO `rfcs:` and NO `story-maps:` until the design firms up.
-- **Retrospective bootstrap migration** (Slice 15 of P170 Phase 2): extracting existing slices from `docs/plans/170-rfc-framework-story-map.md` into individual story files. The bounded-escape carve-out for I7 / I8 enforce-at-accepted permits the retrospective sequence (capture draft, design fills in `rfcs:` + `story-maps:`, manage-story <NNN> accepted gate fires).
+- **Placing a story on its map at capture**: per ADR-095 a story is born on a story map — `--story-map` is MANDATORY at capture (I8 refuse-and-route if absent). `--rfc` stays optional (I7 enforces at the `draft → accepted` transition); a draft story may exist with NO `rfcs:` until the design firms up, but NEVER with an empty `story-maps:`.
+- **Retrospective bootstrap migration** (Slice 15 of P170 Phase 2): extracting existing slices from `docs/plans/170-rfc-framework-story-map.md` into individual story files. The bootstrap-exempt marker (ADR-060 A4 / ADR-053) permits the retrospective sequence to bypass the capture-time I8 hard-block for migration stories ONLY; `rfcs:` still fills in before the manage-story <NNN> accepted gate (I7).
 - **Forward dogfood capture**: a new story for in-flight work, captured at the start of implementation, runs to `done` via `Refs: STORY-NNN` trailer detection + acceptance-criteria all-ticked.
 
 **Use `/wr-itil:manage-story` instead** when:
@@ -153,21 +153,25 @@ jtbd_file=$(ls docs/jtbd/*/JTBD-<NNN>-*.md 2>/dev/null | head -1)
 
 JTBD lifecycle states (`.proposed.md` / `.accepted.md` / `.archived.md`) all pass silently — a story may anchor on a proposed JTBD per the dogfood pattern (Phase 2 itself is being captured against proposed JTBDs).
 
-### 2.6. Validate optional `--rfc` and `--story-map` traces
+### 2.6. Validate story-map trace (I8 hard-block AT CAPTURE per ADR-095) + optional `--rfc`
 
-If `$rfc_trace` is non-empty, for each `RFC-<NNN>`:
+**I8 story-map membership is enforced at CAPTURE (ADR-095) — a story is born on a map.** `--story-map` is MANDATORY:
+
+- **`--story-map` absent**: hard-block with **refuse-and-route** (parity with the I6/I9 mandatory-trace gates). Do NOT scaffold `story-maps: []`. Emit the deny log (`reason: missing-story-map-trace`) and halt with:
+  > `/wr-itil:capture-story` requires a story-map trace (ADR-095 / I8): every story is born on a story map. Create a map first via `/wr-itil:capture-story-map` (or extend one via `/wr-itil:manage-story-map`), then re-invoke capture-story with `--story-map STORY-MAP-<NNN>`.
+
+  AFK orchestrators author the map first (born `human-oversight: unconfirmed` per ADR-090, drained later), then capture the story onto it — nothing halts silently; the map is a prerequisite step.
+- **`--story-map` present**: for each `STORY-MAP-<NNN>`, existence check `ls docs/story-maps/*/STORY-MAP-<NNN>-*.html 2>/dev/null`. Malformed or unresolved → hard-block (`reason: unresolved-story-map-trace`). Lifecycle advisory-warn on `draft` / `in-progress` maps; pass silently on `accepted` / `completed`.
+- **Bootstrap exemption (ADR-060 A4 / ADR-053)**: a capture carrying the inline `<!-- bootstrap-exempt: ... -->` marker bypasses the I8 hard-block for migration stories ONLY. A **non-bootstrap** capture carrying the marker is rejected (the marker is not a general capture-time escape hatch — behavioural test asserts).
+
+`--rfc` stays **OPTIONAL** at capture (I7 enforces at the `accepted` transition — a story can legitimately precede its RFC firming up):
 
 ```bash
 rfc_file=$(ls docs/rfcs/RFC-<NNN>-*.md 2>/dev/null | head -1)
 [ -z "$rfc_file" ] && unresolved_rfcs+=("RFC-<NNN>")
 ```
 
-- Token absent: skip (the "optional" path).
-- Token present but malformed (`--rfc RFC-99`, etc.) OR resolves to no file: hard-block. Emit deny log with `reason: unresolved-rfc-trace`. The optional-vs-malformed distinction is load-bearing — absence is permitted, malformed input is not.
-
-Same shape for `--story-map`. Story-maps are HTML; existence check uses `ls docs/story-maps/*/STORY-MAP-<NNN>-*.html 2>/dev/null`.
-
-Lifecycle classification on resolved files: advisory-warn on `proposed` / `draft` / `in-progress` states (the design isn't firm yet — captured story will reference work that may itself drift); pass silently on `accepted` / `closed` / `verifying` states.
+- `--rfc` token absent: skip (the optional path). Present-but-malformed OR resolves to no file: hard-block (`reason: unresolved-rfc-trace`).
 
 ### 3. Compute next STORY ID
 
@@ -200,7 +204,7 @@ decision-makers: [<git config user.name>]
 problems: [P<NNN>, P<NNN>, ...]
 jtbd: [JTBD-<NNN>, JTBD-<NNN>, ...]
 rfcs: [<RFC-<NNN>, ...> or empty]
-story-maps: [<STORY-MAP-<NNN>, ...> or empty]
+story-maps: [<STORY-MAP-<NNN>, ...>]     # >=1 REQUIRED at capture (I8 / ADR-095)
 estimated-effort: <S|M|L|XL — derived at capture per ADR-067 (real best-effort value, no deferral marker)>
 human-oversight: unconfirmed
 ---
@@ -212,16 +216,16 @@ human-oversight: unconfirmed
 **Problems**: <P<NNN> [, P<NNN>, ...]>
 **JTBD**: <JTBD-<NNN> [, ...]>
 **RFCs**: <RFC-<NNN> [, ...]> or (none — populate at accepted transition per I7)
-**Story Maps**: <STORY-MAP-<NNN> [, ...]> or (none — populate at accepted transition per I8)
+**Story Maps**: <STORY-MAP-<NNN> [, ...]> (>=1 required at capture — I8 / ADR-095)
 **Estimated effort**: <S|M|L|XL> — derived at capture as a real best-effort value (P375 / ADR-032 amendment 2026-06-24; ADR-067 silent-derivation). NO `deferred` default and no "not estimated" marker — those are deferrals (user correction 2026-06-24). Confirmed/refined at the accepted transition per I10 INVEST Estimable.
 
 ## User value (required, INVEST Valuable)
 
-(populate at /wr-itil:manage-story accepted transition — one-paragraph user-facing value statement)
+<REQUIRED at capture (I10 Valuable subset / ADR-095): a real one-paragraph value-first user-facing statement — NOT a placeholder. "In order to <value>, as a <persona>, I want <capability>.">
 
 ## Acceptance criteria (accepted-gate, INVEST Testable)
 
-- [ ] (populate at /wr-itil:manage-story accepted transition — observable behavioural criteria)
+- [ ] <REQUIRED at capture (I10 Testable subset / ADR-095): >=1 real observable behavioural acceptance criterion — NOT a placeholder>
 
 ## Driving problem trace (required — I6 invariant)
 
@@ -335,7 +339,7 @@ The trailing pointer is **not optional** — it is the user-visible signal that 
 | Problem-trace I6 enforcement | Re-validated at every lifecycle transition | Hard-block at capture-time; deny logged to `logs/story-capture-denials.jsonl` |
 | JTBD-trace I9 enforcement | Re-validated at every lifecycle transition | Hard-block at capture-time |
 | RFC-trace I7 enforcement | Hard-block at `accepted` transition (allows draft stories to exist before RFC reference firms up) | Advisory-warn at capture-time if `--rfc` provided and resolves to draft/proposed lifecycle |
-| Story-map-trace I8 enforcement | Hard-block at `accepted` transition | Same advisory-warn pattern at capture-time |
+| Story-map-trace I8 enforcement | Hard-block AT CAPTURE — refuse-and-route to `/wr-itil:capture-story-map` if absent (ADR-095) | direction-setting (caller must supply or author a map first) |
 | INVEST shape (I10) | Behavioural checks at `accepted` transition | Out of scope: capture produces a skeleton with deferred-placeholder sections |
 | Skeleton-fill | Full-intake; AskUserQuestion for User value + Acceptance criteria + Estimated effort | Deferred-placeholder pattern; one optional taste prompt only |
 | Status transitions | Step 7 owns draft → accepted → in-progress → done | Out of scope (creation only) |
@@ -373,4 +377,4 @@ The two skills share the `/tmp/wr-itil-story-capture-grep-${SESSION_ID}` create-
 
 ## Phase-out-of-order note
 
-This skill ships BEFORE `/wr-itil:capture-story-map` (Slice 3 of P170 Phase 2) due to the voice-tone-hook-on-HTML blocker documented at P170 line 297. Building capture-story first is structurally permitted per ADR-060 line 291 (story-map traces optional at capture; I8 enforce only at accepted transition). When Slices 3-6 eventually ship the story-map skills, `manage-story <NNN> accepted` will validate the I8 invariant against the then-existing story-map corpus. The deviation from ADR-060's recommended commit-grain order (line 449-454 — sub-slice 3 story-map skills then sub-slice 4 story skills) is auditable here and in this commit's Slice 7 commit message.
+This skill ships BEFORE `/wr-itil:capture-story-map` (Slice 3 of P170 Phase 2) due to the voice-tone-hook-on-HTML blocker documented at P170 line 297. Building capture-story first was structurally permitted at the time (story-map traces were then optional at capture). **Superseded by ADR-095** — I8 now hard-blocks at capture, and `/wr-itil:capture-story-map` has since shipped, so a map must exist before a story is captured. When Slices 3-6 eventually ship the story-map skills, `manage-story <NNN> accepted` will validate the I8 invariant against the then-existing story-map corpus. The deviation from ADR-060's recommended commit-grain order (line 449-454 — sub-slice 3 story-map skills then sub-slice 4 story skills) is auditable here and in this commit's Slice 7 commit message.

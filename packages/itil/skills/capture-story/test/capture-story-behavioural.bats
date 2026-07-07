@@ -197,7 +197,7 @@ decision-makers: [Test]
 problems: [P170]
 jtbd: [JTBD-008]
 rfcs: []
-story-maps: []
+story-maps: [STORY-MAP-001]
 estimated-effort: M
 ---
 
@@ -210,6 +210,27 @@ EOF
     run grep -E "^${field}:" "$story_file"
     [ "$status" -eq 0 ]
   done
+}
+
+@test "capture-story: I8-at-capture invariant — a valid captured story has a NON-EMPTY story-maps: (ADR-095)" {
+  mkdir -p docs/stories/draft
+  cat > docs/stories/draft/STORY-001-mapped.md <<EOF
+---
+status: draft
+story-maps: [STORY-MAP-002]
+---
+EOF
+  run grep -E '^story-maps: \[STORY-MAP-[0-9]' docs/stories/draft/STORY-001-mapped.md
+  [ "$status" -eq 0 ]
+  run grep -E '^story-maps: \[\]' docs/stories/draft/STORY-001-mapped.md
+  [ "$status" -ne 0 ]
+}
+
+@test "capture-story: SKILL prescribes refuse-and-route on a missing story-map trace (I8/ADR-095)" {
+  run grep -E 'I8 hard-block AT CAPTURE|refuse-and-route|missing-story-map-trace' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  run grep -E 'story-map traces are optional at capture' "$SKILL_FILE"
+  [ "$status" -ne 0 ]
 }
 
 @test "capture-story: captured story file lands at docs/stories/draft/ per ADR-060 lines 145-147" {
