@@ -98,6 +98,8 @@ The solution-space investigation this ticket was opened to do is **complete and 
 
 ## Related
 
+- **Evidence 2026-07-07**: editing SKILL prose per the ADR-095/096 amendments (removing the `draft → in-progress` auto-transition wording) broke TWO contract bats that grep for that prose — `manage-story-contract.bats` test "names draft → in-progress auto-transition" and `itil-commit-trailer-transition-advisory.bats` "advises draft story → in-progress". Both are STRUCTURAL (assert SKILL/hook prose strings), so a wording change reddened CI; a behavioural test would not. Cost a CI Quality-Gates red + a fix-forward cycle. Concrete argument for removing the structural-test escape hatch (P290) / giving prose verdicts a behavioural harness (this ticket).
+
 - captured via /wr-itil:capture-problem + P078 capture-on-correction (user: *"structural tests are not ok and circumvent the desired outcome"* + *"why aren't you implementing P176/P012"*), 2026-05-27.
 - **ADR-075** — the adoption decision this ticket's investigation produced (promptfoo, two-tier, per-package; amends ADR-052 + ADR-005; `human-oversight: confirmed` 2026-06-02). Built via RFC-012.
 - **ADR-052** — behavioural-tests-default; its Surface-2 structural escape hatch (the selected line) is what this harness would let P290 remove. **Narrowed by ADR-075** for agent-prose (and, per the 2026-06-02 amendment, SKILL-prose) verdicts.

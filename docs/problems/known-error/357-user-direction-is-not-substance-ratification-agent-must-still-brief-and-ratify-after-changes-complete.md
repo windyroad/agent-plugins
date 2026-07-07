@@ -105,6 +105,8 @@ Attempted the I13 propose-fix path this iter: `wr-itil-check-fix-rfc-trace` emit
 
 ## Related
 
+- **Recurrence 2026-07-07 (create-adr path)**: drafting ADR-095 (capture-time story gates) I wrote `human-oversight: confirmed` off the PRE-draft AskUserQuestion (the Option-A choice), treating the decision-pick as artefact-ratification — the exact P348 hollow-marker bug this ticket names. User: *"you CAN'T draft it confirmed. You need to draft it and then confirm, otherwise I can't catch if you have misunderstood."* Fixed by flipping to `unconfirmed` + a separate post-draft brief-and-confirm; the user then caught a scope expansion (INVEST-at-capture) at the confirm — direct evidence the post-draft confirm is load-bearing, not ceremony. Reinforces that P357's fix must be a structural enforcement, not memory.
+
 (captured via /wr-itil:capture-problem; expand at next investigation)
 
 - **P340** (`docs/problems/verifying/340-human-oversight-marker-can-be-written-on-draft-acceptance-substance-confirmation-pattern-needs-prose-briefing-and-selectable-options.md`) — the AskUserQuestion-path version of this class. Fix shipped 2026-06-01 via @windyroad/architect@0.13.0 commit 4a36ae1. This new ticket captures the parallel gap on the user-direction code path that the P340 fix did not cover.
