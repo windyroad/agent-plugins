@@ -17,7 +17,8 @@
 #   - is NOT the artefact's capture commit (subject does not start with
 #     `docs(rfcs): capture RFC-` / `feat(itil): capture STORY-`), AND
 #   - the referenced artefact is in a pre-in-progress status
-#     (RFC: .proposed/.accepted ; story: .draft) on disk.
+#     (RFC: .proposed/.accepted ; story: .accepted — per ADR-096 a draft
+#     story is blocked from implementation, not advised to advance) on disk.
 # → emit a stderr advisory naming the transition command. Silent otherwise.
 #
 # Advisory-only (ADR-013 Rule 6 fail-open; ADR-045 ≤300-byte band; exit 0).
@@ -69,9 +70,14 @@ while IFS= read -r id; do
       ;;
     STORY-*)
       [ -d "./docs/stories" ] || continue
-      shopt -s nullglob; files=(./docs/stories/draft/${id}-*.md ./docs/stories/${id}-*.draft.md); shopt -u nullglob
+      # ADR-096: a draft story is NEVER implementable — the PreToolUse
+      # itil-no-implement-draft-gate blocks a commit referencing a draft story.
+      # So this advisory now fires for an ACCEPTED story carrying its first
+      # implementing commit: advise accepted -> in-progress (draft -> in-progress
+      # no longer exists; a draft story must be accepted first).
+      shopt -s nullglob; files=(./docs/stories/accepted/${id}-*.md); shopt -u nullglob
       [ ${#files[@]} -gt 0 ] || continue
-      advise "${id} carries a non-capture commit but is still draft. It should advance to in-progress — run /wr-itil:manage-story ${id} in-progress. Bypass: BYPASS_TRANSITION_ADVISORY=1."
+      advise "${id} carries a non-capture implementing commit and is accepted. It should advance to in-progress — run /wr-itil:manage-story ${id} in-progress. Bypass: BYPASS_TRANSITION_ADVISORY=1."
       ;;
   esac
 done <<< "$TRAILERS"

@@ -39,6 +39,10 @@
       },
       {
         "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/itil-no-implement-draft-gate.sh" }]
+      },
+      {
+        "matcher": "Bash",
         "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/itil-bash-polling-antipattern-detect.sh" }]
       },
       {
