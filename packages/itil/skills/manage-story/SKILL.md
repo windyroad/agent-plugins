@@ -1,6 +1,6 @@
 ---
 name: wr-itil:manage-story
-description: Heavyweight story intake + lifecycle management following ADR-060 Phase 2. Creates and updates story tickets, transitions through draft → accepted → in-progress → done → archived lifecycle, enforces I7 + I8 trace-gate at the accepted transition, runs INVEST checks per I10 at acceptance, auto-transitions draft→in-progress on first non-capture commit and in-progress→done on all-criteria-ticked + linked RFC closes, and refreshes docs/stories/README.md per the P062 / P094 contract pattern. Companion to /wr-itil:capture-story (lightweight aside surface).
+description: Heavyweight story intake + lifecycle management following ADR-060 Phase 2. Creates and updates story tickets, transitions through draft → accepted → in-progress → done → archived lifecycle, enforces I7 + I8 trace-gate at the accepted transition, runs INVEST checks per I10 at acceptance, auto-detects accepted→in-progress on the first implementing commit and in-progress→done on all-criteria-ticked + linked RFC closes (per ADR-096 a draft story is NEVER implementable — draft→in-progress is removed; the itil-no-implement-draft-gate blocks implementing a draft story), and refreshes docs/stories/README.md per the P062 / P094 contract pattern. Companion to /wr-itil:capture-story (lightweight aside surface).
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
@@ -117,7 +117,7 @@ For any transition `<from> → <to>`:
 
 The auto-transition logic fires in two contexts:
 
-- **`draft → in-progress`**: when the FIRST commit AFTER the story's capture commit lands with a `Refs: STORY-<NNN>` trailer AND a commit subject NOT prefixed with `feat(itil): capture STORY-`. **Detected by `itil-commit-trailer-transition-advisory.sh`** (PostToolUse:Bash; the shared RFC+story commit-trailer trigger — P378/RFC-030 Piece 2, no longer "a future deferred hook"). Per ADR-014 the hook DETECTS + emits a stderr advisory; it does NOT perform the `git mv` itself (that would land outside the commit grain). The transition is performed by `manage-story <NNN> in-progress` (run on the advisory) or by an AFK orchestrator acting on it.
+- **`accepted → in-progress`**: when the FIRST implementing commit lands with a `Refs: STORY-<NNN>` trailer AND a commit subject NOT prefixed with `feat(itil): capture STORY-`, on a story that is already `accepted`. **Per ADR-096 a `draft` story is NEVER implementable — there is NO `draft → in-progress` transition**; the `itil-no-implement-draft-gate` PreToolUse hook blocks a commit referencing a draft story (accept it first). **Detected by `itil-commit-trailer-transition-advisory.sh`** (PostToolUse:Bash; P378/RFC-030 Piece 2). Per ADR-014 the hook DETECTS + emits a stderr advisory; it does NOT perform the `git mv` (that would land outside the commit grain). The transition is performed by `manage-story <NNN> in-progress` (run on the advisory) or by an AFK orchestrator acting on it.
 
 - **`in-progress → done`**: when all `- [ ]` lines in `## Acceptance criteria` are ticked AND the linked RFC is `closed`. Detected at manage-rfc close-fire (the RFC's transition triggers a sweep of its `stories:` array; each in-progress story with all-criteria-ticked auto-transitions to `done`). Manual `manage-story <NNN> done` invocation works in the interim.
 
@@ -229,7 +229,7 @@ After commit, report:
 | I10 INVEST shape | **Primary surface** — fires at `manage-story <NNN> accepted` | Out of scope (capture produces skeleton) |
 | Status transitions | Owns draft → accepted → in-progress → done → archived | Out of scope (creation only) |
 | README refresh | Inline per transition (P094 mirror) | Deferred to `manage-story review` or `wr-itil-reconcile-stories` |
-| Auto-transition triggers | Fires on first non-capture commit (draft→in-progress) + criteria-ticked + RFC-closed (in-progress→done) | n/a |
+| Auto-transition triggers | Fires on first implementing commit against an ACCEPTED story (accepted→in-progress; draft→in-progress REMOVED per ADR-096) + criteria-ticked + RFC-closed (in-progress→done) | n/a |
 | Reverse-trace refresh on parents | Inline per transition | Inline per capture |
 | Commit grain | One commit per transition / per intake | One commit per capture |
 
@@ -238,7 +238,7 @@ After commit, report:
 - **ADR-060** — Problem-RFC-Story framework + Phase 2 amendment 2026-05-10 (story tier).
 - **ADR-060 lines 248-253** — I6-I11 story-tier invariants.
 - **ADR-060 line 252** — I10 INVEST shape (Testable/Valuable/Independent/Estimable; Small SHOULD per architect-amendment-2026-05-10 nitpick N3).
-- **ADR-060 line 292** — auto-transition triggers (draft→in-progress on first non-capture commit; in-progress→done on criteria-ticked + RFC-closed).
+- **ADR-060 line 292** — auto-transition triggers (**amended by ADR-096**: draft→in-progress REMOVED — a draft story is blocked from implementation by the itil-no-implement-draft-gate; accepted→in-progress on the first implementing commit; in-progress→done on criteria-ticked + RFC-closed).
 - **ADR-060 line 339 + ADR-053 Bootstrapping precedent** — bootstrap-exemption marker contract for STORY-MAP-001 migration retrofit.
 - **P170** — driver problem ticket.
 - **JTBD-008** — Decompose a Fix Into Coordinated Changes. Primary persona-anchor.
