@@ -105,13 +105,19 @@ The user observed the live AFK flow (P160 iter, session 2026-07-05) producing ex
 - **ADR-096** (confirmed) — a `draft` story is never implementable: remove ADR-060's `draft → in-progress` auto-transition; implementation requires `accepted`; **commit-trailer gate** (`Refs: STORY-NNN` → block if the story is not `accepted`) is the primary enforcement locus.
 - **ADR-060** amended in lockstep (I8/I10 enforcement points, draft/in-progress lifecycle rows, capture-story/manage-story surfaces, `Refs:` trailer vocab). `docs/rfcs/README.md` template aligned (stories not tasks). Compendium regenerated.
 
-**Implementation progress:**
-- [x] `capture-story` I8 + content-subset at capture (commit `<this session>`): rejects `story-maps: []` → refuse-and-route; requires real user-value + ≥1 acceptance criterion; bootstrap-exempt honored; SKILL swept consistent; bats 14/14 (added the I8-at-capture invariant + refuse-and-route contract). **DONE.**
-- [ ] **ADR-096 commit-trailer gate** (the no-implement-draft teeth): a hook parsing `Refs: STORY-NNN` that blocks a commit when the story is not `accepted`/`in-progress`; + bats. **NEXT — highest value.**
-- [ ] `manage-story`: remove the `draft → in-progress` auto-transition; `accepted → in-progress` only.
-- [ ] `work-problems` / `work-problem` dispatch preflight: change the silent draft-skip to a hard refuse-and-route.
-- [ ] `capture-rfc` / `manage-rfc` SKILL bodies: stop scaffolding `## Tasks` (README already aligned).
-- [ ] promptfoo eval case for the capture-time gate firing on the AFK path.
+**Implementation progress — ENFORCEMENT CORE COMPLETE 2026-07-07 (the P404 failure class is closed):**
+- [x] `capture-story` I8 + content-subset at capture: rejects `story-maps: []` → refuse-and-route; requires real user-value + ≥1 acceptance criterion; bootstrap-exempt honored; SKILL swept consistent; bats 14/14. **DONE.**
+- [x] **ADR-096 commit-trailer gate** (`itil-no-implement-draft-gate.sh`, PreToolUse:Bash, wired): blocks a commit whose `Refs: STORY-NNN` names a draft story → route to `manage-story <NNN> accepted`; capture + bootstrap-exempt exempt; fail-open; `BYPASS_NO_IMPLEMENT_DRAFT=1`; bats 7/7. **DONE.**
+- [x] `manage-story`: `draft → in-progress` auto-transition removed; `accepted → in-progress` on first implementing commit (description, transition section, table, ADR ref). **DONE.**
+- [x] `work-problem` dispatch: the Known-Error story traversal refuse-and-routes on a draft story (no longer a silent skip), queues under AFK; auto-transition prose corrected. **DONE.**
+- [x] `capture-rfc`: template `## Tasks` → `## Stories`; `--fix-time` routes to capture-story-map + capture-story (stories on a map, not tasks) — closes the AFK path that produced the task-based RFC. **DONE.** (`docs/rfcs/README.md` already aligned.)
+- [x] `itil-commit-trailer-transition-advisory.sh` realigned to `accepted → in-progress`.
+
+**Why the core is complete:** the three surfaces the AFK flow used to produce the P404 artefacts are now all gated — a mapless story cannot be captured (capture-story refuse-and-route), a task-based RFC is not scaffolded (capture-rfc → stories-on-a-map), and a draft story cannot be implemented (the commit-trailer gate blocks it). `capture-story-map` already exists, so the refuse-and-route has a real destination. All released via `@windyroad/itil` (changeset `p404-story-lifecycle-gates`).
+
+**Residual cleanup (does NOT block the failure-class closure):**
+- [ ] Back-fill the two legacy mapless survivors **STORY-037** (P408, verifying — commit-gate cadence, JTBD-001) and **STORY-038** (P345, known-error — fix-titled lifecycle, JTBD-006). Neither fits the two existing maps (STORY-MAP-001 RFC-framework-bootstrap; STORY-MAP-002 decompose-a-fix/JTBD-008), and they are unrelated to each other — fabricating a map for two disconnected legacy stragglers is worse than leaving them. Correct handling is per-story: confirm whether each is still needed given its parent problem's progress (P408's fix shipped), then either author/assign an appropriate map via `capture-story-map` or archive the redundant straggler. Small, specific, human-judgment task.
+- [ ] promptfoo eval case exercising the capture-time refuse-and-route on the AFK path (the CI eval-agents gate is the behavioural harness; bats cover the observable invariants).
 
 Original reopen tasks (superseded/subsumed by the above where ticked):
 
