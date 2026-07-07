@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 92 (83 in-force, 9 historical)
+**Total ADRs:** 94 (85 in-force, 9 historical)
 
 ---
 
 ## In-force decisions
 
-_83 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_85 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -243,7 +243,7 @@ _83 ADRs. These are the current rules. The architect agent reads this section fi
 
 ### ADR-060 — Problem-RFC-Story framework with mandatory problem-trace and unified problem ontology
 **Status:** accepted | **Oversight:** confirmed
-**Related:** ADR-032
+**Related:** ADR-095, ADR-032
 
 ### ADR-061 — Dogfood graduation criteria for held changesets — symmetric risk balance drives the reinstate decision
 **Status:** proposed | **Oversight:** unconfirmed
@@ -412,6 +412,14 @@ _83 ADRs. These are the current rules. The architect agent reads this section fi
 **Chosen:** Chosen option: **native `/goal` external evaluator**, because it moves the stop decision to an independent per-turn evaluator — the only option that structurally breaks the same-actor conflation — and it is the mechanism the user pinned...
 **Confirmation:** packages/itil/skills/work-problems/SKILL.md contains a Step 0e (/goal loop-anchor) section carrying the canoni...; Step 2.4 Gate (0) prose requires the re-scan classification be PRINTED in turn output.; Paired promptfoo Tier-A/Tier-B eval cases in packages/itil/skills/work-problems/eval/promptfooconfig.yaml asse...; Empirical probe results (Skill-tool rejection message, headless recognition JSON) recorded in this ADR and in ...
 **Related:** ADR-032, ADR-044, ADR-026, ADR-061, ADR-075, ADR-093
+
+### ADR-095 — Story-map membership and story-content completeness are enforced at capture
+**Status:** proposed | **Oversight:** confirmed
+**Chosen:** Chosen option: **A.** Amends ADR-060:
+
+### ADR-096 — A story cannot be implemented while in draft — implementation requires accepted
+**Status:** proposed | **Oversight:** confirmed
+**Chosen:** Chosen option: **A.** Amends ADR-060:
 
 ---
 
