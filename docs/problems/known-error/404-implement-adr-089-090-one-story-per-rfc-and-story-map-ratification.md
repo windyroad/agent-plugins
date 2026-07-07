@@ -100,7 +100,22 @@ The user observed the live AFK flow (P160 iter, session 2026-07-05) producing ex
 
 ### Phase 3 — capture-time enforcement + story-map authoring (reopen scope)
 
-- [ ] `capture-story` / `manage-story`: story-map membership is **mandatory at capture** — `story-maps: []` is invalid. If no suitable map exists, the flow must create/extend one (delegate to `capture-story-map` / `manage-story-map`), not emit an empty list. Kill the "(populate at accepted transition per I8)" deferral prose; amend I8 (ADR-060) accordingly — architect review required.
+**Governance landed 2026-07-07 (the ratification-gated core):** the capture-time-enforcement + no-implement-draft design was architect-reviewed (twice, on the widened scope) and **user-ratified via the draft-then-confirm flow** (AskUserQuestion, per P357 — I initially mis-marked an ADR confirmed off the pre-draft choice; user corrected, flipped to draft-then-confirm). Shipped:
+- **ADR-095** (confirmed) — story-map membership (I8) + the story-content INVEST subset (Valuable + Testable) enforced at CAPTURE; refuse-and-route when no map; documented ADR-032 deviation; `draft` state redefined.
+- **ADR-096** (confirmed) — a `draft` story is never implementable: remove ADR-060's `draft → in-progress` auto-transition; implementation requires `accepted`; **commit-trailer gate** (`Refs: STORY-NNN` → block if the story is not `accepted`) is the primary enforcement locus.
+- **ADR-060** amended in lockstep (I8/I10 enforcement points, draft/in-progress lifecycle rows, capture-story/manage-story surfaces, `Refs:` trailer vocab). `docs/rfcs/README.md` template aligned (stories not tasks). Compendium regenerated.
+
+**Implementation progress:**
+- [x] `capture-story` I8 + content-subset at capture (commit `<this session>`): rejects `story-maps: []` → refuse-and-route; requires real user-value + ≥1 acceptance criterion; bootstrap-exempt honored; SKILL swept consistent; bats 14/14 (added the I8-at-capture invariant + refuse-and-route contract). **DONE.**
+- [ ] **ADR-096 commit-trailer gate** (the no-implement-draft teeth): a hook parsing `Refs: STORY-NNN` that blocks a commit when the story is not `accepted`/`in-progress`; + bats. **NEXT — highest value.**
+- [ ] `manage-story`: remove the `draft → in-progress` auto-transition; `accepted → in-progress` only.
+- [ ] `work-problems` / `work-problem` dispatch preflight: change the silent draft-skip to a hard refuse-and-route.
+- [ ] `capture-rfc` / `manage-rfc` SKILL bodies: stop scaffolding `## Tasks` (README already aligned).
+- [ ] promptfoo eval case for the capture-time gate firing on the AFK path.
+
+Original reopen tasks (superseded/subsumed by the above where ticked):
+
+- [x] `capture-story` / `manage-story`: story-map membership is **mandatory at capture** — `story-maps: []` is invalid. If no suitable map exists, the flow must create/extend one (delegate to `capture-story-map` / `manage-story-map`), not emit an empty list. Kill the "(populate at accepted transition per I8)" deferral prose; amend I8 (ADR-060) accordingly — architect review required.
 - [~] `capture-rfc` / `manage-rfc`: RFC work-breakdown is **stories, not tasks** — stop scaffolding `## Tasks` for new RFCs; the `stories:` list is populated at authoring time with stories that live on a story map. Update `docs/rfcs/README.md` template guidance. **PARTIAL (2026-07-06)**: `docs/rfcs/README.md` `## Tasks` section reframed SUPERSEDED-by-Stories + `## Stories` lazy-empty language removed (aligned with ratified ADR-089). REMAINING (ratification-gated, folded with the I8 amendment below): the `capture-rfc`/`manage-rfc` SKILL bodies still scaffold `## Tasks` skeletons — changing them to author stories-on-a-map is coupled to the ADR-060 I8 capture-time-enforcement amendment.
 - [ ] Story-map authoring wired into the fix flow: `work-problems` / `work-problem` / I13 fix-vehicle creation must produce (or extend) a story map whose stories the RFC references — STORY-MAP-002 is the golden exemplar of the output shape.
 - [ ] Behavioural bats proving the capture-time gates fire on the AFK path (not just the accepted transition): a `capture-story` without a resolvable map is rejected; a new RFC with a `## Tasks` body / empty `stories:` is rejected at authoring.
