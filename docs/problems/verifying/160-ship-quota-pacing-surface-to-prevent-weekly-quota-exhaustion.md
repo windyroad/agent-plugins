@@ -91,6 +91,8 @@ The fix is a new pacing surface, not a tweak to an existing one. Open design que
 - [x] ~~Wire AFK orchestrator between-iter integration (Q5)~~ — SUPERSEDED by Correction 2: the throttle is a **frequently-firing PreToolUse hook across ALL work** (interactive + AFK), which subsumes the narrower between-iter checkpoint.
 - [x] Behavioural bats — SHIPPED: `packages/shared/test/quota-pace-throttle.bats`, 8/8 green (ahead-of-pace sleeps capped; behind-pace fast no-op; tighter-window-wins; weekly-headroom; fail-open on missing/malformed cache; recent-check no-op; never emits deny).
 - [ ] Document in BRIEFING.md as the token-budget analogue of ADR-038's context budget (follow-on; does NOT block verification).
+- [ ] **Adopter-inert producer gap (folded from user audit 2026-07-07).** The throttle ships the CONSUMER (`quota-pace-throttle.sh` hook, synced ×7) but NOT the PRODUCER of its data source. `~/.claude/quota-state.json` is written ONLY by the user's statusline (`~/.claude/statusline-command.sh`, lines 223-226) — Claude Code passes `.rate_limits` to no other surface. The producer exists only as a copy-paste snippet in `QUOTA-THROTTLE-SETUP.md`; there is no first-run nudge, no plugin-contributed statusline, and no staleness guard. **Out of the box an adopter's hook fail-opens forever → zero throttling.** It works for the maintainer solely because the statusline was hand-wired. Fix options: ship a plugin-contributed statusLine, OR a SessionStart absent-cache nudge (already a deferred RFC-046 slice), OR both. This is the "solved only for me" gap.
+- [ ] **Own-plugin extraction (folded from user audit 2026-07-07).** Quota-pacing is a cross-cutting, general-purpose capability with nothing to do with governance, yet it ships as a hook synced verbatim across 7 governance plugins whose canonical home (`packages/shared/`) is not itself installable. A proper JTBD/USM (see P443) shows it is independent of the other user-story-maps → it belongs in its **own** plugin (`@windyroad/quota-pacing`?). An adopter who wants only quota-pacing should not have to install a governance plugin, and the capability should not be maintained as 7 synced copies. **Ratification-gated — surface the plugin-home + name to the user.**
 
 ## Dependencies
 
@@ -196,3 +198,16 @@ maintainer's ratification at `/wr-architect:review-decisions` + `/wr-itil:manage
 
 Awaiting: (1) user verification that pacing behaves as intended over a real window;
 (2) governance ratification of ADR-093/RFC-046. The code path is live meanwhile.
+
+## Verification inadequate — reopen pending (user audit 2026-07-07)
+
+The maintainer verified the throttle live and found it **works — but only for the maintainer**, and the delivery is inadequate on three axes. Verbatim substance: *"Yes, the problem got solved, but only for me. … the problem doesn't specify the persona it impacts. How can you solve it for the user if you don't know who the user is? … if you had done a proper JTBD and USM, you would have seen it was independent of the other USMs and belonged in its own plugin."*
+
+Confirmed 2026-07-07 (see verification session):
+
+1. **Working for the maintainer.** The hook is installed in the active cache, firing every tool call, and on live numbers (weekly 74% used at 43% elapsed) actively glide-path throttling ~37s/call. The mechanism is sound.
+2. **Inert for adopters.** The data producer is not shipped (folded gap above) — an adopter gets the hook but no throttling.
+3. **Mis-placed.** Synced across 7 governance plugins instead of its own (folded gap above).
+4. **Broken governance lineage.** Wrong/absent grounding JTBD + persona; orphaned STORY-039 / STORY-MAP-003; RFC-046 `proposed` while this ticket is `verifying`. Captured as **P443** (blocks honest verification of this ticket) + folded into **P404** (systemic gate-gaps).
+
+**This ticket must NOT close** until (a) P443's lineage repair lands (correct JTBD/persona/USM), (b) the adopter-inert producer gap is closed, and (c) the own-plugin extraction is ratified + done. Per the P404/P390 verification-failure precedent this is a candidate for `verifying → known-error` reopen + re-rate; that lifecycle+severity move is **queued for user ratification** (the acute "loops halt mid-flight" pain the severity-20 rating captured is itself mitigated by the shipped throttle, so the remaining scope re-rates lower — a judgment left to the user).
