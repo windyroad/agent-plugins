@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>STORY-MAP-003: Sustain My Token Quota Across the Week and Across Surfaces</title>
+  <meta name="story-map-id" content="STORY-MAP-003">
+  <meta name="status" content="draft">
+  <meta name="human-oversight" content="unconfirmed">
+  <meta name="problems" content="P160,P443">
+  <meta name="rfcs" content="RFC-046">
+  <meta name="jtbd" content="JTBD-010">
+  <meta name="adrs" content="ADR-093">
+  <meta name="reported" content="2026-07-08">
+  <meta name="decision-makers" content="Tom Howard">
+  <style>
+    /* Layout-only rules per docs/STYLE-GUIDE.md.
+       No styling on data-bearing elements; status conveyed by neighbour
+       prose rather than inline style. */
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 1200px;
+      margin: 1rem auto;
+      padding: 0 1rem;
+    }
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.125rem; margin-top: 1.5rem; }
+    .backbone {
+      display: grid;
+      grid-template-columns: repeat(var(--cols), 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .rib-header { grid-column: 1 / -1; border-bottom: 1px solid #ccc; padding-bottom: 0.25rem; }
+    .rib { display: contents; }
+    .activity { font-weight: 600; border-bottom: 2px solid #999; padding-bottom: 0.25rem; }
+    .slice {
+      border: 1px solid #ccc;
+      padding: 0.5rem;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .slice:hover { border-color: #666; }
+    .note { padding: 0.5rem; color: #555; }
+  </style>
+</head>
+<body>
+  <h1>STORY-MAP-003: Sustain My Token Quota Across the Week and Across Surfaces</h1>
+
+  <p>User-story map for <strong>JTBD-010</strong> (Sustain My Token Quota Across the Week and Across Surfaces), grounding the reopened <strong>P160</strong> and its lineage-repair ticket <strong>P443</strong>. Backbone (the developer's journey across a week on one shared account quota) &times; ribs (releases) &times; slices (stories), per Patton, <em>User Story Mapping</em> (O'Reilly, 2014). Born <code>human-oversight: unconfirmed</code> per ADR-090 &mdash; awaiting ratification via <code>/wr-itil:manage-story-map</code>.</p>
+
+  <p>This map exists to make the extraction argument concrete: quota-pacing shares <strong>no backbone activity</strong> with the two existing story maps (STORY-MAP-001 and STORY-MAP-002, both JTBD-008 "decompose a fix into coordinated changes"). It is an independent journey, which is why the capability belongs in its own plugin (<code>@windyroad/quota-pacing</code>, ratified 2026-07-08) rather than synced across the seven governance plugins. Release 1 (the throttle) shipped 2026-07-06; Release 2 (own plugin + self-installing producer) is the fix that closes the P160/P443 adopter-inert and mis-placement gaps.</p>
+
+  <section class="backbone" style="--cols: 5">
+    <header class="rib-header">
+      <h2 data-rib="backbone">Backbone &mdash; the developer's journey across a week on one shared quota</h2>
+    </header>
+    <div class="rib">
+      <div class="activity" data-activity="1-quota-state-reaches-tooling">1. Quota state reaches my tooling</div>
+      <div class="activity" data-activity="2-every-call-self-paces">2. Every tool call self-paces</div>
+      <div class="activity" data-activity="3-ease-back-when-ahead">3. Ease back when ahead, don't stop</div>
+      <div class="activity" data-activity="4-keep-weekly-headroom">4. Keep weekly headroom for chat/Cowork</div>
+      <div class="activity" data-activity="5-works-without-hidden-setup">5. Works without hidden setup</div>
+    </div>
+  </section>
+
+  <section class="backbone" style="--cols: 5">
+    <header class="rib-header">
+      <h2 data-rib="release-1-shipped">Release 1 &mdash; the shipped throttle (released 2026-07-06)</h2>
+    </header>
+    <div class="rib">
+      <div class="note" data-activity="1">Statusline writes <code>~/.claude/quota-state.json</code> (maintainer hand-wired &mdash; the adopter-inert gap).</div>
+      <a class="slice" href="../../stories/draft/STORY-039-throttle-token-burn.md"
+         data-story-id="STORY-039" data-rfc="RFC-046" data-jtbd="JTBD-010" data-status="draft"
+         style="grid-column: 2 / 5;">
+        STORY-039: Throttle token burn against the quota windows (mechanical PreToolUse calculated sleep + glide-path ease-back + 5pp weekly headroom). Code shipped; story back-documented (draft).
+      </a>
+      <div class="note" data-activity="5">Gap: inert for adopters until the statusline snippet is wired.</div>
+    </div>
+  </section>
+
+  <section class="backbone" style="--cols: 5">
+    <header class="rib-header">
+      <h2 data-rib="release-2-the-fix">Release 2 &mdash; the fix: own plugin + self-installing producer</h2>
+    </header>
+    <div class="rib">
+      <a class="slice" href="../../stories/draft/STORY-043-self-installing-quota-producer.md"
+         data-story-id="STORY-043" data-rfc="RFC-046" data-jtbd="JTBD-010" data-status="draft"
+         style="grid-column: 1 / 2;">
+        STORY-043: Self-install the quota-state producer (SessionStart hook; implied-at-install consent + opt-out; mechanism ADR at build).
+      </a>
+      <a class="slice" href="../../stories/draft/STORY-042-extract-quota-pacing-plugin.md"
+         data-story-id="STORY-042" data-rfc="RFC-046" data-jtbd="JTBD-010" data-status="draft"
+         style="grid-column: 2 / 5;">
+        STORY-042: Extract into <code>@windyroad/quota-pacing</code> (opt-in; retire the 7-plugin sync; rework the recent-check marker for concurrent-session grip).
+      </a>
+      <a class="slice" href="../../stories/draft/STORY-043-self-installing-quota-producer.md"
+         data-story-id="STORY-043" data-rfc="RFC-046" data-jtbd="JTBD-010" data-status="draft"
+         style="grid-column: 5 / 6;">
+        STORY-043: Producer self-installs &mdash; closes the "works without hidden setup" gap (JTBD-010 outcome #7).
+      </a>
+    </div>
+  </section>
+
+  <section class="backbone" style="--cols: 5">
+    <header class="rib-header">
+      <h2 data-rib="release-3-future">Release 3 &mdash; future (deferred)</h2>
+    </header>
+    <div class="rib">
+      <div class="note" data-activity="1" style="grid-column: 1 / 2;">Cross-surface, account-wide quota read (beyond the statusline cache) &mdash; P160 Q6; deferred, no story yet.</div>
+      <div class="note" data-activity="4" style="grid-column: 4 / 5;">Tunable weekly headroom per adopter &mdash; deferred.</div>
+    </div>
+  </section>
+</body>
+</html>
