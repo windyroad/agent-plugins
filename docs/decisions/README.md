@@ -402,10 +402,11 @@ _85 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-092 — Fix-titled-commit lifecycle drift surfaces as an advisory, never an auto-fire or hard gate
 **Status:** proposed | **Oversight:** unconfirmed
 **Chosen:** Chosen option: **post-commit advisory hook**, because **a lifecycle transition may only be automated on observable facts, and O→KE rests on a knowledge claim** — so the strongest honest surface for the fix-titled-commit signal is an adv...
-
 ### ADR-093 — Mechanical quota-pace throttle — frequently-firing PreToolUse hook, calculated sleep, never blocks
-**Status:** proposed | **Oversight:** unconfirmed
-**Chosen:** Chosen option 3, distributed per option 4's mitigation: canonical hook `packages/shared/hooks/quota-pace-throttle.sh`, synced to the seven published plugins (architect, itil, jtbd, tdd, risk-scorer, style-guide, voice-tone) by `scripts/sync...
+**Status:** proposed | **Oversight:** confirmed
+**Decides:** A matcher-less PreToolUse hook fires on every tool call, reads the `~/.claude/quota-state.json` cache, and sleeps (capped per firing) just enough to keep cumulative usage under the elapsed fraction of the tighter 5h/7d window — mechanical, no nudge, fail-open (never blocks or asks) — so all work (interactive and AFK) self-throttles to land at quota resets with headroom instead of hard-stopping mid-flight. Amended 2026-07-08: retired the seven-plugin sync for a dedicated opt-in `@windyroad/quota-pacing` plugin with a self-installing statusline producer (implied-at-install consent + opt-out).
+**Confirmation:** behind-pace fast no-op; ahead-of-pace sleeps the calculated amount (+ one real capped-sleep wall-clock case); 7d-headroom violation throttles even when raw usage < elapsed; recent-check marker short-circuit; missing/stale cache, kill-switch, and past `resets_at` all no-op; exit 0 and empty stdout on every path; extraction + self-installer bats land with STORY-042/043.
+**Related:** ADR-017, ADR-013, ADR-057, ADR-045, ADR-023, ADR-002, ADR-003, ADR-066, ADR-038, ADR-074, ADR-034, ADR-030
 
 ### ADR-094 — AFK loops anchor completion with the native `/goal` external evaluator
 **Status:** proposed | **Oversight:** unconfirmed
