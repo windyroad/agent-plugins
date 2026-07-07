@@ -3,12 +3,13 @@ status: proposed
 job-id: sustain-token-quota
 persona: developer
 date-created: 2026-07-07
-human-oversight: unconfirmed
+human-oversight: confirmed
+oversight-date: 2026-07-07
 ---
 
 # JTBD-010: Sustain My Token Quota Across the Week and Across Surfaces
 
-> **Born `human-oversight: unconfirmed` (ADR-068 / P288).** Drafted 2026-07-07 to ground P160 / P443 (quota-pacing was shipped anchored to the wrong/narrow JTBD-006 "Progress the Backlog While I'm Away"; the throttle actually fires on ALL work, not just AFK). Awaiting user ratification via `/wr-jtbd:confirm-jobs-and-personas` — confirm / amend the job statement + outcomes, or reject.
+> **Ratified 2026-07-07** (user confirmed the job statement + outcomes "as drafted" via a briefed `AskUserQuestion` confirm event — a genuine ratification per ADR-068 / P288 / P357). Authored to ground P160 / P443 (quota-pacing was shipped anchored to the wrong/narrow JTBD-006 "Progress the Backlog While I'm Away"; the throttle actually fires on ALL work, not just AFK). Note: outcome #7 ("works out-of-the-box") is retained as the true desired outcome; the platform ceiling — the statusline is the only surface exposed to `.rate_limits` and no plugin can ship it, so a one-time statusline setup is unavoidable — is a **solution** constraint recorded in P160, not a weakening of the job.
 
 ## Job Statement
 
