@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-06 **P160 + P390 → Verification Pending** — both fixes shipped and released. P160 (quota-pacing): the frequently-firing calculated-sleep throttle + the smart glide-path controller (over-pace work slows proportionally and eases back onto pace before quota exhaustion, per user refinement) released across 7 plugins (itil 0.57.3). P390 (premature ALL_DONE): the `/goal` external-evaluator loop-anchor released (itil 0.57.2). Both moved from Rankings → Verification Queue; awaiting live verification + ratification of ADR-093/094 + RFC-046/047 (born unconfirmed).
+> Last reviewed: 2026-07-07 **P443 captured** — quota-pacing (P160/RFC-046/ADR-093) shipped without a grounded JTBD→persona→USM→RFC→story lineage: wrong/narrow JTBD-006 (AFK) anchor with no general quota-sustainability job, orphaned STORY-039 + STORY-MAP-003 references, RFC-046 `proposed` while P160 `verifying`, and consequent mis-placement as a 7-plugin synced hook instead of its own plugin. Lineage-repair ticket (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -47,6 +47,7 @@ Internally-reported tickets (`Origin: internal` / `corrective-feedback`). Ranked
 | 8.0 | P345 | Fix-titled commits do not transition the ticket lifecycle in the same commit grain — ticket stays Open across release + CI-verify + multiple intervening commits | 8 Medium | Known Error | M | 2026-05-31 | internal |
 | 8.0 | P375 | Repo conflates a "named re-entry point" with a self-firing cadence — deferrals not transitively reachable from an automatic trigger rot | 16 High | Known Error | L | 2026-06-23 | internal |
 | 7.5 | P359 | Changeset holding does not withhold shipment — held code ships with any sibling release | 15 High | Known Error | L | 2026-06-11 | internal |
+| 7.5 | P443 | Quota-pacing (P160/RFC-046/ADR-093) shipped without a grounded JTBD→persona→USM→RFC→story lineage — wrong/narrow JTBD anchor, orphaned STORY-039 + STORY-MAP-003, RFC proposed while problem verifying, mis-placed across 7 plugins | 15 High | Open | L | 2026-07-07 | internal |
 | 6.0 | P305 | Post-Edit silent revert of working-tree files before commit — potential silent-work-loss hazard | 6 Med | Known Error | M | 2026-05-26 | internal |
 | 6.0 | P404 | Implement ADR-089 + ADR-090 (≥1-story-per-RFC + story-map/story ratification) — reopened; gates only fire at accepted transitions, so AFK flow still authors task-based RFCs and mapless stories, and nothing ever creates a story map (story MUST belong to a map at capture) | 12 High | Known Error | L | 2026-07-02 | corrective-feedback (user, 2026-07-05 reopen) |
 | 6.0 | P395 | external-comms agent silently goes dormant on the credibility axis — no nudge to author the missing RISK-POLICY section | 12 High | Open | M | 2026-06-28 | corrective-feedback (user, 2026-06-28) |
