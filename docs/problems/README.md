@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-07 **P160 reopened → Known Error (Severity 20, Tier 0)** — quota-pacing verification FAILED (user audit): the throttle works for one hand-wired maintainer machine but is INERT for every adopter (the `~/.claude/quota-state.json` producer is user-owned statusline config no plugin can ship — authoritative Claude Code constraint) and is mis-placed across 7 governance plugins. Severity kept at 20 because the pain is undiminished for everyone not on that one machine. Grounding JTBD-010 authored (born unconfirmed); ratified fix = extract `@windyroad/quota-pacing` + SessionStart absent-cache nudge + repair lineage (P443).
+> Last reviewed: 2026-07-08 **P444 captured** — agent buries granular design decisions (default values, thresholds, policy choices) inside artefacts (ADR mechanics, story criteria) where they pass artefact-level ratification unsurfaced, escaping real oversight. Driving witness: the 5pp/0pp quota headroom the user only caught by opening STORY-039. Sibling of P357. Also reopened P404 (story-map authoring solved for maintainer not adopters).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -56,6 +56,7 @@ Internally-reported tickets (`Origin: internal` / `corrective-feedback`). Ranked
 | 8.0 | P375 | Repo conflates a "named re-entry point" with a self-firing cadence — deferrals not transitively reachable from an automatic trigger rot | 16 High | Known Error | L | 2026-06-23 | internal |
 | 7.5 | P359 | Changeset holding does not withhold shipment — held code ships with any sibling release | 15 High | Known Error | L | 2026-06-11 | internal |
 | 7.5 | P443 | Quota-pacing (P160/RFC-046/ADR-093) shipped without a grounded JTBD→persona→USM→RFC→story lineage — wrong/narrow JTBD anchor, orphaned STORY-039 + STORY-MAP-003, RFC proposed while problem verifying, mis-placed across 7 plugins | 15 High | Open | L | 2026-07-07 | internal |
+| 7.5 | P444 | Agent buries granular design decisions (default values, thresholds, policy choices) in artefacts — they pass artefact-level ratification unsurfaced, escaping oversight (5pp/0pp headroom witness) | 15 High | Open | M | 2026-07-08 | internal |
 | 6.0 | P305 | Post-Edit silent revert of working-tree files before commit — potential silent-work-loss hazard | 6 Med | Known Error | M | 2026-05-26 | internal |
 | 6.0 | P404 | Implement ADR-089 + ADR-090 (≥1-story-per-RFC + story-map/story ratification) — reopened; gates only fire at accepted transitions, so AFK flow still authors task-based RFCs and mapless stories, and nothing ever creates a story map (story MUST belong to a map at capture) | 12 High | Known Error | L | 2026-07-02 | corrective-feedback (user, 2026-07-05 reopen) |
 | 6.0 | P395 | external-comms agent silently goes dormant on the credibility axis — no nudge to author the missing RISK-POLICY section | 12 High | Open | M | 2026-06-28 | corrective-feedback (user, 2026-06-28) |
