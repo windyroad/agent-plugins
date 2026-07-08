@@ -23,7 +23,7 @@ estimated-effort: L
 
 ## User value (required, INVEST Valuable)
 
-In order to get token pacing actually working the moment I install the plugin — not silently inert until I happen to hand-wire my statusline — as a developer installing `@windyroad/quota-pacing`, I want the plugin to self-install its own data producer, so throttling works out of the box (or from the next session) with no invisible one-time setup step whose absence disables it (JTBD-010 outcome #7; closes the P160/P443 adopter-inert gap).
+In order to get token pacing actually working the moment I install the plugin — not silently inert until I happen to hand-wire my statusline — as a developer installing `@windyroad/cruise`, I want the plugin to self-install its own data producer, so throttling works out of the box (or from the next session) with no invisible one-time setup step whose absence disables it (JTBD-010 outcome #7; closes the P160/P443 adopter-inert gap).
 
 ## Acceptance criteria (accepted-gate, INVEST Testable)
 

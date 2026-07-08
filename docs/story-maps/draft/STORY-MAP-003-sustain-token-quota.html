@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta name="human-oversight" content="confirmed">
-  <meta name="oversight-hash" content="8f426b49d7eb57ca52d9cf37445fc0a67feff765d806b23d5d5b1a76a0d2ae9f">
+  <meta name="oversight-hash" content="5fe6508ab1409ed678421a388ab31d15d9e8d5f45ddeed1897fc2b8961f2539c">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>STORY-MAP-003: Sustain my token quota across the week and across surfaces</title>
@@ -131,7 +131,7 @@
     <h2 id="trace-h">Traces</h2>
     <p><strong>Persona:</strong> developer — shares one Claude account quota across Code, chat, and Cowork; wants pacing to be mechanical and silent, not a status line to babysit.</p>
     <p><strong>Job mapped:</strong> JTBD-010 (Sustain My Token Quota Across the Week and Across Surfaces) across the five activities above.</p>
-    <p><strong>Independence:</strong> none of these five activities appear on STORY-MAP-001 or STORY-MAP-002 (both JTBD-008, "decompose a fix"). Zero shared backbone → quota-pacing is its own journey → its own <code>@windyroad/quota-pacing</code> plugin (ADR-093 amendment, 2026-07-08).</p>
+    <p><strong>Independence:</strong> none of these five activities appear on STORY-MAP-001 or STORY-MAP-002 (both JTBD-008, "decompose a fix"). Zero shared backbone → quota-pacing is its own journey → its own <code>@windyroad/cruise</code> plugin (ADR-093 amendment, 2026-07-08).</p>
     <p><strong>Open gaps (Later / Next):</strong> it protects only a hand-wired machine, not adopters (P160/P443); pacing counts only Code burn, not chat/Cowork (P160 Q6); own opt-in plugin not yet built (STORY-042); self-installing producer + its recorded consent/mechanism decision (STORY-043 · a dedicated ADR).</p>
     <p><strong>Decisions the journey rests on:</strong> ADR-093 (mechanical quota-pace throttle; amended 2026-07-08 → own opt-in plugin + self-installing producer, implied-at-install consent + opt-out); grounded in JTBD-010; problems P160 (reopened Known Error, Sev 20) + P443 (lineage repair).</p>
   </section>
