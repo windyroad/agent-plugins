@@ -1,8 +1,9 @@
 ---
-status: proposed
+status: accepted
 rfc-id: quota-pace-throttle-hook-frequently-firing-pretooluse
 reported: 2026-07-06
-human-oversight: unconfirmed
+human-oversight: confirmed
+oversight-date: 2026-07-09
 decision-makers: [Tom Howard]
 problems: [P160, P443]
 adrs: [ADR-093]
@@ -13,7 +14,7 @@ story-maps: [STORY-MAP-003]
 
 # RFC-046: Quota-pace throttle — mechanical PreToolUse pacing, extracted into `@windyroad/cruise`
 
-**Status**: proposed
+**Status**: accepted (2026-07-09)
 **Reported**: 2026-07-06
 **Problems**: P160, P443
 **ADRs**: ADR-093

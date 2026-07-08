@@ -1,6 +1,6 @@
 # RFC Backlog
 
-> Last reviewed: 2026-07-03 **RFC-037 → verifying** — implementation complete (ADR-089/090; STORY-020/021/022/024/025 done + ratified); Confirmation met with commit evidence; awaiting P404 verification to close.
+> Last reviewed: 2026-07-09 **RFC-046 → accepted** — quota-pace throttle, extracted into @windyroad/cruise; re-anchored to JTBD-010, traces P160+P443 → STORY-MAP-003 → STORY-039/042/043 (all ratified). Release 1 (the throttle) shipped; Release 2 (extract cruise + self-installing producer + config file, each gated on its mechanism ADR) to build.
 > Run `/wr-itil:manage-rfc review` to refresh once the manage-rfc skill ships.
 
 ## Status
@@ -130,6 +130,7 @@ One row per RFC in `proposed` / `accepted` / `in-progress` status. RFC-level WSJ
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported |
 |------|-----|-------|----------|--------|--------|----------|
+| 10.0 | RFC-046 | Quota-pace throttle — mechanical PreToolUse pacing, extracted into @windyroad/cruise | 20 Critical | accepted | L | 2026-07-06 |
 | 8.0 | RFC-036 | Plugin-staleness surfacer | 16 High | accepted | L | 2026-07-02 |
 | 3.0 | RFC-005 | RFC-first trace invariant not enforced at fix-time | 3 Med | accepted | M | 2026-05-17 |
 
