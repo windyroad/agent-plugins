@@ -9,7 +9,7 @@ rfcs: [RFC-046]
 story-maps: [STORY-MAP-003]
 estimated-effort: M
 human-oversight: confirmed
-oversight-hash: 80a799ac190d9a744417e304a0ccb1acc93219e12221ba5c2cd2d1fa1acaecb3
+oversight-hash: 1417aeb2d8062969b90296a5f4a1724ae6509b06817dd8772dc5df3c90abab41
 ---
 
 # STORY-039: Throttle token burn against the quota windows
@@ -38,4 +38,4 @@ In order to keep working across a whole week without a mid-window quota hard-sto
 
 ## Notes
 
-- The throttle mechanics are normatively recorded in ADR-093 (ratified 2026-07-08). Release 2 (STORY-042 extraction + STORY-043 self-installing producer) re-homes this hook into `@windyroad/quota-pacing` and closes the adopter-inert gap; this story is the Release-1 baseline they build on.
+- The throttle mechanics are normatively recorded in ADR-093 (ratified 2026-07-08). Release 2 (STORY-042 extraction + STORY-043 self-installing producer) re-homes this hook into `@windyroad/cruise` and closes the adopter-inert gap; this story is the Release-1 baseline they build on.

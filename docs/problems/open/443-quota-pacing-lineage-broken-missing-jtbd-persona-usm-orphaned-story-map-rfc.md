@@ -24,7 +24,7 @@ Confirmed lineage defects (all verified against on-disk artefacts 2026-07-07):
 
 5. **Lifecycle inversion.** RFC-046 is `status: proposed` while P160 is `Verification Pending` **with a `## Fix Released` section** — shipped, released code and a verifying problem hanging off an **unaccepted** RFC. (JTBD-006 itself is `status: proposed`, though `human-oversight: confirmed` — the RFC builds on a proposed-lifecycle job.)
 
-6. **Consequence — mis-placement.** Because no proper JTBD/USM analysis was done, the capability's independence from the other user-story-maps was missed, and it was mis-placed as a hook **synced verbatim across 7 governance plugins** (`packages/shared/hooks/quota-pace-throttle.sh` → architect/itil/jtbd/risk-scorer/style-guide/tdd/voice-tone) whose canonical home (`packages/shared/`) is **not itself an installable plugin**. A proper USM would have shown it belongs in its **own** plugin (`@windyroad/quota-pacing`?).
+6. **Consequence — mis-placement.** Because no proper JTBD/USM analysis was done, the capability's independence from the other user-story-maps was missed, and it was mis-placed as a hook **synced verbatim across 7 governance plugins** (`packages/shared/hooks/quota-pace-throttle.sh` → architect/itil/jtbd/risk-scorer/style-guide/tdd/voice-tone) whose canonical home (`packages/shared/`) is **not itself an installable plugin**. A proper USM would have shown it belongs in its **own** plugin (`@windyroad/cruise`?).
 
 ## Symptoms
 
