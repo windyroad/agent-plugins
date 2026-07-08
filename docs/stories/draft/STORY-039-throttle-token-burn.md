@@ -2,13 +2,14 @@
 status: draft
 story-id: throttle-token-burn-against-quota-windows
 reported: 2026-07-08
-human-oversight: unconfirmed
 decision-makers: [Tom Howard]
 problems: [P160, P443]
 jtbd: [JTBD-010]
 rfcs: [RFC-046]
 story-maps: [STORY-MAP-003]
 estimated-effort: M
+human-oversight: confirmed
+oversight-hash: 80a799ac190d9a744417e304a0ccb1acc93219e12221ba5c2cd2d1fa1acaecb3
 ---
 
 # STORY-039: Throttle token burn against the quota windows
@@ -31,7 +32,7 @@ In order to keep working across a whole week without a mid-window quota hard-sto
 
 - [x] A matcher-less `PreToolUse` hook fires on every tool call and reads the statusline-written `~/.claude/quota-state.json` cache.
 - [x] When ahead of pace (usage% > elapsed% − headroom) on the governing (tighter) window, the hook sleeps the calculated glide-path catch-up — proportional ease-back, capped at 60s per firing — converging onto pace before the quota is consumed; behind pace it is a fast no-op that adds negligible latency.
-- [x] A 5pp weekly headroom is reserved for non-Claude-Code surfaces (chat/Cowork); the 5h window uses 0pp.
+- [x] A configurable weekly headroom is reserved for non-Claude-Code surfaces (chat/Cowork) — **defaults: 5pp weekly, 0pp for the 5h window** (user-ratified defaults 2026-07-08). Both are **tunable**, today via env vars (`WR_QUOTA_HEADROOM_7D_PP` / `WR_QUOTA_HEADROOM_5H_PP`); a per-project + per-machine config file follows in STORY-042. The values are defaults the user chose, not baked policy (P444).
 - [x] Fail-open on every abnormal path (missing/stale/malformed cache, kill-switch `WR_QUOTA_THROTTLE_DISABLE=1`, `resets_at` in the past, `jq` absent): exit 0, empty stdout, never emits `permissionDecision`, never blocks or asks.
 - [x] Behavioural bats green (`packages/shared/test/quota-pace-throttle.bats`): behind-pace no-op, ahead-of-pace calculated sleep, proportional ease-back (far-over sleeps strictly longer than mildly-over), 7d-headroom throttle, recent-check short-circuit, fail-open paths.
 

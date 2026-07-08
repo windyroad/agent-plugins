@@ -2,13 +2,14 @@
 status: draft
 story-id: self-installing-quota-producer
 reported: 2026-07-08
-human-oversight: unconfirmed
 decision-makers: [Tom Howard]
 problems: [P160, P443]
 jtbd: [JTBD-010]
 rfcs: [RFC-046]
 story-maps: [STORY-MAP-003]
 estimated-effort: L
+human-oversight: confirmed
+oversight-hash: 84065ec7d04ebf3ef687fd2b0e1efc62d5a6ba15b031ff5a8ff74e0700427759
 ---
 
 # STORY-043: Self-install the quota-state producer
