@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 95 (86 in-force, 9 historical)
+**Total ADRs:** 96 (87 in-force, 9 historical)
 
 ---
 
 ## In-force decisions
 
-_86 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_87 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -422,6 +422,9 @@ _86 ADRs. These are the current rules. The architect agent reads this section fi
 **Chosen:** Chosen option: **A.** Amends ADR-060:
 
 ### ADR-097 — Self-installing quota-state producer (SessionStart guarded-statusline edit)
+**Status:** proposed | **Oversight:** confirmed
+
+### ADR-098 — Cruise config file — layered precedence (project → machine → defaults)
 **Status:** proposed | **Oversight:** confirmed
 
 ---
