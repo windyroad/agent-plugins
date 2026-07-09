@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 94 (85 in-force, 9 historical)
+**Total ADRs:** 95 (86 in-force, 9 historical)
 
 ---
 
 ## In-force decisions
 
-_85 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_86 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -402,11 +402,10 @@ _85 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-092 — Fix-titled-commit lifecycle drift surfaces as an advisory, never an auto-fire or hard gate
 **Status:** proposed | **Oversight:** unconfirmed
 **Chosen:** Chosen option: **post-commit advisory hook**, because **a lifecycle transition may only be automated on observable facts, and O→KE rests on a knowledge claim** — so the strongest honest surface for the fix-titled-commit signal is an adv...
+
 ### ADR-093 — Mechanical quota-pace throttle — frequently-firing PreToolUse hook, calculated sleep, never blocks
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** A matcher-less PreToolUse hook fires on every tool call, reads the `~/.claude/quota-state.json` cache, and sleeps (capped per firing) just enough to keep cumulative usage under the elapsed fraction of whichever 5h/7d window is tighter — mechanical, no nudge, fail-open (never blocks or asks) — so all work (interactive and AFK) self-throttles to land at quota resets with headroom instead of hard-stopping mid-flight. Amended 2026-07-08: retired the seven-plugin canonical-sync in favour of a dedicated opt-in `@windyroad/cruise` plugin with a self-installing statusline producer (implied-at-install consent + opt-out), since the statusline is the only surface Claude Code exposes to `.rate_limits`.
-**Confirmation:** behind-pace fast no-op; ahead-of-pace sleeps the calculated amount (+ one real capped-sleep wall-clock case); 7d-headroom violation throttles even when raw usage < elapsed; recent-check marker short-circuit; missing/stale cache, kill-switch, and past `resets_at` all no-op; exit 0 and empty stdout on every path; extraction + self-installer bats land with STORY-042/043.
-**Related:** ADR-017, ADR-013, ADR-057, ADR-045, ADR-023, ADR-002, ADR-003, ADR-066, ADR-038, ADR-074, ADR-034, ADR-030
+**Chosen:** Chosen option 3 (mechanical PreToolUse calculated sleep), registered in `hooks.json` as `PreToolUse` with **no matcher** (every tool call — Correction 2 verbatim) and `timeout: 90`. **Plugin home — REVISED 2026-07-08 (see Amendment):** ...
 
 ### ADR-094 — AFK loops anchor completion with the native `/goal` external evaluator
 **Status:** proposed | **Oversight:** unconfirmed
@@ -421,6 +420,9 @@ _85 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-096 — A story cannot be implemented while in draft — implementation requires accepted
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **A.** Amends ADR-060:
+
+### ADR-097 — Self-installing quota-state producer (SessionStart guarded-statusline edit)
+**Status:** proposed | **Oversight:** confirmed
 
 ---
 
