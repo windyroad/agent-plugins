@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-07-03 **STORY-020/021/022/024/025 done** — RFC-037's five tooling stories implemented, ratified, and transitioned to done (all acceptance criteria met).
+> Last reviewed: 2026-07-09 **STORY-042 accepted** — quota-pacing extraction passes I7 (RFC-046) / I8 (STORY-MAP-003) / I10 INVEST; Rankings table backfilled with active stories from FS truth (Done-table backfill still outstanding — run `/wr-itil:manage-story review`). RFC-046 Release-2 build begins.
 >
 > Run `/wr-itil:manage-story review` to refresh once the manage-story skill ships.
 
@@ -108,10 +108,36 @@ Links to ADRs, JTBDs, retro docs, sibling stories, and the parent story map.
 
 ## Story Rankings
 
-(Empty — no stories captured yet. Bootstrap stories from P170 Phase 1 land in P170 Phase 2 Slice 8.)
+Active (non-done) stories, from filesystem truth. (The `## Done` backfill of terminal stories remains outstanding pre-existing debt — run `/wr-itil:manage-story review`.)
 
 | Status | ID | Title | Effort | Problems | RFCs | Story Map |
 |--------|-----|-------|--------|----------|------|-----------|
+| accepted | STORY-042 | Extract quota-pacing into its own plugin | L | P160, P443 | RFC-046 | STORY-MAP-003 |
+| draft | STORY-012 | Can't start coding without an RFC — the gate makes me create one first | S | P251, P314 | RFC-005 | STORY-MAP-002 |
+| draft | STORY-013 | Full gate: an RFC exists → I proceed; none → I create it first | M | P251, P314 | RFC-005 | STORY-MAP-002 |
+| draft | STORY-014 | Unattended, the agent works the plan and pauses for real decisions | M | P251, P314 | RFC-005 | STORY-MAP-002 |
+| draft | STORY-015 | The RFC lists its stories before any code is written | M | P251, P399 | RFC-005 | STORY-MAP-002 |
+| draft | STORY-016 | Every step is regression-proven | S | P251 | RFC-005 | STORY-MAP-002 |
+| draft | STORY-017 | Backfill-or-supersede the skeleton RFCs the repudiated mechanism left behind | M | P399, P375 | RFC-005 | STORY-MAP-002 |
+| draft | STORY-018 | Capture the problem in seconds, mid-flow | M | P155 | — | STORY-MAP-002 |
+| draft | STORY-019 | Find the root cause and a workaround → Known Error | M | P170 | — | STORY-MAP-002 |
+| draft | STORY-023 | Ship → verify → problem closes with a real trace; adopter gets the fix | M | P170 | — | STORY-MAP-002 |
+| draft | STORY-026 | Work the RFC's stories one at a time | M | P170 | RFC-005 | STORY-MAP-002 |
+| draft | STORY-027 | Capture a problem reported through an inbound channel | M | P170 | — | STORY-MAP-002 |
+| draft | STORY-028 | Acknowledge the report on capture | S | P170 | — | STORY-MAP-002 |
+| draft | STORY-029 | Share the workaround with the reporter | S | P170 | — | STORY-MAP-002 |
+| draft | STORY-030 | Tell the reporter a fix is underway | S | P170 | — | STORY-MAP-002 |
+| draft | STORY-031 | Tell the reporter it's released → verify → close the loop | M | P170 | — | STORY-MAP-002 |
+| draft | STORY-032 | Triage the report's disposition — accept, elicit a new job, or decline | M | P170, P401 | — | STORY-MAP-002 |
+| draft | STORY-033 | Loud cold-path diagnostic for oversight-marker shims | S | P368 | RFC-038 | — |
+| draft | STORY-034 | Warn once per new version when a session runs stale plugin code | M | P045, P375 | RFC-036 | — |
+| draft | STORY-035 | Home RFC decisions in ADRs and make the RFC-first trace unconditional | L | P310, P251 | RFC-006 | — |
+| draft | STORY-036 | Write the create-gate marker under every candidate session id | M | P260 | RFC-007 | — |
+| draft | STORY-037 | Commit gate honours the RISK-POLICY stated review cadence for staleness | S | P408 | RFC-043 | — |
+| draft | STORY-038 | Fix-titled commits surface a lifecycle-drift advisory | deferred | P345 | RFC-044 | — |
+| draft | STORY-039 | Throttle token burn against the quota windows | M | P160, P443 | RFC-046 | STORY-MAP-003 |
+| draft | STORY-040 | AFK loop anchored with the native `/goal` external evaluator | M | P390 | RFC-047 | STORY-MAP-002 |
+| draft | STORY-043 | Self-install the quota-state producer | L | P160, P443 | RFC-046 | STORY-MAP-003 |
 
 ## Done
 

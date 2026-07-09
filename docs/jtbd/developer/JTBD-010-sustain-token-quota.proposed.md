@@ -38,13 +38,6 @@ When I work with Claude across a whole week — in Claude Code and also in chat 
 - Manually choosing a smaller model (Opus → Sonnet → Haiku) to trade quality for tokens when burn is high.
 - Deferring non-essential governance work (retrospectives, audits) to early in the week when headroom is high.
 - Accepting mid-week exhaustion as a recoverable failure (wait for reset) — the failure this job exists to prevent.
-
-## Stories
-
-| ID | Title | Status |
-|----|-------|--------|
-| _(pending)_ | Story decomposition follows the USM authored from this job (P443) — the quota-pacing story map + its stories will be listed here once the JTBD is ratified and the USM is built. | — |
-
 ## Related
 
 - **P160** (Ship quota-pacing surface) — the driving capability; currently anchored to JTBD-006 (wrong/narrow). This job is its correct grounding.
@@ -52,3 +45,12 @@ When I work with Claude across a whole week — in Claude Code and also in chat 
 - **JTBD-006** (Progress the Backlog While I'm Away) — the AFK-only job quota-pacing was mis-anchored to. Related but distinct: JTBD-006 is *what* the agent does unattended; JTBD-010 is the *token budget* that must survive underneath all work, attended or not.
 - **JTBD-001** (Enforce Governance Without Slowing Down) — adjacent: governance verbosity is a major quota consumer, so this job is the counter-balance that keeps governance from starving the developer out of tokens. Distinct axis (budget-across-surfaces, not governance-speed).
 - **ADR-093** (mechanical quota-pace throttle) — the mechanism serving this job.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-042 | STORY-042: Extract quota-pacing into its own plugin | accepted |
+| STORY-039 | STORY-039: Throttle token burn against the quota windows | draft |
+| STORY-043 | STORY-043: Self-install the quota-state producer | draft |

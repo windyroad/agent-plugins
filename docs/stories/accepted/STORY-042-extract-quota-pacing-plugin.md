@@ -1,5 +1,5 @@
 ---
-status: draft
+status: accepted
 story-id: extract-quota-pacing-plugin
 reported: 2026-07-08
 decision-makers: [Tom Howard]
@@ -9,12 +9,12 @@ rfcs: [RFC-046]
 story-maps: [STORY-MAP-003]
 estimated-effort: L
 human-oversight: confirmed
-oversight-hash: 4c82246a6243ff2094c1909f970ec404ee60c9f89fc6bb80ad62223bd2e5ab27
+oversight-hash: f77049d37f331712ae9473f696725b3628e1f05a3cc051862e49a9716757c712
 ---
 
 # STORY-042: Extract quota-pacing into its own plugin
 
-**Status**: draft
+**Status**: accepted
 **Reported**: 2026-07-08
 **Problems**: P160, P443
 **JTBD**: JTBD-010

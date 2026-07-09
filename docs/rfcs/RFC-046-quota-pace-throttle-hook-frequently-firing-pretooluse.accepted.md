@@ -43,13 +43,6 @@ The mechanical quota-pace throttle (ADR-093): a matcher-less `PreToolUse` hook t
   - Extract the hook into a dedicated, opt-in `@windyroad/cruise` plugin; retire `scripts/sync-quota-pace-throttle.sh` + the 7-plugin sync; ADR-002 inventory / `marketplace.json` / `install.mjs` wiring; rework the machine-wide recent-check marker for per-session grip under concurrent sessions.
   - A **config file** for the knobs (headroom / cap / kill-switch) resolved **project → machine → built-in defaults** (env vars a final override). The config *mechanism* (exact keys, file name/location, precedence) is deferred to its own build-time ADR (P444) — not baked in silently.
   - A self-installing producer (SessionStart hook: create/patch the statusline cache-writer / agent-merge fallback), gated on its own mechanism ADR (write shape + consent) before build.
-
-## Stories
-
-- **STORY-039** — Throttle token burn against the quota windows. **done** (shipped Release 1).
-- **STORY-042** — Extract into `@windyroad/cruise` (opt-in) + config file. **ratified**, to build.
-- **STORY-043** — Self-install the quota-state producer. **ratified**, to build (blocked-by its mechanism ADR).
-
 ## Deferred (non-story slices, pending their own decisions)
 
 - Config-mechanism ADR (P444) — settles the config-file shape before STORY-042's config work.
@@ -68,3 +61,12 @@ The mechanical quota-pace throttle (ADR-093): a matcher-less `PreToolUse` hook t
 - **JTBD-010** (Sustain My Token Quota Across the Week and Across Surfaces — the driver, ratified).
 - **JTBD-006** (Progress the Backlog While I'm Away) — the AFK-only job this was originally *mis-anchored* to (P443); related but not the driver, since the throttle fires on interactive work too. JTBD-001 / JTBD-302 — adjacent.
 - `~/.claude/statusline-command.sh` — the diagnostic read surface / cache-writer host (self-installed per STORY-043).
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-042 | STORY-042: Extract quota-pacing into its own plugin | accepted |
+| STORY-039 | STORY-039: Throttle token burn against the quota windows | draft |
+| STORY-043 | STORY-043: Self-install the quota-state producer | draft |

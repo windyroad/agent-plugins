@@ -178,6 +178,14 @@ Shipped: `packages/shared/hooks/quota-pace-throttle.sh` glide-path rewrite + `pa
 |-----|--------|-------|
 | RFC-046 | proposed | Quota-pace throttle hook — frequently-firing PreToolUse calculated-sleep pacing across all work |
 
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-042 | STORY-042: Extract quota-pacing into its own plugin | accepted |
+| STORY-039 | STORY-039: Throttle token burn against the quota windows | draft |
+| STORY-043 | STORY-043: Self-install the quota-state producer | draft |
+
 ## Fix Released — code slice (2026-07-06)
 
 The throttle CODE is built, tested (8/8 behavioural bats), and RELEASED across all
@@ -215,3 +223,4 @@ Confirmed 2026-07-07 (see verification session):
 ### Producer constraint (research 2026-07-07 — reshapes the adopter fix)
 
 Authoritative Claude Code v2.1.x finding: **the statusLine is the ONLY surface exposed to `.rate_limits`.** No hook event receives it; there is no `claude usage` CLI / native quota file / env var / API a hook can reach; and **a plugin CANNOT contribute the main `statusLine`** (only the `agent` + `subagentStatusLine` settings keys exist). `.rate_limits` also only appears for Pro/Max subscribers after the first API response. Consequence: the producer (`~/.claude/quota-state.json` writer) is unavoidably **user-owned config the plugin cannot ship**. The "works fully out-of-the-box" goal is therefore **not achievable**; the honest ceiling is *"the one-time statusline setup is surfaced/nudged, never silently inert"* — closed by (a) a **SessionStart absent-cache nudge** + (b) a **ready-made statusline snippet / opt-in installer**. The earlier "plugin-contributed statusLine" option is struck (impossible).
+
