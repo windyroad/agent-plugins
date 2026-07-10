@@ -177,14 +177,13 @@ Shipped: `packages/shared/hooks/quota-pace-throttle.sh` glide-path rewrite + `pa
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-046 | proposed | Quota-pace throttle hook — frequently-firing PreToolUse calculated-sleep pacing across all work |
-
 ## Stories
 
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-042 | STORY-042: Extract quota-pacing into its own plugin | accepted |
+| STORY-043 | STORY-043: Self-install the quota-state producer | accepted |
 | STORY-039 | STORY-039: Throttle token burn against the quota windows | draft |
-| STORY-043 | STORY-043: Self-install the quota-state producer | draft |
 
 ## Fix Released — code slice (2026-07-06)
 

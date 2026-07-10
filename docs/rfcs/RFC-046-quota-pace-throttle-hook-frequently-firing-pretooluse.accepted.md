@@ -68,5 +68,5 @@ The mechanical quota-pace throttle (ADR-093): a matcher-less `PreToolUse` hook t
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-042 | STORY-042: Extract quota-pacing into its own plugin | accepted |
+| STORY-043 | STORY-043: Self-install the quota-state producer | accepted |
 | STORY-039 | STORY-039: Throttle token burn against the quota windows | draft |
-| STORY-043 | STORY-043: Self-install the quota-state producer | draft |

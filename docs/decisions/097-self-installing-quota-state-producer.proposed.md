@@ -6,7 +6,7 @@ consulted: [wr-architect:agent]
 informed: []
 reassessment-date: 2026-10-09
 human-oversight: confirmed
-oversight-date: 2026-07-09
+oversight-date: 2026-07-11
 ---
 
 # Self-installing quota-state producer (SessionStart guarded-statusline edit)
@@ -26,11 +26,11 @@ The `@windyroad/cruise` throttle (ADR-093) reads `~/.claude/quota-state.json`, w
 ## Considered Options (how self-install is controlled)
 
 1. **A separate opt-out knob** (env var and/or a config-file key) that disables self-install while the plugin stays installed.
-2. **No opt-out knob — install is the consent, uninstall is the reversal.** Installing `@windyroad/cruise` (whose whole purpose is quota pacing, which *requires* the producer) is the authorisation (ADR-093 implied-at-install). There is no coherent "keep the plugin but disable its core function" state. To pause pacing without uninstalling, use the throttle's existing kill-switch (`WR_QUOTA_THROTTLE_DISABLE`, ADR-093), which disables the throttle and leaves the producer untouched.
+2. **No opt-out knob — install is the consent, uninstall is the reversal.** Installing `@windyroad/cruise` (whose whole purpose is quota pacing, which *requires* the producer) is the authorisation (ADR-093 implied-at-install). There is no coherent "keep the plugin but disable its core function" state. To pause pacing without uninstalling, set `max_sleep_s: 0` in the cruise config (disables the throttle, leaves the producer untouched).
 
 ## Decision Outcome
 
-**Chosen: Option 2 — no self-install opt-out knob (user direction 2026-07-09: "it should live in not installing the plugin").** A `cruise` install with self-install disabled would be an inert plugin, identical to not installing it — so a separate opt-out is incoherent. Consent is the install; the control surface is install / uninstall; temporary pause is the existing throttle kill-switch.
+**Chosen: Option 2 — no self-install opt-out knob (user direction 2026-07-09: "it should live in not installing the plugin").** A `cruise` install with self-install disabled would be an inert plugin, identical to not installing it — so a separate opt-out is incoherent. Consent is the install; the control surface is install / uninstall; temporary pause is `max_sleep_s: 0` in the config.
 
 **Write mechanism (determined by constraints):** a SessionStart hook that —
 - **statusline absent** → create `~/.claude/statusline-command.sh` with the cache-writing code and wire `~/.claude/settings.json` `statusLine.command` to it;
@@ -45,7 +45,7 @@ The `@windyroad/cruise` throttle (ADR-093) reads `~/.claude/quota-state.json`, w
 ### Good
 - The throttle works on install for every adopter — closes the P160/P443 inert gap.
 - The user's existing statusline is never clobbered (guarded block + agent-merge fallback).
-- No incoherent "inert plugin" state; the control surface is simple and honest — install to get it, uninstall (clean removal) to reverse it, throttle kill-switch to pause without touching the statusline.
+- No incoherent "inert plugin" state; the control surface is simple and honest — install to get it, uninstall (clean removal) to reverse it, `max_sleep_s: 0` to pause without touching the statusline.
 
 ### Neutral
 - The plugin writes to the user's `~/.claude/` config — invasive by nature, but bounded, logged, and cleanly reversible on uninstall (sentinel-bounded block), and consented at install.
@@ -57,7 +57,7 @@ The `@windyroad/cruise` throttle (ADR-093) reads `~/.claude/quota-state.json`, w
 
 ## Confirmation
 
-Behavioural bats: absent → created + `settings.json` wired; present-missing-block → guarded-append exactly once (idempotent on re-run); foreign complex statusline → agent-merge path taken (no blind append); no `.rate_limits` → no-op, session unbroken; **uninstall → the guarded block is removed and (if cruise wired it) `settings.json` is unwired, leaving no trace**; the throttle kill-switch (`WR_QUOTA_THROTTLE_DISABLE`) pauses pacing without touching the statusline. Verified against STORY-043's acceptance criteria before it transitions to done.
+Behavioural bats: absent → created + `settings.json` wired; present-missing-block → guarded-append exactly once (idempotent on re-run); foreign complex statusline → agent-merge path taken (no blind append); no `.rate_limits` → no-op, session unbroken; **uninstall → the guarded block is removed and (if cruise wired it) `settings.json` is unwired, leaving no trace**; `max_sleep_s: 0` (config) pauses pacing without touching the statusline. Verified against STORY-043's acceptance criteria before it transitions to done.
 
 ## Pros and Cons of the Options
 
@@ -66,9 +66,17 @@ Behavioural bats: absent → created + `settings.json` wired; present-missing-bl
 - Bad: incoherent — a cruise install with self-install off is inert (identical to not installing); adds a documented surface + precedence rule for a state no one wants.
 
 ### Option 2 — No knob; install is consent, uninstall is reversal (chosen)
-- Good: simplest honest model; consent = install (ADR-093); clean uninstall removes all trace; throttle kill-switch already handles temporary pause.
+- Good: simplest honest model; consent = install (ADR-093); clean uninstall removes all trace; `max_sleep_s: 0` already handles temporary pause.
 - Bad: relies on uninstall doing the cleanup (a build requirement for STORY-043).
 
 ## Reassessment Criteria
 
 Revisit if Claude Code ever exposes `.rate_limits` to a hook or ships a plugin-contributable statusLine (the self-install mechanism would become unnecessary), or if the guarded-append proves fragile against real-world statuslines in the field.
+
+
+## Amendment 2026-07-10 — build refinements (STORY-043)
+
+Two mechanics were refined while building the self-installer + throttle; both stay inside this decision (self-installing producer, implied-at-install consent), so this is pre-acceptance evolution, not a supersession:
+
+1. **Present statusline → agent-merge, NOT guarded-append.** The indicative "idempotently append a guarded block when present but missing our code" above is superseded for the *present* case: a live statusline has already consumed stdin, so an appended stdin-reading block would run empty (broken). The shipped self-installer instead: **absent** → create the statusline + wire `settings.json`; **already a producer** (writes the cache) → no-op; **present non-producer** → a once-only SessionStart agent-merge instruction (human-watched), and it NEVER blind-appends. Verified by `packages/cruise/test/quota-state-producer-install.bats` (7 green).
+2. **No kill-switch.** All references above to a throttle kill-switch (`WR_QUOTA_THROTTLE_DISABLE`) are retired (user direction 2026-07-10): the glide only ever slows and never blocks, so there is nothing to escape; pacing is disabled via config `max_sleep_s: 0`, and the producer is reversed by uninstalling. The env-switch existed for the declined deny-backstop.
