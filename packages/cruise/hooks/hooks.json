@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/quota-pace-throttle.sh", "timeout": 660 }
+        ]
+      }
+    ]
+  }
+}

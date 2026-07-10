@@ -1,0 +1,10 @@
+{
+  "description": "Cruise — mechanical token-quota pacing for Claude Code: a self-calibrating throttle that glides you onto each rate-limit window's pace line so you converge on the reset instead of hard-stopping mid-flight",
+  "maturity": {
+    "band": "Experimental",
+    "bootstrapping": true,
+    "schema_version": "2.0"
+  },
+  "name": "wr-cruise",
+  "version": "0.1.0"
+}
