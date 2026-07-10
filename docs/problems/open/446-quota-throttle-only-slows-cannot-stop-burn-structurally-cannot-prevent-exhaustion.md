@@ -1,4 +1,4 @@
-# Problem 446: Quota-pace throttle only SLOWS burn (sleep-and-allow), cannot STOP it — structurally incapable of preventing the exhaustion it exists to prevent; must DENY at the budget line
+# Problem 446: Quota-pace throttle's glide is too weak to hold the pace line — a real hard weekly-limit stop occurred with the throttle running; strengthen the glide (deficit response + much larger cap)
 
 **Status**: Open
 **Reported**: 2026-07-10
@@ -37,14 +37,18 @@ So the "NEVER blocks" tenet in ADR-093 — intended as politeness / fail-open sa
 
 Sleep-and-allow cannot stop burn (facts 1–3 above). The `budget ≤ 0 → safe_rate 0 → sleep CAP → ALLOW` branch of the glide math is the specific defect: at the reserved line it naps 60s and then lets the burn through.
 
-### Fix direction (to be ratified via ADR-093 amendment)
+### Fix direction — STRENGTHEN THE GLIDE, no hard stop (user direction 2026-07-10: "I'm not asking for a complete stop. The glide didn't work.")
 
-- **Soft zone (ahead of pace, budget remains):** keep slowing — sleep the corrected glide amount. This is the dominant behaviour and preserves the "slow, don't jerk" philosophy.
-- **Hard zone (used ≥ 100 − headroom for a window, window not yet reset):** **DENY** (`permissionDecision: deny`, informative reason) instead of sleep-and-allow — hold tool calls until the window eases back / resets. Guarantees burn cannot cross the reserved line → the account never reaches the 100% hard limit; the weekly headroom (5pp) is preserved for non-Code surfaces.
-- **Override:** the existing kill-switch (`WR_QUOTA_THROTTLE_DISABLE=1`) lets the user push through deliberately.
-- **Fail-open preserved on ERRORS** (missing/malformed cache, no jq) — deny only when correctly, confidently over the reserved line.
+ADR-093's "never blocks / slow, don't jerk" tenet STANDS. The defect is that the glide was too WEAK to hold the line, not that slowing is wrong. Fix the mechanics:
 
-This amends ADR-093's "NEVER blocks / NEVER a hard stop from the throttle" tenet: the throttle now imposes a *self-controlled, headroom-preserving, overridable* stop precisely to prevent the *uncontrolled, total, account-wide* hard stop.
+1. **Correct the response curve** — sleep scales with how far *above the linear pace line* the usage is (deficit-based: `ahead = used − (100−headroom)·elapsed/100`), so a few points ahead already throttles hard. The Release-1 `cap·(1−budget/time_left)` curve is too gentle (~19s at 40%-used/20%-elapsed when it should be standing on the brakes).
+2. **Raise the per-firing cap** from 60s to a much larger default (~300s), configurable via `max_sleep_s` (ADR-098), and set the hook's `timeout` to 600s so the sleep always *completes under the timeout* — never killed, so it never fails open and leaks the call.
+3. **Continuous correction** — fires every call, catching small drift before it compounds.
+4. **Fail-open on ERRORS preserved** (missing/malformed cache, no jq) + kill-switch (`WR_QUOTA_THROTTLE_DISABLE=1`) unchanged.
+
+**Known residual (flagged, not covered — user chose no hard stop):** a pure glide cannot *guarantee* non-exhaustion in the pathological case of burning most of a window's budget very early — the required slowdown is a multi-day near-halt no per-call sleep can express, and hooks fail open past their timeout. The strengthened glide covers the real drift that caused the observed exhaustion; the far corner stays uncovered by design choice. (A deny-at-the-line backstop was considered and declined 2026-07-10.)
+
+This is a mechanics correction to ADR-093 (cap + response curve), NOT a philosophy change — still mechanical, slow-not-block, fail-open.
 
 ## Dependencies
 
