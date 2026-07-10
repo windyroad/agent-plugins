@@ -405,7 +405,7 @@ _87 ADRs. These are the current rules. The architect agent reads this section fi
 
 ### ADR-093 — Mechanical quota-pace throttle — frequently-firing PreToolUse hook, calculated sleep, never blocks
 **Status:** proposed | **Oversight:** confirmed
-**Chosen:** Chosen option 3 (mechanical PreToolUse calculated sleep), registered in `hooks.json` as `PreToolUse` with **no matcher** (every tool call — Correction 2 verbatim) and `timeout: 90`. **Plugin home — REVISED 2026-07-08 (see Amendment):** ...
+**Chosen:** Chosen option 3 (mechanical PreToolUse calculated sleep), registered in `hooks.json` as `PreToolUse` with **no matcher** (every tool call — Correction 2 verbatim) and `timeout: 660` (strictly greater than the 600s sleep ceiling below, so ...
 
 ### ADR-094 — AFK loops anchor completion with the native `/goal` external evaluator
 **Status:** proposed | **Oversight:** unconfirmed

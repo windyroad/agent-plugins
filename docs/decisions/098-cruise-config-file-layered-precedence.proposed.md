@@ -6,14 +6,14 @@ consulted: [wr-architect:agent]
 informed: []
 reassessment-date: 2026-10-09
 human-oversight: confirmed
-oversight-date: 2026-07-09
+oversight-date: 2026-07-10
 ---
 
 # Cruise config file — layered precedence (project → machine → defaults)
 
 ## Context and Problem Statement
 
-`@windyroad/cruise`'s knobs — `headroom_7d_pp` (default 5), `headroom_5h_pp` (default 0), the per-firing sleep cap (default 60s), and a cache-path override — must be **configurable via a config file, not env vars** (user direction 2026-07-08: env vars are inconvenient — per-machine only, undiscoverable). The resolution direction is already decided by the user (2026-07-08): **project-root config → machine (`~/.claude/`) config → built-in defaults**, with env vars remaining as a final override that trumps the file (so CI / one-off overrides still work). This ADR settles the concrete SHAPE — chiefly the **file format** — so STORY-042's config work can be built (ADR-074: this ADR must be ratified first). Note: per ADR-097 there is **no self-install opt-out**, so the config file holds only the throttle knobs — no `self_install` key.
+`@windyroad/cruise`'s knobs — `headroom_7d_pp` (default 5), `headroom_5h_pp` (default 0), the per-firing sleep cap (default 600s per P446 — the 60s Release-1 cap was too weak to converge), and a cache-path override — must be **configurable via a config file, not env vars** (user direction 2026-07-08: env vars are inconvenient — per-machine only, undiscoverable). The resolution direction is already decided by the user (2026-07-08): **project-root config → machine (`~/.claude/`) config → built-in defaults**, with env vars remaining as a final override that trumps the file (so CI / one-off overrides still work). This ADR settles the concrete SHAPE — chiefly the **file format** — so STORY-042's config work can be built (ADR-074: this ADR must be ratified first). Note: per ADR-097 there is **no self-install opt-out**, so the config file holds only the throttle knobs — no `self_install` key.
 
 ## Decision Drivers
 
@@ -36,7 +36,7 @@ The precedence (project → machine → defaults, env last-override), the locati
 
 - **Files:** in-project `.claude/cruise.config.json`; per-machine `~/.claude/cruise.config.json`.
 - **Precedence:** a key set in the project file wins over the machine file, which wins over the built-in default; an env var (`WR_QUOTA_HEADROOM_7D_PP` / `_5H_PP` / `WR_QUOTA_THROTTLE_MAX_SLEEP` / `WR_QUOTA_CACHE_FILE`) trumps all of them (CI / emergency override).
-- **Keys (all optional; each falls back through the layers):** `headroom_7d_pp` (int, default 5), `headroom_5h_pp` (int, default 0), `max_sleep_s` (int, default 60), `cache_path` (string, default `~/.claude/quota-state.json`).
+- **Keys (all optional; each falls back through the layers):** `headroom_7d_pp` (int, default 5), `headroom_5h_pp` (int, default 0), `max_sleep_s` (int, default 600 — the sleep ceiling, under the 660s hook timeout; P446), `cache_path` (string, default `~/.claude/quota-state.json`).
 - **Fail-open:** a missing / malformed / unreadable config file falls back to the next layer (ultimately built-in defaults) — the throttle never breaks on a bad config (consistent with ADR-093's fail-open envelope).
 
 ## Consequences
