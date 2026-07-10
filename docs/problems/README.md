@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-08 **P445 captured** — agent offers unsolicited off-ramps, projects effort/time onto the user, and narrates its own conduct ("I'll drop it") then recurs — the hollow-marker pattern turned on itself. Fix MUST be a portable plugin-shipped behavioural rule (loads every project), not a project-local memory (per P423). Also this session: RFC-046 lineage repaired + accepted-pending; @windyroad/cruise rename propagated; STORY-039/042/043 + STORY-MAP-003 ratified.
+> Last reviewed: 2026-07-10 **P446 captured (Critical)** — the quota-pace throttle only SLOWS burn (sleep-and-allow, 60s cap); verified against Claude Code docs that a PreToolUse hook fails OPEN on timeout and sleep never blocks, so it is structurally incapable of preventing exhaustion — a real hard weekly-limit stop occurred with the throttle running. Fix: DENY at the reserved line (amends ADR-093 never-block); rides the in-flight @windyroad/cruise build. RFC-046 accepted; ADR-097/098 ratified; STORY-042 accepted.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -23,6 +23,7 @@ Reports from adopters / downstream projects (`Origin: inbound-reported`). These 
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
 | 12.0 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | 12 High | Open | S | 2026-07-06 | inbound-reported (#169) |
+| 10.0 | P446 | Quota-pace throttle only SLOWS burn (sleep-and-allow), cannot STOP it — structurally cannot prevent exhaustion; must DENY at the reserved line (amends ADR-093) | 20 Critical | Open | M | 2026-07-10 | internal |
 | 9.0 | P428 | work-problems Step 5 dispatch heredoc-in-command-substitution unparseable under macOS bash 3.2 | 9 Medium | Open | S | 2026-07-06 | inbound-reported (#345) |
 | 9.0 | P437 | wr-wardley exposes no version-stable invocation path for its owm-to-svg converter — consumers pin the cache version and break on bump | 9 Medium | Open | S | 2026-07-06 | inbound-reported (#325) |
 | 8.0 | P429 | manage-problem commit-message examples fail @commitlint subject-case in adopter projects | 8 Medium | Open | S | 2026-07-06 | inbound-reported (#137) |
