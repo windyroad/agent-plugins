@@ -23,7 +23,7 @@ Reports from adopters / downstream projects (`Origin: inbound-reported`). These 
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
 | 12.0 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | 12 High | Open | S | 2026-07-06 | inbound-reported (#169) |
-| 10.0 | P446 | Quota-pace throttle's glide too weak to hold the pace line — real hard weekly-limit stop with the throttle running; strengthen the glide (deficit response + much larger cap), no hard stop | 20 Critical | Open | M | 2026-07-10 | internal |
+| 10.0 | P446 | Quota-pace throttle's glide too weak to hold the pace line — real hard weekly-limit stop with the throttle running; RCA (simulated, 85s cadence) → self-calibrating sleep-to-sustainable-rate + 600s ceiling, no hard stop | 20 Critical | Open | M | 2026-07-10 | internal |
 | 9.0 | P428 | work-problems Step 5 dispatch heredoc-in-command-substitution unparseable under macOS bash 3.2 | 9 Medium | Open | S | 2026-07-06 | inbound-reported (#345) |
 | 9.0 | P437 | wr-wardley exposes no version-stable invocation path for its owm-to-svg converter — consumers pin the cache version and break on bump | 9 Medium | Open | S | 2026-07-06 | inbound-reported (#325) |
 | 8.0 | P429 | manage-problem commit-message examples fail @commitlint subject-case in adopter projects | 8 Medium | Open | S | 2026-07-06 | inbound-reported (#137) |
