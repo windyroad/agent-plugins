@@ -10,3 +10,7 @@
 
 > Last reviewed: 2026-07-03 **STORY-020/021/022/024/025 done** — RFC-037's five tooling stories implemented, ratified, and transitioned to done (all acceptance criteria met).
 
+## 2026-07-11
+
+> Last reviewed: 2026-07-09 **STORY-042 accepted** — quota-pacing extraction passes I7 (RFC-046) / I8 (STORY-MAP-003) / I10 INVEST; Rankings table backfilled with active stories from FS truth (Done-table backfill still outstanding — run `/wr-itil:manage-story review`). RFC-046 Release-2 build begins.
+

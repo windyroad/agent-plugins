@@ -17,10 +17,10 @@ setup() {
 teardown() { rm -rf "$TMP"; }
 
 slept() { cat "$TMP/slept" 2>/dev/null || echo 0; }
-# nested schema (ADR-093): five_used five_reset week_used week_reset
+# flat schema (shipped reality): five_used five_reset week_used week_reset
 write_cache() {
-  printf '{"written_at":%s,"five_hour":{"used_percentage":%s,"resets_at":%s},"seven_day":{"used_percentage":%s,"resets_at":%s}}' \
-    "$NOW" "$1" "$2" "$3" "$4" > "$WR_QUOTA_CACHE_FILE"
+  printf '{"five_used_pct":%s,"five_resets_at":%s,"week_used_pct":%s,"week_resets_at":%s}' \
+    "$1" "$2" "$3" "$4" > "$WR_QUOTA_CACHE_FILE"
 }
 # state: check_ts base_ts base_week base_five cur_s
 write_state() { printf '%s %s %s %s %s\n' "$1" "$2" "$3" "$4" "$5" > "$WR_QUOTA_MARKER"; }
@@ -81,10 +81,10 @@ write_state() { printf '%s %s %s %s %s\n' "$1" "$2" "$3" "$4" "$5" > "$WR_QUOTA_
   [ "$status" -eq 0 ]; [ ! -f "$TMP/slept" ]
 }
 
-@test "kill-switch disables throttling entirely" {
-  export WR_QUOTA_THROTTLE_DISABLE=1
+@test "max_sleep_s=0 disables throttling (the ceiling clamps every sleep to 0)" {
+  export WR_QUOTA_THROTTLE_MAX_SLEEP=0
   write_state $((NOW-100)) $((NOW-100)) 10 5 0
-  write_cache 99 $((NOW+100)) 99 $((NOW+100))
+  write_cache 99 $((NOW+100)) 99 $((NOW+100))   # maximally over pace
   run bash "$HOOK" </dev/null
   [ "$status" -eq 0 ]; [ ! -f "$TMP/slept" ]
 }

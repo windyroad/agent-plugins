@@ -18,23 +18,25 @@
 # rate already reflects prior sleeps → oscillation); the controller is the stable
 # realisation of the same target.
 #
-# Cache (nested; written by the self-installed statusline producer — ADR-097):
-#   {"written_at":<epoch>,
-#    "five_hour":{"used_percentage":N,"resets_at":<epoch>},
-#    "seven_day":{"used_percentage":N,"resets_at":<epoch>}}
-# Missing/stale/malformed → no-op (fail-open).
+# Cache (flat; written by the self-installed statusline producer — ADR-097 —
+# and the shipped reality both Release-1 and this hook read):
+#   {"five_used_pct":N,"five_resets_at":<epoch>,
+#    "week_used_pct":N,"week_resets_at":<epoch>}
+# The statusline's own stdin payload is nested (.rate_limits.five_hour.…); the
+# producer flattens it into this cache. Missing/stale/malformed → no-op (fail-open).
 #
 # Config (ADR-098): env → project .claude/cruise.config.json → machine
 # ~/.claude/cruise.config.json → default. jq-read, never sourced.
 # Ceiling max_sleep_s default 600s, under the 660s hooks.json timeout so the sleep
-# always completes (a timeout-killed hook fails OPEN and leaks the call).
-# Kill-switch WR_QUOTA_THROTTLE_DISABLE=1 pauses pacing without uninstalling.
+# always completes (a timeout-killed hook fails OPEN and leaks the call). Setting
+# max_sleep_s: 0 disables throttling (the ceiling clamps every sleep to 0) — there
+# is no separate kill-switch: the glide only ever SLOWS, never blocks, so there is
+# nothing to escape from, and uninstalling reverses it entirely.
 #
 # ponytail: integer arithmetic (cross-multiply to compare rates, no floats) + one
 # sleep; ceiling + fail-open keep the blast radius to "a slower tool call".
 
 set +e
-[ "${WR_QUOTA_THROTTLE_DISABLE:-}" = "1" ] && exit 0   # kill-switch
 emit_ok() { exit 0; }
 command -v jq >/dev/null 2>&1 || emit_ok
 
@@ -83,8 +85,7 @@ CEIL=$(cfg max_sleep_s 600 "${WR_QUOTA_THROTTLE_MAX_SLEEP:-}"); isint "$CEIL" ||
 
 [ -r "$CACHE" ] || emit_ok
 read -r fu fr wu wr_ < <(
-  jq -r '[.five_hour.used_percentage, .five_hour.resets_at,
-          .seven_day.used_percentage, .seven_day.resets_at] | map(tostring) | join(" ")' \
+  jq -r '[.five_used_pct, .five_resets_at, .week_used_pct, .week_resets_at] | map(tostring) | join(" ")' \
      "$CACHE" 2>/dev/null
 ) || emit_ok
 for v in "$fu" "$fr" "$wu" "$wr_"; do case "$v" in ''|null|*[!0-9.]*) emit_ok;; esac; done

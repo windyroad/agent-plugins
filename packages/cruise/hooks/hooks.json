@@ -1,5 +1,12 @@
 {
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/quota-state-producer-install.sh" }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "hooks": [

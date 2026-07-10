@@ -14,7 +14,7 @@ Two rate-limit windows are paced simultaneously (rolling 5-hour and 7-day); the 
 
 ## Controls
 
-- **Kill-switch:** `WR_QUOTA_THROTTLE_DISABLE=1` pauses pacing for the session (leaves everything installed).
+- **Disable without uninstalling:** set `max_sleep_s: 0` in the config file — a zero ceiling clamps every sleep to nothing. There's no separate kill-switch: the glide only ever *slows*, never blocks, so there's nothing to escape from.
 - **Config file** (`.claude/cruise.config.json` in a project, or `~/.claude/cruise.config.json` per-machine; project wins, then machine, then built-in defaults; env vars override all):
 
   ```json
@@ -34,8 +34,8 @@ The throttle reads `~/.claude/quota-state.json` (nested schema: `.five_hour.used
 
 ## Uninstall / opt-out
 
-There's no "disable but keep installed" knob — a cruise install with pacing off would be inert. To stop it, **uninstall the plugin**; uninstall removes the self-installed statusline block (leaving your statusline as it was). To pause without uninstalling, use the kill-switch above.
+There's no "install but don't self-install the producer" knob — that would be an inert plugin. To remove the producer, **uninstall the plugin**; uninstall removes the self-installed statusline block (leaving your statusline as it was). To pause the *pacing* while keeping everything installed, set `max_sleep_s: 0` (above).
 
 ## Tests
 
-`test/quota-pace-throttle.bats` — behavioural: fail-open paths, baseline capture, over-pace ramp-up, under-pace ease-off, ceiling clamp, recent-check short-circuit, kill-switch, never-denies, and 5h-window-governs.
+`test/quota-pace-throttle.bats` (throttle) + `test/quota-state-producer-install.bats` (self-installer) — behavioural: fail-open paths, baseline capture, over-pace ramp-up, under-pace ease-off, ceiling clamp + `max_sleep_s: 0` disable, recent-check short-circuit, never-denies, 5h-window-governs; and for the installer: create-and-wire when absent, no-op when already producing, agent-merge (never blind-append) otherwise.

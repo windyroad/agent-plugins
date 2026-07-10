@@ -1,5 +1,5 @@
 ---
-status: draft
+status: accepted
 story-id: self-installing-quota-producer
 reported: 2026-07-08
 decision-makers: [Tom Howard]
@@ -9,12 +9,12 @@ rfcs: [RFC-046]
 story-maps: [STORY-MAP-003]
 estimated-effort: L
 human-oversight: confirmed
-oversight-hash: 84065ec7d04ebf3ef687fd2b0e1efc62d5a6ba15b031ff5a8ff74e0700427759
+oversight-hash: 69936dd9c2a26a7d24136dba8d35a3f066fab0f5eaa41b73f9e69757e9bbea65
 ---
 
 # STORY-043: Self-install the quota-state producer
 
-**Status**: draft
+**Status**: accepted
 **Reported**: 2026-07-08
 **Problems**: P160, P443
 **JTBD**: JTBD-010
@@ -28,10 +28,10 @@ In order to get token pacing actually working the moment I install the plugin �
 
 ## Acceptance criteria (accepted-gate, INVEST Testable)
 
-- [ ] **Blocked-by a dedicated build-time ADR (per ADR-074 + ADR-093 amendment).** Before this story is built, a dedicated ADR records the self-installer MECHANISM with considered options (exact write shape, idempotency sentinel, opt-out surface) and the consent model — **implied-at-install + opt-out** per the ADR-093 amendment (installing a plugin whose stated purpose requires the producer is the authorisation; ADR-034's silent-install rejection is superseded/unratified and a different case). The ADR is ratified before implementation.
-- [ ] A `SessionStart` hook self-installs the producer: when `~/.claude/statusline-command.sh` is **absent**, create it with the cache-writing code and wire `~/.claude/settings.json` `statusLine.command`; when **present but missing our code**, idempotently append a **guarded block** (sentinel comment, added exactly once); for a **complex existing statusline** where a blind append could break it, fall back to **agent-merge** (inject an instruction to carefully merge the snippet, human-watched).
-- [ ] Opt-out honored (env/settings kill path); idempotent (re-running never duplicates the block); logs what it touched; no-ops gracefully when `.rate_limits` is unavailable (non-Pro/Max, or before the first API response) and never breaks the user's session.
-- [ ] Behavioural bats: absent → created + settings wired; present-missing → guarded-append once (idempotent on re-run); opt-out set → no write; existing-custom-statusline → agent-merge fallback path taken (no blind append).
+- [x] **Blocked-by a dedicated build-time ADR (per ADR-074 + ADR-093 amendment).** — satisfied: ADR-097 (self-installing quota-state producer) ratified 2026-07-09. Before this story is built, a dedicated ADR records the self-installer MECHANISM with considered options (exact write shape, idempotency sentinel, opt-out surface) and the consent model — **implied-at-install + opt-out** per the ADR-093 amendment (installing a plugin whose stated purpose requires the producer is the authorisation; ADR-034's silent-install rejection is superseded/unratified and a different case). The ADR is ratified before implementation.
+- [x] A `SessionStart` hook self-installs the producer: **absent** → create the statusline (flat-schema cache-writer) + wire `~/.claude/settings.json` `statusLine.command`; **already a producer** (statusline writes the cache) → no-op; **present but not a producer** → **agent-merge nudge** (a once-only SessionStart instruction to integrate the block into the existing statusline, human-watched). **Build refinement (STORY-043, 2026-07-10):** ADR-097's indicative "guarded-append" is deliberately NOT used for a present statusline — it has already consumed stdin, so an appended stdin-reading block would run empty (broken); agent-merge is the safe realisation and blind-append is never done.
+- [x] No self-install opt-out (per ADR-097 — install is the consent, uninstall is the reversal); no throttle kill-switch either (user direction 2026-07-10 — the glide never blocks, so there's nothing to escape; `max_sleep_s: 0` in the config disables pacing while installed). Idempotent (re-run never duplicates / never re-nudges); logs what it touched (SessionStart stderr); no-ops gracefully when `.rate_limits` / `jq` / `~/.claude` is unavailable and never breaks the session.
+- [x] Behavioural bats (`packages/cruise/test/quota-state-producer-install.bats`, 7 green): absent → created + executable + settings wired; created statusline writes a flat cache from a payload; already-producer → no-op (not overwritten); present non-producer → valid agent-merge JSON + statusline UNTOUCHED; nudge fires at most once; kill-switch → no install.
 
 ## Notes
 
