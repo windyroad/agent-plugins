@@ -144,7 +144,8 @@ agent-plugins/
   ├── @windyroad/itil             (requires: @windyroad/risk-scorer)
   ├── @windyroad/retrospective    (requires: @windyroad/itil, @windyroad/risk-scorer)
   ├── @windyroad/c4               (standalone)
-  └── @windyroad/wardley          (standalone)
+  ├── @windyroad/wardley          (standalone)
+  └── @windyroad/cruise           (standalone)
 ```
 
 ## Install UX

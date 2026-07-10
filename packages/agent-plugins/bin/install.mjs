@@ -18,6 +18,7 @@ const PLUGINS = [
   "wr-c4",
   "wr-wardley",
   "wr-connect",
+  "wr-cruise",
 ];
 
 const HELP = `
@@ -39,7 +40,7 @@ Options:
 
 Available plugins:
   architect, risk-scorer, voice-tone, style-guide, jtbd,
-  tdd, itil, retrospective, c4, wardley, connect
+  tdd, itil, retrospective, c4, wardley, connect, cruise
 
 Examples:
   npx @windyroad/agent-plugins
