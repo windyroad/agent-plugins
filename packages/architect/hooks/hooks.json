@@ -8,10 +8,6 @@
       { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/staleness-check.sh" }] }
     ],
     "PreToolUse": [
-      {
-        "matcher": "Bash|Write|Edit|Read|Glob|Grep|Task|WebFetch|WebSearch",
-        "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/quota-pace-throttle.sh" }]
-      },
       { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-enforce-edit.sh" }] },
       { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-oversight-marker-discipline.sh" }] },
       { "matcher": "ExitPlanMode", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-plan-enforce.sh" }] },
