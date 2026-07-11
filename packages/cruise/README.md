@@ -1,6 +1,6 @@
 # @windyroad/cruise
 
-Cruise control for your Claude Code token burn. A mechanical, self-calibrating throttle that paces your tool-call burn so you **glide onto each rate-limit window's pace line and converge on the reset** — instead of sprinting into a hard rate-limit stop mid-flight.
+Cruise control for your Claude Code token burn. A mechanical, self-calibrating throttle that paces your tool-call burn so you **glide onto each rate-limit window's pace line and converge on the reset** — instead of sprinting into a hard rate-limit stop mid-flight. *Maturity: Experimental.*
 
 Grounded in JTBD-010 (Sustain My Token Quota Across the Week and Across Surfaces); mechanics in ADR-093; config in ADR-098; producer self-install in ADR-097.
 
