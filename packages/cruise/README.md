@@ -11,11 +11,10 @@ It runs in the background, never blocks, never asks, and fails open — a broken
 ## Install
 
 ```bash
-npx @windyroad/cruise           # just the throttle
-npx @windyroad/agent-plugins    # the whole suite, cruise included
+npx @windyroad/cruise
 ```
 
-Restart Claude Code to activate. Cruise self-installs everything else it needs — no hand-wiring.
+Restart Claude Code to activate. Cruise self-installs everything it needs — the statusline producer, its hooks, defaults — no hand-wiring.
 
 ## See it working
 
