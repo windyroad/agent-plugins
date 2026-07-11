@@ -7,9 +7,17 @@
     "skills": {
       "status": {
         "band": "Experimental",
+        "computed_at": "2026-07-12T00:00:00Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 0,
+          "days_shipped": 0,
+          "invocations_30d": 0
+        },
         "schema_version": "2.0"
       }
-    }
+    },
+    "rollup_invocations_30d": 0
   },
   "name": "wr-cruise",
   "version": "0.2.0"
