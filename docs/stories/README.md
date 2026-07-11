@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-07-11 **STORY-042/043 → in-progress, STORY-039 → archived, RFC-046 → in-progress** — RFC-046 Release 2 fully built (throttle self-calibrating fix + extraction + self-installer, 19 cruise bats incl. concurrency); STORY-039 superseded. Awaiting release (changeset) → then done/verifying.
+> Last reviewed: 2026-07-12 **STORY-044 accepted** — cruise status/telemetry skill (`/wr-cruise:status`): per-window pace vs usage, the sleep the throttle is injecting now, glide projection, cache-health (flags an inert fail-open throttle). Built + 7 bats (29 cruise bats total). Awaiting release.
 >
 > Run `/wr-itil:manage-story review` to refresh once the manage-story skill ships.
 
@@ -113,6 +113,7 @@ Active (non-done) stories, from filesystem truth. (The `## Done` backfill of ter
 | Status | ID | Title | Effort | Problems | RFCs | Story Map |
 |--------|-----|-------|--------|----------|------|-----------|
 | in-progress | STORY-042 | Extract quota-pacing into its own plugin | L | P160, P443 | RFC-046 | STORY-MAP-003 |
+| accepted | STORY-044 | See what cruise is doing — status/telemetry skill | M | P160, P446 | RFC-046 | STORY-MAP-003 |
 | draft | STORY-012 | Can't start coding without an RFC — the gate makes me create one first | S | P251, P314 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-013 | Full gate: an RFC exists → I proceed; none → I create it first | M | P251, P314 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-014 | Unattended, the agent works the plan and pauses for real decisions | M | P251, P314 | RFC-005 | STORY-MAP-002 |

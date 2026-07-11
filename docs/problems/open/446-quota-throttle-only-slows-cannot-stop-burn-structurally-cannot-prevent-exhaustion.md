@@ -74,3 +74,10 @@ This is a mechanics correction to ADR-093 (self-calibrating sleep + ceiling), NO
 - **RFC-046** — the shipping RFC; the corrected hook lands in `@windyroad/cruise`.
 - **JTBD-010** — the job this defeats (sustain quota; never hard-stop mid-flight).
 - Verified platform facts: Claude Code hooks docs — PreToolUse fail-open-on-timeout + deny mechanism (2026-07-10).
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-044 | STORY-044: See what cruise is doing — a status/telemetry skill | accepted |

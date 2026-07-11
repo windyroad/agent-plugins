@@ -1,7 +1,7 @@
 {
   "name": "@windyroad/cruise",
   "version": "0.2.0",
-  "description": "Cruise — mechanical token-quota pacing for Claude Code (self-calibrating burn throttle)",
+  "description": "Cruise \u2014 mechanical token-quota pacing for Claude Code (self-calibrating burn throttle)",
   "type": "module",
   "license": "MIT",
   "repository": {
@@ -21,7 +21,9 @@
     "hooks/",
     ".claude-plugin/",
     "bin/",
-    "lib/"
+    "lib/",
+    "skills/",
+    "scripts/"
   ],
   "bin": {
     "windyroad-cruise": "./bin/install.mjs"
