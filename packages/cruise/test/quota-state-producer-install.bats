@@ -59,3 +59,42 @@ teardown() { rm -rf "$HOME"; }
   run bash "$INST" </dev/null                        # second: marker present → silent no-op
   [ "$status" -eq 0 ]; [ -z "$output" ]
 }
+
+# --- adopter-config-diversity: prove non-destructive across shapes (risk remediation) ---
+
+@test "path-robust: an active statusline at a NON-default path that already produces → no-op" {
+  other="$HOME/.claude/my-statusline.sh"
+  printf '#!/bin/bash\n# writes quota-state.json\ncat >/dev/null\n' > "$other"
+  printf '{"statusLine":{"type":"command","command":"%s"}}' "$other" > "$SETTINGS"
+  run bash "$INST" </dev/null
+  [ "$status" -eq 0 ]
+  [ ! -f "$SL" ]                                              # no orphan default statusline created
+  [ ! -f "$HOME/.claude/.cruise-producer-merge-nudged" ]     # not nudged (already produces)
+}
+
+@test "non-destructive: an existing settings.statusLine is never overwritten (nudge, no orphan)" {
+  other="$HOME/.claude/my-statusline.sh"
+  printf '#!/bin/bash\ninput=$(cat)\necho hi\n' > "$other"    # exists elsewhere, does NOT produce
+  printf '{"statusLine":{"type":"command","command":"%s"},"keep":1}' "$other" > "$SETTINGS"
+  before="$(cat "$SETTINGS")"
+  run bash "$INST" </dev/null
+  [ "$status" -eq 0 ]
+  echo "$output" | jq -e '.hookSpecificOutput.additionalContext' >/dev/null   # agent-merge nudge
+  [ "$(cat "$SETTINGS")" = "$before" ]                       # settings UNTOUCHED
+  [ ! -f "$SL" ]                                             # NO orphan default statusline created
+}
+
+@test "non-destructive: a malformed settings.json is never clobbered" {
+  printf 'this is { not valid json' > "$SETTINGS"
+  before="$(cat "$SETTINGS")"
+  run bash "$INST" </dev/null
+  [ "$status" -eq 0 ]
+  [ "$(cat "$SETTINGS")" = "$before" ]                       # malformed settings preserved byte-for-byte
+}
+
+@test "missing ~/.claude directory → no-op, creates nothing, no crash" {
+  rm -rf "$HOME/.claude"
+  run bash "$INST" </dev/null
+  [ "$status" -eq 0 ]
+  [ ! -d "$HOME/.claude" ]
+}

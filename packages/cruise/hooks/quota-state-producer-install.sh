@@ -38,8 +38,14 @@ NUDGE_MARKER="${CLAUDE_DIR}/.cruise-producer-merge-nudged"
 
 log() { printf 'cruise: %s\n' "$1" >&2; }   # SessionStart stderr is a visible, non-breaking log
 
-# --- case 1: already a producer (our block, or any statusline that writes the cache) → no-op
-if [ -f "$SL" ] && grep -q "$CACHE_NAME" "$SL" 2>/dev/null; then
+# The ACTIVE statusline is whatever settings.json points at (may be a non-default
+# path); fall back to the default path when nothing is configured.
+CONFIGURED=$(jq -r '.statusLine.command // empty' "$SETTINGS" 2>/dev/null)
+ACTIVE="$CONFIGURED"; [ -z "$ACTIVE" ] && ACTIVE="$SL"
+case "$ACTIVE" in "~/"*) ACTIVE="${HOME}/${ACTIVE#\~/}";; esac   # expand a leading ~
+
+# --- case 1: the ACTIVE statusline already writes the cache → no-op (any path)
+if [ -f "$ACTIVE" ] && grep -q "$CACHE_NAME" "$ACTIVE" 2>/dev/null; then
   emit_plain
 fi
 
@@ -66,8 +72,9 @@ fi
 BLOCK
 }
 
-# --- case 2: no statusline → create one (producer + minimal display) + wire settings.json
-if [ ! -f "$SL" ]; then
+# --- case 2: NO statusline anywhere (none configured + default file absent) → create + wire.
+# If a statusline is configured elsewhere, we must NOT create an orphan — fall to agent-merge.
+if [ -z "$CONFIGURED" ] && [ ! -f "$SL" ]; then
   {
     printf '#!/usr/bin/env bash\n'
     producer_block
@@ -89,7 +96,7 @@ fi
 # --- case 3: statusline present but not a producer → agent-merge nudge (once, non-breaking)
 if [ ! -f "$NUDGE_MARKER" ]; then
   : > "$NUDGE_MARKER" 2>/dev/null
-  _ctx="@windyroad/cruise needs a quota-state producer, but ~/.claude/statusline-command.sh already exists and does not write ~/.claude/quota-state.json. Do NOT blind-append it (the statusline reads stdin once). Carefully integrate this block into the existing statusline — reuse its already-captured stdin variable instead of the block's \$(cat) — then confirm with the user:
+  _ctx="@windyroad/cruise needs a quota-state producer, but your active statusline ($ACTIVE) does not write ~/.claude/quota-state.json. Do NOT blind-append it (the statusline reads stdin once). Carefully integrate this block into that statusline — reuse its already-captured stdin variable instead of the block's \$(cat) — then confirm with the user:
 
 $(producer_block)"
   jq -n --arg ctx "$_ctx" \
