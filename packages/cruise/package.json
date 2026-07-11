@@ -1,6 +1,6 @@
 {
   "name": "@windyroad/cruise",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Cruise — mechanical token-quota pacing for Claude Code (self-calibrating burn throttle)",
   "type": "module",
   "license": "MIT",
