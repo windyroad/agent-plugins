@@ -1,5 +1,11 @@
 # @windyroad/cruise
 
+## 0.3.1
+
+### Patch Changes
+
+- 36d13be: Rewrite the README to lead with the value — the pain of a mid-run rate-limit stop and the glide-to-reset outcome — and add the install commands and the `/wr-cruise:status` usage.
+
 ## 0.3.0
 
 ### Minor Changes
