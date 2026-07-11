@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-07-11 **STORY-043 accepted** — self-installing quota-state producer passes I7/I8/I10; built + 7 green bats (create-and-wire when absent / no-op when producing / agent-merge never blind-append). Kill-switch retired (disable via `max_sleep_s: 0`). Closes RFC-046 Release 2's functional scope.
+> Last reviewed: 2026-07-11 **STORY-042/043 → in-progress, STORY-039 → archived, RFC-046 → in-progress** — RFC-046 Release 2 fully built (throttle self-calibrating fix + extraction + self-installer, 19 cruise bats incl. concurrency); STORY-039 superseded. Awaiting release (changeset) → then done/verifying.
 >
 > Run `/wr-itil:manage-story review` to refresh once the manage-story skill ships.
 
@@ -112,7 +112,7 @@ Active (non-done) stories, from filesystem truth. (The `## Done` backfill of ter
 
 | Status | ID | Title | Effort | Problems | RFCs | Story Map |
 |--------|-----|-------|--------|----------|------|-----------|
-| accepted | STORY-042 | Extract quota-pacing into its own plugin | L | P160, P443 | RFC-046 | STORY-MAP-003 |
+| in-progress | STORY-042 | Extract quota-pacing into its own plugin | L | P160, P443 | RFC-046 | STORY-MAP-003 |
 | draft | STORY-012 | Can't start coding without an RFC — the gate makes me create one first | S | P251, P314 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-013 | Full gate: an RFC exists → I proceed; none → I create it first | M | P251, P314 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-014 | Unattended, the agent works the plan and pauses for real decisions | M | P251, P314 | RFC-005 | STORY-MAP-002 |
@@ -135,9 +135,8 @@ Active (non-done) stories, from filesystem truth. (The `## Done` backfill of ter
 | draft | STORY-036 | Write the create-gate marker under every candidate session id | M | P260 | RFC-007 | — |
 | draft | STORY-037 | Commit gate honours the RISK-POLICY stated review cadence for staleness | S | P408 | RFC-043 | — |
 | draft | STORY-038 | Fix-titled commits surface a lifecycle-drift advisory | deferred | P345 | RFC-044 | — |
-| draft | STORY-039 | Throttle token burn against the quota windows | M | P160, P443 | RFC-046 | STORY-MAP-003 |
 | draft | STORY-040 | AFK loop anchored with the native `/goal` external evaluator | M | P390 | RFC-047 | STORY-MAP-002 |
-| accepted | STORY-043 | Self-install the quota-state producer | L | P160, P443 | RFC-046 | STORY-MAP-003 |
+| in-progress | STORY-043 | Self-install the quota-state producer | L | P160, P443 | RFC-046 | STORY-MAP-003 |
 
 ## Done
 

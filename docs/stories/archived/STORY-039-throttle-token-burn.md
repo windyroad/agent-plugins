@@ -1,5 +1,5 @@
 ---
-status: draft
+status: archived
 story-id: throttle-token-burn-against-quota-windows
 reported: 2026-07-08
 decision-makers: [Tom Howard]
@@ -14,13 +14,15 @@ oversight-hash: 1417aeb2d8062969b90296a5f4a1724ae6509b06817dd8772dc5df3c90abab41
 
 # STORY-039: Throttle token burn against the quota windows
 
-**Status**: draft
+**Status**: archived
 **Reported**: 2026-07-08
 **Problems**: P160, P443
 **JTBD**: JTBD-010
 **RFCs**: RFC-046
 **Story Maps**: STORY-MAP-003 (Sustain My Token Quota — Release 1, the shipped throttle)
 **Estimated effort**: M
+
+> **Archived 2026-07-11** — scope superseded by Release 2. The Release-1 throttle this story back-documented (`packages/shared/hooks/quota-pace-throttle.sh`) was deleted and replaced by the corrected self-calibrating throttle in `@windyroad/cruise` (STORY-042 extraction + P446 fix). Kept as the Release-1 lineage anchor on STORY-MAP-003; it can never advance draft→done, so `archived` is its honest terminal state.
 
 > **Back-documents already-shipped Release-1 work.** The throttle CODE shipped 2026-07-06 (`packages/shared/hooks/quota-pace-throttle.sh`, released across 7 plugins, itil 0.57.x) BEFORE this story existed — the P443 lineage debt. Born `draft` (not `done`, no bootstrap-exempt marker — that marker is P170-only per ADR-095) to document the shipped behaviour on STORY-MAP-003. Acceptance criteria are already met by the shipped code; this story records what was built, not pending work.
 

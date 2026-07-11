@@ -105,3 +105,19 @@ write_state() { printf '%s %s %s %s %s\n' "$1" "$2" "$3" "$4" "$5" > "$WR_QUOTA_
   run bash "$HOOK" </dev/null
   [ "$status" -eq 0 ]; [ "$(slept)" -gt 0 ]
 }
+
+@test "concurrent sessions keep independent throttle grip (STORY-042 per-session state)" {
+  # State lives at \$TMPDIR/wr-quota-throttle-<sid>: each session has its own file,
+  # so one session's fresh recent-check must NOT short-circuit another's throttle.
+  export TMPDIR="$TMP"; unset WR_QUOTA_MARKER
+  write_cache 90 $((NOW+9000)) 90 $((NOW+500000))          # both windows heavily over pace
+  # Seed each session a baseline 100s old (so a firing throttles, not just baselines).
+  printf '%s %s %s %s %s\n' $((NOW-100)) $((NOW-100)) 10 5 20 > "$TMP/wr-quota-throttle-sessA"
+  printf '%s %s %s %s %s\n' $((NOW-100)) $((NOW-100)) 10 5 20 > "$TMP/wr-quota-throttle-sessB"
+  CLAUDE_SESSION_ID=sessA bash "$HOOK" </dev/null; a="$(slept)"; rm -f "$TMP/slept"
+  # Session B fires right after A. A machine-wide marker would make B's recent-check
+  # (< 5s since A wrote its marker) skip → no sleep. Per-session state keeps them independent.
+  CLAUDE_SESSION_ID=sessB bash "$HOOK" </dev/null; b="$(slept)"
+  [ "$a" -gt 0 ]        # session A throttled
+  [ "$b" -gt 0 ]        # session B throttled independently (not suppressed by A)
+}

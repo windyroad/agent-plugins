@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: in-progress
 rfc-id: quota-pace-throttle-hook-frequently-firing-pretooluse
 reported: 2026-07-06
 human-oversight: confirmed
@@ -14,7 +14,7 @@ story-maps: [STORY-MAP-003]
 
 # RFC-046: Quota-pace throttle — mechanical PreToolUse pacing, extracted into `@windyroad/cruise`
 
-**Status**: accepted (2026-07-09)
+**Status**: in-progress (2026-07-11)
 **Reported**: 2026-07-06
 **Problems**: P160, P443
 **ADRs**: ADR-093
@@ -67,6 +67,6 @@ The mechanical quota-pace throttle (ADR-093): a matcher-less `PreToolUse` hook t
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-042 | STORY-042: Extract quota-pacing into its own plugin | accepted |
-| STORY-043 | STORY-043: Self-install the quota-state producer | accepted |
-| STORY-039 | STORY-039: Throttle token burn against the quota windows | draft |
+| STORY-039 | STORY-039: Throttle token burn against the quota windows | archived |
+| STORY-042 | STORY-042: Extract quota-pacing into its own plugin | in-progress |
+| STORY-043 | STORY-043: Self-install the quota-state producer | in-progress |

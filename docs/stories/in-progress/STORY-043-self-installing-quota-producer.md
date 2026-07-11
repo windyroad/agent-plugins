@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: in-progress
 story-id: self-installing-quota-producer
 reported: 2026-07-08
 decision-makers: [Tom Howard]
@@ -9,12 +9,12 @@ rfcs: [RFC-046]
 story-maps: [STORY-MAP-003]
 estimated-effort: L
 human-oversight: confirmed
-oversight-hash: 69936dd9c2a26a7d24136dba8d35a3f066fab0f5eaa41b73f9e69757e9bbea65
+oversight-hash: 0a1f3f27a06dd9d29d399063e3431b2c85256fa42c2bbb2abd882395e8f8a20a
 ---
 
 # STORY-043: Self-install the quota-state producer
 
-**Status**: accepted
+**Status**: in-progress
 **Reported**: 2026-07-08
 **Problems**: P160, P443
 **JTBD**: JTBD-010
