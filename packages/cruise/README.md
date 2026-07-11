@@ -1,41 +1,67 @@
 # @windyroad/cruise
 
-Cruise control for your Claude Code token burn. A mechanical, self-calibrating throttle that paces your tool-call burn so you **glide onto each rate-limit window's pace line and converge on the reset** — instead of sprinting into a hard rate-limit stop mid-flight. *Maturity: Experimental.*
+**Cruise control for your Claude Code token burn.** *Maturity: Experimental.*
 
-Grounded in JTBD-010 (Sustain My Token Quota Across the Week and Across Surfaces); mechanics in ADR-093; config in ADR-098; producer self-install in ADR-097.
+Part of [Windy Road Agent Plugins](../../README.md).
 
-## What it does
+You're hours into an overnight run and your weekly rate limit is exhausted mid-task. The loop halts until the window resets — sometimes days out. `@windyroad/cruise` guards against that for all realistic heavy use: a mechanical, self-calibrating throttle that eases your tool-call burn onto pace so you reach each window's reset with headroom to spare, instead of hitting a hard rate-limit stop.
 
-A matcher-less `PreToolUse` hook fires before every tool call. It reads your current rate-limit usage from a cache, measures your actual burn rate, and — when you're burning faster than the *remaining sustainable rate* `(100 − headroom − used) / time_left` — sleeps a small, growing amount per call (a feedback controller) to bring your burn back onto pace. When you're on or under pace it's a fast no-op. It **never blocks, never asks, and fails open** on every abnormal path (a broken throttle must not break your session).
+It runs in the background, never blocks, never asks, and fails open — a broken throttle must never break your session.
 
-Two rate-limit windows are paced simultaneously (rolling 5-hour and 7-day); the tighter one governs. A weekly **headroom** (default 5pp) is reserved so Claude Code doesn't consume the last of your budget that chat / Cowork also draw on.
+## Install
 
-**Honest limit:** because it slows rather than blocks (by design — see JTBD-010), it cannot prevent exhaustion under *sustained* very-heavy burn (>~5%/hr for days); that would need a hard stop, which is deliberately not done. It covers all realistic heavy burn.
+```bash
+npx @windyroad/cruise           # just the throttle
+npx @windyroad/agent-plugins    # the whole suite, cruise included
+```
 
-## Controls
+Restart Claude Code to activate. Cruise self-installs everything else it needs — no hand-wiring.
 
-- **Disable without uninstalling:** set `max_sleep_s: 0` in the config file — a zero ceiling clamps every sleep to nothing. There's no separate kill-switch: the glide only ever *slows*, never blocks, so there's nothing to escape from.
-- **Config file** (`.claude/cruise.config.json` in a project, or `~/.claude/cruise.config.json` per-machine; project wins, then machine, then built-in defaults; env vars override all):
+## See it working
 
-  ```json
-  {
-    "headroom_7d_pp": 5,
-    "headroom_5h_pp": 0,
-    "max_sleep_s": 600,
-    "cache_path": "~/.claude/quota-state.json"
-  }
-  ```
+```bash
+/wr-cruise:status
+```
 
-  `max_sleep_s` is the per-call sleep ceiling (default 600s, under the hook's 660s timeout so the sleep always completes). Raising it toward the timeout throttles harder (a near-hold at the line) while always remaining a sleep, never a block.
+An on-demand report of what the throttle is doing: usage against the pace line per window, how far ahead or behind you are, the sleep it's injecting right now, a glide projection, and a health check that reports whether pacing has stalled.
 
-## The quota cache
+```
+  5-hour window  [##----------|-------]  used 10%  ·  pace 62%  ·  52pp behind
+  7-day window   [|-------------------]  used  3%  ·  pace  3%  ·  0pp behind
+  Throttle now:   idle (0s) — on or under pace, full speed
+```
 
-The throttle reads `~/.claude/quota-state.json` (nested schema: `.five_hour.used_percentage` / `.resets_at`, `.seven_day.{…}`). Only a **statusline** receives Claude Code's `.rate_limits`, so the cache is written by a small statusline snippet. `@windyroad/cruise` self-installs that producer (ADR-097) — you don't wire it by hand. If the cache is absent/stale/malformed the throttle is a silent no-op (fail-open).
+## How it works
 
-## Uninstall / opt-out
+A `PreToolUse` hook fires before every tool call. It reads your current rate-limit usage, measures your actual burn rate, and — when you're burning faster than the *remaining sustainable rate* `(100 − headroom − used) / time_left` — sleeps a small, growing amount per call to bring you back onto pace. On or under pace, it's a fast no-op.
 
-There's no "install but don't self-install the producer" knob — that would be an inert plugin. To remove the producer, **uninstall the plugin**; uninstall removes the self-installed statusline block (leaving your statusline as it was). To pause the *pacing* while keeping everything installed, set `max_sleep_s: 0` (above).
+Both rolling windows are paced at once (5-hour and 7-day); the tighter one governs. Cruise holds back a weekly **headroom** (default 5pp) so Claude Code doesn't consume the budget your chat and Cowork sessions also draw on.
 
-## Tests
+The throttle reads a small cache (`~/.claude/quota-state.json`) that only a statusline can produce — so cruise writes the statusline for you on first run (create-if-absent, and it never touches an existing one).
 
-`test/quota-pace-throttle.bats` (throttle) + `test/quota-state-producer-install.bats` (self-installer) — behavioural: fail-open paths, baseline capture, over-pace ramp-up, under-pace ease-off, ceiling clamp + `max_sleep_s: 0` disable, recent-check short-circuit, never-denies, 5h-window-governs; and for the installer: create-and-wire when absent, no-op when already producing, agent-merge (never blind-append) otherwise.
+## Configure
+
+Optional. Knobs resolve project → machine → built-in defaults, with env vars overriding all:
+
+```json
+{
+  "headroom_7d_pp": 5,
+  "headroom_5h_pp": 0,
+  "max_sleep_s": 600,
+  "cache_path": "~/.claude/quota-state.json"
+}
+```
+
+Save it at `.claude/cruise.config.json` (per project) or `~/.claude/cruise.config.json` (per machine). `max_sleep_s: 0` pauses pacing without uninstalling.
+
+## Honest limits
+
+It slows; it doesn't block — by design. So it can't save you from *sustained* very-heavy burn (upward of 5%/hr for days on end) — nothing short of a hard stop could, and a hard stop is the outage this exists to avoid. Short of that extreme, it holds the line.
+
+To remove it, uninstall the plugin — that cleanly removes the statusline block it added.
+
+## Licence
+
+[MIT](../../LICENSE)
+
+Built by [Windy Road Technology](https://windyroad.com.au).
