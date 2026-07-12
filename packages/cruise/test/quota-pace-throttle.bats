@@ -98,12 +98,25 @@ write_state() { printf '%s %s %s %s %s\n' "$1" "$2" "$3" "$4" "$5" > "$WR_QUOTA_
   ! echo "$output" | grep -qi 'deny'
 }
 
-@test "5h window can govern when it is the tighter constraint" {
-  # 5h badly over (5->30 in 100s, reset soon); week fine. Should throttle on the 5h.
-  write_state $((NOW-100)) $((NOW-100)) 10 5 0
-  write_cache 30 $((NOW+600)) 12 $((NOW+500000))
+@test "5h window can govern when it is the tighter constraint (and over its line)" {
+  # 5h at 70% ~2.5h into the 5h window (linear pace 50%) → over its line AND over-rate
+  # (15->70 in 100s); week behind. Should throttle on the 5h.
+  write_state $((NOW-100)) $((NOW-100)) 10 15 0
+  write_cache 70 $((NOW+9000)) 12 $((NOW+500000))
   run bash "$HOOK" </dev/null
   [ "$status" -eq 0 ]; [ "$(slept)" -gt 0 ]
+}
+
+@test "behind the pace line does NOT throttle despite a high burst (P446 deficit-aware)" {
+  # 7d at 13% used ~29h into the 168h window (linear pace ~16%) → behind pace with
+  # banked surplus; 5h also behind (8% used, 2.5h in). A momentary burst (+3% wk /
+  # +3% 5h in 100s) exceeds the sustainable RATE but must NOT brake — the surplus is
+  # there to be spent. This is the over-brake bug the deficit gate fixes.
+  write_state $((NOW-100)) $((NOW-100)) 10 5 0
+  write_cache 8 $((NOW+9000)) 13 $((NOW+500000))
+  run bash "$HOOK" </dev/null
+  [ "$status" -eq 0 ]; [ ! -f "$TMP/slept" ]        # no sleep — behind pace on both windows
+  grep -qE " 0$" "$WR_QUOTA_MARKER"                 # cur_s stays at 0
 }
 
 @test "concurrent sessions keep independent throttle grip (STORY-042 per-session state)" {

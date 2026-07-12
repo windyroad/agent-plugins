@@ -79,11 +79,24 @@ window "5-hour window" "$fu" "$fr" 18000 "$HD5"
 window "7-day window" "$wu" "$wr_" 604800 "$HD7"
 echo ""
 
+# position (used − linear pace) per window; the most-ahead window governs the label.
+# The throttle is deficit-aware: it only brakes at/over the line, so the label must
+# derive from real position, not from sleep>0 (P446 second dimension).
+pos() { local used="$1" reset="$2" W="$3" hd="$4"; local left=$(( reset-now )); [ "$left" -lt 0 ] && left=0
+  local el=$(( (W-left)*100/W )); [ "$el" -gt 100 ] && el=100; echo $(( used - (100-hd)*el/100 )); }
+gov=$(pos "$fu" "$fr" 18000 "$HD5"); wpos=$(pos "$wu" "$wr_" 604800 "$HD7"); [ "$wpos" -gt "$gov" ] && gov=$wpos
+
 # --- throttle now ---
 if [ "$cur_s" -gt 0 ]; then
-  echo "  Throttle now:   sleeping ${cur_s}s per tool call — braking (you're ahead of pace)"
+  if [ "$gov" -ge 0 ]; then
+    echo "  Throttle now:   sleeping ${cur_s}s per tool call — holding you on the pace line (+${gov}pp) to glide to reset"
+  else
+    echo "  Throttle now:   sleeping ${cur_s}s per tool call — easing off ($(( -gov ))pp behind pace, sleep winding down)"
+  fi
+elif [ "$gov" -ge 0 ]; then
+  echo "  Throttle now:   idle (0s) — on the pace line, full speed"
 else
-  echo "  Throttle now:   idle (0s) — on or under pace, full speed"
+  echo "  Throttle now:   idle (0s) — $(( -gov ))pp behind pace, full speed"
 fi
 
 # --- projection (measured burn vs sustainable, 7d — the scarce window) ---

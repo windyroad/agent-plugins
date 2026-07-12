@@ -107,19 +107,30 @@ if [ "$dt" -lt "$BASELINE_MIN" ]; then
   emit_ok
 fi
 
-# over-rate test, per window, WITHOUT floats:
-#   r > safe  ⟺  Δused/dt > (100−headroom−used)/(reset−now)
-#            ⟺  Δused·(reset−now) > (100−headroom−used)·dt      (denominators > 0)
-# A window whose reset has passed (reset−now ≤ 0) is unconstrained (skip).
+# Brake only when a window is BOTH over-rate AND at/over its linear pace line
+# (P446 second dimension — deficit-aware, 2026-07-13). WITHOUT floats:
+#   over-rate:    Δused/dt > (100−headroom−used)/(reset−now)
+#               ⟺ Δused·(reset−now) > (100−headroom−used)·dt
+#   at/over line: used ≥ (100−headroom)·elapsed/WL   [elapsed = WL − (reset−now)]
+#               ⟺ used·WL ≥ (100−headroom)·elapsed
+# While BEHIND the line you hold banked surplus (used less than the even-glide
+# target) — spend it, bursts don't brake. Braking engages as you reach the line and
+# holds you on it; the line ends at (100−headroom) < 100 at reset, so you still glide
+# to reset without exhausting. Extreme sustained burn that empties the surplus AND
+# exceeds what the ceiling can offset still exhausts (documented P446 residual).
+# A window whose reset has passed (reset−now ≤ 0) is unconstrained (skip). Bad data
+# (reset further than a window length → elapsed ≤ 0) fails safe: reads as over-line.
+# ponytail: WL are the platform's rolling-window lengths; update if Anthropic changes them.
+WL7=604800; WL5=18000          # 7-day / 5-hour window lengths (seconds)
 over=0
-w_left=$(( wr_ - now )); w_budget=$(( 100 - HD7 - wu )); w_dused=$(( wu - base_week ))
-if [ "$w_left" -gt 0 ] && [ "$w_dused" -gt 0 ]; then
-  [ $(( w_dused * w_left )) -gt $(( (w_budget>0?w_budget:0) * dt )) ] && over=1
-fi
-f_left=$(( fr - now )); f_budget=$(( 100 - HD5 - fu )); f_dused=$(( fu - base_five ))
-if [ "$f_left" -gt 0 ] && [ "$f_dused" -gt 0 ]; then
-  [ $(( f_dused * f_left )) -gt $(( (f_budget>0?f_budget:0) * dt )) ] && over=1
-fi
+w_left=$(( wr_ - now )); w_budget=$(( 100 - HD7 - wu )); w_dused=$(( wu - base_week )); w_elapsed=$(( WL7 - w_left ))
+if [ "$w_left" -gt 0 ] && [ "$w_dused" -gt 0 ] \
+   && [ $(( wu * WL7 )) -ge $(( (100 - HD7) * w_elapsed )) ] \
+   && [ $(( w_dused * w_left )) -gt $(( (w_budget>0?w_budget:0) * dt )) ]; then over=1; fi
+f_left=$(( fr - now )); f_budget=$(( 100 - HD5 - fu )); f_dused=$(( fu - base_five )); f_elapsed=$(( WL5 - f_left ))
+if [ "$f_left" -gt 0 ] && [ "$f_dused" -gt 0 ] \
+   && [ $(( fu * WL5 )) -ge $(( (100 - HD5) * f_elapsed )) ] \
+   && [ $(( f_dused * f_left )) -gt $(( (f_budget>0?f_budget:0) * dt )) ]; then over=1; fi
 
 # Feedback controller: ramp the per-call sleep toward holding burn = safe.
 if [ "$over" -eq 1 ]; then
