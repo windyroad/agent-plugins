@@ -62,6 +62,16 @@ ADR-093's "never blocks / slow, don't jerk" tenet STANDS. The defect is that the
 
 This is a mechanics correction to ADR-093 (self-calibrating sleep + ceiling), NOT a philosophy change — still mechanical, slow-not-block, fail-open. It also needs the producer to write a monotonic `written_at`/usage so Δ can be measured (the flat cache already carries usage; add the read-delta in the hook).
 
+## Second dimension — the glide OVER-brakes when behind the pace line (position-unaware controller), observed 2026-07-13
+
+The RCA above fixes "glide too WEAK to hold the line." Live `/wr-cruise:status` telemetry on 2026-07-13 surfaced the complementary failure: the self-calibrating controller (the P446 mechanism, shipped in `@windyroad/cruise`) **over-brakes when you are well behind the pace line**. Observed: 5h window 8% used vs 17% pace (9pp behind), 7d window 11% used vs 22% pace (11pp behind) — clear surplus, days of runway — yet the throttle was sleeping 25s/call.
+
+**Mechanism**: the over-rate test (`quota-pace-throttle.sh` lines 110–121) is purely a RATE comparison: it brakes whenever measured burn `Δused/dt` exceeds `safe = (100−headroom−used)/(reset−now)` — the remaining budget spread evenly over ALL remaining window time. It gives **no credit for accumulated position** (the surplus banked by being under the linear pace line). On a 7-day window `safe` is ~0.6%/hr, so ANY genuine working burst (~13%/hr) trips it, even with 84% budget and 5.3 days left. Being behind pace bumps `safe` only marginally (larger remaining budget), nowhere near enough to stop the over-brake.
+
+**Fix direction (a control-law change, not a re-tune)**: make the controller **deficit/surplus-aware**, not pure instantaneous-rate. While usage is under the linear pace line, the banked slack should be spendable — let bursts draw it down freely (little/no brake); engage braking only as usage approaches the line, hard at/over it. This still guarantees non-exhaustion (at the line the sustainable rate holds the glide to reset) but stops the pointless braking when there is a large surplus and a long horizon. Candidate shapes (a genuine ≥2-option design decision — confirm before building per ADR-074): (a) token-bucket / surplus-drawdown allowance above `safe`; (b) PI controller adding an integral (position) term to the current proportional (rate) term; (c) brake magnitude scaled by `(used − linear_pace)` deficit. One deficit-aware law fixes BOTH dimensions of this ticket (too-weak-at-the-line AND too-aggressive-when-behind).
+
+**Sibling reporter bug (cheap, separable)**: `cruise-status.sh` prints `Throttle now: … braking (you're ahead of pace)` whenever the injected sleep is >0 — it infers "ahead" from sleep>0, not from actual position, so it flatly contradicts the "Npp behind" line it prints above. The label must derive from real position (behind/at/ahead), not from whether a sleep is active.
+
 ## Dependencies
 
 - **Composes with**: **P160** (ship quota-pacing surface — this is a defect in its Release-1 fix), **P443** (lineage). The distribution fix (P160/P443) and this correctness fix are independent.
