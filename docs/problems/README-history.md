@@ -1191,3 +1191,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-07-10
 
 > Last reviewed: 2026-07-08 **P445 captured** — agent offers unsolicited off-ramps, projects effort/time onto the user, and narrates its own conduct ("I'll drop it") then recurs — the hollow-marker pattern turned on itself. Fix MUST be a portable plugin-shipped behavioural rule (loads every project), not a project-local memory (per P423). Also this session: RFC-046 lineage repaired + accepted-pending; @windyroad/cruise rename propagated; STORY-039/042/043 + STORY-MAP-003 ratified.
+
+## 2026-07-13
+
+> Last reviewed: 2026-07-10 **P446 captured (Critical)** — the quota-pace throttle's glide is too weak to hold the pace line (60s cap + a gentle response curve); a real hard weekly-limit stop occurred with the throttle running. Fix (user direction — NOT a hard stop): strengthen the glide — deficit-based response + much larger configurable cap (sleep completes under the hook timeout, no fail-open). Rides the in-flight @windyroad/cruise build. RFC-046 accepted; ADR-097/098 ratified; STORY-042 accepted.

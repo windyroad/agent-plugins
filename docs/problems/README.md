@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-10 **P446 captured (Critical)** — the quota-pace throttle's glide is too weak to hold the pace line (60s cap + a gentle response curve); a real hard weekly-limit stop occurred with the throttle running. Fix (user direction — NOT a hard stop): strengthen the glide — deficit-based response + much larger configurable cap (sleep completes under the hook timeout, no fail-open). Rides the in-flight @windyroad/cruise build. RFC-046 accepted; ADR-097/098 ratified; STORY-042 accepted.
+> Last reviewed: 2026-07-13 **P447 captured (Critical)** — cruise ships its two hooks non-executable (git mode 644); Claude Code exec's them directly so `/bin/sh` returns Permission denied on every PreToolUse and the throttle is silently inert (fails open) across 0.2.0–0.3.2. Observed live 2026-07-12. Service restored by chmod'ing the installed copies; durable fix = git mode 755 + a CI mode-guard control + R074 register entry.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -14,6 +14,7 @@ Ranks above all other tiers regardless of WSJF (ADR-076).
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
+| 25.0 | P447 | cruise hooks ship non-executable (git mode 644) — /bin/sh Permission denied on every PreToolUse, throttle silently inert across 0.2.0–0.3.2 | 25 Critical | Open | S | 2026-07-13 | internal |
 | 5.0 | P160 | Ship quota-pacing surface — throttle shipped but INERT for adopters (producer is user-owned statusline config no plugin can ship) + mis-placed across 7 plugins + broken lineage (P443); reopened 2026-07-07, pain undiminished for everyone not on the one hand-wired machine | 20 Critical | Known Error | XL | 2026-05-03 | internal |
 
 ### Tier 1 — Inbound-reported (prioritised above internal per ADR-076)
