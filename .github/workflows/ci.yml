@@ -100,6 +100,9 @@ jobs:
       - name: Check shim-wrapper templates in sync (P343, ADR-080)
         run: npm run check:shim-wrappers
 
+      - name: Check plugin entrypoints are tracked executable (P447, R074)
+        run: npm run check:executable-modes
+
       - name: Check locale-discipline in bash scripts (P328, advisory)
         run: packages/itil/bin/wr-itil-check-locale-discipline .
 
