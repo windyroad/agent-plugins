@@ -1,12 +1,16 @@
 # Problem 447: cruise hooks ship non-executable (git mode 644) — /bin/sh Permission denied on every PreToolUse, throttle silently inert
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-07-13
 **Priority**: 25 (Critical) — Impact: 5 (Catastrophic — the plugin is entirely inert; the throttle does zero pacing on every install, defeating cruise's whole purpose, sibling to P446) × Likelihood: 5 (Certain — every published version 0.2.0–0.3.2, every PreToolUse firing; observed live 2026-07-12) — derived at capture per Step 4a
 **Origin**: internal
 **Effort**: S — chmod +x two files + git mode 755 + release; plus a small CI/behavioural mode guard to close the class.
 **JTBD**: JTBD-010
 **Persona**: developer
+
+## Fix Released
+
+Closed 2026-07-13. Fix released in `@windyroad/cruise@0.3.3` (both hooks now git mode 755) and verified live in a restarted session — the PreToolUse hook exec's and renders telemetry with no Permission denied. Recurrence guarded by the `check:executable-modes` CI gate (R074). Evidence: `yes — observed: post-restart on 0.3.5, /wr-cruise:status ran and rendered per-window telemetry; installed hook mode -rwxr-xr-x`.
 
 ## Description
 

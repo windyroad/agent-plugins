@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-13 **P447 captured (Critical)** — cruise ships its two hooks non-executable (git mode 644); Claude Code exec's them directly so `/bin/sh` returns Permission denied on every PreToolUse and the throttle is silently inert (fails open) across 0.2.0–0.3.2. Observed live 2026-07-12. Service restored by chmod'ing the installed copies; durable fix = git mode 755 + a CI mode-guard control + R074 register entry.
+> Last reviewed: 2026-07-13 **P447 closed** — cruise permission-denied throttle-inert fix released (@windyroad/cruise 0.3.3, hooks git mode 755) and verified live post-restart; recurrence guarded by the check:executable-modes CI gate (R074). Telescoped capture→fix→verify→close in one session.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -14,7 +14,6 @@ Ranks above all other tiers regardless of WSJF (ADR-076).
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
-| 25.0 | P447 | cruise hooks ship non-executable (git mode 644) — /bin/sh Permission denied on every PreToolUse, throttle silently inert across 0.2.0–0.3.2 | 25 Critical | Open | S | 2026-07-13 | internal |
 | 5.0 | P160 | Ship quota-pacing surface — throttle shipped but INERT for adopters (producer is user-owned statusline config no plugin can ship) + mis-placed across 7 plugins + broken lineage (P443); reopened 2026-07-07, pain undiminished for everyone not on the one hand-wired machine | 20 Critical | Known Error | XL | 2026-05-03 | internal |
 
 ### Tier 1 — Inbound-reported (prioritised above internal per ADR-076)
@@ -371,6 +370,7 @@ Recently closed this session (2026-04-19/20, against direct in-session evidence)
 
 | ID | Title | Closed via |
 |----|-------|-----------|
+| P447 | cruise hooks ship non-executable (git mode 644) — Permission denied on every PreToolUse, throttle silently inert across 0.2.0–0.3.2 | Closed 2026-07-13 (telescoped capture→fix→verify→close in one session — direct Open → Closed). Fix released `@windyroad/cruise@0.3.3` (hooks git mode 755); recurrence guarded by `check:executable-modes` CI gate (R074). Evidence: `yes — observed: post-restart on 0.3.5, /wr-cruise:status rendered per-window telemetry; installed hook mode -rwxr-xr-x`. |
 | P166 | Precomputed-sha256 helper for `wr-risk-scorer:external-comms` agent invocations to eliminate double-invocation cost | Closed 2026-07-05 (run-retro Step 4a close-on-evidence, P345 AFK iter — Verifying → Closed). Evidence: `yes — observed: seven single-fire gate cycles this session (5 commit-message + 2 changeset-evaluator reviews); every PostToolUse mark hook derived the matching key; every gated commit/Write passed first-try (56478af4, c41579f5, 2b1a7529, 337ef18a, d7082517 + changeset Write); zero re-blocks, zero double invocations`. Recovery: `/wr-itil:transition-problem 166 known-error`. |
 | P384 | wr-risk-scorer:external-comms agent gains Outbound Credibility / Self-Own review axis | Closed 2026-07-04 (run-retro Step 4a sub-step 9 prior-session evidence drain — Verifying → Closed). Evidence: `yes — observed: promptfoo eval 2/2 GREEN 2026-07-03`; released `@windyroad/risk-scorer@0.16.0` (2026-07-03). Recovery: `/wr-itil:transition-problem 384 known-error`. |
 | P391 | oversight-nudge bats suites non-hermetic against inherited WR_SUPPRESS_OVERSIGHT_NUDGE — `unset` added to setup() of jtbd/architect/itil-rfc oversight-nudge + risk-scorer scaffold-nudge suites | Closed 2026-07-04 (run-retro Step 4a sub-step 9 prior-session evidence drain — Verifying → Closed). Evidence: `yes — observed: 30/30 GREEN under exported guard + 30/30 under env -u, in-session 2026-06-28`; test-only (no release). Recovery: `/wr-itil:transition-problem 391 known-error`. |
