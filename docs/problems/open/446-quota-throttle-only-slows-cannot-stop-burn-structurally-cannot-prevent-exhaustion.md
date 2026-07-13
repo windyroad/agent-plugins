@@ -72,6 +72,14 @@ The RCA above fixes "glide too WEAK to hold the line." Live `/wr-cruise:status` 
 
 **Sibling reporter bug (cheap, separable)**: `cruise-status.sh` prints `Throttle now: … braking (you're ahead of pace)` whenever the injected sleep is >0 — it infers "ahead" from sleep>0, not from actual position, so it flatly contradicts the "Npp behind" line it prints above. The label must derive from real position (behind/at/ahead), not from whether a sleep is active.
 
+### Third dimension — sticky recovery (the injected sleep unwinds too slowly), fixed 2026-07-13
+
+Surfaced live 2026-07-13: `/wr-cruise:status` sat "Waiting…" for 2m+ because the throttle was sleeping on the status command's own tool call, using a stale per-call sleep (`cur_s=88`) ramped during the over-brake window. Root cause of the *stickiness*: (a) the ease-down was gradual (`cur_s*2/3−10`, one firing at a time) AND each firing sits behind its own sleep, so a high `cur_s` unwinds over minutes; (b) the re-baseline / too-soon early-return paths re-slept the stored `cur_s` unconditionally, without re-checking position. A session that had banked surplus (fell behind pace) stayed slow long after conditions said "don't brake."
+
+**Fix (shipped 0.3.5, user-pinned Option A via AskUserQuestion):** asymmetric recovery — when a window is behind pace the controller drops `cur_s` to 0 **at once** (not eased); the position gate is hoisted so the early-return paths respect it and never re-sleep a stale value while behind pace. Dropping braking cannot cause exhaustion, and it re-engages the instant a window is over pace again (ramp-up unchanged). Immediate manual reset for a running session: clear `$TMPDIR/wr-quota-throttle-*`.
+
+**ADR-093 amendment scope (queued, per architect review 2026-07-13):** the ADR-093 Mechanics body still describes the retired one-shot `S=interval·(r/safe−1)` formula and a *symmetric* converge. The queued amendment must rewrite it to the three shipped realities — (1) the deficit-aware position gate, (2) the feedback controller that replaced the one-shot formula, (3) the asymmetric immediate-recovery law — and is deferred to the `/wr-architect` ratification flow (P357: user direction is not itself ADR-body substance ratification).
+
 ## Dependencies
 
 - **Composes with**: **P160** (ship quota-pacing surface — this is a defect in its Release-1 fix), **P443** (lineage). The distribution fix (P160/P443) and this correctness fix are independent.

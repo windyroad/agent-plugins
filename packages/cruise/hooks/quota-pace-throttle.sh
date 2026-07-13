@@ -93,52 +93,67 @@ wu=${wu%%.*}; fu=${fu%%.*}   # integer-truncate the used%
 
 write_state() { printf '%s %s %s %s %s\n' "$now" "$base_ts" "$base_week" "$base_five" "$cur_s" > "$STATE" 2>/dev/null; }
 
-# First sample (or reset baseline): record it, no rate yet → hold current sleep.
+# Position gate (needs NO rate): a window is at/over its linear pace line when
+#   used·WL ≥ (100−headroom)·elapsed   [elapsed = WL − (reset−now)].
+# Computed up-front so the re-baseline / too-soon paths below respect current
+# position instead of blindly re-sleeping a stale cur_s (P446 sticky-recovery fix,
+# 2026-07-13). reset passed (left ≤ 0) → not over-line; bad data (elapsed ≤ 0) → fails
+# safe as over-line. WL are the platform rolling-window lengths (7d / 5h).
+WL7=604800; WL5=18000
+w_left=$(( wr_ - now )); f_left=$(( fr - now )); w_overline=0; f_overline=0
+[ "$w_left" -gt 0 ] && [ $(( wu * WL7 )) -ge $(( (100 - HD7) * (WL7 - w_left) )) ] && w_overline=1
+[ "$f_left" -gt 0 ] && [ $(( fu * WL5 )) -ge $(( (100 - HD5) * (WL5 - f_left) )) ] && f_overline=1
+any_overline=0; { [ "$w_overline" -eq 1 ] || [ "$f_overline" -eq 1 ]; } && any_overline=1
+
+# First sample (or reset baseline): record it, no rate yet. Sleep the established
+# pace ONLY if still at/over the line; behind pace → drop the stale grip at once.
 if [ "$base_week" -lt 0 ] || [ "$base_ts" -le 0 ]; then
-  base_ts=$now; base_week=$wu; base_five=$fu; write_state
-  [ "$cur_s" -gt 0 ] && sleep "$cur_s" 2>/dev/null   # keep any established pace while re-baselining
+  base_ts=$now; base_week=$wu; base_five=$fu
+  [ "$any_overline" -eq 1 ] || cur_s=0
+  write_state
+  [ "$cur_s" -gt 0 ] && sleep "$cur_s" 2>/dev/null
   emit_ok
 fi
 
 dt=$(( now - base_ts ))
 if [ "$dt" -lt "$BASELINE_MIN" ]; then
-  write_state                     # too soon to re-measure; keep sleeping the current amount
+  # Too soon to measure a rate → gate on position only. Behind the line → drop the
+  # stale grip; still at/over it → keep the pace. (Position-only is slightly more
+  # conservative than the full path: it may keep sleeping while on the line but
+  # under-rate for this sub-BASELINE_MIN window — safe, only brief extra latency.)
+  [ "$any_overline" -eq 1 ] || cur_s=0
+  write_state
   [ "$cur_s" -gt 0 ] && sleep "$cur_s" 2>/dev/null
   emit_ok
 fi
 
-# Brake only when a window is BOTH over-rate AND at/over its linear pace line
-# (P446 second dimension — deficit-aware, 2026-07-13). WITHOUT floats:
-#   over-rate:    Δused/dt > (100−headroom−used)/(reset−now)
-#               ⟺ Δused·(reset−now) > (100−headroom−used)·dt
-#   at/over line: used ≥ (100−headroom)·elapsed/WL   [elapsed = WL − (reset−now)]
-#               ⟺ used·WL ≥ (100−headroom)·elapsed
-# While BEHIND the line you hold banked surplus (used less than the even-glide
-# target) — spend it, bursts don't brake. Braking engages as you reach the line and
-# holds you on it; the line ends at (100−headroom) < 100 at reset, so you still glide
-# to reset without exhausting. Extreme sustained burn that empties the surplus AND
-# exceeds what the ceiling can offset still exhausts (documented P446 residual).
-# A window whose reset has passed (reset−now ≤ 0) is unconstrained (skip). Bad data
-# (reset further than a window length → elapsed ≤ 0) fails safe: reads as over-line.
-# ponytail: WL are the platform's rolling-window lengths; update if Anthropic changes them.
-WL7=604800; WL5=18000          # 7-day / 5-hour window lengths (seconds)
+# Brake only when a window is BOTH at/over its pace line (w_overline/f_overline,
+# computed up-front) AND over-rate (needs the measured Δused/dt). WITHOUT floats:
+#   over-rate: Δused/dt > (100−headroom−used)/(reset−now)
+#            ⟺ Δused·(reset−now) > (100−headroom−used)·dt
+# While BEHIND the line you hold banked surplus — spend it, bursts don't brake.
+# Braking engages as you reach the line and holds you on it; the line ends at
+# (100−headroom) < 100 at reset, so you still glide to reset without exhausting.
+# Extreme sustained burn that empties the surplus AND exceeds what the ceiling can
+# offset still exhausts (documented P446 residual). Reset passed (left ≤ 0) → skip.
 over=0
-w_left=$(( wr_ - now )); w_budget=$(( 100 - HD7 - wu )); w_dused=$(( wu - base_week )); w_elapsed=$(( WL7 - w_left ))
-if [ "$w_left" -gt 0 ] && [ "$w_dused" -gt 0 ] \
-   && [ $(( wu * WL7 )) -ge $(( (100 - HD7) * w_elapsed )) ] \
+w_budget=$(( 100 - HD7 - wu )); w_dused=$(( wu - base_week ))
+if [ "$w_overline" -eq 1 ] && [ "$w_dused" -gt 0 ] \
    && [ $(( w_dused * w_left )) -gt $(( (w_budget>0?w_budget:0) * dt )) ]; then over=1; fi
-f_left=$(( fr - now )); f_budget=$(( 100 - HD5 - fu )); f_dused=$(( fu - base_five )); f_elapsed=$(( WL5 - f_left ))
-if [ "$f_left" -gt 0 ] && [ "$f_dused" -gt 0 ] \
-   && [ $(( fu * WL5 )) -ge $(( (100 - HD5) * f_elapsed )) ] \
+f_budget=$(( 100 - HD5 - fu )); f_dused=$(( fu - base_five ))
+if [ "$f_overline" -eq 1 ] && [ "$f_dused" -gt 0 ] \
    && [ $(( f_dused * f_left )) -gt $(( (f_budget>0?f_budget:0) * dt )) ]; then over=1; fi
 
-# Feedback controller: ramp the per-call sleep toward holding burn = safe.
+# Feedback controller. Over pace → ramp the per-call sleep up toward holding burn=safe.
+# Behind pace → drop the grip to 0 AT ONCE (asymmetric recovery, P446 sticky-recovery
+# fix): easing down one call at a time left a session that had banked surplus paying
+# minutes of stale latency before it recovered. Dropping braking never risks
+# exhaustion, and it re-engages the instant a window is over pace again.
 if [ "$over" -eq 1 ]; then
   cur_s=$(( cur_s * 3 / 2 + 10 ))          # over pace → slow more
   [ "$cur_s" -gt "$CEIL" ] && cur_s="$CEIL"
 else
-  cur_s=$(( cur_s * 2 / 3 - 10 ))          # on/under pace → ease off
-  [ "$cur_s" -lt 0 ] && cur_s=0
+  cur_s=0                                  # behind/under pace → full speed immediately
 fi
 
 # Slide the baseline forward so the next rate reading stays current.

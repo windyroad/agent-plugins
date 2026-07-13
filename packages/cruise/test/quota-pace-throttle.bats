@@ -119,6 +119,36 @@ write_state() { printf '%s %s %s %s %s\n' "$1" "$2" "$3" "$4" "$5" > "$WR_QUOTA_
   grep -qE " 0$" "$WR_QUOTA_MARKER"                 # cur_s stays at 0
 }
 
+@test "behind pace drops a high sleep to 0 at once, not eased over calls (P446 sticky-recovery)" {
+  # cur_s ramped to 200 during an earlier over-pace window; now behind pace on both
+  # windows with no fresh burst. Old controller eased 200->123->..., leaving a session
+  # slow for minutes; the fix drops the grip straight to 0.
+  write_state $((NOW-100)) $((NOW-100)) 13 8 200
+  write_cache 8 $((NOW+9000)) 13 $((NOW+500000))
+  run bash "$HOOK" </dev/null
+  [ "$status" -eq 0 ]
+  grep -qE " 0$" "$WR_QUOTA_MARKER"                # cur_s := 0 immediately
+}
+
+@test "too-soon firing behind pace drops the stale grip instead of re-sleeping it (P446)" {
+  # dt=10s < BASELINE_MIN → too soon to remeasure a rate; a big stale cur_s must NOT
+  # be re-slept while behind pace (position gate applies without a rate).
+  write_state $((NOW-10)) $((NOW-10)) 13 8 300
+  write_cache 8 $((NOW+9000)) 13 $((NOW+500000))
+  run bash "$HOOK" </dev/null
+  [ "$status" -eq 0 ]; [ ! -f "$TMP/slept" ]       # stale grip dropped, no sleep
+  grep -qE " 0$" "$WR_QUOTA_MARKER"
+}
+
+@test "too-soon firing AT/over the line keeps the established pace (P446 asymmetry is recovery-only)" {
+  # dt=10s < BASELINE_MIN, but at/over the line (70% used ~2.5h into the 5h window):
+  # recovery-to-0 must NOT fire — the established sleep is kept so braking holds.
+  write_state $((NOW-10)) $((NOW-10)) 12 70 40
+  write_cache 70 $((NOW+9000)) 12 $((NOW+500000))
+  run bash "$HOOK" </dev/null
+  [ "$status" -eq 0 ]; [ "$(slept)" -eq 40 ]       # over the line → keep sleeping 40
+}
+
 @test "concurrent sessions keep independent throttle grip (STORY-042 per-session state)" {
   # State lives at \$TMPDIR/wr-quota-throttle-<sid>: each session has its own file,
   # so one session's fresh recent-check must NOT short-circuit another's throttle.
