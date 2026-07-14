@@ -78,7 +78,7 @@ Surfaced live 2026-07-13: `/wr-cruise:status` sat "Waiting…" for 2m+ because t
 
 **Fix (shipped 0.3.5, user-pinned Option A via AskUserQuestion):** asymmetric recovery — when a window is behind pace the controller drops `cur_s` to 0 **at once** (not eased); the position gate is hoisted so the early-return paths respect it and never re-sleep a stale value while behind pace. Dropping braking cannot cause exhaustion, and it re-engages the instant a window is over pace again (ramp-up unchanged). Immediate manual reset for a running session: clear `$TMPDIR/wr-quota-throttle-*`.
 
-**ADR-093 amendment scope (queued, per architect review 2026-07-13):** the ADR-093 Mechanics body still describes the retired one-shot `S=interval·(r/safe−1)` formula and a *symmetric* converge. The queued amendment must rewrite it to the three shipped realities — (1) the deficit-aware position gate, (2) the feedback controller that replaced the one-shot formula, (3) the asymmetric immediate-recovery law — and is deferred to the `/wr-architect` ratification flow (P357: user direction is not itself ADR-body substance ratification).
+**ADR-093 amendment — LANDED 2026-07-13 (commit 4ca91d5e).** ADR-093's normative Mechanics now records all three shipped realities — (1) the deficit-aware position gate, (2) the feedback controller that replaced the one-shot `S=interval·(r/safe−1)` formula, (3) the asymmetric immediate-recovery law — with the numeric constants surfaced per P444, the old formula retired-in-place with forward pointers, and non-exhaustion / ceiling / fail-open unchanged. Architect + JTBD PASS; oversight re-ratified 2026-07-13 via AskUserQuestion Confirm (P357). No amendment work remains.
 
 ## Dependencies
 
