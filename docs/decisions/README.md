@@ -246,7 +246,7 @@ _87 ADRs. These are the current rules. The architect agent reads this section fi
 **Related:** ADR-095, ADR-032
 
 ### ADR-061 — Dogfood graduation criteria for held changesets — symmetric risk balance drives the reinstate decision
-**Status:** proposed | **Oversight:** unconfirmed
+**Status:** proposed | **Oversight:** rejected-pending-supersede (P359)
 **Chosen:** Chosen option: **Sibling ADR codifying symmetric-balance graduation (Option 1) with Phase 1b Option A drain-condition amendment.**
 **Related:** ADR-042, ADR-018, ADR-020, ADR-022, ADR-026, ADR-052, ADR-060, ADR-082, ADR-014, ADR-013, ADR-015, ADR-044
 
@@ -317,7 +317,7 @@ _87 ADRs. These are the current rules. The architect agent reads this section fi
 **Related:** ADR-072, ADR-064, ADR-066, ADR-044, ADR-060, ADR-070
 
 ### ADR-075 — ADR-075: promptfoo as the behavioural test harness for agent-prose verdicts
-**Status:** proposed | **Oversight:** unconfirmed
+**Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen: **adopt promptfoo as the agent-prose eval harness, alongside (not replacing) bats.**
 **Related:** ADR-052, ADR-005, ADR-002, ADR-071, ADR-066
 
@@ -400,7 +400,7 @@ _87 ADRs. These are the current rules. The architect agent reads this section fi
 **Chosen:** Chosen option: **derive from the stated cadence**, because it makes `RISK-POLICY.md` the single source of truth for its own staleness — the doc and the gate can never disagree — and it is the option the user ratified in the 2026-07-04 i...
 
 ### ADR-092 — Fix-titled-commit lifecycle drift surfaces as an advisory, never an auto-fire or hard gate
-**Status:** proposed | **Oversight:** unconfirmed
+**Status:** proposed | **Oversight:** rejected-pending-supersede (P345)
 **Chosen:** Chosen option: **post-commit advisory hook**, because **a lifecycle transition may only be automated on observable facts, and O→KE rests on a knowledge claim** — so the strongest honest surface for the fix-titled-commit signal is an adv...
 
 ### ADR-093 — Mechanical quota-pace throttle — frequently-firing PreToolUse hook, calculated sleep, never blocks
@@ -408,7 +408,7 @@ _87 ADRs. These are the current rules. The architect agent reads this section fi
 **Chosen:** Chosen option 3 (mechanical PreToolUse calculated sleep), registered in `hooks.json` as `PreToolUse` with **no matcher** (every tool call — Correction 2 verbatim) and `timeout: 660` (strictly greater than the 600s sleep ceiling below, so ...
 
 ### ADR-094 — AFK loops anchor completion with the native `/goal` external evaluator
-**Status:** proposed | **Oversight:** unconfirmed
+**Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **native `/goal` external evaluator**, because it moves the stop decision to an independent per-turn evaluator — the only option that structurally breaks the same-actor conflation — and it is the mechanism the user pinned...
 **Confirmation:** packages/itil/skills/work-problems/SKILL.md contains a Step 0e (/goal loop-anchor) section carrying the canoni...; Step 2.4 Gate (0) prose requires the re-scan classification be PRINTED in turn output.; Paired promptfoo Tier-A/Tier-B eval cases in packages/itil/skills/work-problems/eval/promptfooconfig.yaml asse...; Empirical probe results (Skill-tool rejection message, headless recognition JSON) recorded in this ADR and in ...
 **Related:** ADR-032, ADR-044, ADR-026, ADR-061, ADR-075, ADR-093

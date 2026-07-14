@@ -1,8 +1,10 @@
 ---
 status: "proposed"
 date: 2026-07-05
-human-oversight: unconfirmed
-oversight-note: "substance was ratified in the 2026-07-04 interactive decision drain (P345 § Ratified Direction: fix surface (a) — post-commit advisory hook, advisory-only, never blocks, NOT auto-fire, NOT hard-gate). This ADR was recorded in a 2026-07-05 AFK iter without AskUserQuestion access, so per P348/ADR-066 it is born-unconfirmed; the next /wr-architect:review-decisions drain promotes it by confirming this recording matches the drain-ratified substance. The Decision Outcome quotes the ratified direction; the detection mechanics (HEAD-subject parse, Open-tickets-only scope, ≤300-byte total emission, bypass env var) are behaviour-preserving elaborations of the ratified advisory shape."
+human-oversight: rejected-pending-supersede
+oversight-date: 2026-07-13
+supersede-ticket: P345
+oversight-note: "REJECTED in the 2026-07-13 review-decisions drain — reverses the 2026-07-04 advisory-only ratification per ADR-066 Reassessment. User: you can't say a commit fixes something and leave the problem Open. If there is no more work, the ticket MUST NOT stay Open — verifying is the correct state, and a fix-titled commit should BLOCK if the ticket is not verifying/closed. The sole exception is when the problem is broken into multiple fixes (more work remains), where Open is legitimate. This upgrades the advisory to a gate — which this ADR's own binding rule says requires superseding it. Superseding decision + the multi-fix-exception mechanics tracked on P345."
 decision-makers: [tomhoward]
 consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: [Windy Road plugin users, downstream adopters]

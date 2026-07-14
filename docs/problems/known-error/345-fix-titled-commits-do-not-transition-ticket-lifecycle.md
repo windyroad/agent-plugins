@@ -118,6 +118,14 @@ Implemented 2026-07-05 (AFK work-problems iter; fix commit on main). New PostToo
 
 Build fix surface **(a)**: a PostToolUse:Bash post-commit ADVISORY hook that parses fix(<pkg>): P<NNN> commit titles and emits a stderr nudge when the named ticket is still Open with no paired transition. Advisory-only, never blocks. + bats + changeset. NOT auto-fire, NOT hard-gate (O->KE is a knowledge claim, not mechanically inferable).
 
+## Superseding Direction - 2026-07-13 review-decisions drain (reverses the 2026-07-04 advisory-only direction)
+
+User reversed the advisory-only call during the 2026-07-13 `/wr-architect:review-decisions` drain; ADR-092 (advisory-only) is now `rejected-pending-supersede` against this ticket. New direction:
+
+A fix-titled commit (`fix(<pkg>): ... P<NNN>` / `(closes P<NNN>)`) must NOT leave the named ticket **Open**. If the fix completes the problem, the ticket MUST be **verifying** (a release shipped — an observable fact) or **closed** in the same commit; the commit **BLOCKS** (hard gate) when the ticket is neither. The sole exception: the problem has been decomposed into **multiple fixes** and more work genuinely remains — then Open is legitimate and the commit passes.
+
+This upgrades the advisory to a gate, which ADR-092's own binding rule states requires superseding it. The prior knowledge-claim objection (O→KE not mechanically inferable) does not defeat this: the gate asserts only **observable** facts — "a fix-titled commit landed" and "the ticket's on-disk state is / isn't verifying/closed". The verifying (not closed) default keeps the honest-state requirement without asserting the unobservable "root cause is known". Mechanics — multi-fix-remaining detection, the block message, verifying-vs-closed selection — to be settled in the superseding ADR.
+
 ## RFCs
 
 | RFC | Status | Title |

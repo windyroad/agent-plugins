@@ -1,7 +1,8 @@
 ---
 status: "proposed"
 date: 2026-07-06
-human-oversight: unconfirmed
+human-oversight: confirmed
+oversight-date: 2026-07-13
 decision-makers: [Tom Howard (mechanism direction 2026-07-05), Claude (AFK-derived details 2026-07-06)]
 consulted: [wr-architect:agent (pre-edit review 2026-07-06), wr-jtbd:agent (JTBD-006 alignment 2026-07-06)]
 informed: []
