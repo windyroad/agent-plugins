@@ -1,6 +1,6 @@
 # Problem 404: Implement ADR-089 + ADR-090 in the skills and tests (≥1-story-per-RFC + story-map/story ratification)
 
-**Status**: Known Error (reopened 2026-07-05 — verification FAILED, see § Verification Failed below)
+**Status**: Verification Pending (transitioned 2026-07-15 via /wr-itil:transition-problems — fix released: ADR-089/090 implementation complete 2026-07-03 via RFC-037 (all 5 stories done + ratified), changeset published (.changeset/ queue empty); awaiting user verification per ADR-022)
 **Reported**: 2026-07-02
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 = 12. Rated at review 2026-07-02: implement ADR-089+090 in skills+tests.
 **Origin**: internal

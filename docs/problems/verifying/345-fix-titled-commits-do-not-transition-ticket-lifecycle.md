@@ -1,6 +1,6 @@
 # Problem 345: Fix-titled commits do not transition the ticket lifecycle in the same commit grain — ticket stays Open across release + CI-verify + multiple intervening commits
 
-**Status**: Known Error
+**Status**: Verification Pending (transitioned 2026-07-15 via /wr-itil:transition-problems — fix released: itil-fix-title-lifecycle-advisory.sh PostToolUse hook, fix commit on main 2026-07-05, shipped in @windyroad/itil ≥0.56; awaiting user verification per ADR-022)
 **Reported**: 2026-05-31
 **Priority**: 8 (Medium) — Impact: 2 × Likelihood: 4 = 8. Rated at review 2026-07-02: auto-K→V gap; fires every fix commit.
 **Origin**: internal
