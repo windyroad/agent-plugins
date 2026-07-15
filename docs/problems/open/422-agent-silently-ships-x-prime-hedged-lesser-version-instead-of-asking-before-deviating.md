@@ -5,6 +5,7 @@
 **Priority**: 12 (High) — Impact: 4 x Likelihood: 3
 **Origin**: internal
 **Effort**: M
+**WSJF**: 6.0 — (12 × 1.0) / 2 (added 2026-07-15 review)
 **JTBD**: JTBD-001
 **Persona**: developer
 

@@ -4,7 +4,7 @@
 **Reported**: 2026-05-10
 **Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3 = 9. Rated at review 2026-07-02: mitigation-selection instance of P132 class.
 **Origin**: internal
-**Effort**: M. WSJF = (9 × 1.0) / 2 = 2.25.
+**Effort**: M. WSJF = (9 × 2.0) / 2 = 9.0 (Known Error ×2.0 multiplier applied 2026-07-15 review).
 ## Description
 
 During the I002 incident-management session (2026-05-10), the agent ended Step 14 reporting with the literal phrasing:

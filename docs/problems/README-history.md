@@ -1196,3 +1196,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 
 > Last reviewed: 2026-07-10 **P446 captured (Critical)** — the quota-pace throttle's glide is too weak to hold the pace line (60s cap + a gentle response curve); a real hard weekly-limit stop occurred with the throttle running. Fix (user direction — NOT a hard stop): strengthen the glide — deficit-based response + much larger configurable cap (sleep completes under the hook timeout, no fail-open). Rides the in-flight @windyroad/cruise build. RFC-046 accepted; ADR-097/098 ratified; STORY-042 accepted.
 > Last reviewed: 2026-07-13 **P447 captured (Critical)** — cruise ships its two hooks non-executable (git mode 644); Claude Code exec's them directly so `/bin/sh` returns Permission denied on every PreToolUse and the throttle is silently inert (fails open) across 0.2.0–0.3.2. Observed live 2026-07-12. Service restored by chmod'ing the installed copies; durable fix = git mode 755 + a CI mode-guard control + R074 register entry.
+
+## 2026-07-15
+
+> Last reviewed: 2026-07-13 **P447 closed** — cruise permission-denied throttle-inert fix released (@windyroad/cruise 0.3.3, hooks git mode 755) and verified live post-restart; recurrence guarded by the check:executable-modes CI gate (R074). Telescoped capture→fix→verify→close in one session.

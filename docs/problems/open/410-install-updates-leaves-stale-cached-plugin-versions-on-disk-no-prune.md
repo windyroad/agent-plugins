@@ -2,9 +2,10 @@
 
 **Status**: Open
 **Reported**: 2026-07-03
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 8 (Medium) — Impact: 2 (Minor — disk bloat; stale caches also feed the P402-class stale-code-execution risk) × Likelihood: 4 (Likely — accumulates on every release; releases are frequent) — re-rated 2026-07-15 /wr-itil:review-problems
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: M — prune step in the repo-local /install-updates skill; needs care around live sessions holding old versions
+**WSJF**: 4.0 — (8 × 1.0) / 2
 **JTBD**: JTBD-007
 **Persona**: developer
 

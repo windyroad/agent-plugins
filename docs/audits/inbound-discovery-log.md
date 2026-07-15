@@ -256,3 +256,14 @@ Invoked as `/wr-itil:review-problems` Step 4.5 from the `/wr-itil:work-problems`
   - `AskUserQuestion` not called (AFK context per orchestrator instruction; mechanical-stage carve-out per P132 / ADR-062 § 4.5 AFK behaviour).
   - Relevance-close pass (Step 4.6) ran: 25 CLOSE-CANDIDATE-WITH-CAVEAT, 0 plain CLOSE-CANDIDATE → 0 auto-closes (AFK closes only clean candidates; caveated ones route to the next interactive review's AskUserQuestion surface). 5 KEEP-WITH-NOTE, 15 SKIP.
   - Verification Queue prompt (Step 4) not fired — AFK non-interactive branch per ADR-013 Rule 6; the 199-ticket queue is preserved for the next interactive invocation.
+
+## 2026-07-15T06:44:11Z - Discovery pass
+
+- **Invocation**: `/wr-itil:review-problems` (interactive). TTL-expiry auto-recheck branch: cache age ~13 days exceeded `ttl_seconds: 86400`.
+- **Channels polled**: 2 of 3. `github-issues:windyroad/agent-plugins` — 56 open issues; `github-security-advisories` — 0 advisories. `github-discussions` skipped fail-soft (HTTP 410, P406 known error).
+- **New vs 2026-07-02 cache**: 25 reports (#312-#349 range). Classification: 13 `matched-local-ticket` via the 2026-07-06 capture batch (P424-P441), 1 `matched-local-ticket` via semantic match this pass (#317 -> P368, verifying), 11 `pending-pipeline-processing` (5 ambiguous-match candidates noted for disambiguation: #313 P214/P358, #320 P389, #321 P371/P314, #338 P416, #340 P419, #348 P080/P413, #349 P363/P080; 4 net-new capture candidates: #315, #323, #327, #344).
+- **Pipeline outcomes**: 0 local tickets auto-created, 0 upstream issues closed, 0 ack comments posted (maintainer self-filed reports; discovery-only per the standing 2026-05-15 user direction recorded in the cache).
+- **Cache refresh**: `docs/problems/.upstream-cache.json` rewritten at `last_checked: 2026-07-15T06:44:11Z`.
+- **Audit notes**:
+  - Verification Queue Step 4 fired interactively: 7 Bucket-1 close-on-evidence (P049/P068/P069/P071/P076/P150/P186) + 3 user-confirmed closes (P019/P020/P021); 0 regressions flagged.
+  - Relevance-close pass (Step 4.6): 40 CLOSE-CANDIDATE-WITH-CAVEAT, 0 plain CLOSE-CANDIDATE, 0 closes. The caveat cohort is dominated by the #306 ADR-citation over-fire (the evaluator flagged even P160, the pinned top-priority ticket); verdicts treated as unusable signal pending the #306 fix.

@@ -1,6 +1,6 @@
 # Problem 020: No user-invocable skills for on-demand governance assessments
 
-**Status**: Verification Pending
+**Status**: Closed (yes — observed: user confirmed 2026-07-15 via /wr-itil:review-problems Step 4 verification prompt. Recovery: rerun /wr-itil:transition-problem 20 known-error to reopen)
 **Reported**: 2026-04-16
 **Priority**: 16 (High) — Impact: Significant (4) x Likelihood: Likely (4)
 **Effort**: L

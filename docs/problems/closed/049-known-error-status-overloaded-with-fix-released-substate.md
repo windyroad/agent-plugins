@@ -1,6 +1,6 @@
 # Problem 049: Known Error status is overloaded — "fix released, awaiting verification" deserves its own explicit status
 
-**Status**: Verification Pending
+**Status**: Closed (closed-on-evidence 2026-07-15 — .verifying.md Verification Pending status in live use: 195 verifying tickets enumerated via the per-state glob this review pass; the whole Verification Queue pipeline runs on the first-class status. Recovery: rerun /wr-itil:transition-problem 49 known-error to reopen)
 **Reported**: 2026-04-19
 **Priority**: 8 (Medium) — Impact: Minor (2) x Likelihood: Likely (4)
 **Effort**: M (re-rated L for the full scope including migration; see iter 5 plan)

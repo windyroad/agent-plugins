@@ -2,9 +2,10 @@
 
 **Status**: Open
 **Reported**: 2026-07-05
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 6 (Medium) — Impact: 3 (Moderate — destructive truncation of a governance file; git-recoverable but silent) × Likelihood: 2 (Unlikely — requires invalid UTF-8 in the target file; rare) — re-rated 2026-07-15 /wr-itil:review-problems
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: M — byte-mode (LC_ALL=C) awk invocations + truncation guard across the reference-section helpers
+**WSJF**: 3.0 — (6 × 1.0) / 2
 **JTBD**: JTBD-001
 **Persona**: developer
 

@@ -2,9 +2,10 @@
 
 **Status**: Open
 **Reported**: 2026-07-04
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 6 (Medium) — Impact: 3 (Moderate — a later fix builds on the stale overridden strategy: the P315 build-on-then-rejected class) × Likelihood: 2 (Unlikely — needs a superseding decision + a later work pass on the same ticket) — re-rated 2026-07-15 /wr-itil:review-problems
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: M — drain-step contract change: reconcile Fix Strategy when appending a superseding decision
+**WSJF**: 3.0 — (6 × 1.0) / 2
 **JTBD**: JTBD-001
 **Persona**: plugin-developer
 

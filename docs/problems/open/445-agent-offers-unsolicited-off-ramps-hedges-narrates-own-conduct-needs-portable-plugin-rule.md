@@ -5,6 +5,7 @@
 **Priority**: 15 (High) — Impact: 3 (Moderate — recurring friction that erodes the agent's value as a crisp, decisive collaborator; hands decisions back to the user; wastes attention) × Likelihood: 5 (Certain — it is default behaviour, recurs every session and every project) — derived at capture per Step 4a
 **Origin**: internal
 **Effort**: L — design + ship a portable behavioural-rule surface (a plugin hook that injects the rule) + decide its plugin home; behavioural coverage is a prose-eval, not a bats gate.
+**WSJF**: 3.75 — (15 × 1.0) / 4 (added 2026-07-15 review)
 **JTBD**: JTBD-001
 **Persona**: developer
 

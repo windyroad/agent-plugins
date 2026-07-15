@@ -2,9 +2,10 @@
 
 **Status**: Open
 **Reported**: 2026-07-03
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 2 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 6 (Medium) — Impact: 2 (Minor — oversight visibility gap on register entries; no runtime effect) × Likelihood: 3 (Possible — pending-review entries accumulate on every bootstrap/assessment) — re-rated 2026-07-15 /wr-itil:review-problems
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: M — new drain skill mirroring review-decisions / confirm-jobs-and-personas shape
+**WSJF**: 3.0 — (6 × 1.0) / 2
 **JTBD**: JTBD-001
 **Persona**: developer
 

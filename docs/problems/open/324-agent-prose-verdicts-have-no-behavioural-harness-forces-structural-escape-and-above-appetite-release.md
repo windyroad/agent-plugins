@@ -2,9 +2,10 @@
 
 **Status**: Open
 **Reported**: 2026-05-27
-**Priority**: 9 (Med-High) — Impact: 3 x Likelihood: 3 (deferred — re-rate at next /wr-itil:review-problems; flagged HIGH-LEVERAGE — see Impact)
+**Priority**: 9 (Med-High) — Impact: 3 (Moderate — forces the ADR-052 structural escape hatch + above-appetite releases on agent-prose changes) × Likelihood: 3 (Possible — recurs on every agent-verdict change) — re-rated 2026-07-15 /wr-itil:review-problems (flagged HIGH-LEVERAGE — see Impact)
 **Origin**: internal
-**Effort**: L (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: L — harness build (RFC-012 Tier-A promptfoo wiring is the live vehicle; re-affirmed 2026-07-15 review)
+**WSJF**: 2.25 — (9 × 1.0) / 4
 
 ## Description
 

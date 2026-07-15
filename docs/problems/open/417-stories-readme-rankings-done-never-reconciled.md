@@ -2,9 +2,10 @@
 
 **Status**: Open
 **Reported**: 2026-07-04
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 8 (Medium) — Impact: 2 (Minor — stale story ranking cache; misleads story-tier consumers) × Likelihood: 4 (Likely — the whole corpus is stale now and drifts with every story change) — re-rated 2026-07-15 /wr-itil:review-problems
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: S — /wr-itil:reconcile-stories already ships; wire the cadence + refresh the header prose
+**WSJF**: 8.0 — (8 × 1.0) / 1 (S — reconcile skill exists, re-sized from M at 2026-07-15 review)
 **JTBD**: JTBD-001
 **Persona**: developer
 

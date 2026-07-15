@@ -5,6 +5,7 @@
 **Priority**: 16 (Critical) — Impact: 4 x Likelihood: 4
 **Origin**: internal
 **Effort**: M
+**WSJF**: 8.0 — (16 × 1.0) / 2 (added 2026-07-15 review)
 **JTBD**: JTBD-101
 **Persona**: plugin-developer
 

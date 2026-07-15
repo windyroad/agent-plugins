@@ -5,6 +5,7 @@
 **Priority**: 15 (High) — Impact: 3 (Moderate — a Critical-priority capability shipped mis-grounded and mis-homed across 7 published plugins; adopters inherit an inert/wrong feature; honest verification of P160 is blocked) × Likelihood: 5 (Certain — this is the present state, directly observed) — derived at capture per Step 4a
 **Origin**: internal
 **Effort**: L — new ratified developer JTBD + proper USM/story-map + RFC-046 lifecycle repair + real story authoring + re-anchor P160/RFC-046. (The consequent own-plugin extraction + adopter-producer shipping are tracked as P160 folded gaps + P444 systemic sibling.)
+**WSJF**: 3.75 — (15 × 1.0) / 4 (added 2026-07-15 review)
 **JTBD**: JTBD-001
 **Persona**: developer
 

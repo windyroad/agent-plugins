@@ -6,7 +6,7 @@
 **Going-forward decision**: ADR-082 (`human-oversight: confirmed` 2026-06-17) — options **(b) real shipment control + (c) reconcile K→V lifecycle** ratified; fix vehicle is RFC-025. Status stays `proposed` (status-flip gated on dependent work landing per ADR-074).
 **Priority**: 15 (High) — Impact: 3 × Likelihood: 5 = 15. Rated at review 2026-07-02: all ~27 held changesets leaking; holds fail their purpose.
 **Origin**: internal
-**Effort**: L. WSJF = (15 × 1.0) / 4 = 1.875.
+**Effort**: L. WSJF = (15 × 2.0) / 4 = 7.5 (Known Error ×2.0 multiplier applied 2026-07-15 review).
 **JTBD**: JTBD-002
 **Persona**: developer
 

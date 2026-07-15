@@ -1,6 +1,6 @@
 # Problem 068: run-retro does not close .verifying.md tickets that have been observed as verified in the session
 
-**Status**: Verification Pending
+**Status**: Closed (closed-on-evidence 2026-07-15 — run-retro Step 4a close-on-evidence exercised repeatedly post-release: README Closed rows record Step 4a closes on 2026-07-04/05 (P166, P384, P391, P392, P394). Recovery: rerun /wr-itil:transition-problem 68 known-error to reopen)
 **Reported**: 2026-04-20
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: M — add a "Verification-close housekeeping" step to `packages/retrospective/skills/run-retro/SKILL.md` that scans `docs/problems/*.verifying.md` against the session's observed evidence, calls out which are verified in-session, and transitions them to `.closed.md` (ADR-022 Verification Pending → Closed). Includes bats doc-lint test assertions and cross-reference to `manage-problem` Step 9d.

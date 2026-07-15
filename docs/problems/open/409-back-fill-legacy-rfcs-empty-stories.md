@@ -2,9 +2,10 @@
 
 **Status**: Open
 **Reported**: 2026-07-03
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 6 (Medium) — Impact: 2 (Minor — legacy-RFC data hygiene; tooling reads stale `stories: []`) × Likelihood: 3 (Possible — every RFC-lifecycle pass over pre-ADR-089 RFCs reads the stale field) — re-rated 2026-07-15 /wr-itil:review-problems
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: M — enumerate pre-ADR-089 RFCs + author/backfill stories
+**WSJF**: 3.0 — (6 × 1.0) / 2
 **JTBD**: JTBD-008
 **Persona**: plugin-developer
 

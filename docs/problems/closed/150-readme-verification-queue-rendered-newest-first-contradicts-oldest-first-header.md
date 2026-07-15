@@ -1,6 +1,6 @@
 # Problem 150: docs/problems/README.md Verification Queue rendered newest-first contradicts section header "Ranked by release age, oldest first"
 
-**Status**: Verification Pending (fold-fix Open → Verifying per ADR-022 P143 amendment — root cause + fix strategy + workaround documented inline; ships 2026-05-03 AFK iter 9)
+**Status**: Closed (closed-on-evidence 2026-07-15 — Verification Queue observed rendered oldest-first (P019 April row 1) with the VQ-SORT-DIRECTION marker present at every render site. Recovery: rerun /wr-itil:transition-problem 150 known-error to reopen)
 **Reported**: 2026-05-02
 **Priority**: 4 (Low) — Impact: Minor (2) x Likelihood: Possible (2)
 **Effort**: S — single-line section-header text edit OR per-render sort-direction flip; bounded across `manage-problem` Step 9c / Step 9e template, `review-problems` SKILL.md, `transition-problem` Step 7, `reconcile-readme` rendering.

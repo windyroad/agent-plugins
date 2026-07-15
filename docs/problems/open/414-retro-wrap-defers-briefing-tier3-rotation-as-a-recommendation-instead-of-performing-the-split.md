@@ -2,9 +2,10 @@
 
 **Status**: Open
 **Reported**: 2026-07-03
-**Priority**: 6 (Medium) — Impact: 2 x Likelihood: 4 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 8 (Medium) — Impact: 2 (Minor — briefing rotation stalls; user carries a mechanical task) × Likelihood: 4 (Likely — default behaviour on every over-threshold retro wrap) — re-rated 2026-07-15 /wr-itil:review-problems
 **Origin**: internal
-**Effort**: S (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: S — run-retro SKILL contract change: perform the split instead of recommending it
+**WSJF**: 8.0 — (8 × 1.0) / 1
 **JTBD**: JTBD-006
 **Persona**: developer
 

@@ -1,6 +1,6 @@
 # Problem 019: Deprecate single-file `docs/JOBS_TO_BE_DONE.md` fallback
 
-**Status**: Verification Pending
+**Status**: Closed (yes — observed: user confirmed 2026-07-15 via /wr-itil:review-problems Step 4 verification prompt. Recovery: rerun /wr-itil:transition-problem 19 known-error to reopen)
 **Reported**: 2026-04-16
 **Priority**: 6 (Medium) — Impact: Moderate (3) x Likelihood: Possible (2)
 **Effort**: L — 3 ADR edits, 1 hook, 4 BATS files, 1 SKILL.md, 1 file delete (re-sized after architect review 2026-04-16; was S)

@@ -2,9 +2,10 @@
 
 **Status**: Open
 **Reported**: 2026-07-03
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 6 (Medium) — Impact: 2 (Minor — deny-after-PASS friction, recoverable re-review) × Likelihood: 3 (Possible — multi-`-m` commits recur; observed) — re-rated 2026-07-15 /wr-itil:review-problems
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: S — accumulate ALL `-m` occurrences in the gate's extraction loop + bats
+**WSJF**: 6.0 — (6 × 1.0) / 1 (S — single-function hook fix, re-sized from M at 2026-07-15 review)
 **JTBD**: JTBD-006
 **Persona**: plugin-developer
 

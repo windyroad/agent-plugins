@@ -4,7 +4,7 @@
 **Reported**: 2026-06-11
 **Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3 = 9. Rated at review 2026-07-02: inbound verdict leg unimplemented; JTBD-301 breach.
 **Origin**: internal
-**Effort**: M. WSJF = (9 × 1.0) / 2 = 2.25.
+**Effort**: M. WSJF = (9 × 2.0) / 2 = 9.0 (Known Error ×2.0 multiplier applied 2026-07-15 review).
 **JTBD**: JTBD-301
 **Persona**: plugin-user
 

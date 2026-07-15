@@ -1,6 +1,6 @@
 # Problem 076: WSJF scoring in manage-problem does not model transitive dependencies
 
-**Status**: Verification Pending
+**Status**: Closed (closed-on-evidence 2026-07-15 — Step 2.5 transitive-effort traversal shipped in @windyroad/itil 0.59.0 SKILL and executed this pass; transitive annotation live on P176 (Effort XL via P012). Recovery: rerun /wr-itil:transition-problem 76 known-error to reopen)
 **Reported**: 2026-04-21
 **Priority**: 9 (Medium) — Impact: Moderate (3) x Likelihood: Possible (3)
 **Effort**: M — amend `packages/itil/skills/manage-problem/SKILL.md` WSJF Prioritisation section to define the transitive-dependency rule: a dependent ticket's effort is the max of (own marginal effort, transitive closure of upstream dependencies' efforts). Add a worked example. Amend Step 9b (review re-assess) to walk the dependency graph and propagate effort up. Add bats doc-lint assertions for the new rule. Cross-cutting with review behaviour; no new ADR strictly required because the WSJF section is the canonical location — but a short sibling ADR (or ADR-014-adjacent amendment) is a candidate if the dependency-graph mechanics need wider coverage across the skill suite.

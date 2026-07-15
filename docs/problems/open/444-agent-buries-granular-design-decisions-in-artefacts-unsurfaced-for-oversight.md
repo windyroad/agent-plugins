@@ -5,6 +5,7 @@
 **Priority**: 15 (High) — Impact: 3 (Moderate — real loss of user oversight over design/policy choices; recurs across the suite's own governance artefacts) × Likelihood: 5 (Certain — it is the default authoring behaviour) — derived at capture per Step 4a
 **Origin**: internal
 **Effort**: M — a surfacing discipline (per-embedded-choice flag) + possibly a lightweight checklist/gate; not a large build.
+**WSJF**: 7.5 — (15 × 1.0) / 2 (added 2026-07-15 review)
 **JTBD**: JTBD-001
 **Persona**: developer
 

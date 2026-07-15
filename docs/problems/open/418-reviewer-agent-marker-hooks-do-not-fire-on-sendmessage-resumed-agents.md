@@ -2,9 +2,10 @@
 
 **Status**: Open
 **Reported**: 2026-07-05
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 6 (Medium) — Impact: 2 (Minor — forces a full fresh re-review; friction not breakage) × Likelihood: 3 (Possible — recurs whenever an ISSUES-FOUND review is continued via SendMessage) — re-rated 2026-07-15 /wr-itil:review-problems
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: M — marker-hook firing path for resumed agents (composes with the P402 launch-variant fix)
+**WSJF**: 3.0 — (6 × 1.0) / 2
 **JTBD**: JTBD-006
 **Persona**: developer
 

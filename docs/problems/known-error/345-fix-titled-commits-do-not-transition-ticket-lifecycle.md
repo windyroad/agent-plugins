@@ -4,7 +4,7 @@
 **Reported**: 2026-05-31
 **Priority**: 8 (Medium) — Impact: 2 × Likelihood: 4 = 8. Rated at review 2026-07-02: auto-K→V gap; fires every fix commit.
 **Origin**: internal
-**Effort**: M. WSJF = (8 × 1.0) / 2 = 2.0.
+**Effort**: M. WSJF = (8 × 2.0) / 2 = 8.0 (Known Error ×2.0 multiplier applied 2026-07-15 review).
 ## Description
 
 Recurring class: when fix code lands in commits titled `fix(<pkg>): P<NNN> ...`, the named ticket's lifecycle (Open → Known Error or Known Error → Verifying) is NOT transitioned in the same commit grain. The ticket stays Open across the release that ships the fix, across CI verification, and across N intervening commits — until a later session manually closes the lifecycle gap.

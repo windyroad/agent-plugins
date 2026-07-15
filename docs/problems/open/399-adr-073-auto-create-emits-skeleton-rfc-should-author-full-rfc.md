@@ -4,7 +4,8 @@
 **Reported**: 2026-06-28
 **Priority**: 12 (High) — Impact: 4 x Likelihood: 3 (user-directed; the recurring under-scoped-RFC population observed 5× on 2026-06-28)
 **Origin**: corrective-feedback (user, 2026-06-28 — ratified at the work-problems loop-end decision surface)
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: M — SKILL authoring change (auto-create authors the full RFC) + eval coverage (re-affirmed 2026-07-15 review)
+**WSJF**: 6.0 — (12 × 1.0) / 2
 **JTBD**: JTBD-008
 **Persona**: plugin-developer
 

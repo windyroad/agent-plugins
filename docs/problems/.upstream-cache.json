@@ -1,11 +1,11 @@
 {
   "$schema": "https://windyroad.github.io/agent-plugins/schemas/upstream-cache.json",
   "$comment": "Cache file for inbound report discovery (P079 / ADR-062). Written by /wr-itil:review-problems Step 8.5 after each discovery pass.",
-  "last_checked": "2026-07-02T16:43:14Z",
+  "last_checked": "2026-07-15T06:44:11Z",
   "$last_pass_note": "/wr-itil:review-problems Step 4.5 discovery pass 2026-07-02 (AFK pre-flight from work-problems Step 0b; TTL-expiry auto-recheck, cache was 6d stale). github-issues polled --state open unfiltered: 4 new issues appended as pending-pipeline-processing discovery-only entries (#296, #304, #306, #307). All maintainer self-filed; per the 2026-05-15 discovery-only direction + AFK safe-default (ADR-013 Rule 6): no acks posted, no local tickets auto-created (each overlaps existing backlog tickets - matching deferred to interactive triage). discussions channel skipped fail-soft (HTTP 410, P406). advisories channel skipped fail-soft (external-comms gate false-positive on read path, P405).",
   "channels": {
     "github-issues:windyroad/agent-plugins": {
-      "fetched_at": "2026-07-02T16:43:14Z",
+      "fetched_at": "2026-07-15T06:44:11Z",
       "filter": "polled --state open UNFILTERED (P373); title_prefix soft signal only",
       "status": "ok",
       "reports": [
@@ -74,7 +74,7 @@
           "createdAt": "2026-05-18T11:55:37Z",
           "body_hash": "bfda21a42bc40001",
           "classification": "closed-upstream",
-          "cache_audit_note": "CLOSED upstream as of 2026-05-26 poll — P010 fixed by 56bae5f (released risk-scorer 0.11.0, mirrored locally as P198) and P007 fixed by 3c732ba (released risk-scorer 0.11.0, mirrored as P286). No pipeline action needed."
+          "cache_audit_note": "CLOSED upstream as of 2026-05-26 poll \u2014 P010 fixed by 56bae5f (released risk-scorer 0.11.0, mirrored locally as P198) and P007 fixed by 3c732ba (released risk-scorer 0.11.0, mirrored as P286). No pipeline action needed."
         },
         {
           "number": 202,
@@ -114,7 +114,7 @@
         },
         {
           "number": 236,
-          "title": "[problem] wr-risk-scorer:external-comms gate fires on private-repo git commit messages — git commits aren't external comms on private repos",
+          "title": "[problem] wr-risk-scorer:external-comms gate fires on private-repo git commit messages \u2014 git commits aren't external comms on private repos",
           "author": "tompahoward",
           "createdAt": "2026-06-08T04:22:53Z",
           "body_hash": "0a7ed3e9c3154667",
@@ -123,7 +123,7 @@
         },
         {
           "number": 241,
-          "title": "[problem] @windyroad/risk-scorer@0.12.7 — appetite-from-policy parser regex too narrow + subagent prompt hardcodes ≤4 with false RISK-POLICY citation (follow-up to closed #149)",
+          "title": "[problem] @windyroad/risk-scorer@0.12.7 \u2014 appetite-from-policy parser regex too narrow + subagent prompt hardcodes \u22644 with false RISK-POLICY citation (follow-up to closed #149)",
           "author": "tompahoward",
           "createdAt": "2026-06-08T11:54:20Z",
           "body_hash": "d740c14bfea5bd3c",
@@ -204,7 +204,7 @@
         },
         {
           "number": 139,
-          "title": "[problem] migrate-problems-layout.sh helper uses bashisms but /wr-itil:work-problems Step 0a SKILL.md does not specify bash — sourcing fails under zsh",
+          "title": "[problem] migrate-problems-layout.sh helper uses bashisms but /wr-itil:work-problems Step 0a SKILL.md does not specify bash \u2014 sourcing fails under zsh",
           "author": "tompahoward",
           "createdAt": "2026-05-17T20:51:10Z",
           "body_hash": "4718c55fe9f0c267",
@@ -231,7 +231,7 @@
         },
         {
           "number": 126,
-          "title": "[problem] capture-problem → manage-problem same-session halts at Step 0 reconcile (HALT_ROUTE_RECONCILE on deferred-refresh seam)",
+          "title": "[problem] capture-problem \u2192 manage-problem same-session halts at Step 0 reconcile (HALT_ROUTE_RECONCILE on deferred-refresh seam)",
           "author": "tompahoward",
           "createdAt": "2026-05-13T20:13:45Z",
           "body_hash": "43eeab2af47e1acb",
@@ -240,7 +240,7 @@
         },
         {
           "number": 125,
-          "title": "[problem] external-comms gate marker key cannot be computed by the reviewer agent (Read/Glob/Grep tool surface — no shasum); hash-scope ambiguity adds three recurrences",
+          "title": "[problem] external-comms gate marker key cannot be computed by the reviewer agent (Read/Glob/Grep tool surface \u2014 no shasum); hash-scope ambiguity adds three recurrences",
           "author": "tompahoward",
           "createdAt": "2026-05-13T20:12:24Z",
           "body_hash": "8e2fa16bdf660e46",
@@ -285,7 +285,7 @@
         },
         {
           "number": 117,
-          "title": "[problem] No /wr-retrospective:migrate-briefing skill — legacy docs/BRIEFING.md → docs/briefing/ topic-tree migration is manual per-adopter",
+          "title": "[problem] No /wr-retrospective:migrate-briefing skill \u2014 legacy docs/BRIEFING.md \u2192 docs/briefing/ topic-tree migration is manual per-adopter",
           "author": "tompahoward",
           "createdAt": "2026-05-10T20:10:01Z",
           "body_hash": "1761465715adefe1",
@@ -303,7 +303,7 @@
         },
         {
           "number": 98,
-          "title": "[problem] work-problems iter workers don't add changesets — fix commits accumulate without release path",
+          "title": "[problem] work-problems iter workers don't add changesets \u2014 fix commits accumulate without release path",
           "author": "tompahoward",
           "createdAt": "2026-04-28T02:31:57Z",
           "body_hash": "b2c16163511e0421",
@@ -501,7 +501,7 @@
         },
         {
           "number": 42,
-          "title": "[problem] ADR-022 .known-error.md → .verifying.md transition not happening consistently at release time",
+          "title": "[problem] ADR-022 .known-error.md \u2192 .verifying.md transition not happening consistently at release time",
           "author": "tompahoward",
           "createdAt": "2026-04-21T00:20:36Z",
           "body_hash": "b66ba6368d1d0dae",
@@ -516,7 +516,7 @@
           "body_hash": "f77ce3edb76d3a11",
           "classification": "safe-and-valid-local-ticket-created",
           "matched_local_ticket": "P164, P374",
-          "cache_audit_note": "discovered 2026-06-21 manually after channel filter missed it (P373 captures the filter defect); routed by user direction: octal eval bug → P164 Phase 2 reopen V→KE; hardcoded suite name → P374 new ticket; #273 ack comment posted with cross-references. Title prefix '[problem]' absent — would have been missed by the title_prefix filter; surfaces P373 as the filter-too-narrow class.",
+          "cache_audit_note": "discovered 2026-06-21 manually after channel filter missed it (P373 captures the filter defect); routed by user direction: octal eval bug \u2192 P164 Phase 2 reopen V\u2192KE; hardcoded suite name \u2192 P374 new ticket; #273 ack comment posted with cross-references. Title prefix '[problem]' absent \u2014 would have been missed by the title_prefix filter; surfaces P373 as the filter-too-narrow class.",
           "discovered_at": "2026-06-21T13:26:29Z"
         },
         {
@@ -558,17 +558,243 @@
           "classification": "pending-pipeline-processing",
           "matched_local_ticket": null,
           "cache_audit_note": "discovered 2026-07-02 (TTL-expiry auto-recheck, cache 6d stale); discovery-only (maintainer self-filed in own repo); semantic match against existing local backlog pending interactive triage; no ack posted, no local ticket auto-created (AFK safe-default per ADR-013 Rule 6 - avoids duplicating overlapping existing tickets)"
+        },
+        {
+          "number": 349,
+          "title": "wr-itil: downstream verification of an upstream fix is not confirmed back upstream",
+          "createdAt": "2026-07-06",
+          "author": "tompahoward",
+          "classification": "pending-pipeline-processing",
+          "matched_local_ticket": null,
+          "cache_audit_note": "discovered 2026-07-15 (TTL-expiry auto-recheck, cache 13d stale); semantic-comparator: sibling of P363/P080 close-the-loop family \u2014 ambiguous-match-candidates-P363-P080; interactive triage queued"
+        },
+        {
+          "number": 348,
+          "title": "wr-retrospective/wr-itil: new upstream-relevant evidence is not routed upstream",
+          "createdAt": "2026-07-05",
+          "author": "tompahoward",
+          "classification": "pending-pipeline-processing",
+          "matched_local_ticket": null,
+          "cache_audit_note": "discovered 2026-07-15; ambiguous-match-candidates-P080-P413; interactive triage queued"
+        },
+        {
+          "number": 344,
+          "title": "wr-risk-scorer: restage-commit helper sweeps the whole index/working tree",
+          "createdAt": "2026-07-05",
+          "author": "tompahoward",
+          "classification": "pending-pipeline-processing",
+          "matched_local_ticket": null,
+          "cache_audit_note": "discovered 2026-07-15; no comparator hit \u2014 net-new candidate; capture queued for interactive triage"
+        },
+        {
+          "number": 340,
+          "title": "wr-jtbd: edit-gate marker invalidated by the reviewer's own required doc-sync edits",
+          "createdAt": "2026-07-05",
+          "author": "tompahoward",
+          "classification": "pending-pipeline-processing",
+          "matched_local_ticket": null,
+          "cache_audit_note": "discovered 2026-07-15; ambiguous-match-candidates-P419 (same mechanical-edit-relocks-gate mechanism, different skill surface); interactive triage queued"
+        },
+        {
+          "number": 338,
+          "title": "wr-itil: outstanding_questions queue entries carry no decision-revision pin",
+          "createdAt": "2026-07-05",
+          "author": "tompahoward",
+          "classification": "pending-pipeline-processing",
+          "matched_local_ticket": null,
+          "cache_audit_note": "discovered 2026-07-15; ambiguous-match-candidates-P416 (sibling, distinct defect); interactive triage queued"
+        },
+        {
+          "number": 327,
+          "title": "work-problems Step 5 dispatch exceeds the interactive-harness 10min foreground timeout",
+          "createdAt": "2026-07-03",
+          "author": "tompahoward",
+          "classification": "pending-pipeline-processing",
+          "matched_local_ticket": null,
+          "cache_audit_note": "discovered 2026-07-15; no comparator hit \u2014 net-new candidate; capture queued for interactive triage"
+        },
+        {
+          "number": 323,
+          "title": "Verification Queue evidence cells never populated from subsequent-session exercises",
+          "createdAt": "2026-07-03",
+          "author": "tompahoward",
+          "classification": "pending-pipeline-processing",
+          "matched_local_ticket": null,
+          "cache_audit_note": "discovered 2026-07-15; no comparator hit (P186 shipped the cell shape; this is the population cadence) \u2014 net-new candidate"
+        },
+        {
+          "number": 321,
+          "title": "I13 RFC-trace predicate + manage-problem I13 gate are not adopter-aware",
+          "createdAt": "2026-07-03",
+          "author": "tompahoward",
+          "classification": "pending-pipeline-processing",
+          "matched_local_ticket": null,
+          "cache_audit_note": "discovered 2026-07-15; ambiguous-match-candidates-P371-P314; interactive triage queued"
+        },
+        {
+          "number": 320,
+          "title": "work-problems Step 6.5 post-release K->V has no vehicle for repo-local scripts",
+          "createdAt": "2026-07-03",
+          "author": "tompahoward",
+          "classification": "pending-pipeline-processing",
+          "matched_local_ticket": null,
+          "cache_audit_note": "discovered 2026-07-15; ambiguous-match-candidates-P389; interactive triage queued"
+        },
+        {
+          "number": 317,
+          "title": "architect edit-gate session-ID mismatch under AFK subprocess",
+          "createdAt": "2026-07-03",
+          "author": "tompahoward",
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P368",
+          "cache_audit_note": "discovered 2026-07-15; semantic-comparator hit: P368 (wr-architect-mark-oversight-confirmed cannot discover session id) \u2014 verifying; ack deferred (maintainer self-filed, discovery-only per 2026-05-15 direction)"
+        },
+        {
+          "number": 315,
+          "title": "work-problems orchestrator WSJF ranking does not factor placement-authority",
+          "createdAt": "2026-07-03",
+          "author": "tompahoward",
+          "classification": "pending-pipeline-processing",
+          "matched_local_ticket": null,
+          "cache_audit_note": "discovered 2026-07-15; no comparator hit \u2014 net-new candidate; capture queued for interactive triage"
+        },
+        {
+          "number": 313,
+          "title": "AFK iter subprocess Stream idle timeout API errors recur at high rate",
+          "createdAt": "2026-07-03",
+          "author": "tompahoward",
+          "classification": "pending-pipeline-processing",
+          "matched_local_ticket": null,
+          "cache_audit_note": "discovered 2026-07-15; ambiguous-match-candidates-P214-P358 (transient-API-failure family, reporter says distinct subclass); interactive triage queued"
+        },
+        {
+          "number": 312,
+          "title": "work-problems Step 1 ranking does not exclude just-worked KE awaiting orchestrator push",
+          "createdAt": "2026-07-03",
+          "author": "tompahoward",
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P441",
+          "cache_audit_note": "discovered 2026-07-15; matched at capture 2026-07-06 (P441 cites #312); recorded for completeness"
+        },
+        {
+          "number": 316,
+          "title": "Voice-tone gate misses Tom-specific idioms not codified in the guide",
+          "createdAt": "2026-07-03",
+          "author": "tompahoward",
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P440",
+          "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass"
+        },
+        {
+          "number": 318,
+          "title": "work-problems orchestrator re-selects direction-blocked tickets as highest-WSJF every loop",
+          "createdAt": "2026-07-03",
+          "author": "tompahoward",
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P441",
+          "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass"
+        },
+        {
+          "number": 319,
+          "title": "check-upstream-responses writes a U+2014 em-dash into the audit-log heading",
+          "createdAt": "2026-07-03",
+          "author": "tompahoward",
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P424",
+          "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass"
+        },
+        {
+          "number": 324,
+          "title": "Assistant routes free-text input collection through AskUserQuestion instead of per-item copyable blocks",
+          "createdAt": "2026-07-03",
+          "author": "tompahoward",
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P438",
+          "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass"
+        },
+        {
+          "number": 325,
+          "title": "wr-newsletter step 7 hard-codes the wr-wardley owm-to-svg converter at a pinned plugin version",
+          "createdAt": "2026-07-03",
+          "author": "tompahoward",
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P437",
+          "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass"
+        },
+        {
+          "number": 326,
+          "title": "External-review round-trips waste cycles when the reviewer sees a stale copy of a repo artifact",
+          "createdAt": "2026-07-03",
+          "author": "tompahoward",
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P439",
+          "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass"
+        },
+        {
+          "number": 339,
+          "title": "problem captures write unverified root-cause hypotheses as established fact",
+          "createdAt": "2026-07-05",
+          "author": "tompahoward",
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P434",
+          "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass"
+        },
+        {
+          "number": 341,
+          "title": "upstream-cache-staleness helper misfires on a declined-permanently (empty channels) config",
+          "createdAt": "2026-07-05",
+          "author": "tompahoward",
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P431",
+          "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass"
+        },
+        {
+          "number": 342,
+          "title": "wr-architect: edit-gate re-litigates its own same-session PASS after a prescribed ADR capture",
+          "createdAt": "2026-07-05",
+          "author": "tompahoward",
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P425",
+          "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass"
+        },
+        {
+          "number": 343,
+          "title": "work-problems orchestrator can double-dispatch the same ticket to concurrent iters",
+          "createdAt": "2026-07-05",
+          "author": "tompahoward",
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P427",
+          "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass"
+        },
+        {
+          "number": 345,
+          "title": "work-problems Step 5 dispatch heredoc is unparseable under macOS /bin/bash 3.2",
+          "createdAt": "2026-07-05",
+          "author": "tompahoward",
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P428",
+          "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass"
+        },
+        {
+          "number": 347,
+          "title": "assistant does not auto-close the feedback loop on conversion (channel-agnostic)",
+          "createdAt": "2026-07-05",
+          "author": "tompahoward",
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P432",
+          "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass"
         }
       ]
     },
     "github-discussions:windyroad/agent-plugins": {
-      "fetched_at": "2026-07-02T16:43:14Z",
+      "fetched_at": "2026-07-15T06:44:11Z",
       "status": "skipped-failsoft",
       "skip_reason": "HTTP 410 - Discussions are disabled for this repo (P406); fail-soft skip per Step 4.5 contract",
-      "reports": []
+      "reports": [],
+      "cache_audit_note": "channel skipped: HTTP 410 (P406 known error \u2014 Discussions disabled on repo)"
     },
     "github-security-advisories:windyroad/agent-plugins": {
-      "fetched_at": "2026-07-02T16:43:14Z",
+      "fetched_at": "2026-07-15T06:44:11Z",
       "status": "skipped-failsoft",
       "skip_reason": "external-comms gate false-positived on the read-only advisories poll (P405); fail-soft skip per Step 4.5 contract",
       "reports": []

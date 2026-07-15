@@ -1,6 +1,6 @@
 # Problem 021: Governance-skill decision prompts must be structured (AskUserQuestion + plan mode), not prose — silent below appetite
 
-**Status**: Verification Pending
+**Status**: Closed (yes — observed: user confirmed 2026-07-15 via /wr-itil:review-problems Step 4 verification prompt. Recovery: rerun /wr-itil:transition-problem 21 known-error to reopen)
 **Reported**: 2026-04-16 (generalised 2026-04-16 from risk-scorer-only to cross-skill pattern)
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: M

@@ -2,9 +2,10 @@
 
 **Status**: Open
 **Reported**: 2026-07-03
-**Priority**: 6 (Medium) — Impact: 3 x Likelihood: 3 (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 6 (Medium) — Impact: 3 (Moderate — a whole shipped framework tier is invisible to adopters) × Likelihood: 2 (Unlikely — adopter uptake of the RFC/story tier is still early; home repo unaffected) — re-rated 2026-07-15 /wr-itil:review-problems
 **Origin**: internal
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: M — scaffold/nudge surface per the P297 SessionStart-hook pattern
+**WSJF**: 3.0 — (6 × 1.0) / 2
 **JTBD**: JTBD-101
 **Persona**: plugin-developer
 
