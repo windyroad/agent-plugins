@@ -166,3 +166,9 @@ The catalogue is self-pruning: when a class stops surfacing in `.risk-reports/` 
 | [R071](R071-r009-i13-existing-vehicle-trace-branch-no-promptfoo-eval.active.md) | R009 I13 Existing Vehicle Trace Branch No Promptfoo Eval | pending | — | — | pending | pending | 2026-07-03 |
 | [R072](R072-skill-prose-gate-invocation-floor-no-paired-promptfoo-for-changed-branch.active.md) | Skill Prose Gate Invocation Floor No Paired Promptfoo For Changed Branch | pending | — | — | pending | pending | 2026-07-03 |
 | [R073](R073-adopter-name-and-usage-detail-in-public-repo-rfc-prose.active.md) | Adopter Name And Usage Detail In Public Repo Rfc Prose | pending | — | — | pending | pending | 2026-07-03 |
+| [R075](R075-new-prose-pattern-hook-detector-shipped-without-dogfood-window.active.md) | New Prose Pattern Hook Detector Shipped Without Dogfood Window | pending | — | — | pending | pending | 2026-07-15 |
+| [R076](R076-skill-behavioural-change-shipped-without-paired-changeset.active.md) | Skill Behavioural Change Shipped Without Paired Changeset | pending | — | — | pending | pending | 2026-07-15 |
+| [R077](R077-restore-incident-skill-prose-floor-no-promptfoo-eval.active.md) | Restore Incident Skill Prose Floor No Promptfoo Eval | pending | — | — | pending | pending | 2026-07-15 |
+| [R078](R078-capture-adr-skill-prose-no-paired-promptfoo-eval.active.md) | Capture Adr Skill Prose No Paired Promptfoo Eval | pending | — | — | pending | pending | 2026-07-15 |
+| [R079](R079-cruise-self-installer-config-mutation-first-landing-no-dogfood.active.md) | Cruise Self Installer Config Mutation First Landing No Dogfood | pending | — | — | pending | pending | 2026-07-15 |
+| [R080](R080-plugin-installer-help-text-copied-verbatim-from-sibling-package.active.md) | Plugin Installer Help Text Copied Verbatim From Sibling Package | pending | — | — | pending | pending | 2026-07-15 |

@@ -1,16 +1,16 @@
-# Risk R047: Work Problems Skill Prose Floor No Paired Promptfoo
+# Risk R075: New Prose Pattern Hook Detector Shipped Without Dogfood Window
 
 **Status**: Active (auto-scaffolded — pending review)
 **Category**: <!-- pending review — auto-scaffolded from pipeline hint -->
-**Identified**: 2026-06-10
+**Identified**: 2026-07-15
 **Owner**: pending review
-**Last reviewed**: 2026-06-10
-**Next review**: 2026-06-10
-**Curation**: pending review (auto-scaffolded 2026-06-10)
+**Last reviewed**: 2026-07-15
+**Next review**: 2026-07-15
+**Curation**: pending review (auto-scaffolded 2026-07-15)
 
 ## Description
 
-R009 bedrock SKILL-prose floor firing again on `packages/itil/skills/work-problems/SKILL.md` (5th hold this surface — P206/P211/P212/P352/P220 all blocked on missing `packages/itil/skills/work-problems/eval/promptfooconfig.yaml` paired Tier-A/B eval); recurring class signals the P012/RFC-012 harness-extension backlog needs the work-problems eval slice elevated.
+New AND-gated Stop-hook detector matching agent natural-language framing reaches adopters with full bats but no held-area dogfood window; recurring new-hook-no-dogfood shape (R003/R015 family)
 
 > Auto-scaffolded by the Phase 2b drain (ADR-056) from a `wr-risk-scorer:pipeline`
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
@@ -58,9 +58,8 @@ pending review — treatment decision deferred until scoring is curated.
 
 Auto-populated from `.risk-reports/` via Phase 2b drain.
 
-- 2026-06-07T16:53:53Z: fired in `.risk-reports/2026-06-07T16-53-53-commit.md` (reason: above-appetite-residual)
-- 2026-07-03T16:37:46Z: fired in `.risk-reports/2026-07-03T16-37-46-commit.md` (reason: above-appetite-residual)
+- 2026-07-03T14:16:36Z: fired in `.risk-reports/2026-07-03T14-16-36-commit.md` (reason: above-appetite-residual)
 
 ## Change Log
 
-- 2026-06-10: Auto-scaffolded by Phase 2b drain (ADR-056). Pending human curation.
+- 2026-07-15: Auto-scaffolded by Phase 2b drain (ADR-056). Pending human curation.

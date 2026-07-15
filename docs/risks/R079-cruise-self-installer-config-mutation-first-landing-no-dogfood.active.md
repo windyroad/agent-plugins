@@ -1,16 +1,16 @@
-# Risk R047: Work Problems Skill Prose Floor No Paired Promptfoo
+# Risk R079: Cruise Self Installer Config Mutation First Landing No Dogfood
 
 **Status**: Active (auto-scaffolded — pending review)
 **Category**: <!-- pending review — auto-scaffolded from pipeline hint -->
-**Identified**: 2026-06-10
+**Identified**: 2026-07-15
 **Owner**: pending review
-**Last reviewed**: 2026-06-10
-**Next review**: 2026-06-10
-**Curation**: pending review (auto-scaffolded 2026-06-10)
+**Last reviewed**: 2026-07-15
+**Next review**: 2026-07-15
+**Curation**: pending review (auto-scaffolded 2026-07-15)
 
 ## Description
 
-R009 bedrock SKILL-prose floor firing again on `packages/itil/skills/work-problems/SKILL.md` (5th hold this surface — P206/P211/P212/P352/P220 all blocked on missing `packages/itil/skills/work-problems/eval/promptfooconfig.yaml` paired Tier-A/B eval); recurring class signals the P012/RFC-012 harness-extension backlog needs the work-problems eval slice elevated.
+New default-installed SessionStart self-installer edits adopter ~/.claude/ statusline+settings; first-landing, no dogfood window, adopter-config-diversity failure mode un-exercised by maintainer-shape bats; release residual 8/25 Medium, above 5 appetite.
 
 > Auto-scaffolded by the Phase 2b drain (ADR-056) from a `wr-risk-scorer:pipeline`
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
@@ -58,9 +58,8 @@ pending review — treatment decision deferred until scoring is curated.
 
 Auto-populated from `.risk-reports/` via Phase 2b drain.
 
-- 2026-06-07T16:53:53Z: fired in `.risk-reports/2026-06-07T16-53-53-commit.md` (reason: above-appetite-residual)
-- 2026-07-03T16:37:46Z: fired in `.risk-reports/2026-07-03T16-37-46-commit.md` (reason: above-appetite-residual)
+- 2026-07-11T02:17:32Z: fired in `.risk-reports/2026-07-11T02-17-32-commit.md` (reason: above-appetite-residual)
 
 ## Change Log
 
-- 2026-06-10: Auto-scaffolded by Phase 2b drain (ADR-056). Pending human curation.
+- 2026-07-15: Auto-scaffolded by Phase 2b drain (ADR-056). Pending human curation.
