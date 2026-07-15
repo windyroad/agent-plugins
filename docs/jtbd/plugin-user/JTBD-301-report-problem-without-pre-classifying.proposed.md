@@ -46,3 +46,10 @@ When I hit a problem with a windyroad plugin I installed, I want to submit a use
 - **P067** — `/wr-itil:report-upstream` classifier problem-first (Open, WSJF 4.5). Applies the same problem-first discipline to the upstream-classifier heuristic.
 - **P070** — report-upstream dedup (Open, WSJF 6.0). Directly addresses the "was this a duplicate?" outcome above.
 - **P072** — this job's originating ticket; filled the persona gap surfaced during P066's JTBD review.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-004 | STORY-MAP-004: Close the outbound reporter loop with honest, generated upstream lifecycle comments | draft |

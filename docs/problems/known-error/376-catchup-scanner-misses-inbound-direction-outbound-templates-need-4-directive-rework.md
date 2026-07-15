@@ -143,7 +143,13 @@ The outbound update-upstream templates carry the same defect P363 fixed inbound,
 |-----|--------|-------|
 | RFC-028 | proposed | Consume the `**Origin**` field for inbound-reported fix-released verdict |
 
-
 ## Ratified Direction - 2026-07-04 interactive decision drain
 
 **Confirm** the ADR-024 outbound-comment amendment: apply the 4 P363 directives symmetrically to outbound upstream-report comments (per-transition LLM-generation from local ticket + upstream comments; acknowledge suggested workarounds; visibility-gated linking; @handle credit). Build the symmetric fix.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-004 | STORY-MAP-004: Close the outbound reporter loop with honest, generated upstream lifecycle comments | draft |
