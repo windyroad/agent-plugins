@@ -54,3 +54,10 @@ Extended later (P376 — catchup-scanner surface, 2026-06-28):
 ## Related
 
 (captured via /wr-itil:capture-rfc; expand at next /wr-itil:manage-rfc invocation)
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-045 | STORY-045: Outbound lifecycle comments generated from real issue context | draft |

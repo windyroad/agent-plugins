@@ -47,9 +47,21 @@ When I hit a problem with a windyroad plugin I installed, I want to submit a use
 - **P070** — report-upstream dedup (Open, WSJF 6.0). Directly addresses the "was this a duplicate?" outcome above.
 - **P072** — this job's originating ticket; filled the persona gap surfaced during P066's JTBD review.
 
-
 ## Story Maps
 
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-MAP-004 | STORY-MAP-004: Close the outbound reporter loop with honest, generated upstream lifecycle comments | draft |
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-027 | STORY-027: Capture a problem reported through an inbound channel | done |
+| STORY-028 | STORY-028: Acknowledge the report on capture | draft |
+| STORY-029 | STORY-029: Share the workaround with the reporter | draft |
+| STORY-030 | STORY-030: Tell the reporter a fix is underway | draft |
+| STORY-031 | STORY-031: Tell the reporter it's released → verify → close the loop | draft |
+| STORY-032 | STORY-032: Triage the report's disposition — accept, elicit a new job, or decline | draft |
+| STORY-045 | STORY-045: Outbound lifecycle comments generated from real issue context | draft |
