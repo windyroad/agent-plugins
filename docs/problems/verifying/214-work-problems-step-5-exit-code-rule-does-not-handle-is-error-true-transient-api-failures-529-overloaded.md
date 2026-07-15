@@ -24,7 +24,7 @@ Manually halt the loop on observation. AFK promise broken — the loop runs thro
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
 - [x] Extend Step 5 exit-code rule: orchestrator parses `is_error` from the `claude -p --output-format json` stdout. If `is_error: true`, halt the loop with the transient-error advisory (rate-limit / overload / auth-expired). (Phase 1 — landed via SKILL.md Step 5 ordered-check amendment + ADR-032 P214 class-taxonomy extension; commit pending.)
-- [ ] Phase 2 — add a retry policy for known-transient classes (529 Overloaded → exponential backoff, max 3 retries; 401 auth-expired → halt-with-prompt). Deferred to a separate iter per the narrow-scope P214 Phase 1 split.
+- [ ] Phase 2 — add a retry policy for known-transient classes (529 Overloaded → exponential backoff, max 3 retries; 401 auth-expired → halt-with-prompt). Deferred to a separate iter per the narrow-scope P214 Phase 1 split. Witness (2026-07-15, inbound #313 routed here via hang-off arbitration): un-policied retries on the stream-idle-timeout class burned $9.11 across 3/3 failed attempts in one downstream session — the retry policy must also cover retry-cost ceilings, not just attempt counts.
 - [x] Behavioural test asserting is_error:true detected + appropriate routing. (Phase 1 — `packages/itil/skills/work-problems/test/work-problems-step-5-is-error-transient-halt.bats`, 11 cases / 6 behavioural + 5 doc-lint.)
 
 ## Resolution (Phase 1 — Verifying)

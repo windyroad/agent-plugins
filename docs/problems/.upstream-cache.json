@@ -1,7 +1,7 @@
 {
   "$schema": "https://windyroad.github.io/agent-plugins/schemas/upstream-cache.json",
   "$comment": "Cache file for inbound report discovery (P079 / ADR-062). Written by /wr-itil:review-problems Step 8.5 after each discovery pass.",
-  "last_checked": "2026-07-15T06:44:11Z",
+  "last_checked": "2026-07-15T07:34:57Z",
   "$last_pass_note": "/wr-itil:review-problems Step 4.5 discovery pass 2026-07-02 (AFK pre-flight from work-problems Step 0b; TTL-expiry auto-recheck, cache was 6d stale). github-issues polled --state open unfiltered: 4 new issues appended as pending-pipeline-processing discovery-only entries (#296, #304, #306, #307). All maintainer self-filed; per the 2026-05-15 discovery-only direction + AFK safe-default (ADR-013 Rule 6): no acks posted, no local tickets auto-created (each overlaps existing backlog tickets - matching deferred to interactive triage). discussions channel skipped fail-soft (HTTP 410, P406). advisories channel skipped fail-soft (external-comms gate false-positive on read path, P405).",
   "channels": {
     "github-issues:windyroad/agent-plugins": {
@@ -564,81 +564,81 @@
           "title": "wr-itil: downstream verification of an upstream fix is not confirmed back upstream",
           "createdAt": "2026-07-06",
           "author": "tompahoward",
-          "classification": "pending-pipeline-processing",
-          "matched_local_ticket": null,
-          "cache_audit_note": "discovered 2026-07-15 (TTL-expiry auto-recheck, cache 13d stale); semantic-comparator: sibling of P363/P080 close-the-loop family \u2014 ambiguous-match-candidates-P363-P080; interactive triage queued"
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P376",
+          "cache_audit_note": "triaged 2026-07-15: absorbed into P376 Gap 2 (ratified outbound rework use case b); P376 Origin flipped to inbound-reported"
         },
         {
           "number": 348,
           "title": "wr-retrospective/wr-itil: new upstream-relevant evidence is not routed upstream",
           "createdAt": "2026-07-05",
           "author": "tompahoward",
-          "classification": "pending-pipeline-processing",
-          "matched_local_ticket": null,
-          "cache_audit_note": "discovered 2026-07-15; ambiguous-match-candidates-P080-P413; interactive triage queued"
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P455",
+          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW"
         },
         {
           "number": 344,
           "title": "wr-risk-scorer: restage-commit helper sweeps the whole index/working tree",
           "createdAt": "2026-07-05",
           "author": "tompahoward",
-          "classification": "pending-pipeline-processing",
-          "matched_local_ticket": null,
-          "cache_audit_note": "discovered 2026-07-15; no comparator hit \u2014 net-new candidate; capture queued for interactive triage"
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P454",
+          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW; defect verified at restage-commit.sh:121; P326 lineage"
         },
         {
           "number": 340,
           "title": "wr-jtbd: edit-gate marker invalidated by the reviewer's own required doc-sync edits",
           "createdAt": "2026-07-05",
           "author": "tompahoward",
-          "classification": "pending-pipeline-processing",
-          "matched_local_ticket": null,
-          "cache_audit_note": "discovered 2026-07-15; ambiguous-match-candidates-P419 (same mechanical-edit-relocks-gate mechanism, different skill surface); interactive triage queued"
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P453",
+          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW; sibling P419 cluster flagged"
         },
         {
           "number": 338,
           "title": "wr-itil: outstanding_questions queue entries carry no decision-revision pin",
           "createdAt": "2026-07-05",
           "author": "tompahoward",
-          "classification": "pending-pipeline-processing",
-          "matched_local_ticket": null,
-          "cache_audit_note": "discovered 2026-07-15; ambiguous-match-candidates-P416 (sibling, distinct defect); interactive triage queued"
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P452",
+          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW; sibling P416 cluster flagged"
         },
         {
           "number": 327,
           "title": "work-problems Step 5 dispatch exceeds the interactive-harness 10min foreground timeout",
           "createdAt": "2026-07-03",
           "author": "tompahoward",
-          "classification": "pending-pipeline-processing",
-          "matched_local_ticket": null,
-          "cache_audit_note": "discovered 2026-07-15; no comparator hit \u2014 net-new candidate; capture queued for interactive triage"
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P451",
+          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW"
         },
         {
           "number": 323,
           "title": "Verification Queue evidence cells never populated from subsequent-session exercises",
           "createdAt": "2026-07-03",
           "author": "tompahoward",
-          "classification": "pending-pipeline-processing",
-          "matched_local_ticket": null,
-          "cache_audit_note": "discovered 2026-07-15; no comparator hit (P186 shipped the cell shape; this is the population cadence) \u2014 net-new candidate"
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P450",
+          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW"
         },
         {
           "number": 321,
           "title": "I13 RFC-trace predicate + manage-problem I13 gate are not adopter-aware",
           "createdAt": "2026-07-03",
           "author": "tompahoward",
-          "classification": "pending-pipeline-processing",
-          "matched_local_ticket": null,
-          "cache_audit_note": "discovered 2026-07-15; ambiguous-match-candidates-P371-P314; interactive triage queued"
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P449",
+          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW; policy tension with P412 recorded on ticket"
         },
         {
           "number": 320,
           "title": "work-problems Step 6.5 post-release K->V has no vehicle for repo-local scripts",
           "createdAt": "2026-07-03",
           "author": "tompahoward",
-          "classification": "pending-pipeline-processing",
-          "matched_local_ticket": null,
-          "cache_audit_note": "discovered 2026-07-15; ambiguous-match-candidates-P389; interactive triage queued"
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P448",
+          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW per hang-off arbitration"
         },
         {
           "number": 317,
@@ -654,18 +654,18 @@
           "title": "work-problems orchestrator WSJF ranking does not factor placement-authority",
           "createdAt": "2026-07-03",
           "author": "tompahoward",
-          "classification": "pending-pipeline-processing",
-          "matched_local_ticket": null,
-          "cache_audit_note": "discovered 2026-07-15; no comparator hit \u2014 net-new candidate; capture queued for interactive triage"
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P441",
+          "cache_audit_note": "triaged 2026-07-15: absorbed as P441 third excluded-state class (upstream-blocked/placement-authority)"
         },
         {
           "number": 313,
           "title": "AFK iter subprocess Stream idle timeout API errors recur at high rate",
           "createdAt": "2026-07-03",
           "author": "tompahoward",
-          "classification": "pending-pipeline-processing",
-          "matched_local_ticket": null,
-          "cache_audit_note": "discovered 2026-07-15; ambiguous-match-candidates-P214-P358 (transient-API-failure family, reporter says distinct subclass); interactive triage queued"
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P261",
+          "cache_audit_note": "triaged 2026-07-15: pre-fix evidence datum absorbed into P261 Impact Assessment + P214 Phase 2 retry facet; NOT verification evidence"
         },
         {
           "number": 312,

@@ -3,7 +3,7 @@
 **Status**: Known Error
 **Reported**: 2026-06-23
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 = 12. Rated at review 2026-07-02: catchup outbound-only; retroactive inbound is manual.
-**Origin**: internal
+**Origin**: inbound-reported (#349) — flipped 2026-07-15: inbound issue #349 (downstream verification of an upstream fix is not confirmed back upstream) absorbed into Gap 2 per wr-itil:hang-off-check verdict; originally internal (2026-06-23 catchup session)
 **Effort**: M. WSJF = (12 × 1.0) / 2 = 3.0.
 **JTBD**: JTBD-001
 **Persona**: plugin-developer
@@ -80,7 +80,7 @@ The outbound templates in Step 4 of `update-upstream/SKILL.md` carry the concept
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
 - [x] Investigate fix shape: single coordinating ticket vs split into P376-A (scanner) + P376-B (templates) per P016 concern-boundary — **resolved 2026-06-28**: kept ONE ticket; the two gaps share a root cause but split on lifecycle (Gap 1 is clean shippable script code → done this iter; Gap 2 is design-bearing → deferred). The WORK split rides RFC vehicles, not separate tickets.
 - [x] Decide whether outbound-template rework warrants its own ADR-024 amendment (likely yes — symmetric to the 2026-06-23 inbound amendment) — **yes**; recorded as a PROPOSED skeleton amendment in ADR-024 (2026-06-28 entry, `human-oversight: unconfirmed`); ratification queued (see Resolution).
-- [ ] **(Gap 2 — deferred, design-bearing)** Apply the four P363 rework directives to outbound templates; preserve outbound-specific purpose (test-confirm / report-outcome-with-thanks / respond-to-info-request) per user clarification 2026-06-23 — NOT built; gated on the queued `category: direction` ratification (substance-confirm-before-build, ADR-074).
+- [ ] **(Gap 2 — deferred, design-bearing)** Apply the four P363 rework directives to outbound templates; preserve outbound-specific purpose (test-confirm / report-outcome-with-thanks / respond-to-info-request) per user clarification 2026-06-23 — ratified at the 2026-07-04 interactive decision drain (see § Ratified Direction). Expanded 2026-07-15 (inbound #349 absorbed via hang-off arbitration — verbatim use case (b) of the outbound purpose taxonomy): (i) trigger — a local transition driven by a *verified upstream fix* must auto-dispatch the outbound confirmation comment without a user prompt; (ii) the generated comment must be honest about verified-in-the-wild vs installed-only status, and must handle the already-closed-upstream-issue posting path (cf. the P113 → claude-code#52831 closed-for-inactivity witness).
 - [x] Extend `catchup-scan.sh` to walk inbound `**Origin**` field alongside outbound `## Reported Upstream`; emit direction-tagged `CATCHUP P<NNN> inbound-#<NN>` lines; idempotency contract re-checks `## Upstream Lifecycle Updates` for `(inbound)`-tagged entries — **done 2026-06-28** (Gap 1).
 - [x] Behavioural bats: scanner produces both outbound + inbound candidate lines on a corpus carrying both surfaces — **done** (`catchup-scan.bats` tests 15–23, incl. the both-surface case).
 - [ ] **(Gap 2 / Gap 1 follow-up)** Update `update-upstream/SKILL.md` § Catchup migration mode to reflect dual-direction scope — deferred; the scanner header comment + RFC-028 already document the dual-direction scope, and the SKILL § rewrite is bundled with the Gap 2 outbound-template rework (avoids a second R009 prose-floor cycle on the same SKILL for a doc-only line). Tracked here for the Gap 2 build.
@@ -119,6 +119,8 @@ The outbound update-upstream templates carry the same defect P363 fixed inbound,
 ## Related
 
 (captured via /wr-itil:capture-problem during 2026-06-23 retroactive catchup session; expand at next investigation)
+
+- **Inbound #349** (2026-07-15, absorbed): downstream verification of an upstream fix is not confirmed back upstream without a user prompt — witness for Gap 2 use case (b); sibling inbound #348 (evidence-routing leg) captured separately as P455 — keep the two linked.
 
 - **P363** (`docs/problems/known-error/363-inbound-reported-tickets-never-receive-fix-released-verdict-on-originating-issue.md`) — sibling: same four-directive rework, applied to the inbound direction; this ticket carries the symmetric outbound work. Today's P363 rework (`@windyroad/itil@0.51.2`) shipped the inbound side.
 - **P080** (`docs/problems/known-error/080-no-bidirectional-update-of-upstream-reported-problems.md`) — parent: Phase 2 catchup is the surface both Gap 1 and Gap 2 live within. P080 Phase 2 reopened on 2026-06-17 user direction; this ticket extends Phase 2's scope to cover the cross-direction parity gap.

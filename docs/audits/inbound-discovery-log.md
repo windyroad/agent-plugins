@@ -267,3 +267,12 @@ Invoked as `/wr-itil:review-problems` Step 4.5 from the `/wr-itil:work-problems`
 - **Audit notes**:
   - Verification Queue Step 4 fired interactively: 7 Bucket-1 close-on-evidence (P049/P068/P069/P071/P076/P150/P186) + 3 user-confirmed closes (P019/P020/P021); 0 regressions flagged.
   - Relevance-close pass (Step 4.6): 40 CLOSE-CANDIDATE-WITH-CAVEAT, 0 plain CLOSE-CANDIDATE, 0 closes. The caveat cohort is dominated by the #306 ADR-citation over-fire (the evaluator flagged even P160, the pinned top-priority ticket); verdicts treated as unusable signal pending the #306 fix.
+
+## 2026-07-15T07:40:00Z - Triage pass (interactive, user-directed)
+
+- **Invocation**: interactive follow-on to the 2026-07-15 discovery pass — the 11 unmatched reports arbitrated via 11 parallel `wr-itil:hang-off-check` subagents (ADR-032 5th invocation pattern; fresh-context, no session bias).
+- **HANG_OFF (3)**: #313 -> P261 (pre-fix evidence datum + likelihood re-rate note; retry-cost facet routed to P214 Phase 2) | #315 -> P441 (third excluded-state class: upstream-blocked/placement-authority; ranking-vs-filter framing preserved) | #349 -> P376 Gap 2 (verbatim use case (b) of the ratified outbound rework; Origin flipped to inbound-reported (#349), ticket moves to Tier 1).
+- **PROCEED_NEW (8)**: #320 -> P448 | #321 -> P449 | #323 -> P450 | #327 -> P451 | #338 -> P452 | #340 -> P453 | #344 -> P454 (defect verified live at packages/risk-scorer/scripts/restage-commit.sh:121) | #348 -> P455. All captured Origin: inbound-reported, ranked Tier 1; arbiter rationales recorded in each ticket's Related section.
+- **Cluster flags for the next review pass**: P448/P389/P361 (release-vehicle-assumes-npm axis); P449 vs P412 (opposite policy faces of I13 adopter behaviour); P452+P416 (outstanding-questions temporal consistency); P453+P419 (gate hashes files, not substance); Step 5 dispatch resilience family (P451+P427+P428 with verifying P261/P307).
+- **Ack comments**: none posted (maintainer self-filed reports; discovery-only per standing 2026-05-15 direction).
+- **Commit grain note**: the 8 captures + 5 ticket amendments + README/cache/audit updates land in ONE commit (batch unit-of-work per the ADR-014 transition-problems precedent) rather than capture-problem's one-commit-per-capture — deliberate grain call for a single arbitrated triage batch, recorded here for the audit trail.

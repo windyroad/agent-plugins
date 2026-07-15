@@ -45,6 +45,7 @@ The three together form a class-of-failure: **agent infers framework-resolved bo
 - User reaction signal: "you have a habit of deferring" / "I expected this to be implemented" / "where did X go" / "what about Y" — strong-affect class-of-behaviour correction triggering P078.
 - ADRs accumulate "Phase 2" / "Phase 3" / "Phase 4" / "out-of-scope deferred" sections that never get implemented until user surfaces the gap.
 - The user's mental model after a session: "we discussed solution X with components A, B, C, D, E"; the actual ship: "agent shipped A and B; C, D, E silently in 'Phase 2'".
+- **Recurrence 2026-07-15** (interactive review-problems session): agent surfaced 11 unmatched inbound reports as "queued for triage" in its review summary instead of triaging them; user correction: *"Triage the 11. I shouldn't have to ask FFS"* — the surface-as-queued-instead-of-doing variant of the same defer-requested-work class (P413/P414 meta-class sibling).
 
 ## Workaround
 

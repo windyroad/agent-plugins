@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-15 **batch transition** — P345 verifying, P404 verifying (fixes released 2026-07-05 / 2026-07-03; surfaced by the same-day review pass as fixed-but-not-transitioned). Full re-rank details in README-history.md under ## 2026-07-15.
+> Last reviewed: 2026-07-15 **inbound triage** — the 11 unmatched reports arbitrated via wr-itil:hang-off-check: 3 absorbed into existing tickets (#313 → P261 evidence datum + P214 retry facet; #315 → P441 third excluded-state class; #349 → P376 Gap 2, Origin flipped to inbound → Tier 1), 8 captured as P448–P455 (all Tier 1 inbound-reported). P179 recurrence datum recorded (surface-as-queued-instead-of-doing correction).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -23,9 +23,11 @@ Reports from adopters / downstream projects (`Origin: inbound-reported`). These 
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
+| 12.0 | P376 | Catchup scanner misses the inbound direction; outbound templates carry the same structural defect the P363 rework fixed on the inbound side — cross-direction parity gap | 12 High | Known Error | M | 2026-06-23 | inbound-reported (#349) |
 | 12.0 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | 12 High | Open | S | 2026-07-06 | inbound-reported (#169) |
 | 9.0 | P428 | work-problems Step 5 dispatch heredoc-in-command-substitution unparseable under macOS bash 3.2 | 9 Medium | Open | S | 2026-07-06 | inbound-reported (#345) |
 | 9.0 | P437 | wr-wardley exposes no version-stable invocation path for its owm-to-svg converter — consumers pin the cache version and break on bump | 9 Medium | Open | S | 2026-07-06 | inbound-reported (#325) |
+| 9.0 | P454 | wr-risk-scorer restage-commit helper sweeps the whole index into the commit instead of pathspec-scoping (verified restage-commit.sh:121) | 9 Medium | Open | S | 2026-07-15 | inbound-reported (#344) |
 | 8.0 | P429 | manage-problem commit-message examples fail @commitlint subject-case in adopter projects | 8 Medium | Open | S | 2026-07-06 | inbound-reported (#137) |
 | 8.0 | P430 | itil-correction-detect hook false-positives on orchestrator/AFK prompt text | 8 Medium | Open | S | 2026-07-06 | inbound-reported (#257) |
 | 6.0 | P431 | check-upstream-cache-staleness helper misfires on a declined-permanently (empty channels) config | 6 Medium | Open | S | 2026-07-06 | inbound-reported (#341) |
@@ -35,12 +37,19 @@ Reports from adopters / downstream projects (`Origin: inbound-reported`). These 
 | 6.0 | P424 | Governance tooling emits U+2014 em-dashes in generated output, breaking adopter no-em-dash Edit/Write hooks | 12 High | Open | M | 2026-07-06 | inbound-reported (#185,#186,#219,#223,#319) |
 | 6.0 | P433 | transition/review/run-retro lack a sibling-family completeness scan before close | 12 High | Open | M | 2026-07-06 | inbound-reported (#187) |
 | 6.0 | P434 | Capture flows write unverified claims (premise + root-cause mechanism) as established fact | 12 High | Open | M | 2026-07-06 | inbound-reported (#202,#339) |
+| 6.0 | P450 | VQ evidence cells never populated from subsequent-session exercises — run-retro Step 4a drain structurally starved | 12 High | Open | M | 2026-07-15 | inbound-reported (#323) |
 | 4.5 | P425 | wr-architect edit-gate re-litigates its own same-session PASS — [Unratified Dependency] over-fires on agent-prescribed born-proposed ADRs | 9 Medium | Open | M | 2026-07-06 | inbound-reported (#342) |
 | 4.5 | P432 | Assistant does not auto-close the feedback loop on inbound-feedback conversion (channel-agnostic) | 9 Medium | Open | M | 2026-07-06 | inbound-reported (#347) |
 | 4.5 | P435 | wr-risk-scorer gates hardcoded to home-repo shape — push-gate over-fires on non-npm repos, external-comms under-fires on static-site/deck | 9 Medium | Open | M | 2026-07-06 | inbound-reported (#235,#253) |
-| 4.5 | P441 | work-problems pre-dispatch selection filter misses committed-but-unpushed KE (#312) and direction-blocked/interactive-only (#318) states | 9 Medium | Open | M | 2026-07-06 | inbound-reported (#312,#318) |
+| 4.5 | P441 | work-problems pre-dispatch selection filter misses committed-but-unpushed KE (#312) and direction-blocked/interactive-only (#318) states | 9 Medium | Open | M | 2026-07-06 | inbound-reported (#312,#315,#318) |
+| 4.5 | P448 | work-problems post-release K→V auto-transition has no release-vehicle class for repo-local fixes in consumer repos (no npm release) — tickets drift at every tier | 9 Medium | Open | M | 2026-07-15 | inbound-reported (#320) |
+| 4.5 | P449 | I13 RFC-trace predicate + manage-problem gate not adopter-aware — fire no-rfc-trace + direct RFC auto-create in repos without an RFC tier | 9 Medium | Open | M | 2026-07-15 | inbound-reported (#321) |
+| 4.5 | P451 | work-problems Step 5 dispatch exceeds the interactive-harness 10min foreground Bash ceiling (SIGTERM + 0-byte JSON) | 9 Medium | Open | M | 2026-07-15 | inbound-reported (#327) |
 | 3.0 | P427 | work-problems Step 5 can double-dispatch the same ticket to concurrent iters — no per-ticket lock/liveness/dirty-tree preflight | 6 Medium | Open | M | 2026-07-06 | inbound-reported (#343) |
 | 3.0 | P440 | wr-voice-tone:agent has no project-idiom oracle beyond the guide — passes phrases that violate the author's voice | 6 Medium | Open | M | 2026-07-06 | inbound-reported (#316) |
+| 3.0 | P452 | outstanding_questions entries carry no decision-revision pin — stale entries outlive amendments, adjudicated against retired mechanisms | 6 Medium | Open | M | 2026-07-15 | inbound-reported (#338) |
+| 3.0 | P453 | wr-jtbd edit-gate marker invalidated by the reviewer's own mandated doc-sync edits — PASS self-deletes, forcing re-review | 6 Medium | Open | M | 2026-07-15 | inbound-reported (#340) |
+| 3.0 | P455 | New evidence on an already-upstream-reported ticket is not routed upstream — no evidence-append mode in update-upstream / run-retro | 6 Medium | Open | M | 2026-07-15 | inbound-reported (#348) |
 
 ### Tier 2 — Internal
 
@@ -50,7 +59,6 @@ Internally-reported tickets (`Origin: internal` / `corrective-feedback`). Ranked
 |------|-----|-------|----------|--------|--------|----------|--------|
 | 12.0 | P179 | Agent defers requested work into untracked phases — phases are fine, but unticketed phases never get implemented | 12 High | Known Error | M | 2026-05-10 | internal |
 | 12.0 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 High | Known Error | M | 2026-06-10 | internal |
-| 12.0 | P376 | Catchup scanner misses the inbound direction; outbound templates carry the same structural defect the P363 rework fixed on the inbound side — cross-direction parity gap | 12 High | Known Error | M | 2026-06-23 | internal |
 | 9.0 | P180 | Agent defers mitigation selection to user during active incident — surfaces mitigation choice as user-authority when SKILL contract empowers agent-driven reversible mitigations | 9 Medium | Known Error | M | 2026-05-10 | internal |
 | 9.0 | P363 | Inbound-reported tickets never receive fix-released verdict on originating issue — reopened 2026-07-06: status-sync loop still failing at scale (40 fixed-but-open issues manually closed); needs an automatic back-fill reconciliation cadence (sibling P080) | 9 Medium | Known Error | M | 2026-06-11 | internal |
 | 9.0 | P371 | manage-problem I13 propose-fix gate auto-creates a new RFC instead of wiring an existing fix-vehicle's trace edge | 9 Medium | Known Error | M | 2026-06-17 | internal |
@@ -359,30 +367,30 @@ Reports discovered by `/wr-itil:review-problems` Step 4.5 inbound-discovery pipe
 | #306 | github-issues:windyroad/agent-plugins | wr-itil evaluate-relevance over-fires CLOSE-CANDIDATE on tickets that merely cite a shipped ADR | tompahoward | 2026-06-28 | pending-pipeline-processing | — |
 | #307 | github-issues:windyroad/agent-plugins | wr-risk-scorer external-comms gate cannot read `gh issue create --body-file` — empty draft, marker key never matches | tompahoward | 2026-06-28 | pending-pipeline-processing | — |
 | #312 | github-issues:windyroad/agent-plugins | work-problems Step 1 ranking does not exclude just-worked Known Error tickets awaiting orchestrator push | tompahoward | 2026-07-03 | matched-local-ticket | P441 |
-| #313 | github-issues:windyroad/agent-plugins | AFK iter subprocess Stream idle timeout API errors recur at high rate (distinct subclass from #81) | tompahoward | 2026-07-03 | pending-pipeline-processing — ambiguous-match P214/P358 | — |
-| #315 | github-issues:windyroad/agent-plugins | work-problems orchestrator WSJF ranking does not factor placement-authority | tompahoward | 2026-07-03 | pending-pipeline-processing — net-new, capture queued | — |
+| #313 | github-issues:windyroad/agent-plugins | AFK iter subprocess Stream idle timeout API errors recur at high rate (distinct subclass from #81) | tompahoward | 2026-07-03 | matched-local-ticket (evidence datum absorbed) | P261 |
+| #315 | github-issues:windyroad/agent-plugins | work-problems orchestrator WSJF ranking does not factor placement-authority | tompahoward | 2026-07-03 | matched-local-ticket (absorbed as third excluded-state class) | P441 |
 | #316 | github-issues:windyroad/agent-plugins | Voice-tone gate misses Tom-specific idioms not codified in the guide | tompahoward | 2026-07-03 | matched-local-ticket | P440 |
 | #317 | github-issues:windyroad/agent-plugins | architect edit-gate session-ID mismatch under AFK subprocess forces manual marker reconcile | tompahoward | 2026-07-03 | matched-local-ticket (semantic match this pass) | P368 |
 | #318 | github-issues:windyroad/agent-plugins | work-problems orchestrator re-selects direction-blocked tickets as highest-WSJF every loop | tompahoward | 2026-07-03 | matched-local-ticket | P441 |
 | #319 | github-issues:windyroad/agent-plugins | check-upstream-responses writes a U+2014 em-dash into the audit-log heading, tripping adopter hooks | tompahoward | 2026-07-03 | matched-local-ticket | P424 |
-| #320 | github-issues:windyroad/agent-plugins | work-problems Step 6.5 post-release K→V auto-transition has no vehicle for repo-local scripts | tompahoward | 2026-07-03 | pending-pipeline-processing — ambiguous-match P389 | — |
-| #321 | github-issues:windyroad/agent-plugins | I13 RFC-trace predicate + manage-problem I13 gate are not adopter-aware | tompahoward | 2026-07-03 | pending-pipeline-processing — ambiguous-match P371/P314 | — |
-| #323 | github-issues:windyroad/agent-plugins | Verification Queue evidence cells never populated from subsequent-session exercises | tompahoward | 2026-07-03 | pending-pipeline-processing — net-new, capture queued | — |
+| #320 | github-issues:windyroad/agent-plugins | work-problems Step 6.5 post-release K→V auto-transition has no vehicle for repo-local scripts | tompahoward | 2026-07-03 | safe-and-valid-local-ticket-created | P448 |
+| #321 | github-issues:windyroad/agent-plugins | I13 RFC-trace predicate + manage-problem I13 gate are not adopter-aware | tompahoward | 2026-07-03 | safe-and-valid-local-ticket-created | P449 |
+| #323 | github-issues:windyroad/agent-plugins | Verification Queue evidence cells never populated from subsequent-session exercises | tompahoward | 2026-07-03 | safe-and-valid-local-ticket-created | P450 |
 | #324 | github-issues:windyroad/agent-plugins | Assistant routes free-text input collection through AskUserQuestion instead of per-item copyable blocks | tompahoward | 2026-07-03 | matched-local-ticket | P438 |
 | #325 | github-issues:windyroad/agent-plugins | wr-newsletter step 7 hard-codes the wr-wardley owm-to-svg converter at a pinned plugin version | tompahoward | 2026-07-03 | matched-local-ticket | P437 |
 | #326 | github-issues:windyroad/agent-plugins | External-review round-trips waste cycles when the reviewer sees a stale copy of a repo artifact | tompahoward | 2026-07-03 | matched-local-ticket | P439 |
-| #327 | github-issues:windyroad/agent-plugins | work-problems Step 5 iter/pre-flight dispatch exceeds the interactive-harness 10min foreground timeout | tompahoward | 2026-07-03 | pending-pipeline-processing — net-new, capture queued | — |
-| #338 | github-issues:windyroad/agent-plugins | outstanding_questions queue entries carry no decision-revision pin — stale entries survive supersession | tompahoward | 2026-07-05 | pending-pipeline-processing — ambiguous-match P416 (sibling, distinct defect) | — |
+| #327 | github-issues:windyroad/agent-plugins | work-problems Step 5 iter/pre-flight dispatch exceeds the interactive-harness 10min foreground timeout | tompahoward | 2026-07-03 | safe-and-valid-local-ticket-created | P451 |
+| #338 | github-issues:windyroad/agent-plugins | outstanding_questions queue entries carry no decision-revision pin — stale entries survive supersession | tompahoward | 2026-07-05 | safe-and-valid-local-ticket-created | P452 |
 | #339 | github-issues:windyroad/agent-plugins | problem captures write unverified root-cause hypotheses as established fact | tompahoward | 2026-07-05 | matched-local-ticket | P434 |
-| #340 | github-issues:windyroad/agent-plugins | wr-jtbd: edit-gate marker invalidated by the reviewer's own required doc-sync edits | tompahoward | 2026-07-05 | pending-pipeline-processing — ambiguous-match P419 (same mechanism, different surface) | — |
+| #340 | github-issues:windyroad/agent-plugins | wr-jtbd: edit-gate marker invalidated by the reviewer's own required doc-sync edits | tompahoward | 2026-07-05 | safe-and-valid-local-ticket-created | P453 |
 | #341 | github-issues:windyroad/agent-plugins | upstream-cache-staleness helper misfires on a declined-permanently (empty channels) config | tompahoward | 2026-07-05 | matched-local-ticket | P431 |
 | #342 | github-issues:windyroad/agent-plugins | wr-architect: edit-gate re-litigates its own same-session PASS after a prescribed ADR capture | tompahoward | 2026-07-05 | matched-local-ticket | P425 |
 | #343 | github-issues:windyroad/agent-plugins | work-problems orchestrator can double-dispatch the same ticket to concurrent iters | tompahoward | 2026-07-05 | matched-local-ticket | P427 |
-| #344 | github-issues:windyroad/agent-plugins | wr-risk-scorer: restage-commit helper sweeps the whole index/working tree instead of the staged scope | tompahoward | 2026-07-05 | pending-pipeline-processing — net-new, capture queued | — |
+| #344 | github-issues:windyroad/agent-plugins | wr-risk-scorer: restage-commit helper sweeps the whole index/working tree instead of the staged scope | tompahoward | 2026-07-05 | safe-and-valid-local-ticket-created | P454 |
 | #345 | github-issues:windyroad/agent-plugins | work-problems Step 5 dispatch heredoc is unparseable under macOS /bin/bash 3.2 | tompahoward | 2026-07-05 | matched-local-ticket | P428 |
 | #347 | github-issues:windyroad/agent-plugins | assistant does not auto-close the feedback loop on conversion (channel-agnostic) | tompahoward | 2026-07-05 | matched-local-ticket | P432 |
-| #348 | github-issues:windyroad/agent-plugins | new upstream-relevant evidence is not routed upstream without a prompt | tompahoward | 2026-07-05 | pending-pipeline-processing — ambiguous-match P080/P413 | — |
-| #349 | github-issues:windyroad/agent-plugins | downstream verification of an upstream fix is not confirmed back upstream without a prompt | tompahoward | 2026-07-06 | pending-pipeline-processing — ambiguous-match P363/P080 | — |
+| #348 | github-issues:windyroad/agent-plugins | new upstream-relevant evidence is not routed upstream without a prompt | tompahoward | 2026-07-05 | safe-and-valid-local-ticket-created | P455 |
+| #349 | github-issues:windyroad/agent-plugins | downstream verification of an upstream fix is not confirmed back upstream without a prompt | tompahoward | 2026-07-06 | matched-local-ticket (absorbed into Gap 2) | P376 |
 
 ## Closed
 

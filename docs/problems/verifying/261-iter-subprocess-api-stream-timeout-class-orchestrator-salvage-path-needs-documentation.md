@@ -38,7 +38,7 @@ Orchestrator main turn applies the 4-step salvage path (above) when the iter's s
 ## Impact Assessment
 
 - **Who is affected**: AFK orchestrator loops that hit iter API errors.
-- **Frequency**: Unlikely (2) — observed once in session 6 across 10 iters; ~10% per-iter rate; gated on iter length / API stability.
+- **Frequency**: Unlikely (2) — observed once in session 6 across 10 iters; ~10% per-iter rate; gated on iter length / API stability. **Re-rate datum (2026-07-15, inbound #313)**: a pre-fix 2026-05-12 downstream session hit this class on 3/3 dispatch attempts ($9.11 total, 19-44 turns each, zero ITERATION_SUMMARY) — materially above the ~10% premise; likelihood should be revisited if a post-fix occurrence recurs. NOT verification evidence (observation predates the fix; do not count toward close). The retry-burn facet routes to P214 Phase 2's retry-policy task. Flip-back trigger to watch: substantial UNSTAGED work discarded by the HALT branch (salvage gate requires staged diff).
 - **Severity**: Moderate — without salvage, the iter cost is lost AND the loop halts; with salvage, the work lands cleanly.
 
 ## Root Cause Analysis
