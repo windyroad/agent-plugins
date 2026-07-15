@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-15 **P456 captured** — AFK iter cannot progress a ratified Known Error when the fix-vehicle RFC has empty stories (lightweight aside via /wr-itil:capture-problem during the P376 Gap 2 iter retro; ADR-089/090/096 compose into an interactive-only ratification path, so the iter degrades to capture-story-infrastructure-and-hold).
+> Last reviewed: 2026-07-15 **P426 known error** — root cause confirmed for the inbound-reported (#169) first-match-on-non-unique-collection review-heuristic gap: the class was never encoded in the architect review agent's prose, so the reviewer cannot flag it. Fix design (heuristic + paired promptfoo evals) architect-PASSed and recorded in Fix Strategy; implementation held for interactive story ratification per ADR-090/096 (the P456 composition) — RFC + story map + story captured born-unconfirmed this iter.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -22,8 +22,8 @@ Reports from adopters / downstream projects (`Origin: inbound-reported`). These 
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
+| 24.0 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | 12 High | Known Error | S | 2026-07-06 | inbound-reported (#169) |
 | 12.0 | P376 | Catchup scanner misses the inbound direction; outbound templates carry the same structural defect the P363 rework fixed on the inbound side — cross-direction parity gap | 12 High | Known Error | M | 2026-06-23 | inbound-reported (#349) |
-| 12.0 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | 12 High | Open | S | 2026-07-06 | inbound-reported (#169) |
 | 9.0 | P428 | work-problems Step 5 dispatch heredoc-in-command-substitution unparseable under macOS bash 3.2 | 9 Medium | Open | S | 2026-07-06 | inbound-reported (#345) |
 | 9.0 | P437 | wr-wardley exposes no version-stable invocation path for its owm-to-svg converter — consumers pin the cache version and break on bump | 9 Medium | Open | S | 2026-07-06 | inbound-reported (#325) |
 | 9.0 | P454 | wr-risk-scorer restage-commit helper sweeps the whole index into the commit instead of pathspec-scoping (verified restage-commit.sh:121) | 9 Medium | Open | S | 2026-07-15 | inbound-reported (#344) |
