@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-15 **P446 verification pending** — quota-throttle glide fix verified released (@windyroad/cruise 0.3.4 + 0.3.5 on npm; installed cache 0.3.5 carries all three controller dimensions; ADR-093 amendment 4ca91d5e). Trace edge wired into fix-vehicle RFC-046 per the I13 gate (P371 case a — existing vehicle, no new RFC). Awaiting live verification: heavy session glides to reset at the headroom line, no over-brake while behind pace.
+> Last reviewed: 2026-07-15 **P456 captured** — AFK iter cannot progress a ratified Known Error when the fix-vehicle RFC has empty stories (lightweight aside via /wr-itil:capture-problem during the P376 Gap 2 iter retro; ADR-089/090/096 compose into an interactive-only ratification path, so the iter degrades to capture-story-infrastructure-and-hold).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -91,6 +91,7 @@ Internally-reported tickets (`Origin: internal` / `corrective-feedback`). Ranked
 | 3.0 | P416 | Outstanding-questions drain appends a superseding human decision without reconciling the stale Fix Strategy section it overrides | 6 Medium | Open | M | 2026-07-04 | internal |
 | 3.0 | P418 | Reviewer-agent marker hooks do not fire on SendMessage-resumed agents — ISSUES FOUND cannot be continued to a marker-writing PASS, forcing a full fresh re-review | 6 Medium | Open | M | 2026-07-05 | internal |
 | 3.0 | P421 | Reference-section awk helpers destructively truncate governance files containing invalid UTF-8 | 6 Medium | Open | M | 2026-07-05 | internal |
+| 3.0 | P456 | AFK iter cannot progress a ratified Known Error when the fix-vehicle RFC has empty stories — ADR-089/090/096 compose interactive-only; iter degrades to capture-and-hold | 6 Medium | Open | M | 2026-07-15 | internal |
 | 3.0 | P045 | Auto plugin install on user's machine after governance release | 12 High | Open | L | 2026-04-19 | internal |
 | 2.25 | P136 | ADR-044 alignment audit — sweep all unaudited skills/hooks/agents/ADRs/JTBDs/READMEs against the framework-resolution boundary (master ticket) | 9 Med | Open | L | 2026-04-27 | internal |
 | 2.25 | P290 | Harden ADR-052 to behavioural-only — remove the structural-test escape hatch entirely | 9 Med High | Open | L | 2026-05-25 | internal |
