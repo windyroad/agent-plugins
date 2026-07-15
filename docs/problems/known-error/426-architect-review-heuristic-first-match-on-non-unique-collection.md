@@ -62,3 +62,9 @@ Behavioural coverage per ADR-052/ADR-075 (harness exists, RFC-012/P324): two pai
 ## Related
 
 - Inbound issue #169.
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-048 | proposed | Add a first-match-on-non-unique-collection review heuristic to the architect review agent |
