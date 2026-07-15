@@ -1,6 +1,6 @@
 # Problem 446: Quota-pace throttle's glide is too weak to hold the pace line — a real hard weekly-limit stop occurred with the throttle running; strengthen the glide (deficit response + much larger cap)
 
-**Status**: Known Error (auto-transitioned 2026-07-15 /wr-itil:review-problems — root cause simulation-confirmed 2026-07-10; all three fix dimensions shipped in @windyroad/cruise 0.3.5 + ADR-093 amendment landed 2026-07-13; live verification of the deficit-aware controller outstanding)
+**Status**: Verification Pending (transitioned 2026-07-15 — fix verified released: cruise 0.3.5 on npm + installed cache, all three controller dimensions present in the shipped hook, ADR-093 amendment landed; awaiting live verification of the deficit-aware controller)
 **Reported**: 2026-07-10
 **Priority**: 20 (Critical) — Impact: 5 (Catastrophic — the feature's entire purpose is defeated; a real hard weekly-limit stop occurred mid-work WITH the throttle installed and running) × Likelihood: 5 (Certain — observed 2026-07-09) — derived at capture per Step 4a
 **Origin**: internal
@@ -81,6 +81,23 @@ Surfaced live 2026-07-13: `/wr-cruise:status` sat "Waiting…" for 2m+ because t
 
 **ADR-093 amendment — LANDED 2026-07-13 (commit 4ca91d5e).** ADR-093's normative Mechanics now records all three shipped realities — (1) the deficit-aware position gate, (2) the feedback controller that replaced the one-shot `S=interval·(r/safe−1)` formula, (3) the asymmetric immediate-recovery law — with the numeric constants surfaced per P444, the old formula retired-in-place with forward pointers, and non-exhaustion / ceiling / fail-open unchanged. Architect + JTBD PASS; oversight re-ratified 2026-07-13 via AskUserQuestion Confirm (P357). No amendment work remains.
 
+## Fix Strategy
+
+The fix shipped through RFC-046's `@windyroad/cruise` vehicle across two patch releases: 0.3.4 (deficit-aware position gate — brake only when over-rate AND at/over the linear pace line; plus the `/wr-cruise:status` position-label fix) and 0.3.5 (asymmetric instant recovery — `cur_s` drops to 0 the moment a window is behind pace; re-baseline/too-soon paths respect the position gate). The feedback controller replacing the fixed-cap one-shot formula landed in the same series. ADR-093 amendment recording all three mechanics: commit 4ca91d5e (2026-07-13).
+
+**Release vehicle**: .changeset/cruise-instant-recovery.md (drained at the 0.3.5 publish; sibling .changeset/cruise-deficit-aware-throttle.md drained at 0.3.4)
+
+## Fix Released
+
+Released in `@windyroad/cruise` 0.3.4 + 0.3.5 (npm-published; installed plugin cache at 0.3.5 as of 2026-07-15). The strengthened glide is deficit-aware, feedback-driven, and recovers instantly when behind pace. Awaiting user verification — the observable acceptance signal is a heavy session gliding to the window reset at the headroom line (≤95% weekly) with no hard rate-limit stop, and no over-braking while behind pace.
+
+Exercise evidence from the releasing/verifying sessions (2026-07-15 in-session checks):
+
+- `npm view @windyroad/cruise versions` lists 0.3.5; installed cache `~/.claude/plugins/cache/windyroad/wr-cruise/0.3.5/` present.
+- Shipped `hooks/quota-pace-throttle.sh` (0.3.5 cache) verifiably carries all three fix dimensions: deficit-aware position gate (brake only at/over the linear pace line; banked surplus spendable), feedback controller ramping per-call sleep toward burn=safe, and asymmetric instant recovery (`cur_s=0` at once when behind pace, incl. re-baseline/too-soon paths).
+- ADR-093 amendment recording the three mechanics: commit 4ca91d5e, oversight re-ratified 2026-07-13.
+- Known residual stands as documented: sustained >5 %/hr burn for days still exhausts (no sleep-based throttle can cover it; a block was declined 2026-07-10).
+
 ## Dependencies
 
 - **Composes with**: **P160** (ship quota-pacing surface — this is a defect in its Release-1 fix), **P443** (lineage). The distribution fix (P160/P443) and this correctness fix are independent.
@@ -100,3 +117,9 @@ Surfaced live 2026-07-13: `/wr-cruise:status` sat "Waiting…" for 2m+ because t
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-044 | STORY-044: See what cruise is doing — a status/telemetry skill | accepted |
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-046 | in-progress | Quota-pace throttle — mechanical PreToolUse pacing, extracted into `@windyroad/cruise` |

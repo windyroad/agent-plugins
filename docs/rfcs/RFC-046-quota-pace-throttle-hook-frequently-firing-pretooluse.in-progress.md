@@ -5,7 +5,7 @@ reported: 2026-07-06
 human-oversight: confirmed
 oversight-date: 2026-07-09
 decision-makers: [Tom Howard]
-problems: [P160, P443]
+problems: [P160, P443, P446]
 adrs: [ADR-093]
 jtbd: [JTBD-010]
 stories: [STORY-039, STORY-042, STORY-043]
@@ -16,7 +16,7 @@ story-maps: [STORY-MAP-003]
 
 **Status**: in-progress (2026-07-11)
 **Reported**: 2026-07-06
-**Problems**: P160, P443
+**Problems**: P160, P443, P446
 **ADRs**: ADR-093
 **JTBD**: JTBD-010
 **Stories**: STORY-039, STORY-042, STORY-043
@@ -35,6 +35,7 @@ The mechanical quota-pace throttle (ADR-093): a matcher-less `PreToolUse` hook t
 
 - **P160** (Ship quota-pacing surface — Known Error, reopened Sev 20) — hitting a rate-limit window halts work mid-flight (AFK loops break; effortful resume; forced-waking). The throttle converts the statusline's diagnostic burn-rate data into mechanical pacing so work lands at each window reset with headroom instead of hard-stopping.
 - **P443** (quota-pacing lineage broken) — the throttle shipped without a grounded problem → JTBD → USM → RFC → story lineage: mis-anchored to JTBD-006 (AFK-only) when it fires on ALL work, inert for adopters, and mis-placed across 7 plugins. This RFC is the repaired lineage: **JTBD-010** (Sustain My Token Quota Across the Week and Across Surfaces) → **STORY-MAP-003** → the three stories below.
+- **P446** (throttle glide too weak to hold the pace line — a real hard weekly-limit stop occurred with the throttle running) — trace edge wired 2026-07-15 per the I13 gate: this RFC was already P446's fix vehicle (the corrected controller — deficit-aware position gate, feedback controller, asymmetric instant recovery — shipped in `@windyroad/cruise` 0.3.4/0.3.5 through this RFC's vehicle, with the ADR-093 amendment landed 2026-07-13), but the `problems:` array named only the original drivers.
 
 ## Scope
 

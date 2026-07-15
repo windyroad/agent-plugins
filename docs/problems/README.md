@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-15 **inbound triage** — the 11 unmatched reports arbitrated via wr-itil:hang-off-check: 3 absorbed into existing tickets (#313 → P261 evidence datum + P214 retry facet; #315 → P441 third excluded-state class; #349 → P376 Gap 2, Origin flipped to inbound → Tier 1), 8 captured as P448–P455 (all Tier 1 inbound-reported). P179 recurrence datum recorded (surface-as-queued-instead-of-doing correction).
+> Last reviewed: 2026-07-15 **P446 verification pending** — quota-throttle glide fix verified released (@windyroad/cruise 0.3.4 + 0.3.5 on npm; installed cache 0.3.5 carries all three controller dimensions; ADR-093 amendment 4ca91d5e). Trace edge wired into fix-vehicle RFC-046 per the I13 gate (P371 case a — existing vehicle, no new RFC). Awaiting live verification: heavy session glides to reset at the headroom line, no over-brake while behind pace.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -14,7 +14,6 @@ Ranks above all other tiers regardless of WSJF (ADR-076).
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
-| 20.0 | P446 | Quota-pace throttle's glide too weak to hold the pace line — real hard weekly-limit stop with the throttle running; RCA (simulated, 85s cadence) → self-calibrating sleep-to-sustainable-rate + 600s ceiling, no hard stop | 20 Critical | Known Error | M | 2026-07-10 | internal |
 | 5.0 | P160 | Ship quota-pacing surface — throttle shipped but INERT for adopters (producer is user-owned statusline config no plugin can ship) + mis-placed across 7 plugins + broken lineage (P443); reopened 2026-07-07, pain undiminished for everyone not on the one hand-wired machine | 20 Critical | Known Error | XL | 2026-05-03 | internal |
 
 ### Tier 1 — Inbound-reported (prioritised above internal per ADR-076)
@@ -306,6 +305,7 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P345 | Fix-titled commits do not transition the ticket lifecycle in the same commit grain | itil-fix-title-lifecycle-advisory.sh hook, fix commit on main 2026-07-05, @windyroad/itil ≥0.56 | no — not observed |
 | P140 | work-problems Step 6.5 halt-on-CI-failure should be fix-and-continue for mechanically-fixable failures | release marker missing from ticket (pre-RFC-002 migration-era transition; row restored 2026-07-15 after VQ drift detected) | no — not observed |
 | P390 | agent declares ALL_DONE prematurely while actionable backlog remains — /goal external-evaluator loop-anchor (ADR-094/RFC-047) | @windyroad/itil@0.57.2 (2026-07-06, PR #337) | no — not observed |
+| P446 | Quota-pace throttle glide too weak to hold the pace line — deficit-aware position gate + feedback controller + asymmetric instant recovery | @windyroad/cruise@0.3.4 + 0.3.5 (2026-07-13; ADR-093 amendment 4ca91d5e) | no — not observed |
 
 ## Inbound Upstream Reports
 
