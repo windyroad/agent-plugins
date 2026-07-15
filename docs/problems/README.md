@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-15 **P426 known error** — root cause confirmed for the inbound-reported (#169) first-match-on-non-unique-collection review-heuristic gap: the class was never encoded in the architect review agent's prose, so the reviewer cannot flag it. Fix design (heuristic + paired promptfoo evals) architect-PASSed and recorded in Fix Strategy; implementation held for interactive story ratification per ADR-090/096 (the P456 composition) — RFC + story map + story captured born-unconfirmed this iter.
+> Last reviewed: 2026-07-16 **batch transition** — P180 verifying, P371 verifying (post-release K→V auto-transition on the @windyroad/itil 0.59.1 drain; P371 carries live exercise evidence from the P446 iter). 7 enumerator candidates skipped as false: P160/P170/P178/P179/P251 cite the tangential shared changeset p287-type-classification-retired as Release vehicle (seed-quality issue, fixes not shipped), P375/P376 are umbrellas with deliberately-open scope.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -58,9 +58,7 @@ Internally-reported tickets (`Origin: internal` / `corrective-feedback`). Ranked
 |------|-----|-------|----------|--------|--------|----------|--------|
 | 12.0 | P179 | Agent defers requested work into untracked phases — phases are fine, but unticketed phases never get implemented | 12 High | Known Error | M | 2026-05-10 | internal |
 | 12.0 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 High | Known Error | M | 2026-06-10 | internal |
-| 9.0 | P180 | Agent defers mitigation selection to user during active incident — surfaces mitigation choice as user-authority when SKILL contract empowers agent-driven reversible mitigations | 9 Medium | Known Error | M | 2026-05-10 | internal |
 | 9.0 | P363 | Inbound-reported tickets never receive fix-released verdict on originating issue — reopened 2026-07-06: status-sync loop still failing at scale (40 fixed-but-open issues manually closed); needs an automatic back-fill reconciliation cadence (sibling P080) | 9 Medium | Known Error | M | 2026-06-11 | internal |
-| 9.0 | P371 | manage-problem I13 propose-fix gate auto-creates a new RFC instead of wiring an existing fix-vehicle's trace edge | 9 Medium | Known Error | M | 2026-06-17 | internal |
 | 8.0 | P375 | Repo conflates a "named re-entry point" with a self-firing cadence — deferrals not transitively reachable from an automatic trigger rot | 16 High | Known Error | L | 2026-06-23 | internal |
 | 8.0 | P414 | retro/wrap defers over-threshold briefing Tier-3 rotation as a recommendation instead of performing the split | 8 Medium | Open | S | 2026-07-03 | internal |
 | 8.0 | P417 | docs/stories/README.md Rankings/Done never reconciled — stale for the whole story corpus | 8 Medium | Open | S | 2026-07-04 | internal |
@@ -304,6 +302,8 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P408 | risk-score-commit-gate hardcodes a 14-day RISK-POLICY staleness threshold, ignoring the policy's stated review cadence — gate now derives the threshold from the stated `> Reviewed <cadence>` line per ADR-091 (fallback 14 when absent/unrecognised) | 2026-07-05 (`@windyroad/risk-scorer` patch, pending release) | no — not observed || P390 | agent emits ALL_DONE prematurely while actionable backlog remains — `/goal` external-evaluator loop-anchor (ADR-094/RFC-047), turn-bound removed | `@windyroad/itil@0.57.2` (2026-07-06, PR #337) | no — not observed |
 | P404 | Implement ADR-089 + ADR-090 (≥1-story-per-RFC + story-map/story ratification) | RFC-037 complete 2026-07-03 (all 5 stories done + ratified); changeset published | no — not observed |
 | P345 | Fix-titled commits do not transition the ticket lifecycle in the same commit grain | itil-fix-title-lifecycle-advisory.sh hook, fix commit on main 2026-07-05, @windyroad/itil ≥0.56 | no — not observed |
+| P180 | Agent defers mitigation selection to user during active incident | .changeset/p180-mitigation-selection-empowerment.md (shipped; enumerated on the 2026-07-16 0.59.1 drain) | no — not observed |
+| P371 | I13 gate auto-creates new RFC instead of wiring existing fix-vehicle trace | .changeset/wr-itil-p371-i13-existing-vehicle-trace-branch.md (shipped) | yes — observed: P446 iter wired RFC-046 trace edge via the new branch (ae95ecec, 2026-07-15) |
 | P140 | work-problems Step 6.5 halt-on-CI-failure should be fix-and-continue for mechanically-fixable failures | release marker missing from ticket (pre-RFC-002 migration-era transition; row restored 2026-07-15 after VQ drift detected) | no — not observed |
 | P390 | agent declares ALL_DONE prematurely while actionable backlog remains — /goal external-evaluator loop-anchor (ADR-094/RFC-047) | @windyroad/itil@0.57.2 (2026-07-06, PR #337) | no — not observed |
 | P446 | Quota-pace throttle glide too weak to hold the pace line — deficit-aware position gate + feedback controller + asymmetric instant recovery | @windyroad/cruise@0.3.4 + 0.3.5 (2026-07-13; ADR-093 amendment 4ca91d5e) | no — not observed |

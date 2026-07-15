@@ -1,6 +1,6 @@
 # Problem 180: Agent defers mitigation selection to user during active incident — surfaces mitigation choice as user-authority when SKILL contract empowers agent-driven reversible mitigations
 
-**Status**: Known Error
+**Status**: Verification Pending (K→V 2026-07-16 via work-problems Step 6.5 post-release auto-transition — release vehicle .changeset/p180-mitigation-selection-empowerment.md shipped; awaiting user verification per ADR-022)
 **Reported**: 2026-05-10
 **Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3 = 9. Rated at review 2026-07-02: mitigation-selection instance of P132 class.
 **Origin**: internal
@@ -94,3 +94,7 @@ Root cause confirmed and the deferral reconciled against the closed P132 class. 
 - **P179** — sibling deferral pattern (untracked phases for requested work).
 - **JTBD-201** — Restore Service Fast with an Audit Trail; "reversible mitigations are preferred" desired outcome wording is the load-bearing JTBD evidence that SKILL empowerment is documented.
 - `feedback_dont_defer_at_session_wrap.md` (user-memory feedback) — sibling pattern at session-wrap surface; this ticket extends the family to mid-flow active-incident surface.
+
+## Fix Released
+
+Released via `.changeset/p180-mitigation-selection-empowerment.md` (shipped in a prior @windyroad/itil release; enumerated by the post-release K→V pass on the 2026-07-16 0.59.1 drain). The manage-incident mitigation-selection empowerment: agent-driven reversible mitigations proceed without deferring the selection to the user mid-incident. Awaiting user verification.

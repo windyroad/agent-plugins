@@ -123,3 +123,14 @@ Exercise evidence from the releasing/verifying sessions (2026-07-15 in-session c
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-046 | in-progress | Quota-pace throttle — mechanical PreToolUse pacing, extracted into `@windyroad/cruise` |
+
+## Verification-period evidence — 2026-07-15 evening (5h-window session-limit hit with throttle active)
+
+Observed during the 2026-07-15 work-problems loop: a **5-hour-window session limit** was hit at ~20:08 (reset 20:30) WITH the 0.3.5 throttle installed, cache fresh, and braking confirmed active afterwards (25s/call per /wr-cruise:status; 7-day window held exactly on the pace line at 56% vs 57% — the primary job working). Contributing mechanics, in order:
+
+1. **Concurrency gap (NEW — not in the three shipped dimensions or the recorded residual)**: 3-4 concurrent sessions (this orchestrator + its iter subprocess + two other projects' AFK loops) each computed per-call braking from the shared cache as if alone; collective burn was N× a single throttled session while braking stayed per-session. The control law has no concurrency term.
+2. **Position gate spending banked surplus (by design)**: the evening started behind pace; the asymmetric-recovery gate (third dimension, user-pinned Option A) correctly let the burst draw the surplus down at zero brake until usage crossed the line — close to the window edge, where per-call sleeps cannot stop a short-horizon overshoot.
+3. **Documented residual**: sustained multi-session burn is the "no sleep-based throttle can fix it" case recorded at fix time (deny/block declined 2026-07-10).
+
+Impact was the benign case: 22 minutes of stall (one iter died pre-work, $2.44, retried clean), not the lost-week weekly-window case. Disposition: this is verification-period evidence, NOT a regression of the three shipped dimensions (each behaved as designed). The concurrency gap is uncovered scope — route at the next interactive review: absorb into this ticket as a fourth dimension pre-close, or capture as a sibling (the P448/P389/P361-style cluster call).
+
