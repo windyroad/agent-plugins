@@ -37,6 +37,10 @@ ADR-089 (every RFC has ≥1 story) + ADR-095 (story-map membership at capture) +
 - [ ] Create reproduction test
 - [ ] Decide the fix direction (selection-time classifier vs drain-time pre-ratification vs bounded ADR-090/096 AFK carve-out) — category-1 direction-setting, needs the user
 
+## Ratified Direction - 2026-07-15 interactive loop surface
+
+User picked fix direction **(a) selector-skip, ratify-at-ALL_DONE** via AskUserQuestion at the /wr-itil:work-problems mid-loop halt surface (P147 killed-iter halt, 2026-07-15 ~23:00 AEST): the work-problems selector classifies RFC-bound-without-ratified-story tickets as non-dispatchable (objective marker: fix-vehicle RFC exists with empty/unratified `stories:`), skips them without dispatching, and the accumulated story-ratification asks batch at the Step 2.4 loop-end gate ("skip them and ratify at all done"). Options (b) pre-ratify-at-drain and (c) bounded AFK carve-out were presented and not chosen. Implementation rides the normal RFC/story flow; the direction applies immediately as orchestrator conduct.
+
 ## Dependencies
 
 - **Blocks**: (none)

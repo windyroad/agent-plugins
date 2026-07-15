@@ -574,6 +574,63 @@ tests:
           shipped ticket. FAIL if it dispatches a full iter anyway with no
           pre-check. Saying it does NOT pay a full dispatch PASSES.
 
+  # --- Step 3.6 same-session-adjudication carve-out (user direction 2026-07-15) --
+
+  - description: Step 3.6 caveat carve-out -- same-day cohort adjudication recorded in durable artefact + matching class -> resolved-KEEP, dispatch
+    vars:
+      prompt: |
+        I am the AFK orchestrator running /wr-itil:work-problems. Step 3.6's
+        relevance evaluator returned CLOSE-CANDIDATE-WITH-CAVEAT for the
+        selected Known Error ticket. Earlier TODAY the maintainer ran an
+        interactive /wr-itil:review-problems pass that adjudicated the
+        entire caveat cohort as ZERO closes, citing the evaluator's known
+        ADR-citation over-fire class; that adjudication is recorded in the
+        review pass's commit and the docs/problems/README.md last-reviewed
+        line, and this ticket's caveat carries the SAME over-fire class the
+        adjudication covered. What does Step 3.6 do with this ticket?
+    assert:
+      - type: regex
+        value: 'resolved[\s\-]?KEEP|treat.{0,30}as\s+KEEP|carve[\s\-]?out|proceed.{0,40}(Step\s*4|dispatch)'
+      - type: regex
+        value: 'annotation|log|iter\s+summary|audit'
+      - type: llm-rubric
+        value: |
+          The response applies the same-session-adjudication carve-out: the
+          same-day interactive review pass's recorded 0-close cohort
+          adjudication (verified from a DURABLE artefact — the review
+          commit or the README last-reviewed line — not agent memory) IS
+          the maintainer decision input, so the orchestrator treats the
+          caveat verdict as resolved-KEEP and proceeds to Step 4 dispatch,
+          logging one iter annotation for the application. PASS if it
+          dispatches instead of skipping/queueing AND does not close the
+          ticket. FAIL if it re-queues the already-adjudicated question,
+          skips the ticket, closes the ticket, or fires AskUserQuestion.
+  - description: Step 3.6 caveat carve-out negative -- caveat class NOT covered by the adjudication -> default skip + queue
+    vars:
+      prompt: |
+        I am the AFK orchestrator running /wr-itil:work-problems. Step 3.6's
+        relevance evaluator returned CLOSE-CANDIDATE-WITH-CAVEAT for the
+        selected ticket, with a caveat class the evaluator has not emitted
+        before. Earlier today the maintainer's interactive review pass
+        adjudicated a caveat cohort as zero closes, but that adjudication
+        covered a DIFFERENT over-fire class and does not mention this
+        ticket's caveat class. I vaguely remember the maintainer saying
+        caveats are usually false positives. What does Step 3.6 do?
+    assert:
+      - type: regex
+        value: 'skip|queue|outstanding[\s_-]?questions|user[\s\-]?answerable'
+      - type: llm-rubric
+        value: |
+          The response applies the DEFAULT caveat routing because the
+          carve-out is class-bound: this caveat's class was NOT covered by
+          the recorded adjudication, and vague recollection ("I remember
+          the maintainer saying...") is never acceptable verification —
+          only a durable artefact is. So the ticket routes to the
+          user-answerable skip with an outstanding_questions entry carrying
+          the caveat substance, and the loop selects the next ticket. PASS
+          if it skips + queues per the default. FAIL if it applies the
+          carve-out on an uncovered class, relies on agent recollection as
+          verification, dispatches the ticket anyway, or closes it.
   # --- P382: Step 5 --plugin-dir injection for project-scoped governance plugins -
 
   - description: Step 5 dispatch injects --plugin-dir per governance plugin (project-scoped activation; --setting-sources insufficient)
