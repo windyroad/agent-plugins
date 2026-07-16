@@ -1211,3 +1211,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-07-15 **P456 captured** — AFK iter cannot progress a ratified Known Error when the fix-vehicle RFC has empty stories (lightweight aside via /wr-itil:capture-problem during the P376 Gap 2 iter retro; ADR-089/090/096 compose into an interactive-only ratification path, so the iter degrades to capture-story-infrastructure-and-hold).
 
 > Last reviewed: 2026-07-15 **P426 known error** — root cause confirmed for the inbound-reported (#169) first-match-on-non-unique-collection review-heuristic gap: the class was never encoded in the architect review agent's prose, so the reviewer cannot flag it. Fix design (heuristic + paired promptfoo evals) architect-PASSed and recorded in Fix Strategy; implementation held for interactive story ratification per ADR-090/096 (the P456 composition) — RFC + story map + story captured born-unconfirmed this iter.
+
+## 2026-07-16
+
+> Last reviewed: 2026-07-16 **batch transition** — P180 verifying, P371 verifying (post-release K→V auto-transition on the @windyroad/itil 0.59.1 drain; P371 carries live exercise evidence from the P446 iter). 7 enumerator candidates skipped as false: P160/P170/P178/P179/P251 cite the tangential shared changeset p287-type-classification-retired as Release vehicle (seed-quality issue, fixes not shipped), P375/P376 are umbrellas with deliberately-open scope.

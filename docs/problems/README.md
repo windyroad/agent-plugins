@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-16 **batch transition** — P180 verifying, P371 verifying (post-release K→V auto-transition on the @windyroad/itil 0.59.1 drain; P371 carries live exercise evidence from the P446 iter). 7 enumerator candidates skipped as false: P160/P170/P178/P179/P251 cite the tangential shared changeset p287-type-classification-retired as Release vehicle (seed-quality issue, fixes not shipped), P375/P376 are umbrellas with deliberately-open scope.
+> Last reviewed: 2026-07-16 **P457 captured** — story-map ratification surfaces an unauthored skeleton (ratify-before-author inversion; STORY-MAP-004 witness, user correction). STORY-MAP-004 populated by hand from STORY-045's substance so its ratification is meaningful (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -66,6 +66,7 @@ Internally-reported tickets (`Origin: internal` / `corrective-feedback`). Ranked
 | 8.0 | P423 | Agent "fixes" recurring behavioural corrections via project-local memory instead of shipping an adopter-facing plugin surface | 16 Critical | Open | M | 2026-07-06 | internal |
 | 7.5 | P359 | Changeset holding does not withhold shipment — held code ships with any sibling release | 15 High | Known Error | L | 2026-06-11 | internal |
 | 7.5 | P444 | Agent buries granular design decisions (default values, thresholds, policy choices) in artefacts — they pass artefact-level ratification unsurfaced, escaping oversight (5pp/0pp headroom witness) | 15 High | Open | M | 2026-07-08 | internal |
+| 6.0 | P457 | Story-map ratification surfaces an unauthored skeleton — ratify-before-author lifecycle inversion (hollow-marker class) | 12 High | Open | M | 2026-07-16 | internal |
 | 6.0 | P305 | Post-Edit silent revert of working-tree files before commit — potential silent-work-loss hazard | 6 Med | Known Error | M | 2026-05-26 | internal |
 | 6.0 | P415 | External-comms commit-msg gate reviews only the first `-m` of a multi-`-m` git commit, causing deny-after-PASS on multi-paragraph commits | 6 Medium | Open | S | 2026-07-03 | internal |
 | 6.0 | P395 | external-comms agent silently goes dormant on the credibility axis — no nudge to author the missing RISK-POLICY section | 12 High | Open | M | 2026-06-28 | corrective-feedback (user, 2026-06-28) |

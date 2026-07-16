@@ -26,19 +26,19 @@
 <body>
   <h1>STORY-MAP-004: Close the outbound reporter loop with honest, generated upstream lifecycle comments</h1>
 
-  <p>(Story-map purpose paragraph — populated at /wr-itil:manage-story-map accepted transition.)</p>
+  <p>When this project reports a problem to an upstream repository and later has news — the root cause was confirmed, an upstream fix was adopted or verified, the local ticket closed — the follow-up comment on the upstream issue should read like it was written by someone who actually read the thread. Today the outbound templates are direction-inverted form letters (they thank the maintainer for a report the maintainer never filed). This map closes the outbound half of the reporter feedback loop: comments generated from the local ticket's sections PLUS the upstream issue's real body and comments, crediting whoever provided the fix or workaround by handle, honest about verified-in-the-wild versus merely-installed, auto-posted through the gate chain when a verified upstream fix drives our local transition, and posted even when the upstream issue is already closed. One journey, one rib: the maintainer hears back, truthfully, without the reporter being prompted. (Traces: P376 Gap 2 — ratified direction 2026-07-04, expanded with inbound #349; JTBD-301 with this project as the reporter.)</p>
 
   <section class="backbone" style="--cols: 1">
     <header class="rib-header">
-      <h2 data-rib="placeholder">Backbone — populate at /wr-itil:manage-story-map accepted transition</h2>
+      <h2 data-rib="upstream-hears-back-honestly">Upstream hears back, honestly and unprompted</h2>
     </header>
     <div class="rib">
-      <!-- Slice cards as <a class="slice" href="../../stories/<state>/STORY-NNN-<slug>.md"
-           data-story-id="STORY-NNN" data-rfc="RFC-NNN" data-jtbd="JTBD-NNN"
-           data-status="<draft|accepted|in-progress|done|archived>">Story title</a>
-           per docs/story-maps/README.md schema. Populated by manage-story-map.
-      -->
+      <a class="slice" href="../../stories/draft/STORY-045-outbound-lifecycle-comments-generated-from-real-issue-context.md"
+         data-story-id="STORY-045" data-rfc="RFC-028" data-jtbd="JTBD-301"
+         data-status="draft">Outbound lifecycle comments generated from real issue context — context-derived (no canned bodies), workaround-acknowledging, contributor-crediting by handle, verified-vs-installed honest, auto-posted within appetite, closed-issue tolerant</a>
     </div>
   </section>
+
+  <p class="map-note">Single-story map: ADR-089 (every RFC has ≥1 story) + ADR-095 (map membership at capture) make one-rib maps like this the floor shape for a single-surface rework. If the outbound loop grows (e.g. evidence-append comments per P455), those stories join this rib rather than minting sibling maps.</p>
 </body>
 </html>
