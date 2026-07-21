@@ -43,3 +43,35 @@ PY
   [[ "$output" == *"deny"* ]]
   [[ "$output" == *"AWS access key"* ]]
 }
+
+@test "dispatcher routes PostToolUse Write through the WIP nudge" {
+  local dir input orig
+  dir="$(mktemp -d)"
+  orig="$PWD"
+  mkdir -p "$dir/repo" "$dir/tmp"
+  cd "$dir/repo"
+  git init -q
+  git config user.email test@example.com
+  git config user.name "Test User"
+  printf 'base\n' > base.txt
+  git add base.txt
+  git commit -q -m initial
+  mkdir -p src
+  printf 'one\n' > src/one.txt
+  printf 'two\n' > src/two.txt
+  printf 'three\n' > src/three.txt
+  input="$(python3 - <<'PY'
+import json
+print(json.dumps({
+    "tool_name": "Write",
+    "session_id": "dispatch-wip",
+    "tool_input": {"file_path": "src/three.txt"},
+}))
+PY
+)"
+  run env TMPDIR="$dir/tmp" bash "$HOOKS/risk-scorer-dispatch.sh" post-tool <<<"$input"
+  cd "$orig"
+  rm -rf "$dir"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Batching risk rising"* ]]
+}

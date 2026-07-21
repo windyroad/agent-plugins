@@ -1,0 +1,20 @@
+{
+  "name": "windyroad-local",
+  "interface": {
+    "displayName": "Windy Road Risk Scorer"
+  },
+  "plugins": [
+    {
+      "name": "wr-risk-scorer",
+      "source": {
+        "source": "local",
+        "path": "."
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

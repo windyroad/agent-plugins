@@ -56,6 +56,9 @@ case "$EVENT" in
         run_hook risk-hash-refresh.sh
         run_hook risk-slide-marker.sh
         ;;
+      Edit|Write)
+        run_hook wip-risk-mark.sh
+        ;;
       Skill)
         run_hook risk-slide-marker.sh
         ;;

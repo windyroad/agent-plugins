@@ -10,6 +10,9 @@ node_modules/
 # Skill eval workspaces (test-infrastructure scratch output per skill-creator)
 *-workspace/
 
+# Temporary backup while @windyroad/risk-scorer packs Codex-facing skills
+packages/risk-scorer/.pack-claude-skills/
+
 # Per-project consent caches — per-machine, never committed (P120 / ADR-034)
 .claude/.install-updates-consent
 .claude/.auto-install-consent

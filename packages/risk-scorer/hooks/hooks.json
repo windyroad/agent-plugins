@@ -10,7 +10,7 @@
       { "matcher": "Bash|Edit|Write|ExitPlanMode|EnterPlanMode", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/risk-scorer-dispatch.sh pre-tool" }] }
     ],
     "PostToolUse": [
-      { "matcher": "Agent|Bash|Skill", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/risk-scorer-dispatch.sh post-tool" }] }
+      { "matcher": "Agent|Bash|Edit|Skill|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/risk-scorer-dispatch.sh post-tool" }] }
     ]
   }
 }

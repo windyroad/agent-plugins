@@ -2,6 +2,10 @@
   "name": "@windyroad/risk-scorer",
   "version": "0.17.2",
   "description": "Pipeline risk scoring, commit/push gates, and secret leak detection",
+  "scripts": {
+    "prepack": "node scripts/sync-codex-skills.mjs --pack",
+    "postpack": "node scripts/sync-codex-skills.mjs --restore-pack"
+  },
   "bin": {
     "windyroad-risk-scorer": "./bin/install.mjs"
   },
@@ -23,6 +27,7 @@
     "agents/",
     "hooks/",
     "skills/",
+    ".agents/",
     ".claude-plugin/",
     ".codex-plugin/",
     "lib/",
