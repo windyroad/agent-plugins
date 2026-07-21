@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.17.1
+
+### Patch Changes
+
+- cba1e78: Add Codex plugin packaging and installer support for `wr-risk-scorer`.
+
 ## 0.17.0
 
 ### Minor Changes
