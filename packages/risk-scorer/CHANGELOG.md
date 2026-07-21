@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.17.4
+
+### Patch Changes
+
+- 8d158f2: Fix Codex `update-policy` generation to use native Codex subagents for policy review, add a project-local Codex policy-review agent, and align the policy reviewer label bands with ADR-086.
+
 ## 0.17.3
 
 ### Patch Changes
