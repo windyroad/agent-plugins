@@ -24,6 +24,7 @@
     "hooks/",
     "skills/",
     ".claude-plugin/",
+    ".codex-plugin/",
     "lib/",
     "scripts/",
     "!skills/*/eval/",

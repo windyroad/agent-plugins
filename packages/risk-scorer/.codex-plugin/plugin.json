@@ -1,0 +1,43 @@
+{
+  "name": "wr-risk-scorer",
+  "version": "0.17.0",
+  "description": "Pipeline risk scoring, commit/push gates, and secret leak detection",
+  "author": {
+    "name": "Windy Road Technology",
+    "url": "https://windyroad.com.au"
+  },
+  "homepage": "https://github.com/windyroad/agent-plugins/tree/main/packages/risk-scorer",
+  "repository": "https://github.com/windyroad/agent-plugins",
+  "license": "MIT",
+  "keywords": [
+    "risk",
+    "pipeline",
+    "governance",
+    "secret-leak-detection",
+    "codex",
+    "claude-code"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Windy Road Risk Scorer",
+    "shortDescription": "Score pipeline risk and guard risky changes",
+    "longDescription": "Pipeline risk scoring, commit and push gates, release risk checks, and secret leak detection for AI coding workflows.",
+    "developerName": "Windy Road Technology",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://windyroad.com.au",
+    "privacyPolicyURL": "https://windyroad.com.au/privacy",
+    "termsOfServiceURL": "https://windyroad.com.au/terms",
+    "defaultPrompt": [
+      "Assess release risk for the current changes",
+      "Review this outbound message for secret leaks",
+      "Update this project's risk policy"
+    ],
+    "brandColor": "#B45309",
+    "screenshots": []
+  }
+}
