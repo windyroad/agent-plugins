@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.17.2
+
+### Patch Changes
+
+- 5f63e01: Collapse risk-scorer hook registration through a dispatcher to reduce Codex hook noise.
+
 ## 0.17.1
 
 ### Patch Changes
