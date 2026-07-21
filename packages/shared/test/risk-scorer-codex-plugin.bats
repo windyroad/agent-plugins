@@ -50,6 +50,10 @@ setup() {
   [ "$status" -eq 0 ]
   run grep -n "request_user_input" "$PACKAGE/scripts/sync-codex-skills.mjs"
   [ "$status" -eq 0 ]
+  run grep -n "native Codex subagent workflow" "$PACKAGE/scripts/sync-codex-skills.mjs"
+  [ "$status" -eq 0 ]
+  run grep -n "codex exec" "$PACKAGE/scripts/sync-codex-skills.mjs"
+  [ "$status" -ne 0 ]
 }
 
 @test "risk-scorer Codex smoke runner uses published npm installer then codex exec" {

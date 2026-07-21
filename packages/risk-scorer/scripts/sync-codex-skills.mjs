@@ -23,14 +23,30 @@ const restoreMode = process.argv.includes("--restore-pack");
 
 const preamble = `<!-- Generated from packages/risk-scorer/skills/*/SKILL.md by packages/risk-scorer/scripts/sync-codex-skills.mjs during npm pack. Do not edit packaged output directly. -->
 
-> Codex runtime note: use \`request_user_input\` where this skill needs structured user input. If a step refers to Claude-style agent dispatch or \`subagent_type\`, invoke the matching installed Codex agent when available; in \`codex exec\` or any runtime without custom-agent dispatch, perform the same review inline from the plugin's sibling \`agents/*.md\` instructions and preserve the structured verdict blocks.
+> Codex runtime note: use \`request_user_input\` only in Plan Mode where this skill needs structured user input. Outside Plan Mode, ask one concise direct question only when no safe assumption exists. If a step refers to Claude-style agent dispatch or \`subagent_type\`, use a native Codex subagent workflow: spawn the matching installed Codex custom agent when available, otherwise spawn the built-in \`default\` subagent and instruct it to read the plugin's sibling \`agents/*.md\` instructions in full before returning the same structured verdict block.
 
 `;
+
+const updatePolicyCodexAgentStep = `Run the Codex policy reviewer with this prompt:
+
+> Review this draft risk policy for ISO 31000 compliance. Validate it.
+>
+> [paste the full draft policy content here]
+
+Use a native Codex subagent workflow. Prefer the installed plugin agent named \`wr-risk-scorer:policy\` when available. In this source repo, the generated project-local alias \`wr-risk-scorer-policy\` may also be available for dogfooding. If neither custom agent is available in the current Codex session, spawn the built-in \`default\` subagent and instruct it to read \`agents/policy.md\` from this plugin in full before performing the review.`;
 
 function transform(text) {
   return preamble + text
     .replaceAll("AskUserQuestion", "request_user_input")
-    .replaceAll("`.claude/agents/risk-scorer-pipeline.md`", "`agents/pipeline.md`");
+    .replaceAll("`.claude/agents/risk-scorer-pipeline.md`", "`agents/pipeline.md`")
+    .replace(
+      `Run the risk-scorer agent (subagent_type: "risk-scorer") with this prompt:
+
+> Review this draft risk policy for ISO 31000 compliance. Validate it.
+>
+> [paste the full draft policy content here]`,
+      updatePolicyCodexAgentStep,
+    );
 }
 
 function generatedFiles(sourceRoot, targetRoot) {
