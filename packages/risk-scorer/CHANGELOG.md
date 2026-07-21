@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.17.3
+
+### Patch Changes
+
+- 895c98c: Generate Codex-facing skills during package publishing, install Codex from the published package marketplace, and restore WIP nudges for small-batch commit/push/release risk management.
+
 ## 0.17.2
 
 ### Patch Changes
