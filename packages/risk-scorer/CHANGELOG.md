@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.18.5
+
+### Patch Changes
+
+- e157712: Consolidate Codex agent repair and policy nudging behind one SessionStart hook, and persist completed pipeline assessments returned by Codex `wait_agent` before commit gates run.
+
 ## 0.18.4
 
 ### Patch Changes
