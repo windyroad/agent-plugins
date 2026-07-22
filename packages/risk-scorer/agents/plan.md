@@ -47,7 +47,10 @@ You are the Risk Scorer in plan review mode. Assess both the plan's own risk AND
 - Overall: PASS/FAIL
 ```
 
-End your report with `RISK_VERDICT: PASS` or `RISK_VERDICT: FAIL` on its own line. A PostToolUse hook reads this and writes the marker files — do NOT write files yourself.
+After any required remediation block, end your entire response with
+`RISK_VERDICT: PASS` or `RISK_VERDICT: FAIL` on its own line. A PostToolUse
+hook reads this final marker and writes the marker files — do NOT write files
+yourself.
 
 On FAIL, the verbal verdict is **STOP**. **Do NOT emit** "Proceed", "Continue",
 "You may ship", "OK to implement", or any similar nudge language. The plan is
@@ -55,7 +58,8 @@ not policy-authorised — the only sanctioned FAIL output is the Plan Risk Repor
 the `RISK_VERDICT: FAIL` marker, and the structured `RISK_REMEDIATIONS:` block
 defined below.
 
-Emit a structured `RISK_REMEDIATIONS:` block after the verdict (5 columns):
+On FAIL, emit a structured `RISK_REMEDIATIONS:` block before the final verdict
+marker (5 columns):
 ```
 RISK_REMEDIATIONS:
 - R1 | <description of what the plan must add/change> | <effort S/M/L> | <risk_delta -N> | <affected area>
