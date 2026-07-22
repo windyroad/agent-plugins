@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.18.3
+
+### Patch Changes
+
+- 0f67163: Align pipeline, plan, WIP, and assess-release guidance with the configured appetite threshold and the default Low-band ceiling of 5.
+
 ## 0.18.2
 
 ### Patch Changes
