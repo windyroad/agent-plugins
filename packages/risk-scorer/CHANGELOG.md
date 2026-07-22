@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.18.4
+
+### Patch Changes
+
+- cbb385a: Make the plan agent's final risk-verdict marker ordering unambiguous.
+
 ## 0.18.3
 
 ### Patch Changes
