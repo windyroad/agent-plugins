@@ -1,5 +1,11 @@
 # @windyroad/cruise
 
+## 0.4.1
+
+### Patch Changes
+
+- 936a2ec: Use Codex hook payload identity for quota state and begin braking immediately when a fresh session is already over pace.
+
 ## 0.4.0
 
 ### Minor Changes
