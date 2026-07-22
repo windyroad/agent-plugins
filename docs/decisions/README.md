@@ -355,7 +355,8 @@ _87 ADRs. These are the current rules. The architect agent reads this section fi
 
 ### ADR-083 — Codex CLI as second runtime
 **Status:** proposed | **Oversight:** confirmed
-**Chosen:** Chosen option: **"Option A"**, because the shape matches ADR-002's explicit forward-looking note ("the per-plugin package structure should extend naturally — each package adds its tool-specific install logic") and ADR-017's sync-script + ...
+**Chosen:** Codex remains the second runtime through sibling manifests, installers, generated runtime surfaces, and shared governance. Because Codex plugin manifests do not bundle custom agents, Claude agent markdown is rendered to standalone project or user TOML. Installers place those agents by scope; Codex SessionStart repairs marketplace/tag-only installs idempotently; marker-safe uninstall preserves modified or user-owned files.
+**Confirmation:** Manifest and instruction drift checks; generator coverage for every invoked agent and exact runtime name; project/user scope, idempotence, Codex-only repair, and marker-safe uninstall tests; isolated pre-release tarball install followed by fresh-Codex discovery and execution of a generated agent.
 
 ### ADR-084 — Self-firing deferral census — a SessionStart surfacer so deferred governance work cannot silently rot
 **Status:** proposed | **Oversight:** confirmed

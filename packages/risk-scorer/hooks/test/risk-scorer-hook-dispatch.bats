@@ -5,14 +5,14 @@ setup() {
   HOOKS="$REPO_ROOT/packages/risk-scorer/hooks"
 }
 
-@test "hooks.json registers four command hooks" {
+@test "hooks.json registers five command hooks" {
   run python3 - "$HOOKS/hooks.json" <<'PY'
 import json, sys
 data = json.load(open(sys.argv[1]))
 print(sum(len(entry["hooks"]) for entries in data["hooks"].values() for entry in entries))
 PY
   [ "$status" -eq 0 ]
-  [ "$output" = "4" ]
+  [ "$output" = "5" ]
 }
 
 @test "dispatcher is registered for prompt, pre-tool, and post-tool events" {

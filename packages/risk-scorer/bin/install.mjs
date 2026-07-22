@@ -1,16 +1,32 @@
 #!/usr/bin/env node
 
-import { resolve, dirname } from "node:path";
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync } from "node:fs";
+import { homedir } from "node:os";
+import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const utils = await import(resolve(__dirname, "../lib/install-utils.mjs"));
+const agents = await import(resolve(__dirname, "../scripts/codex-agents.mjs"));
 
 const PLUGIN = "wr-risk-scorer";
+const CODEX_MARKETPLACE = "windyroad-risk-scorer-local";
 const DEPS = [];
 const PACKAGE_ROOT = resolve(__dirname, "..");
+const PACKAGE_VERSION = JSON.parse(readFileSync(join(PACKAGE_ROOT, "package.json"), "utf8")).version;
+
+function codexMarketplaceRoot() {
+  const codexHome = process.env.CODEX_HOME || join(homedir(), ".codex");
+  return join(codexHome, ".tmp", "marketplaces", `wr-risk-scorer-${PACKAGE_VERSION}`);
+}
 
 const flags = utils.parseStandardArgs(process.argv);
+
+if (flags.runtime === "codex" || flags.runtime === "both") {
+  const bundled = "/Applications/ChatGPT.app/Contents/Resources/codex";
+  const binary = process.env.CODEX_BINARY || (existsSync(bundled) ? bundled : null);
+  if (binary?.includes("/")) process.env.PATH = `${dirname(binary)}:${process.env.PATH || ""}`;
+}
 
 if (flags.help) {
   console.log(`
@@ -37,12 +53,30 @@ if (flags.dryRun) {
 utils.checkPrerequisites({ runtime: flags.runtime });
 
 function codexInstall() {
-  utils.run(`codex plugin marketplace add ${PACKAGE_ROOT}`, "Codex marketplace: windyroad-local");
-  utils.run(`codex plugin add ${PLUGIN}@windyroad-local`, PLUGIN);
+  const marketplaceRoot = codexMarketplaceRoot();
+  if (!flags.dryRun) {
+    rmSync(marketplaceRoot, { recursive: true, force: true });
+    mkdirSync(dirname(marketplaceRoot), { recursive: true });
+    cpSync(PACKAGE_ROOT, marketplaceRoot, { recursive: true });
+  }
+  if (!utils.run(`codex plugin marketplace add ${JSON.stringify(marketplaceRoot)}`, `Codex marketplace: ${CODEX_MARKETPLACE}`)) return false;
+  if (!utils.run(`codex plugin add ${PLUGIN}@${CODEX_MARKETPLACE}`, PLUGIN)) return false;
+  if (!flags.dryRun) agents.installRiskAgents(agents.agentDirForScope(flags.scope));
+  return true;
 }
 
 function codexUninstall() {
-  utils.run(`codex plugin remove ${PLUGIN}`, `Removing ${PLUGIN}`);
+  const removed = utils.run(`codex plugin remove ${PLUGIN}@${CODEX_MARKETPLACE}`, `Removing ${PLUGIN}`);
+  utils.run(`codex plugin marketplace remove ${CODEX_MARKETPLACE}`, `Removing ${CODEX_MARKETPLACE}`);
+  if (!flags.dryRun) {
+    const targets = new Set([
+      agents.agentDirForScope(flags.scope),
+      agents.agentDirForScope("user"),
+    ]);
+    for (const target of targets) agents.uninstallRiskAgents(target);
+    rmSync(codexMarketplaceRoot(), { recursive: true, force: true });
+  }
+  return removed;
 }
 
 if (flags.uninstall) {
@@ -50,22 +84,22 @@ if (flags.uninstall) {
     utils.uninstallPackage(PLUGIN, { runtime: "claude" });
   }
   if (flags.runtime === "codex" || flags.runtime === "both") {
-    codexUninstall();
+    if (!codexUninstall()) process.exit(1);
   }
 } else if (flags.update) {
   if (flags.runtime === "claude" || flags.runtime === "both") {
     utils.updatePackage(PLUGIN, { scope: flags.scope, runtime: "claude" });
   }
   if (flags.runtime === "codex" || flags.runtime === "both") {
-    codexInstall();
+    if (!codexInstall()) process.exit(1);
   }
 } else if (flags.runtime === "codex") {
   console.log(`\nInstalling @windyroad/risk-scorer (${flags.scope} scope)...\n`);
-  codexInstall();
+  if (!codexInstall()) process.exit(1);
   console.log("\nDone! Restart Codex to activate.\n");
 } else if (flags.runtime === "both") {
   utils.installPackage(PLUGIN, { deps: DEPS, scope: flags.scope, runtime: "claude" });
-  codexInstall();
+  if (!codexInstall()) process.exit(1);
   console.log("\nDone! Restart Claude Code and Codex to activate.\n");
 } else {
   utils.installPackage(PLUGIN, { deps: DEPS, scope: flags.scope, runtime: "claude" });

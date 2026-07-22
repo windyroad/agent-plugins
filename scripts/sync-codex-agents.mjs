@@ -5,6 +5,10 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  renderRiskAgent,
+  riskAgentSpecs,
+} from "../packages/risk-scorer/scripts/codex-agents.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -17,12 +21,10 @@ const AGENTS = [
     name: "wr-architect",
     fallbackDescription: "Architecture reviewer for structural and technology decisions.",
   },
-  {
-    source: join(REPO_ROOT, "packages", "risk-scorer", "agents", "policy.md"),
-    target: join(REPO_ROOT, ".codex", "agents", "wr-risk-scorer-policy.toml"),
-    name: "wr-risk-scorer-policy",
-    fallbackDescription: "Validates RISK-POLICY.md drafts for ISO 31000 compliance.",
-  },
+  ...riskAgentSpecs.map((spec) => ({
+    target: join(REPO_ROOT, ".codex", "agents", spec.filename),
+    render: () => renderRiskAgent(spec),
+  })),
 ];
 
 function splitFrontmatter(markdown) {
@@ -56,6 +58,7 @@ function tomlMultiline(value) {
 }
 
 function buildAgent(agent) {
+  if (agent.render) return agent.render();
   const source = readFileSync(agent.source, "utf8");
   const { frontmatter, body } = splitFrontmatter(source);
   const description =

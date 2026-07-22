@@ -33,6 +33,17 @@
 
 set -euo pipefail
 
+cat >/dev/null
+IS_CODEX="${CODEX_THREAD_ID:+1}"
+
+emit_message() {
+  if [ "${IS_CODEX:-0}" = "1" ]; then
+    MESSAGE="$1" python3 -c 'import json,os; print(json.dumps({"systemMessage": os.environ["MESSAGE"]}))'
+  else
+    printf '%s\n' "$1"
+  fi
+}
+
 if [ "${WR_SUPPRESS_OVERSIGHT_NUDGE:-}" = "1" ]; then
   exit 0
 fi
@@ -55,13 +66,13 @@ REGISTER_DIR="$PROJECT_DIR/docs/risks"
 # — the hook never writes; the policy authoring is gated behind the user
 # invoking the on-demand skill.
 if [ ! -f "$POLICY_FILE" ]; then
-  echo "[wr-risk-scorer] No RISK-POLICY.md in this project — run /wr-risk-scorer:update-policy to author one so the risk-scorer gates score against your appetite instead of the default."
+  emit_message "[wr-risk-scorer] No RISK-POLICY.md in this project — run /wr-risk-scorer:update-policy to author one so the risk-scorer gates score against your appetite instead of the default."
   exit 0
 fi
 
 # Register directory missing — nudge to scaffold it.
 if [ ! -d "$REGISTER_DIR" ]; then
-  echo "[wr-risk-scorer] RISK-POLICY.md present but docs/risks/ is missing — run /wr-risk-scorer:bootstrap-catalog to scaffold the standing-risk register."
+  emit_message "[wr-risk-scorer] RISK-POLICY.md present but docs/risks/ is missing — run /wr-risk-scorer:bootstrap-catalog to scaffold the standing-risk register."
   exit 0
 fi
 
@@ -76,7 +87,7 @@ PENDING="${PENDING:-0}"
 [ "$PENDING" -gt 0 ] 2>/dev/null || exit 0
 
 if [ "$PENDING" -eq 1 ]; then
-  echo "[wr-risk-scorer] 1 standing-risk entry is pending review — curate it in docs/risks/ (enumerate controls + Impact×Likelihood scoring)."
+  emit_message "[wr-risk-scorer] 1 standing-risk entry is pending review — curate it in docs/risks/ (enumerate controls + Impact×Likelihood scoring)."
 else
-  echo "[wr-risk-scorer] $PENDING standing-risk entries are pending review — curate them in docs/risks/ (enumerate controls + Impact×Likelihood scoring)."
+  emit_message "[wr-risk-scorer] $PENDING standing-risk entries are pending review — curate them in docs/risks/ (enumerate controls + Impact×Likelihood scoring)."
 fi

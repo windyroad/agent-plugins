@@ -1,5 +1,5 @@
 {
-  "name": "windyroad-local",
+  "name": "windyroad-risk-scorer-local",
   "interface": {
     "displayName": "Windy Road Risk Scorer"
   },

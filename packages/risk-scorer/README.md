@@ -1,6 +1,6 @@
 # @windyroad/risk-scorer
 
-**Pipeline risk scoring, commit/push gates, and secret leak detection for Claude Code.** Scores every change for risk and blocks high-risk commits and pushes before they happen. *Maturity: Experimental (suite-bootstrap window; 2047 invocations / 30d).*
+**Pipeline risk scoring, commit/push gates, and secret leak detection for Claude Code and Codex.** Scores every change for risk and blocks high-risk commits and pushes before they happen. *Maturity: Experimental (suite-bootstrap window; 2047 invocations / 30d).*
 
 Part of [Windy Road Agent Plugins](../../README.md).
 
@@ -24,6 +24,16 @@ npx @windyroad/risk-scorer
 ```
 
 Restart Claude Code after installing.
+
+For Codex, install the plugin and its native custom agents together:
+
+```bash
+npx @windyroad/risk-scorer --runtime codex --scope project
+```
+
+Use `--scope user` to make the agents available across repositories. Restart
+Codex after installing. Marketplace/tag-only installs self-repair the user
+agent files at SessionStart and request one additional restart when needed.
 
 ## Usage
 
@@ -55,7 +65,8 @@ This creates a `RISK-POLICY.md` tailored to your project, defining impact levels
 
 ## Agents
 
-The plugin includes six specialised agents:
+Claude Code includes the routing agent plus six specialised agents. Codex
+installs the six mode-specific agents directly:
 
 | Agent | Purpose |
 |-------|---------|

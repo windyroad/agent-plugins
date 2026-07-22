@@ -35,9 +35,33 @@ setup() {
 @test "risk-scorer installer exposes runtime option and passes it through" {
   run grep -n -- "--runtime" "$PACKAGE/bin/install.mjs"
   [ "$status" -eq 0 ]
-  run grep -n 'codex plugin marketplace add ${PACKAGE_ROOT}' "$PACKAGE/bin/install.mjs"
+  run grep -n 'codex plugin marketplace add ${JSON.stringify(marketplaceRoot)}' "$PACKAGE/bin/install.mjs"
   [ "$status" -eq 0 ]
   run grep -n "codexInstall()" "$PACKAGE/bin/install.mjs"
+  [ "$status" -eq 0 ]
+  run grep -n "installRiskAgents" "$PACKAGE/bin/install.mjs"
+  [ "$status" -eq 0 ]
+  run grep -n "uninstallRiskAgents" "$PACKAGE/bin/install.mjs"
+  [ "$status" -eq 0 ]
+}
+
+@test "risk-scorer installer can prefer the Codex desktop binary" {
+  grep -q '/Applications/ChatGPT.app/Contents/Resources/codex' "$PACKAGE/bin/install.mjs"
+  grep -q 'process.env.CODEX_BINARY' "$PACKAGE/bin/install.mjs"
+}
+
+@test "risk-scorer removes the plugin from its package marketplace" {
+  grep -Fq 'codex plugin remove ${PLUGIN}@${CODEX_MARKETPLACE}' "$PACKAGE/bin/install.mjs"
+}
+
+@test "risk-scorer repairs native Codex agents from Claude sources" {
+  local generator="$PACKAGE/scripts/codex-agents.mjs"
+  [ -f "$generator" ]
+  run grep -n 'wr-risk-scorer:${mode}' "$generator"
+  [ "$status" -eq 0 ]
+  run grep -n "codex-agents.mjs --session-start" "$PACKAGE/hooks/hooks.json"
+  [ "$status" -eq 0 ]
+  run grep -n "Do not substitute" "$PACKAGE/scripts/sync-codex-skills.mjs"
   [ "$status" -eq 0 ]
 }
 
@@ -56,21 +80,23 @@ setup() {
   [ "$status" -ne 0 ]
 }
 
-@test "risk-scorer Codex smoke runner uses published npm installer then codex exec" {
+@test "risk-scorer Codex smoke runner packs current code and proves exact agent marker flow" {
   local runner="$PACKAGE/eval/run-codex-smoke.sh"
   [ -x "$runner" ]
   run grep -n "WR_RISK_SCORER_NPM_SPEC" "$runner"
+  [ "$status" -eq 0 ]
+  run grep -n 'npm pack "$REPO_ROOT/packages/risk-scorer"' "$runner"
   [ "$status" -eq 0 ]
   run grep -n "npm exec --yes --package" "$runner"
   [ "$status" -eq 0 ]
   run grep -n "windyroad-risk-scorer --runtime codex" "$runner"
   [ "$status" -eq 0 ]
-  run grep -n "codex exec" "$runner"
+  run grep -n '"$CODEX_BIN" exec' "$runner"
   [ "$status" -eq 0 ]
   run grep -n -- "--ephemeral" "$runner"
+  [ "$status" -ne 0 ]
+  run grep -n "wr-risk-scorer:external-comms" "$runner"
   [ "$status" -eq 0 ]
-  run grep -n "assess-release" "$runner"
-  [ "$status" -eq 0 ]
-  run grep -n "assess-external-comms" "$runner"
+  run grep -n "external-comms-risk-reviewed" "$runner"
   [ "$status" -eq 0 ]
 }

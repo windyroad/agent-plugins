@@ -23,7 +23,7 @@ const restoreMode = process.argv.includes("--restore-pack");
 
 const preamble = `<!-- Generated from packages/risk-scorer/skills/*/SKILL.md by packages/risk-scorer/scripts/sync-codex-skills.mjs during npm pack. Do not edit packaged output directly. -->
 
-> Codex runtime note: use \`request_user_input\` only in Plan Mode where this skill needs structured user input. Outside Plan Mode, ask one concise direct question only when no safe assumption exists. If a step refers to Claude-style agent dispatch or \`subagent_type\`, use a native Codex subagent workflow: spawn the matching installed Codex custom agent when available, otherwise spawn the built-in \`default\` subagent and instruct it to read the plugin's sibling \`agents/*.md\` instructions in full before returning the same structured verdict block.
+> Codex runtime note: use \`request_user_input\` only in Plan Mode where this skill needs structured user input. Outside Plan Mode, ask one concise direct question only when no safe assumption exists. If a step refers to Claude-style agent dispatch or \`subagent_type\`, use a native Codex subagent workflow and spawn the matching installed \`wr-risk-scorer:<mode>\` custom agent. Wait for it, then close that same agent so the completion hook receives its final response. Do not substitute the built-in \`default\` agent when a hook consumes the subagent identity; restart Codex if the installed agent is not yet visible.
 
 `;
 
@@ -33,10 +33,10 @@ const updatePolicyCodexAgentStep = `Run the Codex policy reviewer with this prom
 >
 > [paste the full draft policy content here]
 
-Use a native Codex subagent workflow. Prefer the installed plugin agent named \`wr-risk-scorer:policy\` when available. In this source repo, the generated project-local alias \`wr-risk-scorer-policy\` may also be available for dogfooding. If neither custom agent is available in the current Codex session, spawn the built-in \`default\` subagent and instruct it to read \`agents/policy.md\` from this plugin in full before performing the review.`;
+Use a native Codex subagent workflow with the installed custom agent named \`wr-risk-scorer:policy\`. If it is not visible in the current session, restart Codex; do not substitute a different agent identity because the policy marker hook consumes it.`;
 
 function transform(text) {
-  return preamble + text
+  const transformed = text
     .replaceAll("AskUserQuestion", "request_user_input")
     .replaceAll("`.claude/agents/risk-scorer-pipeline.md`", "`agents/pipeline.md`")
     .replace(
@@ -47,6 +47,11 @@ function transform(text) {
 > [paste the full draft policy content here]`,
       updatePolicyCodexAgentStep,
     );
+  if (!transformed.startsWith("---\n")) return preamble + transformed;
+  const frontmatterEnd = transformed.indexOf("\n---\n", 4);
+  if (frontmatterEnd === -1) return preamble + transformed;
+  const bodyStart = frontmatterEnd + 5;
+  return transformed.slice(0, bodyStart) + "\n" + preamble + transformed.slice(bodyStart);
 }
 
 function generatedFiles(sourceRoot, targetRoot) {

@@ -2,7 +2,7 @@
 status: "proposed"
 date: 2026-06-23
 human-oversight: confirmed
-oversight-date: 2026-06-23
+oversight-date: 2026-07-22
 decision-makers: [Tom Howard]
 consulted: []
 informed: []
@@ -57,3 +57,45 @@ Chosen option: **"Option A"**, because the shape matches ADR-002's explicit forw
 ## Reassessment Criteria
 
 (deferred to /wr-architect:create-adr canonical review — default reassessment-date 3 months from capture)
+
+## Amendments
+
+### 2026-07-22 — Install generated Codex custom agents outside plugin bundles
+
+The original Option A statement that Codex auto-discovers `agents/*.md` from a
+plugin bundle is superseded. Current Codex documentation defines custom agents
+only as standalone TOML files under project `.codex/agents/` or user
+`$CODEX_HOME/agents/`; the plugin manifest has no agent component.
+
+Claude agent markdown remains the source of truth. A package-local generator
+renders the risk scorer's `pipeline`, `plan`, `wip`, `policy`,
+`external-comms`, and `inbound-report` agents as Codex TOML using the exact
+`wr-risk-scorer:<mode>` names expected by the existing hooks and skills. The
+repo sync command writes project-scoped dogfood files. The published installer
+writes project or user agent files according to `--scope` before asking for a
+restart. For marketplace or tagged-source installs that do not execute the npm
+installer, the existing SessionStart hook idempotently repairs the user agent
+files on Codex only and emits a restart advisory only when content changes.
+
+Generated files carry an ownership marker and a hash of their last generated
+payload. Install updates and uninstall removals apply only while that payload
+still matches the recorded hash, preserving unmarked collisions and modified
+agent configuration. Claude Code sources, discovery, and behavior are unchanged.
+
+**Confirmation:** generator drift tests cover all six source agents and exact
+agent names; installer tests cover project/user scope, idempotence, Codex-only
+SessionStart repair, and marker-safe uninstall; an isolated pre-release tarball
+is installed into a temporary `CODEX_HOME`, then a fresh Codex process must
+discover and run `wr-risk-scorer:external-comms` and produce the structured
+PASS verdict consumed by the marker hook.
+
+Current Codex CLI completion hooks expose an encrypted spawn prompt and no
+verdict in the wait response. A CLI probe against codex-cli 0.145.0-alpha.27
+confirmed that closing a completed agent emits `collaborationinterrupt_agent`
+with the final response in `previous_status.completed`. The Codex-only adapter
+therefore records the exact risk-agent identity and returned target on
+`collaborationspawn_agent`, then passes that stable close response into the
+existing Claude marker parser. It does not read session transcripts.
+External-comms still emits the canonical draft key in its generated Codex
+instructions because the adapter cannot inspect the encrypted prompt. Missing,
+unrecognised, or unclosed agents fail closed.

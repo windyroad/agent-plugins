@@ -33,6 +33,9 @@
     "lib/",
     "scripts/",
     "!skills/*/eval/",
-    "!agents/eval/"
+    "!agents/eval/",
+    "!agents/test/",
+    "!hooks/test/",
+    "!scripts/test/"
   ]
 }

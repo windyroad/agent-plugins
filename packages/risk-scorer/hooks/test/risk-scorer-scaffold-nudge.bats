@@ -44,6 +44,23 @@ teardown() {
   [[ "$output" == *"/wr-risk-scorer:bootstrap-catalog"* ]]
 }
 
+@test "Codex SessionStart emits JSON context" {
+  printf 'placeholder policy\n' > "$DIR/RISK-POLICY.md"
+  run bash -c 'printf '\''%s'\'' '\''{"model":"gpt-test"}'\'' | env CODEX_THREAD_ID=codex-test CLAUDE_PROJECT_DIR="$1" CLAUDE_PLUGIN_ROOT="$2" bash "$3"' _ "$DIR" "$PLUGIN_ROOT" "$HOOK"
+  [ "$status" -eq 0 ]
+  run jq -er '.systemMessage | contains("bootstrap-catalog")' <<< "$output"
+  [ "$status" -eq 0 ]
+}
+
+@test "Claude SessionStart payload keeps plain text output" {
+  printf 'placeholder policy\n' > "$DIR/RISK-POLICY.md"
+  run bash -c 'printf '\''%s'\'' '\''{"hook_event_name":"SessionStart","model":"claude-opus-4"}'\'' | env -u CODEX_THREAD_ID CLAUDE_PROJECT_DIR="$1" CLAUDE_PLUGIN_ROOT="$2" bash "$3"' _ "$DIR" "$PLUGIN_ROOT" "$HOOK"
+  [ "$status" -eq 0 ]
+  [[ "$output" == "[wr-risk-scorer] RISK-POLICY.md present"* ]]
+  run jq -e . <<< "$output"
+  [ "$status" -ne 0 ]
+}
+
 @test "silent when RISK-POLICY.md exists and docs/risks/ exists but is empty" {
   printf 'placeholder policy\n' > "$DIR/RISK-POLICY.md"
   mkdir -p "$DIR/docs/risks"
