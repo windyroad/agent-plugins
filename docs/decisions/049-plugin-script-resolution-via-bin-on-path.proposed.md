@@ -63,6 +63,7 @@ The shim resolves the canonical script body relative to its own location, so it 
 ### Amendments
 
 - **2026-06-02 — ADR-080 (Highest-version-wins shim wrapper) amends the canonical shim body shape.** The 3-line `exec` above is superseded by a ~25-line resolver that picks the highest-version sibling under the cache parent at every invocation (source-monorepo execution falls through to a `$(dirname "$0")/../scripts/<name>.sh` branch via the source-repo guard, preserving the dev-tree behaviour this ADR established). The `wr-<plugin>-<kebab-script-name>` naming grammar is preserved unchanged. The canonical template lives at `packages/shared/lib/shim-wrapper-template.sh`; per-shim regeneration is driven by `scripts/sync-shim-wrappers.sh` per the ADR-017 sync-script pattern. The amendment closes the P343 mid-session-staleness window without altering this ADR's normative rule that script invocations resolve via `bin/` on `$PATH`.
+- **2026-07-23 — ADR-083 (Codex CLI as second runtime) adds a Codex runtime exception.** Claude Code continues to resolve plugin scripts through `bin/` on `$PATH`. Codex does not add plugin `bin/` directories to `$PATH`; generated Codex skills therefore resolve bundled scripts relative to their installed `SKILL.md` location. Repository-relative adopter paths remain forbidden. This preserves the adopter-portability intent of the normative rule while using the runtime-supported resolution mechanism on each platform.
 
 ## Consequences
 

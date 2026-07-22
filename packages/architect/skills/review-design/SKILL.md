@@ -87,7 +87,7 @@ agent: wr-architect:agent
 prompt: <constructed review prompt from step 4>
 ```
 
-Codex auto-discovers the agent from the installed plugin's `agents/agent.md` and registers it as `wr-architect:agent` (plugin name + agent frontmatter name). Adopter projects do not need to ship any `.codex/agents/*.toml` themselves — `codex plugin add wr-architect@windyroad` is enough. The repo-local `.codex/agents/wr-architect.toml`, kept in sync from `packages/architect/agents/agent.md` by `scripts/sync-codex-agents.mjs`, only supports in-repo dogfooding before the plugin is installed into `CODEX_HOME`; it registers a short-name alias `wr-architect` for source-repo developers. If a non-interactive `codex exec` validation harness cannot spawn the custom agent directly, perform the review inline using the same generated agent instructions and name that fallback in the output.
+The Codex installer generates `.codex/agents/wr-architect-agent.toml` from the installed plugin's `agents/agent.md` and registers the exact identity `wr-architect:agent`. SessionStart repairs the user-scoped registration when needed. Adopter projects do not need to ship their own agent configuration. Restart Codex if that exact identity is not visible; do not substitute the built-in `default` agent because the review marker consumes the architect identity. The repo-local `.codex/agents/wr-architect.toml`, kept in sync from `packages/architect/agents/agent.md` by `scripts/sync-codex-agents.mjs`, remains the short-name `wr-architect` alias for source-repo dogfooding.
 
 Wait for the agent to complete.
 

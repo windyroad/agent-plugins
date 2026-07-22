@@ -6,6 +6,10 @@
     "windyroad-architect": "./bin/install.mjs"
   },
   "type": "module",
+  "scripts": {
+    "prepack": "node scripts/sync-codex-skills.mjs --pack",
+    "postpack": "node scripts/sync-codex-skills.mjs --restore-pack"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -24,6 +28,7 @@
     "hooks/",
     "skills/",
     "scripts/",
+    ".agents/",
     ".claude-plugin/",
     ".codex-plugin/",
     "lib/",

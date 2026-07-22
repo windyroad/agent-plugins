@@ -3,6 +3,9 @@ description: |
   Claude promptfooconfig.yaml and exercises the Codex plugin install path via
   run-codex-skill-eval.sh.
 
+evaluateOptions:
+  maxConcurrency: 1
+
 providers:
   - id: 'exec:bash ./run-codex-skill-eval.sh'
 

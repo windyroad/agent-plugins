@@ -78,22 +78,13 @@ No conflicts with existing decisions.")
 # P181 bug-fix cases: substring-anywhere false-positive FAIL
 # ---------------------------------------------------------------------------
 
-@test "verdict-grep: marker drops when no canonical heading + body mentions 'ISSUES FOUND' inline (P181)" {
-  # Agent emits prose without a canonical heading but the narrative discusses
-  # the concept of ISSUES FOUND. Current substring grep falsely classifies
-  # this as FAIL → no marker. After fix: anchored regex doesn't match → falls
-  # through to default branch → marker drops (lockout-avoidance).
+@test "verdict-grep: no marker without a canonical heading" {
   INPUT=$(_make_input "I reviewed the change. The previous review surfaced ISSUES FOUND that have since been addressed; the current proposed change is fine.")
   echo "$INPUT" | "$HOOK"
-  [ -f "$REVIEW_MARKER" ]
+  [ ! -f "$REVIEW_MARKER" ]
 }
 
-@test "verdict-grep: marker drops on NEEDS DIRECTION heading even if body prose mentions 'ISSUES FOUND' (P181)" {
-  # NEEDS DIRECTION is one of three canonical verdicts (agent.md line 137).
-  # It currently falls through to the default branch (creates marker for
-  # backward-compat lockout-avoidance). The bug: if the body narratively
-  # references the ISSUES FOUND verdict shape, substring grep fires FAIL.
-  # After fix: neither anchored regex matches → fallback creates marker.
+@test "verdict-grep: NEEDS DIRECTION does not unlock edits" {
   INPUT=$(_make_input "**Architecture Review: NEEDS DIRECTION**
 
 A decision must be recorded. This differs from an ISSUES FOUND verdict because the option is not pinned.
@@ -101,7 +92,8 @@ A decision must be recorded. This differs from an ISSUES FOUND verdict because t
 - Option A — ...
 - Option B — ...")
   echo "$INPUT" | "$HOOK"
-  [ -f "$REVIEW_MARKER" ]
+  [ ! -f "$REVIEW_MARKER" ]
+  [ ! -f "$PLAN_MARKER" ]
 }
 
 @test "verdict-grep: marker drops when PASS heading present and body also says 'ISSUES FOUND' inline" {
@@ -114,13 +106,8 @@ No conflicts. Note: earlier sessions reported ISSUES FOUND on adjacent files but
   [ -f "$REVIEW_MARKER" ]
 }
 
-@test "verdict-grep: marker drops when body just says 'no issues found' in prose" {
-  # Verbatim substring "issues found" should not satisfy the anchored
-  # ISSUES FOUND regex (which requires the bold heading shape). Old code:
-  # grep -q "ISSUES FOUND" is case-sensitive so 'issues found' lowercase
-  # doesn't match either — this test pins case-sensitivity behaviour so
-  # future regex changes don't accidentally relax it.
+@test "verdict-grep: prose-only approval does not unlock edits" {
   INPUT=$(_make_input "Review complete — no issues found in the diff.")
   echo "$INPUT" | "$HOOK"
-  [ -f "$REVIEW_MARKER" ]
+  [ ! -f "$REVIEW_MARKER" ]
 }

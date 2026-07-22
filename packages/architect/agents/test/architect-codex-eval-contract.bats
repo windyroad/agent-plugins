@@ -17,13 +17,17 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "architect Codex agent eval runner uses codex exec and local plugin install" {
-  run grep -n "codex plugin marketplace add" "$EVAL_DIR/run-codex-agent-eval.sh"
+@test "architect Codex agent eval runner uses packed install and exact custom agent" {
+  run grep -n 'npm pack' "$EVAL_DIR/run-codex-agent-eval.sh"
   [ "$status" -eq 0 ]
-  run grep -n "codex plugin add wr-architect@windyroad-local" "$EVAL_DIR/run-codex-agent-eval.sh"
+  run grep -n 'windyroad-architect --runtime codex --scope user' "$EVAL_DIR/run-codex-agent-eval.sh"
   [ "$status" -eq 0 ]
   run grep -n "codex exec" "$EVAL_DIR/run-codex-agent-eval.sh"
   [ "$status" -eq 0 ]
-  run grep -n ".codex/agents/wr-architect.toml" "$EVAL_DIR/run-codex-agent-eval.sh"
+  run grep -n 'agents/wr-architect-agent.toml' "$EVAL_DIR/run-codex-agent-eval.sh"
+  [ "$status" -eq 0 ]
+  run grep -n 'wr-architect:agent' "$EVAL_DIR/run-codex-agent-eval.sh"
+  [ "$status" -eq 0 ]
+  run grep -n 'git -C "$TMP_REPO" init' "$EVAL_DIR/run-codex-agent-eval.sh"
   [ "$status" -eq 0 ]
 }

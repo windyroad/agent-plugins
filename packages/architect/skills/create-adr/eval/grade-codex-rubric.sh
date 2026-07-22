@@ -23,7 +23,7 @@ raw="$(
     --output-schema "$SCHEMA" \
     "${GRADER_SYSTEM}
 
-${PROMPT}"
+${PROMPT}" </dev/null
 )"
 
 printf '%s' "$raw" | awk '

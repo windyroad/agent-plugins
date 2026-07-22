@@ -49,10 +49,7 @@ case "$SUBAGENT" in
     # per 3-filing session).
     MARKER="/tmp/architect-reviewed-${SESSION_ID}"
     case "$VERDICT" in
-      PASS|"")
-        # PASS or unparseable verdict — allow with marker (the empty case
-        # preserves the pre-amendment "could not parse verdict" backward-
-        # compat allow-with-marker behaviour to avoid lockout).
+      PASS)
         if [ -d "$PROJECT_DIR/docs/decisions" ]; then
           HASH=$(_substance_hash_path "$PROJECT_DIR/docs/decisions")
         else
@@ -62,13 +59,12 @@ case "$SUBAGENT" in
           echo "WARN: architect-mark-reviewed atomic marker-write failed for ${MARKER}" >&2
         fi
         ;;
-      FAIL)
-        # Do NOT create marker — review found issues
+      FAIL|"")
+        # Fail closed: issues and unparseable output do not unlock edits.
         ;;
     esac
 
-    # Plan review marker
-    touch "/tmp/architect-plan-reviewed-${SESSION_ID}"
+    [ "$VERDICT" = "PASS" ] && touch "/tmp/architect-plan-reviewed-${SESSION_ID}"
     ;;
 esac
 

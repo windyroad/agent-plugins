@@ -20,7 +20,7 @@ raw="$(
     --output-schema "$SCHEMA" \
     "You are a strict grading assistant. Respond only with JSON matching the provided schema. Grade this promptfoo rubric literally.
 
-${PROMPT}"
+${PROMPT}" </dev/null
 )"
 
 printf '%s' "$raw" | awk '

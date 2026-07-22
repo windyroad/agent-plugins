@@ -12,6 +12,7 @@ node_modules/
 
 # Temporary backup while @windyroad/risk-scorer packs Codex-facing skills
 packages/risk-scorer/.pack-claude-skills/
+packages/architect/.pack-claude-skills/
 
 # Per-project consent caches — per-machine, never committed (P120 / ADR-034)
 .claude/.install-updates-consent

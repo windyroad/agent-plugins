@@ -14,10 +14,12 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "create-adr Codex eval runner uses codex exec and plugin marketplace" {
-  run grep -n "codex plugin marketplace add" "$EVAL_DIR/run-codex-skill-eval.sh"
+@test "create-adr Codex eval runner uses packed installer and codex exec" {
+  run grep -n 'npm pack' "$EVAL_DIR/run-codex-skill-eval.sh"
   [ "$status" -eq 0 ]
-  run grep -n "codex plugin add wr-architect@windyroad-local" "$EVAL_DIR/run-codex-skill-eval.sh"
+  run grep -n 'windyroad-architect --runtime codex --scope user' "$EVAL_DIR/run-codex-skill-eval.sh"
+  [ "$status" -eq 0 ]
+  run grep -n 'agents/wr-architect-agent.toml' "$EVAL_DIR/run-codex-skill-eval.sh"
   [ "$status" -eq 0 ]
   run grep -n "codex exec" "$EVAL_DIR/run-codex-skill-eval.sh"
   [ "$status" -eq 0 ]
@@ -26,5 +28,7 @@ setup() {
   run grep -n -- 'approval_policy="never"' "$EVAL_DIR/run-codex-skill-eval.sh"
   [ "$status" -eq 0 ]
   run grep -n -- "--sandbox read-only" "$EVAL_DIR/run-codex-skill-eval.sh"
+  [ "$status" -eq 0 ]
+  run grep -n -- '</dev/null' "$EVAL_DIR/run-codex-skill-eval.sh"
   [ "$status" -eq 0 ]
 }

@@ -201,8 +201,8 @@ _87 ADRs. These are the current rules. The architect agent reads this section fi
 
 ### ADR-049 — Plugin-bundled scripts invoked from SKILL.md resolve via `bin/` on `$PATH`
 **Status:** proposed | **Oversight:** confirmed
-**Chosen:** Chosen option: **"Option D — `bin/` on `$PATH` with thin shim wrapper"**, because it works today (no upstream feature dependency), preserves canonical-body editability under `packages/<plugin>/scripts/`, ships portably across Windows + np...
-**Related:** ADR-002, ADR-003, ADR-017, ADR-038, ADR-080
+**Chosen:** Claude Code uses the `bin/`-on-`$PATH` shim; generated Codex skills resolve bundled scripts relative to their installed `SKILL.md`, because Codex does not add plugin `bin/` directories to `$PATH`.
+**Related:** ADR-002, ADR-003, ADR-017, ADR-038, ADR-080, ADR-083
 
 ### ADR-050 — Capture the runtime stdin session_id via a PreToolUse hook so the create-gate marker binds to the same SID the runtime hook will see
 **Status:** proposed | **Oversight:** confirmed | **Supersedes:** ["048-gate-misfire-recovery-procedure.proposed.md"]
