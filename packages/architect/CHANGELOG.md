@@ -1,5 +1,11 @@
 # @windyroad/architect
 
+## 0.20.1
+
+### Patch Changes
+
+- 52948ef: Add native Codex skill paths, custom-agent registration, review completion handling, and CLI validation while preserving the Claude Code runtime.
+
 ## 0.20.0
 
 ### Minor Changes
