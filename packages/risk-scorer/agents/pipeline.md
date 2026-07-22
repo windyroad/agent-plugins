@@ -168,7 +168,7 @@ criteria above.
 
 ## Below-Appetite Output Rule (ADR-013 Rule 5)
 
-When ALL cumulative scores are within appetite (≤ the appetite threshold in `RISK-POLICY.md` § Risk Appetite — read it; `Threshold: N`, default 4/Low when absent; do NOT hardcode 4), your output MUST contain ONLY:
+When ALL cumulative scores are within appetite (≤ the appetite threshold in `RISK-POLICY.md` § Risk Appetite — read it; `Threshold: N`, default 5/Low when absent; do NOT hardcode), your output MUST contain ONLY:
 1. The Pipeline Risk Report structure (layers, risk items, summary table)
 2. `RISK_SCORES: commit=N push=N release=N`
 3. `RISK_BYPASS: reducing` (if applicable)
@@ -177,7 +177,7 @@ Do NOT emit: "Suggested Actions", "Your call:", advisory warnings, back-pressure
 
 ## Above-Appetite Remediations
 
-When ANY cumulative score exceeds appetite (> the RISK-POLICY.md appetite threshold, default 4 — read it, do NOT hardcode), the verbal verdict is **STOP**.
+When ANY cumulative score exceeds appetite (> the RISK-POLICY.md appetite threshold, default 5 — read it, do NOT hardcode), the verbal verdict is **STOP**.
 The scorer is not the primary decision-maker — the hook gate will block the
 action — but the scorer's verdict must match the structured score so the agent
 does not waste tool calls acting on an ambiguous nudge.
@@ -203,8 +203,8 @@ Column definitions:
 - **description**: free-form prose. The agent reads this and decides what to do. No structured action_class column.
 
 Include downstream back-pressure in the remediation list:
-- **Commit**: If adding this commit would push the push queue risk >= 5, include a remediation to split the commit.
-- **Push**: If pushing would push the release queue risk >= 5, include a remediation to release first.
+- **Commit**: If adding this commit would make the push queue exceed appetite, include a remediation to split the commit.
+- **Push**: If pushing would make the release queue exceed appetite, include a remediation to release first.
 
 Do NOT emit free-text "Your call:" or "consider splitting" prose. The structured `RISK_REMEDIATIONS:` block is the only output for above-appetite guidance.
 
@@ -214,7 +214,7 @@ When a pipeline run identifies a **register-worthy risk shape**, emit a structur
 
 ### Trigger conditions (emit a hint when ANY fire)
 
-1. **Above-appetite residual** — any cumulative residual score exceeds the appetite threshold declared in `RISK-POLICY.md` § Risk Appetite (default 4; read it, do NOT hardcode). A risk that breaches appetite on this change is a standing-risk candidate, not just a one-off remediation target.
+1. **Above-appetite residual** — any cumulative residual score exceeds the appetite threshold declared in `RISK-POLICY.md` § Risk Appetite (default 5; read it, do NOT hardcode). A risk that breaches appetite on this change is a standing-risk candidate, not just a one-off remediation target.
 2. **Confidentiality disclosure** — the Confidential Information Disclosure check (below) flagged business metrics (revenue, user counts, pricing, client names, traffic volumes) in the diff. Confidentiality leaks are standing-risk-shaped even after the immediate remediation.
 3. **User-stated precondition** — the User-Stated Preconditions Check (below) flagged an unmet paired capability as a standalone Risk item. Unmet preconditions are standing-risk-shaped because the dependency gap persists until the paired capability ships.
 
@@ -272,7 +272,7 @@ Do NOT emit `RISK_REGISTER_HINT:` when all cumulative scores are within appetite
 
 ## Held-Changeset Graduation Evaluation (ADR-061)
 
-When the pipeline state indicates **within-appetite drain mode** (cumulative push and release residual both ≤ 4/25 per `RISK-POLICY.md`) AND `docs/changesets-holding/` contains entries, evaluate each held changeset against ADR-061 Rule 1's symmetric graduation criterion: **reinstate when `release-risk(pipeline with held changeset hypothetically reinstated) ≤ problem-ticket Priority`**.
+When the pipeline state indicates **within-appetite drain mode** (cumulative push and release residual both ≤ the threshold in `RISK-POLICY.md`, default 5) AND `docs/changesets-holding/` contains entries, evaluate each held changeset against ADR-061 Rule 1's symmetric graduation criterion: **reinstate when `release-risk(pipeline with held changeset hypothetically reinstated) ≤ problem-ticket Priority`**.
 
 This is the symmetric counterpart to ADR-042 Rule 2's move-to-holding contract. Material flows in when release-risk would exceed appetite; material flows out when release-risk falls at or below the originating problem-ticket Priority.
 

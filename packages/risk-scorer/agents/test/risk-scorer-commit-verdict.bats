@@ -47,7 +47,7 @@ setup() {
 }
 
 @test "wip.md COMMIT verdict is only emitted when risk is within appetite" {
-  # ADR-016 §Detection Heuristic criterion 1: risk must be ≤ 4 for COMMIT to fire.
+  # ADR-016 §Detection Heuristic criterion 1: risk must be within appetite for COMMIT to fire.
   # Above-appetite changes must be PAUSE regardless of governance-artefact status.
   # Look for the explicit appetite gate in the COMMIT detection section specifically.
   run grep -in "PAUSE.*governance\|governance.*PAUSE\|appetite.*COMMIT\|COMMIT.*appetite\|COMMIT.*within\|within.*COMMIT" "$WIP_FILE"

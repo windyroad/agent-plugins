@@ -1,0 +1,19 @@
+description: assess-release appetite-boundary presentation
+
+providers:
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: Score 5 is within default appetite and score 6 is above it
+    vars:
+      prompt: |
+        Apply only Step 6's result-presentation rules. RISK-POLICY.md has no
+        Risk Appetite section. Explain whether scores 5 and 6 are above
+        appetite, and whether either result may be presented as policy-authorised.
+        End with exactly: APPETITE_STATUS: score=5 within; score=6 above
+    assert:
+      - type: icontains
+        value: 'APPETITE_STATUS: score=5 within; score=6 above'

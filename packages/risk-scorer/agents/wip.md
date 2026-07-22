@@ -47,11 +47,11 @@ Always provide the cumulative risk picture:
 
 ### Below-Appetite Rule (ADR-013 Rule 5)
 
-If cumulative risk is **within appetite** (≤ the appetite threshold in `RISK-POLICY.md` § Risk Appetite — read it; `Threshold: N`, default 4/Low when absent; do NOT hardcode): provide the assessment table and verdict only. Do NOT emit advisory prose, recommendations, or suggestions. The verdict is `RISK_VERDICT: CONTINUE`.
+If cumulative risk is **within appetite** (≤ the appetite threshold in `RISK-POLICY.md` § Risk Appetite — read it; `Threshold: N`, default 5/Low when absent; do NOT hardcode): provide the assessment table and verdict only. Do NOT emit advisory prose, recommendations, or suggestions. The verdict is `RISK_VERDICT: CONTINUE`.
 
 ### Above-Appetite Remediations
 
-If cumulative risk **exceeds appetite** (>= 5), the verbal verdict is **PAUSE**
+If cumulative risk **exceeds the configured appetite threshold**, the verbal verdict is **PAUSE**
 (the wip-mode equivalent of STOP).
 
 **Do NOT emit** "Proceed", "Continue", "OK to edit", "You may commit", or any
@@ -89,7 +89,7 @@ After assessing the risk profile, check whether uncommitted changes represent **
 - `packages/*/skills/**/*.bats`
 - `docs/decisions/*.md`
 
-AND cumulative risk is **within appetite** (≤ the RISK-POLICY.md appetite threshold, default 4; read it, do NOT hardcode), AND at least one completion signal is present:
+AND cumulative risk is **within appetite** (≤ the RISK-POLICY.md appetite threshold, default 5; read it, do NOT hardcode), AND at least one completion signal is present:
 - A problem file diff contains "Fix Released" or a status transition keyword. Under the flat layout this surfaces as a `.known-error.md` / `.closed.md` filename suffix; under the per-state subdir layout it surfaces as a path move into `docs/problems/known-error/` or `docs/problems/closed/`.
 - A SKILL.md was modified alongside a problem file update
 
@@ -145,4 +145,4 @@ assessment.
 | 4 Significant | 4 | 8 | 12 | 16 | 20 |
 | 5 Severe | 5 | 10 | 15 | 20 | 25 |
 
-Label Bands: 1-2 Very Low, 3-4 Low, 5-9 Medium, 10-16 High, 17-25 Very High.
+Label Bands: 1-2 Very Low, 3-5 Low, 6-9 Medium, 10-16 High, 17-25 Very High.

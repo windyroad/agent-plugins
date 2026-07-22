@@ -33,11 +33,19 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-AGENT_MD="${SCRIPT_DIR}/../external-comms.md"
 FIXTURE_POLICY="${SCRIPT_DIR}/fixtures/risk-policy.fixture.md"
+PROMPT_PARTS=()
+for arg in "$@"; do
+  [[ "$arg" = '{"id":'* ]] && break
+  PROMPT_PARTS+=("$arg")
+done
+PROMPT="${PROMPT_PARTS[*]}"
+AGENT="$(printf '%s\n' "$PROMPT" | sed -E -n 's/.*AGENT: (external-comms|pipeline|plan|wip).*/\1/p' | head -1)"
+AGENT="${AGENT:-external-comms}"
+AGENT_MD="${SCRIPT_DIR}/../${AGENT}.md"
 
 if [[ ! -f "$AGENT_MD" ]]; then
-  echo "run-agent-eval.sh: external-comms.md not found at $AGENT_MD" >&2
+  echo "run-agent-eval.sh: agent not found at $AGENT_MD" >&2
   exit 2
 fi
 if [[ ! -f "$FIXTURE_POLICY" ]]; then
@@ -51,6 +59,16 @@ fi
 WORKDIR="$(mktemp -d)"
 trap 'rm -rf "$WORKDIR"' EXIT
 cp "$FIXTURE_POLICY" "$WORKDIR/RISK-POLICY.md"
+threshold="$(printf '%s\n' "$PROMPT" | sed -n 's/.*POLICY_THRESHOLD: \([0-9][0-9]*\).*/\1/p' | head -1)"
+if [[ -n "$threshold" ]]; then
+  printf '\n## Risk Appetite\n\nThreshold: %s\n' "$threshold" >> "$WORKDIR/RISK-POLICY.md"
+fi
 cd "$WORKDIR"
 
-claude -p --system-prompt "$(cat "$AGENT_MD")" "$@"
+if [[ "${WR_EVAL_RUNTIME:-claude}" = "codex" ]]; then
+  CODEX_PROMPT="Follow these agent instructions exactly:\n\n$(cat "$AGENT_MD")\n\nEvaluation prompt:\n$PROMPT"
+  CODEX_PROMPT="$(python3 -c 'import sys; print(sys.stdin.read().translate(str.maketrans({"§":"section ","—":"--","→":"->","≤":"<=","≥":">="})), end="")' <<< "$CODEX_PROMPT")"
+  exec codex exec --ephemeral --cd "$WORKDIR" --skip-git-repo-check -c 'approval_policy="never"' --sandbox read-only - <<< "$CODEX_PROMPT"
+fi
+
+claude -p --system-prompt "$(cat "$AGENT_MD")" "$PROMPT"

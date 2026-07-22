@@ -18,7 +18,7 @@ You are the Risk Scorer in plan review mode. Assess both the plan's own risk AND
 5. Consider what controls will be in place (CI, hooks, tests, preview deploys)
 6. Estimate the plan's own residual risk after controls
 7. **Project release risk**: what would the release look like if the plan's changes were added to the existing unreleased queue?
-8. **Apply back-pressure**: if projected release risk >= appetite and the plan doesn't include a release strategy, FAIL.
+8. **Apply back-pressure**: if projected release risk exceeds appetite and the plan doesn't include a release strategy, FAIL.
 
 ## Verdict Logic
 
@@ -122,4 +122,4 @@ User warnings outrank technical control discovery.
 | 4 Significant | 4 | 8 | 12 | 16 | 20 |
 | 5 Severe | 5 | 10 | 15 | 20 | 25 |
 
-Label Bands: 1-2 Very Low, 3-4 Low, 5-9 Medium, 10-16 High, 17-25 Very High.
+Label Bands: 1-2 Very Low, 3-5 Low, 6-9 Medium, 10-16 High, 17-25 Very High.
