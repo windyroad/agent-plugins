@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.18.1
+
+### Patch Changes
+
+- 3da277c: Track current Codex agent tool names and identifiers, and clear stale role mappings when an agent target is reused.
+
 ## 0.18.0
 
 ### Minor Changes
