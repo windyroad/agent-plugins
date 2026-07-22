@@ -40,12 +40,22 @@
 set +e
 emit_ok() { exit 0; }
 
+HOOK_INPUT=$(cat)
+payload_sid=""
+is_codex=0
+if command -v jq >/dev/null 2>&1 && [ -n "$HOOK_INPUT" ]; then
+  payload_sid=$(printf '%s' "$HOOK_INPUT" | jq -r '.session_id // empty' 2>/dev/null)
+  payload_runtime=$(printf '%s' "$HOOK_INPUT" | jq -r 'if (.session_id? and .transcript_path == null) then "codex" else "" end' 2>/dev/null)
+  [ "$payload_runtime" = "codex" ] && is_codex=1
+fi
+[ -n "${CODEX_THREAD_ID:-}" ] && is_codex=1
+
 BASELINE_MIN=60      # need ≥60s between baseline samples to read a burn rate through integer usage%
 BASELINE_SLIDE=300   # slide the baseline forward once it ages past 5min (keeps the rate current)
 
 # Per-session state (concurrency, STORY-042): one file per session so N concurrent
 # sessions each keep full throttle grip while the shared cache coordinates aggregate burn.
-sid="${CODEX_THREAD_ID:-${CLAUDE_SESSION_ID:-shared}}"
+sid="${CODEX_THREAD_ID:-${CLAUDE_SESSION_ID:-${payload_sid:-shared}}}"
 STATE="${WR_QUOTA_MARKER:-${TMPDIR:-/tmp}/wr-quota-throttle-${sid}}"
 
 now="${EPOCHSECONDS:-}"
@@ -66,7 +76,7 @@ if [ -f "$STATE" ]; then
 fi
 
 # --- config resolution (ADR-098), only past the fast path ---
-if [ -n "${CODEX_THREAD_ID:-}" ]; then
+if [ "$is_codex" -eq 1 ]; then
   CODEX_ROOT="${CODEX_HOME:-${HOME}/.codex}"
   CFG_P="${PWD}/.codex/cruise.config.json"; CFG_M="${CODEX_ROOT}/cruise.config.json"
   CACHE_DEFAULT="${CODEX_ROOT}/quota-state.json"
@@ -104,14 +114,14 @@ isint "$CEIL" || CEIL=600
 # Keep Node and app-server off the fresh-cache path. The producer's numeric
 # sidecar also carries its write time, avoiding an external stat on every tool call.
 pace_loaded=0; pace_written=0
-if [ -n "${CODEX_THREAD_ID:-}" ] && [ -r "${CACHE}.pace" ]; then
+if [ "$is_codex" -eq 1 ] && [ -r "${CACHE}.pace" ]; then
   read -r fu fr wu wr_ WL5 WL7 pace_written < "${CACHE}.pace" 2>/dev/null || emit_ok
   case "$pace_written" in ''|*[!0-9]*) pace_written=0;; *) pace_loaded=1;; esac
 fi
 
 # A stale cache starts one background refresh; this invocation continues against
 # the last good snapshot. Legacy caches without a sidecar fall back to stat.
-if [ -n "${CODEX_THREAD_ID:-}" ]; then
+if [ "$is_codex" -eq 1 ]; then
   mtime="$pace_written"
   if [ "$mtime" -le 0 ]; then
     case "${OSTYPE:-}" in
@@ -153,11 +163,17 @@ w_left=$(( wr_ - now )); f_left=$(( fr - now )); w_overline=0; f_overline=0
 [ "$WL5" -gt 0 ] && [ "$f_left" -gt 0 ] && [ $(( fu * WL5 )) -ge $(( (100 - HD5) * (WL5 - f_left) )) ] && f_overline=1
 any_overline=0; { [ "$w_overline" -eq 1 ] || [ "$f_overline" -eq 1 ]; } && any_overline=1
 
-# First sample (or reset baseline): record it, no rate yet. Sleep the established
-# pace ONLY if still at/over the line; behind pace → drop the stale grip at once.
+# First sample (or reset baseline): record it. Position needs no burn-rate sample,
+# so start minimum braking immediately when already over pace; subsequent samples
+# self-calibrate it upward. Behind pace drops any stale grip at once.
 if [ "$base_week" -lt 0 ] || [ "$base_ts" -le 0 ]; then
   base_ts=$now; base_week=$wu; base_five=$fu
-  [ "$any_overline" -eq 1 ] || cur_s=0
+  if [ "$any_overline" -eq 1 ]; then
+    [ "$cur_s" -gt 0 ] || cur_s=10
+    [ "$cur_s" -gt "$CEIL" ] && cur_s="$CEIL"
+  else
+    cur_s=0
+  fi
   write_state
   [ "$cur_s" -gt 0 ] && sleep "$cur_s" 2>/dev/null
   emit_ok

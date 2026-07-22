@@ -112,7 +112,7 @@ if [ "$cur_s" -gt 0 ]; then
     echo "  Throttle now:   sleeping ${cur_s}s per tool call — easing off ($(( -gov ))pp behind pace, sleep winding down)"
   fi
 elif [ "$gov" -ge 0 ]; then
-  echo "  Throttle now:   idle (0s) — on the pace line, full speed"
+  echo "  Throttle now:   idle (0s) — +${gov}pp ahead, braking not engaged"
 else
   echo "  Throttle now:   idle (0s) — $(( -gov ))pp behind pace, full speed"
 fi
@@ -124,8 +124,10 @@ if [ "$base_week" -ge 0 ] && [ "$base_ts" -gt 0 ] && [ $(( now-base_ts )) -ge 60
   safe_x1000=$(( (100-HD7-wu>0?100-HD7-wu:0)*1000*3600/wleft ))
   if [ "$r_x1000" -le "$safe_x1000" ]; then
     echo "  Projection:     at your measured burn (~$((r_x1000/1000)).$(( (r_x1000/100)%10 ))%/hr) you glide to the 7d reset with headroom ✓"
-  else
+  elif [ "$cur_s" -gt 0 ]; then
     echo "  Projection:     measured burn (~$((r_x1000/1000)).$(( (r_x1000/100)%10 ))%/hr) exceeds the sustainable rate — the throttle is slowing you toward it"
+  else
+    echo "  Projection:     measured burn (~$((r_x1000/1000)).$(( (r_x1000/100)%10 ))%/hr) exceeds the sustainable rate — braking is not engaged"
   fi
 else
   echo "  Projection:     not enough burn samples yet this session to project."

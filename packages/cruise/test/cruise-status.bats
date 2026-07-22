@@ -63,6 +63,15 @@ write_state() { printf '%s %s %s %s %s\n' "$1" "$2" "$3" "$4" "$5" > "$WR_QUOTA_
   echo "$output" | grep -qi "idle"
 }
 
+@test "idle while ahead reports braking is not engaged" {
+  write_cache 0 0 29 $((NOW+500000))
+  printf '%s %s %s %s 0\n' "$((NOW-100))" "$((NOW-100))" 20 0 > "$WR_QUOTA_MARKER"
+  run bash "$SC"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q "ahead, braking not engaged"
+  ! echo "$output" | grep -q "throttle is slowing"
+}
+
 @test "fresh cache is reported as fresh" {
   write_cache 5 $((NOW+9000)) 5 $((NOW+500000))
   run bash "$SC" </dev/null

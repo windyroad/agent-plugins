@@ -45,12 +45,19 @@ write_state() { printf '%s %s %s %s %s\n' "$1" "$2" "$3" "$4" "$5" > "$WR_QUOTA_
   [ "$status" -eq 0 ]; [ ! -f "$TMP/slept" ]
 }
 
-@test "first firing records a baseline and does not sleep" {
+@test "first firing over pace records a baseline and starts minimum braking" {
   write_cache 20 $((NOW+9000)) 50 $((NOW+500000))
   run bash "$HOOK" </dev/null
-  [ "$status" -eq 0 ]; [ ! -f "$TMP/slept" ]
+  [ "$status" -eq 0 ]; [ "$(slept)" -eq 10 ]
   [ -f "$WR_QUOTA_MARKER" ]                      # baseline written
-  grep -q " 50 20 0" "$WR_QUOTA_MARKER"          # base_week base_five cur_s
+  grep -q " 50 20 10" "$WR_QUOTA_MARKER"         # base_week base_five cur_s
+}
+
+@test "first firing behind pace records a baseline without braking" {
+  write_cache 8 $((NOW+9000)) 10 $((NOW+500000))
+  run bash "$HOOK" </dev/null
+  [ "$status" -eq 0 ]; [ ! -f "$TMP/slept" ]
+  grep -q " 10 8 0" "$WR_QUOTA_MARKER"
 }
 
 @test "over pace ramps the per-call sleep up (self-calibrating)" {
