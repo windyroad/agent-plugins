@@ -32,11 +32,18 @@ function statePath(input, target) {
   return join(riskDir(input.session_id), `codex-agent-${Buffer.from(target).toString("base64url")}`);
 }
 
+function spawnTarget(input) {
+  const result = response(input);
+  return result.agent_id ?? result.task_name;
+}
+
 function rememberSpawn(input) {
   const role = input.tool_input?.agent_type;
-  const target = response(input).task_name;
-  if (!riskAgentRoles.has(role) || typeof target !== "string" || !target.startsWith("/")) return;
+  const target = spawnTarget(input);
+  if (typeof target !== "string" || !target) return;
   mkdirSync(riskDir(input.session_id), { recursive: true });
+  rmSync(statePath(input, target), { force: true });
+  if (!riskAgentRoles.has(role)) return;
   writeFileSync(statePath(input, target), role, "utf8");
 }
 
@@ -78,5 +85,9 @@ try {
 
 if (!/^[A-Za-z0-9-]+$/.test(input.session_id || "")) process.exit(0);
 
-if (input.tool_name === "collaborationspawn_agent") rememberSpawn(input);
-if (input.tool_name === "collaborationinterrupt_agent") markCompletion(input);
+if (["collaborationspawn_agent", "spawn_agent", "multi_agent_v1__spawn_agent"].includes(input.tool_name)) {
+  rememberSpawn(input);
+}
+if (["collaborationinterrupt_agent", "close_agent", "multi_agent_v1__close_agent"].includes(input.tool_name)) {
+  markCompletion(input);
+}

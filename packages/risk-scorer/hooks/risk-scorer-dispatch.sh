@@ -52,7 +52,7 @@ case "$EVENT" in
         run_hook risk-score-mark.sh
         run_hook risk-slide-marker.sh
         ;;
-      collaborationspawn_agent|collaborationinterrupt_agent)
+      collaborationspawn_agent|collaborationinterrupt_agent|spawn_agent|close_agent|multi_agent_v1__spawn_agent|multi_agent_v1__close_agent)
         printf '%s' "$INPUT" | node "$SCRIPT_DIR/codex-agent-completion.mjs"
         ;;
       Bash)
