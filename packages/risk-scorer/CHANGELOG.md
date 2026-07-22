@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.18.2
+
+### Patch Changes
+
+- e5137e3: Emit valid plan-guidance JSON for multiline queue summaries and use the mechanical gate's portable appetite parsing and default.
+
 ## 0.18.1
 
 ### Patch Changes
