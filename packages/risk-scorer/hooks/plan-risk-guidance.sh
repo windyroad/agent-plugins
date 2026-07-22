@@ -32,21 +32,37 @@ if [ -n "$SESSION_ID" ] && [ -f "$RELEASE_SCORE_FILE" ]; then
 fi
 
 # --- Read appetite from RISK-POLICY.md ---
-# Default 4 (Low) — MUST match the canonical gate parser default in
-# packages/risk-scorer/hooks/lib/risk-gate.sh (P377/RFC-029: a default of 5
-# here was an ADR-065 confirmation violation — the canonical default is 4).
-# The authoritative parser lives in risk-gate.sh; this guidance script mirrors
-# its 3 tolerated phrasings (Threshold: N | exceeds N | N / Low appetite).
-APPETITE="4"
-if [ -f "RISK-POLICY.md" ]; then
-  EXTRACTED=$(grep -oP '(?:Threshold:\s*|exceeds\s+)\K[0-9]+' RISK-POLICY.md 2>/dev/null | head -1 || echo "")
-  if [ -z "$EXTRACTED" ]; then
-    EXTRACTED=$(grep -oP '[0-9]+(?=\s*/\s*Low appetite)' RISK-POLICY.md 2>/dev/null | head -1 || echo "")
-  fi
-  if [ -n "$EXTRACTED" ]; then
-    APPETITE="$EXTRACTED"
-  fi
-fi
+# Mirror the canonical risk-gate parser: scope matches to the Risk Appetite
+# section and default to the ADR-086 Low ceiling of 5.
+APPETITE=$(python3 -c "
+import re
+try:
+    text = open('RISK-POLICY.md', encoding='utf-8').read()
+except Exception:
+    text = ''
+section = re.search(r'##\s*Risk Appetite\s*(.*?)(?=\n##\s|\Z)', text, re.DOTALL | re.IGNORECASE)
+scope = section.group(1) if section else text
+value = None
+for pattern in (r'Threshold:\s*(\d+)', r'exceeds\s+(\d+)', r'(\d+)\s*/\s*Low appetite'):
+    match = re.search(pattern, scope, re.IGNORECASE)
+    if match:
+        value = match.group(1)
+        break
+print(value or '5')
+" 2>/dev/null || echo "5")
+
+emit_json() {
+  HOOK_SYSTEM_MESSAGE="$1" python3 -c "
+import json, os
+print(json.dumps({
+    'hookSpecificOutput': {
+        'hookEventName': 'PreToolUse',
+        'permissionDecision': 'allow',
+        'systemMessage': os.environ['HOOK_SYSTEM_MESSAGE'],
+    }
+}))
+"
+}
 
 # --- P096 Phase 2 — once-per-session gating (ADR-038 progressive disclosure) ---
 # First EnterPlanMode of a session emits the full advisory body; subsequent
@@ -54,27 +70,17 @@ fi
 # ADR-038 budget). Pipeline state and appetite are unchanged across plan-mode
 # entries within one session, so re-emitting full prose is repetition.
 if has_announced "risk-scorer-plan-guidance" "$SESSION_ID"; then
-  cat <<EOF
-{
-  "hookSpecificOutput": {
-    "hookEventName": "PreToolUse",
-    "permissionDecision": "allow",
-    "systemMessage": "MANDATORY release-risk gate active (RISK-POLICY.md present). Release risk: ${RELEASE_SCORE}; appetite: ${APPETITE}. ExitPlanMode will FAIL plans projected above appetite. See first-EnterPlanMode emission for full guidance."
-  }
-}
-EOF
+  emit_json "MANDATORY release-risk gate active (RISK-POLICY.md present). Release risk: ${RELEASE_SCORE}; appetite: ${APPETITE}. ExitPlanMode will FAIL plans projected above appetite. See first-EnterPlanMode emission for full guidance."
   exit 0
 fi
 
 # --- First emission: full advisory (compressed per audit recommendation) ---
 mark_announced "risk-scorer-plan-guidance" "$SESSION_ID"
-cat <<EOF
-{
-  "hookSpecificOutput": {
-    "hookEventName": "PreToolUse",
-    "permissionDecision": "allow",
-    "systemMessage": "RELEASE RISK GUIDANCE FOR PLANNING:\nUnreleased queue:\n${UNRELEASED_SUMMARY}\n\nRelease risk: ${RELEASE_SCORE}. Appetite threshold: ${APPETITE} (Medium).\n\nIf projected release risk would exceed appetite, the plan MUST include a release strategy (release queue first, split into smaller batches, or risk-reducing steps). See RISK-POLICY.md for option details. ExitPlanMode runs the risk-scorer and FAILS plans above appetite without a strategy."
-  }
-}
-EOF
+emit_json "RELEASE RISK GUIDANCE FOR PLANNING:
+Unreleased queue:
+${UNRELEASED_SUMMARY}
+
+Release risk: ${RELEASE_SCORE}. Appetite threshold: ${APPETITE}.
+
+If projected release risk would exceed appetite, the plan MUST include a release strategy (release queue first, split into smaller batches, or risk-reducing steps). See RISK-POLICY.md for option details. ExitPlanMode runs the risk-scorer and FAILS plans above appetite without a strategy."
 exit 0

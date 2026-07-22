@@ -86,10 +86,34 @@ run_hook() {
 
 @test "plan-risk-guidance: emits valid JSON with permissionDecision allow on both first and subsequent invocations" {
   run run_hook "$SID"
-  [[ "$output" == *'"permissionDecision": "allow"'* ]]
-  [[ "$output" == *'"hookEventName": "PreToolUse"'* ]]
+  [ "$status" -eq 0 ]
+  echo "$output" | jq -e '.hookSpecificOutput.permissionDecision == "allow"'
+  echo "$output" | jq -e '.hookSpecificOutput.hookEventName == "PreToolUse"'
 
   run run_hook "$SID"
-  [[ "$output" == *'"permissionDecision": "allow"'* ]]
-  [[ "$output" == *'"hookEventName": "PreToolUse"'* ]]
+  [ "$status" -eq 0 ]
+  echo "$output" | jq -e '.hookSpecificOutput.permissionDecision == "allow"'
+  echo "$output" | jq -e '.hookSpecificOutput.hookEventName == "PreToolUse"'
+}
+
+@test "plan-risk-guidance: defaults appetite to the ADR-086 Low ceiling" {
+  rm "$WORKDIR/RISK-POLICY.md"
+  run run_hook "$SID"
+  [ "$status" -eq 0 ]
+  [[ "$(echo "$output" | jq -r '.hookSpecificOutput.systemMessage')" == *"Appetite threshold: 5."* ]]
+}
+
+@test "plan-risk-guidance: scopes portable appetite parsing to the Risk Appetite section" {
+  cat > "$WORKDIR/RISK-POLICY.md" <<'POLICY'
+# Risk Policy
+
+Threshold: 17
+
+## Risk Appetite
+
+Risk exceeds 9 is above appetite.
+POLICY
+  run run_hook "$SID"
+  [ "$status" -eq 0 ]
+  [[ "$(echo "$output" | jq -r '.hookSpecificOutput.systemMessage')" == *"Appetite threshold: 9."* ]]
 }
