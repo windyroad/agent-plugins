@@ -59,7 +59,7 @@ setup() {
   [ -f "$generator" ]
   run grep -n 'wr-risk-scorer:${mode}' "$generator"
   [ "$status" -eq 0 ]
-  run grep -n "codex-agents.mjs --session-start" "$PACKAGE/hooks/hooks.json"
+  run grep -n "codex-agents.mjs\" --session-start" "$PACKAGE/hooks/risk-scorer-dispatch.sh"
   [ "$status" -eq 0 ]
   run grep -n "Do not substitute" "$PACKAGE/scripts/sync-codex-skills.mjs"
   [ "$status" -eq 0 ]

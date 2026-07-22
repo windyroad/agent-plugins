@@ -38,6 +38,16 @@ current_close_input() {
     "$SESSION" "$TMP" "$TARGET" "$KEY"
 }
 
+current_pipeline_wait_input() {
+  printf '{"session_id":"%s","cwd":"%s","tool_name":"multi_agent_v1__wait_agent","tool_input":{"targets":["%s"]},"tool_response":{"status":{"%s":{"completed":"RISK_SCORES: commit=4 push=4 release=4"}},"timed_out":false}}' \
+    "$SESSION" "$TMP" "$TARGET" "$TARGET"
+}
+
+current_pipeline_close_input() {
+  printf '{"session_id":"%s","cwd":"%s","tool_name":"multi_agent_v1__close_agent","tool_input":{"target":"%s"},"tool_response":{"previous_status":{"completed":"RISK_SCORES: commit=4 push=4 release=4"}}}' \
+    "$SESSION" "$TMP" "$TARGET"
+}
+
 @test "Codex completion bridge marks the exact risk agent when it closes" {
   dispatch "$(spawn_input)"
   dispatch "$(close_input)"
@@ -52,6 +62,23 @@ current_close_input() {
   dispatch "$(current_close_input)"
 
   [ -f "$TMPDIR/claude-risk-$SESSION/external-comms-risk-reviewed-$KEY" ]
+}
+
+@test "wait_agent completion refreshes a stale pipeline score exactly once" {
+  rdir="$TMPDIR/claude-risk-$SESSION"
+  mkdir -p "$rdir"
+  printf '9' > "$rdir/commit"
+
+  dispatch "$(current_spawn_input wr-risk-scorer:pipeline)"
+  dispatch "$(current_pipeline_wait_input)"
+
+  [ "$(cat "$rdir/commit")" = "4" ]
+  [ "$(cat "$rdir/push")" = "4" ]
+  [ "$(cat "$rdir/release")" = "4" ]
+  [ "$(find "$TMP/.risk-reports" -type f -name '*-commit.md' | wc -l | tr -d ' ')" = "1" ]
+
+  dispatch "$(current_pipeline_close_input)"
+  [ "$(find "$TMP/.risk-reports" -type f -name '*-commit.md' | wc -l | tr -d ' ')" = "1" ]
 }
 
 @test "a reused target cannot retain a stale risk-agent role" {

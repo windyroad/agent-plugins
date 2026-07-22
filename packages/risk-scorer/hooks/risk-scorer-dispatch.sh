@@ -21,6 +21,31 @@ tool_name() {
 }
 
 case "$EVENT" in
+  session-start)
+    if ! AGENT_OUTPUT="$(printf '%s' "$INPUT" | node "$SCRIPT_DIR/../scripts/codex-agents.mjs" --session-start 2>/dev/null)"; then
+      AGENT_OUTPUT='{"systemMessage":"wr-risk-scorer: Codex agent repair failed; reinstall the plugin."}'
+    fi
+    if ! NUDGE_OUTPUT="$(printf '%s' "$INPUT" | "$SCRIPT_DIR/risk-scorer-scaffold-nudge.sh" 2>/dev/null)"; then
+      NUDGE_OUTPUT=""
+    fi
+    if [ -n "${CODEX_THREAD_ID:-}" ]; then
+      AGENT_OUTPUT="$AGENT_OUTPUT" NUDGE_OUTPUT="$NUDGE_OUTPUT" python3 -c '
+import json, os
+messages = []
+for name in ("AGENT_OUTPUT", "NUDGE_OUTPUT"):
+    try:
+        message = json.loads(os.environ[name]).get("systemMessage", "")
+    except (json.JSONDecodeError, AttributeError):
+        message = ""
+    if message:
+        messages.append(message)
+if messages:
+    print(json.dumps({"systemMessage": "\n".join(messages)}))
+'
+    else
+      [ -z "$NUDGE_OUTPUT" ] || printf '%s\n' "$NUDGE_OUTPUT"
+    fi
+    ;;
   user-prompt)
     run_hook risk-score.sh
     run_hook staleness-check.sh
@@ -52,7 +77,7 @@ case "$EVENT" in
         run_hook risk-score-mark.sh
         run_hook risk-slide-marker.sh
         ;;
-      collaborationspawn_agent|collaborationinterrupt_agent|spawn_agent|close_agent|multi_agent_v1__spawn_agent|multi_agent_v1__close_agent)
+      collaborationspawn_agent|collaborationwait_agent|collaborationinterrupt_agent|spawn_agent|wait_agent|close_agent|multi_agent_v1__spawn_agent|multi_agent_v1__wait_agent|multi_agent_v1__close_agent)
         printf '%s' "$INPUT" | node "$SCRIPT_DIR/codex-agent-completion.mjs"
         ;;
       Bash)

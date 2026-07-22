@@ -5,22 +5,57 @@ setup() {
   HOOKS="$REPO_ROOT/packages/risk-scorer/hooks"
 }
 
-@test "hooks.json registers five command hooks" {
+@test "hooks.json registers four command hooks" {
   run python3 - "$HOOKS/hooks.json" <<'PY'
 import json, sys
 data = json.load(open(sys.argv[1]))
 print(sum(len(entry["hooks"]) for entries in data["hooks"].values() for entry in entries))
 PY
   [ "$status" -eq 0 ]
-  [ "$output" = "5" ]
+  [ "$output" = "4" ]
 }
 
-@test "dispatcher is registered for prompt, pre-tool, and post-tool events" {
+@test "dispatcher is registered for session, prompt, pre-tool, and post-tool events" {
+  run grep -n "risk-scorer-dispatch.sh session-start" "$HOOKS/hooks.json"
+  [ "$status" -eq 0 ]
   run grep -n "risk-scorer-dispatch.sh user-prompt" "$HOOKS/hooks.json"
   [ "$status" -eq 0 ]
   run grep -n "risk-scorer-dispatch.sh pre-tool" "$HOOKS/hooks.json"
   [ "$status" -eq 0 ]
   run grep -n "risk-scorer-dispatch.sh post-tool" "$HOOKS/hooks.json"
+  [ "$status" -eq 0 ]
+  run grep -n "multi_agent_v1__wait_agent" "$HOOKS/hooks.json"
+  [ "$status" -eq 0 ]
+}
+
+@test "dispatcher combines Codex SessionStart repair and scaffold messages" {
+  local dir input
+  dir="$(mktemp -d)"
+  mkdir -p "$dir/project"
+  printf 'placeholder policy\n' > "$dir/project/RISK-POLICY.md"
+  input='{"model":"gpt-test"}'
+
+  run env CODEX_THREAD_ID=codex-test CODEX_HOME="$dir/codex" CLAUDE_PROJECT_DIR="$dir/project" \
+    bash "$HOOKS/risk-scorer-dispatch.sh" session-start <<< "$input"
+  rm -rf "$dir"
+
+  [ "$status" -eq 0 ]
+  run jq -er '.systemMessage | contains("Codex agents installed") and contains("bootstrap-catalog")' <<< "$output"
+  [ "$status" -eq 0 ]
+}
+
+@test "dispatcher preserves Codex scaffold nudge when agent repair fails" {
+  local dir input
+  dir="$(mktemp -d)"
+  printf 'placeholder policy\n' > "$dir/RISK-POLICY.md"
+  input='{"model":"gpt-test"}'
+
+  run env CODEX_THREAD_ID=codex-test CODEX_HOME=/dev/null CLAUDE_PROJECT_DIR="$dir" \
+    bash "$HOOKS/risk-scorer-dispatch.sh" session-start <<< "$input"
+  rm -rf "$dir"
+
+  [ "$status" -eq 0 ]
+  run jq -er '.systemMessage | contains("agent repair failed") and contains("bootstrap-catalog")' <<< "$output"
   [ "$status" -eq 0 ]
 }
 

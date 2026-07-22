@@ -47,9 +47,7 @@ function rememberSpawn(input) {
   writeFileSync(statePath(input, target), role, "utf8");
 }
 
-function markCompletion(input) {
-  const target = input.tool_input?.target;
-  const output = response(input).previous_status?.completed;
+function markTarget(input, target, output) {
   if (typeof target !== "string" || typeof output !== "string" || !output) return;
 
   const state = statePath(input, target);
@@ -72,6 +70,18 @@ function markCompletion(input) {
   if (result.status === 0) rmSync(state, { force: true });
 }
 
+function markClose(input) {
+  markTarget(input, input.tool_input?.target, response(input).previous_status?.completed);
+}
+
+function markWait(input) {
+  const statuses = response(input).status;
+  if (!statuses || typeof statuses !== "object") return;
+  for (const [target, status] of Object.entries(statuses)) {
+    markTarget(input, target, status?.completed);
+  }
+}
+
 let body = "";
 process.stdin.setEncoding("utf8");
 for await (const chunk of process.stdin) body += chunk;
@@ -89,5 +99,8 @@ if (["collaborationspawn_agent", "spawn_agent", "multi_agent_v1__spawn_agent"].i
   rememberSpawn(input);
 }
 if (["collaborationinterrupt_agent", "close_agent", "multi_agent_v1__close_agent"].includes(input.tool_name)) {
-  markCompletion(input);
+  markClose(input);
+}
+if (["collaborationwait_agent", "wait_agent", "multi_agent_v1__wait_agent"].includes(input.tool_name)) {
+  markWait(input);
 }
