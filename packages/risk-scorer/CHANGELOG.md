@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.18.0
+
+### Minor Changes
+
+- 17d1fff: Install native Codex risk agents from the existing Claude sources, preserve user-modified agent files, and bridge stable Codex close-agent responses into the existing risk marker hooks without reading transcripts.
+
 ## 0.17.4
 
 ### Patch Changes
