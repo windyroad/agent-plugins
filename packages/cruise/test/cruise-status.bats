@@ -2,6 +2,7 @@
 # Behavioural tests for the cruise status/telemetry reporter (STORY-044).
 
 setup() {
+  unset CODEX_THREAD_ID CODEX_HOME CODEX_BINARY
   SC="${BATS_TEST_DIRNAME}/../scripts/cruise-status.sh"
   TMP="$(mktemp -d)"
   export WR_QUOTA_CACHE_FILE="$TMP/cache"
@@ -12,6 +13,14 @@ setup() {
 teardown() { rm -rf "$TMP"; }
 write_cache() { printf '{"five_used_pct":%s,"five_resets_at":%s,"week_used_pct":%s,"week_resets_at":%s}' "$1" "$2" "$3" "$4" > "$WR_QUOTA_CACHE_FILE"; }
 write_state() { printf '%s %s %s %s %s\n' "$1" "$2" "$3" "$4" "$5" > "$WR_QUOTA_MARKER"; }
+
+@test "reports only the available dynamic window" {
+  printf '{"five_used_pct":0,"five_resets_at":0,"five_window_s":0,"week_used_pct":7,"week_resets_at":%s,"week_window_s":604800}' "$((NOW+500000))" > "$WR_QUOTA_CACHE_FILE"
+  run bash "$SC" </dev/null
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q "7-day window"
+  ! echo "$output" | grep -q "5-hour window"
+}
 
 @test "no cache → warns the throttle is fail-open (inert), never errors" {
   run bash "$SC" </dev/null
@@ -29,6 +38,15 @@ write_state() { printf '%s %s %s %s %s\n' "$1" "$2" "$3" "$4" "$5" > "$WR_QUOTA_
   echo "$output" | grep -q "used 60%"
   echo "$output" | grep -qi "ahead"
   echo "$output" | grep -qi "resets in"
+}
+
+@test "expired windows report unavailable sustainable burn without arithmetic errors" {
+  write_cache 60 0 55 0
+  run bash "$SC" </dev/null
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q "sustainable n/a"
+  echo "$output" | grep -q "reset passed"
+  ! echo "$output" | grep -Eq "division by 0|error token"
 }
 
 @test "surfaces the sleep the throttle is injecting right now (cur_s)" {

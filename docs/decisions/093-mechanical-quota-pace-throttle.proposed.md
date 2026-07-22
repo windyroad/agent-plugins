@@ -2,7 +2,7 @@
 status: "proposed"
 date: 2026-07-06
 human-oversight: confirmed
-oversight-date: 2026-07-13
+oversight-date: 2026-07-22
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: []
@@ -73,6 +73,8 @@ Chosen option 3 (mechanical PreToolUse calculated sleep), registered in `hooks.j
 
 Behavioural bats (`packages/cruise/test/quota-pace-throttle.bats`, moved from `packages/shared/` with the extraction): no usable baseline yet → fast no-op (records the first sample); measured burn ≤ sustainable rate → fast no-op; measured burn > sustainable → sleeps a ramped `cur_s` (superseded 2026-07-13 — the bats now assert the feedback controller + deficit-aware position gate + asymmetric recovery, 16 tests; see Amendment 2026-07-13); `S` clamped to the 600s ceiling; tighter (5h vs 7d) window governs; recent-check marker short-circuit skips the parse; missing/stale/malformed cache, `max_sleep_s: 0`, and past `resets_at` all fast no-op; exit code 0 and empty stdout on every path. A scenario test asserts convergence: replaying a burn trace that exhausts unthrottled stays under 100% with the throttle. ~~Sync drift covered by `scripts/sync-quota-pace-throttle.sh --check` in CI (ADR-017).~~ — **RETIRED 2026-07-08**: the extraction to a single `@windyroad/cruise` plugin removes the seven-way sync surface entirely (see Amendment). The extraction + self-installer bats land with STORY-042 / STORY-043.
 
+Codex confirmation adds: one-window input disables the absent slot with duration 0; two windows map shortest/longest deterministically; legacy Claude caches retain fixed default durations; a fresh-cache Codex hook completes within 50ms; concurrent stale calls start at most one refresh per 60 seconds; and every refresh failure remains empty-stdout exit 0.
+
 ## More Information
 
 - P160 (`docs/problems/known-error/160-ship-quota-pacing-surface-to-prevent-weekly-quota-exhaustion.md`) — driver ticket (reopened Known Error, Sev 20, Tier 0); ratified direction + corrections verbatim.
@@ -102,3 +104,9 @@ Three mechanics refinements shipped in `@windyroad/cruise` 0.3.4–0.3.5 after l
 Also shipped alongside (not a mechanics change, noted for completeness): the two hooks now ship git mode 755 so Claude Code can exec them directly (they were shipping non-executable → `/bin/sh` Permission denied → silently inert; P447), guarded by the `check:executable-modes` CI gate and risk-register entry R074.
 
 **Traceability:** problems P446 (glide correctness — second + third dimensions) + P447 (executable-mode packaging); JTBD-010; behavioural coverage in `packages/cruise/test/quota-pace-throttle.bats` (16 tests); risk R074. Architect PASS + JTBD PASS + runtime-path perf PASS at ship time and for this amendment (2026-07-13).
+
+## Amendment 2026-07-22 — Codex quota windows
+
+Cruise also supports Codex. Codex quota is read from the authenticated app-server `account/rateLimits/read` method and normalized into the existing two-slot flat cache. Optional `five_window_s` and `week_window_s` fields carry the actual window durations; old Claude caches default to 18,000 and 604,800 seconds. Available Codex windows are sorted by duration into short and long slots; a missing slot has duration 0 and is ignored by pacing. This preserves the controller while removing its Claude-only fixed-window assumption.
+
+The frequent hook retains the 50ms fresh-cache budget: the producer atomically writes a private numeric `.pace` sidecar containing normalized window values and its write timestamp, so the hot path needs neither Node, `jq`, nor `stat`. Legacy caches fall back to the JSON parser and filesystem mtime check. A stale cache starts at most one background refresh per 60 seconds using an atomic lock. Refresh failure, timeout, malformed data, or a missing Codex binary remains fail-open. The status command may wait for a synchronous refresh because it is explicitly invoked telemetry, not the per-tool fast path. User direction 2026-07-22 pinned the Codex port; pre-edit architect review required this amendment and the latency-preserving refresh shape.

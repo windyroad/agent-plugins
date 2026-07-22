@@ -1,0 +1,37 @@
+description: Codex Cruise status skill behavior
+
+providers:
+  - id: 'exec:bash ./run-codex-skill-eval.sh'
+
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ../../../../architect/skills/create-adr/eval/grade-codex-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: Reports live Cruise telemetry faithfully
+    vars:
+      prompt: Show the current Cruise quota-pacing status and faithfully report the command output.
+    assert:
+      - type: regex
+        value: '@windyroad/cruise|Cruise'
+      - type: regex
+        value: 'window|quota'
+      - type: regex
+        value: 'pace|pacing|Throttle'
+      - type: llm-rubric
+        value: The response invokes the installed Cruise status skill and faithfully reports its quota window, pacing or throttle state, and cache freshness without inventing unavailable windows.
+
+  - description: Prominently reports stale fail-open state
+    vars:
+      prompt: '[STALE_FIXTURE] Show Cruise status and explain whether pacing is active.'
+    assert:
+      - type: regex
+        value: 'STALE|stale'
+      - type: regex
+        value: 'fail-open|not pacing|silently doing nothing|inactive'
+      - type: llm-rubric
+        value: The response prominently says the cache is stale and therefore Cruise is fail-open and not actively pacing; it must not imply that throttling is active.

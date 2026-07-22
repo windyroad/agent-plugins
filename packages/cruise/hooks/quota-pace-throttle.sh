@@ -18,10 +18,11 @@
 # rate already reflects prior sleeps → oscillation); the controller is the stable
 # realisation of the same target.
 #
-# Cache (flat; written by the self-installed statusline producer — ADR-097 —
-# and the shipped reality both Release-1 and this hook read):
+# Cache (flat; written by Claude's statusline or Codex app-server — ADR-097):
 #   {"five_used_pct":N,"five_resets_at":<epoch>,
-#    "week_used_pct":N,"week_resets_at":<epoch>}
+#    "week_used_pct":N,"week_resets_at":<epoch>,
+#    "five_window_s":N,"week_window_s":N}
+# Window durations are optional for legacy Claude caches (defaults: 5h/7d).
 # The statusline's own stdin payload is nested (.rate_limits.five_hour.…); the
 # producer flattens it into this cache. Missing/stale/malformed → no-op (fail-open).
 #
@@ -38,18 +39,17 @@
 
 set +e
 emit_ok() { exit 0; }
-command -v jq >/dev/null 2>&1 || emit_ok
 
-FIVE_W=18000; WEEK_W=604800
 BASELINE_MIN=60      # need ≥60s between baseline samples to read a burn rate through integer usage%
 BASELINE_SLIDE=300   # slide the baseline forward once it ages past 5min (keeps the rate current)
 
 # Per-session state (concurrency, STORY-042): one file per session so N concurrent
 # sessions each keep full throttle grip while the shared cache coordinates aggregate burn.
-sid="${CLAUDE_SESSION_ID:-shared}"
+sid="${CODEX_THREAD_ID:-${CLAUDE_SESSION_ID:-shared}}"
 STATE="${WR_QUOTA_MARKER:-${TMPDIR:-/tmp}/wr-quota-throttle-${sid}}"
 
-now=$(date +%s 2>/dev/null) || emit_ok
+now="${EPOCHSECONDS:-}"
+[ -n "$now" ] || now=$(date +%s 2>/dev/null) || emit_ok
 case "$now" in ''|*[!0-9]*) emit_ok;; esac
 
 # State line: "check_ts base_ts base_week base_five cur_s". Recent-check FIRST
@@ -66,29 +66,78 @@ if [ -f "$STATE" ]; then
 fi
 
 # --- config resolution (ADR-098), only past the fast path ---
-CFG_P="${PWD}/.claude/cruise.config.json"; CFG_M="${HOME}/.claude/cruise.config.json"
+if [ -n "${CODEX_THREAD_ID:-}" ]; then
+  CODEX_ROOT="${CODEX_HOME:-${HOME}/.codex}"
+  CFG_P="${PWD}/.codex/cruise.config.json"; CFG_M="${CODEX_ROOT}/cruise.config.json"
+  CACHE_DEFAULT="${CODEX_ROOT}/quota-state.json"
+else
+  CFG_P="${PWD}/.claude/cruise.config.json"; CFG_M="${HOME}/.claude/cruise.config.json"
+  CACHE_DEFAULT="${HOME}/.claude/quota-state.json"
+fi
 cfg() { # key default env
   local k="$1" d="$2" e="$3" f v
   [ -n "$e" ] && { printf '%s' "$e"; return; }
   for f in "$CFG_P" "$CFG_M"; do
     [ -r "$f" ] || continue
+    command -v jq >/dev/null 2>&1 || { printf '%s' "$d"; return; }
     v=$(jq -r --arg k "$k" '.[$k] // empty' "$f" 2>/dev/null)
     case "$v" in ''|null) : ;; *) printf '%s' "$v"; return;; esac
   done
   printf '%s' "$d"
 }
 isint() { case "$1" in ''|*[!0-9]*) return 1;; *) return 0;; esac; }
-CACHE=$(cfg cache_path "${HOME}/.claude/quota-state.json" "${WR_QUOTA_CACHE_FILE:-}")
-HD7=$(cfg headroom_7d_pp 5 "${WR_QUOTA_HEADROOM_7D_PP:-}");  isint "$HD7" || HD7=5
-HD5=$(cfg headroom_5h_pp 0 "${WR_QUOTA_HEADROOM_5H_PP:-}");  isint "$HD5" || HD5=0
-CEIL=$(cfg max_sleep_s 600 "${WR_QUOTA_THROTTLE_MAX_SLEEP:-}"); isint "$CEIL" || CEIL=600
+if [ ! -r "$CFG_P" ] && [ ! -r "$CFG_M" ]; then
+  CACHE="${WR_QUOTA_CACHE_FILE:-$CACHE_DEFAULT}"
+  HD7="${WR_QUOTA_HEADROOM_7D_PP:-5}"
+  HD5="${WR_QUOTA_HEADROOM_5H_PP:-0}"
+  CEIL="${WR_QUOTA_THROTTLE_MAX_SLEEP:-600}"
+else
+  CACHE=$(cfg cache_path "$CACHE_DEFAULT" "${WR_QUOTA_CACHE_FILE:-}")
+  HD7=$(cfg headroom_7d_pp 5 "${WR_QUOTA_HEADROOM_7D_PP:-}")
+  HD5=$(cfg headroom_5h_pp 0 "${WR_QUOTA_HEADROOM_5H_PP:-}")
+  CEIL=$(cfg max_sleep_s 600 "${WR_QUOTA_THROTTLE_MAX_SLEEP:-}")
+fi
+isint "$HD7" || HD7=5
+isint "$HD5" || HD5=0
+isint "$CEIL" || CEIL=600
+
+# Keep Node and app-server off the fresh-cache path. The producer's numeric
+# sidecar also carries its write time, avoiding an external stat on every tool call.
+pace_loaded=0; pace_written=0
+if [ -n "${CODEX_THREAD_ID:-}" ] && [ -r "${CACHE}.pace" ]; then
+  read -r fu fr wu wr_ WL5 WL7 pace_written < "${CACHE}.pace" 2>/dev/null || emit_ok
+  case "$pace_written" in ''|*[!0-9]*) pace_written=0;; *) pace_loaded=1;; esac
+fi
+
+# A stale cache starts one background refresh; this invocation continues against
+# the last good snapshot. Legacy caches without a sidecar fall back to stat.
+if [ -n "${CODEX_THREAD_ID:-}" ]; then
+  mtime="$pace_written"
+  if [ "$mtime" -le 0 ]; then
+    case "${OSTYPE:-}" in
+      darwin*) mtime=$(/usr/bin/stat -f %m "$CACHE" 2>/dev/null);;
+      *) mtime=$(/usr/bin/stat -c %Y "$CACHE" 2>/dev/null);;
+    esac
+  fi
+  case "$mtime" in ''|*[!0-9]*) age=61;; *) age=$(( now - mtime ));; esac
+  if [ "$age" -ge 60 ]; then
+    lock="${CACHE}.refresh.lock"
+    if mkdir "$lock" 2>/dev/null; then
+      PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)}"
+      (node "$PLUGIN_ROOT/scripts/codex-quota-state.mjs" "$CACHE"; rmdir "$lock") >/dev/null 2>&1 &
+    fi
+  fi
+fi
 
 [ -r "$CACHE" ] || emit_ok
-read -r fu fr wu wr_ < <(
-  jq -r '[.five_used_pct, .five_resets_at, .week_used_pct, .week_resets_at] | map(tostring) | join(" ")' \
-     "$CACHE" 2>/dev/null
-) || emit_ok
-for v in "$fu" "$fr" "$wu" "$wr_"; do case "$v" in ''|null|*[!0-9.]*) emit_ok;; esac; done
+if [ "$pace_loaded" -ne 1 ]; then
+  command -v jq >/dev/null 2>&1 || emit_ok
+  read -r fu fr wu wr_ WL5 WL7 < <(
+    jq -r '[.five_used_pct, .five_resets_at, .week_used_pct, .week_resets_at, (.five_window_s // 18000), (.week_window_s // 604800)] | map(tostring) | join(" ")' \
+       "$CACHE" 2>/dev/null
+  ) || emit_ok
+fi
+for v in "$fu" "$fr" "$wu" "$wr_" "$WL5" "$WL7"; do case "$v" in ''|null|*[!0-9.]*) emit_ok;; esac; done
 wu=${wu%%.*}; fu=${fu%%.*}   # integer-truncate the used%
 
 write_state() { printf '%s %s %s %s %s\n' "$now" "$base_ts" "$base_week" "$base_five" "$cur_s" > "$STATE" 2>/dev/null; }
@@ -98,11 +147,10 @@ write_state() { printf '%s %s %s %s %s\n' "$now" "$base_ts" "$base_week" "$base_
 # Computed up-front so the re-baseline / too-soon paths below respect current
 # position instead of blindly re-sleeping a stale cur_s (P446 sticky-recovery fix,
 # 2026-07-13). reset passed (left ≤ 0) → not over-line; bad data (elapsed ≤ 0) → fails
-# safe as over-line. WL are the platform rolling-window lengths (7d / 5h).
-WL7=604800; WL5=18000
+# safe as over-line. A duration of 0 disables an absent platform window.
 w_left=$(( wr_ - now )); f_left=$(( fr - now )); w_overline=0; f_overline=0
-[ "$w_left" -gt 0 ] && [ $(( wu * WL7 )) -ge $(( (100 - HD7) * (WL7 - w_left) )) ] && w_overline=1
-[ "$f_left" -gt 0 ] && [ $(( fu * WL5 )) -ge $(( (100 - HD5) * (WL5 - f_left) )) ] && f_overline=1
+[ "$WL7" -gt 0 ] && [ "$w_left" -gt 0 ] && [ $(( wu * WL7 )) -ge $(( (100 - HD7) * (WL7 - w_left) )) ] && w_overline=1
+[ "$WL5" -gt 0 ] && [ "$f_left" -gt 0 ] && [ $(( fu * WL5 )) -ge $(( (100 - HD5) * (WL5 - f_left) )) ] && f_overline=1
 any_overline=0; { [ "$w_overline" -eq 1 ] || [ "$f_overline" -eq 1 ]; } && any_overline=1
 
 # First sample (or reset baseline): record it, no rate yet. Sleep the established

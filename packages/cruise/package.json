@@ -1,7 +1,7 @@
 {
   "name": "@windyroad/cruise",
   "version": "0.3.5",
-  "description": "Cruise — mechanical token-quota pacing for Claude Code (self-calibrating burn throttle)",
+  "description": "Cruise — mechanical token-quota pacing for Claude Code and Codex",
   "type": "module",
   "license": "MIT",
   "repository": {
@@ -12,6 +12,7 @@
   "keywords": [
     "claude-code",
     "claude-code-plugin",
+    "codex",
     "ai-agent",
     "ai-coding",
     "rate-limit",
@@ -20,9 +21,12 @@
   "files": [
     "hooks/",
     ".claude-plugin/",
+    ".codex-plugin/",
+    ".agents/",
     "bin/",
     "lib/",
     "skills/",
+    "!skills/*/eval/",
     "scripts/"
   ],
   "bin": {

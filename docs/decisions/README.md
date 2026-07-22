@@ -404,9 +404,9 @@ _87 ADRs. These are the current rules. The architect agent reads this section fi
 **Chosen:** Chosen option: **post-commit advisory hook**, because **a lifecycle transition may only be automated on observable facts, and O→KE rests on a knowledge claim** — so the strongest honest surface for the fix-titled-commit signal is an adv...
 ### ADR-093 — Mechanical quota-pace throttle — frequently-firing PreToolUse hook, calculated sleep, never blocks
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** A mechanical PreToolUse hook (no matcher, `timeout: 660` > the 600s sleep ceiling) calculates any sleep needed to hold cumulative token burn under the elapsed-fraction pace line of the tighter of the 5h/7d windows (with cross-surface weekly headroom) and sleeps — zero decisions, fail-open, never blocks — so AFK loops and interactive work stop hard-stopping mid-flight. Homed in the dedicated opt-in `@windyroad/cruise` plugin with a self-installing statusline producer (implied-at-install consent); mechanics evolved to a feedback controller + deficit-aware position gate + asymmetric immediate recovery.
-**Confirmation:** cruise behavioural bats (16 tests) — no baseline→fast no-op; burn ≤ safe→no-op; burn > safe→controller sleep clamped to 600s ceiling; tighter window governs; recent-check marker short-circuit; missing/stale/malformed cache + `max_sleep_s:0` + past `resets_at`→fast no-op; exit 0 + empty stdout every path; plus a convergence scenario test replaying an exhausting burn trace.
-**Related:** ADR-002, ADR-003, ADR-013, ADR-017, ADR-023, ADR-030, ADR-034, ADR-038, ADR-045, ADR-057, ADR-066, ADR-074
+**Decides:** A mechanical PreToolUse hook in the opt-in `@windyroad/cruise` plugin paces the tighter available quota window with a feedback controller, deficit-aware position gate, and immediate recovery. Claude's fixed 5h/7d cache remains compatible; Codex app-server windows carry their actual durations and absent slots are ignored. An atomic numeric sidecar keeps fresh-cache calls under 50ms; stale refreshes are single-flight and fail open.
+**Confirmation:** Existing 16 controller bats plus Codex cases for duration-zero handling, deterministic shortest/longest mapping, legacy defaults, fresh-cache execution ≤50ms, at most one app-server refresh per 60 seconds, and empty-stdout exit 0 on failures.
+**Related:** ADR-002, ADR-003, ADR-013, ADR-017, ADR-023, ADR-038, ADR-045, ADR-057, ADR-074, ADR-083, ADR-097, ADR-098
 
 ### ADR-094 — AFK loops anchor completion with the native `/goal` external evaluator
 **Status:** proposed | **Oversight:** confirmed
@@ -424,9 +424,15 @@ _87 ADRs. These are the current rules. The architect agent reads this section fi
 
 ### ADR-097 — Self-installing quota-state producer (SessionStart guarded-statusline edit)
 **Status:** proposed | **Oversight:** confirmed
+**Decides:** Installing Cruise authorizes its required quota producer. Claude uses the guarded statusline mechanism; Codex uses authenticated app-server reads into an atomic runtime-owned cache and private numeric sidecar, with bounded timeout, deterministic binary precedence, and fail-open behavior. Package uninstall removes only Cruise-owned default cache state.
+**Confirmation:** Claude's existing seven producer tests plus Codex assertions for no writes under `~/.claude`, binary precedence, timeout/fail-open, atomic writes, source-marked guarded cleanup, and live `account/rateLimits/read` compatibility.
+**Related:** ADR-002, ADR-013, ADR-074, ADR-083, ADR-093, ADR-098
 
 ### ADR-098 — Cruise config file — layered precedence (project → machine → defaults)
 **Status:** proposed | **Oversight:** confirmed
+**Decides:** Cruise uses JSON configuration with env → project → machine → defaults precedence. Claude owns `.claude` paths; Codex owns `.codex`/`CODEX_HOME` paths. Both runtimes share the same keys and never source configuration as shell code.
+**Confirmation:** Bats prove precedence, malformed-file fallback, non-execution of config content, runtime-specific roots, and that neither runtime reads the other's default config or cache.
+**Related:** ADR-013, ADR-074, ADR-083, ADR-093, ADR-097
 
 ---
 

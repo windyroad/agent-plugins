@@ -1,0 +1,39 @@
+{
+  "name": "wr-cruise",
+  "version": "0.3.5",
+  "description": "Mechanical quota pacing for Claude Code and Codex",
+  "author": {
+    "name": "Windy Road Technology",
+    "url": "https://windyroad.com.au"
+  },
+  "homepage": "https://github.com/windyroad/agent-plugins/tree/main/packages/cruise",
+  "repository": "https://github.com/windyroad/agent-plugins",
+  "license": "MIT",
+  "keywords": [
+    "quota",
+    "rate-limit",
+    "pacing",
+    "codex",
+    "claude-code"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Windy Road Cruise",
+    "shortDescription": "Pace quota usage to avoid mid-task limits",
+    "longDescription": "Mechanical quota pacing that slows tool calls when usage runs ahead of the sustainable rate, while failing open if telemetry is unavailable.",
+    "developerName": "Windy Road Technology",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read"
+    ],
+    "websiteURL": "https://windyroad.com.au",
+    "privacyPolicyURL": "https://windyroad.com.au/privacy",
+    "termsOfServiceURL": "https://windyroad.com.au/terms",
+    "defaultPrompt": [
+      "Show Cruise quota pacing status"
+    ],
+    "brandColor": "#0369A1",
+    "screenshots": []
+  }
+}

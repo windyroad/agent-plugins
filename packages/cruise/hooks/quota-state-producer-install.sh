@@ -26,6 +26,15 @@
 
 set +e
 emit_plain() { exit 0; }
+
+# Codex exposes quota through app-server, not a statusline. Never mutate Claude
+# config from a Codex session; initialize the Codex cache and fail open.
+if [ -n "${CODEX_THREAD_ID:-}" ]; then
+  PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)}"
+  command -v node >/dev/null 2>&1 && node "$PLUGIN_ROOT/scripts/codex-quota-state.mjs" >/dev/null 2>&1
+  emit_plain
+fi
+
 command -v jq >/dev/null 2>&1 || emit_plain
 
 CLAUDE_DIR="${HOME}/.claude"

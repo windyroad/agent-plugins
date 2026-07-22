@@ -1,6 +1,6 @@
 # @windyroad/cruise
 
-**Cruise control for your Claude Code token burn.** *Maturity: Experimental.*
+**Cruise control for your Claude Code and Codex token burn.** *Maturity: Experimental.*
 
 Part of [Windy Road Agent Plugins](../../README.md).
 
@@ -12,9 +12,10 @@ It runs in the background, never blocks, never asks, and fails open — a broken
 
 ```bash
 npx @windyroad/cruise
+npx @windyroad/cruise --runtime codex
 ```
 
-Restart Claude Code to activate. Cruise self-installs everything it needs — the statusline producer, its hooks, defaults — no hand-wiring.
+Claude Code remains the default. Use `--runtime codex` or `--runtime both`, then restart the selected runtime. Cruise reads Claude quota from its statusline payload and Codex quota from the authenticated local app-server.
 
 ## See it working
 
@@ -34,9 +35,9 @@ An on-demand report of what the throttle is doing: usage against the pace line p
 
 A `PreToolUse` hook fires before every tool call. It reads your current rate-limit usage, measures your actual burn rate, and — when you're burning faster than the *remaining sustainable rate* `(100 − headroom − used) / time_left` — sleeps a small, growing amount per call to bring you back onto pace. On or under pace, it's a fast no-op.
 
-Both rolling windows are paced at once (5-hour and 7-day); the tighter one governs. Cruise holds back a weekly **headroom** (default 5pp) so Claude Code doesn't consume the budget your chat and Cowork sessions also draw on.
+Every rate-limit window exposed by the runtime is paced; the tighter one governs. Claude currently exposes 5-hour and 7-day windows. Codex windows are discovered from app-server and retain their reported durations. Cruise holds back **headroom** (default 5pp on the long window) for other account surfaces.
 
-The throttle reads a small cache (`~/.claude/quota-state.json`) that only a statusline can produce — so cruise writes the statusline for you on first run (create-if-absent, and it never touches an existing one).
+The throttle reads a small runtime-owned cache. Claude uses `~/.claude/quota-state.json` produced by its statusline; Codex uses `~/.codex/quota-state.json` produced from `account/rateLimits/read`. Producers write atomically and the throttle fails open when data is unavailable.
 
 ## Configure
 
@@ -51,7 +52,7 @@ Optional. Knobs resolve project → machine → built-in defaults, with env vars
 }
 ```
 
-Save it at `.claude/cruise.config.json` (per project) or `~/.claude/cruise.config.json` (per machine). `max_sleep_s: 0` pauses pacing without uninstalling.
+Save it under the active runtime: `.claude/cruise.config.json` or `~/.claude/cruise.config.json` for Claude; `.codex/cruise.config.json` or `~/.codex/cruise.config.json` for Codex. `max_sleep_s: 0` pauses pacing without uninstalling.
 
 ## Honest limits
 

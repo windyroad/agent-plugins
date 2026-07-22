@@ -6,7 +6,7 @@ consulted: [wr-architect:agent]
 informed: []
 reassessment-date: 2026-10-09
 human-oversight: confirmed
-oversight-date: 2026-07-11
+oversight-date: 2026-07-22
 ---
 
 # Self-installing quota-state producer (SessionStart guarded-statusline edit)
@@ -59,6 +59,8 @@ The `@windyroad/cruise` throttle (ADR-093) reads `~/.claude/quota-state.json`, w
 
 Behavioural bats: absent → created + `settings.json` wired; present-missing-block → guarded-append exactly once (idempotent on re-run); foreign complex statusline → agent-merge path taken (no blind append); no `.rate_limits` → no-op, session unbroken; **uninstall → the guarded block is removed and (if cruise wired it) `settings.json` is unwired, leaving no trace**; `max_sleep_s: 0` (config) pauses pacing without touching the statusline. Verified against STORY-043's acceptance criteria before it transitions to done.
 
+Codex confirmation adds: SessionStart never writes under `~/.claude`; app-server binary selection follows `CODEX_BINARY` → macOS app bundle → `PATH`; reads time out and fail open; cache writes are atomic; and package uninstall removes only a default cache carrying the `codex-app-server` source marker.
+
 ## Pros and Cons of the Options
 
 ### Option 1 — A separate opt-out knob (env/config disables self-install, plugin stays)
@@ -80,3 +82,9 @@ Two mechanics were refined while building the self-installer + throttle; both st
 
 1. **Present statusline → agent-merge, NOT guarded-append.** The indicative "idempotently append a guarded block when present but missing our code" above is superseded for the *present* case: a live statusline has already consumed stdin, so an appended stdin-reading block would run empty (broken). The shipped self-installer instead: **absent** → create the statusline + wire `settings.json`; **already a producer** (writes the cache) → no-op; **present non-producer** → a once-only SessionStart agent-merge instruction (human-watched), and it NEVER blind-appends. Verified by `packages/cruise/test/quota-state-producer-install.bats` (7 green).
 2. **No kill-switch.** All references above to a throttle kill-switch (`WR_QUOTA_THROTTLE_DISABLE`) are retired (user direction 2026-07-10): the glide only ever slows and never blocks, so there is nothing to escape; pacing is disabled via config `max_sleep_s: 0`, and the producer is reversed by uninstalling. The env-switch existed for the declined deny-backstop.
+
+## Amendment 2026-07-22 — Codex app-server producer
+
+Codex does not use the Claude statusline producer. On Codex, the SessionStart hook must not write `~/.claude`; it initializes `~/.codex/quota-state.json` from the authenticated Codex app-server instead. It also atomically writes a mode-0600 `.pace` numeric sidecar with the normalized windows and write timestamp for the latency-bounded frequent hook; neither file contains credentials or raw account data. Subsequent stale refreshes are single-flight background reads started by the existing PreToolUse hook, while the on-demand status command may refresh synchronously. The producer calls `account/rateLimits/read`, prefers `CODEX_BINARY` when supplied, then the ChatGPT app-bundled Codex binary on macOS, then `codex` on `PATH`; it has a bounded timeout, writes atomically, and fails open.
+
+Codex uninstall through the package installer removes the default cache and its `.pace` sidecar only when the JSON cache carries Cruise's `codex-app-server` source marker. It never removes an arbitrary configured cache path. Claude's statusline mechanism and reversal contract remain unchanged. User direction 2026-07-22 pinned the Codex port; pre-edit architect review confirmed this is an amendment to the existing producer decision, not a new decision.

@@ -6,7 +6,7 @@ consulted: [wr-architect:agent]
 informed: []
 reassessment-date: 2026-10-09
 human-oversight: confirmed
-oversight-date: 2026-07-10
+oversight-date: 2026-07-22
 ---
 
 # Cruise config file — layered precedence (project → machine → defaults)
@@ -57,6 +57,8 @@ The precedence (project → machine → defaults, env last-override), the locati
 
 Behavioural bats: project config overrides machine config overrides built-in default (per key); env var trumps both; missing/malformed config → fall through to defaults, throttle still runs (fail-open); a config file is never sourced (a shell metacharacter in a value cannot execute). Verified against STORY-042's config criterion before it transitions to done.
 
+Codex confirmation repeats the same precedence against `.codex` project/machine roots and asserts Claude and Codex defaults never read the other runtime's config or cache path.
+
 ## Pros and Cons of the Options
 
 ### Option 1 — JSON (chosen)
@@ -74,3 +76,7 @@ Behavioural bats: project config overrides machine config overrides built-in def
 ## Reassessment Criteria
 
 Revisit if the knob set grows beyond simple scalars (nested structure would favour a richer format), or if `jq` is ever dropped as a dependency, or if adopters report the JSON hand-edit friction outweighs the security benefit.
+
+## Amendment 2026-07-22 — runtime-specific config roots
+
+The same JSON keys and precedence apply on Codex, but runtime-owned paths follow the active runtime: project `.codex/cruise.config.json`, machine `${CODEX_HOME:-~/.codex}/cruise.config.json`, and default cache `${CODEX_HOME:-~/.codex}/quota-state.json`. Claude retains `.claude/cruise.config.json`, `~/.claude/cruise.config.json`, and `~/.claude/quota-state.json`. Environment overrides remain highest precedence for both runtimes. This avoids Cruise reading or mutating the other runtime's config while keeping one key schema and controller.

@@ -3,6 +3,7 @@
 # HOME is redirected to a temp dir so nothing touches the real ~/.claude.
 
 setup() {
+  unset CODEX_THREAD_ID CODEX_HOME CODEX_BINARY
   INST="${BATS_TEST_DIRNAME}/../hooks/quota-state-producer-install.sh"
   export HOME="$(mktemp -d)"
   mkdir -p "$HOME/.claude"

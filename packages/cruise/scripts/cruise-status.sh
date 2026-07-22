@@ -18,13 +18,20 @@ if ! command -v jq >/dev/null 2>&1; then
 fi
 
 # --- config resolution (ADR-098): env → project → machine → default ---
-CFG_P="${PWD}/.claude/cruise.config.json"; CFG_M="${HOME}/.claude/cruise.config.json"
+if [ -n "${CODEX_THREAD_ID:-}" ]; then
+  CODEX_ROOT="${CODEX_HOME:-${HOME}/.codex}"
+  CFG_P="${PWD}/.codex/cruise.config.json"; CFG_M="${CODEX_ROOT}/cruise.config.json"
+  CACHE_DEFAULT="${CODEX_ROOT}/quota-state.json"
+else
+  CFG_P="${PWD}/.claude/cruise.config.json"; CFG_M="${HOME}/.claude/cruise.config.json"
+  CACHE_DEFAULT="${HOME}/.claude/quota-state.json"
+fi
 cfg() { local k="$1" d="$2" e="$3" f v; [ -n "$e" ] && { printf '%s' "$e"; return; }
   for f in "$CFG_P" "$CFG_M"; do [ -r "$f" ] || continue
     v=$(jq -r --arg k "$k" '.[$k] // empty' "$f" 2>/dev/null)
     case "$v" in ''|null) : ;; *) printf '%s' "$v"; return;; esac; done; printf '%s' "$d"; }
 isint() { case "$1" in ''|*[!0-9]*) return 1;; *) return 0;; esac; }
-CACHE=$(cfg cache_path "${HOME}/.claude/quota-state.json" "${WR_QUOTA_CACHE_FILE:-}")
+CACHE=$(cfg cache_path "$CACHE_DEFAULT" "${WR_QUOTA_CACHE_FILE:-}")
 HD7=$(cfg headroom_7d_pp 5 "${WR_QUOTA_HEADROOM_7D_PP:-}"); isint "$HD7" || HD7=5
 HD5=$(cfg headroom_5h_pp 0 "${WR_QUOTA_HEADROOM_5H_PP:-}"); isint "$HD5" || HD5=0
 CEIL=$(cfg max_sleep_s 600 "${WR_QUOTA_THROTTLE_MAX_SLEEP:-}"); isint "$CEIL" || CEIL=600
@@ -32,21 +39,26 @@ CEIL=$(cfg max_sleep_s 600 "${WR_QUOTA_THROTTLE_MAX_SLEEP:-}"); isint "$CEIL" ||
 echo "@windyroad/cruise — quota pacing status"
 echo ""
 
+if [ -n "${CODEX_THREAD_ID:-}" ]; then
+  PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)}"
+  command -v node >/dev/null 2>&1 && node "$PLUGIN_ROOT/scripts/codex-quota-state.mjs" "$CACHE" >/dev/null 2>&1
+  now=$(date +%s 2>/dev/null)
+fi
+
 # --- cache health ---
 if [ ! -r "$CACHE" ]; then
   echo "  ⚠ No quota cache at $CACHE."
-  echo "    The throttle is FAIL-OPEN (not pacing). Install/repair the statusline producer,"
-  echo "    or run a Pro/Max session so Claude Code exposes .rate_limits to the statusline."
+  echo "    The throttle is FAIL-OPEN (not pacing). Restart the runtime or repair its quota producer."
   exit 0
 fi
 mtime=$(stat -c %Y "$CACHE" 2>/dev/null || stat -f %m "$CACHE" 2>/dev/null)  # GNU form first, BSD fallback
 age="?"; case "$mtime" in *[!0-9]*|'') : ;; *) age=$(( now - mtime ));; esac
-read -r fu fr wu wr_ < <(jq -r '[.five_used_pct,.five_resets_at,.week_used_pct,.week_resets_at]|map(tostring)|join(" ")' "$CACHE" 2>/dev/null)
-for v in "$fu" "$fr" "$wu" "$wr_"; do case "$v" in ''|null|*[!0-9.]*) echo "  ⚠ Cache is malformed — throttle fail-open."; exit 0;; esac; done
+read -r fu fr wu wr_ WL5 WL7 < <(jq -r '[.five_used_pct,.five_resets_at,.week_used_pct,.week_resets_at,(.five_window_s // 18000),(.week_window_s // 604800)]|map(tostring)|join(" ")' "$CACHE" 2>/dev/null)
+for v in "$fu" "$fr" "$wu" "$wr_" "$WL5" "$WL7"; do case "$v" in ''|null|*[!0-9.]*) echo "  ⚠ Cache is malformed — throttle fail-open."; exit 0;; esac; done
 fu=${fu%%.*}; wu=${wu%%.*}
 
 # --- per-session throttle state (the sleep it's injecting now) ---
-sid="${CLAUDE_SESSION_ID:-shared}"
+sid="${CODEX_THREAD_ID:-${CLAUDE_SESSION_ID:-shared}}"
 STATE="${WR_QUOTA_MARKER:-${TMPDIR:-/tmp}/wr-quota-throttle-${sid}}"
 cur_s=0 base_ts=0 base_week=-1
 if [ -f "$STATE" ]; then read -r _c base_ts base_week _bf cur_s < "$STATE" 2>/dev/null
@@ -68,15 +80,20 @@ window() { # label used reset W headroom
   local pace=$(( (100-hd)*elapsed/100 )); local ahead=$(( used - pace ))
   local hrs_left=$(( left/3600 )); local hrs_x10=$(( left*10/3600 ))
   local budget=$(( 100-hd-used )); [ "$budget" -lt 0 ] && budget=0
-  local sust_x10="n/a"; [ "$left" -gt 0 ] && sust_x10=$(( budget*10*3600/left ))
   local tag=""; [ "$ahead" -gt 0 ] && tag="+${ahead}pp ahead" || tag="$(( -ahead ))pp behind"
   printf "  %-14s [%s]  used %s%%  ·  pace %s%%  ·  %s\n" "$label" "$(bar "$used" "$pace")" "$used" "$pace" "$tag"
-  printf "  %-14s sustainable %s.%s%%/hr  ·  resets in %s.%sh\n" "" "$((sust_x10/10))" "$((sust_x10%10))" "$((hrs_x10/10))" "$((hrs_x10%10))"
+  if [ "$left" -gt 0 ]; then
+    local sust_x10=$(( budget*10*3600/left ))
+    printf "  %-14s sustainable %s.%s%%/hr  ·  resets in %s.%sh\n" "" "$((sust_x10/10))" "$((sust_x10%10))" "$((hrs_x10/10))" "$((hrs_x10%10))"
+  else
+    printf "  %-14s sustainable n/a  ·  reset passed\n" ""
+  fi
 }
 
 # governing window = the one you're more ahead on
-window "5-hour window" "$fu" "$fr" 18000 "$HD5"
-window "7-day window" "$wu" "$wr_" 604800 "$HD7"
+window_label() { local seconds="$1"; if [ $(( seconds % 86400 )) -eq 0 ]; then echo "$((seconds/86400))-day window"; elif [ $(( seconds % 3600 )) -eq 0 ]; then echo "$((seconds/3600))-hour window"; else echo "$((seconds/60))-minute window"; fi; }
+[ "$WL5" -gt 0 ] && window "$(window_label "$WL5")" "$fu" "$fr" "$WL5" "$HD5"
+[ "$WL7" -gt 0 ] && window "$(window_label "$WL7")" "$wu" "$wr_" "$WL7" "$HD7"
 echo ""
 
 # position (used − linear pace) per window; the most-ahead window governs the label.
@@ -84,7 +101,8 @@ echo ""
 # derive from real position, not from sleep>0 (P446 second dimension).
 pos() { local used="$1" reset="$2" W="$3" hd="$4"; local left=$(( reset-now )); [ "$left" -lt 0 ] && left=0
   local el=$(( (W-left)*100/W )); [ "$el" -gt 100 ] && el=100; echo $(( used - (100-hd)*el/100 )); }
-gov=$(pos "$fu" "$fr" 18000 "$HD5"); wpos=$(pos "$wu" "$wr_" 604800 "$HD7"); [ "$wpos" -gt "$gov" ] && gov=$wpos
+gov=-100; [ "$WL5" -gt 0 ] && gov=$(pos "$fu" "$fr" "$WL5" "$HD5")
+if [ "$WL7" -gt 0 ]; then wpos=$(pos "$wu" "$wr_" "$WL7" "$HD7"); [ "$wpos" -gt "$gov" ] && gov=$wpos; fi
 
 # --- throttle now ---
 if [ "$cur_s" -gt 0 ]; then

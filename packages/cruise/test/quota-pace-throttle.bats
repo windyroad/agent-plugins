@@ -3,6 +3,7 @@
 # A `sleep` shim on PATH records the requested seconds instead of sleeping.
 
 setup() {
+  unset CODEX_THREAD_ID CODEX_HOME CODEX_BINARY
   HOOK="${BATS_TEST_DIRNAME}/../hooks/quota-pace-throttle.sh"
   TMP="$(mktemp -d)"
   export CLAUDE_SESSION_ID=test
@@ -24,6 +25,14 @@ write_cache() {
 }
 # state: check_ts base_ts base_week base_five cur_s
 write_state() { printf '%s %s %s %s %s\n' "$1" "$2" "$3" "$4" "$5" > "$WR_QUOTA_MARKER"; }
+
+@test "a duration-zero window is ignored" {
+  write_state $((NOW-100)) $((NOW-100)) 10 99 0
+  printf '{"five_used_pct":99,"five_resets_at":%s,"five_window_s":0,"week_used_pct":10,"week_resets_at":%s,"week_window_s":604800}' \
+    "$((NOW+100))" "$((NOW+500000))" > "$WR_QUOTA_CACHE_FILE"
+  run bash "$HOOK" </dev/null
+  [ "$status" -eq 0 ]; [ ! -f "$TMP/slept" ]
+}
 
 @test "missing cache fails open (exit 0, no sleep)" {
   run bash "$HOOK" </dev/null
