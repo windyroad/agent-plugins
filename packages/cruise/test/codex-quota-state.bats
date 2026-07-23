@@ -127,12 +127,27 @@ SH
   printf '0 0 29 %s 0 604800 %s\n' "$(( $(date +%s) + 500000 ))" "$(date +%s)" > "$HOME/.codex/quota-state.json.pace"
   printf '{"five_used_pct":11,"five_resets_at":1,"week_used_pct":42,"week_resets_at":1}\n' > "$HOME/.claude/quota-state.json"
 
-  run bash "$THROTTLE" <<< '{"session_id":"codex-payload-session","turn_id":"codex-turn","transcript_path":null,"cwd":"/tmp/project","hook_event_name":"PreToolUse","model":"gpt-test","permission_mode":"bypassPermissions","tool_name":"Bash","tool_input":{"command":"pwd"},"tool_use_id":"exec-test"}'
+  run bash "$THROTTLE" <<< '{"session_id":"codex-payload-session","turn_id":"codex-turn","transcript_path":"/tmp/codex-transcript.jsonl","cwd":"/tmp/project","hook_event_name":"PreToolUse","model":"gpt-test","permission_mode":"bypassPermissions","tool_name":"Bash","tool_input":{"command":"pwd"},"tool_use_id":"exec-test"}'
 
   [ "$status" -eq 0 ]
   [ -f "$TMPDIR/wr-quota-throttle-codex-payload-session" ]
   [ "$(awk '{print $3}' "$TMPDIR/wr-quota-throttle-codex-payload-session")" = "29" ]
+  [ "$(awk '{print $5}' "$TMPDIR/wr-quota-throttle-codex-payload-session")" = "10" ]
   [ ! -e "$TMPDIR/wr-quota-throttle-shared" ]
+}
+
+@test "Claude hook payload with model still selects Claude cache" {
+  unset CODEX_THREAD_ID CODEX_HOME CLAUDE_SESSION_ID WR_QUOTA_MARKER WR_QUOTA_CACHE_FILE
+  export HOME="$TMP/payload-home"
+  export TMPDIR="$TMP/runtime"
+  mkdir -p "$HOME/.codex" "$HOME/.claude" "$TMPDIR"
+  printf '{"five_used_pct":0,"five_resets_at":0,"week_used_pct":29,"week_resets_at":1}\n' > "$HOME/.codex/quota-state.json"
+  printf '{"five_used_pct":11,"five_resets_at":1,"week_used_pct":42,"week_resets_at":1}\n' > "$HOME/.claude/quota-state.json"
+
+  run bash "$THROTTLE" <<< '{"session_id":"claude-payload-session","transcript_path":"/tmp/claude-transcript.jsonl","cwd":"/tmp/project","hook_event_name":"PreToolUse","model":"claude-test","permission_mode":"default","tool_name":"Bash","tool_input":{"command":"pwd"},"tool_use_id":"tool-test"}'
+
+  [ "$status" -eq 0 ]
+  [ "$(awk '{print $3}' "$TMPDIR/wr-quota-throttle-claude-payload-session")" = "42" ]
 }
 
 @test "Codex config precedence is env then project then machine then default" {

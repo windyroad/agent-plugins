@@ -45,7 +45,8 @@ payload_sid=""
 is_codex=0
 if command -v jq >/dev/null 2>&1 && [ -n "$HOOK_INPUT" ]; then
   payload_sid=$(printf '%s' "$HOOK_INPUT" | jq -r '.session_id // empty' 2>/dev/null)
-  payload_runtime=$(printf '%s' "$HOOK_INPUT" | jq -r 'if (.session_id? and .transcript_path == null) then "codex" else "" end' 2>/dev/null)
+  # Codex transcript_path may be null or a path; turn_id is the stable discriminator.
+  payload_runtime=$(printf '%s' "$HOOK_INPUT" | jq -r 'if (.session_id? and .turn_id?) then "codex" else "" end' 2>/dev/null)
   [ "$payload_runtime" = "codex" ] && is_codex=1
 fi
 [ -n "${CODEX_THREAD_ID:-}" ] && is_codex=1
