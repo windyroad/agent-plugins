@@ -34,6 +34,24 @@ function expandHome(path) {
   return path === "~" ? homedir() : path.startsWith("~/") ? join(homedir(), path.slice(2)) : path;
 }
 
+function monthlyWindowDurationMins(resetsAt) {
+  const reset = new Date(resetsAt * 1000);
+  const previousMonthLastDay = new Date(Date.UTC(
+    reset.getUTCFullYear(),
+    reset.getUTCMonth(),
+    0,
+  )).getUTCDate();
+  const previous = Date.UTC(
+    reset.getUTCFullYear(),
+    reset.getUTCMonth() - 1,
+    Math.min(reset.getUTCDate(), previousMonthLastDay),
+    reset.getUTCHours(),
+    reset.getUTCMinutes(),
+    reset.getUTCSeconds(),
+  );
+  return (resetsAt * 1000 - previous) / 60_000;
+}
+
 function query({ binary, label }) {
   return new Promise((resolve, reject) => {
     const child = spawn(binary, ["app-server", "--stdio"], { stdio: ["pipe", "pipe", "ignore"] });
@@ -80,12 +98,29 @@ function query({ binary, label }) {
 
 function normalize(result) {
   const snapshot = result?.rateLimitsByLimitId?.codex || result?.rateLimits;
-  const windows = [snapshot?.primary, snapshot?.secondary]
+  let windows = [snapshot?.primary, snapshot?.secondary]
     .filter((window) => Number.isInteger(window?.usedPercent)
       && Number.isInteger(window?.resetsAt)
       && Number.isInteger(window?.windowDurationMins)
       && window.windowDurationMins > 0)
     .sort((a, b) => a.windowDurationMins - b.windowDurationMins);
+
+  const individual = snapshot?.individualLimit;
+  if (!windows.length
+    && Number.isInteger(individual?.remainingPercent)
+    && individual.remainingPercent >= 0
+    && individual.remainingPercent <= 100
+    && Number.isInteger(individual?.resetsAt)
+    && individual.resetsAt > 0) {
+    const windowDurationMins = monthlyWindowDurationMins(individual.resetsAt);
+    if (Number.isInteger(windowDurationMins) && windowDurationMins > 0) {
+      windows = [{
+        usedPercent: 100 - individual.remainingPercent,
+        resetsAt: individual.resetsAt,
+        windowDurationMins,
+      }];
+    }
+  }
   if (!windows.length) throw new Error("Codex returned no usable quota windows");
 
   const short = windows.length > 1 ? windows[0] : null;

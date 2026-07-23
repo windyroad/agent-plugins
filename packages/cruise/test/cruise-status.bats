@@ -22,6 +22,16 @@ write_state() { printf '%s %s %s %s %s\n' "$1" "$2" "$3" "$4" "$5" > "$WR_QUOTA_
   ! echo "$output" | grep -q "5-hour window"
 }
 
+@test "reports a monthly managed-workspace window without 7d wording" {
+  printf '{"five_used_pct":0,"five_resets_at":0,"five_window_s":0,"week_used_pct":86,"week_resets_at":%s,"week_window_s":2678400}' "$((NOW+700000))" > "$WR_QUOTA_CACHE_FILE"
+  run bash "$SC" </dev/null
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q "31-day window"
+  echo "$output" | grep -q "ahead"
+  echo "$output" | grep -q "headroom short=0pp long=5pp"
+  ! echo "$output" | grep -q "7d reset"
+}
+
 @test "no cache → warns the throttle is fail-open (inert), never errors" {
   run bash "$SC" </dev/null
   [ "$status" -eq 0 ]

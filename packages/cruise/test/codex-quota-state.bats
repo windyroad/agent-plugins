@@ -46,6 +46,43 @@ teardown() { rm -rf "$TMP"; }
   [ "$(jq -r '.week_used_pct' "$CODEX_HOME/quota-state.json")" = "20" ]
 }
 
+@test "normalizes a managed-workspace monthly individual limit" {
+  export FAKE_RATE_LIMITS='{"rateLimitsByLimitId":{"codex":{"primary":null,"secondary":null,"individualLimit":{"limit":"7000","used":"6032.30476641655","remainingPercent":14,"resetsAt":1785542401}}}}'
+  run node "$SCRIPT"
+  [ "$status" -eq 0 ]
+  [ "$(jq -r '.five_window_s' "$CODEX_HOME/quota-state.json")" = "0" ]
+  [ "$(jq -r '.week_used_pct' "$CODEX_HOME/quota-state.json")" = "86" ]
+  [ "$(jq -r '.week_resets_at' "$CODEX_HOME/quota-state.json")" = "1785542401" ]
+  [ "$(jq -r '.week_window_s' "$CODEX_HOME/quota-state.json")" = "2678400" ]
+}
+
+@test "managed-workspace duration follows leap-month and year boundaries" {
+  for case in '1777593600:2592000' '1709251200:2505600' '1798761600:2678400'; do
+    reset=${case%%:*}
+    duration=${case##*:}
+    export FAKE_RATE_LIMITS="{\"rateLimits\":{\"primary\":null,\"individualLimit\":{\"remainingPercent\":50,\"resetsAt\":$reset}}}"
+    run node "$SCRIPT"
+    [ "$status" -eq 0 ]
+    [ "$(jq -r '.week_window_s' "$CODEX_HOME/quota-state.json")" = "$duration" ]
+  done
+}
+
+@test "regular Codex windows take precedence over an individual limit" {
+  export FAKE_RATE_LIMITS='{"rateLimits":{"primary":{"usedPercent":8,"windowDurationMins":10080,"resetsAt":1785258703},"individualLimit":{"remainingPercent":14,"resetsAt":1785542401}}}'
+  run node "$SCRIPT"
+  [ "$status" -eq 0 ]
+  [ "$(jq -r '.week_used_pct' "$CODEX_HOME/quota-state.json")" = "8" ]
+  [ "$(jq -r '.week_window_s' "$CODEX_HOME/quota-state.json")" = "604800" ]
+}
+
+@test "malformed managed-workspace limit fails open without replacing cache" {
+  printf '{"source":"keep"}\n' > "$CODEX_HOME/quota-state.json"
+  export FAKE_RATE_LIMITS='{"rateLimits":{"primary":null,"individualLimit":{"remainingPercent":101,"resetsAt":1785542401}}}'
+  run node "$SCRIPT"
+  [ "$status" -eq 0 ]
+  [ "$(jq -r '.source' "$CODEX_HOME/quota-state.json")" = "keep" ]
+}
+
 @test "malformed quota response fails open without replacing cache" {
   printf '{"source":"keep"}\n' > "$CODEX_HOME/quota-state.json"
   export FAKE_RATE_LIMITS='{"rateLimits":{"primary":null}}'

@@ -121,13 +121,13 @@ else
   echo "  Throttle now:   idle (0s) — $(( -gov ))pp behind pace, full speed"
 fi
 
-# --- projection (measured burn vs sustainable, 7d — the scarce window) ---
+# --- projection (measured burn vs sustainable, long window) ---
 if [ "$base_week" -ge 0 ] && [ "$base_ts" -gt 0 ] && [ $(( now-base_ts )) -ge 60 ] && [ "$wu" -gt "$base_week" ]; then
   dt=$(( now-base_ts )); r_x1000=$(( (wu-base_week)*1000*3600/dt ))     # measured %/hr ×1000
   wleft=$(( wr_-now )); [ "$wleft" -lt 1 ] && wleft=1
   safe_x1000=$(( (100-HD7-wu>0?100-HD7-wu:0)*1000*3600/wleft ))
   if [ "$r_x1000" -le "$safe_x1000" ]; then
-    echo "  Projection:     at your measured burn (~$((r_x1000/1000)).$(( (r_x1000/100)%10 ))%/hr) you glide to the 7d reset with headroom ✓"
+    echo "  Projection:     at your measured burn (~$((r_x1000/1000)).$(( (r_x1000/100)%10 ))%/hr) you glide to the long-window reset with headroom ✓"
   elif [ "$cur_s" -gt 0 ]; then
     echo "  Projection:     measured burn (~$((r_x1000/1000)).$(( (r_x1000/100)%10 ))%/hr) exceeds the sustainable rate — the throttle is slowing you toward it"
   else
@@ -139,7 +139,7 @@ fi
 
 # --- config + health ---
 fresh="fresh"; case "$age" in *[!0-9]*) fresh="age unknown";; *) [ "$age" -gt 1800 ] && fresh="⚠ STALE (${age}s — throttle fail-open)" || fresh="fresh (${age}s ago)";; esac
-echo "  Config:         headroom 5h=${HD5}pp 7d=${HD7}pp  ·  ceiling ${CEIL}s  ·  cache ${fresh}"
+echo "  Config:         headroom short=${HD5}pp long=${HD7}pp  ·  ceiling ${CEIL}s  ·  cache ${fresh}"
 if [ -n "${CODEX_THREAD_ID:-}" ] && [ -r "${CODEX_ROOT}/quota-state.error.json" ]; then
   producer_error=$(jq -r '.error // empty' "${CODEX_ROOT}/quota-state.error.json" 2>/dev/null)
   [ -n "$producer_error" ] && echo "  Producer error: $producer_error"
