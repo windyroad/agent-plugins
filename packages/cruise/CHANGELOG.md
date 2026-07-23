@@ -1,5 +1,11 @@
 # @windyroad/cruise
 
+## 0.4.2
+
+### Patch Changes
+
+- 9712fea: Detect Codex hooks from Codex-specific payload fields so a non-null transcript path cannot make the throttle read Claude quota state.
+
 ## 0.4.1
 
 ### Patch Changes
