@@ -78,11 +78,11 @@ JTBD notes honoured per `wr-jtbd:agent` review:
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-046 | STORY-046: Red-CI denial explains the recovery path | accepted |
+| STORY-046 | STORY-046: Red-CI denial explains the recovery path | in-progress |
 
 
 ## RFCs
 
 | RFC | Status | Title |
 |-----|--------|-------|
-| RFC-049 | accepted | Make the red-CI gate explain the CI-repair recovery path |
+| RFC-049 | in-progress | Make the red-CI gate explain the CI-repair recovery path |

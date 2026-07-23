@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: in-progress
 rfc-id: red-ci-recovery-guidance
 reported: 2026-07-23
 human-oversight: confirmed
@@ -13,7 +13,7 @@ stories: [STORY-046]
 
 # RFC-049: Make the red-CI gate explain the CI-repair recovery path
 
-**Status**: accepted
+**Status**: in-progress (2026-07-23)
 **Reported**: 2026-07-23
 **Problems**: P208
 **JTBD**: JTBD-002 (Ship AI-Assisted Code with Confidence)
@@ -48,4 +48,4 @@ waiting for green, and retrying release; the existing live-outage path remains.
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-046 | STORY-046: Red-CI denial explains the recovery path | accepted |
+| STORY-046 | STORY-046: Red-CI denial explains the recovery path | in-progress |

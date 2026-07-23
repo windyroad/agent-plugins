@@ -29,6 +29,15 @@ A changeset is a candidate for holding in either of two cases:
 
 > Index hygiene 2026-07-04: stale phantom entries (code already released; index never cleaned) removed, and the P403/P401/P136/P371/P413 R009-floor holds reinstated to `.changeset/` for release per the P359 correction (holding does not withhold shipment — the code ships on the next sibling release regardless, so a hold only strips changelog attribution; either withhold properly by reverting, or release). Only genuinely-not-shippable changesets remain below.
 
+- `risk-scorer-red-ci-recovery-guidance.md` — `@windyroad/risk-scorer` patch
+  (P208 / RFC-049 / STORY-046). **Held 2026-07-23** under ADR-042 after the
+  release scorer applied R003's no-dogfood modifier to the load-bearing
+  push/release hook. **Reinstate criterion**: install the exact pushed git tag
+  in an isolated fresh Codex home and observe the completed-red-CI push and
+  release paths remain denied while emitting the ratified recovery guidance;
+  the incident-release path must remain allowed. This is evidence-based, not
+  calendar-based, per P246.
+
 - `wr-itil-p399-fix-time-rfc-full-authoring.md` — `@windyroad/itil` patch (P399 fix-time full-RFC authoring). **RE-HELD 2026-06-29** (was briefly reinstated 2026-06-28 after its evals went GREEN). The user corrected the underlying decision (ADR-073) on 2026-06-29: the RFC must exist BEFORE fix work (RFC-first), authored as stories in a user story map, with options routed to a ratified ADR — NOT auto-authored at fix-time as a Scope/Tasks byproduct. So the P399 `capture-rfc --fix-time` mechanism this changeset ships is itself superseded and must be reworked to the RFC-first model before it can ship. **Reinstate criterion**: the `--fix-time` mechanism is reworked to author the RFC as a pre-implementation story map (per the corrected ADR-073) AND the ADR-073 RFC-first correction is human-ratified. NOT the prior eval-GREEN criterion (that discharged the R009 floor but the mechanism's behaviour is now wrong).
 
 ## Recently reinstated
