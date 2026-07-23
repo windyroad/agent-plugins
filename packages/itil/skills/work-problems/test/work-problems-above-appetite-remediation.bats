@@ -46,17 +46,18 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "SKILL.md references docs/changesets-holding/ (Rule 2a move-to-holding class)" {
-  # The one currently-implemented action class moves changesets to the holding
-  # area. The path must be named so the skill body is unambiguous about target.
+@test "SKILL.md does not use a held-changeset directory as remediation" {
   run grep -n "docs/changesets-holding/" "$SKILL_FILE"
-  [ "$status" -eq 0 ]
+  [ "$status" -ne 0 ]
 }
 
-@test "SKILL.md names the open action-class vocabulary (Rule 2a)" {
-  # "move-to-holding" is the single supported class today; later P108 extends.
-  # The string must appear so the enumeration is greppable.
+@test "SKILL.md does not offer move-to-holding as a remediation" {
   run grep -n "move-to-holding" "$SKILL_FILE"
+  [ "$status" -ne 0 ]
+}
+
+@test "SKILL.md offers shipment-affecting remediation classes" {
+  run grep -nE "split-change|disable-or-revert|revert-commit" "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }
 

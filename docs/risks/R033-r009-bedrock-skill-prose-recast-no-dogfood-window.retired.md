@@ -1,6 +1,6 @@
-# Risk R051: Work Problems Eval Paired Capability Unmet 7Th Time
+# Risk R033: R009 Bedrock Skill Prose Recast No Dogfood Window
 
-**Status**: Active (auto-scaffolded — pending review)
+**Status**: Retired — duplicate of R009; release-delay treatment removed by ADR-099
 **Category**: <!-- pending review — auto-scaffolded from pipeline hint -->
 **Identified**: 2026-06-10
 **Owner**: pending review
@@ -10,7 +10,7 @@
 
 ## Description
 
-brief explicitly cites "7th hold on work-problems SKILL surface — apply ADR-042 Rule 2 move-to-holding if scored above 4/25"; paired capability is the unbuilt `packages/itil/skills/work-problems/eval/promptfooconfig.yaml`; precondition recurring across 7 commits now
+P270 fold-fix re-casts 3 SKILL surfaces + amends bedrock ADR-024 contract; behavioural bats GREEN locally but no in-repo dogfood window yet — same shape as P344/P351/P308 R009-bedrock iter pattern, recurring standing risk worth re-affirming.
 
 > Auto-scaffolded by the Phase 2b drain (ADR-056) from a `wr-risk-scorer:pipeline`
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
@@ -58,8 +58,9 @@ pending review — treatment decision deferred until scoring is curated.
 
 Auto-populated from `.risk-reports/` via Phase 2b drain.
 
-- 2026-06-08T04:40:50Z: fired in `.risk-reports/2026-06-08T04-40-50-commit.md` (reason: user-stated-precondition)
+- 2026-06-04T04:12:18Z: fired in `.risk-reports/2026-06-04T04-12-17-commit.md` (reason: above-appetite-residual)
 
 ## Change Log
 
+- 2026-07-23: Retired. The functional-defect class remains covered by R009; waiting before release is not a control.
 - 2026-06-10: Auto-scaffolded by Phase 2b drain (ADR-056). Pending human curation.

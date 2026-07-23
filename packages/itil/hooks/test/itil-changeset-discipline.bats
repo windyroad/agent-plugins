@@ -229,54 +229,11 @@ run_bash_hook() {
   [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
 }
 
-# --- P177: held-window directory recognition (ADR-042 Rule 7) ---
-#
-# P141's gate purpose is "every publishable iter has a changeset to drain".
-# A `docs/changesets-holding/<name>.md` entry IS a changeset — authored and
-# audit-trailed, just intentionally held outside `.changeset/` per ADR-042
-# Rule 7 (held-window blessing). Before P177 the gate ignored the holding
-# directory (held entries fell through the `*)` catch-all), forcing held-
-# window-bound work through a 2-commit workaround (work commit + a separate
-# `chore(changeset): move ... to holding`). The gate now recognises a staged
-# held entry as satisfying the discipline, mirroring the `.changeset/*.md`
-# branch (and its README.md meta-doc exclusion). Release/drain semantics are
-# unchanged — the Release workflow reads `.changeset/` only; a held entry is
-# recognised at the commit-gate layer, never drained without a graduation
-# `git mv` back into `.changeset/`.
-
-@test "P177 allow: staged packages/<plugin>/ source WITH a staged docs/changesets-holding/ entry allows the commit" {
+@test "ADR-099 deny: a staged legacy holding entry does NOT satisfy changeset discipline" {
   echo "skill body" > packages/itil/skills/foo/SKILL.md
   mkdir -p docs/changesets-holding
-  printf -- '---\n"@windyroad/itil": patch\n---\nheld fix\n' > docs/changesets-holding/wr-itil-p177.md
-  git add packages/itil/skills/foo/SKILL.md docs/changesets-holding/wr-itil-p177.md
-  run run_bash_hook "git commit -m 'feat'"
-  [ "$status" -eq 0 ]
-  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
-}
-
-@test "P177 allow path with held-window entry emits 0 bytes (ADR-045 Pattern 1 silent-on-pass)" {
-  echo "skill body" > packages/itil/skills/foo/SKILL.md
-  mkdir -p docs/changesets-holding
-  printf -- '---\n"@windyroad/itil": patch\n---\nheld fix\n' > docs/changesets-holding/wr-itil-p177.md
-  git add packages/itil/skills/foo/SKILL.md docs/changesets-holding/wr-itil-p177.md
-  run run_bash_hook "git commit -m 'feat'"
-  [ "$status" -eq 0 ]
-  [ "${#output}" -eq 0 ]
-}
-
-@test "P177 deny: staged docs/changesets-holding/README.md alone does NOT count as a valid held changeset" {
-  echo "skill body" > packages/itil/skills/foo/SKILL.md
-  mkdir -p docs/changesets-holding
-  echo "# Changesets Holding Area" > docs/changesets-holding/README.md
-  git add packages/itil/skills/foo/SKILL.md docs/changesets-holding/README.md
-  run run_bash_hook "git commit -m 'feat'"
-  [ "$status" -eq 0 ]
-  [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
-}
-
-@test "P177 deny: staged source with NEITHER .changeset/*.md NOR a holding entry still denies (regression guard)" {
-  echo "skill body" > packages/itil/skills/foo/SKILL.md
-  git add packages/itil/skills/foo/SKILL.md
+  printf -- '---\n"@windyroad/itil": patch\n---\nlegacy metadata\n' > docs/changesets-holding/legacy.md
+  git add packages/itil/skills/foo/SKILL.md docs/changesets-holding/legacy.md
   run run_bash_hook "git commit -m 'feat'"
   [ "$status" -eq 0 ]
   [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
@@ -547,20 +504,6 @@ mark_origin_at_head() {
   [ "$status" -eq 0 ]
   [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
   [[ "$output" == *"itil"* ]]
-}
-
-@test "P141 Phase 2 allow: held-window docs/changesets-holding/*.md in-range entry also covers (ADR-042 Rule 7 composes with Phase 2)" {
-  mark_origin_at_head
-  mkdir -p docs/changesets-holding
-  printf -- '---\n"@windyroad/itil": patch\n---\nheld fix\n' > docs/changesets-holding/wr-itil-p347.md
-  git add docs/changesets-holding/wr-itil-p347.md
-  git -c commit.gpgsign=false commit --quiet -m "held changeset"
-  # Subsequent itil source commit — held entry in range covers.
-  echo "skill body" > packages/itil/skills/foo/SKILL.md
-  git add packages/itil/skills/foo/SKILL.md
-  run run_bash_hook "git commit -m 'feat'"
-  [ "$status" -eq 0 ]
-  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
 }
 
 @test "P141 Phase 2: when no upstream and no origin/main ref exists, Check 2b skips silently and Phase 1 strict-deny is preserved" {

@@ -3,7 +3,7 @@
 **Status**: Known Error
 **Reported**: 2026-06-11
 **Root cause identified**: 2026-06-17 (P359 RCA, this iter — see Root Cause Analysis)
-**Going-forward decision**: ADR-082 (`human-oversight: confirmed` 2026-06-17) — options **(b) real shipment control + (c) reconcile K→V lifecycle** ratified; fix vehicle is RFC-025. Status stays `proposed` (status-flip gated on dependent work landing per ADR-074).
+**Going-forward decision**: ADR-099 (`human-oversight: confirmed` 2026-07-23) — remove held changesets; changesets are release metadata only.
 **Priority**: 15 (High) — Impact: 3 × Likelihood: 5 = 15. Rated at review 2026-07-02: all ~27 held changesets leaking; holds fail their purpose.
 **Origin**: internal
 **Effort**: L. WSJF = (15 × 2.0) / 4 = 7.5 (Known Error ×2.0 multiplier applied 2026-07-15 review).
@@ -81,3 +81,14 @@ The framework then compounds the gap by *describing* the hold as a shipment cont
 ## Ratified Direction - 2026-07-04 interactive decision drain
 
 **SUPERSEDE the changeset-holding mechanism entirely + retire ADR-061** (user decision, 2026-07-04). Holding is theatre - held code ships on the next sibling release regardless, so a hold only strips changelog attribution. Either withhold PROPERLY (revert the code) or release. Remove docs/changesets-holding/, retire ADR-061 (dogfood-graduation-criteria), and rework ADR-042 Rule 2 (above-appetite move-to-holding) to a real resolution (revert / block-until-eval-green / release-with-authorisation). This is P359's ratified fix direction.
+
+## Fix Implemented - 2026-07-23
+
+- ADR-099 supersedes ADR-061 and ADR-082.
+- RFC-025 is retired without implementation.
+- The holding directory, graduation evaluator, hook recognition, release-helper
+  exception, and skill branches are removed.
+- `.changeset/` is the sole release-metadata queue.
+- Above-appetite work must be split, controlled, disabled/reverted, or halted.
+
+Release vehicle: `.changeset/remove-held-changeset-workflow.md`.

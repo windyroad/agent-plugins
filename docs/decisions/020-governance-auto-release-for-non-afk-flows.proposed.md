@@ -11,6 +11,10 @@ reassessment-date: 2026-07-19
 
 # Governance skills auto-release when changesets are queued
 
+> **Amendment 2026-07-23 (ADR-099):** held-changeset and graduation disjuncts
+> below are superseded. The drain considers unpushed commits and entries in
+> `.changeset/` only. Changesets are release metadata, never shipment controls.
+
 ## Context and Problem Statement
 
 Governance skills under ADR-014 (`manage-problem`, `manage-incident`) commit their own completed work — a commit with a changeset is produced by the skill itself at the end of step 11. That commit then sits in the local working tree waiting for the user to run `npm run push:watch` and `npm run release:watch` before the fix lands on npm.

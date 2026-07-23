@@ -1,6 +1,6 @@
-# Risk R027: New Sessionstart Hook Shipped Without Dogfood Window
+# Risk R030: New Deny Surface Shipped Direct To Changeset No Dogfood
 
-**Status**: Active (auto-scaffolded — pending review)
+**Status**: Retired 2026-07-23 — holding-window framing superseded by ADR-099; R003 covers deny-surface landings.
 **Category**: <!-- pending review — auto-scaffolded from pipeline hint -->
 **Identified**: 2026-05-31
 **Owner**: pending review
@@ -10,7 +10,7 @@
 
 ## Description
 
-Graduating p283 oversight changeset ships architect-oversight-nudge.sh SessionStart hook to adopters with the held-changeset dogfood control deliberately removed; release residual 6/25 Medium. Standing class (R003 first-landing modulator); already partially scaffolded as R015/R019/R021 — recommend consolidating into R003's per-action modulator table rather than a new entry.
+external-comms-gate adds `git commit -m` deny surface shipping direct-to-.changeset without held-area dogfood window; R003 modulator + R009 bedrock floor stack at 8/Medium; precedent R015/R019/R020 already capture adjacent patterns
 
 > Auto-scaffolded by the Phase 2b drain (ADR-056) from a `wr-risk-scorer:pipeline`
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
@@ -18,24 +18,25 @@ Graduating p283 oversight changeset ships architect-oversight-nudge.sh SessionSt
 
 ## Recogniser
 
-**Path patterns** (any match → consider this entry; release-stage sibling of R026):
+**Path patterns** (any match → consider this entry):
 
-- `packages/*/hooks/*.sh` (SessionStart event, present in a graduating changeset)
-- `.changeset/*.md` referencing SessionStart hook source where the holding-area sibling has been **graduated** (file moved from `docs/changesets-holding/` to `.changeset/`)
-- `packages/*/hooks/hooks.json` (SessionStart registration present in graduating cohort)
+- `packages/*/hooks/*.sh` (PreToolUse, with new `permissionDecision: "deny"` matcher)
+- `packages/*/hooks/external-comms*.sh` (canonical instance — external-comms gate)
+- `.changeset/*.md` (paired with new deny-surface AND no `docs/changesets-holding/` sibling)
 
 **Diff-content keywords** (any match → consider):
 
-- `SessionStart`
-- `graduated`, `graduating`, `held-changeset dogfood control deliberately removed`
-- `p283`, `oversight changeset` (canonical instance signals)
-- release-stage markers (`changesets-holding/` → `.changeset/` move)
+- `permissionDecision`, `"deny"`, `deny surface`
+- `git commit -m` (canonical instance matcher target)
+- `external-comms-gate`, `external-comms`
+- new-file additions OR new-matcher additions to existing hook adding deny semantics
 
-**Anti-patterns** (looks like R027 but isn't):
+**Anti-patterns** (looks like R030 but isn't):
 
-- First-landing event (commit-stage R026 class) → score as **R026** instead
-- SessionStart hook held in `docs/changesets-holding/` (still dogfooding) → controls firing
-- Recommend per the prefill: consolidate this entry into **R003** per-action modulator table; consider retiring R027 as a duplicate of R015/R019/R021/R026
+- Existing deny-surface *modification* (e.g. expanding an allowlist) → standard **R003**
+- Deny surface WITH paired `docs/changesets-holding/` dogfood window → controls firing; routine R003
+- Advisory-only (no deny — `additionalContext` only) → score as **R026/R015** new-hook class, not deny-surface class
+- Deny surface scope narrowing / loosening (R003 reductions) → score as routine R003 modification
 
 ## Inherent Risk
 
@@ -79,7 +80,7 @@ pending review — treatment decision deferred until scoring is curated.
 
 Auto-populated from `.risk-reports/` via Phase 2b drain.
 
-- 2026-05-25T21:32:11Z: fired in `.risk-reports/2026-05-25T21-32-11-commit.md` (reason: above-appetite-residual)
+- 2026-05-31T06:39:25Z: fired in `.risk-reports/2026-05-31T06-39-25-commit.md` (reason: above-appetite-residual)
 
 ## Change Log
 

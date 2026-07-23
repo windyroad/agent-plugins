@@ -6,9 +6,9 @@
 # surfaces whose GREEN result discharges the R009 prose-surface release-floor
 # for P399 (the first is the work-problems Step 5 case in
 # `packages/itil/skills/work-problems/eval/`; the manage-problem surface case
-# lives in `packages/itil/skills/manage-problem/eval/`). Per ADR-061 Rule 4
-# evidence-floor, a passing Tier-A/Tier-B eval IS the per-class evidence for a
-# SKILL-prose surface — it flips the R009 modulator +1 → -1 for this surface.
+# lives in `packages/itil/skills/manage-problem/eval/`). Per ADR-075, a passing
+# Tier-A/Tier-B eval is the per-class evidence for a SKILL-prose surface and
+# flips the R009 modulator +1 → -1 for this surface.
 #
 # Contract under test (ADR-073 P399 amendment):
 #   - `--fix-time` switches Step 5 from the deferred-placeholder skeleton
@@ -29,8 +29,8 @@
 #   - ADR-075 (Amendment 2026-06-02) — SKILL-prose harness scope; per-skill
 #     `packages/<plugin>/skills/<skill>/eval/promptfooconfig.yaml` location;
 #     exec:bash provider; Tier-A regex + Tier-B llm-rubric.
-#   - ADR-061 (Rule 4 evidence-floor) — paired promptfoo Tier-A/B GREEN IS the
-#     per-class evidence for SKILL-prose surfaces; discharges the R009 floor.
+#   - ADR-075 — paired promptfoo Tier-A/B GREEN is the per-class evidence for
+#     SKILL-prose surfaces and discharges the R009 floor.
 #   - ADR-073 (P399 amendment) — fix-time auto-create authors the full RFC.
 #   - ADR-070 — chosen-path prose only, NO Considered-Options block.
 #   - ADR-071 — every fix goes through an RFC (the mandatory vehicle).
@@ -57,7 +57,6 @@
 # @problem P399
 # @rfc RFC-005
 # @adr ADR-075 (Amendment 2026-06-02)
-# @adr ADR-061 (Rule 4 evidence-floor)
 # @adr ADR-073 (P399 amendment)
 # @adr ADR-070 (no Considered-Options block)
 # @adr ADR-014 (single-commit grain)
@@ -68,8 +67,7 @@ description: |
   authors a populated ## Scope + real ## Tasks derived from the traced
   problem (NOT a deferred-placeholder skeleton), and that the default
   user-aside path still writes the skeleton. Passing eval flips the R009
-  prose-surface modulator +1 → -1 for capture-rfc per ADR-061 Rule 4,
-  discharging the held P399 changeset's reinstate floor.
+  prose-surface modulator +1 → -1 for capture-rfc per ADR-075.
 
 providers:
   # Path is relative to this config file's directory (promptfoo basePath).

@@ -1,16 +1,16 @@
-# Risk R075: New Prose Pattern Hook Detector Shipped Without Dogfood Window
+# Risk R055: R009 Review Problems Skill Prose Bedrock Floor
 
-**Status**: Active (auto-scaffolded — pending review)
+**Status**: Retired — duplicate of R009; release-delay treatment removed by ADR-099
 **Category**: <!-- pending review — auto-scaffolded from pipeline hint -->
-**Identified**: 2026-07-15
+**Identified**: 2026-06-10
 **Owner**: pending review
-**Last reviewed**: 2026-07-15
-**Next review**: 2026-07-15
-**Curation**: pending review (auto-scaffolded 2026-07-15)
+**Last reviewed**: 2026-06-10
+**Next review**: 2026-06-10
+**Curation**: pending review (auto-scaffolded 2026-06-10)
 
 ## Description
 
-New AND-gated Stop-hook detector matching agent natural-language framing reaches adopters with full bats but no held-area dogfood window; recurring new-hook-no-dogfood shape (R003/R015 family)
+P129 Phase 1 review-problems classifier + upgrade-pushback comment-body is an R009 SKILL-prose surface; promptfoo Tier-A/B eval discharges -1 likelihood but R018 bedrock floor keeps residual at Medium until dogfood window closes
 
 > Auto-scaffolded by the Phase 2b drain (ADR-056) from a `wr-risk-scorer:pipeline`
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
@@ -58,8 +58,9 @@ pending review — treatment decision deferred until scoring is curated.
 
 Auto-populated from `.risk-reports/` via Phase 2b drain.
 
-- 2026-07-03T14:16:36Z: fired in `.risk-reports/2026-07-03T14-16-36-commit.md` (reason: above-appetite-residual)
+- 2026-06-08T18:34:30Z: fired in `.risk-reports/2026-06-08T18-34-30-commit.md` (reason: above-appetite-residual)
 
 ## Change Log
 
-- 2026-07-15: Auto-scaffolded by Phase 2b drain (ADR-056). Pending human curation.
+- 2026-07-23: Retired. Promptfoo and installed-runtime evidence control R009 directly; elapsed waiting does not.
+- 2026-06-10: Auto-scaffolded by Phase 2b drain (ADR-056). Pending human curation.

@@ -1,6 +1,6 @@
-# Risk R022: Phase 3A Shipped Ahead Of Held Phase 2 Dependencies
+# Risk R013: Rfc 001 Chain Atomicity Paired Capability Unmet
 
-**Status**: Active (auto-scaffolded — pending review)
+**Status**: Retired 2026-07-23 — holding-based recogniser superseded by ADR-099; R007 covers unmet paired capabilities.
 **Category**: <!-- pending review — auto-scaffolded from pipeline hint -->
 **Identified**: 2026-05-17
 **Owner**: pending review
@@ -10,7 +10,7 @@
 
 ## Description
 
-Phase 3a populate-script changeset authored into .changeset/ while its Phase 2a + Phase 2b NDJSON-producer dependencies remain held in docs/changesets-holding/; precondition chain 2a→2b→3a→3b inverted at the release queue.
+User-stated precondition "entire RFC-001 commit chain ships or doesn't" with held Slices 2-3 framework code as paired capability not graduated; persists until RFC-001 reaches closed post-Slice-5 forward-dogfood
 
 > Auto-scaffolded by the Phase 2b drain (ADR-056) from a `wr-risk-scorer:pipeline`
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
@@ -20,21 +20,22 @@ Phase 3a populate-script changeset authored into .changeset/ while its Phase 2a 
 
 **Path patterns** (any match → consider this entry):
 
-- `.changeset/*.md` AND `docs/changesets-holding/*.md` simultaneously where the active bodies cite a later Phase than the held bodies
-- `.changeset/*.md` bodies citing `Phase N` while sibling holding bodies cite `Phase N-1`
+- `docs/rfcs/RFC-001-*.md` (specifically RFC-001)
+- `docs/changesets-holding/*.md` (where bodies cite RFC-001 Slices 2 or 3)
+- `.changeset/*.md` (where bodies cite RFC-001 Slices 4 or 5 while siblings remain held)
+- `packages/*/{skills,agents,hooks}/*` files altering RFC-001 framework surfaces
 
 **Diff-content keywords** (any match → consider):
 
-- `Phase 2a`, `Phase 2b`, `Phase 3a`, `Phase 3b`
-- `precondition chain`, `precondition`
-- `NDJSON producer`, `producer`, `consumer`
-- `inverted at the release queue`
+- `RFC-001`, `Slice 2`, `Slice 3`, `Slice 4`, `Slice 5`
+- `framework code`, `paired capability`, `forward-dogfood`
+- `entire RFC-001 commit chain` (user-stated precondition phrasing)
 
-**Anti-patterns** (looks like R022 but isn't):
+**Anti-patterns** (looks like R013 but isn't):
 
-- Active Phase chain has NO held siblings (all Phases on the active path) → no inversion possible; routine **R005**
-- Single-Phase ticket (no chain semantics) → routine **R005**
-- Phase 3a + Phase 2 in same active batch (atomic ship) → controls firing; no inversion
+- RFC-001 closed (post-Slice-5 graduation) → no longer applies; retire this entry
+- Other RFC chain (RFC-002+) → score as **R012** (general RFC chain atomicity), not RFC-001-specific R013
+- Single-Slice tweak that doesn't alter the framework surface → routine R005
 
 ## Inherent Risk
 
@@ -78,7 +79,7 @@ pending review — treatment decision deferred until scoring is curated.
 
 Auto-populated from `.risk-reports/` via Phase 2b drain.
 
-- 2026-05-17T06:55:25Z: fired in `.risk-reports/2026-05-17T06-55-25-commit.md` (reason: user-stated-precondition)
+- 2026-05-06T12:15:35Z: fired in `.risk-reports/2026-05-06T12-15-35-commit.md` (reason: user-stated-precondition)
 
 ## Change Log
 

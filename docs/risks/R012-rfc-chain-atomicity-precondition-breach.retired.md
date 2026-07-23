@@ -1,6 +1,6 @@
-# Risk R023: Release Coordination Changeset Drift Phase 3A Ahead Of Phase 2
+# Risk R012: Rfc Chain Atomicity Precondition Breach
 
-**Status**: Active (auto-scaffolded — pending review)
+**Status**: Retired 2026-07-23 — holding-based recogniser superseded by ADR-099; R007 covers unmet preconditions.
 **Category**: <!-- pending review — auto-scaffolded from pipeline hint -->
 **Identified**: 2026-05-17
 **Owner**: pending review
@@ -10,7 +10,7 @@
 
 ## Description
 
-Phase 3a release-coordination drift: dependent script ships before its NDJSON producers; held-area pattern available but not applied; symmetric-cohort hold is the controlling remediation.
+Active changeset graduates ahead of held RFC-001 chain, breaching ADR-060 § Confirmation criterion 6 atomicity contract; standing risk class for any future RFC-shaped held window
 
 > Auto-scaffolded by the Phase 2b drain (ADR-056) from a `wr-risk-scorer:pipeline`
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
@@ -18,25 +18,24 @@ Phase 3a release-coordination drift: dependent script ships before its NDJSON pr
 
 ## Recogniser
 
-**Path patterns** (any match → consider this entry; sibling specialisation of R022 — focus on R005 release coordination):
+**Path patterns** (any match → consider this entry):
 
-- `.changeset/*.md` (with Phase markers in body — `Phase Na`, `Phase Nb`)
-- `docs/changesets-holding/*.md` (held siblings)
-- Dependent source files (`packages/*/scripts/populate-*.sh`) shipping while NDJSON producers stay held
+- `.changeset/*.md` AND `docs/changesets-holding/*.md` simultaneously where the active changeset cites an RFC also represented in holding
+- `docs/rfcs/RFC-*.md` (Status: `accepted` / `in-progress` with chain-atomicity confirmation criteria)
+- `docs/rfcs/README.md` (Phase / Slice progression rows)
 
 **Diff-content keywords** (any match → consider):
 
-- `Phase 2a`, `Phase 2b`, `Phase 3a` (Phase-marker phrasing)
-- `symmetric-cohort hold`, `cohort hold`
-- `release coordination`, `release queue`
-- `dependent script`, `producer`, `consumer`
+- `RFC-NNN`, `Phase N`, `Slice N`
+- `chain`, `atomicity`, `Confirmation criterion`
+- `precondition` (in changeset bodies)
+- `paired capability` (ADR-060 vocabulary)
 
-**Anti-patterns** (looks like R023 but isn't):
+**Anti-patterns** (looks like R012 but isn't):
 
-- Pure dependency-graph violation INSIDE a Phase (no chain across Phases) → routine **R005**
-- Atomic-cohort ship (all dependencies in same active batch) → controls firing; symmetric-cohort hold applied
-- Dependent script + producers all in `docs/changesets-holding/` together → controls firing
-- Specifically RFC-001 chain context → score as **R012/R013** RFC chain atomicity instead
+- Standalone RFC (not chain-shaped — single-Slice scope) → routine release; no atomicity breach possible
+- All chain Slices in same active batch (atomic ship) → controls firing; score as routine R005 release coordination
+- RFC closed (post-final-Slice) with no held siblings → no longer in scope; ADR-060 atomicity not at risk
 
 ## Inherent Risk
 
@@ -80,7 +79,7 @@ pending review — treatment decision deferred until scoring is curated.
 
 Auto-populated from `.risk-reports/` via Phase 2b drain.
 
-- 2026-05-17T06:55:25Z: fired in `.risk-reports/2026-05-17T06-55-25-commit.md` (reason: above-appetite-residual)
+- 2026-05-06T12:15:35Z: fired in `.risk-reports/2026-05-06T12-15-35-commit.md` (reason: above-appetite-residual)
 
 ## Change Log
 

@@ -11,6 +11,10 @@ reassessment-date: 2026-07-18
 
 # Inter-iteration release cadence for AFK loops
 
+> **Amendment 2026-07-23 (ADR-099):** held-changeset and graduation disjuncts
+> below are superseded. Releasable material means unpushed commits or entries
+> in `.changeset/`. Changesets are release metadata, never shipment controls.
+
 ## Context and Problem Statement
 
 `/wr-itil:work-problems` and any future AFK orchestrator (e.g. a hypothetical

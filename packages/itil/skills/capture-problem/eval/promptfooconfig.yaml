@@ -3,9 +3,7 @@
 # 2026-06-02).
 #
 # Tier A deterministic regex + Tier B llm-rubric coverage for 6 contracts on
-# the capture-problem SKILL.md surface — each contract corresponds to a held
-# changeset in `docs/changesets-holding/` whose Reinstate criterion (per
-# ADR-061 Rule 4 evidence-floor) names this exact eval path:
+# the capture-problem SKILL.md surface:
 #
 #   - Step 6 P199 Option 2 inline README staging: `docs/problems/README.md`
 #     stages inline in the same single ADR-014-grain commit as the new
@@ -43,11 +41,8 @@
 #   - ADR-075 (Amendment 2026-06-02) — SKILL-prose harness scope; per-skill
 #     `packages/<plugin>/skills/<skill>/eval/promptfooconfig.yaml`
 #     location; exec:bash provider; Tier-A regex + Tier-B llm-rubric.
-#   - ADR-061 (Rule 4 evidence-floor) — paired promptfoo Tier-A/B GREEN IS
-#     the per-class evidence for SKILL-prose surfaces; flips the R009
-#     modulator +1 → -1 for this surface, dropping P199 + P350-itil
-#     capture-problem-portion + P352-itil capture-problem-portion atomically
-#     per cohort-graduation pre-check (ADR-061 Rule 3b).
+#   - ADR-075 — paired promptfoo Tier-A/B GREEN is the per-class evidence
+#     floor for SKILL-prose surfaces and flips the R009 modulator +1 → -1.
 #   - ADR-014 (single-commit grain) — this eval file ships in the same
 #     commit as its companion runners (no `.changeset/*.md` — eval test
 #     infrastructure excluded from the tarball via packages/itil/.npmignore
@@ -69,8 +64,7 @@
 #     (P352).
 #   - RFC-012 — single build vehicle for the harness.
 #   - P324 (driving problem — agent-prose verdict harness gap).
-#   - P199 / P350 / P352 (held changesets this eval discharges per
-#     ADR-061 Rule 4).
+#   - P199 / P350 / P352 (behavioural contracts covered by this eval).
 #
 # Tier-B (llm-rubric) grader: the capture-problem contracts contain heavy
 # NEGATIVE clauses ("does NOT halt"; "does NOT branch"; "MUST NOT leak the
@@ -95,7 +89,6 @@
 # @problem P352
 # @rfc RFC-012
 # @adr ADR-075 (Amendment 2026-06-02)
-# @adr ADR-061 (Rule 4 evidence-floor)
 # @adr ADR-032 (5th invocation pattern — fresh-context-subagent arbiter)
 # @adr ADR-031 (per-state-subdir layout)
 # @adr ADR-044 (decision-delegation contract)
@@ -106,12 +99,9 @@
 description: |
   capture-problem SKILL eval — Tier-A regex + Tier-B llm-rubric coverage for
   6 foreground-lightweight-capture behavioural contracts on the
-  capture-problem SKILL surface. Each test case asserts one held-changeset
-  Reinstate criterion per ADR-061 Rule 4 evidence-floor: passing eval flips
-  the R009 prose-surface modulator +1 → -1 for `capture-problem`, dropping
-  the held cohort (P199 + P350 capture-problem-portion + P352
-  capture-problem-portion) within appetite atomically per cohort-graduation
-  pre-check.
+  capture-problem SKILL surface. Passing eval satisfies the ADR-075 evidence
+  floor and flips the R009 prose-surface modulator +1 → -1 for
+  `capture-problem`.
 
 providers:
   # Path is relative to this config file's directory (promptfoo basePath).

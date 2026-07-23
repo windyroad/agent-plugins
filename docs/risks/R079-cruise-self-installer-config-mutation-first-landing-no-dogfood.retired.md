@@ -1,16 +1,16 @@
-# Risk R055: R009 Review Problems Skill Prose Bedrock Floor
+# Risk R079: Cruise Self Installer Config Mutation First Landing No Dogfood
 
-**Status**: Active (auto-scaffolded — pending review)
+**Status**: Retired — release-delay treatment removed by ADR-099
 **Category**: <!-- pending review — auto-scaffolded from pipeline hint -->
-**Identified**: 2026-06-10
+**Identified**: 2026-07-15
 **Owner**: pending review
-**Last reviewed**: 2026-06-10
-**Next review**: 2026-06-10
-**Curation**: pending review (auto-scaffolded 2026-06-10)
+**Last reviewed**: 2026-07-15
+**Next review**: 2026-07-15
+**Curation**: pending review (auto-scaffolded 2026-07-15)
 
 ## Description
 
-P129 Phase 1 review-problems classifier + upgrade-pushback comment-body is an R009 SKILL-prose surface; promptfoo Tier-A/B eval discharges -1 likelihood but R018 bedrock floor keeps residual at Medium until dogfood window closes
+New default-installed SessionStart self-installer edits adopter ~/.claude/ statusline+settings; first-landing, no dogfood window, adopter-config-diversity failure mode un-exercised by maintainer-shape bats; release residual 8/25 Medium, above 5 appetite.
 
 > Auto-scaffolded by the Phase 2b drain (ADR-056) from a `wr-risk-scorer:pipeline`
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
@@ -58,8 +58,9 @@ pending review — treatment decision deferred until scoring is curated.
 
 Auto-populated from `.risk-reports/` via Phase 2b drain.
 
-- 2026-06-08T18:34:30Z: fired in `.risk-reports/2026-06-08T18-34-30-commit.md` (reason: above-appetite-residual)
+- 2026-07-11T02:17:32Z: fired in `.risk-reports/2026-07-11T02-17-32-commit.md` (reason: above-appetite-residual)
 
 ## Change Log
 
-- 2026-06-10: Auto-scaffolded by Phase 2b drain (ADR-056). Pending human curation.
+- 2026-07-23: Retired. Cruise installer risk is controlled by configuration-diversity fixtures and packaged runtime smoke tests, not elapsed waiting.
+- 2026-07-15: Auto-scaffolded by Phase 2b drain (ADR-056). Pending human curation.

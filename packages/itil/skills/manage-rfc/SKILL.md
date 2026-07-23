@@ -259,11 +259,7 @@ Satisfy the commit gate per ADR-014 — primary path delegates to `wr-risk-score
 
 ### 12. Auto-release (skip in AFK orchestrator)
 
-Same conditional drain as `manage-problem` Step 12: if not in an AFK orchestrator AND `.changeset/` is non-empty AND push/release within appetite, run `npm run push:watch` then `npm run release:watch`. Held-changeset window per ADR-042 / P162 governs which changesets graduate; RFC-shaped held changesets graduate atomically per ADR-060 architect finding 12.
-
-## Held-changeset window scope (Phase 1)
-
-Phase 1 of the RFC framework (Slices 2-5 per `docs/plans/170-rfc-framework-story-map.md`) ships under a held-changeset window. ADR-042 auto-apply is paused until RFC-001 (P168 retro) reaches `closed` status. Counterfactual risk assessment per P162 governs graduation: delay-risk vs release-risk. The full chain graduates atomically — the entire RFC-001 commit chain ships or nothing does.
+Same conditional drain as `manage-problem` Step 12: if not in an AFK orchestrator AND `.changeset/` is non-empty AND push/release are within appetite, run `npm run push:watch` then `npm run release:watch`.
 
 ## Composition with capture-rfc
 
@@ -291,7 +287,7 @@ The two skills share the `/tmp/wr-itil-rfc-capture-grep-${SESSION_ID}` create-ga
 - **ADR-022** — lifecycle suffix-based (RFC mirrors).
 - **ADR-032** — lightweight + heavyweight split.
 - **ADR-038** — progressive disclosure; future REFERENCE.md split deferred per ADR-054.
-- **ADR-042** — held-changeset auto-apply; window discipline.
+- **ADR-042** — above-appetite remediation and halt discipline.
 - **ADR-044** — decision delegation contract; authority classes.
 - **ADR-049** — `wr-itil-reconcile-rfcs` shim grammar (Slice 3).
 - **ADR-051** — load-bearing-from-the-start; I1 hard-block on day one.
@@ -304,4 +300,4 @@ The two skills share the `/tmp/wr-itil-rfc-capture-grep-${SESSION_ID}` create-ga
 - **P134** — Last-reviewed line discipline (single fragment + history archive).
 - **P138** — tie-break ladder consistency.
 - **P150** — Verification Queue sort direction.
-- **P162** — held-changeset graduation criteria.
+- **P359** — changeset holding does not withhold shipped code.

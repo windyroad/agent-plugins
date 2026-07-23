@@ -47,7 +47,7 @@ Per `RISK-POLICY.md` (without controls):
 |---------|-------------|--------|---------------:|---------------------------|
 | `pipeline.md` `## User-Stated Preconditions Check` mandatory section | Every per-action assessment (scorer is required to scan recent conversation + tickets + changesets + CLAUDE.md) | 1 | -1 likelihood | Bump +2 (the check is foundational; skipping it is structural failure) |
 | `/wr-risk-scorer:assess-release` skill | User explicitly invokes for pre-release sweep | 2 | -1 likelihood | Bump +1 |
-| Held-changeset pattern for paired-capability case | Paired capability is in flight; changeset held until paired capability ships | 3 | -1 likelihood | Bump +1 (paired capability not yet shipped means precondition unmet) |
+| Shipment-affecting dependency control | Paired capability is in flight; dependent behaviour is disabled/reverted or the commit is blocked until the capability ships | 3 | -1 likelihood | Bump +1 (paired capability not yet shipped means precondition unmet) |
 | Briefing memory items naming cross-cutting dependencies | Always (declarative; surfaces at SessionStart) | n/a (declarative) | 0 paths | Lower author-mindfulness |
 
 Lifetime residual likelihood = 1 (Rare; capped at floor) when all three paths fire.
@@ -61,14 +61,14 @@ Adjust likelihood for THIS action's specifics (composition: max-pessimistic):
 | Recent conversation includes verbatim "only safe if" / "don't release until" / "paired" language naming a paired capability | 0 (the check is about to fire) | Surfaces the precondition; not a band-shift |
 | Paired capability status: NOT YET SHIPPED at this moment | +2 | Precondition unmet; this is the load-bearing high-residual case |
 | Paired capability status: shipped in a prior session, can be cited by SHA | -1 | Empirical evidence of paired-capability presence |
-| Held-changeset for paired capability is in `docs/changesets-holding/` with reinstate trigger naming this commit's paired surface | 0 (held-changeset pattern is the right shape) | Documented control fire |
+| Dependent behaviour is disabled/reverted or not committed until the paired capability ships | 0 | Shipment-affecting control fire |
 | User has not stated any preconditions in scope of this action | -2 (floor 1) | No precondition class to fire on |
 
 ## Residual risk
 
 Residual reflects controls firing-and-passing (per-action lens):
 
-- **Likelihood after controls**: 1 (Rare) — pipeline.md mandatory check fires every assessment; held-changeset pattern parks unmet-precondition cases.
+- **Likelihood after controls**: 1 (Rare) — pipeline.md mandatory check fires every assessment and shipment-affecting controls block unmet-precondition cases.
 - **Residual score**: 4
 - **Residual band**: Low — at appetite.
 

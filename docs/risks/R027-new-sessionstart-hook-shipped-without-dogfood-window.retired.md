@@ -1,6 +1,6 @@
-# Risk R026: New Sessionstart Hook First Landing No Dogfood Window
+# Risk R027: New Sessionstart Hook Shipped Without Dogfood Window
 
-**Status**: Active (auto-scaffolded — pending review)
+**Status**: Retired 2026-07-23 — holding/graduation framing superseded by ADR-099; R003 covers SessionStart changes.
 **Category**: <!-- pending review — auto-scaffolded from pipeline hint -->
 **Identified**: 2026-05-31
 **Owner**: pending review
@@ -10,7 +10,7 @@
 
 ## Description
 
-New SessionStart nudge hook (architect-oversight-nudge.sh) lands direct into package without held-area dogfood; R003 new-hook modulator + absent dogfood control hold commit/push residual at 8/25 Medium. Distinct from R020 (PreToolUse:Bash gate class) — this is the SessionStart additionalContext class with exit-0-always self-suppressing envelope.
+Graduating p283 oversight changeset ships architect-oversight-nudge.sh SessionStart hook to adopters with the held-changeset dogfood control deliberately removed; release residual 6/25 Medium. Standing class (R003 first-landing modulator); already partially scaffolded as R015/R019/R021 — recommend consolidating into R003's per-action modulator table rather than a new entry.
 
 > Auto-scaffolded by the Phase 2b drain (ADR-056) from a `wr-risk-scorer:pipeline`
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
@@ -18,27 +18,24 @@ New SessionStart nudge hook (architect-oversight-nudge.sh) lands direct into pac
 
 ## Recogniser
 
-**Path patterns** (any match → consider this entry):
+**Path patterns** (any match → consider this entry; release-stage sibling of R026):
 
-- `packages/*/hooks/*.sh` (new file, SessionStart event)
-- `packages/*/hooks/*-nudge.sh`, `packages/*/hooks/*-oversight*.sh` (canonical SessionStart nudge naming)
-- `packages/*/hooks/hooks.json` (new SessionStart event registration)
-- `.changeset/*.md` paired with new SessionStart hook AND no `docs/changesets-holding/` sibling
+- `packages/*/hooks/*.sh` (SessionStart event, present in a graduating changeset)
+- `.changeset/*.md` referencing SessionStart hook source where the holding-area sibling has been **graduated** (file moved from `docs/changesets-holding/` to `.changeset/`)
+- `packages/*/hooks/hooks.json` (SessionStart registration present in graduating cohort)
 
 **Diff-content keywords** (any match → consider):
 
 - `SessionStart`
-- `additionalContext`, `hookSpecificOutput`
-- `nudge`, `oversight`
-- `exit 0` self-suppressing envelope on the SessionStart path
-- new-file additions under `packages/*/hooks/` declaring `SessionStart`
+- `graduated`, `graduating`, `held-changeset dogfood control deliberately removed`
+- `p283`, `oversight changeset` (canonical instance signals)
+- release-stage markers (`changesets-holding/` → `.changeset/` move)
 
-**Anti-patterns** (looks like R026 but isn't):
+**Anti-patterns** (looks like R027 but isn't):
 
-- PreToolUse:Bash matcher (not SessionStart) → score as **R020** Bash-gate class instead
-- PreToolUse:Edit/Write hook → score as **R015** generic new-hook class
-- Existing SessionStart hook *modification* → standard **R003** (no first-landing modulator)
-- New SessionStart hook WITH paired `docs/changesets-holding/` dogfood window → controls firing
+- First-landing event (commit-stage R026 class) → score as **R026** instead
+- SessionStart hook held in `docs/changesets-holding/` (still dogfooding) → controls firing
+- Recommend per the prefill: consolidate this entry into **R003** per-action modulator table; consider retiring R027 as a duplicate of R015/R019/R021/R026
 
 ## Inherent Risk
 
@@ -82,8 +79,7 @@ pending review — treatment decision deferred until scoring is curated.
 
 Auto-populated from `.risk-reports/` via Phase 2b drain.
 
-- 2026-05-24T22:06:33Z: fired in `.risk-reports/2026-05-24T22-06-33-commit.md` (reason: above-appetite-residual)
-- 2026-06-08T07:07:17Z: fired in `.risk-reports/2026-06-08T07-07-17-commit.md` (reason: above-appetite-residual)
+- 2026-05-25T21:32:11Z: fired in `.risk-reports/2026-05-25T21-32-11-commit.md` (reason: above-appetite-residual)
 
 ## Change Log
 

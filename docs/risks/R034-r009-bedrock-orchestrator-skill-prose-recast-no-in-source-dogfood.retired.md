@@ -1,6 +1,6 @@
-# Risk R032: Orchestrator Layer Graduation Gate Prose No Dogfood Window
+# Risk R034: R009 Bedrock Orchestrator Skill Prose Recast No In Source Dogfood
 
-**Status**: Active (auto-scaffolded — pending review)
+**Status**: Retired 2026-07-23 — holding-window treatment superseded by ADR-099; R009 covers prose defects.
 **Category**: <!-- pending review — auto-scaffolded from pipeline hint -->
 **Identified**: 2026-06-10
 **Owner**: pending review
@@ -10,7 +10,7 @@
 
 ## Description
 
-New work-problems Step 6.5 evidence-floor judgement surface ships direct-to-changeset at R009 bedrock 8/25 Medium with no held-area dogfood window; recurring sibling shape with P344/P351 jtbd/itil orchestrator-layer surfaces.
+ADR-024 bedrock contract amendment + 3 SKILL surface re-cast pushed to source carries the R009/R018 8/25 bedrock floor; held-changeset gates release but not the source push — recurring orchestrator-layer skill-prose-recast class (P344/P351/P308/P270 same session shape).
 
 > Auto-scaffolded by the Phase 2b drain (ADR-056) from a `wr-risk-scorer:pipeline`
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
@@ -58,7 +58,7 @@ pending review — treatment decision deferred until scoring is curated.
 
 Auto-populated from `.risk-reports/` via Phase 2b drain.
 
-- 2026-06-03T04:16:46Z: fired in `.risk-reports/2026-06-03T04-16-46-commit.md` (reason: above-appetite-residual)
+- 2026-06-04T04:25:52Z: fired in `.risk-reports/2026-06-04T04-25-52-commit.md` (reason: above-appetite-residual)
 
 ## Change Log
 

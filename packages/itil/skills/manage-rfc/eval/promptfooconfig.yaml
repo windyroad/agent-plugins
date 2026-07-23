@@ -1,0 +1,25 @@
+description: |
+  manage-rfc SKILL eval for ADR-099 changeset semantics.
+
+providers:
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: ADR-099 manage-rfc drains only real changesets and has no held window
+    vars:
+      prompt: |
+        I am executing /wr-itil:manage-rfc after a commit. Explain the
+        auto-release condition and whether I should move release metadata into
+        a held directory when risk is above appetite.
+    assert:
+      - type: contains
+        value: '.changeset/'
+      - type: not-regex
+        value: 'git\s+mv[\s\S]{0,120}changesets-holding'
+      - type: regex
+        value: '[Nn]o[\s\S]{0,100}(held|holding)|[Dd]o\s+not\s+(hold|move)'
+      - type: regex
+        value: '[Ss]plit|[Dd]isable|[Rr]evert|[Rr]educ(?:e|ing)|[Hh]alt'

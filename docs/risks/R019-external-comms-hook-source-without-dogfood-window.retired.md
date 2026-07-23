@@ -1,6 +1,6 @@
-# Risk R011: Load Bearing Commit Hook First Release Blast Radius
+# Risk R019: External Comms Hook Source Without Dogfood Window
 
-**Status**: Active (auto-scaffolded — pending review)
+**Status**: Retired 2026-07-23 — holding-window framing superseded by ADR-099; R003 covers hook changes.
 **Category**: <!-- pending review — auto-scaffolded from pipeline hint -->
 **Identified**: 2026-05-17
 **Owner**: pending review
@@ -10,7 +10,7 @@
 
 ## Description
 
-First load-bearing commit-hook on wr-retrospective (P159) shipping with auto-fix path; release-side blast radius is standing risk for any new gate-class hook published to users
+Hook source change replacing cached-key derivation across 2 plugins shipping single-commit without held-changeset dogfood; R003 modulator stack lands at 8/25 even with bats + architect-twice + ADR-056 dual-parse because no in-commit runtime exercise of external-comms surface
 
 > Auto-scaffolded by the Phase 2b drain (ADR-056) from a `wr-risk-scorer:pipeline`
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
@@ -20,21 +20,23 @@ First load-bearing commit-hook on wr-retrospective (P159) shipping with auto-fix
 
 **Path patterns** (any match → consider this entry):
 
-- `packages/*/hooks/*.sh` (PreToolUse with `permissionDecision: "deny"` — load-bearing class)
-- `packages/wr-retrospective/hooks/*.sh` (P159 instance)
-- `.changeset/*.md` (when paired with a new load-bearing hook source change AND no `docs/changesets-holding/` sibling)
+- `packages/*/hooks/external-comms*.sh` (external-comms gate surface)
+- `packages/*/hooks/lib/*.sh` (shared cached-key derivation code consumed by external-comms hooks)
+- `.changeset/*.md` (when paired with external-comms source change AND no `docs/changesets-holding/` sibling)
+- Cross-plugin: ≥2 `packages/*/hooks/` directories touched in same commit
 
-**Diff-content keywords** (consider when the diff suggests load-bearing semantics):
+**Diff-content keywords** (any match → consider):
 
-- `permissionDecision`, `"deny"`, `PreToolUse`
-- `auto-fix`, `load-bearing`
-- new-file additions under `packages/*/hooks/`
+- `external-comms`, `external-comms-gate`
+- `cached-key`, `cache-key`, `cached_key`, key-derivation function names
+- `deny surface`, `PreToolUse:Bash`
+- absence of paired `docs/changesets-holding/external-comms*.md`
 
-**Anti-patterns** (looks like R011 but score under a different class):
+**Anti-patterns** (looks like R019 but isn't):
 
-- Existing-hook *modification* (no first-landing semantics) → **R003**
-- Load-bearing hook with paired `docs/changesets-holding/` dogfood window → controls firing; score as standard R003 with held-changeset modulator
-- Hook prose change that also changes SKILL.md contract → also-flag **R010** (semver violation)
+- External-comms-gate doc/test change only (no `.sh` source change) → score as **R009** coverage class
+- External-comms hook WITH paired held-changeset dogfood window → controls firing; routine R003
+- Single-plugin scope (one hook surface only, not cached-key shared library) → score as **R003** new-hook or modification; cross-plugin fan-out modulator absent
 
 ## Inherent Risk
 
@@ -78,7 +80,7 @@ pending review — treatment decision deferred until scoring is curated.
 
 Auto-populated from `.risk-reports/` via Phase 2b drain.
 
-- 2026-05-03T15:13:32Z: fired in `.risk-reports/2026-05-03T15-13-32-commit.md` (reason: above-appetite-residual)
+- 2026-05-16T06:28:35Z: fired in `.risk-reports/2026-05-16T06-28-35-commit.md` (reason: above-appetite-residual)
 
 ## Change Log
 

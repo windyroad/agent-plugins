@@ -3,9 +3,7 @@
 # ADR-075 Amendment 2026-06-02).
 #
 # Tier A deterministic regex + Tier B llm-rubric coverage for 6 contracts on
-# the review-problems SKILL.md surface — each contract corresponds to a held
-# changeset in `docs/changesets-holding/` whose Reinstate criterion (per
-# ADR-061 Rule 4 evidence-floor) names this exact eval path:
+# the review-problems SKILL.md surface:
 #
 #   - Step 4.5e JTBD-301 verdict-shape contract: four documented verdicts
 #     (fix-released / accepted-into-backlog / duplicate / won't-fix) +
@@ -35,9 +33,8 @@
 #   - ADR-075 (Amendment 2026-06-02) — SKILL-prose harness scope; per-skill
 #     `packages/<plugin>/skills/<skill>/eval/promptfooconfig.yaml`
 #     location; exec:bash provider; Tier-A regex + Tier-B llm-rubric.
-#   - ADR-061 (Rule 4 evidence-floor) — paired promptfoo Tier-A/B GREEN IS
-#     the per-class evidence for SKILL-prose surfaces; flips the R009
-#     modulator +1 → -1 for this surface, dropping P229 + P287 atomically.
+#   - ADR-075 — paired promptfoo Tier-A/B GREEN is the per-class evidence
+#     floor for SKILL-prose surfaces and flips the R009 modulator +1 → -1.
 #   - ADR-014 (single-commit grain) — this eval file ships in the same
 #     commit as its companion runners (no `.changeset/*.md` — eval test
 #     infrastructure excluded from the tarball via packages/itil/.npmignore
@@ -55,7 +52,7 @@
 #     "accepted into backlog".
 #   - RFC-012 — single build vehicle for the harness.
 #   - P324 (driving problem — agent-prose verdict harness gap).
-#   - P229 / P287 (held changesets this eval discharges per ADR-061 Rule 4).
+#   - P229 / P287 (behavioural contracts covered by this eval).
 #
 # Tier-B (llm-rubric) grader: the review-problems contracts contain heavy
 # NEGATIVE clauses ("MUST NOT contain maintainer-internal framework vocab";
@@ -81,18 +78,15 @@
 # @problem P373
 # @rfc RFC-012
 # @adr ADR-075 (Amendment 2026-06-02)
-# @adr ADR-061 (Rule 4 evidence-floor)
 # @adr ADR-062 (inbound-discovery + assessment-pipeline)
 # @adr ADR-014 (single-commit grain)
 
 description: |
   review-problems SKILL eval — Tier-A regex + Tier-B llm-rubric coverage for
   6 Step 4.5 inbound-discovery + assessment-pipeline behavioural contracts
-  on the review-problems SKILL surface. Each test case asserts one
-  held-changeset Reinstate criterion per ADR-061 Rule 4 evidence-floor:
-  passing eval flips the R009 prose-surface modulator +1 → -1 for
-  `review-problems`, dropping the held cohort (P229 + P287) within appetite
-  atomically per cohort-graduation pre-check.
+  on the review-problems SKILL surface. Passing eval satisfies the ADR-075
+  evidence floor and flips the R009 prose-surface modulator +1 → -1 for
+  `review-problems`.
 
 providers:
   # Path is relative to this config file's directory (promptfoo basePath).

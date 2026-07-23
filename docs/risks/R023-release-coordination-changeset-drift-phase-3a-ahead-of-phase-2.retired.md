@@ -1,6 +1,6 @@
-# Risk R019: External Comms Hook Source Without Dogfood Window
+# Risk R023: Release Coordination Changeset Drift Phase 3A Ahead Of Phase 2
 
-**Status**: Active (auto-scaffolded — pending review)
+**Status**: Retired 2026-07-23 — held dependency queues were removed by ADR-099; R005 and R007 cover coordination.
 **Category**: <!-- pending review — auto-scaffolded from pipeline hint -->
 **Identified**: 2026-05-17
 **Owner**: pending review
@@ -10,7 +10,7 @@
 
 ## Description
 
-Hook source change replacing cached-key derivation across 2 plugins shipping single-commit without held-changeset dogfood; R003 modulator stack lands at 8/25 even with bats + architect-twice + ADR-056 dual-parse because no in-commit runtime exercise of external-comms surface
+Phase 3a release-coordination drift: dependent script ships before its NDJSON producers; held-area pattern available but not applied; symmetric-cohort hold is the controlling remediation.
 
 > Auto-scaffolded by the Phase 2b drain (ADR-056) from a `wr-risk-scorer:pipeline`
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
@@ -18,25 +18,25 @@ Hook source change replacing cached-key derivation across 2 plugins shipping sin
 
 ## Recogniser
 
-**Path patterns** (any match → consider this entry):
+**Path patterns** (any match → consider this entry; sibling specialisation of R022 — focus on R005 release coordination):
 
-- `packages/*/hooks/external-comms*.sh` (external-comms gate surface)
-- `packages/*/hooks/lib/*.sh` (shared cached-key derivation code consumed by external-comms hooks)
-- `.changeset/*.md` (when paired with external-comms source change AND no `docs/changesets-holding/` sibling)
-- Cross-plugin: ≥2 `packages/*/hooks/` directories touched in same commit
+- `.changeset/*.md` (with Phase markers in body — `Phase Na`, `Phase Nb`)
+- `docs/changesets-holding/*.md` (held siblings)
+- Dependent source files (`packages/*/scripts/populate-*.sh`) shipping while NDJSON producers stay held
 
 **Diff-content keywords** (any match → consider):
 
-- `external-comms`, `external-comms-gate`
-- `cached-key`, `cache-key`, `cached_key`, key-derivation function names
-- `deny surface`, `PreToolUse:Bash`
-- absence of paired `docs/changesets-holding/external-comms*.md`
+- `Phase 2a`, `Phase 2b`, `Phase 3a` (Phase-marker phrasing)
+- `symmetric-cohort hold`, `cohort hold`
+- `release coordination`, `release queue`
+- `dependent script`, `producer`, `consumer`
 
-**Anti-patterns** (looks like R019 but isn't):
+**Anti-patterns** (looks like R023 but isn't):
 
-- External-comms-gate doc/test change only (no `.sh` source change) → score as **R009** coverage class
-- External-comms hook WITH paired held-changeset dogfood window → controls firing; routine R003
-- Single-plugin scope (one hook surface only, not cached-key shared library) → score as **R003** new-hook or modification; cross-plugin fan-out modulator absent
+- Pure dependency-graph violation INSIDE a Phase (no chain across Phases) → routine **R005**
+- Atomic-cohort ship (all dependencies in same active batch) → controls firing; symmetric-cohort hold applied
+- Dependent script + producers all in `docs/changesets-holding/` together → controls firing
+- Specifically RFC-001 chain context → score as **R012/R013** RFC chain atomicity instead
 
 ## Inherent Risk
 
@@ -80,7 +80,7 @@ pending review — treatment decision deferred until scoring is curated.
 
 Auto-populated from `.risk-reports/` via Phase 2b drain.
 
-- 2026-05-16T06:28:35Z: fired in `.risk-reports/2026-05-16T06-28-35-commit.md` (reason: above-appetite-residual)
+- 2026-05-17T06:55:25Z: fired in `.risk-reports/2026-05-17T06-55-25-commit.md` (reason: above-appetite-residual)
 
 ## Change Log
 

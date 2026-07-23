@@ -1,6 +1,6 @@
-# Risk R030: New Deny Surface Shipped Direct To Changeset No Dogfood
+# Risk R026: New Sessionstart Hook First Landing No Dogfood Window
 
-**Status**: Active (auto-scaffolded — pending review)
+**Status**: Retired 2026-07-23 — holding-window framing superseded by ADR-099; R003 covers hook landings.
 **Category**: <!-- pending review — auto-scaffolded from pipeline hint -->
 **Identified**: 2026-05-31
 **Owner**: pending review
@@ -10,7 +10,7 @@
 
 ## Description
 
-external-comms-gate adds `git commit -m` deny surface shipping direct-to-.changeset without held-area dogfood window; R003 modulator + R009 bedrock floor stack at 8/Medium; precedent R015/R019/R020 already capture adjacent patterns
+New SessionStart nudge hook (architect-oversight-nudge.sh) lands direct into package without held-area dogfood; R003 new-hook modulator + absent dogfood control hold commit/push residual at 8/25 Medium. Distinct from R020 (PreToolUse:Bash gate class) — this is the SessionStart additionalContext class with exit-0-always self-suppressing envelope.
 
 > Auto-scaffolded by the Phase 2b drain (ADR-056) from a `wr-risk-scorer:pipeline`
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
@@ -20,23 +20,25 @@ external-comms-gate adds `git commit -m` deny surface shipping direct-to-.change
 
 **Path patterns** (any match → consider this entry):
 
-- `packages/*/hooks/*.sh` (PreToolUse, with new `permissionDecision: "deny"` matcher)
-- `packages/*/hooks/external-comms*.sh` (canonical instance — external-comms gate)
-- `.changeset/*.md` (paired with new deny-surface AND no `docs/changesets-holding/` sibling)
+- `packages/*/hooks/*.sh` (new file, SessionStart event)
+- `packages/*/hooks/*-nudge.sh`, `packages/*/hooks/*-oversight*.sh` (canonical SessionStart nudge naming)
+- `packages/*/hooks/hooks.json` (new SessionStart event registration)
+- `.changeset/*.md` paired with new SessionStart hook AND no `docs/changesets-holding/` sibling
 
 **Diff-content keywords** (any match → consider):
 
-- `permissionDecision`, `"deny"`, `deny surface`
-- `git commit -m` (canonical instance matcher target)
-- `external-comms-gate`, `external-comms`
-- new-file additions OR new-matcher additions to existing hook adding deny semantics
+- `SessionStart`
+- `additionalContext`, `hookSpecificOutput`
+- `nudge`, `oversight`
+- `exit 0` self-suppressing envelope on the SessionStart path
+- new-file additions under `packages/*/hooks/` declaring `SessionStart`
 
-**Anti-patterns** (looks like R030 but isn't):
+**Anti-patterns** (looks like R026 but isn't):
 
-- Existing deny-surface *modification* (e.g. expanding an allowlist) → standard **R003**
-- Deny surface WITH paired `docs/changesets-holding/` dogfood window → controls firing; routine R003
-- Advisory-only (no deny — `additionalContext` only) → score as **R026/R015** new-hook class, not deny-surface class
-- Deny surface scope narrowing / loosening (R003 reductions) → score as routine R003 modification
+- PreToolUse:Bash matcher (not SessionStart) → score as **R020** Bash-gate class instead
+- PreToolUse:Edit/Write hook → score as **R015** generic new-hook class
+- Existing SessionStart hook *modification* → standard **R003** (no first-landing modulator)
+- New SessionStart hook WITH paired `docs/changesets-holding/` dogfood window → controls firing
 
 ## Inherent Risk
 
@@ -80,7 +82,8 @@ pending review — treatment decision deferred until scoring is curated.
 
 Auto-populated from `.risk-reports/` via Phase 2b drain.
 
-- 2026-05-31T06:39:25Z: fired in `.risk-reports/2026-05-31T06-39-25-commit.md` (reason: above-appetite-residual)
+- 2026-05-24T22:06:33Z: fired in `.risk-reports/2026-05-24T22-06-33-commit.md` (reason: above-appetite-residual)
+- 2026-06-08T07:07:17Z: fired in `.risk-reports/2026-06-08T07-07-17-commit.md` (reason: above-appetite-residual)
 
 ## Change Log
 

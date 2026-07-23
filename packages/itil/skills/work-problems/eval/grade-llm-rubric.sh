@@ -31,6 +31,12 @@
 # @problem P012
 set -euo pipefail
 
+if [[ "${WR_EVAL_RUNTIME:-claude}" == "codex" ]]; then
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
+  exec bash "$REPO_ROOT/packages/architect/skills/create-adr/eval/grade-codex-rubric.sh" "$@"
+fi
+
 GRADER_SYSTEM='You are a strict grading assistant for an automated test
 harness. You will be given a rubric and a model output to grade against it.
 Respond with ONLY a single minified JSON object and nothing else — no

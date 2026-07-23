@@ -1,6 +1,6 @@
-# Risk R013: Rfc 001 Chain Atomicity Paired Capability Unmet
+# Risk R011: Load Bearing Commit Hook First Release Blast Radius
 
-**Status**: Active (auto-scaffolded — pending review)
+**Status**: Retired 2026-07-23 — holding-based control superseded by ADR-099; R003 covers hook blast radius.
 **Category**: <!-- pending review — auto-scaffolded from pipeline hint -->
 **Identified**: 2026-05-17
 **Owner**: pending review
@@ -10,7 +10,7 @@
 
 ## Description
 
-User-stated precondition "entire RFC-001 commit chain ships or doesn't" with held Slices 2-3 framework code as paired capability not graduated; persists until RFC-001 reaches closed post-Slice-5 forward-dogfood
+First load-bearing commit-hook on wr-retrospective (P159) shipping with auto-fix path; release-side blast radius is standing risk for any new gate-class hook published to users
 
 > Auto-scaffolded by the Phase 2b drain (ADR-056) from a `wr-risk-scorer:pipeline`
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
@@ -20,22 +20,21 @@ User-stated precondition "entire RFC-001 commit chain ships or doesn't" with hel
 
 **Path patterns** (any match → consider this entry):
 
-- `docs/rfcs/RFC-001-*.md` (specifically RFC-001)
-- `docs/changesets-holding/*.md` (where bodies cite RFC-001 Slices 2 or 3)
-- `.changeset/*.md` (where bodies cite RFC-001 Slices 4 or 5 while siblings remain held)
-- `packages/*/{skills,agents,hooks}/*` files altering RFC-001 framework surfaces
+- `packages/*/hooks/*.sh` (PreToolUse with `permissionDecision: "deny"` — load-bearing class)
+- `packages/wr-retrospective/hooks/*.sh` (P159 instance)
+- `.changeset/*.md` (when paired with a new load-bearing hook source change AND no `docs/changesets-holding/` sibling)
 
-**Diff-content keywords** (any match → consider):
+**Diff-content keywords** (consider when the diff suggests load-bearing semantics):
 
-- `RFC-001`, `Slice 2`, `Slice 3`, `Slice 4`, `Slice 5`
-- `framework code`, `paired capability`, `forward-dogfood`
-- `entire RFC-001 commit chain` (user-stated precondition phrasing)
+- `permissionDecision`, `"deny"`, `PreToolUse`
+- `auto-fix`, `load-bearing`
+- new-file additions under `packages/*/hooks/`
 
-**Anti-patterns** (looks like R013 but isn't):
+**Anti-patterns** (looks like R011 but score under a different class):
 
-- RFC-001 closed (post-Slice-5 graduation) → no longer applies; retire this entry
-- Other RFC chain (RFC-002+) → score as **R012** (general RFC chain atomicity), not RFC-001-specific R013
-- Single-Slice tweak that doesn't alter the framework surface → routine R005
+- Existing-hook *modification* (no first-landing semantics) → **R003**
+- Load-bearing hook with paired `docs/changesets-holding/` dogfood window → controls firing; score as standard R003 with held-changeset modulator
+- Hook prose change that also changes SKILL.md contract → also-flag **R010** (semver violation)
 
 ## Inherent Risk
 
@@ -79,7 +78,7 @@ pending review — treatment decision deferred until scoring is curated.
 
 Auto-populated from `.risk-reports/` via Phase 2b drain.
 
-- 2026-05-06T12:15:35Z: fired in `.risk-reports/2026-05-06T12-15-35-commit.md` (reason: user-stated-precondition)
+- 2026-05-03T15:13:32Z: fired in `.risk-reports/2026-05-03T15-13-32-commit.md` (reason: above-appetite-residual)
 
 ## Change Log
 

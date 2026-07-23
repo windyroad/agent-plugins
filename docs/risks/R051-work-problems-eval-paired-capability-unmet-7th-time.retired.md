@@ -1,6 +1,6 @@
-# Risk R034: R009 Bedrock Orchestrator Skill Prose Recast No In Source Dogfood
+# Risk R051: Work Problems Eval Paired Capability Unmet 7Th Time
 
-**Status**: Active (auto-scaffolded — pending review)
+**Status**: Retired 2026-07-23 — holding treatment superseded by ADR-099; R007 covers paired preconditions.
 **Category**: <!-- pending review — auto-scaffolded from pipeline hint -->
 **Identified**: 2026-06-10
 **Owner**: pending review
@@ -10,7 +10,7 @@
 
 ## Description
 
-ADR-024 bedrock contract amendment + 3 SKILL surface re-cast pushed to source carries the R009/R018 8/25 bedrock floor; held-changeset gates release but not the source push — recurring orchestrator-layer skill-prose-recast class (P344/P351/P308/P270 same session shape).
+brief explicitly cites "7th hold on work-problems SKILL surface — apply ADR-042 Rule 2 move-to-holding if scored above 4/25"; paired capability is the unbuilt `packages/itil/skills/work-problems/eval/promptfooconfig.yaml`; precondition recurring across 7 commits now
 
 > Auto-scaffolded by the Phase 2b drain (ADR-056) from a `wr-risk-scorer:pipeline`
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
@@ -58,7 +58,7 @@ pending review — treatment decision deferred until scoring is curated.
 
 Auto-populated from `.risk-reports/` via Phase 2b drain.
 
-- 2026-06-04T04:25:52Z: fired in `.risk-reports/2026-06-04T04-25-52-commit.md` (reason: above-appetite-residual)
+- 2026-06-08T04:40:50Z: fired in `.risk-reports/2026-06-08T04-40-50-commit.md` (reason: user-stated-precondition)
 
 ## Change Log
 

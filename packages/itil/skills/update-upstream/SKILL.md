@@ -18,7 +18,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Skill, Agen
   @adr ADR-010 amended (sibling-skill naming; split execution ownership)
   @adr ADR-044 (decision-delegation contract — framework-resolution boundary)
   @adr ADR-075 (Amendment 2026-06-02 — paired promptfoo eval discharges R009 prose floor)
-  @adr ADR-061 Rule 4 (evidence-floor — paired Tier-A/B eval ships in same commit as SKILL)
+  @adr ADR-075 (evidence-floor — paired Tier-A/B eval ships in same commit as SKILL)
 -->
 
 # Update Upstream — Lifecycle-Update Skill
@@ -549,7 +549,7 @@ The skill's no-op exit (Step 1) means firing the trigger unconditionally on ever
 - [ADR-044](../../../docs/decisions/044-decision-delegation-contract.proposed.md) — framework-resolution boundary; the gate verdict IS the framework, no per-transition AskUserQuestion for the gate firing itself.
 - [ADR-042](../../../docs/decisions/042-auto-apply-scorer-remediations-open-vocabulary.proposed.md) — within-axis precedent for open-vocabulary risk-reducing measures.
 - [ADR-075](../../../docs/decisions/075-promptfoo-agent-prose-verdict-eval-harness.proposed.md) Amendment 2026-06-02 — paired promptfoo Tier-A/B eval discharges the R009 prose-floor for SKILL surfaces.
-- [ADR-061](../../../docs/decisions/061-dogfood-graduation-criteria.proposed.md) Rule 4 — evidence-floor; the paired eval ships in the same commit as this SKILL prose for atomic R009 discharge.
+- [ADR-075](../../../docs/decisions/075-agent-prose-behavioural-test-harness.proposed.md) — evidence-floor; the paired eval ships in the same commit as this SKILL prose for atomic R009 discharge.
 - **P080** — driving problem ticket (No bidirectional update of upstream-reported problems).
 - **P363** — driving problem ticket for the [§ Inbound-origin verdict dispatch](#inbound-origin-verdict-dispatch-p363) leg (inbound-reported tickets never received a fix-released verdict on the originating issue). Fix option (b) — consume the `**Origin**` field — user-ratified 2026-06-22. **Rework 2026-06-23** (four user directives): the inbound verdict is LLM-generated per-context (not templated); O→KE shares the workaround with reporter/commenter provenance-credit; anti-leakage is visibility-gated (PUBLIC → titled+linked refs); the gate chain gains a cog-a11y leg first (P338-gated).
 - [ADR-055](../../../docs/decisions/055-plugin-published-namespace-prefixed-internal-ids.proposed.md) — grounds the PUBLIC-repo titled+linked reference discipline (permalink-progressive-enhancement; cures the bare-ID collision failure mode).

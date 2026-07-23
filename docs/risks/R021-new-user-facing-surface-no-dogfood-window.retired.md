@@ -1,6 +1,6 @@
 # Risk R021: New User Facing Surface No Dogfood Window
 
-**Status**: Active (auto-scaffolded — pending review)
+**Status**: Retired 2026-07-23 — holding-window framing superseded by ADR-099; R009 covers new user-facing defects.
 **Category**: <!-- pending review — auto-scaffolded from pipeline hint -->
 **Identified**: 2026-05-17
 **Owner**: pending review

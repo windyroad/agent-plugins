@@ -1,16 +1,16 @@
-# Risk R079: Cruise Self Installer Config Mutation First Landing No Dogfood
+# Risk R031: Review Problems Skill Auto Bootstrap Direct To Changeset No Dogfood
 
-**Status**: Active (auto-scaffolded — pending review)
+**Status**: Retired 2026-07-23 — direct-to-changeset vs holding distinction removed by ADR-099; R009 covers skill defects.
 **Category**: <!-- pending review — auto-scaffolded from pipeline hint -->
-**Identified**: 2026-07-15
+**Identified**: 2026-06-10
 **Owner**: pending review
-**Last reviewed**: 2026-07-15
-**Next review**: 2026-07-15
-**Curation**: pending review (auto-scaffolded 2026-07-15)
+**Last reviewed**: 2026-06-10
+**Next review**: 2026-06-10
+**Curation**: pending review (auto-scaffolded 2026-06-10)
 
 ## Description
 
-New default-installed SessionStart self-installer edits adopter ~/.claude/ statusline+settings; first-landing, no dogfood window, adopter-config-diversity failure mode un-exercised by maintainer-shape bats; release residual 8/25 Medium, above 5 appetite.
+P351 auto-bootstrap surface shipped direct-to-`.changeset/` without held-area dogfood window; recurrence class of R015/R030 narrowed to skill-level (not hook-level) new-surface landings.
 
 > Auto-scaffolded by the Phase 2b drain (ADR-056) from a `wr-risk-scorer:pipeline`
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
@@ -58,8 +58,8 @@ pending review — treatment decision deferred until scoring is curated.
 
 Auto-populated from `.risk-reports/` via Phase 2b drain.
 
-- 2026-07-11T02:17:32Z: fired in `.risk-reports/2026-07-11T02-17-32-commit.md` (reason: above-appetite-residual)
+- 2026-06-03T03:15:33Z: fired in `.risk-reports/2026-06-03T03-15-33-commit.md` (reason: above-appetite-residual)
 
 ## Change Log
 
-- 2026-07-15: Auto-scaffolded by Phase 2b drain (ADR-056). Pending human curation.
+- 2026-06-10: Auto-scaffolded by Phase 2b drain (ADR-056). Pending human curation.

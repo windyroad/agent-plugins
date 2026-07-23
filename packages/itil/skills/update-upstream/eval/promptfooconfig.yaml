@@ -15,9 +15,7 @@
 # bypass the gates) and is idempotent (skips already-logged tickets).
 #
 # Pairing with the bats contract test discharges the R009 prose-floor for
-# this new SKILL surface atomically per ADR-061 Rule 4 evidence-floor —
-# without this paired eval, ADR-042 Rule 2 move-to-holding would apply per
-# the P080 iter contract.
+# this new SKILL surface atomically per the ADR-075 evidence floor.
 #
 # Drivers:
 #   - ADR-024 (P080 amendment — bidirectional lifecycle updates, sibling
@@ -28,7 +26,7 @@
 #     post when triggered from transition-problem Step 7).
 #   - ADR-044 (framework-resolution boundary — gate verdict IS the framework;
 #     no per-transition AskUserQuestion for the gate firing itself).
-#   - ADR-061 (Rule 4 evidence-floor — paired Tier-A/B GREEN IS the per-class
+#   - ADR-075 (paired Tier-A/B GREEN is the per-class
 #     evidence for SKILL-prose surfaces; drops the R009 +1 modulator -> -1).
 #   - ADR-075 (Amendment 2026-06-02 — SKILL-prose harness scope; per-skill
 #     packages/<plugin>/skills/<skill>/eval/promptfooconfig.yaml location;
@@ -47,7 +45,6 @@
 # @problem P080
 # @adr ADR-024 (P080 amendment)
 # @adr ADR-075 (Amendment 2026-06-02)
-# @adr ADR-061 (Rule 4)
 
 description: |
   update-upstream SKILL eval — bidirectional lifecycle update contract

@@ -31,7 +31,10 @@ This ADR **supersedes ADR-041** (2026-04-22). ADR-041's Rule 2a encoded a **clos
 
 ADR-042 replaces the closed enumeration with an **open vocabulary**: the scorer writes free-form prose suggestions; the agent reads them and decides what to do. No lookup tables, no parsers, no pre-built executors.
 
-Concurrently, the `docs/changesets-holding/` convention introduced by the P100 multi-slice work is now **orchestrator-blessed** (Rule 7).
+ADR-099 later removed the `docs/changesets-holding/` convention because moving
+release metadata does not withhold committed code. The open remediation
+vocabulary remains, but every remediation must affect actual risk, evidence,
+controls, scope, or shipped behaviour.
 
 ## Decision Drivers
 
@@ -169,13 +172,13 @@ The orchestrator MUST halt (not release) when any of the following hold:
 
 **Non-AFK mode (manage-problem / manage-incident lineage / ADR-020 terminal):** halt the skill. Emit the skill's terminal report naming the final re-score, the remediations attempted, and any VP ticket implications. The user must resolve interactively — typical resolutions include splitting the commit, feature-flagging the change, or opening a problem ticket documenting the scorer gap.
 
-Halt is a **bug signal**, not a routine outcome. The scorer SHOULD always have progressively more aggressive remediations available (move → revert → feature-flag → rollback). Halt exposes a gap in the scorer's vocabulary or suggestions — the correct follow-up is to improve the scorer, not to relax Rule 1. A halt SHOULD produce a new problem ticket (via run-retro or user-initiated) capturing the scorer gap.
+Halt is a **bug signal**, not a routine outcome. The scorer SHOULD always have progressively more aggressive remediations available (split → add controls → disable or revert → rollback). Halt exposes a gap in the scorer's vocabulary or suggestions — the correct follow-up is to improve the scorer, not to relax Rule 1. A halt SHOULD produce a new problem ticket (via run-retro or user-initiated) capturing the scorer gap.
 
 #### Rule 6 — Audit trail
 
-Every auto-apply decision MUST be logged in two places:
+Every auto-apply decision MUST be logged in the iteration or skill report:
 
-1. **Iteration / skill report** — append one line per auto-apply with:
+- Append one line per auto-apply with:
    - Pre-apply `commit/push/release` scores
    - Post-apply re-score
    - Action taken (the git operation or Edit summary)
@@ -183,11 +186,11 @@ Every auto-apply decision MUST be logged in two places:
 
    When multiple auto-applies fire in one iteration, emit one line per apply under a single "Auto-apply trail" subheading so the iteration summary stays skimmable.
 
-2. **Holding-area README** (`docs/changesets-holding/README.md`) — for `move-to-holding` actions only. Append to the "Currently held" section with the parent ticket reference and the reinstate trigger. When a held changeset is later reinstated (`git mv docs/changesets-holding/<name>.md .changeset/<name>.md`), move the entry from "Currently held" to "Recently reinstated" with the reinstate date and reason.
+#### Rule 7 — Changesets are not remediations
 
-#### Rule 7 — Holding-area convention (blessed)
-
-`docs/changesets-holding/` is now an **orchestrator-blessed convention**, not provisional. The holding-area README's "provisional" banner is removed and the README cites this ADR as the authoritative mechanism. The mechanics (`git mv` to/from the area, file naming preserved, README "Currently held" + "Recently reinstated" sections) are unchanged from the provisional version.
+Per ADR-099, changesets are release metadata only. Moving or renaming a
+changeset never counts as risk reduction. Above-appetite remediation must
+change the code, evidence, controls, scope, or shipped behaviour.
 
 ### Scope
 
@@ -198,7 +201,6 @@ Every auto-apply decision MUST be logged in two places:
 - `packages/itil/skills/work-problems/SKILL.md` — Step 6.5 above-appetite branch per Rules 1–6; Non-Interactive Decision Making table updated for "Commit when risk above appetite" → cites ADR-042.
 - `packages/itil/skills/manage-problem/SKILL.md` — Step 11 terminal commit sequence above-appetite branch per Rules 1–6 and Rule 5 non-AFK halt.
 - `packages/itil/skills/manage-incident/SKILL.md` — terminal commit step, same shape as manage-problem.
-- `docs/changesets-holding/README.md` — provisional banner removal + ADR-042 citation (Rule 7).
 - `docs/decisions/018-inter-iteration-release-cadence-for-afk-loops.proposed.md` — amendment adding above-appetite cross-reference to ADR-042.
 - `docs/decisions/020-governance-auto-release-for-non-afk-flows.proposed.md` — §6 above-appetite branch replaced with cross-reference to ADR-042.
 - `packages/itil/skills/work-problems/test/work-problems-above-appetite-remediation.bats` — contract-assertion bats file per ADR-037 (structural, to be retrofitted under P081).
@@ -207,7 +209,6 @@ Every auto-apply decision MUST be logged in two places:
 **Out of scope (this ADR's landing):**
 
 - P108 scorer-contract vocabulary — tracked separately.
-- Reinstate automation for held changesets — remains a user-initiated `git mv` once the blocking slices land. Future work may automate this when blocking-ticket close detection is reliable.
 - Adjustments to `RISK-POLICY.md` appetite threshold — the invariant "never release above appetite" operates at the current 4/25 threshold; any threshold change is a separate `update-policy` invocation.
 - Changing the release-cadence trigger (ADR-018 at-appetite threshold) — out of scope; the release-often principle is preserved via ADR-018 as-is.
 - JTBD job for extensible remediation vocabulary — tracked as a follow-up task; see Consequences §JTBD Gap.
@@ -235,7 +236,7 @@ Every auto-apply decision MUST be logged in two places:
 
 ### Bad
 
-- **Source-edit auto-apply actions are NOT mechanically reversible the way `move-to-holding` is.** When the agent applies a feature-flag or rollback, the audit trail per Rule 6 becomes load-bearing for user review-and-revert on return. Mitigation: each auto-apply commit is a distinct commit (or a named amendment in AFK mode) so `git revert` works at the commit level.
+- **Source-edit auto-apply actions require real reversal.** When the agent applies a feature flag or rollback, the audit trail per Rule 6 becomes load-bearing for user review-and-revert on return. Mitigation: each auto-apply commit is a distinct commit (or a named amendment in AFK mode) so `git revert` works at the commit level.
 - **Scorer contract dependency.** The scorer must write clear descriptions so the agent can decide. If the scorer's descriptions are vague, the agent may halt unnecessarily. Mitigation: the scorer learns from halt reports (Rule 6 logs the description text) and adapts its descriptions. The agent's judgment is the fallback.
 - **Halt-on-exhaustion can stop an AFK loop mid-queue.** If a scorer gap halts iteration N, iterations N+1..M never fire — even if they would have worked on unrelated tickets. This is the conservative choice: continuing past an unreleasable iteration risks compounding the above-appetite state. Mitigated in practice by the scorer being reliable enough that exhaustion is rare; when it happens, treat as a bug and fix the scorer.
 - **Gate traversal cost per auto-apply.** Rule 3 requires architect + JTBD + risk-scorer review on every auto-apply commit. For a 3-remediation iteration that means 3× full gate traversal. Mitigated by AFK mode's `git commit --amend` folding (Rule 3 amend-based folding) — the iteration still produces one final commit that carries one final gate traversal against the amended state.
@@ -246,8 +247,8 @@ Every auto-apply decision MUST be logged in two places:
 Compliance is verified by:
 
 1. **Source review**: each in-scope SKILL.md has the above-appetite branch with Rules 1–7 referenced (never-release-above-appetite invariant, open vocabulary, VP carve-out, gate-per-commit, halt-on-exhaustion, audit trail) and cites this ADR. The ADR-018 and ADR-020 amendments cite ADR-042.
-2. **Bats contract assertions** (per ADR-037): `packages/itil/skills/work-problems/test/work-problems-above-appetite-remediation.bats` asserts the load-bearing strings — `RISK_REMEDIATIONS`, `docs/changesets-holding/`, `above appetite`, ADR-013 Rule 5 citation, `never release above appetite` invariant phrase, `ADR-042` citation, the Non-Interactive Decision Making table row for the above-appetite branch, and the Rule 5 halt-on-exhaustion semantics.
-3. **Behavioural** (manual until P012's harness lands): an AFK loop that hits an above-appetite release-cadence event with an eligible `move-to-holding` remediation auto-applies the move, re-scores within appetite, drains, and proceeds to the next iteration — without invoking `AskUserQuestion`. Verifiable from the iteration report's Auto-apply trail subsection + the holding-area README's "Currently held" entry.
+2. **Bats contract assertions** (per ADR-037): `packages/itil/skills/work-problems/test/work-problems-above-appetite-remediation.bats` asserts the load-bearing strings — `RISK_REMEDIATIONS`, shipment-affecting remediation classes, ADR-013 Rule 5 citation, `never release above appetite` invariant phrase, `ADR-042` citation, the Non-Interactive Decision Making table row for the above-appetite branch, and the Rule 5 halt-on-exhaustion semantics.
+3. **Behavioural**: an AFK loop that hits an above-appetite release-cadence event applies a shipment-affecting remediation, re-scores within appetite, drains, and proceeds to the next iteration without invoking `AskUserQuestion`. The iteration report's Auto-apply trail makes the path verifiable.
 4. **Halt-on-exhaustion behavioural**: an AFK loop hitting a scorer suggestion the agent cannot act on halts with `outcome: halted-above-appetite` naming the class and description. Verifiable from the halt report shape.
 5. **Open-vocabulary behavioural**: a scorer proposing a novel class (e.g. `noop-audit`) is read by the agent, which decides what to do and applies its chosen action (subject to Rule 3 gates). Verifiable from the iteration report's action log.
 
@@ -281,5 +282,5 @@ Revisit this decision if:
 - **JTBD-001** (`docs/jtbd/solo-developer/JTBD-001-enforce-governance.proposed.md`) — under-60-second target (per-edit scope, not release-drain scope).
 - **JTBD-002** (`docs/jtbd/solo-developer/JTBD-002-ship-with-confidence.proposed.md`) — audit trail requirement satisfied by Rule 6.
 - **JTBD-006** (`docs/jtbd/solo-developer/JTBD-006-work-backlog-afk.proposed.md`) — AFK persona, primary motivator; "stops gracefully when it hits a blocker" authorises Rule 5 loop-halt on exhaustion.
-- **`docs/changesets-holding/README.md`** — holding-area mechanics; provisional banner removed and ADR-042 cited as the authoritative basis per Rule 7.
+- **ADR-099** — supersedes the former holding-area mechanics and makes changesets release metadata only.
 - Memory: `feedback_act_on_obvious_decisions.md` — captures the user's lesson; this ADR is the structural / repo-wide encoding.

@@ -40,7 +40,7 @@ Cascade fan-out is high; detection latency is long; rollback path is slow (npm p
 Per `RISK-POLICY.md` (without controls):
 
 - **Impact**: 4 (Significant) — `RISK-POLICY.md` L64: "Installed plugins degrade developer workflow — hooks fire incorrectly". Hook regression is the canonical instance.
-- **Likelihood**: 4 (Likely) — every hook change risks behavioural regression; without dogfood discipline, source-tree-locally-tested-only hooks ship straight to adopters.
+- **Likelihood**: 4 (Likely) — every hook change risks behavioural regression; source-tree-only checks can miss installed-runtime behaviour.
 - **Inherent score**: 16
 - **Inherent band**: High
 
@@ -48,9 +48,10 @@ Per `RISK-POLICY.md` (without controls):
 
 | Control | Fires when… | Path # | Band reduction | If absent for THIS action |
 |---------|-------------|--------|---------------:|---------------------------|
-| Held-changeset / dogfood-window pattern (`docs/changesets-holding/`, ADR-042 Rule 7) | Hook-bearing changeset is held in `docs/changesets-holding/` AND has documented reinstate trigger | 1 | -1 likelihood | Bump +1 (regression ships without in-repo dogfood) |
-| Behavioural bats per ADR-052 (`packages/*/hooks/test/*.bats`) | Bats coverage exists for the changed hook surface | 2 | -1 likelihood | Bump +1; flag as R009 sub-class too |
-| P141 changeset-discipline gate (`itil-changeset-discipline.sh`) | Plugin source change includes a `.changeset/*.md` declaring bump class | 3 | -1 likelihood | Hard-block at commit gate; if bypassed, bump +2 |
+| Behavioural bats per ADR-052 (`packages/*/hooks/test/*.bats`) | Bats coverage exists for the changed hook surface | 1 | -1 likelihood | Bump +1; flag as R009 sub-class too |
+| Installed-runtime smoke test | The packaged hook runs against representative Codex and/or Claude payloads | 2 | -1 likelihood | Bump +1 for payload or discovery uncertainty |
+| Small isolated release with rollback path | The hook ships alone after package dry-run and release verification | 3 | -1 likelihood | Bump +1 for bundled blast radius |
+| P141 changeset-discipline gate (`itil-changeset-discipline.sh`) | Plugin source change includes a `.changeset/*.md` declaring bump class | n/a | 0 paths | Hard-block at commit gate; if bypassed, bump +2 |
 | ADR-045 hook injection budget policy | Hook prose changed (≤300 bytes deny; ≤150 bytes additionalContext) | n/a (impact-shaping) | 0 paths | Risk of context-overflow regression class; bump impact +1 if exceeded |
 | CLAUDE.md "marketplace cache" briefing | Always (declarative) | n/a | 0 paths | Lower author-mindfulness; not runtime |
 
@@ -62,22 +63,22 @@ Adjust likelihood for THIS action's specifics (composition: max-pessimistic):
 
 | Modifier | Adjustment | Rationale |
 |----------|------------|-----------|
-| New hook landing for the first time (not a regression of an existing hook) | +1 | No dogfood evidence yet; held-changeset pattern is mid-cycle, not catching regressions |
+| New hook landing for the first time (not a regression of an existing hook) | +1 | No installed-runtime evidence yet |
 | Wide-matcher change (`PreToolUse:Bash\|Write\|Edit\|Read`) | +1 | Cascade fan-out higher than narrow matchers |
 | Cross-shell behaviour change (zsh / dash compatibility tweak) | +1 | Tested on macOS bash typically; adopter shells differ |
 | Same-commit-self-block: hook gates `git commit` AND ships in same commit | +1 | Bootstrap commit can self-block; bypass needed |
 | Hook-prose change shipped under `patch` bump | +1 (and consider also-flag as R010) | Under-classification; behavioural change deserves minor at minimum |
-| Held-changeset window has been ≥7 days with no false-positives | -1 | Dogfood evidence is empirical; reduce per-action concern |
+| Installed packaged hook has representative trigger and non-trigger evidence | -1 | Runtime evidence is empirical; reduce per-action concern |
 
 ## Residual risk
 
 Residual reflects controls firing-and-passing (per-action lens):
 
-- **Likelihood after controls**: 1 (Rare) — held-changeset + bats + changeset-discipline gate stack to capped reduction.
+- **Likelihood after controls**: 1 (Rare) — bats + installed-runtime smoke + isolated release stack to capped reduction.
 - **Residual score**: 4
 - **Residual band**: Low — within appetite (at floor).
 
-**At appetite**. Controls stack working; further reduction has diminishing returns. Sustain held-changeset discipline as primary control.
+**At appetite**. Controls stack working; further reduction has diminishing returns.
 
 ## Watch-out
 

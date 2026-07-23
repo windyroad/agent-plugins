@@ -44,11 +44,8 @@
 #   - ADR-075 (Amendment 2026-06-02) — SKILL-prose harness scope; per-skill
 #     `packages/<plugin>/skills/<skill>/eval/promptfooconfig.yaml`
 #     location; exec:bash provider; Tier-A regex + Tier-B llm-rubric.
-#   - ADR-061 (Rule 4 evidence-floor) — paired promptfoo Tier-A/B GREEN IS
-#     the per-class evidence for SKILL-prose surfaces; flips the R009
-#     modulator +1 → -1 for this surface, dropping the P352-scaffold-intake
-#     cohort portion atomically per cohort-graduation pre-check (ADR-061
-#     Rule 3b).
+#   - ADR-075 — paired promptfoo Tier-A/B GREEN is the per-class evidence
+#     floor for SKILL-prose surfaces and flips the R009 modulator +1 → -1.
 #   - ADR-014 (single-commit grain) — this eval file ships in the same
 #     commit as its companion runners (no `.changeset/*.md` — eval test
 #     infrastructure excluded from the tarball via packages/itil/.npmignore
@@ -70,8 +67,7 @@
 #     record; the four intake paths + layered trigger surfaces.
 #   - RFC-012 — single build vehicle for the harness.
 #   - P324 (driving problem — agent-prose verdict harness gap).
-#   - P352 (held changeset this eval discharges per ADR-061 Rule 4 for the
-#     scaffold-intake surface portion).
+#   - P352 (behavioural contract covered by this eval).
 #
 # Tier-B (llm-rubric) grader: the scaffold-intake contracts contain heavy
 # NEGATIVE clauses ("does NOT fire AskUserQuestion under AFK"; "does NOT
@@ -95,7 +91,6 @@
 # @problem P352
 # @rfc RFC-012
 # @adr ADR-075 (Amendment 2026-06-02)
-# @adr ADR-061 (Rule 4 evidence-floor)
 # @adr ADR-036 (scaffold downstream OSS intake contract)
 # @adr ADR-032 (foreground-synchronous pattern)
 # @adr ADR-013 (Rule 1 + Rule 6 universal default)
@@ -106,9 +101,8 @@ description: |
   scaffold-intake SKILL eval — Tier-A regex + Tier-B llm-rubric coverage for
   7 foreground-synchronous behavioural contracts on the scaffold-intake
   SKILL surface. Each test case asserts one load-bearing invariant per
-  ADR-061 Rule 4 evidence-floor: passing eval flips the R009 prose-surface
-  modulator +1 → -1 for `scaffold-intake`, dropping the held P352-scaffold-
-  intake cohort portion within appetite per cohort-graduation pre-check.
+  ADR-075 evidence floor: passing eval flips the R009 prose-surface
+  modulator +1 → -1 for `scaffold-intake`.
 
 providers:
   # Path is relative to this config file's directory (promptfoo basePath).

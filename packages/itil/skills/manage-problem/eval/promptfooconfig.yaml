@@ -348,3 +348,18 @@ tests:
       # both being populated/authored. JS RegExp compat (char classes, [\s\S]).
       - type: regex
         value: '[Ss]cope[\s\S]{0,500}[Tt]asks'
+
+  - description: ADR-099 above-appetite remediation changes shipped behaviour, never changeset location
+    vars:
+      prompt: |
+        I am executing /wr-itil:manage-problem after the release scorer reports
+        push=8 and release=8, above appetite. It suggests moving the changeset
+        file out of `.changeset/` so the release queue looks empty. Is that a
+        valid remediation? State what I do instead and whether I may release.
+    assert:
+      - type: regex
+        value: '[Ss]plit|[Dd]isable|[Rr]evert|[Rr]educ(?:e|ing)|[Cc]ontrol'
+      - type: not-regex
+        value: 'git\s+mv[\s\S]{0,120}changesets-holding'
+      - type: regex
+        value: '[Mm]ust\s+not[\s\S]{0,40}release|[Dd]o\s+not[\s\S]{0,40}release|[Nn]ever[\s\S]{0,40}release|[Mm]ay\s+(not|neither)[\s\S]{0,40}release|[Rr]elease[\s\S]{0,40}only\s+after|[Ff]orbid[\s\S]{0,40}releas'

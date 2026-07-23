@@ -29,7 +29,7 @@ Single-pass lookup for "given this action's diff, which catalogue entries should
 | `*/README.md`, `*/SKILL.md`, `*/REFERENCE.md`, `docs/decisions/*`, `docs/jtbd/*`, `docs/problems/README.md`, `CLAUDE.md`, `RISK-POLICY.md` | sort-spec / tie-break / render / lifecycle suffix; ADR/JTBD/P-NNN moves | **R002** |
 | `packages/*/hooks/*.sh`, `*/hooks.json`, `packages/*/hooks/lib/*.sh`, `packages/*/hooks/test/*.bats` | PreToolUse / PostToolUse / permissionDecision / additionalContext / hookSpecificOutput | **R003** |
 | (state-shape) gitStatus shows ambient files in `.claude/`, `.afk-run-state/`, `/tmp/*-marker-*` | `git add -A`, `git add .`, broad-glob `git add` | **R004** |
-| `.changeset/*.md`, `docs/changesets-holding/*.md` | bump-class declarations; multi-slice references | **R005** |
+| `.changeset/*.md` | bump-class declarations; multi-slice references | **R005** |
 | `packages/*/skills/*/SKILL.md`, `packages/*/agents/*.md`, `packages/*/package.json` `files` array, `packages/*/bin/*` | `bash packages/...`; bare `ADR-NNN`/`JTBD-NNN`/`P-NNN` without `@windyroad/<plugin>:` prefix; `"files": [` array changes | **R006** |
 | (prose-context) recent conversation, commit messages, ticket bodies, CLAUDE.md MANDATORY rules | "only safe if", "don't release X until", "paired with", "depends on" | **R007** |
 | (any Edit/Write target — content-shape, not path-shape) | AWS / PEM / GitHub-token / Cloudflare / Netlify patterns; `api_key=` / `auth_token=` / `secret_key=` with high-entropy values | **R008** |
@@ -84,22 +84,13 @@ R001 + R008 are confidentiality classes (different surfaces). R004 is a state-le
 | [R008](R008-credentials-in-committed-files.active.md) | Credentials / secrets in committed files | 15 (High) | 5 (Medium) | above |
 | [R009](R009-functional-defects-in-shipped-behaviour.active.md) | Functional defects in shipped plugin behaviour (bedrock) | 16 (High) | 8 (Medium) | above |
 | [R010](R010-semver-or-backward-compatibility-violation.active.md) | Semver / backward-compatibility violation on plugin contracts | 12 (High) | 4 (Low) | at appetite |
-| [R011](R011-load-bearing-commit-hook-first-release-blast-radius.active.md) | Load-bearing commit-hook first-release blast radius | — | — | pending review |
-| [R012](R012-rfc-chain-atomicity-precondition-breach.active.md) | RFC-chain atomicity / precondition breach | — | — | pending review |
-| [R013](R013-rfc-001-chain-atomicity-paired-capability-unmet.active.md) | RFC-001 chain atomicity / paired capability unmet | — | — | pending review |
 | [R014](R014-release-pressure-wip-limit-controls-not-firing.active.md) | Release-pressure / WIP-limit controls not firing | — | — | pending review |
-| [R015](R015-new-hook-first-landing-without-dogfood-window.active.md) | New hook first-landing without dogfood window | — | — | pending review |
 | [R016](R016-release-batch-r009-skill-prose-concentration-above-appetite.active.md) | Release-batch R009 skill-prose concentration above appetite | — | — | pending review |
 | [R017](R017-skill-prose-class-bats-deferred-residual-above-appetite.active.md) | Skill-prose class / bats-deferred residual above appetite | — | — | pending review |
 | [R018](R018-r009-bedrock-functional-defect-class-floor-medium.active.md) | R009 bedrock functional-defect class floor medium | — | — | pending review |
-| [R019](R019-external-comms-hook-source-without-dogfood-window.active.md) | External-comms hook source without dogfood window | — | — | pending review |
-| [R020](R020-new-hook-shipped-without-dogfood-window-bash-gate-class.active.md) | New hook shipped without dogfood window (Bash gate class) | — | — | pending review |
-| [R021](R021-new-user-facing-surface-no-dogfood-window.active.md) | New user-facing surface — no dogfood window | — | — | pending review |
-| [R022](R022-phase-3a-shipped-ahead-of-held-phase-2-dependencies.active.md) | Phase 3a shipped ahead of held Phase 2 dependencies | — | — | pending review |
-| [R023](R023-release-coordination-changeset-drift-phase-3a-ahead-of-phase-2.active.md) | Release-coordination changeset drift (Phase 3a ahead of Phase 2) | — | — | pending review |
 | [R024](R024-risk-catalog-empty-no-baseline-controls-documented.active.md) | Risk catalog empty / no baseline controls documented (obsolete — superseded by R001-R010 bootstrap) | — | — | pending review |
 
-> **Pending-review queue**: R011-R024 were auto-scaffolded by the Phase 2b drain on 2026-05-17 from `.afk-run-state/risk-register-queue.jsonl` (14 slugs accumulated since Phase 1 bootstrap). Each entry carries ADR-026 sentinels for ungrounded scoring fields and `Status: Active (auto-scaffolded — pending review)` for downstream human curation. Per ADR-056 §"Bad consequences" reassessment criterion #2 — several entries (R011, R015, R019, R020, R021 in the no-dogfood-window class; R012, R013 in the RFC-chain-atomicity class) are semantic duplicates from slug-drift across pipeline runs; curation will merge during review.
+> **Pending-review queue**: Remaining active auto-scaffolded entries carry ADR-026 sentinels for ungrounded scoring fields and `Status: Active (auto-scaffolded — pending review)` for downstream human curation. Obsolete release-delay and atomic-holding entries were retired when ADR-099 removed held changesets as a shipment control.
 
 ## Where we need more controls (above-appetite entries)
 
@@ -118,15 +109,8 @@ The entry shape (per-entry sections to author): description; recogniser (path pa
 
 The catalogue is self-pruning: when a class stops surfacing in `.risk-reports/` (controls have made it rare), retire its entry by renaming `R<NNN>-<slug>.md` to `R<NNN>-<slug>.retired.md`. Git history preserves prior content.
 | [R025](R025-external-adopter-name-in-public-repo-ticket-prose.active.md) | External Adopter Name In Public Repo Ticket Prose | pending | — | — | pending | pending | 2026-05-31 |
-| [R026](R026-new-sessionstart-hook-first-landing-no-dogfood-window.active.md) | New Sessionstart Hook First Landing No Dogfood Window | pending | — | — | pending | pending | 2026-05-31 |
-| [R027](R027-new-sessionstart-hook-shipped-without-dogfood-window.active.md) | New Sessionstart Hook Shipped Without Dogfood Window | pending | — | — | pending | pending | 2026-05-31 |
 | [R028](R028-jtbd-build-upon-guard-agent-prose-verdict-residual-above-appetite.active.md) | Jtbd Build Upon Guard Agent Prose Verdict Residual Above Appetite | pending | — | — | pending | pending | 2026-05-31 |
 | [R029](R029-r009-agent-prose-verdict-surface-no-llm-harness.active.md) | R009 Agent Prose Verdict Surface No Llm Harness | pending | — | — | pending | pending | 2026-05-31 |
-| [R030](R030-new-deny-surface-shipped-direct-to-changeset-no-dogfood.active.md) | New Deny Surface Shipped Direct To Changeset No Dogfood | pending | — | — | pending | pending | 2026-05-31 |
-| [R031](R031-review-problems-skill-auto-bootstrap-direct-to-changeset-no-dogfood.active.md) | Review Problems Skill Auto Bootstrap Direct To Changeset No Dogfood | pending | — | — | pending | pending | 2026-06-10 |
-| [R032](R032-orchestrator-layer-graduation-gate-prose-no-dogfood-window.active.md) | Orchestrator Layer Graduation Gate Prose No Dogfood Window | pending | — | — | pending | pending | 2026-06-10 |
-| [R033](R033-r009-bedrock-skill-prose-recast-no-dogfood-window.active.md) | R009 Bedrock Skill Prose Recast No Dogfood Window | pending | — | — | pending | pending | 2026-06-10 |
-| [R034](R034-r009-bedrock-orchestrator-skill-prose-recast-no-in-source-dogfood.active.md) | R009 Bedrock Orchestrator Skill Prose Recast No In Source Dogfood | pending | — | — | pending | pending | 2026-06-10 |
 | [R035](R035-r009-prose-surface-floor-un-verified-eval-run.active.md) | R009 Prose Surface Floor Un Verified Eval Run | pending | — | — | pending | pending | 2026-06-10 |
 | [R036](R036-p350-skill-prose-brief-before-id-no-promptfoo-coverage.active.md) | P350 Skill Prose Brief Before Id No Promptfoo Coverage | pending | — | — | pending | pending | 2026-06-10 |
 | [R037](R037-capture-problem-skill-prose-no-promptfoo-eval.active.md) | Capture Problem Skill Prose No Promptfoo Eval | pending | — | — | pending | pending | 2026-06-10 |
@@ -134,20 +118,16 @@ The catalogue is self-pruning: when a class stops surfacing in `.risk-reports/` 
 | [R039](R039-skill-prose-r009-floor-migrate-briefing-no-promptfoo.active.md) | Skill Prose R009 Floor Migrate Briefing No Promptfoo | pending | — | — | pending | pending | 2026-06-10 |
 | [R040](R040-work-problems-skill-prose-floor-without-paired-promptfoo-eval.active.md) | Work Problems Skill Prose Floor Without Paired Promptfoo Eval | pending | — | — | pending | pending | 2026-06-10 |
 | [R041](R041-external-project-handle-in-public-repo-ticket-origin-stamp.active.md) | External Project Handle In Public Repo Ticket Origin Stamp | pending | — | — | pending | pending | 2026-06-10 |
-| [R042](R042-hook-source-change-direct-to-changeset-no-dogfood-window.active.md) | Hook Source Change Direct To Changeset No Dogfood Window | pending | — | — | pending | pending | 2026-06-10 |
 | [R043](R043-r009-wrapper-skill-prose-no-paired-promptfoo-eval.active.md) | R009 Wrapper Skill Prose No Paired Promptfoo Eval | pending | — | — | pending | pending | 2026-06-10 |
 | [R044](R044-work-problems-skill-prose-no-promptfoo-coverage.active.md) | Work Problems Skill Prose No Promptfoo Coverage | pending | — | — | pending | pending | 2026-06-10 |
 | [R045](R045-r009-skill-prose-work-problems-no-promptfoo-eval.active.md) | R009 Skill Prose Work Problems No Promptfoo Eval | pending | — | — | pending | pending | 2026-06-10 |
 | [R046](R046-r009-skill-prose-floor-work-problems-no-promptfoo-coverage.active.md) | R009 Skill Prose Floor Work Problems No Promptfoo Coverage | pending | — | — | pending | pending | 2026-06-10 |
 | [R047](R047-work-problems-skill-prose-floor-no-paired-promptfoo.active.md) | Work Problems Skill Prose Floor No Paired Promptfoo | pending | — | — | pending | pending | 2026-06-10 |
-| [R048](R048-r009-work-problems-skill-prose-floor-untenably-deep-hold-cohort.active.md) | R009 Work Problems Skill Prose Floor Untenably Deep Hold Cohort | pending | — | — | pending | pending | 2026-06-10 |
 | [R049](R049-review-problems-skill-prose-floor-without-paired-promptfoo.active.md) | Review Problems Skill Prose Floor Without Paired Promptfoo | pending | — | — | pending | pending | 2026-06-10 |
 | [R050](R050-work-problems-skill-prose-cohort-depth-7-binding-on-single-eval-slice.active.md) | Work Problems Skill Prose Cohort Depth 7 Binding On Single Eval Slice | pending | — | — | pending | pending | 2026-06-10 |
-| [R051](R051-work-problems-eval-paired-capability-unmet-7th-time.active.md) | Work Problems Eval Paired Capability Unmet 7Th Time | pending | — | — | pending | pending | 2026-06-10 |
 | [R052](R052-review-problems-skill-prose-no-promptfoo-eval.active.md) | Review Problems Skill Prose No Promptfoo Eval | pending | — | — | pending | pending | 2026-06-10 |
 | [R053](R053-adr-skill-prose-amendment-no-paired-changeset-or-promptfoo.active.md) | Adr Skill Prose Amendment No Paired Changeset Or Promptfoo | pending | — | — | pending | pending | 2026-06-10 |
 | [R054](R054-architect-jtbd-agent-prose-verdict-grammar-no-promptfoo-eval.active.md) | Architect Jtbd Agent Prose Verdict Grammar No Promptfoo Eval | pending | — | — | pending | pending | 2026-06-10 |
-| [R055](R055-r009-review-problems-skill-prose-bedrock-floor.active.md) | R009 Review Problems Skill Prose Bedrock Floor | pending | — | — | pending | pending | 2026-06-10 |
 | [R056](R056-reconcile-readme-prose-no-promptfoo-eval.active.md) | Reconcile Readme Prose No Promptfoo Eval | pending | — | — | pending | pending | 2026-06-10 |
 | [R057](R057-feat-commit-without-paired-changeset-phase-1-ambiguity.active.md) | Feat Commit Without Paired Changeset Phase 1 Ambiguity | pending | — | — | pending | pending | 2026-06-17 |
 | [R058](R058-work-problems-skill-prose-floor-no-paired-promptfoo-p358.active.md) | Work Problems Skill Prose Floor No Paired Promptfoo P358 | pending | — | — | pending | pending | 2026-06-17 |
@@ -166,9 +146,7 @@ The catalogue is self-pruning: when a class stops surfacing in `.risk-reports/` 
 | [R071](R071-r009-i13-existing-vehicle-trace-branch-no-promptfoo-eval.active.md) | R009 I13 Existing Vehicle Trace Branch No Promptfoo Eval | pending | — | — | pending | pending | 2026-07-03 |
 | [R072](R072-skill-prose-gate-invocation-floor-no-paired-promptfoo-for-changed-branch.active.md) | Skill Prose Gate Invocation Floor No Paired Promptfoo For Changed Branch | pending | — | — | pending | pending | 2026-07-03 |
 | [R073](R073-adopter-name-and-usage-detail-in-public-repo-rfc-prose.active.md) | Adopter Name And Usage Detail In Public Repo Rfc Prose | pending | — | — | pending | pending | 2026-07-03 |
-| [R075](R075-new-prose-pattern-hook-detector-shipped-without-dogfood-window.active.md) | New Prose Pattern Hook Detector Shipped Without Dogfood Window | pending | — | — | pending | pending | 2026-07-15 |
 | [R076](R076-skill-behavioural-change-shipped-without-paired-changeset.active.md) | Skill Behavioural Change Shipped Without Paired Changeset | pending | — | — | pending | pending | 2026-07-15 |
 | [R077](R077-restore-incident-skill-prose-floor-no-promptfoo-eval.active.md) | Restore Incident Skill Prose Floor No Promptfoo Eval | pending | — | — | pending | pending | 2026-07-15 |
 | [R078](R078-capture-adr-skill-prose-no-paired-promptfoo-eval.active.md) | Capture Adr Skill Prose No Paired Promptfoo Eval | pending | — | — | pending | pending | 2026-07-15 |
-| [R079](R079-cruise-self-installer-config-mutation-first-landing-no-dogfood.active.md) | Cruise Self Installer Config Mutation First Landing No Dogfood | pending | — | — | pending | pending | 2026-07-15 |
 | [R080](R080-plugin-installer-help-text-copied-verbatim-from-sibling-package.active.md) | Plugin Installer Help Text Copied Verbatim From Sibling Package | pending | — | — | pending | pending | 2026-07-15 |

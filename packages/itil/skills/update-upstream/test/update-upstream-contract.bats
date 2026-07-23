@@ -346,12 +346,11 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-# ─── Paired promptfoo eval (ADR-075 Amendment 2026-06-02 + ADR-061 Rule 4) ────
+# ─── Paired promptfoo eval (ADR-075 Amendment 2026-06-02) ────────────────────
 #
 # The paired promptfoo eval at packages/itil/skills/update-upstream/eval/
 # discharges the R009 prose-floor for this SKILL surface atomically per
-# ADR-061 Rule 4 evidence-floor — without the paired eval, ADR-042 Rule 2
-# move-to-holding would apply per the P080 iter contract.
+# ADR-075 evidence floor.
 
 @test "update-upstream: paired promptfoo eval config exists (ADR-075 Amendment 2026-06-02)" {
   [ -f "$EVAL_CONFIG" ]

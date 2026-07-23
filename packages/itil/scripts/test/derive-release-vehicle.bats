@@ -21,11 +21,10 @@
 #     release-date: <YYYY-MM-DD>
 #
 # Exit codes:
-#   0 = OK (full citation emitted, OR de-facto-released graduated-holding
-#       changeset whose code already shipped with a sibling release — P361)
+#   0 = OK (full citation emitted)
 #   1 = ticket file not found
 #   2 = no changeset reference in ticket body
-#   3 = changeset still present AND not de-facto-released (genuinely unreleased)
+#   3 = changeset still present (unreleased)
 #   4 = deletion commit found but no merge PR / merge commit resolvable
 #
 # @adr ADR-049 (bin/ on PATH shim — adopter-safe script resolution)
@@ -158,37 +157,26 @@ EOF
   echo "$output" | grep -qi "unreleased\|not.*delet"
 }
 
-# ── Exit 0: de-facto-released graduated-holding changeset (P361) ─────────────
-
-@test "derive-release-vehicle: graduated holding changeset whose code shipped with a sibling release → exit 0 de-facto-released" {
-  # P361 / ADR-061 Rule 5 + P359: a changeset can be reinstated to
-  # .changeset/ awaiting changelog attribution AFTER its code already shipped
-  # with a sibling release. Present-in-tree must NOT read as unreleased.
-  cat > .changeset/p211-graduated.md <<'EOF'
+@test "ADR-099: present changeset remains unreleased after a sibling version bump" {
+  cat > .changeset/p211-present.md <<'EOF'
 ---
 '@windyroad/itil': patch
 ---
 
-P211 fix — held then graduated.
+P211 fix.
 EOF
-  cat > docs/problems/verifying/211-graduated.md <<'EOF'
-# Problem 211: Graduated
+  cat > docs/problems/known-error/211-present.md <<'EOF'
+# Problem 211: Present Changeset
 
 **Status**: Known Error
 
 ## Fix Strategy
 
-Ship via `.changeset/p211-graduated.md`.
+Ship via `.changeset/p211-present.md`.
 EOF
   git add .
-  git commit -q -m "feat(itil): P211 fix + changeset"   # commit A — the fix
+  git commit -q -m "feat(itil): P211 fix"
 
-  # Hold it out of the active release queue (ADR-042 Rule 7).
-  mkdir -p docs/changesets-holding
-  git mv .changeset/p211-graduated.md docs/changesets-holding/p211-graduated.md
-  git commit -q -m "chore(itil): hold P211 changeset (above-appetite)"
-
-  # A sibling release ships AFTER the fix landed (P359: code ships regardless).
   cat > .changeset/p999-sibling.md <<'EOF'
 ---
 '@windyroad/itil': patch
@@ -197,19 +185,13 @@ EOF
 Sibling fix.
 EOF
   git add .changeset/p999-sibling.md
-  git commit -q -m "feat(itil): sibling fix + changeset"
+  git commit -q -m "feat(itil): sibling fix"
   git rm -q .changeset/p999-sibling.md
-  git commit -q -m "chore: version packages"   # the published release bump
-
-  # Graduate the held changeset back to .changeset/ awaiting attribution.
-  mkdir -p .changeset
-  git mv docs/changesets-holding/p211-graduated.md .changeset/p211-graduated.md
-  git commit -q -m "chore(itil): graduate P211 changeset"
+  git commit -q -m "chore: version packages"
 
   run "$SCRIPT" P211 docs/problems
-  [ "$status" -eq 0 ]
-  echo "$output" | grep -qi "de-facto-released"
-  echo "$output" | grep -q "changeset: .changeset/p211-graduated.md"
+  [ "$status" -eq 3 ]
+  echo "$output" | grep -qi "unreleased"
 }
 
 @test "derive-release-vehicle: fresh changeset added AFTER the last release → still exit 3 (not a false de-facto-released)" {

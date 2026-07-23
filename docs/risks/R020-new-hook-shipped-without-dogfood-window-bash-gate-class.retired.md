@@ -1,6 +1,6 @@
-# Risk R015: New Hook First Landing Without Dogfood Window
+# Risk R020: New Hook Shipped Without Dogfood Window Bash Gate Class
 
-**Status**: Active (auto-scaffolded — pending review)
+**Status**: Retired 2026-07-23 — holding-window framing superseded by ADR-099; R003 covers Bash gate landings.
 **Category**: <!-- pending review — auto-scaffolded from pipeline hint -->
 **Identified**: 2026-05-17
 **Owner**: pending review
@@ -10,7 +10,7 @@
 
 ## Description
 
-New PreToolUse:Bash commit-gate hook landing direct to `.changeset/` instead of `docs/changesets-holding/`; R003 new-hook-landing modulator drives release-layer residual above appetite (8/25 Medium) despite full bats + architect/JTBD/risk-scorer green inside iter subprocess.
+P232 Bash polling-antipattern PreToolUse hook landing for first time without held-area dogfood; R003 new-hook modulator pushes residual to 8/Medium
 
 > Auto-scaffolded by the Phase 2b drain (ADR-056) from a `wr-risk-scorer:pipeline`
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
@@ -20,21 +20,22 @@ New PreToolUse:Bash commit-gate hook landing direct to `.changeset/` instead of 
 
 **Path patterns** (any match → consider this entry):
 
-- `packages/*/hooks/*.sh` (new file, not modification — git-add-newfile signal)
-- `packages/*/hooks/hooks.json` (new hook event registration)
-- `.changeset/*.md` (when paired with new-hook source change AND no `docs/changesets-holding/` sibling)
+- `packages/*/hooks/*.sh` (new file, PreToolUse:Bash matcher)
+- `packages/*/hooks/hooks.json` (new `PreToolUse:Bash` registration)
+- `.changeset/*.md` (paired with new Bash-gate AND no `docs/changesets-holding/` sibling)
 
 **Diff-content keywords** (any match → consider):
 
-- `PreToolUse`, `PostToolUse`, `UserPromptSubmit`, `Stop`, `SessionStart`
-- new-file additions (`new file mode` markers in diff)
-- absence of paired `docs/changesets-holding/<hook>.md`
+- `PreToolUse:Bash`, `"matcher": "Bash"`, `Bash|Write|Edit`
+- `polling-antipattern`, `polling`, `sleep`, `until`
+- new-file additions under `packages/*/hooks/` declaring `PreToolUse:Bash`
 
-**Anti-patterns** (looks like R015 but isn't):
+**Anti-patterns** (looks like R020 but isn't):
 
-- Modification of existing hook → standard **R003** (no first-landing modulator)
-- New hook with paired `docs/changesets-holding/` dogfood window → controls firing; score as routine R003
-- New hook that only touches test fixtures (`packages/*/hooks/test/*.bats`) → score as **R009** test-coverage class
+- Existing Bash-gate modification (no new-hook landing) → standard **R003**
+- SessionStart additionalContext hook → score as **R026/R027** (SessionStart class — exit-0-always envelope differs)
+- PreToolUse hook with non-Bash matcher (e.g. Write/Edit/Read) → score as **R015** generic new-hook class
+- New Bash-gate WITH paired `docs/changesets-holding/` dogfood window → controls firing; routine R003
 
 ## Inherent Risk
 
@@ -78,8 +79,7 @@ pending review — treatment decision deferred until scoring is curated.
 
 Auto-populated from `.risk-reports/` via Phase 2b drain.
 
-- 2026-05-11T13:29:38Z: fired in `.risk-reports/2026-05-11T13-29-38-commit.md` (reason: above-appetite-residual)
-- 2026-07-04T01:16:58Z: fired in `.risk-reports/2026-07-04T01-16-58-commit.md` (reason: above-appetite-residual)
+- 2026-05-16T12:03:11Z: fired in `.risk-reports/2026-05-16T12-03-11-commit.md` (reason: above-appetite-residual)
 
 ## Change Log
 

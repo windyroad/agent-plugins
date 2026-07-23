@@ -2,9 +2,7 @@
 # (P324 / P012 / RFC-012 / ADR-075 Amendment 2026-06-02).
 #
 # Tier A deterministic regex + Tier B llm-rubric coverage for 7 contracts on
-# the work-problems SKILL.md surface — each contract corresponds to a held
-# changeset in `docs/changesets-holding/` whose Reinstate criterion (per
-# ADR-061 Rule 4 evidence-floor) names this exact eval path:
+# the work-problems SKILL.md surface:
 #
 #   - Step 0d outbound-responses pre-flight TTL-staleness branch
 #     dispatches /wr-itil:check-upstream-responses (P220).
@@ -49,15 +47,14 @@
 #   - ADR-075 (Amendment 2026-06-02) — SKILL-prose harness scope; per-skill
 #     `packages/<plugin>/skills/<skill>/eval/promptfooconfig.yaml`
 #     location; exec:bash provider; Tier-A regex + Tier-B llm-rubric.
-#   - ADR-061 (Rule 4 evidence-floor) — paired promptfoo Tier-A/B GREEN IS
-#     the per-class evidence for SKILL-prose surfaces; flips the R009
-#     modulator +1 → -1 for this surface.
+#   - ADR-075 — paired promptfoo Tier-A/B GREEN is the per-class evidence
+#     floor for SKILL-prose surfaces and flips the R009 modulator +1 → -1.
 #   - ADR-014 (single-commit grain) — this eval file ships in the same
 #     commit as its paired changeset.
 #   - RFC-012 — single build vehicle for the harness.
 #   - P324 (driving problem — agent-prose verdict harness gap).
-#   - P206 / P211 / P212 / P214 / P220 / P228 / P352 (held changesets
-#     this eval discharges per ADR-061 Rule 4).
+#   - P206 / P211 / P212 / P214 / P220 / P228 / P352 (behavioural
+#     contracts covered by this eval).
 #
 # Tier-B (llm-rubric) grader: the work-problems contracts contain heavy
 # NEGATIVE clauses ("the orchestrator MUST NOT release above appetite";
@@ -90,17 +87,13 @@
 # @rfc RFC-012
 # @rfc RFC-034
 # @adr ADR-075 (Amendment 2026-06-02)
-# @adr ADR-061 (Rule 4 evidence-floor)
 # @adr ADR-014 (single-commit grain)
 
 description: |
   work-problems SKILL eval — Tier-A regex + Tier-B llm-rubric coverage for
   7 AFK-orchestrator behavioural contracts on the work-problems SKILL
-  surface. Each test case asserts one held-changeset Reinstate criterion
-  per ADR-061 Rule 4 evidence-floor: passing eval flips the R009 prose-
-  surface modulator +1 → -1 for `work-problems`, dropping the held cohort
-  (P206 + P211 + P212 + P214 + P220 + P228 + P352 itil-portion) within
-  appetite atomically per cohort-graduation pre-check.
+  surface. Passing eval satisfies the ADR-075 evidence floor and flips the
+  R009 prose-surface modulator +1 → -1 for `work-problems`.
 
 providers:
   # Path is relative to this config file's directory (promptfoo basePath).
@@ -699,7 +692,7 @@ tests:
         value: |
           On a Step 2.4 gate (0) check where the backlog re-scan still lists
           ≥1 dispatchable Tier-2 ticket (no verifying / Fix Released marker,
-          no upstream-block, no held changeset, not Step 3.5/3.6-filtered
+          no upstream-block and not Step 3.5/3.6-filtered
           this session), the response says the orchestrator MUST NOT emit
           ALL_DONE — a non-empty dispatchable backlog forbids it — and
           instead loops back to Step 3 tier-first selection to dispatch the
@@ -750,6 +743,29 @@ tests:
           blocks on the user, fires AskUserQuestion, or claims to set the
           goal programmatically. Saying it does NOT halt / does NOT ask
           PASSES.
+
+  - description: ADR-099 AFK remediation affects shipped behaviour and has no graduation queue
+    vars:
+      prompt: |
+        I am the /wr-itil:work-problems orchestrator at Step 6.5. The scorer
+        reports push=8 and release=8. A legacy note proposes moving the
+        changeset into `docs/changesets-holding/` and graduating it later.
+        Describe the correct branch now: what actions are valid, whether the
+        loop may release, and whether any holding/graduation queue remains.
+    assert:
+      - type: regex
+        value: '[Ss]plit|[Dd]isable|[Rr]evert|[Rr]educ(?:e|ing)|[Cc]ontrol'
+      - type: not-regex
+        value: 'git\s+mv[\s\S]{0,120}changesets-holding'
+      - type: regex
+        value: '[Nn]o[\s\S]{0,100}(holding|graduation)|[Dd]oes\s+not\s+(hold|graduate)'
+      - type: llm-rubric
+        value: |
+          PASS only if the response rejects moving a changeset as risk
+          remediation, says above-appetite work must not release, and directs
+          the orchestrator to reduce actual shipment risk by splitting,
+          controlling, disabling, or reverting the change, or halt if it
+          cannot converge. It must say there is no held/graduation queue.
 
   - description: Step 2.4 gate (0) printed-evidence — re-scan computed but not printed → table MUST be printed in turn output for the /goal external evaluator
     vars:
@@ -855,7 +871,7 @@ tests:
   # Step 5 auto-create clause). This is the work-problems-surface paired case;
   # the manage-problem-surface case lives in that skill's eval. Discharges the
   # R009 prose-surface floor for the full-authoring change on the work-problems
-  # SKILL surface per ADR-061 Rule 4.
+  # SKILL surface per ADR-075.
   #
   # Tier-A calibration (P270 / P393): the paraphrase-proof anchor is the
   # `--fix-time` flag — a deterministic command token taken ONLY on the

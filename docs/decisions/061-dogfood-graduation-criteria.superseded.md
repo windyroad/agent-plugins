@@ -1,9 +1,10 @@
 ---
-status: "proposed"
+status: "superseded"
 date: 2026-05-11
 human-oversight: rejected-pending-supersede
 oversight-date: 2026-07-13
 supersede-ticket: P359
+superseded-by: ADR-099
 oversight-note: "REJECTED in the 2026-07-13 review-decisions drain. User: changeset holding is theatre — it holds only the changelog entry, not the code or the risk, so held code ships anyway with any sibling release. The graduation criteria this ADR codifies are moot until holding actually withholds shipment. Direction: either holding must withhold BOTH the changeset AND the code (+risk), or the concept of holding is purged entirely. Tracked on P359 (holding does not withhold shipment); a superseding ADR follows P359's resolution."
 decision-makers: [tomhoward]
 consulted: [wr-architect:agent, wr-jtbd:agent]
@@ -12,6 +13,9 @@ reassessment-date: 2026-08-11
 ---
 
 # Dogfood graduation criteria for held changesets — symmetric risk balance drives the reinstate decision
+
+> Superseded by ADR-099. Held changesets were removed because moving release
+> metadata does not withhold code or reduce shipment risk.
 
 ## Context and Problem Statement
 

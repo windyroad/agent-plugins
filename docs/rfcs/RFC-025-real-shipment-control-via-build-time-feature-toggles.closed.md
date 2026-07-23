@@ -1,24 +1,27 @@
 ---
-status: proposed
+status: closed
 rfc-id: real-shipment-control-via-build-time-feature-toggles
 reported: 2026-06-17
 human-oversight: unconfirmed
 decision-makers: [Tom Howard]
 problems: [P359]
-adrs: [ADR-082]
+adrs: [ADR-082, ADR-099]
 jtbd: [JTBD-002, JTBD-006]
 stories: []
 ---
 
 # RFC-025: Real shipment control via build-time feature toggles
 
-**Status**: proposed
+**Status**: closed — retired without implementation on 2026-07-23
 **Reported**: 2026-06-17
 **Problems**: P359
 **ADRs**: ADR-082 (ratified option (b) at `/wr-architect:review-decisions` 2026-06-17)
 **JTBD**: JTBD-002 (Ship AI-Assisted Code with Confidence), JTBD-006 (Progress the Backlog While I'm Away)
 
 ## Summary
+
+**Retirement note:** ADR-099 superseded ADR-082 and removed held changesets.
+This build-time feature-toggle proposal is therefore retired, not completed.
 
 Build the real shipment-control mechanism ADR-082 option (b) selected: when held above-appetite work is committed to main, the npm tarball must EXCLUDE the held content (not just exclude the CHANGELOG entry). The shipped tarball IS the build artifact, produced at publisher CI time from templated source. Adopters install pre-rendered tarballs and remain unaware of the templating layer. The mechanism must support testing BOTH the feature-enabled AND feature-disabled states of each held entry — otherwise the OFF state is untested and unsafe to ship.
 

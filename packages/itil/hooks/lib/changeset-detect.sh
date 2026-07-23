@@ -32,10 +32,9 @@
 #       * any other path: ignored (non-publishable surface — `.github/`,
 #         root config, top-level `docs/`, etc.).
 #   - If any path is publishable source:
-#       * **Check 2a (Phase 1)**: a `.changeset/*.md` (or held-window
-#         `docs/changesets-holding/*.md` per P177) staged → allow.
-#       * **Check 2b (Phase 2)**: an in-scope `.changeset/*.md` (or
-#         held-window entry) targeting the plugin via YAML frontmatter
+#       * **Check 2a (Phase 1)**: a `.changeset/*.md` staged → allow.
+#       * **Check 2b (Phase 2)**: an in-scope `.changeset/*.md`
+#         targeting the plugin via YAML frontmatter
 #         `"@windyroad/<slug>": <any-bump>` → allow. Scope =
 #         in-unpushed-range additions (`<base>..HEAD`) + untracked
 #         working-tree files + modified-not-staged working-tree files.
@@ -98,8 +97,7 @@
 #              shape — per-invocation deterministic, no markers).
 #   P141     — this helper.
 
-# P141 Phase 2 helper — does any `.changeset/*.md` (or held entry under
-# `docs/changesets-holding/*.md`) ALREADY in scope target the plugin
+# P141 Phase 2 helper — does any `.changeset/*.md` ALREADY in scope target the plugin
 # slug via its YAML frontmatter `"@windyroad/<slug>": <bump>` line?
 #
 # Scope = files reachable from HEAD but not from `origin/<base>`,
@@ -142,11 +140,11 @@ _changeset_in_scope_covers_plugin() {
   candidates=$(
     {
       git log --diff-filter=A --name-only --pretty=format: "${base}..HEAD" \
-        -- '.changeset/*.md' 'docs/changesets-holding/*.md' 2>/dev/null
+        -- '.changeset/*.md' 2>/dev/null
       git ls-files --others --exclude-standard \
-        -- '.changeset/*.md' 'docs/changesets-holding/*.md' 2>/dev/null
+        -- '.changeset/*.md' 2>/dev/null
       git diff --name-only \
-        -- '.changeset/*.md' 'docs/changesets-holding/*.md' 2>/dev/null
+        -- '.changeset/*.md' 2>/dev/null
     } | grep -v '/README\.md$' | sort -u
   )
 
@@ -235,21 +233,6 @@ detect_changeset_required() {
         # README in changeset dir is meta-doc, not a real changeset.
         ;;
       .changeset/*.md)
-        has_changeset=1
-        ;;
-      docs/changesets-holding/README.md)
-        # README in the holding dir is meta-doc, not a real changeset
-        # (mirrors the .changeset/README.md exclusion above).
-        ;;
-      docs/changesets-holding/*.md)
-        # P177: a held-window changeset entry IS a changeset — authored
-        # and audit-trailed, just intentionally held outside `.changeset/`
-        # per ADR-042 Rule 7 (held-window blessing). Recognising it here
-        # gives the gate a held-window-awareness branch so held-window-
-        # bound work commits no longer need a separate move-to-holding
-        # chore commit. Release/drain semantics are unchanged — the
-        # Release workflow reads `.changeset/` only; a held entry is never
-        # drained without a graduation `git mv` back into `.changeset/`.
         has_changeset=1
         ;;
       packages/*)

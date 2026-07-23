@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 96 (87 in-force, 9 historical)
+**Total ADRs:** 97 (86 in-force, 11 historical)
 
 ---
 
 ## In-force decisions
 
-_87 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_86 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -176,7 +176,7 @@ _87 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-042 — Auto-apply scorer remediations to reach within appetite — open action-class vocabulary
 **Status:** proposed | **Oversight:** confirmed | **Supersedes:** ADR-041
 **Chosen:** Chosen option: **"Liberal auto-apply with open vocabulary and halt-on-exhaustion"**, because the never-release-above-appetite invariant is the primary constraint and liberal auto-apply is the only mechanism that reliably honours it across A...
-**Related:** ADR-041, ADR-013, ADR-014, ADR-032, ADR-015, ADR-018, ADR-020, ADR-022, ADR-037, ADR-042
+**Related:** ADR-041, ADR-013, ADR-014, ADR-032, ADR-015, ADR-018, ADR-020, ADR-022, ADR-037, ADR-099
 
 ### ADR-043 — Progressive context-usage measurement and reporting for retrospective sessions
 **Status:** proposed | **Oversight:** confirmed
@@ -201,8 +201,8 @@ _87 ADRs. These are the current rules. The architect agent reads this section fi
 
 ### ADR-049 — Plugin-bundled scripts invoked from SKILL.md resolve via `bin/` on `$PATH`
 **Status:** proposed | **Oversight:** confirmed
-**Chosen:** Claude Code uses the `bin/`-on-`$PATH` shim; generated Codex skills resolve bundled scripts relative to their installed `SKILL.md`, because Codex does not add plugin `bin/` directories to `$PATH`.
-**Related:** ADR-002, ADR-003, ADR-017, ADR-038, ADR-080, ADR-083
+**Chosen:** Chosen option: **"Option D — `bin/` on `$PATH` with thin shim wrapper"**, because it works today (no upstream feature dependency), preserves canonical-body editability under `packages/<plugin>/scripts/`, ships portably across Windows + np...
+**Related:** ADR-002, ADR-003, ADR-017, ADR-038, ADR-080
 
 ### ADR-050 — Capture the runtime stdin session_id via a PreToolUse hook so the create-gate marker binds to the same SID the runtime hook will see
 **Status:** proposed | **Oversight:** confirmed | **Supersedes:** ["048-gate-misfire-recovery-procedure.proposed.md"]
@@ -244,11 +244,6 @@ _87 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-060 — Problem-RFC-Story framework with mandatory problem-trace and unified problem ontology
 **Status:** accepted | **Oversight:** confirmed
 **Related:** ADR-095, ADR-032
-
-### ADR-061 — Dogfood graduation criteria for held changesets — symmetric risk balance drives the reinstate decision
-**Status:** proposed | **Oversight:** rejected-pending-supersede (P359)
-**Chosen:** Chosen option: **Sibling ADR codifying symmetric-balance graduation (Option 1) with Phase 1b Option A drain-condition amendment.**
-**Related:** ADR-042, ADR-018, ADR-020, ADR-022, ADR-026, ADR-052, ADR-060, ADR-082, ADR-014, ADR-013, ADR-015, ADR-044
 
 ### ADR-062 — Inbound upstream-report discovery + assessment pipeline (peer of ADR-024)
 **Status:** proposed | **Oversight:** confirmed
@@ -348,15 +343,9 @@ _87 ADRs. These are the current rules. The architect agent reads this section fi
 **Chosen:** Chosen option: **"Option A — Shim wrapper resolves to highest-version sibling at invoke time"**, because it closes the mid-session staleness window that motivated P343 (the dominant cost driver of session 9), aligns with the existing ADR-...
 **Related:** ADR-049, ADR-081, ADR-040, ADR-080, ADR-002, ADR-003, ADR-014, ADR-066, ADR-074
 
-### ADR-082 — Changeset holding semantics — attribution-only governance vs a real shipment control
-**Status:** proposed | **Oversight:** confirmed
-**Chosen:** Chosen option: **"(b) Real shipment control + (c) Reconcile K→V release lifecycle — riding together in a single RFC-first fix path"**, confirmed by the user via `AskUserQuestion` 2026-06-17 (`/wr-architect:review-decisions` drain across...
-**Related:** ADR-042, ADR-070, ADR-066, ADR-074
-
 ### ADR-083 — Codex CLI as second runtime
 **Status:** proposed | **Oversight:** confirmed
-**Chosen:** Codex remains the second runtime through sibling manifests, installers, generated runtime surfaces, and shared governance. Because Codex plugin manifests do not bundle custom agents, Claude agent markdown is rendered to standalone project or user TOML. Installers place those agents by scope; Codex SessionStart repairs marketplace/tag-only installs idempotently; marker-safe uninstall preserves modified or user-owned files.
-**Confirmation:** Manifest and instruction drift checks; generator coverage for every invoked agent and exact runtime name; project/user scope, idempotence, Codex-only repair, and marker-safe uninstall tests; isolated pre-release tarball install followed by fresh-Codex discovery and execution of a generated agent.
+**Chosen:** Chosen option: **"Option A"**, because the shape matches ADR-002's explicit forward-looking note ("the per-plugin package structure should extend naturally — each package adds its tool-specific install logic") and ADR-017's sync-script + ...
 
 ### ADR-084 — Self-firing deferral census — a SessionStart surfacer so deferred governance work cannot silently rot
 **Status:** proposed | **Oversight:** confirmed
@@ -403,11 +392,10 @@ _87 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-092 — Fix-titled-commit lifecycle drift surfaces as an advisory, never an auto-fire or hard gate
 **Status:** proposed | **Oversight:** rejected-pending-supersede (P345)
 **Chosen:** Chosen option: **post-commit advisory hook**, because **a lifecycle transition may only be automated on observable facts, and O→KE rests on a knowledge claim** — so the strongest honest surface for the fix-titled-commit signal is an adv...
+
 ### ADR-093 — Mechanical quota-pace throttle — frequently-firing PreToolUse hook, calculated sleep, never blocks
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** A mechanical PreToolUse hook in the opt-in `@windyroad/cruise` plugin paces the tighter available quota window with a feedback controller, deficit-aware position gate, and immediate recovery. Claude's fixed 5h/7d cache remains compatible; Codex app-server windows carry their actual durations and absent slots are ignored. An atomic numeric sidecar keeps fresh-cache calls under 50ms; stale refreshes are single-flight and fail open.
-**Confirmation:** Existing 16 controller bats plus Codex cases for duration-zero handling, deterministic shortest/longest mapping, legacy defaults, fresh-cache execution ≤50ms, at most one app-server refresh per 60 seconds, and empty-stdout exit 0 on failures.
-**Related:** ADR-002, ADR-003, ADR-013, ADR-017, ADR-023, ADR-038, ADR-045, ADR-057, ADR-074, ADR-083, ADR-097, ADR-098
+**Chosen:** Chosen option 3 (mechanical PreToolUse calculated sleep), registered in `hooks.json` as `PreToolUse` with **no matcher** (every tool call — Correction 2 verbatim) and `timeout: 660` (strictly greater than the 600s sleep ceiling below, so ...
 
 ### ADR-094 — AFK loops anchor completion with the native `/goal` external evaluator
 **Status:** proposed | **Oversight:** confirmed
@@ -425,21 +413,20 @@ _87 ADRs. These are the current rules. The architect agent reads this section fi
 
 ### ADR-097 — Self-installing quota-state producer (SessionStart guarded-statusline edit)
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** Installing Cruise authorizes its required quota producer. Claude uses the guarded statusline mechanism; Codex uses authenticated app-server reads into an atomic runtime-owned cache and private numeric sidecar, with bounded timeout, deterministic binary precedence, and fail-open behavior. Package uninstall removes only Cruise-owned default cache state.
-**Confirmation:** Claude's existing seven producer tests plus Codex assertions for no writes under `~/.claude`, binary precedence, timeout/fail-open, atomic writes, source-marked guarded cleanup, and live `account/rateLimits/read` compatibility.
-**Related:** ADR-002, ADR-013, ADR-074, ADR-083, ADR-093, ADR-098
 
 ### ADR-098 — Cruise config file — layered precedence (project → machine → defaults)
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** Cruise uses JSON configuration with env → project → machine → defaults precedence. Claude owns `.claude` paths; Codex owns `.codex`/`CODEX_HOME` paths. Both runtimes share the same keys and never source configuration as shell code.
-**Confirmation:** Bats prove precedence, malformed-file fallback, non-execution of config content, runtime-specific roots, and that neither runtime reads the other's default config or cache.
-**Related:** ADR-013, ADR-074, ADR-083, ADR-093, ADR-097
+
+### ADR-099 — Changesets are release metadata, not shipment controls
+**Status:** accepted | **Oversight:** confirmed | **Supersedes:** [ADR-061, ADR-082]
+**Confirmation:** No runtime skill, hook, scorer agent, or release helper treats; The holding directory and graduation evaluator are absent.; Codex-generated agent surfaces match the runtime-neutral source.; ITIL and risk-scorer tests pass.
+**Related:** ADR-042, ADR-061, ADR-082
 
 ---
 
 ## Historical decisions
 
-_9 ADRs. These were tried and superseded, rejected, or deprecated. Read them as direction for what NOT to do, or to understand the lineage of an in-force decision. Do not enforce them as current rules._
+_11 ADRs. These were tried and superseded, rejected, or deprecated. Read them as direction for what NOT to do, or to understand the lineage of an in-force decision. Do not enforce them as current rules._
 
 ### ADR-001 — Unified Install Experience via npm Package
 **Status:** superseded
@@ -479,7 +466,17 @@ _9 ADRs. These were tried and superseded, rejected, or deprecated. Read them as 
 **Chosen:** Chosen option: **"Option D2 — Plugin README MUST cite at least one current JTBD job ID; value framing SHOULD derive from JTBD"**, because it (a) creates a stable, structurally-simple drift-detection anchor (JTBD ID grep + filesystem resol...
 **Related:** ADR-002, ADR-003, ADR-008, ADR-013, ADR-014, ADR-051, ADR-021, ADR-040, ADR-053, ADR-044, ADR-049
 
+### ADR-061 — Dogfood graduation criteria for held changesets — symmetric risk balance drives the reinstate decision
+**Status:** superseded | **Oversight:** rejected-pending-supersede (P359)
+**Chosen:** Chosen option: **Sibling ADR codifying symmetric-balance graduation (Option 1) with Phase 1b Option A drain-condition amendment.**
+**Related:** ADR-042, ADR-018, ADR-020, ADR-022, ADR-026, ADR-052, ADR-060, ADR-082, ADR-014, ADR-013, ADR-015, ADR-044
+
 ### ADR-081 — SessionStart PATH refresh hook for plugin cache
 **Status:** rejected | **Oversight:** confirmed
 **Chosen:** Chosen option: **"Option A — SessionStart hook recomputes `PATH` from current cache state at every session start"**, because it closes the cold-start staleness window that P343 documents, reuses the established ADR-040 SessionStart surfac...
 **Related:** ADR-040, ADR-080, ADR-049, ADR-002, ADR-003, ADR-014, ADR-066, ADR-074
+
+### ADR-082 — Changeset holding semantics — attribution-only governance vs a real shipment control
+**Status:** superseded | **Oversight:** confirmed
+**Chosen:** Chosen option: **"(b) Real shipment control + (c) Reconcile K→V release lifecycle — riding together in a single RFC-first fix path"**, confirmed by the user via `AskUserQuestion` 2026-06-17 (`/wr-architect:review-decisions` drain across...
+**Related:** ADR-042, ADR-070, ADR-066, ADR-074

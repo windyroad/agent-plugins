@@ -1,6 +1,6 @@
-# Risk R012: Rfc Chain Atomicity Precondition Breach
+# Risk R022: Phase 3A Shipped Ahead Of Held Phase 2 Dependencies
 
-**Status**: Active (auto-scaffolded — pending review)
+**Status**: Retired 2026-07-23 — held dependency queues were removed by ADR-099; R007 covers dependency preconditions.
 **Category**: <!-- pending review — auto-scaffolded from pipeline hint -->
 **Identified**: 2026-05-17
 **Owner**: pending review
@@ -10,7 +10,7 @@
 
 ## Description
 
-Active changeset graduates ahead of held RFC-001 chain, breaching ADR-060 § Confirmation criterion 6 atomicity contract; standing risk class for any future RFC-shaped held window
+Phase 3a populate-script changeset authored into .changeset/ while its Phase 2a + Phase 2b NDJSON-producer dependencies remain held in docs/changesets-holding/; precondition chain 2a→2b→3a→3b inverted at the release queue.
 
 > Auto-scaffolded by the Phase 2b drain (ADR-056) from a `wr-risk-scorer:pipeline`
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
@@ -20,22 +20,21 @@ Active changeset graduates ahead of held RFC-001 chain, breaching ADR-060 § Con
 
 **Path patterns** (any match → consider this entry):
 
-- `.changeset/*.md` AND `docs/changesets-holding/*.md` simultaneously where the active changeset cites an RFC also represented in holding
-- `docs/rfcs/RFC-*.md` (Status: `accepted` / `in-progress` with chain-atomicity confirmation criteria)
-- `docs/rfcs/README.md` (Phase / Slice progression rows)
+- `.changeset/*.md` AND `docs/changesets-holding/*.md` simultaneously where the active bodies cite a later Phase than the held bodies
+- `.changeset/*.md` bodies citing `Phase N` while sibling holding bodies cite `Phase N-1`
 
 **Diff-content keywords** (any match → consider):
 
-- `RFC-NNN`, `Phase N`, `Slice N`
-- `chain`, `atomicity`, `Confirmation criterion`
-- `precondition` (in changeset bodies)
-- `paired capability` (ADR-060 vocabulary)
+- `Phase 2a`, `Phase 2b`, `Phase 3a`, `Phase 3b`
+- `precondition chain`, `precondition`
+- `NDJSON producer`, `producer`, `consumer`
+- `inverted at the release queue`
 
-**Anti-patterns** (looks like R012 but isn't):
+**Anti-patterns** (looks like R022 but isn't):
 
-- Standalone RFC (not chain-shaped — single-Slice scope) → routine release; no atomicity breach possible
-- All chain Slices in same active batch (atomic ship) → controls firing; score as routine R005 release coordination
-- RFC closed (post-final-Slice) with no held siblings → no longer in scope; ADR-060 atomicity not at risk
+- Active Phase chain has NO held siblings (all Phases on the active path) → no inversion possible; routine **R005**
+- Single-Phase ticket (no chain semantics) → routine **R005**
+- Phase 3a + Phase 2 in same active batch (atomic ship) → controls firing; no inversion
 
 ## Inherent Risk
 
@@ -79,7 +78,7 @@ pending review — treatment decision deferred until scoring is curated.
 
 Auto-populated from `.risk-reports/` via Phase 2b drain.
 
-- 2026-05-06T12:15:35Z: fired in `.risk-reports/2026-05-06T12-15-35-commit.md` (reason: above-appetite-residual)
+- 2026-05-17T06:55:25Z: fired in `.risk-reports/2026-05-17T06-55-25-commit.md` (reason: user-stated-precondition)
 
 ## Change Log
 

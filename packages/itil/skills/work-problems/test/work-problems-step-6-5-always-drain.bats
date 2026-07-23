@@ -4,8 +4,7 @@
 # pivot on releasable material, not residual band. The defective prior
 # clause "Within appetite (≤ 3/25) — no drain needed" encoded
 # accumulation-permitted-below-threshold semantics that violated the
-# symmetric-balance principle (ADR-061 Rule 1) and the user's verbatim
-# direction: "If it's low risk, you should release."
+# user's verbatim direction: "If it's low risk, you should release."
 #
 # Amended contract (three-band):
 #   1. Above appetite (≥ 5/25)        → ADR-042 auto-apply (unchanged).
@@ -13,8 +12,7 @@
 #   3. Within appetite (≤ 4/25) AND empty queue        → no drain (no-op fast-path).
 #
 # The trigger for the drain action is *presence of releasable material*
-# (any unpushed commits OR any .changeset/ entries OR any graduation-
-# eligible held entries per ADR-061 Rule 1). The residual band remains
+# (any unpushed commits OR any .changeset/ entries). The residual band remains
 # the safety check (above-appetite never releases) but is no longer the
 # action gate for the within-appetite branch.
 #
@@ -32,7 +30,6 @@
 # @adr ADR-018 (release-cadence policy parent — amended in same commit)
 # @adr ADR-037 (skill-testing strategy — contract-assertion class)
 # @adr ADR-042 (above-appetite branch — preserved unchanged)
-# @adr ADR-061 (Rule 1 symmetric-balance principle — parent principle)
 # @jtbd JTBD-006 (Progress the Backlog While I'm Away — primary)
 # @jtbd JTBD-002 (Ship with Confidence — composes; small frequent releases)
 
@@ -85,7 +82,7 @@ setup() {
 
 @test "work-problems P250: Within-appetite + releasable material triggers drain" {
   # The load-bearing positive contract: within appetite AND any unpushed
-  # commits OR changeset OR graduation-eligible held entry → drain.
+  # commits OR changeset entry → drain.
   run grep -nE 'Within appetite \(≤ 4/25\) AND there is releasable material' "$SKILL_MD"
   [ "$status" -eq 0 ]
 }
@@ -97,14 +94,6 @@ setup() {
 
 @test "work-problems P250: releasable-material clause enumerates .changeset/ entries" {
   run grep -nE 'any entries in `\.changeset/`|`\.changeset/` non-empty|entries in `\.changeset/`' "$SKILL_MD"
-  [ "$status" -eq 0 ]
-}
-
-@test "work-problems P250: releasable-material clause enumerates ADR-061 Rule 1 graduation-eligible held entries" {
-  # ADR-061 cross-reference: the symmetric-balance disjunct ensures
-  # held entries that have decayed within appetite are graduation-
-  # eligible AND drainable.
-  run grep -nE 'graduation-eligible.*ADR-061 Rule 1|ADR-061 Rule 1.*graduation-eligible|docs/changesets-holding.*ADR-061' "$SKILL_MD"
   [ "$status" -eq 0 ]
 }
 

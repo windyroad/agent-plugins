@@ -1,5 +1,5 @@
 ---
-status: "proposed"
+status: "superseded"
 date: 2026-06-17
 human-oversight: confirmed
 oversight-date: 2026-06-17
@@ -7,9 +7,13 @@ decision-makers: [Tom Howard]
 consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: [Windy Road plugin users]
 problems: [P359]
+superseded-by: ADR-099
 ---
 
 # Changeset holding semantics — attribution-only governance vs a real shipment control
+
+> Superseded by ADR-099. The project removed the holding concept instead of
+> building a generic shipment-control layer around changeset metadata.
 
 ## Context and Problem Statement
 

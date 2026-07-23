@@ -1,6 +1,6 @@
 # Risk R048: R009 Work Problems Skill Prose Floor Untenably Deep Hold Cohort
 
-**Status**: Active (auto-scaffolded — pending review)
+**Status**: Retired 2026-07-23 — held cohorts were removed by ADR-099; R009 covers prose coverage.
 **Category**: <!-- pending review — auto-scaffolded from pipeline hint -->
 **Identified**: 2026-06-10
 **Owner**: pending review
