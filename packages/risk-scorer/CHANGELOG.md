@@ -1,5 +1,13 @@
 # @windyroad/risk-scorer
 
+## 0.18.6
+
+### Patch Changes
+
+- 297f954: Remove held changesets and require above-appetite remediations to affect shipped
+  code, controls, evidence, or scope.
+- 297f954: Explain the authorised CI-repair recovery path when red CI blocks a push or release, so agents continue recoverable work without weakening the gate.
+
 ## 0.18.5
 
 ### Patch Changes
