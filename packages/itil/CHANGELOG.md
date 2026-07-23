@@ -1,5 +1,12 @@
 # @windyroad/problem
 
+## 0.59.2
+
+### Patch Changes
+
+- 297f954: Remove held changesets and require above-appetite remediations to affect shipped
+  code, controls, evidence, or scope.
+
 ## 0.59.1
 
 ### Patch Changes
