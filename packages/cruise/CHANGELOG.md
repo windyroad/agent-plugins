@@ -1,5 +1,11 @@
 # @windyroad/cruise
 
+## 0.4.5
+
+### Patch Changes
+
+- d3a5279: Pace Codex managed-workspace monthly credit limits when app-server returns an `individualLimit` instead of standard rate-limit windows.
+
 ## 0.4.4
 
 ### Patch Changes
