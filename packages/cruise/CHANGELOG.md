@@ -1,5 +1,11 @@
 # @windyroad/cruise
 
+## 0.4.3
+
+### Patch Changes
+
+- b5b8168: Stage the published package outside its scoped npm path before registering the Codex marketplace, so Codex does not misinterpret `@windyroad` as a Git ref.
+
 ## 0.4.2
 
 ### Patch Changes
