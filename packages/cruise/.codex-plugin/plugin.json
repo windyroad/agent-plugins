@@ -1,6 +1,6 @@
 {
   "name": "wr-cruise",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Mechanical quota pacing for Claude Code and Codex",
   "author": {
     "name": "Windy Road Technology",
