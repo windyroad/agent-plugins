@@ -1,6 +1,6 @@
 {
   "name": "@windyroad/cruise",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "Cruise — mechanical token-quota pacing for Claude Code and Codex",
   "type": "module",
   "license": "MIT",
