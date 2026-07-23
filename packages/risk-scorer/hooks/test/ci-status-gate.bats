@@ -88,6 +88,11 @@ _run_check() {
   [[ "$result" == DENY:* ]]
   [[ "$result" == *"failure"* ]]
   [[ "$result" == *"https://github.com/x/y/actions/runs/2"* ]]
+  [[ "$result" == *"not itself a goal blocker"* ]]
+  [[ "$result" == *"wr-risk-scorer:pipeline"* ]]
+  [[ "$result" == *"CI-recovery context"* ]]
+  [[ "$result" == *"reducing-push"* ]]
+  [[ "$result" == *"Unrelated outgoing commits remain blocked"* ]]
 }
 
 @test "check_ci_status denies when latest CI run concluded cancelled" {
@@ -203,6 +208,10 @@ JSON
   [[ "$output" == *"permissionDecision"* ]]
   [[ "$output" == *"deny"* ]]
   [[ "$output" == *"failure"* ]]
+  [[ "$output" == *"Fix and push the CI repair"* ]]
+  [[ "$output" == *"wait for green CI"* ]]
+  [[ "$output" == *"npm run release:watch"* ]]
+  [[ "$output" == *"incident-release"* ]]
 }
 
 @test "git-push-gate.sh allows release:watch when incident-release bypass is set, even if CI is red (JTBD-201)" {

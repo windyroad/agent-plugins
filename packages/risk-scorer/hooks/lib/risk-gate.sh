@@ -273,7 +273,11 @@ except Exception:
           ;;
         failure|cancelled|timed_out|action_required|startup_failure)
           CI_GATE_CATEGORY="red"
-          CI_GATE_REASON="Latest CI run on branch '${BRANCH}' concluded ${CONCLUSION}: ${URL}. Fix CI before pushing/releasing — there is no override (P377/RFC-029; ci-bypass removed). A live-outage restore-service release uses the separate incident-release path."
+          if [ "$ACTION" = "push" ]; then
+            CI_GATE_REASON="Latest CI run on branch '${BRANCH}' concluded ${CONCLUSION}: ${URL}. Red CI is not itself a goal blocker. Inspect that run, verify the outgoing commits directly repair that exact failure, then delegate to wr-risk-scorer:pipeline with CI-recovery context. Retry \`npm run push:watch\` only after a net risk-reducing verdict creates the existing reducing-push marker. Unrelated outgoing commits remain blocked; there is no generic override (P377/RFC-029)."
+          else
+            CI_GATE_REASON="Latest CI run on branch '${BRANCH}' concluded ${CONCLUSION}: ${URL}. Release remains blocked. Fix and push the CI repair, wait for green CI, then retry \`npm run release:watch\`. A live-outage restore-service release uses the separate incident-release path; there is no generic override (P377/RFC-029)."
+          fi
           return 1
           ;;
         *)

@@ -132,6 +132,7 @@ One row per RFC in `proposed` / `accepted` / `in-progress` status. RFC-level WSJ
 |------|-----|-------|----------|--------|--------|----------|
 | 10.0 | RFC-046 | Quota-pace throttle — mechanical PreToolUse pacing, extracted into @windyroad/cruise | 20 Critical | in-progress | L | 2026-07-06 |
 | 8.0 | RFC-036 | Plugin-staleness surfacer | 16 High | accepted | L | 2026-07-02 |
+| 6.0 | RFC-049 | Make the red-CI gate explain the CI-repair recovery path | 3 Medium | accepted | S | 2026-07-23 |
 | 3.0 | RFC-005 | RFC-first trace invariant not enforced at fix-time | 3 Med | accepted | M | 2026-05-17 |
 
 WSJF for RFC-036: Severity inherited from highest-severity traced problem (P375 = 16 High); Status multiplier `accepted` = 2.0; Effort L divisor = 4; WSJF = (16 × 2.0) / 4 = 8.0.

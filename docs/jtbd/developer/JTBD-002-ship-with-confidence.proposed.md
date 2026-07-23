@@ -29,3 +29,10 @@ When I delegate coding to an AI agent, I want to know it followed the full TDD c
 ## Current Solutions
 
 Pair programming with the AI, manual review of every diff, restricting agent permissions
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-046 | STORY-046: Red-CI denial explains the recovery path | accepted |
