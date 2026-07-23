@@ -6,7 +6,7 @@ consulted: [wr-architect:agent]
 informed: []
 reassessment-date: 2026-10-09
 human-oversight: confirmed
-oversight-date: 2026-07-22
+oversight-date: 2026-07-23
 ---
 
 # Cruise config file — layered precedence (project → machine → defaults)
@@ -32,11 +32,12 @@ The precedence (project → machine → defaults, env last-override), the locati
 
 ## Decision Outcome
 
-**Chosen: Option 1 — JSON**, because it is read with `jq` (already a dependency), is never sourced (no code-execution risk from a project-committed config), and is adopter-portable. Concretely:
+Chosen option: JSON layered config, never sourced. Codex adds one installer-managed, machine-only `codex_binary` key; project config cannot override it and `CODEX_BINARY` remains the environment override.
 
 - **Files:** in-project `.claude/cruise.config.json`; per-machine `~/.claude/cruise.config.json`.
 - **Precedence:** a key set in the project file wins over the machine file, which wins over the built-in default; an env var (`WR_QUOTA_HEADROOM_7D_PP` / `_5H_PP` / `WR_QUOTA_THROTTLE_MAX_SLEEP` / `WR_QUOTA_CACHE_FILE`) trumps all of them (CI / emergency override).
 - **Keys (all optional; each falls back through the layers):** `headroom_7d_pp` (int, default 5), `headroom_5h_pp` (int, default 0), `max_sleep_s` (int, default 600 — the sleep ceiling, under the 660s hook timeout; P446), `cache_path` (string, default `~/.claude/quota-state.json`).
+- **Codex installer key:** machine config alone may contain installer-managed `codex_binary`; project config cannot override it, and `CODEX_BINARY` remains the explicit environment override.
 - **Fail-open:** a missing / malformed / unreadable config file falls back to the next layer (ultimately built-in defaults) — the throttle never breaks on a bad config (consistent with ADR-093's fail-open envelope).
 
 ## Consequences
@@ -55,9 +56,15 @@ The precedence (project → machine → defaults, env last-override), the locati
 
 ## Confirmation
 
+- JSON config is parsed, never sourced, and malformed or non-object files are preserved byte-for-byte.
+- Runtime roots remain isolated and normal keys follow environment, project, machine, then default precedence.
+- `codex_binary` is machine-only; project config cannot override it.
+- Install and update preserve unrelated machine keys; dry runs and failed installs do not write managed config.
+- Successful uninstall removes only the managed key after plugin removal succeeds.
+
 Behavioural bats: project config overrides machine config overrides built-in default (per key); env var trumps both; missing/malformed config → fall through to defaults, throttle still runs (fail-open); a config file is never sourced (a shell metacharacter in a value cannot execute). Verified against STORY-042's config criterion before it transitions to done.
 
-Codex confirmation repeats the same precedence against `.codex` project/machine roots and asserts Claude and Codex defaults never read the other runtime's config or cache path.
+Codex confirmation repeats the same precedence against `.codex` project/machine roots and asserts Claude and Codex defaults never read the other runtime's config or cache path. It also proves project `codex_binary` is ignored; install/update preserve unrelated machine keys; malformed and non-object config is preserved byte-for-byte; dry runs and failed installs do not write the key; and successful uninstall removes only the managed key.
 
 ## Pros and Cons of the Options
 
@@ -80,3 +87,11 @@ Revisit if the knob set grows beyond simple scalars (nested structure would favo
 ## Amendment 2026-07-22 — runtime-specific config roots
 
 The same JSON keys and precedence apply on Codex, but runtime-owned paths follow the active runtime: project `.codex/cruise.config.json`, machine `${CODEX_HOME:-~/.codex}/cruise.config.json`, and default cache `${CODEX_HOME:-~/.codex}/quota-state.json`. Claude retains `.claude/cruise.config.json`, `~/.claude/cruise.config.json`, and `~/.claude/quota-state.json`. Environment overrides remain highest precedence for both runtimes. This avoids Cruise reading or mutating the other runtime's config while keeping one key schema and controller.
+
+## Amendment 2026-07-23 — installer-managed Codex binary
+
+Codex machine config may additionally contain `codex_binary`, an absolute path written by a successful Codex install or update and used only by the Codex quota producer and installer lifecycle. It is not a project-level policy knob: project config cannot override it. `CODEX_BINARY` remains the explicit environment override. The installer preserves all unrelated machine-config keys and does not write this key during dry runs, failed installs, or Claude-only operations.
+
+**Human oversight:** confirmed by Tom Howard on 2026-07-23.
+
+Confirmation extends the Codex config Bats to prove that install and update preserve unrelated machine keys, malformed or non-object JSON is preserved byte-for-byte, project config cannot override `codex_binary`, dry runs and failed installs do not write it, and uninstall removes only that managed key after plugin removal succeeds.

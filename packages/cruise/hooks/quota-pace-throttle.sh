@@ -40,7 +40,7 @@
 set +e
 emit_ok() { exit 0; }
 
-HOOK_INPUT=$(cat)
+IFS= read -r -d '' HOOK_INPUT || :
 payload_sid=""
 is_codex=0
 if command -v jq >/dev/null 2>&1 && [ -n "$HOOK_INPUT" ]; then

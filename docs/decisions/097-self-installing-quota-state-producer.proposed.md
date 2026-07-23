@@ -6,7 +6,7 @@ consulted: [wr-architect:agent]
 informed: []
 reassessment-date: 2026-10-09
 human-oversight: confirmed
-oversight-date: 2026-07-22
+oversight-date: 2026-07-23
 ---
 
 # Self-installing quota-state producer (SessionStart guarded-statusline edit)
@@ -30,7 +30,7 @@ The `@windyroad/cruise` throttle (ADR-093) reads `~/.claude/quota-state.json`, w
 
 ## Decision Outcome
 
-**Chosen: Option 2 — no self-install opt-out knob (user direction 2026-07-09: "it should live in not installing the plugin").** A `cruise` install with self-install disabled would be an inert plugin, identical to not installing it — so a separate opt-out is incoherent. Consent is the install; the control surface is install / uninstall; temporary pause is `max_sleep_s: 0` in the config.
+Chosen option: self-install the runtime-specific quota producer with no separate opt-out. On Codex, persist the exact working binary and fall through machine/app/PATH candidates until one returns usable quota windows.
 
 **Write mechanism (determined by constraints):** a SessionStart hook that —
 - **statusline absent** → create `~/.claude/statusline-command.sh` with the cache-writing code and wire `~/.claude/settings.json` `statusLine.command` to it;
@@ -39,6 +39,8 @@ The `@windyroad/cruise` throttle (ADR-093) reads `~/.claude/quota-state.json`, w
 - always: **log what it touched** (a one-line SessionStart note naming the file + action), **idempotent** (re-run never duplicates the block), and **no-op gracefully** when `.rate_limits` is unavailable (non-Pro/Max, or before the first API response) — never breaking the user's session.
 
 **Reversal on uninstall:** because the guarded block is sentinel-bounded, uninstalling `@windyroad/cruise` must **remove the block** (and unwire the `settings.json` `statusLine.command` if — and only if — cruise created it), leaving the statusline as it was. The sentinel bounds make this a clean, deterministic removal. (Uninstall-cleanup mechanism — a plugin uninstall hook vs a documented `cruise` cleanup command — is a build detail for STORY-043, not a separate decision.)
+
+**Codex producer:** the installer atomically persists the exact successful Codex binary in machine config. Producer lookup is `CODEX_BINARY` → persisted machine binary → Codex app bundle → ChatGPT app bundle → `codex` on `PATH`, falling through whenever a candidate cannot return usable quota windows. Total failure remains fail-open and writes only a bounded mode-0600 diagnostic under `CODEX_HOME`; success clears it. Dry runs and failed install/uninstall operations do not mutate producer state.
 
 ## Consequences
 
@@ -57,9 +59,15 @@ The `@windyroad/cruise` throttle (ADR-093) reads `~/.claude/quota-state.json`, w
 
 ## Confirmation
 
+- Claude absent/present/complex statusline paths remain idempotent and non-destructive.
+- Codex candidate order is env, persisted machine binary, Codex app, ChatGPT app, then PATH, with fallback.
+- Codex failure writes a bounded private diagnostic; success clears it; all producer failures remain fail-open.
+- Dry runs and failed uninstall leave producer state intact; successful uninstall removes only Cruise-managed state.
+- Behavioural Bats cover exact binary invocation, unusable fallback, atomic writes, diagnostics, and lifecycle cleanup.
+
 Behavioural bats: absent → created + `settings.json` wired; present-missing-block → guarded-append exactly once (idempotent on re-run); foreign complex statusline → agent-merge path taken (no blind append); no `.rate_limits` → no-op, session unbroken; **uninstall → the guarded block is removed and (if cruise wired it) `settings.json` is unwired, leaving no trace**; `max_sleep_s: 0` (config) pauses pacing without touching the statusline. Verified against STORY-043's acceptance criteria before it transitions to done.
 
-Codex confirmation adds: SessionStart never writes under `~/.claude`; app-server binary selection follows `CODEX_BINARY` → macOS app bundle → `PATH`; reads time out and fail open; cache writes are atomic; and package uninstall removes only a default cache carrying the `codex-app-server` source marker.
+Codex confirmation adds: SessionStart never writes under `~/.claude`; app-server binary selection follows `CODEX_BINARY` → persisted machine binary → Codex app bundle → ChatGPT app bundle → `PATH`, falling through after unusable responses; reads time out and fail open; cache and bounded private diagnostic writes are atomic; success clears the diagnostic; dry runs do not mutate state; and package uninstall removes managed state only after plugin removal succeeds and removes only a default cache carrying the `codex-app-server` source marker.
 
 ## Pros and Cons of the Options
 
@@ -88,3 +96,13 @@ Two mechanics were refined while building the self-installer + throttle; both st
 Codex does not use the Claude statusline producer. On Codex, the SessionStart hook must not write `~/.claude`; it initializes `~/.codex/quota-state.json` from the authenticated Codex app-server instead. It also atomically writes a mode-0600 `.pace` numeric sidecar with the normalized windows and write timestamp for the latency-bounded frequent hook; neither file contains credentials or raw account data. Subsequent stale refreshes are single-flight background reads started by the existing PreToolUse hook, while the on-demand status command may refresh synchronously. The producer calls `account/rateLimits/read`, prefers `CODEX_BINARY` when supplied, then the ChatGPT app-bundled Codex binary on macOS, then `codex` on `PATH`; it has a bounded timeout, writes atomically, and fails open.
 
 Codex uninstall through the package installer removes the default cache and its `.pace` sidecar only when the JSON cache carries Cruise's `codex-app-server` source marker. It never removes an arbitrary configured cache path. Claude's statusline mechanism and reversal contract remain unchanged. User direction 2026-07-22 pinned the Codex port; pre-edit architect review confirmed this is an amendment to the existing producer decision, not a new decision.
+
+## Amendment 2026-07-23 — durable Codex producer discovery and diagnostics
+
+The Codex installer persists the absolute Codex binary that it successfully used as the machine-level `codex_binary` value in `${CODEX_HOME:-~/.codex}/cruise.config.json`. Producer refreshes prefer `CODEX_BINARY`, then the persisted binary, then the Codex and ChatGPT app-bundled binaries on macOS, then `codex` on `PATH`. Installer, updater, and uninstaller use the same resolution. Dry runs, failed installs, and Claude-only operations do not modify Codex config.
+
+When every candidate fails, the producer remains fail-open but atomically writes a mode-0600 `${CODEX_HOME:-~/.codex}/quota-state.error.json` containing only a bounded failure classification and timestamp. A successful refresh removes it. The status command reports that diagnostic when the quota cache is absent instead of presenting restart as the only recovery. The fixed runtime-owned error path avoids writing beside an arbitrary configured cache.
+
+**Human oversight:** confirmed by Tom Howard on 2026-07-23.
+
+Confirmation extends the Codex producer Bats to prove install-time binary persistence and exact invocation, fallback after an unusable candidate response, private bounded diagnostics, diagnostic removal after success, dry-run non-mutation, and cleanup only after successful uninstall.

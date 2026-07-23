@@ -413,9 +413,13 @@ _86 ADRs. These are the current rules. The architect agent reads this section fi
 
 ### ADR-097 — Self-installing quota-state producer (SessionStart guarded-statusline edit)
 **Status:** proposed | **Oversight:** confirmed
+**Chosen:** Chosen option: self-install the runtime-specific quota producer with no separate opt-out. On Codex, persist the exact working binary and fall through machine/app/PATH candidates until one returns usable quota windows.
+**Confirmation:** Claude absent/present/complex statusline paths remain idempotent and non-destructive.; Codex candidate order is env, persisted machine binary, Codex app, ChatGPT app, then PATH, with fallback.; Codex failure writes a bounded private diagnostic; success clears it; all producer failures remain fail-open.; Dry runs and failed uninstall leave producer state intact; successful uninstall removes only Cruise-managed st...; Behavioural Bats cover exact binary invocation, unusable fallback, atomic writes, diagnostics, and lifecycle c...
 
 ### ADR-098 — Cruise config file — layered precedence (project → machine → defaults)
 **Status:** proposed | **Oversight:** confirmed
+**Chosen:** Chosen option: JSON layered config, never sourced. Codex adds one installer-managed, machine-only `codex_binary` key; project config cannot override it and `CODEX_BINARY` remains the environment override.
+**Confirmation:** JSON config is parsed, never sourced, and malformed or non-object files are preserved byte-for-byte.; Runtime roots remain isolated and normal keys follow environment, project, machine, then default precedence.; codex_binary is machine-only; project config cannot override it.; Install and update preserve unrelated machine keys; dry runs and failed installs do not write managed config.; Successful uninstall removes only the managed key after plugin removal succeeds.
 
 ### ADR-099 — Changesets are release metadata, not shipment controls
 **Status:** accepted | **Oversight:** confirmed | **Supersedes:** [ADR-061, ADR-082]

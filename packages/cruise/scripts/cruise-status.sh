@@ -49,6 +49,10 @@ fi
 if [ ! -r "$CACHE" ]; then
   echo "  ⚠ No quota cache at $CACHE."
   echo "    The throttle is FAIL-OPEN (not pacing). Restart the runtime or repair its quota producer."
+  if [ -n "${CODEX_THREAD_ID:-}" ] && [ -r "${CODEX_ROOT}/quota-state.error.json" ]; then
+    producer_error=$(jq -r '.error // empty' "${CODEX_ROOT}/quota-state.error.json" 2>/dev/null)
+    [ -n "$producer_error" ] && echo "    Producer error: $producer_error"
+  fi
   exit 0
 fi
 mtime=$(stat -c %Y "$CACHE" 2>/dev/null || stat -f %m "$CACHE" 2>/dev/null)  # GNU form first, BSD fallback
@@ -136,3 +140,7 @@ fi
 # --- config + health ---
 fresh="fresh"; case "$age" in *[!0-9]*) fresh="age unknown";; *) [ "$age" -gt 1800 ] && fresh="⚠ STALE (${age}s — throttle fail-open)" || fresh="fresh (${age}s ago)";; esac
 echo "  Config:         headroom 5h=${HD5}pp 7d=${HD7}pp  ·  ceiling ${CEIL}s  ·  cache ${fresh}"
+if [ -n "${CODEX_THREAD_ID:-}" ] && [ -r "${CODEX_ROOT}/quota-state.error.json" ]; then
+  producer_error=$(jq -r '.error // empty' "${CODEX_ROOT}/quota-state.error.json" 2>/dev/null)
+  [ -n "$producer_error" ] && echo "  Producer error: $producer_error"
+fi

@@ -4,6 +4,7 @@ setup() {
   SCRIPT="${BATS_TEST_DIRNAME}/../scripts/codex-quota-state.mjs"
   HOOK="${BATS_TEST_DIRNAME}/../hooks/quota-state-producer-install.sh"
   THROTTLE="${BATS_TEST_DIRNAME}/../hooks/quota-pace-throttle.sh"
+  STATUS="${BATS_TEST_DIRNAME}/../scripts/cruise-status.sh"
   TMP="$(mktemp -d)"
   export HOME="$TMP/home"
   export CODEX_HOME="$HOME/.codex"
@@ -68,6 +69,39 @@ SH
   [ ! -e "$TMP/path-codex-ran" ]
 }
 
+@test "persisted installer binary works when CODEX_BINARY and PATH do not provide Codex" {
+  printf '{"codex_binary":"%s"}\n' "$CODEX_BINARY" > "$CODEX_HOME/cruise.config.json"
+  unset CODEX_BINARY
+  export FAKE_RATE_LIMITS='{"rateLimits":{"primary":{"usedPercent":8,"windowDurationMins":10080,"resetsAt":1785258703}}}'
+  run node "$SCRIPT"
+  [ "$status" -eq 0 ]
+  [ "$(jq -r '.week_used_pct' "$CODEX_HOME/quota-state.json")" = "8" ]
+}
+
+@test "project config cannot override the machine-managed Codex binary" {
+  project="$TMP/project"
+  mkdir -p "$project/.codex"
+  printf '{"codex_binary":"%s"}\n' "$TMP/missing-project-codex" > "$project/.codex/cruise.config.json"
+  printf '{"codex_binary":"%s"}\n' "$CODEX_BINARY" > "$CODEX_HOME/cruise.config.json"
+  unset CODEX_BINARY
+  export FAKE_RATE_LIMITS='{"rateLimits":{"primary":{"usedPercent":10,"windowDurationMins":10080,"resetsAt":1785258703}}}'
+  run bash -c 'cd "$1" && node "$2"' _ "$project" "$SCRIPT"
+  [ "$status" -eq 0 ]
+  [ "$(jq -r '.week_used_pct' "$CODEX_HOME/quota-state.json")" = "10" ]
+}
+
+@test "unusable first candidate falls through to the persisted binary" {
+  persisted="$TMP/persisted-codex"
+  cp "$CODEX_BINARY" "$persisted"
+  printf '#!/usr/bin/env bash\nwhile IFS= read -r line; do case "$line" in *"id\":0"*) printf '\''{"id":0,"result":{}}\\n'\'';; *account/rateLimits/read*) printf '\''{"id":1,"result":{"rateLimits":{"primary":null}}}\\n'\'';; esac; done\n' > "$CODEX_BINARY"
+  chmod +x "$CODEX_BINARY"
+  printf '{"codex_binary":"%s"}\n' "$persisted" > "$CODEX_HOME/cruise.config.json"
+  export FAKE_RATE_LIMITS='{"rateLimits":{"primary":{"usedPercent":12,"windowDurationMins":10080,"resetsAt":1785258703}}}'
+  run node "$SCRIPT"
+  [ "$status" -eq 0 ]
+  [ "$(jq -r '.week_used_pct' "$CODEX_HOME/quota-state.json")" = "12" ]
+}
+
 @test "producer timeout fails open and preserves the previous cache" {
   printf '{"source":"keep"}\n' > "$CODEX_HOME/quota-state.json"
   cat > "$CODEX_BINARY" <<'SH'
@@ -80,6 +114,33 @@ SH
   run node "$SCRIPT"
   [ "$status" -eq 0 ]
   [ "$(jq -r '.source' "$CODEX_HOME/quota-state.json")" = "keep" ]
+}
+
+@test "producer failure writes a private bounded diagnostic and success clears it" {
+  export CODEX_BINARY="$TMP/missing-codex"
+  export WR_CRUISE_CODEX_BINARY_ONLY=1
+  run node "$SCRIPT"
+  [ "$status" -eq 0 ]
+  [ "$(jq -r '.source' "$CODEX_HOME/quota-state.error.json")" = "wr-cruise" ]
+  [ "$(jq -r '.error' "$CODEX_HOME/quota-state.error.json")" = "No usable Codex binary found" ]
+  mode=$(/usr/bin/stat -f %Lp "$CODEX_HOME/quota-state.error.json" 2>/dev/null || /usr/bin/stat -c %a "$CODEX_HOME/quota-state.error.json")
+  [ "$mode" = "600" ]
+
+  unset WR_CRUISE_CODEX_BINARY_ONLY
+  export CODEX_BINARY="$TMP/fake-codex"
+  export FAKE_RATE_LIMITS='{"rateLimits":{"primary":{"usedPercent":9,"windowDurationMins":10080,"resetsAt":1785258703}}}'
+  run node "$SCRIPT"
+  [ "$status" -eq 0 ]
+  [ ! -e "$CODEX_HOME/quota-state.error.json" ]
+}
+
+@test "status reports the producer failure when the Codex cache is absent" {
+  export CODEX_BINARY="$TMP/missing-codex"
+  export WR_CRUISE_CODEX_BINARY_ONLY=1
+  run bash "$STATUS"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"No quota cache"* ]]
+  [[ "$output" == *"Producer error: No usable Codex binary found"* ]]
 }
 
 @test "producer atomically replaces private cache and pace files" {
@@ -199,10 +260,15 @@ SH
   export PATH="$TMP/bin:$PATH"
   printf '{"source":"codex-app-server"}\n' > "$CODEX_HOME/quota-state.json"
   printf 'pace\n' > "$CODEX_HOME/quota-state.json.pace"
+  printf '{"source":"wr-cruise","error":"test"}\n' > "$CODEX_HOME/quota-state.error.json"
+  printf '{"max_sleep_s":0,"codex_binary":"%s"}\n' "$TMP/bin/codex" > "$CODEX_HOME/cruise.config.json"
   run node "${BATS_TEST_DIRNAME}/../bin/install.mjs" --runtime codex --uninstall
   [ "$status" -eq 0 ]
   [ ! -e "$CODEX_HOME/quota-state.json" ]
   [ ! -e "$CODEX_HOME/quota-state.json.pace" ]
+  [ ! -e "$CODEX_HOME/quota-state.error.json" ]
+  [ "$(jq -r '.max_sleep_s' "$CODEX_HOME/cruise.config.json")" = "0" ]
+  [ "$(jq -r '.codex_binary // empty' "$CODEX_HOME/cruise.config.json")" = "" ]
 
   printf '{"source":"user-owned"}\n' > "$CODEX_HOME/quota-state.json"
   run node "${BATS_TEST_DIRNAME}/../bin/install.mjs" --runtime codex --uninstall
@@ -218,12 +284,93 @@ SH
 printf '%s\n' "\$*" >> "$TMP/codex-install.log"
 SH
   chmod +x "$TMP/codex-bin/codex"
+  printf '{"max_sleep_s":0}\n' > "$CODEX_HOME/cruise.config.json"
   run env PATH="/usr/bin:/bin" CODEX_BINARY="$TMP/codex-bin/codex" HOME="$HOME" CODEX_HOME="$CODEX_HOME" \
     "$node_binary" "${BATS_TEST_DIRNAME}/../bin/install.mjs" --runtime codex
   [ "$status" -eq 0 ]
   grep -q '^--version$' "$TMP/codex-install.log"
   grep -q '^plugin marketplace add ' "$TMP/codex-install.log"
   grep -q '^plugin add wr-cruise@windyroad-local$' "$TMP/codex-install.log"
+  [ "$(jq -r '.max_sleep_s' "$CODEX_HOME/cruise.config.json")" = "0" ]
+  [ "$(jq -r '.codex_binary' "$CODEX_HOME/cruise.config.json")" = "$(realpath "$TMP/codex-bin/codex")" ]
+}
+
+@test "Codex installer falls through after a stale persisted binary" {
+  node_binary=$(command -v node)
+  mkdir -p "$TMP/fallback-bin"
+  cat > "$TMP/stale-codex" <<'SH'
+#!/usr/bin/env bash
+exit 1
+SH
+  cat > "$TMP/fallback-bin/codex" <<SH
+#!/usr/bin/env bash
+printf '%s\n' "\$*" >> "$TMP/codex-fallback.log"
+SH
+  chmod +x "$TMP/stale-codex" "$TMP/fallback-bin/codex"
+  printf '{"codex_binary":"%s"}\n' "$TMP/stale-codex" > "$CODEX_HOME/cruise.config.json"
+  run env PATH="$TMP/fallback-bin:/usr/bin:/bin" HOME="$HOME" CODEX_HOME="$CODEX_HOME" \
+    "$node_binary" "${BATS_TEST_DIRNAME}/../bin/install.mjs" --runtime codex
+  [ "$status" -eq 0 ]
+  [ "$(jq -r '.codex_binary' "$CODEX_HOME/cruise.config.json")" != "$(realpath "$TMP/stale-codex")" ]
+}
+
+@test "Codex update uses the persisted binary without env or PATH support" {
+  node_binary=$(command -v node)
+  printf '{"codex_binary":"%s"}\n' "$CODEX_BINARY" > "$CODEX_HOME/cruise.config.json"
+  run env PATH="/usr/bin:/bin" HOME="$HOME" CODEX_HOME="$CODEX_HOME" \
+    "$node_binary" "${BATS_TEST_DIRNAME}/../bin/install.mjs" --runtime codex --update
+  [ "$status" -eq 0 ]
+  [ "$(jq -r '.codex_binary' "$CODEX_HOME/cruise.config.json")" = "$(realpath "$CODEX_BINARY")" ]
+}
+
+@test "Codex installer preserves malformed and non-object machine config" {
+  node_binary=$(command -v node)
+  for value in 'null' '[]' '"string"'; do
+    printf '%s\n' "$value" > "$CODEX_HOME/cruise.config.json"
+    before=$(cat "$CODEX_HOME/cruise.config.json")
+    run env CODEX_BINARY="$CODEX_BINARY" HOME="$HOME" CODEX_HOME="$CODEX_HOME" \
+      "$node_binary" "${BATS_TEST_DIRNAME}/../bin/install.mjs" --runtime codex
+    [ "$status" -eq 1 ]
+    [ "$(cat "$CODEX_HOME/cruise.config.json")" = "$before" ]
+  done
+}
+
+@test "Codex installer dry-run does not write machine config" {
+  rm -f "$CODEX_HOME/cruise.config.json"
+  run node "${BATS_TEST_DIRNAME}/../bin/install.mjs" --runtime codex --dry-run
+  [ "$status" -eq 0 ]
+  [ ! -e "$CODEX_HOME/cruise.config.json" ]
+}
+
+@test "Codex dry-run uninstall leaves cache diagnostic and config untouched" {
+  printf '{"source":"codex-app-server"}\n' > "$CODEX_HOME/quota-state.json"
+  printf '{"source":"wr-cruise","error":"test"}\n' > "$CODEX_HOME/quota-state.error.json"
+  printf '{"codex_binary":"%s"}\n' "$CODEX_BINARY" > "$CODEX_HOME/cruise.config.json"
+  run node "${BATS_TEST_DIRNAME}/../bin/install.mjs" --runtime codex --uninstall --dry-run
+  [ "$status" -eq 0 ]
+  [ -e "$CODEX_HOME/quota-state.json" ]
+  [ -e "$CODEX_HOME/quota-state.error.json" ]
+  [ "$(jq -r '.codex_binary' "$CODEX_HOME/cruise.config.json")" = "$CODEX_BINARY" ]
+}
+
+@test "failed Codex uninstall preserves producer state" {
+  cat > "$CODEX_BINARY" <<'SH'
+#!/usr/bin/env bash
+case "$*" in
+  --version) exit 0 ;;
+  plugin\ remove\ *) exit 1 ;;
+  *) exit 0 ;;
+esac
+SH
+  chmod +x "$CODEX_BINARY"
+  printf '{"source":"codex-app-server"}\n' > "$CODEX_HOME/quota-state.json"
+  printf '{"source":"wr-cruise","error":"test"}\n' > "$CODEX_HOME/quota-state.error.json"
+  printf '{"codex_binary":"%s"}\n' "$CODEX_BINARY" > "$CODEX_HOME/cruise.config.json"
+  run node "${BATS_TEST_DIRNAME}/../bin/install.mjs" --runtime codex --uninstall
+  [ "$status" -eq 1 ]
+  [ -e "$CODEX_HOME/quota-state.json" ]
+  [ -e "$CODEX_HOME/quota-state.error.json" ]
+  [ "$(jq -r '.codex_binary' "$CODEX_HOME/cruise.config.json")" = "$CODEX_BINARY" ]
 }
 
 @test "stale Codex calls start at most one background refresh" {
@@ -252,6 +399,6 @@ SH
   [ -f "$PACKAGE/.codex-plugin/plugin.json" ]
   grep -q '".codex-plugin/"' "$PACKAGE/package.json"
   grep -q -- '--runtime' "$PACKAGE/bin/install.mjs"
-  grep -q 'runtime: flags.runtime' "$PACKAGE/bin/install.mjs"
+  grep -q 'execFileSync(binary' "$PACKAGE/bin/install.mjs"
   grep -q '"name": "wr-cruise"' "$PACKAGE/.agents/plugins/marketplace.json"
 }

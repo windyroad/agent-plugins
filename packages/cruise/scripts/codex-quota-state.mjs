@@ -1,15 +1,16 @@
 #!/usr/bin/env node
 
 import { spawn } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 
 const timeoutMs = Number(process.env.WR_CRUISE_CODEX_TIMEOUT_MS) || 8_000;
+const codexHome = process.env.CODEX_HOME || join(homedir(), ".codex");
+const errorPath = join(codexHome, "quota-state.error.json");
 
 function configCachePath() {
   if (process.env.WR_QUOTA_CACHE_FILE) return process.env.WR_QUOTA_CACHE_FILE;
-  const codexHome = process.env.CODEX_HOME || join(homedir(), ".codex");
   const files = [join(process.cwd(), ".codex", "cruise.config.json"), join(codexHome, "cruise.config.json")];
   for (const file of files) {
     try {
@@ -20,11 +21,20 @@ function configCachePath() {
   return join(codexHome, "quota-state.json");
 }
 
+function configuredBinary() {
+  try {
+    const value = JSON.parse(readFileSync(join(codexHome, "cruise.config.json"), "utf8")).codex_binary;
+    return typeof value === "string" && value ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 function expandHome(path) {
   return path === "~" ? homedir() : path.startsWith("~/") ? join(homedir(), path.slice(2)) : path;
 }
 
-function query(binary) {
+function query({ binary, label }) {
   return new Promise((resolve, reject) => {
     const child = spawn(binary, ["app-server", "--stdio"], { stdio: ["pipe", "pipe", "ignore"] });
     let settled = false;
@@ -36,11 +46,11 @@ function query(binary) {
       child.kill();
       error ? reject(error) : resolve(result);
     };
-    const timer = setTimeout(() => finish(new Error("Codex quota read timed out")), timeoutMs);
+    const timer = setTimeout(() => finish(new Error(`${label}: quota read timed out`)), timeoutMs);
 
-    child.on("error", (error) => finish(error));
+    child.on("error", (error) => finish(new Error(`${label}: binary unavailable (${error.code || "spawn error"})`)));
     child.on("exit", (code) => {
-      if (!settled) finish(new Error(`Codex app-server exited ${code}`));
+      if (!settled) finish(new Error(`${label}: app-server exited ${code}`));
     });
     child.stdout.on("data", (chunk) => {
       buffer += chunk;
@@ -54,7 +64,9 @@ function query(binary) {
           child.stdin.write(`${JSON.stringify({ method: "initialized", params: {} })}\n`);
           child.stdin.write(`${JSON.stringify({ method: "account/rateLimits/read", id: 1, params: {} })}\n`);
         } else if (message.id === 1) {
-          message.error ? finish(new Error("Codex quota read failed")) : finish(null, message.result);
+          message.error
+            ? finish(new Error(`${label}: quota read failed (${message.error.code ?? "app-server error"})`))
+            : finish(null, message.result);
         }
       }
     });
@@ -90,24 +102,39 @@ function normalize(result) {
   };
 }
 
+function writeError(error) {
+  mkdirSync(codexHome, { recursive: true });
+  const temporary = `${errorPath}.${process.pid}.tmp`;
+  const value = {
+    source: "wr-cruise",
+    error: String(error.message || error).slice(0, 240),
+    written_at: Math.floor(Date.now() / 1000),
+  };
+  writeFileSync(temporary, `${JSON.stringify(value)}\n`, { mode: 0o600 });
+  renameSync(temporary, errorPath);
+}
+
 async function main() {
   const cachePath = expandHome(process.argv[2] || configCachePath());
   const candidates = (process.env.WR_CRUISE_CODEX_BINARY_ONLY === "1"
-    ? [process.env.CODEX_BINARY]
+    ? [{ binary: process.env.CODEX_BINARY, label: "CODEX_BINARY" }]
     : [
-      process.env.CODEX_BINARY,
-      process.platform === "darwin" ? "/Applications/ChatGPT.app/Contents/Resources/codex" : null,
-      "codex",
-    ]).filter((value, index, all) => value && all.indexOf(value) === index)
-    .filter((value) => value === "codex" || existsSync(value));
+      { binary: process.env.CODEX_BINARY, label: "CODEX_BINARY" },
+      { binary: configuredBinary(), label: "configured Codex binary" },
+      { binary: process.platform === "darwin" ? "/Applications/Codex.app/Contents/Resources/codex" : null, label: "Codex app binary" },
+      { binary: process.platform === "darwin" ? "/Applications/ChatGPT.app/Contents/Resources/codex" : null, label: "ChatGPT app binary" },
+      { binary: "codex", label: "codex on PATH" },
+    ]).filter(({ binary }, index, all) => binary && all.findIndex((candidate) => candidate.binary === binary) === index)
+    .filter(({ binary }) => binary === "codex" || existsSync(binary));
 
   let result;
-  for (const binary of candidates) {
-    try { result = await query(binary); break; } catch {}
+  let failure = new Error("No usable Codex binary found");
+  for (const candidate of candidates) {
+    try { result = normalize(await query(candidate)); break; } catch (error) { failure = error; }
   }
-  if (!result) return;
+  if (!result) throw failure;
 
-  const state = normalize(result);
+  const state = result;
   mkdirSync(dirname(cachePath), { recursive: true });
   const temporary = `${cachePath}.${process.pid}.tmp`;
   writeFileSync(temporary, `${JSON.stringify(state)}\n`, { mode: 0o600 });
@@ -120,6 +147,9 @@ async function main() {
     state.week_resets_at, state.five_window_s, state.week_window_s, state.written_at].join(" ");
   writeFileSync(paceTemporary, `${pace}\n`, { mode: 0o600 });
   renameSync(paceTemporary, pacePath);
+  rmSync(errorPath, { force: true });
 }
 
-main().catch(() => {});
+main().catch((error) => {
+  try { writeError(error); } catch {}
+});
