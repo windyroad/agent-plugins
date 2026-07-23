@@ -125,6 +125,9 @@ jobs:
       - name: Install Claude Code CLI for plugin manifest validation (P263, ADR-063 Confirmation #11)
         run: npm i -g @anthropic-ai/claude-code@2.1.150
 
+      - name: Install Codex CLI for Codex plugin integration tests
+        run: npm i -g @openai/codex@0.145.0
+
       - name: Validate each plugin manifest (P263, ADR-063 Confirmation #11; non-strict per P258 refined RCA)
         run: packages/itil/bin/wr-itil-plugin-validate-ci-gate
 
