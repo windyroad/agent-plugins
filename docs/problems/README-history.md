@@ -1215,3 +1215,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-07-16
 
 > Last reviewed: 2026-07-16 **batch transition** — P180 verifying, P371 verifying (post-release K→V auto-transition on the @windyroad/itil 0.59.1 drain; P371 carries live exercise evidence from the P446 iter). 7 enumerator candidates skipped as false: P160/P170/P178/P179/P251 cite the tangential shared changeset p287-type-classification-retired as Release vehicle (seed-quality issue, fixes not shipped), P375/P376 are umbrellas with deliberately-open scope.
+
+## 2026-07-24
+
+> Last reviewed: 2026-07-16 **P457 captured** — story-map ratification surfaces an unauthored skeleton (ratify-before-author inversion; STORY-MAP-004 witness, user correction). STORY-MAP-004 populated by hand from STORY-045's substance so its ratification is meaningful (lightweight aside via /wr-itil:capture-problem).

@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-16 **P457 captured** — story-map ratification surfaces an unauthored skeleton (ratify-before-author inversion; STORY-MAP-004 witness, user correction). STORY-MAP-004 populated by hand from STORY-045's substance so its ratification is meaningful (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-07-24 **P458 captured** — edit-gate family fires on writes to `.git/` plumbing paths (architect + JTBD gates blocked a commit-message scratch file; P004's project-root fix left the inside-the-repo VCS-internal case uncovered) (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -63,6 +63,7 @@ Internally-reported tickets (`Origin: internal` / `corrective-feedback`). Ranked
 | 8.0 | P414 | retro/wrap defers over-threshold briefing Tier-3 rotation as a recommendation instead of performing the split | 8 Medium | Open | S | 2026-07-03 | internal |
 | 8.0 | P417 | docs/stories/README.md Rankings/Done never reconciled — stale for the whole story corpus | 8 Medium | Open | S | 2026-07-04 | internal |
 | 8.0 | P420 | check-briefing-budgets.sh crashes with unbound must_split[@] on empty arrays under macOS default bash 3.2 — CI bash 5 masks it; retro Tier 3 pass degrades to fail-open pointer | 8 Medium | Open | S | 2026-07-05 | internal |
+| 8.0 | P458 | Edit-gate family fires on writes to .git/ plumbing paths — P004's project-root scope fix left VCS-internal paths inside the repo uncovered | 8 Medium | Open | S | 2026-07-24 | internal |
 | 8.0 | P423 | Agent "fixes" recurring behavioural corrections via project-local memory instead of shipping an adopter-facing plugin surface | 16 Critical | Open | M | 2026-07-06 | internal |
 | 7.5 | P359 | Changeset holding does not withhold shipment — held code ships with any sibling release | 15 High | Known Error | L | 2026-06-11 | internal |
 | 7.5 | P444 | Agent buries granular design decisions (default values, thresholds, policy choices) in artefacts — they pass artefact-level ratification unsurfaced, escaping oversight (5pp/0pp headroom witness) | 15 High | Open | M | 2026-07-08 | internal |
