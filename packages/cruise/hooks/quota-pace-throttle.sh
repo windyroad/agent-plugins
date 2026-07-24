@@ -192,8 +192,11 @@ if [ "$dt" -lt "$BASELINE_MIN" ]; then
   emit_ok
 fi
 
-# Brake only when a window is BOTH at/over its pace line (w_overline/f_overline,
-# computed up-front) AND over-rate (needs the measured Δused/dt). WITHOUT floats:
+# Ramp braking when a window is BOTH at/over its pace line
+# (w_overline/f_overline, computed up-front) AND measurably over-rate. When the
+# cache's integer percentage has not moved, the rate is unresolved rather than
+# proven safe: retain at least the minimum brake until a positive delta can be
+# compared. WITHOUT floats:
 #   over-rate: Δused/dt > (100−headroom−used)/(reset−now)
 #            ⟺ Δused·(reset−now) > (100−headroom−used)·dt
 # While BEHIND the line you hold banked surplus — spend it, bursts don't brake.
@@ -201,13 +204,23 @@ fi
 # (100−headroom) < 100 at reset, so you still glide to reset without exhausting.
 # Extreme sustained burn that empties the surplus AND exceeds what the ceiling can
 # offset still exhausts (documented P446 residual). Reset passed (left ≤ 0) → skip.
-over=0
+over=0; unresolved=0
 w_budget=$(( 100 - HD7 - wu )); w_dused=$(( wu - base_week ))
-if [ "$w_overline" -eq 1 ] && [ "$w_dused" -gt 0 ] \
-   && [ $(( w_dused * w_left )) -gt $(( (w_budget>0?w_budget:0) * dt )) ]; then over=1; fi
+if [ "$w_overline" -eq 1 ]; then
+  if [ "$w_dused" -le 0 ]; then
+    unresolved=1
+  elif [ $(( w_dused * w_left )) -gt $(( (w_budget>0?w_budget:0) * dt )) ]; then
+    over=1
+  fi
+fi
 f_budget=$(( 100 - HD5 - fu )); f_dused=$(( fu - base_five ))
-if [ "$f_overline" -eq 1 ] && [ "$f_dused" -gt 0 ] \
-   && [ $(( f_dused * f_left )) -gt $(( (f_budget>0?f_budget:0) * dt )) ]; then over=1; fi
+if [ "$f_overline" -eq 1 ]; then
+  if [ "$f_dused" -le 0 ]; then
+    unresolved=1
+  elif [ $(( f_dused * f_left )) -gt $(( (f_budget>0?f_budget:0) * dt )) ]; then
+    over=1
+  fi
+fi
 
 # Feedback controller. Over pace → ramp the per-call sleep up toward holding burn=safe.
 # Behind pace → drop the grip to 0 AT ONCE (asymmetric recovery, P446 sticky-recovery
@@ -217,8 +230,11 @@ if [ "$f_overline" -eq 1 ] && [ "$f_dused" -gt 0 ] \
 if [ "$over" -eq 1 ]; then
   cur_s=$(( cur_s * 3 / 2 + 10 ))          # over pace → slow more
   [ "$cur_s" -gt "$CEIL" ] && cur_s="$CEIL"
+elif [ "$any_overline" -eq 1 ] && [ "$unresolved" -eq 1 ]; then
+  [ "$cur_s" -gt 0 ] || cur_s=10           # coarse usage data → keep minimum grip
+  [ "$cur_s" -gt "$CEIL" ] && cur_s="$CEIL"
 else
-  cur_s=0                                  # behind/under pace → full speed immediately
+  cur_s=0                                  # behind or measurably sustainable → full speed
 fi
 
 # Slide the baseline forward so the next rate reading stays current.

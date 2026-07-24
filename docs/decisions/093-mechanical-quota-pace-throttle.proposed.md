@@ -1,8 +1,7 @@
 ---
 status: "proposed"
 date: 2026-07-06
-human-oversight: confirmed
-oversight-date: 2026-07-22
+human-oversight: unconfirmed
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: []
@@ -71,7 +70,13 @@ Chosen option 3 (mechanical PreToolUse calculated sleep), registered in `hooks.j
 
 ## Confirmation
 
-Behavioural bats (`packages/cruise/test/quota-pace-throttle.bats`, moved from `packages/shared/` with the extraction): no usable baseline yet → fast no-op (records the first sample); measured burn ≤ sustainable rate → fast no-op; measured burn > sustainable → sleeps a ramped `cur_s` (superseded 2026-07-13 — the bats now assert the feedback controller + deficit-aware position gate + asymmetric recovery, 16 tests; see Amendment 2026-07-13); `S` clamped to the 600s ceiling; tighter (5h vs 7d) window governs; recent-check marker short-circuit skips the parse; missing/stale/malformed cache, `max_sleep_s: 0`, and past `resets_at` all fast no-op; exit code 0 and empty stdout on every path. A scenario test asserts convergence: replaying a burn trace that exhausts unthrottled stays under 100% with the throttle. ~~Sync drift covered by `scripts/sync-quota-pace-throttle.sh --check` in CI (ADR-017).~~ — **RETIRED 2026-07-08**: the extraction to a single `@windyroad/cruise` plugin removes the seven-way sync surface entirely (see Amendment). The extraction + self-installer bats land with STORY-042 / STORY-043.
+- Behind pace drops immediately to `cur_s=0`; a positive measurable delta at or below sustainable also releases braking.
+- A positive over-rate delta ramps `cur_s`; an unresolved overline delta retains at least the 10-second minimum brake.
+- Mixed-window coverage keeps braking when either active overline window is unresolved.
+- The 21 behavioural cases cover first samples, ceiling, window governance, recent checks, concurrent sessions, disabled pacing, and malformed or expired data.
+- Every path remains exit 0 with empty stdout; Cruise never blocks or asks.
+
+~~Sync drift covered by `scripts/sync-quota-pace-throttle.sh --check` in CI (ADR-017).~~ — **RETIRED 2026-07-08**: the extraction to a single `@windyroad/cruise` plugin removes the seven-way sync surface entirely (see Amendment). The extraction + self-installer bats land with STORY-042 / STORY-043.
 
 Codex confirmation adds: one-window input disables the absent slot with duration 0; two windows map shortest/longest deterministically; legacy Claude caches retain fixed default durations; a fresh-cache Codex hook completes within 50ms; concurrent stale calls start at most one refresh per 60 seconds; and every refresh failure remains empty-stdout exit 0.
 
@@ -110,3 +115,11 @@ Also shipped alongside (not a mechanics change, noted for completeness): the two
 Cruise also supports Codex. Codex quota is read from the authenticated app-server `account/rateLimits/read` method and normalized into the existing two-slot flat cache. Optional `five_window_s` and `week_window_s` fields carry the actual window durations; old Claude caches default to 18,000 and 604,800 seconds. Available Codex windows are sorted by duration into short and long slots; a missing slot has duration 0 and is ignored by pacing. This preserves the controller while removing its Claude-only fixed-window assumption.
 
 The frequent hook retains the 50ms fresh-cache budget: the producer atomically writes a private numeric `.pace` sidecar containing normalized window values and its write timestamp, so the hot path needs neither Node, `jq`, nor `stat`. Legacy caches fall back to the JSON parser and filesystem mtime check. A stale cache starts at most one background refresh per 60 seconds using an atomic lock. Refresh failure, timeout, malformed data, or a missing Codex binary remains fail-open. The status command may wait for a synchronous refresh because it is explicitly invoked telemetry, not the per-tool fast path. User direction 2026-07-22 pinned the Codex port; pre-edit architect review required this amendment and the latency-preserving refresh shape.
+
+## Amendment 2026-07-23 — unresolved integer-rate samples retain minimum braking
+
+Live Codex use exposed a false-release path in the feedback controller. Managed-workspace quota usage is reported with an integer `remainingPercent`; after the baseline minimum elapsed, no whole-percentage-point movement was treated as a measured under-rate and set `cur_s` to zero even when usage was materially ahead of its pace line. For a 7,000-credit monthly window, many tool calls can occur before the integer percentage changes, so Cruise repeatedly reported “braking not engaged.”
+
+The controller now distinguishes unresolved resolution from a positively measured sustainable rate. Behind pace still drops `cur_s` to zero immediately. A positive measurable delta at or below the sustainable rate also releases braking. A positive over-rate delta ramps the existing feedback controller. At or over the pace line with no positive measurable delta retains `cur_s`, starting at the existing 10-second minimum when necessary and remaining subject to the existing `max_sleep_s` ceiling. If either active overline window is unresolved, the minimum grip remains even when another window is measurably sustainable.
+
+This is a mechanics correction under the existing chosen option, not a new architectural decision. Cache production and location (ADR-097), configuration precedence (ADR-098), the fail-open envelope, the 600-second ceiling, and immediate behind-pace recovery are unchanged. Behavioural coverage reproduces the 7,000-credit monthly case and separates unresolved, measurably sustainable, measurably over-rate, behind-pace, and mixed-window states.

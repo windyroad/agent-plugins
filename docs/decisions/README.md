@@ -394,8 +394,9 @@ _86 ADRs. These are the current rules. The architect agent reads this section fi
 **Chosen:** Chosen option: **post-commit advisory hook**, because **a lifecycle transition may only be automated on observable facts, and O→KE rests on a knowledge claim** — so the strongest honest surface for the fix-titled-commit signal is an adv...
 
 ### ADR-093 — Mechanical quota-pace throttle — frequently-firing PreToolUse hook, calculated sleep, never blocks
-**Status:** proposed | **Oversight:** confirmed
+**Status:** proposed | **Oversight:** unconfirmed
 **Chosen:** Chosen option 3 (mechanical PreToolUse calculated sleep), registered in `hooks.json` as `PreToolUse` with **no matcher** (every tool call — Correction 2 verbatim) and `timeout: 660` (strictly greater than the 600s sleep ceiling below, so ...
+**Confirmation:** Behind pace drops immediately to cur_s=0; a positive measurable delta at or below sustainable also releases br...; A positive over-rate delta ramps cur_s; an unresolved overline delta retains at least the 10-second minimum br...; Mixed-window coverage keeps braking when either active overline window is unresolved.; The 21 behavioural cases cover first samples, ceiling, window governance, recent checks, concurrent sessions, ...; Every path remains exit 0 with empty stdout; Cruise never blocks or asks.
 
 ### ADR-094 — AFK loops anchor completion with the native `/goal` external evaluator
 **Status:** proposed | **Oversight:** confirmed

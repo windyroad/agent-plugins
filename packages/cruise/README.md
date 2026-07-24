@@ -33,7 +33,7 @@ An on-demand report of what the throttle is doing: usage against the pace line p
 
 ## How it works
 
-A `PreToolUse` hook fires before every tool call. It reads your current rate-limit usage, measures your actual burn rate, and — when you're burning faster than the *remaining sustainable rate* `(100 − headroom − used) / time_left` — sleeps a small, growing amount per call to bring you back onto pace. On or under pace, it's a fast no-op.
+A `PreToolUse` hook fires before every tool call. It reads your current rate-limit usage, measures your actual burn rate, and — when you're burning faster than the *remaining sustainable rate* `(100 − headroom − used) / time_left` — sleeps a small, growing amount per call to bring you back onto pace. When usage is ahead of pace but the platform's integer percentage has not changed enough to measure a rate, Cruise keeps a minimum 10-second brake instead of mistaking unresolved data for safe burn. Behind pace, or at a positively measured sustainable rate, it's a fast no-op.
 
 Every rate-limit window exposed by the runtime is paced; the tighter one governs. Claude currently exposes 5-hour and 7-day windows. Codex windows are discovered from app-server and retain their reported durations. Cruise holds back **headroom** (default 5pp on the long window) for other account surfaces.
 

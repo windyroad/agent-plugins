@@ -82,12 +82,38 @@ write_state() { printf '%s %s %s %s %s\n' "$1" "$2" "$3" "$4" "$5" > "$WR_QUOTA_
   [ "$status" -eq 0 ]; [ "$(slept)" -le 30 ]
 }
 
-@test "on/under pace eases the sleep off toward zero" {
-  write_state $((NOW-100)) $((NOW-100)) 40 15 20  # sleeping 20, but no burn since
-  write_cache 15 $((NOW+9000)) 40 $((NOW+500000)) # week unchanged (40->40) => under pace
+@test "ahead of pace with an unresolved integer delta keeps the established brake" {
+  write_state $((NOW-100)) $((NOW-100)) 40 15 20
+  write_cache 15 $((NOW+9000)) 40 $((NOW+500000))
   run bash "$HOOK" </dev/null
   [ "$status" -eq 0 ]
-  grep -qE " (0|[1-3])$" "$WR_QUOTA_MARKER"       # cur_s eased down (20*2/3-10 = 3)
+  [ "$(slept)" -eq 20 ]
+  grep -qE " 20$" "$WR_QUOTA_MARKER"
+}
+
+@test "monthly window ahead at 89 percent starts minimum braking without a measurable delta" {
+  write_state $((NOW-100)) $((NOW-100)) 89 0 0
+  printf '{"five_used_pct":0,"five_resets_at":0,"five_window_s":0,"week_used_pct":89,"week_resets_at":%s,"week_window_s":2678400}' \
+    "$((NOW+741600))" > "$WR_QUOTA_CACHE_FILE"
+  run bash "$HOOK" </dev/null
+  [ "$status" -eq 0 ]; [ "$(slept)" -eq 10 ]
+  grep -qE " 10$" "$WR_QUOTA_MARKER"
+}
+
+@test "ahead of pace with a positive measurably sustainable delta releases braking" {
+  write_state $((NOW-100000)) $((NOW-100000)) 39 15 40
+  write_cache 15 $((NOW+9000)) 40 $((NOW+500000))
+  run bash "$HOOK" </dev/null
+  [ "$status" -eq 0 ]; [ ! -f "$TMP/slept" ]
+  grep -qE " 0$" "$WR_QUOTA_MARKER"
+}
+
+@test "one unresolved overline window retains braking when another is measurably sustainable" {
+  write_state $((NOW-10000)) $((NOW-10000)) 89 69 0
+  write_cache 70 $((NOW+9000)) 89 $((NOW+500000))
+  run bash "$HOOK" </dev/null
+  [ "$status" -eq 0 ]; [ "$(slept)" -eq 10 ]
+  grep -qE " 10$" "$WR_QUOTA_MARKER"
 }
 
 @test "a check within 5s of the last is skipped" {
