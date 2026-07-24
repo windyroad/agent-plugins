@@ -56,6 +56,41 @@ setup() {
   fi
 }
 
+@test "no published SKILL.md invokes a repo-relative script via an imperative verb (P151/P153 residual — 'invoke \`packages/.../scripts/x.sh\`')" {
+  # The `bash packages/...` test above catches the literal-bash form, but a
+  # SKILL can dispatch a script just as fatally in prose: "invoke
+  # `packages/retrospective/scripts/check-briefing-budgets.sh`". The agent
+  # reads that as an instruction to run the repo-relative path, which exit-127s
+  # in an adopter tree (the P151/P153 residual that shipped because the bash-
+  # only regex missed it). Match an invocation VERB immediately preceding a
+  # backtick-wrapped repo-relative script/hook path. Anchoring on the verb is
+  # load-bearing (architect condition): it must NOT match the ADR-049-permitted
+  # maintainer hint form `invoke \`wr-<plugin>-<name>\` (... → \`packages/.../x.sh\`)`,
+  # where the repo path follows a shim name + "→", not the verb.
+  local hits
+  hits=$(grep -rnE '(invoke|invokes|run|runs|execute|executes|dispatch|dispatches)[[:space:]]+`packages/[a-z][a-z0-9-]*/(scripts|hooks)/[a-z0-9-]+\.(sh|py|bats|js|ts)`' \
+    "$REPO_ROOT"/packages/*/skills/*/SKILL.md "$REPO_ROOT"/.claude/skills/*/SKILL.md 2>/dev/null || true)
+
+  if [ -n "$hits" ]; then
+    echo "ADR-049 violation — imperative invocation of a repo-relative script in published SKILL.md:"
+    echo "$hits"
+    echo ""
+    echo "Replace with the bin-wrapper name (add the shim via scripts/sync-shim-wrappers.sh):"
+    echo "  invoke \`packages/<plugin>/scripts/<name>.sh\`"
+    echo "  → invoke \`wr-<plugin>-<name>\` (ADR-049 PATH shim → \`packages/<plugin>/scripts/<name>.sh\`)"
+    return 1
+  fi
+}
+
+@test "the three P151/P153-residual retrospective shims exist and resolve their scripts (smoke)" {
+  local name
+  for name in check-ask-hygiene check-briefing-budgets check-tickets-deferred-cause; do
+    local shim="$REPO_ROOT/packages/retrospective/bin/wr-retrospective-$name"
+    [ -x "$shim" ] || { echo "missing/non-exec shim: $shim"; return 1; }
+    grep -qE "scripts/$name\.sh" "$shim" || { echo "shim does not resolve scripts/$name.sh: $shim"; return 1; }
+  done
+}
+
 @test "no published SKILL.md contains 'bash packages/<plugin>/hooks/<name>.<ext>' (P151 / ADR-049)" {
   # Matched by the same regex as the first test, but expressed as a separate
   # @test block so the failure surface names which directory class regressed

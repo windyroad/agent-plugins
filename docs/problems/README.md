@@ -1,12 +1,12 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-25 **P460 captured** — agent surfaces findings/next-actions as recommendations instead of autonomously capturing or acting (user correction; mirror of P078, sibling of P179/P423).
+> Last reviewed: 2026-07-25 **P151/P153 fixed → Verifying** — the ADR-049 sweep had missed 3 retrospective scripts (check-ask-hygiene / check-briefing-budgets / check-tickets-deferred-cause) invoked repo-relative; added shims + fixed skills + closed the lint blind spot. Releasing in @windyroad/retrospective.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
 
-Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) and Parked (`.parked.md`, multiplier 0) tickets are excluded per ADR-022 — surfaced in their own sections below. Rows render **tier-first** (Tier 0 Critical-bypass [Severity Very High ≥17 OR security-classified OR incident-linked — currently: P151, P160] → Tier 1 Inbound-reported [`**Origin**: inbound-reported`] → Tier 2 Internal), then within each tier by `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)` so top-to-bottom order matches `/wr-itil:work-problems` Step 3 selection 1:1 (P138 + ADR-076). The `Reported` and `Origin` columns make the third tie-break input and the Tier 1 partition visible. <!-- REPORTED-FIRST-TIER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 (ADR-076) -->
+Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) and Parked (`.parked.md`, multiplier 0) tickets are excluded per ADR-022 — surfaced in their own sections below. Rows render **tier-first** (Tier 0 Critical-bypass [Severity Very High ≥17 OR security-classified OR incident-linked — currently: P160] → Tier 1 Inbound-reported [`**Origin**: inbound-reported`] → Tier 2 Internal), then within each tier by `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)` so top-to-bottom order matches `/wr-itil:work-problems` Step 3 selection 1:1 (P138 + ADR-076). The `Reported` and `Origin` columns make the third tie-break input and the Tier 1 partition visible. <!-- REPORTED-FIRST-TIER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 (ADR-076) -->
 
 ### Tier 0 — Critical-bypass (Severity ≥17 OR security-classified OR incident-linked)
 
@@ -14,7 +14,6 @@ Ranks above all other tiers regardless of WSJF (ADR-076).
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
-| 10.0 | P151 | reconcile-readme.sh + retro scripts still fail exit-127 in adopter installs — ADR-049 PATH shim does not cover all bundled scripts (regression; recurs in voder-mcp-hub) | 20 Critical | Known Error | L | 2026-05-02 | internal |
 | 5.0 | P160 | Ship quota-pacing surface — throttle shipped but INERT for adopters (producer is user-owned statusline config no plugin can ship) + mis-placed across 7 plugins + broken lineage (P443); reopened 2026-07-07, pain undiminished for everyone not on the one hand-wired machine | 20 Critical | Known Error | XL | 2026-05-03 | internal |
 
 ### Tier 1 — Inbound-reported (prioritised above internal per ADR-076)
@@ -57,7 +56,6 @@ Internally-reported tickets (`Origin: internal` / `corrective-feedback`). Ranked
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
-| 30.0 | P153 | retrospective repo-relative script paths fail in adopter installs (sibling of P151; recurs in voder-mcp-hub) | 15 High | Known Error | S | 2026-05-02 | internal |
 | 12.0 | P179 | Agent defers requested work into untracked phases — phases are fine, but unticketed phases never get implemented | 12 High | Known Error | M | 2026-05-10 | internal |
 | 12.0 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 High | Known Error | M | 2026-06-10 | internal |
 | 9.0 | P363 | Inbound-reported tickets never receive fix-released verdict on originating issue — reopened 2026-07-06: status-sync loop still failing at scale (40 fixed-but-open issues manually closed); needs an automatic back-fill reconciliation cadence (sibling P080) | 9 Medium | Known Error | M | 2026-06-11 | internal |
@@ -116,6 +114,8 @@ Internally-reported tickets (`Origin: internal` / `corrective-feedback`). Ranked
 
 Fix released, awaiting user verification (driven off `docs/problems/*.verifying.md` via glob per ADR-022). Sorted by `Released date ASC` (oldest at row 1; same-day releases tiebreak by ID ASC). <!-- VQ-SORT-DIRECTION: oldest-first per ADR-022 --> `Likely verified?` column carries an **evidence-first** cell per P186 — `yes — observed: <evidence>` / `no — not observed` (default for newly-released) / `no — observed regression`. Age is preserved separately via the `Released` column. <!-- LIKELY-VERIFIED-CELL-SHAPE: evidence-based per P186 -->
 
+| P151 | Published skills invoke repo-relative script paths — adopter bash hard-fails exit-127 (residual: 3 retrospective scripts unshimmed) | 2026-07-25 (/retrospective — this release) | no — not observed |
+| P153 | Retrospective repo-relative script paths fail in adopter installs (sibling of P151; same 3-script residual) | 2026-07-25 (/retrospective — this release) | no — not observed |
 | ID | Title | Released | Likely verified? |
 |----|-------|----------|------------------|
 | P035 | manage-problem commit-gate no subagent delegation fallback | pending — fallback path never fired this session | no — not observed |

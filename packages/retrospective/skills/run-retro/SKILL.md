@@ -298,7 +298,7 @@ Per **ADR-044** (Decision-Delegation Contract — framework-resolution boundary)
 
 7. **AFK behaviour (ADR-013 Rule 6 / ADR-044)**: identical to interactive mode. The pass is silent (no AskUserQuestion-about-the-classifications); the table + trail entry ride the retro summary; AFK orchestrators read the summary on iteration close.
 
-8. **R6 numeric gate auto-flag** (P135 / ADR-044 Reassessment Trigger): after computing this retro's lazy count, invoke `packages/retrospective/scripts/check-ask-hygiene.sh` to read the cross-session trail and detect the R6 condition (lazy count remains **≥2 across 3 consecutive retros** including this one). When the gate fires, **auto-queue a deviation-candidate** in the orchestrator's `outstanding_questions` queue (per the AFK loop's Phase 3 schema in `packages/itil/skills/work-problems/SKILL.md` ITERATION_SUMMARY contract):
+8. **R6 numeric gate auto-flag** (P135 / ADR-044 Reassessment Trigger): after computing this retro's lazy count, invoke `wr-retrospective-check-ask-hygiene` (ADR-049 PATH shim → `packages/retrospective/scripts/check-ask-hygiene.sh`) to read the cross-session trail and detect the R6 condition (lazy count remains **≥2 across 3 consecutive retros** including this one). When the gate fires, **auto-queue a deviation-candidate** in the orchestrator's `outstanding_questions` queue (per the AFK loop's Phase 3 schema in `packages/itil/skills/work-problems/SKILL.md` ITERATION_SUMMARY contract):
    ```
    {
      category: "deviation-approval"
@@ -356,7 +356,7 @@ Per ADR-044 framework-resolution boundary: Step 3 is silent agent action (per th
 
 After all topic-file edits, Step 1.5 delete-queue persistence, and the README refresh have completed, run the per-topic-file budget pass. ADR-040 Tier 3 names a 2-5 KB / topic envelope; this pass promotes that budget from informational to advisory enforcement.
 
-**Mechanism**: invoke `packages/retrospective/scripts/check-briefing-budgets.sh` (read-only diagnostic) against `docs/briefing/`. Output has two line shapes:
+**Mechanism**: invoke `wr-retrospective-check-briefing-budgets` (ADR-049 PATH shim → `packages/retrospective/scripts/check-briefing-budgets.sh`, read-only diagnostic) against `docs/briefing/`. Output has two line shapes:
 
 ```
 OVER <basename> bytes=<N> threshold=<N>

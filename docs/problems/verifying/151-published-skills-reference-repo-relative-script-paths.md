@@ -1,6 +1,6 @@
 # Problem 151: Published skills reference repo-relative script paths — adopter `bash` invocations hard-fail at Step 0
 
-**Status**: Known Error
+**Status**: Verifying
 **Reported**: 2026-05-02
 **Priority**: 20 (Very High) — Impact: Significant (4) x Likelihood: Almost certain (5)
 **Effort**: L — ADR-049 codifying plugin-bundled-script resolution via `bin/` on `$PATH` + thin shim wrappers + mechanical edits across 5 SKILL.md files in 2 plugins + path-resolution tests + grep-as-lint behavioural test (per architect ADR-049 Confirmation criterion).
@@ -128,3 +128,11 @@ Adopter-side verification path: install `@windyroad/itil` and `@windyroad/retros
 - **Source**: /wr-itil:review-problems second-pass evidence sweep (adopter-repo transcript mining + ticket-state audit).
 - **Action**: flip back to Known Error via `/wr-itil:transition-problem 151 known-error` (Bucket 3: observed regression / mis-file — never batch-close).
 - **Reopened**: 2026-07-25 Verifying → Known Error (this action) — fix incomplete / mis-filed; back in the dev-work queue.
+
+## Fix Applied 2026-07-25 (residual — the ADR-049 sweep missed three retrospective scripts)
+
+The 2026-05-02 ADR-049 sweep shimmed most repo-relative script invocations but missed the imperative "invoke `packages/...`" prose form in run-retro/analyze-context. Three retrospective diagnostics (`check-ask-hygiene.sh`, `check-briefing-budgets.sh`, `check-tickets-deferred-cause.sh`) had no `bin/` shim and were invoked repo-relative — hard-failing exit-127 in adopter installs (confirmed recurring in voder-mcp-hub 2026-06/07).
+
+**Fix**: added 3 shims (`packages/retrospective/bin/wr-retrospective-{check-ask-hygiene,check-briefing-budgets,check-tickets-deferred-cause}`, generated via `scripts/sync-shim-wrappers.sh`); run-retro + analyze-context now invoke the shim names; the `no-repo-relative-script-paths-in-skills.bats` lint gained a verb-anchored `@test` catching the imperative-invoke form (proven to catch the old string, spare the ADR-049 hint form) + a shim-smoke `@test`. Ships in `@windyroad/retrospective` (this release). Architect + JTBD PASS; JTBD trace corrected to JTBD-302 (+ JTBD-101).
+
+**Verify**: an adopter running `/wr-retrospective:run-retro` Step 2d/Step 3 or `/wr-retrospective:analyze-context` past the budget/ask-hygiene steps should no longer hit `No such file or directory`.

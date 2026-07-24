@@ -1233,3 +1233,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-07-25 **43 more tickets verified & closed** — 2nd-pass sweep: 6 non-recurrence-over-duration + 3 adopter-repo (downstream) + 34 in-session behavioural-test exercises. Verification Queue 174 -> 131. Flagged NOT closed (likely-recurrence / mis-filed): P151, P153, P281, P365 (downstream recurrence); P293, P300 (incomplete fix).
 
 > Last reviewed: 2026-07-25 **6 tickets flipped Verifying → Known Error** — P151/P153/P281/P365 (fix still recurs in adopter repos) + P293/P300 (mis-filed, incomplete) moved back into the dev-work queue. Verification Queue 131 -> 125.
+
+> Last reviewed: 2026-07-25 **P460 captured** — agent surfaces findings/next-actions as recommendations instead of autonomously capturing or acting (user correction; mirror of P078, sibling of P179/P423).

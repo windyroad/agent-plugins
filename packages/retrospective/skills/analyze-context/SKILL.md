@@ -110,7 +110,7 @@ For each non-trivial bucket (top-5 by byte count), generate a trim-candidate sug
 For surfaces with explicit budgets, check for breach:
 
 - **ADR-038 hook prose budget** (≤150 bytes per subsequent-prompt reminder) — verify by sampling each `UserPromptSubmit` hook's terse-reminder branch. Emit a `BREACH` row per offending hook with citation.
-- **ADR-040 Tier 1 / Tier 2 / Tier 3 budgets** — invoke `packages/retrospective/scripts/check-briefing-budgets.sh` and surface any `OVER` rows verbatim in the deep report.
+- **ADR-040 Tier 1 / Tier 2 / Tier 3 budgets** — invoke `wr-retrospective-check-briefing-budgets` (ADR-049 PATH shim → `packages/retrospective/scripts/check-briefing-budgets.sh`) and surface any `OVER` rows verbatim in the deep report.
 - **ADR-038 SKILL.md size cluster (P097)** — when a single `SKILL.md` exceeds 50KB, emit a `BREACH` row citing the file path + byte count + the P097 ticket as the evolving budget anchor.
 
 When a breach is detected, the report includes a `## Policy Breaches` section. Each breach cites the specific budget rule + the offending file path + a concrete byte count.
