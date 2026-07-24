@@ -59,3 +59,9 @@ The ADR amendment landed 2026-06-08 (this iter). Verification follows on the Pha
 - **P287 / P289–P299** — sibling drain-surfaced reworks.
 - **ADR-063** (`docs/decisions/063-plugin-maturity-presentation-layer.proposed.md`) — amendment target.
 - **ADR-053** + **ADR-058** — the maturity taxonomy + measurement neighbours.
+
+## Regression / incomplete observed 2026-07-25 — DO NOT CLOSE
+
+- **Finding (incomplete)**: mis-filed in verifying: only the ADR amendment (F2->F1, 2026-06-08) landed; the Phase 3 build-side re-simplify tasks (populate/render/bats) are all unchecked. Fix incomplete; belongs in Known Error.
+- **Source**: /wr-itil:review-problems second-pass evidence sweep (adopter-repo transcript mining + ticket-state audit).
+- **Action**: flip back to Known Error via `/wr-itil:transition-problem 300 known-error` (Bucket 3: observed regression / mis-file — never batch-close).

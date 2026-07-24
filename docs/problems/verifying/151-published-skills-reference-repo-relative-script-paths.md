@@ -121,3 +121,9 @@ Fix landed 2026-05-02 in iter 3 of the AFK `/wr-itil:work-problems` loop. Single
 In-session exercise evidence: the new `wr-itil-reconcile-readme` shim was driven against `docs/problems/` and exited 0 (clean); all 8 bats tests at `packages/shared/test/no-repo-relative-script-paths-in-skills.bats` are green; the published SKILL.md invocation surface contains zero `bash packages/<plugin>/(scripts|hooks)/...` patterns.
 
 Adopter-side verification path: install `@windyroad/itil` and `@windyroad/retrospective` in a fresh project (no source-repo cohabitation), run `/wr-itil:work-problems` and `/wr-retrospective:analyze-context`, observe Step 0 succeeds via the `wr-itil-reconcile-readme` and `wr-retrospective-measure-context-budget` bin-resolved commands. Awaiting user verification.
+
+## Regression / incomplete observed 2026-07-25 — DO NOT CLOSE
+
+- **Finding (regression)**: voder-mcp-hub adopter shows `packages/itil/scripts/reconcile-readme.sh: No such file or directory` across ~14 sessions 2026-06-25..07-07, AFTER the 2026-05-02 fix — the ADR-049 PATH shim does not cover this script in adopter installs. Fix is incomplete; needs reopen (Known Error).
+- **Source**: /wr-itil:review-problems second-pass evidence sweep (adopter-repo transcript mining + ticket-state audit).
+- **Action**: flip back to Known Error via `/wr-itil:transition-problem 151 known-error` (Bucket 3: observed regression / mis-file — never batch-close).

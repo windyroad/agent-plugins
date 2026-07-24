@@ -78,3 +78,9 @@ Recorded as ADR-028 Amendment 2026-06-16 (P365). No RISK-POLICY.md change needed
 (captured via /wr-itil:capture-problem; expand at next investigation)
 - P364 — sibling class on the same surface (marker-derivation friction; hash-drift class). This ticket is the scope-drift class.
 - P353 — original marker-derivation friction precedent.
+
+## Regression / incomplete observed 2026-07-25 — DO NOT CLOSE
+
+- **Finding (regression)**: voder-mcp-hub (private repo) shows risk-scorer git-commit-message deny reasons dated 2026-07-03..06, AFTER the 2026-06-16 private-repo-path fix — likely recurrence of the private-repo path. Needs reopen + investigation.
+- **Source**: /wr-itil:review-problems second-pass evidence sweep (adopter-repo transcript mining + ticket-state audit).
+- **Action**: flip back to Known Error via `/wr-itil:transition-problem 365 known-error` (Bucket 3: observed regression / mis-file — never batch-close).

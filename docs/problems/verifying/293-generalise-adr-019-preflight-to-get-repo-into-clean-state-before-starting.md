@@ -80,3 +80,9 @@ ADR-019 is **left unoversighted** (P283/ADR-066 marker withheld) until this gene
 **Verification criterion**: the next interactive `/wr-architect:review-decisions` drain presents the amended ADR-019 substance; the user either confirms (→ Closed) or amends further (→ back to Open / Known Error with new scope captured).
 
 **Follow-up**: Branch 2 auto-commit implementation — a separate problem ticket should be captured covering (a) the auto-commit mechanism, (b) JTBD-001 gate composition wiring (architect/JTBD/style/voice-tone/TDD/risk-scorer pre-existing-edit re-gate), (c) the commit-subject convention enforcement, (d) the contract-assertion bats. Out of scope for P293 per architect Condition 1 + JTBD Condition 1's "documentation-shape, not blockers" verdict.
+
+## Regression / incomplete observed 2026-07-25 — DO NOT CLOSE
+
+- **Finding (incomplete)**: mis-filed in verifying: no fix landed — the ADR-019 generalisation investigation tasks are all unchecked. Should not be in the Verification Queue; belongs in Known Error / Open.
+- **Source**: /wr-itil:review-problems second-pass evidence sweep (adopter-repo transcript mining + ticket-state audit).
+- **Action**: flip back to Known Error via `/wr-itil:transition-problem 293 known-error` (Bucket 3: observed regression / mis-file — never batch-close).

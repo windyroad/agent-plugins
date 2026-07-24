@@ -110,3 +110,9 @@ Implemented as a hybrid of Candidate 1 (cache walk) + Candidate 2 (`$PATH` sniff
 - ADR-049 — `docs/decisions/049-plugin-script-resolution-via-bin-on-path.proposed.md` (reassessment-criteria clause 3 explicitly names this surface as a future extension scope).
 - `packages/retrospective/skills/analyze-context/SKILL.md` lines 56-67 — the two specific loop sites identified.
 - `packages/shared/test/no-repo-relative-script-paths-in-skills.bats` — the grep-as-lint to extend.
+
+## Regression / incomplete observed 2026-07-25 — DO NOT CLOSE
+
+- **Finding (regression)**: voder-mcp-hub adopter shows retrospective repo-relative script paths (check-ask-hygiene.sh, check-briefing-budgets.sh) failing `No such file` 2026-06-25..07-07, AFTER the 2026-05-03 fix. Sibling of P151; ADR-049 shim gap. Needs reopen.
+- **Source**: /wr-itil:review-problems second-pass evidence sweep (adopter-repo transcript mining + ticket-state audit).
+- **Action**: flip back to Known Error via `/wr-itil:transition-problem 153 known-error` (Bucket 3: observed regression / mis-file — never batch-close).

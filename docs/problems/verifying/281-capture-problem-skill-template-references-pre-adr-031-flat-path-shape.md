@@ -121,3 +121,9 @@ RELEASE_VEHICLE:
 Fix commit: `dd47f8a` (capture-problem SKILL.md path template names per-state-subdir layout per ADR-031 — closes P281 capture-problem sub-shape).
 
 **Verification path**: closure happens when an adopter capture lands at the per-state subdir post-release (e.g. a fresh capture in voder-mcp-hub or any adopter using `@windyroad/itil@0.37.1+` writes `docs/problems/open/<NNN>-<slug>.md` rather than the legacy flat `docs/problems/<NNN>-<slug>.open.md` shape). Sibling-SKILL drift, adopter migration, and the inference-vs-template precedence rule remain open under P329 + descendants.
+
+## Regression / incomplete observed 2026-07-25 — DO NOT CLOSE
+
+- **Finding (regression)**: addressr adopter commit e3fe664 (2026-07-15) wrote docs/problems/047-*.open.md + 048-*.open.md at the FLAT repo root, AFTER the 2026-05-30 fix — a genuine capture, not a migration source. The fix was partial (capture-problem template only); adopter/sibling paths still land flat. Needs reopen.
+- **Source**: /wr-itil:review-problems second-pass evidence sweep (adopter-repo transcript mining + ticket-state audit).
+- **Action**: flip back to Known Error via `/wr-itil:transition-problem 281 known-error` (Bucket 3: observed regression / mis-file — never batch-close).
