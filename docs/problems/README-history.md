@@ -1229,3 +1229,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-07-24 **20 tickets verified & closed on transcript evidence** — mined ~/.claude + ~/.codex for concrete exercise of released fixes (P082/099/105/145/156/203/205/209/215/219/237/238/240/249/309/320/348/371/402/407); Verification Queue drained 199 -> 179. See the evidence-scan report.
 
 > Last reviewed: 2026-07-24 **5 more tickets verified & closed on evidence** — P252/269/271/295/302 from the 250-302 evidence scan (re-run after network stalls); Verification Queue 179 -> 174.
+
+> Last reviewed: 2026-07-25 **43 more tickets verified & closed** — 2nd-pass sweep: 6 non-recurrence-over-duration + 3 adopter-repo (downstream) + 34 in-session behavioural-test exercises. Verification Queue 174 -> 131. Flagged NOT closed (likely-recurrence / mis-filed): P151, P153, P281, P365 (downstream recurrence); P293, P300 (incomplete fix).

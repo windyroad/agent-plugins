@@ -1,6 +1,6 @@
 # Problem 151: Published skills reference repo-relative script paths — adopter `bash` invocations hard-fail at Step 0
 
-**Status**: Verification Pending
+**Status**: Known Error
 **Reported**: 2026-05-02
 **Priority**: 20 (Very High) — Impact: Significant (4) x Likelihood: Almost certain (5)
 **Effort**: L — ADR-049 codifying plugin-bundled-script resolution via `bin/` on `$PATH` + thin shim wrappers + mechanical edits across 5 SKILL.md files in 2 plugins + path-resolution tests + grep-as-lint behavioural test (per architect ADR-049 Confirmation criterion).
@@ -127,3 +127,4 @@ Adopter-side verification path: install `@windyroad/itil` and `@windyroad/retros
 - **Finding (regression)**: voder-mcp-hub adopter shows `packages/itil/scripts/reconcile-readme.sh: No such file or directory` across ~14 sessions 2026-06-25..07-07, AFTER the 2026-05-02 fix — the ADR-049 PATH shim does not cover this script in adopter installs. Fix is incomplete; needs reopen (Known Error).
 - **Source**: /wr-itil:review-problems second-pass evidence sweep (adopter-repo transcript mining + ticket-state audit).
 - **Action**: flip back to Known Error via `/wr-itil:transition-problem 151 known-error` (Bucket 3: observed regression / mis-file — never batch-close).
+- **Reopened**: 2026-07-25 Verifying → Known Error (this action) — fix incomplete / mis-filed; back in the dev-work queue.

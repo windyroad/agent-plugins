@@ -1,6 +1,6 @@
 # Problem 300: ADR-063 maturity-presentation schema — F2 (rich-record per-surface) is overkill; F1 is sufficient to begin with
 
-**Status**: Verification Pending
+**Status**: Known Error
 **Reported**: 2026-05-25
 **Verifying since**: 2026-06-08
 **Priority**: 4 (Low-Med) — Impact: 2 (Minor — over-engineering the plugin.json maturity schema adds build + maintenance cost for capability not yet needed; not shipped, so caught before the cost lands) × Likelihood: 2 (Unlikely — affects the Phase-3 maturity-presentation build only)
@@ -65,3 +65,4 @@ The ADR amendment landed 2026-06-08 (this iter). Verification follows on the Pha
 - **Finding (incomplete)**: mis-filed in verifying: only the ADR amendment (F2->F1, 2026-06-08) landed; the Phase 3 build-side re-simplify tasks (populate/render/bats) are all unchecked. Fix incomplete; belongs in Known Error.
 - **Source**: /wr-itil:review-problems second-pass evidence sweep (adopter-repo transcript mining + ticket-state audit).
 - **Action**: flip back to Known Error via `/wr-itil:transition-problem 300 known-error` (Bucket 3: observed regression / mis-file — never batch-close).
+- **Reopened**: 2026-07-25 Verifying → Known Error (this action) — fix incomplete / mis-filed; back in the dev-work queue.

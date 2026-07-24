@@ -1,6 +1,6 @@
 # Problem 293: Generalise ADR-019 preflight from "fetch + ff-only divergence" to "get the repo into a clean state before starting"
 
-**Status**: Verifying
+**Status**: Known Error
 **Reported**: 2026-05-25
 **Priority**: 6 (Medium) — Impact: 2 (Minor — the current preflight handles the divergence case correctly; the gap is that it doesn't cover the broader "repo isn't clean" situations, so an orchestrator can start work on an untidy tree; recoverable, not breaking) × Likelihood: 3 (Possible — every AFK orchestrator start; uncommitted-work and messy-tree states occur regularly)
 **Effort**: M — ADR-019 amendment generalising the preflight + reconciling with P109 (session-continuity detection) + the work-problems Step 0 implementation
@@ -86,3 +86,4 @@ ADR-019 is **left unoversighted** (P283/ADR-066 marker withheld) until this gene
 - **Finding (incomplete)**: mis-filed in verifying: no fix landed — the ADR-019 generalisation investigation tasks are all unchecked. Should not be in the Verification Queue; belongs in Known Error / Open.
 - **Source**: /wr-itil:review-problems second-pass evidence sweep (adopter-repo transcript mining + ticket-state audit).
 - **Action**: flip back to Known Error via `/wr-itil:transition-problem 293 known-error` (Bucket 3: observed regression / mis-file — never batch-close).
+- **Reopened**: 2026-07-25 Verifying → Known Error (this action) — fix incomplete / mis-filed; back in the dev-work queue.

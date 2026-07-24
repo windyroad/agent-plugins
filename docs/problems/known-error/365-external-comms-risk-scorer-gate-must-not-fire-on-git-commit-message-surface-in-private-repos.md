@@ -1,6 +1,6 @@
 # Problem 365: external-comms risk-scorer gate must not fire on git-commit-message surface in private repos
 
-**Status**: Verifying
+**Status**: Known Error
 **Reported**: 2026-06-11
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: internal (cross-project witness)
@@ -60,7 +60,7 @@ Recorded as ADR-028 Amendment 2026-06-16 (P365). No RISK-POLICY.md change needed
 
 ## Fix Released
 
-**Status**: Verification Pending (committed, not yet released).
+**Status**: Known Error
 
 - **Commit**: external-comms gate repo-visibility precondition for the git-commit-message surface (P365).
 - **Files**: `packages/shared/hooks/external-comms-gate.sh` (canonical) + synced `packages/{risk-scorer,voice-tone}/hooks/external-comms-gate.sh`; behavioural bats in both consumers; ADR-028 amendment + compendium README entry; changeset (`@windyroad/risk-scorer` + `@windyroad/voice-tone` patch).
@@ -84,3 +84,4 @@ Recorded as ADR-028 Amendment 2026-06-16 (P365). No RISK-POLICY.md change needed
 - **Finding (regression)**: voder-mcp-hub (private repo) shows risk-scorer git-commit-message deny reasons dated 2026-07-03..06, AFTER the 2026-06-16 private-repo-path fix — likely recurrence of the private-repo path. Needs reopen + investigation.
 - **Source**: /wr-itil:review-problems second-pass evidence sweep (adopter-repo transcript mining + ticket-state audit).
 - **Action**: flip back to Known Error via `/wr-itil:transition-problem 365 known-error` (Bucket 3: observed regression / mis-file — never batch-close).
+- **Reopened**: 2026-07-25 Verifying → Known Error (this action) — fix incomplete / mis-filed; back in the dev-work queue.

@@ -1,6 +1,6 @@
 # Problem 153: Published skills enumerate repo-relative directories — adopter sessions get zero-byte attribution rows from missing trees
 
-**Status**: Verifying
+**Status**: Known Error
 **Reported**: 2026-05-02
 **Priority**: 15 (High) — Impact: Moderate (3) x Likelihood: Almost certain (5) — within RISK-POLICY appetite High but the surface is adopter-facing
 **Effort**: S — single SKILL.md edit (`/wr-retrospective:analyze-context` Step 2 lines 56-67) plus an extension to the P151 grep-as-lint bats pattern to catch the directory-enumeration class. No new ADR required — covered under ADR-049's reassessment-criteria amendment clause.
@@ -116,3 +116,4 @@ Implemented as a hybrid of Candidate 1 (cache walk) + Candidate 2 (`$PATH` sniff
 - **Finding (regression)**: voder-mcp-hub adopter shows retrospective repo-relative script paths (check-ask-hygiene.sh, check-briefing-budgets.sh) failing `No such file` 2026-06-25..07-07, AFTER the 2026-05-03 fix. Sibling of P151; ADR-049 shim gap. Needs reopen.
 - **Source**: /wr-itil:review-problems second-pass evidence sweep (adopter-repo transcript mining + ticket-state audit).
 - **Action**: flip back to Known Error via `/wr-itil:transition-problem 153 known-error` (Bucket 3: observed regression / mis-file — never batch-close).
+- **Reopened**: 2026-07-25 Verifying → Known Error (this action) — fix incomplete / mis-filed; back in the dev-work queue.

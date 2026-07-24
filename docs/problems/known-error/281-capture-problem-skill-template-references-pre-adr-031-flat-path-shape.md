@@ -1,6 +1,6 @@
 # Problem 281: capture-problem skill template references pre-ADR-031 flat-path shape
 
-**Status**: Verifying
+**Status**: Known Error
 **Reported**: 2026-05-19
 **Priority**: 9 (Med High) — Impact: 3 (Moderate — adopter projects accumulate flat-layout tickets; README cache mis-classify risk; cross-adopter inventory drift) x Likelihood: 3 (Likely — structural defect; every adopter following SKILL.md literally hits it; observed once concretely in voder-mcp-hub today)
 **Effort**: M — three plausible resolution shapes enumerated (adopter migration / SKILL template literal refresh / agent inference-vs-template precedence rule); template-refresh alone might be S but combined fix sits at M
@@ -127,3 +127,4 @@ Fix commit: `dd47f8a` (capture-problem SKILL.md path template names per-state-su
 - **Finding (regression)**: addressr adopter commit e3fe664 (2026-07-15) wrote docs/problems/047-*.open.md + 048-*.open.md at the FLAT repo root, AFTER the 2026-05-30 fix — a genuine capture, not a migration source. The fix was partial (capture-problem template only); adopter/sibling paths still land flat. Needs reopen.
 - **Source**: /wr-itil:review-problems second-pass evidence sweep (adopter-repo transcript mining + ticket-state audit).
 - **Action**: flip back to Known Error via `/wr-itil:transition-problem 281 known-error` (Bucket 3: observed regression / mis-file — never batch-close).
+- **Reopened**: 2026-07-25 Verifying → Known Error (this action) — fix incomplete / mis-filed; back in the dev-work queue.
