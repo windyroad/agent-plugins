@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-25 **6 tickets flipped Verifying → Known Error** — P151/P153/P281/P365 (fix still recurs in adopter repos) + P293/P300 (mis-filed, incomplete) moved back into the dev-work queue. Verification Queue 131 -> 125.
+> Last reviewed: 2026-07-25 **P460 captured** — agent surfaces findings/next-actions as recommendations instead of autonomously capturing or acting (user correction; mirror of P078, sibling of P179/P423).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -89,6 +89,7 @@ Internally-reported tickets (`Origin: internal` / `corrective-feedback`). Ranked
 | 3.75 | P443 | Quota-pacing (P160/RFC-046/ADR-093) shipped without a grounded JTBD→persona→USM→RFC→story lineage — wrong/narrow JTBD anchor, orphaned STORY-039 + STORY-MAP-003, RFC proposed while problem verifying, mis-placed across 7 plugins | 15 High | Open | L | 2026-07-07 | internal |
 | 3.75 | P445 | Agent offers unsolicited off-ramps / hedges / narrates own conduct ("I'll drop it") then recurs — needs a portable plugin-shipped behavioural rule (per P423), not a project-local fix | 15 High | Open | L | 2026-07-08 | internal |
 | 3.0 | P365 | external-comms private-repo commit-skip recurs in adopters (voder-mcp-hub post-fix denies) | 3 Medium | Known Error | M | 2026-06-16 | internal |
+| 3.0 | P460 | Agent surfaces ticket-worthy findings + obvious next-actions as recommendations instead of autonomously capturing / acting (mirror of P078; sibling of P179/P423) | 12 High | Open | L | 2026-07-25 | internal |
 | 3.0 | P178 | Agent skips ITIL state-machine gates on architecture-driven problems — treats architect-PASS verdict as substitute for empirical RCA + skips Open → Known Error transition | 3 Medium | Known Error | M | 2026-05-10 | internal |
 | 3.0 | P208 | Red-CI push/release denial omits the authorised CI-repair recovery path, causing agents to misclassify actionable recovery as a blocked goal | 3 Medium | Known Error | M | 2026-05-15 | internal |
 | 3.0 | P248 | Use time and token cost (not t-shirt sizing) for WSJF effort, with retro-driven estimation refinement | 6 Medium | Open | M | 2026-05-17 | internal |
