@@ -1219,3 +1219,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-07-24
 
 > Last reviewed: 2026-07-16 **P457 captured** — story-map ratification surfaces an unauthored skeleton (ratify-before-author inversion; STORY-MAP-004 witness, user correction). STORY-MAP-004 populated by hand from STORY-045's substance so its ratification is meaningful (lightweight aside via /wr-itil:capture-problem).
+
+> Last reviewed: 2026-07-24 **P458 captured** — edit-gate family fires on writes to `.git/` plumbing paths (architect + JTBD gates blocked a commit-message scratch file; P004's project-root fix left the inside-the-repo VCS-internal case uncovered) (lightweight aside via /wr-itil:capture-problem).
