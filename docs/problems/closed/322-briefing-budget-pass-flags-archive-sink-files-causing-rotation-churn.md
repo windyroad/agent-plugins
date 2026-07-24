@@ -1,0 +1,54 @@
+# Problem 322: Tier-3 briefing-budget pass flags `*-archive*.md` sink files — re-rotating a rotation SINK proliferates siblings for ~zero reader value
+
+**Status**: Closed
+**Reported**: 2026-05-27
+**Priority**: 3 (Medium) — Impact: 2 x Likelihood: 3 (deferred — re-rate at next /wr-itil:review-problems)
+**Effort**: S (deferred — re-rate at next /wr-itil:review-problems)
+
+## Fix
+
+Fix landed 2026-06-03 (this commit). `packages/retrospective/scripts/check-briefing-budgets.sh` now excludes `*-archive*.md` from the OVER / MUST_SPLIT pass alongside the existing `README.md` exclusion. Header comment documents the rationale (rotation sinks, on-demand-only loading, ADR-040 Tier 3 session-start surface intent). Three bats fixtures in `packages/retrospective/scripts/test/check-briefing-budgets.bats` pin the new exclusion behaviour: (a) archive file ≥ threshold not flagged, (b) date-suffixed archive variant `*-archive-2026-05.md` not flagged, (c) non-archive over-threshold file still flagged alongside an archive sibling.
+
+Architect verdict ALIGN-WITH-CONDITIONS — C1 (ADR-040 Confirmation field amend + ADR-077 compendium regen) queued as P349 per AFK no-ADR-edits constraint.
+
+Composes-with: P099 (the budget pass surface), P145/P247 (don't-defer rotation discipline).
+
+## Description
+
+`check-briefing-budgets.sh` globs ALL of `docs/briefing/*.md`, including the `*-archive*.md` rotation **sink** files. The run-retro Step 3 Tier-3 pass (Branch B, P247 "don't defer") then demands rotation of any sink ≥5120 bytes. But archive files are the DESTINATION of split-by-date rotation — re-splitting them has no clean target:
+
+- `governance-workflow-archive.md` (6551 B) holds the NEWEST archived batch (2026-05-xx); its `-mid` (04-23/25) and `-pre-2026-04-23` siblings hold OLDER entries. Splitting archive.md by date would need a NEW `-archive-2026-05-*` sibling *between* archive.md and mid — proliferating files.
+- `hooks-and-gates-archive.md` (5429 B, only +6%) — same shape.
+
+So the pass creates a forced choice between **churn** (proliferate `-archive-N` siblings every retro) and **defer** (the P247 anti-pattern the pass exists to prevent). Neither is right — the real fix is that archives, which are NOT session-start-loaded (loaded on-demand only per README "load alongside when full historical context needed"), should not be held to the per-topic-file session-surface budget at all.
+
+## Symptoms
+
+- Every retro's Step 3 budget pass flags the same `*-archive*.md` files as OVER; the agent either churns (new sibling) or defers (anti-pattern).
+- Splitting an archive sink has no chronologically-correct destination among existing siblings → file proliferation.
+
+## Workaround
+
+Leave the marginally-over archives as-is this retro (recorded as rotation candidates); the overage is on on-demand files, not the session-start surface, so the cost is ~zero.
+
+## Root Cause Analysis
+
+### Investigation Tasks
+
+- [ ] Re-rate Priority and Effort at next /wr-itil:review-problems.
+- [ ] Fix `packages/retrospective/scripts/check-briefing-budgets.sh`: exclude `*-archive*.md` from the OVER/MUST_SPLIT pass (archives are rotation sinks, not session-start surface), OR apply a higher ceiling for archive files. Update the run-retro Step 3 contract + the bats fixture accordingly.
+- [ ] Confirm with the ADR-040 Tier-3 envelope intent — the 2-5KB budget targets the session-start-loaded surface; archives are explicitly on-demand.
+
+## Dependencies
+
+- **Composes with**: P099 (the Tier-3 budget pass), P145/P247 (the don't-defer rotation discipline — this carves out the legitimate non-defer case: a sink that shouldn't be flagged), ADR-040 (Tier-3 envelope).
+
+## Related
+
+- captured via /wr-retrospective:run-retro Step 3 Tier-3 pass + Step 2b (Skill-contract friction), 2026-05-27. Two archives flagged OVER (governance-workflow-archive 6551, hooks-and-gates-archive 5429); rotation deferred-with-cause to this detector fix rather than proliferating siblings.
+
+## Verified & Closed
+
+- **Verified**: 2026-07-25 via /wr-itil:review-problems second-pass evidence sweep (duration/downstream transcript mining + in-session behavioural test exercise).
+- **Evidence**: In-session behavioural bats: check-briefing-budgets.bats 23/23 ok — archive-sink exclusion under bash 3.2 exercised.
+- **Recovery**: reversible via `/wr-itil:transition-problem 322 known-error` or `git revert`.

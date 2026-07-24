@@ -1227,3 +1227,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-07-24 **P458 → Verifying** — `.git/` gate-exclusion fix released (architect 0.20.2 / jtbd 0.13.1 / voice-tone 0.7.1 / style-guide 0.5.1 / tdd 0.5.1); moved to the Verification Queue. Targeted pass — P458 transition + README only, not a full re-score (see the review report).
 
 > Last reviewed: 2026-07-24 **20 tickets verified & closed on transcript evidence** — mined ~/.claude + ~/.codex for concrete exercise of released fixes (P082/099/105/145/156/203/205/209/215/219/237/238/240/249/309/320/348/371/402/407); Verification Queue drained 199 -> 179. See the evidence-scan report.
+
+> Last reviewed: 2026-07-24 **5 more tickets verified & closed on evidence** — P252/269/271/295/302 from the 250-302 evidence scan (re-run after network stalls); Verification Queue 179 -> 174.
