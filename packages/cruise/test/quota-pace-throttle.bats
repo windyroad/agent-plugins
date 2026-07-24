@@ -71,7 +71,17 @@ write_state() { printf '%s %s %s %s %s\n' "$1" "$2" "$3" "$4" "$5" > "$WR_QUOTA_
   write_state $((NOW-100)) $((NOW-100)) 40 15 10  # already sleeping 10
   write_cache 20 $((NOW+9000)) 55 $((NOW+500000))
   run bash "$HOOK" </dev/null
-  [ "$status" -eq 0 ]; [ "$(slept)" -gt 10 ]      # 10 -> 10*3/2+10 = 25
+  [ "$status" -eq 0 ]; [ "$(slept)" -gt 10 ]      # cur_s := 10*3/2 + kick, kick scales with burn
+}
+
+@test "a severe over-line sprint slams the brake toward the ceiling in ONE call (rec 3 proportional kick)" {
+  # From a standing start (cur_s=0), a burn many multiples over sustainable must jump
+  # to a large sleep immediately, not crawl up +10/call. Week 20->90 (+70%) in 100s vs
+  # a ~6-day window: burn is thousands× sustainable → kick clamps to the ceiling.
+  write_state $((NOW-100)) $((NOW-100)) 20 5 0
+  write_cache 10 $((NOW+9000)) 90 $((NOW+500000))
+  run bash "$HOOK" </dev/null
+  [ "$status" -eq 0 ]; [ "$(slept)" -gt 100 ]     # far above the old 0 -> 10 first step
 }
 
 @test "sleep is clamped to the ceiling (max_sleep_s)" {
@@ -149,16 +159,46 @@ write_state() { printf '%s %s %s %s %s\n' "$1" "$2" "$3" "$4" "$5" > "$WR_QUOTA_
   [ "$status" -eq 0 ]; [ "$(slept)" -gt 0 ]
 }
 
-@test "behind the pace line does NOT throttle despite a high burst (P446 deficit-aware)" {
-  # 7d at 13% used ~29h into the 168h window (linear pace ~16%) → behind pace with
-  # banked surplus; 5h also behind (8% used, 2.5h in). A momentary burst (+3% wk /
-  # +3% 5h in 100s) exceeds the sustainable RATE but must NOT brake — the surplus is
-  # there to be spent. This is the over-brake bug the deficit gate fixes.
-  write_state $((NOW-100)) $((NOW-100)) 10 5 0
-  write_cache 8 $((NOW+9000)) 13 $((NOW+500000))
+@test "behind the pace line does NOT throttle on a mild sub-guard burn (P446 deficit-aware)" {
+  # Both windows well behind their line with banked surplus, and burning at a rate
+  # that projects comfortably within the window (under the GUARD=4 threshold): week
+  # 39->40 with ~2.8h to reset, 5h 9->10 at 2.5h in. Surplus is there to be spent —
+  # a mild burn must NOT brake. (A sustained SPRINT, ratio ≥ 4, is a separate test.)
+  write_state $((NOW-100)) $((NOW-100)) 39 9 0
+  write_cache 10 $((NOW+9000)) 40 $((NOW+10000))
   run bash "$HOOK" </dev/null
-  [ "$status" -eq 0 ]; [ ! -f "$TMP/slept" ]        # no sleep — behind pace on both windows
+  [ "$status" -eq 0 ]; [ ! -f "$TMP/slept" ]        # no sleep — mild burn, behind pace
   grep -qE " 0$" "$WR_QUOTA_MARKER"                 # cur_s stays at 0
+}
+
+@test "behind the pace line, a sustained sprint DOES brake (rec 4 burn guard, default 4x)" {
+  # Week 10% used ~24h into a 168h window → BEHIND the ~13% line (surplus banked), but
+  # burning +8% in 100s projects to exhaust the window in well under 1/4 the time left,
+  # far over the GUARD=4 threshold. The guard engages even though position is behind pace.
+  # (5h quiet and behind: 5% used, no measurable delta.)
+  write_state $((NOW-100)) $((NOW-100)) 2 5 0
+  write_cache 5 $((NOW+9000)) 10 $((NOW+520000))
+  run bash "$HOOK" </dev/null
+  [ "$status" -eq 0 ]; [ "$(slept)" -gt 0 ]         # guard braked the behind-line sprint
+}
+
+@test "burn_guard_multiple=0 disables the behind-line guard" {
+  export WR_QUOTA_BURN_GUARD_MULTIPLE=0
+  write_state $((NOW-100)) $((NOW-100)) 2 5 0
+  write_cache 5 $((NOW+9000)) 10 $((NOW+520000))   # same behind-line sprint as above
+  run bash "$HOOK" </dev/null
+  [ "$status" -eq 0 ]; [ ! -f "$TMP/slept" ]        # guard off → surplus spendable, no brake
+  grep -qE " 0$" "$WR_QUOTA_MARKER"
+}
+
+@test "the behind-line guard releases at once when the sprint falls back (asymmetric recovery)" {
+  # A guard sleep ramped to 200; still behind the line but the burn has fallen back under
+  # threshold (week 9->10 over a long baseline → sustainable). Must drop to 0 at once.
+  write_state $((NOW-100000)) $((NOW-100000)) 9 5 200
+  write_cache 5 $((NOW+9000)) 10 $((NOW+520000))
+  run bash "$HOOK" </dev/null
+  [ "$status" -eq 0 ]
+  grep -qE " 0$" "$WR_QUOTA_MARKER"                 # cur_s := 0 immediately
 }
 
 @test "behind pace drops a high sleep to 0 at once, not eased over calls (P446 sticky-recovery)" {

@@ -33,7 +33,9 @@ An on-demand report of what the throttle is doing: usage against the pace line p
 
 ## How it works
 
-A `PreToolUse` hook fires before every tool call. It reads your current rate-limit usage, measures your actual burn rate, and — when you're burning faster than the *remaining sustainable rate* `(100 − headroom − used) / time_left` — sleeps a small, growing amount per call to bring you back onto pace. When usage is ahead of pace but the platform's integer percentage has not changed enough to measure a rate, Cruise keeps a minimum 10-second brake instead of mistaking unresolved data for safe burn. Behind pace, or at a positively measured sustainable rate, it's a fast no-op.
+A `PreToolUse` hook fires before every tool call. It reads your current rate-limit usage, measures your actual burn rate, and — when you're burning faster than the *remaining sustainable rate* `(100 − headroom − used) / time_left` — sleeps a small, growing amount per call to bring you back onto pace. The sleep grows in proportion to how far over the rate you are, so a genuine sprint brakes hard within a call or two instead of ramping slowly. When usage is ahead of pace but the platform's integer percentage has not changed enough to measure a rate, Cruise keeps a minimum 10-second brake instead of mistaking unresolved data for safe burn. Behind pace, or at a positively measured sustainable rate, it's a fast no-op.
+
+Even while you're still behind the pace line with surplus banked, a **burn guard** steps in if your current rate would exhaust the window in under a quarter of the time left — the early-week sprint that would otherwise run unthrottled right up to the line. It releases the instant your rate falls back. Tune it with `burn_guard_multiple` (default 4; `0` turns it off).
 
 Every rate-limit window exposed by the runtime is paced; the tighter one governs. Claude currently exposes 5-hour and 7-day windows. Codex windows are discovered from app-server and retain their reported durations. Cruise holds back **headroom** (default 5pp on the long window) for other account surfaces.
 
@@ -48,11 +50,12 @@ Optional. Knobs resolve project → machine → built-in defaults, with env vars
   "headroom_7d_pp": 5,
   "headroom_5h_pp": 0,
   "max_sleep_s": 600,
-  "cache_path": "~/.claude/quota-state.json"
+  "cache_path": "~/.claude/quota-state.json",
+  "burn_guard_multiple": 4
 }
 ```
 
-Save it under the active runtime: `.claude/cruise.config.json` or `~/.claude/cruise.config.json` for Claude; `.codex/cruise.config.json` or `~/.codex/cruise.config.json` for Codex. `max_sleep_s: 0` pauses pacing without uninstalling.
+Save it under the active runtime: `.claude/cruise.config.json` or `~/.claude/cruise.config.json` for Claude; `.codex/cruise.config.json` or `~/.codex/cruise.config.json` for Codex. `max_sleep_s: 0` pauses pacing without uninstalling; `burn_guard_multiple: 0` turns off the behind-line burn guard.
 
 ## Honest limits
 

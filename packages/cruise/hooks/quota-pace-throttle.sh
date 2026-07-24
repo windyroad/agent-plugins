@@ -102,15 +102,18 @@ if [ ! -r "$CFG_P" ] && [ ! -r "$CFG_M" ]; then
   HD7="${WR_QUOTA_HEADROOM_7D_PP:-5}"
   HD5="${WR_QUOTA_HEADROOM_5H_PP:-0}"
   CEIL="${WR_QUOTA_THROTTLE_MAX_SLEEP:-600}"
+  GUARD="${WR_QUOTA_BURN_GUARD_MULTIPLE:-4}"
 else
   CACHE=$(cfg cache_path "$CACHE_DEFAULT" "${WR_QUOTA_CACHE_FILE:-}")
   HD7=$(cfg headroom_7d_pp 5 "${WR_QUOTA_HEADROOM_7D_PP:-}")
   HD5=$(cfg headroom_5h_pp 0 "${WR_QUOTA_HEADROOM_5H_PP:-}")
   CEIL=$(cfg max_sleep_s 600 "${WR_QUOTA_THROTTLE_MAX_SLEEP:-}")
+  GUARD=$(cfg burn_guard_multiple 4 "${WR_QUOTA_BURN_GUARD_MULTIPLE:-}")
 fi
 isint "$HD7" || HD7=5
 isint "$HD5" || HD5=0
 isint "$CEIL" || CEIL=600
+isint "$GUARD" || GUARD=4    # behind-line burn-guard multiple; 0 disables (ADR-093 Amendment 2026-07-24)
 
 # Keep Node and app-server off the fresh-cache path. The producer's numeric
 # sidecar also carries its write time, avoiding an external stat on every tool call.
@@ -133,6 +136,20 @@ if [ "$is_codex" -eq 1 ]; then
   case "$mtime" in ''|*[!0-9]*) age=61;; *) age=$(( now - mtime ));; esac
   if [ "$age" -ge 60 ]; then
     lock="${CACHE}.refresh.lock"
+    # Reap a stale lock. The refresh runs in a backgrounded subshell that ends
+    # with rmdir; Codex reaps hook children at turn end, so that rmdir can be
+    # skipped, orphaning the lock and disabling ALL further refresh until manual
+    # cleanup (observed: a lock orphaned 2 days). A lock older than the refresh
+    # could plausibly take (≥30s ≫ the 8s producer timeout) is dead — remove it.
+    # Fail-safe: if the mtime can't be read, do NOT reap (never kill a live lock).
+    if [ -d "$lock" ]; then
+      case "${OSTYPE:-}" in
+        darwin*) lmt=$(/usr/bin/stat -f %m "$lock" 2>/dev/null);;
+        *) lmt=$(/usr/bin/stat -c %Y "$lock" 2>/dev/null);;
+      esac
+      case "$lmt" in ''|*[!0-9]*) lmt=0;; esac
+      [ "$lmt" -gt 0 ] && [ $(( now - lmt )) -ge 30 ] && rmdir "$lock" 2>/dev/null
+    fi
     if mkdir "$lock" 2>/dev/null; then
       PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)}"
       (node "$PLUGIN_ROOT/scripts/codex-quota-state.mjs" "$CACHE"; rmdir "$lock") >/dev/null 2>&1 &
@@ -204,14 +221,27 @@ fi
 # (100−headroom) < 100 at reset, so you still glide to reset without exhausting.
 # Extreme sustained burn that empties the surplus AND exceeds what the ceiling can
 # offset still exhausts (documented P446 residual). Reset passed (left ≤ 0) → skip.
-over=0; unresolved=0
+# A window brakes when EITHER it is at/over its pace line AND over-rate (position
+# gate, P446), OR — while still BEHIND the line — its burn projects to exhaust the
+# window in under 1/GUARD of the time left (behind-line burn guard, ADR-093
+# Amendment 2026-07-24; GUARD=0 disables). Both reduce to dused·left ⋛ k·budget·dt
+# (k=1 over the line, k=GUARD behind it). over_ratio = measured burn / sustainable
+# rate (integer floor) scales the ramp kick below, so a real sprint slams toward the
+# ceiling in ~1 call instead of crawling +10/call; at the boundary ratio=1 the kick
+# is the original 10 (mild overage unchanged). WITHOUT floats. Reset passed → skip.
+over=0; unresolved=0; guard=0; over_ratio=1
 w_budget=$(( 100 - HD7 - wu )); w_dused=$(( wu - base_week ))
 if [ "$w_overline" -eq 1 ]; then
   if [ "$w_dused" -le 0 ]; then
     unresolved=1
   elif [ $(( w_dused * w_left )) -gt $(( (w_budget>0?w_budget:0) * dt )) ]; then
     over=1
+    if [ "$w_budget" -gt 0 ]; then r=$(( (w_dused * w_left) / (w_budget * dt) )); else r=99; fi
+    [ "$r" -gt "$over_ratio" ] && over_ratio=$r
   fi
+elif [ "$GUARD" -gt 0 ] && [ "$w_dused" -gt 0 ] && [ "$w_budget" -gt 0 ] && [ "$w_left" -gt 0 ] \
+     && [ $(( w_dused * w_left )) -gt $(( GUARD * w_budget * dt )) ]; then
+  guard=1; r=$(( (w_dused * w_left) / (w_budget * dt) )); [ "$r" -gt "$over_ratio" ] && over_ratio=$r
 fi
 f_budget=$(( 100 - HD5 - fu )); f_dused=$(( fu - base_five ))
 if [ "$f_overline" -eq 1 ]; then
@@ -219,16 +249,23 @@ if [ "$f_overline" -eq 1 ]; then
     unresolved=1
   elif [ $(( f_dused * f_left )) -gt $(( (f_budget>0?f_budget:0) * dt )) ]; then
     over=1
+    if [ "$f_budget" -gt 0 ]; then r=$(( (f_dused * f_left) / (f_budget * dt) )); else r=99; fi
+    [ "$r" -gt "$over_ratio" ] && over_ratio=$r
   fi
+elif [ "$GUARD" -gt 0 ] && [ "$f_dused" -gt 0 ] && [ "$f_budget" -gt 0 ] && [ "$f_left" -gt 0 ] \
+     && [ $(( f_dused * f_left )) -gt $(( GUARD * f_budget * dt )) ]; then
+  guard=1; r=$(( (f_dused * f_left) / (f_budget * dt) )); [ "$r" -gt "$over_ratio" ] && over_ratio=$r
 fi
 
-# Feedback controller. Over pace → ramp the per-call sleep up toward holding burn=safe.
-# Behind pace → drop the grip to 0 AT ONCE (asymmetric recovery, P446 sticky-recovery
-# fix): easing down one call at a time left a session that had banked surplus paying
-# minutes of stale latency before it recovered. Dropping braking never risks
-# exhaustion, and it re-engages the instant a window is over pace again.
-if [ "$over" -eq 1 ]; then
-  cur_s=$(( cur_s * 3 / 2 + 10 ))          # over pace → slow more
+# Feedback controller. Over pace / guarded sprint → ramp the per-call sleep up
+# toward holding burn=safe; the kick scales with over_ratio so heavy burn brakes
+# hard immediately. Behind pace → drop the grip to 0 AT ONCE (asymmetric recovery,
+# P446 sticky-recovery fix): easing down one call at a time left a session that had
+# banked surplus paying minutes of stale latency. Dropping braking never risks
+# exhaustion, and it re-engages the instant a window is over pace (or guard-tripped).
+if [ "$over" -eq 1 ] || [ "$guard" -eq 1 ]; then
+  kick=$(( 10 * over_ratio )); [ "$kick" -gt "$CEIL" ] && kick="$CEIL"
+  cur_s=$(( cur_s * 3 / 2 + kick ))        # ramp proportional to how far over-rate
   [ "$cur_s" -gt "$CEIL" ] && cur_s="$CEIL"
 elif [ "$any_overline" -eq 1 ] && [ "$unresolved" -eq 1 ]; then
   [ "$cur_s" -gt 0 ] || cur_s=10           # coarse usage data → keep minimum grip

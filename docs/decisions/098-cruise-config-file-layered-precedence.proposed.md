@@ -36,7 +36,7 @@ Chosen option: JSON layered config, never sourced. Codex adds one installer-mana
 
 - **Files:** in-project `.claude/cruise.config.json`; per-machine `~/.claude/cruise.config.json`.
 - **Precedence:** a key set in the project file wins over the machine file, which wins over the built-in default; an env var (`WR_QUOTA_HEADROOM_7D_PP` / `_5H_PP` / `WR_QUOTA_THROTTLE_MAX_SLEEP` / `WR_QUOTA_CACHE_FILE`) trumps all of them (CI / emergency override).
-- **Keys (all optional; each falls back through the layers):** `headroom_7d_pp` (int, default 5), `headroom_5h_pp` (int, default 0), `max_sleep_s` (int, default 600 — the sleep ceiling, under the 660s hook timeout; P446), `cache_path` (string, default `~/.claude/quota-state.json`).
+- **Keys (all optional; each falls back through the layers):** `headroom_7d_pp` (int, default 5), `headroom_5h_pp` (int, default 0), `max_sleep_s` (int, default 600 — the sleep ceiling, under the 660s hook timeout; P446), `cache_path` (string, default `~/.claude/quota-state.json`), `burn_guard_multiple` (int, default 4, 0 disables — the behind-line burn-guard multiple; env `WR_QUOTA_BURN_GUARD_MULTIPLE`; see ADR-093 Amendment 2026-07-24).
 - **Codex installer key:** machine config alone may contain installer-managed `codex_binary`; project config cannot override it, and `CODEX_BINARY` remains the explicit environment override.
 - **Fail-open:** a missing / malformed / unreadable config file falls back to the next layer (ultimately built-in defaults) — the throttle never breaks on a bad config (consistent with ADR-093's fail-open envelope).
 
@@ -95,3 +95,7 @@ Codex machine config may additionally contain `codex_binary`, an absolute path w
 **Human oversight:** confirmed by Tom Howard on 2026-07-23.
 
 Confirmation extends the Codex config Bats to prove that install and update preserve unrelated machine keys, malformed or non-object JSON is preserved byte-for-byte, project config cannot override `codex_binary`, dry runs and failed installs do not write it, and uninstall removes only that managed key after plugin removal succeeds.
+
+## Amendment 2026-07-24 — `burn_guard_multiple` key (pending ratification)
+
+Additive, backward-compatible: one new optional throttle knob `burn_guard_multiple` (int, default 4, 0 disables) is added to the key schema above, governing the behind-line burn guard introduced in ADR-093 Amendment 2026-07-24. It resolves through the identical layered precedence (project → machine → default) with `WR_QUOTA_BURN_GUARD_MULTIPLE` as the env last-override, and is validated `isint`-or-default like the other integer knobs. The core JSON-layered-precedence decision this ADR ratifies is unchanged; this amendment only records the new key so the enumerated schema stays authoritative. The key's substance was user-pinned via AskUserQuestion 2026-07-24; this amendment paragraph is queued for the next interactive ratification drain (P348/P357), and does not by itself re-affirm the ratified `human-oversight: confirmed` marker above.
