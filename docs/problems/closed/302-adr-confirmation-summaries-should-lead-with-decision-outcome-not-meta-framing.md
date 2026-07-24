@@ -1,6 +1,6 @@
 # Problem 302: ADR-confirmation summaries should lead with the Decision Outcome, not the meta-framing (caused 2 user re-asks this session)
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-05-25
 **Priority**: 4 (Low-Med) — Impact: 2 (Minor — a confusing summary costs a clarifying re-ask round-trip + erodes trust in the drain's presentation; recoverable) × Likelihood: 2 (Unlikely-Possible — recurs when presenting meta-heavy ADRs, i.e. sibling/supersede/separate-vs-amend decisions, for oversight-confirm)
 **Effort**: S — presentation-guidance edit to the `/wr-architect:review-decisions` skill (held) + a one-line agent-interaction briefing note
@@ -69,3 +69,9 @@ Awaiting user verification — exercise either drain skill on a meta-heavy ADR (
 - **P283** / **ADR-066** + **P288** / **ADR-068** — the drains whose presentation guidance this improves.
 - `packages/architect/skills/review-decisions/SKILL.md` + `packages/jtbd/skills/confirm-jobs-and-personas/SKILL.md` — the edit targets (architect side released in 0.12.1; jtbd side held with p288).
 - `docs/briefing/agent-interaction-patterns.md` — the briefing note target (shipped at commit `d1de917`).
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: /wr-architect:review-decisions surfaced its AskUserQuestion with the question leading "This ADR decides: ..." across two drains 2026-06-22 and 2026-07-07 (transcripts 397313ab, 72d7d65e)
+- **Recovery**: reversible via `/wr-itil:transition-problem 302 known-error` or `git revert`.

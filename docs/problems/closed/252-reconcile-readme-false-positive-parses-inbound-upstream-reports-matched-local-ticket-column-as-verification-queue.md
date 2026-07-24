@@ -1,6 +1,6 @@
 # Problem 252: reconcile-readme false-positive parses Inbound Upstream Reports `Matched local ticket` column as Verification Queue
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-05-17
 **Fix Released**: @windyroad/itil@0.35.3 — fix landed 2026-05-17 commit `52a50e9` "fix(itil): scope reconcile-readme VQ slice to terminate at Inbound Upstream Reports (closes P252)"; consumed in version-packages commit `55dde23` 2026-05-18; merged via PR #148 (`d450683`); cache now at `@windyroad/itil@0.35.3` (released session 7 loop-end Step 6.5 drain 2026-05-18). The fix added `INBOUND_START` to the section-boundary scan and updated `VQ_END` / `WSJF_END` sentinel cascade so VQ extraction terminates at the Inbound Upstream Reports section per ADR-062 / RFC-004. Transition Open → Verification Pending per ADR-022 P143 fold-fix amendment (changeset removal in `55dde23` IS the canonical fix-shipped signal). Sibling P264 captured 2026-05-18 was a duplicate (the cached 0.32.1 script still had the bug at session 7 start); closed in this iter referencing P252 as authoritative.
 **Priority**: 9 (Med-High) — Impact: 3 x Likelihood: 3 (deferred — re-rate at next /wr-itil:review-problems)
@@ -82,3 +82,9 @@ Possible interim workarounds (to validate):
 1. 2026-05-17 work-problems session — 3 friction events documented in this ticket's Description (P082 commit blocked, P251 commit blocked, P251+P082 bundling workaround applied).
 2. `wr-itil-reconcile-readme docs/problems` output at session position post-`5553cc4` commit: 31 STALE entries on P198-P228, all of which are actually Open tickets with rows in WSJF Rankings + cross-refs in Inbound Upstream Reports.
 3. `wr-itil-classify-readme-drift` HALT_ROUTE_RECONCILE verdict on the false-positive output — running the recommended `/wr-itil:reconcile-readme` recovery would have destructively rewritten the README.
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: wr-itil-reconcile-readme docs/problems returned "reconcile exit: 0" with no VQ false-positives and the Inbound Upstream section intact (transcript 16d019f1, wr-itil 0.59.0, 2026-07-21)
+- **Recovery**: reversible via `/wr-itil:transition-problem 252 known-error` or `git revert`.

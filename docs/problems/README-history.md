@@ -1225,3 +1225,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-07-24 **P459 captured** — Agent-Prose Behavioural Eval flaky; red-lines CI on ~50% of `main` pushes regardless of the diff (unrelated `risk-scorer:plan` LLM-rubric case), eroding CI as a release signal (lightweight aside via /wr-itil:capture-problem).
 
 > Last reviewed: 2026-07-24 **P458 → Verifying** — `.git/` gate-exclusion fix released (architect 0.20.2 / jtbd 0.13.1 / voice-tone 0.7.1 / style-guide 0.5.1 / tdd 0.5.1); moved to the Verification Queue. Targeted pass — P458 transition + README only, not a full re-score (see the review report).
+
+> Last reviewed: 2026-07-24 **20 tickets verified & closed on transcript evidence** — mined ~/.claude + ~/.codex for concrete exercise of released fixes (P082/099/105/145/156/203/205/209/215/219/237/238/240/249/309/320/348/371/402/407); Verification Queue drained 199 -> 179. See the evidence-scan report.

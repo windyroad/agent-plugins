@@ -1,6 +1,6 @@
 # Problem 295: ADR-043 deep layer (`analyze-context`) needs an automatic cadence — on-demand-only means it never runs
 
-**Status**: Verification Pending (ADR-043 Amendment 2026-06-08 fix released — first shipped in `@windyroad/retrospective@0.24.0`, present in current `0.24.1`; awaiting user verification per ADR-022)
+**Status**: Closed
 **Reported**: 2026-05-25
 **Root cause confirmed**: 2026-06-08 (fix landed `9045cadc`, released in `@windyroad/retrospective@0.24.0`)
 **Priority**: 6 (Medium) — Impact: 2 (Minor — the deep context analysis exists but, being on-demand-only, effectively never fires; the cheap layer carries all the load and the deep insights are never realised; no breakage, just an un-exercised capability) × Likelihood: 3 (Likely — every retro runs the cheap layer; the deep layer's zero-cadence means zero runs)
@@ -77,3 +77,9 @@ Awaiting user verification — observe whether the next retro whose trigger hold
 - **P291** — same "no automatic cadence" root cause (ADRs stuck in proposed because no acceptance cadence fires).
 - **ADR-043** (`docs/decisions/043-progressive-context-usage-measurement.proposed.md`) — amendment target.
 - memory `feedback_automatic_cadence_or_it_doesnt_happen` — the generalised principle.
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: the Skill tool auto-fired wr-retrospective:analyze-context with args "Auto-fired from run-retro Step 2c" (calendar trigger) and committed docs/retros/2026-07-03-context-analysis.md (transcripts f4f3160b, 1590d122)
+- **Recovery**: reversible via `/wr-itil:transition-problem 295 known-error` or `git revert`.

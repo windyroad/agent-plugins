@@ -1,6 +1,6 @@
 # Problem 269: Amend `plugin-maturity-populate.sh` to write `rollup_invocations_30d` on plugin root rollup for compound rendering
 
-**Status**: Verifying
+**Status**: Closed
 **Reported**: 2026-05-18
 **Root cause confirmed**: 2026-05-18
 **Fix released**: 2026-05-18 (`@windyroad/itil@0.35.4` — source commit `7ca47ef` "fix(maturity): P087 Phase 3 (P269) — amend populate to write rollup_invocations_30d + bootstrapping on plugin root for compound rendering" + retroactive rollout `f3c0d26` + doc-lint fold-fix `3040b69` + retro `d945727`; version-packages commit `28ac9e7`; PR #150 merge commit `6127ed8` 2026-05-18; released session 8 loop-end Step 6.5 drain; transitions Open → Verifying per ADR-022 P143 fold-fix amendment — changeset removal in `28ac9e7` IS the canonical fix-shipped signal; verification window remains in-flight — 5 AFK iterations across ≥2 sessions of low-risk iters; recovery path: `/wr-itil:transition-problem 269 known-error` after reverting the iter commits)
@@ -74,3 +74,9 @@ None applied — fall-through bare-band form is functionally correct (just less 
 - ADR-063 §rollup schema + §Bootstrapping clause rendering
 - `packages/itil/scripts/plugin-maturity-populate.sh` rollup-emission block
 - `packages/itil/scripts/plugin-maturity-render.sh` compound-rendering fall-through
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: the installed wr-itil 0.59.2 .claude-plugin/plugin.json carries computed maturity.rollup_invocations_30d=327 on the root rollup (+siblings 811/2047/282) — the direct output of the populate script (on-disk installed cache)
+- **Recovery**: reversible via `/wr-itil:transition-problem 269 known-error` or `git revert`.

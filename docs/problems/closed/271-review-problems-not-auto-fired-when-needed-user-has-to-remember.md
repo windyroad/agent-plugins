@@ -1,6 +1,6 @@
 # Problem 271: `/wr-itil:review-problems` not auto-fired when needed — user has to remember to run it
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-05-18
 **Priority**: 8 (Medium) — Impact: 2 × Likelihood: 4
 **Effort**: M (re-estimated 2026-05-18 — trigger condition + auto-dispatch wiring across work-problems/manage-problem/capture-problem surfaces + bats fixture)
@@ -153,3 +153,9 @@ Awaiting user verification.
 - `packages/itil/skills/work-problems/SKILL.md` Step 0/0a/0b — candidate trigger sites for the orchestrator surface
 - `packages/itil/skills/manage-problem/SKILL.md` Step 0 — candidate trigger site for interactive surface
 - `packages/itil/skills/capture-problem/SKILL.md` Step 7 trailing-pointer — current placeholder mechanism (the "Run /wr-itil:review-problems next" trailing pointer signals stale README but does NOT auto-dispatch; P271 closes the gap between signal and action)
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: work-problems Step 0c fired "Step 0c deferred placeholders below-threshold count=1 threshold=3" — the staleness preflight ran live (transcript 16d019f1, wr-itil 0.59.0, 2026-07-21)
+- **Recovery**: reversible via `/wr-itil:transition-problem 271 known-error` or `git revert`.
