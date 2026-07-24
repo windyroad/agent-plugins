@@ -1,6 +1,6 @@
 # Problem 219: manage-problem SKILL.md uses repo-relative script path that fails for plugin-installed users
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-05-15
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -34,3 +34,9 @@ Use the $PATH-resolved shim (ADR-049): `wr-itil-reconcile-readme docs/problems`.
 - **Reported Upstream**: https://github.com/windyroad/agent-plugins/issues/76
 - **Pipeline classification**: safe-low-fix-risk; route=safe-and-valid.
 - **Affected plugin**: @windyroad/itil. Sibling of P209/#85.
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: sibling of P209: Step 0 reconcile ran via the wr-itil-reconcile-readme shim (no repo-relative path) across many sessions (16d019f1, a8c88334)
+- **Recovery**: reversible via `/wr-itil:transition-problem 219 known-error` or `git revert`.

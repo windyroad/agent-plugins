@@ -1,6 +1,6 @@
 # Problem 215: architect-gate drift detection rm's marker without offering recovery path
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-05-15
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -39,3 +39,9 @@ Add an `ARCHITECT_GATE_REASON` variable to `check_architect_gate` (architect-gat
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-021 | proposed | P215 — architect-gate deny-reason recovery directive |
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: architect-enforce-edit deny emitted the recovery directive "delegate to wr-architect:agent using the Agent tool (subagent_type: wr-architect:agent)" (13041792); also observed firing in-session 2026-07-24
+- **Recovery**: reversible via `/wr-itil:transition-problem 215 known-error` or `git revert`.

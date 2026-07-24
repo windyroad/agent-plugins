@@ -1,6 +1,6 @@
 # Problem 099: `docs/BRIEFING.md` grows unbounded via run-retro appends — violates progressive disclosure
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-22
 **Released**: 2026-04-26
 **Priority**: 15 (High) — Impact: Moderate (3) x Likelihood: Almost certain (5)
@@ -105,3 +105,9 @@ The ADR anchor on P091 ("Progressive disclosure for governance tooling context")
 - **P081 (structural content tests are wasteful)** — the new behavioural bats test for the budget should be behavioural (measure file size) not structural (grep for a specific string in run-retro's SKILL.md).
 - **ADR-038** — progressive-disclosure anchor. This ticket either amends it to cover accumulator surfaces or authors a sibling ADR.
 - **ADR anchor**: P091's "Progressive disclosure for governance tooling context" umbrella covers this ticket too.
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: run-retro surfaced an over-budget topic file and rotated it 6263 bytes -> 4641 (<5120 ceiling), creating the afk-subprocess-archive.md sibling (257ba25e)
+- **Recovery**: reversible via `/wr-itil:transition-problem 099 known-error` or `git revert`.

@@ -1,6 +1,6 @@
 # Problem 203: architect-enforce-edit + jtbd-enforce-edit hooks should add docs/retros/ to their exclusion paths
 
-**Status**: Verifying (Fix Released)
+**Status**: Closed
 **Reported**: 2026-05-15
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -60,3 +60,9 @@ Tolerate the gate delegations on retro append writes (adds friction to ask-hygie
 - **Pipeline classification**: JTBD-aligned (JTBD-001); safe-low-fix-risk; route=safe-and-valid.
 - **Affected plugin**: @windyroad/architect + @windyroad/jtbd.
 - **Recurrence 2026-05-26** (verifying-queue-review retro): both gates fired on the FIRST `docs/retros/2026-05-26-verifying-queue-review-ask-hygiene.md` write of a fresh session — architect `BLOCKED` then JTBD `BLOCKED`, forcing two subagent round-trips (architect PASS + jtbd PASS) for a Step 2d-mandated trail artifact before the write succeeded. Likelihood data point: this fires on EVERY retro's trail write, not the "Likelihood 1" the deferred rating assumes — consider re-rating likelihood upward at next review.
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: docs/retros/*-ask-hygiene.md written with "File created successfully" and NO architect/jtbd gate BLOCK across multiple sessions (5f213e7d)
+- **Recovery**: reversible via `/wr-itil:transition-problem 203 known-error` or `git revert`.

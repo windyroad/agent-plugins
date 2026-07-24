@@ -1,6 +1,6 @@
 # Problem 145: `/wr-retrospective:run-retro` Tier 3 budget rotation prompt accumulates "defer" answers across retros — topic files exceed budget recurringly without action
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-29
 **Fold-Fix Open → Verification Pending As Of**: 2026-05-03 (per ADR-022 amendment endorsing fold-fix when Open ticket documents root cause + fix strategy + workaround inline; precedents P140 / P142 / P143 / P153)
 **Priority**: 9 (Med) — Impact: Moderate (3) x Likelihood: Likely (3) — observed recurring across multiple recent retros; user surfaced explicitly today: *"we need to do better at splitting. We can\'t just keep deferring."*
@@ -113,3 +113,9 @@ The fix shape is escalating pressure on the rotation prompt itself, NOT a strict
 - **`packages/retrospective/scripts/check-briefing-budgets.sh`** — the read-only advisory script that fires today; potential extension surface for defer-count tracking.
 - **`packages/retrospective/scripts/test/check-briefing-budgets.bats`** — behavioural-test parent for the chosen fix.
 - 2026-04-29 retro evidence: today\'s retro Topic File Rotation Candidates table — all 6 entries `defer`.
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: run-retro Tier-3 split-by-date fired: afk-subprocess.md over budget -> archive sibling written, "Parent now 4641 (under budget)"; recurred 06-27/06-28/07-04 (257ba25e)
+- **Recovery**: reversible via `/wr-itil:transition-problem 145 known-error` or `git revert`.

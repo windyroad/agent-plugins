@@ -1,6 +1,6 @@
 # Problem 237: Phase 3a — `wr-itil-plugin-maturity-populate` writes `plugin.json` `maturity:` field from Phase 2 NDJSON
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-05-17
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -68,3 +68,9 @@ Fold-fix Open → Verification Pending per ADR-022 P143 amendment — the script
 Awaiting user verification — next adopter session that runs `wr-itil-plugin-maturity-populate` from a marketplace-installed cache against a Phase 2 NDJSON pair confirms script behaves per ADR-063 contract. P237 was tracked separately from P087's Phase 3a `[x]` Investigation Task to surface the script-deliverable as a discrete WSJF-ranked entity; both representations stay in sync per ADR-014 governance.
 
 Recovery path: `/wr-itil:transition-problem 237 known-error` after reverting the script commits.
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: .claude-plugin/plugin.json carries populated "maturity" records with real computed 30-day evidence (327 invocations) across plugins — the direct output of the populate script (on-disk)
+- **Recovery**: reversible via `/wr-itil:transition-problem 237 known-error` or `git revert`.

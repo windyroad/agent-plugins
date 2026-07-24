@@ -1,6 +1,6 @@
 # Problem 205: wr-risk-scorer:assess-release SKILL.md step 5 prose says "Skill tool" but provides subagent_type
 
-**Status**: Verifying
+**Status**: Closed
 **Reported**: 2026-05-15
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -61,3 +61,9 @@ Phase 2 is tracked here; will be lifted to a separate ticket if WSJF priority wa
 - **Reported Upstream**: https://github.com/windyroad/agent-plugins/issues/110
 - **Pipeline classification**: JTBD-aligned (JTBD-301/JTBD-302/JTBD-101); safe-low-fix-risk; route=safe-and-valid.
 - **Affected plugin**: @windyroad/risk-scorer.
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: the Skill tool was invoked with skill: wr-risk-scorer:pipeline across ~10 sessions returning a RISK_SCORES block — the wrapper SKILL exists and is invocable (54a54dfa)
+- **Recovery**: reversible via `/wr-itil:transition-problem 205 known-error` or `git revert`.

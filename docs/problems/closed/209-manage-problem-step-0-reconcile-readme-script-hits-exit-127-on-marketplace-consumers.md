@@ -1,6 +1,6 @@
 # Problem 209: manage-problem Step 0 reconcile-readme.sh hits exit 127 on marketplace consumers; script only resolves via repo-relative path
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-05-15
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -40,3 +40,9 @@ Adopters must either (a) clone the source repo to get the script at its expected
 - **Pipeline classification**: JTBD-aligned (JTBD-101/JTBD-302 — marketplace adopter trust contract); safe-low-fix-risk; route=safe-and-valid.
 - **Affected plugin**: @windyroad/itil.
 - **Sibling**: ADR-049 ($PATH-resolved shim pattern).
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: wr-itil-reconcile-readme resolved via PATH including the plugin cache .../cache/windyroad/wr-itil/0.59.0/bin and ran a clean reconcile with no exit-127 (16d019f1)
+- **Recovery**: reversible via `/wr-itil:transition-problem 209 known-error` or `git revert`.

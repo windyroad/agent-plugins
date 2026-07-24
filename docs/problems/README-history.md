@@ -1223,3 +1223,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-07-24 **P458 captured** — edit-gate family fires on writes to `.git/` plumbing paths (architect + JTBD gates blocked a commit-message scratch file; P004's project-root fix left the inside-the-repo VCS-internal case uncovered) (lightweight aside via /wr-itil:capture-problem).
 
 > Last reviewed: 2026-07-24 **P459 captured** — Agent-Prose Behavioural Eval flaky; red-lines CI on ~50% of `main` pushes regardless of the diff (unrelated `risk-scorer:plan` LLM-rubric case), eroding CI as a release signal (lightweight aside via /wr-itil:capture-problem).
+
+> Last reviewed: 2026-07-24 **P458 → Verifying** — `.git/` gate-exclusion fix released (architect 0.20.2 / jtbd 0.13.1 / voice-tone 0.7.1 / style-guide 0.5.1 / tdd 0.5.1); moved to the Verification Queue. Targeted pass — P458 transition + README only, not a full re-score (see the review report).

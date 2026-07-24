@@ -1,6 +1,6 @@
 # Problem 156: Ship `/wr-architect:capture-adr` skill — lightweight aside-invocation surface for ADR capture during foreground work
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-05-03
 **Priority**: 12 (High) — Impact: Significant (3) x Likelihood: Almost certain (4)
 **Effort**: M — new skill SKILL.md + REFERENCE.md per ADR-038 progressive-disclosure pattern; bin shim per ADR-049; behavioural bats per ADR-052; compose with `wr-architect:create-adr` (the heavyweight canonical path) so capture-adr produces a `.proposed.md` with skeleton sections deferred for later canonical review.
@@ -120,3 +120,9 @@ ok 1..12 — all green
 **Verification path for the user**: invoke `/wr-architect:capture-adr <Title>\n<Context>\n<Decision>` against a real foreground design decision. Expected outcome: ~3-4 turn skeleton-filled `.proposed.md` lands at `docs/decisions/<NNN>-<title>.proposed.md`, single commit `docs(decisions): capture ADR-<NNN> <title>`, status `proposed`, trailing pointer surfaces "Run /wr-architect:create-adr <NNN> next to expand the deferred sections canonically".
 
 Recovery path if the close action was wrong: `/wr-itil:transition-problem 156 known-error` flips back to Known Error for further work.
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: /wr-architect:capture-adr produced the ADR-094 skeleton and the canonical commit "docs(decisions): capture ADR-094 ..." landed (create mode 100644 docs/decisions/094-...) (52c4bdde)
+- **Recovery**: reversible via `/wr-itil:transition-problem 156 known-error` or `git revert`.

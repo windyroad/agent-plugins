@@ -1,6 +1,6 @@
 # Problem 320: /install-updates Step 2/3 discovery loop is zsh-unsafe — `for X in $VAR` word-split (P133) + `status` is a read-only zsh var
 
-**Status**: Verifying
+**Status**: Closed
 **Reported**: 2026-05-27
 **Fix Released**: 2026-06-02 (fold-fix per ADR-022 P143-class — RCA + Fix Strategy + Workaround all documented inline + fix shipped same iter)
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
@@ -61,3 +61,9 @@ Verifying status will close at next `/wr-itil:transition-problems` pass once an 
 ## Related
 
 - captured via /wr-retrospective:run-retro Step 2b (Skill-contract violation), 2026-05-27. Witnessed running /install-updates after the architect@0.9.2 release.
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: /install-updates printed one line per plugin with correct semver "cached=" values (no SHA/blob dirs), including in this session (16d019f1, c36429d5 this session)
+- **Recovery**: reversible via `/wr-itil:transition-problem 320 known-error` or `git revert`.

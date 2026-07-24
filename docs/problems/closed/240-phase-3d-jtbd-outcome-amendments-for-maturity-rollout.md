@@ -1,6 +1,6 @@
 # Problem 240: Phase 3d — JTBD outcome amendments for P087 plugin maturity Phase 3 reactivation
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-05-17
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: S (deferred — re-rate at next /wr-itil:review-problems)
@@ -84,3 +84,9 @@ Fold-fix Open → Verification Pending per ADR-022 P143 amendment — the amendm
 Awaiting user verification — next adopter reading the four JTBD job files sees the maturity-aware outcomes alongside the existing ones. P240 was tracked separately from P087's Phase 3d `[x]` Investigation Task to surface the four-file documentation deliverable as a discrete WSJF-ranked entity; both representations stay in sync per ADR-014 governance.
 
 Recovery path: `/wr-itil:transition-problem 240 known-error` after reverting the JTBD amendment commits.
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: docs/jtbd/plugin-user/JTBD-302 (and 007/101/003) carry the maturity-outcome bullets verbatim (verified on-disk 2026-07-24)
+- **Recovery**: reversible via `/wr-itil:transition-problem 240 known-error` or `git revert`.

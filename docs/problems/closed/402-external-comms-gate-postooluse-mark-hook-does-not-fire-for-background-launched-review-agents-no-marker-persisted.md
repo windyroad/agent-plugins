@@ -1,6 +1,6 @@
 # Problem 402: external-comms gate — PostToolUse mark hook does not fire for background-launched (forced-async) review agents, so no marker is persisted to the live session dir despite PASS
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-07-01
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 (Likely) = 12. **Rated at capture from in-session evidence (5/5 PASS, 0 markers), NOT deferred** — re-rating "at next /wr-itil:review-problems" would itself be the P375 bug (nothing self-fires review-problems). Impact 3: blocks every external-facing commit and forces habitual `BYPASS_RISK_GATE=1`, eroding a load-bearing leak gate (workaround exists). Likelihood 4: reproduces on every background-launched review this session.
 **Origin**: internal
@@ -124,3 +124,9 @@ Strong recurrence: ~10 changeset-bearing commits in the RFC-037/P404 session eac
 ### Scope broadening — same bug hits the `wr-risk-scorer:pipeline` PUSH gate (2026-07-03, work-problems AFK loop)
 
 The async-no-fire marker bug is NOT external-comms-specific — the `risk-score-mark.sh` **push** branch has the identical failure mode. In a `/wr-itil:work-problems` wrap this session, the orchestrator scored push risk by delegating to `wr-risk-scorer:pipeline` via a **background** `Agent` (returned `RISK_SCORES: commit=4 push=4 release=4`, within appetite), then ran `npm run push:watch` — which **re-blocked** with `Push blocked: No push risk score found` because the PostToolUse:Agent mark hook never wrote the `${TMPDIR}/claude-risk-<SID>/push` marker for the background agent. Re-dispatching the *same* pipeline agent **synchronously** (`run_in_background: false`) fired the mark hook, wrote a fresh `push` marker (observed under `$TMPDIR`), and push:watch then passed and pushed 9 commits CI-green. So the fix direction (prefer synchronous dispatch for any gate-marker-writing review agent) generalises across BOTH the external-comms gate and the pipeline commit/push gate — worth widening the fix scope + the DENY-message guidance to cover the pipeline gate. Compounding factor observed: `CLAUDE_SESSION_ID` was empty in the orchestrator Bash env (macOS `$TMPDIR` markers keyed on the SID), but the synchronous dispatch still resolved correctly, so async-vs-sync is the dominant variable, not the empty SID.
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: synchronous external-comms reviewers -> marker persisted and gated commits proceeded with zero real BYPASS uses (BYPASS appears only as "removed" prose) (3cda89d3, 2026-07-05)
+- **Recovery**: reversible via `/wr-itil:transition-problem 402 known-error` or `git revert`.

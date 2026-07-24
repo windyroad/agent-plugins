@@ -1,6 +1,6 @@
 # Problem 309: `wr-risk-scorer-drain-register-queue` no-ops on queued slugs that have no register file — creates 0, appends 0, and does NOT truncate the queue
 
-**Status**: Verifying
+**Status**: Closed
 **Reported**: 2026-05-26
 **Verifying since**: 2026-06-03 (fold-fixed by P171, regression coverage added)
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
@@ -77,3 +77,9 @@ Reproduction on 2026-06-03 against the live 8-entry queue returned `entries_drai
 - `packages/risk-scorer/scripts/drain-register-queue.sh` — the no-op'ing script.
 - `/wr-itil:work-problems` Step 6.4 — the invocation surface where the no-op was observed.
 - Captured via /wr-retrospective:run-retro Step 4b Stage 1 (pipeline-instability detection); 2026-05-26.
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: Step 6.4 register drain ran "entries_drained=10 new_risks_created=6" and 11/11, creating register files (the bug was creating 0) (16d019f1, 13041792)
+- **Recovery**: reversible via `/wr-itil:transition-problem 309 known-error` or `git revert`.

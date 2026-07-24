@@ -1,6 +1,6 @@
 # Problem 238: Phase 3b — README badge renderer (`wr-itil-plugin-maturity-render`) + advisory drift detector (`check-plugin-maturity-drift.sh`)
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-05-17
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
@@ -74,3 +74,9 @@ Phase 3b renderer + drift detector shipped 2026-05-18 in `/wr-itil:work-problems
 Awaiting user verification — next adopter session that runs `wr-itil-plugin-maturity-render` and `wr-retrospective-check-plugin-maturity-drift` from a marketplace-installed cache against a populated `plugin.json` set confirms the renderer + drift detector behave as documented. Per ADR-022 the user may also signal verification by acknowledging Phase 3b's smoke-test behaviour against the live monorepo (12 plugins / 0 drift instances at baseline — coherent because all 11 plugins lack `maturity:` field pending Phase 3a mechanical rollout).
 
 Recovery path: `/wr-itil:transition-problem 238 known-error` after reverting the iter commit.
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: packages/itil/README.md renders the maturity badge "Experimental (suite-bootstrap window; 327 invocations / 30d)" plus a per-skill Maturity column (verified on-disk 2026-07-24)
+- **Recovery**: reversible via `/wr-itil:transition-problem 238 known-error` or `git revert`.

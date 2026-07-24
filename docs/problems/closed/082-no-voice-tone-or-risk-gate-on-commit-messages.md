@@ -1,6 +1,6 @@
 # Problem 082: No voice-and-tone or content-risk-scoring gate on commit messages
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-21
 **Priority**: 12 (High) — Impact: Moderate (3) x Likelihood: Likely (4)
 **Effort**: M <!-- transitive: P038+P064 CLOSED → 0 2026-05-23; effort = marginal M (was transitive XL) -->
@@ -214,3 +214,9 @@ P038 (Open, XL) propagates XL transitive effort per P076. P064 (`.verifying.md`)
 - `packages/risk-scorer/hooks/risk-gate.sh` — current commit-time hook (changeset-risk only); extension target for content-risk composition.
 - `packages/voice-tone/hooks/` — current edit-gate hooks; no commit-time sibling exists yet.
 - **JTBD-001**, **JTBD-101**, **JTBD-201** — personas whose "governance-without-slowing-down" + "audit trail complete" expectations this ticket serves.
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: git-commit-message gate BLOCKED a real `git commit`; wr-risk-scorer:external-comms returned its verdict; the retried commit then succeeded (transcript 257ba25e, 2026-07-04)
+- **Recovery**: reversible via `/wr-itil:transition-problem 082 known-error` or `git revert`.

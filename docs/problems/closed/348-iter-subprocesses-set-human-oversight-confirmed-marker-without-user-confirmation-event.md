@@ -1,6 +1,6 @@
 # Problem 348: iter subprocesses set `human-oversight: confirmed` marker on ADRs / personas / JTBDs without an actual user-confirmation event
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-06-02
 **Priority**: 15 (Very High) — Impact: 5 (Significant — entire oversight mechanism rests on this marker; if iters self-certify, the marker is hollow and the safety guarantee P283/P288/ADR-066/ADR-068 codify is compromised) × Likelihood: 5 (Almost certain — observed verbatim in a prior session per user screenshot 2026-06-02; the SKILL contracts for capture-adr / create-adr / capture-rfc / update-guide / oversight drains don't structurally prevent iter subprocesses from writing the marker)
 **Origin**: internal
@@ -118,3 +118,9 @@ Each has trade-offs (option 1 is simplest; option 3 leaves a permanent audit tra
   - 5 SKILL surfaces updated: create-adr Step 5a, capture-adr, jtbd update-guide (×2), capture-rfc, work-problems Step 2.4 drain
 - **Transition**: Open → Verification Pending per ADR-022 P143 fold-fix amendment (RCA + Fix Strategy + Workaround documented inline; fix released same session).
 - **Migration deferred**: 63 ADRs + 17 JTBDs carry `human-oversight: confirmed` from prior sessions. Audit cadence-driven via `/wr-architect:review-decisions` + `/wr-jtbd:confirm-jobs-and-personas` drains. Markers from this session (ADR-060/075/080/081 + amendments) were legitimately set via in-session AskUserQuestion sequences.
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: the oversight-discipline hook deny fired on a real ADR write — tool_result "BLOCKED: 084-...md about to receive human-oversight: confirmed" 2026-06-23 (397313ab); ADR-086 (3c689e6e)
+- **Recovery**: reversible via `/wr-itil:transition-problem 348 known-error` or `git revert`.

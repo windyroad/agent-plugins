@@ -1,6 +1,6 @@
 # Problem 371: manage-problem I13 propose-fix gate auto-creates a new RFC instead of wiring an existing fix-vehicle's trace edge
 
-**Status**: Verification Pending (K→V 2026-07-16 via work-problems Step 6.5 post-release auto-transition — release vehicle .changeset/wr-itil-p371-i13-existing-vehicle-trace-branch.md shipped; fix exercised live 2026-07-15 by the P446 iter; awaiting user verification per ADR-022)
+**Status**: Closed
 **Reported**: 2026-06-17
 **Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3 = 9. Rated at review 2026-07-02: redundant RFC creation on rework tickets.
 **Origin**: internal
@@ -84,3 +84,9 @@ Architect APPROVED (within-decision SKILL-prose refinement; ADR-073-compliant �
 ## Fix Released
 
 Released via `.changeset/wr-itil-p371-i13-existing-vehicle-trace-branch.md` (I13 third branch: wire the trace edge into an existing fix-vehicle RFC instead of minting a duplicate). **Exercised live post-release 2026-07-15**: the P446 AFK iter detected RFC-046 as the existing vehicle and wired the P446 trace edge via the new branch (`I13: wired P446 trace edge into existing RFC-046`, commit ae95ecec) — no duplicate RFC minted. Awaiting user verification.
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: the I13 existing-vehicle branch fired live: detected RFC-046 as the fix vehicle, wired the P446 trace edge, and minted no new RFC; commit ae95ecec (16d019f1)
+- **Recovery**: reversible via `/wr-itil:transition-problem 371 known-error` or `git revert`.

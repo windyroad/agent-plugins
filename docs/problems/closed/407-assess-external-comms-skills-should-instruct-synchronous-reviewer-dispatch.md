@@ -1,6 +1,6 @@
 # Problem 407: `/wr-*:assess-external-comms` skills should instruct synchronous reviewer dispatch (P402 follow-up)
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-07-02
 **Priority**: 4 (Low) — Impact: 2 × Likelihood: 2. Impact 2: secondary surface — the gate deny message (the primary agent-in-the-loop surface) already instructs synchronous dispatch as of the P402 fix (commit 16c180e8), so an agent that hits the gate is already corrected; this only affects an agent invoking the assess skill proactively without hitting a deny. Likelihood 2: the deny-message path covers most cases.
 **Origin**: internal
@@ -53,3 +53,9 @@ Dispatch the reviewer synchronously by hand; or hit the gate deny (which now ins
 ## Related
 
 - **P402** (`docs/problems/open/402-...md`) — parent; the deny-message half shipped 16c180e8; ADR-028 amended 2026-07-02.
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: wr-risk-scorer:external-comms x9 + wr-voice-tone:external-comms dispatched run_in_background:false and the gated commits landed (3cda89d3, 2026-07-05)
+- **Recovery**: reversible via `/wr-itil:transition-problem 407 known-error` or `git revert`.

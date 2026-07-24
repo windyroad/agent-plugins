@@ -1,6 +1,6 @@
 # Problem 249: No process for issue reporters to check for responses — symmetric gap to inbound discovery
 
-**Status**: Verifying
+**Status**: Closed
 **Reported**: 2026-05-17
 **Phase 1 fix landed**: 2026-05-18 — `/wr-itil:check-upstream-responses` skill ships us-as-upstream-reporter polling surface. Phase 2 (external-reporter-as-our-reporter) remains scheduled-future-surface per P179.
 **Fix released**: 2026-05-18 (`@windyroad/itil@0.34.0`, source commit `49dd0ba`; consumed in version-packages commit `11caa25` 2026-05-17 23:41:35 UTC, merged via PR #144 / merge commit `5388ba3` 2026-05-18 09:46:05 AEST; current ships at 0.35.2)
@@ -99,3 +99,9 @@ Verification window remains in-flight per § Verification (post-release) — 5 A
 - **ADR-062** — inbound upstream-report discovery assessment pipeline (parent ADR for the inbound half; this ticket may motivate an amendment to cover the outbound symmetric surface)
 - `/wr-itil:report-upstream` SKILL.md — the report-filing surface; the natural place to chain or sibling the check-for-responses surface
 - `.github/ISSUE_TEMPLATE/problem-report.yml` — the plugin-user-side inbound surface; interpretation 2 fix may compose here
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: the check-upstream-responses skill was exercised in >=3 sessions returning a real verdict "polled: 1, New responses: 0" (5e056d14, 64b5f5dc, 16d019f1)
+- **Recovery**: reversible via `/wr-itil:transition-problem 249 known-error` or `git revert`.

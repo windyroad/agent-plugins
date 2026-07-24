@@ -1,6 +1,6 @@
 # Problem 105: `/wr-retrospective:run-retro` needs a signal-vs-noise pass on briefing entries to drive session-start curation
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-04-22
 **Priority**: 16 (High) — Impact: Major (4) x Likelihood: Likely (4)
 **Effort**: M
@@ -179,3 +179,9 @@ Deployed in `@windyroad/retrospective` via commit implementing:
 - Bats contract-assertion test `packages/retrospective/skills/run-retro/test/run-retro-signal-vs-noise.bats`
 
 Awaiting user verification.
+
+## Verified & Closed
+
+- **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
+- **Evidence**: run-retro Step 1.5 signal-vs-noise pass ran: per-entry signal-score blocks updated with last-classified 2026-07-03/04 and the delete-queue threshold applied (257ba25e)
+- **Recovery**: reversible via `/wr-itil:transition-problem 105 known-error` or `git revert`.
