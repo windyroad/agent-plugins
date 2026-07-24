@@ -1,6 +1,6 @@
 # Problem 458: Edit Gates Fire on Git-Internal Plumbing Paths
 
-**Status**: Open
+**Status**: Verifying
 **Reported**: 2026-07-24
 **Priority**: 8 (Medium) — Impact: 2 × Likelihood: 4 — derived at capture from the description per Step 4a
 **Origin**: internal
@@ -43,6 +43,10 @@ P004 added a project-root scope check to all six enforce hooks (files *outside* 
 - [ ] Add `.git/` path-prefix exclusion at the shared detector layer (edit the packages/shared canonical + run its sync script, not consumer copies)
 - [ ] Bats: Write to `.git/<file>` passes each gate without a review marker
 - [ ] Create reproduction test
+
+## Fix Released
+
+Released 2026-07-24. Added a `*/.git/*|.git/*) exit 0` VCS-internal exclusion to all five enforce-edit gates, placed before the extension/classification/policy checks so it short-circuits. Shipped in `@windyroad/architect@0.20.2`, `@windyroad/jtbd@0.13.1`, `@windyroad/voice-tone@0.7.1`, `@windyroad/style-guide@0.5.1`, `@windyroad/tdd@0.5.1` (commit `6abb4ef1`). Behavioural bats added to all five scope suites (incl. a contrast "still blocks" case), all green. Verification pending: with the refreshed plugin cache active (restart required), a `Write` to a `.git/` path passes each gate without a review marker.
 
 ## Dependencies
 

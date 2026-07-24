@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-24 **P459 captured** — Agent-Prose Behavioural Eval flaky; red-lines CI on ~50% of `main` pushes regardless of the diff (unrelated `risk-scorer:plan` LLM-rubric case), eroding CI as a release signal (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-07-24 **P458 → Verifying** — `.git/` gate-exclusion fix released (architect 0.20.2 / jtbd 0.13.1 / voice-tone 0.7.1 / style-guide 0.5.1 / tdd 0.5.1); moved to the Verification Queue. Targeted pass — P458 transition + README only, not a full re-score (see the review report).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -63,7 +63,6 @@ Internally-reported tickets (`Origin: internal` / `corrective-feedback`). Ranked
 | 8.0 | P414 | retro/wrap defers over-threshold briefing Tier-3 rotation as a recommendation instead of performing the split | 8 Medium | Open | S | 2026-07-03 | internal |
 | 8.0 | P417 | docs/stories/README.md Rankings/Done never reconciled — stale for the whole story corpus | 8 Medium | Open | S | 2026-07-04 | internal |
 | 8.0 | P420 | check-briefing-budgets.sh crashes with unbound must_split[@] on empty arrays under macOS default bash 3.2 — CI bash 5 masks it; retro Tier 3 pass degrades to fail-open pointer | 8 Medium | Open | S | 2026-07-05 | internal |
-| 8.0 | P458 | Edit-gate family fires on writes to .git/ plumbing paths — P004's project-root scope fix left VCS-internal paths inside the repo uncovered | 8 Medium | Open | S | 2026-07-24 | internal |
 | 8.0 | P459 | Agent-Prose Behavioural Eval flaky — red-lines CI on ~50% of main pushes regardless of the diff (unrelated risk-scorer:plan LLM-rubric case) | 8 Medium | Open | M | 2026-07-24 | internal |
 | 8.0 | P423 | Agent "fixes" recurring behavioural corrections via project-local memory instead of shipping an adopter-facing plugin surface | 16 Critical | Open | M | 2026-07-06 | internal |
 | 7.5 | P359 | Changeset holding does not withhold shipment — held code ships with any sibling release | 15 High | Known Error | L | 2026-06-11 | internal |
@@ -310,6 +309,7 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P140 | work-problems Step 6.5 halt-on-CI-failure should be fix-and-continue for mechanically-fixable failures | release marker missing from ticket (pre-RFC-002 migration-era transition; row restored 2026-07-15 after VQ drift detected) | no — not observed |
 | P390 | agent declares ALL_DONE prematurely while actionable backlog remains — /goal external-evaluator loop-anchor (ADR-094/RFC-047) | @windyroad/itil@0.57.2 (2026-07-06, PR #337) | no — not observed |
 | P446 | Quota-pace throttle glide too weak to hold the pace line — deficit-aware position gate + feedback controller + asymmetric instant recovery | @windyroad/cruise@0.3.4 + 0.3.5 (2026-07-13; ADR-093 amendment 4ca91d5e) | no — not observed |
+| P458 | Edit-gate family fires on writes to .git/ plumbing paths — VCS-internal exclusion added to all five enforce-edit gates | 2026-07-24 (architect 0.20.2 / jtbd 0.13.1 / voice-tone 0.7.1 / style-guide 0.5.1 / tdd 0.5.1; commit 6abb4ef1) | no — not observed |
 
 ## Inbound Upstream Reports
 
