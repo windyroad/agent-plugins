@@ -53,6 +53,10 @@ esac
 # Short-circuits before the *.html opt-in match below would otherwise fire
 # on story-map HTML — the empirical block documented at P170 line 297.
 case "$FILE_PATH" in
+  # VCS-internal plumbing is never a project artefact (P458; sibling of the P004
+  # outside-the-repo exclusion, for paths INSIDE the repo root).
+  */.git/*|.git/*)
+    exit 0 ;;
   */docs/story-maps/*|docs/story-maps/*)
     exit 0 ;;
   */docs/stories/*|docs/stories/*)

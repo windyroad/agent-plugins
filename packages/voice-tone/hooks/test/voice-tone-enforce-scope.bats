@@ -67,6 +67,10 @@ assert_path_blocked() {
 
 # --- Regression: non-exempt HTML still gate ---
 
+@test "voice-tone: exempts VCS-internal .git/ files even with a gated extension (P458)" {
+  assert_path_allowed "$PWD/.git/hooks/prepare-commit-msg.tsx"
+}
+
 @test "voice-tone: still blocks an unrelated .html file when no policy exists" {
   assert_path_blocked "$PWD/public/index.html"
 }

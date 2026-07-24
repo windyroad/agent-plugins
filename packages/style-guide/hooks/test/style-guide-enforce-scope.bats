@@ -61,6 +61,10 @@ assert_path_blocked() {
 
 # --- Regression: non-exempt UI files still gate ---
 
+@test "style-guide: exempts VCS-internal .git/ files even with a gated extension (P458)" {
+  assert_path_allowed "$PWD/.git/hooks/pre-commit.css"
+}
+
 @test "style-guide: still blocks an unrelated .html file when no policy exists" {
   # No docs/STYLE-GUIDE.md created — hook should still block this HTML.
   assert_path_blocked "$PWD/public/index.html"

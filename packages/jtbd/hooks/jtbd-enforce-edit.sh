@@ -74,6 +74,11 @@ BASENAME=$(basename "$FILE_PATH")
 
 # Exclude non-JTBD files (matches architect gate exclusions)
 case "$FILE_PATH" in
+  # VCS-internal plumbing is never a project artefact — a commit-message file or
+  # any scratch under .git/ must not require governance review. Sibling of the P004
+  # outside-the-repo exclusion above, for paths INSIDE the repo root (P458).
+  */.git/*|.git/*)
+    exit 0 ;;
   *.css|*.scss|*.sass|*.less)
     exit 0 ;;
   *.png|*.jpg|*.jpeg|*.gif|*.svg|*.ico|*.webp)

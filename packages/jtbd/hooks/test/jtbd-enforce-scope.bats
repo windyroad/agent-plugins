@@ -47,6 +47,11 @@ assert_path_blocked() {
 # Claude Code passes absolute file paths in tool_input.file_path, so tests
 # use $PWD-prefixed paths to match the real shape (after the P004 root check).
 
+@test "enforce: excludes VCS-internal .git/ plumbing files (P458)" {
+  assert_path_allowed "$PWD/.git/cruise-brake-commit-msg.txt"
+  assert_path_allowed "$PWD/.git/COMMIT_EDITMSG"
+}
+
 @test "enforce: excludes CSS files" {
   assert_path_allowed "$PWD/src/styles.css"
 }

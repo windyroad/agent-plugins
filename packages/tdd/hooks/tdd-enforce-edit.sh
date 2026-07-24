@@ -26,6 +26,12 @@ case "$FILE_PATH" in
     ;;
 esac
 
+# VCS-internal plumbing is never a project artefact — never gate edits under .git/
+# (P458; sibling of the P004 outside-the-repo exclusion, for paths inside the repo).
+case "$FILE_PATH" in
+  */.git/*|.git/*) exit 0 ;;
+esac
+
 # Classify first, then check test script (only impl files need gating)
 FILE_TYPE=$(tdd_classify_file "$FILE_PATH")
 if [ "$FILE_TYPE" != "impl" ]; then

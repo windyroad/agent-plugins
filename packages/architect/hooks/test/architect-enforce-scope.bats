@@ -51,6 +51,13 @@ assert_path_allowed() {
   [[ "$output" == *"BLOCKED"* ]]
 }
 
+@test "architect: exempts VCS-internal .git/ plumbing files (P458)" {
+  # A commit-message scratch file under .git/ is not a project artefact. Without
+  # the exclusion a .txt under the repo root is gated (no extension exemption).
+  assert_path_allowed "$PWD/.git/cruise-brake-commit-msg.txt"
+  assert_path_allowed "$PWD/.git/COMMIT_EDITMSG"
+}
+
 @test "architect: exempts JTBD directory file (P009)" {
   assert_path_allowed "$PWD/docs/jtbd/solo-developer/persona.md"
 }

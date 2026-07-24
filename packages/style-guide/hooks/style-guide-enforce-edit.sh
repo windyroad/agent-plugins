@@ -51,6 +51,10 @@ esac
 # architect-enforce-edit.sh + jtbd-enforce-edit.sh. Short-circuits before
 # the *.html extension check below would otherwise fire on story-map HTML.
 case "$FILE_PATH" in
+  # VCS-internal plumbing is never a project artefact (P458; sibling of the P004
+  # outside-the-repo exclusion, for paths INSIDE the repo root).
+  */.git/*|.git/*)
+    exit 0 ;;
   */docs/story-maps/*|docs/story-maps/*)
     exit 0 ;;
   */docs/stories/*|docs/stories/*)
