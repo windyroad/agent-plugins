@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-26 **P462 captured** — amendment-scoped `human-oversight: unconfirmed` has no detector: `detect-unoversighted.sh` reads the frontmatter block only and skips any ADR whose top-level marker says confirmed, so an in-window amendment declaring its own substance unratified never reaches the `/wr-architect:review-decisions` drain or the SessionStart nudge (lightweight aside via /wr-itil:capture-problem; surfaced by the risk-scorer while scoring the P429 commit).
+> Last reviewed: 2026-07-26 **P463 captured** — relevance-close evaluator over-fires: a bare ADR/skill citation in `## Related` is read as "fix shipped", so it returned CLOSE-CANDIDATE on 61/80 tickets (76%) vs the ~4.2% documented, drowning genuine close-candidates and poisoning the work-problems Step 3.6 pre-dispatch gate; upstream #306 already describes it (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -65,6 +65,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P422 | Agent silently ships X-prime (a hedged/lesser version of the requested X) instead of asking before deviating | 12 (High) | Open | M | 2026-07-06 | internal |
 | 6 | P457 | Story-map ratification surfaces an unauthored skeleton — the lifecycle asks for oversight before the authoring stage runs | 12 (High) | Open | M | 2026-07-16 | internal |
 | 6 | P462 | Amendment-scoped `human-oversight: unconfirmed` has no detector — unratified amendment substance never reaches the oversight drain | 12 (High) | Open | M | 2026-07-26 | internal |
+| 6 | P463 | Relevance-close evaluator over-fires — a bare ADR/skill citation is read as "fix shipped", producing a 76% false-positive CLOSE-CANDIDATE rate | 12 (High) | Open | M | 2026-07-26 | internal |
 | 5 | P406 | `github-discussions` channel in `.upstream-channels.json` returns HTTP 410 | 5 (Low) | Open | S | 2026-07-02 | internal |
 | 4.5 | P251 | RFC-first trace invariant not enforced — fixes start without RFC, story map, or JTBD trace | 9 (Medium) | Known Error | L | 2026-05-17 | internal |
 | 4.5 | P297 | ADR-047 — governance-artefact scaffolding should be a SessionStart hook (per-project, automatic), not an inline `/install-updates` step | 9 (Medium) | Open | M | 2026-05-25 | internal |
