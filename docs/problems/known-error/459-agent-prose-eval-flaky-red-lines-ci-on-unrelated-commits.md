@@ -5,6 +5,7 @@
 **Priority**: 8 (Medium) — Impact: 2 × Likelihood: 4 — derived at capture from the description per Step 4a
 **Origin**: internal
 **Effort**: M — derived at capture; de-flaking an LLM-rubric eval (pin judge model / raise determinism / add per-case retry / harden the rubric) is a design-bearing change to the eval harness
+**WSJF**: 8 — (8 × 2.0) / 2 (added 2026-07-26 review)
 **JTBD**: JTBD-001
 **Persona**: developer
 

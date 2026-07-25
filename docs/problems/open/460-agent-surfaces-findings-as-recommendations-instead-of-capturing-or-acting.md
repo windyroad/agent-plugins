@@ -5,6 +5,7 @@
 **Priority**: 12 (High) — Impact: 3 (Moderate — erodes user trust and re-imposes the manual-policing-the-AI friction the suite exists to remove) × Likelihood: 4 (Likely — recurred repeatedly within a single session) — derived at capture
 **Origin**: internal
 **Effort**: L — behavioural-discipline defect; a durable fix is a shipped surface (detector/SKILL-contract/eval), not a memory note — same class as P423
+**WSJF**: 3 — (12 × 1.0) / 4 (added 2026-07-26 review)
 **JTBD**: JTBD-001
 **Persona**: plugin-developer
 

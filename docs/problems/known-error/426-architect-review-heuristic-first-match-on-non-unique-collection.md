@@ -5,6 +5,7 @@
 **Priority**: 12 (High) — Impact: 4 × Likelihood: 3
 **Origin**: inbound-reported (#169)
 **Effort**: S. WSJF = (12 × 2.0) / 1 = 24.0.
+**WSJF**: 24 — (12 × 2.0) / 1 (added 2026-07-26 review)
 **JTBD**: JTBD-002
 **Persona**: developer
 

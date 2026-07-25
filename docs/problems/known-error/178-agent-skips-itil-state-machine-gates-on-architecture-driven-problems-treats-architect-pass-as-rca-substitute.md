@@ -5,6 +5,7 @@
 **Priority**: 3 (Medium) — Impact: 3 (Moderate) x Likelihood: 2 (Possible) — re-rated iter-20 2026-06-16: base-rate survey (below) raised Likelihood 1→2; Impact stays Moderate (routes around a discipline gate, does not block ship); Priority band unchanged at 3, so WSJF (1.5) and README ranking are stable.
 **Origin**: internal
 **Effort**: M — re-rated iter-20: two SKILL surfaces (manage-problem Step 9 + work-problems Step 5) + behavioural test + likely ADR amendment/new-ADR for the framework-position decision.
+**WSJF**: 3 — (3 × 2.0) / 2 (added 2026-07-26 review)
 
 ## Description
 

@@ -5,6 +5,7 @@
 **Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3
 **Origin**: inbound-reported (#235, #253)
 **Effort**: M. WSJF = (9 × 1.0) / 2 = 4.5.
+**WSJF**: 4.5 — (9 × 1.0) / 2 (added 2026-07-26 review)
 **JTBD**: JTBD-101
 **Persona**: plugin-developer
 

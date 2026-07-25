@@ -1,11 +1,11 @@
 # Problem 419: capture-story's mechanical reverse-trace edit to a docs/jtbd file re-locks the JTBD edit gate mid-session
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-07-05
 **Priority**: 8 (Medium) — Impact: 2 (Minor — one re-review round-trip of friction) × Likelihood: 4 (Likely — deterministic on every story capture that touches a docs/jtbd reverse-trace) — re-rated 2026-07-15 /wr-itil:review-problems
 **Origin**: internal
 **Effort**: M — exempt the mechanical reverse-trace edit from gate re-lock (or re-stamp the marker post-edit)
-**WSJF**: 4.0 — (8 × 1.0) / 2
+**WSJF**: 8 — (8 × 2.0) / 2 (2026-07-26 review: auto-transitioned Open → Known Error — root cause confirmed + workaround documented; multiplier 1.0 → 2.0)
 **JTBD**: JTBD-001
 **Persona**: developer
 

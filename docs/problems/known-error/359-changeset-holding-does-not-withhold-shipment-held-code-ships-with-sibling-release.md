@@ -7,6 +7,7 @@
 **Priority**: 15 (High) — Impact: 3 × Likelihood: 5 = 15. Rated at review 2026-07-02: all ~27 held changesets leaking; holds fail their purpose.
 **Origin**: internal
 **Effort**: L. WSJF = (15 × 2.0) / 4 = 7.5 (Known Error ×2.0 multiplier applied 2026-07-15 review).
+**WSJF**: 7.5 — (15 × 2.0) / 4 (added 2026-07-26 review)
 **JTBD**: JTBD-002
 **Persona**: developer
 

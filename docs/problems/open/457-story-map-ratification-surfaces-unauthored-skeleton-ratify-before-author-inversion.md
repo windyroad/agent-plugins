@@ -5,6 +5,7 @@
 **Priority**: 12 (High) — Impact: 3 (Moderate — the ADR-090 oversight surface presents an artefact with literally nothing to approve; a ratification given on an empty shell is the P348 hollow-marker class at the story-map surface, and the user-visible absurdity damages trust in the whole ratification pipeline — witnessed "WTF is this story map you are asking me to approve", 2026-07-16) × Likelihood: 4 (Likely — every AFK-captured story map hits it: capture-story-map deliberately emits a skeleton (purpose + backbone deferred to the manage-story-map accepted transition), and the ratification queue then surfaces that skeleton for human oversight BEFORE the accepted transition can author it) — derived at capture per Step 4a
 **Origin**: internal (user correction 2026-07-16)
 **Effort**: M — lifecycle reorder across capture-story-map / manage-story-map / the ratification surfaces: either author purpose + backbone at capture when the substance is derivable (the P399 principle applied to maps — the 2026-07-16 hand-population of STORY-MAP-004 from STORY-045's substance took minutes and is the proof), or gate ratification requests on the authoring stage having run
+**WSJF**: 6 — (12 × 1.0) / 2 (added 2026-07-26 review)
 **JTBD**: JTBD-001
 **Persona**: developer
 

@@ -4,7 +4,9 @@
 **Reported**: 2026-04-19
 **Reopened**: 2026-07-02
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 (Likely) = 12. **Re-rated at reopen from observed evidence, NOT deferred.** Impact 3 (up from 2): the gap does not merely delay a fix — it silently **re-introduces already-closed bugs** into a live session (witnessed 2026-07-01: a stale 0.51.0 cache ran the pre-ADR-067 capture-problem template and leaked the exact uncadenced deferred-placeholder default P375 had retired → P402). Likelihood 4 (up from 3): occurs on every session that starts before picking up a release; concretely witnessed.
+**Origin**: internal
 **Effort**: L — cross-plugin shared SessionStart hook (packages/shared, synced to all `@windyroad/*` plugins) + tests + release. WSJF = (12 × 1.0) / 4 = 3.0.
+**WSJF**: 3 — (12 × 1.0) / 4 (added 2026-07-26 review)
 
 ## Reopened 2026-07-02 — closed on a P375-antipattern
 

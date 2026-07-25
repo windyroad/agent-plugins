@@ -5,6 +5,7 @@
 **Priority**: 12 (High) — Impact: 3 (Moderate — the verification pipeline's automated drain is structurally starved; downstream queue grew to 47 tickets requiring a manual 4-agent triage to close 30; this repo's queue sits at ~190 with the same dynamic) × Likelihood: 4 (Likely — continuous: every verifying fix exercised in a later session fails to get its cell updated) — derived at capture per Step 4a
 **Origin**: inbound-reported (#323)
 **Effort**: M — a write-path mechanism (run-retro sub-step and/or per-session VQ-exercise detector) that records `yes — observed: <evidence>` when a later session exercises a verifying fix; design must stay honest per ADR-026 (observed proof, not inference)
+**WSJF**: 6 — (12 × 1.0) / 2 (added 2026-07-26 review)
 **JTBD**: JTBD-001
 **Persona**: developer
 

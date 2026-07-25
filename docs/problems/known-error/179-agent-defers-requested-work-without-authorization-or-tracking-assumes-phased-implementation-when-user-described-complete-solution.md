@@ -5,6 +5,7 @@
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 = 12. Rated at review 2026-07-02: behavioral chronic (sibling P403); observed pattern.
 **Origin**: internal
 **Effort**: M. WSJF = (12 × 2.0) / 2 = 12.0 (Known Error ×2.0 multiplier applied 2026-07-15 review; header previously carried the Open ×1.0 value).
+**WSJF**: 12 — (12 × 2.0) / 2 (added 2026-07-26 review)
 ## Description
 
 **Phases are NOT the problem.** Incremental implementation across phases is a legitimate engineering technique and the user explicitly endorses it. The problem is **untracked phases** — when the agent defers work to "Phase 2 / Phase 3 / out-of-scope / follow-up iter" without creating a tracking artefact (problem ticket, RFC, or other backlog entry) that surfaces the deferred work in WSJF rankings, work-problems backlog, or any actionable queue.

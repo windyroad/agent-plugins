@@ -5,6 +5,7 @@
 **Priority**: 9 (Medium) — Impact: 3 (Moderate — causes wrong lifecycle transitions: fixed tickets flipped back to Known Error, wasting re-work and misrepresenting state) × Likelihood: 3 (Possible — fires whenever an evidence-mining pass scans adopter transcripts) — derived at capture
 **Origin**: internal
 **Effort**: M — a version-gate check in the downstream-scan method + a contract note in the review/evidence-mining SKILL
+**WSJF**: 4.5 — (9 × 1.0) / 2 (added 2026-07-26 review)
 
 **JTBD**: JTBD-001
 **Persona**: plugin-developer

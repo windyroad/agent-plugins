@@ -5,6 +5,7 @@
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 = 12. Rated at review 2026-07-02: catchup outbound-only; retroactive inbound is manual.
 **Origin**: inbound-reported (#349) — flipped 2026-07-15: inbound issue #349 (downstream verification of an upstream fix is not confirmed back upstream) absorbed into Gap 2 per wr-itil:hang-off-check verdict; originally internal (2026-06-23 catchup session)
 **Effort**: M. WSJF = (12 × 1.0) / 2 = 3.0.
+**WSJF**: 12 — (12 × 2.0) / 2 (added 2026-07-26 review)
 **JTBD**: JTBD-001
 **Persona**: plugin-developer
 

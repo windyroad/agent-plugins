@@ -1,11 +1,11 @@
 # Problem 420: check-briefing-budgets.sh crashes with `must_split[@]: unbound variable` on empty arrays under macOS default bash 3.2
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-07-05
 **Priority**: 8 (Medium) — Impact: 2 (Minor — retro Tier-3 budget pass degrades to fail-open pointer) × Likelihood: 4 (Likely — deterministic under macOS default bash 3.2 whenever the array is empty; CI bash 5 masks it) — re-rated 2026-07-15 /wr-itil:review-problems
 **Origin**: internal
 **Effort**: S — `${arr[@]+"${arr[@]}"}` empty-array guard + bats under bash 3.2
-**WSJF**: 8.0 — (8 × 1.0) / 1 (S — one-line guard, re-sized from M at 2026-07-15 review)
+**WSJF**: 16 — (8 × 2.0) / 1 (2026-07-26 review: auto-transitioned Open → Known Error — root cause confirmed + workaround documented; multiplier 1.0 → 2.0)
 **JTBD**: JTBD-006
 **Persona**: developer
 

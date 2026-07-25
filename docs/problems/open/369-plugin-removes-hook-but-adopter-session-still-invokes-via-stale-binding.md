@@ -5,6 +5,7 @@
 **Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3 = 9. Rated at review 2026-07-02: stale plugin binding; recurring "bad paths" class.
 **Origin**: internal
 **Effort**: M. WSJF = (9 × 1.0) / 2 = 4.5.
+**WSJF**: 4.5 — (9 × 1.0) / 2 (added 2026-07-26 review)
 **JTBD**: JTBD-302
 **Persona**: plugin-user
 

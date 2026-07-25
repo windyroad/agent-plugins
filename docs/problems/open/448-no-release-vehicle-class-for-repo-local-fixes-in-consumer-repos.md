@@ -5,6 +5,7 @@
 **Priority**: 9 (Medium) — Impact: 3 (Moderate — adopter ticket lifecycle drifts out of sync with already-shipped fixes at every tier; manual transition passes required; witnessed P092/P075/P081 downstream) × Likelihood: 3 (Possible — every repo-local script/skill/doc fix in a consumer repo that does not publish to npm) — derived at capture per Step 4a
 **Origin**: inbound-reported (#320)
 **Effort**: M — recognise a repo-local/pushed-to-origin release-vehicle class in `enumerate-postrelease-kv-candidates` + `derive-release-vehicle` + work-problems Step 6.5; cf. P389's seed-discipline fix (same surfaces, different root cause)
+**WSJF**: 4.5 — (9 × 1.0) / 2 (added 2026-07-26 review)
 **JTBD**: JTBD-302
 **Persona**: plugin-user
 

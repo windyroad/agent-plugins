@@ -1,11 +1,11 @@
 # Problem 415: External-comms commit-msg gate reviews only the first `-m` of a multi-`-m` git commit, causing deny-after-PASS on multi-paragraph commits
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-07-03
 **Priority**: 6 (Medium) — Impact: 2 (Minor — deny-after-PASS friction, recoverable re-review) × Likelihood: 3 (Possible — multi-`-m` commits recur; observed) — re-rated 2026-07-15 /wr-itil:review-problems
 **Origin**: internal
 **Effort**: S — accumulate ALL `-m` occurrences in the gate's extraction loop + bats
-**WSJF**: 6.0 — (6 × 1.0) / 1 (S — single-function hook fix, re-sized from M at 2026-07-15 review)
+**WSJF**: 12 — (6 × 2.0) / 1 (2026-07-26 review: auto-transitioned Open → Known Error — root cause confirmed + workaround documented; multiplier 1.0 → 2.0)
 **JTBD**: JTBD-006
 **Persona**: plugin-developer
 

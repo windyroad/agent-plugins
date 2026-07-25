@@ -1,10 +1,11 @@
 # Problem 456: AFK iter cannot progress a ratified Known Error when the fix-vehicle RFC has empty stories
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-07-15
 **Priority**: 6 (Medium) — Impact: 2 (Minor — iter degrades to capture-and-hold; work preserved but implementation throughput lost) × Likelihood: 3 (Possible — fires on every AFK iter whose selected ticket's fix vehicle carries `stories: []`; 7 under-scoped skeleton RFCs + legacy empty-stories RFCs currently on disk) — derived at capture from the description per Step 4a
 **Origin**: internal
 **Effort**: M — design decision + bounded SKILL edits (work-problems selection classifier and/or drain-skill pre-ratification path) — cf. P409 (M)
+**WSJF**: 6 — (6 × 2.0) / 2 (2026-07-26 review: auto-transitioned Open → Known Error — root cause confirmed + workaround documented; multiplier 1.0 → 2.0)
 **JTBD**: JTBD-006
 **Persona**: developer
 

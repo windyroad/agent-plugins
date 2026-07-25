@@ -5,6 +5,7 @@
 **Priority**: 6 (Medium) — Impact: 2 (Minor — upstream maintainer misses field evidence until the user manually prompts; no local data loss) × Likelihood: 3 (Possible — every retro/session that surfaces new evidence on an upstream-reported, still-open ticket) — derived at capture per Step 4a
 **Origin**: inbound-reported (#348)
 **Effort**: M — run-retro Step 2b sub-step (detections deduping to an upstream-reported ticket draft a gated upstream comment) and/or update-upstream extension covering evidence-appends, not just lifecycle transitions
+**WSJF**: 3 — (6 × 1.0) / 2 (added 2026-07-26 review)
 **JTBD**: JTBD-301
 **Persona**: plugin-user
 

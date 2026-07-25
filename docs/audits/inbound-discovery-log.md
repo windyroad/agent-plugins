@@ -276,3 +276,19 @@ Invoked as `/wr-itil:review-problems` Step 4.5 from the `/wr-itil:work-problems`
 - **Cluster flags for the next review pass**: P448/P389/P361 (release-vehicle-assumes-npm axis); P449 vs P412 (opposite policy faces of I13 adopter behaviour); P452+P416 (outstanding-questions temporal consistency); P453+P419 (gate hashes files, not substance); Step 5 dispatch resilience family (P451+P427+P428 with verifying P261/P307).
 - **Ack comments**: none posted (maintainer self-filed reports; discovery-only per standing 2026-05-15 direction).
 - **Commit grain note**: the 8 captures + 5 ticket amendments + README/cache/audit updates land in ONE commit (batch unit-of-work per the ADR-014 transition-problems precedent) rather than capture-problem's one-commit-per-capture — deliberate grain call for a single arbitrated triage batch, recorded here for the audit trail.
+
+## 2026-07-26T00:00:00Z — Discovery pass
+
+- **Trigger**: `/wr-itil:review-problems` Step 4.5 (AFK pre-flight from `/wr-itil:work-problems` Step 0b). TTL-expiry auto-recheck — cache age ~11d against `ttl_seconds: 86400`.
+- **Channels polled**: 3 configured; 1 productive.
+  - `github-issues:windyroad/agent-plugins` — 71 open issues fetched unfiltered (`title_prefix` soft per P373). 26 new vs prior cache snapshot; 45 unchanged. 40 previously-cached numbers no longer open (stamped `upstream_state: closed`).
+  - `github-discussions:windyroad/agent-plugins` — skipped, HTTP 410 (tracked as P406).
+  - `github-security-advisories:windyroad/agent-plugins` — 0 reports.
+- **Pipeline outcomes**:
+  - `matched-local-ticket`: 12 newly matched via on-ticket `**Origin**` / `## Reported Upstream` backlinks (semantic-comparator hit) — #169→P426, #170→P436, #223→P424, #235→P435, #253→P435, plus 7 pre-existing entries back-filled.
+  - `pending-pipeline-processing`: 21 (#194, #196, #197, #221, #222, #258, #360-#370, #391-#394). No comparator hit. All maintainer self-filed (`tompahoward`) against this repo.
+  - `safe-and-valid-local-ticket-created`: 0. `above-threshold-pushback`: 0. `clear-malicious-closed`: 0.
+- **Comments posted**: none. Per the 2026-05-15 discovery-only direction + AFK safe-default (ADR-013 Rule 6), maintainer self-filed issues do not receive reporter-facing acknowledgement comments — the JTBD-301 acknowledgement contract governs third-party reporters, and the local ticket is the authoritative record for outbound mirrors.
+- **Local tickets created**: 0. The 21 unmatched reports are queued for assessment-pipeline routing at the next interactive `/wr-itil:review-problems`.
+- **Audit-flagged reporter handles (P123 future consumption)**: none.
+- **Cache refresh**: `docs/problems/.upstream-cache.json` rewritten at `last_checked: 2026-07-26T00:00:00Z`; 111 total cached reports.

@@ -5,6 +5,7 @@
 **Priority**: 12 (High) — Impact: 4 × Likelihood: 3 = 12. Rated at review 2026-07-02: user flagged HIGH in practice; ratification-drift blast radius.
 **Origin**: internal
 **Effort**: M. WSJF = (12 × 2.0) / 2 = 12.0 (Known Error ×2.0 multiplier applied 2026-07-15 review).
+**WSJF**: 12 — (12 × 2.0) / 2 (added 2026-07-26 review)
 **JTBD**: JTBD-001
 **Persona**: developer
 

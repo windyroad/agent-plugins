@@ -5,6 +5,7 @@
 **Priority**: 8 (Medium) — Impact: 2 × Likelihood: 4
 **Origin**: corrective-feedback (user, 2026-07-06 — "why isn't docs/problems/README.md differentiating between inbound reported items (top priority) and internally reported items?")
 **Effort**: M. WSJF = (8 × 1.0) / 2 = 4.0.
+**WSJF**: 4 — (8 × 1.0) / 2 (added 2026-07-26 review)
 **JTBD**: JTBD-101
 **Persona**: plugin-developer
 

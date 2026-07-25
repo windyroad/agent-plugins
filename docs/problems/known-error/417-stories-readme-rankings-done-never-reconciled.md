@@ -1,11 +1,11 @@
 # Problem 417: docs/stories/README.md Rankings/Done never reconciled — stale for the whole corpus
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-07-04
 **Priority**: 8 (Medium) — Impact: 2 (Minor — stale story ranking cache; misleads story-tier consumers) × Likelihood: 4 (Likely — the whole corpus is stale now and drifts with every story change) — re-rated 2026-07-15 /wr-itil:review-problems
 **Origin**: internal
 **Effort**: S — /wr-itil:reconcile-stories already ships; wire the cadence + refresh the header prose
-**WSJF**: 8.0 — (8 × 1.0) / 1 (S — reconcile skill exists, re-sized from M at 2026-07-15 review)
+**WSJF**: 16 — (8 × 2.0) / 1 (2026-07-26 review: auto-transitioned Open → Known Error — root cause confirmed + workaround documented; multiplier 1.0 → 2.0)
 **JTBD**: JTBD-001
 **Persona**: developer
 

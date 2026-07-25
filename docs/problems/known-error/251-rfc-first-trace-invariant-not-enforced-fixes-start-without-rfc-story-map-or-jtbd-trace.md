@@ -5,6 +5,7 @@
 **Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3 = 9. Rated at review 2026-07-02: RFC-first design still queued for user direction.
 **Origin**: internal
 **Effort**: L. WSJF = (9 × 2.0) / 4 = 4.5 (Known Error ×2.0 multiplier applied 2026-07-15 review).
+**WSJF**: 4.5 — (9 × 2.0) / 4 (added 2026-07-26 review)
 **JTBD**: JTBD-008
 **Persona**: solo-developer
 **RFCs**: RFC-005 (accepted — the fix vehicle)

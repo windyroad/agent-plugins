@@ -5,6 +5,7 @@
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 = 12. Rated at review 2026-07-02: shipped capability invisible without policy section.
 **Origin**: corrective-feedback (user, 2026-06-28)
 **Effort**: M. WSJF = (12 × 1.0) / 2 = 3.0.
+**WSJF**: 6 — (12 × 1.0) / 2 (added 2026-07-26 review)
 **JTBD**: JTBD-302 (re-anchored from JTBD-101 per the wr-jtbd:agent gate, 2026-06-28 — JTBD-101 is a plugin-author authoring/CI job; this serves adopter discoverability of a shipped-but-dormant capability, which is JTBD-302 "Trust That the README Describes the Plugin I Just Installed")
 **Persona**: plugin-user (re-anchored from plugin-developer to match JTBD-302)
 

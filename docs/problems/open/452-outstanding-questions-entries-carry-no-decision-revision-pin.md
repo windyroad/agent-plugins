@@ -5,6 +5,7 @@
 **Priority**: 6 (Medium) — Impact: 3 (Moderate — a stale adjudication can produce a rework decision contradicting the CURRENT decision text; observed once with user-visible impact 2026-06-10, caught only by an accidental fresh read) × Likelihood: 2 (Unlikely — needs a queued entry to outlive an amendment to its cited decision before the next loop-end drain) — derived at capture per Step 4a
 **Origin**: inbound-reported (#338)
 **Effort**: M — queue-entry schema extension (blob SHA / amendment-date pin at queue time) + Step 2.5 surfacing-pass mismatch flag and/or pre-present re-read; behavioural test
+**WSJF**: 3 — (6 × 1.0) / 2 (added 2026-07-26 review)
 **JTBD**: JTBD-006
 **Persona**: developer
 

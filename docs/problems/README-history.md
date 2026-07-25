@@ -1241,3 +1241,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-07-25 **P281/P365 corrected → Verifying** (fix verified in current source; adopter sightings were stale-install, not live regressions) + **P461 captured** (downstream evidence-scan lacks version-gating — caused the 2 wrong flips).
 
 > Last reviewed: 2026-07-25 **P459 fixed → Verifying** — Agent-Prose Evals flake (single-shot claude -p omitting the contract verdict token red-lined CI ~50%%); driver now retries until the token appears, without masking regressions. CI-only, no release.
+
+## 2026-07-26
+
+> Last reviewed: 2026-07-25 **Lint false-positive fixed + P459 honestly re-scoped** — my P151 lint over-matched "dispatches `packages/…`" (permitted hint), red-lining Quality Gates; narrowed to invoke/run/execute. P459 first fix was partial (primary flake is verdict-VALUE variance, needs pass^k) → back to Known Error.

@@ -5,6 +5,7 @@
 **Priority**: 9 (Medium) — Impact: 3 (Moderate — the directive would bootstrap an entire governance tier for a trivial fix, a direction-setting framework-adoption decision mis-framed as mechanical; each occurrence forces manual false-positive recognition) × Likelihood: 3 (Possible — three downstream hits already: their P070/P103/P101) — derived at capture per Step 4a
 **Origin**: inbound-reported (#321)
 **Effort**: M — adoption predicate (docs/rfcs/ presence + RFC git history) in `wr-itil-check-fix-rfc-trace` + manage-problem I13 gate prose + bats; design-bearing because the fix must reconcile with P412's fold-in direction (see Related)
+**WSJF**: 4.5 — (9 × 1.0) / 2 (added 2026-07-26 review)
 **JTBD**: JTBD-302
 **Persona**: plugin-user
 

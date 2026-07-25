@@ -5,6 +5,7 @@
 **Priority**: 9 (Medium) — Impact: 3 (Moderate — wrong commit content, silently: unrelated staged paths and even unstaged working-tree modifications folded into commits; collapses planned multi-commit sequences) × Likelihood: 3 (Possible — fires whenever the index holds paths outside the supplied list, which the helper's own driver (Agent-tool boundary clearing/restoring index state) makes common) — derived at capture per Step 4a
 **Origin**: inbound-reported (#344)
 **Effort**: S — pathspec-scoped commit (`git commit -- <paths>`) or warn/abort when the index holds paths outside the supplied list, + bats for the sweep case (existing `restage-commit.bats` misses it) — cf. verified defect locus `packages/risk-scorer/scripts/restage-commit.sh:121`
+**WSJF**: 9 — (9 × 1.0) / 1 (added 2026-07-26 review)
 **JTBD**: JTBD-002
 **Persona**: developer
 

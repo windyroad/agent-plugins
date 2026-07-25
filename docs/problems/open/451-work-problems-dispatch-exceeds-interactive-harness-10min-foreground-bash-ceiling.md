@@ -5,6 +5,7 @@
 **Priority**: 9 (Medium) — Impact: 3 (Moderate — the loop cannot make forward progress on any ticket whose iter exceeds 10min when orchestrated foreground from an interactive session; partial pre-flight writes need revert-and-proceed recovery) × Likelihood: 3 (Possible — every iter/pre-flight over 10min under interactive orchestration; observed 2026-07-03 at exactly 600s) — derived at capture per Step 4a
 **Origin**: inbound-reported (#327)
 **Effort**: M — rearchitect Step 5 dispatch to the harness background primitive (`run_in_background: true`, detached across turns, re-invokes on completion) instead of an in-call poll loop; composes with P427's per-ticket lock design
+**WSJF**: 4.5 — (9 × 1.0) / 2 (added 2026-07-26 review)
 **JTBD**: JTBD-006
 **Persona**: developer
 

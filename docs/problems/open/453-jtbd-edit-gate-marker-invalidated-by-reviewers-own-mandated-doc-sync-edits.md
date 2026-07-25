@@ -5,6 +5,7 @@
 **Priority**: 6 (Medium) — Impact: 2 (Minor — one extra marker-refresh review round of friction per occurrence; no data loss) × Likelihood: 3 (Possible — any reviewer verdict that mandates edits to the gate's own policy files is self-defeating by construction) — derived at capture per Step 4a
 **Origin**: inbound-reported (#340)
 **Effort**: M — design-bearing: (a) hash job/persona substance not quoted-label prose, (b) PASS pre-authorises the specific mandated edits, or (c) document the round-3 refresh as canonical; must reconcile with P419's helper-path fix shapes
+**WSJF**: 3 — (6 × 1.0) / 2 (added 2026-07-26 review)
 **JTBD**: JTBD-001
 **Persona**: developer
 

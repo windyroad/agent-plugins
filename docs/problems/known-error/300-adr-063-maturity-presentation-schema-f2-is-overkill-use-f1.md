@@ -4,8 +4,9 @@
 **Reported**: 2026-05-25
 **Verifying since**: 2026-06-08
 **Priority**: 4 (Low-Med) — Impact: 2 (Minor — over-engineering the plugin.json maturity schema adds build + maintenance cost for capability not yet needed; not shipped, so caught before the cost lands) × Likelihood: 2 (Unlikely — affects the Phase-3 maturity-presentation build only)
+**Origin**: internal
 **Effort**: S — amend ADR-063's chosen schema option F2 → F1; the implementation simplifies (less to build)
-**WSJF**: 4/1 = **4.0** (Verifying multiplier — release-verification queue)
+**WSJF**: 8 — (4 × 2.0) / 1 (corrected 2026-07-26 review: ticket is Known Error, not Verifying — prior line applied the Verifying 0-multiplier note against a known-error file)
 
 ## Description
 

@@ -5,6 +5,7 @@
 **Priority**: 5 (Low) — Impact: 1 (Negligible — channel is skipped fail-soft; no discovery from Discussions but the other two channels work) × Likelihood: 5 (Almost certain — fires every poll; deterministic).
 **Origin**: internal
 **Effort**: S — either drop the channel from `.upstream-channels.json` or re-enable Discussions on the repo. WSJF = 5 / 2 = 2.5.
+**WSJF**: 5 — (5 × 1.0) / 1 (added 2026-07-26 review)
 **JTBD**: JTBD-007
 **Persona**: developer
 

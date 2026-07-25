@@ -5,6 +5,7 @@
 **Priority**: 6 (Med) — Impact: 3 (Moderate) x Likelihood: 2 (Possible) — re-rated 2026-06-08 from earlier deferred 3
 **Origin**: internal
 **Effort**: M (ticket update; substantive fix M-L pending fix-strategy ratification)
+**WSJF**: 6 — (6 × 2.0) / 2 (added 2026-07-26 review)
 
 ## Description
 
