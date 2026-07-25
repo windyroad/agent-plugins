@@ -1,6 +1,6 @@
 # Problem 365: external-comms risk-scorer gate must not fire on git-commit-message surface in private repos
 
-**Status**: Known Error
+**Status**: Verifying
 **Reported**: 2026-06-11
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Origin**: internal (cross-project witness)
@@ -60,7 +60,7 @@ Recorded as ADR-028 Amendment 2026-06-16 (P365). No RISK-POLICY.md change needed
 
 ## Fix Released
 
-**Status**: Known Error
+**Status**: Verifying
 
 - **Commit**: external-comms gate repo-visibility precondition for the git-commit-message surface (P365).
 - **Files**: `packages/shared/hooks/external-comms-gate.sh` (canonical) + synced `packages/{risk-scorer,voice-tone}/hooks/external-comms-gate.sh`; behavioural bats in both consumers; ADR-028 amendment + compendium README entry; changeset (`@windyroad/risk-scorer` + `@windyroad/voice-tone` patch).
@@ -85,3 +85,8 @@ Recorded as ADR-028 Amendment 2026-06-16 (P365). No RISK-POLICY.md change needed
 - **Source**: /wr-itil:review-problems second-pass evidence sweep (adopter-repo transcript mining + ticket-state audit).
 - **Action**: flip back to Known Error via `/wr-itil:transition-problem 365 known-error` (Bucket 3: observed regression / mis-file — never batch-close).
 - **Reopened**: 2026-07-25 Verifying → Known Error (this action) — fix incomplete / mis-filed; back in the dev-work queue.
+
+## Correction 2026-07-25 — fix verified present in current source (adopter sighting was stale-install)
+
+- Current source HAS the fix: `packages/risk-scorer/hooks/external-comms-gate.sh:370` "Repo-visibility precondition: git-commit-message surface (P365)" confirms visibility via `gh` and silent-passes on any non-PUBLIC (private/internal/indeterminate) result. The voder-mcp-hub 2026-07-03..06 post-fix deny is a STALE-INSTALL artifact (adopter risk-scorer predated the 2026-06-16 fix), not a live source bug.
+- **Correction**: an earlier same-session flip to Known Error trusted a downstream evidence-scan finding without version-gating it against the fix release. Verified against current source; moved to Verifying. Full closure awaits a current-version adopter confirmation (adopters lag). See the captured methodology gap.

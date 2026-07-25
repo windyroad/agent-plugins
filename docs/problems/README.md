@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-25 **P151/P153 fixed → Verifying** — the ADR-049 sweep had missed 3 retrospective scripts (check-ask-hygiene / check-briefing-budgets / check-tickets-deferred-cause) invoked repo-relative; added shims + fixed skills + closed the lint blind spot. Releasing in @windyroad/retrospective.
+> Last reviewed: 2026-07-25 **P281/P365 corrected → Verifying** (fix verified in current source; adopter sightings were stale-install, not live regressions) + **P461 captured** (downstream evidence-scan lacks version-gating — caused the 2 wrong flips).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -59,7 +59,6 @@ Internally-reported tickets (`Origin: internal` / `corrective-feedback`). Ranked
 | 12.0 | P179 | Agent defers requested work into untracked phases — phases are fine, but unticketed phases never get implemented | 12 High | Known Error | M | 2026-05-10 | internal |
 | 12.0 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 High | Known Error | M | 2026-06-10 | internal |
 | 9.0 | P363 | Inbound-reported tickets never receive fix-released verdict on originating issue — reopened 2026-07-06: status-sync loop still failing at scale (40 fixed-but-open issues manually closed); needs an automatic back-fill reconciliation cadence (sibling P080) | 9 Medium | Known Error | M | 2026-06-11 | internal |
-| 9.0 | P281 | capture-problem flat-path tickets still land at repo root in adopters — 2026-05-30 fix was partial (recurs in addressr) | 9 Med High | Known Error | M | 2026-05-30 | internal |
 | 8.0 | P300 | ADR-063 maturity-schema re-simplify (F2->F1) build side incomplete — only the ADR amendment landed | 4 Low-Med | Known Error | S | 2026-06-08 | internal |
 | 8.0 | P375 | Repo conflates a "named re-entry point" with a self-firing cadence — deferrals not transitively reachable from an automatic trigger rot | 16 High | Known Error | L | 2026-06-23 | internal |
 | 8.0 | P414 | retro/wrap defers over-threshold briefing Tier-3 rotation as a recommendation instead of performing the split | 8 Medium | Open | S | 2026-07-03 | internal |
@@ -78,6 +77,7 @@ Internally-reported tickets (`Origin: internal` / `corrective-feedback`). Ranked
 | 6.0 | P401 | Capture/RFC persona-JTBD anchoring shoehorns (or discards the problem) instead of interviewing the human to elicit the real who/why | 12 High | Open | M | 2026-06-29 | corrective-feedback (user, 2026-06-29 — during the RFC-first ADR-072/060/087 ratification walkthrough) |
 | 6.0 | P422 | Agent silently ships X-prime (a hedged/lesser version of the requested X) instead of asking before deviating | 12 High | Open | M | 2026-07-06 | internal |
 | 5.0 | P406 | `github-discussions` channel in `.upstream-channels.json` returns HTTP 410 | 5 Low | Open | S | 2026-07-02 | internal |
+| 4.5 | P461 | Downstream evidence-scan flags adopter-repo sightings as live regressions without version-gating against the fix release (caused 2 wrong flips this session) | 9 Medium | Open | M | 2026-07-25 | internal |
 | 4.5 | P251 | RFC-first trace invariant not enforced — fixes start without RFC, story map, or JTBD trace | 9 Medium | Known Error | L | 2026-05-17 | internal |
 | 4.5 | P297 | ADR-047 — governance-artefact scaffolding should be a SessionStart hook (per-project, automatic), not an inline `/install-updates` step | 9 Med High | Open | M | 2026-05-25 | internal |
 | 4.5 | P369 | Plugin removes hook file but adopter session still invokes it via stale binding — `architect-compendium-refresh-discipline.sh` case 2026-06-17 | 9 Medium | Open | M | 2026-06-17 | internal |
@@ -86,7 +86,6 @@ Internally-reported tickets (`Origin: internal` / `corrective-feedback`). Ranked
 | 4.0 | P442 | WSJF Rankings render convention has no visual tier separator — inbound-reported (top priority) vs internal not legible | 8 Medium | Open | M | 2026-07-06 | corrective-feedback |
 | 3.75 | P443 | Quota-pacing (P160/RFC-046/ADR-093) shipped without a grounded JTBD→persona→USM→RFC→story lineage — wrong/narrow JTBD anchor, orphaned STORY-039 + STORY-MAP-003, RFC proposed while problem verifying, mis-placed across 7 plugins | 15 High | Open | L | 2026-07-07 | internal |
 | 3.75 | P445 | Agent offers unsolicited off-ramps / hedges / narrates own conduct ("I'll drop it") then recurs — needs a portable plugin-shipped behavioural rule (per P423), not a project-local fix | 15 High | Open | L | 2026-07-08 | internal |
-| 3.0 | P365 | external-comms private-repo commit-skip recurs in adopters (voder-mcp-hub post-fix denies) | 3 Medium | Known Error | M | 2026-06-16 | internal |
 | 3.0 | P460 | Agent surfaces ticket-worthy findings + obvious next-actions as recommendations instead of autonomously capturing / acting (mirror of P078; sibling of P179/P423) | 12 High | Open | L | 2026-07-25 | internal |
 | 3.0 | P178 | Agent skips ITIL state-machine gates on architecture-driven problems — treats architect-PASS verdict as substitute for empirical RCA + skips Open → Known Error transition | 3 Medium | Known Error | M | 2026-05-10 | internal |
 | 3.0 | P208 | Red-CI push/release denial omits the authorised CI-repair recovery path, causing agents to misclassify actionable recovery as a blocked goal | 3 Medium | Known Error | M | 2026-05-15 | internal |
@@ -116,6 +115,8 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 
 | P151 | Published skills invoke repo-relative script paths — adopter bash hard-fails exit-127 (residual: 3 retrospective scripts unshimmed) | 2026-07-25 (/retrospective — this release) | no — not observed |
 | P153 | Retrospective repo-relative script paths fail in adopter installs (sibling of P151; same 3-script residual) | 2026-07-25 (/retrospective — this release) | no — not observed |
+| P281 | capture-problem flat-path tickets in adopters — VERIFIED fixed in current source (per-state write + auto-migrate); sighting was stale-install | 2026-05-30 (/itil; verified 2026-07-25) | no — not observed |
+| P365 | external-comms gate fires on commit-message in private repos — VERIFIED fixed in current source (repo-visibility precondition); sighting was stale-install | 2026-06-16 (/{risk-scorer,voice-tone}; verified 2026-07-25) | no — not observed |
 | ID | Title | Released | Likely verified? |
 |----|-------|----------|------------------|
 | P035 | manage-problem commit-gate no subagent delegation fallback | pending — fallback path never fired this session | no — not observed |

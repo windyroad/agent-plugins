@@ -1,6 +1,6 @@
 # Problem 281: capture-problem skill template references pre-ADR-031 flat-path shape
 
-**Status**: Known Error
+**Status**: Verifying
 **Reported**: 2026-05-19
 **Priority**: 9 (Med High) — Impact: 3 (Moderate — adopter projects accumulate flat-layout tickets; README cache mis-classify risk; cross-adopter inventory drift) x Likelihood: 3 (Likely — structural defect; every adopter following SKILL.md literally hits it; observed once concretely in voder-mcp-hub today)
 **Effort**: M — three plausible resolution shapes enumerated (adopter migration / SKILL template literal refresh / agent inference-vs-template precedence rule); template-refresh alone might be S but combined fix sits at M
@@ -128,3 +128,8 @@ Fix commit: `dd47f8a` (capture-problem SKILL.md path template names per-state-su
 - **Source**: /wr-itil:review-problems second-pass evidence sweep (adopter-repo transcript mining + ticket-state audit).
 - **Action**: flip back to Known Error via `/wr-itil:transition-problem 281 known-error` (Bucket 3: observed regression / mis-file — never batch-close).
 - **Reopened**: 2026-07-25 Verifying → Known Error (this action) — fix incomplete / mis-filed; back in the dev-work queue.
+
+## Correction 2026-07-25 — fix verified present in current source (adopter sighting was stale-install)
+
+- Current source is CLEAN: both ticket-writers use the per-state path — capture-problem SKILL.md line 247/313 (`docs/problems/open/<NNN>-<slug>.md`) and manage-problem line 520 + a Step-0 auto-migration of any flat tickets. Exercised in-session 2026-07-25: capture-problem wrote P458/P459/P460 all to `docs/problems/open/`. The addressr (2026-07-15) / voder-mcp-hub (0.35.6, 2026-05-19) flat-write sightings are STALE-INSTALL artifacts (adopter itil predated the 2026-05-30 fix), not a live source bug.
+- **Correction**: an earlier same-session flip to Known Error trusted a downstream evidence-scan finding without version-gating it against the fix release. Verified against current source; moved to Verifying. Full closure awaits a current-version adopter confirmation (adopters lag). See the captured methodology gap.
