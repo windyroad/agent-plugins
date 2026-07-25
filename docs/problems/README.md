@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-26 **P429 known error — commitlint rejects our own documented commit examples** — root cause confirmed empirically against the real `@commitlint/lint`: a subject led by an uppercase artefact ID (`P429 known error — …`) satisfies commitlint's sentence-case predicate, so `subject-case` rejects it and every adopter running commitlint hard-fails their first governance commit. 12 occurrences across 8 itil SKILLs; the shape is also pinned normatively in ADR-014's registry (3 rows) and ADR-024 Step 8. Both ADRs amended verb-first this pass (amendment substance `human-oversight: unconfirmed`, queued for ratification); the SKILL sweep + changeset are HELD pending that ratification plus RFC-050 and an accepted story (ADR-071/089/096). Regression guard blocked on a design decision — no `commitlint` dep exists in the workspace, so a behavioural guard needs a new devDependency.
+> Last reviewed: 2026-07-26 **P462 captured** — amendment-scoped `human-oversight: unconfirmed` has no detector: `detect-unoversighted.sh` reads the frontmatter block only and skips any ADR whose top-level marker says confirmed, so an in-window amendment declaring its own substance unratified never reaches the `/wr-architect:review-decisions` drain or the SessionStart nudge (lightweight aside via /wr-itil:capture-problem; surfaced by the risk-scorer while scoring the P429 commit).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -55,6 +55,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 8 | P423 | Agent "fixes" recurring behavioural corrections via project-local memory instead of shipping an adopter-facing plugin surface | 16 (High) | Open | M | 2026-07-06 | internal |
 | 7.5 | P359 | Changeset holding does not withhold shipment — held code ships with any sibling release | 15 (High) | Known Error | L | 2026-06-11 | internal |
 | 7.5 | P444 | Agent buries granular design decisions in artefacts — default values, thresholds, and policy choices pass artefact-level ratification unsurfaced, escaping real oversight | 15 (High) | Open | M | 2026-07-08 | internal |
+| 6 | P462 | Amendment-scoped `human-oversight: unconfirmed` has no detector — unratified amendment substance never reaches the oversight drain | 12 (High) | Open | M | 2026-07-26 | internal |
 | 6 | P293 | Generalise ADR-019 preflight from "fetch + ff-only divergence" to "get the repo into a clean state before starting" | 6 (Medium) | Known Error | M | 2026-05-25 | internal |
 | 6 | P305 | Post-Edit silent revert of working-tree files before commit — potential silent-work-loss hazard | 6 (Medium) | Known Error | M | 2026-05-26 | internal |
 | 6 | P409 | Back-fill legacy RFCs still carrying empty `stories: []` | 6 (Medium) | Known Error | M | 2026-07-03 | internal |
