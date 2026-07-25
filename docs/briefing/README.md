@@ -44,6 +44,7 @@ The highest-value entries across the briefing — the handful of rules that save
 > - `releases-and-ci-archive.md` (older release-pipeline entries + 2026-05-26 entries added 2026-06-08 + P284 E404/2FA ladder archived 2026-06-10)
 > - `afk-subprocess-mechanics.md` + `afk-subprocess-recovery.md` (sibling briefs split out 2026-05-03) + `afk-subprocess-recovery-archive.md` (oldest recovery entries, 2026-05-26) + `afk-subprocess-archive.md` (2026-05-17/18 entries archived 2026-06-08)
 > - `agent-hook-gate-quirks.md` (sibling brief — hook-gate quirks) + `agent-hook-gate-quirks-archive.md` (2026-04-25/26 + 2026-05-03 entries rotated 2026-06-17 — duplicate-bypass warning, persona-vs-runtime-mode rule, runtime-SID instrumentation, architect-agent re-invoke)
+> - `architect-gate-marker-mechanics.md` (split out of `agent-hook-gate-quirks.md` 2026-07-26 per Tier 3 budget — when the architect PostToolUse marker is and is not written, the literal `**Architecture Review: PASS**` heading grep, and the sanctioned manual-assertion recovery incl. where to get the right session ID)
 > - `agent-interaction-patterns-archive.md` (settled/codified entries split out 2026-05-26/31 — P057 re-stage, P014 framing, P121 Fix-Strategy-premise + P302 decision-confirmation-substance-first added 2026-06-08)
 > - `external-comms-gate-archive.md` (2026-06-28 entries split out 2026-07-03 — git-add-lost-on-gate-block, over-fire on read-only security-advisory polls)
 
