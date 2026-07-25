@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-25 **P459 fixed → Verifying** — Agent-Prose Evals flake (single-shot claude -p omitting the contract verdict token red-lined CI ~50%%); driver now retries until the token appears, without masking regressions. CI-only, no release.
+> Last reviewed: 2026-07-25 **Lint false-positive fixed + P459 honestly re-scoped** — my P151 lint over-matched "dispatches `packages/…`" (permitted hint), red-lining Quality Gates; narrowed to invoke/run/execute. P459 first fix was partial (primary flake is verdict-VALUE variance, needs pass^k) → back to Known Error.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -60,6 +60,7 @@ Internally-reported tickets (`Origin: internal` / `corrective-feedback`). Ranked
 | 12.0 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 High | Known Error | M | 2026-06-10 | internal |
 | 9.0 | P363 | Inbound-reported tickets never receive fix-released verdict on originating issue — reopened 2026-07-06: status-sync loop still failing at scale (40 fixed-but-open issues manually closed); needs an automatic back-fill reconciliation cadence (sibling P080) | 9 Medium | Known Error | M | 2026-06-11 | internal |
 | 8.0 | P300 | ADR-063 maturity-schema re-simplify (F2->F1) build side incomplete — only the ADR amendment landed | 4 Low-Med | Known Error | S | 2026-06-08 | internal |
+| 8.0 | P459 | Agent-Prose Evals flaky — PRIMARY cause is verdict-VALUE variance at policy boundary (token-retry shipped covers only omission); needs pass^k / fixture disambiguation | 8 Medium | Known Error | M | 2026-07-24 | internal |
 | 8.0 | P375 | Repo conflates a "named re-entry point" with a self-firing cadence — deferrals not transitively reachable from an automatic trigger rot | 16 High | Known Error | L | 2026-06-23 | internal |
 | 8.0 | P414 | retro/wrap defers over-threshold briefing Tier-3 rotation as a recommendation instead of performing the split | 8 Medium | Open | S | 2026-07-03 | internal |
 | 8.0 | P417 | docs/stories/README.md Rankings/Done never reconciled — stale for the whole story corpus | 8 Medium | Open | S | 2026-07-04 | internal |
@@ -116,7 +117,6 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P153 | Retrospective repo-relative script paths fail in adopter installs (sibling of P151; same 3-script residual) | 2026-07-25 (/retrospective — this release) | no — not observed |
 | P281 | capture-problem flat-path tickets in adopters — VERIFIED fixed in current source (per-state write + auto-migrate); sighting was stale-install | 2026-05-30 (/itil; verified 2026-07-25) | no — not observed |
 | P365 | external-comms gate fires on commit-message in private repos — VERIFIED fixed in current source (repo-visibility precondition); sighting was stale-install | 2026-06-16 (/{risk-scorer,voice-tone}; verified 2026-07-25) | no — not observed |
-| P459 | Agent-Prose Behavioural Evals flaky — red-lined CI ~50%% of pushes on token-omission; driver retries until the contract token appears | 2026-07-25 (CI-only, no release; effective next CI run) | no — not observed |
 | ID | Title | Released | Likely verified? |
 |----|-------|----------|------------------|
 | P035 | manage-problem commit-gate no subagent delegation fallback | pending — fallback path never fired this session | no — not observed |

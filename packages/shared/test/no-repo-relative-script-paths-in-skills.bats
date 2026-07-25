@@ -68,7 +68,11 @@ setup() {
   # maintainer hint form `invoke \`wr-<plugin>-<name>\` (... → \`packages/.../x.sh\`)`,
   # where the repo path follows a shim name + "→", not the verb.
   local hits
-  hits=$(grep -rnE '(invoke|invokes|run|runs|execute|executes|dispatch|dispatches)[[:space:]]+`packages/[a-z][a-z0-9-]*/(scripts|hooks)/[a-z0-9-]+\.(sh|py|bats|js|ts)`' \
+  # Verb list is deliberately narrow (invoke/run/execute) — NOT "dispatch",
+  # which is the ADR-049-permitted shim-DESCRIPTION idiom ("the shim that
+  # dispatches `packages/.../x.sh`") and would false-positive on maintainer
+  # hints the rule explicitly allows (architect condition on the widening).
+  hits=$(grep -rnE '(invoke|invokes|run|runs|execute|executes)[[:space:]]+`packages/[a-z][a-z0-9-]*/(scripts|hooks)/[a-z0-9-]+\.(sh|py|bats|js|ts)`' \
     "$REPO_ROOT"/packages/*/skills/*/SKILL.md "$REPO_ROOT"/.claude/skills/*/SKILL.md 2>/dev/null || true)
 
   if [ -n "$hits" ]; then

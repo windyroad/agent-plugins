@@ -1,6 +1,6 @@
 # Problem 459: Agent-Prose Behavioural Eval Flaky — Red-Lines CI on Unrelated Commits
 
-**Status**: Verifying
+**Status**: Known Error
 **Reported**: 2026-07-24
 **Priority**: 8 (Medium) — Impact: 2 × Likelihood: 4 — derived at capture from the description per Step 4a
 **Origin**: internal
@@ -64,3 +64,11 @@ Root cause verified: `packages/risk-scorer/agents/eval/run-agent-eval.sh` ran th
 **Fix**: bounded retry in the driver — map AGENT→its contract token, generate up to 3× until the token PREFIX appears, then emit. Absorbs transient token-omission WITHOUT masking regressions: never-emits still fails after 3 tries; a WRONG-value verdict has the prefix present so no retry fires and the assertion still grades/fails (the load-bearing masking-avoidance invariant). No changeset — eval artefacts are tarball-excluded (`!agents/eval/`, `!agents/test/`), CI-only; takes effect on the next CI run. Behavioural bats `packages/risk-scorer/agents/test/run-agent-eval-retry.bats` (3/3 — recover / hard-fail-preserved / wrong-value-no-retry) per ADR-005. Architect PASS (with the required bats).
 
 **Verify**: the next several pushes should show the Agent-Prose Behavioural Evals job green consistently (no PASS/FAIL flip on unrelated commits).
+
+## Correction 2026-07-25 — first fix was PARTIAL; primary flake is verdict-VALUE variance
+
+The CI run on the token-retry fix (02901e65) STILL failed the same Agent-Prose Evals job (7/8). Precise diagnosis: the dominant flake is verdict-VALUE variance, not token omission — e.g. the plan case "residual 5/25 + projected release 6/25, threshold 5" should emit `RISK_VERDICT: FAIL` (6 > 5 exceeds appetite) but the agent non-deterministically emits PASS. The bounded token-PREFIX retry (shipped, kept as a real partial improvement for the omission sub-flake + guarded by run-agent-eval-retry.bats) does NOT address value variance — the prefix is present either way.
+
+**Refined fix strategy** (proper fix, not yet done): one of — (a) ADR-075 §5 pass^k / N-sample majority so a single boundary flip does not fail the job; (b) disambiguate the boundary fixtures (move off the exactly-at/just-over-threshold edge where the LLM flips); (c) harden the plan/pipeline agents boundary-appetite reasoning (explicit "> threshold exceeds; ≤ threshold within"). (a) is the ADR-075-documented mechanism and the most robust.
+
+**Process note**: I had wrongly attributed ALL this session`s CI red to P459; verifying the actual failed job revealed my own P151 lint also false-positived (fixed same commit). The exact P461 / P434 verify-before-asserting lesson.
