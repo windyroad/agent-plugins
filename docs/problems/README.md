@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-26 **Full re-rank + inbound-discovery refresh** — recomputed WSJF across all 80 open/known-error tickets (48 were missing a WSJF line entirely, 2 were stale); auto-transitioned 6 Open → Known Error (P409/P415/P417/P419/P420/P456 — confirmed root cause + documented workaround); propagated P176 effort M → XL transitively via P012; stamped 4 pre-ADR-076 tickets `Origin: internal`; refreshed the upstream cache (11d stale) with 26 new reports, 12 newly matched. Relevance-close pass surfaced 61 candidates, all caveated — none auto-closed, all queued for the next interactive review.
+> Last reviewed: 2026-07-26 **P429 known error — commitlint rejects our own documented commit examples** — root cause confirmed empirically against the real `@commitlint/lint`: a subject led by an uppercase artefact ID (`P429 known error — …`) satisfies commitlint's sentence-case predicate, so `subject-case` rejects it and every adopter running commitlint hard-fails their first governance commit. 12 occurrences across 8 itil SKILLs; the shape is also pinned normatively in ADR-014's registry (3 rows) and ADR-024 Step 8. Both ADRs amended verb-first this pass (amendment substance `human-oversight: unconfirmed`, queued for ratification); the SKILL sweep + changeset are HELD pending that ratification plus RFC-050 and an accepted story (ADR-071/089/096). Regression guard blocked on a design decision — no `commitlint` dep exists in the workspace, so a behavioural guard needs a new devDependency.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -14,11 +14,11 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 (Very High) | Known Error | XL | 2026-05-03 | internal |
 | | | **Tier 1 — Inbound-reported (an external user actually hit this)** | | | | | |
 | 24 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | 12 (High) | Known Error | S | 2026-07-06 | inbound-reported (#169) |
+| 16 | P429 | manage-problem commit-message examples fail @commitlint/config-conventional subject-case in adopter projects | 8 (Medium) | Known Error | S | 2026-07-06 | inbound-reported (#137) |
 | 12 | P376 | Catchup scanner misses the inbound direction; outbound templates carry the same structural defect the P363 rework fixed on the inbound side — cross-direction parity gap | 12 (High) | Known Error | M | 2026-06-23 | inbound-reported (#349) |
 | 9 | P428 | work-problems Step 5 dispatch heredoc-in-command-substitution is unparseable under macOS /bin/bash 3.2 | 9 (Medium) | Open | S | 2026-07-06 | inbound-reported (#345) |
 | 9 | P437 | wr-wardley exposes no version-stable invocation path for its owm-to-svg converter (consumers pin the cache version and break on bump) | 9 (Medium) | Open | S | 2026-07-06 | inbound-reported (#325) |
 | 9 | P454 | wr-risk-scorer restage-commit helper sweeps the whole index/working tree into the commit instead of pathspec-scoping to the supplied paths | 9 (Medium) | Open | S | 2026-07-15 | inbound-reported (#344) |
-| 8 | P429 | manage-problem commit-message examples fail @commitlint/config-conventional subject-case in adopter projects | 8 (Medium) | Open | S | 2026-07-06 | inbound-reported (#137) |
 | 8 | P430 | itil-correction-detect UserPromptSubmit hook false-positives on orchestrator / AFK prompt text | 8 (Medium) | Open | S | 2026-07-06 | inbound-reported (#257) |
 | 6 | P431 | check-upstream-cache-staleness helper misfires on a declined-permanently (empty channels) config | 6 (Medium) | Open | S | 2026-07-06 | inbound-reported (#341) |
 | 6 | P436 | Issue templates declare labels ('problem', 'needs-triage') that don't exist; scaffold-intake should provision declared labels | 6 (Medium) | Open | S | 2026-07-06 | inbound-reported (#170) |

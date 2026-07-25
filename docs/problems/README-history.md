@@ -1245,3 +1245,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-07-26
 
 > Last reviewed: 2026-07-25 **Lint false-positive fixed + P459 honestly re-scoped** — my P151 lint over-matched "dispatches `packages/…`" (permitted hint), red-lining Quality Gates; narrowed to invoke/run/execute. P459 first fix was partial (primary flake is verdict-VALUE variance, needs pass^k) → back to Known Error.
+
+> Last reviewed: 2026-07-26 **Full re-rank + inbound-discovery refresh** — recomputed WSJF across all 80 open/known-error tickets (48 were missing a WSJF line entirely, 2 were stale); auto-transitioned 6 Open → Known Error (P409/P415/P417/P419/P420/P456 — confirmed root cause + documented workaround); propagated P176 effort M → XL transitively via P012; stamped 4 pre-ADR-076 tickets `Origin: internal`; refreshed the upstream cache (11d stale) with 26 new reports, 12 newly matched. Relevance-close pass surfaced 61 candidates, all caveated — none auto-closed, all queued for the next interactive review.
