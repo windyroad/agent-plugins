@@ -1237,3 +1237,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-07-25 **P460 captured** — agent surfaces findings/next-actions as recommendations instead of autonomously capturing or acting (user correction; mirror of P078, sibling of P179/P423).
 
 > Last reviewed: 2026-07-25 **P151/P153 fixed → Verifying** — the ADR-049 sweep had missed 3 retrospective scripts (check-ask-hygiene / check-briefing-budgets / check-tickets-deferred-cause) invoked repo-relative; added shims + fixed skills + closed the lint blind spot. Releasing in @windyroad/retrospective.
+
+> Last reviewed: 2026-07-25 **P281/P365 corrected → Verifying** (fix verified in current source; adopter sightings were stale-install, not live regressions) + **P461 captured** (downstream evidence-scan lacks version-gating — caused the 2 wrong flips).

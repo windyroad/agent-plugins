@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-25 **P281/P365 corrected → Verifying** (fix verified in current source; adopter sightings were stale-install, not live regressions) + **P461 captured** (downstream evidence-scan lacks version-gating — caused the 2 wrong flips).
+> Last reviewed: 2026-07-25 **P459 fixed → Verifying** — Agent-Prose Evals flake (single-shot claude -p omitting the contract verdict token red-lined CI ~50%%); driver now retries until the token appears, without masking regressions. CI-only, no release.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -64,7 +64,6 @@ Internally-reported tickets (`Origin: internal` / `corrective-feedback`). Ranked
 | 8.0 | P414 | retro/wrap defers over-threshold briefing Tier-3 rotation as a recommendation instead of performing the split | 8 Medium | Open | S | 2026-07-03 | internal |
 | 8.0 | P417 | docs/stories/README.md Rankings/Done never reconciled — stale for the whole story corpus | 8 Medium | Open | S | 2026-07-04 | internal |
 | 8.0 | P420 | check-briefing-budgets.sh crashes with unbound must_split[@] on empty arrays under macOS default bash 3.2 — CI bash 5 masks it; retro Tier 3 pass degrades to fail-open pointer | 8 Medium | Open | S | 2026-07-05 | internal |
-| 8.0 | P459 | Agent-Prose Behavioural Eval flaky — red-lines CI on ~50% of main pushes regardless of the diff (unrelated risk-scorer:plan LLM-rubric case) | 8 Medium | Open | M | 2026-07-24 | internal |
 | 8.0 | P423 | Agent "fixes" recurring behavioural corrections via project-local memory instead of shipping an adopter-facing plugin surface | 16 Critical | Open | M | 2026-07-06 | internal |
 | 7.5 | P359 | Changeset holding does not withhold shipment — held code ships with any sibling release | 15 High | Known Error | L | 2026-06-11 | internal |
 | 7.5 | P444 | Agent buries granular design decisions (default values, thresholds, policy choices) in artefacts — they pass artefact-level ratification unsurfaced, escaping oversight (5pp/0pp headroom witness) | 15 High | Open | M | 2026-07-08 | internal |
@@ -117,6 +116,7 @@ Fix released, awaiting user verification (driven off `docs/problems/*.verifying.
 | P153 | Retrospective repo-relative script paths fail in adopter installs (sibling of P151; same 3-script residual) | 2026-07-25 (/retrospective — this release) | no — not observed |
 | P281 | capture-problem flat-path tickets in adopters — VERIFIED fixed in current source (per-state write + auto-migrate); sighting was stale-install | 2026-05-30 (/itil; verified 2026-07-25) | no — not observed |
 | P365 | external-comms gate fires on commit-message in private repos — VERIFIED fixed in current source (repo-visibility precondition); sighting was stale-install | 2026-06-16 (/{risk-scorer,voice-tone}; verified 2026-07-25) | no — not observed |
+| P459 | Agent-Prose Behavioural Evals flaky — red-lined CI ~50%% of pushes on token-omission; driver retries until the contract token appears | 2026-07-25 (CI-only, no release; effective next CI run) | no — not observed |
 | ID | Title | Released | Likely verified? |
 |----|-------|----------|------------------|
 | P035 | manage-problem commit-gate no subagent delegation fallback | pending — fallback path never fired this session | no — not observed |

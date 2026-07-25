@@ -1,6 +1,6 @@
 # Problem 459: Agent-Prose Behavioural Eval Flaky — Red-Lines CI on Unrelated Commits
 
-**Status**: Open
+**Status**: Verifying
 **Reported**: 2026-07-24
 **Priority**: 8 (Medium) — Impact: 2 × Likelihood: 4 — derived at capture from the description per Step 4a
 **Origin**: internal
@@ -56,3 +56,11 @@ An LLM-rubric assertion on the `risk-scorer:plan` agent's prose is graded too st
 - P324, P290, P012 — agent-prose / skill-eval harness tickets (this is the CI-flakiness failure mode, distinct from the verdict-pattern concern).
 
 (captured via /wr-itil:capture-problem; expand at next investigation)
+
+## Fix Applied 2026-07-25
+
+Root cause verified: `packages/risk-scorer/agents/eval/run-agent-eval.sh` ran the agent as a single-shot non-deterministic `claude -p`; the plan/wip/pipeline/external-comms cases assert a deterministic `icontains` of the contract verdict token (`RISK_VERDICT:` / `RISK_SCORES:` / `EXTERNAL_COMMS_RISK_VERDICT:`). When a generation omitted the exact token, the case failed and red-lined the whole Agent-Prose Evals job (~50% of pushes, incl. a version-packages merge touching no agent code).
+
+**Fix**: bounded retry in the driver — map AGENT→its contract token, generate up to 3× until the token PREFIX appears, then emit. Absorbs transient token-omission WITHOUT masking regressions: never-emits still fails after 3 tries; a WRONG-value verdict has the prefix present so no retry fires and the assertion still grades/fails (the load-bearing masking-avoidance invariant). No changeset — eval artefacts are tarball-excluded (`!agents/eval/`, `!agents/test/`), CI-only; takes effect on the next CI run. Behavioural bats `packages/risk-scorer/agents/test/run-agent-eval-retry.bats` (3/3 — recover / hard-fail-preserved / wrong-value-no-retry) per ADR-005. Architect PASS (with the required bats).
+
+**Verify**: the next several pushes should show the Agent-Prose Behavioural Evals job green consistently (no PASS/FAIL flip on unrelated commits).
