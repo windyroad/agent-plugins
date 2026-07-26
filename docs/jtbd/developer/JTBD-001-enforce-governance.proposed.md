@@ -43,3 +43,4 @@ Manual code review, PR review checklists, hoping the agent follows CLAUDE.md ins
 | STORY-023 | STORY-023: Ship → verify → problem closes with a real trace; adopter gets the fix | done |
 | STORY-033 | STORY-033: Loud cold-path diagnostic for oversight-marker shims | draft |
 | STORY-037 | STORY-037: Commit gate honours the RISK-POLICY stated review cadence for staleness | draft |
+| STORY-052 | STORY-052: Surface still-outstanding family members before a close | draft |

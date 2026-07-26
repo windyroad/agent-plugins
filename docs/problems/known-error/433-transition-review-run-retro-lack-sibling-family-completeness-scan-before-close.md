@@ -9,8 +9,8 @@
 creation-time M assumed a single-surface edit. The confirmed root cause spans a new script + its ADR-049
 `$PATH` shim + behavioural bats + three call sites, one of which lives in a second plugin
 (`packages/retrospective`), so it is no longer a "few files, moderate change".)
-**JTBD**: JTBD-101
-**Persona**: plugin-developer
+**JTBD**: JTBD-006 (primary), JTBD-001 (secondary)
+**Persona**: developer
 
 ## Description
 
@@ -106,9 +106,19 @@ then proceed. This is exactly the manual policing the fix automates.
 2. Siblings under `verifying/`, `parked/`, or `closed/` contribute nothing — mirroring the already-ratified
    upstream-status carve-out in the P076 transitive-effort rule, where closed/verifying/parked upstreams
    contribute 0.
-3. **Exit 0 always.** The scan surfaces, it never blocks. This is the AFK-safety requirement (an
-   orchestrated close must not halt on an advisory) and it is what keeps the mechanism outside ADR-013
-   Rule 6's halt-and-route class.
+3. **Exit 0 always, and the finding is queued — not merely printed.** The scan never blocks: an
+   orchestrated close must not halt on an advisory, and P184's halt-and-route carve-out is not earned here
+   because a close is reversible (`/wr-itil:transition-problem <NNN> known-error`). But exit-0-advisory
+   *alone* would reproduce this ticket's own root cause one layer up — a line in an AFK iter's close report
+   has no human reader either, which is why the 29 stranded edges are "never surfaced" rather than
+   "invisible". So the calling skill takes the ADR-013 Rule 6 **queue-and-continue** default: on a non-empty
+   scan it appends one `outstanding_questions` entry carrying the three dispositions the Workaround above
+   names (closes with this ticket / gets re-linked / knowingly left open) and the close proceeds.
+   Interactively the finding renders in the close report, and on the `review-problems` Bucket 1 batch-close
+   path it surfaces as ONE batched `AskUserQuestion` across all closes with stranded siblings — never one
+   ask per ticket, which would be the P132 / inverse-P078 over-firing trap. Queue-and-continue is
+   framework-resolved, so no new ADR is required; each call site carries an inline
+   `per ADR-013 Rule 6 (queue-and-continue)` citation.
 4. Call sites: `transition-problem` Step 4 (`close` pre-flight), `review-problems` Step 4 Bucket 1 +
    Step 4.6 (before each `git mv` to `closed/`), `run-retro` Step 4a (before the dispatch). Output rides
    the existing close report / retro summary — no new surface.
@@ -153,3 +163,22 @@ stops short of implementation.
 - `/wr-itil:transition-problem` SKILL.md § "Conditional-deferral check on K→V (P184)" — the shape precedent.
   A body-scanning pre-flight gate that halts-or-surfaces already exists and is ratified; this ticket adds a
   second axis to that pattern rather than inventing a new gate class.
+
+## RFCs
+
+| ID | Title | Status |
+|----|-------|--------|
+| RFC-056 | RFC-056: Family-aware close gate — surface still-actionable composes-with siblings | proposed |
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-009 | STORY-MAP-009: Trust that a close does not strand the sibling family | draft |
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-052 | STORY-052: Surface still-outstanding family members before a close | draft |
