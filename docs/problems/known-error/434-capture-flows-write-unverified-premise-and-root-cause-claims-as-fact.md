@@ -6,8 +6,10 @@
 **Origin**: inbound-reported (#202, #339)
 **Effort**: L — re-rated M → L 2026-07-26 at the Open → Known Error transition (P047 live-estimate rule). The documented Fix Strategy resolves to multiple files within one plugin: a new committed predicate + its behavioural bats, plus SKILL + template edits on BOTH capture surfaces (`capture-problem`, `manage-problem`). Grounded on the scope-shape of P347 (extend `evaluate-relevance.sh` with four evidence shapes — rated L for script + per-shape bats + SKILL amendment + changeset, the same brick set); P347 carries no `Actual Effort:` field, so per ADR-026 this citation grounds the **scope shape**, not a measured duration.
 **WSJF**: 6 — (12 × 2.0) / 4 (re-rated 2026-07-26 at K→E transition; Known Error multiplier 2.0 offsets the L divisor, so rank is unchanged)
-**JTBD**: JTBD-101
-**Persona**: plugin-developer
+**JTBD**: JTBD-002
+**Persona**: developer
+
+> **Anchoring re-derived 2026-07-26** (`wr-jtbd:agent` ruling, this iteration). The captured `JTBD-101` / `plugin-developer` pair was the AFK auto-capture default, not a considered anchor. JTBD-101 is about plugin-package structure and skill-authoring templates and does not touch claim truthfulness. **JTBD-002 (Ship AI-Assisted Code with Confidence)** is the precedented home: ADR-026's own Decision Drivers cite JTBD-002 for this exact concern — *"confidence erodes when users discover agent outputs were fabricated"* — and used it to ground a rule reaching non-code agent output, so P434 widens an established scope rather than opening a new one. Persona corrected to `developer` per JTBD-002's own frontmatter and the `developer` persona's no-dedicated-review-process constraint. JTBD-006 stays a cross-reference, not the anchor. Both anchors are already `human-oversight: confirmed`, so no ratification is queued for them.
 
 ## Description
 
@@ -121,7 +123,9 @@ On a **falsified** claim the ticket is still captured — P401's never-discard r
 
 so the next reader sees the contradiction before the fix planning, not after.
 
-Detection is mechanical and belongs in committed shell with behavioural bats coverage (ADR-052; ADR-060 I1 load-bearing-from-the-start), following the sub-step 2b precedent that put the mechanical pre-filter in shell and left the judgement to a subagent — though the exact split is Q3 below.
+Claim extraction and the bounded tree reads are mechanical and belong in committed shell with behavioural bats coverage (ADR-052). The falsified/corroborated/untestable **classification** is a judgement call over natural-language claims, and the on-point precedent is **ADR-032's fifth invocation pattern** (fresh-context-subagent-as-decision-arbiter), demonstrated by the sub-step 2b hang-off check. The architect's lean is toward that split rather than a fully-mechanical predicate, on the strength of P463: a structurally similar fully-mechanical world-space check (`evaluate-relevance.sh`'s `file-no-longer-exists` shape) is currently running at a 76% false-positive rate. The final pick is Q3 below.
+
+> **Correction (architect review, 2026-07-26).** An earlier draft of this section cited *"ADR-060 I1 load-bearing-from-the-start"* as the authority for putting detection in committed shell. That citation is wrong: ADR-060's **I1 is the RFC-must-trace-to-a-problem invariant** and says nothing about invocation-pattern architecture. Recorded here rather than silently deleted, because writing an unverified mechanism claim in an authoritative voice is precisely the defect this ticket is about.
 
 ### Brick 2 — hypothesis marking for unexecuted mechanism claims
 
@@ -141,9 +145,11 @@ Both bricks edit shipped plugin surfaces (`packages/itil/skills/*/SKILL.md` + a 
 
 ### Outstanding design questions (queued — do not decide under AFK)
 
-- **Q1 — where does the decision home?** Widening ADR-026's scope from numeric estimates to claims-of-fact, versus recording a new decision for capture-time truth discipline. ADR-026 is `human-oversight: confirmed`, so a Scope amendment is a substance change requiring post-change ratification per P357. Bears on whether Brick 2 inherits ADR-026's cite+persist+uncertainty trio or ADR-011's Evidence+Confidence pair.
+- **Q1 — where does the decision home? SETTLED 2026-07-26 by architect review: a new ADR.** Widening ADR-026's Scope was foreclosed (it is `human-oversight: confirmed`, so a Scope amendment is a P357 substance change with no AFK path, and citing it as-is would misrepresent coverage it does not have). "No new decision" was also foreclosed: ADR-073's Decision Outcome states that a choice falling outside existing ADR coverage *is* captured in a new ADR, and Finding 3 already establishes these claim-classes fall outside ADR-026. **ADR-100** is therefore authored this iteration, born `human-oversight: unconfirmed`, carrying Q2 and Q3 as its Considered Options. Its ratification is queued — ADR-073 requires the ADR be ratified *before implementation*, which the ADR-096 hold already enforces.
 - **Q2 — what does a falsified premise do to the capture?** Capture-with-banner (the Fix Strategy's assumption, following P401 never-discard) versus halt-and-report-to-reporter (which is what would actually have kept #202's phantom ticket out of the backlog). A genuine two-option trade-off between backlog hygiene and never losing a finding.
-- **Q3 — how much of Brick 1 is committed shell?** Fully mechanical predicate + bats, versus mechanical claim-extraction in shell with a fresh-context subagent making the falsified/corroborated call (the sub-step 2b split). Affects adopter portability and the ADR-052 behavioural-coverage shape.
+- **Q3 — how much of Brick 1 is committed shell?** Fully mechanical predicate + bats, versus mechanical claim-extraction in shell with a fresh-context subagent making the falsified/corroborated call (ADR-032's fifth invocation pattern, the sub-step 2b split). Affects adopter portability and the ADR-052 behavioural-coverage shape. Architect leans to the subagent split, citing P463's 76% false-positive rate on a comparable fully-mechanical world-space check.
+
+Q1 is settled by the architect ruling below and is no longer open; **Q2 and Q3 are the live substance choices**, and they home in ADR-100 as its Considered Options rather than in this ticket or in RFC-057 (ADR-070 bars decisions from living in RFCs).
 
 ## Dependencies
 
@@ -155,10 +161,16 @@ Both bricks edit shipped plugin surfaces (`packages/itil/skills/*/SKILL.md` + a 
 
 - Inbound issues #202, #339.
 - **ADR-011** — incident evidence-first gate; source of the `Evidence:` + `Confidence:` hypothesis entry shape Brick 2 ports.
-- **ADR-026** — agent output grounding; scoped to numeric estimates, does not reach existence/causal claims (Finding 3). Q1 asks whether to widen it.
-- **ADR-032** — lightweight-capture latency budget that bounds Brick 1's tree reads.
-- **ADR-052 / ADR-060 I1** — behavioural coverage + load-bearing-detection-in-committed-shell, governing Brick 1's implementation split (Q3).
+- **ADR-026** — agent output grounding; scoped to numeric estimates, does not reach existence/causal claims (Finding 3). Widening it was considered and rejected as the vehicle (Q1, settled).
+- **ADR-032** — two bearings: the fifth invocation pattern (fresh-context-subagent-as-decision-arbiter) is the on-point precedent for Brick 1's implementation split (Q3), and the lightweight-capture flow budget bounds how much tree-reading the pass may do. This bullet previously miscited "ADR-060 I1" for the split; struck per the architect correction recorded in the Fix Strategy above.
+- **ADR-052** — behavioural-coverage-by-default (with P081), governing the shape of Brick 1's tests.
+- **ADR-100** — the decision this fix homes in, authored 2026-07-26, born `human-oversight: unconfirmed`; carries Q2 and Q3 as its Considered Options.
+- **RFC-057** / **STORY-MAP-010** / **STORY-053** — the fix vehicle authored 2026-07-26 and held pending ratification.
 - `packages/itil/skills/capture-problem/SKILL.md`, `packages/itil/skills/manage-problem/SKILL.md` — the two surfaces to change.
 - `packages/itil/skills/mitigate-incident/SKILL.md` — the shipped prior art Brick 2 mirrors.
-</content>
-</invoke>
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-057 | proposed | Capture-time truth discipline — falsify premises, mark unexecuted mechanisms |
