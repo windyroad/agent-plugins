@@ -15,3 +15,7 @@
 > Last reviewed: 2026-07-09 **STORY-042 accepted** — quota-pacing extraction passes I7 (RFC-046) / I8 (STORY-MAP-003) / I10 INVEST; Rankings table backfilled with active stories from FS truth (Done-table backfill still outstanding — run `/wr-itil:manage-story review`). RFC-046 Release-2 build begins.
 > Last reviewed: 2026-07-11 **STORY-043 accepted** — self-installing quota-state producer passes I7/I8/I10; built + 7 green bats (create-and-wire when absent / no-op when producing / agent-merge never blind-append). Kill-switch retired (disable via `max_sleep_s: 0`). Closes RFC-046 Release 2's functional scope.
 > Last reviewed: 2026-07-11 **STORY-042/043 → in-progress, STORY-039 → archived, RFC-046 → in-progress** — RFC-046 Release 2 fully built (throttle self-calibrating fix + extraction + self-installer, 19 cruise bats incl. concurrency); STORY-039 superseded. Awaiting release (changeset) → then done/verifying.
+
+## 2026-07-26
+
+> Last reviewed: 2026-07-12 **STORY-044 accepted** — cruise status/telemetry skill (`/wr-cruise:status`): per-window pace vs usage, the sleep the throttle is injecting now, glide projection, cache-health (flags an inert fail-open throttle). Built + 7 bats (29 cruise bats total). Awaiting release.

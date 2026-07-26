@@ -90,3 +90,15 @@ Possible interim workarounds (to validate):
 |-----|--------|-------|
 | RFC-005 | accepted | RFC-first trace invariant not enforced at fix-time |
 | RFC-006 | verifying | Implement ADR-070 + ADR-071 — re-home RFC decisions to ADRs and make RFC-first unconditional |
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-012 | STORY-012: Can't start coding without an RFC — the gate makes me create one first | superseded |
+| STORY-013 | STORY-013: Full gate: an RFC exists → I proceed; none → I create it first | draft |
+| STORY-014 | STORY-014: Unattended, the agent works the plan and pauses for real decisions | draft |
+| STORY-015 | STORY-015: The RFC lists its stories before any code is written | draft |
+| STORY-016 | STORY-016: Every step is regression-proven | draft |
+| STORY-035 | STORY-035: Home RFC decisions in ADRs and make the RFC-first trace unconditional | draft |

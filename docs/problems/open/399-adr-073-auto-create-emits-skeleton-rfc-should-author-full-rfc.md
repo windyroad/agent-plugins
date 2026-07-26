@@ -72,7 +72,14 @@ Ratified at the 2026-06-28 `/wr-itil:work-problems` loop-end decision surface (t
 |-----|--------|-------|
 | RFC-005 | accepted | RFC-first trace invariant not enforced at fix-time |
 
-
 ## Ratified Direction - 2026-07-04 interactive decision drain
 
 Part of the ADR-073 lockstep rework (see P357). The --fix-time Scope+Tasks auto-create mechanism is superseded by RFC-first; rework or drop it per the lockstep RFC. The held p399 changeset stays held pending that rework (genuine, not theatre).
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-015 | STORY-015: The RFC lists its stories before any code is written | draft |
+| STORY-017 | STORY-017: Backfill-or-supersede the skeleton RFCs the repudiated mechanism left behind | draft |

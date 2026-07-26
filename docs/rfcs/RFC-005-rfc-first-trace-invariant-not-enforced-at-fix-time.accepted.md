@@ -105,3 +105,21 @@ Ordered slice decomposition (one-purpose-per-commit per ADR-014). Slices land in
 - **JTBD-008** — primary anchor. **JTBD-101** — atomic-fix-adopter; the carve-out is removed (per ADR-071), atomic fixes go through the same RFC. **JTBD-006** — AFK orchestrator: under RFC-first the loop authors the RFC first and **lawfully halts for ADR ratification on an uncovered option-choice** (within JTBD-006's judgment-queue / ADR-019 graceful-stop carve-out — ADR-073 subordinates "never stall" to process correctness). **JTBD-001** — per-edit governance composition.
 - **P165** — sibling structural hook shape; PreToolUse:Bash gate on staged ticket surfaces.
 - **P196 / P189** — sibling premature-completion / fictional-defer failure modes at the RFC/SKILL surfaces.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-020 | STORY-020: Start the job's story map | done |
+| STORY-021 | STORY-021: Add the fix's new stories to the map | done |
+| STORY-022 | STORY-022: Ratify the story map and its stories after any change | done |
+| STORY-024 | STORY-024: Reuse stories already on the map | done |
+| STORY-025 | STORY-025: Slice the fix's stories into releases | done |
+| STORY-012 | STORY-012: Can't start coding without an RFC — the gate makes me create one first | superseded |
+| STORY-013 | STORY-013: Full gate: an RFC exists → I proceed; none → I create it first | draft |
+| STORY-014 | STORY-014: Unattended, the agent works the plan and pauses for real decisions | draft |
+| STORY-015 | STORY-015: The RFC lists its stories before any code is written | draft |
+| STORY-016 | STORY-016: Every step is regression-proven | draft |
+| STORY-017 | STORY-017: Backfill-or-supersede the skeleton RFCs the repudiated mechanism left behind | draft |
+| STORY-026 | STORY-026: Work the RFC's stories one at a time | done |

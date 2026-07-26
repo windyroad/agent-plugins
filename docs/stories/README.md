@@ -1,8 +1,8 @@
 # Story Backlog
 
-> Last reviewed: 2026-07-12 **STORY-044 accepted** — cruise status/telemetry skill (`/wr-cruise:status`): per-window pace vs usage, the sleep the throttle is injecting now, glide projection, cache-health (flags an inert fail-open throttle). Built + 7 bats (29 cruise bats total). Awaiting release.
+> Last reviewed: 2026-07-26 **index reconciled (P417)** — first full `/wr-itil:reconcile-stories` pass over the corpus: STORY-045 added to Rankings, the twelve terminal stories back-filled into Done, and the `## Stories` reverse-trace section refreshed on 14 problem tickets, 4 RFCs, and 4 JTBD files. Stale bootstrap prose retired.
 >
-> Run `/wr-itil:manage-story review` to refresh once the manage-story skill ships.
+> Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
 ## Jobs to be Done
 
@@ -25,7 +25,7 @@ This index serves two persona-jobs per ADR-051 sibling pattern (JTBD-anchored RE
 | Story Map | `docs/story-maps/<state>/` | HTML (`*.html`) | `draft → accepted → in-progress → completed → archived` | How the work decomposes spatially across backbone × ribs × slices |
 | **Story** | **`docs/stories/<state>/`** | **markdown (`*.md`)** | **`draft → accepted → in-progress → done → archived`** | **One slice of a story map; INVEST-shaped + JTBD-anchored** |
 
-This directory is **scaffold-only** until P170 Phase 2 Slice 4 ships `/wr-itil:capture-story` + `/wr-itil:manage-story` and Slice 8 migrates the existing P170 bootstrap slices.
+This directory is **live**. P170 Phase 2 Slice 4 shipped `/wr-itil:capture-story` + `/wr-itil:manage-story`, Slice 8 migrated the P170 bootstrap slices, and Slice 9 shipped `/wr-itil:reconcile-stories`. Capture stories with `/wr-itil:capture-story`, move them through the lifecycle with `/wr-itil:manage-story`, and repair index drift with `/wr-itil:reconcile-stories`.
 
 ## Story filename grammar
 
@@ -108,12 +108,13 @@ Links to ADRs, JTBDs, retro docs, sibling stories, and the parent story map.
 
 ## Story Rankings
 
-Active (non-done) stories, from filesystem truth. (The `## Done` backfill of terminal stories remains outstanding pre-existing debt — run `/wr-itil:manage-story review`.)
+Active (non-done) stories, from filesystem truth. Terminal stories are listed under `## Done` below.
 
 | Status | ID | Title | Effort | Problems | RFCs | Story Map |
 |--------|-----|-------|--------|----------|------|-----------|
 | in-progress | STORY-042 | Extract quota-pacing into its own plugin | L | P160, P443 | RFC-046 | STORY-MAP-003 |
 | accepted | STORY-044 | See what cruise is doing — status/telemetry skill | M | P160, P446 | RFC-046 | STORY-MAP-003 |
+| draft | STORY-045 | Outbound lifecycle comments generated from real issue context | M | P376 | RFC-028 | STORY-MAP-004 |
 | draft | STORY-047 | Gate the correction nudge on prompt authorship | S | P430 | RFC-050 | STORY-MAP-005 |
 | draft | STORY-048 | Gate the inbound-discovery pre-flight on the channel list | S | P431 | RFC-051 | STORY-MAP-006 |
 | draft | STORY-049 | Ask for a URL in a shape I can paste into | M | P438 | RFC-052 | STORY-MAP-007 |
@@ -147,10 +148,24 @@ Active (non-done) stories, from filesystem truth. (The `## Done` backfill of ter
 
 ## Done
 
-(Empty — no completed stories yet.)
+Terminal stories, from filesystem truth (`docs/stories/done/`). `Done` is the date the story file landed in `done/`.
 
 | ID | Title | Done | Driving problems |
 |----|-------|------|------------------|
+| STORY-001 | Hook exemption globs for docs/story-maps + docs/stories | 2026-05-12 | P170 |
+| STORY-002 | `/wr-itil:capture-story` lightweight aside skill | 2026-05-12 | P170 |
+| STORY-003 | `/wr-itil:list-stories` read-only display skill | 2026-05-12 | P170 |
+| STORY-004 | RFC frontmatter `stories:` extension + capture-rfc / manage-rfc updates | 2026-05-12 | P170 |
+| STORY-005 | Working-the-problem traversal rewrite (manage-problem + work-problem) | 2026-05-12 | P170 |
+| STORY-006 | `/wr-itil:reconcile-stories` trio (skill + script + bin shim) | 2026-05-12 | P170 |
+| STORY-007 | `/wr-itil:manage-story` heavyweight story lifecycle skill | 2026-05-12 | P170 |
+| STORY-020 | Start the job's story map | 2026-07-03 | P170 |
+| STORY-021 | Add the fix's new stories to the map | 2026-07-03 | P170 |
+| STORY-022 | Ratify the story map and its stories after any change | 2026-07-03 | P170 |
+| STORY-024 | Reuse stories already on the map | 2026-07-03 | P170 |
+| STORY-025 | Slice the fix's stories into releases | 2026-07-03 | P170 |
+
+**Known frontmatter/directory divergence (recorded, not repaired here).** STORY-018, STORY-019, STORY-023, STORY-026 and STORY-027 carry `status: done` in their YAML frontmatter while their files sit in `docs/stories/draft/`. The Rankings table above follows filesystem truth (the reconciler's source), so they render as `draft`; the `## Stories` reverse-trace sections on parent artefacts follow frontmatter, so they render as `done`. `wr-itil-reconcile-stories` does not compare frontmatter `status:` against the containing subdirectory, so it reports neither. Repairing the divergence means either a lifecycle move or a frontmatter edit, both of which `/wr-itil:manage-story` owns and `/wr-itil:reconcile-stories` explicitly does not. Tracked on P417.
 
 ## Reconciliation
 

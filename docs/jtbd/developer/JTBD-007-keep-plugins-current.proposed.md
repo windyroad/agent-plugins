@@ -40,3 +40,10 @@ When I ship a new version of a plugin I depend on, I want every active project t
 - **ADR-051** — JTBD-anchored README structure (amended P159; **superseded 2026-05-25 by ADR-069**). Extended this job's currency scope from code-currency to README-content-currency. ADR-069 retains the content-currency dimension as skill-inventory drift and drops the JTBD-ID anchor.
 - **(Added 2026-05-25) ADR-069** — READMEs market the persona's problem (no ID citation); commit-hook narrowed to skill-inventory-drift. Current home of this job's content-currency enforcement.
 - **(Added 2026-05-04) P159** — Drift detector should be a load-bearing commit-hook with auto-fix, not a retro-time advisory. Drives the load-bearing-from-the-start direction for this job's content-currency dimension.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-034 | STORY-034: Warn once per new version when a session runs stale plugin code | draft |

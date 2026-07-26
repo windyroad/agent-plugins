@@ -67,3 +67,10 @@ The held `@windyroad/itil` changeset `wr-itil-p260-option-c-multi-uuid-create-ga
 - **ADR-071** — every fix goes through an RFC; this retro-fit is the backfill that brings the pre-ADR-071 P260 fix under the RFC framework.
 - **RFC-006** — the ADR-070/071 implementation RFC; this retro-fit is its slice 7.
 - **P124 / P142 / P119** — agent-side SID discovery helper history, runtime-SID introduction, and the create-gate hook contract the fix composes with.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-036 | STORY-036: Write the create-gate marker under every candidate session id | draft |

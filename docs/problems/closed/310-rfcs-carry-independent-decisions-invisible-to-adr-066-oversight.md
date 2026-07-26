@@ -90,3 +90,10 @@ ADR-060 line 97 (permissive clause) + ADR-066 detector scope (`docs/decisions/` 
 - **Verified**: 2026-07-25 via /wr-itil:review-problems second-pass evidence sweep (duration/downstream transcript mining + in-session behavioural test exercise).
 - **Evidence**: In-session behavioural bats: check-rfc-rejected-alternatives.bats 8/8 ok — RFC rejected-alternatives lint exercised.
 - **Recovery**: reversible via `/wr-itil:transition-problem 310 known-error` or `git revert`.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-035 | STORY-035: Home RFC decisions in ADRs and make the RFC-first trace unconditional | draft |

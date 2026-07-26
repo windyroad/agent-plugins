@@ -102,6 +102,12 @@ The fix shape:
 - ADR-052 (behavioural-tests-default for skill testing) — bats fixture shape.
 - P088 (`docs/problems/088-...verifying.md`) — settled the user-direction-scoped decision: capture-problem + capture-adr are shippable; capture-retro is deferred (context-marshalling problem).
 
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-018 | STORY-018: Capture the problem in seconds, mid-flow | done |
+
 ## Fix Released
 
 Shipped 2026-05-03 in this commit (AFK iter 2 of `/wr-itil:work-problems`). Awaiting user verification.
@@ -126,3 +132,4 @@ ok 1..14 — all green
 **Verification path for the user**: invoke `/wr-itil:capture-problem <description>` against a real observation. Expected outcome: ~3-4 turn skeleton-filled ticket lands at `docs/problems/<NNN>-<title>.open.md`, single commit `docs(problems): capture P<NNN> <title>`, README is NOT touched, trailing pointer surfaces "Run /wr-itil:review-problems next to fold P<NNN> into the WSJF rankings". Then run `/wr-itil:review-problems` to fold the captured ticket into the WSJF table and re-rate the deferred placeholders.
 
 Recovery path if the close action was wrong: `/wr-itil:transition-problem 155 known-error` flips back to Known Error for further work.
+

@@ -131,3 +131,10 @@ This ticket (P045) remains **Open** as the execution tracker. Closes when:
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-036 | accepted | Plugin-staleness surfacer |
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-034 | STORY-034: Warn once per new version when a session runs stale plugin code | draft |

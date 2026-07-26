@@ -7,6 +7,14 @@
 **Effort**: L (re-rated 2026-06-10 — Phase 2 RFC-005 B-tasks: propose-fix gate relocation + auto-create mechanism + behavioural bats; significant single-plugin change)
 **WSJF**: 4.0 ((Severity 8 × Status 2.0) / Effort L (4))
 
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-012 | STORY-012: Can't start coding without an RFC — the gate makes me create one first | superseded |
+| STORY-013 | STORY-013: Full gate: an RFC exists → I proceed; none → I create it first | draft |
+| STORY-014 | STORY-014: Unattended, the agent works the plan and pauses for real decisions | draft |
+
 ## Fix Released
 
 <!-- no-changeset-reference -->
@@ -135,7 +143,7 @@ With B6 closed this iter, the **core P314 fix is functionally complete and user-
 |-----|--------|-------|
 | RFC-005 | accepted | RFC-first trace invariant not enforced at fix-time |
 
-
 ## Human decision — 2026-07-03 (outstanding-questions drain)
 
 **Graduate the held changeset (B10)** — user-ratified interactive release call (ADR-061 Rule 4). ADR-073 reassessment: the ~7 under-scoped skeleton RFCs traced to already-shipped problems should be **transitioned to reflect shipped state** (accepted/closed), NOT fleshed out; the RFC-creation process change prevents recurrence, so no policy revisit needed.
+

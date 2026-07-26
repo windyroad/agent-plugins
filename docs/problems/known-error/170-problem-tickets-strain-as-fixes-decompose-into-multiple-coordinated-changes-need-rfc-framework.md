@@ -420,3 +420,30 @@ Phase 2 framework code shipped 2026-05-12 across the following commits:
 |-----|--------|-------|
 | RFC-003 | in-progress | P170 Phase 2 — Story-tier framework + working-the-problem traversal |
 | RFC-022 | proposed | P170 Phase 3 + Phase 4 build — `persona:`/`jtbd:` problem frontmatter + story-level WSJF tie-break |
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-001 | STORY-001: Hook exemption globs for docs/story-maps + docs/stories | done |
+| STORY-002 | STORY-002: /wr-itil:capture-story lightweight aside skill | done |
+| STORY-003 | STORY-003: /wr-itil:list-stories read-only display skill | done |
+| STORY-004 | STORY-004: RFC frontmatter stories: extension + capture-rfc / manage-rfc updates | done |
+| STORY-005 | STORY-005: Working-the-problem traversal rewrite (manage-problem + work-problem) | done |
+| STORY-006 | STORY-006: /wr-itil:reconcile-stories trio (skill + script + bin shim) | done |
+| STORY-007 | STORY-007: /wr-itil:manage-story heavyweight story lifecycle skill | done |
+| STORY-020 | STORY-020: Start the job's story map | done |
+| STORY-021 | STORY-021: Add the fix's new stories to the map | done |
+| STORY-022 | STORY-022: Ratify the story map and its stories after any change | done |
+| STORY-024 | STORY-024: Reuse stories already on the map | done |
+| STORY-025 | STORY-025: Slice the fix's stories into releases | done |
+| STORY-019 | STORY-019: Find the root cause and a workaround → Known Error | done |
+| STORY-023 | STORY-023: Ship → verify → problem closes with a real trace; adopter gets the fix | done |
+| STORY-026 | STORY-026: Work the RFC's stories one at a time | done |
+| STORY-027 | STORY-027: Capture a problem reported through an inbound channel | done |
+| STORY-028 | STORY-028: Acknowledge the report on capture | draft |
+| STORY-029 | STORY-029: Share the workaround with the reporter | draft |
+| STORY-030 | STORY-030: Tell the reporter a fix is underway | draft |
+| STORY-031 | STORY-031: Tell the reporter it's released → verify → close the loop | draft |
+| STORY-032 | STORY-032: Triage the report's disposition — accept, elicit a new job, or decline | draft |

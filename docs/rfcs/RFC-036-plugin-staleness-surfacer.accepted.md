@@ -61,3 +61,10 @@ Ship the per-plugin, per-turn plugin-staleness surfacer per ADR-088: each windyr
 - **ADR-038** — per-turn UserPromptSubmit injection budget (the announcement-marker discipline Task 1 extends).
 - **ADR-017** — shared-code sync discipline (Task 2).
 - **`/install-updates`** — the on-demand manual path this RFC makes self-firing at the detection layer.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-034 | STORY-034: Warn once per new version when a session runs stale plugin code | draft |

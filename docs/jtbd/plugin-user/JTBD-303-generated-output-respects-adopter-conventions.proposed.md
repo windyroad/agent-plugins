@@ -57,3 +57,10 @@ Authored explicitly so this job is not later challenged as redundant with its ne
 - **ADR-052** — behavioural tests default. The fifth desired outcome (a regression signal) has to be a test that exercises an emitter and asserts on the bytes it writes, not a structural grep over a template.
 - **ADR-049** — plugin scripts resolve via `bin/` on `$PATH`. Sibling adopter-context decision on the executable-correctness axis; established the precedent that source-repo dogfooding masks adopter-context defects.
 - **ADR-008** — JTBD directory structure. Establishes the `docs/jtbd/<persona>/JTBD-NNN-<title>.<status>.md` layout this file follows.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-051 | STORY-051: Have generated content respect my project's conventions | draft |

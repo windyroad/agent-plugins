@@ -8,6 +8,12 @@
 **JTBD**: JTBD-001, JTBD-006
 **Persona**: plugin-developer
 
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-033 | STORY-033: Loud cold-path diagnostic for oversight-marker shims | draft |
+
 ## Fix Released
 
 - **Released**: 2026-07-03 in `@windyroad/architect@0.18.4` (+ `@windyroad/jtbd`)
@@ -138,3 +144,4 @@ Fix committed 2026-07-03 via **RFC-038** / **STORY-033** — both `mark-oversigh
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-038 | proposed | Loud cold-path diagnostic for oversight-marker shims when no session-id is discoverable |
+

@@ -101,3 +101,10 @@ the hook still fires.
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-050 | proposed | Correction-detector provenance guard |
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-047 | STORY-047: Gate the correction nudge on prompt authorship | draft |

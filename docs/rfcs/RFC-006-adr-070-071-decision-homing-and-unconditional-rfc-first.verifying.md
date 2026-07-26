@@ -92,3 +92,10 @@ All seven slices shipped (commits above); the corrective P311 sweep removed the 
 - **RFC-005** — carries the disavowed carve-out (F2/F7/I13); retrofitted under slice 1b.
 - **P310 / P251** — driving problems.
 - **JTBD-008 / JTBD-101** — anchor the carve-out; reframed under slice 2.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-035 | STORY-035: Home RFC decisions in ADRs and make the RFC-first trace unconditional | draft |

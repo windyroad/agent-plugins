@@ -120,3 +120,10 @@ Nothing implements until STORY-051 is ratified at its `accepted` gate (ADR-090 /
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-054 | proposed | Make generated output portable by default |
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-051 | STORY-051: Have generated content respect my project's conventions | draft |

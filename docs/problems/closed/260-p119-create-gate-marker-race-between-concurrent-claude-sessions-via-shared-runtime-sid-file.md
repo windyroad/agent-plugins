@@ -11,6 +11,12 @@
 |-----|--------|-------|
 | RFC-007 | verifying | P260 — concurrent-session create-gate marker race fix (ADR-050 Option C) |
 
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-036 | STORY-036: Write the create-gate marker under every candidate session id | draft |
+
 ## Fix Released
 
 Released in **`@windyroad/itil@0.35.14`** (release commit `bf1ebdd`, 2026-05-26) — the Option-C bounded multi-UUID create-gate marker-write shipped to adopters. Brought under the RFC framework as **RFC-007** (retro-fit per ADR-071 — every fix goes through an RFC) so the held changeset could release under the new unconditional gate. Transitioned `Known Error → Verifying` on release per ADR-022.
@@ -114,3 +120,4 @@ Implemented via `/wr-itil:manage-problem` AFK iteration. Architect + JTBD gates 
 - P142 / ADR-050 — runtime-SID introduction.
 
 (captured via /wr-retrospective:run-retro Step 4b Stage 1; expand at next investigation)
+
