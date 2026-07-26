@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-26 **P431 → Known Error** — the inbound-discovery pre-flight helper tests whether the upstream-channels config file exists but never reads the channel list inside it, so a project that explicitly declined (empty list) is charged a no-op pre-flight subprocess every loop while a project that never configured anything is silently passed. Reproduced in situ; fix vehicle authored as RFC-051 / STORY-MAP-006 / STORY-048 and held for ratification. Prior: **P467 captured** — work-problems should surface decisions/ratifications continuously (non-blocking) so a present user can ratify held vehicles mid-loop and unblock later iters in the same run, not only in the loop-end batch; user-voiced enhancement (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-07-26 **P438 → Known Error; P468 + P469 captured from its retro** — P438: the only per-turn rule the suite ships about the multiple-choice prompt tells the agent to use it whenever a decision is ambiguous, dropping the half of ADR-013 Rule 1 that says the branch point needs two or more mutually exclusive options; nothing anywhere states the converse, so free-text collection has no rule and lands in a picker the user cannot paste into. Fix vehicle authored and held: RFC-052, STORY-MAP-007, STORY-049, and a new grounding job JTBD-011 the JTBD gate required before it would pass. Mechanism and plugin home left open and queued. P468: a fresh architect PASS did not fire its marker hook because the verdict line was a markdown heading rather than bold. P469: the style-guide and voice-tone reviewers spawn without Bash and cannot write the verdict file their own gate contract names.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -61,6 +61,8 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P305 | Post-Edit silent revert of working-tree files before commit — potential silent-work-loss hazard | 6 (Medium) | Known Error | M | 2026-05-26 | internal |
 | 6 | P409 | Back-fill legacy RFCs still carrying empty `stories: []` | 6 (Medium) | Known Error | M | 2026-07-03 | internal |
 | 6 | P466 | The story-map HTML template ships sub-3:1 borders, no focus ring, and no viewport meta | 6 (Medium) | Open | S | 2026-07-26 | internal |
+| 6 | P468 | architect-mark-reviewed misses a genuine PASS whose verdict line is a markdown heading rather than bold | 6 (Medium) | Open | S | 2026-07-26 | internal |
+| 6 | P469 | style-guide and voice-tone reviewer agents spawn without Bash, so they cannot write the verdict marker their own gate reads | 6 (Medium) | Open | S | 2026-07-26 | internal |
 | 6 | P456 | AFK iter cannot progress a ratified Known Error when the fix-vehicle RFC has empty stories | 6 (Medium) | Known Error | M | 2026-07-15 | internal |
 | 6 | P395 | external-comms agent silently goes dormant on the credibility axis — no nudge to author the missing RISK-POLICY section | 12 (High) | Open | M | 2026-06-28 | corrective-feedback |
 | 6 | P399 | ADR-073 fix-time auto-create emits a SKELETON RFC; it should author the RFC fully | 12 (High) | Open | M | 2026-06-28 | corrective-feedback |
