@@ -192,6 +192,7 @@ RFCs in `proposed` / `accepted` / `in-progress` status that are on disk but carr
 | RFC-052 | Ship a portable rule routing free-text collection to per-item copyable blocks | proposed | 2026-07-26 | P438 |
 | RFC-053 | Ship a portable rule requiring a verified-current handover before an external review | proposed | 2026-07-26 | P439 |
 | RFC-054 | Make generated output portable by default | proposed | 2026-07-26 | P424 |
+| RFC-055 | Verification-evidence write path for the run-retro Step 4a prior-session drain | proposed | 2026-07-26 | P450 |
 
 ## Verification Queue
 
