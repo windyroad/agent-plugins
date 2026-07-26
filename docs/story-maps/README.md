@@ -94,6 +94,8 @@ One row per story map in `draft` / `accepted` / `in-progress` status, from files
 | — | STORY-MAP-006 | Decline upstream discovery once and stay declined | draft | P431 | RFC-051 |
 | — | STORY-MAP-007 | A correction to the agent's conduct holds in every project | draft | P438, P439 | RFC-052, RFC-053 |
 | — | STORY-MAP-008 | Have plugin-generated content respect my project's conventions | draft | P424 | RFC-054 |
+| — | STORY-MAP-009 | Trust that a close does not strand the sibling family | draft | P433 | RFC-056 |
+| — | STORY-MAP-010 | Trust that a ticket states only what was verified | draft | P434 | RFC-057 |
 
 ## Completed
 

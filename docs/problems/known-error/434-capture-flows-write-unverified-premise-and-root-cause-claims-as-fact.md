@@ -174,3 +174,9 @@ Q1 is settled by the architect ruling below and is no longer open; **Q2 and Q3 a
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-057 | proposed | Capture-time truth discipline — falsify premises, mark unexecuted mechanisms |
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-053 | STORY-053: Test claims against the tree at capture and label the untested ones | draft |

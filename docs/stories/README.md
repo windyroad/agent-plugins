@@ -120,6 +120,8 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | draft | STORY-049 | Ask for a URL in a shape I can paste into | M | P438 | RFC-052 | STORY-MAP-007 |
 | draft | STORY-050 | Have my reviewer read the version I actually have | M | P439 | RFC-053 | STORY-MAP-007 |
 | draft | STORY-051 | Have generated content respect my project's conventions | M | P424 | RFC-054 | STORY-MAP-008 |
+| draft | STORY-052 | Surface still-outstanding family members before a close | M | P433 | RFC-056 | STORY-MAP-009 |
+| draft | STORY-053 | Test claims against the tree at capture and label the untested ones | L | P434 | RFC-057 | STORY-MAP-010 |
 | draft | STORY-012 | Can't start coding without an RFC — the gate makes me create one first | S | P251, P314 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-013 | Full gate: an RFC exists → I proceed; none → I create it first | M | P251, P314 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-014 | Unattended, the agent works the plan and pauses for real decisions | M | P251, P314 | RFC-005 | STORY-MAP-002 |

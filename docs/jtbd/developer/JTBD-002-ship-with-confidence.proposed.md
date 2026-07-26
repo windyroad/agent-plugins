@@ -36,3 +36,4 @@ Pair programming with the AI, manual review of every diff, restricting agent per
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-046 | STORY-046: Red-CI denial explains the recovery path | in-progress |
+| STORY-053 | STORY-053: Test claims against the tree at capture and label the untested ones | draft |

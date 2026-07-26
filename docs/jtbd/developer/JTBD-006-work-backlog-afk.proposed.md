@@ -64,3 +64,4 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 | STORY-047 | STORY-047: Gate the correction nudge on prompt authorship | draft |
 | STORY-048 | STORY-048: Gate the inbound-discovery pre-flight on the channel list | draft |
 | STORY-052 | STORY-052: Surface still-outstanding family members before a close | draft |
+| STORY-053 | STORY-053: Test claims against the tree at capture and label the untested ones | draft |
