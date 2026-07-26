@@ -24,7 +24,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P438 | Assistant routes free-text collection (URLs/tokens/IDs) through AskUserQuestion instead of per-item copyable blocks | 6 (Medium) | Known Error | M | 2026-07-06 | inbound-reported (#324) |
 | 6 | P436 | Issue templates declare labels ('problem', 'needs-triage') that don't exist; scaffold-intake should provision declared labels | 6 (Medium) | Open | S | 2026-07-06 | inbound-reported (#170) |
 | 6.0 | P439 | External-review round-trips waste cycles on stale repo artifacts (unpushed commits + stale IDE buffer) | 6 (Medium) | Known Error | M | 2026-07-06 | inbound-reported (#326) |
-| 6 | P424 | Governance tooling emits U+2014 em-dashes in generated output, breaking adopter no-em-dash Edit/Write hooks | 12 (High) | Open | M | 2026-07-06 | inbound-reported (#185, #186, #219, #223, #319) |
+| 6 | P424 | Governance tooling emits U+2014 em-dashes in generated output, breaking adopter no-em-dash Edit/Write hooks | 12 (High) | Known Error | M | 2026-07-06 | inbound-reported (#185, #186, #219, #223, #319) |
 | 6 | P433 | transition-problem / review-problems / run-retro Step 4a lack a sibling-family completeness scan before close | 12 (High) | Open | M | 2026-07-06 | inbound-reported (#187) |
 | 6 | P434 | Capture flows write unverified claims (premise + root-cause mechanism) as established fact | 12 (High) | Open | M | 2026-07-06 | inbound-reported (#202, #339) |
 | 6 | P450 | Verification Queue evidence cells are never populated from subsequent-session exercises, so the run-retro Step 4a auto-drain never fires | 12 (High) | Open | M | 2026-07-15 | inbound-reported (#323) |

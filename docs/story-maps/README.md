@@ -93,6 +93,7 @@ One row per story map in `draft` / `accepted` / `in-progress` status, from files
 | — | STORY-MAP-005 | Trust the capture-on-correction signal | draft | P430 | RFC-050 |
 | — | STORY-MAP-006 | Decline upstream discovery once and stay declined | draft | P431 | RFC-051 |
 | — | STORY-MAP-007 | A correction to the agent's conduct holds in every project | draft | P438, P439 | RFC-052, RFC-053 |
+| — | STORY-MAP-008 | Have plugin-generated content respect my project's conventions | draft | P424 | RFC-054 |
 
 ## Completed
 

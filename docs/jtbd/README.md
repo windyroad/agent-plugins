@@ -61,3 +61,4 @@ Developer using an installed windyroad plugin who encountered a problem and want
 |----|-----|------|
 | JTBD-301 | Report a Problem Without Pre-Classifying It | [JTBD-301-report-problem-without-pre-classifying.proposed.md](plugin-user/JTBD-301-report-problem-without-pre-classifying.proposed.md) |
 | JTBD-302 | Trust That the README Describes the Plugin I Just Installed | [JTBD-302-trust-readme-describes-installed-behaviour.proposed.md](plugin-user/JTBD-302-trust-readme-describes-installed-behaviour.proposed.md) |
+| JTBD-303 | Have Plugin-Generated Content Respect My Project's Own Conventions | [JTBD-303-generated-output-respects-adopter-conventions.proposed.md](plugin-user/JTBD-303-generated-output-respects-adopter-conventions.proposed.md) |
