@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-26 **P465 + P466 captured from the P430 retro** — P465: ADR-095 and ADR-096 both say human ratification fires at the story's `accepted` gate, but `manage-story` checks only I7/I8/I10 and the no-implement-draft hook reads status alone, so an unratified story can be accepted and implemented with every gate passing; the ambiguous "orthogonal to the status lifecycle" wording is what makes the bypass look compliant (architect findings N1/N2, hang-off-checked PROCEED_NEW against P456/P457/P409/P412 as the inverse pair of P456). P466: the story-map HTML template in ADR-060 and the story-maps README teaches sub-3:1 borders, no `:focus-visible`, and no viewport meta, and four of five on-disk maps inherited it — plus a live grid overflow on STORY-MAP-001. Evidence also appended to P456 (second, stronger witness) and P417 (the never-reconciled index drift spans the RFC and story-map tiers too, not just stories).
+> Last reviewed: 2026-07-26 **P467 captured** — work-problems should surface decisions/ratifications continuously (non-blocking) so a present user can ratify held vehicles mid-loop and unblock later iters in the same run, not only in the loop-end batch; user-voiced enhancement (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -76,6 +76,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 4.5 | P461 | Downstream evidence-scan flags adopter-repo sightings as live regressions without version-gating against the fix release | 9 (Medium) | Open | M | 2026-07-25 | internal |
 | 4 | P410 | install-updates leaves stale cached plugin versions on disk — no prune step | 8 (Medium) | Open | M | 2026-07-03 | internal |
 | 4 | P442 | WSJF Rankings render convention differentiates tiers only by ordering + the Origin column — no visual tier separator, so inbound-reported priority is not legible | 8 (Medium) | Open | M | 2026-07-06 | corrective-feedback |
+| 4 | P467 | work-problems should surface decisions/ratifications continuously (non-blocking), not only batched at loop-end | 8 (Medium) | Open | M | 2026-07-26 | corrective-feedback |
 | 3.75 | P443 | Quota-pacing (P160 / RFC-046 / ADR-093) shipped without a grounded JTBD → persona → USM → RFC → story lineage — governance artefacts are wrong, orphaned, or missing | 15 (High) | Open | L | 2026-07-07 | internal |
 | 3.75 | P445 | Agent offers unsolicited off-ramps, hedges, projects onto the user, and narrates its own conduct — "acknowledges-but-recurs" — and needs a PLUGIN-shipped behavioural rule (portable across every project), not a project-local fix | 15 (High) | Open | L | 2026-07-08 | internal |
 | 3 | P178 | Agent skips ITIL state-machine gates on architecture-driven problems — treats architect-PASS verdict as substitute for empirical RCA + skips Open → Known Error transition | 3 (Low) | Known Error | M | 2026-05-10 | internal |
