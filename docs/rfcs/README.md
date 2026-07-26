@@ -1,7 +1,7 @@
 # RFC Backlog
 
-> Last reviewed: 2026-07-11 **RFC-046 → in-progress** — Release 2 fully built into @windyroad/cruise (self-calibrating throttle per P446 + config file + self-installing producer), all stories in-progress, 19 bats green, changeset queued. Awaiting release → verifying → closed.
-> Run `/wr-itil:manage-rfc review` to refresh once the manage-rfc skill ships.
+> Last reviewed: 2026-07-26 **index reconciled (P417)** — the 42 RFCs on disk but absent from this index are listed under `### Unranked`; RFC-037 added to the Verification Queue and RFC-025 to Closed; ranked rows re-sorted to the documented ladder; stale bootstrap prose retired; `## RFCs` reverse-trace refreshed on 7 problem tickets. Two `reconcile-rfcs.sh` detector defects recorded on P417.
+> Run `/wr-itil:manage-rfc review` to re-rank, or `wr-itil-reconcile-rfcs docs/rfcs docs/problems` to diagnose index drift.
 
 ## Status
 
@@ -12,9 +12,9 @@
 | Problem | `docs/problems/` | `Open → Known Error → Verifying → Closed` (or `Parked`) | What hurts |
 | ADR | `docs/decisions/` | `proposed → accepted → superseded` | How we decided to solve it |
 | **RFC** | **`docs/rfcs/`** (this directory) | **`proposed → accepted → in-progress → verifying → closed`** | **What we're shipping to solve it** |
-| Story | (Phase 2 — deferred) | INVEST + JTBD-anchored | Slices of an RFC |
+| Story | `docs/stories/<state>/` | `draft → accepted → in-progress → done → archived` | Slices of an RFC; INVEST + JTBD-anchored |
 
-This directory is **scaffold-only** until `/wr-itil:capture-rfc` and `/wr-itil:manage-rfc` ship in Slice 2 of P170's RFC framework story map (`docs/plans/170-rfc-framework-story-map.md`). RFCs land here once those skills exist; the first dogfood RFC (RFC-001 retro on P168 per ADR-060 Phase 1 item 9) is captured in Slice 4.
+This directory is **live**. `/wr-itil:capture-rfc` and `/wr-itil:manage-rfc` shipped in Slice 2 of P170's RFC framework story map, and the first dogfood RFC (RFC-001, the retro on P168 per ADR-060 Phase 1 item 9) was captured in Slice 4. Capture RFCs with `/wr-itil:capture-rfc`, move them through the lifecycle with `/wr-itil:manage-rfc`.
 
 ## Mandatory invariants (load-bearing per ADR-060)
 
@@ -132,8 +132,8 @@ One row per RFC in `proposed` / `accepted` / `in-progress` status. RFC-level WSJ
 |------|-----|-------|----------|--------|--------|----------|
 | 10.0 | RFC-046 | Quota-pace throttle — mechanical PreToolUse pacing, extracted into @windyroad/cruise | 20 Critical | in-progress | L | 2026-07-06 |
 | 8.0 | RFC-036 | Plugin-staleness surfacer | 16 High | accepted | L | 2026-07-02 |
-| 4.5 | RFC-049 | Make the red-CI gate explain the CI-repair recovery path | 3 Medium | in-progress | S | 2026-07-23 |
 | 8.0 | RFC-050 | Correction-detector provenance guard | 8 Medium | proposed | S | 2026-07-26 |
+| 4.5 | RFC-049 | Make the red-CI gate explain the CI-repair recovery path | 3 Medium | in-progress | S | 2026-07-23 |
 | 3.0 | RFC-005 | RFC-first trace invariant not enforced at fix-time | 3 Med | accepted | M | 2026-05-17 |
 
 WSJF for RFC-036: Severity inherited from highest-severity traced problem (P375 = 16 High); Status multiplier `accepted` = 2.0; Effort L divisor = 4; WSJF = (16 × 2.0) / 4 = 8.0.
@@ -143,6 +143,55 @@ WSJF for RFC-005: Severity inherited from highest-severity traced problem (P251 
 WSJF for RFC-050: Severity inherited from its sole traced problem (P430 = 8 Medium); Status multiplier `proposed` = 1.0; Effort S divisor = 1; WSJF = (8 × 1.0) / 1 = 8.0.
 
 RFC-006 + RFC-007 transitioned to `verifying` 2026-05-26 (RFC-006 all seven slices shipped; RFC-007 P260 fix released in `@windyroad/itil@0.35.14`) — excluded from RFC Rankings (multiplier 0); see Verification Queue.
+
+### Unranked
+
+RFCs in `proposed` / `accepted` / `in-progress` status that are on disk but carry **no recorded WSJF, Severity or Effort**. Those three fields are assigned by `/wr-itil:manage-rfc review` (Step 9c), which is the only surface authorised to score them — the reconcile pass that surfaced these rows deliberately synthesises nothing. Rows here are unscored, not ranked last. Back-filled 2026-07-26 under P417.
+
+| ID | Title | Status | Reported | Problems |
+|----|-------|--------|----------|----------|
+| RFC-003 | P170 Phase 2 — Story-tier framework + working-the-problem traversal | in-progress | 2026-05-12 | P170 |
+| RFC-008 | Confirm-substance-before-build enforcement (ADR-074 mechanical layer) | proposed | 2026-05-27 | P315 |
+| RFC-009 | Adopter-safe path resolution in shipped SKILLs | proposed | 2026-05-27 | P317 |
+| RFC-010 | Architect flags changes built on an unratified ADR | proposed | 2026-05-27 | P318 |
+| RFC-011 | JTBD review flags changes built on an unratified persona or job | proposed | 2026-05-27 | P323 |
+| RFC-012 | Build the promptfoo agent-prose AND SKILL-prose verdict eval harness | proposed | 2026-05-28 | P324, P012 |
+| RFC-013 | P346 backlog flow control multi-phase | proposed | 2026-05-31 | P346 |
+| RFC-014 | ADR-078 Phase 1 — architect-on-edit compendium entries | proposed | 2026-06-02 | P337 |
+| RFC-015 | `.afk-run-state/iter-*.json` error-marker staleness filter for work-problems Step 0 | proposed | 2026-06-03 | P333 |
+| RFC-016 | work-problems Step 3.5 JTBD ratification predicate-check | proposed | 2026-06-03 | P344 |
+| RFC-017 | Auto-bootstrap on missing precondition config | proposed | 2026-06-03 | P351 |
+| RFC-018 | External-comms-risk-gated AFK auto-fire for all upstream reports | proposed | 2026-06-04 | P270, P413 |
+| RFC-019 | promptfoo Tier-A/B eval discharges the R009 bedrock floor for prose surfaces | proposed | 2026-06-04 | P355 |
+| RFC-020 | JTBD edit gate resolves docs/jtbd from the project root, not the hook runtime CWD | proposed | 2026-06-04 | P191 |
+| RFC-021 | Architect-gate deny-reason recovery directive | proposed | 2026-06-07 | P215, P400 |
+| RFC-022 | P170 Phase 3 + 4 — `persona:`/`jtbd:` problem frontmatter + story-level WSJF tie-break | proposed | 2026-06-16 | P170 |
+| RFC-023 | Bundler-based shared-code approach replacing duplicate-and-sync | proposed | 2026-06-16 | P304 |
+| RFC-024 | work-problems pre-flight subprocess failure handling — non-blocking revert-and-proceed | proposed | 2026-06-16 | P358 |
+| RFC-026 | derive-release-vehicle de-facto-released exit-0 path for graduated holding changesets | proposed | 2026-06-18 | P361 |
+| RFC-027 | Apply `10#` base-10 prefix to script-surface next-ID formula | proposed | 2026-06-22 | P164 |
+| RFC-028 | Consume the `**Origin**` field for inbound-reported fix-released verdict | proposed | 2026-06-22 | P363, P376 |
+| RFC-029 | Apply RISK-POLICY appetite faithfully across all surfaces | proposed | 2026-06-24 | P377 |
+| RFC-030 | RFC lifecycle self-maintenance | proposed | 2026-06-25 | P378 |
+| RFC-031 | Persona validation against adopter corpus + JTBD-M-NNN resolution | proposed | 2026-06-27 | P383 |
+| RFC-032 | External-comms credibility / self-own review axis | proposed | 2026-06-27 | P384 |
+| RFC-033 | Per-iter git worktree isolation for AFK iter dispatch | proposed | 2026-06-27 | P305 |
+| RFC-034 | Forbid backgrounded-task launches inside `claude -p` AFK iter dispatch contexts | proposed | 2026-06-28 | P370 |
+| RFC-035 | Authoring-time deferral-cadence enforcement gate | proposed | 2026-06-28 | P375 |
+| RFC-038 | Loud cold-path diagnostic for oversight-marker shims when no session-id is discoverable | proposed | 2026-07-03 | P368 |
+| RFC-039 | External-comms gate discriminates read-only `gh api` polls from body-bearing draft writes | proposed | 2026-07-03 | P405 |
+| RFC-040 | Narrow the ADR-061 Rule 2 VP carve-out so shipped-verifying changesets graduate | proposed | 2026-07-03 | P398 |
+| RFC-041 | Dispatch marker-writing review agents synchronously so the mark hook fires first | proposed | 2026-07-03 | P402, P407 |
+| RFC-042 | Detect mechanical-step-framed-as-user-optional in agent end-of-turn prose | proposed | 2026-07-03 | P403 |
+| RFC-043 | Derive the commit-gate staleness threshold from RISK-POLICY's stated review cadence | proposed | 2026-07-05 | P408 |
+| RFC-044 | Fix-title lifecycle-drift advisory hook | proposed | 2026-07-05 | P345 |
+| RFC-045 | capture-adr derives full ADR substance at capture | proposed | 2026-07-06 | P375 |
+| RFC-047 | AFK loop `/goal` anchor — external evaluator judges the stop | proposed | 2026-07-06 | P390 |
+| RFC-048 | First-match-on-non-unique-collection review heuristic for the architect agent | proposed | 2026-07-15 | P426 |
+| RFC-051 | Inbound-discovery pre-flight honours a declined channel list | proposed | 2026-07-26 | P431 |
+| RFC-052 | Ship a portable rule routing free-text collection to per-item copyable blocks | proposed | 2026-07-26 | P438 |
+| RFC-053 | Ship a portable rule requiring a verified-current handover before an external review | proposed | 2026-07-26 | P439 |
+| RFC-054 | Make generated output portable by default | proposed | 2026-07-26 | P424 |
 
 ## Verification Queue
 
@@ -155,13 +204,15 @@ Sorted by `Released date ASC`, mirroring the canonical Verification Queue sort d
 | RFC-004 | P079 inbound upstream-report discovery + assessment pipeline (ADR-062 implementation rollout) | 2026-05-15 | All seven slices (A-G) shipped (commits `ca4f6e4` Slices A+D scaffold; `f635470` Slice B; `368b8e6` Slice C; `e8ef115` Slice E; `fb8f326` Slice F; `<this commit>` Slice G + transition). User verification gate: four synthetic-report behavioural-replay scenarios per ADR-062 § Confirmation criterion 3 (clean / out-of-scope / info-extraction / matched-local-ticket). |
 | RFC-006 | Implement ADR-070 + ADR-071 — re-home RFC decisions to ADRs and make RFC-first unconditional | 2026-05-26 | All seven slices shipped (see RFC-006 § Commits). Release marker: `@windyroad/itil@0.35.14` (commit `bf1ebdd`) carrying `wr-itil-adr-070-071-rfc-skills.md` + `wr-itil-rfc-no-rejected-alternatives-lint.md`. User verification gate: the dropped atomic-fix carve-out + the ADR-052 rejected-alternatives lint are observable in published `@windyroad/itil`; the unconditional I13 gate (hook + skill enforcement) ships separately under RFC-005's B2–B10 held-changeset chain. |
 | RFC-007 | P260 — concurrent-session create-gate marker race fix (ADR-050 Option C) | 2026-05-26 | Retro-fit (per ADR-071) of the already-committed Option-C fix; released in `@windyroad/itil@0.35.14` (commit `bf1ebdd`). User verification gate: the concurrent-session create-gate deny no longer fires during `/wr-itil:work-problems` AFK loops (behavioural bats negative-control reproduces the pre-fix deny). Closes with P260. |
+| RFC-037 | Implement ADR-089 (every RFC ≥1 story) + ADR-090 (story-map/story oversight) | 2026-07-02 | Hand-authored as a pre-implementation story map listing STORY-MAP-002's A3 stories (020/021/022/024/025), all five now `done`. User verification gate: the `manage-rfc` proposed→accepted transition refuses an RFC with an empty `stories:` array, and story-map/story oversight markers are demanded at their ratification gates. |
 
 ## Closed
 
-(Empty — no closed RFCs yet. RFC-001 closes once Slice 5 forward-dogfood completes per the P170 story map.)
+RFC-001 closes once Slice 5 forward-dogfood completes per the P170 story map.
 
 | ID | Title | Closed | Driving problems |
 |----|-------|--------|------------------|
+| RFC-025 | Real shipment control via build-time feature toggles | 2026-06-17 | P359 |
 
 ## Held-changeset window
 

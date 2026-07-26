@@ -78,7 +78,6 @@ The JTBD + USM discipline (problem → correct JTBD/persona → user-story-map �
 - Hang-off consideration (capture Step 2b): mechanical pre-filter surfaced P160 + P390 as signal-sharing candidates; **PROCEED_NEW per explicit user direction** ("we need problems for all of these"; meta issue kept distinct from P160). Recorded per ADR-026 audit-trail.
 - User correction 2026-07-07 (verbatim excerpts in Description) — the driver.
 
-
 ## Stories
 
 | ID | Title | Status |
@@ -86,3 +85,10 @@ The JTBD + USM discipline (problem → correct JTBD/persona → user-story-map �
 | STORY-039 | STORY-039: Throttle token burn against the quota windows | archived |
 | STORY-042 | STORY-042: Extract quota-pacing into its own plugin | in-progress |
 | STORY-043 | STORY-043: Self-install the quota-state producer | in-progress |
+
+
+## RFCs
+
+| ID | Title | Status |
+|----|-------|--------|
+| RFC-046 | RFC-046: Quota-pace throttle — mechanical PreToolUse pacing, extracted into `@windyroad/cruise` | in-progress |

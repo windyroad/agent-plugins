@@ -108,3 +108,10 @@ Fold-fix per ADR-022 P143. Release vehicle: `.changeset/p191-jtbd-gate-project-r
 - **Verified**: 2026-07-25 via /wr-itil:review-problems second-pass evidence sweep (duration/downstream transcript mining + in-session behavioural test exercise).
 - **Evidence**: Duration: the jtbd fail-closed symptom ("no JTBD documentation exists" deny) is absent across all 271 transcripts despite ~75 post-fix sessions editing package files; both phases shipped 2026-06-04.
 - **Recovery**: reversible via `/wr-itil:transition-problem 191 known-error` or `git revert`.
+
+
+## RFCs
+
+| ID | Title | Status |
+|----|-------|--------|
+| RFC-020 | RFC-020: P191 — JTBD edit gate resolves docs/jtbd from the project root, not the hook runtime CWD | proposed |

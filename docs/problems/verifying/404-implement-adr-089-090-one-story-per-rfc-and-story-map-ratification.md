@@ -66,16 +66,17 @@ Implement via **RFC-037** (authored 2026-07-02; traces `problems: [P404]`; archi
 - **Blocks**: (none)
 - **Blocked by**: (none — ADR-089/090 are ratified; this is their implementation)
 - **Composes with**: RFC-005 / STORY-MAP-002 (the RFC-first work this may land within)
-
-## RFCs
-
-- **RFC-037** — the RFC-first fix for this problem (authored 2026-07-02). Implements ADR-089/090 in two phases; its `stories:` are STORY-MAP-002's A3 tooling stories (020/021/022/024/025). This is the RFC we should have created *before* decomposing — dogfood gap closed.
-
 ## Related
 
 - **ADR-089** (every RFC has ≥1 story) + **ADR-090** (story-map/story drift-invalidated oversight) — the authorities, both confirmed 2026-07-02.
 - **STORY-MAP-002** / **RFC-005** — the RFC-first vehicle this may land within as new stories (per the ADRs' "consider hanging off" note); the A3 ratify/create/add/reuse stories on the map are the natural home. **STORY-MAP-002 is also the hand-authored exemplar** — the golden reference for what a good, ratified USM + its INVEST stories look like (see the Investigation Task above).
 - Hang-off pre-filter (skipped subagent, >5 candidates) surfaced the RFC-first cluster for review-time consolidation: **P399** (author full RFC not skeleton), **P314** (I13 gate rework), **P310** (RFCs carry independent decisions), **P315**, **P312**. A reviewer should decide whether Phase 1/2 fold into RFC-005's implementation or that cluster rather than standing alone.
+
+## RFCs
+
+| ID | Title | Status |
+|----|-------|--------|
+| RFC-037 | RFC-037: Implement ADR-089 (every RFC ≥1 story) + ADR-090 (story-map/story oversight) | verifying |
 
 ## Fix Released
 
@@ -137,3 +138,4 @@ Original reopen tasks (superseded/subsumed by the above where ticked):
 - [ ] **REOPENED 2026-07-08 — the story-map authoring feature was solved for THIS project, not for adopters (same class as P160/quota-pacing).** P404's enforcement gates shipped, but the *authoring* half is not: `capture-story-map` + `manage-story-map` + the ADR-060 § Phase 2 HTML schema still scaffold the OLD crude `.backbone/.rib/.slice` skeleton. A maintainer can hand-craft a good map ABOVE the template by copying a rich exemplar they already have (e.g. windyroad `STORY-MAP-002`) — **but an adopter who installs `@windyroad/itil` and runs `/wr-itil:capture-story-map` on a fresh project has NO exemplar to copy and gets a crude skeleton.** "Copy a good exemplar" is not a solution for adopters; it is the tell that the feature was solved for the maintainer, not shipped — the exact parallel to P160 (the throttle worked only on the one hand-wired machine). **The real fix (the reopened scope): the tooling itself must scaffold + author the good, value-first, Patton-correct format so ANY project produces a good story map from the skill, with no exemplar on hand** — goal/persona banner; a journey backbone of user activities ending at real value; VALUE-first cards in the persona's voice ("I keep working without hitting the wall"), with the mechanism / STORY-id demoted to the trace ref and NEVER a build task (write an ADR / wire a hook) dressed as a story; now/next/later (or release-band) status; theme-aware, ARIA-labelled. The golden shape is documented (windyroad `STORY-MAP-002`; the 2026-07-08 STORY-MAP-003 rebuild) and the authoring discipline is in the maintainer memory `project_story_maps_html_convention` — **both must become the SKILL's emitted template + its guided authoring prompts, and the ADR-060 § Phase 2 schema upgraded to match**, so the discipline ships with the plugin instead of living in one maintainer's head. Then reformat the crude on-disk maps (STORY-MAP-001) to the shipped format. NB — this gap did NOT cause the 2026-07-08 STORY-MAP-003 miss (that was maintainer authoring discipline); it is the *separate, adopter-facing* half that makes the feature real for other projects, which is P404's original intent.
 - [ ] Behavioural bats proving the capture-time gates fire on the AFK path (not just the accepted transition): a `capture-story` without a resolvable map is rejected; a new RFC with a `## Tasks` body / empty `stories:` is rejected at authoring.
 - [ ] Back-fill/repair the mapless survivors: STORY-037, STORY-038 (assign to a map or fold into one).
+

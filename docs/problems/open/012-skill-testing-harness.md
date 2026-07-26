@@ -140,3 +140,10 @@ Diagnosed the *exact* mechanism behind finding #3's flake: the brittle assertion
 **Stability evidence**: post-fix runs — 100%, 100%, then a single T3-rubric flake (the prompt/rubric mismatch, now fixed), then **6 consecutive 4/4 ALL-PASS runs** after the test-4 rubric re-scope. manage-problem eval remains 1/1 stable. The systematic negation-false-fail that made the eval "never green" is eliminated.
 
 **Remaining open**: criterion (b) — better-sqlite3 CI rebuild (finding #2) — is the last blocker before P012 can close. The evals run under subscription auth (local/dev dogfood), NOT in CI, so (b) is about making `npm run eval:skills` runnable from a clean install, not about gating CI. Criterion (c) reference pattern is documented inline above (positive paraphrase-proof Tier-A anchors + negative clauses → llm-rubric + never assert un-elicited content).
+
+
+## RFCs
+
+| ID | Title | Status |
+|----|-------|--------|
+| RFC-012 | RFC-012: Build the promptfoo agent-prose AND SKILL-prose verdict eval harness | proposed |

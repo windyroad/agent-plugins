@@ -71,14 +71,6 @@ The framework then compounds the gap by *describing* the hold as a shipment cont
 - **RFC-025** (`docs/rfcs/RFC-025-real-shipment-control-via-build-time-feature-toggles.proposed.md`) — the ADR-082-(b) build vehicle: build-time feature toggles rendering shipped tarballs from templated source, with paired ON/OFF test matrices. Slices 1–4 decompose the mechanism build + holding-area retirement + K→V reconciliation.
 - ADR-042 (auto-apply scorer remediations; Rule 7 holding convention), R009 (SKILL-prose floor standing risk), P220 (witnessing case — de-facto-released held changeset), P162 (graduation criteria — verifying), P228 (K→V enumerator keys on deleted-from-tree changesets — same blind spot).
 - Hang-off pre-filter (capture Step 2b): 25 candidates shared ≥1 signal (ADR-042 / changesets-holding) — above the 5-candidate dispatch cap, so the hang-off-check subagent was skipped per the candidate-cap short-circuit; re-evaluate absorption at next `/wr-itil:review-problems`. Title-grep matches (list-only): P162, P177 (holding-dir 2-commit pattern), P330 (release-vehicle helper), P141, P073 (closed), P202 (closed), P206 (closed).
-
-## RFCs
-
-| RFC | Status | Title |
-|-----|--------|-------|
-| RFC-025 | proposed | Real shipment control via build-time feature toggles |
-
-
 ## Ratified Direction - 2026-07-04 interactive decision drain
 
 **SUPERSEDE the changeset-holding mechanism entirely + retire ADR-061** (user decision, 2026-07-04). Holding is theatre - held code ships on the next sibling release regardless, so a hold only strips changelog attribution. Either withhold PROPERLY (revert the code) or release. Remove docs/changesets-holding/, retire ADR-061 (dogfood-graduation-criteria), and rework ADR-042 Rule 2 (above-appetite move-to-holding) to a real resolution (revert / block-until-eval-green / release-with-authorisation). This is P359's ratified fix direction.
@@ -93,3 +85,10 @@ The framework then compounds the gap by *describing* the hold as a shipment cont
 - Above-appetite work must be split, controlled, disabled/reverted, or halted.
 
 Release vehicle: `.changeset/remove-held-changeset-workflow.md`.
+
+
+## RFCs
+
+| ID | Title | Status |
+|----|-------|--------|
+| RFC-025 | RFC-025: Real shipment control via build-time feature toggles | closed |
