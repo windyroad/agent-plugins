@@ -3,8 +3,9 @@ status: proposed
 job-id: work-backlog-afk
 persona: developer
 date-created: 2026-04-17
-human-oversight: unconfirmed
+human-oversight: confirmed
 oversight-date: 2026-05-31
+oversight-confirmed-date: "2026-07-27 — re-ratified via the P357 brief AskUserQuestion this session; the ADR-101 lockstep narrowing (bounded AFK-accept carve-out for pure decomposition of already-confirmed substance; verification untouched; opt-in) confirmed in the same batch as ADR-101."
 oversight-downgraded: "2026-07-26 — ADR-101 lockstep (material amendment per ADR-068): the Desired Outcome 'Problems requiring my judgment are queued for my return, not guessed at' is NARROWED by a bounded AFK-accept carve-out for pure decomposition of already-confirmed substance. Marker held until re-ratified; re-ratification queued with ADR-101's owed post-draft brief (P456 open items)."
 ---
 

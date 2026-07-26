@@ -4,8 +4,9 @@ job-id: ship-with-confidence
 persona: developer
 secondary-persona: tech-lead
 date-created: 2026-04-14
-human-oversight: unconfirmed
+human-oversight: confirmed
 oversight-date: 2026-05-31
+oversight-confirmed-date: "2026-07-27 — re-ratified via the P357 brief AskUserQuestion this session; the ADR-101 lockstep two-axis amendment (governance-bypass strengthened for everyone per P465, narrowed on the machine-accept axis only where a project opts in) confirmed in the same batch as ADR-101."
 oversight-downgraded: "2026-07-26 — ADR-101 lockstep (material amendment per ADR-068): the Desired Outcome 'The agent cannot bypass governance — hooks block edits until reviews pass' is QUALIFIED on two axes — strengthened on the ratification axis for everyone (P465), narrowed on the machine-accept axis only where a project opts in. Marker held until re-ratified; re-ratification queued with ADR-101's owed post-draft brief (P456 open items)."
 ---
 

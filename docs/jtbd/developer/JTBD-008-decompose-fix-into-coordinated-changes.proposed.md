@@ -4,9 +4,10 @@ job-id: decompose-fix-into-coordinated-changes
 persona: developer
 secondary-persona: tech-lead
 date-created: 2026-05-05
-human-oversight: unconfirmed
+human-oversight: confirmed
 oversight-date: 2026-05-26
-oversight-confirmed-date: "2026-07-02 — re-ratified via AskUserQuestion (P357 batched pass) after the ADR-089/090 amendment"
+oversight-confirmed-date: "2026-07-27 — re-ratified via the P357 brief AskUserQuestion this session; the ADR-101 lockstep narrowing of the story-map 're-ratify on any change' rule (excludes the accepted story's own ADR-095-compelled card) confirmed in the same batch as ADR-101."
+oversight-confirmed-date-prior: "2026-07-02 — re-ratified via AskUserQuestion (P357 batched pass) after the ADR-089/090 amendment"
 oversight-downgraded: "2026-07-26 — ADR-101 lockstep (material amendment per ADR-068): 're-ratify on any change' to a story map is NARROWED to any change other than adding the accepted story's own card, because ADR-095 compels that card and the unqualified rule was unsatisfiable by construction. Marker held until re-ratified; re-ratification queued with ADR-101's owed post-draft brief (P456 open items)."
 oversight-downgraded-prior: "2026-07-02 — ADR-089 lockstep: 'atomic = empty stories:[]' → 'atomic = exactly one full story' (an RFC always has ≥1 story); + ADR-090 story-map drift-invalidated ratification. P357 re-ratification batched this session."
 ---
