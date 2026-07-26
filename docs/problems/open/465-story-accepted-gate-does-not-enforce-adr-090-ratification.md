@@ -49,11 +49,13 @@ Rely on the architect gate to catch the bypass. That works only when an architec
 |-----|--------|-------|
 | RFC-058 | proposed | The AFK-accept carve-out, and the story-ratification check that was never implemented |
 
-## Fix Released
+## Fix Committed - not yet released
 
-Fixed 2026-07-26 in the same slice as P456's carve-out — the two are the inverse pair, so fixing one without the other would have left them contradicting. The tightening ships **unconditionally** for every adopter: putting an ADR-090-mandated check behind an opt-in flag would itself have been the decision conflict, and would have meant adopters got the loosening's absence without the tightening's presence.
+Committed 2026-07-26 (`11d7a6d1`) in the same slice as P456's carve-out — the two are the inverse pair, so fixing one without the other would have left them contradicting. The tightening ships **unconditionally** for every adopter: putting an ADR-090-mandated check behind an opt-in flag would itself have been the decision conflict, and would have meant adopters got the loosening's absence without the tightening's presence.
 
 Recorded as ADR-101 (`docs/decisions/101-afk-accept-carve-out-for-pure-decomposition-stories.proposed.md`), which defines the one bounded basis on which the ratification may be machine-written rather than human, and is otherwise a pure tightening of this gate.
+
+Status stays **Open** rather than Verification Pending: no push and no release happened this iteration, so the fix is not in an adopter's hands and there is nothing for the maintainer to verify yet. Transition to `verifying` when `@windyroad/itil` next publishes.
 
 ## Dependencies
 
