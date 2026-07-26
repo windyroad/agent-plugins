@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-26 **P450 → Known Error** — the verification lifecycle has a consumer with no producer: the session-wrap drain closes tickets whose queue row reads `yes — observed:`, but nothing ever writes that value onto a still-verifying row. Confirmed by census, not inference — 129 rows in the queue, exactly one carries evidence; all 37 commits that ever touched the evidence token write it as a close-time annotation on an already-closed row, while the release transition writes the `no — not observed` default and no later surface revisits it. A dedicated discriminator over those 37 commits excluded the competing clobber hypothesis with zero hits. Diagnosis also turned up a laundering path: the one informal producer in the wild wrote its own same-session evidence and was closed on it a week later, because the drain's same-session exclusion keys off the ticket rename date rather than the evidence write date. Fix vehicle authored and held: RFC-055. The story is deliberately NOT authored — the storage locus is a genuine open decision (the queue cell is a rendered projection, so making it the store of record needs its own ratified ADR) and it determines the acceptance criteria almost entirely, so authoring them now would be the P315 build-on-unratified failure. Effort re-rated M → L. JTBD re-anchored JTBD-001 → JTBD-006. Storage decision queued.
+> Last reviewed: 2026-07-26 **P471 captured** — the ask-hygiene trail writes one file per date, not per retro, so same-day AFK iterations silently overwrite each other's entries (lightweight aside via /wr-itil:capture-problem)
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -54,6 +54,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 8 | P375 | Repo conflates a "named re-entry point" with a self-firing cadence — deferrals not transitively reachable from an automatic trigger rot | 16 (High) | Known Error | L | 2026-06-23 | internal |
 | 8 | P465 | The story `accepted` gate names ADR-090 ratification but no surface enforces it | 8 (Medium) | Open | M | 2026-07-26 | internal |
 | 8 | P414 | retro/wrap defers over-threshold briefing Tier-3 rotation as a "run interactive run-retro" recommendation instead of performing the split | 8 (Medium) | Open | S | 2026-07-03 | internal |
+| 8 | P471 | run-retro Step 2d ask-hygiene trail path collides across same-day iterations, clobbering prior entries | 8 (Medium) | Open | S | 2026-07-26 | internal |
 | 8 | P423 | Agent "fixes" recurring behavioural corrections via project-local memory instead of shipping an adopter-facing plugin surface | 16 (High) | Open | M | 2026-07-06 | internal |
 | 7.5 | P359 | Changeset holding does not withhold shipment — held code ships with any sibling release | 15 (High) | Known Error | L | 2026-06-11 | internal |
 | 7.5 | P444 | Agent buries granular design decisions in artefacts — default values, thresholds, and policy choices pass artefact-level ratification unsurfaced, escaping real oversight | 15 (High) | Open | M | 2026-07-08 | internal |
