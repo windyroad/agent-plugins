@@ -116,6 +116,7 @@ Active (non-done) stories, from filesystem truth. (The `## Done` backfill of ter
 | accepted | STORY-044 | See what cruise is doing — status/telemetry skill | M | P160, P446 | RFC-046 | STORY-MAP-003 |
 | draft | STORY-047 | Gate the correction nudge on prompt authorship | S | P430 | RFC-050 | STORY-MAP-005 |
 | draft | STORY-048 | Gate the inbound-discovery pre-flight on the channel list | S | P431 | RFC-051 | STORY-MAP-006 |
+| draft | STORY-049 | Ask for a URL in a shape I can paste into | M | P438 | RFC-052 | STORY-MAP-007 |
 | draft | STORY-012 | Can't start coding without an RFC — the gate makes me create one first | S | P251, P314 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-013 | Full gate: an RFC exists → I proceed; none → I create it first | M | P251, P314 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-014 | Unattended, the agent works the plan and pauses for real decisions | M | P251, P314 | RFC-005 | STORY-MAP-002 |

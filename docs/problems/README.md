@@ -21,8 +21,8 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 9 | P428 | work-problems Step 5 dispatch heredoc-in-command-substitution is unparseable under macOS /bin/bash 3.2 | 9 (Medium) | Open | S | 2026-07-06 | inbound-reported (#345) |
 | 9 | P437 | wr-wardley exposes no version-stable invocation path for its owm-to-svg converter (consumers pin the cache version and break on bump) | 9 (Medium) | Open | S | 2026-07-06 | inbound-reported (#325) |
 | 9 | P454 | wr-risk-scorer restage-commit helper sweeps the whole index/working tree into the commit instead of pathspec-scoping to the supplied paths | 9 (Medium) | Open | S | 2026-07-15 | inbound-reported (#344) |
+| 6 | P438 | Assistant routes free-text collection (URLs/tokens/IDs) through AskUserQuestion instead of per-item copyable blocks | 6 (Medium) | Known Error | M | 2026-07-06 | inbound-reported (#324) |
 | 6 | P436 | Issue templates declare labels ('problem', 'needs-triage') that don't exist; scaffold-intake should provision declared labels | 6 (Medium) | Open | S | 2026-07-06 | inbound-reported (#170) |
-| 6 | P438 | Assistant routes free-text collection (URLs/tokens/IDs) through AskUserQuestion instead of per-item copyable blocks | 6 (Medium) | Open | S | 2026-07-06 | inbound-reported (#324) |
 | 6 | P439 | External-review round-trips waste cycles on stale repo artifacts (unpushed commits + stale IDE buffer) | 6 (Medium) | Open | S | 2026-07-06 | inbound-reported (#326) |
 | 6 | P424 | Governance tooling emits U+2014 em-dashes in generated output, breaking adopter no-em-dash Edit/Write hooks | 12 (High) | Open | M | 2026-07-06 | inbound-reported (#185, #186, #219, #223, #319) |
 | 6 | P433 | transition-problem / review-problems / run-retro Step 4a lack a sibling-family completeness scan before close | 12 (High) | Open | M | 2026-07-06 | inbound-reported (#187) |

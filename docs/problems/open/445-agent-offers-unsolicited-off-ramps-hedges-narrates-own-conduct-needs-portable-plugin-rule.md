@@ -6,7 +6,7 @@
 **Origin**: internal
 **Effort**: L — design + ship a portable behavioural-rule surface (a plugin hook that injects the rule) + decide its plugin home; behavioural coverage is a prose-eval, not a bats gate.
 **WSJF**: 3.75 — (15 × 1.0) / 4 (added 2026-07-15 review)
-**JTBD**: JTBD-001
+**JTBD**: JTBD-011 (re-anchored 2026-07-26 from the capture default JTBD-001 — see Related)
 **Persona**: developer
 
 ## Description
@@ -56,5 +56,7 @@ The behaviour is a trained default; the framework has no PORTABLE surface that i
 ## Related
 
 - **P423** — master: behavioural corrections need a portable adopter-facing surface, not project-local memory. This ticket's fix is scoped as a plugin surface per P423 by user direction 2026-07-08.
+- **STORY-MAP-007** (A correction to the agent's conduct holds in every project) — the shared map for this class, authored 2026-07-26 while working P438 (the assistant collects free text through the bounded-options picker instead of a copyable block). This ticket's rule belongs there as a second rib, *"No off-ramps I never asked for"*, once it has a story — not as a new map. The rib is named in that map's closing note rather than built empty.
+- **JTBD-011** (Have a Correction to the Agent's Conduct Hold Everywhere) — the grounding job authored in the same pass, replacing this ticket's capture-default anchor on JTBD-001. This ticket, P438 and P423 are its three independent instances.
 - Driving witness: user, 2026-07-08 (verbatim in Description).
 - Maintainer memory `feedback_surface_embedded_design_decisions` (sibling conduct-discipline lesson).

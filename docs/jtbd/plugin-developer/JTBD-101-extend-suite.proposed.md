@@ -36,3 +36,34 @@ When I'm building a new plugin, I want to follow a clear template and have CI va
 ## Current Solutions
 
 Copy an existing plugin and modify it, read ADRs and BRIEFING.md
+
+## RFCs
+
+| ID | Title | Status |
+|----|-------|--------|
+| RFC-002 | RFC-002: docs/problems/ flat layout migration — per-state subdirs + adopter auto-migration | verifying |
+| RFC-003 | RFC-003: P170 Phase 2 — Story-tier framework + working-the-problem traversal | in-progress |
+| RFC-004 | RFC-004: P079 inbound upstream-report discovery + assessment pipeline (ADR-062 implementation rollout) | verifying |
+| RFC-005 | RFC-005: RFC-first trace invariant not enforced at fix-time | accepted |
+| RFC-006 | RFC-006: Implement ADR-070 + ADR-071 — re-home RFC decisions to ADRs and make RFC-first unconditional | verifying |
+| RFC-012 | RFC-012: Build the promptfoo agent-prose AND SKILL-prose verdict eval harness | proposed |
+| RFC-013 | RFC-013: P346 backlog flow control multi-phase | proposed |
+| RFC-017 | RFC-017: P351 — auto-bootstrap on missing precondition config (witnessed instance + structural lint) | proposed |
+| RFC-020 | RFC-020: P191 — JTBD edit gate resolves docs/jtbd from the project root, not the hook runtime CWD | proposed |
+| RFC-051 | RFC-051: Inbound-discovery pre-flight honours a declined channel list | proposed |
+| RFC-052 | RFC-052: Ship a portable rule routing free-text collection to per-item copyable blocks | proposed |
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-007 | STORY-MAP-007: A correction to the agent's conduct holds in every project | draft |
+| STORY-MAP-001 | STORY-MAP-001: RFC Framework Phase 1 + Phase 2 Bootstrap | in-progress |
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-004 | STORY-004: RFC frontmatter stories: extension + capture-rfc / manage-rfc updates | done |
+| STORY-049 | STORY-049: Ask for a URL in a shape I can paste into | draft |
