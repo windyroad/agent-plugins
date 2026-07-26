@@ -52,3 +52,5 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 | STORY-036 | STORY-036: Write the create-gate marker under every candidate session id | draft |
 | STORY-038 | STORY-038: Fix-titled commits surface a lifecycle-drift advisory | draft |
 | STORY-040 | STORY-040: AFK loop anchored with the native `/goal` external evaluator | draft |
+| STORY-047 | STORY-047: Gate the correction nudge on prompt authorship | draft |
+| STORY-048 | STORY-048: Gate the inbound-discovery pre-flight on the channel list | draft |

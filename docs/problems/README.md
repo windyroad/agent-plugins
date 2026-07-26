@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-26 **P467 captured** — work-problems should surface decisions/ratifications continuously (non-blocking) so a present user can ratify held vehicles mid-loop and unblock later iters in the same run, not only in the loop-end batch; user-voiced enhancement (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-07-26 **P431 → Known Error** — the inbound-discovery pre-flight helper tests whether the upstream-channels config file exists but never reads the channel list inside it, so a project that explicitly declined (empty list) is charged a no-op pre-flight subprocess every loop while a project that never configured anything is silently passed. Reproduced in situ; fix vehicle authored as RFC-051 / STORY-MAP-006 / STORY-048 and held for ratification. Prior: **P467 captured** — work-problems should surface decisions/ratifications continuously (non-blocking) so a present user can ratify held vehicles mid-loop and unblock later iters in the same run, not only in the loop-end batch; user-voiced enhancement (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -16,11 +16,11 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 24 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | 12 (High) | Known Error | S | 2026-07-06 | inbound-reported (#169) |
 | 16 | P429 | manage-problem commit-message examples fail @commitlint/config-conventional subject-case in adopter projects | 8 (Medium) | Known Error | S | 2026-07-06 | inbound-reported (#137) |
 | 16 | P430 | itil-correction-detect UserPromptSubmit hook false-positives on orchestrator / AFK prompt text | 8 (Medium) | Known Error | S | 2026-07-06 | inbound-reported (#257) |
+| 12 | P431 | check-upstream-cache-staleness helper misfires on a declined-permanently (empty channels) config | 6 (Medium) | Known Error | S | 2026-07-06 | inbound-reported (#341) |
 | 12 | P376 | Catchup scanner misses the inbound direction; outbound templates carry the same structural defect the P363 rework fixed on the inbound side — cross-direction parity gap | 12 (High) | Known Error | M | 2026-06-23 | inbound-reported (#349) |
 | 9 | P428 | work-problems Step 5 dispatch heredoc-in-command-substitution is unparseable under macOS /bin/bash 3.2 | 9 (Medium) | Open | S | 2026-07-06 | inbound-reported (#345) |
 | 9 | P437 | wr-wardley exposes no version-stable invocation path for its owm-to-svg converter (consumers pin the cache version and break on bump) | 9 (Medium) | Open | S | 2026-07-06 | inbound-reported (#325) |
 | 9 | P454 | wr-risk-scorer restage-commit helper sweeps the whole index/working tree into the commit instead of pathspec-scoping to the supplied paths | 9 (Medium) | Open | S | 2026-07-15 | inbound-reported (#344) |
-| 6 | P431 | check-upstream-cache-staleness helper misfires on a declined-permanently (empty channels) config | 6 (Medium) | Open | S | 2026-07-06 | inbound-reported (#341) |
 | 6 | P436 | Issue templates declare labels ('problem', 'needs-triage') that don't exist; scaffold-intake should provision declared labels | 6 (Medium) | Open | S | 2026-07-06 | inbound-reported (#170) |
 | 6 | P438 | Assistant routes free-text collection (URLs/tokens/IDs) through AskUserQuestion instead of per-item copyable blocks | 6 (Medium) | Open | S | 2026-07-06 | inbound-reported (#324) |
 | 6 | P439 | External-review round-trips waste cycles on stale repo artifacts (unpushed commits + stale IDE buffer) | 6 (Medium) | Open | S | 2026-07-06 | inbound-reported (#326) |

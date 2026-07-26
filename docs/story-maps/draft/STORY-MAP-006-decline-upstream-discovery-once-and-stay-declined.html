@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>STORY-MAP-005: Trust the capture-on-correction signal</title>
-  <meta name="story-map-id" content="STORY-MAP-005">
+  <title>STORY-MAP-006: Decline upstream discovery once and stay declined</title>
+  <meta name="story-map-id" content="STORY-MAP-006">
   <meta name="status" content="draft">
-  <meta name="problems" content="P430">
-  <meta name="rfcs" content="RFC-050">
+  <meta name="problems" content="P431">
+  <meta name="rfcs" content="RFC-051">
   <meta name="jtbd" content="JTBD-006">
   <meta name="adrs" content="">
   <meta name="reported" content="2026-07-26">
@@ -39,22 +39,22 @@
 </head>
 <body>
   <main>
-    <h1>STORY-MAP-005: Trust the capture-on-correction signal</h1>
+    <h1>STORY-MAP-006: Decline upstream discovery once and stay declined</h1>
 
-    <p>When a user tells the agent it got something wrong, that correction should become a durable problem record rather than decaying with the session — that is the job the capture-on-correction nudge exists to do. The nudge only works if it means something. Today its prompt detector fires on any prompt containing an imperative like "do not", including the framework's own iteration prompts, so a signal that should be rare and pointed arrives on nearly every autonomous iteration with no correction behind it. This map covers making the nudge trustworthy by teaching the detector to distinguish user-authored prompts from framework-generated ones. (Traces: P430, inbound #257; JTBD-006.)</p>
+    <p>A project that never wants its upstream tracker polled for inbound problem reports can say so once, and the framework records that answer as an empty channel list. Saying no should then cost nothing. Today it costs a full pre-flight subprocess on every autonomous loop: the staleness check that decides whether to refresh the inbound-discovery cache looks only for the presence of the config file, so a recorded "no thanks" reads as "never checked", and the loop keeps dispatching a pass that has nothing to poll and so never writes the cache that would quiet it. This map covers teaching that check to read the answer it was given. (Traces: P431, inbound #341; JTBD-006.)</p>
 
     <section class="backbone" style="--cols: 1">
       <header class="rib-header">
-        <h2 data-rib="trustworthy-correction-signal">Trustworthy correction signal</h2>
+        <h2 data-rib="honoured-decline">Honoured decline</h2>
       </header>
       <div class="rib">
-        <a class="slice" href="../../stories/draft/STORY-047-correction-nudge-fires-only-on-user-authored-prompts.md"
-           data-story-id="STORY-047" data-rfc="RFC-050" data-jtbd="JTBD-006"
-           data-status="draft">Gate the correction nudge on prompt authorship</a>
+        <a class="slice" href="../../stories/draft/STORY-048-inbound-discovery-preflight-honours-an-empty-channel-list.md"
+           data-story-id="STORY-048" data-rfc="RFC-051" data-jtbd="JTBD-006"
+           data-status="draft">Gate the inbound-discovery pre-flight on the channel list</a>
       </div>
     </section>
 
-    <p class="map-note">Single-story map: ADR-089 (every RFC has at least one story) and ADR-095 (map membership at capture) make one-rib maps the floor shape for a single-surface fix. Further over-fire problems in the same prompt-detector family become stories on this rib rather than minting sibling maps. Slices link to Markdown story files.</p>
+    <p class="map-note">Single-story map: ADR-089 (every RFC has at least one story) and ADR-095 (map membership at capture) make one-rib maps the floor shape for a single-surface fix. Further declined-capability problems in the same pre-flight family become stories on this rib rather than minting sibling maps. Slices link to Markdown story files.</p>
   </main>
 </body>
 </html>

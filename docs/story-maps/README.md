@@ -91,6 +91,7 @@ One row per story map in `draft` / `accepted` / `in-progress` status, from files
 | — | STORY-MAP-003 | Sustain my token quota across the week and across surfaces | draft | P160, P443 | RFC-046 |
 | — | STORY-MAP-004 | Close the outbound reporter loop with honest, generated upstream lifecycle comments | draft | P376 | — |
 | — | STORY-MAP-005 | Trust the capture-on-correction signal | draft | P430 | RFC-050 |
+| — | STORY-MAP-006 | Decline upstream discovery once and stay declined | draft | P431 | RFC-051 |
 
 ## Completed
 
