@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 97 (86 in-force, 11 historical)
+**Total ADRs:** 98 (87 in-force, 11 historical)
 
 ---
 
 ## In-force decisions
 
-_86 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_87 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -63,11 +63,11 @@ _86 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed
 **Confirmation:** grep -rn "Options:.*\(a\)\|Your call:\|which would you like\|which way?" packages/*/skills/ returns zero match...; Every SKILL.md with AskUserQuestion in allowed-tools uses it at all documented branch points (no prose fallbac...; Scoring agents (pipeline.md, wip.md, plan.md) have tools: [Read, Glob] only — no AskUserQuestion grant; Below-appetite / policy-authorised paths produce no user prompt (silent proceed); 2026-06-06 amendment confirmation — every SKILL.md AFK fallback prose either (a) names queue-and-continue as...
 **Related:** ADR-011, ADR-010, ADR-005, ADR-044, ADR-052, ADR-074
+
 ### ADR-014 — Governance Skills Commit Their Own Completed Work
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** Governance skills auto-commit their own completed work instead of leaving it uncommitted, following a strict `work → score → commit` order (stage, delegate to `wr-risk-scorer:pipeline`, commit within appetite, `AskUserQuestion` above appetite, skip-and-report when non-interactive) — chosen because immediate pipeline visibility, an audit trail at completion time, and reduced WIP dwell outweigh the new skill-to-risk-scorer sequencing dependency. In scope: manage-problem and manage-incident; carries the canonical commit-message convention table plus its later amendments (context-analysis, ADR-031 migration bypass, capture-problem with the P199 Option 2 reversal, upstream-responses pass, and the P429 verb-first subject-case amendment — every registered subject must start with a lowercase token, seven rows now verb-first with the artefact ID retained after the verb, its own substance `human-oversight: unconfirmed` and the 12-occurrence SKILL prose flip HELD pending ratification) and the P118 README reconciliation preflight layer.
-**Confirmation:** manage-problem and manage-incident SKILL.md contain no "Do not commit" instruction; both contain the work → score → commit ordering sequence; both reference AskUserQuestion at the above-appetite branch point; a BATS functional test asserts the commit path in at least one in-scope skill (deferred to the P012 harness); every registered subject shape begins with a lowercase token so it passes commitlint `subject-case` (registry-level guard blocked on P429; maintained by review at amendment time)
-**Related:** ADR-013, ADR-011, ADR-009, ADR-043, ADR-031, ADR-019, ADR-032, ADR-062, ADR-024, ADR-038, ADR-060, ADR-071, ADR-089, ADR-096
+**Confirmation:** packages/itil/skills/manage-problem/SKILL.md contains no "Do not commit" instruction; packages/itil/skills/manage-incident/SKILL.md contains no "Do not commit" instruction; packages/itil/skills/manage-problem/SKILL.md contains the work → score → commit ordering sequence; packages/itil/skills/manage-incident/SKILL.md contains the work → score → commit ordering sequence; Both SKILL.md files reference AskUserQuestion at the above-appetite commit branch point
+**Related:** ADR-013, ADR-014, ADR-011, ADR-009
 
 ### ADR-015 — On-Demand Assessment Skills for Governance Plugins
 **Status:** proposed | **Oversight:** confirmed
@@ -111,11 +111,11 @@ _86 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **"Prompt amendment + performance-budget ADR template"**, because the prompt change closes the immediate blind spot (the architect asks the right question) while the template gives downstream projects a reusable surface the a...
 **Related:** ADR-013, ADR-015
+
 ### ADR-024 — Cross-project problem-reporting contract — `report-upstream` skill in `@windyroad/itil`
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** Ship a `report-upstream` action skill inside `@windyroad/itil` that discovers an upstream repo's issue templates and falls through to a structured default body when none exist, routes security-classified tickets via the upstream `SECURITY.md` channel, and back-writes the upstream issue URL into the local ticket — respecting maintainers' curated intake without abandoning downstreams whose upstreams have no templates, and without publishing a separate plugin. Amendments extend the contract to dedup/comment-on-existing paths, external-comms-risk-gated AFK auto-filing (including security), a reciprocal `update-upstream` lifecycle-comment skill with a `--catchup` batch mode, an inbound-verdict dispatch leg keyed off the `**Origin**: inbound-reported (#NN)` field whose reporter-facing prose is LLM-generated (not templated) with visibility-gated anti-leakage and workaround-provenance credit, a proposed-but-unbuilt symmetric rework of the outbound `update-upstream` templates, and a correction of the Step 8 commit subject to `docs(problems): report P<NNN> upstream — …` (the old uppercase-ID-leading form fails commitlint `subject-case`), whose canonical shape now lives in ADR-014.
-**Confirmation:** SKILL.md documents template discovery, security-path routing, external-comms-gated AFK branching, and cross-reference back-write; bats assert those steps plus the Step 4b dedup / Step 5c comment paths, the inbound Origin-field dispatch, both-present dual dispatch, idempotency skip, and visibility-gated anti-leakage (PUBLIC title+link vs PRIVATE strict ban); `manage-problem` names `## Reported Upstream` as an allowed appendage and ADR-002's itil inventory lists the skill; behavioural replay across templated / untemplated / SECURITY.md-present / SECURITY.md-absent upstreams; end-to-end bidirectional cross-reference check, with the `## Reported Upstream` URL line co-owned by `check-upstream-responses`; advisory downstream dogfood within 3 months.
-**Related:** ADR-002, ADR-010, ADR-011, ADR-013, ADR-014, ADR-015, ADR-022, ADR-028, ADR-031, ADR-033, ADR-038, ADR-042, ADR-044, ADR-049, ADR-054, ADR-055, ADR-060, ADR-061, ADR-062, ADR-065, ADR-066, ADR-071, ADR-074, ADR-075, ADR-076
+**Chosen:** Chosen option: **"Discover + fall through to structured default, skill lives in `@windyroad/itil`"**, because it respects upstream maintainers' curated intake shape when they have one (Option 1 over Option 3), doesn't abandon downstreams wh...
+**Related:** ADR-002, ADR-010, ADR-011, ADR-013, ADR-014, ADR-015, ADR-022, ADR-031
 
 ### ADR-025 — Test content quality review — concreteness + traceability (JTBD or Problem) invariant for `@windyroad/tdd`
 **Status:** proposed | **Oversight:** confirmed
@@ -392,11 +392,11 @@ _86 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-092 — Fix-titled-commit lifecycle drift surfaces as an advisory, never an auto-fire or hard gate
 **Status:** proposed | **Oversight:** rejected-pending-supersede (P345)
 **Chosen:** Chosen option: **post-commit advisory hook**, because **a lifecycle transition may only be automated on observable facts, and O→KE rests on a knowledge claim** — so the strongest honest surface for the fix-titled-commit signal is an adv...
+
 ### ADR-093 — Mechanical quota-pace throttle — frequently-firing PreToolUse hook, calculated sleep, never blocks
 **Status:** proposed | **Oversight:** unconfirmed
-**Decides:** A no-matcher PreToolUse hook fires on every tool call, reads a flat quota cache (produced by a self-installing statusline writer — the only surface Claude Code exposes to `.rate_limits`; now also Codex windows via the app-server rate-limits method), and injects a position-gated feedback-controller sleep so cumulative burn holds under the tighter of the 5h/7d (or Codex short/long) pace lines — letting AFK and interactive work glide to window resets with headroom instead of hard-stopping. It brakes only when a window is both over-rate and at/over its linear pace line, ramps the sleep proportionally to how far over-rate the burn is, adds a behind-line burn guard that catches a sprint projecting near-term exhaustion, and recovers to zero sleep the instant a window falls behind pace. Mechanical (no advice/nudge/ask), fail-open on every abnormal path (never blocks/denies), clamped to a 600s ceiling under the 660s timeout, and shipped as the standalone opt-in `@windyroad/cruise` plugin.
-**Confirmation:** Behind pace → `cur_s=0` immediately, and a measurable at-or-below-sustainable delta also releases braking; a positive over-rate delta ramps `cur_s`, an unresolved overline delta retains the 10s minimum brake; mixed-window coverage brakes while either overline window is unresolved; the over-pace ramp kick scales with the over-rate ratio (proportional slam); a behind-line sprint over `burn_guard_multiple` brakes and releases the instant it drops back; Codex one/two-window mapping, legacy-cache fixed durations, <50ms fresh-cache hot path, at-most-one refresh per 60s, and every malformed/expired/refresh-failure path stay exit 0 with empty stdout; 25 behavioural cases cover first samples, ceiling, window governance, recent checks, concurrent sessions, disabled pacing, the proportional kick, the behind-line guard (fires/disabled/releases), and malformed or expired data — Cruise never blocks or asks.
-**Related:** ADR-002, ADR-003, ADR-013, ADR-017, ADR-023, ADR-030, ADR-034, ADR-038, ADR-045, ADR-057, ADR-066, ADR-074, ADR-097, ADR-098
+**Chosen:** Chosen option 3 (mechanical PreToolUse calculated sleep), registered in `hooks.json` as `PreToolUse` with **no matcher** (every tool call — Correction 2 verbatim) and `timeout: 660` (strictly greater than the 600s sleep ceiling below, so ...
+**Confirmation:** Behind pace drops immediately to cur_s=0; a positive measurable delta at or below sustainable also releases br...; A positive over-rate delta ramps cur_s; an unresolved overline delta retains at least the 10-second minimum br...; Mixed-window coverage keeps braking when either active overline window is unresolved.; Over pace, the ramp kick scales with how far over-rate the burn is (proportional slam); while behind the line,...; The 25 behavioural cases cover first samples, ceiling, window governance, recent checks, concurrent sessions, ...
 
 ### ADR-094 — AFK loops anchor completion with the native `/goal` external evaluator
 **Status:** proposed | **Oversight:** confirmed
@@ -416,16 +416,20 @@ _86 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: self-install the runtime-specific quota producer with no separate opt-out. On Codex, persist the exact working binary and fall through machine/app/PATH candidates until one returns usable quota windows.
 **Confirmation:** Claude absent/present/complex statusline paths remain idempotent and non-destructive.; Codex candidate order is env, persisted machine binary, Codex app, ChatGPT app, then PATH, with fallback.; Codex failure writes a bounded private diagnostic; success clears it; all producer failures remain fail-open.; Dry runs and failed uninstall leave producer state intact; successful uninstall removes only Cruise-managed st...; Behavioural Bats cover exact binary invocation, unusable fallback, atomic writes, diagnostics, and lifecycle c...
+
 ### ADR-098 — Cruise config file — layered precedence (project → machine → defaults)
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** Cruise's throttle knobs come from a JSON config file that is parsed, never sourced — project `.claude/cruise.config.json` wins over machine `~/.claude/cruise.config.json` over built-in defaults, with env vars as a final override; JSON beats sourced shell (arbitrary-code-execution risk) and TOML/YAML (extra parser dependency), and reuses the already-required `jq`. Runtime-specific roots apply on Codex, which also carries one installer-managed, machine-only `codex_binary` key that project config cannot override (`CODEX_BINARY` stays the env override).
-**Confirmation:** JSON parsed never sourced, malformed/non-object files preserved byte-for-byte; runtime roots isolated and keys follow env → project → machine → default precedence; `codex_binary` machine-only, unoverridable by project; install/update preserve unrelated machine keys, dry runs and failed installs write nothing; uninstall removes only the managed key after plugin removal succeeds.
-**Related:** ADR-074, ADR-093, ADR-097
+**Chosen:** Chosen option: JSON layered config, never sourced. Codex adds one installer-managed, machine-only `codex_binary` key; project config cannot override it and `CODEX_BINARY` remains the environment override.
+**Confirmation:** JSON config is parsed, never sourced, and malformed or non-object files are preserved byte-for-byte.; Runtime roots remain isolated and normal keys follow environment, project, machine, then default precedence.; codex_binary is machine-only; project config cannot override it.; Install and update preserve unrelated machine keys; dry runs and failed installs do not write managed config.; Successful uninstall removes only the managed key after plugin removal succeeds.
 
 ### ADR-099 — Changesets are release metadata, not shipment controls
 **Status:** accepted | **Oversight:** confirmed | **Supersedes:** [ADR-061, ADR-082]
 **Confirmation:** No runtime skill, hook, scorer agent, or release helper treats; The holding directory and graduation evaluator are absent.; Codex-generated agent surfaces match the runtime-neutral source.; ITIL and risk-scorer tests pass.
 **Related:** ADR-042, ADR-061, ADR-082
+
+### ADR-100 — Capture-time truth discipline for problem tickets — falsify premises, mark unexecuted mechanisms
+**Status:** proposed | **Oversight:** unconfirmed
+**Confirmation:** A description asserting X is missing, where X is present in the tree, produces a captured ticket carrying the ...; A description asserting a root-cause mechanism with no cited evidence produces a ticket recording it under ## ...; A description with no existence-claims produces byte-identical capture output to the pre-change behaviour.
 
 ---
 
