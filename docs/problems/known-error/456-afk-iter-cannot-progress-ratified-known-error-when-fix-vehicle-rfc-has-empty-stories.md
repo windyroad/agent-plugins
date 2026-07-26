@@ -16,6 +16,7 @@ AFK work-problems iteration cannot progress a substance-ratified Known Error who
 ## Symptoms
 
 - 2026-07-15 P376 Gap 2 iter: three architect reviews (ISSUES FOUND ×2 → PASS on the held plan), STORY-MAP-004 + STORY-045 captured born-unconfirmed, implementation queued to `outstanding_questions`; the targeted SKILL rework did not land despite the ADR-074 substance gate being satisfied.
+- 2026-07-26 P430 iter (second witness, and a stronger one — the ticket had NO fix vehicle at all, so the wall is not specific to a pre-existing `stories: []` RFC): the fix is a three-line env-var guard in one hook plus one SKILL export line, effort S, approach fully covered by four existing ADR precedents. It still could not land. The iter spent its budget on three architect reviews, two style-guide reviews, two voice-tone reviews, one accessibility review, and the authoring of RFC-050 + STORY-MAP-005 + STORY-047 — then held, because ADR-095 line 45 and ADR-096 lines 19/25/44 place ADR-090 human ratification at the `accepted` gate and ratification has no AFK path. Note the ratio: the governance vehicle for a 3-line fix is three new artefacts across three tiers. The architect explicitly refuted the "accept mechanically, ratify later" reading (`manage-story` SKILL.md line 179's "orthogonal to the `status:` lifecycle" describes the marker's *mechanism*, not an exemption from the gate) — so the mechanical loophole that would let an iter proceed is closed by decision even though it is open in code (see the sibling enforcement-hole ticket).
 
 ## Workaround
 

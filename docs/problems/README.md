@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-26 **P430 known error — the correction detector cannot tell who wrote the prompt** — root cause confirmed and reproduced in situ: the hook decides purely on prompt content, and `grep -Eqi` on a bare `\bDO NOT\b` pattern matches ordinary imperative framework prose, so the AFK iteration prompt trips it on nearly every iter (this one included) with no user behind it. Iters run `< /dev/null`, so provenance is a dispatcher property and unrecoverable from the text — the fix is a dispatcher-side `WR_SUPPRESS_CORRECTION_DETECT` guard, the shape four sibling hooks already use. WSJF 8 → 16 on the known-error multiplier. Fix vehicle authored pre-implementation per ADR-071/073 (RFC-050 + STORY-MAP-005 + STORY-047); implementation HELD pending ADR-090 ratification of the map and story, which cannot happen while the user is away.
+> Last reviewed: 2026-07-26 **P465 + P466 captured from the P430 retro** — P465: ADR-095 and ADR-096 both say human ratification fires at the story's `accepted` gate, but `manage-story` checks only I7/I8/I10 and the no-implement-draft hook reads status alone, so an unratified story can be accepted and implemented with every gate passing; the ambiguous "orthogonal to the status lifecycle" wording is what makes the bypass look compliant (architect findings N1/N2, hang-off-checked PROCEED_NEW against P456/P457/P409/P412 as the inverse pair of P456). P466: the story-map HTML template in ADR-060 and the story-maps README teaches sub-3:1 borders, no `:focus-visible`, and no viewport meta, and four of five on-disk maps inherited it — plus a live grid overflow on STORY-MAP-001. Evidence also appended to P456 (second, stronger witness) and P417 (the never-reconciled index drift spans the RFC and story-map tiers too, not just stories).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -52,6 +52,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 8 | P419 | capture-story's mechanical reverse-trace edit to a docs/jtbd file re-locks the JTBD edit gate mid-session | 8 (Medium) | Known Error | M | 2026-07-05 | internal |
 | 8 | P459 | Agent-Prose Behavioural Eval Flaky — Red-Lines CI on Unrelated Commits | 8 (Medium) | Known Error | M | 2026-07-24 | internal |
 | 8 | P375 | Repo conflates a "named re-entry point" with a self-firing cadence — deferrals not transitively reachable from an automatic trigger rot | 16 (High) | Known Error | L | 2026-06-23 | internal |
+| 8 | P465 | The story `accepted` gate names ADR-090 ratification but no surface enforces it | 8 (Medium) | Open | M | 2026-07-26 | internal |
 | 8 | P414 | retro/wrap defers over-threshold briefing Tier-3 rotation as a "run interactive run-retro" recommendation instead of performing the split | 8 (Medium) | Open | S | 2026-07-03 | internal |
 | 8 | P423 | Agent "fixes" recurring behavioural corrections via project-local memory instead of shipping an adopter-facing plugin surface | 16 (High) | Open | M | 2026-07-06 | internal |
 | 7.5 | P359 | Changeset holding does not withhold shipment — held code ships with any sibling release | 15 (High) | Known Error | L | 2026-06-11 | internal |
@@ -59,6 +60,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P293 | Generalise ADR-019 preflight from "fetch + ff-only divergence" to "get the repo into a clean state before starting" | 6 (Medium) | Known Error | M | 2026-05-25 | internal |
 | 6 | P305 | Post-Edit silent revert of working-tree files before commit — potential silent-work-loss hazard | 6 (Medium) | Known Error | M | 2026-05-26 | internal |
 | 6 | P409 | Back-fill legacy RFCs still carrying empty `stories: []` | 6 (Medium) | Known Error | M | 2026-07-03 | internal |
+| 6 | P466 | The story-map HTML template ships sub-3:1 borders, no focus ring, and no viewport meta | 6 (Medium) | Open | S | 2026-07-26 | internal |
 | 6 | P456 | AFK iter cannot progress a ratified Known Error when the fix-vehicle RFC has empty stories | 6 (Medium) | Known Error | M | 2026-07-15 | internal |
 | 6 | P395 | external-comms agent silently goes dormant on the credibility axis — no nudge to author the missing RISK-POLICY section | 12 (High) | Open | M | 2026-06-28 | corrective-feedback |
 | 6 | P399 | ADR-073 fix-time auto-create emits a SKELETON RFC; it should author the RFC fully | 12 (High) | Open | M | 2026-06-28 | corrective-feedback |

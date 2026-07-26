@@ -15,7 +15,7 @@
 
 ## Symptoms
 
-(deferred to investigation)
+- 2026-07-26 (P430 iter): the drift is not confined to the stories index — the same never-reconciled shape holds across all three non-problem tiers. `wr-itil-reconcile-rfcs docs/rfcs` reported 9 `MISMATCH` rows (RFC-001/002/004/006/007 recorded `closed` while on-disk state is `verifying`; RFC-005 and RFC-036 recorded `closed` vs `accepted`; RFC-046 and RFC-049 vs `in-progress`) plus 3 `MISSING` rows. `wr-itil-reconcile-stories docs/stories` reported a dozen-plus `STALE` rows. `wr-itil-reconcile-story-maps docs/story-maps` reported all five maps missing from the README — its Rankings table literally read "(Empty — no story maps captured yet)" while four maps had been on disk for weeks. Contrast with `wr-itil-reconcile-readme docs/problems`, which exits clean: the problems tier has the P062/P094/P118 refresh-on-every-transition contract wired into its skills, and the other three tiers do not. That asymmetry looks like the root cause rather than three independent lapses. The story-map Rankings table was back-filled by hand in that iter's commit; the RFC and story indices were left drifting because the fix belongs here, not inline.
 
 ## Workaround
 
