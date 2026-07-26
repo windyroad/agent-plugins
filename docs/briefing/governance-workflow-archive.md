@@ -76,3 +76,19 @@ Problem tickets carry `**Priority**:` (Impact×Likelihood) and `**Effort**:` lin
 ### A ticket blocked by a non-ticket condition stays Open and gets re-selected+skipped forever — Park it (2026-07-04)
 
 The transitive-effort WSJF rule only suppresses a ticket's rank via `**Blocked by**` edges to OTHER tickets, and an upstream in `verifying/`/`closed/`/`parked/` contributes **0** to the closure (carve-out) — so it does NOT suppress. When a ticket is genuinely un-workable but its blocker is (a) an upstream sitting in `verifying/`, or (b) a condition that isn't a ticket at all (an unreconciled/self-contradictory ADR, an architect decision, an un-landed sibling build), **nothing lowers its WSJF** and the AFK loop keeps re-selecting it as top-actionable and skipping it every iter. Witnessed 2026-07-04: P244 selected+skipped **7×** (iters 14–19 + this one) while Open — blocked by P300 (in `verifying/`, contributes 0) + an unreconciled ADR-063 §F9 contract (not a ticket). Fix: **Park it** (Status→Parked, `## Parked` section with reason + un-park trigger, README row moved WSJF-Rankings→Parked). Parked tickets are excluded from ranking + work-selection per ADR-022, so the churn stops; the un-park trigger re-admits it when blockers clear. Don't leave a known-blocked ticket Open just because it has a `Blocked by` edge — check whether that edge actually suppresses the rank. <!-- signal-score: 2 | last-classified: 2026-07-04 | first-written: 2026-07-04 -->
+
+### Risk appetite band reference (rotated 2026-07-26)
+
+- **Risk appetite is Low (5)**. Changes scoring Medium (6+) need explicit acknowledgement (ADR-086 rebalanced the bands 2026-06-25: score 5 is now Low, default appetite 4->5). See `RISK-POLICY.md`, ADR-086. <!-- signal-score: 2 | last-classified: 2026-07-26 | first-written: 2026-06-11 -->
+
+## Rotated 2026-07-26 (Branch B, split-by-date)
+
+### Born-confirmed ADRs still need a POST-DRAFT confirm — picking the option pre-draft is not ratifying the draft (2026-07-07)
+
+Surfacing the chosen option via `AskUserQuestion` BEFORE drafting an ADR (the P339 run-decision-before-drafting discipline) does NOT authorise `human-oversight: confirmed`. The pre-draft choice ratifies the DECISION, not that the DRAFT faithfully captured it. Sequence: draft born `unconfirmed` → brief the drafted content in plain prose → a SEPARATE `AskUserQuestion` confirm → only then write the marker. User correction 2026-07-07 (ADR-095): *"you CAN'T draft it confirmed. You need to draft it and then confirm, otherwise I can't catch if you have misunderstood."* This is P357 on the create-adr path; the ADR-095/096 pair went draft→brief→confirm→amend→re-confirm and the user caught a scope expansion (INVEST-at-capture) at the confirm.
+  <!-- signal-score: 2 | last-classified: 2026-07-07 | first-written: 2026-07-07 -->
+
+### Editing SKILL.md prose breaks contract bats that grep the old prose — grep the changed phrases across test .bats BEFORE pushing (2026-07-07)
+
+Contract bats (`manage-story-contract.bats`, `itil-commit-trailer-transition-advisory.bats`) assert the PRESENCE of specific SKILL.md prose. Change that prose (e.g. removing a `draft → in-progress` auto-transition per an ADR amendment) and those greps go red — but only on CI's Quality Gates "Run hook tests", AFTER you push. Grep the changed phrases across `packages/*/skills/*/test/*.bats` + `packages/*/hooks/test/*.bats` BEFORE pushing a SKILL-prose change. Fresh evidence for P290/P324 (structural tests grep prose; behavioural-only wouldn't break on a wording change).
+  <!-- signal-score: 2 | last-classified: 2026-07-07 | first-written: 2026-07-07 -->
