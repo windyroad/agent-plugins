@@ -45,6 +45,35 @@ ADR-089 (every RFC has ≥1 story) + ADR-095 (story-map membership at capture) +
 
 User picked fix direction **(a) selector-skip, ratify-at-ALL_DONE** via AskUserQuestion at the /wr-itil:work-problems mid-loop halt surface (P147 killed-iter halt, 2026-07-15 ~23:00 AEST): the work-problems selector classifies RFC-bound-without-ratified-story tickets as non-dispatchable (objective marker: fix-vehicle RFC exists with empty/unratified `stories:`), skips them without dispatching, and the accumulated story-ratification asks batch at the Step 2.4 loop-end gate ("skip them and ratify at all done"). Options (b) pre-ratify-at-drain and (c) bounded AFK carve-out were presented and not chosen. Implementation rides the normal RFC/story flow; the direction applies immediately as orchestrator conduct.
 
+## Ratified Direction - 2026-07-26 (SUPERSEDES the 2026-07-15 block above)
+
+The maintainer ratified option **(c) bounded AFK carve-out** verbatim in-session on 2026-07-26: *"the loop may accept-and-implement a story that only decomposes already-ratified substance, without a fresh human ratification."*
+
+The 2026-07-15 block is left verbatim above as audit trail; it is not edited. The two are successive pins on one open question, and they **compose rather than conflict** — skip what is ineligible, accept what qualifies. Selector-skip is NOT cancelled. The third witness below (P450) remains a sub-shape the carve-out deliberately does not cover: its blocking decision is undiscoverable at selection time and it introduces new substance, so it fails the carve-out's condition (b) and stays held.
+
+Recorded as **ADR-101** (`docs/decisions/101-afk-accept-carve-out-for-pure-decomposition-stories.proposed.md`), amending ADR-060 / ADR-090 / ADR-095 / ADR-096. The carve-out is opt-in per project and per story, and fires only when every decision, job, persona and map the story traces to is already human-confirmed AND each of its acceptance criteria names the confirmed clause it decomposes.
+
+Machinery landed 2026-07-26 (see § Fix vehicle). The sibling defect P465 — the same gate being unenforced in code — is fixed in the same slice and unconditionally: an implementing commit against an unratified story is now blocked for every adopter, which it never was before.
+
+## Open items - owed to the maintainer (drain these when working this ticket)
+
+Tracked here rather than only in `outstanding_questions` because that queue is truncated once surfaced, so a queue entry alone would evaporate (the named-re-entry-is-not-cadence failure, P375). `/wr-itil:work-problems` drains this ticket automatically, which is the self-firing trigger.
+
+- [ ] **P357 post-draft brief owed on ADR-101.** The maintainer's 2026-07-26 quote pins the POLICY, and the policy is not in doubt. What is unconfirmed is whether the drafted ADR records it without semantic drift — the two-condition conjunction, the opt-in split, the story-map drift boundary, the marker encoding, and the supersession recorded above. The maintainer directed the ADR be born `confirmed`; that write was refused by the P348 evidence-marker gate, which requires a same-session `AskUserQuestion` substance-confirm event that a non-interactive session cannot produce. Per the gate's own AFK directive and CLAUDE.md's P357 fallback it is born `unconfirmed`. `wr-architect:agent` independently dissented from born-confirmed on the same grounds; the dissent is recorded in the ADR. Brief the maintainer on what the ADR actually says, then confirm or amend.
+- [ ] **Confirm whether this repo opts in.** The carve-out ships default-OFF and requires `.claude/itil.config.json` to set `afk_accept_pure_decomposition: true`. An earlier pass of this iteration wrote that file itself; both `wr-jtbd:agent` and `wr-architect:agent` flagged it, because the shipped README promises "Nothing ever writes this file for you" and ADR-101 makes the same thing an invariant — a machine-written opt-in converts opt-in into opt-out-by-stealth. The file and its pre-authorisation marker were deleted, and the path is now gitignored. Whether this repo turns the carve-out on is the maintainer's call, not the loop's.
+- [ ] **STORY-054 deferred.** The carve-out cannot bootstrap itself: until ADR-101 is confirmed, a story implementing it fails the carve-out's own condition (a). So no story ships with the machinery — the fix vehicle RFC lands `proposed` with no `stories:` entry (a reserved ID would be a fabricated trace that `check-rfc-stories-ratified` resolves as missing). Once ADR-101 is confirmed, author STORY-054, add its STORY-MAP-002 card and its JTBD-006 reverse-trace row, and self-accept it under the carve-out — the first genuine exercise of the rule, and the evidence that it works end to end.
+- [ ] **Re-ratify JTBD-002 / JTBD-006 / JTBD-008 in the same drain.** All three had a Desired Outcome materially rewritten by ADR-101's lockstep, which under ADR-068 clears their oversight marker. Each now carries an `oversight-downgraded` entry naming what changed; the `confirmed` marker is held pending re-ratification. They derive from the same substance as the ADR-101 brief, so they should re-ratify in the same pass rather than as four separate asks.
+- [ ] **ADR-089 wording correction** rides the same brief: its escape hatch names a `draft` RFC, but the RFC lifecycle has no `draft` state and `proposed` is the de facto occupant. Retarget the state name while keeping the "before the fix is scoped" qualifier and the accepted-gate enforcement in the same sentence — without the qualifier it would read as a general licence and hollow out the one-story floor.
+
+## Fix vehicle
+
+Machinery landed 2026-07-26 under the maintainer's direct one-time authorisation for that iteration (NOT under the carve-out — see the bootstrap note above):
+
+- `check-afk-accept-eligible.sh` — the two-condition eligibility predicate, opt-in and fail-closed.
+- `itil-no-implement-draft-gate.sh` — the unconditional ADR-090 ratification check (the P465 fix) plus story-local carve-out re-assertion.
+- `story-oversight.sh` — the card-excluding map hash that makes the carve-out satisfiable at all, since ADR-095 compels every new story to edit its map.
+- `mark-story-oversight-confirmed.sh --pure-decomposition`, the `--with-afk-accepted` post-hoc drain listing, `manage-story` I12, and the adopter-facing config + README surfaces.
+
 ## Dependencies
 
 - **Blocks**: (none)
@@ -57,3 +86,9 @@ User picked fix direction **(a) selector-skip, ratify-at-ALL_DONE** via AskUserQ
 
 - Hang-off pre-filter short-circuited at capture: 130 candidate tickets shared ≥1 signal (ADR-060/074/089/090/096 citations are ubiquitous) — over the 5-candidate cap, so the `wr-itil:hang-off-check` dispatch was skipped per the capture-problem Step 2b cap rule. Strongest absorb candidates for review-time re-evaluation: P409 (back-fill legacy empty-stories RFCs — adjacent data-hygiene concern, but this ticket is about the AFK capability boundary, not the legacy corpus), P399 (skeleton-RFC authoring).
 - STORY-MAP-004 / STORY-045 (`docs/story-maps/draft/`, `docs/stories/draft/`) — the capture-and-hold artefacts from the witnessing iteration.
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-058 | proposed | The AFK-accept carve-out, and the story-ratification check that was never implemented |

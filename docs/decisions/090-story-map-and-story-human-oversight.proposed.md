@@ -86,6 +86,8 @@ This lands as a new ADR (sibling of ADR-066/068 — a cross-cutting oversight pr
 
 Revisit if the re-ratify-on-every-edit friction proves heavier than the drift risk it prevents (e.g. maps churn so often that ratification becomes rubber-stamping). The remedy would be to coarsen the drift trigger (ratify per coherent edit-set) — not to drop to write-once, which reintroduces the silent-drift gap.
 
+**Exercised 2026-07-26 (ADR-101).** That remedy was taken, once and narrowly. ADR-095 compels every new story to add a card to its map, so "any change" made the AFK-accept carve-out unsatisfiable by construction — capturing the story broke the condition the story had to satisfy. ADR-101's map leg therefore hashes the map with the accepted story's OWN card excluded, which coarsens the trigger to a coherent edit-set exactly as anticipated here. It is not a drop to write-once: any map edit other than adding that one card still drifts the hash and still re-opens ratification.
+
 ## Related
 
 - **ADR-066** — human-oversight marker + review-decisions drain (the write-once precedent this diverges from, deliberately, for a living artefact).

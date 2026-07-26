@@ -93,7 +93,7 @@ See [ADR-011](../../docs/decisions/011-manage-incident-skill.proposed.md) for th
 | `/wr-itil:capture-story` | Lightweight story-capture skill — mandatory problem-trace AND JTBD-trace per ADR-060 I6 + I9 invariants; optional `--rfc` / `--story-map` flags (I7 + I8 enforce at `accepted` transition); drafts an INVEST-shaped sub-workstream entity under a parent RFC (Phase 2 of the Problem-RFC-Story framework, P170 / ADR-060) | Experimental |
 | `/wr-itil:list-stories` | Read-only display of stories grouped by lifecycle state, with optional `--rfc RFC-<NNN>` filter rendering the RFC's ordered story list per ADR-060 line 259 (Phase 2 / P170) | Experimental |
 | `/wr-itil:reconcile-stories` | Detect and correct drift between `docs/stories/README.md` and on-disk story inventory + reverse-trace `## Stories` sections on driving problems / RFCs / JTBDs (Phase 2 / P170) | Experimental |
-| `/wr-itil:manage-story` | Heavyweight story lifecycle management — draft → accepted → in-progress → done → archived; I7+I8+I10 hard-block at accepted transition; INVEST 4-axis check; auto-transitions on `Refs: STORY-NNN` commit trailer + linked RFC closure (Phase 2 / P170) | Experimental |
+| `/wr-itil:manage-story` | Heavyweight story lifecycle management — draft → accepted → in-progress → done → archived; I7+I8+I10+I12 hard-block at accepted transition; INVEST 4-axis check; auto-transitions on `Refs: STORY-NNN` commit trailer + linked RFC closure (Phase 2 / P170). **I12 (ADR-101)**: `accepted` requires a recorded ratification basis, and an implementing commit against an unratified story is blocked. The basis is a human ratification event by default; an `oversight-basis: pure-decomposition` marker is written instead only where the project has opted in AND the story decomposes nothing but already-confirmed substance — see the config key below | Experimental |
 | `/wr-itil:capture-story-map` | Lightweight story-map-capture skill — mandatory problem-trace AND JTBD-trace per ADR-060 I3 + I4 invariants; HTML skeleton at `docs/story-maps/draft/STORY-MAP-NNN-<slug>.html` per ADR-060 § Phase 2 encoding amendment 2026-05-12 (Phase 2 / P170) | Experimental |
 | `/wr-itil:manage-story-map` | Heavyweight story-map lifecycle management — draft → accepted → in-progress → completed → archived; backbone/ribs/slices authoring guidance; reverse-trace `## Story Maps` refresh on driving problems + JTBDs (Phase 2 / P170) | Experimental |
 | `/wr-itil:reconcile-story-maps` | Detect and correct drift between `docs/story-maps/README.md` and on-disk story-map HTML inventory (Phase 2 / P170) | Experimental |
@@ -102,6 +102,22 @@ See [ADR-011](../../docs/decisions/011-manage-incident-skill.proposed.md) for th
 | `/wr-itil:list-incidents` | Read-only display of active incidents by severity | Experimental |
 | `/wr-itil:mitigate-incident` / `/wr-itil:restore-incident` / `/wr-itil:close-incident` / `/wr-itil:link-incident` | Incident lifecycle transitions (ADR-011) | Experimental |
 | `/wr-itil:scaffold-intake` | Scaffold OSS intake surfaces (`.github/ISSUE_TEMPLATE/`, `SECURITY.md`, `SUPPORT.md`, `CONTRIBUTING.md`) for downstream adopters (ADR-036) | Experimental |
+
+## Configuration
+
+Optional. Create `.claude/itil.config.json` in your project (or `~/.claude/itil.config.json` for all your projects); a project key wins over a machine key, and both are optional.
+
+| Key | Default | What it does |
+|---|---|---|
+| `afk_accept_pure_decomposition` | `false` | Lets an unattended run accept and implement a story **without** asking you first — but only when that story adds no new thinking. Every decision, job and map it draws on must already be one you confirmed, and each of its acceptance criteria must name the confirmed clause it breaks down. Anything that introduces a new design choice, persona or decision is still held for you. Off unless you turn it on. |
+
+```json
+{ "afk_accept_pure_decomposition": true }
+```
+
+Only the literal `true` turns it on. Stories accepted this way are marked `oversight-basis: pure-decomposition`, listed by `wr-itil-detect-unratified-stories-maps --with-afk-accepted`, and shown distinctly by `/wr-itil:list-stories`, so you can review them afterwards. Nothing ever writes this file for you. Background: ADR-101.
+
+Independently of this setting, an implementing commit against a story you have not ratified is blocked for everyone.
 
 ## Updating and Uninstalling
 

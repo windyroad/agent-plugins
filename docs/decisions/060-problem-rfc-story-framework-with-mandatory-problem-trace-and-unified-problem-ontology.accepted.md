@@ -233,8 +233,15 @@ problems: [P<NNN>, ...]                # ≥1 — problems this story serves; I6
 rfcs: [RFC-<NNN>, ...]                 # ≥1 — RFCs that reference this story; I7 invariant
 story-maps: [STORY-MAP-<NNN>, ...]     # ≥1 — maps that include this story; I8 invariant
 jtbd: [JTBD-<NNN>, ...]                # ≥1 — jobs the story serves; I9 invariant
-acceptance-criteria-count: <N>         # mechanical — count of `- [ ]` / `- [x]` lines in body
+acceptance-criteria-count: <N>         # mechanical — count of `- [ ]` / `- [x]` lines within
+                                       #   the `## Acceptance criteria` section only (prefix-
+                                       #   matched heading, terminated by the next `##`);
+                                       #   section-scoped per ADR-101, not whole-body
 estimated-effort: S | M | L | XL       # INVEST "Estimable" — set at accepted transition
+adrs: [ADR-<NNN>, ...]                 # optional — decisions this story decomposes; REQUIRED
+                                       #   when `afk-accept:` is declared (ADR-101)
+afk-accept: pure-decomposition         # optional — opt in to the ADR-101 AFK-accept carve-out;
+                                       #   requires a `## Decomposition basis` body section
 ---
 
 # STORY-NNN: <Title>

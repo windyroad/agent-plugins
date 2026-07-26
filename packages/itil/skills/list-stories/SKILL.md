@@ -85,8 +85,8 @@ For each `STORY-<NNN>` in the ordered list, resolve to a file under `docs/storie
 
 ## Accepted
 
-| ID | Title | Problems | JTBD | RFCs | Story Maps | Effort |
-|----|-------|----------|------|------|------------|--------|
+| ID | Title | Problems | JTBD | RFCs | Story Maps | Effort | Accepted by |
+|----|-------|----------|------|------|------------|--------|-------------|
 ...
 
 ## In Progress
@@ -101,6 +101,8 @@ For each `STORY-<NNN>` in the ordered list, resolve to a file under `docs/storie
 ```
 
 Omit empty sections rather than rendering empty headers. The Estimated Effort column is omitted from the Draft section because effort is deferred at capture and only required at accepted per I10 INVEST Estimable.
+
+**The `Accepted by` column (ADR-101, Accepted + In Progress sections only).** `accepted` carries one of two ratification bases and they must not read alike — a report that counts them together overstates how much a human has seen, which is exactly what JTBD-202's auditable-handover outcome depends on. Render `human` when the story's marker is a human ratification event, and `pure-decomposition` when it carries `oversight-basis: pure-decomposition` (machine-accepted by an opted-in project's AFK loop; awaiting post-hoc human ratification). Derive it by reading the story's `oversight-basis:` frontmatter line — its absence means `human`. Never collapse the two into a single "accepted" tick.
 
 **Filtered mode** (`--rfc RFC-<NNN>`) — render a single ordered table:
 

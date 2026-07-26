@@ -14,8 +14,8 @@ Per ADR-060 Phase 2 amendment 2026-05-10 lines 200-253:
 
 | Status | Filename pattern | Meaning | Entry criteria |
 |--------|-----------------|---------|----------------|
-| **draft** | `docs/stories/draft/STORY-<NNN>-<slug>.md` | Captured (problem + JTBD traces present); skeleton body | I6 + I9 satisfied at capture |
-| **accepted** | `docs/stories/accepted/STORY-<NNN>-<slug>.md` | INVEST shape verified; ready for implementation | I7 + I8 + I10 hard-block satisfied |
+| **draft** | `docs/stories/draft/STORY-<NNN>-<slug>.md` | Content-complete (map membership + real user value + ≥1 real acceptance criterion per ADR-095) but not yet accepted — `estimated-effort`/Small unset, I7 RFC trace absent, ratification pending | I6 + I8 + I9 + content floor satisfied at capture |
+| **accepted** | `docs/stories/accepted/STORY-<NNN>-<slug>.md` | INVEST shape verified; ratified; ready for implementation | I7 + I8 + I10 + I12 hard-block satisfied |
 | **in-progress** | `docs/stories/in-progress/STORY-<NNN>-<slug>.md` | Implementation underway | Auto-transitioned on first non-capture commit carrying `Refs: STORY-<NNN>` |
 | **done** | `docs/stories/done/STORY-<NNN>-<slug>.md` | All acceptance criteria ticked + linked RFC closed | Auto-transitioned (triggered by RFC close-fire or by manual `manage-story <NNN> done`) |
 | **archived** | `docs/stories/archived/STORY-<NNN>-<slug>.md` | Closed without completion (scope shifted; superseded) | Manual transition only |
@@ -30,6 +30,7 @@ Per ADR-060 Phase 2 amendment 2026-05-10 lines 200-253:
 | **I9** trace-to-JTBD | Every story traces to ≥ 1 JTBD | Hard-block at `/wr-itil:capture-story` (also verified at every transition) |
 | **I10** INVEST shape | At acceptance, INVEST behaviourally: ≥1 acceptance criterion (Testable); user-value statement (Valuable); no Blocked-by-unaccepted refs (Independent); `estimated-effort` field set (Estimable); S/M effort SHOULD; L/XL flagged decomposition-candidate (Small) | Hard-block at `manage-story <NNN> accepted` |
 | **I11** no-WSJF-leak | Phase 2: stories MUST NOT carry a WSJF field | Behavioural test at this skill (no WSJF field added/read) |
+| **I12** ratification | Every story carries a recorded ratification basis before it is implementable — a human ratification event, OR the ADR-101 pure-decomposition carve-out | Hard-block at `manage-story <NNN> accepted`; re-asserted at the commit locus by `itil-no-implement-draft-gate` |
 
 **Bootstrap-exemption marker** (per ADR-060 line 339 + ADR-053 Bootstrapping precedent): the I7/I8/I9/I10 retrofit on bootstrap-migration stories rides a one-time exemption marker `<!-- bootstrap-exempt: STORY-MAP-001 migration per ADR-060 amendment 2026-05-10 -->` inline with the frontmatter. Non-bootstrap captures with the marker fail per the behavioural test.
 
@@ -53,6 +54,7 @@ Per ADR-060 Phase 2 amendment 2026-05-10 lines 200-253:
 | Lifecycle transition validation | Mechanical: state machine — draft → accepted → in-progress → done; allow draft → archived; disallow backwards | silent-mechanical |
 | I7 + I8 hard-block at accepted | Mechanical: frontmatter `rfcs:` and `story-maps:` arrays MUST be non-empty AND each ID must resolve to a file in `docs/rfcs/` and `docs/story-maps/` | silent-mechanical |
 | I10 INVEST shape check | Mechanical: `## User value` section non-empty; `## Acceptance criteria` has ≥ 1 `- [ ]` line; `estimated-effort` field set to S/M/L/XL; L/XL flagged as decomposition-candidate (advisory, not blocking per ADR-060 line 252 architect-amendment-2026-05-10 nitpick N3) | silent-mechanical |
+| I12 ratification basis at accepted | Mechanical: the story is ratified (`human-oversight: confirmed` + a matching `oversight-hash`), OR `wr-itil-check-afk-accept-eligible` exits 0. Never an `AskUserQuestion` — the eligibility predicate is fully framework-resolved per ADR-101, and a story that fails it is HELD for the ratification drain, not asked about | silent-mechanical |
 | INVEST shape violation | Halt-with-stderr-directive listing the missing INVEST attributes; user re-invokes after editing the story body | n/a (halt) |
 | README refresh on every transition | Mechanical: regenerate `docs/stories/README.md` Story Rankings + Done tables from FS truth; stage in same commit | silent-mechanical |
 | Reverse-trace refresh on driving artefacts | Mechanical: every transition refreshes `## Stories` section on each driving problem + JTBD + RFC + story-map via the Slice 2a/2b helpers | silent-mechanical |
@@ -99,7 +101,14 @@ Use `AskUserQuestion` for direction-setting fields (e.g. `## User value` rewrite
 For any transition `<from> → <to>`:
 
 1. **Verify pre-transition invariants** for `<to>`:
-   - `accepted`: I7 + I8 + I10 hard-block (see § I-invariant table).
+   - `accepted`: I7 + I8 + I10 + **I12** hard-block (see § I-invariant table).
+
+     **I12 — the ratification gate (ADR-090 / ADR-096, enforced per ADR-101; the hole P465 named).** A story reaches `accepted` only with a recorded ratification basis. Resolve it in this order:
+
+     1. Already ratified (`human-oversight: confirmed` with a matching `oversight-hash`)? I12 satisfied; proceed.
+     2. Otherwise run `wr-itil-check-afk-accept-eligible "$story_file"`. **Exit 0** — the story is pure decomposition of confirmed substance in an opted-in project; proceed and mark it with `--pure-decomposition` at step 5 below.
+     3. **Exit 1** — HALT. Do not accept. Interactively, route to the ratify flow (§ 7.5). Under AFK, leave the story in `draft` and queue the ratification to `outstanding_questions`; do NOT ask about it, and never hand-write the marker.
+
    - `in-progress`: linked RFC status is `accepted` or `in-progress` (you can't progress a story under a proposed/closed RFC).
    - `done`: ALL `- [ ]` checkboxes in `## Acceptance criteria` are ticked (i.e. zero unticked); linked RFC status is `closed` OR the RFC's other stories have closed (transitive closure check deferred to a per-RFC `manage-rfc done-gate` check in a future slice).
    - `archived`: no invariants (manual close-without-completion).
@@ -112,6 +121,16 @@ For any transition `<from> → <to>`:
 3. **Edit the file** — Status field; for `accepted`, populate any deferred `## User value` / `## Acceptance criteria` / `## Implementation notes` sections via AskUserQuestion if not already filled.
 
 4. **P057 staging-trap** — after the Edit, re-stage: `git add "docs/stories/${to_state}/STORY-${nnn}-${slug}.md"`.
+
+5. **Ratify LAST, then re-stage (ADR-101 — write ordering is load-bearing).** Only when I12 resolved via the eligibility path at step 1. Every step above writes substance — the `estimated-effort` field, the `## User value` and `## Acceptance criteria` fills — and every substance write drifts the content hash. So the ratify write MUST be the LAST write of the transition, and the file MUST be re-staged after it:
+
+   ```bash
+   export CLAUDE_SESSION_ID="${CLAUDE_SESSION_ID:?marker shims silently no-op on an empty SID (P368)}"
+   wr-itil-mark-story-oversight-confirmed --pure-decomposition "docs/stories/accepted/STORY-${nnn}-${slug}.md"
+   git add "docs/stories/accepted/STORY-${nnn}-${slug}.md"
+   ```
+
+   Get the order wrong and the marker records a hash of a file that no longer exists — the commit-locus gate then denies the very next commit, inside an AFK loop, where the recovery is itself gated. Skip the re-stage and the committed blob carries the story WITHOUT the marker while the worktree has it; the hook reads the worktree, so nothing catches it.
 
 #### Auto-transition triggers (ADR-060 line 292)
 
@@ -176,11 +195,13 @@ The helpers are idempotent + lazy-empty per the Slice 2a/2b/Slice 11 contract.
 
 ### 7.5. Ratification flow (`ratify`) — ADR-090 / STORY-022
 
-`ratify` confirms human oversight of a single story — **orthogonal to the `status:` lifecycle** and drift-invalidated (any later content edit re-opens it via the `oversight-hash` fingerprint). The primary ratification surface is `/wr-itil:manage-story-map <NNN> ratify` (map first, then its stories); this per-story form is for ratifying a story on its own.
+`ratify` confirms human oversight of a single story. Ratification is **not itself a lifecycle state, but it IS a precondition of `accepted`** (I12) — and it is drift-invalidated, so any later content edit re-opens it via the `oversight-hash` fingerprint. The primary ratification surface is `/wr-itil:manage-story-map <NNN> ratify` (map first, then its stories); this per-story form is for ratifying a story on its own.
+
+> This sentence previously read "orthogonal to the `status:` lifecycle", which was ambiguous between "ratification is not itself a status" (what it meant) and "ratification is not a precondition of any status" (what it read like). An agent acting on the second reading accepted and implemented an unratified story believing it compliant — the P465 failure, 2026-07-26.
 
 1. **Born-confirmed discipline (P348):** `export CLAUDE_SESSION_ID` first (the marker shim no-ops on an empty SID). Never write `confirmed` without the same-turn confirm below.
 2. **Brief + confirm:** present the story's `## User value` + `## Acceptance criteria` — substance BEFORE the ID (P350) — then `AskUserQuestion` with two options: **Ratify** / **(type something)**. On **Ratify**: run `wr-itil-mark-story-oversight-confirmed <story-file>` (writes `confirmed` + fingerprint). On free-text: apply the correction as a story edit and re-present (the edit re-opens ratification).
-3. **AFK (ADR-013 Rule 6):** if `AskUserQuestion` is unavailable, do NOT auto-ratify (hollow marker, P348) — leave it unratified for the `/wr-itil:work-problems` Step 2.4 drain.
+3. **AFK (ADR-013 Rule 6):** if `AskUserQuestion` is unavailable, do NOT auto-ratify (hollow marker, P348) — leave it unratified for the `/wr-itil:work-problems` Step 2.4 drain. **One carve-out, and only one (ADR-101):** where `wr-itil-check-afk-accept-eligible` exits 0, the loop marks the story with `--pure-decomposition` at the accept transition (§ 7 mechanic 5). That is not a hollow marker — it records a machine-established basis rather than asserting a human confirmed something they never saw, it is opt-in per project and per story, and the story still surfaces for post-hoc human ratification via `wr-itil-detect-unratified-stories-maps --with-afk-accepted`. Everything else stays held.
 4. **Single commit** per ADR-014.
 
 ### 8. List flow (`list`)

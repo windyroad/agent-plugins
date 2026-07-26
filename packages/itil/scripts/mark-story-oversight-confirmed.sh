@@ -8,10 +8,19 @@
 # stored fingerprint no longer matches → the artefact reads as drifted /
 # unratified until re-ratified (ADR-090 drift-invalidation).
 #
-# Usage: mark-story-oversight-confirmed.sh <story-or-map-file>
+# With `--pure-decomposition` (ADR-101) it additionally records
+# `oversight-basis: pure-decomposition` — the marker was written by an AFK loop
+# under the carve-out, not by a human ratification event. That field is
+# markdown-story-only (a map is always human-ratified and never carries a
+# decomposition basis) and is EXCLUDED from the content hash, exactly like
+# `oversight-hash`; the authored `afk-accept:` declaration stays INSIDE the hash.
+# Without the flag the basis line is dropped, so re-ratifying by hand clears a
+# stale basis rather than leaving a human-ratified story labelled AFK-accepted.
+#
+# Usage: mark-story-oversight-confirmed.sh [--pure-decomposition] <story-or-map-file>
 # Exit:  0 = ratified; 2 = usage / file error.
 #
-# Authority: ADR-090. Driver: P404 Phase 2. Test: mark-story-oversight-confirmed.bats.
+# Authority: ADR-090, ADR-101. Driver: P404 Phase 2, P456. Test: mark-story-oversight-confirmed.bats.
 set -euo pipefail
 
 # Adopter-safe: source the shared hash lib RELATIVE TO THIS SCRIPT (P317), never
@@ -21,9 +30,15 @@ LIB="$(cd "$(dirname "${BASH_SOURCE[0]}")/../lib" 2>/dev/null && pwd)" || {
 # shellcheck source=/dev/null
 source "$LIB/story-oversight.sh"
 
+basis=""
+if [ "${1:-}" = "--pure-decomposition" ]; then
+  basis="pure-decomposition"
+  shift
+fi
+
 f="${1:-}"
 if [ -z "$f" ]; then
-  echo "mark-story-oversight-confirmed: usage: mark-story-oversight-confirmed.sh <file>" >&2
+  echo "mark-story-oversight-confirmed: usage: mark-story-oversight-confirmed.sh [--pure-decomposition] <file>" >&2
   exit 2
 fi
 [ -f "$f" ] || { echo "mark-story-oversight-confirmed: file not found: $f" >&2; exit 2; }
@@ -54,12 +69,13 @@ case "$f" in
   *)
     # Markdown: rewrite frontmatter — drop existing markers, insert both before
     # the closing `---`.
-    awk -v H="$h" '
+    awk -v H="$h" -v B="$basis" '
       NR==1 && $0=="---" { infm=1; print; next }
-      infm && /^(human-oversight|oversight-hash):/ { next }
+      infm && /^(human-oversight|oversight-hash|oversight-basis):/ { next }
       infm && /^---[[:space:]]*$/ && !done {
         print "human-oversight: confirmed"
         print "oversight-hash: " H
+        if (B != "") print "oversight-basis: " B
         print; done=1; infm=0; next
       }
       { print }

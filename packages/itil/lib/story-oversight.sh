@@ -25,9 +25,62 @@ oversight_content_hash() {
   # ONLY a SUBSTANCE change re-opens ratification. Ticking a criterion or advancing
   # status/slice-progress is progress, not a change to what the user ratified; the
   # value statement, criterion TEXT, and structure still drift the hash.
-  grep -vE '^(human-oversight|oversight-hash|status):|<meta[^>]*name="(human-oversight|oversight-hash|status)"' "$1" \
+  grep -vE '^(human-oversight|oversight-hash|oversight-basis|status):|<meta[^>]*name="(human-oversight|oversight-hash|oversight-basis|status)"' "$1" \
     | sed -E 's/- \[[ xX]\]/- [ ]/g; s/data-status="[^"]*"/data-status=""/g' \
     | shasum -a 256 | awk '{print $1}'
+}
+
+# Hash a story MAP's content while EXCLUDING the single-line card elements whose
+# data-story-id is in the caller-supplied set (ADR-101 condition (a), map leg).
+#
+# ADR-095 requires story-map membership at capture, so authoring a story ALWAYS
+# adds a card to its map — which, under ADR-090 drift-invalidation, re-opens the
+# map's ratification by construction. Requiring a hash-matching map would make
+# the AFK-accept carve-out unsatisfiable: capturing the story would break the
+# very condition the story must satisfy.
+#
+# This COARSENS the drift trigger to a coherent edit-set — the remedy ADR-090's
+# own Reassessment Criteria authorises — rather than dropping to write-once,
+# which ADR-090 explicitly forbids. Any map edit OTHER than adding the named
+# cards still drifts the hash, so the condition stays load-bearing.
+oversight_content_hash_excluding_stories() {
+  local f="$1"; shift
+  local filtered id
+  filtered="$(cat "$f")"
+  for id in "$@"; do
+    [ -n "$id" ] || continue
+    # Anchored on the closing quote so STORY-05 cannot strip STORY-054's card.
+    filtered="$(printf '%s\n' "$filtered" | grep -vF "data-story-id=\"${id}\"" || true)"
+  done
+  printf '%s\n' "$filtered" \
+    | grep -vE '^(human-oversight|oversight-hash|oversight-basis|status):|<meta[^>]*name="(human-oversight|oversight-hash|oversight-basis|status)"' \
+    | sed -E 's/- \[[ xX]\]/- [ ]/g; s/data-status="[^"]*"/data-status=""/g' \
+    | shasum -a 256 | awk '{print $1}'
+}
+
+# True (0) if this artefact's `confirmed` marker was written by the ADR-101 AFK
+# pure-decomposition carve-out rather than by a human ratification event.
+# BSD grep has no \s — use [[:space:]] (the P334 portability class).
+oversight_is_pure_decomposition() {
+  grep -qE '^oversight-basis:[[:space:]]*pure-decomposition([[:space:]]|$)' "$1" 2>/dev/null
+}
+
+# True (0) if the story DECLARES itself eligible for the ADR-101 carve-out.
+# Unlike `oversight-basis:` (marker-adjacent, excluded from the hash), this is an
+# AUTHORED claim and stays INSIDE the hash — editing it re-opens ratification,
+# and it cannot be stripped to hide the story from the post-hoc drain.
+oversight_declares_pure_decomposition() {
+  grep -qE '^afk-accept:[[:space:]]*pure-decomposition([[:space:]]|$)' "$1" 2>/dev/null
+}
+
+# ADR-101 map leg. Satisfied when the map is fully ratified (card already present
+# at ratification time), OR when it is `confirmed` and its stored hash matches the
+# content hash with THIS story's card excluded (card added after ratification).
+oversight_map_leg_ok() {
+  local map="$1" story_id="$2"
+  is_story_map_ratified "$map" && return 0
+  oversight_is_confirmed "$map" || return 1
+  [ "$(oversight_stored_hash "$map")" = "$(oversight_content_hash_excluding_stories "$map" "$story_id")" ]
 }
 
 # Echo the stored oversight-hash (md frontmatter OR HTML meta), empty if none.

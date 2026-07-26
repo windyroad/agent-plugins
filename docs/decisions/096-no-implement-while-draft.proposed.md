@@ -43,6 +43,8 @@ Chosen option: **A.** Amends ADR-060:
 
 Once the auto-transition is removed and I7/I10/ratification fire at `accepted` before any implementation, ADR-095's decision to keep I7 (and full INVEST) at `accepted` is sufficient — no malformed or unratified story can ever be implemented.
 
+**Correction (ADR-101, 2026-07-26).** That closing claim was an over-claim, and P465 is the ticket that names it: the Confirmation item (b) below specifies a status-only check, so nothing in code enforced the ratification this paragraph depends on. An accepted-but-unratified story passed every gate. ADR-101 lands the missing check unconditionally at this ADR's own primary locus — the commit-trailer gate now denies a commit referencing an `accepted`/`in-progress` story that is not ratified — and simultaneously defines the one bounded basis on which that ratification may be machine-written rather than human: an opted-in project's AFK loop, for a story that only decomposes already-confirmed substance. Read the claim as: no malformed story, and no story lacking a recorded ratification basis, can be implemented.
+
 ### Consequences
 
 - Good: the P404 loophole is closed at its root; every story is accepted (gates + ratification passed) before any code lands; the lifecycle matches the traversal.

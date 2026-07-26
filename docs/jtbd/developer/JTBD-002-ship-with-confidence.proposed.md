@@ -4,8 +4,9 @@ job-id: ship-with-confidence
 persona: developer
 secondary-persona: tech-lead
 date-created: 2026-04-14
-human-oversight: confirmed
+human-oversight: unconfirmed
 oversight-date: 2026-05-31
+oversight-downgraded: "2026-07-26 — ADR-101 lockstep (material amendment per ADR-068): the Desired Outcome 'The agent cannot bypass governance — hooks block edits until reviews pass' is QUALIFIED on two axes — strengthened on the ratification axis for everyone (P465), narrowed on the machine-accept axis only where a project opts in. Marker held until re-ratified; re-ratification queued with ADR-101's owed post-draft brief (P456 open items)."
 ---
 
 # JTBD-002: Ship AI-Assisted Code with Confidence
@@ -18,6 +19,7 @@ When I delegate coding to an AI agent, I want to know it followed the full TDD c
 
 - Every commit has been through architecture review, risk scoring, and TDD enforcement
 - The agent cannot bypass governance — hooks block edits until reviews pass
+  - **Amendment 2026-07-26 (ADR-101), stated on two axes because the net effect differs by project.** On the **ratification axis** the guarantee gets stronger for everyone: the commit gate now blocks an implementing commit against a story I have not ratified, which it never did before — the check ADR-095 and ADR-096 both named was enforced nowhere in code (P465). On the **machine-accept axis** it narrows, but only where the project has explicitly opted in: there, an unattended run may write the ratification itself for a story that decomposes nothing but already-confirmed substance. Under the shipped default nothing is loosened at all, so for an adopter who changes nothing, the hooks block strictly more than before.
 - The refactor step is enforced and not skipped at green — structural quality lands with the tests, so the code is well-factored and not just test-passing
 - Audit trail exists (markers, scores, review records) showing governance was followed
 

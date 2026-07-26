@@ -34,12 +34,26 @@ Rely on the architect gate to catch the bypass. That works only when an architec
 
 ## Root Cause Analysis
 
+**Confirmed 2026-07-26.** The root cause is exactly as described: ADR-096's Confirmation item (b) specifies a status-only check, so the ratification its own Decision Driver depends on was never implemented at any locus. The claim was held closed by decision alone. Blast radius of closing it was measured before the fix landed and is zero — all four then-implementable stories (STORY-042/043/044/046) are genuinely ratified, so no in-flight work was blocked by the new check.
+
 ### Investigation Tasks
 
-- [ ] Decide the enforcement locus: the `manage-story accepted` transition check, `itil-no-implement-draft-gate.sh`, or both. ADR-096 names the commit-trailer gate as the primary locus precisely because it catches hand-written commits, which argues for the hook.
-- [ ] Disambiguate SKILL.md line 179 — "orthogonal" should say "not itself a lifecycle state, but a precondition of `accepted`".
-- [ ] Amend ADR-096's Confirmation item (b) so it specifies the ratification check its Decision Driver depends on.
-- [ ] Behavioural bats: a commit referencing an accepted-but-unratified story is blocked; an accepted-and-ratified story is allowed.
+- [x] Decide the enforcement locus — **both**, split by what each can see. The commit-trailer gate carries the ratification check, per ADR-096's own reasoning that it is the only locus catching a hand-written commit. `manage-story` carries the I12 accept-time gate so the failure surfaces before an iteration spends its budget.
+- [x] Disambiguate SKILL.md line 179 — now reads "not itself a lifecycle state, but it IS a precondition of `accepted`", with the failure that the old wording invited recorded inline.
+- [x] Amend ADR-096 — its closing over-claim now carries a correction naming this ticket, and ADR-095's "carries human ratification" sentence names both acceptance bases.
+- [x] Behavioural bats — the existing "allows an ACCEPTED story" case seeded an empty, unratified stub and asserted allow, which was the hole encoded as a test. Split into two directions: a ratified story allows, an accepted-but-unratified story denies. Flipped in the slice that ships the behaviour, per the ADR-089 precedent.
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-058 | proposed | The AFK-accept carve-out, and the story-ratification check that was never implemented |
+
+## Fix Released
+
+Fixed 2026-07-26 in the same slice as P456's carve-out — the two are the inverse pair, so fixing one without the other would have left them contradicting. The tightening ships **unconditionally** for every adopter: putting an ADR-090-mandated check behind an opt-in flag would itself have been the decision conflict, and would have meant adopters got the loosening's absence without the tightening's presence.
+
+Recorded as ADR-101 (`docs/decisions/101-afk-accept-carve-out-for-pure-decomposition-stories.proposed.md`), which defines the one bounded basis on which the ratification may be machine-written rather than human, and is otherwise a pure tightening of this gate.
 
 ## Dependencies
 

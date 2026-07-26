@@ -3,8 +3,9 @@ status: proposed
 job-id: work-backlog-afk
 persona: developer
 date-created: 2026-04-17
-human-oversight: confirmed
+human-oversight: unconfirmed
 oversight-date: 2026-05-31
+oversight-downgraded: "2026-07-26 — ADR-101 lockstep (material amendment per ADR-068): the Desired Outcome 'Problems requiring my judgment are queued for my return, not guessed at' is NARROWED by a bounded AFK-accept carve-out for pure decomposition of already-confirmed substance. Marker held until re-ratified; re-ratification queued with ADR-101's owed post-draft brief (P456 open items)."
 ---
 
 # JTBD-006: Progress the Backlog While I'm Away
@@ -20,6 +21,7 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 - Scope expansion is handled conservatively — save findings and move to the next problem rather than sinking unbounded effort
 - When I return, I can see a clear summary of what was worked, what was skipped, and what remains
 - Problems requiring my judgment (verification, scope decisions, ambiguous investigation) are queued for my return, not guessed at
+  - **Amendment 2026-07-26 (ADR-101).** One bounded exception, and it is not a licence to guess. Where the project has opted in, the loop may accept and implement a story that only **decomposes substance I already confirmed** — every decision, job, persona and map it draws on carries my confirmation, and each of its acceptance criteria names the confirmed clause it decomposes. Anything introducing a new design choice, persona, job or decision is still queued for my return, and **verification is untouched** — the loop still never decides that a fix works. This exists because the gate it relaxes was not slowing the loop down, it was stopping it: ratification had no unattended path at all, so an iteration could author governance artefacts and nothing else. Three witnesses are recorded on P456 and five more in the cross-session briefing, including a three-line fix that could not land.
 - Git commits happen automatically when risk is within appetite; uncommitted work is reported transparently when risk is above appetite
 - Between iterations, the loop drains push/release queues when unreleased risk would reach appetite, so risk never silently accumulates across AFK iterations (see ADR-018)
 - Before each iteration, the loop reconciles working-tree state with origin per ADR-019's three-branch clean-state preflight: trivial fast-forward divergence pulls non-interactively (Branch 1); prior-session in-flight work is recoverable as a distinct preflight commit when provenance is unambiguous and risk is within appetite (Branch 2 — deferred to a follow-up; current implementation conservatively routes to Branch 3); ambiguously-dirty tree or non-fast-forward divergence halts the loop with a structured Prior-Session State report (Branch 3 — interactive: `AskUserQuestion`; AFK: halt-with-report carve-out from the 2026-06-06 Rule 6 queue-and-continue default). See ADR-019.

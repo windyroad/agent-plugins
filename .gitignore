@@ -15,6 +15,10 @@ packages/risk-scorer/.pack-claude-skills/
 packages/architect/.pack-claude-skills/
 
 # Per-project consent caches — per-machine, never committed (P120 / ADR-034)
+# itil.config.json holds the ADR-101 AFK-accept opt-in — a governance-loosening
+# knob only a human may set. Ignored so no automated path can commit a `true`
+# and turn opt-in into opt-out-by-stealth.
+.claude/itil.config.json
 .claude/.install-updates-consent
 .claude/.auto-install-consent
 
