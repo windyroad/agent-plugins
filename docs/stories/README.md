@@ -114,6 +114,7 @@ Active (non-done) stories, from filesystem truth. (The `## Done` backfill of ter
 |--------|-----|-------|--------|----------|------|-----------|
 | in-progress | STORY-042 | Extract quota-pacing into its own plugin | L | P160, P443 | RFC-046 | STORY-MAP-003 |
 | accepted | STORY-044 | See what cruise is doing — status/telemetry skill | M | P160, P446 | RFC-046 | STORY-MAP-003 |
+| draft | STORY-047 | Gate the correction nudge on prompt authorship | S | P430 | RFC-050 | STORY-MAP-005 |
 | draft | STORY-012 | Can't start coding without an RFC — the gate makes me create one first | S | P251, P314 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-013 | Full gate: an RFC exists → I proceed; none → I create it first | M | P251, P314 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-014 | Unattended, the agent works the plan and pauses for real decisions | M | P251, P314 | RFC-005 | STORY-MAP-002 |

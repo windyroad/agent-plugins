@@ -133,11 +133,14 @@ One row per RFC in `proposed` / `accepted` / `in-progress` status. RFC-level WSJ
 | 10.0 | RFC-046 | Quota-pace throttle — mechanical PreToolUse pacing, extracted into @windyroad/cruise | 20 Critical | in-progress | L | 2026-07-06 |
 | 8.0 | RFC-036 | Plugin-staleness surfacer | 16 High | accepted | L | 2026-07-02 |
 | 4.5 | RFC-049 | Make the red-CI gate explain the CI-repair recovery path | 3 Medium | in-progress | S | 2026-07-23 |
+| 8.0 | RFC-050 | Correction-detector provenance guard | 8 Medium | proposed | S | 2026-07-26 |
 | 3.0 | RFC-005 | RFC-first trace invariant not enforced at fix-time | 3 Med | accepted | M | 2026-05-17 |
 
 WSJF for RFC-036: Severity inherited from highest-severity traced problem (P375 = 16 High); Status multiplier `accepted` = 2.0; Effort L divisor = 4; WSJF = (16 × 2.0) / 4 = 8.0.
 
 WSJF for RFC-005: Severity inherited from highest-severity traced problem (P251 = 3 Med); Status multiplier `accepted` = 2.0; Effort M divisor = 2; WSJF = (3 × 2.0) / 2 = 3.0.
+
+WSJF for RFC-050: Severity inherited from its sole traced problem (P430 = 8 Medium); Status multiplier `proposed` = 1.0; Effort S divisor = 1; WSJF = (8 × 1.0) / 1 = 8.0.
 
 RFC-006 + RFC-007 transitioned to `verifying` 2026-05-26 (RFC-006 all seven slices shipped; RFC-007 P260 fix released in `@windyroad/itil@0.35.14`) — excluded from RFC Rankings (multiplier 0); see Verification Queue.
 

@@ -82,10 +82,15 @@ Per ADR-060 § Phase 2 encoding amendment (2026-05-12). Every story-map HTML fil
 
 ## Story Map Rankings
 
-(Empty — no story maps captured yet. STORY-MAP-001 bootstrap migration lands in P170 Phase 2 Slice 8.)
+One row per story map in `draft` / `accepted` / `in-progress` status, from filesystem truth. Map-level WSJF is not yet computed — the column is reserved.
 
 | WSJF | ID | Title | Status | Problems | RFCs |
 |------|-----|-------|--------|----------|------|
+| — | STORY-MAP-001 | RFC Framework Phase 1 + Phase 2 Bootstrap | in-progress | P170 | RFC-001, RFC-002, RFC-003 |
+| — | STORY-MAP-002 | Decompose a Fix Into Coordinated Changes | draft | P170, P251, P314, P371, P399, P390 | RFC-003, RFC-005, RFC-047 |
+| — | STORY-MAP-003 | Sustain my token quota across the week and across surfaces | draft | P160, P443 | RFC-046 |
+| — | STORY-MAP-004 | Close the outbound reporter loop with honest, generated upstream lifecycle comments | draft | P376 | — |
+| — | STORY-MAP-005 | Trust the capture-on-correction signal | draft | P430 | RFC-050 |
 
 ## Completed
 

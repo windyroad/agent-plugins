@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>STORY-MAP-005: Trust the capture-on-correction signal</title>
+  <meta name="story-map-id" content="STORY-MAP-005">
+  <meta name="status" content="draft">
+  <meta name="problems" content="P430">
+  <meta name="rfcs" content="RFC-050">
+  <meta name="jtbd" content="JTBD-006">
+  <meta name="adrs" content="">
+  <meta name="reported" content="2026-07-26">
+  <meta name="decision-makers" content="Tom Howard">
+  <meta name="human-oversight" content="unconfirmed">
+  <style>
+    :root { color-scheme: light; }
+    body { font-family: system-ui, sans-serif; max-width: 1200px; margin: 1rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.125rem; margin-top: 1.5rem; }
+    .backbone { display: grid; grid-template-columns: repeat(var(--cols), 1fr); gap: 1rem; margin-bottom: 2rem; }
+    .rib-header { grid-column: 1 / -1; border-bottom: 1px solid #767676; padding-bottom: 0.25rem; }
+    /* .rib is intentionally a bare <div>: display:contents strips an element's own
+       semantics from the a11y tree. Safe here (generic wrapper, no role, not focusable).
+       If it ever becomes a <ul>, gains a role/aria-*, or if .slice needs flattening,
+       switch to grid-template-columns: subgrid instead. */
+    .rib { display: contents; }
+    .slice { border: 1px solid #767676; padding: 0.5rem; text-decoration: none; color: inherit; display: block; }
+    .slice:hover,
+    .slice:focus-visible { border-color: #0b3a66; text-decoration: underline; }
+    .slice:focus-visible { outline: 3px solid #0b3a66; outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>STORY-MAP-005: Trust the capture-on-correction signal</h1>
+
+    <p>When a user tells the agent it got something wrong, that correction should become a durable problem record rather than decaying with the session — that is the job the capture-on-correction nudge exists to do. The nudge only works if it means something. Today its prompt detector fires on any prompt containing an imperative like "do not", including the framework's own iteration prompts, so a signal that should be rare and pointed arrives on nearly every autonomous iteration with no correction behind it. This map covers making the nudge trustworthy by teaching the detector to distinguish user-authored prompts from framework-generated ones. (Traces: P430, inbound #257; JTBD-006.)</p>
+
+    <section class="backbone" style="--cols: 1">
+      <header class="rib-header">
+        <h2 data-rib="trustworthy-correction-signal">Trustworthy correction signal</h2>
+      </header>
+      <div class="rib">
+        <a class="slice" href="../../stories/draft/STORY-047-correction-nudge-fires-only-on-user-authored-prompts.md"
+           data-story-id="STORY-047" data-rfc="RFC-050" data-jtbd="JTBD-006"
+           data-status="draft">Gate the correction nudge on prompt authorship</a>
+      </div>
+    </section>
+
+    <p class="map-note">Single-story map: ADR-089 (every RFC has at least one story) and ADR-095 (map membership at capture) make one-rib maps the floor shape for a single-surface fix. Further over-fire problems in the same prompt-detector family become stories on this rib rather than minting sibling maps. Slices link to Markdown story files.</p>
+  </main>
+</body>
+</html>

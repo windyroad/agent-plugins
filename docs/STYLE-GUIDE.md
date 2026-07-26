@@ -30,6 +30,9 @@ Per ADR-060 § Phase 2 encoding amendment 2026-05-12 lines 392-435:
 - `.rib` — horizontal lane of related slices; many per map.
 - `.rib-header` — heading row for a rib; one per rib.
 - `.slice` — single story reference (carries `data-story-id`); many per rib.
+- `.map-note` — optional trailing prose annotation on the map (rationale, floor-shape justification, growth plan). Carries no `data-*` attributes; unstyled by default.
+
+Maps written before this vocabulary was recorded also use `.task`, `.legend`, `.badge`, and `.b-live` / `.b-next` / `.b-later` (see `STORY-MAP-003`). Those are not yet normative — they are catalogued in the vocabulary-and-contrast sweep ticket rather than blessed here.
 
 ### Data attributes (machine-readable trace)
 - `data-story-id="STORY-NNN"` — on `<a>` slice element.
@@ -50,6 +53,16 @@ Story maps are intentionally style-minimal; colour is OPTIONAL. If used:
 - High contrast against white background (WCAG AA minimum 4.5:1 for text).
 - Conventional status indicators: `draft = gray`, `accepted = blue`, `in-progress = yellow`, `done = green`, `archived = light gray`.
 - No background colours on data-bearing `<a class="slice">` elements (keep them visually neutral; status conveyed via border / outline if at all).
+- **Non-text contrast**: borders and other non-text UI boundaries meet 3:1 against their background (WCAG 2.2 SC 1.4.11). This binds hardest on `.slice`, whose border is the only resting signal that the card is a link. Use `#767676` (4.54:1 on white) as the shared border value for new maps.
+
+  Maps written before this rule, plus the two template sources (ADR-060's inlined template and `docs/story-maps/README.md`), still carry sub-3:1 border greys such as `#ccc` (1.6:1), `#c9d2de`, and `#c4c4c4`. The sweep is tracked as its own ticket — this line is normative for new work, not a description of what is currently on disk.
+
+### Interaction states
+
+- **Focus**: `:focus-visible` is required on every interactive element whose only resting affordance is its border. Use `outline: 3px solid #0b3a66; outline-offset: 2px;` — reusing the value already shipped as `--focus` in `STORY-MAP-003` rather than minting a third blue.
+- **Hover**: pair the border-colour change with a non-colour cue (`text-decoration: underline`) so the state survives greyscale and forced-colours mode. A 1px border darkening on its own is a state-to-state difference most sighted users cannot detect.
+- **Viewport and canvas**: every map declares `<meta name="viewport" content="width=device-width, initial-scale=1">` (WCAG 2.2 SC 1.4.10 Reflow) and pins its canvas with `:root { color-scheme: light; }` unless it ships a dark-mode counterpart — otherwise auto-dark-theme inverts the background while authored colours stay put, invalidating every contrast ratio.
+- **Dark mode**: a map that declares `color-scheme` supplies a light-on-dark focus counterpart (`STORY-MAP-003` uses `#97c6f5`). A map that stays on the white canvas does not need one.
 
 ## Typography
 
