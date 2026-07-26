@@ -26,7 +26,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6.0 | P439 | External-review round-trips waste cycles on stale repo artifacts (unpushed commits + stale IDE buffer) | 6 (Medium) | Known Error | M | 2026-07-06 | inbound-reported (#326) |
 | 6 | P424 | Governance tooling emits U+2014 em-dashes in generated output, breaking adopter no-em-dash Edit/Write hooks | 12 (High) | Known Error | M | 2026-07-06 | inbound-reported (#185, #186, #219, #223, #319) |
 | 6 | P450 | Verification Queue evidence cells are never populated from subsequent-session exercises, so the run-retro Step 4a auto-drain never fires | 12 (High) | Known Error | L | 2026-07-15 | inbound-reported (#323) |
-| 6 | P433 | transition-problem / review-problems / run-retro Step 4a lack a sibling-family completeness scan before close | 12 (High) | Open | M | 2026-07-06 | inbound-reported (#187) |
+| 6 | P433 | transition-problem / review-problems / run-retro Step 4a lack a sibling-family completeness scan before close | 12 (High) | Known Error | L | 2026-07-06 | inbound-reported (#187) |
 | 6 | P434 | Capture flows write unverified claims (premise + root-cause mechanism) as established fact | 12 (High) | Open | M | 2026-07-06 | inbound-reported (#202, #339) |
 | 4.5 | P425 | wr-architect edit-gate re-litigates its own same-session PASS — [Unratified Dependency] over-fires on agent-prescribed born-proposed ADRs | 9 (Medium) | Open | M | 2026-07-06 | inbound-reported (#342) |
 | 4.5 | P432 | Assistant does not auto-close the feedback loop on inbound-feedback conversion (channel-agnostic) | 9 (Medium) | Open | M | 2026-07-06 | inbound-reported (#347) |
