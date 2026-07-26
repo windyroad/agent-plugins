@@ -18,9 +18,10 @@ human-oversight: unconfirmed
 ## Job Statement
 
 When I correct how the agent conducts a turn — how it asks me for something, whether it hands
-me off-ramps I never asked for, whether it narrates its own conduct instead of doing the work
-— I want the corrected behaviour to hold in my next session and in every other project I work
-in, so that I never have to deliver the same correction twice.
+me off-ramps I never asked for, whether it narrates its own conduct instead of doing the work,
+whether it hands my work to someone else without checking they can see the version I actually
+have — I want the corrected behaviour to hold in my next session and in every other project I
+work in, so that I never have to deliver the same correction twice.
 
 ## Desired Outcomes
 
@@ -36,6 +37,10 @@ in, so that I never have to deliver the same correction twice.
   the agent says anything about it.
 - The rule costs me no measurable additional per-turn overhead beyond what governance guidance
   already spends.
+- When I relay a repository artefact to someone outside my session — an external reviewer, a
+  colleague, a second agent — the agent hands over content it has verified is current, or names
+  what is unpushed and offers to push, rather than assuming the copy the recipient can see is
+  the copy it just read.
 
 ## Persona Constraints
 
@@ -63,10 +68,20 @@ in, so that I never have to deliver the same correction twice.
 
 - **P438** (the assistant collects free text — URLs, tokens, IDs — through the bounded-options
   picker instead of one copyable block per item; arrived as inbound report #324), **P445** (the
-  assistant offers off-ramps nobody asked for, hedges, and narrates its own conduct), and
-  **P423** (the assistant "fixes" recurring behavioural corrections by writing to project-local
-  memory, which reaches no adopter). Three independent captures, by three different routes, of
-  one job — which is what makes this a job rather than an outcome bolted onto an existing one.
+  assistant offers off-ramps nobody asked for, hedges, and narrates its own conduct), **P423**
+  (the assistant "fixes" recurring behavioural corrections by writing to project-local memory,
+  which reaches no adopter), and **P439** (the assistant relays a repository artefact to an
+  outside reviewer while assuming the copy that reviewer can reach is current; arrived as
+  inbound report #326). Four independent captures, by four different routes, of one job — which
+  is what makes this a job rather than an outcome bolted onto an existing one.
+
+  The four are not identical in shape, and the coherence claim is the weaker, honest one rather
+  than the tidy one. P438, P445 and P423 are corrections the *user* delivered that failed to
+  persist. P439 is different: it is a first-capture inbound report of a rule never stated
+  anywhere, and its repetition is the *reviewer* re-flagging, not the user re-correcting. What
+  unites all four is not that each was delivered twice — it is that each needs the same thing to
+  be fixed at all: a conduct rule that ships as a portable surface and changes the next turn's
+  default. That is this job's third desired outcome, and it is the axis the four share.
 - **JTBD-003** (Compose Only the Guardrails I Need) is about *which* guardrails you get.
   **JTBD-007** (Keep Plugins Current Across Projects) is about *whether they are current*. This
   job is about whether a correction *persists at all* — a distinct axis from both.
@@ -79,6 +94,7 @@ in, so that I never have to deliver the same correction twice.
 | ID | Title | Status |
 |----|-------|--------|
 | RFC-052 | RFC-052: Ship a portable rule routing free-text collection to per-item copyable blocks | proposed |
+| RFC-053 | RFC-053: Ship a portable rule requiring a verified-current handover before an external-review round-trip | proposed |
 
 ## Story Maps
 
@@ -92,3 +108,4 @@ in, so that I never have to deliver the same correction twice.
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-049 | STORY-049: Ask for a URL in a shape I can paste into | draft |
+| STORY-050 | STORY-050: Have my reviewer read the version I actually have | draft |

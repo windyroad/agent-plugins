@@ -14,6 +14,7 @@ Per ADR-060 § Phase 2 encoding amendment 2026-05-12 lines 392-435:
 ### Layout
 - Backbone × ribs × slices uses CSS Grid via embedded `<style>` block in `<head>`. Layout-only rules (no semantic styling).
 - Grid sizing via `--<custom-property>` variables permitted inline on layout-container elements (e.g. `style="--cols: 4"` on `.backbone`).
+- `--cols` is the **number of slices laid out per row** within one rib — the grid's column count — not the number of ribs and not the rib's total slice count. A rib holding one slice uses `--cols: 1`; a rib holding four side by side uses `--cols: 4`. A rib may hold more slices than `--cols`, in which case they wrap to further rows (see `STORY-MAP-001`, whose `--cols: 1` rib stacks two slices).
 
 ### Prohibited
 - **Inline `style=""` on data-bearing elements**: `<a class="slice">` carrying `data-story-id` MUST NOT carry inline `style=""`. Rationale: keeps `grep`-as-lint deterministic; data-attribute extraction never matches a styling string.
@@ -26,7 +27,7 @@ Per ADR-060 § Phase 2 encoding amendment 2026-05-12 lines 392-435:
 - HTML5 semantic elements: `<section>`, `<header>`, `<h1>` / `<h2>`, `<a>`, `<div>` (only as a layout container).
 
 ### Class names (story-map vocabulary)
-- `.backbone` — top-level grid container; one per map.
+- `.backbone` — per-rib grid container; one per rib, many per map. Multiple ribs are encoded as sibling `<section class="backbone">` elements, not as multiple `.rib` divs inside one section: `.rib { display: contents }` promotes slices to direct grid items and `.rib-header { grid-column: 1 / -1 }` assumes one header per grid, so a second rib inside one `.backbone` would share a single `--cols` track list and break both. Keeping ribs as siblings in DOM order also keeps focus order equal to visual order. (Known misnomer: Patton's conceptual backbone is the ordered set of these sections, not any one of them. Renaming the class is a decision, not a doc fix.)
 - `.rib` — horizontal lane of related slices; many per map.
 - `.rib-header` — heading row for a rib; one per rib.
 - `.slice` — single story reference (carries `data-story-id`); many per rib.
