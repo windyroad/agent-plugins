@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-26 **P463 captured** — relevance-close evaluator over-fires: a bare ADR/skill citation in `## Related` is read as "fix shipped", so it returned CLOSE-CANDIDATE on 61/80 tickets (76%) vs the ~4.2% documented, drowning genuine close-candidates and poisoning the work-problems Step 3.6 pre-dispatch gate; upstream #306 already describes it (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-07-26 **P464 captured** — agent self-limits external-comms as "out of scope" in AFK/pre-flight: the Step 0b review-problems pre-flight held P164 citing "external-comms out of pre-flight scope", but the external-comms gate silent-passes low-risk so the dispatch was in-scope; user correction "External comms is NOT out of pre-flight scope"; sibling of P184/P363 (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -47,6 +47,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 12 | P179 | Agent defers requested work into untracked phases — phases are fine, but unticketed phases never get implemented | 12 (High) | Known Error | M | 2026-05-10 | internal |
 | 12 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 (High) | Known Error | M | 2026-06-10 | internal |
 | 9 | P363 | Inbound-reported tickets never receive fix-released verdict on originating issue | 9 (Medium) | Known Error | M | 2026-06-11 | internal |
+| 9 | P464 | Agent self-limits external-comms as "out of scope" in AFK / pre-flight — strands dispatchable lifecycle/ack/upstream-report obligations | 9 (Medium) | Open | S | 2026-07-26 | corrective-feedback |
 | 8 | P300 | ADR-063 maturity-presentation schema — F2 (rich-record per-surface) is overkill; F1 is sufficient to begin with | 4 (Low) | Known Error | S | 2026-05-25 | internal |
 | 8 | P419 | capture-story's mechanical reverse-trace edit to a docs/jtbd file re-locks the JTBD edit gate mid-session | 8 (Medium) | Known Error | M | 2026-07-05 | internal |
 | 8 | P459 | Agent-Prose Behavioural Eval Flaky — Red-Lines CI on Unrelated Commits | 8 (Medium) | Known Error | M | 2026-07-24 | internal |
