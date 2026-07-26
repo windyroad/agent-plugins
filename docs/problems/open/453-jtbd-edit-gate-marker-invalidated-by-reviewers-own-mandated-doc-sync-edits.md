@@ -19,6 +19,7 @@ Any verdict that mandates edits to the gate's own policy files is self-defeating
 
 - Applying reviewer-mandated docs/jtbd/ edits deletes the just-issued PASS marker.
 - Next gated write blocks with "jtbd policy file changed since last review" until a redundant re-review.
+- **2026-07-26 (P417 iter) — the trigger is wider than reviewer-mandated edits, and wider than semantic ones.** Reconciling the story-tier index ran `wr-itil-update-jtbd-references-section` over four already-ratified job files (JTBD-007, JTBD-008, JTBD-101, JTBD-303) to refresh their derived `## Stories` reverse-trace tables. Pure mechanical helper output; frontmatter untouched; no reviewer asked for it. Committing that pass invalidated the marker anyway, and the next gated write — `docs/rfcs/README.md` for the second half of the same reconcile — blocked with the identical *"jtbd policy file changed since last review"*, costing a full re-review round for a doc-only index edit. So the gate keys on policy-path drift alone, with no discrimination between (a) a semantic amendment to a job, (b) a reviewer-mandated sync, and (c) a derived-table refresh a helper wrote. Any multi-tier reconcile that touches `docs/jtbd/` therefore self-invalidates mid-pass. Note the interaction with P438's advice to "sequence jtbd-policy writes last": that advice assumes you know in advance which writes touch `docs/jtbd/`, which a reverse-trace sweep driven off a drift report does not.
 
 ## Workaround
 
