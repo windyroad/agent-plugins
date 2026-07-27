@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>STORY-MAP-011: Trust the AFK loop's autonomous conduct</title>
+  <meta name="story-map-id" content="STORY-MAP-011">
+  <meta name="status" content="draft">
+  <meta name="persona" content="developer">
+  <meta name="problems" content="P430,P434,P433">
+  <meta name="rfcs" content="RFC-050,RFC-056,RFC-057">
+  <meta name="jtbd" content="JTBD-006,JTBD-001,JTBD-002">
+  <meta name="adrs" content="ADR-101">
+  <meta name="reported" content="2026-07-27">
+  <meta name="decision-makers" content="Tom Howard">
+  <meta name="human-oversight" content="unconfirmed">
+  <style>
+    :root { color-scheme: light; }
+    body { font-family: system-ui, sans-serif; max-width: 1200px; margin: 1rem auto; padding: 0 1rem; line-height: 1.5; }
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.125rem; margin-top: 1.5rem; }
+    p { max-width: 74ch; }
+    .lead { color: #565656; }
+    .backbone { display: grid; grid-template-columns: repeat(var(--cols), 1fr); gap: 1rem; margin-bottom: 2rem; }
+    .rib-header { grid-column: 1 / -1; border-bottom: 1px solid #767676; padding-bottom: 0.25rem; }
+    .rib-header .step { color: #565656; font-weight: 400; font-size: .8rem; display: block; margin-top: .15rem; }
+    /* .rib is intentionally a bare <div>: no role, no name, no tabindex, so it computes to
+       `generic` and is pruned from the a11y tree whatever its display value — display:contents
+       costs nothing here. All three declarations are required — subgrid alone is inert on a
+       display:contents box, and a grid item spans one column by default:
+         .rib { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; }
+       Focus order matches visual order only because placement is left to default row-major
+       auto-flow: keep one .rib per .backbone, and never set grid-auto-flow: column, dense,
+       order, grid-row or grid-column on a .slice. Sibling .backbone sections are the way to add
+       a rib. --cols is the number of slices laid out per row within one rib. Bare 1fr is
+       minmax(auto, 1fr); at --cols: 1 it is inert, but raise --cols above 1 and also want
+       minmax(0, 1fr) plus .slice { overflow-wrap: anywhere; }. outline-offset: 2px is
+       load-bearing: it interposes white between the #767676 resting border and the #0b3a66
+       focus ring; at offset 0 those adjoin at 2.55:1. */
+    .rib { display: contents; }
+    .slice { border: 1px solid #767676; border-radius: 6px; padding: 0.6rem 0.7rem; text-decoration: none; color: inherit; display: block; }
+    .slice .s-value { display: block; color: #565656; font-size: .8rem; margin-top: .3rem; }
+    .slice .s-ref { display: block; color: #565656; font-size: .72rem; margin-top: .3rem; }
+    .slice:hover,
+    .slice:focus-visible { border-color: #0b3a66; }
+    .slice:hover .s-title,
+    .slice:focus-visible .s-title { text-decoration: underline; }
+    .slice:focus-visible { outline: 3px solid #0b3a66; outline-offset: 2px; }
+    .map-note { color: #565656; font-size: .85rem; max-width: 74ch; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Trust the AFK loop's autonomous conduct</h1>
+    <p class="lead">A story map for the <strong>developer</strong> who starts <code>/wr-itil:work-problems</code> and walks away. Each rib is one thing the unattended loop must get right for its output to be trustworthy: my corrections land as real records, the tickets it writes say only what was verified, and a close doesn't quietly strand related work. Read the ribs top to bottom as the journey from "the agent noticed" to "the record it left is sound." Each slice links to its story; the backbone, ribs, and slices are refined at the <code>/wr-itil:manage-story-map</code> accepted transition.</p>
+
+    <section class="backbone" style="--cols: 1">
+      <header class="rib-header">
+        <h2 data-rib="faithful-correction-capture">Capture my corrections faithfully</h2>
+        <span class="step">Activity A: when I tell the agent it got something wrong, that becomes a durable record; when I didn't, nothing fires.</span>
+      </header>
+      <div class="rib">
+        <a class="slice" href="../../stories/draft/STORY-047-correction-nudge-fires-only-on-user-authored-prompts.md"
+           data-story-id="STORY-047" data-rfc="RFC-050" data-jtbd="JTBD-006" data-status="draft"><span class="s-title">The correction offer fires only when I actually corrected the agent, not on the framework's own iteration prompts</span><span class="s-value">Value: a rare, pointed signal I can trust, instead of a nudge on nearly every autonomous iteration.</span><span class="s-ref">STORY-047, P430 (inbound #257), RFC-050</span></a>
+      </div>
+    </section>
+
+    <section class="backbone" style="--cols: 1">
+      <header class="rib-header">
+        <h2 data-rib="verified-before-recorded">Say only what was verified</h2>
+        <span class="step">Activity B: a ticket is read downstream as ground truth, so an untested claim must not wear the same authority as a confirmed finding.</span>
+      </header>
+      <div class="rib">
+        <a class="slice" href="../../stories/draft/STORY-053-test-claims-against-the-tree-and-label-the-untested-ones.md"
+           data-story-id="STORY-053" data-rfc="RFC-057" data-jtbd="JTBD-002" data-status="draft"><span class="s-title">A captured ticket tests its claims against the tree and labels the ones it could not run as guesses</span><span class="s-value">Value: no phantom tickets, no fix aimed at a problem that a quick grep would have disproved.</span><span class="s-ref">STORY-053, P434 (inbound #202/#339), RFC-057</span></a>
+      </div>
+    </section>
+
+    <section class="backbone" style="--cols: 1">
+      <header class="rib-header">
+        <h2 data-rib="close-without-stranding">Close without stranding the family</h2>
+        <span class="step">Activity C: when one ticket closes, the still-open siblings in its friction family must not silently fall out of sync.</span>
+      </header>
+      <div class="rib">
+        <a class="slice" href="../../stories/draft/STORY-052-surface-still-outstanding-family-members-before-a-close.md"
+           data-story-id="STORY-052" data-rfc="RFC-056" data-jtbd="JTBD-001" data-status="draft"><span class="s-title">Before a close lands, the agent shows me the still-open siblings in the same family</span><span class="s-value">Value: related work stays coordinated; a close never quietly orphans its siblings.</span><span class="s-ref">STORY-052, P433 (inbound #187), RFC-056</span></a>
+      </div>
+    </section>
+
+    <p class="map-note">This map consolidates three per-fix stub maps (STORY-MAP-005 correction-signal, STORY-MAP-009 sibling-family, and STORY-MAP-010 verified-ticket) into one developer-conduct journey per P473 &mdash; the honest unit is the journey, not the single fix. Each rib grows more slices as further conduct fixes drive stories rather than minting sibling maps. Landing order is governed by ADR-101 (an AFK loop may accept and implement a story that only decomposes already-confirmed substance): STORY-047's parents are all confirmed, so it lands first; the others land as their traces confirm. Slices link to Markdown story files.</p>
+  </main>
+</body>
+</html>
