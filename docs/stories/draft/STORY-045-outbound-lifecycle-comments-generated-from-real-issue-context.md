@@ -8,7 +8,8 @@ jtbd: [JTBD-301]
 rfcs: [RFC-028]
 story-maps: [STORY-MAP-004]
 estimated-effort: M
-human-oversight: unconfirmed
+human-oversight: confirmed
+oversight-hash: c686b28d0a4dbed7139ff7d7d654b3b5b6c616d81c8099b92d779e8832078d38
 ---
 
 # STORY-045: Outbound lifecycle comments generated from real issue context

@@ -858,6 +858,67 @@ tests:
           NOT end its turn mid-background / does NOT defer completion past
           the turn boundary PASSES.
 
+  # --- P430: Step 5 iter dispatch exports all THREE self-suppress guards -------
+  #
+  # Driver: P430 (the capture-on-correction detector was content-only, so a
+  # machine-authored iter prompt carrying an ordinary imperative like "DO NOT
+  # skip the gate" tripped it and nearly every unattended iteration emitted the
+  # full MANDATORY block at an absent user). STORY-047 adds a third dispatcher-
+  # asserted provenance guard, `WR_SUPPRESS_CORRECTION_DETECT=1`, alongside the
+  # two already exported in the Step 5 block. Provenance is a property of the
+  # spawning process, so the dispatcher must assert it — if this export is ever
+  # dropped from the Step 5 prose the hook silently reverts to the P430 noise
+  # with nothing failing. Discharges the R009 prose-surface floor for the
+  # changed dispatch block per ADR-075.
+  #
+  # Tier-A calibration (P270 / P393): the paraphrase-proof anchors are the three
+  # literal env-var names — deterministic tokens the orchestrator writes
+  # verbatim into the spawn block, not LLM-judgement branches. The semantic
+  # clause (why provenance is dispatcher-asserted rather than content-sniffed,
+  # and that a real correction in the orchestrator session still fires) routes
+  # to the Tier-B rubric.
+  #
+  # @problem P430 (correction nudge fires on machine-authored iter prompts)
+  # @adr ADR-032 (P157 cross-context-leak guard discipline) + ADR-066 (oversight nudge)
+  - description: Step 5 iter dispatch exports all three self-suppress guards, correction-detect included (P430)
+    vars:
+      prompt: |
+        I am the /wr-itil:work-problems orchestrator about to dispatch an AFK
+        iteration worker as a `claude -p` subprocess. Per the Step 5 dispatch
+        block, list EVERY `WR_SUPPRESS_*` environment variable I must export
+        before the spawn, and for each one say in one line why an absent user
+        makes it necessary. Then say what happens if a real correction is typed
+        into my own orchestrator session rather than into an iter.
+    assert:
+      # Tier A — all three literal guard names must be named.
+      - type: contains
+        value: 'WR_SUPPRESS_PENDING_QUESTIONS'
+      - type: contains
+        value: 'WR_SUPPRESS_OVERSIGHT_NUDGE'
+      - type: contains
+        value: 'WR_SUPPRESS_CORRECTION_DETECT'
+      # Tier B — semantic invariant: three guards, each justified by absent-user
+      # provenance; and P078 is preserved in the orchestrator session.
+      - type: llm-rubric
+        value: |
+          The response names THREE exported suppression guards for the AFK iter
+          spawn — the pending-questions queue guard, the oversight-nudge guard,
+          and the correction-detect guard — and treats the correction-detect one
+          as a distinct guard class rather than a rename or a split of the
+          oversight-nudge guard. It explains the correction guard as prompt
+          PROVENANCE (the iteration prompt is machine-authored, so an imperative
+          inside it is not a user correcting anything, and no user is present to
+          act on a capture nudge) rather than as content matching. It states
+          that a correction typed into the ORCHESTRATOR session still fires the
+          nudge normally, because the guard is not set there — i.e. P078
+          capture-on-correction is preserved for real corrections. PASS if it
+          (a) names all three guards, (b) frames the correction guard as
+          machine-authored-prompt provenance, AND (c) says real corrections in
+          the orchestrator session still fire. FAIL if it names only two guards,
+          OR describes the correction guard as suppressing corrections
+          generally / disabling P078, OR says the hook should detect machine
+          authorship by inspecting the prompt's content itself.
+
   # --- P399: Step 5 I13 fix-time RFC auto-create authors the FULL RFC ----------
   #
   # Driver: P399 (ADR-073's I13 fix-time auto-create originally emitted a

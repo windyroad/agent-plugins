@@ -20,9 +20,15 @@ setup() {
   REPO_ROOT="$(cd "$(dirname "$BATS_TEST_FILENAME")/../../../.." && pwd)"
   HOOK="$REPO_ROOT/packages/itil/hooks/itil-correction-detect.sh"
   SID="itil-correction-test-$$-$RANDOM"
+  # An AFK iter exports WR_SUPPRESS_CORRECTION_DETECT=1, which the hook
+  # self-suppresses on. Unset it so the positive-detection cases below do not
+  # false-RED when this suite runs inside such an iter (the P391 hermeticity
+  # class). Suppression is asserted per-invocation via `run env ...` instead.
+  unset WR_SUPPRESS_CORRECTION_DETECT
 }
 
 teardown() {
+  unset WR_SUPPRESS_CORRECTION_DETECT
   rm -f "/tmp/itil-correction-detect-announced-${SID}"
   rm -f "/tmp/itil-correction-detect-announced-${SID}-alt"
 }
@@ -133,4 +139,51 @@ run_hook() {
   [ "$status" -eq 0 ]
   [ -z "$output" ]
   [ ! -f "/tmp/itil-correction-detect-announced-${SID}" ]
+}
+
+# --- P430 / STORY-047: prompt-authorship guard --------------------------------
+# A framework-authored iter prompt carrying an ordinary imperative ("DO NOT
+# skip the gate") is not a correction — nobody is correcting anything, and the
+# absent user cannot act on the nudge. Provenance is a property of the spawning
+# process, so the dispatcher asserts it via env var rather than the hook
+# guessing from content.
+
+run_hook_env() {
+  local guard="$1" sid="$2" prompt="$3"
+  echo "{\"session_id\":\"$sid\",\"prompt\":$(printf '%s' "$prompt" | jq -Rs .)}" \
+    | env WR_SUPPRESS_CORRECTION_DETECT="$guard" bash "$HOOK"
+}
+
+@test "correction-detect: WR_SUPPRESS_CORRECTION_DETECT=1 suppresses a correction prompt" {
+  run run_hook_env 1 "$SID" "DO NOT skip the architect gate"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "correction-detect: suppressed path writes no announcement marker" {
+  run run_hook_env 1 "$SID" "FFS, you didn't run the test"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+  # The once-per-session budget must survive a prompt that produced no output,
+  # or the first real correction in the orchestrator session emits only the
+  # terse reminder.
+  [ ! -f "/tmp/itil-correction-detect-announced-${SID}" ]
+}
+
+@test "correction-detect: same prompt still fires with the guard unset" {
+  run run_hook "$SID" "DO NOT skip the architect gate"
+  [ "$status" -eq 0 ]
+  [ "${#output}" -gt 300 ]
+  [[ "$output" == *"MANDATORY"* ]]
+}
+
+@test "correction-detect: only the literal value 1 suppresses" {
+  for v in 0 true yes ""; do
+    run run_hook_env "$v" "$SID-$RANDOM" "FFS, that's wrong"
+    [ "$status" -eq 0 ]
+    [ -n "$output" ] || {
+      echo "guard value '$v' wrongly suppressed"
+      false
+    }
+  done
 }

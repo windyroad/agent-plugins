@@ -2,13 +2,14 @@
 status: draft
 story-id: afk-loop-anchored-with-native-goal-external-evaluator
 reported: 2026-07-06
-human-oversight: unconfirmed
 decision-makers: [Tom Howard]
 problems: [P390]
 jtbd: [JTBD-006]
 rfcs: [RFC-047]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
+human-oversight: confirmed
+oversight-hash: 08de76c34226c0de5ddebad0f51e88ae49ce025d85454e689beed18aa6c79e4a
 ---
 
 # STORY-040: AFK loop anchored with the native `/goal` external evaluator

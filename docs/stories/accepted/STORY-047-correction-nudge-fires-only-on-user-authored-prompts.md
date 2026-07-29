@@ -1,5 +1,5 @@
 ---
-status: draft
+status: accepted
 story-id: correction-nudge-fires-only-on-user-authored-prompts
 reported: 2026-07-26
 decision-makers: [Tom Howard]
@@ -8,12 +8,13 @@ jtbd: [JTBD-006]
 rfcs: [RFC-050]
 story-maps: [STORY-MAP-005]
 estimated-effort: S
-human-oversight: unconfirmed
+human-oversight: confirmed
+oversight-hash: 71a113a512e3ccb22b1988e506b613d35286efb4f8b8e07c23b9eba7ccbc0510
 ---
 
 # STORY-047: Gate the correction nudge on prompt authorship
 
-**Status**: draft
+**Status**: accepted
 **Reported**: 2026-07-26
 **Problems**: P430
 **JTBD**: JTBD-006
@@ -31,29 +32,29 @@ make, and a real correction still lands as a durable problem record.
 
 ## Acceptance criteria (accepted-gate, INVEST Testable)
 
-- [ ] `packages/itil/hooks/itil-correction-detect.sh` exits silently when
+- [x] `packages/itil/hooks/itil-correction-detect.sh` exits silently when
   `WR_SUPPRESS_CORRECTION_DETECT=1`, with the guard placed ahead of the `jq` parses so the
   suppressed path costs one string comparison.
-- [ ] Only the literal value `1` suppresses; `0`, `true`, empty, and unset all leave the
+- [x] Only the literal value `1` suppresses; `0`, `true`, empty, and unset all leave the
   detector firing normally.
-- [ ] No announce marker is written on the suppressed path, so the once-per-session
+- [x] No announce marker is written on the suppressed path, so the once-per-session
   progressive-disclosure budget is not burned by a prompt that produced no output.
-- [ ] `packages/itil/skills/work-problems/SKILL.md` Step 5 exports
+- [x] `packages/itil/skills/work-problems/SKILL.md` Step 5 exports
   `WR_SUPPRESS_CORRECTION_DETECT=1` before each `claude -p` iter spawn, alongside the two
   guards already exported there, with a comment citing P430 and JTBD-006 in the prose shape
   the neighbouring guard blocks use.
-- [ ] The hook header comment records why this is a distinct guard class rather than a split
+- [x] The hook header comment records why this is a distinct guard class rather than a split
   of `WR_SUPPRESS_OVERSIGHT_NUDGE` (the ADR-068 / ADR-047 constraint), so the next reader
   does not mistake it for a violation.
-- [ ] Behavioural bats in `packages/itil/hooks/test/itil-correction-detect.bats`: a
+- [x] Behavioural bats in `packages/itil/hooks/test/itil-correction-detect.bats`: a
   user-authored correction still emits the MANDATORY block with the guard unset; the same
   prompt under `WR_SUPPRESS_CORRECTION_DETECT=1` emits nothing and writes no marker; a
   non-`1` value does not suppress.
-- [ ] `setup()` and `teardown()` in that suite `unset WR_SUPPRESS_CORRECTION_DETECT`, so the
+- [x] `setup()` and `teardown()` in that suite `unset WR_SUPPRESS_CORRECTION_DETECT`, so the
   existing positive-detection cases do not false-RED when the suite runs inside an AFK iter
   that exports the guard (the P391 hermeticity class).
-- [ ] `docs/briefing/afk-subprocess.md` lists three exported iter guards, not two.
-- [ ] A `.changeset/*.md` bumps `@windyroad/itil` minor — the change introduces a new public
+- [x] `docs/briefing/afk-subprocess.md` lists three exported iter guards, not two.
+- [x] A `.changeset/*.md` bumps `@windyroad/itil` minor — the change introduces a new public
   env-var contract that adopter orchestrators can set.
 
 ## Driving problem trace (required — I7 invariant)

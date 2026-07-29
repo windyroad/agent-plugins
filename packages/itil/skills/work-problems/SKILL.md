@@ -582,6 +582,16 @@ export WR_SUPPRESS_PENDING_QUESTIONS=1
 # pending-questions guard above (JTBD-006 friction guard).
 export WR_SUPPRESS_OVERSIGHT_NUDGE=1
 
+# AFK-iter correction-signal suppression (P430 / JTBD-006): the iteration prompt
+# this loop writes is machine-authored, so an ordinary imperative in it ("DO NOT
+# skip the gate") is not a user correcting anything, and no user is present to
+# act on the capture nudge. itil-correction-detect.sh self-suppresses when this
+# env var is set. A real correction is typed into the ORCHESTRATOR session,
+# where this is unset, so P078 is preserved. Distinct guard class from the
+# oversight nudge above — that one means "cannot ratify", this one means
+# "nobody authored a correction".
+export WR_SUPPRESS_CORRECTION_DETECT=1
+
 # Project-scoped governance plugins are NOT loaded by headless `claude -p`
 # (P382): it activates only USER-scoped enabledPlugins, and project activation
 # is trust-gated (headless skips trust), so `--setting-sources user,project`

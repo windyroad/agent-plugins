@@ -16,6 +16,24 @@
 # Forward-compat: advertises /wr-itil:capture-problem (ADR-032 — not
 # yet shipped) with /wr-itil:manage-problem as the today-target
 # fallback. When capture-problem ships the wording stays valid.
+#
+# P430 / STORY-047 — WR_SUPPRESS_CORRECTION_DETECT is a DISTINCT guard
+# class, not a split of WR_SUPPRESS_OVERSIGHT_NUDGE. That guard means
+# "an absent user cannot ratify"; this one means "nobody authored a
+# correction". A machine-authored iter prompt carrying an ordinary
+# imperative ("DO NOT skip the gate") is not a correction signal, and
+# conflating the two would couple this gate's suppression to the
+# ADR-068 / ADR-047 oversight-nudge contract. Provenance is a property
+# of the spawning process, so the dispatcher asserts it — the hook does
+# not sniff content for it.
+
+# Machine-authored prompt: no correction happened and no user is present to act
+# on the nudge. Ahead of the jq parses so the suppressed path costs one string
+# comparison, and before any marker write so the once-per-session budget is not
+# burned by a prompt that produced no output.
+if [ "${WR_SUPPRESS_CORRECTION_DETECT:-}" = "1" ]; then
+  exit 0
+fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/session-marker.sh
