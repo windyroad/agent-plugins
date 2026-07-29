@@ -253,8 +253,13 @@ run_check() { run bash "$CHECK" docs/stories/draft/STORY-901-a-story.md \
 @test "no shipped installer or scaffold writes an opt-in value" {
   # The guard that keeps opt-in from becoming opt-out-by-stealth. Any shipped
   # code that WRITES this key would defeat the split; reading it is fine.
-  cd "$(dirname "$CHECK")/../.."
-  run grep -rIlE 'afk_accept_pure_decomposition' --include='*.mjs' --include='*.js' bin/ hooks/ 2>/dev/null
+  cd "$(dirname "$CHECK")/.."
+  # Guard the search roots. Pointed at a directory that does not exist, grep
+  # matches nothing and the assertion below passes for the wrong reason — and
+  # whether it passes at all then depends on which grep merges its warning into
+  # bats' $output.
+  [ -d bin ] && [ -d hooks ]
+  run grep -rIlE 'afk_accept_pure_decomposition' --include='*.mjs' --include='*.js' bin/ hooks/
   [ -z "$output" ]
 }
 
