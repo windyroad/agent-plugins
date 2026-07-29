@@ -1,0 +1,3 @@
+interface:
+  display_name: "WR Risk Scorer: External Comms"
+  short_description: "Run the external communications risk reviewer"

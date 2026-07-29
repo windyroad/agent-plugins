@@ -2,7 +2,7 @@
 status: "proposed"
 date: 2026-06-23
 human-oversight: confirmed
-oversight-date: 2026-07-22
+oversight-date: 2026-07-29
 decision-makers: [Tom Howard]
 consulted: []
 informed: []
@@ -99,3 +99,62 @@ existing Claude marker parser. It does not read session transcripts.
 External-comms still emits the canonical draft key in its generated Codex
 instructions because the adapter cannot inspect the encrypted prompt. Missing,
 unrecognised, or unclosed agents fail closed.
+
+### 2026-07-29 — Skill-tier Codex interface metadata and its naming grammar
+
+Option A enumerated the plugin-tier Codex surfaces but not a per-skill one, so
+skills reached Codex and ChatGPT pickers labelled by their raw invocation name.
+This amendment adds the skill tier.
+
+Each Codex-bearing skill ships `skills/<skill>/agents/openai.yaml` declaring
+`interface.display_name` and `interface.short_description`. The schema is
+snake_case under a single `interface:` key, which diverges from the camelCase
+`interface.displayName` in `.codex-plugin/plugin.json`; that divergence is
+upstream's, not ours, and is deliberate here rather than a typo. Scope is the
+three packages carrying a `.codex-plugin/` manifest — architect (4 skills),
+cruise (1), risk-scorer (10).
+
+**Naming grammar:** `WR <Package Title>: <Skill Title Case>`, with `ADR` and
+`WIP` kept as acronyms. Two properties are load-bearing. The label is
+capitalised and brand-prefixed while the machine invocation name stays
+lowercase and unchanged, so scripted invocation is unaffected by a
+presentation change. And the package prefix disambiguates: several skill names
+are generic enough (`status`, `pipeline`, `wip`, `external-comms`) to be
+meaningless beside unrelated vendors' skills in a shared picker. This knowingly
+diverges from first-party Codex convention, which leaves skill labels
+unprefixed (`Spreadsheets`, `Translate Design`) and lets the plugin supply the
+brand. The plugin tier keeps the spelled-out `Windy Road <Package>` form; the
+skill tier abbreviates to `WR` because the label already carries a skill name
+and picker width is finite. The divergence was put to the maintainer explicitly
+on 2026-07-29, against the unprefixed and prefix-only-the-ambiguous-ones
+alternatives, and prefixing everything was chosen; it is not an agent-inferred
+default.
+
+Labels are hand-authored per skill, not derived from `SKILL.md` frontmatter.
+This follows the plugin tier, where `interface.displayName` is also
+hand-authored and `sync-codex-plugin-manifests.mjs` syncs only `version`. A
+generator would need acronym special-casing and would remove per-skill
+copy-editing freedom for no correctness gain at this scale. The cost accepted
+is that `short_description` restates each skill's `description:` frontmatter
+with no drift check.
+
+**Packaging invariant:** a package whose `prepack` rewrites `skills/` must
+carry per-skill non-`SKILL.md` assets into the packed tree. `architect`
+satisfies this structurally by copying recursively then transforming in place.
+`risk-scorer` rebuilds `skills/` from an explicit allowlist, so it names
+`agents/openai.yaml` explicitly; that allowlist is the recorded choice, and the
+tradeoff is that a future per-skill asset must be added to it. The allowlist is
+preferred over converging on a recursive copy because `risk-scorer` has
+`skills/*/test/` directories that a recursive copy would start shipping, and
+`package.json` negates only `!skills/*/eval/`.
+
+**Confirmation:** the schema is grounded in codex-cli 0.145.0, where all 59
+first-party `agents/openai.yaml` files under `~/.codex/skills` and
+`~/.codex/plugins/cache` use `interface.display_name` +
+`interface.short_description`.
+`packages/shared/test/codex-skill-interface-metadata.bats` asserts the exact
+expected label for every skill, derives coverage from `.codex-plugin/` presence
+so a new Codex-bearing skill or package fails rather than shipping label-less,
+and behaviourally exercises the `risk-scorer` `--pack` transform to prove the
+metadata survives packaging. `npm pack --dry-run` confirms all 15 files ship in
+their tarballs.

@@ -1,0 +1,3 @@
+interface:
+  display_name: "WR Risk Scorer: Assess WIP"
+  short_description: "Assess accumulated uncommitted work risk"

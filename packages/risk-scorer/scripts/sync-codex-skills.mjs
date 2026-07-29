@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import {
+  copyFileSync,
   existsSync,
   mkdirSync,
   readdirSync,
@@ -80,6 +81,14 @@ function writeGenerated(sourceRoot, targetRoot) {
   for (const { path, text } of generated) {
     mkdirSync(dirname(path), { recursive: true });
     writeFileSync(path, text, "utf8");
+  }
+  for (const entry of readdirSync(sourceRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const source = join(sourceRoot, entry.name, "agents", "openai.yaml");
+    if (!existsSync(source)) continue;
+    const target = join(targetRoot, entry.name, "agents", "openai.yaml");
+    mkdirSync(dirname(target), { recursive: true });
+    copyFileSync(source, target);
   }
   return generated.length;
 }

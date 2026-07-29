@@ -1,0 +1,3 @@
+interface:
+  display_name: "WR Risk Scorer: Assess Inbound Report"
+  short_description: "Review inbound reports for request and fix risk"

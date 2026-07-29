@@ -1,0 +1,3 @@
+interface:
+  display_name: "WR Risk Scorer: Create Risk"
+  short_description: "Create a standing risk register entry"

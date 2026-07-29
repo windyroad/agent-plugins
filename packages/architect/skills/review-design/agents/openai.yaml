@@ -1,0 +1,3 @@
+interface:
+  display_name: "WR Architect: Review Design"
+  short_description: "Review changes against architecture decisions"
