@@ -1,0 +1,78 @@
+# Problem 474: Oversight hash treats the `**Status**:` body mirror as substance, so an accept transition self-invalidates its own ratification
+
+**Status**: Open
+**Reported**: 2026-07-29
+**Priority**: 12 (High) — Impact: 3 × Likelihood: 4 — derived at capture from the description per Step 4a
+**Origin**: internal
+**Effort**: M — derived at capture per Step 4a
+**JTBD**: JTBD-001, JTBD-006
+**Persona**: developer
+
+## Description
+
+`oversight_content_hash` in `packages/itil/lib/story-oversight.sh` excludes the frontmatter `status:` key and normalises acceptance-criterion checkbox ticks, but nothing normalises the `**Status**:` body line that every story template mirrors the status in. The grep filter is line-start-anchored on `^status:`, so it cannot match `**Status**: accepted`. `oversight_content_hash_excluding_stories` carries the identical omission.
+
+Consequence: advancing a story from `draft` to `accepted` drifts its own oversight hash, so a story the maintainer genuinely ratified reads as unratified the instant it is accepted — and `itil-no-implement-draft-gate` then denies the implementing commit until someone re-ratifies. The lib's own comment (line 26) and the shipped `@windyroad/itil@0.60.0` changeset prose both promise the opposite: *"ticking an acceptance criterion or advancing its status does not count as a change"*. That guarantee is only half-implemented — the frontmatter half holds, the body-mirror half does not.
+
+Shipped in `@windyroad/itil@0.60.0` on 2026-07-29. Per the capture-time hang-off arbitration, the defect was introduced by P404 Phase 2 (which delivered the lazy-fingerprint machinery on 2026-07-03), and P465 did not cause it — P465 only made a latent defect observable, by making a matching hash a precondition of the implementing commit.
+
+Reproduced 2026-07-29 with two controlled experiments on STORY-047: reverting only an added acceptance criterion still drifted, and reverting only the body `**Status**:` line still drifted. Each drifts independently, so the body mirror is a genuine, sufficient cause. Hit live in the same session — STORY-047 had to be re-ratified after its accept transition purely to clear this, which is why the observation exists at all.
+
+Also affected, and independent of P465's gate: `wr-itil-detect-unratified-stories-maps` and `wr-itil-check-rfc-stories-ratified` both consume the same hash, so both report a falsely-unratified story after any accept transition.
+
+### The fix is known; the migration is the open decision
+
+The one-line fix is to extend the existing `sed` with `s/^\*\*Status\*\*:.*$/**Status**:/`, anchored on the exact `**Status**:` token so prose like `**Status quo**: …` still counts as substance. It was written with three bats cases (body-mirror advance does not drift; frontmatter + body advancing together does not drift; `**Status quo**:` prose still drifts) and went GREEN, then was **deliberately reverted and not shipped**.
+
+Reason for the revert: changing the hash algorithm silently invalidates the stored hash of all 30 currently-confirmed story and story-map artefacts. The two discharge paths are both consequential enough to be the maintainer's call under ADR-044's framework-resolution boundary:
+
+- **(a) Re-mark the corpus** — re-run `mark-story-oversight-confirmed.sh` over the 29 other artefacts. Rejected as written, because it writes `confirmed` markers with no human confirm event behind them, which is exactly the P348 hollow-marker class.
+- **(b) Legacy-hash fallback** — have `is_story_map_ratified` accept either the pre-fix or post-fix hash, so existing ratifications survive and only new ratifications use the corrected algorithm. Costs a dual-hash comparison and a documented sunset.
+
+Shipping the fix without choosing converts a *fail-closed* friction defect into a *fail-open* ratification-integrity defect across the whole corpus, which is the worse direction. Hence: captured and queued rather than guessed.
+
+## Symptoms
+
+- A story transitioned `draft` → `accepted` immediately reads as unratified, despite carrying `human-oversight: confirmed`.
+- `itil-no-implement-draft-gate` denies a commit whose `Refs: STORY-NNN` trailer names that story.
+- `wr-itil-detect-unratified-stories-maps` lists the story as needing ratification straight after it was ratified.
+- Re-running the marker shim clears it, so the symptom looks transient and self-healing — which is why it can be mistaken for correct drift-invalidation rather than a defect.
+
+## Workaround
+
+Re-ratify the story after the accept transition (`mark-story-oversight-confirmed.sh <file>`). Legitimate only when a genuine human confirm event covers that story; otherwise it manufactures a hollow marker.
+
+## Impact Assessment
+
+- **Who is affected**: any adopter on `@windyroad/itil@0.60.0`+ who accepts a story and then implements it — the ADR-096 happy path.
+- **Frequency**: every accept transition, so once per story.
+- **Severity**: fail-closed. Blocks legitimate work and costs a redundant re-ratification per story; does not admit unratified substance.
+- **Analytics**: (deferred to investigation)
+
+## Root Cause Analysis
+
+Line-start anchoring on `^status:` in the exclusion grep at `packages/itil/lib/story-oversight.sh:28` cannot reach the markdown body mirror `**Status**: <value>`. The adjacent `sed` at line 29 normalises the HTML `data-status="…"` mirror and the checkbox ticks, so the markdown body mirror is the one lifecycle surface with no normalisation. Confirmed by controlled experiment rather than inspection alone.
+
+### Investigation Tasks
+
+- [ ] Decide the migration path: legacy-hash fallback (b) versus a corpus re-mark (a) versus another option. This is the blocking decision; everything else is mechanical.
+- [ ] Land the `sed` normalisation in both `oversight_content_hash` and `oversight_content_hash_excluding_stories` — the omission is duplicated.
+- [ ] Re-add the three bats cases (they exist in this session's history and went GREEN before the revert).
+- [ ] Audit for any other lifecycle mirror with the same shape — a body line duplicating a frontmatter key that the hash excludes on one side only.
+- [ ] Cross-reference P465 so its released "advancing status is progress" promise is not read as already holding.
+
+## Dependencies
+
+- **Blocks**: (none)
+- **Blocked by**: the migration-path decision above (maintainer-owned)
+- **Composes with**: P465, P404
+
+## Related
+
+Captured via `/wr-itil:capture-problem`. Sub-step 2b hang-off arbitration returned **PROCEED_NEW** against candidates P465, P404, P472, P457, P462 — the fresh-context subagent found that no candidate owns the hash-algorithm locus, and that the queued migration decision sits outside every candidate's scope. Its per-candidate reasoning:
+
+- **P465** (story accepted-gate does not enforce ADR-090 ratification) — closest candidate and the reason this became blocking, but a different problem: its confirmed root cause is that no ratification check existed at any locus, its fix loci are the `manage-story` accept gate and `itil-no-implement-draft-gate`, and all its investigation tasks are closed and released in 0.60.0. It made a latent hash defect observable; it did not create it. P465 should gain a cross-reference so its released guarantee is not read as already holding.
+- **P404** (implement ADR-089/090) — the delivery ticket that introduced the machinery on 2026-07-03, so this is where the omission originated. Not absorbed: P404 is in Verifying after two reopens with residual scope on authoring and lineage integrity, and a third reopen for a one-line `sed` plus a corpus-migration decision would make it unclosable.
+- **P472** (reconcile-stories false MISSING_REVERSE_TRACE) — shares only the ADR-090 citation and the false-positive-detector shape; its fix is a reverse-trace predicate and never touches the hash. Sibling surface, not parent.
+- **P457** (story-map ratify-before-author inversion) — concerns whether ratification should fire at that stage at all; this defect is input normalisation downstream of that question.
+- **P462** (amendment-scoped unconfirmed has no detector) — different plugin, different tier, and the opposite failure direction (unratified substance invisible, versus ratified substance falsely invalidated).

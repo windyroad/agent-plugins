@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-27 **P473 captured** — story maps are authored as per-fix 1-card stubs, not user journeys, below the STORY-MAP-003 bar the maintainer named (backbone × release slices × user-value cards × light/dark + a11y); direction: consolidate the session's fix-stories onto real journey maps and retire the stubs (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-07-29 **P474 captured** — the oversight fingerprint that decides whether a story is still ratified treats the `**Status**:` line in the story body as substance, even though it excludes the identical value in the frontmatter and normalises criterion ticks. So accepting a story the maintainer just ratified drifts its own hash, the story reads as unratified, and the no-implement gate then blocks its own implementation; the two detectors that read the same hash report it as needing ratification seconds after it got it. Released in itil@0.60.0, introduced by the machinery P404 delivered, and only made visible by P465 making a matching hash a precondition of the commit. Reproduced by controlled experiment and hit live the same session. The one-line fix was written, went green, and was deliberately reverted: changing the algorithm silently invalidates the stored hash of all 30 confirmed artefacts, and the choice between re-marking that corpus (hollow markers) and a legacy-hash fallback is the maintainer's to make (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -46,6 +46,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 12 | P415 | External-comms commit-msg gate reviews only the first `-m` of a multi-`-m` git commit, causing deny-after-PASS on multi-paragraph commits | 6 (Medium) | Known Error | S | 2026-07-03 | internal |
 | 12 | P179 | Agent defers requested work into untracked phases — phases are fine, but unticketed phases never get implemented | 12 (High) | Known Error | M | 2026-05-10 | internal |
 | 12 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 (High) | Known Error | M | 2026-06-10 | internal |
+| 12 | P474 | Oversight hash treats the `**Status**:` body mirror as substance — an accept transition self-invalidates its own ratification and the no-implement gate blocks its own implementation | 12 (High) | Open | M | 2026-07-29 | internal |
 | 9 | P363 | Inbound-reported tickets never receive fix-released verdict on originating issue | 9 (Medium) | Known Error | M | 2026-06-11 | internal |
 | 9 | P464 | Agent self-limits external-comms as "out of scope" in AFK / pre-flight — strands dispatchable lifecycle/ack/upstream-report obligations | 9 (Medium) | Open | S | 2026-07-26 | corrective-feedback |
 | 8 | P300 | ADR-063 maturity-presentation schema — F2 (rich-record per-surface) is overkill; F1 is sufficient to begin with | 4 (Low) | Known Error | S | 2026-05-25 | internal |
