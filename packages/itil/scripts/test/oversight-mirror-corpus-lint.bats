@@ -55,7 +55,14 @@ mirror_pattern() {
 # STORY-055's own problem trace), which would redden on arrival and require an
 # exclusion list growing with every future story that discusses a mirror.
 scan() {
-  grep -rniE "$(mirror_pattern)" "$@" 2>/dev/null || true
+  # -H is load-bearing, not decoration. Given exactly ONE file argument, GNU grep
+  # OMITS the filename prefix while this machine's grep emits it — so a fixture
+  # scan over a single file produced output containing the matched line but not
+  # the file it came from, and the assertion naming that file passed locally and
+  # failed on CI. Forcing the prefix makes output identical across grep
+  # implementations, and makes the two production diagnostics below name the
+  # offending artefact rather than only quoting the line.
+  grep -rHniE "$(mirror_pattern)" "$@" 2>/dev/null || true
 }
 
 @test "lint: the excluded-key accessor is non-empty and the pattern is well-formed" {
