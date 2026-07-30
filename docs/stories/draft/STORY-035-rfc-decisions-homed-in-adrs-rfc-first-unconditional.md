@@ -11,7 +11,6 @@ estimated-effort: L
 
 # STORY-035: Home RFC decisions in ADRs and make the RFC-first trace unconditional
 
-**Status**: draft
 **Reported**: 2026-07-04
 **Problems**: P310, P251
 **JTBD**: JTBD-008

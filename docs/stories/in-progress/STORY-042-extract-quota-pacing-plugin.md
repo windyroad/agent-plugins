@@ -9,12 +9,11 @@ rfcs: [RFC-046]
 story-maps: [STORY-MAP-003]
 estimated-effort: L
 human-oversight: confirmed
-oversight-hash: 729a552a8213537d53f9d2dfff75074fac9778d77a0a559abe604c442fd58c03
+oversight-hash: 3aa1acef05ec689794c3dd49f6d39be20677cf261be893e8a4deb619736c429d
 ---
 
 # STORY-042: Extract quota-pacing into its own plugin
 
-**Status**: in-progress
 **Reported**: 2026-07-08
 **Problems**: P160, P443
 **JTBD**: JTBD-010

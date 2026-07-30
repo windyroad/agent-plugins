@@ -9,12 +9,11 @@ rfcs: [RFC-051]
 story-maps: [STORY-MAP-006]
 estimated-effort: S
 human-oversight: confirmed
-oversight-hash: 5f342daca5880be805b0b1a03d916639b6d311ebee043841384728a9759cb5d3
+oversight-hash: 4dbd37ab53b39fdc0b81c29d00029b9d18b1a3e648d22f7d82af2caca0e0fedf
 ---
 
 # STORY-048: Gate the inbound-discovery pre-flight on the channel list
 
-**Status**: draft
 **Reported**: 2026-07-26
 **Problems**: P431
 **JTBD**: JTBD-006

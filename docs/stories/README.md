@@ -57,10 +57,11 @@ estimated-effort: S | M | L | XL   # REQUIRED at accepted (I10 INVEST Estimable)
 
 Sections appear top-to-bottom in this order. Required sections must be present at capture time; sections marked **(accepted-gate)** must be present at the `draft → accepted` transition to satisfy I10 INVEST checks.
 
+> **No `**Status**:` body line.** Lifecycle state lives in frontmatter `status:` only. It used to be mirrored here, and because the oversight fingerprint excludes the frontmatter key but hashed the body copy, advancing a story from `draft` to `accepted` drifted its own hash — so a story that had just been ratified read as unratified and the no-implement gate denied its own implementing commit. Do not reintroduce the line; `wr-itil-migrate-story-status-mirror` removes it from an existing corpus. See ADR-090's 2026-07-29 amendment and P474.
+
 ```markdown
 # STORY-<NNN>: <Title>
 
-**Status**: <status>
 **Reported**: <YYYY-MM-DD>
 **Problems**: <P<NNN> [, P<NNN>, ...]>
 **JTBD**: <JTBD-<NNN> [, ...]>
@@ -115,13 +116,14 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | in-progress | STORY-042 | Extract quota-pacing into its own plugin | L | P160, P443 | RFC-046 | STORY-MAP-003 |
 | accepted | STORY-044 | See what cruise is doing — status/telemetry skill | M | P160, P446 | RFC-046 | STORY-MAP-003 |
 | draft | STORY-045 | Outbound lifecycle comments generated from real issue context | M | P376 | RFC-028 | STORY-MAP-004 |
-| draft | STORY-047 | Gate the correction nudge on prompt authorship | S | P430 | RFC-050 | STORY-MAP-005 |
+| accepted | STORY-047 | Gate the correction nudge on prompt authorship | S | P430 | RFC-050 | STORY-MAP-005 |
 | draft | STORY-048 | Gate the inbound-discovery pre-flight on the channel list | S | P431 | RFC-051 | STORY-MAP-006 |
 | draft | STORY-049 | Ask for a URL in a shape I can paste into | M | P438 | RFC-052 | STORY-MAP-007 |
 | draft | STORY-050 | Have my reviewer read the version I actually have | M | P439 | RFC-053 | STORY-MAP-007 |
 | draft | STORY-051 | Have generated content respect my project's conventions | M | P424 | RFC-054 | STORY-MAP-008 |
 | draft | STORY-052 | Surface still-outstanding family members before a close | M | P433 | RFC-056 | STORY-MAP-009 |
 | draft | STORY-053 | Test claims against the tree at capture and label the untested ones | L | P434 | RFC-057 | STORY-MAP-010 |
+| accepted | STORY-054 | Lifecycle transitions preserve a story's ratification | M | P474 | RFC-059 | STORY-MAP-002 |
 | draft | STORY-012 | Can't start coding without an RFC — the gate makes me create one first | S | P251, P314 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-013 | Full gate: an RFC exists → I proceed; none → I create it first | M | P251, P314 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-014 | Unattended, the agent works the plan and pauses for real decisions | M | P251, P314 | RFC-005 | STORY-MAP-002 |

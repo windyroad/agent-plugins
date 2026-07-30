@@ -13,7 +13,6 @@ human-oversight: unconfirmed
 
 # STORY-049: Ask for a URL in a shape I can paste into
 
-**Status**: draft
 **Reported**: 2026-07-26
 **Problems**: P438
 **JTBD**: JTBD-011 (secondary: JTBD-101)

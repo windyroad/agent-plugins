@@ -9,12 +9,11 @@ rfcs: [RFC-047]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
 human-oversight: confirmed
-oversight-hash: 08de76c34226c0de5ddebad0f51e88ae49ce025d85454e689beed18aa6c79e4a
+oversight-hash: 535f7910ebf98ff81e815bd412fe39cedbadf05d656f15328ef1a1a6c2dcdf73
 ---
 
 # STORY-040: AFK loop anchored with the native `/goal` external evaluator
 
-**Status**: draft
 **Reported**: 2026-07-06
 **Problems**: P390
 **JTBD**: JTBD-006

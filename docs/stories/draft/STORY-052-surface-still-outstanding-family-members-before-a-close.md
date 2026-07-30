@@ -13,7 +13,6 @@ human-oversight: unconfirmed
 
 # STORY-052: Surface still-outstanding family members before a close
 
-**Status**: draft
 **Reported**: 2026-07-26
 **Problems**: P433
 **JTBD**: JTBD-006 (secondary: JTBD-001)

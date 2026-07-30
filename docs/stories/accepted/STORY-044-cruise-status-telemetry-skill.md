@@ -9,12 +9,11 @@ rfcs: [RFC-046]
 story-maps: [STORY-MAP-003]
 estimated-effort: M
 human-oversight: confirmed
-oversight-hash: 26980e82045677025f036054f8dc1c30d8b5b4752d88cc1348c4723e30620a1c
+oversight-hash: 57ebfa1460745d43125362842d52189f00b7aca2ab657d496ed626bb8bd55ef7
 ---
 
 # STORY-044: See what cruise is doing — a status/telemetry skill
 
-**Status**: accepted
 **Reported**: 2026-07-11
 **Problems**: P160, P446
 **JTBD**: JTBD-010

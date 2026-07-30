@@ -12,7 +12,6 @@ estimated-effort: S
 
 # STORY-037: Commit gate honours the RISK-POLICY stated review cadence for staleness
 
-**Status**: draft
 **Reported**: 2026-07-05
 **Problems**: P408
 **JTBD**: JTBD-001

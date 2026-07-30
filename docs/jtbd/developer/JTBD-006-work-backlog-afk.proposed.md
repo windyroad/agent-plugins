@@ -56,6 +56,8 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 
 | ID | Title | Status |
 |----|-------|--------|
+| STORY-047 | STORY-047: Gate the correction nudge on prompt authorship | accepted |
+| STORY-054 | STORY-054: Lifecycle transitions preserve a story's ratification | accepted |
 | STORY-003 | STORY-003: /wr-itil:list-stories read-only display skill | done |
 | STORY-005 | STORY-005: Working-the-problem traversal rewrite (manage-problem + work-problem) | done |
 | STORY-014 | STORY-014: Unattended, the agent works the plan and pauses for real decisions | draft |
@@ -64,7 +66,6 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 | STORY-036 | STORY-036: Write the create-gate marker under every candidate session id | draft |
 | STORY-038 | STORY-038: Fix-titled commits surface a lifecycle-drift advisory | draft |
 | STORY-040 | STORY-040: AFK loop anchored with the native `/goal` external evaluator | draft |
-| STORY-047 | STORY-047: Gate the correction nudge on prompt authorship | draft |
 | STORY-048 | STORY-048: Gate the inbound-discovery pre-flight on the channel list | draft |
 | STORY-052 | STORY-052: Surface still-outstanding family members before a close | draft |
 | STORY-053 | STORY-053: Test claims against the tree at capture and label the untested ones | draft |

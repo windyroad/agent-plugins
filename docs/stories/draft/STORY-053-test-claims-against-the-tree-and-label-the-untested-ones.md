@@ -13,7 +13,6 @@ human-oversight: unconfirmed
 
 # STORY-053: Test claims against the tree at capture and label the untested ones
 
-**Status**: draft
 **Reported**: 2026-07-26
 **Problems**: P434
 **JTBD**: JTBD-002 (secondary: JTBD-006)

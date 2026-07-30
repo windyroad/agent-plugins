@@ -9,12 +9,11 @@ rfcs: [RFC-049]
 story-maps: [STORY-MAP-002]
 estimated-effort: S
 human-oversight: confirmed
-oversight-hash: 2730942ab6327edf43d077e6537e8ad3f1990a713be47468d89f4cc17ba157e8
+oversight-hash: cd0846926ac20f1d84363f31c2844afe7865b563be742133bd6f948ef995ec0c
 ---
 
 # STORY-046: Red-CI denial explains the recovery path
 
-**Status**: in-progress (2026-07-23)
 **Reported**: 2026-07-23
 **Problems**: P208
 **JTBD**: JTBD-002 (Ship AI-Assisted Code with Confidence)

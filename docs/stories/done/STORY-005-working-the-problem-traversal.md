@@ -13,7 +13,6 @@ estimated-effort: M
 
 # STORY-005: Working-the-problem traversal rewrite (manage-problem + work-problem)
 
-**Status**: done
 **Reported**: 2026-05-12
 **Problems**: P170
 **JTBD**: JTBD-008, JTBD-001, JTBD-006

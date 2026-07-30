@@ -12,7 +12,6 @@ estimated-effort: M
 
 # STORY-014: Unattended, the agent works the plan and pauses for real decisions
 
-**Status**: draft
 **Reported**: 2026-06-29
 **Problems**: P251, P314
 **JTBD**: JTBD-008, JTBD-006

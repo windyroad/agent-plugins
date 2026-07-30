@@ -18,7 +18,6 @@ oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-stor
 **Siblings (A3):** [start the map](020-start-the-jobs-story-map.md) · [add to map](021-add-the-fixs-stories-to-the-map.md) · [ratify](022-ratify-the-story-map-and-its-stories.md) · [reuse](024-reuse-stories-already-on-the-map.md) · [slice](025-slice-the-fixs-stories-into-releases.md)
 **Note (ADR-089/090):** the RFC lists **≥1 story** (never empty) and only **ratified** stories.
 
-**Status**: draft
 **Reported**: 2026-06-29
 **Problems**: P251, P399
 **JTBD**: JTBD-008

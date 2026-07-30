@@ -9,12 +9,11 @@ rfcs: [RFC-046]
 story-maps: [STORY-MAP-003]
 estimated-effort: L
 human-oversight: confirmed
-oversight-hash: 0a1f3f27a06dd9d29d399063e3431b2c85256fa42c2bbb2abd882395e8f8a20a
+oversight-hash: dc4a98342bb3401f77b0478d962ec2d9a7df21646480c566e80e36aedccd7d7e
 ---
 
 # STORY-043: Self-install the quota-state producer
 
-**Status**: in-progress
 **Reported**: 2026-07-08
 **Problems**: P160, P443
 **JTBD**: JTBD-010

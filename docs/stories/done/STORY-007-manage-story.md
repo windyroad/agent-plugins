@@ -13,7 +13,6 @@ estimated-effort: L
 
 # STORY-007: /wr-itil:manage-story heavyweight story lifecycle skill
 
-**Status**: done
 **Reported**: 2026-05-12
 **Problems**: P170
 **JTBD**: JTBD-008, JTBD-001

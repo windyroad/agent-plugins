@@ -13,7 +13,6 @@ estimated-effort: M
 
 # STORY-006: /wr-itil:reconcile-stories trio (skill + script + bin shim)
 
-**Status**: done
 **Reported**: 2026-05-12
 **Problems**: P170
 **JTBD**: JTBD-008, JTBD-001

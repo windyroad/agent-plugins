@@ -12,7 +12,6 @@ estimated-effort: M
 
 # STORY-013: Full gate: an RFC exists → I proceed; none → I create it first
 
-**Status**: draft
 **Reported**: 2026-06-29
 **Problems**: P251, P314
 **JTBD**: JTBD-008, JTBD-001

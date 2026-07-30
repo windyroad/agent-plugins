@@ -12,7 +12,6 @@ estimated-effort: M
 
 # STORY-017: Backfill-or-supersede the skeleton RFCs the repudiated mechanism left behind
 
-**Status**: draft
 **Reported**: 2026-06-29
 **Problems**: P399, P375
 **JTBD**: JTBD-008

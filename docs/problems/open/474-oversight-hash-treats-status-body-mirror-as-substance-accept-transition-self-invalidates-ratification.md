@@ -20,7 +20,17 @@ Reproduced 2026-07-29 with two controlled experiments on STORY-047: reverting on
 
 Also affected, and independent of P465's gate: `wr-itil-detect-unratified-stories-maps` and `wr-itil-check-rfc-stories-ratified` both consume the same hash, so both report a falsely-unratified story after any accept transition.
 
-### The fix is known; the migration is the open decision
+### RESOLVED 2026-07-30 — a third option the capture did not consider
+
+The capture below framed this as a choice between two migration paths for a hash-algorithm change. The maintainer picked neither: on 2026-07-29 they directed **removing the duplicated line instead of teaching the hash to ignore it**, on the grounds that this was the fourth lifecycle mirror in a family of three with a fifth anticipated — normalising costs one rule per mirror indefinitely, removal ends the class.
+
+That reframing dissolved the migration problem the capture treated as blocking. Because no hash function changes, no already-stored fingerprint is invalidated when the fix reaches an adopter; only artefacts still carrying the mirror need migrating at all. The legacy-hash fallback recorded as option (b) below was also **tested and disproved** before being abandoned: an artefact ratified under the shipped algorithm has the mirror inside its stored hash, so after an accept transition the stored value matches neither the old nor the new function — dual-accept leaves the accept transition just as broken.
+
+Fix vehicle: **RFC-059**, story **STORY-054**, both tracing this ticket. Contract recorded in ADR-090's 2026-07-29 amendment. Migration ships as `wr-itil-migrate-story-status-mirror` (PATH-shimmed per ADR-049 so adopter corpora can run it), re-fingerprinting under a validity gate and a mirror-agreement precondition — never re-ratifying.
+
+A separate finding surfaced while recording the contract, and it is arguably the more significant one: ADR-090's Decision Outcome said "**any change** invalidates" and had been false since 2026-07-03, when the narrowing to "any *substance* change" shipped recorded only in a code comment and a changeset. It was never put to the maintainer as a decision. It is now recorded retroactively, ratified 2026-07-30 in isolation, and the Outcome text reconciled.
+
+### The original capture-time framing (superseded — retained for audit)
 
 The one-line fix is to extend the existing `sed` with `s/^\*\*Status\*\*:.*$/**Status**:/`, anchored on the exact `**Status**:` token so prose like `**Status quo**: …` still counts as substance. It was written with three bats cases (body-mirror advance does not drift; frontmatter + body advancing together does not drift; `**Status quo**:` prose still drifts) and went GREEN, then was **deliberately reverted and not shipped**.
 
@@ -55,11 +65,15 @@ Line-start anchoring on `^status:` in the exclusion grep at `packages/itil/lib/s
 
 ### Investigation Tasks
 
-- [ ] Decide the migration path: legacy-hash fallback (b) versus a corpus re-mark (a) versus another option. This is the blocking decision; everything else is mechanical.
-- [ ] Land the `sed` normalisation in both `oversight_content_hash` and `oversight_content_hash_excluding_stories` — the omission is duplicated.
-- [ ] Re-add the three bats cases (they exist in this session's history and went GREEN before the revert).
-- [ ] Audit for any other lifecycle mirror with the same shape — a body line duplicating a frontmatter key that the hash excludes on one side only.
-- [ ] Cross-reference P465 so its released "advancing status is progress" promise is not read as already holding.
+- [x] Decide the migration path — resolved 2026-07-29 by a third option neither (a) nor (b): remove the mirror, leaving the hash untouched. See the resolution section above.
+- [x] ~~Land the `sed` normalisation in both hash functions~~ — **not done, and correctly so.** Superseded by the removal approach; neither hash function is touched.
+- [x] ~~Re-add the three bats cases~~ — superseded. Replaced by 10 behavioural cases over the migration instead.
+- [x] Ship the migration PATH-shimmed so adopter corpora can run it, not only this repo's.
+- [x] Remove the mirror from BOTH template carriers — the `capture-story` scaffold and `docs/stories/README.md`. The second was missed on the first pass and caught in review; it is the adopter-facing one, since `reconcile-stories.sh` reads the adopter's own stories README.
+- [x] Cross-reference P465 so its released "advancing status is progress" promise is not read as already holding.
+- [ ] Audit for any other lifecycle mirror with the same shape — a body line duplicating a frontmatter key the hash excludes on one side only. Story artefacts are now clean; problem, incident and ADR bodies legitimately carry `**Status**:` as their own convention and are NOT affected, because their tiers have no oversight fingerprint. The open part is whether any future fingerprinted tier acquires one.
+- [ ] Extract the duplicated grep/sed filter shared by `oversight_content_hash` and `oversight_content_hash_excluding_stories`. Deliberately out of RFC-059's scope since neither filter is touched there — but it is real duplication and it is why the original omission occurred twice, so a fourth mirror could still be half-fixed.
+- [ ] Consider wiring the idempotent migration into a self-firing surface (bootstrap or the staleness surfacer). Release notes carry the invocation today, which is a one-time notice rather than a cadence; a migration reachable only by reading release notes has no automatic trigger in adopter repos.
 
 ## Dependencies
 
@@ -76,3 +90,16 @@ Captured via `/wr-itil:capture-problem`. Sub-step 2b hang-off arbitration return
 - **P472** (reconcile-stories false MISSING_REVERSE_TRACE) — shares only the ADR-090 citation and the false-positive-detector shape; its fix is a reverse-trace predicate and never touches the hash. Sibling surface, not parent.
 - **P457** (story-map ratify-before-author inversion) — concerns whether ratification should fire at that stage at all; this defect is input normalisation downstream of that question.
 - **P462** (amendment-scoped unconfirmed has no detector) — different plugin, different tier, and the opposite failure direction (unratified substance invisible, versus ratified substance falsely invalidated).
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-059 | proposed | Lifecycle state is not duplicated inside hashed story content |
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-054 | STORY-054: Lifecycle transitions preserve a story's ratification | accepted |

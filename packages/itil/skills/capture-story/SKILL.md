@@ -209,9 +209,17 @@ estimated-effort: <S|M|L|XL — derived at capture per ADR-067 (real best-effort
 human-oversight: unconfirmed
 ---
 
+<!-- Frontmatter `status:` is the ONLY place a story's lifecycle state lives.
+     Do NOT add a `**Status**:` body line here. It used to mirror the
+     frontmatter, and because the oversight fingerprint excludes the frontmatter
+     key but hashed the body copy, every accept transition drifted the story's
+     own hash — so a story the maintainer had just ratified read as unratified
+     and the no-implement gate denied its own implementing commit. Maintainer
+     direction 2026-07-29 removed the mirror rather than adding a fourth
+     normaliser rule for it (P474 / ADR-090 amendment). -->
+
 # STORY-<NNN>: <Title>
 
-**Status**: draft
 **Reported**: <YYYY-MM-DD>
 **Problems**: <P<NNN> [, P<NNN>, ...]>
 **JTBD**: <JTBD-<NNN> [, ...]>

@@ -13,7 +13,6 @@ estimated-effort: S
 
 # STORY-003: /wr-itil:list-stories read-only display skill
 
-**Status**: done
 **Reported**: 2026-05-12
 **Problems**: P170
 **JTBD**: JTBD-008, JTBD-006

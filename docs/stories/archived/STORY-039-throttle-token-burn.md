@@ -14,7 +14,6 @@ oversight-hash: 1417aeb2d8062969b90296a5f4a1724ae6509b06817dd8772dc5df3c90abab41
 
 # STORY-039: Throttle token burn against the quota windows
 
-**Status**: archived
 **Reported**: 2026-07-08
 **Problems**: P160, P443
 **JTBD**: JTBD-010

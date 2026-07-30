@@ -9,12 +9,11 @@ rfcs: [RFC-028]
 story-maps: [STORY-MAP-004]
 estimated-effort: M
 human-oversight: confirmed
-oversight-hash: c686b28d0a4dbed7139ff7d7d654b3b5b6c616d81c8099b92d779e8832078d38
+oversight-hash: 25afedba4f3e1cdff7f4742dce1635519871fae6e3b4f117b0fbc2ff6ba77b41
 ---
 
 # STORY-045: Outbound lifecycle comments generated from real issue context
 
-**Status**: draft
 **Reported**: 2026-07-15
 **Problems**: P376
 **JTBD**: JTBD-301

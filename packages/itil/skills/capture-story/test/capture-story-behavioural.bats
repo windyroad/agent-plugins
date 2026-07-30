@@ -246,3 +246,72 @@ EOF
   [ ! -f docs/stories/in-progress/STORY-001-test.md ]
   [ ! -f docs/stories/done/STORY-001-test.md ]
 }
+
+# --- P474 / STORY-054: the lifecycle mirror must stay gone ---------------------
+# A `**Status**:` body line duplicating the frontmatter `status:` used to sit in
+# this template. The oversight fingerprint excludes the frontmatter key but
+# hashed the body copy, so advancing a story un-ratified it and the no-implement
+# gate then denied its own implementing commit. This was the FOURTH such
+# lifecycle mirror in a family of three, so the removal needs a lock: without
+# one, the next template edit reintroduces it and nothing fails.
+
+@test "P474: the capture-story template emits no **Status** body mirror" {
+  # Behavioural on the artefact the skill prescribes, not on prose ABOUT it:
+  # extract the template's own story scaffold and assert the shape it produces.
+  # The SKILL may still MENTION the forbidden line in its do-not-reintroduce
+  # note, so match only a line-start emission inside a fenced block.
+  run bash -c "awk '/^# STORY-<NNN>/,/^## Dependencies/' '$SKILL_FILE' | grep -cE '^\*\*Status\*\*:'"
+  [ "$output" = "0" ]
+  # Anti-vacuity: if a heading rename ever empties the awk range, the grep -c
+  # above returns 0 and passes while the mirror is present. Assert the range
+  # actually contains the sibling field that DID survive.
+  run bash -c "awk '/^# STORY-<NNN>/,/^## Dependencies/' '$SKILL_FILE' | grep -cE '^\*\*Reported\*\*:'"
+  [ "$output" -ge 1 ]
+}
+
+@test "P474: the documented story body shape emits no **Status** body mirror" {
+  # The second carrier. docs/stories/README.md is the ADOPTER-facing one —
+  # reconcile-stories.sh reads the adopter's own copy — so a stale shape here
+  # has them hand-author the mirror straight back in.
+  local readme="${REPO_ROOT}/docs/stories/README.md"
+  [ -f "$readme" ]
+  run bash -c "awk '/^# STORY-<NNN>/,/^## /' '$readme' | grep -cE '^\*\*Status\*\*:'"
+  [ "$output" = "0" ]
+  # Same anti-vacuity guard as the template carrier above.
+  run bash -c "awk '/^# STORY-<NNN>/,/^## /' '$readme' | grep -cE '^\*\*Reported\*\*:'"
+  [ "$output" -ge 1 ]
+}
+
+@test "P474: a template-shaped story keeps its ratification across an accept transition" {
+  # The invariant the prose serves. Seeds a story in the shape the template now
+  # produces, ratifies it, advances status + ticks a criterion, and asserts the
+  # fingerprint still matches — the exact sequence that used to drift.
+  # shellcheck source=/dev/null
+  source "${REPO_ROOT}/packages/itil/lib/story-oversight.sh"
+  mkdir -p docs/stories/draft
+  local f=docs/stories/draft/STORY-902-shape.md
+  printf -- '---\nstatus: draft\nstory-id: shape\nhuman-oversight: confirmed\noversight-hash: P\n---\n\n# STORY-902: a story\n\n**Reported**: 2026-07-30\n\n## User value\n\nvalue.\n\n## Acceptance criteria\n\n- [ ] a criterion\n' > "$f"
+  local h; h="$(oversight_content_hash "$f")"
+  sed -i.bak "s/oversight-hash: P/oversight-hash: $h/" "$f" && rm -f "$f.bak"
+  run is_story_map_ratified "$f"
+  [ "$status" -eq 0 ]
+
+  sed -i.bak 's/^status: draft/status: accepted/; s/- \[ \] a criterion/- [x] a criterion/' "$f" && rm -f "$f.bak"
+  run is_story_map_ratified "$f"
+  [ "$status" -eq 0 ]
+}
+
+@test "P474: reintroducing the mirror DOES drift a ratified story (the lock has teeth)" {
+  # Proves the invariant test above is not vacuous: put the mirror back and the
+  # accept transition drifts again, which is the defect.
+  # shellcheck source=/dev/null
+  source "${REPO_ROOT}/packages/itil/lib/story-oversight.sh"
+  mkdir -p docs/stories/draft
+  local f=docs/stories/draft/STORY-903-regress.md
+  printf -- '---\nstatus: draft\nstory-id: regress\nhuman-oversight: confirmed\noversight-hash: P\n---\n\n# STORY-903: a story\n\n**Status**: draft\n**Reported**: 2026-07-30\n\n## User value\n\nvalue.\n' > "$f"
+  local h; h="$(oversight_content_hash "$f")"
+  sed -i.bak "s/oversight-hash: P/oversight-hash: $h/" "$f" && rm -f "$f.bak"
+  sed -i.bak 's/^status: draft/status: accepted/; s/^\*\*Status\*\*: draft/**Status**: accepted/' "$f" && rm -f "$f.bak"
+  run is_story_map_ratified "$f"
+  [ "$status" -ne 0 ]
+}

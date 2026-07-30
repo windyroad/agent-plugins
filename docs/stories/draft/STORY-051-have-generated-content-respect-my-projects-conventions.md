@@ -13,7 +13,6 @@ human-oversight: unconfirmed
 
 # STORY-051: Have generated content respect my project's conventions
 
-**Status**: draft
 **Reported**: 2026-07-26
 **Problems**: P424
 **JTBD**: JTBD-303 (secondary: JTBD-101)

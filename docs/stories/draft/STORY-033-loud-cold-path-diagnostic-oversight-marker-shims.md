@@ -11,7 +11,6 @@ estimated-effort: S
 
 # STORY-033: Loud cold-path diagnostic for oversight-marker shims
 
-**Status**: draft
 **Reported**: 2026-07-03
 **Problems**: P368
 **JTBD**: JTBD-001

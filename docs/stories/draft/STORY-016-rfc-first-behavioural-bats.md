@@ -12,7 +12,6 @@ estimated-effort: S
 
 # STORY-016: Every step is regression-proven
 
-**Status**: draft
 **Reported**: 2026-06-29
 **Problems**: P251
 **JTBD**: JTBD-008

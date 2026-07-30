@@ -12,7 +12,6 @@ estimated-effort: deferred
 
 # STORY-038: Fix-titled commits surface a lifecycle-drift advisory
 
-**Status**: draft
 **Reported**: 2026-07-05
 **Problems**: P345
 **JTBD**: JTBD-006

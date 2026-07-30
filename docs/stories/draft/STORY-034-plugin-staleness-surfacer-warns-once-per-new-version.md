@@ -11,7 +11,6 @@ estimated-effort: M
 
 # STORY-034: Warn once per new version when a session runs stale plugin code
 
-**Status**: draft
 **Reported**: 2026-07-04
 **Problems**: P045, P375
 **JTBD**: JTBD-007

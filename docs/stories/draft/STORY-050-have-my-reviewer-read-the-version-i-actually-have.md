@@ -13,7 +13,6 @@ human-oversight: unconfirmed
 
 # STORY-050: Have my reviewer read the version I actually have
 
-**Status**: draft
 **Reported**: 2026-07-26
 **Problems**: P439
 **JTBD**: JTBD-011 (secondary: JTBD-101)

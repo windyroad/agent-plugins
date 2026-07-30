@@ -13,7 +13,6 @@ estimated-effort: S
 
 # STORY-001: Hook exemption globs for docs/story-maps + docs/stories
 
-**Status**: done
 **Reported**: 2026-05-12
 **Problems**: P170
 **JTBD**: JTBD-008

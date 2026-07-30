@@ -9,12 +9,11 @@ rfcs: [RFC-050]
 story-maps: [STORY-MAP-005]
 estimated-effort: S
 human-oversight: confirmed
-oversight-hash: 71a113a512e3ccb22b1988e506b613d35286efb4f8b8e07c23b9eba7ccbc0510
+oversight-hash: 3045b2ae2c3d06a1aad1e7017448fa534478bb6c5509e73351aefca035856992
 ---
 
 # STORY-047: Gate the correction nudge on prompt authorship
 
-**Status**: accepted
 **Reported**: 2026-07-26
 **Problems**: P430
 **JTBD**: JTBD-006

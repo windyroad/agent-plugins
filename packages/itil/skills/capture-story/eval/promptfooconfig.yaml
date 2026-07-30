@@ -80,3 +80,64 @@ tests:
           (Note: the User-value and Acceptance-criteria sections legitimately
           DO stay deferred to the accepted transition — that is correct and
           does NOT fail this rubric, which is only about the effort field.)
+
+  # --- P474 / STORY-054: the lifecycle mirror must not come back ---------------
+  #
+  # Driver: P474. The story template carried a `**Status**:` body line
+  # duplicating the frontmatter `status:`. The oversight fingerprint excludes the
+  # frontmatter key but hashed the body copy, so advancing a story from draft to
+  # accepted changed hashed content — a story the maintainer had just ratified
+  # read as unratified, and the no-implement gate then denied its own
+  # implementing commit. This was the FOURTH lifecycle mirror in a family of
+  # three, so the removal is a class fix and needs a lock at the authoring
+  # surface: the bats cases lock the template FILE, this locks what the agent
+  # actually EMITS when it captures a story.
+  #
+  # Tier-A calibration (P270 / P393): the paraphrase-proof anchor is a
+  # `not-regex` on a line-start `**Status**:` emission — a deterministic token
+  # the agent either writes or does not. The semantic clause (that lifecycle
+  # state belongs in frontmatter only, and why) routes to the Tier-B rubric.
+  #
+  # @problem P474  @adr ADR-090 (oversight fingerprint) @story STORY-054
+  - description: P474 lifecycle mirror — a captured story body carries NO **Status** line
+    vars:
+      prompt: |
+        I am capturing a new story via /wr-itil:capture-story. Traces are
+        P474, JTBD-001, RFC-059, STORY-MAP-002. The story is about making a
+        lifecycle transition preserve a story's ratification.
+
+        Write out the story file you would create — the complete frontmatter
+        and the complete body header block down to the first `##` section
+        heading. Then state where a story's lifecycle status lives, and say
+        whether that value appears anywhere in the body.
+    assert:
+      # Tier A — must NOT emit a line-start `**Status**:` body field. Anchored on
+      # a preceding newline rather than `^` with an inline `(?m)` flag: promptfoo
+      # compiles these as JS RegExp, which rejects `(?m)` as an invalid group and
+      # fails the assertion outright. Newline-anchoring is the JS-compatible way
+      # to say "at the start of a line", and it still lets prose that merely
+      # names the field (e.g. explaining it was removed) pass.
+      - type: not-regex
+        value: '\n\*\*Status\*\*:'
+      # Tier A — must still emit the sibling body fields that DID survive, so a
+      # response that omits the whole block cannot pass vacuously.
+      - type: regex
+        value: '\n\*\*Reported\*\*:'
+      # Tier B — semantic invariant: frontmatter is the single home for lifecycle
+      # state, and the body does not duplicate it.
+      - type: llm-rubric
+        value: |
+          The story file the response writes carries its lifecycle state ONLY
+          in the frontmatter `status:` key. Its body header block does NOT
+          include a `**Status**:` field, even though it does include sibling
+          body fields such as `**Reported**:`, `**Problems**:`, `**JTBD**:`,
+          `**Story Maps**:` and `**Estimated effort**:`. When asked where the
+          status lives, the response says frontmatter `status:` and states
+          that the value does NOT also appear in the body. PASS if the body
+          block omits a `**Status**:` field AND the response confirms
+          lifecycle state is frontmatter-only. FAIL if the body block
+          includes a `**Status**:` line, or if the response says the status
+          is mirrored in or duplicated into the body, or if it omits the
+          whole body field block (which would dodge the question rather than
+          answer it). A response that explicitly notes the field was removed,
+          and why, PASSES.

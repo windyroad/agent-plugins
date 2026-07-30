@@ -11,7 +11,6 @@ estimated-effort: M
 
 # STORY-036: Write the create-gate marker under every candidate session id
 
-**Status**: draft
 **Reported**: 2026-07-04
 **Problems**: P260
 **JTBD**: JTBD-006
