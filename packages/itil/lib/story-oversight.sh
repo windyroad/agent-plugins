@@ -19,15 +19,43 @@
 # encodings in one filter:
 #   - markdown: `human-oversight:` / `oversight-hash:` frontmatter lines
 #   - HTML:     <meta name="human-oversight" ...> / <meta name="oversight-hash" ...>
+# THE single definition of what the fingerprint ignores. Reads stdin, writes the
+# normalised stream. Both hash functions route through this and neither carries
+# its own copy — that duplication is why the P474 `**Status**:` mirror had to be
+# removed from two places and why a third copy could have been missed entirely
+# (RFC-059 / STORY-055).
+#
+# Excludes the marker lines plus the lifecycle `status` key in both encodings, and
+# normalises lifecycle PROGRESS — acceptance-criterion ticks and slice
+# `data-status` — so ONLY a SUBSTANCE change re-opens ratification. Ticking a
+# criterion or advancing status is progress, not a revision of what the human
+# ratified; the value statement, criterion TEXT and structure all still drift.
+#
+# Editing this filter changes ADR-090's Decision Outcome, not merely a mechanism.
+# It is the surface the 2026-07-03 narrowing changed while going unrecorded for
+# three weeks; a change here needs an ADR-090 amendment. The pattern is a
+# LITERAL on purpose: built from a variable, an expansion that ever yielded empty
+# would make `grep -vE ''` suppress every line and hash the empty stream to a
+# constant, after which one artefact's stored hash would validate against ANY
+# content — and `itil-no-implement-draft-gate` sources this lib under
+# `2>/dev/null || exit 0`, so that failure would remove the gate silently.
+_oversight_filter() {
+  grep -vE '^(human-oversight|oversight-hash|oversight-basis|status):|<meta[^>]*name="(human-oversight|oversight-hash|oversight-basis|status)"' \
+    | sed -E 's/- \[[ xX]\]/- [ ]/g; s/data-status="[^"]*"/data-status=""/g'
+}
+
+# The excluded key set, readable by tests and the corpus lint. Kept in agreement
+# with the literal above by a bidirectional test rather than by construction, for
+# the reason in that comment. One key per line.
+oversight_excluded_keys() {
+  printf '%s\n' human-oversight oversight-hash oversight-basis status
+}
+
 oversight_content_hash() {
-  # Exclude the marker + lifecycle-`status` lines, and normalize lifecycle-PROGRESS
-  # state — acceptance-criterion checkbox ticks and slice `data-status` — so that
-  # ONLY a SUBSTANCE change re-opens ratification. Ticking a criterion or advancing
-  # status/slice-progress is progress, not a change to what the user ratified; the
-  # value statement, criterion TEXT, and structure still drift the hash.
-  grep -vE '^(human-oversight|oversight-hash|oversight-basis|status):|<meta[^>]*name="(human-oversight|oversight-hash|oversight-basis|status)"' "$1" \
-    | sed -E 's/- \[[ xX]\]/- [ ]/g; s/data-status="[^"]*"/data-status=""/g' \
-    | shasum -a 256 | awk '{print $1}'
+  # Input path: the file is fed to the filter directly, so trailing blank lines
+  # are PRESERVED. Deliberately NOT unified with the map variant below — see the
+  # note there. Changing this changes every stored fingerprint.
+  _oversight_filter < "$1" | shasum -a 256 | awk '{print $1}'
 }
 
 # Hash a story MAP's content while EXCLUDING the single-line card elements whose
@@ -52,10 +80,16 @@ oversight_content_hash_excluding_stories() {
     # Anchored on the closing quote so STORY-05 cannot strip STORY-054's card.
     filtered="$(printf '%s\n' "$filtered" | grep -vF "data-story-id=\"${id}\"" || true)"
   done
-  printf '%s\n' "$filtered" \
-    | grep -vE '^(human-oversight|oversight-hash|oversight-basis|status):|<meta[^>]*name="(human-oversight|oversight-hash|oversight-basis|status)"' \
-    | sed -E 's/- \[[ xX]\]/- [ ]/g; s/data-status="[^"]*"/data-status=""/g' \
-    | shasum -a 256 | awk '{print $1}'
+  # Input path: `$(cat)` above stripped ALL trailing newlines and this `printf`
+  # re-adds exactly one, so trailing blank lines are COLLAPSED here where
+  # `oversight_content_hash` preserves them. That divergence is pre-existing and
+  # is preserved deliberately — unifying the two input paths would silently change
+  # one function's hash and un-ratify every stored fingerprint at once. A
+  # consequence worth knowing: with zero ids this does NOT equal
+  # `oversight_content_hash` for an artefact with trailing blank lines, which is
+  # recorded as its own P474 task because it makes ADR-101's map leg
+  # unsatisfiable for such a map even with the right card excluded.
+  printf '%s\n' "$filtered" | _oversight_filter | shasum -a 256 | awk '{print $1}'
 }
 
 # True (0) if this artefact's `confirmed` marker was written by the ADR-101 AFK

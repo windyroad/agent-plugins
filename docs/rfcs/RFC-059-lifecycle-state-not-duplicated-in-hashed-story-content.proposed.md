@@ -6,8 +6,8 @@ human-oversight: unconfirmed
 decision-makers: [Tom Howard]
 problems: [P474]
 adrs: [ADR-090, ADR-101, ADR-049]
-jtbd: [JTBD-001, JTBD-006, JTBD-009]
-stories: [STORY-054]
+jtbd: [JTBD-002, JTBD-001, JTBD-006, JTBD-009]
+stories: [STORY-054, STORY-055]
 ---
 
 # RFC-059: Lifecycle state is not duplicated inside hashed story content
@@ -16,7 +16,7 @@ stories: [STORY-054]
 **Reported**: 2026-07-29
 **Problems**: P474
 **ADRs**: ADR-090, ADR-101, ADR-049
-**JTBD**: JTBD-001, JTBD-006, JTBD-009
+**JTBD**: JTBD-002, JTBD-001, JTBD-006, JTBD-009
 
 ## Summary
 
@@ -36,7 +36,18 @@ Removal has a property the normalise path lacked. Because no hash function chang
 
 Migration ships as `wr-itil-migrate-story-status-mirror`, PATH-shimmed per ADR-049 so adopter corpora can run it; a source-repo-only migration would be the P151/P317 dogfooding blind spot, since adopter stories carry the mirror too. It removes the line and carries each artefact's existing ratification forward by **re-fingerprinting, never re-ratifying**: `human-oversight: confirmed` records that a human confirmed something and is never written, while `oversight-hash` records no event at all and only identifies which content that confirmation covered. Recomputing the pointer over content whose sole delta is a mechanical mirror of an already-excluded field removes zero ratified substance. That argument is not a general licence for hash changes — it holds here only under two guards: a per-artefact validity gate, so an artefact whose stored hash no longer matches is left drifted rather than revived; and a mirror-agreement precondition, so a body line disagreeing with its frontmatter is skipped and reported for a human rather than deleted, because such a line is carrying information the frontmatter does not.
 
-Deliberately out of scope, and recorded on P474 instead: extracting the duplicated grep/sed filter the two hash functions share. It is real duplication and it is why the omission occurred twice, but neither filter is touched under the chosen approach, so claiming it here would overstate what this change does.
+### Scope widened 2026-07-31 — the extraction is admitted, under STORY-055
+
+This RFC originally recorded the filter extraction as **out of scope**, on the reasoning that neither filter was touched by the chosen approach so claiming it would overstate what the change did. That was accurate for the shipped leg and is retained above as the reason the first commit did not include it.
+
+Scope is widened here rather than a second RFC minted, because the follow-up work is a defect in this RFC's own delivered surface. Two things pushed it in:
+
+- The duplication is the recorded cause of the P474 omission existing in two places at once. Leaving it means the next lifecycle mirror can still be half-fixed — the same failure, one instance later.
+- `@windyroad/itil@0.61.0` went green with the refactor recorded as skipped, which is precisely the step JTBD-002 exists to stop being skipped at green.
+
+The extraction and its evidence are carried by **STORY-055**, with its own acceptance criteria. Its load-bearing constraint: extract the **filter only** and leave each function's input path alone. The two paths are not equivalent today — one feeds the file to `grep` directly and preserves trailing blank lines, the other round-trips through `$(cat)` and collapses them — so unifying them "for symmetry" would silently change one function's hash and un-ratify every stored fingerprint at once. Verified by a frozen-reference equivalence matrix over the edge shapes plus a zero-difference diff across all 71 corpus values.
+
+STORY-055 also converts P474's one-time mirror audit into a permanent corpus lint, and records two shapes that lint cannot see: the story-map `href` leg (an open P474 task) and a mirror written with leading whitespace. Those are named rather than papered over, for the same reason this section retains the original carve-out instead of deleting it.
 
 ### Adopter migration — two documented deviations from JTBD-009
 
@@ -71,3 +82,4 @@ Verified end-to-end on a real ratified story: the accept transition preserves ra
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-054 | STORY-054: Lifecycle transitions preserve a story's ratification | accepted |
+| STORY-055 | STORY-055: One definition of what the oversight fingerprint ignores | accepted |

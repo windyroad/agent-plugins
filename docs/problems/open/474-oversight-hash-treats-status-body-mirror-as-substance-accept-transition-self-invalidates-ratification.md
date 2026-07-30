@@ -108,3 +108,4 @@ Captured via `/wr-itil:capture-problem`. Sub-step 2b hang-off arbitration return
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-054 | STORY-054: Lifecycle transitions preserve a story's ratification | accepted |
+| STORY-055 | STORY-055: One definition of what the oversight fingerprint ignores | accepted |
