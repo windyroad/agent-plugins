@@ -293,6 +293,31 @@ readiness may be listed separately as "post-release follow-ups" outside the
 residual risk computation, but MUST NOT appear in a Controls list and MUST NOT
 reduce any inherent risk score.
 
+**Deferral is not a control.** A control removes or bounds a hazard. A deferral
+relocates it. Holding work back, splitting a commit to land part of it later, or
+routing a change onto a branch does NOT reduce that work's risk. It moves the
+hazard outside the window you are scoring, which is not the same thing.
+
+This matters because you score the action in front of you, so a deferral always
+looks cheaper on the current hop. You have no way to price un-integrated work
+unless you go looking for it.
+
+When a proposed mitigation moves work OUT of the current action rather than
+removing a hazard, score the **end state**: the deferred action, plus any
+additional applies, deploys or releases the split introduces. Call it mitigation
+only if that total is lower. A recommendation to hold work back must show the
+total is lower, not merely that this hop is.
+
+Do not over-apply this. Some splits genuinely reduce risk: separating an
+unrelated change out of a risky commit narrows blast radius without deferring
+anything. The test is whether the end state still requires the held-back action.
+If it does, you have deferred; if it does not, you have separated.
+
+Note the direction of the bias this corrects: uncorrected, it favours smaller
+batches per action, which is the opposite of what teams practising trunk-based
+development want, and it can produce a recommendation that argues against a
+project's own delivery model with a number.
+
 ### R009 control vocabulary — SKILL/agent-prose surfaces (P355 / RFC-012 / ADR-075)
 
 For diffs touching `packages/*/skills/*/SKILL.md`, `packages/*/skills/*/REFERENCE.md`, or `packages/*/agents/*.md`, the **previously-irreducible R009 "no behavioural harness for the LLM-prose surface" floor is discharged** when a paired promptfoo Tier-A/B eval exists for the changed prose AND `npx promptfoo eval` passes on this commit. Credit it as a named likelihood-reducing control with the same evidence shape as behavioural bats:
