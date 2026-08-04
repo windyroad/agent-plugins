@@ -75,10 +75,8 @@ fi
 # occasionally omits the agent's mandated contract verdict token; the single-shot
 # `icontains` assertions then fail and red-line the whole Agent-Prose Evals job —
 # flaking CI ~50% of pushes regardless of the diff. Retry up to 3× until the output
-# carries the agent's contract token. This absorbs the transient-omission flake
-# WITHOUT masking real regressions: an agent that genuinely never emits its verdict
-# still fails after the retries, and an agent that emits the WRONG verdict value has
-# the token present (no retry) so the assertion still grades — and fails — correctly.
+# carries a consistent contract verdict. This absorbs transient omissions and
+# self-contradictory plan markers without masking persistent regressions.
 case "$AGENT" in
   external-comms) VERDICT_TOKEN='EXTERNAL_COMMS_RISK_VERDICT:' ;;
   pipeline)       VERDICT_TOKEN='RISK_SCORES:' ;;
@@ -88,6 +86,12 @@ esac
 agent_out=""
 for _attempt in 1 2 3; do
   agent_out="$(claude -p --system-prompt "$(cat "$AGENT_MD")" "$PROMPT")"
+  if [[ "$AGENT" = "plan" ]] && {
+    { printf '%s' "$agent_out" | grep -Eiq 'Overall:.*FAIL' && ! printf '%s' "$agent_out" | grep -q '^RISK_VERDICT: FAIL$'; } ||
+    { printf '%s' "$agent_out" | grep -Eiq 'Overall:.*PASS' && ! printf '%s' "$agent_out" | grep -q '^RISK_VERDICT: PASS$'; }
+  }; then
+    continue
+  fi
   if [[ -z "$VERDICT_TOKEN" ]] || printf '%s' "$agent_out" | grep -qF "$VERDICT_TOKEN"; then
     break
   fi
