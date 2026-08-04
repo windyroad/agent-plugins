@@ -76,8 +76,8 @@ setup() {
   [ "$status" -eq 0 ]
   run grep -n "native Codex subagent workflow" "$PACKAGE/scripts/sync-codex-skills.mjs"
   [ "$status" -eq 0 ]
-  run grep -n "codex exec" "$PACKAGE/scripts/sync-codex-skills.mjs"
-  [ "$status" -ne 0 ]
+  run grep -n 'Do not parse transcripts or launch nested.*codex exec' "$PACKAGE/scripts/sync-codex-skills.mjs"
+  [ "$status" -eq 0 ]
 }
 
 @test "risk-scorer Codex smoke runner packs current code and proves exact agent marker flow" {

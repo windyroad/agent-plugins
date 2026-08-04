@@ -154,8 +154,9 @@ tests:
         AGENT: plan
         The fixture facts are complete; do not inspect the filesystem. No Risk
         Appetite section is available, so use the documented default. Plan
-        residual risk is 5/25 and projected release risk is 6/25. The plan has
-        no release strategy. Return the required verdict.
+        residual risk is 5/25 and projected release risk is 6/25. Treat these
+        supplied scores as authoritative. The plan has no release strategy.
+        Return the required verdict.
     assert:
       - type: icontains
         value: 'RISK_VERDICT: FAIL'
