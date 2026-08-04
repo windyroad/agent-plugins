@@ -1,8 +1,8 @@
 ---
 status: "proposed"
 date: 2026-06-23
-human-oversight: confirmed
-oversight-date: 2026-07-29
+human-oversight: unconfirmed
+amended-date: 2026-08-04
 decision-makers: [Tom Howard]
 consulted: []
 informed: []
@@ -158,3 +158,52 @@ so a new Codex-bearing skill or package fails rather than shipping label-less,
 and behaviourally exercises the `risk-scorer` `--pack` transform to prove the
 metadata survives packaging. `npm pack --dry-run` confirms all 15 files ship in
 their tarballs.
+
+### 2026-07-30 — Use `SubagentStop` as the primary Codex completion signal
+
+The 2026-07-22 amendment's close-response adapter was grounded in the Codex
+hook surface available during that probe. Current Codex exposes a purpose-built
+`SubagentStop` event whose stable input includes `agent_type`, `agent_id`, and
+`last_assistant_message`. Risk-scorer completion handling now uses that event
+as its primary Codex path rather than inferring completion from the model's
+subsequent wait or close tool call.
+
+The existing adapter remains the single normalization boundary. It converts
+`SubagentStop.last_assistant_message` into the same synthetic `Agent` envelope
+consumed by `risk-score-mark.sh`; it does not parse the session or subagent
+transcript. Legacy spawn/wait/close payloads remain accepted for older Codex
+releases. An atomic `(session_id, agent_id)` claim/done record deduplicates
+overlapping delivery across the primary and fallback routes.
+
+Claude behavior is unchanged: Claude continues to use
+`PostToolUse:Agent`. Codex external-comms agents continue to emit the canonical
+draft key because `SubagentStop` intentionally exposes the final response but
+not the encrypted spawn prompt.
+
+**Confirmation:** unit fixtures replay the documented `SubagentStop` payload,
+including duplicate and malformed delivery, and the isolated Codex package
+smoke must produce the marker without instructing the model to close the agent
+or invoking a marker command.
+
+**Oversight:** confirmed by Tom Howard on 2026-08-04.
+
+### 2026-08-04 — Split completion delivery by Codex surface
+
+Codex completion delivery differs by runtime surface. The isolated CLI tarball
+smoke on `0.146.0-alpha.9.2` did not emit `SubagentStop`, even with hook trust
+bypassed, and its completed wait payload carried no verdict. The desktop app,
+after explicit hook trust, emitted the documented event and invoked the hook
+before the completed agent was closed.
+
+`SubagentStop` is therefore the primary desktop path. The existing
+`PostToolUse` completed-close adapter remains the CLI and older-runtime
+fallback. Both normalize through `risk-score-mark.sh` and share atomic
+claim/done state, so overlapping delivery writes once. There is no nested Codex
+process or transcript parsing, and Claude behavior remains unchanged.
+
+**Confirmation:** fixtures replay desktop `SubagentStop`, empty CLI wait, and
+completed-close payloads. A trusted desktop probe records completion before
+close; the isolated tarball smoke produces the external-comms PASS marker via
+the completed-close fallback.
+
+**Oversight:** unconfirmed; correction surfaced to Tom Howard on 2026-08-04.

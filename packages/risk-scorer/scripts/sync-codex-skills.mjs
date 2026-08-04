@@ -24,7 +24,7 @@ const restoreMode = process.argv.includes("--restore-pack");
 
 const preamble = `<!-- Generated from packages/risk-scorer/skills/*/SKILL.md by packages/risk-scorer/scripts/sync-codex-skills.mjs during npm pack. Do not edit packaged output directly. -->
 
-> Codex runtime note: use \`request_user_input\` only in Plan Mode where this skill needs structured user input. Outside Plan Mode, ask one concise direct question only when no safe assumption exists. If a step refers to Claude-style agent dispatch or \`subagent_type\`, use a native Codex subagent workflow and spawn the matching installed \`wr-risk-scorer:<mode>\` custom agent. Wait for it, then close that same agent so the completion hook receives its final response. Do not substitute the built-in \`default\` agent when a hook consumes the subagent identity; restart Codex if the installed agent is not yet visible.
+> Codex runtime note: use \`request_user_input\` only in Plan Mode where this skill needs structured user input. Outside Plan Mode, ask one concise direct question only when no safe assumption exists. If a step refers to Claude-style agent dispatch or \`subagent_type\`, use a native Codex subagent workflow and spawn the matching installed \`wr-risk-scorer:<mode>\` custom agent. Wait for it to finish, then close that completed agent once so the PostToolUse compatibility hook can persist its structured verdict. Do not parse transcripts or launch nested \`codex exec\`. Do not substitute the built-in \`default\` agent when a hook consumes the subagent identity; restart Codex if the installed agent is not yet visible.
 
 `;
 

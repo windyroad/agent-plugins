@@ -18,6 +18,10 @@ dispatch() {
   printf '%s' "$1" | "$HOOK_DIR/risk-scorer-dispatch.sh" post-tool
 }
 
+dispatch_subagent_stop() {
+  printf '%s' "$1" | "$HOOK_DIR/risk-scorer-dispatch.sh" subagent-stop
+}
+
 spawn_input() {
   printf '{"session_id":"%s","cwd":"%s","tool_name":"collaborationspawn_agent","tool_input":{"agent_type":"%s"},"tool_response":"{\\"task_name\\":\\"%s\\"}"}' \
     "$SESSION" "$TMP" "${1:-wr-risk-scorer:external-comms}" "$TARGET"
@@ -48,19 +52,51 @@ current_pipeline_close_input() {
     "$SESSION" "$TMP" "$TARGET"
 }
 
+current_empty_wait_input() {
+  printf '{"session_id":"%s","cwd":"%s","tool_name":"collaborationwait_agent","tool_input":{"timeout_ms":3600000},"tool_response":"{\"message\":\"Wait completed.\",\"timed_out\":false}"}' \
+    "$SESSION" "$TMP"
+}
+
+subagent_stop_input() {
+  printf '{"hook_event_name":"SubagentStop","session_id":"%s","cwd":"%s","agent_id":"%s","agent_type":"wr-risk-scorer:external-comms","last_assistant_message":"EXTERNAL_COMMS_RISK_VERDICT: PASS\\nEXTERNAL_COMMS_RISK_KEY: %s"}' \
+    "$SESSION" "$TMP" "$TARGET" "$KEY"
+}
+
+@test "desktop SubagentStop marks completion before agent close" {
+  dispatch "$(current_spawn_input)"
+  dispatch_subagent_stop "$(subagent_stop_input)"
+
+  [ -f "$TMPDIR/claude-risk-$SESSION/external-comms-risk-reviewed-$KEY" ]
+  [ "$(find "$TMPDIR/claude-risk-$SESSION" -name 'codex-agent-*.done' | wc -l | tr -d ' ')" = "1" ]
+
+  dispatch "$(current_close_input)"
+  [ "$(find "$TMPDIR/claude-risk-$SESSION" -name 'codex-agent-*.done' | wc -l | tr -d ' ')" = "1" ]
+}
+
 @test "Codex completion bridge marks the exact risk agent when it closes" {
   dispatch "$(spawn_input)"
   dispatch "$(close_input)"
 
   [ -f "$TMPDIR/claude-risk-$SESSION/external-comms-risk-reviewed-$KEY" ]
-  run find "$TMPDIR/claude-risk-$SESSION" -name 'codex-agent-*' -print -quit
+  run find "$TMPDIR/claude-risk-$SESSION" -name 'codex-agent-*.claim' -print -quit
   [ -z "$output" ]
+  run find "$TMPDIR/claude-risk-$SESSION" -name 'codex-agent-*.done' -print -quit
+  [ -n "$output" ]
 }
 
 @test "Codex completion bridge supports current agent ids and tool names" {
   dispatch "$(current_spawn_input)"
   dispatch "$(current_close_input)"
 
+  [ -f "$TMPDIR/claude-risk-$SESSION/external-comms-risk-reviewed-$KEY" ]
+}
+
+@test "current wait response stays inert until completed-agent close" {
+  dispatch "$(spawn_input)"
+  dispatch "$(current_empty_wait_input)"
+  [ ! -e "$TMPDIR/claude-risk-$SESSION/external-comms-risk-reviewed-$KEY" ]
+
+  dispatch "$(close_input)"
   [ -f "$TMPDIR/claude-risk-$SESSION/external-comms-risk-reviewed-$KEY" ]
 }
 

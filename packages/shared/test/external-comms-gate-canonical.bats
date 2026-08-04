@@ -48,12 +48,11 @@ setup() {
   grep -qE 'BYPASS_RISK_GATE' "$CANONICAL"
 }
 
-@test "canonical deny message instructs synchronous reviewer dispatch (P402)" {
-  # P402: a background-launched reviewer's PostToolUse mark hook never fires,
-  # so the marker never persists and the gate re-blocks. The deny message must
-  # tell the agent to dispatch the reviewer synchronously.
+@test "canonical deny message carries runtime-specific completion guidance" {
   grep -qE 'run_in_background: false' "$CANONICAL"
   grep -qi 'SYNCHRONOUSLY' "$CANONICAL"
+  grep -q 'close that completed agent once' "$CANONICAL"
+  grep -q 'no transcript parsing or nested codex exec' "$CANONICAL"
 }
 
 @test "canonical hook sources per-package external-comms-evaluator.conf (ADR-028 amended 2026-05-14)" {

@@ -18,6 +18,8 @@ setup() {
   [ "$(head -1 "$pkg/skills/demo/SKILL.md")" = "---" ]
   grep -q "Generated from packages/risk-scorer" "$pkg/skills/demo/SKILL.md"
   grep -q "request_user_input" "$pkg/skills/demo/SKILL.md"
+  grep -q 'close that completed agent once' "$pkg/skills/demo/SKILL.md"
+  grep -q 'Do not parse transcripts or launch nested `codex exec`' "$pkg/skills/demo/SKILL.md"
 }
 
 teardown() {

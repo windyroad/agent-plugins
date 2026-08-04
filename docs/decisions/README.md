@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 98 (87 in-force, 11 historical)
+**Total ADRs:** 99 (88 in-force, 11 historical)
 
 ---
 
 ## In-force decisions
 
-_87 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_88 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -128,7 +128,7 @@ _87 ADRs. These are the current rules. The architect agent reads this section fi
 **Related:** ADR-026, ADR-023, ADR-022, ADR-015, ADR-005
 
 ### ADR-028 — External-comms gate — voice-tone + risk/leak evaluators on shared PreToolUse surface
-**Status:** proposed | **Oversight:** confirmed
+**Status:** proposed | **Oversight:** unconfirmed
 **Related:** ADR-002, ADR-017, ADR-008, ADR-009, ADR-013, ADR-015, ADR-020, ADR-024, ADR-025, ADR-026, ADR-027
 
 ### ADR-029 — Diagnose before implement — structured hypothesis + evidence + RED-for-the-right-reason gate
@@ -187,7 +187,7 @@ _87 ADRs. These are the current rules. The architect agent reads this section fi
 **Related:** ADR-013, ADR-044, ADR-014, ADR-022, ADR-026, ADR-032, ADR-040, ADR-042, ADR-043
 
 ### ADR-045 — Hook injection budget policy for PreToolUse and PostToolUse hooks
-**Status:** proposed | **Oversight:** confirmed
+**Status:** proposed | **Oversight:** unconfirmed
 **Related:** ADR-038, ADR-002, ADR-009, ADR-013, ADR-014, ADR-017, ADR-022, ADR-023, ADR-026, ADR-037
 
 ### ADR-046 — ADR-046 — Blocked-reporters persistence: per-repo, hashed-ID, audit-log-first
@@ -240,11 +240,10 @@ _87 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed
 **Confirmation:** packages/risk-scorer/agents/test/pipeline-consume-catalog.bats — 6 cases:; packages/risk-scorer/skills/create-risk/test/create-risk-flag-driven.bats — 4 cases:; packages/risk-scorer/skills/bootstrap-catalog/test/bootstrap-catalog.bats — 6 cases:; scripts/repo-local-skills/install-updates/test/install-updates-bootstrap-trigger.bats — 4 cases:
 **Related:** ADR-059, ADR-047, ADR-056, ADR-013, ADR-014, ADR-015, ADR-022, ADR-026, ADR-036, ADR-038, ADR-040, ADR-042, ADR-044, ADR-049, ADR-052, ADR-053, ADR-054, ADR-055
+
 ### ADR-060 — Problem-RFC-Story framework with mandatory problem-trace and unified problem ontology
 **Status:** accepted | **Oversight:** confirmed
-**Decides:** Introduces a four-tier artefact ontology (Problem → RFC → story map → story, with ADRs riding alongside) so fixes that decompose across many commits get a scoped, WSJF-rankable home instead of accreting multi-phase Fix Strategy sections inside problem tickets; every RFC must trace to ≥1 problem (no orphan RFCs), all problems are handled uniformly with no technical/user-business type split, and every fix goes through an RFC that must pre-exist at fix-proposal on a Known Error (I13, no carve-out).
-**Confirmation:** capture-rfc without `--problem` hard-blocks and logs the denial; manage-rfc hard-blocks irreversible transitions on missing problem trace, advisory only at `→ closed`; problem `## RFCs` reverse-trace auto-maintained from `Refs: RFC-NNN` trailers; P168 migrates to RFC-001 with no semantic loss (six round-trip clauses); Phase 1 ships held per ADR-042 and graduates atomically; behavioural bats (no structural grep) cover capture-rfc / manage-rfc / reconcile-rfcs; I2 regression guard asserts no classification-keyed branch; forward-dogfood RFC captured before its first commit and run to closure before adopter release; I12 derive-then-ratify bats fixture covers derive / flag-preresolve / AskUserQuestion REJECT-as-problem-rejection / correction-as-acceptance / AFK halt.
-**Related:** ADR-010, ADR-013, ADR-014, ADR-019, ADR-022, ADR-031, ADR-032, ADR-038, ADR-040, ADR-042, ADR-044, ADR-049, ADR-052, ADR-053, ADR-059, ADR-060, ADR-064, ADR-065, ADR-066, ADR-068, ADR-069, ADR-070, ADR-071, ADR-072, ADR-073, ADR-074, ADR-086, ADR-089, ADR-090, ADR-093, ADR-095, ADR-096, ADR-101
+**Related:** ADR-095, ADR-032
 
 ### ADR-062 — Inbound upstream-report discovery + assessment pipeline (peer of ADR-024)
 **Status:** proposed | **Oversight:** confirmed
@@ -343,11 +342,10 @@ _87 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **"Option A — Shim wrapper resolves to highest-version sibling at invoke time"**, because it closes the mid-session staleness window that motivated P343 (the dominant cost driver of session 9), aligns with the existing ADR-...
 **Related:** ADR-049, ADR-081, ADR-040, ADR-080, ADR-002, ADR-003, ADR-014, ADR-066, ADR-074
+
 ### ADR-083 — Codex CLI as second runtime
-**Status:** proposed | **Oversight:** confirmed
-**Decides:** Ship `@windyroad/*` plugins on OpenAI's Codex CLI as a second runtime via dual-runtime install utils (`--runtime claude|codex|both`), per-plugin `.codex-plugin/` manifests synced from the Claude ones, and a runtime-neutral `AGENTS.md`/`CLAUDE.md` pair — because ADR-002 already anticipated per-package tool-specific install logic and ADR-017's sync-script + drift-check discipline covers the mirrors; architect is the pilot, other packages follow per-iter. Amended 2026-07-22 to generate Codex custom agents as standalone TOML outside plugin bundles (Codex has no plugin agent component), with ownership markers + payload hashes guarding install/uninstall, plus a Codex-only completion adapter that reads the `collaborationinterrupt_agent` close response; amended 2026-07-29 to add a per-skill `agents/openai.yaml` interface tier labelled `WR <Package>: <Skill Title Case>`, hand-authored rather than derived, with a packaging invariant that `prepack` must carry per-skill assets into the packed tree.
-**Confirmation:** end-to-end run on codex-cli 0.137.0 — marketplace add + plugin add + `codex exec` spawning `wr-architect:agent` from a no-`.codex/` adopter dir returned a correctly-shaped verdict; generator drift tests cover all six risk-scorer agents and exact names; installer tests cover project/user scope, idempotence, Codex-only SessionStart repair and marker-safe uninstall; isolated tarball into a temp `CODEX_HOME` must let a fresh Codex discover and run `wr-risk-scorer:external-comms` for the PASS verdict the marker hook consumes; schema grounded in all 59 first-party `agents/openai.yaml` files on codex-cli 0.145.0; `packages/shared/test/codex-skill-interface-metadata.bats` asserts every skill's exact label, derives coverage from `.codex-plugin/` presence, and exercises the risk-scorer `--pack` transform; `npm pack --dry-run` confirms all 15 files ship.
-**Related:** ADR-002, ADR-003, ADR-017, ADR-032, ADR-049
+**Status:** proposed | **Oversight:** unconfirmed
+**Chosen:** Chosen option: **"Option A"**, because the shape matches ADR-002's explicit forward-looking note ("the per-plugin package structure should extend naturally — each package adds its tool-specific install logic") and ADR-017's sync-script + ...
 
 ### ADR-084 — Self-firing deferral census — a SessionStart surfacer so deferred governance work cannot silently rot
 **Status:** proposed | **Oversight:** confirmed
@@ -380,11 +378,12 @@ _87 ADRs. These are the current rules. The architect agent reads this section fi
 **Chosen:** Chosen option: **"The atomic singleton is a full story"** (Option 1), because it is the only option that removes the empty-stories residue *without* re-introducing a shaped exemption. Option 2 re-creates the exact reduced-ceremony carve-out...
 **Confirmation:** A behavioural test (per ADR-052) asserts an RFC proposed for a fix cannot reach accepted with an empty stories...; The four bats that currently assert the empty-stories fallback is legal (rfc-stories-extension.bats, working-t...; ADR-060's cardinality clauses and ADR-071's atomic-representation clauses read "≥1 / exactly one story," wit...
 **Related:** ADR-071, ADR-060, ADR-070
+
 ### ADR-090 — Story maps and stories carry a drift-invalidated human-oversight marker
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** Story maps and stories carry a `human-oversight:` marker orthogonal to the `status:` lifecycle, and — unlike ADR-066/068's write-once markers — a **substance** change invalidates it back to `unconfirmed`, because a living artefact that was ratified then silently edited must not still read as ratified; lifecycle progress (advancing `status:`, ticking a criterion, advancing a slice's `data-status`) is not substance and preserves ratification. An RFC may reference only ratified stories, so `capture-rfc` / `manage-rfc` gate the `stories:` list on story-ratification. Amends ADR-060. The substance-only narrowing shipped 2026-07-03, was recorded retroactively 2026-07-29, and was **ratified 2026-07-30** ("I agree with the narrowing" — a direct selection from {substance-only, literal any-change}) with the Outcome text reconciled to the rule in force; ADR-101 coarsened the map leg narrowly (2026-07-26); P474 (2026-07-29) removed the body `**Status**:` mirror so lifecycle state is never duplicated inside hashed content — hash function unchanged, migration re-fingerprints but never re-ratifies.
-**Confirmation:** an edit newer than `oversight-date` reads as `unconfirmed` (behavioural test); capture-rfc / manage-rfc refuse an unratified story in an RFC's `stories:` (behavioural test); a detector surfaces unratified story maps, mirroring `wr-architect-detect-unoversighted`; migration bats cover mirror-removal on agreement, skip-and-report on disagreement, ratification preserved, already-drifted not revived, `human-oversight` never written, idempotence.
-**Related:** ADR-066, ADR-068, ADR-060, ADR-074, ADR-009, ADR-095, ADR-101, ADR-049
+**Chosen:** Chosen option: **"Drift-invalidated marker"** (Option 1), because it is what the user's "ratify after **any** change" literally requires and what the stated purpose demands — you must not rely on a story map that changed since it was rati...
+**Confirmation:** A story map / story with an edit newer than its oversight-date reads as unconfirmed (drift-invalidation fires)...; capture-rfc / manage-rfc refuse to list an unratified story in an RFC's stories: — asserted by a behavioural...; A detector surfaces unratified story maps (mirroring wr-architect-detect-unoversighted for decisions).
+**Related:** ADR-066, ADR-068, ADR-060, ADR-074, ADR-009
 
 ### ADR-091 — Commit-gate staleness threshold derives from RISK-POLICY.md's stated review cadence
 **Status:** proposed | **Oversight:** confirmed
@@ -404,16 +403,14 @@ _87 ADRs. These are the current rules. The architect agent reads this section fi
 **Chosen:** Chosen option: **native `/goal` external evaluator**, because it moves the stop decision to an independent per-turn evaluator — the only option that structurally breaks the same-actor conflation — and it is the mechanism the user pinned...
 **Confirmation:** packages/itil/skills/work-problems/SKILL.md contains a Step 0e (/goal loop-anchor) section carrying the canoni...; Step 2.4 Gate (0) prose requires the re-scan classification be PRINTED in turn output.; Paired promptfoo Tier-A/Tier-B eval cases in packages/itil/skills/work-problems/eval/promptfooconfig.yaml asse...; Empirical probe results (Skill-tool rejection message, headless recognition JSON) recorded in this ADR and in ...
 **Related:** ADR-032, ADR-044, ADR-026, ADR-061, ADR-075, ADR-093
+
 ### ADR-095 — Story-map membership and story-content completeness are enforced at capture
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** Story-map membership (I8) and the story-content INVEST subset — Valuable (a real user-value statement) plus Testable (at least one real acceptance criterion) — are enforced at `capture-story` rather than only at the `accepted` transition, because the AFK flow authors skeleton stories that never reach the promotion where the old gates fired. A mapless capture refuses and routes to `/wr-itil:capture-story-map` first (no silent auto-create), and `draft` is redefined to mean content-complete but not yet accepted; the content-subset gate at capture is a deliberate, documented deviation from ADR-032's defer-shape-gates rule, and Estimable/Small stay at `accepted`.
-**Confirmation:** `capture-story` rejects empty `story-maps:` with a route directive; rejects placeholder/empty `## User value` or `## Acceptance criteria`; honors the bootstrap-exempt marker; behavioural bats cover mapless-rejected, placeholder-rejected, content-complete-accepted, bootstrap-exempt-permitted, non-bootstrap-marker-rejected; ADR-060 I8 + the draft-state lifecycle cell amended in lockstep.
-**Related:** ADR-032, ADR-060, ADR-089, ADR-090, ADR-096, ADR-101
+**Chosen:** Chosen option: **A.** Amends ADR-060:
+
 ### ADR-096 — A story cannot be implemented while in draft — implementation requires accepted
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** Removes ADR-060's `draft -> in-progress` auto-transition so a story reaches `in-progress` only via `accepted`, and blocks any commit whose `Refs: STORY-NNN` trailer names a story that is not `accepted`/`in-progress` — closing the P404 loophole where draft stories were implemented without the INVEST, RFC-trace and ratification gates ever firing. Dispatch preflight refuse-and-routes as fast-fail UX, and the trailer vocabulary is standardised on `Refs: STORY-NNN`. ADR-101 later corrects the over-claim that this alone guaranteed ratification, adding the missing ratified check at the same commit-trailer locus.
-**Confirmation:** ADR-060 lifecycle table drops the draft auto-transition (`in-progress` only via `accepted`); commit-trailer gate hook blocks a commit referencing a non-accepted story; `work-problems`/`work-problem` preflight refuse-and-routes on a draft story; behavioural bats cover draft-blocked-with-route, accepted-allowed, preflight refuse-and-route, and the untouched in-progress->done auto-transition.
-**Related:** ADR-060, ADR-089, ADR-090, ADR-095, ADR-101
+**Chosen:** Chosen option: **A.** Amends ADR-060:
 
 ### ADR-097 — Self-installing quota-state producer (SessionStart guarded-statusline edit)
 **Status:** proposed | **Oversight:** confirmed
@@ -433,11 +430,12 @@ _87 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-100 — Capture-time truth discipline for problem tickets — falsify premises, mark unexecuted mechanisms
 **Status:** proposed | **Oversight:** unconfirmed
 **Confirmation:** A description asserting X is missing, where X is present in the tree, produces a captured ticket carrying the ...; A description asserting a root-cause mechanism with no cited evidence produces a ticket recording it under ## ...; A description with no existence-claims produces byte-identical capture output to the pre-change behaviour.
+
 ### ADR-101 — An AFK loop may accept and implement a story that only decomposes already-ratified substance
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** An AFK loop may self-accept a story `draft → accepted` and implement it without fresh human ratification, but only when the project has opted in, the story declares `afk-accept: pure-decomposition`, every traced parent artefact is already `confirmed`, and a `## Decomposition basis` section positively names one confirmed clause per acceptance criterion — because the loop must be able to land work whose substance a human already approved, while nothing unconfirmed may reach implementation. The two halves are deliberately split: the story-ratification check in the commit gate ships enabled for everyone (the P465 fix), while the carve-out itself ships opt-in and fails closed, so adopters inherit the tightening and not the loosening.
-**Confirmation:** eligible with all parents confirmed, not eligible with an unconfirmed parent or mismatched basis entries; not eligible without opt-in, or when `jq` is absent or the config value is non-boolean; commits referencing an accepted-but-unratified story blocked regardless of config; map re-ratified with the story's card present still passes condition (a); `detect-unratified-stories-maps` default stdout byte-identical; no automated path — installer, scaffold, or agent — writes a `true` opt-in; ratify write is last and the story re-staged so the committed blob carries the marker
-**Related:** ADR-060, ADR-066, ADR-068, ADR-070, ADR-074, ADR-083, ADR-090, ADR-095, ADR-096, ADR-098
+**Chosen:** Chosen option: **1, bounded AFK-accept carve-out — opt-in and fail-closed**, composed with option 2 rather than replacing it.
+**Confirmation:** A story declaring the carve-out with all parents confirmed is eligible; one with an unconfirmed parent is not;...; The carve-out is not-eligible when the project has not opted in, even when (a) and (b) both hold; and not-elig...; A commit referencing an accepted-but-unratified story is blocked regardless of config; a ratified story's comm...; A map re-ratified with the story's card already present still satisfies condition (a) — behavioural test for...; detect-unratified-stories-maps default stdout is byte-identical to before the flag existed — behavioural tes...
+**Related:** ADR-090, ADR-095, ADR-096, ADR-060, ADR-098, ADR-070, ADR-066, ADR-068, ADR-074
 
 ---
 

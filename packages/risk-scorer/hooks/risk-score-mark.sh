@@ -240,7 +240,7 @@ except Exception:
     # Fallback: cached old SKILL.md still instructs the agent to emit
     # EXTERNAL_COMMS_RISK_KEY. Honour it during the deprecation window.
     KEY_LINE=$(echo "$AGENT_OUTPUT" | grep -E '^EXTERNAL_COMMS_RISK_KEY:' | tail -1) || true
-    KEY=$(echo "$KEY_LINE" | sed 's/^EXTERNAL_COMMS_RISK_KEY:[[:space:]]*//' | tr -d '[:space:]')
+    KEY=$(echo "$KEY_LINE" | sed 's/^EXTERNAL_COMMS_RISK_KEY:[[:space:]]*//' | tr -d '[:space:]`')
   fi
 
   # Validate key: 64 hex chars (sha256 output). Reject anything else.

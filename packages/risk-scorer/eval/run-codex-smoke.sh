@@ -81,6 +81,6 @@ DESTINATION: npm public registry
 <draft>
 ${MARKER_DRAFT}
 </draft>
-Wait for it, close that same agent, then return the reviewer verdict and key verbatim. Do not compute the verdict yourself."
+Wait for it to finish, then close that completed agent once and return the reviewer verdict and key verbatim. Do not compute the verdict yourself or inspect any transcript."
 
 find "$TMPDIR" -type f -name "external-comms-risk-reviewed-${MARKER_KEY}" -print -quit | grep -q .

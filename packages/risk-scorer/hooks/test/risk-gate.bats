@@ -2,6 +2,7 @@
 # Tests for .claude/hooks/lib/risk-gate.sh
 
 setup() {
+  unset CODEX_THREAD_ID
   HOOKS_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
   source "$HOOKS_DIR/lib/gate-helpers.sh"
   source "$HOOKS_DIR/lib/risk-gate.sh"
@@ -65,6 +66,14 @@ assert_gate_allows() {
   # no marker persists and the gate re-blocks. The deny must tell the agent to
   # dispatch synchronously. Mirrors external-comms-gate-canonical.bats.
   assert_gate_denies "$TEST_SESSION" "commit" "run_in_background: false"
+}
+
+@test "Codex missing-score deny instructs completed-agent close compatibility" {
+  export CODEX_THREAD_ID=codex-test
+  assert_gate_denies "$TEST_SESSION" "commit" "close that completed agent once"
+  [[ "$RISK_GATE_REASON" != *"run_in_background: false"* ]]
+  [[ "$RISK_GATE_REASON" == *"no transcript parsing or nested codex exec"* ]]
+  unset CODEX_THREAD_ID
 }
 
 @test "score file with PENDING denies (non-numeric)" {

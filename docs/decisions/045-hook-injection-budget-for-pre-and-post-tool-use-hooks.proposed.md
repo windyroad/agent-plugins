@@ -1,8 +1,8 @@
 ---
 status: "proposed"
 date: 2026-04-28
-human-oversight: confirmed
-oversight-date: 2026-05-25
+human-oversight: unconfirmed
+amended-date: 2026-08-04
 decision-makers: [tomhoward]
 consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: [Windy Road plugin users, windyroad-claude-plugin adopters]
@@ -232,3 +232,46 @@ Revisit this decision if:
 - `packages/risk-scorer/hooks/plan-risk-guidance.sh` — Pattern 5 reference.
 - `packages/shared/hooks/lib/session-marker.sh` — canonical helper.
 - `scripts/sync-session-marker.sh` — distribution mechanism.
+
+## Amendments
+
+### 2026-07-30 — Extend the side-effect-only rule to `SubagentStop`
+
+Current Codex and Claude runtimes expose `SubagentStop` as the stable event for
+subagent completion. It is added to this ADR's governed surface for
+side-effect-only completion markers.
+
+The risk-scorer handler writes marker state and emits no success prose, so it
+must comply with Pattern 2 exactly. `SubagentStop` is a distinct lifecycle
+event and cannot be consolidated into the existing SessionStart,
+UserPromptSubmit, PreToolUse, or PostToolUse registrations. The risk-scorer
+therefore carries five command-hook registrations after this amendment. The
+fifth registration is accepted because it replaces unreliable inference from
+later model tool calls with the runtime's direct completion event; adding a
+second handler on the same event would still require a separate consolidation
+review.
+
+**Confirmation:** the hook-count contract asserts one dispatcher handler for
+each of the five lifecycle events, the `SubagentStop` handler is silent on
+success, and duplicate completion delivery produces one marker/report.
+
+**Oversight:** confirmed by Tom Howard on 2026-08-04.
+
+### 2026-08-04 — Use five hooks for desktop completion with a CLI fallback
+
+An isolated Codex `0.146.0-alpha.9.2` CLI smoke did not emit `SubagentStop`, but
+the desktop runtime emitted it after the hook was trusted and wrote a completion
+marker before the agent was closed. The event is therefore useful on desktop,
+while the existing `PostToolUse` completed-close adapter remains necessary for
+CLI and older-runtime compatibility.
+
+Risk-scorer carries five dispatcher registrations. The fifth is not duplicate
+work: it is the only direct desktop completion event, and the existing atomic
+claim suppresses the later close delivery. Both completion routes remain
+side-effect-only and silent.
+
+**Confirmation:** the hook-count contract asserts five registrations, fixtures
+prove `SubagentStop` plus close produces one marker, the trusted desktop probe
+records completion before close, and the isolated CLI smoke proves fallback.
+
+**Oversight:** unconfirmed; correction surfaced to Tom Howard on 2026-08-04.

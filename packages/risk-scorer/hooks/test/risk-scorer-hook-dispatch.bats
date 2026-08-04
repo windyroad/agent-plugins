@@ -5,17 +5,17 @@ setup() {
   HOOKS="$REPO_ROOT/packages/risk-scorer/hooks"
 }
 
-@test "hooks.json registers four command hooks" {
+@test "hooks.json registers five command hooks" {
   run python3 - "$HOOKS/hooks.json" <<'PY'
 import json, sys
 data = json.load(open(sys.argv[1]))
 print(sum(len(entry["hooks"]) for entries in data["hooks"].values() for entry in entries))
 PY
   [ "$status" -eq 0 ]
-  [ "$output" = "4" ]
+  [ "$output" = "5" ]
 }
 
-@test "dispatcher is registered for session, prompt, pre-tool, and post-tool events" {
+@test "dispatcher is registered for session, prompt, and tool events" {
   run grep -n "risk-scorer-dispatch.sh session-start" "$HOOKS/hooks.json"
   [ "$status" -eq 0 ]
   run grep -n "risk-scorer-dispatch.sh user-prompt" "$HOOKS/hooks.json"
@@ -25,6 +25,8 @@ PY
   run grep -n "risk-scorer-dispatch.sh post-tool" "$HOOKS/hooks.json"
   [ "$status" -eq 0 ]
   run grep -n "multi_agent_v1__wait_agent" "$HOOKS/hooks.json"
+  [ "$status" -eq 0 ]
+  run grep -n "risk-scorer-dispatch.sh subagent-stop" "$HOOKS/hooks.json"
   [ "$status" -eq 0 ]
 }
 

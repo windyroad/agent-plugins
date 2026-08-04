@@ -1,9 +1,8 @@
 ---
 status: "proposed"
 date: 2026-04-20
-human-oversight: confirmed
-oversight-date: 2026-05-25
-amended-date: 2026-06-06
+human-oversight: unconfirmed
+amended-date: 2026-08-04
 decision-makers: [tomhoward]
 consulted: [wr-architect:agent, wr-jtbd:agent, wr-risk-scorer:wip]
 informed: [Windy Road plugin users, addressr maintainer, bbstats maintainer]
@@ -581,3 +580,60 @@ The external-comms mark hook (`risk-score-mark.sh` / `external-comms-mark-review
 - **Follow-up (named)**: the two `/wr-*:assess-external-comms` skills' Step 3 should carry the same synchronous-dispatch note (secondary manual-walkthrough surface; the deny message is the primary agent-in-the-loop surface).
 
 **Status**: stays `proposed`.
+
+### Amendment 2026-07-30 — Runtime-native subagent completion markers
+
+The 2026-07-02 P402 amendment made synchronous dispatch load-bearing because
+`PostToolUse:Agent` was the only reliable completion signal then available.
+Current Codex and Claude hook contracts now expose `SubagentStop` with the
+subagent's exact `agent_type`, `agent_id`, and `last_assistant_message`.
+
+For Codex, `@windyroad/risk-scorer` therefore consumes the risk evaluator's
+structured verdict from `SubagentStop` and passes it through the existing
+deterministic marker parser. Codex no longer depends on a model-visible
+`wait_agent` or `close_agent` response to persist the marker. Legacy Codex
+spawn/wait/close adaptation remains as a compatibility fallback and all Codex
+completion routes share an atomic `(session_id, agent_id)` claim so one
+completion can write at most one marker/report.
+
+Claude Code keeps the existing `PostToolUse:Agent` path and the synchronous
+dispatch requirement from P402. Runtime-facing gate and skill guidance must
+state this distinction instead of claiming that synchronous dispatch is a
+universal hook requirement.
+
+`SubagentStop` does not carry the original spawn prompt. The generated Codex
+external-comms agent therefore continues to emit
+`EXTERNAL_COMMS_RISK_KEY`; the adapter validates the key shape before the
+existing marker parser writes anything. This is the narrow Codex exception to
+the 2026-05-16 hook-side key derivation rule. Claude still derives the key from
+the original `PostToolUse:Agent` prompt.
+
+**Confirmation:** behavioural fixtures cover a Codex `SubagentStop` PASS,
+pipeline scores, a non-risk agent, malformed output, and duplicate delivery
+across `SubagentStop` plus legacy wait/close with exactly one report write.
+The handler remains side-effect-only and silent on success.
+
+**Oversight:** confirmed by Tom Howard on 2026-08-04.
+
+### Amendment 2026-08-04 — Use desktop `SubagentStop` with completed-close fallback
+
+Codex currently differs by surface. An isolated `codex exec` tarball smoke on
+`0.146.0-alpha.9.2`, with hook trust bypassed, emitted no `SubagentStop`; its
+completed `wait_agent` response contained only
+`{"message":"Wait completed.","timed_out":false}`. The desktop runtime did emit
+the documented `SubagentStop` after its hook was trusted, including the exact
+`agent_id`, `agent_type`, and parent `session_id`, and ran the completion hook
+before the completed agent was closed.
+
+The plugin therefore registers `SubagentStop` for desktop completion and keeps
+the existing `PostToolUse` completed-close adapter for `codex exec` and older
+runtimes. Both routes use the same atomic `(session_id, agent_id)` claim and
+deterministic marker parser. Neither route parses a transcript or starts a
+nested Codex process; Claude Code keeps its existing `PostToolUse:Agent` path.
+
+**Confirmation:** behavioural fixtures prove `SubagentStop` writes the exact
+content-keyed PASS marker before close and that a later close is deduplicated.
+The isolated CLI smoke proves the completed-close fallback. Desktop evidence
+comes from a trusted hook writing a completion marker before agent close.
+
+**Oversight:** unconfirmed; correction surfaced to Tom Howard on 2026-08-04.

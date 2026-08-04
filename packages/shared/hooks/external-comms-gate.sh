@@ -407,10 +407,15 @@ fi
 # Marker absent — deny + delegate.
 # P166: instruct the orchestrator to structure the agent prompt with a
 # leading `SURFACE: <name>` line and a `<draft>...</draft>` block so the
-# PostToolUse mark hook can derive the canonical marker key locally
+# Claude PostToolUse mark hook can derive the canonical marker key locally
 # (sha256(DRAFT + '\n' + SURFACE)). Single fire per gate cycle.
 VERDICT_PREFIX="${EXTERNAL_COMMS_VERDICT_PREFIX:-EXTERNAL_COMMS_${EXTERNAL_COMMS_EVALUATOR_ID^^}}"
-REASON=$(printf 'BLOCKED (external-comms gate / %s evaluator): %s draft has not been reviewed by %s. Delegate to %s (subagent_type: '"'"'%s'"'"') with a prompt that starts with the line `SURFACE: %s` and wraps the draft body verbatim inside `<draft>...</draft>` markers (for the changeset-author surface the body is the changeset summary WITHOUT the leading `---` frontmatter block — the gate strips frontmatter before hashing the marker key). The PostToolUse hook derives the marker key from that structure and marks the draft reviewed when the subagent emits %s_VERDICT: PASS — single fire suffices. Dispatch the reviewer SYNCHRONOUSLY (run_in_background: false): a background-launched reviewer does not fire its PostToolUse mark hook, so the marker never persists and this gate re-blocks (P402). Use %s for an interactive walkthrough. There is no env override (P377/RFC-029 — BYPASS_RISK_GATE removed).' \
-    "$EXTERNAL_COMMS_EVALUATOR_ID" "$SURFACE" "$EXTERNAL_COMMS_SUBAGENT_TYPE" "$EXTERNAL_COMMS_SUBAGENT_TYPE" "$EXTERNAL_COMMS_SUBAGENT_TYPE" "$SURFACE" "$VERDICT_PREFIX" "$EXTERNAL_COMMS_ASSESS_SKILL")
+if [ -n "${CODEX_THREAD_ID:-}" ]; then
+    COMPLETION_GUIDANCE='On Codex, wait for the reviewer to finish, then close that completed agent once before retrying; the PostToolUse compatibility hook consumes the completed close response and persists its structured verdict, with no transcript parsing or nested codex exec.'
+else
+    COMPLETION_GUIDANCE='On Claude Code, dispatch the reviewer SYNCHRONOUSLY (run_in_background: false): a background-launched reviewer does not fire its PostToolUse mark hook, so the marker never persists and this gate re-blocks (P402).'
+fi
+REASON=$(printf 'BLOCKED (external-comms gate / %s evaluator): %s draft has not been reviewed by %s. Delegate to %s (subagent_type: '"'"'%s'"'"') with a prompt that starts with the line `SURFACE: %s` and wraps the draft body verbatim inside `<draft>...</draft>` markers (for the changeset-author surface the body is the changeset summary WITHOUT the leading `---` frontmatter block — the gate strips frontmatter before hashing the marker key). The completion hook marks the draft reviewed when the subagent emits %s_VERDICT: PASS — single fire suffices. %s Use %s for an interactive walkthrough. There is no env override (P377/RFC-029 — BYPASS_RISK_GATE removed).' \
+    "$EXTERNAL_COMMS_EVALUATOR_ID" "$SURFACE" "$EXTERNAL_COMMS_SUBAGENT_TYPE" "$EXTERNAL_COMMS_SUBAGENT_TYPE" "$EXTERNAL_COMMS_SUBAGENT_TYPE" "$SURFACE" "$VERDICT_PREFIX" "$COMPLETION_GUIDANCE" "$EXTERNAL_COMMS_ASSESS_SKILL")
 deny_with_reason "$REASON"
 exit 0

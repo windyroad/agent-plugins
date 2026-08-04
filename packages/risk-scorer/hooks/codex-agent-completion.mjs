@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -28,8 +28,14 @@ function riskDir(sessionId) {
   return join(process.env.TMPDIR || "/tmp", `claude-risk-${sessionId}`);
 }
 
-function statePath(input, target) {
-  return join(riskDir(input.session_id), `codex-agent-${Buffer.from(target).toString("base64url")}`);
+function statePath(input, target, suffix = "") {
+  return join(riskDir(input.session_id), `codex-agent-${Buffer.from(target).toString("base64url")}${suffix}`);
+}
+
+function clearTarget(input, target) {
+  for (const suffix of ["", ".claim", ".done"]) {
+    rmSync(statePath(input, target, suffix), { force: true });
+  }
 }
 
 function spawnTarget(input) {
@@ -42,9 +48,23 @@ function rememberSpawn(input) {
   const target = spawnTarget(input);
   if (typeof target !== "string" || !target) return;
   mkdirSync(riskDir(input.session_id), { recursive: true });
-  rmSync(statePath(input, target), { force: true });
+  clearTarget(input, target);
   if (!riskAgentRoles.has(role)) return;
   writeFileSync(statePath(input, target), role, "utf8");
+}
+
+function claimTarget(input, target) {
+  const claim = statePath(input, target, ".claim");
+  const done = statePath(input, target, ".done");
+  if (existsSync(done)) return null;
+  mkdirSync(riskDir(input.session_id), { recursive: true });
+  try {
+    writeFileSync(claim, "", { flag: "wx" });
+  } catch (error) {
+    if (error?.code === "EEXIST") return null;
+    throw error;
+  }
+  return { claim, done };
 }
 
 function markTarget(input, target, output) {
@@ -54,6 +74,8 @@ function markTarget(input, target, output) {
   if (!existsSync(state)) return;
   const role = readFileSync(state, "utf8");
   if (!riskAgentRoles.has(role)) return;
+  const claim = claimTarget(input, target);
+  if (!claim) return;
 
   const synthetic = {
     ...input,
@@ -67,7 +89,13 @@ function markTarget(input, target, output) {
     input: JSON.stringify(synthetic),
     encoding: "utf8",
   });
-  if (result.status === 0) rmSync(state, { force: true });
+  if (result.status === 0) {
+    renameSync(claim.claim, claim.done);
+    rmSync(state, { force: true });
+  } else {
+    rmSync(claim.claim, { force: true });
+    process.exitCode = 1;
+  }
 }
 
 function markClose(input) {
@@ -80,6 +108,10 @@ function markWait(input) {
   for (const [target, status] of Object.entries(statuses)) {
     markTarget(input, target, status?.completed);
   }
+}
+
+function markSubagentStop(input) {
+  markTarget(input, input.agent_id, input.last_assistant_message);
 }
 
 let body = "";
@@ -103,4 +135,7 @@ if (["collaborationinterrupt_agent", "close_agent", "multi_agent_v1__close_agent
 }
 if (["collaborationwait_agent", "wait_agent", "multi_agent_v1__wait_agent"].includes(input.tool_name)) {
   markWait(input);
+}
+if (input.hook_event_name === "SubagentStop") {
+  markSubagentStop(input);
 }

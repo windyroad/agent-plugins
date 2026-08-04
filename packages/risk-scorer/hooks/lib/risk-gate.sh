@@ -38,7 +38,11 @@ check_risk_gate() {
   # 1. Score file must exist (fail-closed)
   if [ ! -f "$SCORE_FILE" ]; then
     RISK_GATE_CATEGORY="missing"
-    RISK_GATE_REASON="No ${ACTION} risk score found. Delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') to assess cumulative pipeline risk. Dispatch the scorer SYNCHRONOUSLY (run_in_background: false): a background-launched scorer does not fire its PostToolUse:Agent mark hook, so no marker persists and this gate re-blocks despite a within-appetite score (P402)."
+    if [ -n "${CODEX_THREAD_ID:-}" ]; then
+      RISK_GATE_REASON="No ${ACTION} risk score found. Delegate to the native Codex agent wr-risk-scorer:pipeline to assess cumulative pipeline risk, wait for it to finish, then close that completed agent once before retrying. The PostToolUse compatibility hook consumes the completed close response and persists its structured verdict; no transcript parsing or nested codex exec is required."
+    else
+      RISK_GATE_REASON="No ${ACTION} risk score found. Delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') to assess cumulative pipeline risk. Dispatch the scorer SYNCHRONOUSLY (run_in_background: false): a background-launched scorer does not fire its PostToolUse:Agent mark hook, so no marker persists and this gate re-blocks despite a within-appetite score (P402)."
+    fi
     return 1
   fi
 
