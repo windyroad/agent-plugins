@@ -33,7 +33,6 @@ When I delegate coding to an AI agent, I want to know it followed the full TDD c
 
 Pair programming with the AI, manual review of every diff, restricting agent permissions
 
-
 ## Stories
 
 | ID | Title | Status |
@@ -41,3 +40,12 @@ Pair programming with the AI, manual review of every diff, restricting agent per
 | STORY-055 | STORY-055: One definition of what the oversight fingerprint ignores | accepted |
 | STORY-053 | STORY-053: Test claims against the tree at capture and label the untested ones | draft |
 | STORY-046 | STORY-046: Red-CI denial explains the recovery path | in-progress |
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-010 | STORY-MAP-010: Trust that a ticket states only what was verified | archived |
+| STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |
+| STORY-MAP-012 | STORY-MAP-012: Ship through a scored path | draft |

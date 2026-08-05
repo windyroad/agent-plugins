@@ -185,6 +185,11 @@ Shipped: `packages/shared/hooks/quota-pace-throttle.sh` glide-path rewrite + `pa
 | ID | Title | Status |
 |----|-------|--------|
 | RFC-046 | RFC-046: Quota-pace throttle — mechanical PreToolUse pacing, extracted into `@windyroad/cruise` | in-progress |
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-003 | STORY-MAP-003: Sustain my token quota across the week and across surfaces | draft |
 
 ## Fix Released — code slice (2026-07-06)
 

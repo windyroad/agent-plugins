@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 99 (88 in-force, 11 historical)
+**Total ADRs:** 100 (89 in-force, 11 historical)
 
 ---
 
 ## In-force decisions
 
-_88 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_89 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -436,6 +436,13 @@ _88 ADRs. These are the current rules. The architect agent reads this section fi
 **Chosen:** Chosen option: **1, bounded AFK-accept carve-out — opt-in and fail-closed**, composed with option 2 rather than replacing it.
 **Confirmation:** A story declaring the carve-out with all parents confirmed is eligible; one with an unconfirmed parent is not;...; The carve-out is not-eligible when the project has not opted in, even when (a) and (b) both hold; and not-elig...; A commit referencing an accepted-but-unratified story is blocked regardless of config; a ratified story's comm...; A map re-ratified with the story's card already present still satisfies condition (a) — behavioural test for...; detect-unratified-stories-maps default stdout is byte-identical to before the flag existed — behavioural tes...
 **Related:** ADR-090, ADR-095, ADR-096, ADR-060, ADR-098, ADR-070, ADR-066, ADR-068, ADR-074
+
+### ADR-102 — Story maps render from JSON through a canonical template
+**Status:** proposed | **Oversight:** confirmed
+**Chosen:** Chosen option: **B, one self-contained file per map** — the map's data lives inside it in a `<script id="story-map-data">` island and the renderer rewrites the presentation around it in place. Reverses an earlier same-session choice of the two-file split, which was rejected on sight as too easy to let source and rendered output diverge. The renderer owns the grid shape; the skill never hand-writes HTML and never reads a sibling map to infer shape.
+**Confirmation:** A map is one file: a stub containing only the data island renders into a full map, editing the island changes the grid, and re-rendering in place is idempotent; A fixture renders backbone activities as `th.act scope=col` columns and release slices as `th.slice scope=row` rows, with cell count equal to activities x releases (the assertion that distinguishes a grid from a stack); A task renders in its declared cell and nowhere else; an empty activity/release pair renders `class="cell empty"`; Each story-bearing card emits `data-story-id` on a single line, so the ADR-101 whole-line filter still holds; Round trip — update-story-references-section.sh resolves a story rendered into a generated map; Re-rendering an unchanged source is byte-identical, and the oversight hash is stable across a presentation-only template change; A guard asserts the old stacked shape is never emitted
+**Amends:** ADR-060 (Phase 2 encoding — grid replaces stacked sections), ADR-090 (oversight hash re-based onto the data island alone, so restyling cannot revoke ratification), ADR-049 (renderer ships via bin shim; `${CLAUDE_SKILL_DIR}` rejected as empirically unset)
+**Related:** ADR-060, ADR-090, ADR-101, ADR-049, ADR-080, ADR-052, ADR-054, ADR-077
 
 ---
 

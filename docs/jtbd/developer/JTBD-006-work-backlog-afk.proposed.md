@@ -41,17 +41,6 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 
 - Manually running `/wr-itil:manage-problem work` repeatedly
 - Writing a bash script that calls `claude --print` in a loop (fragile, no progress visibility)
-## Story Maps
-
-| ID | Title | Status |
-|----|-------|--------|
-| STORY-MAP-002 | STORY-MAP-002: Decompose a Fix Into Coordinated Changes | draft |
-| STORY-MAP-005 | STORY-MAP-005: Trust the capture-on-correction signal | draft |
-| STORY-MAP-006 | STORY-MAP-006: Decline upstream discovery once and stay declined | draft |
-| STORY-MAP-009 | STORY-MAP-009: Trust that a close does not strand the sibling family | draft |
-| STORY-MAP-001 | STORY-MAP-001: RFC Framework Phase 1 + Phase 2 Bootstrap | in-progress |
-
-
 ## Stories
 
 | ID | Title | Status |
@@ -69,3 +58,16 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 | STORY-048 | STORY-048: Gate the inbound-discovery pre-flight on the channel list | draft |
 | STORY-052 | STORY-052: Surface still-outstanding family members before a close | draft |
 | STORY-053 | STORY-053: Test claims against the tree at capture and label the untested ones | draft |
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-005 | STORY-MAP-005: Trust the capture-on-correction signal | archived |
+| STORY-MAP-006 | STORY-MAP-006: Decline upstream discovery once and stay declined | archived |
+| STORY-MAP-009 | STORY-MAP-009: Trust that a close does not strand the sibling family | archived |
+| STORY-MAP-002 | STORY-MAP-002: Decompose a fix into coordinated changes | draft |
+| STORY-MAP-004 | STORY-MAP-004: Close the loop with someone who reported a problem | draft |
+| STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |
+| STORY-MAP-001 | STORY-MAP-001: RFC framework Phase 1 + Phase 2 bootstrap | in-progress |

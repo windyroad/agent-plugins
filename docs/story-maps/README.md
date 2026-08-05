@@ -40,45 +40,43 @@ This directory is **scaffold-only** until P170 Phase 2 Slice 3 ships `/wr-itil:c
 
 ## Story-map HTML schema
 
-Per ADR-060 § Phase 2 encoding amendment (2026-05-12). Every story-map HTML file carries:
+**Amended by ADR-102 (2026-08-05).** A story map is a rendered grid, and it is generated. Each map is ONE file carrying its own data in a `<script id="story-map-data" type="application/json">` island; `wr-itil-render-story-map` reads that island and rewrites everything around it. Creation and editing are the same command on the same file.
+
+**Author the island. Never hand-write the markup, and never open another map to copy its shape** — that inference is what let the whole corpus drift into a vertical stack together.
 
 ```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>STORY-MAP-NNN: <Title></title>
-  <meta name="story-map-id" content="STORY-MAP-NNN">
-  <meta name="status" content="<draft|accepted|in-progress|completed|archived>">
-  <meta name="problems" content="P<NNN>[,P<NNN>...]">
-  <meta name="rfcs" content="RFC-<NNN>[,RFC-<NNN>...]">
-  <meta name="jtbd" content="JTBD-<NNN>[,JTBD-<NNN>...]">
-  <style>
-    .backbone { display: grid; grid-template-columns: repeat(var(--cols), 1fr); gap: 1rem; }
-    .rib { display: contents; }
-    .slice { border: 1px solid #ccc; padding: 0.5rem; }
-  </style>
-</head>
-<body>
-  <h1>STORY-MAP-NNN: <Title></h1>
-  <section class="backbone" style="--cols: <N>">
-    <header class="rib-header"><h2 data-rib="<rib-N-name>">Rib N</h2></header>
-    <div class="rib">
-      <a class="slice"
-         href="../../stories/<state>/STORY-NNN-<slug>.md"
-         data-story-id="STORY-NNN"
-         data-rfc="RFC-<NNN>"
-         data-jtbd="JTBD-<NNN>"
-         data-status="<draft|accepted|in-progress|done|archived>">
-        Story title
-      </a>
-    </div>
-  </section>
-</body>
-</html>
+<script id="story-map-data" type="application/json">
+{
+  "storyMapId": "STORY-MAP-<NNN>",
+  "title": "<Title>",
+  "status": "draft",
+  "persona": "<persona>",
+  "traces": { "problems": ["P<NNN>"], "rfcs": [], "jtbd": ["JTBD-<NNN>"], "adrs": [] },
+  "lead": "A story map for the <persona> who ... Read across the top for the journey; read down the rows for release bands.",
+  "backbone": [ { "id": "<slug>", "title": "A. <Activity>", "note": "<optional gloss>" } ],
+  "releases": [ { "id": "live", "name": "Existing", "badge": "Live", "note": "shipped" } ],
+  "tasks": [
+    { "activity": "<backbone id>", "release": "<release id>",
+      "title": "<what the persona can do>", "value": "Value: <why it matters>",
+      "storyId": "STORY-<NNN>", "rfc": "RFC-<NNN>", "jtbd": "JTBD-<NNN>",
+      "storyStatus": "draft", "ref": "STORY-<NNN>, P<NNN>" }
+  ],
+  "traceProse": { "persona": "...", "jobs": "...", "problems": "...", "decisions": "...", "open": "..." }
+}
+</script>
 ```
 
-**Prohibition**: `<a class="slice">`, `<h2 class="rib-header">`, and any element carrying `data-*` attributes MUST NOT carry inline `style=""` attributes. `--<custom-property>` CSS variables for grid sizing on container elements are permitted because they are layout-not-data. See ADR-060 amendment 2026-05-12 § Prohibition.
+Rendered shape: backbone activities become `<th class="act" scope="col">` COLUMNS; releases become `<th class="slice" scope="row">` ROWS; tasks become `<div class="task">` cards inside `<td class="cell">`; an activity × release pair with no tasks renders `<td class="cell empty">`. A row read left to right is everything that ships together.
+
+**Trace layer** (unchanged in meaning, moved to the task card): `data-story-id`, `data-rfc`, `data-jtbd`, `data-status`. Each story-bearing card is emitted on a single line — `story-oversight.sh` filters whole lines, and a multi-line card breaks the ADR-101 AFK-accept carve-out.
+
+**Ratification** is fingerprinted over the data island alone, not the whole file, so restyling the template can never revoke a human approval (ADR-102's amendment to ADR-090).
+
+**Prohibition**: no inline `style=""` anywhere — presentation belongs to the template only. This is stricter than the superseded rule, which permitted `--<custom-property>` on layout containers. `--cols`, `<section class="backbone">`, `.rib`, `.rib-header`, `data-rib` and `<a class="slice">`-as-story-link are all removed.
+
+**Authoring note**: escape a literal `<` in island strings as `\u003c`. A raw `</script>` terminates the block early — in the renderer and in a browser — and the renderer refuses the file rather than emitting a truncated map.
+
+**Migration**: maps predating this amendment still carry the stacked encoding. They remain parseable — every consumer matches `data-story-id` or the `<meta>` block, neither of which is container-dependent — so a mixed corpus is safe. Tracked separately.
 
 ## Story Map Rankings
 
@@ -86,16 +84,27 @@ One row per story map in `draft` / `accepted` / `in-progress` status, from files
 
 | WSJF | ID | Title | Status | Problems | RFCs |
 |------|-----|-------|--------|----------|------|
-| — | STORY-MAP-001 | RFC Framework Phase 1 + Phase 2 Bootstrap | in-progress | P170 | RFC-001, RFC-002, RFC-003 |
-| — | STORY-MAP-002 | Decompose a Fix Into Coordinated Changes | draft | P170, P251, P314, P371, P399, P390 | RFC-003, RFC-005, RFC-047 |
+| — | STORY-MAP-001 | RFC framework Phase 1 + Phase 2 bootstrap | in-progress | P170 | RFC-001, RFC-002, RFC-003 |
+| — | STORY-MAP-002 | Decompose a fix into coordinated changes | draft | P170, P251, P314, P371, P399, P390 | RFC-003, RFC-005, RFC-047 |
 | — | STORY-MAP-003 | Sustain my token quota across the week and across surfaces | draft | P160, P443 | RFC-046 |
-| — | STORY-MAP-004 | Close the outbound reporter loop with honest, generated upstream lifecycle comments | draft | P376 | — |
-| — | STORY-MAP-005 | Trust the capture-on-correction signal | draft | P430 | RFC-050 |
-| — | STORY-MAP-006 | Decline upstream discovery once and stay declined | draft | P431 | RFC-051 |
-| — | STORY-MAP-007 | A correction to the agent's conduct holds in every project | draft | P438, P439 | RFC-052, RFC-053 |
-| — | STORY-MAP-008 | Have plugin-generated content respect my project's conventions | draft | P424 | RFC-054 |
-| — | STORY-MAP-009 | Trust that a close does not strand the sibling family | draft | P433 | RFC-056 |
-| — | STORY-MAP-010 | Trust that a ticket states only what was verified | draft | P434 | RFC-057 |
+| — | STORY-MAP-004 | Close the loop with someone who reported a problem | draft | P376, P431 | RFC-051 |
+| — | STORY-MAP-008 | Have a plugin behave like a guest in my repository | draft | P424, P435 | RFC-054 |
+| — | STORY-MAP-011 | Trust the AFK loop's autonomous conduct | draft | P430, P433, P434, P438, P439 | RFC-050, RFC-052, RFC-053, RFC-056, RFC-057 |
+| — | STORY-MAP-012 | Ship through a scored path | draft | P435, P208 | — |
+| — | STORY-MAP-013 | Know what my push did | draft | P435 | — |
+
+
+## Archived
+
+Absorbed into a consolidated journey on 2026-08-05. Each was a single-story stub — one card wearing a map's clothes — and the honest unit is the journey, not the single fix.
+
+| ID | Title | Absorbed into |
+|----|-------|---------------|
+| STORY-MAP-005 | Trust the capture-on-correction signal | STORY-MAP-011 |
+| STORY-MAP-006 | Decline upstream discovery once and stay declined | STORY-MAP-004 |
+| STORY-MAP-007 | A correction to the agent's conduct holds in every project | STORY-MAP-011 |
+| STORY-MAP-009 | Trust that a close does not strand the sibling family | STORY-MAP-011 |
+| STORY-MAP-010 | Trust that a ticket states only what was verified | STORY-MAP-011 |
 
 ## Completed
 

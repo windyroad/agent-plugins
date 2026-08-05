@@ -21,6 +21,7 @@ Developer using AI coding agents — solo, small-team, or within a larger softwa
 | JTBD-009 | Migrate Adopter Artefacts When a Plugin Layout Evolves | [JTBD-009-migrate-adopter-artefacts.proposed.md](developer/JTBD-009-migrate-adopter-artefacts.proposed.md) |
 | JTBD-010 | Sustain My Token Quota Across the Week and Across Surfaces | [JTBD-010-sustain-token-quota.proposed.md](developer/JTBD-010-sustain-token-quota.proposed.md) |
 | JTBD-011 | Have a Correction to the Agent's Conduct Hold Everywhere | [JTBD-011-corrected-conduct-holds-everywhere.proposed.md](developer/JTBD-011-corrected-conduct-holds-everywhere.proposed.md) |
+| JTBD-012 | Know What My Push Did Without Leaving the Terminal | [JTBD-012-know-what-my-push-did.proposed.md](developer/JTBD-012-know-what-my-push-did.proposed.md) |
 
 ## Tech Lead / Consultant
 

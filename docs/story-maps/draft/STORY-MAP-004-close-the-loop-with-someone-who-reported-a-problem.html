@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>STORY-MAP-003: Sustain my token quota across the week and across surfaces</title>
-  <meta name="story-map-id" content="STORY-MAP-003">
+  <title>STORY-MAP-004: Close the loop with someone who reported a problem</title>
+  <meta name="story-map-id" content="STORY-MAP-004">
   <meta name="status" content="draft">
-  <meta name="persona" content="developer">
-  <meta name="problems" content="P160,P443">
-  <meta name="rfcs" content="RFC-046">
-  <meta name="jtbd" content="JTBD-010,JTBD-003">
-  <meta name="adrs" content="ADR-093">
-  <meta name="reported" content="2026-07-08">
+  <meta name="persona" content="plugin-user">
+  <meta name="secondary-persona" content="developer">
+  <meta name="problems" content="P376,P431">
+  <meta name="rfcs" content="RFC-051">
+  <meta name="jtbd" content="JTBD-301,JTBD-006">
+  <meta name="adrs" content="">
+  <meta name="reported" content="2026-07-15">
   <meta name="decision-makers" content="Tom Howard">
   <meta name="human-oversight" content="unconfirmed">
   <style>
@@ -132,47 +133,64 @@
 </head>
 <body>
   <main>
-  <h1>Sustain my token quota across the week and across surfaces</h1>
-  <p class="lead">A story map for the developer who leans on Claude all week against one shared quota. Read across the top for the journey — install it, work without watching the meter, keep going when budget is tight, and still have headroom for chat and other surfaces. Read down the rows for release bands. Most cells are empty: only three stories exist, and the emptiness is the point — it shows how much of this journey is unbuilt.</p>
+  <h1>Close the loop with someone who reported a problem</h1>
+  <p class="lead">A story map for the person outside this project who reports something and then waits. Read across the top for their journey — they report it, hear it landed, find out what will happen to it, get kept posted while it is worked, and end with a real outcome. Read down the rows for release bands. The empty cells are the silences a reporter currently experiences.</p>
 
   <ul class="legend" aria-label="Status legend">
-    <li><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>R1</span> the pacing spine</li>
+    <li><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>R1</span> stories exist</li>
     <li><span class="badge b-later"><span class="b-glyph" aria-hidden="true">◇</span>R2</span> unbuilt</li>
   </ul>
 
   <div class="scroll" tabindex="0" role="region" aria-label="Story map grid">
     <table class="map">
-      <caption>4 journey activities across the top; 2 release bands down the side. Read a row left to right for everything that ships in one release. A cell with no cards means that activity ships nothing in that release.</caption>
+      <caption>5 journey activities across the top; 2 release bands down the side. Read a row left to right for everything that ships in one release. A cell with no cards means that activity ships nothing in that release.</caption>
       <thead>
         <tr>
           <td class="corner"></td>
-          <th class="act" scope="col">A. Install it <span class="jtbd">no setup tax</span></th>
-          <th class="act" scope="col">B. Work without watching <span class="jtbd">JTBD-010 — sustain my quota</span></th>
-          <th class="act" scope="col">C. Keep going when tight <span class="jtbd">slowed, not stopped</span></th>
-          <th class="act" scope="col">D. Still have headroom at week's end <span class="jtbd">chat, Cowork</span></th>
+          <th class="act" scope="col">A. Report it <span class="jtbd">JTBD-301</span></th>
+          <th class="act" scope="col">B. Hear it landed</th>
+          <th class="act" scope="col">C. Find out what will happen to it</th>
+          <th class="act" scope="col">D. Get kept posted while it is worked</th>
+          <th class="act" scope="col">E. Get a real outcome</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>R1</span> <span class="s-name">First cut</span> <span class="s-note">the pacing spine</span></th>
-          <td class="cell">
-            <ul class="tasks" role="list">
-            <li><div class="task" data-story-id="STORY-043" data-status="draft"><span class="t-title">Pacing starts working the moment I install it, with nothing to configure</span> <span class="t-value">Value: protection I did not have to set up is protection I actually get.</span> <span class="t-ref">Traces: STORY-043, P160</span></div></li>
-            <li><div class="task" data-story-id="STORY-042" data-status="draft"><span class="t-title">I can add quota pacing on its own without dragging in governance plugins I did not ask for</span> <span class="t-value">Value: I take the one guardrail I want.</span> <span class="t-ref">Traces: STORY-042, JTBD-003</span></div></li>
-            </ul>
-          </td>
-          <td class="cell">
-            <ul class="tasks" role="list">
-            <li><div class="task" data-story-id="STORY-039" data-status="draft"><span class="t-title">I work all week without hitting the quota wall, because the work quietly slows itself</span> <span class="t-value">Value: the limit shapes my pace instead of ending my day.</span> <span class="t-ref">Traces: STORY-039</span></div></li>
-            </ul>
-          </td>
+          <th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>R1</span> <span class="s-name">Now</span> <span class="s-note">stories exist</span></th>
           <td class="cell empty"></td>
+          <td class="cell empty"></td>
+          <td class="cell">
+            <ul class="tasks" role="list">
+            <li><div class="task" data-story-id="STORY-048" data-rfc="RFC-051" data-jtbd="JTBD-006" data-status="draft"><span class="t-title">If I decline having my report chased upstream, that decision sticks</span> <span class="t-value">Value: declining once means declining, not answering the same question every run.</span> <span class="t-ref">Traces: STORY-048, P431 (inbound #187)</span></div></li>
+            </ul>
+          </td>
+          <td class="cell">
+            <ul class="tasks" role="list">
+            <li><div class="task" data-story-id="STORY-045" data-jtbd="JTBD-301" data-status="draft"><span class="t-title">I get updates that refer to my actual report and the workaround I was already given</span> <span class="t-value">Value: the update reads as though someone looked at my report, because someone's tooling did.</span> <span class="t-ref">Traces: STORY-045, P376</span></div></li>
+            </ul>
+          </td>
           <td class="cell empty"></td>
         </tr>
 
         <tr>
-          <th class="slice" scope="row"><span class="badge b-later"><span class="b-glyph" aria-hidden="true">◇</span>R2</span> <span class="s-name">Later</span> <span class="s-note">unbuilt</span></th>
-          <td class="cell empty" colspan="4"><span class="vh">No stories in this release band.</span></td>
+          <th class="slice" scope="row"><span class="badge b-later"><span class="b-glyph" aria-hidden="true">◇</span>R2</span> <span class="s-name">Open</span> <span class="s-note">unbuilt</span></th>
+          <td class="cell">
+            <ul class="tasks" role="list">
+            <li><div class="task"><span class="t-title">I report a problem without having to classify it first</span> <span class="t-value">Value: I describe what happened; working out what kind of thing it is, is not my job.</span> <span class="t-ref">Traces: JTBD-301, no story yet</span></div></li>
+            </ul>
+          </td>
+          <td class="cell">
+            <ul class="tasks" role="list">
+            <li><div class="task"><span class="t-title">I hear that it landed, straight away, before anyone has looked at it</span> <span class="t-value">Value: silence after reporting is the thing that makes people stop reporting.</span> <span class="t-ref">Traces: no story yet</span></div></li>
+            </ul>
+          </td>
+          <td class="cell empty"></td>
+          <td class="cell empty"></td>
+          <td class="cell">
+            <ul class="tasks" role="list">
+            <li><div class="task"><span class="t-title">I am told when it shipped, and the thread ends rather than trailing off</span> <span class="t-value">Value: I find out my report mattered without going to check.</span> <span class="t-ref">Traces: no story yet</span></div></li>
+            </ul>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -180,11 +198,11 @@
 
   <section class="trace" aria-labelledby="trace-h">
     <h2 id="trace-h">What this map traces to</h2>
-    <p><strong>Persona:</strong> developer — using Claude across Code, chat and other surfaces against a single shared weekly quota.</p>
-    <p><strong>Jobs mapped:</strong> JTBD-010 (sustain my token quota across the week and across surfaces).</p>
-    <p><strong>Problems this closes:</strong> P160 — no pacing signal, so the quota wall arrives without warning. P443.</p>
-    <p><strong>Decisions the journey rests on:</strong> ADR-093.</p>
-    <p><strong>Open questions:</strong> Re-encoded onto the canonical grid on 2026-08-05. The prior encoding had five activities and no release dimension, so the bands are new. Two activities carry no stories: surviving an over-budget week, and protecting headroom for other surfaces.</p>
+    <p><strong>Persona:</strong> plugin-user — someone outside this project who hit a problem and reported it. developer secondary, as the person on the receiving end.</p>
+    <p><strong>Jobs mapped:</strong> JTBD-301 (report a problem without pre-classifying it) is the spine. JTBD-006 covers the unattended side that does the chasing.</p>
+    <p><strong>Problems this closes:</strong> P376 — generated upstream lifecycle comments were canned rather than derived from the real issue. P431 — a decision to decline upstream discovery was not remembered.</p>
+    <p><strong>Decisions the journey rests on:</strong> None yet.</p>
+    <p><strong>Open questions:</strong> Consolidated on 2026-08-05, absorbing STORY-MAP-006 (decline upstream discovery), now archived — it held one card, which sits on this journey. Three of five activities carry no story: reporting without pre-classifying, immediate acknowledgement, and being told when it shipped.</p>
   </section>
 
   </main>
@@ -193,101 +211,120 @@
 
   <script id="story-map-data" type="application/json">
 {
-  "storyMapId": "STORY-MAP-003",
-  "title": "Sustain my token quota across the week and across surfaces",
+  "storyMapId": "STORY-MAP-004",
+  "title": "Close the loop with someone who reported a problem",
   "status": "draft",
-  "persona": "developer",
-  "reported": "2026-07-08",
+  "persona": "plugin-user",
+  "secondaryPersona": "developer",
+  "reported": "2026-07-15",
   "decisionMakers": "Tom Howard",
   "humanOversight": "unconfirmed",
   "traces": {
     "problems": [
-      "P160",
-      "P443"
+      "P376",
+      "P431"
     ],
     "rfcs": [
-      "RFC-046"
+      "RFC-051"
     ],
     "jtbd": [
-      "JTBD-010",
-      "JTBD-003"
+      "JTBD-301",
+      "JTBD-006"
     ],
-    "adrs": [
-      "ADR-093"
-    ]
+    "adrs": []
   },
-  "lead": "A story map for the developer who leans on Claude all week against one shared quota. Read across the top for the journey — install it, work without watching the meter, keep going when budget is tight, and still have headroom for chat and other surfaces. Read down the rows for release bands. Most cells are empty: only three stories exist, and the emptiness is the point — it shows how much of this journey is unbuilt.",
+  "lead": "A story map for the person outside this project who reports something and then waits. Read across the top for their journey — they report it, hear it landed, find out what will happen to it, get kept posted while it is worked, and end with a real outcome. Read down the rows for release bands. The empty cells are the silences a reporter currently experiences.",
   "backbone": [
     {
-      "id": "install",
-      "title": "A. Install it",
-      "note": "no setup tax"
+      "id": "report",
+      "title": "A. Report it",
+      "note": "JTBD-301"
     },
     {
-      "id": "pace",
-      "title": "B. Work without watching",
-      "note": "JTBD-010 — sustain my quota"
+      "id": "ack",
+      "title": "B. Hear it landed",
+      "note": ""
     },
     {
-      "id": "overbudget",
-      "title": "C. Keep going when tight",
-      "note": "slowed, not stopped"
+      "id": "decide",
+      "title": "C. Find out what will happen to it",
+      "note": ""
     },
     {
-      "id": "surfaces",
-      "title": "D. Still have headroom at week's end",
-      "note": "chat, Cowork"
+      "id": "inform",
+      "title": "D. Get kept posted while it is worked",
+      "note": ""
+    },
+    {
+      "id": "resolve",
+      "title": "E. Get a real outcome",
+      "note": ""
     }
   ],
   "releases": [
     {
       "id": "r1",
-      "name": "First cut",
+      "name": "Now",
       "badge": "R1",
-      "note": "the pacing spine"
+      "note": "stories exist"
     },
     {
       "id": "r2",
-      "name": "Later",
+      "name": "Open",
       "badge": "R2",
       "note": "unbuilt"
     }
   ],
   "tasks": [
     {
-      "activity": "install",
+      "activity": "inform",
       "release": "r1",
-      "title": "Pacing starts working the moment I install it, with nothing to configure",
-      "value": "Value: protection I did not have to set up is protection I actually get.",
-      "storyId": "STORY-043",
+      "title": "I get updates that refer to my actual report and the workaround I was already given",
+      "value": "Value: the update reads as though someone looked at my report, because someone's tooling did.",
+      "storyId": "STORY-045",
+      "jtbd": "JTBD-301",
       "storyStatus": "draft",
-      "ref": "STORY-043, P160"
+      "ref": "STORY-045, P376"
     },
     {
-      "activity": "install",
+      "activity": "decide",
       "release": "r1",
-      "title": "I can add quota pacing on its own without dragging in governance plugins I did not ask for",
-      "value": "Value: I take the one guardrail I want.",
-      "storyId": "STORY-042",
+      "title": "If I decline having my report chased upstream, that decision sticks",
+      "value": "Value: declining once means declining, not answering the same question every run.",
+      "storyId": "STORY-048",
+      "rfc": "RFC-051",
+      "jtbd": "JTBD-006",
       "storyStatus": "draft",
-      "ref": "STORY-042, JTBD-003"
+      "ref": "STORY-048, P431 (inbound #187)"
     },
     {
-      "activity": "pace",
-      "release": "r1",
-      "title": "I work all week without hitting the quota wall, because the work quietly slows itself",
-      "value": "Value: the limit shapes my pace instead of ending my day.",
-      "storyId": "STORY-039",
-      "storyStatus": "draft",
-      "ref": "STORY-039"
+      "activity": "report",
+      "release": "r2",
+      "title": "I report a problem without having to classify it first",
+      "value": "Value: I describe what happened; working out what kind of thing it is, is not my job.",
+      "ref": "JTBD-301, no story yet"
+    },
+    {
+      "activity": "ack",
+      "release": "r2",
+      "title": "I hear that it landed, straight away, before anyone has looked at it",
+      "value": "Value: silence after reporting is the thing that makes people stop reporting.",
+      "ref": "no story yet"
+    },
+    {
+      "activity": "resolve",
+      "release": "r2",
+      "title": "I am told when it shipped, and the thread ends rather than trailing off",
+      "value": "Value: I find out my report mattered without going to check.",
+      "ref": "no story yet"
     }
   ],
   "traceProse": {
-    "persona": "developer — using Claude across Code, chat and other surfaces against a single shared weekly quota.",
-    "jobs": "JTBD-010 (sustain my token quota across the week and across surfaces).",
-    "problems": "P160 — no pacing signal, so the quota wall arrives without warning. P443.",
-    "decisions": "ADR-093.",
-    "open": "Re-encoded onto the canonical grid on 2026-08-05. The prior encoding had five activities and no release dimension, so the bands are new. Two activities carry no stories: surviving an over-budget week, and protecting headroom for other surfaces."
+    "persona": "plugin-user — someone outside this project who hit a problem and reported it. developer secondary, as the person on the receiving end.",
+    "jobs": "JTBD-301 (report a problem without pre-classifying it) is the spine. JTBD-006 covers the unattended side that does the chasing.",
+    "problems": "P376 — generated upstream lifecycle comments were canned rather than derived from the real issue. P431 — a decision to decline upstream discovery was not remembered.",
+    "decisions": "None yet.",
+    "open": "Consolidated on 2026-08-05, absorbing STORY-MAP-006 (decline upstream discovery), now archived — it held one card, which sits on this journey. Three of five activities carry no story: reporting without pre-classifying, immediate acknowledgement, and being told when it shipped."
   }
 }
   </script>

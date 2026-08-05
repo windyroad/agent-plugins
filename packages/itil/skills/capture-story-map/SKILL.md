@@ -107,66 +107,77 @@ next=$(printf '%03d' $(( 10#$(echo -e "${local_max:-0}\n${origin_max:-0}" | sort
 
 Same shape as capture-story Step 4 — silent-default when unavailable.
 
-### 5. Write the story-map file
+### 5. Write the story-map JSON, then render it
 
-**File path**: `docs/story-maps/draft/STORY-MAP-<NNN>-<kebab-title>.html`
+**NEVER hand-write the HTML, and NEVER open an existing map to copy its shape.** Both maps and template drifted together once already: every map in the corpus became a vertical stack of headings — no journey columns, no release rows, no cells — because each new map was cloned from the last. The renderer owns the shape so that cannot recur.
 
-**Template** (per ADR-060 § Phase 2 encoding amendment 2026-05-12 lines 381-420 + `docs/STYLE-GUIDE.md` rules):
+**A map is ONE file**: `docs/story-maps/draft/STORY-MAP-<NNN>-<kebab-title>.html`. Its data lives inside it, in a `<script id="story-map-data" type="application/json">` island. The renderer rewrites the presentation around that island. There is no separate source file to fall out of step with the rendered map, and the file a reader opens is the file an author edits.
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>STORY-MAP-<NNN>: <Title></title>
-  <meta name="story-map-id" content="STORY-MAP-<NNN>">
-  <meta name="status" content="draft">
-  <meta name="problems" content="<P<NNN>[,P<NNN>...]>">
-  <meta name="rfcs" content="">
-  <meta name="jtbd" content="<JTBD-<NNN>[,JTBD-<NNN>...]>">
-  <meta name="adrs" content="">
-  <meta name="reported" content="<YYYY-MM-DD>">
-  <meta name="decision-makers" content="<git config user.name>">
-  <meta name="human-oversight" content="unconfirmed">
-  <style>
-    body { font-family: system-ui, sans-serif; max-width: 1200px; margin: 1rem auto; padding: 0 1rem; }
-    h1 { font-size: 1.5rem; }
-    h2 { font-size: 1.125rem; margin-top: 1.5rem; }
-    .backbone { display: grid; grid-template-columns: repeat(var(--cols), 1fr); gap: 1rem; margin-bottom: 2rem; }
-    .rib-header { grid-column: 1 / -1; border-bottom: 1px solid #ccc; padding-bottom: 0.25rem; }
-    .rib { display: contents; }
-    .slice { border: 1px solid #ccc; padding: 0.5rem; text-decoration: none; color: inherit; display: block; }
-    .slice:hover { border-color: #666; }
-  </style>
-</head>
-<body>
-  <h1>STORY-MAP-<NNN>: <Title></h1>
+**There is one command and one mode.** To CREATE a map, write a file containing nothing but the data island, then render it — the renderer fills in everything around it:
 
-  <p>(Story-map purpose paragraph — populated at /wr-itil:manage-story-map accepted transition.)</p>
-
-  <section class="backbone" style="--cols: 1">
-    <header class="rib-header">
-      <h2 data-rib="placeholder">Backbone — populate at /wr-itil:manage-story-map accepted transition</h2>
-    </header>
-    <div class="rib">
-      <!-- Slice cards as <a class="slice" href="../../stories/<state>/STORY-NNN-<slug>.md"
-           data-story-id="STORY-NNN" data-rfc="RFC-NNN" data-jtbd="JTBD-NNN"
-           data-status="<draft|accepted|in-progress|done|archived>">Story title</a>
-           per docs/story-maps/README.md schema. Populated by manage-story-map.
-      -->
-    </div>
-  </section>
-</body>
-</html>
+```bash
+# Write docs/story-maps/draft/STORY-MAP-<NNN>-<kebab-title>.html containing only:
+#   <script id="story-map-data" type="application/json">
+#   { ...the map data... }
+#   </script>
+wr-itil-render-story-map docs/story-maps/draft/STORY-MAP-<NNN>-<kebab-title>.html
 ```
 
-Per `docs/STYLE-GUIDE.md`: NO inline `style=""` on `<a class="slice">` or `<h2 data-rib>` data-bearing elements; embedded `<style>` block in `<head>` is the only permitted styling source; `--cols` custom-property on `.backbone` is the layout-container exception.
+**To CHANGE a map**, edit the data island in that same file and run the same command again. Creation and editing are the same operation, so there is no seed file to clean up and no bootstrap mode. Re-rendering is idempotent. Never edit the grid, the `<style>` block, or the `<meta>` block by hand — they are regenerated from the island, and a hand-edit outside it is discarded on the next render.
+
+**What a story map is.** A grid, not a list. Backbone activities are COLUMNS across the top and form the user's journey left to right. Release slices are ROWS. Task cards sit in the cells. A row read left to right is everything that ships together — that is the whole point of the artefact, and it is what a vertical stack cannot express.
+
+**JSON shape:**
+
+```json
+{
+  "storyMapId": "STORY-MAP-<NNN>",
+  "title": "<Title>",
+  "status": "draft",
+  "persona": "<persona>",
+  "reported": "<YYYY-MM-DD>",
+  "decisionMakers": "<git config user.name>",
+  "humanOversight": "unconfirmed",
+  "traces": { "problems": ["P<NNN>"], "rfcs": [], "jtbd": ["JTBD-<NNN>"], "adrs": [] },
+  "lead": "A story map for the <persona> who ... Read across the top for the journey; read down the rows for release bands.",
+  "backbone": [
+    { "id": "<slug>", "title": "A. <Activity>", "note": "<optional JTBD or gloss>" }
+  ],
+  "releases": [
+    { "id": "live", "name": "Existing", "badge": "Live", "note": "shipped" },
+    { "id": "r1",   "name": "Now",      "badge": "R1",   "note": "being built" }
+  ],
+  "tasks": [
+    {
+      "activity": "<backbone id>", "release": "<release id>",
+      "title": "<what the persona can do>",
+      "value": "Value: <why it matters to them>",
+      "storyId": "STORY-<NNN>", "rfc": "RFC-<NNN>", "jtbd": "JTBD-<NNN>",
+      "storyStatus": "draft", "ref": "STORY-<NNN>, P<NNN>"
+    }
+  ],
+  "traceProse": {
+    "persona": "...", "jobs": "...", "problems": "...", "decisions": "...", "open": "..."
+  }
+}
+```
+
+**Authoring rules:**
+
+- **The backbone must be a journey, not a list of invariants.** Activities are steps the persona walks through in sequence. "Finish a change → get it assessed → push it → get through CI → release it" is a backbone. "Leave no unscored way out", "score this change not the last one" are invariants, and a column of them is not a map.
+- At capture a map may legitimately have **columns and rows but empty cells**. Say so in the `lead`, or an all-empty grid reads as a rendering failure.
+- `storyId` / `rfc` / `jtbd` / `storyStatus` are optional per task and emit the `data-*` reference layer that reverse-trace and the AFK-accept check consume. Omit them until stories exist; add them as stories are captured onto the map.
+- Every task needs `activity` and `release` matching an `id` in `backbone` / `releases`, or it renders nowhere.
+- Presentation is not yours to set. There is no CSS in the JSON and no inline `style` anywhere; the template is the only styling source.
+- Escape a literal `<` in any string as `\\u003c`. A raw `</script>` inside the island terminates the block early — in the renderer and in a browser — and the renderer will refuse the file rather than emit a truncated map.
+
+**Born `human-oversight: unconfirmed` (ADR-090).** Set `"humanOversight": "unconfirmed"` in the JSON — orthogonal to the `status:` lifecycle. It is NOT ratified until a human confirms it via `/wr-itil:manage-story-map <NNN> ratify` (which writes `confirmed` + an `oversight-hash` fingerprint via `wr-itil-mark-story-oversight-confirmed`). Until then `wr-itil-detect-unratified-stories-maps` surfaces it and an RFC may not reference its stories (`wr-itil-check-rfc-stories-ratified`). Any later content edit drifts the fingerprint and silently re-opens ratification (lazy-fingerprint, ADR-009 lineage). Do NOT hand-write `confirmed` here — born-unconfirmed is the load-bearing default.
 
 **Born `human-oversight: unconfirmed` (ADR-090).** A new map is created with `<meta name="human-oversight" content="unconfirmed">` — orthogonal to the `status:` lifecycle. It is NOT ratified until a human confirms it via `/wr-itil:manage-story-map <NNN> ratify` (which writes `confirmed` + an `oversight-hash` fingerprint via `wr-itil-mark-story-oversight-confirmed`). Until then `wr-itil-detect-unratified-stories-maps` surfaces it and an RFC may not reference its stories (`wr-itil-check-rfc-stories-ratified`). Any later content edit drifts the fingerprint and silently re-opens ratification (lazy-fingerprint, ADR-009 lineage). Do NOT hand-write `confirmed` here — born-unconfirmed is the load-bearing default.
 
 ### 6. Single commit — `## Story Maps` reverse-trace refresh
 
-**Stage list**: new HTML file PLUS driving problem files (refresh `## Story Maps` section via `update-problem-references-section.sh <file> "Story Maps"`) PLUS driving JTBD files (refresh `## Story Maps` section via `update-jtbd-references-section.sh <file> "Story Maps"`). Do NOT stage `docs/story-maps/README.md` (deferred).
+**Stage list**: the map `.html` (one file — it carries its own data island) PLUS driving problem files (refresh `## Story Maps` section via `update-problem-references-section.sh <file> "Story Maps"`) PLUS driving JTBD files (refresh `## Story Maps` section via `update-jtbd-references-section.sh <file> "Story Maps"`). Do NOT stage `docs/story-maps/README.md` (deferred).
 
 ```bash
 for pid_token in $(echo "$problem_trace" | tr ',' ' '); do

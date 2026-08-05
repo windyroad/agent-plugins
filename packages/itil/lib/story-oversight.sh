@@ -51,11 +51,39 @@ oversight_excluded_keys() {
   printf '%s\n' human-oversight oversight-hash oversight-basis status
 }
 
+# Emit the bytes a fingerprint should cover.
+#
+# For a story map under ADR-102 that is the DATA ISLAND alone, not the whole
+# file: the grid, the <style> block and the <meta> block are all generated from
+# the island, so hashing the whole file would let a template change regenerate
+# every map, drift every stored fingerprint, and silently revoke ratification
+# across the corpus (ADR-090's marker is drift-invalidated). A presentation
+# change must never revoke a substance approval.
+#
+# Anything with no island — stories (.md), and maps predating ADR-102 — falls
+# through to whole-file bytes, so the story leg and the legacy corpus are
+# untouched.
+_oversight_hashable() {
+  local f="$1"
+  if grep -qF '<script id="story-map-data"' "$f" 2>/dev/null; then
+    # NOT a sed range: `/start/,/end/` never tests the end address on the start
+    # line, so a compact single-line island would run on to the next </script>
+    # or EOF and silently widen the hash basis — undoing the property this
+    # scoping exists to establish. awk tests both on every line.
+    awk '
+      !inside && index($0, "<script id=\"story-map-data\"") { inside=1; print; if (index($0, "</script>")) exit; next }
+      inside { print; if (index($0, "</script>")) exit }
+    ' "$f"
+  else
+    cat "$f"
+  fi
+}
+
 oversight_content_hash() {
-  # Input path: the file is fed to the filter directly, so trailing blank lines
+  # Input path: bytes are fed to the filter directly, so trailing blank lines
   # are PRESERVED. Deliberately NOT unified with the map variant below — see the
   # note there. Changing this changes every stored fingerprint.
-  _oversight_filter < "$1" | shasum -a 256 | awk '{print $1}'
+  _oversight_hashable "$1" | _oversight_filter | shasum -a 256 | awk '{print $1}'
 }
 
 # Hash a story MAP's content while EXCLUDING the single-line card elements whose
@@ -74,11 +102,24 @@ oversight_content_hash() {
 oversight_content_hash_excluding_stories() {
   local f="$1"; shift
   local filtered id
-  filtered="$(cat "$f")"
+  # Same island-scoping as oversight_content_hash (ADR-102): the ADR-101 map leg
+  # must ride on the same basis, or a restyle breaks AFK-accept eligibility for
+  # every map. Cards live inside the island as task entries, so excluding by
+  # data-story-id still works — the grep below matches the rendered card when the
+  # whole file is hashed, and the island's own "storyId" entry when it is not.
+  filtered="$(_oversight_hashable "$f")"
   for id in "$@"; do
     [ -n "$id" ] || continue
-    # Anchored on the closing quote so STORY-05 cannot strip STORY-054's card.
-    filtered="$(printf '%s\n' "$filtered" | grep -vF "data-story-id=\"${id}\"" || true)"
+    # Two forms carry the same fact and BOTH must be excluded. In the rendered
+    # grid a story is a card bearing data-story-id="X". Inside an ADR-102 data
+    # island the same story is a task entry with "storyId": "X". Since the hash
+    # is island-scoped for ADR-102 maps and whole-file for everything else,
+    # matching only the rendered form would silently no-op the exclusion on
+    # every new map and make the ADR-101 carve-out unsatisfiable.
+    # Both are anchored on the closing quote so STORY-05 cannot strip STORY-054.
+    filtered="$(printf '%s\n' "$filtered" \
+      | grep -vF "data-story-id=\"${id}\"" \
+      | grep -vE "\"storyId\"[[:space:]]*:[[:space:]]*\"${id}\"" || true)"
   done
   # Input path: `$(cat)` above stripped ALL trailing newlines and this `printf`
   # re-adds exactly one, so trailing blank lines are COLLAPSED here where

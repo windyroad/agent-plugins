@@ -91,7 +91,6 @@ Possible interim workarounds (to validate):
 | RFC-005 | accepted | RFC-first trace invariant not enforced at fix-time |
 | RFC-006 | verifying | Implement ADR-070 + ADR-071 — re-home RFC decisions to ADRs and make RFC-first unconditional |
 
-
 ## Stories
 
 | ID | Title | Status |
@@ -102,3 +101,10 @@ Possible interim workarounds (to validate):
 | STORY-015 | STORY-015: The RFC lists its stories before any code is written | draft |
 | STORY-016 | STORY-016: Every step is regression-proven | draft |
 | STORY-035 | STORY-035: Home RFC decisions in ADRs and make the RFC-first trace unconditional | draft |
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-002 | STORY-MAP-002: Decompose a fix into coordinated changes | draft |
