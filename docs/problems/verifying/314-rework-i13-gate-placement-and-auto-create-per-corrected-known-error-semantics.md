@@ -14,6 +14,11 @@
 | STORY-012 | STORY-012: Can't start coding without an RFC — the gate makes me create one first | superseded |
 | STORY-013 | STORY-013: Full gate: an RFC exists → I proceed; none → I create it first | draft |
 | STORY-014 | STORY-014: Unattended, the agent works the plan and pauses for real decisions | draft |
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-002 | STORY-MAP-002: Decompose a fix into coordinated changes | draft |
 
 ## Fix Released
 

@@ -102,9 +102,16 @@ the hook still fires.
 |-----|--------|-------|
 | RFC-050 | proposed | Correction-detector provenance guard |
 
-
 ## Stories
 
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-047 | STORY-047: Gate the correction nudge on prompt authorship | draft |
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-005 | STORY-MAP-005: Trust the capture-on-correction signal | archived |
+| STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |

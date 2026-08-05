@@ -58,9 +58,15 @@ Authored explicitly so this job is not later challenged as redundant with its ne
 - **ADR-049** — plugin scripts resolve via `bin/` on `$PATH`. Sibling adopter-context decision on the executable-correctness axis; established the precedent that source-repo dogfooding masks adopter-context defects.
 - **ADR-008** — JTBD directory structure. Establishes the `docs/jtbd/<persona>/JTBD-NNN-<title>.<status>.md` layout this file follows.
 
-
 ## Stories
 
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-051 | STORY-051: Have generated content respect my project's conventions | draft |
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-008 | STORY-MAP-008: Have a plugin behave like a guest in my repository | draft |

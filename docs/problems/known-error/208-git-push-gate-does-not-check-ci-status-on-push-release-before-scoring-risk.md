@@ -82,9 +82,15 @@ JTBD notes honoured per `wr-jtbd:agent` review:
 |----|-------|--------|
 | STORY-046 | STORY-046: Red-CI denial explains the recovery path | in-progress |
 
-
 ## RFCs
 
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-049 | in-progress | Make the red-CI gate explain the CI-repair recovery path |
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-012 | STORY-MAP-012: Ship through a scored path | draft |

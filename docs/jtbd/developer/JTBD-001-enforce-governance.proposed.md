@@ -30,7 +30,6 @@ When I'm using an AI agent to write code, I want architecture decisions, risk sc
 
 Manual code review, PR review checklists, hoping the agent follows CLAUDE.md instructions
 
-
 ## Stories
 
 | ID | Title | Status |
@@ -46,3 +45,13 @@ Manual code review, PR review checklists, hoping the agent follows CLAUDE.md ins
 | STORY-033 | STORY-033: Loud cold-path diagnostic for oversight-marker shims | draft |
 | STORY-037 | STORY-037: Commit gate honours the RISK-POLICY stated review cadence for staleness | draft |
 | STORY-052 | STORY-052: Surface still-outstanding family members before a close | draft |
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-002 | STORY-MAP-002: Decompose a fix into coordinated changes | draft |
+| STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |
+| STORY-MAP-012 | STORY-MAP-012: Ship through a scored path | draft |
+| STORY-MAP-001 | STORY-MAP-001: RFC framework Phase 1 + Phase 2 bootstrap | in-progress |

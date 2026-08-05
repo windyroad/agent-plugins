@@ -99,6 +99,11 @@ Use the built-in [`/goal`](https://code.claude.com/docs/en/goal) command (Claude
 4. Generalisation candidates once proven here: the run-retro loop (P332) and any other AFK drain loop in the same failure-class (P148, P175).
 
 **Open questions**: interaction with the existing `claude -p` per-iter subprocess dispatch (does the goal live on the orchestrator session, the iter subprocess, or both?); whether the turn-bound clause conflicts with quota-pacing (P160); eval coverage for the `/goal` path. Resolve during fix work; likely wants a short ADR for "AFK loops set a `/goal` completion condition" since it changes the loop-control contract shared across skills.
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-002 | STORY-MAP-002: Decompose a fix into coordinated changes | draft |
 
 ## Fix Released
 
@@ -124,9 +129,9 @@ Released in `@windyroad/itil@0.57.2` (2026-07-06, PR #337). The work-problem / w
 |-----|--------|-------|
 | RFC-047 | proposed | AFK loop `/goal` anchor — external evaluator judges the stop |
 
-
 ## Stories
 
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-040 | STORY-040: AFK loop anchored with the native `/goal` external evaluator | draft |
+

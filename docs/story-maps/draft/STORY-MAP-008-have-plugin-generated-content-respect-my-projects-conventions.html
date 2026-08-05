@@ -3,65 +3,330 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>STORY-MAP-008: Have plugin-generated content respect my project's conventions</title>
+  <title>STORY-MAP-008: Have a plugin behave like a guest in my repository</title>
   <meta name="story-map-id" content="STORY-MAP-008">
   <meta name="status" content="draft">
-  <meta name="problems" content="P424">
+  <meta name="persona" content="plugin-user">
+  <meta name="secondary-persona" content="plugin-developer">
+  <meta name="problems" content="P424,P435">
   <meta name="rfcs" content="RFC-054">
-  <meta name="jtbd" content="JTBD-303,JTBD-101">
+  <meta name="jtbd" content="JTBD-303,JTBD-003,JTBD-302,JTBD-101">
   <meta name="adrs" content="">
   <meta name="reported" content="2026-07-26">
   <meta name="decision-makers" content="Tom Howard">
   <meta name="human-oversight" content="unconfirmed">
   <style>
-    :root { color-scheme: light; }
-    body { font-family: system-ui, sans-serif; max-width: 1200px; margin: 1rem auto; padding: 0 1rem; }
-    h1 { font-size: 1.5rem; }
-    h2 { font-size: 1.125rem; margin-top: 1.5rem; }
-    .backbone { display: grid; grid-template-columns: repeat(var(--cols), 1fr); gap: 1rem; margin-bottom: 2rem; }
-    .rib-header { grid-column: 1 / -1; border-bottom: 1px solid #767676; padding-bottom: 0.25rem; }
-    /* .rib is intentionally a bare <div>: no role, no name, no tabindex, so it computes to
-       `generic` and is pruned from the a11y tree whatever its display value — display:contents
-       costs nothing here. Swap to a real grid item if it ever becomes a <ul>, gains a
-       role/aria-*, gains tabindex, needs its own border/background/padding, or needs to
-       scroll. All three declarations are required — subgrid alone is inert on a
-       display:contents box, and a grid item spans one column by default:
-         .rib { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; }
-       Focus order matches visual order only because placement is left to default row-major
-       auto-flow: keep one .rib per .backbone, and never set grid-auto-flow: column, dense,
-       order, grid-row or grid-column on a .slice. Sibling .backbone sections are the way to add
-       a rib — each is its own grid container, so the rule holds once per section and slices
-       cannot flow between them. Do NOT read "one .rib per .backbone" as "one .backbone": a
-       second rib crammed into this section is the exact failure the rule prevents. Order
-       BETWEEN sections then rests on <main> staying a block container in normal flow — never
-       make <main> a grid or flex container, and never set order, float, or position:
-       absolute/fixed on a .backbone. --cols is the number of slices laid out per row within one
-       rib, not the rib count. */
-    .rib { display: contents; }
-    .slice { border: 1px solid #767676; padding: 0.5rem; text-decoration: none; color: inherit; display: block; }
-    .slice:hover,
-    .slice:focus-visible { border-color: #0b3a66; text-decoration: underline; }
-    .slice:focus-visible { outline: 3px solid #0b3a66; outline-offset: 2px; }
+    :root {
+      color-scheme: light dark;
+      --bg: #ffffff; --fg: #1a1a1a; --muted: #565656; --line: #767676;
+      --card: #f6f6f6; --card-line: #767676;
+      --live-fg: #0b5d1e; --live-bg: #e4f4e8; --live-line: #0b5d1e;
+      --next-fg: #0b3a66; --next-bg: #e2eefb; --next-line: #0b3a66;
+      --later-fg: #6b3a00; --later-bg: #f6ead6; --later-line: #6b3a00;
+      --focus: #0b3a66;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #16181c; --fg: #f2f3f5; --muted: #b6bac2; --line: #8a919c;
+        --card: #1f2228; --card-line: #8a919c;
+        --live-fg: #7fe0a0; --live-bg: #123020; --live-line: #7fe0a0;
+        --next-fg: #97c6f5; --next-bg: #10263c; --next-line: #97c6f5;
+        --later-fg: #f0c58a; --later-bg: #33260f; --later-line: #f0c58a;
+        --focus: #97c6f5;
+      }
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #ffffff; --fg: #1a1a1a; --muted: #565656; --line: #767676;
+      --card: #f6f6f6; --card-line: #767676;
+      --live-fg: #0b5d1e; --live-bg: #e4f4e8; --live-line: #0b5d1e;
+      --next-fg: #0b3a66; --next-bg: #e2eefb; --next-line: #0b3a66;
+      --later-fg: #6b3a00; --later-bg: #f6ead6; --later-line: #6b3a00;
+      --focus: #0b3a66;
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #16181c; --fg: #f2f3f5; --muted: #b6bac2; --line: #8a919c;
+      --card: #1f2228; --card-line: #8a919c;
+      --live-fg: #7fe0a0; --live-bg: #123020; --live-line: #7fe0a0;
+      --next-fg: #97c6f5; --next-bg: #10263c; --next-line: #97c6f5;
+      --later-fg: #f0c58a; --later-bg: #33260f; --later-line: #f0c58a;
+      --focus: #97c6f5;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; color: var(--fg); background: var(--bg);
+           max-width: 1500px; margin: 0 auto; padding: 1.5rem 1rem 3rem; line-height: 1.5; }
+    h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
+    p { max-width: 74ch; }
+    .lead { color: var(--muted); }
+    a { color: var(--focus); }
+    /* Required on every interactive element, not just links: the theme toggle
+       (if a host adds one) and the scroll region both take focus. */
+    /* :focus first as a fallback for engines without :focus-visible; the
+       :focus-visible rule below then narrows it to keyboard interaction.
+       No border-radius here — it clips the content of the overflow:auto
+       scroll region for as long as it holds focus. */
+    a:focus, button:focus, [tabindex]:focus { outline: 3px solid var(--focus); outline-offset: 2px; }
+    a:focus-visible,
+    button:focus-visible,
+    [tabindex]:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+    .legend { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin: 1rem 0 1.25rem; padding: 0; list-style: none; }
+    .legend li { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .9rem; }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; font-size: .75rem; font-weight: 700;
+             padding: .1rem .45rem; border-radius: 999px; border: 1px solid; white-space: nowrap; }
+    /* Release state is carried by the badge's text label and by a glyph in real
+       markup (see .b-glyph). The glyph is aria-hidden — it is a second VISUAL
+       channel so colour is never the sole one, and assistive tech already has
+       the label. It must not be generated content: in forced-colors mode the
+       badge backgrounds all collapse to Canvas, and the glyph becomes the only
+       thing distinguishing the three states. */
+    .b-live  { color: var(--live-fg);  background: var(--live-bg);  border-color: var(--live-line); }
+    .b-next  { color: var(--next-fg);  background: var(--next-bg);  border-color: var(--next-line); }
+    .b-later { color: var(--later-fg); background: var(--later-bg); border-color: var(--later-line); }
+
+    .scroll { overflow-x: auto; padding-bottom: .5rem; }
+    table.map { border-collapse: collapse; width: 100%; min-width: 940px; }
+    table.map caption { text-align: left; color: var(--muted); font-size: .85rem; margin-bottom: .5rem; }
+    /* Activity headers across the top are the backbone: the user journey. */
+    thead th.act { text-align: left; vertical-align: bottom; padding: .5rem .6rem; font-size: .9rem;
+                   border-bottom: 3px solid var(--fg); width: 18%; }
+    thead th.act .jtbd { display: block; font-weight: 400; color: var(--muted); font-size: .75rem; margin-top: .2rem; }
+    thead td.corner { border-bottom: 3px solid var(--fg); }
+    /* Each row is one release slice. A row read left to right is everything
+       that ships together. */
+    th.slice { text-align: left; vertical-align: top; padding: .7rem .6rem; width: 10%; min-width: 96px;
+               border-bottom: 2px solid var(--fg); position: sticky; left: 0; background: var(--bg); }
+    th.slice .s-name { font-size: .95rem; display: block; margin-top: .35rem; margin-bottom: .35rem; }
+    th.slice .s-note { font-weight: 400; color: var(--muted); font-size: .75rem; display: block; margin-top: .35rem; }
+    td.cell { vertical-align: top; padding: .5rem; border-bottom: 2px solid var(--fg); border-left: 1px solid var(--line); }
+    /* An empty cell is meaningful — it says this activity ships nothing in this
+       release — so the hatch is drawn in the 3:1 border tone, not a tint. */
+    td.cell.empty { background: repeating-linear-gradient(45deg, transparent, transparent 7px, var(--line) 7px, var(--line) 8px); }
+    .task { border: 1px solid var(--card-line); border-radius: 6px; background: var(--card); padding: .5rem .55rem; }
+    .task + .task { margin-top: .5rem; }
+    .task .t-title { font-size: .85rem; }
+    .task .t-value { display: block; font-size: .75rem; color: var(--muted); margin-top: .25rem; }
+    .task .t-ref { display: block; font-size: .75rem; color: var(--muted); margin-top: .3rem; }
+    .trace { margin-top: 2rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .trace h2 { font-size: 1.125rem; }
+    .vh { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+          overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+    .tasks { list-style: none; margin: 0; padding: 0; }
+    .tasks li + li { margin-top: .5rem; }
+    .b-glyph { font-weight: 900; }
+    .genfrom { color: var(--muted); font-size: .8rem; margin-top: 1.5rem; }
+    @media (forced-colors: active) {
+      /* background-image is not part of the forced-colors UA cascade, so the
+         hatch would paint literal #767676 over the user's chosen Canvas in
+         Chromium and vanish entirely in Firefox. Restate it in system colours. */
+      td.cell.empty { background-image: repeating-linear-gradient(45deg, Canvas, Canvas 7px, GrayText 7px, GrayText 8px); }
+      .badge { forced-color-adjust: none; border: 1px solid CanvasText; }
+    }
+    /* Sticky row headers are kept at narrow widths: this is exactly where the
+       table scrolls furthest, so losing the orientation anchor costs most. The
+       column is narrowed and its note dropped rather than unpinned. */
+    @media (max-width: 640px) {
+      th.slice { min-width: 72px; padding: .5rem .35rem; font-size: .85rem; }
+      th.slice .s-note { display: none; }
+    }
   </style>
 </head>
 <body>
   <main>
-    <h1>STORY-MAP-008: Have plugin-generated content respect my project's conventions</h1>
+  <h1>Have a plugin behave like a guest in my repository</h1>
+  <p class="lead">A story map for the adopter who installs a @windyroad plugin into a repository it did not come from. Read across the top for their journey — they choose what to install, read what it claims, let it generate into their tree, run into its rules, and get a fix that arrives with an upgrade. Read down the rows for release bands. The empty cells are where the plugin currently behaves like it owns the place.</p>
 
-    <p>A plugin is a guest in the repository that installs it. When one of these plugins writes content into that repository — an ADR skeleton, a regenerated decisions compendium, a rendered verification-queue cell, an audit-log entry — the adopter is left holding whatever characters the generating template happened to use. Five inbound reports have now hit the same wall. In each, the adopter's own project hard-blocks the em-dash, the adopter's own Edit and Write hooks fire correctly on it, and the text tripping those hooks arrives from a cached plugin they cannot edit. Scrubbing it by hand is a treadmill, because the next regeneration puts it back. This map covers making generated output portable by default, so a stricter project than ours can install the suite without inheriting a block it has no way to clear. Its first rib carries the four emitting surfaces the reports actually raised. The slice below links to a Markdown story file. (Traces: P424, inbound #185, #186, #219, #223, #319; JTBD-303, JTBD-101.)</p>
+  <ul class="legend" aria-label="Status legend">
+    <li><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>R1</span> stories exist</li>
+    <li><span class="badge b-later"><span class="b-glyph" aria-hidden="true">◇</span>R2</span> unbuilt</li>
+  </ul>
 
-    <section class="backbone" style="--cols: 1">
-      <header class="rib-header">
-        <h2 data-rib="portable-generated-output">Portable generated output</h2>
-      </header>
-      <div class="rib">
-        <a class="slice" href="../../stories/draft/STORY-051-have-generated-content-respect-my-projects-conventions.md"
-           data-story-id="STORY-051" data-rfc="RFC-054" data-jtbd="JTBD-303"
-           data-status="draft">Have generated content respect my project's conventions</a>
-      </div>
-    </section>
+  <div class="scroll" tabindex="0" role="region" aria-label="Story map grid">
+    <table class="map">
+      <caption>5 journey activities across the top; 2 release bands down the side. Read a row left to right for everything that ships in one release. A cell with no cards means that activity ships nothing in that release.</caption>
+      <thead>
+        <tr>
+          <td class="corner"></td>
+          <th class="act" scope="col">A. Choose what to install <span class="jtbd">JTBD-003 — compose only the guardrails I need</span></th>
+          <th class="act" scope="col">B. Read what it claims <span class="jtbd">JTBD-302 — trust the README describes what I installed</span></th>
+          <th class="act" scope="col">C. Let it write into my tree <span class="jtbd">JTBD-303 — generated content respects my conventions</span></th>
+          <th class="act" scope="col">D. Hit one of its rules</th>
+          <th class="act" scope="col">E. Get a fix on upgrade</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>R1</span> <span class="s-name">Now</span> <span class="s-note">stories exist</span></th>
+          <td class="cell empty"></td>
+          <td class="cell empty"></td>
+          <td class="cell">
+            <ul class="tasks" role="list">
+            <li><div class="task" data-story-id="STORY-051" data-rfc="RFC-054" data-jtbd="JTBD-303" data-status="draft"><span class="t-title">Generated content defaults to the most portable form, so my own policy hooks do not fire on text I did not write</span> <span class="t-value">Value: I stop scrubbing the same characters back out after every regeneration.</span> <span class="t-ref">Traces: STORY-051, P424</span></div></li>
+            </ul>
+          </td>
+          <td class="cell">
+            <ul class="tasks" role="list">
+            <li><div class="task" data-jtbd="JTBD-003"><span class="t-title">Clear any block the plugin raises with a command my repository actually has</span> <span class="t-value">Value: I am never left holding a block with no path through it.</span> <span class="t-ref">Traces: P435 (inbound #235) — see STORY-MAP-013</span></div></li>
+            </ul>
+          </td>
+          <td class="cell empty"></td>
+        </tr>
 
-    <p class="map-note">One rib so far. A fifth emitting surface is already recorded in P424, without a ticket of its own — the RFC skeleton placeholder, where the same character is pinned on both sides as a parse key, so emitter and reader have to move together: the coupling is fail-open, and if only one moves the checker silently stops matching and no test catches it. That is a second rib, "Coupled emitter and reader", once it has a story to hang on it. Building the rib empty today would be scaffolding for work not yet scoped, so it is named here instead. When that rib arrives, the editor who adds it puts it in a sibling section, not as a second rib inside this one.</p>
+        <tr>
+          <th class="slice" scope="row"><span class="badge b-later"><span class="b-glyph" aria-hidden="true">◇</span>R2</span> <span class="s-name">Open</span> <span class="s-note">unbuilt</span></th>
+          <td class="cell">
+            <ul class="tasks" role="list">
+            <li><div class="task"><span class="t-title">I install the one guardrail I want without dragging in the rest of the suite</span> <span class="t-value">Value: my session is not cluttered with hooks for practices I have not adopted.</span> <span class="t-ref">Traces: JTBD-003, no story yet</span></div></li>
+            </ul>
+          </td>
+          <td class="cell">
+            <ul class="tasks" role="list">
+            <li><div class="task"><span class="t-title">Read a README that describes the version I just installed</span> <span class="t-value">Value: I can act on the documented contract without checking it against the source.</span> <span class="t-ref">Traces: JTBD-302, no story yet</span></div></li>
+            </ul>
+          </td>
+          <td class="cell empty"></td>
+          <td class="cell empty"></td>
+          <td class="cell">
+            <ul class="tasks" role="list">
+            <li><div class="task"><span class="t-title">Get the fix by upgrading, without patching a cached plugin myself</span> <span class="t-value">Value: reporting it upstream is a real path, not a wait with a workaround.</span> <span class="t-ref">Traces: JTBD-303, no story yet</span></div></li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <section class="trace" aria-labelledby="trace-h">
+    <h2 id="trace-h">What this map traces to</h2>
+    <p><strong>Persona:</strong> plugin-user — an adopter with low context on this repository's internals, who is not expected to read our ADRs or patch a cached plugin.</p>
+    <p><strong>Jobs mapped:</strong> JTBD-303 (generated content respects my conventions) is the spine. JTBD-003 (compose only the guardrails I need) governs the choosing and the blocking. JTBD-302 (trust the README describes what I installed) governs the reading. JTBD-101 covers the plugin-developer side.</p>
+    <p><strong>Problems this closes:</strong> P424 — generated content carries characters an adopter's own policy hook rejects, re-introduced on every regeneration. P435 — a gate hardcoded to this repository's shape blocks adopters with no way through.</p>
+    <p><strong>Decisions the journey rests on:</strong> None yet.</p>
+    <p><strong>Open questions:</strong> Widened on 2026-08-05 from a single-story stub into the adopter's whole journey; the prior map held one card about generated characters. Three activities carry no story. The blocking card in D also appears on STORY-MAP-013, seen there from the author's side.</p>
+  </section>
+
   </main>
+
+  <p class="genfrom">Everything above is rendered by <code>wr-itil-render-story-map</code> from the data block below. Edit the data block, then re-render &mdash; edits made anywhere else are overwritten.</p>
+
+  <script id="story-map-data" type="application/json">
+{
+  "storyMapId": "STORY-MAP-008",
+  "title": "Have a plugin behave like a guest in my repository",
+  "status": "draft",
+  "persona": "plugin-user",
+  "secondaryPersona": "plugin-developer",
+  "reported": "2026-07-26",
+  "decisionMakers": "Tom Howard",
+  "humanOversight": "unconfirmed",
+  "traces": {
+    "problems": [
+      "P424",
+      "P435"
+    ],
+    "rfcs": [
+      "RFC-054"
+    ],
+    "jtbd": [
+      "JTBD-303",
+      "JTBD-003",
+      "JTBD-302",
+      "JTBD-101"
+    ],
+    "adrs": []
+  },
+  "lead": "A story map for the adopter who installs a @windyroad plugin into a repository it did not come from. Read across the top for their journey — they choose what to install, read what it claims, let it generate into their tree, run into its rules, and get a fix that arrives with an upgrade. Read down the rows for release bands. The empty cells are where the plugin currently behaves like it owns the place.",
+  "backbone": [
+    {
+      "id": "choose",
+      "title": "A. Choose what to install",
+      "note": "JTBD-003 — compose only the guardrails I need"
+    },
+    {
+      "id": "trust",
+      "title": "B. Read what it claims",
+      "note": "JTBD-302 — trust the README describes what I installed"
+    },
+    {
+      "id": "generate",
+      "title": "C. Let it write into my tree",
+      "note": "JTBD-303 — generated content respects my conventions"
+    },
+    {
+      "id": "collide",
+      "title": "D. Hit one of its rules",
+      "note": ""
+    },
+    {
+      "id": "fixed",
+      "title": "E. Get a fix on upgrade",
+      "note": ""
+    }
+  ],
+  "releases": [
+    {
+      "id": "r1",
+      "name": "Now",
+      "badge": "R1",
+      "note": "stories exist"
+    },
+    {
+      "id": "r2",
+      "name": "Open",
+      "badge": "R2",
+      "note": "unbuilt"
+    }
+  ],
+  "tasks": [
+    {
+      "activity": "generate",
+      "release": "r1",
+      "title": "Generated content defaults to the most portable form, so my own policy hooks do not fire on text I did not write",
+      "value": "Value: I stop scrubbing the same characters back out after every regeneration.",
+      "storyId": "STORY-051",
+      "rfc": "RFC-054",
+      "jtbd": "JTBD-303",
+      "storyStatus": "draft",
+      "ref": "STORY-051, P424"
+    },
+    {
+      "activity": "collide",
+      "release": "r1",
+      "title": "Clear any block the plugin raises with a command my repository actually has",
+      "value": "Value: I am never left holding a block with no path through it.",
+      "jtbd": "JTBD-003",
+      "ref": "P435 (inbound #235) — see STORY-MAP-013"
+    },
+    {
+      "activity": "choose",
+      "release": "r2",
+      "title": "I install the one guardrail I want without dragging in the rest of the suite",
+      "value": "Value: my session is not cluttered with hooks for practices I have not adopted.",
+      "ref": "JTBD-003, no story yet"
+    },
+    {
+      "activity": "trust",
+      "release": "r2",
+      "title": "Read a README that describes the version I just installed",
+      "value": "Value: I can act on the documented contract without checking it against the source.",
+      "ref": "JTBD-302, no story yet"
+    },
+    {
+      "activity": "fixed",
+      "release": "r2",
+      "title": "Get the fix by upgrading, without patching a cached plugin myself",
+      "value": "Value: reporting it upstream is a real path, not a wait with a workaround.",
+      "ref": "JTBD-303, no story yet"
+    }
+  ],
+  "traceProse": {
+    "persona": "plugin-user — an adopter with low context on this repository's internals, who is not expected to read our ADRs or patch a cached plugin.",
+    "jobs": "JTBD-303 (generated content respects my conventions) is the spine. JTBD-003 (compose only the guardrails I need) governs the choosing and the blocking. JTBD-302 (trust the README describes what I installed) governs the reading. JTBD-101 covers the plugin-developer side.",
+    "problems": "P424 — generated content carries characters an adopter's own policy hook rejects, re-introduced on every regeneration. P435 — a gate hardcoded to this repository's shape blocks adopters with no way through.",
+    "decisions": "None yet.",
+    "open": "Widened on 2026-08-05 from a single-story stub into the adopter's whole journey; the prior map held one card about generated characters. Three activities carry no story. The blocking card in D also appears on STORY-MAP-013, seen there from the author's side."
+  }
+}
+  </script>
 </body>
 </html>

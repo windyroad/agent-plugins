@@ -9,43 +9,54 @@ This project is a plugin-development monorepo. Style guidance applies primarily 
 
 ## Story-map HTML style rules
 
-Per ADR-060 § Phase 2 encoding amendment 2026-05-12 lines 392-435:
+Per ADR-060 § Phase 2 encoding, **as amended by ADR-102 (2026-08-05)**. A story map is a grid, and it is generated: presentation lives only in `packages/itil/templates/story-map.html`, and every map is rendered from its own data island by `wr-itil-render-story-map`. Nobody hand-writes a map's markup, so these rules bind the template, not the artefact.
 
 ### Layout
-- Backbone × ribs × slices uses CSS Grid via embedded `<style>` block in `<head>`. Layout-only rules (no semantic styling).
-- Grid sizing via `--<custom-property>` variables permitted inline on layout-container elements (e.g. `style="--cols: 4"` on `.backbone`).
-- `--cols` is the **number of slices laid out per row** within one rib — the grid's column count — not the number of ribs and not the rib's total slice count. A rib holding one slice uses `--cols: 1`; a rib holding four side by side uses `--cols: 4`. A rib may hold more slices than `--cols`, in which case they wrap to further rows (see `STORY-MAP-001`, whose `--cols: 1` rib stacks two slices).
+- A map is a `<table class="map">` inside a `<div class="scroll">` horizontal-scroll wrapper. Backbone activities are COLUMNS (`<thead>` → `<th class="act" scope="col">`); release slices are ROWS (`<th class="slice" scope="row">`); task cards sit in `<td class="cell">`. A row read left to right is everything that ships together.
+- The scroll wrapper is the sanctioned two-dimensional-content exception to reflow (SC 1.4.10). `table.map { min-width: 940px }` inside `overflow-x: auto` is correct; do not make the grid reflow.
+- `--cols` and the CSS-Grid backbone are **removed**. They belonged to the superseded stacked encoding.
 
 ### Prohibited
-- **Inline `style=""` on data-bearing elements**: `<a class="slice">` carrying `data-story-id` MUST NOT carry inline `style=""`. Rationale: keeps `grep`-as-lint deterministic; data-attribute extraction never matches a styling string.
-- **Inline `style=""` on `<h2 class="rib-header">` carrying `data-rib`**: same rationale.
-- **External stylesheets** (`<link rel="stylesheet">`): story maps are self-contained artefacts; the embedded `<style>` block in `<head>` is the only permitted styling source.
+- **Inline `style=""` anywhere in a map.** Under ADR-102 presentation is the template's alone; the renderer emits none. This is stricter than the previous rule, which permitted `--<custom-property>` on layout containers.
+- **External stylesheets** (`<link rel="stylesheet">`): maps are self-contained; the embedded `<style>` block is the only styling source.
+- **Hand-editing a rendered map.** The grid, `<style>` and `<meta>` blocks are regenerated from the data island; edits outside it are discarded on the next render.
 
 ### Permitted
-- Embedded `<style>` block in `<head>` with layout-only class-keyed rules.
-- `--<custom-property>` variables inline on layout containers (e.g. `--cols`, `--rows`, `--gap`).
-- HTML5 semantic elements: `<section>`, `<header>`, `<h1>` / `<h2>`, `<a>`, `<div>` (only as a layout container).
+- One embedded `<style>` block, supplied by the template.
+- HTML5 semantic elements: `<table>`, `<thead>`, `<tbody>`, `<tr>`, `<th>`, `<td>`, `<caption>`, `<section>`, `<ul>`, `<h1>` / `<h2>`, `<div>` (layout only).
 
 ### Class names (story-map vocabulary)
-- `.backbone` — per-rib grid container; one per rib, many per map. Multiple ribs are encoded as sibling `<section class="backbone">` elements, not as multiple `.rib` divs inside one section: `.rib { display: contents }` promotes slices to direct grid items and `.rib-header { grid-column: 1 / -1 }` assumes one header per grid, so a second rib inside one `.backbone` would share a single `--cols` track list and break both. Keeping ribs as siblings in DOM order also keeps focus order equal to visual order. (Known misnomer: Patton's conceptual backbone is the ordered set of these sections, not any one of them. Renaming the class is a decision, not a doc fix.)
-- `.rib` — horizontal lane of related slices; many per map.
-- `.rib-header` — heading row for a rib; one per rib.
-- `.slice` — single story reference (carries `data-story-id`); many per rib.
-- `.map-note` — optional trailing prose annotation on the map (rationale, floor-shape justification, growth plan). Carries no `data-*` attributes; unstyled by default.
 
-Maps written before this vocabulary was recorded also use `.task`, `.legend`, `.badge`, and `.b-live` / `.b-next` / `.b-later` (see `STORY-MAP-003`). Those are not yet normative — they are catalogued in the vocabulary-and-contrast sweep ticket rather than blessed here.
+Normative, and emitted only by the template:
+
+- `.map` — the grid table; one per map.
+- `.scroll` — horizontal-scroll wrapper around `.map`; focusable (`tabindex="0"`, `role="region"`) so a keyboard user can pan it.
+- `.act` — a backbone activity column header; one per activity. `.jtbd` is its optional gloss line.
+- `.slice` — a release-band ROW header; one per release. `.s-name` and `.s-note` are its parts. **Meaning changed under ADR-102**: `.slice` was previously a single story reference carrying `data-story-id`. That role now belongs to `.task`.
+- `.cell` — an activity × release intersection. `.cell.empty` means this activity ships nothing in that band, and is meaningful rather than decorative — the hatch is drawn in the `--line` tone so it clears 3:1.
+- `.task` — a task card inside a cell; carries the `data-*` trace layer. `.t-title`, `.t-value`, `.t-ref` are its parts.
+- `.badge` with `.b-live` / `.b-next` / `.b-later` — release-band status pill. Now normative. Colour is never the sole channel: each badge carries real text and a distinct glyph.
+- `.legend` — the status key above the grid.
+- `.lead` — the reading instruction under the `<h1>`; must name the grid axes.
+- `.trace` — the prose traceability section below the grid.
+- `.genfrom` — the generated-file banner.
+
+Removed by ADR-102: `.backbone`, `.rib`, `.rib-header`, `.map-note`. Maps still carrying them predate the amendment and are pending migration.
 
 ### Data attributes (machine-readable trace)
-- `data-story-id="STORY-NNN"` — on `<a>` slice element.
-- `data-rfc="RFC-NNN"` — optional; ties the slice to a parent RFC.
+- `data-story-id="STORY-NNN"` — on the `<div class="task">` card (was: on an `<a class="slice">`).
+- `data-rfc="RFC-NNN"` — optional; ties the task to a parent RFC.
 - `data-jtbd="JTBD-NNN"` — optional; ties to a persona-job.
-- `data-status="<draft|accepted|in-progress|done|archived>"` — story's lifecycle state at map-render time.
+- `data-status="<draft|accepted|in-progress|done|archived>"` — the story's lifecycle state at render time.
+- `data-rib` — **removed**.
+
+Each story-bearing card is emitted on a **single line**. `story-oversight.sh` filters whole lines; a pretty-printed card would break the ADR-101 AFK-accept carve-out.
 
 ## Naming
 
 - **Filenames**: kebab-case. `STORY-MAP-001-rfc-framework-phase-1-bootstrap.html` not `storyMap001RfcFramework.html`.
 - **CSS class names**: kebab-case. `.rib-header` not `.ribHeader` or `.rib_header`.
-- **Custom properties**: kebab-case prefixed with `--`. `--cols` not `--Cols` or `--c`.
+- **Custom properties**: kebab-case prefixed with `--`. `--card-line` not `--CardLine` or `--cl`.
 
 ## Colours
 

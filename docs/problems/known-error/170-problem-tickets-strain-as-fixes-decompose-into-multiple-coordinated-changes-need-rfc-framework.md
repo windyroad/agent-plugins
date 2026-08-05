@@ -421,7 +421,6 @@ Phase 2 framework code shipped 2026-05-12 across the following commits:
 | RFC-003 | in-progress | P170 Phase 2 — Story-tier framework + working-the-problem traversal |
 | RFC-022 | proposed | P170 Phase 3 + Phase 4 build — `persona:`/`jtbd:` problem frontmatter + story-level WSJF tie-break |
 
-
 ## Stories
 
 | ID | Title | Status |
@@ -447,3 +446,11 @@ Phase 2 framework code shipped 2026-05-12 across the following commits:
 | STORY-030 | STORY-030: Tell the reporter a fix is underway | draft |
 | STORY-031 | STORY-031: Tell the reporter it's released → verify → close the loop | draft |
 | STORY-032 | STORY-032: Triage the report's disposition — accept, elicit a new job, or decline | draft |
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-002 | STORY-MAP-002: Decompose a fix into coordinated changes | draft |
+| STORY-MAP-001 | STORY-MAP-001: RFC framework Phase 1 + Phase 2 bootstrap | in-progress |

@@ -3,17 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>STORY-MAP-003: Sustain my token quota across the week and across surfaces</title>
-  <meta name="story-map-id" content="STORY-MAP-003">
-  <meta name="status" content="draft">
-  <meta name="persona" content="developer">
-  <meta name="problems" content="P160,P443">
-  <meta name="rfcs" content="RFC-046">
-  <meta name="jtbd" content="JTBD-010,JTBD-003">
-  <meta name="adrs" content="ADR-093">
-  <meta name="reported" content="2026-07-08">
-  <meta name="decision-makers" content="Tom Howard">
-  <meta name="human-oversight" content="unconfirmed">
+  <title>{{TITLE_FULL}}</title>
+{{META}}
   <style>
     :root {
       color-scheme: light dark;
@@ -132,59 +123,31 @@
 </head>
 <body>
   <main>
-  <h1>Sustain my token quota across the week and across surfaces</h1>
-  <p class="lead">A story map for the developer who leans on Claude all week against one shared quota. Read across the top for the journey — install it, work without watching the meter, keep going when budget is tight, and still have headroom for chat and other surfaces. Read down the rows for release bands. Most cells are empty: only three stories exist, and the emptiness is the point — it shows how much of this journey is unbuilt.</p>
+  <h1>{{TITLE}}</h1>
+  <p class="lead">{{LEAD}}</p>
 
   <ul class="legend" aria-label="Status legend">
-    <li><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>R1</span> the pacing spine</li>
-    <li><span class="badge b-later"><span class="b-glyph" aria-hidden="true">◇</span>R2</span> unbuilt</li>
+{{LEGEND}}
   </ul>
 
   <div class="scroll" tabindex="0" role="region" aria-label="Story map grid">
     <table class="map">
-      <caption>4 journey activities across the top; 2 release bands down the side. Read a row left to right for everything that ships in one release. A cell with no cards means that activity ships nothing in that release.</caption>
+      <caption>{{CAPTION}}</caption>
       <thead>
         <tr>
           <td class="corner"></td>
-          <th class="act" scope="col">A. Install it <span class="jtbd">no setup tax</span></th>
-          <th class="act" scope="col">B. Work without watching <span class="jtbd">JTBD-010 — sustain my quota</span></th>
-          <th class="act" scope="col">C. Keep going when tight <span class="jtbd">slowed, not stopped</span></th>
-          <th class="act" scope="col">D. Still have headroom at week's end <span class="jtbd">chat, Cowork</span></th>
+{{ACTIVITIES}}
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>R1</span> <span class="s-name">First cut</span> <span class="s-note">the pacing spine</span></th>
-          <td class="cell">
-            <ul class="tasks" role="list">
-            <li><div class="task" data-story-id="STORY-043" data-status="draft"><span class="t-title">Pacing starts working the moment I install it, with nothing to configure</span> <span class="t-value">Value: protection I did not have to set up is protection I actually get.</span> <span class="t-ref">Traces: STORY-043, P160</span></div></li>
-            <li><div class="task" data-story-id="STORY-042" data-status="draft"><span class="t-title">I can add quota pacing on its own without dragging in governance plugins I did not ask for</span> <span class="t-value">Value: I take the one guardrail I want.</span> <span class="t-ref">Traces: STORY-042, JTBD-003</span></div></li>
-            </ul>
-          </td>
-          <td class="cell">
-            <ul class="tasks" role="list">
-            <li><div class="task" data-story-id="STORY-039" data-status="draft"><span class="t-title">I work all week without hitting the quota wall, because the work quietly slows itself</span> <span class="t-value">Value: the limit shapes my pace instead of ending my day.</span> <span class="t-ref">Traces: STORY-039</span></div></li>
-            </ul>
-          </td>
-          <td class="cell empty"></td>
-          <td class="cell empty"></td>
-        </tr>
-
-        <tr>
-          <th class="slice" scope="row"><span class="badge b-later"><span class="b-glyph" aria-hidden="true">◇</span>R2</span> <span class="s-name">Later</span> <span class="s-note">unbuilt</span></th>
-          <td class="cell empty" colspan="4"><span class="vh">No stories in this release band.</span></td>
-        </tr>
+{{ROWS}}
       </tbody>
     </table>
   </div>
 
   <section class="trace" aria-labelledby="trace-h">
     <h2 id="trace-h">What this map traces to</h2>
-    <p><strong>Persona:</strong> developer — using Claude across Code, chat and other surfaces against a single shared weekly quota.</p>
-    <p><strong>Jobs mapped:</strong> JTBD-010 (sustain my token quota across the week and across surfaces).</p>
-    <p><strong>Problems this closes:</strong> P160 — no pacing signal, so the quota wall arrives without warning. P443.</p>
-    <p><strong>Decisions the journey rests on:</strong> ADR-093.</p>
-    <p><strong>Open questions:</strong> Re-encoded onto the canonical grid on 2026-08-05. The prior encoding had five activities and no release dimension, so the bands are new. Two activities carry no stories: surviving an over-budget week, and protecting headroom for other surfaces.</p>
+{{TRACE}}
   </section>
 
   </main>
@@ -192,104 +155,7 @@
   <p class="genfrom">Everything above is rendered by <code>wr-itil-render-story-map</code> from the data block below. Edit the data block, then re-render &mdash; edits made anywhere else are overwritten.</p>
 
   <script id="story-map-data" type="application/json">
-{
-  "storyMapId": "STORY-MAP-003",
-  "title": "Sustain my token quota across the week and across surfaces",
-  "status": "draft",
-  "persona": "developer",
-  "reported": "2026-07-08",
-  "decisionMakers": "Tom Howard",
-  "humanOversight": "unconfirmed",
-  "traces": {
-    "problems": [
-      "P160",
-      "P443"
-    ],
-    "rfcs": [
-      "RFC-046"
-    ],
-    "jtbd": [
-      "JTBD-010",
-      "JTBD-003"
-    ],
-    "adrs": [
-      "ADR-093"
-    ]
-  },
-  "lead": "A story map for the developer who leans on Claude all week against one shared quota. Read across the top for the journey — install it, work without watching the meter, keep going when budget is tight, and still have headroom for chat and other surfaces. Read down the rows for release bands. Most cells are empty: only three stories exist, and the emptiness is the point — it shows how much of this journey is unbuilt.",
-  "backbone": [
-    {
-      "id": "install",
-      "title": "A. Install it",
-      "note": "no setup tax"
-    },
-    {
-      "id": "pace",
-      "title": "B. Work without watching",
-      "note": "JTBD-010 — sustain my quota"
-    },
-    {
-      "id": "overbudget",
-      "title": "C. Keep going when tight",
-      "note": "slowed, not stopped"
-    },
-    {
-      "id": "surfaces",
-      "title": "D. Still have headroom at week's end",
-      "note": "chat, Cowork"
-    }
-  ],
-  "releases": [
-    {
-      "id": "r1",
-      "name": "First cut",
-      "badge": "R1",
-      "note": "the pacing spine"
-    },
-    {
-      "id": "r2",
-      "name": "Later",
-      "badge": "R2",
-      "note": "unbuilt"
-    }
-  ],
-  "tasks": [
-    {
-      "activity": "install",
-      "release": "r1",
-      "title": "Pacing starts working the moment I install it, with nothing to configure",
-      "value": "Value: protection I did not have to set up is protection I actually get.",
-      "storyId": "STORY-043",
-      "storyStatus": "draft",
-      "ref": "STORY-043, P160"
-    },
-    {
-      "activity": "install",
-      "release": "r1",
-      "title": "I can add quota pacing on its own without dragging in governance plugins I did not ask for",
-      "value": "Value: I take the one guardrail I want.",
-      "storyId": "STORY-042",
-      "storyStatus": "draft",
-      "ref": "STORY-042, JTBD-003"
-    },
-    {
-      "activity": "pace",
-      "release": "r1",
-      "title": "I work all week without hitting the quota wall, because the work quietly slows itself",
-      "value": "Value: the limit shapes my pace instead of ending my day.",
-      "storyId": "STORY-039",
-      "storyStatus": "draft",
-      "ref": "STORY-039"
-    }
-  ],
-  "traceProse": {
-    "persona": "developer — using Claude across Code, chat and other surfaces against a single shared weekly quota.",
-    "jobs": "JTBD-010 (sustain my token quota across the week and across surfaces).",
-    "problems": "P160 — no pacing signal, so the quota wall arrives without warning. P443.",
-    "decisions": "ADR-093.",
-    "open": "Re-encoded onto the canonical grid on 2026-08-05. The prior encoding had five activities and no release dimension, so the bands are new. Two activities carry no stories: surviving an over-budget week, and protecting headroom for other surfaces."
-  }
-}
+{{DATA}}
   </script>
 </body>
 </html>

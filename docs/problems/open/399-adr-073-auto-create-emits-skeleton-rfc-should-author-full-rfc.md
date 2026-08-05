@@ -76,10 +76,16 @@ Ratified at the 2026-06-28 `/wr-itil:work-problems` loop-end decision surface (t
 
 Part of the ADR-073 lockstep rework (see P357). The --fix-time Scope+Tasks auto-create mechanism is superseded by RFC-first; rework or drop it per the lockstep RFC. The held p399 changeset stays held pending that rework (genuine, not theatre).
 
-
 ## Stories
 
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-015 | STORY-015: The RFC lists its stories before any code is written | draft |
 | STORY-017 | STORY-017: Backfill-or-supersede the skeleton RFCs the repudiated mechanism left behind | draft |
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-002 | STORY-MAP-002: Decompose a fix into coordinated changes | draft |
