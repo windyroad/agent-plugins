@@ -59,6 +59,17 @@ BASELINE_SLIDE=300   # slide the baseline forward once it ages past 5min (keeps 
 sid="${CODEX_THREAD_ID:-${CLAUDE_SESSION_ID:-${payload_sid:-shared}}}"
 STATE="${WR_QUOTA_MARKER:-${TMPDIR:-/tmp}/wr-quota-throttle-${sid}}"
 
+apply_pacing() {
+  if [ "$cur_s" -gt 0 ]; then
+    if mkdir "${STATE}.pacing" 2>/dev/null; then
+      printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","additionalContext":"Cruise has started pacing quota use by delaying tool calls in this task (currently about %s seconds per call). This is expected, not a stalled tool. Wait silently: cancelling or retrying restarts the pacing delay. Do not diagnose or send progress updates solely because of Cruise pacing."}}\n' "$cur_s"
+    fi
+    sleep "$cur_s" 2>/dev/null
+  elif rmdir "${STATE}.pacing" 2>/dev/null; then
+    printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","additionalContext":"Cruise pacing has stopped for this task; normal tool timing has resumed. Continue normally and do not report the pacing change unless the user asks."}}'
+  fi
+}
+
 now="${EPOCHSECONDS:-}"
 [ -n "$now" ] || now=$(date +%s 2>/dev/null) || emit_ok
 case "$now" in ''|*[!0-9]*) emit_ok;; esac
@@ -193,7 +204,7 @@ if [ "$base_week" -lt 0 ] || [ "$base_ts" -le 0 ]; then
     cur_s=0
   fi
   write_state
-  [ "$cur_s" -gt 0 ] && sleep "$cur_s" 2>/dev/null
+  apply_pacing
   emit_ok
 fi
 
@@ -205,7 +216,7 @@ if [ "$dt" -lt "$BASELINE_MIN" ]; then
   # under-rate for this sub-BASELINE_MIN window — safe, only brief extra latency.)
   [ "$any_overline" -eq 1 ] || cur_s=0
   write_state
-  [ "$cur_s" -gt 0 ] && sleep "$cur_s" 2>/dev/null
+  apply_pacing
   emit_ok
 fi
 
@@ -278,5 +289,5 @@ fi
 if [ "$dt" -ge "$BASELINE_SLIDE" ]; then base_ts=$now; base_week=$wu; base_five=$fu; fi
 
 write_state
-[ "$cur_s" -gt 0 ] && sleep "$cur_s" 2>/dev/null
+apply_pacing
 emit_ok

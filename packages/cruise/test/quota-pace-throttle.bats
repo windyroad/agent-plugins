@@ -53,6 +53,28 @@ write_state() { printf '%s %s %s %s %s\n' "$1" "$2" "$3" "$4" "$5" > "$WR_QUOTA_
   grep -q " 50 20 10" "$WR_QUOTA_MARKER"         # base_week base_five cur_s
 }
 
+@test "throttling announces engage and release transitions but stays silent while active" {
+  write_cache 20 $((NOW+9000)) 50 $((NOW+500000))
+  run bash "$HOOK" </dev/null
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"has started pacing quota use"* ]]
+  [[ "$output" == *"cancelling or retrying restarts the pacing delay"* ]]
+  [ -d "${WR_QUOTA_MARKER}.pacing" ]
+
+  rm -f "$TMP/slept"
+  write_state $((NOW-100)) $((NOW-100)) 50 20 10
+  run bash "$HOOK" </dev/null
+  [ "$status" -eq 0 ]; [ -z "$output" ]; [ "$(slept)" -eq 10 ]
+
+  rm -f "$TMP/slept"
+  write_state $((NOW-100)) $((NOW-100)) 13 8 10
+  write_cache 8 $((NOW+9000)) 13 $((NOW+500000))
+  run bash "$HOOK" </dev/null
+  [ "$status" -eq 0 ]; [ ! -f "$TMP/slept" ]
+  [[ "$output" == *"pacing has stopped"* ]]
+  [ ! -d "${WR_QUOTA_MARKER}.pacing" ]
+}
+
 @test "first firing behind pace records a baseline without braking" {
   write_cache 8 $((NOW+9000)) 10 $((NOW+500000))
   run bash "$HOOK" </dev/null

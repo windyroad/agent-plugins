@@ -19,6 +19,9 @@ teardown() { rm -rf "$HOME"; }
   [ -x "$SL" ]
   grep -q "@windyroad/cruise" "$SL"
   [ "$(jq -r '.statusLine.command' "$SETTINGS")" = "$SL" ]
+  [[ "$output" == *"start, stop, or change intentional tool-call delays"* ]]
+  [[ "$output" == *"Wait silently"* ]]
+  [[ "$output" == *"cancelling or retrying restarts the pacing delay"* ]]
 }
 
 @test "the created statusline writes a flat quota cache from a rate_limits payload" {
@@ -54,11 +57,13 @@ teardown() { rm -rf "$HOME"; }
   [ -f "$HOME/.claude/.cruise-producer-merge-nudged" ]
 }
 
-@test "agent-merge nudge fires at most once (marker guard)" {
+@test "agent-merge nudge fires at most once while pacing guidance remains" {
   printf '#!/bin/bash\ninput=$(cat)\necho hi\n' > "$SL"
   bash "$INST" </dev/null >/dev/null                 # first: nudges + writes marker
   run bash "$INST" </dev/null                        # second: marker present → silent no-op
-  [ "$status" -eq 0 ]; [ -z "$output" ]
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"start, stop, or change intentional tool-call delays"* ]]
+  [[ "$output" != *"needs a quota-state producer"* ]]
 }
 
 # --- adopter-config-diversity: prove non-destructive across shapes (risk remediation) ---

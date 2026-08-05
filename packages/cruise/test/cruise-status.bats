@@ -7,6 +7,7 @@ setup() {
   TMP="$(mktemp -d)"
   export WR_QUOTA_CACHE_FILE="$TMP/cache"
   export WR_QUOTA_MARKER="$TMP/state"
+  export WR_CRUISE_PROJECTION_STATE="$TMP/projection"
   export CLAUDE_SESSION_ID=t
   NOW="$(date +%s)"
 }
@@ -80,6 +81,23 @@ write_state() { printf '%s %s %s %s %s\n' "$1" "$2" "$3" "$4" "$5" > "$WR_QUOTA_
   [ "$status" -eq 0 ]
   echo "$output" | grep -q "ahead, braking not engaged"
   ! echo "$output" | grep -q "throttle is slowing"
+}
+
+@test "projection persists account-level samples across task throttle state" {
+  reset=$((NOW+500000))
+  write_cache 20 $((NOW+9000)) 55 "$reset"
+  run bash "$SC" </dev/null
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q "not enough burn samples"
+  grep -qE " 55 ${reset}$" "$WR_CRUISE_PROJECTION_STATE"
+
+  printf '%s %s %s\n' $((NOW-3600)) 55 "$reset" > "$WR_CRUISE_PROJECTION_STATE"
+  export CLAUDE_SESSION_ID=another-task
+  write_cache 20 $((NOW+9000)) 60 "$reset"
+  run bash "$SC" </dev/null
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q "measured burn"
+  ! echo "$output" | grep -q "not enough burn samples"
 }
 
 @test "fresh cache is reported as fresh" {

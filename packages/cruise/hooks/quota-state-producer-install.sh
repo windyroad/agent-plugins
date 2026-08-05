@@ -10,7 +10,7 @@
 # max_sleep_s: 0, and the glide never blocks so there is nothing to escape).
 #
 # Idempotent + fail-SAFE: a SessionStart hook must never break the session. Every
-# abnormal path is a silent no-op. Cases:
+# abnormal path is a non-breaking no-op after emitting pacing guidance. Cases:
 #   - statusline already writes the cache (grep quota-state.json)  → no-op
 #   - statusline ABSENT                                            → create it + wire settings.json
 #   - statusline PRESENT but not a producer                        → agent-merge nudge (once)
@@ -25,17 +25,21 @@
 # never edits an existing statusline in place.
 
 set +e
-emit_plain() { exit 0; }
+PACING_CONTEXT='Cruise can start, stop, or change intentional tool-call delays at any time in this task. A pending call within the configured pacing ceiling is expected, not evidence that a service is unavailable or hung. Wait silently: cancelling or retrying restarts the pacing delay. Do not diagnose or send progress updates solely because of Cruise pacing. Use the Cruise status skill only when the user asks for pacing details.'
+emit_context() {
+  printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' "$PACING_CONTEXT"
+  exit 0
+}
 
 # Codex exposes quota through app-server, not a statusline. Never mutate Claude
 # config from a Codex session; initialize the Codex cache and fail open.
 if [ -n "${CODEX_THREAD_ID:-}" ]; then
   PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)}"
   command -v node >/dev/null 2>&1 && node "$PLUGIN_ROOT/scripts/codex-quota-state.mjs" >/dev/null 2>&1
-  emit_plain
+  emit_context
 fi
 
-command -v jq >/dev/null 2>&1 || emit_plain
+command -v jq >/dev/null 2>&1 || emit_context
 
 CLAUDE_DIR="${HOME}/.claude"
 SL="${CLAUDE_DIR}/statusline-command.sh"
@@ -43,7 +47,7 @@ SETTINGS="${CLAUDE_DIR}/settings.json"
 CACHE_NAME="quota-state.json"
 SENTINEL="@windyroad/cruise (quota pacing)"
 NUDGE_MARKER="${CLAUDE_DIR}/.cruise-producer-merge-nudged"
-[ -d "$CLAUDE_DIR" ] || emit_plain
+[ -d "$CLAUDE_DIR" ] || emit_context
 
 log() { printf 'cruise: %s\n' "$1" >&2; }   # SessionStart stderr is a visible, non-breaking log
 
@@ -55,7 +59,7 @@ case "$ACTIVE" in "~/"*) ACTIVE="${HOME}/${ACTIVE#\~/}";; esac   # expand a lead
 
 # --- case 1: the ACTIVE statusline already writes the cache → no-op (any path)
 if [ -f "$ACTIVE" ] && grep -q "$CACHE_NAME" "$ACTIVE" 2>/dev/null; then
-  emit_plain
+  emit_context
 fi
 
 # The managed producer block (flat schema, matching the throttle + shipped cache).
@@ -88,7 +92,7 @@ if [ -z "$CONFIGURED" ] && [ ! -f "$SL" ]; then
     printf '#!/usr/bin/env bash\n'
     producer_block
     printf 'printf "cruise ✓"\n'   # minimal display; the user can replace it (the block above is what matters)
-  } > "$SL" 2>/dev/null && chmod +x "$SL" 2>/dev/null || emit_plain
+  } > "$SL" 2>/dev/null && chmod +x "$SL" 2>/dev/null || emit_context
 
   # wire settings.json statusLine.command (only if not already set), atomically
   if [ -f "$SETTINGS" ]; then
@@ -99,18 +103,20 @@ if [ -z "$CONFIGURED" ] && [ ! -f "$SL" ]; then
     printf '{"statusLine":{"type":"command","command":"%s"}}\n' "$SL" > "$SETTINGS" 2>/dev/null
   fi
   log "created $SL + wired statusLine (quota producer installed)"
-  emit_plain
+  emit_context
 fi
 
 # --- case 3: statusline present but not a producer → agent-merge nudge (once, non-breaking)
 if [ ! -f "$NUDGE_MARKER" ]; then
   : > "$NUDGE_MARKER" 2>/dev/null
-  _ctx="@windyroad/cruise needs a quota-state producer, but your active statusline ($ACTIVE) does not write ~/.claude/quota-state.json. Do NOT blind-append it (the statusline reads stdin once). Carefully integrate this block into that statusline — reuse its already-captured stdin variable instead of the block's \$(cat) — then confirm with the user:
+  _ctx="$PACING_CONTEXT
+
+@windyroad/cruise needs a quota-state producer, but your active statusline ($ACTIVE) does not write ~/.claude/quota-state.json. Do NOT blind-append it (the statusline reads stdin once). Carefully integrate this block into that statusline — reuse its already-captured stdin variable instead of the block's \$(cat) — then confirm with the user:
 
 $(producer_block)"
   jq -n --arg ctx "$_ctx" \
     '{hookSpecificOutput:{hookEventName:"SessionStart",additionalContext:$ctx}}' 2>/dev/null \
-    || emit_plain
+    || emit_context
   exit 0
 fi
-emit_plain
+emit_context

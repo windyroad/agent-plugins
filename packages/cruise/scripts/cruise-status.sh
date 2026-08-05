@@ -64,9 +64,9 @@ fu=${fu%%.*}; wu=${wu%%.*}
 # --- per-session throttle state (the sleep it's injecting now) ---
 sid="${CODEX_THREAD_ID:-${CLAUDE_SESSION_ID:-shared}}"
 STATE="${WR_QUOTA_MARKER:-${TMPDIR:-/tmp}/wr-quota-throttle-${sid}}"
-cur_s=0 base_ts=0 base_week=-1
-if [ -f "$STATE" ]; then read -r _c base_ts base_week _bf cur_s < "$STATE" 2>/dev/null
-  isint "$cur_s" || cur_s=0; isint "$base_ts" || base_ts=0; fi
+cur_s=0
+if [ -f "$STATE" ]; then read -r _c _bt _bw _bf cur_s < "$STATE" 2>/dev/null
+  isint "$cur_s" || cur_s=0; fi
 
 # --- per-window report ---
 bar() { # used_pct pace_pct  → 20-cell ASCII bar (# used, - remaining, | pace line)
@@ -121,9 +121,22 @@ else
   echo "  Throttle now:   idle (0s) — $(( -gov ))pp behind pace, full speed"
 fi
 
-# --- projection (measured burn vs sustainable, long window) ---
-if [ "$base_week" -ge 0 ] && [ "$base_ts" -gt 0 ] && [ $(( now-base_ts )) -ge 60 ] && [ "$wu" -gt "$base_week" ]; then
-  dt=$(( now-base_ts )); r_x1000=$(( (wu-base_week)*1000*3600/dt ))     # measured %/hr ×1000
+# --- projection (machine-wide measured burn vs sustainable, long window) ---
+# Keep this separate from the throttle's five-minute sliding controller baseline:
+# status calls are sparse and quota belongs to the account, not one task.
+PROJECTION_STATE="${WR_CRUISE_PROJECTION_STATE:-${CACHE}.projection}"
+sample_ts=0 sample_week=-1 sample_reset=0
+if [ -r "$PROJECTION_STATE" ]; then
+  read -r sample_ts sample_week sample_reset < "$PROJECTION_STATE" 2>/dev/null
+  isint "$sample_ts" || sample_ts=0
+  isint "$sample_week" || sample_week=-1
+  isint "$sample_reset" || sample_reset=0
+fi
+projection_ready=0
+if [ "$sample_reset" -eq "$wr_" ] && [ "$sample_week" -ge 0 ] && [ "$sample_ts" -gt 0 ] \
+   && [ $(( now-sample_ts )) -ge 60 ] && [ "$wu" -gt "$sample_week" ]; then
+  projection_ready=1
+  dt=$(( now-sample_ts )); r_x1000=$(( (wu-sample_week)*1000*3600/dt )) # measured %/hr ×1000
   wleft=$(( wr_-now )); [ "$wleft" -lt 1 ] && wleft=1
   safe_x1000=$(( (100-HD7-wu>0?100-HD7-wu:0)*1000*3600/wleft ))
   if [ "$r_x1000" -le "$safe_x1000" ]; then
@@ -134,7 +147,15 @@ if [ "$base_week" -ge 0 ] && [ "$base_ts" -gt 0 ] && [ $(( now-base_ts )) -ge 60
     echo "  Projection:     measured burn (~$((r_x1000/1000)).$(( (r_x1000/100)%10 ))%/hr) exceeds the sustainable rate — braking is not engaged"
   fi
 else
-  echo "  Projection:     not enough burn samples yet this session to project."
+  echo "  Projection:     not enough burn samples yet to project."
+fi
+
+# Preserve an unchanged baseline until integer usage advances. Reset it for a
+# new quota window or a backwards correction; advance it after a valid reading.
+if [ "$sample_ts" -le 0 ] || [ "$sample_reset" -ne "$wr_" ] || [ "$wu" -lt "$sample_week" ] || [ "$projection_ready" -eq 1 ]; then
+  _ptmp="${PROJECTION_STATE}.$$.tmp"
+  printf '%s %s %s\n' "$now" "$wu" "$wr_" > "$_ptmp" 2>/dev/null \
+    && mv -f "$_ptmp" "$PROJECTION_STATE" 2>/dev/null || rm -f "$_ptmp" 2>/dev/null
 fi
 
 # --- config + health ---
