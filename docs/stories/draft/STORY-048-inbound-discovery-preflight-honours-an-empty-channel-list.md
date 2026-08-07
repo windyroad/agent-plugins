@@ -8,8 +8,6 @@ jtbd: [JTBD-006]
 rfcs: [RFC-051]
 story-maps: [STORY-MAP-006]
 estimated-effort: S
-human-oversight: confirmed
-oversight-hash: 4dbd37ab53b39fdc0b81c29d00029b9d18b1a3e648d22f7d82af2caca0e0fedf
 ---
 
 # STORY-048: Gate the inbound-discovery pre-flight on the channel list
@@ -114,3 +112,11 @@ made.
 - RFC-051 (the fix vehicle), STORY-MAP-006 (the map), P431 (the driving problem), inbound #341.
 - RFC-017 introduced the declined-permanently stub this work teaches the helper to honour —
   lineage, not vehicle.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-004 | STORY-MAP-004: Close the loop with someone who reported a problem | draft |
+| STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |

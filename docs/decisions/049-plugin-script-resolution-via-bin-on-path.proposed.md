@@ -145,3 +145,5 @@ Reassess if any of the following occur:
 - P097 — SKILL.md runtime vs maintainer content mixed (composes-with on the "inline the script logic" candidate fix shape).
 - JTBD-301 — Plugin-user persona's primary job (driven by adopter sessions reading published skills with low repo-internal context).
 - JTBD-101 — Plugin-developer persona's "clear patterns, not reverse-engineering" outcome (driver of the fixed naming-grammar requirement).
+
+**Amended by ADR-102 (2026-08-04).** Story-map rendering and querying ship as `bin/wr-itil-*` shims resolving through PATH exactly as this decision requires; the renderer and its shared CSS/JS assets are located relative to the script, never repo-relative, so a generated map renders identically in an adopter install and in this monorepo.

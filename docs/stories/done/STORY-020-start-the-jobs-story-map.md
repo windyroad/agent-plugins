@@ -8,14 +8,11 @@ jtbd: [JTBD-008]
 rfcs: [RFC-005]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
-oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass; reworked to the map's whole-picture value before ratifying)"
-human-oversight: confirmed
-oversight-hash: de3bd164fbe962c48770125d8382ed53ae491291aa0cebcb9ab060d3ed35d1dd
 ---
 
 # STORY-020: Start the job's story map
 
-**Story map:** [← STORY-MAP-002: Decompose a Fix Into Coordinated Changes](../../story-maps/draft/STORY-MAP-002-decompose-a-fix-into-coordinated-changes.html) · A3 (Release 1)
+**Story map:** [← STORY-MAP-002: Take a Problem From Noticed to Resolved](../../story-maps/draft/STORY-MAP-002-take-a-problem-from-noticed-to-resolved.html) · A3 (Release 1)
 **Siblings (A3):** [add to map](021-add-the-fixs-stories-to-the-map.md) · [ratify](022-ratify-the-story-map-and-its-stories.md) · [create RFC](015-rfc-authoring-is-pre-implementation-story-map.md) · [reuse](024-reuse-stories-already-on-the-map.md) · [slice](025-slice-the-fixs-stories-into-releases.md)
 
 ## User value (INVEST Valuable)
@@ -43,3 +40,10 @@ In order to see and reason about a coordinated fix as one coherent picture — i
 - **STORY-MAP-002** A3 "start-the-map" card (Release 1 walking skeleton — the first run has no map, so it creates one).
 - **ADR-090** — the new map is born unconfirmed and carries a drift-invalidated oversight marker.
 - Implementation tracked in **P404** (Phase 2 story-map skills).
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-002 | STORY-MAP-002: Take a problem from noticed to resolved | draft |

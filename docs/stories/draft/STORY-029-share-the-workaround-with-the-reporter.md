@@ -8,13 +8,11 @@ jtbd: [JTBD-008, JTBD-301]
 adrs: [ADR-062]
 story-maps: [STORY-MAP-002]
 estimated-effort: S
-human-oversight: confirmed
-oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass, inbound thread)"
 ---
 
 # STORY-029: Share the workaround with the reporter
 
-**Story map:** [← STORY-MAP-002: Decompose a Fix Into Coordinated Changes](../../story-maps/draft/STORY-MAP-002-decompose-a-fix-into-coordinated-changes.html) · A2 (Release 1) — inbound touchpoint
+**Story map:** [← STORY-MAP-002: Take a Problem From Noticed to Resolved](../../story-maps/draft/STORY-MAP-002-take-a-problem-from-noticed-to-resolved.html) · A2 (Release 1) — inbound touchpoint
 **Backbone (inbound thread):** [A1 capture-inbound](027-capture-a-problem-from-an-inbound-channel.md) · [A1 acknowledge](028-acknowledge-the-inbound-report.md) · A2 share workaround · [A3/A4 fix underway](030-tell-the-reporter-a-fix-is-underway.md) · [A5 released → verify → close](031-tell-the-reporter-released-and-close-the-loop.md)
 
 ## User value (INVEST Valuable)
@@ -38,3 +36,10 @@ In order that the person hitting the problem can unblock themselves now — rath
 ## Related
 
 - **STORY-MAP-002** A2 inbound card. **Precedent to mirror:** `report-upstream` / `update-upstream` / `check-upstream-responses` (the upstream direction of the same pattern). To build.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-002 | STORY-MAP-002: Take a problem from noticed to resolved | draft |

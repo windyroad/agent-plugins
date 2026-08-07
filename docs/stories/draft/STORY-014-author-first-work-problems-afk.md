@@ -20,7 +20,7 @@ estimated-effort: M
 
 ## User value (INVEST Valuable)
 
-As the AFK `/wr-itil:work-problems` orchestrator dispatching a fix on an RFC-less Known Error, I want to **author the RFC's story map first** (for an unambiguous or already-ADR-covered fix) then implement — and to **lawfully halt the loop for ADR ratification** when the fix requires an option-choice no existing ADR covers — so that AFK work never silently builds a hollow fix nor silently makes a new direction-setting decision.
+In order that unattended work never silently builds a hollow fix, and never silently makes a direction-setting choice on my behalf, as the unattended `/wr-itil:work-problems` orchestrator dispatching a fix on an RFC-less Known Error, I want to **author the RFC's story map first** where the fix is unambiguous, and **halt for ratification** where it needs a decision no ADR covers.
 
 ## Acceptance criteria (INVEST Testable)
 

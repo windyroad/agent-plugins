@@ -20,7 +20,7 @@ estimated-effort: M
 
 ## User value (INVEST Valuable)
 
-As a maintainer, I want the skeleton RFCs auto-created under the now-repudiated fix-time mechanism (RFC-026 + RFC-028/029/030/032/033/034, plus any flagged by the repurposed scope detector) each authored as a **real pre-existing story map** via `/wr-itil:manage-rfc` — or **superseded** where the fix has already shipped/closed — so the RFC corpus stops carrying hollow placeholders that defeat the trace's purpose.
+In order that the RFC corpus stops carrying placeholders that defeat the very trace they were meant to satisfy, as a maintainer, I want each skeleton RFC auto-created under the repudiated fix-time mechanism either **authored into a real story map** or **superseded** where its fix has already shipped.
 
 ## Acceptance criteria (INVEST Testable)
 

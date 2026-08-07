@@ -25,7 +25,7 @@ The generative cause is that the skill has no internal notion of what a story ma
 - The skill must know what a correct map is without inspecting the repository it runs in. Exemplar-cloning is what let nine maps grow from a wrong skeleton while two others diverged into their own shapes.
 - Presentation must live in exactly one place, so a fix reaches every map.
 - Authoring must be data entry, not markup authoring. An agent hand-writing a grid will drift from it.
-- The existing story-reference layer is load-bearing and must survive: `data-story-id` is consumed by reverse-trace computation (`update-story-references-section.sh`), the ADR-101 AFK-accept carve-out (`story-oversight.sh`), and `check-afk-accept-eligible.sh`.
+- The existing story-reference layer is load-bearing and must survive: `data-story-id` is consumed by reverse-trace computation (`update-story-references-section.sh`) and by story-map queries. (The ADR-101 consumers named here originally — the AFK-accept carve-out and `check-afk-accept-eligible.sh` — were retired with ADR-103 and no longer read it.)
 - Human ratification must survive presentation changes. Under ADR-090 the oversight marker is drift-invalidated against file content; if rendered HTML is the hash basis, restyling the template mass-unratifies every map.
 - Scripts must resolve in adopter installs, not only in source-repo dogfooding (the recurring P151 / P153 / P219 / P317 class).
 
@@ -48,6 +48,16 @@ Two files per map create a divergence class with no structural defence. Nothing 
 
 It also converts the ADR-090 hash problem below from something the tooling must remember into a property of the format. Because the island is separable, the ratification fingerprint can be scoped to the data alone — so restyling every map in the corpus provably cannot revoke a human approval. Under option A that guarantee had to be maintained by hand.
 
+**Amended 2026-08-06 — the grid is drawn at view time, and status is derived.** Two changes, both taken after the ratified decision above was in use, and both removing duplication rather than adding capability.
+
+*Status is no longer authored.* A card carried `storyStatus`, duplicating the story file's own `status:`. That imposed a sync obligation on every transition, produced a drift class that put three of eight maps out of date, and churned ratification — ticking a story to done is progress, not a revision of what a human approved, yet a stored value drifted the map's fingerprint. The renderer now reads each story's current state from its own file, so a transition needs no map edit at all and the fingerprint does not move.
+
+*Presentation is no longer committed.* A map's markup was regenerated into every file, so 59% of the corpus was derived and one stylesheet was duplicated byte-for-byte eight times — a template tweak rewrote eight files and produced ~920 lines of identical CSS diff. A map is now a shell plus its data block; `story-map.css` and `story-map.js` sit beside the maps as single copies, kept in step by the renderer, and the grid is built in the browser from the data. The corpus went from 3,037 lines to 1,626, and derived content from 1,814 to 403.
+
+Consequences of the second change, stated plainly. The grid is unreachable without script, which the server-rendered version did not require; a `<noscript>` note names the data block as the fallback. Maps are no longer self-contained — a file copied away from its siblings loses its presentation, and the story-map encoding's prohibition on external stylesheets is superseded for this reason. Tooling that grepped rendered markup for `data-story-id` now finds the island's `"storyId"` instead; `update-story-references-section.sh` and `story-oversight.sh` match both. Tests assert on a jsdom render rather than the file's bytes, which is why `jsdom` is a devDependency.
+
+A markdown-table encoding was weighed against this and rejected by the user in favour of keeping the visual grid. It would have been ~34 lines per map with no tooling at all, and it renders on GitHub where the HTML does not.
+
 Trade-off accepted: the renderer is read-modify-write rather than a pure emit, and the data island can in principle be hand-edited into invalid JSON. The renderer fails loudly on that rather than silently, and re-rendering is idempotent and round-trip-tested.
 
 One authoring constraint follows from the encoding: a raw `</script>` inside the island terminates it early, in this renderer and in any browser. The renderer escapes the angle bracket on write, so a rendered map is always safe; a hand-authored island must do the same. The renderer errors rather than emitting a silently truncated map, and both halves are covered by test.
@@ -60,7 +70,7 @@ The normative encoding changes from stacked `<section class="backbone">` with `<
 - Each release slice is a `<tr>` whose row header is `<th class="slice" scope="row">`.
 - Cells are `<td class="cell">`; an activity/release pair with no tasks renders `<td class="cell empty">`.
 - Task cards keep the story-reference layer: `data-story-id`, `data-rfc`, `data-jtbd`, `data-status` are carried on the card element, exactly as before. The grid is additive to the reference layer, never a replacement for it.
-- Each story-bearing card is emitted on a **single line**. `story-oversight.sh` filters whole lines; a pretty-printed multi-line card leaves non-matching lines in the filtered output, drifting the hash and making the ADR-101 AFK-accept carve-out unsatisfiable.
+- Each story-bearing card is emitted on a **single line**. This was originally a correctness constraint: `story-oversight.sh` filtered whole lines, so a multi-line card drifted the hash and made ADR-101's carve-out unsatisfiable. **Under ADR-103 that reason is void** — cards are outside the fingerprint basis entirely. The rule is retained as a readability convention: one card per line keeps a map's diff reviewable.
 - The `<meta>` trace block is preserved verbatim, including `human-oversight` and `oversight-hash`, so `reconcile-story-maps.sh` and `render-story-map-index.sh` are unaffected.
 - The ADR-060 prohibition on inline `style` attributes on data-bearing elements is retained and extended: presentation belongs only in the template's `<style>` block. The reference map that informed this shape carries `style="margin-top:.35rem"` on a row-header span; the renderer must not reproduce that.
 

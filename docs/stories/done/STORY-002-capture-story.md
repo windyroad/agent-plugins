@@ -22,7 +22,7 @@ estimated-effort: M
 
 ## User value (INVEST Valuable)
 
-As a plugin maintainer mid-flow, I want a lightweight `/wr-itil:capture-story` aside skill that captures INVEST-shaped stories with mandatory problem + JTBD traces in a single commit so I can slice an RFC into stories without leaving my current task context.
+In order to record a story the moment I see the need for it, without losing the thread of what I am already doing, as a plugin maintainer mid-flow, I want a lightweight `/wr-itil:capture-story` aside that captures an INVEST-shaped story with its problem and JTBD traces in a single commit.
 
 ## Acceptance criteria (INVEST Testable)
 
@@ -57,3 +57,10 @@ Architect AMEND verdict 2026-05-12 closed (finding 1 single-trailer + finding 2 
 - ADR-060 line 291 (skill description authority).
 - RFC-003 (parent RFC).
 - Commits `b9085b9` + `8280815`.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-001 | STORY-MAP-001: RFC framework Phase 1 + Phase 2 bootstrap | in-progress |

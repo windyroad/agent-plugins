@@ -152,3 +152,24 @@ Memory references:
 ## Ratified Direction - 2026-07-04 interactive decision drain
 
 Build the **full RFC-scoped mechanism**: one-cycle no-op-shim deprecation convention PLUS a dedicated session-start drift-warning detector for retired-hook bindings. Capture the RFC.
+
+## Investigation Task (added 2026-08-07) — may a blocking governance gate degrade to a no-op when its lib is absent?
+
+**The question.** Options: fail-open (current), fail-closed, or fail-loud-then-open. Nothing in force settles it. This is the same partial-presence family as the ticket's own subject — there, a hook is registered but its file is absent; here, a lib is registered by a `source` line and its file is absent. Fix Strategy candidate (a) is verbatim this class and has been orphaned since the 2026-07-04 RCA took (c)+(b), so this is its home.
+
+**What was measured.** `packages/itil/hooks/itil-no-implement-draft-gate.sh` sources two libs, each under `2>/dev/null || exit 0`. Both guards are terminal and both sit above every check, so removing either produces **no gate at all** — not a partial gate. Confirmed by execution: with `lib/story-oversight.sh` deleted, the hook emits nothing for a DRAFT story that it otherwise denies. The comment that used to claim it "degrades to the draft-only gate" was false and is corrected.
+
+**What already landed, so this IT is about the posture and the attribution, not the exposure.** The exposure is mitigated by `packages/itil/scripts/test/gate-lib-ships.bats`, which derives every `source` target from the hook and asserts each ships in `npm pack --dry-run --json` — proven RED by removing `lib/` from the `files` array. The behaviour itself is pinned by a characterization test in `packages/itil/hooks/test/itil-no-implement-draft-gate.bats`.
+
+**The attribution is wrong in four places, and this is the sharper half.** The hook no longer claims ADR-013 Rule 6 as authority for fail-open: Rule 6 governs a *skill* that cannot reach `AskUserQuestion`, and its Continue clause reads "Do NOT silently fail-soft-skip" — it does not authorise a hook that emits nothing. Three ADR bodies still assert that attribution and are untouched:
+
+- **ADR-088** (plugin-staleness surfacer) L30 — `human-oversight: confirmed`, so correcting it is an ordinary body amendment that re-opens ratification.
+- **ADR-093** (mechanical quota-pace throttle) L31 — `human-oversight: unconfirmed`, so its correction rides a first-time ratification, not an amendment; gated on work that has not happened.
+- **ADR-092** (fix-titled commit lifecycle drift, advisory-only) L25 and L71 — `rejected-pending-supersede` with `supersede-ticket: P345`. Amending a rejected ADR in place is the wrong shape; this correction should ride P345's superseding decision.
+
+Two of those are advisory surfaces where fail-open may well be the right posture. The point is that the attribution is wrong regardless of which posture wins.
+
+**The strongest argument available to whoever drains this.** The hook's own header asserts the ADR-090 half is "UNCONDITIONAL — a pure tightening, no config, no opt-in — because putting an ADR-090-mandated check behind a flag would be the decision conflict", and ADR-096 carries the same unconditionality claim. A silent no-op on a missing lib *is* a conditional — an unflagged, undiscoverable one. Reconciling the fail-open posture with an explicit unconditionality claim that two artefacts assert is the crux.
+
+**Prior reasoning, for context rather than authority.** ADR-048 (superseded by ADR-050) weighed a fail-open at a different gate and rejected it "at this scope", reasoning that fail-open "weakens P119's enforcement during the very stop-gap window where the audit-trail-preservation test is load-bearing" — then deferred the general question. ADR-050 carried that forward as a rejected option and IS in force, but scoped to loosening a marker predicate at the manage-problem create-gate, not to missing-lib degradation.
+

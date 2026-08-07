@@ -64,9 +64,6 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-MAP-005 | STORY-MAP-005: Trust the capture-on-correction signal | archived |
-| STORY-MAP-006 | STORY-MAP-006: Decline upstream discovery once and stay declined | archived |
-| STORY-MAP-009 | STORY-MAP-009: Trust that a close does not strand the sibling family | archived |
 | STORY-MAP-002 | STORY-MAP-002: Decompose a fix into coordinated changes | draft |
 | STORY-MAP-004 | STORY-MAP-004: Close the loop with someone who reported a problem | draft |
 | STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |

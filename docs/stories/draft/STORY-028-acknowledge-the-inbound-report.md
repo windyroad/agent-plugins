@@ -8,13 +8,11 @@ jtbd: [JTBD-008, JTBD-301]
 adrs: [ADR-062]
 story-maps: [STORY-MAP-002]
 estimated-effort: S
-human-oversight: confirmed
-oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass, inbound thread)"
 ---
 
 # STORY-028: Acknowledge the report on capture
 
-**Story map:** [← STORY-MAP-002: Decompose a Fix Into Coordinated Changes](../../story-maps/draft/STORY-MAP-002-decompose-a-fix-into-coordinated-changes.html) · A1 (Release 1) — inbound touchpoint
+**Story map:** [← STORY-MAP-002: Take a Problem From Noticed to Resolved](../../story-maps/draft/STORY-MAP-002-take-a-problem-from-noticed-to-resolved.html) · A1 (Release 1) — inbound touchpoint
 **Backbone (inbound thread):** [A1 capture-inbound](027-capture-a-problem-from-an-inbound-channel.md) · A1 acknowledge · [A2 share workaround](029-share-the-workaround-with-the-reporter.md) · [A3/A4 fix underway](030-tell-the-reporter-a-fix-is-underway.md) · [A5 released → verify → close](031-tell-the-reporter-released-and-close-the-loop.md)
 
 ## User value (INVEST Valuable)
@@ -38,3 +36,10 @@ In order that the person who reported the problem knows they were heard and it's
 ## Related
 
 - **STORY-MAP-002** A1 inbound-acknowledge card. First of the per-beat inbound touchpoints. To build.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-002 | STORY-MAP-002: Take a problem from noticed to resolved | draft |

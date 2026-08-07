@@ -131,11 +131,6 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | draft | STORY-015 | The RFC lists its stories before any code is written | M | P251, P399 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-016 | Every step is regression-proven | S | P251 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-017 | Backfill-or-supersede the skeleton RFCs the repudiated mechanism left behind | M | P399, P375 | RFC-005 | STORY-MAP-002 |
-| draft | STORY-018 | Capture the problem in seconds, mid-flow | M | P155 | — | STORY-MAP-002 |
-| draft | STORY-019 | Find the root cause and a workaround → Known Error | M | P170 | — | STORY-MAP-002 |
-| draft | STORY-023 | Ship → verify → problem closes with a real trace; adopter gets the fix | M | P170 | — | STORY-MAP-002 |
-| draft | STORY-026 | Work the RFC's stories one at a time | M | P170 | RFC-005 | STORY-MAP-002 |
-| draft | STORY-027 | Capture a problem reported through an inbound channel | M | P170 | — | STORY-MAP-002 |
 | draft | STORY-028 | Acknowledge the report on capture | S | P170 | — | STORY-MAP-002 |
 | draft | STORY-029 | Share the workaround with the reporter | S | P170 | — | STORY-MAP-002 |
 | draft | STORY-030 | Tell the reporter a fix is underway | S | P170 | — | STORY-MAP-002 |
@@ -150,6 +145,7 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | draft | STORY-040 | AFK loop anchored with the native `/goal` external evaluator | M | P390 | RFC-047 | STORY-MAP-002 |
 | in-progress | STORY-043 | Self-install the quota-state producer | L | P160, P443 | RFC-046 | STORY-MAP-003 |
 | in-progress | STORY-046 | Red-CI denial explains the recovery path | S | P208 | RFC-049 | STORY-MAP-002 |
+
 
 ## Done
 
@@ -169,8 +165,13 @@ Terminal stories, from filesystem truth (`docs/stories/done/`). `Done` is the da
 | STORY-022 | Ratify the story map and its stories after any change | 2026-07-03 | P170 |
 | STORY-024 | Reuse stories already on the map | 2026-07-03 | P170 |
 | STORY-025 | Slice the fix's stories into releases | 2026-07-03 | P170 |
+| STORY-018 | Capture the problem in seconds, mid-flow | 2026-08-05 | P155 |
+| STORY-019 | Find the root cause and a workaround → Known Error | 2026-08-05 | P170 |
+| STORY-023 | Ship → verify → problem closes with a real trace | 2026-08-05 | P170 |
+| STORY-026 | Work the RFC's stories one at a time | 2026-08-05 | P170 |
+| STORY-027 | Capture a problem reported through an inbound channel | 2026-08-05 | P170 |
 
-**Known frontmatter/directory divergence (recorded, not repaired here).** STORY-018, STORY-019, STORY-023, STORY-026 and STORY-027 carry `status: done` in their YAML frontmatter while their files sit in `docs/stories/draft/`. The Rankings table above follows filesystem truth (the reconciler's source), so they render as `draft`; the `## Stories` reverse-trace sections on parent artefacts follow frontmatter, so they render as `done`. `wr-itil-reconcile-stories` does not compare frontmatter `status:` against the containing subdirectory, so it reports neither. Repairing the divergence means either a lifecycle move or a frontmatter edit, both of which `/wr-itil:manage-story` owns and `/wr-itil:reconcile-stories` explicitly does not. Tracked on P417.
+**Frontmatter/directory divergence — repaired 2026-08-06.** STORY-018, STORY-019, STORY-023, STORY-026 and STORY-027 carried `status: done` in frontmatter while sitting in `docs/stories/draft/`. The files were moved to `done/` so both agree, and the rows above follow. Worth knowing for next time: `wr-itil-reconcile-stories` compares the Rankings and Done tables against the filesystem, but never compares a story's own frontmatter against its containing directory — so those two can disagree indefinitely with nothing reporting it. That gap is what let a story map under-report its Live band by five. Tracked on P417.
 
 ## Reconciliation
 

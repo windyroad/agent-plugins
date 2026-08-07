@@ -180,5 +180,4 @@ stops short of implementation.
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-MAP-009 | STORY-MAP-009: Trust that a close does not strand the sibling family | archived |
 | STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |

@@ -15,211 +15,36 @@
   <meta name="reported" content="2026-07-27">
   <meta name="decision-makers" content="Tom Howard">
   <meta name="human-oversight" content="unconfirmed">
-  <style>
-    :root {
-      color-scheme: light dark;
-      --bg: #ffffff; --fg: #1a1a1a; --muted: #565656; --line: #767676;
-      --card: #f6f6f6; --card-line: #767676;
-      --live-fg: #0b5d1e; --live-bg: #e4f4e8; --live-line: #0b5d1e;
-      --next-fg: #0b3a66; --next-bg: #e2eefb; --next-line: #0b3a66;
-      --later-fg: #6b3a00; --later-bg: #f6ead6; --later-line: #6b3a00;
-      --focus: #0b3a66;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #16181c; --fg: #f2f3f5; --muted: #b6bac2; --line: #8a919c;
-        --card: #1f2228; --card-line: #8a919c;
-        --live-fg: #7fe0a0; --live-bg: #123020; --live-line: #7fe0a0;
-        --next-fg: #97c6f5; --next-bg: #10263c; --next-line: #97c6f5;
-        --later-fg: #f0c58a; --later-bg: #33260f; --later-line: #f0c58a;
-        --focus: #97c6f5;
-      }
-    }
-    :root[data-theme="light"] {
-      color-scheme: light;
-      --bg: #ffffff; --fg: #1a1a1a; --muted: #565656; --line: #767676;
-      --card: #f6f6f6; --card-line: #767676;
-      --live-fg: #0b5d1e; --live-bg: #e4f4e8; --live-line: #0b5d1e;
-      --next-fg: #0b3a66; --next-bg: #e2eefb; --next-line: #0b3a66;
-      --later-fg: #6b3a00; --later-bg: #f6ead6; --later-line: #6b3a00;
-      --focus: #0b3a66;
-    }
-    :root[data-theme="dark"] {
-      color-scheme: dark;
-      --bg: #16181c; --fg: #f2f3f5; --muted: #b6bac2; --line: #8a919c;
-      --card: #1f2228; --card-line: #8a919c;
-      --live-fg: #7fe0a0; --live-bg: #123020; --live-line: #7fe0a0;
-      --next-fg: #97c6f5; --next-bg: #10263c; --next-line: #97c6f5;
-      --later-fg: #f0c58a; --later-bg: #33260f; --later-line: #f0c58a;
-      --focus: #97c6f5;
-    }
-    * { box-sizing: border-box; }
-    body { font-family: system-ui, sans-serif; color: var(--fg); background: var(--bg);
-           max-width: 1500px; margin: 0 auto; padding: 1.5rem 1rem 3rem; line-height: 1.5; }
-    h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
-    p { max-width: 74ch; }
-    .lead { color: var(--muted); }
-    a { color: var(--focus); }
-    /* Required on every interactive element, not just links: the theme toggle
-       (if a host adds one) and the scroll region both take focus. */
-    /* :focus first as a fallback for engines without :focus-visible; the
-       :focus-visible rule below then narrows it to keyboard interaction.
-       No border-radius here — it clips the content of the overflow:auto
-       scroll region for as long as it holds focus. */
-    a:focus, button:focus, [tabindex]:focus { outline: 3px solid var(--focus); outline-offset: 2px; }
-    a:focus-visible,
-    button:focus-visible,
-    [tabindex]:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-    .legend { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin: 1rem 0 1.25rem; padding: 0; list-style: none; }
-    .legend li { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .9rem; }
-    .badge { display: inline-flex; align-items: center; gap: .3rem; font-size: .75rem; font-weight: 700;
-             padding: .1rem .45rem; border-radius: 999px; border: 1px solid; white-space: nowrap; }
-    /* Release state is carried by the badge's text label and by a glyph in real
-       markup (see .b-glyph). The glyph is aria-hidden — it is a second VISUAL
-       channel so colour is never the sole one, and assistive tech already has
-       the label. It must not be generated content: in forced-colors mode the
-       badge backgrounds all collapse to Canvas, and the glyph becomes the only
-       thing distinguishing the three states. */
-    .b-live  { color: var(--live-fg);  background: var(--live-bg);  border-color: var(--live-line); }
-    .b-next  { color: var(--next-fg);  background: var(--next-bg);  border-color: var(--next-line); }
-    .b-later { color: var(--later-fg); background: var(--later-bg); border-color: var(--later-line); }
-
-    .scroll { overflow-x: auto; padding-bottom: .5rem; }
-    table.map { border-collapse: collapse; width: 100%; min-width: 940px; }
-    table.map caption { text-align: left; color: var(--muted); font-size: .85rem; margin-bottom: .5rem; }
-    /* Activity headers across the top are the backbone: the user journey. */
-    thead th.act { text-align: left; vertical-align: bottom; padding: .5rem .6rem; font-size: .9rem;
-                   border-bottom: 3px solid var(--fg); width: 18%; }
-    thead th.act .jtbd { display: block; font-weight: 400; color: var(--muted); font-size: .75rem; margin-top: .2rem; }
-    thead td.corner { border-bottom: 3px solid var(--fg); }
-    /* Each row is one release slice. A row read left to right is everything
-       that ships together. */
-    th.slice { text-align: left; vertical-align: top; padding: .7rem .6rem; width: 10%; min-width: 96px;
-               border-bottom: 2px solid var(--fg); position: sticky; left: 0; background: var(--bg); }
-    th.slice .s-name { font-size: .95rem; display: block; margin-top: .35rem; margin-bottom: .35rem; }
-    th.slice .s-note { font-weight: 400; color: var(--muted); font-size: .75rem; display: block; margin-top: .35rem; }
-    td.cell { vertical-align: top; padding: .5rem; border-bottom: 2px solid var(--fg); border-left: 1px solid var(--line); }
-    /* An empty cell is meaningful — it says this activity ships nothing in this
-       release — so the hatch is drawn in the 3:1 border tone, not a tint. */
-    td.cell.empty { background: repeating-linear-gradient(45deg, transparent, transparent 7px, var(--line) 7px, var(--line) 8px); }
-    .task { border: 1px solid var(--card-line); border-radius: 6px; background: var(--card); padding: .5rem .55rem; }
-    .task + .task { margin-top: .5rem; }
-    .task .t-title { font-size: .85rem; }
-    .task .t-value { display: block; font-size: .75rem; color: var(--muted); margin-top: .25rem; }
-    .task .t-ref { display: block; font-size: .75rem; color: var(--muted); margin-top: .3rem; }
-    .trace { margin-top: 2rem; border-top: 1px solid var(--line); padding-top: 1rem; }
-    .trace h2 { font-size: 1.125rem; }
-    .vh { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-          overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-    .tasks { list-style: none; margin: 0; padding: 0; }
-    .tasks li + li { margin-top: .5rem; }
-    .b-glyph { font-weight: 900; }
-    .genfrom { color: var(--muted); font-size: .8rem; margin-top: 1.5rem; }
-    @media (forced-colors: active) {
-      /* background-image is not part of the forced-colors UA cascade, so the
-         hatch would paint literal #767676 over the user's chosen Canvas in
-         Chromium and vanish entirely in Firefox. Restate it in system colours. */
-      td.cell.empty { background-image: repeating-linear-gradient(45deg, Canvas, Canvas 7px, GrayText 7px, GrayText 8px); }
-      .badge { forced-color-adjust: none; border: 1px solid CanvasText; }
-    }
-    /* Sticky row headers are kept at narrow widths: this is exactly where the
-       table scrolls furthest, so losing the orientation anchor costs most. The
-       column is narrowed and its note dropped rather than unpinned. */
-    @media (max-width: 640px) {
-      th.slice { min-width: 72px; padding: .5rem .35rem; font-size: .85rem; }
-      th.slice .s-note { display: none; }
-    }
-  </style>
+  <link rel="stylesheet" href="../story-map.css">
+  <script src="../story-map.js" defer></script>
 </head>
 <body>
   <main>
-  <h1>Trust the AFK loop's autonomous conduct</h1>
-  <p class="lead">A story map for the developer who starts an unattended run and walks away. Read across the top for the journey the loop goes through on my behalf — it notices something, records it, decides what to do, closes it out, and hands back to me. Read down the rows for release bands. The empty cells are the parts of that journey nobody has built yet.</p>
-
-  <ul class="legend" aria-label="Status legend">
-    <li><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>R1</span> stories exist</li>
-    <li><span class="badge b-later"><span class="b-glyph" aria-hidden="true">◇</span>R2</span> unbuilt</li>
-  </ul>
-
-  <div class="scroll" tabindex="0" role="region" aria-label="Story map grid">
-    <table class="map">
-      <caption>5 journey activities across the top; 2 release bands down the side. Read a row left to right for everything that ships in one release. A cell with no cards means that activity ships nothing in that release.</caption>
-      <thead>
-        <tr>
-          <td class="corner"></td>
-          <th class="act" scope="col">A. Notice something <span class="jtbd">JTBD-006 — progress the backlog while I am away</span></th>
-          <th class="act" scope="col">B. Record it <span class="jtbd">claims tested against the tree</span></th>
-          <th class="act" scope="col">C. Decide what to do</th>
-          <th class="act" scope="col">D. Close it out <span class="jtbd">JTBD-001 — enforce governance without slowing down</span></th>
-          <th class="act" scope="col">E. Hand back to me <span class="jtbd">JTBD-011 — a correction holds everywhere</span></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>R1</span> <span class="s-name">Now</span> <span class="s-note">stories exist</span></th>
-          <td class="cell">
-            <ul class="tasks" role="list">
-            <li><div class="task" data-story-id="STORY-047" data-rfc="RFC-050" data-jtbd="JTBD-006" data-status="draft"><span class="t-title">The offer to capture a correction fires only when I actually corrected the agent, not on the framework's own prompts</span> <span class="t-value">Value: a rare, pointed signal I can trust, instead of a nudge on nearly every iteration.</span> <span class="t-ref">Traces: STORY-047, P430 (inbound #257)</span></div></li>
-            <li><div class="task" data-story-id="STORY-048" data-rfc="RFC-051" data-jtbd="JTBD-006" data-status="draft"><span class="t-title">A decision to decline upstream discovery is remembered, so I am not asked again</span> <span class="t-value">Value: declining once means declining, rather than a question that returns every run.</span> <span class="t-ref">Traces: STORY-048, P431 (inbound #187)</span></div></li>
-            </ul>
-          </td>
-          <td class="cell">
-            <ul class="tasks" role="list">
-            <li><div class="task" data-story-id="STORY-053" data-rfc="RFC-057" data-jtbd="JTBD-002" data-status="draft"><span class="t-title">A captured ticket tests its claims against the tree and labels the ones it could not run as guesses</span> <span class="t-value">Value: no phantom tickets, and no fix aimed at a problem a quick check would have disproved.</span> <span class="t-ref">Traces: STORY-053, P434 (inbound #202/#339)</span></div></li>
-            </ul>
-          </td>
-          <td class="cell">
-            <ul class="tasks" role="list">
-            <li><div class="task" data-story-id="STORY-050" data-rfc="RFC-053" data-jtbd="JTBD-011" data-status="draft"><span class="t-title">A reviewer reads the version I actually have, not the one that has moved on since</span> <span class="t-value">Value: the answer I get back describes my tree.</span> <span class="t-ref">Traces: STORY-050, P439</span></div></li>
-            </ul>
-          </td>
-          <td class="cell">
-            <ul class="tasks" role="list">
-            <li><div class="task" data-story-id="STORY-052" data-rfc="RFC-056" data-jtbd="JTBD-001" data-status="draft"><span class="t-title">Before a close lands, the still-open siblings in the same family are surfaced</span> <span class="t-value">Value: related work stays coordinated; a close never quietly orphans its siblings.</span> <span class="t-ref">Traces: STORY-052, P433 (inbound #187)</span></div></li>
-            </ul>
-          </td>
-          <td class="cell">
-            <ul class="tasks" role="list">
-            <li><div class="task" data-story-id="STORY-049" data-rfc="RFC-052" data-jtbd="JTBD-011" data-status="draft"><span class="t-title">When the loop needs a URL from me, it asks in a shape I can paste into</span> <span class="t-value">Value: the handover is answerable on a phone, not a form that assumes I am at the machine.</span> <span class="t-ref">Traces: STORY-049, P438</span></div></li>
-            </ul>
-          </td>
-        </tr>
-
-        <tr>
-          <th class="slice" scope="row"><span class="badge b-later"><span class="b-glyph" aria-hidden="true">◇</span>R2</span> <span class="s-name">Open</span> <span class="s-note">unbuilt</span></th>
-          <td class="cell empty"></td>
-          <td class="cell">
-            <ul class="tasks" role="list">
-            <li><div class="task"><span class="t-title">A ticket the loop writes reads as though a person wrote it for the next reader</span> <span class="t-value">Value: the backlog stays readable rather than accumulating machine prose.</span> <span class="t-ref">Traces: no story yet</span></div></li>
-            </ul>
-          </td>
-          <td class="cell">
-            <ul class="tasks" role="list">
-            <li><div class="task"><span class="t-title">The loop's choice of what to work next is legible to me afterwards</span> <span class="t-value">Value: I can tell why it picked that ticket without reconstructing the ranking myself.</span> <span class="t-ref">Traces: no story yet</span></div></li>
-            </ul>
-          </td>
-          <td class="cell empty"></td>
-          <td class="cell empty"></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <section class="trace" aria-labelledby="trace-h">
-    <h2 id="trace-h">What this map traces to</h2>
-    <p><strong>Persona:</strong> developer — starts an unattended run and is not watching it. plugin-developer secondary, for the handover activities.</p>
-    <p><strong>Jobs mapped:</strong> JTBD-006 (progress the backlog while I am away) is the spine. JTBD-002 (ship with confidence) governs what the loop is allowed to assert. JTBD-001 (enforce governance without slowing down) governs the close. JTBD-011 (a correction to conduct holds everywhere) governs the handover.</p>
-    <p><strong>Problems this closes:</strong> P430 (correction nudge over-fires), P431 (a decline is not remembered), P433 (a close strands its sibling family), P434 (tickets assert untested claims), P438 and P439 (handovers the developer cannot answer from a phone; reviewers reading stale versions).</p>
-    <p><strong>Decisions the journey rests on:</strong> ADR-101 (an AFK loop may accept and implement a story that only decomposes already-ratified substance).</p>
-    <p><strong>Open questions:</strong> Consolidated on 2026-08-05, absorbing four single-story stub maps — STORY-MAP-005 (correction signal), 007 (handovers), 009 (sibling family) and 010 (verified claims), now archived; each held one card, and all four cards sit on this journey. STORY-048 also appears on STORY-MAP-004, seen there from the reporter's side. Two cells carry no story yet: how the loop explains its own selection, and whether what it writes reads as human prose.</p>
-  </section>
-
+    <h1 id="story-map-title">Trust the AFK loop's autonomous conduct</h1>
+    <p class="lead" id="story-map-lead">A story map for the developer who starts an unattended run and walks away. Read across the top for the journey the loop goes through on my behalf — it notices something, records it, decides what to do, closes it out, and hands back to me. Read down the rows for release bands. The empty cells are the parts of that journey nobody has built yet.</p>
+    <ul class="legend" id="story-map-legend" role="list" aria-label="Status legend"></ul>
+    <div id="story-map">
+      <p class="lead">This map's grid has not been drawn. It is built from the data block
+      at the end of this file by <code>story-map.js</code>, which sits alongside the maps —
+      so this message means the script did not load or did not run. The data itself is
+      intact: open this file in a text editor, or use View Source, and read the block with
+      <code>id="story-map-data"</code>.</p>
+    </div>
+    <section class="trace" id="story-map-trace-section" aria-labelledby="trace-h" hidden>
+      <h2 id="trace-h">What this map traces to</h2>
+      <div id="story-map-trace"></div>
+    </section>
   </main>
 
-  <p class="genfrom">Everything above is rendered by <code>wr-itil-render-story-map</code> from the data block below. Edit the data block, then re-render &mdash; edits made anywhere else are overwritten.</p>
+  <footer>
+    <p class="genfrom">This file is the map. The grid is drawn from the data block below;
+    edit that block, or use <code>wr-itil-story-map-edit</code>, then re-render with
+    <code>wr-itil-render-story-map</code>.</p>
+  </footer>
 
   <script id="story-map-data" type="application/json">
 {
+  "humanOversight": "unconfirmed",
   "storyMapId": "STORY-MAP-011",
   "title": "Trust the AFK loop's autonomous conduct",
   "status": "draft",
@@ -227,7 +52,6 @@
   "secondaryPersona": "plugin-developer",
   "reported": "2026-07-27",
   "decisionMakers": "Tom Howard",
-  "humanOversight": "unconfirmed",
   "traces": {
     "problems": [
       "P430",
@@ -288,13 +112,11 @@
     {
       "id": "r1",
       "name": "Now",
-      "badge": "R1",
       "note": "stories exist"
     },
     {
       "id": "r2",
       "name": "Open",
-      "badge": "R2",
       "note": "unbuilt"
     }
   ],
@@ -303,80 +125,66 @@
       "activity": "notice",
       "release": "r1",
       "title": "The offer to capture a correction fires only when I actually corrected the agent, not on the framework's own prompts",
-      "value": "Value: a rare, pointed signal I can trust, instead of a nudge on nearly every iteration.",
       "storyId": "STORY-047",
       "rfc": "RFC-050",
       "jtbd": "JTBD-006",
-      "storyStatus": "draft",
       "ref": "STORY-047, P430 (inbound #257)"
     },
     {
       "activity": "notice",
       "release": "r1",
       "title": "A decision to decline upstream discovery is remembered, so I am not asked again",
-      "value": "Value: declining once means declining, rather than a question that returns every run.",
       "storyId": "STORY-048",
       "rfc": "RFC-051",
       "jtbd": "JTBD-006",
-      "storyStatus": "draft",
       "ref": "STORY-048, P431 (inbound #187)"
     },
     {
       "activity": "record",
       "release": "r1",
       "title": "A captured ticket tests its claims against the tree and labels the ones it could not run as guesses",
-      "value": "Value: no phantom tickets, and no fix aimed at a problem a quick check would have disproved.",
       "storyId": "STORY-053",
       "rfc": "RFC-057",
       "jtbd": "JTBD-002",
-      "storyStatus": "draft",
       "ref": "STORY-053, P434 (inbound #202/#339)"
     },
     {
       "activity": "close",
       "release": "r1",
       "title": "Before a close lands, the still-open siblings in the same family are surfaced",
-      "value": "Value: related work stays coordinated; a close never quietly orphans its siblings.",
       "storyId": "STORY-052",
       "rfc": "RFC-056",
       "jtbd": "JTBD-001",
-      "storyStatus": "draft",
       "ref": "STORY-052, P433 (inbound #187)"
     },
     {
       "activity": "hand",
       "release": "r1",
       "title": "When the loop needs a URL from me, it asks in a shape I can paste into",
-      "value": "Value: the handover is answerable on a phone, not a form that assumes I am at the machine.",
       "storyId": "STORY-049",
       "rfc": "RFC-052",
       "jtbd": "JTBD-011",
-      "storyStatus": "draft",
       "ref": "STORY-049, P438"
     },
     {
       "activity": "decide",
       "release": "r1",
       "title": "A reviewer reads the version I actually have, not the one that has moved on since",
-      "value": "Value: the answer I get back describes my tree.",
       "storyId": "STORY-050",
       "rfc": "RFC-053",
       "jtbd": "JTBD-011",
-      "storyStatus": "draft",
       "ref": "STORY-050, P439"
     },
     {
       "activity": "decide",
       "release": "r2",
       "title": "The loop's choice of what to work next is legible to me afterwards",
-      "value": "Value: I can tell why it picked that ticket without reconstructing the ranking myself.",
       "ref": "no story yet"
     },
     {
       "activity": "record",
       "release": "r2",
       "title": "A ticket the loop writes reads as though a person wrote it for the next reader",
-      "value": "Value: the backlog stays readable rather than accumulating machine prose.",
       "ref": "no story yet"
     }
   ],
@@ -385,9 +193,158 @@
     "jobs": "JTBD-006 (progress the backlog while I am away) is the spine. JTBD-002 (ship with confidence) governs what the loop is allowed to assert. JTBD-001 (enforce governance without slowing down) governs the close. JTBD-011 (a correction to conduct holds everywhere) governs the handover.",
     "problems": "P430 (correction nudge over-fires), P431 (a decline is not remembered), P433 (a close strands its sibling family), P434 (tickets assert untested claims), P438 and P439 (handovers the developer cannot answer from a phone; reviewers reading stale versions).",
     "decisions": "ADR-101 (an AFK loop may accept and implement a story that only decomposes already-ratified substance).",
-    "open": "Consolidated on 2026-08-05, absorbing four single-story stub maps — STORY-MAP-005 (correction signal), 007 (handovers), 009 (sibling family) and 010 (verified claims), now archived; each held one card, and all four cards sit on this journey. STORY-048 also appears on STORY-MAP-004, seen there from the reporter's side. Two cells carry no story yet: how the loop explains its own selection, and whether what it writes reads as human prose."
+    "open": "Consolidated on 2026-08-05 from four single-story stub maps — correction signal, handovers, sibling family and verified claims. Each held one card, and all four cards sit on this journey; the stubs were removed once their stories moved here. STORY-048 also appears on STORY-MAP-004, seen there from the reporter's side. Two cells carry no story yet: how the loop explains its own selection, and whether what it writes reads as human prose."
   }
 }
   </script>
+  <script id="story-map-status" type="application/json">
+{
+  "rows": {
+    "r1": "unproposed",
+    "r2": "unproposed"
+  },
+  "status": {
+    "STORY-047": "accepted",
+    "STORY-048": "draft",
+    "STORY-053": "draft",
+    "STORY-052": "draft",
+    "STORY-049": "draft",
+    "STORY-050": "draft"
+  },
+  "values": {
+    "STORY-047": {
+      "value": [
+        {
+          "t": "keep the capture-on-correction nudge meaningful — so that seeing it means a real correction happened, rather than the framework's own iteration prompt containing the words \"do not\""
+        }
+      ],
+      "who": [
+        {
+          "t": "developer running autonomous backlog loops"
+        }
+      ],
+      "want": [
+        {
+          "t": "the detector to know who authored the prompt, so an absent user is never nudged to capture a correction they did not make, and a real correction still lands as a durable problem record."
+        }
+      ]
+    },
+    "STORY-048": {
+      "value": [
+        {
+          "t": "have \"no thanks\" stay answered — so that declining upstream discovery costs nothing rather than a full pre-flight subprocess on every loop, forever"
+        }
+      ],
+      "who": [
+        {
+          "t": "developer running autonomous backlog loops"
+        }
+      ],
+      "want": [
+        {
+          "t": "the staleness check to read the channel list it was given, so a recorded decline silent-passes the way an absent config already does."
+        }
+      ]
+    },
+    "STORY-053": {
+      "value": [
+        {
+          "t": "be able to trust a problem ticket as a statement of what is actually true, rather than a transcript of what somebody asserted"
+        }
+      ],
+      "who": [
+        {
+          "t": "developer who plans fixes from those tickets and has no separate review step to catch a wrong premise"
+        }
+      ],
+      "want": [
+        {
+          "t": "capture to test the claims that can be tested against the tree, and to mark the ones it could not test as guesses instead of writing them in the same voice as findings. The cost of not doing this is already on the record. One inbound report asserted a component was missing when it was in fact exported, and the resulting ticket was a phantom that no capture check would have caught. Another stated a root-cause mechanism nobody had executed; it was replicated across the ticket body and came close to steering a fix at a problem that did not exist. Both surfaces already verify carefully — they check for duplicates, and they ask whether a parent ticket should absorb the scope — but every check they run asks a question about the backlog, and none asks whether the ticket is true. This story adds the missing question at the one moment it is cheap to answer."
+        }
+      ]
+    },
+    "STORY-052": {
+      "value": [
+        {
+          "t": "know that closing a ticket settles the work it belongs with, rather than quietly leaving related tickets behind"
+        }
+      ],
+      "who": [
+        {
+          "t": "developer draining a WSJF backlog — often while away from the keyboard"
+        }
+      ],
+      "want": [
+        {
+          "t": "each close path to tell me which tickets the closing one is recorded as composing with are still outstanding, and to put that call in front of me instead of making it silently or blocking on it. The edges already exist. Maintainers have authored 212 `"
+        },
+        {
+          "t": "Composes with",
+          "em": true
+        },
+        {
+          "t": "` references across the open, known-error and verifying corpus, and nothing reads a single one of them. Twenty-nine tickets have already closed naming a sibling that is still open or known-error today; in none of those closes was the edge surfaced, so nobody decided whether it should have closed too. This story makes the authored edge do work at the one moment it matters."
+        }
+      ]
+    },
+    "STORY-049": {
+      "value": [
+        {
+          "t": "paste a long URL without fighting a bounded-option picker — so that handing the agent a link, a token or a path costs one gesture instead of three corrections"
+        }
+      ],
+      "who": [
+        {
+          "t": "developer"
+        }
+      ],
+      "want": [
+        {
+          "t": "the assistant to present one copyable block per free-text item. The title names the witnessed instance. The criteria below cover the whole unbounded-input class: URL, token, ID, file path."
+        }
+      ]
+    },
+    "STORY-050": {
+      "value": [
+        {
+          "t": "get a review of the version I actually have — so that a round-trip is spent on problems that are still real rather than on ones I fixed before I asked"
+        }
+      ],
+      "who": [
+        {
+          "t": "developer"
+        }
+      ],
+      "want": [
+        {
+          "t": "the assistant to establish that an outside reviewer can reach the current content before it relays anything to them. The title names the witnessed instance, an external code review. The criteria below cover the whole class: any relay of a repository artefact to a party outside the session, and both staleness routes — commits that exist only locally, and a reader whose copy is older than the working tree."
+        }
+      ]
+    }
+  },
+  "hrefs": {
+    "STORY-047": "../../stories/accepted/STORY-047-correction-nudge-fires-only-on-user-authored-prompts.md",
+    "STORY-048": "../../stories/draft/STORY-048-inbound-discovery-preflight-honours-an-empty-channel-list.md",
+    "STORY-053": "../../stories/draft/STORY-053-test-claims-against-the-tree-and-label-the-untested-ones.md",
+    "STORY-052": "../../stories/draft/STORY-052-surface-still-outstanding-family-members-before-a-close.md",
+    "STORY-049": "../../stories/draft/STORY-049-ask-for-a-url-in-a-shape-i-can-paste-into.md",
+    "STORY-050": "../../stories/draft/STORY-050-have-my-reviewer-read-the-version-i-actually-have.md",
+    "JTBD-006": "../../jtbd/developer/JTBD-006-work-backlog-afk.proposed.md",
+    "P430": "../../problems/known-error/430-itil-correction-detect-hook-false-positives-on-afk-orchestrator-prompt-text.md",
+    "P431": "../../problems/known-error/431-check-upstream-cache-staleness-misfires-on-declined-permanently-empty-channels.md",
+    "JTBD-002": "../../jtbd/developer/JTBD-002-ship-with-confidence.proposed.md",
+    "P434": "../../problems/known-error/434-capture-flows-write-unverified-premise-and-root-cause-claims-as-fact.md",
+    "JTBD-001": "../../jtbd/developer/JTBD-001-enforce-governance.proposed.md",
+    "P433": "../../problems/known-error/433-transition-review-run-retro-lack-sibling-family-completeness-scan-before-close.md",
+    "JTBD-011": "../../jtbd/developer/JTBD-011-corrected-conduct-holds-everywhere.proposed.md",
+    "P438": "../../problems/known-error/438-assistant-routes-free-text-collection-through-askuserquestion-not-copyable-blocks.md",
+    "P439": "../../problems/known-error/439-external-review-round-trips-waste-cycles-on-stale-repo-artifacts.md",
+    "JTBD-101": "../../jtbd/plugin-developer/JTBD-101-extend-suite.proposed.md",
+    "ADR-101": "../../decisions/101-afk-accept-carve-out-for-pure-decomposition-stories.superseded.md",
+    "STORY-MAP-004": "STORY-MAP-004-close-the-loop-with-someone-who-reported-a-problem.html"
+  }
+}
+  </script>
+
 </body>
 </html>

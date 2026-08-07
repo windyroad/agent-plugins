@@ -8,14 +8,11 @@ jtbd: [JTBD-008]
 rfcs: [RFC-005]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
-oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass)"
-human-oversight: confirmed
-oversight-hash: 3c662bdcd47c25cf47b29f3513c0eac42a0c0ae27a57713849ef2822fa1fc5f7
 ---
 
 # STORY-021: Add the fix's new stories to the map
 
-**Story map:** [← STORY-MAP-002: Decompose a Fix Into Coordinated Changes](../../story-maps/draft/STORY-MAP-002-decompose-a-fix-into-coordinated-changes.html) · A3 (Release 1)
+**Story map:** [← STORY-MAP-002: Take a Problem From Noticed to Resolved](../../story-maps/draft/STORY-MAP-002-take-a-problem-from-noticed-to-resolved.html) · A3 (Release 1)
 **Siblings (A3):** [start the map](020-start-the-jobs-story-map.md) · [ratify](022-ratify-the-story-map-and-its-stories.md) · [create RFC](015-rfc-authoring-is-pre-implementation-story-map.md) · [reuse](024-reuse-stories-already-on-the-map.md) · [slice](025-slice-the-fixs-stories-into-releases.md)
 
 ## User value (INVEST Valuable)
@@ -43,3 +40,10 @@ In order that no part of a coordinated fix slips through the cracks — each cha
 - **STORY-MAP-002** A3 "add-to-map" card.
 - **ADR-089** (every RFC has ≥1 story) · **ADR-090** (added stories carry a drift-invalidated oversight marker).
 - Implementation tracked in **P404**.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-002 | STORY-MAP-002: Take a problem from noticed to resolved | draft |

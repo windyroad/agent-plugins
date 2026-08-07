@@ -8,8 +8,6 @@ jtbd: [JTBD-301]
 rfcs: [RFC-028]
 story-maps: [STORY-MAP-004]
 estimated-effort: M
-human-oversight: confirmed
-oversight-hash: 25afedba4f3e1cdff7f4742dce1635519871fae6e3b4f117b0fbc2ff6ba77b41
 ---
 
 # STORY-045: Outbound lifecycle comments generated from real issue context
@@ -55,3 +53,10 @@ Symmetric to the inbound I3 generation-prompt section already shipped in the sam
 ## Related
 
 (captured via /wr-itil:capture-story during the 2026-07-15 AFK P376 iteration; expand at next /wr-itil:manage-story invocation)
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-004 | STORY-MAP-004: Close the loop with someone who reported a problem | draft |

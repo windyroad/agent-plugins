@@ -9,14 +9,11 @@ rfcs: [RFC-005]
 story-maps: [STORY-MAP-002]
 adrs: [ADR-090]
 estimated-effort: L
-oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass); acceptance amended to encode the map-first, two-option ratification UX the user pinned"
-human-oversight: confirmed
-oversight-hash: adcd7b2c5defc6f8362b73e1b478fc2f0195da24e50ce96ef23becd9ff314958
 ---
 
 # STORY-022: Ratify the story map and its stories after any change
 
-**Story map:** [← STORY-MAP-002: Decompose a Fix Into Coordinated Changes](../../story-maps/draft/STORY-MAP-002-decompose-a-fix-into-coordinated-changes.html) · A3 (Release 1)
+**Story map:** [← STORY-MAP-002: Take a Problem From Noticed to Resolved](../../story-maps/draft/STORY-MAP-002-take-a-problem-from-noticed-to-resolved.html) · A3 (Release 1)
 **Siblings (A3):** [start the map](020-start-the-jobs-story-map.md) · [add to map](021-add-the-fixs-stories-to-the-map.md) · [create RFC](015-rfc-authoring-is-pre-implementation-story-map.md) · [reuse](024-reuse-stories-already-on-the-map.md) · [slice](025-slice-the-fixs-stories-into-releases.md)
 
 ## User value (INVEST Valuable)
@@ -44,3 +41,10 @@ In order to trust that a fix is built on a map a human actually reviewed — not
 - **Implementation exemplar:** this map (STORY-MAP-002), hand-authored + ratified end-to-end this session (through two drift-invalidation cycles), is the golden reference for the output this capability should reproduce (see P404).
 - **STORY-MAP-002** A3 "ratify" card. **ADR-090** — the authority (drift-invalidated marker; RFC references only ratified stories).
 - Implementation tracked in **P404** (Phase 2).
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-002 | STORY-MAP-002: Take a problem from noticed to resolved | draft |

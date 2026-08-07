@@ -8,13 +8,11 @@ jtbd: [JTBD-008]
 adrs: [ADR-022]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
-human-oversight: confirmed
-oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story ratification pass; reworked record→find-via-RCA before ratifying)"
 ---
 
 # STORY-019: Find the root cause and a workaround → Known Error
 
-**Story map:** [← STORY-MAP-002: Decompose a Fix Into Coordinated Changes](../../story-maps/draft/STORY-MAP-002-decompose-a-fix-into-coordinated-changes.html) · A2 (Release 1)
+**Story map:** [← STORY-MAP-002: Take a Problem From Noticed to Resolved](../../story-maps/draft/STORY-MAP-002-take-a-problem-from-noticed-to-resolved.html) · A2 (Release 1)
 **Backbone:** [A1 capture](018-capture-the-problem-mid-flow.md) · A2 root cause · A3 decompose ([start map](020-start-the-jobs-story-map.md) …) · [A4 work the stories](014-author-first-work-problems-afk.md) · [A5 ship](023-ship-verify-and-close-with-a-real-trace.md)
 
 ## User value (INVEST Valuable)
@@ -39,3 +37,10 @@ In order to know what to actually fix — the *root cause*, not a symptom — an
 ## Related
 
 - **STORY-MAP-002** A2 card. **ADR-022** — Known Error semantics. Shipped via `/wr-itil:manage-problem` + `transition-problem`.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-002 | STORY-MAP-002: Take a problem from noticed to resolved | draft |

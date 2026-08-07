@@ -8,13 +8,11 @@ jtbd: [JTBD-008, JTBD-006]
 rfcs: [RFC-005]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
-human-oversight: confirmed
-oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass; value reworked to delivering each INVEST story's value)"
 ---
 
 # STORY-026: Work the RFC's stories one at a time
 
-**Story map:** [← STORY-MAP-002: Decompose a Fix Into Coordinated Changes](../../story-maps/draft/STORY-MAP-002-decompose-a-fix-into-coordinated-changes.html) · A4 (Release 1)
+**Story map:** [← STORY-MAP-002: Take a Problem From Noticed to Resolved](../../story-maps/draft/STORY-MAP-002-take-a-problem-from-noticed-to-resolved.html) · A4 (Release 1)
 **Backbone:** [A1 capture](018-capture-the-problem-mid-flow.md) · [A2 root cause](019-record-root-cause-and-workaround.md) · A3 decompose ([start map](020-start-the-jobs-story-map.md) …) · A4 work · [A5 ship](023-ship-verify-and-close-with-a-real-trace.md)
 
 ## User value (INVEST Valuable)
@@ -38,3 +36,10 @@ In order to deliver the value of each story in turn — every one an INVEST-valu
 ## Related
 
 - **STORY-MAP-002** A4 card. Implemented by the work-the-problem traversal (STORY-005, MAP-001); ADR-089 fallback-removal in P404.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-002 | STORY-MAP-002: Take a problem from noticed to resolved | draft |

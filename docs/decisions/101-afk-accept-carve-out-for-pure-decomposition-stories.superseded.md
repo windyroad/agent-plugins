@@ -1,5 +1,5 @@
 ---
-status: "proposed"
+status: "superseded"
 date: 2026-07-26
 human-oversight: confirmed
 oversight-date: 2026-07-27
@@ -10,9 +10,35 @@ consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: []
 reassessment-date: 2026-10-26
 amends: [ADR-060, ADR-090, ADR-095, ADR-096]
+superseded-by: ADR-103
 ---
 
 # An AFK loop may accept and implement a story that only decomposes already-ratified substance
+
+> **Superseded by [ADR-103](103-a-release-row-is-the-rfc-and-the-map-is-the-approval-surface.proposed.md) on 2026-08-07, and its machinery removed.**
+>
+> This carve-out existed for one reason: ADR-095 compels a card onto the map when
+> a story is captured, and under ADR-090 drift-invalidation that re-opened the
+> map's ratification — so authoring a story broke the very condition the story
+> then had to satisfy. The carve-out worked around it by hashing the map with
+> that story's own card excluded.
+>
+> ADR-103 removed the cause instead. Rows and the cards in them are scheduling,
+> not substance, so they sit outside the fingerprint basis entirely and adding
+> one no longer drifts anything. With nothing left to exclude, the map leg was a
+> no-op. ADR-103 also made the map the approval surface, so the question this
+> ADR answered — may a machine accept a *story* without human ratification — no
+> longer arises: stories are not separately ratified.
+>
+> Removed with it: `check-afk-accept-eligible.sh` and its shim,
+> `oversight_content_hash_excluding_stories`, `oversight_map_leg_ok`,
+> `oversight_is_pure_decomposition`, `oversight_declares_pure_decomposition`,
+> `mark-story-oversight-confirmed --pure-decomposition`,
+> `detect-unratified-stories-maps --with-afk-accepted`, and the
+> `afk_accept_pure_decomposition` config key. No story in the corpus ever
+> declared `afk-accept: pure-decomposition`, so nothing was ever accepted under
+> it — the retirement is inert for adopters as well as for this repo.
+
 
 ## Context and Problem Statement
 

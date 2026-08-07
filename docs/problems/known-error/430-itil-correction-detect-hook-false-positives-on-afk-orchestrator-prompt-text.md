@@ -113,5 +113,4 @@ the hook still fires.
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-MAP-005 | STORY-MAP-005: Trust the capture-on-correction signal | archived |
 | STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |

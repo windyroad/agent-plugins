@@ -8,8 +8,6 @@ jtbd: [JTBD-010]
 rfcs: [RFC-046]
 story-maps: [STORY-MAP-003]
 estimated-effort: L
-human-oversight: confirmed
-oversight-hash: dc4a98342bb3401f77b0478d962ec2d9a7df21646480c566e80e36aedccd7d7e
 ---
 
 # STORY-043: Self-install the quota-state producer
@@ -36,3 +34,10 @@ In order to get token pacing actually working the moment I install the plugin â€
 
 - Platform constraint (ADR-093 amendment): the statusline is the only surface exposed to `.rate_limits` and a plugin cannot ship the `statusLine` settings key, so self-installing the user's statusline config is the only mechanism to close the adopter-inert gap.
 - The "self-installs on first (or second) session" caveat is acceptable: for a fresh adopter with no statusline, the `settings.json` wiring may only take effect next session; a SessionStart absent-cache log line covers the first-session window.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-003 | STORY-MAP-003: Sustain my token quota across the week and across surfaces | draft |

@@ -153,7 +153,7 @@ wr-itil-render-story-map docs/story-maps/draft/STORY-MAP-<NNN>-<kebab-title>.htm
       "title": "<what the persona can do>",
       "value": "Value: <why it matters to them>",
       "storyId": "STORY-<NNN>", "rfc": "RFC-<NNN>", "jtbd": "JTBD-<NNN>",
-      "storyStatus": "draft", "ref": "STORY-<NNN>, P<NNN>"
+      "ref": "STORY-<NNN>, P<NNN>"
     }
   ],
   "traceProse": {
@@ -166,18 +166,30 @@ wr-itil-render-story-map docs/story-maps/draft/STORY-MAP-<NNN>-<kebab-title>.htm
 
 - **The backbone must be a journey, not a list of invariants.** Activities are steps the persona walks through in sequence. "Finish a change → get it assessed → push it → get through CI → release it" is a backbone. "Leave no unscored way out", "score this change not the last one" are invariants, and a column of them is not a map.
 - At capture a map may legitimately have **columns and rows but empty cells**. Say so in the `lead`, or an all-empty grid reads as a rendering failure.
-- `storyId` / `rfc` / `jtbd` / `storyStatus` are optional per task and emit the `data-*` reference layer that reverse-trace and the AFK-accept check consume. Omit them until stories exist; add them as stories are captured onto the map.
+- `storyId` / `rfc` / `jtbd` are optional per task and emit the `data-*` reference layer that reverse-trace and the story-map queries consume. Omit them until stories exist; add them as stories are captured onto the map.
+- **Do NOT author a status.** A story's lifecycle state is read from its own file when the map renders, so a transition needs no map edit and does not re-open the map's ratification. There is no `storyStatus` field and no `--status` flag.
+- **Prefer the edit command over hand-editing the island** for structural changes — it validates against the map's own backbone and bands, names what is available when you get an id wrong, and leaves the file untouched on failure:
+
+```bash
+wr-itil-story-map-edit <map.html> add-card     --story STORY-<NNN> --activity <id> --release <id> --title "..." [--value "..."] [--ref "..."]
+wr-itil-story-map-edit <map.html> move-card    --story STORY-<NNN> [--activity <id>] [--release <id>]
+wr-itil-story-map-edit <map.html> remove-card  --story STORY-<NNN>
+wr-itil-story-map-edit <map.html> add-band     --id <id> --name "..." [--badge Live|R1|R2] [--note "..."]
+wr-itil-story-map-edit <map.html> add-activity --id <id> --title "..." [--note "..."]
+```
+
+Hand-editing the island still works — the renderer reads whatever is there — but the command is the safer path and the one to reach for by default.
 - Every task needs `activity` and `release` matching an `id` in `backbone` / `releases`, or it renders nowhere.
 - Presentation is not yours to set. There is no CSS in the JSON and no inline `style` anywhere; the template is the only styling source.
 - Escape a literal `<` in any string as `\\u003c`. A raw `</script>` inside the island terminates the block early — in the renderer and in a browser — and the renderer will refuse the file rather than emit a truncated map.
 
-**Born `human-oversight: unconfirmed` (ADR-090).** Set `"humanOversight": "unconfirmed"` in the JSON — orthogonal to the `status:` lifecycle. It is NOT ratified until a human confirms it via `/wr-itil:manage-story-map <NNN> ratify` (which writes `confirmed` + an `oversight-hash` fingerprint via `wr-itil-mark-story-oversight-confirmed`). Until then `wr-itil-detect-unratified-stories-maps` surfaces it and an RFC may not reference its stories (`wr-itil-check-rfc-stories-ratified`). Any later content edit drifts the fingerprint and silently re-opens ratification (lazy-fingerprint, ADR-009 lineage). Do NOT hand-write `confirmed` here — born-unconfirmed is the load-bearing default.
+**Born unconfirmed (ADR-090).** Set `"humanOversight": "unconfirmed"` in the data island — orthogonal to the `status:` lifecycle. The `<meta name="human-oversight">` tag is a projection the renderer regenerates from the island; never author it directly (ADR-102). The map is NOT ratified until a human confirms it via `/wr-itil:manage-story-map <NNN> ratify`, which writes `confirmed` + an `oversight-hash` fingerprint through `wr-itil-mark-story-oversight-confirmed`. Until then `wr-itil-detect-unratified-stories-maps` surfaces it and an RFC may not reference its stories (`wr-itil-check-rfc-stories-ratified`).
 
-**Born `human-oversight: unconfirmed` (ADR-090).** A new map is created with `<meta name="human-oversight" content="unconfirmed">` — orthogonal to the `status:` lifecycle. It is NOT ratified until a human confirms it via `/wr-itil:manage-story-map <NNN> ratify` (which writes `confirmed` + an `oversight-hash` fingerprint via `wr-itil-mark-story-oversight-confirmed`). Until then `wr-itil-detect-unratified-stories-maps` surfaces it and an RFC may not reference its stories (`wr-itil-check-rfc-stories-ratified`). Any later content edit drifts the fingerprint and silently re-opens ratification (lazy-fingerprint, ADR-009 lineage). Do NOT hand-write `confirmed` here — born-unconfirmed is the load-bearing default.
+**What re-opens ratification, and what does not (ADR-103).** A later edit to the map's SUBSTANCE — its activity columns, title, persona, lead, traces, trace prose or caption — drifts the fingerprint and silently re-opens ratification. Release rows and the cards in them sit OUTSIDE the basis, so drawing a row or adding a story to one changes nothing. Presentation is outside it too: restyling the shared template cannot revoke an approval. Do NOT hand-write `confirmed` — born-unconfirmed is the load-bearing default.
 
 ### 6. Single commit — `## Story Maps` reverse-trace refresh
 
-**Stage list**: the map `.html` (one file — it carries its own data island) PLUS driving problem files (refresh `## Story Maps` section via `update-problem-references-section.sh <file> "Story Maps"`) PLUS driving JTBD files (refresh `## Story Maps` section via `update-jtbd-references-section.sh <file> "Story Maps"`). Do NOT stage `docs/story-maps/README.md` (deferred).
+**Stage list**: the map `.html` (it carries its own data island) AND, on a repository's first map, the shared `docs/story-maps/story-map.css` + `story-map.js` the renderer places beside them, PLUS driving problem files (refresh `## Story Maps` section via `update-problem-references-section.sh <file> "Story Maps"`) PLUS driving JTBD files (refresh `## Story Maps` section via `update-jtbd-references-section.sh <file> "Story Maps"`). Do NOT stage `docs/story-maps/README.md` (deferred).
 
 ```bash
 for pid_token in $(echo "$problem_trace" | tr ',' ' '); do

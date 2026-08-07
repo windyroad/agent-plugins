@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-30 **P476 captured** — shell utilities behave differently on this machine than on CI, so tests can pass locally while asserting nothing. Three instances in one session: a guard grep over a directory that did not exist, a BSD stat spelling that under GNU means "filesystem info" and returns a volume blob with exit 0, and grep omitting the filename prefix for a single file. The pattern is that the wrong variant does not fail loudly — it exits 0 with different output — so "the test passed" is not sound evidence here. Two reddened main; one was a shipped-code defect found only because a reviewer challenged the premise. No cadenced control exists; CI is the detector, which means red CI is the harm rather than a guard against it. Control shape left open with three candidates (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-08-07 **P478 captured** — the story `accepted` gate checks that a story's value section is non-empty but never that it states a value: 12 of 50 stories were written feature-first with a trailing "so that", and nothing detected it. The only signal was a story-map card rendering as an unreadable wall of text, spotted by eye during a ratification review. The same investigation found the map's own parser too strict — it rejected 15 correctly-written statements on punctuation alone — so any check must be strict about the clause order and permissive about what separates them (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -82,6 +82,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 4.5 | P297 | ADR-047 — governance-artefact scaffolding should be a SessionStart hook (per-project, automatic), not an inline `/install-updates` step | 9 (Medium) | Open | M | 2026-05-25 | internal |
 | 4.5 | P369 | Plugin removes hook file but adopter session still invokes it via stale binding — `architect-compendium-refresh-discipline.sh` case 2026-06-17 | 9 (Medium) | Open | M | 2026-06-17 | internal |
 | 4.5 | P461 | Downstream evidence-scan flags adopter-repo sightings as live regressions without version-gating against the fix release | 9 (Medium) | Open | M | 2026-07-25 | internal |
+| 4.5 | P478 | I10 checks that a story's `## User value` section is non-empty, but never that it is value-first — 12 of 50 stories drifted feature-first undetected | 9 (Medium) | Open | M | 2026-08-07 | internal |
 | 4 | P410 | install-updates leaves stale cached plugin versions on disk — no prune step | 8 (Medium) | Open | M | 2026-07-03 | internal |
 | 4 | P442 | WSJF Rankings render convention differentiates tiers only by ordering + the Origin column — no visual tier separator, so inbound-reported priority is not legible | 8 (Medium) | Open | M | 2026-07-06 | corrective-feedback |
 | 4 | P467 | work-problems should surface decisions/ratifications continuously (non-blocking), not only batched at loop-end | 8 (Medium) | Open | M | 2026-07-26 | corrective-feedback |
@@ -96,6 +97,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3 | P416 | Outstanding-questions drain appends a superseding human decision without reconciling the stale Fix Strategy section it overrides | 6 (Medium) | Open | M | 2026-07-04 | internal |
 | 3 | P418 | Reviewer-agent marker hooks do not fire on SendMessage-resumed agents — ISSUES FOUND cannot be continued to a marker-writing PASS, forcing a full fresh re-review | 6 (Medium) | Open | M | 2026-07-05 | internal |
 | 3 | P421 | Reference-section awk helpers destructively truncate governance files containing invalid UTF-8 | 6 (Medium) | Open | M | 2026-07-05 | internal |
+| 3 | P477 | Nine story maps carry the superseded stacked encoding, and two more use bespoke encodings, all needing migration to the rendered grid | 6 (Low) | Open | M | 2026-08-05 | internal |
 | 3 | P045 | Auto plugin install on user's machine after governance release | 12 (High) | Open | L | 2026-04-19 | internal |
 | 3 | P460 | Agent surfaces ticket-worthy findings and obvious next-actions as recommendations instead of autonomously capturing or acting | 12 (High) | Open | L | 2026-07-25 | internal |
 | 2.25 | P136 | ADR-044 alignment audit — sweep all unaudited skills/hooks/agents/ADRs/JTBDs/READMEs against the framework-resolution boundary (master ticket) | 9 (Medium) | Open | L | 2026-04-27 | internal |

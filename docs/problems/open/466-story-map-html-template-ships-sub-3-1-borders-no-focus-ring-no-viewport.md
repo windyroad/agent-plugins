@@ -28,7 +28,7 @@ Related but separable: `docs/STYLE-GUIDE.md`'s story-map class vocabulary is inc
 
 ## Workaround
 
-Copy `docs/story-maps/draft/STORY-MAP-005-trust-the-capture-on-correction-signal.html` rather than the README/ADR-060 template. It is the first map authored under the corrected rules and demonstrates every clause.
+Superseded by ADR-102 (2026-08-05): maps are no longer copied from an exemplar at all. `packages/itil/templates/story-map.html` is the single source of the shape and `wr-itil-render-story-map` builds every map from it, so the inherited-values failure mode this ticket describes is closed at the source.
 
 ## Impact Assessment
 
@@ -56,5 +56,5 @@ Copy `docs/story-maps/draft/STORY-MAP-005-trust-the-capture-on-correction-signal
 ## Related
 
 - `docs/STYLE-GUIDE.md` § Colours (non-text contrast) + § Interaction states — added 2026-07-26 in the P430 commit; both sections name this sweep as their outstanding follow-up, so leaving it uncaptured would make the guide's own pointer dangle.
-- `docs/story-maps/draft/STORY-MAP-005-...html` — the conforming worked reference.
+- `packages/itil/templates/story-map.html` — the canonical template every map is now rendered from.
 - Captured via `/wr-itil:capture-problem`; expand at next investigation.

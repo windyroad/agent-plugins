@@ -22,7 +22,7 @@ estimated-effort: S
 
 ## User value (INVEST Valuable)
 
-As a maintainer (or the AFK orchestrator) proposing a fix on a Known Error, I want the `check-fix-rfc-trace.sh` predicate to signal **refuse / route-to-RFC-authoring** when no RFC traces the problem — instead of emitting a `no-rfc-trace: … auto-create` directive — so that I cannot silently build a hollow fix and so the RFC-first invariant is enforced at the detection layer.
+In order that a fix cannot be built against an RFC that does not exist — the detection layer used to paper over it by auto-creating a skeleton — as a maintainer or unattended orchestrator proposing a fix on a Known Error, I want the trace predicate to **refuse and route to RFC authoring** when no RFC traces the problem.
 
 ## Acceptance criteria (INVEST Testable)
 

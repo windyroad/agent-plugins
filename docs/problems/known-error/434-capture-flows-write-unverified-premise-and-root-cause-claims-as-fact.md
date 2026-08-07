@@ -187,5 +187,4 @@ Q1 is settled by the architect ruling below and is no longer open; **Q2 and Q3 a
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-MAP-010 | STORY-MAP-010: Trust that a ticket states only what was verified | archived |
 | STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |

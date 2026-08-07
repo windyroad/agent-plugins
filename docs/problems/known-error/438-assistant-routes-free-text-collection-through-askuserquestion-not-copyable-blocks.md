@@ -128,5 +128,4 @@ STORY-049 is ratified at its `accepted` gate (ADR-090 / ADR-096), which has no A
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-MAP-007 | STORY-MAP-007: A correction to the agent's conduct holds in every project | archived |
 | STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |

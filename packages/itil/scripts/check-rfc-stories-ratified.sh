@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-# check-rfc-stories-ratified.sh — ADR-090 (an RFC may reference only RATIFIED stories).
+# check-rfc-stories-ratified.sh — ADR-103 (an RFC may reference only APPROVED stories).
 #
 # For each STORY-NNN in the RFC's `stories:` frontmatter, resolve the story file
-# under <stories-root>/*/STORY-NNN-*.md and verify it carries
-# `human-oversight: confirmed`. Exit non-zero (with a stderr directive naming the
-# offending stories) if any listed story is unratified, unconfirmed, or missing.
+# under <stories-root>/*/STORY-NNN-*.md and ask `story_is_approved`: is every map
+# in that story's `story-maps:` field ratified? A story carries no oversight
+# marker of its own (ADR-103), so the remedy for a failure is always to ratify
+# the MAP. Exit non-zero, with a stderr directive naming the offending stories,
+# if any listed story is unapproved or missing.
 #
 # Composes with check-rfc-has-stories.sh (ADR-089): has-stories checks >=1 story
 # exists; this checks each listed story is ratified. An empty `stories:` passes
@@ -14,7 +16,7 @@
 # Exit:  0 = all listed stories ratified (or none listed); 1 = >=1 unratified/missing;
 #        2 = usage / file error.
 #
-# Authority: ADR-090. Driver: P404 Phase 2. Test: check-rfc-stories-ratified.bats.
+# Authority: ADR-090, ADR-103. Driver: P404 Phase 2. Test: check-rfc-stories-ratified.bats.
 set -euo pipefail
 
 # Adopter-safe: source the shared lazy-fingerprint lib RELATIVE TO THIS SCRIPT (P317).
@@ -25,8 +27,9 @@ source "$LIB/story-oversight.sh"
 
 rfc="${1:-}"
 stories_root="${2:-docs/stories}"
+maps_root="${3:-docs/story-maps}"
 if [ -z "$rfc" ]; then
-  echo "check-rfc-stories-ratified: usage: check-rfc-stories-ratified.sh <rfc-file> [stories-root]" >&2
+  echo "check-rfc-stories-ratified: usage: check-rfc-stories-ratified.sh <rfc-file> [stories-root] [maps-root]" >&2
   exit 2
 fi
 if [ ! -f "$rfc" ]; then
@@ -51,13 +54,16 @@ for id in $ids; do
     unratified="$unratified $id(missing)"
     continue
   fi
-  if ! is_story_map_ratified "$f"; then
-    unratified="$unratified $id(unratified)"
+  # ADR-103: approval reaches a story through its map. Judging it by the story
+  # predicate alone would re-create the P456 deadlock one tier up — the RFC tier
+  # would block on a story ADR-103 approves.
+  if ! story_is_approved "$f" "$maps_root"; then
+    unratified="$unratified $id(unapproved)"
   fi
 done
 
 if [ -n "$unratified" ]; then
-  echo "check-rfc-stories-ratified: $rfc references unratified stories:$unratified — ADR-090: an RFC may reference only ratified (human-oversight: confirmed) stories. Ratify them first." >&2
+  echo "check-rfc-stories-ratified: $rfc references unapproved stories:$unratified — ADR-103: an RFC may reference only approved stories, and a story is approved by its story MAP. Ratify the map named in the story's story-maps: field via /wr-itil:manage-story-map <MAP-ID> ratify — a story carries no oversight marker of its own." >&2
   exit 1
 fi
 exit 0

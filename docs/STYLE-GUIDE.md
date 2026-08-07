@@ -9,7 +9,7 @@ This project is a plugin-development monorepo. Style guidance applies primarily 
 
 ## Story-map HTML style rules
 
-Per ADR-060 § Phase 2 encoding, **as amended by ADR-102 (2026-08-05)**. A story map is a grid, and it is generated: presentation lives only in `packages/itil/templates/story-map.html`, and every map is rendered from its own data island by `wr-itil-render-story-map`. Nobody hand-writes a map's markup, so these rules bind the template, not the artefact.
+Per ADR-060 § Phase 2 encoding, **as amended by ADR-102 (2026-08-05, further amended 2026-08-06)**. A story map is a grid, and it is generated. A map file is a shell plus a `<script id="story-map-data">` block; the grid itself is built at view time by the shared `story-map.js`. Presentation lives in `packages/itil/templates/` — the stylesheet, the script and the shell — so these rules bind those three files, not the artefacts.
 
 ### Layout
 - A map is a `<table class="map">` inside a `<div class="scroll">` horizontal-scroll wrapper. Backbone activities are COLUMNS (`<thead>` → `<th class="act" scope="col">`); release slices are ROWS (`<th class="slice" scope="row">`); task cards sit in `<td class="cell">`. A row read left to right is everything that ships together.
@@ -18,11 +18,11 @@ Per ADR-060 § Phase 2 encoding, **as amended by ADR-102 (2026-08-05)**. A story
 
 ### Prohibited
 - **Inline `style=""` anywhere in a map.** Under ADR-102 presentation is the template's alone; the renderer emits none. This is stricter than the previous rule, which permitted `--<custom-property>` on layout containers.
-- **External stylesheets** (`<link rel="stylesheet">`): maps are self-contained; the embedded `<style>` block is the only styling source.
+- **A per-map `<style>` block.** *(Reversed 2026-08-06 by ADR-102.)* Presentation lives in one shared `docs/story-maps/story-map.css`, linked by every map. Inlining it duplicated ~920 identical lines across eight files and made a single tweak rewrite all of them. Maps are no longer self-contained, which is the accepted cost.
 - **Hand-editing a rendered map.** The grid, `<style>` and `<meta>` blocks are regenerated from the data island; edits outside it are discarded on the next render.
 
 ### Permitted
-- One embedded `<style>` block, supplied by the template.
+- One `<link rel="stylesheet" href="../story-map.css">`, and one `<script src="../story-map.js" defer>`. Both are placed beside the maps by `wr-itil-render-story-map` from the copies shipped in `@windyroad/itil`; edit the shipped copy, never the one in a repository.
 - HTML5 semantic elements: `<table>`, `<thead>`, `<tbody>`, `<tr>`, `<th>`, `<td>`, `<caption>`, `<section>`, `<ul>`, `<h1>` / `<h2>`, `<div>` (layout only).
 
 ### Class names (story-map vocabulary)

@@ -8,8 +8,6 @@ jtbd: [JTBD-006]
 rfcs: [RFC-047]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
-human-oversight: confirmed
-oversight-hash: 535f7910ebf98ff81e815bd412fe39cedbadf05d656f15328ef1a1a6c2dcdf73
 ---
 
 # STORY-040: AFK loop anchored with the native `/goal` external evaluator
@@ -56,3 +54,10 @@ Decision authority: ADR-094 (`docs/decisions/094-afk-loops-anchor-completion-wit
 - **RFC-047** (`docs/rfcs/RFC-047-afk-loop-goal-anchor-external-evaluator.proposed.md`) — parent RFC; this story is its single-story decomposition.
 - **ADR-094** — decision authority.
 - Claude Code `/goal` docs: https://code.claude.com/docs/en/goal
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-002 | STORY-MAP-002: Decompose a fix into coordinated changes | draft |

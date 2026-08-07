@@ -133,5 +133,4 @@ P445; one ADR settles all three, or states why they differ.
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-MAP-007 | STORY-MAP-007: A correction to the agent's conduct holds in every project | archived |
 | STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |

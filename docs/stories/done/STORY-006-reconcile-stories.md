@@ -22,7 +22,7 @@ estimated-effort: M
 
 ## User value (INVEST Valuable)
 
-As a plugin maintainer, I want a `/wr-itil:reconcile-stories` skill (and the underlying script + bin shim) that detects drift between `docs/stories/README.md` and on-disk story inventory + reverse-trace `## Stories` sections on driving problems / RFCs / JTBDs, so that drift is detectable + correctable when inline refresh contracts are missed.
+In order to catch the moment the story index stops matching what is on disk — inline refresh gets missed, and a stale index is worse than none — as a plugin maintainer, I want a `/wr-itil:reconcile-stories` check that reports the drift and can correct it.
 
 ## Acceptance criteria (INVEST Testable)
 
@@ -57,3 +57,10 @@ Differences from reconcile-rfcs: no WSJF column (I11 invariant); 5 lifecycle sub
 - ADR-060 amendment 2026-05-10 line 270 (reverse-trace contract authority).
 - RFC-003 (parent RFC).
 - Commit `2f3c220`.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-001 | STORY-MAP-001: RFC framework Phase 1 + Phase 2 bootstrap | in-progress |

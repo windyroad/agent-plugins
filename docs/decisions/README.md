@@ -11,7 +11,7 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 100 (89 in-force, 11 historical)
+**Total ADRs:** 101 (89 in-force, 12 historical)
 
 ---
 
@@ -379,10 +379,10 @@ _89 ADRs. These are the current rules. The architect agent reads this section fi
 **Confirmation:** A behavioural test (per ADR-052) asserts an RFC proposed for a fix cannot reach accepted with an empty stories...; The four bats that currently assert the empty-stories fallback is legal (rfc-stories-extension.bats, working-t...; ADR-060's cardinality clauses and ADR-071's atomic-representation clauses read "≥1 / exactly one story," wit...
 **Related:** ADR-071, ADR-060, ADR-070
 
-### ADR-090 — Story maps and stories carry a drift-invalidated human-oversight marker
+### ADR-090 — Story maps carry a drift-invalidated human-oversight marker
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **"Drift-invalidated marker"** (Option 1), because it is what the user's "ratify after **any** change" literally requires and what the stated purpose demands — you must not rely on a story map that changed since it was rati...
-**Confirmation:** A story map / story with an edit newer than its oversight-date reads as unconfirmed (drift-invalidation fires)...; capture-rfc / manage-rfc refuse to list an unratified story in an RFC's stories: — asserted by a behavioural...; A detector surfaces unratified story maps (mirroring wr-architect-detect-unoversighted for decisions).
+**Confirmation:** A story map with a SUBSTANCE edit newer than its oversight-date reads as unconfirmed (drift-invalidation fires...; A story carries no oversight marker; its approval is derived from its story-maps: field, and a marker left on ...; capture-rfc / manage-rfc refuse to list an unapproved story in an RFC's stories: — asserted by a behavioural...; A detector surfaces unratified story maps (mirroring wr-architect-detect-unoversighted for decisions).
 **Related:** ADR-066, ADR-068, ADR-060, ADR-074, ADR-009
 
 ### ADR-091 — Commit-gate staleness threshold derives from RISK-POLICY.md's stated review cadence
@@ -431,24 +431,19 @@ _89 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** unconfirmed
 **Confirmation:** A description asserting X is missing, where X is present in the tree, produces a captured ticket carrying the ...; A description asserting a root-cause mechanism with no cited evidence produces a ticket recording it under ## ...; A description with no existence-claims produces byte-identical capture output to the pre-change behaviour.
 
-### ADR-101 — An AFK loop may accept and implement a story that only decomposes already-ratified substance
+### ADR-102 — ADR-102: Story maps render from JSON through a canonical template
 **Status:** proposed | **Oversight:** confirmed
-**Chosen:** Chosen option: **1, bounded AFK-accept carve-out — opt-in and fail-closed**, composed with option 2 rather than replacing it.
-**Confirmation:** A story declaring the carve-out with all parents confirmed is eligible; one with an unconfirmed parent is not;...; The carve-out is not-eligible when the project has not opted in, even when (a) and (b) both hold; and not-elig...; A commit referencing an accepted-but-unratified story is blocked regardless of config; a ratified story's comm...; A map re-ratified with the story's card already present still satisfies condition (a) — behavioural test for...; detect-unratified-stories-maps default stdout is byte-identical to before the flag existed — behavioural tes...
-**Related:** ADR-090, ADR-095, ADR-096, ADR-060, ADR-098, ADR-070, ADR-066, ADR-068, ADR-074
+**Confirmation:** A fixture JSON rendered through render-story-map.mjs emits backbone activities as <th class="act" scope="col">...; A task declared at a given activity and release renders inside that cell and nowhere else; an empty pair rende...; Each story-bearing card emits data-story-id on a single line.; Round trip: update-story-references-section.sh <map> "Story Maps" resolves a story rendered into a generated m...; Re-rendering an unchanged source is byte-identical, and oversight_content_hash is stable across a presentation...
 
-### ADR-102 — Story maps render from JSON through a canonical template
-**Status:** proposed | **Oversight:** confirmed
-**Chosen:** Chosen option: **B, one self-contained file per map** — the map's data lives inside it in a `<script id="story-map-data">` island and the renderer rewrites the presentation around it in place. Reverses an earlier same-session choice of the two-file split, which was rejected on sight as too easy to let source and rendered output diverge. The renderer owns the grid shape; the skill never hand-writes HTML and never reads a sibling map to infer shape.
-**Confirmation:** A map is one file: a stub containing only the data island renders into a full map, editing the island changes the grid, and re-rendering in place is idempotent; A fixture renders backbone activities as `th.act scope=col` columns and release slices as `th.slice scope=row` rows, with cell count equal to activities x releases (the assertion that distinguishes a grid from a stack); A task renders in its declared cell and nowhere else; an empty activity/release pair renders `class="cell empty"`; Each story-bearing card emits `data-story-id` on a single line, so the ADR-101 whole-line filter still holds; Round trip — update-story-references-section.sh resolves a story rendered into a generated map; Re-rendering an unchanged source is byte-identical, and the oversight hash is stable across a presentation-only template change; A guard asserts the old stacked shape is never emitted
-**Amends:** ADR-060 (Phase 2 encoding — grid replaces stacked sections), ADR-090 (oversight hash re-based onto the data island alone, so restyling cannot revoke ratification), ADR-049 (renderer ships via bin shim; `${CLAUDE_SKILL_DIR}` rejected as empirically unset)
-**Related:** ADR-060, ADR-090, ADR-101, ADR-049, ADR-080, ADR-052, ADR-054, ADR-077
+### ADR-103 — ADR-103: A release row is the RFC, and the map is the approval surface
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** ADR-101
+**Confirmation:** A row with all stories done reads delivered; a row named by a problem or an RFC reads proposed; a row named by...; Proposing a fix records release rows against the problem ticket, and implementation is refused when the propos...; Adding a story to an existing row on a ratified map does not drift that map's oversight fingerprint.; A story file carries no independent oversight marker; its approval is the map's.; STORY-MAP-002 renders five rows, two delivered, and RFC-005 appears on exactly one of them.
 
 ---
 
 ## Historical decisions
 
-_11 ADRs. These were tried and superseded, rejected, or deprecated. Read them as direction for what NOT to do, or to understand the lineage of an in-force decision. Do not enforce them as current rules._
+_12 ADRs. These were tried and superseded, rejected, or deprecated. Read them as direction for what NOT to do, or to understand the lineage of an in-force decision. Do not enforce them as current rules._
 
 ### ADR-001 — Unified Install Experience via npm Package
 **Status:** superseded
@@ -502,3 +497,9 @@ _11 ADRs. These were tried and superseded, rejected, or deprecated. Read them as
 **Status:** superseded | **Oversight:** confirmed
 **Chosen:** Chosen option: **"(b) Real shipment control + (c) Reconcile K→V release lifecycle — riding together in a single RFC-first fix path"**, confirmed by the user via `AskUserQuestion` 2026-06-17 (`/wr-architect:review-decisions` drain across...
 **Related:** ADR-042, ADR-070, ADR-066, ADR-074
+
+### ADR-101 — An AFK loop may accept and implement a story that only decomposes already-ratified substance
+**Status:** superseded | **Oversight:** confirmed
+**Chosen:** Chosen option: **1, bounded AFK-accept carve-out — opt-in and fail-closed**, composed with option 2 rather than replacing it.
+**Confirmation:** A story declaring the carve-out with all parents confirmed is eligible; one with an unconfirmed parent is not;...; The carve-out is not-eligible when the project has not opted in, even when (a) and (b) both hold; and not-elig...; A commit referencing an accepted-but-unratified story is blocked regardless of config; a ratified story's comm...; A map re-ratified with the story's card already present still satisfies condition (a) — behavioural test for...; detect-unratified-stories-maps default stdout is byte-identical to before the flag existed — behavioural tes...
+**Related:** ADR-090, ADR-095, ADR-096, ADR-060, ADR-098, ADR-070, ADR-066, ADR-068, ADR-074

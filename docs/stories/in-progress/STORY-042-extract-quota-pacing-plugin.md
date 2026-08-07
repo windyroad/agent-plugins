@@ -8,8 +8,6 @@ jtbd: [JTBD-010]
 rfcs: [RFC-046]
 story-maps: [STORY-MAP-003]
 estimated-effort: L
-human-oversight: confirmed
-oversight-hash: 3aa1acef05ec689794c3dd49f6d39be20677cf261be893e8a4deb619736c429d
 ---
 
 # STORY-042: Extract quota-pacing into its own plugin
@@ -40,3 +38,10 @@ In order to install token pacing on its own — without pulling in a governance 
 - Opt-in reach is intentional (ADR-093 amendment retracts Option 4's "every adopter auto-gets it"): adopters of only other windyroad plugins no longer get throttling unless they add `@windyroad/cruise`.
 - Pairs with STORY-043 (self-installing producer) to fully close the P160/P443 adopter-inert + mis-placement gaps.
 - **Name: `@windyroad/cruise`** (user-ratified 2026-07-08 — the marketable name for the capability; "cruise control" for your token burn). Propagate the name into ADR-093, RFC-046, and the P160/P443/P444 prose during the RFC-046 repair batch so the lineage stays consistent (do NOT leave `@windyroad/quota-pacing` in the decision-of-record while the stories say `cruise`).
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-003 | STORY-MAP-003: Sustain my token quota across the week and across surfaces | draft |

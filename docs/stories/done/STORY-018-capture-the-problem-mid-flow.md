@@ -7,13 +7,11 @@ problems: [P155]
 jtbd: [JTBD-008, JTBD-006]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
-human-oversight: confirmed
-oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story ratification pass)"
 ---
 
 # STORY-018: Capture the problem in seconds, mid-flow
 
-**Story map:** [← STORY-MAP-002: Decompose a Fix Into Coordinated Changes](../../story-maps/draft/STORY-MAP-002-decompose-a-fix-into-coordinated-changes.html) · A1 (Release 1)
+**Story map:** [← STORY-MAP-002: Take a Problem From Noticed to Resolved](../../story-maps/draft/STORY-MAP-002-take-a-problem-from-noticed-to-resolved.html) · A1 (Release 1)
 **Backbone:** A1 capture · [A2 root cause](019-record-root-cause-and-workaround.md) · A3 decompose ([start map](020-start-the-jobs-story-map.md) …) · [A4 work the stories](014-author-first-work-problems-afk.md) · [A5 ship](023-ship-verify-and-close-with-a-real-trace.md)
 
 ## User value (INVEST Valuable)
@@ -37,3 +35,10 @@ In order to keep a problem from being lost when I hit it mid-flow, as a develope
 ## Related
 
 - **STORY-MAP-002** A1 card. Shipped via `/wr-itil:capture-problem`.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-002 | STORY-MAP-002: Take a problem from noticed to resolved | draft |

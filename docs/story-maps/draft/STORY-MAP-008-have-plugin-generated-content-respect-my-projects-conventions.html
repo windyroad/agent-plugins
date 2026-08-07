@@ -15,199 +15,32 @@
   <meta name="reported" content="2026-07-26">
   <meta name="decision-makers" content="Tom Howard">
   <meta name="human-oversight" content="unconfirmed">
-  <style>
-    :root {
-      color-scheme: light dark;
-      --bg: #ffffff; --fg: #1a1a1a; --muted: #565656; --line: #767676;
-      --card: #f6f6f6; --card-line: #767676;
-      --live-fg: #0b5d1e; --live-bg: #e4f4e8; --live-line: #0b5d1e;
-      --next-fg: #0b3a66; --next-bg: #e2eefb; --next-line: #0b3a66;
-      --later-fg: #6b3a00; --later-bg: #f6ead6; --later-line: #6b3a00;
-      --focus: #0b3a66;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #16181c; --fg: #f2f3f5; --muted: #b6bac2; --line: #8a919c;
-        --card: #1f2228; --card-line: #8a919c;
-        --live-fg: #7fe0a0; --live-bg: #123020; --live-line: #7fe0a0;
-        --next-fg: #97c6f5; --next-bg: #10263c; --next-line: #97c6f5;
-        --later-fg: #f0c58a; --later-bg: #33260f; --later-line: #f0c58a;
-        --focus: #97c6f5;
-      }
-    }
-    :root[data-theme="light"] {
-      color-scheme: light;
-      --bg: #ffffff; --fg: #1a1a1a; --muted: #565656; --line: #767676;
-      --card: #f6f6f6; --card-line: #767676;
-      --live-fg: #0b5d1e; --live-bg: #e4f4e8; --live-line: #0b5d1e;
-      --next-fg: #0b3a66; --next-bg: #e2eefb; --next-line: #0b3a66;
-      --later-fg: #6b3a00; --later-bg: #f6ead6; --later-line: #6b3a00;
-      --focus: #0b3a66;
-    }
-    :root[data-theme="dark"] {
-      color-scheme: dark;
-      --bg: #16181c; --fg: #f2f3f5; --muted: #b6bac2; --line: #8a919c;
-      --card: #1f2228; --card-line: #8a919c;
-      --live-fg: #7fe0a0; --live-bg: #123020; --live-line: #7fe0a0;
-      --next-fg: #97c6f5; --next-bg: #10263c; --next-line: #97c6f5;
-      --later-fg: #f0c58a; --later-bg: #33260f; --later-line: #f0c58a;
-      --focus: #97c6f5;
-    }
-    * { box-sizing: border-box; }
-    body { font-family: system-ui, sans-serif; color: var(--fg); background: var(--bg);
-           max-width: 1500px; margin: 0 auto; padding: 1.5rem 1rem 3rem; line-height: 1.5; }
-    h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
-    p { max-width: 74ch; }
-    .lead { color: var(--muted); }
-    a { color: var(--focus); }
-    /* Required on every interactive element, not just links: the theme toggle
-       (if a host adds one) and the scroll region both take focus. */
-    /* :focus first as a fallback for engines without :focus-visible; the
-       :focus-visible rule below then narrows it to keyboard interaction.
-       No border-radius here — it clips the content of the overflow:auto
-       scroll region for as long as it holds focus. */
-    a:focus, button:focus, [tabindex]:focus { outline: 3px solid var(--focus); outline-offset: 2px; }
-    a:focus-visible,
-    button:focus-visible,
-    [tabindex]:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-    .legend { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin: 1rem 0 1.25rem; padding: 0; list-style: none; }
-    .legend li { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .9rem; }
-    .badge { display: inline-flex; align-items: center; gap: .3rem; font-size: .75rem; font-weight: 700;
-             padding: .1rem .45rem; border-radius: 999px; border: 1px solid; white-space: nowrap; }
-    /* Release state is carried by the badge's text label and by a glyph in real
-       markup (see .b-glyph). The glyph is aria-hidden — it is a second VISUAL
-       channel so colour is never the sole one, and assistive tech already has
-       the label. It must not be generated content: in forced-colors mode the
-       badge backgrounds all collapse to Canvas, and the glyph becomes the only
-       thing distinguishing the three states. */
-    .b-live  { color: var(--live-fg);  background: var(--live-bg);  border-color: var(--live-line); }
-    .b-next  { color: var(--next-fg);  background: var(--next-bg);  border-color: var(--next-line); }
-    .b-later { color: var(--later-fg); background: var(--later-bg); border-color: var(--later-line); }
-
-    .scroll { overflow-x: auto; padding-bottom: .5rem; }
-    table.map { border-collapse: collapse; width: 100%; min-width: 940px; }
-    table.map caption { text-align: left; color: var(--muted); font-size: .85rem; margin-bottom: .5rem; }
-    /* Activity headers across the top are the backbone: the user journey. */
-    thead th.act { text-align: left; vertical-align: bottom; padding: .5rem .6rem; font-size: .9rem;
-                   border-bottom: 3px solid var(--fg); width: 18%; }
-    thead th.act .jtbd { display: block; font-weight: 400; color: var(--muted); font-size: .75rem; margin-top: .2rem; }
-    thead td.corner { border-bottom: 3px solid var(--fg); }
-    /* Each row is one release slice. A row read left to right is everything
-       that ships together. */
-    th.slice { text-align: left; vertical-align: top; padding: .7rem .6rem; width: 10%; min-width: 96px;
-               border-bottom: 2px solid var(--fg); position: sticky; left: 0; background: var(--bg); }
-    th.slice .s-name { font-size: .95rem; display: block; margin-top: .35rem; margin-bottom: .35rem; }
-    th.slice .s-note { font-weight: 400; color: var(--muted); font-size: .75rem; display: block; margin-top: .35rem; }
-    td.cell { vertical-align: top; padding: .5rem; border-bottom: 2px solid var(--fg); border-left: 1px solid var(--line); }
-    /* An empty cell is meaningful — it says this activity ships nothing in this
-       release — so the hatch is drawn in the 3:1 border tone, not a tint. */
-    td.cell.empty { background: repeating-linear-gradient(45deg, transparent, transparent 7px, var(--line) 7px, var(--line) 8px); }
-    .task { border: 1px solid var(--card-line); border-radius: 6px; background: var(--card); padding: .5rem .55rem; }
-    .task + .task { margin-top: .5rem; }
-    .task .t-title { font-size: .85rem; }
-    .task .t-value { display: block; font-size: .75rem; color: var(--muted); margin-top: .25rem; }
-    .task .t-ref { display: block; font-size: .75rem; color: var(--muted); margin-top: .3rem; }
-    .trace { margin-top: 2rem; border-top: 1px solid var(--line); padding-top: 1rem; }
-    .trace h2 { font-size: 1.125rem; }
-    .vh { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-          overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-    .tasks { list-style: none; margin: 0; padding: 0; }
-    .tasks li + li { margin-top: .5rem; }
-    .b-glyph { font-weight: 900; }
-    .genfrom { color: var(--muted); font-size: .8rem; margin-top: 1.5rem; }
-    @media (forced-colors: active) {
-      /* background-image is not part of the forced-colors UA cascade, so the
-         hatch would paint literal #767676 over the user's chosen Canvas in
-         Chromium and vanish entirely in Firefox. Restate it in system colours. */
-      td.cell.empty { background-image: repeating-linear-gradient(45deg, Canvas, Canvas 7px, GrayText 7px, GrayText 8px); }
-      .badge { forced-color-adjust: none; border: 1px solid CanvasText; }
-    }
-    /* Sticky row headers are kept at narrow widths: this is exactly where the
-       table scrolls furthest, so losing the orientation anchor costs most. The
-       column is narrowed and its note dropped rather than unpinned. */
-    @media (max-width: 640px) {
-      th.slice { min-width: 72px; padding: .5rem .35rem; font-size: .85rem; }
-      th.slice .s-note { display: none; }
-    }
-  </style>
+  <link rel="stylesheet" href="../story-map.css">
+  <script src="../story-map.js" defer></script>
 </head>
 <body>
   <main>
-  <h1>Have a plugin behave like a guest in my repository</h1>
-  <p class="lead">A story map for the adopter who installs a @windyroad plugin into a repository it did not come from. Read across the top for their journey — they choose what to install, read what it claims, let it generate into their tree, run into its rules, and get a fix that arrives with an upgrade. Read down the rows for release bands. The empty cells are where the plugin currently behaves like it owns the place.</p>
-
-  <ul class="legend" aria-label="Status legend">
-    <li><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>R1</span> stories exist</li>
-    <li><span class="badge b-later"><span class="b-glyph" aria-hidden="true">◇</span>R2</span> unbuilt</li>
-  </ul>
-
-  <div class="scroll" tabindex="0" role="region" aria-label="Story map grid">
-    <table class="map">
-      <caption>5 journey activities across the top; 2 release bands down the side. Read a row left to right for everything that ships in one release. A cell with no cards means that activity ships nothing in that release.</caption>
-      <thead>
-        <tr>
-          <td class="corner"></td>
-          <th class="act" scope="col">A. Choose what to install <span class="jtbd">JTBD-003 — compose only the guardrails I need</span></th>
-          <th class="act" scope="col">B. Read what it claims <span class="jtbd">JTBD-302 — trust the README describes what I installed</span></th>
-          <th class="act" scope="col">C. Let it write into my tree <span class="jtbd">JTBD-303 — generated content respects my conventions</span></th>
-          <th class="act" scope="col">D. Hit one of its rules</th>
-          <th class="act" scope="col">E. Get a fix on upgrade</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>R1</span> <span class="s-name">Now</span> <span class="s-note">stories exist</span></th>
-          <td class="cell empty"></td>
-          <td class="cell empty"></td>
-          <td class="cell">
-            <ul class="tasks" role="list">
-            <li><div class="task" data-story-id="STORY-051" data-rfc="RFC-054" data-jtbd="JTBD-303" data-status="draft"><span class="t-title">Generated content defaults to the most portable form, so my own policy hooks do not fire on text I did not write</span> <span class="t-value">Value: I stop scrubbing the same characters back out after every regeneration.</span> <span class="t-ref">Traces: STORY-051, P424</span></div></li>
-            </ul>
-          </td>
-          <td class="cell">
-            <ul class="tasks" role="list">
-            <li><div class="task" data-jtbd="JTBD-003"><span class="t-title">Clear any block the plugin raises with a command my repository actually has</span> <span class="t-value">Value: I am never left holding a block with no path through it.</span> <span class="t-ref">Traces: P435 (inbound #235) — see STORY-MAP-013</span></div></li>
-            </ul>
-          </td>
-          <td class="cell empty"></td>
-        </tr>
-
-        <tr>
-          <th class="slice" scope="row"><span class="badge b-later"><span class="b-glyph" aria-hidden="true">◇</span>R2</span> <span class="s-name">Open</span> <span class="s-note">unbuilt</span></th>
-          <td class="cell">
-            <ul class="tasks" role="list">
-            <li><div class="task"><span class="t-title">I install the one guardrail I want without dragging in the rest of the suite</span> <span class="t-value">Value: my session is not cluttered with hooks for practices I have not adopted.</span> <span class="t-ref">Traces: JTBD-003, no story yet</span></div></li>
-            </ul>
-          </td>
-          <td class="cell">
-            <ul class="tasks" role="list">
-            <li><div class="task"><span class="t-title">Read a README that describes the version I just installed</span> <span class="t-value">Value: I can act on the documented contract without checking it against the source.</span> <span class="t-ref">Traces: JTBD-302, no story yet</span></div></li>
-            </ul>
-          </td>
-          <td class="cell empty"></td>
-          <td class="cell empty"></td>
-          <td class="cell">
-            <ul class="tasks" role="list">
-            <li><div class="task"><span class="t-title">Get the fix by upgrading, without patching a cached plugin myself</span> <span class="t-value">Value: reporting it upstream is a real path, not a wait with a workaround.</span> <span class="t-ref">Traces: JTBD-303, no story yet</span></div></li>
-            </ul>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <section class="trace" aria-labelledby="trace-h">
-    <h2 id="trace-h">What this map traces to</h2>
-    <p><strong>Persona:</strong> plugin-user — an adopter with low context on this repository's internals, who is not expected to read our ADRs or patch a cached plugin.</p>
-    <p><strong>Jobs mapped:</strong> JTBD-303 (generated content respects my conventions) is the spine. JTBD-003 (compose only the guardrails I need) governs the choosing and the blocking. JTBD-302 (trust the README describes what I installed) governs the reading. JTBD-101 covers the plugin-developer side.</p>
-    <p><strong>Problems this closes:</strong> P424 — generated content carries characters an adopter's own policy hook rejects, re-introduced on every regeneration. P435 — a gate hardcoded to this repository's shape blocks adopters with no way through.</p>
-    <p><strong>Decisions the journey rests on:</strong> None yet.</p>
-    <p><strong>Open questions:</strong> Widened on 2026-08-05 from a single-story stub into the adopter's whole journey; the prior map held one card about generated characters. Three activities carry no story. The blocking card in D also appears on STORY-MAP-013, seen there from the author's side.</p>
-  </section>
-
+    <h1 id="story-map-title">Have a plugin behave like a guest in my repository</h1>
+    <p class="lead" id="story-map-lead">A story map for the adopter who installs a @windyroad plugin into a repository it did not come from. Read across the top for their journey — they choose what to install, read what it claims, let it generate into their tree, run into its rules, and get a fix that arrives with an upgrade. Read down the rows for release bands. The empty cells are where the plugin currently behaves like it owns the place.</p>
+    <ul class="legend" id="story-map-legend" role="list" aria-label="Status legend"></ul>
+    <div id="story-map">
+      <p class="lead">This map's grid has not been drawn. It is built from the data block
+      at the end of this file by <code>story-map.js</code>, which sits alongside the maps —
+      so this message means the script did not load or did not run. The data itself is
+      intact: open this file in a text editor, or use View Source, and read the block with
+      <code>id="story-map-data"</code>.</p>
+    </div>
+    <section class="trace" id="story-map-trace-section" aria-labelledby="trace-h" hidden>
+      <h2 id="trace-h">What this map traces to</h2>
+      <div id="story-map-trace"></div>
+    </section>
   </main>
 
-  <p class="genfrom">Everything above is rendered by <code>wr-itil-render-story-map</code> from the data block below. Edit the data block, then re-render &mdash; edits made anywhere else are overwritten.</p>
+  <footer>
+    <p class="genfrom">This file is the map. The grid is drawn from the data block below;
+    edit that block, or use <code>wr-itil-story-map-edit</code>, then re-render with
+    <code>wr-itil-render-story-map</code>.</p>
+  </footer>
 
   <script id="story-map-data" type="application/json">
 {
@@ -267,13 +100,11 @@
     {
       "id": "r1",
       "name": "Now",
-      "badge": "R1",
       "note": "stories exist"
     },
     {
       "id": "r2",
       "name": "Open",
-      "badge": "R2",
       "note": "unbuilt"
     }
   ],
@@ -282,18 +113,15 @@
       "activity": "generate",
       "release": "r1",
       "title": "Generated content defaults to the most portable form, so my own policy hooks do not fire on text I did not write",
-      "value": "Value: I stop scrubbing the same characters back out after every regeneration.",
       "storyId": "STORY-051",
       "rfc": "RFC-054",
       "jtbd": "JTBD-303",
-      "storyStatus": "draft",
       "ref": "STORY-051, P424"
     },
     {
       "activity": "collide",
       "release": "r1",
       "title": "Clear any block the plugin raises with a command my repository actually has",
-      "value": "Value: I am never left holding a block with no path through it.",
       "jtbd": "JTBD-003",
       "ref": "P435 (inbound #235) — see STORY-MAP-013"
     },
@@ -301,21 +129,18 @@
       "activity": "choose",
       "release": "r2",
       "title": "I install the one guardrail I want without dragging in the rest of the suite",
-      "value": "Value: my session is not cluttered with hooks for practices I have not adopted.",
       "ref": "JTBD-003, no story yet"
     },
     {
       "activity": "trust",
       "release": "r2",
       "title": "Read a README that describes the version I just installed",
-      "value": "Value: I can act on the documented contract without checking it against the source.",
       "ref": "JTBD-302, no story yet"
     },
     {
       "activity": "fixed",
       "release": "r2",
       "title": "Get the fix by upgrading, without patching a cached plugin myself",
-      "value": "Value: reporting it upstream is a real path, not a wait with a workaround.",
       "ref": "JTBD-303, no story yet"
     }
   ],
@@ -328,5 +153,46 @@
   }
 }
   </script>
+  <script id="story-map-status" type="application/json">
+{
+  "rows": {
+    "r1": "unproposed",
+    "r2": "unproposed"
+  },
+  "status": {
+    "STORY-051": "draft"
+  },
+  "values": {
+    "STORY-051": {
+      "value": [
+        {
+          "t": "keep the content policy my project enforces — so that my own hooks stop firing on text I did not write and cannot reach"
+        }
+      ],
+      "who": [
+        {
+          "t": "adopter of the plugin suite"
+        }
+      ],
+      "want": [
+        {
+          "t": "the content these plugins generate into my repository to arrive in the most portable form available, and to keep arriving that way on every regeneration. The title names the witnessed character, the U+2014 em-dash, because that is what five inbound reports raised. The criteria below cover the behaviour rather than the glyph: a generated artefact should not carry a character class a stricter project than ours forbids, whatever that class turns out to be next."
+        }
+      ]
+    }
+  },
+  "hrefs": {
+    "STORY-051": "../../stories/draft/STORY-051-have-generated-content-respect-my-projects-conventions.md",
+    "JTBD-303": "../../jtbd/plugin-user/JTBD-303-generated-output-respects-adopter-conventions.proposed.md",
+    "P424": "../../problems/known-error/424-governance-tooling-emits-em-dashes-breaking-adopter-no-em-dash-hooks.md",
+    "JTBD-003": "../../jtbd/developer/JTBD-003-compose-guardrails.proposed.md",
+    "P435": "../../problems/open/435-risk-scorer-gates-hardcoded-to-home-repo-shape-push-gate-overfire-external-comms-underfire.md",
+    "STORY-MAP-013": "STORY-MAP-013-know-what-my-push-did.html",
+    "JTBD-302": "../../jtbd/plugin-user/JTBD-302-trust-readme-describes-installed-behaviour.proposed.md",
+    "JTBD-101": "../../jtbd/plugin-developer/JTBD-101-extend-suite.proposed.md"
+  }
+}
+  </script>
+
 </body>
 </html>

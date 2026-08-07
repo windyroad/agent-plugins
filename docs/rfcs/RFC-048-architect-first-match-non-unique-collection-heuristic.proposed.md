@@ -36,7 +36,7 @@ Agent prose is the only viable surface for this control — judging lookup-key u
 
 ## Stories
 
-The fix's story leg is captured on a story map per ADR-089/ADR-095 (STORY-046 on STORY-MAP-005, draft, born `human-oversight: unconfirmed`). Per ADR-090 an RFC lists only ratified stories in its `stories:` frontmatter, so the wiring is deferred: the draft story carries the story-side `--rfc` trace to this RFC; the RFC-side `stories:` listing lands when the story is ratified and accepted at the next interactive drain (the P456 held-at-gate composition — no AFK carve-out invented, per P311).
+The fix's story leg is captured on a story map per ADR-089/ADR-095 (STORY-046 on STORY-MAP-011, draft, born `human-oversight: unconfirmed`). Per ADR-090 an RFC lists only ratified stories in its `stories:` frontmatter, so the wiring is deferred: the draft story carries the story-side `--rfc` trace to this RFC; the RFC-side `stories:` listing lands when the story is ratified and accepted at the next interactive drain (the P456 held-at-gate composition — no AFK carve-out invented, per P311).
 
 ## Commits
 

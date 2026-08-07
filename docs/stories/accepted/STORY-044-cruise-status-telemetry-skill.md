@@ -8,8 +8,6 @@ jtbd: [JTBD-010]
 rfcs: [RFC-046]
 story-maps: [STORY-MAP-003]
 estimated-effort: M
-human-oversight: confirmed
-oversight-hash: 57ebfa1460745d43125362842d52189f00b7aca2ab657d496ed626bb8bd55ef7
 ---
 
 # STORY-044: See what cruise is doing — a status/telemetry skill

@@ -8,8 +8,6 @@ jtbd: [JTBD-002, JTBD-001]
 rfcs: [RFC-059]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
-human-oversight: confirmed
-oversight-hash: 54dcf9810fd8412053e35a9a2312ac0729d6245f4d866920ba8878abdb466b71
 ---
 
 # STORY-055: One definition of what the oversight fingerprint ignores

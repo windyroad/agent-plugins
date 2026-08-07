@@ -8,8 +8,6 @@ jtbd: [JTBD-006]
 rfcs: [RFC-050]
 story-maps: [STORY-MAP-005]
 estimated-effort: S
-human-oversight: confirmed
-oversight-hash: 3045b2ae2c3d06a1aad1e7017448fa534478bb6c5509e73351aefca035856992
 ---
 
 # STORY-047: Gate the correction nudge on prompt authorship
@@ -82,3 +80,10 @@ into the **orchestrator** session, where the guard is not set.
 ## Related
 
 - RFC-050 (the fix vehicle), STORY-MAP-005 (the map), P430 (the driving problem), inbound #257.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |

@@ -8,7 +8,6 @@ jtbd: [JTBD-011, JTBD-101]
 rfcs: [RFC-053]
 story-maps: [STORY-MAP-007]
 estimated-effort: M
-human-oversight: unconfirmed
 ---
 
 # STORY-050: Have my reviewer read the version I actually have
@@ -116,3 +115,10 @@ so confirming the job alone would leave the criteria unconfirmed while looking c
   acquires two portable conduct-rule surfaces with no stated boundary between them.
 - **P116** (closed) — the adjacent unpushed-commit surface. Its subject is which commit CI
   blames for a regression, not what a human reviewer can see.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |

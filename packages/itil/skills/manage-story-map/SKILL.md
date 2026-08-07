@@ -38,7 +38,7 @@ Per ADR-060 amendment 2026-05-10 lines 145-189 + encoding amendment 2026-05-12:
 /wr-itil:manage-story-map <STORY-MAP-NNN> in-progress  # Manual transition
 /wr-itil:manage-story-map <STORY-MAP-NNN> completed    # Transition in-progress → completed
 /wr-itil:manage-story-map <STORY-MAP-NNN> archived     # Close without completion
-/wr-itil:manage-story-map <STORY-MAP-NNN> ratify       # ADR-090: confirm the map, then its stories, one at a time
+/wr-itil:manage-story-map <STORY-MAP-NNN> ratify       # ADR-103: confirm the map — approves every story on it
 /wr-itil:manage-story-map review                       # Re-validate all maps + refresh README
 ```
 
@@ -114,13 +114,13 @@ done
 
 Per architect amend finding 2 on Slice 7: story-map HTML files do NOT carry an auto-maintained markdown reverse-trace section themselves (the `<a class="slice">` data-attribute traces are authored manually during backbone design). No reverse-trace refresh on the map itself; reverse-trace only flows OUT to problem + JTBD parents.
 
-### 7.5. Ratification flow (`ratify`) — ADR-090 / STORY-022
+### 7.5. Ratification flow (`ratify`) — ADR-090 / ADR-103 / STORY-022
 
-`ratify` is **orthogonal to the status lifecycle** — a map can be ratified at any status. It confirms human oversight of the map + its stories after they are authored or edited. Ratification is **drift-invalidated** (ADR-009 lineage, NOT ADR-066 write-once): any later content edit silently re-opens it (the `oversight-hash` fingerprint stops matching). This is the STORY-022 surface.
+`ratify` is **orthogonal to the status lifecycle** — a map can be ratified at any status. It confirms human oversight of **the map**, and under ADR-103 that approves every story on it, including stories added later; stories are never ratified individually. Ratification is **drift-invalidated** (ADR-009 lineage, NOT ADR-066 write-once), but only a **substance** edit re-opens it: the map's activity columns, identity, title, persona, lead, traces, trace prose or caption. Release rows, the cards in them, story-body edits and template restyling all sit outside the fingerprint basis and change nothing. This is the STORY-022 surface.
 
 **Born-confirmed discipline (P348).** Before any marker write, `export CLAUDE_SESSION_ID` from the transcript path — the marker shim silently no-ops on an empty SID. Every `confirmed` marker MUST be backed by a same-turn human confirm event; never write `confirmed` without the `AskUserQuestion` below (a hollow marker is the P348 bug).
 
-**Map first, then stories — one at a time (STORY-022 UX):**
+**Ratify the map; its stories follow (STORY-022 UX, amended by ADR-103):**
 
 1. **Ratify the map.** Present the map's path/URL + a self-contained briefing of what it is — the JTBD it serves, its backbone activities, its release slices — briefing the substance BEFORE any ID (P350; the user may be on a device with no repo access). Then `AskUserQuestion` with exactly two options:
    - **Ratify** — the map is correct as-is.
@@ -128,17 +128,17 @@ Per architect amend finding 2 on Slice 7: story-map HTML files do NOT carry an a
 
    On **Ratify**: run `wr-itil-mark-story-oversight-confirmed <map-file>` (writes `confirmed` + the fingerprint). The map is now ratified.
 
-2. **Ratify each story, one at a time.** ONLY after the map is ratified, walk the map's `data-story-id` references in order. For each story that is not already ratified (test with `wr-itil-detect-unratified-stories-maps` or the `is_story_map_ratified` lib helper): brief its `## User value` + `## Acceptance criteria` (substance before ID), then the SAME two-option `AskUserQuestion` (**Ratify** / type-something). On **Ratify**: `wr-itil-mark-story-oversight-confirmed <story-file>`. On free-text: apply the correction as a story edit and re-present (the edit re-opens that story only).
+2. **Do NOT ratify the stories at all (ADR-103).** Ratifying the map approves every story on it, so there is nothing left to do: no per-story marker, no per-story `AskUserQuestion`, and no oversight field written onto a story. `wr-itil-mark-story-oversight-confirmed` refuses a story path outright. Test a story's approval with `story_is_approved`, which derives it from the story's `story-maps:` field.
 
 3. **AFK / non-interactive (ADR-013 Rule 6).** When `AskUserQuestion` is unavailable, do NOT auto-ratify — that would forge a hollow marker (P348). Leave the artefacts unratified; they surface in the `/wr-itil:work-problems` Step 2.4 drain for the next interactive session.
 
-4. **Single commit** — stage the map + every newly-ratified story + the README refresh; commit per ADR-014.
+4. **Single commit** — stage the map + the README refresh; commit per ADR-014. No story file changes: ratifying a map approves its stories without touching them.
 
-**Why map-first:** an RFC may reference only ratified stories (`wr-itil-check-rfc-stories-ratified`), and a story is only meaningful inside its ratified map — ratifying stories under an unratified map would invert the dependency STORY-022 encodes.
+**Why the map:** an RFC may reference only approved stories (`wr-itil-check-rfc-stories-ratified`), and a story is only meaningful inside its map — which is why ADR-103 makes the map the single approval surface rather than ratifying at both tiers.
 
-**Reuse offers ratified stories only (STORY-024).** When decomposing a fix, existing map stories the fix touches are offered for **reuse** — referenced by an additional slice card / `data-story-id`, NOT duplicated as a new file; the reused story's `rfcs:` reverse-trace picks up the new RFC. Only **ratified** stories (test with `is_story_map_ratified`) are offered for reuse; an unratified story must be ratified (§ 7.5) before an RFC can reference it.
+**Reuse offers approved stories only (STORY-024).** When decomposing a fix, existing map stories the fix touches are offered for **reuse** — referenced by an additional slice card / `data-story-id`, NOT duplicated as a new file; the reused story's `rfcs:` reverse-trace picks up the new RFC. Only **approved** stories (test with `story_is_approved`, which honours ADR-103 map inheritance) are offered for reuse; an unapproved story needs its map ratified (§ 7) before an RFC can reference it.
 
-**Re-slicing re-opens ratification (STORY-025).** Grouping stories into ordered release slices (Release 1 walking skeleton → Release 2 …) is authored as `data-status` / slice-card edits on the map; deferred phases stay first-class cards (visible, competing for priority), never buried. Because slicing edits the map's content, it drifts the `oversight-hash` and silently re-opens the map's ratification (§ 7.5) — no explicit marker reset needed; the fingerprint handles it.
+**Re-slicing does NOT re-open ratification (STORY-025, amended by ADR-103).** Grouping stories into ordered release rows (Release 1 walking skeleton → Release 2 …) is authored as release-row and card edits on the map; deferred phases stay first-class cards (visible, competing for priority), never buried. Rows and cards sit OUTSIDE the fingerprint basis, so re-slicing is silent — scheduling is not what the human approved. What DOES re-open a map's approval: a new activity column, or a change to its title, persona, lead, traces or caption. The fingerprint handles it either way; no explicit marker reset is needed.
 
 ### 8. List flow (`list`)
 

@@ -40,7 +40,7 @@
 # Usage: migrate-story-status-mirror.sh [<stories-dir>...]   (default: docs/stories)
 # Exit:  0 = completed (including "nothing to do"); 2 = usage / missing lib.
 #
-# Authority: ADR-090 (oversight fingerprint), ADR-101 (oversight-basis).
+# Authority: ADR-090 (oversight fingerprint), ADR-103 (stories carry no marker).
 # Driver: P474. Test: migrate-story-status-mirror.bats.
 
 set -euo pipefail
@@ -105,8 +105,12 @@ for d in "${dirs[@]}"; do
 
     # Was this artefact ratified-and-valid BEFORE we touch it? Decide now: once
     # the line is gone the pre-migration hash is unreproducible.
+    #
+    # ADR-103: a story carries no fingerprint of its own, so this is always 0 on
+    # the story tier and the re-point branch below never runs there. The branch
+    # is retained for any artefact that does carry one.
     was_valid=0
-    if is_story_map_ratified "$f"; then was_valid=1; fi
+    if [ -n "$(oversight_stored_hash "$f")" ] && is_story_map_ratified "$f"; then was_valid=1; fi
 
     # Drop the FIRST matching mirror line and nothing else — surrounding blank
     # lines are left exactly as they are. The template puts the mirror in a run
@@ -132,7 +136,7 @@ for d in "${dirs[@]}"; do
       refingerprinted=$((refingerprinted + 1))
       printf 'MIGRATE %s — mirror removed, fingerprint re-pointed (ratification preserved)\n' "$f"
     else
-      printf 'MIGRATE %s — mirror removed (was not ratified-and-valid; left unratified)\n' "$f"
+      printf 'MIGRATE %s — mirror removed (no fingerprint of its own to re-point)\n' "$f"
     fi
     # STORY-*.md only. `README.md` documents the template and legitimately
     # contains a `**Status**: <status>` example; scanning it would report a

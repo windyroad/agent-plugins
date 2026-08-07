@@ -8,7 +8,6 @@ jtbd: [JTBD-303, JTBD-101]
 rfcs: [RFC-054]
 story-maps: [STORY-MAP-008]
 estimated-effort: M
-human-oversight: unconfirmed
 ---
 
 # STORY-051: Have generated content respect my project's conventions
@@ -129,3 +128,10 @@ isolation and the class it belonged to went unnamed until five more reports arri
   never as a local scrub or project-local memory. AC6 is that rule made testable.
 - **ADR-078** — the compendium's migration-by-edit-cadence model, which is why AC3 (regeneration)
   does not by itself reach entries an adopter never touches.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-008 | STORY-MAP-008: Have a plugin behave like a guest in my repository | draft |

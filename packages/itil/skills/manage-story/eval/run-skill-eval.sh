@@ -14,7 +14,7 @@
 # @adr ADR-075 (Amendment 2026-06-02)
 # @rfc RFC-012 S6
 # @problem P456 P465
-# @adr ADR-101 (the I12 accept-gate contract this eval harnesses)
+# @adr ADR-103 (the I12 accept-gate contract this eval harnesses)
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

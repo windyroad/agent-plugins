@@ -236,12 +236,15 @@ jtbd: [JTBD-<NNN>, ...]                # ≥1 — jobs the story serves; I9 inva
 acceptance-criteria-count: <N>         # mechanical — count of `- [ ]` / `- [x]` lines within
                                        #   the `## Acceptance criteria` section only (prefix-
                                        #   matched heading, terminated by the next `##`);
-                                       #   section-scoped per ADR-101, not whole-body
+                                       #   section-scoped, not whole-body
 estimated-effort: S | M | L | XL       # INVEST "Estimable" — set at accepted transition
-adrs: [ADR-<NNN>, ...]                 # optional — decisions this story decomposes; REQUIRED
-                                       #   when `afk-accept:` is declared (ADR-101)
-afk-accept: pure-decomposition         # optional — opt in to the ADR-101 AFK-accept carve-out;
-                                       #   requires a `## Decomposition basis` body section
+adrs: [ADR-<NNN>, ...]                 # optional — decisions this story decomposes
+                                       # ADR-103 — a story carries NO oversight field.
+                                       #   Approval is derived from `story-maps:`: the
+                                       #   story is approved when every map it names is
+                                       #   ratified. `human-oversight:`, `oversight-hash:`,
+                                       #   `afk-accept:` and `## Decomposition basis` were
+                                       #   all removed from the story tier.
 ---
 
 # STORY-NNN: <Title>
@@ -668,3 +671,7 @@ Re-evaluate this decision when any of:
 - **ADR-059** — most recent ADR shipped under the strain pattern; first retrospective RFC candidate.
 - Jeff Patton, *User Story Mapping*, O'Reilly Media, 2014 — backbone/ribs/slices canonical reference.
 - ITIL 4 Foundation — Change Enablement, Service Request Management, Problem Management practices (informs but does not constrain; we extend per user direction).
+
+**Amended by ADR-102 (2026-08-04).** A story map is no longer hand-authored HTML. It is a single file whose authored data lives in a `<script id="story-map-data" type="application/json">` island, with the rendered grid regenerated from that island. The prohibition on inline `style` attributes on data-bearing elements is retained and extended: presentation belongs only in the shared stylesheet.
+
+**Amended by ADR-101 (2026-07-26), since superseded by ADR-103.** ADR-101 added an `afk-accept: pure-decomposition` story field and a `## Decomposition basis` body section, letting an unattended run accept a story that only broke down already-confirmed substance. Both were removed with ADR-103, which makes the story map the approval surface — see the ADR-103 note above for the schema as it now stands.

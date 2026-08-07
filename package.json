@@ -14,7 +14,8 @@
     "bats": "^1.13.0",
     "bats-assert": "^2.2.4",
     "bats-support": "^0.3.0",
-    "promptfoo": "^0.120.19"
+    "promptfoo": "^0.120.19",
+    "jsdom": "^26.0.0"
   },
   "scripts": {
     "test": "LC_ALL=C bats --recursive packages/*/hooks/test/ packages/*/skills/*/test/ packages/*/agents/test/ packages/*/scripts/test/ packages/shared/test/ .claude/skills/*/test/",

@@ -14,182 +14,32 @@
   <meta name="reported" content="2026-07-08">
   <meta name="decision-makers" content="Tom Howard">
   <meta name="human-oversight" content="unconfirmed">
-  <style>
-    :root {
-      color-scheme: light dark;
-      --bg: #ffffff; --fg: #1a1a1a; --muted: #565656; --line: #767676;
-      --card: #f6f6f6; --card-line: #767676;
-      --live-fg: #0b5d1e; --live-bg: #e4f4e8; --live-line: #0b5d1e;
-      --next-fg: #0b3a66; --next-bg: #e2eefb; --next-line: #0b3a66;
-      --later-fg: #6b3a00; --later-bg: #f6ead6; --later-line: #6b3a00;
-      --focus: #0b3a66;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #16181c; --fg: #f2f3f5; --muted: #b6bac2; --line: #8a919c;
-        --card: #1f2228; --card-line: #8a919c;
-        --live-fg: #7fe0a0; --live-bg: #123020; --live-line: #7fe0a0;
-        --next-fg: #97c6f5; --next-bg: #10263c; --next-line: #97c6f5;
-        --later-fg: #f0c58a; --later-bg: #33260f; --later-line: #f0c58a;
-        --focus: #97c6f5;
-      }
-    }
-    :root[data-theme="light"] {
-      color-scheme: light;
-      --bg: #ffffff; --fg: #1a1a1a; --muted: #565656; --line: #767676;
-      --card: #f6f6f6; --card-line: #767676;
-      --live-fg: #0b5d1e; --live-bg: #e4f4e8; --live-line: #0b5d1e;
-      --next-fg: #0b3a66; --next-bg: #e2eefb; --next-line: #0b3a66;
-      --later-fg: #6b3a00; --later-bg: #f6ead6; --later-line: #6b3a00;
-      --focus: #0b3a66;
-    }
-    :root[data-theme="dark"] {
-      color-scheme: dark;
-      --bg: #16181c; --fg: #f2f3f5; --muted: #b6bac2; --line: #8a919c;
-      --card: #1f2228; --card-line: #8a919c;
-      --live-fg: #7fe0a0; --live-bg: #123020; --live-line: #7fe0a0;
-      --next-fg: #97c6f5; --next-bg: #10263c; --next-line: #97c6f5;
-      --later-fg: #f0c58a; --later-bg: #33260f; --later-line: #f0c58a;
-      --focus: #97c6f5;
-    }
-    * { box-sizing: border-box; }
-    body { font-family: system-ui, sans-serif; color: var(--fg); background: var(--bg);
-           max-width: 1500px; margin: 0 auto; padding: 1.5rem 1rem 3rem; line-height: 1.5; }
-    h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
-    p { max-width: 74ch; }
-    .lead { color: var(--muted); }
-    a { color: var(--focus); }
-    /* Required on every interactive element, not just links: the theme toggle
-       (if a host adds one) and the scroll region both take focus. */
-    /* :focus first as a fallback for engines without :focus-visible; the
-       :focus-visible rule below then narrows it to keyboard interaction.
-       No border-radius here — it clips the content of the overflow:auto
-       scroll region for as long as it holds focus. */
-    a:focus, button:focus, [tabindex]:focus { outline: 3px solid var(--focus); outline-offset: 2px; }
-    a:focus-visible,
-    button:focus-visible,
-    [tabindex]:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-    .legend { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin: 1rem 0 1.25rem; padding: 0; list-style: none; }
-    .legend li { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .9rem; }
-    .badge { display: inline-flex; align-items: center; gap: .3rem; font-size: .75rem; font-weight: 700;
-             padding: .1rem .45rem; border-radius: 999px; border: 1px solid; white-space: nowrap; }
-    /* Release state is carried by the badge's text label and by a glyph in real
-       markup (see .b-glyph). The glyph is aria-hidden — it is a second VISUAL
-       channel so colour is never the sole one, and assistive tech already has
-       the label. It must not be generated content: in forced-colors mode the
-       badge backgrounds all collapse to Canvas, and the glyph becomes the only
-       thing distinguishing the three states. */
-    .b-live  { color: var(--live-fg);  background: var(--live-bg);  border-color: var(--live-line); }
-    .b-next  { color: var(--next-fg);  background: var(--next-bg);  border-color: var(--next-line); }
-    .b-later { color: var(--later-fg); background: var(--later-bg); border-color: var(--later-line); }
-
-    .scroll { overflow-x: auto; padding-bottom: .5rem; }
-    table.map { border-collapse: collapse; width: 100%; min-width: 940px; }
-    table.map caption { text-align: left; color: var(--muted); font-size: .85rem; margin-bottom: .5rem; }
-    /* Activity headers across the top are the backbone: the user journey. */
-    thead th.act { text-align: left; vertical-align: bottom; padding: .5rem .6rem; font-size: .9rem;
-                   border-bottom: 3px solid var(--fg); width: 18%; }
-    thead th.act .jtbd { display: block; font-weight: 400; color: var(--muted); font-size: .75rem; margin-top: .2rem; }
-    thead td.corner { border-bottom: 3px solid var(--fg); }
-    /* Each row is one release slice. A row read left to right is everything
-       that ships together. */
-    th.slice { text-align: left; vertical-align: top; padding: .7rem .6rem; width: 10%; min-width: 96px;
-               border-bottom: 2px solid var(--fg); position: sticky; left: 0; background: var(--bg); }
-    th.slice .s-name { font-size: .95rem; display: block; margin-top: .35rem; margin-bottom: .35rem; }
-    th.slice .s-note { font-weight: 400; color: var(--muted); font-size: .75rem; display: block; margin-top: .35rem; }
-    td.cell { vertical-align: top; padding: .5rem; border-bottom: 2px solid var(--fg); border-left: 1px solid var(--line); }
-    /* An empty cell is meaningful — it says this activity ships nothing in this
-       release — so the hatch is drawn in the 3:1 border tone, not a tint. */
-    td.cell.empty { background: repeating-linear-gradient(45deg, transparent, transparent 7px, var(--line) 7px, var(--line) 8px); }
-    .task { border: 1px solid var(--card-line); border-radius: 6px; background: var(--card); padding: .5rem .55rem; }
-    .task + .task { margin-top: .5rem; }
-    .task .t-title { font-size: .85rem; }
-    .task .t-value { display: block; font-size: .75rem; color: var(--muted); margin-top: .25rem; }
-    .task .t-ref { display: block; font-size: .75rem; color: var(--muted); margin-top: .3rem; }
-    .trace { margin-top: 2rem; border-top: 1px solid var(--line); padding-top: 1rem; }
-    .trace h2 { font-size: 1.125rem; }
-    .vh { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-          overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-    .tasks { list-style: none; margin: 0; padding: 0; }
-    .tasks li + li { margin-top: .5rem; }
-    .b-glyph { font-weight: 900; }
-    .genfrom { color: var(--muted); font-size: .8rem; margin-top: 1.5rem; }
-    @media (forced-colors: active) {
-      /* background-image is not part of the forced-colors UA cascade, so the
-         hatch would paint literal #767676 over the user's chosen Canvas in
-         Chromium and vanish entirely in Firefox. Restate it in system colours. */
-      td.cell.empty { background-image: repeating-linear-gradient(45deg, Canvas, Canvas 7px, GrayText 7px, GrayText 8px); }
-      .badge { forced-color-adjust: none; border: 1px solid CanvasText; }
-    }
-    /* Sticky row headers are kept at narrow widths: this is exactly where the
-       table scrolls furthest, so losing the orientation anchor costs most. The
-       column is narrowed and its note dropped rather than unpinned. */
-    @media (max-width: 640px) {
-      th.slice { min-width: 72px; padding: .5rem .35rem; font-size: .85rem; }
-      th.slice .s-note { display: none; }
-    }
-  </style>
+  <link rel="stylesheet" href="../story-map.css">
+  <script src="../story-map.js" defer></script>
 </head>
 <body>
   <main>
-  <h1>Sustain my token quota across the week and across surfaces</h1>
-  <p class="lead">A story map for the developer who leans on Claude all week against one shared quota. Read across the top for the journey — install it, work without watching the meter, keep going when budget is tight, and still have headroom for chat and other surfaces. Read down the rows for release bands. Most cells are empty: only three stories exist, and the emptiness is the point — it shows how much of this journey is unbuilt.</p>
-
-  <ul class="legend" aria-label="Status legend">
-    <li><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>R1</span> the pacing spine</li>
-    <li><span class="badge b-later"><span class="b-glyph" aria-hidden="true">◇</span>R2</span> unbuilt</li>
-  </ul>
-
-  <div class="scroll" tabindex="0" role="region" aria-label="Story map grid">
-    <table class="map">
-      <caption>4 journey activities across the top; 2 release bands down the side. Read a row left to right for everything that ships in one release. A cell with no cards means that activity ships nothing in that release.</caption>
-      <thead>
-        <tr>
-          <td class="corner"></td>
-          <th class="act" scope="col">A. Install it <span class="jtbd">no setup tax</span></th>
-          <th class="act" scope="col">B. Work without watching <span class="jtbd">JTBD-010 — sustain my quota</span></th>
-          <th class="act" scope="col">C. Keep going when tight <span class="jtbd">slowed, not stopped</span></th>
-          <th class="act" scope="col">D. Still have headroom at week's end <span class="jtbd">chat, Cowork</span></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>R1</span> <span class="s-name">First cut</span> <span class="s-note">the pacing spine</span></th>
-          <td class="cell">
-            <ul class="tasks" role="list">
-            <li><div class="task" data-story-id="STORY-043" data-status="draft"><span class="t-title">Pacing starts working the moment I install it, with nothing to configure</span> <span class="t-value">Value: protection I did not have to set up is protection I actually get.</span> <span class="t-ref">Traces: STORY-043, P160</span></div></li>
-            <li><div class="task" data-story-id="STORY-042" data-status="draft"><span class="t-title">I can add quota pacing on its own without dragging in governance plugins I did not ask for</span> <span class="t-value">Value: I take the one guardrail I want.</span> <span class="t-ref">Traces: STORY-042, JTBD-003</span></div></li>
-            </ul>
-          </td>
-          <td class="cell">
-            <ul class="tasks" role="list">
-            <li><div class="task" data-story-id="STORY-039" data-status="draft"><span class="t-title">I work all week without hitting the quota wall, because the work quietly slows itself</span> <span class="t-value">Value: the limit shapes my pace instead of ending my day.</span> <span class="t-ref">Traces: STORY-039</span></div></li>
-            </ul>
-          </td>
-          <td class="cell empty"></td>
-          <td class="cell empty"></td>
-        </tr>
-
-        <tr>
-          <th class="slice" scope="row"><span class="badge b-later"><span class="b-glyph" aria-hidden="true">◇</span>R2</span> <span class="s-name">Later</span> <span class="s-note">unbuilt</span></th>
-          <td class="cell empty" colspan="4"><span class="vh">No stories in this release band.</span></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <section class="trace" aria-labelledby="trace-h">
-    <h2 id="trace-h">What this map traces to</h2>
-    <p><strong>Persona:</strong> developer — using Claude across Code, chat and other surfaces against a single shared weekly quota.</p>
-    <p><strong>Jobs mapped:</strong> JTBD-010 (sustain my token quota across the week and across surfaces).</p>
-    <p><strong>Problems this closes:</strong> P160 — no pacing signal, so the quota wall arrives without warning. P443.</p>
-    <p><strong>Decisions the journey rests on:</strong> ADR-093.</p>
-    <p><strong>Open questions:</strong> Re-encoded onto the canonical grid on 2026-08-05. The prior encoding had five activities and no release dimension, so the bands are new. Two activities carry no stories: surviving an over-budget week, and protecting headroom for other surfaces.</p>
-  </section>
-
+    <h1 id="story-map-title">Sustain my token quota across the week and across surfaces</h1>
+    <p class="lead" id="story-map-lead">A story map for the developer who leans on Claude all week against one shared quota. Read across the top for the journey — install it, work without watching the meter, keep going when budget is tight, and still have headroom at week's end. Read down the rows for release bands. Pacing itself already ships; the packaging work that would let someone adopt it on its own is in flight. Two activities carry no story at all, and those empty columns are the honest state of the work.</p>
+    <ul class="legend" id="story-map-legend" role="list" aria-label="Status legend"></ul>
+    <div id="story-map">
+      <p class="lead">This map's grid has not been drawn. It is built from the data block
+      at the end of this file by <code>story-map.js</code>, which sits alongside the maps —
+      so this message means the script did not load or did not run. The data itself is
+      intact: open this file in a text editor, or use View Source, and read the block with
+      <code>id="story-map-data"</code>.</p>
+    </div>
+    <section class="trace" id="story-map-trace-section" aria-labelledby="trace-h" hidden>
+      <h2 id="trace-h">What this map traces to</h2>
+      <div id="story-map-trace"></div>
+    </section>
   </main>
 
-  <p class="genfrom">Everything above is rendered by <code>wr-itil-render-story-map</code> from the data block below. Edit the data block, then re-render &mdash; edits made anywhere else are overwritten.</p>
+  <footer>
+    <p class="genfrom">This file is the map. The grid is drawn from the data block below;
+    edit that block, or use <code>wr-itil-story-map-edit</code>, then re-render with
+    <code>wr-itil-render-story-map</code>.</p>
+  </footer>
 
   <script id="story-map-data" type="application/json">
 {
@@ -216,7 +66,7 @@
       "ADR-093"
     ]
   },
-  "lead": "A story map for the developer who leans on Claude all week against one shared quota. Read across the top for the journey — install it, work without watching the meter, keep going when budget is tight, and still have headroom for chat and other surfaces. Read down the rows for release bands. Most cells are empty: only three stories exist, and the emptiness is the point — it shows how much of this journey is unbuilt.",
+  "lead": "A story map for the developer who leans on Claude all week against one shared quota. Read across the top for the journey — install it, work without watching the meter, keep going when budget is tight, and still have headroom at week's end. Read down the rows for release bands. Pacing itself already ships; the packaging work that would let someone adopt it on its own is in flight. Two activities carry no story at all, and those empty columns are the honest state of the work.",
   "backbone": [
     {
       "id": "install",
@@ -241,16 +91,19 @@
   ],
   "releases": [
     {
+      "id": "live",
+      "name": "Existing",
+      "note": "shipped & in prod"
+    },
+    {
       "id": "r1",
-      "name": "First cut",
-      "badge": "R1",
-      "note": "the pacing spine"
+      "name": "In flight",
+      "note": "being built now"
     },
     {
       "id": "r2",
-      "name": "Later",
-      "badge": "R2",
-      "note": "unbuilt"
+      "name": "Open",
+      "note": "no story yet"
     }
   ],
   "tasks": [
@@ -258,27 +111,21 @@
       "activity": "install",
       "release": "r1",
       "title": "Pacing starts working the moment I install it, with nothing to configure",
-      "value": "Value: protection I did not have to set up is protection I actually get.",
       "storyId": "STORY-043",
-      "storyStatus": "draft",
       "ref": "STORY-043, P160"
     },
     {
       "activity": "install",
       "release": "r1",
       "title": "I can add quota pacing on its own without dragging in governance plugins I did not ask for",
-      "value": "Value: I take the one guardrail I want.",
       "storyId": "STORY-042",
-      "storyStatus": "draft",
       "ref": "STORY-042, JTBD-003"
     },
     {
       "activity": "pace",
-      "release": "r1",
+      "release": "live",
       "title": "I work all week without hitting the quota wall, because the work quietly slows itself",
-      "value": "Value: the limit shapes my pace instead of ending my day.",
       "storyId": "STORY-039",
-      "storyStatus": "draft",
       "ref": "STORY-039"
     }
   ],
@@ -287,9 +134,87 @@
     "jobs": "JTBD-010 (sustain my token quota across the week and across surfaces).",
     "problems": "P160 — no pacing signal, so the quota wall arrives without warning. P443.",
     "decisions": "ADR-093.",
-    "open": "Re-encoded onto the canonical grid on 2026-08-05. The prior encoding had five activities and no release dimension, so the bands are new. Two activities carry no stories: surviving an over-budget week, and protecting headroom for other surfaces."
+    "open": "Re-encoded onto the canonical grid on 2026-08-05; the prior encoding had five activities and no release dimension. Bands were corrected on 2026-08-06 after a status audit: throttling is archived (shipped and retired), and both packaging stories are in-progress rather than draft. Surviving an over-budget week and protecting headroom for other surfaces carry no story yet."
   }
 }
   </script>
+  <script id="story-map-status" type="application/json">
+{
+  "rows": {
+    "live": "delivered",
+    "r1": "unproposed",
+    "r2": "unproposed"
+  },
+  "status": {
+    "STORY-043": "in-progress",
+    "STORY-042": "in-progress",
+    "STORY-039": "archived"
+  },
+  "values": {
+    "STORY-043": {
+      "value": [
+        {
+          "t": "get token pacing actually working the moment I install the plugin — not silently inert until I happen to hand-wire my statusline"
+        }
+      ],
+      "who": [
+        {
+          "t": "developer installing `@windyroad/cruise`"
+        }
+      ],
+      "want": [
+        {
+          "t": "the plugin to self-install its own data producer, so throttling works out of the box (or from the next session) with no invisible one-time setup step whose absence disables it (JTBD-010 outcome #7; closes the P160/P443 adopter-inert gap)."
+        }
+      ]
+    },
+    "STORY-042": {
+      "value": [
+        {
+          "t": "install token pacing on its own — without pulling in a governance plugin I don't want — and to have it maintained as one thing rather than seven byte-identical synced copies"
+        }
+      ],
+      "who": [
+        {
+          "t": "developer who wants quota pacing"
+        }
+      ],
+      "want": [
+        {
+          "t": "the throttle extracted into a dedicated `@windyroad/cruise` plugin, so it is an opt-in capability with a single home (per ADR-093's 2026-07-08 amendment)."
+        }
+      ]
+    },
+    "STORY-039": {
+      "value": [
+        {
+          "t": "keep working across a whole week without a mid-window quota hard-stop halting my loops mid-flight"
+        }
+      ],
+      "who": [
+        {
+          "t": "developer sharing one Claude token quota across Code + chat + Cowork"
+        }
+      ],
+      "want": [
+        {
+          "t": "every tool call to mechanically self-pace against the tighter of the 5-hour and 7-day windows, so cumulative usage never sprints past the elapsed fraction of the window into a hard stop."
+        }
+      ]
+    }
+  },
+  "hrefs": {
+    "STORY-043": "../../stories/in-progress/STORY-043-self-installing-quota-producer.md",
+    "STORY-042": "../../stories/in-progress/STORY-042-extract-quota-pacing-plugin.md",
+    "STORY-039": "../../stories/archived/STORY-039-throttle-token-burn.md",
+    "P160": "../../problems/known-error/160-ship-quota-pacing-surface-to-prevent-weekly-quota-exhaustion.md",
+    "JTBD-003": "../../jtbd/developer/JTBD-003-compose-guardrails.proposed.md",
+    "P443": "../../problems/open/443-quota-pacing-lineage-broken-missing-jtbd-persona-usm-orphaned-story-map-rfc.md",
+    "JTBD-010": "../../jtbd/developer/JTBD-010-sustain-token-quota.proposed.md",
+    "ADR-093": "../../decisions/093-mechanical-quota-pace-throttle.proposed.md"
+  }
+}
+  </script>
+
 </body>
 </html>

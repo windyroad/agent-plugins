@@ -1,6 +1,6 @@
 # Story Map Backlog
 
-> Last reviewed: 2026-05-12 — **Scaffolded.** Directory + lifecycle subdirs created; encoding decision per ADR-060 amendment 2026-05-12 = HTML for story-maps; markdown stays for stories + RFCs + problems + decisions. STORY-MAP-001 bootstrap migration (from `docs/plans/170-rfc-framework-story-map.md`) lands in P170 Phase 2 Slice 8. Skills (`/wr-itil:capture-story-map`, `/manage-story-map`, `/reconcile-story-maps`, `/list-story-maps`) land in Phase 2 Slice 3.
+> Last reviewed: 2026-08-07. Maps are rendered from a data island by `wr-itil-render-story-map` per ADR-102; edit with `wr-itil-story-map-edit`, query with `wr-itil-story-map-query`. The bootstrap migration this note used to track is long done, and the map that carried it has since been retired into the decompose-a-fix journey.
 >
 > Run `/wr-itil:manage-story-map review` to refresh once the manage-story-map skill ships.
 
@@ -28,7 +28,7 @@ This index serves two persona-jobs per ADR-051 sibling pattern (JTBD-anchored RE
 | **Story Map** | **`docs/story-maps/<state>/`** | **HTML (`*.html`)** | **`draft → accepted → in-progress → completed → archived`** | **How the work decomposes spatially across backbone × ribs × slices** |
 | Story | `docs/stories/<state>/` | markdown | `draft → accepted → in-progress → done → archived` | One slice of a story map; INVEST-shaped + JTBD-anchored |
 
-This directory is **scaffold-only** until P170 Phase 2 Slice 3 ships `/wr-itil:capture-story-map` + `/wr-itil:manage-story-map` (Slice 3) and Slice 8 migrates `docs/plans/170-rfc-framework-story-map.md` to `STORY-MAP-001-rfc-framework-phase-1-bootstrap.html`.
+This directory is live. Capture a map with `/wr-itil:capture-story-map`, move it through its lifecycle with `/wr-itil:manage-story-map`, and repair index drift with `/wr-itil:reconcile-story-maps`.
 
 ## Story-map filename grammar
 
@@ -59,7 +59,7 @@ This directory is **scaffold-only** until P170 Phase 2 Slice 3 ships `/wr-itil:c
     { "activity": "<backbone id>", "release": "<release id>",
       "title": "<what the persona can do>", "value": "Value: <why it matters>",
       "storyId": "STORY-<NNN>", "rfc": "RFC-<NNN>", "jtbd": "JTBD-<NNN>",
-      "storyStatus": "draft", "ref": "STORY-<NNN>, P<NNN>" }
+      "ref": "STORY-<NNN>, P<NNN>" }
   ],
   "traceProse": { "persona": "...", "jobs": "...", "problems": "...", "decisions": "...", "open": "..." }
 }
@@ -68,7 +68,7 @@ This directory is **scaffold-only** until P170 Phase 2 Slice 3 ships `/wr-itil:c
 
 Rendered shape: backbone activities become `<th class="act" scope="col">` COLUMNS; releases become `<th class="slice" scope="row">` ROWS; tasks become `<div class="task">` cards inside `<td class="cell">`; an activity × release pair with no tasks renders `<td class="cell empty">`. A row read left to right is everything that ships together.
 
-**Trace layer** (unchanged in meaning, moved to the task card): `data-story-id`, `data-rfc`, `data-jtbd`, `data-status`. Each story-bearing card is emitted on a single line — `story-oversight.sh` filters whole lines, and a multi-line card breaks the ADR-101 AFK-accept carve-out.
+**Trace layer**: `data-story-id`, `data-rfc`, `data-jtbd`, `data-status` on each rendered card. Since the cards are built in the browser, tooling that needs the trace reads the data block's `"storyId"` instead — `update-story-references-section.sh` and `story-oversight.sh` match both spellings. The island's pretty-printed serialisation keeps each `"storyId"` on its own line, which is what the ADR-101 whole-line filter needs.
 
 **Ratification** is fingerprinted over the data island alone, not the whole file, so restyling the template can never revoke a human approval (ADR-102's amendment to ADR-090).
 
@@ -84,7 +84,6 @@ One row per story map in `draft` / `accepted` / `in-progress` status, from files
 
 | WSJF | ID | Title | Status | Problems | RFCs |
 |------|-----|-------|--------|----------|------|
-| — | STORY-MAP-001 | RFC framework Phase 1 + Phase 2 bootstrap | in-progress | P170 | RFC-001, RFC-002, RFC-003 |
 | — | STORY-MAP-002 | Decompose a fix into coordinated changes | draft | P170, P251, P314, P371, P399, P390 | RFC-003, RFC-005, RFC-047 |
 | — | STORY-MAP-003 | Sustain my token quota across the week and across surfaces | draft | P160, P443 | RFC-046 |
 | — | STORY-MAP-004 | Close the loop with someone who reported a problem | draft | P376, P431 | RFC-051 |
@@ -94,17 +93,11 @@ One row per story map in `draft` / `accepted` / `in-progress` status, from files
 | — | STORY-MAP-013 | Know what my push did | draft | P435 | — |
 
 
-## Archived
+## Consolidated away
 
-Absorbed into a consolidated journey on 2026-08-05. Each was a single-story stub — one card wearing a map's clothes — and the honest unit is the journey, not the single fix.
+Six maps were absorbed into consolidated journeys and their files removed — five single-story stubs on 2026-08-05, and the framework-bootstrap map on 2026-08-07. Five held one card each — a map's clothes on a single fix. The sixth listed the tooling's own commands, which is an inventory rather than a journey anybody walks. The honest unit is the journey a persona takes.
 
-| ID | Title | Absorbed into |
-|----|-------|---------------|
-| STORY-MAP-005 | Trust the capture-on-correction signal | STORY-MAP-011 |
-| STORY-MAP-006 | Decline upstream discovery once and stay declined | STORY-MAP-004 |
-| STORY-MAP-007 | A correction to the agent's conduct holds in every project | STORY-MAP-011 |
-| STORY-MAP-009 | Trust that a close does not strand the sibling family | STORY-MAP-011 |
-| STORY-MAP-010 | Trust that a ticket states only what was verified | STORY-MAP-011 |
+Their IDs are retired and must not be reused. The lookup from each retired ID to the journey that absorbed it is recorded in problem ticket 477, kept there rather than here because this index treats any map ID it contains as a claim that the file exists on disk.
 
 ## Completed
 
@@ -130,7 +123,6 @@ Index row rendering uses `packages/itil/scripts/render-story-map-index.sh` (P170
 - **JTBD-008** — Decompose a Fix Into Coordinated Changes. Primary persona-job for this directory.
 - **JTBD-302** — Trust That the README Describes the Plugin I Just Installed. Secondary persona-job; README-currency rule applies.
 - **P170** — driver problem ticket capturing the strain pattern that motivated ADR-060.
-- **`docs/plans/170-rfc-framework-story-map.md`** — current Patton-style planning artefact for P170; migrates to `STORY-MAP-001-rfc-framework-phase-1-bootstrap.html` in P170 Phase 2 Slice 8.
 - **`docs/rfcs/README.md`** — sibling directory's lifecycle index. Same architectural pattern applied at the RFC tier (markdown encoding).
 - **`docs/stories/README.md`** — sibling directory for individual stories (markdown encoding, JTBD-008 + JTBD-001 anchors).
 - **Jeff Patton**, *User Story Mapping* (O'Reilly, 2014) — backbone/ribs/slices canonical reference.

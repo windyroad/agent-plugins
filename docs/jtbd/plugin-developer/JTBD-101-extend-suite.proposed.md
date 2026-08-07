@@ -66,7 +66,6 @@ Copy an existing plugin and modify it, read ADRs and BRIEFING.md
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-MAP-007 | STORY-MAP-007: A correction to the agent's conduct holds in every project | archived |
 | STORY-MAP-008 | STORY-MAP-008: Have a plugin behave like a guest in my repository | draft |
 | STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |
 | STORY-MAP-001 | STORY-MAP-001: RFC framework Phase 1 + Phase 2 bootstrap | in-progress |

@@ -57,3 +57,22 @@ Both the shipped template and the whole corpus were wrong together, so cloning t
 
 - ADR-102 — story maps render from JSON through a canonical template.
 - ADR-090 — drift-invalidated human-oversight marker; the reason migration forces re-ratification.
+
+## Retired story-map IDs
+
+Consolidated away and removed from the tree (2026-08-05, and STORY-MAP-001 on 2026-08-07). These IDs are retired and must not be reused. Older tickets and RFCs still name them in narrative describing what happened at the time; this table is the lookup from those mentions to the journey that now carries the work.
+
+| Retired ID | Was | Absorbed into |
+|------------|-----|---------------|
+| STORY-MAP-005 | Trust the capture-on-correction signal | STORY-MAP-011 |
+| STORY-MAP-006 | Decline upstream discovery once and stay declined | STORY-MAP-004 |
+| STORY-MAP-007 | A correction to the agent's conduct holds in every project | STORY-MAP-011 |
+| STORY-MAP-009 | Trust that a close does not strand the sibling family | STORY-MAP-011 |
+| STORY-MAP-010 | Trust that a ticket states only what was verified | STORY-MAP-011 |
+| STORY-MAP-001 | RFC framework Phase 1 + Phase 2 bootstrap | STORY-MAP-002 |
+
+## Progress
+
+**2026-08-05 — migration done; ticket now covers only the residue.** All eleven predecessors were rebuilt or consolidated: nine stacked maps re-authored onto the grid, one two-dimensional map transposed, one widened from a stub. Five stubs were absorbed and removed. Every live map renders from the canonical template, and release bands on STORY-MAP-002 were re-derived from actual story status rather than guessed.
+
+What remains: all eight live maps are `human-oversight: unconfirmed`. The shape change drifted every fingerprint, which this ticket predicted, so each needs a human ratification pass before an RFC can reference its stories.

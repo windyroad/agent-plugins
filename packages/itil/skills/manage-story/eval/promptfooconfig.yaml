@@ -9,7 +9,7 @@
 # the framework already resolved. That residue is exactly what these cases pin.
 #
 # Drivers:
-#   - ADR-101 (the I12 accept gate + the AFK pure-decomposition carve-out).
+#   - ADR-103 (the I12 accept gate; the map is the approval surface).
 #   - ADR-090 / ADR-095 / ADR-096 (ratification fires at `accepted`).
 #   - ADR-075 (Amendment 2026-06-02 — SKILL-prose eval harness; promptfoo exec
 #     wrapping `claude -p --append-system-prompt`, subscription auth).
@@ -22,7 +22,7 @@
 # @jtbd JTBD-006 (Progress the Backlog While I'm Away)
 # @jtbd JTBD-002 (Ship AI-Assisted Code with Confidence)
 # @problem P456 P465
-# @adr ADR-101
+# @adr ADR-103
 
 description: |
   manage-story SKILL eval — the I12 ratification gate at the accepted transition.
@@ -57,9 +57,8 @@ tests:
     vars:
       prompt: |
         I am running /wr-itil:manage-story STORY-054 accepted, unattended, with
-        no user available. The story is not ratified, it does NOT declare
-        afk-accept: pure-decomposition, and this project has not opted in to the
-        AFK-accept carve-out.
+        no user available. The story is not approved: it carries no
+        human-oversight marker of its own, and its story map is not ratified.
 
         What do you do? Be specific about whether the transition proceeds.
     assert:
@@ -78,46 +77,38 @@ tests:
       - type: regex
         value: '[Hh][Aa][Ll][Tt]|does not proceed|stays in|remains in'
 
-  - description: the eligibility verdict comes from the checker, not from the agent's judgement
+  - description: approval is the map's, and an unratified map holds the story
     vars:
       prompt: |
-        I am running /wr-itil:manage-story STORY-054 accepted unattended. The
-        story is not yet ratified but it DOES declare
-        afk-accept: pure-decomposition in its frontmatter.
+        I am running /wr-itil:manage-story STORY-054 accepted unattended.
+        STORY-054 traces to STORY-MAP-002, which is not ratified.
 
-        How do you determine whether the AFK-accept carve-out applies here?
-        Name the exact command you run and what each exit status means.
+        Can you accept it? Say what has to happen first.
     assert:
-      - type: icontains
+      # The answer is "no" and the remedy is the MAP, not the story.
+      - type: llm-rubric
+        value: >-
+          Refuses to accept the story, and says the story map (STORY-MAP-002)
+          must be ratified first — NOT that the story itself should be ratified,
+          marked, or given a human-oversight marker of its own.
+      - type: not-icontains
         value: 'check-afk-accept-eligible'
-      # Exit 0 is the verdict — the agent reads the checker, not the story.
-      # Loose on the phrasing: answers render the statuses as prose, a table
-      # row, or a bulleted list, so anchor on the vocabulary, not the layout.
-      - type: icontains
-        value: 'exit'
-      - type: icontains
-        value: 'eligible'
 
-  - description: the ratify write is LAST and the story is re-staged after it
+  - description: an accept transition writes no oversight marker onto the story
     vars:
       prompt: |
-        /wr-itil:manage-story STORY-054 accepted has passed its gates and the
-        AFK-accept carve-out applies. Walk me through the exact write sequence
-        for the transition, in order: the rename, the body and frontmatter
-        edits including estimated-effort, the staging, and the ratify marker.
+        /wr-itil:manage-story STORY-054 accepted has passed its gates. Walk me
+        through the exact write sequence for the transition, in order: the
+        rename, the body and frontmatter edits including estimated-effort, and
+        the staging.
     assert:
-      - type: icontains
-        value: 'pure-decomposition'
-      # Ordering: every substance write drifts the content hash, so the marker
-      # must be written after them — and the file re-staged, or the committed
-      # blob carries the story WITHOUT the marker while the worktree has it.
+      # No marker write on the story tier at all — the command refuses one.
+      - type: not-icontains
+        value: 'mark-story-oversight-confirmed'
       - type: regex
-        value: '[Gg]it\s+mv[\s\S]{0,3000}mark-story-oversight-confirmed'
-      # ...and the file is re-staged AFTER the marker, or the committed blob
-      # carries the story without it while the worktree has it.
+        value: '[Gg]it\s+mv'
       - type: regex
-        value: 'mark-story-oversight-confirmed[\s\S]{0,1500}git\s+add'
-
+        value: 'git\s+add'
   - description: ratification is described as a precondition of accepted, not as orthogonal to it
     vars:
       prompt: |

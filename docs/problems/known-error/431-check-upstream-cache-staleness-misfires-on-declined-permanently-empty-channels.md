@@ -95,6 +95,5 @@ Rejected: making review-problems write `.upstream-cache.json` even on a zero-cha
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-MAP-006 | STORY-MAP-006: Decline upstream discovery once and stay declined | archived |
 | STORY-MAP-004 | STORY-MAP-004: Close the loop with someone who reported a problem | draft |
 | STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |

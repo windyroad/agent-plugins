@@ -8,13 +8,11 @@ jtbd: [JTBD-008, JTBD-301]
 adrs: [ADR-062]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
-human-oversight: confirmed
-oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass, inbound thread)"
 ---
 
 # STORY-027: Capture a problem reported through an inbound channel
 
-**Story map:** [← STORY-MAP-002: Decompose a Fix Into Coordinated Changes](../../story-maps/draft/STORY-MAP-002-decompose-a-fix-into-coordinated-changes.html) · A1 (Release 1) — inbound variation
+**Story map:** [← STORY-MAP-002: Take a Problem From Noticed to Resolved](../../story-maps/draft/STORY-MAP-002-take-a-problem-from-noticed-to-resolved.html) · A1 (Release 1) — inbound variation
 **Backbone (inbound thread):** A1 capture-inbound · [A1 acknowledge](028-acknowledge-the-inbound-report.md) · [A2 share workaround](029-share-the-workaround-with-the-reporter.md) · [A3/A4 fix underway](030-tell-the-reporter-a-fix-is-underway.md) · [A5 released → verify → close](031-tell-the-reporter-released-and-close-the-loop.md)
 
 ## User value (INVEST Valuable)
@@ -39,3 +37,10 @@ In order to fix the problems real users are actually hitting — not only the on
 ## Related
 
 - **STORY-MAP-002** A1 inbound-capture card. Sibling of [STORY-018](018-capture-the-problem-mid-flow.md) (the internal mid-flow capture). Implementation ripple tracked with the inbound thread (P404 / ADR-062 surfaces).
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-002 | STORY-MAP-002: Take a problem from noticed to resolved | draft |

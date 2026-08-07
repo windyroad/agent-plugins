@@ -160,7 +160,7 @@ JTBD lifecycle states (`.proposed.md` / `.accepted.md` / `.archived.md`) all pas
 - **`--story-map` absent**: hard-block with **refuse-and-route** (parity with the I6/I9 mandatory-trace gates). Do NOT scaffold `story-maps: []`. Emit the deny log (`reason: missing-story-map-trace`) and halt with:
   > `/wr-itil:capture-story` requires a story-map trace (ADR-095 / I8): every story is born on a story map. Create a map first via `/wr-itil:capture-story-map` (or extend one via `/wr-itil:manage-story-map`), then re-invoke capture-story with `--story-map STORY-MAP-<NNN>`.
 
-  AFK orchestrators author the map first (born `human-oversight: unconfirmed` per ADR-090, drained later), then capture the story onto it — nothing halts silently; the map is a prerequisite step.
+  AFK orchestrators author the map first (born `"humanOversight": "unconfirmed"` in its data island per ADR-102, drained later), then capture the story onto it — nothing halts silently; the map is a prerequisite step.
 - **`--story-map` present**: for each `STORY-MAP-<NNN>`, existence check `ls docs/story-maps/*/STORY-MAP-<NNN>-*.html 2>/dev/null`. Malformed or unresolved → hard-block (`reason: unresolved-story-map-trace`). Lifecycle advisory-warn on `draft` / `in-progress` maps; pass silently on `accepted` / `completed`.
 - **Bootstrap exemption (ADR-060 A4 / ADR-053)**: a capture carrying the inline `<!-- bootstrap-exempt: ... -->` marker bypasses the I8 hard-block for migration stories ONLY. A **non-bootstrap** capture carrying the marker is rejected (the marker is not a general capture-time escape hatch — behavioural test asserts).
 
@@ -206,8 +206,13 @@ jtbd: [JTBD-<NNN>, JTBD-<NNN>, ...]
 rfcs: [<RFC-<NNN>, ...> or empty]
 story-maps: [<STORY-MAP-<NNN>, ...>]     # >=1 REQUIRED at capture (I8 / ADR-095)
 estimated-effort: <S|M|L|XL — derived at capture per ADR-067 (real best-effort value, no deferral marker)>
-human-oversight: unconfirmed
 ---
+
+<!-- NO `human-oversight:` field, and none of its siblings (ADR-103). A story
+     carries no oversight marker: approval is its story map's, derived from the
+     `story-maps:` field above. Writing one here creates a second approval
+     surface that `story_is_approved` deliberately ignores, so it would be
+     inert as well as wrong. -->
 
 <!-- Frontmatter `status:` is the ONLY place a story's lifecycle state lives.
      Do NOT add a `**Status**:` body line here. It used to mirror the
@@ -257,7 +262,7 @@ human-oversight: unconfirmed
 (captured via /wr-itil:capture-story; expand at next /wr-itil:manage-story invocation)
 ```
 
-**Born `human-oversight: unconfirmed` (ADR-090).** A new story is created with `human-oversight: unconfirmed` in its frontmatter — orthogonal to the `status:` lifecycle. It is NOT ratified until a human confirms it via `/wr-itil:manage-story <NNN> ratify` (which writes `confirmed` + an `oversight-hash` fingerprint via `wr-itil-mark-story-oversight-confirmed`). Until then `wr-itil-detect-unratified-stories-maps` surfaces it and an RFC may not reference it (`wr-itil-check-rfc-stories-ratified`). Adding a story also drifts its parent map's fingerprint, re-opening the map's ratification (lazy-fingerprint, ADR-009 lineage). Do NOT hand-write `confirmed` — born-unconfirmed is the load-bearing default.
+**Born with no oversight field (ADR-103).** A new story carries no `human-oversight:` and no `oversight-hash:`. Its approval is derived from the maps in its `story-maps:` field: approved when every one of them is ratified, never approved when it names none. Until then `wr-itil-detect-unratified-stories-maps` surfaces it and an RFC may not reference it (`wr-itil-check-rfc-stories-ratified`). Do NOT write an oversight field onto a story — `wr-itil-mark-story-oversight-confirmed` refuses a story path, and `story_is_approved` ignores any field left behind, so a hand-written one would be wrong AND inert. **Adding a story to its map does NOT re-open the map's ratification** — rows and cards sit outside the fingerprint basis, which is what removed the deadlock ADR-101 existed to work around.
 
 The deferred-section pattern matches `capture-rfc`'s placeholder approach — the captured story is intentionally minimal; full INVEST shape lands at the manage-story accepted-transition step.
 
