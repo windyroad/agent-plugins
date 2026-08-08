@@ -1302,3 +1302,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-08-09
 
 > Last reviewed: 2026-08-08 **P485 captured** — every gate in the process adds something and is enforced; nothing removes, and removal is optional, so cruft accumulates until someone's patience runs out. Measured on the files this session touched: one is 64% comment-only, explaining states that no longer exist (lightweight aside via /wr-itil:capture-problem).
+
+> Last reviewed: 2026-08-09 **P486 captured** — a risk policy is the arbiter every commit, push and release is scored against, and the validator only checks its shape. An adopter's policy states in one sentence that a control can reduce impact and that controls never reduce impact; it passed validation (lightweight aside via /wr-itil:capture-problem).

@@ -125,6 +125,7 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | draft | STORY-056 | Clear a block with a command my repository actually has | M | P435 | RFC-062 | STORY-MAP-008 |
 | draft | STORY-057 | Get the fix by upgrading, not by patching a cache | M | P369 | RFC-063 | STORY-MAP-008 |
 | draft | STORY-058 | Read a README that describes the version I installed | M | P152 | RFC-064 | STORY-MAP-008 |
+| draft | STORY-059 | See why the loop did not work what I expected | M | P487 | — | STORY-MAP-011 |
 | accepted | STORY-054 | Lifecycle transitions preserve a story's ratification | M | P474 | RFC-059 | STORY-MAP-002 |
 | accepted | STORY-055 | One definition of what the oversight fingerprint ignores | M | P474 | RFC-059 | STORY-MAP-002 |
 | draft | STORY-012 | Can't start coding without an RFC — the gate makes me create one first | S | P251, P314 | RFC-005 | STORY-MAP-002 |
