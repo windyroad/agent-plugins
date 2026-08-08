@@ -164,6 +164,20 @@ appear here changes what that test asserts, and that binding is deliberate.
 
 - **The backbone must be a journey, not a list of invariants.** Activities are steps the persona walks through in sequence. "Finish a change → get it assessed → push it → get through CI → release it" is a backbone. "Leave no unscored way out", "score this change not the last one" are invariants, and a column of them is not a map.
 - At capture a map may legitimately have **columns and rows but empty cells**. That is the honest state of unbuilt work, and the renderer says so in place — a wholly empty band carries its own sentence. Do not add prose at the top explaining it.
+- **Composing a row asks two questions, in order.** A row is a release, so putting two stories in one is a claim that they ship together. Answer both before drawing it.
+
+  **1. Do they NEED to ship together?** Coupling. Is either broken, meaningless or misleading on its own? A migration and the code that depends on it need one row. Two fixes that merely arrived in the same conversation do not. *Absence of a dependency is not a reason to bundle* — it is the reason not to.
+
+  **2. SHOULD they ship together?** Economics, and this is the question that gets skipped. Batching imposes the delay of the slowest story on everything in the batch. It buys something back only when each release costs a lot to perform — so weigh the holding cost against the per-release transaction cost:
+
+  - **Producer-side cost is usually near zero here**: release is automated on merge, and this repo has shipped three times in a day. When transaction cost approaches zero the optimal batch approaches one, and bundling is pure loss.
+  - **Adopter-side cost is not zero.** Every release asks an adopter to upgrade, and upgrading has known friction. That is the real argument for a larger batch.
+  - **Watch for the story that REDUCES that cost.** It ships first and alone. Queueing your transaction-cost reducer behind other work is the expensive mistake, because it makes every later release cheaper — attack the cost, then the batch size falls out.
+  - **Cost of delay is per persona, not per story.** A gate blocking most adopters today outweighs an intermittent failure that bites across an upgrade. Name who waits, and what waiting costs each of them, before deciding the row.
+  - **Check the package boundary.** Stories in packages that version independently cannot share a release the tooling will actually produce; a row spanning them claims something no changeset emits.
+
+  The default is one story per row. Two stories share a row when the answer to question 1 is yes, or when question 2 shows a transaction cost high enough to pay for the delay. Neither is assumed.
+
 - **A row IS an RFC (ADR-103).** A row a problem has proposed carries its `rfc`; drawing the row is what allocates the identity. There is no separate "not yet allocated" state and no `badge` field — a row's status is derived from its stories, and its label is its RFC id.
 - **Every row carries an identity, and finishing one earns no exemption (ADR-107).** A row with no `rfc` renders as a defect — a red "Untraced" badge — whether or not its stories are done. Delivery cannot excuse a missing identity, because every row is delivered eventually; that reading would let work nobody proposed become legitimate by being finished.
 

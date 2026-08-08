@@ -71,21 +71,35 @@
   ],
   "releases": [
     {
-      "id": "r1",
+      "id": "rfc-046",
+      "name": "Pacing is its own plugin, not welded to a guardrail",
+      "rfc": "RFC-046"
+    },
+    {
+      "id": "rfc-054",
       "name": "Generated content is portable by default",
-      "note": "stories exist",
       "rfc": "RFC-054"
+    },
+    {
+      "id": "rfc-062",
+      "name": "A block names a remedy this repository can run",
+      "rfc": "RFC-062"
+    },
+    {
+      "id": "rfc-063",
+      "name": "An upgrade delivers the fix, without touching a cache",
+      "rfc": "RFC-063"
     },
     {
       "id": "r2",
       "name": "Open",
-      "note": "unbuilt"
+      "note": "nothing proposes this yet"
     }
   ],
   "tasks": [
     {
       "activity": "generate",
-      "release": "r1",
+      "release": "rfc-054",
       "title": "Generated content defaults to the most portable form, so my own policy hooks do not fire on text I did not write",
       "storyId": "STORY-051",
       "rfc": "RFC-054",
@@ -94,7 +108,7 @@
     },
     {
       "activity": "collide",
-      "release": "r1",
+      "release": "rfc-062",
       "title": "Clear any block the plugin raises with a command my repository actually has",
       "jtbd": "JTBD-003",
       "ref": "P435 (inbound #235) \u2014 see STORY-MAP-013",
@@ -102,9 +116,10 @@
     },
     {
       "activity": "choose",
-      "release": "r2",
+      "release": "rfc-046",
       "title": "I install the one guardrail I want without dragging in the rest of the suite",
-      "ref": "JTBD-003, no story yet"
+      "ref": "STORY-042, P160, P443",
+      "storyId": "STORY-042"
     },
     {
       "activity": "trust",
@@ -114,7 +129,7 @@
     },
     {
       "activity": "fixed",
-      "release": "r2",
+      "release": "rfc-063",
       "title": "Get the fix by upgrading, without patching a cached plugin myself",
       "ref": "JTBD-303, no story yet",
       "storyId": "STORY-057"

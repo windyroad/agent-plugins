@@ -4,6 +4,7 @@ story-id: clear-a-block-with-a-command-my-repository-has
 reported: 2026-08-09
 decision-makers: [Tom Howard]
 problems: [P435]
+rfcs: [RFC-062]
 jtbd: [JTBD-303, JTBD-101]
 story-maps: [STORY-MAP-008]
 estimated-effort: M

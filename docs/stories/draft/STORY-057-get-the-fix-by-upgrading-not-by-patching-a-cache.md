@@ -4,6 +4,7 @@ story-id: get-the-fix-by-upgrading-not-by-patching-a-cache
 reported: 2026-08-09
 decision-makers: [Tom Howard]
 problems: [P369]
+rfcs: [RFC-063]
 jtbd: [JTBD-303, JTBD-101]
 story-maps: [STORY-MAP-008]
 estimated-effort: M

@@ -1,0 +1,113 @@
+# SKILL eval — capture-story-map row composition.
+#
+# A release row is a claim that its stories ship together, and the skill states
+# two tests for drawing one: do they NEED to (coupling), and SHOULD they (batch
+# economics). The second is the one that gets skipped — an agent with no
+# dependency between two stories will bundle them anyway, because they arrived
+# in the same conversation.
+#
+# Both directions are covered. Bundling two independent stories is the failure
+# this exists to catch; refusing to bundle two genuinely coupled ones is the
+# over-correction, and a check that only fires one way teaches the wrong lesson.
+#
+# Two tiers (ADR-075):
+#   - Tier A: deterministic `icontains` where a distinctive token is reliable.
+#   - Tier B: `llm-rubric` for the reasoning, which no regex can grade. Note the
+#     P270 not-regex lesson — a not-regex for "one row" fires on the correct
+#     answer "these do NOT belong in one row".
+#
+# Drivers:
+#   - ADR-075 (Amendment 2026-06-02 — SKILL-prose scope; promptfoo exec wrapping
+#     `claude -p --append-system-prompt`, subscription auth, no API key).
+#   - ADR-052 (behavioural tests default — a rule asserted only by grepping
+#     SKILL.md prose is the structural test this repo rejects).
+#   - ADR-103 (a release row is the RFC).
+
+description: capture-story-map — how a release row is composed
+
+providers:
+  # Path is relative to this config file's directory (promptfoo basePath).
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: Splits two independent stories into separate rows, on the economics
+    vars:
+      prompt: |
+        I am drawing release rows on a story map. Two stories are ready:
+
+        - One fixes a gate that blocks an adopter and tells them to run a
+          command that only exists in our own repository. It is in the
+          risk-scorer package. Two adopters have reported it.
+        - One fixes a retired hook that a live session still invokes by its old
+          path, so upgrading does not deliver the fix and the adopter ends up
+          editing a plugin cache by hand. It is in the architect package.
+
+        Neither depends on the other. Releases here are automated on merge and
+        we have shipped three times in one day.
+
+        Should these two stories share one release row, or take a row each?
+        Give your answer and your reasoning.
+    assert:
+      # Tier A — the outcome. "each" / "separate" are the distinctive tokens.
+      - type: llm-rubric
+        value: >-
+          The response concludes the two stories should NOT share a release row,
+          and should take a row each. It reasons about more than the absence of
+          a dependency: it makes at least one economic argument, such as the low
+          per-release transaction cost making small batches cheap, the delay
+          that batching imposes on the story that is ready first, the cost of
+          delay differing between the two, or the two stories living in packages
+          that version independently. A response that splits them purely because
+          "they are not coupled" without any economic reasoning does not pass.
+
+  - description: Keeps genuinely coupled stories in one row, rather than splitting reflexively
+    vars:
+      prompt: |
+        I am drawing release rows on a story map. Two stories are ready:
+
+        - One changes the on-disk format of a data file that the tool reads.
+        - One updates the reader so it can parse the new format. Shipped
+          without the first, it reads a format nothing produces; shipped
+          without the second, every existing file becomes unreadable.
+
+        Releases here are automated on merge.
+
+        Should these two stories share one release row, or take a row each?
+        Give your answer and your reasoning.
+    assert:
+      # Tier B only — the claim is that it does NOT split them, and a not-regex
+      # on "separate rows" fires on the correct answer "not separate rows".
+      - type: llm-rubric
+        value: >-
+          The response concludes the two stories DO belong in one release row.
+          It identifies that they are coupled — either is broken, meaningless or
+          harmful without the other — so shipping them separately would leave
+          the tool in a state where it cannot read its own data. It does not
+          recommend splitting them on the grounds that releases are cheap; the
+          coupling test settles it before the economics are reached.
+
+  - description: Ships a transaction-cost reducer first rather than batching it
+    vars:
+      prompt: |
+        I am drawing release rows on a story map. Two stories are ready:
+
+        - One improves the wording of a warning message.
+        - One fixes the reason upgrading is disruptive for adopters: today an
+          upgrade can leave a session bound to code the new version removed, so
+          every release costs adopters a restart and some risk.
+
+        Neither depends on the other.
+
+        Should these two stories share one release row, or take a row each?
+        If they take a row each, which should ship first, and why?
+    assert:
+      - type: llm-rubric
+        value: >-
+          The response gives them separate rows AND says the story that reduces
+          the cost of upgrading should ship first. Its reasoning recognises that
+          this story lowers the cost of every future release, so delaying it
+          behind other work is more expensive than it looks — rather than
+          ordering them by the size or urgency of the fix alone.
