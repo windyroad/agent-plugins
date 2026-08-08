@@ -1166,3 +1166,114 @@ JSON
   [ "$rows" = "history=delivered sneaked=untraced" ] \
     || { echo "row statuses were '$rows'; wanted history=delivered sneaked=untraced"; return 1; }
 }
+
+@test "a card shows its own lifecycle state, not only the row's" {
+  # The defect this closes: every card carried a correct `data-status` and the
+  # stylesheet had no rule referencing status at all, so a shipped story and one
+  # nobody had started rendered identically. A row only reads delivered when
+  # everything in it is done, so a single shipped story inside an in-flight row
+  # was invisible — the maintainer reported the same story as live three times
+  # and the map he was asked to approve looked the same every time.
+  local root="$TMP/cardstatus"
+  mkdir -p "$root/docs/story-maps/draft" "$root/docs/stories/done" "$root/docs/stories/in-progress" "$root/docs/stories/draft"
+  printf -- '---\nstatus: done\n---\n# STORY-970\n'        > "$root/docs/stories/done/STORY-970-a.md"
+  printf -- '---\nstatus: in-progress\n---\n# STORY-971\n' > "$root/docs/stories/in-progress/STORY-971-b.md"
+  printf -- '---\nstatus: draft\n---\n# STORY-972\n'       > "$root/docs/stories/draft/STORY-972-c.md"
+
+  local map="$root/docs/story-maps/draft/STORY-MAP-987-x.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    printf '%s\n' '{ "storyMapId": "STORY-MAP-987", "title": "T", "traces": { "jtbd": ["JTBD-900"] }, "backbone": [ { "id": "a", "title": "A" } ], "releases": [ { "id": "r1", "name": "N", "rfc": "RFC-900" } ], "tasks": [ { "activity": "a", "release": "r1", "title": "Shipped", "storyId": "STORY-970" }, { "activity": "a", "release": "r1", "title": "Building", "storyId": "STORY-971" }, { "activity": "a", "release": "r1", "title": "Not started", "storyId": "STORY-972" } ] }'
+    printf '</script>\n'
+  } > "$map"
+  run node "$RENDER" "$map"
+  [ "$status" -eq 0 ]
+
+  local d="$TMP/dom987.html"; node "$IN_DOM" "$map" > "$d"
+
+  # Each state renders a marker carrying REAL TEXT — colour is never the sole
+  # channel, and a screen reader gets the state from the accessible name.
+  grep -q 'ts-done'  "$d" || { echo "no done marker"; return 1; }
+  grep -q 'ts-prog'  "$d" || { echo "no in-progress marker"; return 1; }
+  grep -q 'ts-draft' "$d" || { echo "no draft marker"; return 1; }
+  grep -qi 'Done'    "$d" || { echo "the done marker carries no text"; return 1; }
+
+  # Draft is present but quiet. Absence is reserved for a status that could not
+  # be resolved — if draft rendered nothing, the two would be identical and this
+  # very defect would be unverifiable by looking at a map.
+  run bash -c "grep -o 'ts-draft' '$d' | wc -l | tr -d ' '"
+  [ "$output" -eq 1 ]
+
+  # And a card whose story does not resolve stays silent, so absence keeps
+  # meaning "unresolved" rather than "draft".
+  local nores="$TMP/nores.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    printf '%s\n' '{ "storyMapId": "STORY-MAP-988", "title": "T", "traces": { "jtbd": ["JTBD-900"] }, "backbone": [ { "id": "a", "title": "A" } ], "releases": [ { "id": "r1", "name": "N", "rfc": "RFC-900" } ] }'
+    printf '</script>\n'
+  } > "$nores"
+  run node "$RENDER" "$nores"
+  [ "$status" -eq 0 ]
+  run bash -c "grep -c 't-status' '$nores' || true"
+  [ "$output" -eq 0 ]
+}
+
+@test "an archived story is refused among live rows, and allowed in a graveyard row" {
+  # Archived means closed WITHOUT completion — scope shifted or superseded. A
+  # card for one sitting among live work reads as abandoned capability: map 003
+  # showed a live throttle marked Archived, because the card pointed at the
+  # record of the deleted first implementation rather than at the story that
+  # shipped the working one. Either it comes off the map, or it goes in a row
+  # that says what it is.
+  local root="$TMP/graveyard"
+  mkdir -p "$root/docs/story-maps/draft" "$root/docs/stories/archived" "$root/docs/stories/done"
+  printf -- '---\nstatus: archived\n---\n# STORY-980\n' > "$root/docs/stories/archived/STORY-980-a.md"
+  printf -- '---\nstatus: done\n---\n# STORY-981\n'     > "$root/docs/stories/done/STORY-981-b.md"
+
+  # Among live rows: refused, and the message names both ways out.
+  local bad="$root/docs/story-maps/draft/STORY-MAP-989-x.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    printf '%s\n' '{ "storyMapId": "STORY-MAP-989", "title": "T", "traces": { "jtbd": ["JTBD-900"] }, "backbone": [ { "id": "a", "title": "A" } ], "releases": [ { "id": "r1", "name": "N", "rfc": "RFC-900" } ], "tasks": [ { "activity": "a", "release": "r1", "title": "Superseded", "storyId": "STORY-980" } ] }'
+    printf '</script>\n'
+  } > "$bad"
+  run node "$RENDER" "$bad"
+  [ "$status" -ne 0 ] || { echo "an archived story was drawn among live rows"; return 1; }
+  [[ "$output" == *"STORY-980"* ]] || { echo "the refusal does not name the story"; return 1; }
+  [[ "$output" == *"graveyard"* ]] || { echo "the refusal does not name the graveyard row as a way out"; return 1; }
+
+  # In a graveyard row: allowed, and the row says what it holds.
+  local ok="$root/docs/story-maps/draft/STORY-MAP-990-y.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    printf '%s\n' '{ "storyMapId": "STORY-MAP-990", "title": "T", "traces": { "jtbd": ["JTBD-900"] }, "backbone": [ { "id": "a", "title": "A" } ], "releases": [ { "id": "r1", "name": "N", "rfc": "RFC-900" }, { "id": "old", "name": "Superseded along the way", "graveyard": true } ], "tasks": [ { "activity": "a", "release": "r1", "title": "Live", "storyId": "STORY-981" }, { "activity": "a", "release": "old", "title": "Superseded", "storyId": "STORY-980" } ] }'
+    printf '</script>\n'
+  } > "$ok"
+  run node "$RENDER" "$ok"
+  [ "$status" -eq 0 ] || { echo "a graveyard row was refused: $output"; return 1; }
+
+  local rows
+  rows="$(node -e '
+    const fs=require("fs"), h=fs.readFileSync(process.argv[1],"utf8");
+    const O="<script id=\"story-map-status\" type=\"application/json\">";
+    const i=h.indexOf(O)+O.length, j=h.indexOf("</script>", i);
+    process.stdout.write(Object.entries(JSON.parse(h.slice(i,j)).rows).map(([k,v])=>k+"="+v).sort().join(" "));
+  ' "$ok")"
+  # A graveyard row is not delivered — nothing in it completed.
+  [ "$rows" = "old=archived r1=delivered" ] \
+    || { echo "row statuses were '$rows'; wanted old=archived r1=delivered"; return 1; }
+
+  # And a live story may not hide in the graveyard. Built from scratch, NOT by
+  # editing the rendered file above — the renderer pretty-prints the island, so
+  # a sed against the authored one-line form matches nothing and the fixture
+  # silently stays unmodified.
+  local mixed="$root/docs/story-maps/draft/STORY-MAP-991-z.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    printf '%s\n' '{ "storyMapId": "STORY-MAP-991", "title": "T", "traces": { "jtbd": ["JTBD-900"] }, "backbone": [ { "id": "a", "title": "A" } ], "releases": [ { "id": "old", "name": "Superseded along the way", "graveyard": true } ], "tasks": [ { "activity": "a", "release": "old", "title": "Live", "storyId": "STORY-981" } ] }'
+    printf '</script>\n'
+  } > "$mixed"
+  run node "$RENDER" "$mixed"
+  [ "$status" -ne 0 ] || { echo "a live story was allowed in the graveyard row"; return 1; }
+  [[ "$output" == *"STORY-981"* ]] || { echo "the refusal does not name the intruder"; return 1; }
+}

@@ -46,6 +46,13 @@ Normative, and emitted only by the template:
 - `.traces` / `.tr-group` — the jobs the map is drawn for, as one line of links from the island's `traces.jtbd`. Jobs only: a decision trace is not a map's to carry (ADR-106), and an RFC line would restate the row badges directly beneath it. It replaced five paragraphs of hand-written trace prose, every one of which restated something already on the page.
 - `.ref-link` — a resolved link to another artefact. Absent when the id did not resolve, so the text stands alone rather than dangling.
 - `.task` — a task card inside a cell; carries the `data-*` trace layer. `.t-title`, `.t-value`, `.t-ref` are its parts.
+- `.t-status` with `.ts-done` / `.ts-arch` / `.ts-prog` / `.ts-acc` / `.ts-draft` — a **card's** own lifecycle state, keyed off the story file. A card-grain sibling of `.badge`, never `.badge` itself: the row's status is the more important fact and the card marker must not out-shout it.
+
+  **Subordinate by four axes at once.** No pill shape and no fill — border-only where a border is used, per the no-background rule below. `.7rem`/600 against the badge's `.75rem`/700, glyph at 700 against `.b-glyph`'s 900. Its own line above `.t-title`, not inline beside it. And a chroma budget: only `done`, `archived` and `in-progress` carry colour; `accepted` and `draft` render achromatic in `--muted`. A map with twenty-four cards would otherwise put twenty-four coloured markers against five row badges.
+
+  The glyph is real text, never generated content — under forced colors the backgrounds collapse and the glyph becomes the only discriminator. For the same reason `.t-status` does **not** take `forced-color-adjust: none`: `.badge` opts out because its state lives in its fill, and this marker's does not.
+
+  **No lifecycle state renders as absence.** Draft is quiet — muted, weight 400, no glyph, no border — but present. Absence is reserved for a story whose status could not be resolved, which is a different fact and needs an edit. Rendering draft as nothing would make the two identical, and would make this very defect unverifiable by looking at a map.
 - `.badge` with `.b-live` / `.b-next` / `.b-defect` — a row's status pill, keyed off DERIVED status, never an authored field. Colour is never the sole channel: each badge carries real text — its RFC id, or `Needs an RFC id` / `Untraced — needs a problem` — and a distinct glyph, supplied once by the badge and never repeated in the label. There is no authored `badge`; an R1/R2 ordinal duplicated the RFC identity and collided with it.
 - `.genfrom` — the generated-file banner.
 
@@ -58,7 +65,7 @@ Removed by ADR-102: `.backbone`, `.rib`, `.rib-header`, `.map-note`. Maps still 
 - `data-status="<draft|accepted|in-progress|done|archived>"` — the story's lifecycle state at render time.
 - `data-rib` — **removed**.
 
-Each story-bearing card is emitted on a **single line**. `story-oversight.sh` filters whole lines; a pretty-printed card would break the ADR-101 AFK-accept carve-out.
+Each story-bearing card is emitted on a **single line**. That was load-bearing under ADR-101's whole-line filter; since the fingerprint became island-scoped, cards sit outside the basis entirely and this is a readability convention rather than a correctness constraint. A corollary worth stating: rendered marker text cannot drift a ratification, so there is no fingerprint reason to reach for generated content.
 
 ## Naming
 
@@ -71,8 +78,10 @@ Each story-bearing card is emitted on a **single line**. `story-oversight.sh` fi
 Story maps are intentionally style-minimal; colour is OPTIONAL. If used:
 
 - High contrast against white background (WCAG AA minimum 4.5:1 for text).
-- Conventional status indicators: `draft = gray`, `accepted = blue`, `in-progress = yellow`, `done = green`, `archived = light gray`.
-- No background colours on data-bearing `<a class="slice">` elements (keep them visually neutral; status conveyed via border / outline if at all).
+- Conventional status indicators: `draft = gray`, `accepted = blue`, `in-progress = yellow`, `done = green`, `archived = muted gray`.
+
+  **Archived is not `--line`.** Read literally, "light gray" lands on `--line`, which is 4.20:1 against `--card` in light mode — under the 4.5:1 that marker text needs, and passing in dark mode at 5.02:1, so it fails in exactly one theme. Archived takes `--muted` (6.79:1 light, 8.19:1 dark) for its glyph and label, and may use `--line` for a border only, where 3:1 applies. Same class of miss as the 3.76:1 `.v-lead` incident.
+- No background colours on the data-bearing story element (keep it visually neutral; status conveyed via border / outline if at all). Written for `<a class="slice">`; since ADR-102 that role is held by `.task`, so the rule now binds card markers.
 - **Non-text contrast**: borders and other non-text UI boundaries meet 3:1 against their background (WCAG 2.2 SC 1.4.11). This binds hardest on `.slice`, whose border is the only resting signal that the card is a link. Use `#767676` (4.54:1 on white) as the shared border value for new maps.
 
   Maps written before this rule, plus the two template sources (ADR-060's inlined template and `docs/story-maps/README.md`), still carry sub-3:1 border greys such as `#ccc` (1.6:1), `#c9d2de`, and `#c4c4c4`. The sweep is tracked as its own ticket — this line is normative for new work, not a description of what is currently on disk.

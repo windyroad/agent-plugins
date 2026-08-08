@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-08 **P485 captured** — every gate in the process adds something and is enforced; nothing removes, and removal is optional, so cruft accumulates until someone's patience runs out. Measured on the files this session touched: one is 64% comment-only, explaining states that no longer exist (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-08-09 **P486 captured** — a risk policy is the arbiter every commit, push and release is scored against, and the validator only checks its shape. An adopter's policy states in one sentence that a control can reduce impact and that controls never reduce impact; it passed validation (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -80,6 +80,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P479 | Decisions accrete into the nearest ADR because amending is cheaper than deciding — ADR-102 weighed two options and carries six decisions | 12 (High) | Open | M | 2026-08-07 | corrective-feedback |
 | 6 | P480 | An ADR's ratification is document-scoped, so riders that were never weighed inherit its authority — one contradicted an accepted-tier decision undeclared | 12 (High) | Open | M | 2026-08-08 | corrective-feedback |
 | 8 | P485 | Every step in the process adds and none removes, so cruft accumulates without limit — no refactor step, no simplification step, and nothing self-firing to trigger one | 16 (High) | Open | L | 2026-08-08 | corrective-feedback |
+| 6 | P486 | The policy validator checks a policy's shape, never whether it contradicts itself — a self-contradicting policy passes | 12 (High) | Open | M | 2026-08-09 | inbound-reported |
 | 8 | P483 | Amendment sections are not a legitimate mechanism — a ratified decision is immutable, and is changed only by being deprecated or superseded | 16 (High) | Open | L | 2026-08-08 | corrective-feedback |
 | 5 | P484 | The reading-context persona constraint is load-bearing in two ratified decisions but documented nowhere | 9 (Medium) | Open | S | 2026-08-08 | internal |
 | 4 | P482 | ADR line-number citations are positional, so they rot silently every time the ADR is amended — 122 occurrences across 42 files | 6 (Medium) | Open | M | 2026-08-08 | architect-review |

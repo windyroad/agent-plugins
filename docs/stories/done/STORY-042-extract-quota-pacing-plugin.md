@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 story-id: extract-quota-pacing-plugin
 reported: 2026-07-08
 decision-makers: [Tom Howard]

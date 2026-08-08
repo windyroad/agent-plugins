@@ -117,6 +117,38 @@ td.cell.empty { background: repeating-linear-gradient(45deg, transparent, transp
 .task .v-asa { color: var(--fg); }
 /* Author emphasis, rendered as written. */
 .task .t-value strong { font-weight: 700; color: var(--fg); }
+/* A card's own lifecycle state. Subordinate to the row badge by four axes at
+   once — no pill, no fill, smaller and lighter, on its own line, and only the
+   three states worth colouring get colour. Twenty-four cards would otherwise
+   put twenty-four coloured markers against five row badges.
+
+   No `forced-color-adjust: none` here, unlike `.badge`: that opts out because
+   its state lives in its fill; this marker's lives in its text, so letting the
+   UA force the colours is correct. */
+.task .t-status {
+  display: block;
+  font-size: .7rem;
+  font-weight: 600;
+  margin-bottom: .15rem;
+  letter-spacing: .01em;
+}
+.task .ts-glyph { font-weight: 700; margin-right: .25rem; }
+
+/* Coloured: the states worth picking out of a wall of cards. Border-only —
+   a fill on a data-bearing element is prohibited, and the row badge's own
+   fill is 1.14:1 anyway, so its loudness was never coming from the fill. */
+.task .ts-done { color: var(--live-fg); }
+.task .ts-prog { color: var(--later-fg); }
+/* `--muted`, NOT `--line`. Read literally, "archived = light gray" lands on
+   --line, which is 4.20:1 on --card in light mode — under the 4.5:1 that .7rem
+   text needs, and passing in dark at 5.02:1, so it fails in exactly one theme.
+   Same shape as the 3.76:1 .v-lead miss. */
+.task .ts-arch { color: var(--muted); }
+
+/* Achromatic: the common states, kept as texture so the coloured ones read. */
+.task .ts-acc,
+.task .ts-draft { color: var(--muted); font-weight: 400; }
+
 .task .t-ref { display: block; font-size: .75rem; color: var(--muted); margin-top: .3rem; }
 .slice .s-problems { display: block; font-size: .7rem; color: var(--muted); margin-top: .2rem; }
 .traces { margin-top: 1.5rem; border-top: 1px solid var(--line); padding-top: .75rem;

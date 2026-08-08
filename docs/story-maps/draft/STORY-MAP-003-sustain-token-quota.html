@@ -12,26 +12,28 @@
   <meta name="jtbd" content="JTBD-010,JTBD-003">
   <meta name="reported" content="2026-07-08">
   <meta name="decision-makers" content="Tom Howard">
-  <meta name="human-oversight" content="unconfirmed">
+  <meta name="human-oversight" content="confirmed">
+  <meta name="oversight-hash" content="bc476421c2f9e4b8387e3dda4026028886ca6c1174c602e57dfc1696c3a4555c">
   <link rel="stylesheet" href="../story-map.css">
 </head>
 <body>
   <main>
     <h1 id="story-map-title">Sustain my token quota across the week and across surfaces</h1>
-    <div id="story-map"><div class="scroll" tabindex="0" role="region" aria-label="Story map grid"><table class="map"><caption>Sustain my token quota across the week and across surfaces — 4 journey activities across 2 releases</caption><thead><tr><td class="corner"></td><th class="act" scope="col">A. Install it <span class="jtbd">no setup tax</span></th><th class="act" scope="col">B. Work without watching <span class="jtbd">JTBD-010 — sustain my quota</span></th><th class="act" scope="col">C. Keep going when tight <span class="jtbd">slowed, not stopped</span></th><th class="act" scope="col">D. Still have headroom at week's end <span class="jtbd">chat, Cowork</span></th></tr></thead><tbody><tr><th class="slice" scope="row"><span class="badge b-live"><span class="b-glyph" aria-hidden="true">✓</span>Delivered, pre-RFC</span> <span class="s-name">Already shipped</span> <span class="s-note">shipped &amp; in prod</span><span class="s-problems">closes <a href="../../problems/known-error/160-ship-quota-pacing-surface-to-prevent-weekly-quota-exhaustion.md" class="ref-link">P160</a>, <a href="../../problems/open/443-quota-pacing-lineage-broken-missing-jtbd-persona-usm-orphaned-story-map-rfc.md" class="ref-link">P443</a></span></th><td class="cell empty"></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-039" data-status="archived"><a href="../../stories/archived/STORY-039-throttle-token-burn.md" class="ref-link"><span class="t-title">I work all week without hitting the quota wall, because the work quietly slows itself</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>keep working across a whole week without a mid-window quota hard-stop halting my loops mid-flight</div><div class="v-line v-asa"><span class="v-lead">as a </span>developer sharing one Claude token quota across Code + chat + Cowork</div><div class="v-line v-iwant"><span class="v-lead">I want </span>every tool call to mechanically self-pace against the tighter of the 5-hour and 7-day windows, so cumulative usage never sprints past the elapsed fraction of the window into a hard stop.</div></div><div class="t-ref">Traces: <a href="../../stories/archived/STORY-039-throttle-token-burn.md" class="ref-link">STORY-039</a></div></div></li></ul></td><td class="cell empty"></td><td class="cell empty"></td></tr><tr><th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>RFC-046</span> <span class="s-name">Pacing works the moment it is installed</span> <span class="s-note">being built now</span><span class="s-problems">closes <a href="../../problems/known-error/160-ship-quota-pacing-surface-to-prevent-weekly-quota-exhaustion.md" class="ref-link">P160</a>, <a href="../../problems/open/443-quota-pacing-lineage-broken-missing-jtbd-persona-usm-orphaned-story-map-rfc.md" class="ref-link">P443</a></span></th><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-043" data-status="done"><a href="../../stories/done/STORY-043-self-installing-quota-producer.md" class="ref-link"><span class="t-title">Pacing starts working the moment I install it, with nothing to configure</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>get token pacing actually working the moment I install the plugin — not silently inert until I happen to hand-wire my statusline</div><div class="v-line v-asa"><span class="v-lead">as a </span>developer installing `@windyroad/cruise`</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the plugin to self-install its own data producer, so throttling works out of the box (or from the next session) with no invisible one-time setup step whose absence disables it (JTBD-010 outcome #7; closes the P160/P443 adopter-inert gap).</div></div><div class="t-ref">Traces: <a href="../../stories/done/STORY-043-self-installing-quota-producer.md" class="ref-link">STORY-043</a>, <a href="../../problems/known-error/160-ship-quota-pacing-surface-to-prevent-weekly-quota-exhaustion.md" class="ref-link">P160</a></div></div></li><li><div class="task" data-story-id="STORY-042" data-status="in-progress"><a href="../../stories/in-progress/STORY-042-extract-quota-pacing-plugin.md" class="ref-link"><span class="t-title">I can add quota pacing on its own without dragging in governance plugins I did not ask for</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>install token pacing on its own — without pulling in a governance plugin I don't want — and to have it maintained as one thing rather than seven byte-identical synced copies</div><div class="v-line v-asa"><span class="v-lead">as a </span>developer who wants quota pacing</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the throttle extracted into a dedicated `@windyroad/cruise` plugin, so it is an opt-in capability with a single home (per ADR-093's 2026-07-08 amendment).</div></div><div class="t-ref">Traces: <a href="../../stories/in-progress/STORY-042-extract-quota-pacing-plugin.md" class="ref-link">STORY-042</a>, <a href="../../jtbd/developer/JTBD-003-compose-guardrails.proposed.md" class="ref-link">JTBD-003</a></div></div></li></ul></td><td class="cell empty"></td><td class="cell empty"></td><td class="cell empty"></td></tr></tbody></table></div></div>
+    <div id="story-map"><div class="scroll" tabindex="0" role="region" aria-label="Story map grid"><table class="map"><caption>Sustain my token quota across the week and across surfaces — 4 journey activities across 2 releases</caption><thead><tr><td class="corner"></td><th class="act" scope="col">A. Install it <span class="jtbd">no setup tax</span></th><th class="act" scope="col">B. Work without watching <span class="jtbd">JTBD-010 — sustain my quota</span></th><th class="act" scope="col">C. Keep going when tight <span class="jtbd">slowed, not stopped</span></th><th class="act" scope="col">D. Still have headroom at week's end <span class="jtbd">chat, Cowork</span></th></tr></thead><tbody><tr><th class="slice" scope="row"><span class="badge b-live"><span class="b-glyph" aria-hidden="true">✓</span>Delivered, pre-RFC</span> <span class="s-name">Already shipped</span> <span class="s-note">shipped &amp; in prod</span><span class="s-problems">closes <a href="../../problems/known-error/160-ship-quota-pacing-surface-to-prevent-weekly-quota-exhaustion.md" class="ref-link">P160</a>, <a href="../../problems/open/443-quota-pacing-lineage-broken-missing-jtbd-persona-usm-orphaned-story-map-rfc.md" class="ref-link">P443</a></span></th><td class="cell empty"></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-042" data-status="done"><div class="t-status ts-done"><span class="ts-glyph" aria-hidden="true">✓</span>Done</div><a href="../../stories/done/STORY-042-extract-quota-pacing-plugin.md" class="ref-link"><span class="t-title">I work all week without hitting the quota wall, because the work quietly slows itself</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>install token pacing on its own — without pulling in a governance plugin I don't want — and to have it maintained as one thing rather than seven byte-identical synced copies</div><div class="v-line v-asa"><span class="v-lead">as a </span>developer who wants quota pacing</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the throttle extracted into a dedicated `@windyroad/cruise` plugin, so it is an opt-in capability with a single home (per ADR-093's 2026-07-08 amendment).</div></div><div class="t-ref">Traces: <a href="../../stories/done/STORY-042-extract-quota-pacing-plugin.md" class="ref-link">STORY-042</a>, <a href="../../problems/known-error/160-ship-quota-pacing-surface-to-prevent-weekly-quota-exhaustion.md" class="ref-link">P160</a>, <a href="../../problems/open/443-quota-pacing-lineage-broken-missing-jtbd-persona-usm-orphaned-story-map-rfc.md" class="ref-link">P443</a></div></div></li></ul></td><td class="cell empty"></td><td class="cell empty"></td></tr><tr><th class="slice" scope="row"><span class="badge b-live"><span class="b-glyph" aria-hidden="true">✓</span>RFC-046</span> <span class="s-name">Pacing works the moment it is installed</span> <span class="s-note">shipped in @windyroad/cruise</span><span class="s-problems">closes <a href="../../problems/known-error/160-ship-quota-pacing-surface-to-prevent-weekly-quota-exhaustion.md" class="ref-link">P160</a>, <a href="../../problems/open/443-quota-pacing-lineage-broken-missing-jtbd-persona-usm-orphaned-story-map-rfc.md" class="ref-link">P443</a></span></th><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-043" data-status="done"><div class="t-status ts-done"><span class="ts-glyph" aria-hidden="true">✓</span>Done</div><a href="../../stories/done/STORY-043-self-installing-quota-producer.md" class="ref-link"><span class="t-title">Pacing starts working the moment I install it, with nothing to configure</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>get token pacing actually working the moment I install the plugin — not silently inert until I happen to hand-wire my statusline</div><div class="v-line v-asa"><span class="v-lead">as a </span>developer installing `@windyroad/cruise`</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the plugin to self-install its own data producer, so throttling works out of the box (or from the next session) with no invisible one-time setup step whose absence disables it (JTBD-010 outcome #7; closes the P160/P443 adopter-inert gap).</div></div><div class="t-ref">Traces: <a href="../../stories/done/STORY-043-self-installing-quota-producer.md" class="ref-link">STORY-043</a>, <a href="../../problems/known-error/160-ship-quota-pacing-surface-to-prevent-weekly-quota-exhaustion.md" class="ref-link">P160</a></div></div></li><li><div class="task" data-story-id="STORY-042" data-status="done"><div class="t-status ts-done"><span class="ts-glyph" aria-hidden="true">✓</span>Done</div><a href="../../stories/done/STORY-042-extract-quota-pacing-plugin.md" class="ref-link"><span class="t-title">I can add quota pacing on its own without dragging in governance plugins I did not ask for</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>install token pacing on its own — without pulling in a governance plugin I don't want — and to have it maintained as one thing rather than seven byte-identical synced copies</div><div class="v-line v-asa"><span class="v-lead">as a </span>developer who wants quota pacing</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the throttle extracted into a dedicated `@windyroad/cruise` plugin, so it is an opt-in capability with a single home (per ADR-093's 2026-07-08 amendment).</div></div><div class="t-ref">Traces: <a href="../../stories/done/STORY-042-extract-quota-pacing-plugin.md" class="ref-link">STORY-042</a>, <a href="../../jtbd/developer/JTBD-003-compose-guardrails.proposed.md" class="ref-link">JTBD-003</a></div></div></li></ul></td><td class="cell empty"></td><td class="cell empty"></td><td class="cell empty"></td></tr></tbody></table></div></div>
 <p class="traces" id="story-map-traces"><span class="tr-group"><strong>Jobs:</strong> <a href="../../jtbd/developer/JTBD-010-sustain-token-quota.proposed.md" class="ref-link">JTBD-010</a>, <a href="../../jtbd/developer/JTBD-003-compose-guardrails.proposed.md" class="ref-link">JTBD-003</a></span></p>
   </main>
 
 
   <script id="story-map-data" type="application/json">
 {
+  "humanOversight": "confirmed",
+  "oversightHash": "bc476421c2f9e4b8387e3dda4026028886ca6c1174c602e57dfc1696c3a4555c",
   "storyMapId": "STORY-MAP-003",
   "title": "Sustain my token quota across the week and across surfaces",
   "status": "draft",
   "persona": "developer",
   "reported": "2026-07-08",
   "decisionMakers": "Tom Howard",
-  "humanOversight": "unconfirmed",
   "traces": {
     "jtbd": [
       "JTBD-010",
@@ -70,7 +72,7 @@
     {
       "id": "r1",
       "name": "Pacing works the moment it is installed",
-      "note": "being built now",
+      "note": "shipped in @windyroad/cruise",
       "rfc": "RFC-046"
     }
   ],
@@ -93,8 +95,8 @@
       "activity": "pace",
       "release": "live",
       "title": "I work all week without hitting the quota wall, because the work quietly slows itself",
-      "storyId": "STORY-039",
-      "ref": "STORY-039"
+      "storyId": "STORY-042",
+      "ref": "STORY-042, P160, P443"
     }
   ]
 }
@@ -103,7 +105,7 @@
 {
   "rows": {
     "live": "delivered",
-    "r1": "proposed"
+    "r1": "delivered"
   },
   "rowProblems": {
     "live": [
@@ -121,8 +123,7 @@
   ],
   "status": {
     "STORY-043": "done",
-    "STORY-042": "in-progress",
-    "STORY-039": "archived"
+    "STORY-042": "done"
   },
   "values": {
     "STORY-043": {
@@ -158,33 +159,15 @@
           "t": "the throttle extracted into a dedicated `@windyroad/cruise` plugin, so it is an opt-in capability with a single home (per ADR-093's 2026-07-08 amendment)."
         }
       ]
-    },
-    "STORY-039": {
-      "value": [
-        {
-          "t": "keep working across a whole week without a mid-window quota hard-stop halting my loops mid-flight"
-        }
-      ],
-      "who": [
-        {
-          "t": "developer sharing one Claude token quota across Code + chat + Cowork"
-        }
-      ],
-      "want": [
-        {
-          "t": "every tool call to mechanically self-pace against the tighter of the 5-hour and 7-day windows, so cumulative usage never sprints past the elapsed fraction of the window into a hard stop."
-        }
-      ]
     }
   },
   "hrefs": {
     "STORY-043": "../../stories/done/STORY-043-self-installing-quota-producer.md",
-    "STORY-042": "../../stories/in-progress/STORY-042-extract-quota-pacing-plugin.md",
-    "STORY-039": "../../stories/archived/STORY-039-throttle-token-burn.md",
+    "STORY-042": "../../stories/done/STORY-042-extract-quota-pacing-plugin.md",
     "P160": "../../problems/known-error/160-ship-quota-pacing-surface-to-prevent-weekly-quota-exhaustion.md",
     "JTBD-003": "../../jtbd/developer/JTBD-003-compose-guardrails.proposed.md",
-    "JTBD-010": "../../jtbd/developer/JTBD-010-sustain-token-quota.proposed.md",
-    "P443": "../../problems/open/443-quota-pacing-lineage-broken-missing-jtbd-persona-usm-orphaned-story-map-rfc.md"
+    "P443": "../../problems/open/443-quota-pacing-lineage-broken-missing-jtbd-persona-usm-orphaned-story-map-rfc.md",
+    "JTBD-010": "../../jtbd/developer/JTBD-010-sustain-token-quota.proposed.md"
   }
 }
   </script>

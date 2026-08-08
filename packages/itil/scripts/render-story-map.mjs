@@ -356,6 +356,7 @@ function rowStatus(row, tasks, statuses) {
   // with `preRfc`. Delivery alone cannot earn the exception — every row is
   // delivered eventually, so that reading would make shipping unproposed work
   // legitimate by finishing it.
+  if (row.graveyard) return 'archived';
   if (shipped && (row.rfc || row.preRfc)) return 'delivered';
   if (row.rfc || (row.problems ?? []).length) return 'proposed';
   // NOT a third resting state. A row whose stories close no problem is a defect:
@@ -548,6 +549,35 @@ function valueHtml(v) {
   ).join('') + '</div>';
 }
 
+/** A card's own lifecycle state, as real text.
+ *
+ *  A row only reads delivered when everything in it is done, so a single
+ *  shipped story inside an in-flight row was invisible: the status reached the
+ *  markup as `data-status` and no stylesheet rule ever referenced it. The same
+ *  story was reported as live three times against a map that looked identical
+ *  each time.
+ *
+ *  The glyph is real text, never generated content — under forced colors the
+ *  backgrounds collapse and it becomes the only discriminator. Draft is quiet
+ *  but present; ABSENCE is reserved for a status that could not be resolved,
+ *  which is a different fact and needs an edit rather than a nudge.
+ */
+const CARD_STATUS = {
+  done:          ['ts-done',  '✓', 'Done'],
+  archived:      ['ts-arch',  '○', 'Archived'],
+  'in-progress': ['ts-prog',  '◑', 'In progress'],
+  accepted:      ['ts-acc',   '○', 'Accepted'],
+  draft:         ['ts-draft', '',       'Draft'],
+};
+
+function statusHtml(status) {
+  const hit = CARD_STATUS[status];
+  if (!hit) return '';
+  const [cls, glyph, label] = hit;
+  const mark = glyph ? `<span class="ts-glyph" aria-hidden="true">${glyph}</span>` : '';
+  return `<div class="t-status ${cls}">${mark}${esc(label)}</div>`;
+}
+
 function cardHtml(task, status, value, hrefs) {
   const attrs = ['class="task"'];
   if (task.storyId) attrs.push(`data-story-id="${esc(task.storyId)}"`);
@@ -555,6 +585,7 @@ function cardHtml(task, status, value, hrefs) {
   if (task.jtbd) attrs.push(`data-jtbd="${esc(task.jtbd)}"`);
   if (status) attrs.push(`data-status="${esc(status)}"`);
   let out = `<div ${attrs.join(' ')}>`;
+  out += statusHtml(status);
   out += link(hrefs, task.storyId, `<span class="t-title">${esc(task.title || '')}</span>`);
   out += valueHtml(value);
   if (task.ref) out += `<div class="t-ref">Traces: ${linkify(hrefs, String(task.ref))}</div>`;
@@ -726,6 +757,53 @@ function renderTrace(map, derived) {
  *  map for lacking a tree that was never there (ADR-104's degrade-gracefully
  *  consequence).
  */
+/** Archived work is separated from live work.
+ *
+ *  `archived` means closed WITHOUT completion — scope shifted, or superseded.
+ *  A card for one sitting among live rows reads as abandoned capability: map
+ *  003 showed a working throttle marked Archived, because the card pointed at
+ *  the record of the deleted first implementation rather than at the story
+ *  that shipped the replacement. The reader cannot tell "this was dropped"
+ *  from "this shipped, under a different story".
+ *
+ *  So an archived story is off the map, or it is in a row that says what it
+ *  holds. The rule runs both ways: a graveyard row takes nothing else, or it
+ *  becomes a quiet place to park live work.
+ */
+function assertArchivedIsSeparated(map, storiesDir) {
+  if (!storiesDir || !existsSync(storiesDir)) return;
+  const graveyard = new Set((map.releases ?? []).filter((r) => r.graveyard).map((r) => r.id));
+  const strays = [];
+  const intruders = [];
+  for (const t of map.tasks ?? []) {
+    if (!t.storyId) continue;
+    const archived = resolveStoryStatus(storiesDir, t.storyId) === 'archived';
+    const inGraveyard = graveyard.has(t.release);
+    if (archived && !inGraveyard) strays.push(`${t.storyId} ("${t.title ?? ''}") in row "${t.release}"`);
+    if (!archived && inGraveyard) intruders.push(`${t.storyId} ("${t.title ?? ''}")`);
+  }
+  if (!strays.length && !intruders.length) return;
+
+  const lines = [];
+  if (strays.length) {
+    lines.push('this map places archived stories among live work.');
+    for (const x of strays) lines.push(`    - ${x}`);
+    lines.push('');
+    lines.push('  Archived means closed without completion. Among live rows it reads');
+    lines.push('  as abandoned capability, and a reader cannot tell that from work');
+    lines.push('  that shipped under a different story. Either take the card off the');
+    lines.push('  map, or move it to a graveyard row — a release carrying');
+    lines.push('  "graveyard": true, which says what it holds.');
+  }
+  if (intruders.length) {
+    if (lines.length) lines.push('');
+    lines.push('  A graveyard row holds archived stories only. These are not archived:');
+    for (const x of intruders) lines.push(`    - ${x}`);
+    lines.push('  Otherwise it becomes a quiet place to park live work.');
+  }
+  throw new Error(lines.join('\n'));
+}
+
 function assertEveryCardHasAStory(map, storiesDir) {
   if (!storiesDir || !existsSync(storiesDir)) return;
   const orphans = [];
@@ -762,6 +840,7 @@ function render(map, storiesDir, mapPath) {
   }
 
   assertEveryCardHasAStory(map, storiesDir);
+  assertArchivedIsSeparated(map, storiesDir);
 
   const title = map.title ?? map.storyMapId;
   // Everything derived from outside the island is resolved ONCE and shared by

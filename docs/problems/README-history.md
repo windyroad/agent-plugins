@@ -1298,3 +1298,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-08-07 **P479 captured** — decisions accrete into whichever decision record is nearest, because amending one is structurally cheaper than writing a new one: no options to weigh, no ratification event, no new file. ADR-102 weighed two options and ended up carrying six decisions, one of which was added and reversed in the same session with its own failure mode written into the body and accepted in a sentence (lightweight aside via /wr-itil:capture-problem).
 
 > Last reviewed: 2026-08-08 **P480 captured** — a human ratifies a decision but the marker lands on a document, so every claim in it reads as ratified, including claims that were never weighed as options. One such rider permitted exactly what an accepted-tier decision hard-blocks, undeclared — and when it was challenged, both the agent and the architect spent a re-ratification ceremony retracting something nobody had ratified (lightweight aside via /wr-itil:capture-problem).
+
+## 2026-08-09
+
+> Last reviewed: 2026-08-08 **P485 captured** — every gate in the process adds something and is enforced; nothing removes, and removal is optional, so cruft accumulates until someone's patience runs out. Measured on the files this session touched: one is 64% comment-only, explaining states that no longer exist (lightweight aside via /wr-itil:capture-problem).
