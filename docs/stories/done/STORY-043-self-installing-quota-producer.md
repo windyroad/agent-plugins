@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 story-id: self-installing-quota-producer
 reported: 2026-07-08
 decision-makers: [Tom Howard]

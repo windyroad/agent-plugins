@@ -123,6 +123,8 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | draft | STORY-051 | Have generated content respect my project's conventions | M | P424 | RFC-054 | STORY-MAP-008 |
 | draft | STORY-052 | Surface still-outstanding family members before a close | M | P433 | RFC-056 | STORY-MAP-009 |
 | draft | STORY-053 | Test claims against the tree at capture and label the untested ones | L | P434 | RFC-057 | STORY-MAP-010 |
+| draft | STORY-056 | Clear a block with a command my repository actually has | M | P435 | — | STORY-MAP-008 |
+| draft | STORY-057 | Get the fix by upgrading, not by patching a cache | M | P369 | — | STORY-MAP-008 |
 | accepted | STORY-054 | Lifecycle transitions preserve a story's ratification | M | P474 | RFC-059 | STORY-MAP-002 |
 | accepted | STORY-055 | One definition of what the oversight fingerprint ignores | M | P474 | RFC-059 | STORY-MAP-002 |
 | draft | STORY-012 | Can't start coding without an RFC — the gate makes me create one first | S | P251, P314 | RFC-005 | STORY-MAP-002 |
@@ -143,7 +145,6 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | draft | STORY-037 | Commit gate honours the RISK-POLICY stated review cadence for staleness | S | P408 | RFC-043 | — |
 | draft | STORY-038 | Fix-titled commits surface a lifecycle-drift advisory | deferred | P345 | RFC-044 | — |
 | draft | STORY-040 | AFK loop anchored with the native `/goal` external evaluator | M | P390 | RFC-047 | STORY-MAP-002 |
-| in-progress | STORY-043 | Self-install the quota-state producer | L | P160, P443 | RFC-046 | STORY-MAP-003 |
 | in-progress | STORY-046 | Red-CI denial explains the recovery path | S | P208 | RFC-049 | STORY-MAP-002 |
 
 
@@ -153,6 +154,7 @@ Terminal stories, from filesystem truth (`docs/stories/done/`). `Done` is the da
 
 | ID | Title | Done | Driving problems |
 |----|-------|------|------------------|
+| STORY-043 | Pacing starts working the moment I install it, with nothing to configure | 2026-08-09 | P160, P443 |
 | STORY-001 | Hook exemption globs for docs/story-maps + docs/stories | 2026-05-12 | P170 |
 | STORY-002 | `/wr-itil:capture-story` lightweight aside skill | 2026-05-12 | P170 |
 | STORY-003 | `/wr-itil:list-stories` read-only display skill | 2026-05-12 | P170 |
