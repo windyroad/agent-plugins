@@ -210,6 +210,10 @@ setup() {
   [ -x "$REPO_ROOT/packages/itil/bin/wr-itil-classify-readme-drift" ]
 }
 
+@test "shim wrapper packages/itil/bin/wr-itil-check-wsjf-arithmetic exists and is executable (P477)" {
+  [ -x "$REPO_ROOT/packages/itil/bin/wr-itil-check-wsjf-arithmetic" ]
+}
+
 @test "shim wrapper packages/retrospective/bin/wr-retrospective-measure-context-budget exists and is executable" {
   [ -x "$REPO_ROOT/packages/retrospective/bin/wr-retrospective-measure-context-budget" ]
 }
@@ -240,6 +244,15 @@ setup() {
   run "$REPO_ROOT/packages/itil/bin/wr-itil-classify-readme-drift"
   [ "$status" -ne 127 ]
   [ "$status" -eq 2 ]
+}
+
+@test "wr-itil-check-wsjf-arithmetic shim resolves canonical script (smoke) (P477)" {
+  # Diagnose-only: exit 0 = every stored WSJF matches its own fields,
+  # 1 = at least one mismatch, 2 = problems dir missing. Any of those
+  # means the shim dispatched the canonical body; 127 would mean it
+  # didn't resolve.
+  run "$REPO_ROOT/packages/itil/bin/wr-itil-check-wsjf-arithmetic" "$REPO_ROOT/docs/problems"
+  [ "$status" -ne 127 ]
 }
 
 @test "wr-retrospective-measure-context-budget shim resolves canonical script (smoke)" {

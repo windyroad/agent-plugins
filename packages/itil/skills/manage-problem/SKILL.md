@@ -685,6 +685,7 @@ Pre-flight checks before allowing transition:
 - [ ] A reproduction test exists or is referenced
 - [ ] A workaround is documented (even if "feature disabled")
 - [ ] Effort bucket re-rated against the now-documented fix strategy; if the bucket changed since creation, update the Effort / WSJF lines and note the reason (P047 — creation-time estimates drift as scope clarifies)
+- [ ] **Status multiplier re-rated alongside the Effort re-rate** — this transition changes the multiplier from Open 1.0 to Known Error 2.0, so recompute WSJF as `(Severity × 2.0) / Effort Divisor` and write the result to both the ticket's WSJF line and its README row (P477). Recomputing the Effort divisor without the multiplier is the failure mode: the divisor doubles with nothing to offset it and the stored value halves. A transition that also re-rates M → L legitimately leaves the number unchanged — the two doublings cancel — so an unchanged value is only correct if you actually recomputed it.
 
 If any check fails, report which checks failed and ask the user to address them before transitioning.
 
@@ -924,12 +925,12 @@ Enumerate via dual-tolerant glob `docs/problems/*.open.md docs/problems/*.known-
 5. **Calculate Severity** = Impact × Likelihood
 6. **Look up Label** from the risk matrix label bands
 7. **Re-estimate Effort** (S / M / L / XL) by reading the root cause analysis and fix strategy. Consider: how many files, how complex, does it need planning, is it cross-package or migration-heavy (XL territory)? If the bucket has changed since last review, update the Effort line in the problem file and note the reason in a short parenthetical (e.g. "L → XL — architect review added ADR + migration script"). P047.
-8. **Calculate WSJF** = (Severity × Status Multiplier) / Effort Divisor
-9. **Update the Priority line** in the problem file if the score changed
-10. **Auto-transition to Known Error**: If an open problem has confirmed root cause AND a workaround documented (even "feature disabled"), automatically transition it to known-error:
+8. **Auto-transition to Known Error**: If an open problem has confirmed root cause AND a workaround documented (even "feature disabled"), automatically transition it to known-error:
     - `git mv docs/problems/open/<NNN>-<title>.md docs/problems/known-error/<NNN>-<title>.md`
     - Update the Status field to "Known Error"
     - This happens automatically — do not ask the user
+9. **Calculate WSJF** = (Severity × Status Multiplier) / Effort Divisor. **Take the multiplier from the status the ticket holds now, after step 8** — a ticket that just transitioned is a Known Error and takes 2.0, not the 1.0 it carried when this iteration began. The calculation is sequenced after the transition for exactly that reason (P477); computing it first persists the stale Open multiplier and the ticket renders at half its rank for as long as it sits in the queue.
+10. **Update the Priority and WSJF lines** in the problem file if the scores changed. Both the Effort re-rate at step 7 and the transition at step 8 move WSJF; the dangerous shape is the partial recompute, where Effort is updated and the multiplier is not, so the divisor doubles with nothing to offset it. Verify the pass with `wr-itil-check-wsjf-arithmetic docs/problems`.
 
 **Step 9b.1: Dependency-graph traversal — propagate transitive effort (P076)**
 
