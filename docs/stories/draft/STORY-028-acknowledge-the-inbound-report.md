@@ -3,10 +3,10 @@ status: draft
 story-id: acknowledge-the-inbound-report
 reported: 2026-07-02
 decision-makers: [Tom Howard]
-problems: [P170]
+problems: [P080, P170]
 jtbd: [JTBD-008, JTBD-301]
 adrs: [ADR-062]
-story-maps: [STORY-MAP-002]
+story-maps: [STORY-MAP-002, STORY-MAP-004]
 estimated-effort: S
 ---
 
@@ -43,3 +43,4 @@ In order that the person who reported the problem knows they were heard and it's
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-MAP-002 | STORY-MAP-002: Take a problem from noticed to resolved | draft |
+| STORY-MAP-004 | STORY-MAP-004: Close the loop with someone who reported a problem | draft |

@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-07 **P478 captured** — the story `accepted` gate checks that a story's value section is non-empty but never that it states a value: 12 of 50 stories were written feature-first with a trailing "so that", and nothing detected it. The only signal was a story-map card rendering as an unreadable wall of text, spotted by eye during a ratification review. The same investigation found the map's own parser too strict — it rejected 15 correctly-written statements on punctuation alone — so any check must be strict about the clause order and permissive about what separates them (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-08-08 **P485 captured** — every gate in the process adds something and is enforced; nothing removes, and removal is optional, so cruft accumulates until someone's patience runs out. Measured on the files this session touched: one is 64% comment-only, explaining states that no longer exist (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -77,6 +77,13 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P457 | Story-map ratification surfaces an unauthored skeleton — the lifecycle asks for oversight before the authoring stage runs | 12 (High) | Open | M | 2026-07-16 | internal |
 | 6 | P462 | Amendment-scoped `human-oversight: unconfirmed` has no detector — unratified amendment substance never reaches the oversight drain | 12 (High) | Open | M | 2026-07-26 | internal |
 | 6 | P463 | Relevance-close evaluator over-fires — a bare ADR/skill citation is read as "fix shipped", producing a 76% false-positive CLOSE-CANDIDATE rate | 12 (High) | Open | M | 2026-07-26 | internal |
+| 6 | P479 | Decisions accrete into the nearest ADR because amending is cheaper than deciding — ADR-102 weighed two options and carries six decisions | 12 (High) | Open | M | 2026-08-07 | corrective-feedback |
+| 6 | P480 | An ADR's ratification is document-scoped, so riders that were never weighed inherit its authority — one contradicted an accepted-tier decision undeclared | 12 (High) | Open | M | 2026-08-08 | corrective-feedback |
+| 8 | P485 | Every step in the process adds and none removes, so cruft accumulates without limit — no refactor step, no simplification step, and nothing self-firing to trigger one | 16 (High) | Open | L | 2026-08-08 | corrective-feedback |
+| 8 | P483 | Amendment sections are not a legitimate mechanism — a ratified decision is immutable, and is changed only by being deprecated or superseded | 16 (High) | Open | L | 2026-08-08 | corrective-feedback |
+| 5 | P484 | The reading-context persona constraint is load-bearing in two ratified decisions but documented nowhere | 9 (Medium) | Open | S | 2026-08-08 | internal |
+| 4 | P482 | ADR line-number citations are positional, so they rot silently every time the ADR is amended — 122 occurrences across 42 files | 6 (Medium) | Open | M | 2026-08-08 | architect-review |
+| 3 | P481 | Two ratified decisions describe a story-map format that no longer exists | 6 (Medium) | Open | S | 2026-08-08 | architect-review |
 | 5 | P406 | `github-discussions` channel in `.upstream-channels.json` returns HTTP 410 | 5 (Low) | Open | S | 2026-07-02 | internal |
 | 4.5 | P251 | RFC-first trace invariant not enforced — fixes start without RFC, story map, or JTBD trace | 9 (Medium) | Known Error | L | 2026-05-17 | internal |
 | 4.5 | P297 | ADR-047 — governance-artefact scaffolding should be a SessionStart hook (per-project, automatic), not an inline `/install-updates` step | 9 (Medium) | Open | M | 2026-05-25 | internal |

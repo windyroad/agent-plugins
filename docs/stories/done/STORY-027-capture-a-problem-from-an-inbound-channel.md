@@ -6,7 +6,7 @@ decision-makers: [Tom Howard]
 problems: [P170]
 jtbd: [JTBD-008, JTBD-301]
 adrs: [ADR-062]
-story-maps: [STORY-MAP-002]
+story-maps: [STORY-MAP-002, STORY-MAP-004]
 estimated-effort: M
 ---
 
@@ -44,3 +44,4 @@ In order to fix the problems real users are actually hitting — not only the on
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-MAP-002 | STORY-MAP-002: Take a problem from noticed to resolved | draft |
+| STORY-MAP-004 | STORY-MAP-004: Close the loop with someone who reported a problem | draft |

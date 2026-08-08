@@ -4,12 +4,12 @@
 
 This project is a plugin-development monorepo. Style guidance applies primarily to:
 
-- Story-map HTML (`docs/story-maps/**/*.html`) — minimal embedded `<style>` per ADR-060 § Phase 2 encoding amendment 2026-05-12.
+- Story-map HTML (`docs/story-maps/**/*.html`) — a rendered grid plus its data island, styled by one shared stylesheet. Per ADR-060 § Phase 2 encoding as amended by ADR-102.
 - Any CSS / JSX / TSX / Vue / Svelte / ejs / hbs surfaces shipped by plugins (currently none — the repo publishes governance plugins, not UI plugins).
 
 ## Story-map HTML style rules
 
-Per ADR-060 § Phase 2 encoding, **as amended by ADR-102 (2026-08-05, further amended 2026-08-06)**. A story map is a grid, and it is generated. A map file is a shell plus a `<script id="story-map-data">` block; the grid itself is built at view time by the shared `story-map.js`. Presentation lives in `packages/itil/templates/` — the stylesheet, the script and the shell — so these rules bind those three files, not the artefacts.
+Per ADR-060 § Phase 2 encoding, **as amended by ADR-102 (2026-08-05; amended 2026-08-06, 2026-08-07)**. A story map is a grid, and it is generated. A map file carries its own rendered grid plus the `<script id="story-map-data">` block it was generated from. The grid is written by `wr-itil-render-story-map`, never by hand and never at view time — **a map must be readable with no script engine at all**. Presentation lives in `packages/itil/templates/` — the stylesheet and the shell — so these rules bind those two files, not the artefacts.
 
 ### Layout
 - A map is a `<table class="map">` inside a `<div class="scroll">` horizontal-scroll wrapper. Backbone activities are COLUMNS (`<thead>` → `<th class="act" scope="col">`); release slices are ROWS (`<th class="slice" scope="row">`); task cards sit in `<td class="cell">`. A row read left to right is everything that ships together.
@@ -19,11 +19,14 @@ Per ADR-060 § Phase 2 encoding, **as amended by ADR-102 (2026-08-05, further am
 ### Prohibited
 - **Inline `style=""` anywhere in a map.** Under ADR-102 presentation is the template's alone; the renderer emits none. This is stricter than the previous rule, which permitted `--<custom-property>` on layout containers.
 - **A per-map `<style>` block.** *(Reversed 2026-08-06 by ADR-102.)* Presentation lives in one shared `docs/story-maps/story-map.css`, linked by every map. Inlining it duplicated ~920 identical lines across eight files and made a single tweak rewrite all of them. Maps are no longer self-contained, which is the accepted cost.
-- **Hand-editing a rendered map.** The grid, `<style>` and `<meta>` blocks are regenerated from the data island; edits outside it are discarded on the next render.
+- **Hand-editing a rendered map.** Everything outside the data island — the grid, the `<meta>` block, the `<link>` — is regenerated from it; edits there are discarded on the next render. This matters more now that the grid ships in the file: it looks like ordinary HTML and is the first thing a reader reaches for.
+- **A script the map needs in order to render.** *(Reversed 2026-08-07 by ADR-102.)* The grid ships in the file. Building it at view time made every map unreadable wherever scripts do not run — a phone's file preview, a sandboxed viewer, GitHub's HTML rendering, print — which is most of the places a file gets opened that are not a browser tab.
 
 ### Permitted
-- One `<link rel="stylesheet" href="../story-map.css">`, and one `<script src="../story-map.js" defer>`. Both are placed beside the maps by `wr-itil-render-story-map` from the copies shipped in `@windyroad/itil`; edit the shipped copy, never the one in a repository.
-- HTML5 semantic elements: `<table>`, `<thead>`, `<tbody>`, `<tr>`, `<th>`, `<td>`, `<caption>`, `<section>`, `<ul>`, `<h1>` / `<h2>`, `<div>` (layout only).
+- One `<link rel="stylesheet" href="../story-map.css">`, placed beside the maps by `wr-itil-render-story-map` from the copy shipped in `@windyroad/itil`; edit the shipped copy, never the one in a repository.
+- Exactly two `<script type="application/json">` data islands, which a viewer ignores rather than executes: `#story-map-data` (the authored source) and `#story-map-status` (derived — story statuses, value statements, row statuses, row and map problems, and resolved hrefs). No other `<script>` may appear.
+- HTML5 semantic elements: `<table>`, `<thead>`, `<tbody>`, `<tr>`, `<th>`, `<td>`, `<caption>`, `<section>`, `<ul>`, `<li>`, `<p>`, `<a>`, `<span>`, `<strong>`, `<code>`, `<main>`, `<footer>`, `<h1>` / `<h2>`, `<div>` (layout only). The list grew when the grid moved back into the file: `<span>` carries most of the card vocabulary, `<a>` every resolved trace link, and `<strong>` the emphasis a story's own value statement marked.
+- A wholly empty release band renders as ONE spanning `<td class="cell empty" colspan="N">` carrying a visually-hidden sentence, not N separate cells. It is silent in a screen reader's browse mode otherwise, while being a loud full-width hatch visually. Do not normalise it to per-cell markup.
 
 ### Class names (story-map vocabulary)
 
@@ -34,11 +37,16 @@ Normative, and emitted only by the template:
 - `.act` — a backbone activity column header; one per activity. `.jtbd` is its optional gloss line.
 - `.slice` — a release-band ROW header; one per release. `.s-name` and `.s-note` are its parts. **Meaning changed under ADR-102**: `.slice` was previously a single story reference carrying `data-story-id`. That role now belongs to `.task`.
 - `.cell` — an activity × release intersection. `.cell.empty` means this activity ships nothing in that band, and is meaningful rather than decorative — the hatch is drawn in the `--line` tone so it clears 3:1.
+- `.corner` — the empty top-left `<td>` where the two header axes meet.
+- `.tasks` — the `role="list"` of cards inside one `.cell`.
+- `.vh` — visually hidden; carries the empty-band sentence for a screen reader.
+- `.b-glyph` — the `aria-hidden` glyph inside a `.badge`, carrying status as a channel besides colour.
+- `.t-value` — a story's value statement on a card, split into `.v-line` parts: `.v-inorder`, `.v-asa`, `.v-iwant`. `.v-lead` is the connective ("In order to", "as a", "I want"), set in italic — and deliberately at full `--muted`, never faded, because at `opacity: .75` it composited to 3.76:1 against `--card` and 12px text needs 4.5:1.
+- `.s-problems` — the problems a release row closes, on its row header. Derived from the stories in that row, never authored.
+- `.traces` / `.tr-group` — the jobs the map is drawn for, as one line of links from the island's `traces.jtbd`. Jobs only: a decision trace is not a map's to carry (ADR-106), and an RFC line would restate the row badges directly beneath it. It replaced five paragraphs of hand-written trace prose, every one of which restated something already on the page.
+- `.ref-link` — a resolved link to another artefact. Absent when the id did not resolve, so the text stands alone rather than dangling.
 - `.task` — a task card inside a cell; carries the `data-*` trace layer. `.t-title`, `.t-value`, `.t-ref` are its parts.
-- `.badge` with `.b-live` / `.b-next` / `.b-later` — release-band status pill. Now normative. Colour is never the sole channel: each badge carries real text and a distinct glyph.
-- `.legend` — the status key above the grid.
-- `.lead` — the reading instruction under the `<h1>`; must name the grid axes.
-- `.trace` — the prose traceability section below the grid.
+- `.badge` with `.b-live` / `.b-next` / `.b-defect` — a row's status pill, keyed off DERIVED status, never an authored field. Colour is never the sole channel: each badge carries real text — its RFC id, or `Needs an RFC id` / `Untraced — needs a problem` — and a distinct glyph, supplied once by the badge and never repeated in the label. There is no authored `badge`; an R1/R2 ordinal duplicated the RFC identity and collided with it.
 - `.genfrom` — the generated-file banner.
 
 Removed by ADR-102: `.backbone`, `.rib`, `.rib-header`, `.map-note`. Maps still carrying them predate the amendment and are pending migration.

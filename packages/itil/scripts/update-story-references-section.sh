@@ -51,11 +51,11 @@ extract_from_html_data_story_id() {
   local file="$1"
   # Story maps reference stories via <a data-story-id="STORY-NNN"> per ADR-060
   # amendment schema; grep on the literal attribute match.
-  # Two spellings carry the same fact. Before ADR-102 a map's cards were
-  # rendered into the file, so the story appeared as data-story-id="X". Now the
-  # grid is drawn in the browser and the file carries the authored data island,
-  # where the same story is a task entry with "storyId": "X". Matching only the
-  # rendered form silently drops every reverse-trace for a modern map.
+  # Two spellings carry the same fact, and a rendered map carries BOTH: the
+  # card as data-story-id="X", and the authored island entry as "storyId": "X".
+  # Pre-ADR-102 maps have only the first; a map edited but not yet re-rendered
+  # has only the second. Matching both covers every state. The alternation is
+  # boolean per file, so a map carrying both spellings is not double-listed.
   grep -qE "data-story-id=\"${story_id}\"|\"storyId\"[[:space:]]*:[[:space:]]*\"${story_id}\"" "$file"
 }
 

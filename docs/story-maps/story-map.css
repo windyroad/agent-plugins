@@ -8,6 +8,7 @@
   --live-fg: #0b5d1e; --live-bg: #e4f4e8; --live-line: #0b5d1e;
   --next-fg: #0b3a66; --next-bg: #e2eefb; --next-line: #0b3a66;
   --later-fg: #6b3a00; --later-bg: #f6ead6; --later-line: #6b3a00;
+  --defect-fg: #8c1d18; --defect-bg: #fdecea; --defect-line: #8c1d18;
   --focus: #0b3a66;
 }
 @media (prefers-color-scheme: dark) {
@@ -17,6 +18,7 @@
     --live-fg: #7fe0a0; --live-bg: #123020; --live-line: #7fe0a0;
     --next-fg: #97c6f5; --next-bg: #10263c; --next-line: #97c6f5;
     --later-fg: #f0c58a; --later-bg: #33260f; --later-line: #f0c58a;
+    --defect-fg: #ffb4ab; --defect-bg: #3b1512; --defect-line: #ffb4ab;
     --focus: #97c6f5;
   }
 }
@@ -27,6 +29,7 @@
   --live-fg: #0b5d1e; --live-bg: #e4f4e8; --live-line: #0b5d1e;
   --next-fg: #0b3a66; --next-bg: #e2eefb; --next-line: #0b3a66;
   --later-fg: #6b3a00; --later-bg: #f6ead6; --later-line: #6b3a00;
+  --defect-fg: #8c1d18; --defect-bg: #fdecea; --defect-line: #8c1d18;
   --focus: #0b3a66;
 }
 :root[data-theme="dark"] {
@@ -36,6 +39,7 @@
   --live-fg: #7fe0a0; --live-bg: #123020; --live-line: #7fe0a0;
   --next-fg: #97c6f5; --next-bg: #10263c; --next-line: #97c6f5;
   --later-fg: #f0c58a; --later-bg: #33260f; --later-line: #f0c58a;
+    --defect-fg: #ffb4ab; --defect-bg: #3b1512; --defect-line: #ffb4ab;
   --focus: #97c6f5;
 }
 * { box-sizing: border-box; }
@@ -43,7 +47,6 @@ body { font-family: system-ui, sans-serif; color: var(--fg); background: var(--b
        max-width: 1500px; margin: 0 auto; padding: 1.5rem 1rem 3rem; line-height: 1.5; }
 h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
 p { max-width: 74ch; }
-.lead { color: var(--muted); }
 a { color: var(--focus); }
 /* Required on every interactive element, not just links: the theme toggle
    (if a host adds one) and the scroll region both take focus. */
@@ -59,8 +62,6 @@ a:focus, button:focus, [tabindex]:focus { outline: 3px solid var(--focus); outli
 a:focus-visible,
 button:focus-visible,
 [tabindex]:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-.legend { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin: 1rem 0 1.25rem; padding: 0; list-style: none; }
-.legend li { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .9rem; }
 .badge { display: inline-flex; align-items: center; gap: .3rem; font-size: .75rem; font-weight: 700;
          padding: .1rem .45rem; border-radius: 999px; border: 1px solid; white-space: nowrap; }
 /* Release state is carried by the badge's text label and by a glyph in real
@@ -72,6 +73,11 @@ button:focus-visible,
 .b-live  { color: var(--live-fg);  background: var(--live-bg);  border-color: var(--live-line); }
 .b-next  { color: var(--next-fg);  background: var(--next-bg);  border-color: var(--next-line); }
 .b-later { color: var(--later-fg); background: var(--later-bg); border-color: var(--later-line); }
+/* A row with no RFC identity, or whose stories close no problem. Deliberately
+   red rather than the amber `.b-later` used for scheduled-later work: this is
+   not "later", it is wrong, and it needs an edit before the map is ratified.
+   7.97:1 light, 9.50:1 dark; the glyph carries it as a second channel. */
+.b-defect { color: var(--defect-fg); background: var(--defect-bg); border-color: var(--defect-line); }
 
 .scroll { overflow-x: auto; padding-bottom: .5rem; }
 table.map { border-collapse: collapse; width: 100%; min-width: 940px; }
@@ -100,9 +106,11 @@ td.cell.empty { background: repeating-linear-gradient(45deg, transparent, transp
 .task .v-line { display: block; margin-top: .2rem; }
 .task .v-line:first-child { margin-top: 0; }
 /* The connectives carry no information once you know the pattern, so they
-   recede and let the three payloads read as a list. Not colour alone — they are
-   also the only italic run in the card. */
-.task .v-lead { font-style: italic; opacity: .75; }
+   recede and let the three payloads read as a list. The italic IS the channel —
+   there is deliberately no opacity. At .75 over --card this composited to
+   #7e7e7e for 3.76:1, under the 4.5:1 that 12px text needs; the muted token
+   alone is 6.79:1. Receding must not mean unreadable. */
+.task .v-lead { font-style: italic; }
 /* Whose journey this is, is the thing you scan a map for — so the line carries
    the body colour rather than the muted value tone. Structural prominence, not
    fabricated emphasis: bold here belongs to whatever the STORY marked. */
@@ -110,8 +118,16 @@ td.cell.empty { background: repeating-linear-gradient(45deg, transparent, transp
 /* Author emphasis, rendered as written. */
 .task .t-value strong { font-weight: 700; color: var(--fg); }
 .task .t-ref { display: block; font-size: .75rem; color: var(--muted); margin-top: .3rem; }
-.trace { margin-top: 2rem; border-top: 1px solid var(--line); padding-top: 1rem; }
-.trace h2 { font-size: 1.125rem; }
+.slice .s-problems { display: block; font-size: .7rem; color: var(--muted); margin-top: .2rem; }
+.traces { margin-top: 1.5rem; border-top: 1px solid var(--line); padding-top: .75rem;
+          font-size: .8rem; color: var(--muted); }
+.traces .tr-group { display: inline-block; margin-right: 1.25rem; }
+/* The caption is the table's accessible name — a screen-reader user gets it,
+   and the dimensions in it, before entering the grid. On screen it repeated
+   the h1 immediately above, so it is hidden rather than deleted. */
+table.map > caption { position: absolute; width: 1px; height: 1px; padding: 0;
+  margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
 .vh { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
       overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 .tasks { list-style: none; margin: 0; padding: 0; }

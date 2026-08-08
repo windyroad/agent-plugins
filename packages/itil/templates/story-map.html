@@ -6,31 +6,14 @@
   <title>{{TITLE_FULL}}</title>
 {{META}}
   <link rel="stylesheet" href="../story-map.css">
-  <script src="../story-map.js" defer></script>
 </head>
 <body>
   <main>
     <h1 id="story-map-title">{{TITLE}}</h1>
-    <p class="lead" id="story-map-lead">{{LEAD}}</p>
-    <ul class="legend" id="story-map-legend" role="list" aria-label="Status legend"></ul>
-    <div id="story-map">
-      <p class="lead">This map's grid has not been drawn. It is built from the data block
-      at the end of this file by <code>story-map.js</code>, which sits alongside the maps —
-      so this message means the script did not load or did not run. The data itself is
-      intact: open this file in a text editor, or use View Source, and read the block with
-      <code>id="story-map-data"</code>.</p>
-    </div>
-    <section class="trace" id="story-map-trace-section" aria-labelledby="trace-h" hidden>
-      <h2 id="trace-h">What this map traces to</h2>
-      <div id="story-map-trace"></div>
-    </section>
+    <div id="story-map">{{GRID}}</div>
+{{TRACE}}
   </main>
 
-  <footer>
-    <p class="genfrom">This file is the map. The grid is drawn from the data block below;
-    edit that block, or use <code>wr-itil-story-map-edit</code>, then re-render with
-    <code>wr-itil-render-story-map</code>.</p>
-  </footer>
 
   <script id="story-map-data" type="application/json">
 {{DATA}}

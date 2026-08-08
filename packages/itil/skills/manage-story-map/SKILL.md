@@ -24,9 +24,9 @@ Per ADR-060 amendment 2026-05-10 lines 145-189 + encoding amendment 2026-05-12:
 
 | Invariant | What it asserts | Where it fires |
 |-----------|-----------------|----------------|
-| **I3** trace-to-problem | Every map traces to ≥ 1 problem (ADR-060 line 187) | Hard-block at `/wr-itil:capture-story-map` + re-validated at every transition |
-| **I4** trace-to-JTBD | Every map traces to ≥ 1 JTBD (ADR-060 line 188) | Hard-block at `/wr-itil:capture-story-map` + re-validated at every transition |
-| **I5** no-WSJF-leak | Maps MUST NOT carry WSJF (ADR-060 line 189) | Behavioural test: argument grammar + frontmatter carry no WSJF |
+| **I3** trace-to-problem | Every map traces to ≥ 1 problem (ADR-060, the story-map schema's `problems:` field) | Hard-block at `/wr-itil:capture-story-map` + re-validated at every transition |
+| **I4** trace-to-JTBD | Every map traces to ≥ 1 JTBD (ADR-060, the story-map schema's `jtbd:` field) | Hard-block at `/wr-itil:capture-story-map` + re-validated at every transition |
+| **I5** no-WSJF-leak | Maps MUST NOT carry WSJF (ADR-060, the no-WSJF-on-maps invariant) | Behavioural test: argument grammar + frontmatter carry no WSJF |
 
 **Bootstrap-exemption marker** per ADR-060 line 339 + ADR-053 Bootstrapping precedent: STORY-MAP-001 ships with the `<!-- bootstrap-exempt -->` marker during retrofit; non-bootstrap captures with the marker fail.
 
@@ -76,7 +76,7 @@ If `$story_map_id == "review"`, branch to Step 8 (review flow). Otherwise resolv
 
 ### 2. Read story-map HTML
 
-Parse `<meta>` block (problems, rfcs, jtbd, adrs, status, reported, decision-makers). Read backbone structure (`<section class="backbone">` → `.rib-header` → `.rib` → `<a class="slice">` data-* attributes).
+Parse `<meta>` block (problems, rfcs, jtbd, status, reported, decision-makers) — no `adrs`, and `problems`/`rfcs` are DERIVED, so they carry content the island does not. Read backbone structure from the grid's `<th class="act" scope="col">` columns and `<th class="slice" scope="row">` rows.
 
 ### 3-6. (Update flow — bare `<STORY-MAP-NNN>`)
 
@@ -101,7 +101,7 @@ For any transition `<from> → <to>`:
 4. **Reverse-trace refresh** — for each problem + JTBD in `<meta>` block:
 
 ```bash
-for pid_token in $(grep -oE '<meta name="problems" content="[^"]*"' "$map_file" | grep -oE 'P[0-9]{3}'); do
+for pid_token in $(grep -oE '<meta name="problems" content="[^"]*"' "$map_file" | grep -oE 'P[0-9]{3,}'); do
   pid_num="${pid_token#P}"
   problem_file=$(ls docs/problems/${pid_num}-*.md docs/problems/*/${pid_num}-*.md 2>/dev/null | head -1)
   [ -z "$problem_file" ] && continue
@@ -116,7 +116,7 @@ Per architect amend finding 2 on Slice 7: story-map HTML files do NOT carry an a
 
 ### 7.5. Ratification flow (`ratify`) — ADR-090 / ADR-103 / STORY-022
 
-`ratify` is **orthogonal to the status lifecycle** — a map can be ratified at any status. It confirms human oversight of **the map**, and under ADR-103 that approves every story on it, including stories added later; stories are never ratified individually. Ratification is **drift-invalidated** (ADR-009 lineage, NOT ADR-066 write-once), but only a **substance** edit re-opens it: the map's activity columns, identity, title, persona, lead, traces, trace prose or caption. Release rows, the cards in them, story-body edits and template restyling all sit outside the fingerprint basis and change nothing. This is the STORY-022 surface.
+`ratify` is **orthogonal to the status lifecycle** — a map can be ratified at any status. It confirms human oversight of **the map**, and under ADR-103 that approves every story on it, including stories added later; stories are never ratified individually. Ratification is **drift-invalidated** (ADR-009 lineage, NOT ADR-066 write-once), but only a **substance** edit re-opens it: the map's own substance as ADR-090 defines it — its journey, its identity, and what it traces to. `oversight_map_substance_keys()` is the authoritative field list; this page deliberately does not restate it. Release rows, the cards in them, story-body edits and template restyling all sit outside the fingerprint basis and change nothing. This is the STORY-022 surface.
 
 **Born-confirmed discipline (P348).** Before any marker write, `export CLAUDE_SESSION_ID` from the transcript path — the marker shim silently no-ops on an empty SID. Every `confirmed` marker MUST be backed by a same-turn human confirm event; never write `confirmed` without the `AskUserQuestion` below (a hollow marker is the P348 bug).
 
@@ -138,7 +138,7 @@ Per architect amend finding 2 on Slice 7: story-map HTML files do NOT carry an a
 
 **Reuse offers approved stories only (STORY-024).** When decomposing a fix, existing map stories the fix touches are offered for **reuse** — referenced by an additional slice card / `data-story-id`, NOT duplicated as a new file; the reused story's `rfcs:` reverse-trace picks up the new RFC. Only **approved** stories (test with `story_is_approved`, which honours ADR-103 map inheritance) are offered for reuse; an unapproved story needs its map ratified (§ 7) before an RFC can reference it.
 
-**Re-slicing does NOT re-open ratification (STORY-025, amended by ADR-103).** Grouping stories into ordered release rows (Release 1 walking skeleton → Release 2 …) is authored as release-row and card edits on the map; deferred phases stay first-class cards (visible, competing for priority), never buried. Rows and cards sit OUTSIDE the fingerprint basis, so re-slicing is silent — scheduling is not what the human approved. What DOES re-open a map's approval: a new activity column, or a change to its title, persona, lead, traces or caption. The fingerprint handles it either way; no explicit marker reset is needed.
+**Re-slicing does NOT re-open ratification (STORY-025, amended by ADR-103).** Grouping stories into ordered release rows (Release 1 walking skeleton → Release 2 …) is authored as release-row and card edits on the map; deferred phases stay first-class cards (visible, competing for priority), never buried. Rows and cards sit OUTSIDE the fingerprint basis, so re-slicing is silent — scheduling is not what the human approved. What DOES re-open a map's approval: a change to the map's own substance — see `oversight_map_substance_keys()`. *(This sentence enumerated five of the seven keys until 2026-08-08, omitting `storyMapId` and `secondaryPersona`. It is the under-enumeration half of that day's drift: it told a maintainer mid-re-slice that a secondary-persona edit was safe when it re-opens approval.)* The fingerprint handles it either way; no explicit marker reset is needed.
 
 ### 8. List flow (`list`)
 
@@ -170,9 +170,11 @@ Story-map ID + new status + invariants verified + parent artefacts touched + tra
 
 ## Related
 
-- **ADR-060** — Problem-RFC-Story framework; Phase 2 amendment 2026-05-10 lines 145-189 + encoding amendment 2026-05-12 lines 381-435.
-- **ADR-060 line 145** — I5 no-WSJF-on-maps invariant.
-- **ADR-060 line 339 + ADR-053** — bootstrap-exemption marker contract.
+- **ADR-060** — Problem-RFC-Story framework; Phase 2 amendment 2026-05-10 (story-map frontmatter schema + the I3/I4/I5 invariants) + encoding amendment 2026-05-12.
+- **ADR-060**, the no-WSJF-on-maps invariant — I5.
+- **ADR-060**, the ordered `stories:` array on an RFC, **+ ADR-053** — bootstrap-exemption marker contract.
+
+  (Line-number citations were removed here: they are positional, and ADR-060 has been amended enough times that every one of them pointed at the wrong line.)
 - **`docs/STYLE-GUIDE.md`** — HTML style rules manage-story-map enforces.
 - **P170** — driver problem ticket.
 - **JTBD-008** — primary anchor.

@@ -202,3 +202,74 @@ PYEOF
   [ -n "$before" ]
   [ "$before" = "$after" ]
 }
+
+@test "a field the format no longer has cannot drift a ratification" {
+  # `lead` and `traceProse` were removed from the map format on 2026-08-07 but
+  # stayed in the fingerprint basis. That is a live re-introduction vector: a
+  # field nothing documents would silently become ratification-bearing, so
+  # writing one into an island would revoke an approval for a reason no reader
+  # could find.
+  #
+  # Removing them moved no stored hash, because the basis only includes keys
+  # PRESENT in the island and no map carries either. Asserted here so the next
+  # edit to the basis has to prove the same thing.
+  _write_map "#111111"
+  local before
+  before="$(oversight_content_hash "$MAP")"
+
+  python3 - "$MAP" <<'PYEOF'
+import sys, pathlib, json
+p = pathlib.Path(sys.argv[1]); h = p.read_text()
+O = '<script id="story-map-data" type="application/json">'
+s = h.index(O) + len(O); e = h.index('</script>', s)
+d = json.loads(h[s:e].replace('<', '<'))
+d["lead"] = "prose the format no longer has"
+d["traceProse"] = {"persona": "nor this"}
+p.write_text(h[:s] + "\n" + json.dumps(d, indent=2) + "\n  " + h[e:])
+PYEOF
+
+  # Writing both must leave the fingerprint exactly where it was.
+  [ "$(oversight_content_hash "$MAP")" = "$before" ]
+}
+
+@test "the substance accessor and the hash basis are the same set" {
+  # ONE definition of what re-opens a ratification. This set used to be restated
+  # in prose in five places — ADR-090, ADR-103, ADR-105 and two SKILLs — and on
+  # 2026-08-08 it had drifted in BOTH directions at once: the ADRs still named
+  # `lead` and `traceProse`, dead the day before, while a SKILL had lost
+  # `caption` and `secondaryPersona`, both live. Over-enumeration makes a dead
+  # field ratification-bearing; under-enumeration tells a reader an edit is safe
+  # when it re-opens approval.
+  #
+  # The probe is built from a FIXED candidate list, never from the accessor. An
+  # earlier version generated it from `oversight_map_substance_keys`, which made the
+  # under-enumeration half circular: a key the accessor omitted was never
+  # offered, so its absence from the basis proved nothing. That version passed
+  # with `caption` deleted.
+  local CANDIDATES="storyMapId title persona secondaryPersona traces backbone caption lead traceProse status humanOversight oversightHash releases tasks decoy"
+
+  local probe="$BATS_TEST_TMPDIR/probe.html"
+  {
+    printf '<!DOCTYPE html>\n<body>\n<script id="story-map-data" type="application/json">\n{'
+    local first=1 k
+    for k in $CANDIDATES; do
+      [ "$first" = 1 ] || printf ','
+      printf '"%s":"probe"' "$k"
+      first=0
+    done
+    printf '}\n</script>\n</body>\n</html>\n'
+  } > "$probe"
+
+  local hashed declared
+  hashed="$(_oversight_hashable "$probe" | grep -oE '"[a-zA-Z]+":' | tr -d '":' | sort | tr '\n' ' ')"
+  declared="$(oversight_map_substance_keys | sort | tr '\n' ' ')"
+  [ -n "$declared" ]
+
+  # Exact set equality, so BOTH drift directions fail.
+  [ "$hashed" = "$declared" ] || {
+    echo "accessor and hash basis disagree"
+    echo "  accessor says: $declared"
+    echo "  hash covers  : $hashed"
+    return 1
+  }
+}

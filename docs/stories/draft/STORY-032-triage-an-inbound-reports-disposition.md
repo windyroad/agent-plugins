@@ -3,7 +3,7 @@ status: draft
 story-id: triage-an-inbound-reports-disposition
 reported: 2026-07-02
 decision-makers: [Tom Howard]
-problems: [P170, P401]
+problems: [P080, P170, P401]
 jtbd: [JTBD-008, JTBD-301]
 adrs: [ADR-062, ADR-068]
 story-maps: [STORY-MAP-002]

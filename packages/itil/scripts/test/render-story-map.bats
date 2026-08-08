@@ -36,9 +36,10 @@ setup() {
   RENDER="$REPO_ROOT/packages/itil/scripts/render-story-map.mjs"
   IN_DOM="$REPO_ROOT/packages/itil/scripts/test/lib/render-in-dom.mjs"
 
-  # The grid is built in the browser under ADR-102, so assertions about header
-  # association, cell count and card placement must run the shared script
-  # against a DOM. Asserting on the file's bytes would only check the island.
+  # The grid is rendered into the file, so it can be asserted either way. A
+  # parsed DOM is still the right instrument for header association, cell count
+  # and card placement — a grep cannot tell a `scope` from a substring. Nothing
+  # is executed: see scripts/test/lib/render-in-dom.mjs.
   dom() { node "$IN_DOM" "$1" > "$TMP/dom.html"; printf '%s' "$TMP/dom.html"; }
   # jsdom serialises the whole table onto very few lines, so `grep -c` (which
   # counts matching LINES) under-reports. Count occurrences instead.
@@ -62,51 +63,35 @@ setup() {
   "decisionMakers": "Tom Howard",
   "humanOversight": "unconfirmed",
   "traces": {
-    "problems": ["P901"],
-    "rfcs": [],
-    "jtbd": ["JTBD-901"],
-    "adrs": ["ADR-102"]
+    "jtbd": ["JTBD-901"]
   },
-  "lead": "A fixture map used only by the renderer's behavioural test.",
   "backbone": [
     { "id": "decide",  "title": "Decide it is ready", "note": "JTBD-901" },
     { "id": "assess",  "title": "Get it assessed",    "note": "" },
     { "id": "release", "title": "Release it",         "note": "" }
   ],
   "releases": [
-    { "id": "live", "name": "Existing", "badge": "Live", "note": "shipped" },
-    { "id": "r1",   "name": "Now",      "badge": "R1",   "note": "being built" }
+    { "id": "live", "name": "Existing", "note": "shipped" },
+    { "id": "r1",   "name": "Now",      "rfc": "RFC-901", "note": "being built" }
   ],
   "tasks": [
     {
       "activity": "assess",
       "release": "live",
       "title": "A score is taken before work leaves the machine",
-      "value": "Value: the assessment is not optional in practice.",
       "storyId": "STORY-901",
-      "rfc": "RFC-901",
       "jtbd": "JTBD-901",
-      "storyStatus": "draft",
       "ref": "STORY-901, P901"
     },
     {
       "activity": "release",
       "release": "r1",
       "title": "The release reports its own outcome",
-      "value": "Value: I stop polling CI.",
       "storyId": "STORY-902",
-      "rfc": "",
       "jtbd": "JTBD-901",
-      "storyStatus": "draft",
       "ref": "STORY-902, P901"
     }
-  ],
-  "traceProse": {
-    "persona": "Fixture persona prose.",
-    "jobs": "Fixture jobs prose.",
-    "problems": "Fixture problems prose.",
-    "decisions": "Fixture decisions prose."
-  }
+  ]
 }
 JSON
     printf '</script>\n'
@@ -176,10 +161,14 @@ JSON
 @test "preserves the meta trace block including oversight markers" {
   run node "$RENDER" "$OUT"
   [ "$status" -eq 0 ]
-  for m in story-map-id status persona problems jtbd adrs reported decision-makers human-oversight; do
+  for m in story-map-id status persona problems jtbd reported decision-makers human-oversight; do
     run grep -c "<meta name=\"$m\"" "$OUT"
     [ "$output" -ge 1 ]
   done
+  # And no `adrs`: a map carries no decision trace (ADR-106). Asserted, not
+  # left to a comment — absence is the whole claim.
+  run bash -c "grep -c '<meta name=\"adrs\"' '$OUT' || true"
+  [ "$output" -eq 0 ]
 }
 
 @test "emits no inline style attribute on data-bearing elements" {
@@ -378,7 +367,6 @@ JSON
   # and the links, not markup. What must ship is the shell AND the shared assets
   # it points at — without them an adopter's map renders blank.
   [ -f "$sb/package/templates/story-map.css" ]
-  [ -f "$sb/package/templates/story-map.js" ]
   run grep -c 'story-map.css' "$work/m.html"
   [ "$output" -eq 1 ]
   run grep -c '"storyId": "STORY-001"' "$work/m.html"
@@ -424,7 +412,7 @@ JSON
   "storyMapId": "STORY-MAP-946",
   "backbone": [ { "id": "a", "title": "A" } ],
   "releases": [
-    { "id": "shipped", "name": "Shipped",  "badge": "R2" },
+    { "id": "shipped", "name": "Shipped",  "badge": "R2", "preRfc": true },
     { "id": "asked",   "name": "Asked for", "rfc": "RFC-900" },
     { "id": "nobody",  "name": "Nobody asked" }
   ],
@@ -435,14 +423,16 @@ JSON
   } > "$m"
   run node "$RENDER" "$m"
   [ "$status" -eq 0 ]
-  # delivered (its only story is done) → b-live, DESPITE the authored "R2".
+  # marked pre-RFC and its only story is done → b-live, DESPITE the authored "R2".
   run domcount "$m" 'class="badge b-live"'
   [ "$output" -ge 1 ]
   # named by an RFC → b-next
   run domcount "$m" 'class="badge b-next"'
   [ "$output" -ge 1 ]
-  # nothing has asked for it → b-later
-  run domcount "$m" 'class="badge b-later"'
+  # nothing has asked for it → a DEFECT, not a third resting state. It used to
+  # render b-later/"Speculative", which named the problem comfortably enough
+  # that a row could sit there untraced indefinitely.
+  run domcount "$m" 'class="badge b-defect"'
   [ "$output" -ge 1 ]
 }
 
@@ -628,6 +618,12 @@ JSON
 @test "the reviewed accessibility properties are all emitted" {
   # The script's own header warns these must not be edited away, but the guard
   # set only covered about half of them. This closes the gap.
+  #
+  # `aria-label="Status legend"` was dropped from this set on 2026-08-07 with the
+  # legend itself: it listed every row's badge, name and note, which is what the
+  # grid's first column shows three lines below. A duplicate index is not an
+  # accessibility feature. The glyphs need no key — each badge carries its own
+  # text and the glyph is the redundant non-colour channel beside it.
   run node "$RENDER" "$OUT"
   [ "$status" -eq 0 ]
   local d; d="$(dom "$OUT")"
@@ -636,8 +632,7 @@ JSON
     '<caption>' \
     'aria-label="Story map grid"' \
     'tabindex="0"' \
-    'role="region"' \
-    'aria-label="Status legend"'
+    'role="region"'
   do
     run bash -c "grep -c '$needle' '$d'"
     [ "$output" -ge 1 ] || { echo "missing: $needle"; return 1; }
@@ -671,33 +666,81 @@ PYEOF
   [ "$output" -eq 0 ]
 }
 
-@test "the trace section stays hidden until it has content" {
-  # A named landmark holding nothing, under a visible heading, is worse than no
-  # landmark — and axe's empty-heading rule will not catch it.
+@test "traces render from the ids, and are absent when there are none" {
+  # This replaced five paragraphs of hand-written `traceProse` on 2026-08-07.
+  # Every one restated something already on the page or already in the island —
+  # the persona is the island's own field and the lead's first sentence, the jobs
+  # are glossed on the backbone columns, the problems are derived onto each row
+  # so the authored copy drifted by construction, and "open questions" was a
+  # changelog entry. Rendering the ids leaves no prose to keep in step.
   local notrace="$TMP/notrace.html"
   {
     printf '<script id="story-map-data" type="application/json">\n'
-    printf '{ "storyMapId": "STORY-MAP-971", "title": "T", "backbone": [ { "id": "a", "title": "A" } ], "releases": [ { "id": "r1", "name": "N", "badge": "R1" } ] }\n'
+    printf '{ "storyMapId": "STORY-MAP-971", "title": "T", "backbone": [ { "id": "a", "title": "A" } ], "releases": [ { "id": "r1", "name": "N" } ] }\n'
     printf '</script>\n'
   } > "$notrace"
   run node "$RENDER" "$notrace"
   [ "$status" -eq 0 ]
-  run bash -c "grep -c 'id=\"story-map-trace-section\" aria-labelledby=\"trace-h\" hidden' '$(dom "$notrace")'"
+  # A named landmark holding nothing is worse than no landmark.
+  run grep -c 'story-map-traces' "$notrace"
+  [ "$output" -eq 0 ]
+
+  # With jobs, the ids render — and as links where they resolve.
+  local withtrace="$TMP/withtrace.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    printf '{ "storyMapId": "STORY-MAP-972", "title": "T", "backbone": [ { "id": "a", "title": "A" } ], "releases": [ { "id": "r1", "name": "N" } ], "traces": { "jtbd": ["JTBD-008"] } }\n'
+    printf '</script>\n'
+  } > "$withtrace"
+  run node "$RENDER" "$withtrace"
+  [ "$status" -eq 0 ]
+  run grep -c 'story-map-traces' "$withtrace"
   [ "$output" -eq 1 ]
-  # And it IS revealed when there is prose to show.
-  run bash -c "grep -c 'hidden' '$(dom "$OUT")'"
+  run bash -c "grep -o 'JTBD-008' '$withtrace' | wc -l | tr -d ' '"
+  [ "$output" -ge 2 ]
+}
+
+@test "the map carries no authoring instructions for its reader" {
+  # The footer told the reader to edit the data block and re-render — guidance
+  # for whoever maintains a map, printed on every map, telling a reader nothing
+  # about the map. It belongs in the SKILL and the style guide.
+  run node "$RENDER" "$OUT"
+  [ "$status" -eq 0 ]
+  run grep -c 'wr-itil-story-map-edit\|wr-itil-render-story-map' "$OUT"
+  [ "$output" -eq 0 ]
+  run grep -c '<footer' "$OUT"
   [ "$output" -eq 0 ]
 }
 
-@test "a map whose script never runs says so instead of looking complete" {
-  # Silent total content loss was the highest-value failure to close: the page
-  # kept its heading and lead, so it looked finished while 17 stories were gone.
+@test "the map is readable with no script engine at all" {
+  # The regression this closes: the grid was built client-side from the data
+  # island, so the file itself carried no map. Open it anywhere that does not
+  # run scripts — a phone's file preview, a sandboxed viewer, GitHub's HTML
+  # rendering, print — and you got a fallback message instead of the map. A
+  # document that needs a live script engine to be read is not a document.
+  #
+  # Asserted against the FILE's bytes, deliberately, not against a DOM: reading
+  # it through jsdom would run whatever scripts are present and prove nothing.
   run node "$RENDER" "$OUT"
   [ "$status" -eq 0 ]
-  run grep -c 'has not been drawn' "$OUT"
+
+  # The grid, the cards and the headers are all in the file as shipped.
+  run bash -c "grep -o '<table class=\"map\"' '$OUT' | wc -l | tr -d ' '"
   [ "$output" -eq 1 ]
-  # Once the script runs, the message is cleared.
-  run bash -c "grep -c 'has not been drawn' '$(dom "$OUT")'"
+  run bash -c "grep -o 'class=\"task\"' '$OUT' | wc -l | tr -d ' '"
+  [ "$output" -ge 2 ]
+  run bash -c "grep -o 'scope=\"col\"' '$OUT' | wc -l | tr -d ' '"
+  [ "$output" -ge 1 ]
+  run bash -c "grep -o 'scope=\"row\"' '$OUT' | wc -l | tr -d ' '"
+  [ "$output" -ge 1 ]
+
+  # No executable script is left. Both remaining <script> elements are JSON
+  # data islands, which a viewer that blocks scripts simply ignores.
+  run bash -c "grep -o '<script[^>]*>' '$OUT' | grep -vc 'type=\"application/json\"' || true"
+  [ "$output" -eq 0 ]
+
+  # And no fallback message, because there is nothing left to fall back from.
+  run grep -c 'has not been drawn' "$OUT"
   [ "$output" -eq 0 ]
 }
 
@@ -708,4 +751,418 @@ PYEOF
   [ "$status" -eq 0 ]
   run bash -c "grep -o '<th class=\"slice\" scope=\"row\">.*</th>' '$(dom "$OUT")' | head -1"
   [[ "$output" == *'</span> <span class="s-name">'* ]]
+}
+
+@test "a row that closes problems is never labelled speculative" {
+  # The bug: rowLabel branched only on `delivered`, so EVERY other row without an
+  # RFC id fell through to "Speculative" — including rows tracing real problems.
+  # STORY-MAP-003 rendered a row reading "→ Speculative … closes P160, P443",
+  # contradicting itself on one line.
+  local root="$TMP/repo"
+  mkdir -p "$root/docs/story-maps/draft" "$root/docs/stories/draft"
+  printf -- '---\nstatus: draft\nproblems: [P160]\n---\n\n# STORY-901\n' > "$root/docs/stories/draft/STORY-901-a.md"
+
+  local map="$root/docs/story-maps/draft/STORY-MAP-947-x.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    cat <<'JSON'
+{
+  "storyMapId": "STORY-MAP-947",
+  "backbone": [ { "id": "a", "title": "A" } ],
+  "releases": [ { "id": "r1", "name": "In flight" } ],
+  "tasks": [ { "activity": "a", "release": "r1", "title": "one", "storyId": "STORY-901" } ]
+}
+JSON
+    printf '</script>\n'
+  } > "$map"
+  run node "$RENDER" "$map"
+  [ "$status" -eq 0 ]
+
+  local d; d="$(dom "$map")"
+  # It closes P160, so it is proposed — not speculative.
+  run bash -c "grep -c 'Speculative' '$d' || true"
+  [ "$output" -eq 0 ]
+  run bash -c "grep -c 'P160' '$d'"
+  [ "$output" -ge 1 ]
+}
+
+@test "a row tracing nothing renders as a defect, not as a state" {
+  # A story not linked to a problem is something to fix — document the problem
+  # or link an existing one. Rendering it as a tidy third status normalises it.
+  local root="$TMP/repo2"
+  mkdir -p "$root/docs/story-maps/draft" "$root/docs/stories/draft"
+  printf -- '---\nstatus: draft\n---\n\n# STORY-902\n' > "$root/docs/stories/draft/STORY-902-b.md"
+
+  local map="$root/docs/story-maps/draft/STORY-MAP-948-y.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    cat <<'JSON'
+{
+  "storyMapId": "STORY-MAP-948",
+  "backbone": [ { "id": "a", "title": "A" } ],
+  "releases": [ { "id": "r1", "name": "Nothing asked for this" } ],
+  "tasks": [ { "activity": "a", "release": "r1", "title": "one", "storyId": "STORY-902" } ]
+}
+JSON
+    printf '</script>\n'
+  } > "$map"
+  run node "$RENDER" "$map"
+  [ "$status" -eq 0 ]
+
+  local d; d="$(dom "$map")"
+  # Flagged as needing a trace, and visually distinct from a healthy row.
+  run bash -c "grep -c 'b-defect' '$d'"
+  [ "$output" -ge 1 ]
+  run bash -c "grep -ci 'untraced' '$d'"
+  [ "$output" -ge 1 ]
+}
+
+@test "a card with no story is refused, not rendered" {
+  # "If the story doesn't exist, then it shouldn't even be in the map."
+  # A card is a story's position in a journey. Without a story it is a sketch
+  # wearing map vocabulary — which is what nine rows across maps 012 and 013
+  # were, all of them rendering as a tidy status rather than as the defect they
+  # are. The renderer refuses rather than drawing them.
+  local root="$TMP/nostory"
+  mkdir -p "$root/docs/story-maps/draft" "$root/docs/stories/draft"
+
+  local map="$root/docs/story-maps/draft/STORY-MAP-949-x.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    cat <<'JSON'
+{
+  "storyMapId": "STORY-MAP-949",
+  "backbone": [ { "id": "a", "title": "A" } ],
+  "releases": [ { "id": "r1", "name": "R" } ],
+  "tasks": [ { "activity": "a", "release": "r1", "title": "a card with no story behind it" } ]
+}
+JSON
+    printf '</script>\n'
+  } > "$map"
+
+  run node "$RENDER" "$map"
+  [ "$status" -ne 0 ]
+  # The message must name the card and both remedies, or the agent cannot act.
+  echo "$output" | grep -q 'a card with no story behind it'
+  echo "$output" | grep -qi 'capture'
+  echo "$output" | grep -qi 'remove'
+}
+
+@test "a card naming a story that does not exist is refused too" {
+  # A dangling storyId is the same defect wearing a reference.
+  local root="$TMP/dangling"
+  mkdir -p "$root/docs/story-maps/draft" "$root/docs/stories/draft"
+  printf -- '---\nstatus: draft\nproblems: [P160]\n---\n\n# STORY-901\n' > "$root/docs/stories/draft/STORY-901-a.md"
+
+  local map="$root/docs/story-maps/draft/STORY-MAP-950-y.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    cat <<'JSON'
+{
+  "storyMapId": "STORY-MAP-950",
+  "backbone": [ { "id": "a", "title": "A" } ],
+  "releases": [ { "id": "r1", "name": "R" } ],
+  "tasks": [
+    { "activity": "a", "release": "r1", "title": "real", "storyId": "STORY-901" },
+    { "activity": "a", "release": "r1", "title": "phantom", "storyId": "STORY-999" }
+  ]
+}
+JSON
+    printf '</script>\n'
+  } > "$map"
+
+  run node "$RENDER" "$map"
+  [ "$status" -ne 0 ]
+  echo "$output" | grep -q 'STORY-999'
+}
+
+@test "outside a repository the rule does not fire" {
+  # ADR-104: a map rendered from the published package resolves no stories at
+  # all. Enforcing there would refuse every valid map for lacking a corpus that
+  # was never present. The rule is about the map, not about the reader.
+  local loose="$TMP/loose.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    printf '{ "storyMapId": "STORY-MAP-951", "backbone": [ { "id": "a", "title": "A" } ], "releases": [ { "id": "r1", "name": "R" } ], "tasks": [ { "activity": "a", "release": "r1", "title": "x", "storyId": "STORY-901" } ] }\n'
+    printf '</script>\n'
+  } > "$loose"
+  run node "$RENDER" "$loose"
+  [ "$status" -eq 0 ]
+}
+
+@test "an authored problems or rfcs list in the island is ignored, not merged" {
+  # A pre-migration island must not outvote the corpus (ADR-104). Asserted as
+  # EQUALITY, not as absence of the authored value: with an empty derived union
+  # "does not contain P999" passes for the wrong reason.
+  local root="$TMP/ignore"
+  mkdir -p "$root/docs/story-maps/draft" "$root/docs/stories/done"
+  printf -- '---\nstatus: done\nproblems: [P900]\n---\n# STORY-903\n' \
+    > "$root/docs/stories/done/STORY-903-a.md"
+
+  local map="$root/docs/story-maps/draft/STORY-MAP-980-x.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    cat <<'JSON'
+{
+  "storyMapId": "STORY-MAP-980",
+  "title": "Authored loses",
+  "traces": { "jtbd": ["JTBD-900"], "problems": ["P999"], "rfcs": ["RFC-999"] },
+  "backbone": [ { "id": "a", "title": "A" } ],
+  "releases": [ { "id": "r1", "name": "Now", "rfc": "RFC-900" } ],
+  "tasks": [ { "activity": "a", "release": "r1", "title": "T", "storyId": "STORY-903" } ]
+}
+JSON
+    printf '</script>\n'
+  } > "$map"
+  run node "$RENDER" "$map"
+  [ "$status" -eq 0 ]
+
+  local got
+  got="$(grep -o 'name="problems" content="[^"]*"' "$map" | sed 's/.*content="//;s/"//')"
+  [ "$got" = "P900" ] || { echo "problems meta was '$got', wanted the derived union P900"; return 1; }
+  got="$(grep -o 'name="rfcs" content="[^"]*"' "$map" | sed 's/.*content="//;s/"//')"
+  [ "$got" = "RFC-900" ] || { echo "rfcs meta was '$got', wanted the row identity RFC-900"; return 1; }
+}
+
+@test "a row carrying no rfc contributes nothing to the rfcs meta" {
+  # A row legitimately has no RFC, in two spellings: an explicit null, and no key
+  # at all. Unfiltered, the join yields ",RFC-900" or ",," — and content=",,"
+  # satisfies the reverse-tracers' content="[^"]+" guard, so a map with no RFCs
+  # stops looking like one.
+  local map="$TMP/norfc.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    printf '%s\n' '{ "storyMapId": "STORY-MAP-981", "title": "T", "backbone": [ { "id": "a", "title": "A" } ], "releases": [ { "id": "pre", "name": "P", "rfc": null }, { "id": "bare", "name": "B" }, { "id": "r1", "name": "N", "rfc": "RFC-900" } ] }'
+    printf '</script>\n'
+  } > "$map"
+  run node "$RENDER" "$map"
+  [ "$status" -eq 0 ]
+  local got
+  got="$(grep -o 'name="rfcs" content="[^"]*"' "$map" | sed 's/.*content="//;s/"//')"
+  [ "$got" = "RFC-900" ] || { echo "rfcs meta was '$got' — falsy rows leaked in"; return 1; }
+}
+
+@test "an authored decision trace is inert, not merely unrendered" {
+  # A map carries no decision trace (ADR-106). "Unrendered" is not enough: while
+  # the mentioned-scan stringified the whole traces object, an authored adrs
+  # still resolved into derived.hrefs. The fixture MUST be able to resolve an
+  # ADR, or this passes vacuously — resolveHref returns null with no
+  # docs/decisions/ and every id looks inert whatever the scan does.
+  local root="$TMP/inert"
+  mkdir -p "$root/docs/story-maps/draft" "$root/docs/decisions"
+  printf -- '# ADR-999: A resolvable decision\n' > "$root/docs/decisions/999-x.md"
+
+  local map="$root/docs/story-maps/draft/STORY-MAP-982-x.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    printf '%s\n' '{ "storyMapId": "STORY-MAP-982", "title": "T", "traces": { "adrs": ["ADR-999"] }, "backbone": [ { "id": "a", "title": "A" } ], "releases": [ { "id": "r1", "name": "N" } ] }'
+    printf '</script>\n'
+  } > "$map"
+  run node "$RENDER" "$map"
+  [ "$status" -eq 0 ]
+
+  # No landmark: a named region holding nothing is worse than no region.
+  run grep -c 'story-map-traces' "$map"
+  [ "$output" -eq 0 ]
+  # And no resolved href — this is the half that fails if the scan is widened back.
+  run bash -c "grep -c 'ADR-999' '$map'"
+  [ "$output" -eq 1 ] || { echo "ADR-999 appears $output times; it should survive only in the island"; return 1; }
+}
+
+@test "renaming a row's rfc does not drift the map's oversight fingerprint" {
+  # Rows are scheduling, not substance (ADR-103), so they sit outside the basis.
+  # This would break the moment a derived value were written back into traces
+  # before the island is serialised.
+  source "$REPO_ROOT/packages/itil/lib/story-oversight.sh"
+  local map="$TMP/rowrename.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    printf '%s\n' '{ "storyMapId": "STORY-MAP-983", "title": "T", "traces": { "jtbd": ["JTBD-900"] }, "backbone": [ { "id": "a", "title": "A" } ], "releases": [ { "id": "r1", "name": "N", "rfc": "RFC-900" } ] }'
+    printf '</script>\n'
+  } > "$map"
+  run node "$RENDER" "$map"
+  [ "$status" -eq 0 ]
+  local before; before="$(oversight_content_hash "$map")"
+  [ -n "$before" ]
+
+  sed -i.bak 's/RFC-900/RFC-901/' "$map" && rm -f "$map.bak"
+  run node "$RENDER" "$map"
+  [ "$status" -eq 0 ]
+  [ "$(oversight_content_hash "$map")" = "$before" ] \
+    || { echo "renaming a row's RFC moved the fingerprint — scheduling leaked into the basis"; return 1; }
+}
+
+@test "a map is readable with no stylesheet, not just with no script engine" {
+  # ADR-105 claims a map "degrades to unstyled-but-readable" when separated from
+  # its shared stylesheet. It did not. The value clauses were <span>s whose only
+  # separation was `.v-line { display: block }`, so with no CSS they ran together
+  # as "mid-flowas a developerI want" — found by the maintainer opening a map on
+  # a phone, where the relative stylesheet href resolves to nothing.
+  #
+  # Asserted on the text a no-CSS user agent produces: only DEFAULT-block
+  # elements break the line, so this fails whenever separation is carried by the
+  # stylesheet rather than by the markup.
+  local root="$TMP/nocss"
+  mkdir -p "$root/docs/story-maps/draft" "$root/docs/stories/done"
+  printf -- '---\nstatus: done\n---\n\n## User value\n\nIn order to read a map without its stylesheet, as a developer, I want the clauses to stay apart.\n' \
+    > "$root/docs/stories/done/STORY-904-a.md"
+
+  local map="$root/docs/story-maps/draft/STORY-MAP-984-x.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    printf '%s\n' '{ "storyMapId": "STORY-MAP-984", "title": "T", "traces": { "jtbd": ["JTBD-900"] }, "backbone": [ { "id": "a", "title": "A" } ], "releases": [ { "id": "r1", "name": "N", "rfc": "RFC-900" } ], "tasks": [ { "activity": "a", "release": "r1", "title": "A card", "storyId": "STORY-904", "ref": "STORY-904" } ] }'
+    printf '</script>\n'
+  } > "$map"
+  run node "$RENDER" "$map"
+  [ "$status" -eq 0 ]
+
+  local text
+  text="$(node -e '
+    const fs = require("fs");
+    let h = fs.readFileSync(process.argv[1], "utf8");
+    // What a user agent with no author stylesheet does: block-level elements
+    // break the line, inline ones do not.
+    h = h.replace(/<\/?(div|p|li|ul|ol|tr|td|th|table|section|article|header|footer|h[1-6]|caption)\b[^>]*>/gi, "\n");
+    h = h.replace(/<[^>]+>/g, "");
+    process.stdout.write(h.split("\n").map((l) => l.trim()).filter(Boolean).join("\n"));
+  ' "$map")"
+
+  # Each clause starts its own line. If separation is CSS-only they concatenate.
+  echo "$text" | grep -q '^In order to read a map without its stylesheet' \
+    || { echo "value clauses ran together without CSS:"; echo "$text" | head -20; return 1; }
+  echo "$text" | grep -q '^as a developer' \
+    || { echo "the 'as a' clause did not start its own line"; echo "$text" | head -20; return 1; }
+  echo "$text" | grep -q '^I want the clauses to stay apart' \
+    || { echo "the 'I want' clause did not start its own line"; echo "$text" | head -20; return 1; }
+  echo "$text" | grep -q '^Traces:' \
+    || { echo "the traces line did not start its own line"; echo "$text" | head -20; return 1; }
+}
+
+@test "no map in the corpus carries a decision trace, in either surface" {
+  # A corpus assertion, not a fixture one. The renderer's behaviour was already
+  # covered, and it stayed green while four real maps still published a
+  # `Decisions:` group and an `adrs` meta — they refuse to render, so their
+  # rendered halves were never regenerated. A green suite and a contradicting
+  # corpus are compatible unless something looks at the corpus.
+  #
+  # Conjunction, deliberately: <meta> lives in <head>, so a traces-paragraph
+  # assertion cannot see it, and neither clause subsumes the other.
+  local maps root
+  root="$(cd "$BATS_TEST_DIRNAME/../../../.." && pwd)/docs/story-maps"
+  [ -d "$root" ] || skip "no story-map corpus in this checkout"
+  maps="$(find "$root" -maxdepth 2 -name 'STORY-MAP-*.html' -print)"
+  # Guard the search root: a glob that matches nothing asserts nothing, and
+  # whether that passes is grep-implementation-dependent between here and CI.
+  [ -n "$maps" ]
+
+  local f bad=""
+  while IFS= read -r f; do
+    grep -q '<meta name="adrs"' "$f" && bad="$bad
+  $(basename "$f") — carries an adrs meta"
+    # The trace line carries the Jobs group and nothing else (ADR-106 removed
+    # Decisions; the ADR-103 amendment removed RFCs, which restated the badges).
+    grep -o '<strong>[A-Za-z]*:</strong>' "$f" | grep -qv '<strong>Jobs:</strong>' \
+      && bad="$bad
+  $(basename "$f") — carries a non-Jobs trace group"
+  done <<< "$maps"
+  [ -z "$bad" ] || { echo "maps publishing a decision trace:$bad"; return 1; }
+}
+
+@test "a row with no RFC is a defect unless every story in it is delivered" {
+  # The exception (ADR-107) is work that shipped before the model existed, marked
+  # `preRfc` on the row. Everything else without an identity is a defect — there
+  # is no quiet band for work nobody has proposed. The companion test below
+  # covers the half that matters most: delivery alone does not earn the
+  # exception.
+  local root="$TMP/norfcrule"
+  mkdir -p "$root/docs/story-maps/draft" "$root/docs/stories/done" "$root/docs/stories/draft"
+  printf -- '---\nstatus: done\n---\n# STORY-905\n'  > "$root/docs/stories/done/STORY-905-a.md"
+  printf -- '---\nstatus: draft\n---\n# STORY-906\n' > "$root/docs/stories/draft/STORY-906-b.md"
+
+  local map="$root/docs/story-maps/draft/STORY-MAP-985-x.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    cat <<'JSON'
+{
+  "storyMapId": "STORY-MAP-985",
+  "title": "The one exception",
+  "traces": { "jtbd": ["JTBD-900"] },
+  "backbone": [ { "id": "a", "title": "A" } ],
+  "releases": [
+    { "id": "shipped", "name": "Before the model", "preRfc": true },
+    { "id": "open",    "name": "Not delivered, no identity" }
+  ],
+  "tasks": [
+    { "activity": "a", "release": "shipped", "title": "Done one", "storyId": "STORY-905" },
+    { "activity": "a", "release": "open",    "title": "Draft one", "storyId": "STORY-906" }
+  ]
+}
+JSON
+    printf '</script>\n'
+  } > "$map"
+  run node "$RENDER" "$map"
+  [ "$status" -eq 0 ]
+
+  local rows
+  rows="$(node -e '
+    const fs=require("fs"), h=fs.readFileSync(process.argv[1],"utf8");
+    const O="<script id=\"story-map-status\" type=\"application/json\">";
+    const i=h.indexOf(O)+O.length, j=h.indexOf("</script>", i);
+    const d=JSON.parse(h.slice(i,j));
+    process.stdout.write(Object.entries(d.rows).map(([k,v])=>k+"="+v).sort().join(" "));
+  ' "$map")"
+  [ "$rows" = "open=untraced shipped=delivered" ] \
+    || { echo "row statuses were '$rows'; wanted shipped=delivered open=untraced"; return 1; }
+
+  # And the defect is visible, not just classified.
+  run bash -c "grep -c 'b-defect' '$map'"
+  [ "$output" -ge 1 ]
+}
+
+@test "only a row explicitly marked pre-RFC may ship without an identity" {
+  # The exception is CLOSED (ADR-107): it covers the rows holding work that
+  # shipped before release rows carried RFC identities, and no new row joins it.
+  # "All stories delivered" cannot be the test — every row meets that eventually,
+  # which would make shipping unproposed work legitimate by finishing it. So a
+  # historical row says so explicitly, and finishing a row earns nothing.
+  local root="$TMP/closedexc"
+  mkdir -p "$root/docs/story-maps/draft" "$root/docs/stories/done"
+  printf -- '---\nstatus: done\n---\n# STORY-907\n' > "$root/docs/stories/done/STORY-907-a.md"
+  printf -- '---\nstatus: done\n---\n# STORY-908\n' > "$root/docs/stories/done/STORY-908-b.md"
+
+  local map="$root/docs/story-maps/draft/STORY-MAP-986-x.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    cat <<'JSON'
+{
+  "storyMapId": "STORY-MAP-986",
+  "title": "Closed exception",
+  "traces": { "jtbd": ["JTBD-900"] },
+  "backbone": [ { "id": "a", "title": "A" } ],
+  "releases": [
+    { "id": "history", "name": "Before rows carried identities", "preRfc": true },
+    { "id": "sneaked", "name": "Finished, but nobody proposed it" }
+  ],
+  "tasks": [
+    { "activity": "a", "release": "history", "title": "Old one", "storyId": "STORY-907" },
+    { "activity": "a", "release": "sneaked", "title": "New one", "storyId": "STORY-908" }
+  ]
+}
+JSON
+    printf '</script>\n'
+  } > "$map"
+  run node "$RENDER" "$map"
+  [ "$status" -eq 0 ]
+
+  local rows
+  rows="$(node -e '
+    const fs=require("fs"), h=fs.readFileSync(process.argv[1],"utf8");
+    const O="<script id=\"story-map-status\" type=\"application/json\">";
+    const i=h.indexOf(O)+O.length, j=h.indexOf("</script>", i);
+    process.stdout.write(Object.entries(JSON.parse(h.slice(i,j)).rows)
+      .map(([k,v])=>k+"="+v).sort().join(" "));
+  ' "$map")"
+  # Both rows are fully delivered. Only the marked one is legitimate.
+  [ "$rows" = "history=delivered sneaked=untraced" ] \
+    || { echo "row statuses were '$rows'; wanted history=delivered sneaked=untraced"; return 1; }
 }

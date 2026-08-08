@@ -51,26 +51,26 @@ This directory is live. Capture a map with `/wr-itil:capture-story-map`, move it
   "title": "<Title>",
   "status": "draft",
   "persona": "<persona>",
-  "traces": { "problems": ["P<NNN>"], "rfcs": [], "jtbd": ["JTBD-<NNN>"], "adrs": [] },
-  "lead": "A story map for the <persona> who ... Read across the top for the journey; read down the rows for release bands.",
+  "traces": { "jtbd": ["JTBD-<NNN>"] },
   "backbone": [ { "id": "<slug>", "title": "A. <Activity>", "note": "<optional gloss>" } ],
-  "releases": [ { "id": "live", "name": "Existing", "badge": "Live", "note": "shipped" } ],
+  "releases": [ { "id": "rfc-<nnn>", "name": "<what ships together>", "rfc": "RFC-<NNN>", "note": "<optional>" } ],
   "tasks": [
     { "activity": "<backbone id>", "release": "<release id>",
-      "title": "<what the persona can do>", "value": "Value: <why it matters>",
+      "title": "<what the persona can do>",
       "storyId": "STORY-<NNN>", "rfc": "RFC-<NNN>", "jtbd": "JTBD-<NNN>",
       "ref": "STORY-<NNN>, P<NNN>" }
-  ],
-  "traceProse": { "persona": "...", "jobs": "...", "problems": "...", "decisions": "...", "open": "..." }
+  ]
 }
 </script>
 ```
 
+**What a map does NOT carry.** No `lead`, no `traceProse`, no `badge`, no `storyStatus`, no card `value`, no row `problems`, **no map-level `rfcs`, and no `adrs` at all**. Everything a story file already says is derived when the map renders (ADR-104): status, the value statement, and the problems each story closes. A row's status and problems are the union of its stories'; a row's label is its RFC id, because a row IS an RFC (ADR-103) — and the map's RFC list is the union of its rows', so it is not authored either. Every row carries an identity: one without an `rfc` renders as a defect whether or not its stories are done, since delivery cannot excuse a missing identity (ADR-107). The single exception is a row holding work that shipped before rows carried identities, marked `"preRfc": true`; that set is closed and no new row joins it. A map carries no decision trace: a decision constrains how something is built, so it belongs on the story that builds it (ADR-106). Prose at the top describing the grid below it was removed for the same reason.
+
 Rendered shape: backbone activities become `<th class="act" scope="col">` COLUMNS; releases become `<th class="slice" scope="row">` ROWS; tasks become `<div class="task">` cards inside `<td class="cell">`; an activity × release pair with no tasks renders `<td class="cell empty">`. A row read left to right is everything that ships together.
 
-**Trace layer**: `data-story-id`, `data-rfc`, `data-jtbd`, `data-status` on each rendered card. Since the cards are built in the browser, tooling that needs the trace reads the data block's `"storyId"` instead — `update-story-references-section.sh` and `story-oversight.sh` match both spellings. The island's pretty-printed serialisation keeps each `"storyId"` on its own line, which is what the ADR-101 whole-line filter needs.
+**Trace layer**: `data-story-id`, `data-rfc`, `data-jtbd`, `data-status` on each rendered card. A rendered map carries the trace twice — once on the card and once in the data island as `"storyId"` — and tooling matches both spellings, because a pre-ADR-102 map has only the first and a map edited but not yet re-rendered has only the second. The island's pretty-printed serialisation keeps each `"storyId"` on its own line; that used to be load-bearing for the ADR-101 whole-line filter, and since ADR-103 retired it the one-per-line shape is kept for diff readability alone.
 
-**Ratification** is fingerprinted over the data island alone, not the whole file, so restyling the template can never revoke a human approval (ADR-102's amendment to ADR-090).
+**Ratification** is fingerprinted over the map's own SUBSTANCE within the data island — not the whole file, and not the whole island, so restyling the template can never revoke a human approval (ADR-102's amendment to ADR-090).
 
 **Prohibition**: no inline `style=""` anywhere — presentation belongs to the template only. This is stricter than the superseded rule, which permitted `--<custom-property>` on layout containers. `--cols`, `<section class="backbone">`, `.rib`, `.rib-header`, `data-rib` and `<a class="slice">`-as-story-link are all removed.
 
@@ -84,13 +84,13 @@ One row per story map in `draft` / `accepted` / `in-progress` status, from files
 
 | WSJF | ID | Title | Status | Problems | RFCs |
 |------|-----|-------|--------|----------|------|
-| — | STORY-MAP-002 | Decompose a fix into coordinated changes | draft | P170, P251, P314, P371, P399, P390 | RFC-003, RFC-005, RFC-047 |
+| — | STORY-MAP-002 | Take a problem from noticed to resolved | draft | P080, P155, P170, P251, P390, P399, P401 | RFC-005, RFC-060, RFC-047, RFC-061 |
 | — | STORY-MAP-003 | Sustain my token quota across the week and across surfaces | draft | P160, P443 | RFC-046 |
-| — | STORY-MAP-004 | Close the loop with someone who reported a problem | draft | P376, P431 | RFC-051 |
-| — | STORY-MAP-008 | Have a plugin behave like a guest in my repository | draft | P424, P435 | RFC-054 |
-| — | STORY-MAP-011 | Trust the AFK loop's autonomous conduct | draft | P430, P433, P434, P438, P439 | RFC-050, RFC-052, RFC-053, RFC-056, RFC-057 |
-| — | STORY-MAP-012 | Ship through a scored path | draft | P435, P208 | — |
-| — | STORY-MAP-013 | Know what my push did | draft | P435 | — |
+| — | STORY-MAP-004 | Close the loop with someone who reported a problem | draft | P080, P170, P376, P431 | RFC-028, RFC-051, RFC-061 |
+| — | STORY-MAP-008 | Have a plugin behave like a guest in my repository | draft | P424 | RFC-054 |
+| — | STORY-MAP-011 | Trust the AFK loop's autonomous conduct | draft | P430, P431, P433, P434, P438, P439 | RFC-050, RFC-051, RFC-052, RFC-053, RFC-056, RFC-057 |
+| — | STORY-MAP-012 | Ship through a scored path | draft | — | — |
+| — | STORY-MAP-013 | Know what my push did | draft | — | — |
 
 
 ## Consolidated away

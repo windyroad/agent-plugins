@@ -10,7 +10,8 @@
 // would disagree with the oversight hash, which is island-scoped.
 //
 // Operations:
-//   list                     every map: id, title, status, traces, ratification
+//   list                     every map: id, title, status, jobs, problems,
+//                            RFC row identities, ratification
 //   get <MAP-ID>             one map: backbone, releases, tasks
 //   find-story <STORY-ID>    which maps hold a story, and in which cell
 //   unratified               only the maps needing ratification, with a reason
@@ -96,13 +97,14 @@ function readFacts() {
  *  removed four times over. The renderer owns it because it is the only layer
  *  that can read story files.
  *
- *  A map edited but not re-rendered answers `unproposed` for every row — the
- *  same staleness the story statuses and card values already carry, and
- *  `story-map-edit` re-renders after every operation so it does not arise in
- *  practice.
+ *  A map edited but not re-rendered answers `stale` for every row — a value the
+ *  renderer never emits, so it reads as "no derived answer" rather than
+ *  impersonating a verdict. It is the same staleness the story statuses and card
+ *  values already carry, and `story-map-edit` re-renders after every operation
+ *  so it does not arise in practice.
  */
 function rowStatus(row, derived) {
-  return (derived.rows ?? {})[row.id] ?? 'unproposed';
+  return (derived.rows ?? {})[row.id] ?? 'stale';
 }
 
 function corpus() {
@@ -118,7 +120,16 @@ function summary(m) {
     title: m.data.title ?? null,
     status: m.data.status ?? null,
     persona: m.data.persona ?? null,
-    traces: m.data.traces ?? {},
+    // `traces` holds ONE authored key — the jobs the map is drawn for. Spelled
+    // out rather than passed through, so a stale island carrying the removed
+    // `adrs`/`rfcs` cannot leak them back into the query's answer.
+    traces: { jtbd: m.data.traces?.jtbd ?? [] },
+    // Derived, and read from what the renderer emitted rather than recomputed —
+    // the renderer is the definition, and two definitions of one fact is the
+    // drift class this format has removed repeatedly. Row RFC identities are
+    // AUTHORED, so they come from the island; only problems are derived.
+    problems: m.derived?.mapProblems ?? [],
+    rfcs: [...new Set((m.data.releases ?? []).map((r) => r.rfc).filter(Boolean))],
     ratified: m.ratified,
     reason: m.reason,
     activities: (m.data.backbone ?? []).length,
@@ -143,8 +154,6 @@ const OPS = {
         status: rowStatus(r, m.derived ?? {}),
       })),
       tasks: m.data.tasks ?? [],
-      lead: m.data.lead ?? null,
-      traceProse: m.data.traceProse ?? {},
     };
   },
 
@@ -175,7 +184,7 @@ function main(argv) {
   if (!op || !OPS[op]) {
     console.error('usage: story-map-query <list|get|find-story|unratified> [args] [--maps-dir DIR]');
     console.error('');
-    console.error('  list                   every map with status, traces and ratification state');
+    console.error('  list                   every map: status, jobs, problems, RFC rows, ratification');
     console.error('  get <MAP-ID>           one map: backbone, release bands, cards');
     console.error('  find-story <STORY-ID>  which maps hold a story, and in which cell');
     console.error('  unratified             maps needing ratification, each with a reason');

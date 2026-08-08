@@ -45,7 +45,7 @@ Enumerate each lifecycle subdir:
 ls docs/story-maps/draft/*.html docs/story-maps/accepted/*.html docs/story-maps/in-progress/*.html docs/story-maps/completed/*.html docs/story-maps/archived/*.html 2>/dev/null
 ```
 
-For each map file, parse the `<meta>` block to extract: `story-map-id`, `status`, `problems`, `rfcs`, `jtbd`. Use `xmllint --xpath` when available; fall back to `grep` on `<meta>` lines:
+For each map file, parse the `<meta>` block to extract: `story-map-id`, `status`, `problems`, `rfcs`, `jtbd`. `problems` and `rfcs` are DERIVED — the union of the stories' `problems:` and of the release-row identities — so they carry content the data island does not. Use `xmllint --xpath` when available; fall back to `grep` on `<meta>` lines:
 
 ```bash
 status=$(xmllint --xpath 'string(//meta[@name="status"]/@content)' "$map" 2>/dev/null || \

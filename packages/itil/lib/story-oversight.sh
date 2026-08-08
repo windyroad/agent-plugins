@@ -57,6 +57,35 @@ oversight_excluded_keys() {
   printf '%s\n' human-oversight oversight-hash oversight-basis status
 }
 
+# The MAP-SUBSTANCE key set: the island keys a story map's ratification hangs on.
+#
+# Editing this set — here or in the SUBSTANCE tuple below — changes ADR-090's
+# Decision Outcome as amended by ADR-103, not merely a mechanism. It IS the drift
+# trigger. A change here needs an ADR-090 amendment, and the bidirectional test
+# will NOT catch that: it asserts the accessor and the tuple agree, so it passes
+# whenever both move together, which is the shape of exactly that edit. The
+# sibling notice on _oversight_filter says the same thing for the same reason.
+#
+# SCOPE: island keys only. Unlike oversight_excluded_keys, which strips keys from
+# every artefact in three encodings, this set is meaningless for anything with no
+# island — stories and pre-ADR-102 maps fall through to whole-file bytes. The two
+# are not complements; `excluded ∪ substance` is not the key space.
+#
+# THIS IS THE ONLY ENUMERATION. Six documents used to restate it (ADR-090,
+# ADR-103, ADR-105, capture-story-map, and manage-story-map twice) and by
+# 2026-08-08 it had drifted in both directions at once: the ADRs still named
+# `lead` and `traceProse`, dead the day before, while manage-story-map had lost
+# `storyMapId` and `secondaryPersona`, both live. The prose now states the rule
+# and points here — which is what the excluded-key set has always done, and it
+# has never drifted.
+#
+# Consumers DERIVE from this rather than restating it, the way the corpus lint
+# derives its pattern from oversight_excluded_keys. A consumer that hardcodes the
+# list starts a seventh enumeration.
+oversight_map_substance_keys() {
+  printf '%s\n' storyMapId title persona secondaryPersona traces backbone caption
+}
+
 # Emit the bytes a fingerprint should cover.
 #
 # For a story map under ADR-102 that is the DATA ISLAND alone, not the whole
@@ -94,8 +123,13 @@ try:
     d = json.loads(sys.stdin.read().replace("\\u003c", "<"))
 except Exception:
     sys.exit(0)          # unparseable island → empty basis, reads as drifted
+# Only keys PRESENT in the island are included, so a key listed here that no
+# map carries contributes nothing — which is why `lead` and `traceProse` could
+# be removed on 2026-08-08 without moving a single stored hash. They had left
+# the format the day before and were a live re-introduction vector: a field
+# nothing documents would still have been ratification-bearing.
 SUBSTANCE = ("storyMapId", "title", "persona", "secondaryPersona",
-             "traces", "lead", "backbone", "traceProse", "caption")
+             "traces", "backbone", "caption")
 print(json.dumps({k: d[k] for k in SUBSTANCE if k in d}, sort_keys=True, indent=2))
 '
   else

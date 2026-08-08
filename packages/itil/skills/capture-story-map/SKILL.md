@@ -81,7 +81,7 @@ For each `P<NNN>`:
 trace_files=$(ls docs/problems/<NNN>-*.md docs/problems/*/<NNN>-*.md 2>/dev/null)
 ```
 
-**I3 hard-block** (per ADR-060 line 187): trace absent / malformed / unresolved → emit deny log entry to `logs/story-map-capture-denials.jsonl`, halt with stderr directive naming `/wr-itil:capture-problem` as the open-the-driving-problem-first surface.
+**I3 hard-block** (ADR-060, the story-map schema's `problems:` field): trace absent / malformed / unresolved → emit deny log entry to `logs/story-map-capture-denials.jsonl`, halt with stderr directive naming `/wr-itil:capture-problem` as the open-the-driving-problem-first surface.
 
 ### 2.5. Validate JTBD trace + I4 hard-block
 
@@ -91,7 +91,7 @@ For each `JTBD-<NNN>`:
 jtbd_file=$(ls docs/jtbd/*/JTBD-<NNN>-*.md 2>/dev/null | head -1)
 ```
 
-**I4 hard-block** (per ADR-060 line 188): trace absent / malformed / unresolved → emit deny log + halt. Story-maps without JTBD trace are structurally meaningless per ADR-060 ("a map with no JTBD trace is structurally meaningless"; Patton's central thesis is journey-around-user-value).
+**I4 hard-block** (ADR-060, the story-map schema's `jtbd:` field): trace absent / malformed / unresolved → emit deny log + halt. Story-maps without JTBD trace are structurally meaningless per ADR-060 ("a map with no JTBD trace is structurally meaningless"; Patton's central thesis is journey-around-user-value).
 
 ### 3. Compute next STORY-MAP ID
 
@@ -129,6 +129,10 @@ wr-itil-render-story-map docs/story-maps/draft/STORY-MAP-<NNN>-<kebab-title>.htm
 
 **JSON shape:**
 
+Extracted verbatim by `test/documented-island-renders.bats` — editing which keys
+appear here changes what that test asserts, and that binding is deliberate.
+
+<!-- documented-island:begin -->
 ```json
 {
   "storyMapId": "STORY-MAP-<NNN>",
@@ -137,44 +141,45 @@ wr-itil-render-story-map docs/story-maps/draft/STORY-MAP-<NNN>-<kebab-title>.htm
   "persona": "<persona>",
   "reported": "<YYYY-MM-DD>",
   "decisionMakers": "<git config user.name>",
-  "humanOversight": "unconfirmed",
-  "traces": { "problems": ["P<NNN>"], "rfcs": [], "jtbd": ["JTBD-<NNN>"], "adrs": [] },
-  "lead": "A story map for the <persona> who ... Read across the top for the journey; read down the rows for release bands.",
+  "traces": { "jtbd": ["JTBD-<NNN>"] },
   "backbone": [
     { "id": "<slug>", "title": "A. <Activity>", "note": "<optional JTBD or gloss>" }
   ],
   "releases": [
-    { "id": "live", "name": "Existing", "badge": "Live", "note": "shipped" },
-    { "id": "r1",   "name": "Now",      "badge": "R1",   "note": "being built" }
+    { "id": "rfc-<nnn>", "name": "<what this release delivers>", "rfc": "RFC-<NNN>", "note": "<optional>" }
   ],
   "tasks": [
     {
       "activity": "<backbone id>", "release": "<release id>",
       "title": "<what the persona can do>",
-      "value": "Value: <why it matters to them>",
       "storyId": "STORY-<NNN>", "rfc": "RFC-<NNN>", "jtbd": "JTBD-<NNN>",
       "ref": "STORY-<NNN>, P<NNN>"
     }
-  ],
-  "traceProse": {
-    "persona": "...", "jobs": "...", "problems": "...", "decisions": "...", "open": "..."
-  }
+  ]
 }
 ```
+<!-- documented-island:end -->
 
 **Authoring rules:**
 
 - **The backbone must be a journey, not a list of invariants.** Activities are steps the persona walks through in sequence. "Finish a change → get it assessed → push it → get through CI → release it" is a backbone. "Leave no unscored way out", "score this change not the last one" are invariants, and a column of them is not a map.
-- At capture a map may legitimately have **columns and rows but empty cells**. Say so in the `lead`, or an all-empty grid reads as a rendering failure.
+- At capture a map may legitimately have **columns and rows but empty cells**. That is the honest state of unbuilt work, and the renderer says so in place — a wholly empty band carries its own sentence. Do not add prose at the top explaining it.
+- **A row IS an RFC (ADR-103).** A row a problem has proposed carries its `rfc`; drawing the row is what allocates the identity. There is no separate "not yet allocated" state and no `badge` field — a row's status is derived from its stories, and its label is its RFC id.
+- **Every row carries an identity, and finishing one earns no exemption (ADR-107).** A row with no `rfc` renders as a defect — a red "Untraced" badge — whether or not its stories are done. Delivery cannot excuse a missing identity, because every row is delivered eventually; that reading would let work nobody proposed become legitimate by being finished.
+
+  The only exception is a row holding work that shipped **before rows carried identities**, and such a row says so explicitly with `"preRfc": true`. That set is closed. Do not add the marker to a new row: it is a statement about history, not a way to skip allocating an RFC. It appears in no example above because a row that has an `rfc` does not need it, and the example shows the normal case.
+- **A map carries no `traces.rfcs` (ADR-107).** The map's RFC list is the union of its row identities, so authoring it restates the rows and drifts from them the moment one changes.
 - `storyId` / `rfc` / `jtbd` are optional per task and emit the `data-*` reference layer that reverse-trace and the story-map queries consume. Omit them until stories exist; add them as stories are captured onto the map.
-- **Do NOT author a status.** A story's lifecycle state is read from its own file when the map renders, so a transition needs no map edit and does not re-open the map's ratification. There is no `storyStatus` field and no `--status` flag.
+- **Author nothing a story file already says (ADR-104).** A story's lifecycle state, its value statement, and the problems it closes are all read from the story when the map renders — so a transition needs no map edit and does not re-open the map's ratification. There are no `storyStatus`, `value` or row-level `problems` fields, and no `--status` or `--value` flags. A row's problems are the union of its stories'; a map's are the union of its rows'.
+- **A map carries no decision trace (ADR-106).** There is no `traces.adrs`. A decision constrains how something is built, and the thing built is the story — so a decision reference belongs on the story (`adrs:` in its frontmatter), not on the lens drawn over it.
+- **Write no prose the grid already carries.** There is no `lead` and no `traceProse`. A map is a title, a grid, and the jobs it is drawn for. Where a column or a row needs a note, both carry a `note` field — put it next to the thing it describes, not in a paragraph at the top restating the picture below it. Six kinds of duplication were removed from this format for exactly this reason; the seventh will be whatever gets added back.
 - **Prefer the edit command over hand-editing the island** for structural changes — it validates against the map's own backbone and bands, names what is available when you get an id wrong, and leaves the file untouched on failure:
 
 ```bash
-wr-itil-story-map-edit <map.html> add-card     --story STORY-<NNN> --activity <id> --release <id> --title "..." [--value "..."] [--ref "..."]
+wr-itil-story-map-edit <map.html> add-card     --story STORY-<NNN> --activity <id> --release <id> --title "..." [--ref "..."]
 wr-itil-story-map-edit <map.html> move-card    --story STORY-<NNN> [--activity <id>] [--release <id>]
 wr-itil-story-map-edit <map.html> remove-card  --story STORY-<NNN>
-wr-itil-story-map-edit <map.html> add-band     --id <id> --name "..." [--badge Live|R1|R2] [--note "..."]
+wr-itil-story-map-edit <map.html> add-band     --id <id> --name "..." [--rfc RFC-<NNN>] [--note "..."]
 wr-itil-story-map-edit <map.html> add-activity --id <id> --title "..." [--note "..."]
 ```
 
@@ -183,13 +188,13 @@ Hand-editing the island still works — the renderer reads whatever is there —
 - Presentation is not yours to set. There is no CSS in the JSON and no inline `style` anywhere; the template is the only styling source.
 - Escape a literal `<` in any string as `\\u003c`. A raw `</script>` inside the island terminates the block early — in the renderer and in a browser — and the renderer will refuse the file rather than emit a truncated map.
 
-**Born unconfirmed (ADR-090).** Set `"humanOversight": "unconfirmed"` in the data island — orthogonal to the `status:` lifecycle. The `<meta name="human-oversight">` tag is a projection the renderer regenerates from the island; never author it directly (ADR-102). The map is NOT ratified until a human confirms it via `/wr-itil:manage-story-map <NNN> ratify`, which writes `confirmed` + an `oversight-hash` fingerprint through `wr-itil-mark-story-oversight-confirmed`. Until then `wr-itil-detect-unratified-stories-maps` surfaces it and an RFC may not reference its stories (`wr-itil-check-rfc-stories-ratified`).
+**Born unconfirmed (ADR-090).** Do NOT author `humanOversight` at all: the renderer treats an absent field as `unconfirmed`, so writing it is writing the default, and the field exists so that `wr-itil-mark-story-oversight-confirmed` can set `confirmed` — which an agent must never hand-write (P348). The `<meta name="human-oversight">` tag is a projection the renderer regenerates from the island; never author it directly (ADR-102). The map is NOT ratified until a human confirms it via `/wr-itil:manage-story-map <NNN> ratify`, which writes `confirmed` + an `oversight-hash` fingerprint through `wr-itil-mark-story-oversight-confirmed`. Until then `wr-itil-detect-unratified-stories-maps` surfaces it and an RFC may not reference its stories (`wr-itil-check-rfc-stories-ratified`).
 
-**What re-opens ratification, and what does not (ADR-103).** A later edit to the map's SUBSTANCE — its activity columns, title, persona, lead, traces, trace prose or caption — drifts the fingerprint and silently re-opens ratification. Release rows and the cards in them sit OUTSIDE the basis, so drawing a row or adding a story to one changes nothing. Presentation is outside it too: restyling the shared template cannot revoke an approval. Do NOT hand-write `confirmed` — born-unconfirmed is the load-bearing default.
+**What re-opens ratification, and what does not (ADR-103).** A later edit to the map's SUBSTANCE — the map's own substance as ADR-090 defines it — its journey, its identity, and what it traces to; `oversight_map_substance_keys()` is the field list — drifts the fingerprint and silently re-opens ratification. Release rows and the cards in them sit OUTSIDE the basis, so drawing a row or adding a story to one changes nothing. Presentation is outside it too: restyling the shared template cannot revoke an approval. Do NOT hand-write `confirmed` — born-unconfirmed is the load-bearing default.
 
 ### 6. Single commit — `## Story Maps` reverse-trace refresh
 
-**Stage list**: the map `.html` (it carries its own data island) AND, on a repository's first map, the shared `docs/story-maps/story-map.css` + `story-map.js` the renderer places beside them, PLUS driving problem files (refresh `## Story Maps` section via `update-problem-references-section.sh <file> "Story Maps"`) PLUS driving JTBD files (refresh `## Story Maps` section via `update-jtbd-references-section.sh <file> "Story Maps"`). Do NOT stage `docs/story-maps/README.md` (deferred).
+**Stage list**: the map `.html` (it carries its own data island) AND, on a repository's first map, the shared `docs/story-maps/story-map.css` the renderer places beside them, PLUS driving problem files (refresh `## Story Maps` section via `update-problem-references-section.sh <file> "Story Maps"`) PLUS driving JTBD files (refresh `## Story Maps` section via `update-jtbd-references-section.sh <file> "Story Maps"`). Do NOT stage `docs/story-maps/README.md` (deferred).
 
 ```bash
 for pid_token in $(echo "$problem_trace" | tr ',' ' '); do

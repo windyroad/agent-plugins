@@ -8,39 +8,21 @@
   <meta name="status" content="draft">
   <meta name="persona" content="developer">
   <meta name="secondary-persona" content="tech-lead">
-  <meta name="problems" content="P435,P208">
+  <meta name="problems" content="">
   <meta name="rfcs" content="">
   <meta name="jtbd" content="JTBD-002,JTBD-001,JTBD-005,JTBD-201,JTBD-003">
-  <meta name="adrs" content="ADR-102">
   <meta name="reported" content="2026-08-05">
   <meta name="decision-makers" content="Tom Howard">
   <meta name="human-oversight" content="unconfirmed">
   <link rel="stylesheet" href="../story-map.css">
-  <script src="../story-map.js" defer></script>
 </head>
 <body>
   <main>
     <h1 id="story-map-title">Ship through a scored path</h1>
-    <p class="lead" id="story-map-lead">A story map for the developer who wants work assessed before it leaves their machine. Read across the top for the journey — finish a change, get it assessed, push it, get it through CI, release it. Read down the rows for release bands: what the gate already does, then the stack-neutrality fix, then what is still open. A row read left to right is everything that ships together. Most of this is already live; the value of the map is showing where the funnel still leaks.</p>
-    <ul class="legend" id="story-map-legend" role="list" aria-label="Status legend"></ul>
-    <div id="story-map">
-      <p class="lead">This map's grid has not been drawn. It is built from the data block
-      at the end of this file by <code>story-map.js</code>, which sits alongside the maps —
-      so this message means the script did not load or did not run. The data itself is
-      intact: open this file in a text editor, or use View Source, and read the block with
-      <code>id="story-map-data"</code>.</p>
-    </div>
-    <section class="trace" id="story-map-trace-section" aria-labelledby="trace-h" hidden>
-      <h2 id="trace-h">What this map traces to</h2>
-      <div id="story-map-trace"></div>
-    </section>
+    <div id="story-map"><div class="scroll" tabindex="0" role="region" aria-label="Story map grid"><table class="map"><caption>Ship through a scored path — 5 journey activities across 3 releases</caption><thead><tr><td class="corner"></td><th class="act" scope="col">A. Finish a change <span class="jtbd">JTBD-002 — governance cannot be bypassed</span></th><th class="act" scope="col">B. Get it assessed <span class="jtbd">JTBD-005 — assess on demand</span></th><th class="act" scope="col">C. Push it <span class="jtbd">the funnel onto a scored path</span></th><th class="act" scope="col">D. Get through CI <span class="jtbd">P208 — the observed signal</span></th><th class="act" scope="col">E. Release it <span class="jtbd">JTBD-201 — restore service fast</span></th></tr></thead><tbody><tr><th class="slice" scope="row"><span class="badge b-defect"><span class="b-glyph" aria-hidden="true">⚠</span>⚠ Untraced — needs a problem</span> <span class="s-name">Existing</span> <span class="s-note">shipped &amp; in prod</span></th><td class="cell"><ul class="tasks" role="list"><li><div class="task"><span class="t-title">Get a running risk read on my uncommitted work, without asking for one</span><span class="t-ref">Traces: risk-scorer WIP nudge</span></div></li></ul></td><td class="cell"><ul class="tasks" role="list"><li><div class="task"><span class="t-title">Run an assessment on demand, and have it count at the gate instead of being repeated</span><span class="t-ref">Traces: <a href="../../jtbd/developer/JTBD-005-assess-on-demand.proposed.md" class="ref-link">JTBD-005</a></span></div></li><li><div class="task"><span class="t-title">A score I earned earlier stops counting once the work moves under it</span><span class="t-ref">Traces: TTL + pipeline-state hash — Expires on a timer and on content drift</span></div></li></ul></td><td class="cell"><ul class="tasks" role="list"><li><div class="task"><span class="t-title">A bare push is hard-blocked, so work reaches the scorer instead of going around it</span><span class="t-ref">Traces: git-push-gate</span></div></li><li><div class="task"><span class="t-title">A push straight to a branch the release pipeline owns is hard-blocked</span><span class="t-ref">Traces: publish, changeset-release/*</span></div></li><li><div class="task"><span class="t-title">A clean tree pushes without a fresh score</span><span class="t-ref">Traces: clean-tree bypass</span></div></li></ul></td><td class="cell"><ul class="tasks" role="list"><li><div class="task"><span class="t-title">A green run on the target branch is required before my work ships, not just a good prediction</span><span class="t-ref">Traces: <a href="../../problems/known-error/208-git-push-gate-does-not-check-ci-status-on-push-release-before-scoring-risk.md" class="ref-link">P208</a> — Fails closed if CI cannot be read</span></div></li></ul></td><td class="cell"><ul class="tasks" role="list"><li><div class="task"><span class="t-title">Releasing is scored on its own, above the push score</span><span class="t-ref">Traces: release gate</span></div></li><li><div class="task"><span class="t-title">When I am restoring service, the release goes through ahead of the CI check</span><span class="t-ref">Traces: <a href="../../jtbd/tech-lead/JTBD-201-restore-service-fast.proposed.md" class="ref-link">JTBD-201</a>, incident bypass — Single-use, and it is spent whether or not it was needed</span></div></li><li><div class="task"><span class="t-title">A change that only reduces risk proceeds without a fresh score, until the work moves under it</span><span class="t-ref">Traces: risk-reducing bypass — Revalidates against drift rather than lasting the session</span></div></li></ul></td></tr><tr><th class="slice" scope="row"><span class="badge b-defect"><span class="b-glyph" aria-hidden="true">⚠</span>⚠ Untraced — needs a problem</span> <span class="s-name">Now</span> <span class="s-note">the P435 fix</span></th><td class="cell empty"></td><td class="cell empty"></td><td class="cell"><ul class="tasks" role="list"><li><div class="task"><span class="t-title">The block names a command my repository actually has, or explains itself without naming one</span><span class="t-ref">Traces: <a href="../../problems/open/435-risk-scorer-gates-hardcoded-to-home-repo-shape-push-gate-overfire-external-comms-underfire.md" class="ref-link">P435</a>, inbound #235</span></div></li></ul></td><td class="cell empty"></td><td class="cell"><ul class="tasks" role="list"><li><div class="task"><span class="t-title">Blocking a merge stops telling me to go and write a release script first</span><span class="t-ref">Traces: <a href="../../problems/open/435-risk-scorer-gates-hardcoded-to-home-repo-shape-push-gate-overfire-external-comms-underfire.md" class="ref-link">P435</a>, gh pr merge branch</span></div></li></ul></td></tr><tr><th class="slice" scope="row"><span class="badge b-defect"><span class="b-glyph" aria-hidden="true">⚠</span>⚠ Untraced — needs a problem</span> <span class="s-name">Open</span> <span class="s-note">known gaps, unscheduled</span></th><td class="cell"><ul class="tasks" role="list"><li><div class="task"><span class="t-title">The funnel is written down as a control, not left as an emergent property of two files</span><span class="t-ref">Traces: no entry in docs/risks/</span></div></li></ul></td><td class="cell empty"></td><td class="cell"><ul class="tasks" role="list"><li><div class="task"><span class="t-title">Pushing an explicit feature branch reaches the scorer too</span><span class="t-ref">Traces: known gap</span></div></li></ul></td><td class="cell empty"></td><td class="cell empty"></td></tr></tbody></table></div></div>
+<p class="traces" id="story-map-traces"><span class="tr-group"><strong>Jobs:</strong> <a href="../../jtbd/developer/JTBD-002-ship-with-confidence.proposed.md" class="ref-link">JTBD-002</a>, <a href="../../jtbd/developer/JTBD-001-enforce-governance.proposed.md" class="ref-link">JTBD-001</a>, <a href="../../jtbd/developer/JTBD-005-assess-on-demand.proposed.md" class="ref-link">JTBD-005</a>, <a href="../../jtbd/tech-lead/JTBD-201-restore-service-fast.proposed.md" class="ref-link">JTBD-201</a>, <a href="../../jtbd/developer/JTBD-003-compose-guardrails.proposed.md" class="ref-link">JTBD-003</a></span></p>
   </main>
 
-  <footer>
-    <p class="genfrom">This file is the map. The grid is drawn from the data block below;
-    edit that block, or use <code>wr-itil-story-map-edit</code>, then re-render with
-    <code>wr-itil-render-story-map</code>.</p>
-  </footer>
 
   <script id="story-map-data" type="application/json">
 {
@@ -53,33 +35,24 @@
   "decisionMakers": "Tom Howard",
   "humanOversight": "unconfirmed",
   "traces": {
-    "problems": [
-      "P435",
-      "P208"
-    ],
-    "rfcs": [],
     "jtbd": [
       "JTBD-002",
       "JTBD-001",
       "JTBD-005",
       "JTBD-201",
       "JTBD-003"
-    ],
-    "adrs": [
-      "ADR-102"
     ]
   },
-  "lead": "A story map for the developer who wants work assessed before it leaves their machine. Read across the top for the journey — finish a change, get it assessed, push it, get it through CI, release it. Read down the rows for release bands: what the gate already does, then the stack-neutrality fix, then what is still open. A row read left to right is everything that ships together. Most of this is already live; the value of the map is showing where the funnel still leaks.",
   "backbone": [
     {
       "id": "finish",
       "title": "A. Finish a change",
-      "note": "JTBD-002 — governance cannot be bypassed"
+      "note": "JTBD-002 \u2014 governance cannot be bypassed"
     },
     {
       "id": "assess",
       "title": "B. Get it assessed",
-      "note": "JTBD-005 — assess on demand"
+      "note": "JTBD-005 \u2014 assess on demand"
     },
     {
       "id": "push",
@@ -89,12 +62,12 @@
     {
       "id": "ci",
       "title": "D. Get through CI",
-      "note": "P208 — the observed signal"
+      "note": "P208 \u2014 the observed signal"
     },
     {
       "id": "release",
       "title": "E. Release it",
-      "note": "JTBD-201 — restore service fast"
+      "note": "JTBD-201 \u2014 restore service fast"
     }
   ],
   "releases": [
@@ -131,7 +104,7 @@
       "activity": "assess",
       "release": "live",
       "title": "A score I earned earlier stops counting once the work moves under it",
-      "ref": "TTL + pipeline-state hash — Expires on a timer and on content drift"
+      "ref": "TTL + pipeline-state hash \u2014 Expires on a timer and on content drift"
     },
     {
       "activity": "push",
@@ -155,7 +128,7 @@
       "activity": "ci",
       "release": "live",
       "title": "A green run on the target branch is required before my work ships, not just a good prediction",
-      "ref": "P208 — Fails closed if CI cannot be read"
+      "ref": "P208 \u2014 Fails closed if CI cannot be read"
     },
     {
       "activity": "release",
@@ -167,13 +140,13 @@
       "activity": "release",
       "release": "live",
       "title": "When I am restoring service, the release goes through ahead of the CI check",
-      "ref": "JTBD-201, incident bypass — Single-use, and it is spent whether or not it was needed"
+      "ref": "JTBD-201, incident bypass \u2014 Single-use, and it is spent whether or not it was needed"
     },
     {
       "activity": "release",
       "release": "live",
       "title": "A change that only reduces risk proceeds without a fresh score, until the work moves under it",
-      "ref": "risk-reducing bypass — Revalidates against drift rather than lasting the session"
+      "ref": "risk-reducing bypass \u2014 Revalidates against drift rather than lasting the session"
     },
     {
       "activity": "push",
@@ -199,22 +172,15 @@
       "title": "The funnel is written down as a control, not left as an emergent property of two files",
       "ref": "no entry in docs/risks/"
     }
-  ],
-  "traceProse": {
-    "persona": "developer — the person doing the work, with tech-lead secondary for the incident path. Constraint that binds this map: repo shape varies, so anything naming a specific command must discover it rather than assume it.",
-    "jobs": "JTBD-002 (ship with confidence) is the spine — its outcome that governance cannot be bypassed is what activity C exists to make true. JTBD-005 (assess on demand) is activity B. JTBD-201 (restore service fast) is the incident bypass in activity E. JTBD-001 (enforce governance without slowing down) and JTBD-003 (compose only the guardrails I need) constrain the whole map — JTBD-003 is why the R1 fix is obligatory rather than nice to have.",
-    "problems": "P435 — the gate is hardcoded to this repo's shape, so it over-fires in projects without the pipeline it assumes (the R1 band). P208 — CI status was not checked before scoring, now shipped in the Live band.",
-    "decisions": "The push and release gates, the drift-revalidated bypass markers, and the CI precondition. Note that none of this is recorded as a control in docs/risks/ — the funnel exists only as a property of the dispatch order and one deny branch, which is how it was nearly read as a workflow convention rather than a safety control.",
-    "open": "Whether the concerns on this map and on STORY-MAP-013 ship as one plugin or two is undecided as of 2026-08-05. Both involve blocks, so 'one blocks, the other reports' is not the dividing line. The push to a pipeline-owned branch in activity C has a genuine claim on both maps and is recorded here rather than resolved."
-  }
+  ]
 }
-  </script>
+</script>
   <script id="story-map-status" type="application/json">
 {
   "rows": {
-    "live": "unproposed",
-    "r1": "unproposed",
-    "r2": "unproposed"
+    "live": "untraced",
+    "r1": "untraced",
+    "r2": "untraced"
   },
   "hrefs": {
     "JTBD-005": "../../jtbd/developer/JTBD-005-assess-on-demand.proposed.md",
@@ -224,8 +190,7 @@
     "JTBD-002": "../../jtbd/developer/JTBD-002-ship-with-confidence.proposed.md",
     "JTBD-001": "../../jtbd/developer/JTBD-001-enforce-governance.proposed.md",
     "JTBD-003": "../../jtbd/developer/JTBD-003-compose-guardrails.proposed.md",
-    "ADR-102": "../../decisions/102-story-maps-render-from-json-through-a-canonical-template.proposed.md",
-    "STORY-MAP-013": "STORY-MAP-013-know-what-my-push-did.html"
+    "ADR-102": "../../decisions/102-story-maps-render-from-json-through-a-canonical-template.proposed.md"
   }
 }
   </script>

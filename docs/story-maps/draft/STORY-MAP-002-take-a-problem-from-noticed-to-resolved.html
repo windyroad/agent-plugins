@@ -7,45 +7,27 @@
   <meta name="story-map-id" content="STORY-MAP-002">
   <meta name="status" content="draft">
   <meta name="persona" content="developer">
-  <meta name="problems" content="P170,P251,P314,P371,P399,P390">
-  <meta name="rfcs" content="RFC-003,RFC-005,RFC-047,RFC-001,RFC-002">
+  <meta name="problems" content="P080,P155,P170,P251,P390,P399,P401">
+  <meta name="rfcs" content="RFC-005,RFC-060,RFC-047,RFC-061">
   <meta name="jtbd" content="JTBD-008,JTBD-001,JTBD-006">
-  <meta name="adrs" content="ADR-060,ADR-022,ADR-031,ADR-071,ADR-089,ADR-090">
   <meta name="reported" content="2026-06-29">
   <meta name="decision-makers" content="Tom Howard">
   <meta name="human-oversight" content="confirmed">
-  <meta name="oversight-hash" content="44d198da9b80074ee74a9c61b32a266b5df9b99d9c7702ce6d8b41631c86a015">
+  <meta name="oversight-hash" content="c210411d8a906fdf2bb0d779737c8eec9725c690190cc8daae1c30a8e17bbeaa">
   <link rel="stylesheet" href="../story-map.css">
-  <script src="../story-map.js" defer></script>
 </head>
 <body>
   <main>
     <h1 id="story-map-title">Take a problem from noticed to resolved</h1>
-    <p class="lead" id="story-map-lead">A story map for the developer who has hit a problem and has to see it through. Read across the top for the journey — notice and capture it, find the cause, decompose the fix, build it, land it. Fixing is one step of five, not the whole job: most of what this journey costs is everything around the fix. Read down the rows for the releases. Each row is one set of stories that ships together, which is what an RFC is — a row that a problem has proposed carries an RFC id, and a row nobody has asked for yet is speculative. Two rows are delivered, two are proposed against a problem, and one is drawn but speculative.</p>
-    <ul class="legend" id="story-map-legend" role="list" aria-label="Status legend"></ul>
-    <div id="story-map">
-      <p class="lead">This map's grid has not been drawn. It is built from the data block
-      at the end of this file by <code>story-map.js</code>, which sits alongside the maps —
-      so this message means the script did not load or did not run. The data itself is
-      intact: open this file in a text editor, or use View Source, and read the block with
-      <code>id="story-map-data"</code>.</p>
-    </div>
-    <section class="trace" id="story-map-trace-section" aria-labelledby="trace-h" hidden>
-      <h2 id="trace-h">What this map traces to</h2>
-      <div id="story-map-trace"></div>
-    </section>
+    <div id="story-map"><div class="scroll" tabindex="0" role="region" aria-label="Story map grid"><table class="map"><caption>Take a problem from noticed to resolved — 5 journey activities across 5 releases</caption><thead><tr><td class="corner"></td><th class="act" scope="col">A. Notice and capture <span class="jtbd">JTBD-008 — decompose a fix into coordinated changes</span></th><th class="act" scope="col">B. Find the cause <span class="jtbd">cause known, workaround published</span></th><th class="act" scope="col">C. Decompose the fix <span class="jtbd">map + RFC + stories</span></th><th class="act" scope="col">D. Implement the changes <span class="jtbd">JTBD-006 — progress the backlog while I am away</span></th><th class="act" scope="col">E. Land, release and verify <span class="jtbd">adopter gets the fix</span></th></tr></thead><tbody><tr><th class="slice" scope="row"><span class="badge b-live"><span class="b-glyph" aria-hidden="true">✓</span>Delivered, pre-RFC</span> <span class="s-name">Before the RFC framework</span> <span class="s-note">shipped before fixes were vehicled through an RFC</span><span class="s-problems">closes <a href="../../problems/closed/155-ship-capture-problem-skill.md" class="ref-link">P155</a>, <a href="../../problems/known-error/170-problem-tickets-strain-as-fixes-decompose-into-multiple-coordinated-changes-need-rfc-framework.md" class="ref-link">P170</a></span></th><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-018" data-status="done"><a href="../../stories/done/STORY-018-capture-the-problem-mid-flow.md" class="ref-link"><span class="t-title">Capture the problem in seconds, mid-flow</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>keep a problem from being lost when I hit it mid-flow</div><div class="v-line v-asa"><span class="v-lead">as a </span>developer</div><div class="v-line v-iwant"><span class="v-lead">I want </span>to capture it in seconds — with a real trace — without breaking my current task.</div></div><div class="t-ref">Traces: <a href="../../stories/done/STORY-018-capture-the-problem-mid-flow.md" class="ref-link">STORY-018</a></div></div></li><li><div class="task" data-story-id="STORY-027" data-status="done"><a href="../../stories/done/STORY-027-capture-a-problem-from-an-inbound-channel.md" class="ref-link"><span class="t-title">Capture a problem reported through an inbound channel</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>fix the problems real users are actually hitting — not only the ones I happen to notice myself</div><div class="v-line v-asa"><span class="v-lead">as a </span>maintainer</div><div class="v-line v-iwant"><span class="v-lead">I want </span>to capture a problem reported through an inbound channel (issue, discussion, or security advisory) and triage it into the backlog.</div></div><div class="t-ref">Traces: <a href="../../stories/done/STORY-027-capture-a-problem-from-an-inbound-channel.md" class="ref-link">STORY-027</a></div></div></li></ul></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-019" data-status="done"><a href="../../stories/done/STORY-019-record-root-cause-and-workaround.md" class="ref-link"><span class="t-title">Find root cause and workaround, and reach Known Error</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>know what to actually fix — the *root cause*, not a symptom — and to mitigate the impact while that fix is built</div><div class="v-line v-asa"><span class="v-lead">as a </span>developer</div><div class="v-line v-iwant"><span class="v-lead">I want </span>to use RCA techniques (like 5 Whys) to find a problem's root cause and a workaround, reaching Known Error.</div></div><div class="t-ref">Traces: <a href="../../stories/done/STORY-019-record-root-cause-and-workaround.md" class="ref-link">STORY-019</a></div></div></li></ul></td><td class="cell empty"></td><td class="cell empty"></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-023" data-status="done"><a href="../../stories/done/STORY-023-ship-verify-and-close-with-a-real-trace.md" class="ref-link"><span class="t-title">Ship, verify, and close the problem with a real trace</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>the person who hit the problem actually gets it solved — a verified fix in a published release, not just merged code</div><div class="v-line v-asa"><span class="v-lead">as a </span>developer</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the coordinated fix to land, release, and be verified, closing the problem.</div></div><div class="t-ref">Traces: <a href="../../stories/done/STORY-023-ship-verify-and-close-with-a-real-trace.md" class="ref-link">STORY-023</a></div></div></li></ul></td></tr><tr><th class="slice" scope="row"><span class="badge b-live"><span class="b-glyph" aria-hidden="true">✓</span>RFC-005</span> <span class="s-name">Decomposition machinery</span> <span class="s-note">map, stories and ratification</span><span class="s-problems">closes <a href="../../problems/known-error/170-problem-tickets-strain-as-fixes-decompose-into-multiple-coordinated-changes-need-rfc-framework.md" class="ref-link">P170</a></span></th><td class="cell empty"></td><td class="cell empty"></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-020" data-status="done"><a href="../../stories/done/STORY-020-start-the-jobs-story-map.md" class="ref-link"><span class="t-title">Start the job's story map, creating it if the job has none</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>see and reason about a coordinated fix as one coherent picture — its whole shape at a glance, what's MVP versus later, where the gaps are — instead of a scattered pile of changes buried in a ticket</div><div class="v-line v-asa"><span class="v-lead">as a </span>developer taking on the first coordinated fix for a job that has no map yet</div><div class="v-line v-iwant"><span class="v-lead">I want </span>a story map <strong>started for it</strong>.</div></div><div class="t-ref">Traces: <a href="../../stories/done/STORY-020-start-the-jobs-story-map.md" class="ref-link">STORY-020</a></div></div></li><li><div class="task" data-story-id="STORY-021" data-status="done"><a href="../../stories/done/STORY-021-add-the-fixs-stories-to-the-map.md" class="ref-link"><span class="t-title">Add the fix's new stories to the job's story map</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>no part of a coordinated fix slips through the cracks — each change captured as its own trackable, prioritisable, reviewable piece rather than lost in a blob</div><div class="v-line v-asa"><span class="v-lead">as a </span>developer decomposing a fix</div><div class="v-line v-iwant"><span class="v-lead">I want </span>to <strong>add the fix's stories to the job's story map</strong>.</div></div><div class="t-ref">Traces: <a href="../../stories/done/STORY-021-add-the-fixs-stories-to-the-map.md" class="ref-link">STORY-021</a></div></div></li><li><div class="task" data-story-id="STORY-022" data-status="done"><a href="../../stories/done/STORY-022-ratify-the-story-map-and-its-stories.md" class="ref-link"><span class="t-title">Ratify the map and its stories after any change, before building on them</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>trust that a fix is built on a map a human actually reviewed — not one that quietly drifted or was auto-generated and never checked</div><div class="v-line v-asa"><span class="v-lead">as a </span>maintainer</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the map <strong>and each story on it</strong> to require <strong>re-ratification after any change</strong> before an RFC can rely on them.</div></div><div class="t-ref">Traces: <a href="../../stories/done/STORY-022-ratify-the-story-map-and-its-stories.md" class="ref-link">STORY-022</a>, <a href="../../decisions/090-story-map-and-story-human-oversight.proposed.md" class="ref-link">ADR-090</a></div></div></li><li><div class="task" data-story-id="STORY-024" data-status="done"><a href="../../stories/done/STORY-024-reuse-stories-already-on-the-map.md" class="ref-link"><span class="t-title">Reuse stories already on the map when the fix touches existing ones</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>the map keeps telling the truth — one story per capability, not confusing near-duplicates — and I don't redo work already captured</div><div class="v-line v-asa"><span class="v-lead">as a </span>developer decomposing a later fix</div><div class="v-line v-iwant"><span class="v-lead">I want </span>to <strong>reuse the stories on the map</strong> the fix touches.</div></div><div class="t-ref">Traces: <a href="../../stories/done/STORY-024-reuse-stories-already-on-the-map.md" class="ref-link">STORY-024</a></div></div></li><li><div class="task" data-story-id="STORY-025" data-status="done"><a href="../../stories/done/STORY-025-slice-the-fixs-stories-into-releases.md" class="ref-link"><span class="t-title">Slice the fix's stories into releases, smallest useful first</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>users get the important part sooner, and work I defer stays visible instead of being quietly dropped</div><div class="v-line v-asa"><span class="v-lead">as a </span>developer</div><div class="v-line v-iwant"><span class="v-lead">I want </span>to <strong>slice the fix's stories into releases</strong> (MVP first).</div></div><div class="t-ref">Traces: <a href="../../stories/done/STORY-025-slice-the-fixs-stories-into-releases.md" class="ref-link">STORY-025</a></div></div></li></ul></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-026" data-status="done"><a href="../../stories/done/STORY-026-work-the-rfcs-stories-one-at-a-time.md" class="ref-link"><span class="t-title">Work the RFC's stories one at a time</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>deliver the value of each story in turn — every one an INVEST-valuable increment that moves the problem toward fixed</div><div class="v-line v-asa"><span class="v-lead">as a </span>developer implementing a decomposed fix</div><div class="v-line v-iwant"><span class="v-lead">I want </span>to work the RFC's stories one at a time.</div></div><div class="t-ref">Traces: <a href="../../stories/done/STORY-026-work-the-rfcs-stories-one-at-a-time.md" class="ref-link">STORY-026</a></div></div></li></ul></td><td class="cell empty"></td></tr><tr><th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>RFC-060</span> <span class="s-name">Propose before you build</span> <span class="s-note">the row IS the RFC — drawing it is what allocates the identity</span><span class="s-problems">closes <a href="../../problems/known-error/251-rfc-first-trace-invariant-not-enforced-fixes-start-without-rfc-story-map-or-jtbd-trace.md" class="ref-link">P251</a>, <a href="../../problems/open/399-adr-073-auto-create-emits-skeleton-rfc-should-author-full-rfc.md" class="ref-link">P399</a></span></th><td class="cell empty"></td><td class="cell empty"></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-015" data-status="draft"><a href="../../stories/draft/STORY-015-rfc-authoring-is-pre-implementation-story-map.md" class="ref-link"><span class="t-title">Propose the release rows against the problem before writing code</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>fix the problem — and keep a single, traceable catalogue of the work that fix takes, tied back to the problem it solves</div><div class="v-line v-asa"><span class="v-lead">as a </span>maintainer working a Known Error</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the fix proposed as <strong>one or more release rows on a story map</strong>, recorded on the problem ticket, before any code is written. A release row is the RFC: the set of stories that ship together. There is no separate RFC document to author, so &quot;the RFC is written first&quot; means &quot;the rows are drawn and proposed first&quot;.</div></div><div class="t-ref">Traces: <a href="../../stories/draft/STORY-015-rfc-authoring-is-pre-implementation-story-map.md" class="ref-link">STORY-015</a>, <a href="../../problems/known-error/251-rfc-first-trace-invariant-not-enforced-fixes-start-without-rfc-story-map-or-jtbd-trace.md" class="ref-link">P251</a>, <a href="../../problems/open/399-adr-073-auto-create-emits-skeleton-rfc-should-author-full-rfc.md" class="ref-link">P399</a></div></div></li></ul></td><td class="cell empty"></td><td class="cell empty"></td></tr><tr><th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>RFC-047</span> <span class="s-name">Unattended drain</span> <span class="s-note">anchored by the native goal evaluator</span><span class="s-problems">closes <a href="../../problems/verifying/390-agent-declares-all-done-prematurely-while-actionable-backlog-remains.md" class="ref-link">P390</a></span></th><td class="cell empty"></td><td class="cell empty"></td><td class="cell empty"></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-040" data-status="draft"><a href="../../stories/draft/STORY-040-afk-loop-anchored-with-native-goal-external-evaluator.md" class="ref-link"><span class="t-title">Leave the backlog draining while I am away</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>trust that an AFK backlog drain only stops when the backlog is genuinely empty</div><div class="v-line v-asa"><span class="v-lead">as a </span>developer running `/wr-itil:work-problems` while away</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the loop anchored with Claude Code's native `/goal` external evaluator — a fresh model judges the completion condition against printed transcript evidence each turn, so the working agent can no longer rationalise a premature `ALL_DONE` (the P390 failure the shipped Gate (0) self-assessment could not prevent).</div></div><div class="t-ref">Traces: <a href="../../stories/draft/STORY-040-afk-loop-anchored-with-native-goal-external-evaluator.md" class="ref-link">STORY-040</a></div></div></li></ul></td><td class="cell empty"></td></tr><tr><th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>RFC-061</span> <span class="s-name">Close the reporter loop</span> <span class="s-note">lifecycle transitions never reach the person who reported it</span><span class="s-problems">closes <a href="../../problems/verifying/080-no-bidirectional-update-of-upstream-reported-problems.md" class="ref-link">P080</a>, <a href="../../problems/known-error/170-problem-tickets-strain-as-fixes-decompose-into-multiple-coordinated-changes-need-rfc-framework.md" class="ref-link">P170</a>, <a href="../../problems/open/401-capture-persona-jtbd-shoehorns-or-discards-instead-of-interviewing.md" class="ref-link">P401</a></span></th><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-028" data-status="draft"><a href="../../stories/draft/STORY-028-acknowledge-the-inbound-report.md" class="ref-link"><span class="t-title">Acknowledge the report when it is captured</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>the person who reported the problem knows they were heard and it's being handled — instead of wondering whether it vanished into the void</div><div class="v-line v-asa"><span class="v-lead">as a </span>maintainer</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the inbound channel updated to acknowledge the report when it's captured.</div></div><div class="t-ref">Traces: <a href="../../stories/draft/STORY-028-acknowledge-the-inbound-report.md" class="ref-link">STORY-028</a></div></div></li></ul></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-032" data-status="draft"><a href="../../stories/draft/STORY-032-triage-an-inbound-reports-disposition.md" class="ref-link"><span class="t-title">Triage the report: accept it, elicit a new job, or decline it</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>the software's scope stays a deliberate choice — accepting a report that fits an existing job, or a new job I decide is worth supporting, and declining one I choose not to</div><div class="v-line v-asa"><span class="v-lead">as a </span>maintainer triaging an *external* report</div><div class="v-line v-iwant"><span class="v-lead">I want </span>to settle its disposition after interviewing me: accept, create-a-new-job-and-accept, or decline (nicely).</div></div><div class="t-ref">Traces: <a href="../../stories/draft/STORY-032-triage-an-inbound-reports-disposition.md" class="ref-link">STORY-032</a></div></div></li><li><div class="task" data-story-id="STORY-029" data-status="draft"><a href="../../stories/draft/STORY-029-share-the-workaround-with-the-reporter.md" class="ref-link"><span class="t-title">Share the workaround with the reporter</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>the person hitting the problem can unblock themselves now — rather than waiting idle for the full fix</div><div class="v-line v-asa"><span class="v-lead">as a </span>maintainer</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the documented workaround posted back to the reporter's channel once we reach Known Error.</div></div><div class="t-ref">Traces: <a href="../../stories/draft/STORY-029-share-the-workaround-with-the-reporter.md" class="ref-link">STORY-029</a></div></div></li></ul></td><td class="cell empty"></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-030" data-status="draft"><a href="../../stories/draft/STORY-030-tell-the-reporter-a-fix-is-underway.md" class="ref-link"><span class="t-title">Tell the reporter a fix is underway</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>the reporter knows the fix is really being worked — not stalled or forgotten, so they stay engaged instead of escalating or re-reporting</div><div class="v-line v-asa"><span class="v-lead">as a </span>maintainer</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the channel updated when a fix is underway (an RFC is accepted / implementation has started).</div></div><div class="t-ref">Traces: <a href="../../stories/draft/STORY-030-tell-the-reporter-a-fix-is-underway.md" class="ref-link">STORY-030</a></div></div></li></ul></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-031" data-status="draft"><a href="../../stories/draft/STORY-031-tell-the-reporter-released-and-close-the-loop.md" class="ref-link"><span class="t-title">Tell the reporter it is released, verify, and close the loop</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>the person who reported the problem gets the resolution — knows the fix shipped, can confirm it works for them, and sees the loop closed rather than left hanging</div><div class="v-line v-asa"><span class="v-lead">as a </span>maintainer</div><div class="v-line v-iwant"><span class="v-lead">I want </span>to tell them it's released and close the channel on their confirmation.</div></div><div class="t-ref">Traces: <a href="../../stories/draft/STORY-031-tell-the-reporter-released-and-close-the-loop.md" class="ref-link">STORY-031</a></div></div></li></ul></td></tr></tbody></table></div></div>
+<p class="traces" id="story-map-traces"><span class="tr-group"><strong>Jobs:</strong> <a href="../../jtbd/developer/JTBD-008-decompose-fix-into-coordinated-changes.proposed.md" class="ref-link">JTBD-008</a>, <a href="../../jtbd/developer/JTBD-001-enforce-governance.proposed.md" class="ref-link">JTBD-001</a>, <a href="../../jtbd/developer/JTBD-006-work-backlog-afk.proposed.md" class="ref-link">JTBD-006</a></span></p>
   </main>
 
-  <footer>
-    <p class="genfrom">This file is the map. The grid is drawn from the data block below;
-    edit that block, or use <code>wr-itil-story-map-edit</code>, then re-render with
-    <code>wr-itil-render-story-map</code>.</p>
-  </footer>
 
   <script id="story-map-data" type="application/json">
 {
   "humanOversight": "confirmed",
-  "oversightHash": "44d198da9b80074ee74a9c61b32a266b5df9b99d9c7702ce6d8b41631c86a015",
+  "oversightHash": "c210411d8a906fdf2bb0d779737c8eec9725c690190cc8daae1c30a8e17bbeaa",
   "storyMapId": "STORY-MAP-002",
   "title": "Take a problem from noticed to resolved",
   "status": "draft",
@@ -53,36 +35,12 @@
   "reported": "2026-06-29",
   "decisionMakers": "Tom Howard",
   "traces": {
-    "problems": [
-      "P170",
-      "P251",
-      "P314",
-      "P371",
-      "P399",
-      "P390"
-    ],
-    "rfcs": [
-      "RFC-003",
-      "RFC-005",
-      "RFC-047",
-      "RFC-001",
-      "RFC-002"
-    ],
     "jtbd": [
       "JTBD-008",
       "JTBD-001",
       "JTBD-006"
-    ],
-    "adrs": [
-      "ADR-060",
-      "ADR-022",
-      "ADR-031",
-      "ADR-071",
-      "ADR-089",
-      "ADR-090"
     ]
   },
-  "lead": "A story map for the developer who has hit a problem and has to see it through. Read across the top for the journey — notice and capture it, find the cause, decompose the fix, build it, land it. Fixing is one step of five, not the whole job: most of what this journey costs is everything around the fix. Read down the rows for the releases. Each row is one set of stories that ships together, which is what an RFC is — a row that a problem has proposed carries an RFC id, and a row nobody has asked for yet is speculative. Two rows are delivered, two are proposed against a problem, and one is drawn but speculative.",
   "backbone": [
     {
       "id": "notice",
@@ -115,47 +73,32 @@
       "id": "pre-rfc",
       "name": "Before the RFC framework",
       "rfc": null,
-      "problems": [
-        "P170"
-      ],
-      "note": "shipped before fixes were vehicled through an RFC"
+      "note": "shipped before fixes were vehicled through an RFC",
+      "preRfc": true
     },
     {
       "id": "rfc-005",
       "name": "Decomposition machinery",
       "rfc": "RFC-005",
-      "problems": [
-        "P251",
-        "P314",
-        "P371",
-        "P399"
-      ],
       "note": "map, stories and ratification"
     },
     {
       "id": "rfc-060",
       "name": "Propose before you build",
       "rfc": "RFC-060",
-      "problems": [
-        "P399"
-      ],
       "note": "the row IS the RFC — drawing it is what allocates the identity"
     },
     {
       "id": "rfc-047",
       "name": "Unattended drain",
       "rfc": "RFC-047",
-      "problems": [
-        "P390"
-      ],
       "note": "anchored by the native goal evaluator"
     },
     {
-      "id": "reporter-loop",
+      "id": "rfc-061",
       "name": "Close the reporter loop",
-      "rfc": null,
-      "problems": [],
-      "note": "no problem has proposed this yet"
+      "rfc": "RFC-061",
+      "note": "lifecycle transitions never reach the person who reported it"
     }
   ],
   "tasks": [
@@ -238,35 +181,35 @@
     },
     {
       "activity": "notice",
-      "release": "reporter-loop",
+      "release": "rfc-061",
       "title": "Acknowledge the report when it is captured",
       "storyId": "STORY-028",
       "ref": "STORY-028"
     },
     {
       "activity": "cause",
-      "release": "reporter-loop",
+      "release": "rfc-061",
       "title": "Triage the report: accept it, elicit a new job, or decline it",
       "storyId": "STORY-032",
       "ref": "STORY-032"
     },
     {
       "activity": "cause",
-      "release": "reporter-loop",
+      "release": "rfc-061",
       "title": "Share the workaround with the reporter",
       "storyId": "STORY-029",
       "ref": "STORY-029"
     },
     {
       "activity": "implement",
-      "release": "reporter-loop",
+      "release": "rfc-061",
       "title": "Tell the reporter a fix is underway",
       "storyId": "STORY-030",
       "ref": "STORY-030"
     },
     {
       "activity": "land",
-      "release": "reporter-loop",
+      "release": "rfc-061",
       "title": "Tell the reporter it is released, verify, and close the loop",
       "storyId": "STORY-031",
       "ref": "STORY-031"
@@ -278,14 +221,7 @@
       "storyId": "STORY-015",
       "ref": "STORY-015, P251, P399"
     }
-  ],
-  "traceProse": {
-    "persona": "developer — working a problem that turns out to need several coordinated changes rather than one commit.",
-    "jobs": "JTBD-008 (decompose a fix into coordinated changes) is the spine. JTBD-001 (enforce governance without slowing down) constrains the decompose column — the ratification step must not become friction. JTBD-006 (progress the backlog while I am away) drives the unattended drain in the implement column.",
-    "problems": "P170 (problem tickets strain when a fix needs multiple coordinated changes), P251, P314, P371, P399, P390.",
-    "decisions": "ADR-060 (problem-RFC-story framework), ADR-090 (drift-invalidated ratification), ADR-089, ADR-071, ADR-031, ADR-022. The tooling this journey runs on was itself built as part of it: capture, list, manage and reconcile for both the story and story-map tiers, the traversal from a problem into its RFC's stories, RFC story ordering, and the gate exemptions that let the framework's own artefacts be authored without tripping the edit gates. Delivered across RFC-001, RFC-002 and RFC-003.",
-    "open": "Re-encoded onto the canonical grid on 2026-08-05 from a prior CSS-grid encoding; all 17 stories preserved. Release bands were derived from story status on 2026-08-06, and re-drawn on 2026-08-07 as RFCs: a row is now the set of stories that ship together, which is what an RFC already was. RFC-005 had to split — six of its stories shipped and one did not, so it was never one release; the remainder sits in its own row awaiting an RFC identity. STORY-MAP-001 was retired into this map on 2026-08-07: it listed the same capabilities from the tooling's side, which is a command inventory rather than a journey anybody walks."
-  }
+  ]
 }
   </script>
   <script id="story-map-status" type="application/json">
@@ -295,8 +231,38 @@
     "rfc-005": "delivered",
     "rfc-060": "proposed",
     "rfc-047": "proposed",
-    "reporter-loop": "unproposed"
+    "rfc-061": "proposed"
   },
+  "rowProblems": {
+    "pre-rfc": [
+      "P155",
+      "P170"
+    ],
+    "rfc-005": [
+      "P170"
+    ],
+    "rfc-060": [
+      "P251",
+      "P399"
+    ],
+    "rfc-047": [
+      "P390"
+    ],
+    "rfc-061": [
+      "P080",
+      "P170",
+      "P401"
+    ]
+  },
+  "mapProblems": [
+    "P080",
+    "P155",
+    "P170",
+    "P251",
+    "P390",
+    "P399",
+    "P401"
+  ],
   "status": {
     "STORY-018": "done",
     "STORY-019": "done",
@@ -677,18 +643,14 @@
     "ADR-090": "../../decisions/090-story-map-and-story-human-oversight.proposed.md",
     "P251": "../../problems/known-error/251-rfc-first-trace-invariant-not-enforced-fixes-start-without-rfc-story-map-or-jtbd-trace.md",
     "P399": "../../problems/open/399-adr-073-auto-create-emits-skeleton-rfc-should-author-full-rfc.md",
-    "P170": "../../problems/known-error/170-problem-tickets-strain-as-fixes-decompose-into-multiple-coordinated-changes-need-rfc-framework.md",
-    "P314": "../../problems/verifying/314-rework-i13-gate-placement-and-auto-create-per-corrected-known-error-semantics.md",
-    "P371": "../../problems/closed/371-i13-gate-auto-creates-new-rfc-instead-of-wiring-existing-fix-vehicle-trace.md",
-    "P390": "../../problems/verifying/390-agent-declares-all-done-prematurely-while-actionable-backlog-remains.md",
     "JTBD-008": "../../jtbd/developer/JTBD-008-decompose-fix-into-coordinated-changes.proposed.md",
     "JTBD-001": "../../jtbd/developer/JTBD-001-enforce-governance.proposed.md",
     "JTBD-006": "../../jtbd/developer/JTBD-006-work-backlog-afk.proposed.md",
-    "ADR-060": "../../decisions/060-problem-rfc-story-framework-with-mandatory-problem-trace-and-unified-problem-ontology.accepted.md",
-    "ADR-022": "../../decisions/022-problem-lifecycle-verification-pending-status.proposed.md",
-    "ADR-031": "../../decisions/031-problem-ticket-directory-layout.accepted.md",
-    "ADR-071": "../../decisions/071-every-fix-goes-through-an-rfc.proposed.md",
-    "ADR-089": "../../decisions/089-every-rfc-has-at-least-one-story.proposed.md"
+    "P155": "../../problems/closed/155-ship-capture-problem-skill.md",
+    "P170": "../../problems/known-error/170-problem-tickets-strain-as-fixes-decompose-into-multiple-coordinated-changes-need-rfc-framework.md",
+    "P390": "../../problems/verifying/390-agent-declares-all-done-prematurely-while-actionable-backlog-remains.md",
+    "P080": "../../problems/verifying/080-no-bidirectional-update-of-upstream-reported-problems.md",
+    "P401": "../../problems/open/401-capture-persona-jtbd-shoehorns-or-discards-instead-of-interviewing.md"
   }
 }
   </script>

@@ -8,39 +8,21 @@
   <meta name="status" content="draft">
   <meta name="persona" content="plugin-user">
   <meta name="secondary-persona" content="plugin-developer">
-  <meta name="problems" content="P424,P435">
+  <meta name="problems" content="">
   <meta name="rfcs" content="RFC-054">
   <meta name="jtbd" content="JTBD-303,JTBD-003,JTBD-302,JTBD-101">
-  <meta name="adrs" content="">
   <meta name="reported" content="2026-07-26">
   <meta name="decision-makers" content="Tom Howard">
   <meta name="human-oversight" content="unconfirmed">
   <link rel="stylesheet" href="../story-map.css">
-  <script src="../story-map.js" defer></script>
 </head>
 <body>
   <main>
     <h1 id="story-map-title">Have a plugin behave like a guest in my repository</h1>
-    <p class="lead" id="story-map-lead">A story map for the adopter who installs a @windyroad plugin into a repository it did not come from. Read across the top for their journey — they choose what to install, read what it claims, let it generate into their tree, run into its rules, and get a fix that arrives with an upgrade. Read down the rows for release bands. The empty cells are where the plugin currently behaves like it owns the place.</p>
-    <ul class="legend" id="story-map-legend" role="list" aria-label="Status legend"></ul>
-    <div id="story-map">
-      <p class="lead">This map's grid has not been drawn. It is built from the data block
-      at the end of this file by <code>story-map.js</code>, which sits alongside the maps —
-      so this message means the script did not load or did not run. The data itself is
-      intact: open this file in a text editor, or use View Source, and read the block with
-      <code>id="story-map-data"</code>.</p>
-    </div>
-    <section class="trace" id="story-map-trace-section" aria-labelledby="trace-h" hidden>
-      <h2 id="trace-h">What this map traces to</h2>
-      <div id="story-map-trace"></div>
-    </section>
+    <div id="story-map"><div class="scroll" tabindex="0" role="region" aria-label="Story map grid"><table class="map"><caption>Have a plugin behave like a guest in my repository — 5 journey activities across 2 releases</caption><thead><tr><td class="corner"></td><th class="act" scope="col">A. Choose what to install <span class="jtbd">JTBD-003 — compose only the guardrails I need</span></th><th class="act" scope="col">B. Read what it claims <span class="jtbd">JTBD-302 — trust the README describes what I installed</span></th><th class="act" scope="col">C. Let it write into my tree <span class="jtbd">JTBD-303 — generated content respects my conventions</span></th><th class="act" scope="col">D. Hit one of its rules</th><th class="act" scope="col">E. Get a fix on upgrade</th></tr></thead><tbody><tr><th class="slice" scope="row"><span class="badge b-defect"><span class="b-glyph" aria-hidden="true">⚠</span>⚠ Needs an RFC id</span> <span class="s-name">Now</span> <span class="s-note">stories exist</span><span class="s-problems">closes <a href="../../problems/known-error/424-governance-tooling-emits-em-dashes-breaking-adopter-no-em-dash-hooks.md" class="ref-link">P424</a></span></th><td class="cell empty"></td><td class="cell empty"></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-051" data-rfc="RFC-054" data-jtbd="JTBD-303" data-status="draft"><a href="../../stories/draft/STORY-051-have-generated-content-respect-my-projects-conventions.md" class="ref-link"><span class="t-title">Generated content defaults to the most portable form, so my own policy hooks do not fire on text I did not write</span></a><span class="t-value"><span class="v-line v-inorder"><span class="v-lead">In order to </span>keep the content policy my project enforces — so that my own hooks stop firing on text I did not write and cannot reach</span><span class="v-line v-asa"><span class="v-lead">as a </span>adopter of the plugin suite</span><span class="v-line v-iwant"><span class="v-lead">I want </span>the content these plugins generate into my repository to arrive in the most portable form available, and to keep arriving that way on every regeneration. The title names the witnessed character, the U+2014 em-dash, because that is what five inbound reports raised. The criteria below cover the behaviour rather than the glyph: a generated artefact should not carry a character class a stricter project than ours forbids, whatever that class turns out to be next.</span></span><span class="t-ref">Traces: <a href="../../stories/draft/STORY-051-have-generated-content-respect-my-projects-conventions.md" class="ref-link">STORY-051</a>, <a href="../../problems/known-error/424-governance-tooling-emits-em-dashes-breaking-adopter-no-em-dash-hooks.md" class="ref-link">P424</a></span></div></li></ul></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-jtbd="JTBD-003"><span class="t-title">Clear any block the plugin raises with a command my repository actually has</span><span class="t-ref">Traces: <a href="../../problems/open/435-risk-scorer-gates-hardcoded-to-home-repo-shape-push-gate-overfire-external-comms-underfire.md" class="ref-link">P435</a> (inbound #235) — see <a href="STORY-MAP-013-know-what-my-push-did.html" class="ref-link">STORY-MAP-013</a></span></div></li></ul></td><td class="cell empty"></td></tr><tr><th class="slice" scope="row"><span class="badge b-defect"><span class="b-glyph" aria-hidden="true">⚠</span>⚠ Untraced — needs a problem</span> <span class="s-name">Open</span> <span class="s-note">unbuilt</span></th><td class="cell"><ul class="tasks" role="list"><li><div class="task"><span class="t-title">I install the one guardrail I want without dragging in the rest of the suite</span><span class="t-ref">Traces: <a href="../../jtbd/developer/JTBD-003-compose-guardrails.proposed.md" class="ref-link">JTBD-003</a>, no story yet</span></div></li></ul></td><td class="cell"><ul class="tasks" role="list"><li><div class="task"><span class="t-title">Read a README that describes the version I just installed</span><span class="t-ref">Traces: <a href="../../jtbd/plugin-user/JTBD-302-trust-readme-describes-installed-behaviour.proposed.md" class="ref-link">JTBD-302</a>, no story yet</span></div></li></ul></td><td class="cell empty"></td><td class="cell empty"></td><td class="cell"><ul class="tasks" role="list"><li><div class="task"><span class="t-title">Get the fix by upgrading, without patching a cached plugin myself</span><span class="t-ref">Traces: <a href="../../jtbd/plugin-user/JTBD-303-generated-output-respects-adopter-conventions.proposed.md" class="ref-link">JTBD-303</a>, no story yet</span></div></li></ul></td></tr></tbody></table></div></div>
+<p class="traces" id="story-map-traces"><span class="tr-group"><strong>Jobs:</strong> <a href="../../jtbd/plugin-user/JTBD-303-generated-output-respects-adopter-conventions.proposed.md" class="ref-link">JTBD-303</a>, <a href="../../jtbd/developer/JTBD-003-compose-guardrails.proposed.md" class="ref-link">JTBD-003</a>, <a href="../../jtbd/plugin-user/JTBD-302-trust-readme-describes-installed-behaviour.proposed.md" class="ref-link">JTBD-302</a>, <a href="../../jtbd/plugin-developer/JTBD-101-extend-suite.proposed.md" class="ref-link">JTBD-101</a></span></p>
   </main>
 
-  <footer>
-    <p class="genfrom">This file is the map. The grid is drawn from the data block below;
-    edit that block, or use <code>wr-itil-story-map-edit</code>, then re-render with
-    <code>wr-itil-render-story-map</code>.</p>
-  </footer>
 
   <script id="story-map-data" type="application/json">
 {
@@ -53,37 +35,28 @@
   "decisionMakers": "Tom Howard",
   "humanOversight": "unconfirmed",
   "traces": {
-    "problems": [
-      "P424",
-      "P435"
-    ],
-    "rfcs": [
-      "RFC-054"
-    ],
     "jtbd": [
       "JTBD-303",
       "JTBD-003",
       "JTBD-302",
       "JTBD-101"
-    ],
-    "adrs": []
+    ]
   },
-  "lead": "A story map for the adopter who installs a @windyroad plugin into a repository it did not come from. Read across the top for their journey — they choose what to install, read what it claims, let it generate into their tree, run into its rules, and get a fix that arrives with an upgrade. Read down the rows for release bands. The empty cells are where the plugin currently behaves like it owns the place.",
   "backbone": [
     {
       "id": "choose",
       "title": "A. Choose what to install",
-      "note": "JTBD-003 — compose only the guardrails I need"
+      "note": "JTBD-003 \u2014 compose only the guardrails I need"
     },
     {
       "id": "trust",
       "title": "B. Read what it claims",
-      "note": "JTBD-302 — trust the README describes what I installed"
+      "note": "JTBD-302 \u2014 trust the README describes what I installed"
     },
     {
       "id": "generate",
       "title": "C. Let it write into my tree",
-      "note": "JTBD-303 — generated content respects my conventions"
+      "note": "JTBD-303 \u2014 generated content respects my conventions"
     },
     {
       "id": "collide",
@@ -99,8 +72,9 @@
   "releases": [
     {
       "id": "r1",
-      "name": "Now",
-      "note": "stories exist"
+      "name": "Generated content is portable by default",
+      "note": "stories exist",
+      "rfc": "RFC-054"
     },
     {
       "id": "r2",
@@ -123,7 +97,7 @@
       "release": "r1",
       "title": "Clear any block the plugin raises with a command my repository actually has",
       "jtbd": "JTBD-003",
-      "ref": "P435 (inbound #235) — see STORY-MAP-013"
+      "ref": "P435 (inbound #235) \u2014 see STORY-MAP-013"
     },
     {
       "activity": "choose",
@@ -143,22 +117,23 @@
       "title": "Get the fix by upgrading, without patching a cached plugin myself",
       "ref": "JTBD-303, no story yet"
     }
-  ],
-  "traceProse": {
-    "persona": "plugin-user — an adopter with low context on this repository's internals, who is not expected to read our ADRs or patch a cached plugin.",
-    "jobs": "JTBD-303 (generated content respects my conventions) is the spine. JTBD-003 (compose only the guardrails I need) governs the choosing and the blocking. JTBD-302 (trust the README describes what I installed) governs the reading. JTBD-101 covers the plugin-developer side.",
-    "problems": "P424 — generated content carries characters an adopter's own policy hook rejects, re-introduced on every regeneration. P435 — a gate hardcoded to this repository's shape blocks adopters with no way through.",
-    "decisions": "None yet.",
-    "open": "Widened on 2026-08-05 from a single-story stub into the adopter's whole journey; the prior map held one card about generated characters. Three activities carry no story. The blocking card in D also appears on STORY-MAP-013, seen there from the author's side."
-  }
+  ]
 }
-  </script>
+</script>
   <script id="story-map-status" type="application/json">
 {
   "rows": {
-    "r1": "unproposed",
-    "r2": "unproposed"
+    "r1": "proposed",
+    "r2": "untraced"
   },
+  "rowProblems": {
+    "r1": [
+      "P424"
+    ]
+  },
+  "mapProblems": [
+    "P424"
+  ],
   "status": {
     "STORY-051": "draft"
   },

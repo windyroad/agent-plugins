@@ -6,7 +6,7 @@ decision-makers: [Tom Howard]
 problems: [P431]
 jtbd: [JTBD-006]
 rfcs: [RFC-051]
-story-maps: [STORY-MAP-006]
+story-maps: [STORY-MAP-004, STORY-MAP-006]
 estimated-effort: S
 ---
 

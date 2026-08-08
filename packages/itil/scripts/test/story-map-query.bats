@@ -27,16 +27,16 @@ setup() {
   MARK="$REPO_ROOT/packages/itil/scripts/mark-story-oversight-confirmed.sh"
   TMP="$BATS_TEST_TMPDIR/work"
   mkdir -p "$TMP/docs/story-maps/draft" "$TMP/docs/stories/done"
-  printf -- '---\nstatus: done\n---\n# STORY-950\n' > "$TMP/docs/stories/done/STORY-950-a.md"
+  printf -- '---\nstatus: done\nproblems: [P900]\n---\n# STORY-950\n' > "$TMP/docs/stories/done/STORY-950-a.md"
 
   _map() {
     local id="$1" tasks="$2"
     {
       printf '<script id="story-map-data" type="application/json">\n'
       printf '{ "storyMapId": "%s", "title": "Map %s", "status": "draft",\n' "$id" "$id"
-      printf '  "traces": { "problems": ["P900"], "jtbd": ["JTBD-900"], "rfcs": [], "adrs": [] },\n'
+      printf '  "traces": { "jtbd": ["JTBD-900"] },\n'
       printf '  "backbone": [ { "id": "a", "title": "A. Notice" }, { "id": "b", "title": "B. Decide" } ],\n'
-      printf '  "releases": [ { "id": "live", "name": "Existing", "badge": "Live" } ],\n'
+      printf '  "releases": [ { "id": "live", "name": "Existing", "rfc": "RFC-900" } ],\n'
       printf '  "tasks": [ %s ] }\n' "$tasks"
       printf '</script>\n'
     } > "$TMP/docs/story-maps/draft/${id}-x.html"
@@ -46,7 +46,7 @@ setup() {
   _map "STORY-MAP-941" ''
 }
 
-@test "list returns every map with id, title, status and traces" {
+@test "list returns every map with id, title, status, jobs and derived problems" {
   run bash -c "cd '$TMP' && '$QUERY' list | node -e \"
     const d=JSON.parse(require('fs').readFileSync(0,'utf8'));
     process.stdout.write(d.map(m=>m.storyMapId).join(','));\""
@@ -55,8 +55,10 @@ setup() {
   run bash -c "cd '$TMP' && '$QUERY' list | node -e \"
     const d=JSON.parse(require('fs').readFileSync(0,'utf8'));
     const m=d.find(x=>x.storyMapId==='STORY-MAP-940');
-    process.stdout.write([m.title,m.status,m.traces.problems[0]].join('|'));\""
-  [ "$output" = "Map STORY-MAP-940|draft|P900" ]
+    process.stdout.write([m.title,m.status,m.traces.jtbd[0],m.problems[0],m.rfcs[0]].join('|'));\""
+  # `problems` is the DERIVED union of the stories' own `problems:` — the island
+  # no longer carries one. `rfcs` is the union of row identities.
+  [ "$output" = "Map STORY-MAP-940|draft|JTBD-900|P900|RFC-900" ]
 }
 
 @test "ratification comes from the shared oversight lib, not a local guess" {
@@ -216,11 +218,18 @@ setup() {
 @test "a row's status is derived from its stories, not stored" {
   # Same reason storyStatus went: a stored value duplicates what the corpus
   # already knows, imposes a sync obligation, and drifts. A row is delivered
-  # when its stories are, proposed when a problem or an RFC names it, and
-  # unproposed when nothing has asked for it yet.
+  # when its stories are, proposed when an RFC names it OR its STORIES cite a
+  # problem, and unproposed when nothing has asked for it yet.
+  #
+  # Note `byprob`: the problem trace comes from the story, not from an authored
+  # list on the row. Three places used to name problems — the map's traces, a
+  # list on each row, and the story files — and all three disagreed. The story
+  # is the only one that can be right, so a row authoring its own problems is
+  # ignored exactly like a row authoring its own status.
   mkdir -p "$TMP/docs/stories/done" "$TMP/docs/stories/draft"
   printf -- '---\nstatus: done\n---\n# STORY-960\n' > "$TMP/docs/stories/done/STORY-960-a.md"
   printf -- '---\nstatus: draft\n---\n# STORY-961\n' > "$TMP/docs/stories/draft/STORY-961-b.md"
+  printf -- '---\nstatus: draft\nproblems: [P900]\n---\n# STORY-962\n' > "$TMP/docs/stories/draft/STORY-962-c.md"
 
   local map="$TMP/docs/story-maps/draft/STORY-MAP-945-x.html"
   {
@@ -231,14 +240,15 @@ setup() {
   "title": "Derived row status",
   "backbone": [ { "id": "a", "title": "A" } ],
   "releases": [
-    { "id": "shipped", "name": "Shipped", "badge": "Live" },
+    { "id": "shipped", "name": "Shipped", "badge": "Live", "preRfc": true },
     { "id": "named",   "name": "Named",   "badge": "R1", "rfc": "RFC-900" },
-    { "id": "byprob",  "name": "By problem", "badge": "R1", "problems": ["P900"] },
+    { "id": "byprob",  "name": "By problem" },
     { "id": "nobody",  "name": "Nobody asked", "badge": "R2" }
   ],
   "tasks": [
     { "activity": "a", "release": "shipped", "title": "done one", "storyId": "STORY-960" },
-    { "activity": "a", "release": "named",   "title": "draft one", "storyId": "STORY-961" }
+    { "activity": "a", "release": "named",   "title": "draft one", "storyId": "STORY-961" },
+    { "activity": "a", "release": "byprob",  "title": "by problem", "storyId": "STORY-962" }
   ]
 }
 JSON
@@ -250,7 +260,10 @@ JSON
   run bash -c "cd '$TMP' && '$QUERY' get STORY-MAP-945 | node -e \"
     const m=JSON.parse(require('fs').readFileSync(0,'utf8'));
     process.stdout.write(m.releasesDetail.map(r=>r.id+'='+r.status).join(' '));\""
-  [ "$output" = "shipped=delivered named=proposed byprob=proposed nobody=unproposed" ]
+  # `shipped` is history: marked `preRfc`, so its delivered stories give it a
+  # delivered status. `nobody` holds no cards, names no RFC and carries no mark,
+  # so nothing derives a status for it — a defect, not a resting state.
+  [ "$output" = "shipped=delivered named=proposed byprob=proposed nobody=untraced" ]
 }
 
 @test "a stored row status is ignored in favour of the derived one" {
@@ -275,5 +288,7 @@ JSON
   run bash -c "cd '$TMP' && '$QUERY' get STORY-MAP-946 | node -e \"
     const m=JSON.parse(require('fs').readFileSync(0,'utf8'));
     process.stdout.write(m.releasesDetail[0].status);\""
-  [ "$output" = "unproposed" ]
+  # The row stores `delivered`; it holds no stories, so the derived answer is
+  # `untraced` and the stored value loses.
+  [ "$output" = "untraced" ]
 }

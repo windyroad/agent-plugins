@@ -14,15 +14,18 @@
 //
 // Usage:
 //   story-map-edit.mjs <map.html> add-card     --story ID --activity ID --release ID
-//                                              --title T [--value V] [--ref R]
-//                                              [--rfc ID] [--jtbd ID]
+//                                              --title T [--ref R] [--rfc ID] [--jtbd ID]
 //   story-map-edit.mjs <map.html> move-card    --story ID [--activity ID] [--release ID]
 //   story-map-edit.mjs <map.html> remove-card  --story ID
-//   story-map-edit.mjs <map.html> add-band     --id ID --name N [--badge B] [--note N]
+//   story-map-edit.mjs <map.html> add-band     --id ID --name N [--rfc RFC-NNN] [--note N]
 //   story-map-edit.mjs <map.html> add-activity --id ID --title T [--note N]
 //
-// Story lifecycle status is NOT settable here: it is derived from the story's
-// own file at render time (ADR-102), so a transition needs no map edit at all.
+// Nothing the story file already says is settable here — status, the value
+// statement, and the problems a story closes are all read from the story at
+// render time (ADR-104). A card carries what identifies it and where it sits;
+// a row carries its RFC identity and its name. There are no --status, --value
+// or --badge flags, and a row's status and problems are derived from the
+// stories in it.
 //
 // @adr ADR-102 (story maps render from JSON through a canonical template)
 // @adr ADR-095 (story-map membership enforced at capture — drives add-card)
@@ -97,7 +100,6 @@ const OPS = {
       throw new Error(`${story} is already on this map — use move-card to relocate it.`);
     }
     const card = { activity, release, title };
-    if (flags.value && flags.value !== true) card.value = String(flags.value);
     if (flags.rfc && flags.rfc !== true) card.rfc = String(flags.rfc);
     if (flags.jtbd && flags.jtbd !== true) card.jtbd = String(flags.jtbd);
     card.storyId = story;
@@ -137,7 +139,9 @@ const OPS = {
       throw new Error(`release band "${id}" already exists on this map.`);
     }
     const band = { id, name };
-    band.badge = flags.badge && flags.badge !== true ? String(flags.badge) : 'R2';
+    // A row IS an RFC (ADR-103). Where a problem has proposed the row it carries
+    // that identity; where nothing has, it renders as speculative and says so.
+    if (flags.rfc && flags.rfc !== true) band.rfc = String(flags.rfc);
     if (flags.note && flags.note !== true) band.note = String(flags.note);
     data.releases.push(band);
     return `added release band ${id}`;
@@ -161,18 +165,18 @@ function usage() {
   console.error('usage: story-map-edit.mjs <map.html> <operation> [flags]');
   console.error('');
   console.error('  add-card     --story ID --activity ID --release ID --title T');
-  console.error('               [--value V] [--ref R] [--rfc ID] [--jtbd ID]');
+  console.error('               [--ref R] [--rfc ID] [--jtbd ID]');
   console.error('  move-card    --story ID [--activity ID] [--release ID]');
   console.error('  remove-card  --story ID');
-  console.error('  add-band     --id ID --name N [--badge B] [--note N]');
+  console.error('  add-band     --id ID --name N [--rfc RFC-NNN] [--note N]');
   console.error('  add-activity --id ID --title T [--note N]');
   console.error('');
   console.error('Or pass the operation as JSON on stdin, which needs no shell escaping:');
   console.error('  echo \'{"op":"add-card","story":"STORY-1","activity":"a","release":"r1","title":"He said \\"go\\" — then left"}\' \\');
   console.error('    | story-map-edit.mjs <map.html> --json -');
   console.error('');
-  console.error('Story status is derived from the story file at render time and');
-  console.error('is not settable here — a transition needs no map edit.');
+  console.error('Status, value and problems are derived from the story files at');
+  console.error('render time and are not settable here (ADR-104).');
 }
 
 /** Read an operation as a JSON object on stdin.

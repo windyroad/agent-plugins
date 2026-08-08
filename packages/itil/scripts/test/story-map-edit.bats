@@ -169,3 +169,31 @@ JSON
   run node "$EDIT" "$TMP/bare.html" add-card --story STORY-950 --activity notice --release r1 --title "T"
   [ "$status" -ne 0 ]
 }
+
+@test "editing a map preserves a row's pre-RFC marker" {
+  # The exception is closed (ADR-107), so the marker only ever exists on rows
+  # that already carry it. An edit that dropped it would silently turn history
+  # into a defect, and there is no command to put it back — deliberately, since
+  # a command to create a historical row would contradict the closed set.
+  local root="$TMP/keepmark"
+  mkdir -p "$root/docs/story-maps/draft" "$root/docs/stories/done"
+  printf -- '---\nstatus: done\n---\n# STORY-991\n' > "$root/docs/stories/done/STORY-991-a.md"
+  local map="$root/docs/story-maps/draft/STORY-MAP-991-x.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    printf '%s\n' '{ "storyMapId": "STORY-MAP-991", "title": "T", "traces": { "jtbd": ["JTBD-900"] }, "backbone": [ { "id": "a", "title": "A" } ], "releases": [ { "id": "hist", "name": "History", "preRfc": true } ], "tasks": [ { "activity": "a", "release": "hist", "title": "one", "storyId": "STORY-991" } ] }'
+    printf '</script>\n'
+  } > "$map"
+  run bash -c "cd '$root' && node '$RENDER' docs/story-maps/draft/STORY-MAP-991-x.html"
+  [ "$status" -eq 0 ]
+
+  run bash -c "cd '$root' && node '$EDIT' docs/story-maps/draft/STORY-MAP-991-x.html add-activity --id z --title 'Z. New step'"
+  [ "$status" -eq 0 ]
+
+  run bash -c "grep -c '\"preRfc\": true' '$map'"
+  [ "$output" -eq 1 ] || { echo "the pre-RFC marker did not survive the edit"; return 1; }
+
+  # And it still earns the exception rather than reading as a defect.
+  run bash -c "grep -o '\"hist\": \"[a-z]*\"' '$map'"
+  [ "$output" = '"hist": "delivered"' ] || { echo "derived status was $output, wanted delivered"; return 1; }
+}

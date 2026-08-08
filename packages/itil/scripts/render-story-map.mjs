@@ -107,6 +107,28 @@ function resolveStoryStatus(storiesDir, storyId) {
   return m ? m[1].trim() : hit.state;
 }
 
+/** The problems a story closes, from its `problems:` frontmatter.
+ *
+ *  Derived like everything else that already exists elsewhere. Three places
+ *  were naming problems — the map's `traces.problems`, an authored list on each
+ *  row, and the story files — and all three disagreed: the map cited two
+ *  problems no story mentioned and omitted three that stories did. The story is
+ *  the only one of the three that can be right, because it is where the work
+ *  and the problem meet.
+ *
+ *  A row's problems are the union of its stories'; the map's are the union of
+ *  its rows'. A card with no story file contributes nothing, which is the
+ *  honest answer — an untraced row should look untraced rather than inherit a
+ *  trace from a neighbour.
+ */
+function resolveStoryProblems(storiesDir, storyId) {
+  const hit = readStoryBody(storiesDir, storyId);
+  if (!hit || !hit.body) return [];
+  const m = hit.body.match(/^problems:\s*\[(.*?)\]\s*$/m);
+  if (!m) return [];
+  return m[1].split(',').map((s) => s.trim()).filter(Boolean);
+}
+
 /** A story's value statement, read from its `## User value` section.
  *
  *  Derived, never stored on the card — the fifth application of the same rule
@@ -222,17 +244,26 @@ function serialiseIsland(map) {
   return JSON.stringify(map, null, 2).replace(/</g, '\\u003c');
 }
 
-function renderMeta(map) {
+function renderMeta(map, derived) {
   const t = map.traces ?? {};
+  // `problems` and `rfcs` are DERIVED, and the read is unconditional — no
+  // `?? t.problems` alternation, which would let a pre-migration island outvote
+  // the corpus and re-open the override ADR-104 forbids.
+  //
+  // The rfcs filter is load-bearing, not defensive: a row legitimately carries no
+  // RFC, in two spellings — `"rfc": null` on a pre-RFC row, and no `rfc` key at
+  // all. A raw join yields ",RFC-005,…" or ",,", and `content=",,"` satisfies the
+  // reverse-tracers' `content="[^"]+"` guard, so a map with no RFCs would stop
+  // looking like one.
+  const rfcs = [...new Set((map.releases ?? []).map((r) => r.rfc).filter(Boolean))];
   const rows = [
     ['story-map-id', map.storyMapId],
     ['status', map.status],
     ['persona', map.persona],
     ['secondary-persona', map.secondaryPersona],
-    ['problems', (t.problems ?? []).join(',')],
-    ['rfcs', (t.rfcs ?? []).join(',')],
+    ['problems', (derived.mapProblems ?? []).join(',')],
+    ['rfcs', rfcs.join(',')],
     ['jtbd', (t.jtbd ?? []).join(',')],
-    ['adrs', (t.adrs ?? []).join(',')],
     ['reported', map.reported],
     ['decision-makers', map.decisionMakers],
     ['human-oversight', map.humanOversight ?? 'unconfirmed'],
@@ -301,7 +332,7 @@ function resolveHref(mapPath, id) {
  *
  *  None of it is authored. Status and value are read from each story's own file
  *  and hrefs from the docs tree, here, where the filesystem is available, and
- *  consumed by the shared script at view time. Omitted entirely when nothing
+ *  consumed by the renderer below, not at view time. Omitted entirely when nothing
  *  resolves, which is the published-package case: a map opened outside a
  *  repository shows no status, no values and plain text instead of links.
  */
@@ -319,9 +350,19 @@ function resolveHref(mapPath, id) {
 function rowStatus(row, tasks, statuses) {
   const mine = tasks.filter((t) => t.release === row.id);
   const terminal = (s) => s === 'done' || s === 'archived';
-  if (mine.length && mine.every((t) => terminal(statuses[t.storyId]))) return 'delivered';
+  const shipped = mine.length && mine.every((t) => terminal(statuses[t.storyId]));
+  // A row carries an RFC identity. The exception is CLOSED: it covers rows
+  // holding work that shipped before rows carried identities, and those say so
+  // with `preRfc`. Delivery alone cannot earn the exception — every row is
+  // delivered eventually, so that reading would make shipping unproposed work
+  // legitimate by finishing it.
+  if (shipped && (row.rfc || row.preRfc)) return 'delivered';
   if (row.rfc || (row.problems ?? []).length) return 'proposed';
-  return 'unproposed';
+  // NOT a third resting state. A row whose stories close no problem is a defect:
+  // either the problem exists and the stories should trace it, or it needs
+  // documenting. This used to return `unproposed` and render as "Speculative",
+  // which gave a tidy name to work nobody had asked for and let it sit there.
+  return 'untraced';
 }
 
 function renderStatus(map, storiesDir, mapPath) {
@@ -330,11 +371,13 @@ function renderStatus(map, storiesDir, mapPath) {
   const hrefs = {};
 
   const ids = [...new Set((map.tasks ?? []).map((t) => t.storyId).filter(Boolean))];
+  const storyProblems = {};
   for (const id of ids) {
     const st = resolveStoryStatus(storiesDir, id);
     if (st) status[id] = st;
     const v = resolveStoryValue(storiesDir, id);
     if (v) values[id] = v;
+    storyProblems[id] = resolveStoryProblems(storiesDir, id);
   }
 
   if (mapPath) {
@@ -344,12 +387,13 @@ function renderStatus(map, storiesDir, mapPath) {
       for (const k of ['rfc', 'jtbd']) if (t[k]) mentioned.add(t[k]);
       for (const m of String(t.ref ?? '').match(/\b(?:ADR|JTBD|RFC|STORY-MAP|STORY|P)-?\d+\b/g) ?? []) mentioned.add(m);
     }
-    for (const r of map.releases ?? []) {
-      if (r.rfc) mentioned.add(r.rfc);
-      for (const pr of r.problems ?? []) mentioned.add(pr);
-    }
-    const proseBlob = JSON.stringify(map.traces ?? {}) + JSON.stringify(map.traceProse ?? {}) + String(map.lead ?? '');
-    for (const m of proseBlob.match(/\b(?:ADR|JTBD|RFC|STORY-MAP|STORY|P)-?\d+\b/g) ?? []) mentioned.add(m);
+    for (const r of map.releases ?? []) if (r.rfc) mentioned.add(r.rfc);
+    // Only `traces.jtbd` — the one authored trace left. Scanning the whole object
+    // would resolve an authored `traces.adrs` into `hrefs`, leaving it UNRENDERED
+    // but not inert; narrowing is what makes "inert" true.
+    for (const m of (map.traces?.jtbd ?? []).join(' ').match(/\b(?:ADR|JTBD|RFC|STORY-MAP|STORY|P)-?\d+\b/g) ?? []) mentioned.add(m);
+    // The problems each story closes, so they resolve to links on the rows.
+    for (const pr of Object.values(storyProblems).flat()) mentioned.add(pr);
 
     for (const id of mentioned) {
       const href = resolveHref(mapPath, id);
@@ -361,10 +405,25 @@ function renderStatus(map, storiesDir, mapPath) {
   // computed here and emitted rather than left for the client — the browser
   // cannot read story files.
   const rows = {};
-  for (const r of map.releases ?? []) rows[r.id] = rowStatus(r, map.tasks ?? [], status);
+  const rowProblems = {};
+  const mapProblems = new Set();
+  for (const r of map.releases ?? []) {
+    const mine = (map.tasks ?? []).filter((t) => t.release === r.id);
+    const ps = new Set();
+    for (const t of mine) {
+      if (!t.storyId) continue;
+      for (const pr of storyProblems[t.storyId] ?? []) ps.add(pr);
+    }
+    const sorted = [...ps].sort();
+    if (sorted.length) rowProblems[r.id] = sorted;
+    sorted.forEach((pr) => mapProblems.add(pr));
+    rows[r.id] = rowStatus({ ...r, problems: sorted }, map.tasks ?? [], status);
+  }
 
   const payload = {};
   if (Object.keys(rows).length) payload.rows = rows;
+  if (Object.keys(rowProblems).length) payload.rowProblems = rowProblems;
+  if (mapProblems.size) payload.mapProblems = [...mapProblems].sort();
   if (Object.keys(status).length) payload.status = status;
   if (Object.keys(values).length) payload.values = values;
   if (Object.keys(hrefs).length) payload.hrefs = hrefs;
@@ -378,6 +437,322 @@ function renderStatus(map, storiesDir, mapPath) {
   );
 }
 
+
+/* ---------------------------------------------------------------------------
+ * The grid, rendered HERE rather than in the browser.
+ *
+ * It used to be built client-side from the data island by a shared story-map.js.
+ * That made the file a thin shell: open it anywhere that does not run scripts —
+ * a phone's file preview, a sandboxed viewer, GitHub's HTML rendering, print —
+ * and you got the fallback message instead of the map. A map you cannot read
+ * without a live script engine is not a document.
+ *
+ * Rendering here costs nothing that mattered. The renderer already runs on every
+ * edit (story-map-edit re-renders after each operation), it already reads the
+ * story corpus for status, values and problems, and the fingerprint is scoped to
+ * the data island (ADR-102) — so generated markup in the file cannot drift a
+ * ratification. Presentation stays de-duplicated in the shared stylesheet, which
+ * is where the duplication actually was.
+ *
+ * Markup is byte-identical to what the script produced, including every
+ * accessibility property that was reviewed: scope on both header axes, the
+ * spanning empty-band cell with its visually-hidden sentence, role="list" on the
+ * card lists, and the aria-hidden glyph carrying status as a second channel
+ * alongside colour.
+ * ------------------------------------------------------------------------- */
+
+const BADGE_GLYPH = { 'b-live': '\u2713', 'b-next': '\u2192', 'b-later': '\u25c7', 'b-defect': '\u26a0' };
+
+/** Status as a class. Derived, never an authored badge — a hand-written R1/R2
+ *  ordinal duplicated the RFC identity and collided with it. */
+function badgeClass(rel) {
+  switch (String(rel.status || '').toLowerCase()) {
+    case 'delivered': return 'b-live';
+    case 'proposed':  return rel.rfc ? 'b-next' : 'b-defect';
+    default:          return 'b-defect';
+  }
+}
+
+/** What a row is CALLED. A row IS an RFC (ADR-103), so where a problem has
+ *  proposed it, its id is the label. There is deliberately no "not yet
+ *  allocated" state: drawing the row is what allocates the identity. */
+/** What a row is CALLED. A row IS an RFC (ADR-103), so its id is the label.
+ *
+ *  Without one, the label says what is MISSING rather than inventing a status.
+ *  Two distinct gaps, and they need different work:
+ *
+ *    proposed, no id — the stories close a problem, so the release is real and
+ *                      wants an RFC identity. Drawing the row is what allocates
+ *                      it; this row was drawn and never given one.
+ *    untraced        — no story here closes anything. Link an existing problem
+ *                      or document a new one.
+ *
+ *  Neither is a resting state, so neither gets a comfortable name. "Speculative"
+ *  was the comfortable name, and it rendered on a row whose own header read
+ *  "closes P160, P443" — the label and the trace contradicting each other.
+ */
+function rowLabel(rel) {
+  if (rel.rfc) return rel.rfc;
+  switch (String(rel.status || '').toLowerCase()) {
+    case 'delivered': return 'Delivered, pre-RFC';
+    // No glyph here \u2014 badge() prepends the one for the class, aria-hidden, as
+    // the non-colour channel. A second copy in the label put "warning" into the
+    // accessible name and rendered "\u26a0 \u26a0 Needs an RFC id".
+    case 'proposed':  return 'Needs an RFC id';
+    default:          return 'Untraced \u2014 needs a problem';
+  }
+}
+
+function badge(cls, text) {
+  return `<span class="badge ${cls}"><span class="b-glyph" aria-hidden="true">${esc(BADGE_GLYPH[cls] || '')}</span>${esc(text)}</span>`;
+}
+
+/** Wrap in a link when the renderer resolved one, else return the text. */
+function link(hrefs, id, inner) {
+  const href = id && hrefs[id];
+  return href ? `<a href="${esc(href)}" class="ref-link">${inner}</a>` : inner;
+}
+
+/** Turn every artefact id in a run of prose into a link, leaving the rest be. */
+function linkify(hrefs, text) {
+  const re = /\b(?:ADR|JTBD|RFC|STORY-MAP|STORY|P)-?\d+\b/g;
+  let out = '', last = 0, m;
+  while ((m = re.exec(text)) !== null) {
+    out += esc(text.slice(last, m.index));
+    out += link(hrefs, m[0], esc(m[0]));
+    last = m.index + m[0].length;
+  }
+  return out + esc(text.slice(last));
+}
+
+/** Emphasis runs from the story, as text and <strong>. Data in, markup out —
+ *  nothing here interprets a story body as HTML. */
+function runsHtml(list) {
+  return (list || []).map((r) => (r.em ? `<strong>${esc(r.t)}</strong>` : esc(r.t))).join('');
+}
+
+/** A value statement as three lines. Run together it is a wall of text at card
+ *  width; the shape that makes it scannable is the shape it was written in. */
+function valueHtml(v) {
+  if (!v) return '';
+  if (v.raw || !v.value) {
+    return `<div class="t-value"><div class="v-line">${runsHtml(v.raw)}</div></div>`;
+  }
+  const parts = [
+    ['In order to ', v.value, 'v-inorder'],
+    ['as a ', v.who, 'v-asa'],
+    ['I want ', v.want, 'v-iwant'],
+  ];
+  return '<div class="t-value">' + parts.map(([lead, runs, cls]) =>
+    `<div class="v-line ${cls}"><span class="v-lead">${esc(lead)}</span>${runsHtml(runs)}</div>`
+  ).join('') + '</div>';
+}
+
+function cardHtml(task, status, value, hrefs) {
+  const attrs = ['class="task"'];
+  if (task.storyId) attrs.push(`data-story-id="${esc(task.storyId)}"`);
+  if (task.rfc) attrs.push(`data-rfc="${esc(task.rfc)}"`);
+  if (task.jtbd) attrs.push(`data-jtbd="${esc(task.jtbd)}"`);
+  if (status) attrs.push(`data-status="${esc(status)}"`);
+  let out = `<div ${attrs.join(' ')}>`;
+  out += link(hrefs, task.storyId, `<span class="t-title">${esc(task.title || '')}</span>`);
+  out += valueHtml(value);
+  if (task.ref) out += `<div class="t-ref">Traces: ${linkify(hrefs, String(task.ref))}</div>`;
+  return out + '</div>';
+}
+
+/** The whole grid: caption, both header axes, and one row per release. */
+/** Read back the payload we just serialised, so the grid and the island share
+ *  one resolution rather than computing it twice. */
+function parseDerived(statusBlock) {
+  const m = statusBlock.match(/<script id="story-map-status" type="application\/json">\n([\s\S]*?)\n\s*<\/script>/);
+  if (!m) return {};
+  try {
+    return JSON.parse(m[1].replace(/\\u003c/g, '<'));
+  } catch {
+    return {};
+  }
+}
+
+/* There is no lead paragraph. It was persona plus an observation, and both were
+ * already on the page: the persona appears in every card's value statement ("as
+ * a developer", 24 times on STORY-MAP-002), and any observation about the shape
+ * of the work — how many columns, how much is live, which cells are empty — is
+ * countable from the grid the reader is looking at.
+ *
+ * A map shows the work. Where a specific column or row needs a note, both carry
+ * a `note` field for exactly that, next to the thing it is about. Prose at the
+ * top that restates the picture below it is the ADR-104 rule applied to writing.
+ */
+
+function renderGrid(map, derived) {
+  const backbone = map.backbone ?? [];
+  const tasks = map.tasks ?? [];
+  const hrefs = derived.hrefs ?? {};
+  const statuses = derived.status ?? {};
+  const values = derived.values ?? {};
+  const releases = (map.releases ?? []).map((r) => ({
+    ...r,
+    status: (derived.rows ?? {})[r.id] || 'untraced',
+    problems: (derived.rowProblems ?? {})[r.id] || [],
+  }));
+
+  // A caption NAMES the table; it does not teach the reader how to use one.
+  //
+  // This used to run: "N journey activities across the top; M release bands down
+  // the side. Read a row left to right for everything that ships in one release.
+  // A cell with no cards means that activity ships nothing in that release."
+  // Every clause of that was already somewhere better. The lead paragraph says
+  // how to read the map, in the map's own terms rather than in generic grid
+  // terms. Each empty cell already carries its own visually-hidden sentence, so
+  // the last clause explained something the reader meets in place.
+  //
+  // What survives is the part a caption is for: a name, and the dimensions —
+  // which a screen-reader user gets BEFORE entering the table, and which are not
+  // stated anywhere else.
+  const caption = map.caption ||
+    `${map.title ?? map.storyMapId} — ${backbone.length} journey activities across ${releases.length} releases`;
+
+  let out = '<div class="scroll" tabindex="0" role="region" aria-label="Story map grid">';
+  out += `<table class="map"><caption>${esc(caption)}</caption>`;
+  out += '<thead><tr><td class="corner"></td>';
+  for (const a of backbone) {
+    // Explicit boundary: without it the accessible name concatenates as
+    // "A. NoticeJTBD-008". The spaces the other sites rely on come from
+    // display:block, which the accessible-name spec does not mandate.
+    out += `<th class="act" scope="col">${esc(a.title || '')}`;
+    if (a.note) out += ` <span class="jtbd">${esc(a.note)}</span>`;
+    out += '</th>';
+  }
+  out += '</tr></thead><tbody>';
+
+  for (const rel of releases) {
+    const cls = badgeClass(rel);
+    out += '<tr><th class="slice" scope="row">';
+    out += badge(cls, rowLabel(rel));
+    out += ' ' + link(hrefs, rel.rfc, `<span class="s-name">${esc(rel.name || '')}</span>`);
+    if (rel.note) out += ` <span class="s-note">${esc(rel.note)}</span>`;
+    if (rel.problems.length) {
+      out += '<span class="s-problems">closes ' +
+        rel.problems.map((p) => link(hrefs, p, esc(p))).join(', ') + '</span>';
+    }
+    out += '</th>';
+
+    const filled = backbone.map((act) =>
+      tasks.filter((t) => t.activity === act.id && t.release === rel.id));
+
+    if (filled.every((h) => h.length === 0)) {
+      // A wholly empty band is silent in a screen reader's browse mode while
+      // being a loud full-width hatch visually. One spanning cell states it
+      // once — per-cell text would bury a sparse map's few cards.
+      out += `<td class="cell empty" colspan="${backbone.length || 1}"><span class="vh">No stories in this release band.</span></td>`;
+    } else {
+      for (const here of filled) {
+        if (!here.length) { out += '<td class="cell empty"></td>'; continue; }
+        out += '<td class="cell"><ul class="tasks" role="list">';
+        for (const t of here) {
+          out += '<li>' + cardHtml(t, statuses[t.storyId], values[t.storyId], hrefs) + '</li>';
+        }
+        out += '</ul></td>';
+      }
+    }
+    out += '</tr>';
+  }
+  return out + '</tbody></table></div>';
+}
+
+/* The legend and the map-level problems line are BOTH gone, deliberately.
+ *
+ * The legend listed every row with its badge, name and note — which is exactly
+ * what the first column of the grid shows, in the same order, three lines
+ * further down. It had stopped being a legend (a key to the glyphs) and become
+ * a second index of the rows. The glyphs need no key: each badge carries its
+ * own text, and the glyph is the redundant non-colour channel beside it.
+ *
+ * The map-level problems line was the union of what every row already shows in
+ * its own header. It was added when problems became derived, and it duplicated
+ * the thing it was derived into.
+ *
+ * Both are the ADR-104 rule applied to presentation rather than to data: do not
+ * show in two places what one place already says. The maintainer caught this as
+ * the seventh instance, introduced while fixing the sixth.
+ */
+
+/** The traces, as one line of links, built from the island's `traces` object.
+ *
+ *  This replaces five paragraphs of hand-written `traceProse` — persona, jobs
+ *  mapped, problems closed, decisions rested on, open questions — every one of
+ *  which restated something already on the page or already in the island. The
+ *  persona is the island's own field and the lead's first sentence; the jobs are
+ *  glossed on the backbone columns; the problems are derived onto each row, so
+ *  the authored version drifted from them by construction; the decisions are
+ *  `traces.adrs`; and "open questions" was a changelog entry, not a trace.
+ *
+ *  Rendering the ids directly means there is no prose to keep in step. It is the
+ *  ADR-104 rule again: show what is authored once, derive the rest, write
+ *  nothing twice.
+ */
+function renderTrace(map, derived) {
+  const hrefs = derived.hrefs ?? {};
+  const tr = map.traces ?? {};
+  // Jobs only. `Decisions` went with `traces.adrs` (ADR-106 — a map carries no
+  // decision trace). `RFCs` went too rather than being derived: it would have
+  // restated the row badges immediately beside it, which is the duplication
+  // deleted from the map-level problems line for the same reason.
+  const groups = [
+    ['Jobs', tr.jtbd],
+  ].filter(([, v]) => Array.isArray(v) && v.length);
+  if (!groups.length) return '';
+  const body = groups.map(([label, ids]) =>
+    `<span class="tr-group"><strong>${esc(label)}:</strong> ` +
+    ids.map((id) => link(hrefs, id, esc(id))).join(', ') + '</span>'
+  ).join('');
+  return `<p class="traces" id="story-map-traces">${body}</p>`;
+}
+
+/** Refuse a map whose cards have no stories behind them.
+ *
+ *  A card IS a story's position in a journey. Without one it is a sketch wearing
+ *  map vocabulary — and nine rows across two maps were exactly that, rendering
+ *  as a tidy status rather than as the defect they were. "If the story doesn't
+ *  exist, then it shouldn't even be in the map."
+ *
+ *  This is also what makes an untraced row unreachable on a valid map: every
+ *  card has a story, and ADR-060 I6 hard-blocks a story that traces no problem,
+ *  so every row traces something.
+ *
+ *  Only fires when a story corpus is present. Rendering from the published
+ *  package resolves nothing at all, and refusing there would reject every valid
+ *  map for lacking a tree that was never there (ADR-104's degrade-gracefully
+ *  consequence).
+ */
+function assertEveryCardHasAStory(map, storiesDir) {
+  if (!storiesDir || !existsSync(storiesDir)) return;
+  const orphans = [];
+  const dangling = [];
+  for (const t of map.tasks ?? []) {
+    if (!t.storyId) { orphans.push(t.title ?? '(untitled card)'); continue; }
+    if (!readStoryBody(storiesDir, t.storyId)) dangling.push(`${t.storyId} ("${t.title ?? ''}")`);
+  }
+  if (!orphans.length && !dangling.length) return;
+
+  const lines = ['this map has cards with no story behind them.'];
+  if (orphans.length) {
+    lines.push(`  ${orphans.length} card(s) name no story at all:`);
+    for (const o of orphans) lines.push(`    - "${o}"`);
+  }
+  if (dangling.length) {
+    lines.push(`  ${dangling.length} card(s) name a story that does not exist:`);
+    for (const d of dangling) lines.push(`    - ${d}`);
+  }
+  lines.push('');
+  lines.push('  Fix each one: capture the story (/wr-itil:capture-story, which');
+  lines.push('  hard-blocks a story that traces no problem — ADR-060 I6), or');
+  lines.push('  remove the card. A card is a story\'s position in a journey; a');
+  lines.push('  card without one is a sketch, and the map should not carry it.');
+  throw new Error(lines.join('\n'));
+}
+
 function render(map, storiesDir, mapPath) {
   if (!Array.isArray(map.backbone) || map.backbone.length === 0) {
     throw new Error('story map needs a non-empty "backbone" array (the journey activities)');
@@ -386,14 +761,22 @@ function render(map, storiesDir, mapPath) {
     throw new Error('story map needs a non-empty "releases" array (the horizontal slices)');
   }
 
+  assertEveryCardHasAStory(map, storiesDir);
+
   const title = map.title ?? map.storyMapId;
+  // Everything derived from outside the island is resolved ONCE and shared by
+  // the island payload and the grid, so the two cannot disagree about a status,
+  // a value or a link.
+  const statusBlock = renderStatus(map, storiesDir, mapPath);
+  const derived = parseDerived(statusBlock);
   const tokens = {
     TITLE: esc(title),
     TITLE_FULL: esc(`${map.storyMapId}: ${title}`),
-    LEAD: esc(map.lead ?? ''),
     DATA: serialiseIsland(map),
-    META: renderMeta(map),
-    STATUS: renderStatus(map, storiesDir, mapPath),
+    META: renderMeta(map, derived),
+    STATUS: statusBlock,
+    GRID: renderGrid(map, derived),
+    TRACE: renderTrace(map, derived),
   };
 
   let out = readFileSync(TEMPLATE, 'utf8');
@@ -403,12 +786,16 @@ function render(map, storiesDir, mapPath) {
   return out;
 }
 
-/** Keep the shared stylesheet and script beside the maps. They are one copy for
- *  a whole corpus, so a presentation change touches one file rather than every
- *  map — which is the point of not committing generated markup. */
+/** Keep the shared stylesheet beside the maps. It is one copy for a whole
+ *  corpus, so a restyle touches one file rather than every map — which was the
+ *  duplication worth removing. The grid itself IS committed into each map, so
+ *  that a map can be read with no script engine; the stylesheet staying shared
+ *  is what keeps that affordable. */
 function ensureSharedAssets(mapPath) {
   const dest = dirname(dirname(mapPath));
-  for (const name of ['story-map.css', 'story-map.js']) {
+  // Stylesheet only. The client script is gone: the grid is rendered into the
+  // file, so nothing needs to run at view time.
+  for (const name of ['story-map.css']) {
     const from = join(HERE, '..', 'templates', name);
     const to = join(dest, name);
     if (!existsSync(from)) continue;

@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 101 (89 in-force, 12 historical)
+**Total ADRs:** 105 (93 in-force, 12 historical)
 
 ---
 
 ## In-force decisions
 
-_89 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_93 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -438,6 +438,26 @@ _89 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-103 — ADR-103: A release row is the RFC, and the map is the approval surface
 **Status:** proposed | **Oversight:** confirmed | **Supersedes:** ADR-101
 **Confirmation:** A row with all stories done reads delivered; a row named by a problem or an RFC reads proposed; a row named by...; Proposing a fix records release rows against the problem ticket, and implementation is refused when the propos...; Adding a story to an existing row on a ratified map does not drift that map's oversight fingerprint.; A story file carries no independent oversight marker; its approval is the map's.; STORY-MAP-002 renders five rows, two delivered, and RFC-005 appears on exactly one of them.
+
+### ADR-104 — ADR-104: A story map card stores no value a story file already carries
+**Status:** proposed | **Oversight:** confirmed
+**Confirmation:** A story transitioned draft → done changes no map file, and every map showing it renders the new status — b...; A card carrying an authored storyStatus or value, or a row carrying authored problems, is ignored in favour of...; The map's oversight fingerprint does not move across a story's lifecycle transition.; A map rendered outside a repository emits no derived block and shows no status, rather than a stale one.; data-story-id survives on every story-bearing card, and reverse-trace resolves through it — the carve-out is...
+**Related:** ADR-102, ADR-103, ADR-090
+
+### ADR-105 — ADR-105: The grid ships in the file — a map is readable with no script engine
+**Status:** proposed | **Oversight:** confirmed
+**Confirmation:** A map's own bytes carry the grid: the table, its cards and both header axes are present in the file as shipped...; No fallback message survives, because there is nothing left to fall back from.; The scroll region is present and focusable, so a wide grid is scrollable by keyboard and on a narrow screen.; Re-rendering an unchanged source is byte-identical, and the map's oversight fingerprint is stable across a pre...
+**Related:** ADR-102, ADR-103, ADR-104
+
+### ADR-106 — ADR-106: A story map carries no decision trace
+**Status:** proposed | **Oversight:** confirmed
+**Confirmation:** A map's island carries no adrs key and the renderer emits no <meta name="adrs"> — behavioural test.; An island that authors traces.adrs anyway renders no trace landmark and contributes no entry to the derived hr...; The documented island in capture-story-map/SKILL.md names no adrs, and the differential test that checks every...
+**Related:** ADR-103, ADR-104, ADR-090, ADR-060, ADR-102
+
+### ADR-107 — ADR-107: A story map's RFC list is derived from its release rows
+**Status:** proposed | **Oversight:** confirmed
+**Confirmation:** A map's rendered RFC list equals the RFCs its rows name, and a hand-written list in the file is ignored in fav...; A row carrying no identity contributes nothing to the list — behavioural test.; A row marked preRfc whose stories have all shipped renders as delivered. An unmarked row whose stories have al...; Renaming a row's RFC does not invalidate the map's approval, because the RFC list is no longer part of what a ...; No map carries a hand-written RFC list — a check across all seven maps, guarded so an unmatched search canno...
+**Related:** ADR-103, ADR-104, ADR-090
 
 ---
 

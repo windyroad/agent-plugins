@@ -8,39 +8,21 @@
   <meta name="status" content="draft">
   <meta name="persona" content="plugin-user">
   <meta name="secondary-persona" content="developer">
-  <meta name="problems" content="P376,P431">
-  <meta name="rfcs" content="RFC-051">
+  <meta name="problems" content="P080,P170,P376,P431">
+  <meta name="rfcs" content="RFC-028,RFC-051,RFC-061">
   <meta name="jtbd" content="JTBD-301,JTBD-006">
-  <meta name="adrs" content="">
   <meta name="reported" content="2026-07-15">
   <meta name="decision-makers" content="Tom Howard">
   <meta name="human-oversight" content="unconfirmed">
   <link rel="stylesheet" href="../story-map.css">
-  <script src="../story-map.js" defer></script>
 </head>
 <body>
   <main>
     <h1 id="story-map-title">Close the loop with someone who reported a problem</h1>
-    <p class="lead" id="story-map-lead">A story map for the person outside this project who reports something and then waits. Read across the top for their journey — they report it, hear it landed, find out what will happen to it, get kept posted while it is worked, and end with a real outcome. Read down the rows for release bands. The empty cells are the silences a reporter currently experiences.</p>
-    <ul class="legend" id="story-map-legend" role="list" aria-label="Status legend"></ul>
-    <div id="story-map">
-      <p class="lead">This map's grid has not been drawn. It is built from the data block
-      at the end of this file by <code>story-map.js</code>, which sits alongside the maps —
-      so this message means the script did not load or did not run. The data itself is
-      intact: open this file in a text editor, or use View Source, and read the block with
-      <code>id="story-map-data"</code>.</p>
-    </div>
-    <section class="trace" id="story-map-trace-section" aria-labelledby="trace-h" hidden>
-      <h2 id="trace-h">What this map traces to</h2>
-      <div id="story-map-trace"></div>
-    </section>
+    <div id="story-map"><div class="scroll" tabindex="0" role="region" aria-label="Story map grid"><table class="map"><caption>Close the loop with someone who reported a problem — 5 journey activities across 4 releases</caption><thead><tr><td class="corner"></td><th class="act" scope="col">A. Report it <span class="jtbd">JTBD-301</span></th><th class="act" scope="col">B. Hear it landed</th><th class="act" scope="col">C. Find out what will happen to it</th><th class="act" scope="col">D. Get kept posted while it is worked</th><th class="act" scope="col">E. Get a real outcome</th></tr></thead><tbody><tr><th class="slice" scope="row"><span class="badge b-live"><span class="b-glyph" aria-hidden="true">✓</span>Delivered, pre-RFC</span> <span class="s-name">Already shipped</span> <span class="s-note">delivered before the row was the RFC</span><span class="s-problems">closes <a href="../../problems/known-error/170-problem-tickets-strain-as-fixes-decompose-into-multiple-coordinated-changes-need-rfc-framework.md" class="ref-link">P170</a></span></th><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-027" data-jtbd="JTBD-301" data-status="done"><a href="../../stories/done/STORY-027-capture-a-problem-from-an-inbound-channel.md" class="ref-link"><span class="t-title">I report a problem without having to classify it first</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>fix the problems real users are actually hitting — not only the ones I happen to notice myself</div><div class="v-line v-asa"><span class="v-lead">as a </span>maintainer</div><div class="v-line v-iwant"><span class="v-lead">I want </span>to capture a problem reported through an inbound channel (issue, discussion, or security advisory) and triage it into the backlog.</div></div><div class="t-ref">Traces: <a href="../../stories/done/STORY-027-capture-a-problem-from-an-inbound-channel.md" class="ref-link">STORY-027</a>, <a href="../../problems/known-error/170-problem-tickets-strain-as-fixes-decompose-into-multiple-coordinated-changes-need-rfc-framework.md" class="ref-link">P170</a></div></div></li></ul></td><td class="cell empty"></td><td class="cell empty"></td><td class="cell empty"></td><td class="cell empty"></td></tr><tr><th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>RFC-028</span> <span class="s-name">Updates quote the report they answer</span><span class="s-problems">closes <a href="../../problems/known-error/376-catchup-scanner-misses-inbound-direction-outbound-templates-need-4-directive-rework.md" class="ref-link">P376</a></span></th><td class="cell empty"></td><td class="cell empty"></td><td class="cell empty"></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-045" data-jtbd="JTBD-301" data-status="draft"><a href="../../stories/draft/STORY-045-outbound-lifecycle-comments-generated-from-real-issue-context.md" class="ref-link"><span class="t-title">I get updates that refer to my actual report and the workaround I was already given</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>hear a fast, honest verdict on fixes I ship</div><div class="v-line v-asa"><span class="v-lead">as a </span>upstream maintainer receiving reports from this project</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the downstream reporter's lifecycle comments generated from my issue's real context — crediting whoever provided the fix or workaround, honest about whether the fix is verified in the wild or merely installed, and posted even when my issue has already been closed — instead of direction-inverted form-letters that thank me for a report I never filed.</div></div><div class="t-ref">Traces: <a href="../../stories/draft/STORY-045-outbound-lifecycle-comments-generated-from-real-issue-context.md" class="ref-link">STORY-045</a>, <a href="../../problems/known-error/376-catchup-scanner-misses-inbound-direction-outbound-templates-need-4-directive-rework.md" class="ref-link">P376</a></div></div></li></ul></td><td class="cell empty"></td></tr><tr><th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>RFC-051</span> <span class="s-name">A declined upstream chase stays declined</span><span class="s-problems">closes <a href="../../problems/known-error/431-check-upstream-cache-staleness-misfires-on-declined-permanently-empty-channels.md" class="ref-link">P431</a></span></th><td class="cell empty"></td><td class="cell empty"></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-048" data-jtbd="JTBD-006" data-status="draft"><a href="../../stories/draft/STORY-048-inbound-discovery-preflight-honours-an-empty-channel-list.md" class="ref-link"><span class="t-title">If I decline having my report chased upstream, that decision sticks</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>have &quot;no thanks&quot; stay answered — so that declining upstream discovery costs nothing rather than a full pre-flight subprocess on every loop, forever</div><div class="v-line v-asa"><span class="v-lead">as a </span>developer running autonomous backlog loops</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the staleness check to read the channel list it was given, so a recorded decline silent-passes the way an absent config already does.</div></div><div class="t-ref">Traces: <a href="../../stories/draft/STORY-048-inbound-discovery-preflight-honours-an-empty-channel-list.md" class="ref-link">STORY-048</a>, <a href="../../problems/known-error/431-check-upstream-cache-staleness-misfires-on-declined-permanently-empty-channels.md" class="ref-link">P431</a> (inbound #187)</div></div></li></ul></td><td class="cell empty"></td><td class="cell empty"></td></tr><tr><th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>RFC-061</span> <span class="s-name">The reporter is kept in the loop end to end</span><span class="s-problems">closes <a href="../../problems/verifying/080-no-bidirectional-update-of-upstream-reported-problems.md" class="ref-link">P080</a>, <a href="../../problems/known-error/170-problem-tickets-strain-as-fixes-decompose-into-multiple-coordinated-changes-need-rfc-framework.md" class="ref-link">P170</a></span></th><td class="cell empty"></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-028" data-jtbd="JTBD-301" data-status="draft"><a href="../../stories/draft/STORY-028-acknowledge-the-inbound-report.md" class="ref-link"><span class="t-title">I hear that it landed, straight away, before anyone has looked at it</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>the person who reported the problem knows they were heard and it's being handled — instead of wondering whether it vanished into the void</div><div class="v-line v-asa"><span class="v-lead">as a </span>maintainer</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the inbound channel updated to acknowledge the report when it's captured.</div></div><div class="t-ref">Traces: <a href="../../stories/draft/STORY-028-acknowledge-the-inbound-report.md" class="ref-link">STORY-028</a>, <a href="../../problems/verifying/080-no-bidirectional-update-of-upstream-reported-problems.md" class="ref-link">P080</a></div></div></li></ul></td><td class="cell empty"></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-029" data-jtbd="JTBD-301" data-status="draft"><a href="../../stories/draft/STORY-029-share-the-workaround-with-the-reporter.md" class="ref-link"><span class="t-title">I am given something that works in the meantime, not just a promise that it will be fixed</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>the person hitting the problem can unblock themselves now — rather than waiting idle for the full fix</div><div class="v-line v-asa"><span class="v-lead">as a </span>maintainer</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the documented workaround posted back to the reporter's channel once we reach Known Error.</div></div><div class="t-ref">Traces: <a href="../../stories/draft/STORY-029-share-the-workaround-with-the-reporter.md" class="ref-link">STORY-029</a>, <a href="../../problems/verifying/080-no-bidirectional-update-of-upstream-reported-problems.md" class="ref-link">P080</a></div></div></li><li><div class="task" data-story-id="STORY-030" data-jtbd="JTBD-301" data-status="draft"><a href="../../stories/draft/STORY-030-tell-the-reporter-a-fix-is-underway.md" class="ref-link"><span class="t-title">I can tell the work is really moving, without having to chase it</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>the reporter knows the fix is really being worked — not stalled or forgotten, so they stay engaged instead of escalating or re-reporting</div><div class="v-line v-asa"><span class="v-lead">as a </span>maintainer</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the channel updated when a fix is underway (an RFC is accepted / implementation has started).</div></div><div class="t-ref">Traces: <a href="../../stories/draft/STORY-030-tell-the-reporter-a-fix-is-underway.md" class="ref-link">STORY-030</a>, <a href="../../problems/verifying/080-no-bidirectional-update-of-upstream-reported-problems.md" class="ref-link">P080</a></div></div></li></ul></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-031" data-jtbd="JTBD-301" data-status="draft"><a href="../../stories/draft/STORY-031-tell-the-reporter-released-and-close-the-loop.md" class="ref-link"><span class="t-title">I am told when it shipped, and the thread ends rather than trailing off</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>the person who reported the problem gets the resolution — knows the fix shipped, can confirm it works for them, and sees the loop closed rather than left hanging</div><div class="v-line v-asa"><span class="v-lead">as a </span>maintainer</div><div class="v-line v-iwant"><span class="v-lead">I want </span>to tell them it's released and close the channel on their confirmation.</div></div><div class="t-ref">Traces: <a href="../../stories/draft/STORY-031-tell-the-reporter-released-and-close-the-loop.md" class="ref-link">STORY-031</a>, <a href="../../problems/verifying/080-no-bidirectional-update-of-upstream-reported-problems.md" class="ref-link">P080</a></div></div></li></ul></td></tr></tbody></table></div></div>
+<p class="traces" id="story-map-traces"><span class="tr-group"><strong>Jobs:</strong> <a href="../../jtbd/plugin-user/JTBD-301-report-problem-without-pre-classifying.proposed.md" class="ref-link">JTBD-301</a>, <a href="../../jtbd/developer/JTBD-006-work-backlog-afk.proposed.md" class="ref-link">JTBD-006</a></span></p>
   </main>
 
-  <footer>
-    <p class="genfrom">This file is the map. The grid is drawn from the data block below;
-    edit that block, or use <code>wr-itil-story-map-edit</code>, then re-render with
-    <code>wr-itil-render-story-map</code>.</p>
-  </footer>
 
   <script id="story-map-data" type="application/json">
 {
@@ -53,20 +35,11 @@
   "decisionMakers": "Tom Howard",
   "humanOversight": "unconfirmed",
   "traces": {
-    "problems": [
-      "P376",
-      "P431"
-    ],
-    "rfcs": [
-      "RFC-051"
-    ],
     "jtbd": [
       "JTBD-301",
       "JTBD-006"
-    ],
-    "adrs": []
+    ]
   },
-  "lead": "A story map for the person outside this project who reports something and then waits. Read across the top for their journey — they report it, hear it landed, find out what will happen to it, get kept posted while it is worked, and end with a real outcome. Read down the rows for release bands. The empty cells are the silences a reporter currently experiences.",
   "backbone": [
     {
       "id": "report",
@@ -96,87 +69,157 @@
   ],
   "releases": [
     {
-      "id": "r1",
-      "name": "Now",
-      "note": "stories exist"
+      "id": "pre-rfc",
+      "name": "Already shipped",
+      "note": "delivered before the row was the RFC",
+      "preRfc": true
     },
     {
-      "id": "r2",
-      "name": "Open",
-      "note": "unbuilt"
+      "id": "rfc-028",
+      "name": "Updates quote the report they answer",
+      "rfc": "RFC-028"
+    },
+    {
+      "id": "rfc-051",
+      "name": "A declined upstream chase stays declined",
+      "rfc": "RFC-051"
+    },
+    {
+      "id": "rfc-061",
+      "name": "The reporter is kept in the loop end to end",
+      "rfc": "RFC-061"
     }
   ],
   "tasks": [
     {
+      "activity": "report",
+      "release": "pre-rfc",
+      "title": "I report a problem without having to classify it first",
+      "storyId": "STORY-027",
+      "jtbd": "JTBD-301",
+      "ref": "STORY-027, P170"
+    },
+    {
+      "activity": "ack",
+      "release": "rfc-061",
+      "title": "I hear that it landed, straight away, before anyone has looked at it",
+      "storyId": "STORY-028",
+      "jtbd": "JTBD-301",
+      "ref": "STORY-028, P080"
+    },
+    {
+      "activity": "decide",
+      "release": "rfc-051",
+      "title": "If I decline having my report chased upstream, that decision sticks",
+      "storyId": "STORY-048",
+      "jtbd": "JTBD-006",
+      "ref": "STORY-048, P431 (inbound #187)"
+    },
+    {
       "activity": "inform",
-      "release": "r1",
+      "release": "rfc-028",
       "title": "I get updates that refer to my actual report and the workaround I was already given",
       "storyId": "STORY-045",
       "jtbd": "JTBD-301",
       "ref": "STORY-045, P376"
     },
     {
-      "activity": "decide",
-      "release": "r1",
-      "title": "If I decline having my report chased upstream, that decision sticks",
-      "storyId": "STORY-048",
-      "rfc": "RFC-051",
-      "jtbd": "JTBD-006",
-      "ref": "STORY-048, P431 (inbound #187)"
+      "activity": "inform",
+      "release": "rfc-061",
+      "title": "I am given something that works in the meantime, not just a promise that it will be fixed",
+      "storyId": "STORY-029",
+      "jtbd": "JTBD-301",
+      "ref": "STORY-029, P080"
     },
     {
-      "activity": "report",
-      "release": "r2",
-      "title": "I report a problem without having to classify it first",
-      "ref": "JTBD-301, no story yet"
-    },
-    {
-      "activity": "ack",
-      "release": "r2",
-      "title": "I hear that it landed, straight away, before anyone has looked at it",
-      "ref": "no story yet"
+      "activity": "inform",
+      "release": "rfc-061",
+      "title": "I can tell the work is really moving, without having to chase it",
+      "storyId": "STORY-030",
+      "jtbd": "JTBD-301",
+      "ref": "STORY-030, P080"
     },
     {
       "activity": "resolve",
-      "release": "r2",
+      "release": "rfc-061",
       "title": "I am told when it shipped, and the thread ends rather than trailing off",
-      "ref": "no story yet"
+      "storyId": "STORY-031",
+      "jtbd": "JTBD-301",
+      "ref": "STORY-031, P080"
     }
-  ],
-  "traceProse": {
-    "persona": "plugin-user — someone outside this project who hit a problem and reported it. developer secondary, as the person on the receiving end.",
-    "jobs": "JTBD-301 (report a problem without pre-classifying it) is the spine. JTBD-006 covers the unattended side that does the chasing.",
-    "problems": "P376 — generated upstream lifecycle comments were canned rather than derived from the real issue. P431 — a decision to decline upstream discovery was not remembered.",
-    "decisions": "None yet.",
-    "open": "Consolidated on 2026-08-05, absorbing a single-story stub map about declining upstream discovery; it held one card, which sits on this journey, and the stub was removed once the card moved. Three of five activities carry no story: reporting without pre-classifying, immediate acknowledgement, and being told when it shipped."
-  }
+  ]
 }
   </script>
   <script id="story-map-status" type="application/json">
 {
   "rows": {
-    "r1": "unproposed",
-    "r2": "unproposed"
+    "pre-rfc": "delivered",
+    "rfc-028": "proposed",
+    "rfc-051": "proposed",
+    "rfc-061": "proposed"
   },
+  "rowProblems": {
+    "pre-rfc": [
+      "P170"
+    ],
+    "rfc-028": [
+      "P376"
+    ],
+    "rfc-051": [
+      "P431"
+    ],
+    "rfc-061": [
+      "P080",
+      "P170"
+    ]
+  },
+  "mapProblems": [
+    "P080",
+    "P170",
+    "P376",
+    "P431"
+  ],
   "status": {
+    "STORY-027": "done",
+    "STORY-028": "draft",
+    "STORY-048": "draft",
     "STORY-045": "draft",
-    "STORY-048": "draft"
+    "STORY-029": "draft",
+    "STORY-030": "draft",
+    "STORY-031": "draft"
   },
   "values": {
-    "STORY-045": {
+    "STORY-027": {
       "value": [
         {
-          "t": "hear a fast, honest verdict on fixes I ship"
+          "t": "fix the problems real users are actually hitting — not only the ones I happen to notice myself"
         }
       ],
       "who": [
         {
-          "t": "upstream maintainer receiving reports from this project"
+          "t": "maintainer"
         }
       ],
       "want": [
         {
-          "t": "the downstream reporter's lifecycle comments generated from my issue's real context — crediting whoever provided the fix or workaround, honest about whether the fix is verified in the wild or merely installed, and posted even when my issue has already been closed — instead of direction-inverted form-letters that thank me for a report I never filed."
+          "t": "to capture a problem reported through an inbound channel (issue, discussion, or security advisory) and triage it into the backlog."
+        }
+      ]
+    },
+    "STORY-028": {
+      "value": [
+        {
+          "t": "the person who reported the problem knows they were heard and it's being handled — instead of wondering whether it vanished into the void"
+        }
+      ],
+      "who": [
+        {
+          "t": "maintainer"
+        }
+      ],
+      "want": [
+        {
+          "t": "the inbound channel updated to acknowledge the report when it's captured."
         }
       ]
     },
@@ -196,15 +239,90 @@
           "t": "the staleness check to read the channel list it was given, so a recorded decline silent-passes the way an absent config already does."
         }
       ]
+    },
+    "STORY-045": {
+      "value": [
+        {
+          "t": "hear a fast, honest verdict on fixes I ship"
+        }
+      ],
+      "who": [
+        {
+          "t": "upstream maintainer receiving reports from this project"
+        }
+      ],
+      "want": [
+        {
+          "t": "the downstream reporter's lifecycle comments generated from my issue's real context — crediting whoever provided the fix or workaround, honest about whether the fix is verified in the wild or merely installed, and posted even when my issue has already been closed — instead of direction-inverted form-letters that thank me for a report I never filed."
+        }
+      ]
+    },
+    "STORY-029": {
+      "value": [
+        {
+          "t": "the person hitting the problem can unblock themselves now — rather than waiting idle for the full fix"
+        }
+      ],
+      "who": [
+        {
+          "t": "maintainer"
+        }
+      ],
+      "want": [
+        {
+          "t": "the documented workaround posted back to the reporter's channel once we reach Known Error."
+        }
+      ]
+    },
+    "STORY-030": {
+      "value": [
+        {
+          "t": "the reporter knows the fix is really being worked — not stalled or forgotten, so they stay engaged instead of escalating or re-reporting"
+        }
+      ],
+      "who": [
+        {
+          "t": "maintainer"
+        }
+      ],
+      "want": [
+        {
+          "t": "the channel updated when a fix is underway (an RFC is accepted / implementation has started)."
+        }
+      ]
+    },
+    "STORY-031": {
+      "value": [
+        {
+          "t": "the person who reported the problem gets the resolution — knows the fix shipped, can confirm it works for them, and sees the loop closed rather than left hanging"
+        }
+      ],
+      "who": [
+        {
+          "t": "maintainer"
+        }
+      ],
+      "want": [
+        {
+          "t": "to tell them it's released and close the channel on their confirmation."
+        }
+      ]
     }
   },
   "hrefs": {
-    "STORY-045": "../../stories/draft/STORY-045-outbound-lifecycle-comments-generated-from-real-issue-context.md",
+    "STORY-027": "../../stories/done/STORY-027-capture-a-problem-from-an-inbound-channel.md",
+    "STORY-028": "../../stories/draft/STORY-028-acknowledge-the-inbound-report.md",
     "STORY-048": "../../stories/draft/STORY-048-inbound-discovery-preflight-honours-an-empty-channel-list.md",
+    "STORY-045": "../../stories/draft/STORY-045-outbound-lifecycle-comments-generated-from-real-issue-context.md",
+    "STORY-029": "../../stories/draft/STORY-029-share-the-workaround-with-the-reporter.md",
+    "STORY-030": "../../stories/draft/STORY-030-tell-the-reporter-a-fix-is-underway.md",
+    "STORY-031": "../../stories/draft/STORY-031-tell-the-reporter-released-and-close-the-loop.md",
     "JTBD-301": "../../jtbd/plugin-user/JTBD-301-report-problem-without-pre-classifying.proposed.md",
-    "P376": "../../problems/known-error/376-catchup-scanner-misses-inbound-direction-outbound-templates-need-4-directive-rework.md",
+    "P170": "../../problems/known-error/170-problem-tickets-strain-as-fixes-decompose-into-multiple-coordinated-changes-need-rfc-framework.md",
+    "P080": "../../problems/verifying/080-no-bidirectional-update-of-upstream-reported-problems.md",
     "JTBD-006": "../../jtbd/developer/JTBD-006-work-backlog-afk.proposed.md",
-    "P431": "../../problems/known-error/431-check-upstream-cache-staleness-misfires-on-declined-permanently-empty-channels.md"
+    "P431": "../../problems/known-error/431-check-upstream-cache-staleness-misfires-on-declined-permanently-empty-channels.md",
+    "P376": "../../problems/known-error/376-catchup-scanner-misses-inbound-direction-outbound-templates-need-4-directive-rework.md"
   }
 }
   </script>
