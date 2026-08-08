@@ -44,6 +44,14 @@
 # @adr ADR-038 (progressive disclosure — per-row byte budget)
 # @adr ADR-049 (invoked via wr-itil-check-upstream-responses bin shim)
 # @adr ADR-062 (inbound discovery — symmetric counterpart)
+# @adr ADR-102 (prefer an upstream pull request over an issue — the
+#   `## Reported Upstream` disclosure path selects `gh pr view` over
+#   `gh issue view`. An ABSENT path means a ticket written before that
+#   decision, which the pre-ADR-102 skill could only ever have filed as
+#   a public issue — so absent means issue, and no probe is needed. This
+#   is the explicit legacy-path decision ADR-102 requires; an
+#   issue-then-pr probe would double the call count for every legacy
+#   ticket on every cycle against a `gh` rate budget nothing governs.)
 # @jtbd JTBD-004 (cross-repo coordination — primary anchor)
 # @jtbd JTBD-006 (AFK-safe)
 # @jtbd JTBD-001 (governance without slowing down)
@@ -146,6 +154,30 @@ extract_upstream_url() {
   ' "$1"
 }
 
+# Extract the `## Reported Upstream` disclosure-path line (lower-cased).
+# Same awk shape as catchup-scan.sh's helper of the same name.
+extract_disclosure_path() {
+  awk '
+    /^## Reported Upstream/ { in_section = 1; next }
+    /^## / && in_section { in_section = 0 }
+    in_section && /^- \*\*Disclosure path\*\*:/ {
+      sub(/^- \*\*Disclosure path\*\*: */, "")
+      print
+      exit
+    }
+  ' "$1" | tr "[:upper:]" "[:lower:]"
+}
+
+# Which `gh` read subcommand polls this ticket's upstream artefact?
+# `pull request` (or `pull-request`) → `gh pr view`; anything else,
+# INCLUDING an absent disclosure path, → `gh issue view` (ADR-102).
+upstream_view_noun() {
+  case "$1" in
+    *pull*request*) echo "pr" ;;
+    *) echo "issue" ;;
+  esac
+}
+
 # Extract numeric ID prefix from a ticket file basename.
 extract_ticket_id() {
   local base
@@ -189,8 +221,13 @@ for ticket_file in "${TICKET_FILES[@]}"; do
 
   POLL_COUNT=$((POLL_COUNT + 1))
 
-  # Poll the upstream.
-  if ! gh_output="$("$GH_BIN" issue view "$upstream_url" --json comments,state,labels,updatedAt 2>&1)"; then
+  # Poll the upstream. One call either way — `gh pr view` accepts the same
+  # four fields as `gh issue view`, so a pull-request ticket costs exactly
+  # what an issue ticket costs. `state` carries MERGED for a merged pull
+  # request, distinct from CLOSED, so a rejected one is not logged as a
+  # resolution.
+  view_noun="$(upstream_view_noun "$(extract_disclosure_path "$ticket_file")")"
+  if ! gh_output="$("$GH_BIN" "$view_noun" view "$upstream_url" --json comments,state,labels,updatedAt 2>&1)"; then
     short_reason="$(echo "$gh_output" | head -1 | cut -c1-80)"
     printf "FAIL    %s %s reason=%s\n" "$ticket_id" "$upstream_url" "$short_reason"
     PARTIAL_FAILURE=1

@@ -272,3 +272,73 @@ make_inbound_ticket() {
   [[ "$output" != *"P400"* ]]
   [[ "$output" != *"P401"* ]]
 }
+
+# ── ADR-102: the CATCHUP row carries the artefact discriminator ─────────────
+#
+# ADR-102 adds a `pull request` disclosure path. Two things must hold: the
+# path is ACTIONABLE (so it must not be skipped alongside out-of-band and
+# mailbox), and the discriminator must reach the consumer on the worklist
+# row — otherwise `/wr-itil:update-upstream` runs `gh issue comment` against
+# a pull request. Recording the value on the ticket without propagating it
+# is the half-migration these cases exist to catch.
+#
+# @jtbd JTBD-201 (audit trail — issue vs pull request stays distinguishable)
+# @jtbd JTBD-001 (governance without slowing down — the worklist is derived,
+#   not hand-policed, so the row has to carry what the consumer needs)
+# @adr ADR-102
+
+@test "ADR-102: a pull-request ticket emits CATCHUP with disclosure=pull-request" {
+  make_reported_ticket "500-pr.closed.md" "https://github.com/o/r/pull/5" "pull request"
+  run bash "$SCRIPT" --problems-dir "$FIX"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"CATCHUP P500 https://github.com/o/r/pull/5 state=closed transition=Verifying->Closed disclosure=pull-request"* ]]
+}
+
+@test "ADR-102: a pull-request ticket is NOT skipped as out-of-band" {
+  make_reported_ticket "501-pr.closed.md" "https://github.com/o/r/pull/6" "pull request"
+  run bash "$SCRIPT" --problems-dir "$FIX"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"SKIP    P501"* ]]
+  [[ "$output" == *"CATCHUP P501"* ]]
+}
+
+@test "ADR-102: an issue ticket emits CATCHUP with disclosure=issue" {
+  make_reported_ticket "502-issue.closed.md" "https://github.com/o/r/issues/7" "public issue"
+  run bash "$SCRIPT" --problems-dir "$FIX"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"CATCHUP P502 https://github.com/o/r/issues/7 state=closed transition=Verifying->Closed disclosure=issue"* ]]
+}
+
+@test "ADR-102: a legacy ticket with no disclosure-path line emits disclosure=issue" {
+  # Pre-ADR-102 tickets carry no disclosure path; absent means issue.
+  make_reported_ticket "503-legacy.closed.md" "https://github.com/o/r/issues/8" ""
+  run bash "$SCRIPT" --problems-dir "$FIX"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"CATCHUP P503 https://github.com/o/r/issues/8"* ]]
+  [[ "$output" == *"disclosure=issue"* ]]
+}
+
+@test "ADR-102: the hyphenated pull-request spelling is tolerated on the wire" {
+  make_reported_ticket "504-pr.closed.md" "https://github.com/o/r/pull/9" "pull-request"
+  run bash "$SCRIPT" --problems-dir "$FIX"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"disclosure=pull-request"* ]]
+}
+
+@test "ADR-102: out-of-band and mailbox paths are still skipped" {
+  make_reported_ticket "505-oob.closed.md" "https://github.com/o/r/issues/10" "drafted-and-saved (out-of-band)"
+  make_reported_ticket "506-mbx.closed.md" "https://github.com/o/r/issues/11" "mailbox"
+  run bash "$SCRIPT" --problems-dir "$FIX"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"SKIP    P505"* ]]
+  [[ "$output" == *"SKIP    P506"* ]]
+}
+
+@test "ADR-102: the outbound worklist row stays within the ADR-038 150-byte budget" {
+  make_reported_ticket "507-long.closed.md" "https://github.com/averylongowner/withaverylongreponame/pull/123456" "pull request"
+  run bash "$SCRIPT" --problems-dir "$FIX"
+  [ "$status" -eq 0 ]
+  line="$(printf '%s\n' "$output" | grep '^CATCHUP P507')"
+  [ -n "$line" ]
+  [ "${#line}" -le 150 ]
+}

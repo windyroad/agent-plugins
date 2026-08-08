@@ -1,6 +1,6 @@
 ---
 name: wr-itil:check-upstream-responses
-description: Poll upstream issues we've filed via `/wr-itil:report-upstream` and surface new comments, state changes, or label changes since last check. Reads `## Reported Upstream` back-link sections in local problem tickets, queries `gh issue view` (read-only), diffs against `docs/problems/.outbound-responses-cache.json`, and appends an audit-log entry to `docs/audits/outbound-responses-log.md`. Outbound symmetric counterpart to ADR-062's inbound discovery pipeline (P249 Phase 1).
+description: Poll upstream issues we've filed via `/wr-itil:report-upstream` and surface new comments, state changes, or label changes since last check. Reads `## Reported Upstream` back-link sections in local problem tickets, queries `gh issue view` — or `gh pr view` when the disclosure path records a pull request (ADR-102) — both read-only, diffs against `docs/problems/.outbound-responses-cache.json`, and appends an audit-log entry to `docs/audits/outbound-responses-log.md`. Outbound symmetric counterpart to ADR-062's inbound discovery pipeline (P249 Phase 1).
 allowed-tools: Read, Edit, Write, Bash, Glob, Grep
 ---
 
@@ -14,14 +14,14 @@ This is **Phase 1** of P249. Phase 1 covers the **us-as-upstream-reporter** half
 
 In scope:
 - Scan `docs/problems/**/*.md` for `## Reported Upstream` back-link sections (the contract section written by `/wr-itil:report-upstream` Step 7 — see [ADR-024](../../../../docs/decisions/024-cross-project-problem-reporting-contract.proposed.md) Step 7).
-- For each ticket with a back-link, extract the `- **URL**:` line and poll the upstream issue via `gh issue view <url> --json comments,state,labels,updatedAt`.
+- For each ticket with a back-link, extract the `- **URL**:` line and poll the upstream artefact. Read the `- **Disclosure path**:` line to pick the subcommand: `pull request` (or `pull-request`) uses `gh pr view <url> --json comments,state,labels,updatedAt`; anything else, **including an absent line**, uses `gh issue view` with the same four fields. Absent means a ticket written before ADR-102, which could only have been filed as a public issue — so it is read as an issue, with no probe. One call either way.
 - Diff against `docs/problems/.outbound-responses-cache.json` (cache file mirroring the inbound `.upstream-cache.json` shape per ADR-031 § "Cache files live under docs/problems/").
 - Surface five response classes: NEW (new comments), STATE (state change), LABEL (label change), NONE (no change), FAIL (gh poll error).
 - Update the cache file with the latest seen state.
 - Append a timestamped pass entry to `docs/audits/outbound-responses-log.md` (audit-log mirroring `docs/audits/inbound-discovery-log.md` per ADR-062's audit-log surface contract).
 
 Out of scope:
-- Posting comments back to the upstream issue. The skill is **read-only externally** — does not trip ADR-028's external-comms gate.
+- Posting comments back to the upstream issue or pull request. The skill is **read-only externally** — does not trip ADR-028's external-comms gate.
 - Auto-transitioning local ticket lifecycle based on upstream state change (that is P080's bidirectional update axis, separate).
 - Polling against the inbound-discovery channels (`docs/problems/.upstream-channels.json`). That is the inverse axis, owned by `/wr-itil:review-problems` Step 4.5 per ADR-062.
 - Phase 2 external-reporter-as-our-reporter surface (deferred).
@@ -43,7 +43,7 @@ Out of scope:
 
 This skill is **AFK-safe by construction**:
 
-- Read-only `gh issue view` calls — does NOT fire ADR-028 external-comms gate.
+- Read-only `gh issue view` / `gh pr view` calls — neither fires ADR-028's external-comms gate.
 - No `AskUserQuestion` calls — five flag-based knobs (`--problems-dir`, `--cache-file`, `--audit-log`, `--ticket`, `--force-recheck`) are the user-direction surface per CLAUDE.md `act on obvious, AskUserQuestion for ambiguous, NEVER prose-ask` (P085).
 - Partial-failure exit code (2) lets AFK orchestrators distinguish "some upstream URLs were unreachable" from "everything broke" without halting the loop.
 
@@ -63,7 +63,7 @@ The script:
 
 1. Walks `<problems-dir>` (both flat layout `<NNN>-*.<state>.md` AND per-state subdir layout `<state>/<NNN>-*.md` per RFC-002 dual-tolerant migration).
 2. For each ticket file, extracts the `## Reported Upstream` URL line. Tickets without that section are silently skipped.
-3. For each URL, calls `gh issue view <url> --json comments,state,labels,updatedAt`.
+3. For each URL, calls `gh issue view` or `gh pr view` (chosen by the disclosure path) with `--json comments,state,labels,updatedAt`. A merged pull request reports `state=MERGED`, distinct from `CLOSED`, so a rejected one is not recorded as a resolution.
 4. Compares the response against the cached entry for that ticket and emits one of: NEW / STATE / LABEL / NONE / FAIL.
 5. Updates the cache file and appends an audit-log entry.
 
@@ -110,7 +110,7 @@ Three invocation surfaces:
 
 This skill's contract holds when:
 
-1. The script `packages/itil/scripts/check-upstream-responses.sh` is read-only externally — only `gh issue view` (no `gh issue comment`, no `gh issue create`, no `gh api`).
+1. The script `packages/itil/scripts/check-upstream-responses.sh` is read-only externally — only `gh issue view` and `gh pr view` (no `gh issue comment`, no `gh pr comment`, no `gh issue create`, no `gh pr create`, no `gh api`).
 2. The script extracts the URL from `## Reported Upstream` sections matching the format `- **URL**: <url>` per ADR-024 Step 7's back-link contract.
 3. After a successful pass, the cache file exists, is valid JSON, and contains a `tickets.<P<NNN>>` entry for every polled ticket.
 4. After a successful pass, the audit-log file exists and has a new `## YYYY-MM-DDTHH:MM:SSZ` heading appended.

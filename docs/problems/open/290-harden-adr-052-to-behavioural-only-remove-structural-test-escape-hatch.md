@@ -129,3 +129,11 @@ This question is queued in `outstanding_questions` for the user's next interacti
 ## Ratified Direction - 2026-07-04 interactive decision drain
 
 **Provision a CI claude-auth secret** (USER ACTION), then wire the promptfoo behavioural checks to gate CI merges, THEN delete the structural grep-the-prose tests. Also unblocks P324 (agent-prose harness S3). Do NOT delete structural tests before CI-wiring exists.
+
+## Touched-and-deferred structural contracts
+
+ADR-054's opportunistic-retrofit clause fires when a maintainer edits a `SKILL.md` that has a sibling structural `contract.bats`. ADR-052's 2026-06-09 amendment removed the "or carry an in-file justification comment" branch, so retrofit is the only surviving discharge — and retrofit is blocked here on this ticket's own Ratified Direction (CI-wire the promptfoo checks first; do not delete structural tests before CI-wiring exists) and on P324.
+
+Recording the touches so they are not lost:
+
+- **2026-08-08** — implementing ADR-102 (prefer an upstream pull request over an issue) edited `packages/itil/skills/report-upstream/SKILL.md` and `packages/itil/skills/update-upstream/SKILL.md`. Their siblings `packages/itil/skills/report-upstream/test/report-upstream-contract.bats` and `packages/itil/skills/update-upstream/test/update-upstream-contract.bats` are **touched-and-deferred pending P324**. No in-file justification comment was added (that is ADR-052's removed Surface 2), and **no new structural assertions were added to either file** — ADR-052 forbids those under any justification. The new coverage for that change went to genuinely behavioural bats over the two executables (`packages/itil/scripts/test/`) and to promptfoo Tier-A/Tier-B assertions in the two skills' `eval/promptfooconfig.yaml`.
