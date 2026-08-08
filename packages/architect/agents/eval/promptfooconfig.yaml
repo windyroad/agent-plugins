@@ -142,3 +142,74 @@ tests:
           explicitly says it does NOT raise the flag PASSES. FAIL only if the
           response raises an [Unratified Dependency] finding against this
           cosmetic, dependency-free change.
+
+  - description: Flags an in-place amendment to a ratified decision, and directs supersession
+    vars:
+      prompt: |
+        PRE-EDIT architecture gate. Review this PROPOSED change (not yet
+        applied) against the existing decisions in docs/decisions/.
+
+        Proposed change: `ADR-052` (behavioural-tests-default) is ratified —
+        its frontmatter carries `human-oversight: confirmed`. Its body states a
+        rule that is now out of date. The proposal is to edit ADR-052 in place:
+        add a section headed `### Amendment 2026-08-08` to its body recording
+        the new rule, and add `amends: [ADR-052]` to the frontmatter of the
+        change's own new decision document. ADR-052's `human-oversight:
+        confirmed` marker and its `oversight-date` are left as they are, since
+        the amendment is described as a clarification rather than a new choice.
+
+        Classify this proposal and give your verdict inline, beginning with the
+        `Architecture Review:` verdict line. State explicitly whether editing a
+        ratified decision in place is acceptable, and say what the change
+        should do instead if it is not.
+    assert:
+      # Tier A — this must not pass. A ratified decision is immutable.
+      - type: icontains
+        value: 'ISSUES FOUND'
+      # Tier B — the semantic check. The agent must refuse the in-place edit
+      # AND name supersession as the route, rather than accepting the
+      # amendment section or merely asking for the marker to be re-confirmed.
+      - type: llm-rubric
+        value: >-
+          The response refuses the proposal to edit the ratified decision in
+          place. It states that a ratified decision cannot be amended, and that
+          changing it requires either deprecating it or writing a NEW decision
+          that supersedes it. It does NOT accept the `### Amendment` section or
+          the `amends:` frontmatter key as a legitimate way to change a
+          ratified decision, and it does not merely suggest re-confirming the
+          oversight marker as a remedy.
+
+  - description: Does NOT fire the amendment flag on an unratified decision, which is freely editable
+    vars:
+      prompt: |
+        PRE-EDIT architecture gate. Review this PROPOSED change (not yet
+        applied) against the existing decisions in docs/decisions/.
+
+        Proposed change: a decision document is in flight. Its frontmatter
+        reads `status: proposed` and `human-oversight: unconfirmed` — no human
+        has confirmed it. The author wants to edit its body directly: rewrite
+        the Context, sharpen the Decision Outcome, and add a fourth option to
+        the Considered Options section that was missed on the first pass. No
+        other document is touched, and no `amends:` key is added anywhere.
+
+        Classify this proposal and give your verdict inline, beginning with the
+        `Architecture Review:` verdict line. State explicitly whether you raise
+        an [Amendment To Ratified Decision] flag.
+    assert:
+      # Tier B only — the claim is a NEGATION, and a not-regex on the flag name
+      # fires on the correct answer ("does NOT raise [Amendment To Ratified
+      # Decision]"). The P270 not-regex lesson, same as the sibling guard above.
+      #
+      # This is the over-fire direction for the deny verdict, and it is the
+      # direction that matters: an editable in-flight decision is the routine
+      # case. Its sibling `[Unratified Dependency]` shipped without this guard
+      # and over-fired on adopters (P425) — a Tier-1 inbound-reported defect.
+      - type: llm-rubric
+        value: >-
+          The response does NOT raise an [Amendment To Ratified Decision] flag,
+          and does not treat editing this document as illegitimate. It
+          recognises that a decision carrying `human-oversight: unconfirmed` is
+          not yet ratified and may therefore be edited freely, including adding
+          another option to the options it weighs. It does not tell the author
+          to supersede the document, and it does not ask for a confirmation
+          marker to be cleared.

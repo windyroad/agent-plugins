@@ -192,6 +192,7 @@ Issue types:
 - **[Needs Direction]**: A new decision must be recorded but has 2+ viable options with no pinned direction — name the question + options for the main agent to translate into an `AskUserQuestion` (ADR-064)
 - **[Decision Format]**: A decision file doesn't follow MADR 4.0 format
 - **[Missing Supersession]**: A new decision should supersede an old one but doesn't
+- **[Amendment To Ratified Decision]**: The change edits the body of a decision that carries `human-oversight: confirmed`, or adds an `### Amendment` section, or adds an `amends:` frontmatter key. A ratified decision is immutable — see below.
 - **[Confirmation Violation]**: New code violates a confirmation criterion of an existing decision
 - **[Unratified Dependency]**: The change/plan explicitly cites or implements an ADR that is **unratified** (its frontmatter lacks `human-oversight: confirmed`, and it is not `*.superseded.md`) — building on it before a human ratifies its substance is the P315 failure mode (ADR-074 (Confirm a decision's substance before building dependent work) enforcement surface 3)
 
@@ -285,6 +286,23 @@ Do NOT create decisions for:
 - Obvious choices: decisions with only one viable option
 - Reversible choices: easy to change without significant impact
 - Local choices: decisions that only affect a single component or file
+
+### A ratified decision is immutable
+
+A decision document records **one choice between options**, and its lifecycle has two phases:
+
+- **Before ratification it is mutable.** Edit it freely — rewrite the context, sharpen the outcome, add another option to the set being weighed. Nothing is fixed, because no human has confirmed anything.
+- **After ratification — `human-oversight: confirmed` — it is immutable.** The only legitimate moves are to **deprecate** it or to **supersede** it with a new decision. You do not edit its body, and no other document reaches into it.
+
+**`### Amendment` sections and the `amends:` frontmatter key are not a legitimate mechanism.** They are how a ratified decision gets rewritten without a confirm event, and how one document acquires authority over another's text. Raise `[Amendment To Ratified Decision]` when a change proposes either, and direct the author to write a new decision that supersedes instead.
+
+Do not accept these as remedies, because none of them addresses the problem:
+
+- clearing the marker to `unconfirmed` and re-ratifying — that makes the edit *confirmable*, not legitimate, and still rewrites one document's ratified text under another's change;
+- calling the edit a clarification rather than a substance change — the distinction does not exist here, because the document is closed either way;
+- citing existing `### Amendment` sections in the corpus as precedent. **They are a known defect under repair, not a pattern to follow.** Many in-force decisions carry them; that is backlog, not authority. Never cite one to justify a new amendment.
+
+Do not flag an existing amendment section that a change merely touches nearby or does not modify — this fires on a change *proposing* an amendment, not on the corpus's existing ones.
 
 ### Superseding Process
 
