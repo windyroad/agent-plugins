@@ -83,6 +83,7 @@ Destination-specific pre-flight checks gate the transition. If any check fails, 
 - [ ] A reproduction test exists or is referenced
 - [ ] A workaround is documented (even if "feature disabled")
 - [ ] Effort bucket re-rated against the now-documented fix strategy; if the bucket changed since creation, update the Effort / WSJF lines and note the reason (P047 — creation-time estimates drift as scope clarifies)
+- [ ] **Status multiplier re-rated alongside the Effort re-rate** — this transition changes the multiplier from Open 1.0 to Known Error 2.0, so recompute WSJF as `(Severity × 2.0) / Effort Divisor` and write the result to both the ticket's WSJF line and its README row (P477). Recomputing the Effort divisor without the multiplier is the failure mode: the divisor doubles with nothing to offset it and the stored value halves. A transition that also re-rates M → L legitimately leaves the number unchanged — the two doublings cancel — so an unchanged value is only correct if you actually recomputed it.
 
 **Known Error → Verification Pending** (`<status>` = `verifying`) requires:
 

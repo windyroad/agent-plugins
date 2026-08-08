@@ -65,6 +65,27 @@ setup() {
   SKILL_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
   SKILL_FILE="${SKILL_DIR}/SKILL.md"
   SINGULAR_SKILL_FILE="${SKILL_DIR}/../transition-problem/SKILL.md"
+  MANAGE_SKILL_FILE="${SKILL_DIR}/../manage-problem/SKILL.md"
+}
+
+@test "all three Open to Known Error checklists mandate the status-multiplier re-rate (P477 lockstep)" {
+  # The Open → Known Error transition changes the WSJF status multiplier
+  # from 1.0 to 2.0, and all three checklists historically mandated an
+  # Effort re-rate without it — so the divisor was updated, the
+  # multiplier was not, and the stored WSJF halved (P477).
+  #
+  # ADR-010's copy-not-move rule means each of the three surfaces hosts
+  # its own copy of the pre-flight checklist, so the clause must appear
+  # in all three or it drifts back on whichever surface lacks it. This
+  # is a structural grep by the documented Permitted Exception for
+  # *-contract.bats drift detection, not an ADR-052 violation.
+  [ -f "$SINGULAR_SKILL_FILE" ]
+  [ -f "$MANAGE_SKILL_FILE" ]
+  for f in "$SKILL_FILE" "$SINGULAR_SKILL_FILE" "$MANAGE_SKILL_FILE"; do
+    run grep -icE "status multiplier re-rated" "$f"
+    [ "$status" -eq 0 ]
+    [ "$output" -ge 1 ]
+  done
 }
 
 @test "SKILL.md exists and has frontmatter" {
