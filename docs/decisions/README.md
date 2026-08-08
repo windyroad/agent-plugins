@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 99 (88 in-force, 11 historical)
+**Total ADRs:** 100 (89 in-force, 11 historical)
 
 ---
 
 ## In-force decisions
 
-_88 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_89 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -436,6 +436,11 @@ _88 ADRs. These are the current rules. The architect agent reads this section fi
 **Chosen:** Chosen option: **1, bounded AFK-accept carve-out — opt-in and fail-closed**, composed with option 2 rather than replacing it.
 **Confirmation:** A story declaring the carve-out with all parents confirmed is eligible; one with an unconfirmed parent is not;...; The carve-out is not-eligible when the project has not opted in, even when (a) and (b) both hold; and not-elig...; A commit referencing an accepted-but-unratified story is blocked regardless of config; a ratified story's comm...; A map re-ratified with the story's card already present still satisfies condition (a) — behavioural test for...; detect-unratified-stories-maps default stdout is byte-identical to before the flag existed — behavioural tes...
 **Related:** ADR-090, ADR-095, ADR-096, ADR-060, ADR-098, ADR-070, ADR-066, ADR-068, ADR-074
+### ADR-102 — Prefer an upstream pull request over an issue when the upstream accepts pull requests
+**Status:** proposed | **Oversight:** unconfirmed
+**Decides:** `/wr-itil:report-upstream` prefers opening a pull request over filing an issue whenever the upstream accepts contributions — the predicate is acceptance of contributions, not our write access, so fork-and-PR counts and third-party dependencies stop being a terminal issue-only case. Four fallbacks route back to the issue path (upstream closed to contributions, maintainers' design decision needed, security-classified, or no defensible fix in hand), the PR body defers to the upstream's own template, and under AFK the branch degrades to the issue path with the drafted PR queued.
+**Confirmation:** PR preferred on an acceptance predicate, not permission level; all four issue-path fallbacks implemented; PR body defers to `.github/PULL_REQUEST_TEMPLATE.md`, issue branch keeps ADR-033's shape; AFK degrades to issue + queues the draft; new disclosure-path value lands with every consuming site (check-upstream-responses.sh, catchup-scan.sh, update-upstream, report-upstream dedup path) plus fixtures; legacy-ticket polling path decided explicitly; `gh pr create` named in report-upstream's gated surfaces; unscored-diff surface closed or ticketed; ADR-024 forward-pointer (deferred to the skill-change job); one real PR driven end to end.
+**Related:** ADR-073, ADR-024, ADR-033, ADR-028, ADR-015, ADR-032, ADR-014, ADR-004, ADR-077
 
 ---
 
