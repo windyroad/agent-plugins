@@ -1277,3 +1277,35 @@ JSON
   [ "$status" -ne 0 ] || { echo "a live story was allowed in the graveyard row"; return 1; }
   [[ "$output" == *"STORY-981"* ]] || { echo "the refusal does not name the intruder"; return 1; }
 }
+
+@test "a story may span activities but not rows — it ships in one release" {
+  # A story appearing in two columns is the grid working: one piece of work can
+  # serve two steps of a journey. Two ROWS is a contradiction, because a row is
+  # a release and a story ships once. This fired for real: repointing a card at
+  # a story that already had one on the same map put it in both the pre-RFC row
+  # and an RFC row, and the map was ratified before anyone noticed.
+  local root="$TMP/spanrows"
+  mkdir -p "$root/docs/story-maps/draft" "$root/docs/stories/done"
+  printf -- '---\nstatus: done\n---\n# STORY-995\n' > "$root/docs/stories/done/STORY-995-a.md"
+
+  # Two activities, one row — allowed.
+  local ok="$root/docs/story-maps/draft/STORY-MAP-995-x.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    printf '%s\n' '{ "storyMapId": "STORY-MAP-995", "title": "T", "traces": { "jtbd": ["JTBD-900"] }, "backbone": [ { "id": "a", "title": "A" }, { "id": "b", "title": "B" } ], "releases": [ { "id": "r1", "name": "N", "rfc": "RFC-900" } ], "tasks": [ { "activity": "a", "release": "r1", "title": "First step", "storyId": "STORY-995" }, { "activity": "b", "release": "r1", "title": "Second step", "storyId": "STORY-995" } ] }'
+    printf '</script>\n'
+  } > "$ok"
+  run node "$RENDER" "$ok"
+  [ "$status" -eq 0 ] || { echo "a story spanning two activities in one row was refused: $output"; return 1; }
+
+  # Two rows — refused.
+  local bad="$root/docs/story-maps/draft/STORY-MAP-996-y.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    printf '%s\n' '{ "storyMapId": "STORY-MAP-996", "title": "T", "traces": { "jtbd": ["JTBD-900"] }, "backbone": [ { "id": "a", "title": "A" }, { "id": "b", "title": "B" } ], "releases": [ { "id": "old", "name": "History", "preRfc": true }, { "id": "r1", "name": "N", "rfc": "RFC-900" } ], "tasks": [ { "activity": "a", "release": "r1", "title": "In the release", "storyId": "STORY-995" }, { "activity": "b", "release": "old", "title": "Also in history", "storyId": "STORY-995" } ] }'
+    printf '</script>\n'
+  } > "$bad"
+  run node "$RENDER" "$bad"
+  [ "$status" -ne 0 ] || { echo "a story was allowed to ship in two releases"; return 1; }
+  [[ "$output" == *"STORY-995"* ]] || { echo "the refusal does not name the story"; return 1; }
+}

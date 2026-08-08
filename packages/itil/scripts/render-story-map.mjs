@@ -770,6 +770,33 @@ function renderTrace(map, derived) {
  *  holds. The rule runs both ways: a graveyard row takes nothing else, or it
  *  becomes a quiet place to park live work.
  */
+/** A story ships in exactly one release.
+ *
+ *  Two cards for one story across two ACTIVITIES is the grid working — one
+ *  piece of work can serve two steps of a journey. Across two ROWS it is a
+ *  contradiction, because a row is a release. This fired for real: a card was
+ *  repointed at a story that already had one on the same map, putting it in
+ *  both the pre-RFC row and an RFC row, and the map was ratified before anyone
+ *  noticed.
+ */
+function assertOneReleasePerStory(map) {
+  const rows = new Map();
+  for (const t of map.tasks ?? []) {
+    if (!t.storyId) continue;
+    if (!rows.has(t.storyId)) rows.set(t.storyId, new Set());
+    rows.get(t.storyId).add(t.release);
+  }
+  const split = [...rows].filter(([, r]) => r.size > 1);
+  if (!split.length) return;
+  const lines = ['this map ships a story in more than one release.'];
+  for (const [id, r] of split) lines.push(`    - ${id} appears in rows: ${[...r].join(', ')}`);
+  lines.push('');
+  lines.push('  A story may span activities — one piece of work can serve two');
+  lines.push('  steps of a journey — but a row is a release, and a story ships');
+  lines.push('  once. Keep the card in the row that actually delivers it.');
+  throw new Error(lines.join('\n'));
+}
+
 function assertArchivedIsSeparated(map, storiesDir) {
   if (!storiesDir || !existsSync(storiesDir)) return;
   const graveyard = new Set((map.releases ?? []).filter((r) => r.graveyard).map((r) => r.id));
@@ -841,6 +868,7 @@ function render(map, storiesDir, mapPath) {
 
   assertEveryCardHasAStory(map, storiesDir);
   assertArchivedIsSeparated(map, storiesDir);
+  assertOneReleasePerStory(map);
 
   const title = map.title ?? map.storyMapId;
   // Everything derived from outside the island is resolved ONCE and shared by
