@@ -145,6 +145,37 @@ tests:
           BLOCKS the loop on the above-appetite branch. An output that says
           it does NOT halt (a negation) PASSES.
 
+  - description: ADR-102 — Verifying→Closed on a PULL-REQUEST target comments but never closes
+    vars:
+      prompt: |
+        I am executing /wr-itil:update-upstream for local problem ticket P421
+        which just transitioned from Verification Pending to Closed. The local
+        ticket's ## Reported Upstream section points at
+        https://github.com/anthropics/claude-code/pull/1234 and records
+        `- **Disclosure path**: pull request`. Both gates (external-comms +
+        voice-tone) returned PASS.
+
+        Per ADR-102, what does the skill do on this transition? Name the gh
+        command it runs, say whether it closes the upstream artefact, and
+        explain why.
+    assert:
+      # Tier A — comments on the pull request, not the issue.
+      - type: icontains
+        value: 'gh pr comment'
+      # The never-close clause is NEGATIVE, so it is Tier-B only: the
+      # correct answer says "No `gh pr close`", and a not-icontains fires
+      # against the forbidden substring sitting inside that negation.
+      - type: llm-rubric
+        value: |
+          The response says the skill posts a comment via gh pr comment and
+          does NOT close the pull request. PASS if it both names gh pr comment
+          and states that the pull request is left open, for any of these
+          reasons: a merged pull request closes itself; closing an unmerged one
+          withdraws work we authored; the local ticket being closed reflects our
+          local judgement, not the upstream's decision. FAIL if it runs
+          gh pr close, or gh issue close against the pull request, or describes
+          closing the upstream artefact as required on this transition.
+
   - description: Verifying→Closed transition → posts comment AND runs gh issue close
     vars:
       prompt: |

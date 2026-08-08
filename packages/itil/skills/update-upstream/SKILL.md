@@ -49,7 +49,7 @@ The single-ticket form is typically invoked from `/wr-itil:transition-problem` S
 - Determine the local ticket's current Status from the filename suffix.
 - Draft a transition-specific lifecycle-update comment per the templates below (Open→KE / KE→Verifying / Verifying→Closed).
 - Compose the drafted prose through `wr-risk-scorer:external-comms` + `wr-voice-tone:external-comms` gates.
-- Within appetite → post via `gh issue comment <n>`; on Verifying→Closed also run `gh issue close <n>`.
+- Within appetite → post via `gh issue comment <n>`, or `gh pr comment <n>` when the disclosure path records a pull request (ADR-102); on Verifying→Closed also run `gh issue close <n>` — **but never `gh pr close`** (see below).
 - Above appetite → AskUserQuestion (interactive) / queue `outstanding_questions` (AFK, per P352 queue-and-continue).
 - Back-write a `## Upstream Lifecycle Updates` log entry to the local ticket recording the transition, the matched URL, the posted comment URL, and the disclosure path.
 - **Historical catch-up migration (`--catchup`, P080 Phase 2)** — one-shot retroactive scan of the existing `.verifying.md` + `.closed.md` corpus; posts the lifecycle update each linked-upstream ticket should already carry. Idempotent — re-running is safe. See [§ Catchup migration mode](#catchup-migration-mode-phase-2).
@@ -269,6 +269,14 @@ gh issue close "${UPSTREAM_ISSUE_NUMBER}" \
 
 If the issue is already closed upstream (someone else closed it manually), `gh issue close` returns a benign error — capture the existing state and continue to Step 6 with `closed-already-upstream` recorded in the back-write disclosure path.
 
+#### Pull-request targets never get closed (ADR-102)
+
+When the `## Reported Upstream` disclosure path records a **pull request**, post the comment with `gh pr comment` and **stop there**. Do not run `gh pr close`, on this transition or any other.
+
+A merged pull request closes itself, so closing is redundant. An unmerged one is still work we authored and offered; closing it is a hostile act against our own contribution and withdraws it from the maintainer's queue without saying so. The local ticket reaching `.closed.md` means *we* consider the problem resolved locally — it does not mean the upstream has finished deciding.
+
+Record `posted-pr-comment` in the back-write disclosure path. On a pull-request target `posted-comment-and-closed` is unreachable by construction.
+
 ### 6. Back-write to local ticket
 
 Append a log entry to the local ticket's `## Upstream Lifecycle Updates` section (create the section if absent — never inserted mid-document; appended after all existing sections per the same discipline as `## Reported Upstream` in `/wr-itil:report-upstream` Step 7):
@@ -279,7 +287,7 @@ Append a log entry to the local ticket's `## Upstream Lifecycle Updates` section
 - **<YYYY-MM-DD>** — Open → Known Error
   - **Target URL**: <upstream-issue-url>
   - **Comment URL**: <posted-comment-url> (or "queued — see ## Queued Upstream Update" when above-appetite)
-  - **Disclosure path**: posted-comment | posted-comment-and-closed (Verifying → Closed) | queued-above-appetite | closed-already-upstream | skipped-out-of-band
+  - **Disclosure path**: posted-comment | posted-pr-comment (pull-request target, ADR-102 — never closed) | posted-comment-and-closed (Verifying → Closed, issue targets only) | queued-above-appetite | closed-already-upstream | skipped-out-of-band
   - **Gate verdict**: external-comms <band/score> + voice-tone <pass|fail>
 
 - **<YYYY-MM-DD>** — Known Error → Verification Pending
