@@ -104,30 +104,16 @@ Phase 2 lands when the policy/artefact-pair semantics are confirmed for voice-to
 
 ---
 
-## Amendment 2026-06-28 (P379) — policy-ABSENT predicate added to the scaffold-nudge hook
+## Superseded 2026-06-28 predicate — see ADR-108
 
-**The same `risk-scorer-scaffold-nudge.sh` hook now also nudges on the inverse predicate: when `RISK-POLICY.md` is ABSENT ENTIRELY** (not just when it exists and the register dir is missing). On bare policy-absence the hook emits a one-line stderr advisory pointing the adopter at `/wr-risk-scorer:update-policy`. Same read-only shape, same `WR_SUPPRESS_OVERSIGHT_NUDGE=1` envelope (ADR-068).
+The policy-absent arm of the scaffold nudge was added here as an amendment on
+2026-06-28, eighteen days after this decision was ratified. It is now
+**ADR-108 (The risk scorer nudges a project that has no risk policy at all)**,
+ratified 2026-08-09, which also weighs the narrowing that was left open at the
+time — nudging only where a reports directory shows the scorer in use.
 
-### The predicate this reverses
-
-The Phase 1 hook (P297 amendment above) deliberately silent-skipped on policy-absence, reasoning: *"The policy file presence is the user authorisation for the register to exist; without it, the absence of docs/risks/ is not a governance gap."* That rationale is sound **for the register concern** — without a policy there is no register expectation. But it left a second, distinct gap uncovered: an adopter who installs `@windyroad/risk-scorer`, never authors a `RISK-POLICY.md`, and runs sessions for weeks gets the gate's default appetite (5 per ADR-086) silently, with no surfacing that a policy can be authored at all. The capability sits dormant and undiscoverable. P379 records that bare policy-absence IS a (separate, discovery-class) gap, scoped to capability-discoverability rather than register-completeness. The Phase 1 comment is reworded in-source to scope its silence to the register concern.
-
-### Decision driver and the alternative considered
-
-The P379 architect review surfaced an alternative — Option B: nudge **only** when there is positive evidence of risk-scorer usage without a policy (e.g. `.risk-reports/` exists but `RISK-POLICY.md` is absent), to avoid firing every session on adopters who deliberately run policy-free per-change scoring. The chosen option (A, bare-absence nudge) follows the documented user intent in P379's Description (*"if RISK-POLICY.md is absent in an adopter project, the adopter should be auto-interviewed by /wr-risk-scorer:update-policy"*) and the orchestrator's scoping of that intent to a read-only advisory. Option B is queued to the next `/wr-architect:review-decisions` drain as a possible narrowing — see Frontmatter.
-
-### Mechanism
-
-1. A project-dir-exists guard (`[ -d "$PROJECT_DIR" ] || exit 0`) precedes the policy check so a stale `CLAUDE_PROJECT_DIR` stays silent.
-2. Policy-absent arm: `[ ! -f "$POLICY_FILE" ]` → one stderr line citing `/wr-risk-scorer:update-policy`, then exit 0 (the register/curation arms below never run when there is no policy).
-3. AFK self-suppress unchanged — the top-of-file `WR_SUPPRESS_OVERSIGHT_NUDGE=1` short-circuit governs all arms.
-4. Behavioural bats extended: policy-absent → nudge cites update-policy; policy-absent + register-dir-present → nudge still fires (policy-absence wins); policy-absent + AFK guard → silent; non-existent dir → silent.
-
-This supersedes the Phase 1 Confirmation bullet (c) ("silent on policy-absent") — that state now nudges.
-
-### Frontmatter
-
-`human-oversight: unconfirmed` applies to this amendment (the top-level marker stays `confirmed` from the 2026-06-10 drain that ratified the P297 amendment). This P379 amendment was applied by an AFK iter subprocess under `/wr-itil:work-problems`; the substance-confirm marker pipeline requires an AskUserQuestion-shaped event the AFK subprocess cannot produce (P357). Two items are queued to the next interactive `/wr-architect:review-decisions` drain per ADR-066 P348: (1) ratify this amendment's chosen predicate, and (2) the Option B narrowing (gate on `.risk-reports/` evidence) as a possible refinement.
+Nothing else in this decision changes. The register-absent arm and the
+session-start nudge shape are ADR-047 substance and stand as ratified.
 
 ---
 
@@ -142,7 +128,7 @@ The verification the P375 decision asked for: neither ADR-056 nor ADR-059 owns t
 - **ADR-056** defines the `**Curation**: pending review (auto-scaffolded YYYY-MM-DD)` marker and the write-contract that stamps it; it defers the `/wr-risk-scorer:review-register` DRAIN skill to "when adopter usage demonstrates demand". It documents the *write* of the marker, not any *count* of it.
 - **ADR-059** again defers the same drain skill and, at verdict A1, explicitly *rejects* SessionStart as a firing surface for the register **bootstrap-write** (content generation, more aggressive). The COUNT arm is a read-only stderr count, not a write — so A1 does not reach it and there is no contradiction.
 
-`risk-scorer-scaffold-nudge.sh` is ADR-047's artefact (its two prior arms are documented as the P297 and P379 amendments above). Keeping all three arms of one hook co-located under the hook's home ADR is the correct discovery-surface grain: ADR-056 owns the marker, ADR-047 owns the nudge that surfaces it.
+`risk-scorer-scaffold-nudge.sh` is ADR-047's artefact — the register-absent arm is this decision's own substance, and the policy-absent arm is now ADR-108. Keeping the arms of one hook discoverable from the hook's home ADR is the correct grain: ADR-056 owns the marker, ADR-047 owns the nudge that surfaces it.
 
 ### The P375 class-B fit
 

@@ -56,13 +56,14 @@ REGISTER_DIR="$PROJECT_DIR/docs/risks"
 # to nudge (e.g. a stale CLAUDE_PROJECT_DIR).
 [ -d "$PROJECT_DIR" ] || exit 0
 
-# Policy file absent entirely (P379, inverse predicate of the
+# Policy file absent entirely (ADR-108, inverse predicate of the
 # register-missing arm below). Without a RISK-POLICY.md the risk-scorer
 # gates run at their default appetite (5 per ADR-086) silently, and the
 # capability sits dormant with no surfacing that a policy can be authored.
 # Nudge the adopter to author one via /wr-risk-scorer:update-policy. The
-# original guard treated bare policy-absence as a non-gap; the P379 review
-# (ADR-047 Amendment 2026-06-28) records the predicate reversal. Read-only
+# original guard treated bare policy-absence as a non-gap; ADR-108 weighs
+# that reversal against the narrower alternative — nudging only where a
+# reports directory shows the scorer in use — and takes this one. Read-only
 # — the hook never writes; the policy authoring is gated behind the user
 # invoking the on-demand skill.
 if [ ! -f "$POLICY_FILE" ]; then

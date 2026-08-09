@@ -193,11 +193,11 @@ _93 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-046 — ADR-046 — Blocked-reporters persistence: per-repo, hashed-ID, audit-log-first
 **Status:** accepted | **Oversight:** confirmed
 **Related:** ADR-046, ADR-024, ADR-014, ADR-017, ADR-022, ADR-029, ADR-030, ADR-037, ADR-044
-
 ### ADR-047 — Install-updates scaffolds governance artefacts when policy file is present but artefact is missing
 **Status:** proposed | **Oversight:** confirmed
-**Confirmation:** .claude/skills/install-updates/SKILL.md — Step 6.5 "Scaffold governance artefacts (per-sibling)" exists betw...; .claude/skills/install-updates/REFERENCE.md — new section "Governance-artefact scaffold (P033)" present with...; .claude/skills/install-updates/templates/risk-register-README.md.tmpl — present; adopter-flavoured (no R001 ...; .claude/skills/install-updates/templates/risk-register-TEMPLATE.md.tmpl — present; verbatim copy of this rep...; docs/problems/033-no-persistent-risk-register.known-error.md — Phase 1 marked complete with ADR-047 citation...
-**Related:** ADR-036, ADR-030, ADR-013, ADR-014, ADR-038, ADR-040, ADR-004
+**Decides:** Adopters configure `RISK-POLICY.md` but never get `docs/risks/` (4/6 surveyed projects lacked it), so nothing holds the standing-risk register. A SessionStart hook in the risk-scorer plugin now nudges — never writes — when the policy file is present but the register directory is absent, pointing at the on-demand `/wr-risk-scorer:bootstrap-catalog` skill; a later arm also counts `pending review` entries once the register exists and re-surfaces the backlog every session until drained. (Originally chose an inline `/install-updates` scaffold step; superseded 2026-06-08 because install-updates only reaches sibling projects on one machine. The policy-absent arm moved out to ADR-108.)
+**Confirmation:** `risk-scorer-scaffold-nudge.sh` exists, executable, follows the `architect-oversight-nudge.sh` shape (AFK-guard, silent-on-no-condition, one-line stderr); registered in `hooks.json` under SessionStart matcher `startup`; behavioural bats covers all four detection states plus AFK-guard semantics and the pending-review count arm; compendium regenerated per ADR-077
+**Related:** ADR-108, ADR-036, ADR-030, ADR-013, ADR-014, ADR-038, ADR-040, ADR-045, ADR-049, ADR-056, ADR-059, ADR-066, ADR-068, ADR-077, ADR-084, ADR-004, ADR-074
 
 ### ADR-049 — Plugin-bundled scripts invoked from SKILL.md resolve via `bin/` on `$PATH`
 **Status:** proposed | **Oversight:** confirmed
@@ -458,6 +458,11 @@ _93 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed
 **Confirmation:** A map's rendered RFC list equals the RFCs its rows name, and a hand-written list in the file is ignored in fav...; A row carrying no identity contributes nothing to the list — behavioural test.; A row marked preRfc whose stories have all shipped renders as delivered. An unmarked row whose stories have al...; Renaming a row's RFC does not invalidate the map's approval, because the RFC list is no longer part of what a ...; No map carries a hand-written RFC list — a check across all seven maps, guarded so an unmatched search canno...
 **Related:** ADR-103, ADR-104, ADR-090
+### ADR-108 — The risk scorer nudges a project that has no risk policy at all
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** ADR-047 (in part — the 2026-06-28 policy-absent predicate only)
+**Decides:** When no risk policy file is present, the session-start hook emits one line pointing at the policy-authoring skill and then stops, so someone who never wrote a policy learns they can — and learns they have been running on a default appetite nobody chose. The narrower "only nudge where a reports directory shows the scorer is in use" reading was rejected because it can only fire after scoring has already happened silently, against an appetite the person never saw.
+**Confirmation:** emits on a policy-less project naming the policy-authoring skill, then exits before the register and curation checks; silent on every arm when the suppression variable is set; silent when the project directory is absent; policy absence wins over register presence; coverage lands in the hook's existing test file.
+**Related:** ADR-047, ADR-086, ADR-056
 
 ---
 
