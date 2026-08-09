@@ -463,6 +463,11 @@ _93 ADRs. These are the current rules. The architect agent reads this section fi
 **Decides:** When no risk policy file is present, the session-start hook emits one line pointing at the policy-authoring skill and then stops, so someone who never wrote a policy learns they can — and learns they have been running on a default appetite nobody chose. The narrower "only nudge where a reports directory shows the scorer is in use" reading was rejected because it can only fire after scoring has already happened silently, against an appetite the person never saw.
 **Confirmation:** emits on a policy-less project naming the policy-authoring skill, then exits before the register and curation checks; silent on every arm when the suppression variable is set; silent when the project directory is absent; policy absence wins over register presence; coverage lands in the hook's existing test file.
 **Related:** ADR-047, ADR-086, ADR-056
+### ADR-109 — The jobs reviewer refuses work built on a job nobody has ratified
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** ADR-068 (in part — the 2026-05-27 build-upon guard only)
+**Decides:** The JTBD reviewer fails any change that explicitly cites, implements, or authors a job or persona whose ratification is absent, naming the artefact to ratify — work resting on an unagreed claim is cheaper to stop than to unwind. The trigger is an explicit dependency, never the ambient topic match the reviewer computes for every change, and it keys on ratification rather than lifecycle status; it does not wait for the unratified backlog to be drained, since the guard is what forces the drain.
+**Confirmation:** Change citing an unratified job fails with that job named and how to ratify it; topic-only match passes; ratified-but-draft job passes (status is not the test); superseded job does not fire.
+**Related:** ADR-068, ADR-074
 
 ---
 
