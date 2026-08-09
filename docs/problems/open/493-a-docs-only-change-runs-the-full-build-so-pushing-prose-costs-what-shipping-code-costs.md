@@ -72,10 +72,11 @@ Suspected: the workflow was written to run on everything because that is the saf
 ## Dependencies
 
 - **Blocks**: (none)
-- **Blocked by**: (none)
+- **Blocked by**: **P494** — plugin tests and project-conformance tests are one suite. The filter this ticket asks for is a simple rule once they are separable, and unspecifiable before.
 
 ## Related
 
+- **P494** — the two test categories are not separated. That is the parent of this ticket: the measured path table above describes that defect rather than a constraint to design around, because a conformance check on the real corpus is correct and simply misfiled.
 - **P492** — nothing nudges when unpushed work piles up. The paired concern: that ticket asks for more frequent pushes, this one makes a push cheap enough to want.
 - **ADR-020** — the interactive release trigger, confirmed changeset-only on 2026-08-09. A docs commit produces no changeset, so it already does not trigger a release; what it does trigger is the build.
 

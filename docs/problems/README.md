@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-09 **P492 and P493 captured** — the pressure to keep work-in-progress small has no trigger of its own, so nine commits accumulated unpushed and CI found a defect that had been sitting across several of them; and a docs-only change runs the full build, which argues for holding it (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-08-09 **P494 captured** — tests that verify a plugin and tests that verify this project's use of one are the same suite in the same directory; 257 test files ship to adopters across four packages, thirteen of them asserting on decisions and tickets no adopter has (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -84,6 +84,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P488 | The agent batches artefacts it was told to produce one at a time, then asks permission for the batch — the instruction lives only in session memory and CLAUDE.md prose, so nothing checks it and it decays every session | 12 (High) | Open | M | 2026-08-09 | corrective-feedback |
 | 6 | P489 | The shipped ratification surfaces do not meet the rule they are governed by — both drains, the jobs-and-personas confirm, two authoring surfaces and the marker writers, plus two unanswered design questions | 12 (High) | Open | L | 2026-08-09 | internal |
 | 6 | P490 | The agent sends status reports into a window that can only hold one actionable thing — the same correction fired verbatim on consecutive days, and the memory written after the first did not prevent the second | 12 (High) | Open | M | 2026-08-09 | corrective-feedback |
+| 8 | P494 | Plugin tests and project-conformance tests are the same suite, so neither can be right — 257 test files ship across four packages, thirteen of them asserting on this repository's own governance corpus | 16 (High) | Open | L | 2026-08-09 | corrective-feedback |
 | 6 | P492 | Nothing nudges when unpushed work piles up, so batches grow until someone notices — I002 named this gap in May and it recurred on 2026-08-09 with nine unpushed commits and one undetected defect | 12 (High) | Open | M | 2026-08-09 | corrective-feedback |
 | 4.5 | P491 | The retro context trigger's thresholds are prose in five places and none of them is the decision — two tests redden on contact, the eval keeps certifying the superseded contract silently, and the config surface the decision assumes does not exist | 9 (Medium) | Open | M | 2026-08-09 | internal |
 | 3 | P493 | A docs-only change runs the full build, so pushing prose costs what shipping code costs — which argues for holding it, the accumulation P492 is about | 6 (Medium) | Open | S | 2026-08-09 | corrective-feedback |

@@ -1301,6 +1301,8 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 
 ## 2026-08-09
 
+> Last reviewed: 2026-08-09 **P492 and P493 captured** — the pressure to keep work-in-progress small has no trigger of its own, so nine commits accumulated unpushed and CI found a defect that had been sitting across several of them; and a docs-only change runs the full build, which argues for holding it (lightweight aside via /wr-itil:capture-problem).
+
 > Last reviewed: 2026-08-09 **P491 captured** — ADR-112 settled when the deep context analyser fires, and five shipped surfaces still describe the values it replaced; the eval that should catch that passes either way, and the per-project config the decision assumes has not been built (lightweight aside via /wr-itil:capture-problem).
 
 > Last reviewed: 2026-08-09 **P490 captured** — a five-screen status report ending in an open invitation, sent to a phone with nothing in it to act on; the identical correction had been given the day before and the memory written in response did not prevent the repeat (lightweight aside via /wr-itil:capture-problem).
