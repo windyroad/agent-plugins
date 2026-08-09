@@ -20,18 +20,25 @@ On 2026-08-09 a session pushed nine commits, six of which touched only `docs/`. 
 
 The cost is not really CI time. It is that an expensive push discourages frequent pushing, and frequent pushing is what keeps batches small. P492 records the missing nudge that would ask for more pushes; this ticket is the other half — if pushes become more frequent, what a push costs starts to matter. A docs commit that costs eight minutes of build is an argument for holding it until something else is ready, which is the accumulation both are trying to prevent.
 
-### What "docs-only" has to mean here
+### What "docs-only" has to mean here — measured, not assumed
 
-Not simply "the diff is under `docs/`". This repository's governance documents are read by agents at runtime, and some of them are load-bearing:
+Not simply "the diff is under `docs/`". Some of this repository's documents are asserted against by the test suite, and the set is not the one you would guess. Measured on 2026-08-09 by finding every bats file that reads the real corpus rather than a temp fixture:
 
-- `docs/decisions/README.md` is the architect's routine load surface.
-- `RISK-POLICY.md` drives the scorer.
-- `docs/VOICE-AND-TONE.md` and `docs/STYLE-GUIDE.md` drive reviewers.
-- `docs/jtbd/` drives the jobs reviewer.
+| Path | Asserted by |
+|---|---|
+| `docs/stories/`, `docs/story-maps/` | the oversight mirror lint |
+| `docs/problems/` | the exercise index; the no-type-regression guard |
+| `docs/rfcs/`, `docs/rfcs/README.md` | the stories-extension and rejected-alternatives checks |
+| `docs/risks/README.md` | the register-queue drain |
+| `docs/decisions/` | three test files |
 
-Several of those have tests asserting their shape. So the filter needs to distinguish prose that nothing asserts against from prose that something does — or accept that some `docs/` paths keep triggering the build.
+And the set that **nothing** asserts against, each with zero test files: `docs/jtbd/`, `RISK-POLICY.md`, `docs/VOICE-AND-TONE.md`, `docs/STYLE-GUIDE.md`.
 
-There is also a real hazard in getting it wrong: a path filter that skips too much lets a change through unverified, and a required check that never runs can leave a pull request unable to merge depending on how branch protection is configured. That has to be checked before the filter lands, not after.
+That inverts the obvious guess. The policy documents that drive the reviewers at runtime have no tests; the story and story-map corpus, which reads like ordinary prose, does.
+
+It also sharpens the hazard. A docs-only commit in this repository most often edits stories, story maps or problem tickets — which is precisely the set the corpus lints cover. So the naive filter, "skip the build for anything under `docs/`", would skip the only checks likely to catch a real defect in that commit. The useful filter is close to the inverse of the intuitive one.
+
+A path filter that skips too much also lets a change through unverified, and a required check that never runs can leave a pull request unable to merge depending on branch protection. That has to be checked before the filter lands.
 
 ## Symptoms
 
@@ -56,7 +63,7 @@ Suspected: the workflow was written to run on everything because that is the saf
 
 ### Investigation Tasks
 
-- [ ] Decide what counts as docs-only, given that several `docs/` paths are runtime surfaces with tests asserting their shape. A `paths-ignore` list is the obvious mechanism; the content of the list is the decision.
+- [ ] Decide what counts as docs-only against the measured set above, not the intuitive one. The paths that ARE asserted — stories, story maps, problems, rfcs, `docs/risks/README.md`, decisions — are also the paths a docs commit most often touches, so a `paths-ignore` covering all of `docs/` would skip the checks most likely to fire. The candidate is a narrow ignore-list of the untested paths, which is a smaller win than it first appears and may not be worth the branch-protection risk.
 - [ ] Check branch protection before landing a filter. If a required check is skipped rather than passed, a pull request may become unmergeable — verify the behaviour rather than assuming it.
 - [ ] Decide whether the agent-prose eval job follows the same rule. It is the more expensive of the two and is even less likely to be affected by a prose-only change, but it is also the job that reviews prose.
 - [ ] Confirm the release workflow is unaffected. A docs-only commit should not start a release either, and that is a separate trigger from CI.
