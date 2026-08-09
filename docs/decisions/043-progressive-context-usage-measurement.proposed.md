@@ -2,8 +2,6 @@
 status: "proposed"
 human-oversight: confirmed
 oversight-date: 2026-05-26
-amended: 2026-06-08
-amendment-driver: P295 — settles the Amendment 2026-05-26 follow-up. Combined trigger (calendar-elapse >14 days OR delta >20% any bucket since prior snapshot) auto-invokes the deep layer from run-retro Step 2c with a once-per-day guard (presence of `docs/retros/<TODAY>-context-analysis.md`). Prior amendment (2026-05-26, P283-prong-2-oversight): deep layer MUST have an automatic trigger, not on-demand-only (user direction 2026-05-26 — "it shouldn't rely on someone remembering"; the automatic-cadence principle). See "Amendment 2026-06-08" in Decision Outcome.
 date: 2026-04-26
 decision-makers: [tomhoward]
 consulted: [wr-architect:agent, wr-jtbd:agent]
@@ -34,7 +32,7 @@ The user's delivery-mode preference is **two-layer**: a cheap layer integrated i
 - **ADR-038** (Progressive disclosure for UserPromptSubmit governance prose) — sibling ADR. Its tiered-disclosure pattern + per-row byte budget + advisory-script-plus-bats-fixture triplet is the precedent shape this ADR mirrors.
 - **ADR-040** (Session-start briefing surface) — sibling ADR. Its Tier 1 / Tier 2 / Tier 3 budget envelope is the parent measurement infrastructure the cheap layer aggregates over for the briefing surface; its HTML-comment-trailer pattern is the precedent for snapshot persistence.
 - **ADR-014** (Governance skills commit their own work) — both layers commit their own output per the `work → score → commit` ordering. New commit-message convention `docs(retros): context analysis YYYY-MM-DD` for the deep-layer artefact, amended into ADR-014's Commit Message Convention table.
-- **ADR-013** Rule 6 (AFK fallback) — both layers must have explicit non-interactive behaviour. Cheap layer is silent in AFK; the deep layer is silent (never invokes `AskUserQuestion`) and auto-fires from Step 2c when the combined trigger holds (calendar-elapse >14 days OR delta >20% any bucket since prior snapshot, once-per-day guard via `docs/retros/<TODAY>-context-analysis.md` presence) — see Amendment 2026-06-08. The deep layer remains user-invokable on demand via `/wr-retrospective:analyze-context`.
+- **ADR-013** Rule 6 (AFK fallback) — both layers must have explicit non-interactive behaviour. Cheap layer is silent in AFK; the deep layer is silent (never invokes `AskUserQuestion`) and auto-fires from Step 2c when the trigger holds, under a once-per-day guard via `docs/retros/<TODAY>-context-analysis.md` presence. The trigger itself — its conditions and its thresholds — is ADR-112's. The deep layer remains user-invokable on demand via `/wr-retrospective:analyze-context`.
 - **ADR-009** (Gate marker lifecycle) — does NOT apply. Snapshot persistence uses HTML-comment trailers in the deep layer's report file, not `/tmp` markers. ADR-009's TTL+drift primitive is purpose-built for clearance-marker semantics and would over-engineer a session-frequency snapshot.
 - **`P091`** (parent meta — Session-wide context budget) — this ADR closes P091's "Build a measurement harness" investigation task as subsumed by the broader analyzer+suggestion design.
 - **`P099`** (briefing bloat) and **`P105`** (signal-vs-noise pass) — sibling measurement surfaces; the cheap layer aggregates over them rather than re-measuring.
@@ -50,22 +48,25 @@ The user's delivery-mode preference is **two-layer**: a cheap layer integrated i
 
 **Chosen: Option 1 — two-layer.** Cheap layer (Step 2c in `run-retro`) + deep layer (new `/wr-retrospective:analyze-context` skill). Fail-open guard: if the cheap layer's static budget proof becomes invalid (e.g. byte-count operations grow beyond `< 5%` of session budget), the cheap layer disables itself and Step 2c emits a one-line pointer to the deep layer.
 
-> **Amendment 2026-05-26 — deep layer MUST be automatically triggered (human-oversight correction, P283 prong 2).** The deep layer as originally specified is **on-demand only** (`/wr-retrospective:analyze-context` invoked by the user). User direction 2026-05-26: *"We need a way to automatically trigger the deep layer. It shouldn't rely on someone remembering."* This realises the automatic-cadence principle (a maintenance action with no automatic cadence never happens — the analyzer that's never run is no analyzer). **Requirement:** the deep layer MUST have an automatic trigger, not on-demand-only. On-demand invocation remains available but is no longer the *sole* path. Settlement deferred to follow-up ticket P295 — see Amendment 2026-06-08 below.
+> **Amendment 2026-05-26 — deep layer MUST be automatically triggered (human-oversight correction, P283 prong 2).** The deep layer as originally specified is **on-demand only** (`/wr-retrospective:analyze-context` invoked by the user). User direction 2026-05-26: *"We need a way to automatically trigger the deep layer. It shouldn't rely on someone remembering."* This realises the automatic-cadence principle (a maintenance action with no automatic cadence never happens — the analyzer that's never run is no analyzer). **Requirement:** the deep layer MUST have an automatic trigger, not on-demand-only. On-demand invocation remains available but is no longer the *sole* path. Settled by ADR-112.
 
-> **Amendment 2026-06-08 — combined-trigger settlement (P295 settles the Amendment 2026-05-26 follow-up).** User direction 2026-05-25: *"the second layer should happen proactively as well with less frequency than the first layer. Generally speaking, if there is no automatic cadence, it does not happen."* The deep layer auto-fires from `run-retro` Step 2c (cheap layer) when the **combined whichever-comes-first trigger** holds:
->
-> 1. **Calendar-elapse trigger** — the most recent `docs/retros/*-context-analysis.md` (lex-desc sort on date in filename) is **older than 14 days**.
-> 2. **Delta-breach trigger** — any bucket's byte total has BOTH changed by **more than 20%** versus the prior snapshot (HTML-comment trailer of the most recent deep-layer report) AND changed by more than the **absolute minimum-delta floor of 10 KB** (`|current − prior| > 10240` bytes). Both gates are required (Amendment 2026-06-17, P372 — see sub-note below).
->
-> **Once-per-day guard**: if `docs/retros/<TODAY>-context-analysis.md` already exists, the trigger is treated as already-satisfied and auto-fire is skipped this retro. No new persistent state file is needed — the snapshot artefact itself is the state (mirrors ADR-009's explicit non-use in this ADR — see Decision Drivers; the snapshot persistence is via the HTML-comment trailer, not via `/tmp` markers).
->
-> **Threshold grounding (ADR-026 line 92)**: the chosen values (`>14 days`, `>20%`, `>10 KB`) are `not estimated — chosen as initial values, reassess after 6 months of cross-project use` per ADR-026's no-prior-data sentinel. The 14-day cadence aligns with the ADR-040 session-start refresh envelope (≥2 retro cycles between deep runs in typical solo-developer cadence); the 20% delta-breach threshold aligns with ADR-040's Tier 3 briefing-budget breach grain; the 10 KB absolute floor is the same order as the cheap-layer report envelope (`CONTEXT_BUDGET_MAX_BYTES` default 10240, the 5% / 200K cap) — a delta below it cannot be a dominant context cost. All three are *initial values*, subject to reassessment per the Reassessment Criteria below. The 10 KB floor is **not** calibrated from observed data — the P372 example (`project-claude-md` 4277→5897 = +1620 bytes) illustrates the failure mode the floor closes, but is not the source of the value.
->
-> **Behaviour when triggered**: Step 2c invokes `/wr-retrospective:analyze-context` via the Skill tool (silent — the deep layer never invokes `AskUserQuestion`; it writes a committed report at `docs/retros/<TODAY>-context-analysis.md`). Identical contract in interactive and AFK modes (per ADR-013 Rule 6 + ADR-044 framework-resolution boundary — auto-invocation is framework-resolved mechanical action, not user-decided).
->
-> **"Analyzer must not itself be bloat" preservation**: the cheap layer's static-budget proof (~2.5 KB / retro) is unaffected — the auto-invocation acts only on the trigger condition the cheap layer was already computing. The deep layer fires at most once per day (once-per-day guard) and only when the trigger condition holds — far less than every retro, satisfying the original "less frequency than the cheap layer" user direction.
->
-> **Sub-note — Amendment 2026-06-17 (P372 absolute-floor gate on the delta-breach axis).** The delta-breach axis as settled above (`>20%` change in any bucket) lacked an absolute-byte floor, so it fired the deep layer on negligible absolute deltas to *small* buckets: a `project-claude-md` or `jtbd` bucket trips 20% on a sub-2 KB edit (observed P314 iter 3, 2026-06-17 — `project-claude-md` grew 4277→5897 bytes = +37.9% on a single CLAUDE.md MANDATORY-block addition, a +1620-byte change). The percentage tripped though the absolute delta does not warrant the deep layer's committed-report + subagent cost. **Fix**: the delta-breach trigger now requires BOTH the `>20%` relative gate AND a `>10 KB` (`>10240` bytes) absolute gate (`|current − prior|`). This is a **noise-suppression gate on the existing delta axis**, not a new firing axis. The capture-time framing also raised the inverse concern ("a large-but-stable bucket — e.g. the multi-MB `docs/problems` corpus — never re-fires despite being the dominant cost"); that concern is **already covered by the calendar-elapse axis** (≥14 days re-fires every bucket regardless of delta), so no separate third firing axis is added — adding one would only *increase* fires and cannot fix an over-fire. The combined trigger remains "whichever-comes-first" across the two axes; the delta axis simply gains a floor. Surfaces updated in lockstep: `run-retro` Step 2c step 4 (Delta-breach bullet + the "trigger does NOT hold" note), `analyze-context/SKILL.md` (3 trigger-description lines), and the paired promptfoo eval case (`run-retro/eval/promptfooconfig.yaml` Step 2c contract). Floor grounded as an initial value above.
+### Superseded 2026-06-08 combined trigger and its 2026-06-17 floor — see ADR-112
+
+The trigger that fires the deep layer, and the absolute-byte floor added to it
+nine days later, were recorded here as amendments after this decision was
+ratified. They are now **ADR-112 (The deep context analysis fires on elapsed
+time or on real growth)**, ratified 2026-08-09, which also moves the thresholds
+to 10 days, 10% and 5 KB and makes them tunable per project. ADR-112 is the
+reassessment of this trigger axis; the rest of this decision is still owed one.
+
+The ADR-026 grounding for those three values travels with them — ADR-112 records
+them as chosen rather than measured, names what each was taken from, and says
+which of them has a derivation and which does not.
+
+Everything else here stands as ratified substance: the two-layer split, what each
+layer measures, the cheap layer and its budget proof, the measurement methodology,
+and the snapshot trailer. So does the 2026-05-26 amendment above — same day as this
+decision's ratification, and the requirement ADR-112 satisfies rather than replaces.
 
 ### Scope
 
@@ -166,8 +167,8 @@ Per-plugin attribution is **deep-layer only** to keep the cheap layer's report u
 
 ### AFK / non-interactive behaviour (ADR-013 Rule 6)
 
-- **Cheap layer (Step 2c)** — runs unconditionally in every retro, including AFK. Output lands in the retro summary; no `AskUserQuestion` fired. The combined-trigger branch (per Amendment 2026-06-08 — calendar-elapse >14 days OR delta >20% any bucket, once-per-day guard) auto-invokes the deep layer via the Skill tool when triggered; otherwise emits a one-line non-blocking note to the summary's "Context Usage" section. Never prompts the user.
-- **Deep layer (`/wr-retrospective:analyze-context`)** — auto-fires from Step 2c when the combined trigger holds (silent, no `AskUserQuestion`; identical behaviour in interactive and AFK modes per Amendment 2026-06-08). Also remains user-invokable on demand. AFK orchestrators read the resulting `docs/retros/<TODAY>-context-analysis.md` report on iteration close; the user reviews on return.
+- **Cheap layer (Step 2c)** — runs unconditionally in every retro, including AFK. Output lands in the retro summary; no `AskUserQuestion` fired. The combined-trigger branch (per ADR-112) auto-invokes the deep layer via the Skill tool when triggered; otherwise emits a one-line non-blocking note to the summary's "Context Usage" section. Never prompts the user.
+- **Deep layer (`/wr-retrospective:analyze-context`)** — auto-fires from Step 2c when the combined trigger holds (silent, no `AskUserQuestion`; identical behaviour in interactive and AFK modes per ADR-112). Also remains user-invokable on demand. AFK orchestrators read the resulting `docs/retros/<TODAY>-context-analysis.md` report on iteration close; the user reviews on return.
 
 ### Suggestion grounding (ADR-026 amendment)
 
@@ -286,7 +287,7 @@ Revisit this decision if:
 - **`ADR-040`** (Session-start briefing surface) — sibling ADR; HTML-comment trailer pattern precedent (lines 99–104).
 - **`ADR-026`** (Agent output grounding) — amended within reassessment window: `analyze-context/SKILL.md` added to per-agent prompt amendments list.
 - **`ADR-014`** (Governance skills commit own work) — amended within reassessment window: `docs(retros): context analysis YYYY-MM-DD` row added to Commit Message Convention table.
-- **`ADR-013`** Rule 1 / Rule 6 — interactive AskUserQuestion path / AFK fallback. Cheap layer is silent in AFK; deep layer never auto-fires.
+- **`ADR-013`** Rule 1 / Rule 6 — interactive AskUserQuestion path / AFK fallback. Cheap layer is silent in AFK; the deep layer auto-fires silently per ADR-112.
 - **`ADR-009`** (gate marker lifecycle) — explicitly NOT used; trailer-based persistence chosen over `/tmp` markers.
 - **`ADR-022`** (problem lifecycle Verification Pending) — P101's transition path from this ADR's landing.
 - **`ADR-005`** (plugin testing strategy) / **`ADR-037`** (skill testing strategy) — bats fixture shape.

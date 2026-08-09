@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 109 (97 in-force, 12 historical)
+**Total ADRs:** 110 (98 in-force, 12 historical)
 
 ---
 
 ## In-force decisions
 
-_97 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_98 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -177,10 +177,11 @@ _97 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed | **Supersedes:** ADR-041
 **Chosen:** Chosen option: **"Liberal auto-apply with open vocabulary and halt-on-exhaustion"**, because the never-release-above-appetite invariant is the primary constraint and liberal auto-apply is the only mechanism that reliably honours it across A...
 **Related:** ADR-041, ADR-013, ADR-014, ADR-032, ADR-015, ADR-018, ADR-020, ADR-022, ADR-037, ADR-099
-
 ### ADR-043 — Progressive context-usage measurement and reporting for retrospective sessions
 **Status:** proposed | **Oversight:** confirmed
-**Related:** ADR-038, ADR-040, ADR-026, ADR-014, ADR-013, ADR-009, ADR-022, ADR-005, ADR-037
+**Decides:** Context-usage measurement in retros splits into two layers — a cheap byte-count pass baked into every `run-retro` (per-source buckets, ~2.5 KB report, static budget proof, fail-open to a pointer) plus a deeper on-demand/auto-fired `/wr-retrospective:analyze-context` skill that adds per-turn and per-plugin attribution and grounded trim suggestions — so bloat is surfaced proactively without the analyzer itself becoming bloat. Delta-from-last-retro rides an HTML-comment snapshot trailer in the committed deep-layer report; the trigger that fires the deep layer has since moved to ADR-112.
+**Confirmation:** Step 2c block in `run-retro/SKILL.md` plus the `analyze-context` skill and `measure-context-budget.sh` exist and cite this ADR + ADR-026; bats fixtures for the script and both skill contracts pass; end-to-end replay shows the bucket table, the first-run no-prior-snapshot sentinel, and a populated delta after the deep layer runs; ADR-026 and ADR-014 carry their amendments; P101 transitions per ADR-022.
+**Related:** ADR-112, ADR-038, ADR-040, ADR-026, ADR-014, ADR-013, ADR-009, ADR-022, ADR-005, ADR-037
 
 ### ADR-044 — ADR-044 — Decision-Delegation Contract: when agents act on the framework vs ask the user
 **Status:** proposed | **Oversight:** confirmed
@@ -478,6 +479,12 @@ _97 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed | **Supersedes:** [ADR-064 (in part — the 2026-05-31 (P339 + P340) substance-confirm amendment, only as it governs the ratification fire), ADR-066 (in part — the 2026-05-31 born-confirmed amendment only)]
 **Confirmation:** A ratification is preceded by the summary and the file, and collected through a structured question.; Where the artefact records a choice, the question's substantive answers are its considered options; a yes/no q...; Where it records no choice, the substantive answers are ratify and say-what-is-wrong; a prose ask does not pro...; Where the answer selects an option the artefact was not written against, no marker is written until the artefa...; The note on a ratified artefact records what was offered and what was picked.
 **Related:** ADR-064, ADR-066, ADR-068, ADR-110, ADR-109, ADR-074, ADR-090, ADR-103
+
+### ADR-112 — The deep context analysis fires on elapsed time or on real growth
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** ADR-043 (in part — the 2026-06-08 combined-trigger amendment and its 2026-06-17 absolute-floor sub-note)
+**Decides:** The expensive deep context analyser fires automatically from the cheap measuring layer when either the last report is older than 10 days (or none exists) or a bucket has grown by both >10% and >5 KB, capped at once per day — because an on-demand-only trigger never runs, while a percentage-only one fires on noise and an absolute floor alone never fires on small buckets. The two growth gates halve what shipped; the elapsed clock is set to clear a weekly retro cadence rather than halving. All three are per-project overridable defaults that nothing reads yet, recorded as chosen-by-analogy starting values with reassessment pulled in from six months to three.
+**Confirmation:** No prior report → fires; report older than 10 days → fires regardless of change; 38%-but-1.6 KB → does not fire; 8%-but-50 KB → does not fire (both gates, not one); an environment variable beats a project file setting a different value; today's report already exists → does not fire and the retro says why; nothing triggers → the retro says that too.
+**Related:** ADR-043, ADR-098, ADR-026, ADR-040
 
 ---
 

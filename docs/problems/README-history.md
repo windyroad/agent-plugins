@@ -1301,6 +1301,8 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 
 ## 2026-08-09
 
+> Last reviewed: 2026-08-09 **P490 captured** — a five-screen status report ending in an open invitation, sent to a phone with nothing in it to act on; the identical correction had been given the day before and the memory written in response did not prevent the repeat (lightweight aside via /wr-itil:capture-problem).
+
 > Last reviewed: 2026-08-09 **P489 captured** — the rule for how a ratification is collected was stated in May, implemented on one surface, and never reached the others; both drains, the jobs-and-personas confirm and two authoring surfaces still ask in shapes it forbids, and no marker writer records what was offered (lightweight aside via /wr-itil:capture-problem).
 
 > Last reviewed: 2026-08-09 **P488 captured** — told twice in one session to work one map, and one story, at a time, the agent still proposed capturing twenty-two stories as a single unit and asked permission for the bundle; the instruction lives only in session memory and CLAUDE.md prose, so nothing checks it (lightweight aside via /wr-itil:capture-problem).
