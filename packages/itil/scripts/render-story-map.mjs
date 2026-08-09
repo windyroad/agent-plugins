@@ -152,11 +152,18 @@ function resolveStoryValue(storiesDir, storyId) {
   if (start === -1) return null;
   let end = lines.findIndex((l, i) => i > start && /^##\s/.test(l));
   if (end === -1) end = lines.length;
-  const text = lines.slice(start + 1, end)
-    .map((l) => l.trim())
-    .filter(Boolean)
-    .join(' ')
-    .trim();
+  // The value statement is the FIRST paragraph. Filtering blanks out of the
+  // whole section glued a following paragraph onto the "I want" clause: on a
+  // phone STORY-052's card ran to 169 words, most of it the evidence prose the
+  // author had deliberately put below the statement. A story is free to
+  // explain itself under its value; the card carries the statement.
+  const para = [];
+  for (const line of lines.slice(start + 1, end)) {
+    const t = line.trim();
+    if (!t) { if (para.length) break; continue; }
+    para.push(t);
+  }
+  const text = para.join(' ').trim();
   return text ? splitValue(text) : null;
 }
 
@@ -185,12 +192,27 @@ function splitValue(text) {
   // An earlier stricter pattern rejected 15 correctly-written statements and
   // rendered them as walls of text, which reads as a story defect when it is a
   // parser defect. Be strict about the SHAPE (value, who, want, in that order)
-  // and loose about the punctuation between them.
+  // and loose about everything else — the punctuation between the clauses, and
+  // how the persona opens.
+  //
+  // The article is NOT required. "as whoever picks the ticket up" is the shape
+  // written correctly; demanding a/an/the was a guess about wording, and the
+  // guess cost STORY-060 its three lines with nothing reporting why. Widening
+  // does not close that class on its own — see assertValueStatementsSplit,
+  // which is what makes the next unanticipated phrasing loud instead of silent.
+  // The connectives are CAPTURED, not re-emitted from memory. A story written
+  // "In order that ..." was being relabelled "In order to ...", and dropping
+  // the article from the persona group turned "as a developer" into a card
+  // reading "as a a developer". The renderer does not get to decide how the
+  // author opened a clause; it only decides where the line breaks.
   const m = text.match(
-    /^In order (?:to|that)\s+([\s\S]+?)\s*[,—–-]\s*as (?:an?|the)\s+([\s\S]+?)\s*[,—–-]\s*I want\s+([\s\S]+)$/i
+    /^(In order (?:to|that))\s+([\s\S]+?)\s*[,—–-]\s*(as)\s+([\s\S]+?)\s*[,—–-]\s*(I want)\s+([\s\S]+)$/i
   );
   if (!m) return { raw: runs(text) };
-  return { value: runs(m[1]), who: runs(m[2]), want: runs(m[3]) };
+  return {
+    leads: [m[1], m[3], m[5]],
+    value: runs(m[2]), who: runs(m[4]), want: runs(m[6]),
+  };
 }
 
 /** Split a markdown fragment into plain and emphasised runs.
@@ -242,6 +264,33 @@ export function extractIsland(html) {
  *  so a title containing `</script>` cannot break out of the block. */
 function serialiseIsland(map) {
   return JSON.stringify(map, null, 2).replace(/</g, '\\u003c');
+}
+
+/** What the reader is looking at, in prose, before any scrolling.
+ *
+ *  Both facts that make a map a decision — that it is a draft, and that nobody
+ *  has agreed it yet — lived only in `<meta>`, which does not render. A reader
+ *  opening the file on a phone got a title, then five screens of grid, and had
+ *  to infer the ask from the genre. The scale is the other half: the caption
+ *  carries "N activities across M releases" but is clipped for screen readers
+ *  only, so the one reader who cannot see how much is left is the one scrolling
+ *  through it.
+ */
+function renderOrient(map) {
+  const rows = (map.releases ?? []).length;
+  const cards = (map.tasks ?? []).length;
+  const agreed = (map.humanOversight ?? 'unconfirmed') === 'confirmed';
+  const lead = agreed
+    ? 'Agreed.'
+    : map.status === 'draft' ? 'Draft — not yet agreed.' : 'Proposed — not yet agreed.';
+  const shape = `${rows} release${rows === 1 ? '' : 's'}, ${cards} ` +
+    `${cards === 1 ? 'story' : 'stories'}, one release per row.`;
+  const ask = agreed
+    ? ''
+    : '<p class="orient">Read the release names down the left. Say yes to agree ' +
+      'it, or name the row that is wrong or missing. The detail inside the cards ' +
+      'is there if you want it, not because you have to read it.</p>';
+  return `    <p class="orient"><strong>${lead}</strong> ${esc(shape)}</p>\n${ask ? '    ' + ask + '\n' : ''}`;
 }
 
 function renderMeta(map, derived) {
@@ -539,10 +588,11 @@ function valueHtml(v) {
   if (v.raw || !v.value) {
     return `<div class="t-value"><div class="v-line">${runsHtml(v.raw)}</div></div>`;
   }
+  const [l0, l1, l2] = v.leads ?? ['In order to', 'as', 'I want'];
   const parts = [
-    ['In order to ', v.value, 'v-inorder'],
-    ['as a ', v.who, 'v-asa'],
-    ['I want ', v.want, 'v-iwant'],
+    [`${l0} `, v.value, 'v-inorder'],
+    [`${l1} `, v.who, 'v-asa'],
+    [`${l2} `, v.want, 'v-iwant'],
   ];
   return '<div class="t-value">' + parts.map(([lead, runs, cls]) =>
     `<div class="v-line ${cls}"><span class="v-lead">${esc(lead)}</span>${runsHtml(runs)}</div>`
@@ -779,6 +829,48 @@ function renderTrace(map, derived) {
  *  both the pre-RFC row and an RFC row, and the map was ratified before anyone
  *  noticed.
  */
+/** Refuse a map carrying a value statement the renderer cannot split.
+ *
+ *  The fallback path renders an unsplittable statement as one undifferentiated
+ *  block. On a map where every other card shows three labelled clauses, that
+ *  is indistinguishable from a story written badly — so the parser's failure
+ *  gets read as the author's, by a reader who has no way to tell them apart.
+ *
+ *  This is the second time the class has fired. The first cost 15 stories
+ *  their three lines; the fix was to loosen the pattern, and the pattern will
+ *  always be narrower than the ways people write, so the class stayed open and
+ *  STORY-060 walked into it. Loosening cannot close it. Refusing can: the
+ *  renderer is the last point where anyone still knows a split was attempted.
+ *
+ *  Silent only when there is genuinely nothing to check — no stories tree, or
+ *  a story with no value section. A story that HAS one and will not split is
+ *  either written outside the house shape or has found the pattern's next
+ *  edge, and both are worth an edit rather than a wall of text.
+ */
+function assertValueStatementsSplit(map, storiesDir) {
+  if (!storiesDir || !existsSync(storiesDir)) return;
+  const bad = [];
+  for (const id of new Set((map.tasks ?? []).map((t) => t.storyId).filter(Boolean))) {
+    const v = resolveStoryValue(storiesDir, id);
+    if (v && v.raw) bad.push([id, v.raw.map((r) => r.t).join('')]);
+  }
+  if (!bad.length) return;
+  const lines = ['this map has a story whose value statement will not split into its clauses.'];
+  for (const [id, text] of bad) {
+    lines.push(`    - ${id}: ${text.length > 120 ? text.slice(0, 117) + '...' : text}`);
+  }
+  lines.push('');
+  lines.push('  A card renders the statement as three lines — the value, who it is');
+  lines.push('  for, and what they want. One that will not split renders as a single');
+  lines.push('  block, which on a map of three-line cards reads as a badly written');
+  lines.push('  story rather than a parser that gave up.');
+  lines.push('');
+  lines.push('  Write it as: In order to <value>, as <who>, I want <capability>.');
+  lines.push('  If it IS in that shape, the pattern has found a new edge — widen it');
+  lines.push('  in splitValue rather than reword the story to suit the regex.');
+  throw new Error(lines.join('\n'));
+}
+
 function assertOneReleasePerStory(map) {
   const rows = new Map();
   for (const t of map.tasks ?? []) {
@@ -869,6 +961,7 @@ function render(map, storiesDir, mapPath) {
   assertEveryCardHasAStory(map, storiesDir);
   assertArchivedIsSeparated(map, storiesDir);
   assertOneReleasePerStory(map);
+  assertValueStatementsSplit(map, storiesDir);
 
   const title = map.title ?? map.storyMapId;
   // Everything derived from outside the island is resolved ONCE and shared by
@@ -882,6 +975,7 @@ function render(map, storiesDir, mapPath) {
     DATA: serialiseIsland(map),
     META: renderMeta(map, derived),
     STATUS: statusBlock,
+    ORIENT: renderOrient(map),
     GRID: renderGrid(map, derived),
     TRACE: renderTrace(map, derived),
   };

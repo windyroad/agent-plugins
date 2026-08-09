@@ -4,6 +4,7 @@ story-id: see-why-the-loop-did-not-work-what-i-expected
 reported: 2026-08-09
 decision-makers: [Tom Howard]
 problems: [P487]
+rfcs: [RFC-065]
 jtbd: [JTBD-006, JTBD-002]
 story-maps: [STORY-MAP-011]
 estimated-effort: M

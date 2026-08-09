@@ -1309,3 +1309,121 @@ JSON
   [ "$status" -ne 0 ] || { echo "a story was allowed to ship in two releases"; return 1; }
   [[ "$output" == *"STORY-995"* ]] || { echo "the refusal does not name the story"; return 1; }
 }
+
+@test "a card carries the value statement, not the prose the author put under it" {
+  # The section was flattened with blank lines filtered out, so a second
+  # paragraph glued itself onto the "I want" clause. On a phone STORY-052's
+  # card ran to 169 words — the statement, then the evidence prose below it,
+  # with no break. A story is free to explain itself under its value; the card
+  # carries the statement and stops.
+  local root="$TMP/valuepara"
+  mkdir -p "$root/docs/story-maps/draft" "$root/docs/stories/draft"
+  {
+    printf -- '---\nstatus: draft\n---\n# STORY-994\n\n## User value (INVEST Valuable)\n\n'
+    printf 'In order to keep the card readable, as a maintainer reading on a phone, I want the statement alone.\n\n'
+    printf 'GLUEDPROSE. This paragraph explains the background and belongs off the card entirely.\n'
+  } > "$root/docs/stories/draft/STORY-994-a.md"
+
+  local map="$root/docs/story-maps/draft/STORY-MAP-994-x.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    printf '%s\n' '{ "storyMapId": "STORY-MAP-994", "title": "T", "traces": { "jtbd": ["JTBD-900"] }, "backbone": [ { "id": "a", "title": "A" } ], "releases": [ { "id": "r1", "name": "N", "rfc": "RFC-900" } ], "tasks": [ { "activity": "a", "release": "r1", "title": "Card", "storyId": "STORY-994" } ] }'
+    printf '</script>\n'
+  } > "$map"
+  run node "$RENDER" "$map"
+  [ "$status" -eq 0 ] || { echo "render failed: $output"; return 1; }
+
+  grep -q 'the statement alone' "$map" || { echo "the card lost its value statement"; return 1; }
+  ! grep -q 'GLUEDPROSE' "$map" || { echo "the paragraph below the value statement reached the card"; return 1; }
+}
+
+@test "a value statement the parser cannot split is refused, not quietly flattened" {
+  # The fallback rendered an unsplittable statement as one undifferentiated
+  # block — visually identical to a story written badly, on a map where every
+  # other card showed three labelled clauses. STORY-060 hit it with "as whoever
+  # picks the ticket up": correctly written, silently degraded, and the only
+  # way anyone found out was reading the map on a phone.
+  #
+  # The renderer had already been here once. The recorded fix was to loosen the
+  # pattern, which fixed fifteen stories and left the class open. Loosening
+  # cannot close it; only refusing to render can, because the pattern will
+  # always be narrower than the ways people write.
+  local root="$TMP/rawvalue"
+  mkdir -p "$root/docs/story-maps/draft" "$root/docs/stories/draft"
+  {
+    printf -- '---\nstatus: draft\n---\n# STORY-993\n\n## User value (INVEST Valuable)\n\n'
+    printf 'This statement is not in the value-first shape at all.\n'
+  } > "$root/docs/stories/draft/STORY-993-a.md"
+
+  local map="$root/docs/story-maps/draft/STORY-MAP-993-x.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    printf '%s\n' '{ "storyMapId": "STORY-MAP-993", "title": "T", "traces": { "jtbd": ["JTBD-900"] }, "backbone": [ { "id": "a", "title": "A" } ], "releases": [ { "id": "r1", "name": "N", "rfc": "RFC-900" } ], "tasks": [ { "activity": "a", "release": "r1", "title": "Card", "storyId": "STORY-993" } ] }'
+    printf '</script>\n'
+  } > "$map"
+  run node "$RENDER" "$map"
+  [ "$status" -ne 0 ] || { echo "an unsplittable value statement rendered without complaint"; return 1; }
+  [[ "$output" == *"STORY-993"* ]] || { echo "the refusal does not name the story: $output"; return 1; }
+}
+
+@test "a persona clause without an article still parses — the shape is the rule, not the wording" {
+  # "as whoever picks the ticket up", "as maintainers", "as someone returning
+  # to this". The house shape is value, who, want in that order; requiring the
+  # who to open with a/an/the is a guess about wording that the corpus does not
+  # respect.
+  local root="$TMP/noarticle"
+  mkdir -p "$root/docs/story-maps/draft" "$root/docs/stories/draft"
+  {
+    printf -- '---\nstatus: draft\n---\n# STORY-992\n\n## User value (INVEST Valuable)\n\n'
+    printf 'In order to keep going, as whoever picks the ticket up, I want the evidence in hand.\n'
+  } > "$root/docs/stories/draft/STORY-992-a.md"
+
+  local map="$root/docs/story-maps/draft/STORY-MAP-992-x.html"
+  {
+    printf '<script id="story-map-data" type="application/json">\n'
+    printf '%s\n' '{ "storyMapId": "STORY-MAP-992", "title": "T", "traces": { "jtbd": ["JTBD-900"] }, "backbone": [ { "id": "a", "title": "A" } ], "releases": [ { "id": "r1", "name": "N", "rfc": "RFC-900" } ], "tasks": [ { "activity": "a", "release": "r1", "title": "Card", "storyId": "STORY-992" } ] }'
+    printf '</script>\n'
+  } > "$map"
+  run node "$RENDER" "$map"
+  [ "$status" -eq 0 ] || { echo "a value statement with no article on the persona was refused: $output"; return 1; }
+  grep -q 'v-asa' "$map" || { echo "the persona clause did not reach its own line"; return 1; }
+  grep -q 'whoever picks the ticket up' "$map" || { echo "the persona clause is missing"; return 1; }
+}
+
+@test "a map states what it is and what is being asked, before the grid" {
+  # Whether a map was still a draft, and whether anyone had agreed it, lived
+  # only in <meta> — which does not render. A reader opening the file got a
+  # title and a grid and had to infer the rest. The corpus exercises only the
+  # agreed branch, because every map in it is ratified, so the two unagreed
+  # leads and the plural boundary are covered here.
+  local root="$TMP/orient"
+  mkdir -p "$root/docs/story-maps/draft" "$root/docs/stories/draft"
+  printf -- '---\nstatus: draft\n---\n# STORY-991\n' > "$root/docs/stories/draft/STORY-991-a.md"
+
+  _orient_map() {  # $1 = file, $2 = extra island keys
+    printf '<script id="story-map-data" type="application/json">\n' > "$1"
+    printf '%s\n' "{ \"storyMapId\": \"STORY-MAP-991\", \"title\": \"T\", $2 \"traces\": { \"jtbd\": [\"JTBD-900\"] }, \"backbone\": [ { \"id\": \"a\", \"title\": \"A\" } ], \"releases\": [ { \"id\": \"r1\", \"name\": \"N\", \"rfc\": \"RFC-900\" } ], \"tasks\": [ { \"activity\": \"a\", \"release\": \"r1\", \"title\": \"Card\", \"storyId\": \"STORY-991\" } ] }" >> "$1"
+    printf '</script>\n' >> "$1"
+  }
+
+  # Draft, unagreed: says so, and says what to do about it.
+  local m="$root/docs/story-maps/draft/STORY-MAP-991-x.html"
+  _orient_map "$m" '"status": "draft",'
+  run node "$RENDER" "$m"
+  [ "$status" -eq 0 ] || { echo "render failed: $output"; return 1; }
+  grep -q 'Draft — not yet agreed' "$m" || { echo "a draft map does not say it is a draft"; return 1; }
+  grep -q 'name the row that is wrong' "$m" || { echo "an unagreed map does not say what is being asked"; return 1; }
+  # One release and one story must not read "1 releases, 1 stories".
+  grep -q '1 release, 1 story,' "$m" || { echo "the singular boundary is wrong: $(grep -o '<p class="orient">[^<]*' "$m")"; return 1; }
+
+  # Not a draft and still unagreed reads differently from a draft.
+  _orient_map "$m" '"status": "proposed",'
+  run node "$RENDER" "$m"
+  grep -q 'Proposed — not yet agreed' "$m" || { echo "a proposed map is not distinguished from a draft"; return 1; }
+
+  # Agreed: no ask, because there is nothing left to answer.
+  _orient_map "$m" '"status": "draft", "humanOversight": "confirmed",'
+  run node "$RENDER" "$m"
+  grep -q '<strong>Agreed.</strong>' "$m" || { echo "a ratified map still reads as unagreed"; return 1; }
+  ! grep -q 'name the row that is wrong' "$m" || { echo "a ratified map still asks to be ratified"; return 1; }
+}

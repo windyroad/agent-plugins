@@ -173,6 +173,19 @@ table.map > caption { position: absolute; width: 1px; height: 1px; padding: 0;
   td.cell.empty { background-image: repeating-linear-gradient(45deg, Canvas, Canvas 7px, GrayText 7px, GrayText 8px); }
   .badge { forced-color-adjust: none; border: 1px solid CanvasText; }
 }
+/* What the reader is being asked. Sits between the title and the grid, so it
+   is read before any scrolling and cannot be missed by not scrolling back. */
+.orient { max-width: 62ch; margin: .5rem 0 1rem; font-size: .95rem; line-height: 1.5; }
+.orient + .orient { color: var(--muted); }
+
+/* The column header is the journey step a card belongs to, and rows run taller
+   than a screen — so without this it scrolls away inside the first row and
+   never comes back, leaving horizontal scroll position as the only clue to
+   which activity you are looking at. The row header outranks it at the corner
+   intersection: it is pinned on the axis that moves further. */
+thead th.act { position: sticky; top: 0; z-index: 1; background: var(--bg); }
+th.slice { z-index: 2; }
+
 /* Sticky row headers are kept at narrow widths: this is exactly where the
    table scrolls furthest, so losing the orientation anchor costs most. The
    column is narrowed and its note dropped rather than unpinned. */
