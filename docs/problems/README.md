@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-09 **P488 captured** — told twice in one session to work one map, and one story, at a time, the agent still proposed capturing twenty-two stories as a single unit and asked permission for the bundle; the instruction lives only in session memory and CLAUDE.md prose, so nothing checks it (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-08-09 **P489 captured** — the rule for how a ratification is collected was stated in May, implemented on one surface, and never reached the others; both drains, the jobs-and-personas confirm and two authoring surfaces still ask in shapes it forbids, and no marker writer records what was offered (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -82,6 +82,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 8 | P485 | Every step in the process adds and none removes, so cruft accumulates without limit — no refactor step, no simplification step, and nothing self-firing to trigger one | 16 (High) | Open | L | 2026-08-08 | corrective-feedback |
 | 6 | P486 | The policy validator checks a policy's shape, never whether it contradicts itself — a self-contradicting policy passes | 12 (High) | Open | M | 2026-08-09 | inbound-reported |
 | 6 | P488 | The agent batches artefacts it was told to produce one at a time, then asks permission for the batch — the instruction lives only in session memory and CLAUDE.md prose, so nothing checks it and it decays every session | 12 (High) | Open | M | 2026-08-09 | corrective-feedback |
+| 6 | P489 | The shipped ratification surfaces do not meet the rule they are governed by — both drains, the jobs-and-personas confirm, two authoring surfaces and the marker writers, plus two unanswered design questions | 12 (High) | Open | L | 2026-08-09 | internal |
 | 1 | P487 | The loop overwrites the ranking that justified its own choices — a diagnostic for when what you expected to be worked was not | 4 (Low) | Open | M | 2026-08-09 | internal |
 | 8 | P483 | Amendment sections are not a legitimate mechanism — a ratified decision is immutable, and is changed only by being deprecated or superseded | 16 (High) | Open | L | 2026-08-08 | corrective-feedback |
 | 5 | P484 | The reading-context persona constraint is load-bearing in two ratified decisions but documented nowhere | 9 (Medium) | Open | S | 2026-08-08 | internal |

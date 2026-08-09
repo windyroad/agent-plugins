@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 105 (93 in-force, 12 historical)
+**Total ADRs:** 109 (97 in-force, 12 historical)
 
 ---
 
 ## In-force decisions
 
-_93 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_97 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -193,11 +193,11 @@ _93 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-046 — ADR-046 — Blocked-reporters persistence: per-repo, hashed-ID, audit-log-first
 **Status:** accepted | **Oversight:** confirmed
 **Related:** ADR-046, ADR-024, ADR-014, ADR-017, ADR-022, ADR-029, ADR-030, ADR-037, ADR-044
+
 ### ADR-047 — Install-updates scaffolds governance artefacts when policy file is present but artefact is missing
 **Status:** proposed | **Oversight:** confirmed
-**Decides:** Adopters configure `RISK-POLICY.md` but never get `docs/risks/` (4/6 surveyed projects lacked it), so nothing holds the standing-risk register. A SessionStart hook in the risk-scorer plugin now nudges — never writes — when the policy file is present but the register directory is absent, pointing at the on-demand `/wr-risk-scorer:bootstrap-catalog` skill; a later arm also counts `pending review` entries once the register exists and re-surfaces the backlog every session until drained. (Originally chose an inline `/install-updates` scaffold step; superseded 2026-06-08 because install-updates only reaches sibling projects on one machine. The policy-absent arm moved out to ADR-108.)
-**Confirmation:** `risk-scorer-scaffold-nudge.sh` exists, executable, follows the `architect-oversight-nudge.sh` shape (AFK-guard, silent-on-no-condition, one-line stderr); registered in `hooks.json` under SessionStart matcher `startup`; behavioural bats covers all four detection states plus AFK-guard semantics and the pending-review count arm; compendium regenerated per ADR-077
-**Related:** ADR-108, ADR-036, ADR-030, ADR-013, ADR-014, ADR-038, ADR-040, ADR-045, ADR-049, ADR-056, ADR-059, ADR-066, ADR-068, ADR-077, ADR-084, ADR-004, ADR-074
+**Confirmation:** .claude/skills/install-updates/SKILL.md — Step 6.5 "Scaffold governance artefacts (per-sibling)" exists betw...; .claude/skills/install-updates/REFERENCE.md — new section "Governance-artefact scaffold (P033)" present with...; .claude/skills/install-updates/templates/risk-register-README.md.tmpl — present; adopter-flavoured (no R001 ...; .claude/skills/install-updates/templates/risk-register-TEMPLATE.md.tmpl — present; verbatim copy of this rep...; docs/problems/033-no-persistent-risk-register.known-error.md — Phase 1 marked complete with ADR-047 citation...
+**Related:** ADR-036, ADR-030, ADR-013, ADR-014, ADR-038, ADR-040, ADR-004
 
 ### ADR-049 — Plugin-bundled scripts invoked from SKILL.md resolve via `bin/` on `$PATH`
 **Status:** proposed | **Oversight:** confirmed
@@ -275,7 +275,7 @@ _93 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-068 — ADR-068: JTBD + persona human-oversight marker + `/wr-jtbd:confirm-jobs-and-personas` drain (sibling of ADR-066)
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen: **mirror ADR-066 as a wr-jtbd sibling**.
-**Related:** ADR-066, ADR-074, ADR-008, ADR-049, ADR-040, ADR-009, ADR-002, ADR-013, ADR-044
+**Related:** ADR-066, ADR-109, ADR-074, ADR-008, ADR-049, ADR-040, ADR-009, ADR-002, ADR-013, ADR-044
 
 ### ADR-069 — ADR-069: Plugin READMEs market to their primary persona's problem — derived from the JTBD, not cited by ID
 **Status:** proposed | **Oversight:** confirmed | **Supersedes:** [051-jtbd-anchored-readme-with-drift-advisory]
@@ -458,21 +458,26 @@ _93 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed
 **Confirmation:** A map's rendered RFC list equals the RFCs its rows name, and a hand-written list in the file is ignored in fav...; A row carrying no identity contributes nothing to the list — behavioural test.; A row marked preRfc whose stories have all shipped renders as delivered. An unmarked row whose stories have al...; Renaming a row's RFC does not invalidate the map's approval, because the RFC list is no longer part of what a ...; No map carries a hand-written RFC list — a check across all seven maps, guarded so an unmatched search canno...
 **Related:** ADR-103, ADR-104, ADR-090
-### ADR-108 — The risk scorer nudges a project that has no risk policy at all
-**Status:** proposed | **Oversight:** confirmed | **Supersedes:** ADR-047 (in part — the 2026-06-28 policy-absent predicate only)
-**Decides:** When no risk policy file is present, the session-start hook emits one line pointing at the policy-authoring skill and then stops, so someone who never wrote a policy learns they can — and learns they have been running on a default appetite nobody chose. The narrower "only nudge where a reports directory shows the scorer is in use" reading was rejected because it can only fire after scoring has already happened silently, against an appetite the person never saw.
-**Confirmation:** emits on a policy-less project naming the policy-authoring skill, then exits before the register and curation checks; silent on every arm when the suppression variable is set; silent when the project directory is absent; policy absence wins over register presence; coverage lands in the hook's existing test file.
+
+### ADR-108 — ADR-108: The risk scorer nudges a project that has no risk policy at all
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** [ADR-047 (in part — the 2026-06-28 policy-absent predicate only; the rest of ADR-047 stands)]
+**Confirmation:** The hook emits on a project with no policy file, naming the policy-authoring skill, and exits without running ...; It stays silent when the suppression variable is set, on every arm.; It stays silent when the project directory does not exist.; A project with no policy file but with a register directory present still gets the policy line — policy abse...; Behavioural coverage sits with the hook's existing test file rather than in a new one.
 **Related:** ADR-047, ADR-086, ADR-056
-### ADR-109 — The jobs reviewer refuses work built on a job nobody has ratified
-**Status:** proposed | **Oversight:** confirmed | **Supersedes:** ADR-068 (in part — the 2026-05-27 build-upon guard only)
-**Decides:** The JTBD reviewer fails any change that explicitly cites, implements, or authors a job or persona whose ratification is absent, naming the artefact to ratify — work resting on an unagreed claim is cheaper to stop than to unwind. The trigger is an explicit dependency, never the ambient topic match the reviewer computes for every change, and it keys on ratification rather than lifecycle status; it does not wait for the unratified backlog to be drained, since the guard is what forces the drain.
-**Confirmation:** Change citing an unratified job fails with that job named and how to ratify it; topic-only match passes; ratified-but-draft job passes (status is not the test); superseded job does not fire.
+
+### ADR-109 — ADR-109: The jobs reviewer refuses work built on a job nobody has ratified
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** [ADR-068 (in part — the 2026-05-27 build-upon guard only; the rest of ADR-068 stands)]
+**Confirmation:** A change citing a job by name that has no ratification gets a failing verdict naming that job and how to ratif...; A change matched to a job only by topic — no citation, no implementation of its flow — passes.; A change citing a job that is ratified but still a draft passes: status is not the test.; A change citing a job that has been superseded does not fire.
 **Related:** ADR-068, ADR-074
-### ADR-110 — A ratification marker can only be written when someone actually ratified
-**Status:** proposed | **Oversight:** confirmed | **Supersedes:** ADR-066 (in part — the 2026-06-02 marker-write amendment only), ADR-068 (in part — the 2026-06-02 marker-write amendment only)
-**Decides:** Structurally refuse any edit that writes a ratified marker into a decision, job or persona unless per-document, per-session evidence of a human confirmation exists, and let unattended work write `unconfirmed` instead — because the prose-only version of this rule already sat on the authoring surfaces and unattended runs wrote `confirmed` anyway, leaving every downstream guard, drain pass and nudge that reads the marker decorative.
-**Confirmation:** Marker edit refused with no evidence for that document/session; same edit succeeds with evidence; evidence for one document doesn't permit the marker on another; an `unconfirmed` artefact is surfaced by the drain pass and session-start nudge just like a missing marker; unattended authoring writes `unconfirmed` and is not refused.
+
+### ADR-110 — ADR-110: A ratification marker can only be written when someone actually ratified
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** [ADR-066 (in part — the 2026-06-02 marker-write amendment only), ADR-068 (in part — the 2026-06-02 marker-write amendment only)]
+**Confirmation:** An edit introducing a ratified marker into a decision, job or persona is refused when no evidence exists for t...; The same edit succeeds when the evidence exists.; Evidence for one document does not permit the marker on another.; An artefact marked unconfirmed is surfaced by the drain pass and by the session-start nudge, exactly as one wi...; Unattended authoring produces unconfirmed and is not refused.
 **Related:** ADR-066, ADR-068, ADR-109
+
+### ADR-111 — ADR-111: A ratification is agreement to the substance, not to the draft
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** [ADR-064 (in part — the 2026-05-31 (P339 + P340) substance-confirm amendment, only as it governs the ratification fire), ADR-066 (in part — the 2026-05-31 born-confirmed amendment only)]
+**Confirmation:** A ratification is preceded by the summary and the file, and collected through a structured question.; Where the artefact records a choice, the question's substantive answers are its considered options; a yes/no q...; Where it records no choice, the substantive answers are ratify and say-what-is-wrong; a prose ask does not pro...; Where the answer selects an option the artefact was not written against, no marker is written until the artefa...; The note on a ratified artefact records what was offered and what was picked.
+**Related:** ADR-064, ADR-066, ADR-068, ADR-110, ADR-109, ADR-074, ADR-090, ADR-103
 
 ---
 

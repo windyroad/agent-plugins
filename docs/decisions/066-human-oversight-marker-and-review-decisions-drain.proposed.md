@@ -46,27 +46,24 @@ Chosen: **Option 1 (flat scalars)** — confirmed by the user via `AskUserQuesti
 2. **Detection.** A `$PATH`-resolved shim `wr-architect-detect-unoversighted` (ADR-049 naming grammar) dispatching `packages/architect/scripts/detect-unoversighted.sh`, which greps `docs/decisions/` ADR frontmatter for absence of `human-oversight: confirmed`. No body reads, no per-ADR LLM call. Emits a count + the list of unconfirmed ADR paths.
 3. **Session-start nudge.** A new architect-plugin `SessionStart` hook (matcher `startup`, modelled on `itil-pending-questions-surface.sh`; silent-on-no-content) emitting `N decision(s) lack human oversight — run /wr-architect:review-decisions`. **The hook self-suppresses inside AFK subprocesses** via an env-var guard (`WR_SUPPRESS_OVERSIGHT_NUDGE=1`, set by AFK orchestrators before each `claude -p` spawn — the same discipline `itil-pending-questions-surface.sh` applies with `WR_SUPPRESS_PENDING_QUESTIONS`) so the interactive batch-confirm prompt never fires into an absent-user iteration (JTBD-006 friction guard).
 4. **Drain skill.** A new `/wr-architect:review-decisions` skill drains the unconfirmed set in **topic-clustered batches, load-bearing ADRs first**, via `AskUserQuestion` (confirm / amend / reject per ADR). On confirm it writes the marker + today's date; never re-asks (the marker persists).
-5. **Born-confirmed.** `create-adr` (post-ADR-064) writes `human-oversight: confirmed` + the confirm date when the user confirms at Step 5. Any ADR recorded through that flow is born oversighted. **(Amended 2026-05-31 by P340 — see amendment below.)**
+5. **Born-confirmed.** `create-adr` (post-ADR-064) writes `human-oversight: confirmed` + the confirm date when the user confirms at Step 5. Any ADR recorded through that flow is born oversighted. **the shape of the confirming event is now ADR-111**
 6. **Confirmation gate.** A `capture-adr` `.proposed.md` skeleton MUST NOT transition to `accepted` without a `create-adr` / `AskUserQuestion` confirm pass — closing the "auto-decided skeleton stands as a decision" gap.
 7. **Dogfood.** ADR-066 itself is recorded through the asking flow and born `human-oversight: confirmed` (the architect PASSed; the user confirmed the marker shape via `AskUserQuestion`).
 
 > **Amendment 2026-05-27 (ADR-074) — marker ≠ implementation licence.** The "born-`proposed`, drain later" model governs the *recording/existence* of a decision and the *marker* alone. It is **NOT** a licence to build dependent work (other ADRs, RFC slices, invariants, code) on the decision's **substance** before that substance is human-confirmed. P315's root cause was exactly this conflation — "don't born-confirm the marker" was misread as "OK to implement before confirmation," and dependent work (ADR-060 I13 + the RFC-005 retrofit) was built on ADR-072/073 before the drain rejected them. The drain catching an unconfirmed decision is the backlog safety net; it is not the intended first point of substance-confirmation for a decision being actively built upon. See ADR-074 (confirm-substance-before-build) for the build-upon enforcement contract.
 
-> **Amendment 2026-05-31 (P340) — born-confirmed marker writes ONLY in response to a substance-confirm answer that selects a specific option.** Decision Outcome item 5 ("Born-confirmed") is tightened: the marker write fires ONLY when the Step 5 `AskUserQuestion` answer selects ONE specific substantive option from the considered-options set AND that option matches the option the draft was authored against. Draft-quality / problem-statement-OK / consulted-informed answers do NOT trigger the marker write — those are a separate, optional, non-marker-gating fire.
->
-> The bogus-ratification class P340 captures: ADR-078 commit `5196e3d` (2026-05-30) shipped with `human-oversight: confirmed` after a bundled "review pass" `AskUserQuestion` ("does the problem statement + Decision Outcome (Option X) capture the situation?") whose "Yes" answer the agent treated as substance-ratification. The user had confirmed only draft quality; Option X was substantially different from the option the user actually wanted (Option 9). The marker says "this ADR is human-oversighted," but the oversight pass was *on the draft, not the substance*. User correction 2026-05-31: *"the previous iteration of the decision, with the programmatic extraction was not approved. How did that ADR skip ratification?"*
->
-> The mechanism fix: marker writes ONLY on a substance-confirm answer (the `AskUserQuestion` MUST be option-shaped not yes/no, MUST present each considered option as a selectable option, MUST be preceded by a main-turn prose briefing — full requirements in ADR-064 § Amendment 2026-05-31). If the user picks a DIFFERENT option than the draft, the SKILL re-drafts Decision Outcome + dependent sections and re-fires substance-confirm; marker writes only after the draft on disk matches the user's substantive pick. Concrete implementation at `/wr-architect:create-adr` Step 5 (split into Step 5a substance-confirm fire + Step 5b draft-quality review fire). Bats coverage at `packages/architect/skills/create-adr/test/create-adr-substance-confirm-pattern.bats`.
->
-> This amendment is itself recorded `human-oversight: confirmed` because it tightens the *mechanism* implementing the Decision Outcome (does NOT change the chosen Option 1 flat-scalars substance). Per ADR-066 Reassessment Criteria, a supersede/amend that changes the Decision Outcome SHOULD clear `human-oversight`; mechanism tightening does not. P340 is the captured ticket; iter dispatched 2026-05-31 to land the fix.
+### Superseded 2026-05-31 born-confirmed rule — see ADR-111
 
-> **Superseded 2026-06-02 marker-write gate — see ADR-110.** The structural
-> gate on writing a ratification marker, and the `unconfirmed` value that
-> unattended work writes instead, were added here as an amendment on 2026-06-02,
-> a week after this decision was ratified — and that amendment recorded itself
-> as ratified. Both are now **ADR-110 (A ratification marker can only be written
-> when someone actually ratified)**, ratified 2026-08-09, which states the rule
-> once for this surface and the jobs-and-personas one rather than twice.
+The rule that a marker writes only in response to an option-shaped question was
+added here on 2026-05-31, six days after this decision was ratified, and that
+amendment recorded itself as ratified. It is now **ADR-111 (A ratification is
+agreement to the substance, not to the draft)**, ratified 2026-08-09, which adds
+the summary and the file alongside the question and states the rule for every
+artefact carrying a marker rather than for decisions alone. The mismatch handling
+this amendment specified — re-draft, then re-ask — carries forward unchanged.
+
+Decision Outcome item 4 below is untouched: its drain vocabulary survives this
+supersession, and where it and ADR-111 differ, ADR-111 governs.
 
 ### Precedent citations (per architect review)
 
