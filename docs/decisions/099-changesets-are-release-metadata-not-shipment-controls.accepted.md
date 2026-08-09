@@ -75,6 +75,8 @@ and halt-on-exhaustion rule, but its holding-area rules are removed.
 
 ## Related
 
+- **ADR-018** and **ADR-020** — the release-cadence decisions whose held-changeset and graduation
+  disjuncts this supersedes. Both now point here.
 - P359 — holding changesets does not withhold shipment.
 - ADR-042 — above-appetite remediation and halt discipline.
 - ADR-061 — superseded graduation criteria.

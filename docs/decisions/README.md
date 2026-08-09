@@ -87,6 +87,7 @@ _98 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-018 — Inter-iteration release cadence for AFK loops
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **"Risk-driven cadence"**, because it reuses the existing
+**Related:** ADR-099
 
 ### ADR-019 — AFK orchestrator preflight: get the repo into a clean state before starting
 **Status:** proposed | **Oversight:** confirmed
@@ -95,7 +96,7 @@ _98 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-020 — Governance skills auto-release when changesets are queued
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **"New ADR citing ADR-014 + ADR-018 as lineage"**, because it follows the precedent set by ADR-018 (symmetric decision, separate file, cited lineage) and preserves single-purpose ADRs. ADR-014 stays focused on "commit their w...
-**Related:** ADR-014, ADR-020, ADR-018, ADR-015, ADR-013, ADR-019, ADR-061
+**Related:** ADR-099, ADR-014, ADR-020, ADR-018, ADR-015, ADR-013, ADR-019, ADR-061
 
 ### ADR-021 — Plugin manifest version sync mechanism
 **Status:** proposed | **Oversight:** confirmed
@@ -244,7 +245,7 @@ _98 ADRs. These are the current rules. The architect agent reads this section fi
 
 ### ADR-060 — Problem-RFC-Story framework with mandatory problem-trace and unified problem ontology
 **Status:** accepted | **Oversight:** confirmed
-**Related:** ADR-095, ADR-032
+**Related:** ADR-089, ADR-090, ADR-095, ADR-032
 
 ### ADR-062 — Inbound upstream-report discovery + assessment pipeline (peer of ADR-024)
 **Status:** proposed | **Oversight:** confirmed
@@ -292,7 +293,7 @@ _98 ADRs. These are the current rules. The architect agent reads this section fi
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **"Every problem is fixed only via an RFC — no carve-out, no effort threshold"**, ratified by the user via clear direction on 2026-05-26 (*"Each problem may ONLY be fixed via an RFC"*).
 **Confirmation:** A Problem→RFC fix-time gate enforces RFC-first with no effort carve-out (a problem fix cannot commence/commi...; JTBD-008 (lines 21/26/44) + JTBD-101 (line 30) no longer contain the atomic-fix carve-out; both edits route th...; RFC-005's F2/F7/I13 carve-out is removed under the implementation RFC.; JTBD-008 + JTBD-101 document that atomic fixes go through the same RFC as any fix — explicitly NOT a thin / ...
-**Related:** ADR-070, ADR-060, ADR-066, ADR-068
+**Related:** ADR-089, ADR-070, ADR-060, ADR-066, ADR-068
 
 ### ADR-072 — RFC required at the propose-fix step on a Known Error
 **Status:** proposed | **Oversight:** confirmed
@@ -426,7 +427,7 @@ _98 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-099 — Changesets are release metadata, not shipment controls
 **Status:** accepted | **Oversight:** confirmed | **Supersedes:** [ADR-061, ADR-082]
 **Confirmation:** No runtime skill, hook, scorer agent, or release helper treats; The holding directory and graduation evaluator are absent.; Codex-generated agent surfaces match the runtime-neutral source.; ITIL and risk-scorer tests pass.
-**Related:** ADR-042, ADR-061, ADR-082
+**Related:** ADR-018, ADR-020, ADR-042, ADR-061, ADR-082
 
 ### ADR-100 — Capture-time truth discipline for problem tickets — falsify premises, mark unexecuted mechanisms
 **Status:** proposed | **Oversight:** unconfirmed
