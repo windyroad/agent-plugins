@@ -251,7 +251,7 @@ options:
   - ...one entry per considered option
 ```
 
-**Born-confirmed marker write (ADR-066 — tightened by P340 amendment + structurally gated by P348 amendment 2026-06-02).** The marker write fires ONLY when the substance-confirm answer specifies a substantive option from the considered-options set AND that option matches the option the draft was authored against. On a substantive match, IMMEDIATELY call the marker-evidence helper THEN insert the two lines:
+**Born-confirmed marker write (ADR-066 — tightened by P340 amendment + structurally gated by ADR-110).** The marker write fires ONLY when the substance-confirm answer specifies a substantive option from the considered-options set AND that option matches the option the draft was authored against. On a substantive match, IMMEDIATELY call the marker-evidence helper THEN insert the two lines:
 
 ```bash
 wr-architect-mark-oversight-confirmed docs/decisions/<NNN>-<slug>.proposed.md
@@ -262,7 +262,7 @@ human-oversight: confirmed
 oversight-date: YYYY-MM-DD   # today
 ```
 
-The `wr-architect-mark-oversight-confirmed` call writes the session-scoped evidence marker (`/tmp/oversight-confirmed-<sha>-<sid>`) that the `architect-oversight-marker-discipline.sh` PreToolUse hook reads to authorise the subsequent Edit/Write — without the helper call, the hook will DENY the marker write. AFK iter subprocesses spawned via `claude -p` have no `AskUserQuestion` access; they MUST write `human-oversight: unconfirmed` instead (the AFK fallback enum value codified in ADR-066 amendment 2026-06-02), which the drain (`/wr-architect:review-decisions`) later promotes interactively. Calling the helper without a real user substance-confirm event is the P348 hollow-marker bug — every legitimate marker write traces back to an `AskUserQuestion` answer in the same turn.
+The `wr-architect-mark-oversight-confirmed` call writes the session-scoped evidence marker (`/tmp/oversight-confirmed-<sha>-<sid>`) that the `architect-oversight-marker-discipline.sh` PreToolUse hook reads to authorise the subsequent Edit/Write — without the helper call, the hook will DENY the marker write. AFK iter subprocesses spawned via `claude -p` have no `AskUserQuestion` access; they MUST write `human-oversight: unconfirmed` instead (the AFK fallback enum value codified in ADR-110), which the drain (`/wr-architect:review-decisions`) later promotes interactively. Calling the helper without a real user substance-confirm event is the P348 hollow-marker bug — every legitimate marker write traces back to an `AskUserQuestion` answer in the same turn.
 
 **ADR-013 Rule 6 carve-out audit (P352, 2026-06-06 amendment)**: the universal AFK default is queue-and-continue. This Step 5 substance-confirm HALT-and-write-`human-oversight: unconfirmed` shape is a documented carve-out, authorised by **ADR-074** (Confirm decision substance before building dependent work). Rationale: an ADR with `human-oversight: confirmed` enters the world born-confirmed (it does not appear in `/wr-architect:review-decisions`' unoversighted set), so dependent work — every implementation that cites this ADR as authority — would be built on substance that was never user-affirmed. AFK writing `human-oversight: unconfirmed` IS the queue-and-continue shape: the loop continues; the substance-confirm decision is queued to the next interactive drain. Persona-correct for JTBD-006 ("queued for my return, not guessed at"); the carve-out is from the auto-confirm shape, not from queue-and-continue itself.
 

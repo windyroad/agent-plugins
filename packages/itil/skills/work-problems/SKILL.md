@@ -375,7 +375,7 @@ Before the orchestrator emits the final `ALL_DONE` sentinel for the AFK loop, it
 
 **Gate (0) × Step 0e `/goal` anchor (ADR-094).** Under an active goal, the `ALL_DONE` emit does not by itself end the session — the Step 0e external evaluator reads the printed gate (0) table + sentinel and independently confirms the condition holds; a premature emit just triggers a "keep working" turn with the evaluator's reason as guidance. The anchor is one-directional: a cleared goal (or a loop that was never anchored) does NOT relax this gate — gate (0) fires unconditionally either way.
 
-**Gate (a) — Outstanding-questions surface + oversight-unconfirmed drain (P348 amendment 2026-06-02).** Two sub-surfaces, both fire in this gate:
+**Gate (a) — Outstanding-questions surface + oversight-unconfirmed drain (ADR-110 / P348).** Two sub-surfaces, both fire in this gate:
 
 1. *Outstanding-questions surface.* Read `.afk-run-state/outstanding-questions.jsonl`. If non-empty, invoke Step 2.5b's surfacing routine to present the accumulated queue (via `AskUserQuestion`-when-available-else-table per ADR-013 Rule 1 / Rule 6). On completion, truncate the queue file. If the queue is empty, this sub-surface returns immediately. The surfacing routine is the existing Step 2.5b — Step 2.4 does NOT re-implement; it sequences.
 

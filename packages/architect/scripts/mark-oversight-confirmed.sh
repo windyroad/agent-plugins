@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # wr-architect — mark a decision/ADR's human-oversight: confirmed marker write
-# as user-substance-confirmed (P348 / ADR-066 amendment 2026-06-02).
+# as user-substance-confirmed (P348 / ADR-110).
 #
 # Companion to the architect-oversight-marker-discipline.sh PreToolUse hook
 # (also P348). SKILLs invoke this script AFTER an AskUserQuestion lands the

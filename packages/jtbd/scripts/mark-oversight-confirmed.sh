@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # wr-jtbd — mark a JTBD/persona's human-oversight: confirmed marker write as
-# user-substance-confirmed (P348 / ADR-068 amendment 2026-06-02).
+# user-substance-confirmed (P348 / ADR-110).
 #
 # JTBD-side sibling of packages/architect/scripts/mark-oversight-confirmed.sh.
 # Companion to jtbd-oversight-marker-discipline.sh (also P348). SKILLs invoke
@@ -20,7 +20,7 @@
 #
 # AFK iter subprocesses with no AskUserQuestion access MUST write
 # `human-oversight: unconfirmed` instead (the new enum value codified in
-# ADR-068 amendment 2026-06-02), which the drain
+# ADR-110), which the drain
 # (/wr-jtbd:confirm-jobs-and-personas) later promotes.
 #
 # Marker convention:

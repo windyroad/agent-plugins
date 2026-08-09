@@ -89,7 +89,7 @@ Use AskUserQuestion to present the drafted personas and ask:
 - Any missing user segments?
 - Any constraints or pain points to add?
 
-**Born-confirmed write (ADR-068 — structurally gated by P348 amendment 2026-06-02).** Once the user confirms a persona via this AskUserQuestion pass, IMMEDIATELY call the marker-evidence helper THEN insert the two lines into that persona's frontmatter — after the `description:` line:
+**Born-confirmed write (ADR-068 — structurally gated by ADR-110).** Once the user confirms a persona via this AskUserQuestion pass, IMMEDIATELY call the marker-evidence helper THEN insert the two lines into that persona's frontmatter — after the `description:` line:
 
 ```bash
 wr-jtbd-mark-oversight-confirmed docs/jtbd/<persona-name>/persona.md
@@ -100,7 +100,7 @@ human-oversight: confirmed
 oversight-date: YYYY-MM-DD   # today
 ```
 
-The `wr-jtbd-mark-oversight-confirmed` call writes the session-scoped evidence marker (`/tmp/oversight-confirmed-<sha>-<sid>`) that the `jtbd-oversight-marker-discipline.sh` PreToolUse hook reads to authorise the subsequent Edit/Write — without the helper call, the hook will DENY the marker write. This is the load-bearing born-confirmed gate: a persona authored through update-guide enters the world human-oversighted ONLY because the helper above paired the user's substance-confirm answer to the marker write. Do NOT write the marker for a persona the user has not confirmed. AFK iter subprocesses spawned via `claude -p` have no `AskUserQuestion` access; they MUST write `human-oversight: unconfirmed` (the AFK fallback enum value codified in ADR-068 amendment 2026-06-02), which the drain (`/wr-jtbd:confirm-jobs-and-personas`) later promotes interactively. The marker is orthogonal to status.
+The `wr-jtbd-mark-oversight-confirmed` call writes the session-scoped evidence marker (`/tmp/oversight-confirmed-<sha>-<sid>`) that the `jtbd-oversight-marker-discipline.sh` PreToolUse hook reads to authorise the subsequent Edit/Write — without the helper call, the hook will DENY the marker write. This is the load-bearing born-confirmed gate: a persona authored through update-guide enters the world human-oversighted ONLY because the helper above paired the user's substance-confirm answer to the marker write. Do NOT write the marker for a persona the user has not confirmed. AFK iter subprocesses spawned via `claude -p` have no `AskUserQuestion` access; they MUST write `human-oversight: unconfirmed` (the AFK fallback enum value codified in ADR-110), which the drain (`/wr-jtbd:confirm-jobs-and-personas`) later promotes interactively. The marker is orthogonal to status.
 
 ### 5. Draft jobs
 
@@ -148,7 +148,7 @@ Use AskUserQuestion to present the drafted jobs and ask:
 - Do the job statements ring true?
 - Any missing jobs or user flows?
 
-**Born-confirmed write (ADR-068 — structurally gated by P348 amendment 2026-06-02).** Once the user confirms a job via this AskUserQuestion pass, IMMEDIATELY call the marker-evidence helper THEN insert the two lines into that job's frontmatter — after the `date-created:` line:
+**Born-confirmed write (ADR-068 — structurally gated by ADR-110).** Once the user confirms a job via this AskUserQuestion pass, IMMEDIATELY call the marker-evidence helper THEN insert the two lines into that job's frontmatter — after the `date-created:` line:
 
 ```bash
 wr-jtbd-mark-oversight-confirmed docs/jtbd/<persona-name>/JTBD-NNN-<kebab-title>.proposed.md
@@ -159,7 +159,7 @@ human-oversight: confirmed
 oversight-date: YYYY-MM-DD   # today
 ```
 
-Without the `wr-jtbd-mark-oversight-confirmed` call, the `jtbd-oversight-marker-discipline.sh` PreToolUse hook will DENY the marker write. A job authored through update-guide is born human-oversighted ONLY because the helper above paired the user's substance-confirm answer to the marker write. Do NOT write the marker for a job the user has not confirmed. AFK iter subprocesses MUST write `human-oversight: unconfirmed` instead (the AFK fallback enum value codified in ADR-068 amendment 2026-06-02); the drain (`/wr-jtbd:confirm-jobs-and-personas`) later promotes it interactively. The marker is orthogonal to `status:`.
+Without the `wr-jtbd-mark-oversight-confirmed` call, the `jtbd-oversight-marker-discipline.sh` PreToolUse hook will DENY the marker write. A job authored through update-guide is born human-oversighted ONLY because the helper above paired the user's substance-confirm answer to the marker write. Do NOT write the marker for a job the user has not confirmed. AFK iter subprocesses MUST write `human-oversight: unconfirmed` instead (the AFK fallback enum value codified in ADR-110); the drain (`/wr-jtbd:confirm-jobs-and-personas`) later promotes it interactively. The marker is orthogonal to `status:`.
 
 ### 7. Generate README.md index
 

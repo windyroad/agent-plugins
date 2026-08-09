@@ -38,17 +38,15 @@ Chosen: **mirror ADR-066 as a wr-jtbd sibling**.
 5. **Born-confirmed.** `packages/jtbd/skills/update-guide/SKILL.md` (the job/persona authoring surface — the JTBD equivalent of `create-adr`) writes the marker when the user confirms a new/edited job or persona.
 6. **Confirm-gate.** A `proposed` job/persona is not treated as human-oversighted without a confirm pass.
 
-### Amendment 2026-06-02 (P348) — `unconfirmed` is a fourth enum value + the marker-write authority is structurally gated (mirror of ADR-066 amendment 2026-06-02)
+### Superseded 2026-06-02 marker-write gate — see ADR-110
 
-Mirror of ADR-066's 2026-06-02 amendment on the JTBD/persona surface. AFK iter subprocesses spawned via `claude -p` have no `AskUserQuestion` access and were silently authoring JTBDs and personas through skills like `/wr-jtbd:update-guide` while writing `human-oversight: confirmed` without a user confirmation event — directly contradicting JTBD-006's "audit trail — every action taken during AFK mode should be traceable" outcome and JTBD-201/202's auditability persona constraints. The mechanism fix has two prongs:
-
-1. **Structural marker-write gate** — a new PreToolUse:Edit|Write hook (`packages/jtbd/hooks/jtbd-oversight-marker-discipline.sh`) denies any Edit/Write that INTRODUCES `human-oversight: confirmed` into a `docs/jtbd/**/*.md` frontmatter (jobs AND personas) unless a session-scoped evidence marker `/tmp/oversight-confirmed-<sha256-of-path>-<session-id>` exists for THAT specific artefact. SKILLs land the marker via `wr-jtbd-mark-oversight-confirmed <artefact-path>` (ADR-049 PATH shim → `packages/jtbd/scripts/mark-oversight-confirmed.sh`) IMMEDIATELY after the substance-confirm `AskUserQuestion` answer lands. Written under EVERY recent candidate SID per ADR-050 Option C. Behavioural bats: `packages/jtbd/hooks/test/jtbd-oversight-marker-discipline.bats`.
-
-2. **`unconfirmed` enum value** — AFK iter subprocesses MUST write `human-oversight: unconfirmed`. The detector (`detect-unoversighted.sh`) and the single-artifact predicate (`is-job-or-persona-unconfirmed.sh`) already treat anything-not-`confirmed`-and-not-`rejected-pending-supersede`-with-ticket as unoversighted, so `unconfirmed` flows naturally into the drain queue (`/wr-jtbd:confirm-jobs-and-personas`) without a detector change. The build-upon guard (ADR-109) correctly fires `[Unratified Dependency]` on iter-derived `unconfirmed` artefacts — the iter explicitly signalled it could not confirm.
-
-The marker namespace (`/tmp/oversight-confirmed-<sha>-<sid>`) is SHARED between architect and JTBD hooks — data-schema convergence, NOT code coupling (mirrors the "shared cross-plugin contracts" section). Each plugin's helper script independently writes the same-shape marker file; each plugin's hook independently reads it. SKILL surface updated: `packages/jtbd/skills/update-guide/SKILL.md`.
-
-This amendment is itself recorded `human-oversight: confirmed` because it tightens the *mechanism* — the new enum value is the data-side counterpart to the structural guard, and the substance (Option 1 flat scalars + sibling-mirror of ADR-066) is unchanged from the original Decision Outcome.
+The structural gate on writing a ratification marker, and the `unconfirmed`
+value that unattended work writes instead, were added here as an amendment on
+2026-06-02, a week after this decision was ratified — and that amendment
+recorded itself as ratified. Both are now
+**ADR-110 (A ratification marker can only be written when someone actually
+ratified)**, ratified 2026-08-09, which states the rule once for the decisions
+surface and this one rather than twice.
 
 ### Superseded 2026-05-27 build-upon guard — see ADR-109
 

@@ -22,7 +22,7 @@
 # architect-oversight-marker-discipline.sh (and JTBD sibling) hooks remain
 # active as the safety net: a marker-only diff that introduces
 # `human-oversight: confirmed` still requires the per-ADR session evidence
-# marker (P348 / ADR-066 amendment 2026-06-02).
+# marker (P348 / ADR-110).
 #
 # Conservative boundary: any non-empty line outside the marker grammar
 # (frontmatter delimiters that shift position, status:/date: changes, body

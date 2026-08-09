@@ -468,6 +468,11 @@ _93 ADRs. These are the current rules. The architect agent reads this section fi
 **Decides:** The JTBD reviewer fails any change that explicitly cites, implements, or authors a job or persona whose ratification is absent, naming the artefact to ratify — work resting on an unagreed claim is cheaper to stop than to unwind. The trigger is an explicit dependency, never the ambient topic match the reviewer computes for every change, and it keys on ratification rather than lifecycle status; it does not wait for the unratified backlog to be drained, since the guard is what forces the drain.
 **Confirmation:** Change citing an unratified job fails with that job named and how to ratify it; topic-only match passes; ratified-but-draft job passes (status is not the test); superseded job does not fire.
 **Related:** ADR-068, ADR-074
+### ADR-110 — A ratification marker can only be written when someone actually ratified
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** ADR-066 (in part — the 2026-06-02 marker-write amendment only), ADR-068 (in part — the 2026-06-02 marker-write amendment only)
+**Decides:** Structurally refuse any edit that writes a ratified marker into a decision, job or persona unless per-document, per-session evidence of a human confirmation exists, and let unattended work write `unconfirmed` instead — because the prose-only version of this rule already sat on the authoring surfaces and unattended runs wrote `confirmed` anyway, leaving every downstream guard, drain pass and nudge that reads the marker decorative.
+**Confirmation:** Marker edit refused with no evidence for that document/session; same edit succeeds with evidence; evidence for one document doesn't permit the marker on another; an `unconfirmed` artefact is surfaced by the drain pass and session-start nudge just like a missing marker; unattended authoring writes `unconfirmed` and is not refused.
+**Related:** ADR-066, ADR-068, ADR-109
 
 ---
 
