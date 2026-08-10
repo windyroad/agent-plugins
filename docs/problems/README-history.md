@@ -1301,6 +1301,8 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 
 ## 2026-08-09
 
+> Last reviewed: 2026-08-09 **P494 captured** — tests that verify a plugin and tests that verify this project's use of one are the same suite in the same directory; 257 test files ship to adopters across four packages, thirteen of them asserting on decisions and tickets no adopter has (lightweight aside via /wr-itil:capture-problem).
+
 > Last reviewed: 2026-08-09 **P492 and P493 captured** — the pressure to keep work-in-progress small has no trigger of its own, so nine commits accumulated unpushed and CI found a defect that had been sitting across several of them; and a docs-only change runs the full build, which argues for holding it (lightweight aside via /wr-itil:capture-problem).
 
 > Last reviewed: 2026-08-09 **P491 captured** — ADR-112 settled when the deep context analyser fires, and five shipped surfaces still describe the values it replaced; the eval that should catch that passes either way, and the per-project config the decision assumes has not been built (lightweight aside via /wr-itil:capture-problem).
