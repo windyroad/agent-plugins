@@ -28,6 +28,11 @@
     "templates/",
     ".claude-plugin/",
     "lib/",
-    "!skills/*/eval/"
+    "!skills/*/eval/",
+    "!agents/test/",
+    "!hooks/test/",
+    "!lib/test/",
+    "!scripts/test/",
+    "!skills/*/test/"
   ]
 }

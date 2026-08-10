@@ -1,7 +1,7 @@
 {
   "name": "@windyroad/cruise",
   "version": "0.4.9",
-  "description": "Cruise — mechanical token-quota pacing for Claude Code and Codex",
+  "description": "Cruise \u2014 mechanical token-quota pacing for Claude Code and Codex",
   "type": "module",
   "license": "MIT",
   "repository": {
@@ -27,7 +27,9 @@
     "lib/",
     "skills/",
     "!skills/*/eval/",
-    "scripts/"
+    "scripts/",
+    "!scripts/test/",
+    "!hooks/test/"
   ],
   "bin": {
     "windyroad-cruise": "./bin/install.mjs"
