@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# wr-risk-scorer — SessionStart hook (ADR-047 Amendment 2026-06-08, P297)
+# wr-risk-scorer — SessionStart hook. Three arms, first match wins:
+#   policy absent   → ADR-108
+#   register absent → ADR-047
+#   entries pending → ADR-113
 #
 # Surfaces a one-line nudge when this project has a RISK-POLICY.md (the
 # trigger condition for an ISO 31000 / ISO 27001 standing-risk register)
@@ -7,9 +10,9 @@
 # scaffolds the register on-demand via /wr-risk-scorer:bootstrap-catalog
 # (ADR-059); this hook is the discovery surface — it does NOT write.
 #
-# P375 (2026-06-27): once docs/risks/ exists, the hook no longer goes
-# silent — it counts entries still carrying the `**Curation**: pending
-# review` marker and re-surfaces the count every session. This closes the
+# Once docs/risks/ exists, the hook no longer goes silent — it counts
+# entries still carrying the `**Curation**: pending review` marker and
+# re-surfaces the count every session. This closes the
 # audit's "one step short of the jtbd pattern" gap: the scaffold check
 # alone went quiet once stubs existed, so the pending-review backlog
 # (auto-scaffolded entries whose controls + Impact×Likelihood scoring are
@@ -82,7 +85,20 @@ fi
 # instead of going silent once stubs exist. Token-cheap grep over the
 # register dir — no body reads, no per-file LLM call (matches the
 # jtbd-oversight-nudge.sh cost profile).
-PENDING="$(grep -rlE '^\*\*Curation\*\*: pending review' "$REGISTER_DIR" 2>/dev/null | grep -c . || true)"
+# Retired entries are excluded. A risk that has been closed no longer needs its
+# impact and likelihood weighed, and counting them puts a floor under the number
+# that curation cannot move — 22 of 69 on 2026-08-09 — which would make the
+# count undrainable and the nudge permanent.
+#
+# EXCLUSION-shaped, not an `*.active.md` inclusion. The register's status
+# vocabulary is three-valued: `.active.md`, `.accepted.md` for a risk that is
+# consciously tolerated, and `.retired.md`. An accepted risk is live, and the
+# Impact x Likelihood the curation marker says is missing is exactly what a
+# decision to tolerate it should have rested on — so it counts. Matching on
+# active alone would write those off silently, and would also miss an
+# unsuffixed entry, which the register README documents as the pre-retire form.
+PENDING="$(grep -rlE '^\*\*Curation\*\*: pending review' "$REGISTER_DIR" 2>/dev/null \
+  | grep -v '\.retired\.md$' | grep -c . || true)"
 PENDING="${PENDING:-0}"
 
 [ "$PENDING" -gt 0 ] 2>/dev/null || exit 0

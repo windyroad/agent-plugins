@@ -487,6 +487,12 @@ _98 ADRs. These are the current rules. The architect agent reads this section fi
 **Confirmation:** No prior report → fires; report older than 10 days → fires regardless of change; 38%-but-1.6 KB → does not fire; 8%-but-50 KB → does not fire (both gates, not one); an environment variable beats a project file setting a different value; today's report already exists → does not fire and the retro says why; nothing triggers → the retro says that too.
 **Related:** ADR-043, ADR-098, ADR-026, ADR-040
 
+### ADR-113 — An uncurated risk register says so, every session
+**Status:** proposed | **Oversight:** unconfirmed | **Supersedes:** ADR-047 (in part — the 2026-07-03 pending-review count amendment only)
+**Decides:** The risk-scorer session-start hook counts register entries still marked as needing curation and re-emits one line every session until the count reaches zero, so its silence means the register is curated rather than merely present. Retired entries are excluded (an exclusion-shaped predicate, so accepted and suffix-less entries still count) to keep the count drainable; it reads rather than writes, and surfaces a backlog no tool yet drains.
+**Confirmation:** Three arms fire in order, first match wins (policy absent → register absent → entries needing curation); silent when every countable entry is curated; one line naming the count and pointing at the register directory, no drain skill named; count excludes retired and includes accepted; suppression variable silences it.
+**Related:** ADR-047, ADR-108, ADR-056, ADR-059
+
 ---
 
 ## Historical decisions

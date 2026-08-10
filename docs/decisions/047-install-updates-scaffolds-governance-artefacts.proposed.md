@@ -117,30 +117,22 @@ session-start nudge shape are ADR-047 substance and stand as ratified.
 
 ---
 
-## Amendment 2026-07-03 (P375) — pending-review COUNT arm reconciled with shipped behaviour
+### Superseded 2026-07-03 pending-review count — see ADR-113
 
-**The same `risk-scorer-scaffold-nudge.sh` hook gained a third arm on 2026-06-27** (P375's risk-scorer self-surfacer): once `docs/risks/` exists — the state on which the P297 (register-dir-absent) and P379 (policy-absent) arms both exit — the hook no longer goes silent. It counts register entries still carrying the `**Curation**: pending review` marker (ADR-056's curation field) and re-surfaces the count every SessionStart until the backlog is drained. That arm shipped without any ADR reconciling it; this amendment closes the honesty gap (recorded as a P375 investigation item at the 2026-07-03 outstanding-questions drain: *"verify ADR-056/ADR-059 do not already cover the 'risk-register pending-review' nudge trigger; if not, add the one-liner to ADR-047 reconciling text with shipped behaviour"*).
+The third arm of this hook — counting register entries still marked as needing
+curation, and re-surfacing until the count reaches zero — shipped on 2026-06-27
+and was recorded here as an amendment a week later, seventeen days after this
+decision was ratified. The amendment said as much itself: the arm had shipped
+and nothing had reconciled it.
 
-### Why it homes on ADR-047, not ADR-056/059
+It is now **ADR-113 (An uncurated risk register says so, every session)**,
+ratified 2026-08-09, which also narrows the count to exclude retired entries so
+that it can reach zero.
 
-The verification the P375 decision asked for: neither ADR-056 nor ADR-059 owns the SessionStart COUNT nudge trigger.
-
-- **ADR-056** defines the `**Curation**: pending review (auto-scaffolded YYYY-MM-DD)` marker and the write-contract that stamps it; it defers the `/wr-risk-scorer:review-register` DRAIN skill to "when adopter usage demonstrates demand". It documents the *write* of the marker, not any *count* of it.
-- **ADR-059** again defers the same drain skill and, at verdict A1, explicitly *rejects* SessionStart as a firing surface for the register **bootstrap-write** (content generation, more aggressive). The COUNT arm is a read-only stderr count, not a write — so A1 does not reach it and there is no contradiction.
-
-`risk-scorer-scaffold-nudge.sh` is ADR-047's artefact — the register-absent arm is this decision's own substance, and the policy-absent arm is now ADR-108. Keeping the arms of one hook discoverable from the hook's home ADR is the correct grain: ADR-056 owns the marker, ADR-047 owns the nudge that surfaces it.
-
-### The P375 class-B fit
-
-The 2026-06-23 P375 reachability audit named this exact hook as having "stopped one step short of the jtbd pattern": the scaffold check went silent once stubs existed, so the pending-review backlog (auto-scaffolded entries whose controls + Impact×Likelihood scoring are not yet human-curated) rotted invisibly (class C — on-demand-only). Counting content state and re-surfacing until drained is the class-B self-surfacing pattern that `jtbd-oversight-nudge.sh` / `architect-oversight-nudge.sh` already use — the same pattern ADR-084's `retrospective-deferral-census.sh` clones. This arm converts the silent-once-scaffolded rot surface (class C) into a visible-every-session one (class B). It *surfaces* the backlog; it does not *drain* it — draining still needs the deferred `/wr-risk-scorer:review-register` skill (ADR-056/059).
-
-### Mechanism
-
-`packages/risk-scorer/hooks/risk-scorer-scaffold-nudge.sh` — after the policy-absent (P379) and register-dir-absent (P297) arms exit, a token-cheap `grep -rlE '^\*\*Curation\*\*: pending review'` over `docs/risks/` counts pending-review entries; on count > 0 it emits a one-line stderr nudge to curate them (singular / plural form); silent on zero. Same `WR_SUPPRESS_OVERSIGHT_NUDGE=1` envelope (ADR-068) — the AFK guard short-circuits all three arms. Behavioural coverage is in `packages/risk-scorer/hooks/test/risk-scorer-scaffold-nudge.bats`.
-
-### Frontmatter
-
-`human-oversight: unconfirmed` applies to this amendment (the top-level marker stays `confirmed` from the 2026-06-10 drain that ratified the P297 amendment). This amendment was applied by an AFK `/wr-itil:work-problems` iter subprocess; the substance-confirm marker pipeline requires an AskUserQuestion-shaped event the subprocess cannot produce (P357). Queued to the next interactive `/wr-architect:review-decisions` drain per ADR-066 P348. This amendment **documents already-shipped behaviour** (the arm has been live since 2026-06-27) — it reconciles the record with the code; it introduces no new unratified design.
+This decision keeps the register-absent arm as its own substance, and its
+2026-06-08 amendment — which reshaped the hook from a rejected silent write into
+a read-only nudge — stands and is what ADR-113 relies on. The policy-absent arm
+is ADR-108.
 
 ---
 

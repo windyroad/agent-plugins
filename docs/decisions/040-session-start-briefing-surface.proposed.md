@@ -156,9 +156,18 @@ The signal-vs-noise pass closes the "author-judgment curation" gap identified in
   - Tier 2 (`docs/briefing/README.md`) exceeds ~5 KB. Revisit the topic taxonomy: a bloated index implies the topic granularity is wrong, not that the index needs rotation.
 - **Reassessment date**: 2026-07-22.
 
-## Amendment 2026-06-02 — `*-archive*.md` exclusion (P322)
+### What the per-topic budget applies to
 
-The Tier 3 budget pass at `packages/retrospective/scripts/check-briefing-budgets.sh` now excludes `*-archive*.md` files alongside the existing `README.md` exclusion. Archive files are rotation **sinks** (the destination of split-by-date rotation per Tier 3 Branch A safe default), not session-start-loaded surfaces, so holding them to the per-topic-file budget produced forced churn (proliferating `*-archive-N.md` siblings every retro) without reader benefit. The exclusion aligns Tier 3 enforcement with the ADR's session-surface intent. Closes P322. User-ratified 2026-06-03.
+The Tier 3 budget covers the topic files a session actually loads. Two kinds of
+file sit in the same directory and are outside it.
+
+`README.md` is the index, not a topic. And `*-archive*.md` files are rotation
+sinks — the destination when a topic file is split by date, which is this
+decision's own safe default for keeping a topic under budget. Holding a sink to
+the per-topic budget makes rotation self-defeating: each split produces a new
+file that immediately needs splitting, so the budget generates the churn it
+exists to prevent. Neither is loaded at session start, which is what the budget
+is measuring.
 
 ## More Information
 
