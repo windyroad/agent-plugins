@@ -25,6 +25,7 @@
     "skills/",
     ".claude-plugin/",
     "lib/",
-    "!agents/eval/"
+    "!agents/eval/",
+    "!hooks/test/"
   ]
 }

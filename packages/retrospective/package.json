@@ -26,6 +26,9 @@
     "scripts/",
     ".claude-plugin/",
     "lib/",
-    "!skills/*/eval/"
+    "!skills/*/eval/",
+    "!hooks/test/",
+    "!scripts/test/",
+    "!skills/*/test/"
   ]
 }
