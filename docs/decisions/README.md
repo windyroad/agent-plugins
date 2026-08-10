@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 110 (98 in-force, 12 historical)
+**Total ADRs:** 112 (100 in-force, 12 historical)
 
 ---
 
 ## In-force decisions
 
-_98 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_100 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -488,10 +488,16 @@ _98 ADRs. These are the current rules. The architect agent reads this section fi
 **Related:** ADR-043, ADR-098, ADR-026, ADR-040
 
 ### ADR-113 — An uncurated risk register says so, every session
-**Status:** proposed | **Oversight:** unconfirmed | **Supersedes:** ADR-047 (in part — the 2026-07-03 pending-review count amendment only)
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** ADR-047 (in part — the 2026-07-03 pending-review count amendment only)
 **Decides:** The risk-scorer session-start hook counts register entries still marked as needing curation and re-emits one line every session until the count reaches zero, so its silence means the register is curated rather than merely present. Retired entries are excluded (an exclusion-shaped predicate, so accepted and suffix-less entries still count) to keep the count drainable; it reads rather than writes, and surfaces a backlog no tool yet drains.
 **Confirmation:** Three arms fire in order, first match wins (policy absent → register absent → entries needing curation); silent when every countable entry is curated; one line naming the count and pointing at the register directory, no drain skill named; count excludes retired and includes accepted; suppression variable silences it.
 **Related:** ADR-047, ADR-108, ADR-056, ADR-059
+
+### ADR-114 — The burn guard brakes above four times the sustainable rate
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** ADR-098 (in part — the burn_guard_multiple default and its rationale)
+**Decides:** The quota throttle's burn guard fires when measured burn is strictly more than four times the rate the remaining budget can sustain, because behind the pacing line nothing else brakes at all and this threshold is the whole boundary between running unthrottled and stopping. Four is an unmeasured choice — clear of ordinary variation, still catching the runaway case — and remains project-tunable via the layered config, with `WR_QUOTA_BURN_GUARD_MULTIPLE` as the override and zero as the documented opt-out.
+**Confirmation:** Over the line and over-rate, the proportional correction applies; over the line but sustainable, nothing brakes; behind the line at or below 4× sustainable, nothing brakes; grip and ramp are process-wide, not per-window; strictly above 4× trips the guard and exactly 4× does not (integer `>`); env beats project file beats machine file, else four; zero disables the guard; a non-integer value falls back to four, not zero.
+**Related:** ADR-098, ADR-093
 
 ---
 
