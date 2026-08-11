@@ -92,6 +92,12 @@ The solution-space investigation this ticket was opened to do is **complete and 
 
 **Remaining for P324 close:** S1b + architect synthetic-corpus positive-fire, S2/S3 residue (local pre-commit/pre-push Tier-A hook), S4 (after a proven-green CI run: retire the RFC-010/RFC-011 structural escape-hatch bats → advance P290), S5 (graduate RFC-011 within appetite on gate-passing evidence).
 
+### Reliability recalibration (2026-08-12 — CI run 31537137532)
+
+The JTBD agent-prose fixtures produced the same correct authoritative `JTBD Review: PASS` outcome on the PR run, the first main run, and a failed-job rerun. The second LLM rubric grader nevertheless alternated PASS, FAIL, then PASS while grading sandbox-denial commentary about the subordinate `/tmp/jtbd-verdict` marker. The main run therefore passed only after a rerun.
+
+RFC-012 now removes that redundant judge from these two all-PASS fixtures and asserts the emitted `JTBD Review: PASS` contract directly. The real agent still runs; only the nondeterministic second interpretation of an already-structured verdict is removed. This is a calibration fix within the existing behavioural harness, not a structural source-prose assertion or broadened sandbox permission.
+
 ## Dependencies
 
 - **Blocks**: `P290` (remove ADR-052 structural escape hatch — needs a behavioural alternative first); within-appetite release of every agent-verdict change (RFC-010, RFC-011, and future).
