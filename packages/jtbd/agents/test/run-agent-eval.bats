@@ -14,12 +14,54 @@ setup() {
   export PATH="$BIN:$PATH"
   export FAKE_CLAUDE_MODE=success
   export CLAUDE_CALLED="$TMP/claude-called"
-  export CLAUDE_ARGS="$TMP/claude-args"
+  export EXPECTED_REPO_ROOT="$(cd "${BATS_TEST_DIRNAME}/../../../.." && pwd -P)"
 
   cat > "$BIN/claude" <<'MOCK'
 #!/usr/bin/env bash
+set -euo pipefail
+
 touch "$CLAUDE_CALLED"
-printf '%s\n' "$@" > "$CLAUDE_ARGS"
+python3 - "$EXPECTED_REPO_ROOT" "$@" <<'PY'
+import json
+import os
+import sys
+
+repo_root = sys.argv[1]
+args = sys.argv[2:]
+
+def option(name):
+    position = args.index(name)
+    return args[position + 1]
+
+assert option("--setting-sources") == ""
+assert option("--tools") == "Read,Glob,Grep,Bash"
+settings = json.loads(option("--settings"))
+sandbox = settings["sandbox"]
+assert sandbox["enabled"] is True
+assert sandbox["failIfUnavailable"] is True
+assert sandbox["autoAllowBashIfSandboxed"] is True
+assert sandbox["allowUnsandboxedCommands"] is False
+assert sandbox["filesystem"]["allowWrite"] == ["//tmp/jtbd-verdict"]
+assert sandbox["filesystem"]["denyWrite"] == [
+    "//" + os.path.realpath(repo_root).lstrip("/")
+]
+for forbidden in (
+    "--add-dir",
+    "--dangerously-skip-permissions",
+    "--allow-dangerously-skip-permissions",
+    "--allowedTools",
+    "--allowed-tools",
+):
+    assert all(
+        argument != forbidden and not argument.startswith(forbidden + "=")
+        for argument in args
+    )
+assert "bypassPermissions" not in args
+assert not any(
+    argument.startswith("--permission-mode=bypassPermissions")
+    for argument in args
+)
+PY
 case "$FAKE_CLAUDE_MODE" in
   nonzero)
     printf '%s\n' '{"type":"assistant","message":{"content":[{"type":"text","text":"JTBD Review: PASS"}]},"parent_tool_use_id":null}'
@@ -57,8 +99,6 @@ teardown() {
   [ "$status" -eq 0 ]
   [[ "$output" == *"JTBD Review: PASS"* ]]
   [[ "$output" == *"Marker written."* ]]
-  grep -Fx '{"sandbox":{"filesystem":{"allowWrite":["/tmp/jtbd-verdict"]}}}' "$CLAUDE_ARGS"
-  ! grep -Eq -- '--add-dir|bypassPermissions' "$CLAUDE_ARGS"
   [ ! -e "$VERDICT_FILE" ]
 }
 

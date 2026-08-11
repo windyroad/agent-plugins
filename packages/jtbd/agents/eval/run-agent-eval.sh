@@ -27,9 +27,9 @@
 # @problem P324
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 AGENT_MD="${SCRIPT_DIR}/../agent.md"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd -P)"
 VERDICT_FILE="/tmp/jtbd-verdict"
 STREAM_FILE="$(mktemp "${TMPDIR:-/tmp}/jtbd-agent-eval.XXXXXX")"
 MARKER_CREATED=0
@@ -61,6 +61,27 @@ if ! (set -o noclobber; : > "$VERDICT_FILE") 2>/dev/null; then
 fi
 MARKER_CREATED=1
 
+SANDBOX_SETTINGS="$(python3 - "$REPO_ROOT" <<'PY'
+import json
+import os
+import sys
+
+repo_root = os.path.realpath(sys.argv[1])
+print(json.dumps({
+    "sandbox": {
+        "enabled": True,
+        "failIfUnavailable": True,
+        "autoAllowBashIfSandboxed": True,
+        "allowUnsandboxedCommands": False,
+        "filesystem": {
+            "allowWrite": ["//tmp/jtbd-verdict"],
+            "denyWrite": ["//" + repo_root.lstrip("/")],
+        },
+    },
+}, separators=(",", ":")))
+PY
+)"
+
 # Run from repo root so docs/jtbd/ and the shim's default root resolve.
 cd "$REPO_ROOT"
 
@@ -68,7 +89,9 @@ set +e
 claude -p \
   --output-format stream-json \
   --verbose \
-  --settings '{"sandbox":{"filesystem":{"allowWrite":["/tmp/jtbd-verdict"]}}}' \
+  --setting-sources "" \
+  --tools "Read,Glob,Grep,Bash" \
+  --settings "$SANDBOX_SETTINGS" \
   --system-prompt "$(cat "$AGENT_MD")" \
   "$@" > "$STREAM_FILE"
 CLAUDE_STATUS=$?

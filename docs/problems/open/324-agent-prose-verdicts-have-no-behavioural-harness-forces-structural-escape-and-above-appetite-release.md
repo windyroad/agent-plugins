@@ -100,6 +100,8 @@ RFC-012 now removes that redundant judge from these two all-PASS fixtures and as
 
 **Post-release correction — CI run 31541991794:** the deterministic assertion exposed a second failure rather than hiding it: Claude emitted the correct inline PASS in an earlier assistant turn, then replaced print-mode stdout with a terse final summary after the required `/tmp/jtbd-verdict` write was sandbox-denied. The runner now consumes Claude's structured stream and emits every main-agent assistant text block, grants sandbox write access only to the exact marker file, and independently requires exact `PASS` marker content. The config serializes its two fixtures because that marker is intentionally global. Behavioural runner tests cover multi-turn extraction, missing/pre-existing markers, malformed streams, non-zero Claude status, and cleanup. No LLM judge, broad `/tmp` access, retry, or synthesized verdict is introduced.
 
+**Fresh-CI correction — CI run 31544631906:** both serialized fixtures still failed because `sandbox.filesystem.allowWrite` does not enable sandboxing; developer user settings had hidden that missing precondition locally. The runner now excludes user/project/local setting sources, exposes only `Read`, `Glob`, `Grep`, and `Bash`, explicitly enables fail-closed sandboxing, disables unsandboxed escape, denies repository writes, and permits only the verdict file outside the repository. CI installs the documented Linux sandbox prerequisites. The fake-Claude regression validates that exact invocation before it will write its marker.
+
 ## Dependencies
 
 - **Blocks**: `P290` (remove ADR-052 structural escape hatch — needs a behavioural alternative first); within-appetite release of every agent-verdict change (RFC-010, RFC-011, and future).
