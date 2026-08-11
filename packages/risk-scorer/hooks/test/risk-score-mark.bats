@@ -13,7 +13,7 @@
 setup() {
   SCRIPT_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
   HOOK="$SCRIPT_DIR/risk-score-mark.sh"
-  source "$SCRIPT_DIR/lib/gate-helpers.sh"
+  source "$SCRIPT_DIR/lib/risk-gate.sh"
   ORIG_DIR="$PWD"
   TEST_DIR=$(mktemp -d)
   cd "$TEST_DIR"
@@ -79,6 +79,38 @@ RISK_BYPASS: incident"
   [ ! -f "$RDIR/push" ]
   [ ! -f "$RDIR/release" ]
   [ ! -f "$RDIR/checkout-id" ]
+}
+
+@test "pipeline: interrupted marker publication invalidates both checkout roots" {
+  mkdir -p "$RDIR"
+  OTHER_DIR=$(mktemp -d)
+  git clone -q "$TEST_DIR" "$OTHER_DIR"
+  (cd "$OTHER_DIR" && _checkout_id) > "$RDIR/checkout-id"
+  printf '1' > "$RDIR/commit"
+  printf 'old-hash' > "$RDIR/state-hash"
+
+  mkdir "$TEST_DIR/bin"
+  cat > "$TEST_DIR/bin/mkdir" <<'EOF'
+#!/bin/sh
+case "$*" in
+  *'.risk-reports'*) exit 1 ;;
+  *) exec /bin/mkdir "$@" ;;
+esac
+EOF
+  chmod +x "$TEST_DIR/bin/mkdir"
+
+  PATH="$TEST_DIR/bin:$PATH" run run_hook "wr-risk-scorer:pipeline" \
+    "RISK_SCORES: commit=2 push=2 release=2"
+  [ "$status" -ne 0 ]
+  [ ! -f "$RDIR/checkout-id" ]
+
+  cd "$TEST_DIR"
+  run check_risk_gate "$SESSION_ID" commit
+  [ "$status" -ne 0 ]
+  cd "$OTHER_DIR"
+  run check_risk_gate "$SESSION_ID" commit
+  [ "$status" -ne 0 ]
+  rm -rf "$OTHER_DIR"
 }
 
 # --- Plan scorer: writes plan-reviewed marker on PASS only ---

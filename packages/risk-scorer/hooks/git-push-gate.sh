@@ -20,6 +20,13 @@ TOOL_NAME=$(_get_tool_name)
 COMMAND=$(_get_command)
 SESSION_ID=$(_get_session_id)
 
+if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*(git push|npm run (push:watch|release:watch)|npx changeset|npm run changeset|gh pr merge)(\s|$)'; then
+    if ! _enter_hook_cwd; then
+        risk_gate_deny "Pipeline action blocked: the command checkout could not be validated. Run the command from an absolute Git working directory and rescore that checkout."
+        exit 0
+    fi
+fi
+
 # Block git push to master/main/publish/changeset-release/*, or bare git push.
 # Allow explicit pushes to other branches (feature branches etc).
 if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*git push(\s|$)'; then

@@ -12,6 +12,7 @@ COMMAND=$(_get_command)
 
 # Only act on commands that change git state
 echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*git (add|commit|stash|reset|checkout|restore)' || exit 0
+_enter_hook_cwd || exit 0
 
 SESSION_ID=$(_get_session_id)
 [ -n "$SESSION_ID" ] || exit 0

@@ -15,6 +15,10 @@ TOOL_NAME=$(_get_tool_name)
 
 COMMAND=$(_get_command)
 echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*git commit' || exit 0
+if ! _enter_hook_cwd; then
+    risk_gate_deny "Commit blocked: the command checkout could not be validated. Run the command from an absolute Git working directory and rescore that checkout."
+    exit 0
+fi
 
 # P170 / RFC-002 / ADR-031 T11: commit-message-embedded RISK_BYPASS
 # marker recognition. The adopter auto-migrate routine (T7,

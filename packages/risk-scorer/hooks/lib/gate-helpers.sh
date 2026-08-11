@@ -204,6 +204,45 @@ except:
 " 2>/dev/null || echo ""
 }
 
+_get_cwd() {
+    echo "$_HOOK_INPUT" | python3 -c "
+import json, re, shlex, sys
+try:
+    data = json.load(sys.stdin)
+    tool = data.get('tool_input', {})
+    command_cwd = ''
+    try:
+        tokens = shlex.split(tool.get('command', ''))
+        while tokens and re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*=.*', tokens[0]):
+            tokens.pop(0)
+        if len(tokens) >= 3 and tokens[0] == 'cd' and tokens[2] == '&&':
+            command_cwd = tokens[1]
+    except ValueError:
+        pass
+    print(tool.get('cwd') or tool.get('workdir') or command_cwd or data.get('cwd') or '')
+except:
+    print('')
+" 2>/dev/null || echo ""
+}
+
+_enter_hook_cwd() {
+    local declared real root
+    declared=$(_get_cwd)
+    if [ -z "$declared" ]; then
+        # Legacy Claude payloads omit cwd. The caller's process root remains a
+        # safe fallback because checkout-id matching still denies a marker
+        # minted by any other physical checkout.
+        return 0
+    fi
+    case "$declared" in /*) ;; *) return 1 ;; esac
+    real=$(python3 -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "$declared" 2>/dev/null) || return 1
+    [ -d "$real" ] || return 1
+    root=$(git -C "$real" rev-parse --show-toplevel 2>/dev/null) || return 1
+    root=$(python3 -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "$root" 2>/dev/null) || return 1
+    [ -d "$root" ] || return 1
+    cd "$root"
+}
+
 _get_file_path() {
     echo "$_HOOK_INPUT" | python3 -c "
 import sys, json

@@ -47,7 +47,7 @@ if echo "$SUBAGENT" | grep -qE 'risk-scorer.pipeline'; then
 
   CHECKOUT_ID=$(_checkout_id) || exit 1
   [ -n "$CHECKOUT_ID" ] || exit 1
-  printf '%s' "$CHECKOUT_ID" > "${RDIR}/checkout-id"
+  rm -f "${RDIR}/checkout-id"
 
   # Birth markers (<action>-born) capture the scorer-run timestamp. Band B
   # of the three-band TTL policy (P090) uses them to enforce a 2×TTL
@@ -166,6 +166,10 @@ print(json.dumps({
       done <<< "$HINT_BLOCK"
     fi
   } 2>/dev/null || true
+
+  # Publish the physical-checkout binding last. If any required marker write
+  # above fails, legacy scores remain unusable in a different checkout.
+  printf '%s' "$CHECKOUT_ID" > "${RDIR}/checkout-id"
 fi
 
 # ---------------------------------------------------------------------------
