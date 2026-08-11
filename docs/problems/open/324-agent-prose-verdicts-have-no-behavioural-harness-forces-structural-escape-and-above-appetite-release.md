@@ -102,6 +102,8 @@ RFC-012 now removes that redundant judge from these two all-PASS fixtures and as
 
 **Fresh-CI correction — CI run 31544631906:** both serialized fixtures still failed because `sandbox.filesystem.allowWrite` does not enable sandboxing; developer user settings had hidden that missing precondition locally. The runner now excludes user/project/local setting sources, exposes only `Read`, `Glob`, `Grep`, and `Bash`, explicitly enables fail-closed sandboxing, disables unsandboxed escape, denies repository writes, and permits only the verdict file outside the repository. CI installs the documented Linux sandbox prerequisites. The fake-Claude regression validates that exact invocation before it will write its marker.
 
+**Provider-capacity diagnostic — CI run 31546594132:** the sandbox prerequisites installed, but the unchanged architect fixtures both exited in about four seconds before the JTBD runner executed. A same-time local `claude -p` call returned the explicit weekly-limit message, while promptfoo discarded provider stdout on non-zero exit. The architect and TDD direct runners now mirror Claude stdout to stderr only on failure and preserve the original non-zero status, so capacity/authentication failures remain fail-closed and become diagnosable. No retry, skip, provider fallback, or synthesized verdict is introduced.
+
 ## Dependencies
 
 - **Blocks**: `P290` (remove ADR-052 structural escape hatch — needs a behavioural alternative first); within-appetite release of every agent-verdict change (RFC-010, RFC-011, and future).
