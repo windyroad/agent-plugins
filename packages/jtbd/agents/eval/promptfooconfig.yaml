@@ -41,6 +41,11 @@ description: |
   job citation, and the inverse-P078/P132 over-fire guard ([Unratified
   Dependency] must NOT fire on ambient alignment with no explicit dependency).
 
+# Both fixtures exercise the agent's required global /tmp/jtbd-verdict marker.
+# Serialize them so one run can never consume or overwrite the other's marker.
+evaluateOptions:
+  maxConcurrency: 1
+
 providers:
   # Path is relative to this config file's directory (promptfoo basePath).
   - id: 'exec:bash ./run-agent-eval.sh'

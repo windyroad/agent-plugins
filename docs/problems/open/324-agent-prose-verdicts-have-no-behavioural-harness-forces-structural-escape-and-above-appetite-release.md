@@ -98,6 +98,8 @@ The JTBD agent-prose fixtures produced the same correct authoritative `JTBD Revi
 
 RFC-012 now removes that redundant judge from these two all-PASS fixtures and asserts the emitted `JTBD Review: PASS` contract directly. The real agent still runs; only the nondeterministic second interpretation of an already-structured verdict is removed. This is a calibration fix within the existing behavioural harness, not a structural source-prose assertion or broadened sandbox permission.
 
+**Post-release correction — CI run 31541991794:** the deterministic assertion exposed a second failure rather than hiding it: Claude emitted the correct inline PASS in an earlier assistant turn, then replaced print-mode stdout with a terse final summary after the required `/tmp/jtbd-verdict` write was sandbox-denied. The runner now consumes Claude's structured stream and emits every main-agent assistant text block, grants sandbox write access only to the exact marker file, and independently requires exact `PASS` marker content. The config serializes its two fixtures because that marker is intentionally global. Behavioural runner tests cover multi-turn extraction, missing/pre-existing markers, malformed streams, non-zero Claude status, and cleanup. No LLM judge, broad `/tmp` access, retry, or synthesized verdict is introduced.
+
 ## Dependencies
 
 - **Blocks**: `P290` (remove ADR-052 structural escape hatch — needs a behavioural alternative first); within-appetite release of every agent-verdict change (RFC-010, RFC-011, and future).
