@@ -12,8 +12,8 @@ setup() {
   OTHER_REPO="$TMP/completion"
   git init -q "$PIPELINE_REPO"
   git init -q "$OTHER_REPO"
-  printf 'assessed\n' > "$PIPELINE_REPO/state"
-  printf 'completion\n' > "$OTHER_REPO/state"
+  printf 'same\n' > "$PIPELINE_REPO/state"
+  printf 'same\n' > "$OTHER_REPO/state"
   git -C "$PIPELINE_REPO" add state
   git -C "$OTHER_REPO" add state
   git -C "$PIPELINE_REPO" -c user.name=test -c user.email=test@example.com commit -qm initial
@@ -124,7 +124,11 @@ subagent_stop_input() {
   expected="$(cd "$PIPELINE_REPO" && source "$HOOK_DIR/lib/gate-helpers.sh" && "$HOOK_DIR/lib/pipeline-state.sh" --hash-inputs | _hashcmd | cut -d' ' -f1)"
   completion_hash="$(cd "$OTHER_REPO" && source "$HOOK_DIR/lib/gate-helpers.sh" && "$HOOK_DIR/lib/pipeline-state.sh" --hash-inputs | _hashcmd | cut -d' ' -f1)"
   [ "$(cat "$rdir/state-hash")" = "$expected" ]
-  [ "$(cat "$rdir/state-hash")" != "$completion_hash" ]
+  [ "$expected" = "$completion_hash" ]
+  expected_checkout="$(cd "$PIPELINE_REPO" && source "$HOOK_DIR/lib/gate-helpers.sh" && _checkout_id)"
+  completion_checkout="$(cd "$OTHER_REPO" && source "$HOOK_DIR/lib/gate-helpers.sh" && _checkout_id)"
+  [ "$(cat "$rdir/checkout-id")" = "$expected_checkout" ]
+  [ "$expected_checkout" != "$completion_checkout" ]
   [ "$(find "$PIPELINE_REPO/.risk-reports" -type f -name '*-commit.md' | wc -l | tr -d ' ')" = "1" ]
   [ ! -e "$OTHER_REPO/.risk-reports" ]
   run grep -R "$PIPELINE_REPO" "$PIPELINE_REPO/.risk-reports"

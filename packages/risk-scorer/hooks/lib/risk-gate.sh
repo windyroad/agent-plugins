@@ -30,6 +30,7 @@ check_risk_gate() {
   local SCORE_FILE="${RDIR}/${ACTION}"
   local BORN_FILE="${RDIR}/${ACTION}-born"
   local HASH_FILE="${RDIR}/state-hash"
+  local CHECKOUT_FILE="${RDIR}/checkout-id"
   local TTL_SECONDS="${RISK_TTL:-3600}"
 
   RISK_GATE_CATEGORY=""
@@ -43,6 +44,14 @@ check_risk_gate() {
     else
       RISK_GATE_REASON="No ${ACTION} risk score found. Delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') to assess cumulative pipeline risk. Dispatch the scorer SYNCHRONOUSLY (run_in_background: false): a background-launched scorer does not fire its PostToolUse:Agent mark hook, so no marker persists and this gate re-blocks despite a within-appetite score (P402)."
     fi
+    return 1
+  fi
+
+  # Scores and bypasses belong to the physical checkout that was assessed.
+  # Fail closed for legacy markers that predate this binding.
+  if ! _checkout_matches "$CHECKOUT_FILE"; then
+    RISK_GATE_CATEGORY="drift"
+    RISK_GATE_REASON="Risk assessment checkout binding is missing or does not match the current Git checkout. Delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') to rescore this checkout."
     return 1
   fi
 

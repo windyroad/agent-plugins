@@ -11,9 +11,11 @@ setup() {
   RDIR=$(_risk_dir "$TEST_SESSION")
   SCORE_FILE="${RDIR}/commit"
   HASH_FILE="${RDIR}/state-hash"
+  CHECKOUT_FILE="${RDIR}/checkout-id"
 
   export RISK_TTL=5
-  rm -f "$SCORE_FILE" "$HASH_FILE"
+  rm -f "$SCORE_FILE" "$HASH_FILE" "$CHECKOUT_FILE"
+  _checkout_id > "$CHECKOUT_FILE"
 }
 
 teardown() {
@@ -33,6 +35,8 @@ _use_policy() {
       "$appetite_section" > "$POLICY_DIR/RISK-POLICY.md"
   fi
   cd "$POLICY_DIR"
+  git init -q
+  _checkout_id > "$CHECKOUT_FILE"
 }
 
 # Helper: call check_risk_gate directly (not via run) so RISK_GATE_REASON is visible
@@ -112,6 +116,32 @@ assert_gate_allows() {
   printf '3' > "$SCORE_FILE"
   touch "$SCORE_FILE"
   assert_gate_allows "$TEST_SESSION" "commit"
+}
+
+@test "missing legacy checkout identity denies" {
+  printf '3' > "$SCORE_FILE"
+  rm -f "$CHECKOUT_FILE"
+  assert_gate_denies "$TEST_SESSION" "commit" "checkout binding"
+}
+
+@test "identical tree in a different checkout denies" {
+  local first second
+  first=$(mktemp -d)
+  second=$(mktemp -d)
+  for repo in "$first" "$second"; do
+    git -C "$repo" init -q
+    printf 'same\n' > "$repo/state"
+    git -C "$repo" add state
+    git -C "$repo" -c user.name=test -c user.email=test@example.com commit -qm initial
+  done
+
+  cd "$first"
+  _checkout_id > "$CHECKOUT_FILE"
+  printf '3' > "$SCORE_FILE"
+  cd "$second"
+  assert_gate_denies "$TEST_SESSION" "commit" "checkout binding"
+
+  rm -rf "$first" "$second"
 }
 
 @test "drift detection: hash mismatch denies" {

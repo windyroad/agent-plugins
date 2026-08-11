@@ -78,8 +78,8 @@ COMPLETION_REPO="$TMP_FIXTURE_DIR/completion"
 mkdir -p "$ASSESSED_REPO" "$COMPLETION_REPO"
 git init -q "$ASSESSED_REPO"
 git init -q "$COMPLETION_REPO"
-printf 'assessed\n' > "$ASSESSED_REPO/state"
-printf 'completion\n' > "$COMPLETION_REPO/state"
+printf 'same\n' > "$ASSESSED_REPO/state"
+printf 'same\n' > "$COMPLETION_REPO/state"
 git -C "$ASSESSED_REPO" add state
 git -C "$COMPLETION_REPO" add state
 git -C "$ASSESSED_REPO" -c user.name=test -c user.email=test@example.com commit -qm initial
@@ -113,7 +113,13 @@ STATE_HASH="$(find "$PIPELINE_TMP" -type f -name state-hash -print -quit)"
 expected="$(cd "$ASSESSED_REPO" && source "$REPO_ROOT/packages/risk-scorer/hooks/lib/gate-helpers.sh" && "$REPO_ROOT/packages/risk-scorer/hooks/lib/pipeline-state.sh" --hash-inputs | _hashcmd | cut -d' ' -f1)"
 completion_hash="$(cd "$COMPLETION_REPO" && source "$REPO_ROOT/packages/risk-scorer/hooks/lib/gate-helpers.sh" && "$REPO_ROOT/packages/risk-scorer/hooks/lib/pipeline-state.sh" --hash-inputs | _hashcmd | cut -d' ' -f1)"
 [[ "$(cat "$STATE_HASH")" = "$expected" ]]
-[[ "$(cat "$STATE_HASH")" != "$completion_hash" ]]
+[[ "$expected" = "$completion_hash" ]]
+CHECKOUT_ID="$(find "$PIPELINE_TMP" -type f -name checkout-id -print -quit)"
+[[ -n "$CHECKOUT_ID" ]]
+expected_checkout="$(cd "$ASSESSED_REPO" && source "$REPO_ROOT/packages/risk-scorer/hooks/lib/gate-helpers.sh" && _checkout_id)"
+completion_checkout="$(cd "$COMPLETION_REPO" && source "$REPO_ROOT/packages/risk-scorer/hooks/lib/gate-helpers.sh" && _checkout_id)"
+[[ "$(cat "$CHECKOUT_ID")" = "$expected_checkout" ]]
+[[ "$expected_checkout" != "$completion_checkout" ]]
 find "$ASSESSED_REPO/.risk-reports" -type f -name '*-commit.md' -print -quit | grep -q .
 [[ ! -e "$COMPLETION_REPO/.risk-reports" ]]
 ! grep -R "$ASSESSED_REPO" "$ASSESSED_REPO/.risk-reports"

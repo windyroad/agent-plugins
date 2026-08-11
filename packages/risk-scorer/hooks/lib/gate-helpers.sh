@@ -13,6 +13,21 @@ _mtime() { stat -c%Y "$1" 2>/dev/null || /usr/bin/stat -f%m "$1" 2>/dev/null || 
 # Portable hash: tries md5sum, falls back to md5 -r, then shasum
 _hashcmd() { md5sum 2>/dev/null || md5 -r 2>/dev/null || shasum 2>/dev/null; }
 
+# Opaque identity for the physical Git checkout. Device + inode distinguishes
+# separate clones with identical trees without persisting their local paths.
+_checkout_id() {
+    local root
+    root=$(git rev-parse --show-toplevel 2>/dev/null) || return 1
+    python3 -c 'import hashlib, os, sys; s=os.stat(os.path.realpath(sys.argv[1])); print(hashlib.sha256(f"{s.st_dev}:{s.st_ino}".encode()).hexdigest())' "$root" 2>/dev/null
+}
+
+_checkout_matches() {
+    local stored_file="$1" current
+    [ -s "$stored_file" ] || return 1
+    current=$(_checkout_id) || return 1
+    [ -n "$current" ] && [ "$(cat "$stored_file")" = "$current" ]
+}
+
 # ---------------------------------------------------------------------------
 # Substance-aware drift hash + atomic verdict-write (ADR-009 amendment
 # 2026-06-06, P353 + P303 close).

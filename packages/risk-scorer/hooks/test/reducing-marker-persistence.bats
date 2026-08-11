@@ -24,8 +24,10 @@
 
 setup() {
   HOOKS_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
+  source "$HOOKS_DIR/lib/gate-helpers.sh"
   COMMIT_GATE="$HOOKS_DIR/risk-score-commit-gate.sh"
   PUSH_GATE="$HOOKS_DIR/git-push-gate.sh"
+  HASH_REFRESH="$HOOKS_DIR/risk-hash-refresh.sh"
 
   TEST_SESSION="bats-p192-$$-${BATS_TEST_NUMBER}"
   RDIR="${TMPDIR:-/tmp}/claude-risk-${TEST_SESSION}"
@@ -50,6 +52,9 @@ Pipeline gates block when cumulative residual risk exceeds 4.
 EOF
   git add RISK-POLICY.md
   git commit -q -m "initial"
+  _checkout_id > "$RDIR/checkout-id"
+  OTHER_REPO="$(mktemp -d)"
+  git clone -q "$TMP_REPO" "$OTHER_REPO"
 
   # Default short TTL so we can exercise expiry without slow tests.
   export RISK_TTL=5
@@ -57,7 +62,7 @@ EOF
 
 teardown() {
   rm -rf "$RDIR"
-  rm -rf "$TMP_REPO"
+  rm -rf "$TMP_REPO" "$OTHER_REPO"
   unset RISK_TTL 2>/dev/null || true
 }
 
@@ -106,6 +111,19 @@ print(json.dumps({
   echo "$input" | bash "$PUSH_GATE"
 }
 
+invoke_hash_refresh() {
+  local input
+  input=$(python3 -c "
+import json
+print(json.dumps({
+  'tool_name': 'Bash',
+  'tool_input': {'command': 'git add state'},
+  'session_id': '$TEST_SESSION',
+}))
+")
+  echo "$input" | bash "$HASH_REFRESH"
+}
+
 # ---------------------------------------------------------------------------
 # Commit gate — reducing-commit persistence
 # ---------------------------------------------------------------------------
@@ -122,6 +140,27 @@ print(json.dumps({
   # Marker MUST still exist after a successful allow — this is the load-
   # bearing behaviour change.
   [ -f "$RDIR/reducing-commit" ]
+}
+
+@test "identical-tree checkout cannot reuse reducing-commit marker" {
+  HASH=$(_current_hash)
+  echo "$HASH" > "$RDIR/state-hash"
+  touch "$RDIR/reducing-commit"
+
+  cd "$OTHER_REPO"
+  run invoke_commit_gate 'git commit -m "x"'
+  [[ "$output" == *"permissionDecision"* ]]
+  [ ! -f "$RDIR/reducing-commit" ]
+}
+
+@test "hash refresh from another checkout cannot rebind the score" {
+  HASH=$(_current_hash)
+  echo "$HASH" > "$RDIR/state-hash"
+  printf 'different\n' > "$OTHER_REPO/state"
+
+  cd "$OTHER_REPO"
+  invoke_hash_refresh
+  [ "$(cat "$RDIR/state-hash")" = "$HASH" ]
 }
 
 @test "reducing-commit marker survives back-to-back commits (no rescore round-trip)" {

@@ -13,9 +13,11 @@
 setup() {
   SCRIPT_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
   HOOK="$SCRIPT_DIR/risk-score-mark.sh"
+  source "$SCRIPT_DIR/lib/gate-helpers.sh"
   ORIG_DIR="$PWD"
   TEST_DIR=$(mktemp -d)
   cd "$TEST_DIR"
+  git init -q
   TMPDIR="$TEST_DIR/tmp"
   export TMPDIR
   mkdir -p "$TMPDIR"
@@ -53,6 +55,7 @@ Trailing text"
   [ "$(cat "$RDIR/commit")" = "2" ]
   [ "$(cat "$RDIR/push")" = "3" ]
   [ "$(cat "$RDIR/release")" = "1" ]
+  [ "$(cat "$RDIR/checkout-id")" = "$(_checkout_id)" ]
 }
 
 @test "pipeline: writes reducing bypass markers when RISK_BYPASS: reducing" {
@@ -70,10 +73,12 @@ RISK_BYPASS: incident"
 }
 
 @test "pipeline: writes nothing when output has no RISK_SCORES line" {
-  run_hook "wr-risk-scorer:pipeline" "No score line in this output"
+  run run_hook "wr-risk-scorer:pipeline" "No score line in this output"
+  [ "$status" -ne 0 ]
   [ ! -f "$RDIR/commit" ]
   [ ! -f "$RDIR/push" ]
   [ ! -f "$RDIR/release" ]
+  [ ! -f "$RDIR/checkout-id" ]
 }
 
 # --- Plan scorer: writes plan-reviewed marker on PASS only ---

@@ -21,6 +21,7 @@ setup() {
   ORIG_DIR="$PWD"
   TEST_DIR=$(mktemp -d)
   cd "$TEST_DIR"
+  git init -q
   TMPDIR="$TEST_DIR/tmp"
   export TMPDIR
   mkdir -p "$TMPDIR"
@@ -189,8 +190,9 @@ RISK_BYPASS: reducing"
   [ ! -f "$QUEUE_FILE" ]
 }
 
-@test "empty agent output → no queue file, no crash" {
-  run_hook "wr-risk-scorer:pipeline" ""
+@test "empty pipeline output fails closed without a queue file" {
+  run run_hook "wr-risk-scorer:pipeline" ""
+  [ "$status" -ne 0 ]
   [ ! -f "$QUEUE_FILE" ]
 }
 

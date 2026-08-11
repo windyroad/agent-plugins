@@ -22,6 +22,16 @@ This SKILL is an **invokable wrapper** around the `wr-risk-scorer:pipeline` agen
 
 Invoke the pipeline subagent via the Agent tool with the caller's `$ARGUMENTS` verbatim. Dispatch it **synchronously** (`run_in_background: false`) — the `PostToolUse:Agent` mark hook that writes the risk-gate marker fires reliably only for a synchronous agent; a background-launched scorer's mark hook does not fire in time, so no marker persists and the commit/push gate re-blocks despite a within-appetite score (P402):
 
+On Codex, when the Agent tool is exposed as `spawn_agent`, pass
+`agent_type: wr-risk-scorer:pipeline` with `fork_turns: "none"`. Codex rejects an
+explicit agent type on a full-history fork; omitting the type on retry also
+prevents the completion bridge from binding the returned verdict. `$ARGUMENTS`
+is already self-contained, so no forked conversation context is required.
+After the Codex agent reports completion, close that completed agent exactly
+once so the compatibility hook receives the structured result. When Codex
+exposes completed-agent close as `interrupt_agent`, invoke it once on the
+completed target; do not relaunch or inspect a transcript.
+
 ```
 subagent_type: wr-risk-scorer:pipeline
 run_in_background: false

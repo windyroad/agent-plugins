@@ -19,6 +19,7 @@ SESSION_ID=$(_get_session_id)
 RDIR=$(_risk_dir "$SESSION_ID")
 HASH_FILE="${RDIR}/state-hash"
 [ -f "$HASH_FILE" ] || exit 0  # No hash file yet — scorer hasn't run
+_checkout_matches "${RDIR}/checkout-id" || exit 0
 
 CURRENT_HASH=$("$SCRIPT_DIR/lib/pipeline-state.sh" --hash-inputs 2>/dev/null | _hashcmd | cut -d' ' -f1)
 if [ -n "$CURRENT_HASH" ]; then

@@ -37,6 +37,9 @@ setup() {
   TEST_REPO="$(mktemp -d)"
   ( cd "$TEST_REPO" && git init -q -b main && \
       git -c user.email=t@e -c user.name=t commit --allow-empty -q -m "init" )
+  (cd "$TEST_REPO" && _checkout_id) > "$RDIR/checkout-id"
+  OTHER_REPO="$(mktemp -d)"
+  git clone -q "$TEST_REPO" "$OTHER_REPO"
 
   # Stub `gh` on PATH. The stub reads $FAKE_GH_OUTPUT and $FAKE_GH_EXIT
   # for behaviour. PATH ordering: stub dir first.
@@ -59,7 +62,7 @@ STUB
 }
 
 teardown() {
-  rm -rf "$RDIR" "$TEST_REPO" "$STUB_DIR"
+  rm -rf "$RDIR" "$TEST_REPO" "$OTHER_REPO" "$STUB_DIR"
   export PATH="$ORIG_PATH"
   unset FAKE_GH_OUTPUT FAKE_GH_EXIT FAKE_GH_DELAY CI_GATE_REASON CI_GATE_CATEGORY 2>/dev/null || true
 }
@@ -228,6 +231,19 @@ JSON
   # No permissionDecision means allow (exit 0 with no JSON).
   [[ "$output" != *"permissionDecision"* ]]
   # incident-release marker is one-shot — must be consumed
+  [ ! -f "$RDIR/incident-release" ]
+}
+
+@test "incident-release bypass cannot cross checkout roots" {
+  echo "9" > "$RDIR/release"
+  : > "$RDIR/incident-release"
+  export FAKE_GH_OUTPUT='[{"status":"completed","conclusion":"failure","databaseId":14,"url":"https://github.com/x/y/actions/runs/14"}]'
+
+  INPUT=$(_build_input "npm run release:watch")
+  output=$( cd "$OTHER_REPO" && echo "$INPUT" | \
+    FAKE_GH_OUTPUT="$FAKE_GH_OUTPUT" PATH="$STUB_DIR:$PATH" \
+    "$HOOKS_DIR/git-push-gate.sh" )
+  [[ "$output" == *"permissionDecision"* ]]
   [ ! -f "$RDIR/incident-release" ]
 }
 
