@@ -53,6 +53,12 @@ if [[ ! -f "$FIXTURE_POLICY" ]]; then
   exit 2
 fi
 
+AGENT_INSTRUCTIONS="$(cat "$AGENT_MD")"
+if [[ "$AGENT" = "pipeline" && "$PROMPT" = *"CODEX_BINDING_CONTRACT: true"* ]]; then
+  REPO_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
+  AGENT_INSTRUCTIONS="$(python3 -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["developer_instructions"])' "$REPO_ROOT/.codex/agents/wr-risk-scorer-pipeline.toml")"
+fi
+
 # Stage the fixture as RISK-POLICY.md in an isolated temp cwd so the agent's
 # cwd read of RISK-POLICY.md resolves the credibility-axis-bearing fixture,
 # not the live dormant home-repo policy.
@@ -66,7 +72,7 @@ fi
 cd "$WORKDIR"
 
 if [[ "${WR_EVAL_RUNTIME:-claude}" = "codex" ]]; then
-  CODEX_PROMPT="Follow these agent instructions exactly:\n\n$(cat "$AGENT_MD")\n\nEvaluation prompt:\n$PROMPT"
+  CODEX_PROMPT="Follow these agent instructions exactly:\n\n${AGENT_INSTRUCTIONS}\n\nEvaluation prompt:\n$PROMPT"
   CODEX_PROMPT="$(python3 -c 'import sys; print(sys.stdin.read().translate(str.maketrans({"§":"section ","—":"--","→":"->","≤":"<=","≥":">="})), end="")' <<< "$CODEX_PROMPT")"
   exec codex exec --ephemeral --cd "$WORKDIR" --skip-git-repo-check -c 'approval_policy="never"' --sandbox read-only - <<< "$CODEX_PROMPT"
 fi
@@ -85,7 +91,7 @@ case "$AGENT" in
 esac
 agent_out=""
 for _attempt in 1 2 3; do
-  agent_out="$(claude -p --system-prompt "$(cat "$AGENT_MD")" "$PROMPT")"
+  agent_out="$(claude -p --system-prompt "$AGENT_INSTRUCTIONS" "$PROMPT")"
   if [[ "$AGENT" = "plan" ]] && {
     { printf '%s' "$agent_out" | grep -Eiq 'Overall:.*FAIL' && ! printf '%s' "$agent_out" | grep -q '^RISK_VERDICT: FAIL$'; } ||
     { printf '%s' "$agent_out" | grep -Eiq 'Overall:.*PASS' && ! printf '%s' "$agent_out" | grep -q '^RISK_VERDICT: PASS$'; }

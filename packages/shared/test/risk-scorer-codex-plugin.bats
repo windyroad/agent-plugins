@@ -99,4 +99,10 @@ setup() {
   [ "$status" -eq 0 ]
   run grep -n "external-comms-risk-reviewed" "$runner"
   [ "$status" -eq 0 ]
+  run grep -n "wr-risk-scorer:pipeline" "$runner"
+  [ "$status" -eq 0 ]
+  run grep -n "RISK_CWD:" "$runner"
+  [ "$status" -eq 0 ]
+  run grep -n 'state-hash' "$runner"
+  [ "$status" -eq 0 ]
 }

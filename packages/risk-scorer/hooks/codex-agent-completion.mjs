@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { existsSync, mkdirSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { dirname, isAbsolute, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
@@ -67,6 +67,37 @@ function claimTarget(input, target) {
   return { claim, done };
 }
 
+function pipelineAssessment(output) {
+  const roots = [...output.matchAll(/^RISK_CWD:[ \t]*(.+)$/gm)];
+  if (roots.length !== 1) return null;
+
+  const declaredRoot = roots[0][1].trim();
+  if (!isAbsolute(declaredRoot)) return null;
+
+  let root;
+  try {
+    root = realpathSync(declaredRoot);
+  } catch {
+    return null;
+  }
+  const git = spawnSync("git", ["-C", root, "rev-parse", "--show-toplevel"], { encoding: "utf8" });
+  if (git.status !== 0) return null;
+
+  let gitRoot;
+  try {
+    gitRoot = realpathSync(git.stdout.trim());
+  } catch {
+    return null;
+  }
+  if (gitRoot !== root) return null;
+
+  let sanitized = output.split(/\r?\n/).filter((line) => !line.startsWith("RISK_CWD:")).join("\n");
+  for (const privatePath of new Set([declaredRoot, root])) {
+    sanitized = sanitized.split(privatePath).join("<assessed-root>");
+  }
+  return { root, output: sanitized };
+}
+
 function markTarget(input, target, output) {
   if (typeof target !== "string" || typeof output !== "string" || !output) return;
 
@@ -77,14 +108,24 @@ function markTarget(input, target, output) {
   const claim = claimTarget(input, target);
   if (!claim) return;
 
+  const assessment = role === "wr-risk-scorer:pipeline" ? pipelineAssessment(output) : null;
+  if (role === "wr-risk-scorer:pipeline" && !assessment) {
+    rmSync(claim.claim, { force: true });
+    process.exitCode = 1;
+    return;
+  }
+
+  const cwd = assessment?.root || input.cwd || process.cwd();
+
   const synthetic = {
     ...input,
+    cwd,
     tool_name: "Agent",
     tool_input: { subagent_type: role, prompt: "" },
-    tool_response: { content: [{ type: "text", text: output }] },
+    tool_response: { content: [{ type: "text", text: assessment?.output || output }] },
   };
   const result = spawnSync(join(hookDir, "risk-score-mark.sh"), {
-    cwd: input.cwd || process.cwd(),
+    cwd,
     env: process.env,
     input: JSON.stringify(synthetic),
     encoding: "utf8",

@@ -8,11 +8,13 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 SOURCE_CODEX_HOME="${CODEX_HOME:-${HOME}/.codex}"
 TMP_CODEX_HOME=""
 TMP_PACK_DIR=""
+TMP_FIXTURE_DIR=""
 CODEX_BIN="${CODEX_BINARY:-}"
 
 cleanup() {
   [[ -z "$TMP_CODEX_HOME" ]] || rm -rf "$TMP_CODEX_HOME"
   [[ -z "$TMP_PACK_DIR" ]] || rm -rf "$TMP_PACK_DIR"
+  [[ -z "$TMP_FIXTURE_DIR" ]] || rm -rf "$TMP_FIXTURE_DIR"
 }
 trap cleanup EXIT
 
@@ -60,13 +62,28 @@ done
 CODEX_HOME="$CODEX_HOME" "$CODEX_BIN" plugin list | grep -q 'wr-risk-scorer@windyroad-risk-scorer-local'
 
 run_codex() {
+  local cwd="$1"
+  shift
   "$CODEX_BIN" exec \
-    --cd "$REPO_ROOT" \
+    --cd "$cwd" \
     -c 'approval_policy="never"' \
     --sandbox read-only \
     --dangerously-bypass-hook-trust \
     "$1"
 }
+
+TMP_FIXTURE_DIR="$(mktemp -d)"
+ASSESSED_REPO="$TMP_FIXTURE_DIR/assessed"
+COMPLETION_REPO="$TMP_FIXTURE_DIR/completion"
+mkdir -p "$ASSESSED_REPO" "$COMPLETION_REPO"
+git init -q "$ASSESSED_REPO"
+git init -q "$COMPLETION_REPO"
+printf 'assessed\n' > "$ASSESSED_REPO/state"
+printf 'completion\n' > "$COMPLETION_REPO/state"
+git -C "$ASSESSED_REPO" add state
+git -C "$COMPLETION_REPO" add state
+git -C "$ASSESSED_REPO" -c user.name=test -c user.email=test@example.com commit -qm initial
+git -C "$COMPLETION_REPO" -c user.name=test -c user.email=test@example.com commit -qm initial
 
 MARKER_DRAFT="Codex packaged external communications marker smoke test."
 MARKER_KEY="$(MARKER_DRAFT="$MARKER_DRAFT" python3 - <<'PY'
@@ -75,7 +92,7 @@ draft = os.environ["MARKER_DRAFT"]
 print(hashlib.sha256((draft + "\nchangeset-author").encode()).hexdigest())
 PY
 )"
-run_codex "Use the exact custom agent wr-risk-scorer:external-comms synchronously without full-history fork. Send it exactly this structured review request:
+run_codex "$COMPLETION_REPO" "Use the exact custom agent wr-risk-scorer:external-comms synchronously without full-history fork. Send it exactly this structured review request:
 SURFACE: changeset-author
 DESTINATION: npm public registry
 <draft>
@@ -84,3 +101,19 @@ ${MARKER_DRAFT}
 Wait for it to finish, then close that completed agent once and return the reviewer verdict and key verbatim. Do not compute the verdict yourself or inspect any transcript."
 
 find "$TMPDIR" -type f -name "external-comms-risk-reviewed-${MARKER_KEY}" -print -quit | grep -q .
+
+PIPELINE_TMP="$(mktemp -d "$TMPDIR/pipeline-cwd.XXXXXX")"
+TMPDIR="$PIPELINE_TMP" run_codex "$COMPLETION_REPO" "Use the exact custom agent wr-risk-scorer:pipeline synchronously without full-history fork. Send it exactly this scoring request and treat the supplied fixture scores as authoritative:
+RISK_CWD: ${ASSESSED_REPO}
+POLICY_THRESHOLD: 5
+Commit, push, and release residual risk are each 4/25. Return the required structured score output. Wait for it to finish, then close that completed agent once. Do not compute the scores yourself or inspect any transcript."
+
+STATE_HASH="$(find "$PIPELINE_TMP" -type f -name state-hash -print -quit)"
+[[ -n "$STATE_HASH" ]]
+expected="$(cd "$ASSESSED_REPO" && source "$REPO_ROOT/packages/risk-scorer/hooks/lib/gate-helpers.sh" && "$REPO_ROOT/packages/risk-scorer/hooks/lib/pipeline-state.sh" --hash-inputs | _hashcmd | cut -d' ' -f1)"
+completion_hash="$(cd "$COMPLETION_REPO" && source "$REPO_ROOT/packages/risk-scorer/hooks/lib/gate-helpers.sh" && "$REPO_ROOT/packages/risk-scorer/hooks/lib/pipeline-state.sh" --hash-inputs | _hashcmd | cut -d' ' -f1)"
+[[ "$(cat "$STATE_HASH")" = "$expected" ]]
+[[ "$(cat "$STATE_HASH")" != "$completion_hash" ]]
+find "$ASSESSED_REPO/.risk-reports" -type f -name '*-commit.md' -print -quit | grep -q .
+[[ ! -e "$COMPLETION_REPO/.risk-reports" ]]
+! grep -R "$ASSESSED_REPO" "$ASSESSED_REPO/.risk-reports"

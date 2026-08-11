@@ -8,6 +8,16 @@ setup() {
   SESSION="parent-session"
   TARGET="/root/external-comms"
   KEY="0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+  PIPELINE_REPO="$TMP/assessed"
+  OTHER_REPO="$TMP/completion"
+  git init -q "$PIPELINE_REPO"
+  git init -q "$OTHER_REPO"
+  printf 'assessed\n' > "$PIPELINE_REPO/state"
+  printf 'completion\n' > "$OTHER_REPO/state"
+  git -C "$PIPELINE_REPO" add state
+  git -C "$OTHER_REPO" add state
+  git -C "$PIPELINE_REPO" -c user.name=test -c user.email=test@example.com commit -qm initial
+  git -C "$OTHER_REPO" -c user.name=test -c user.email=test@example.com commit -qm initial
 }
 
 teardown() {
@@ -43,13 +53,13 @@ current_close_input() {
 }
 
 current_pipeline_wait_input() {
-  printf '{"session_id":"%s","cwd":"%s","tool_name":"multi_agent_v1__wait_agent","tool_input":{"targets":["%s"]},"tool_response":{"status":{"%s":{"completed":"RISK_SCORES: commit=4 push=4 release=4"}},"timed_out":false}}' \
-    "$SESSION" "$TMP" "$TARGET" "$TARGET"
+  printf '{"session_id":"%s","cwd":"%s","tool_name":"multi_agent_v1__wait_agent","tool_input":{"targets":["%s"]},"tool_response":{"status":{"%s":{"completed":"RISK_SCORES: commit=4 push=4 release=4\\nRISK_CWD: %s"}},"timed_out":false}}' \
+    "$SESSION" "$OTHER_REPO" "$TARGET" "$TARGET" "$PIPELINE_REPO"
 }
 
 current_pipeline_close_input() {
-  printf '{"session_id":"%s","cwd":"%s","tool_name":"multi_agent_v1__close_agent","tool_input":{"target":"%s"},"tool_response":{"previous_status":{"completed":"RISK_SCORES: commit=4 push=4 release=4"}}}' \
-    "$SESSION" "$TMP" "$TARGET"
+  printf '{"session_id":"%s","cwd":"%s","tool_name":"multi_agent_v1__close_agent","tool_input":{"target":"%s"},"tool_response":{"previous_status":{"completed":"RISK_SCORES: commit=4 push=4 release=4\\nRISK_CWD: %s"}}}' \
+    "$SESSION" "$OTHER_REPO" "$TARGET" "$PIPELINE_REPO"
 }
 
 current_empty_wait_input() {
@@ -111,10 +121,33 @@ subagent_stop_input() {
   [ "$(cat "$rdir/commit")" = "4" ]
   [ "$(cat "$rdir/push")" = "4" ]
   [ "$(cat "$rdir/release")" = "4" ]
-  [ "$(find "$TMP/.risk-reports" -type f -name '*-commit.md' | wc -l | tr -d ' ')" = "1" ]
+  expected="$(cd "$PIPELINE_REPO" && source "$HOOK_DIR/lib/gate-helpers.sh" && "$HOOK_DIR/lib/pipeline-state.sh" --hash-inputs | _hashcmd | cut -d' ' -f1)"
+  completion_hash="$(cd "$OTHER_REPO" && source "$HOOK_DIR/lib/gate-helpers.sh" && "$HOOK_DIR/lib/pipeline-state.sh" --hash-inputs | _hashcmd | cut -d' ' -f1)"
+  [ "$(cat "$rdir/state-hash")" = "$expected" ]
+  [ "$(cat "$rdir/state-hash")" != "$completion_hash" ]
+  [ "$(find "$PIPELINE_REPO/.risk-reports" -type f -name '*-commit.md' | wc -l | tr -d ' ')" = "1" ]
+  [ ! -e "$OTHER_REPO/.risk-reports" ]
+  run grep -R "$PIPELINE_REPO" "$PIPELINE_REPO/.risk-reports"
+  [ "$status" -ne 0 ]
 
   dispatch "$(current_pipeline_close_input)"
-  [ "$(find "$TMP/.risk-reports" -type f -name '*-commit.md' | wc -l | tr -d ' ')" = "1" ]
+  [ "$(find "$PIPELINE_REPO/.risk-reports" -type f -name '*-commit.md' | wc -l | tr -d ' ')" = "1" ]
+}
+
+@test "pipeline completion rejects invalid assessed roots and remains retryable" {
+  dispatch "$(current_spawn_input wr-risk-scorer:pipeline)"
+  mkdir "$PIPELINE_REPO/subdir"
+
+  for invalid_root in relative/path "$PIPELINE_REPO/subdir"; do
+    invalid="$(current_pipeline_close_input | sed "s#RISK_CWD: $PIPELINE_REPO#RISK_CWD: $invalid_root#")"
+    run dispatch "$invalid"
+    [ "$status" -ne 0 ]
+    [ ! -e "$TMPDIR/claude-risk-$SESSION/commit" ]
+    [ "$(find "$TMPDIR/claude-risk-$SESSION" -name 'codex-agent-*' ! -name '*.claim' ! -name '*.done' | wc -l | tr -d ' ')" = "1" ]
+  done
+
+  dispatch "$(current_pipeline_close_input)"
+  [ "$(cat "$TMPDIR/claude-risk-$SESSION/commit")" = "4" ]
 }
 
 @test "a reused target cannot retain a stale risk-agent role" {

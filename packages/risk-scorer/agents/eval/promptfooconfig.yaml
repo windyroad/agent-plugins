@@ -209,3 +209,36 @@ tests:
         value: 'RISK_SCORES: commit=10 push=10 release=10'
       - type: icontains
         value: 'RISK_REMEDIATIONS:'
+
+  - description: Codex pipeline binds structured output to the supplied assessed root exactly once
+    vars:
+      prompt: |
+        AGENT: pipeline
+        CODEX_BINDING_CONTRACT: true
+        RISK_CWD: /tmp/assessed-repository
+        POLICY_THRESHOLD: 5
+        The fixture facts are complete; do not inspect the filesystem. Commit,
+        push, and release residual risk are each 4/25. Return only the required
+        structured output.
+    assert:
+      - type: icontains
+        value: 'RISK_SCORES: commit=4 push=4 release=4'
+      - type: contains
+        value: 'RISK_CWD: /tmp/assessed-repository'
+      - type: not-regex
+        value: 'RISK_CWD:[\s\S]*RISK_CWD:'
+
+  - description: Codex pipeline fails closed when the assessed root is absent
+    vars:
+      prompt: |
+        AGENT: pipeline
+        CODEX_BINDING_CONTRACT: true
+        POLICY_THRESHOLD: 5
+        The fixture facts are complete; do not inspect the filesystem. Commit,
+        push, and release residual risk are each 4/25. Return only the required
+        structured output.
+    assert:
+      - type: not-contains
+        value: 'RISK_SCORES:'
+      - type: icontains
+        value: 'unbound'

@@ -13,7 +13,7 @@ This SKILL is an **invokable wrapper** around the `wr-risk-scorer:pipeline` agen
 ## Contract
 
 - **Input** (`$ARGUMENTS`): a self-contained scoring prompt with pipeline state context. Caller assembles UNCOMMITTED / UNPUSHED / UNRELEASED sections per `packages/risk-scorer/agents/pipeline.md` § Pipeline State.
-- **Output**: the agent's verbatim report, including the structured `RISK_SCORES: commit=N push=N release=N` block, optional `RISK_BYPASS:` line, optional `RISK_REMEDIATIONS:` block, optional `RISK_REGISTER_HINT:` block, and optional `CATALOG_HIT_RATE:` line.
+- **Output**: the agent's verbatim report, including the structured `RISK_SCORES: commit=N push=N release=N` block, required `RISK_CWD:` line supplied by the caller, optional `RISK_BYPASS:` line, optional `RISK_REMEDIATIONS:` block, optional `RISK_REGISTER_HINT:` block, and optional `CATALOG_HIT_RATE:` line.
 - **Side effects**: the `PostToolUse:Agent` hook (`risk-score-mark.sh`) reads the agent's output downstream of this wrapper and writes the bypass marker files to `${TMPDIR}/claude-risk-${SESSION_ID}/`. The wrapper itself writes no files.
 
 ## Steps
@@ -30,6 +30,6 @@ prompt: $ARGUMENTS
 
 ### 2. Return the agent report verbatim
 
-Return the agent's response to the caller without alteration. Do NOT strip, paraphrase, or post-process the structured output blocks (`RISK_SCORES:`, `RISK_BYPASS:`, `RISK_REMEDIATIONS:`, `RISK_REGISTER_HINT:`, `CATALOG_HIT_RATE:`). The PostToolUse hook depends on the exact byte sequence to parse.
+Return the agent's response to the caller without alteration. Do NOT strip, paraphrase, or post-process the structured output blocks (`RISK_SCORES:`, `RISK_CWD:`, `RISK_BYPASS:`, `RISK_REMEDIATIONS:`, `RISK_REGISTER_HINT:`, `CATALOG_HIT_RATE:`). The PostToolUse hook depends on the exact byte sequence to parse.
 
 $ARGUMENTS
