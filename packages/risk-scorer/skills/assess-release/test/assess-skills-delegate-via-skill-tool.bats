@@ -104,6 +104,17 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
+@test "wrapper SKILL pipeline uses a context-free Codex fork with its explicit agent type" {
+  run grep -F 'fork_turns: "none"' "$WRAPPER_PIPELINE"
+  [ "$status" -eq 0 ]
+  run grep -F 'agent_type: wr-risk-scorer:pipeline' "$WRAPPER_PIPELINE"
+  [ "$status" -eq 0 ]
+  run grep -F 'interrupt_agent' "$WRAPPER_PIPELINE"
+  [ "$status" -eq 0 ]
+  run grep -F 'close that completed agent exactly' "$WRAPPER_PIPELINE"
+  [ "$status" -eq 0 ]
+}
+
 @test "wrapper SKILL packages/risk-scorer/skills/wip/SKILL.md exists" {
   [ -f "$WRAPPER_WIP" ]
 }

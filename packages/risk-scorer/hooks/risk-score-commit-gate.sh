@@ -15,6 +15,10 @@ TOOL_NAME=$(_get_tool_name)
 
 COMMAND=$(_get_command)
 echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*git commit' || exit 0
+if ! _enter_hook_cwd; then
+    risk_gate_deny "Commit blocked: the command checkout could not be validated. Run the command from an absolute Git working directory and rescore that checkout."
+    exit 0
+fi
 
 # P170 / RFC-002 / ADR-031 T11: commit-message-embedded RISK_BYPASS
 # marker recognition. The adopter auto-migrate routine (T7,
@@ -92,7 +96,7 @@ if [ -f "${RDIR}/reducing-commit" ]; then
     MARK_TIME=$(_mtime "${RDIR}/reducing-commit")
     AGE=$(( NOW - MARK_TIME ))
     TTL_SECONDS="${RISK_TTL:-3600}"
-    if [ "$AGE" -lt "$TTL_SECONDS" ] && [ -f "${RDIR}/state-hash" ]; then
+    if [ "$AGE" -lt "$TTL_SECONDS" ] && [ -f "${RDIR}/state-hash" ] && _checkout_matches "${RDIR}/checkout-id"; then
         STORED_HASH=$(cat "${RDIR}/state-hash")
         CURRENT_HASH=$("$SCRIPT_DIR/lib/pipeline-state.sh" --hash-inputs 2>/dev/null | _hashcmd | cut -d' ' -f1)
         if [ "$STORED_HASH" = "$CURRENT_HASH" ]; then

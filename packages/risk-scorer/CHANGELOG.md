@@ -1,5 +1,23 @@
 # @windyroad/risk-scorer
 
+## 0.18.11
+
+### Patch Changes
+
+- 4c9dfd7: Persist Codex pipeline risk receipts when native collaboration completion is observed only in the child conversation.
+
+## 0.18.10
+
+### Patch Changes
+
+- 7cdafc1: Recognize Codex's current `interrupt_agent` completion event so pipeline risk receipts persist for the assessed checkout.
+
+## 0.18.9
+
+### Patch Changes
+
+- fd55278: Bind Codex pipeline risk markers to the explicitly assessed Git checkout. The completion bridge now rejects missing or invalid assessment roots, validates the declared path as the repository top level, writes the marker from that checkout, and removes the local path from persisted reports.
+
 ## 0.18.8
 
 ### Patch Changes

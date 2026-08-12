@@ -20,6 +20,13 @@ TOOL_NAME=$(_get_tool_name)
 COMMAND=$(_get_command)
 SESSION_ID=$(_get_session_id)
 
+if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*(git push|npm run (push:watch|release:watch)|npx changeset|npm run changeset|gh pr merge)(\s|$)'; then
+    if ! _enter_hook_cwd; then
+        risk_gate_deny "Pipeline action blocked: the command checkout could not be validated. Run the command from an absolute Git working directory and rescore that checkout."
+        exit 0
+    fi
+fi
+
 # Block git push to master/main/publish/changeset-release/*, or bare git push.
 # Allow explicit pushes to other branches (feature branches etc).
 if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*git push(\s|$)'; then
@@ -45,7 +52,7 @@ if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm run push:watch(\s|$)'; then
             MARK_TIME=$(_mtime "${RDIR}/reducing-push")
             AGE=$(( NOW - MARK_TIME ))
             TTL_SECONDS="${RISK_TTL:-3600}"
-            if [ "$AGE" -lt "$TTL_SECONDS" ] && [ -f "${RDIR}/state-hash" ]; then
+            if [ "$AGE" -lt "$TTL_SECONDS" ] && [ -f "${RDIR}/state-hash" ] && _checkout_matches "${RDIR}/checkout-id"; then
                 STORED_HASH=$(cat "${RDIR}/state-hash")
                 CURRENT_HASH=$("$SCRIPT_DIR/lib/pipeline-state.sh" --hash-inputs 2>/dev/null | _hashcmd | cut -d' ' -f1)
                 if [ "$STORED_HASH" = "$CURRENT_HASH" ]; then
@@ -109,8 +116,11 @@ if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm run release:watch(\s|$)'; the
         # Per JTBD-201, this MUST short-circuit BEFORE the CI-status check
         # so the hotfix path is unaffected by red CI on master.
         if [ -f "${RDIR}/incident-release" ]; then
+            if _checkout_matches "${RDIR}/checkout-id"; then
+                rm -f "${RDIR}/incident-release"
+                exit 0
+            fi
             rm -f "${RDIR}/incident-release"
-            exit 0
         fi
         # Risk-reducing bypass for release — session-scoped, drift-
         # revalidated (P192). Same lifecycle as reducing-push above.
@@ -119,7 +129,7 @@ if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm run release:watch(\s|$)'; the
             MARK_TIME=$(_mtime "${RDIR}/reducing-release")
             AGE=$(( NOW - MARK_TIME ))
             TTL_SECONDS="${RISK_TTL:-3600}"
-            if [ "$AGE" -lt "$TTL_SECONDS" ] && [ -f "${RDIR}/state-hash" ]; then
+            if [ "$AGE" -lt "$TTL_SECONDS" ] && [ -f "${RDIR}/state-hash" ] && _checkout_matches "${RDIR}/checkout-id"; then
                 STORED_HASH=$(cat "${RDIR}/state-hash")
                 CURRENT_HASH=$("$SCRIPT_DIR/lib/pipeline-state.sh" --hash-inputs 2>/dev/null | _hashcmd | cut -d' ' -f1)
                 if [ "$STORED_HASH" = "$CURRENT_HASH" ]; then

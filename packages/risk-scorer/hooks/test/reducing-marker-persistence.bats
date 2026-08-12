@@ -24,8 +24,10 @@
 
 setup() {
   HOOKS_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
+  source "$HOOKS_DIR/lib/gate-helpers.sh"
   COMMIT_GATE="$HOOKS_DIR/risk-score-commit-gate.sh"
   PUSH_GATE="$HOOKS_DIR/git-push-gate.sh"
+  HASH_REFRESH="$HOOKS_DIR/risk-hash-refresh.sh"
 
   TEST_SESSION="bats-p192-$$-${BATS_TEST_NUMBER}"
   RDIR="${TMPDIR:-/tmp}/claude-risk-${TEST_SESSION}"
@@ -50,6 +52,9 @@ Pipeline gates block when cumulative residual risk exceeds 4.
 EOF
   git add RISK-POLICY.md
   git commit -q -m "initial"
+  _checkout_id > "$RDIR/checkout-id"
+  OTHER_REPO="$(mktemp -d)"
+  git clone -q "$TMP_REPO" "$OTHER_REPO"
 
   # Default short TTL so we can exercise expiry without slow tests.
   export RISK_TTL=5
@@ -57,7 +62,7 @@ EOF
 
 teardown() {
   rm -rf "$RDIR"
-  rm -rf "$TMP_REPO"
+  rm -rf "$TMP_REPO" "$OTHER_REPO"
   unset RISK_TTL 2>/dev/null || true
 }
 
@@ -82,11 +87,12 @@ invoke_commit_gate() {
   local cmd="$1"
   local input
   input=$(python3 -c "
-import json, sys
+import json, os, sys
 print(json.dumps({
   'tool_name': 'Bash',
-  'tool_input': {'command': sys.argv[1]},
+  'tool_input': {'command': sys.argv[1], 'workdir': os.environ.get('HOOK_WORKDIR', '')},
   'session_id': sys.argv[2],
+  'cwd': os.environ.get('HOOK_CWD', ''),
 }))
 " "$cmd" "$TEST_SESSION")
   echo "$input" | bash "$COMMIT_GATE"
@@ -96,14 +102,29 @@ invoke_push_gate() {
   local cmd="$1"
   local input
   input=$(python3 -c "
-import json, sys
+import json, os, sys
 print(json.dumps({
   'tool_name': 'Bash',
-  'tool_input': {'command': sys.argv[1]},
+  'tool_input': {'command': sys.argv[1], 'workdir': os.environ.get('HOOK_WORKDIR', '')},
   'session_id': sys.argv[2],
+  'cwd': os.environ.get('HOOK_CWD', ''),
 }))
 " "$cmd" "$TEST_SESSION")
   echo "$input" | bash "$PUSH_GATE"
+}
+
+invoke_hash_refresh() {
+  local cmd="${1:-git add state}" input
+  input=$(python3 -c "
+import json, os, sys
+print(json.dumps({
+  'tool_name': 'Bash',
+  'tool_input': {'command': sys.argv[1], 'workdir': os.environ.get('HOOK_WORKDIR', '')},
+  'session_id': '$TEST_SESSION',
+  'cwd': os.environ.get('HOOK_CWD', ''),
+}))
+" "$cmd")
+  echo "$input" | bash "$HASH_REFRESH"
 }
 
 # ---------------------------------------------------------------------------
@@ -122,6 +143,65 @@ print(json.dumps({
   # Marker MUST still exist after a successful allow — this is the load-
   # bearing behaviour change.
   [ -f "$RDIR/reducing-commit" ]
+}
+
+@test "identical-tree checkout cannot reuse reducing-commit marker" {
+  HASH=$(_current_hash)
+  echo "$HASH" > "$RDIR/state-hash"
+  touch "$RDIR/reducing-commit"
+
+  cd "$OTHER_REPO"
+  run invoke_commit_gate 'git commit -m "x"'
+  [[ "$output" == *"permissionDecision"* ]]
+  [ ! -f "$RDIR/reducing-commit" ]
+}
+
+@test "commit gate validates from the command cwd, not the hook process cwd" {
+  cd "$OTHER_REPO"
+  _checkout_id > "$RDIR/checkout-id"
+  HASH=$(_current_hash)
+  echo "$HASH" > "$RDIR/state-hash"
+  touch "$RDIR/reducing-commit"
+  mkdir -p "$OTHER_REPO/nested/workdir"
+
+  cd "$TMP_REPO"
+  HOOK_CWD="$TMP_REPO" HOOK_WORKDIR="$OTHER_REPO/nested/workdir" run invoke_commit_gate 'git commit -m "x"'
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"deny"* ]]
+}
+
+@test "commit gate uses an explicit cd when Codex omits command workdir" {
+  cd "$OTHER_REPO"
+  _checkout_id > "$RDIR/checkout-id"
+  HASH=$(_current_hash)
+  echo "$HASH" > "$RDIR/state-hash"
+  touch "$RDIR/reducing-commit"
+  mkdir -p "$OTHER_REPO/nested/workdir"
+
+  cd "$TMP_REPO"
+  HOOK_CWD="$TMP_REPO" run invoke_commit_gate "cd '$OTHER_REPO/nested/workdir' && git commit -m x"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"deny"* ]]
+}
+
+@test "hash refresh from another checkout cannot rebind the score" {
+  HASH=$(_current_hash)
+  echo "$HASH" > "$RDIR/state-hash"
+  printf 'different\n' > "$OTHER_REPO/state"
+
+  cd "$OTHER_REPO"
+  invoke_hash_refresh
+  [ "$(cat "$RDIR/state-hash")" = "$HASH" ]
+}
+
+@test "hash refresh uses an explicit cd when Codex omits command workdir" {
+  cd "$OTHER_REPO"
+  _checkout_id > "$RDIR/checkout-id"
+  echo "stale-hash" > "$RDIR/state-hash"
+
+  cd "$TMP_REPO"
+  HOOK_CWD="$TMP_REPO" invoke_hash_refresh "cd '$OTHER_REPO' && git add state"
+  [ "$(cat "$RDIR/state-hash")" != "stale-hash" ]
 }
 
 @test "reducing-commit marker survives back-to-back commits (no rescore round-trip)" {
@@ -183,6 +263,32 @@ print(json.dumps({
   [[ "$output" != *"deny"* ]]
 
   [ -f "$RDIR/reducing-push" ]
+}
+
+@test "push gate validates from the command cwd, not the hook process cwd" {
+  cd "$OTHER_REPO"
+  _checkout_id > "$RDIR/checkout-id"
+  HASH=$(_current_hash)
+  echo "$HASH" > "$RDIR/state-hash"
+  touch "$RDIR/reducing-push"
+
+  cd "$TMP_REPO"
+  HOOK_CWD="$TMP_REPO" HOOK_WORKDIR="$OTHER_REPO" run invoke_push_gate 'npm run push:watch'
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"deny"* ]]
+}
+
+@test "push gate uses an explicit cd when Codex omits command workdir" {
+  cd "$OTHER_REPO"
+  _checkout_id > "$RDIR/checkout-id"
+  HASH=$(_current_hash)
+  echo "$HASH" > "$RDIR/state-hash"
+  touch "$RDIR/reducing-push"
+
+  cd "$TMP_REPO"
+  HOOK_CWD="$TMP_REPO" run invoke_push_gate "cd '$OTHER_REPO' && npm run push:watch"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"deny"* ]]
 }
 
 @test "reducing-push marker is consumed when tree hash drifts" {

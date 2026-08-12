@@ -27,6 +27,9 @@ Read `$ARGUMENTS` for an explicit release scope (e.g., "release v1.3.0", "commit
 Run the following to establish the assessment scope:
 
 ```bash
+# Exact checkout whose state the completion marker must bind to.
+git rev-parse --show-toplevel
+
 # Unpushed commits
 git log origin/$(git rev-parse --abbrev-ref HEAD)..HEAD --oneline 2>/dev/null || git log HEAD --oneline -10
 
@@ -57,6 +60,7 @@ Do not ask if there is an obvious unpushed commit queue.
 ### 4. Construct the assessment prompt
 
 Build a self-contained prompt for the pipeline subagent that includes:
+- A single `RISK_CWD: <absolute Git root>` line from Step 2
 - The git log summary (unpushed commits with subjects)
 - The staged diff summary (file names and line counts)
 - The changeset list (if any)

@@ -17,3 +17,16 @@ tests:
     assert:
       - type: icontains
         value: 'APPETITE_STATUS: score=5 within; score=6 above'
+
+  - description: Exact assessed root is carried once into the pipeline prompt
+    vars:
+      prompt: |
+        Apply Steps 2 through 5 for an otherwise complete assessment. The
+        exact output of git rev-parse --show-toplevel is
+        /tmp/assessed-repository. Output only the self-contained prompt that
+        must be passed through the pipeline wrapper.
+    assert:
+      - type: contains
+        value: 'RISK_CWD: /tmp/assessed-repository'
+      - type: not-regex
+        value: 'RISK_CWD:[\s\S]*RISK_CWD:'

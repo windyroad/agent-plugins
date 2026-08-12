@@ -168,9 +168,12 @@ jobs:
         if: steps.token.outputs.present == 'true'
         run: npm ci || npm install
 
-      - name: Install Claude Code CLI (evals drive claude -p)
+      - name: Install Claude Code CLI and sandbox prerequisites
         if: steps.token.outputs.present == 'true'
-        run: npm i -g @anthropic-ai/claude-code@2.1.150
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y bubblewrap socat
+          npm i -g @anthropic-ai/claude-code@2.1.150
 
       - name: Run agent-prose behavioural evals
         if: steps.token.outputs.present == 'true'

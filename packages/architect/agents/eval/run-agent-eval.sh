@@ -38,4 +38,14 @@ fi
 # Run from repo root so docs/decisions/ resolves for ratification checks.
 cd "$REPO_ROOT"
 
-exec claude -p --system-prompt "$(cat "$AGENT_MD")" "$@"
+set +e
+agent_out="$(claude -p --system-prompt "$(cat "$AGENT_MD")" "$@")"
+claude_status=$?
+set -e
+
+if [[ "$claude_status" -ne 0 ]]; then
+  printf '%s\n' "$agent_out" >&2
+  exit "$claude_status"
+fi
+
+printf '%s\n' "$agent_out"

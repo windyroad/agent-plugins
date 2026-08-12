@@ -92,6 +92,18 @@ The solution-space investigation this ticket was opened to do is **complete and 
 
 **Remaining for P324 close:** S1b + architect synthetic-corpus positive-fire, S2/S3 residue (local pre-commit/pre-push Tier-A hook), S4 (after a proven-green CI run: retire the RFC-010/RFC-011 structural escape-hatch bats → advance P290), S5 (graduate RFC-011 within appetite on gate-passing evidence).
 
+### Reliability recalibration (2026-08-12 — CI run 31537137532)
+
+The JTBD agent-prose fixtures produced the same correct authoritative `JTBD Review: PASS` outcome on the PR run, the first main run, and a failed-job rerun. The second LLM rubric grader nevertheless alternated PASS, FAIL, then PASS while grading sandbox-denial commentary about the subordinate `/tmp/jtbd-verdict` marker. The main run therefore passed only after a rerun.
+
+RFC-012 now removes that redundant judge from these two all-PASS fixtures and asserts the emitted `JTBD Review: PASS` contract directly. The real agent still runs; only the nondeterministic second interpretation of an already-structured verdict is removed. This is a calibration fix within the existing behavioural harness, not a structural source-prose assertion or broadened sandbox permission.
+
+**Post-release correction — CI run 31541991794:** the deterministic assertion exposed a second failure rather than hiding it: Claude emitted the correct inline PASS in an earlier assistant turn, then replaced print-mode stdout with a terse final summary after the required `/tmp/jtbd-verdict` write was sandbox-denied. The runner now consumes Claude's structured stream and emits every main-agent assistant text block, grants sandbox write access only to the exact marker file, and independently requires exact `PASS` marker content. The config serializes its two fixtures because that marker is intentionally global. Behavioural runner tests cover multi-turn extraction, missing/pre-existing markers, malformed streams, non-zero Claude status, and cleanup. No LLM judge, broad `/tmp` access, retry, or synthesized verdict is introduced.
+
+**Fresh-CI correction — CI run 31544631906:** both serialized fixtures still failed because `sandbox.filesystem.allowWrite` does not enable sandboxing; developer user settings had hidden that missing precondition locally. The runner now excludes user/project/local setting sources, exposes only `Read`, `Glob`, `Grep`, and `Bash`, explicitly enables fail-closed sandboxing, disables unsandboxed escape, denies repository writes, and permits only the verdict file outside the repository. CI installs the documented Linux sandbox prerequisites. The fake-Claude regression validates that exact invocation before it will write its marker.
+
+**Provider-capacity diagnostic — CI run 31546594132:** the sandbox prerequisites installed, but the unchanged architect fixtures both exited in about four seconds before the JTBD runner executed. A same-time local `claude -p` call returned the explicit weekly-limit message, while promptfoo discarded provider stdout on non-zero exit. The architect and TDD direct runners now mirror Claude stdout to stderr only on failure and preserve the original non-zero status, so capacity/authentication failures remain fail-closed and become diagnosable. No retry, skip, provider fallback, or synthesized verdict is introduced.
+
 ## Dependencies
 
 - **Blocks**: `P290` (remove ADR-052 structural escape hatch — needs a behavioural alternative first); within-appetite release of every agent-verdict change (RFC-010, RFC-011, and future).

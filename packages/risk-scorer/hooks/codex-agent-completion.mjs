@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { createHash } from "node:crypto";
+import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, renameSync, rmSync, statSync, utimesSync, writeFileSync } from "node:fs";
+import { dirname, isAbsolute, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
@@ -26,6 +27,10 @@ function response(input) {
 
 function riskDir(sessionId) {
   return join(process.env.TMPDIR || "/tmp", `claude-risk-${sessionId}`);
+}
+
+function pendingDir() {
+  return join(process.env.TMPDIR || "/tmp", "claude-risk-pending");
 }
 
 function statePath(input, target, suffix = "") {
@@ -67,6 +72,94 @@ function claimTarget(input, target) {
   return { claim, done };
 }
 
+function pipelineAssessment(output) {
+  const roots = [...output.matchAll(/^RISK_CWD:[ \t]*(.+)$/gm)];
+  if (roots.length !== 1) return null;
+
+  const declaredRoot = roots[0][1].trim();
+  if (!isAbsolute(declaredRoot)) return null;
+
+  let root;
+  try {
+    root = realpathSync(declaredRoot);
+  } catch {
+    return null;
+  }
+  const git = spawnSync("git", ["-C", root, "rev-parse", "--show-toplevel"], { encoding: "utf8" });
+  if (git.status !== 0) return null;
+
+  let gitRoot;
+  try {
+    gitRoot = realpathSync(git.stdout.trim());
+  } catch {
+    return null;
+  }
+  if (gitRoot !== root) return null;
+
+  let sanitized = output.split(/\r?\n/).filter((line) => !line.startsWith("RISK_CWD:")).join("\n");
+  for (const privatePath of new Set([declaredRoot, root])) {
+    sanitized = sanitized.split(privatePath).join("<assessed-root>");
+  }
+  return { root, output: sanitized };
+}
+
+function checkoutId(root) {
+  const stat = statSync(root);
+  return createHash("sha256").update(`${stat.dev}:${stat.ino}`).digest("hex");
+}
+
+function stateHash(root) {
+  const state = spawnSync(join(hookDir, "lib/pipeline-state.sh"), ["--hash-inputs"], {
+    cwd: root,
+    encoding: "utf8",
+  });
+  if (state.status !== 0) return null;
+  return createHash("md5").update(state.stdout).digest("hex");
+}
+
+function completionId(input, output) {
+  if (typeof input.session_id !== "string" || typeof input.agent_id !== "string") return null;
+  return createHash("sha256").update(`${input.session_id}\0${input.agent_id}\0${output}`).digest("hex");
+}
+
+function pendingPath(id, hash, completion, suffix = "") {
+  return join(pendingDir(), `${id}-${hash}-${completion}${suffix}`);
+}
+
+function freshReceipt(path) {
+  if (!existsSync(path)) return false;
+  const ttl = Number.parseInt(process.env.RISK_TTL || "3600", 10) * 1000;
+  return Date.now() - statSync(path).mtimeMs < ttl;
+}
+
+function persistPendingPipeline(input) {
+  if (input.agent_type !== "wr-risk-scorer:pipeline") return;
+  const assessment = pipelineAssessment(input.last_assistant_message);
+  if (!assessment) return;
+  const id = checkoutId(assessment.root);
+  const hash = stateHash(assessment.root);
+  const completion = completionId(input, assessment.output);
+  if (!hash || !completion || !/^RISK_SCORES: commit=\d+ push=\d+ release=\d+$/m.test(assessment.output)) return;
+  mkdirSync(pendingDir(), { recursive: true });
+  const path = pendingPath(id, hash, completion);
+  for (const candidate of [path, `${path}.done`]) {
+    if (freshReceipt(candidate)) return;
+    rmSync(candidate, { force: true });
+  }
+  try {
+    writeFileSync(path, JSON.stringify({
+      role: input.agent_type,
+      output: assessment.output,
+      checkoutId: id,
+      stateHash: hash,
+      completionId: completion,
+      createdAt: Date.now(),
+    }), { flag: "wx", mode: 0o600 });
+  } catch (error) {
+    if (error?.code !== "EEXIST") throw error;
+  }
+}
+
 function markTarget(input, target, output) {
   if (typeof target !== "string" || typeof output !== "string" || !output) return;
 
@@ -77,14 +170,24 @@ function markTarget(input, target, output) {
   const claim = claimTarget(input, target);
   if (!claim) return;
 
+  const assessment = role === "wr-risk-scorer:pipeline" ? pipelineAssessment(output) : null;
+  if (role === "wr-risk-scorer:pipeline" && !assessment) {
+    rmSync(claim.claim, { force: true });
+    process.exitCode = 1;
+    return;
+  }
+
+  const cwd = assessment?.root || input.cwd || process.cwd();
+
   const synthetic = {
     ...input,
+    cwd,
     tool_name: "Agent",
     tool_input: { subagent_type: role, prompt: "" },
-    tool_response: { content: [{ type: "text", text: output }] },
+    tool_response: { content: [{ type: "text", text: assessment?.output || output }] },
   };
   const result = spawnSync(join(hookDir, "risk-score-mark.sh"), {
-    cwd: input.cwd || process.cwd(),
+    cwd,
     env: process.env,
     input: JSON.stringify(synthetic),
     encoding: "utf8",
@@ -111,7 +214,88 @@ function markWait(input) {
 }
 
 function markSubagentStop(input) {
-  markTarget(input, input.agent_id, input.last_assistant_message);
+  const state = typeof input.agent_id === "string" ? statePath(input, input.agent_id) : "";
+  if (state && existsSync(state)) {
+    markTarget(input, input.agent_id, input.last_assistant_message);
+    return;
+  }
+  persistPendingPipeline(input);
+}
+
+function consumePending(input) {
+  if (!/^[A-Za-z0-9-]+$/.test(input.session_id || "")) return;
+  let root;
+  try {
+    root = realpathSync(process.cwd());
+  } catch {
+    return;
+  }
+  const git = spawnSync("git", ["-C", root, "rev-parse", "--show-toplevel"], { encoding: "utf8" });
+  if (git.status !== 0 || realpathSync(git.stdout.trim()) !== root) return;
+
+  const id = checkoutId(root);
+  const hash = stateHash(root);
+  if (!hash) return;
+  const prefix = `${id}-${hash}-`;
+  const pendingPaths = existsSync(pendingDir())
+    ? readdirSync(pendingDir())
+      .filter((name) => name.startsWith(prefix) && !name.endsWith(".claim") && !name.endsWith(".done"))
+      .map((name) => join(pendingDir(), name))
+      .sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs)
+    : [];
+  const path = pendingPaths[0];
+  if (!path) return;
+
+  const claim = `${path}.claim`;
+  try {
+    writeFileSync(claim, "", { flag: "wx", mode: 0o600 });
+  } catch (error) {
+    if (error?.code === "EEXIST") return;
+    throw error;
+  }
+
+  try {
+    const pending = JSON.parse(readFileSync(path, "utf8"));
+    const ttl = Number.parseInt(process.env.RISK_TTL || "3600", 10) * 1000;
+    if (pending.role !== "wr-risk-scorer:pipeline" || pending.checkoutId !== id ||
+        pending.stateHash !== hash || typeof pending.output !== "string" ||
+        typeof pending.completionId !== "string" || !path.endsWith(`-${pending.completionId}`) ||
+        !Number.isFinite(pending.createdAt) || Date.now() - pending.createdAt < 0 ||
+        Date.now() - pending.createdAt >= ttl) return;
+
+    const synthetic = {
+      ...input,
+      cwd: root,
+      tool_name: "Agent",
+      tool_input: { subagent_type: pending.role, prompt: "" },
+      tool_response: { content: [{ type: "text", text: pending.output }] },
+    };
+    const result = spawnSync(join(hookDir, "risk-score-mark.sh"), {
+      cwd: root,
+      env: process.env,
+      input: JSON.stringify(synthetic),
+      encoding: "utf8",
+    });
+    if (result.status !== 0) {
+      process.exitCode = 1;
+      return;
+    }
+    const assessedAt = new Date(pending.createdAt);
+    const markers = ["commit", "push", "release", "commit-born", "push-born", "release-born"];
+    if (/^RISK_BYPASS:\s*reducing\s*$/m.test(pending.output)) {
+      markers.push("reducing-commit", "reducing-push", "reducing-release");
+    } else if (/^RISK_BYPASS:\s*incident\s*$/m.test(pending.output)) {
+      markers.push("incident-release");
+    }
+    for (const marker of markers) {
+      const markerPath = join(riskDir(input.session_id), marker);
+      if (existsSync(markerPath)) utimesSync(markerPath, assessedAt, assessedAt);
+    }
+    renameSync(path, `${path}.done`);
+    for (const stale of pendingPaths.slice(1)) rmSync(stale, { force: true });
+  } finally {
+    rmSync(claim, { force: true });
+  }
 }
 
 let body = "";
@@ -125,12 +309,17 @@ try {
   process.exit(0);
 }
 
+if (process.argv.includes("--consume-pending")) {
+  consumePending(input);
+  process.exit(process.exitCode || 0);
+}
+
 if (!/^[A-Za-z0-9-]+$/.test(input.session_id || "")) process.exit(0);
 
 if (["collaborationspawn_agent", "spawn_agent", "multi_agent_v1__spawn_agent"].includes(input.tool_name)) {
   rememberSpawn(input);
 }
-if (["collaborationinterrupt_agent", "close_agent", "multi_agent_v1__close_agent"].includes(input.tool_name)) {
+if (["collaborationinterrupt_agent", "interrupt_agent", "close_agent", "multi_agent_v1__close_agent"].includes(input.tool_name)) {
   markClose(input);
 }
 if (["collaborationwait_agent", "wait_agent", "multi_agent_v1__wait_agent"].includes(input.tool_name)) {

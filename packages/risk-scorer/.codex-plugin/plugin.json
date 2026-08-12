@@ -1,6 +1,6 @@
 {
   "name": "wr-risk-scorer",
-  "version": "0.18.8",
+  "version": "0.18.11",
   "description": "Pipeline risk scoring, commit/push gates, and secret leak detection",
   "author": {
     "name": "Windy Road Technology",

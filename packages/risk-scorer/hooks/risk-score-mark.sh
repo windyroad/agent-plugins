@@ -39,19 +39,23 @@ RDIR=$(_risk_dir "$SESSION_ID")
 if echo "$SUBAGENT" | grep -qE 'risk-scorer.pipeline'; then
   # Parse RISK_SCORES: commit=N push=N release=N
   SCORES_LINE=$(echo "$AGENT_OUTPUT" | grep -E '^RISK_SCORES:' | tail -1) || true
-  if [ -n "$SCORES_LINE" ]; then
-    COMMIT=$(echo "$SCORES_LINE" | grep -oE 'commit=[0-9]+' | cut -d= -f2) || true
-    PUSH=$(echo "$SCORES_LINE" | grep -oE 'push=[0-9]+' | cut -d= -f2) || true
-    RELEASE=$(echo "$SCORES_LINE" | grep -oE 'release=[0-9]+' | cut -d= -f2) || true
+  [ -n "$SCORES_LINE" ] || exit 1
+  COMMIT=$(echo "$SCORES_LINE" | grep -oE 'commit=[0-9]+' | cut -d= -f2) || true
+  PUSH=$(echo "$SCORES_LINE" | grep -oE 'push=[0-9]+' | cut -d= -f2) || true
+  RELEASE=$(echo "$SCORES_LINE" | grep -oE 'release=[0-9]+' | cut -d= -f2) || true
+  [ -n "$COMMIT" ] && [ -n "$PUSH" ] && [ -n "$RELEASE" ] || exit 1
 
-    # Birth markers (<action>-born) capture the scorer-run timestamp. Band B
-    # of the three-band TTL policy (P090) uses them to enforce a 2×TTL
-    # hard-cap on sliding-window extension, so an unchanged-but-idle tree
-    # cannot ride a single score indefinitely.
-    [ -n "$COMMIT" ] && { printf '%s' "$COMMIT" > "${RDIR}/commit"; touch "${RDIR}/commit-born"; }
-    [ -n "$PUSH" ] && { printf '%s' "$PUSH" > "${RDIR}/push"; touch "${RDIR}/push-born"; }
-    [ -n "$RELEASE" ] && { printf '%s' "$RELEASE" > "${RDIR}/release"; touch "${RDIR}/release-born"; }
-  fi
+  CHECKOUT_ID=$(_checkout_id) || exit 1
+  [ -n "$CHECKOUT_ID" ] || exit 1
+  rm -f "${RDIR}/checkout-id"
+
+  # Birth markers (<action>-born) capture the scorer-run timestamp. Band B
+  # of the three-band TTL policy (P090) uses them to enforce a 2×TTL
+  # hard-cap on sliding-window extension, so an unchanged-but-idle tree
+  # cannot ride a single score indefinitely.
+  printf '%s' "$COMMIT" > "${RDIR}/commit"; touch "${RDIR}/commit-born"
+  printf '%s' "$PUSH" > "${RDIR}/push"; touch "${RDIR}/push-born"
+  printf '%s' "$RELEASE" > "${RDIR}/release"; touch "${RDIR}/release-born"
 
   # Parse RISK_BYPASS: reducing|incident
   BYPASS_LINE=$(echo "$AGENT_OUTPUT" | grep -E '^RISK_BYPASS:' | tail -1) || true
@@ -162,6 +166,10 @@ print(json.dumps({
       done <<< "$HINT_BLOCK"
     fi
   } 2>/dev/null || true
+
+  # Publish the physical-checkout binding last. If any required marker write
+  # above fails, legacy scores remain unusable in a different checkout.
+  printf '%s' "$CHECKOUT_ID" > "${RDIR}/checkout-id"
 fi
 
 # ---------------------------------------------------------------------------

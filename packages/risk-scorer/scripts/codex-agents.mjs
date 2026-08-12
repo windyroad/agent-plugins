@@ -33,6 +33,16 @@ On PASS, append \`EXTERNAL_COMMS_RISK_KEY: <64 lowercase hex characters>\` after
 the verdict. On FAIL, do not emit a key. This is generated Codex-only behavior;
 the completion hook independently validates the key shape before writing a marker.`;
 
+const pipelineCodexInstructions = `
+
+## Codex assessed-checkout binding
+
+The request must contain exactly one \`RISK_CWD: <absolute Git root>\` line.
+Repeat that exact line once after the structured risk output so the completion
+bridge can bind marker generation to the checkout that was assessed. Do not
+repeat the path elsewhere. If the request omits the line or provides more than
+one, do not emit \`RISK_SCORES\`; report that the assessed checkout is unbound.`;
+
 export const riskAgentSpecs = [
   ["pipeline", "Scores pipeline actions for cumulative residual risk."],
   ["plan", "Reviews implementation plans and projected release risk."],
@@ -73,7 +83,9 @@ function renderPayload(spec) {
   const description = frontmatterValue(frontmatter, "description") || spec.fallbackDescription;
   const instructions = spec.mode === "external-comms"
     ? `${body.trimEnd()}${externalCommsCodexInstructions}`
-    : body;
+    : spec.mode === "pipeline"
+      ? `${body.trimEnd()}${pipelineCodexInstructions}`
+      : body;
   return [
     "# Do not edit by hand; update the Claude agent markdown and regenerate.",
     `name = ${JSON.stringify(spec.name)}`,

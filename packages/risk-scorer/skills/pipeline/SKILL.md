@@ -13,7 +13,7 @@ This SKILL is an **invokable wrapper** around the `wr-risk-scorer:pipeline` agen
 ## Contract
 
 - **Input** (`$ARGUMENTS`): a self-contained scoring prompt with pipeline state context. Caller assembles UNCOMMITTED / UNPUSHED / UNRELEASED sections per `packages/risk-scorer/agents/pipeline.md` § Pipeline State.
-- **Output**: the agent's verbatim report, including the structured `RISK_SCORES: commit=N push=N release=N` block, optional `RISK_BYPASS:` line, optional `RISK_REMEDIATIONS:` block, optional `RISK_REGISTER_HINT:` block, and optional `CATALOG_HIT_RATE:` line.
+- **Output**: the agent's verbatim report, including the structured `RISK_SCORES: commit=N push=N release=N` block, required `RISK_CWD:` line supplied by the caller, optional `RISK_BYPASS:` line, optional `RISK_REMEDIATIONS:` block, optional `RISK_REGISTER_HINT:` block, and optional `CATALOG_HIT_RATE:` line.
 - **Side effects**: the `PostToolUse:Agent` hook (`risk-score-mark.sh`) reads the agent's output downstream of this wrapper and writes the bypass marker files to `${TMPDIR}/claude-risk-${SESSION_ID}/`. The wrapper itself writes no files.
 
 ## Steps
@@ -21,6 +21,16 @@ This SKILL is an **invokable wrapper** around the `wr-risk-scorer:pipeline` agen
 ### 1. Pass-through to the pipeline agent
 
 Invoke the pipeline subagent via the Agent tool with the caller's `$ARGUMENTS` verbatim. Dispatch it **synchronously** (`run_in_background: false`) — the `PostToolUse:Agent` mark hook that writes the risk-gate marker fires reliably only for a synchronous agent; a background-launched scorer's mark hook does not fire in time, so no marker persists and the commit/push gate re-blocks despite a within-appetite score (P402):
+
+On Codex, when the Agent tool is exposed as `spawn_agent`, pass
+`agent_type: wr-risk-scorer:pipeline` with `fork_turns: "none"`. Codex rejects an
+explicit agent type on a full-history fork; omitting the type on retry also
+prevents the completion bridge from binding the returned verdict. `$ARGUMENTS`
+is already self-contained, so no forked conversation context is required.
+After the Codex agent reports completion, close that completed agent exactly
+once so the compatibility hook receives the structured result. When Codex
+exposes completed-agent close as `interrupt_agent`, invoke it once on the
+completed target; do not relaunch or inspect a transcript.
 
 ```
 subagent_type: wr-risk-scorer:pipeline
@@ -30,6 +40,6 @@ prompt: $ARGUMENTS
 
 ### 2. Return the agent report verbatim
 
-Return the agent's response to the caller without alteration. Do NOT strip, paraphrase, or post-process the structured output blocks (`RISK_SCORES:`, `RISK_BYPASS:`, `RISK_REMEDIATIONS:`, `RISK_REGISTER_HINT:`, `CATALOG_HIT_RATE:`). The PostToolUse hook depends on the exact byte sequence to parse.
+Return the agent's response to the caller without alteration. Do NOT strip, paraphrase, or post-process the structured output blocks (`RISK_SCORES:`, `RISK_CWD:`, `RISK_BYPASS:`, `RISK_REMEDIATIONS:`, `RISK_REGISTER_HINT:`, `CATALOG_HIT_RATE:`). The PostToolUse hook depends on the exact byte sequence to parse.
 
 $ARGUMENTS

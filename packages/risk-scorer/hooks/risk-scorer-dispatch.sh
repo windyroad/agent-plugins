@@ -47,6 +47,9 @@ if messages:
     fi
     ;;
   user-prompt)
+    # Codex code-mode tools do not expose a parent PreToolUse event. Import a
+    # completed child receipt on the next already-enabled parent prompt.
+    "$SCRIPT_DIR/risk-pending-receipt.sh" <<<"$INPUT" || true
     run_hook risk-score.sh
     run_hook staleness-check.sh
     ;;
@@ -59,6 +62,10 @@ if messages:
         run_hook risk-policy-enforce-edit.sh
         ;;
       Bash)
+        # Current Codex emits SubagentStop in the child conversation but does
+        # not expose native collaboration calls to the parent's PostToolUse.
+        # Import the exact checkout/hash-bound receipt before enforcing gates.
+        "$SCRIPT_DIR/risk-pending-receipt.sh" <<<"$INPUT" || true
         run_hook git-push-gate.sh
         run_hook risk-score-commit-gate.sh
         run_hook external-comms-gate.sh
@@ -77,7 +84,7 @@ if messages:
         run_hook risk-score-mark.sh
         run_hook risk-slide-marker.sh
         ;;
-      collaborationspawn_agent|collaborationwait_agent|collaborationinterrupt_agent|spawn_agent|wait_agent|close_agent|multi_agent_v1__spawn_agent|multi_agent_v1__wait_agent|multi_agent_v1__close_agent)
+      collaborationspawn_agent|collaborationwait_agent|collaborationinterrupt_agent|spawn_agent|wait_agent|interrupt_agent|close_agent|multi_agent_v1__spawn_agent|multi_agent_v1__wait_agent|multi_agent_v1__close_agent)
         printf '%s' "$INPUT" | node "$SCRIPT_DIR/codex-agent-completion.mjs"
         ;;
       Bash)
