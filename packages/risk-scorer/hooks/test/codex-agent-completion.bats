@@ -18,6 +18,7 @@ setup() {
   git -C "$OTHER_REPO" add state
   git -C "$PIPELINE_REPO" -c user.name=test -c user.email=test@example.com commit -qm initial
   git -C "$OTHER_REPO" -c user.name=test -c user.email=test@example.com commit -qm initial
+  printf '# Risk Policy\n\n## Risk Appetite\n\n**Threshold: 5 (Low)**\n' > "$PIPELINE_REPO/RISK-POLICY.md"
 }
 
 teardown() {
@@ -82,6 +83,25 @@ subagent_stop_input() {
     "$SESSION" "$TMP" "$TARGET" "$KEY"
 }
 
+pipeline_subagent_stop_input() {
+  printf '{"hook_event_name":"SubagentStop","session_id":"%s","cwd":"%s","agent_id":"%s","agent_type":"wr-risk-scorer:pipeline","last_assistant_message":"RISK_SCORES: commit=%s push=%s release=%s\\nRISK_CWD: %s"}' \
+    "${1:-child-session}" "$OTHER_REPO" "${2:-child-agent}" "${3:-4}" "${3:-4}" "${3:-4}" "$PIPELINE_REPO"
+}
+
+parent_bash_input() {
+  printf '{"hook_event_name":"PreToolUse","session_id":"%s","cwd":"%s","tool_name":"Bash","tool_input":{"cwd":"%s","command":"git commit --dry-run"}}' \
+    "$SESSION" "$PIPELINE_REPO" "$PIPELINE_REPO"
+}
+
+parent_prompt_input() {
+  printf '{"hook_event_name":"UserPromptSubmit","session_id":"%s","cwd":"%s","prompt":"continue"}' \
+    "$SESSION" "$PIPELINE_REPO"
+}
+
+dispatch_pretool() {
+  printf '%s' "$1" | "$HOOK_DIR/risk-scorer-dispatch.sh" pre-tool
+}
+
 @test "desktop SubagentStop marks completion before agent close" {
   dispatch "$(current_spawn_input)"
   dispatch_subagent_stop "$(subagent_stop_input)"
@@ -91,6 +111,96 @@ subagent_stop_input() {
 
   dispatch "$(current_close_input)"
   [ "$(find "$TMPDIR/claude-risk-$SESSION" -name 'codex-agent-*.done' | wc -l | tr -d ' ')" = "1" ]
+}
+
+@test "desktop pipeline SubagentStop hands a checkout-bound receipt to the parent without spawn state" {
+  dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
+  [ ! -e "$TMPDIR/claude-risk-$SESSION/commit" ]
+
+  run dispatch_pretool "$(parent_bash_input)"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+
+  rdir="$TMPDIR/claude-risk-$SESSION"
+  [ "$(cat "$rdir/commit")" = "4" ]
+  expected_hash="$(cd "$PIPELINE_REPO" && source "$HOOK_DIR/lib/gate-helpers.sh" && "$HOOK_DIR/lib/pipeline-state.sh" --hash-inputs | _hashcmd | cut -d' ' -f1)"
+  expected_checkout="$(cd "$PIPELINE_REPO" && source "$HOOK_DIR/lib/gate-helpers.sh" && _checkout_id)"
+  [ "$(cat "$rdir/state-hash")" = "$expected_hash" ]
+  [ "$(cat "$rdir/checkout-id")" = "$expected_checkout" ]
+  [ ! -e "$TMPDIR/claude-risk-child-session/commit" ]
+  [ "$(find "$PIPELINE_REPO/.risk-reports" -type f -name '*-commit.md' | wc -l | tr -d ' ')" = "1" ]
+  run grep -R "$PIPELINE_REPO" "$PIPELINE_REPO/.risk-reports"
+  [ "$status" -ne 0 ]
+
+  dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
+  dispatch_pretool "$(parent_bash_input)"
+  [ "$(find "$PIPELINE_REPO/.risk-reports" -type f -name '*-commit.md' | wc -l | tr -d ' ')" = "1" ]
+}
+
+@test "a distinct completion from the same agent supersedes an unchanged checkout score" {
+  dispatch_subagent_stop "$(pipeline_subagent_stop_input child-one agent-one 3)"
+  dispatch_subagent_stop "$(pipeline_subagent_stop_input child-one agent-one 4)"
+  dispatch_pretool "$(parent_bash_input)"
+  [ "$(cat "$TMPDIR/claude-risk-$SESSION/commit")" = "4" ]
+  [ "$(find "$TMPDIR/claude-risk-pending" -type f ! -name '*.done' ! -name '*.claim' | wc -l | tr -d ' ')" = "0" ]
+}
+
+@test "duplicate delivery of the same completion writes one receipt" {
+  dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
+  dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
+  [ "$(find "$TMPDIR/claude-risk-pending" -type f ! -name '*.done' ! -name '*.claim' | wc -l | tr -d ' ')" = "1" ]
+}
+
+@test "Codex parent prompt imports a completed child receipt" {
+  dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
+  run bash -c 'printf "%s" "$1" | "$2" user-prompt' _ "$(parent_prompt_input)" "$HOOK_DIR/risk-scorer-dispatch.sh"
+  [ "$status" -eq 0 ]
+  [ "$(cat "$TMPDIR/claude-risk-$SESSION/commit")" = "4" ]
+}
+
+@test "imported score retains the original assessment timestamp" {
+  dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
+  pending="$(find "$TMPDIR/claude-risk-pending" -type f ! -name '*.done' ! -name '*.claim' -print -quit)"
+  assessed_seconds="$(node -e 'console.log(Math.floor(JSON.parse(require("fs").readFileSync(process.argv[1])).createdAt / 1000))' "$pending")"
+  sleep 1
+  printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
+  born_seconds="$(source "$HOOK_DIR/lib/gate-helpers.sh" && _mtime "$TMPDIR/claude-risk-$SESSION/commit-born")"
+  [ "$born_seconds" = "$assessed_seconds" ]
+}
+
+@test "ordinary imported score does not renew an unrelated bypass marker" {
+  rdir="$TMPDIR/claude-risk-$SESSION"
+  mkdir -p "$rdir"
+  touch -t 200001010000 "$rdir/incident-release"
+  before="$(source "$HOOK_DIR/lib/gate-helpers.sh" && _mtime "$rdir/incident-release")"
+  dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
+  printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
+  after="$(source "$HOOK_DIR/lib/gate-helpers.sh" && _mtime "$rdir/incident-release")"
+  [ "$after" = "$before" ]
+}
+
+@test "pending pipeline receipt rejects checkout drift" {
+  dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
+  printf 'drift\n' >> "$PIPELINE_REPO/state"
+  printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
+  [ ! -e "$TMPDIR/claude-risk-$SESSION/commit" ]
+}
+
+@test "pending pipeline receipt rejects malformed completion" {
+  malformed="$(pipeline_subagent_stop_input | sed 's#RISK_CWD: [^\"]*#RISK_CWD: relative/path#')"
+  dispatch_subagent_stop "$malformed"
+  printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
+  [ ! -e "$TMPDIR/claude-risk-$SESSION/commit" ]
+}
+
+@test "expired consumed receipt permits rescoring the unchanged checkout" {
+  dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
+  printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
+  done_receipt="$(find "$TMPDIR/claude-risk-pending" -name '*.done' -print -quit)"
+  touch -t 200001010000 "$done_receipt"
+
+  RISK_TTL=1 dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
+  [ "$(find "$TMPDIR/claude-risk-pending" -type f ! -name '*.done' ! -name '*.claim' | wc -l | tr -d ' ')" = "1" ]
 }
 
 @test "Codex completion bridge marks the exact risk agent when it closes" {
