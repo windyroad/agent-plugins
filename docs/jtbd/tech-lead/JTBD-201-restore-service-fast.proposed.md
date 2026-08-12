@@ -31,10 +31,3 @@ When production breaks, I want an evidence-first workflow that gets service rest
 ## Current Solutions
 
 Ad-hoc incident response in chat, post-mortems written from memory, root causes lost or merged into problem tickets by hand.
-
-
-## Story Maps
-
-| ID | Title | Status |
-|----|-------|--------|
-| STORY-MAP-012 | STORY-MAP-012: Ship through a scored path | draft |

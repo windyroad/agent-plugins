@@ -89,8 +89,6 @@ One row per story map in `draft` / `accepted` / `in-progress` status, from files
 | — | STORY-MAP-004 | Close the loop with someone who reported a problem | draft | P080, P170, P376, P431 | RFC-028, RFC-051, RFC-061 |
 | — | STORY-MAP-008 | Have a plugin behave like a guest in my repository | draft | P424 | RFC-054 |
 | — | STORY-MAP-011 | Trust the AFK loop's autonomous conduct | draft | P430, P431, P433, P434, P438, P439 | RFC-050, RFC-051, RFC-052, RFC-053, RFC-056, RFC-057 |
-| — | STORY-MAP-012 | Ship through a scored path | draft | — | — |
-| — | STORY-MAP-013 | Know what my push did | draft | — | — |
 
 
 ## Consolidated away

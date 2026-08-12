@@ -47,5 +47,3 @@ Two faces of one class — `wr-risk-scorer` gate scope is hardcoded to the home-
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-MAP-008 | STORY-MAP-008: Have a plugin behave like a guest in my repository | draft |
-| STORY-MAP-012 | STORY-MAP-012: Ship through a scored path | draft |
-| STORY-MAP-013 | STORY-MAP-013: Know what my push did | draft |

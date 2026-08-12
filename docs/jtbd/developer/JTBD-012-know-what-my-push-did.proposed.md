@@ -5,8 +5,8 @@ persona: developer
 secondary-persona: tech-lead
 date-created: 2026-08-04
 human-oversight: confirmed
-oversight-date: 2026-08-04
-oversight-note: "2026-08-04 — confirmed as written via AskUserQuestion (P357 post-change brief), in the same batch as the developer persona amendment this job's Persona Constraints defer to. The user confirmed the job statement, all six desired outcomes, and specifically that two of those outcomes are blocks rather than reporting — which is why 'the risk plugin blocks, this one reports' is recorded here as NOT the dividing line. The plugin boundary itself remains open; see Open Question."
+oversight-date: 2026-08-12
+oversight-note: "2026-08-12 - confirmed after removing the obsolete STORY-MAP-012/STORY-MAP-013 sentence from the Open Question; all other substance retains its 2026-08-04 confirmation."
 ---
 
 # JTBD-012: Know What My Push Did Without Leaving the Terminal
@@ -53,7 +53,7 @@ Authored explicitly so this job is not later challenged as redundant with its ne
 
 ## Open Question
 
-Whether the tooling serving this job belongs in `@windyroad/risk-scorer` (where it is implemented today, fused into `git-push-gate.sh`) or in a separate stack-neutral plugin is **undecided as of 2026-08-04**. Two of this job's desired outcomes are denials, so "the risk plugin denies, this one only reports" is not the dividing line. STORY-MAP-012 and STORY-MAP-013 map the two concerns separately so the overlap can be inspected; they assert no boundary. A composition contract for the shared `git push` interception point is a prerequisite of any split — without one, a split converts P435 into the cross-plugin attribution ambiguity the `plugin-user` persona documents as a pain point.
+Whether the tooling serving this job belongs in `@windyroad/risk-scorer` (where it is implemented today, fused into `git-push-gate.sh`) or in a separate stack-neutral plugin is **undecided as of 2026-08-04**. Two of this job's desired outcomes are denials, so "the risk plugin denies, this one only reports" is not the dividing line. A composition contract for the shared `git push` interception point is a prerequisite of any split — without one, a split converts P435 into the cross-plugin attribution ambiguity the `plugin-user` persona documents as a pain point.
 
 ## Related Problem Tickets
 
@@ -63,10 +63,3 @@ Whether the tooling serving this job belongs in `@windyroad/risk-scorer` (where 
 
 | ID | Title | Status |
 |----|-------|--------|
-
-
-## Story Maps
-
-| ID | Title | Status |
-|----|-------|--------|
-| STORY-MAP-013 | STORY-MAP-013: Know what my push did | draft |

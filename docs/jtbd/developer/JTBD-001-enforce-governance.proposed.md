@@ -51,7 +51,5 @@ Manual code review, PR review checklists, hoping the agent follows CLAUDE.md ins
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-MAP-002 | STORY-MAP-002: Decompose a fix into coordinated changes | draft |
+| STORY-MAP-002 | STORY-MAP-002: Take a problem from noticed to resolved | draft |
 | STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |
-| STORY-MAP-012 | STORY-MAP-012: Ship through a scored path | draft |
-| STORY-MAP-001 | STORY-MAP-001: RFC framework Phase 1 + Phase 2 bootstrap | in-progress |

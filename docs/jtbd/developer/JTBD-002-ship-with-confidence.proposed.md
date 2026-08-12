@@ -47,4 +47,3 @@ Pair programming with the AI, manual review of every diff, restricting agent per
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |
-| STORY-MAP-012 | STORY-MAP-012: Ship through a scored path | draft |

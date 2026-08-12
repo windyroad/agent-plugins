@@ -17,6 +17,12 @@ reassessment-date: 2026-08-04
 
 # Problem-RFC-Story framework with mandatory problem-trace and unified problem ontology
 
+### Superseded story-map ID allocation - see ADR-115
+
+**ADR-115 (story-map IDs are never reused)** supersedes only this decision's
+`max(local, origin) + 1` rule for STORY-MAP IDs. Story-map allocation now uses
+`max(local, origin, history) + 1`; all other ID namespaces remain unchanged.
+
 ### Superseded stories-cardinality and oversight clauses — see ADR-089 and ADR-090
 
 **ADR-089 (every RFC has at least one story)** supersedes this decision's

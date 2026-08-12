@@ -56,6 +56,22 @@ teardown() {
   [ "$next" = "003" ]
 }
 
+@test "capture-story-map: next-ID formula does not reuse a deleted ID" {
+  mkdir -p docs/story-maps/draft
+  git init -q
+  git config user.email test@example.com
+  git config user.name Test
+  touch docs/story-maps/draft/STORY-MAP-013-retired.html
+  git add docs/story-maps/draft/STORY-MAP-013-retired.html
+  git commit -qm "add map"
+  git rm -q docs/story-maps/draft/STORY-MAP-013-retired.html
+  git commit -qm "delete map"
+
+  history_max=$(git log --all --name-only --format= -- docs/story-maps/ 2>/dev/null | sed 's|.*/STORY-MAP-||;s|-.*||' | grep -oE '^[0-9]+' | sort -n | tail -1)
+  next=$(printf '%03d' $(( 10#${history_max:-0} + 1 )))
+  [ "$next" = "014" ]
+}
+
 @test "capture-story-map: update-problem-references-section.sh accepts 'Story Maps' section name" {
   mkdir -p docs/problems/known-error docs/story-maps/draft
   cat > docs/problems/known-error/170-test.md <<'EOF'

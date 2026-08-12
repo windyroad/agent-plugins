@@ -33,6 +33,24 @@ prompts:
   - '{{prompt}}'
 
 tests:
+  - description: Does not reuse a deleted story-map ID
+    vars:
+      prompt: |
+        In the current repository, STORY-MAP-012 and STORY-MAP-013 have been
+        deleted from the working tree but still exist in Git history. Without
+        creating or editing any files, determine the next STORY-MAP ID that
+        capture-story-map must allocate. Give the ID and briefly name the
+        sources included in the maximum.
+    assert:
+      - type: icontains
+        value: STORY-MAP-014
+      - type: icontains
+        value: working tree
+      - type: icontains
+        value: origin
+      - type: icontains
+        value: history
+
   - description: Splits two independent stories into separate rows, on the economics
     vars:
       prompt: |

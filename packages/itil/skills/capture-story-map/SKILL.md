@@ -42,7 +42,7 @@ Positional grammar mirrors `/wr-itil:capture-story` shape (footnote per ADR-060 
 | Problem-trace validation | Mechanical: each `P<NNN>` exists in `docs/problems/`; dual-tolerant lookup | silent-mechanical |
 | JTBD-trace presence | I4 hard-block — refuse on missing trace; emit deny log + halt | direction-setting |
 | JTBD-trace validation | Mechanical: each `JTBD-<NNN>` resolves to a file in `docs/jtbd/` | silent-mechanical |
-| STORY-MAP ID allocation | Mechanical: `max(local, origin) + 1` enumerating `docs/story-maps/*/STORY-MAP-*.html` (ADR-019 inline collision-guard) | silent-mechanical |
+| STORY-MAP ID allocation | Mechanical: `max(local, origin, history) + 1` enumerating `docs/story-maps/*/STORY-MAP-*.html` (ADR-019 inline collision-guard) | silent-mechanical |
 | Title kebab-slug | Mechanical: first 8-10 non-stopword tokens of description | silent-mechanical |
 | Title prose refinement | Optional taste AskUserQuestion; silent-default to derived form | taste |
 | HTML file write | Mechanical: schema per ADR-060 § Phase 2 encoding amendment 2026-05-12 lines 381-435 | silent-mechanical |
@@ -95,12 +95,13 @@ jtbd_file=$(ls docs/jtbd/*/JTBD-<NNN>-*.md 2>/dev/null | head -1)
 
 ### 3. Compute next STORY-MAP ID
 
-Inline `max(local, origin) + 1` per ADR-019 collision-guard (architect Slice 3 design review option a — inline-only path, mirrors capture-rfc + capture-story precedent):
+Inline `max(local, origin, history) + 1` per ADR-019 collision-guard (architect Slice 3 design review option a — inline-only path, mirrors capture-rfc + capture-story precedent). Git history keeps deleted IDs retired without adding tombstone files:
 
 ```bash
 local_max=$(ls docs/story-maps/*/STORY-MAP-*.html 2>/dev/null | sed 's|.*/STORY-MAP-||;s|-.*||' | grep -oE '^[0-9]+' | sort -n | tail -1)
 origin_max=$(git ls-tree -r --name-only origin/main docs/story-maps/ 2>/dev/null | sed 's|.*/STORY-MAP-||;s|-.*||' | grep -oE '^[0-9]+' | sort -n | tail -1)
-next=$(printf '%03d' $(( 10#$(echo -e "${local_max:-0}\n${origin_max:-0}" | sort -n | tail -1) + 1 )))
+history_max=$(git log --all --name-only --format= -- docs/story-maps/ 2>/dev/null | sed 's|.*/STORY-MAP-||;s|-.*||' | grep -oE '^[0-9]+' | sort -n | tail -1)
+next=$(printf '%03d' $(( 10#$(printf '%s\n' "${local_max:-0}" "${origin_max:-0}" "${history_max:-0}" | sort -n | tail -1) + 1 )))
 ```
 
 ### 4. Optional taste prompt for title
