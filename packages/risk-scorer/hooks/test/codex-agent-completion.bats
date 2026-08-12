@@ -42,6 +42,11 @@ current_spawn_input() {
     "$SESSION" "$TMP" "${1:-wr-risk-scorer:external-comms}" "$TARGET"
 }
 
+direct_spawn_input() {
+  printf '{"session_id":"%s","cwd":"%s","tool_name":"spawn_agent","tool_input":{"agent_type":"%s"},"tool_response":{"task_name":"%s"}}' \
+    "$SESSION" "$TMP" "${1:-wr-risk-scorer:external-comms}" "$TARGET"
+}
+
 close_input() {
   printf '{"session_id":"%s","cwd":"%s","tool_name":"collaborationinterrupt_agent","tool_input":{"target":"%s"},"tool_response":"{\\"previous_status\\":{\\"completed\\":\\"EXTERNAL_COMMS_RISK_VERDICT: PASS\\\\nEXTERNAL_COMMS_RISK_KEY: %s\\"}}"}' \
     "$SESSION" "$TMP" "$TARGET" "$KEY"
@@ -59,6 +64,11 @@ current_pipeline_wait_input() {
 
 current_pipeline_close_input() {
   printf '{"session_id":"%s","cwd":"%s","tool_name":"multi_agent_v1__close_agent","tool_input":{"target":"%s"},"tool_response":{"previous_status":{"completed":"RISK_SCORES: commit=4 push=4 release=4\\nRISK_CWD: %s"}}}' \
+    "$SESSION" "$OTHER_REPO" "$TARGET" "$PIPELINE_REPO"
+}
+
+direct_pipeline_interrupt_input() {
+  printf '{"session_id":"%s","cwd":"%s","tool_name":"interrupt_agent","tool_input":{"target":"%s"},"tool_response":{"previous_status":{"completed":"RISK_SCORES: commit=4 push=4 release=4\\nRISK_CWD: %s"}}}' \
     "$SESSION" "$OTHER_REPO" "$TARGET" "$PIPELINE_REPO"
 }
 
@@ -99,6 +109,27 @@ subagent_stop_input() {
   dispatch "$(current_close_input)"
 
   [ -f "$TMPDIR/claude-risk-$SESSION/external-comms-risk-reviewed-$KEY" ]
+}
+
+@test "direct Codex interrupt_agent completion persists the assessed checkout" {
+  dispatch "$(direct_spawn_input wr-risk-scorer:pipeline)"
+  dispatch "$(direct_pipeline_interrupt_input)"
+
+  rdir="$TMPDIR/claude-risk-$SESSION"
+  [ "$(cat "$rdir/commit")" = "4" ]
+  expected_checkout="$(cd "$PIPELINE_REPO" && source "$HOOK_DIR/lib/gate-helpers.sh" && _checkout_id)"
+  completion_checkout="$(cd "$OTHER_REPO" && source "$HOOK_DIR/lib/gate-helpers.sh" && _checkout_id)"
+  [ "$(cat "$rdir/checkout-id")" = "$expected_checkout" ]
+  [ "$expected_checkout" != "$completion_checkout" ]
+  [ ! -e "$OTHER_REPO/.risk-reports" ]
+}
+
+@test "PostToolUse routes direct Codex interrupt_agent completions" {
+  run node -e '
+    const hooks = require(process.argv[1]).hooks.PostToolUse;
+    if (!hooks.some(({ matcher }) => matcher.split("|").includes("interrupt_agent"))) process.exit(1);
+  ' "$HOOK_DIR/hooks.json"
+  [ "$status" -eq 0 ]
 }
 
 @test "current wait response stays inert until completed-agent close" {

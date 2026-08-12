@@ -171,7 +171,7 @@ if (!/^[A-Za-z0-9-]+$/.test(input.session_id || "")) process.exit(0);
 if (["collaborationspawn_agent", "spawn_agent", "multi_agent_v1__spawn_agent"].includes(input.tool_name)) {
   rememberSpawn(input);
 }
-if (["collaborationinterrupt_agent", "close_agent", "multi_agent_v1__close_agent"].includes(input.tool_name)) {
+if (["collaborationinterrupt_agent", "interrupt_agent", "close_agent", "multi_agent_v1__close_agent"].includes(input.tool_name)) {
   markClose(input);
 }
 if (["collaborationwait_agent", "wait_agent", "multi_agent_v1__wait_agent"].includes(input.tool_name)) {

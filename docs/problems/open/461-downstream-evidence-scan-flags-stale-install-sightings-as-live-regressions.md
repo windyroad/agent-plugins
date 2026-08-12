@@ -16,7 +16,18 @@ When mining adopter-repo transcripts for evidence (the `/wr-itil:review-problems
 
 Concrete cost, 2026-07-25 (this session): the downstream-scan flagged P281 (capture-problem flat-path) and P365 (external-comms private-repo commit) as "still recurring in adopters" based on addressr/voder-mcp-hub transcript sightings. Both were flipped from Verifying → Known Error on that signal. On verification, the current source is CLEAN for both (P281 writes per-state + auto-migrates; P365 has the repo-visibility precondition) — the sightings were stale adopter installs (voder explicitly on itil 0.35.6, months behind). Both had to be flipped back to Verifying. The two wrong transitions were avoidable with a version-gate.
 
-Same root as the appetite-semantics observation left in this session (adopters silently run stale plugin semantics) — but this ticket is specifically about the **evidence-mining method** over-flagging, not the runtime stale-semantics itself.
+Same root as the appetite-semantics observation left in this session (adopters silently run stale plugin semantics) — but this ticket is specifically about the **evidence-mining method** over-flagging, not the runtime stale-semantics itself. The relevance gate is symmetric: later unrelated upstream state also cannot invalidate an exact supported-installed artifact whose required downstream behavior remains applicable.
+
+### Recurrence: unrelated later upstream CI was propagated downstream (2026-08-12)
+
+A downstream delivery was incorrectly frozen because later `agent-plugins` main CI exhausted a shared Claude OAuth quota, even though the supported-installed risk-scorer artifact contained the required cwd-binding repair. The maintainer corrected the dependency boundary:
+
+- downstream truth is scoped to the exact supported-installed artifact and the relevant behavior in the actual delivery checkout;
+- commit, push, and release risk score the real change set at their respective delivery stages in that checkout;
+- a separate clone/worktree is workspace hygiene, not a distinct scoring subject or prerequisite consumer rehearsal;
+- later unrelated upstream CI does not freeze or rewind a downstream consumer unless it invalidates the consumed artifact or its required behavior.
+
+The Claude Agent-Prose failure remained an `agent-plugins` release-quality concern. It did not invalidate the supported-installed risk-scorer artifact or make latest upstream `main` green a downstream delivery dependency. The correct recovery was to resume the consumer's normal score/gate flow in its existing checkout, not wait for unrelated CI or invent a synthetic installed-package rehearsal.
 
 ## Symptoms
 
@@ -27,6 +38,8 @@ Same root as the appetite-semantics observation left in this session (adopters s
 ## Workaround
 
 Before treating an adopter-repo sighting as a live regression, verify the fix's presence in **current source** AND, where determinable, the adopter's **installed plugin version** vs the fix release. If current source is clean, the sighting is a stale-install artifact — do not reopen; keep/return to Verifying.
+
+Before blocking a downstream consumer on later upstream evidence, bind the evidence to the exact artifact/version the consumer uses and the required behavior. If the later failure is unrelated, preserve the downstream boundary and evaluate the normal delivery path in its actual checkout.
 
 ## Impact Assessment
 
@@ -44,8 +57,9 @@ The downstream-scan method (and the sub-agents that implement it) treat "bug sig
 ### Investigation Tasks
 
 - [ ] Add a version-gate step to the downstream-scan contract in `/wr-itil:review-problems` (and the evidence-mining sub-agent prompts): source-clean OR adopter-version ≥ fix-release before a regression verdict
+- [ ] Make the relevance gate symmetric: unrelated later upstream CI cannot block or rewind a downstream dependency whose exact consumed artifact remains valid; do not add an independent-clone smoke as a prerequisite for the normal checkout-scoped delivery gate
 - [ ] Decide whether adopter installed-version is determinable from transcripts (plugin cache paths carry versions) or must be assumed-stale
-- [ ] Behavioural coverage for the "stale-install sighting → NOT a regression" path
+- [ ] Behavioural coverage for both directions: stale-install sighting → NOT a regression; unrelated later upstream failure → NOT a downstream block
 
 ## Dependencies
 
