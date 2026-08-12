@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.18.11
+
+### Patch Changes
+
+- 4c9dfd7: Persist Codex pipeline risk receipts when native collaboration completion is observed only in the child conversation.
+
 ## 0.18.10
 
 ### Patch Changes
