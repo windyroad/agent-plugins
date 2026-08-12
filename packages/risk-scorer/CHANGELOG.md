@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.18.10
+
+### Patch Changes
+
+- 7cdafc1: Recognize Codex's current `interrupt_agent` completion event so pipeline risk receipts persist for the assessed checkout.
+
 ## 0.18.9
 
 ### Patch Changes
