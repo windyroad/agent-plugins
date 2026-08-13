@@ -82,7 +82,6 @@ JTBD notes honoured per `wr-jtbd:agent` review:
 |----|-------|--------|
 | STORY-046 | STORY-046: Red-CI denial explains the recovery path | in-progress |
 
-
 ## RFCs
 
 | RFC | Status | Title |

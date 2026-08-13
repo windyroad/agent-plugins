@@ -17,7 +17,7 @@ stories: []
 **Problems**: P430 (itil-correction-detect UserPromptSubmit hook false-positives on orchestrator / AFK prompt text)
 **ADRs**: ADR-032 (governance skill invocation patterns — the AFK-iter self-suppress clause), ADR-047 (install-updates scaffolds governance artefacts — the category-axis guard-sharing constraint), ADR-066 / ADR-068 (human-oversight markers — the oversight-nudge guard family), ADR-084 (self-firing deferral census), ADR-087 (authoring-time cadence-annotation contract)
 **JTBD**: JTBD-006 (progress the backlog while I'm away), JTBD-001 (enforce governance without slowing down)
-**Story maps**: STORY-MAP-005 (Trust the capture-on-correction signal)
+**Story maps**: STORY-MAP-011 (Trust the AFK loop's autonomous conduct)
 
 ## Summary
 
@@ -85,7 +85,7 @@ home. Per ADR-070 an RFC holds no independent decisions, so it is not re-argued 
 
 ## Stories
 
-Decomposed as STORY-047 (Gate the correction nudge on prompt authorship) on STORY-MAP-005.
+Decomposed as STORY-047 (Gate the correction nudge on prompt authorship) on STORY-MAP-011.
 The story is authored and awaiting ratification; the `stories:` array is wired once it is
 ratified, before this RFC transitions to `accepted`.
 
@@ -97,4 +97,4 @@ are no commits yet.)
 ## Related
 
 - **P430** — driving problem, inbound report #257.
-- **STORY-MAP-005** — the story map this RFC's work sits on.
+- **STORY-MAP-011** — the story map this RFC's work sits on.

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # grade-llm-rubric.sh — promptfoo grading-provider driver for Tier-B
-# llm-rubric assertions in the capture-problem SKILL eval.
+# llm-rubric assertions in ITIL story SKILL evals.
 #
 # Tier-A deterministic regex/substring assertions false-fail on the
 # capture-problem contracts' NEGATIVE clauses (e.g. "does NOT halt"; "MUST
@@ -22,9 +22,10 @@
 # JSON object as a defensive post-process so a stray fence cannot break
 # the promptfoo parse.
 #
-# Subscription auth via the developer's logged-in claude session — no
-# ANTHROPIC_API_KEY, no CLAUDE_CODE_OAUTH_TOKEN (CI/release-only per
-# ADR-075 §6). Mirrors run-skill-eval.sh's auth posture.
+# Claude remains the default. WR_EVAL_RUNTIME=codex uses the logged-in Codex
+# CLI so Codex validation does not depend on Claude. Neither path needs an
+# API key; CLAUDE_CODE_OAUTH_TOKEN is CI/release-only per ADR-075 §6. Mirrors
+# run-skill-eval.sh's auth posture.
 #
 # @adr ADR-075 (Amendment 2026-06-02)
 # @rfc RFC-012
@@ -41,7 +42,16 @@ Set "pass" true only if the output satisfies the rubric. Be literal about
 negation: an output that says a thing does NOT happen SATISFIES a rubric
 requiring that the thing must not happen.'
 
-raw="$(claude -p --append-system-prompt "$GRADER_SYSTEM" "$@")"
+if [[ "${WR_EVAL_RUNTIME:-claude}" == "codex" ]]; then
+  REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../.." && pwd)"
+  raw="$(codex exec --ephemeral --ignore-user-config --cd "$REPO_ROOT" \
+    -c 'approval_policy="never"' --sandbox read-only \
+    "${GRADER_SYSTEM}
+
+$*" </dev/null)"
+else
+  raw="$(claude -p --append-system-prompt "$GRADER_SYSTEM" "$@")"
+fi
 
 # Defensive extraction: emit the first balanced {...} JSON object found in
 # the response, stripping any code fences or surrounding prose. If no brace

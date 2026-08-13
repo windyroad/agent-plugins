@@ -8,8 +8,6 @@ jtbd: [JTBD-002]
 rfcs: [RFC-049]
 story-maps: [STORY-MAP-002]
 estimated-effort: S
-human-oversight: confirmed
-oversight-hash: cd0846926ac20f1d84363f31c2844afe7865b563be742133bd6f948ef995ec0c
 ---
 
 # STORY-046: Red-CI denial explains the recovery path

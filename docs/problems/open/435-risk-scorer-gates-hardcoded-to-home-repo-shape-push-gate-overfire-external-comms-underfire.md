@@ -40,3 +40,16 @@ Two faces of one class — `wr-risk-scorer` gate scope is hardcoded to the home-
 ## Related
 
 - Inbound issues #235 (over-fire), #253 (under-fire). Kept as one ticket: same root class (gate scope hardcoded to home-repo shape).
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-008 | STORY-MAP-008: Have a plugin behave like a guest in my repository | draft |
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-056 | STORY-056: Clear a block with a command my repository actually has | draft |

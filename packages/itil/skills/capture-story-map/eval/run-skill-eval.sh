@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# run-skill-eval.sh — promptfoo exec-provider driver for the capture-story-map
+# SKILL eval. Loads SKILL.md as an APPENDED system prompt (preserves harness
+# session context for skill-graph traversal per ADR-075 Amendment 2026-06-02)
+# and feeds promptfoo's per-test prompt as the user message.
+#
+# Promptfoo invokes this as: bash run-skill-eval.sh "$PROMPT"
+# (per `providers: - id: 'exec:bash <script>'` shape).
+#
+# Subscription auth via the developer's logged-in claude session — no
+# ANTHROPIC_API_KEY, no CLAUDE_CODE_OAUTH_TOKEN (those are CI/release-only
+# per ADR-075 §6).
+#
+# @adr ADR-075 (Amendment 2026-06-02)
+# @rfc RFC-012 S6
+# @problem P485 (a rule with no behavioural check rots)
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SKILL_MD="${SCRIPT_DIR}/../SKILL.md"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
+
+if [[ ! -f "$SKILL_MD" ]]; then
+  echo "run-skill-eval.sh: SKILL.md not found at $SKILL_MD" >&2
+  exit 2
+fi
+
+# Pass the promptfoo prompt through as the user message. claude -p prints to
+# stdout, which promptfoo captures as the response under assertion.
+if [[ "${WR_EVAL_RUNTIME:-claude}" == "codex" ]]; then
+  exec codex exec --ephemeral --ignore-user-config --cd "$REPO_ROOT" \
+    -c 'approval_policy="never"' --sandbox read-only \
+    "Read ${SKILL_MD} and answer the validation prompt using that skill contract.
+
+${1:-}" </dev/null
+fi
+
+exec claude -p --append-system-prompt "$(cat "$SKILL_MD")" "${1:-}"

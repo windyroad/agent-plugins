@@ -22,7 +22,7 @@ estimated-effort: S
 
 ## User value (INVEST Valuable)
 
-As a plugin maintainer building Phase 2, I want the RFC frontmatter to carry an ORDERED `stories:` array (0..N cardinality) so that RFCs can reference the stories implementing them in execution sequence, with `capture-rfc --stories STORY-NNN,...` populating at capture and `manage-rfc` rendering a `## Stories` body section from the array on every lifecycle transition.
+In order that an RFC says which stories implement it and in what order — rather than leaving the sequence in someone's head — as a plugin maintainer building the story tier, I want RFC frontmatter to carry an ordered `stories:` array, populated at capture and rendered into a `## Stories` section on every lifecycle transition.
 
 ## Acceptance criteria (INVEST Testable)
 
@@ -57,3 +57,10 @@ Unlocks STORY-MAP-001 bootstrap migration (Slice 14) by giving the RFC frontmatt
 - ADR-060 line 270 + 296 (manage-rfc body section refresh contract).
 - RFC-003 (parent RFC).
 - Commit `cb7a90e`.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-001 | STORY-MAP-001: RFC framework Phase 1 + Phase 2 bootstrap | in-progress |

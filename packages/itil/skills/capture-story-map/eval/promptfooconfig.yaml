@@ -1,0 +1,132 @@
+# SKILL eval — capture-story-map row composition.
+#
+# A release row is a claim that its stories ship together, and the skill states
+# two tests for drawing one: do they NEED to (coupling), and SHOULD they (batch
+# economics). The second is the one that gets skipped — an agent with no
+# dependency between two stories will bundle them anyway, because they arrived
+# in the same conversation.
+#
+# Both directions are covered. Bundling two independent stories is the failure
+# this exists to catch; refusing to bundle two genuinely coupled ones is the
+# over-correction, and a check that only fires one way teaches the wrong lesson.
+#
+# Tier A positive assertions cover the outcome and a stable reason token. Tier B
+# grades the whole economic/coupling argument that regex cannot establish.
+#
+# Drivers:
+#   - ADR-075 (Amendment 2026-06-02 — SKILL-prose scope; promptfoo exec wrapping
+#     `claude -p --append-system-prompt`, subscription auth, no API key).
+#   - ADR-052 (behavioural tests default — a rule asserted only by grepping
+#     SKILL.md prose is the structural test this repo rejects).
+#   - ADR-103 (a release row is the RFC).
+
+description: capture-story-map — how a release row is composed
+
+providers:
+  # Path is relative to this config file's directory (promptfoo basePath).
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ../../capture-story/eval/grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: Does not reuse a deleted story-map ID
+    vars:
+      prompt: |
+        In the current repository, STORY-MAP-012 and STORY-MAP-013 have been
+        deleted from the working tree but still exist in Git history. Without
+        creating or editing any files, determine the next STORY-MAP ID that
+        capture-story-map must allocate. Give the ID and briefly name the
+        sources included in the maximum.
+    assert:
+      - type: icontains
+        value: STORY-MAP-014
+      - type: regex
+        value: 'working[- ]tree'
+      - type: icontains
+        value: origin
+      - type: icontains
+        value: history
+
+  - description: Splits two independent stories into separate rows, on the economics
+    vars:
+      prompt: |
+        I am drawing release rows on a story map. Two stories are ready:
+
+        - One fixes a gate that blocks an adopter and tells them to run a
+          command that only exists in our own repository. It is in the
+          risk-scorer package. Two adopters have reported it.
+        - One fixes a retired hook that a live session still invokes by its old
+          path, so upgrading does not deliver the fix and the adopter ends up
+          editing a plugin cache by hand. It is in the architect package.
+
+        Neither depends on the other. Releases here are automated on merge and
+        we have shipped three times in one day.
+
+        Should these two stories share one release row, or take a row each?
+        Give your answer and your reasoning.
+    assert:
+      - type: regex
+        value: '(one (release )?row each|separate (release )?rows)'
+      - type: regex
+        value: '(cost|automat|delay|independent packages|version independently)'
+      - type: llm-rubric
+        value: >-
+          The response gives the independent stories separate release rows and
+          makes an economic argument for the split, such as cheap automated
+          releases, avoided delay, different adopter costs, or independently
+          versioned packages. Merely saying they are not coupled is insufficient.
+
+  - description: Keeps genuinely coupled stories in one row, rather than splitting reflexively
+    vars:
+      prompt: |
+        I am drawing release rows on a story map. Two stories are ready:
+
+        - One changes the on-disk format of a data file that the tool reads.
+        - One updates the reader so it can parse the new format. Shipped
+          without the first, it reads a format nothing produces; shipped
+          without the second, every existing file becomes unreadable.
+
+        Releases here are automated on merge.
+
+        Should these two stories share one release row, or take a row each?
+        Give your answer and your reasoning.
+    assert:
+      - type: regex
+        value: '(share|same|one) (release )?row'
+      - type: regex
+        value: '(coupl|broken|meaningless|unreadable)'
+      - type: llm-rubric
+        value: >-
+          The response keeps the format change and its reader in one release row
+          because either is broken or harmful without the other. Cheap release
+          mechanics must not override this coupling.
+
+  - description: Ships a transaction-cost reducer first rather than batching it
+    vars:
+      prompt: |
+        I am drawing release rows on a story map. Two stories are ready:
+
+        - One improves the wording of a warning message.
+        - One fixes the reason upgrading is disruptive for adopters: today an
+          upgrade can leave a session bound to code the new version removed, so
+          every release costs adopters a restart and some risk.
+
+        Neither depends on the other.
+
+        Should these two stories share one release row, or take a row each?
+        If they take a row each, which should ship first, and why?
+    assert:
+      - type: regex
+        value: '(one (release )?row each|separate (release )?rows)'
+      - type: regex
+        value: '(upgrade|upgrading).{0,120}first|first.{0,120}(upgrade|upgrading)'
+      - type: llm-rubric
+        value: >-
+          The response gives the stories separate rows and ships the upgrade-cost
+          reducer first because doing so lowers the cost of later releases.

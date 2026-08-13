@@ -8,14 +8,11 @@ jtbd: [JTBD-008]
 rfcs: [RFC-005]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
-oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass)"
-human-oversight: confirmed
-oversight-hash: 9f87d90cf7281c1d8dc2c012d2c21a829f129348a8dd4352672cc3143e3dc74e
 ---
 
 # STORY-024: Reuse stories already on the map
 
-**Story map:** [← STORY-MAP-002: Decompose a Fix Into Coordinated Changes](../../story-maps/draft/STORY-MAP-002-decompose-a-fix-into-coordinated-changes.html) · A3 (Release 2)
+**Story map:** [← STORY-MAP-002: Take a Problem From Noticed to Resolved](../../story-maps/draft/STORY-MAP-002-take-a-problem-from-noticed-to-resolved.html) · A3 (Release 2)
 **Siblings (A3):** [start the map](020-start-the-jobs-story-map.md) · [add to map](021-add-the-fixs-stories-to-the-map.md) · [ratify](022-ratify-the-story-map-and-its-stories.md) · [create RFC](015-rfc-authoring-is-pre-implementation-story-map.md) · [slice](025-slice-the-fixs-stories-into-releases.md)
 
 ## User value (INVEST Valuable)
@@ -39,3 +36,10 @@ In order that the map keeps telling the truth — one story per capability, not 
 ## Related
 
 - **STORY-MAP-002** A3 "reuse" card (Release 2 — the harder cases). Implementation tracked in **P404**.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-002 | STORY-MAP-002: Take a problem from noticed to resolved | draft |

@@ -169,16 +169,15 @@ stops short of implementation.
 | ID | Title | Status |
 |----|-------|--------|
 | RFC-056 | RFC-056: Family-aware close gate — surface still-actionable composes-with siblings | proposed |
-
-## Story Maps
-
-| ID | Title | Status |
-|----|-------|--------|
-| STORY-MAP-009 | STORY-MAP-009: Trust that a close does not strand the sibling family | draft |
-
-
 ## Stories
 
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-052 | STORY-052: Surface still-outstanding family members before a close | draft |
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |

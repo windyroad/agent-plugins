@@ -4,7 +4,8 @@
 # story still in docs/stories/draft/ — implementation requires `accepted` (where
 # the INVEST + RFC-trace gates + ADR-090 ratification fire). Capture commits are
 # exempt (they CREATE the draft story). Bootstrap-exempt commits bypass
-# (ADR-060 A4). Fail-open on every abnormal path (ADR-013 Rule 6).
+# (ADR-060 A4). Degrades to a no-op on abnormal paths — characterised, not
+# authorised; see the header note below.
 #
 # This is the enforcement locus the architect named as the ONLY one that catches
 # the exact P404 bypass — a direct implementing commit against a draft story,
@@ -14,25 +15,27 @@
 # (P465): a commit against an `accepted`/`in-progress` story is blocked unless
 # that story is ratified. This half is UNCONDITIONAL — a pure tightening, no
 # config, no opt-in — because putting an ADR-090-mandated check behind a flag
-# would be the decision conflict. Where the marker was machine-written under the
-# ADR-101 pure-decomposition carve-out, the gate additionally re-asserts the
-# story-LOCAL structure of that carve-out. It never re-evaluates the carve-out's
-# shared-artefact conditions: those are accept-time only, because unrelated churn
-# on a shared story map must not block an unrelated story (that is P456's shape).
+# would be the decision conflict. Under ADR-103 the approval surface is the story
+# MAP: a story carries no oversight marker of its own, and is approved when every
+# map in its `story-maps:` field is ratified.
 #
 # Bypass: BYPASS_NO_IMPLEMENT_DRAFT=1.
 #
-# @adr ADR-096 (no-implement-while-draft) ADR-060 (lifecycle) ADR-013 (Rule 6)
+# @adr ADR-096 (no-implement-while-draft) ADR-060 (lifecycle)
 #      ADR-095 (sibling capture-time gates) ADR-052 (bats)
-#      ADR-090 (drift-invalidated ratification) ADR-101 (AFK carve-out)
+#      ADR-090 (drift-invalidated ratification) ADR-103 (map is the approval surface)
 # @problem P404 P465 P456
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=lib/command-detect.sh
 source "$SCRIPT_DIR/lib/command-detect.sh" 2>/dev/null || exit 0
-# Fail-open per ADR-013 Rule 6. A missing story-oversight lib degrades to the
-# draft-only gate; a missing command-detect lib (sourced above with the same
-# guard) exits before the draft check too, so that path degrades to no gate at
-# all. Both fail in the safe direction — never blocking every commit.
+# Degrades to a no-op on a missing lib. NOT authorised by any in-force decision:
+# ADR-013 (Structured user interaction for governance-skill decisions) Rule 6
+# governs a skill that cannot reach AskUserQuestion, and its Continue clause
+# reads "Do NOT silently fail-soft-skip". This posture is CHARACTERISED, not
+# endorsed — see "the gate degrades to a no-op when its predicate lib is
+# missing" in hooks/test/. Both source guards are terminal and both precede
+# every check, so a missing lib — either one — degrades to no gate at all.
+# Open question queued at P369.
 # shellcheck source=../lib/story-oversight.sh
 source "$SCRIPT_DIR/../lib/story-oversight.sh" 2>/dev/null || exit 0
 
@@ -92,22 +95,10 @@ while IFS= read -r id; do
   [ ${#livefiles[@]} -gt 0 ] || continue
   story="${livefiles[0]}"
 
-  if ! is_story_map_ratified "$story"; then
-    deny "BLOCKED (ADR-090 / ADR-096 / P465): this commit references ${id}, but ${id} is not ratified — it carries no confirmed human-oversight marker, or its content has drifted since it was ratified. ADR-096 requires ratification before any implementation. Ratify it via /wr-itil:manage-story ${id} ratify, then re-commit. Bypass: BYPASS_NO_IMPLEMENT_DRAFT=1."
-  fi
-
-  # ADR-101 belt-and-braces. The load-bearing catch for a post-accept edit is
-  # the hash above (both `afk-accept:` and `## Decomposition basis` sit inside
-  # it). This adds a specific, actionable deny reason instead of a generic drift
-  # deny, on a story-local structure no shared-artefact churn can invalidate.
-  if oversight_is_pure_decomposition "$story"; then
-    oversight_declares_pure_decomposition "$story" || deny \
-      "BLOCKED (ADR-101): ${id} carries a machine-written pure-decomposition marker but no longer declares \`afk-accept: pure-decomposition\`. Re-accept it, or ratify it as a human via /wr-itil:manage-story ${id} ratify."
-    crit=$(awk '/^##[[:space:]]+Acceptance criteria/{i=1;next} i&&/^##[[:space:]]/{exit} i' "$story" | grep -cE '^- \[[ xX]\]')
-    basis=$(awk '/^##[[:space:]]+Decomposition basis/{i=1;next} i&&/^##[[:space:]]/{exit} i' "$story" | grep -cE '^- ')
-    if [ "$crit" -eq 0 ] || [ "$basis" -ne "$crit" ]; then
-      deny "BLOCKED (ADR-101): ${id} was AFK-accepted as pure decomposition, but its \`## Decomposition basis\` (${basis} entries) no longer matches its acceptance criteria (${crit}). Every criterion must name the already-confirmed clause it decomposes. Re-run /wr-itil:manage-story ${id} accepted, or ratify it as a human."
-    fi
+  # ADR-103: a story's approval is its story MAP's. The story itself carries no
+  # oversight marker, so there is one question to ask and one place to fix it.
+  if ! story_is_approved "$story"; then
+    deny "BLOCKED (ADR-103 / ADR-096 / P465): this commit references ${id}, but ${id} is not approved. A story is approved by its story map: every map in its \`story-maps:\` field must be ratified, and ${id} either names no map or names one that is unratified or has drifted since it was ratified. Ratify the map via /wr-itil:manage-story-map <MAP-ID> ratify, then re-commit. Bypass: BYPASS_NO_IMPLEMENT_DRAFT=1."
   fi
 done <<< "$STORIES"
 

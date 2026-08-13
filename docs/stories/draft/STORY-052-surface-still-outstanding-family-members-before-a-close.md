@@ -8,7 +8,6 @@ jtbd: [JTBD-006, JTBD-001]
 rfcs: [RFC-056]
 story-maps: [STORY-MAP-009]
 estimated-effort: M
-human-oversight: unconfirmed
 ---
 
 # STORY-052: Surface still-outstanding family members before a close
@@ -77,3 +76,10 @@ One design question is unresolved and is queued for ratification: whether the ga
 advisory-plus-queue as scoped here, plain advisory, or halting. RFC-056 argues advisory-plus-queue
 and the architect concurs, but the maintainer has not ratified it. That ratification is the same
 event that moves this story to `accepted`, so it is not a separate blocker.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |

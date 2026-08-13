@@ -23,6 +23,7 @@
 setup() {
   SCRIPTS="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
   MIGRATE="$SCRIPTS/migrate-story-status-mirror.sh"
+  MARK="$(dirname "$MIGRATE")/mark-story-oversight-confirmed.sh"
   # shellcheck source=/dev/null
   source "$SCRIPTS/../lib/story-oversight.sh"
   TMPD="$(mktemp -d)"; cd "$TMPD"
@@ -60,25 +61,37 @@ seed_ratified() {
   grep -q 'value prose.' docs/stories/draft/STORY-901-x.md
 }
 
-@test "a currently-ratified story is still ratified after migration" {
+# P474's defect was that removing the mirror moved a story's own fingerprint.
+# ADR-103 removed the story fingerprint entirely, so the defect cannot recur —
+# what must hold now is that the migration leaves a story's APPROVAL alone,
+# which lives on its map and must survive a story edit untouched.
+@test "migration leaves a story's approval alone — it lives on the map" {
   seed_ratified docs/stories/draft/STORY-901-x.md draft draft
-  run is_story_map_ratified docs/stories/draft/STORY-901-x.md
+  mkdir -p docs/story-maps/draft
+  printf '<!DOCTYPE html>\n<body>\n<script id="story-map-data" type="application/json">\n{ "storyMapId": "STORY-MAP-940", "backbone": [] }\n</script>\n</body>\n</html>\n' \
+    > docs/story-maps/draft/STORY-MAP-940-f.html
+  bash "$MARK" docs/story-maps/draft/STORY-MAP-940-f.html >/dev/null 2>&1
+  printf -- '%s\n' "$(sed 's/^status: draft/status: draft\nstory-maps: [STORY-MAP-940]/' docs/stories/draft/STORY-901-x.md)" \
+    > docs/stories/draft/STORY-901-x.md
+
+  run story_is_approved docs/stories/draft/STORY-901-x.md docs/story-maps
   [ "$status" -eq 0 ]
   run bash "$MIGRATE" docs/stories
   [ "$status" -eq 0 ]
-  run is_story_map_ratified docs/stories/draft/STORY-901-x.md
+  run story_is_approved docs/stories/draft/STORY-901-x.md docs/story-maps
   [ "$status" -eq 0 ]
 }
 
-# The whole point: after migration, the accept transition must stop drifting.
-@test "after migration an accept transition does NOT drift the hash" {
+@test "an accept transition does not disturb approval either" {
   seed_ratified docs/stories/draft/STORY-901-x.md draft draft
   bash "$MIGRATE" docs/stories
   # Advance status the way manage-story does: frontmatter + a criterion tick.
   sed -i.bak 's/^status: draft/status: accepted/; s/- \[ \] a criterion/- [x] a criterion/' \
     docs/stories/draft/STORY-901-x.md && rm -f docs/stories/draft/STORY-901-x.md.bak
-  run is_story_map_ratified docs/stories/draft/STORY-901-x.md
-  [ "$status" -eq 0 ]
+  # No map named, so not approved — but the point is that nothing CRASHED and no
+  # story-level fingerprint was consulted to decide it.
+  run story_is_approved docs/stories/draft/STORY-901-x.md docs/story-maps
+  [ "$status" -eq 1 ]
 }
 
 @test "SKIPS and REPORTS a story whose body Status carries extra information" {
@@ -114,15 +127,15 @@ seed_ratified() {
   ! grep -q '^human-oversight: confirmed' docs/stories/draft/STORY-904-w.md
 }
 
-# ADR-101: the post-hoc drain finds AFK-accepted stories via oversight-basis.
-# Migration must not strip it, or those stories stop surfacing for review.
-@test "preserves oversight-basis so the ADR-101 post-hoc drain still finds it" {
+# The migration removes ONE line and nothing else. Frontmatter it does not
+# understand must survive untouched, or a migration becomes a silent rewrite.
+@test "leaves frontmatter it does not own untouched" {
   seed_ratified docs/stories/accepted/STORY-905-v.md accepted accepted
-  printf -- '%s\n' "$(sed 's/^human-oversight: confirmed/human-oversight: confirmed\noversight-basis: pure-decomposition/' docs/stories/accepted/STORY-905-v.md)" \
+  printf -- '%s\n' "$(sed 's/^status: accepted/status: accepted\nsome-other-field: keep-me/' docs/stories/accepted/STORY-905-v.md)" \
     > docs/stories/accepted/STORY-905-v.md
   run bash "$MIGRATE" docs/stories
   [ "$status" -eq 0 ]
-  grep -q '^oversight-basis: pure-decomposition' docs/stories/accepted/STORY-905-v.md
+  grep -q '^some-other-field: keep-me' docs/stories/accepted/STORY-905-v.md
 }
 
 @test "is idempotent — a second run changes nothing" {

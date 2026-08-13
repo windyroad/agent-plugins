@@ -42,7 +42,7 @@ Positional grammar mirrors `/wr-itil:capture-story` shape (footnote per ADR-060 
 | Problem-trace validation | Mechanical: each `P<NNN>` exists in `docs/problems/`; dual-tolerant lookup | silent-mechanical |
 | JTBD-trace presence | I4 hard-block — refuse on missing trace; emit deny log + halt | direction-setting |
 | JTBD-trace validation | Mechanical: each `JTBD-<NNN>` resolves to a file in `docs/jtbd/` | silent-mechanical |
-| STORY-MAP ID allocation | Mechanical: `max(local, origin) + 1` enumerating `docs/story-maps/*/STORY-MAP-*.html` (ADR-019 inline collision-guard) | silent-mechanical |
+| STORY-MAP ID allocation | Mechanical: `max(local, origin, history) + 1` enumerating `docs/story-maps/*/STORY-MAP-*.html` (ADR-019 inline collision-guard) | silent-mechanical |
 | Title kebab-slug | Mechanical: first 8-10 non-stopword tokens of description | silent-mechanical |
 | Title prose refinement | Optional taste AskUserQuestion; silent-default to derived form | taste |
 | HTML file write | Mechanical: schema per ADR-060 § Phase 2 encoding amendment 2026-05-12 lines 381-435 | silent-mechanical |
@@ -81,7 +81,7 @@ For each `P<NNN>`:
 trace_files=$(ls docs/problems/<NNN>-*.md docs/problems/*/<NNN>-*.md 2>/dev/null)
 ```
 
-**I3 hard-block** (per ADR-060 line 187): trace absent / malformed / unresolved → emit deny log entry to `logs/story-map-capture-denials.jsonl`, halt with stderr directive naming `/wr-itil:capture-problem` as the open-the-driving-problem-first surface.
+**I3 hard-block** (ADR-060, the story-map schema's `problems:` field): trace absent / malformed / unresolved → emit deny log entry to `logs/story-map-capture-denials.jsonl`, halt with stderr directive naming `/wr-itil:capture-problem` as the open-the-driving-problem-first surface.
 
 ### 2.5. Validate JTBD trace + I4 hard-block
 
@@ -91,82 +91,125 @@ For each `JTBD-<NNN>`:
 jtbd_file=$(ls docs/jtbd/*/JTBD-<NNN>-*.md 2>/dev/null | head -1)
 ```
 
-**I4 hard-block** (per ADR-060 line 188): trace absent / malformed / unresolved → emit deny log + halt. Story-maps without JTBD trace are structurally meaningless per ADR-060 ("a map with no JTBD trace is structurally meaningless"; Patton's central thesis is journey-around-user-value).
+**I4 hard-block** (ADR-060, the story-map schema's `jtbd:` field): trace absent / malformed / unresolved → emit deny log + halt. Story-maps without JTBD trace are structurally meaningless per ADR-060 ("a map with no JTBD trace is structurally meaningless"; Patton's central thesis is journey-around-user-value).
 
 ### 3. Compute next STORY-MAP ID
 
-Inline `max(local, origin) + 1` per ADR-019 collision-guard (architect Slice 3 design review option a — inline-only path, mirrors capture-rfc + capture-story precedent):
+Inline `max(local, origin, history) + 1` per ADR-019 collision-guard (architect Slice 3 design review option a — inline-only path, mirrors capture-rfc + capture-story precedent). Git history keeps deleted IDs retired without adding tombstone files:
 
 ```bash
 local_max=$(ls docs/story-maps/*/STORY-MAP-*.html 2>/dev/null | sed 's|.*/STORY-MAP-||;s|-.*||' | grep -oE '^[0-9]+' | sort -n | tail -1)
 origin_max=$(git ls-tree -r --name-only origin/main docs/story-maps/ 2>/dev/null | sed 's|.*/STORY-MAP-||;s|-.*||' | grep -oE '^[0-9]+' | sort -n | tail -1)
-next=$(printf '%03d' $(( 10#$(echo -e "${local_max:-0}\n${origin_max:-0}" | sort -n | tail -1) + 1 )))
+history_max=$(git log --all --name-only --format= -- docs/story-maps/ 2>/dev/null | sed 's|.*/STORY-MAP-||;s|-.*||' | grep -oE '^[0-9]+' | sort -n | tail -1)
+next=$(printf '%03d' $(( 10#$(printf '%s\n' "${local_max:-0}" "${origin_max:-0}" "${history_max:-0}" | sort -n | tail -1) + 1 )))
 ```
 
 ### 4. Optional taste prompt for title
 
 Same shape as capture-story Step 4 — silent-default when unavailable.
 
-### 5. Write the story-map file
+### 5. Write the story-map JSON, then render it
 
-**File path**: `docs/story-maps/draft/STORY-MAP-<NNN>-<kebab-title>.html`
+**NEVER hand-write the HTML, and NEVER open an existing map to copy its shape.** Both maps and template drifted together once already: every map in the corpus became a vertical stack of headings — no journey columns, no release rows, no cells — because each new map was cloned from the last. The renderer owns the shape so that cannot recur.
 
-**Template** (per ADR-060 § Phase 2 encoding amendment 2026-05-12 lines 381-420 + `docs/STYLE-GUIDE.md` rules):
+**A map is ONE file**: `docs/story-maps/draft/STORY-MAP-<NNN>-<kebab-title>.html`. Its data lives inside it, in a `<script id="story-map-data" type="application/json">` island. The renderer rewrites the presentation around that island. There is no separate source file to fall out of step with the rendered map, and the file a reader opens is the file an author edits.
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>STORY-MAP-<NNN>: <Title></title>
-  <meta name="story-map-id" content="STORY-MAP-<NNN>">
-  <meta name="status" content="draft">
-  <meta name="problems" content="<P<NNN>[,P<NNN>...]>">
-  <meta name="rfcs" content="">
-  <meta name="jtbd" content="<JTBD-<NNN>[,JTBD-<NNN>...]>">
-  <meta name="adrs" content="">
-  <meta name="reported" content="<YYYY-MM-DD>">
-  <meta name="decision-makers" content="<git config user.name>">
-  <meta name="human-oversight" content="unconfirmed">
-  <style>
-    body { font-family: system-ui, sans-serif; max-width: 1200px; margin: 1rem auto; padding: 0 1rem; }
-    h1 { font-size: 1.5rem; }
-    h2 { font-size: 1.125rem; margin-top: 1.5rem; }
-    .backbone { display: grid; grid-template-columns: repeat(var(--cols), 1fr); gap: 1rem; margin-bottom: 2rem; }
-    .rib-header { grid-column: 1 / -1; border-bottom: 1px solid #ccc; padding-bottom: 0.25rem; }
-    .rib { display: contents; }
-    .slice { border: 1px solid #ccc; padding: 0.5rem; text-decoration: none; color: inherit; display: block; }
-    .slice:hover { border-color: #666; }
-  </style>
-</head>
-<body>
-  <h1>STORY-MAP-<NNN>: <Title></h1>
+**There is one command and one mode.** To CREATE a map, write a file containing nothing but the data island, then render it — the renderer fills in everything around it:
 
-  <p>(Story-map purpose paragraph — populated at /wr-itil:manage-story-map accepted transition.)</p>
-
-  <section class="backbone" style="--cols: 1">
-    <header class="rib-header">
-      <h2 data-rib="placeholder">Backbone — populate at /wr-itil:manage-story-map accepted transition</h2>
-    </header>
-    <div class="rib">
-      <!-- Slice cards as <a class="slice" href="../../stories/<state>/STORY-NNN-<slug>.md"
-           data-story-id="STORY-NNN" data-rfc="RFC-NNN" data-jtbd="JTBD-NNN"
-           data-status="<draft|accepted|in-progress|done|archived>">Story title</a>
-           per docs/story-maps/README.md schema. Populated by manage-story-map.
-      -->
-    </div>
-  </section>
-</body>
-</html>
+```bash
+# Write docs/story-maps/draft/STORY-MAP-<NNN>-<kebab-title>.html containing only:
+#   <script id="story-map-data" type="application/json">
+#   { ...the map data... }
+#   </script>
+wr-itil-render-story-map docs/story-maps/draft/STORY-MAP-<NNN>-<kebab-title>.html
 ```
 
-Per `docs/STYLE-GUIDE.md`: NO inline `style=""` on `<a class="slice">` or `<h2 data-rib>` data-bearing elements; embedded `<style>` block in `<head>` is the only permitted styling source; `--cols` custom-property on `.backbone` is the layout-container exception.
+**To CHANGE a map**, edit the data island in that same file and run the same command again. Creation and editing are the same operation, so there is no seed file to clean up and no bootstrap mode. Re-rendering is idempotent. Never edit the grid, the `<style>` block, or the `<meta>` block by hand — they are regenerated from the island, and a hand-edit outside it is discarded on the next render.
 
-**Born `human-oversight: unconfirmed` (ADR-090).** A new map is created with `<meta name="human-oversight" content="unconfirmed">` — orthogonal to the `status:` lifecycle. It is NOT ratified until a human confirms it via `/wr-itil:manage-story-map <NNN> ratify` (which writes `confirmed` + an `oversight-hash` fingerprint via `wr-itil-mark-story-oversight-confirmed`). Until then `wr-itil-detect-unratified-stories-maps` surfaces it and an RFC may not reference its stories (`wr-itil-check-rfc-stories-ratified`). Any later content edit drifts the fingerprint and silently re-opens ratification (lazy-fingerprint, ADR-009 lineage). Do NOT hand-write `confirmed` here — born-unconfirmed is the load-bearing default.
+**What a story map is.** A grid, not a list. Backbone activities are COLUMNS across the top and form the user's journey left to right. Release slices are ROWS. Task cards sit in the cells. A row read left to right is everything that ships together — that is the whole point of the artefact, and it is what a vertical stack cannot express.
+
+**JSON shape:**
+
+Extracted verbatim by `test/documented-island-renders.bats` — editing which keys
+appear here changes what that test asserts, and that binding is deliberate.
+
+<!-- documented-island:begin -->
+```json
+{
+  "storyMapId": "STORY-MAP-<NNN>",
+  "title": "<Title>",
+  "status": "draft",
+  "persona": "<persona>",
+  "reported": "<YYYY-MM-DD>",
+  "decisionMakers": "<git config user.name>",
+  "traces": { "jtbd": ["JTBD-<NNN>"] },
+  "backbone": [
+    { "id": "<slug>", "title": "A. <Activity>", "note": "<optional JTBD or gloss>" }
+  ],
+  "releases": [
+    { "id": "rfc-<nnn>", "name": "<what this release delivers>", "rfc": "RFC-<NNN>", "note": "<optional>" }
+  ],
+  "tasks": [
+    {
+      "activity": "<backbone id>", "release": "<release id>",
+      "title": "<what the persona can do>",
+      "storyId": "STORY-<NNN>", "rfc": "RFC-<NNN>", "jtbd": "JTBD-<NNN>",
+      "ref": "STORY-<NNN>, P<NNN>"
+    }
+  ]
+}
+```
+<!-- documented-island:end -->
+
+**Authoring rules:**
+
+- **The backbone must be a journey, not a list of invariants.** Activities are steps the persona walks through in sequence. "Finish a change → get it assessed → push it → get through CI → release it" is a backbone. "Leave no unscored way out", "score this change not the last one" are invariants, and a column of them is not a map.
+- At capture a map may legitimately have **columns and rows but empty cells**. That is the honest state of unbuilt work, and the renderer says so in place — a wholly empty band carries its own sentence. Do not add prose at the top explaining it.
+- **Composing a row asks two questions, in order.** A row is a release, so putting two stories in one is a claim that they ship together. Answer both before drawing it.
+
+  **1. Do they NEED to ship together?** Coupling. Is either broken, meaningless or misleading on its own? A migration and the code that depends on it need one row. Two fixes that merely arrived in the same conversation do not. *Absence of a dependency is not a reason to bundle* — it is the reason not to.
+
+  **2. SHOULD they ship together?** Economics, and this is the question that gets skipped. Batching imposes the delay of the slowest story on everything in the batch. It buys something back only when each release costs a lot to perform — so weigh the holding cost against the per-release transaction cost:
+
+  - **Producer-side cost is usually near zero here**: release is automated on merge, and this repo has shipped three times in a day. When transaction cost approaches zero the optimal batch approaches one, and bundling is pure loss.
+  - **Adopter-side cost is not zero.** Every release asks an adopter to upgrade, and upgrading has known friction. That is the real argument for a larger batch.
+  - **Watch for the story that REDUCES that cost.** It ships first and alone. Queueing your transaction-cost reducer behind other work is the expensive mistake, because it makes every later release cheaper — attack the cost, then the batch size falls out.
+  - **Cost of delay is per persona, not per story.** A gate blocking most adopters today outweighs an intermittent failure that bites across an upgrade. Name who waits, and what waiting costs each of them, before deciding the row.
+  - **Check the package boundary.** Stories in packages that version independently cannot share a release the tooling will actually produce; a row spanning them claims something no changeset emits.
+
+  The default is one story per row. Two stories share a row when the answer to question 1 is yes, or when question 2 shows a transaction cost high enough to pay for the delay. Neither is assumed.
+
+- **A row IS an RFC (ADR-103).** A row a problem has proposed carries its `rfc`; drawing the row is what allocates the identity. There is no separate "not yet allocated" state and no `badge` field — a row's status is derived from its stories, and its label is its RFC id.
+- **Every row carries an identity, and finishing one earns no exemption (ADR-107).** A row with no `rfc` renders as a defect — a red "Untraced" badge — whether or not its stories are done. Delivery cannot excuse a missing identity, because every row is delivered eventually; that reading would let work nobody proposed become legitimate by being finished.
+
+  The only exception is a row holding work that shipped **before rows carried identities**, and such a row says so explicitly with `"preRfc": true`. That set is closed. Do not add the marker to a new row: it is a statement about history, not a way to skip allocating an RFC. It appears in no example above because a row that has an `rfc` does not need it, and the example shows the normal case.
+- **A map carries no `traces.rfcs` (ADR-107).** The map's RFC list is the union of its row identities, so authoring it restates the rows and drifts from them the moment one changes.
+- `storyId` / `rfc` / `jtbd` are optional per task and emit the `data-*` reference layer that reverse-trace and the story-map queries consume. Omit them until stories exist; add them as stories are captured onto the map.
+- **Author nothing a story file already says (ADR-104).** A story's lifecycle state, its value statement, and the problems it closes are all read from the story when the map renders — so a transition needs no map edit and does not re-open the map's ratification. There are no `storyStatus`, `value` or row-level `problems` fields, and no `--status` or `--value` flags. A row's problems are the union of its stories'; a map's are the union of its rows'.
+- **A map carries no decision trace (ADR-106).** There is no `traces.adrs`. A decision constrains how something is built, and the thing built is the story — so a decision reference belongs on the story (`adrs:` in its frontmatter), not on the lens drawn over it.
+- **Write no prose the grid already carries.** There is no `lead` and no `traceProse`. A map is a title, a grid, and the jobs it is drawn for. Where a column or a row needs a note, both carry a `note` field — put it next to the thing it describes, not in a paragraph at the top restating the picture below it. Six kinds of duplication were removed from this format for exactly this reason; the seventh will be whatever gets added back.
+- **Prefer the edit command over hand-editing the island** for structural changes — it validates against the map's own backbone and bands, names what is available when you get an id wrong, and leaves the file untouched on failure:
+
+```bash
+wr-itil-story-map-edit <map.html> add-card     --story STORY-<NNN> --activity <id> --release <id> --title "..." [--ref "..."]
+wr-itil-story-map-edit <map.html> move-card    --story STORY-<NNN> [--activity <id>] [--release <id>]
+wr-itil-story-map-edit <map.html> remove-card  --story STORY-<NNN>
+wr-itil-story-map-edit <map.html> add-band     --id <id> --name "..." [--rfc RFC-<NNN>] [--note "..."]
+wr-itil-story-map-edit <map.html> add-activity --id <id> --title "..." [--note "..."]
+```
+
+Hand-editing the island still works — the renderer reads whatever is there — but the command is the safer path and the one to reach for by default.
+- Every task needs `activity` and `release` matching an `id` in `backbone` / `releases`, or it renders nowhere.
+- Presentation is not yours to set. There is no CSS in the JSON and no inline `style` anywhere; the template is the only styling source.
+- Escape a literal `<` in any string as `\\u003c`. A raw `</script>` inside the island terminates the block early — in the renderer and in a browser — and the renderer will refuse the file rather than emit a truncated map.
+
+**Born unconfirmed (ADR-090).** Do NOT author `humanOversight` at all: the renderer treats an absent field as `unconfirmed`, so writing it is writing the default, and the field exists so that `wr-itil-mark-story-oversight-confirmed` can set `confirmed` — which an agent must never hand-write (P348). The `<meta name="human-oversight">` tag is a projection the renderer regenerates from the island; never author it directly (ADR-102). The map is NOT ratified until a human confirms it via `/wr-itil:manage-story-map <NNN> ratify`, which writes `confirmed` + an `oversight-hash` fingerprint through `wr-itil-mark-story-oversight-confirmed`. Until then `wr-itil-detect-unratified-stories-maps` surfaces it and an RFC may not reference its stories (`wr-itil-check-rfc-stories-ratified`).
+
+**What re-opens ratification, and what does not (ADR-103).** A later edit to the map's SUBSTANCE — the map's own substance as ADR-090 defines it — its journey, its identity, and what it traces to; `oversight_map_substance_keys()` is the field list — drifts the fingerprint and silently re-opens ratification. Release rows and the cards in them sit OUTSIDE the basis, so drawing a row or adding a story to one changes nothing. Presentation is outside it too: restyling the shared template cannot revoke an approval. Do NOT hand-write `confirmed` — born-unconfirmed is the load-bearing default.
 
 ### 6. Single commit — `## Story Maps` reverse-trace refresh
 
-**Stage list**: new HTML file PLUS driving problem files (refresh `## Story Maps` section via `update-problem-references-section.sh <file> "Story Maps"`) PLUS driving JTBD files (refresh `## Story Maps` section via `update-jtbd-references-section.sh <file> "Story Maps"`). Do NOT stage `docs/story-maps/README.md` (deferred).
+**Stage list**: the map `.html` (it carries its own data island) AND, on a repository's first map, the shared `docs/story-maps/story-map.css` the renderer places beside them, PLUS driving problem files (refresh `## Story Maps` section via `update-problem-references-section.sh <file> "Story Maps"`) PLUS driving JTBD files (refresh `## Story Maps` section via `update-jtbd-references-section.sh <file> "Story Maps"`). Do NOT stage `docs/story-maps/README.md` (deferred).
 
 ```bash
 for pid_token in $(echo "$problem_trace" | tr ',' ' '); do

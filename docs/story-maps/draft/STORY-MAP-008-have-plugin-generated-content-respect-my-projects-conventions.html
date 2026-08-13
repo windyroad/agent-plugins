@@ -3,65 +3,317 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>STORY-MAP-008: Have plugin-generated content respect my project's conventions</title>
+  <title>STORY-MAP-008: Have a plugin behave like a guest in my repository</title>
   <meta name="story-map-id" content="STORY-MAP-008">
   <meta name="status" content="draft">
-  <meta name="problems" content="P424">
-  <meta name="rfcs" content="RFC-054">
-  <meta name="jtbd" content="JTBD-303,JTBD-101">
-  <meta name="adrs" content="">
+  <meta name="persona" content="plugin-user">
+  <meta name="secondary-persona" content="plugin-developer">
+  <meta name="problems" content="P152,P160,P369,P424,P435,P443">
+  <meta name="rfcs" content="RFC-046,RFC-054,RFC-064,RFC-062,RFC-063">
+  <meta name="jtbd" content="JTBD-303,JTBD-003,JTBD-302,JTBD-101">
   <meta name="reported" content="2026-07-26">
   <meta name="decision-makers" content="Tom Howard">
-  <meta name="human-oversight" content="unconfirmed">
-  <style>
-    :root { color-scheme: light; }
-    body { font-family: system-ui, sans-serif; max-width: 1200px; margin: 1rem auto; padding: 0 1rem; }
-    h1 { font-size: 1.5rem; }
-    h2 { font-size: 1.125rem; margin-top: 1.5rem; }
-    .backbone { display: grid; grid-template-columns: repeat(var(--cols), 1fr); gap: 1rem; margin-bottom: 2rem; }
-    .rib-header { grid-column: 1 / -1; border-bottom: 1px solid #767676; padding-bottom: 0.25rem; }
-    /* .rib is intentionally a bare <div>: no role, no name, no tabindex, so it computes to
-       `generic` and is pruned from the a11y tree whatever its display value — display:contents
-       costs nothing here. Swap to a real grid item if it ever becomes a <ul>, gains a
-       role/aria-*, gains tabindex, needs its own border/background/padding, or needs to
-       scroll. All three declarations are required — subgrid alone is inert on a
-       display:contents box, and a grid item spans one column by default:
-         .rib { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; }
-       Focus order matches visual order only because placement is left to default row-major
-       auto-flow: keep one .rib per .backbone, and never set grid-auto-flow: column, dense,
-       order, grid-row or grid-column on a .slice. Sibling .backbone sections are the way to add
-       a rib — each is its own grid container, so the rule holds once per section and slices
-       cannot flow between them. Do NOT read "one .rib per .backbone" as "one .backbone": a
-       second rib crammed into this section is the exact failure the rule prevents. Order
-       BETWEEN sections then rests on <main> staying a block container in normal flow — never
-       make <main> a grid or flex container, and never set order, float, or position:
-       absolute/fixed on a .backbone. --cols is the number of slices laid out per row within one
-       rib, not the rib count. */
-    .rib { display: contents; }
-    .slice { border: 1px solid #767676; padding: 0.5rem; text-decoration: none; color: inherit; display: block; }
-    .slice:hover,
-    .slice:focus-visible { border-color: #0b3a66; text-decoration: underline; }
-    .slice:focus-visible { outline: 3px solid #0b3a66; outline-offset: 2px; }
-  </style>
+  <meta name="human-oversight" content="confirmed">
+  <meta name="oversight-hash" content="90ab0ec363699013c1b8b766f39ff84a9ca97415ffb63aa08d09f9670c45ebe7">
+  <link rel="stylesheet" href="../story-map.css">
 </head>
 <body>
   <main>
-    <h1>STORY-MAP-008: Have plugin-generated content respect my project's conventions</h1>
-
-    <p>A plugin is a guest in the repository that installs it. When one of these plugins writes content into that repository — an ADR skeleton, a regenerated decisions compendium, a rendered verification-queue cell, an audit-log entry — the adopter is left holding whatever characters the generating template happened to use. Five inbound reports have now hit the same wall. In each, the adopter's own project hard-blocks the em-dash, the adopter's own Edit and Write hooks fire correctly on it, and the text tripping those hooks arrives from a cached plugin they cannot edit. Scrubbing it by hand is a treadmill, because the next regeneration puts it back. This map covers making generated output portable by default, so a stricter project than ours can install the suite without inheriting a block it has no way to clear. Its first rib carries the four emitting surfaces the reports actually raised. The slice below links to a Markdown story file. (Traces: P424, inbound #185, #186, #219, #223, #319; JTBD-303, JTBD-101.)</p>
-
-    <section class="backbone" style="--cols: 1">
-      <header class="rib-header">
-        <h2 data-rib="portable-generated-output">Portable generated output</h2>
-      </header>
-      <div class="rib">
-        <a class="slice" href="../../stories/draft/STORY-051-have-generated-content-respect-my-projects-conventions.md"
-           data-story-id="STORY-051" data-rfc="RFC-054" data-jtbd="JTBD-303"
-           data-status="draft">Have generated content respect my project's conventions</a>
-      </div>
-    </section>
-
-    <p class="map-note">One rib so far. A fifth emitting surface is already recorded in P424, without a ticket of its own — the RFC skeleton placeholder, where the same character is pinned on both sides as a parse key, so emitter and reader have to move together: the coupling is fail-open, and if only one moves the checker silently stops matching and no test catches it. That is a second rib, "Coupled emitter and reader", once it has a story to hang on it. Building the rib empty today would be scaffolding for work not yet scoped, so it is named here instead. When that rib arrives, the editor who adds it puts it in a sibling section, not as a second rib inside this one.</p>
+    <h1 id="story-map-title">Have a plugin behave like a guest in my repository</h1>
+    <p class="orient"><strong>Agreed.</strong> 5 releases, 5 stories, one release per row.</p>
+    <div id="story-map"><div class="scroll" tabindex="0" role="region" aria-label="Story map grid"><table class="map"><caption>Have a plugin behave like a guest in my repository — 5 journey activities across 5 releases</caption><thead><tr><td class="corner"></td><th class="act" scope="col">A. Choose what to install <span class="jtbd">JTBD-003 — compose only the guardrails I need</span></th><th class="act" scope="col">B. Read what it claims <span class="jtbd">JTBD-302 — trust the README describes what I installed</span></th><th class="act" scope="col">C. Let it write into my tree <span class="jtbd">JTBD-303 — generated content respects my conventions</span></th><th class="act" scope="col">D. Hit one of its rules</th><th class="act" scope="col">E. Get a fix on upgrade</th></tr></thead><tbody><tr><th class="slice" scope="row"><span class="badge b-live"><span class="b-glyph" aria-hidden="true">✓</span>RFC-046</span> <span class="s-name">Pacing is its own plugin, not welded to a guardrail</span><span class="s-problems">closes <a href="../../problems/known-error/160-ship-quota-pacing-surface-to-prevent-weekly-quota-exhaustion.md" class="ref-link">P160</a>, <a href="../../problems/open/443-quota-pacing-lineage-broken-missing-jtbd-persona-usm-orphaned-story-map-rfc.md" class="ref-link">P443</a></span></th><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-042" data-status="done"><div class="t-status ts-done"><span class="ts-glyph" aria-hidden="true">✓</span>Done</div><a href="../../stories/done/STORY-042-extract-quota-pacing-plugin.md" class="ref-link"><span class="t-title">I install the one guardrail I want without dragging in the rest of the suite</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>install token pacing on its own — without pulling in a governance plugin I don't want — and to have it maintained as one thing rather than seven byte-identical synced copies</div><div class="v-line v-asa"><span class="v-lead">as </span>a developer who wants quota pacing</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the throttle extracted into a dedicated `@windyroad/cruise` plugin, so it is an opt-in capability with a single home (per ADR-093's 2026-07-08 amendment).</div></div><div class="t-ref">Traces: <a href="../../stories/done/STORY-042-extract-quota-pacing-plugin.md" class="ref-link">STORY-042</a>, <a href="../../problems/known-error/160-ship-quota-pacing-surface-to-prevent-weekly-quota-exhaustion.md" class="ref-link">P160</a>, <a href="../../problems/open/443-quota-pacing-lineage-broken-missing-jtbd-persona-usm-orphaned-story-map-rfc.md" class="ref-link">P443</a></div></div></li></ul></td><td class="cell empty"><span class="vh">No stories for B. Read what it claims in Pacing is its own plugin, not welded to a guardrail.</span></td><td class="cell empty"><span class="vh">No stories for C. Let it write into my tree in Pacing is its own plugin, not welded to a guardrail.</span></td><td class="cell empty"><span class="vh">No stories for D. Hit one of its rules in Pacing is its own plugin, not welded to a guardrail.</span></td><td class="cell empty"><span class="vh">No stories for E. Get a fix on upgrade in Pacing is its own plugin, not welded to a guardrail.</span></td></tr><tr><th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>RFC-054</span> <span class="s-name">Generated content is portable by default</span><span class="s-problems">closes <a href="../../problems/known-error/424-governance-tooling-emits-em-dashes-breaking-adopter-no-em-dash-hooks.md" class="ref-link">P424</a></span></th><td class="cell empty"><span class="vh">No stories for A. Choose what to install in Generated content is portable by default.</span></td><td class="cell empty"><span class="vh">No stories for B. Read what it claims in Generated content is portable by default.</span></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-051" data-rfc="RFC-054" data-jtbd="JTBD-303" data-status="draft"><div class="t-status ts-draft">Draft</div><a href="../../stories/draft/STORY-051-have-generated-content-respect-my-projects-conventions.md" class="ref-link"><span class="t-title">Generated content defaults to the most portable form, so my own policy hooks do not fire on text I did not write</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>keep the content policy my project enforces — so that my own hooks stop firing on text I did not write and cannot reach</div><div class="v-line v-asa"><span class="v-lead">as </span>an adopter of the plugin suite</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the content these plugins generate into my repository to arrive in the most portable form available, and to keep arriving that way on every regeneration.</div></div><div class="t-ref">Traces: <a href="../../stories/draft/STORY-051-have-generated-content-respect-my-projects-conventions.md" class="ref-link">STORY-051</a>, <a href="../../problems/known-error/424-governance-tooling-emits-em-dashes-breaking-adopter-no-em-dash-hooks.md" class="ref-link">P424</a></div></div></li></ul></td><td class="cell empty"><span class="vh">No stories for D. Hit one of its rules in Generated content is portable by default.</span></td><td class="cell empty"><span class="vh">No stories for E. Get a fix on upgrade in Generated content is portable by default.</span></td></tr><tr><th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>RFC-064</span> <span class="s-name">A README describes the version it ships with</span><span class="s-problems">closes <a href="../../problems/verifying/152-no-pressure-or-nudge-for-documentation-currency.md" class="ref-link">P152</a></span></th><td class="cell empty"><span class="vh">No stories for A. Choose what to install in A README describes the version it ships with.</span></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-058" data-status="draft"><div class="t-status ts-draft">Draft</div><a href="../../stories/draft/STORY-058-read-a-readme-that-describes-the-version-i-installed.md" class="ref-link"><span class="t-title">Read a README that describes the version I just installed</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>act on a plugin's README without checking it against the source first</div><div class="v-line v-asa"><span class="v-lead">as </span>a developer who has just installed one and wants to know what it does</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the prose to describe the version I actually have — so the skills it names can be invoked, the hooks it describes are the ones that will fire, and reading it is enough.</div></div><div class="t-ref">Traces: <a href="../../stories/draft/STORY-058-read-a-readme-that-describes-the-version-i-installed.md" class="ref-link">STORY-058</a>, <a href="../../problems/verifying/152-no-pressure-or-nudge-for-documentation-currency.md" class="ref-link">P152</a></div></div></li></ul></td><td class="cell empty"><span class="vh">No stories for C. Let it write into my tree in A README describes the version it ships with.</span></td><td class="cell empty"><span class="vh">No stories for D. Hit one of its rules in A README describes the version it ships with.</span></td><td class="cell empty"><span class="vh">No stories for E. Get a fix on upgrade in A README describes the version it ships with.</span></td></tr><tr><th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>RFC-062</span> <span class="s-name">A block names a remedy this repository can run</span><span class="s-problems">closes <a href="../../problems/open/435-risk-scorer-gates-hardcoded-to-home-repo-shape-push-gate-overfire-external-comms-underfire.md" class="ref-link">P435</a></span></th><td class="cell empty"><span class="vh">No stories for A. Choose what to install in A block names a remedy this repository can run.</span></td><td class="cell empty"><span class="vh">No stories for B. Read what it claims in A block names a remedy this repository can run.</span></td><td class="cell empty"><span class="vh">No stories for C. Let it write into my tree in A block names a remedy this repository can run.</span></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-056" data-jtbd="JTBD-003" data-status="draft"><div class="t-status ts-draft">Draft</div><a href="../../stories/draft/STORY-056-clear-a-block-with-a-command-my-repository-has.md" class="ref-link"><span class="t-title">Clear any block the plugin raises with a command my repository actually has</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>get past a guardrail without reverse-engineering what the plugin assumed about my project</div><div class="v-line v-asa"><span class="v-lead">as </span>a developer whose repository is not shaped like the plugin author's</div><div class="v-line v-iwant"><span class="v-lead">I want </span>every block to name a remedy that exists here — so the way out is something I can run rather than something I have to translate.</div></div><div class="t-ref">Traces: <a href="../../problems/open/435-risk-scorer-gates-hardcoded-to-home-repo-shape-push-gate-overfire-external-comms-underfire.md" class="ref-link">P435</a> (inbound #235)</div></div></li></ul></td><td class="cell empty"><span class="vh">No stories for E. Get a fix on upgrade in A block names a remedy this repository can run.</span></td></tr><tr><th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>RFC-063</span> <span class="s-name">An upgrade delivers the fix, without touching a cache</span><span class="s-problems">closes <a href="../../problems/open/369-plugin-removes-hook-but-adopter-session-still-invokes-via-stale-binding.md" class="ref-link">P369</a></span></th><td class="cell empty"><span class="vh">No stories for A. Choose what to install in An upgrade delivers the fix, without touching a cache.</span></td><td class="cell empty"><span class="vh">No stories for B. Read what it claims in An upgrade delivers the fix, without touching a cache.</span></td><td class="cell empty"><span class="vh">No stories for C. Let it write into my tree in An upgrade delivers the fix, without touching a cache.</span></td><td class="cell empty"><span class="vh">No stories for D. Hit one of its rules in An upgrade delivers the fix, without touching a cache.</span></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-057" data-status="draft"><div class="t-status ts-draft">Draft</div><a href="../../stories/draft/STORY-057-get-the-fix-by-upgrading-not-by-patching-a-cache.md" class="ref-link"><span class="t-title">Get the fix by upgrading, without patching a cached plugin myself</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>trust that upgrading is how I get a fix</div><div class="v-line v-asa"><span class="v-lead">as </span>a developer running a plugin that has just shipped one</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the upgrade to actually take effect in my session — so I am not editing files inside a plugin cache to work around something already fixed upstream.</div></div><div class="t-ref">Traces: <a href="../../jtbd/plugin-user/JTBD-303-generated-output-respects-adopter-conventions.proposed.md" class="ref-link">JTBD-303</a>, no story yet</div></div></li></ul></td></tr></tbody></table></div></div>
+<p class="traces" id="story-map-traces"><span class="tr-group"><strong>Jobs:</strong> <a href="../../jtbd/plugin-user/JTBD-303-generated-output-respects-adopter-conventions.proposed.md" class="ref-link">JTBD-303</a>, <a href="../../jtbd/developer/JTBD-003-compose-guardrails.proposed.md" class="ref-link">JTBD-003</a>, <a href="../../jtbd/plugin-user/JTBD-302-trust-readme-describes-installed-behaviour.proposed.md" class="ref-link">JTBD-302</a>, <a href="../../jtbd/plugin-developer/JTBD-101-extend-suite.proposed.md" class="ref-link">JTBD-101</a></span></p>
   </main>
+
+
+  <script id="story-map-data" type="application/json">
+{
+  "humanOversight": "confirmed",
+  "oversightHash": "90ab0ec363699013c1b8b766f39ff84a9ca97415ffb63aa08d09f9670c45ebe7",
+  "storyMapId": "STORY-MAP-008",
+  "title": "Have a plugin behave like a guest in my repository",
+  "status": "draft",
+  "persona": "plugin-user",
+  "secondaryPersona": "plugin-developer",
+  "reported": "2026-07-26",
+  "decisionMakers": "Tom Howard",
+  "traces": {
+    "jtbd": [
+      "JTBD-303",
+      "JTBD-003",
+      "JTBD-302",
+      "JTBD-101"
+    ]
+  },
+  "backbone": [
+    {
+      "id": "choose",
+      "title": "A. Choose what to install",
+      "note": "JTBD-003 — compose only the guardrails I need"
+    },
+    {
+      "id": "trust",
+      "title": "B. Read what it claims",
+      "note": "JTBD-302 — trust the README describes what I installed"
+    },
+    {
+      "id": "generate",
+      "title": "C. Let it write into my tree",
+      "note": "JTBD-303 — generated content respects my conventions"
+    },
+    {
+      "id": "collide",
+      "title": "D. Hit one of its rules",
+      "note": ""
+    },
+    {
+      "id": "fixed",
+      "title": "E. Get a fix on upgrade",
+      "note": ""
+    }
+  ],
+  "releases": [
+    {
+      "id": "rfc-046",
+      "name": "Pacing is its own plugin, not welded to a guardrail",
+      "rfc": "RFC-046"
+    },
+    {
+      "id": "rfc-054",
+      "name": "Generated content is portable by default",
+      "rfc": "RFC-054"
+    },
+    {
+      "id": "rfc-064",
+      "name": "A README describes the version it ships with",
+      "rfc": "RFC-064"
+    },
+    {
+      "id": "rfc-062",
+      "name": "A block names a remedy this repository can run",
+      "rfc": "RFC-062"
+    },
+    {
+      "id": "rfc-063",
+      "name": "An upgrade delivers the fix, without touching a cache",
+      "rfc": "RFC-063"
+    }
+  ],
+  "tasks": [
+    {
+      "activity": "generate",
+      "release": "rfc-054",
+      "title": "Generated content defaults to the most portable form, so my own policy hooks do not fire on text I did not write",
+      "storyId": "STORY-051",
+      "rfc": "RFC-054",
+      "jtbd": "JTBD-303",
+      "ref": "STORY-051, P424"
+    },
+    {
+      "activity": "collide",
+      "release": "rfc-062",
+      "title": "Clear any block the plugin raises with a command my repository actually has",
+      "jtbd": "JTBD-003",
+      "ref": "P435 (inbound #235)",
+      "storyId": "STORY-056"
+    },
+    {
+      "activity": "choose",
+      "release": "rfc-046",
+      "title": "I install the one guardrail I want without dragging in the rest of the suite",
+      "ref": "STORY-042, P160, P443",
+      "storyId": "STORY-042"
+    },
+    {
+      "activity": "trust",
+      "release": "rfc-064",
+      "title": "Read a README that describes the version I just installed",
+      "ref": "STORY-058, P152",
+      "storyId": "STORY-058"
+    },
+    {
+      "activity": "fixed",
+      "release": "rfc-063",
+      "title": "Get the fix by upgrading, without patching a cached plugin myself",
+      "ref": "JTBD-303, no story yet",
+      "storyId": "STORY-057"
+    }
+  ]
+}
+  </script>
+  <script id="story-map-status" type="application/json">
+{
+  "rows": {
+    "rfc-046": "delivered",
+    "rfc-054": "proposed",
+    "rfc-064": "proposed",
+    "rfc-062": "proposed",
+    "rfc-063": "proposed"
+  },
+  "rowProblems": {
+    "rfc-046": [
+      "P160",
+      "P443"
+    ],
+    "rfc-054": [
+      "P424"
+    ],
+    "rfc-064": [
+      "P152"
+    ],
+    "rfc-062": [
+      "P435"
+    ],
+    "rfc-063": [
+      "P369"
+    ]
+  },
+  "mapProblems": [
+    "P152",
+    "P160",
+    "P369",
+    "P424",
+    "P435",
+    "P443"
+  ],
+  "status": {
+    "STORY-051": "draft",
+    "STORY-056": "draft",
+    "STORY-042": "done",
+    "STORY-058": "draft",
+    "STORY-057": "draft"
+  },
+  "values": {
+    "STORY-051": {
+      "leads": [
+        "In order to",
+        "as",
+        "I want"
+      ],
+      "value": [
+        {
+          "t": "keep the content policy my project enforces — so that my own hooks stop firing on text I did not write and cannot reach"
+        }
+      ],
+      "who": [
+        {
+          "t": "an adopter of the plugin suite"
+        }
+      ],
+      "want": [
+        {
+          "t": "the content these plugins generate into my repository to arrive in the most portable form available, and to keep arriving that way on every regeneration."
+        }
+      ]
+    },
+    "STORY-056": {
+      "leads": [
+        "In order to",
+        "as",
+        "I want"
+      ],
+      "value": [
+        {
+          "t": "get past a guardrail without reverse-engineering what the plugin assumed about my project"
+        }
+      ],
+      "who": [
+        {
+          "t": "a developer whose repository is not shaped like the plugin author's"
+        }
+      ],
+      "want": [
+        {
+          "t": "every block to name a remedy that exists here — so the way out is something I can run rather than something I have to translate."
+        }
+      ]
+    },
+    "STORY-042": {
+      "leads": [
+        "In order to",
+        "as",
+        "I want"
+      ],
+      "value": [
+        {
+          "t": "install token pacing on its own — without pulling in a governance plugin I don't want — and to have it maintained as one thing rather than seven byte-identical synced copies"
+        }
+      ],
+      "who": [
+        {
+          "t": "a developer who wants quota pacing"
+        }
+      ],
+      "want": [
+        {
+          "t": "the throttle extracted into a dedicated `@windyroad/cruise` plugin, so it is an opt-in capability with a single home (per ADR-093's 2026-07-08 amendment)."
+        }
+      ]
+    },
+    "STORY-058": {
+      "leads": [
+        "In order to",
+        "as",
+        "I want"
+      ],
+      "value": [
+        {
+          "t": "act on a plugin's README without checking it against the source first"
+        }
+      ],
+      "who": [
+        {
+          "t": "a developer who has just installed one and wants to know what it does"
+        }
+      ],
+      "want": [
+        {
+          "t": "the prose to describe the version I actually have — so the skills it names can be invoked, the hooks it describes are the ones that will fire, and reading it is enough."
+        }
+      ]
+    },
+    "STORY-057": {
+      "leads": [
+        "In order to",
+        "as",
+        "I want"
+      ],
+      "value": [
+        {
+          "t": "trust that upgrading is how I get a fix"
+        }
+      ],
+      "who": [
+        {
+          "t": "a developer running a plugin that has just shipped one"
+        }
+      ],
+      "want": [
+        {
+          "t": "the upgrade to actually take effect in my session — so I am not editing files inside a plugin cache to work around something already fixed upstream."
+        }
+      ]
+    }
+  },
+  "hrefs": {
+    "STORY-051": "../../stories/draft/STORY-051-have-generated-content-respect-my-projects-conventions.md",
+    "STORY-056": "../../stories/draft/STORY-056-clear-a-block-with-a-command-my-repository-has.md",
+    "STORY-042": "../../stories/done/STORY-042-extract-quota-pacing-plugin.md",
+    "STORY-058": "../../stories/draft/STORY-058-read-a-readme-that-describes-the-version-i-installed.md",
+    "STORY-057": "../../stories/draft/STORY-057-get-the-fix-by-upgrading-not-by-patching-a-cache.md",
+    "JTBD-303": "../../jtbd/plugin-user/JTBD-303-generated-output-respects-adopter-conventions.proposed.md",
+    "P424": "../../problems/known-error/424-governance-tooling-emits-em-dashes-breaking-adopter-no-em-dash-hooks.md",
+    "JTBD-003": "../../jtbd/developer/JTBD-003-compose-guardrails.proposed.md",
+    "P435": "../../problems/open/435-risk-scorer-gates-hardcoded-to-home-repo-shape-push-gate-overfire-external-comms-underfire.md",
+    "P160": "../../problems/known-error/160-ship-quota-pacing-surface-to-prevent-weekly-quota-exhaustion.md",
+    "P443": "../../problems/open/443-quota-pacing-lineage-broken-missing-jtbd-persona-usm-orphaned-story-map-rfc.md",
+    "P152": "../../problems/verifying/152-no-pressure-or-nudge-for-documentation-currency.md",
+    "JTBD-302": "../../jtbd/plugin-user/JTBD-302-trust-readme-describes-installed-behaviour.proposed.md",
+    "JTBD-101": "../../jtbd/plugin-developer/JTBD-101-extend-suite.proposed.md",
+    "P369": "../../problems/open/369-plugin-removes-hook-but-adopter-session-still-invokes-via-stale-binding.md"
+  }
+}
+  </script>
+
 </body>
 </html>

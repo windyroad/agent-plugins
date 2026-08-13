@@ -17,7 +17,7 @@ stories: []
 **Problems**: P439 (the assistant relays a repo artefact to an outside reviewer while assuming the copy that reviewer can see is the copy it just read)
 **ADRs**: ADR-002 (one plugin per governance concern — under it, which plugin ships a rule decides who ever receives it), ADR-026 (agent output grounding — this rule's whole content is "establish the fact instead of assuming it"), ADR-038 (progressive disclosure + the ≤150-byte terse governance-injection budget, a live constraint on one candidate mechanism), ADR-045 (hook injection budget), ADR-052 (behavioural tests default), ADR-060 (Problem-RFC-Story framework — I1 problem trace, and the scope-boundary rationale that rules out an umbrella RFC), ADR-070 (RFCs hold no independent decisions), ADR-071 (every fix goes through an RFC), ADR-073 (RFC-first — an approach-choice not covered by the existing corpus needs a ratified ADR before implementation), ADR-089 (every RFC has at least one story), ADR-090 (an RFC may not reference an unratified story), ADR-095 (story-map membership and story-content completeness enforced at capture)
 **JTBD**: JTBD-011 (have a correction to the agent's conduct hold everywhere), JTBD-101 (extend the suite — secondary, the shipping half)
-**Story maps**: STORY-MAP-007 (A correction to the agent's conduct holds in every project), rib "Current handovers"
+**Story maps**: STORY-MAP-011 (Trust the AFK loop's autonomous conduct), rib "Current handovers"
 
 ## Summary
 
@@ -84,7 +84,7 @@ scopes in one RFC. RFC-052's own Out-of-scope section excludes P445's rule on gr
 identically here ("a different rule with its own content"), and warns that settling packaging
 inside a single-rule RFC would decide it by accident; ADR-060 rejected its Option E for exactly
 the lost scope-boundary. So P439 is the I13 gate's branch (b), no-vehicle. What the two RFCs
-*do* share is the map (STORY-MAP-007), the grounding job (JTBD-011), and the mechanism ADR both
+*do* share is the map (STORY-MAP-011), the grounding job (JTBD-011), and the mechanism ADR both
 are blocked on. Widening RFC-052 into a "portable agent-conduct rules" umbrella was considered
 and rejected on those grounds; so was minting an RFC for the shared mechanism blocker, which is
 structurally illegal — ADR-060's I1 requires every RFC to trace a problem and no packaging
@@ -117,7 +117,7 @@ freshness ceremony.
 
 The machine-read `stories:` array is deliberately empty; the human-readable trace is here.
 
-- **STORY-050** — Have my reviewer read the version I actually have. On **STORY-MAP-007**, rib
+- **STORY-050** — Have my reviewer read the version I actually have. On **STORY-MAP-011**, rib
   "Current handovers". Status `draft`, `human-oversight: unconfirmed`, estimated effort M.
 
 **Empty `stories:` is transient, not the atomic shape.** P439 carries a full Fix Strategy, so
@@ -159,7 +159,7 @@ disavowed.
 
 ## Related
 
-- **P439** (driving problem, inbound #326), **STORY-MAP-007** (the map), **STORY-050** (the
+- **P439** (driving problem, inbound #326), **STORY-MAP-011** (the map), **STORY-050** (the
   story), **JTBD-011** (the grounding job).
 - **RFC-052** — the sibling rule under the same job and map, blocked on the same mechanism ADR.
 - **P423** — the master class: a correction that should govern the plugins or their adopters

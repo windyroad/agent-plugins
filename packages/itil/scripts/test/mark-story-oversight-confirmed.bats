@@ -1,10 +1,12 @@
 #!/usr/bin/env bats
 # Behavioural test for mark-story-oversight-confirmed.sh (ADR-090 ratify write-path).
-# Writes `confirmed` + the content fingerprint into a story (md frontmatter) or a
-# story-map (HTML meta). After marking, is_story_map_ratified is true; a later
-# content edit drifts it back to not-ratified.
+# Writes `confirmed` + the content fingerprint into a story MAP. After marking,
+# is_story_map_ratified is true; a later substance edit drifts it back.
 #
-# @adr ADR-090
+# ADR-103: a STORY is never marked — its approval is its map's — so the script
+# refuses one rather than writing a second approval surface.
+#
+# @adr ADR-090  @adr ADR-103
 # @problem P404 (Phase 2)
 
 setup() {
@@ -16,33 +18,23 @@ setup() {
 }
 teardown() { rm -rf "$TMPD"; }
 
-@test "mark: md story with no marker → ratified after mark" {
+@test "mark: refuses a story — approval is the map's, not the story's (ADR-103)" {
   printf -- '---\nstatus: accepted\n---\n# body\n' > "$TMPD/s.md"
-  run bash "$SCRIPT" "$TMPD/s.md"; [ "$status" -eq 0 ]
-  run is_story_map_ratified "$TMPD/s.md"; [ "$status" -eq 0 ]
+  run bash "$SCRIPT" "$TMPD/s.md"
+  [ "$status" -eq 2 ]
+  # The refusal must name the remedy, or the caller has nowhere to go.
+  echo "$output" | grep -q 'story-maps'
+  # And it must not have written anything.
+  ! grep -q 'human-oversight' "$TMPD/s.md"
 }
 
-@test "mark: md story with existing unconfirmed marker → confirmed + ratified" {
-  printf -- '---\nstatus: accepted\nhuman-oversight: unconfirmed\n---\n# body\n' > "$TMPD/s.md"
-  bash "$SCRIPT" "$TMPD/s.md"
-  grep -qE '^human-oversight:[[:space:]]*confirmed' "$TMPD/s.md"
-  run is_story_map_ratified "$TMPD/s.md"; [ "$status" -eq 0 ]
-  # no duplicate marker line left behind
-  [ "$(grep -cE '^human-oversight:' "$TMPD/s.md")" -eq 1 ]
-}
-
-@test "mark: idempotent — marking twice stays ratified, single marker" {
-  printf -- '---\nstatus: accepted\n---\n# body\n' > "$TMPD/s.md"
-  bash "$SCRIPT" "$TMPD/s.md"; bash "$SCRIPT" "$TMPD/s.md"
-  run is_story_map_ratified "$TMPD/s.md"; [ "$status" -eq 0 ]
-  [ "$(grep -cE '^oversight-hash:' "$TMPD/s.md")" -eq 1 ]
-}
-
-@test "mark: drift — mark then edit body → not ratified" {
-  printf -- '---\nstatus: accepted\n---\n# body\n' > "$TMPD/s.md"
-  bash "$SCRIPT" "$TMPD/s.md"
-  printf -- '---\nstatus: accepted\nhuman-oversight: confirmed\n---\n# body EDITED\n' > "$TMPD/s.md"
-  run is_story_map_ratified "$TMPD/s.md"; [ "$status" -ne 0 ]
+@test "mark: refuses regardless of where the story lives" {
+  # Keyed on the artefact, not a `docs/stories/` path substring — an adopter
+  # with a different layout must get the same answer.
+  mkdir -p "$TMPD/some/other/place"
+  printf -- '---\nstatus: accepted\n---\n# body\n' > "$TMPD/some/other/place/s.md"
+  run bash "$SCRIPT" "$TMPD/some/other/place/s.md"
+  [ "$status" -eq 2 ]
 }
 
 @test "mark: HTML map → ratified after mark" {

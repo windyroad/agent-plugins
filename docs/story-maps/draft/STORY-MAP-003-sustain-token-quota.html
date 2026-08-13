@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="human-oversight" content="confirmed">
-  <meta name="oversight-hash" content="5fe6508ab1409ed678421a388ab31d15d9e8d5f45ddeed1897fc2b8961f2539c">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>STORY-MAP-003: Sustain my token quota across the week and across surfaces</title>
@@ -11,129 +9,168 @@
   <meta name="persona" content="developer">
   <meta name="problems" content="P160,P443">
   <meta name="rfcs" content="RFC-046">
-  <meta name="jtbd" content="JTBD-010">
-  <meta name="adrs" content="ADR-093">
+  <meta name="jtbd" content="JTBD-010,JTBD-003">
   <meta name="reported" content="2026-07-08">
   <meta name="decision-makers" content="Tom Howard">
-  <style>
-    :root {
-      --bg: #ffffff; --fg: #1a1a1a; --muted: #565656; --line: #c4c4c4;
-      --card: #f6f6f6; --card-line: #cfcfcf;
-      --live-fg: #0b5d1e; --live-bg: #e4f4e8; --live-line: #0b5d1e;
-      --next-fg: #0b3a66; --next-bg: #e2eefb; --next-line: #0b3a66;
-      --later-fg: #6b3a00; --later-bg: #f6ead6; --later-line: #6b3a00;
-      --focus: #0b3a66;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #16181c; --fg: #f2f3f5; --muted: #b6bac2; --line: #3a3f47;
-        --card: #1f2228; --card-line: #3a3f47;
-        --live-fg: #7fe0a0; --live-bg: #123020; --live-line: #7fe0a0;
-        --next-fg: #97c6f5; --next-bg: #10263c; --next-line: #97c6f5;
-        --later-fg: #f0c58a; --later-bg: #33260f; --later-line: #f0c58a;
-        --focus: #97c6f5;
-      }
-    }
-    * { box-sizing: border-box; }
-    body { font-family: system-ui, -apple-system, sans-serif; color: var(--fg); background: var(--bg);
-           max-width: 1400px; margin: 0 auto; padding: 1.5rem 1rem 3rem; line-height: 1.5; }
-    h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
-    h2 { font-size: 1rem; margin: 0 0 .5rem; }
-    p { max-width: 70ch; }
-    .lead { color: var(--muted); }
-    a { color: var(--focus); }
-    a:focus-visible, .task:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
-    .legend { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin: 1rem 0 1.5rem; padding: 0; list-style: none; }
-    .legend li { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .9rem; }
-    .badge { display: inline-flex; align-items: center; gap: .3rem; font-size: .72rem; font-weight: 700;
-             padding: .1rem .45rem; border-radius: 999px; border: 1px solid; white-space: nowrap; }
-    .badge::before { font-weight: 900; }
-    .b-live  { color: var(--live-fg);  background: var(--live-bg);  border-color: var(--live-line); }
-    .b-live::before  { content: "\2713"; }
-    .b-next  { color: var(--next-fg);  background: var(--next-bg);  border-color: var(--next-line); }
-    .b-next::before  { content: "\2192"; }
-    .b-later { color: var(--later-fg); background: var(--later-bg); border-color: var(--later-line); }
-    .b-later::before { content: "\25C7"; }
-    .scroll { overflow-x: auto; padding-bottom: .5rem; }
-    .backbone { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(250px, 1fr); gap: .75rem; align-items: start; }
-    .activity { border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
-    .activity > h2 { padding: .6rem .7rem; margin: 0; border-bottom: 2px solid var(--fg); }
-    .activity .jtbd { display: block; font-weight: 400; color: var(--muted); font-size: .78rem; margin-top: .2rem; }
-    .tasks { list-style: none; margin: 0; padding: .55rem; display: flex; flex-direction: column; gap: .55rem; }
-    .task { border: 1px solid var(--card-line); border-radius: 6px; background: var(--card); padding: .5rem .55rem; }
-    .task .t-title { font-size: .86rem; }
-    a.slice { text-decoration: none; color: inherit; display: block; }
-    a.slice:hover .t-title { text-decoration: underline; }
-    .task .t-meta { margin-top: .35rem; display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; }
-    .ref { font-size: .7rem; color: var(--muted); }
-    .step-no { font-variant-numeric: tabular-nums; color: var(--muted); font-size: .78rem; }
-    .trace { margin-top: 2rem; border-top: 1px solid var(--line); padding-top: 1rem; }
-    .trace h2 { font-size: 1.05rem; }
-    @media (max-width: 640px) { .backbone { grid-auto-columns: 82vw; } }
-  </style>
+  <meta name="human-oversight" content="confirmed">
+  <meta name="oversight-hash" content="bc476421c2f9e4b8387e3dda4026028886ca6c1174c602e57dfc1696c3a4555c">
+  <link rel="stylesheet" href="../story-map.css">
 </head>
 <body>
-  <h1>Sustain my token quota across the week and across surfaces</h1>
-  <p class="lead">A user story map for the <strong>developer</strong> (JTBD-010) whose Claude Code, chat, and Cowork all draw on one shared weekly quota. Read left to right as what I get: I lean on Claude all week, my work paces itself, I stay in flow even when I'm over budget, I keep enough for my other surfaces, and it all protects me from the moment I install it — so I can set an overnight run and go to bed instead of getting hard-stopped mid-task. Each card is a value I get, in my own voice; the linked STORY / ADR is the implementer. Ratified 2026-07-08 (ADR-090); further refined at the <code>/wr-itil:manage-story-map</code> accepted transition.</p>
+  <main>
+    <h1 id="story-map-title">Sustain my token quota across the week and across surfaces</h1>
+    <p class="orient"><strong>Agreed.</strong> 1 release, 3 stories, one release per row.</p>
+    <div id="story-map"><div class="scroll" tabindex="0" role="region" aria-label="Story map grid"><table class="map"><caption>Sustain my token quota across the week and across surfaces — 4 journey activities across 1 releases</caption><thead><tr><td class="corner"></td><th class="act" scope="col">A. Install it <span class="jtbd">no setup tax</span></th><th class="act" scope="col">B. Work without watching <span class="jtbd">JTBD-010 — sustain my quota</span></th><th class="act" scope="col">C. Keep going when tight <span class="jtbd">slowed, not stopped</span></th><th class="act" scope="col">D. Still have headroom at week's end <span class="jtbd">chat, Cowork</span></th></tr></thead><tbody><tr><th class="slice" scope="row"><span class="badge b-live"><span class="b-glyph" aria-hidden="true">✓</span>RFC-046</span> <span class="s-name">Pacing works the moment it is installed</span> <span class="s-note">shipped in @windyroad/cruise</span><span class="s-problems">closes <a href="../../problems/known-error/160-ship-quota-pacing-surface-to-prevent-weekly-quota-exhaustion.md" class="ref-link">P160</a>, <a href="../../problems/open/443-quota-pacing-lineage-broken-missing-jtbd-persona-usm-orphaned-story-map-rfc.md" class="ref-link">P443</a></span></th><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-043" data-status="done"><div class="t-status ts-done"><span class="ts-glyph" aria-hidden="true">✓</span>Done</div><a href="../../stories/done/STORY-043-self-installing-quota-producer.md" class="ref-link"><span class="t-title">Pacing starts working the moment I install it, with nothing to configure</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>get token pacing actually working the moment I install the plugin — not silently inert until I happen to hand-wire my statusline</div><div class="v-line v-asa"><span class="v-lead">as </span>a developer installing `@windyroad/cruise`</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the plugin to self-install its own data producer, so throttling works out of the box (or from the next session) with no invisible one-time setup step whose absence disables it (JTBD-010 outcome #7; closes the P160/P443 adopter-inert gap).</div></div><div class="t-ref">Traces: <a href="../../stories/done/STORY-043-self-installing-quota-producer.md" class="ref-link">STORY-043</a>, <a href="../../problems/known-error/160-ship-quota-pacing-surface-to-prevent-weekly-quota-exhaustion.md" class="ref-link">P160</a></div></div></li><li><div class="task" data-story-id="STORY-042" data-status="done"><div class="t-status ts-done"><span class="ts-glyph" aria-hidden="true">✓</span>Done</div><a href="../../stories/done/STORY-042-extract-quota-pacing-plugin.md" class="ref-link"><span class="t-title">I can add quota pacing on its own without dragging in governance plugins I did not ask for</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>install token pacing on its own — without pulling in a governance plugin I don't want — and to have it maintained as one thing rather than seven byte-identical synced copies</div><div class="v-line v-asa"><span class="v-lead">as </span>a developer who wants quota pacing</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the throttle extracted into a dedicated `@windyroad/cruise` plugin, so it is an opt-in capability with a single home (per ADR-093's 2026-07-08 amendment).</div></div><div class="t-ref">Traces: <a href="../../stories/done/STORY-042-extract-quota-pacing-plugin.md" class="ref-link">STORY-042</a>, <a href="../../jtbd/developer/JTBD-003-compose-guardrails.proposed.md" class="ref-link">JTBD-003</a></div></div></li></ul></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-042" data-status="done"><div class="t-status ts-done"><span class="ts-glyph" aria-hidden="true">✓</span>Done</div><a href="../../stories/done/STORY-042-extract-quota-pacing-plugin.md" class="ref-link"><span class="t-title">I work all week without hitting the quota wall, because the work quietly slows itself</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>install token pacing on its own — without pulling in a governance plugin I don't want — and to have it maintained as one thing rather than seven byte-identical synced copies</div><div class="v-line v-asa"><span class="v-lead">as </span>a developer who wants quota pacing</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the throttle extracted into a dedicated `@windyroad/cruise` plugin, so it is an opt-in capability with a single home (per ADR-093's 2026-07-08 amendment).</div></div><div class="t-ref">Traces: <a href="../../stories/done/STORY-042-extract-quota-pacing-plugin.md" class="ref-link">STORY-042</a>, <a href="../../problems/known-error/160-ship-quota-pacing-surface-to-prevent-weekly-quota-exhaustion.md" class="ref-link">P160</a>, <a href="../../problems/open/443-quota-pacing-lineage-broken-missing-jtbd-persona-usm-orphaned-story-map-rfc.md" class="ref-link">P443</a></div></div></li></ul></td><td class="cell empty"><span class="vh">No stories for C. Keep going when tight in Pacing works the moment it is installed.</span></td><td class="cell empty"><span class="vh">No stories for D. Still have headroom at week's end in Pacing works the moment it is installed.</span></td></tr></tbody></table></div></div>
+<p class="traces" id="story-map-traces"><span class="tr-group"><strong>Jobs:</strong> <a href="../../jtbd/developer/JTBD-010-sustain-token-quota.proposed.md" class="ref-link">JTBD-010</a>, <a href="../../jtbd/developer/JTBD-003-compose-guardrails.proposed.md" class="ref-link">JTBD-003</a></span></p>
+  </main>
 
-  <ul class="legend" aria-label="Status legend">
-    <li><span class="badge b-live">Live</span> I get this today</li>
-    <li><span class="badge b-next">Next</span> decided (2026-07-08), not yet built</li>
-    <li><span class="badge b-later">Later</span> known gap or proposal, not yet decided</li>
-  </ul>
 
-  <div class="scroll">
-    <div class="backbone">
+  <script id="story-map-data" type="application/json">
+{
+  "humanOversight": "confirmed",
+  "oversightHash": "bc476421c2f9e4b8387e3dda4026028886ca6c1174c602e57dfc1696c3a4555c",
+  "storyMapId": "STORY-MAP-003",
+  "title": "Sustain my token quota across the week and across surfaces",
+  "status": "draft",
+  "persona": "developer",
+  "reported": "2026-07-08",
+  "decisionMakers": "Tom Howard",
+  "traces": {
+    "jtbd": [
+      "JTBD-010",
+      "JTBD-003"
+    ]
+  },
+  "backbone": [
+    {
+      "id": "install",
+      "title": "A. Install it",
+      "note": "no setup tax"
+    },
+    {
+      "id": "pace",
+      "title": "B. Work without watching",
+      "note": "JTBD-010 — sustain my quota"
+    },
+    {
+      "id": "overbudget",
+      "title": "C. Keep going when tight",
+      "note": "slowed, not stopped"
+    },
+    {
+      "id": "surfaces",
+      "title": "D. Still have headroom at week's end",
+      "note": "chat, Cowork"
+    }
+  ],
+  "releases": [
+    {
+      "id": "r1",
+      "name": "Pacing works the moment it is installed",
+      "note": "shipped in @windyroad/cruise",
+      "rfc": "RFC-046"
+    }
+  ],
+  "tasks": [
+    {
+      "activity": "install",
+      "release": "r1",
+      "title": "Pacing starts working the moment I install it, with nothing to configure",
+      "storyId": "STORY-043",
+      "ref": "STORY-043, P160"
+    },
+    {
+      "activity": "install",
+      "release": "r1",
+      "title": "I can add quota pacing on its own without dragging in governance plugins I did not ask for",
+      "storyId": "STORY-042",
+      "ref": "STORY-042, JTBD-003"
+    },
+    {
+      "activity": "pace",
+      "release": "r1",
+      "title": "I work all week without hitting the quota wall, because the work quietly slows itself",
+      "storyId": "STORY-042",
+      "ref": "STORY-042, P160, P443"
+    }
+  ]
+}
+  </script>
+  <script id="story-map-status" type="application/json">
+{
+  "rows": {
+    "r1": "delivered"
+  },
+  "rowProblems": {
+    "r1": [
+      "P160",
+      "P443"
+    ]
+  },
+  "mapProblems": [
+    "P160",
+    "P443"
+  ],
+  "status": {
+    "STORY-043": "done",
+    "STORY-042": "done"
+  },
+  "values": {
+    "STORY-043": {
+      "leads": [
+        "In order to",
+        "as",
+        "I want"
+      ],
+      "value": [
+        {
+          "t": "get token pacing actually working the moment I install the plugin — not silently inert until I happen to hand-wire my statusline"
+        }
+      ],
+      "who": [
+        {
+          "t": "a developer installing `@windyroad/cruise`"
+        }
+      ],
+      "want": [
+        {
+          "t": "the plugin to self-install its own data producer, so throttling works out of the box (or from the next session) with no invisible one-time setup step whose absence disables it (JTBD-010 outcome #7; closes the P160/P443 adopter-inert gap)."
+        }
+      ]
+    },
+    "STORY-042": {
+      "leads": [
+        "In order to",
+        "as",
+        "I want"
+      ],
+      "value": [
+        {
+          "t": "install token pacing on its own — without pulling in a governance plugin I don't want — and to have it maintained as one thing rather than seven byte-identical synced copies"
+        }
+      ],
+      "who": [
+        {
+          "t": "a developer who wants quota pacing"
+        }
+      ],
+      "want": [
+        {
+          "t": "the throttle extracted into a dedicated `@windyroad/cruise` plugin, so it is an opt-in capability with a single home (per ADR-093's 2026-07-08 amendment)."
+        }
+      ]
+    }
+  },
+  "hrefs": {
+    "STORY-043": "../../stories/done/STORY-043-self-installing-quota-producer.md",
+    "STORY-042": "../../stories/done/STORY-042-extract-quota-pacing-plugin.md",
+    "P160": "../../problems/known-error/160-ship-quota-pacing-surface-to-prevent-weekly-quota-exhaustion.md",
+    "JTBD-003": "../../jtbd/developer/JTBD-003-compose-guardrails.proposed.md",
+    "P443": "../../problems/open/443-quota-pacing-lineage-broken-missing-jtbd-persona-usm-orphaned-story-map-rfc.md",
+    "JTBD-010": "../../jtbd/developer/JTBD-010-sustain-token-quota.proposed.md"
+  }
+}
+  </script>
 
-      <section class="activity" aria-labelledby="a1">
-        <h2 id="a1"><span class="step-no">1.</span> I lean on Claude all week<span class="jtbd">JTBD-010 — one shared quota across Code, chat &amp; Cowork</span></h2>
-        <ul class="tasks">
-          <li class="task"><span class="t-title">I want to use Claude across the whole week and not run dry mid-week and lose the chat and Cowork I still need</span><span class="t-meta"><span class="badge b-live">Live</span> <span class="ref">the need</span></span></li>
-        </ul>
-      </section>
-
-      <section class="activity" aria-labelledby="a2">
-        <h2 id="a2"><span class="step-no">2.</span> My work paces itself<span class="jtbd">I don't babysit a status line</span></h2>
-        <ul class="tasks">
-          <li class="task"><a class="slice" href="../../stories/draft/STORY-039-throttle-token-burn.md" data-story-id="STORY-039" data-jtbd="JTBD-010" data-status="done"><span class="t-title">I keep working all week without slamming into the quota wall, because my work quietly slows itself when I'm burning too fast — no nudge, no decision, I barely notice</span></a><span class="t-meta"><span class="badge b-live">Live</span> <span class="ref">STORY-039 · ADR-093</span></span></li>
-          <li class="task"><span class="t-title">I can kick off an overnight AFK loop and actually go to bed — it paces itself to the reset instead of breaking mid-run and needing an effortful restart</span><span class="t-meta"><span class="badge b-live">Live</span> <span class="ref">JTBD-010 · P160</span></span></li>
-          <li class="task"><span class="t-title">I never have to watch a status line or hand-switch to a smaller model to stretch my quota</span><span class="t-meta"><span class="badge b-live">Live</span></span></li>
-        </ul>
-      </section>
-
-      <section class="activity" aria-labelledby="a3">
-        <h2 id="a3"><span class="step-no">3.</span> I stay in flow even when I'm over budget<span class="jtbd">it slows me, it doesn't stop me</span></h2>
-        <ul class="tasks">
-          <li class="task"><span class="t-title">When I'm well over pace it eases me back gently instead of freezing me out — I still make progress and drift back onto budget before I'd have run out</span><span class="t-meta"><span class="badge b-live">Live</span> <span class="ref">STORY-039 glide-path</span></span></li>
-        </ul>
-      </section>
-
-      <section class="activity" aria-labelledby="a4">
-        <h2 id="a4"><span class="step-no">4.</span> I keep enough for my other surfaces<span class="jtbd">chat &amp; Cowork stay funded</span></h2>
-        <ul class="tasks">
-          <li class="task"><span class="t-title">I still have tokens for chat and Cowork late in the week, because Code holds back a weekly reserve instead of spending the whole pool</span><span class="t-meta"><span class="badge b-live">Live</span></span></li>
-          <li class="task"><span class="t-title">I want my pacing to count my chat and Cowork burn too, not just Code, so the reserve reflects everything I'm actually spending</span><span class="t-meta"><span class="badge b-later">Later</span> <span class="ref">P160 Q6 — account-wide read</span></span></li>
-        </ul>
-      </section>
-
-      <section class="activity" aria-labelledby="a5">
-        <h2 id="a5"><span class="step-no">5.</span> It protects me the moment I install it<span class="jtbd">no setup tax — the adopter gap (P160/P443)</span></h2>
-        <ul class="tasks">
-          <li class="task"><a class="slice" href="../../stories/draft/STORY-043-self-installing-quota-producer.md" data-story-id="STORY-043" data-jtbd="JTBD-010" data-status="draft"><span class="t-title">I get pacing the moment I install it — it sets itself up because I installed it, with no hidden step to wire by hand, and I can turn it off whenever I want</span></a><span class="t-meta"><span class="badge b-next">Next</span> <span class="ref">STORY-043 · P443</span></span></li>
-          <li class="task"><a class="slice" href="../../stories/draft/STORY-042-extract-quota-pacing-plugin.md" data-story-id="STORY-042" data-jtbd="JTBD-010" data-status="draft"><span class="t-title">I add just quota-pacing on purpose, without dragging in governance plugins I don't want</span></a><span class="t-meta"><span class="badge b-next">Next</span> <span class="ref">STORY-042 · P443</span></span></li>
-        </ul>
-      </section>
-
-    </div>
-  </div>
-
-  <section class="trace" aria-labelledby="trace-h">
-    <h2 id="trace-h">Traces</h2>
-    <p><strong>Persona:</strong> developer — shares one Claude account quota across Code, chat, and Cowork; wants pacing to be mechanical and silent, not a status line to babysit.</p>
-    <p><strong>Job mapped:</strong> JTBD-010 (Sustain My Token Quota Across the Week and Across Surfaces) across the five activities above.</p>
-    <p><strong>Independence:</strong> none of these five activities appear on STORY-MAP-001 or STORY-MAP-002 (both JTBD-008, "decompose a fix"). Zero shared backbone → quota-pacing is its own journey → its own <code>@windyroad/cruise</code> plugin (ADR-093 amendment, 2026-07-08).</p>
-    <p><strong>Open gaps (Later / Next):</strong> it protects only a hand-wired machine, not adopters (P160/P443); pacing counts only Code burn, not chat/Cowork (P160 Q6); own opt-in plugin not yet built (STORY-042); self-installing producer + its recorded consent/mechanism decision (STORY-043 · a dedicated ADR).</p>
-    <p><strong>Decisions the journey rests on:</strong> ADR-093 (mechanical quota-pace throttle; amended 2026-07-08 → own opt-in plugin + self-installing producer, implied-at-install consent + opt-out); grounded in JTBD-010; problems P160 (reopened Known Error, Sev 20) + P443 (lineage repair).</p>
-  </section>
 </body>
 </html>

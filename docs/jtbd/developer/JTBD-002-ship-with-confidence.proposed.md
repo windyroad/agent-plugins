@@ -32,6 +32,11 @@ When I delegate coding to an AI agent, I want to know it followed the full TDD c
 ## Current Solutions
 
 Pair programming with the AI, manual review of every diff, restricting agent permissions
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |
 
 
 ## Stories
@@ -40,4 +45,5 @@ Pair programming with the AI, manual review of every diff, restricting agent per
 |----|-------|--------|
 | STORY-055 | STORY-055: One definition of what the oversight fingerprint ignores | accepted |
 | STORY-053 | STORY-053: Test claims against the tree at capture and label the untested ones | draft |
+| STORY-059 | STORY-059: See why the loop did not work what I expected | draft |
 | STORY-046 | STORY-046: Red-CI denial explains the recovery path | in-progress |

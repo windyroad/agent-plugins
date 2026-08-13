@@ -159,6 +159,63 @@ EOF
   [ "$status" -eq 0 ]
 }
 
+@test "reconcile-stories: accepts an RFC implemented by a story-map release row" {
+  mkdir -p docs/stories/draft docs/{problems,rfcs,jtbd} docs/story-maps/draft
+  cat > docs/stories/README.md <<'EOF'
+# Stories
+
+## Story Rankings
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-007 | Foo | draft |
+
+## Done
+EOF
+  cat > docs/stories/draft/STORY-007-foo.md <<'EOF'
+---
+status: draft
+rfcs: [RFC-900]
+---
+# STORY-007: Foo
+EOF
+  cat > docs/story-maps/draft/STORY-MAP-001-map.html <<'EOF'
+<script id="story-map-data" type="application/json">
+{"storyMapId":"STORY-MAP-001","releases":[{"id":"r1","rfc":"RFC-900"}],"tasks":[{"release":"r1","storyId":"STORY-007"}]}
+</script>
+EOF
+
+  run bash "$SCRIPT" docs/stories docs/problems docs/rfcs docs/jtbd docs/story-maps
+  [ "$status" -eq 0 ]
+}
+
+@test "reconcile-stories: an unresolved RFC does not fall through to a bare ls of cwd" {
+  mkdir -p docs/stories/draft docs/{problems,rfcs,jtbd,story-maps}
+  cat > docs/stories/README.md <<'EOF'
+# Stories
+
+## Story Rankings
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-007 | Foo | draft |
+
+## Done
+EOF
+  cat > docs/stories/draft/STORY-007-foo.md <<'EOF'
+---
+status: draft
+rfcs: [RFC-901]
+---
+# STORY-007: Foo
+EOF
+  printf '## Stories\n\nSTORY-007\n' > AGENTS.md
+
+  run bash "$SCRIPT" docs/stories docs/problems docs/rfcs docs/jtbd docs/story-maps
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"UNRESOLVED_RFC_TRACE STORY-007 claims=RFC-901"* ]]
+}
+
 # ---------------------------------------------------------------------------
 # Surface 5: SKILL.md presence + read-only contract
 # ---------------------------------------------------------------------------

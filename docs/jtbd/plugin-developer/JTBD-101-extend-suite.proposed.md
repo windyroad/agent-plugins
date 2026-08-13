@@ -52,13 +52,13 @@ Copy an existing plugin and modify it, read ADRs and BRIEFING.md
 | RFC-020 | RFC-020: P191 — JTBD edit gate resolves docs/jtbd from the project root, not the hook runtime CWD | proposed |
 | RFC-051 | RFC-051: Inbound-discovery pre-flight honours a declined channel list | proposed |
 | RFC-052 | RFC-052: Ship a portable rule routing free-text collection to per-item copyable blocks | proposed |
-
 ## Story Maps
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-MAP-007 | STORY-MAP-007: A correction to the agent's conduct holds in every project | draft |
-| STORY-MAP-001 | STORY-MAP-001: RFC Framework Phase 1 + Phase 2 Bootstrap | in-progress |
+| STORY-MAP-008 | STORY-MAP-008: Have a plugin behave like a guest in my repository | draft |
+| STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |
+| STORY-MAP-001 | STORY-MAP-001: RFC framework Phase 1 + Phase 2 bootstrap | in-progress |
 
 
 ## Stories
@@ -69,3 +69,6 @@ Copy an existing plugin and modify it, read ADRs and BRIEFING.md
 | STORY-049 | STORY-049: Ask for a URL in a shape I can paste into | draft |
 | STORY-050 | STORY-050: Have my reviewer read the version I actually have | draft |
 | STORY-051 | STORY-051: Have generated content respect my project's conventions | draft |
+| STORY-056 | STORY-056: Clear a block with a command my repository actually has | draft |
+| STORY-057 | STORY-057: Get the fix by upgrading, not by patching a cache | draft |
+| STORY-058 | STORY-058: Read a README that describes the version I installed | draft |

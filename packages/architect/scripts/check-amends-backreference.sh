@@ -2,9 +2,9 @@
 # check-amends-backreference.sh — load-bearing detector for lockstep-amendment drift.
 #
 # An ADR that declares `amends: [ADR-NNN, ...]` is asserting that it changed those
-# decisions' meaning. A reader who lands on the AMENDED ADR must be able to find
-# that out from the amended ADR itself — otherwise the old text reads as current
-# and the amendment is invisible from the only direction that matters.
+# decisions' meaning. While the target remains mutable, a reader who lands on it
+# must be able to discover the amendment. Confirmed targets are immutable under
+# ADR-116, so legacy amendment debt must not force an in-place back-reference.
 #
 # This checks the back-reference exists: for every `amends:` entry, the amended
 # ADR's body must mention the amending ADR by ID. Cheap, mechanical, and it fires
@@ -41,6 +41,7 @@ for f in "$dir"/[0-9]*.md; do
       missing="$missing\n  $self declares amends: $target, which does not resolve in $dir"
       continue
     fi
+    awk 'NR==1&&$0=="---"{fm=1;next} fm&&/^---[[:space:]]*$/{exit} fm&&tolower($0)~/^human-oversight:[[:space:]]*confirmed[[:space:]]*$/{found=1} END{exit !found}' "$tf" && continue
     grep -qF "$self" "$tf" || \
       missing="$missing\n  $(basename "$tf") is amended by $self but never mentions it — a reader of the amended decision cannot discover the amendment"
   done

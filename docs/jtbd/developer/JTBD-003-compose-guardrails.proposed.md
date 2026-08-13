@@ -27,3 +27,11 @@ When I only need architecture and TDD enforcement, I want to install just those 
 ## Current Solutions
 
 Install everything and ignore irrelevant hooks, or don't install at all
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-003 | STORY-MAP-003: Sustain my token quota across the week and across surfaces | draft |
+| STORY-MAP-008 | STORY-MAP-008: Have a plugin behave like a guest in my repository | draft |

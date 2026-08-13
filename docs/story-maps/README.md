@@ -1,6 +1,6 @@
 # Story Map Backlog
 
-> Last reviewed: 2026-05-12 — **Scaffolded.** Directory + lifecycle subdirs created; encoding decision per ADR-060 amendment 2026-05-12 = HTML for story-maps; markdown stays for stories + RFCs + problems + decisions. STORY-MAP-001 bootstrap migration (from `docs/plans/170-rfc-framework-story-map.md`) lands in P170 Phase 2 Slice 8. Skills (`/wr-itil:capture-story-map`, `/manage-story-map`, `/reconcile-story-maps`, `/list-story-maps`) land in Phase 2 Slice 3.
+> Last reviewed: 2026-08-07. Maps are rendered from a data island by `wr-itil-render-story-map` per ADR-102; edit with `wr-itil-story-map-edit`, query with `wr-itil-story-map-query`. The bootstrap migration this note used to track is long done, and the map that carried it has since been retired into the decompose-a-fix journey.
 >
 > Run `/wr-itil:manage-story-map review` to refresh once the manage-story-map skill ships.
 
@@ -28,7 +28,7 @@ This index serves two persona-jobs per ADR-051 sibling pattern (JTBD-anchored RE
 | **Story Map** | **`docs/story-maps/<state>/`** | **HTML (`*.html`)** | **`draft → accepted → in-progress → completed → archived`** | **How the work decomposes spatially across backbone × ribs × slices** |
 | Story | `docs/stories/<state>/` | markdown | `draft → accepted → in-progress → done → archived` | One slice of a story map; INVEST-shaped + JTBD-anchored |
 
-This directory is **scaffold-only** until P170 Phase 2 Slice 3 ships `/wr-itil:capture-story-map` + `/wr-itil:manage-story-map` (Slice 3) and Slice 8 migrates `docs/plans/170-rfc-framework-story-map.md` to `STORY-MAP-001-rfc-framework-phase-1-bootstrap.html`.
+This directory is live. Capture a map with `/wr-itil:capture-story-map`, move it through its lifecycle with `/wr-itil:manage-story-map`, and repair index drift with `/wr-itil:reconcile-story-maps`.
 
 ## Story-map filename grammar
 
@@ -40,45 +40,43 @@ This directory is **scaffold-only** until P170 Phase 2 Slice 3 ships `/wr-itil:c
 
 ## Story-map HTML schema
 
-Per ADR-060 § Phase 2 encoding amendment (2026-05-12). Every story-map HTML file carries:
+**Amended by ADR-102 (2026-08-05).** A story map is a rendered grid, and it is generated. Each map is ONE file carrying its own data in a `<script id="story-map-data" type="application/json">` island; `wr-itil-render-story-map` reads that island and rewrites everything around it. Creation and editing are the same command on the same file.
+
+**Author the island. Never hand-write the markup, and never open another map to copy its shape** — that inference is what let the whole corpus drift into a vertical stack together.
 
 ```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>STORY-MAP-NNN: <Title></title>
-  <meta name="story-map-id" content="STORY-MAP-NNN">
-  <meta name="status" content="<draft|accepted|in-progress|completed|archived>">
-  <meta name="problems" content="P<NNN>[,P<NNN>...]">
-  <meta name="rfcs" content="RFC-<NNN>[,RFC-<NNN>...]">
-  <meta name="jtbd" content="JTBD-<NNN>[,JTBD-<NNN>...]">
-  <style>
-    .backbone { display: grid; grid-template-columns: repeat(var(--cols), 1fr); gap: 1rem; }
-    .rib { display: contents; }
-    .slice { border: 1px solid #ccc; padding: 0.5rem; }
-  </style>
-</head>
-<body>
-  <h1>STORY-MAP-NNN: <Title></h1>
-  <section class="backbone" style="--cols: <N>">
-    <header class="rib-header"><h2 data-rib="<rib-N-name>">Rib N</h2></header>
-    <div class="rib">
-      <a class="slice"
-         href="../../stories/<state>/STORY-NNN-<slug>.md"
-         data-story-id="STORY-NNN"
-         data-rfc="RFC-<NNN>"
-         data-jtbd="JTBD-<NNN>"
-         data-status="<draft|accepted|in-progress|done|archived>">
-        Story title
-      </a>
-    </div>
-  </section>
-</body>
-</html>
+<script id="story-map-data" type="application/json">
+{
+  "storyMapId": "STORY-MAP-<NNN>",
+  "title": "<Title>",
+  "status": "draft",
+  "persona": "<persona>",
+  "traces": { "jtbd": ["JTBD-<NNN>"] },
+  "backbone": [ { "id": "<slug>", "title": "A. <Activity>", "note": "<optional gloss>" } ],
+  "releases": [ { "id": "rfc-<nnn>", "name": "<what ships together>", "rfc": "RFC-<NNN>", "note": "<optional>" } ],
+  "tasks": [
+    { "activity": "<backbone id>", "release": "<release id>",
+      "title": "<what the persona can do>",
+      "storyId": "STORY-<NNN>", "rfc": "RFC-<NNN>", "jtbd": "JTBD-<NNN>",
+      "ref": "STORY-<NNN>, P<NNN>" }
+  ]
+}
+</script>
 ```
 
-**Prohibition**: `<a class="slice">`, `<h2 class="rib-header">`, and any element carrying `data-*` attributes MUST NOT carry inline `style=""` attributes. `--<custom-property>` CSS variables for grid sizing on container elements are permitted because they are layout-not-data. See ADR-060 amendment 2026-05-12 § Prohibition.
+**What a map does NOT carry.** No `lead`, no `traceProse`, no `badge`, no `storyStatus`, no card `value`, no row `problems`, **no map-level `rfcs`, and no `adrs` at all**. Everything a story file already says is derived when the map renders (ADR-104): status, the value statement, and the problems each story closes. A row's status and problems are the union of its stories'; a row's label is its RFC id, because a row IS an RFC (ADR-103) — and the map's RFC list is the union of its rows', so it is not authored either. Every row carries an identity: one without an `rfc` renders as a defect whether or not its stories are done, since delivery cannot excuse a missing identity (ADR-107). The single exception is a row holding work that shipped before rows carried identities, marked `"preRfc": true`; that set is closed and no new row joins it. A map carries no decision trace: a decision constrains how something is built, so it belongs on the story that builds it (ADR-106). Prose at the top describing the grid below it was removed for the same reason.
+
+Rendered shape: backbone activities become `<th class="act" scope="col">` COLUMNS; releases become `<th class="slice" scope="row">` ROWS; tasks become `<div class="task">` cards inside `<td class="cell">`; an activity × release pair with no tasks renders `<td class="cell empty">` with a visually hidden text equivalent. A row read left to right is everything that ships together.
+
+**Trace layer**: `data-story-id`, `data-rfc`, `data-jtbd`, `data-status` on each rendered card. A rendered map carries the trace twice — once on the card and once in the data island as `"storyId"` — and tooling matches both spellings, because a pre-ADR-102 map has only the first and a map edited but not yet re-rendered has only the second. The island's pretty-printed serialisation keeps each `"storyId"` on its own line; that used to be load-bearing for the ADR-101 whole-line filter, and since ADR-103 retired it the one-per-line shape is kept for diff readability alone.
+
+**Ratification** is fingerprinted over the map's own SUBSTANCE within the data island — not the whole file, and not the whole island, so restyling the template can never revoke a human approval (ADR-102's amendment to ADR-090).
+
+**Prohibition**: no inline `style=""` anywhere — presentation belongs to the template only. This is stricter than the superseded rule, which permitted `--<custom-property>` on layout containers. `--cols`, `<section class="backbone">`, `.rib`, `.rib-header`, `data-rib` and `<a class="slice">`-as-story-link are all removed.
+
+**Authoring note**: escape a literal `<` in island strings as `\u003c`. A raw `</script>` terminates the block early — in the renderer and in a browser — and the renderer refuses the file rather than emitting a truncated map.
+
+**Migration**: maps predating this amendment still carry the stacked encoding. They remain parseable — every consumer matches `data-story-id` or the `<meta>` block, neither of which is container-dependent — so a mixed corpus is safe. Tracked separately.
 
 ## Story Map Rankings
 
@@ -86,16 +84,18 @@ One row per story map in `draft` / `accepted` / `in-progress` status, from files
 
 | WSJF | ID | Title | Status | Problems | RFCs |
 |------|-----|-------|--------|----------|------|
-| — | STORY-MAP-001 | RFC Framework Phase 1 + Phase 2 Bootstrap | in-progress | P170 | RFC-001, RFC-002, RFC-003 |
-| — | STORY-MAP-002 | Decompose a Fix Into Coordinated Changes | draft | P170, P251, P314, P371, P399, P390 | RFC-003, RFC-005, RFC-047 |
+| — | STORY-MAP-002 | Take a problem from noticed to resolved | draft | P080, P155, P170, P251, P390, P399, P401 | RFC-005, RFC-060, RFC-047, RFC-061 |
 | — | STORY-MAP-003 | Sustain my token quota across the week and across surfaces | draft | P160, P443 | RFC-046 |
-| — | STORY-MAP-004 | Close the outbound reporter loop with honest, generated upstream lifecycle comments | draft | P376 | — |
-| — | STORY-MAP-005 | Trust the capture-on-correction signal | draft | P430 | RFC-050 |
-| — | STORY-MAP-006 | Decline upstream discovery once and stay declined | draft | P431 | RFC-051 |
-| — | STORY-MAP-007 | A correction to the agent's conduct holds in every project | draft | P438, P439 | RFC-052, RFC-053 |
-| — | STORY-MAP-008 | Have plugin-generated content respect my project's conventions | draft | P424 | RFC-054 |
-| — | STORY-MAP-009 | Trust that a close does not strand the sibling family | draft | P433 | RFC-056 |
-| — | STORY-MAP-010 | Trust that a ticket states only what was verified | draft | P434 | RFC-057 |
+| — | STORY-MAP-004 | Close the loop with someone who reported a problem | draft | P080, P170, P376, P431 | RFC-028, RFC-051, RFC-061 |
+| — | STORY-MAP-008 | Have a plugin behave like a guest in my repository | draft | P424 | RFC-054 |
+| — | STORY-MAP-011 | Trust the AFK loop's autonomous conduct | draft | P430, P431, P433, P434, P438, P439 | RFC-050, RFC-051, RFC-052, RFC-053, RFC-056, RFC-057 |
+
+
+## Consolidated away
+
+Six maps were absorbed into consolidated journeys and their files removed — five single-story stubs on 2026-08-05, and the framework-bootstrap map on 2026-08-07. Five held one card each — a map's clothes on a single fix. The sixth listed the tooling's own commands, which is an inventory rather than a journey anybody walks. The honest unit is the journey a persona takes.
+
+Their IDs are retired and must not be reused. The lookup from each retired ID to the journey that absorbed it is recorded in problem ticket 477, kept there rather than here because this index treats any map ID it contains as a claim that the file exists on disk.
 
 ## Completed
 
@@ -121,7 +121,6 @@ Index row rendering uses `packages/itil/scripts/render-story-map-index.sh` (P170
 - **JTBD-008** — Decompose a Fix Into Coordinated Changes. Primary persona-job for this directory.
 - **JTBD-302** — Trust That the README Describes the Plugin I Just Installed. Secondary persona-job; README-currency rule applies.
 - **P170** — driver problem ticket capturing the strain pattern that motivated ADR-060.
-- **`docs/plans/170-rfc-framework-story-map.md`** — current Patton-style planning artefact for P170; migrates to `STORY-MAP-001-rfc-framework-phase-1-bootstrap.html` in P170 Phase 2 Slice 8.
 - **`docs/rfcs/README.md`** — sibling directory's lifecycle index. Same architectural pattern applied at the RFC tier (markdown encoding).
 - **`docs/stories/README.md`** — sibling directory for individual stories (markdown encoding, JTBD-008 + JTBD-001 anchors).
 - **Jeff Patton**, *User Story Mapping* (O'Reilly, 2014) — backbone/ribs/slices canonical reference.

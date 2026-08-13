@@ -21,7 +21,7 @@ This index serves two persona-jobs per ADR-051 sibling pattern (JTBD-anchored RE
 |------|---------|----------|-----------|----------|
 | Problem | `docs/problems/<state>/` | markdown | `Open → Known Error → Verifying → Closed` (or `Parked`) | What hurts |
 | ADR | `docs/decisions/` | markdown | `proposed → accepted → superseded` | How we decided to solve it |
-| RFC | `docs/rfcs/` | markdown | `proposed → accepted → in-progress → verifying → closed` | What we're shipping to solve it |
+| RFC | legacy `docs/rfcs/` file or ADR-103 story-map release row | markdown / map JSON island | legacy lifecycle or row-derived status | What we're shipping to solve it |
 | Story Map | `docs/story-maps/<state>/` | HTML (`*.html`) | `draft → accepted → in-progress → completed → archived` | How the work decomposes spatially across backbone × ribs × slices |
 | **Story** | **`docs/stories/<state>/`** | **markdown (`*.md`)** | **`draft → accepted → in-progress → done → archived`** | **One slice of a story map; INVEST-shaped + JTBD-anchored** |
 
@@ -113,7 +113,6 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 
 | Status | ID | Title | Effort | Problems | RFCs | Story Map |
 |--------|-----|-------|--------|----------|------|-----------|
-| in-progress | STORY-042 | Extract quota-pacing into its own plugin | L | P160, P443 | RFC-046 | STORY-MAP-003 |
 | accepted | STORY-044 | See what cruise is doing — status/telemetry skill | M | P160, P446 | RFC-046 | STORY-MAP-003 |
 | draft | STORY-045 | Outbound lifecycle comments generated from real issue context | M | P376 | RFC-028 | STORY-MAP-004 |
 | accepted | STORY-047 | Gate the correction nudge on prompt authorship | S | P430 | RFC-050 | STORY-MAP-005 |
@@ -123,6 +122,11 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | draft | STORY-051 | Have generated content respect my project's conventions | M | P424 | RFC-054 | STORY-MAP-008 |
 | draft | STORY-052 | Surface still-outstanding family members before a close | M | P433 | RFC-056 | STORY-MAP-009 |
 | draft | STORY-053 | Test claims against the tree at capture and label the untested ones | L | P434 | RFC-057 | STORY-MAP-010 |
+| draft | STORY-056 | Clear a block with a command my repository actually has | M | P435 | RFC-062 | STORY-MAP-008 |
+| draft | STORY-057 | Get the fix by upgrading, not by patching a cache | M | P369 | RFC-063 | STORY-MAP-008 |
+| draft | STORY-058 | Read a README that describes the version I installed | M | P152 | RFC-064 | STORY-MAP-008 |
+| draft | STORY-059 | See why the loop did not work what I expected | M | P487 | RFC-065 | STORY-MAP-011 |
+| draft | STORY-060 | Pick up a captured ticket and know what was observed | M | P375 | RFC-066 | STORY-MAP-011 |
 | accepted | STORY-054 | Lifecycle transitions preserve a story's ratification | M | P474 | RFC-059 | STORY-MAP-002 |
 | accepted | STORY-055 | One definition of what the oversight fingerprint ignores | M | P474 | RFC-059 | STORY-MAP-002 |
 | draft | STORY-012 | Can't start coding without an RFC — the gate makes me create one first | S | P251, P314 | RFC-005 | STORY-MAP-002 |
@@ -131,11 +135,6 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | draft | STORY-015 | The RFC lists its stories before any code is written | M | P251, P399 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-016 | Every step is regression-proven | S | P251 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-017 | Backfill-or-supersede the skeleton RFCs the repudiated mechanism left behind | M | P399, P375 | RFC-005 | STORY-MAP-002 |
-| draft | STORY-018 | Capture the problem in seconds, mid-flow | M | P155 | — | STORY-MAP-002 |
-| draft | STORY-019 | Find the root cause and a workaround → Known Error | M | P170 | — | STORY-MAP-002 |
-| draft | STORY-023 | Ship → verify → problem closes with a real trace; adopter gets the fix | M | P170 | — | STORY-MAP-002 |
-| draft | STORY-026 | Work the RFC's stories one at a time | M | P170 | RFC-005 | STORY-MAP-002 |
-| draft | STORY-027 | Capture a problem reported through an inbound channel | M | P170 | — | STORY-MAP-002 |
 | draft | STORY-028 | Acknowledge the report on capture | S | P170 | — | STORY-MAP-002 |
 | draft | STORY-029 | Share the workaround with the reporter | S | P170 | — | STORY-MAP-002 |
 | draft | STORY-030 | Tell the reporter a fix is underway | S | P170 | — | STORY-MAP-002 |
@@ -148,8 +147,8 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | draft | STORY-037 | Commit gate honours the RISK-POLICY stated review cadence for staleness | S | P408 | RFC-043 | — |
 | draft | STORY-038 | Fix-titled commits surface a lifecycle-drift advisory | deferred | P345 | RFC-044 | — |
 | draft | STORY-040 | AFK loop anchored with the native `/goal` external evaluator | M | P390 | RFC-047 | STORY-MAP-002 |
-| in-progress | STORY-043 | Self-install the quota-state producer | L | P160, P443 | RFC-046 | STORY-MAP-003 |
 | in-progress | STORY-046 | Red-CI denial explains the recovery path | S | P208 | RFC-049 | STORY-MAP-002 |
+
 
 ## Done
 
@@ -157,6 +156,8 @@ Terminal stories, from filesystem truth (`docs/stories/done/`). `Done` is the da
 
 | ID | Title | Done | Driving problems |
 |----|-------|------|------------------|
+| STORY-042 | Extract quota-pacing into its own plugin | 2026-08-09 | P160, P443 |
+| STORY-043 | Pacing starts working the moment I install it, with nothing to configure | 2026-08-09 | P160, P443 |
 | STORY-001 | Hook exemption globs for docs/story-maps + docs/stories | 2026-05-12 | P170 |
 | STORY-002 | `/wr-itil:capture-story` lightweight aside skill | 2026-05-12 | P170 |
 | STORY-003 | `/wr-itil:list-stories` read-only display skill | 2026-05-12 | P170 |
@@ -169,14 +170,19 @@ Terminal stories, from filesystem truth (`docs/stories/done/`). `Done` is the da
 | STORY-022 | Ratify the story map and its stories after any change | 2026-07-03 | P170 |
 | STORY-024 | Reuse stories already on the map | 2026-07-03 | P170 |
 | STORY-025 | Slice the fix's stories into releases | 2026-07-03 | P170 |
+| STORY-018 | Capture the problem in seconds, mid-flow | 2026-08-05 | P155 |
+| STORY-019 | Find the root cause and a workaround → Known Error | 2026-08-05 | P170 |
+| STORY-023 | Ship → verify → problem closes with a real trace | 2026-08-05 | P170 |
+| STORY-026 | Work the RFC's stories one at a time | 2026-08-05 | P170 |
+| STORY-027 | Capture a problem reported through an inbound channel | 2026-08-05 | P170 |
 
-**Known frontmatter/directory divergence (recorded, not repaired here).** STORY-018, STORY-019, STORY-023, STORY-026 and STORY-027 carry `status: done` in their YAML frontmatter while their files sit in `docs/stories/draft/`. The Rankings table above follows filesystem truth (the reconciler's source), so they render as `draft`; the `## Stories` reverse-trace sections on parent artefacts follow frontmatter, so they render as `done`. `wr-itil-reconcile-stories` does not compare frontmatter `status:` against the containing subdirectory, so it reports neither. Repairing the divergence means either a lifecycle move or a frontmatter edit, both of which `/wr-itil:manage-story` owns and `/wr-itil:reconcile-stories` explicitly does not. Tracked on P417.
+**Frontmatter/directory divergence — repaired 2026-08-06.** STORY-018, STORY-019, STORY-023, STORY-026 and STORY-027 carried `status: done` in frontmatter while sitting in `docs/stories/draft/`. The files were moved to `done/` so both agree, and the rows above follow. Worth knowing for next time: `wr-itil-reconcile-stories` compares the Rankings and Done tables against the filesystem, but never compares a story's own frontmatter against its containing directory — so those two can disagree indefinitely with nothing reporting it. That gap is what let a story map under-report its Live band by five. Tracked on P417.
 
 ## Reconciliation
 
 `docs/stories/README.md` is reconciled against on-disk markdown story files by `wr-itil-reconcile-stories` (P170 Phase 2 Slice 5; `$PATH` shim per ADR-049). The reconciliation contract mirrors `wr-itil-reconcile-readme docs/problems` per P118: diagnose-only mechanical drift detector that runs as a Step 0 preflight in `/wr-itil:manage-story` invocations.
 
-Reverse-trace pass (sibling to the RFC reverse-trace pass per ADR-060): `wr-itil-reconcile-stories docs/stories docs/problems docs/rfcs docs/story-maps` extends to detect drift in the auto-maintained `## Stories` reverse-trace section on each problem ticket / RFC / story-map. Three drift kinds (mirroring the RFC-tier reverse-trace contract):
+Reverse-trace pass (sibling to the RFC reverse-trace pass per ADR-060): `wr-itil-reconcile-stories docs/stories docs/problems docs/rfcs docs/jtbd docs/story-maps` detects drift in auto-maintained `## Stories` sections on problem, JTBD and legacy RFC files. For ADR-103 row-backed RFCs it verifies that the release row exists and contains the story card.
 
 - `MISSING_REVERSE_TRACE STORY-<NNN> in <parent> ## Stories`
 - `STALE_REVERSE_TRACE STORY-<NNN> in <parent> ## Stories`

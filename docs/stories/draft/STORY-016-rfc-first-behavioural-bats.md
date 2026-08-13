@@ -20,7 +20,7 @@ estimated-effort: S
 
 ## User value (INVEST Valuable)
 
-As a maintainer, I want behavioural bats (ADR-052 behavioural-only) that prove the RFC-first gate actually behaves correctly — so the invariant is regression-protected, not just documented.
+In order that the RFC-first invariant stays true as the code around it changes — documented is not enforced — as a maintainer, I want behavioural tests that exercise the gate and assert what it actually does.
 
 ## Acceptance criteria (INVEST Testable)
 

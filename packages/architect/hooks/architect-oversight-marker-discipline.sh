@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # architect-oversight-marker-discipline.sh — PreToolUse:Edit|Write hook
-# (P348 / ADR-066 amendment 2026-06-02). Denies Edit/Write operations that
+# (P348 / ADR-110). Denies Edit/Write operations that
 # introduce `human-oversight: confirmed` into a docs/decisions/ ADR's
 # frontmatter unless a session-scoped evidence marker proves the user has
 # substance-confirmed THAT specific ADR via AskUserQuestion.

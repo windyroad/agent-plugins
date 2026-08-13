@@ -22,7 +22,7 @@ estimated-effort: M
 
 ## User value (INVEST Valuable)
 
-As a maintainer working a Known Error problem, I want a deterministic Problem → RFC → Story dispatch in manage-problem § Working a Problem so that "implement the fix" is concretely traceable — read the problem's Fix Strategy, traverse referenced RFCs in order, pick the first not-done story from each RFC's frontmatter `stories:` array, implement scope-bounded to the story, attribute via `Refs: STORY-NNN` trailer.
+In order that "implement the fix" names a specific next action instead of a direction to figure out, as a maintainer working a Known Error, I want manage-problem to traverse the problem's RFCs in order, pick the first not-done story, and scope the work to that story alone.
 
 ## Acceptance criteria (INVEST Testable)
 
@@ -59,3 +59,10 @@ Two fallback paths (atomic-RFC empty-stories + legacy no-RFC) preserve all Phase
 - ADR-060 line 307 + nitpick N2 (single-trailer vocabulary).
 - RFC-003 (parent RFC).
 - Commit `d0cd2a2`.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-001 | STORY-MAP-001: RFC framework Phase 1 + Phase 2 bootstrap | in-progress |

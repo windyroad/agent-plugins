@@ -130,7 +130,7 @@ esac
 # assess. The architect-oversight-marker-discipline.sh hook remains the
 # safety net: marker-only diffs that introduce `human-oversight:
 # confirmed` still require the per-ADR session evidence marker (P348 /
-# ADR-066 amendment 2026-06-02). Mixed marker+body diffs, status:/date:
+# ADR-110). Mixed marker+body diffs, status:/date:
 # changes, and pure body changes fall through to the normal gate.
 case "$FILE_PATH" in
   */docs/decisions/*.md|docs/decisions/*.md)

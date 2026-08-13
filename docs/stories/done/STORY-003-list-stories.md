@@ -22,7 +22,7 @@ estimated-effort: S
 
 ## User value (INVEST Valuable)
 
-As a plugin maintainer or AFK orchestrator, I want a read-only `/wr-itil:list-stories` view that renders stories grouped by lifecycle state OR filtered by `--rfc RFC-NNN` in the RFC's frontmatter execution order, so I can see the story corpus at a glance and dispatch the next not-done story under any RFC.
+In order to see the whole story corpus at a glance and pick up the next piece of work without opening files one by one, as a plugin maintainer or an unattended orchestrator, I want a read-only `/wr-itil:list-stories` view grouped by lifecycle state, or filtered to one RFC in its execution order.
 
 ## Acceptance criteria (INVEST Testable)
 
@@ -57,3 +57,10 @@ Mirrors `list-problems` precedent (P071 phased-landing split per ADR-010). Archi
 - ADR-060 line 294 (skill description authority).
 - RFC-003 (parent RFC).
 - Commit `c5b21ed`.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-001 | STORY-MAP-001: RFC framework Phase 1 + Phase 2 bootstrap | in-progress |

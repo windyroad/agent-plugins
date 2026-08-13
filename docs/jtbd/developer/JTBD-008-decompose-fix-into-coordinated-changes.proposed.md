@@ -67,7 +67,6 @@ None of these compose well with WSJF prioritisation when phases need to compete 
 - Jeff Patton, *User Story Mapping* (O'Reilly, 2014) — backbone/ribs/slices canonical reference for capture-time work decomposition. Applied at RFC level in ADR-060 Phase 2; applied at this JTBD's capture-time-scoping outcome.
 - ITIL 4 Foundation, Change Enablement practice — RFC lifecycle conventions. The framework adopts the lifecycle mirror but rejects ITIL's split between Service Request and Problem (per ADR-060 invariant 2).
 
-
 ## Stories
 
 | ID | Title | Status |
@@ -101,3 +100,11 @@ None of these compose well with WSJF prioritisation when phases need to compete 
 | STORY-031 | STORY-031: Tell the reporter it's released → verify → close the loop | draft |
 | STORY-032 | STORY-032: Triage the report's disposition — accept, elicit a new job, or decline | draft |
 | STORY-035 | STORY-035: Home RFC decisions in ADRs and make the RFC-first trace unconditional | draft |
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-002 | STORY-MAP-002: Decompose a fix into coordinated changes | draft |
+| STORY-MAP-001 | STORY-MAP-001: RFC framework Phase 1 + Phase 2 bootstrap | in-progress |

@@ -10,10 +10,12 @@ Sibling to `/wr-itil:reconcile-readme` (P118 / ADR-014) and `/wr-itil:reconcile-
 
 **Diagnose-only mechanic** — wraps `packages/itil/scripts/reconcile-stories.sh` (resolved via `wr-itil-reconcile-stories` `$PATH` shim per ADR-049). The script reads `docs/stories/<state>/STORY-NNN-*.md` files across all 5 lifecycle subdirs (draft, accepted, in-progress, done, archived), parses `docs/stories/README.md`'s Story Rankings + Done tables, and reports each disagreement. Exit codes: `0` clean, `1` drift detected (structured stdout), `2` parse error.
 
-**Reverse-trace pass** — when `docs/problems/`, `docs/rfcs/`, and `docs/jtbd/` exist on disk (the default project layout), the reconciler ALSO checks the auto-maintained `## Stories` section on each parent artefact against the story frontmatter's `problems:` / `rfcs:` / `jtbd:` claims. Three drift kinds per parent tier (mirrors the RFC-tier reverse-trace contract):
+**Reverse-trace pass** — when the parent directories exist, the reconciler checks auto-maintained `## Stories` sections on problem, JTBD and legacy RFC files. For an ADR-103 row-backed RFC, it checks the map row instead: the RFC must resolve and the row must contain the story card.
 - `MISSING_REVERSE_TRACE STORY-NNN in <PARENT-ID> ## Stories` — story claims parent but parent's `## Stories` table doesn't list the story
 - `STALE_REVERSE_TRACE STORY-NNN in <PARENT-ID> ## Stories` — parent lists the story but story no longer claims the parent
 - `STATUS_MISMATCH STORY-NNN in <PARENT-ID> ## Stories claims=<X> actual=<Y>` — parent's row claims one lifecycle status; story's filesystem subdir is a different state
+- `UNRESOLVED_RFC_TRACE STORY-NNN claims=RFC-NNN` — neither a legacy RFC file nor a story-map release row exists
+- `MISSING_REVERSE_TRACE STORY-NNN in RFC-NNN release row` — the release row exists but does not contain the story card
 
 ## When to invoke
 
@@ -30,7 +32,7 @@ Sibling to `/wr-itil:reconcile-readme` (P118 / ADR-014) and `/wr-itil:reconcile-
 ### 1. Run the diagnose script
 
 ```bash
-wr-itil-reconcile-stories docs/stories docs/problems docs/rfcs docs/jtbd > /tmp/wr-itil-stories-drift-$$.txt
+wr-itil-reconcile-stories docs/stories docs/problems docs/rfcs docs/jtbd docs/story-maps > /tmp/wr-itil-stories-drift-$$.txt
 reconcile_exit=$?
 ```
 
@@ -47,6 +49,7 @@ Read `/tmp/wr-itil-stories-drift-$$.txt` line by line. Each line is one of:
 - `MISSING_REVERSE_TRACE STORY-NNN in <PARENT-ID> ## Stories` — parent's `## Stories` section needs the story added; call `update-<parent-kind>-references-section.sh <parent-file> "Stories"` to refresh.
 - `STALE_REVERSE_TRACE STORY-NNN in <PARENT-ID> ## Stories` — parent's `## Stories` section needs the story removed; same helper call (idempotent, lazy-empty discipline removes when no traces remain).
 - `STATUS_MISMATCH STORY-NNN in <PARENT-ID> ## Stories claims=<X> actual=<Y>` — same helper call refreshes the status column.
+- `UNRESOLVED_RFC_TRACE` / row `MISSING_REVERSE_TRACE` — repair the map's release row or card through `/wr-itil:manage-story-map`; do not create an empty RFC file.
 
 ### 3. Apply edits
 

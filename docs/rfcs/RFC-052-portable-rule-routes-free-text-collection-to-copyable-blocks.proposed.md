@@ -17,7 +17,7 @@ stories: []
 **Problems**: P438 (the assistant collects free text — URLs, tokens, IDs, paths — through the bounded-options picker, which has no field the user can paste into)
 **ADRs**: ADR-013 (Structured user interaction for governance-skill decisions — Rule 1 carries the precondition this fix restores), ADR-026 (agent output grounding), ADR-038 (progressive disclosure + once-per-session budget for `UserPromptSubmit` governance prose — its 150-byte terse ceiling is a live constraint on one candidate mechanism), ADR-045 (hook injection budget), ADR-052 (behavioural tests default), ADR-070 (RFCs hold no independent decisions), ADR-073 (RFC-first — an approach-choice not covered by the existing corpus needs a ratified ADR before implementation)
 **JTBD**: JTBD-011 (have a correction to the agent's conduct hold everywhere), JTBD-101 (extend the suite — secondary, the shipping half)
-**Story maps**: STORY-MAP-007 (A correction to the agent's conduct holds in every project)
+**Story maps**: STORY-MAP-011 (Trust the AFK loop's autonomous conduct)
 
 ## Summary
 
@@ -126,7 +126,7 @@ blocks, and a genuinely bounded choice still arrives as `AskUserQuestion`.
 
 The machine-read `stories:` array is deliberately empty; the human-readable trace is here.
 
-- **STORY-049** — Ask for a URL in a shape I can paste into. On **STORY-MAP-007**, rib
+- **STORY-049** — Ask for a URL in a shape I can paste into. On **STORY-MAP-011**, rib
   "Answerable prompts". Status `draft`, `human-oversight: unconfirmed`, estimated effort M.
   Its acceptance criteria cover the whole unbounded-input class — URL, token, ID, file path —
   not URLs alone; the title names the witnessed instance.
@@ -151,7 +151,7 @@ atomic fallback that ADR-089 and ADR-071 disavowed.
        point. -->
 - **P445's rule** (unsolicited off-ramps, hedging, self-narration). Same job, same map, second
   rib — but it is a different rule with its own content, and it has no story yet. It rides
-  STORY-MAP-007 rather than minting a parallel map.
+  STORY-MAP-011 rather than minting a parallel map.
 - **No changeset is authored in this vehicle-authoring commit.** A changeset describing a fix
   that does not yet exist in the package is untruthful release metadata, which is the
   distinction ADR-099 draws. It lands with the code, in the implementation slice.
@@ -162,7 +162,7 @@ atomic fallback that ADR-089 and ADR-071 disavowed.
 
 ## Related
 
-- **P438** (driving problem, inbound #324), **STORY-MAP-007** (the map), **STORY-049** (the
+- **P438** (driving problem, inbound #324), **STORY-MAP-011** (the map), **STORY-049** (the
   story), **JTBD-011** (the grounding job, authored in the same commit).
 - **P423** — the master class: a correction that should govern the plugins or their adopters
   must land as a shipped surface, never as project-local memory. This RFC's scope obeys it.

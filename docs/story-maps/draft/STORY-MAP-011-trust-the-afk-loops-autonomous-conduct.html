@@ -7,87 +7,447 @@
   <meta name="story-map-id" content="STORY-MAP-011">
   <meta name="status" content="draft">
   <meta name="persona" content="developer">
-  <meta name="problems" content="P430,P434,P433">
-  <meta name="rfcs" content="RFC-050,RFC-056,RFC-057">
-  <meta name="jtbd" content="JTBD-006,JTBD-001,JTBD-002">
-  <meta name="adrs" content="ADR-101">
+  <meta name="secondary-persona" content="plugin-developer">
+  <meta name="problems" content="P375,P430,P431,P433,P434,P438,P439,P487">
+  <meta name="rfcs" content="RFC-050,RFC-051,RFC-052,RFC-053,RFC-056,RFC-057,RFC-065,RFC-066">
+  <meta name="jtbd" content="JTBD-006,JTBD-001,JTBD-002,JTBD-011,JTBD-101">
   <meta name="reported" content="2026-07-27">
   <meta name="decision-makers" content="Tom Howard">
-  <meta name="human-oversight" content="unconfirmed">
-  <style>
-    :root { color-scheme: light; }
-    body { font-family: system-ui, sans-serif; max-width: 1200px; margin: 1rem auto; padding: 0 1rem; line-height: 1.5; }
-    h1 { font-size: 1.5rem; }
-    h2 { font-size: 1.125rem; margin-top: 1.5rem; }
-    p { max-width: 74ch; }
-    .lead { color: #565656; }
-    .backbone { display: grid; grid-template-columns: repeat(var(--cols), 1fr); gap: 1rem; margin-bottom: 2rem; }
-    .rib-header { grid-column: 1 / -1; border-bottom: 1px solid #767676; padding-bottom: 0.25rem; }
-    .rib-header .step { color: #565656; font-weight: 400; font-size: .8rem; display: block; margin-top: .15rem; }
-    /* .rib is intentionally a bare <div>: no role, no name, no tabindex, so it computes to
-       `generic` and is pruned from the a11y tree whatever its display value — display:contents
-       costs nothing here. All three declarations are required — subgrid alone is inert on a
-       display:contents box, and a grid item spans one column by default:
-         .rib { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; }
-       Focus order matches visual order only because placement is left to default row-major
-       auto-flow: keep one .rib per .backbone, and never set grid-auto-flow: column, dense,
-       order, grid-row or grid-column on a .slice. Sibling .backbone sections are the way to add
-       a rib. --cols is the number of slices laid out per row within one rib. Bare 1fr is
-       minmax(auto, 1fr); at --cols: 1 it is inert, but raise --cols above 1 and also want
-       minmax(0, 1fr) plus .slice { overflow-wrap: anywhere; }. outline-offset: 2px is
-       load-bearing: it interposes white between the #767676 resting border and the #0b3a66
-       focus ring; at offset 0 those adjoin at 2.55:1. */
-    .rib { display: contents; }
-    .slice { border: 1px solid #767676; border-radius: 6px; padding: 0.6rem 0.7rem; text-decoration: none; color: inherit; display: block; }
-    .slice .s-value { display: block; color: #565656; font-size: .8rem; margin-top: .3rem; }
-    .slice .s-ref { display: block; color: #565656; font-size: .72rem; margin-top: .3rem; }
-    .slice:hover,
-    .slice:focus-visible { border-color: #0b3a66; }
-    .slice:hover .s-title,
-    .slice:focus-visible .s-title { text-decoration: underline; }
-    .slice:focus-visible { outline: 3px solid #0b3a66; outline-offset: 2px; }
-    .map-note { color: #565656; font-size: .85rem; max-width: 74ch; }
-  </style>
+  <meta name="human-oversight" content="confirmed">
+  <meta name="oversight-hash" content="6bcbbef4b090e2af35a4f9143e293e0144c7086bb384bf2953e7ee4b6876cec4">
+  <link rel="stylesheet" href="../story-map.css">
 </head>
 <body>
   <main>
-    <h1>Trust the AFK loop's autonomous conduct</h1>
-    <p class="lead">A story map for the <strong>developer</strong> who starts <code>/wr-itil:work-problems</code> and walks away. Each rib is one thing the unattended loop must get right for its output to be trustworthy: my corrections land as real records, the tickets it writes say only what was verified, and a close doesn't quietly strand related work. Read the ribs top to bottom as the journey from "the agent noticed" to "the record it left is sound." Each slice links to its story; the backbone, ribs, and slices are refined at the <code>/wr-itil:manage-story-map</code> accepted transition.</p>
-
-    <section class="backbone" style="--cols: 1">
-      <header class="rib-header">
-        <h2 data-rib="faithful-correction-capture">Capture my corrections faithfully</h2>
-        <span class="step">Activity A: when I tell the agent it got something wrong, that becomes a durable record; when I didn't, nothing fires.</span>
-      </header>
-      <div class="rib">
-        <a class="slice" href="../../stories/draft/STORY-047-correction-nudge-fires-only-on-user-authored-prompts.md"
-           data-story-id="STORY-047" data-rfc="RFC-050" data-jtbd="JTBD-006" data-status="draft"><span class="s-title">The correction offer fires only when I actually corrected the agent, not on the framework's own iteration prompts</span><span class="s-value">Value: a rare, pointed signal I can trust, instead of a nudge on nearly every autonomous iteration.</span><span class="s-ref">STORY-047, P430 (inbound #257), RFC-050</span></a>
-      </div>
-    </section>
-
-    <section class="backbone" style="--cols: 1">
-      <header class="rib-header">
-        <h2 data-rib="verified-before-recorded">Say only what was verified</h2>
-        <span class="step">Activity B: a ticket is read downstream as ground truth, so an untested claim must not wear the same authority as a confirmed finding.</span>
-      </header>
-      <div class="rib">
-        <a class="slice" href="../../stories/draft/STORY-053-test-claims-against-the-tree-and-label-the-untested-ones.md"
-           data-story-id="STORY-053" data-rfc="RFC-057" data-jtbd="JTBD-002" data-status="draft"><span class="s-title">A captured ticket tests its claims against the tree and labels the ones it could not run as guesses</span><span class="s-value">Value: no phantom tickets, no fix aimed at a problem that a quick grep would have disproved.</span><span class="s-ref">STORY-053, P434 (inbound #202/#339), RFC-057</span></a>
-      </div>
-    </section>
-
-    <section class="backbone" style="--cols: 1">
-      <header class="rib-header">
-        <h2 data-rib="close-without-stranding">Close without stranding the family</h2>
-        <span class="step">Activity C: when one ticket closes, the still-open siblings in its friction family must not silently fall out of sync.</span>
-      </header>
-      <div class="rib">
-        <a class="slice" href="../../stories/draft/STORY-052-surface-still-outstanding-family-members-before-a-close.md"
-           data-story-id="STORY-052" data-rfc="RFC-056" data-jtbd="JTBD-001" data-status="draft"><span class="s-title">Before a close lands, the agent shows me the still-open siblings in the same family</span><span class="s-value">Value: related work stays coordinated; a close never quietly orphans its siblings.</span><span class="s-ref">STORY-052, P433 (inbound #187), RFC-056</span></a>
-      </div>
-    </section>
-
-    <p class="map-note">This map consolidates three per-fix stub maps (STORY-MAP-005 correction-signal, STORY-MAP-009 sibling-family, and STORY-MAP-010 verified-ticket) into one developer-conduct journey per P473 &mdash; the honest unit is the journey, not the single fix. Each rib grows more slices as further conduct fixes drive stories rather than minting sibling maps. Landing order is governed by ADR-101 (an AFK loop may accept and implement a story that only decomposes already-confirmed substance): STORY-047's parents are all confirmed, so it lands first; the others land as their traces confirm. Slices link to Markdown story files.</p>
+    <h1 id="story-map-title">Trust the AFK loop's autonomous conduct</h1>
+    <p class="orient"><strong>Agreed.</strong> 8 releases, 8 stories, one release per row.</p>
+    <div id="story-map"><div class="scroll" tabindex="0" role="region" aria-label="Story map grid"><table class="map"><caption>Trust the AFK loop's autonomous conduct — 5 journey activities across 8 releases</caption><thead><tr><td class="corner"></td><th class="act" scope="col">A. Notice something <span class="jtbd">JTBD-006 — progress the backlog while I am away</span></th><th class="act" scope="col">B. Record it <span class="jtbd">claims tested against the tree</span></th><th class="act" scope="col">C. Decide what to do</th><th class="act" scope="col">D. Close it out <span class="jtbd">JTBD-001 — enforce governance without slowing down</span></th><th class="act" scope="col">E. Hand back to me <span class="jtbd">JTBD-011 — a correction holds everywhere</span></th></tr></thead><tbody><tr><th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>RFC-050</span> <span class="s-name">A correction offer fires only on a real correction</span><span class="s-problems">closes <a href="../../problems/known-error/430-itil-correction-detect-hook-false-positives-on-afk-orchestrator-prompt-text.md" class="ref-link">P430</a></span></th><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-047" data-rfc="RFC-050" data-jtbd="JTBD-006" data-status="accepted"><div class="t-status ts-acc"><span class="ts-glyph" aria-hidden="true">○</span>Accepted</div><a href="../../stories/accepted/STORY-047-correction-nudge-fires-only-on-user-authored-prompts.md" class="ref-link"><span class="t-title">The offer to capture a correction fires only when I actually corrected the agent, not on the framework's own prompts</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>keep the capture-on-correction nudge meaningful — so that seeing it means a real correction happened, rather than the framework's own iteration prompt containing the words &quot;do not&quot;</div><div class="v-line v-asa"><span class="v-lead">as </span>a developer running autonomous backlog loops</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the detector to know who authored the prompt, so an absent user is never nudged to capture a correction they did not make, and a real correction still lands as a durable problem record.</div></div><div class="t-ref">Traces: <a href="../../stories/accepted/STORY-047-correction-nudge-fires-only-on-user-authored-prompts.md" class="ref-link">STORY-047</a>, <a href="../../problems/known-error/430-itil-correction-detect-hook-false-positives-on-afk-orchestrator-prompt-text.md" class="ref-link">P430</a> (inbound #257)</div></div></li></ul></td><td class="cell empty"><span class="vh">No stories for B. Record it in A correction offer fires only on a real correction.</span></td><td class="cell empty"><span class="vh">No stories for C. Decide what to do in A correction offer fires only on a real correction.</span></td><td class="cell empty"><span class="vh">No stories for D. Close it out in A correction offer fires only on a real correction.</span></td><td class="cell empty"><span class="vh">No stories for E. Hand back to me in A correction offer fires only on a real correction.</span></td></tr><tr><th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>RFC-051</span> <span class="s-name">A declined upstream chase stays declined</span><span class="s-problems">closes <a href="../../problems/known-error/431-check-upstream-cache-staleness-misfires-on-declined-permanently-empty-channels.md" class="ref-link">P431</a></span></th><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-048" data-rfc="RFC-051" data-jtbd="JTBD-006" data-status="draft"><div class="t-status ts-draft">Draft</div><a href="../../stories/draft/STORY-048-inbound-discovery-preflight-honours-an-empty-channel-list.md" class="ref-link"><span class="t-title">A decision to decline upstream discovery is remembered, so I am not asked again</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>have &quot;no thanks&quot; stay answered — so that declining upstream discovery costs nothing rather than a full pre-flight subprocess on every loop, forever</div><div class="v-line v-asa"><span class="v-lead">as </span>a developer running autonomous backlog loops</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the staleness check to read the channel list it was given, so a recorded decline silent-passes the way an absent config already does.</div></div><div class="t-ref">Traces: <a href="../../stories/draft/STORY-048-inbound-discovery-preflight-honours-an-empty-channel-list.md" class="ref-link">STORY-048</a>, <a href="../../problems/known-error/431-check-upstream-cache-staleness-misfires-on-declined-permanently-empty-channels.md" class="ref-link">P431</a> (inbound #187)</div></div></li></ul></td><td class="cell empty"><span class="vh">No stories for B. Record it in A declined upstream chase stays declined.</span></td><td class="cell empty"><span class="vh">No stories for C. Decide what to do in A declined upstream chase stays declined.</span></td><td class="cell empty"><span class="vh">No stories for D. Close it out in A declined upstream chase stays declined.</span></td><td class="cell empty"><span class="vh">No stories for E. Hand back to me in A declined upstream chase stays declined.</span></td></tr><tr><th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>RFC-052</span> <span class="s-name">The loop asks for input in a shape I can act on</span><span class="s-problems">closes <a href="../../problems/known-error/438-assistant-routes-free-text-collection-through-askuserquestion-not-copyable-blocks.md" class="ref-link">P438</a></span></th><td class="cell empty"><span class="vh">No stories for A. Notice something in The loop asks for input in a shape I can act on.</span></td><td class="cell empty"><span class="vh">No stories for B. Record it in The loop asks for input in a shape I can act on.</span></td><td class="cell empty"><span class="vh">No stories for C. Decide what to do in The loop asks for input in a shape I can act on.</span></td><td class="cell empty"><span class="vh">No stories for D. Close it out in The loop asks for input in a shape I can act on.</span></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-049" data-rfc="RFC-052" data-jtbd="JTBD-011" data-status="draft"><div class="t-status ts-draft">Draft</div><a href="../../stories/draft/STORY-049-ask-for-a-url-in-a-shape-i-can-paste-into.md" class="ref-link"><span class="t-title">When the loop needs a URL from me, it asks in a shape I can paste into</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>paste a long URL without fighting a bounded-option picker — so that handing the agent a link, a token or a path costs one gesture instead of three corrections</div><div class="v-line v-asa"><span class="v-lead">as </span>a developer</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the assistant to present one copyable block per free-text item.</div></div><div class="t-ref">Traces: <a href="../../stories/draft/STORY-049-ask-for-a-url-in-a-shape-i-can-paste-into.md" class="ref-link">STORY-049</a>, <a href="../../problems/known-error/438-assistant-routes-free-text-collection-through-askuserquestion-not-copyable-blocks.md" class="ref-link">P438</a></div></div></li></ul></td></tr><tr><th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>RFC-053</span> <span class="s-name">A reviewer reads the version I actually have</span><span class="s-problems">closes <a href="../../problems/known-error/439-external-review-round-trips-waste-cycles-on-stale-repo-artifacts.md" class="ref-link">P439</a></span></th><td class="cell empty"><span class="vh">No stories for A. Notice something in A reviewer reads the version I actually have.</span></td><td class="cell empty"><span class="vh">No stories for B. Record it in A reviewer reads the version I actually have.</span></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-050" data-rfc="RFC-053" data-jtbd="JTBD-011" data-status="draft"><div class="t-status ts-draft">Draft</div><a href="../../stories/draft/STORY-050-have-my-reviewer-read-the-version-i-actually-have.md" class="ref-link"><span class="t-title">A reviewer reads the version I actually have, not the one that has moved on since</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>get a review of the version I actually have — so that a round-trip is spent on problems that are still real rather than on ones I fixed before I asked</div><div class="v-line v-asa"><span class="v-lead">as </span>a developer</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the assistant to establish that an outside reviewer can reach the current content before it relays anything to them.</div></div><div class="t-ref">Traces: <a href="../../stories/draft/STORY-050-have-my-reviewer-read-the-version-i-actually-have.md" class="ref-link">STORY-050</a>, <a href="../../problems/known-error/439-external-review-round-trips-waste-cycles-on-stale-repo-artifacts.md" class="ref-link">P439</a></div></div></li></ul></td><td class="cell empty"><span class="vh">No stories for D. Close it out in A reviewer reads the version I actually have.</span></td><td class="cell empty"><span class="vh">No stories for E. Hand back to me in A reviewer reads the version I actually have.</span></td></tr><tr><th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>RFC-056</span> <span class="s-name">A close accounts for its still-open siblings</span><span class="s-problems">closes <a href="../../problems/known-error/433-transition-review-run-retro-lack-sibling-family-completeness-scan-before-close.md" class="ref-link">P433</a></span></th><td class="cell empty"><span class="vh">No stories for A. Notice something in A close accounts for its still-open siblings.</span></td><td class="cell empty"><span class="vh">No stories for B. Record it in A close accounts for its still-open siblings.</span></td><td class="cell empty"><span class="vh">No stories for C. Decide what to do in A close accounts for its still-open siblings.</span></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-052" data-rfc="RFC-056" data-jtbd="JTBD-001" data-status="draft"><div class="t-status ts-draft">Draft</div><a href="../../stories/draft/STORY-052-surface-still-outstanding-family-members-before-a-close.md" class="ref-link"><span class="t-title">Before a close lands, the still-open siblings in the same family are surfaced</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>know that closing a ticket settles the work it belongs with, rather than quietly leaving related tickets behind</div><div class="v-line v-asa"><span class="v-lead">as </span>a developer draining a WSJF backlog — often while away from the keyboard</div><div class="v-line v-iwant"><span class="v-lead">I want </span>each close path to tell me which tickets the closing one is recorded as composing with are still outstanding, and to put that call in front of me instead of making it silently or blocking on it.</div></div><div class="t-ref">Traces: <a href="../../stories/draft/STORY-052-surface-still-outstanding-family-members-before-a-close.md" class="ref-link">STORY-052</a>, <a href="../../problems/known-error/433-transition-review-run-retro-lack-sibling-family-completeness-scan-before-close.md" class="ref-link">P433</a> (inbound #187)</div></div></li></ul></td><td class="cell empty"><span class="vh">No stories for E. Hand back to me in A close accounts for its still-open siblings.</span></td></tr><tr><th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>RFC-057</span> <span class="s-name">A captured ticket is checked against the tree</span><span class="s-problems">closes <a href="../../problems/known-error/434-capture-flows-write-unverified-premise-and-root-cause-claims-as-fact.md" class="ref-link">P434</a></span></th><td class="cell empty"><span class="vh">No stories for A. Notice something in A captured ticket is checked against the tree.</span></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-053" data-rfc="RFC-057" data-jtbd="JTBD-002" data-status="draft"><div class="t-status ts-draft">Draft</div><a href="../../stories/draft/STORY-053-test-claims-against-the-tree-and-label-the-untested-ones.md" class="ref-link"><span class="t-title">A captured ticket tests its claims against the tree and labels the ones it could not run as guesses</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>be able to trust a problem ticket as a statement of what is actually true, rather than a transcript of what somebody asserted</div><div class="v-line v-asa"><span class="v-lead">as </span>a developer who plans fixes from those tickets and has no separate review step to catch a wrong premise</div><div class="v-line v-iwant"><span class="v-lead">I want </span>capture to test the claims that can be tested against the tree, and to mark the ones it could not test as guesses instead of writing them in the same voice as findings.</div></div><div class="t-ref">Traces: <a href="../../stories/draft/STORY-053-test-claims-against-the-tree-and-label-the-untested-ones.md" class="ref-link">STORY-053</a>, <a href="../../problems/known-error/434-capture-flows-write-unverified-premise-and-root-cause-claims-as-fact.md" class="ref-link">P434</a> (inbound #202/#339)</div></div></li></ul></td><td class="cell empty"><span class="vh">No stories for C. Decide what to do in A captured ticket is checked against the tree.</span></td><td class="cell empty"><span class="vh">No stories for D. Close it out in A captured ticket is checked against the tree.</span></td><td class="cell empty"><span class="vh">No stories for E. Hand back to me in A captured ticket is checked against the tree.</span></td></tr><tr><th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>RFC-065</span> <span class="s-name">A run records what it chose between</span><span class="s-problems">closes <a href="../../problems/open/487-the-loop-overwrites-the-ranking-that-justified-its-own-choices.md" class="ref-link">P487</a></span></th><td class="cell empty"><span class="vh">No stories for A. Notice something in A run records what it chose between.</span></td><td class="cell empty"><span class="vh">No stories for B. Record it in A run records what it chose between.</span></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-059" data-status="draft"><div class="t-status ts-draft">Draft</div><a href="../../stories/draft/STORY-059-see-why-the-loop-did-not-work-what-i-expected.md" class="ref-link"><span class="t-title">The loop's choice of what to work next is legible to me afterwards</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>find out why something I expected to be worked was not</div><div class="v-line v-asa"><span class="v-lead">as </span>a developer surprised by the morning summary of a loop that chose for itself overnight</div><div class="v-line v-iwant"><span class="v-lead">I want </span>to see whether that ticket was outranked, skipped for a stated reason, or never considered at all — so I can tell an ordering I disagree with from one the loop never made.</div></div><div class="t-ref">Traces: <a href="../../stories/draft/STORY-059-see-why-the-loop-did-not-work-what-i-expected.md" class="ref-link">STORY-059</a>, <a href="../../problems/open/487-the-loop-overwrites-the-ranking-that-justified-its-own-choices.md" class="ref-link">P487</a></div></div></li></ul></td><td class="cell empty"><span class="vh">No stories for D. Close it out in A run records what it chose between.</span></td><td class="cell empty"><span class="vh">No stories for E. Hand back to me in A run records what it chose between.</span></td></tr><tr><th class="slice" scope="row"><span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>RFC-066</span> <span class="s-name">A capture carries the evidence it is real</span><span class="s-problems">closes <a href="../../problems/known-error/375-repo-conflates-named-re-entry-point-with-self-firing-cadence.md" class="ref-link">P375</a></span></th><td class="cell empty"><span class="vh">No stories for A. Notice something in A capture carries the evidence it is real.</span></td><td class="cell"><ul class="tasks" role="list"><li><div class="task" data-story-id="STORY-060" data-status="draft"><div class="t-status ts-draft">Draft</div><a href="../../stories/draft/STORY-060-pick-up-a-captured-ticket-and-know-what-was-observed.md" class="ref-link"><span class="t-title">A ticket the loop writes reads as though a person wrote it for the next reader</span></a><div class="t-value"><div class="v-line v-inorder"><span class="v-lead">In order to </span>work a problem against evidence rather than against my own reconstruction of it</div><div class="v-line v-asa"><span class="v-lead">as </span>whoever picks the ticket up — usually an agent with no memory of the session that wrote it</div><div class="v-line v-iwant"><span class="v-lead">I want </span>the capture to state what was observed, so the work starts from a finding instead of from an inference about one.</div></div><div class="t-ref">Traces: <a href="../../stories/draft/STORY-060-pick-up-a-captured-ticket-and-know-what-was-observed.md" class="ref-link">STORY-060</a>, <a href="../../problems/known-error/375-repo-conflates-named-re-entry-point-with-self-firing-cadence.md" class="ref-link">P375</a></div></div></li></ul></td><td class="cell empty"><span class="vh">No stories for C. Decide what to do in A capture carries the evidence it is real.</span></td><td class="cell empty"><span class="vh">No stories for D. Close it out in A capture carries the evidence it is real.</span></td><td class="cell empty"><span class="vh">No stories for E. Hand back to me in A capture carries the evidence it is real.</span></td></tr></tbody></table></div></div>
+<p class="traces" id="story-map-traces"><span class="tr-group"><strong>Jobs:</strong> <a href="../../jtbd/developer/JTBD-006-work-backlog-afk.proposed.md" class="ref-link">JTBD-006</a>, <a href="../../jtbd/developer/JTBD-001-enforce-governance.proposed.md" class="ref-link">JTBD-001</a>, <a href="../../jtbd/developer/JTBD-002-ship-with-confidence.proposed.md" class="ref-link">JTBD-002</a>, <a href="../../jtbd/developer/JTBD-011-corrected-conduct-holds-everywhere.proposed.md" class="ref-link">JTBD-011</a>, <a href="../../jtbd/plugin-developer/JTBD-101-extend-suite.proposed.md" class="ref-link">JTBD-101</a></span></p>
   </main>
+
+
+  <script id="story-map-data" type="application/json">
+{
+  "humanOversight": "confirmed",
+  "oversightHash": "6bcbbef4b090e2af35a4f9143e293e0144c7086bb384bf2953e7ee4b6876cec4",
+  "storyMapId": "STORY-MAP-011",
+  "title": "Trust the AFK loop's autonomous conduct",
+  "status": "draft",
+  "persona": "developer",
+  "secondaryPersona": "plugin-developer",
+  "reported": "2026-07-27",
+  "decisionMakers": "Tom Howard",
+  "traces": {
+    "jtbd": [
+      "JTBD-006",
+      "JTBD-001",
+      "JTBD-002",
+      "JTBD-011",
+      "JTBD-101"
+    ]
+  },
+  "backbone": [
+    {
+      "id": "notice",
+      "title": "A. Notice something",
+      "note": "JTBD-006 — progress the backlog while I am away"
+    },
+    {
+      "id": "record",
+      "title": "B. Record it",
+      "note": "claims tested against the tree"
+    },
+    {
+      "id": "decide",
+      "title": "C. Decide what to do",
+      "note": ""
+    },
+    {
+      "id": "close",
+      "title": "D. Close it out",
+      "note": "JTBD-001 — enforce governance without slowing down"
+    },
+    {
+      "id": "hand",
+      "title": "E. Hand back to me",
+      "note": "JTBD-011 — a correction holds everywhere"
+    }
+  ],
+  "releases": [
+    {
+      "id": "rfc-050",
+      "name": "A correction offer fires only on a real correction",
+      "rfc": "RFC-050"
+    },
+    {
+      "id": "rfc-051",
+      "name": "A declined upstream chase stays declined",
+      "rfc": "RFC-051"
+    },
+    {
+      "id": "rfc-052",
+      "name": "The loop asks for input in a shape I can act on",
+      "rfc": "RFC-052"
+    },
+    {
+      "id": "rfc-053",
+      "name": "A reviewer reads the version I actually have",
+      "rfc": "RFC-053"
+    },
+    {
+      "id": "rfc-056",
+      "name": "A close accounts for its still-open siblings",
+      "rfc": "RFC-056"
+    },
+    {
+      "id": "rfc-057",
+      "name": "A captured ticket is checked against the tree",
+      "rfc": "RFC-057"
+    },
+    {
+      "id": "rfc-065",
+      "name": "A run records what it chose between",
+      "rfc": "RFC-065"
+    },
+    {
+      "id": "rfc-066",
+      "name": "A capture carries the evidence it is real",
+      "rfc": "RFC-066"
+    }
+  ],
+  "tasks": [
+    {
+      "activity": "notice",
+      "release": "rfc-050",
+      "title": "The offer to capture a correction fires only when I actually corrected the agent, not on the framework's own prompts",
+      "storyId": "STORY-047",
+      "rfc": "RFC-050",
+      "jtbd": "JTBD-006",
+      "ref": "STORY-047, P430 (inbound #257)"
+    },
+    {
+      "activity": "notice",
+      "release": "rfc-051",
+      "title": "A decision to decline upstream discovery is remembered, so I am not asked again",
+      "storyId": "STORY-048",
+      "rfc": "RFC-051",
+      "jtbd": "JTBD-006",
+      "ref": "STORY-048, P431 (inbound #187)"
+    },
+    {
+      "activity": "record",
+      "release": "rfc-057",
+      "title": "A captured ticket tests its claims against the tree and labels the ones it could not run as guesses",
+      "storyId": "STORY-053",
+      "rfc": "RFC-057",
+      "jtbd": "JTBD-002",
+      "ref": "STORY-053, P434 (inbound #202/#339)"
+    },
+    {
+      "activity": "close",
+      "release": "rfc-056",
+      "title": "Before a close lands, the still-open siblings in the same family are surfaced",
+      "storyId": "STORY-052",
+      "rfc": "RFC-056",
+      "jtbd": "JTBD-001",
+      "ref": "STORY-052, P433 (inbound #187)"
+    },
+    {
+      "activity": "hand",
+      "release": "rfc-052",
+      "title": "When the loop needs a URL from me, it asks in a shape I can paste into",
+      "storyId": "STORY-049",
+      "rfc": "RFC-052",
+      "jtbd": "JTBD-011",
+      "ref": "STORY-049, P438"
+    },
+    {
+      "activity": "decide",
+      "release": "rfc-053",
+      "title": "A reviewer reads the version I actually have, not the one that has moved on since",
+      "storyId": "STORY-050",
+      "rfc": "RFC-053",
+      "jtbd": "JTBD-011",
+      "ref": "STORY-050, P439"
+    },
+    {
+      "activity": "decide",
+      "release": "rfc-065",
+      "title": "The loop's choice of what to work next is legible to me afterwards",
+      "ref": "STORY-059, P487",
+      "storyId": "STORY-059"
+    },
+    {
+      "activity": "record",
+      "release": "rfc-066",
+      "title": "A ticket the loop writes reads as though a person wrote it for the next reader",
+      "ref": "STORY-060, P375",
+      "storyId": "STORY-060"
+    }
+  ]
+}
+  </script>
+  <script id="story-map-status" type="application/json">
+{
+  "rows": {
+    "rfc-050": "proposed",
+    "rfc-051": "proposed",
+    "rfc-052": "proposed",
+    "rfc-053": "proposed",
+    "rfc-056": "proposed",
+    "rfc-057": "proposed",
+    "rfc-065": "proposed",
+    "rfc-066": "proposed"
+  },
+  "rowProblems": {
+    "rfc-050": [
+      "P430"
+    ],
+    "rfc-051": [
+      "P431"
+    ],
+    "rfc-052": [
+      "P438"
+    ],
+    "rfc-053": [
+      "P439"
+    ],
+    "rfc-056": [
+      "P433"
+    ],
+    "rfc-057": [
+      "P434"
+    ],
+    "rfc-065": [
+      "P487"
+    ],
+    "rfc-066": [
+      "P375"
+    ]
+  },
+  "mapProblems": [
+    "P375",
+    "P430",
+    "P431",
+    "P433",
+    "P434",
+    "P438",
+    "P439",
+    "P487"
+  ],
+  "status": {
+    "STORY-047": "accepted",
+    "STORY-048": "draft",
+    "STORY-053": "draft",
+    "STORY-052": "draft",
+    "STORY-049": "draft",
+    "STORY-050": "draft",
+    "STORY-059": "draft",
+    "STORY-060": "draft"
+  },
+  "values": {
+    "STORY-047": {
+      "leads": [
+        "In order to",
+        "as",
+        "I want"
+      ],
+      "value": [
+        {
+          "t": "keep the capture-on-correction nudge meaningful — so that seeing it means a real correction happened, rather than the framework's own iteration prompt containing the words \"do not\""
+        }
+      ],
+      "who": [
+        {
+          "t": "a developer running autonomous backlog loops"
+        }
+      ],
+      "want": [
+        {
+          "t": "the detector to know who authored the prompt, so an absent user is never nudged to capture a correction they did not make, and a real correction still lands as a durable problem record."
+        }
+      ]
+    },
+    "STORY-048": {
+      "leads": [
+        "In order to",
+        "as",
+        "I want"
+      ],
+      "value": [
+        {
+          "t": "have \"no thanks\" stay answered — so that declining upstream discovery costs nothing rather than a full pre-flight subprocess on every loop, forever"
+        }
+      ],
+      "who": [
+        {
+          "t": "a developer running autonomous backlog loops"
+        }
+      ],
+      "want": [
+        {
+          "t": "the staleness check to read the channel list it was given, so a recorded decline silent-passes the way an absent config already does."
+        }
+      ]
+    },
+    "STORY-053": {
+      "leads": [
+        "In order to",
+        "as",
+        "I want"
+      ],
+      "value": [
+        {
+          "t": "be able to trust a problem ticket as a statement of what is actually true, rather than a transcript of what somebody asserted"
+        }
+      ],
+      "who": [
+        {
+          "t": "a developer who plans fixes from those tickets and has no separate review step to catch a wrong premise"
+        }
+      ],
+      "want": [
+        {
+          "t": "capture to test the claims that can be tested against the tree, and to mark the ones it could not test as guesses instead of writing them in the same voice as findings."
+        }
+      ]
+    },
+    "STORY-052": {
+      "leads": [
+        "In order to",
+        "as",
+        "I want"
+      ],
+      "value": [
+        {
+          "t": "know that closing a ticket settles the work it belongs with, rather than quietly leaving related tickets behind"
+        }
+      ],
+      "who": [
+        {
+          "t": "a developer draining a WSJF backlog — often while away from the keyboard"
+        }
+      ],
+      "want": [
+        {
+          "t": "each close path to tell me which tickets the closing one is recorded as composing with are still outstanding, and to put that call in front of me instead of making it silently or blocking on it."
+        }
+      ]
+    },
+    "STORY-049": {
+      "leads": [
+        "In order to",
+        "as",
+        "I want"
+      ],
+      "value": [
+        {
+          "t": "paste a long URL without fighting a bounded-option picker — so that handing the agent a link, a token or a path costs one gesture instead of three corrections"
+        }
+      ],
+      "who": [
+        {
+          "t": "a developer"
+        }
+      ],
+      "want": [
+        {
+          "t": "the assistant to present one copyable block per free-text item."
+        }
+      ]
+    },
+    "STORY-050": {
+      "leads": [
+        "In order to",
+        "as",
+        "I want"
+      ],
+      "value": [
+        {
+          "t": "get a review of the version I actually have — so that a round-trip is spent on problems that are still real rather than on ones I fixed before I asked"
+        }
+      ],
+      "who": [
+        {
+          "t": "a developer"
+        }
+      ],
+      "want": [
+        {
+          "t": "the assistant to establish that an outside reviewer can reach the current content before it relays anything to them."
+        }
+      ]
+    },
+    "STORY-059": {
+      "leads": [
+        "In order to",
+        "as",
+        "I want"
+      ],
+      "value": [
+        {
+          "t": "find out why something I expected to be worked was not"
+        }
+      ],
+      "who": [
+        {
+          "t": "a developer surprised by the morning summary of a loop that chose for itself overnight"
+        }
+      ],
+      "want": [
+        {
+          "t": "to see whether that ticket was outranked, skipped for a stated reason, or never considered at all — so I can tell an ordering I disagree with from one the loop never made."
+        }
+      ]
+    },
+    "STORY-060": {
+      "leads": [
+        "In order to",
+        "as",
+        "I want"
+      ],
+      "value": [
+        {
+          "t": "work a problem against evidence rather than against my own reconstruction of it"
+        }
+      ],
+      "who": [
+        {
+          "t": "whoever picks the ticket up — usually an agent with no memory of the session that wrote it"
+        }
+      ],
+      "want": [
+        {
+          "t": "the capture to state what was observed, so the work starts from a finding instead of from an inference about one."
+        }
+      ]
+    }
+  },
+  "hrefs": {
+    "STORY-047": "../../stories/accepted/STORY-047-correction-nudge-fires-only-on-user-authored-prompts.md",
+    "STORY-048": "../../stories/draft/STORY-048-inbound-discovery-preflight-honours-an-empty-channel-list.md",
+    "STORY-053": "../../stories/draft/STORY-053-test-claims-against-the-tree-and-label-the-untested-ones.md",
+    "STORY-052": "../../stories/draft/STORY-052-surface-still-outstanding-family-members-before-a-close.md",
+    "STORY-049": "../../stories/draft/STORY-049-ask-for-a-url-in-a-shape-i-can-paste-into.md",
+    "STORY-050": "../../stories/draft/STORY-050-have-my-reviewer-read-the-version-i-actually-have.md",
+    "STORY-059": "../../stories/draft/STORY-059-see-why-the-loop-did-not-work-what-i-expected.md",
+    "STORY-060": "../../stories/draft/STORY-060-pick-up-a-captured-ticket-and-know-what-was-observed.md",
+    "JTBD-006": "../../jtbd/developer/JTBD-006-work-backlog-afk.proposed.md",
+    "P430": "../../problems/known-error/430-itil-correction-detect-hook-false-positives-on-afk-orchestrator-prompt-text.md",
+    "P431": "../../problems/known-error/431-check-upstream-cache-staleness-misfires-on-declined-permanently-empty-channels.md",
+    "JTBD-002": "../../jtbd/developer/JTBD-002-ship-with-confidence.proposed.md",
+    "P434": "../../problems/known-error/434-capture-flows-write-unverified-premise-and-root-cause-claims-as-fact.md",
+    "JTBD-001": "../../jtbd/developer/JTBD-001-enforce-governance.proposed.md",
+    "P433": "../../problems/known-error/433-transition-review-run-retro-lack-sibling-family-completeness-scan-before-close.md",
+    "JTBD-011": "../../jtbd/developer/JTBD-011-corrected-conduct-holds-everywhere.proposed.md",
+    "P438": "../../problems/known-error/438-assistant-routes-free-text-collection-through-askuserquestion-not-copyable-blocks.md",
+    "P439": "../../problems/known-error/439-external-review-round-trips-waste-cycles-on-stale-repo-artifacts.md",
+    "P487": "../../problems/open/487-the-loop-overwrites-the-ranking-that-justified-its-own-choices.md",
+    "P375": "../../problems/known-error/375-repo-conflates-named-re-entry-point-with-self-firing-cadence.md",
+    "JTBD-101": "../../jtbd/plugin-developer/JTBD-101-extend-suite.proposed.md"
+  }
+}
+  </script>
+
 </body>
 </html>

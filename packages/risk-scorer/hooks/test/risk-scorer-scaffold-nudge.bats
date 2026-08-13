@@ -147,3 +147,53 @@ teardown() {
   [ "$status" -eq 0 ]
   [ -z "$output" ]
 }
+
+@test "the pending-review count excludes retired entries but keeps accepted ones" {
+  # The register's status vocabulary is three-valued: .active.md, .accepted.md
+  # (a risk consciously tolerated) and .retired.md (no longer relevant). The
+  # count is exclusion-shaped — everything except retired — rather than
+  # active-only, because an accepted risk is live and its Impact x Likelihood
+  # is exactly what the curation marker says is still missing. Filtering to
+  # active alone would write those off silently.
+  #
+  # Retired entries are excluded because they put a floor under the count that
+  # curation cannot move: 22 of 69 on 2026-08-09. A count that cannot reach
+  # zero makes the nudge permanent and its reassessment meaningless.
+  local proj="$DIR/threevalued"
+  mkdir -p "$proj/docs/risks"
+  printf 'x\n' > "$proj/RISK-POLICY.md"
+  local marker='**Curation**: pending review (auto-scaffolded 2026-08-09)'
+
+  printf '# R001\n%s\n' "$marker" > "$proj/docs/risks/R001-live.active.md"
+  printf '# R002\n%s\n' "$marker" > "$proj/docs/risks/R002-tolerated.accepted.md"
+  printf '# R003\n%s\n' "$marker" > "$proj/docs/risks/R003-closed.retired.md"
+  printf '# R004\n%s\n' "$marker" > "$proj/docs/risks/R004-closed-too.retired.md"
+
+  run env -u WR_SUPPRESS_OVERSIGHT_NUDGE CLAUDE_PROJECT_DIR="$proj" bash "$HOOK"
+  [ "$status" -eq 0 ]
+
+  # Two countable entries — the active one and the accepted one — not four.
+  # Fixed-string match on the emitted phrase, not a word-boundary regex. `\b`
+  # is a GNU/ugrep extension rather than portable ERE, and this repo has been
+  # reddened twice by grep dialect differing between this machine and CI.
+  echo "$output" | grep -qF '2 standing-risk entries' || {
+    echo "expected a count of 2 (active + accepted), got: $output"; return 1; }
+  echo "$output" | grep -qF '4 standing-risk entries' && {
+    echo "retired entries were counted: $output"; return 1; }
+  true
+}
+
+@test "a register whose only pending entries are retired leaves the hook silent" {
+  # The drainable-to-zero property. Without it the nudge never goes quiet and
+  # its reassessment criterion — did the count reach zero — cannot be met.
+  local proj="$DIR/allretired"
+  mkdir -p "$proj/docs/risks"
+  printf 'x\n' > "$proj/RISK-POLICY.md"
+  printf '# R001\n**Curation**: pending review (auto-scaffolded 2026-08-09)\n' \
+    > "$proj/docs/risks/R001-closed.retired.md"
+
+  run env -u WR_SUPPRESS_OVERSIGHT_NUDGE CLAUDE_PROJECT_DIR="$proj" bash "$HOOK"
+  [ "$status" -eq 0 ]
+  [ -z "$(printf '%s' "$output" | tr -d '[:space:]')" ] || {
+    echo "expected silence, got: $output"; return 1; }
+}

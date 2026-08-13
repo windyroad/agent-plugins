@@ -22,7 +22,7 @@ estimated-effort: L
 
 ## User value (INVEST Valuable)
 
-As a plugin maintainer, I want a heavyweight `/wr-itil:manage-story` skill that handles the full story lifecycle (draft → accepted → in-progress → done → archived) with I7+I8+I10 hard-block at accepted transition, INVEST 4-axis check, auto-transitions on `Refs: STORY-NNN` commit trailers + linked RFC closure, and inline reverse-trace refresh on 4 parent tiers, so that stories progress through their lifecycle with all invariants enforced and parent artefacts stay current.
+In order that a story cannot reach implementation malformed, untraced or unreviewed, as a plugin maintainer, I want a `/wr-itil:manage-story` lifecycle skill that hard-blocks the accepted transition on the trace and INVEST invariants, and refreshes every parent's reverse-trace on each move.
 
 ## Acceptance criteria (INVEST Testable)
 
@@ -63,3 +63,10 @@ Largest skill in the story-tier MVP. Companion to capture-story (Slice 7) per AD
 - ADR-060 line 339 + ADR-053 (bootstrap-exemption marker).
 - RFC-003 (parent RFC).
 - Commit `51de089`.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-001 | STORY-MAP-001: RFC framework Phase 1 + Phase 2 bootstrap | in-progress |

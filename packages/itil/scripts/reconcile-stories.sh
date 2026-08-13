@@ -7,13 +7,14 @@
 # Story Rankings + Done tables, and reports each disagreement.
 #
 # Usage:
-#   reconcile-stories.sh [<stories-dir> [<problems-dir> [<rfcs-dir> [<jtbd-dir>]]]]
+#   reconcile-stories.sh [<stories-dir> [<problems-dir> [<rfcs-dir> [<jtbd-dir> [<story-maps-dir>]]]]]
 #
 # Defaults:
 #   <stories-dir>   = ./docs/stories
 #   <problems-dir>  = ./docs/problems (when supplied + on disk; reverse trace)
 #   <rfcs-dir>      = ./docs/rfcs (when supplied + on disk; reverse trace)
 #   <jtbd-dir>      = ./docs/jtbd (when supplied + on disk; reverse trace)
+#   <story-maps-dir> = ./docs/story-maps (row-backed RFC resolution)
 #
 # Exit codes:
 #   0 = clean (README matches filesystem)
@@ -71,10 +72,12 @@
 
 set -uo pipefail
 
+HERE="$(cd "$(dirname "$0")" && pwd)"
 STORIES_DIR="${1:-docs/stories}"
 PROBLEMS_DIR="${2:-$(dirname "$STORIES_DIR")/problems}"
 RFCS_DIR="${3:-$(dirname "$STORIES_DIR")/rfcs}"
 JTBD_DIR="${4:-$(dirname "$STORIES_DIR")/jtbd}"
+MAPS_DIR="${5:-$(dirname "$STORIES_DIR")/story-maps}"
 README="${STORIES_DIR}/README.md"
 
 # ── Pre-checks ──────────────────────────────────────────────────────────────
@@ -183,6 +186,8 @@ done
 
 reverse_trace_pass() {
   local parent_dir="$1" parent_kind="$2" parent_id_pattern="$3"
+  local -a matches=()
+  local pfile row_json
   [ ! -d "$parent_dir" ] && return 0
 
   shopt -s nullglob globstar
@@ -198,19 +203,35 @@ reverse_trace_pass() {
     parent_claims=$(awk -v k="^${parent_kind}:" '$0 ~ k {gsub(/[][]/,""); gsub(/,/," "); for(i=2;i<=NF;i++)print $i; exit}' "$sf")
     for pid in $parent_claims; do
       # Resolve parent file under parent_dir
+      matches=()
       case "$parent_kind" in
         problems)
           pnum="${pid#P}"
-          pfile=$(ls "$parent_dir"/${pnum}-*.md "$parent_dir"/*/${pnum}-*.md 2>/dev/null | head -1)
+          matches=("$parent_dir"/${pnum}-*.md "$parent_dir"/*/${pnum}-*.md)
           ;;
         rfcs)
-          pfile=$(ls "$parent_dir"/${pid}-*.md 2>/dev/null | head -1)
+          matches=("$parent_dir"/${pid}-*.md)
           ;;
         jtbd)
-          pfile=$(ls "$parent_dir"/*/${pid}-*.md 2>/dev/null | head -1)
+          matches=("$parent_dir"/*/${pid}-*.md)
           ;;
-        *) pfile="" ;;
+        *) matches=() ;;
       esac
+      pfile="${matches[0]:-}"
+
+      # ADR-103: a release row may be the RFC, so no markdown parent exists.
+      # In that case the map row itself is the reverse trace and must contain
+      # this story. Query the canonical map island rather than scraping HTML.
+      if [ "$parent_kind" = rfcs ] && [ -z "$pfile" ]; then
+        row_json=$("$HERE/story-map-query.sh" find-rfc "$pid" --maps-dir "$MAPS_DIR" 2>/dev/null || true)
+        if [ -z "$row_json" ] || [ "$row_json" = "[]" ]; then
+          DRIFT_LINES+=("UNRESOLVED_RFC_TRACE ${sid} claims=${pid}")
+        elif ! grep -qF "\"${sid}\"" <<< "$row_json"; then
+          DRIFT_LINES+=("MISSING_REVERSE_TRACE ${sid} in ${pid} release row")
+        fi
+        continue
+      fi
+
       [ -z "$pfile" ] && continue
 
       # Check parent's ## Stories section contains this story's ID

@@ -46,7 +46,6 @@ When I work with Claude across a whole week — in Claude Code and also in chat 
 - **JTBD-001** (Enforce Governance Without Slowing Down) — adjacent: governance verbosity is a major quota consumer, so this job is the counter-balance that keeps governance from starving the developer out of tokens. Distinct axis (budget-across-surfaces, not governance-speed).
 - **ADR-093** (mechanical quota-pace throttle) — the mechanism serving this job.
 
-
 ## Stories
 
 | ID | Title | Status |
@@ -55,3 +54,10 @@ When I work with Claude across a whole week — in Claude Code and also in chat 
 | STORY-044 | STORY-044: See what cruise is doing — a status/telemetry skill | accepted |
 | STORY-042 | STORY-042: Extract quota-pacing into its own plugin | in-progress |
 | STORY-043 | STORY-043: Self-install the quota-state producer | in-progress |
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-003 | STORY-MAP-003: Sustain my token quota across the week and across surfaces | draft |

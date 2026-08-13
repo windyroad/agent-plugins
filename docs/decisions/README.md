@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 99 (88 in-force, 11 historical)
+**Total ADRs:** 114 (103 in-force, 11 historical)
 
 ---
 
 ## In-force decisions
 
-_88 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_103 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -314,7 +314,6 @@ _88 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-075 — ADR-075: promptfoo as the behavioural test harness for agent-prose verdicts
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen: **adopt promptfoo as the agent-prose eval harness, alongside (not replacing) bats.**
-**Confirmation:** Agent, eval-infrastructure, or root promptfoo dependency changes run both eval tiers on pull requests; unrelated pull requests skip the Claude provider; every push to `main` runs the full eval. A quota-only availability probe is reported as unavailable evidence without making `main` red; mixed output and every eval failure remain blocking.
 **Related:** ADR-052, ADR-005, ADR-002, ADR-071, ADR-066
 
 ### ADR-076 — Inbound-reported problems rank ahead of internally-discovered problems via a sort tier
@@ -395,7 +394,7 @@ _88 ADRs. These are the current rules. The architect agent reads this section fi
 **Chosen:** Chosen option: **post-commit advisory hook**, because **a lifecycle transition may only be automated on observable facts, and O→KE rests on a knowledge claim** — so the strongest honest surface for the fix-titled-commit signal is an adv...
 
 ### ADR-093 — Mechanical quota-pace throttle — frequently-firing PreToolUse hook, calculated sleep, never blocks
-**Status:** proposed | **Oversight:** unconfirmed
+**Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option 3 (mechanical PreToolUse calculated sleep), registered in `hooks.json` as `PreToolUse` with **no matcher** (every tool call — Correction 2 verbatim) and `timeout: 660` (strictly greater than the 600s sleep ceiling below, so ...
 **Confirmation:** Behind pace drops immediately to cur_s=0; a positive measurable delta at or below sustainable also releases br...; A positive over-rate delta ramps cur_s; an unresolved overline delta retains at least the 10-second minimum br...; Mixed-window coverage keeps braking when either active overline window is unresolved.; Over pace, the ramp kick scales with how far over-rate the burn is (proportional slam); while behind the line,...; The 25 behavioural cases cover first samples, ceiling, window governance, recent checks, concurrent sessions, ...
 
@@ -437,6 +436,78 @@ _88 ADRs. These are the current rules. The architect agent reads this section fi
 **Chosen:** Chosen option: **1, bounded AFK-accept carve-out — opt-in and fail-closed**, composed with option 2 rather than replacing it.
 **Confirmation:** A story declaring the carve-out with all parents confirmed is eligible; one with an unconfirmed parent is not;...; The carve-out is not-eligible when the project has not opted in, even when (a) and (b) both hold; and not-elig...; A commit referencing an accepted-but-unratified story is blocked regardless of config; a ratified story's comm...; A map re-ratified with the story's card already present still satisfies condition (a) — behavioural test for...; detect-unratified-stories-maps default stdout is byte-identical to before the flag existed — behavioural tes...
 **Related:** ADR-090, ADR-095, ADR-096, ADR-060, ADR-098, ADR-070, ADR-066, ADR-068, ADR-074
+
+### ADR-102 — ADR-102: Story maps render from JSON through a canonical template
+**Status:** proposed | **Oversight:** confirmed
+**Confirmation:** A fixture JSON rendered through render-story-map.mjs emits backbone activities as <th class="act" scope="col">...; A task declared at a given activity and release renders inside that cell and nowhere else; an empty pair rende...; Each story-bearing card emits data-story-id on a single line.; Round trip: update-story-references-section.sh <map> "Story Maps" resolves a story rendered into a generated m...; Re-rendering an unchanged source is byte-identical, and oversight_content_hash is stable across a presentation...
+
+### ADR-103 — ADR-103: A release row is the RFC, and the map is the approval surface
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** ADR-101
+**Confirmation:** A row with all stories done reads delivered; a row named by a problem or an RFC reads proposed; a row named by...; Proposing a fix records release rows against the problem ticket, and implementation is refused when the propos...; Adding a story to an existing row on a ratified map does not drift that map's oversight fingerprint.; A story file carries no independent oversight marker; its approval is the map's.; STORY-MAP-002 renders five rows, two delivered, and RFC-005 appears on exactly one of them.
+
+### ADR-104 — ADR-104: A story map card stores no value a story file already carries
+**Status:** proposed | **Oversight:** confirmed
+**Confirmation:** A story transitioned draft → done changes no map file, and every map showing it renders the new status — b...; A card carrying an authored storyStatus or value, or a row carrying authored problems, is ignored in favour of...; The map's oversight fingerprint does not move across a story's lifecycle transition.; A map rendered outside a repository emits no derived block and shows no status, rather than a stale one.; data-story-id survives on every story-bearing card, and reverse-trace resolves through it — the carve-out is...
+**Related:** ADR-102, ADR-103, ADR-090
+
+### ADR-105 — ADR-105: The grid ships in the file — a map is readable with no script engine
+**Status:** proposed | **Oversight:** confirmed
+**Confirmation:** A map's own bytes carry the grid: the table, its cards and both header axes are present in the file as shipped...; No fallback message survives, because there is nothing left to fall back from.; The scroll region is present and focusable, so a wide grid is scrollable by keyboard and on a narrow screen.; Re-rendering an unchanged source is byte-identical, and the map's oversight fingerprint is stable across a pre...
+**Related:** ADR-102, ADR-103, ADR-104
+
+### ADR-106 — ADR-106: A story map carries no decision trace
+**Status:** proposed | **Oversight:** confirmed
+**Confirmation:** A map's island carries no adrs key and the renderer emits no <meta name="adrs"> — behavioural test.; An island that authors traces.adrs anyway renders no trace landmark and contributes no entry to the derived hr...; The documented island in capture-story-map/SKILL.md names no adrs, and the differential test that checks every...
+**Related:** ADR-103, ADR-104, ADR-090, ADR-060, ADR-102
+
+### ADR-107 — ADR-107: A story map's RFC list is derived from its release rows
+**Status:** proposed | **Oversight:** confirmed
+**Confirmation:** A map's rendered RFC list equals the RFCs its rows name, and a hand-written list in the file is ignored in fav...; A row carrying no identity contributes nothing to the list — behavioural test.; A row marked preRfc whose stories have all shipped renders as delivered. An unmarked row whose stories have al...; Renaming a row's RFC does not invalidate the map's approval, because the RFC list is no longer part of what a ...; No map carries a hand-written RFC list — a check across all seven maps, guarded so an unmatched search canno...
+**Related:** ADR-103, ADR-104, ADR-090
+
+### ADR-108 — ADR-108: The risk scorer nudges a project that has no risk policy at all
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** [ADR-047 (in part — the 2026-06-28 policy-absent predicate only; the rest of ADR-047 stands)]
+**Confirmation:** The hook emits on a project with no policy file, naming the policy-authoring skill, and exits without running ...; It stays silent when the suppression variable is set, on every arm.; It stays silent when the project directory does not exist.; A project with no policy file but with a register directory present still gets the policy line — policy abse...; Behavioural coverage sits with the hook's existing test file rather than in a new one.
+**Related:** ADR-047, ADR-086, ADR-056
+
+### ADR-109 — ADR-109: The jobs reviewer refuses work built on a job nobody has ratified
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** [ADR-068 (in part — the 2026-05-27 build-upon guard only; the rest of ADR-068 stands)]
+**Confirmation:** A change citing a job by name that has no ratification gets a failing verdict naming that job and how to ratif...; A change matched to a job only by topic — no citation, no implementation of its flow — passes.; A change citing a job that is ratified but still a draft passes: status is not the test.; A change citing a job that has been superseded does not fire.
+**Related:** ADR-068, ADR-074
+
+### ADR-110 — ADR-110: A ratification marker can only be written when someone actually ratified
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** [ADR-066 (in part — the 2026-06-02 marker-write amendment only), ADR-068 (in part — the 2026-06-02 marker-write amendment only)]
+**Confirmation:** An edit introducing a ratified marker into a decision, job or persona is refused when no evidence exists for t...; The same edit succeeds when the evidence exists.; Evidence for one document does not permit the marker on another.; An artefact marked unconfirmed is surfaced by the drain pass and by the session-start nudge, exactly as one wi...; Unattended authoring produces unconfirmed and is not refused.
+**Related:** ADR-066, ADR-068, ADR-109
+
+### ADR-111 — ADR-111: A ratification is agreement to the substance, not to the draft
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** [ADR-064 (in part — the 2026-05-31 (P339 + P340) substance-confirm amendment, only as it governs the ratification fire), ADR-066 (in part — the 2026-05-31 born-confirmed amendment only)]
+**Confirmation:** A ratification is preceded by the summary and the file, and collected through a structured question.; Where the artefact records a choice, the question's substantive answers are its considered options; a yes/no q...; Where it records no choice, the substantive answers are ratify and say-what-is-wrong; a prose ask does not pro...; Where the answer selects an option the artefact was not written against, no marker is written until the artefa...; The note on a ratified artefact records what was offered and what was picked.
+**Related:** ADR-064, ADR-066, ADR-068, ADR-110, ADR-109, ADR-074, ADR-090, ADR-103
+
+### ADR-112 — ADR-112: The deep context analysis fires on elapsed time or on real growth
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** [ADR-043 (in part — the 2026-06-08 combined-trigger amendment and its 2026-06-17 absolute-floor sub-note)]
+**Confirmation:** With no prior report, the deep layer fires.; With a report older than 10 days, it fires regardless of what changed.; A bucket that moves 38% but only 1.6 KB does not fire it — the case that produced the floor.; A bucket that moves 8% but 50 KB does not fire it either — both gates, not one.; A project that sets its own values gets those; with none, the machine file; with neither, these defaults.
+**Related:** ADR-043, ADR-098, ADR-026, ADR-040
+
+### ADR-113 — ADR-113: An uncurated risk register says so, every session
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** [ADR-047 (in part — the 2026-07-03 pending-review count amendment only)]
+**Confirmation:** The three arms fire in order and the first match wins: policy absent, then register absent, then entries needi...; With the register present and every countable entry curated, the hook is silent — retired entries do not hol...; With countable entries needing curation, one line names the count and points at the register directory. It doe...; The count excludes retired entries and includes accepted ones.; With the suppression variable set, nothing is emitted.
+**Related:** ADR-047, ADR-108, ADR-056, ADR-059
+
+### ADR-114 — ADR-114: The burn guard brakes above four times the sustainable rate
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** [ADR-098 (in part — the burn_guard_multiple default and its rationale, as recorded in the 2026-07-24 amendment and in the Decision Outcome key entry)]
+**Confirmation:** Over the line and measurably over-rate, the proportional correction applies.; Over the line but measurably sustainable, and with no other window braking, nothing brakes.; Behind the line, at or below four times sustainable, and with no other window braking, nothing brakes.; When one window is over-line unresolved or behind-line guard-tripped, the other window does not escape it — ...; Burn strictly above four times sustainable trips the guard. At exactly four times it does not — the comparis...
+**Related:** ADR-098, ADR-093
+
+### ADR-115 — ADR-115: Story-map IDs are never reused
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** [ADR-060 (in part - STORY-MAP ID allocation only)]
+**Chosen:** Chosen option: **Include Git history in the maximum**.
+**Confirmation:** The capture-story-map behavioural test creates and commits STORY-MAP-013, deletes and commits it, then asserts...; A Codex Promptfoo case runs the actual skill contract against the repository with STORY-MAP-012 and STORY-MAP-...; A repository scan after deletion finds no live references to STORY-MAP-012 or STORY-MAP-013 outside explicit h...; reconcile-story-maps.sh reports the README and filesystem are aligned after deletion.
+
+### ADR-116 — Ratified decisions change only by supersession
+**Status:** proposed | **Oversight:** confirmed
+**Confirmation:** The architect reviewer reports [Amendment To Ratified Decision] when a proposed change edits a confirmed decis...; The reviewer directs substantive change into a new superseding decision and does not accept clearing the overs...; A change that merely cites a legacy decision containing amendments does not trigger the finding.
 
 ---
 

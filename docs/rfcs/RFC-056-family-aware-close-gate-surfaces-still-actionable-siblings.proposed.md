@@ -110,7 +110,7 @@ relevance-close evaluator, which reads a citation as a fix-shipped signal (P463 
 deterministic one has demonstrated a miss rate would repeat that mistake.
 
 Phase 2 is an ordered phase of this RFC, not a body TODO — it competes for attention as a first-class
-entity and gains its own story on STORY-MAP-009 when Phase 1's miss rate is observed. Its pre-filter
+entity and gains its own story on STORY-MAP-011 when Phase 1's miss rate is observed. Its pre-filter
 should reuse the mechanical shared-signal pre-filter already built for the capture-time hang-off-check
 arbiter rather than minting a second implementation; hang-off-check answers the same family-signal
 question at the opposite end of the lifecycle.
@@ -119,16 +119,6 @@ question at the opposite end of the lifecycle.
 The deferral above is counted and reported on every interactive session start by the retrospective
 deferral-census SessionStart hook, which scans authoring surfaces for deferred-work markers. That is
 the self-firing trigger; nothing here waits on someone remembering to re-read this RFC.
-
-## Stories
-
-Phase 1's work is decomposed as a story on `STORY-MAP-009` (Trust that a close does not strand the
-sibling family). The `stories:` array stays empty until that story is ratified — an RFC may reference
-only ratified stories, and a story captured under AFK is born `human-oversight: unconfirmed`. This RFC
-therefore stays `proposed` and lists no stories in this iteration; both are wired at the ratification
-drain, after which the story transitions to `accepted` and implementation may begin (ADR-096 — a draft
-story is never implementable).
-
 ## Commits
 
 (rendered from `git log --grep "Refs: RFC-056"` by `/wr-itil:manage-rfc` + `wr-itil-reconcile-rfcs` per
@@ -145,3 +135,10 @@ ADR-085 — at capture there are no commits yet.)
   family-signal question, opposite end of the lifecycle.
 - **P184** — the conditional-deferral check on the Known Error → Verifying transition: the shape
   precedent for a body-scanning pre-flight, and the contrast case for why this gate does not halt.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-052 | STORY-052: Surface still-outstanding family members before a close | draft |

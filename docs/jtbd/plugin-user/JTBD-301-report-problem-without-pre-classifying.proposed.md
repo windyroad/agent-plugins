@@ -46,14 +46,6 @@ When I hit a problem with a windyroad plugin I installed, I want to submit a use
 - **P067** — `/wr-itil:report-upstream` classifier problem-first (Open, WSJF 4.5). Applies the same problem-first discipline to the upstream-classifier heuristic.
 - **P070** — report-upstream dedup (Open, WSJF 6.0). Directly addresses the "was this a duplicate?" outcome above.
 - **P072** — this job's originating ticket; filled the persona gap surfaced during P066's JTBD review.
-
-## Story Maps
-
-| ID | Title | Status |
-|----|-------|--------|
-| STORY-MAP-004 | STORY-MAP-004: Close the outbound reporter loop with honest, generated upstream lifecycle comments | draft |
-
-
 ## Stories
 
 | ID | Title | Status |
@@ -65,3 +57,10 @@ When I hit a problem with a windyroad plugin I installed, I want to submit a use
 | STORY-031 | STORY-031: Tell the reporter it's released → verify → close the loop | draft |
 | STORY-032 | STORY-032: Triage the report's disposition — accept, elicit a new job, or decline | draft |
 | STORY-045 | STORY-045: Outbound lifecycle comments generated from real issue context | draft |
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-004 | STORY-MAP-004: Close the loop with someone who reported a problem | draft |

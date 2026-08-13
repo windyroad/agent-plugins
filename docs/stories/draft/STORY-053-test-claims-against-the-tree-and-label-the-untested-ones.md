@@ -8,7 +8,6 @@ jtbd: [JTBD-002, JTBD-006]
 rfcs: [RFC-057]
 story-maps: [STORY-MAP-010]
 estimated-effort: L
-human-oversight: unconfirmed
 ---
 
 # STORY-053: Test claims against the tree at capture and label the untested ones
@@ -91,3 +90,10 @@ why the alternatives lose.
 The ratification of ADR-100 is the same event that moves this story to `accepted`, so it is not a
 separate blocker to track.
 </content>
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |

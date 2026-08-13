@@ -1,6 +1,6 @@
 ---
 status: draft
-story-id: rfc-authoring-is-pre-implementation-story-map
+story-id: releases-are-proposed-against-the-problem-before-code
 reported: 2026-06-29
 decision-makers: [Tom Howard]
 problems: [P251, P399]
@@ -8,13 +8,11 @@ jtbd: [JTBD-008]
 rfcs: [RFC-005]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
-human-oversight: confirmed
-oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass; value reworked to the RFC-as-traceable-catalogue-of-the-fix)"
 ---
 
-# STORY-015: The RFC lists its stories before any code is written
+# STORY-015: Releases are proposed against the problem before any code is written
 
-**Story map:** [← STORY-MAP-002: Decompose a Fix Into Coordinated Changes](../../story-maps/draft/STORY-MAP-002-decompose-a-fix-into-coordinated-changes.html) · A3 (Release 1) — the *create-RFC* card
+**Story map:** [← STORY-MAP-002: Take a Problem From Noticed to Resolved](../../story-maps/draft/STORY-MAP-002-take-a-problem-from-noticed-to-resolved.html) · A3 (Release 1) — the *create-RFC* card
 **Siblings (A3):** [start the map](020-start-the-jobs-story-map.md) · [add to map](021-add-the-fixs-stories-to-the-map.md) · [ratify](022-ratify-the-story-map-and-its-stories.md) · [reuse](024-reuse-stories-already-on-the-map.md) · [slice](025-slice-the-fixs-stories-into-releases.md)
 **Note (ADR-089/090):** the RFC lists **≥1 story** (never empty) and only **ratified** stories.
 
@@ -26,14 +24,16 @@ oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-stor
 
 ## User value (INVEST Valuable)
 
-In order to fix the problem — and keep a single, traceable catalogue of the work that fix takes, tied back to the problem it solves — as a maintainer authoring an RFC, I want `/wr-itil:capture-rfc` (and heavyweight `/wr-itil:manage-rfc`) to write it as a **pre-implementation user story map** (ADR-060), not a fix-time `## Scope`+`## Tasks` blob.
+In order to fix the problem — and keep a single, traceable catalogue of the work that fix takes, tied back to the problem it solves — as a maintainer working a Known Error, I want the fix proposed as **one or more release rows on a story map**, recorded on the problem ticket, before any code is written.
+
+A release row is the RFC: the set of stories that ship together. There is no separate RFC document to author, so "the RFC is written first" means "the rows are drawn and proposed first".
 
 ## Acceptance criteria (INVEST Testable)
 
-- [ ] `/wr-itil:capture-rfc` authors a pre-implementation story map (backbone + stories), not a fix-time Scope/Tasks blob.
-- [ ] The `capture-rfc --fix-time` byproduct flag/path (shipped 2026-06-28, held) is **retired**; its held changeset is resolved (graduated-as-reworked or dropped).
-- [ ] `/wr-itil:manage-rfc` produces/maintains the same story-map shape.
-- [ ] **Forward-dogfood**: take a real Known-Error problem from the RFC-005 B7 backlog, author its RFC story map **first** (citing existing ADRs, or escalating an uncovered option to a ratified ADR), THEN implement one story — confirming RFC-first ordering end-to-end.
+- [ ] Proposing a fix on a Known Error records one or more release rows — new or existing, on new or existing maps — against the problem ticket.
+- [ ] Work is queued, not started, when the proposal needs a new map, a new activity column, or a new ADR; it proceeds when the proposal uses only what is already ratified.
+- [ ] The `capture-rfc --fix-time` byproduct path (shipped 2026-06-28, held) is **retired**, and its held changeset is resolved — graduated as reworked, or dropped.
+- [ ] **Forward-dogfood**: take a real Known-Error problem, propose its release rows first (citing existing ADRs, or escalating an uncovered option to a ratified ADR), THEN implement one story from a row — confirming the ordering end-to-end.
 
 ## Driving problem trace (I6)
 
@@ -45,7 +45,7 @@ In order to fix the problem — and keep a single, traceable catalogue of the wo
 
 ## Release split (per STORY-MAP-002)
 
-This story spans two releases on the map. **Release 1 (walking skeleton)** ships the **thin covered-path slice**: `/wr-itil:capture-rfc` authors one minimal pre-implementation story map for a fix whose approach existing ADRs already cover. **Release 2** ships the **deepening**: the heavyweight `/wr-itil:manage-rfc` richer authoring path, and retirement of the held `--fix-time` byproduct path.
+Sits in the row that has no RFC identity yet: RFC-005 delivered six of its seven stories, so it was never one release and cannot own an undelivered one. This story's row gains an identity when a problem proposes it.
 
 ## Dependencies
 
@@ -56,3 +56,16 @@ This story spans two releases on the map. **Release 1 (walking skeleton)** ships
 
 - **Implementation exemplar:** this map (STORY-MAP-002), hand-authored + ratified end-to-end this session, is the golden reference for the RFC-as-pre-implementation-story-map output this capability should reproduce (see P404).
 - RFC-005 B15; supersedes B8 + held B11. ADR-073 (RFC-first), ADR-060 (RFC = story map), P399 (the held --fix-time changeset).
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-002 | STORY-MAP-002: Take a problem from noticed to resolved | draft |
+
+## Rework note (2026-08-07)
+
+Rewritten when a release row became the RFC. The original ask — that `capture-rfc` author an RFC document shaped like a story map rather than a `## Scope` + `## Tasks` blob — dissolved: there is no RFC document to shape. What survived is the ordering it was really protecting (propose before you build), the retirement of the held `--fix-time` byproduct path, and the end-to-end dogfood.
+
+It also overlapped STORY-025 ("slice the fix's stories into releases"), which shipped the grouping itself. The distinction now is that STORY-025 draws the rows; this story requires that they be proposed against a problem before implementation begins.

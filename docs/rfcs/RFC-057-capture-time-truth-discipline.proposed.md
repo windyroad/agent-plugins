@@ -48,17 +48,10 @@ Implementation is **held** pending ADR-100's ratification. Two of its three axes
 
 Out of scope:
 
-- **Close-time truth discipline.** The same evidence-versus-inference failure recurs where the relevance-close evaluator reads a bare decision citation as proof a fix shipped (P463). Same class, opposite end of the lifecycle, separate surface (`evaluate-relevance.sh`), separate ticket. It lands as a second rib on STORY-MAP-010 when it drives a story — not folded in here.
+- **Close-time truth discipline.** The same evidence-versus-inference failure recurs where the relevance-close evaluator reads a bare decision citation as proof a fix shipped (P463). Same class, opposite end of the lifecycle, separate surface (`evaluate-relevance.sh`), separate ticket. It lands as a second rib on STORY-MAP-011 when it drives a story — not folded in here.
 - **Widening ADR-026.** Considered and foreclosed in ADR-100's Considered Options; ADR-026 is `human-oversight: confirmed`, so a Scope amendment is a P357 substance change with no AFK path.
 - **The incident surface.** ADR-011 already covers it; this RFC ports from it and does not change it.
 - **Story, story-map and RFC capture surfaces.** Their own intake carries the same theoretical gap; ship under separate tickets when demand emerges.
-
-## Stories
-
-Brick 1 and Brick 2 are decomposed as a single story on **STORY-MAP-010** (Trust that a ticket states only what was verified) — they share one surface, one release and one set of acceptance criteria, so splitting them would produce two stories neither of which is independently shippable.
-
-The `stories:` array stays empty in this iteration. An RFC may reference only ratified stories, and a story captured under AFK is born `human-oversight: unconfirmed` (ADR-090). This RFC therefore stays `proposed` and lists no stories; the array and the story's `accepted` transition are both wired at the ratification drain, after which implementation may begin (ADR-096 — a draft story is never implementable).
-
 ## Commits
 
 (rendered from `git log --grep "Refs: RFC-057"` by `/wr-itil:manage-rfc` + `wr-itil-reconcile-rfcs` per ADR-085 — a git-log-derived view, not stored per-commit. At capture there are no implementation commits yet; the governance commits that preceded this one are `e6f1697c` for P434's root cause and `ab73735a` for ADR-100.)
@@ -72,3 +65,10 @@ The `stories:` array stays empty in this iteration. An RFC may reference only ra
 - `packages/itil/skills/capture-problem/SKILL.md`, `packages/itil/skills/manage-problem/SKILL.md` — the two surfaces to change.
 - `packages/itil/skills/mitigate-incident/SKILL.md` — the shipped prior art Brick 2 ports.
 </content>
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-053 | STORY-053: Test claims against the tree at capture and label the untested ones | draft |

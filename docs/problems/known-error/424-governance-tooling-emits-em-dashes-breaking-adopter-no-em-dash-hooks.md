@@ -121,9 +121,15 @@ Nothing implements until STORY-051 is ratified at its `accepted` gate (ADR-090 /
 |-----|--------|-------|
 | RFC-054 | proposed | Make generated output portable by default |
 
-
 ## Stories
 
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-051 | STORY-051: Have generated content respect my project's conventions | draft |
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-008 | STORY-MAP-008: Have a plugin behave like a guest in my repository | draft |

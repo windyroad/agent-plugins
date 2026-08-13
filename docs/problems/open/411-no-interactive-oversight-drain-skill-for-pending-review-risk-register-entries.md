@@ -66,7 +66,9 @@ Manual editing of `docs/risks/*.md` frontmatter by hand.
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
 - [ ] Design `/wr-risk-scorer:review-register` mirroring the review-decisions detector + AskUserQuestion drain + oversight-marker write
-- [ ] Wire the ADR-047 nudge to point at the new skill instead of manual curation
+- [ ] Wire the nudge to point at the new skill instead of manual curation. The count arm moved to **ADR-113** on 2026-08-09; ADR-047 keeps only the register-absent arm.
+- [ ] **Phase 2 — sweep the 22 retired-but-never-scored entries.** ADR-113 narrowed the count to exclude `*.retired.md`, because 22 of 69 entries were closed without ever being scored and put a floor under the number that curation could not move. That made the count drainable, and it also removed the only thing surfacing those 22. They were not written off: resolving them is this phase. Decide per entry whether to score it retrospectively or strip the marker with a reason, and record which — a risk retired without ever being weighed is a governance gap whether or not anyone is still exposed to it.
+- [ ] Note that both deferrals of this skill have fired. ADR-056 set a numeric trigger — 30+ days past adoption with a curation rate under 20% — and ADR-059 carried it forward qualitatively as "when adopter usage demonstrates demand". At 47 countable entries months later, both conditions are met.
 - [ ] Confirm scope split vs P110 (passive-create-trigger) at review time — merge if the overlap is real
 - [ ] Create behavioural test coverage per ADR-052
 

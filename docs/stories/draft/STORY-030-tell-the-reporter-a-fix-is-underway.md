@@ -3,18 +3,16 @@ status: draft
 story-id: tell-the-reporter-a-fix-is-underway
 reported: 2026-07-02
 decision-makers: [Tom Howard]
-problems: [P170]
+problems: [P080, P170]
 jtbd: [JTBD-008, JTBD-301]
 adrs: [ADR-062]
-story-maps: [STORY-MAP-002]
+story-maps: [STORY-MAP-002, STORY-MAP-004]
 estimated-effort: S
-human-oversight: confirmed
-oversight-confirmed-date: "2026-07-02 — ratified via AskUserQuestion (per-story pass, inbound thread)"
 ---
 
 # STORY-030: Tell the reporter a fix is underway
 
-**Story map:** [← STORY-MAP-002: Decompose a Fix Into Coordinated Changes](../../story-maps/draft/STORY-MAP-002-decompose-a-fix-into-coordinated-changes.html) · A3/A4 (Release 1) — inbound touchpoint
+**Story map:** [← STORY-MAP-002: Take a Problem From Noticed to Resolved](../../story-maps/draft/STORY-MAP-002-take-a-problem-from-noticed-to-resolved.html) · A3/A4 (Release 1) — inbound touchpoint
 **Backbone (inbound thread):** [A1 capture-inbound](027-capture-a-problem-from-an-inbound-channel.md) · [A1 acknowledge](028-acknowledge-the-inbound-report.md) · [A2 share workaround](029-share-the-workaround-with-the-reporter.md) · A3/A4 fix underway · [A5 released → verify → close](031-tell-the-reporter-released-and-close-the-loop.md)
 
 ## User value (INVEST Valuable)
@@ -38,3 +36,11 @@ In order that the reporter knows the fix is really being worked — not stalled 
 ## Related
 
 - **STORY-MAP-002** A3/A4 inbound card. **Precedent to mirror:** `update-upstream`. Lowest-priority of the inbound touchpoints (the acknowledge / workaround / released updates matter more). To build.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-002 | STORY-MAP-002: Take a problem from noticed to resolved | draft |
+| STORY-MAP-004 | STORY-MAP-004: Close the loop with someone who reported a problem | draft |

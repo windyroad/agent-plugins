@@ -89,7 +89,7 @@ teardown() { rm -rf "$TMPD"; }
 
 # --- P474 / STORY-055: the extraction must not move a single hash --------------
 #
-# `oversight_content_hash` and `oversight_content_hash_excluding_stories` shared a
+# `oversight_content_hash` and the since-removed map variant shared a
 # verbatim grep|sed filter, which is why the P474 mirror had to be removed twice
 # and why a third copy could have been missed. The filter is now extracted.
 #
@@ -146,19 +146,6 @@ _ref_hash_excluding() {
       echo "oversight_content_hash diverged on fixture $n"; false
     }
   done
-}
-
-@test "extraction: map variant byte-identical, including the id-exclusion loop" {
-  printf -- '<meta name="status" content="draft">\n<a data-story-id="STORY-05">short</a>\n<a data-story-id="STORY-054">long</a>\n<a class="slice" data-status="done">s</a>\nbody\n\n\n' \
-    > "$TMPD/m.html"
-  # Zero ids, one id, and the prefix-collision pair — STORY-05 must not strip
-  # STORY-054's card, which is what the closing-quote anchor buys.
-  [ "$(oversight_content_hash_excluding_stories "$TMPD/m.html")" = "$(_ref_hash_excluding "$TMPD/m.html")" ]
-  [ "$(oversight_content_hash_excluding_stories "$TMPD/m.html" STORY-054)" = "$(_ref_hash_excluding "$TMPD/m.html" STORY-054)" ]
-  [ "$(oversight_content_hash_excluding_stories "$TMPD/m.html" STORY-05)" = "$(_ref_hash_excluding "$TMPD/m.html" STORY-05)" ]
-  [ "$(oversight_content_hash_excluding_stories "$TMPD/m.html" STORY-05 STORY-054)" = "$(_ref_hash_excluding "$TMPD/m.html" STORY-05 STORY-054)" ]
-  # And the divergence itself is preserved rather than accidentally unified.
-  [ "$(oversight_content_hash_excluding_stories "$TMPD/m.html")" != "$(oversight_content_hash "$TMPD/m.html")" ]
 }
 
 # Golden hashes are pinned over FIXTURES, never over live artefacts. Pinning to

@@ -52,7 +52,7 @@ Per `RISK-POLICY.md` (without controls):
 | Installed-runtime smoke test | The packaged hook runs against representative Codex and/or Claude payloads | 2 | -1 likelihood | Bump +1 for payload or discovery uncertainty |
 | Small isolated release with rollback path | The hook ships alone after package dry-run and release verification | 3 | -1 likelihood | Bump +1 for bundled blast radius |
 | P141 changeset-discipline gate (`itil-changeset-discipline.sh`) | Plugin source change includes a `.changeset/*.md` declaring bump class | n/a | 0 paths | Hard-block at commit gate; if bypassed, bump +2 |
-| ADR-045 hook injection budget policy | Hook prose changed (≤300 bytes deny; ≤150 bytes additionalContext) | n/a (impact-shaping) | 0 paths | Risk of context-overflow regression class; bump impact +1 if exceeded |
+| ADR-045 hook injection budget policy | Hook prose changed (deny path: honour-system, typically 200–700 bytes, **no fixed cap** — ADR-045 § Per-band byte budget; ≤150 bytes additionalContext) | n/a (impact-shaping) | 0 paths | Risk of context-overflow regression class; bump impact +1 if a band is exceeded. *(Read "≤300 bytes deny" until 2026-08-07 — a number ADR-045 does not state. A scorer nearly raised a false finding against a 407-byte deny message on it.)* |
 | CLAUDE.md "marketplace cache" briefing | Always (declarative) | n/a | 0 paths | Lower author-mindfulness; not runtime |
 
 Lifetime residual likelihood under all three paths firing-and-passing = 1 (Rare; capped at floor).

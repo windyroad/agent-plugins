@@ -17,7 +17,7 @@ stories: []
 **Problems**: P431 (the Step 0b staleness helper treats a declined-permanently empty-channels stub as a first run)
 **ADRs**: ADR-013 (Rule 5 below-appetite silent-pass — the declined branch opens no user-attention surface), ADR-026 (agent output grounding — the reason string and its iter-summary annotation are audit surfaces and must state what was observed), ADR-052 (behavioural bats default), ADR-062 (inbound-discovery surface; § Downstream-adopter non-obligation is the contract this defect breaches), ADR-099 (changesets are release metadata, not shipment controls)
 **JTBD**: JTBD-006 (progress the backlog while I'm away), JTBD-101 (extend the suite — secondary)
-**Story maps**: STORY-MAP-006 (Decline upstream discovery once and stay declined)
+**Story maps**: STORY-MAP-004 (Close the loop with someone who reported a problem)
 
 ## Summary
 
@@ -145,7 +145,7 @@ ratified — ADR-090 forbids an RFC referencing an unratified story — and is w
 ## Stories
 
 Decomposed as STORY-048 (Gate the inbound-discovery pre-flight on the channel list) on
-STORY-MAP-006 (Decline upstream discovery once and stay declined).
+STORY-MAP-004 (Close the loop with someone who reported a problem).
 
 ## Commits
 
@@ -155,7 +155,7 @@ per ADR-085 — a git-log-derived view, not stored per-commit. At capture there 
 ## Related
 
 - **P431** — driving problem, inbound report #341.
-- **STORY-MAP-006** — the story map this RFC's work sits on.
+- **STORY-MAP-004** — the story map this RFC's work sits on.
 - **RFC-017** (P351 auto-bootstrap on missing precondition config) — lineage only. Its work
   *introduced* the declined-permanently stub that this helper fails to honour, but its task
   set is closed out and awaiting release; it is not this ticket's fix vehicle, and wiring P431

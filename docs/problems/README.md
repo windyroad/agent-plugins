@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-07-30 **P476 captured** — shell utilities behave differently on this machine than on CI, so tests can pass locally while asserting nothing. Three instances in one session: a guard grep over a directory that did not exist, a BSD stat spelling that under GNU means "filesystem info" and returns a volume blob with exit 0, and grep omitting the filename prefix for a single file. The pattern is that the wrong variant does not fail loudly — it exits 0 with different output — so "the test passed" is not sound evidence here. Two reddened main; one was a shipped-code defect found only because a reviewer challenged the premise. No cadenced control exists; CI is the detector, which means red CI is the harm rather than a guard against it. Control shape left open with three candidates (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-08-09 **P495 captured** — a full release-versioning run appeared in the working copy, consuming all five queued changesets and bumping two packages; it was uncommitted and recovered, but nothing warned and a consumed queue is indistinguishable from an empty one (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -11,6 +11,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
 | | | **Tier 0 — Critical bypass (Severity Very High ≥17, security-classified, or incident-linked)** | | | | | |
+| 40 | P477 | Codex collaboration completion bypasses the risk-marker bridge | 20 (Very High) | Open | S | 2026-08-12 | internal |
 | 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 (Very High) | Known Error | XL | 2026-05-03 | internal |
 | | | **Tier 1 — Inbound-reported (an external user actually hit this)** | | | | | |
 | 24 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | 12 (High) | Known Error | S | 2026-07-06 | inbound-reported (#169) |
@@ -77,11 +78,29 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P457 | Story-map ratification surfaces an unauthored skeleton — the lifecycle asks for oversight before the authoring stage runs | 12 (High) | Open | M | 2026-07-16 | internal |
 | 6 | P462 | Amendment-scoped `human-oversight: unconfirmed` has no detector — unratified amendment substance never reaches the oversight drain | 12 (High) | Open | M | 2026-07-26 | internal |
 | 6 | P463 | Relevance-close evaluator over-fires — a bare ADR/skill citation is read as "fix shipped", producing a 76% false-positive CLOSE-CANDIDATE rate | 12 (High) | Open | M | 2026-07-26 | internal |
+| 6 | P479 | Decisions accrete into the nearest ADR because amending is cheaper than deciding — ADR-102 weighed two options and carries six decisions | 12 (High) | Open | M | 2026-08-07 | corrective-feedback |
+| 6 | P480 | An ADR's ratification is document-scoped, so riders that were never weighed inherit its authority — one contradicted an accepted-tier decision undeclared | 12 (High) | Open | M | 2026-08-08 | corrective-feedback |
+| 8 | P485 | Every step in the process adds and none removes, so cruft accumulates without limit — no refactor step, no simplification step, and nothing self-firing to trigger one | 16 (High) | Open | L | 2026-08-08 | corrective-feedback |
+| 6 | P486 | The policy validator checks a policy's shape, never whether it contradicts itself — a self-contradicting policy passes | 12 (High) | Open | M | 2026-08-09 | inbound-reported |
+| 6 | P488 | The agent batches artefacts it was told to produce one at a time, then asks permission for the batch — the instruction lives only in session memory and CLAUDE.md prose, so nothing checks it and it decays every session | 12 (High) | Open | M | 2026-08-09 | corrective-feedback |
+| 6 | P489 | The shipped ratification surfaces do not meet the rule they are governed by — both drains, the jobs-and-personas confirm, two authoring surfaces and the marker writers, plus two unanswered design questions | 12 (High) | Open | L | 2026-08-09 | internal |
+| 6 | P490 | The agent sends status reports into a window that can only hold one actionable thing — the same correction fired verbatim on consecutive days, and the memory written after the first did not prevent the second | 12 (High) | Open | M | 2026-08-09 | corrective-feedback |
+| 8 | P494 | Plugin tests and project-conformance tests are the same suite, so neither can be right — 257 test files ship across four packages, thirteen of them asserting on this repository's own governance corpus | 16 (High) | Open | L | 2026-08-09 | corrective-feedback |
+| 6 | P495 | The release queue can be consumed in a working copy and nothing says so — five changesets and two version bumps appeared uncommitted; committing them would have destroyed the release notes and stamped versions CI never issued | 12 (High) | Open | S | 2026-08-09 | internal |
+| 6 | P492 | Nothing nudges when unpushed work piles up, so batches grow until someone notices — I002 named this gap in May and it recurred on 2026-08-09 with nine unpushed commits and one undetected defect | 12 (High) | Open | M | 2026-08-09 | corrective-feedback |
+| 4.5 | P491 | The retro context trigger's thresholds are prose in five places and none of them is the decision — two tests redden on contact, the eval keeps certifying the superseded contract silently, and the config surface the decision assumes does not exist | 9 (Medium) | Open | M | 2026-08-09 | internal |
+| 3 | P493 | A docs-only change runs the full build, so pushing prose costs what shipping code costs — which argues for holding it, the accumulation P492 is about | 6 (Medium) | Open | S | 2026-08-09 | corrective-feedback |
+| 1 | P487 | The loop overwrites the ranking that justified its own choices — a diagnostic for when what you expected to be worked was not | 4 (Low) | Open | M | 2026-08-09 | internal |
+| 8 | P483 | Amendment sections are not a legitimate mechanism — a ratified decision is immutable, and is changed only by being deprecated or superseded | 16 (High) | Open | L | 2026-08-08 | corrective-feedback |
+| 5 | P484 | The reading-context persona constraint is load-bearing in two ratified decisions but documented nowhere | 9 (Medium) | Open | S | 2026-08-08 | internal |
+| 4 | P482 | ADR line-number citations are positional, so they rot silently every time the ADR is amended — 122 occurrences across 42 files | 6 (Medium) | Open | M | 2026-08-08 | architect-review |
+| 3 | P481 | Two ratified decisions describe a story-map format that no longer exists | 6 (Medium) | Open | S | 2026-08-08 | architect-review |
 | 5 | P406 | `github-discussions` channel in `.upstream-channels.json` returns HTTP 410 | 5 (Low) | Open | S | 2026-07-02 | internal |
 | 4.5 | P251 | RFC-first trace invariant not enforced — fixes start without RFC, story map, or JTBD trace | 9 (Medium) | Known Error | L | 2026-05-17 | internal |
 | 4.5 | P297 | ADR-047 — governance-artefact scaffolding should be a SessionStart hook (per-project, automatic), not an inline `/install-updates` step | 9 (Medium) | Open | M | 2026-05-25 | internal |
 | 4.5 | P369 | Plugin removes hook file but adopter session still invokes it via stale binding — `architect-compendium-refresh-discipline.sh` case 2026-06-17 | 9 (Medium) | Open | M | 2026-06-17 | internal |
 | 4.5 | P461 | Downstream evidence-scan flags adopter-repo sightings as live regressions without version-gating against the fix release | 9 (Medium) | Open | M | 2026-07-25 | internal |
+| 4.5 | P478 | I10 checks that a story's `## User value` section is non-empty, but never that it is value-first — 12 of 50 stories drifted feature-first undetected | 9 (Medium) | Open | M | 2026-08-07 | internal |
 | 4 | P410 | install-updates leaves stale cached plugin versions on disk — no prune step | 8 (Medium) | Open | M | 2026-07-03 | internal |
 | 4 | P442 | WSJF Rankings render convention differentiates tiers only by ordering + the Origin column — no visual tier separator, so inbound-reported priority is not legible | 8 (Medium) | Open | M | 2026-07-06 | corrective-feedback |
 | 4 | P467 | work-problems should surface decisions/ratifications continuously (non-blocking), not only batched at loop-end | 8 (Medium) | Open | M | 2026-07-26 | corrective-feedback |
@@ -96,6 +115,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3 | P416 | Outstanding-questions drain appends a superseding human decision without reconciling the stale Fix Strategy section it overrides | 6 (Medium) | Open | M | 2026-07-04 | internal |
 | 3 | P418 | Reviewer-agent marker hooks do not fire on SendMessage-resumed agents — ISSUES FOUND cannot be continued to a marker-writing PASS, forcing a full fresh re-review | 6 (Medium) | Open | M | 2026-07-05 | internal |
 | 3 | P421 | Reference-section awk helpers destructively truncate governance files containing invalid UTF-8 | 6 (Medium) | Open | M | 2026-07-05 | internal |
+| 3 | P496 | Nine story maps carry the superseded stacked encoding, and two more use bespoke encodings, all needing migration to the rendered grid | 6 (Low) | Open | M | 2026-08-05 | internal |
 | 3 | P045 | Auto plugin install on user's machine after governance release | 12 (High) | Open | L | 2026-04-19 | internal |
 | 3 | P460 | Agent surfaces ticket-worthy findings and obvious next-actions as recommendations instead of autonomously capturing or acting | 12 (High) | Open | L | 2026-07-25 | internal |
 | 2.25 | P136 | ADR-044 alignment audit — sweep all unaudited skills/hooks/agents/ADRs/JTBDs/READMEs against the framework-resolution boundary (master ticket) | 9 (Medium) | Open | L | 2026-04-27 | internal |

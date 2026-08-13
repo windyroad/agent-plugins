@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 # Doc-lint guard: jtbd agent.md must carry the [Unratified Dependency] verdict
-# (ADR-068 enforcement surface 3 / RFC-011 / P323) — flag a change or plan that
+# (ADR-109 / RFC-011 / P323) — flag a change or plan that
 # explicitly cites/implements/serves a persona or job lacking `human-oversight:
 # confirmed` (unratified, non-superseded), keyed on the oversight marker NOT
 # `status:`. The JTBD twin of the architect side's surface 3 (RFC-010 / P318).
@@ -31,10 +31,12 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "agent.md has an 'Unratified Dependency (build-upon guard' section citing ADR-068" {
-  run grep -niE "Unratified Dependency \(build-upon guard" "$AGENT_FILE"
-  [ "$status" -eq 0 ]
-  run grep -n "ADR-068" "$AGENT_FILE"
+@test "agent.md has an 'Unratified Dependency (build-upon guard' section citing its own decision" {
+  # Pin the citation to the HEADING, not to the file. Asserting a bare
+  # "ADR-NNN" appears anywhere passes off any other mention: when the guard
+  # moved to ADR-109 this test stayed green on an unrelated line, so it was
+  # both vacuous and aimed at the wrong one.
+  run grep -niE "Unratified Dependency \(build-upon guard — ADR-109\)" "$AGENT_FILE"
   [ "$status" -eq 0 ]
 }
 

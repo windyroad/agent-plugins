@@ -84,9 +84,16 @@ Rejected: making review-problems write `.upstream-cache.json` even on a zero-cha
 |-----|--------|-------|
 | RFC-051 | proposed | Inbound-discovery pre-flight honours a declined channel list |
 
-
 ## Stories
 
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-048 | STORY-048: Gate the inbound-discovery pre-flight on the channel list | draft |
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-004 | STORY-MAP-004: Close the loop with someone who reported a problem | draft |
+| STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |

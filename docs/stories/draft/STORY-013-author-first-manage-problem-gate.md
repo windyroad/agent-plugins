@@ -20,7 +20,7 @@ estimated-effort: M
 
 ## User value (INVEST Valuable)
 
-As a maintainer proposing a fix in `/wr-itil:manage-problem`, I want the propose-fix gate to route me by RFC-precondition: if an RFC already traces the problem, implement its stories; if none does, **author the RFC first** (a user-story-map decomposition derived from the problem's RCA) as a deliberate pre-implementation step — never auto-create a skeleton and proceed — so that the fix genuinely implements a pre-existing plan.
+In order that a fix implements a plan someone actually made, rather than a placeholder generated to satisfy the gate, as a maintainer proposing a fix in `/wr-itil:manage-problem`, I want the gate to route me by precondition: implement the stories of an RFC that already traces the problem, or **author the RFC first** as a deliberate step.
 
 ## Acceptance criteria (INVEST Testable)
 

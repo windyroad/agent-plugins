@@ -8,7 +8,6 @@ jtbd: [JTBD-011, JTBD-101]
 rfcs: [RFC-052]
 story-maps: [STORY-MAP-007]
 estimated-effort: M
-human-oversight: unconfirmed
 ---
 
 # STORY-049: Ask for a URL in a shape I can paste into
@@ -108,3 +107,10 @@ so confirming the job alone would leave the criteria unconfirmed while looking c
   a shipped surface, never as project-local memory. This story's AC1 install-scope clause is
   that rule made testable.
 - **P445** — the sibling instance riding the same map's future second rib.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |

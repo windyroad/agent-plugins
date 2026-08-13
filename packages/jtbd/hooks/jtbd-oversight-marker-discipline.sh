@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # jtbd-oversight-marker-discipline.sh — PreToolUse:Edit|Write hook
-# (P348 / ADR-068 amendment 2026-06-02). JTBD-side sibling of
+# (P348 / ADR-110). JTBD-side sibling of
 # architect-oversight-marker-discipline.sh. Denies Edit/Write operations
 # that introduce `human-oversight: confirmed` into a docs/jtbd/ artefact's
 # (persona.md or JTBD-NNN-*.md) frontmatter unless a session-scoped

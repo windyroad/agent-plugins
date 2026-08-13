@@ -8,8 +8,6 @@ jtbd: [JTBD-001, JTBD-006, JTBD-009]
 rfcs: [RFC-059]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
-human-oversight: confirmed
-oversight-hash: d09a9356c890691096778bc060ac430814b233ec6070a14856721705fb40d7cc
 ---
 
 # STORY-054: Lifecycle transitions preserve a story's ratification

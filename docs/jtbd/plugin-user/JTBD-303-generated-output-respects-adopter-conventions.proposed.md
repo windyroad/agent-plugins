@@ -57,6 +57,11 @@ Authored explicitly so this job is not later challenged as redundant with its ne
 - **ADR-052** — behavioural tests default. The fifth desired outcome (a regression signal) has to be a test that exercises an emitter and asserts on the bytes it writes, not a structural grep over a template.
 - **ADR-049** — plugin scripts resolve via `bin/` on `$PATH`. Sibling adopter-context decision on the executable-correctness axis; established the precedent that source-repo dogfooding masks adopter-context defects.
 - **ADR-008** — JTBD directory structure. Establishes the `docs/jtbd/<persona>/JTBD-NNN-<title>.<status>.md` layout this file follows.
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-008 | STORY-MAP-008: Have a plugin behave like a guest in my repository | draft |
 
 
 ## Stories
@@ -64,3 +69,5 @@ Authored explicitly so this job is not later challenged as redundant with its ne
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-051 | STORY-051: Have generated content respect my project's conventions | draft |
+| STORY-056 | STORY-056: Clear a block with a command my repository actually has | draft |
+| STORY-057 | STORY-057: Get the fix by upgrading, not by patching a cache | draft |

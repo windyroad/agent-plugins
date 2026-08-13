@@ -1,11 +1,14 @@
 #!/usr/bin/env bats
 # Behavioural test for detect-unratified-stories-maps.sh (ADR-090 detector).
-# DRIFT-AWARE via the shared lazy-fingerprint lib: an artefact counts as ratified
-# only when it is `confirmed` AND its stored oversight-hash matches current
-# content. Surfaces never-ratified, unconfirmed, and drift-reopened (confirmed
-# then edited) cases; omits genuinely-ratified ones. Always exit 0.
+# DRIFT-AWARE via the shared lazy-fingerprint lib: a MAP counts as ratified only
+# when it is `confirmed` AND its stored oversight-hash matches current content.
+# Surfaces never-ratified, unconfirmed, and drift-reopened (confirmed then
+# edited) maps; omits genuinely-ratified ones. Always exit 0.
 #
-# @adr ADR-090
+# ADR-103: a STORY carries no marker of its own. It is approved when every map in
+# its `story-maps:` field is ratified, so the story leg is tested through maps.
+#
+# @adr ADR-090  @adr ADR-103
 # @problem P404 (Phase 2)
 
 setup() {
@@ -15,27 +18,25 @@ setup() {
   TMPD="$(mktemp -d)"
   mkdir -p "$TMPD/stories/accepted" "$TMPD/story-maps/draft"
 
-  # Genuinely ratified (via the mark write-path) — should NOT be listed.
-  printf -- '---\nstatus: accepted\n---\n# ok\n' > "$TMPD/stories/accepted/STORY-1-ok.md"
-  bash "$MARK" "$TMPD/stories/accepted/STORY-1-ok.md"
+  # A ratified map, and a story sitting on it — neither should be listed.
   printf -- '<head></head>\n<h1>ok map</h1>\n' > "$TMPD/story-maps/draft/STORY-MAP-1-ok.html"
   bash "$MARK" "$TMPD/story-maps/draft/STORY-MAP-1-ok.html"
+  printf -- '---\nstatus: accepted\nstory-maps: [STORY-MAP-1]\n---\n# ok\n' > "$TMPD/stories/accepted/STORY-1-ok.md"
 
-  # Unconfirmed + unmarked — listed.
-  printf -- '---\nstatus: accepted\nhuman-oversight: unconfirmed\n---\n# no\n' > "$TMPD/stories/accepted/STORY-2-unconf.md"
-  printf -- '---\nstatus: accepted\n---\n# nomarker\n'                          > "$TMPD/stories/accepted/STORY-3-none.md"
+  # A story naming an UNRATIFIED map, and one naming no map at all — listed.
+  printf -- '---\nstatus: accepted\nstory-maps: [STORY-MAP-3]\n---\n# no\n' > "$TMPD/stories/accepted/STORY-2-unconf.md"
+  printf -- '---\nstatus: accepted\n---\n# nomarker\n'                       > "$TMPD/stories/accepted/STORY-3-none.md"
 
-  # Drifted: ratified, then content edited afterward — listed.
-  printf -- '---\nstatus: accepted\n---\n# body\n' > "$TMPD/stories/accepted/STORY-4-drift.md"
-  bash "$MARK" "$TMPD/stories/accepted/STORY-4-drift.md"
-  printf '\nAn edit made after ratification.\n' >> "$TMPD/stories/accepted/STORY-4-drift.md"
+  # A leftover story-level marker must NOT approve anything (ADR-103) — listed.
+  printf -- '---\nstatus: accepted\nhuman-oversight: confirmed\nstory-maps: [STORY-MAP-3]\n---\n# stale\n' \
+    > "$TMPD/stories/accepted/STORY-4-drift.md"
 
   # HTML map with no marker — listed.
   printf -- '<h1>no meta</h1>\n' > "$TMPD/story-maps/draft/STORY-MAP-3-none.html"
 }
 teardown() { rm -rf "$TMPD"; }
 
-@test "detect: lists unconfirmed + unmarked + DRIFTED, omits genuinely-ratified; exit 0" {
+@test "detect: lists stories on unratified maps and unratified maps; omits approved; exit 0" {
   run bash "$SCRIPT" "$TMPD/stories" "$TMPD/story-maps"
   [ "$status" -eq 0 ]
   [[ "$output" == *"STORY-2-unconf.md"* ]]
@@ -46,7 +47,7 @@ teardown() { rm -rf "$TMPD"; }
   [[ "$output" != *"STORY-MAP-1-ok.html"* ]]
 }
 
-@test "detect: all-ratified set yields empty output, exit 0" {
+@test "detect: fully-approved set yields empty output, exit 0" {
   rm "$TMPD/stories/accepted/STORY-2-unconf.md" "$TMPD/stories/accepted/STORY-3-none.md" \
      "$TMPD/stories/accepted/STORY-4-drift.md" "$TMPD/story-maps/draft/STORY-MAP-3-none.html"
   run bash "$SCRIPT" "$TMPD/stories" "$TMPD/story-maps"

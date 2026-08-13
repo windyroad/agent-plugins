@@ -1287,3 +1287,34 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-07-30
 
 > Last reviewed: 2026-07-30 **P475 captured** — RFCs carry a human-oversight axis they should not have. The governing decision already says an RFC holds no decisions of its own, so an RFC-tier ratification marker has nothing to ratify — yet the template mints every new RFC into that state, a detector exists solely to count them, and a session-start nudge reports 52 of them as awaiting ratification. It is an un-actionable line in the one surface that should carry only actionable ones, and agents read the marker as meaningful and repeat the claim (twice now). Removing an oversight axis is a loosening, so it needs its own recorded amendment and its own ratification event rather than riding along in a fix — three options recorded, none picked (lightweight aside via /wr-itil:capture-problem).
+
+## 2026-08-07
+
+> Last reviewed: 2026-07-30 **P476 captured** — shell utilities behave differently on this machine than on CI, so tests can pass locally while asserting nothing. Three instances in one session: a guard grep over a directory that did not exist, a BSD stat spelling that under GNU means "filesystem info" and returns a volume blob with exit 0, and grep omitting the filename prefix for a single file. The pattern is that the wrong variant does not fail loudly — it exits 0 with different output — so "the test passed" is not sound evidence here. Two reddened main; one was a shipped-code defect found only because a reviewer challenged the premise. No cadenced control exists; CI is the detector, which means red CI is the harm rather than a guard against it. Control shape left open with three candidates (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-08-07 **P478 captured** — the story `accepted` gate checks that a story's value section is non-empty but never that it states a value: 12 of 50 stories were written feature-first with a trailing "so that", and nothing detected it. The only signal was a story-map card rendering as an unreadable wall of text, spotted by eye during a ratification review. The same investigation found the map's own parser too strict — it rejected 15 correctly-written statements on punctuation alone — so any check must be strict about the clause order and permissive about what separates them (lightweight aside via /wr-itil:capture-problem).
+
+## 2026-08-08
+
+> Last reviewed: 2026-08-07 **P479 captured** — decisions accrete into whichever decision record is nearest, because amending one is structurally cheaper than writing a new one: no options to weigh, no ratification event, no new file. ADR-102 weighed two options and ended up carrying six decisions, one of which was added and reversed in the same session with its own failure mode written into the body and accepted in a sentence (lightweight aside via /wr-itil:capture-problem).
+
+> Last reviewed: 2026-08-08 **P480 captured** — a human ratifies a decision but the marker lands on a document, so every claim in it reads as ratified, including claims that were never weighed as options. One such rider permitted exactly what an accepted-tier decision hard-blocks, undeclared — and when it was challenged, both the agent and the architect spent a re-ratification ceremony retracting something nobody had ratified (lightweight aside via /wr-itil:capture-problem).
+
+## 2026-08-09
+
+> Last reviewed: 2026-08-09 **P494 captured** — tests that verify a plugin and tests that verify this project's use of one are the same suite in the same directory; 257 test files ship to adopters across four packages, thirteen of them asserting on decisions and tickets no adopter has (lightweight aside via /wr-itil:capture-problem).
+
+> Last reviewed: 2026-08-09 **P492 and P493 captured** — the pressure to keep work-in-progress small has no trigger of its own, so nine commits accumulated unpushed and CI found a defect that had been sitting across several of them; and a docs-only change runs the full build, which argues for holding it (lightweight aside via /wr-itil:capture-problem).
+
+> Last reviewed: 2026-08-09 **P491 captured** — ADR-112 settled when the deep context analyser fires, and five shipped surfaces still describe the values it replaced; the eval that should catch that passes either way, and the per-project config the decision assumes has not been built (lightweight aside via /wr-itil:capture-problem).
+
+> Last reviewed: 2026-08-09 **P490 captured** — a five-screen status report ending in an open invitation, sent to a phone with nothing in it to act on; the identical correction had been given the day before and the memory written in response did not prevent the repeat (lightweight aside via /wr-itil:capture-problem).
+
+> Last reviewed: 2026-08-09 **P489 captured** — the rule for how a ratification is collected was stated in May, implemented on one surface, and never reached the others; both drains, the jobs-and-personas confirm and two authoring surfaces still ask in shapes it forbids, and no marker writer records what was offered (lightweight aside via /wr-itil:capture-problem).
+
+> Last reviewed: 2026-08-09 **P488 captured** — told twice in one session to work one map, and one story, at a time, the agent still proposed capturing twenty-two stories as a single unit and asked permission for the bundle; the instruction lives only in session memory and CLAUDE.md prose, so nothing checks it (lightweight aside via /wr-itil:capture-problem).
+
+> Last reviewed: 2026-08-09 **P487 captured** — the loop's selection is a sort with no judgement in it, but the ranking that produced each choice is regenerated by every capture and transition the loop makes, so a night's work destroys the evidence for the night's decisions. Rated low: it is a diagnostic reached for when something you expected to be worked was not (lightweight aside via /wr-itil:capture-problem).
+
+> Last reviewed: 2026-08-08 **P485 captured** — every gate in the process adds something and is enforced; nothing removes, and removal is optional, so cruft accumulates until someone's patience runs out. Measured on the files this session touched: one is 64% comment-only, explaining states that no longer exist (lightweight aside via /wr-itil:capture-problem).
+
+> Last reviewed: 2026-08-09 **P486 captured** — a risk policy is the arbiter every commit, push and release is scored against, and the validator only checks its shape. An adopter's policy states in one sentence that a control can reduce impact and that controls never reduce impact; it passed validation (lightweight aside via /wr-itil:capture-problem).

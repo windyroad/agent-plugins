@@ -95,17 +95,16 @@ work in, so that I never have to deliver the same correction twice.
 |----|-------|--------|
 | RFC-052 | RFC-052: Ship a portable rule routing free-text collection to per-item copyable blocks | proposed |
 | RFC-053 | RFC-053: Ship a portable rule requiring a verified-current handover before an external-review round-trip | proposed |
-
-## Story Maps
-
-| ID | Title | Status |
-|----|-------|--------|
-| STORY-MAP-007 | STORY-MAP-007: A correction to the agent's conduct holds in every project | draft |
-
-
 ## Stories
 
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-049 | STORY-049: Ask for a URL in a shape I can paste into | draft |
 | STORY-050 | STORY-050: Have my reviewer read the version I actually have | draft |
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |

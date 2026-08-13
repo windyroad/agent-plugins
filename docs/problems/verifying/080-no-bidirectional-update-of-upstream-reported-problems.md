@@ -216,6 +216,16 @@ User-ratified at work-problems Step 2.4 gate (a) loop-end drain:
   - Re-run catchup on real corpus after G1+G2 ship; the P113 → claude-code#52831 case becomes a clean dogfood once the close-template handles "local-workaround on already-NOT_PLANNED-closed upstream issue" correctly.
 - **Phase 2 transition deferred**: P080 stays Known Error per the strict Phase 2 verification gate (criterion 7 needs a clean real-corpus post). Phase 3 completion → re-run → satisfies criterion 7 → transition KE → Verifying.
 
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-028 | STORY-028: Acknowledge the report on capture | draft |
+| STORY-029 | STORY-029: Share the workaround with the reporter | draft |
+| STORY-030 | STORY-030: Tell the reporter a fix is underway | draft |
+| STORY-031 | STORY-031: Tell the reporter it's released → verify → close the loop | draft |
+| STORY-032 | STORY-032: Triage the report's disposition — accept, elicit a new job, or decline | draft |
+
 ## Fix Released
 
 **Phase 1 released in `@windyroad/itil@0.48.0`** (version-packages commit `43e164fe`, PR #248, merge commit `2571d9da`, released 2026-06-09). Present in the current published `@windyroad/itil@0.49.5` tree (feat commit `5a4f8b1c` is an ancestor of the latest release bump `0449bc7f`). <!-- no-changeset-reference --> (release-vehicle helper resolved a full citation after the P330 seed above; the original ticket body carried no `.changeset/` reference.)

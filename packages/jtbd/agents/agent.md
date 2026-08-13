@@ -61,7 +61,7 @@ All review criteria come from the JTBD documentation. Read the docs first and ap
 - If the change involves API interactions, do the actions align with the job's expected flow?
 - Are new actions documented in the relevant job's action list?
 
-### Unratified Dependency (build-upon guard — ADR-068 enforcement surface 3)
+### Unratified Dependency (build-upon guard — ADR-109)
 
 When the change or plan under review **explicitly cites, implements, or serves** a specific persona or job — an `@jtbd JTBD-NNN` annotation, a `persona: <name>` reference, or it is authoring that artifact's own flow — check whether that persona/job has been **ratified** (carries `human-oversight: confirmed` in its frontmatter) before letting the change stand. You have `Bash`, so run the predicate by **exit code** (you do NOT need to grep frontmatter yourself):
 
@@ -70,7 +70,7 @@ wr-jtbd-is-job-or-persona-unconfirmed <persona-name | JTBD-NNN>
 ```
 
 - **Exit 0** (frontmatter lacks the marker AND the artifact is not superseded AND it does not carry the rejected-pending-supersede + supersede-ticket pair) → the artifact is **unratified**. Emit **ISSUES FOUND / [Unratified Dependency]** with action: "ratify `<persona | JTBD-NNN>` via `/wr-jtbd:confirm-jobs-and-personas` before this lands." (The predicate prints the resolved path on stdout.)
-- **Exit 1** (ratified, superseded, or rejected-pending-supersede with a tracked `supersede-ticket: P<NNN>` — ADR-068 amendment per P316) → do NOT flag. A user-rejected artifact with a tracked supersede ticket is ratified-equivalent for the build-upon guard.
+- **Exit 1** (ratified, superseded, or rejected-pending-supersede with a tracked `supersede-ticket: P<NNN>` — ADR-066 amendment per P316) → do NOT flag. A user-rejected artifact with a tracked supersede ticket is ratified-equivalent for the build-upon guard.
 - **Exit 2** (ref not found) → the change cites a persona/job that does not exist; that is a separate Job Gap / Persona Mismatch, not an Unratified Dependency.
 
 **Key the flag on the oversight marker, NEVER on `status:`.** `status: proposed`/`accepted` and `human-oversight:` are orthogonal axes (ADR-066). Building on a **ratified** job whose `status` is still `proposed` is fine — do NOT flag it; only the *unratified* (marker-absent, non-superseded) case flags.

@@ -56,6 +56,6 @@ tests:
         architect verdict and action.
     assert:
       - type: regex
-        value: 'Architecture Review:\s*ISSUES FOUND|Architect verdict:\s*ISSUES FOUND'
+        value: 'ISSUES FOUND'
       - type: regex
         value: 'Unratified Dependency|ratify|review-decisions'

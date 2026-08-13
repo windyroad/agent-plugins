@@ -51,7 +51,12 @@ extract_from_html_data_story_id() {
   local file="$1"
   # Story maps reference stories via <a data-story-id="STORY-NNN"> per ADR-060
   # amendment schema; grep on the literal attribute match.
-  grep -qE "data-story-id=\"${story_id}\"" "$file"
+  # Two spellings carry the same fact, and a rendered map carries BOTH: the
+  # card as data-story-id="X", and the authored island entry as "storyId": "X".
+  # Pre-ADR-102 maps have only the first; a map edited but not yet re-rendered
+  # has only the second. Matching both covers every state. The alternation is
+  # boolean per file, so a map carrying both spellings is not double-listed.
+  grep -qE "data-story-id=\"${story_id}\"|\"storyId\"[[:space:]]*:[[:space:]]*\"${story_id}\"" "$file"
 }
 
 extract_id_from_filename() { basename "$1" | grep -oE "$id_pattern" | head -1; }

@@ -1,7 +1,9 @@
 ---
 status: "proposed"
 date: 2026-07-06
-human-oversight: unconfirmed
+human-oversight: confirmed
+oversight-date: 2026-08-13
+oversight-note: "Recorded from the maintainer's explicit approval of ADR-093 in this implementation thread; the approved substance is unchanged."
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: []

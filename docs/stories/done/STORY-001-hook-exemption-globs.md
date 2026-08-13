@@ -22,7 +22,7 @@ estimated-effort: S
 
 ## User value (INVEST Valuable)
 
-As a plugin maintainer building the Phase 2 story-tier framework, I want `docs/story-maps/**/*.html` and `docs/stories/**/*.md` paths exempted from the 4 enforce-edit hooks (architect / jtbd / style-guide / voice-tone) so that the story-map skill bats fixtures can write HTML files without being rejected, and so that the STORY-MAP-001 bootstrap migration can land its HTML scaffold.
+In order that the story tier could be built at all — its fixtures write HTML, and four enforce-edit hooks rejected every one — as a plugin maintainer bootstrapping the story-tier framework, I want `docs/story-maps/**/*.html` and `docs/stories/**/*.md` exempted from the architect, JTBD, style-guide and voice-tone edit gates.
 
 ## Acceptance criteria (INVEST Testable)
 
@@ -58,3 +58,10 @@ Ships across 4 hook source edits + 2 modified bats + 2 new bats (style-guide-enf
 - P170 line 297 (empirical block documentation).
 - Architect AMEND verdict 2026-05-12 finding 1 (load-bearing AMEND on Slice 3 design review).
 - Commit `b60f576`.
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-001 | STORY-MAP-001: RFC framework Phase 1 + Phase 2 bootstrap | in-progress |

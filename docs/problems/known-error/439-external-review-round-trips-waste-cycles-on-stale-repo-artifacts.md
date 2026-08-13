@@ -122,9 +122,15 @@ P445; one ADR settles all three, or states why they differ.
 |-----|--------|-------|
 | RFC-053 | proposed | Ship a portable rule requiring a verified-current handover before an external-review round-trip |
 
-
 ## Stories
 
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-050 | STORY-050: Have my reviewer read the version I actually have | draft |
+
+
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |
