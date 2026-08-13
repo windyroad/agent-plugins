@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 113 (101 in-force, 12 historical)
+**Total ADRs:** 114 (102 in-force, 12 historical)
 
 ---
 
 ## In-force decisions
 
-_101 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_102 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -395,7 +395,7 @@ _101 ADRs. These are the current rules. The architect agent reads this section f
 **Chosen:** Chosen option: **post-commit advisory hook**, because **a lifecycle transition may only be automated on observable facts, and O→KE rests on a knowledge claim** — so the strongest honest surface for the fix-titled-commit signal is an adv...
 
 ### ADR-093 — Mechanical quota-pace throttle — frequently-firing PreToolUse hook, calculated sleep, never blocks
-**Status:** proposed | **Oversight:** unconfirmed
+**Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option 3 (mechanical PreToolUse calculated sleep), registered in `hooks.json` as `PreToolUse` with **no matcher** (every tool call — Correction 2 verbatim) and `timeout: 660` (strictly greater than the 600s sleep ceiling below, so ...
 **Confirmation:** Behind pace drops immediately to cur_s=0; a positive measurable delta at or below sustainable also releases br...; A positive over-rate delta ramps cur_s; an unresolved overline delta retains at least the 10-second minimum br...; Mixed-window coverage keeps braking when either active overline window is unresolved.; Over pace, the ramp kick scales with how far over-rate the burn is (proportional slam); while behind the line,...; The 25 behavioural cases cover first samples, ceiling, window governance, recent checks, concurrent sessions, ...
 
@@ -499,6 +499,10 @@ _101 ADRs. These are the current rules. The architect agent reads this section f
 **Status:** proposed | **Oversight:** confirmed | **Supersedes:** [ADR-060 (in part - STORY-MAP ID allocation only)]
 **Chosen:** Chosen option: **Include Git history in the maximum**.
 **Confirmation:** The capture-story-map behavioural test creates and commits STORY-MAP-013, deletes and commits it, then asserts...; A Codex Promptfoo case runs the actual skill contract against the repository with STORY-MAP-012 and STORY-MAP-...; A repository scan after deletion finds no live references to STORY-MAP-012 or STORY-MAP-013 outside explicit h...; reconcile-story-maps.sh reports the README and filesystem are aligned after deletion.
+
+### ADR-116 — Ratified decisions change only by supersession
+**Status:** proposed | **Oversight:** unconfirmed
+**Confirmation:** The architect reviewer reports [Amendment To Ratified Decision] when a proposed change edits a confirmed decis...; The reviewer directs substantive change into a new superseding decision and does not accept clearing the overs...; A change that merely cites a legacy decision containing amendments does not trigger the finding.
 
 ---
 
