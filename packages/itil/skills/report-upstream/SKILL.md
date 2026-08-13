@@ -6,13 +6,13 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Skill, Agen
 
 # Report Upstream — Cross-Project Problem-Reporting Skill
 
-File a local `docs/problems/<NNN>` ticket as an issue (or private security advisory) against an upstream repository. Discover upstream issue templates, fall through to a structured default when none exist, route security-classified tickets via the upstream's `SECURITY.md`, and back-write a cross-reference into the local ticket.
+Report a local `docs/problems/<NNN>` ticket upstream. **Prefer opening a pull request when the upstream accepts pull requests**; fall back to filing an issue otherwise (or a private security advisory when the ticket is security-classified). Discover upstream templates, fall through to a structured default when none exist, route security-classified tickets via the upstream's `SECURITY.md`, and back-write a cross-reference into the local ticket.
 
 This skill implements the contract documented in [ADR-024](../../../docs/decisions/024-cross-project-problem-reporting-contract.proposed.md) (Cross-project problem-reporting contract). All step numbering below maps 1:1 to ADR-024 Decision Outcome.
 
 [ADR-033](../../../docs/decisions/033-report-upstream-classifier-problem-first.proposed.md) (Report-upstream classifier is problem-first) partially supersedes ADR-024 Decision Outcome **Steps 3 and 5 only** — the classifier is problem-first with best-fit backward-compat fallback (per Step 3 below), and the structured default body is problem-shaped (per Step 5 below). ADR-024 Steps 1, 2, 4, 6, 7, 8 and all Consequences / Confirmation clauses remain in force unchanged.
 
-The **ADR-024 amendment of 2026-04-25 (P070)** adds Step 4b (dedup check — own re-run + third-party search via `gh issue list --search` + inline LLM semantic match) and Step 5c (comment path — `gh issue comment` with cross-reference body when dedup match found). The maintainer-annoyance risk evaluator named in the P070 Direction decision is deferred to compose with the `wr-risk-scorer:external-comms` subagent declared in ADR-028 (per ADR-028 line 117 — third-evaluator extension point); the AFK auto-comment branch is on the interim **static heuristic** described in Step 4b until that evaluator lands. See Step 4b below.
+The **ADR-024 amendment of 2026-04-25 (P070)** adds Step 4b (dedup check — own re-run + third-party search across issues and pull requests, followed by inline LLM semantic matching) and Step 5c (kind-aware comment path). AFK comments use the shipped `wr-risk-scorer:external-comms` gate; unresolved above-appetite prose is queued without halting the orchestrator.
 
 ## Invocation
 
@@ -44,7 +44,7 @@ This skill files reports against an upstream's intake surface. Its reciprocal �
 
 ## Voice-tone gate interaction (ADR-028)
 
-The skill's `gh issue create` (Step 5) and `gh api repos/.../security-advisories` (Step 6) calls are **on the gated surface list per [ADR-028](../../../docs/decisions/028-voice-tone-gate-external-comms.proposed.md)** (Voice-tone gate on external communications). Expected behaviour during these tool calls:
+The skill's `gh issue create` (Step 5), `gh pr create` (Step 5b), `gh issue comment` / `gh pr comment` (Step 5c) and `gh api repos/.../security-advisories` (Step 6) calls are **on the gated surface list per [ADR-028](../../../docs/decisions/028-voice-tone-gate-external-comms.proposed.md)** (Voice-tone gate on external communications). Expected behaviour during these tool calls:
 
 1. The voice-tone gate fires `PreToolUse:Bash` with a deny-plus-delegate response.
 2. The hook delegates to `wr-voice-tone:agent` to review the drafted body for brand-voice + tone alignment against `docs/VOICE-AND-TONE.md`.
@@ -53,6 +53,13 @@ The skill's `gh issue create` (Step 5) and `gh api repos/.../security-advisories
 The skill should treat this transient deny-plus-delegate as the expected path, not as an error. The voice-tone agent's review covers only the prose body of the upstream report (issue body, advisory body); structural fields (template field IDs, plugin name, version) are not in voice-tone scope.
 
 If `wr-voice-tone:agent` is not installed in the project, the gate is dormant and the skill proceeds without delegation.
+
+**A pull request carries two outbound surfaces; only one of them is gated.** The prose must be reviewed, but the shipped hook extracts only the `--body` value. Before `gh pr create`, explicitly send the **combined title and body** through `wr-risk-scorer:external-comms` and `wr-voice-tone:external-comms`; the hook then enforces the body review on the command itself. The **diff is not gated by anything**. Nothing in this repo scores a diff against an upstream's policy or contribution standards. Read the diff yourself before opening the pull request; that gap is tracked as P497 and is deliberately not closed by this skill.
+
+Two mechanical notes so a re-route is not mistaken for a defect:
+
+- The surface label is part of the gate's marker key. A body first reviewed as an issue and then re-routed to a pull request misses its marker and pays a second full review by both evaluators, even though the prose is byte-identical. Expected, not a bug.
+- The gate's surface regex anchors on a command start, a `;`, an `&&` or a `||`. A **piped** invocation (`… | gh pr create`) does not match and the gate silently no-ops. Invoke `gh pr create` in an anchor-matching form.
 
 ## Steps
 
@@ -73,12 +80,17 @@ Extract:
 
 If the ticket is not found, halt with a clear error: `Error: local ticket P<NNN> not found in docs/problems/. Did you mean a different ID?`
 
-### 2. Discover upstream issue templates
+### 2. Discover upstream metadata, contribution guidance, and issue templates
 
 ```bash
 UPSTREAM_OWNER_REPO=$(echo "$UPSTREAM_URL" | sed -E 's|https?://github.com/([^/]+/[^/]+)(/.*)?|\1|')
+REPO_JSON=$(gh api "repos/${UPSTREAM_OWNER_REPO}")
 TEMPLATES_JSON=$(gh api "repos/${UPSTREAM_OWNER_REPO}/contents/.github/ISSUE_TEMPLATE" 2>/dev/null)
+CONTRIBUTING_MD=$(gh api "repos/${UPSTREAM_OWNER_REPO}/contents/CONTRIBUTING.md" --jq '.content' 2>/dev/null | base64 -d)
+PR_TEMPLATE_MD=$(gh api "repos/${UPSTREAM_OWNER_REPO}/contents/.github/PULL_REQUEST_TEMPLATE.md" --jq '.content' 2>/dev/null | base64 -d)
 ```
+
+If the conventional contribution files are absent, also try `.github/CONTRIBUTING.md`, `.github/pull_request_template.md`, and `docs/PULL_REQUEST_TEMPLATE.md`. A 404 for any optional file means absent; cache successful responses for Steps 4c and 5b. A failure fetching `REPO_JSON` is fatal because its `archived`, `disabled`, and `default_branch` fields govern the route and checkout.
 
 Parse the response:
 - HTTP 200 with a JSON array → upstream has templates. List the names + types (`.yml` for forms, `.md` for legacy markdown templates).
@@ -120,13 +132,56 @@ The local ticket is **security-classified** if any of:
 - The ticket body has a `## Security classification` section.
 - The CLI `--classification security` argument was passed.
 
-If security-classified, route to Step 6. Otherwise, route to Step 4b (dedup check) before Step 5 (public-issue path).
+If security-classified, route to Step 6. Otherwise, route to Step 4b (dedup check), then Step 4c (choose the outbound artefact), then Step 5 or Step 5b.
+
+Security classification is checked **first and wins outright**. A security-classified ticket never reaches Step 4c, so it can never be routed to a pull request — the private disclosure path in Step 6 stands exactly as it is.
+
+### 4c. Choose the outbound artefact — pull request or issue (ADR-117)
+
+This step is governed by [ADR-117](../../../docs/decisions/117-prefer-an-upstream-pull-request-over-an-issue.proposed.md) (Prefer an upstream pull request over an issue when the upstream accepts pull requests), which adds this branch alongside ADR-024's confirmed reporting contract and ahead of Step 5.
+
+**Prefer a pull request. File an issue when one of the four fallbacks below applies.**
+
+#### The predicate is "does this upstream accept pull requests"
+
+It is **not** "do we have write access". Fork-and-PR is the ordinary way a third party contributes, and it needs no permission we have to negotiate for. Most adopters of this plugin are consumers of their dependencies, not owners of them — a write-access predicate would make this whole branch a no-op for exactly the case the skill was written for.
+
+Read the signal from the discovery calls Step 2 makes:
+
+- The `repos/<owner>/<repo>` payload's `archived` and `disabled` flags. Either one true → the upstream is not accepting contributions.
+- The presence of `CONTRIBUTING.md`, or of a pull-request template fetched in Step 2. Either is positive evidence that pull requests are wanted.
+- An explicit statement in `CONTRIBUTING.md` that the project does not accept outside contributions.
+
+**On an absent or ambiguous signal, default to "accepts".** Do not escalate through a probe ladder to prove acceptance — a refuse-unless-proven predicate is the same failure mode ADR-024 already rejected when it declined to refuse upstreams that ship no issue templates. State which signal was read, or say the signal was absent and the default applied. Do not write "upstream likely accepts pull requests".
+
+#### File an issue instead when
+
+1. **The upstream does not accept contributions.** Archived, disabled, or says so.
+2. **The fix needs a design decision that is the maintainers' to make.** More than one defensible approach, and picking between them is their call, not ours.
+3. **The ticket is security-classified.** Already routed at Step 4 — this fallback records that the routing exists, and it is Step 6's private path that runs, not this one. Nothing here re-asserts the pre-P270 blanket ban.
+4. **There is no defensible fix in hand.** A symptom, or even a confident diagnosis, is not a change we can responsibly author in a codebase we do not know.
+
+#### Fallback 4 is decided silently — never ask the reporter
+
+The reporter describes a symptom. That is the whole of their obligation and this decision must not touch it. **Do not raise an `AskUserQuestion` about whether to write a patch.** The skill already carries two interactive gates (Step 4b dedup, Step 6 missing-`SECURITY.md`); a third would push intake past the couple of minutes beyond which a report simply gets abandoned, and it would be asking the reporter to ratify a judgement the agent is there to make.
+
+The preference is a preference. It never converts the reporter into a patch author. The added cost lands on agent time and token budget, not on anyone's attention.
+
+#### Draft the issue body first; the pull request is an upgrade of it
+
+Compose the Step 5 issue body **before** attempting the pull request, always. Then attempt the pull request. If the attempt fails for any reason — fork refused, patch will not apply, upstream tests red, effort budget spent — **file the already-drafted issue** rather than aborting.
+
+Without this, a failed pull-request attempt loses a report that the issue-only path would have filed, which is strictly worse than not having tried.
+
+#### Effort budget
+
+Spend at most **20 minutes of wall-clock and 3 attempts** on getting a working patch. Past that, fall back to fallback 4 and file the drafted issue. The budget is a real number rather than a judgement call because an open-ended "author a fix in an unfamiliar codebase" is how a loop burns a quota and how an idle guard that measures progress in commits kills a session doing legitimate work.
 
 ### 4b. Dedup check (P070)
 
-This step is governed by the [ADR-024](../../../docs/decisions/024-cross-project-problem-reporting-contract.proposed.md) 2026-04-25 amendment, which adds dedup checking to the Decision Outcome step list (P070). Two duplication windows close at the same insertion point: own re-run (4b.1) and third-party search (4b.2). Both branches share the same AskUserQuestion surface and the same AFK halt-and-save behaviour.
+This step is governed by the [ADR-024](../../../docs/decisions/024-cross-project-problem-reporting-contract.proposed.md) 2026-04-25 amendment, which adds dedup checking to the Decision Outcome step list (P070). Two duplication windows close at the same insertion point: own re-run (4b.1) and third-party search (4b.2). Both branches share the same AskUserQuestion surface and AFK risk-gated queue-and-continue behaviour.
 
-> **Serves**: JTBD-004 (cross-repo coordination — dedup is the difference between coordination and spam), JTBD-001 (solo developer "without slowing down" — dedup protects the user from policing upstream duplicates manually), JTBD-006 (AFK persona — halt-and-surface protects loops from duplicate-firing), JTBD-101 (clear pattern — pattern ships without a duplication hole).
+> **Serves**: JTBD-004 (cross-repo coordination — dedup is the difference between coordination and spam), JTBD-001 (solo developer "without slowing down" — dedup protects the user from policing upstream duplicates manually), JTBD-006 (AFK persona — risk-gated queue-and-continue avoids duplicate firing), JTBD-101 (clear pattern — pattern ships without a duplication hole).
 
 #### 4b.1. Own re-run check
 
@@ -134,8 +189,13 @@ Detect whether the local ticket already records a previous upstream report. The 
 
 ```bash
 LOCAL_URL=$(grep -A5 '^## Reported Upstream' "$LOCAL_TICKET" | grep -oE 'https?://[^ )]+' | head -1)
+LOCAL_DISCLOSURE=$(grep -A5 '^## Reported Upstream' "$LOCAL_TICKET" | sed -n 's/^- \*\*Disclosure path\*\*: //p' | head -1)
+case "$(printf '%s' "$LOCAL_DISCLOSURE" | tr '[:upper:]' '[:lower:]')" in
+  *pull*request*) LOCAL_KIND="pull-request" ;;
+  *) LOCAL_KIND="issue" ;;
+esac
 if [ -n "$LOCAL_URL" ]; then
-  echo "Local ticket P${LOCAL_ID} already records an existing upstream report: $LOCAL_URL"
+  echo "Local ticket P${LOCAL_ID} already records an existing upstream ${LOCAL_KIND}: $LOCAL_URL"
   # Branch interactive vs AFK below.
 fi
 ```
@@ -146,10 +206,10 @@ fi
 - `multiSelect: false`
 - Options:
   1. `Halt — local ticket already records ${LOCAL_URL}` (Recommended) — abort the invocation; the existing report is current.
-  2. `Comment on the existing upstream report` — route to Step 5c with the existing URL's issue number; appropriate when new evidence has emerged since the previous report.
+  2. `Comment on the existing upstream report` — route to Step 5c with the existing URL's number and `${LOCAL_KIND}`; appropriate when new evidence has emerged since the previous report.
   3. `File a new upstream issue anyway (override)` — explicit override after user has reviewed the existing record and judged the second filing warranted (e.g. previous report was closed without resolution and a fresh tracker is needed).
 
-**AFK / non-interactive branch** — apply the **interim static heuristic** (no subagent dispatch; the maintainer-annoyance risk evaluator is deferred per ADR-028 line 117 — see "AFK static heuristic" below). Default action: halt and save the drafted report to the local ticket's `## Queued Upstream Report` section; do NOT auto-comment. The static heuristic remains in place until `wr-risk-scorer:external-comms` ships, at which point the AFK branch wires the gate combination (maintainer-annoyance + leak gate, both within appetite) per the ticket Direction decision (2026-04-21).
+**AFK / non-interactive branch** — apply the external-communications gate in the AFK behaviour summary. Below-appetite prose comments on the existing `${LOCAL_KIND}`; unresolved above-appetite prose is queued and the orchestrator continues.
 
 #### 4b.2. Third-party search
 
@@ -158,26 +218,48 @@ Detect whether a different reporter (or another agent in a parallel session) has
 ```bash
 # Stage 1: gh-search pre-filter on title keywords (cheap, ~500ms-2s).
 KEYWORDS=$(extract_3-5_keywords_from "$LOCAL_TICKET_TITLE + $LOCAL_TICKET_DESCRIPTION")
-MATCHES=$(gh issue list \
+ISSUE_MATCHES=$(gh issue list \
   --repo "$UPSTREAM_OWNER_REPO" \
   --state all \
   --search "$KEYWORDS" \
   --json number,title,state,url \
   --limit 10)
+
+# ADR-117: `gh issue list` does NOT return pull requests. Now that this skill
+# opens pull requests, searching issues alone leaves the whole pull-request
+# window open — including against pull requests we opened ourselves.
+PR_MATCHES=$(gh pr list \
+  --repo "$UPSTREAM_OWNER_REPO" \
+  --state all \
+  --search "$KEYWORDS" \
+  --json number,title,state,url \
+  --limit 10)
+
+MATCHES=$(jq -cn \
+  --argjson issues "$ISSUE_MATCHES" \
+  --argjson prs "$PR_MATCHES" \
+  '($issues | map(. + {kind: "issue"})) +
+   ($prs | map(. + {kind: "pull-request"}))')
 ```
+
+Carry the artefact kind alongside each candidate. Step 5c needs it to pick between `gh issue comment` and `gh pr comment`, and the user needs it to judge a match — "already fixed in an open pull request" is a different situation from "already reported in an open issue".
 
 For each candidate returned by Stage 1, fetch the full body and run **Stage 2 — inline LLM semantic judgement**:
 
 ```bash
 # Stage 2: per-candidate body fetch + inline classification.
-for n in $(echo "$MATCHES" | jq -r '.[].number'); do
-  CANDIDATE=$(gh issue view "$n" --repo "$UPSTREAM_OWNER_REPO" --json title,body,state,url)
+while IFS=$'\t' read -r kind n; do
+  if [ "$kind" = "pull-request" ]; then
+    CANDIDATE=$(gh pr view "$n" --repo "$UPSTREAM_OWNER_REPO" --json title,body,state,url)
+  else
+    CANDIDATE=$(gh issue view "$n" --repo "$UPSTREAM_OWNER_REPO" --json title,body,state,url)
+  fi
   # Inline LLM judgement: read {local ticket Description + Symptoms, candidate title + body}
   # and return one of: same-problem | different-problem | uncertain.
   # No subagent dispatch — Direction decision 2026-04-21 pins inline classification
   # for simplicity. Promotion to a `wr-itil:dedup-check` subagent is a future
   # ADR amendment if architect review later flags context-isolation concerns.
-done
+done < <(echo "$MATCHES" | jq -r '.[] | [.kind, .number] | @tsv')
 ```
 
 Notes on inline LLM classification:
@@ -197,31 +279,23 @@ If Stage 2 produces one or more `same-problem` matches, surface them to the user
 
 `uncertain` matches surface alongside `same-problem` matches with their verdict labelled, so the user can review. The skill never auto-resolves an `uncertain` verdict.
 
-**AFK / non-interactive branch** — apply the same interim static heuristic as 4b.1: halt and save the drafted report to the local ticket's `## Queued Upstream Report` section. The third-party-match auto-comment path requires the deferred `wr-risk-scorer:external-comms` gate (maintainer-annoyance + leak), so the AFK branch must NOT auto-comment under the static heuristic.
+**AFK / non-interactive branch** — apply the external-communications gate in the AFK behaviour summary, preserving the matched artefact kind. Below-appetite prose comments on the matching issue or pull request; unresolved above-appetite prose is queued and the orchestrator continues.
 
-#### AFK static heuristic (interim, until `wr-risk-scorer:external-comms` ships)
-
-The Direction decision (2026-04-21) pins the AFK auto-comment branch on **two gates passing together**: the maintainer-annoyance risk evaluator AND the P064 external-comms leak gate, both within RISK-POLICY.md's commit-layer appetite (Low, ≤4/25). Neither gate exists yet — ADR-028 declares the `wr-risk-scorer:external-comms` subagent type but P064's implementation is open at WSJF 3.0 (Effort L), and the maintainer-annoyance evaluator was deferred by architect review on P070 to compose with the same subagent rather than ship as a separate evaluator (per ADR-028 line 117 — *"Third evaluator (licence-compliance, etc.) adding to the same gate — when it emerges, amend this ADR's evaluator list and the composite marker's `evaluator_set` component; no new ADR expected."*).
-
-**Static heuristic, valid until both gates ship**: in AFK mode, both 4b.1 and 4b.2 default to **halt and save the drafted report**. No auto-comment, no auto-file. The drafted report is appended to the local ticket's `## Queued Upstream Report` section so the user can review and act manually on return. This matches JTBD-006's "does not trust the agent to make judgement calls" stance — the conservative default is the right interim behaviour.
-
-**Re-wire trigger**: when `wr-risk-scorer:external-comms` lands (ADR-028 implementation, P064 closure), amend this section to invoke both evaluators and proceed with auto-comment ONLY when both verdicts return PASS within appetite. Update the AFK behaviour summary table accordingly. Until then, the static heuristic stands.
-
-**Queued Upstream Report save format** (used by both 4b.1 and 4b.2 AFK halts; mirrors the security-path halt pattern from Step 6 per ADR-024 Consequences lines 116, 123. **Renamed from `## Drafted Upstream Report` per ADR-024 2026-06-04 second-amendment ratification (c)** — same shape; new name reflects post-amendment semantics, queue-for-review-on-return not loop-stopping halt-and-save):
+**Queued Upstream Report save format** (used by both 4b.1 and 4b.2 when risk cannot be reduced within appetite):
 
 ```markdown
 ## Queued Upstream Report
 
 - **Drafted**: <YYYY-MM-DD>
 - **Target upstream**: <upstream-repo-url>
-- **Halt reason**: dedup match (own re-run | third-party `same-problem`) — interim static heuristic awaiting `wr-risk-scorer:external-comms` (ADR-028 / P064)
+- **Queue reason**: dedup match (own re-run | third-party `same-problem`) — external-communications risk remains above appetite
 - **Matched URL(s)**: <existing-issue-or-report-URL(s)>
 - **Drafted body**:
 
-  <the body that would have been posted as a `gh issue comment` or `gh issue create`, ready for manual copy-paste review>
+  <the body that would have been posted as a comment or new report, ready for review>
 ```
 
-The halt is a loop-stopping event for AFK orchestrators — same pattern as the security-path halt-and-surface branch — so the user sees the dedup match on return rather than the orchestrator silently auto-commenting.
+Queue an `outstanding_questions` entry and include the queued report in the progress summary; do not halt the orchestrator.
 
 ### 5. Public-issue path
 
@@ -395,25 +469,118 @@ Reported from <downstream-repo-url>/<local-ticket-relative-path>
 This issue is tracked locally as P<NNN> in the downstream project's `docs/problems/` directory.
 ```
 
+Retain the completed issue-shaped body separately so a failed pull-request attempt cannot overwrite its fallback:
+
+```bash
+ISSUE_BODY="${FILLED_BODY}"
+```
+
 Open the issue:
 
 ```bash
 gh issue create \
   --repo "${UPSTREAM_OWNER_REPO}" \
   --title "${TITLE_PREFIXED_BY_TEMPLATE}" \
-  --body "${FILLED_BODY}"
+  --body "${ISSUE_BODY}"
 ```
 
 Do **not** pass `--label` on this call (P207). Labels are supplied by the matched template's YAML `labels:` frontmatter and applied by GitHub when the issue form is submitted; passing `--label <name>` for a label that has not been pre-created on the upstream repo causes `gh issue create` to hard-fail with `could not add label: '<name>' not found`. The flag is redundant when the matched template carries `labels:` and a hard-fail surface when it does not. If the upstream has no matched template at all (structured-default body path, Step 3 preference order item 7), omit labels entirely — leave triage to the upstream maintainer's existing routing.
 
 Capture the returned issue URL. The voice-tone gate per ADR-028 may delegate-and-retry; treat this as expected (see "Voice-tone gate interaction" above). Proceed to Step 7 once the issue is created.
 
+### 5b. Pull-request path (ADR-117)
+
+Reached when Step 4c chose a pull request. The Step 5 issue body is already drafted at this point and is held as the fallback.
+
+#### The body defers to the upstream's own template
+
+ADR-033's structured default is a **problem report** — Description, Symptoms, Workaround, Affected plugin, Frequency, Versions, Evidence, Cross-reference. That shape is incoherent on a pull request, where the diff already resolves the symptoms it would recite. ADR-033's classifier and its structured default remain unchanged and in force on the issue branch; only this branch differs.
+
+1. Fetch `.github/PULL_REQUEST_TEMPLATE.md` (also try `.github/pull_request_template.md` and `docs/PULL_REQUEST_TEMPLATE.md`). **If one exists, fill it.** This is the same posture as respecting the upstream's curated issue templates, applied to a second artefact kind.
+2. If none exists, use the reduced shape below — rationale plus cross-reference, not a problem report:
+
+```markdown
+## What this changes
+
+<one paragraph: the change, in the upstream's own vocabulary>
+
+## Why
+
+<the problem this fixes, stated as the upstream experiences it — not as our
+ticket experiences it. Link an existing upstream issue if one covers it.>
+
+## Cross-reference
+
+Reported from <downstream-repo-url>/<local-ticket-relative-path>, where this
+is tracked as P<NNN>.
+```
+
+Keep it short. A pull request body that recites symptoms the diff already answers reads as noise to a reviewer.
+
+Retain this separately as `PR_BODY`; never overwrite `ISSUE_BODY`.
+
+#### Show the diff before opening it
+
+The external-comms gate forces a turn here to review the prose. Nothing reviews the **patch** — no surface in this repo reads a diff against an upstream's conventions (P497). So make the patch visible at the stop that is already happening, rather than letting it go out unseen:
+
+1. Print the full patch to the session — `git diff` against the upstream's base branch — immediately before `gh pr create`.
+2. State in the drafted body which of the upstream's own convention files you read and complied with: `CONTRIBUTING.md`, `.github/PULL_REQUEST_TEMPLATE.md`, a linter config, a CI workflow. Name the file. If you read none, say so.
+
+This adds no `AskUserQuestion` and does not reopen Step 4c's silent determination. It converts an invisible diff into a visible one at a turn the reviewer is already stopped on, which is the cheapest control available until P497 is closed.
+
+#### Build and open it from an isolated upstream checkout
+
+Do not author the upstream patch in the downstream project's working tree. Use a temporary clone, create one branch, apply the smallest defensible patch, run the upstream's documented checks, commit it, and push it to a fork (or directly only when write access is already available).
+
+```bash
+UPSTREAM_BASE=$(echo "$REPO_JSON" | jq -r '.default_branch')
+UPSTREAM_CHECKOUT=$(mktemp -d)
+BRANCH="windyroad/p${LOCAL_ID}-$(printf '%s' "$TITLE" | tr '[:upper:] ' '[:lower:]-' | tr -cd '[:alnum:]-' | cut -c1-40)"
+
+PR_URL=$(
+  gh repo clone "$UPSTREAM_OWNER_REPO" "$UPSTREAM_CHECKOUT/repo" -- --filter=blob:none
+  cd "$UPSTREAM_CHECKOUT/repo"
+  git switch -c "$BRANCH" "origin/$UPSTREAM_BASE"
+
+  # Apply the patch, run the upstream's documented checks, then:
+  git add --all
+  git commit -m "fix: <upstream-facing summary>"
+  gh repo fork "$UPSTREAM_OWNER_REPO" --remote --remote-name fork
+  git push --set-upstream fork "$BRANCH"
+
+  GH_USER=$(gh api user --jq .login)
+  git diff "origin/$UPSTREAM_BASE...HEAD" >&2
+  gh pr create \
+    --repo "${UPSTREAM_OWNER_REPO}" \
+    --base "${UPSTREAM_BASE}" \
+    --head "${GH_USER}:${BRANCH}" \
+    --title "${TITLE}" \
+    --body "${PR_BODY}"
+)
+```
+
+The command substitution is a subshell, so Step 7 resumes in the downstream checkout. Immediately before `gh pr create`, explicitly review `${TITLE}` plus `${PR_BODY}` together through both external-communications evaluators. Do not rely on the command hook for the title: it extracts the body only.
+
+Invoke it at a command start or after `;` / `&&` / `||`, never through a pipe, or the external-comms gate does not match the surface and silently skips the review. Do not pass `--label` for the same reason Step 5 does not (P207).
+
+Capture the returned pull-request URL and proceed to Step 7, recording disclosure path `pull request`.
+
+If the attempt fails at any point, file the drafted Step 5 issue instead and record `public issue`. A failed pull request must never cost us the report.
+
 ### 5c. Comment path (P070)
 
 Used when Step 4b's dedup check (own re-run or third-party search) finds a match AND the user picks the "comment instead" option. Skips `gh issue create` and posts a cross-reference comment on the existing upstream issue:
 
+**Branch on what the dedup check actually matched (ADR-117).** Step 4b.2 now searches pull requests as well as issues, so the match may be either. `gh issue comment` errors on a pull request:
+
 ```bash
-gh issue comment "${EXISTING_ISSUE_NUMBER}" \
+# Issue match:
+gh issue comment "${EXISTING_NUMBER}" \
+  --repo "${UPSTREAM_OWNER_REPO}" \
+  --body "${COMMENT_BODY}"
+
+# Pull-request match:
+gh pr comment "${EXISTING_NUMBER}" \
   --repo "${UPSTREAM_OWNER_REPO}" \
   --body "${COMMENT_BODY}"
 ```
@@ -437,7 +604,7 @@ Empty subsections are skipped — the comment should add information, not restat
 
 The voice-tone gate per ADR-028 also fires on `gh issue comment` (per the canonical hook's regex list at ADR-028 line 61); treat the deny-plus-delegate-and-retry as expected, same as Step 5.
 
-Capture the returned comment URL (gh prints `https://github.com/<owner>/<repo>/issues/<n>#issuecomment-<id>`). The Step 7 back-write records this as the cross-reference URL with disclosure path `commented-on-existing-issue`. Proceed to Step 7.
+Capture the returned comment URL. The Step 7 back-write records an issue match as `commented-on-existing-issue` and a pull-request match as `commented-on-existing-pull-request`. Proceed to Step 7.
 
 ### 6. Security path
 
@@ -489,9 +656,11 @@ After the upstream issue or advisory is created (or drafted-and-saved in the sec
    - **URL**: <upstream-issue-or-advisory-url>
    - **Reported**: <YYYY-MM-DD>
    - **Template used**: <template-name-or-"structured default">
-   - **Disclosure path**: <public issue | security advisory | drafted-and-saved (mailbox / out-of-band) | commented-on-existing-issue (Step 5c, P070)>
+   - **Disclosure path**: <public issue | pull request (Step 5b, ADR-117) | security advisory | drafted-and-saved (mailbox / out-of-band) | commented-on-existing-issue (Step 5c, P070) | commented-on-existing-pull-request (Step 5c, ADR-117)>
    - **Cross-reference confirmed**: <yes/no — true once the upstream issue body contains the local ticket reference>
    ```
+
+The `pull request` and `commented-on-existing-pull-request` values are what `/wr-itil:check-upstream-responses` and `/wr-itil:update-upstream` read to pick `gh pr view` and `gh pr comment` over their issue equivalents. Write them exactly; an absent line is read as `public issue`, which is correct for tickets predating ADR-117 but wrong for a pull request.
 
 ### 8. Commit per ADR-014
 
@@ -505,14 +674,15 @@ If the cumulative pipeline risk lands above appetite and `AskUserQuestion` is un
 
 ## AFK behaviour summary
 
-Five distinct AFK branches; **per the ADR-024 2026-06-04 (P270) amendment, ALL pre-commit branches now route through the `wr-risk-scorer:external-comms` gate** (ADR-028) — below-appetite proceeds, above-appetite risk-reduces then queues. The legacy "halt the orchestrator" semantics for dedup-match and security-path-without-declared-channel are **superseded** by queue-and-continue per P352:
+Six distinct AFK branches; **per the ADR-024 2026-06-04 (P270) amendment, ALL pre-commit branches now route through the `wr-risk-scorer:external-comms` gate** (ADR-028) — below-appetite proceeds, above-appetite risk-reduces then queues. The legacy "halt the orchestrator" semantics for dedup-match and security-path-without-declared-channel are **superseded** by queue-and-continue per P352:
 
 | Branch | AFK behaviour | Authority |
 |---|---|---|
 | Public-issue path (Step 5) | Score drafted prose via `wr-risk-scorer:external-comms` (ADR-028). Below-appetite → proceed via `gh issue create`. Above-appetite → risk-reduce + re-score; if within → proceed; else → save draft to `## Queued Upstream Report` + queue `outstanding_questions` entry; orchestrator continues. Risk-reducing measures vocabulary is **open-ended LLM judgement** per ADR-024 2026-06-04 second-amendment leaf (a) — `wr-risk-scorer:external-comms` picks the remedy case-by-case. Voice-tone gate per ADR-028 may also delegate-and-retry on the proceed path. | ADR-024 2026-06-04 amendment (P270); ADR-024 2026-06-04 second-amendment (leaf a — open vocabulary); ADR-028 line 126 |
-| Dedup match — Step 4b (own re-run OR third-party `same-problem`) | Score the proposed comment body via `wr-risk-scorer:external-comms`. Below-appetite → proceed via `gh issue comment` (Step 5c). Above-appetite → risk-reduce + re-score (open-ended LLM judgement per leaf (a)); if within → proceed; else → save draft to `## Queued Upstream Report` + queue `outstanding_questions` entry; orchestrator continues. **The 2026-04-25 (P070) "interim static heuristic in force until that subagent ships" deferral is LIFTED** — the subagent (`packages/risk-scorer/agents/external-comms.md`) has shipped. | ADR-024 2026-06-04 amendment (P270); ADR-024 2026-04-25 amendment (P070); ADR-024 2026-06-04 second-amendment (leaf a) |
+| Dedup match — Step 4b (own re-run OR third-party `same-problem`) | Score the proposed comment body via `wr-risk-scorer:external-comms`. Below-appetite → comment on the matching issue or pull request (Step 5c). Above-appetite → risk-reduce + re-score (open-ended LLM judgement per leaf (a)); if within → proceed; else → save draft to `## Queued Upstream Report` + queue `outstanding_questions` entry; orchestrator continues. | ADR-024 2026-06-04 amendment (P270); ADR-024 2026-04-25 amendment (P070); ADR-024 2026-06-04 second-amendment (leaf a) |
 | Security path with declared channel (Step 6, GitHub Advisories — upstream has `SECURITY.md`) | Per ADR-024 2026-06-04 second-amendment leaf (b) — ratified: if upstream has `SECURITY.md` AND below-appetite → **file** via the SECURITY.md-declared channel. Above-appetite → risk-reduce + re-score (open-ended LLM judgement per leaf (a)); if within → proceed; else → save draft + queue; orchestrator continues. | ADR-024 2026-06-04 amendment (P270); ADR-024 2026-06-04 second-amendment (leaf b); ADR-024 Decision Outcome step 6 |
 | Security path with `security@` / other / missing-SECURITY.md (Step 6) | Per ADR-024 2026-06-04 second-amendment leaf (b) — ratified: when upstream has NO `SECURITY.md` but another disclosure channel exists, score drafted prose via `wr-risk-scorer:external-comms` considering impact to (i) our repository, (ii) our reputation, (iii) the party we are reporting to. Below-appetite → save drafted report to `## Queued Upstream Report` + queue `outstanding_questions` entry naming the channel the user must follow on return (the no-infra-for-email constraint still holds — the channel-action remains user-side, but the queue surface replaces the loop-stopping halt). Above-appetite → risk-reduce + re-score (open-ended LLM judgement per leaf (a)) then queue per the same shape. Orchestrator continues. The pre-2026-06-04 "AFK orchestrators must never auto-report a security-classified ticket" rule is **superseded** by the external-comms-gated per-classification branching. | ADR-024 2026-06-04 amendment (P270); ADR-024 2026-06-04 second-amendment (leaf b); ADR-024 Consequences lines 116, 123 (superseded) |
+| **Pull-request path (Step 5b)** | **Degrade to the issue branch.** No unattended session opens a pull request against a repository we do not own. File the issue per the Public-issue-path row above, and append the drafted pull request (body + the change it would have made) to `## Queued Upstream Report` for the interactive return. **Also surface it in the orchestrator's progress summary** — a returning developer must see "a pull request was drafted and queued" without opening the ticket. The external-comms gate reads prose; it cannot authorise pushing code into a third party's repository under our name, and that is a judgement call an unattended loop does not get to make. | ADR-117 (AFK degrade); JTBD-006 (no unattended judgement calls; visible on return) |
 | Above-appetite commit (Step 8) | Skip the commit, report uncommitted state. | ADR-013 Rule 6 |
 
 ## References
@@ -521,7 +691,9 @@ Five distinct AFK branches; **per the ADR-024 2026-06-04 (P270) amendment, ALL p
 - [ADR-033](../../../docs/decisions/033-report-upstream-classifier-problem-first.proposed.md) — partially supersedes ADR-024 Decision Outcome Steps 3 + 5; governs the problem-first classifier and problem-shaped structured default body.
 - [P070](../../../docs/problems/) — driver ticket for the Step 4b dedup check + Step 5c comment path; carries the 2026-04-21 Direction decision (gh search + inline LLM, no subagent dispatch) and the AFK static-heuristic interim behaviour.
 - [ADR-027](../../../docs/decisions/027-governance-skill-auto-delegation.proposed.md) — Step-0 deferral rationale (held for reassessment).
-- [ADR-028](../../../docs/decisions/028-voice-tone-gate-external-comms.proposed.md) — voice-tone gate on `gh issue create` and `gh api .../security-advisories`.
+- [ADR-117](../../../docs/decisions/117-prefer-an-upstream-pull-request-over-an-issue.proposed.md) — prefer an upstream pull request over an issue when the upstream accepts pull requests. Adds Step 4c (artefact choice) and Step 5b (pull-request path), extends Step 4b.2's dedup search to pull requests, branches Step 5c's comment call, and widens Step 7's disclosure-path enumeration without editing ADR-024 or ADR-033.
+- [P497](../../../docs/problems/open/497-upstream-pull-request-diff-is-unscored.md) — the pull-request **diff** is unscored. The prose is gated; nothing reads the diff against an upstream's policy. Named by ADR-117 and deliberately left open.
+- [ADR-028](../../../docs/decisions/028-voice-tone-gate-external-comms.proposed.md) — voice-tone gate on `gh issue create`, `gh pr create`, `gh issue comment`, `gh pr comment` and `gh api .../security-advisories`.
 - [ADR-013](../../../docs/decisions/013-structured-user-interaction-for-governance-decisions.proposed.md) — interaction policy; Rule 1 governs Step 6 missing-SECURITY.md `AskUserQuestion`; Rule 6 governs the commit-gate AFK branch.
 - [ADR-014](../../../docs/decisions/014-governance-skills-commit-their-own-work.proposed.md) — work → score → commit ordering.
 - [ADR-015](../../../docs/decisions/015-on-demand-assessment-skills.proposed.md) — fallback path for `wr-risk-scorer:assess-release`.

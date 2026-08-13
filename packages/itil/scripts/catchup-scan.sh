@@ -45,7 +45,7 @@
 # Structured stdout (one per actionable upstream entry; <= 150 bytes per
 # line per ADR-038). ASCII `->` for the transition arrow per the P334
 # awk/script portability lesson (no Unicode in machine-read output):
-#   CATCHUP P<NNN> <url> state=<state> transition=<KE->Verifying|Verifying->Closed>
+#   CATCHUP P<NNN> <url> state=<state> transition=<KE->Verifying|Verifying->Closed> disclosure=<issue|pull-request>
 #   CATCHUP P<NNN> inbound-<ref> state=<state> transition=<…> direction=inbound
 #   SKIP    P<NNN> <url> reason=already-logged
 #   SKIP    P<NNN> inbound-<ref> reason=already-logged
@@ -64,6 +64,10 @@
 # @adr ADR-049 (invoked via wr-itil-catchup-scan bin shim, never repo-relative path)
 # @adr ADR-032 (foreground synchronous skill)
 # @adr ADR-076 (reads the `**Origin**: inbound-reported (#NN)` field for the inbound leg)
+# @adr ADR-117 (prefer an upstream pull request over an issue — the CATCHUP
+#   row carries a `disclosure=` discriminator so the consuming skill knows
+#   whether to comment on a pull request or an issue. A `pull request` path
+#   is actionable, so it is NOT skipped alongside out-of-band / mailbox.)
 # @problem P376 — catchup scanner misses the inbound direction (cross-direction parity)
 # @rfc RFC-028 (consume the Origin field for inbound-reported verdict — extended to the catchup surface)
 # @jtbd JTBD-301 (reporter feedback loop — the catchup's primary job)
@@ -264,8 +268,17 @@ for ticket_file in "${TICKET_FILES[@]}"; do
       printf "SKIP    %s %s reason=already-logged\n" "$ticket_id" "$upstream_url"
       SKIP_LOGGED=$((SKIP_LOGGED + 1))
     else
-      printf "CATCHUP %s %s state=%s transition=%s\n" \
-        "$ticket_id" "$upstream_url" "$state" "$transition"
+      # Carry the artefact kind to the consumer. Without it the value is
+      # recorded on the ticket and never acted on, and `/wr-itil:update-upstream`
+      # runs `gh issue comment` against a pull request. Hyphenated on the wire
+      # so the row stays whitespace-tokenisable; the ticket body keeps the
+      # spaced `pull request` spelling.
+      case "$disclosure" in
+        *pull*request*) disclosure_field="pull-request" ;;
+        *) disclosure_field="issue" ;;
+      esac
+      printf "CATCHUP %s %s state=%s transition=%s disclosure=%s\n" \
+        "$ticket_id" "$upstream_url" "$state" "$transition" "$disclosure_field"
       CATCHUP_COUNT=$((CATCHUP_COUNT + 1))
     fi
   fi

@@ -13,7 +13,8 @@
 # script that polls upstream issues, writes cache + audit-log, and
 # emits a structured one-line-per-ticket report to stdout.
 #
-# Read-soft externally: only `gh issue view` (read-only) — no
+# Read-soft externally: `gh issue view`, or `gh pr view` plus `gh api` for
+# inline review comments (all read-only) — no
 # `gh issue comment` / `gh issue create`. Does NOT trip ADR-028
 # external-comms gate. AFK-safe.
 #
@@ -35,7 +36,7 @@
 #
 # Structured stdout format (≤ 150 bytes per line per ADR-038
 # progressive-disclosure budget):
-#   NEW     P<NNN> <url> state=<state> new-comments=<N>
+#   NEW     P<NNN> <url> state=<state> new-responses=<N>
 #   STATE   P<NNN> <url> state=<old>→<new>
 #   LABEL   P<NNN> <url> labels-added=<csv> labels-removed=<csv>
 #   NONE    P<NNN> <url> no-change-since=<last-checked>
@@ -255,7 +256,7 @@ EOF
   run "$SCRIPT" --problems-dir "$PROBLEMS_DIR" --cache-file "$CACHE_FILE" --audit-log "$AUDIT_LOG" --gh-bin "$GHFAKE_DIR/gh"
   [ "$status" -eq 0 ]
   echo "$output" | grep -qE "^NEW *P103"
-  echo "$output" | grep -q "new-comments=2"
+  echo "$output" | grep -q "new-responses=2"
 }
 
 # ── Behavioural: state change surfaces STATE marker ─────────────────────────
@@ -500,4 +501,226 @@ EOF
   [ "$status" -eq 0 ]
   # With --force-recheck, the line is emitted as NEW regardless of cache match.
   echo "$output" | grep -qE "^NEW *P112"
+}
+
+# ── Behavioural: disclosure path selects the gh read subcommand (ADR-117) ───
+#
+# ADR-117 makes a pull request the preferred outbound artefact. `gh issue view`
+# errors on a pull-request URL, so a ticket whose `## Reported Upstream`
+# disclosure path records `pull request` must be polled with `gh pr view`.
+# These cases exercise the real script against a fake `gh` that accepts ONLY
+# the correct noun for the artefact it was primed with — so polling with the
+# wrong subcommand surfaces as FAIL rather than as a silent pass.
+#
+# @jtbd JTBD-201 (audit trail — a rejected pull request must not be recorded
+#   as a resolution, which needs the poll to reach the pull request at all)
+# @jtbd JTBD-010 (per-report token burn — legacy issues remain one call; pull
+#   requests use one additional bounded read for inline review comments)
+# @adr ADR-117
+
+# Fake `gh` that answers only the given noun, and records the noun it saw.
+make_noun_strict_gh() {
+  local accept="$1"
+  cat > "$GHFAKE_DIR/gh" <<EOF
+#!/usr/bin/env bash
+echo "\$1 \$2" >> "\$GHFAKE_DATA/nouns.log"
+if [ "\$1" = "api" ]; then
+  if [ -f "\$GHFAKE_DATA/review-comments.json" ]; then
+    cat "\$GHFAKE_DATA/review-comments.json"
+  else
+    printf '[[]]'
+  fi
+  exit 0
+fi
+if [ "\$1" = "$accept" ] && [ "\$2" = "view" ]; then
+  URL="\$3"
+  HASH=\$(echo -n "\$URL" | shasum | awk '{print \$1}')
+  if [ -f "\$GHFAKE_DATA/\$HASH.json" ]; then cat "\$GHFAKE_DATA/\$HASH.json"; exit 0; fi
+  echo "no canned response for \$URL" >&2; exit 1
+fi
+echo "gh: '\$1 \$2' is not valid for this artefact" >&2
+exit 1
+EOF
+  chmod +x "$GHFAKE_DIR/gh"
+}
+
+write_upstream_ticket() {
+  local file="$1" url="$2" disclosure="$3"
+  {
+    echo "# Problem: fixture"
+    echo ""
+    echo "**Status**: Open"
+    echo ""
+    echo "## Reported Upstream"
+    echo ""
+    echo "- **URL**: $url"
+    echo "- **Reported**: 2026-08-08"
+    [ -n "$disclosure" ] && echo "- **Disclosure path**: $disclosure"
+    echo "- **Cross-reference confirmed**: yes"
+  } > "$PROBLEMS_DIR/$file"
+}
+
+@test "ADR-117: a pull-request disclosure path is polled with gh pr view, not gh issue view" {
+  write_upstream_ticket "300-pr.open.md" "https://github.com/example/repo/pull/7" "pull request"
+  make_noun_strict_gh "pr"
+  export GHFAKE_DATA="$GHFAKE_DIR"
+  prime_gh_response "https://github.com/example/repo/pull/7" '{"state":"OPEN","comments":[{"id":1,"author":{"login":"m"},"createdAt":"2026-08-08T00:00:00Z","body":"review"}],"labels":[],"updatedAt":"2026-08-08T00:00:00Z"}'
+
+  run "$SCRIPT" --problems-dir "$PROBLEMS_DIR" --cache-file "$CACHE_FILE" --audit-log "$AUDIT_LOG" --gh-bin "$GHFAKE_DIR/gh"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -qE "^NEW *P300"
+  ! echo "$output" | grep -qE "^FAIL *P300"
+  grep -q '^pr view$' "$GHFAKE_DIR/nouns.log"
+  ! grep -q '^issue view$' "$GHFAKE_DIR/nouns.log"
+}
+
+@test "ADR-117: a new pull-request review is surfaced as a response" {
+  write_upstream_ticket "305-review.open.md" "https://github.com/example/repo/pull/12" "pull request"
+  cat > "$CACHE_FILE" <<'EOF'
+{
+  "last_checked": "2026-08-08T00:00:00Z",
+  "tickets": {
+    "P305": {
+      "upstream_url": "https://github.com/example/repo/pull/12",
+      "last_checked_at": "2026-08-08T00:00:00Z",
+      "last_seen_state": "OPEN",
+      "last_seen_response_count": 0,
+      "last_seen_labels": [],
+      "last_seen_updated_at": "2026-08-08T00:00:00Z"
+    }
+  }
+}
+EOF
+  make_noun_strict_gh "pr"
+  export GHFAKE_DATA="$GHFAKE_DIR"
+  prime_gh_response "https://github.com/example/repo/pull/12" '{"state":"OPEN","comments":[],"reviews":[{"id":"r1","state":"CHANGES_REQUESTED","body":"Please adjust this."}],"labels":[],"updatedAt":"2026-08-09T00:00:00Z"}'
+
+  run "$SCRIPT" --problems-dir "$PROBLEMS_DIR" --cache-file "$CACHE_FILE" --audit-log "$AUDIT_LOG" --gh-bin "$GHFAKE_DIR/gh"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -qE '^NEW *P305'
+  echo "$output" | grep -q 'new-responses=1'
+  [ "$(jq -r '.tickets.P305.last_seen_response_count' "$CACHE_FILE")" -eq 1 ]
+}
+
+@test "ADR-117: a new inline pull-request review comment is surfaced as a response" {
+  write_upstream_ticket "307-inline-review.open.md" "https://github.com/example/repo/pull/14" "pull request"
+  cat > "$CACHE_FILE" <<'EOF'
+{
+  "last_checked": "2026-08-08T00:00:00Z",
+  "tickets": {
+    "P307": {
+      "upstream_url": "https://github.com/example/repo/pull/14",
+      "last_checked_at": "2026-08-08T00:00:00Z",
+      "last_seen_state": "OPEN",
+      "last_seen_response_count": 0,
+      "last_seen_labels": [],
+      "last_seen_response_updated_at": "2026-08-08T00:00:00Z"
+    }
+  }
+}
+EOF
+  make_noun_strict_gh "pr"
+  export GHFAKE_DATA="$GHFAKE_DIR"
+  prime_gh_response "https://github.com/example/repo/pull/14" '{"state":"OPEN","comments":[],"reviews":[],"labels":[],"updatedAt":"2026-08-09T00:00:00Z"}'
+  printf '%s' '[[{"id":91,"createdAt":"2026-08-09T01:00:00Z","body":"Please rename this."}]]' > "$GHFAKE_DIR/review-comments.json"
+
+  run "$SCRIPT" --problems-dir "$PROBLEMS_DIR" --cache-file "$CACHE_FILE" --audit-log "$AUDIT_LOG" --gh-bin "$GHFAKE_DIR/gh"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -qE '^NEW *P307'
+  echo "$output" | grep -q 'new-responses=1'
+  [ "$(jq -r '.tickets.P307.last_seen_response_count' "$CACHE_FILE")" -eq 1 ]
+  [ "$(jq -r '.tickets.P307.last_seen_response_updated_at' "$CACHE_FILE")" = "2026-08-09T01:00:00Z" ]
+}
+
+@test "ADR-117: pull-request metadata updates do not mask a label-only change as a response" {
+  write_upstream_ticket "308-label.open.md" "https://github.com/example/repo/pull/15" "pull request"
+  cat > "$CACHE_FILE" <<'EOF'
+{
+  "last_checked": "2026-08-08T00:00:00Z",
+  "tickets": {
+    "P308": {
+      "upstream_url": "https://github.com/example/repo/pull/15",
+      "last_checked_at": "2026-08-08T00:00:00Z",
+      "last_seen_state": "OPEN",
+      "last_seen_response_count": 0,
+      "last_seen_labels": [],
+      "last_seen_updated_at": "2026-08-08T00:00:00Z",
+      "last_seen_response_updated_at": ""
+    }
+  }
+}
+EOF
+  make_noun_strict_gh "pr"
+  export GHFAKE_DATA="$GHFAKE_DIR"
+  prime_gh_response "https://github.com/example/repo/pull/15" '{"state":"OPEN","comments":[],"reviews":[],"labels":[{"name":"needs-review"}],"updatedAt":"2026-08-09T00:00:00Z"}'
+
+  run "$SCRIPT" --problems-dir "$PROBLEMS_DIR" --cache-file "$CACHE_FILE" --audit-log "$AUDIT_LOG" --gh-bin "$GHFAKE_DIR/gh"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -qE '^LABEL *P308'
+  ! echo "$output" | grep -qE '^NEW *P308'
+}
+
+@test "ADR-117: the hyphenated pull-request spelling is tolerated" {
+  write_upstream_ticket "301-pr.open.md" "https://github.com/example/repo/pull/8" "pull-request"
+  make_noun_strict_gh "pr"
+  export GHFAKE_DATA="$GHFAKE_DIR"
+  prime_gh_response "https://github.com/example/repo/pull/8" '{"state":"MERGED","comments":[],"labels":[],"updatedAt":"2026-08-08T00:00:00Z"}'
+
+  run "$SCRIPT" --problems-dir "$PROBLEMS_DIR" --cache-file "$CACHE_FILE" --audit-log "$AUDIT_LOG" --gh-bin "$GHFAKE_DIR/gh"
+  [ "$status" -eq 0 ]
+  ! echo "$output" | grep -qE "^FAIL *P301"
+  grep -q '^pr view$' "$GHFAKE_DIR/nouns.log"
+}
+
+@test "ADR-117: a dedup comment on an existing pull request is polled as a pull request" {
+  write_upstream_ticket "306-pr-comment.open.md" "https://github.com/example/repo/pull/13" "commented-on-existing-pull-request"
+  make_noun_strict_gh "pr"
+  export GHFAKE_DATA="$GHFAKE_DIR"
+  prime_gh_response "https://github.com/example/repo/pull/13" '{"state":"OPEN","comments":[],"reviews":[],"labels":[],"updatedAt":"2026-08-08T00:00:00Z"}'
+
+  run "$SCRIPT" --problems-dir "$PROBLEMS_DIR" --cache-file "$CACHE_FILE" --audit-log "$AUDIT_LOG" --gh-bin "$GHFAKE_DIR/gh"
+  [ "$status" -eq 0 ]
+  ! echo "$output" | grep -qE '^FAIL *P306'
+  grep -q '^pr view$' "$GHFAKE_DIR/nouns.log"
+}
+
+@test "ADR-117: a merged pull request reports MERGED, distinct from CLOSED" {
+  write_upstream_ticket "302-merged.open.md" "https://github.com/example/repo/pull/9" "pull request"
+  make_noun_strict_gh "pr"
+  export GHFAKE_DATA="$GHFAKE_DIR"
+  prime_gh_response "https://github.com/example/repo/pull/9" '{"state":"MERGED","comments":[],"labels":[],"updatedAt":"2026-08-08T00:00:00Z"}'
+
+  run "$SCRIPT" --problems-dir "$PROBLEMS_DIR" --cache-file "$CACHE_FILE" --audit-log "$AUDIT_LOG" --gh-bin "$GHFAKE_DIR/gh"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q "MERGED"
+  ! echo "$output" | grep -q "CLOSED"
+}
+
+@test "ADR-117: an issue disclosure path still polls with gh issue view" {
+  write_upstream_ticket "303-issue.open.md" "https://github.com/example/repo/issues/10" "public issue"
+  make_noun_strict_gh "issue"
+  export GHFAKE_DATA="$GHFAKE_DIR"
+  prime_gh_response "https://github.com/example/repo/issues/10" '{"state":"OPEN","comments":[],"labels":[],"updatedAt":"2026-08-08T00:00:00Z"}'
+
+  run "$SCRIPT" --problems-dir "$PROBLEMS_DIR" --cache-file "$CACHE_FILE" --audit-log "$AUDIT_LOG" --gh-bin "$GHFAKE_DIR/gh"
+  [ "$status" -eq 0 ]
+  ! echo "$output" | grep -qE "^FAIL *P303"
+  grep -q '^issue view$' "$GHFAKE_DIR/nouns.log"
+}
+
+@test "ADR-117: a legacy ticket with NO disclosure path polls as an issue, with no probe" {
+  # Tickets written before ADR-117 carry no disclosure-path line at all. The
+  # pre-ADR-117 skill could only ever have filed a public issue, so absent
+  # means issue. Exactly one call — an issue-then-pr probe ladder would show
+  # up here as a second entry in nouns.log.
+  write_upstream_ticket "304-legacy.open.md" "https://github.com/example/repo/issues/11" ""
+  make_noun_strict_gh "issue"
+  export GHFAKE_DATA="$GHFAKE_DIR"
+  prime_gh_response "https://github.com/example/repo/issues/11" '{"state":"OPEN","comments":[],"labels":[],"updatedAt":"2026-08-08T00:00:00Z"}'
+
+  run "$SCRIPT" --problems-dir "$PROBLEMS_DIR" --cache-file "$CACHE_FILE" --audit-log "$AUDIT_LOG" --gh-bin "$GHFAKE_DIR/gh"
+  [ "$status" -eq 0 ]
+  ! echo "$output" | grep -qE "^FAIL *P304"
+  [ "$(wc -l < "$GHFAKE_DIR/nouns.log" | tr -d ' ')" -eq 1 ]
+  grep -q '^issue view$' "$GHFAKE_DIR/nouns.log"
 }

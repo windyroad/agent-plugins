@@ -39,7 +39,15 @@ Set "pass" true only if the output satisfies the rubric. Be literal about
 negation: an output that says a thing does NOT happen SATISFIES a rubric
 requiring that the thing must not happen.'
 
-raw="$(claude -p --append-system-prompt "$GRADER_SYSTEM" "$@")"
+if [[ "${WR_EVAL_RUNTIME:-claude}" == "codex" ]]; then
+  raw="$(codex exec --ephemeral --ignore-user-config \
+    -c 'approval_policy="never"' --sandbox read-only \
+    "${GRADER_SYSTEM}
+
+${1:-}" </dev/null 2>/dev/null)"
+else
+  raw="$(claude -p --append-system-prompt "$GRADER_SYSTEM" "${1:-}")"
+fi
 
 # Defensive extraction: emit the first balanced {...} JSON object found in
 # the response, stripping any code fences or surrounding prose. If no brace

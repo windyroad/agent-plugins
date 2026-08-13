@@ -5,10 +5,11 @@
 # discovery pipeline. Scans local problem tickets for `## Reported
 # Upstream` back-link sections (written by `/wr-itil:report-upstream`
 # Step 7), polls each upstream issue via `gh issue view`, diffs against
-# cache, and surfaces new comments / state changes / label changes since
+# cache, and surfaces new responses / state changes / label changes since
 # last check.
 #
-# Read-only externally: only `gh issue view` (read-only) — no
+# Read-only externally: `gh issue view`, or `gh pr view` plus the pull
+# request's inline review comments via `gh api` — no
 # `gh issue comment` / `gh issue create`. Does NOT trip ADR-028
 # external-comms gate. AFK-safe.
 #
@@ -28,13 +29,13 @@
 #       written to cache + audit-log
 #
 # Structured stdout (one per ticket; ≤ 150 bytes per line per ADR-038):
-#   NEW     P<NNN> <url> state=<state> new-comments=<N>
+#   NEW     P<NNN> <url> state=<state> new-responses=<N>
 #   STATE   P<NNN> <url> state=<old>→<new>
 #   LABEL   P<NNN> <url> labels-added=<csv> labels-removed=<csv>
 #   NONE    P<NNN> <url> no-change-since=<last-checked>
 #   FAIL    P<NNN> <url> reason=<gh-error-short>
 #
-# Precedence when multiple change classes apply: STATE > NEW (comments) > LABEL > NONE.
+# Precedence when multiple change classes apply: STATE > NEW (responses) > LABEL > NONE.
 #
 # @problem P249 — no process for issue reporters to check for responses (Phase 1)
 # @adr ADR-014 (governance skills commit their own work)
@@ -44,6 +45,14 @@
 # @adr ADR-038 (progressive disclosure — per-row byte budget)
 # @adr ADR-049 (invoked via wr-itil-check-upstream-responses bin shim)
 # @adr ADR-062 (inbound discovery — symmetric counterpart)
+# @adr ADR-117 (prefer an upstream pull request over an issue — the
+#   `## Reported Upstream` disclosure path selects `gh pr view` over
+#   `gh issue view`. An ABSENT path means a ticket written before that
+#   decision, which the pre-ADR-117 skill could only ever have filed as
+#   a public issue — so absent means issue, and no probe is needed. This
+#   is the explicit legacy-path decision ADR-117 requires; an
+#   issue-then-pr probe would double the call count for every legacy
+#   ticket on every cycle against a `gh` rate budget nothing governs.)
 # @jtbd JTBD-004 (cross-repo coordination — primary anchor)
 # @jtbd JTBD-006 (AFK-safe)
 # @jtbd JTBD-001 (governance without slowing down)
@@ -146,6 +155,30 @@ extract_upstream_url() {
   ' "$1"
 }
 
+# Extract the `## Reported Upstream` disclosure-path line (lower-cased).
+# Same awk shape as catchup-scan.sh's helper of the same name.
+extract_disclosure_path() {
+  awk '
+    /^## Reported Upstream/ { in_section = 1; next }
+    /^## / && in_section { in_section = 0 }
+    in_section && /^- \*\*Disclosure path\*\*:/ {
+      sub(/^- \*\*Disclosure path\*\*: */, "")
+      print
+      exit
+    }
+  ' "$1" | tr "[:upper:]" "[:lower:]"
+}
+
+# Which `gh` read subcommand polls this ticket's upstream artefact?
+# `pull request` (or `pull-request`) → `gh pr view`; anything else,
+# INCLUDING an absent disclosure path, → `gh issue view` (ADR-117).
+upstream_view_noun() {
+  case "$1" in
+    *pull*request*) echo "pr" ;;
+    *) echo "issue" ;;
+  esac
+}
+
 # Extract numeric ID prefix from a ticket file basename.
 extract_ticket_id() {
   local base
@@ -189,8 +222,16 @@ for ticket_file in "${TICKET_FILES[@]}"; do
 
   POLL_COUNT=$((POLL_COUNT + 1))
 
-  # Poll the upstream.
-  if ! gh_output="$("$GH_BIN" issue view "$upstream_url" --json comments,state,labels,updatedAt 2>&1)"; then
+  # Poll the upstream. Pull requests need one additional read because
+  # `gh pr view` omits inline review-thread comments. `state` carries MERGED
+  # for a merged pull request, distinct from CLOSED.
+  view_noun="$(upstream_view_noun "$(extract_disclosure_path "$ticket_file")")"
+  if [ "$view_noun" = "pr" ]; then
+    view_fields="comments,reviews,state,labels,updatedAt"
+  else
+    view_fields="comments,state,labels,updatedAt"
+  fi
+  if ! gh_output="$("$GH_BIN" "$view_noun" view "$upstream_url" --json "$view_fields" 2>&1)"; then
     short_reason="$(echo "$gh_output" | head -1 | cut -c1-80)"
     printf "FAIL    %s %s reason=%s\n" "$ticket_id" "$upstream_url" "$short_reason"
     PARTIAL_FAILURE=1
@@ -198,39 +239,67 @@ for ticket_file in "${TICKET_FILES[@]}"; do
     continue
   fi
 
+  if [ "$view_noun" = "pr" ]; then
+    pr_path="${upstream_url#https://github.com/}"
+    pr_path="${pr_path%/}"
+    review_endpoint="repos/${pr_path/\/pull\//\/pulls\/}/comments"
+    if ! review_pages="$("$GH_BIN" api "$review_endpoint" --paginate --slurp 2>&1)"; then
+      short_reason="$(echo "$review_pages" | head -1 | cut -c1-80)"
+      printf "FAIL    %s %s reason=%s\n" "$ticket_id" "$upstream_url" "$short_reason"
+      PARTIAL_FAILURE=1
+      FAIL_COUNT=$((FAIL_COUNT + 1))
+      continue
+    fi
+    if ! review_comments="$(echo "$review_pages" | jq -c 'add // []' 2>/dev/null)"; then
+      printf "FAIL    %s %s reason=malformed-inline-review-response\n" "$ticket_id" "$upstream_url"
+      PARTIAL_FAILURE=1
+      FAIL_COUNT=$((FAIL_COUNT + 1))
+      continue
+    fi
+    gh_output="$(jq -cn --argjson base "$gh_output" --argjson inline "$review_comments" '$base + {reviewComments: $inline}')"
+  else
+    gh_output="$(jq -cn --argjson base "$gh_output" '$base + {reviewComments: []}')"
+  fi
+
   # Parse upstream state.
   current_state="$(echo "$gh_output" | jq -r '.state // "UNKNOWN"')"
-  current_comment_count="$(echo "$gh_output" | jq -r '.comments | length')"
+  current_response_count="$(echo "$gh_output" | jq -r '((.comments // []) | length) + ((.reviews // []) | length) + ((.reviewComments // []) | length)')"
   current_labels_csv="$(echo "$gh_output" | jq -r '[.labels[].name] | sort | join(",")')"
   current_updated_at="$(echo "$gh_output" | jq -r '.updatedAt // ""')"
+  current_response_updated_at="$(echo "$gh_output" | jq -r '[
+    (.comments[]? | .updatedAt // .createdAt),
+    (.reviews[]? | .updatedAt // .submittedAt // .createdAt),
+    (.reviewComments[]? | .updatedAt // .createdAt)
+  ] | map(select(. != null and . != "")) | max // ""')"
 
   # Look up cache entry.
   cache_state="$(echo "$UPDATED_CACHE" | jq -r ".tickets[\"$ticket_id\"].last_seen_state // \"\"")"
-  cache_comment_count="$(echo "$UPDATED_CACHE" | jq -r ".tickets[\"$ticket_id\"].last_seen_comment_count // -1")"
+  cache_response_count="$(echo "$UPDATED_CACHE" | jq -r ".tickets[\"$ticket_id\"].last_seen_response_count // .tickets[\"$ticket_id\"].last_seen_comment_count // -1")"
   cache_labels_csv="$(echo "$UPDATED_CACHE" | jq -r ".tickets[\"$ticket_id\"].last_seen_labels // [] | sort | join(\",\")")"
   cache_last_checked="$(echo "$UPDATED_CACHE" | jq -r ".tickets[\"$ticket_id\"].last_checked_at // \"\"")"
+  cache_response_updated_at="$(echo "$UPDATED_CACHE" | jq -r ".tickets[\"$ticket_id\"].last_seen_response_updated_at // \"\"")"
 
-  # Decide the change class (precedence: STATE > NEW (comments) > LABEL > NONE).
+  # Decide the change class (precedence: STATE > NEW (responses/activity) > LABEL > NONE).
   no_cache_entry=0
-  if [ -z "$cache_state" ] || [ "$cache_comment_count" = "-1" ]; then
+  if [ -z "$cache_state" ] || [ "$cache_response_count" = "-1" ]; then
     no_cache_entry=1
   fi
 
   if [ "$FORCE_RECHECK" -eq 1 ] || [ "$no_cache_entry" -eq 1 ]; then
-    delta="$current_comment_count"
+    delta="$current_response_count"
     if [ "$no_cache_entry" -eq 0 ]; then
-      delta=$((current_comment_count - cache_comment_count))
+      delta=$((current_response_count - cache_response_count))
       [ "$delta" -lt 0 ] && delta=0
     fi
-    printf "NEW     %s %s state=%s new-comments=%s\n" "$ticket_id" "$upstream_url" "$current_state" "$delta"
+    printf "NEW     %s %s state=%s new-responses=%s\n" "$ticket_id" "$upstream_url" "$current_state" "$delta"
     NEW_COUNT=$((NEW_COUNT + 1))
   elif [ "$current_state" != "$cache_state" ]; then
     printf "STATE   %s %s state=%s→%s\n" "$ticket_id" "$upstream_url" "$cache_state" "$current_state"
     STATE_CHANGE_COUNT=$((STATE_CHANGE_COUNT + 1))
-  elif [ "$current_comment_count" -ne "$cache_comment_count" ]; then
-    delta=$((current_comment_count - cache_comment_count))
+  elif [ "$current_response_count" -ne "$cache_response_count" ] || { [ -n "$cache_response_updated_at" ] && [ "$current_response_updated_at" != "$cache_response_updated_at" ]; }; then
+    delta=$((current_response_count - cache_response_count))
     [ "$delta" -lt 0 ] && delta=0
-    printf "NEW     %s %s state=%s new-comments=%s\n" "$ticket_id" "$upstream_url" "$current_state" "$delta"
+    printf "NEW     %s %s state=%s new-responses=%s\n" "$ticket_id" "$upstream_url" "$current_state" "$delta"
     NEW_COUNT=$((NEW_COUNT + 1))
   elif [ "$current_labels_csv" != "$cache_labels_csv" ]; then
     # Compute labels added/removed.
@@ -251,15 +320,17 @@ for ticket_file in "${TICKET_FILES[@]}"; do
     --arg state "$current_state" \
     --arg checked "$now_iso" \
     --arg updated "$current_updated_at" \
-    --argjson count "$current_comment_count" \
+    --arg response_updated "$current_response_updated_at" \
+    --argjson count "$current_response_count" \
     --argjson labels "$(echo "$gh_output" | jq '[.labels[].name] | sort')" \
     '.tickets[$id] = {
       upstream_url: $url,
       last_checked_at: $checked,
       last_seen_state: $state,
-      last_seen_comment_count: $count,
+      last_seen_response_count: $count,
       last_seen_labels: $labels,
-      last_seen_updated_at: $updated
+      last_seen_updated_at: $updated,
+      last_seen_response_updated_at: $response_updated
     }')"
 done
 
