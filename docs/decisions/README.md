@@ -344,8 +344,9 @@ _103 ADRs. These are the current rules. The architect agent reads this section f
 **Related:** ADR-049, ADR-081, ADR-040, ADR-080, ADR-002, ADR-003, ADR-014, ADR-066, ADR-074
 
 ### ADR-083 — Codex CLI as second runtime
-**Status:** proposed | **Oversight:** unconfirmed
-**Chosen:** Chosen option: **"Option A"**, because the shape matches ADR-002's explicit forward-looking note ("the per-plugin package structure should extend naturally — each package adds its tool-specific install logic") and ADR-017's sync-script + ...
+**Status:** proposed | **Oversight:** confirmed
+**Chosen:** **Option A — extend each existing package to both runtimes.** Claude remains the default; Codex support is added and validated one package at a time without duplicating the product tree.
+**Confirmation:** Each migrated package preserves its Claude-default installer, stages and installs its packed Codex artefact in isolation, passes manifest and generated-surface drift checks, and proves its actual skills or agents through isolated behavioural validation without adding speculative surfaces.
 
 ### ADR-084 — Self-firing deferral census — a SessionStart surfacer so deferred governance work cannot silently rot
 **Status:** proposed | **Oversight:** confirmed
