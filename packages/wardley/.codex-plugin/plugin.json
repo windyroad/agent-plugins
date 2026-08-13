@@ -1,0 +1,40 @@
+{
+  "name": "wr-wardley",
+  "version": "0.1.7",
+  "description": "Wardley Map generation for AI coding agents",
+  "author": {
+    "name": "Windy Road Technology",
+    "url": "https://windyroad.com.au"
+  },
+  "homepage": "https://github.com/windyroad/agent-plugins/tree/main/packages/wardley",
+  "repository": "https://github.com/windyroad/agent-plugins",
+  "license": "MIT",
+  "keywords": [
+    "wardley-maps",
+    "strategy",
+    "architecture",
+    "codex",
+    "claude-code"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Windy Road Wardley",
+    "shortDescription": "Generate Wardley Maps from a codebase",
+    "longDescription": "Analyse a codebase, map its value chain and evolution, render the map, and explain the resulting strategic choices.",
+    "developerName": "Windy Road Technology",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://windyroad.com.au",
+    "privacyPolicyURL": "https://windyroad.com.au/privacy",
+    "termsOfServiceURL": "https://windyroad.com.au/terms",
+    "defaultPrompt": [
+      "Generate a Wardley Map for this codebase"
+    ],
+    "brandColor": "#475569",
+    "screenshots": []
+  }
+}

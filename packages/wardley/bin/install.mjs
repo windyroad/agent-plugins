@@ -1,15 +1,31 @@
 #!/usr/bin/env node
 
-import { resolve, dirname } from "node:path";
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync } from "node:fs";
+import { homedir } from "node:os";
+import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const utils = await import(resolve(__dirname, "../lib/install-utils.mjs"));
 
 const PLUGIN = "wr-wardley";
+const CODEX_MARKETPLACE = "windyroad-wardley-local";
 const DEPS = [];
+const PACKAGE_ROOT = resolve(__dirname, "..");
+const PACKAGE_VERSION = JSON.parse(readFileSync(join(PACKAGE_ROOT, "package.json"), "utf8")).version;
+
+function codexMarketplaceRoot() {
+  const codexHome = process.env.CODEX_HOME || join(homedir(), ".codex");
+  return join(codexHome, ".tmp", "marketplaces", `wr-wardley-${PACKAGE_VERSION}`);
+}
 
 const flags = utils.parseStandardArgs(process.argv);
+
+if (flags.runtime === "codex" || flags.runtime === "both") {
+  const bundled = "/Applications/ChatGPT.app/Contents/Resources/codex";
+  const binary = process.env.CODEX_BINARY || (existsSync(bundled) ? bundled : null);
+  if (binary?.includes("/")) process.env.PATH = `${dirname(binary)}:${process.env.PATH || ""}`;
+}
 
 if (flags.help) {
   console.log(`
@@ -21,6 +37,7 @@ Options:
   --update     Update this plugin and its skills
   --uninstall  Remove this plugin
   --scope      Installation scope: project (default) or user
+  --runtime    Runtime to install for: claude (default), codex, or both
   --dry-run    Show what would be done without executing
   --help, -h   Show this help
 `);
@@ -32,12 +49,40 @@ if (flags.dryRun) {
   console.log("[dry-run mode — no commands will be executed]\n");
 }
 
-utils.checkPrerequisites();
+utils.checkPrerequisites({ runtime: flags.runtime });
+
+function codexInstall() {
+  const marketplaceRoot = codexMarketplaceRoot();
+  if (!flags.dryRun) {
+    rmSync(marketplaceRoot, { recursive: true, force: true });
+    mkdirSync(dirname(marketplaceRoot), { recursive: true });
+    cpSync(PACKAGE_ROOT, marketplaceRoot, { recursive: true });
+  }
+  if (!utils.run(`codex plugin marketplace add ${JSON.stringify(marketplaceRoot)}`, `Codex marketplace: ${CODEX_MARKETPLACE}`)) return false;
+  return utils.run(`codex plugin add ${PLUGIN}@${CODEX_MARKETPLACE}`, PLUGIN);
+}
+
+function codexUninstall() {
+  const removed = utils.run(`codex plugin remove ${PLUGIN}@${CODEX_MARKETPLACE}`, `Removing ${PLUGIN}`);
+  utils.run(`codex plugin marketplace remove ${CODEX_MARKETPLACE}`, `Removing ${CODEX_MARKETPLACE}`);
+  if (!flags.dryRun) rmSync(codexMarketplaceRoot(), { recursive: true, force: true });
+  return removed;
+}
 
 if (flags.uninstall) {
-  utils.uninstallPackage(PLUGIN);
+  if (flags.runtime === "claude" || flags.runtime === "both") utils.uninstallPackage(PLUGIN, { runtime: "claude" });
+  if ((flags.runtime === "codex" || flags.runtime === "both") && !codexUninstall()) process.exit(1);
 } else if (flags.update) {
-  utils.updatePackage(PLUGIN, { scope: flags.scope });
+  if (flags.runtime === "claude" || flags.runtime === "both") utils.updatePackage(PLUGIN, { scope: flags.scope, runtime: "claude" });
+  if ((flags.runtime === "codex" || flags.runtime === "both") && !codexInstall()) process.exit(1);
+} else if (flags.runtime === "codex") {
+  console.log(`\nInstalling @windyroad/wardley (${flags.scope} scope)...\n`);
+  if (!codexInstall()) process.exit(1);
+  console.log("\nDone! Restart Codex to activate.\n");
+} else if (flags.runtime === "both") {
+  utils.installPackage(PLUGIN, { deps: DEPS, scope: flags.scope, runtime: "claude" });
+  if (!codexInstall()) process.exit(1);
+  console.log("\nDone! Restart Claude Code and Codex to activate.\n");
 } else {
-  utils.installPackage(PLUGIN, { deps: DEPS, scope: flags.scope });
+  utils.installPackage(PLUGIN, { deps: DEPS, scope: flags.scope, runtime: "claude" });
 }

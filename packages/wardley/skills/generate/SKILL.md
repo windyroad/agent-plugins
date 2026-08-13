@@ -104,8 +104,13 @@ From->To
 
 ### 9. Render
 
+Resolve `<wardley-skill-dir>` to the absolute directory containing this
+installed `SKILL.md`. In Claude Code, `${CLAUDE_SKILL_DIR}` supplies that
+directory. In Codex, use this skill's installed path directly; do not search the
+adopter repository or assume a plugin `bin/` directory is on `PATH`.
+
 ```bash
-node ${CLAUDE_SKILL_DIR}/owm-to-svg.mjs
+node "<wardley-skill-dir>/owm-to-svg.mjs"
 ```
 
 ### 10. Verify

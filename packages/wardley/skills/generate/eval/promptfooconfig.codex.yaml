@@ -1,0 +1,25 @@
+description: Codex Wardley generation skill behavior
+
+evaluateOptions:
+  maxConcurrency: 1
+
+providers:
+  - id: 'exec:bash ./run-codex-skill-eval.sh'
+
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ../../../../architect/skills/create-adr/eval/grade-codex-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: Generates and analyses a Wardley Map through the installed plugin
+    vars:
+      prompt: Generate a Wardley Map for the fixture project and summarize its main strategic implication.
+    assert:
+      - type: regex
+        value: 'WARDLEY_EVAL_ARTIFACTS:.*wardley-map\.owm.*wardley-map\.svg.*wardley-map\.png.*wardley-map\.md'
+      - type: llm-rubric
+        value: The installed Wardley skill generates OWM, SVG, PNG, and Markdown analysis files and reports a concrete strategic implication grounded in the fixture project.

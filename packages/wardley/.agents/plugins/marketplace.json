@@ -1,0 +1,20 @@
+{
+  "name": "windyroad-wardley-local",
+  "interface": {
+    "displayName": "Windy Road Wardley"
+  },
+  "plugins": [
+    {
+      "name": "wr-wardley",
+      "source": {
+        "source": "local",
+        "path": "."
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # @windyroad/wardley
 
-**Wardley Map generation for Claude Code.** Analyses your codebase and generates a value chain evolution map. *Maturity: Experimental.*
+**Wardley Map generation for Claude Code and Codex.** Analyses your codebase and generates a value chain evolution map. *Maturity: Experimental.*
 
 Part of [Windy Road Agent Plugins](../../README.md).
 
@@ -18,9 +18,11 @@ It produces:
 
 ```bash
 npx @windyroad/wardley
+npx @windyroad/wardley --runtime codex
 ```
 
-Restart Claude Code after installing.
+Claude Code remains the default. Use `--runtime codex` or `--runtime both`, then
+restart the selected runtime.
 
 ## Usage
 

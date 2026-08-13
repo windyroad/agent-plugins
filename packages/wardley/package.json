@@ -15,6 +15,7 @@
   "keywords": [
     "claude-code",
     "claude-code-plugin",
+    "codex",
     "ai-agent",
     "ai-coding"
   ],
@@ -23,7 +24,10 @@
     "agents/",
     "hooks/",
     "skills/",
+    ".agents/",
     ".claude-plugin/",
+    ".codex-plugin/",
+    "!skills/*/eval/",
     "lib/"
   ]
 }
