@@ -1,5 +1,94 @@
 # @windyroad/problem
 
+## 1.0.0
+
+### Major Changes
+
+- 1b309c2: **Your story map is now what you approve, and approving it approves every story on it.**
+
+  Until now you ratified a story map and then ratified each story on it again, one at a time. Worse, capturing a story listed it on its map, which re-opened that map's approval — so writing a story could un-approve the map the story depended on.
+
+  Approval now sits in one place. Ratify the map and every story on it is approved, including stories added later.
+
+  **A story no longer carries an oversight field at all.** No `human-oversight:`, no `oversight-hash:`. Whether a story is approved is worked out from the maps named in its `story-maps:` field: if every one of them is ratified, the story is approved. A story naming no map is never approved, so deleting the field cannot approve a story by accident. `wr-itil-mark-story-oversight-confirmed` now refuses a story and tells you to ratify the map instead.
+
+  This is a cutover, not a gradual migration. Oversight fields were stripped from every story that had one, and a leftover `human-oversight: confirmed` on a story no longer approves anything. Until you ratify a map, the stories on it are unapproved and commits referencing them are blocked. Ratifying each map once clears it.
+
+  What still re-opens a map's approval: a new activity column, a change to the map's own prose or traces. What no longer does: drawing a release row, putting a story in one, or editing a story's body. A row is scheduling, and scheduling was never what you were approving.
+
+  **Also removed.** An unattended run used to be able to accept a story on its own if you turned that on, and a set of commands and flags existed to support it. The deadlock that feature worked around is gone, so the feature is gone with it:
+
+  - the `wr-itil-check-afk-accept-eligible` command
+  - the `--pure-decomposition` flag on `wr-itil-mark-story-oversight-confirmed`
+  - the `--with-afk-accepted` flag on `wr-itil-detect-unratified-stories-maps`
+  - the `afk_accept_pure_decomposition` key in `.claude/itil.config.json`
+  - the `afkAccepted` field in `wr-itil-story-map-query` output
+  - the `afk-accept:` story field and its `## Decomposition basis` section
+
+  If you set `afk_accept_pure_decomposition` in your config, the key is now ignored — delete it. If you call the removed command from a script, that call will fail; the check it performed no longer has anything to check. No story in this project's own corpus ever used the feature, so we have no evidence of it running anywhere, but the removal is a hard break for anyone who did opt in.
+
+  `wr-itil-check-rfc-stories-ratified` takes an optional third argument, the story-maps root, so it can resolve a story's approval through its map.
+
+### Minor Changes
+
+- da58ffa: Story map cards now show the value statement a story actually wrote, and a map is refused rather than rendered when one cannot be shown properly.
+
+  A card renders a story's value statement as three lines — the value, who it is for, and what they want. Three faults meant the card could differ from the story it was showing, and none of them said so.
+
+  The section was flattened with blank lines removed, so a paragraph written _below_ the statement glued itself onto the end of the last clause. One card ran to 169 words, most of it the author's supporting evidence. The card now takes the statement and stops; a story is still free to explain itself underneath.
+
+  The clause openings were re-emitted from memory rather than read. Eighteen stories written "In order that ..." were relabelled "In order to ..." on every map that carried them, and requiring the persona clause to begin with "a", "an" or "the" turned "as whoever picks the ticket up" into an unsplittable statement. Both are gone: the shape is the rule — value, who, want, in that order — and the wording is the author's.
+
+  The last fault is the one that matters. A statement that could not be split fell through to a path that rendered it as a single undifferentiated block. On a map where every other card shows three labelled clauses, that is indistinguishable from a story written badly, so the renderer's failure was read as the author's by a reader with no way to tell them apart. This had happened before; the recorded fix was to widen the pattern, which fixed the statements in front of it and left the fault open for the next unanticipated wording. Rendering now stops, names the story and the text, and says what to do — including that a statement already in the house shape means the pattern has found a new edge and should be widened, rather than the story reworded to suit it.
+
+  Maps also now open with what they are and what is being asked, in prose. Whether a map was still a draft, and whether anyone had agreed it, previously existed only in `<meta>` tags, which do not render — so a reader opening a map got a title and a grid, and had to infer the rest. Column headers stay in view while scrolling, which matters because a single row can run taller than the screen.
+
+- c65fe47: A new `wr-itil-render-story-map` command renders story maps from data, and renders them as a grid rather than a list.
+
+  `/wr-itil:capture-story-map` shipped an HTML skeleton that was not a story map. A story map in Patton's sense is two-dimensional — journey activities across the top, release slices down the side, task cards in the cells, so that reading a row left to right tells you everything that ships together. The skeleton emitted a vertical stack of headings with no columns, no release dimension and no cells, so every map it generated was a list wearing map vocabulary.
+
+  One template now owns the shape, and the renderer builds every map from it. A map is a single file carrying its own data in a `<script id="story-map-data">` block; the renderer reads that block and rewrites the presentation around it in place. Creating a map and editing one are the same command on the same file, so no source file can fall out of step with the rendered output. The skill no longer asks an agent to hand-write markup, and no longer leaves it to infer the shape from a sibling map — which is how the shape drifted in the first place.
+
+  Ratification fingerprints for story maps now cover the data block rather than the whole file. Without that, changing the template would regenerate every map, drift every stored fingerprint, and silently revoke approvals a human had given. Maps carrying no data block — anything authored before this release — still hash whole-file, so existing ratifications survive untouched and a mixed corpus stays safe.
+
+  This release also fixes packaging: `@windyroad/itil` now ships the template in its published files. Without that entry, installing the plugin gave you a renderer that could not find its template.
+
+  Empty activity/release intersections include a contextual screen-reader label as well as the visible hatch, so the grid preserves the same meaning without vision.
+
+- c31807b: Story maps no longer carry a decision trace, and their RFC list is derived from their release rows.
+
+  A map's `traces` object held three keys. Two of them restated things the corpus already knew, and both had drifted. On the one ratified map, the authored RFC list named three RFCs whose work is not on it — two have no stories at all — while omitting both rows it does have. The decision list named six decisions of which only two appear on any of its stories.
+
+  `traces.rfcs` is now derived as the union of the release-row identities, since a row _is_ an RFC. `traces.adrs` is removed outright: a decision constrains how something is built, and the thing built is the story, so a decision reference belongs on the story rather than on a lens drawn over it. `traces` keeps one authored key, `jtbd` — the jobs the map is drawn for. Nine decision references across four maps are dropped rather than relocated; the decisions themselves are unaffected.
+
+  **Every release row now carries an RFC identity.** The one exception is closed: rows holding work that shipped before rows carried identities, each marked `preRfc`. Finishing a row earns nothing — a row with no identity and no mark is drawn as a defect whether or not its stories are done, so shipping work nobody proposed cannot become legitimate by completing it. If you have maps with rows that predate this, mark those rows; anything else without an identity is a row nobody proposed.
+
+  **Problem tickets will start showing their story maps.** When a map's problems became derived, the renderer kept emitting `<meta name="problems" content="">`, and the reverse-trace helper only matches a non-empty value — so every map in every adopter corpus has been failing that match, and the `## Story Maps` section on problem tickets has been silently empty ever since. It looked like "no map traces this problem". That meta now carries the derived union, so the next map transition writes those sections for the first time. Expect a larger-than-usual diff on that commit; it is the trace working, not new behaviour.
+
+  Also in this release:
+
+  - A map is readable with no stylesheet. A story's value statement is drawn as three clauses, and they were separated only by a CSS rule — so a map opened away from its directory, in a phone preview or an email attachment or a sandboxed viewer, ran all three together as one unbroken line. The markup carries its own separation now. There is a test for it; there was not before.
+  - A defect row rendered its warning glyph twice, once from the badge and once from the label. The label's copy was in the accessible name, so a screen reader announced "warning" as part of the row's name.
+  - `story-map-query` reports a map's derived problems and its row RFC identities alongside its jobs. A row with no derived answer now reads `stale` rather than borrowing a status name the renderer can no longer produce.
+  - A map's data lives in an embedded JSON block, and one test checks that every field the authoring guide documents actually affects what renders. It could not see nested fields, so both removed keys sat outside the one guard built to catch exactly this. It now checks them too.
+
+### Patch Changes
+
+- b084d4c: Published packages no longer carry their own tests.
+
+  Every plugin was shipping its bats suites inside the tarball — 171 files in `@windyroad/itil` alone, 257 across the suite. They were never part of the plugin. They exist to verify it, and they went out with it because `files` listed `scripts/` and `skills/` wholesale, with a single carve-out for evals that was never generalised.
+
+  The weight is the smaller half. `@windyroad/itil` drops from 885 kB to 525 kB and the others fall in proportion. What matters more is that thirteen of those tests read the repository they were written in: they lint its stories and story maps, grep its problem tickets, open three of its decision records by filename, and read its own upstream-channel configuration. An adopter running them is told about artefacts they have never had.
+
+  Nothing invoked a test at runtime, so nothing that worked before stops working. Templates, libraries, hooks, skills, agents and the `$PATH` shims all still ship — the packaged-tarball render test still packs, extracts and renders from outside the repository.
+
+  A new check asserts this against `npm pack --dry-run` rather than against the `files` array, because the array is the input and the tarball is the outcome. It found two packages missed on the first pass, which is the argument for testing the outcome.
+
+  Separating a test that verifies a plugin from one that verifies a project's use of it is the larger question, and it is tracked rather than settled here.
+
+- cb2e801: Retire two empty story maps and keep their IDs reserved through Git history when allocating the next map ID.
+- 15d6507: Stop shipping the obsolete migration that reintroduced the retired problem type field, and guard published tarballs against its return.
+
 ## 0.61.2
 
 ### Patch Changes
