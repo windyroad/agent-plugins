@@ -1,4 +1,4 @@
-# Problem 477: Nine story maps carry the superseded stacked encoding, and two more use bespoke encodings, all needing migration to the rendered grid
+# Problem 496: Nine story maps carry the superseded stacked encoding, and two more use bespoke encodings, all needing migration to the rendered grid
 
 **Status**: Open
 **Reported**: 2026-08-05

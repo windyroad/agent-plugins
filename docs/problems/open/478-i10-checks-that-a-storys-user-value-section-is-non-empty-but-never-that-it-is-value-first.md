@@ -77,7 +77,7 @@ The detection-path gap is a consequence: with no check at the gate, the only pla
 
 - **P465** (`docs/problems/open/465-story-accepted-gate-does-not-enforce-adr-090-ratification.md`) — same fix file (`manage-story` accepted gate) but a distinct invariant: P465 is a check that is *absent*, this is a check that is *under-specified*. The hang-off arbiter returned PROCEED_NEW, noting P465's Investigation Tasks are already complete and awaiting release, so absorbing here would reopen a committed fix.
 - **P466** (`docs/problems/open/466-story-map-html-template-ships-sub-3-1-borders-no-focus-ring-no-viewport.md`) — shares the story-map rendering surface, but is presentational CSS and WCAG conformance. The unreadable card here is a detection symptom, not a rendering defect.
-- **P477** (`docs/problems/open/477-story-map-corpus-carries-three-incompatible-encodings-needing-migration.md`) — shares ADR-102 but is retrospective map-encoding migration; this is prospective enforcement on story files.
+- **P496** (`docs/problems/open/496-story-map-corpus-carries-three-incompatible-encodings-needing-migration.md`) — shares ADR-102 but is retrospective map-encoding migration; this is prospective enforcement on story files.
 - **ADR-102** / **ADR-103** — the map rendering that made the drift visible.
 - Discovered 2026-08-07 while the maintainer reviewed STORY-MAP-002 for ratification and asked why one card was unreadable.
 

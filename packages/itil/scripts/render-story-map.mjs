@@ -728,8 +728,11 @@ function renderGrid(map, derived) {
       // once — per-cell text would bury a sparse map's few cards.
       out += `<td class="cell empty" colspan="${backbone.length || 1}"><span class="vh">No stories in this release band.</span></td>`;
     } else {
-      for (const here of filled) {
-        if (!here.length) { out += '<td class="cell empty"></td>'; continue; }
+      for (const [i, here] of filled.entries()) {
+        if (!here.length) {
+          out += `<td class="cell empty"><span class="vh">No stories for ${esc(backbone[i]?.title || 'this activity')} in ${esc(rel.name || rel.id || 'this release')}.</span></td>`;
+          continue;
+        }
         out += '<td class="cell"><ul class="tasks" role="list">';
         for (const t of here) {
           out += '<li>' + cardHtml(t, statuses[t.storyId], values[t.storyId], hrefs) + '</li>';

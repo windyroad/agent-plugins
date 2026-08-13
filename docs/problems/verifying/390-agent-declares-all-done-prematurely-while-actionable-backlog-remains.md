@@ -134,4 +134,3 @@ Released in `@windyroad/itil@0.57.2` (2026-07-06, PR #337). The work-problem / w
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-040 | STORY-040: AFK loop anchored with the native `/goal` external evaluator | draft |
-

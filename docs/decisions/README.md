@@ -501,7 +501,7 @@ _102 ADRs. These are the current rules. The architect agent reads this section f
 **Confirmation:** The capture-story-map behavioural test creates and commits STORY-MAP-013, deletes and commits it, then asserts...; A Codex Promptfoo case runs the actual skill contract against the repository with STORY-MAP-012 and STORY-MAP-...; A repository scan after deletion finds no live references to STORY-MAP-012 or STORY-MAP-013 outside explicit h...; reconcile-story-maps.sh reports the README and filesystem are aligned after deletion.
 
 ### ADR-116 — Ratified decisions change only by supersession
-**Status:** proposed | **Oversight:** unconfirmed
+**Status:** proposed | **Oversight:** confirmed
 **Confirmation:** The architect reviewer reports [Amendment To Ratified Decision] when a proposed change edits a confirmed decis...; The reviewer directs substantive change into a new superseding decision and does not accept clearing the overs...; A change that merely cites a legacy decision containing amendments does not trigger the finding.
 
 ---

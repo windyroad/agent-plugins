@@ -142,6 +142,8 @@ JSON
   [ "$status" -eq 0 ]
   run domcount "$OUT" 'class="cell empty"'
   [ "$output" -eq 4 ]
+  run domcount "$OUT" 'class="cell empty"><span class="vh">No stories for'
+  [ "$output" -eq 4 ]
 }
 
 @test "each story's id sits on its own line in the island" {

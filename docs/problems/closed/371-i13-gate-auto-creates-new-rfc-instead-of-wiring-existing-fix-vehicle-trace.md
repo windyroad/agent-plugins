@@ -94,4 +94,3 @@ Released via `.changeset/wr-itil-p371-i13-existing-vehicle-trace-branch.md` (I13
 - **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
 - **Evidence**: the I13 existing-vehicle branch fired live: detected RFC-046 as the fix vehicle, wired the P446 trace edge, and minted no new RFC; commit ae95ecec (16d019f1)
 - **Recovery**: reversible via `/wr-itil:transition-problem 371 known-error` or `git revert`.
-

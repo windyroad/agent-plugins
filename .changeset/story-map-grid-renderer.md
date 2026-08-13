@@ -11,3 +11,5 @@ One template now owns the shape, and the renderer builds every map from it. A ma
 Ratification fingerprints for story maps now cover the data block rather than the whole file. Without that, changing the template would regenerate every map, drift every stored fingerprint, and silently revoke approvals a human had given. Maps carrying no data block — anything authored before this release — still hash whole-file, so existing ratifications survive untouched and a mixed corpus stays safe.
 
 This release also fixes packaging: `@windyroad/itil` now ships the template in its published files. Without that entry, installing the plugin gave you a renderer that could not find its template.
+
+Empty activity/release intersections include a contextual screen-reader label as well as the visible hatch, so the grid preserves the same meaning without vision.

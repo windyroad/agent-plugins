@@ -11,6 +11,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
 | | | **Tier 0 — Critical bypass (Severity Very High ≥17, security-classified, or incident-linked)** | | | | | |
+| 40 | P477 | Codex collaboration completion bypasses the risk-marker bridge | 20 (Very High) | Open | S | 2026-08-12 | internal |
 | 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 (Very High) | Known Error | XL | 2026-05-03 | internal |
 | | | **Tier 1 — Inbound-reported (an external user actually hit this)** | | | | | |
 | 24 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | 12 (High) | Known Error | S | 2026-07-06 | inbound-reported (#169) |
@@ -114,7 +115,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3 | P416 | Outstanding-questions drain appends a superseding human decision without reconciling the stale Fix Strategy section it overrides | 6 (Medium) | Open | M | 2026-07-04 | internal |
 | 3 | P418 | Reviewer-agent marker hooks do not fire on SendMessage-resumed agents — ISSUES FOUND cannot be continued to a marker-writing PASS, forcing a full fresh re-review | 6 (Medium) | Open | M | 2026-07-05 | internal |
 | 3 | P421 | Reference-section awk helpers destructively truncate governance files containing invalid UTF-8 | 6 (Medium) | Open | M | 2026-07-05 | internal |
-| 3 | P477 | Nine story maps carry the superseded stacked encoding, and two more use bespoke encodings, all needing migration to the rendered grid | 6 (Low) | Open | M | 2026-08-05 | internal |
+| 3 | P496 | Nine story maps carry the superseded stacked encoding, and two more use bespoke encodings, all needing migration to the rendered grid | 6 (Low) | Open | M | 2026-08-05 | internal |
 | 3 | P045 | Auto plugin install on user's machine after governance release | 12 (High) | Open | L | 2026-04-19 | internal |
 | 3 | P460 | Agent surfaces ticket-worthy findings and obvious next-actions as recommendations instead of autonomously capturing or acting | 12 (High) | Open | L | 2026-07-25 | internal |
 | 2.25 | P136 | ADR-044 alignment audit — sweep all unaudited skills/hooks/agents/ADRs/JTBDs/READMEs against the framework-resolution boundary (master ticket) | 9 (Medium) | Open | L | 2026-04-27 | internal |
