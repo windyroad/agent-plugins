@@ -1,5 +1,33 @@
 # @windyroad/architect
 
+## 0.21.0
+
+### Minor Changes
+
+- 94e1591: The architecture reviewer now refuses in-place edits to a ratified decision, and directs you to supersede instead.
+
+  A decision record has two phases. Before anyone ratifies it, edit it freely — rewrite the context, sharpen the outcome, add another option to the set being weighed. Nothing is fixed, because nobody has confirmed anything. Once it carries a human's confirmation it is closed: the only moves are to deprecate it or to write a new decision that supersedes it.
+
+  Adding an `### Amendment` section to a ratified decision, or an `amends:` key pointing at one, is how that document gets rewritten without anyone confirming the new text — and how one record acquires authority over another's text. The reviewer raises `[Amendment To Ratified Decision]` on either and names supersession as the route.
+
+  It also refuses three remedies that look reasonable and are not: clearing the confirmation and re-ratifying, which makes the edit confirmable rather than legitimate; calling the change a clarification rather than a substance change, which does not matter because the document is closed either way; and citing amendment sections already in your corpus as precedent. That last one matters most. Those sections are a known problem under repair, and the reviewer used to cite them itself.
+
+  The flag fires on a change _proposing_ an amendment, not on the ones already in your decisions. A change that merely cites a decision carrying old amendment sections draws nothing.
+
+### Patch Changes
+
+- b084d4c: Published packages no longer carry their own tests.
+
+  Every plugin was shipping its bats suites inside the tarball — 171 files in `@windyroad/itil` alone, 257 across the suite. They were never part of the plugin. They exist to verify it, and they went out with it because `files` listed `scripts/` and `skills/` wholesale, with a single carve-out for evals that was never generalised.
+
+  The weight is the smaller half. `@windyroad/itil` drops from 885 kB to 525 kB and the others fall in proportion. What matters more is that thirteen of those tests read the repository they were written in: they lint its stories and story maps, grep its problem tickets, open three of its decision records by filename, and read its own upstream-channel configuration. An adopter running them is told about artefacts they have never had.
+
+  Nothing invoked a test at runtime, so nothing that worked before stops working. Templates, libraries, hooks, skills, agents and the `$PATH` shims all still ship — the packaged-tarball render test still packs, extracts and renders from outside the repository.
+
+  A new check asserts this against `npm pack --dry-run` rather than against the `files` array, because the array is the input and the tarball is the outcome. It found two packages missed on the first pass, which is the argument for testing the outcome.
+
+  Separating a test that verifies a plugin from one that verifies a project's use of it is the larger question, and it is tracked rather than settled here.
+
 ## 0.20.4
 
 ### Patch Changes
