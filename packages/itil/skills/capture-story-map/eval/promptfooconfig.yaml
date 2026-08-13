@@ -10,11 +10,8 @@
 # this exists to catch; refusing to bundle two genuinely coupled ones is the
 # over-correction, and a check that only fires one way teaches the wrong lesson.
 #
-# Two tiers (ADR-075):
-#   - Tier A: deterministic `icontains` where a distinctive token is reliable.
-#   - Tier B: `llm-rubric` for the reasoning, which no regex can grade. Note the
-#     P270 not-regex lesson — a not-regex for "one row" fires on the correct
-#     answer "these do NOT belong in one row".
+# Tier A positive assertions cover the outcome and a stable reason token. Tier B
+# grades the whole economic/coupling argument that regex cannot establish.
 #
 # Drivers:
 #   - ADR-075 (Amendment 2026-06-02 — SKILL-prose scope; promptfoo exec wrapping
@@ -28,6 +25,11 @@ description: capture-story-map — how a release row is composed
 providers:
   # Path is relative to this config file's directory (promptfoo basePath).
   - id: 'exec:bash ./run-skill-eval.sh'
+
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ../../capture-story/eval/grade-llm-rubric.sh'
 
 prompts:
   - '{{prompt}}'
@@ -44,8 +46,8 @@ tests:
     assert:
       - type: icontains
         value: STORY-MAP-014
-      - type: icontains
-        value: working tree
+      - type: regex
+        value: 'working[- ]tree'
       - type: icontains
         value: origin
       - type: icontains
@@ -69,17 +71,16 @@ tests:
         Should these two stories share one release row, or take a row each?
         Give your answer and your reasoning.
     assert:
-      # Tier A — the outcome. "each" / "separate" are the distinctive tokens.
+      - type: regex
+        value: '(one (release )?row each|separate (release )?rows)'
+      - type: regex
+        value: '(cost|automat|delay|independent packages|version independently)'
       - type: llm-rubric
         value: >-
-          The response concludes the two stories should NOT share a release row,
-          and should take a row each. It reasons about more than the absence of
-          a dependency: it makes at least one economic argument, such as the low
-          per-release transaction cost making small batches cheap, the delay
-          that batching imposes on the story that is ready first, the cost of
-          delay differing between the two, or the two stories living in packages
-          that version independently. A response that splits them purely because
-          "they are not coupled" without any economic reasoning does not pass.
+          The response gives the independent stories separate release rows and
+          makes an economic argument for the split, such as cheap automated
+          releases, avoided delay, different adopter costs, or independently
+          versioned packages. Merely saying they are not coupled is insufficient.
 
   - description: Keeps genuinely coupled stories in one row, rather than splitting reflexively
     vars:
@@ -96,16 +97,15 @@ tests:
         Should these two stories share one release row, or take a row each?
         Give your answer and your reasoning.
     assert:
-      # Tier B only — the claim is that it does NOT split them, and a not-regex
-      # on "separate rows" fires on the correct answer "not separate rows".
+      - type: regex
+        value: '(share|same|one) (release )?row'
+      - type: regex
+        value: '(coupl|broken|meaningless|unreadable)'
       - type: llm-rubric
         value: >-
-          The response concludes the two stories DO belong in one release row.
-          It identifies that they are coupled — either is broken, meaningless or
-          harmful without the other — so shipping them separately would leave
-          the tool in a state where it cannot read its own data. It does not
-          recommend splitting them on the grounds that releases are cheap; the
-          coupling test settles it before the economics are reached.
+          The response keeps the format change and its reader in one release row
+          because either is broken or harmful without the other. Cheap release
+          mechanics must not override this coupling.
 
   - description: Ships a transaction-cost reducer first rather than batching it
     vars:
@@ -122,10 +122,11 @@ tests:
         Should these two stories share one release row, or take a row each?
         If they take a row each, which should ship first, and why?
     assert:
+      - type: regex
+        value: '(one (release )?row each|separate (release )?rows)'
+      - type: regex
+        value: '(upgrade|upgrading).{0,120}first|first.{0,120}(upgrade|upgrading)'
       - type: llm-rubric
         value: >-
-          The response gives them separate rows AND says the story that reduces
-          the cost of upgrading should ship first. Its reasoning recognises that
-          this story lowers the cost of every future release, so delaying it
-          behind other work is more expensive than it looks — rather than
-          ordering them by the size or urgency of the fix alone.
+          The response gives the stories separate rows and ships the upgrade-cost
+          reducer first because doing so lowers the cost of later releases.

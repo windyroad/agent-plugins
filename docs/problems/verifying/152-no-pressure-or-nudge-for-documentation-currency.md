@@ -129,6 +129,12 @@ Candidate fix shapes to explore in the architect-design phase:
 - `packages/retrospective/scripts/check-tickets-deferred-cause.sh` — advisory-only-then-escalate precedent (P148 fix; same shape this ticket's Phase 1 detector should adopt).
 - `packages/itil/scripts/check-problems-readme-budget.sh` — advisory-only precedent (P134 hard-ceiling surface; same shape).
 
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-058 | STORY-058: Read a README that describes the version I installed | draft |
+
 ## Fix Released — Phase 1 (2026-05-03 iter 11)
 
 Phase 1 of the JTBD-anchored README mechanism shipped via `@windyroad/retrospective` minor bump (changeset `p152-jtbd-anchored-readme-drift-advisory`). Concretely:

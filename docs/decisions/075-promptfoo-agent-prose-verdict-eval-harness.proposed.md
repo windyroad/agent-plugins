@@ -2,7 +2,7 @@
 status: "proposed"
 date: 2026-05-28
 human-oversight: confirmed
-oversight-date: 2026-07-13
+oversight-date: 2026-08-13
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: []
@@ -86,6 +86,18 @@ Per the 2026-07-04 interactive decision drain (ratified direction recorded on P2
 
 **Oversight status of this amendment (P357 / ADR-066 P348 AFK fallback):** this amendment changes the Decision Outcome (§4 cadence), so per ADR-066's amend rule the file-level `human-oversight:` marker is cleared to `unconfirmed` pending interactive ratification via `/wr-architect:review-decisions`. The **base decision is not in question** — promptfoo adoption, exec-provider `claude -p`, per-package eval location, and the subscription-auth posture were user-confirmed 2026-05-28 and 2026-06-02 (the retained `oversight-date: 2026-06-02` refers to that base); only this cadence delta is pending. The interpretation to confirm: the ratified direction says "wire the promptfoo behavioural checks to gate CI merges" without distinguishing tiers; because the landed configs mix both tiers per file, this amendment reads it as **both-tiers-per-CI-run (release-only Tier-B cadence retired)**. On ratification: restore `human-oversight: confirmed`, refresh `oversight-date`, regenerate the decisions compendium. If amended to Tier-A-only-per-PR instead, the `eval-agents` job narrows accordingly (config tier split); P290's retirement sequencing is unaffected either way.
 
+### Amendment 2026-08-13 — path-scoped PR execution with full main validation
+
+The 2026-07-05 amendment's "every CI run" cadence spent finite Claude subscription quota and made unrelated PRs fail when that quota was exhausted, without adding evidence about the changed surface. For `pull_request` events, the `eval-agents` job now invokes Claude only when the diff touches an agent definition or eval (`packages/<plugin>/agents/**`), the eval workflow/wrapper/regression test, or a root promptfoo dependency (`package.json` / `package-lock.json`). The job remains present and reports a successful explicit skip for unrelated PRs. Every push to `main` still runs the full eval, and relevant token-bearing PRs still fail closed on provider or assertion errors. Fork-token handling and the deterministic Quality Gates are unchanged.
+
+This supersedes only the 2026-07-05 per-PR cadence. It does not treat quota exhaustion as passing evidence for a relevant change. The user approved this exact path-scoped workaround after the behavioural boundary was briefed on 2026-08-13; file-level oversight therefore remains `confirmed`.
+
+### Amendment 2026-08-13 — quota exhaustion is visible unavailable evidence, not a red build
+
+The path-scoped amendment still left every `main` push red while the Claude subscription reported its explicit weekly-limit error. That red state contained no behavioural result and could trigger unrelated red-CI recovery gates. Before promptfoo starts, a one-call availability probe treats only a single-line `You've hit your weekly limit` response as a successful job with a visible warning that no evidence was produced. Mixed output, authentication failure, transport error, an unrecognised provider failure, and any later promptfoo failure retain their non-zero status. When quota returns, the same command automatically resumes normal blocking validation without a configuration change.
+
+This is a degraded-availability workaround, not passing behavioural evidence. A quota-skipped run cannot be cited as Tier-A or Tier-B confirmation. The user requested disabling the Claude quality gate as a workaround; this narrower error classification preserves every failure mode that can still produce actionable evidence.
+
 ## Confirmation
 
 1. promptfoo is a **root devDependency**; eval configs + fixtures live per-package at `packages/<plugin>/agents/eval/` and are **excluded from every published tarball** (`files` field) — assert no eval path ships in `npm pack` output.
@@ -94,11 +106,14 @@ Per the 2026-07-04 interactive decision drain (ratified direction recorded on P2
 4. **First slice (RFC-011 coverage):** the jtbd `[Unratified Dependency]` verdict eval fires the verdict when fed a change citing an unratified `developer` job (e.g. JTBD-001) and stays silent (PASS, no flag) on a ratified-job cite — covering already-shipped behaviour (no unratified-ADR dependency).
 5. **ADR-052 Surface-2 narrowing** + **ADR-005 reassessment flag** are recorded in those ADRs.
 6. ADR-075 carries `human-oversight: confirmed` (born-confirmed — substance + both sub-decisions user-confirmed via AskUserQuestion 2026-05-28).
+7. On pull requests, `.github/workflows/ci.yml` runs agent-prose evals only for agent, eval-infrastructure, or root promptfoo dependency changes; pushes to `main` always run them.
+8. A quota-only availability probe emits a visible warning and exits successfully; quota mixed with another error and all eval failures remain blocking. `packages/shared/test/agent-eval-quota-gate.bats` covers quota-only, ordinary-failure, mixed-failure, and available-provider paths.
 
 ## Reassessment Criteria
 
 - **Tier B promotion**: ~~if a per-PR (not just release) semantic gate becomes affordable + non-flaky (pass-rate variance characterised), consider promoting Tier B to block PRs.~~ **[Realised 2026-07-05 per the CI-merge-gating amendment — Tier B now runs per CI run; ratification pending.]**
 - **Cost trip**: if per-CI-run eval cost (4 configs × N samples per push/PR, subscription-billed via `claude -p`) exceeds budget or adds unacceptable merge latency, revisit sample count N / rubric scope / a Tier-A-only per-PR split. No per-run data yet — the first proven-green `eval-agents` run is the measurement point; record it (ADR-026 grounding).
+- **Scope miss**: if a PR outside the path allowlist changes agent-prose behaviour, expand the allowlist at the shared dependency boundary that caused the miss. Decision-only changes deliberately receive their full Claude validation on the subsequent `main` run.
 - **Tool fit**: if promptfoo's exec provider wrapping `claude -p --system-prompt` proves unable to faithfully reproduce agent behaviour (vs a real subagent invocation), reassess the provider mechanism (e.g. `--output-format stream-json` parsing, or promptfoo's dedicated claude-code provider if it matures).
 - **SKILL-surface coverage** (added 2026-06-02 with the SKILL-prose scope extension): reassess if (a) the SKILL eval pattern proves unable to reach Tier-A/Tier-B parity with agent-prose evals; (b) skill-graph traversal (sibling-skill delegation under `--append-system-prompt`) introduces non-determinism the harness can't bound via pass^k; or (c) the per-skill eval surface count exceeds ~25 skills × 1 eval each, at which point a shared per-plugin eval-runner script may be warranted (vs the current `packages/*/skills/*/eval/` glob fan-out).
 - Reassess at 2026-08-28.

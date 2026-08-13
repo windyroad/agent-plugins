@@ -54,9 +54,15 @@ When I install a `@windyroad/*` plugin and read its README to understand what it
 - **ADR-013** — Structured user interaction; Rule 6 advisory-then-escalate pattern that ADR-051 follows for the drift detector.
 - **ADR-008** — JTBD directory structure. Establishes `docs/jtbd/<persona>/JTBD-NNN-<title>.<status>.md` as the canonical layout the README anchors against.
 
-
 ## Story Maps
 
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-MAP-008 | STORY-MAP-008: Have a plugin behave like a guest in my repository | draft |
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-058 | STORY-058: Read a README that describes the version I installed | draft |

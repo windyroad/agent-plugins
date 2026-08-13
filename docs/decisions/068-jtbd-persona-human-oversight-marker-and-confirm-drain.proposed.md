@@ -38,28 +38,23 @@ Chosen: **mirror ADR-066 as a wr-jtbd sibling**.
 5. **Born-confirmed.** `packages/jtbd/skills/update-guide/SKILL.md` (the job/persona authoring surface — the JTBD equivalent of `create-adr`) writes the marker when the user confirms a new/edited job or persona.
 6. **Confirm-gate.** A `proposed` job/persona is not treated as human-oversighted without a confirm pass.
 
-### Superseded 2026-06-02 marker-write gate — see ADR-110
+### Amendment 2026-06-02 (P348) — `unconfirmed` is a fourth enum value + the marker-write authority is structurally gated (mirror of ADR-066 amendment 2026-06-02)
 
-The structural gate on writing a ratification marker, and the `unconfirmed`
-value that unattended work writes instead, were added here as an amendment on
-2026-06-02, a week after this decision was ratified — and that amendment
-recorded itself as ratified. Both are now
-**ADR-110 (A ratification marker can only be written when someone actually
-ratified)**, ratified 2026-08-09, which states the rule once for the decisions
-surface and this one rather than twice.
+Mirror of ADR-066's 2026-06-02 amendment on the JTBD/persona surface. AFK iter subprocesses spawned via `claude -p` have no `AskUserQuestion` access and were silently authoring JTBDs and personas through skills like `/wr-jtbd:update-guide` while writing `human-oversight: confirmed` without a user confirmation event — directly contradicting JTBD-006's "audit trail — every action taken during AFK mode should be traceable" outcome and JTBD-201/202's auditability persona constraints. The mechanism fix has two prongs:
 
-### Superseded 2026-05-27 build-upon guard — see ADR-109
+1. **Structural marker-write gate** — a new PreToolUse:Edit|Write hook (`packages/jtbd/hooks/jtbd-oversight-marker-discipline.sh`) denies any Edit/Write that INTRODUCES `human-oversight: confirmed` into a `docs/jtbd/**/*.md` frontmatter (jobs AND personas) unless a session-scoped evidence marker `/tmp/oversight-confirmed-<sha256-of-path>-<session-id>` exists for THAT specific artefact. SKILLs land the marker via `wr-jtbd-mark-oversight-confirmed <artefact-path>` (ADR-049 PATH shim → `packages/jtbd/scripts/mark-oversight-confirmed.sh`) IMMEDIATELY after the substance-confirm `AskUserQuestion` answer lands. Written under EVERY recent candidate SID per ADR-050 Option C. Behavioural bats: `packages/jtbd/hooks/test/jtbd-oversight-marker-discipline.bats`.
 
-The third enforcement surface — the reviewer failing work that builds on a job
-or persona nobody has ratified — was added here as an amendment on 2026-05-27,
-two days after this decision was ratified. It is now
-**ADR-109 (The jobs reviewer refuses work built on a job nobody has ratified)**,
-ratified 2026-08-09, which also weighs the option of holding the guard until the
-unratified backlog is drained.
+2. **`unconfirmed` enum value** — AFK iter subprocesses MUST write `human-oversight: unconfirmed`. The detector (`detect-unoversighted.sh`) and the single-artifact predicate (`is-job-or-persona-unconfirmed.sh`) already treat anything-not-`confirmed`-and-not-`rejected-pending-supersede`-with-ticket as unoversighted, so `unconfirmed` flows naturally into the drain queue (`/wr-jtbd:confirm-jobs-and-personas`) without a detector change. The build-upon guard (surface 3) correctly fires `[Unratified Dependency]` on iter-derived `unconfirmed` artefacts — the iter explicitly signalled it could not confirm.
 
-Items 1-6 above are unaffected: the marker, the detector, the session-start
-nudge, the drain pass, born-confirmed authoring, and the confirm-gate are this
-decision's own substance and stand as ratified.
+The marker namespace (`/tmp/oversight-confirmed-<sha>-<sid>`) is SHARED between architect and JTBD hooks — data-schema convergence, NOT code coupling (mirrors the "shared cross-plugin contracts" section). Each plugin's helper script independently writes the same-shape marker file; each plugin's hook independently reads it. SKILL surface updated: `packages/jtbd/skills/update-guide/SKILL.md`.
+
+This amendment is itself recorded `human-oversight: confirmed` because it tightens the *mechanism* — the new enum value is the data-side counterpart to the structural guard, and the substance (Option 1 flat scalars + sibling-mirror of ADR-066) is unchanged from the original Decision Outcome.
+
+### Amendment 2026-05-27 — enforcement surface 3: the build-upon guard (P323; user-confirmed via AskUserQuestion 2026-05-27)
+
+Items 1–6 above are oversight enforcement **surfaces 1 (born-confirmed record via `update-guide`) and 2 (interactive drain via `confirm-jobs-and-personas`)** — the JTBD twins of ADR-066's `create-adr` + `review-decisions`. They confirm an artifact's substance and let a human drain the unconfirmed set, but they do **not** stop *dependent work* from being built on a job/persona whose substance is still unconfirmed. That third surface — the **build-upon guard** — was added to the ADR side by ADR-074 / RFC-010 (the architect agent's `[Unratified Dependency]` verdict, 2026-05-27) and had no JTBD equivalent (P323; the asymmetry was a sequencing artifact — ADR-068 was authored 2026-05-25, before surface 3 existed on the ADR side, so there was nothing to mirror). This amendment adds the JTBD surface 3. The decision home (amend ADR-068 vs new ADR vs amend ADR-074) was confirmed by the user via `AskUserQuestion` on 2026-05-27: **amend ADR-068** — surface 3 completes the JTBD-oversight surface-set in its cohesive home, mirroring how ADR-074 carried the ADR-side surface 3 as an amendment to the contract it extends.
+
+7. **Build-upon guard (surface 3).** The `wr-jtbd:agent` reviewer emits an `[Unratified Dependency]` verdict (ISSUES FOUND / FAIL) when a change or plan **explicitly cites, implements, or serves** a specific persona or job — an `@jtbd JTBD-NNN` annotation, a `persona: <name>` reference, or it authors that artifact's own flow — whose frontmatter lacks `human-oversight: confirmed` and which is not superseded. Action: "ratify `<persona | JTBD-NNN>` via `/wr-jtbd:confirm-jobs-and-personas` before this lands." **Keyed on the marker, never on `status:`** (orthogonal axes, item 1) — building on a *ratified* job whose `status` is still `proposed` is fine. **Bound to explicit cite/implement, NOT ambient alignment** — the reviewer already matches every change to a job for its PASS verdict; surface 3 must not fire on that mere match, only on an explicit dependency (the inverse-P078 / P132 over-fire guard). The reviewer runs the single-artifact predicate `wr-jtbd-is-job-or-persona-unconfirmed` (ADR-049 shim → `packages/jtbd/scripts/is-job-or-persona-unconfirmed.sh`, the sibling of the architect's `is-decision-unconfirmed.sh`) **by exit code** — the jtbd agent has `Bash` (the architect agent does not, which is why it greps frontmatter inline; the JTBD instruction therefore differs in form, which is correct, not a fidelity gap). The predicate shares the marker grammar with `detect-unoversighted.sh` (item 2) per the cross-surface-consistency driver. **Does NOT wait on the P288 drain** — surface 3 is the forcing function; the currently-large unratified set is exactly what it gates against, so its first real fires are expected, not false positives. (Live instance as of 2026-05-27: after P289 renamed `solo-developer` → `developer` and ratified the persona, its jobs `JTBD-001`..`007` remain unratified pending the P288 drain — those are surface 3's canonical first-fire cases.)
 
 ### Shared cross-plugin contracts (named so they are not refactored away)
 
@@ -84,7 +79,7 @@ Behavioural (per ADR-052), mirroring ADR-066's set:
 3. `/wr-jtbd:confirm-jobs-and-personas` writes the marker on confirm and leaves it absent on amend/reject — behavioural bats.
 4. `update-guide` writes the marker on the Step-N confirm (born-confirmed) — assertion against the update-guide contract.
 5. **Dogfood self-check:** ADR-068 carries `human-oversight: confirmed` in its own frontmatter (it does — recorded through the asking flow, with the one open sub-decision resolved by `AskUserQuestion`).
-6. The build-upon guard has its own confirmation criteria in **ADR-109**; it is not confirmed here.
+6. **(Surface 3, amendment 2026-05-27)** The `wr-jtbd:agent` emits `[Unratified Dependency]` (FAIL) on a change that explicitly cites an unratified persona/job, and PASS when the cited artifact carries the marker — structural-permitted per ADR-052 Surface 2 (P176: the agent verdict is prompt-driven, not behaviourally testable until the skill-invocation harness lands; mirrors `architect-unratified-dependency-verdict.bats`). The single-artifact predicate `is-job-or-persona-unconfirmed.sh` is behaviourally tested (exit-code over a `docs/jtbd/` fixture tree — marker-present→0, marker-absent→1, superseded→0), the sibling of `is-decision-unconfirmed.bats`.
 
 ## Reassessment Criteria
 
@@ -95,7 +90,7 @@ Behavioural (per ADR-052), mirroring ADR-066's set:
 ## Related
 
 - **P288** — driving ticket (surfaces 1 & 2). **P283 / ADR-066** — the precedent mechanism this mirrors.
-- **P323** — driving ticket for the build-upon guard, now ADR-109. **ADR-074 / RFC-010 / P318** — the ADR-side surface-3 build-upon guard this JTBD surface mirrors. **P289** — the `solo-developer` → `developer` rename (landed 2026-05-27); the persona is now ratified, and its still-unratified jobs (`JTBD-001`..`007`, pending the P288 drain) are surface 3's live instances.
+- **P323** — driving ticket for the surface-3 amendment (2026-05-27). **ADR-074 / RFC-010 / P318** — the ADR-side surface-3 build-upon guard this JTBD surface mirrors. **P289** — the `solo-developer` → `developer` rename (landed 2026-05-27); the persona is now ratified, and its still-unratified jobs (`JTBD-001`..`007`, pending the P288 drain) are surface 3's live instances.
 - **ADR-008** — JTBD directory structure; the marker is additive to its frontmatter contract.
 - **ADR-049** — shim grammar. **ADR-040** — SessionStart nudge shape. **ADR-009** — never-re-ask principle (not its TTL lifecycle). **ADR-002** — per-plugin packaging (why sibling not shared). **ADR-013 / ADR-044** — structured user interaction + decision-delegation taxonomy.
 - `packages/jtbd/skills/update-guide/SKILL.md` — born-confirmed write site. `packages/jtbd/skills/review-jobs/SKILL.md` — the read-only alignment reviewer (distinct from this drain).

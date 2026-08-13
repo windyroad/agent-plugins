@@ -21,7 +21,7 @@ This index serves two persona-jobs per ADR-051 sibling pattern (JTBD-anchored RE
 |------|---------|----------|-----------|----------|
 | Problem | `docs/problems/<state>/` | markdown | `Open → Known Error → Verifying → Closed` (or `Parked`) | What hurts |
 | ADR | `docs/decisions/` | markdown | `proposed → accepted → superseded` | How we decided to solve it |
-| RFC | `docs/rfcs/` | markdown | `proposed → accepted → in-progress → verifying → closed` | What we're shipping to solve it |
+| RFC | legacy `docs/rfcs/` file or ADR-103 story-map release row | markdown / map JSON island | legacy lifecycle or row-derived status | What we're shipping to solve it |
 | Story Map | `docs/story-maps/<state>/` | HTML (`*.html`) | `draft → accepted → in-progress → completed → archived` | How the work decomposes spatially across backbone × ribs × slices |
 | **Story** | **`docs/stories/<state>/`** | **markdown (`*.md`)** | **`draft → accepted → in-progress → done → archived`** | **One slice of a story map; INVEST-shaped + JTBD-anchored** |
 
@@ -125,7 +125,8 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | draft | STORY-056 | Clear a block with a command my repository actually has | M | P435 | RFC-062 | STORY-MAP-008 |
 | draft | STORY-057 | Get the fix by upgrading, not by patching a cache | M | P369 | RFC-063 | STORY-MAP-008 |
 | draft | STORY-058 | Read a README that describes the version I installed | M | P152 | RFC-064 | STORY-MAP-008 |
-| draft | STORY-059 | See why the loop did not work what I expected | M | P487 | — | STORY-MAP-011 |
+| draft | STORY-059 | See why the loop did not work what I expected | M | P487 | RFC-065 | STORY-MAP-011 |
+| draft | STORY-060 | Pick up a captured ticket and know what was observed | M | P375 | RFC-066 | STORY-MAP-011 |
 | accepted | STORY-054 | Lifecycle transitions preserve a story's ratification | M | P474 | RFC-059 | STORY-MAP-002 |
 | accepted | STORY-055 | One definition of what the oversight fingerprint ignores | M | P474 | RFC-059 | STORY-MAP-002 |
 | draft | STORY-012 | Can't start coding without an RFC — the gate makes me create one first | S | P251, P314 | RFC-005 | STORY-MAP-002 |
@@ -181,7 +182,7 @@ Terminal stories, from filesystem truth (`docs/stories/done/`). `Done` is the da
 
 `docs/stories/README.md` is reconciled against on-disk markdown story files by `wr-itil-reconcile-stories` (P170 Phase 2 Slice 5; `$PATH` shim per ADR-049). The reconciliation contract mirrors `wr-itil-reconcile-readme docs/problems` per P118: diagnose-only mechanical drift detector that runs as a Step 0 preflight in `/wr-itil:manage-story` invocations.
 
-Reverse-trace pass (sibling to the RFC reverse-trace pass per ADR-060): `wr-itil-reconcile-stories docs/stories docs/problems docs/rfcs docs/story-maps` extends to detect drift in the auto-maintained `## Stories` reverse-trace section on each problem ticket / RFC / story-map. Three drift kinds (mirroring the RFC-tier reverse-trace contract):
+Reverse-trace pass (sibling to the RFC reverse-trace pass per ADR-060): `wr-itil-reconcile-stories docs/stories docs/problems docs/rfcs docs/jtbd docs/story-maps` detects drift in auto-maintained `## Stories` sections on problem, JTBD and legacy RFC files. For ADR-103 row-backed RFCs it verifies that the release row exists and contains the story card.
 
 - `MISSING_REVERSE_TRACE STORY-<NNN> in <parent> ## Stories`
 - `STALE_REVERSE_TRACE STORY-<NNN> in <parent> ## Stories`

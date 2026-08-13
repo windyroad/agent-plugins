@@ -11,18 +11,9 @@ reassessment-date: 2026-07-18
 
 # Inter-iteration release cadence for AFK loops
 
-### Superseded held-changeset and graduation disjuncts — see ADR-099
-
-The drain condition below once carried two extra disjuncts, both derived from
-a held-changeset model that no longer exists. **ADR-099 (changesets are release
-metadata, not shipment controls)** superseded that model wholesale, so both fall
-with it.
-
-What remains is the rule as this decision already had it, minus those two:
-releasable material means unpushed commits, or entries in `.changeset/`.
-
-Everything else here stands, including the 2026-05-18 amendment that made the
-drain fire on releasable material rather than on a residual-risk band.
+> **Amendment 2026-07-23 (ADR-099):** held-changeset and graduation disjuncts
+> below are superseded. Releasable material means unpushed commits or entries
+> in `.changeset/`. Changesets are release metadata, never shipment controls.
 
 ## Context and Problem Statement
 
@@ -230,7 +221,3 @@ Revisit this decision if:
   steps.
 - Operational data shows the per-iteration scorer latency is unacceptable
   in practice.
-
-## Related
-
-- **ADR-099** — changesets are release metadata, not shipment controls. Superseded the held-changeset and graduation disjuncts this decision once carried.

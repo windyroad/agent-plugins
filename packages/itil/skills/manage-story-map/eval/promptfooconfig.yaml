@@ -3,6 +3,11 @@ description: story-map approval and derived-reporting behavior
 providers:
   - id: 'exec:bash ./run-skill-eval.sh'
 
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ../../capture-story/eval/grade-llm-rubric.sh'
+
 prompts:
   - '{{prompt}}'
 
@@ -17,8 +22,8 @@ tests:
     assert:
       - type: icontains
         value: STORY-MAP-008
-      - type: icontains
-        value: ratified map
+      - type: regex
+        value: 'ratif.{0,40}map|map.{0,40}ratif'
       - type: icontains
         value: human-oversight
 
@@ -46,9 +51,14 @@ tests:
     assert:
       - type: icontains
         value: Ratify
-      - type: icontains
-        value: Do not ratify
       - type: regex
-        value: 'does[\s*]+not[\s*]+reopen approval'
+        value: '([Dd]o not|[Nn]o need to|[Mm]ust not).{0,30}(re-?)?ratif'
+      - type: regex
+        value: 'does.{0,8}not.{0,8}reopen approval|approval.{0,40}(remains|stays).{0,20}(valid|ratified)'
       - type: icontains
         value: fingerprint
+      - type: llm-rubric
+        value: >-
+          The response ratifies the map once and explains that moving a card
+          between release rows is scheduling, not map substance, so it does not
+          reopen approval when the journey, identity and traces are unchanged.

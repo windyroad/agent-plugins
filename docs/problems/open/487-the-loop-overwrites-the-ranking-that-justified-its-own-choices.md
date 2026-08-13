@@ -79,3 +79,10 @@ Suspected: the ranking is treated as derived state — regenerable from the tick
 - **STORY-MAP-011** — this backs the "Decide what to do" card on the map named for trusting the loop's autonomous conduct.
 
 (captured via /wr-itil:capture-problem; the duplicate-check surfaced twelve matches on wsjf/rank/select/audit, of which P442 and P248 are the only near ones — both concern the ranking's inputs and presentation, neither its survival past the run that used it.)
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-059 | STORY-059: See why the loop did not work what I expected | draft |

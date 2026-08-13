@@ -12,7 +12,7 @@ reassessment-date: 2026-10-02
 amends: [ADR-060]
 ---
 
-# Story maps carry a drift-invalidated human-oversight marker
+# Story maps and stories carry a drift-invalidated human-oversight marker
 
 ## Context and Problem Statement
 
@@ -40,9 +40,9 @@ Chosen option: **"Drift-invalidated marker"** (Option 1), because it is what the
 
 **The rule:**
 
-- A story map carries a `human-oversight:` marker (`unconfirmed` / `confirmed`), orthogonal to the `status:` lifecycle — mirroring ADR-066/068 as a third sibling in the oversight family. *(This bullet read "A story map **and each story on it**" until 2026-08-07. ADR-103 made the map the single approval surface: a story carries no marker, and its approval is derived from the maps in its `story-maps:` field. Reconciled in place, following this ADR's own precedent in the next bullet, so the rule of record matches the rule in force.)*
-- **Any SUBSTANCE change** to a story map **invalidates** its `confirmed` marker back to `unconfirmed` — a drift-invalidated marker, not a write-once one. Re-ratification (human confirm) is required before the map is relied upon again. Substance is what the map is *about* — its journey, its identity, and what it traces to. Scheduling (release rows and the cards in them) and presentation (the rendered grid, the shared stylesheet) sit outside it. The authoritative field list is `oversight_map_substance_keys()` in `packages/itil/lib/story-oversight.sh`, kept in agreement with the hash basis by a bidirectional test. It is deliberately not restated here: restating it is how it drifted in both directions at once on 2026-08-08. *(Enumerated as seven field names until 2026-08-08. Six sites restated the same tuple; by that morning the ADRs still named `lead` and `traceProse`, dead the previous day, while a SKILL had lost live keys. The rule stays here; the list moved to code.)* *(Read “… lead, traces, trace prose and caption” until 2026-08-08. `lead` and `traceProse` left the map format on 2026-08-07. Because the basis includes only keys PRESENT in the island and no map carries either, removing them moved no stored hash and re-opened no ratification — STORY-MAP-002 stayed ratified across the change. Reconciled in place; leaving the enumeration stale would have made this decision the re-introduction vector the code change closes.)* Lifecycle progress is **not** substance: advancing `status:` and ticking an acceptance criterion leave ratification intact. Neither is SCHEDULING: drawing a release row, re-slicing, or adding a story to a row changes nothing, because a human approves a journey and its steps rather than the order work is drawn in. *(This bullet read "Any change" until 2026-07-30, then "a story map or a story … add / edit / re-slice / reuse / retitle" until 2026-08-07. The 2026-07-03 narrowing is recorded retroactively in the Amendments section, ratified 2026-07-30; ADR-103 narrowed the basis to substance and dropped the story leg, reconciled here 2026-08-07.)*
-- **An RFC may reference only APPROVED stories.** `capture-rfc` / `manage-rfc` gate the `stories:` list on approval: an RFC cannot list a story whose maps are not all ratified. This composes with the sibling decision (every RFC has ≥1 story): the atomic fix's single story must be approved before its RFC references it. *(Read "ratified (`confirmed`) USM stories" until 2026-08-07; under ADR-103 the remedy is always to ratify the MAP.)*
+- A story map and each story on it carry a `human-oversight:` marker (`unconfirmed` / `confirmed`), orthogonal to the `status:` lifecycle — mirroring ADR-066/068 as a third sibling in the oversight family.
+- **Any SUBSTANCE change** to a story map or a story (add / edit / re-slice / reuse / retitle) **invalidates** its `confirmed` marker back to `unconfirmed` — a drift-invalidated marker, not a write-once one. Re-ratification (human confirm) is required before the map is relied upon again. Lifecycle progress is **not** a substance change: advancing `status:`, ticking an acceptance criterion, and advancing a slice's `data-status` all leave ratification intact, because none of them revises what the human ratified. *(This bullet read "Any change" until 2026-07-30. The narrowing shipped 2026-07-03 and is recorded retroactively in the Amendments section, where it was ratified 2026-07-30; the Outcome text is reconciled here so the rule of record and the rule in force finally agree.)*
+- **An RFC may reference only ratified (`confirmed`) USM stories.** `capture-rfc` / `manage-rfc` gate the `stories:` list on story-ratification: an RFC cannot list an unratified story. This composes with the sibling decision (every RFC has ≥1 story): the atomic fix's single story must itself be ratified before its RFC references it.
 - Unratified story maps surface for ratification the same way unoversighted decisions/JTBDs do (a detector + a review/drain surface, mirroring `wr-architect-detect-unoversighted`).
 
 This lands as a new ADR (sibling of ADR-066/068 — a cross-cutting oversight primitive, not framework-ADR-internal) and drives lockstep in-place edits to ADR-060's story-map/story lifecycle, schemas, and invariants.
@@ -66,9 +66,8 @@ This lands as a new ADR (sibling of ADR-066/068 — a cross-cutting oversight pr
 
 ## Confirmation
 
-- A story map with a SUBSTANCE edit newer than its `oversight-date` reads as `unconfirmed` (drift-invalidation fires), while a scheduling or presentation edit does not — asserted by a behavioural test.
-- A story carries no oversight marker; its approval is derived from its `story-maps:` field, and a marker left on one approves nothing (ADR-103) — asserted by a behavioural test.
-- `capture-rfc` / `manage-rfc` refuse to list an unapproved story in an RFC's `stories:` — asserted by a behavioural test.
+- A story map / story with an edit newer than its `oversight-date` reads as `unconfirmed` (drift-invalidation fires) — asserted by a behavioural test.
+- `capture-rfc` / `manage-rfc` refuse to list an unratified story in an RFC's `stories:` — asserted by a behavioural test.
 - A detector surfaces unratified story maps (mirroring `wr-architect-detect-unoversighted` for decisions).
 
 ## Pros and Cons of the Options
@@ -88,8 +87,6 @@ This lands as a new ADR (sibling of ADR-066/068 — a cross-cutting oversight pr
 Revisit if the re-ratify-on-every-edit friction proves heavier than the drift risk it prevents (e.g. maps churn so often that ratification becomes rubber-stamping). The remedy would be to coarsen the drift trigger (ratify per coherent edit-set) — not to drop to write-once, which reintroduces the silent-drift gap.
 
 **Exercised twice — 2026-07-03 and 2026-07-26.** The first exercise went unrecorded here for three weeks and is corrected in the 2026-07-29 amendment below; the "once" this sentence previously claimed was wrong. That first exercise has since been **absorbed into the Decision Outcome itself** (reconciled 2026-07-30, ratified the same day), so it is no longer a coarsening *of* the rule — it is the rule. It is retained here for history. The 2026-07-26 exercise (ADR-101) remains a genuine coarsening and was narrow: ADR-095 compels every new story to add a card to its map, so "any change" made the AFK-accept carve-out unsatisfiable by construction — capturing the story broke the condition the story had to satisfy. ADR-101's map leg therefore hashes the map with the accepted story's OWN card excluded, which coarsens the trigger to a coherent edit-set exactly as anticipated here. It is not a drop to write-once: any map edit other than adding that one card still drifts the hash and still re-opens ratification.
-
-**Superseded by ADR-103 (2026-08-07).** ADR-101's map leg no longer exists. Rather than excluding one story's card from a whole-file hash, ADR-103 narrows the basis to substance — identity, prose, traces and the backbone columns — so rows and the cards in them are outside it entirely and the deadlock never arises. For the **membership** dimension that IS the write-once this section warns against, and ADR-103 takes it knowingly: the no-write-once line here defends against silent *substance* drift, and the narrowed basis is the argument that membership is not substance. Columns, prose and traces still drift as before.
 
 ## Related
 
@@ -131,7 +128,7 @@ That choice has a property the normalise option lacked: because no hash function
 
 The migration is idempotent and reports every artefact it touches, so the re-fingerprint set is auditable from the commit that ran it. It ships as a PATH-shimmed script per ADR-049 rather than a repo-local one, because adopter corpora carry the mirror too and source-repo-only migration is the P151/P317 dogfooding blind spot.
 
-**Corpus result (2026-07-29).** 31 mirrors removed, 7 re-fingerprinted with ratification preserved, 3 skipped and hand-resolved. The 12 confirmed-but-drifted stories were verified drifted at `HEAD` **before** the migration ran, so the gate demonstrably did not revive them. `oversight-basis:` was untouched, so ADR-101's post-hoc drain still surfaced AFK-accepted stories at the time. *(Both were removed with ADR-103 on 2026-08-07 — no story ever carried the field. Retained as the record of what the migration did.)*
+**Corpus result (2026-07-29).** 31 mirrors removed, 7 re-fingerprinted with ratification preserved, 3 skipped and hand-resolved. The 12 confirmed-but-drifted stories were verified drifted at `HEAD` **before** the migration ran, so the gate demonstrably did not revive them. `oversight-basis:` is untouched, so ADR-101's post-hoc drain still surfaces AFK-accepted stories.
 
 **Residual, recorded rather than fixed.** Normalisation of criterion ticks and `data-status` remains line-shape-based, so a lifecycle token inside a fenced block or quoted template example in a story body would still be treated as substance. No corpus artefact has that shape today. If a fifth mirror appears, the reassessment trigger is to stop hashing hand-maintained body prose for lifecycle state at all rather than to add another rule.
 
@@ -142,5 +139,3 @@ The migration is idempotent and reports every artefact it touches, so the re-fin
 So the marker stays `confirmed` and its date advances to 2026-07-30, with `oversight-confirmed-date` narrating **both** events — the 2026-07-02 batched ratification that chose drift-invalidation over write-once, and the 2026-07-30 ratification of the substance-only narrowing. Neither supersedes the other; they ratify different clauses.
 
 This 2026-07-29 amendment on its own would not have warranted a bump: it tightens the mechanism implementing an Outcome the 2026-07-02 event already ratified (that Outcome asserts the oversight marker is orthogonal to the `status:` lifecycle; storing lifecycle state inside hashed body prose violated that orthogonality, and removing it restores it), and the hash function is unchanged. The bump is warranted by the Outcome reconciliation and the narrowing's ratification, which ride in the same commit.
-
-**Amended by ADR-102 (2026-08-04).** For a story map the fingerprint basis narrows from the whole rendered file to the data island alone. The grid, styles and `<meta>` block are all generated from that island, so hashing the whole file let a template change drift every stored fingerprint at once and silently revoke ratification corpus-wide. A presentation change must never revoke a substance approval. (ADR-103 narrows the basis further, to substance within the island — see the 2026-08-07 note above.)

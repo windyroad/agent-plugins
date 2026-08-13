@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 114 (102 in-force, 12 historical)
+**Total ADRs:** 114 (103 in-force, 11 historical)
 
 ---
 
 ## In-force decisions
 
-_102 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_103 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -87,7 +87,6 @@ _102 ADRs. These are the current rules. The architect agent reads this section f
 ### ADR-018 — Inter-iteration release cadence for AFK loops
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **"Risk-driven cadence"**, because it reuses the existing
-**Related:** ADR-099
 
 ### ADR-019 — AFK orchestrator preflight: get the repo into a clean state before starting
 **Status:** proposed | **Oversight:** confirmed
@@ -96,7 +95,7 @@ _102 ADRs. These are the current rules. The architect agent reads this section f
 ### ADR-020 — Governance skills auto-release when changesets are queued
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **"New ADR citing ADR-014 + ADR-018 as lineage"**, because it follows the precedent set by ADR-018 (symmetric decision, separate file, cited lineage) and preserves single-purpose ADRs. ADR-014 stays focused on "commit their w...
-**Related:** ADR-099, ADR-014, ADR-020, ADR-018, ADR-015, ADR-013, ADR-019, ADR-061
+**Related:** ADR-014, ADR-020, ADR-018, ADR-015, ADR-013, ADR-019, ADR-061
 
 ### ADR-021 — Plugin manifest version sync mechanism
 **Status:** proposed | **Oversight:** confirmed
@@ -181,7 +180,7 @@ _102 ADRs. These are the current rules. The architect agent reads this section f
 
 ### ADR-043 — Progressive context-usage measurement and reporting for retrospective sessions
 **Status:** proposed | **Oversight:** confirmed
-**Related:** ADR-038, ADR-040, ADR-026, ADR-014, ADR-013, ADR-112, ADR-009, ADR-022, ADR-005, ADR-037
+**Related:** ADR-038, ADR-040, ADR-026, ADR-014, ADR-013, ADR-009, ADR-022, ADR-005, ADR-037
 
 ### ADR-044 — ADR-044 — Decision-Delegation Contract: when agents act on the framework vs ask the user
 **Status:** proposed | **Oversight:** confirmed
@@ -276,7 +275,7 @@ _102 ADRs. These are the current rules. The architect agent reads this section f
 ### ADR-068 — ADR-068: JTBD + persona human-oversight marker + `/wr-jtbd:confirm-jobs-and-personas` drain (sibling of ADR-066)
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen: **mirror ADR-066 as a wr-jtbd sibling**.
-**Related:** ADR-066, ADR-109, ADR-074, ADR-008, ADR-049, ADR-040, ADR-009, ADR-002, ADR-013, ADR-044
+**Related:** ADR-066, ADR-074, ADR-008, ADR-049, ADR-040, ADR-009, ADR-002, ADR-013, ADR-044
 
 ### ADR-069 — ADR-069: Plugin READMEs market to their primary persona's problem — derived from the JTBD, not cited by ID
 **Status:** proposed | **Oversight:** confirmed | **Supersedes:** [051-jtbd-anchored-readme-with-drift-advisory]
@@ -292,7 +291,7 @@ _102 ADRs. These are the current rules. The architect agent reads this section f
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **"Every problem is fixed only via an RFC — no carve-out, no effort threshold"**, ratified by the user via clear direction on 2026-05-26 (*"Each problem may ONLY be fixed via an RFC"*).
 **Confirmation:** A Problem→RFC fix-time gate enforces RFC-first with no effort carve-out (a problem fix cannot commence/commi...; JTBD-008 (lines 21/26/44) + JTBD-101 (line 30) no longer contain the atomic-fix carve-out; both edits route th...; RFC-005's F2/F7/I13 carve-out is removed under the implementation RFC.; JTBD-008 + JTBD-101 document that atomic fixes go through the same RFC as any fix — explicitly NOT a thin / ...
-**Related:** ADR-089, ADR-070, ADR-060, ADR-066, ADR-068
+**Related:** ADR-070, ADR-060, ADR-066, ADR-068
 
 ### ADR-072 — RFC required at the propose-fix step on a Known Error
 **Status:** proposed | **Oversight:** confirmed
@@ -380,10 +379,10 @@ _102 ADRs. These are the current rules. The architect agent reads this section f
 **Confirmation:** A behavioural test (per ADR-052) asserts an RFC proposed for a fix cannot reach accepted with an empty stories...; The four bats that currently assert the empty-stories fallback is legal (rfc-stories-extension.bats, working-t...; ADR-060's cardinality clauses and ADR-071's atomic-representation clauses read "≥1 / exactly one story," wit...
 **Related:** ADR-071, ADR-060, ADR-070
 
-### ADR-090 — Story maps carry a drift-invalidated human-oversight marker
+### ADR-090 — Story maps and stories carry a drift-invalidated human-oversight marker
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **"Drift-invalidated marker"** (Option 1), because it is what the user's "ratify after **any** change" literally requires and what the stated purpose demands — you must not rely on a story map that changed since it was rati...
-**Confirmation:** A story map with a SUBSTANCE edit newer than its oversight-date reads as unconfirmed (drift-invalidation fires...; A story carries no oversight marker; its approval is derived from its story-maps: field, and a marker left on ...; capture-rfc / manage-rfc refuse to list an unapproved story in an RFC's stories: — asserted by a behavioural...; A detector surfaces unratified story maps (mirroring wr-architect-detect-unoversighted for decisions).
+**Confirmation:** A story map / story with an edit newer than its oversight-date reads as unconfirmed (drift-invalidation fires)...; capture-rfc / manage-rfc refuse to list an unratified story in an RFC's stories: — asserted by a behavioural...; A detector surfaces unratified story maps (mirroring wr-architect-detect-unoversighted for decisions).
 **Related:** ADR-066, ADR-068, ADR-060, ADR-074, ADR-009
 
 ### ADR-091 — Commit-gate staleness threshold derives from RISK-POLICY.md's stated review cadence
@@ -426,11 +425,17 @@ _102 ADRs. These are the current rules. The architect agent reads this section f
 ### ADR-099 — Changesets are release metadata, not shipment controls
 **Status:** accepted | **Oversight:** confirmed | **Supersedes:** [ADR-061, ADR-082]
 **Confirmation:** No runtime skill, hook, scorer agent, or release helper treats; The holding directory and graduation evaluator are absent.; Codex-generated agent surfaces match the runtime-neutral source.; ITIL and risk-scorer tests pass.
-**Related:** ADR-018, ADR-020, ADR-042, ADR-061, ADR-082
+**Related:** ADR-042, ADR-061, ADR-082
 
 ### ADR-100 — Capture-time truth discipline for problem tickets — falsify premises, mark unexecuted mechanisms
 **Status:** proposed | **Oversight:** unconfirmed
 **Confirmation:** A description asserting X is missing, where X is present in the tree, produces a captured ticket carrying the ...; A description asserting a root-cause mechanism with no cited evidence produces a ticket recording it under ## ...; A description with no existence-claims produces byte-identical capture output to the pre-change behaviour.
+
+### ADR-101 — An AFK loop may accept and implement a story that only decomposes already-ratified substance
+**Status:** proposed | **Oversight:** confirmed
+**Chosen:** Chosen option: **1, bounded AFK-accept carve-out — opt-in and fail-closed**, composed with option 2 rather than replacing it.
+**Confirmation:** A story declaring the carve-out with all parents confirmed is eligible; one with an unconfirmed parent is not;...; The carve-out is not-eligible when the project has not opted in, even when (a) and (b) both hold; and not-elig...; A commit referencing an accepted-but-unratified story is blocked regardless of config; a ratified story's comm...; A map re-ratified with the story's card already present still satisfies condition (a) — behavioural test for...; detect-unratified-stories-maps default stdout is byte-identical to before the flag existed — behavioural tes...
+**Related:** ADR-090, ADR-095, ADR-096, ADR-060, ADR-098, ADR-070, ADR-066, ADR-068, ADR-074
 
 ### ADR-102 — ADR-102: Story maps render from JSON through a canonical template
 **Status:** proposed | **Oversight:** confirmed
@@ -508,7 +513,7 @@ _102 ADRs. These are the current rules. The architect agent reads this section f
 
 ## Historical decisions
 
-_12 ADRs. These were tried and superseded, rejected, or deprecated. Read them as direction for what NOT to do, or to understand the lineage of an in-force decision. Do not enforce them as current rules._
+_11 ADRs. These were tried and superseded, rejected, or deprecated. Read them as direction for what NOT to do, or to understand the lineage of an in-force decision. Do not enforce them as current rules._
 
 ### ADR-001 — Unified Install Experience via npm Package
 **Status:** superseded
@@ -562,9 +567,3 @@ _12 ADRs. These were tried and superseded, rejected, or deprecated. Read them as
 **Status:** superseded | **Oversight:** confirmed
 **Chosen:** Chosen option: **"(b) Real shipment control + (c) Reconcile K→V release lifecycle — riding together in a single RFC-first fix path"**, confirmed by the user via `AskUserQuestion` 2026-06-17 (`/wr-architect:review-decisions` drain across...
 **Related:** ADR-042, ADR-070, ADR-066, ADR-074
-
-### ADR-101 — An AFK loop may accept and implement a story that only decomposes already-ratified substance
-**Status:** superseded | **Oversight:** confirmed
-**Chosen:** Chosen option: **1, bounded AFK-accept carve-out — opt-in and fail-closed**, composed with option 2 rather than replacing it.
-**Confirmation:** A story declaring the carve-out with all parents confirmed is eligible; one with an unconfirmed parent is not;...; The carve-out is not-eligible when the project has not opted in, even when (a) and (b) both hold; and not-elig...; A commit referencing an accepted-but-unratified story is blocked regardless of config; a ratified story's comm...; A map re-ratified with the story's card already present still satisfies condition (a) — behavioural test for...; detect-unratified-stories-maps default stdout is byte-identical to before the flag existed — behavioural tes...
-**Related:** ADR-090, ADR-095, ADR-096, ADR-060, ADR-098, ADR-070, ADR-066, ADR-068, ADR-074

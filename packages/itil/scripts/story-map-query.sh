@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Read-only JSON query over the story-map corpus.
 #
-# Usage: wr-itil-story-map-query <list|get|find-story|unratified> [args] [--maps-dir DIR]
+# Usage: wr-itil-story-map-query <list|get|find-story|find-rfc|unratified> [args] [--maps-dir DIR]
 #
 # WHY THIS IS A BASH ENTRY POINT AND NOT JUST A .mjs. Ratification state is
 # drift-invalidated and must come from ONE hash definition — the one in

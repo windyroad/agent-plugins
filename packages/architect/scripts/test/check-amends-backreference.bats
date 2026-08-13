@@ -30,6 +30,20 @@ amended() { printf -- '---\nstatus: "proposed"\n---\n\n# ADR-%s\n\n%s\n' "$1" "$
   echo "$output" | grep -q 'ADR-101'
 }
 
+@test "does not require an in-place back-reference on a confirmed target" {
+  amender 101 "ADR-090"
+  printf -- '---\nstatus: "proposed"\nhuman-oversight: confirmed\n---\n\n# ADR-090\n\nThis ratified record is immutable.\n' > d/090-amended.md
+  run bash "$CHECK" d
+  [ "$status" -eq 0 ]
+}
+
+@test "a body-only confirmation marker does not make the target immutable" {
+  amender 101 "ADR-090"
+  amended 090 $'This target is mutable.\n\nhuman-oversight: confirmed'
+  run bash "$CHECK" d
+  [ "$status" -eq 1 ]
+}
+
 @test "checks EVERY entry in a multi-target amends list, not just the first" {
   amender 101 "ADR-090, ADR-095, ADR-096"
   amended 090 "Amended by ADR-101."

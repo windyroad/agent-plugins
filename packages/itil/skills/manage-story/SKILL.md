@@ -52,7 +52,7 @@ Per ADR-060 Phase 2 amendment 2026-05-10 lines 200-253:
 |----------|-----------|-----------------|
 | Story ID resolution | Mechanical: `STORY-<NNN>` regex match against `docs/stories/*/STORY-<NNN>-*.md` | silent-mechanical |
 | Lifecycle transition validation | Mechanical: state machine — draft → accepted → in-progress → done; allow draft → archived; disallow backwards | silent-mechanical |
-| I7 + I8 hard-block at accepted | Mechanical: frontmatter `rfcs:` and `story-maps:` arrays MUST be non-empty AND each ID must resolve to a file in `docs/rfcs/` and `docs/story-maps/` | silent-mechanical |
+| I7 + I8 hard-block at accepted | Mechanical: frontmatter `rfcs:` and `story-maps:` arrays MUST be non-empty. Each map ID resolves to `docs/story-maps/`; each RFC resolves either to a legacy file in `docs/rfcs/` or to a release row containing this story via `wr-itil-story-map-query find-rfc` | silent-mechanical |
 | I10 INVEST shape check | Mechanical: `## User value` section non-empty; `## Acceptance criteria` has ≥ 1 `- [ ]` line; `estimated-effort` field set to S/M/L/XL; L/XL flagged as decomposition-candidate (advisory, not blocking per ADR-060 line 252 architect-amendment-2026-05-10 nitpick N3) | silent-mechanical |
 | I12 approval at accepted | Mechanical: `story_is_approved` passes — every map in the story's `story-maps:` field is ratified (ADR-103). The story itself carries no oversight field. Never an `AskUserQuestion`: the predicate is fully framework-resolved, and a story that fails it is HELD until its map is ratified, not asked about | silent-mechanical |
 | INVEST shape violation | Halt-with-stderr-directive listing the missing INVEST attributes; user re-invokes after editing the story body | n/a (halt) |
@@ -101,7 +101,7 @@ Use `AskUserQuestion` for direction-setting fields (e.g. `## User value` rewrite
 For any transition `<from> → <to>`:
 
 1. **Verify pre-transition invariants** for `<to>`:
-   - `accepted`: I7 + I8 + I10 + **I12** hard-block (see § I-invariant table).
+   - `accepted`: I7 + I8 + I10 + **I12** hard-block (see § I-invariant table). For I7, a legacy RFC file satisfies resolution as before. Otherwise `wr-itil-story-map-query find-rfc <RFC-ID>` must return a release row whose `stories` contains this story; a row with no matching card fails because the row is the RFC under ADR-103.
 
      **I12 — the approval gate (ADR-090 / ADR-096 / ADR-103; the hole P465 named).** A story reaches `accepted` only when it is approved. Under ADR-103 the map is the approval surface, so resolve in this order:
 
@@ -170,7 +170,8 @@ for jid in $(awk '/^jtbd:/{gsub(/[][]/,""); gsub(/,/," "); for(i=2;i<=NF;i++)pri
   git add "$jtbd_file"
 done
 
-# RFC parents — sibling shape (after Slice 11 ships the Stories section helper)
+# Legacy RFC parents only. Row-backed RFCs have no markdown parent; the card
+# in the release row is their reverse trace and is checked by I7 above.
 for rid in $(awk '/^rfcs:/{gsub(/[][]/,""); gsub(/,/," "); for(i=2;i<=NF;i++)print $i; exit}' "$story_file"); do
   rfc_file=$(ls docs/rfcs/${rid}-*.md 2>/dev/null | head -1)
   [ -z "$rfc_file" ] && continue
@@ -243,7 +244,7 @@ After commit, report:
 | Status transitions | Owns draft → accepted → in-progress → done → archived | Out of scope (creation only) |
 | README refresh | Inline per transition (P094 mirror) | Deferred to `manage-story review` or `wr-itil-reconcile-stories` |
 | Auto-transition triggers | Fires on first implementing commit against an ACCEPTED story (accepted→in-progress; draft→in-progress REMOVED per ADR-096) + criteria-ticked + RFC-closed (in-progress→done) | n/a |
-| Reverse-trace refresh on parents | Inline per transition | Inline per capture |
+| Reverse-trace refresh on parents | Inline for problems, JTBDs and legacy RFC files; row-backed RFCs use the map card | Same |
 | Commit grain | One commit per transition / per intake | One commit per capture |
 
 ## Related

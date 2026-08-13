@@ -14,6 +14,7 @@
 //                            RFC row identities, ratification
 //   get <MAP-ID>             one map: backbone, releases, tasks
 //   find-story <STORY-ID>    which maps hold a story, and in which cell
+//   find-rfc <RFC-ID>        which release rows carry an RFC and their stories
 //   unratified               only the maps needing ratification, with a reason
 //
 // @adr ADR-102 (story maps render from JSON through a canonical template)
@@ -176,17 +177,39 @@ const OPS = {
     return hits;
   },
 
+  'find-rfc': (maps, [rfcId]) => {
+    if (!rfcId) throw new Error('find-rfc needs an RFC id, e.g. RFC-062');
+    const hits = [];
+    for (const m of maps) {
+      for (const row of m.data.releases ?? []) {
+        if (row.rfc !== rfcId) continue;
+        hits.push({
+          storyMapId: m.data.storyMapId,
+          rowId: row.id,
+          status: rowStatus(row, m.derived ?? {}),
+          stories: [...new Set((m.data.tasks ?? [])
+            .filter((task) => task.release === row.id)
+            .map((task) => task.storyId)
+            .filter(Boolean))],
+          path: m.path,
+        });
+      }
+    }
+    return hits;
+  },
+
   unratified: (maps) => maps.filter((m) => !m.ratified).map(summary),
 };
 
 function main(argv) {
   const [op, ...rest] = argv;
   if (!op || !OPS[op]) {
-    console.error('usage: story-map-query <list|get|find-story|unratified> [args] [--maps-dir DIR]');
+    console.error('usage: story-map-query <list|get|find-story|find-rfc|unratified> [args] [--maps-dir DIR]');
     console.error('');
     console.error('  list                   every map: status, jobs, problems, RFC rows, ratification');
     console.error('  get <MAP-ID>           one map: backbone, release bands, cards');
     console.error('  find-story <STORY-ID>  which maps hold a story, and in which cell');
+    console.error('  find-rfc <RFC-ID>       which release rows carry an RFC and their stories');
     console.error('  unratified             maps needing ratification, each with a reason');
     return 2;
   }

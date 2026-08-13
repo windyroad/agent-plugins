@@ -148,7 +148,6 @@ Memory references:
 - `feedback_verify_cache_refresh_by_version_dir.md` — workaround mechanism (cache refresh + session restart).
 - `feedback_automatic_cadence_or_it_doesnt_happen.md` — applies: a control without automatic enforcement is a control that doesn't happen.
 
-
 ## Ratified Direction - 2026-07-04 interactive decision drain
 
 Build the **full RFC-scoped mechanism**: one-cycle no-op-shim deprecation convention PLUS a dedicated session-start drift-warning detector for retired-hook bindings. Capture the RFC.
@@ -172,3 +171,10 @@ Two of those are advisory surfaces where fail-open may well be the right posture
 **The strongest argument available to whoever drains this.** The hook's own header asserts the ADR-090 half is "UNCONDITIONAL — a pure tightening, no config, no opt-in — because putting an ADR-090-mandated check behind a flag would be the decision conflict", and ADR-096 carries the same unconditionality claim. A silent no-op on a missing lib *is* a conditional — an unflagged, undiscoverable one. Reconciling the fail-open posture with an explicit unconditionality claim that two artefacts assert is the crux.
 
 **Prior reasoning, for context rather than authority.** ADR-048 (superseded by ADR-050) weighed a fail-open at a different gate and rejected it "at this scope", reasoning that fail-open "weakens P119's enforcement during the very stop-gap window where the audit-trail-preservation test is load-bearing" — then deferred the general question. ADR-050 carried that forward as a rejected option and IS in force, but scoped to loosening a marker predicate at the manage-problem create-gate, not to missing-lib degradation.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-057 | STORY-057: Get the fix by upgrading, not by patching a cache | draft |

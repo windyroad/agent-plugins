@@ -11,21 +11,9 @@ reassessment-date: 2026-07-19
 
 # Governance skills auto-release when changesets are queued
 
-### Superseded held-changeset and graduation disjuncts — see ADR-099
-
-The drain condition below once carried two extra disjuncts, both derived from a
-held-changeset model that no longer exists. **ADR-099 (changesets are release
-metadata, not shipment controls)** superseded that model wholesale, so both fall
-with it.
-
-What remains is the trigger this decision actually ratified, unchanged: the drain
-fires when residual risk is within appetite **and there is a changeset to release**.
-It does not fire on unpushed commits alone. That is a real difference from ADR-018,
-which does — and it is deliberate rather than an oversight. At the keyboard, a
-commit with nothing shippable in it stays local; nothing is watched and no release
-pipeline wakes up.
-
-Everything else in this decision stands.
+> **Amendment 2026-07-23 (ADR-099):** held-changeset and graduation disjuncts
+> below are superseded. The drain considers unpushed commits and entries in
+> `.changeset/` only. Changesets are release metadata, never shipment controls.
 
 ## Context and Problem Statement
 
@@ -155,8 +143,6 @@ Revisit this decision if:
 
 ## Related
 
-- **ADR-099** — changesets are release metadata, not shipment controls. Superseded the
-  held-changeset and graduation disjuncts this decision once carried.
 - ADR-014: `docs/decisions/014-governance-skills-commit-their-own-work.proposed.md` — commit layer; ADR-020 extends the terminal step with a release layer
 - ADR-018: `docs/decisions/018-inter-iteration-release-cadence-for-afk-loops.proposed.md` — AFK release cadence; this ADR is the symmetric non-AFK decision following the same pattern
 - ADR-015: `docs/decisions/015-on-demand-assessment-skills.proposed.md` — pure-scorer contract; defines the Agent-vs-Skill fallback for delegation

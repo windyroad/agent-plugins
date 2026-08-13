@@ -39,24 +39,15 @@ Chosen: **Shape B + a thin slice of Shape C; Shape A rejected.**
 
 > **Amendment 2026-05-27 (ADR-074):** the Needs-Direction verdict and its translation must name and confirm the decision's **substance** (the actual chosen option), not a meta/grain framing question (e.g. "one ADR or two?"). Confirming a grain question alone does NOT satisfy "confirm before recording." See the clauses below + ADR-074 (confirm-substance-before-build), which also adds the build-upon enforcement surface.
 
-### Superseded 2026-05-31 substance-confirm requirements — see ADR-111, at one of two fires
-
-These five requirements were added on 2026-05-31, six days after this decision
-was ratified. They bound two different asks, and only one of them moves.
-
-**At the ratification fire** — the question that confirms an artefact and writes
-its marker — they are superseded by **ADR-111 (A ratification is agreement to the
-substance, not to the draft)**, ratified 2026-08-09. Four survive there in
-substance: the plain-prose briefing, no identifier used as an explainer,
-option-shaped rather than yes/no, and substance-only at that fire. The fifth —
-that the person can decide without looking anything up — is replaced by sending
-the artefact itself as a file, because prose can describe an artefact but cannot
-be one, and the reader has no repository access at the moment they are asked.
-
-**At the Needs-Direction translation ask** — where a decision question is surfaced
-before any document exists — all five stand unchanged, including self-containment.
-There is no artefact to send and no marker written, so ADR-111 does not reach that
-fire.
+> **Amendment 2026-05-31 (P339 + P340) — substance-confirm interaction-pattern requirements.** The `AskUserQuestion` that confirms a decision's substance MUST satisfy ALL FIVE interaction-pattern requirements pinned by user direction 2026-05-31:
+>
+> 1. **Briefing in main-turn prose** — the options-considered + selected-option + rationale appear as plain main-turn text BEFORE the `AskUserQuestion` fires. The briefing carries the substance; the `AskUserQuestion` stays narrow. Long `AskUserQuestion` text is NOT readable on some devices (mobile clients, accessibility tooling, certain notification surfaces); long prose + short question IS readable across the full device matrix. The split is load-bearing.
+> 2. **Option-shaped, not yes/no** — the `options:` array MUST contain each considered option as a selectable entry. The user picks the substantive direction positively (one option), NOT by clicking "yes" on a bundled "is this OK?" question. Yes/no shape on a substance-confirm fire is forbidden.
+> 3. **No IDs as explainers** — neither the briefing prose nor the `AskUserQuestion` text/options/descriptions may carry meaning via IDs (`ADR-NNN`, `P-NNN`, `JTBD-NNN`, `RFC-NNN`). The user does NOT have access to those IDs on all devices. Every option's substance MUST be self-contained in the briefing prose + the option label/description. IDs may appear ONLY as audit-trail annotations after a self-contained explanation, never as the explanation itself.
+> 4. **Informed-decision-without-external-document-lookup** — the briefing + question + options is a self-contained surface. If understanding a chosen option requires the user to first read another document, the briefing has failed.
+> 5. **Substance-only at this fire** — draft-quality, problem-statement-OK, and consulted/informed questions belong to a SEPARATE fire after the substance-confirm fire passes. Bundling them into the substance question landed bogus ratification claims (ADR-078 commit 5196e3d, 2026-05-30; user correction 2026-05-31 *"I never approved the scripted extraction"*).
+>
+> These five requirements extend Shape B's main-agent translation contract: the translation MUST satisfy all five. P340 captures the marker-mechanism sibling (ADR-066 amendment); this amendment captures the verdict / translation shape. Concrete implementation at `/wr-architect:create-adr` Step 5 (split into Step 5a substance-confirm fire + Step 5b draft-quality review fire).
 
 - **Shape B (primary):** add a third verdict type to the architect agent — **Needs Direction**. When the architect detects an undocumented decision with 2+ viable options AND no pinned direction, it emits a structured block naming (a) the decision question and (b) the candidate options (each grounded in what it read, per ADR-026) — instead of auto-picking or prose-asking. **The named options must be the *substantive* choice (the load-bearing options among which the user must pick), not a meta/grain framing question** (ADR-074). When direction IS pinned, it emits a "direction already given" note and the main agent acts without asking.
 

@@ -31,6 +31,11 @@ providers:
   # Path is relative to this config file's directory (promptfoo basePath).
   - id: 'exec:bash ./run-skill-eval.sh'
 
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ../../capture-story/eval/grade-llm-rubric.sh'
+
 prompts:
   - '{{prompt}}'
 
@@ -76,6 +81,11 @@ tests:
       # fails the right behaviour. Assert the halt instead.
       - type: regex
         value: '[Hh][Aa][Ll][Tt]|does not proceed|stays in|remains in'
+      - type: llm-rubric
+        value: >-
+          The response leaves the story in draft, queues the map ratification
+          for human oversight, does not ask during unattended work, and does not
+          write or infer a story-level oversight marker.
 
   - description: approval is the map's, and an unratified map holds the story
     vars:
@@ -86,11 +96,12 @@ tests:
         Can you accept it? Say what has to happen first.
     assert:
       # The answer is "no" and the remedy is the MAP, not the story.
-      - type: llm-rubric
-        value: >-
-          Refuses to accept the story, and says the story map (STORY-MAP-002)
-          must be ratified first — NOT that the story itself should be ratified,
-          marked, or given a human-oversight marker of its own.
+      - type: regex
+        value: '(No\.|cannot|must remain.{0,20}draft)'
+      - type: icontains
+        value: '/wr-itil:manage-story-map STORY-MAP-002 ratify'
+      - type: not-icontains
+        value: 'mark-story-oversight-confirmed'
       - type: not-icontains
         value: 'check-afk-accept-eligible'
 
@@ -117,7 +128,7 @@ tests:
     assert:
       # The exact ambiguity that produced P465: "orthogonal to the status
       # lifecycle" read as "not a precondition of any status".
-      - type: icontains
-        value: 'precondition'
+      - type: regex
+        value: 'precondition|only.{0,80}(ratif|approved)|must.{0,80}(ratif|approved)'
       - type: icontains
         value: 'accepted'

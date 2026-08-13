@@ -183,3 +183,4 @@ Cross-refs surfaced by the 2026-07-03 retro (both already ticketed — recorded 
 |----|-------|--------|
 | STORY-017 | STORY-017: Backfill-or-supersede the skeleton RFCs the repudiated mechanism left behind | draft |
 | STORY-034 | STORY-034: Warn once per new version when a session runs stale plugin code | draft |
+| STORY-060 | STORY-060: Pick up a captured ticket and know what was observed | draft |

@@ -128,6 +128,19 @@ setup() {
   [ "$output" = "[]" ]
 }
 
+@test "find-rfc returns the release row and its story IDs" {
+  run bash -c "cd '$TMP' && '$QUERY' find-rfc RFC-900 | node -e \"
+    const r=JSON.parse(require('fs').readFileSync(0,'utf8'));
+    process.stdout.write(r.map(x=>x.storyMapId+':'+x.rowId+':'+x.stories.join(',')).join('|'));\""
+  [ "$output" = "STORY-MAP-940:live:STORY-950|STORY-MAP-941:live:" ]
+}
+
+@test "find-rfc returns an empty list for an unknown row identity" {
+  run bash -c "cd '$TMP' && '$QUERY' find-rfc RFC-999"
+  [ "$status" -eq 0 ]
+  [ "$output" = "[]" ]
+}
+
 @test "unratified lists only the maps needing ratification" {
   run env CLAUDE_SESSION_ID=test-session bash -c "cd '$TMP' && '$MARK' docs/story-maps/draft/STORY-MAP-940-x.html"
   [ "$status" -eq 0 ]
@@ -151,7 +164,7 @@ setup() {
 @test "query is read-only: the corpus is byte-identical after every operation" {
   local before after
   before="$(cd "$TMP" && find docs -type f -exec shasum {} + | sort | shasum)"
-  run bash -c "cd '$TMP' && '$QUERY' list >/dev/null && '$QUERY' get STORY-MAP-940 >/dev/null && '$QUERY' find-story STORY-950 >/dev/null && '$QUERY' unratified >/dev/null"
+  run bash -c "cd '$TMP' && '$QUERY' list >/dev/null && '$QUERY' get STORY-MAP-940 >/dev/null && '$QUERY' find-story STORY-950 >/dev/null && '$QUERY' find-rfc RFC-900 >/dev/null && '$QUERY' unratified >/dev/null"
   [ "$status" -eq 0 ]
   after="$(cd "$TMP" && find docs -type f -exec shasum {} + | sort | shasum)"
   [ "$before" = "$after" ]

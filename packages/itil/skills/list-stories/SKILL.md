@@ -20,7 +20,7 @@ Stories live under `docs/stories/<state>/STORY-<NNN>-<slug>.md` in lifecycle sub
 - `docs/stories/done/*.md` — done (acceptance-criteria all-ticked + linked RFC closes; auto-transitioned from in-progress)
 - `docs/stories/archived/*.md` — archived (closed without completion; manual transition)
 
-Per ADR-060 I11 invariant (Phase 2 deferred): stories MUST NOT carry a WSJF field. Ordering inside an RFC is per the RFC's frontmatter `stories: [STORY-<NNN>, ...]` array (ordered = execution sequence per ADR-060 line 259), NOT per any per-story WSJF.
+Per ADR-060 I11 invariant (Phase 2 deferred): stories MUST NOT carry a WSJF field. Legacy RFC files retain their ordered frontmatter `stories:` array. Under ADR-103, newer RFCs are release rows and their story sequence comes from the row's cards on the map, NOT from per-story WSJF.
 
 ## Argument grammar
 
@@ -59,18 +59,24 @@ ls docs/stories/draft/*.md docs/stories/accepted/*.md docs/stories/in-progress/*
 
 For each story file, parse the YAML frontmatter to extract: `story-id`, `status`, `problems`, `jtbd`, `rfcs`, `story-maps`, `estimated-effort`. Read the H1 line for the title.
 
-**Filtered live scan** (`--rfc RFC-<NNN>` provided) — resolve the RFC file first, then enumerate its ordered `stories:` array:
+**Filtered live scan** (`--rfc RFC-<NNN>` provided) — resolve a legacy RFC file first; if absent, resolve the release row through the canonical map query:
 
 ```bash
-rfc_file=$(ls docs/rfcs/RFC-<NNN>-*.md 2>/dev/null | head -1)
-[ -z "$rfc_file" ] && echo "RFC-<NNN> not found" >&2 && exit 1
+shopt -s nullglob
+rfc_files=(docs/rfcs/RFC-<NNN>-*.md)
+rfc_file="${rfc_files[0]:-}"
+shopt -u nullglob
 
-# Extract the ordered stories: array from RFC frontmatter
-# (Phase 2 Slice 11 extension — see ADR-060 RFC frontmatter extension)
-stories_list=$(awk '/^stories:/,/^[a-z]/' "$rfc_file" | grep -oE 'STORY-[0-9]+')
+if [ -n "$rfc_file" ]; then
+  stories_list=$(awk '/^stories:/,/^[a-z]/' "$rfc_file" | grep -oE 'STORY-[0-9]+')
+else
+  rfc_rows=$(wr-itil-story-map-query find-rfc RFC-<NNN>)
+  [ "$rfc_rows" = "[]" ] && echo "RFC-<NNN> not found" >&2 && exit 1
+  stories_list=$(grep -oE 'STORY-[0-9]+' <<< "$rfc_rows" | awk '!seen[$0]++')
+fi
 ```
 
-For each `STORY-<NNN>` in the ordered list, resolve to a file under `docs/stories/*/STORY-<NNN>-*.md` and parse the frontmatter as above. Preserve the RFC's array ordering in the output.
+For each `STORY-<NNN>` in the ordered list, resolve to a file under `docs/stories/*/STORY-<NNN>-*.md` and parse the frontmatter as above. Preserve the legacy array or map-row card ordering in the output.
 
 ### 3. Display
 

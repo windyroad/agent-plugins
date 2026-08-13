@@ -52,7 +52,7 @@ This skill has **two direction-setting AskUserQuestion fires** (problem-trace AN
 | Problem trace validation | Mechanical: each `P<NNN>` must exist in `docs/problems/`. Open / Known Error / Verifying = pass; Closed / Parked = advisory-warn but proceed (bounded-escape carve-out — see Step 2) | silent-mechanical |
 | JTBD trace presence | I9 hard-block — refuse on missing JTBD trace; emit deny log + halt-with-stderr-directive | direction-setting |
 | JTBD trace validation | Mechanical: each `JTBD-<NNN>` must resolve to a file under `docs/jtbd/<persona>/JTBD-<NNN>-*.md` (any lifecycle status) | silent-mechanical |
-| Optional `--rfc` trace validation | Mechanical: each provided `RFC-<NNN>` must resolve to a file under `docs/rfcs/`; advisory-warn on `proposed` / `verifying` lifecycle states; missing entirely = hard-block on the provided arg (the absence-from-args case is the "optional" path — the malformed-arg case is not) | silent-mechanical |
+| Optional `--rfc` trace validation | Mechanical: each provided `RFC-<NNN>` must resolve either to a legacy file under `docs/rfcs/` or to a release row returned by `wr-itil-story-map-query find-rfc`; advisory-warn on `proposed` / `verifying` legacy files; missing from both surfaces = hard-block on the provided arg | silent-mechanical |
 | Optional `--story-map` trace validation | Same mechanical pattern against `docs/story-maps/*/STORY-MAP-*.html` (HTML data-attribute existence check); advisory-warn on `draft` / `in-progress` story-maps | silent-mechanical |
 | STORY ID allocation | Mechanical: `max(local, origin) + 1`, three-digit padded; enumerates `docs/stories/*/STORY-*.md` + `git ls-tree origin/main docs/stories/`. ADR-019 collision-guard inline per Slice 3 design review architect approval (finding 3 option a — inline-only path) | silent-mechanical |
 | Title kebab-slug | Mechanical: first 8-10 non-stopword tokens of description | silent-mechanical |
@@ -167,11 +167,14 @@ JTBD lifecycle states (`.proposed.md` / `.accepted.md` / `.archived.md`) all pas
 `--rfc` stays **OPTIONAL** at capture (I7 enforces at the `accepted` transition — a story can legitimately precede its RFC firming up):
 
 ```bash
-rfc_file=$(ls docs/rfcs/RFC-<NNN>-*.md 2>/dev/null | head -1)
-[ -z "$rfc_file" ] && unresolved_rfcs+=("RFC-<NNN>")
+shopt -s nullglob
+rfc_files=(docs/rfcs/RFC-<NNN>-*.md)
+rfc_rows=$(wr-itil-story-map-query find-rfc RFC-<NNN>)
+[ ${#rfc_files[@]} -eq 0 ] && [ "$rfc_rows" = "[]" ] && unresolved_rfcs+=("RFC-<NNN>")
+shopt -u nullglob
 ```
 
-- `--rfc` token absent: skip (the optional path). Present-but-malformed OR resolves to no file: hard-block (`reason: unresolved-rfc-trace`).
+- `--rfc` token absent: skip (the optional path). Present-but-malformed OR resolves to neither a legacy RFC file nor a release row: hard-block (`reason: unresolved-rfc-trace`). ADR-103 makes the row the normal RFC surface; a standalone file is retained only for existing RFCs.
 
 ### 3. Compute next STORY ID
 
@@ -268,7 +271,7 @@ The deferred-section pattern matches `capture-rfc`'s placeholder approach — th
 
 ### 6. Single commit — `## Stories` reverse-trace refresh; no stories README refresh
 
-**Stage list**: the new story file PLUS each driving problem ticket file (refresh `## Stories` reverse-trace section) PLUS each driving JTBD file (refresh `## Stories` reverse-trace section) PLUS each driving RFC file IF `--rfc` was provided (refresh `## Stories` reverse-trace section). **Do NOT** stage `docs/stories/README.md` (deferred). **Do NOT** stage any story-map HTML files — story-maps are spatially-authored HTML; new stories must be placed on the relevant map manually via `/wr-itil:manage-story-map` (when that skill lands per Slice 4 of P170 Phase 2). Capture-story emits an advisory stderr line naming the unplaced-on-map state.
+**Stage list**: the new story file PLUS each driving problem ticket file (refresh `## Stories` reverse-trace section) PLUS each driving JTBD file (refresh `## Stories` reverse-trace section) PLUS each legacy driving RFC file IF `--rfc` resolved to one. A row-backed RFC has no separate reverse-trace document; its card on the story map is the reverse trace. **Do NOT** stage `docs/stories/README.md` (deferred). **Do NOT** stage any story-map HTML files — story-maps are spatially-authored HTML; new stories must be placed on the relevant map manually via `/wr-itil:manage-story-map`. Capture-story emits an advisory stderr line naming the unplaced-on-map state.
 
 The reverse-trace refresh on driving artefacts IS in-commit per ADR-014 single-commit grain — the cross-tier `## Stories` table on a problem / JTBD / RFC must stay current the moment a new story traces it. The same justification as capture-rfc's inline `## RFCs` refresh applies.
 

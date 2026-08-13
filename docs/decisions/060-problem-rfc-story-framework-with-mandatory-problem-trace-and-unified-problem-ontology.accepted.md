@@ -3,7 +3,9 @@ status: "accepted"
 human-oversight: confirmed
 oversight-date: 2026-05-26
 oversight-reconfirmed-2026-07-02: "re-ratified via AskUserQuestion (P357 batched pass) after the ADR-089/090 amendment: ≥1-story cardinality + story-map/story drift-invalidated oversight"
+oversight-downgraded-2026-07-02: "ADR-089 + ADR-090 lockstep: stories: cardinality (0..N + empty-stories fallback) superseded by ADR-089 (1..N; atomic = one full story); story-map/story tier gains a drift-invalidated human-oversight marker + RFC-references-only-ratified-stories gate per ADR-090. P357 re-ratification batched this session."
 oversight-confirmed-date: "2026-06-29 — P357 re-ratification via AskUserQuestion: the I13 RFC-first invariant (RFC must pre-exist at propose-fix; missing RFC authored-first as a story map; uncovered option-choice → ratified ADR; retrospective prohibited) confirmed as written"
+oversight-downgraded: "2026-06-29 — ADR-073 RFC-first lockstep: the I13 missing-RFC response changed (auto-create-skeleton-rather-than-block → RFC-first precondition); the gate PLACEMENT + the unconditional ADR-071 mandate are unchanged. status stays accepted (the invariant remains in force); only the human-ratification marker resets. P357 re-ratification queued."
 date: 2026-05-04
 accepted-date: 2026-05-05
 amended: 2026-06-02
@@ -17,33 +19,15 @@ reassessment-date: 2026-08-04
 
 # Problem-RFC-Story framework with mandatory problem-trace and unified problem ontology
 
-### Superseded story-map ID allocation - see ADR-115
+> **Amendment 2026-07-02 (ADR-089 + ADR-090).** Two ratified sibling decisions amend this ADR. **ADR-089 (every RFC has ≥1 story):** the `stories:` cardinality below — "genuinely 0..N", the empty-`stories: []` atomic-RFC state, and the work-problem traversal's empty-stories fallback branch (I13 + the RFC `stories:` extension + the working-the-problem-flow steps) — is **superseded**: an RFC's `stories:` is **never empty**; cardinality is **1..N once a fix is proposed**; an atomic fix carries **exactly one full story**, not `stories: []`. **ADR-090 (story-map / story human-oversight):** the story-map + story tiers gain a **drift-invalidated `human-oversight:` marker** (re-ratify on any change; orthogonal to `status:`) and a gate that an **RFC may reference only ratified stories**. Read every "empty `stories: []` / 0..N / per-RFC-iter fallback" clause below as superseded per ADR-089; the story-map/story lifecycle + schemas + invariants below gain the ADR-090 ratified axis. Surgical in-place edits + the skill/bats ripple ride the implementation tickets. `human-oversight` downgraded to `unconfirmed` pending P357 re-ratify (batched this session).
 
-**ADR-115 (story-map IDs are never reused)** supersedes only this decision's
-`max(local, origin) + 1` rule for STORY-MAP IDs. Story-map allocation now uses
-`max(local, origin, history) + 1`; all other ID namespaces remain unchanged.
+> **Amendment 2026-06-02 (P287 / ADR-074 substance-confirm — type-tag clauses STRUCK; I12 REPLACED with derive-then-ratify)**: User direction 2026-06-02 (twice-confirmed; first 2026-05-25 P287 base "GET RID OF IT", reaffirmed 2026-06-02 with explicit Recommended option pick): the `type: technical | user-business` axis is retired ACROSS this ADR — Decision Outcome item 1 type-keyed clause, Type-tag schema block, I2 invariant `type_value` references, Phase-3 P3.1 "AND type resolved to user-business" predicate, Phase-4 P4.2/P4.3 "when type resolves to user-business" gating, Confirmation criterion 4 (type-tag prompt), Reassessment "Type-tag drift" entry — all STRUCK in-place. Invariants are preserved WITHOUT the type axis: I2 remains the uniform-ontology invariant (one capture skill / one WSJF formula / one lifecycle / one RFC decomposition path for ALL problems); I12 is REPLACED wholesale with a derive-then-ratify contract that applies to ALL problems (no type-keyed gating). **New I12 (derive-then-ratify)**: every problem ticket capture via `/wr-itil:capture-problem` MUST derive persona + JTBD via LLM analysis of the description; on derivation failure or ambiguity, MUST propose candidates for user ratification via `AskUserQuestion`; user response semantics — **REJECTION** of the proposed persona/JTBD is treated as **rejection of the problem itself** (no ticket created; halt-with-stderr-directive); **CORRECTIONS** to the proposed persona/JTBD are treated as **acceptance with corrected values**; **ACCEPTANCE** of the proposed persona/JTBD is treated as **acceptance with proposed values**. AFK callers MUST pre-resolve via `--persona=<value>` + `--jtbd=JTBD-NNN[,...]` flags; an AFK invocation that cannot derive AND has no flags halts-with-stderr-directive ("cannot derive interactively under AFK; cannot create ticket without persona+JTBD anchoring"; the caller-side contract per ADR-044 silent-framework shape). The plugin-user-side `.github/ISSUE_TEMPLATE/problem-report.yml` firewall is preserved (JTBD-301 protection — never carries this dispatch; maintainer triage during `/wr-itil:manage-problem` ingestion owns the persona+JTBD assignment from reporter signals). Architect verdict AMEND 2026-06-02 (4 must-fix items closed in this amendment: persona enum drift to `developer` aligned across SKILL/ADR/bats; Step 1.5b + Rule 6 row rewritten end-to-end so REJECT semantics + AFK-halt are first-class; ADR-052 positive-control bats fixtures added for the new contract; ADR-044 category re-labelled as direction-setting per the user-ratification framing); JTBD verdict PASS 2026-06-02 (JTBD-301 line 25 "type, " strike + trailing-comma grammar fix landed in same iter). Architect compendium-refresh reminder: `docs/decisions/README.md` regenerated in this iter. Confirmation criteria 4 + 10 amended in-place (see Confirmation section). See "Amendment 2026-06-02" subsection in Decision Outcome.
 
-### Superseded stories-cardinality and oversight clauses — see ADR-089 and ADR-090
+> **Amendment 2026-05-13 (Phase 3 + Phase 4 in-scope reversion)**: User direction 2026-05-13: *"release and then implement phase 3 and phase 4. I never deferred those phases."* Phase 1 (RFC tier) + Phase 2 (story tier) framework code shipped 2026-05-12; Phase 3 (JTBD-trace-conditional UX + story-level WSJF) and Phase 4 (`persona:` + `jtbd:` frontmatter; one-way parallel-existence reverse-trace to `docs/jtbd/`) are the remaining in-scope phases. Prior "deferred" framing in ADR-060 Out-of-Scope + P170 implementation-task blocks was agent-authored without a user-deferral citation; reversion captured at [[P189]] (sibling to [[P184]] transition-surface + [[P179]] untracked-phase-defer). **New invariant I12** — JTBD-as-source-of-truth for persona-anchored unmet need: JTBDs MAY exist with zero `## Related problems`; `type: user-business` problem tickets MUST cite ≥1 JTBD ID (`jtbd:` frontmatter array, hard-block at capture-problem when type resolves to user-business and array is empty). **Extended I2 behavioural test** — asserts no control-flow branch on `persona:` field presence (additive to existing `type`-value uniformity assertion). Architect verdict AMEND 2026-05-13 (5 findings A1-A5 all closed). JTBD verdict PASS 2026-05-13 (7 findings F1-F7 all closed in this amendment). See "Phase 3 + Phase 4 in-scope amendment (2026-05-13)" subsection in Decision Outcome.
 
-**ADR-089 (every RFC has at least one story)** supersedes this decision's
-`stories:` cardinality. Two clauses below are affected and neither has been
-corrected in place: the cardinality statement that an RFC's `stories:` list is
-"genuinely 0..N" with an empty array legitimate for an atomic fix, and the
-work-problem traversal step that branches on an RFC having no stories. Both are
-dead. Cardinality is 1..N once a fix is proposed, and an atomic fix carries
-exactly one full story.
+> **Amendment 2026-05-12 (Phase 2 Slice 0 — HTML encoding for story-maps)**: User direction 2026-05-12: encode `docs/story-maps/` artefacts as HTML rather than markdown — Patton's whole point is that the 2D spatial backbone × ribs × slices layout *is* the meaning; markdown linearises that away. Individual stories + RFCs + problems + decisions stay markdown (each is a 1D card, not a 2D grid). HTML carries `data-story-id` / `data-rfc` / `data-jtbd` / `data-status` attributes for deterministic agent parsing; structure-only HTML5 + minimal embedded `<style>` for grid layout; no inline `style=""` on data-bearing elements. Phase 2 commit-grain gains an encoding-scaffold sub-slice between scaffold and ADR-019 extension. ADR-019 collision-guard extends to `*.html` for `docs/story-maps/`. Hook exemption globs (architect-enforce-edit.sh / jtbd-enforce-edit.sh / risk-policy-enforce-edit.sh / style-guide-enforce-edit.sh / voice-tone-enforce-edit.sh) extend to `docs/story-maps/**/*.html` in the same slice that ships the first HTML map. JTBD-302 (not JTBD-007 — prior-amendment typo) carries the README-currency rule for `docs/story-maps/README.md`. Architect verdict AMEND 2026-05-12 (7 findings; all closed in this amendment). JTBD verdict PASS 2026-05-12 (2 non-blocking notes applied). See "Phase 2 encoding amendment (2026-05-12)" subsection in Decision Outcome.
 
-This does **not** reach invariant I13. That carries a different `0..N` — the
-problem-to-RFC trace, not the RFC-to-stories list — and it stands as written,
-including that a problem reaches Known Error with no fix and no RFC.
-
-**ADR-090** governs the human-oversight marker on story maps. Note that its own
-rule has since narrowed: a marker is invalidated by any **substance** change, not
-by any change at all. Lifecycle progress is explicitly outside it — advancing a
-status, ticking an acceptance criterion, or moving a slice's state all leave a
-ratification intact.
-
-Everything else in this decision stands.
+> **Amendment 2026-05-10**: Phase 2 design (user story maps + individual stories) is accepted; framework code remains deferred. User direction (3-message refinement mid-P170 Slice 5 work) collapsed the original Phase 2 / Phase 2.5 split into a single Phase 2 ship — stories are first-class artefacts from the start so RFCs can reference them by ID for the working-the-problem traversal (Problem → Fix Strategy RFCs → RFC's ordered `stories:` array → next-actionable story). Spec corrections ride this amendment per architect-review verdict (8 amendments + 3 nitpicks applied). See "Story Map + Story design (Phase 2 deliverables)" subsection in Decision Outcome.
 
 ## Context and Problem Statement
 
@@ -252,15 +236,12 @@ jtbd: [JTBD-<NNN>, ...]                # ≥1 — jobs the story serves; I9 inva
 acceptance-criteria-count: <N>         # mechanical — count of `- [ ]` / `- [x]` lines within
                                        #   the `## Acceptance criteria` section only (prefix-
                                        #   matched heading, terminated by the next `##`);
-                                       #   section-scoped, not whole-body
+                                       #   section-scoped per ADR-101, not whole-body
 estimated-effort: S | M | L | XL       # INVEST "Estimable" — set at accepted transition
-adrs: [ADR-<NNN>, ...]                 # optional — decisions this story decomposes
-                                       # ADR-103 — a story carries NO oversight field.
-                                       #   Approval is derived from `story-maps:`: the
-                                       #   story is approved when every map it names is
-                                       #   ratified. `human-oversight:`, `oversight-hash:`,
-                                       #   `afk-accept:` and `## Decomposition basis` were
-                                       #   all removed from the story tier.
+adrs: [ADR-<NNN>, ...]                 # optional — decisions this story decomposes; REQUIRED
+                                       #   when `afk-accept:` is declared (ADR-101)
+afk-accept: pure-decomposition         # optional — opt in to the ADR-101 AFK-accept carve-out;
+                                       #   requires a `## Decomposition basis` body section
 ---
 
 # STORY-NNN: <Title>
@@ -666,8 +647,6 @@ Re-evaluate this decision when any of:
 
 ## Related
 
-- **ADR-089** — every RFC has at least one story. Superseded this decision's `stories:` cardinality.
-- **ADR-090** — the human-oversight marker on story maps, now invalidated by substance changes only.
 - **P170** (driver) — `docs/problems/170-problem-tickets-strain-as-fixes-decompose-into-multiple-coordinated-changes-need-rfc-framework.open.md`.
 - **P168 / P159 / P051 / P169** — concrete examples of the strain pattern this ADR addresses.
 - **P162** — held-changeset graduation criteria (RFCs compose with).
@@ -689,7 +668,3 @@ Re-evaluate this decision when any of:
 - **ADR-059** — most recent ADR shipped under the strain pattern; first retrospective RFC candidate.
 - Jeff Patton, *User Story Mapping*, O'Reilly Media, 2014 — backbone/ribs/slices canonical reference.
 - ITIL 4 Foundation — Change Enablement, Service Request Management, Problem Management practices (informs but does not constrain; we extend per user direction).
-
-**Amended by ADR-102 (2026-08-04).** A story map is no longer hand-authored HTML. It is a single file whose authored data lives in a `<script id="story-map-data" type="application/json">` island, with the rendered grid regenerated from that island. The prohibition on inline `style` attributes on data-bearing elements is retained and extended: presentation belongs only in the shared stylesheet.
-
-**Amended by ADR-101 (2026-07-26), since superseded by ADR-103.** ADR-101 added an `afk-accept: pure-decomposition` story field and a `## Decomposition basis` body section, letting an unattended run accept a story that only broke down already-confirmed substance. Both were removed with ADR-103, which makes the story map the approval surface — see the ADR-103 note above for the schema as it now stands.
