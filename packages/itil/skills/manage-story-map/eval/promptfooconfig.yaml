@@ -1,0 +1,54 @@
+description: story-map approval and derived-reporting behavior
+
+providers:
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: list-stories names the ratified map as approval source
+    vars:
+      prompt: |
+        STORY-051 is accepted and names STORY-MAP-008 in its story-maps field.
+        The map is ratified. The story carries no human-oversight field. What
+        should list-stories put in the Approved by column, and what must it not
+        infer from the story file?
+    assert:
+      - type: icontains
+        value: STORY-MAP-008
+      - type: icontains
+        value: ratified map
+      - type: icontains
+        value: human-oversight
+
+  - description: list-story-maps reads derived problems and RFCs from rendered meta
+    vars:
+      prompt: |
+        A story map's data island does not author problems or RFCs, but its
+        rendered meta block contains both. Which source must list-story-maps
+        read for those fields, and why must it not report them as empty?
+    assert:
+      - type: icontains
+        value: meta
+      - type: icontains
+        value: derived
+      - type: icontains
+        value: data island
+
+  - description: manage-story-map ratifies once and does not reopen on reslicing
+    vars:
+      prompt: |
+        I ratify a story map containing four stories, then move one story card
+        to a different release row without changing the map's journey,
+        identity, or traces. Describe the ratification actions and whether the
+        row change reopens approval.
+    assert:
+      - type: icontains
+        value: Ratify
+      - type: icontains
+        value: Do not ratify
+      - type: regex
+        value: 'does[\s*]+not[\s*]+reopen approval'
+      - type: icontains
+        value: fingerprint
