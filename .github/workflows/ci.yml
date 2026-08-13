@@ -161,7 +161,7 @@ jobs:
           fi
 
           changed=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
-          if printf '%s\n' "$changed" | grep -Eq '^(packages/[^/]+/agents/|package(-lock)?\.json$)'; then
+          if printf '%s\n' "$changed" | grep -Eq '^(\.github/workflows/ci\.yml|scripts/run-agent-evals-ci\.sh|packages/shared/test/agent-eval-quota-gate\.bats|packages/[^/]+/agents/.*|package(-lock)?\.json)$'; then
             echo "run=true" >> "$GITHUB_OUTPUT"
           else
             echo "run=false" >> "$GITHUB_OUTPUT"
@@ -202,4 +202,4 @@ jobs:
         if: steps.scope.outputs.run == 'true' && steps.token.outputs.present == 'true'
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-        run: npm run eval:agents
+        run: scripts/run-agent-evals-ci.sh

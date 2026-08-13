@@ -88,9 +88,15 @@ Per the 2026-07-04 interactive decision drain (ratified direction recorded on P2
 
 ### Amendment 2026-08-13 — path-scoped PR execution with full main validation
 
-The 2026-07-05 amendment's "every CI run" cadence spent finite Claude subscription quota and made unrelated PRs fail when that quota was exhausted, without adding evidence about the changed surface. For `pull_request` events, the `eval-agents` job now invokes Claude only when the diff touches an agent definition or eval (`packages/<plugin>/agents/**`) or a root promptfoo dependency (`package.json` / `package-lock.json`). The job remains present and reports a successful explicit skip for unrelated PRs. Every push to `main` still runs the full eval, and relevant token-bearing PRs still fail closed on provider or assertion errors. Fork-token handling and the deterministic Quality Gates are unchanged.
+The 2026-07-05 amendment's "every CI run" cadence spent finite Claude subscription quota and made unrelated PRs fail when that quota was exhausted, without adding evidence about the changed surface. For `pull_request` events, the `eval-agents` job now invokes Claude only when the diff touches an agent definition or eval (`packages/<plugin>/agents/**`), the eval workflow/wrapper/regression test, or a root promptfoo dependency (`package.json` / `package-lock.json`). The job remains present and reports a successful explicit skip for unrelated PRs. Every push to `main` still runs the full eval, and relevant token-bearing PRs still fail closed on provider or assertion errors. Fork-token handling and the deterministic Quality Gates are unchanged.
 
 This supersedes only the 2026-07-05 per-PR cadence. It does not treat quota exhaustion as passing evidence for a relevant change. The user approved this exact path-scoped workaround after the behavioural boundary was briefed on 2026-08-13; file-level oversight therefore remains `confirmed`.
+
+### Amendment 2026-08-13 — quota exhaustion is visible unavailable evidence, not a red build
+
+The path-scoped amendment still left every `main` push red while the Claude subscription reported its explicit weekly-limit error. That red state contained no behavioural result and could trigger unrelated red-CI recovery gates. Before promptfoo starts, a one-call availability probe treats only a single-line `You've hit your weekly limit` response as a successful job with a visible warning that no evidence was produced. Mixed output, authentication failure, transport error, an unrecognised provider failure, and any later promptfoo failure retain their non-zero status. When quota returns, the same command automatically resumes normal blocking validation without a configuration change.
+
+This is a degraded-availability workaround, not passing behavioural evidence. A quota-skipped run cannot be cited as Tier-A or Tier-B confirmation. The user requested disabling the Claude quality gate as a workaround; this narrower error classification preserves every failure mode that can still produce actionable evidence.
 
 ## Confirmation
 
@@ -100,7 +106,8 @@ This supersedes only the 2026-07-05 per-PR cadence. It does not treat quota exha
 4. **First slice (RFC-011 coverage):** the jtbd `[Unratified Dependency]` verdict eval fires the verdict when fed a change citing an unratified `developer` job (e.g. JTBD-001) and stays silent (PASS, no flag) on a ratified-job cite — covering already-shipped behaviour (no unratified-ADR dependency).
 5. **ADR-052 Surface-2 narrowing** + **ADR-005 reassessment flag** are recorded in those ADRs.
 6. ADR-075 carries `human-oversight: confirmed` (born-confirmed — substance + both sub-decisions user-confirmed via AskUserQuestion 2026-05-28).
-7. On pull requests, `.github/workflows/ci.yml` runs agent-prose evals only for agent or root promptfoo dependency changes; pushes to `main` always run them.
+7. On pull requests, `.github/workflows/ci.yml` runs agent-prose evals only for agent, eval-infrastructure, or root promptfoo dependency changes; pushes to `main` always run them.
+8. A quota-only availability probe emits a visible warning and exits successfully; quota mixed with another error and all eval failures remain blocking. `packages/shared/test/agent-eval-quota-gate.bats` covers quota-only, ordinary-failure, mixed-failure, and available-provider paths.
 
 ## Reassessment Criteria
 
