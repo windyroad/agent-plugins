@@ -210,6 +210,36 @@ tests:
       - type: icontains
         value: 'RISK_REMEDIATIONS:'
 
+  - description: Pipeline rejects branch or metadata deferral as a control
+    vars:
+      prompt: |
+        AGENT: pipeline
+        POLICY_THRESHOLD: 5
+        The fixture facts are complete; do not inspect the filesystem. A
+        proposed remediation leaves the hazardous code unchanged on the same
+        branch but removes its changeset and promises to release it later.
+        Explain whether this reduces residual risk and return the required
+        structured score.
+    assert:
+      - type: regex
+        value: '[Dd]eferr(al|ed|ing)?[\s\S]{0,80}not (a )?controls?'
+
+  - description: Pipeline preserves small complete slices as scope reduction
+    vars:
+      prompt: |
+        AGENT: pipeline
+        POLICY_THRESHOLD: 5
+        The fixture facts are complete; do not inspect the filesystem. A large
+        mixed change is split so the current commit contains one complete,
+        independently releasable behavior. The unrelated behavior is removed
+        and is not required for this commit to work. Explain whether this can
+        reduce risk and return the required structured score.
+    assert:
+      - type: icontains
+        value: 'complete, independently releasable'
+      - type: regex
+        value: '([Ss]cope reduction|[Ss]plit)[\s\S]{0,120}reduc(e|es|ing)[\s\S]{0,40}(risk|blast radius)'
+
   - description: Codex pipeline binds structured output to the supplied assessed root exactly once
     vars:
       prompt: |
