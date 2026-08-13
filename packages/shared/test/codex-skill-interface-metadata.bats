@@ -16,6 +16,7 @@ architect|create-adr|WR Architect: Create ADR
 architect|review-decisions|WR Architect: Review Decisions
 architect|review-design|WR Architect: Review Design
 cruise|status|WR Cruise: Status
+wardley|generate|WR Wardley: Generate
 risk-scorer|assess-external-comms|WR Risk Scorer: Assess External Comms
 risk-scorer|assess-inbound-report|WR Risk Scorer: Assess Inbound Report
 risk-scorer|assess-release|WR Risk Scorer: Assess Release
