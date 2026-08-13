@@ -137,14 +137,40 @@ jobs:
   # Agent-prose behavioural evals (RFC-012 S3 / ADR-075 / P324): runs the 4
   # packages/*/agents/eval promptfoo configs (Tier A icontains + Tier B
   # llm-rubric) via `claude -p` subscription OAuth. Secrets are not readable
-  # in job-level `if:` conditions, so a guard STEP probes the token and every
-  # subsequent step gates on its output — fork PRs (no secret) skip GREEN.
+  # in job-level `if:` conditions, so guard steps first scope the eval to
+  # relevant PR changes, then probe the token. Unrelated and fork PRs skip
+  # GREEN while pushes to main retain the full compatibility check.
   eval-agents:
     name: Agent-Prose Behavioural Evals
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Check whether agent-prose evals are relevant
+        id: scope
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          if [ "$EVENT_NAME" != "pull_request" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          changed=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
+          if printf '%s\n' "$changed" | grep -Eq '^(packages/[^/]+/agents/|package(-lock)?\.json$)'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "No agent-prose or promptfoo dependency changes — skipping Claude evals."
+          fi
+
       - name: Check CLAUDE_CODE_OAUTH_TOKEN availability
         id: token
+        if: steps.scope.outputs.run == 'true'
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: |
@@ -155,28 +181,25 @@ jobs:
             echo "CLAUDE_CODE_OAUTH_TOKEN unavailable (fork PR) — skipping agent-prose evals; they run on main and secret-bearing PRs."
           fi
 
-      - uses: actions/checkout@v5
-        if: steps.token.outputs.present == 'true'
-
       - uses: actions/setup-node@v5
-        if: steps.token.outputs.present == 'true'
+        if: steps.scope.outputs.run == 'true' && steps.token.outputs.present == 'true'
         with:
           node-version: 20
           cache: npm
 
       - name: Install dependencies
-        if: steps.token.outputs.present == 'true'
+        if: steps.scope.outputs.run == 'true' && steps.token.outputs.present == 'true'
         run: npm ci || npm install
 
       - name: Install Claude Code CLI and sandbox prerequisites
-        if: steps.token.outputs.present == 'true'
+        if: steps.scope.outputs.run == 'true' && steps.token.outputs.present == 'true'
         run: |
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y bubblewrap socat
           npm i -g @anthropic-ai/claude-code@2.1.150
 
       - name: Run agent-prose behavioural evals
-        if: steps.token.outputs.present == 'true'
+        if: steps.scope.outputs.run == 'true' && steps.token.outputs.present == 'true'
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: npm run eval:agents
