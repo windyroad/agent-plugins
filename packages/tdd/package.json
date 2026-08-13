@@ -26,6 +26,7 @@
     ".claude-plugin/",
     "lib/",
     "!agents/eval/",
+    "!agents/test/",
     "!hooks/test/"
   ]
 }
