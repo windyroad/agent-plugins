@@ -293,6 +293,18 @@ readiness may be listed separately as "post-release follow-ups" outside the
 residual risk computation, but MUST NOT appear in a Controls list and MUST NOT
 reduce any inherent risk score.
 
+**Deferral is not a control.** Moving release metadata, leaving work on a
+branch, or promising to ship it later does not remove or bound a hazard, so it
+MUST NOT reduce the current action's residual risk. Score only the action in
+scope; record deferred work separately rather than charging an unintegrated
+future action to the current score.
+
+Do not confuse deferral with genuine scope reduction. A small, complete,
+independently releasable change can reduce accumulated risk and blast radius.
+Prefer frequent small commits, pushes, and releases over batching. The test is
+whether the current action is complete without the omitted work: if yes, scope
+was reduced; if no, the hazard was merely deferred and earns no control credit.
+
 ### R009 control vocabulary — SKILL/agent-prose surfaces (P355 / RFC-012 / ADR-075)
 
 For diffs touching `packages/*/skills/*/SKILL.md`, `packages/*/skills/*/REFERENCE.md`, or `packages/*/agents/*.md`, the **previously-irreducible R009 "no behavioural harness for the LLM-prose surface" floor is discharged** when a paired promptfoo Tier-A/B eval exists for the changed prose AND `npx promptfoo eval` passes on this commit. Credit it as a named likelihood-reducing control with the same evidence shape as behavioural bats:
