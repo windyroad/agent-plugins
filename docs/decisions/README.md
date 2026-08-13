@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 114 (103 in-force, 11 historical)
+**Total ADRs:** 115 (104 in-force, 11 historical)
 
 ---
 
 ## In-force decisions
 
-_103 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_104 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -128,7 +128,7 @@ _103 ADRs. These are the current rules. The architect agent reads this section f
 **Related:** ADR-026, ADR-023, ADR-022, ADR-015, ADR-005
 
 ### ADR-028 — External-comms gate — voice-tone + risk/leak evaluators on shared PreToolUse surface
-**Status:** proposed | **Oversight:** unconfirmed
+**Status:** proposed | **Oversight:** confirmed
 **Related:** ADR-002, ADR-017, ADR-008, ADR-009, ADR-013, ADR-015, ADR-020, ADR-024, ADR-025, ADR-026, ADR-027
 
 ### ADR-029 — Diagnose before implement — structured hypothesis + evidence + RED-for-the-right-reason gate
@@ -345,8 +345,7 @@ _103 ADRs. These are the current rules. The architect agent reads this section f
 
 ### ADR-083 — Codex CLI as second runtime
 **Status:** proposed | **Oversight:** confirmed
-**Chosen:** **Option A — extend each existing package to both runtimes.** Claude remains the default; Codex support is added and validated one package at a time without duplicating the product tree.
-**Confirmation:** Each migrated package preserves its Claude-default installer, stages and installs its packed Codex artefact in isolation, passes manifest and generated-surface drift checks, and proves its actual skills or agents through isolated behavioural validation without adding speculative surfaces.
+**Chosen:** Chosen option: **"Option A — Extend each existing package to both runtimes"**,
 
 ### ADR-084 — Self-firing deferral census — a SessionStart surfacer so deferred governance work cannot silently rot
 **Status:** proposed | **Oversight:** confirmed
@@ -509,6 +508,12 @@ _103 ADRs. These are the current rules. The architect agent reads this section f
 ### ADR-116 — Ratified decisions change only by supersession
 **Status:** proposed | **Oversight:** confirmed
 **Confirmation:** The architect reviewer reports [Amendment To Ratified Decision] when a proposed change edits a confirmed decis...; The reviewer directs substantive change into a new superseding decision and does not accept clearing the overs...; A change that merely cites a legacy decision containing amendments does not trigger the finding.
+
+### ADR-117 — Prefer an upstream pull request over an issue when the upstream accepts pull requests
+**Status:** proposed | **Oversight:** confirmed
+**Chosen:** Chosen option: **Prefer a pull request wherever the upstream accepts them.**
+**Confirmation:** The report skill prefers a pull request based on contribution acceptance, not write access.; All four fallback conditions produce the issue or security path without asking the reporter to write a patch.; The pull-request path respects upstream templates and displays the outgoing diff.; AFK execution opens no third-party pull request.; Poll, catch-up, deduplication, comment, and local-closure behavior distinguish issues from pull requests.
+**Related:** ADR-024, ADR-033, ADR-116
 
 ---
 

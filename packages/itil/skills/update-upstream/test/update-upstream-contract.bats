@@ -86,6 +86,40 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
+@test "update-upstream: eval runner and grader execute Codex while preserving the Claude default" {
+  local runner="$(dirname "$BATS_TEST_FILENAME")/../eval/run-skill-eval.sh"
+  local grader="$(dirname "$BATS_TEST_FILENAME")/../eval/grade-llm-rubric.sh"
+  local fake_bin
+  fake_bin="$(mktemp -d)"
+  cat > "$fake_bin/codex" <<'EOF'
+#!/usr/bin/env bash
+printf 'codex %s\n' "$*" >> "$FAKE_LOG"
+printf '{"pass":true,"score":1,"reason":"fake"}\n'
+EOF
+  cat > "$fake_bin/claude" <<'EOF'
+#!/usr/bin/env bash
+printf 'claude %s\n' "$*" >> "$FAKE_LOG"
+printf 'claude-default\n'
+EOF
+  chmod +x "$fake_bin/codex" "$fake_bin/claude"
+
+  run env WR_EVAL_RUNTIME=codex FAKE_LOG="$fake_bin/log" PATH="$fake_bin:$PATH" "$runner" "runner-sentinel"
+  [ "$status" -eq 0 ]
+  grep -F 'codex exec --ephemeral' "$fake_bin/log"
+  grep -F 'runner-sentinel' "$fake_bin/log"
+
+  run env WR_EVAL_RUNTIME=codex FAKE_LOG="$fake_bin/log" PATH="$fake_bin:$PATH" "$grader" "grader-sentinel"
+  [ "$status" -eq 0 ]
+  echo "$output" | jq -e '.pass == true'
+  grep -F 'grader-sentinel' "$fake_bin/log"
+
+  run env FAKE_LOG="$fake_bin/log" PATH="$fake_bin:$PATH" "$runner" "claude-sentinel"
+  [ "$status" -eq 0 ]
+  [ "$output" = "claude-default" ]
+  grep -F 'claude -p' "$fake_bin/log"
+  rm -rf "$fake_bin"
+}
+
 @test "update-upstream: SKILL.md composes through voice-tone gate (P080 user direction (b) + ADR-028)" {
   # User direction (b) — voice-tone gated. The gate is wr-voice-tone:agent
   # firing on gh issue comment / gh issue close per ADR-028.
@@ -371,5 +405,14 @@ setup() {
   [ -f "$GRADER" ]
   [ -x "$GRADER" ]
   run grep -F 'llm-rubric' "$EVAL_CONFIG"
+  [ "$status" -eq 0 ]
+}
+
+@test "update-upstream: catchup honours the disclosure discriminator" {
+  run grep -F 'parse its `disclosure=` token' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F '`disclosure=pull-request` selects `gh pr comment`' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'never runs `gh pr close`' "$SKILL_MD"
   [ "$status" -eq 0 ]
 }

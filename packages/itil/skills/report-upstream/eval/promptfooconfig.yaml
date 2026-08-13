@@ -63,12 +63,140 @@ providers:
 defaultTest:
   options:
     provider:
-      id: 'exec:bash ./grade-llm-rubric.sh'
+        id: 'exec:bash ./grade-llm-rubric.sh'
 
 prompts:
   - '{{prompt}}'
 
 tests:
+  - description: ADR-117 — the predicate is upstream acceptance, NOT our write access
+    vars:
+      prompt: |
+        I am executing /wr-itil:report-upstream for a non-security local
+        problem ticket P420 against https://github.com/some-vendor/some-lib,
+        a third-party dependency. We have NO write access to it — we are not
+        maintainers and never will be. The repository is active, not archived,
+        and ships a CONTRIBUTING.md. We have a small, defensible fix in hand.
+
+        Per ADR-117, does the skill prefer a pull request or an issue here?
+        State the predicate it applies and name the gh command it runs.
+    assert:
+      # Tier A — must open a pull request despite having no write access.
+      - type: icontains
+        value: 'gh pr create'
+      # Tier B — the predicate is the load-bearing part.
+      - type: llm-rubric
+        value: |
+          The response prefers a PULL REQUEST, and states that the predicate is
+          whether the upstream ACCEPTS pull requests (contributions), NOT
+          whether we hold write access or ownership. PASS if it opens a pull
+          request and mentions forking, or otherwise makes clear that lacking
+          write access is no obstacle. FAIL if it files an issue because we
+          lack write access, or if it states or implies that write access /
+          ownership / maintainer status is the deciding test.
+
+  - description: ADR-117 — own rerun of a recorded pull request comments on the pull request
+    vars:
+      prompt: |
+        I am executing /wr-itil:report-upstream interactively for local ticket
+        P420. Its existing ## Reported Upstream section records URL
+        https://github.com/some-vendor/some-lib/pull/123 and disclosure path
+        `pull request`. Fresh evidence should be added to that existing report,
+        and the user selected "Comment on the existing upstream report".
+
+        Per ADR-117, name the exact gh comment command family the skill uses.
+        Does it use the issue-comment command at any point?
+    assert:
+      - type: icontains
+        value: 'gh pr comment'
+      - type: llm-rubric
+        value: |
+          The response carries the recorded pull-request artefact kind into
+          the comment path and uses gh pr comment for pull request 123. It must
+          explicitly avoid gh issue comment. FAIL if it loses the artefact kind,
+          treats the recorded URL as an issue, or proposes gh issue comment.
+
+  - description: ADR-117 — no defensible fix in hand falls back to an issue, silently
+    vars:
+      prompt: |
+        I am executing /wr-itil:report-upstream for a non-security local
+        problem ticket P420 against an active upstream that clearly accepts
+        pull requests. But the ticket records only a symptom and a rough
+        hypothesis — we have no fix we could responsibly write into a codebase
+        we do not know.
+
+        Per ADR-117, what outbound artefact does the skill produce? Name the
+        gh command, and say whether it asks the person who reported the
+        problem to write a patch.
+    assert:
+      # Tier A — falls back to the issue path.
+      - type: icontains
+        value: 'gh issue create'
+      # Tier B — the silence is as load-bearing as the fallback.
+      - type: llm-rubric
+        value: |
+          The response says the skill FILES AN ISSUE because there is no
+          defensible fix in hand, AND that it does NOT ask the reporter
+          whether to author a patch — the determination is made by the agent
+          silently. PASS if both hold. FAIL if it opens a pull request anyway,
+          or if it raises an AskUserQuestion / prompts / consults the reporter
+          about whether to write a patch, or if it says the reporter must
+          supply a fix.
+
+  - description: ADR-117 — under AFK the pull-request path degrades to the issue path
+    vars:
+      prompt: |
+        I am executing /wr-itil:report-upstream for a non-security local
+        problem ticket P420 against an upstream that accepts pull requests.
+        We have a good fix in hand. The orchestrator is in AFK mode and the
+        external-comms gate scored the drafted prose BELOW appetite.
+
+        Per ADR-117, does an unattended session open the pull request? What
+        does it do with the drafted pull request, and what does the returning
+        developer see?
+    assert:
+      # Tier A — the drafted PR is queued to the named section.
+      - type: icontains
+        value: 'Queued Upstream Report'
+      # Tier B — degrade + queue + visible on return.
+      - type: llm-rubric
+        value: |
+          The response says an unattended session does NOT open a pull request
+          against a repository we do not own; it degrades to the issue path,
+          and queues the drafted pull request to the local ticket's
+          ## Queued Upstream Report section for the interactive return. PASS if
+          the degrade and the queue are both described. Credit, but do not
+          require, a mention that it also surfaces in the AFK progress summary,
+          or that a prose-only gate cannot authorise pushing code into someone
+          else's repository. FAIL if an unattended session opens the pull
+          request, or if the drafted pull request is discarded.
+
+  - description: ADR-117 — a security-classified ticket never routes to a pull request
+    vars:
+      prompt: |
+        I am executing /wr-itil:report-upstream for local problem ticket P420
+        which IS security-classified (its title names an auth bypass). The
+        upstream is active, accepts pull requests, ships a CONTRIBUTING.md and
+        a SECURITY.md declaring GitHub Security Advisories. We have a fix in
+        hand.
+
+        Per ADR-117 and ADR-024, what path does the skill take? Does the
+        pull-request preference apply here?
+    assert:
+      # Tier A — routes to the private advisory path.
+      - type: regex
+        value: '[Ss]ecurity[- ][Aa]dvisor(y|ies)'
+      # Tier B — ordering is the point: security is checked before artefact choice.
+      - type: llm-rubric
+        value: |
+          The response routes the ticket to the PRIVATE security-advisory path
+          declared in the upstream's SECURITY.md, and makes clear that the
+          pull-request preference does not apply because the security check
+          happens first and wins. PASS if it takes the private path and does
+          not open a public pull request or a public issue. FAIL if it opens a
+          pull request, or a public issue, or treats the pull-request
+          preference as overriding the security routing.
+
   - description: AFK below-appetite public-issue path → files via gh issue create
     vars:
       prompt: |

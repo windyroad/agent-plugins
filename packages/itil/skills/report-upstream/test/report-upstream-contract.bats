@@ -124,11 +124,9 @@ setup() {
 }
 
 @test "report-upstream: SKILL.md drops the 'interim static heuristic' deferral on the dedup branch (P070 lift-condition met per P270 amendment)" {
-  # The 2026-04-25 (P070) amendment named the dedup-AFK as an "interim static
-  # heuristic in force until wr-risk-scorer:external-comms ships". The agent
-  # has shipped; the 2026-06-04 (P270) amendment lifts the deferral. The
-  # AFK summary's dedup-path row must cite the LIFT, not the deferral.
-  run grep -iE 'interim static heuristic.*lifted|deferral.*lifted|LIFTED' "$SKILL_MD"
+  run grep -iE 'interim static heuristic|static heuristic.*awaiting' "$SKILL_MD"
+  [ "$status" -ne 0 ]
+  run grep -iE 'dedup match.*wr-risk-scorer:external-comms|wr-risk-scorer:external-comms.*dedup' "$SKILL_MD"
   [ "$status" -eq 0 ]
 }
 
@@ -229,7 +227,7 @@ setup() {
   [ "${#lines[@]}" -ge 2 ]
 }
 
-# ─── P070 dedup contract (Step 4b + Step 5c + AFK static heuristic) ────────────
+# ─── P070 dedup contract (Step 4b + Step 5c + AFK risk gate) ──────────────────
 #
 # P070 inserts a dedup check between security-path routing (Step 4) and the
 # outbound `gh` call (Steps 5 / 6). Two duplication windows close at the same
@@ -237,11 +235,7 @@ setup() {
 # and third-party search (different reporter filed similar). Step 5c adds a
 # comment-on-existing-issue path used when the dedup branch finds a match.
 #
-# Per architect verdict on P070: the maintainer-annoyance risk evaluator is
-# deferred until ADR-028 / P064's `wr-risk-scorer:external-comms` subagent
-# ships (ADR-028 line 117 anticipates third evaluators). The interim AFK
-# branch uses a static heuristic — no subagent dispatch — that defaults to
-# halt-and-save.
+# The shipped `wr-risk-scorer:external-comms` gate now governs AFK comments.
 
 @test "report-upstream: SKILL.md contains a Step 4b dedup check (P070)" {
   run grep -nE '^### 4b\.' "$SKILL_MD"
@@ -290,31 +284,25 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "report-upstream: SKILL.md AFK branch uses static heuristic, defers maintainer-annoyance evaluator (P070 interim per ADR-028 line 117)" {
-  # Architect verdict: maintainer-annoyance evaluator deferred. AFK branch
-  # uses a static heuristic and defaults to halt-and-save. The SKILL.md must
-  # name the deferral explicitly so future readers know why the static-heuristic
-  # path exists; once `wr-risk-scorer:external-comms` lands, this branch
-  # gets re-wired.
-  run grep -iE 'static heuristic|interim.*heuristic|heuristic.*interim' "$SKILL_MD"
+@test "report-upstream: SKILL.md AFK dedup branch uses the shipped external-comms gate" {
+  run grep -iE 'dedup match.*wr-risk-scorer:external-comms|wr-risk-scorer:external-comms.*dedup' "$SKILL_MD"
   [ "$status" -eq 0 ]
-  run grep -iE 'wr-risk-scorer:external-comms|external-comms.*evaluator' "$SKILL_MD"
-  [ "$status" -eq 0 ]
+  run grep -iE 'interim static heuristic|static heuristic.*awaiting' "$SKILL_MD"
+  [ "$status" -ne 0 ]
 }
 
-@test "report-upstream: SKILL.md AFK halt-and-save writes Drafted Upstream Report section (P070 + ADR-024 Consequences)" {
-  # AFK halt branch saves the drafted report to the local ticket's
-  # `## Drafted Upstream Report` section — same pattern as the security-path
-  # halt per ADR-024 Consequences (lines 116, 123).
-  run grep -F '## Drafted Upstream Report' "$SKILL_MD"
+@test "report-upstream: SKILL.md AFK above-appetite branch queues without halting" {
+  run grep -F '## Queued Upstream Report' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -iE 'queue an `outstanding_questions` entry.*do not halt' "$SKILL_MD"
   [ "$status" -eq 0 ]
 }
 
 @test "report-upstream: SKILL.md AFK behaviour summary table includes the dedup branch (P070)" {
   # The "AFK behaviour summary" table at the bottom of the skill must list
-  # the new dedup-halt branch alongside the existing public-issue / security
+  # the dedup branch alongside the existing public-issue / security
   # / above-appetite branches.
-  run grep -iE 'dedup.*halt|step 4b.*halt|halt.*dedup|halt-and-save.*dedup' "$SKILL_MD"
+  run grep -iE 'dedup match.*step 4b|step 4b.*dedup match' "$SKILL_MD"
   [ "$status" -eq 0 ]
 }
 
@@ -391,4 +379,88 @@ setup() {
   # template-slot remains, but the top-level section header should be gone).
   run grep -nE '^## Environment$' "$SKILL_MD"
   [ "$status" -ne 0 ]
+}
+
+# ─── ADR-117 upstream pull-request path ──────────────────────────────────────
+
+@test "report-upstream: discovery fetches repository and contribution metadata" {
+  run grep -F 'REPO_JSON=$(gh api "repos/${UPSTREAM_OWNER_REPO}")' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'CONTRIBUTING.md' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'PULL_REQUEST_TEMPLATE.md' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "report-upstream: dedup combines issues and pull requests with an artefact kind" {
+  run grep -F 'map(. + {kind: "issue"})' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'map(. + {kind: "pull-request"})' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'gh pr view "$n"' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "report-upstream: pull-request path uses an isolated checkout and pushed head" {
+  run grep -F 'UPSTREAM_CHECKOUT=$(mktemp -d)' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'git push --set-upstream fork "$BRANCH"' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F -- '--head "${GH_USER}:${BRANCH}"' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "report-upstream: pull-request checkout is a subshell and preserves distinct bodies" {
+  run grep -F 'PR_URL=$(' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'ISSUE_BODY="${FILLED_BODY}"' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F -- '--body "${PR_BODY}"' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "report-upstream: eval runner and grader execute Codex while preserving the Claude default" {
+  local runner="$(dirname "$BATS_TEST_FILENAME")/../eval/run-skill-eval.sh"
+  local grader="$(dirname "$BATS_TEST_FILENAME")/../eval/grade-llm-rubric.sh"
+  local fake_bin
+  fake_bin="$(mktemp -d)"
+  cat > "$fake_bin/codex" <<'EOF'
+#!/usr/bin/env bash
+printf 'codex %s\n' "$*" >> "$FAKE_LOG"
+printf '{"pass":true,"score":1,"reason":"fake"}\n'
+EOF
+  cat > "$fake_bin/claude" <<'EOF'
+#!/usr/bin/env bash
+printf 'claude %s\n' "$*" >> "$FAKE_LOG"
+printf 'claude-default\n'
+EOF
+  chmod +x "$fake_bin/codex" "$fake_bin/claude"
+
+  run env WR_EVAL_RUNTIME=codex FAKE_LOG="$fake_bin/log" PATH="$fake_bin:$PATH" "$runner" "runner-sentinel"
+  [ "$status" -eq 0 ]
+  grep -F 'codex exec --ephemeral' "$fake_bin/log"
+  grep -F 'runner-sentinel' "$fake_bin/log"
+
+  run env WR_EVAL_RUNTIME=codex FAKE_LOG="$fake_bin/log" PATH="$fake_bin:$PATH" "$grader" "grader-sentinel"
+  [ "$status" -eq 0 ]
+  echo "$output" | jq -e '.pass == true'
+  grep -F 'grader-sentinel' "$fake_bin/log"
+
+  run env FAKE_LOG="$fake_bin/log" PATH="$fake_bin:$PATH" "$runner" "claude-sentinel"
+  [ "$status" -eq 0 ]
+  [ "$output" = "claude-default" ]
+  grep -F 'claude -p' "$fake_bin/log"
+  rm -rf "$fake_bin"
+}
+
+@test "report-upstream: title and body are explicitly reviewed together" {
+  run grep -F 'combined title and body' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'hook extracts only the `--body` value' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+}
+
+@test "report-upstream: pull-request dedup comments retain their disclosure path" {
+  run grep -F 'commented-on-existing-pull-request' "$SKILL_MD"
+  [ "$status" -eq 0 ]
 }

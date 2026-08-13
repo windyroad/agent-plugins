@@ -1,8 +1,9 @@
 ---
 status: "proposed"
 date: 2026-04-20
-human-oversight: unconfirmed
+human-oversight: confirmed
 amended-date: 2026-08-04
+oversight-date: 2026-08-14
 decision-makers: [tomhoward]
 consulted: [wr-architect:agent, wr-jtbd:agent, wr-risk-scorer:wip]
 informed: [Windy Road plugin users, addressr maintainer, bbstats maintainer]
@@ -636,4 +637,4 @@ content-keyed PASS marker before close and that a later close is deduplicated.
 The isolated CLI smoke proves the completed-close fallback. Desktop evidence
 comes from a trusted hook writing a completion marker before agent close.
 
-**Oversight:** unconfirmed; correction surfaced to Tom Howard on 2026-08-04.
+**Oversight:** confirmed by Tom Howard on 2026-08-14.

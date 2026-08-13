@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-09 **P495 captured** — a full release-versioning run appeared in the working copy, consuming all five queued changesets and bumping two packages; it was uncommitted and recovered, but nothing warned and a consumed queue is indistinguishable from an empty one (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-08-14 **README reconciled** — one drift entry corrected: P497 added to WSJF Rankings. Reconciliation contract per P118 + ADR-014.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -121,6 +121,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 2.25 | P136 | ADR-044 alignment audit — sweep all unaudited skills/hooks/agents/ADRs/JTBDs/READMEs against the framework-resolution boundary (master ticket) | 9 (Medium) | Open | L | 2026-04-27 | internal |
 | 2.25 | P290 | Harden ADR-052 to behavioural-only — remove the structural-test escape hatch entirely | 9 (Medium) | Open | L | 2026-05-25 | internal |
 | 2.25 | P324 | Agent-prose verdicts have no behavioural test harness — forcing the ADR-052 structural-test escape hatch + above-appetite release workarounds, perpetuating the structural tests the user has rejected | 9 (Medium) | Open | L | 2026-05-27 | internal |
+| 2.25 | P497 | An upstream pull-request diff is not scored against the upstream's conventions | 9 (Medium) | Open | L | 2026-08-14 | internal |
 | 2 | P170 | Problem tickets strain as fixes decompose into multiple coordinated changes — need an RFC framework that ties all changes back to problems (and unifies technical with user/business problems) | 8 (Medium) | Known Error | XL | 2026-05-04 | internal |
 | 1.875 | P091 | Session-wide context budget — Claude Code consumes substantial context before and during every session across all contributor surfaces (meta) | 15 (High) | Open | XL | 2026-04-22 | internal |
 | 1.125 | P298 | Plugin-published artifacts should NOT reference internal IDs at all (ADR-055 chose prefixing; strip them instead — they're meaningless to adopters) | 9 (Medium) | Open | XL | 2026-05-25 | internal |
