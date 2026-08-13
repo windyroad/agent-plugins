@@ -314,6 +314,7 @@ _88 ADRs. These are the current rules. The architect agent reads this section fi
 ### ADR-075 — ADR-075: promptfoo as the behavioural test harness for agent-prose verdicts
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen: **adopt promptfoo as the agent-prose eval harness, alongside (not replacing) bats.**
+**Confirmation:** Agent or root promptfoo dependency changes run both eval tiers on pull requests; unrelated pull requests skip the Claude provider; every push to `main` runs the full eval.
 **Related:** ADR-052, ADR-005, ADR-002, ADR-071, ADR-066
 
 ### ADR-076 — Inbound-reported problems rank ahead of internally-discovered problems via a sort tier
