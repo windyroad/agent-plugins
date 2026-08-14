@@ -118,7 +118,7 @@ dispatch_pretool() {
   diagnostic="$TMPDIR/claude-risk-pending/subagent-stop-diagnostic.json"
   [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).outcome' "$diagnostic")" = "receipt-written" ]
   [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).reason' "$diagnostic")" = "checkout-bound-receipt" ]
-  [ "$(stat -f '%Lp' "$diagnostic" 2>/dev/null || stat -c '%a' "$diagnostic")" = "600" ]
+  [ "$(node -p '(require("fs").statSync(process.argv[1]).mode & 0o777).toString(8)' "$diagnostic")" = "600" ]
   run grep -F "$PIPELINE_REPO" "$diagnostic"
   [ "$status" -ne 0 ]
   run grep -F "child-session" "$diagnostic"

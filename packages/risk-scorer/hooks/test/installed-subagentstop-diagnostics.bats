@@ -33,7 +33,7 @@ input() {
 @test "packed SubagentStop bridge writes privacy-safe diagnostics and one receipt" {
   dispatch "$(input)"
   [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).outcome' "$DIAGNOSTIC")" = "receipt-written" ]
-  [ "$(stat -f '%Lp' "$DIAGNOSTIC" 2>/dev/null || stat -c '%a' "$DIAGNOSTIC")" = "600" ]
+  [ "$(node -p '(require("fs").statSync(process.argv[1]).mode & 0o777).toString(8)' "$DIAGNOSTIC")" = "600" ]
   [ "$(find "$TMPDIR/claude-risk-pending" -type f ! -name 'subagent-stop-diagnostic.json' | wc -l | tr -d ' ')" = "1" ]
 
   dispatch "$(input)"
