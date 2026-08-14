@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.18.13
+
+### Patch Changes
+
+- 5981b5e: Prevent deferred work or release metadata from being credited as a risk control while preserving small, complete releases as the preferred way to limit accumulated risk.
+
 ## 0.18.12
 
 ### Patch Changes
