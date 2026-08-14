@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.18.14
+
+### Patch Changes
+
+- 1d0fbf7: Record a bounded privacy-safe diagnostic when Codex cannot persist a SubagentStop risk receipt.
+
 ## 0.18.13
 
 ### Patch Changes
