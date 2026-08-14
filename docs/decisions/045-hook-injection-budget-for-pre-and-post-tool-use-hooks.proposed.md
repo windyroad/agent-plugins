@@ -1,7 +1,7 @@
 ---
 status: "proposed"
 date: 2026-04-28
-human-oversight: unconfirmed
+human-oversight: confirmed
 amended-date: 2026-08-04
 decision-makers: [tomhoward]
 consulted: [wr-architect:agent, wr-jtbd:agent]
@@ -255,7 +255,8 @@ review.
 each of the five lifecycle events, the `SubagentStop` handler is silent on
 success, and duplicate completion delivery produces one marker/report.
 
-**Oversight:** confirmed by Tom Howard on 2026-08-04.
+**Oversight:** confirmed by Tom Howard via the explicit instruction
+`ADR-045 - approved` in the Codex hook-repair session, recorded 2026-08-14.
 
 ### 2026-08-04 — Use five hooks for desktop completion with a CLI fallback
 
@@ -274,4 +275,4 @@ side-effect-only and silent.
 prove `SubagentStop` plus close produces one marker, the trusted desktop probe
 records completion before close, and the isolated CLI smoke proves fallback.
 
-**Oversight:** unconfirmed; correction surfaced to Tom Howard on 2026-08-04.
+**Oversight:** confirmed by Tom Howard on 2026-08-04.

@@ -129,6 +129,7 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | draft | STORY-060 | Pick up a captured ticket and know what was observed | M | P375 | RFC-066 | STORY-MAP-011 |
 | accepted | STORY-054 | Lifecycle transitions preserve a story's ratification | M | P474 | RFC-059 | STORY-MAP-002 |
 | accepted | STORY-055 | One definition of what the oversight fingerprint ignores | M | P474 | RFC-059 | STORY-MAP-002 |
+| accepted | STORY-061 | See why a SubagentStop risk receipt was not written | S | P477 | RFC-067 | STORY-MAP-002 |
 | draft | STORY-012 | Can't start coding without an RFC — the gate makes me create one first | S | P251, P314 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-013 | Full gate: an RFC exists → I proceed; none → I create it first | M | P251, P314 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-014 | Unattended, the agent works the plan and pauses for real decisions | M | P251, P314 | RFC-005 | STORY-MAP-002 |

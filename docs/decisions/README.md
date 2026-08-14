@@ -187,7 +187,7 @@ _104 ADRs. These are the current rules. The architect agent reads this section f
 **Related:** ADR-013, ADR-044, ADR-014, ADR-022, ADR-026, ADR-032, ADR-040, ADR-042, ADR-043
 
 ### ADR-045 — Hook injection budget policy for PreToolUse and PostToolUse hooks
-**Status:** proposed | **Oversight:** unconfirmed
+**Status:** proposed | **Oversight:** confirmed
 **Related:** ADR-038, ADR-002, ADR-009, ADR-013, ADR-014, ADR-017, ADR-022, ADR-023, ADR-026, ADR-037
 
 ### ADR-046 — ADR-046 — Blocked-reporters persistence: per-repo, hashed-ID, audit-log-first
