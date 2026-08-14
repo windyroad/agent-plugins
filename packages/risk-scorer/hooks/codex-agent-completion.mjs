@@ -33,6 +33,37 @@ function pendingDir() {
   return join(process.env.TMPDIR || "/tmp", "claude-risk-pending");
 }
 
+function fieldType(input, field) {
+  if (!input || !Object.prototype.hasOwnProperty.call(input, field)) return "absent";
+  if (input[field] === null) return "null";
+  if (Array.isArray(input[field])) return "array";
+  return typeof input[field];
+}
+
+function diagnoseSubagentStop(input, outcome, reason) {
+  const dir = pendingDir();
+  const path = join(dir, "subagent-stop-diagnostic.json");
+  const temporary = join(dir, `.subagent-stop-diagnostic-${process.pid}.tmp`);
+  try {
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(temporary, JSON.stringify({
+      timestamp: new Date().toISOString(),
+      outcome,
+      reason,
+      event: input?.hook_event_name === "SubagentStop" ? "SubagentStop" : "other",
+      fields: Object.fromEntries([
+        "session_id",
+        "agent_id",
+        "agent_type",
+        "last_assistant_message",
+      ].map((field) => [field, fieldType(input, field)])),
+    }), { mode: 0o600 });
+    renameSync(temporary, path);
+  } catch {
+    rmSync(temporary, { force: true });
+  }
+}
+
 function statePath(input, target, suffix = "") {
   return join(riskDir(input.session_id), `codex-agent-${Buffer.from(target).toString("base64url")}${suffix}`);
 }
@@ -72,29 +103,47 @@ function claimTarget(input, target) {
   return { claim, done };
 }
 
-function pipelineAssessment(output) {
+function pipelineAssessment(output, reject = () => {}) {
+  if (typeof output !== "string" || !output) {
+    reject("missing-output");
+    return null;
+  }
   const roots = [...output.matchAll(/^RISK_CWD:[ \t]*(.+)$/gm)];
-  if (roots.length !== 1) return null;
+  if (roots.length !== 1) {
+    reject(roots.length ? "multiple-risk-cwd" : "missing-risk-cwd");
+    return null;
+  }
 
   const declaredRoot = roots[0][1].trim();
-  if (!isAbsolute(declaredRoot)) return null;
+  if (!isAbsolute(declaredRoot)) {
+    reject("relative-risk-cwd");
+    return null;
+  }
 
   let root;
   try {
     root = realpathSync(declaredRoot);
   } catch {
+    reject("unreadable-risk-cwd");
     return null;
   }
   const git = spawnSync("git", ["-C", root, "rev-parse", "--show-toplevel"], { encoding: "utf8" });
-  if (git.status !== 0) return null;
+  if (git.status !== 0) {
+    reject("not-git-worktree");
+    return null;
+  }
 
   let gitRoot;
   try {
     gitRoot = realpathSync(git.stdout.trim());
   } catch {
+    reject("unreadable-git-root");
     return null;
   }
-  if (gitRoot !== root) return null;
+  if (gitRoot !== root) {
+    reject("risk-cwd-not-git-root");
+    return null;
+  }
 
   let sanitized = output.split(/\r?\n/).filter((line) => !line.startsWith("RISK_CWD:")).join("\n");
   for (const privatePath of new Set([declaredRoot, root])) {
@@ -133,17 +182,39 @@ function freshReceipt(path) {
 }
 
 function persistPendingPipeline(input) {
-  if (input.agent_type !== "wr-risk-scorer:pipeline") return;
-  const assessment = pipelineAssessment(input.last_assistant_message);
-  if (!assessment) return;
+  diagnoseSubagentStop(input, "received", "pipeline-receipt-attempt");
+  if (input.agent_type !== "wr-risk-scorer:pipeline") {
+    diagnoseSubagentStop(input, "rejected", "unexpected-agent-type");
+    return;
+  }
+  let rejection;
+  const assessment = pipelineAssessment(input.last_assistant_message, (reason) => { rejection = reason; });
+  if (!assessment) {
+    diagnoseSubagentStop(input, "rejected", rejection || "invalid-assessment");
+    return;
+  }
   const id = checkoutId(assessment.root);
   const hash = stateHash(assessment.root);
   const completion = completionId(input, assessment.output);
-  if (!hash || !completion || !/^RISK_SCORES: commit=\d+ push=\d+ release=\d+$/m.test(assessment.output)) return;
+  if (!hash) {
+    diagnoseSubagentStop(input, "rejected", "state-hash-failed");
+    return;
+  }
+  if (!completion) {
+    diagnoseSubagentStop(input, "rejected", "missing-completion-identity");
+    return;
+  }
+  if (!/^RISK_SCORES: commit=\d+ push=\d+ release=\d+$/m.test(assessment.output)) {
+    diagnoseSubagentStop(input, "rejected", "missing-risk-scores");
+    return;
+  }
   mkdirSync(pendingDir(), { recursive: true });
   const path = pendingPath(id, hash, completion);
   for (const candidate of [path, `${path}.done`]) {
-    if (freshReceipt(candidate)) return;
+    if (freshReceipt(candidate)) {
+      diagnoseSubagentStop(input, "duplicate", "fresh-receipt-exists");
+      return;
+    }
     rmSync(candidate, { force: true });
   }
   try {
@@ -155,8 +226,14 @@ function persistPendingPipeline(input) {
       completionId: completion,
       createdAt: Date.now(),
     }), { flag: "wx", mode: 0o600 });
+    diagnoseSubagentStop(input, "receipt-written", "checkout-bound-receipt");
   } catch (error) {
-    if (error?.code !== "EEXIST") throw error;
+    if (error?.code === "EEXIST") {
+      diagnoseSubagentStop(input, "duplicate", "receipt-race");
+      return;
+    }
+    diagnoseSubagentStop(input, "rejected", "receipt-write-failed");
+    throw error;
   }
 }
 
@@ -306,6 +383,9 @@ let input;
 try {
   input = JSON.parse(body);
 } catch {
+  if (process.argv.includes("--subagent-stop")) {
+    diagnoseSubagentStop({}, "rejected", "malformed-json");
+  }
   process.exit(0);
 }
 
@@ -314,7 +394,12 @@ if (process.argv.includes("--consume-pending")) {
   process.exit(process.exitCode || 0);
 }
 
-if (!/^[A-Za-z0-9-]+$/.test(input.session_id || "")) process.exit(0);
+if (!/^[A-Za-z0-9-]+$/.test(input.session_id || "")) {
+  if (process.argv.includes("--subagent-stop")) {
+    diagnoseSubagentStop(input, "rejected", "invalid-session-id");
+  }
+  process.exit(0);
+}
 
 if (["collaborationspawn_agent", "spawn_agent", "multi_agent_v1__spawn_agent"].includes(input.tool_name)) {
   rememberSpawn(input);

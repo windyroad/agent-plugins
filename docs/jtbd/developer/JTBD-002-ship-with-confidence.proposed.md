@@ -44,6 +44,7 @@ Pair programming with the AI, manual review of every diff, restricting agent per
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-055 | STORY-055: One definition of what the oversight fingerprint ignores | accepted |
+| STORY-061 | STORY-061: See why a SubagentStop risk receipt was not written | accepted |
 | STORY-053 | STORY-053: Test claims against the tree at capture and label the untested ones | draft |
 | STORY-059 | STORY-059: See why the loop did not work what I expected | draft |
 | STORY-046 | STORY-046: Red-CI denial explains the recovery path | in-progress |

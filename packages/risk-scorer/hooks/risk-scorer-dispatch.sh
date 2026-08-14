@@ -100,7 +100,7 @@ if messages:
     esac
     ;;
   subagent-stop)
-    printf '%s' "$INPUT" | node "$SCRIPT_DIR/codex-agent-completion.mjs"
+    printf '%s' "$INPUT" | node "$SCRIPT_DIR/codex-agent-completion.mjs" --subagent-stop
     ;;
   *)
     exit 0

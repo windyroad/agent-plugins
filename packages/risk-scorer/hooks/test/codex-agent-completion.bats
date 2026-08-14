@@ -115,6 +115,16 @@ dispatch_pretool() {
 
 @test "desktop pipeline SubagentStop hands a checkout-bound receipt to the parent without spawn state" {
   dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
+  diagnostic="$TMPDIR/claude-risk-pending/subagent-stop-diagnostic.json"
+  [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).outcome' "$diagnostic")" = "receipt-written" ]
+  [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).reason' "$diagnostic")" = "checkout-bound-receipt" ]
+  [ "$(stat -f '%Lp' "$diagnostic" 2>/dev/null || stat -c '%a' "$diagnostic")" = "600" ]
+  run grep -F "$PIPELINE_REPO" "$diagnostic"
+  [ "$status" -ne 0 ]
+  run grep -F "child-session" "$diagnostic"
+  [ "$status" -ne 0 ]
+  run grep -F "child-agent" "$diagnostic"
+  [ "$status" -ne 0 ]
   [ ! -e "$TMPDIR/claude-risk-$SESSION/commit" ]
 
   run dispatch_pretool "$(parent_bash_input)"
@@ -142,13 +152,41 @@ dispatch_pretool() {
   dispatch_subagent_stop "$(pipeline_subagent_stop_input child-one agent-one 4)"
   dispatch_pretool "$(parent_bash_input)"
   [ "$(cat "$TMPDIR/claude-risk-$SESSION/commit")" = "4" ]
-  [ "$(find "$TMPDIR/claude-risk-pending" -type f ! -name '*.done' ! -name '*.claim' | wc -l | tr -d ' ')" = "0" ]
+  [ "$(find "$TMPDIR/claude-risk-pending" -type f ! -name '*.done' ! -name '*.claim' ! -name 'subagent-stop-diagnostic.json' | wc -l | tr -d ' ')" = "0" ]
 }
 
 @test "duplicate delivery of the same completion writes one receipt" {
   dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
   dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
-  [ "$(find "$TMPDIR/claude-risk-pending" -type f ! -name '*.done' ! -name '*.claim' | wc -l | tr -d ' ')" = "1" ]
+  [ "$(find "$TMPDIR/claude-risk-pending" -type f ! -name '*.done' ! -name '*.claim' ! -name 'subagent-stop-diagnostic.json' | wc -l | tr -d ' ')" = "1" ]
+}
+
+@test "desktop pipeline SubagentStop records a privacy-safe rejection reason" {
+  input="$(pipeline_subagent_stop_input | node -e 'let s=""; process.stdin.on("data", c => s += c); process.stdin.on("end", () => { const value = JSON.parse(s); delete value.last_assistant_message; process.stdout.write(JSON.stringify(value)); });')"
+  dispatch_subagent_stop "$input"
+
+  diagnostic="$TMPDIR/claude-risk-pending/subagent-stop-diagnostic.json"
+  [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).outcome' "$diagnostic")" = "rejected" ]
+  [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).reason' "$diagnostic")" = "missing-output" ]
+  [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).fields.last_assistant_message' "$diagnostic")" = "absent" ]
+  [ "$(find "$TMPDIR/claude-risk-pending" -type f ! -name 'subagent-stop-diagnostic.json' | wc -l | tr -d ' ')" = "0" ]
+}
+
+@test "desktop pipeline SubagentStop records malformed JSON without leaking it" {
+  dispatch_subagent_stop '{"secret":"do-not-retain"'
+
+  diagnostic="$TMPDIR/claude-risk-pending/subagent-stop-diagnostic.json"
+  [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).reason' "$diagnostic")" = "malformed-json" ]
+  run grep -F "do-not-retain" "$diagnostic"
+  [ "$status" -ne 0 ]
+}
+
+@test "desktop pipeline SubagentStop records an invalid session id" {
+  invalid="$(pipeline_subagent_stop_input | sed 's/child-session/invalid session/')"
+  dispatch_subagent_stop "$invalid"
+
+  diagnostic="$TMPDIR/claude-risk-pending/subagent-stop-diagnostic.json"
+  [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).reason' "$diagnostic")" = "invalid-session-id" ]
 }
 
 @test "Codex parent prompt imports a completed child receipt" {
@@ -160,7 +198,7 @@ dispatch_pretool() {
 
 @test "imported score retains the original assessment timestamp" {
   dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
-  pending="$(find "$TMPDIR/claude-risk-pending" -type f ! -name '*.done' ! -name '*.claim' -print -quit)"
+  pending="$(find "$TMPDIR/claude-risk-pending" -type f ! -name '*.done' ! -name '*.claim' ! -name 'subagent-stop-diagnostic.json' -print -quit)"
   assessed_seconds="$(node -e 'console.log(Math.floor(JSON.parse(require("fs").readFileSync(process.argv[1])).createdAt / 1000))' "$pending")"
   sleep 1
   printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
@@ -200,7 +238,7 @@ dispatch_pretool() {
   touch -t 200001010000 "$done_receipt"
 
   RISK_TTL=1 dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
-  [ "$(find "$TMPDIR/claude-risk-pending" -type f ! -name '*.done' ! -name '*.claim' | wc -l | tr -d ' ')" = "1" ]
+  [ "$(find "$TMPDIR/claude-risk-pending" -type f ! -name '*.done' ! -name '*.claim' ! -name 'subagent-stop-diagnostic.json' | wc -l | tr -d ' ')" = "1" ]
 }
 
 @test "Codex completion bridge marks the exact risk agent when it closes" {
