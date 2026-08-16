@@ -24,6 +24,8 @@ The bridge assumed every native collaboration spawn and close would be observabl
 
 The sanitized receipt path shipped, but a live 2026-08-14 desktop replay exposed a second defect: a trusted and enabled `SubagentStop` completed with the expected pipeline role and reducing verdict, yet no pending receipt was written. The bridge returned silently for every rejected payload or derived-state condition, leaving no way to distinguish an event that did not fire from a payload-shape mismatch, identity rejection, state-hash failure, or receipt collision. This observability gap is part of P477 because it prevents the repaired handoff from being verified or diagnosed without reading private transcripts.
 
+A 2026-08-16 isolated-checkout replay exposed a third failure in the same handoff. Codex executed `git commit` in the assessed checkout, but the compatibility payload exposed only the parent task checkout. The gate correctly rejected the checkout mismatch, then incorrectly deleted the valid reducing marker. Every retry therefore required another score and repeated the same deletion. The hook cannot recover an omitted path from the opaque checkout identity, so it must preserve the marker and prescribe an explicit leading `cd` rather than consume valid evidence.
+
 ## Fix and Verification
 
 - On a risk-scorer `SubagentStop` without spawn state, publish a short-lived sanitized receipt bound to the exact physical checkout and pipeline state hash.
@@ -31,6 +33,7 @@ The sanitized receipt path shipped, but a live 2026-08-14 desktop replay exposed
 - Reproduce distinct child/parent sessions with no spawn-state file and assert scores, state hash, and opaque checkout identity persist only for the assessed checkout.
 - Reject malformed output, invalid roots, checkout drift, expired receipts, and duplicate completion without persisting an absolute path.
 - Persist one atomically replaced, mode-0600 diagnostic containing only timestamp, outcome/rejection code, normalized event name, and field presence/types. Never persist response text, working directories, session IDs, agent IDs, or absolute paths.
+- When a command arrives from a different checkout than a valid checkout-bound reducing marker, deny without consuming the marker and direct Codex to retry the same command as `cd /absolute/assessed/checkout && ...`. Continue consuming markers on expiry or assessed-state drift.
 - Release and supported-install the patch before the downstream consumer retries its normal gate.
 
 No new hook or ADR is required: this restores the intended completed-agent compatibility path using the already-enabled `SubagentStop`, `PreToolUse:Bash`, and `UserPromptSubmit` events without changing the scoring or delivery contract.
@@ -44,7 +47,7 @@ No new hook or ADR is required: this restores the intended completed-agent compa
 
 | RFC | Status | Title |
 |-----|--------|-------|
-| RFC-067 | proposed | Make Codex SubagentStop receipt rejection diagnosable |
+| RFC-067 | proposed | Make Codex risk-receipt failures diagnosable and recoverable |
 
 ## Stories
 
