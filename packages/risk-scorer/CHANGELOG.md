@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.18.15
+
+### Patch Changes
+
+- eb653b4: Preserve checkout-bound reducing markers when Codex omits a nested command workdir, and provide an explicit checkout retry command instead of forcing another score.
+
 ## 0.18.14
 
 ### Patch Changes
