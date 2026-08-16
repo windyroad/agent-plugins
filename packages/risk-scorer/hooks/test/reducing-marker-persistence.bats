@@ -145,15 +145,23 @@ print(json.dumps({
   [ -f "$RDIR/reducing-commit" ]
 }
 
-@test "identical-tree checkout cannot reuse reducing-commit marker" {
+@test "Codex parent cwd mismatch preserves the marker and explicit cd recovers" {
+  cd "$OTHER_REPO"
+  _checkout_id > "$RDIR/checkout-id"
   HASH=$(_current_hash)
   echo "$HASH" > "$RDIR/state-hash"
   touch "$RDIR/reducing-commit"
 
-  cd "$OTHER_REPO"
-  run invoke_commit_gate 'git commit -m "x"'
+  cd "$TMP_REPO"
+  HOOK_CWD="$TMP_REPO" run invoke_commit_gate 'git commit -m "x"'
   [[ "$output" == *"permissionDecision"* ]]
-  [ ! -f "$RDIR/reducing-commit" ]
+  [[ "$output" == *"explicit leading"* ]]
+  [ -f "$RDIR/reducing-commit" ]
+
+  HOOK_CWD="$TMP_REPO" run invoke_commit_gate "cd '$OTHER_REPO' && git commit -m x"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"deny"* ]]
+  [ -f "$RDIR/reducing-commit" ]
 }
 
 @test "commit gate validates from the command cwd, not the hook process cwd" {

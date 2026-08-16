@@ -96,7 +96,11 @@ if [ -f "${RDIR}/reducing-commit" ]; then
     MARK_TIME=$(_mtime "${RDIR}/reducing-commit")
     AGE=$(( NOW - MARK_TIME ))
     TTL_SECONDS="${RISK_TTL:-3600}"
-    if [ "$AGE" -lt "$TTL_SECONDS" ] && [ -f "${RDIR}/state-hash" ] && _checkout_matches "${RDIR}/checkout-id"; then
+    if [ "$AGE" -lt "$TTL_SECONDS" ] && ! _checkout_matches "${RDIR}/checkout-id"; then
+        risk_gate_deny "Commit blocked: this event resolved to a different Git checkout than the valid risk assessment. Retry the same command with an explicit leading \`cd /absolute/path/to/the/assessed-checkout && git commit ...\`; the marker was preserved, so do not rescore unless that checkout changed."
+        exit 0
+    fi
+    if [ "$AGE" -lt "$TTL_SECONDS" ] && [ -f "${RDIR}/state-hash" ]; then
         STORED_HASH=$(cat "${RDIR}/state-hash")
         CURRENT_HASH=$("$SCRIPT_DIR/lib/pipeline-state.sh" --hash-inputs 2>/dev/null | _hashcmd | cut -d' ' -f1)
         if [ "$STORED_HASH" = "$CURRENT_HASH" ]; then
