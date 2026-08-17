@@ -1,5 +1,11 @@
 # @windyroad/problem
 
+## 1.1.1
+
+### Patch Changes
+
+- 7cf1720: Recompute problem WSJF with the post-transition status multiplier so Open tickets retain the correct backlog rank after becoming Known Errors.
+
 ## 1.1.0
 
 ### Minor Changes
