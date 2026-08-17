@@ -104,7 +104,7 @@ If no file is found OR multiple files are found (suffix-exclusive lifecycle viol
 
 **2c. Run pre-flight checks** for the destination (same gating as the singular):
 
-- Open → Known Error (`known-error`): root cause documented; ≥ 1 investigation task ticked; reproduction test or reference; workaround documented; effort bucket re-rated if scope shifted (P047).
+- Open → Known Error (`known-error`): root cause documented; ≥ 1 investigation task ticked; reproduction test or reference; workaround documented; effort bucket re-rated if scope shifted (P047); status multiplier re-rated from Open 1.0 to Known Error 2.0 and WSJF recomputed with the post-transition status and current Effort (P498).
 - Known Error → Verification Pending (`verifying`): fix implemented; release marker available (version, commit SHA, or date) for the `## Fix Released` section.
 - Verification Pending → Closed (`close`): user has explicitly confirmed the fix works in production. AFK callers (work-problems orchestrator) MUST supply the close pair via prior user authorisation (e.g. an `AskUserQuestion`-batched closure prompt at the orchestrator layer); this skill never auto-closes on inference.
 

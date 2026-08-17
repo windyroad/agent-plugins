@@ -363,3 +363,18 @@ tests:
         value: 'git\s+mv[\s\S]{0,120}changesets-holding'
       - type: regex
         value: '[Mm]ust\s+not[\s\S]{0,40}release|[Dd]o\s+not[\s\S]{0,40}release|[Nn]ever[\s\S]{0,40}release|[Mm]ay\s+(not|neither)[\s\S]{0,40}release|[Rr]elease[\s\S]{0,40}only\s+after|[Ff]orbid[\s\S]{0,40}releas'
+
+  - description: Step 9b auto-transition precedes WSJF persistence (P498)
+    vars:
+      prompt: |
+        In /wr-itil:manage-problem Step 9b, an eligible Open ticket has
+        Severity 9 and Effort M (divisor 2). Its root cause and workaround are
+        documented, so it automatically becomes a Known Error. State the order
+        of the transition and WSJF calculation, and give the persisted WSJF.
+    assert:
+      - type: regex
+        value: '([Tt]ransition|[Gg]it\s+[Mm]v)[\s\S]{0,800}([Cc]alculate|WSJF)'
+      - type: regex
+        value: '2\.0[\s\S]{0,200}(9(\.0)?|WSJF)|WSJF[\s\S]{0,200}9(\.0)?'
+      - type: not-regex
+        value: 'persist(ed|s)?[\s\S]{0,80}4\.5'

@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-14 **README reconciled** — one drift entry corrected: P497 added to WSJF Rankings. Reconciliation contract per P118 + ADR-014.
+> Last reviewed: 2026-08-14 **P498 captured as Known Error** - WSJF is calculated before the automatic Open to Known Error transition, so the persisted value uses the stale Open multiplier.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -15,6 +15,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 (Very High) | Known Error | XL | 2026-05-03 | internal |
 | | | **Tier 1 — Inbound-reported (an external user actually hit this)** | | | | | |
 | 24 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | 12 (High) | Known Error | S | 2026-07-06 | inbound-reported (#169) |
+| 18 | P498 | WSJF uses the pre-transition status multiplier | 9 (Medium) | Known Error | S | 2026-08-14 | inbound-reported (#413) |
 | 16 | P429 | manage-problem commit-message examples fail @commitlint/config-conventional subject-case in adopter projects | 8 (Medium) | Known Error | S | 2026-07-06 | inbound-reported (#137) |
 | 16 | P430 | itil-correction-detect UserPromptSubmit hook false-positives on orchestrator / AFK prompt text | 8 (Medium) | Known Error | S | 2026-07-06 | inbound-reported (#257) |
 | 12 | P431 | check-upstream-cache-staleness helper misfires on a declined-permanently (empty channels) config | 6 (Medium) | Known Error | S | 2026-07-06 | inbound-reported (#341) |

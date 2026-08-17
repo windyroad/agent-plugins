@@ -1,0 +1,24 @@
+description: transition-problems SKILL eval - post-transition WSJF (P498)
+
+providers:
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: Batch Open to Known Error transition re-rates the status multiplier (P498)
+    vars:
+      prompt: |
+        In /wr-itil:transition-problems, an Open problem has Severity 9 and
+        Effort L (divisor 4). The batch transitions it to Known Error. What
+        status multiplier and WSJF must the pre-flight checklist persist?
+    assert:
+      - type: contains
+        value: '2.0'
+      - type: regex
+        value: '4\.5'
+      - type: regex
+        value: '[Ss]tatus\s+[Mm]ultiplier|[Pp]ost-transition\s+status'
+      - type: not-contains
+        value: '2.25'

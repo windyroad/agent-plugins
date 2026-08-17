@@ -78,3 +78,17 @@ tests:
       # transition, then rely on the sibling no-op exit).
       - type: not-regex
         value: '(^|\n)\s*/wr-itil:update-upstream[\s\S]{0,400}grep[\s\S]{0,80}Reported\s+Upstream'
+
+  - description: Open to Known Error transition re-rates status multiplier with Effort (P498)
+    vars:
+      prompt: |
+        I am transitioning an Open problem with Severity 9 to Known Error.
+        Its clarified fix changes Effort from M to L (divisor 4). What WSJF
+        re-rates are required, and what value is written after the transition?
+    assert:
+      - type: contains
+        value: '2.0'
+      - type: regex
+        value: '4\.5'
+      - type: regex
+        value: '[Ss]tatus\s+[Mm]ultiplier|[Pp]ost-transition\s+status'
