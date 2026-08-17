@@ -1324,3 +1324,9 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-08-09 **P495 captured** — a full release-versioning run appeared in the working copy, consuming all five queued changesets and bumping two packages; it was uncommitted and recovered, but nothing warned and a consumed queue is indistinguishable from an empty one (lightweight aside via /wr-itil:capture-problem).
 
 > Last reviewed: 2026-08-14 **README reconciled** — one drift entry corrected: P497 added to WSJF Rankings. Reconciliation contract per P118 + ADR-014.
+
+## 2026-08-17
+
+> Last reviewed: 2026-08-14 **P498 captured as Known Error** - WSJF is calculated before the automatic Open to Known Error transition, so the persisted value uses the stale Open multiplier.
+
+> Last reviewed: 2026-08-17 **P499 captured as Known Error** - the architect ADR pairing hook inspected the task checkout instead of the checkout selected by the commit command.
