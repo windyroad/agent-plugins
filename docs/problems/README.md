@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-14 **P498 captured as Known Error** - WSJF is calculated before the automatic Open to Known Error transition, so the persisted value uses the stale Open multiplier.
+> Last reviewed: 2026-08-17 **P499 captured as Known Error** - the architect ADR pairing hook inspected the task checkout instead of the checkout selected by the commit command.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -11,6 +11,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
 | | | **Tier 0 — Critical bypass (Severity Very High ≥17, security-classified, or incident-linked)** | | | | | |
+| 40 | P499 | Architect ADR pairing hook reads the task checkout instead of the command checkout | 20 (Very High) | Known Error | S | 2026-08-17 | incident-linked |
 | 40 | P477 | Codex collaboration completion bypasses the risk-marker bridge | 20 (Very High) | Open | S | 2026-08-12 | internal |
 | 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 (Very High) | Known Error | XL | 2026-05-03 | internal |
 | | | **Tier 1 — Inbound-reported (an external user actually hit this)** | | | | | |

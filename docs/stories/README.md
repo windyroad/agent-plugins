@@ -113,6 +113,7 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 
 | Status | ID | Title | Effort | Problems | RFCs | Story Map |
 |--------|-----|-------|--------|----------|------|-----------|
+| accepted | STORY-063 | Check ADR pairing in the checkout being committed | S | P499 | RFC-069 | STORY-MAP-002 |
 | accepted | STORY-044 | See what cruise is doing — status/telemetry skill | M | P160, P446 | RFC-046 | STORY-MAP-003 |
 | draft | STORY-045 | Outbound lifecycle comments generated from real issue context | M | P376 | RFC-028 | STORY-MAP-004 |
 | accepted | STORY-047 | Gate the correction nudge on prompt authorship | S | P430 | RFC-050 | STORY-MAP-005 |

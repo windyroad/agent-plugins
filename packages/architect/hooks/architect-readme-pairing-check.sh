@@ -65,9 +65,65 @@ if [ "${BYPASS_COMPENDIUM_REFRESH_GATE:-0}" = "1" ]; then
     exit 0
 fi
 
-# Resolve repo root so the git plumbing is path-stable.
-repo_root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
-cd "$repo_root" || exit 0
+# Resolve the checkout targeted by the command. Codex can execute a command in
+# a different checkout from the hook process, so process cwd is only a legacy
+# fallback when the event declares no checkout at all (P499 / RFC-069).
+checkout=$(printf '%s' "$input" | python3 -c '
+import json, re, shlex, sys
+
+try:
+    data = json.load(sys.stdin)
+    tool = data.get("tool_input") or {}
+    for owner, key in ((tool, "cwd"), (tool, "workdir")):
+        if key in owner:
+            value = owner[key]
+            if not isinstance(value, str):
+                print(json.dumps({"declared": True, "path": ""}))
+                raise SystemExit
+            if value:
+                print(json.dumps({"declared": True, "path": value}))
+                raise SystemExit
+
+    try:
+        tokens = shlex.split(tool.get("command", ""))
+    except (TypeError, ValueError):
+        tokens = []
+    while tokens and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*=.*", tokens[0]):
+        tokens.pop(0)
+    if len(tokens) >= 3 and tokens[0] == "cd" and tokens[2] == "&&":
+        print(json.dumps({"declared": True, "path": tokens[1]}))
+        raise SystemExit
+
+    if "cwd" in data:
+        value = data["cwd"]
+        if not isinstance(value, str):
+            print(json.dumps({"declared": True, "path": ""}))
+        elif value:
+            print(json.dumps({"declared": True, "path": value}))
+        else:
+            print(json.dumps({"declared": False, "path": ""}))
+    else:
+        print(json.dumps({"declared": False, "path": ""}))
+except (AttributeError, json.JSONDecodeError):
+    print(json.dumps({"declared": True, "path": ""}))
+' 2>/dev/null) || checkout='{"declared":true,"path":""}'
+
+deny_invalid_checkout() {
+    echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"architect-readme-pairing-check: the declared command checkout is not an absolute readable Git worktree. Retry the commit with an absolute workdir or an explicit leading cd to the intended checkout."}}' >&2
+    exit 2
+}
+
+if [ "$(printf '%s' "$checkout" | jq -r '.declared')" = "true" ]; then
+    declared=$(printf '%s' "$checkout" | jq -r '.path')
+    case "$declared" in
+        /*) ;;
+        *) deny_invalid_checkout ;;
+    esac
+    repo_root=$(git -C "$declared" rev-parse --show-toplevel 2>/dev/null) || deny_invalid_checkout
+else
+    repo_root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+fi
+cd "$repo_root" || deny_invalid_checkout
 
 # Inspect the staged set. ADR bodies are docs/decisions/<NNN>-*.md (exclude the
 # README itself and the -history / -summary siblings).

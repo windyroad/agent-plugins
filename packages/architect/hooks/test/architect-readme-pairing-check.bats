@@ -16,17 +16,33 @@ setup() {
   echo "# compendium" > docs/decisions/README.md
   echo "# adr 049" > docs/decisions/049-x.proposed.md
   git add -A && git commit -q -m init
+
+  TARGET_REPO="$(mktemp -d)"
+  git -C "$TARGET_REPO" init -q
+  git -C "$TARGET_REPO" config user.email t@e.x
+  git -C "$TARGET_REPO" config user.name t
+  mkdir -p "$TARGET_REPO/docs/decisions"
+  echo "# compendium" > "$TARGET_REPO/docs/decisions/README.md"
+  echo "# adr 050" > "$TARGET_REPO/docs/decisions/050-y.proposed.md"
+  git -C "$TARGET_REPO" add -A
+  git -C "$TARGET_REPO" commit -q -m init
 }
 
 teardown() {
   cd /
-  rm -rf "$REPO"
+  rm -rf "$REPO" "$TARGET_REPO"
 }
 
 # Run the hook with a synthetic `git commit` Bash PreToolUse payload.
 run_commit_hook() {
   local cmd="${1:-git commit -m wip}"
   echo "{\"tool_name\":\"Bash\",\"tool_input\":{\"command\":\"$cmd\"}}" | bash "$HOOK"
+}
+
+run_commit_hook_payload() {
+  local payload="$1"
+  local process_repo="${2:-$REPO}"
+  (cd "$process_repo" && printf '%s\n' "$payload" | bash "$HOOK")
 }
 
 @test "denies commit when an ADR body is staged without README (criterion 1)" {
@@ -123,4 +139,108 @@ run_commit_hook() {
   HOOKS_JSON="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)/hooks.json"
   run jq -e '.hooks.PreToolUse[] | select(.matcher=="Bash") | .hooks[] | select(.command | test("architect-readme-pairing-check"))' "$HOOKS_JSON"
   [ "$status" -eq 0 ]
+}
+
+@test "workdir targets the clean command checkout instead of the dirty hook checkout" {
+  echo "# adr 049 edited" > docs/decisions/049-x.proposed.md
+  git add docs/decisions/049-x.proposed.md
+  payload=$(jq -n --arg dir "$TARGET_REPO" '{tool_name:"Bash",tool_input:{command:"git commit -m wip",workdir:$dir}}')
+  run run_commit_hook_payload "$payload"
+  [ "$status" -eq 0 ]
+}
+
+@test "workdir targets an unpaired command checkout instead of the clean hook checkout" {
+  echo "# adr 050 edited" > "$TARGET_REPO/docs/decisions/050-y.proposed.md"
+  git -C "$TARGET_REPO" add docs/decisions/050-y.proposed.md
+  payload=$(jq -n --arg dir "$TARGET_REPO" '{tool_name:"Bash",tool_input:{command:"git commit -m wip",workdir:$dir}}')
+  run run_commit_hook_payload "$payload"
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"050-y.proposed.md"* ]]
+}
+
+@test "tool cwd wins over a conflicting workdir" {
+  echo "# adr 050 edited" > "$TARGET_REPO/docs/decisions/050-y.proposed.md"
+  git -C "$TARGET_REPO" add docs/decisions/050-y.proposed.md
+  payload=$(jq -n --arg cwd "$REPO" --arg workdir "$TARGET_REPO" '{tool_name:"Bash",tool_input:{command:"git commit -m wip",cwd:$cwd,workdir:$workdir}}')
+  run run_commit_hook_payload "$payload"
+  [ "$status" -eq 0 ]
+}
+
+@test "empty tool cwd falls through to workdir" {
+  echo "# adr 050 edited" > "$TARGET_REPO/docs/decisions/050-y.proposed.md"
+  git -C "$TARGET_REPO" add docs/decisions/050-y.proposed.md
+  payload=$(jq -n --arg workdir "$TARGET_REPO" '{tool_name:"Bash",tool_input:{command:"git commit -m wip",cwd:"",workdir:$workdir}}')
+  run run_commit_hook_payload "$payload"
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"050-y.proposed.md"* ]]
+}
+
+@test "empty workdir falls through to leading cd" {
+  echo "# adr 050 edited" > "$TARGET_REPO/docs/decisions/050-y.proposed.md"
+  git -C "$TARGET_REPO" add docs/decisions/050-y.proposed.md
+  payload=$(jq -n --arg cmd "cd '$TARGET_REPO' && git commit -m wip" '{tool_name:"Bash",tool_input:{command:$cmd,workdir:""}}')
+  run run_commit_hook_payload "$payload"
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"050-y.proposed.md"* ]]
+}
+
+@test "leading quoted cd selects the command checkout without cwd fields" {
+  echo "# adr 050 edited" > "$TARGET_REPO/docs/decisions/050-y.proposed.md"
+  git -C "$TARGET_REPO" add docs/decisions/050-y.proposed.md
+  payload=$(jq -n --arg cmd "cd '$TARGET_REPO' && git commit -m wip" '{tool_name:"Bash",tool_input:{command:$cmd}}')
+  run run_commit_hook_payload "$payload"
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"050-y.proposed.md"* ]]
+}
+
+@test "top-level cwd selects the command checkout when tool fields are absent" {
+  echo "# adr 050 edited" > "$TARGET_REPO/docs/decisions/050-y.proposed.md"
+  git -C "$TARGET_REPO" add docs/decisions/050-y.proposed.md
+  payload=$(jq -n --arg dir "$TARGET_REPO" '{tool_name:"Bash",tool_input:{command:"git commit -m wip"},cwd:$dir}')
+  run run_commit_hook_payload "$payload"
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"050-y.proposed.md"* ]]
+}
+
+@test "relative declared checkout denies instead of falling back" {
+  payload=$(jq -n '{tool_name:"Bash",tool_input:{command:"git commit -m wip",workdir:"relative"}}')
+  run run_commit_hook_payload "$payload"
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"absolute readable Git worktree"* ]]
+}
+
+@test "non-Git declared checkout denies instead of falling back" {
+  non_git=$(mktemp -d)
+  payload=$(jq -n --arg dir "$non_git" '{tool_name:"Bash",tool_input:{command:"git commit -m wip",workdir:$dir}}')
+  run run_commit_hook_payload "$payload"
+  rm -rf "$non_git"
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"absolute readable Git worktree"* ]]
+}
+
+@test "missing checkout metadata preserves legacy process-cwd behavior" {
+  echo "# adr 049 edited" > docs/decisions/049-x.proposed.md
+  git add docs/decisions/049-x.proposed.md
+  run run_commit_hook
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"049-x.proposed.md"* ]]
+}
+
+@test "all-empty checkout metadata preserves legacy process-cwd behavior" {
+  echo "# adr 049 edited" > docs/decisions/049-x.proposed.md
+  git add docs/decisions/049-x.proposed.md
+  payload=$(jq -n '{tool_name:"Bash",tool_input:{command:"git commit -m wip",cwd:"",workdir:""},cwd:""}')
+  run run_commit_hook_payload "$payload"
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"049-x.proposed.md"* ]]
+}
+
+@test "nested declared path resolves its Git root" {
+  mkdir -p "$TARGET_REPO/nested/path"
+  echo "# adr 050 edited" > "$TARGET_REPO/docs/decisions/050-y.proposed.md"
+  git -C "$TARGET_REPO" add docs/decisions/050-y.proposed.md
+  payload=$(jq -n --arg dir "$TARGET_REPO/nested/path" '{tool_name:"Bash",tool_input:{command:"git commit -m wip",workdir:$dir}}')
+  run run_commit_hook_payload "$payload"
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"050-y.proposed.md"* ]]
 }

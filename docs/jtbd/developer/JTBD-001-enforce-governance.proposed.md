@@ -45,6 +45,7 @@ Manual code review, PR review checklists, hoping the agent follows CLAUDE.md ins
 | STORY-055 | STORY-055: One definition of what the oversight fingerprint ignores | accepted |
 | STORY-061 | STORY-061: See why a SubagentStop risk receipt was not written | accepted |
 | STORY-062 | STORY-062: Keep problem ranking correct after a status transition | accepted |
+| STORY-063 | STORY-063: Check ADR pairing in the checkout being committed | accepted |
 | STORY-002 | STORY-002: /wr-itil:capture-story lightweight aside skill | done |
 | STORY-005 | STORY-005: Working-the-problem traversal rewrite (manage-problem + work-problem) | done |
 | STORY-006 | STORY-006: /wr-itil:reconcile-stories trio (skill + script + bin shim) | done |
