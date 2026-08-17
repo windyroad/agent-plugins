@@ -1,5 +1,11 @@
 # @windyroad/architect
 
+## 0.21.1
+
+### Patch Changes
+
+- d920408: Inspect ADR and compendium staging in the checkout targeted by the commit command, failing closed when a declared checkout is invalid.
+
 ## 0.21.0
 
 ### Minor Changes
