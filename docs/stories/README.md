@@ -127,7 +127,7 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | draft | STORY-058 | Read a README that describes the version I installed | M | P152 | RFC-064 | STORY-MAP-008 |
 | draft | STORY-059 | See why the loop did not work what I expected | M | P487 | RFC-065 | STORY-MAP-011 |
 | draft | STORY-060 | Pick up a captured ticket and know what was observed | M | P375 | RFC-066 | STORY-MAP-011 |
-| accepted | STORY-062 | Keep problem ranking correct after a status transition | S | P498 | RFC-068 | STORY-MAP-002 |
+| in-progress | STORY-062 | Keep problem ranking correct after a status transition | S | P498 | RFC-068 | STORY-MAP-002 |
 | accepted | STORY-054 | Lifecycle transitions preserve a story's ratification | M | P474 | RFC-059 | STORY-MAP-002 |
 | accepted | STORY-055 | One definition of what the oversight fingerprint ignores | M | P474 | RFC-059 | STORY-MAP-002 |
 | accepted | STORY-061 | See why a SubagentStop risk receipt was not written | S | P477 | RFC-067 | STORY-MAP-002 |

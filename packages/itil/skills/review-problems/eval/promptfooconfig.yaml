@@ -542,3 +542,18 @@ tests:
       # all three (the P136-regressing lazy-deferral shape).
       - type: not-regex
         value: 'fire\s+`?AskUserQuestion`?\s+for\s+(each|every|all)\s+[\s\S]{0,40}(ticket|verifying)'
+
+  - description: Open to Known Error review uses the post-transition WSJF multiplier (P498)
+    vars:
+      prompt: |
+        During /wr-itil:review-problems, an eligible Open ticket has Severity 9
+        and Effort M (divisor 2). Its root cause and workaround are documented,
+        so the automatic Known Error transition fires. State the order of the
+        transition and WSJF calculation, and give the persisted WSJF.
+    assert:
+      - type: regex
+        value: '([Tt]ransition|[Gg]it\s+[Mm]v)[\s\S]{0,800}([Cc]alculate|WSJF)'
+      - type: regex
+        value: '2\.0[\s\S]{0,200}(9(\.0)?|WSJF)|WSJF[\s\S]{0,200}9(\.0)?'
+      - type: not-regex
+        value: 'persist(ed|s)?[\s\S]{0,80}4\.5'

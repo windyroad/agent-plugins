@@ -48,13 +48,13 @@ For each open / known-error ticket (dual-tolerant enumeration spans `docs/proble
 5. **Calculate Severity** = Impact × Likelihood.
 6. **Look up Label** from the risk matrix label bands.
 7. **Re-estimate Effort** (S / M / L / XL) by reading the Root Cause Analysis and Candidate Fix sections. Consider: how many files, how complex, does it need planning, is it cross-package or migration-heavy (XL territory)? If the bucket has changed since the last review, update the Effort line in the problem file and note the reason in a short parenthetical (e.g. "L → XL — architect review added ADR + migration script"). P047.
-8. **Calculate WSJF** = (Severity × Status Multiplier) / Effort Divisor. Status Multiplier is 1.0 for Open, 2.0 for Known Error (per `/wr-itil:manage-problem`'s WSJF table — re-read if unsure).
-9. **Update the Priority and WSJF lines** in the problem file if the scores changed.
-10. **Auto-transition to Known Error** — if an open problem has confirmed root cause AND a workaround documented (even "feature disabled"), automatically transition it:
+8. **Auto-transition to Known Error** — if an open problem has confirmed root cause AND a workaround documented (even "feature disabled"), automatically transition it:
     - `git mv docs/problems/open/<NNN>-<title>.md docs/problems/known-error/<NNN>-<title>.md`
     - Update the Status field to "Known Error".
     - Re-stage explicitly per the P057 staging trap: `git add <new-path>` after the Edit.
     - This happens automatically — do not ask the user. The transition's fix-strategy is documented; only the shipping is outstanding.
+9. **Calculate WSJF** = (Severity × Status Multiplier) / Effort Divisor, using the ticket's status after step 8. Status Multiplier is 1.0 for Open and 2.0 for Known Error (P498).
+10. **Update the Priority and WSJF lines** in the problem file if the scores changed.
 11. **Confirm the `**Origin**` field (ADR-076)** — this is where "checking for items reported upstream to us" lands during a review. If the ticket originated from an external inbound report, set `**Origin**: inbound-reported (#NN)` (NN = the upstream issue/discussion number); cross-check `docs/problems/.upstream-cache.json` (`matched_local_ticket`) and any acknowledgement comment to confirm. Otherwise set/leave `**Origin**: internal`. Tickets predating ADR-076 carry no Origin field and default to `internal` until stamped here. This field — not the regenerable cache — drives the Step 3 reported-first tier, so stamping it during the review is what makes reported tickets rank ahead on the refreshed ranking.
 
 ### 2.5. Dependency-graph traversal — propagate transitive effort (P076)

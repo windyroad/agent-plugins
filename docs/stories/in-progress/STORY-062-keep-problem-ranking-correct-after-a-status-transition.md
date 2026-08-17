@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: in-progress
 story-id: keep-problem-ranking-correct-after-a-status-transition
 reported: 2026-08-14
 decision-makers: [Tom Howard]
@@ -18,11 +18,11 @@ In order to trust the problem backlog's choice of next work, as a developer usin
 
 ## Acceptance criteria (INVEST Testable)
 
-- [ ] Both automatic review flows transition an eligible Open problem to Known Error before calculating and persisting WSJF.
-- [ ] The WSJF calculation reads the multiplier from the status the ticket holds after the transition.
-- [ ] All three Open to Known Error checklists require the status multiplier to be re-rated alongside Effort.
-- [ ] Focused Promptfoo workflow evaluations fail if either review flow persists the pre-transition multiplier or a transition omits the multiplier re-rate.
-- [ ] Existing Claude Code and Codex skill packaging remains unchanged; this is shared skill prose and test behaviour.
+- [x] Both automatic review flows transition an eligible Open problem to Known Error before calculating and persisting WSJF.
+- [x] The WSJF calculation reads the multiplier from the status the ticket holds after the transition.
+- [x] All three Open to Known Error checklists require the status multiplier to be re-rated alongside Effort.
+- [x] Focused Promptfoo workflow evaluations fail if either review flow persists the pre-transition multiplier or a transition omits the multiplier re-rate.
+- [x] Existing Claude Code and Codex skill packaging remains unchanged; this is shared skill prose and test behaviour.
 
 ## Driving problem trace
 
