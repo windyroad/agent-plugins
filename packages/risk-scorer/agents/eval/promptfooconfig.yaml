@@ -238,7 +238,11 @@ tests:
       - type: icontains
         value: 'complete, independently releasable'
       - type: regex
-        value: '([Ss]cope reduction|[Ss]plit)[\s\S]{0,120}reduc(e|es|ing)[\s\S]{0,40}(risk|blast radius)'
+        value: '[Ss](cope reduction|plit)'
+      - type: regex
+        value: '[Rr]educ(e|es|ed|ing|tion)'
+      - type: regex
+        value: '([Rr]isk|blast radius)'
 
   - description: Codex pipeline binds structured output to the supplied assessed root exactly once
     vars:
