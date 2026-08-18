@@ -11,7 +11,7 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 115 (104 in-force, 11 historical)
+**Total ADRs:** 116 (104 in-force, 12 historical)
 
 ---
 
@@ -256,11 +256,6 @@ _104 ADRs. These are the current rules. The architect agent reads this section f
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen: **Shape B + a thin slice of Shape C; Shape A rejected.**
 **Related:** ADR-013, ADR-044, ADR-026, ADR-052
-
-### ADR-065 — Pipeline gate block threshold is derived from RISK-POLICY.md appetite, not hardcoded
-**Status:** proposed | **Oversight:** confirmed
-**Confirmation:** RISK-POLICY.md with "exceeds 9" → score 7 PASSES, score 10 FAILS.; "Threshold: 9" phrasing → score 9 PASSES, score 10 FAILS.; "exceeds 4" → score 4 PASSES, score 5 FAILS.; Absent RISK-POLICY.md → default appetite 4 (4 PASSES, 5 FAILS).; Unparseable RISK-POLICY.md (no appetite integer) → default appetite 4.
-**Related:** ADR-009, ADR-014, ADR-023, ADR-028, ADR-042, ADR-052
 
 ### ADR-066 — ADR-066: Human-oversight marker + `/wr-architect:review-decisions` drain for recorded decisions
 **Status:** proposed | **Oversight:** confirmed
@@ -515,11 +510,15 @@ _104 ADRs. These are the current rules. The architect agent reads this section f
 **Confirmation:** The report skill prefers a pull request based on contribution acceptance, not write access.; All four fallback conditions produce the issue or security path without asking the reporter to write a patch.; The pull-request path respects upstream templates and displays the outgoing diff.; AFK execution opens no third-party pull request.; Poll, catch-up, deduplication, comment, and local-closure behavior distinguish issues from pull requests.
 **Related:** ADR-024, ADR-033, ADR-116
 
+### ADR-118 — Published plugin artefacts express the rule, not the internal ID
+**Status:** proposed | **Oversight:** unconfirmed | **Supersedes:** [ADR-055]
+**Confirmation:** A package-content check fails when a published runtime artefact contains a source-repository identifier.; The architect package's skills and agent remain behaviorally equivalent after their internal references are re...; A packed architect tarball contains no internal decision corpus and no unresolved source-repository identifier...; An adopter review no longer searches its own decision tree to interpret Windy Road runtime instructions.
+
 ---
 
 ## Historical decisions
 
-_11 ADRs. These were tried and superseded, rejected, or deprecated. Read them as direction for what NOT to do, or to understand the lineage of an in-force decision. Do not enforce them as current rules._
+_12 ADRs. These were tried and superseded, rejected, or deprecated. Read them as direction for what NOT to do, or to understand the lineage of an in-force decision. Do not enforce them as current rules._
 
 ### ADR-001 — Unified Install Experience via npm Package
 **Status:** superseded
@@ -563,6 +562,11 @@ _11 ADRs. These were tried and superseded, rejected, or deprecated. Read them as
 **Status:** superseded | **Oversight:** rejected-pending-supersede (P359)
 **Chosen:** Chosen option: **Sibling ADR codifying symmetric-balance graduation (Option 1) with Phase 1b Option A drain-condition amendment.**
 **Related:** ADR-042, ADR-018, ADR-020, ADR-022, ADR-026, ADR-052, ADR-060, ADR-082, ADR-014, ADR-013, ADR-015, ADR-044
+
+### ADR-065 — Pipeline gate block threshold is derived from RISK-POLICY.md appetite, not hardcoded
+**Status:** superseded | **Oversight:** confirmed
+**Confirmation:** RISK-POLICY.md with "exceeds 9" → score 7 PASSES, score 10 FAILS.; "Threshold: 9" phrasing → score 9 PASSES, score 10 FAILS.; "exceeds 4" → score 4 PASSES, score 5 FAILS.; Absent RISK-POLICY.md → default appetite 4 (4 PASSES, 5 FAILS).; Unparseable RISK-POLICY.md (no appetite integer) → default appetite 4.
+**Related:** ADR-009, ADR-014, ADR-023, ADR-028, ADR-042, ADR-052
 
 ### ADR-081 — SessionStart PATH refresh hook for plugin cache
 **Status:** rejected | **Oversight:** confirmed

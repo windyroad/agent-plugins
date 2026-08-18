@@ -1330,3 +1330,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-08-14 **P498 captured as Known Error** - WSJF is calculated before the automatic Open to Known Error transition, so the persisted value uses the stale Open multiplier.
 
 > Last reviewed: 2026-08-17 **P499 captured as Known Error** - the architect ADR pairing hook inspected the task checkout instead of the checkout selected by the commit command.
+
+## 2026-08-18
+
+> Last reviewed: 2026-08-17 **P500 captured** - external reporter issues can close on internal evidence before reporter confirmation or the promised 14-day quiet period (lightweight aside via /wr-itil:capture-problem).

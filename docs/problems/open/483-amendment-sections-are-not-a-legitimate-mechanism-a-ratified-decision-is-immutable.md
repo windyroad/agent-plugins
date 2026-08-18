@@ -42,6 +42,10 @@ Both describe consequences of amendment being available at all. Remove the mecha
 
 Across roughly twenty architect reviews of the ADR-106 change, `wr-architect:agent` repeatedly **required** amendment sections — flagging a missing `amends:` entry as `[Missing Supersession]`, directing that ADR-060's schema be struck under ADR-106's authority, and citing ADR-095/096/103's amendment sections as the established precedent to follow. The agent was applying the corpus's own convention faithfully. So the rule cannot land only in authoring guidance; the review contract enforces the opposite today.
 
+### Regression evidence - 2026-08-18
+
+The released agent now refuses amendments, but its sibling skills still taught the old path. `review-design` offered "Draft a new or amended ADR"; `review-decisions` said a confirmed marker could be cleared after material amendment; and `create-adr` wrote the confirmation marker before optional prose edits, then instructed the agent to rewrite and annotate the superseded file. The plugin could therefore produce the exact unratified-substance failure that its agent rejected.
+
 ## Symptoms
 
 - An `### Amendment to ADR-NNN` heading inside a decision document.
@@ -70,6 +74,7 @@ Suspected: amendment is structurally cheaper than superseding. It needs no new f
 - [x] **Change the review contract.** Done 2026-08-08. `wr-architect:agent` gained a `[Amendment To Ratified Decision]` issue type and an "a ratified decision is immutable" section stating the two-phase lifecycle, refusing `### Amendment` sections and the `amends:` key, and naming supersession as the route. It explicitly refuses three remedies that look reasonable and are not: clearing the marker and re-ratifying, calling the edit a clarification, and citing the corpus's existing amendment sections as precedent — that last one is why the rule needed stating, since the reviewer used it repeatedly.
 
   Proven behaviourally against the real agent. Before: *"Editing a ratified decision in place is acceptable — and here it's required"*, citing ADR-052's and ADR-090's own amendment sections. After: two `[Amendment To Ratified Decision]` findings plus the supersession mechanics, and it inferred unprompted that retiring a decision leaves its marker alone because retiring is not rewriting. Over-fire checked separately: a change that merely cites an ADR carrying three existing amendment sections draws no flag, with the reason given correctly. A promptfoo eval case pins both halves.
+- [x] **Align the sibling skills.** Done 2026-08-18. `review-design` no longer offers an amended ratified ADR; `review-decisions` limits amendment to its unconfirmed queue and makes confirmation final; `create-adr` completes all draft edits before confirmation and retires an old decision by filename without rewriting its content. A focused BATS check pins the three surfaces together.
 - [ ] Sweep the corpus — **27 amendment sections across 9 ADRs**, plus 12 carrying an `amends:` key. Maintainer direction 2026-08-08 is to convert **every** one into supersession. Each conversion is a new decision needing its own ratification, so the cost falls on the maintainer's review attention rather than on implementation time. Now safe to start: the review contract no longer re-teaches the pattern behind the sweep.
 - [ ] Decide what happens to the `amends:` frontmatter key. It probably goes, replaced by `supersedes:` / `superseded-by:`.
 - [ ] Build a detector: an `### Amendment` heading, or an `amends:` key, or body text dated after `oversight-date` in a `confirmed` document.

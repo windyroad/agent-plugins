@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-17 **P500 captured** - external reporter issues can close on internal evidence before reporter confirmation or the promised 14-day quiet period (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-08-18 **P501 captured** - Project A-specific sections appeared in a Project B document generated through a shared plugin surface (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -103,6 +103,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 4.5 | P369 | Plugin removes hook file but adopter session still invokes it via stale binding — `architect-compendium-refresh-discipline.sh` case 2026-06-17 | 9 (Medium) | Open | M | 2026-06-17 | internal |
 | 4.5 | P461 | Downstream evidence-scan flags adopter-repo sightings as live regressions without version-gating against the fix release | 9 (Medium) | Open | M | 2026-07-25 | internal |
 | 4.5 | P478 | I10 checks that a story's `## User value` section is non-empty, but never that it is value-first — 12 of 50 stories drifted feature-first undetected | 9 (Medium) | Open | M | 2026-08-07 | internal |
+| 4.5 | P501 | Project-specific content leaks into another adopter's generated plugin document | 9 (Medium) | Open | M | 2026-08-18 | corrective-feedback |
 | 4 | P410 | install-updates leaves stale cached plugin versions on disk — no prune step | 8 (Medium) | Open | M | 2026-07-03 | internal |
 | 4 | P442 | WSJF Rankings render convention differentiates tiers only by ordering + the Origin column — no visual tier separator, so inbound-reported priority is not legible | 8 (Medium) | Open | M | 2026-07-06 | corrective-feedback |
 | 4 | P467 | work-problems should surface decisions/ratifications continuously (non-blocking), not only batched at loop-end | 8 (Medium) | Open | M | 2026-07-26 | corrective-feedback |

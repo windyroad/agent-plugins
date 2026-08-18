@@ -23,6 +23,7 @@ Same family as **P294** (README should market from JTBD, not cite JTBD IDs): ado
 
 - ~2,880 internal-ID references across 81 shipped-artifact files (per ADR-055's `check-internal-id-leaks.sh` survey); `manage-problem` SKILL.md alone carries 121.
 - ADR-055's own failure-mode analysis: adopter agent ignores the ref (best case) → surfaces "ADR not found" → resolves to an UNRELATED same-numbered ADR in the adopter's tree and applies wrong semantics (worst case). Prefixing fixes the collision but not the meaninglessness.
+- **Adopter reproduction, 2026-08-18:** while reviewing generated plugin content, the architect reported that the plugin cited roughly 31 of its own ADRs, up to ADR-175, but shipped no corpus, so none was readable in the adopter checkout. The current architect package source contains 36 unique `ADR-NNN` tokens across shipped runtime surfaces when test/eval directories are excluded. This is the unresolved-reference failure mode, not a hypothetical detector count.
 - **Runtime-generated internal tokens surface in hook deny-message bodies (2026-06-10 witness, home-loan-mcp adopter session).** The `@windyroad/jtbd` plugin's PreToolUse:Edit gate denied an Edit to `docs/jtbd/<persona>/persona.md` with a message naming a marker scheme `/tmp/oversight-confirmed-<sha>-<sid>` where `<sha>` is a hash of the artefact path string. The adopter agent ran `wr-jtbd-mark-oversight-confirmed <path>` with the relative path (matching how the deny-message phrased the helper); the retry failed because the Edit tool's stdin carried the absolute path and rel-vs-abs SHAs differ. The agent had to trial-and-error deduce that the SHA is path-keyed before the helper worked. Concrete trail of opaque markers produced: `/tmp/oversight-confirmed-0bc4e220d529d21e-...`, `/tmp/oversight-confirmed-6052b27c2e39dcd6-...`, `/tmp/oversight-confirmed-66f1a91096c50312-...`. The deny-message named the marker scheme but not its derivation; the adopter had no way to compute or predict the SHA from a path. Same authorial-class as the static-prose surface above — internal tokens (here, runtime-generated path-SHA) leak into the adopter-facing surface with no documented derivation, and the adopter cannot recover without source archaeology.
 
 ## Root Cause Analysis
@@ -39,7 +40,7 @@ Same family as **P294** (README should market from JTBD, not cite JTBD IDs): ado
 ## Dependencies
 
 - **Blocks**: ADR-055 human-oversight confirmation (held until superseded).
-- **Blocked by**: best sequenced after P296 (SKILL.md extraction removes many refs).
+- **Blocked by**: none. P296 closed 2026-06-10, so the agreed sequencing gate has cleared.
 - **Composes with**: P294 (README marketing, no JTBD-ID citation — same adopter-facing-content-should-be-self-contained family), P296 (SKILL.md extraction), ADR-049/051 (plugin-boundary-leakage siblings), P137 (the driver behind ADR-055), P283/ADR-066 (the drain that surfaced this).
 
 ## Related
@@ -56,3 +57,7 @@ Same family as **P294** (README should market from JTBD, not cite JTBD IDs): ado
 ## Human decision — 2026-07-03 (outstanding-questions drain)
 
 **Confirmed**: supersede ADR-055's ID-prefix mechanism via the asking-flow, sequenced AFTER the SKILL-extraction ticket (P296) lands first. Enforcement-detector flip is P296-gated. Author the supersede ADR once P296 completes.
+
+## Superseding decision drafted - 2026-08-18
+
+P296 is closed. ADR-118 now records the already-pinned direction as an unconfirmed draft: published artefacts express the governing substance inline, do not ship the private decision corpus, and retain internal IDs only on source-side provenance surfaces. Implementation remains gated on explicit ratification of that document.
