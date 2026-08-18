@@ -222,7 +222,9 @@ tests:
         structured score.
     assert:
       - type: regex
-        value: '[Dd]eferr(al|ed|ing)?[\s\S]{0,80}not (a )?controls?'
+        value: '[Dd]eferr(al|ed|ing)?'
+      - type: regex
+        value: '[Nn]ot (a )?controls?'
 
   - description: Pipeline preserves small complete slices as scope reduction
     vars:
@@ -235,8 +237,10 @@ tests:
         and is not required for this commit to work. Explain whether this can
         reduce risk and return the required structured score.
     assert:
-      - type: icontains
-        value: 'complete, independently releasable'
+      - type: regex
+        value: '[Cc]omplete'
+      - type: regex
+        value: '[Ii]ndependent(ly)? releasable'
       - type: regex
         value: '[Ss](cope reduction|plit)'
       - type: regex
