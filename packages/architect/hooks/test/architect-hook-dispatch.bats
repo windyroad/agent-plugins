@@ -2,7 +2,7 @@
 
 setup() {
   REPO_ROOT="$(cd "$(dirname "$BATS_TEST_FILENAME")/../../../.." && pwd)"
-  HOOKS="$REPO_ROOT/packages/architect/hooks"
+  HOOKS="${ARCHITECT_PACKAGE_ROOT:-$REPO_ROOT/packages/architect}/hooks"
 }
 
 make_fake_dispatcher() {

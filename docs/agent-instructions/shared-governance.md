@@ -5,6 +5,7 @@ This file is the runtime-neutral source for repo rules that must stay aligned ac
 ## Mandatory Rules
 
 - **Act on obvious, ask only when genuinely ambiguous.** When the user has pinned a direction, the next step is obvious from session context, or RISK-POLICY.md appetite resolves the choice, act and report. Do not add consent gates. When ambiguity is genuine, use the runtime's structured question mechanism; never prose-ask.
+- **Finish requested delivery workflows.** A commit is an intermediate state while the requested workflow has delivery stages remaining. Complete only the stages the user requested or the established workflow includes, verify each outcome, or report the concrete external blocker.
 - **Capture on correction.** Strong-signal corrections are class-of-behaviour evidence. Offer to capture a problem ticket before addressing the operational request.
 - **Do not write project-generated artefacts into runtime config directories.** Generated plans, audits, scratch state, briefings, or agent-output dumps belong under `docs/` or directly in the relevant problem-ticket body. Runtime config directories are for user/runtime configuration, not agent scratch output.
 - **Mechanical SKILL stages must stay mechanical.** If a SKILL contract marks a stage as mechanical, no user decision, policy-authorised silent proceed, agent-owned classification, or silent agent action, do not ask again. The framework already resolved the decision boundary.

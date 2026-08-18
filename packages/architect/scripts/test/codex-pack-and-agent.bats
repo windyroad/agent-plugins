@@ -72,6 +72,8 @@ teardown() {
   [ "$status" -eq 0 ]
   run grep -E '\b(The the|the the|inverse-the)\b' "$TMP/package/skills/create-adr/SKILL.md"
   [ "$status" -ne 0 ]
+  run env ARCHITECT_PACKAGE_ROOT="$(cd "$TMP/package" && pwd -P)" bats "$PACKAGE/hooks/test/architect-hook-dispatch.bats"
+  [ "$status" -eq 0 ]
 }
 
 @test "Codex agent install is exact, owned, and removable" {

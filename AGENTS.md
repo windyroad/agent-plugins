@@ -6,6 +6,8 @@ Plugin-development monorepo publishing `@windyroad/*` Claude Code plugins and Co
 
 **MANDATORY - act on obvious, request_user_input for ambiguous, never prose-ask**: when the user has pinned a direction (yes / go / proceed / act / just do it) or the next step is obvious from session context or RISK-POLICY.md appetite, act and report. When genuinely ambiguous in Plan Mode, use `request_user_input`. Outside Plan Mode, ask one concise direct question only when no reasonable assumption is safe. Do not prose-ask with decorative option lists when a structured question is available.
 
+**MANDATORY - finish requested delivery workflows**: a commit is an intermediate state while the requested workflow has delivery stages remaining. Complete only the stages the user requested or the established workflow includes, verify each outcome, or report the concrete external blocker.
+
 **MANDATORY - capture on correction**: when the user delivers a strong-signal correction, offer to capture a problem ticket via the ITIL problem flow before addressing the operational request. Treat the correction as a durable class-of-behaviour signal.
 
 **MANDATORY - never write project-generated artefacts under `.codex/` or `.claude/`**: runtime config directories are user/runtime-controlled config space. Generated plans, audit logs, scratch state, briefing artefacts, and agent-output dumps belong under `docs/` or directly inline in problem-ticket bodies. Generated runtime surfaces that are intentionally checked in, such as `.codex/agents/wr-architect.toml`, must be produced by repo sync scripts and guarded by tests.

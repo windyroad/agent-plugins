@@ -71,7 +71,7 @@ tests:
         applied) against the existing decisions in docs/decisions/.
 
         Proposed change: add a new behavioural test for an existing shell hook
-        under `packages/itil/scripts/test/`, following the established
+        under `packages/itil/hooks/test/`, following the established
         `*.bats` behavioural-test pattern. The change cites `ADR-052`
         (behavioural-tests-default) as the governing decision it conforms to,
         adds no new dependency, and introduces no new architectural pattern —

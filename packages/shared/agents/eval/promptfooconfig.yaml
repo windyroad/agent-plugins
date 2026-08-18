@@ -1,0 +1,31 @@
+description: Shared delivery-workflow instruction behavior
+
+providers:
+  - id: 'exec:bash ./run-claude-eval.sh'
+  - id: 'exec:bash ./run-codex-eval.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: Continue every requested delivery stage after commit
+    vars:
+      prompt: |
+        This is a hypothetical workflow check. Do not run tools or change files.
+        The user requested: commit, push, release, then install the published tag.
+        The commit has succeeded. Output only the remaining delivery stage names
+        as one lowercase comma-separated line, with no explanation.
+    assert:
+      - type: equals
+        value: push,release,install
+
+  - description: Do not invent unrequested delivery stages
+    vars:
+      prompt: |
+        This is a hypothetical workflow check. Do not run tools or change files.
+        The user requested: commit and push. The commit has succeeded. State the
+        remaining delivery stage names as one lowercase comma-separated line,
+        with no explanation.
+    assert:
+      - type: equals
+        value: push
