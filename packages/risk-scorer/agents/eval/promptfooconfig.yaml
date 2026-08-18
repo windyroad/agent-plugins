@@ -224,7 +224,7 @@ tests:
       - type: regex
         value: '[Dd]eferr(al|ed|ing)?'
       - type: regex
-        value: '[Nn]ot (a )?controls?'
+        value: "([Nn]ot (a )?controls?|[Nn]o risk reduction|[Dd]oes(n't| not)[\\s\\S]*reduc(e|es|ed|ing)[\\s\\S]*risk)"
 
   - description: Pipeline preserves small complete slices as scope reduction
     vars:
