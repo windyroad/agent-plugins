@@ -279,4 +279,4 @@ tests:
       - type: not-contains
         value: 'RISK_SCORES:'
       - type: icontains
-        value: 'unbound'
+        value: 'RISK_CWD'
