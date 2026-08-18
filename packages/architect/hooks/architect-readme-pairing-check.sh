@@ -138,7 +138,7 @@ staged_compendium=$(git diff --cached --name-only 2>/dev/null \
 if [ -z "$staged_compendium" ]; then
     first_adr=$(echo "$staged_adrs" | head -1)
     cat >&2 <<EOF
-{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "architect-readme-pairing-check: '${first_adr}' is staged for commit but 'docs/decisions/README.md' is NOT. Under ADR-078 Option 9 every ADR body change must be paired with its compendium entry refresh (the architect-compendium-update-entry PostToolUse hook does this automatically — if README is unstaged the hook did not run or hit degraded mode). Recover: re-run the ADR edit to re-trigger the hook, OR run 'wr-architect-generate-decisions-compendium && git add docs/decisions/README.md'. Intentional follow-up split: append 'RISK_BYPASS: architect-compendium-deferred' to the commit message. Batch/migration: set BYPASS_COMPENDIUM_REFRESH_GATE=1."}}
+{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "architect-readme-pairing-check: '${first_adr}' is staged for commit but 'docs/decisions/README.md' is NOT. Every ADR body change must be paired with its compendium entry refresh (the architect-compendium-update-entry PostToolUse hook does this automatically — if README is unstaged the hook did not run or hit degraded mode). Recover: re-run the ADR edit to re-trigger the hook, OR run 'wr-architect-generate-decisions-compendium && git add docs/decisions/README.md'. Intentional follow-up split: append 'RISK_BYPASS: architect-compendium-deferred' to the commit message. Batch/migration: set BYPASS_COMPENDIUM_REFRESH_GATE=1."}}
 EOF
     exit 2
 fi

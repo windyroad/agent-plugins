@@ -68,6 +68,10 @@ teardown() {
   [ "$status" -ne 0 ]
   run grep -F 'packages/architect/' "$TMP/package/skills/create-adr/SKILL.md"
   [ "$status" -ne 0 ]
+  run grep -F 'the Needs-Direction handoff rule' "$TMP/package/skills/create-adr/SKILL.md"
+  [ "$status" -eq 0 ]
+  run grep -E '\b(The the|the the|inverse-the)\b' "$TMP/package/skills/create-adr/SKILL.md"
+  [ "$status" -ne 0 ]
 }
 
 @test "Codex agent install is exact, owned, and removable" {

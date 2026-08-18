@@ -72,7 +72,8 @@ esac
 # Must be a numbered ADR file (NNN-...).
 echo "$base" | grep -qE '^[0-9]+-' || exit 0
 
-adr_id_padded=$(echo "$base" | grep -oE '^[0-9]+')   # zero-padded form for display (ADR-049)
+# Preserve the zero-padded identifier for display.
+adr_id_padded=$(echo "$base" | grep -oE '^[0-9]+')
 adr_id=$((10#$adr_id_padded))                        # numeric form for sort comparison (49)
 
 # Resolve repo root so the README path + git staging are stable regardless of

@@ -1,7 +1,9 @@
 ---
 status: "proposed"
 date: 2026-08-18
-human-oversight: unconfirmed
+human-oversight: confirmed
+oversight-date: 2026-08-18
+oversight-note: "2026-08-18 - Tom Howard approved Option 1: published plugin artefacts express governing rules inline and omit source-repository identifiers."
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent]
 informed: [Windy Road plugin users, Windy Road plugin developers]

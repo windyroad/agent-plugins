@@ -231,7 +231,8 @@ mk_existing_adr() {
   [ "$status" -eq 0 ]                              # contract: cold path still exits 0
   [ ! -f "$(expected_marker "$adr")" ]             # no marker written
   [[ "$output" == *"no candidate session id"* ]]   # loud, not silent
-  [[ "$output" == *"P368"* ]]
+  [[ "$output" == *"Start a fresh session"* ]]
+  [[ "$output" == *"re-run this shim"* ]]
 }
 
 # ── Non-Edit/Write tool calls always exit 0 silently ────────────────────

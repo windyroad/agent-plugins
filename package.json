@@ -48,6 +48,7 @@
     "sync:shim-wrappers": "bash scripts/sync-shim-wrappers.sh",
     "check:shim-wrappers": "bash scripts/sync-shim-wrappers.sh --check",
     "check:executable-modes": "bash scripts/check-executable-modes.sh",
+    "check:architect-published-ids": "bash packages/architect/scripts/check-published-internal-ids.sh",
     "version": "changeset version && node scripts/sync-plugin-manifests.mjs && node scripts/sync-codex-plugin-manifests.mjs && node scripts/sync-codex-agents.mjs",
     "release": "changeset publish",
     "release:watch": "bash scripts/release-watch.sh",

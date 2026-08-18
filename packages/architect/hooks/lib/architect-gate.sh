@@ -61,7 +61,7 @@ check_architect_gate() {
     fi
   fi
 
-  ARCHITECT_GATE_REASON="No architect review marker found for this session. Delegate to wr-architect:agent via the Agent tool (subagent_type: 'wr-architect:agent') so the architect can review and create the marker. NOTE (P400): a verdict upgrade after an ISSUES FOUND review must be a FRESH Agent spawn of wr-architect:agent whose output leads with '**Architecture Review: PASS**' — a SendMessage resume of the same architect agent does NOT fire the marker hook, so a clean PASS from a resumed agent leaves the marker unwritten and this edit stays blocked. If you already hold a genuine PASS, assert the marker manually: touch /tmp/architect-reviewed-\$SID && rm -f /tmp/architect-reviewed-\$SID.hash (SID = newest architect-plan-reviewed-* / architect-announced-* basename)."
+  ARCHITECT_GATE_REASON="No architect review marker found for this session. Delegate to wr-architect:agent via the Agent tool (subagent_type: 'wr-architect:agent') so the architect can review and create the marker. After an ISSUES FOUND verdict, obtain the upgraded PASS from a fresh wr-architect:agent spawn: resuming the prior agent does not fire the completion hook and therefore cannot write the marker. If you already hold a genuine PASS, assert the marker manually: touch /tmp/architect-reviewed-\$SID && rm -f /tmp/architect-reviewed-\$SID.hash (SID = newest architect-plan-reviewed-* / architect-announced-* basename)."
   return 1  # No marker, deny
 }
 

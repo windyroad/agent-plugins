@@ -49,11 +49,11 @@ teardown() {
 # (a SendMessage resume does NOT fire the marker hook), or the manual marker
 # assertion. Without this directive the deny message is a dead-end for the
 # most common recovery flow.
-@test "ARCHITECT_GATE_REASON documents SendMessage-resume recovery when no marker" {
+@test "ARCHITECT_GATE_REASON documents resumed-agent recovery when no marker" {
   ARCHITECT_GATE_REASON=""
   check_architect_gate "$TEST_SESSION" || true
-  [[ "$ARCHITECT_GATE_REASON" == *"SendMessage"* ]]
-  [[ "$ARCHITECT_GATE_REASON" == *"FRESH Agent spawn"* ]]
+  [[ "$ARCHITECT_GATE_REASON" == *"resuming the prior agent does not fire"* ]]
+  [[ "$ARCHITECT_GATE_REASON" == *"fresh wr-architect:agent spawn"* ]]
   [[ "$ARCHITECT_GATE_REASON" == *"touch /tmp/architect-reviewed-"* ]]
   [[ "$ARCHITECT_GATE_REASON" == *"rm -f /tmp/architect-reviewed-"* ]]
 }

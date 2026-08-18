@@ -111,7 +111,7 @@ if [ -z "$candidates" ]; then
     echo "  NO oversight marker was written for: ${ABS_PATH}"
     echo "  The oversight-marker-discipline hook will DENY the 'human-oversight: confirmed' Edit"
     echo "  until a session announce marker exists. Start a fresh session, or point SESSION_MARKER_DIR"
-    echo "  at a dir containing a *-announced-<sid> file, then re-run this shim (P368)."
+    echo "  at a dir containing a *-announced-<sid> file, then re-run this shim."
   } >&2
   exit 0
 fi

@@ -67,7 +67,7 @@ NOTE: these exclusions are READ tolerance — the architect gate skips
 user edits to these paths. They are NOT agent write targets. Never
 write project-generated artefacts (plans, audits, scratch state) under
 .claude/ — that is user-controlled config space. Project-generated
-content belongs under docs/ or directly in problem-ticket bodies (P131).
+content belongs under docs/ or directly in problem-ticket bodies.
 HOOK_OUTPUT
     mark_announced "architect" "$SESSION_ID"
   fi

@@ -36,6 +36,8 @@
     "!agents/eval/",
     "!agents/test/",
     "!hooks/test/",
+    "!scripts/check-published-internal-ids.sh",
+    "!scripts/sync-codex-skills.mjs",
     "!scripts/test/",
     "!skills/*/test/"
   ]

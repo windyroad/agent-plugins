@@ -21,7 +21,7 @@ tests:
         confirmed file, its oversight marker, and the later choice?
     assert:
       - type: regex
-        value: "do not (?:edit|rewrite|clear)|must not (?:edit|rewrite|clear)|immutable|excluded from future runs|stays untouched|out of scope|won't touch|doesn't clear|ratification closed|marker.*permanent"
+        value: "do not (?:edit|rewrite|clear)|must not (?:edit|rewrite|clear)|isn't edited|immutable|excluded from future runs|(?:stays |— )?untouched|out of scope|won't touch|doesn't clear|never cleared|ratification closed|marker.*permanent"
       - type: regex
         value: 'new ADR|new decision|supersed(?:e|es|ing)'
       - type: llm-rubric

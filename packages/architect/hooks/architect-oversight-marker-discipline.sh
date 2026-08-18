@@ -156,7 +156,7 @@ cat <<EOF
   "hookSpecificOutput": {
     "hookEventName": "PreToolUse",
     "permissionDecision": "deny",
-    "permissionDecisionReason": "BLOCKED: '${BASENAME}' is about to receive 'human-oversight: confirmed' but no substance-confirm evidence marker exists for this ADR in this session (P348 / ADR-066). The marker '/tmp/oversight-confirmed-<sha>-<sid>' is written by 'wr-architect-mark-oversight-confirmed <adr-path>' immediately after an AskUserQuestion lands the user's substance-confirm answer. If you are an AFK iter subprocess without AskUserQuestion access, write 'human-oversight: unconfirmed' instead — the drain (/wr-architect:review-decisions) will promote it interactively. To recover this Edit/Write: surface the substance-confirm AskUserQuestion to the user, call wr-architect-mark-oversight-confirmed with this ADR's path, then retry."
+    "permissionDecisionReason": "BLOCKED: '${BASENAME}' is about to receive 'human-oversight: confirmed' but no substance-confirm evidence marker exists for this ADR in this session. The marker '/tmp/oversight-confirmed-<sha>-<sid>' is written by 'wr-architect-mark-oversight-confirmed <adr-path>' immediately after an AskUserQuestion lands the user's substance-confirm answer. If you are an AFK iter subprocess without AskUserQuestion access, write 'human-oversight: unconfirmed' instead — the drain (/wr-architect:review-decisions) will promote it interactively. To recover this Edit/Write: surface the substance-confirm AskUserQuestion to the user, call wr-architect-mark-oversight-confirmed with this ADR's path, then retry."
   }
 }
 EOF
