@@ -2,26 +2,17 @@
   "hooks": {
     "SessionStart": [
       { "matcher": "startup", "hooks": [
-        { "type": "command", "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/codex-agent.mjs --session-start" },
-        { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-oversight-nudge.sh" }
+        { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-dispatch.sh session-start" }
       ] }
     ],
     "UserPromptSubmit": [
-      { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-detect.sh" }] },
-      { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/staleness-check.sh" }] }
+      { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-dispatch.sh user-prompt" }] }
     ],
     "PreToolUse": [
-      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-enforce-edit.sh" }] },
-      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-oversight-marker-discipline.sh" }] },
-      { "matcher": "ExitPlanMode", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-plan-enforce.sh" }] },
-      { "matcher": "Bash", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-readme-pairing-check.sh" }] }
+      { "matcher": "Bash|Edit|Write|ExitPlanMode", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-dispatch.sh pre-tool" }] }
     ],
     "PostToolUse": [
-      { "matcher": "Agent", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-mark-reviewed.sh" }] },
-      { "matcher": "collaborationspawn_agent|collaborationinterrupt_agent|spawn_agent|close_agent|multi_agent_v1__spawn_agent|multi_agent_v1__close_agent", "hooks": [{ "type": "command", "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/codex-agent-completion.mjs" }] },
-      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-refresh-hash.sh" }] },
-      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-compendium-update-entry.sh" }] },
-      { "matcher": "Agent|Bash|Skill", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-slide-marker.sh" }] }
+      { "matcher": "Agent|Bash|Edit|Skill|Write|collaborationspawn_agent|collaborationinterrupt_agent|spawn_agent|close_agent|multi_agent_v1__spawn_agent|multi_agent_v1__close_agent", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-dispatch.sh post-tool" }] }
     ]
   }
 }

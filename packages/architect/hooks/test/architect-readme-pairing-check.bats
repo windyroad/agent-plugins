@@ -137,7 +137,9 @@ run_commit_hook_payload() {
 
 @test "registered in hooks.json as PreToolUse Bash (criterion 6)" {
   HOOKS_JSON="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)/hooks.json"
-  run jq -e '.hooks.PreToolUse[] | select(.matcher=="Bash") | .hooks[] | select(.command | test("architect-readme-pairing-check"))' "$HOOKS_JSON"
+  run jq -e '.hooks.PreToolUse[] | select(.matcher | test("Bash")) | .hooks[] | select(.command | test("architect-dispatch[.]sh pre-tool"))' "$HOOKS_JSON"
+  [ "$status" -eq 0 ]
+  run grep -F "architect-readme-pairing-check.sh" "$(dirname "$HOOKS_JSON")/architect-dispatch.sh"
   [ "$status" -eq 0 ]
 }
 

@@ -294,6 +294,8 @@ SHIM
 
 @test "registered in hooks.json on PostToolUse Edit|Write (criterion 9)" {
   HOOKS_JSON="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)/hooks.json"
-  run jq -e '.hooks.PostToolUse[] | select(.matcher | test("Edit")) | .hooks[] | select(.command | test("architect-compendium-update-entry"))' "$HOOKS_JSON"
+  run jq -e '.hooks.PostToolUse[] | select(.matcher | test("Edit")) | .hooks[] | select(.command | test("architect-dispatch[.]sh post-tool"))' "$HOOKS_JSON"
+  [ "$status" -eq 0 ]
+  run grep -F "architect-compendium-update-entry.sh" "$(dirname "$HOOKS_JSON")/architect-dispatch.sh"
   [ "$status" -eq 0 ]
 }
