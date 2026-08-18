@@ -132,6 +132,16 @@ mk_adr() {
   grep -q '^\*\*Total ADRs:\*\* 5 (2 in-force, 3 historical)$' "$out"
 }
 
+@test "superseded filename overrides immutable accepted frontmatter" {
+  mk_adr "015-old.superseded.md" "accepted" "Old Historical"
+  bash "$SCRIPT" "$DIR/docs/decisions" >/dev/null 2>&1
+  local out="$DIR/docs/decisions/README.md" hist line
+  hist=$(grep -n '^## Historical decisions' "$out" | cut -d: -f1)
+  line=$(grep -n '^### ADR-015 ' "$out" | cut -d: -f1)
+  [ "$line" -gt "$hist" ]
+  grep -A1 '^### ADR-015 ' "$out" | grep -q '^\*\*Status:\*\* superseded'
+}
+
 @test "compendium omits historical section when there are no historical ADRs" {
   mk_adr "010-alpha.proposed.md" "proposed" "Alpha"
   bash "$SCRIPT" "$DIR/docs/decisions" >/dev/null 2>&1

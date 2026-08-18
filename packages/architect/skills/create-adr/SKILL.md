@@ -49,7 +49,7 @@ Resolve each field via the following dispatch. **The order is load-bearing** —
 
 **Inferred fields (no ask, no advisory needed)**:
 
-- **supersedes** (frontmatter): empty list by default; populated only via Step 6 supersession handling when the user explicitly cites a superseded decision.
+- **supersedes** (frontmatter): empty list by default; populated only via Step 5c supersession handling when the user explicitly cites a superseded decision.
 
 **Stderr advisory contract**: each derived field emits a SINGLE line to stderr (NOT stdout, NOT in the ADR body) via the shared helper's `emit_stderr_advisory` function in `packages/architect/lib/derive-first-dispatch.sh`. The canonical format produced by the helper:
 
@@ -251,18 +251,7 @@ options:
   - ...one entry per considered option
 ```
 
-**Born-confirmed marker write (ADR-066 — tightened by P340 amendment + structurally gated by ADR-110).** The marker write fires ONLY when the substance-confirm answer specifies a substantive option from the considered-options set AND that option matches the option the draft was authored against. On a substantive match, IMMEDIATELY call the marker-evidence helper THEN insert the two lines:
-
-```bash
-wr-architect-mark-oversight-confirmed docs/decisions/<NNN>-<slug>.proposed.md
-```
-
-```yaml
-human-oversight: confirmed
-oversight-date: YYYY-MM-DD   # today
-```
-
-The `wr-architect-mark-oversight-confirmed` call writes the session-scoped evidence marker (`/tmp/oversight-confirmed-<sha>-<sid>`) that the `architect-oversight-marker-discipline.sh` PreToolUse hook reads to authorise the subsequent Edit/Write — without the helper call, the hook will DENY the marker write. AFK iter subprocesses spawned via `claude -p` have no `AskUserQuestion` access; they MUST write `human-oversight: unconfirmed` instead (the AFK fallback enum value codified in ADR-110), which the drain (`/wr-architect:review-decisions`) later promotes interactively. Calling the helper without a real user substance-confirm event is the P348 hollow-marker bug — every legitimate marker write traces back to an `AskUserQuestion` answer in the same turn.
+**Defer the marker write until the draft is final.** A matching substance-confirm answer authorises confirmation, but `human-oversight: confirmed` is the final content write to the ADR. Complete the retitle, optional draft-quality edits, and any `supersedes:` declaration first, then write the marker in Step 5d. AFK iter subprocesses spawned via `claude -p` have no `AskUserQuestion` access; they MUST leave `human-oversight: unconfirmed` for the interactive drain.
 
 **ADR-013 Rule 6 carve-out audit (P352, 2026-06-06 amendment)**: the universal AFK default is queue-and-continue. This Step 5 substance-confirm HALT-and-write-`human-oversight: unconfirmed` shape is a documented carve-out, authorised by **ADR-074** (Confirm decision substance before building dependent work). Rationale: an ADR with `human-oversight: confirmed` enters the world born-confirmed (it does not appear in `/wr-architect:review-decisions`' unoversighted set), so dependent work — every implementation that cites this ADR as authority — would be built on substance that was never user-affirmed. AFK writing `human-oversight: unconfirmed` IS the queue-and-continue shape: the loop continues; the substance-confirm decision is queued to the next interactive drain. Persona-correct for JTBD-006 ("queued for my return, not guessed at"); the carve-out is from the auto-confirm shape, not from queue-and-continue itself.
 
@@ -275,14 +264,12 @@ The `wr-architect-mark-oversight-confirmed` call writes the session-scoped evide
 
 This is NOT a soft "warn and proceed" path — the marker only ever writes when the draft on disk encodes the user's substantive pick. Mismatch is a re-draft trigger, not an override.
 
-**What the marker means.** This is the load-bearing born-confirmed gate: an ADR recorded through create-adr enters the world already human-oversighted (it does not appear in `/wr-architect:review-decisions`' unoversighted set) ONLY because the substance-confirm fire above explicitly affirmed the chosen option. Do NOT write the marker if the user has not confirmed substance (rejected / still-iterating ADRs stay unmarked). The marker is orthogonal to `status:` — a `proposed` ADR can be `human-oversight: confirmed`.
+**Retitle-after-decision check (P354 — ADR-044 category-4 silent-framework).** Before the marker write, check the on-disk filename slug for a question-shape pattern (`-vs-`, `should-`, `whether-`, `-or-`). If matched, the title was derived at intake against a question-shaped problem-statement and must be retitled to the chosen-option's outcome shape now that the substance is locked in. The convention is named in Step 2a above.
 
-**Retitle-after-decision check (P354 — ADR-044 category-4 silent-framework).** After the marker write lands, check the on-disk filename slug for a question-shape pattern (`-vs-`, `should-`, `whether-`, `-or-`). If matched, the title was derived at intake against a question-shaped problem-statement and must be retitled to the chosen-option's outcome shape now that the substance is locked in. The convention is named in Step 2a above.
-
-This step is **mechanical — no AskUserQuestion fires** (per P132 inverse-P078 guard). The chosen option is now known from the substance-confirm answer just above; derive the outcome slug from the chosen-option short name via the same `derive_kebab_slug` helper Step 2's Title derivation uses (`packages/architect/lib/derive-first-dispatch.sh`). Sequence (ordered to preserve marker-discipline hook semantics — the marker-introducing Edit must land BEFORE `git mv`):
+This step is **mechanical — no AskUserQuestion fires** (per P132 inverse-P078 guard). The chosen option is now known from the substance-confirm answer just above; derive the outcome slug from the chosen-option short name via the same `derive_kebab_slug` helper Step 2's Title derivation uses (`packages/architect/lib/derive-first-dispatch.sh`). Sequence:
 
 1. Derive `new_slug = derive_kebab_slug "<chosen option short name>"`.
-2. Edit the H1 in the on-disk file to the new outcome shape (H1 stays human-readable Title Case; the slug is for the filename). The `human-oversight: confirmed` line is already in `OLD_CONTENT` so `architect-oversight-marker-discipline.sh` allows this Edit per its "old content already had the marker" branch.
+2. Edit the H1 in the on-disk file to the new outcome shape (H1 stays human-readable Title Case; the slug is for the filename).
 3. `git mv docs/decisions/<NNN>-<old-slug>.proposed.md docs/decisions/<NNN>-<new-slug>.proposed.md` (Bash command — no Edit/Write hook fires; rename is captured as a rename in git history).
 4. Emit the I2-isomorphic stderr advisory: `create-adr: retitled <NNN>-<old-slug>.proposed.md -> <NNN>-<new-slug>.proposed.md from chosen-option '<short-name>'; git mv reversible via inverse rename.`
 5. The subsequent compendium regen below picks up the new filename automatically.
@@ -293,14 +280,37 @@ If the on-disk slug does NOT match a question-shape pattern (already outcome-sha
 
 #### 5b. Draft-quality review fire (optional, after 5a passes)
 
-After the substance-confirm fire passes and the marker is written, fire a separate narrow `AskUserQuestion` for draft-quality review:
+After the substance-confirm fire passes, fire a separate narrow `AskUserQuestion` for draft-quality review before writing the marker:
 
 1. Does the problem statement accurately capture the situation?
 2. Are the pros/cons fair and complete?
 3. Are the confirmation criteria testable?
 4. Should anyone else be listed as consulted or informed?
 
-Apply any feedback by editing the file. This fire is OPTIONAL — when the agent has high confidence the prose is sound and the consulted/informed list is complete, this fire MAY be skipped. The draft-quality review does NOT gate the marker — the marker writes (or doesn't) on the substance-confirm answer alone. Surfacing a draft-quality fire after marker-write is correct; gating the marker on draft-quality answers is what P340 prohibits.
+Apply any feedback by editing the file. This fire is OPTIONAL — when the agent has high confidence the prose is sound and the consulted/informed list is complete, this fire MAY be skipped. It runs before the marker write because a confirmed ADR is immutable. Draft-quality answers do not decide whether confirmation is allowed; the earlier substance-confirm answer does.
+
+#### 5c. Prepare supersession (if applicable)
+
+If this decision replaces an existing one:
+
+1. Add `supersedes: [NNN-old-decision-title]` to the new decision's frontmatter.
+2. Rename the old decision file from `.accepted.md` (or `.proposed.md`) to `.superseded.md` using `git mv`.
+3. Do not edit the old decision's frontmatter or body. Its content is the immutable historical record; the filename and the new decision's `supersedes:` entry carry the lifecycle transition. This removes the P057 staging trap because there is no post-rename edit to re-stage.
+
+#### 5d. Write the confirmation marker last
+
+Only after every draft edit is complete, call the marker-evidence helper and insert the confirmation lines:
+
+```bash
+wr-architect-mark-oversight-confirmed docs/decisions/<NNN>-<slug>.proposed.md
+```
+
+```yaml
+human-oversight: confirmed
+oversight-date: YYYY-MM-DD   # today
+```
+
+The helper writes the session-scoped evidence marker consumed by `architect-oversight-marker-discipline.sh`. Calling it without a real substance-confirm event is forbidden. Once these lines land, do not edit the ADR body or clear the marker; a later choice requires a new superseding ADR.
 
 **Refresh the decisions compendium (ADR-077).** After the ADR file is written and any born-confirmed marker is applied, regenerate `docs/decisions/README.md` so the architect-agent routine load surface includes the new entry. Run:
 
@@ -310,14 +320,5 @@ git add docs/decisions/README.md
 ```
 
 The compendium is the architect agent's primary load surface per ADR-077; skills own keeping it fresh. The `architect-compendium-refresh-discipline.sh` PreToolUse hook is the safety-net backstop — it will DENY a commit that stages the new `docs/decisions/<NNN>-*.md` without a matching `docs/decisions/README.md`. Regenerating here makes that hook a no-op on the happy path.
-
-### 6. Handle supersession (if applicable)
-
-If the user mentions this decision replaces an existing one:
-1. Add `supersedes: [NNN-old-decision-title]` to the new decision's frontmatter
-2. Rename the old decision file from `.accepted.md` (or `.proposed.md`) to `.superseded.md` using `git mv`
-3. Update the old decision's frontmatter status to `superseded`
-4. Add a "Superseded by" section to the old decision referencing the new one
-5. **Re-stage the renamed file explicitly after the `Edit` tool runs**: `git add docs/decisions/<NNN>-<title>.superseded.md`. `git mv` stages only the rename — the subsequent frontmatter and "Superseded by" edits must be added again before commit, or they leak into the next commit (P057 staging trap).
 
 $ARGUMENTS

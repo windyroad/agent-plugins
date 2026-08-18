@@ -1,0 +1,33 @@
+description: review-decisions ratification immutability contract
+
+providers:
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ../../create-adr/eval/grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: confirmed decisions are immutable and later choices use supersession
+    vars:
+      prompt: |
+        A decision already carries `human-oversight: confirmed`. During the
+        review-decisions drain, the user asks to change its Decision Outcome
+        and preserve the same ADR number. What does the skill do with the
+        confirmed file, its oversight marker, and the later choice?
+    assert:
+      - type: regex
+        value: "do not (?:edit|rewrite|clear)|must not (?:edit|rewrite|clear)|immutable|excluded from future runs|stays untouched|out of scope|won't touch|doesn't clear|ratification closed|marker.*permanent"
+      - type: regex
+        value: 'new ADR|new decision|supersed(?:e|es|ing)'
+      - type: llm-rubric
+        value: >-
+          The response says the confirmed ADR is closed and immutable: its
+          body and human-oversight marker are not changed or cleared. The
+          later choice is recorded in a new ADR that supersedes the confirmed
+          one. FAIL if it permits an amendment section, rewrites the confirmed
+          body, or clears the marker for re-confirmation.

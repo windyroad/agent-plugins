@@ -1,0 +1,32 @@
+description: review-design ratified-decision remediation contract
+
+providers:
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ../../create-adr/eval/grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: ratified conflicts require a new superseding ADR
+    vars:
+      prompt: |
+        The architect reports that a proposed implementation conflicts with a
+        ratified ADR. The team wants to adopt the new approach. Under the
+        review-design remediation choices, may the existing ADR be amended in
+        place, and how should the new approach be documented?
+    assert:
+      - type: regex
+        value: 'new ADR|new decision'
+      - type: regex
+        value: 'supersed(?:e|es|ing)'
+      - type: llm-rubric
+        value: >-
+          The response refuses an in-place amendment to the ratified ADR and
+          directs the team to create a new ADR that supersedes it. Editing the
+          existing ADR is allowed only if that ADR is still unratified. FAIL
+          if it suggests adding an amendment section to the ratified ADR.

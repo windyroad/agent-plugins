@@ -101,7 +101,7 @@ Present the full compliance report to the user. The architect subagent will repo
 If violations are flagged, use the runtime's structured question mechanism to ask how the user wants to proceed:
 - (a) Address the violations before continuing
 - (b) Proceed with a documented exception
-- (c) Draft a new or amended ADR to legitimise the approach
+- (c) Draft a new ADR that supersedes the ratified decision, or edit the existing ADR only when it is still unratified
 
 Do not make the decision unilaterally — per ADR-013 Rule 1, architectural risk decisions are the user's.
 

@@ -218,7 +218,7 @@ Statuses are reflected in the filename:
 - **`accepted`** (`NNN-title.accepted.md`): Validated through production use. Must be followed in new implementations.
 - **`rejected`** (`NNN-title.rejected.md`): Evaluated and determined not suitable. Preserved for institutional knowledge.
 - **`deprecated`** (`NNN-title.deprecated.md`): No longer recommended, being phased out without specific replacement.
-- **`superseded`** (`NNN-title.superseded.md`): Replaced by a newer decision. Updated with "Superseded by" note.
+- **`superseded`** (`NNN-title.superseded.md`): Replaced by a newer decision. The historical body remains unchanged.
 
 Status transitions:
 ```
@@ -301,7 +301,6 @@ Do not flag an existing amendment section that a change merely touches nearby or
 When decision NNN is superseded by decision MMM:
 1. Create new decision (MMM) with `supersedes: [NNN-old-decision-title]`
 2. Rename old decision file to `.superseded.md`
-3. Update old decision frontmatter status to `superseded`
-4. Add "Superseded by" section referencing the new decision
-5. Update `docs/decisions/README.md` if it exists
+3. Do not edit the old decision's frontmatter or body
+4. Update `docs/decisions/README.md` if it exists
 """

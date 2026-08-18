@@ -174,6 +174,19 @@ run_hook() {
   [ "$line012" -gt "$hist" ]
 }
 
+@test "superseded filename overrides immutable accepted frontmatter" {
+  mk_readme
+  fp=$(mk_adr "012" "accepted" "Twelve")
+  superseded="$PROJ/docs/decisions/012-slug.superseded.md"
+  mv "$fp" "$superseded"
+  run run_hook "$superseded"
+  [ "$status" -eq 0 ]
+  hist=$(grep -n '^## Historical decisions' "$PROJ/docs/decisions/README.md" | cut -d: -f1)
+  line012=$(grep -n '^### ADR-012 ' "$PROJ/docs/decisions/README.md" | cut -d: -f1)
+  [ "$line012" -gt "$hist" ]
+  grep -A1 '^### ADR-012 ' "$PROJ/docs/decisions/README.md" | grep -q '^\*\*Status:\*\* superseded'
+}
+
 @test "migrates an entry from in-force to historical when status flips (criterion 6)" {
   mk_readme
   # ADR-049 currently renders in the in-force fixture section; re-author it as

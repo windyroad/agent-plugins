@@ -107,6 +107,9 @@ adr_status=$(awk '
         sub(/^ +/, ""); sub(/ +$/, ""); print; exit
     }
 ' "$file_path")
+case "$(basename "$file_path")" in
+    *.superseded.md) adr_status="superseded" ;;
+esac
 case "$adr_status" in
     superseded|rejected|deprecated) target_section="historical" ;;
     *) target_section="inforce" ;;
@@ -160,6 +163,12 @@ subprocess_rc=$?
 new_entry=""
 if [ "$subprocess_rc" -eq 0 ] && [ -n "$subprocess_out" ]; then
     new_entry=$(printf '%s' "$subprocess_out" | jq -r '.result // empty' 2>/dev/null)
+fi
+
+# The immutable historical ADR keeps its original frontmatter. The filename is
+# therefore authoritative when a decision is superseded.
+if [ "$adr_status" = "superseded" ] && [ -n "$new_entry" ]; then
+    new_entry=$(printf '%s\n' "$new_entry" | sed -E 's/^\*\*Status:\*\* [^|]*/**Status:** superseded /')
 fi
 
 # Degraded mode (criterion l): no usable emit → warn + leave README unchanged,

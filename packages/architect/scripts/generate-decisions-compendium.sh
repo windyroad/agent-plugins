@@ -229,6 +229,9 @@ emit_entry() {
     id=$(basename "$file" | grep -oE '^[0-9]+')
     title=$(get_title "$file")
     status=$(get_frontmatter_field "$file" "status")
+    case "$(basename "$file")" in
+        *.superseded.md) status="superseded" ;;
+    esac
     oversight=$(get_frontmatter_field "$file" "human-oversight")
     superseded=$(get_frontmatter_field "$file" "supersedes")
     # ADR-066 amendment (P316): when the oversight value is
@@ -312,6 +315,9 @@ in_force_files=()
 historical_files=()
 for f in "${all_files[@]}"; do
     s=$(get_frontmatter_field "$f" "status")
+    case "$(basename "$f")" in
+        *.superseded.md) s="superseded" ;;
+    esac
     case "$s" in
         proposed|accepted)
             in_force_files+=("$f")

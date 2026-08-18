@@ -33,12 +33,11 @@
 #     `human-oversight: unconfirmed` instead — documented ADR-074 carve-out
 #     from the ADR-013 Rule 6 universal queue-and-continue default.
 #   - Step 5a retitle-after-decision (P354 — ADR-044 category-4 silent-
-#     framework): after the marker write, if the on-disk slug matches a
+#     framework): before the marker write, if the on-disk slug matches a
 #     question-shape pattern (`-vs-`, `should-`, `whether-`, `-or-`), the
 #     skill mechanically derives the outcome slug from the chosen-option
-#     short name, edits the H1, then `git mv` — in that order to preserve
-#     `architect-oversight-marker-discipline.sh` hook semantics (the
-#     marker-introducing Edit lands BEFORE `git mv`). Does NOT fire
+#     short name, edits the H1, then `git mv`. Confirmation is written only
+#     after all remaining draft work is complete. Does NOT fire
 #     `AskUserQuestion` (P132 inverse-P078 guard).
 #   - Step 2b multi-decision split AUTO-DEFAULT (ADR-013 Rule 6 carve-out
 #     authorised by ADR-044 cat 4): under non-interactive / AFK mode, when
@@ -399,13 +398,13 @@ tests:
 
   # --- Step 5a retitle-after-decision (P354 — silent-framework) ------------
 
-  - description: Step 5a retitle-after-decision — mechanical no-AskUserQuestion; Edit H1 BEFORE git mv to preserve marker-discipline hook semantics
+  - description: Step 5a retitle-after-decision — mechanical no-AskUserQuestion; retitle before the confirmation marker is written last
     vars:
       prompt: |
         I am the /wr-architect:create-adr Step 5a substance-confirm step.
         The substance-confirm fire just passed; the
-        `wr-architect-mark-oversight-confirmed` helper has run; the
-        `human-oversight: confirmed` line is on disk. The on-disk
+        `wr-architect-mark-oversight-confirmed` helper has NOT run; the
+        `human-oversight: confirmed` line is not yet on disk. The on-disk
         filename is `docs/decisions/079-marketplace-vs-git-source-distribution.proposed.md`
         (the slug is question-shaped — matches the `-vs-` pattern). The
         user picked "Marketplace-only distribution" as the chosen option.
@@ -414,8 +413,8 @@ tests:
         category-4 silent-framework), what does create-adr do next? Does
         the retitle fire `AskUserQuestion` to confirm the new slug? What
         helper derives the new outcome slug? What is the ORDER of
-        operations (Edit the H1 vs `git mv` the file)? Why does the
-        order matter?
+        operations (Edit the H1 vs `git mv` the file), and when is the
+        confirmation marker written?
     assert:
       # Tier A — must be mechanical / no AskUserQuestion.
       - type: regex
@@ -423,22 +422,18 @@ tests:
       # Tier A — must name derive_kebab_slug as the helper.
       - type: regex
         value: 'derive_kebab_slug'
-      # Tier A — must indicate Edit H1 happens BEFORE git mv. LLMs phrase
-      # this many ways: "Edit-before-git mv", "Edit the H1 first", "before
-      # the git mv", numbered list ordering, "load-bearing", "order
-      # matters", "matters because the marker-introducing Edit must land
-      # BEFORE".
+      # Tier A — must indicate Edit H1 happens BEFORE git mv.
       - type: regex
-        value: 'Edit[\s\-]+before|edit[\s\-]+before|before\s+(?:the\s+)?(?:`?git\s+mv|mv)|H1\s+(?:Edit\s+|edit\s+)?(?:first|FIRST|before|BEFORE)|[Ee]dit\s+(?:the\s+)?H1[\s\S]{0,100}(?:then|before|first)|order\s+(?:matters|is\s+load[\s\-]?bearing)|load[\s\-]?bearing|[Mm]ust\s+land\s+(?:BEFORE|before)'
+        value: 'Edit[\s\-]+before|edit[\s\-]+before|before\s+(?:the\s+)?(?:`?git\s+mv|mv)|H1\s+(?:Edit\s+|edit\s+)?(?:first|FIRST|before|BEFORE)|[Ee]dit\s+(?:the\s+)?H1[\s\S]{0,100}(?:then|before|first)'
       # Tier A — must name git mv as the rename mechanism.
       - type: regex
         value: 'git\s+mv'
-      # Tier A — must reference the marker-discipline hook semantics.
+      # Tier A — must leave confirmation until all draft edits are complete.
       - type: regex
-        value: 'architect-oversight-marker-discipline|marker-?discipline|marker-?introducing\s+Edit|old\s+content\s+already\s+had\s+the\s+marker'
+        value: '[Mm]arker[\s\S]{0,80}(?:[Ll]ast|[Ff]inal)|(?:[Ll]ast|[Ff]inal)[\s\S]{0,80}[Mm]arker|[Aa]ll\s+(?:draft\s+)?edits\s+(?:are\s+)?complete'
       # Tier B — semantic invariant: retitle is mechanical (category-4
-      # silent-framework); ordering preserves marker-discipline hook
-      # semantics; derive_kebab_slug derives the new outcome slug.
+      # silent-framework); derive_kebab_slug derives the new outcome slug;
+      # confirmation is the final content write.
       - type: llm-rubric
         value: |
           The response describes Step 5a's retitle-after-decision as a
@@ -448,29 +443,25 @@ tests:
           answer just above). The new outcome slug is derived from the
           chosen-option short name ("Marketplace-only distribution") via
           the shared helper's `derive_kebab_slug` function — the same
-          helper Step 2's Title derivation uses. The ORDER of operations
-          is load-bearing:
+          helper Step 2's Title derivation uses. The ORDER of operations is:
             (1) Edit the H1 in the on-disk file to the new outcome shape
-                FIRST (the `human-oversight: confirmed` line is already
-                in OLD_CONTENT so the `architect-oversight-marker-
-                discipline.sh` PreToolUse hook allows this Edit per its
-                "old content already had the marker" branch).
+                FIRST, while the ADR remains unconfirmed and mutable.
             (2) THEN `git mv` the file from the old question-shape
                 filename to the new outcome-shape filename (Bash command
                 — no Edit/Write hook fires; rename is captured as a
                 rename in git history).
             (3) THEN emit the I2-isomorphic stderr advisory.
-          The order matters because the marker-introducing Edit must
-          land BEFORE the `git mv` — otherwise the post-rename Edit
-          would be the first Edit on the new path, OLD_CONTENT would not
-          contain the marker, and the marker-discipline hook would DENY
-          the Edit. PASS if the response identifies mechanical +
-          derive_kebab_slug helper + H1-Edit-before-git-mv ordering +
-          marker-discipline hook rationale. FAIL if the response says
+            (4) Complete any remaining draft-quality and supersession
+                preparation, then write `human-oversight: confirmed` as
+                the final ADR content change.
+          PASS if the response identifies mechanical + derive_kebab_slug
+          helper + H1-Edit-before-git-mv ordering + marker-last ordering.
+          FAIL if the response says
           the retitle fires `AskUserQuestion` to confirm the new slug,
-          OR says `git mv` happens FIRST then Edit H1 (would trip the
-          marker-discipline hook), OR says the slug is hand-typed rather
-          than derived. Saying it does NOT fire AskUserQuestion PASSES.
+          OR says `git mv` happens FIRST then Edit H1, OR says the slug is
+          hand-typed rather than derived, OR writes the confirmation marker
+          before the retitle/draft is complete. Saying it does NOT fire
+          AskUserQuestion PASSES.
 
   # --- Step 2b multi-decision split AUTO-DEFAULT (ADR-013 Rule 6 carve-out) -
 

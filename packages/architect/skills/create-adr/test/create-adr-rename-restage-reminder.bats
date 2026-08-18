@@ -1,11 +1,11 @@
 #!/usr/bin/env bats
-# Doc-lint guard: create-adr SKILL.md must document the re-stage-after-Edit
-# requirement for ADR supersession renames (Step 6).
+# Doc-lint guard: create-adr SKILL.md must prevent the post-rename edit that
+# originally required re-staging during ADR supersession.
 #
 # Structural assertion — Permitted Exception to the source-grep ban
 # (ADR-005 / P011). The test asserts that the supersession step either
-# warns authors that `git mv` stages only the rename, or instructs them
-# to re-stage the file after editing frontmatter + "Superseded by" section.
+# preserves the old ADR as immutable after `git mv`, eliminating the staging
+# trap instead of documenting a workaround for it.
 #
 # Cross-reference:
 #   P057: docs/problems/057-git-mv-plus-edit-staging-ordering-trap.*.md
@@ -22,17 +22,12 @@ setup() {
   [ -f "$SKILL_FILE" ]
 }
 
-@test "create-adr SKILL.md instructs re-staging the renamed ADR file after Edit (P057)" {
-  # Authors must be told to run `git add <new>` (or equivalent) after editing
-  # the renamed file (supersession adds a `Superseded by` section and a status
-  # frontmatter update).
-  run grep -inE "re-stage|re‑stage|\`git add\`.*after|after.*\`git add\`|git add <new>|git add .*\.superseded\.md|stages only the rename" "$SKILL_FILE"
+@test "create-adr SKILL.md eliminates the post-rename edit staging trap (P057)" {
+  run grep -inE "Do not edit the old decision's frontmatter or body" "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }
 
-@test "create-adr SKILL.md cites P057 on the re-stage requirement (P057)" {
-  # Traceability: the new guidance must cite P057 so reviewers can chase
-  # the fix back to the incident that motivated it.
-  run grep -n "P057" "$SKILL_FILE"
+@test "create-adr SKILL.md cites P057 on eliminating the trap (P057)" {
+  run grep -nE "P057 staging trap.*no post-rename edit" "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }
