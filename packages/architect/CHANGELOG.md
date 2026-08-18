@@ -1,5 +1,11 @@
 # @windyroad/architect
 
+## 0.21.3
+
+### Patch Changes
+
+- 1bd6671: Keep decision-compendium totals aligned when an ADR is added or moves between current and historical sections.
+
 ## 0.21.2
 
 ### Patch Changes
