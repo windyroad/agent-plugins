@@ -193,7 +193,8 @@ entry_existed=0
 tmp_entry=$(mktemp -t architect-entry.XXXXXX)
 tmp_readme=$(mktemp -t architect-readme.XXXXXX)
 backup_readme=$(mktemp -t architect-readme-orig.XXXXXX)
-trap 'rm -f "$tmp_entry" "$tmp_readme" "$backup_readme"' EXIT
+tmp_counts=$(mktemp -t architect-readme-counts.XXXXXX)
+trap 'rm -f "$tmp_entry" "$tmp_readme" "$backup_readme" "$tmp_counts"' EXIT
 cp "$readme" "$backup_readme"
 printf '%s\n' "$new_entry" > "$tmp_entry"
 
@@ -239,6 +240,39 @@ awk -v id="$adr_id" -v section="$target_section" -v entryfile="$tmp_entry" '
     }
     END { if (!done) { print ""; print entry } }
 ' "$tmp_readme" > "$readme"
+
+# Keep the derived aggregate labels aligned with the entry set after an ADR is
+# added or moves between the in-force and historical sections.
+total_count=$(grep -cE '^### ADR-[0-9]+' "$readme")
+inforce_count=$(awk '
+    /^## In-force decisions/ { insec=1; next }
+    /^## Historical decisions/ { insec=0 }
+    insec && /^### ADR-[0-9]+/ { count++ }
+    END { print count+0 }
+' "$readme")
+historical_count=$(awk '
+    /^## Historical decisions/ { insec=1; next }
+    insec && /^### ADR-[0-9]+/ { count++ }
+    END { print count+0 }
+' "$readme")
+awk -v total="$total_count" -v inforce="$inforce_count" -v historical="$historical_count" '
+    /^\*\*Total ADRs:\*\*/ {
+        sub(/[0-9]+ \([0-9]+ in-force, [0-9]+ historical\)/,
+            total " (" inforce " in-force, " historical " historical)")
+    }
+    after_inforce && /^_[0-9]+ ADRs?\./ {
+        sub(/^_[0-9]+ ADRs?\./, "_" inforce " ADR" (inforce == 1 ? "" : "s") ".")
+        after_inforce=0
+    }
+    after_historical && /^_[0-9]+ ADRs?\./ {
+        sub(/^_[0-9]+ ADRs?\./, "_" historical " ADR" (historical == 1 ? "" : "s") ".")
+        after_historical=0
+    }
+    /^## In-force decisions/ { after_inforce=1 }
+    /^## Historical decisions/ { after_historical=1 }
+    { print }
+' "$readme" > "$tmp_counts"
+mv "$tmp_counts" "$readme"
 
 # --- Fail-closed post-condition guard (P367, ADR-078 criterion l) -----------
 # The rewrite must preserve every OTHER ADR's entry and the section structure;

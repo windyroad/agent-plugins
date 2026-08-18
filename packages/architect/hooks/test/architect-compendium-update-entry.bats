@@ -59,6 +59,8 @@ mk_readme() {
 
 Intro prose.
 
+**Total ADRs:** 4 (3 in-force, 1 historical)
+
 ---
 
 ## In-force decisions
@@ -160,6 +162,9 @@ run_hook() {
   [ -n "$line050" ]
   [ "$line049" -lt "$line050" ]
   [ "$line050" -lt "$line051" ]
+  grep -q '^\*\*Total ADRs:\*\* 5 (4 in-force, 1 historical)$' "$PROJ/docs/decisions/README.md"
+  grep -q '^_4 ADRs\._$' "$PROJ/docs/decisions/README.md"
+  grep -q '^_1 ADR\._$' "$PROJ/docs/decisions/README.md"
 }
 
 @test "routes a superseded ADR's entry into the historical section (criterion 6)" {
@@ -199,6 +204,8 @@ run_hook() {
   hist=$(grep -n '^## Historical decisions' "$PROJ/docs/decisions/README.md" | cut -d: -f1)
   line049=$(grep -n '^### ADR-049 ' "$PROJ/docs/decisions/README.md" | cut -d: -f1)
   [ "$line049" -gt "$hist" ]
+  grep -q '^\*\*Total ADRs:\*\* 4 (2 in-force, 2 historical)$' "$PROJ/docs/decisions/README.md"
+  grep -q '^_2 ADRs\._$' "$PROJ/docs/decisions/README.md"
 }
 
 @test "stages docs/decisions/README.md after refresh (criterion: same-commit pairing)" {
