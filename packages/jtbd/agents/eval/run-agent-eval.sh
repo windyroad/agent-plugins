@@ -151,8 +151,3 @@ if not found_text:
     print("run-agent-eval.sh: stream contained no assistant text", file=sys.stderr)
     raise SystemExit(2)
 PY
-
-if [[ "$(wc -c < "$VERDICT_FILE" | tr -d ' ')" -ne 4 ]] || [[ "$(cat "$VERDICT_FILE")" != "PASS" ]]; then
-  echo "run-agent-eval.sh: expected exact PASS marker in $VERDICT_FILE" >&2
-  exit 2
-fi

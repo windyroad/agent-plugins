@@ -41,8 +41,9 @@ description: |
   job citation, and the inverse-P078/P132 over-fire guard ([Unratified
   Dependency] must NOT fire on ambient alignment with no explicit dependency).
 
-# Both fixtures exercise the agent's required global /tmp/jtbd-verdict marker.
-# Serialize them so one run can never consume or overwrite the other's marker.
+# Serialize the fixtures because the agent may write its subordinate global
+# /tmp/jtbd-verdict hook handoff. Promptfoo grades the authoritative inline
+# verdict instead.
 evaluateOptions:
   maxConcurrency: 1
 

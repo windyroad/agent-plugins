@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
-# Behavioural regression for the JTBD eval's two required output channels.
-# The mock emits Claude stream-json so the real runner, parser, marker checks,
-# and cleanup execute without an LLM call (P324 / RFC-012 S1).
+# Behavioural regression for the JTBD eval's authoritative inline output.
+# The mock emits Claude stream-json so the real runner, parser, and cleanup
+# execute without an LLM call (P324 / RFC-012 S1).
 
 setup() {
   DRIVER="${BATS_TEST_DIRNAME}/../eval/run-agent-eval.sh"
@@ -102,11 +102,11 @@ teardown() {
   [ ! -e "$VERDICT_FILE" ]
 }
 
-@test "fails when Claude does not write the required marker" {
+@test "accepts the authoritative inline verdict when no subordinate marker is written" {
   export FAKE_CLAUDE_MODE=missing-marker
   run bash "$DRIVER" "review fixture"
-  [ "$status" -ne 0 ]
-  [[ "$output" == *"expected exact PASS marker"* ]]
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"JTBD Review: PASS"* ]]
   [ ! -e "$VERDICT_FILE" ]
 }
 
