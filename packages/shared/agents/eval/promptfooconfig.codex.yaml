@@ -1,7 +1,7 @@
-description: Shared delivery-workflow instruction behavior
+description: Shared Codex delivery-workflow instruction behavior
 
 providers:
-  - id: 'exec:bash ./run-claude-eval.sh'
+  - id: 'exec:bash ./run-codex-eval.sh'
 
 prompts:
   - '{{prompt}}'
