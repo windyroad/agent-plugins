@@ -1,5 +1,13 @@
 # @windyroad/architect
 
+## 0.21.2
+
+### Patch Changes
+
+- 30db241: Keep confirmed architecture decisions immutable across every authoring and review skill. Changed decisions now require a new superseding record, and confirmation is the final content write.
+- 4c61583: Consolidate the architect lifecycle integration from thirteen command hooks to four event dispatchers without dropping any checks.
+- 816fd58: Make published architect instructions and hook output self-contained by removing source-repository identifiers, with an exact-tarball regression check.
+
 ## 0.21.1
 
 ### Patch Changes
