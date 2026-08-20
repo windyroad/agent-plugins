@@ -1,6 +1,6 @@
 # Problem 164: Latent octal-eval bug in next-ID formula across all 4 ticket-creator skills — `$(( $local_max + 1 ))` fails with "value too great for base" when local_max reaches 099
 
-**Status**: Verification Pending
+**Status**: Closed
 **Origin**: inbound-reported (#273) — Phase 2 scope-expansion surfaced 2026-06-21 by external user report. Phase 1 was internal capture 2026-05-04.
 **Reported**: 2026-05-04 (Phase 1) · 2026-06-21 (Phase 2 reopen — Verifying → Known Error)
 **Fix Released**: Phase 1 — 2026-05-11 (committed; awaiting next plugin release for field verification of the 6 ticket-creator SKILL.md formulas). Phase 2 — released 2026-06-27 in `@windyroad/risk-scorer@0.14.1` (release vehicle `.changeset/p164-phase2-octal-eval-script-surface.md`; the script-surface `10#` fix shipped earlier in 0.13.5/0.14.0 and this changeset documents it; re-survey clean, 22/22 bats GREEN). Awaiting field verification that no ticket-creator surface fires the octal eval at the 008→009 boundary.
@@ -136,3 +136,12 @@ Likely shape: same `10#` prefix applied to each identified script-surface formul
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-027 | proposed | Apply `10#` base-10 prefix to script-surface next-ID formula (P164 Phase 2 octal-eval fix) |
+
+## Verified & Closed
+
+- **Verified**: 2026-07-15 in the field, recorded in the `docs/problems/README.md` Verification Queue cell and drained by the 2026-08-20 retro's Step 4a prior-session evidence pass.
+- **Evidence**: `capture-story` Step 3 ran the next-ID formula against an octal-sensitive `local_max=044`; the `10#` guard yielded STORY-045, where an unguarded octal parse gives **037**.
+
+  > The 2026-07-15 Verification Queue cell this evidence was drained from recorded the unguarded value as `036`. That is arithmetically wrong and the error is corrected here rather than carried forward: `044` in base 8 is 36 decimal, and the formula's `+ 1` makes the unguarded output `037`. Confirmed at close time — `$(( 044 + 1 ))` prints `037`, `$(( 10#044 + 1 ))` prints `045`. The verdict is unchanged either way: both differ from the correct `045`, so the guard is still demonstrated load-bearing.
+- **Upstream leg: already discharged, no new comment posted.** The 2026-07-15 note held the close because the run was barred from outbound comms, and that hold has been carried since. Re-checking the upstream issue at close time shows the obligation was already met earlier: `windyroad/agent-plugins#273` is **CLOSED**, and it carries a 2026-06-21 comment stating "Both fixes shipped in `@windyroad/risk-scorer@0.13.5`" naming this ticket's Phase 2 fix and commit `1e20230c`. Posting a third comment would restate a shipped notice as new on a closed issue — the outbound-credibility failure the external-comms gate scores. Step 7b's grep pre-check matched (both an inbound `**Origin**` and a `## Reported Upstream` section are present), but the idempotency condition it exists to protect was already satisfied.
+- **Recovery**: reopening is not reachable via `/wr-itil:transition-problem` (no `closed → *` direction — see P504); reopen by hand or `git revert`.
