@@ -40,8 +40,13 @@ Superseded by ADR-102 (2026-08-05): maps are no longer copied from an exemplar a
 
 ### Investigation Tasks
 
-- [ ] Fix the two template sources first (ADR-060 line 408 and `docs/story-maps/README.md` line 59) — they are the propagation vector; fixing maps without fixing templates re-opens this.
-- [ ] Sweep the four existing maps to `#767676` borders, add `:focus-visible` (`3px solid #0b3a66`, offset 2px), add viewport meta, and pin the canvas with `:root { color-scheme: light; }` where no dark-mode counterpart exists.
+**Re-grounded 2026-08-20** (user re-reported the contrast failure from a live authoring session; verified against disk rather than taken on report). ADR-102's render pipeline closed most of this: `docs/story-maps/story-map.css` now ships `--line: #767676` (4.54:1), a `:focus-visible` outline at `3px solid var(--focus)` with 2px offset, and a dark-mode counterpart; `docs/story-maps/README.md` no longer teaches a `<style>` block at all (it is now the JSON authoring shape). No `border: 1px solid #<sub-3:1>` survives in any on-disk map.
+
+One template source did not get swept: **`docs/decisions/060-...accepted.md` line 415 still inlines `.slice { border: 1px solid #ccc; padding: 0.5rem; }`** — 1.61:1 on white, against the 3:1 floor of SC 1.4.11, and still load-bearing because the inlined template also sets `text-decoration: none; color: inherit`. It is the surviving propagation vector: an author who reads the ADR rather than the CSS re-inherits the original defect.
+
+- [ ] Strike or correct the inlined `<style>` block at ADR-060 line 415 — the last stale template source (`#767676` matches the shipped CSS; `#949494` is the lightest value that clears 3:1)
+- [x] ~~Fix the two template sources first (ADR-060 line 408 and `docs/story-maps/README.md` line 59) — they are the propagation vector; fixing maps without fixing templates re-opens this.~~ — README source retired by ADR-102; ADR-060 still outstanding, split out above
+- [x] ~~Sweep the four existing maps to `#767676` borders, add `:focus-visible` (`3px solid #0b3a66`, offset 2px), add viewport meta, and pin the canvas with `:root { color-scheme: light; }` where no dark-mode counterpart exists.~~ — superseded: the shared CSS carries a full dark-mode block and every map renders from it
 - [ ] Fix STORY-MAP-001's grid overflow — `repeat(auto-fit, minmax(min(100%, 14rem), 1fr))` or an explicit narrow-viewport collapse.
 - [ ] Catalogue `.task` / `.legend` / `.badge` / `.b-live` / `.b-next` / `.b-later` in the STYLE-GUIDE class vocabulary, or retire them from STORY-MAP-003.
 - [ ] Once the sweep lands, tighten the STYLE-GUIDE's deliberately-hedged wording (it currently says the rule is "normative for new work, not a description of what is currently on disk") to describe disk state.
