@@ -19,6 +19,8 @@ Fix direction (either or both, per the report): (a) queue entries record the cit
 
 - Loop-end outstanding_questions entries presented with framing that no longer matches the cited decision's current revision.
 - Without an accidental fresh read, a rework decision contradicting current decision text can be produced.
+- **Second observed hit, 2026-08-20 — the entry was not merely stale-framed, it was already answered.** The queue's P474 entry, written 2026-07-29, asked whether ADR-090's invalidation trigger stands as substance-only. It was ratified the next day (2026-07-30, commit `dd78d937`): ADR-090's Decision Outcome was reconciled to "Any SUBSTANCE change", its amendment recorded the maintainer's verbatim *"I agree with the narrowing"*, and the ADR took `human-oversight: confirmed` / `oversight-date: 2026-07-30`. Nothing dequeued the entry. Three weeks later it surfaced at SessionStart, its claim ("the Decision Outcome still reads *Any change*") was repeated to the maintainer as established fact without opening the ADR, and they were asked to re-decide a settled question. They answered consistently, so no wrong rule was adopted — but a decision event was manufactured out of a settled one.
+- That hit raises the severity of the class: a stale entry that is merely mis-framed produces a bad adjudication, which a fresh read catches. An entry that is already **answered** produces a false consent record, which nothing catches, because the answer looks correct. The revision pin this ticket asks for must therefore also carry a resolved-check, not only a revision comparison.
 
 ## Workaround
 

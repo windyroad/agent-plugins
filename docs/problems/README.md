@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-20 **P507 captured (retro)** - the SessionStart surfacers print the queue and nothing makes anyone drain it; a ratification queued since July survived another ten turns untouched, which falsifies the "fix template that already works" premise P375 builds on (via /wr-retrospective:run-retro).
+> Last reviewed: 2026-08-20 **P508 captured** - the propose-fix gate still writes a standalone RFC document, seven weeks after the decision that made the fix proposal a release row on a story map; the two mechanisms are live at once and the superseded one is the automatic default (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -14,6 +14,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 40 | P499 | Architect ADR pairing hook reads the task checkout instead of the command checkout | 20 (Very High) | Known Error | S | 2026-08-17 | incident-linked |
 | 40 | P477 | Codex collaboration completion bypasses the risk-marker bridge | 20 (Very High) | Open | S | 2026-08-12 | internal |
 | 10 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Open | L | 2026-08-20 | internal |
+| 10 | P508 | The fix proposal still instantiates a standalone RFC document, after ADR-103 made it a release row | 20 (Very High) | Open | L | 2026-08-20 | internal |
 | 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 (Very High) | Known Error | XL | 2026-05-03 | internal |
 | | | **Tier 1 — Inbound-reported (an external user actually hit this)** | | | | | |
 | 24 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | 12 (High) | Known Error | S | 2026-07-06 | inbound-reported (#169) |
