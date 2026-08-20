@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-20 **P502 + P503 captured, P402 reopened** - a transcript audit found three live paths by which a passing review fails to record its gate marker, plus a matcher gap that lets Bash-routed writes skip every edit gate (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-08-20 **P504 + P505 captured (retro)** - no skill surface reopens a closed ticket and the closure note prescribes a command that refuses; seven SKILL.md files breach the 50 KB budget with no path from the cadenced measurement to work (via /wr-retrospective:run-retro).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -38,6 +38,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 4.5 | P448 | work-problems post-release K→V auto-transition has no release-vehicle class for repo-local fixes in consumer repos (no npm release) | 9 (Medium) | Open | M | 2026-07-15 | inbound-reported (#320) |
 | 4.5 | P449 | I13 RFC-trace predicate + manage-problem I13 gate are not adopter-aware — fire no-rfc-trace in repos without an RFC tier | 9 (Medium) | Open | M | 2026-07-15 | inbound-reported (#321) |
 | 4.5 | P451 | work-problems Step 5 iter/pre-flight dispatch exceeds the interactive-harness 10-minute foreground Bash ceiling (SIGTERM + 0-byte JSON) | 9 (Medium) | Open | M | 2026-07-15 | inbound-reported (#327) |
+| 3 | P505 | Seven SKILL.md files breach the 50 KB budget, and nothing converts the measurement into work | 12 (High) | Open | L | 2026-08-20 | internal |
 | 3 | P427 | work-problems Step 5 can double-dispatch the same ticket to concurrent iters — no per-ticket lock / liveness / dirty-tree preflight | 6 (Medium) | Open | M | 2026-07-06 | inbound-reported (#343) |
 | 3 | P440 | wr-voice-tone:agent has no project-idiom oracle beyond the guide — passes phrases that violate the author's personal voice | 6 (Medium) | Open | M | 2026-07-06 | inbound-reported (#316) |
 | 3 | P452 | outstanding_questions queue entries carry no decision-revision pin — stale entries outlive amendments and get adjudicated against retired mechanisms | 6 (Medium) | Open | M | 2026-07-15 | inbound-reported (#338) |
@@ -70,6 +71,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P293 | Generalise ADR-019 preflight from "fetch + ff-only divergence" to "get the repo into a clean state before starting" | 6 (Medium) | Known Error | M | 2026-05-25 | internal |
 | 6 | P305 | Post-Edit silent revert of working-tree files before commit — potential silent-work-loss hazard | 6 (Medium) | Known Error | M | 2026-05-26 | internal |
 | 6 | P409 | Back-fill legacy RFCs still carrying empty `stories: []` | 6 (Medium) | Known Error | M | 2026-07-03 | internal |
+| 6 | P504 | No skill surface reopens a closed problem ticket, and closure notes prescribe a command that refuses | 6 (Medium) | Open | S | 2026-08-20 | internal |
 | 6 | P466 | The story-map HTML template ships sub-3:1 borders, no focus ring, and no viewport meta | 6 (Medium) | Open | S | 2026-07-26 | internal |
 | 6 | P468 | architect-mark-reviewed misses a genuine PASS whose verdict line is a markdown heading rather than bold | 6 (Medium) | Open | S | 2026-07-26 | internal |
 | 6 | P469 | style-guide and voice-tone reviewer agents spawn without Bash, so they cannot write the verdict marker their own gate reads | 6 (Medium) | Open | S | 2026-07-26 | internal |
