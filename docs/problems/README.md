@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-20 **P506 captured** - the version nudge compares session-to-disk and never asks the registry, so a marketplace clone 989 commits behind reported as current and an adopter repo emitted a story map in a format retired three months ago (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-08-20 **P507 captured (retro)** - the SessionStart surfacers print the queue and nothing makes anyone drain it; a ratification queued since July survived another ten turns untouched, which falsifies the "fix template that already works" premise P375 builds on (via /wr-retrospective:run-retro).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -48,6 +48,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | | | **Tier 2 — Internal** | | | | | |
 | 16 | P417 | docs/stories/README.md Rankings/Done never reconciled — stale for the whole corpus | 8 (Medium) | Known Error | S | 2026-07-04 | internal |
 | 16 | P420 | check-briefing-budgets.sh crashes with `must_split[@]: unbound variable` on empty arrays under macOS default bash 3.2 | 8 (Medium) | Known Error | S | 2026-07-05 | internal |
+| 15 | P507 | SessionStart surfacers emit a directive with nothing enforcing the drain — surfacing is not draining | 15 (High) | Open | M | 2026-08-20 | internal |
 | 12 | P415 | External-comms commit-msg gate reviews only the first `-m` of a multi-`-m` git commit, causing deny-after-PASS on multi-paragraph commits | 6 (Medium) | Known Error | S | 2026-07-03 | internal |
 | 12 | P179 | Agent defers requested work into untracked phases — phases are fine, but unticketed phases never get implemented | 12 (High) | Known Error | M | 2026-05-10 | internal |
 | 12 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 (High) | Known Error | M | 2026-06-10 | internal |

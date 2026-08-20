@@ -102,6 +102,22 @@ Mapped which past reviews actually wrote their marker (by key, in `$TMPDIR/claud
 - [ ] Confirm whether background/forced-async `Agent` dispatch fires the PostToolUse mark hook at all, and if so, under which session_id (background-agent SID vs parent live SID) the marker lands.
 - [ ] Determine whether the fix is (a) a foreground/synchronous review path the mark hook can observe, or (b) a multi-SID marker-write (cf. P260 Option-C bounded multi-UUID write) so the marker lands under the live session's SID regardless of which context fired the hook.
 - [ ] Create reproduction test
+- [ ] Re-word the gate's remediation text: `run_in_background: false` is not universally reachable (see the 2026-08-20 evidence below), so the message must name a path an agent in that harness can actually take.
+
+### Evidence 2026-08-20 — the prescribed remediation is unreachable in some harnesses
+
+The push gate blocked twice in one interactive session with:
+
+> Dispatch the scorer SYNCHRONOUSLY (run_in_background: false): a background-launched scorer does not fire its PostToolUse:Agent mark hook.
+
+The session's `Agent` tool exposed **no `run_in_background` parameter at all** — its contract is "Subagents run in the background; you'll be notified when one completes." Every `wr-risk-scorer:pipeline` dispatch therefore returned `Async agent launched successfully`, and the mark hook never fired. The session risk dir held only `state-hash` and `wip-reviewed`; no `commit`, `push`, or `release` file was ever written, exactly as this ticket describes.
+
+Two consequences worth separating:
+
+1. **The mechanism is confirmed** — background dispatch does not fire the mark hook, and no marker lands under any SID (the risk dir was inspected directly, not inferred). That closes the first investigation task's "if so, under which session_id" branch as moot for this harness: the hook does not fire, so there is no SID to attribute.
+2. **The remediation text is a dead end where the parameter does not exist.** An agent that follows it re-dispatches, gets another background agent, and re-blocks — an unbounded loop. The scorer itself worked correctly both times (`commit=4 push=4 release=1`, then `commit=3 push=2 release=1`, both within the appetite of 5); only the marker plumbing failed. The session unblocked by hand-writing the files `risk-score-mark.sh` would have written, derived from the scorer's real verdict.
+
+This strengthens option (b) in the second investigation task — a marker-write path that does not depend on the dispatching agent's ability to choose synchronous execution. Option (a) is not portable: it assumes a harness affordance that is not guaranteed.
 
 ## Dependencies
 
