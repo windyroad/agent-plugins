@@ -80,6 +80,20 @@ Line-start anchoring on `^status:` in the exclusion grep at `packages/itil/lib/s
 - [ ] **Story-map card `href`s encode lifecycle state inside the map's hashed content** — the same asymmetry on the HTML leg, found during the audit. A card links `../../stories/<state>/STORY-NNN-….md`, so the state segment is hashed, while the card's own `data-status` is normalised out. Currently masked by href rot: STORY-047 sits in `accepted/` while STORY-MAP-005 and STORY-MAP-011 both link `draft/`, and STORY-018 is in `draft/` while STORY-MAP-002 renders `data-status="done"`. So exactly one of two defects is live — either those hrefs are broken links, or repairing them re-opens every map's ratification on a pure lifecycle transition. Decision-shaped (drop the state segment from hrefs / normalise the path segment in the map filter / accept the rot), so it needs its own ask rather than a silent pick.
 - [ ] Extract the duplicated grep/sed filter shared by `oversight_content_hash` and `oversight_content_hash_excluding_stories`. Out of RFC-059's own scope by its explicit record — carried by STORY-055 under an RFC-059 scope amendment. Note the extraction boundary is the real risk: the two functions' input paths already differ on trailing-newline handling (one pipes the file directly, the other round-trips through `$(cat)` which strips trailing newlines), so extract the FILTER only and leave each input path alone, or the hash silently changes for artefacts with anomalous trailing whitespace and all 19 stored fingerprints break.
 
+### Ratification resolved 2026-08-20 — substance-only stands
+
+The question queued on this ticket since 2026-07-29 — whether ADR-090's invalidation trigger stands as SUBSTANCE-ONLY (excluding frontmatter `status:`, acceptance-criterion checkbox ticks, and slice `data-status` from the fingerprint) or reverts to the literal "any change" its Decision Outcome still states — was put to the user and answered on 2026-08-20: **substance-only stands.**
+
+The narrowing that shipped 2026-07-03 in commit `35b07f6` is therefore ratified as the intended rule, not accepted as a fait accompli. Ticking a criterion or advancing a story's lifecycle state is progress and does not revoke a human's approval; only a change to the artefact's journey, identity, or traces does.
+
+The question was surfaced through `AskUserQuestion` with the substance stated in plain language ahead of any ID, per P350, and the option set named both readings and their costs, per the ADR-066 Amendment 2026-05-31 / P340 option-set requirement the architect cited when ruling that the 2026-07-29 decline was evidence rather than ratification.
+
+**Outstanding follow-through** — the answer is recorded; the artefacts are not yet reconciled:
+
+- [ ] Amend ADR-090's Decision Outcome, which still reads "Any change … invalidates" and has not been true since 2026-07-03, so the written rule matches the shipped behaviour
+- [ ] Clear the ratification-OPEN marker on ADR-090's 2026-07-29 amendment, citing this resolution — via the interactive shim, never hand-written (P348)
+- [ ] Per P357, brief the user on what actually changed in the ADR body and confirm the interpretation BEFORE the oversight marker is written; user direction on the substance is not itself ratification of the edit
+
 ## Dependencies
 
 - **Blocks**: (none)
