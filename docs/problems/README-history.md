@@ -1334,3 +1334,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-08-18
 
 > Last reviewed: 2026-08-17 **P500 captured** - external reporter issues can close on internal evidence before reporter confirmation or the promised 14-day quiet period (lightweight aside via /wr-itil:capture-problem).
+
+## 2026-08-20
+
+> Last reviewed: 2026-08-18 **P501 captured** - Project A-specific sections appeared in a Project B document generated through a shared plugin surface (lightweight aside via /wr-itil:capture-problem).

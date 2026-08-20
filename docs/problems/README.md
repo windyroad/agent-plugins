@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-18 **P501 captured** - Project A-specific sections appeared in a Project B document generated through a shared plugin surface (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-08-20 **P502 + P503 captured, P402 reopened** - a transcript audit found three live paths by which a passing review fails to record its gate marker, plus a matcher gap that lets Bash-routed writes skip every edit gate (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -49,10 +49,12 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 12 | P415 | External-comms commit-msg gate reviews only the first `-m` of a multi-`-m` git commit, causing deny-after-PASS on multi-paragraph commits | 6 (Medium) | Known Error | S | 2026-07-03 | internal |
 | 12 | P179 | Agent defers requested work into untracked phases — phases are fine, but unticketed phases never get implemented | 12 (High) | Known Error | M | 2026-05-10 | internal |
 | 12 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 (High) | Known Error | M | 2026-06-10 | internal |
+| 12 | P402 | External-comms gate PostToolUse mark hook does not fire for background-launched review agents, so no marker is persisted despite PASS (reopened 2026-08-20 — recurrence 5.5 weeks after closure) | 12 (High) | Known Error | M | 2026-07-01 | internal |
 | 12 | P474 | Oversight hash treats the `**Status**:` body mirror as substance — an accept transition self-invalidates its own ratification and the no-implement gate blocks its own implementation | 12 (High) | Open | M | 2026-07-29 | internal |
 | 12 | P476 | Shell-utility implementation differences between this machine and CI produce false-green locally — the wrong variant exits 0 with different output rather than failing | 12 (High) | Open | M | 2026-07-30 | internal |
 | 9 | P363 | Inbound-reported tickets never receive fix-released verdict on originating issue | 9 (Medium) | Known Error | M | 2026-06-11 | internal |
 | 9 | P464 | Agent self-limits external-comms as "out of scope" in AFK / pre-flight — strands dispatchable lifecycle/ack/upstream-report obligations | 9 (Medium) | Open | S | 2026-07-26 | corrective-feedback |
+| 9 | P502 | The marker shim's 24h candidate-SID window excludes long sessions, so it silently writes no marker | 9 (Medium) | Open | S | 2026-08-20 | internal |
 | 8 | P300 | ADR-063 maturity-presentation schema — F2 (rich-record per-surface) is overkill; F1 is sufficient to begin with | 4 (Low) | Known Error | S | 2026-05-25 | internal |
 | 8 | P419 | capture-story's mechanical reverse-trace edit to a docs/jtbd file re-locks the JTBD edit gate mid-session | 8 (Medium) | Known Error | M | 2026-07-05 | internal |
 | 8 | P459 | Agent-Prose Behavioural Eval Flaky — Red-Lines CI on Unrelated Commits | 8 (Medium) | Known Error | M | 2026-07-24 | internal |
@@ -82,6 +84,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P463 | Relevance-close evaluator over-fires — a bare ADR/skill citation is read as "fix shipped", producing a 76% false-positive CLOSE-CANDIDATE rate | 12 (High) | Open | M | 2026-07-26 | internal |
 | 6 | P479 | Decisions accrete into the nearest ADR because amending is cheaper than deciding — ADR-102 weighed two options and carries six decisions | 12 (High) | Open | M | 2026-08-07 | corrective-feedback |
 | 6 | P480 | An ADR's ratification is document-scoped, so riders that were never weighed inherit its authority — one contradicted an accepted-tier decision undeclared | 12 (High) | Open | M | 2026-08-08 | corrective-feedback |
+| 8 | P503 | Edit gates are bound to the Edit\|Write matcher, so Bash-routed writes pass ungated and leave a stale hash | 16 (High) | Open | M | 2026-08-20 | internal |
 | 8 | P485 | Every step in the process adds and none removes, so cruft accumulates without limit — no refactor step, no simplification step, and nothing self-firing to trigger one | 16 (High) | Open | L | 2026-08-08 | corrective-feedback |
 | 6 | P486 | The policy validator checks a policy's shape, never whether it contradicts itself — a self-contradicting policy passes | 12 (High) | Open | M | 2026-08-09 | inbound-reported |
 | 6 | P488 | The agent batches artefacts it was told to produce one at a time, then asks permission for the batch — the instruction lives only in session memory and CLAUDE.md prose, so nothing checks it and it decays every session | 12 (High) | Open | M | 2026-08-09 | corrective-feedback |

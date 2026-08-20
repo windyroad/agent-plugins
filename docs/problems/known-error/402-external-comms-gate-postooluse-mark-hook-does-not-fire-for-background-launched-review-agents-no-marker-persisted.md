@@ -1,6 +1,6 @@
 # Problem 402: external-comms gate — PostToolUse mark hook does not fire for background-launched (forced-async) review agents, so no marker is persisted to the live session dir despite PASS
 
-**Status**: Closed
+**Status**: Known Error
 **Reported**: 2026-07-01
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 (Likely) = 12. **Rated at capture from in-session evidence (5/5 PASS, 0 markers), NOT deferred** — re-rating "at next /wr-itil:review-problems" would itself be the P375 bug (nothing self-fires review-problems). Impact 3: blocks every external-facing commit and forces habitual `BYPASS_RISK_GATE=1`, eroding a load-bearing leak gate (workaround exists). Likelihood 4: reproduces on every background-launched review this session.
 **Origin**: internal
@@ -14,7 +14,9 @@
 |-----|--------|-------|
 | RFC-041 | proposed | Dispatch marker-writing review agents synchronously so the mark hook fires before the gated action |
 
-## Fix Released
+## Fix Released — SUPERSEDED by the 2026-08-20 reopen, see ## Reopened below
+
+> This section describes a fix that did not close the failing case. It is retained verbatim as the record of what was shipped on 2026-07-03; it is **not** a current statement of this ticket's state. Lifecycle authority is the `**Status**` field, the `known-error/` directory, and the `## Reopened` section.
 
 Fix implemented 2026-07-03 via **RFC-041** (user-chosen option b — codify synchronous dispatch of every marker-writing reviewer). The root cause is a harness-interaction limitation, not a plugin key/SID bug: the `PostToolUse:Agent` mark hook fires reliably **only** for a synchronously-dispatched review agent (`run_in_background: false`); a background-launched reviewer's mark hook does not fire in time, so no marker persists and the gate re-blocks despite a PASS/within-appetite verdict. Synchronous dispatch is the reliable trigger.
 
@@ -125,8 +127,63 @@ Strong recurrence: ~10 changeset-bearing commits in the RFC-037/P404 session eac
 
 The async-no-fire marker bug is NOT external-comms-specific — the `risk-score-mark.sh` **push** branch has the identical failure mode. In a `/wr-itil:work-problems` wrap this session, the orchestrator scored push risk by delegating to `wr-risk-scorer:pipeline` via a **background** `Agent` (returned `RISK_SCORES: commit=4 push=4 release=4`, within appetite), then ran `npm run push:watch` — which **re-blocked** with `Push blocked: No push risk score found` because the PostToolUse:Agent mark hook never wrote the `${TMPDIR}/claude-risk-<SID>/push` marker for the background agent. Re-dispatching the *same* pipeline agent **synchronously** (`run_in_background: false`) fired the mark hook, wrote a fresh `push` marker (observed under `$TMPDIR`), and push:watch then passed and pushed 9 commits CI-green. So the fix direction (prefer synchronous dispatch for any gate-marker-writing review agent) generalises across BOTH the external-comms gate and the pipeline commit/push gate — worth widening the fix scope + the DENY-message guidance to cover the pipeline gate. Compounding factor observed: `CLAUDE_SESSION_ID` was empty in the orchestrator Bash env (macOS `$TMPDIR` markers keyed on the SID), but the synchronous dispatch still resolved correctly, so async-vs-sync is the dominant variable, not the empty SID.
 
-## Verified & Closed
+## Verified & Closed — SUPERSEDED, see ## Reopened below
 
 - **Verified**: 2026-07-24 via transcript-evidence mining (/wr-itil:review-problems evidence scan across ~/.claude + ~/.codex).
 - **Evidence**: synchronous external-comms reviewers -> marker persisted and gated commits proceeded with zero real BYPASS uses (BYPASS appears only as "removed" prose) (3cda89d3, 2026-07-05)
 - **Recovery**: reversible via `/wr-itil:transition-problem 402 known-error` or `git revert`.
+
+## Reopened — 2026-08-20 (Closed → Known Error)
+
+**The 2026-07-24 verification was scoped too narrowly.** It confirmed that a *synchronously* dispatched reviewer persists its marker. That was never in doubt. It did not test the failing case — a background-launched reviewer — because RFC-041's fix did not change that case's behaviour. RFC-041 codified "dispatch synchronously" as prose at four SKILL surfaces and one DENY message; the underlying mechanism is unchanged, so the bug reproduces the moment any caller dispatches asynchronously, whether by choice or because the surrounding harness gives it no choice.
+
+### Recurrence evidence
+
+A 2026-08-20 sweep of ~4,200 Claude Code transcripts and ~16,100 Codex session files found the failure live **five and a half weeks after closure**. From `addressr` session `b782a61f`, 2026-08-10 — two full pipeline scores discarded on a single commit:
+
+> Two prior runs of this exact staged set returned commit=4 push=4 release=4 &hellip; but both were launched into the background so their PostToolUse mark hook never fired and the commit gate cannot see them (P402).
+
+The same session hand-invoked the sanctioned marker writer with the genuine verdict rather than re-running the scorer a third time. Across the sweep, **43** markers were asserted by hand after a genuine PASS — the honest measure of how often a review that really happened failed to be recorded.
+
+### In-session reproduction — the reopen commit hit the bug it reopens
+
+This is not transcript archaeology. The commit that carried this reopen reproduced the defect while being prepared, 2026-08-20:
+
+1. The staged 5-file docs change was scored by dispatching `wr-risk-scorer:pipeline` via the Agent tool.
+2. The scorer returned a complete Pipeline Risk Report — `RISK_SCORES: commit=4 push=4 release=1` against an appetite of 5, comfortably within appetite, with no remediations.
+3. `${TMPDIR}/claude-risk-<this-session-SID>/` afterwards contained `state-hash` and `wip-reviewed` and **no `commit` marker**. The verdict existed; the gate could not see it.
+
+The dispatching session had **no `run_in_background` parameter on its Agent tool at all** — every Agent call in that surface is asynchronous by construction. This is the point RFC-041's prose fix cannot reach: the caller did not choose the async path and had no synchronous path to choose. The instruction "dispatch the scorer SYNCHRONOUSLY (`run_in_background: false`)" in `risk-gate.sh` names a parameter that does not exist on every calling surface.
+
+Recovery used: invoke the sanctioned marker writer directly with the scorer's genuine verdict — triggering a hook that did not fire, not fabricating its output. This is the same recovery the 2026-07-03 and 2026-08-10 sessions used, and it is why the hand-asserted-marker count is the honest measure of this bug's frequency.
+
+### Why prose could not have fixed this
+
+A documentation fix depends on every future caller reading it and having the choice. Neither holds:
+
+1. **The instruction is not always reachable.** RFC-041 put the directive in SKILL bodies and a DENY message. A caller that dispatches a reviewer before hitting the DENY — the normal order — does not see it.
+2. **The caller does not always have the choice.** In the session that captured this reopen, every `Agent` dispatch was forced asynchronous by the harness, with no `run_in_background` parameter exposed on the tool. Under that surface, "dispatch synchronously" is not advice a caller can follow.
+
+### Verification condition (replaces the 2026-07-24 one)
+
+The old condition — "a subsequent filing session should see gated commits proceed with zero `BYPASS_RISK_GATE` uses when the scorer is dispatched synchronously" — is unfalsifiable: it presupposes the synchronous path. Replace it with a test of the failing case:
+
+- [ ] A **background-launched** marker-writing reviewer that returns a passing verdict results in a persisted marker, OR the gate surfaces an actionable diagnosis rather than a bare "no score found".
+
+### Fix direction
+
+Move the marker write off the transport side effect. The mark hook fires on `PostToolUse:Agent`, so its firing is a property of *how the reviewer was dispatched* rather than of *what the reviewer concluded*. Candidate shapes, in ascending order of cost:
+
+- Fire the mark on an event that is emitted regardless of dispatch mode (`SubagentStop` is the natural candidate — but see P477, where the Codex path shows that event arriving without the parent's spawn state).
+- Have the reviewer itself write its verdict to a file the gate reads, so persistence does not depend on any hook firing (P469 records that two reviewers currently lack the `Bash` tool this would need).
+- Keep the hook, but make the gate's DENY name the async-dispatch cause explicitly when a recent verdict exists with no marker, so the caller diagnoses it in one step instead of re-scoring.
+
+### Also correct: a diagnosis to not build on
+
+A Codex session (`019f7561`, recurring 2026-07-18 to 2026-08-17) hitting the sibling failure concluded the hook expects `risk-scorer.pipeline` while Codex records `wr-risk-scorer:pipeline`. **That diagnosis is wrong.** `packages/risk-scorer/hooks/risk-score-mark.sh` line 39 matches with `grep -qE 'risk-scorer.pipeline'`, where `.` is a regex wildcard that matches the colon. The subagent identity is not the failure; the missing parent event is, which is what P477 already records.
+
+### Related tickets from the same sweep
+
+- **P502** — the marker shim's 24h candidate-SID window excludes long sessions, so it silently writes nothing.
+- **P503** — edit gates bound to the `Edit|Write` matcher, so Bash-routed writes pass ungated and leave a stale hash.
+- **P468**, **P418**, **P477** — the other three live paths by which a genuine PASS fails to produce a marker.
