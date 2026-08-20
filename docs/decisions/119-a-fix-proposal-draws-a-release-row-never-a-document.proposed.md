@@ -1,7 +1,9 @@
 ---
 status: "proposed"
 date: 2026-08-20
-human-oversight: unconfirmed
+human-oversight: confirmed
+oversight-date: 2026-08-21
+oversight-confirmed-date: "2026-08-21 — ratified via AskUserQuestion. The option set stated the operative consequence plainly: a fix proposal drawing a row onto an already-ratified map leaves its oversight fingerprint unchanged, so approval is INHERITED rather than freshly given, and only a new map / new activity column / new ADR queues for a human. The maintainer selected ratify-all-three with that in view."
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent, wr-jtbd:agent]
 informed: []

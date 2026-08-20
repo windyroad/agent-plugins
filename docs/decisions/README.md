@@ -512,7 +512,7 @@ _104 ADRs. These are the current rules. The architect agent reads this section f
 **Confirmation:** A package-content check fails when a published runtime artefact contains a source-repository identifier.; The architect package's skills and agent remain behaviorally equivalent after their internal references are re...; A packed architect tarball contains no internal decision corpus and no unresolved source-repository identifier...; An adopter review no longer searches its own decision tree to interpret Windy Road runtime instructions.
 
 ### ADR-119 — A fix proposal draws a release row, never a document
-**Status:** proposed | **Oversight:** unconfirmed | **Supersedes:** ["ADR-070 (in part — the RFC-body shape and the RFC↔ADR trace edge)", "ADR-072 (in part — the artefact the propose-fix gate checks for)"]
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** ["ADR-070 (in part — the RFC-body shape and the RFC↔ADR trace edge)", "ADR-072 (in part — the artefact the propose-fix gate checks for)"]
 **Chosen:** Chosen option: **"Retire the document tier; repoint `capture-rfc` at row-drawing"**.
 **Confirmation:** Working a Known Error with no traced RFC produces a release row on a story map and creates no new file under d...; A Write to a new docs/rfcs/RFC-*.md is refused by the create gate.; ls docs/rfcs/RFC-*.md | wc -l does not increase. The count at capture is 60.; check-fix-rfc-trace.sh answers from row identities: a problem named by a row's problems key reads as traced; o...; Allocating an identity for a new row never returns an id any row holds, in the working tree or in git history.
 **Related:** ADR-103, ADR-107, ADR-073, ADR-085, ADR-089, ADR-106, ADR-070, ADR-115, ADR-116, ADR-108
