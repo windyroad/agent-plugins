@@ -4,11 +4,12 @@ job-id: decompose-fix-into-coordinated-changes
 persona: developer
 secondary-persona: tech-lead
 date-created: 2026-05-05
-human-oversight: confirmed
+human-oversight: unconfirmed
 oversight-date: 2026-05-26
 oversight-confirmed-date: "2026-07-27 — re-ratified via the P357 brief AskUserQuestion this session; the ADR-101 lockstep narrowing of the story-map 're-ratify on any change' rule (excludes the accepted story's own ADR-095-compelled card) confirmed in the same batch as ADR-101."
 oversight-confirmed-date-prior: "2026-07-02 — re-ratified via AskUserQuestion (P357 batched pass) after the ADR-089/090 amendment"
-oversight-downgraded: "2026-07-26 — ADR-101 lockstep (material amendment per ADR-068): 're-ratify on any change' to a story map is NARROWED to any change other than adding the accepted story's own card, because ADR-095 compels that card and the unqualified rule was unsatisfiable by construction. Marker held until re-ratified; re-ratification queued with ADR-101's owed post-draft brief (P456 open items)."
+oversight-downgraded: "2026-08-20 — ADR-103 lockstep (material amendment per ADR-068): ADR-103 SUPERSEDED ADR-101 on 2026-08-07, so the Amendment 2026-07-26 clause below is wrong at HEAD and has been for thirteen days. Grounded on ADR-103, which is ratified — NOT on the unratified ADR-119, so this withdrawal presumes no unratified decision. Withdrawing a ratification claim needs no confirm event; asserting one would. Re-ratification queued with ADR-119, which additionally requires the RFC-as-document framing to be amended."
+oversight-downgraded-2026-07-26: "2026-07-26 — ADR-101 lockstep (material amendment per ADR-068): 're-ratify on any change' to a story map is NARROWED to any change other than adding the accepted story's own card, because ADR-095 compels that card and the unqualified rule was unsatisfiable by construction. Marker held until re-ratified; re-ratification queued with ADR-101's owed post-draft brief (P456 open items)."
 oversight-downgraded-prior: "2026-07-02 — ADR-089 lockstep: 'atomic = empty stories:[]' → 'atomic = exactly one full story' (an RFC always has ≥1 story); + ADR-090 story-map drift-invalidated ratification. P357 re-ratification batched this session."
 ---
 
@@ -16,7 +17,11 @@ oversight-downgraded-prior: "2026-07-02 — ADR-089 lockstep: 'atomic = empty st
 
 > **Amendment 2026-07-02 (ADR-089 + ADR-090).** ADR-089: the "atomic fix = same RFC with an empty `stories:` array" framing below (Desired Outcomes / Persona Constraints) is **superseded** — an RFC always has **≥1 story**; an atomic fix carries **exactly one full story**. The coordination surface (multiple stories / a story map) scales *up* when the work needs it; the RFC never scales below one story. ADR-090: the story maps this job produces carry a **drift-invalidated human-oversight marker** (re-ratify on any change), and an RFC may reference only ratified stories. `human-oversight` downgraded to `unconfirmed` pending P357 re-ratify (batched this session).
 >
-> **Amendment 2026-07-26 (ADR-101).** "Re-ratify on any change" above is narrowed to **any change other than adding the accepted story's own card**. ADR-095 compels every new story to add a card to its map, so under the unqualified rule the act of capturing a story re-opened its map's ratification — which made the AFK-accept carve-out unsatisfiable by construction. The map hash now excludes that one card. Every other map edit still re-opens ratification exactly as before.
+> **Amendment 2026-07-26 (ADR-101).** "Re-ratify on any change" above is narrowed to **any change other than adding the accepted story's own card**. ADR-095 compels every new story to add a card to its map, so under the unqualified rule the act of capturing a story re-opened its map's ratification — which made the AFK-accept carve-out unsatisfiable by construction. The map hash now excludes that one card. ~~Every other map edit still re-opens ratification exactly as before.~~
+
+> **SUPERSEDED 2026-08-07 by ADR-103 — do not read the amendment above as current.** ADR-103 supersedes ADR-101 outright and narrows the drift basis much further: *"Drawing a release row, adding a story to a row, editing a story's body, and restyling the shared template all leave approval intact."* The authoritative list is the `SUBSTANCE` tuple in `packages/itil/lib/story-oversight.sh`, not prose here. Stories carry no oversight marker at all under ADR-103; approval is derived from the maps in their `story-maps:` field.
+>
+> This stale sentence is not inert. On 2026-08-20 it caused a reviewer reading it in good faith to raise a blocking objection against ADR-119 — that drawing a fix-proposal row would re-open a map's ratification — which ADR-103 had already resolved and which the reviewer withdrew after checking the code and running a hash test on a ratified map. Marked here rather than deleted so the witness survives.
 
 ## Job Statement
 

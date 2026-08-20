@@ -47,6 +47,16 @@ Cite ADR-105's Context, which argues it in full, and the P350 rule. Both are rea
 
 Suspected: the constraint was learned through incidents rather than through interviewing, so it landed in incident records — an ADR context, a ticket's working rule — rather than in the persona. Nothing routes an incident-derived persona fact back to the persona file.
 
+### The shared stylesheet is a structural own-bytes gap, not an incidental one (2026-08-20)
+
+Found during ADR-119's JTBD review. `ensureSharedAssets()` in `packages/itil/scripts/render-story-map.mjs` writes `story-map.css` to `dirname(dirname(mapPath))` — one level **above** the state subdirectory. So a map at `docs/story-maps/draft/X.html` resolves its `../story-map.css` against `docs/story-maps/`.
+
+The consequence: **any single map file moved, attached to a message, or previewed in isolation loses its stylesheet by construction.** Not by accident, and not only when someone happens to open it from the wrong directory — the relative path cannot resolve for a file that has left its tree. That is the 2026-08-09 incident's mechanism, and it will recur for every map ever sent as an attachment.
+
+This is the residual ADR-105 knowingly left. Its `ensureSharedAssets()` comment states the trade-off in full — the grid is committed into each map *"so that a map can be read with no script engine"*, and *"the stylesheet staying shared is what keeps that affordable"* — so the scope boundary was deliberate, drawn before the read-from-own-bytes constraint was ratified on 2026-08-09.
+
+Two things raise its priority since that call was made. ADR-103 made the story map the approval surface, and ADR-119 extends that to every fix proposal including AFK-generated ones — so the artefact that cannot travel is now the artefact approvals depend on. Per P479 and P483 this resolves as a **new decision** rather than an amendment to ADR-105 or ADR-107, both ratified.
+
 ### Investigation Tasks
 
 - [ ] Draft the constraint for `docs/jtbd/developer/persona.md` § Context Constraints. Roughly: *reads governance artefacts on devices without repository access, so an artefact must be self-evidently true and readable from its own bytes rather than verifiable against the corpus.*
