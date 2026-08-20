@@ -157,6 +157,28 @@ The dispatching session had **no `run_in_background` parameter on its Agent tool
 
 Recovery used: invoke the sanctioned marker writer directly with the scorer's genuine verdict — triggering a hook that did not fire, not fabricating its output. This is the same recovery the 2026-07-03 and 2026-08-10 sessions used, and it is why the hand-asserted-marker count is the honest measure of this bug's frequency.
 
+#### The title's "does not fire" is NOT established — treat the mechanism as open
+
+This ticket's title, and its 2026-07-01 description, both assert the hook *does not fire*. The 2026-08-20 reproduction turned up evidence that does not fit that claim, and it is recorded here rather than smoothed over.
+
+`.risk-reports/` contains two files dated the same day as the two async scorer runs above, `2026-08-20T03-40-51-commit.md` and `2026-08-20T03-45-53-commit.md`, each **1 byte** — a bare newline. The only writer of that path is `risk-score-mark.sh`, at a point **after** its own guard:
+
+```bash
+SCORES_LINE=$(echo "$AGENT_OUTPUT" | grep -E '^RISK_SCORES:' | tail -1) || true
+[ -n "$SCORES_LINE" ] || exit 1
+...
+echo "$AGENT_OUTPUT" > "$REPORT_PATH"   # ~50 lines later
+```
+
+An empty `$AGENT_OUTPUT` cannot satisfy that guard, so the guard should make an empty report unreachable. Two exist anyway. Either the hook ran with an output that passed the guard and was then lost before the report write, or those two files came from some path not yet identified. Their provenance is **not** conclusively tied to this session — the timestamps match, nothing stronger.
+
+Note also that `state-hash` was present in this session's risk dir. That is *not* evidence the pipeline branch ran: `risk-hash-refresh.sh:21` writes the same file from a different hook.
+
+**Consequence for whoever fixes this**: do not start from "the hook never fires". Establish first whether the hook fires with an empty payload, fires and dies between the report write and the marker writes, or genuinely never runs — the three have different fixes, and the evidence above is consistent with more than one.
+
+- [ ] Instrument `risk-score-mark.sh` to record invocation, `$SUBAGENT`, and `$AGENT_OUTPUT` length on every entry, then reproduce with a background-launched scorer and read the trace
+- [ ] Establish the provenance of the two 1-byte `.risk-reports/` files, and whether an empty report can be produced through the guarded path at all
+
 ### Why prose could not have fixed this
 
 A documentation fix depends on every future caller reading it and having the choice. Neither holds:
