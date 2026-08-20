@@ -54,21 +54,37 @@ Two consequences worth stating plainly:
 
 The genuinely new ground here is ADR-103 plus the 2026-08-20 direction, not the blanks.
 
+## Direction — 2026-08-20
+
+Both blocking design calls were put to the maintainer and answered. Verbatim: *"No standalone rfc doc. Capture-rfc gets repointed"*.
+
+- **The standalone RFC document tier does not survive ADR-103.** No new `docs/rfcs/RFC-<NNN>-*.md` file is created for a fix proposal. The existing corpus becomes historical — the question as put offered "`docs/rfcs/` becomes historical" as the alternative and that is what was chosen, so existing documents are read-only history rather than a live tier to be migrated document-by-document.
+- **`/wr-itil:capture-rfc` is repointed, not retired.** It keeps its name and its invocation surface; what it *writes* changes from a document to a release row on a story map.
+
+This resolves the two tasks that blocked the rest of this ticket. The remaining work is now unblocked, and the substance is settled ahead of it per ADR-074.
+
+**Not yet ratified as an ADR.** The direction above is the maintainer's answer to a two-option question, not itself a recorded decision — per P357, applying user direction to a governance artefact does not by itself authorise the oversight marker. The decision is captured as an ADR born `human-oversight: unconfirmed`, and ratified only after the maintainer sees what the ADR body actually says.
+
 ### Investigation Tasks
 
-- [ ] Decide whether the standalone RFC document tier survives ADR-103 at all, or whether the row is the only RFC and `docs/rfcs/` becomes historical
-- [ ] Decide what `/wr-itil:capture-rfc` becomes — retired, or repointed at row-drawing on a map
+- [x] Decide whether the standalone RFC document tier survives ADR-103 at all — **resolved 2026-08-20: it does not; `docs/rfcs/` becomes historical**
+- [x] Decide what `/wr-itil:capture-rfc` becomes — **resolved 2026-08-20: repointed at row-drawing on a map, not retired**
+- [ ] Record the two decisions above as an ADR and have it ratified
+- [ ] Settle what a repointed `capture-rfc` does when the fix needs a map that does not exist yet — ADR-103 queues implementation for a new map because a new map is new substance needing a human, so the repointed skill cannot mint one silently
+- [ ] Settle whether the RFC id series continues across the tier change, or whether row identities allocate from a fresh series
+- [ ] Decide what `manage-rfc` becomes — it currently owns the `accepted` ratification of a document tier that is going away, while ADR-103 puts approval on the map
 - [ ] Rework the I13 no-vehicle branch to propose rows; settle what it does when the fix needs a map that does not exist yet, given ADR-103 queues implementation for a new map because that is new substance needing a human
 - [ ] Re-check ADR-073's auto-create decision against ADR-103 — it authorises auto-creating a vehicle whose definition has since changed
 - [ ] Transition the seven blanks per the 2026-07-03 ruling, so the detector stops re-flagging them
 - [ ] Give `check-autocreate-rfc-scope.sh` a way to exclude ruled-on candidates, or retire it if the tier goes
 - [ ] Audit the 54 unratified RFCs for how many are this mechanism's post-2026-08-07 output
+- [ ] **Blast radius, measured 2026-08-20.** 62 documents live under `docs/rfcs/`, and **24 non-test files** across the plugins reference the path: 8 skills (`capture-rfc`, `manage-rfc`, `capture-problem`, `manage-problem`, `capture-story`, `manage-story`, `list-stories`, `work-problems`, plus `run-retro` in the retrospective plugin), 5 hooks (`itil-rfc-oversight-nudge`, `itil-rfc-trailer-advisory`, `itil-commit-trailer-transition-advisory`, `itil-deferral-cadence-gate`, `manage-problem-enforce-create`), and 8 scripts (`reconcile-rfcs`, `mark-rfc-capture-gate`, `check-rfc-rejected-alternatives`, `evaluate-relevance`, `render-story-map.mjs`, and the three `update-*-references-section` helpers). Retiring the tier is a sweep across all of them, not an edit to one gate. Sequence it so the *writers* stop first and the *readers* keep working against the historical corpus, or the reverse-trace helpers break while 62 documents are still on disk.
 - [ ] **The fix surface is wider than the I13 branch.** The pre-ADR-103 lineage is asserted at four sites in `packages/itil/skills/manage-problem/SKILL.md` — the lifecycle prose at line 51, the lifecycle **table** at line 58, the I13 gate at line 185, and the closing lifecycle recap at line 680 — each stating that the fix proposal "produces the RFC per ADR-072". Reworking only the gate would leave three sites teaching an agent the superseded model. Sweep all four, and grep the wider corpus for the same phrasing before assuming they are the only ones.
 
 ## Dependencies
 
 - **Blocks**: (none)
-- **Blocked by**: the first two investigation tasks — the gate cannot be reworked until the tier's fate is decided
+- **Blocked by**: (none — the two blocking design calls were answered 2026-08-20; see Direction above)
 - **Composes with**: P314, P457, P170
 
 ## Related
