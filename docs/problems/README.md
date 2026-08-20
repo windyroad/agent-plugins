@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-20 **P164 closed** - the octal-parse guard in the next-ID formula was verified in the field in July and the reporter was already told the fix shipped back in June, so the close carried no new upstream comment.
+> Last reviewed: 2026-08-20 **P506 captured** - the version nudge compares session-to-disk and never asks the registry, so a marketplace clone 989 commits behind reported as current and an adopter repo emitted a story map in a format retired three months ago (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -13,6 +13,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | | | **Tier 0 — Critical bypass (Severity Very High ≥17, security-classified, or incident-linked)** | | | | | |
 | 40 | P499 | Architect ADR pairing hook reads the task checkout instead of the command checkout | 20 (Very High) | Known Error | S | 2026-08-17 | incident-linked |
 | 40 | P477 | Codex collaboration completion bypasses the risk-marker bridge | 20 (Very High) | Open | S | 2026-08-12 | internal |
+| 10 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Open | L | 2026-08-20 | internal |
 | 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 (Very High) | Known Error | XL | 2026-05-03 | internal |
 | | | **Tier 1 — Inbound-reported (an external user actually hit this)** | | | | | |
 | 24 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | 12 (High) | Known Error | S | 2026-07-06 | inbound-reported (#169) |

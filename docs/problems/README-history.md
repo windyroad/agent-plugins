@@ -1342,3 +1342,4 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-08-20 **P502 + P503 captured, P402 reopened** - a transcript audit found three live paths by which a passing review fails to record its gate marker, plus a matcher gap that lets Bash-routed writes skip every edit gate (lightweight aside via /wr-itil:capture-problem).
 
 > Last reviewed: 2026-08-20 **P504 + P505 captured (retro)** - no skill surface reopens a closed ticket and the closure note prescribes a command that refuses; seven SKILL.md files breach the 50 KB budget with no path from the cadenced measurement to work (via /wr-retrospective:run-retro).
+> Last reviewed: 2026-08-20 **P164 closed** - the octal-parse guard in the next-ID formula was verified in the field in July and the reporter was already told the fix shipped back in June, so the close carried no new upstream comment.
