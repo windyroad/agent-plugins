@@ -1,6 +1,6 @@
 # Problem 170: Problem tickets strain as fixes decompose into multiple coordinated changes — need an RFC framework that ties all changes back to problems (and unifies technical with user/business problems)
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-04
 **Transitioned to Known Error**: 2026-05-10 (RCA closed using session evidence + base-rate sweep; see updated Investigation Tasks below)
 **Phase 1 + Slice 5 primary scope shipped**: 2026-05-12 (commits `880c9a5` T5b → `8799f7b` L2 RFC-002 verifying; Phase 1 graduated).
@@ -388,6 +388,12 @@ Phase 2 framework code shipped 2026-05-12 across the following commits:
 - Slice 15: full bootstrap stories extraction (every Slice 0-15 backbone + ribs from the plans file) deferred — the 7 representative stories ship under RFC-003 for THIS SESSION's slices; prior-session work (RFC-001 + RFC-002) warrants its own bootstrap RFC capture pass with frontmatter `stories:` backfill.
 
 **Phase 2 forward-dogfood verification (Phase 3 + Phase 4 still required for full ticket closure)**: Phase 2 framework primitives verify when (a) `/wr-itil:capture-story-map P<NNN> JTBD-<NNN> <description>` writes a fresh STORY-MAP-NNN HTML without rejection; (b) `/wr-itil:capture-story P<NNN> JTBD-<NNN> <description>` writes a fresh STORY-NNN markdown with the I6 + I9 hard-block firing on missing traces; (c) `/wr-itil:manage-story <NNN> accepted` enforces I7+I8+I10; (d) `/wr-itil:work-problem <NNN>` traverses Problem → Fix Strategy → RFC → stories: → next not-done story per the Slice 13 rewrite. Phase 2 dogfood can fire opportunistically during Phase 3 + Phase 4 SHIP work (the new skills get exercised as part of normal capture flow). Full ticket transition Known Error → Verification Pending fires only after Phase 3 + Phase 4 SHIP completes.
+
+## Fix Released
+
+Released in `@windyroad/itil@1.0.0` on 2026-08-13, via changeset `story-map-grid-renderer.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 

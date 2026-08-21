@@ -1,6 +1,6 @@
 # Problem 478: I10 checks that a story's `## User value` section is non-empty, but never that it is value-first
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-08-07
 **Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3 — derived at capture from the description per Step 4a. Impact 3: a malformed value statement is not a broken build, but it defeats the story tier's whole point — the value is what a human ratifies, and 24% of the corpus was stating a feature instead. Likelihood 3: it has already happened 12 times across 50 stories and nothing prevents the 13th. Effort informed by P465 (M — SKILL prose + a check at one locus + behavioural bats), which is the same shape of change at the same gate.
 **Origin**: internal
@@ -67,6 +67,12 @@ The detection-path gap is a consequence: with no check at the gate, the only pla
 - [ ] Behavioural bats for BOTH directions — a persona-first story is rejected, and each punctuation variant already in the corpus is accepted. The accept direction is the one that matters: a check that rejects valid stories at a hard gate is worse than the drift.
 - [ ] Decide whether `done` stories are in scope. Seven of the twelve were already delivered; they were rewritten on 2026-08-07, but a gate at `accepted` cannot reach a story that is already past it.
 - [ ] Consider whether `capture-story` should offer the shape as a template at authoring time, so the gate is a backstop rather than the first feedback.
+
+## Fix Released
+
+Released in `@windyroad/itil@1.0.0` on 2026-08-13, via changeset `retire-afk-accept-carve-out.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 

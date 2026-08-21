@@ -1,6 +1,6 @@
 # Problem 438: Assistant routes free-text collection (URLs/tokens/IDs) through AskUserQuestion instead of per-item copyable blocks
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-07-06
 **Priority**: 6 (Medium) — Impact: 2 × Likelihood: 3
 **Origin**: inbound-reported (#324)
@@ -105,6 +105,12 @@ STORY-049 is ratified at its `accepted` gate (ADR-090 / ADR-096), which has no A
 | Story | Title | Status |
 |-------|-------|--------|
 | STORY-049 | Ask for a URL in a shape I can paste into | draft |
+
+## Fix Released
+
+Released in `@windyroad/itil@1.0.0` on 2026-08-13, via changeset `retire-afk-accept-carve-out.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 

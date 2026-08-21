@@ -1,6 +1,6 @@
 # Problem 293: Generalise ADR-019 preflight from "fetch + ff-only divergence" to "get the repo into a clean state before starting"
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-25
 **Priority**: 6 (Medium) — Impact: 2 (Minor — the current preflight handles the divergence case correctly; the gap is that it doesn't cover the broader "repo isn't clean" situations, so an orchestrator can start work on an untidy tree; recoverable, not breaking) × Likelihood: 3 (Possible — every AFK orchestrator start; uncommitted-work and messy-tree states occur regularly)
 **Origin**: internal
@@ -39,6 +39,12 @@ ADR-019 is **left unoversighted** (P283/ADR-066 marker withheld) until this gene
 - [ ] Define the "needs commit" branch precisely: when is uncommitted work auto-committable vs needs-user-decision? (Likely: clean it only when provenance is unambiguous; otherwise AskUserQuestion / halt per ADR-013 Rule 6.)
 - [ ] Verify consistency with the work-problems Step 0 implementation (fetch/divergence + session-continuity + README reconcile + auto-migrate) — the amend should describe the live behaviour, generalised.
 - [ ] Re-confirm amended ADR-019 via `/wr-architect:review-decisions` → write `human-oversight: confirmed`.
+
+## Fix Released
+
+Released in `@windyroad/itil@0.47.13` on 2026-06-08, via changeset `wr-itil-p293-step-0-three-branch-framing.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 

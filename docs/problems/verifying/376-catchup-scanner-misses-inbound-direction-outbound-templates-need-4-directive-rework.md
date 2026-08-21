@@ -1,6 +1,6 @@
 # Problem 376: Catchup scanner misses the inbound direction; outbound templates carry the same structural defect the P363 rework fixed on the inbound side — cross-direction parity gap
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-06-23
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 = 12. Rated at review 2026-07-02: catchup outbound-only; retroactive inbound is manual.
 **Origin**: inbound-reported (#349) — flipped 2026-07-15: inbound issue #349 (downstream verification of an upstream fix is not confirmed back upstream) absorbed into Gap 2 per wr-itil:hang-off-check verdict; originally internal (2026-06-23 catchup session)
@@ -110,6 +110,12 @@ CATCHUP P<NNN> inbound-<ref> state=<state> transition=<KE->Verifying|Verifying->
 The outbound update-upstream templates carry the same defect P363 fixed inbound, inverted in direction. The fix is the four P363 directives applied symmetrically + the user's 2026-06-23 outbound-purpose clarification (test-confirm / report-outcome-with-thanks / respond-to-info-request). This is a ≥2-option decision (template-rework shape; transition-axis vs new outbound-update taxonomy; share generation-prompt infra with the inbound leg or not). Per P357/ADR-066 a PROPOSED skeleton amendment is recorded in ADR-024 (2026-06-28 entry, `human-oversight: unconfirmed`) and a `category: direction` outstanding_question is queued for the next interactive drain. Implementation is gated on that ratification (ADR-074 substance-confirm-before-build) — NOT built this iteration.
 
 **Lifecycle**: ticket → Known Error. Gap 1's fix verifies at the next `@windyroad/itil` release; the ticket stays Known Error tracking Gap 2's remaining (ratification-gated) design work rather than going to Verifying, because Gap 2 is unresolved.
+
+## Fix Released
+
+Released in `@windyroad/itil@1.0.0` on 2026-08-13, via changeset `story-map-grid-renderer.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 

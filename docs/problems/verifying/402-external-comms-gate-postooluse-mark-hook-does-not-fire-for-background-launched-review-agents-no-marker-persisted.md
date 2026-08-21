@@ -1,6 +1,6 @@
 # Problem 402: external-comms gate — PostToolUse mark hook does not fire for background-launched (forced-async) review agents, so no marker is persisted to the live session dir despite PASS
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-07-01
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 (Likely) = 12. **Rated at capture from in-session evidence (5/5 PASS, 0 markers), NOT deferred** — re-rating "at next /wr-itil:review-problems" would itself be the P375 bug (nothing self-fires review-problems). Impact 3: blocks every external-facing commit and forces habitual `BYPASS_RISK_GATE=1`, eroding a load-bearing leak gate (workaround exists). Likelihood 4: reproduces on every background-launched review this session.
 **Origin**: inbound-reported (#400) — stamped 2026-08-21 review from the upstream poll; upstream filing `wr-risk-scorer: external-comms PASS marker lands in subagent's own session dir`
@@ -119,6 +119,12 @@ Two consequences worth separating:
 2. **The remediation text is a dead end where the parameter does not exist.** An agent that follows it re-dispatches, gets another background agent, and re-blocks — an unbounded loop. The scorer itself worked correctly both times (`commit=4 push=4 release=1`, then `commit=3 push=2 release=1`, both within the appetite of 5); only the marker plumbing failed. The session unblocked by hand-writing the files `risk-score-mark.sh` would have written, derived from the scorer's real verdict.
 
 This strengthens option (b) in the second investigation task — a marker-write path that does not depend on the dispatching agent's ability to choose synchronous execution. Option (a) is not portable: it assumes a harness affordance that is not guaranteed.
+
+## Fix Released
+
+Released in `@windyroad/itil@0.56.0` on 2026-07-03, via changeset `p402-p407-synchronous-marker-reviewer-dispatch.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 

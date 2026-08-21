@@ -1,6 +1,6 @@
 # Problem 179: Agent defers requested work into untracked phases — phases are fine, but unticketed phases never get implemented
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-10
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 = 12. Rated at review 2026-07-02: behavioral chronic (sibling P403); observed pattern.
 **Origin**: internal
@@ -131,6 +131,12 @@ User ratified **Option A — Hard rule + behavioural test per ADR-051 / ADR-052*
 Options B (soft retro-audit), C (mid-flow ask), and D (ratify de-facto) are rejected.
 
 **Superseded next-step (2026-07-03):** the original "capture a new RFC tracing this ticket" step is stale — RFC-035 (`authoring-time-deferral-cadence-gate`) shipped a gate on the same authoring surfaces on 2026-06-28, and its ADR-087 cadence contract *conflicts* with Option A on whether a ticket-ID citation legitimizes a deferral (it does not, per P375). Before any P179 build: resolve the "Reconcile P179 Option A against shipped RFC-035/ADR-087" Investigation Task above. Do NOT capture a second RFC (would duplicate RFC-035); fold into RFC-035 or narrow to the residual authorization axis. See the 2026-07-03 RCA reconciliation finding.
+
+## Fix Released
+
+Released in `@windyroad/itil@0.46.0` on 2026-06-02, via changeset `p287-type-classification-retired.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 

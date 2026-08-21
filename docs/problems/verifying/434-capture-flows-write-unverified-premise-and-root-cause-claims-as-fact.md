@@ -1,6 +1,6 @@
 # Problem 434: Capture flows write unverified claims (premise + root-cause mechanism) as established fact
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-07-06
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4
 **Origin**: inbound-reported (#202, #339)
@@ -159,6 +159,12 @@ Both bricks edit shipped plugin surfaces (`packages/itil/skills/*/SKILL.md` + a 
 - **Q3 — how much of Brick 1 is committed shell?** Fully mechanical predicate + bats, versus mechanical claim-extraction in shell with a fresh-context subagent making the falsified/corroborated call (ADR-032's fifth invocation pattern, the sub-step 2b split). Affects adopter portability and the ADR-052 behavioural-coverage shape. Architect leans to the subagent split, citing P463's 76% false-positive rate on a comparable fully-mechanical world-space check.
 
 Q1 is settled by the architect ruling below and is no longer open; **Q2 and Q3 are the live substance choices**, and they home in ADR-100 as its Considered Options rather than in this ticket or in RFC-057 (ADR-070 bars decisions from living in RFCs).
+
+## Fix Released
+
+Released in `@windyroad/itil@1.0.0` on 2026-08-13, via changeset `retire-afk-accept-carve-out.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 

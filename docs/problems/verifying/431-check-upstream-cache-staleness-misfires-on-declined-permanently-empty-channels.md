@@ -1,6 +1,6 @@
 # Problem 431: check-upstream-cache-staleness helper misfires on a declined-permanently (empty channels) config
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-07-06
 **Priority**: 6 (Medium) — Impact: 2 × Likelihood: 3
 **Origin**: inbound-reported (#341)
@@ -65,6 +65,12 @@ Teach the helper to read the answer it was given, per RFC-051:
 - Add the missing empty-channels branch at `/wr-itil:review-problems` Step 4.5a, and widen the symmetry-marker prose (both copies) from *"TTL semantics"* to *"TTL semantics or the branch set"*, with the pointer naming 4.5a as well as 4.5b — otherwise the fix closes the instance and leaves the class open.
 
 Rejected: making review-problems write `.upstream-cache.json` even on a zero-channel poll, so the TTL branch quiets the dispatch to one per day. Direction is already pinned against it — ADR-062 § Downstream-adopter non-obligation and review-problems SKILL.md line 151 say *skip silently*, and one no-op subprocess per day is not silently.
+
+## Fix Released
+
+Released in `@windyroad/itil@1.0.0` on 2026-08-13, via changeset `retire-afk-accept-carve-out.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 

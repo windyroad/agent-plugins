@@ -1,6 +1,6 @@
 # Problem 375: Repo conflates a "named re-entry point" with a self-firing cadence — deferrals not transitively reachable from an automatic trigger rot
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-06-23
 **Transitioned to Known Error**: 2026-06-28 (root cause documented via the 2026-06-23 4-agent reachability audit; workaround now recorded — ADR-084 SessionStart deferral census re-surfaces the rot every session. Generic-mechanism choice + rollup-parent decision queued as outstanding design questions per ADR-074.)
 **Ratified direction (2026-06-28, user at work-problems loop-end):** build **Option C — the authoring-time enforcement gate** (the root-cause fix): a gate that REJECTS authoring a deferral unless its trigger chain is transitively reachable from a self-firing trigger (hook / SessionStart / AFK pre-flight / cron). This is the "stop new uncadenced deferrals being authored at source" mechanism this ticket's Workaround section flags as the gap the census does not close. Implementation pending (needs an RFC/ADR + the gate hook + tests); supersedes surfacing-only Option A as the PRIMARY mechanism (A retained as the detect-existing-backlog complement).
@@ -126,6 +126,12 @@ The class needs a generic mechanism so the rot is fixed once, not re-discovered 
 1. **`category:direction` — generic-mechanism choice.** Which rung(s) of the A/B/C/D ladder above do we commit to? A is partially shipped; the open call is whether to invest in C (authoring-time enforcement gate, root-cause) now, add B (loop pre-flight execute-gap) as an interim, or stop at A (surfacing-only). Warrants a `/wr-architect:create-adr` once chosen. *Trade-offs briefed in the option-ladder above.*
 2. **`category:direction` — rollup-parent decision.** Should P375 become a rollup PARENT for the `## Related` cluster (P295/P271/P234/P236/P189/P184/P110/P220/P253/P148/P291), or a sibling that supersedes them? Plus: fold P379 in as the next risk-scorer-nudge arm (sibling survey above). Affects backlog accounting (closing children vs leaving them as tracked instances).
 3. **`category:direction` — rollout mode for the authoring-time gate (NEW 2026-06-28, surfaced by the architect review).** The core slice shipped as an **advisory** (PostToolUse stderr, non-blocking) — it fires the moment an uncadenced deferral is authored and tells the author to add a cadence annotation, but does not stop the write. The alternative is a **hard block** (PreToolUse `permissionDecision: deny`) that refuses the write until the deferral is cadenced or removed. The ratified Option-C text said "REJECTS authoring" (block), but the architect judged that ratification was at the mechanism-class grain (authoring-time gate vs surfacing census), not the rollout-mode grain, and recommended advisory-first per the ADR-057 declarative→block staging pattern because this repo's governance corpus is saturated with descriptive deferral prose (a hard block risks false-blocking legitimate new ADR/RFC/SKILL authoring that quotes or narrates the deferral class). **Decide once the advisory's false-positive rate is observed over a few authoring sessions**: stay advisory, or escalate to a PreToolUse hard block (RFC-035 task B9). Warrants no new ADR — the rollout-mode amendment lands on ADR-087.
+
+## Fix Released
+
+Released in `@windyroad/itil@1.0.0` on 2026-08-13, via changeset `story-card-value-statements.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 

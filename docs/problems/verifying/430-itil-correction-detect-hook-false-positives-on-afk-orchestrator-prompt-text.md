@@ -1,6 +1,6 @@
 # Problem 430: itil-correction-detect UserPromptSubmit hook false-positives on orchestrator / AFK prompt text
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-07-06
 **Priority**: 8 (Medium) — Impact: 2 × Likelihood: 4
 **Origin**: inbound-reported (#257)
@@ -87,6 +87,12 @@ over-fire by opening another in the same detector family this ticket's Dependenc
 
 Preserves P078: a real correction reaches the **orchestrator** session, where the guard is not set and
 the hook still fires.
+
+## Fix Released
+
+Released in `@windyroad/itil@1.0.0` on 2026-08-13, via changeset `retire-afk-accept-carve-out.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 

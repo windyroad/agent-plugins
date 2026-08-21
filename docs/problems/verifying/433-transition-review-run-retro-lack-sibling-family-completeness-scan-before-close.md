@@ -1,6 +1,6 @@
 # Problem 433: transition-problem / review-problems / run-retro Step 4a lack a sibling-family completeness scan before close
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-07-06
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4
 **Origin**: inbound-reported (#187)
@@ -139,6 +139,12 @@ see below.
 **Held at the ADR-096 wall.** The fix is a code change (script + shim + SKILL wiring), so it requires a
 story at `accepted`, and story ratification has no AFK path. This iteration authors the fix vehicle and
 stops short of implementation.
+
+## Fix Released
+
+Released in `@windyroad/itil@1.0.0` on 2026-08-13, via changeset `retire-afk-accept-carve-out.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 

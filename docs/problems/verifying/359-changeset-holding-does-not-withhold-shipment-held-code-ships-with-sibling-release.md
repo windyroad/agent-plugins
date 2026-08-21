@@ -1,6 +1,6 @@
 # Problem 359: Changeset holding does not withhold shipment — held code ships with any sibling release
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-06-11
 **Root cause identified**: 2026-06-17 (P359 RCA, this iter — see Root Cause Analysis)
 **Going-forward decision**: ADR-099 (`human-oversight: confirmed` 2026-07-23) — remove held changesets; changesets are release metadata only.
@@ -56,6 +56,12 @@ The framework then compounds the gap by *describing* the hold as a shipment cont
 - [ ] Create reproduction test — carried by RFC-025 Slice 2 (paired ON/OFF test-matrix over a dogfooded held slice); test shape resolved now that option (b) real-shipment-control is the chosen shape
 - [x] Ratify ADR-082 option at `/wr-architect:review-decisions` — done 2026-06-17: options (b)+(c) ratified; fix proposed via RFC-025 (ADR-060 RFC-first path)
 - [ ] Next actionable: RFC-025 Slice 1 tool-comparison investigation (remark/unified vs pandoc vs Sphinx vs MkDocs vs generic preprocessor) → recommendation for user ratification; run via `/wr-itil:manage-rfc` as its own iteration (dedicated deliverable + commit grain)
+
+## Fix Released
+
+Released in `@windyroad/itil@0.59.2` on 2026-07-23, via changeset `remove-held-changeset-workflow.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 

@@ -1,6 +1,6 @@
 # Problem 208: git-push-gate.sh does not check CI status on push/release before scoring risk
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-15
 **Fix Released**: pending — awaiting orchestrator-owned push/release cadence
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
@@ -66,6 +66,12 @@ JTBD notes honoured per `wr-jtbd:agent` review:
 - `incident-release` short-circuits BEFORE the CI check (JTBD-201 hotfix path).
 - Deny reasons include the conclusion enum value and the run URL for audit trail (JTBD-202).
 - Bypass marker is one-shot, matching the established `reducing-push` / `incident-release` semantics (JTBD-002 transparency).
+
+## Fix Released
+
+Released in `@windyroad/itil@0.55.0` on 2026-06-28, via changeset `p208-ci-status-aware-push-release-gate.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Related
 

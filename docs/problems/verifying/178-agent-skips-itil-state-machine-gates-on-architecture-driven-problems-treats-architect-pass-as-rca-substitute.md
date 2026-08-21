@@ -1,6 +1,6 @@
 # Problem 178: Agent skips ITIL state-machine gates on architecture-driven problems — treats architect-PASS verdict as substitute for empirical RCA + skips Open → Known Error transition
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-10
 **Priority**: 3 (Medium) — Impact: 3 (Moderate) x Likelihood: 2 (Possible) — re-rated iter-20 2026-06-16: base-rate survey (below) raised Likelihood 1→2; Impact stays Moderate (routes around a discipline gate, does not block ship); Priority band unchanged at 3, so WSJF (1.5) and README ranking are stable.
 **Origin**: internal
@@ -112,6 +112,12 @@ The 2026-07-03 outstanding-questions drain overrode both the born-proposed carve
 **Residual interpretation to confirm at RFC-authoring time** (queued, not built): if "an ADR must always serve a problem or an RFC" is read as a universally-enforced invariant, every ADR traces and the condition is always met — collapsing to carve-out (A), which the decision explicitly rejects. The coherent reading is that the *gate is the enforcement point* — it checks the driving ADR actually carries the trace, denying substitution for untethered ADRs. That is recorded here as the working interpretation; the RFC scoping the build should confirm it (and the exact "driving ADR" identification rule) before the enforcement lands.
 
 **Build status**: RFC-scoped, deferred under ADR-074. No RFC yet traces this ticket. Per the original next-step and ADR-060 discipline, capture an RFC tracing P178 + P179 for the trace-based Known-Error precondition gate; the RFC's scope is ratified at `manage-rfc accepted` before the enforcement (SKILL gate + ADR + bats) is built. Queued for the user at loop end.
+
+## Fix Released
+
+Released in `@windyroad/itil@0.46.0` on 2026-06-02, via changeset `p287-type-classification-retired.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 

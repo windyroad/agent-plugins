@@ -1,6 +1,6 @@
 # Problem 424: Governance tooling emits U+2014 em-dashes in generated output, breaking adopter no-em-dash Edit/Write hooks
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-07-06
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4
 **Origin**: inbound-reported (#185, #186, #219, #223, #319)
@@ -103,6 +103,12 @@ Architect advisory lean (2026-07-26): **Option C**, with B as the guarantee and 
 - **STORY-MAP-008** — Have plugin-generated content respect my project's conventions.
 
 Nothing implements until STORY-051 is ratified at its `accepted` gate (ADR-090 / ADR-096), which has no AFK path. The deferral is cadenced: `/wr-itil:work-problems` Step 2.4 gate (a) runs `wr-itil-detect-unratified-stories-maps` at every loop end, and `itil-rfc-oversight-nudge.sh` re-surfaces the RFC at every interactive SessionStart while `human-oversight: unconfirmed` stands.
+
+## Fix Released
+
+Released in `@windyroad/itil@1.0.0` on 2026-08-13, via changeset `story-map-grid-renderer.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 

@@ -1,6 +1,6 @@
 # Problem 497: An upstream pull-request diff is not scored against the upstream's conventions
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-08-14
 **Priority**: 9 (Medium) - Impact: 3 x Likelihood: 3
 **Origin**: inbound-reported (#416) — stamped 2026-08-21 review from the upstream poll; upstream filing `The upstream pull-request diff is unscored`
@@ -39,6 +39,12 @@ The risk model assumes that diffs land in the current repository and can be judg
 - [ ] Determine which upstream convention files are reliable inputs.
 - [ ] Define appetite for a repository the user does not own.
 - [ ] Use evidence from the first real ADR-117 contribution before selecting the mechanism.
+
+## Fix Released
+
+Released in `@windyroad/itil@1.1.0` on 2026-08-13, via changeset `prefer-upstream-pull-request.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 

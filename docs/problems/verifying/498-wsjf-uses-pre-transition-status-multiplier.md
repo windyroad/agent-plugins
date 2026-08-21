@@ -1,6 +1,6 @@
 # Problem 498: WSJF uses the pre-transition status multiplier
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-08-14
 **Priority**: 9 (Medium) - Impact: 3 x Likelihood: 3
 **Origin**: inbound-reported (#413)
@@ -36,6 +36,12 @@ After every Open to Known Error transition, manually recalculate WSJF from the t
 ## Fix Strategy
 
 Move the transition ahead of the calculation in both review flows, require the post-transition multiplier in all three checklist copies, and add focused Promptfoo workflow evaluations covering both review paths and transition behaviour. Do not add a second diagnostic command: fixing and testing the shared workflow is sufficient.
+
+## Fix Released
+
+Released in `@windyroad/itil@1.1.1` on 2026-08-17, via changeset `quiet-wsjf-transitions.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 

@@ -1,6 +1,6 @@
 # Problem 439: External-review round-trips waste cycles on stale repo artifacts (unpushed commits + stale IDE buffer)
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-07-06
 **Priority**: 6 (Medium) — Impact: 2 × Likelihood: 3
 **Origin**: inbound-reported (#326)
@@ -89,6 +89,12 @@ substantive rather than mere placement, because under ADR-002 it decides who eve
 rule. Pinning either inside STORY-050's acceptance criteria would ratify it silently, which is
 the build-on-then-rejected failure ADR-074 exists to prevent. Both are shared with P438 and
 P445; one ADR settles all three, or states why they differ.
+
+## Fix Released
+
+Released in `@windyroad/itil@1.0.0` on 2026-08-13, via changeset `retire-afk-accept-carve-out.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 

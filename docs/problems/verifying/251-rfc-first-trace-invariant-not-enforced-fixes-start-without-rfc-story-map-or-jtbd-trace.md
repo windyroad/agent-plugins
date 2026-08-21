@@ -1,6 +1,6 @@
 # Problem 251: RFC-first trace invariant not enforced — fixes start without RFC, story map, or JTBD trace
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-17
 **Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3 = 9. Rated at review 2026-07-02: RFC-first design still queued for user direction.
 **Origin**: internal
@@ -68,6 +68,12 @@ Possible interim workarounds (to validate):
 - [x] Identify the atomic-fix carve-out shape — **decided (ADR-071, P314)**: **no carve-out**. RFC-first is unconditional; no effort threshold, no override hatch. The original F2 / JTBD-101 carve-out is removed.
 - [ ] Survey current Open / Known Error tickets — how many would need retroactive RFC authoring? **= RFC-005 B7 (migration survey, pending).**
 - [ ] Create reproduction test — predicate behaviour covered by `packages/itil/scripts/test/check-fix-rfc-trace.bats` (RFC-005 B6 done); auto-create-fires SKILL-orchestration assertion is the documented harness-gap (RFC-005 B6 partial / B8 dogfood).
+
+## Fix Released
+
+Released in `@windyroad/itil@1.0.0` on 2026-08-13, via changeset `story-map-grid-renderer.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 

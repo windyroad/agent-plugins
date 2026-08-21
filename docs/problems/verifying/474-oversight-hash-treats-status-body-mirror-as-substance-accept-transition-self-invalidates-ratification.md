@@ -1,6 +1,6 @@
 # Problem 474: Oversight hash treats the `**Status**:` body mirror as substance, so an accept transition self-invalidates its own ratification
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-07-29
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 — derived at capture from the description per Step 4a
 **Origin**: internal
@@ -102,6 +102,12 @@ The narrowing that shipped 2026-07-03 in commit `35b07f6` is therefore ratified 
 The question was surfaced through `AskUserQuestion` with the substance stated in plain language ahead of any ID, per P350, and the option set named both readings and their costs, per the ADR-066 Amendment 2026-05-31 / P340 option-set requirement the architect cited when ruling that the 2026-07-29 decline was evidence rather than ratification.
 
 ~~**Outstanding follow-through**~~ — **none.** All three items listed here were already complete on 2026-07-30; they were written on the stale premise corrected above. ADR-090's Decision Outcome is reconciled, its amendment records the ratifying event rather than an OPEN marker, and the oversight marker was written at the time by the proper surface.
+
+## Fix Released
+
+Released in `@windyroad/itil@0.61.1` on 2026-07-30, via changeset `story-055-one-filter-definition.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 

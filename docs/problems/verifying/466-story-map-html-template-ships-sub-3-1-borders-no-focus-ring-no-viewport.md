@@ -1,11 +1,11 @@
 # Problem 466: The story-map HTML template ships sub-3:1 borders, no focus ring, and no viewport meta
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-07-26
-**Priority**: 15 (High) — Impact: 3 (Moderate — a WCAG Level A failure in artefacts this project ships to adopters, by a project whose own product line is accessibility tooling; re-rated 2026-08-21 from 2 on defect 4's evidence) × Likelihood: 5 (Almost certain — *every render already carries it*. Rests on **defect 5** as of 2026-08-21, not defect 4: the sticky-column focus obscuring is live in the shipped CSS at every width under 940px. Defect 4 turned out to be latent rather than live — the UA default underline was still in force — so the original wording, "the rule is absent from the shipped CSS so all renders fail it today", was true of the wrong defect.)
+**Priority**: 10 (Medium) — Impact: 2 (Minor — governance artefacts rendered for humans to read; no adopter runtime surface. Re-rated 2026-08-21: briefly carried Impact 3 on the premise that this project's product line is accessibility tooling. That premise is FALSE — CLAUDE.md line 5 states this is not a web UI project and that the accessibility-first guidance comes from the third-party `accessibility-agents` plugin injected into `~/CLAUDE.md`, not from anything in `packages/`. The product line is governance / ITIL / risk / TDD / JTBD plugins. Severity must not borrow credibility stakes this project does not have.) × Likelihood: 5 (Almost certain — *every render already carries it*. Rests on **defect 5** as of 2026-08-21, not defect 4: the sticky-column focus obscuring is live in the shipped CSS at every width under 940px. Defect 4 turned out to be latent rather than live — the UA default underline was still in force — so the original wording, "the rule is absent from the shipped CSS so all renders fail it today", was true of the wrong defect.)
 **Origin**: inbound-reported (addressr, 2026-08-21) — defect 4 externally corroborated; defects 1-3 internal
 **Effort**: S — mechanical CSS edits across two template sources and four map files, plus one grid fix — cf. P429 (S). *Actual 2026-08-21: S. Two CSS properties, one dead rule retired, and a STYLE-GUIDE pass; the four-map sweep and the grid fix had both been made moot by ADR-102.*
-**WSJF**: 15 — (15 × 1.0) / 1 (re-rated 2026-08-21 on defect 4 — inbound-corroborated Level A failure in current shipped CSS)
+**WSJF**: 10 — (10 × 1.0) / 1 (re-rated 2026-08-21: defect 5 is live and adopter-visible, but the Impact-3 rationale rested on a false product-line premise and is withdrawn)
 **JTBD**: JTBD-008
 **Persona**: developer
 
@@ -37,7 +37,7 @@ Superseded by ADR-102 (2026-08-05): maps are no longer copied from an exemplar a
 
 ## Impact Assessment
 
-- **Who is affected**: anyone reading a story map, most sharply keyboard and low-vision users; also the project's own credibility, since it publishes accessibility tooling.
+- **Who is affected**: anyone reading a story map, most sharply keyboard and low-vision users. (An earlier revision added "the project's own credibility, since it publishes accessibility tooling" — struck 2026-08-21: it does not. See the Priority line.)
 - **Frequency**: every new map authored from the template.
 - **Severity**: Medium — no runtime breakage, but it is a documented standards failure in artefacts the project asks people to read, and it self-propagates.
 
@@ -56,7 +56,7 @@ One template source did not get swept: **`docs/decisions/060-...accepted.md` lin
 - [x] ~~Catalogue `.task` / `.legend` / `.badge` / `.b-live` / `.b-next` / `.b-later`, or retire them~~ — done, and split by which was true of each. `.task`, `.badge`, `.b-live`, `.b-next` were already catalogued. `.legend` and `.map-note` are moot: removed by ADR-102 and emitted by nothing. `.b-later` was neither — it was **dead code in the shipped template**, styled at `story-map.css:75` and present in the renderer's `BADGE_GLYPH`, with no path to it from `badgeClass()` since a row with no trace became a defect rather than a third resting state. Retired from both. Two classes the guide had simply never named — `.orient` and `.ts-glyph` — are now catalogued.
 - [x] ~~Correct the stale § Typography rules~~ — three of them contradicted disk: the font stack was to be declared "in the embedded style block" (prohibited by the guide's own line 21), `text-overflow: ellipsis` was mandated but never implemented and would hide content outright, and "H2 for rib headers" named an element ADR-102 removed. A map has exactly one heading.
 - [x] ~~Tighten the STYLE-GUIDE's deliberately-hedged wording to describe disk state~~ — done. Both halves were stale, not just the tense: it named `docs/story-maps/README.md` as a live template source (retired by ADR-102) and disclaimed describing disk state when disk state is in fact compliant. The § Colours non-text-contrast bullet also still said the rule "binds hardest on `.slice`, whose border is the only resting signal that the card is a link" — post-ADR-102 `.slice` is a `<th scope="row">` and not a link at all; it now binds `.task`.
-- [ ] Consider whether a `docs/story-maps/**/*.html` check belongs in CI, given the project ships accessibility plugins.
+- [ ] Consider whether a `docs/story-maps/**/*.html` check belongs in CI — on the merits of guarding a rendered artefact adopters read, NOT on the struck premise that this project ships accessibility plugins.
 - [x] ~~**Defect 4**: give the reference links a resting non-colour cue and re-sync the shared copy~~ — done. `a { color: var(--focus); text-decoration: underline; }` at `story-map.css:59`, stated on the bare `a` selector rather than `.ref-link` (see the correction under Defect 4). Copy re-synced by re-rendering a map through `wr-itil-render-story-map`, so `ensureSharedAssets()` owns the sync rather than a hand edit; verified byte-identical with `diff`.
 - [x] ~~Add an in-prose-reference-link rule to STYLE-GUIDE.md~~ — done, filed under § Colours rather than § Interaction states. Placement was the reviewer's call and it matters: this is an **at-rest** rule, and filing it beside the hover rule would re-manufacture the exact category confusion that produced the wrong first reading of line 92. The hover rule gained a clause naming itself a card rule so the two cannot be conflated again.
 - [ ] Decide the `<ul role="list">` + `subgrid` semantic upgrade for `.rib` — **out of scope for any AFK iteration**; see Outstanding Questions. Needs an ADR and a human.
@@ -113,7 +113,13 @@ Verification is by construction rather than observation — confirming it needs 
 
 3. **[direction]** Should P466 carry a secondary JTBD anchor to JTBD-303 (generated output respects adopter conventions) for the adopter-install axis — this fix reaches `addressr` through a package upgrade, not a local patch? Raised by `wr-jtbd:agent`, which also warned **against** moving the header anchor now: JTBD-303 is unratified, so citing it in the header would fire the `[Unratified Dependency]` guard with no human present to clear it. Recorded as a question deliberately, since a question is not a build-upon. Ratify via `/wr-jtbd:confirm-jobs-and-personas` first.
 
-4. **[direction]** Should the JTBD corpus document an accessibility/perceivability outcome for rendered artefacts, and should `developer` / `tech-lead` / `plugin-user` gain assistive-technology context constraints? `wr-jtbd:agent` grepped all 18 jobs and 4 personas for `accessib|WCAG|contrast` and found exactly one hit, about skill discoverability — no persona records keyboard-only, low-vision or colour-vision-deficiency context, in a repo whose own product line is accessibility tooling. It ruled this a depth gap in a covered flow rather than a blocker, so it did not hold this fix; but it is the reason defects 4 and 5 had no job to surface them.
+4. **[direction]** Should the JTBD corpus document an accessibility/perceivability outcome for rendered artefacts, and should `developer` / `tech-lead` / `plugin-user` gain assistive-technology context constraints? `wr-jtbd:agent` grepped all 18 jobs and 4 personas for `accessib|WCAG|contrast` and found exactly one hit, about skill discoverability — no persona records keyboard-only, low-vision or colour-vision-deficiency context, in this repo's corpus. (The original wording justified this with "in a repo whose own product line is accessibility tooling" — struck 2026-08-21, false; the question stands or falls on whether rendered artefacts deserve a perceivability outcome at all, not on a product-line claim.) It ruled this a depth gap in a covered flow rather than a blocker, so it did not hold this fix; but it is the reason defects 4 and 5 had no job to surface them.
+
+## Fix Released
+
+Released in `@windyroad/itil@1.1.2` on 2026-08-21, via changeset `itil-story-map-link-and-focus-cues.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 

@@ -1,6 +1,6 @@
 # Problem 465: The story `accepted` gate names ADR-090 ratification but no surface enforces it
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-07-26
 **Priority**: 8 (Medium) — Impact: 2 (Minor — governance/dev-tooling; an unratified story can be built on, defeating a human-oversight gate, but nothing adopter-facing breaks) × Likelihood: 4 (Likely — the hole is open in code today and the ambiguous prose actively invites the reading; an agent proposed exactly this bypass during the P430 iteration) — derived at capture from the description per Step 4a
 **Origin**: internal
@@ -57,6 +57,12 @@ Committed 2026-07-26 (`11d7a6d1`) in the same slice as P456's carve-out — the 
 Recorded as ADR-101 (`docs/decisions/101-afk-accept-carve-out-for-pure-decomposition-stories.proposed.md`), which defines the one bounded basis on which the ratification may be machine-written rather than human, and is otherwise a pure tightening of this gate.
 
 Status stays **Open** rather than Verification Pending: no push and no release happened this iteration, so the fix is not in an adopter's hands and there is nothing for the maintainer to verify yet. Transition to `verifying` when `@windyroad/itil` next publishes.
+
+## Fix Released
+
+Released in `@windyroad/itil@0.60.0` on 2026-07-29, via changeset `afk-accept-pure-decomposition.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 

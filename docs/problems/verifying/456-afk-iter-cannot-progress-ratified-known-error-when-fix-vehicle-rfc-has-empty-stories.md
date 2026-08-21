@@ -1,6 +1,6 @@
 # Problem 456: AFK iter cannot progress a ratified Known Error when the fix-vehicle RFC has empty stories
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-07-15
 **Priority**: 6 (Medium) — Impact: 2 (Minor — iter degrades to capture-and-hold; work preserved but implementation throughput lost) × Likelihood: 3 (Possible — fires on every AFK iter whose selected ticket's fix vehicle carries `stories: []`; 7 under-scoped skeleton RFCs + legacy empty-stories RFCs currently on disk) — derived at capture from the description per Step 4a
 **Origin**: internal
@@ -73,6 +73,12 @@ Machinery landed 2026-07-26 under the maintainer's direct one-time authorisation
 - `itil-no-implement-draft-gate.sh` — the unconditional ADR-090 ratification check (the P465 fix) plus story-local carve-out re-assertion.
 - `story-oversight.sh` — the card-excluding map hash that makes the carve-out satisfiable at all, since ADR-095 compels every new story to edit its map.
 - `mark-story-oversight-confirmed.sh --pure-decomposition`, the `--with-afk-accepted` post-hoc drain listing, `manage-story` I12, and the adopter-facing config + README surfaces.
+
+## Fix Released
+
+Released in `@windyroad/itil@0.60.0` on 2026-07-29, via changeset `afk-accept-pure-decomposition.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 

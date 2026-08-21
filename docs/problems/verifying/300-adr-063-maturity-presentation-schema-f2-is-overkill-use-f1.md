@@ -1,6 +1,6 @@
 # Problem 300: ADR-063 maturity-presentation schema — F2 (rich-record per-surface) is overkill; F1 is sufficient to begin with
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-05-25
 **Verifying since**: 2026-06-08
 **Priority**: 4 (Low-Med) — Impact: 2 (Minor — over-engineering the plugin.json maturity schema adds build + maintenance cost for capability not yet needed; not shipped, so caught before the cost lands) × Likelihood: 2 (Unlikely — affects the Phase-3 maturity-presentation build only)
@@ -46,6 +46,12 @@ The ADR amendment landed 2026-06-08 (this iter). Verification follows on the Pha
 - [ ] Sibling Phase 3c iter: re-simplify per-plugin bats fixtures to assert F1 shape + F3 badge URL.
 - [ ] Touch up ADR-069 lines 76 + 109 to drop stale "prose-weaving citations" phrasing (low-priority; not load-bearing — captured here as follow-up).
 - [ ] Verify the F1 + F3 implementation through a release of `@windyroad/itil` (and the other 10 plugins consuming the maturity pipeline).
+
+## Fix Released
+
+Released in `@windyroad/itil@0.46.0` on 2026-06-02, via changeset `p287-type-classification-retired.md`.
+
+Awaiting user verification that the fix behaves as intended in the installed package.
 
 ## Dependencies
 
