@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-21 **P515 captured** — the drain that scaffolds risk-register entries appends their index rows past the end of the table and with the wrong column count, so nothing it creates has ever shown up in the index; 59 rows had piled up below the table since May before being repaired by hand today (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-08-21 **P516 captured** — the story-map card writer treats the trace back-link as an optional flag, so a card added without it renders with no Traces line; the commit-gate risk scorer caught the one degraded card among nine on a map, which is luck rather than a control (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -64,6 +64,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 8 | P414 | retro/wrap defers over-threshold briefing Tier-3 rotation as a "run interactive run-retro" recommendation instead of performing the split | 8 (Medium) | Open | S | 2026-07-03 | internal |
 | 8 | P471 | run-retro Step 2d ask-hygiene trail path collides across same-day iterations, clobbering prior entries | 8 (Medium) | Open | S | 2026-07-26 | internal |
 | 8 | P472 | reconcile-stories reports permanent false MISSING_REVERSE_TRACE drift against ADR-090's ratified-stories-only rule | 8 (Medium) | Open | S | 2026-07-26 | internal |
+| 8 | P516 | `story-map-edit add-card` omits the `ref` back-link, so a card renders with no Traces line | 8 (Medium) | Open | S | 2026-08-21 | internal |
 | 8 | P423 | Agent "fixes" recurring behavioural corrections via project-local memory instead of shipping an adopter-facing plugin surface | 16 | Open | M | 2026-07-06 | internal |
 | 7.5 | P444 | Agent buries granular design decisions in artefacts — default values, thresholds, and policy choices pass artefact-level ratification unsurfaced, escaping real oversight | 15 (High) | Open | M | 2026-07-08 | internal |
 | 6 | P305 | Post-Edit silent revert of working-tree files before commit — potential silent-work-loss hazard | 6 | Known Error | M | 2026-05-26 | internal |

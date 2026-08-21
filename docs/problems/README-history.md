@@ -1350,6 +1350,8 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 
 ## 2026-08-21
 
+> Last reviewed: 2026-08-21 **P515 captured** — the drain that scaffolds risk-register entries appends their index rows past the end of the table and with the wrong column count, so nothing it creates has ever shown up in the index; 59 rows had piled up below the table since May before being repaired by hand today (lightweight aside via /wr-itil:capture-problem).
+
 > Last reviewed: 2026-08-21 **P368 reopened; P512 + P513 + P514 captured** - an adopter repo has been carrying six live plugin defects that never reached us, and one of them says the fix we were about to close as verified only covers half the path.
 > Last reviewed: 2026-08-21 **full re-score of all 135 open + known-error tickets; 16 auto-transitioned to Known Error; relevance-close pass halted** - 44 tickets were carrying no WSJF line at all and three more were computing it wrong, so the ranking below is the first in a while that every ticket actually participates in. Sixteen tickets whose root cause is confirmed and whose workaround is written down moved Open -> Known Error, which doubles their WSJF and lifts them up the queue. The relevance-close pass was run for measurement and then not applied: it wanted to close 109 of 135 tickets, including seven it would have closed silently in an AFK pass, and every one of those seven is live.
 
