@@ -73,6 +73,14 @@ describes a different session, pick the per-iter path instead.
       fixture `docs/retros/` and assert both entries survive and the trend script sees two `RETRO`
       lines.
 
+### Evidence 2026-08-21 (P466 AFK iter) — reproduced live, four segments in one file
+
+The P466 iteration's retro was the **fourth** retro to write `docs/retros/2026-08-21-ask-hygiene.md`. The three earlier segments were already on disk, one of them carrying `**Lazy count: 2**` with a written-up regression analysis. Overwriting per this SKILL's Step 2d ("Persist trail entry at `docs/retros/<YYYY-MM-DD>-ask-hygiene.md` (one file per retro)") would have destroyed that analysis outright.
+
+The iteration worked around it by appending a `---`-separated segment with its own heading and its own count block. The file now carries three `**Lazy count:**` lines. That preserves the human-readable record but does **not** fix the machine surface: `check-ask-hygiene.sh` reading one count per file still sees only the first segment's number, so the R6 gate (lazy count ≥2 across 3 consecutive retros) is computing on a sample that silently drops every retro after the first each day. On a day with four retros the gate sees one.
+
+Worth noting the append convention is doing real work already and could be the fix rather than a workaround: a per-segment parse (`grep` all `**Lazy count:**` lines rather than the first) would recover every segment without changing the file layout or breaking the existing trail. That is cheaper than the per-retro-file rename this ticket currently contemplates, and it is backward-compatible with every single-segment file already on disk.
+
 ## Dependencies
 
 - **Blocks**: (none)

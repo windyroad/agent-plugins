@@ -48,6 +48,16 @@ Treat the agent's returned verdict text as the authority and check the gate's ac
 - [ ] Audit the sibling reviewers (architect, jtbd, risk-scorer, tdd) for the same contract-versus-tool-surface mismatch.
 - [ ] Behavioural coverage per ADR-052 for whichever mechanism is retained.
 
+### Evidence 2026-08-21 (P466 iter) — the scope is wider than this ticket's title
+
+`wr-risk-scorer:pipeline` has the same defect and is not named in the title. Scoring the P466 commit it opened with: *"I could not run `git diff --cached` — no Bash tool is available in this session — so I verified the change by reading the working tree directly"*, and then scored that inability as its own finding (its Risk 4, "Staged index not directly inspectable this session", residual 4/25), noting it could not distinguish staged from unstaged content and that the session-start `git status` it had been given was already out of date.
+
+That is a materially different consequence from the style-guide / voice-tone case. Those two cannot write a marker file, and the documented workaround — treat the returned verdict text as the authority — fully recovers the review. The pipeline scorer cannot *read the thing it is scoring*: a commit gate that scores the working tree instead of the index will miss a staged-but-since-modified file, and will score files the caller deliberately left unstaged. The workaround is to inline the full change inventory in the scorer's prompt, which is what this iteration did.
+
+`wr-style-guide:agent` also reproduced the original symptom in the same iteration: *"I could not write `/tmp/style-guide-verdict` — no Bash tool is available in this session, so please record `FAIL` on my behalf."* The caller declined to forge it, per the P348 hollow-marker rule.
+
+- [ ] Widen this ticket's scope (and title) to every read-only reviewer whose contract assumes Bash, not just the two verdict-writers. `wr-risk-scorer:pipeline` is the third, and its failure mode is read-side rather than write-side.
+
 ## Dependencies
 
 - **Blocks**: (none)

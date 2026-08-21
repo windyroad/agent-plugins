@@ -38,3 +38,44 @@ correct ("What are you talking about say they become unfixable?").
 Not fired. The condition is lazy ≥2 across **three consecutive** retros; the trail reads 0
 (2026-07-26 iters), 0 (2026-08-20 morning), 0 (2026-08-20 evening), 2 (this retro). One retro at 2
 is a data point, not the gate. Recorded here so the next two retros' counts are read against it.
+
+---
+
+# Ask Hygiene — 2026-08-21 (fourth retro, P466 AFK iter segment)
+
+Scope: AFK `/wr-itil:work-problems` iteration against P466 (story-map stylesheet
+accessibility defects). `AskUserQuestion` was unavailable — the orchestrator prompt
+forbids it for the whole iteration — so the classification below is trivially empty
+rather than earned. Recorded so the cross-session trend is not silently thinned by
+AFK segments that had no opportunity to ask.
+
+| Call # | Header | Classification | Citation |
+|--------|--------|----------------|----------|
+| — | (none) | — | AFK iteration; `AskUserQuestion` forbidden by the orchestrator prompt |
+
+**Lazy count: 0**
+**Direction count: 0**
+**Override count: 0**
+**Silent-framework count: 0**
+**Taste count: 0**
+**Correction-followup count: 0**
+
+Four decisions in this iteration were framework-resolved and taken silently, which is
+the correct handling and is why the lazy count is 0 rather than an artefact of the AFK
+ban. Recorded so a future reader can check the ban was not doing the work:
+
+- Dropping the ADR-060 edit — resolved by ADR-116 via the architect's ruling, not a
+  judgement call.
+- Retiring `.b-later` rather than cataloguing it — the style-guide reviewer offered both;
+  the guide's own "normative, and emitted only by the template" clause settles it, since
+  nothing emits `.b-later`.
+- Routing the ADR-060 scope to P481 rather than capturing a sibling ticket — the
+  hang-off-before-capture rule, with P481 already owning the same document.
+- Fixing the two scorer findings (guide § Scope contradiction, comment arithmetic)
+  rather than relaying them — RISK_REMEDIATIONS are direction, not findings.
+
+**Appended, not overwritten** — `docs/retros/2026-08-21-ask-hygiene.md` already held three
+prior segments from earlier retros today. That collision is P471 ("the ask-hygiene trail is
+one file per day, so a second retro's counts are invisible to the R6 gate"), reproduced live.
+The per-segment `**Lazy count:**` lines still each parse, but `check-ask-hygiene.sh` reading
+one count per file will see only the first.
