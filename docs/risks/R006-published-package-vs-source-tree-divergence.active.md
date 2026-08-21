@@ -97,3 +97,10 @@ Residual reflects controls firing-and-passing (per-action lens):
 - **Generalisation**: R009 (functional defects) — R006 is the publish-boundary specialisation.
 - **Sibling**: R010 (semver violation) — under-classification of behavioural changes that crossed publish boundary.
 - **Drivers / ADRs**: P137 (ID-leakage), P151 (script-path leakage), P154 (npm-pack-extension), ADR-049 (`$PATH bin/`), ADR-055 (namespace-prefixed permalinks), ADR-014 (commit grain).
+
+## Evidence Log
+
+Auto-populated from `.risk-reports/` via Phase 2b drain.
+
+- 2026-08-13T01:06:50Z: fired in `.risk-reports/2026-08-13T01-06-50-commit.md` (reason: above-appetite-residual)
+- 2026-08-13T01:14:03Z: fired in `.risk-reports/2026-08-13T01-14-03-commit.md` (reason: above-appetite-residual)

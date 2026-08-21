@@ -89,6 +89,66 @@ R001 + R008 are confidentiality classes (different surfaces). R004 is a state-le
 | [R017](R017-skill-prose-class-bats-deferred-residual-above-appetite.active.md) | Skill-prose class / bats-deferred residual above appetite | — | — | pending review |
 | [R018](R018-r009-bedrock-functional-defect-class-floor-medium.active.md) | R009 bedrock functional-defect class floor medium | — | — | pending review |
 | [R024](R024-risk-catalog-empty-no-baseline-controls-documented.active.md) | Risk catalog empty / no baseline controls documented (obsolete — superseded by R001-R010 bootstrap) | — | — | pending review |
+| [R025](R025-external-adopter-name-in-public-repo-ticket-prose.active.md) | External Adopter Name In Public Repo Ticket Prose | — | — | pending review |
+| [R028](R028-jtbd-build-upon-guard-agent-prose-verdict-residual-above-appetite.active.md) | Jtbd Build Upon Guard Agent Prose Verdict Residual Above Appetite | — | — | pending review |
+| [R029](R029-r009-agent-prose-verdict-surface-no-llm-harness.active.md) | R009 Agent Prose Verdict Surface No Llm Harness | — | — | pending review |
+| [R035](R035-r009-prose-surface-floor-un-verified-eval-run.active.md) | R009 Prose Surface Floor Un Verified Eval Run | — | — | pending review |
+| [R036](R036-p350-skill-prose-brief-before-id-no-promptfoo-coverage.active.md) | P350 Skill Prose Brief Before Id No Promptfoo Coverage | — | — | pending review |
+| [R037](R037-capture-problem-skill-prose-no-promptfoo-eval.active.md) | Capture Problem Skill Prose No Promptfoo Eval | — | — | pending review |
+| [R038](R038-skill-prose-amendment-multi-surface-promptfoo-coverage-gap.active.md) | Skill Prose Amendment Multi Surface Promptfoo Coverage Gap | — | — | pending review |
+| [R039](R039-skill-prose-r009-floor-migrate-briefing-no-promptfoo.active.md) | Skill Prose R009 Floor Migrate Briefing No Promptfoo | — | — | pending review |
+| [R040](R040-work-problems-skill-prose-floor-without-paired-promptfoo-eval.active.md) | Work Problems Skill Prose Floor Without Paired Promptfoo Eval | — | — | pending review |
+| [R041](R041-external-project-handle-in-public-repo-ticket-origin-stamp.active.md) | External Project Handle In Public Repo Ticket Origin Stamp | — | — | pending review |
+| [R043](R043-r009-wrapper-skill-prose-no-paired-promptfoo-eval.active.md) | R009 Wrapper Skill Prose No Paired Promptfoo Eval | — | — | pending review |
+| [R044](R044-work-problems-skill-prose-no-promptfoo-coverage.active.md) | Work Problems Skill Prose No Promptfoo Coverage | — | — | pending review |
+| [R045](R045-r009-skill-prose-work-problems-no-promptfoo-eval.active.md) | R009 Skill Prose Work Problems No Promptfoo Eval | — | — | pending review |
+| [R046](R046-r009-skill-prose-floor-work-problems-no-promptfoo-coverage.active.md) | R009 Skill Prose Floor Work Problems No Promptfoo Coverage | — | — | pending review |
+| [R047](R047-work-problems-skill-prose-floor-no-paired-promptfoo.active.md) | Work Problems Skill Prose Floor No Paired Promptfoo | — | — | pending review |
+| [R049](R049-review-problems-skill-prose-floor-without-paired-promptfoo.active.md) | Review Problems Skill Prose Floor Without Paired Promptfoo | — | — | pending review |
+| [R050](R050-work-problems-skill-prose-cohort-depth-7-binding-on-single-eval-slice.active.md) | Work Problems Skill Prose Cohort Depth 7 Binding On Single Eval Slice | — | — | pending review |
+| [R052](R052-review-problems-skill-prose-no-promptfoo-eval.active.md) | Review Problems Skill Prose No Promptfoo Eval | — | — | pending review |
+| [R053](R053-adr-skill-prose-amendment-no-paired-changeset-or-promptfoo.active.md) | Adr Skill Prose Amendment No Paired Changeset Or Promptfoo | — | — | pending review |
+| [R054](R054-architect-jtbd-agent-prose-verdict-grammar-no-promptfoo-eval.active.md) | Architect Jtbd Agent Prose Verdict Grammar No Promptfoo Eval | — | — | pending review |
+| [R056](R056-reconcile-readme-prose-no-promptfoo-eval.active.md) | Reconcile Readme Prose No Promptfoo Eval | — | — | pending review |
+| [R057](R057-feat-commit-without-paired-changeset-phase-1-ambiguity.active.md) | Feat Commit Without Paired Changeset Phase 1 Ambiguity | — | — | pending review |
+| [R058](R058-work-problems-skill-prose-floor-no-paired-promptfoo-p358.active.md) | Work Problems Skill Prose Floor No Paired Promptfoo P358 | — | — | pending review |
+| [R059](R059-skill-prose-surface-push-without-paired-eval.active.md) | Skill Prose Surface Push Without Paired Eval | — | — | pending review |
+| [R060](R060-skill-prose-upstream-dispatch-no-promptfoo-coverage.active.md) | Skill Prose Upstream Dispatch No Promptfoo Coverage | — | — | pending review |
+| [R061](R061-catchup-migration-mode-skill-prose-no-promptfoo-coverage.active.md) | Catchup Migration Mode Skill Prose No Promptfoo Coverage | — | — | pending review |
+| [R062](R062-rate-at-capture-skill-prose-no-paired-promptfoo-coverage.active.md) | Rate At Capture Skill Prose No Paired Promptfoo Coverage | — | — | pending review |
+| [R063](R063-minor-bump-shipped-under-unconfirmed-oversight-adr.active.md) | Minor Bump Shipped Under Unconfirmed Oversight Adr | — | — | pending review |
+| [R064](R064-adr-ratification-precondition-unmet-before-release.active.md) | Adr Ratification Precondition Unmet Before Release | — | — | pending review |
+| [R065](R065-update-policy-skill-step-6a-r009-prose-floor-no-promptfoo.active.md) | Update Policy Skill Step 6A R009 Prose Floor No Promptfoo | — | — | pending review |
+| [R066](R066-capture-problem-persona-adopter-corpus-prose-no-dedicated-eval.active.md) | Capture Problem Persona Adopter Corpus Prose No Dedicated Eval | — | — | pending review |
+| [R067](R067-agent-prose-verdict-axis-shipped-without-promptfoo-harness.active.md) | Agent Prose Verdict Axis Shipped Without Promptfoo Harness | — | — | pending review |
+| [R068](R068-work-problems-skill-prose-plugin-dir-dispatch-no-promptfoo.active.md) | Work Problems Skill Prose Plugin Dir Dispatch No Promptfoo | — | — | pending review |
+| [R069](R069-r009-skill-prose-floor-undischarged-until-promptfoo-green-verified.active.md) | R009 Skill Prose Floor Undischarged Until Promptfoo Green Verified | — | — | pending review |
+| [R070](R070-work-problems-skill-prose-r009-floor-cohort-depth-nine-held-on-single-eval.active.md) | Work Problems Skill Prose R009 Floor Cohort Depth Nine Held On Single Eval | — | — | pending review |
+| [R071](R071-r009-i13-existing-vehicle-trace-branch-no-promptfoo-eval.active.md) | R009 I13 Existing Vehicle Trace Branch No Promptfoo Eval | — | — | pending review |
+| [R072](R072-skill-prose-gate-invocation-floor-no-paired-promptfoo-for-changed-branch.active.md) | Skill Prose Gate Invocation Floor No Paired Promptfoo For Changed Branch | — | — | pending review |
+| [R073](R073-adopter-name-and-usage-detail-in-public-repo-rfc-prose.active.md) | Adopter Name And Usage Detail In Public Repo Rfc Prose | — | — | pending review |
+| [R074](R074-shipped-entrypoint-non-executable-mode-bit-inert.active.md) | Shipped plugin entrypoint loses its executable mode bit → inert at adopter installs | — | — | pending review |
+| [R076](R076-skill-behavioural-change-shipped-without-paired-changeset.active.md) | Skill Behavioural Change Shipped Without Paired Changeset | — | — | pending review |
+| [R077](R077-restore-incident-skill-prose-floor-no-promptfoo-eval.active.md) | Restore Incident Skill Prose Floor No Promptfoo Eval | — | — | pending review |
+| [R078](R078-capture-adr-skill-prose-no-paired-promptfoo-eval.active.md) | Capture Adr Skill Prose No Paired Promptfoo Eval | — | — | pending review |
+| [R080](R080-plugin-installer-help-text-copied-verbatim-from-sibling-package.active.md) | Plugin Installer Help Text Copied Verbatim From Sibling Package | — | — | pending review |
+| [R081](R081-work-problems-step-3-6-carveout-branch-no-promptfoo-case.active.md) | Work Problems Step 3 6 Carveout Branch No Promptfoo Case | — | — | pending review |
+| [R082](R082-manage-story-skill-prose-no-paired-promptfoo-eval.active.md) | Manage Story Skill Prose No Paired Promptfoo Eval | — | — | pending review |
+| [R083](R083-multi-adr-lockstep-amendment-drift-no-load-bearing-detector.active.md) | Multi Adr Lockstep Amendment Drift No Load Bearing Detector | — | — | pending review |
+| [R084](R084-adr-101-born-unconfirmed-ratification-drain-pending.active.md) | Adr 101 Born Unconfirmed Ratification Drain Pending | — | — | pending review |
+| [R085](R085-story-implemented-while-in-draft-accepted-gate-never-fired.active.md) | Story Implemented While In Draft Accepted Gate Never Fired | — | — | pending review |
+| [R086](R086-story-047-accepted-gate-unmet-before-implementation.active.md) | Story 047 Accepted Gate Unmet Before Implementation | — | — | pending review |
+| [R087](R087-oversight-content-hash-ignores-body-status-mirror-false-unratified.active.md) | Oversight Content Hash Ignores Body Status Mirror False Unratified | — | — | pending review |
+| [R088](R088-story-body-shape-prose-change-no-paired-promptfoo-assertion.active.md) | Story Body Shape Prose Change No Paired Promptfoo Assertion | — | — | pending review |
+| [R089](R089-adopter-corpus-migration-shipped-without-self-firing-cadence.active.md) | Adopter Corpus Migration Shipped Without Self Firing Cadence | — | — | pending review |
+| [R090](R090-adopter-migration-reachable-only-via-release-notes-no-cadence.active.md) | Adopter Migration Reachable Only Via Release Notes No Cadence | — | — | pending review |
+| [R091](R091-full-local-suite-cannot-complete-ci-is-only-full-suite-arbiter.active.md) | Full Local Suite Cannot Complete Ci Is Only Full Suite Arbiter | — | — | pending review |
+| [R092](R092-machine-wide-projection-sample-concurrency.active.md) | Machine Wide Projection Sample Concurrency | — | — | pending review |
+| [R093](R093-uninspectable-pipeline-state-blocks-risk-assessment.active.md) | Uninspectable Pipeline State Blocks Risk Assessment | — | — | pending review |
+| [R094](R094-release-batch-skill-prose-concentration-above-appetite.active.md) | Release Batch Skill Prose Concentration Above Appetite | — | — | pending review |
+| [R095](R095-cumulative-branch-ratification-and-validation-gap.active.md) | Cumulative Branch Ratification And Validation Gap | — | — | pending review |
+| [R096](R096-adr-116-ratification-precondition-unmet.active.md) | Adr 116 Ratification Precondition Unmet | — | — | pending review |
+| [R097](R097-hook-regression-installed-runtime-smoke-gap.active.md) | Hook Regression Installed Runtime Smoke Gap | — | — | pending review |
 
 > **Pending-review queue**: Remaining active auto-scaffolded entries carry ADR-026 sentinels for ungrounded scoring fields and `Status: Active (auto-scaffolded — pending review)` for downstream human curation. Obsolete release-delay and atomic-holding entries were retired when ADR-099 removed held changesets as a shipment control.
 
@@ -108,45 +168,3 @@ Identifying a new class during scoring? Author it via `/wr-risk-scorer:create-ri
 The entry shape (per-entry sections to author): description; recogniser (path patterns + diff keywords + anti-patterns); stage applicability; inherent risk per `RISK-POLICY.md`; controls table with "if absent for THIS action" column; per-action modulators (composition: max-pessimistic); residual; watch-out; see-also. Refer to existing entries as templates — R001 / R003 are the canonical examples.
 
 The catalogue is self-pruning: when a class stops surfacing in `.risk-reports/` (controls have made it rare), retire its entry by renaming `R<NNN>-<slug>.md` to `R<NNN>-<slug>.retired.md`. Git history preserves prior content.
-| [R025](R025-external-adopter-name-in-public-repo-ticket-prose.active.md) | External Adopter Name In Public Repo Ticket Prose | pending | — | — | pending | pending | 2026-05-31 |
-| [R028](R028-jtbd-build-upon-guard-agent-prose-verdict-residual-above-appetite.active.md) | Jtbd Build Upon Guard Agent Prose Verdict Residual Above Appetite | pending | — | — | pending | pending | 2026-05-31 |
-| [R029](R029-r009-agent-prose-verdict-surface-no-llm-harness.active.md) | R009 Agent Prose Verdict Surface No Llm Harness | pending | — | — | pending | pending | 2026-05-31 |
-| [R035](R035-r009-prose-surface-floor-un-verified-eval-run.active.md) | R009 Prose Surface Floor Un Verified Eval Run | pending | — | — | pending | pending | 2026-06-10 |
-| [R036](R036-p350-skill-prose-brief-before-id-no-promptfoo-coverage.active.md) | P350 Skill Prose Brief Before Id No Promptfoo Coverage | pending | — | — | pending | pending | 2026-06-10 |
-| [R037](R037-capture-problem-skill-prose-no-promptfoo-eval.active.md) | Capture Problem Skill Prose No Promptfoo Eval | pending | — | — | pending | pending | 2026-06-10 |
-| [R038](R038-skill-prose-amendment-multi-surface-promptfoo-coverage-gap.active.md) | Skill Prose Amendment Multi Surface Promptfoo Coverage Gap | pending | — | — | pending | pending | 2026-06-10 |
-| [R039](R039-skill-prose-r009-floor-migrate-briefing-no-promptfoo.active.md) | Skill Prose R009 Floor Migrate Briefing No Promptfoo | pending | — | — | pending | pending | 2026-06-10 |
-| [R040](R040-work-problems-skill-prose-floor-without-paired-promptfoo-eval.active.md) | Work Problems Skill Prose Floor Without Paired Promptfoo Eval | pending | — | — | pending | pending | 2026-06-10 |
-| [R041](R041-external-project-handle-in-public-repo-ticket-origin-stamp.active.md) | External Project Handle In Public Repo Ticket Origin Stamp | pending | — | — | pending | pending | 2026-06-10 |
-| [R043](R043-r009-wrapper-skill-prose-no-paired-promptfoo-eval.active.md) | R009 Wrapper Skill Prose No Paired Promptfoo Eval | pending | — | — | pending | pending | 2026-06-10 |
-| [R044](R044-work-problems-skill-prose-no-promptfoo-coverage.active.md) | Work Problems Skill Prose No Promptfoo Coverage | pending | — | — | pending | pending | 2026-06-10 |
-| [R045](R045-r009-skill-prose-work-problems-no-promptfoo-eval.active.md) | R009 Skill Prose Work Problems No Promptfoo Eval | pending | — | — | pending | pending | 2026-06-10 |
-| [R046](R046-r009-skill-prose-floor-work-problems-no-promptfoo-coverage.active.md) | R009 Skill Prose Floor Work Problems No Promptfoo Coverage | pending | — | — | pending | pending | 2026-06-10 |
-| [R047](R047-work-problems-skill-prose-floor-no-paired-promptfoo.active.md) | Work Problems Skill Prose Floor No Paired Promptfoo | pending | — | — | pending | pending | 2026-06-10 |
-| [R049](R049-review-problems-skill-prose-floor-without-paired-promptfoo.active.md) | Review Problems Skill Prose Floor Without Paired Promptfoo | pending | — | — | pending | pending | 2026-06-10 |
-| [R050](R050-work-problems-skill-prose-cohort-depth-7-binding-on-single-eval-slice.active.md) | Work Problems Skill Prose Cohort Depth 7 Binding On Single Eval Slice | pending | — | — | pending | pending | 2026-06-10 |
-| [R052](R052-review-problems-skill-prose-no-promptfoo-eval.active.md) | Review Problems Skill Prose No Promptfoo Eval | pending | — | — | pending | pending | 2026-06-10 |
-| [R053](R053-adr-skill-prose-amendment-no-paired-changeset-or-promptfoo.active.md) | Adr Skill Prose Amendment No Paired Changeset Or Promptfoo | pending | — | — | pending | pending | 2026-06-10 |
-| [R054](R054-architect-jtbd-agent-prose-verdict-grammar-no-promptfoo-eval.active.md) | Architect Jtbd Agent Prose Verdict Grammar No Promptfoo Eval | pending | — | — | pending | pending | 2026-06-10 |
-| [R056](R056-reconcile-readme-prose-no-promptfoo-eval.active.md) | Reconcile Readme Prose No Promptfoo Eval | pending | — | — | pending | pending | 2026-06-10 |
-| [R057](R057-feat-commit-without-paired-changeset-phase-1-ambiguity.active.md) | Feat Commit Without Paired Changeset Phase 1 Ambiguity | pending | — | — | pending | pending | 2026-06-17 |
-| [R058](R058-work-problems-skill-prose-floor-no-paired-promptfoo-p358.active.md) | Work Problems Skill Prose Floor No Paired Promptfoo P358 | pending | — | — | pending | pending | 2026-06-17 |
-| [R059](R059-skill-prose-surface-push-without-paired-eval.active.md) | Skill Prose Surface Push Without Paired Eval | pending | — | — | pending | pending | 2026-06-17 |
-| [R060](R060-skill-prose-upstream-dispatch-no-promptfoo-coverage.active.md) | Skill Prose Upstream Dispatch No Promptfoo Coverage | pending | — | — | pending | pending | 2026-06-17 |
-| [R061](R061-catchup-migration-mode-skill-prose-no-promptfoo-coverage.active.md) | Catchup Migration Mode Skill Prose No Promptfoo Coverage | pending | — | — | pending | pending | 2026-06-17 |
-| [R062](R062-rate-at-capture-skill-prose-no-paired-promptfoo-coverage.active.md) | Rate At Capture Skill Prose No Paired Promptfoo Coverage | pending | — | — | pending | pending | 2026-07-03 |
-| [R063](R063-minor-bump-shipped-under-unconfirmed-oversight-adr.active.md) | Minor Bump Shipped Under Unconfirmed Oversight Adr | pending | — | — | pending | pending | 2026-07-03 |
-| [R064](R064-adr-ratification-precondition-unmet-before-release.active.md) | Adr Ratification Precondition Unmet Before Release | pending | — | — | pending | pending | 2026-07-03 |
-| [R065](R065-update-policy-skill-step-6a-r009-prose-floor-no-promptfoo.active.md) | Update Policy Skill Step 6A R009 Prose Floor No Promptfoo | pending | — | — | pending | pending | 2026-07-03 |
-| [R066](R066-capture-problem-persona-adopter-corpus-prose-no-dedicated-eval.active.md) | Capture Problem Persona Adopter Corpus Prose No Dedicated Eval | pending | — | — | pending | pending | 2026-07-03 |
-| [R067](R067-agent-prose-verdict-axis-shipped-without-promptfoo-harness.active.md) | Agent Prose Verdict Axis Shipped Without Promptfoo Harness | pending | — | — | pending | pending | 2026-07-03 |
-| [R068](R068-work-problems-skill-prose-plugin-dir-dispatch-no-promptfoo.active.md) | Work Problems Skill Prose Plugin Dir Dispatch No Promptfoo | pending | — | — | pending | pending | 2026-07-03 |
-| [R069](R069-r009-skill-prose-floor-undischarged-until-promptfoo-green-verified.active.md) | R009 Skill Prose Floor Undischarged Until Promptfoo Green Verified | pending | — | — | pending | pending | 2026-07-03 |
-| [R070](R070-work-problems-skill-prose-r009-floor-cohort-depth-nine-held-on-single-eval.active.md) | Work Problems Skill Prose R009 Floor Cohort Depth Nine Held On Single Eval | pending | — | — | pending | pending | 2026-07-03 |
-| [R071](R071-r009-i13-existing-vehicle-trace-branch-no-promptfoo-eval.active.md) | R009 I13 Existing Vehicle Trace Branch No Promptfoo Eval | pending | — | — | pending | pending | 2026-07-03 |
-| [R072](R072-skill-prose-gate-invocation-floor-no-paired-promptfoo-for-changed-branch.active.md) | Skill Prose Gate Invocation Floor No Paired Promptfoo For Changed Branch | pending | — | — | pending | pending | 2026-07-03 |
-| [R073](R073-adopter-name-and-usage-detail-in-public-repo-rfc-prose.active.md) | Adopter Name And Usage Detail In Public Repo Rfc Prose | pending | — | — | pending | pending | 2026-07-03 |
-| [R076](R076-skill-behavioural-change-shipped-without-paired-changeset.active.md) | Skill Behavioural Change Shipped Without Paired Changeset | pending | — | — | pending | pending | 2026-07-15 |
-| [R077](R077-restore-incident-skill-prose-floor-no-promptfoo-eval.active.md) | Restore Incident Skill Prose Floor No Promptfoo Eval | pending | — | — | pending | pending | 2026-07-15 |
-| [R078](R078-capture-adr-skill-prose-no-paired-promptfoo-eval.active.md) | Capture Adr Skill Prose No Paired Promptfoo Eval | pending | — | — | pending | pending | 2026-07-15 |
-| [R080](R080-plugin-installer-help-text-copied-verbatim-from-sibling-package.active.md) | Plugin Installer Help Text Copied Verbatim From Sibling Package | pending | — | — | pending | pending | 2026-07-15 |

@@ -80,6 +80,8 @@ pending review — treatment decision deferred until scoring is curated.
 Auto-populated from `.risk-reports/` via Phase 2b drain.
 
 - 2026-05-12T11:56:56Z: fired in `.risk-reports/2026-05-12T11-56-56-commit.md` (reason: above-appetite-residual)
+- 2026-08-13T08:37:27Z: fired in `.risk-reports/2026-08-13T08-37-27-commit.md` (reason: above-appetite-residual)
+- 2026-08-13T08:38:40Z: fired in `.risk-reports/2026-08-13T08-38-40-commit.md` (reason: above-appetite-residual)
 
 ## Change Log
 

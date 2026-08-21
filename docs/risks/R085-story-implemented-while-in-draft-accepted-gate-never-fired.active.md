@@ -1,16 +1,16 @@
-# Risk R069: R009 Skill Prose Floor Undischarged Until Promptfoo Green Verified
+# Risk R085: Story Implemented While In Draft Accepted Gate Never Fired
 
 **Status**: Active (auto-scaffolded — pending review)
 **Category**: <!-- pending review — auto-scaffolded from pipeline hint -->
-**Identified**: 2026-07-03
+**Identified**: 2026-08-21
 **Owner**: pending review
-**Last reviewed**: 2026-07-03
-**Next review**: 2026-07-03
-**Curation**: pending review (auto-scaffolded 2026-07-03)
+**Last reviewed**: 2026-08-21
+**Next review**: 2026-08-21
+**Curation**: pending review (auto-scaffolded 2026-08-21)
 
 ## Description
 
-run-retro Step 2c delta-breach AND-gate ships with paired promptfoo case present but R009 prose floor stays at 6/Medium until a GREEN `npx promptfoo eval` run is cited; the present-but-unverified state recurs whenever the scorer cannot observe the eval result from pipeline state.
+Implementation of a ratified-but-draft story reached commit-ready state with its `draft → accepted` gate (INVEST I10 + RFC-trace I7 + ADR-090 ratification) never fired; ratified is not accepted, and only the commit-trailer hook stands between this shape and shipping.
 
 > Auto-scaffolded by the Phase 2b drain (ADR-056) from a `wr-risk-scorer:pipeline`
 > RISK_REGISTER_HINT bullet. The description is the agent's prefill; scoring
@@ -58,10 +58,8 @@ pending review — treatment decision deferred until scoring is curated.
 
 Auto-populated from `.risk-reports/` via Phase 2b drain.
 
-- 2026-06-27T09:12:51Z: fired in `.risk-reports/2026-06-27T09-12-51-commit.md` (reason: above-appetite-residual)
-- 2026-07-03T16:07:05Z: fired in `.risk-reports/2026-07-03T16-07-05-commit.md` (reason: above-appetite-residual)
-- 2026-08-13T16:25:56Z: fired in `.risk-reports/2026-08-13T16-25-56-commit.md` (reason: above-appetite-residual)
+- 2026-07-29T13:19:52Z: fired in `.risk-reports/2026-07-29T13-19-52-commit.md` (reason: above-appetite-residual)
 
 ## Change Log
 
-- 2026-07-03: Auto-scaffolded by Phase 2b drain (ADR-056). Pending human curation.
+- 2026-08-21: Auto-scaffolded by Phase 2b drain (ADR-056). Pending human curation.
