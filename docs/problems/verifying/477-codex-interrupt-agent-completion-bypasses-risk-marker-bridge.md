@@ -1,6 +1,6 @@
 # Problem 477: Codex collaboration completion bypasses the risk-marker bridge
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-08-12
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5
 **Origin**: internal
@@ -27,6 +27,18 @@ The sanitized receipt path shipped, but a live 2026-08-14 desktop replay exposed
 
 A 2026-08-16 isolated-checkout replay exposed a third failure in the same handoff. Codex executed `git commit` in the assessed checkout, but the compatibility payload exposed only the parent task checkout. The gate correctly rejected the checkout mismatch, then incorrectly deleted the valid reducing marker. Every retry therefore required another score and repeated the same deletion. The hook cannot recover an omitted path from the opaque checkout identity, so it must preserve the marker and prescribe an explicit leading `cd` rather than consume valid evidence.
 
+A 2026-08-21 verification pass confirmed every declared defect against the shipped
+code and left one residual observation about the diagnostic itself. The diagnostic
+is a single shared path under the pending-receipt directory, not scoped per session.
+The completion event fires for every risk-scorer agent on Claude Code as well, where
+the receipt path is neither needed nor satisfiable, so each of those events overwrites
+the file with a benign `missing-risk-cwd` rejection. A genuine Codex rejection is
+therefore stomped by the next unrelated completion before anyone reads it, which
+blunts the observability this ticket set out to add. The single atomically replaced
+file was specified here deliberately, so narrowing or scoping it is a design question
+for the observability slice rather than a defect in this fix — carried by RFC-067 and
+STORY-061.
+
 ## Fix and Verification
 
 - On a risk-scorer `SubagentStop` without spawn state, publish a short-lived sanitized receipt bound to the exact physical checkout and pipeline state hash.
@@ -39,10 +51,56 @@ A 2026-08-16 isolated-checkout replay exposed a third failure in the same handof
 
 No new hook or ADR is required: this restores the intended completed-agent compatibility path using the already-enabled `SubagentStop`, `PreToolUse:Bash`, and `UserPromptSubmit` events without changing the scoring or delivery contract.
 
+## Fix Released
+
+Released in `@windyroad/risk-scorer` 0.18.10 through 0.18.15. The last of those
+published 2026-08-16; `npm view @windyroad/risk-scorer version` returns `0.18.15`.
+Awaiting user verification on a live Codex collaboration run.
+
+The completion bridge now writes a checkout-bound receipt when a risk-scorer
+`SubagentStop` arrives without parent spawn state, and claims it on the next parent
+`PreToolUse:Bash` or `UserPromptSubmit`. The marker persists under the parent's real
+session without ever needing a parent `PostToolUse` event.
+
+**Release vehicle**: `.changeset/bright-close-bridge.md`, `.changeset/close-child-risk-receipt.md`, `.changeset/risk-scorer-subagentstop-diagnostics.md`, `.changeset/risk-scorer-preserve-checkout-marker.md`
+
+Verified 2026-08-21 by reading the shipped hook and running its behavioural suites —
+`npx bats packages/risk-scorer/hooks/test/codex-agent-completion.bats packages/risk-scorer/hooks/test/reducing-marker-persistence.bats`,
+40 of 40 passing. Every declared fix bullet has a named passing test:
+
+| Declared fix | Implementation | Passing test |
+|---|---|---|
+| Receipt on `SubagentStop` without spawn state | `persistPendingPipeline` | 2 — desktop pipeline SubagentStop hands a checkout-bound receipt to the parent without spawn state |
+| Claim on parent `PreToolUse:Bash` or `UserPromptSubmit` | `risk-pending-receipt.sh` plus `consumePending` | 8, 9 — Codex parent prompt imports a completed child receipt; imported score retains the original assessment timestamp |
+| Persist only for the assessed checkout across distinct child/parent sessions | `checkoutId` and `stateHash` binding | 3, 11 — a distinct completion supersedes an unchanged checkout score; pending receipt rejects checkout drift |
+| Reject malformed output, invalid roots, drift, expiry, duplicates | `pipelineAssessment`, TTL check, `wx` writes | 4, 12, 13, 20 |
+| Mode-0600 diagnostic carrying no paths, sessions or response text | `diagnoseSubagentStop` | 5, 6, 7 |
+| Deny a checkout mismatch without consuming the marker | `risk-score-commit-gate.sh`, `git-push-gate.sh` | 25, 27, 29 |
+
+Live evidence that the `SubagentStop` leg executes in production: the shipped hook
+wrote `$TMPDIR/claude-risk-pending/subagent-stop-diagnostic.json` at
+2026-08-21T08:48:26Z, mode 0600, carrying only a timestamp, an outcome, a rejection
+reason and a field-type map.
+
 ## Related
 
 - P461 — separate evidence-boundary correction; not the runtime defect fixed here.
-- RFC-067 / STORY-061 — observability slice for the silent receipt rejection.
+- RFC-067 / STORY-061 — observability slice for the silent receipt rejection, and the
+  home for the shared-diagnostic-overwrite observation recorded above.
+- P402 — sibling, not the same defect. There the Claude Code harness forces an Agent
+  dispatch into the background so the parent `PostToolUse` mark hook never fires; here
+  Codex native collaboration never emits the parent event at all. Different trigger,
+  same surface: no marker persists. Both fail closed — the gate blocks rather than
+  letting work through — so neither is a bypass in the permissive sense. The receipt
+  machinery built for this ticket is wired on Claude Code too, but cannot produce a
+  receipt there: the assessed-checkout binding that makes the agent echo `RISK_CWD:`
+  is appended only to the Codex agent build by
+  `packages/risk-scorer/scripts/codex-agents.mjs`, so `packages/risk-scorer/agents/pipeline.md`
+  never carries it. Extending the receipt to cover background dispatch belongs to P402.
+- P368 — unrelated mechanism, same silent-no-op class. That ticket is a shell-environment
+  defect: a marker shim reads an empty `CLAUDE_SESSION_ID` from the Bash environment and
+  exits without a trace. This bridge takes `session_id` from the hook's JSON payload,
+  validates it, and now records the rejection reason when it fails.
 
 ## RFCs
 

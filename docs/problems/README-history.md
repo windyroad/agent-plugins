@@ -1350,6 +1350,8 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 
 ## 2026-08-21
 
+> Last reviewed: 2026-08-21 **P516 captured** — the story-map card writer treats the trace back-link as an optional flag, so a card added without it renders with no Traces line; the commit-gate risk scorer caught the one degraded card among nine on a map, which is luck rather than a control (lightweight aside via /wr-itil:capture-problem).
+
 > Last reviewed: 2026-08-21 **P515 captured** — the drain that scaffolds risk-register entries appends their index rows past the end of the table and with the wrong column count, so nothing it creates has ever shown up in the index; 59 rows had piled up below the table since May before being repaired by hand today (lightweight aside via /wr-itil:capture-problem).
 
 > Last reviewed: 2026-08-21 **P368 reopened; P512 + P513 + P514 captured** - an adopter repo has been carrying six live plugin defects that never reached us, and one of them says the fix we were about to close as verified only covers half the path.

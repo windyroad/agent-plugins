@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-21 **P516 captured** — the story-map card writer treats the trace back-link as an optional flag, so a card added without it renders with no Traces line; the commit-gate risk scorer caught the one degraded card among nine on a map, which is luck rather than a control (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-08-21 **P477 verification pending** — the Codex completion bridge's checkout-bound receipt path is confirmed shipped in @windyroad/risk-scorer 0.18.10-0.18.15 with all six declared fix bullets covered by named passing tests (40/40 green); moved out of the dev-work queue to await user verification on a live Codex run.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -12,7 +12,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 |------|-----|-------|----------|--------|--------|----------|--------|
 | | | **Tier 0 — Critical-bypass** (Severity Very High ≥17, security-classified, or incident-linked) | | | | | |
 | 20 | P463 | Relevance-close evaluator over-fires — a bare ADR/skill citation is read as "fix shipped", producing a 76% false-positive CLOSE-CANDIDATE rate | 20 (Very High) | Known Error | M | 2026-07-26 | inbound-reported (#414) |
-| 20 | P477 | Codex collaboration completion bypasses the risk-marker bridge | 20 (Very High) | Open | S | 2026-08-12 | internal |
 | 10 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Known Error | L | 2026-08-20 | internal |
 | 10 | P508 | The fix proposal still instantiates a standalone RFC document, after ADR-103 made it a release row | 20 (Very High) | Known Error | L | 2026-08-20 | internal |
 | 10 | P509 | Story-map capture produces a work breakdown, not the persona's journey | 20 (Very High) | Known Error | L | 2026-08-21 | internal |
@@ -284,6 +283,7 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P398 | the VP carve-out holds changesets for already-shipped (verifying) code indefinitely — pointless changelog stranding | pending — @windyroad/risk-scorer patch committed, ships next release | no — not observed |
 | P400 | architect-mark-reviewed PostToolUse never fires on a SendMessage resume of an architect agent | pending — committed on main, ships next @windyroad/architect release | no — not observed |
 | P403 | Agent frames skill-mandatory mechanical steps as user-optional (detect_mechanical_optional Stop-hook detector; fix vehicle RFC-042) | pending — @windyroad/itil patch committed, ships next release | no — not observed |
+| P477 | Codex collaboration completion bypasses the risk-marker bridge | 2026-08-16 (`@windyroad/risk-scorer@0.18.15`; receipt path landed 0.18.10-0.18.15) | no — not observed |
 
 ## Inbound Upstream Reports
 
