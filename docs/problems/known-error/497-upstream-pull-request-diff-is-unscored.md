@@ -1,11 +1,11 @@
 # Problem 497: An upstream pull-request diff is not scored against the upstream's conventions
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-08-14
 **Priority**: 9 (Medium) - Impact: 3 x Likelihood: 3
-**Origin**: internal
+**Origin**: inbound-reported (#416) — stamped 2026-08-21 review from the upstream poll; upstream filing `The upstream pull-request diff is unscored`
 **Effort**: L
-**WSJF**: 2.25 - (9 x 1.0) / 4
+**WSJF**: 4.5 — (9 × 2.0) / 4 (2026-08-21 review: auto-transitioned Open → Known Error — root cause confirmed + workaround documented; Known Error multiplier 2.0)
 **JTBD**: JTBD-001, JTBD-010
 **Persona**: developer
 

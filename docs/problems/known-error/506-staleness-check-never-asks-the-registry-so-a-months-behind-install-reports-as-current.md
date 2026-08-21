@@ -1,10 +1,11 @@
 # Problem 506: Staleness-check never asks the registry, so a months-behind install reports as current forever
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-08-20
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5 — derived at capture. Impact 4: installed plugins degrade the workflow exactly as the band describes — skills load, but they load a retired contract, so the agent follows months-old instructions and emits artefacts in formats the project abandoned. The adopter has no signal that anything is wrong; the output looks deliberate. Likelihood 5: all three of the band's triggers hold at once — known gap, no control in place, and a previously observed failure (below).
 **Origin**: internal
 **Effort**: L — derived at capture. The predicate change itself is small, but it lands in `packages/shared/hooks/staleness-check.sh` and syncs to six consumer plugins, and it reverses a ratified network-free design premise (RFC-036 / ADR-088), so it needs an ADR-class decision on whether a per-turn hook may touch the network at all — and if not, where else the currency check lives. Sized above the mechanical edit because the design question is the work.
+**WSJF**: 10 — (20 × 2.0) / 4 (2026-08-21 review: auto-transitioned Open → Known Error — root cause confirmed + workaround documented; Known Error multiplier 2.0)
 **JTBD**: JTBD-302
 **Persona**: plugin-user
 

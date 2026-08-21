@@ -5,6 +5,7 @@
 **Priority**: 12 (High) — Impact: 4 × Likelihood: 3 — derived at capture from the description per Step 4a. Impact 4: a rider can contradict an accepted-tier decision and be defended as ratified substance, which is a governance failure rather than a legibility one — ADR-103's rider permitted exactly what ADR-060 I6 hard-blocks. Likelihood 3: present in all three ADRs authored in one two-day window, including the two written specifically to fix the sibling problem. Effort informed by P465 (M — a brief-surface change plus a review-contract rule plus behavioural tests).
 **Origin**: corrective-feedback
 **Effort**: M — one rule (one document, one decision) applied at authoring and at architect review, plus a detector and behavioural tests — cf. P465 (M)
+**WSJF**: 6 — (12 × 1.0) / 2 (added 2026-08-21 review)
 **JTBD**: JTBD-008
 **Persona**: developer
 

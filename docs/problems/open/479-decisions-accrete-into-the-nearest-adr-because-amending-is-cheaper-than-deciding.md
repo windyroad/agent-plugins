@@ -5,6 +5,7 @@
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 — derived at capture from the description per Step 4a. Impact 3: an ADR that carries six decisions cannot be reviewed, reversed or ratified per-decision, and its Considered Options stop describing what was actually weighed — the record survives but stops being usable. Likelihood 4: it happened twice in one session on one document, and the mechanism (amending needs no options, no ratification event, no new file) rewards it every time.
 **Origin**: corrective-feedback
 **Effort**: M — a rule the architect agent can apply at review time, plus a detector for ADRs whose amendment count outruns their options — cf. P465 (M)
+**WSJF**: 6 — (12 × 1.0) / 2 (added 2026-08-21 review)
 **JTBD**: JTBD-008
 **Persona**: developer
 

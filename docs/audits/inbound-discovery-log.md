@@ -292,3 +292,13 @@ Invoked as `/wr-itil:review-problems` Step 4.5 from the `/wr-itil:work-problems`
 - **Local tickets created**: 0. The 21 unmatched reports are queued for assessment-pipeline routing at the next interactive `/wr-itil:review-problems`.
 - **Audit-flagged reporter handles (P123 future consumption)**: none.
 - **Cache refresh**: `docs/problems/.upstream-cache.json` rewritten at `last_checked: 2026-07-26T00:00:00Z`; 111 total cached reports.
+
+## 2026-08-21T00:00:00Z — Discovery pass
+
+- **Channels polled**: 1 of 3. `github-issues` (`windyroad/agent-plugins`) — 84 open issues, 13 not previously cached. `github-discussions` and `github-security-advisories` were not attempted this pass (fail-soft skip; recorded in `cache_audit_note`).
+- **Cache state on entry**: `last_checked: 2026-07-26T00:00:00Z`, 26 days against `ttl_seconds: 86400` — TTL-expiry auto-recheck branch, no explicit flag required.
+- **Pipeline outcomes**: no report was routed through the six-step assessment pipeline. All 13 uncached reports are authored by the repo maintainer (`tompahoward`) — they are this repo's own `report-upstream` filings rather than third-party inbound reports, so the JTBD-301 reporter-acknowledgement contract does not apply. No verdict comments posted; no upstream issues closed; no local tickets created; no reporter handles audit-flagged.
+- **Matched to local tickets** (7): #395 → P415, #397 → P089 (closed), #398 → P201 (closed), #400 → P402, #412 → P503, #414 → P463, #416 → P497. The four with live local tickets (P415, P402, P503, P497) plus P463 were stamped `**Origin**: inbound-reported (#NN)` on the ticket, which is the authoritative rank input per ADR-076.
+- **Unmatched** (6): #396, #399, #401, #407, #408, #410 — recorded as `cache_audit_note` for maintainer disambiguation at the next interactive review.
+- **Notable**: #414 (`wr-itil evaluate-relevance matches ADR numbers across repos and treats Composes-with as fix evidence`) is the upstream filing of P463, which this same review pass re-rated to Severity 20 and transitioned to Known Error after confirming its root cause.
+- **Cache refresh**: `docs/problems/.upstream-cache.json` rewritten at `last_checked: 2026-08-21T00:00:00Z`.

@@ -1,10 +1,11 @@
 # Problem 465: The story `accepted` gate names ADR-090 ratification but no surface enforces it
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-07-26
 **Priority**: 8 (Medium) — Impact: 2 (Minor — governance/dev-tooling; an unratified story can be built on, defeating a human-oversight gate, but nothing adopter-facing breaks) × Likelihood: 4 (Likely — the hole is open in code today and the ambiguous prose actively invites the reading; an agent proposed exactly this bypass during the P430 iteration) — derived at capture from the description per Step 4a
 **Origin**: internal
 **Effort**: M — SKILL prose disambiguation + a ratification check at one or two enforcement loci + behavioural bats — cf. P456 (M)
+**WSJF**: 8 — (8 × 2.0) / 2 (2026-08-21 review: auto-transitioned Open → Known Error — root cause confirmed + workaround documented; Known Error multiplier 2.0)
 **JTBD**: JTBD-006
 **Persona**: developer
 

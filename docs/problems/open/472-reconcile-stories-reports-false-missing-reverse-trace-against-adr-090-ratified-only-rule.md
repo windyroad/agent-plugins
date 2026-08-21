@@ -5,6 +5,7 @@
 **Priority**: 8 (Medium) — Impact: 2 × Likelihood: 4 — derived at capture from the description per Step 4a. Impact 2: dev-tooling signal degraded and an agent that trusts it can be pushed into an ADR-090 violation; no shipped-package or adopter harm. Likelihood 4: fires on every AFK vehicle-authoring iteration from the moment the vehicle is authored until its story is ratified, and was observed on two consecutive iterations the same day.
 **Origin**: internal
 **Effort**: S — derived at capture per Step 4a. One predicate in one script plus behavioural bats over two cases; grounded on the scope-shape of P312 (`reconcile-rfcs` spurious MISSING_REVERSE_TRACE from missing subdir traversal — same detector family, same symptom, single-predicate fix). P312 carries no `Actual Effort:` field, so per ADR-026 this citation grounds the scope shape, not a measured duration. WSJF = (8 × 1.0) / 1 = 8.0.
+**WSJF**: 8 — (8 × 1.0) / 1 (added 2026-08-21 review)
 **JTBD**: JTBD-006
 **Persona**: developer
 

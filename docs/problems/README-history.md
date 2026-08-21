@@ -1347,3 +1347,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-08-20 **P507 captured (retro)** - the SessionStart surfacers print the queue and nothing makes anyone drain it; a ratification queued since July survived another ten turns untouched, which falsifies the "fix template that already works" premise P375 builds on (via /wr-retrospective:run-retro).
 > Last reviewed: 2026-08-20 **P508 captured** - the propose-fix gate still writes a standalone RFC document, seven weeks after the decision that made the fix proposal a release row on a story map; the two mechanisms are live at once and the superseded one is the automatic default (lightweight aside via /wr-itil:capture-problem).
 > Last reviewed: 2026-08-21 **P509 + P510 + P511 captured (retro)** - story-map capture authors from the change rather than the persona so the maintainer had to correct one map three times; and a retraction applied to an ADR never reached the ticket that produced it, which is the surface implementers actually enter from (via /wr-retrospective:run-retro).
+
+## 2026-08-21
+
+> Last reviewed: 2026-08-21 **P368 reopened; P512 + P513 + P514 captured** - an adopter repo has been carrying six live plugin defects that never reached us, and one of them says the fix we were about to close as verified only covers half the path.

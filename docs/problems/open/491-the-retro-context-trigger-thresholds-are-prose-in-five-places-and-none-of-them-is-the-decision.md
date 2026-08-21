@@ -5,6 +5,7 @@
 **Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3. Impact 3: the shipped skills describe a trigger the decision no longer specifies, so an adopter reading them is told the wrong thing and the eval keeps certifying it. Nothing is corrupted; the cost is a governance record and its implementation disagreeing. Likelihood 3: it bites on any read of those surfaces, and it is certain to bite whoever next changes the trigger — but the trigger is not read often.
 **Origin**: internal
 **Effort**: M — five surfaces to correct, of which two are tests, plus a config surface that does not exist yet.
+**WSJF**: 4.5 — (9 × 1.0) / 2 (added 2026-08-21 review)
 **JTBD**: JTBD-002
 **Persona**: developer
 

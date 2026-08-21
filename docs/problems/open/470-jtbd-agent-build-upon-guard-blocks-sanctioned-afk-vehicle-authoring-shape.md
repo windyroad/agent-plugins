@@ -5,6 +5,7 @@
 **Priority**: 12 (High) — Impact: 4 (Significant — a shipped agent surface degrades the adopter's AFK workflow; its prescription, followed literally, ends an iteration with no fix vehicle) × Likelihood: 3 (Possible — it fired on the P439 iteration and withdrew when challenged, so it is not deterministic, but nothing in the agent prevents a recurrence) — derived at capture per Step 4a
 **Origin**: internal
 **Effort**: M — teach `packages/jtbd/agents/agent.md` the same-drain carve-out plus a behavioural eval asserting both directions; cf. P438's same-day M for a comparable agent-surface rule change
+**WSJF**: 6 — (12 × 1.0) / 2 (added 2026-08-21 review)
 **JTBD**: JTBD-006
 **Persona**: plugin-developer
 

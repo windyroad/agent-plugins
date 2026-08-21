@@ -5,7 +5,7 @@
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 — derived at capture per Step 4a. Impact 3: the story-map tier is a core governance artefact (ratification gate, JTBD-008 deliverable); stub maps make ratification hollow and mislead adopters about what a map is. Likelihood 4: every AFK-authored fix vehicle this session (STORY-MAP-005/006/007/008/009) produced a stub; the framework guidance actively encourages it.
 **Origin**: corrective-feedback (user, 2026-07-27)
 **Effort**: L — reshape the map model (consolidate fixes onto real journey maps), retire the "one-rib floor" guidance, re-author the session's stubs, update ADR-089/095 + manage-story-map authoring contract.
-**WSJF**: 4 — (12 × 1.0) / 3
+**WSJF**: 3 — (12 × 1.0) / 4 (corrected 2026-08-21 review: L effort divisor is 4, not 3)
 **JTBD**: JTBD-008, JTBD-001
 **Persona**: developer
 

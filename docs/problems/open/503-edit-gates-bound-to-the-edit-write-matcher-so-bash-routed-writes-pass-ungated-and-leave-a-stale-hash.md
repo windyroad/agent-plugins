@@ -3,8 +3,9 @@
 **Status**: Open
 **Reported**: 2026-08-20
 **Priority**: 16 (High) — Impact: 4 × Likelihood: 4 — derived at capture. Impact 4: the load-bearing governance control is simply absent on one of the two ordinary write paths, so unreviewed edits enter the governed record, and the same gap corrupts the drift hash so honest writes are later denied for a cause the agent cannot attribute. Ships to adopters in five plugins. Likelihood 4: 187 occurrences in one transcript sweep, 166 of them in a single month, and it is the *default* write path in bypass-permissions sessions.
-**Origin**: internal
+**Origin**: inbound-reported (#412) — stamped 2026-08-21 review from the upstream poll; upstream filing `wr-architect: edit gate binds to the Edit/Write tool, so Bash-routed edits of governed files bypass it`
 **Effort**: M — derived at capture. The architect half is four lines (see below). The sibling plugins need matcher registration plus a Bash-command write-target parser, which is the real cost: deciding which file a `cat >` / `sed -i` / heredoc touches is not a one-line grep. Sized above P458's S because that fix was an exclusion line inside already-invoked scripts.
+**WSJF**: 8 — (16 × 1.0) / 2 (added 2026-08-21 review)
 **JTBD**: JTBD-001
 **Persona**: developer
 

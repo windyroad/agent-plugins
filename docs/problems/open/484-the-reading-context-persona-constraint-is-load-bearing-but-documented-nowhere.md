@@ -5,6 +5,7 @@
 **Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3. Impact 3: an undocumented persona attribute that two ratified decisions turn on gets re-derived from scratch each time it matters, so it is applied inconsistently and can be argued away by anyone who has not seen the earlier cases. Not higher, because each individual instance has been caught — by the human hitting it. Likelihood 3: it surfaces whenever a governance artefact is designed for a human to read, which in this cluster is most changes.
 **Origin**: internal
 **Effort**: S — one constraint added to a persona file, plus its re-ratification under the lockstep rule
+**WSJF**: 9 — (9 × 1.0) / 1 (added 2026-08-21 review)
 **JTBD**: JTBD-002
 **Persona**: developer
 

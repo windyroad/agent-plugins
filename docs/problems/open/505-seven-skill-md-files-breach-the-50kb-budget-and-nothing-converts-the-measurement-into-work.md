@@ -5,6 +5,7 @@
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 — derived at capture. Impact 3: SKILL.md bodies load into the agent's context on invocation, so the breach is paid as context on every use of the affected skills, and the largest is the AFK orchestrator that long loops invoke repeatedly. Likelihood 4: measured today and growing — the skills bucket has grown every measured cycle, and the two worst offenders are the two most-invoked skills in the suite.
 **Origin**: internal
 **Effort**: L — derived at capture: seven files, and the largest needs a genuine SKILL/REFERENCE contract split rather than a trim. `run-retro` already carries the target shape, so the pattern is established; the work is applying it seven times. Sized above P503's M on file count and on the judgement each split needs.
+**WSJF**: 3 — (12 × 1.0) / 4 (added 2026-08-21 review)
 **JTBD**: JTBD-001
 **Persona**: developer
 

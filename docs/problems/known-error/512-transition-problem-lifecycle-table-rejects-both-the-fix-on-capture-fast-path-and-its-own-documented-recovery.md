@@ -1,10 +1,11 @@
 # Problem 512: The transition lifecycle table rejects both the fix-on-capture fast path and its own documented recovery path
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-08-21
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 — derived at capture. Impact 3: two legitimate lifecycle moves have no supported route, so tickets either sit in the wrong state or the operator does the rename by hand, which skips the pre-flight checks, the README refresh and the ADR-014 commit the skill exists to guarantee. Likelihood 4: high path-count, no control — the fast path is the common shape for cosmetic and mechanical fixes, and the recovery path is prescribed by another shipped skill that fires on every retro.
 **Origin**: inbound-reported (adopter-repo P151)
 **Effort**: M
+**WSJF**: 12 — (12 × 2.0) / 2 (2026-08-21 review: auto-transitioned Open → Known Error — root cause confirmed + workaround documented; Known Error multiplier 2.0)
 **JTBD**: JTBD-001
 **Persona**: developer
 

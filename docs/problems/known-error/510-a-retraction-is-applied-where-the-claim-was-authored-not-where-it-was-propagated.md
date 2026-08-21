@@ -1,10 +1,11 @@
 # Problem 510: A retraction is applied where the claim was authored, not where it was propagated
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-08-21
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 — derived at capture. Impact 3: the surviving copy sits on the work item an implementer enters from, so it routes real work off a claim its own source has withdrawn; repo-local, no published surface. Likelihood 4: high path-count with no control — every corrected governance artefact has citers, no back-link exists from a claim to them, and six review rounds across two gates all fired on the corrected artefact and none on its citer.
 **Origin**: internal
 **Effort**: M — derived at capture. The check is narrow (does a ticket's Direction agree with the ADR it produced), but there is no citation back-edge to walk, so building one is the bulk of the work.
+**WSJF**: 12 — (12 × 2.0) / 2 (2026-08-21 review: auto-transitioned Open → Known Error — root cause confirmed + workaround documented; Known Error multiplier 2.0)
 **JTBD**: JTBD-001
 **Persona**: developer
 

@@ -5,6 +5,7 @@
 **Priority**: 12 (High) — Impact: 4 × Likelihood: 3 — derived at capture. Impact 4: a ratification marker is what four separate guards read to decide whether work may proceed; where the surface collecting it cannot ask the right question or send the artefact, the marker records something weaker than it claims. Likelihood 3: it bites whenever a ratification is collected through one of the non-compliant surfaces, which is most of them, but the harm is a weak record rather than a wrong one.
 **Origin**: internal
 **Effort**: L — five surfaces, two marker-writing scripts, at least one behavioural fixture and one eval, plus two open design questions that need answering before any of it is built.
+**WSJF**: 3 — (12 × 1.0) / 4 (added 2026-08-21 review)
 **JTBD**: JTBD-002
 **Persona**: developer
 

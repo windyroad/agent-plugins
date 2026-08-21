@@ -1,11 +1,11 @@
 # Problem 462: Amendment-scoped `human-oversight: unconfirmed` has no detector — unratified amendment substance never reaches the oversight drain
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-07-26
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 — derived at capture from the description per Step 4a
 **Origin**: internal
 **Effort**: M — derived at capture per Step 4a
-**WSJF**: 6.0 — (12 × 1.0) / 2
+**WSJF**: 12 — (12 × 2.0) / 2 (2026-08-21 review: auto-transitioned Open → Known Error — root cause confirmed + workaround documented; Known Error multiplier 2.0)
 **JTBD**: JTBD-001
 **Persona**: developer
 

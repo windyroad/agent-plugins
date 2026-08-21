@@ -1,10 +1,11 @@
 # Problem 508: The fix proposal still instantiates a standalone RFC document, after ADR-103 made it a release row
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-08-20
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5 — derived at capture. Impact 4: the gate fires at every fix-time surface, including the AFK loop transitively, and instantiates the artefact the current decision says is no longer the vehicle. Worse than redundancy — under ADR-103 the map is the approval surface, so a fix proposed as a standalone document never reaches it, and the approval model the decision installed is bypassed for exactly the proposals the framework creates on the maintainer's behalf. Likelihood 5: known gap, no control, and the contradictory branch is the shipped default on every RFC-less Known Error.
 **Origin**: internal
 **Effort**: L — derived at capture. The gate branch is small, but the decision it must implement is not: whether the standalone RFC tier survives at all, what `capture-rfc` becomes, and how a gate that currently allocates an id and writes a file instead draws a row on a map that may not exist yet. Sized level with P506 — both reverse a shipped design premise.
+**WSJF**: 10 — (20 × 2.0) / 4 (2026-08-21 review: auto-transitioned Open → Known Error — root cause confirmed + workaround documented; Known Error multiplier 2.0)
 **JTBD**: JTBD-001
 **Persona**: developer
 

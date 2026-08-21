@@ -5,6 +5,7 @@
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4. Impact 3: nothing produced is wrong, but the maintainer's attention is the scarcest resource in the loop and a status report spends several screens of it on something they cannot act on, burying whatever did need them. Likelihood 4: it recurs whenever a unit of work completes, which is constantly. Rated on evidence rather than estimate — the identical correction fired twice, verbatim, on consecutive days.
 **Origin**: corrective-feedback (user, 2026-08-08 and again 2026-08-09)
 **Effort**: M — the rule is simple; making it hold is not, since the obvious mechanism (write it down) is the one already proven insufficient.
+**WSJF**: 6 — (12 × 1.0) / 2 (added 2026-08-21 review)
 **JTBD**: JTBD-002
 **Persona**: developer
 

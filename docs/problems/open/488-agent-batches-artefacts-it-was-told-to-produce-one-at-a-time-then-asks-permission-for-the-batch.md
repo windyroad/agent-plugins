@@ -5,6 +5,7 @@
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 — derived at capture per Step 4a. Impact 3: no artefact is corrupted, but the maintainer's review cadence is destroyed — a batch of 22 cannot be reviewed in the window they actually read in, and any batch built on a still-moving format is wholesale rework. Impact stops short of 4 because the work is recoverable by re-doing it one at a time. Likelihood 4: it recurred twice inside a single session after explicit correction, and nothing checks for it — cf. P085, whose ask-half needed a hook before it stopped.
 **Origin**: corrective-feedback (user, 2026-08-09)
 **Effort**: M — a contract in two capture SKILLs plus a counted signal in the existing ask-hygiene pass; no new machinery.
+**WSJF**: 6 — (12 × 1.0) / 2 (added 2026-08-21 review)
 **JTBD**: JTBD-002
 **Persona**: developer
 

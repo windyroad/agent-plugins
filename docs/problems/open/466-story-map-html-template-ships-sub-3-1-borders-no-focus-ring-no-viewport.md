@@ -5,6 +5,7 @@
 **Priority**: 6 (Medium) — Impact: 2 (Minor — internal governance artefacts, no adopter runtime surface, but they are HTML this project asks people to read and the project sells accessibility work) × Likelihood: 3 (Possible — every new map copies the defective template; four of five on-disk maps already carry it) — derived at capture from the description per Step 4a
 **Origin**: internal
 **Effort**: S — mechanical CSS edits across two template sources and four map files, plus one grid fix — cf. P429 (S)
+**WSJF**: 6 — (6 × 1.0) / 1 (added 2026-08-21 review)
 **JTBD**: JTBD-008
 **Persona**: developer
 

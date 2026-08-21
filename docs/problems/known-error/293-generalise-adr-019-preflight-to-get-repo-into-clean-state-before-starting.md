@@ -5,7 +5,7 @@
 **Priority**: 6 (Medium) — Impact: 2 (Minor — the current preflight handles the divergence case correctly; the gap is that it doesn't cover the broader "repo isn't clean" situations, so an orchestrator can start work on an untidy tree; recoverable, not breaking) × Likelihood: 3 (Possible — every AFK orchestrator start; uncommitted-work and messy-tree states occur regularly)
 **Origin**: internal
 **Effort**: M — ADR-019 amendment generalising the preflight + reconciling with P109 (session-continuity detection) + the work-problems Step 0 implementation
-**WSJF**: 6/2 = **3.0** (Open multiplier 1.0)
+**WSJF**: 6 — (6 × 2.0) / 2 (corrected 2026-08-21 review: Known Error multiplier 2.0 per P498 — was carrying the Open ×1.0)
 
 ## Description
 

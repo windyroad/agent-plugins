@@ -5,6 +5,7 @@
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5
 **Origin**: internal
 **Effort**: S
+**WSJF**: 20 — (20 × 1.0) / 1 (added 2026-08-21 review)
 **JTBD**: JTBD-001
 **Persona**: plugin-developer
 

@@ -1,10 +1,11 @@
 # Problem 509: Story-map capture produces a work breakdown, not the persona's journey
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-08-21
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5 — derived at capture. Impact 4: the map is the artefact ADR-103 made the approval surface, so a map that is not journey-shaped degrades the workflow at its most load-bearing point — the human approves a work breakdown believing they approved a journey, and every story on it inherits that approval. It also lands in adopter repos, where it is the first thing a new adopter sees the framework produce. Likelihood 5: all three band triggers hold — known gap, no control (the rules are prose with no derivation step and no check), and observed in the field, where the maintainer had to push three separate times to correct one map.
 **Origin**: internal
 **Effort**: L — derived at capture. Three coordinated changes to one skill, but two of them are not edits to prose: the title is mechanically derived by construction, and the pre-RFC symptom contradicts a live rule that must first be adjudicated. Sized level with P506 and P508 — a rule has to change, not just a paragraph.
+**WSJF**: 10 — (20 × 2.0) / 4 (2026-08-21 review: auto-transitioned Open → Known Error — root cause confirmed + workaround documented; Known Error multiplier 2.0)
 **JTBD**: JTBD-008
 **Persona**: developer
 

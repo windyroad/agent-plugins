@@ -1,10 +1,11 @@
 # Problem 513: The JTBD corpus has no index or persona currency check, unlike the decision corpus
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-08-21
 **Priority**: 8 (Medium) — Impact: 2 × Likelihood: 4 — derived at capture. Impact 2: repo-local governance corpus; an unregistered job is invisible to anyone reading the index but the file still exists and still gates edits, so nothing breaks — it drifts. Likelihood 4: three instances in one adopter repo already, no control, and the sibling corpus that does have a control is the reason the gap is visible at all.
 **Origin**: inbound-reported (adopter-repo P111)
 **Effort**: M
+**WSJF**: 8 — (8 × 2.0) / 2 (2026-08-21 review: auto-transitioned Open → Known Error — root cause confirmed + workaround documented; Known Error multiplier 2.0)
 **JTBD**: JTBD-001
 **Persona**: developer
 

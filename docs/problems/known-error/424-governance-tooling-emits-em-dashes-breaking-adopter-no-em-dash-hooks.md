@@ -5,7 +5,7 @@
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4
 **Origin**: inbound-reported (#185, #186, #219, #223, #319)
 **Effort**: M. WSJF = (12 × 1.0) / 2 = 6.0.
-**WSJF**: 6 — (12 × 1.0) / 2 (added 2026-07-26 review)
+**WSJF**: 12 — (12 × 2.0) / 2 (corrected 2026-08-21 review: Known Error multiplier 2.0 per P498 — was carrying the Open ×1.0)
 **JTBD**: JTBD-303 (secondary: JTBD-101)
 **Persona**: plugin-user
 

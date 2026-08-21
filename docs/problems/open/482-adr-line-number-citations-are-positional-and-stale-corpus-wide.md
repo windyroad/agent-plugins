@@ -5,6 +5,7 @@
 **Priority**: 6 (Medium) — Impact: 3 × Likelihood: 3. Impact 3: a citation that resolves to the wrong line sends a reader — or an agent following a shipped SKILL — to unrelated text and presents it as the authority for a hard-block. Five of five sampled resolve wrongly, so the failure is the norm rather than the exception. Not higher, because the surrounding prose usually names the invariant well enough to recover. Likelihood 3: every amendment to a cited ADR breaks more of them, and this cluster has amended ADR-060 repeatedly.
 **Origin**: architect-review
 **Effort**: M — 122 occurrences across 42 files, mechanical but wide, and the replacement anchor has to be chosen first
+**WSJF**: 3 — (6 × 1.0) / 2 (added 2026-08-21 review)
 **JTBD**: JTBD-008
 **Persona**: plugin-developer
 

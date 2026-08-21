@@ -5,6 +5,7 @@
 **Priority**: 16 (High) — Impact: 4 × Likelihood: 4. Impact 4: an amendment section changes what a ratified document says without a new confirm event, so it carries the earlier ratification's authority onto text the human never saw. That is a governance failure, not a legibility one, and it is the mechanism behind P479 and P480 rather than a sibling of them. Likelihood 4: the pattern is pervasive — 27 amendment sections sit across 9 in-force decisions, ADR-060 has been amended by several, and the review contract actively coached toward the pattern until it was changed.
 **Origin**: corrective-feedback
 **Effort**: L — a rule, a corpus sweep across many decisions, a change to the review contract, and behavioural tests
+**WSJF**: 4 — (16 × 1.0) / 4 (added 2026-08-21 review)
 **JTBD**: JTBD-008
 **Persona**: plugin-developer
 

@@ -5,6 +5,7 @@
 **Priority**: 12 (High) — Impact: 4 × Likelihood: 3. Impact 4: a risk policy is the arbiter every commit, push and release is scored against. A contradiction inside it does not fail loudly; it makes the scorer's answer depend on which clause the agent read, so two runs over the same change can legitimately disagree and both cite the policy. Likelihood 3: it needs a policy edit that introduces the contradiction, and nothing detects one — the validator passed the live instance below.
 **Origin**: inbound-reported
 **Effort**: M — one more check in the validator, plus deciding what "consistent" means precisely enough to grade
+**WSJF**: 6 — (12 × 1.0) / 2 (added 2026-08-21 review)
 **JTBD**: JTBD-001
 **Persona**: plugin-user
 

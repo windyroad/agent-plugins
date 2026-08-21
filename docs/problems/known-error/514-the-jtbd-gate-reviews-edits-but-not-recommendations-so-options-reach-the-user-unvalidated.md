@@ -1,10 +1,11 @@
 # Problem 514: The JTBD gate reviews edits but not recommendations, so option-sets reach the user unvalidated
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-08-21
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 — derived at capture. Impact 3: the failure lands on the user directly rather than on an artefact — a recommendation that contradicts a documented desired outcome costs a decision cycle and shifts the JTBD check onto the person the corpus exists to serve. Likelihood 4: no control on the path at all; the gate fires on writes, and a recommendation is not a write.
 **Origin**: inbound-reported (adopter-repo P042)
 **Effort**: M
+**WSJF**: 12 — (12 × 2.0) / 2 (2026-08-21 review: auto-transitioned Open → Known Error — root cause confirmed + workaround documented; Known Error multiplier 2.0)
 **JTBD**: JTBD-001
 **Persona**: developer
 

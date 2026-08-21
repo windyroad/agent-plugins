@@ -5,6 +5,7 @@
 **Priority**: 16 (High) — Impact: 4 × Likelihood: 4. Impact 4: this is a property of the process rather than a lapse within it, so it degrades every artefact the process touches — code, tests, decisions, tickets — and it compounds rather than plateauing. Likelihood 4: it operates on every change, because the mechanism is that additive steps are mandatory and gated while removal is optional and ungated.
 **Origin**: corrective-feedback
 **Effort**: L — a cadenced step, a definition of what it removes, and enforcement; the same shape as the review-cadence work
+**WSJF**: 4 — (16 × 1.0) / 4 (added 2026-08-21 review)
 **JTBD**: JTBD-001
 **Persona**: developer
 

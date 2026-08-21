@@ -1,11 +1,11 @@
 # Problem 500: External reporter issues close before reporter confirmation or the promised quiet period
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-08-17
 **Priority**: 16 (High) - Impact: 4 x Likelihood: 4
 **Origin**: internal
 **Effort**: L
-**WSJF**: 4 - (16 x 1.0) / 4
+**WSJF**: 8 — (16 × 2.0) / 4 (2026-08-21 review: auto-transitioned Open → Known Error — root cause confirmed + workaround documented; Known Error multiplier 2.0)
 **JTBD**: JTBD-301
 **Persona**: plugin-user
 

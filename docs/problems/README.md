@@ -1,48 +1,53 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-21 **P368 reopened; P512 + P513 + P514 captured** - an adopter repo has been carrying six live plugin defects that never reached us, and one of them says the fix we were about to close as verified only covers half the path.
+> Last reviewed: 2026-08-21 **full re-score of all 135 open + known-error tickets; 16 auto-transitioned to Known Error; relevance-close pass halted** - 44 tickets were carrying no WSJF line at all and three more were computing it wrong, so the ranking below is the first in a while that every ticket actually participates in. Sixteen tickets whose root cause is confirmed and whose workaround is written down moved Open -> Known Error, which doubles their WSJF and lifts them up the queue. The relevance-close pass was run for measurement and then not applied: it wanted to close 109 of 135 tickets, including seven it would have closed silently in an AFK pass, and every one of those seven is live.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
 
-Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) and Parked (`.parked.md`, multiplier 0) tickets are excluded per ADR-022 — surfaced in their own sections below. Rows render **tier-first** (Tier 0 Critical-bypass → Tier 1 Inbound-reported → Tier 2 Internal), then within each tier by `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)` so top-to-bottom order matches `/wr-itil:work-problems` Step 3 selection 1:1 (P138 + ADR-076). <!-- REPORTED-FIRST-TIER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 (ADR-076) --> <!-- TIE-BREAK-LADDER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 -->
+Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) and Parked (`.parked.md`, multiplier 0) tickets are excluded per ADR-022 - surfaced in their own sections below. Rows render **tier-first** (Tier 0 Critical-bypass [Severity Very High >=17 OR security-classified OR incident-linked] -> Tier 1 Inbound-reported [`**Origin**: inbound-reported`] -> Tier 2 Internal), then within each tier by `(WSJF desc, Known-Error-first, Effort-divisor asc, Reported-date asc, ID asc)` so top-to-bottom order matches `/wr-itil:work-problems` Step 3 selection 1:1 (P138 + ADR-076). The `Reported` and `Origin` columns MUST appear. <!-- REPORTED-FIRST-TIER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 (ADR-076) --> <!-- TIE-BREAK-LADDER-SOURCE: /wr-itil:work-problems SKILL.md Step 3 -->
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
-| | | **Tier 0 — Critical bypass (Severity Very High ≥17, security-classified, or incident-linked)** | | | | | |
+| | | **Tier 0 — Critical-bypass** (Severity Very High ≥17, security-classified, or incident-linked) | | | | | |
 | 40 | P499 | Architect ADR pairing hook reads the task checkout instead of the command checkout | 20 (Very High) | Known Error | S | 2026-08-17 | incident-linked |
-| 40 | P477 | Codex collaboration completion bypasses the risk-marker bridge | 20 (Very High) | Open | S | 2026-08-12 | internal |
-| 10 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Open | L | 2026-08-20 | internal |
-| 10 | P508 | The fix proposal still instantiates a standalone RFC document, after ADR-103 made it a release row | 20 (Very High) | Open | L | 2026-08-20 | internal |
-| 10 | P509 | Story-map capture produces a work breakdown, not the persona's journey | 20 (Very High) | Open | L | 2026-08-21 | internal |
-| 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 (Very High) | Known Error | XL | 2026-05-03 | internal |
-| | | **Tier 1 — Inbound-reported (an external user actually hit this)** | | | | | |
+| 20 | P463 | Relevance-close evaluator over-fires — a bare ADR/skill citation is read as "fix shipped", producing a 76% false-positive CLOSE-CANDIDATE rate | 20 (Very High) | Known Error | M | 2026-07-26 | inbound-reported (#414) |
+| 20 | P477 | Codex collaboration completion bypasses the risk-marker bridge | 20 (Very High) | Open | S | 2026-08-12 | internal |
+| 10 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Known Error | L | 2026-08-20 | internal |
+| 10 | P508 | The fix proposal still instantiates a standalone RFC document, after ADR-103 made it a release row | 20 (Very High) | Known Error | L | 2026-08-20 | internal |
+| 10 | P509 | Story-map capture produces a work breakdown, not the persona's journey | 20 (Very High) | Known Error | L | 2026-08-21 | internal |
+| 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 | Known Error | XL | 2026-05-03 | internal |
+| | | **Tier 1 — Inbound-reported** | | | | | |
 | 24 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | 12 (High) | Known Error | S | 2026-07-06 | inbound-reported (#169) |
 | 18 | P498 | WSJF uses the pre-transition status multiplier | 9 (Medium) | Known Error | S | 2026-08-14 | inbound-reported (#413) |
 | 16 | P429 | manage-problem commit-message examples fail @commitlint/config-conventional subject-case in adopter projects | 8 (Medium) | Known Error | S | 2026-07-06 | inbound-reported (#137) |
 | 16 | P430 | itil-correction-detect UserPromptSubmit hook false-positives on orchestrator / AFK prompt text | 8 (Medium) | Known Error | S | 2026-07-06 | inbound-reported (#257) |
+| 12 | P415 | External-comms commit-msg gate reviews only the first `-m` of a multi-`-m` git commit, causing deny-after-PASS on multi-paragraph commits | 6 (Medium) | Known Error | S | 2026-07-03 | inbound-reported (#395) |
 | 12 | P431 | check-upstream-cache-staleness helper misfires on a declined-permanently (empty channels) config | 6 (Medium) | Known Error | S | 2026-07-06 | inbound-reported (#341) |
 | 12 | P376 | Catchup scanner misses the inbound direction; outbound templates carry the same structural defect the P363 rework fixed on the inbound side — cross-direction parity gap | 12 (High) | Known Error | M | 2026-06-23 | inbound-reported (#349) |
-| 12 | P512 | The transition lifecycle table rejects both the fix-on-capture fast path and its own documented recovery path | 12 (High) | Open | M | 2026-08-21 | inbound-reported (adopter-repo P151) |
-| 12 | P514 | The JTBD gate reviews edits but not recommendations, so option-sets reach the user unvalidated | 12 (High) | Open | M | 2026-08-21 | inbound-reported (adopter-repo P042) |
+| 12 | P402 | external-comms gate — PostToolUse mark hook does not fire for background-launched (forced-async) review agents, so no marker is persisted to the live session dir despite PASS | 12 (High) | Known Error | M | 2026-07-01 | inbound-reported (#400) |
+| 12 | P424 | Governance tooling emits U+2014 em-dashes in generated output, breaking adopter no-em-dash Edit/Write hooks | 12 (High) | Known Error | M | 2026-07-06 | inbound-reported (#319) |
+| 12 | P512 | The transition lifecycle table rejects both the fix-on-capture fast path and its own documented recovery path | 12 (High) | Known Error | M | 2026-08-21 | inbound-reported |
+| 12 | P514 | The JTBD gate reviews edits but not recommendations, so option-sets reach the user unvalidated | 12 (High) | Known Error | M | 2026-08-21 | inbound-reported |
 | 9 | P425 | wr-architect edit-gate re-litigates its own same-session PASS — [Unratified Dependency] over-fires on agent-prescribed born-proposed ADRs | 9 (Medium) | Known Error | M | 2026-07-06 | inbound-reported (#342) |
 | 9 | P428 | work-problems Step 5 dispatch heredoc-in-command-substitution is unparseable under macOS /bin/bash 3.2 | 9 (Medium) | Open | S | 2026-07-06 | inbound-reported (#345) |
 | 9 | P437 | wr-wardley exposes no version-stable invocation path for its owm-to-svg converter (consumers pin the cache version and break on bump) | 9 (Medium) | Open | S | 2026-07-06 | inbound-reported (#325) |
 | 9 | P454 | wr-risk-scorer restage-commit helper sweeps the whole index/working tree into the commit instead of pathspec-scoping to the supplied paths | 9 (Medium) | Open | S | 2026-07-15 | inbound-reported (#344) |
-| 8 | P513 | The JTBD corpus has no index or persona currency check, unlike the decision corpus | 8 (Medium) | Open | M | 2026-08-21 | inbound-reported (adopter-repo P111) |
-| 6 | P424 | Governance tooling emits U+2014 em-dashes in generated output, breaking adopter no-em-dash Edit/Write hooks | 12 (High) | Known Error | M | 2026-07-06 | inbound-reported (#185, #186, #219, #223, #319) |
+| 8 | P513 | The JTBD corpus has no index or persona currency check, unlike the decision corpus | 8 (Medium) | Known Error | M | 2026-08-21 | inbound-reported |
+| 8 | P503 | Edit gates are bound to the Edit\|Write matcher, so Bash-routed writes pass ungated and leave a stale hash | 16 (High) | Open | M | 2026-08-20 | inbound-reported (#412) |
 | 6 | P438 | Assistant routes free-text collection (URLs/tokens/IDs) through AskUserQuestion instead of per-item copyable blocks | 6 (Medium) | Known Error | M | 2026-07-06 | inbound-reported (#324) |
 | 6 | P439 | External-review round-trips waste cycles on stale repo artifacts (unpushed commits + stale IDE buffer) | 6 (Medium) | Known Error | M | 2026-07-06 | inbound-reported (#326) |
 | 6 | P433 | transition-problem / review-problems / run-retro Step 4a lack a sibling-family completeness scan before close | 12 (High) | Known Error | L | 2026-07-06 | inbound-reported (#187) |
-| 6 | P434 | Capture flows write unverified claims (premise + root-cause mechanism) as established fact | 12 (High) | Known Error | L | 2026-07-06 | inbound-reported (#202, #339) |
+| 6 | P434 | Capture flows write unverified claims (premise + root-cause mechanism) as established fact | 12 (High) | Known Error | L | 2026-07-06 | inbound-reported (#339) |
 | 6 | P450 | Verification Queue evidence cells are never populated from subsequent-session exercises, so the run-retro Step 4a auto-drain never fires | 12 (High) | Known Error | L | 2026-07-15 | inbound-reported (#323) |
 | 6 | P436 | Issue templates declare labels ('problem', 'needs-triage') that don't exist; scaffold-intake should provision declared labels | 6 (Medium) | Open | S | 2026-07-06 | inbound-reported (#170) |
-| 6 | P368 | The oversight-marker helper writes markers for the wrong sessions and exits silently | 12 (High) | Open | M | 2026-06-17 | inbound-reported (adopter-repo P212) |
-| 6 | P486 | The policy validator checks a policy's shape, never whether it contradicts itself — a self-contradicting policy passes | 12 (High) | Open | M | 2026-08-09 | inbound-reported |
+| 6 | P368 | The oversight-marker helper writes markers for the wrong sessions and exits silently | 12 (High) | Open | M | 2026-06-17 | inbound-reported |
+| 6 | P486 | The policy validator checks a policy's shape, never whether it contradicts itself | 12 (High) | Open | M | 2026-08-09 | inbound-reported |
+| 4.5 | P497 | An upstream pull-request diff is not scored against the upstream's conventions | 9 (Medium) | Known Error | L | 2026-08-14 | inbound-reported (#416) |
 | 4.5 | P432 | Assistant does not auto-close the feedback loop on inbound-feedback conversion (channel-agnostic) | 9 (Medium) | Open | M | 2026-07-06 | inbound-reported (#347) |
-| 4.5 | P435 | wr-risk-scorer gates hardcoded to home-repo shape — push-gate over-fires on non-npm repos, external-comms under-fires on static-site/deck content | 9 (Medium) | Open | M | 2026-07-06 | inbound-reported (#235, #253) |
-| 4.5 | P441 | work-problems pre-dispatch selection filter misses committed-but-unpushed KE (#312) and direction-blocked / interactive-only-skill (#318) states | 9 (Medium) | Open | M | 2026-07-06 | inbound-reported (#312, #315, #318) |
+| 4.5 | P435 | wr-risk-scorer gates hardcoded to home-repo shape — push-gate over-fires on non-npm repos, external-comms under-fires on static-site/deck content | 9 (Medium) | Open | M | 2026-07-06 | inbound-reported (#253) |
+| 4.5 | P441 | work-problems pre-dispatch selection filter misses committed-but-unpushed KE (#312) and direction-blocked / interactive-only-skill (#318) states | 9 (Medium) | Open | M | 2026-07-06 | inbound-reported (#318) |
 | 4.5 | P448 | work-problems post-release K→V auto-transition has no release-vehicle class for repo-local fixes in consumer repos (no npm release) | 9 (Medium) | Open | M | 2026-07-15 | inbound-reported (#320) |
 | 4.5 | P449 | I13 RFC-trace predicate + manage-problem I13 gate are not adopter-aware — fire no-rfc-trace in repos without an RFC tier | 9 (Medium) | Open | M | 2026-07-15 | inbound-reported (#321) |
 | 4.5 | P451 | work-problems Step 5 iter/pre-flight dispatch exceeds the interactive-harness 10-minute foreground Bash ceiling (SIGTERM + 0-byte JSON) | 9 (Medium) | Open | M | 2026-07-15 | inbound-reported (#327) |
@@ -54,97 +59,92 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | | | **Tier 2 — Internal** | | | | | |
 | 16 | P417 | docs/stories/README.md Rankings/Done never reconciled — stale for the whole corpus | 8 (Medium) | Known Error | S | 2026-07-04 | internal |
 | 16 | P420 | check-briefing-budgets.sh crashes with `must_split[@]: unbound variable` on empty arrays under macOS default bash 3.2 | 8 (Medium) | Known Error | S | 2026-07-05 | internal |
-| 16 | P511 | The ask-hygiene trail is one file per day, so a second retro's counts are invisible to the R6 gate | 8 (Medium) | Open | S | 2026-08-21 | internal |
-| 15 | P507 | SessionStart surfacers emit a directive with nothing enforcing the drain — surfacing is not draining | 15 (High) | Open | M | 2026-08-20 | internal |
-| 12 | P415 | External-comms commit-msg gate reviews only the first `-m` of a multi-`-m` git commit, causing deny-after-PASS on multi-paragraph commits | 6 (Medium) | Known Error | S | 2026-07-03 | internal |
+| 16 | P511 | The ask-hygiene trail is one file per day, so a second retro's counts are invisible to the R6 gate | 8 (Medium) | Known Error | S | 2026-08-21 | internal |
+| 15 | P507 | SessionStart surfacers emit a directive with nothing enforcing the drain — surfacing is not draining | 15 (High) | Known Error | M | 2026-08-20 | internal |
 | 12 | P179 | Agent defers requested work into untracked phases — phases are fine, but unticketed phases never get implemented | 12 (High) | Known Error | M | 2026-05-10 | internal |
 | 12 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 (High) | Known Error | M | 2026-06-10 | internal |
-| 12 | P402 | External-comms gate PostToolUse mark hook does not fire for background-launched review agents, so no marker is persisted despite PASS (reopened 2026-08-20 — recurrence 5.5 weeks after closure) | 12 (High) | Known Error | M | 2026-07-01 | internal |
-| 12 | P474 | Oversight hash treats the `**Status**:` body mirror as substance — an accept transition self-invalidates its own ratification and the no-implement gate blocks its own implementation | 12 (High) | Open | M | 2026-07-29 | internal |
-| 12 | P476 | Shell-utility implementation differences between this machine and CI produce false-green locally — the wrong variant exits 0 with different output rather than failing | 12 (High) | Open | M | 2026-07-30 | internal |
-| 12 | P510 | A retraction is applied where the claim was authored, not where it was propagated | 12 (High) | Open | M | 2026-08-21 | internal |
+| 12 | P462 | Amendment-scoped `human-oversight: unconfirmed` has no detector — unratified amendment substance never reaches the oversight drain | 12 (High) | Known Error | M | 2026-07-26 | internal |
+| 12 | P474 | Oversight hash treats the `**Status**:` body mirror as substance, so an accept transition self-invalidates its own ratification | 12 (High) | Known Error | M | 2026-07-29 | internal |
+| 12 | P510 | A retraction is applied where the claim was authored, not where it was propagated | 12 (High) | Known Error | M | 2026-08-21 | internal |
+| 12 | P495 | The release queue can be consumed in a working copy and nothing says so | 12 (High) | Open | S | 2026-08-09 | internal |
 | 9 | P363 | Inbound-reported tickets never receive fix-released verdict on originating issue | 9 (Medium) | Known Error | M | 2026-06-11 | internal |
-| 9 | P464 | Agent self-limits external-comms as "out of scope" in AFK / pre-flight — strands dispatchable lifecycle/ack/upstream-report obligations | 9 (Medium) | Open | S | 2026-07-26 | corrective-feedback |
+| 9 | P478 | I10 checks that a story's `## User value` section is non-empty, but never that it is value-first | 9 (Medium) | Known Error | M | 2026-08-07 | internal |
+| 9 | P464 | Agent self-limits external-comms as "out of scope" in AFK / pre-flight contexts — strands dispatchable lifecycle/ack/upstream-report obligations the framework authorises to proceed | 9 (Medium) | Open | S | 2026-07-26 | corrective-feedback |
+| 9 | P484 | The reading-context persona constraint is load-bearing in two ratified decisions but documented nowhere | 9 (Medium) | Open | S | 2026-08-08 | internal |
 | 9 | P502 | The marker shim's 24h candidate-SID window excludes long sessions, so it silently writes no marker | 9 (Medium) | Open | S | 2026-08-20 | internal |
-| 8 | P300 | ADR-063 maturity-presentation schema — F2 (rich-record per-surface) is overkill; F1 is sufficient to begin with | 4 (Low) | Known Error | S | 2026-05-25 | internal |
+| 8 | P300 | ADR-063 maturity-presentation schema — F2 (rich-record per-surface) is overkill; F1 is sufficient to begin with | 4 | Known Error | S | 2026-05-25 | internal |
 | 8 | P419 | capture-story's mechanical reverse-trace edit to a docs/jtbd file re-locks the JTBD edit gate mid-session | 8 (Medium) | Known Error | M | 2026-07-05 | internal |
 | 8 | P459 | Agent-Prose Behavioural Eval Flaky — Red-Lines CI on Unrelated Commits | 8 (Medium) | Known Error | M | 2026-07-24 | internal |
+| 8 | P465 | The story `accepted` gate names ADR-090 ratification but no surface enforces it | 8 (Medium) | Known Error | M | 2026-07-26 | internal |
 | 8 | P375 | Repo conflates a "named re-entry point" with a self-firing cadence — deferrals not transitively reachable from an automatic trigger rot | 16 (High) | Known Error | L | 2026-06-23 | internal |
+| 8 | P500 | External reporter issues close before reporter confirmation or the promised quiet period | 16 (High) | Known Error | L | 2026-08-17 | internal |
 | 8 | P414 | retro/wrap defers over-threshold briefing Tier-3 rotation as a "run interactive run-retro" recommendation instead of performing the split | 8 (Medium) | Open | S | 2026-07-03 | internal |
 | 8 | P471 | run-retro Step 2d ask-hygiene trail path collides across same-day iterations, clobbering prior entries | 8 (Medium) | Open | S | 2026-07-26 | internal |
 | 8 | P472 | reconcile-stories reports permanent false MISSING_REVERSE_TRACE drift against ADR-090's ratified-stories-only rule | 8 (Medium) | Open | S | 2026-07-26 | internal |
-| 8 | P423 | Agent "fixes" recurring behavioural corrections via project-local memory instead of shipping an adopter-facing plugin surface | 16 (High) | Open | M | 2026-07-06 | internal |
-| 8 | P465 | The story `accepted` gate names ADR-090 ratification but no surface enforces it | 8 (Medium) | Open | M | 2026-07-26 | internal |
-| 8 | P475 | RFCs carry a human-oversight axis they should not have — 52 un-actionable session-start nudges for a tier whose governing decision says it holds no decisions | 8 (Medium) | Open | M | 2026-07-30 | corrective-feedback |
-| 8 | P483 | Amendment sections are not a legitimate mechanism — a ratified decision is immutable, and is changed only by being deprecated or superseded | 16 (High) | Open | L | 2026-08-08 | corrective-feedback |
-| 8 | P485 | Every step in the process adds and none removes, so cruft accumulates without limit — no refactor step, no simplification step, and nothing self-firing to trigger one | 16 (High) | Open | L | 2026-08-08 | corrective-feedback |
-| 8 | P494 | Plugin tests and project-conformance tests are the same suite, so neither can be right — 257 test files ship across four packages, thirteen of them asserting on this repository's own governance corpus | 16 (High) | Open | L | 2026-08-09 | corrective-feedback |
-| 8 | P503 | Edit gates are bound to the Edit\|Write matcher, so Bash-routed writes pass ungated and leave a stale hash | 16 (High) | Open | M | 2026-08-20 | internal |
+| 8 | P423 | Agent "fixes" recurring behavioural corrections via project-local memory instead of shipping an adopter-facing plugin surface | 16 | Open | M | 2026-07-06 | internal |
 | 7.5 | P359 | Changeset holding does not withhold shipment — held code ships with any sibling release | 15 (High) | Known Error | L | 2026-06-11 | internal |
 | 7.5 | P444 | Agent buries granular design decisions in artefacts — default values, thresholds, and policy choices pass artefact-level ratification unsurfaced, escaping real oversight | 15 (High) | Open | M | 2026-07-08 | internal |
 | 6 | P293 | Generalise ADR-019 preflight from "fetch + ff-only divergence" to "get the repo into a clean state before starting" | 6 (Medium) | Known Error | M | 2026-05-25 | internal |
-| 6 | P305 | Post-Edit silent revert of working-tree files before commit — potential silent-work-loss hazard | 6 (Medium) | Known Error | M | 2026-05-26 | internal |
+| 6 | P305 | Post-Edit silent revert of working-tree files before commit — potential silent-work-loss hazard | 6 | Known Error | M | 2026-05-26 | internal |
 | 6 | P409 | Back-fill legacy RFCs still carrying empty `stories: []` | 6 (Medium) | Known Error | M | 2026-07-03 | internal |
 | 6 | P456 | AFK iter cannot progress a ratified Known Error when the fix-vehicle RFC has empty stories | 6 (Medium) | Known Error | M | 2026-07-15 | internal |
 | 6 | P466 | The story-map HTML template ships sub-3:1 borders, no focus ring, and no viewport meta | 6 (Medium) | Open | S | 2026-07-26 | internal |
 | 6 | P468 | architect-mark-reviewed misses a genuine PASS whose verdict line is a markdown heading rather than bold | 6 (Medium) | Open | S | 2026-07-26 | internal |
 | 6 | P469 | style-guide and voice-tone reviewer agents spawn without Bash, so they cannot write the verdict marker their own gate reads | 6 (Medium) | Open | S | 2026-07-26 | internal |
-| 6 | P495 | The release queue can be consumed in a working copy and nothing says so — five changesets and two version bumps appeared uncommitted; committing them would have destroyed the release notes and stamped versions CI never issued | 12 (High) | Open | S | 2026-08-09 | internal |
+| 6 | P481 | Two ratified decisions describe a story-map format that no longer exists | 6 (Medium) | Open | S | 2026-08-08 | architect-review |
+| 6 | P493 | A docs-only change runs the full build, so pushing prose costs what shipping code costs | 6 (Medium) | Open | S | 2026-08-09 | corrective-feedback |
 | 6 | P504 | No skill surface reopens a closed problem ticket, and closure notes prescribe a command that refuses | 6 (Medium) | Open | S | 2026-08-20 | internal |
 | 6 | P395 | external-comms agent silently goes dormant on the credibility axis — no nudge to author the missing RISK-POLICY section | 12 (High) | Open | M | 2026-06-28 | corrective-feedback |
 | 6 | P399 | ADR-073 fix-time auto-create emits a SKELETON RFC; it should author the RFC fully | 12 (High) | Open | M | 2026-06-28 | corrective-feedback |
 | 6 | P401 | Capture/RFC persona-JTBD anchoring shoehorns (or discards the problem) instead of interviewing the human to elicit the real who/why | 12 (High) | Open | M | 2026-06-29 | corrective-feedback |
 | 6 | P422 | Agent silently ships X-prime (a hedged/lesser version of the requested X) instead of asking before deviating | 12 (High) | Open | M | 2026-07-06 | internal |
 | 6 | P457 | Story-map ratification surfaces an unauthored skeleton — the lifecycle asks for oversight before the authoring stage runs | 12 (High) | Open | M | 2026-07-16 | internal |
-| 6 | P462 | Amendment-scoped `human-oversight: unconfirmed` has no detector — unratified amendment substance never reaches the oversight drain | 12 (High) | Open | M | 2026-07-26 | internal |
-| 6 | P463 | Relevance-close evaluator over-fires — a bare ADR/skill citation is read as "fix shipped", producing a 76% false-positive CLOSE-CANDIDATE rate | 12 (High) | Open | M | 2026-07-26 | internal |
 | 6 | P470 | The JTBD reviewer's build-upon guard blocks the sanctioned AFK vehicle-authoring shape and prescribes a remedy with no AFK path | 12 (High) | Open | M | 2026-07-26 | internal |
-| 6 | P479 | Decisions accrete into the nearest ADR because amending is cheaper than deciding — ADR-102 weighed two options and carries six decisions | 12 (High) | Open | M | 2026-08-07 | corrective-feedback |
-| 6 | P480 | An ADR's ratification is document-scoped, so riders that were never weighed inherit its authority — one contradicted an accepted-tier decision undeclared | 12 (High) | Open | M | 2026-08-08 | corrective-feedback |
-| 6 | P488 | The agent batches artefacts it was told to produce one at a time, then asks permission for the batch — the instruction lives only in session memory and CLAUDE.md prose, so nothing checks it and it decays every session | 12 (High) | Open | M | 2026-08-09 | corrective-feedback |
-| 6 | P490 | The agent sends status reports into a window that can only hold one actionable thing — the same correction fired verbatim on consecutive days, and the memory written after the first did not prevent the second | 12 (High) | Open | M | 2026-08-09 | corrective-feedback |
-| 6 | P492 | Nothing nudges when unpushed work piles up, so batches grow until someone notices — I002 named this gap in May and it recurred on 2026-08-09 with nine unpushed commits and one undetected defect | 12 (High) | Open | M | 2026-08-09 | corrective-feedback |
-| 6 | P489 | The shipped ratification surfaces do not meet the rule they are governed by — both drains, the jobs-and-personas confirm, two authoring surfaces and the marker writers, plus two unanswered design questions | 12 (High) | Open | L | 2026-08-09 | internal |
+| 6 | P476 | Shell-utility implementation differences between this machine and CI produce false-green locally | 12 (High) | Open | M | 2026-07-30 | internal |
+| 6 | P479 | Decisions accrete into the nearest ADR because amending is cheaper than deciding | 12 (High) | Open | M | 2026-08-07 | corrective-feedback |
+| 6 | P480 | An ADR's ratification is document-scoped, so riders that were never weighed inherit its authority | 12 (High) | Open | M | 2026-08-08 | corrective-feedback |
+| 6 | P488 | The agent batches artefacts it was told to produce one at a time, then asks permission for the batch | 12 (High) | Open | M | 2026-08-09 | corrective-feedback |
+| 6 | P490 | The agent sends status reports into a window that can only hold one actionable thing | 12 (High) | Open | M | 2026-08-09 | corrective-feedback |
+| 6 | P492 | Nothing nudges when unpushed work piles up, so batches grow until someone notices | 12 (High) | Open | M | 2026-08-09 | corrective-feedback |
 | 5 | P406 | `github-discussions` channel in `.upstream-channels.json` returns HTTP 410 | 5 (Low) | Open | S | 2026-07-02 | internal |
-| 5 | P484 | The reading-context persona constraint is load-bearing in two ratified decisions but documented nowhere | 9 (Medium) | Open | S | 2026-08-08 | internal |
 | 4.5 | P251 | RFC-first trace invariant not enforced — fixes start without RFC, story map, or JTBD trace | 9 (Medium) | Known Error | L | 2026-05-17 | internal |
-| 4.5 | P297 | ADR-047 — governance-artefact scaffolding should be a SessionStart hook (per-project, automatic), not an inline `/install-updates` step | 9 (Medium) | Open | M | 2026-05-25 | internal |
+| 4.5 | P297 | ADR-047 — governance-artefact scaffolding should be a SessionStart hook (per-project, automatic), not an inline `/install-updates` step | 9 | Open | M | 2026-05-25 | internal |
 | 4.5 | P369 | Plugin removes hook file but adopter session still invokes it via stale binding — `architect-compendium-refresh-discipline.sh` case 2026-06-17 | 9 (Medium) | Open | M | 2026-06-17 | internal |
 | 4.5 | P461 | Downstream evidence-scan flags adopter-repo sightings as live regressions without version-gating against the fix release | 9 (Medium) | Open | M | 2026-07-25 | internal |
-| 4.5 | P478 | I10 checks that a story's `## User value` section is non-empty, but never that it is value-first — 12 of 50 stories drifted feature-first undetected | 9 (Medium) | Open | M | 2026-08-07 | internal |
-| 4.5 | P491 | The retro context trigger's thresholds are prose in five places and none of them is the decision — two tests redden on contact, the eval keeps certifying the superseded contract silently, and the config surface the decision assumes does not exist | 9 (Medium) | Open | M | 2026-08-09 | internal |
+| 4.5 | P491 | The retro context trigger's thresholds are prose in five places, and none of them is the decision | 9 (Medium) | Open | M | 2026-08-09 | internal |
 | 4.5 | P501 | Project-specific content leaks into another adopter's generated plugin document | 9 (Medium) | Open | M | 2026-08-18 | corrective-feedback |
 | 4 | P410 | install-updates leaves stale cached plugin versions on disk — no prune step | 8 (Medium) | Open | M | 2026-07-03 | internal |
 | 4 | P442 | WSJF Rankings render convention differentiates tiers only by ordering + the Origin column — no visual tier separator, so inbound-reported priority is not legible | 8 (Medium) | Open | M | 2026-07-06 | corrective-feedback |
 | 4 | P467 | work-problems should surface decisions/ratifications continuously (non-blocking), not only batched at loop-end | 8 (Medium) | Open | M | 2026-07-26 | corrective-feedback |
-| 4 | P482 | ADR line-number citations are positional, so they rot silently every time the ADR is amended — 122 occurrences across 42 files | 6 (Medium) | Open | M | 2026-08-08 | architect-review |
-| 4 | P473 | Story maps are authored as per-fix 1-card stubs, not user journeys — below the STORY-MAP-003 quality bar | 12 (High) | Open | L | 2026-07-27 | corrective-feedback |
-| 4 | P500 | External reporter issues close before reporter confirmation or the promised quiet period | 16 (High) | Open | L | 2026-08-17 | internal |
+| 4 | P475 | RFCs carry a human-oversight axis they should not have, so 52 false nudges fire at every session start | 8 (Medium) | Open | M | 2026-07-30 | corrective-feedback |
+| 4 | P483 | Amendment sections are not a legitimate mechanism — a ratified decision is immutable | 16 (High) | Open | L | 2026-08-08 | corrective-feedback |
+| 4 | P485 | Every step in the process adds and none removes, so cruft accumulates without limit | 16 (High) | Open | L | 2026-08-08 | corrective-feedback |
+| 4 | P494 | Plugin tests and project-conformance tests are the same suite, so neither can be right | 16 (High) | Open | L | 2026-08-09 | corrective-feedback |
 | 3.75 | P443 | Quota-pacing (P160 / RFC-046 / ADR-093) shipped without a grounded JTBD → persona → USM → RFC → story lineage — governance artefacts are wrong, orphaned, or missing | 15 (High) | Open | L | 2026-07-07 | internal |
 | 3.75 | P445 | Agent offers unsolicited off-ramps, hedges, projects onto the user, and narrates its own conduct — "acknowledges-but-recurs" — and needs a PLUGIN-shipped behavioural rule (portable across every project), not a project-local fix | 15 (High) | Open | L | 2026-07-08 | internal |
-| 3 | P178 | Agent skips ITIL state-machine gates on architecture-driven problems — treats architect-PASS verdict as substitute for empirical RCA + skips Open → Known Error transition | 3 (Low) | Known Error | M | 2026-05-10 | internal |
-| 3 | P208 | git-push-gate.sh does not check CI status on push/release before scoring risk | 3 (Low) | Known Error | M | 2026-05-15 | internal |
-| 3 | P481 | Two ratified decisions describe a story-map format that no longer exists | 6 (Medium) | Open | S | 2026-08-08 | architect-review |
-| 3 | P493 | A docs-only change runs the full build, so pushing prose costs what shipping code costs — which argues for holding it, the accumulation P492 is about | 6 (Medium) | Open | S | 2026-08-09 | corrective-feedback |
+| 3 | P178 | Agent skips ITIL state-machine gates on architecture-driven problems — treats architect-PASS verdict as substitute for empirical RCA + skips Open → Known Error transition | 3 (Medium) | Known Error | M | 2026-05-10 | internal |
+| 3 | P208 | git-push-gate.sh does not check CI status on push/release before scoring risk | 3 (Medium) | Known Error | M | 2026-05-15 | internal |
 | 3 | P248 | Use time and token cost (not t-shirt sizing) for WSJF effort, with retro-driven estimation refinement | 6 (Medium) | Open | M | 2026-05-17 | internal |
 | 3 | P411 | no interactive oversight-drain skill for pending-review risk-register entries | 6 (Medium) | Open | M | 2026-07-03 | internal |
 | 3 | P412 | RFC / Story / Story-map framework tiers are invisible to adopters — no scaffold, no nudge, no discoverable entry point | 6 (Medium) | Open | M | 2026-07-03 | internal |
 | 3 | P416 | Outstanding-questions drain appends a superseding human decision without reconciling the stale Fix Strategy section it overrides | 6 (Medium) | Open | M | 2026-07-04 | internal |
 | 3 | P418 | Reviewer-agent marker hooks do not fire on SendMessage-resumed agents — ISSUES FOUND cannot be continued to a marker-writing PASS, forcing a full fresh re-review | 6 (Medium) | Open | M | 2026-07-05 | internal |
 | 3 | P421 | Reference-section awk helpers destructively truncate governance files containing invalid UTF-8 | 6 (Medium) | Open | M | 2026-07-05 | internal |
-| 3 | P496 | Nine story maps carry the superseded stacked encoding, and two more use bespoke encodings, all needing migration to the rendered grid | 6 (Low) | Open | M | 2026-08-05 | internal |
+| 3 | P496 | Nine story maps carry the superseded stacked encoding, and two more use bespoke encodings, all needing migration to the rendered grid | 6 (Low) | Open | M | 2026-08-05 | found while fixing the shipped template |
+| 3 | P482 | ADR line-number citations are positional, so they rot silently every time the ADR is amended | 6 (Medium) | Open | M | 2026-08-08 | architect-review |
 | 3 | P045 | Auto plugin install on user's machine after governance release | 12 (High) | Open | L | 2026-04-19 | internal |
 | 3 | P460 | Agent surfaces ticket-worthy findings and obvious next-actions as recommendations instead of autonomously capturing or acting | 12 (High) | Open | L | 2026-07-25 | internal |
+| 3 | P473 | Story maps are authored as per-fix 1-card stubs, not user journeys — below the STORY-MAP-003 quality bar | 12 (High) | Open | L | 2026-07-27 | corrective-feedback |
+| 3 | P489 | The shipped ratification surfaces do not meet the rule they are governed by | 12 (High) | Open | L | 2026-08-09 | internal |
 | 3 | P505 | Seven SKILL.md files breach the 50 KB budget, and nothing converts the measurement into work | 12 (High) | Open | L | 2026-08-20 | internal |
-| 2.25 | P136 | ADR-044 alignment audit — sweep all unaudited skills/hooks/agents/ADRs/JTBDs/READMEs against the framework-resolution boundary (master ticket) | 9 (Medium) | Open | L | 2026-04-27 | internal |
-| 2.25 | P290 | Harden ADR-052 to behavioural-only — remove the structural-test escape hatch entirely | 9 (Medium) | Open | L | 2026-05-25 | internal |
-| 2.25 | P324 | Agent-prose verdicts have no behavioural test harness — forcing the ADR-052 structural-test escape hatch + above-appetite release workarounds, perpetuating the structural tests the user has rejected | 9 (Medium) | Open | L | 2026-05-27 | internal |
-| 2.25 | P497 | An upstream pull-request diff is not scored against the upstream's conventions | 9 (Medium) | Open | L | 2026-08-14 | internal |
+| 2.25 | P136 | ADR-044 alignment audit — sweep all unaudited skills/hooks/agents/ADRs/JTBDs/READMEs against the framework-resolution boundary (master ticket) | 9 | Open | L | 2026-04-27 | internal |
+| 2.25 | P290 | Harden ADR-052 to behavioural-only — remove the structural-test escape hatch entirely | 9 | Open | L | 2026-05-25 | internal |
+| 2.25 | P324 | Agent-prose verdicts have no behavioural test harness — forcing the ADR-052 structural-test escape hatch + above-appetite release workarounds, perpetuating the structural tests the user has rejected | 9 | Open | L | 2026-05-27 | internal |
 | 2 | P170 | Problem tickets strain as fixes decompose into multiple coordinated changes — need an RFC framework that ties all changes back to problems (and unifies technical with user/business problems) | 8 (Medium) | Known Error | XL | 2026-05-04 | internal |
+| 2 | P487 | The loop overwrites the ranking that justified its own choices, so afterwards you cannot see why it worked what it worked | 4 (Low) | Open | M | 2026-08-09 | internal |
 | 1.875 | P091 | Session-wide context budget — Claude Code consumes substantial context before and during every session across all contributor surfaces (meta) | 15 (High) | Open | XL | 2026-04-22 | internal |
-| 1.125 | P298 | Plugin-published artifacts should NOT reference internal IDs at all (ADR-055 chose prefixing; strip them instead — they're meaningless to adopters) | 9 (Medium) | Open | XL | 2026-05-25 | internal |
+| 1.125 | P298 | Plugin-published artifacts should NOT reference internal IDs at all (ADR-055 chose prefixing; strip them instead — they're meaningless to adopters) | 9 | Open | XL | 2026-05-25 | internal |
 | 1.125 | P304 | Move `packages/shared/` from duplicate-and-sync to a bundler-based shared-code approach (ADR-017 reassessment outcome) | 9 (Medium) | Open | XL | 2026-05-26 | internal |
-| 1 | P487 | The loop overwrites the ranking that justified its own choices — a diagnostic for when what you expected to be worked was not | 4 (Low) | Open | M | 2026-08-09 | internal |
 | 1 | P338 | P082 Phase 2 — cognitive-accessibility evaluator on the 4 external-comms surfaces (gh / npm / changeset / git commit), shipped as a NEW `@windyroad/cognitive-a11y` plugin | 4 (Low) | Open | L | 2026-05-30 | internal |
 | 0.75 | P012 | Skill Testing Harness Scope Undefined | 6 (Medium) | Open | XL | 2026-04-16 | internal |
 | 0.75 | P176 | Agent-side I2 (no type-branching) coverage gap — SKILL.md type-branching invariant not behaviourally testable until skill-invocation harness lands | 6 (Medium) | Open | XL | 2026-05-06 | internal |
@@ -285,7 +285,7 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 
 ## Inbound Upstream Reports
 
-Inbound reports discovered by Step 4.5 (ADR-062; rendered off `docs/problems/.upstream-cache.json`, `last_checked: 2026-07-26T00:00:00Z`). Sorted by classification group, then `created_at ASC`. The `Classification` column carries the assessment-pipeline verdict; see `packages/risk-scorer/agents/inbound-report.md` § Verdict combinations for branch routing.
+Inbound reports discovered by Step 4.5 (ADR-062; rendered off `docs/problems/.upstream-cache.json`, `last_checked: 2026-08-21T00:00:00Z`). Sorted by classification group, then `created_at ASC`. The `Classification` column carries the assessment-pipeline verdict; see `packages/risk-scorer/agents/inbound-report.md` § Verdict combinations for branch routing.
 
 | # | Source | Title | Author | Created | Classification | Matched local ticket |
 |---|--------|-------|--------|---------|----------------|----------------------|
@@ -360,6 +360,21 @@ Inbound reports discovered by Step 4.5 (ADR-062; rendered off `docs/problems/.up
 | #345 | github-issues:windyroad/agent-plugins | work-problems Step 5 dispatch heredoc is unparseable under macOS /bin/bash 3.2 | tompahoward | 2026-07-05 | matched-local-ticket | P428 |
 | #347 | github-issues:windyroad/agent-plugins | assistant does not auto-close the feedback loop on conversion (channel-agnostic) | tompahoward | 2026-07-05 | matched-local-ticket | P432 |
 | #349 | github-issues:windyroad/agent-plugins | wr-itil: downstream verification of an upstream fix is not confirmed back upstream | tompahoward | 2026-07-06 | matched-local-ticket | P376 |
+| #395 | github-issues:windyroad/agent-plugins | [problem] wr-risk-scorer: external-comms gate leak-scans only the first -m value of a git commit | tompahoward | 2026-07-26 | maintainer-filed-not-third-party | P415 |
+| #396 | github-issues:windyroad/agent-plugins | wr-itil: work-problems Step 0 reconcile halt-route can't handle unscored-ticket MISSING drift (should route to review-problems) | tompahoward | 2026-07-26 | maintainer-filed-not-third-party | — |
+| #397 | github-issues:windyroad/agent-plugins | wr-itil: work-problems Step 5 duration_ms can dramatically undercount (extend P089 Gap 2 authority hierarchy beyond usage.*) | tompahoward | 2026-07-26 | maintainer-filed-not-third-party | P089 |
+| #398 | github-issues:windyroad/agent-plugins | wr-tdd: hook stem-match strictness fails variant-named tests to pair with their source module (needs canonical <stem>.test.js) | tompahoward | 2026-07-26 | maintainer-filed-not-third-party | P201 |
+| #399 | github-issues:windyroad/agent-plugins | wr-tdd: hook per-session IDLE state blocks multi-session RED->GREEN impl edits (on-disk RED not recognised across sessions) | tompahoward | 2026-07-26 | maintainer-filed-not-third-party | — |
+| #400 | github-issues:windyroad/agent-plugins | wr-risk-scorer: external-comms PASS marker lands in subagent's own session dir — main session's gate never sees it (P260/ADR-050 race; sibling of #317) | tompahoward | 2026-07-26 | maintainer-filed-not-third-party | P402 |
+| #401 | github-issues:windyroad/agent-plugins | wr-itil: work-problems orchestrator over-halts the AFK loop at P147 despite verified integrity + queued next iter + ample quota | tompahoward | 2026-07-26 | maintainer-filed-not-third-party | — |
+| #407 | github-issues:windyroad/agent-plugins | wr-risk-scorer: RISK_BYPASS: reducing opens all three gates at once, including push-past-CI | tompahoward | 2026-08-02 | maintainer-filed-not-third-party | — |
+| #408 | github-issues:windyroad/agent-plugins | wr-risk-scorer: external-comms gate hashes an empty draft for --body-file, so that path can never clear | tompahoward | 2026-08-02 | maintainer-filed-not-third-party | — |
+| #410 | github-issues:windyroad/agent-plugins | wr-risk-scorer: text-matching command detection — governed commands slip past it, and documentation trips it | tompahoward | 2026-08-04 | maintainer-filed-not-third-party | — |
+| #412 | github-issues:windyroad/agent-plugins | wr-architect: edit gate binds to the Edit/Write tool, so Bash-routed edits of governed files bypass it entirely | tompahoward | 2026-08-05 | maintainer-filed-not-third-party | P503 |
+| #414 | github-issues:windyroad/agent-plugins | [problem] wr-itil evaluate-relevance matches ADR numbers across repos and treats Composes-with siblings as drivers | tompahoward | 2026-08-08 | maintainer-filed-not-third-party | P463 |
+| #416 | github-issues:windyroad/agent-plugins | The upstream pull-request diff is unscored — no risk surface reads a diff against an upstream's policy | tompahoward | 2026-08-08 | maintainer-filed-not-third-party | P497 |
+
+**2026-08-21 pass note.** The 13 rows dated 2026-07-26 onward were all filed by the repo maintainer, so they are this repo's own `report-upstream` filings rather than third-party inbound reports. The six-step assessment pipeline was not run on them and no acknowledgement comments were posted — the JTBD-301 reporter-acknowledgement contract exists for third-party reporters, and the reporter here is the maintainer. Seven matched to local tickets by semantic comparison and were stamped `**Origin**: inbound-reported (#NN)` on the ticket, which is the authoritative rank input per ADR-076. The six unmatched (#396, #399, #401, #407, #408, #410) have no local ticket at all and are recorded as `cache_audit_note` in `docs/problems/.upstream-cache.json` for disambiguation at the next interactive review — each needs either a back-link to a closed ticket or a fresh capture.
 
 ## Closed
 

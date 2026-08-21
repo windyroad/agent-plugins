@@ -1,10 +1,11 @@
 # Problem 507: SessionStart surfacers emit a directive with nothing enforcing the drain — surfacing is not draining
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-08-20
 **Priority**: 15 (High) — Impact: 3 × Likelihood: 5 — derived at capture. Impact 3: the queue holds decision-ratifications, and while they sit there the governance artefacts they concern keep stating things that are no longer true — ADR-090's Decision Outcome has read "Any change … invalidates" since 2026-07-03 despite the shipped behaviour being substance-only. These artefacts are what agents route on, so the drift is runtime-active for every session in the repo. Likelihood 5: all three band triggers hold — known gap, no control in place, and observed twice on 2026-08-20 alone.
 **Origin**: internal
 **Effort**: M — derived at capture. The enforcement mechanism is a bounded choice among a few known shapes (a Stop-hook check, a first-turn gate, a re-fire on Nth turn), but it needs deciding rather than just writing, and it should be settled once for all three Class B surfacers rather than three times. Sized below P506's L because no ratified design premise is being reversed.
+**WSJF**: 15 — (15 × 2.0) / 2 (2026-08-21 review: auto-transitioned Open → Known Error — root cause confirmed + workaround documented; Known Error multiplier 2.0)
 **JTBD**: JTBD-001
 **Persona**: developer
 

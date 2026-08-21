@@ -5,6 +5,7 @@
 **Priority**: 16 (High) — Impact: 4 × Likelihood: 4. Impact 4: adopters receive tests that assert on this repository's governance content, so a suite they run reports failures about artefacts they have never had; and the conformance checks that should protect this project cannot be targeted at the changes that break them. Likelihood 4: it is the current state of every published package with tests, not a latent risk.
 **Origin**: corrective-feedback (user, 2026-08-09)
 **Effort**: L — a taxonomy, a home for the second category, and thirteen files to move or rewrite.
+**WSJF**: 4 — (16 × 1.0) / 4 (added 2026-08-21 review)
 **JTBD**: JTBD-101
 **Persona**: plugin-developer
 

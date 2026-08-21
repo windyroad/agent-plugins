@@ -1,10 +1,11 @@
 # Problem 478: I10 checks that a story's `## User value` section is non-empty, but never that it is value-first
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-08-07
 **Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3 — derived at capture from the description per Step 4a. Impact 3: a malformed value statement is not a broken build, but it defeats the story tier's whole point — the value is what a human ratifies, and 24% of the corpus was stating a feature instead. Likelihood 3: it has already happened 12 times across 50 stories and nothing prevents the 13th. Effort informed by P465 (M — SKILL prose + a check at one locus + behavioural bats), which is the same shape of change at the same gate.
 **Origin**: internal
 **Effort**: M — one predicate, wired into the existing I10 check, plus behavioural bats for both the accept and reject directions — cf. P465 (M)
+**WSJF**: 9 — (9 × 2.0) / 2 (2026-08-21 review: auto-transitioned Open → Known Error — root cause confirmed + workaround documented; Known Error multiplier 2.0)
 **JTBD**: JTBD-008
 **Persona**: developer
 

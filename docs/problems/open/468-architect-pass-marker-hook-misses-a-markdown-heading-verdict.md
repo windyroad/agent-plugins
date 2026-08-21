@@ -5,6 +5,7 @@
 **Priority**: 6 (Medium) — Impact: 2 × Likelihood: 3 — derived at capture from the description per Step 4a
 **Origin**: internal
 **Effort**: S — derived at capture per Step 4a
+**WSJF**: 6 — (6 × 1.0) / 1 (added 2026-08-21 review)
 **JTBD**: JTBD-101
 **Persona**: plugin-developer
 

@@ -5,6 +5,7 @@
 **Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3 — derived at capture. Impact 3: the caller cannot land the `human-oversight: confirmed` edit the shim exists to permit, and the deny message points back at the shim that just "succeeded" — a recoverable dead-end with a documented env-var workaround, not data loss. Likelihood 3: fires only on sessions older than 24h, which is a minority of sessions but the normal shape of an AFK `/wr-itil:work-problems` loop and of multi-day interactive sessions; observed once in the 2026-08-20 transcript sweep.
 **Origin**: internal
 **Effort**: S — derived at capture: a window/fallback policy change at three duplicated sites plus bats coverage that already has a window-override entry point. Sized against P380, the same three-site sweep over the same `find /tmp` enumeration.
+**WSJF**: 9 — (9 × 1.0) / 1 (added 2026-08-21 review)
 **JTBD**: JTBD-001
 **Persona**: developer
 

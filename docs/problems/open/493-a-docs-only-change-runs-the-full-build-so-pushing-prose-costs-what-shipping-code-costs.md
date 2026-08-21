@@ -5,6 +5,7 @@
 **Priority**: 6 (Medium) — Impact: 2 × Likelihood: 3. Impact 2: nothing breaks; the cost is minutes of CI and a discouragement to push small changes often, which works against the batch-size goal. Likelihood 3: it fires on every docs-only push, which for governance work is a large share of them.
 **Origin**: corrective-feedback (user, 2026-08-09)
 **Effort**: S — path filters on the workflow triggers, plus a decision about what counts as docs-only.
+**WSJF**: 1.5 — (6 × 1.0) / 4 <!-- transitive: L via P494 --> (2026-08-21 review: transitive effort L propagated from open upstream P494 per P076)
 **JTBD**: JTBD-002
 **Persona**: developer
 

@@ -3,8 +3,9 @@
 **Status**: Known Error
 **Reported**: 2026-07-01
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 (Likely) = 12. **Rated at capture from in-session evidence (5/5 PASS, 0 markers), NOT deferred** — re-rating "at next /wr-itil:review-problems" would itself be the P375 bug (nothing self-fires review-problems). Impact 3: blocks every external-facing commit and forces habitual `BYPASS_RISK_GATE=1`, eroding a load-bearing leak gate (workaround exists). Likelihood 4: reproduces on every background-launched review this session.
-**Origin**: internal
+**Origin**: inbound-reported (#400) — stamped 2026-08-21 review from the upstream poll; upstream filing `wr-risk-scorer: external-comms PASS marker lands in subagent's own session dir`
 **Effort**: M — **fix direction corrected 2026-07-02** (see ## Corrected diagnosis): NOT a mark-hook persistence fix (the marker lands correctly under the live SID in `$TMPDIR`). Residual is the draft≠commit key mismatch (P356 class); likely re-scope/close after the one-shot end-to-end isolation test. Priority/Likelihood pending that test — the load-bearing-gate-bug framing (Impact 3 × Likelihood 4) is likely an overstatement now that the gate is shown to work when draft==commit. WSJF = (12 × 1.0) / 2 = 6.0 (to be re-rated).
+**WSJF**: 12 — (12 × 2.0) / 2 (added 2026-08-21 review)
 **JTBD**: JTBD-001
 **Persona**: developer
 

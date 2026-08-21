@@ -5,6 +5,7 @@
 **Priority**: 6 (Medium) — Impact: 2 × Likelihood: 3 — derived at capture. Impact 2: the reopen still happens, just by hand, outside the skill that owns lifecycle transitions — so the P057 re-stage, P062 README refresh and ADR-014 commit discipline all rest on the agent remembering them rather than on the skill. Likelihood 3: reopening is uncommon, but a closure that turns out to be wrong is exactly the case where the lifecycle tooling should be most reliable, and this repo has 236 closed tickets.
 **Origin**: internal
 **Effort**: S — derived at capture: one row in the transition-problem validation table plus the pre-flight and Status-edit branch, mirroring the three existing directions. Sized against P071's other phased transition work.
+**WSJF**: 6 — (6 × 1.0) / 1 (added 2026-08-21 review)
 **JTBD**: JTBD-001
 **Persona**: developer
 

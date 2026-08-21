@@ -5,6 +5,7 @@
 **Priority**: 4 (Low) — Impact: 2 × Likelihood: 2. Rated down 2026-08-09 on maintainer direction: this is a **diagnostic reached for on surprise**, not a standing need. Nobody audits a run they are happy with. Likelihood 2: the evidence is destroyed on every run, but it is only *missed* when something looks wrong — and the trigger is usually not "why that one" but **"why not the other one"**. Impact 2: when it does bite you cannot answer the question and have to replay git history, which is annoying rather than damaging; nothing produced is wrong.
 **Origin**: internal
 **Effort**: M — record the decision at the moment it is made; the inputs are all in hand, nothing needs recomputing
+**WSJF**: 2 — (4 × 1.0) / 2 (added 2026-08-21 review)
 **JTBD**: JTBD-006
 **Persona**: developer
 

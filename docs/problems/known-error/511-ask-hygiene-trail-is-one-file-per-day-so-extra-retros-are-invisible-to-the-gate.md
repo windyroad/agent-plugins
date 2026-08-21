@@ -1,10 +1,11 @@
 # Problem 511: The ask-hygiene trail is one file per day, so a second retro's counts are invisible to the R6 gate
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-08-21
 **Priority**: 8 (Medium) — Impact: 2 × Likelihood: 4 — derived at capture. Impact 2: repo-local governance metric; nothing published, nothing breaks. But the metric it silently under-reports is the one gating whether an enforcement hook gets built, so a suppressed count defers a control indefinitely. Likelihood 4: fires whenever a day carries more than one retro, which happened three times today alone.
 **Origin**: internal
 **Effort**: S — derived at capture. A filename disambiguator plus a parser that reads every block in a file, or one file per retro rather than per day.
+**WSJF**: 16 — (8 × 2.0) / 1 (2026-08-21 review: auto-transitioned Open → Known Error — root cause confirmed + workaround documented; Known Error multiplier 2.0)
 **JTBD**: JTBD-001
 **Persona**: developer
 

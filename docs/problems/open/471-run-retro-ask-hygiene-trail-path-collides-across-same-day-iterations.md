@@ -5,6 +5,7 @@
 **Priority**: 8 (Medium) — Impact: 2 × Likelihood: 4 — derived at capture from the description per Step 4a
 **Origin**: internal
 **Effort**: S — derived at capture per Step 4a
+**WSJF**: 8 — (8 × 1.0) / 1 (added 2026-08-21 review)
 **JTBD**: JTBD-006
 **Persona**: developer
 

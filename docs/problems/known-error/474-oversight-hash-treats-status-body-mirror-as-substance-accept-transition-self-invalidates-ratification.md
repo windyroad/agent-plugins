@@ -1,10 +1,11 @@
 # Problem 474: Oversight hash treats the `**Status**:` body mirror as substance, so an accept transition self-invalidates its own ratification
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-07-29
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 — derived at capture from the description per Step 4a
 **Origin**: internal
 **Effort**: M — derived at capture per Step 4a
+**WSJF**: 12 — (12 × 2.0) / 2 (2026-08-21 review: auto-transitioned Open → Known Error — root cause confirmed + workaround documented; Known Error multiplier 2.0)
 **JTBD**: JTBD-001, JTBD-006
 **Persona**: developer
 

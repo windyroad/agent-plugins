@@ -5,6 +5,7 @@
 **Priority**: 6 (Medium) — Impact: 3 × Likelihood: 2. Impact 3: the block is fenced, machine-shaped YAML in an `accepted`-tier ADR, so it is what a reader or an agent copies when authoring a map — and most of what it names is either derived or absent, so following it produces keys the renderer silently ignores. Not a correctness failure today, because the renderer ignores rather than misreads. Likelihood 2: it bites only when someone authors a map from the ADR rather than from the SKILL's documented island, which is the less-travelled path.
 **Origin**: architect-review
 **Effort**: S — one fenced block plus two prose sentences, no code
+**WSJF**: 6 — (6 × 1.0) / 1 (added 2026-08-21 review)
 **JTBD**: JTBD-008
 **Persona**: developer
 

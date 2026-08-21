@@ -5,6 +5,7 @@
 **Priority**: 12 (High) — Impact: 4 × Likelihood: 3. Impact 4: committing the consumed state destroys the release notes for everything queued and stamps versions CI never issued, which reaches npm. Likelihood 3: observed once, cause unidentified, and nothing prevents a recurrence.
 **Origin**: internal
 **Effort**: S — a guard and a check; the hard part is deciding which of the two.
+**WSJF**: 12 — (12 × 1.0) / 1 (added 2026-08-21 review)
 **JTBD**: JTBD-002
 **Persona**: developer
 

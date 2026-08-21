@@ -5,6 +5,7 @@
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4. Impact 3: the work is not lost, but it goes unverified and lands as one large batch whose failures are expensive to attribute. Likelihood 4: it recurs whenever a session runs long without a release to trigger a push, which is most sessions doing governance work.
 **Origin**: corrective-feedback (user, 2026-08-09)
 **Effort**: M — the signal is cheap to compute; where it fires and at what threshold is the open part.
+**WSJF**: 6 — (12 × 1.0) / 2 (added 2026-08-21 review)
 **JTBD**: JTBD-002
 **Persona**: developer
 

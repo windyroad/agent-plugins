@@ -3,7 +3,7 @@
 **Status**: Known Error
 **Reported**: 2026-07-03
 **Priority**: 6 (Medium) — Impact: 2 (Minor — deny-after-PASS friction, recoverable re-review) × Likelihood: 3 (Possible — multi-`-m` commits recur; observed) — re-rated 2026-07-15 /wr-itil:review-problems
-**Origin**: internal
+**Origin**: inbound-reported (#395) — stamped 2026-08-21 review from the upstream poll; upstream filing `wr-risk-scorer: external-comms gate leak-scans only the first -m value of a git commit`
 **Effort**: S — accumulate ALL `-m` occurrences in the gate's extraction loop + bats
 **WSJF**: 12 — (6 × 2.0) / 1 (2026-07-26 review: auto-transitioned Open → Known Error — root cause confirmed + workaround documented; multiplier 1.0 → 2.0)
 **JTBD**: JTBD-006
