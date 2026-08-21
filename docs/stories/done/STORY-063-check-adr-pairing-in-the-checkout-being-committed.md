@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: done
 story-id: check-adr-pairing-in-the-checkout-being-committed
 reported: 2026-08-17
 decision-makers: [Tom Howard]
@@ -18,12 +18,12 @@ In order to trust governance gates while working across isolated checkouts, as a
 
 ## Acceptance criteria (INVEST Testable)
 
-- [ ] A command `workdir` or `cwd` selects that Git checkout before the hook inspects staged ADRs.
-- [ ] An explicit leading absolute `cd` selects the target checkout when the payload omits a command workdir.
-- [ ] A declared relative, missing, or non-Git checkout fails closed with an actionable denial.
-- [ ] Legacy payloads that declare no checkout preserve the existing process-cwd behaviour.
-- [ ] Cross-checkout behavioural tests prove both permit and deny decisions come only from the target index.
-- [ ] The published architect package is installed and the original two-checkout witness passes before downstream work is called unblocked.
+- [x] A command `workdir` or `cwd` selects that Git checkout before the hook inspects staged ADRs.
+- [x] An explicit leading absolute `cd` selects the target checkout when the payload omits a command workdir.
+- [x] A declared relative, missing, or non-Git checkout fails closed with an actionable denial.
+- [x] Legacy payloads that declare no checkout preserve the existing process-cwd behaviour.
+- [x] Cross-checkout behavioural tests prove both permit and deny decisions come only from the target index.
+- [x] The published architect package is installed and the original two-checkout witness passes before downstream work is called unblocked.
 
 ## Driving problem trace
 

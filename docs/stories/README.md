@@ -113,7 +113,6 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 
 | Status | ID | Title | Effort | Problems | RFCs | Story Map |
 |--------|-----|-------|--------|----------|------|-----------|
-| accepted | STORY-063 | Check ADR pairing in the checkout being committed | S | P499 | RFC-069 | STORY-MAP-002 |
 | accepted | STORY-044 | See what cruise is doing — status/telemetry skill | M | P160, P446 | RFC-046 | STORY-MAP-003 |
 | draft | STORY-045 | Outbound lifecycle comments generated from real issue context | M | P376 | RFC-028 | STORY-MAP-004 |
 | accepted | STORY-047 | Gate the correction nudge on prompt authorship | S | P430 | RFC-050 | STORY-MAP-005 |
@@ -159,6 +158,7 @@ Terminal stories, from filesystem truth (`docs/stories/done/`). `Done` is the da
 
 | ID | Title | Done | Driving problems |
 |----|-------|------|------------------|
+| STORY-063 | Check ADR pairing in the checkout being committed | 2026-08-21 | P499 |
 | STORY-042 | Extract quota-pacing into its own plugin | 2026-08-09 | P160, P443 |
 | STORY-043 | Pacing starts working the moment I install it, with nothing to configure | 2026-08-09 | P160, P443 |
 | STORY-001 | Hook exemption globs for docs/story-maps + docs/stories | 2026-05-12 | P170 |

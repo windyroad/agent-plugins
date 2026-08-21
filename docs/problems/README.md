@@ -11,7 +11,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
 | | | **Tier 0 — Critical-bypass** (Severity Very High ≥17, security-classified, or incident-linked) | | | | | |
-| 40 | P499 | Architect ADR pairing hook reads the task checkout instead of the command checkout | 20 (Very High) | Known Error | S | 2026-08-17 | incident-linked |
 | 20 | P463 | Relevance-close evaluator over-fires — a bare ADR/skill citation is read as "fix shipped", producing a 76% false-positive CLOSE-CANDIDATE rate | 20 (Very High) | Known Error | M | 2026-07-26 | inbound-reported (#414) |
 | 20 | P477 | Codex collaboration completion bypasses the risk-marker bridge | 20 (Very High) | Open | S | 2026-08-12 | internal |
 | 10 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Known Error | L | 2026-08-20 | internal |
@@ -282,6 +281,7 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P398 | the VP carve-out holds changesets for already-shipped (verifying) code indefinitely — pointless changelog stranding | pending — @windyroad/risk-scorer patch committed, ships next release | no — not observed |
 | P400 | architect-mark-reviewed PostToolUse never fires on a SendMessage resume of an architect agent | pending — committed on main, ships next @windyroad/architect release | no — not observed |
 | P403 | Agent frames skill-mandatory mechanical steps as user-optional (detect_mechanical_optional Stop-hook detector; fix vehicle RFC-042) | pending — @windyroad/itil patch committed, ships next release | no — not observed |
+| P499 | Architect ADR pairing hook reads the task checkout instead of the command checkout | 2026-08-17 (`@windyroad/architect@0.21.1`; live in the published 0.21.3) | yes — observed: installed v0.21.3 hook permits a clean declared checkout and denies an unpaired one, both from the target index |
 
 ## Inbound Upstream Reports
 

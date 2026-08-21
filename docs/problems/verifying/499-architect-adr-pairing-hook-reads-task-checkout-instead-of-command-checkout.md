@@ -1,11 +1,11 @@
 # Problem 499: Architect ADR pairing hook reads the task checkout instead of the command checkout
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-08-17
 **Priority**: 20 (Very High) - Impact: 4 x Likelihood: 5
 **Origin**: incident-linked
 **Effort**: S
-**WSJF**: 40 - (20 x 2.0) / 1
+**WSJF**: 0 (excluded - Verification Pending per ADR-022)
 **JTBD**: JTBD-001
 **Persona**: developer
 
@@ -38,6 +38,16 @@ Run the commit from a task whose own workspace root is the exact target checkout
 
 Resolve the actual command checkout before reading the staged index. Prefer `tool_input.cwd`, then `tool_input.workdir`, then an explicit leading absolute `cd`, then top-level `cwd`; retain process cwd only for legacy payloads that declare none. Deny an invalid declared checkout. Preserve the existing ADR pairing and intentional bypass rules unchanged.
 
+## Fix Released
+
+The pairing hook now resolves the checkout the commit command targets before it reads the staged index. It prefers a declared `cwd`, then a declared `workdir`, then an explicit leading absolute `cd`, then the top-level `cwd`, and falls back to the hook process checkout only for a payload that declares none. A declared checkout that is relative, missing, or not a Git worktree is denied rather than quietly falling back.
+
+Released in `@windyroad/architect` v0.21.1 on 2026-08-17; the currently published and locally installed version is 0.21.3.
+
+Observed on 2026-08-21 against the installed published hook, not the source tree: a commit declaring a clean checkout was permitted while the hook process sat in a different checkout holding an unpaired ADR, and the same pairing was denied when the declared checkout was the one holding it. The committed regression suite covering both directions is green at 24 of 24.
+
+Awaiting user verification.
+
 ## Dependencies
 
 - **Blocks**: downstream commits whose execution checkout differs from the task workspace.
@@ -61,4 +71,4 @@ Resolve the actual command checkout before reading the staged index. Prefer `too
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-063 | STORY-063: Check ADR pairing in the checkout being committed | accepted |
+| STORY-063 | STORY-063: Check ADR pairing in the checkout being committed | done |
