@@ -57,7 +57,6 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 |----|-------|--------|
 | STORY-047 | STORY-047: Gate the correction nudge on prompt authorship | accepted |
 | STORY-054 | STORY-054: Lifecycle transitions preserve a story's ratification | accepted |
-| STORY-062 | STORY-062: Keep problem ranking correct after a status transition | accepted |
 | STORY-003 | STORY-003: /wr-itil:list-stories read-only display skill | done |
 | STORY-005 | STORY-005: Working-the-problem traversal rewrite (manage-problem + work-problem) | done |
 | STORY-018 | STORY-018: Capture the problem in seconds, mid-flow | done |
@@ -71,3 +70,5 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 | STORY-053 | STORY-053: Test claims against the tree at capture and label the untested ones | draft |
 | STORY-059 | STORY-059: See why the loop did not work what I expected | draft |
 | STORY-060 | STORY-060: Pick up a captured ticket and know what was observed | draft |
+| STORY-064 | STORY-064: A ticket that only names a decision as background stays open | draft |
+| STORY-062 | STORY-062: Keep problem ranking correct after a status transition | in-progress |

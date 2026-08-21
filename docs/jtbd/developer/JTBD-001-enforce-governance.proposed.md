@@ -44,15 +44,16 @@ Manual code review, PR review checklists, hoping the agent follows CLAUDE.md ins
 | STORY-054 | STORY-054: Lifecycle transitions preserve a story's ratification | accepted |
 | STORY-055 | STORY-055: One definition of what the oversight fingerprint ignores | accepted |
 | STORY-061 | STORY-061: See why a SubagentStop risk receipt was not written | accepted |
-| STORY-062 | STORY-062: Keep problem ranking correct after a status transition | accepted |
-| STORY-063 | STORY-063: Check ADR pairing in the checkout being committed | accepted |
 | STORY-002 | STORY-002: /wr-itil:capture-story lightweight aside skill | done |
 | STORY-005 | STORY-005: Working-the-problem traversal rewrite (manage-problem + work-problem) | done |
 | STORY-006 | STORY-006: /wr-itil:reconcile-stories trio (skill + script + bin shim) | done |
 | STORY-007 | STORY-007: /wr-itil:manage-story heavyweight story lifecycle skill | done |
 | STORY-023 | STORY-023: Ship → verify → problem closes with a real trace; adopter gets the fix | done |
+| STORY-063 | STORY-063: Check ADR pairing in the checkout being committed | done |
 | STORY-013 | STORY-013: Full gate: an RFC exists → I proceed; none → I create it first | draft |
 | STORY-033 | STORY-033: Loud cold-path diagnostic for oversight-marker shims | draft |
 | STORY-037 | STORY-037: Commit gate honours the RISK-POLICY stated review cadence for staleness | draft |
 | STORY-052 | STORY-052: Surface still-outstanding family members before a close | draft |
 | STORY-060 | STORY-060: Pick up a captured ticket and know what was observed | draft |
+| STORY-064 | STORY-064: A ticket that only names a decision as background stays open | draft |
+| STORY-062 | STORY-062: Keep problem ranking correct after a status transition | in-progress |
