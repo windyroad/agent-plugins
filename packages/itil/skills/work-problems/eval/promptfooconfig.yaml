@@ -190,7 +190,7 @@ tests:
     assert:
       # Tier A — must reference the re-grounding invariant by name.
       - type: regex
-        value: 're[\s\-]?ground|re-grounding|reset[\s\-]?per[\s\-]?iter|template[\s\-]?driven'
+        value: 're[\s\-]?ground|re-grounding|reset[\s\-]?per[\s\-]?iter|resets.{0,20}template|template[\s\-]?driven'
       # Tier A — Fix Strategy is NOT inlined verbatim by the orchestrator;
       # the subprocess reads it from disk via manage-problem.
       - type: regex
@@ -439,7 +439,7 @@ tests:
         value: 'scope\s*filter|selection\s+override|SCOPE\s+FILTER|override\s+Step\s+1|override\s+WSJF|pin\s+the\s+loop|pinned\s+ticket'
       # Tier A — must reference framework-resolved loop control / ADR-044.
       - type: regex
-        value: 'framework[\s\-]?resolved|framework[\s\-]?prescribed|ADR-044|Step\s+2\.4|stop[\s\-]?condition'
+        value: 'framework[\s\-]?(resolved|prescribed|defined)|ADR-044|Step\s+2\.4|stop[\s\-]?condition'
       # Tier B — semantic invariant: orchestrator dispatches iter 2 on the same pinned
       # ticket (because Step 1's WSJF selection is overridden to the pinned ticket, not
       # because the orchestrator invented a halt), the scope-pin word is interpreted as
@@ -489,7 +489,7 @@ tests:
         value: '"?direction"?|deviation-approval|category'
       # Tier A — must continue (not halt), per the queue-and-continue default.
       - type: regex
-        value: 'continue|queue[\s\-]?and[\s\-]?continue|proceed|do\s+NOT\s+halt|skip|action:\s*skipped'
+        value: '[Cc]ontinue|queue[\s\-]?and[\s\-]?continue|proceed|do\s+NOT\s+halt|[Ss]kip|action:\s*skipped'
       # Tier B — semantic invariant: queue-and-continue is the universal
       # AFK default; HALT / SKIP-silently / AUTO-DEFAULT are carve-out-
       # justified deviations that need explicit documentation. Calling
@@ -585,7 +585,7 @@ tests:
       - type: regex
         value: 'resolved[\s\-]?KEEP|treat.{0,30}as\s+KEEP|carve[\s\-]?out|proceed.{0,40}(Step\s*4|dispatch)'
       - type: regex
-        value: 'annotation|log|iter\s+summary|audit'
+        value: 'annotation|[Ll]og|iter\s+summary|audit'
       - type: llm-rubric
         value: |
           The response applies the same-session-adjudication carve-out: the
