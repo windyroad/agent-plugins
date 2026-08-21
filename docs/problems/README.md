@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-21 **P508 slice A landed** — the propose-fix gate now proposes a release row instead of a standalone RFC document, and the identity allocator that was re-issuing an id a row already held is fixed. Readers repointed ahead of the writer; P508 re-scored 20 → 16 because the automatic path to the retired artefact is closed while a direct invocation can still reach it.
+> Last reviewed: 2026-08-21 **P517 captured** — an iteration can burn its whole budget in the commit gate and lose everything, because the commit is the last step and the gate rounds compound (lightweight aside via /wr-itil:capture-problem)
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -91,6 +91,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 4.5 | P461 | Downstream evidence-scan flags adopter-repo sightings as live regressions without version-gating against the fix release | 9 (Medium) | Open | M | 2026-07-25 | internal |
 | 4.5 | P491 | The retro context trigger's thresholds are prose in five places, and none of them is the decision | 9 (Medium) | Open | M | 2026-08-09 | internal |
 | 4.5 | P501 | Project-specific content leaks into another adopter's generated plugin document | 9 (Medium) | Open | M | 2026-08-18 | corrective-feedback |
+| 4.5 | P517 | An iteration can burn its whole budget in the commit gate and lose everything, because the commit is the last step | 9 (Medium) | Open | M | 2026-08-21 | internal |
 | 4 | P410 | install-updates leaves stale cached plugin versions on disk — no prune step | 8 (Medium) | Open | M | 2026-07-03 | internal |
 | 4 | P442 | WSJF Rankings render convention differentiates tiers only by ordering + the Origin column — no visual tier separator, so inbound-reported priority is not legible | 8 (Medium) | Open | M | 2026-07-06 | corrective-feedback |
 | 4 | P467 | work-problems should surface decisions/ratifications continuously (non-blocking), not only batched at loop-end | 8 (Medium) | Open | M | 2026-07-26 | corrective-feedback |
