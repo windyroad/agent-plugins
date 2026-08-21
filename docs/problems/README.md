@@ -12,7 +12,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 |------|-----|-------|----------|--------|--------|----------|--------|
 | | | **Tier 0 — Critical-bypass** (Severity Very High ≥17, security-classified, or incident-linked) | | | | | |
 | 20 | P463 | Relevance-close evaluator over-fires — a bare ADR/skill citation is read as "fix shipped", producing a 76% false-positive CLOSE-CANDIDATE rate | 20 (Very High) | Known Error | M | 2026-07-26 | inbound-reported (#414) |
-| 10 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Known Error | L | 2026-08-20 | internal |
+| 20 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Known Error | M | 2026-08-20 | internal |
 | 10 | P508 | The fix proposal still instantiates a standalone RFC document, after ADR-103 made it a release row | 20 (Very High) | Known Error | L | 2026-08-20 | internal |
 | 10 | P509 | Story-map capture produces a work breakdown, not the persona's journey | 20 (Very High) | Known Error | L | 2026-08-21 | internal |
 | 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 | Known Error | XL | 2026-05-03 | internal |
