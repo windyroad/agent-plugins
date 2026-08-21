@@ -60,6 +60,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 16 | P420 | check-briefing-budgets.sh crashes with `must_split[@]: unbound variable` on empty arrays under macOS default bash 3.2 | 8 (Medium) | Known Error | S | 2026-07-05 | internal |
 | 16 | P511 | The ask-hygiene trail is one file per day, so a second retro's counts are invisible to the R6 gate | 8 (Medium) | Known Error | S | 2026-08-21 | internal |
 | 15 | P507 | SessionStart surfacers emit a directive with nothing enforcing the drain — surfacing is not draining | 15 (High) | Known Error | M | 2026-08-20 | internal |
+| 15 | P466 | The story-map HTML template ships sub-3:1 borders, no focus ring, and no viewport meta | 15 (High) | Known Error | S | 2026-07-26 | inbound-reported |
 | 12 | P179 | Agent defers requested work into untracked phases — phases are fine, but unticketed phases never get implemented | 12 (High) | Known Error | M | 2026-05-10 | internal |
 | 12 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 (High) | Known Error | M | 2026-06-10 | internal |
 | 12 | P462 | Amendment-scoped `human-oversight: unconfirmed` has no detector — unratified amendment substance never reaches the oversight drain | 12 (High) | Known Error | M | 2026-07-26 | internal |
@@ -87,7 +88,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P305 | Post-Edit silent revert of working-tree files before commit — potential silent-work-loss hazard | 6 | Known Error | M | 2026-05-26 | internal |
 | 6 | P409 | Back-fill legacy RFCs still carrying empty `stories: []` | 6 (Medium) | Known Error | M | 2026-07-03 | internal |
 | 6 | P456 | AFK iter cannot progress a ratified Known Error when the fix-vehicle RFC has empty stories | 6 (Medium) | Known Error | M | 2026-07-15 | internal |
-| 6 | P466 | The story-map HTML template ships sub-3:1 borders, no focus ring, and no viewport meta | 6 (Medium) | Open | S | 2026-07-26 | internal |
 | 6 | P468 | architect-mark-reviewed misses a genuine PASS whose verdict line is a markdown heading rather than bold | 6 (Medium) | Open | S | 2026-07-26 | internal |
 | 6 | P469 | style-guide and voice-tone reviewer agents spawn without Bash, so they cannot write the verdict marker their own gate reads | 6 (Medium) | Open | S | 2026-07-26 | internal |
 | 6 | P481 | Two ratified decisions describe a story-map format that no longer exists | 6 (Medium) | Open | S | 2026-08-08 | architect-review |

@@ -511,7 +511,7 @@ function renderStatus(map, storiesDir, mapPath) {
  * alongside colour.
  * ------------------------------------------------------------------------- */
 
-const BADGE_GLYPH = { 'b-live': '\u2713', 'b-next': '\u2192', 'b-later': '\u25c7', 'b-defect': '\u26a0' };
+const BADGE_GLYPH = { 'b-live': '\u2713', 'b-next': '\u2192', 'b-defect': '\u26a0' };
 
 /** Status as a class. Derived, never an authored badge — a hand-written R1/R2
  *  ordinal duplicated the RFC identity and collided with it. */

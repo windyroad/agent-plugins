@@ -7,7 +7,7 @@
   --card: #f6f6f6; --card-line: #767676;
   --live-fg: #0b5d1e; --live-bg: #e4f4e8; --live-line: #0b5d1e;
   --next-fg: #0b3a66; --next-bg: #e2eefb; --next-line: #0b3a66;
-  --later-fg: #6b3a00; --later-bg: #f6ead6; --later-line: #6b3a00;
+  --later-fg: #6b3a00;
   --defect-fg: #8c1d18; --defect-bg: #fdecea; --defect-line: #8c1d18;
   --focus: #0b3a66;
 }
@@ -17,7 +17,7 @@
     --card: #1f2228; --card-line: #8a919c;
     --live-fg: #7fe0a0; --live-bg: #123020; --live-line: #7fe0a0;
     --next-fg: #97c6f5; --next-bg: #10263c; --next-line: #97c6f5;
-    --later-fg: #f0c58a; --later-bg: #33260f; --later-line: #f0c58a;
+    --later-fg: #f0c58a;
     --defect-fg: #ffb4ab; --defect-bg: #3b1512; --defect-line: #ffb4ab;
     --focus: #97c6f5;
   }
@@ -28,7 +28,7 @@
   --card: #f6f6f6; --card-line: #767676;
   --live-fg: #0b5d1e; --live-bg: #e4f4e8; --live-line: #0b5d1e;
   --next-fg: #0b3a66; --next-bg: #e2eefb; --next-line: #0b3a66;
-  --later-fg: #6b3a00; --later-bg: #f6ead6; --later-line: #6b3a00;
+  --later-fg: #6b3a00;
   --defect-fg: #8c1d18; --defect-bg: #fdecea; --defect-line: #8c1d18;
   --focus: #0b3a66;
 }
@@ -38,7 +38,7 @@
   --card: #1f2228; --card-line: #8a919c;
   --live-fg: #7fe0a0; --live-bg: #123020; --live-line: #7fe0a0;
   --next-fg: #97c6f5; --next-bg: #10263c; --next-line: #97c6f5;
-  --later-fg: #f0c58a; --later-bg: #33260f; --later-line: #f0c58a;
+  --later-fg: #f0c58a;
     --defect-fg: #ffb4ab; --defect-bg: #3b1512; --defect-line: #ffb4ab;
   --focus: #97c6f5;
 }
@@ -47,7 +47,16 @@ body { font-family: system-ui, sans-serif; color: var(--fg); background: var(--b
        max-width: 1500px; margin: 0 auto; padding: 1.5rem 1rem 3rem; line-height: 1.5; }
 h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
 p { max-width: 74ch; }
-a { color: var(--focus); }
+/* The underline is the channel; the colour is not. Reference links render
+   INSIDE runs of prose ("closes P160, P424", "Traces: STORY-018"), and those
+   runs sit in --muted containers (.t-ref, .s-problems, .traces) — so the real
+   comparison is --focus against --muted: 1.58:1 light and 1.09:1 dark, against
+   the 3:1 that technique G183 wants before colour alone may carry a link. In
+   dark mode the two tones are all but identical.
+   The UA already draws this underline. Stating it means a later
+   `text-decoration: none` reads as the SC 1.4.1 regression it is (failure
+   technique F73) rather than as a tidy-up. */
+a { color: var(--focus); text-decoration: underline; }
 /* Required on every interactive element, not just links: the theme toggle
    (if a host adds one) and the scroll region both take focus. */
 /* :focus first as a fallback for engines without :focus-visible. The two rules
@@ -72,14 +81,25 @@ button:focus-visible,
    thing distinguishing the three states. */
 .b-live  { color: var(--live-fg);  background: var(--live-bg);  border-color: var(--live-line); }
 .b-next  { color: var(--next-fg);  background: var(--next-bg);  border-color: var(--next-line); }
-.b-later { color: var(--later-fg); background: var(--later-bg); border-color: var(--later-line); }
 /* A row with no RFC identity, or whose stories close no problem. Deliberately
-   red rather than the amber `.b-later` used for scheduled-later work: this is
-   not "later", it is wrong, and it needs an edit before the map is ratified.
+   red rather than amber: this is not "later", it is wrong, and it needs an edit
+   before the map is ratified. There is no amber resting state — the `.b-later`
+   badge that once named one was retired with it, because a row could sit there
+   untraced indefinitely and feel accounted for.
    7.97:1 light, 9.50:1 dark; the glyph carries it as a second channel. */
 .b-defect { color: var(--defect-fg); background: var(--defect-bg); border-color: var(--defect-line); }
 
-.scroll { overflow-x: auto; padding-bottom: .5rem; }
+/* scroll-padding-left is load-bearing, not cosmetic. `th.slice` below is
+   sticky-left with an opaque background over the leftmost ~96px of this
+   scrollport, and browsers align a focused element flush with the scrollport
+   edge — under the header. The .t-ref links are narrower than the column, so
+   they are hidden ENTIRELY, which is SC 2.4.11 (AA) rather than 2.4.12 (AAA).
+   104px = the 96px column plus the 3px focus ring, its 2px offset, and
+   clearance: 96 + 3 + 2 = 101, so 104 clears with 3px spare. The column is
+   96px at every width that scrolls — its `width: 10%` resolves to 94px of the
+   940px minimum, so the `min-width` governs, and under the 640px query where
+   `min-width` drops to 72px the 94px percentage takes over instead. */
+.scroll { overflow-x: auto; padding-bottom: .5rem; scroll-padding-left: 104px; }
 table.map { border-collapse: collapse; width: 100%; min-width: 940px; }
 table.map caption { text-align: left; color: var(--muted); font-size: .85rem; margin-bottom: .5rem; }
 /* Activity headers across the top are the backbone: the user journey. */
