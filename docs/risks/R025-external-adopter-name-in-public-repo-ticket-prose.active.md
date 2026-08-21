@@ -84,6 +84,7 @@ Auto-populated from `.risk-reports/` via Phase 2b drain.
 
 - 2026-05-24T16:17:21Z: fired in `.risk-reports/2026-05-24T16-17-21-commit.md` (reason: confidentiality-disclosure)
 - 2026-07-03T06:03:32Z: fired in `.risk-reports/2026-07-03T06-03-32-commit.md` (reason: confidentiality-disclosure)
+- 2026-08-21T07:03:14Z: fired in `.risk-reports/2026-08-21T07-03-14-commit.md` (reason: confidentiality-disclosure)
 
 ## Change Log
 
