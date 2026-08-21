@@ -73,3 +73,73 @@ The CI run on the token-retry fix (02901e65) STILL failed the same Agent-Prose E
 **Refined fix strategy** (proper fix, not yet done): one of — (a) ADR-075 §5 pass^k / N-sample majority so a single boundary flip does not fail the job; (b) disambiguate the boundary fixtures (move off the exactly-at/just-over-threshold edge where the LLM flips); (c) harden the plan/pipeline agents boundary-appetite reasoning (explicit "> threshold exceeds; ≤ threshold within"). (a) is the ADR-075-documented mechanism and the most robust.
 
 **Process note**: I had wrongly attributed ALL this session`s CI red to P459; verifying the actual failed job revealed my own P151 lint also false-positived (fixed same commit). The exact P461 / P434 verify-before-asserting lesson.
+
+## Phase 2 — third mechanism: a fail-closed assertion that cannot tell emitting from naming (added 2026-08-21)
+
+A third, distinct sub-mechanism of the same symptom, found during the
+2026-08-21 release drain. It is not token-omission (Fix Applied 2026-07-25) and
+not verdict-value variance (Correction 2026-07-25) — it is a **latently broken
+assertion** that any sampling variance is enough to trip.
+
+`packages/risk-scorer/agents/eval/promptfooconfig.yaml` line 279, in the case
+`Codex pipeline fails closed when the assessed root is absent`:
+
+```yaml
+    assert:
+      - type: not-contains
+        value: 'RISK_SCORES:'
+      - type: icontains
+        value: 'RISK_CWD'
+```
+
+The case exists to prove the agent **refuses to score** when the assessed root
+is missing. But `not-contains` is a substring test over the whole response, so
+it cannot distinguish the two things it needs to tell apart:
+
+- the agent **emitting** a verdict it should have withheld — a real failure; and
+- the agent **naming** the token inside a correct refusal — "I must not emit
+  `RISK_SCORES:` because the assessed root is absent" — which is the *desired*
+  behaviour and passes the intent of the test while failing its letter.
+
+Whether a given generation phrases its refusal with or without the literal
+token is a sampling coin-flip. So the case fails intermittently on commits that
+touch nothing near it, and passes on re-run.
+
+**Observed 2026-08-21**: this case reddened CI on an otherwise-green commit
+during the release drain, then passed on re-run with no change to the diff.
+
+**Why it matters beyond the wasted triage**: this is the failure mode named in
+this ticket's own Impact Assessment — "trains maintainers to ignore CI red". A
+red that greens on re-run with no code change is indistinguishable, from the
+outside, from the flake classes already fixed here. It will keep recurring, and
+each recurrence makes the next real failure easier to wave through.
+
+**Fix direction**: assert on the refusal's *shape*, not on the absence of a
+substring — e.g. require the fail-closed sentinel the agent is contracted to
+emit, and use a `not-regex` anchored to the token in **emitting** position
+(start-of-line followed by a score payload, as the sibling case at line 273
+already does with `not-regex` for the duplicate-`RISK_CWD` check) rather than a
+bare `not-contains` over free prose. The sibling case two blocks up is the
+worked example: it uses `not-regex` precisely because a bare substring test was
+not precise enough there either.
+
+### Phase 2 Investigation Tasks
+
+- [ ] Replace the line 279 `not-contains: 'RISK_SCORES:'` with an assertion that
+      matches the token only in emitting position, so a refusal that names the
+      token passes.
+- [ ] Add the positive half: assert the refusal actually carries the fail-closed
+      sentinel the agent is contracted to emit, so the case proves refusal
+      rather than merely proving absence.
+- [ ] Sweep the rest of `promptfooconfig.yaml` for other bare `not-contains`
+      assertions over contract tokens — the same emitting-vs-naming ambiguity
+      applies wherever a negative assertion tests a token the agent may
+      legitimately discuss.
+- [ ] Re-check whether this mechanism, rather than value variance, accounts for
+      some of the flakes previously attributed to the Correction 2026-07-25
+      diagnosis.
+
+**Hang-off rationale**: captured against this ticket rather than as a sibling
+per the inflow-discipline rule — same eval config, same CI job, same observable
+symptom (a red that greens on re-run), and the same remedy surface. A separate
+ticket would split one flake-class investigation across two files.

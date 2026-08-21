@@ -90,3 +90,54 @@ Manual editing of `docs/risks/*.md` frontmatter by hand.
 - ADR-047 — the scaffold-nudge that surfaces the pending count.
 - ADR-056 / ADR-059 — risk-register write contract + pipeline catalog consumption (adjacent, not the drain surface).
 - `/wr-architect:review-decisions` + `/wr-jtbd:confirm-jobs-and-personas` — the sibling drain skills this mirrors.
+
+## Evidence refresh 2026-08-21 — ADR-056's reassessment criterion is met and its reassessment date has passed
+
+Re-measured against the live register today. The numbers have moved the wrong
+way since capture, and a second, independent trigger has now also fired.
+
+**Curation rate: 15%.** Of 75 active entries (`docs/risks/R*.active.md`), **64
+carry `**Curation**: pending review`** — auto-scaffolded, never curated. Only 11
+have been through a human. ADR-056 set the reassessment trigger at *30+ days
+past adoption with a curation rate under 20%*; at 15% and months past adoption,
+the criterion is met on both axes with room to spare. (The ticket body above
+records ~51 pending as of 2026-07-03; it is 64 now. The gap is not closing on
+its own.)
+
+**The auto-scaffolded cohort spans the whole period.** `R014` was scaffolded
+2026-05-17 and `R097` today, 2026-08-21 — a continuous three-month run of
+entries landing in `pending review` and staying there. This is not a one-off
+backlog to sweep; it is an inflow with no matching outflow.
+
+**The named remedy is still unbuilt.** `/wr-risk-scorer:review-register` does
+not exist — `packages/risk-scorer/skills/` contains
+`assess-external-comms`, `assess-inbound-report`, `assess-release`,
+`assess-wip`, `bootstrap-catalog`, `create-risk`, `external-comms`, `pipeline`,
+`update-policy`, `wip`. The drain skill this ticket exists to specify has no
+implementation.
+
+**ADR-056's own reassessment date is overdue.** Its frontmatter carries
+`reassessment-date: 2026-08-03`; today is 2026-08-21, so the decision is 18 days
+past the date it set for itself to be re-examined. That is a second trigger,
+independent of the curation-rate criterion, and it fires on the same decision.
+
+**Composing observation**: P515 (captured 2026-08-21) found that the drain
+which *creates* these entries has never successfully written their index rows —
+so the register has simultaneously been over-filling with uncurated entries and
+under-reporting them in its own index. The two defects mask each other: the
+index made the pending-review pile look smaller than it is.
+
+### Investigation Tasks (added 2026-08-21)
+
+- [ ] Re-rate this ticket's Priority at the next `/wr-itil:review-problems` — it
+      was rated when ~51 entries were pending and the ADR-056 trigger was
+      approaching; it is now 64 pending, the trigger is met, and the decision's
+      own reassessment date has passed.
+- [ ] Run the ADR-056 reassessment that its `reassessment-date: 2026-08-03`
+      called for, and record the outcome — the date passing unremarked is itself
+      the P375 named-re-entry-without-a-self-firing-cadence pattern this ticket
+      is already filed as an instance of.
+- [ ] When scoping the drain skill, account for the P515 index defect: curating
+      an entry is only half the job if its row never reaches
+      `docs/risks/README.md`. Decide whether the drain skill re-renders the
+      index or relies on the P515 fix landing first.
