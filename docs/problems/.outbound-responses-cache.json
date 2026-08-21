@@ -1,11 +1,11 @@
 {
-  "last_checked": "2026-07-25T21:29:36Z",
+  "last_checked": "2026-08-21T03:47:38Z",
   "tickets": {
     "P113": {
       "upstream_url": "https://github.com/anthropics/claude-code/issues/52831",
-      "last_checked_at": "2026-07-25T21:29:30Z",
+      "last_checked_at": "2026-08-21T03:47:37Z",
       "last_seen_state": "CLOSED",
-      "last_seen_comment_count": 3,
+      "last_seen_response_count": 4,
       "last_seen_labels": [
         "area:plugins",
         "area:skills",
@@ -14,7 +14,8 @@
         "platform:macos",
         "stale"
       ],
-      "last_seen_updated_at": "2026-05-28T11:29:36Z"
+      "last_seen_updated_at": "2026-07-27T15:02:47Z",
+      "last_seen_response_updated_at": "2026-07-27T15:02:46Z"
     }
   }
 }
