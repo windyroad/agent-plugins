@@ -31,7 +31,14 @@
 #     exec:bash provider; Tier-A regex + Tier-B llm-rubric.
 #   - ADR-075 — paired promptfoo Tier-A/B GREEN is the per-class evidence for
 #     SKILL-prose surfaces and discharges the R009 floor.
-#   - ADR-073 (P399 amendment) — fix-time auto-create authors the full RFC.
+#   - ADR-073 (P399 amendment) — the --fix-time path authors the full RFC.
+#     NOTE: the I13 propose-fix gate no longer fires this path — it draws a
+#     release row instead (ADR-119). The flag survives on direct invocation by
+#     a person, which is what the cases below exercise. The prompt narration
+#     mentioning the I13 gate is fixture context describing P399's own
+#     historical Fix Strategy, not an assertion about the current caller. The
+#     `## Tasks` assertions are writer-shape and stale against ADR-089; they
+#     are left for the writer slice that repoints what this skill writes.
 #   - ADR-070 — chosen-path prose only, NO Considered-Options block.
 #   - ADR-071 — every fix goes through an RFC (the mandatory vehicle).
 #   - ADR-044 — cat-1 reclassification: full-scope authoring of the pinned

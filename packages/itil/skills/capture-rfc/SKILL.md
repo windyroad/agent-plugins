@@ -1,6 +1,6 @@
 ---
 name: wr-itil:capture-rfc
-description: Lightweight RFC-capture skill for aside-invocation during foreground work — mandatory problem-trace per ADR-060 I1 invariant, skeleton RFC file by default (or a fully-authored Scope + Tasks under the `--fix-time` flag, per ADR-073), single commit per capture, no inline README refresh. Defers full duplicate analysis and README refresh to /wr-itil:manage-rfc. Use this when the user (or agent) wants to capture an RFC quickly with a clear problem trace. For full lifecycle management, use /wr-itil:manage-rfc.
+description: Lightweight RFC-capture skill for aside-invocation during foreground work — mandatory problem-trace per ADR-060 I1 invariant, skeleton RFC file by default (or a fully-authored Scope plus the fix's stories on a story map under the `--fix-time` flag, now reachable only when a person invokes this skill directly), single commit per capture, no inline README refresh. Defers full duplicate analysis and README refresh to /wr-itil:manage-rfc. Use this when the user (or agent) wants to capture an RFC quickly with a clear problem trace. For full lifecycle management, use /wr-itil:manage-rfc.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
@@ -10,7 +10,7 @@ Capture a Request for Change (RFC) ticket quickly during foreground work. Lightw
 
 This skill is one half of the capture-then-manage RFC framework introduced by ADR-060 (Problem-RFC-Story framework with mandatory problem-trace and unified problem ontology, accepted 2026-05-05). The other half is `/wr-itil:manage-rfc` (heavyweight intake + lifecycle management).
 
-**Related JTBDs**: JTBD-008 (primary — Decompose a Fix Into Coordinated Changes; this skill IS the capture-time decomposition surface), JTBD-001 (extended scope — change-set-level governance), JTBD-101 (atomic-fix-adopter — every fix goes through an RFC per ADR-071). capture-rfc is invoked two ways: (1) the **user-aside path** (deliberate, default skeleton — the user fleshes scope out later at `/wr-itil:manage-rfc accepted`); and (2) the **fix-time auto-create path** (`--fix-time`), where the I13 propose-fix gate auto-fires it on an RFC-less Known Error and it **authors the full RFC** from the traced problem. Per the ADR-073 P399 amendment, fix-time RFC scope is **framework-mediated** (derived from the already-pinned problem + ADR-071, not direction-setting), so auto-firing with full authoring is correct — NOT a re-ask of a decided question (P132 / inverse-P078).
+**Related JTBDs**: JTBD-008 (primary — Decompose a Fix Into Coordinated Changes; this skill IS the capture-time decomposition surface), JTBD-001 (extended scope — change-set-level governance), JTBD-101 (atomic-fix-adopter — every fix goes through an RFC per ADR-071). capture-rfc is invoked two ways: (1) the **user-aside path** (deliberate, default skeleton — the user fleshes scope out later at `/wr-itil:manage-rfc accepted`); and (2) the **fix-time authoring path** (`--fix-time`), which **authors the full RFC** from the traced problem rather than a skeleton. **The I13 propose-fix gate no longer fires this path.** A fix proposal draws a release row on a story map (ADR-119); the gate draws the row itself and names no document-creating command, so `--fix-time` is now reached only when a person invokes this skill directly. What the flag does is unchanged and still correct where it is used: the scope is derived from the already-pinned problem under ADR-071, so it is framework-mediated rather than direction-setting (P132 / inverse-P078). Repointing what this skill *writes* is the following slice; this file has so far only been corrected about who calls it and how it numbers.
 
 ## Output Formatting
 
@@ -35,7 +35,9 @@ When referencing RFC IDs, problem IDs, ADR IDs, JTBD IDs, or story IDs in prose 
 
 **Optional flag (Phase 2)**: `--stories STORY-<NNN>,STORY-<NNN>,...` — ORDERED execution sequence per ADR-060 line 262. Cardinality 0..N: an RFC whose work is not decomposed into stories OMITS the flag and capture-rfc populates `stories: []` in frontmatter (a structural state, NOT a reduced-ceremony path — every fix goes through an RFC per ADR-071); story-decomposed RFCs supply the ordered list. The flag accepts STORY-IDs that don't yet resolve to files (forward-reference is permitted at capture; the existence check happens at `manage-rfc <NNN> accepted` transition per ADR-060 working-the-problem flow line 304).
 
-**Optional flag (fix-time authoring, ADR-073 P399)**: `--fix-time` — switches Step 5 from the deferred-placeholder template to **full authoring**: capture-rfc reads the traced problem ticket(s) and authors a populated `## Scope` (the fix being proposed + chosen implementation approach as prose) and, per ADR-089, a **story** work-breakdown on a story map — NOT a `## Tasks` decomposition (superseded; the fix's stories are authored via capture-story-map + capture-story and listed in `stories:`), instead of the `(deferred — populate at manage-rfc accepted)` placeholders. Set by the I13 propose-fix gate's auto-create branch (`/wr-itil:manage-problem` + `/wr-itil:work-problems`); the user-aside path omits it. The authored RFC still carries NO Considered-Options block (ADR-070 — chosen-path prose only) and is still born `human-oversight: unconfirmed` (ratified at `manage-rfc accepted`). Composes with `--stories`.
+**Optional flag (fix-time authoring, ADR-073 P399)**: `--fix-time` — switches Step 5 from the deferred-placeholder template to **full authoring**: capture-rfc reads the traced problem ticket(s) and authors a populated `## Scope` (the fix being proposed + chosen implementation approach as prose) and, per ADR-089, a **story** work-breakdown on a story map — NOT a `## Tasks` decomposition (superseded; the fix's stories are authored via capture-story-map + capture-story and listed in `stories:`), instead of the `(deferred — populate at manage-rfc accepted)` placeholders. Set on a direct invocation by a person who wants the scope authored now. **It is no longer set by the I13 propose-fix gate** at either `/wr-itil:manage-problem` or `/wr-itil:work-problems` — that gate draws a release row instead (ADR-119).
+
+> **The option-bearing guard rides here now.** ADR-119 discharged only the vehicle-shape half of ADR-073; its other half still holds, and it says a fix whose approach-choice no ratified decision covers gets that decision recorded BEFORE the fix is authored. That guard used to arrive with the caller — `/wr-itil:manage-problem` queues rather than mints when the fix approach is a choice no existing decision record covers. Direct invocation is now the only route to this flag, so the guard has to be stated here or it is carried nowhere: if the fix this RFC proposes turns on a choice between real alternatives that no ratified decision settles, record that decision first and author the scope against it. Authoring the scope IS framework-mediated once the approach is settled — that is what the audit row below means, and it is not a licence to settle the approach in passing. The authored RFC still carries NO Considered-Options block (ADR-070 — chosen-path prose only) and is still born `human-oversight: unconfirmed` (ratified at `manage-rfc accepted`). Composes with `--stories`.
 
 ```
 /wr-itil:capture-rfc P168 Pipeline consume-catalog and bootstrap-from-reports — multi-commit retrofit
@@ -53,10 +55,10 @@ This skill has **one direction-setting AskUserQuestion** (problem-trace, when ar
 |----------|-----------|-----------------|
 | Problem trace presence | I1 hard-block — refuse on missing trace; emit deny log + halt-with-stderr-directive | direction-setting (the user/caller MUST supply; framework cannot guess) |
 | Problem trace validation | Mechanical: each `P<NNN>` must exist in `docs/problems/`. Open/Known Error/Verifying = pass; Closed/Parked = advisory-warn but proceed (bounded-escape carve-out — see Step 2 rationale) | silent-mechanical |
-| RFC ID allocation | Mechanical: `max(local, origin) + 1`, three-digit padded | silent-mechanical |
+| RFC ID allocation | Mechanical: ask `wr-itil-next-rfc-id`. It is the single rule, and the only one that sees release rows, documents and git history at once — a directory scan re-issues an identity a row already holds | silent-mechanical |
 | Title kebab-slug | Mechanical: first 8-10 non-stopword tokens of description | silent-mechanical |
 | Title prose / scope summary refinement | Optional `AskUserQuestion`; silent-default to derived form when unavailable | taste |
-| Fix-time Scope/Stories authoring (`--fix-time`) | Framework-mediated: author `## Scope` + a **story** work-breakdown on a story map (NOT `## Tasks` — superseded per ADR-089) from the traced problem's RCA + Fix Strategy. NO `AskUserQuestion` — the scope is *derived* from already-pinned ADR-071 direction, not new direction-setting (ADR-073 § ADR-044 reclassification, P399). Born `unconfirmed`; ratified at `manage-rfc accepted` | silent-framework |
+| Fix-time Scope/Stories authoring (`--fix-time`, direct invocation only — the I13 gate draws a release row instead, ADR-119) | Framework-mediated: author `## Scope` + a **story** work-breakdown on a story map (NOT `## Tasks` — superseded per ADR-089) from the traced problem's RCA + Fix Strategy. NO `AskUserQuestion` — the scope is *derived* from already-pinned ADR-071 direction, not new direction-setting. Born `unconfirmed`; ratified at `manage-rfc accepted` | silent-framework |
 | File write / frontmatter | Mechanical: shape per `docs/rfcs/README.md` § RFC body structure | silent-mechanical |
 | Single commit | Mechanical: `docs(rfcs): capture RFC-<NNN> <title>` | silent-mechanical |
 | Empty arguments | Halt-with-stderr-directive: print "capture-rfc requires `<problem-trace> <description>` — invoke /wr-itil:manage-rfc instead for the full intake flow" and exit. AFK orchestrators MUST NOT invoke capture-rfc with empty arguments. | n/a |
@@ -156,15 +158,15 @@ wr-itil-mark-rfc-capture-gate
 
 ### 3. Compute next RFC ID
 
-Same `max(local, origin) + 1` formula as `capture-problem` Step 3, scanning `docs/rfcs/RFC-*.md` instead:
+Ask the allocator. Do NOT scan a directory yourself:
 
 ```bash
-local_max=$(ls docs/rfcs/RFC-*.md 2>/dev/null | sed 's|.*/RFC-||;s|-.*||' | grep -oE '^[0-9]+' | sort -n | tail -1)
-origin_max=$(git ls-tree --name-only origin/main docs/rfcs/ 2>/dev/null | sed 's|^docs/rfcs/RFC-||;s|-.*||' | grep -oE '^[0-9]+' | sort -n | tail -1)
-next=$(printf '%03d' $(( 10#$(echo -e "${local_max:-0}\n${origin_max:-0}" | sort -n | tail -1) + 1 )))
+wr-itil-next-rfc-id
 ```
 
-Log the renumber decision in the operation report if origin and local diverged.
+**Why this and not a directory scan.** An RFC identity is now carried by a release row on a story map as well as by a document, and rows already hold identities above the highest document. A rule that reads `docs/rfcs/` alone therefore hands back an identity a row already owns — a collision that is live, not hypothetical. It also cannot see an identity that survives only in git history, which happens whenever a map is deleted or lives on a branch. The allocator reads all three — documents, rows, and history — and returns the first identity none of them holds. Identities are never reused, so it answers one past the highest seen rather than filling a gap.
+
+This is deliberately the ONLY rule in the repository that answers this question. A second copy anywhere is how the collision above went unnoticed for as long as it did.
 
 ### 4. Optional taste prompt for title / scope summary
 
@@ -318,7 +320,7 @@ The two skills share the `/tmp/wr-itil-rfc-capture-grep-${SESSION_ID}` create-ga
 - **`docs/plans/170-rfc-framework-story-map.md`** — Slice 2 task B5.T3 lands this skill.
 - **JTBD-008** — Decompose a Fix Into Coordinated Changes. Primary persona-anchor.
 - **JTBD-001** (extended scope) — change-set-level governance composition.
-- **JTBD-101** (atomic-fix-adopter) — every fix goes through an RFC (ADR-071); capture-rfc is a deliberate aside-invocation, not auto-fired (RFC scope is direction-setting per ADR-073).
+- **JTBD-101** (atomic-fix-adopter) — every fix goes through an RFC (ADR-071); capture-rfc is a deliberate aside-invocation, not auto-fired. The two readings of ADR-073 elsewhere in this file are about different questions and do not conflict: *whether to open an RFC at all*, and *whether its approach turns on an unsettled choice*, are a person's calls; authoring the scope once both are settled is derived from the traced problem and is framework-mediated.
 - **`docs/rfcs/README.md`** — RFC tier lifecycle index + frontmatter shape spec (Slice 2 tasks B5.T1 + B5.T2 — committed `adc53c8`).
 - **ADR-014** — governance skills commit their own work. Single-commit grain per capture.
 - **ADR-022** — problem lifecycle conventions; RFC lifecycle mirrors.

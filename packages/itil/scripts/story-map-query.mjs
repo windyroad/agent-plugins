@@ -15,6 +15,8 @@
 //   get <MAP-ID>             one map: backbone, releases, tasks
 //   find-story <STORY-ID>    which maps hold a story, and in which cell
 //   find-rfc <RFC-ID>        which release rows carry an RFC and their stories
+//   find-problem <P-ID>      which release rows propose a fix for a problem,
+//                            and which maps could not answer
 //   unratified               only the maps needing ratification, with a reason
 //
 // @adr ADR-102 (story maps render from JSON through a canonical template)
@@ -109,10 +111,21 @@ function rowStatus(row, derived) {
 }
 
 function corpus() {
-  return readFacts()
-    .map((f) => ({ ...f, data: island(f.path), derived: derivedIsland(f.path) }))
+  const all = readFacts()
+    .map((f) => ({ ...f, data: island(f.path), derived: derivedIsland(f.path) }));
+  const maps = all
     .filter((m) => m.data)
     .sort((a, b) => String(a.data.storyMapId).localeCompare(String(b.data.storyMapId)));
+  // The maps dropped by that filter, carried alongside rather than discarded.
+  // `list`, `get`, `summary` and `unratified` all dereference `m.data`
+  // unguarded, so they must not see these — but a predicate asking "does any
+  // row name this problem?" has to report that a map could not answer, or an
+  // island-less map reads as a clean "no" and the caller proceeds. Stdin can be
+  // read once, so this cannot be recovered by calling readFacts() again. An
+  // array property is invisible to .map()/.filter()/JSON.stringify, which is
+  // why it does not leak into any existing op's output.
+  maps.islandless = all.filter((m) => !m.data);
+  return maps;
 }
 
 function summary(m) {
@@ -198,18 +211,78 @@ const OPS = {
     return hits;
   },
 
+  /** Which release rows propose a fix for a problem.
+   *
+   *  A row IS the fix vehicle, so this is the row-model half of the propose-fix
+   *  trace question. The row-to-problem edge is DERIVED, not authored: the
+   *  renderer walks each row's cards to their story files and unions their
+   *  `problems:` frontmatter into `rowProblems`. A row drawn without a card
+   *  whose story names the problem therefore does not answer here — which is a
+   *  true answer, not a bug, and matches the floor that a row carrying an
+   *  identity has at least one card.
+   *
+   *  DELIBERATE SHAPE DIVERGENCE from `find-story` and `find-rfc`, which return
+   *  flat arrays. This returns `{hits, unanswerable}` because the obvious
+   *  consumer test on a flat array is `length > 0`, which would read "this map
+   *  could not answer" as a trace hit and let fix work begin with no vehicle.
+   *  Fail-closed has to be the shape, not a convention the caller remembers.
+   *  Do not normalise this back to an array.
+   */
+  'find-problem': (maps, [pid]) => {
+    if (!pid) throw new Error('find-problem needs a problem id, e.g. P508');
+    const hits = [];
+    // A map with no authored island cannot be read at all.
+    const unanswerable = (maps.islandless ?? []).map((m) => ({
+      storyMapId: null,
+      path: m.path,
+      status: 'stale',
+      why: 'no authored data island',
+    }));
+    for (const m of maps) {
+      const releases = m.data.releases ?? [];
+      const derived = m.derived ?? {};
+      // `rows` is emitted for every release the renderer saw, so its absence on
+      // a map that HAS releases means the map was edited and not re-rendered —
+      // the same condition `rowStatus` names `stale`. A map with no releases is
+      // silent rather than stale: it holds no row that could answer.
+      if (releases.length && !derived.rows) {
+        unanswerable.push({
+          storyMapId: m.data.storyMapId,
+          path: m.path,
+          status: 'stale',
+          why: 'edited but not re-rendered',
+        });
+        continue;
+      }
+      for (const row of releases) {
+        if (!row.rfc) continue; // a speculative row is not a fix vehicle
+        if (!((derived.rowProblems ?? {})[row.id] ?? []).includes(pid)) continue;
+        hits.push({
+          storyMapId: m.data.storyMapId,
+          rowId: row.id,
+          rfc: row.rfc,
+          ratified: m.ratified,
+          path: m.path,
+        });
+      }
+    }
+    return { hits, unanswerable };
+  },
+
   unratified: (maps) => maps.filter((m) => !m.ratified).map(summary),
 };
 
 function main(argv) {
   const [op, ...rest] = argv;
   if (!op || !OPS[op]) {
-    console.error('usage: story-map-query <list|get|find-story|find-rfc|unratified> [args] [--maps-dir DIR]');
+    console.error('usage: story-map-query <list|get|find-story|find-rfc|find-problem|unratified> [args] [--maps-dir DIR]');
     console.error('');
     console.error('  list                   every map: status, jobs, problems, RFC rows, ratification');
     console.error('  get <MAP-ID>           one map: backbone, release bands, cards');
     console.error('  find-story <STORY-ID>  which maps hold a story, and in which cell');
     console.error('  find-rfc <RFC-ID>       which release rows carry an RFC and their stories');
+    console.error('  find-problem <P-ID>    which rows propose a fix for a problem, plus');
+    console.error('                         any map that could not answer');
     console.error('  unratified             maps needing ratification, each with a reason');
     return 2;
   }

@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-07-26 **index reconciled (P417)** — first full `/wr-itil:reconcile-stories` pass over the corpus: STORY-045 added to Rankings, the twelve terminal stories back-filled into Done, and the `## Stories` reverse-trace section refreshed on 14 problem tickets, 4 RFCs, and 4 JTBD files. Stale bootstrap prose retired.
+> Last reviewed: 2026-08-21 **index reconciled** — STORY-065 added at `accepted` (the release-row fix proposal) and STORY-064 back-filled at `draft`; reverse-trace sections refreshed on their driving problems and jobs.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -131,6 +131,8 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | accepted | STORY-054 | Lifecycle transitions preserve a story's ratification | M | P474 | RFC-059 | STORY-MAP-002 |
 | accepted | STORY-055 | One definition of what the oversight fingerprint ignores | M | P474 | RFC-059 | STORY-MAP-002 |
 | accepted | STORY-061 | See why a SubagentStop risk receipt was not written | S | P477 | RFC-067 | STORY-MAP-002 |
+| accepted | STORY-065 | A fix proposal draws a release row, not a document | M | P508 | RFC-071 | STORY-MAP-002 |
+| draft | STORY-064 | A ticket that only names a decision as background stays open | M | P463 | RFC-070 | STORY-MAP-011 |
 | draft | STORY-012 | Can't start coding without an RFC — the gate makes me create one first | S | P251, P314 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-013 | Full gate: an RFC exists → I proceed; none → I create it first | M | P251, P314 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-014 | Unattended, the agent works the plan and pauses for real decisions | M | P251, P314 | RFC-005 | STORY-MAP-002 |

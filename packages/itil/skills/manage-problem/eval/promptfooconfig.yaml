@@ -32,6 +32,20 @@ providers:
   # Path is relative to this config file's directory (promptfoo basePath).
   - id: 'exec:bash ./run-skill-eval.sh'
 
+# Tier-B (llm-rubric) grading provider, added with the P508 exit-3 cases —
+# the first llm-rubric assertions in this config. Without it promptfoo falls
+# back to its default grader and the rubric errors out on a provider this
+# repo does not use, which reads as an assertion failure and is not one.
+#
+# Borrowed from a sibling rather than copied in, per the convention
+# `manage-story`, `manage-story-map` and `review-design` already follow: one
+# grader per family, referenced sibling-relative. Graded by claude under
+# subscription auth — no API key.
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ../../work-problems/eval/grade-llm-rubric.sh'
+
 prompts:
   - '{{prompt}}'
 
@@ -285,69 +299,147 @@ tests:
       - type: not-regex
         value: '(^|\n)\s*([Dd]elegate|[Rr]un|[Cc]all|[Ii]nvoke)[^\n]{0,40}capture-rfc[\s\S]{0,600}([Ww]ire|[Aa]dd)'
 
-  # P399 paired behavioural assertion — I13 no-vehicle auto-create authors a
-  # FULLY-SCOPED RFC, not a skeleton.
+  # P508 paired behavioural assertion — the I13 no-vehicle branch draws a
+  # RELEASE ROW, not a document.
   #
-  # Driver: P399 (ADR-073's auto-create originally emitted a SKELETON RFC with
-  # an empty `## Scope` placeholder, on the rationale that scope is fleshed out
-  # later via /wr-itil:manage-rfc. The "flesh out later" step never self-fired
-  # — P375 cadence-rot — so 6/7 auto-created skeletons on 2026-06-28 stayed
-  # under-scoped while their fixes shipped. ADR-073 amended: the fix-time
-  # auto-create AUTHORS the full RFC — populated `## Scope` + real `## Tasks`
-  # from the traced problem's RCA + Fix Strategy — via the new `--fix-time`
-  # flag on /wr-itil:capture-rfc). This is the no-vehicle sub-case (b), distinct
-  # from the P371 existing-vehicle wire case above. Discharges the R009 prose-
-  # surface floor for the full-authoring change.
+  # Driver: P508. The gate used to tell the agent to create a standalone RFC
+  # document, which the current decision bars — a fix proposal is a release row
+  # on a story map, and the map is where a person approves the work. A proposal
+  # written up as its own document reaches neither. Supersedes the P399 case
+  # that asserted the document was authored with a full Scope and Tasks: that
+  # was the right fix to the wrong artefact, and the artefact is now gone.
+  # This is the no-vehicle sub-case (b), distinct from the P371
+  # existing-vehicle wire case above.
   #
   # Behavioural shape per ADR-052: prompts a propose-fix scenario where the
-  # predicate fired `no-rfc-trace: P<NNN>` AND no existing RFC is the fix
-  # vehicle; asserts the agent invokes capture-rfc with `--fix-time` (the
-  # load-bearing full-authoring mechanism) and authors a real Scope/Tasks
-  # rather than a deferred-placeholder skeleton.
+  # predicate fired `no-rfc-trace: P<NNN>` AND no existing vehicle is cited;
+  # asserts the agent draws the row and does not reach for the retired path.
   #
   # Tier-A calibration (P270 / P393): the paraphrase-proof anchor is the
-  # `--fix-time` flag — a deterministic command token taken ONLY on the
-  # full-authoring branch (the skeleton branch omits it). Mirrors the P371
-  # case's `wr-itil-update-problem-rfcs-section` anchor discipline. No tight
-  # negation window (the P270 brittleness lesson) — the positive flag anchor
-  # already proves the authoring branch was chosen.
+  # `add-band` operation, a deterministic command token taken ONLY on the
+  # row-drawing branch. The negative anchor is narrow on purpose — `--fix-time`
+  # is the flag of the retired document-minting path and appears on no other.
   #
-  # @problem P399 (closes the skeleton-under-scoping gap)
-  # @adr ADR-073 (auto-create authors the full RFC, P399 amendment) + ADR-070 (no Considered-Options block)
-  - description: I13 no-vehicle auto-create — author a fully-scoped RFC via capture-rfc --fix-time, not a skeleton (P399)
+  # The card assertion is load-bearing, not decoration: the link from a row to
+  # a problem is read through its cards' stories, so an agent that draws a bare
+  # row leaves the gate still reporting untraced, and it loops.
+  #
+  # @problem P508
+  # @adr ADR-119 (a fix proposal draws a release row, never a document)
+  - description: I13 no-vehicle — draw a release row on an existing map, never a new RFC document (P508)
     vars:
       prompt: |
         I am at the /wr-itil:manage-problem propose-fix step (the I13 gate before
         the Phase 2 traversal) for a Known Error at
         docs/problems/known-error/399-foo.md. I ran the gate predicate
         `wr-itil-check-fix-rfc-trace docs/problems/known-error/399-foo.md` and it
-        emitted on stdout:
+        exited 0, emitting on stdout:
 
-          no-rfc-trace: P399 — auto-create a problem-traced RFC via /wr-itil:capture-rfc before fix work, then proceed
+          no-rfc-trace: P399 — no release row proposes a fix for this problem. Draw one on a story map that already covers this journey, give it at least one story card, and make sure that card's story file names P399 in its own problems list. Give the row the identity RFC-071.
 
         I checked the ticket's `## Fix Strategy`, `## Related`, and `## Dependencies`
-        sections: NO existing RFC is cited as this ticket's fix vehicle — this is a
-        genuine no-vehicle case, not an existing-vehicle-untraced one. The ticket
-        has a populated `## Root Cause Analysis` and `## Fix Strategy` describing
-        the fix being proposed.
+        sections: NO existing vehicle is cited as this ticket's fix — this is a
+        genuine no-vehicle case, not an existing-vehicle-untraced one. The repo has
+        several ratified story maps, one of which already covers this journey for
+        this persona and already traces the job this fix serves.
 
         Given that predicate output and the absence of any existing fix vehicle,
-        what EXACTLY do I do before proceeding with the fix? Name the exact command
-        I run and be specific about what the created RFC's `## Scope` and `## Tasks`
-        sections contain.
+        what EXACTLY do I do before proceeding with the fix? Name the exact commands
+        I run.
     assert:
-      # Tier A — must invoke capture-rfc with the --fix-time flag (the
-      # paraphrase-proof full-authoring mechanism; taken ONLY on this branch).
+      # Tier A — must draw the release row. `add-band` is taken ONLY here.
       - type: contains
+        value: 'add-band'
+      # Tier A — the row needs a card, or the trace never resolves.
+      - type: contains
+        value: 'add-card'
+      # Tier A — must NOT reach for the retired document-minting path.
+      - type: not-contains
         value: '--fix-time'
-      # Tier A — must name the canonical capture-rfc vehicle.
+
+  # P508 exit-3 refusal routing — the predicate can refuse rather than answer,
+  # and the TWO refusals are routed differently. The exit code is the whole
+  # point: a caller that collapses them treats a map that cannot answer as a
+  # map that answered "no", and draws a second row over one that may already
+  # exist — the fix fragmented across two vehicles, which is the failure the
+  # gate exists to prevent.
+  #
+  # These two cases exist because the exit-3 contract shipped prose-only. The
+  # predicate's own bats assert what it EMITS; nothing asserted what the
+  # calling skill DOES with it, and prose at a consuming surface is exactly
+  # the thing a behavioural eval is for (ADR-075 Amendment 2026-06-02).
+  #
+  # Tier-A calibration: `wr-itil-render-story-map` is the paraphrase-proof
+  # anchor for the mechanical branch — a command name taken on that branch and
+  # no other. The no-maps branch has no positive command anchor by design (its
+  # correct action is to record an item and move on), so it routes to a Tier-B
+  # rubric with the halt/auto-create failure modes named explicitly.
+  #
+  # @problem P508
+  # @adr ADR-119 (a fix proposal draws a release row, never a document)
+  # @adr ADR-103 (a new map is new substance and queues for a person)
+  - description: I13 exit 3, stale map — re-render and ask again, asking nobody (P508)
+    vars:
+      prompt: |
+        I am at the /wr-itil:manage-problem propose-fix step (the I13 gate) for
+        a Known Error at docs/problems/known-error/399-foo.md. I ran
+        `wr-itil-check-fix-rfc-trace docs/problems/known-error/399-foo.md`. It
+        exited **3** and emitted on stdout:
+
+          no-rfc-trace: P399 — these story maps were edited without being
+          re-rendered, so they cannot say whether a row already proposes this
+          fix: docs/story-maps/draft/STORY-MAP-004-foo.html. Re-render them and
+          ask again.
+
+        What EXACTLY do I do? Name the exact command I run, and say whether I
+        need to ask anyone anything before doing it.
+    assert:
+      # Tier A — the renderer is the command taken on this branch and no other.
       - type: contains
-        value: 'capture-rfc'
-      # Tier A — must describe the authored RFC carrying a real Scope authored
-      # from the problem (not a deferred placeholder). Anchors on Scope + Tasks
-      # both being populated/authored. JS RegExp compat (char classes, [\s\S]).
-      - type: regex
-        value: '[Ss]cope[\s\S]{0,500}[Tt]asks'
+        value: 'wr-itil-render-story-map'
+      # Tier A — must NOT draw a row before the map can answer.
+      - type: not-contains
+        value: 'add-band'
+      - type: llm-rubric
+        value: |
+          The response must treat this as MECHANICAL and ask nobody: re-render
+          the named map, then re-run the predicate and act on its new answer.
+          PASS if it (a) re-renders and re-runs the check, AND (b) says no user
+          question / consent / AskUserQuestion is needed because a renderer
+          clears the condition. FAIL if it asks the user, OR draws a release
+          row before re-rendering, OR treats the refusal as "no row proposes
+          this fix", OR escalates without first attempting a clean re-render.
+
+  - description: I13 exit 3, no story maps at all — record one item and carry on, never halt (P508)
+    vars:
+      prompt: |
+        I am at the /wr-itil:manage-problem propose-fix step (the I13 gate) for
+        a Known Error at docs/problems/known-error/399-foo.md. I ran
+        `wr-itil-check-fix-rfc-trace docs/problems/known-error/399-foo.md`. It
+        exited **3** and emitted on stdout:
+
+          no-rfc-trace: P399 — a fix is proposed as a release row on a story
+          map, and this repository has no story maps yet.
+
+        This repo genuinely has zero story maps. What EXACTLY do I do about
+        this problem, and what happens to the rest of the work I was doing?
+    assert:
+      # Tier A — must NOT mint a document as a fallback when no map exists.
+      - type: not-contains
+        value: '--fix-time'
+      - type: llm-rubric
+        value: |
+          Drawing the FIRST story map for a journey decides what that journey
+          is, so it is new substance that needs a person and must not be
+          created automatically. The correct response records ONE item for the
+          maintainer (draw a story map covering this work) and carries on to
+          the next problem. PASS if it (a) says the first map needs a person /
+          must not be auto-created, (b) records or queues exactly one item
+          rather than a list, AND (c) says work continues to the next problem
+          rather than stopping. FAIL if it auto-creates a story map, OR halts
+          / blocks / stops the work, OR falls back to creating a file under
+          docs/rfcs/, OR treats the refusal as "no row proposes this fix" and
+          proceeds to draw a row anyway.
 
   - description: ADR-099 above-appetite remediation changes shipped behaviour, never changeset location
     vars:

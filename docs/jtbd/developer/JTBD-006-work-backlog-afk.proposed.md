@@ -3,10 +3,11 @@ status: proposed
 job-id: work-backlog-afk
 persona: developer
 date-created: 2026-04-17
-human-oversight: confirmed
+human-oversight: unconfirmed
 oversight-date: 2026-05-31
-oversight-confirmed-date: "2026-07-27 — re-ratified via the P357 brief AskUserQuestion this session; the ADR-101 lockstep narrowing (bounded AFK-accept carve-out for pure decomposition of already-confirmed substance; verification untouched; opt-in) confirmed in the same batch as ADR-101."
-oversight-downgraded: "2026-07-26 — ADR-101 lockstep (material amendment per ADR-068): the Desired Outcome 'Problems requiring my judgment are queued for my return, not guessed at' is NARROWED by a bounded AFK-accept carve-out for pure decomposition of already-confirmed substance. Marker held until re-ratified; re-ratification queued with ADR-101's owed post-draft brief (P456 open items)."
+oversight-confirmed-date: "2026-07-27 — re-ratified via the P357 brief AskUserQuestion this session; the ADR-101 lockstep narrowing (bounded AFK-accept carve-out for pure decomposition of already-confirmed substance; verification untouched; opt-in) confirmed in the same batch as ADR-101. SUPERSEDED — see oversight-downgraded below."
+oversight-downgraded: "2026-08-21 — ADR-103 lockstep (material amendment per ADR-068), surfaced by the P508 slice-A JTBD gate. The ADR-101 amendment below conditions unattended acceptance on 'where the project has opted in'; ADR-103 superseded ADR-101 outright on 2026-08-07, dropped that opt-in protection knowingly, and removed the machinery — the config key survives only in a changelog. P508 slice A makes the staleness bind rather than merely sit there: the I13 gate now draws a release row and inherits map approval on every untraced Known Error, at the AFK surface, unconditionally. This is the job a reviewer opens to answer 'may the loop do this unattended?', and it currently answers with a precondition nobody can satisfy. Marker held until re-ratified at the next interactive /wr-jtbd:confirm-jobs-and-personas drain (ADR-066 P348 AFK fallback — no AskUserQuestion was available in the salvage session that wrote this)."
+oversight-downgraded-2026-07-26: "2026-07-26 — ADR-101 lockstep (material amendment per ADR-068): the Desired Outcome 'Problems requiring my judgment are queued for my return, not guessed at' is NARROWED by a bounded AFK-accept carve-out for pure decomposition of already-confirmed substance. Marker held until re-ratified; re-ratification queued with ADR-101's owed post-draft brief (P456 open items)."
 ---
 
 # JTBD-006: Progress the Backlog While I'm Away
@@ -22,7 +23,8 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 - Scope expansion is handled conservatively — save findings and move to the next problem rather than sinking unbounded effort
 - When I return, I can see a clear summary of what was worked, what was skipped, and what remains
 - Problems requiring my judgment (verification, scope decisions, ambiguous investigation) are queued for my return, not guessed at
-  - **Amendment 2026-07-26 (ADR-101).** One bounded exception, and it is not a licence to guess. Where the project has opted in, the loop may accept and implement a story that only **decomposes substance I already confirmed** — every decision, job, persona and map it draws on carries my confirmation, and each of its acceptance criteria names the confirmed clause it decomposes. Anything introducing a new design choice, persona, job or decision is still queued for my return, and **verification is untouched** — the loop still never decides that a fix works. This exists because the gate it relaxes was not slowing the loop down, it was stopping it: ratification had no unattended path at all, so an iteration could author governance artefacts and nothing else. Three witnesses are recorded on P456 and five more in the cross-session briefing, including a three-line fix that could not land.
+  - **Amendment 2026-07-26 (ADR-101).** One bounded exception, and it is not a licence to guess. ~~Where the project has opted in,~~ the loop may accept and implement a story that only **decomposes substance I already confirmed** — every decision, job, persona and map it draws on carries my confirmation, and each of its acceptance criteria names the confirmed clause it decomposes. Anything introducing a new design choice, persona, job or decision is still queued for my return, and **verification is untouched** — the loop still never decides that a fix works. This exists because the gate it relaxes was not slowing the loop down, it was stopping it: ratification had no unattended path at all, so an iteration could author governance artefacts and nothing else. Three witnesses are recorded on P456 and five more in the cross-session briefing, including a three-line fix that could not land.
+  - **SUPERSEDED 2026-08-07 by ADR-103 — do not read the opt-in qualifier above as current.** ADR-103 supersedes ADR-101 outright and drops the opt-in gate knowingly: the carve-out applies unconditionally, and the machinery behind the config key was removed with it. What still bounds the loop is unchanged and is the part to read — anything introducing a new design choice, persona, job or decision is queued, and verification is untouched. The authoritative drift basis is the `SUBSTANCE` tuple in `packages/itil/lib/story-oversight.sh`, not prose here. Struck rather than deleted so the witness survives: this stale precondition is one a reviewer can satisfy nowhere, and P508 records the same stale-text class producing a false blocking objection once already.
 - Git commits happen automatically when risk is within appetite; uncommitted work is reported transparently when risk is above appetite
 - Between iterations, the loop drains push/release queues when unreleased risk would reach appetite, so risk never silently accumulates across AFK iterations (see ADR-018)
 - Before each iteration, the loop reconciles working-tree state with origin per ADR-019's three-branch clean-state preflight: trivial fast-forward divergence pulls non-interactively (Branch 1); prior-session in-flight work is recoverable as a distinct preflight commit when provenance is unambiguous and risk is within appetite (Branch 2 — deferred to a follow-up; current implementation conservatively routes to Branch 3); ambiguously-dirty tree or non-fast-forward divergence halts the loop with a structured Prior-Session State report (Branch 3 — interactive: `AskUserQuestion`; AFK: halt-with-report carve-out from the 2026-06-06 Rule 6 queue-and-continue default). See ADR-019.
@@ -45,7 +47,7 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-MAP-002 | STORY-MAP-002: Decompose a fix into coordinated changes | draft |
+| STORY-MAP-002 | STORY-MAP-002: Take a problem from noticed to resolved | draft |
 | STORY-MAP-004 | STORY-MAP-004: Close the loop with someone who reported a problem | draft |
 | STORY-MAP-011 | STORY-MAP-011: Trust the AFK loop's autonomous conduct | draft |
 | STORY-MAP-001 | STORY-MAP-001: RFC framework Phase 1 + Phase 2 bootstrap | in-progress |
@@ -57,6 +59,7 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 |----|-------|--------|
 | STORY-047 | STORY-047: Gate the correction nudge on prompt authorship | accepted |
 | STORY-054 | STORY-054: Lifecycle transitions preserve a story's ratification | accepted |
+| STORY-065 | STORY-065: A fix proposal draws a release row, not a document | accepted |
 | STORY-003 | STORY-003: /wr-itil:list-stories read-only display skill | done |
 | STORY-005 | STORY-005: Working-the-problem traversal rewrite (manage-problem + work-problem) | done |
 | STORY-018 | STORY-018: Capture the problem in seconds, mid-flow | done |

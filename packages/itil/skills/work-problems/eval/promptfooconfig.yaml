@@ -919,87 +919,169 @@ tests:
           generally / disabling P078, OR says the hook should detect machine
           authorship by inspecting the prompt's content itself.
 
-  # --- P399: Step 5 I13 fix-time RFC auto-create authors the FULL RFC ----------
+  # --- P508: Step 5 I13 draws a RELEASE ROW, never a new RFC document --------
   #
-  # Driver: P399 (ADR-073's I13 fix-time auto-create originally emitted a
-  # SKELETON RFC with an empty `## Scope` placeholder, on the rationale that
-  # scope is fleshed out later via /wr-itil:manage-rfc. The "flesh out later"
-  # step never self-fired — P375 cadence-rot — so 6/7 auto-created skeletons on
-  # 2026-06-28 stayed under-scoped while their fixes shipped. ADR-073 amended:
-  # the fix-time auto-create AUTHORS the full RFC — populated `## Scope` + real
-  # `## Tasks` from the traced problem's RCA + Fix Strategy — via the new
-  # `--fix-time` flag on /wr-itil:capture-rfc, invoked by the work-problems
-  # Step 5 auto-create clause). This is the work-problems-surface paired case;
-  # the manage-problem-surface case lives in that skill's eval. Discharges the
-  # R009 prose-surface floor for the full-authoring change on the work-problems
-  # SKILL surface per ADR-075.
+  # Driver: P508. The Step 5 carve-out used to tell the iter to auto-create a
+  # standalone RFC document, which the current decision bars — a fix proposal
+  # is a release row on a story map, and the map is where a person approves the
+  # work. Supersedes the P399 case that asserted the document was authored with
+  # a full Scope and Tasks: the right fix to the wrong artefact, and the
+  # artefact is gone. This is the work-problems-surface paired case; the
+  # manage-problem-surface case lives in that skill's eval. Discharges the R009
+  # prose-surface floor on the work-problems SKILL surface per ADR-075.
   #
   # Tier-A calibration (P270 / P393): the paraphrase-proof anchor is the
-  # `--fix-time` flag — a deterministic command token taken ONLY on the
-  # full-authoring branch (the skeleton branch omits it) — plus the canonical
-  # `capture-rfc` skill name. Semantic clauses (full-scope-not-skeleton,
-  # framework-mediated / NO AskUserQuestion, loop never blocked) route to the
-  # Tier-B rubric.
+  # `add-band` operation, a deterministic command token taken ONLY on the
+  # row-drawing branch. `--fix-time` is the retired document-minting flag and
+  # appears on no other path, so it is a clean negative anchor. Semantic
+  # clauses (framework-mediated / NO AskUserQuestion, loop never blocked,
+  # inherited approval) route to the Tier-B rubric.
   #
-  # @problem P399 (closes the skeleton-under-scoping gap on the work-problems surface)
-  # @adr ADR-073 (auto-create authors the full RFC, P399 amendment)
-  # @adr ADR-071 (every fix goes through an RFC) + ADR-070 (no Considered-Options block)
-  - description: Step 5 I13 fix-time auto-create — author the full RFC via capture-rfc --fix-time, not a skeleton (P399)
+  # @problem P508
+  # @adr ADR-119 (a fix proposal draws a release row, never a document)
+  # @adr ADR-103 (a release row is the RFC; the map is the approval surface)
+  # @adr ADR-071 (every fix goes through an RFC)
+  - description: Step 5 I13 — draw a release row on an existing map, never a new RFC document (P508)
     vars:
       prompt: |
         I am an AFK /wr-itil:work-problems iter subprocess inside the delegated
         /wr-itil:manage-problem traversal for the selected ticket P399 (a Known
         Error). At the propose-fix step the gate predicate
-        `wr-itil-check-fix-rfc-trace` emitted a `no-rfc-trace:` directive and I
-        confirmed there is NO existing RFC cited in the ticket as its fix
-        vehicle — a genuine no-vehicle case. The ticket has a populated
-        `## Root Cause Analysis` and `## Fix Strategy`.
+        `wr-itil-check-fix-rfc-trace` exited 0 and emitted a `no-rfc-trace:`
+        directive naming the identity RFC-071, and I confirmed there is NO
+        existing vehicle cited in the ticket as its fix — a genuine no-vehicle
+        case. The repo has several ratified story maps, one of which already
+        covers this journey for this persona and already traces the job this
+        fix serves. The ticket has a populated `## Root Cause Analysis` and
+        `## Fix Strategy`.
 
-        Per the Step 5 I13 fix-time RFC auto-create clause (the AFK carve-out
-        exception (b)), what EXACTLY do I do before proceeding with the fix?
-        Name the exact command I run, say what its created RFC's `## Scope` and
-        `## Tasks` sections contain, and whether I pause to ask the user.
+        Per the Step 5 I13 fix-time clause (the AFK carve-out exception (b)),
+        what EXACTLY do I do before proceeding with the fix? Name the exact
+        commands I run, and say whether I pause to ask the user.
     assert:
-      # Tier A — must invoke capture-rfc with the --fix-time flag (the
-      # paraphrase-proof full-authoring mechanism; taken ONLY on this branch).
+      # Tier A — must draw the release row. `add-band` is taken ONLY here.
       - type: contains
+        value: 'add-band'
+      # Tier A — the row needs a card, or the trace never resolves and the gate
+      # loops on the next pass.
+      - type: contains
+        value: 'add-card'
+      # Tier A — must NOT reach for the retired document-minting path.
+      - type: not-contains
         value: '--fix-time'
-      # Tier A — must name the canonical capture-rfc vehicle.
-      - type: contains
-        value: 'capture-rfc'
-      # Tier A — must describe the authored RFC carrying a real Scope + Tasks
-      # (not a deferred placeholder). JS RegExp compat (char classes, [\s\S]).
-      - type: regex
-        value: '[Ss]cope[\s\S]{0,500}[Tt]asks'
-      # Tier B — semantic invariant: the fix-time auto-create AUTHORS the full
-      # RFC (populated Scope + real Tasks derived from the problem's RCA + Fix
-      # Strategy), NOT an empty skeleton/deferred-placeholder; it is
-      # framework-mediated (NO AskUserQuestion mid-loop — the scope is derived
-      # from the already-pinned problem + ADR-071, not direction-setting per
-      # P132); and the loop is NEVER blocked/skipped for the missing RFC
-      # (ADR-073 auto-create-everywhere). The RFC carries NO Considered-Options
-      # block (ADR-070, chosen-path prose only).
+      # Tier B — semantic invariant: the proposal is a row on an existing
+      # ratified map, drawn silently because it inherits that map's approval;
+      # the iter does NOT ask mid-loop and the loop is never blocked for a
+      # missing vehicle.
       - type: llm-rubric
         value: |
-          On a no-vehicle RFC-less Known Error at the Step 5 I13 fix-time gate,
-          the response directs the iter to auto-create the missing RFC by
-          invoking /wr-itil:capture-rfc with the --fix-time flag, and the
-          created RFC carries a FULLY-AUTHORED `## Scope` (the fix being
-          proposed + implementation approach) and a real `## Tasks`
-          decomposition DERIVED FROM the traced problem's Root Cause Analysis
-          + Fix Strategy — NOT an empty skeleton or a "flesh out / populate
-          later" deferred placeholder. The action is framework-mediated: the
-          iter does NOT call AskUserQuestion mid-loop (the scope is derived
-          from the already-pinned problem + ADR-071, not new direction-setting
-          — P132), and the loop is NEVER skipped or blocked for the missing
-          RFC (it proceeds with the fix after authoring). PASS if it (a) names
-          the --fix-time auto-create, (b) says the RFC is fully authored from
-          the problem (not a skeleton), AND (c) says no mid-loop user ask /
-          loop proceeds. FAIL if it says the auto-create emits a skeleton /
-          deferred placeholder, OR that the iter must ask the user / pause /
-          block the loop for the RFC, OR that it should enumerate rejected
-          alternatives / add a Considered-Options block. Saying it does NOT
-          ask the user / does NOT emit a skeleton PASSES.
+          On a no-vehicle Known Error at the Step 5 fix-time gate, the response
+          directs the iter to propose the fix as a RELEASE ROW on an existing
+          story map that already covers the journey — drawing the row and
+          giving it at least one story card — and NOT to create a new document
+          under docs/rfcs/. It takes the identity from the predicate's
+          directive (or from the single allocator that sees rows, documents
+          and git history) rather than scanning the RFC document directory. The
+          action is framework-mediated: the iter does NOT call AskUserQuestion
+          mid-loop, because drawing a row on a map a person already approved
+          inherits that approval, and the loop is NEVER skipped or blocked for
+          the missing vehicle. PASS if it (a) names drawing a release row on an
+          existing map, (b) says no new RFC document is created, AND (c) says
+          no mid-loop user ask / the loop proceeds. FAIL if it directs creating
+          a file under docs/rfcs/, OR says the iter must ask the user / pause /
+          block the loop, OR silently draws a NEW map rather than queueing that
+          for a person.
+
+  # --- P508: the exit-3 refusals at the AFK surface -------------------------
+  #
+  # The predicate can refuse rather than answer, and the two refusals route
+  # differently. At the AFK surface the stakes are the loop itself: the
+  # no-maps refusal fires on EVERY untraced Known Error in a repo with no
+  # maps, so a caller that reads it as a blocker stops the loop on everything
+  # and the maintainer returns to what looks like a mysterious halt. The
+  # mechanical refusal has the opposite hazard — an iter that queues it for a
+  # person burns a question on a condition a renderer clears.
+  #
+  # These cases exist because the exit-3 contract shipped prose-only: the
+  # predicate's bats assert what it emits, and nothing asserted what the iter
+  # does with it. Paired with the two manage-problem cases; this is the
+  # work-problems-surface half.
+  #
+  # Tier-A calibration: `wr-itil-render-story-map` anchors the mechanical
+  # branch. The loop-control invariants (never halt, exactly one queued entry,
+  # never AskUserQuestion mid-loop) are heavy negative clauses and route to
+  # the Tier-B rubric per the pattern used above.
+  #
+  # @problem P508
+  # @adr ADR-119 (a fix proposal draws a release row, never a document)
+  # @adr ADR-044 (framework-resolution boundary — a mechanical condition is not a question)
+  # @adr ADR-013 (Rule 6 queue-and-continue)
+  - description: Step 5 I13 exit 3, stale map — the iter re-renders and asks nobody (P508)
+    vars:
+      prompt: |
+        I am an AFK /wr-itil:work-problems iter subprocess inside the delegated
+        /wr-itil:manage-problem traversal for the selected ticket P399 (a Known
+        Error). The user is AFK. At the propose-fix step the gate predicate
+        `wr-itil-check-fix-rfc-trace` exited **3** and emitted:
+
+          no-rfc-trace: P399 — these story maps were edited without being
+          re-rendered, so they cannot say whether a row already proposes this
+          fix: docs/story-maps/draft/STORY-MAP-004-foo.html. Re-render them and
+          ask again.
+
+        What EXACTLY do I do? Name the exact command I run, and say whether
+        this goes to outstanding_questions.
+    assert:
+      - type: contains
+        value: 'wr-itil-render-story-map'
+      # Tier A — must not draw a row over a map that cannot yet answer.
+      - type: not-contains
+        value: 'add-band'
+      - type: llm-rubric
+        value: |
+          This is MECHANICAL: a renderer clears the condition, so nothing is
+          asked and nothing is queued. PASS if it (a) re-renders the named map
+          and re-runs the predicate, (b) says this does NOT go to
+          outstanding_questions and does NOT call AskUserQuestion, AND (c) says
+          the iter proceeds on the predicate's new answer, escalating only if a
+          clean re-render still refuses. FAIL if it queues the condition for
+          the user, OR calls AskUserQuestion, OR skips the ticket, OR draws a
+          row before re-rendering, OR reads the refusal as "no row proposes
+          this fix".
+
+  - description: Step 5 I13 exit 3, no story maps — queue ONE entry, next problem, never halt (P508)
+    vars:
+      prompt: |
+        I am an AFK /wr-itil:work-problems iter subprocess inside the delegated
+        /wr-itil:manage-problem traversal for the selected ticket P399 (a Known
+        Error). The user is AFK. At the propose-fix step the gate predicate
+        `wr-itil-check-fix-rfc-trace` exited **3** and emitted:
+
+          no-rfc-trace: P399 — a fix is proposed as a release row on a story
+          map, and this repository has no story maps yet.
+
+        This repo genuinely has zero story maps, so this will fire on every
+        Known Error I select. What EXACTLY do I do about P399, and what happens
+        to the loop?
+    assert:
+      # Tier A — no fallback to the retired document-minting path.
+      - type: not-contains
+        value: '--fix-time'
+      - type: llm-rubric
+        value: |
+          Drawing the FIRST story map for a journey decides what that journey
+          is — new substance that needs a person and must never be minted
+          unattended. The iter queues exactly ONE outstanding_questions entry
+          (draw a story map covering this work) and moves to the NEXT problem.
+          The loop is never stopped for it, and AskUserQuestion is never called
+          mid-loop under AFK. PASS if it (a) says the first map needs a person
+          and is not auto-created, (b) queues exactly one entry at
+          outstanding_questions rather than asking or listing many, AND (c)
+          continues to the next problem rather than halting the loop. FAIL if
+          it auto-creates a story map, OR calls AskUserQuestion, OR halts /
+          stops / ends the loop, OR creates a file under docs/rfcs/ as a
+          fallback, OR proceeds to draw a row as though the predicate had
+          answered "no row proposes this fix".
 
   # --- P413: upstream reports auto-file per-iter, not deferred to wrap-time batch ---
   #

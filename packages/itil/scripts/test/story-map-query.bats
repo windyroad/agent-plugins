@@ -161,10 +161,74 @@ setup() {
   [ "$output" = "3" ]
 }
 
+@test "find-problem returns the rows that propose a fix for a problem" {
+  # STORY-MAP-940 row `live` carries RFC-900 and holds STORY-950, whose own
+  # frontmatter names P900. That chain — row to card to story file — is the
+  # row-to-problem edge, and it is what makes a drawn row read as a trace.
+  run bash -c "cd '$TMP' && '$QUERY' find-problem P900 | node -e \"
+    const d=JSON.parse(require('fs').readFileSync(0,'utf8'));
+    process.stdout.write([d.hits.length,d.hits[0].storyMapId,d.hits[0].rowId,d.hits[0].rfc,d.unanswerable.length].join('|'));\""
+  [ "$status" -eq 0 ]
+  [ "$output" = "1|STORY-MAP-940|live|RFC-900|0" ]
+}
+
+@test "find-problem: a problem no row names returns no hits and no non-answers" {
+  run bash -c "cd '$TMP' && '$QUERY' find-problem P999 | node -e \"
+    const d=JSON.parse(require('fs').readFileSync(0,'utf8'));
+    process.stdout.write([d.hits.length,d.unanswerable.length].join('|'));\""
+  [ "$status" -eq 0 ]
+  [ "$output" = "0|0" ]
+}
+
+@test "find-problem: a row with no RFC identity is not a fix vehicle" {
+  # A speculative row is scheduling, not a proposal. Counting it would report a
+  # fix vehicle where none was ever proposed.
+  run bash -c "cd '$TMP' && node '$EDIT' docs/story-maps/draft/STORY-MAP-941-x.html add-band --id spec --name 'Speculative'"
+  [ "$status" -eq 0 ]
+  run bash -c "cd '$TMP' && node '$EDIT' docs/story-maps/draft/STORY-MAP-941-x.html add-card --story STORY-950 --activity a --release spec --title T"
+  [ "$status" -eq 0 ]
+  run bash -c "cd '$TMP' && '$QUERY' find-problem P900 | node -e \"
+    const d=JSON.parse(require('fs').readFileSync(0,'utf8'));
+    process.stdout.write(d.hits.map(h=>h.storyMapId+':'+h.rowId).join(','));\""
+  [ "$output" = "STORY-MAP-940:live" ]
+}
+
+@test "find-problem: a map edited but not re-rendered reports as unanswerable, not as a clean no" {
+  # Fail-closed. If a stale map answered "no rows name this problem", the caller
+  # would draw a second row over one that already exists.
+  local stale="$TMP/docs/story-maps/draft/STORY-MAP-943-stale.html"
+  printf '<script id="story-map-data" type="application/json">\n{ "storyMapId": "STORY-MAP-943", "title": "Never rendered", "backbone": [ { "id": "a", "title": "A" } ], "releases": [ { "id": "r1", "name": "N", "rfc": "RFC-943" } ], "tasks": [] }\n</script>\n' > "$stale"
+  run bash -c "cd '$TMP' && '$QUERY' find-problem P900 | node -e \"
+    const d=JSON.parse(require('fs').readFileSync(0,'utf8'));
+    const u=d.unanswerable.find(x=>x.storyMapId==='STORY-MAP-943');
+    process.stdout.write([Boolean(u),u&&u.status].join('|'));\""
+  [ "$status" -eq 0 ]
+  [ "$output" = "true|stale" ]
+}
+
+@test "find-problem: a file with no data island at all reports as unanswerable" {
+  printf '<html><body>not a map</body></html>\n' > "$TMP/docs/story-maps/draft/STORY-MAP-944-broken.html"
+  run bash -c "cd '$TMP' && '$QUERY' find-problem P900 | node -e \"
+    const d=JSON.parse(require('fs').readFileSync(0,'utf8'));
+    process.stdout.write(String(d.unanswerable.some(x=>/944/.test(x.path))));\""
+  [ "$status" -eq 0 ]
+  [ "$output" = "true" ]
+}
+
+@test "find-problem: an island-less file does not break the other operations" {
+  # The unanswerable list is carried alongside the corpus, not folded into it.
+  printf '<html><body>not a map</body></html>\n' > "$TMP/docs/story-maps/draft/STORY-MAP-945-broken.html"
+  run bash -c "cd '$TMP' && '$QUERY' list | node -e \"
+    const d=JSON.parse(require('fs').readFileSync(0,'utf8'));
+    process.stdout.write(d.map(m=>m.storyMapId).join(','));\""
+  [ "$status" -eq 0 ]
+  [ "$output" = "STORY-MAP-940,STORY-MAP-941" ]
+}
+
 @test "query is read-only: the corpus is byte-identical after every operation" {
   local before after
   before="$(cd "$TMP" && find docs -type f -exec shasum {} + | sort | shasum)"
-  run bash -c "cd '$TMP' && '$QUERY' list >/dev/null && '$QUERY' get STORY-MAP-940 >/dev/null && '$QUERY' find-story STORY-950 >/dev/null && '$QUERY' find-rfc RFC-900 >/dev/null && '$QUERY' unratified >/dev/null"
+  run bash -c "cd '$TMP' && '$QUERY' list >/dev/null && '$QUERY' get STORY-MAP-940 >/dev/null && '$QUERY' find-story STORY-950 >/dev/null && '$QUERY' find-rfc RFC-900 >/dev/null && '$QUERY' find-problem P900 >/dev/null && '$QUERY' unratified >/dev/null"
   [ "$status" -eq 0 ]
   after="$(cd "$TMP" && find docs -type f -exec shasum {} + | sort | shasum)"
   [ "$before" = "$after" ]
