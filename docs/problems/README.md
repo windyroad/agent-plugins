@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-21 **P477 verification pending** — the Codex completion bridge's checkout-bound receipt path is confirmed shipped in @windyroad/risk-scorer 0.18.10-0.18.15 with all six declared fix bullets covered by named passing tests (40/40 green); moved out of the dev-work queue to await user verification on a live Codex run.
+> Last reviewed: 2026-08-21 **P499 closed** — the architect ADR-pairing hook now resolves the checkout the commit command targets before reading the staged index; closed on prior-session evidence against the installed published 0.21.3 hook (both permit and deny directions, regression suite 24/24) via the run-retro Step 4a drain.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -257,7 +257,6 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P478 | I10 checks that a story's `## User value` section is non-empty, but never that it is value-first | 2026-08-13 (`@windyroad/itil@1.0.0`) | no — not observed |
 | P497 | An upstream pull-request diff is not scored against the upstream's conventions | 2026-08-13 (`@windyroad/itil@1.1.0`) | no — not observed |
 | P498 | WSJF uses the pre-transition status multiplier | 2026-08-17 (`@windyroad/itil@1.1.1`) | no — not observed |
-| P499 | Architect ADR pairing hook reads the task checkout instead of the command checkout | 2026-08-17 (`@windyroad/architect@0.21.1`; live in the published 0.21.3) | yes — observed: installed v0.21.3 hook permits a clean declared checkout and denies an unpaired one, both from the target index |
 | P466 | The story-map HTML template ships sub-3:1 borders, no focus ring, and no viewport meta | 2026-08-21 (`@windyroad/itil@1.1.2`) | no — not observed |
 | P035 | manage-problem commit-gate no subagent delegation fallback | pending — fallback path never fired this session | no — not observed |
 | P037 | jtbd-reviewer returns bare verdict without reason | commit 6e7c2e4 | no — not observed |
@@ -384,6 +383,7 @@ Recently closed this session (2026-04-19/20, against direct in-session evidence)
 
 | ID | Title | Closed via |
 |----|-------|-----------|
+| P499 | Architect ADR pairing hook reads the task checkout instead of the command checkout | Closed 2026-08-21 (run-retro Step 4a sub-step 9 prior-session evidence drain per P282). Fix released `@windyroad/architect@0.21.1` 2026-08-17, live in published 0.21.3. Evidence: `yes — observed: installed v0.21.3 hook permits a clean declared checkout and denies an unpaired one, both from the target index`; regression suite 24/24 green. Recovery: `/wr-itil:transition-problem 499 known-error`. |
 | P164 | Latent octal-eval bug in the next-ID formula across six ticket-creator skills | verified in the field 2026-07-15; drained by the 2026-08-20 retro |
 | P019 | Deprecate single-file JTBD fallback (ADR-008 Option 3) | Closed 2026-07-15 (review-problems Step 4 verification prompt — user confirmed). Fix `@windyroad/jtbd@0.6.0` (breaking, migration via update-guide); ~3 months in production, no regressions. Recovery: `/wr-itil:transition-problem 19 known-error`. |
 | P020 | No on-demand assessment skills | Closed 2026-07-15 (Step 4 verification prompt — user confirmed). Fix v0.3.2 (`/wr-risk-scorer:assess-release` + `assess-wip`); in daily use since April. Recovery: `/wr-itil:transition-problem 20 known-error`. |

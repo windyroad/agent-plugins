@@ -1,6 +1,6 @@
 # Problem 499: Architect ADR pairing hook reads the task checkout instead of the command checkout
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-08-17
 **Priority**: 20 (Very High) - Impact: 4 x Likelihood: 5
 **Origin**: incident-linked
@@ -47,6 +47,8 @@ Released in `@windyroad/architect` v0.21.1 on 2026-08-17; the currently publishe
 Observed on 2026-08-21 against the installed published hook, not the source tree: a commit declaring a clean checkout was permitted while the hook process sat in a different checkout holding an unpaired ADR, and the same pairing was denied when the declared checkout was the one holding it. The committed regression suite covering both directions is green at 24 of 24.
 
 Awaiting user verification.
+
+**Closed 2026-08-21** — `/wr-retrospective:run-retro` Step 4a sub-step 9 prior-session evidence drain (P282). The `docs/problems/README.md` Verification Queue cell carried `yes — observed: installed v0.21.3 hook permits a clean declared checkout and denies an unpaired one, both from the target index` from a prior session, and the rename into `verifying/` predates this session's only commit, so sub-step 9c's same-session exclusion does not apply. Evidence is a genuine post-release exercise against the *installed published* hook rather than the source tree, with the regression suite green at 24 of 24. Recovery: `/wr-itil:transition-problem 499 known-error`.
 
 ## Dependencies
 
