@@ -71,7 +71,7 @@ windyroad plugins except `wr-cruise` at user scope, and answered a story-map for
 | Call # | Header | Classification | Citation |
 |--------|--------|----------------|----------|
 | 1a | Ticket | correction-followup | `Gap: P078 mandates OFFERING a ticket before addressing the operational request when a strong-signal correction fires. The itil-correction-detect hook fired on "WTAF!!!" (pattern !{2,}) and instructed the offer. Asking IS the framework-prescribed action here, not sub-contracting.` |
-| 1b | addressr map | direction | `Gap: three materially different dispositions (regenerate in place / delete and recapture / leave) for a governance artefact in a DIFFERENT repo the user was actively working in. No framework resolves whether to spend that effort now, and the user was mid-flow there. Near the boundary — P085 act-on-obvious would have settled it if a single option were obvious; none was.` |
+| 1b | adopter-repo story map | direction | `Gap: three materially different dispositions (regenerate in place / delete and recapture / leave) for a governance artefact in a DIFFERENT repo the user was actively working in. No framework resolves whether to spend that effort now, and the user was mid-flow there. Near the boundary — P085 act-on-obvious would have settled it if a single option were obvious; none was.` |
 
 **Lazy count: 0**
 **Direction count: 1**

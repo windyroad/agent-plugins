@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-20 **P508 captured** - the propose-fix gate still writes a standalone RFC document, seven weeks after the decision that made the fix proposal a release row on a story map; the two mechanisms are live at once and the superseded one is the automatic default (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-08-21 **P509 + P510 + P511 captured (retro)** - story-map capture authors from the change rather than the persona so the maintainer had to correct one map three times; and a retraction applied to an ADR never reached the ticket that produced it, which is the surface implementers actually enter from (via /wr-retrospective:run-retro).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -15,6 +15,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 40 | P477 | Codex collaboration completion bypasses the risk-marker bridge | 20 (Very High) | Open | S | 2026-08-12 | internal |
 | 10 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Open | L | 2026-08-20 | internal |
 | 10 | P508 | The fix proposal still instantiates a standalone RFC document, after ADR-103 made it a release row | 20 (Very High) | Open | L | 2026-08-20 | internal |
+| 10 | P509 | Story-map capture produces a work breakdown, not the persona's journey | 20 (Very High) | Open | L | 2026-08-21 | internal |
 | 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 (Very High) | Known Error | XL | 2026-05-03 | internal |
 | | | **Tier 1 — Inbound-reported (an external user actually hit this)** | | | | | |
 | 24 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | 12 (High) | Known Error | S | 2026-07-06 | inbound-reported (#169) |
@@ -49,7 +50,9 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | | | **Tier 2 — Internal** | | | | | |
 | 16 | P417 | docs/stories/README.md Rankings/Done never reconciled — stale for the whole corpus | 8 (Medium) | Known Error | S | 2026-07-04 | internal |
 | 16 | P420 | check-briefing-budgets.sh crashes with `must_split[@]: unbound variable` on empty arrays under macOS default bash 3.2 | 8 (Medium) | Known Error | S | 2026-07-05 | internal |
+| 16 | P511 | The ask-hygiene trail is one file per day, so a second retro's counts are invisible to the R6 gate | 8 (Medium) | Open | S | 2026-08-21 | internal |
 | 15 | P507 | SessionStart surfacers emit a directive with nothing enforcing the drain — surfacing is not draining | 15 (High) | Open | M | 2026-08-20 | internal |
+| 12 | P510 | A retraction is applied where the claim was authored, not where it was propagated | 12 (High) | Open | M | 2026-08-21 | internal |
 | 12 | P415 | External-comms commit-msg gate reviews only the first `-m` of a multi-`-m` git commit, causing deny-after-PASS on multi-paragraph commits | 6 (Medium) | Known Error | S | 2026-07-03 | internal |
 | 12 | P179 | Agent defers requested work into untracked phases — phases are fine, but unticketed phases never get implemented | 12 (High) | Known Error | M | 2026-05-10 | internal |
 | 12 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 (High) | Known Error | M | 2026-06-10 | internal |
