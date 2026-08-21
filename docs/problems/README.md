@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-21 **batch transition — 25 known-error tickets moved to Verification Pending after the @windyroad/itil@1.1.2 release** - a post-release drain that had gone unrun for a while, so most of these shipped in earlier versions (0.46.0 through 1.1.2) and only P466 came out in today's release. Each row carries the version its fix actually went out in rather than today's. P160 was enumerated as a candidate and refused: it was reopened on 2026-07-07 when verification failed, and the quota-pacing work has not shipped.
+> Last reviewed: 2026-08-21 **P515 captured** — the drain that scaffolds risk-register entries appends their index rows past the end of the table and with the wrong column count, so nothing it creates has ever shown up in the index; 59 rows had piled up below the table since May before being repaired by hand today (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -53,6 +53,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 12 | P462 | Amendment-scoped `human-oversight: unconfirmed` has no detector — unratified amendment substance never reaches the oversight drain | 12 (High) | Known Error | M | 2026-07-26 | internal |
 | 12 | P510 | A retraction is applied where the claim was authored, not where it was propagated | 12 (High) | Known Error | M | 2026-08-21 | internal |
 | 12 | P495 | The release queue can be consumed in a working copy and nothing says so | 12 (High) | Open | S | 2026-08-09 | internal |
+| 10 | P515 | `drain-register-queue.sh` appends index rows past the end of the register table, so auto-scaffolded risks never reach the index | 10 (High) | Open | S | 2026-08-21 | internal |
 | 9 | P363 | Inbound-reported tickets never receive fix-released verdict on originating issue | 9 (Medium) | Known Error | M | 2026-06-11 | internal |
 | 9 | P464 | Agent self-limits external-comms as "out of scope" in AFK / pre-flight contexts — strands dispatchable lifecycle/ack/upstream-report obligations the framework authorises to proceed | 9 (Medium) | Open | S | 2026-07-26 | corrective-feedback |
 | 9 | P484 | The reading-context persona constraint is load-bearing in two ratified decisions but documented nowhere | 9 (Medium) | Open | S | 2026-08-08 | internal |
