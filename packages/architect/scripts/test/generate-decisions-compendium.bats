@@ -81,6 +81,55 @@ mk_adr() {
   [ "$status" -eq 0 ]
 }
 
+@test "generator preserves UTF-8 at byte truncation boundaries and rejects invalid source without clobbering output" {
+  local prefix out before mode
+  prefix="$(printf '%109s' '' | tr ' ' x)"
+  {
+    echo "---"
+    echo 'status: "accepted"'
+    echo "date: 2026-05-30"
+    echo "---"
+    echo ""
+    echo "# Boundary"
+    echo ""
+    echo "## Decision Outcome"
+    echo ""
+    echo 'Chosen option: **"Boundary implementation"**, because reasons.'
+    echo ""
+    echo "## Confirmation"
+    echo ""
+    printf '%s\n' "- [ ] ${prefix}—tail"
+    echo ""
+    echo "## Related"
+    echo ""
+    echo "- Relates to ADR-001"
+  } > "$DIR/docs/decisions/010-boundary.accepted.md"
+  mk_adr "011-history.rejected.md" "rejected" "History"
+
+  run bash "$SCRIPT" "$DIR/docs/decisions"
+  [ "$status" -eq 0 ]
+  out="$DIR/docs/decisions/README.md"
+  run iconv -f UTF-8 -t UTF-8 "$out"
+  [ "$status" -eq 0 ]
+  [ "$(grep -c '^## In-force decisions$' "$out")" -eq 1 ]
+  [ "$(grep -c '^## Historical decisions$' "$out")" -eq 1 ]
+  run grep -F $'\357\277\275' "$out"
+  [ "$status" -eq 1 ]
+  if ! mode=$(stat -f '%Lp' "$out" 2>/dev/null); then
+    mode=$(stat -c '%a' "$out")
+  fi
+  [ "$mode" = "644" ]
+
+  before="$DIR/README.before"
+  cp "$out" "$before"
+  printf '\377' >> "$DIR/docs/decisions/010-boundary.accepted.md"
+  run bash "$SCRIPT" "$DIR/docs/decisions"
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"invalid UTF-8 in authoritative ADR"* ]]
+  run cmp -s "$before" "$out"
+  [ "$status" -eq 0 ]
+}
+
 # --- Drift detection on fixture (mutated ADR body) --------------------------
 
 @test "--check exits 1 when an ADR body is mutated after generation" {

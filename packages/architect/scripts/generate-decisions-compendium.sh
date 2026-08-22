@@ -84,14 +84,31 @@ if [ ! -d "$DECISIONS_DIR" ]; then
     exit 2
 fi
 
-# In check mode, redirect generation to a temp file so the on-disk
-# compendium is never mutated.
-if [ "$CHECK_MODE" = "1" ]; then
-    COMPENDIUM=$(mktemp -t architect-compendium-check.XXXXXX)
-    trap 'rm -f "$COMPENDIUM"' EXIT
-else
-    COMPENDIUM="$TARGET_COMPENDIUM"
+if ! command -v iconv >/dev/null 2>&1; then
+    echo "generate-decisions-compendium: iconv is required for UTF-8 validation" >&2
+    exit 2
 fi
+
+# Generate into a temporary file so invalid or incomplete output never
+# replaces the last known-good compendium. Write mode uses the target
+# directory so the final rename is atomic.
+if [ "$CHECK_MODE" = "1" ]; then
+    if ! COMPENDIUM=$(mktemp -t architect-compendium-check.XXXXXX); then
+        echo "generate-decisions-compendium: could not create check-mode temporary file" >&2
+        exit 2
+    fi
+else
+    if ! COMPENDIUM=$(mktemp "${TARGET_COMPENDIUM}.tmp.XXXXXX"); then
+        echo "generate-decisions-compendium: could not create temporary compendium beside $TARGET_COMPENDIUM" >&2
+        exit 2
+    fi
+fi
+cleanup_compendium() {
+    if [ -n "${COMPENDIUM:-}" ] && [ -f "$COMPENDIUM" ]; then
+        rm -f "$COMPENDIUM"
+    fi
+}
+trap cleanup_compendium EXIT
 
 # --- Field extractors ------------------------------------------------------
 
@@ -157,7 +174,8 @@ get_bullets() {
 # Joins with "; ". Strips markdown emphasis to keep the line scannable.
 compact_join_bullets() {
     local per_item="${1:-120}"
-    awk -v n="$per_item" '
+    local compacted
+    if ! compacted=$(awk -v n="$per_item" '
         {
             # Strip leading checkbox markers `[ ]` / `[x]` (from Confirmation).
             sub(/^\[[ x]\] */, "")
@@ -172,7 +190,11 @@ compact_join_bullets() {
             else out = out "; " line
         }
         END { print out }
-    '
+    ' | iconv -f UTF-8 -t UTF-8 -c); then
+        echo "generate-decisions-compendium: failed to truncate confirmation text safely" >&2
+        return 1
+    fi
+    printf '%s\n' "$compacted"
 }
 
 # Extract ADR-NNN references from Related bullets. Compact "ADR-NNN" listing
@@ -242,12 +264,19 @@ emit_entry() {
 
     # Chosen-option line — truncate to a comfortable summary length.
     chosen=$(get_chosen "$file" | strip_links | oneline)
-    chosen=$(printf '%s' "$chosen" | awk -v n=240 '{ if (length($0) > n) print substr($0,1,n) "..."; else print }')
+    if ! chosen=$(printf '%s' "$chosen" \
+        | awk -v n=240 '{ if (length($0) > n) print substr($0,1,n) "..."; else print }' \
+        | iconv -f UTF-8 -t UTF-8 -c); then
+        echo "generate-decisions-compendium: failed to truncate chosen text safely for $file" >&2
+        return 1
+    fi
 
     # Confirmation: cap 5 bullets, ≤ 110 chars each, joined with "; " on one line.
     # This is the routine-compliance scannable view; the full Confirmation list
     # remains in the per-ADR body for deep-dive surfaces.
-    confirmation=$(get_bullets "$file" "Confirmation" 5 | strip_links | compact_join_bullets 110)
+    if ! confirmation=$(get_bullets "$file" "Confirmation" 5 | strip_links | compact_join_bullets 110); then
+        return 1
+    fi
 
     # Related: extract ADR-NNN graph references only. Full relationship prose
     # (amends / extends / relates / composes) stays in the per-ADR body.
@@ -311,6 +340,13 @@ done < <(find "$DECISIONS_DIR" -maxdepth 1 -type f -name '*.md' \
             ! -name '*-summary.md' \
             2>/dev/null | sort)
 
+for f in "${all_files[@]}"; do
+    if ! iconv -f UTF-8 -t UTF-8 "$f" >/dev/null 2>&1; then
+        echo "generate-decisions-compendium: invalid UTF-8 in authoritative ADR: $f" >&2
+        exit 1
+    fi
+done
+
 in_force_files=()
 historical_files=()
 for f in "${all_files[@]}"; do
@@ -364,7 +400,9 @@ total=$((in_force_total + historical_total))
     echo ""
     echo "_${in_force_total} ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._"
     for f in "${in_force_files[@]}"; do
-        emit_entry "$f"
+        if ! emit_entry "$f"; then
+            exit 1
+        fi
     done
     if [ "$historical_total" -gt 0 ]; then
         echo ""
@@ -374,10 +412,39 @@ total=$((in_force_total + historical_total))
         echo ""
         echo "_${historical_total} ADRs. These were tried and superseded, rejected, or deprecated. Read them as direction for what NOT to do, or to understand the lineage of an in-force decision. Do not enforce them as current rules._"
         for f in "${historical_files[@]}"; do
-            emit_entry "$f"
+            if ! emit_entry "$f"; then
+                exit 1
+            fi
         done
     fi
 } > "$COMPENDIUM"
+
+validate_compendium() {
+    local file="$1" in_force_count historical_count expected_historical=0
+    if ! iconv -f UTF-8 -t UTF-8 "$file" >/dev/null 2>&1; then
+        echo "generate-decisions-compendium: generated output is not valid UTF-8" >&2
+        return 1
+    fi
+    if ! in_force_count=$(awk '$0 == "## In-force decisions" { n++ } END { print n + 0 }' "$file"); then
+        echo "generate-decisions-compendium: could not validate the in-force section" >&2
+        return 1
+    fi
+    if ! historical_count=$(awk '$0 == "## Historical decisions" { n++ } END { print n + 0 }' "$file"); then
+        echo "generate-decisions-compendium: could not validate the historical section" >&2
+        return 1
+    fi
+    if [ "$historical_total" -gt 0 ]; then
+        expected_historical=1
+    fi
+    if [ "$in_force_count" -ne 1 ] || [ "$historical_count" -ne "$expected_historical" ]; then
+        echo "generate-decisions-compendium: generated output has invalid section structure (in-force=$in_force_count, historical=$historical_count, expected historical=$expected_historical)" >&2
+        return 1
+    fi
+}
+
+if ! validate_compendium "$COMPENDIUM"; then
+    exit 1
+fi
 
 if [ "$CHECK_MODE" = "1" ]; then
     # Check mode: diff temp against target. Idempotency contract holds only
@@ -403,4 +470,14 @@ if [ "$CHECK_MODE" = "1" ]; then
     exit 1
 fi
 
-echo "generate-decisions-compendium: wrote $COMPENDIUM (${total} ADRs total — ${in_force_total} in-force, ${historical_total} historical)" >&2
+if ! chmod 0644 "$COMPENDIUM"; then
+    echo "generate-decisions-compendium: could not set compendium mode to 0644" >&2
+    exit 1
+fi
+if ! mv -f "$COMPENDIUM" "$TARGET_COMPENDIUM"; then
+    echo "generate-decisions-compendium: could not replace $TARGET_COMPENDIUM" >&2
+    exit 1
+fi
+COMPENDIUM=""
+
+echo "generate-decisions-compendium: wrote $TARGET_COMPENDIUM (${total} ADRs total — ${in_force_total} in-force, ${historical_total} historical)" >&2
