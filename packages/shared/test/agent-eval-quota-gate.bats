@@ -40,6 +40,17 @@ EOF
   [ ! -e "$TMP/npm-called" ]
 }
 
+@test "quota-only probe accepts a reset time without a date" {
+  write_claude "You've hit your weekly limit · resets 5am (UTC)" 1
+  write_npm 9
+
+  run env PATH="$BIN:$PATH" "$SCRIPT"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"::warning::Claude subscription quota is exhausted"* ]]
+  [ ! -e "$TMP/npm-called" ]
+}
+
 @test "ordinary probe failure remains blocking" {
   write_claude "Authentication failed" 7
   write_npm 0
