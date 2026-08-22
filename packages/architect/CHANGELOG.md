@@ -1,5 +1,13 @@
 # @windyroad/architect
 
+## 0.21.4
+
+### Patch Changes
+
+- 2e6abbf: Preserve every confirmation item and supported relationship field in generated decision compendiums.
+- 3d77b9a: Preserve multiline chosen outcomes in generated decision compendiums and keep truncated Markdown emphasis balanced.
+- fe1a4dd: Preserve valid UTF-8 in the decisions compendium and fail without replacing the existing file when authoritative input or generated output is invalid.
+
 ## 0.21.3
 
 ### Patch Changes
