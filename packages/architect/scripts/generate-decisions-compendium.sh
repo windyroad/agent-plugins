@@ -147,15 +147,18 @@ get_section() {
     ' "$file"
 }
 
-# Extract the "Chosen option:" line from the Decision Outcome section.
+# Extract the first "Chosen option:" paragraph from the Decision Outcome section.
 # Matches the common MADR shapes:
 #   Chosen option: **"X"**, because Y.
 #   Chosen option: X, because Y.
 #   Chosen: X.
 get_chosen() {
     get_section "$1" "Decision Outcome" \
-        | awk '/^Chosen/ { print; exit }' \
-        | head -1
+        | awk '
+            /^Chosen/ { in_chosen = 1 }
+            in_chosen && NF == 0 { exit }
+            in_chosen { print }
+        '
 }
 
 # Extract top-level bullet lines (`- ...`) from a section. Skips nested
@@ -229,16 +232,27 @@ oneline() {
     tr '\n\r' '  ' | tr -s ' ' | sed 's/^ *//; s/ *$//'
 }
 
-# Truncate a string to N chars + ellipsis if longer. Avoids slicing inside
-# a markdown emphasis pair (e.g. `**text**`) — if the truncation would land
-# inside `**...**`, round back to before the opening pair.
+# Truncate a string to N chars + ellipsis if longer. Avoids slicing a `**`
+# marker in half and closes emphasis when truncation lands inside it.
 truncate_with_ellipsis() {
-    local s="$1" n="$2"
+    local s="$1" n="$2" truncated remainder pairs=0
     if [ "${#s}" -le "$n" ]; then
         printf '%s' "$s"
         return
     fi
-    printf '%s' "${s:0:n}..."
+    truncated="${s:0:n}"
+    if [[ "$truncated" == *\* && "${s:n:1}" == "*" ]]; then
+        truncated="${truncated%?}"
+    fi
+    remainder="$truncated"
+    while [[ "$remainder" == *"**"* ]]; do
+        remainder="${remainder#*"**"}"
+        pairs=$((pairs + 1))
+    done
+    if [ $((pairs % 2)) -ne 0 ]; then
+        truncated="${truncated}**"
+    fi
+    printf '%s' "${truncated}..."
 }
 
 # --- Per-ADR entry emitter -------------------------------------------------
@@ -264,8 +278,7 @@ emit_entry() {
 
     # Chosen-option line — truncate to a comfortable summary length.
     chosen=$(get_chosen "$file" | strip_links | oneline)
-    if ! chosen=$(printf '%s' "$chosen" \
-        | awk -v n=240 '{ if (length($0) > n) print substr($0,1,n) "..."; else print }' \
+    if ! chosen=$(truncate_with_ellipsis "$chosen" 240 \
         | iconv -f UTF-8 -t UTF-8 -c); then
         echo "generate-decisions-compendium: failed to truncate chosen text safely for $file" >&2
         return 1

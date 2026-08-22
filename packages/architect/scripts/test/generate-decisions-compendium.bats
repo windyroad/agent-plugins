@@ -130,6 +130,67 @@ mk_adr() {
   [ "$status" -eq 0 ]
 }
 
+@test "generator preserves multiline chosen outcomes with balanced Markdown when truncated" {
+  local out chosen_156 chosen_158 markers
+  {
+    echo "---"
+    echo 'status: "proposed"'
+    echo "date: 2026-08-22"
+    echo "---"
+    echo ""
+    echo "# Cancellation boundary"
+    echo ""
+    echo "## Decision Outcome"
+    echo ""
+    echo "Chosen: **read the boundary from Stripe in the request that confirms the"
+    echo "cancellation, and carry no boundary on a pending one.**"
+    echo ""
+    echo "## Confirmation"
+    echo ""
+    echo "- [ ] Preserve the boundary."
+    echo ""
+    echo "## Related"
+    echo ""
+    echo "- Relates to ADR-001"
+  } > "$DIR/docs/decisions/156-cancellation-boundary.proposed.md"
+  {
+    echo "---"
+    echo 'status: "proposed"'
+    echo "date: 2026-08-22"
+    echo "---"
+    echo ""
+    echo "# Checkout expiry access state"
+    echo ""
+    echo "## Decision Outcome"
+    echo ""
+    echo "Chosen option: **two access states, a signed Checkout-expired transition and a"
+    echo "bounded reconciliation backstop**, because it keeps Stripe authoritative while"
+    echo "making the local model describe only where the answer lives and adds **an"
+    echo "intentionally long emphasized consequence that crosses the summary boundary without losing structural Markdown meaning.**"
+    echo ""
+    echo "## Confirmation"
+    echo ""
+    echo "- [ ] Preserve the access state."
+    echo ""
+    echo "## Related"
+    echo ""
+    echo "- Relates to ADR-001"
+  } > "$DIR/docs/decisions/158-checkout-expiry.proposed.md"
+
+  run bash "$SCRIPT" "$DIR/docs/decisions"
+  [ "$status" -eq 0 ]
+  out="$DIR/docs/decisions/README.md"
+  chosen_156=$(grep -A2 '^### ADR-156 ' "$out" | grep '^\*\*Chosen:\*\*')
+  chosen_158=$(grep -A2 '^### ADR-158 ' "$out" | grep '^\*\*Chosen:\*\*')
+  [[ "$chosen_156" == *"cancellation, and carry no boundary on a pending one.**"* ]]
+  [[ "$chosen_158" == *"bounded reconciliation backstop**"* ]]
+  [[ "$chosen_158" == *"**..." ]]
+  markers=$(awk '{ n += gsub(/\*\*/, "") } END { print n }' <<< "$chosen_156")
+  [ $((markers % 2)) -eq 0 ]
+  markers=$(awk '{ n += gsub(/\*\*/, "") } END { print n }' <<< "$chosen_158")
+  [ $((markers % 2)) -eq 0 ]
+}
+
 # --- Drift detection on fixture (mutated ADR body) --------------------------
 
 @test "--check exits 1 when an ADR body is mutated after generation" {
