@@ -112,19 +112,41 @@ trap cleanup_compendium EXIT
 
 # --- Field extractors ------------------------------------------------------
 
-# Read a frontmatter scalar field (single line `key: value`).
+# Read a frontmatter scalar or block-list field. Scalars are returned as-is;
+# block lists are compacted to the same `[item, item]` shape as inline lists.
 # Strips surrounding quotes and leading/trailing whitespace.
 get_frontmatter_field() {
     local file="$1" field="$2"
     awk -v f="$field" '
+        function emit_list(    i) {
+            if (!list_count || list_emitted) return
+            printf "["
+            for (i = 1; i <= list_count; i++) {
+                if (i > 1) printf ", "
+                printf "%s", list[i]
+            }
+            print "]"
+            list_emitted = 1
+        }
         /^---$/ { fm = !fm; if (!fm) exit; next }
+        in_list && /^  - / {
+            item = $0
+            sub(/^  - */, "", item)
+            list[++list_count] = item
+            next
+        }
+        in_list { emit_list(); exit }
         fm && $0 ~ "^"f":" {
             sub("^"f": *", "")
             gsub(/^["'"'"']|["'"'"']$/, "")
             sub(/^ +/, ""); sub(/ +$/, "")
-            print
-            exit
+            if (length($0)) {
+                print
+                exit
+            }
+            in_list = 1
         }
+        END { emit_list() }
     ' "$file"
 }
 
@@ -162,12 +184,17 @@ get_chosen() {
 }
 
 # Extract top-level bullet lines (`- ...`) from a section. Skips nested
-# `  - ...` sub-bullets to keep the compendium dense. Capped at N entries.
+# `  - ...` sub-bullets to keep the compendium dense. Capped at N entries;
+# a cap of 0 preserves every item.
 get_bullets() {
     local file="$1" section="$2" cap="${3:-5}"
     get_section "$file" "$section" \
-        | awk '/^- / { sub(/^- */, ""); print }' \
-        | head -"$cap"
+        | awk -v cap="$cap" '/^- / {
+            sub(/^- */, "")
+            print
+            count++
+            if (cap > 0 && count >= cap) exit
+        }'
 }
 
 # Compact-join bullets onto one line, truncating each to N chars + "...".
@@ -259,8 +286,8 @@ truncate_with_ellipsis() {
 
 emit_entry() {
     local file="$1"
-    local id title status oversight superseded supersede_ticket
-    local chosen drivers confirmation related
+    local id title status oversight superseded superseded_by supersede_ticket
+    local chosen drivers confirmation related amends supplements
 
     id=$(basename "$file" | grep -oE '^[0-9]+')
     title=$(get_title "$file")
@@ -270,6 +297,9 @@ emit_entry() {
     esac
     oversight=$(get_frontmatter_field "$file" "human-oversight")
     superseded=$(get_frontmatter_field "$file" "supersedes")
+    superseded_by=$(get_frontmatter_field "$file" "superseded-by")
+    amends=$(get_frontmatter_field "$file" "amends")
+    supplements=$(get_frontmatter_field "$file" "supplements")
     # ADR-066 amendment (P316): when the oversight value is
     # `rejected-pending-supersede`, surface the tracking ticket parenthetically
     # so the compendium badge shows both the disposition AND the supersede in
@@ -284,10 +314,9 @@ emit_entry() {
         return 1
     fi
 
-    # Confirmation: cap 5 bullets, ≤ 110 chars each, joined with "; " on one line.
-    # This is the routine-compliance scannable view; the full Confirmation list
-    # remains in the per-ADR body for deep-dive surfaces.
-    if ! confirmation=$(get_bullets "$file" "Confirmation" 5 | strip_links | compact_join_bullets 110); then
+    # Confirmation: preserve every top-level item, ≤ 110 chars each, joined
+    # with "; " on one line for the routine-compliance scannable view.
+    if ! confirmation=$(get_bullets "$file" "Confirmation" 0 | strip_links | compact_join_bullets 110); then
         return 1
     fi
 
@@ -317,6 +346,15 @@ emit_entry() {
             badges="${badges} | **Supersedes:** ${superseded}"
         fi
         echo "${badges}"
+        if [ -n "$superseded_by" ] && [ "$superseded_by" != "[]" ]; then
+            echo "**Superseded-by:** ${superseded_by}"
+        fi
+        if [ -n "$amends" ] && [ "$amends" != "[]" ]; then
+            echo "**Amends:** ${amends}"
+        fi
+        if [ -n "$supplements" ] && [ "$supplements" != "[]" ]; then
+            echo "**Supplements:** ${supplements}"
+        fi
         if [ -n "$chosen" ]; then
             echo "**Chosen:** ${chosen}"
         fi

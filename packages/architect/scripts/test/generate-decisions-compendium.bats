@@ -288,6 +288,56 @@ mk_adr() {
   grep -q '^\*\*Related:\*\* ADR-001$' "$out"
 }
 
+@test "generator preserves every confirmation item and typed relationship" {
+  local adr="$DIR/docs/decisions/042-metadata.accepted.md" out item
+  {
+    echo "---"
+    echo 'status: "accepted"'
+    echo "date: 2026-08-22"
+    echo "supersedes: [014-original-decision]"
+    echo "superseded-by: 999-future-decision"
+    echo "amends:"
+    echo "  - 024-first-amendment"
+    echo "  - 031-second-amendment"
+    echo "supplements:"
+    echo "  - 040-first-decision"
+    echo "  - 054-second-decision"
+    echo "  - 060-third-decision"
+    echo "  - 061-fourth-decision"
+    echo "  - 085-fifth-decision"
+    echo "  - 154-sixth-decision"
+    echo "---"
+    echo ""
+    echo "# Metadata"
+    echo ""
+    echo "## Decision Outcome"
+    echo ""
+    echo 'Chosen option: **"Preserve metadata"**, because every item matters.'
+    echo ""
+    echo "## Confirmation"
+    echo ""
+    for item in one two three four five six seven eight nine; do
+      echo "- [ ] Confirmation $item."
+    done
+    echo ""
+    echo "## Related"
+    echo ""
+    echo "- Relates to ADR-001"
+  } > "$adr"
+
+  run bash "$SCRIPT" "$DIR/docs/decisions"
+  [ "$status" -eq 0 ]
+  out="$DIR/docs/decisions/README.md"
+  for item in one two three four five six seven eight nine; do
+    grep -q "Confirmation $item\." "$out"
+  done
+  grep -q '^\*\*Status:\*\* accepted | \*\*Supersedes:\*\* \[014-original-decision\]$' "$out"
+  grep -q '^\*\*Superseded-by:\*\* 999-future-decision$' "$out"
+  grep -q '^\*\*Amends:\*\* \[024-first-amendment, 031-second-amendment\]$' "$out"
+  grep -q '^\*\*Supplements:\*\* \[040-first-decision, 054-second-decision, 060-third-decision, 061-fourth-decision, 085-fifth-decision, 154-sixth-decision\]$' "$out"
+  grep -q '^\*\*Related:\*\* ADR-001$' "$out"
+}
+
 # --- Error handling ---------------------------------------------------------
 
 @test "missing decisions dir exits 2 with a clear error" {
