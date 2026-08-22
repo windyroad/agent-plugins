@@ -65,7 +65,8 @@ function diagnoseSubagentStop(input, outcome, reason) {
 }
 
 function statePath(input, target, suffix = "") {
-  return join(riskDir(input.session_id), `codex-agent-${Buffer.from(target).toString("base64url")}${suffix}`);
+  const normalized = target.startsWith("/root/") ? target.slice("/root/".length) : target;
+  return join(riskDir(input.session_id), `codex-agent-${Buffer.from(normalized).toString("base64url")}${suffix}`);
 }
 
 function clearTarget(input, target) {
