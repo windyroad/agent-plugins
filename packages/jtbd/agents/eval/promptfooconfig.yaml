@@ -8,22 +8,14 @@
 # structural-grep escape hatch that RFC-010/RFC-011 shipped under. This is the
 # agent-prose twin of the SKILL evals (packages/itil/skills/*/eval/).
 #
-# Both fixtures have one authoritative outcome: `JTBD Review: PASS`. Assert
-# that emitted contract directly. A second LLM judge adds no semantic signal
-# here and made identical correct outputs alternate PASS/FAIL in CI run
-# 31537137532.
+# Each fixture has one authoritative outcome. Assert the emitted contract
+# directly. A second LLM judge adds no semantic signal here and made identical
+# correct outputs alternate PASS/FAIL in CI run 31537137532.
 #
-# COVERAGE NOTE (RFC-012 S1, drain state 2026-06-27): the canonical
-# positive-fire [Unratified Dependency] fixture ("cite an unratified job →
-# expect the flag") is NOT included here. The P288 jtbd oversight drain has
-# completed — all 18 jtbd jobs/personas are `human-oversight: confirmed`, so
-# no live unratified artifact exists to cite, and the shim resolves only the
-# live docs/jtbd root. The positive-fire branch needs a synthetic fixture
-# corpus and is tracked as RFC-012 S1b (do NOT let it rot into prose-only).
-# The two fixtures below pin the drain-INDEPENDENT properties: correct PASS
-# classification, and the inverse-P078/P132 over-fire guard (which still
-# exercises the ratification decision path — the agent must decide NOT to
-# fire). See P324 + RFC-012.
+# JTBD-006 currently carries `human-oversight: unconfirmed`, so the first
+# fixture pins the positive [Unratified Dependency] branch. The second pins
+# the inverse-P078/P132 over-fire guard for an ambient change with no explicit
+# dependency. See P324 + RFC-012.
 #
 # Run from repo root:
 #   npx promptfoo eval -c packages/jtbd/agents/eval/promptfooconfig.yaml
@@ -37,9 +29,9 @@
 # @adr ADR-052 (behavioural-tests-default; Surface-2 narrowing)
 
 description: |
-  jtbd review-agent verdict eval — correct PASS classification on a ratified
-  job citation, and the inverse-P078/P132 over-fire guard ([Unratified
-  Dependency] must NOT fire on ambient alignment with no explicit dependency).
+  jtbd review-agent verdict eval — correct ISSUES FOUND classification on an
+  unratified job citation, and the inverse-P078/P132 over-fire guard
+  ([Unratified Dependency] must NOT fire on ambient alignment).
 
 # Serialize the fixtures because the agent may write its subordinate global
 # /tmp/jtbd-verdict hook handoff. Promptfoo grades the authoritative inline
@@ -55,7 +47,7 @@ prompts:
   - '{{prompt}}'
 
 tests:
-  - description: PASS on a proposal citing a ratified job (JTBD-006), no over-fire
+  - description: ISSUES FOUND on a proposal explicitly citing unratified JTBD-006
     vars:
       prompt: |
         PRE-EDIT alignment gate. Review this PROPOSED change against the
@@ -70,10 +62,12 @@ tests:
         Classify the alignment of this proposal and give your verdict inline,
         beginning with the `JTBD Review:` verdict line.
     assert:
-      # The inline verdict is the authoritative channel. This exact assertion
-      # covers both correct job classification and the no-over-fire outcome.
+      # The inline verdict is the authoritative channel. Pin both the verdict
+      # and the reason so a generic alignment failure cannot pass this case.
       - type: icontains
-        value: 'JTBD Review: PASS'
+        value: 'JTBD Review: ISSUES FOUND'
+      - type: icontains
+        value: 'Unratified Dependency'
 
   - description: Over-fire guard — ambient change, no explicit cite, no [Unratified Dependency]
     vars:
