@@ -1,11 +1,16 @@
 {
   "name": "@windyroad/itil",
   "version": "1.2.0",
-  "description": "ITIL-aligned IT service management for Claude Code (problem, and future incident/change skills)",
+  "description": "ITIL-aligned IT service management for Claude Code and Codex",
   "bin": {
     "windyroad-itil": "./bin/install.mjs"
   },
   "type": "module",
+  "scripts": {
+    "build:codex": "node scripts/sync-codex-skills.mjs --build",
+    "prepack": "node scripts/sync-codex-skills.mjs --pack",
+    "postpack": "node scripts/sync-codex-skills.mjs --restore-pack"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -17,22 +22,30 @@
     "claude-code-plugin",
     "ai-agent",
     "ai-coding",
-    "itil"
+    "itil",
+    "codex"
   ],
   "files": [
     "bin/",
     "agents/",
     "hooks/",
     "skills/",
+    "skills-codex/",
     "scripts/",
     "templates/",
+    ".agents/",
     ".claude-plugin/",
+    ".codex-plugin/",
+    "hooks-codex/",
     "lib/",
     "!skills/*/eval/",
     "!agents/test/",
     "!hooks/test/",
     "!lib/test/",
     "!scripts/test/",
+    "!scripts/check-published-internal-ids.sh",
+    "!scripts/codex-work-problems.md",
+    "!scripts/sync-codex-skills.mjs",
     "!skills/*/test/"
   ]
 }

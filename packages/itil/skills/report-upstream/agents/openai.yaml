@@ -1,0 +1,3 @@
+interface:
+  display_name: "WR ITIL: Report Upstream"
+  short_description: "Report a local problem to an upstream project."

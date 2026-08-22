@@ -93,6 +93,13 @@ if has_approval_marker "$FILE_PATH" "$PWD"; then
 fi
 
 BASENAME=$(basename "$FILE_PATH")
+REL_PATH="${FILE_PATH#"$PWD"/}"
+CONFIG_DIR="${REL_PATH%%/*}"
 
-claude_space_deny "BLOCKED: Cannot Write|Edit '${BASENAME}' under .claude/. That directory is user-controlled config space — agents must not write project-generated artefacts there. Use docs/plans/ for plans, docs/audits/ for audit logs, or attach inline to the relevant problem ticket. To pre-authorize a specific .claude/ path, create marker '.claude/.agent-write-approved-<sha256-of-rel-path>' (P131; see project CLAUDE.md MANDATORY rule)."
+if [ "$CONFIG_DIR" = ".claude" ]; then
+  INSTRUCTIONS="project CLAUDE.md MANDATORY rule"
+else
+  INSTRUCTIONS="project AGENTS.md MANDATORY rule"
+fi
+claude_space_deny "BLOCKED: Cannot Write|Edit '${BASENAME}' under ${CONFIG_DIR}/. That directory is user-controlled config space — agents must not write project-generated artefacts there. Use docs/plans/ for plans, docs/audits/ for audit logs, or attach inline to the relevant problem ticket. To pre-authorize a specific ${CONFIG_DIR}/ path, create marker '${CONFIG_DIR}/.agent-write-approved-<sha256-of-rel-path>' (P131; see ${INSTRUCTIONS})."
 exit 0

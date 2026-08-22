@@ -30,11 +30,6 @@ teardown() {
   cd "$ORIG_DIR"
   rm -rf "$TEST_DIR"
   rm -f "/tmp/manage-problem-grep-${SID}"
-  rm -f "/tmp/wr-itil-rfc-capture-grep-${SID}"
-}
-
-set_rfc_marker() {
-  : > "/tmp/wr-itil-rfc-capture-grep-${SID}"
 }
 
 # Helper: run the hook with mock JSON for a Write tool call to file_path
@@ -247,14 +242,9 @@ teardown_other_sid_marker() {
   [[ "$output" != *"Step 2 substep 7"* ]]
 }
 
-# --- P170 / ADR-060: RFC tier extension ---
-#
-# The hook gate covers both docs/problems/ and docs/rfcs/. Each tier has its
-# own marker (problems: /tmp/manage-problem-grep-${SID};
-# rfcs: /tmp/wr-itil-rfc-capture-grep-${SID}) and its own deny message
-# pointing to the right skill (manage-problem vs capture-rfc).
+# --- RFC documents are retired; new fixes use story-map release rows ---
 
-@test "rfcs deny: Write to new docs/rfcs/RFC-001-foo.proposed.md without RFC marker" {
+@test "rfcs deny: Write to new docs/rfcs/RFC-001-foo.proposed.md" {
   run run_write_hook "$PWD/docs/rfcs/RFC-001-foo.proposed.md" "$SID"
   [ "$status" -eq 0 ]
   [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
@@ -268,19 +258,20 @@ teardown_other_sid_marker() {
   [[ "$output" != *"/wr-itil:manage-problem"* ]]
 }
 
-@test "rfcs deny message names the I1 trace-to-problem invariant + ADR-060" {
+@test "rfcs deny message names the release-row recovery" {
   run run_write_hook "$PWD/docs/rfcs/RFC-001-foo.proposed.md" "$SID"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"problem-trace"* ]]
-  [[ "$output" == *"ADR-060"* ]]
+  [[ "$output" == *"problem-traced release row"* ]]
+  [[ "$output" == *"story map"* ]]
 }
 
-@test "rfcs allow: Write to new docs/rfcs/RFC-001-foo.proposed.md WITH RFC marker" {
-  set_rfc_marker
+@test "rfcs deny: legacy RFC marker cannot authorize a new document" {
+  : > "/tmp/wr-itil-rfc-capture-grep-${SID}"
   run run_write_hook "$PWD/docs/rfcs/RFC-001-foo.proposed.md" "$SID"
   [ "$status" -eq 0 ]
-  [[ "$output" != *"BLOCKED"* ]]
-  [[ "$output" != *"\"permissionDecision\": \"deny\""* ]]
+  [[ "$output" == *"BLOCKED"* ]]
+  [[ "$output" == *"\"permissionDecision\": \"deny\""* ]]
+  rm -f "/tmp/wr-itil-rfc-capture-grep-${SID}"
 }
 
 @test "rfcs allow: Write to docs/rfcs/README.md regardless of marker (chicken-and-egg)" {
@@ -303,23 +294,12 @@ teardown_other_sid_marker() {
   done
 }
 
-@test "rfcs marker independence: problem marker does NOT unlock RFC writes" {
-  # The two markers are siblings, not interchangeable. Setting the
-  # problem-tier marker should NOT bypass the RFC-tier gate.
+@test "rfcs deny: problem marker does NOT unlock RFC writes" {
   set_marker
   run run_write_hook "$PWD/docs/rfcs/RFC-001-foo.proposed.md" "$SID"
   [ "$status" -eq 0 ]
   [[ "$output" == *"BLOCKED"* ]]
   [[ "$output" == *"capture-rfc"* ]]
-}
-
-@test "problems marker independence: RFC marker does NOT unlock problem writes" {
-  # Inverse direction — preserves audit-trail per-surface granularity.
-  set_rfc_marker
-  run run_write_hook "$PWD/docs/problems/999-foo.open.md" "$SID"
-  [ "$status" -eq 0 ]
-  [[ "$output" == *"BLOCKED"* ]]
-  [[ "$output" == *"manage-problem"* ]]
 }
 
 @test "rfcs allow: existing RFC file (overwrite) regardless of marker" {

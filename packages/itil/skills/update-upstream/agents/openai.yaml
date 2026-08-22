@@ -1,0 +1,3 @@
+interface:
+  display_name: "WR ITIL: Update Upstream"
+  short_description: "Post governed lifecycle updates upstream."

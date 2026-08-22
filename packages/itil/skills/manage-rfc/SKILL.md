@@ -272,7 +272,7 @@ Same conditional drain as `manage-problem` Step 12: if not in an AFK orchestrato
 | Commit grain | One commit per intake / per transition / per review | One commit per capture |
 | AskUserQuestion authority | direction-setting (transition-trigger ambiguity), deviation-approval (scope expansion mid-RFC), silent-mechanical (status renames, README refresh) | direction-setting (problem-trace), taste (title), silent-mechanical (everything else) |
 
-The two skills share the `/tmp/wr-itil-rfc-capture-grep-${SESSION_ID}` create-gate marker (sibling to `/tmp/manage-problem-grep-${SESSION_ID}`).
+New RFC documents are retired. This skill manages legacy RFC documents only; new fix proposals use release rows and stories via `/wr-itil:capture-rfc`.
 
 ## Related
 

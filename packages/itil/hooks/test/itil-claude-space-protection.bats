@@ -24,6 +24,7 @@ setup() {
   cd "$TEST_DIR"
   mkdir -p .claude/skills/myskill .claude/commands .claude/agents \
     .claude/hooks .claude/projects/abc/memory .claude/worktrees \
+    .codex/agents .codex/skills \
     docs/plans
 }
 
@@ -80,6 +81,19 @@ marker_path_for() {
   run run_hook "Write" "$PWD/.claude/scratch/state.json"
   [ "$status" -eq 0 ]
   [[ "$output" == *"BLOCKED"* ]]
+}
+
+@test "deny: Write to project-generated .codex/plans output" {
+  run run_hook "Write" "$PWD/.codex/plans/foo.md"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"BLOCKED"* ]]
+  [[ "$output" == *"AGENTS.md"* ]]
+}
+
+@test "allow: Write to generated .codex/agents runtime surface" {
+  run run_hook "Write" "$PWD/.codex/agents/wr-itil.toml"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"BLOCKED"* ]]
 }
 
 # --- Allow paths: user-space allow-list ---

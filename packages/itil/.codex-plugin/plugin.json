@@ -1,0 +1,32 @@
+{
+  "name": "wr-itil",
+  "version": "1.2.0",
+  "description": "ITIL problem-management workflows for AI coding agents",
+  "author": {
+    "name": "Windy Road Technology",
+    "url": "https://windyroad.com.au"
+  },
+  "homepage": "https://github.com/windyroad/agent-plugins/tree/main/packages/itil",
+  "repository": "https://github.com/windyroad/agent-plugins",
+  "license": "MIT",
+  "keywords": ["itil", "problem-management", "governance", "codex", "claude-code"],
+  "skills": "./skills-codex/",
+  "interface": {
+    "displayName": "Windy Road ITIL",
+    "shortDescription": "Manage ITIL problems, incidents, RFCs, stories, and maps",
+    "longDescription": "Complete ITIL workflow support for Codex: capture, prioritise, investigate, transition, review, reconcile, and report service-management records.",
+    "developerName": "Windy Road Technology",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "websiteURL": "https://windyroad.com.au",
+    "privacyPolicyURL": "https://windyroad.com.au/privacy",
+    "termsOfServiceURL": "https://windyroad.com.au/terms",
+    "defaultPrompt": [
+      "Work the highest-priority problem",
+      "Manage this incident",
+      "Review and reconcile the ITIL backlog"
+    ],
+    "brandColor": "#0F766E",
+    "screenshots": []
+  }
+}

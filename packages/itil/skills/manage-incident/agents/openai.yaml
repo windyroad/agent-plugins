@@ -1,0 +1,3 @@
+interface:
+  display_name: "WR ITIL: Manage Incident"
+  short_description: "Declare, triage, mitigate, restore, and close incidents."

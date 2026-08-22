@@ -1,0 +1,3 @@
+interface:
+  display_name: "WR ITIL: Capture RFC"
+  short_description: "Draw a traced RFC release row with at least one story."

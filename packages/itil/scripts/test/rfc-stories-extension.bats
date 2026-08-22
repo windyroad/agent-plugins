@@ -160,8 +160,10 @@ EOF
   [ "$status" -eq 0 ]
 }
 
-@test "rfc-stories-extension: capture-rfc SKILL.md frontmatter template includes stories field" {
-  run grep -E '^stories:' "$CAPTURE_RFC"
+@test "rfc-stories-extension: capture-rfc draws a row and story instead of a document" {
+  run grep -E 'wr-itil-story-map add-band.*wr-itil-story-map add-card|add-band.*add-card' "$CAPTURE_RFC"
+  [ "$status" -eq 0 ]
+  run grep -F 'Never create a new file under `docs/rfcs/`' "$CAPTURE_RFC"
   [ "$status" -eq 0 ]
 }
 

@@ -1,0 +1,3 @@
+interface:
+  display_name: "WR ITIL: Link Incident"
+  short_description: "Link an incident to an existing problem."

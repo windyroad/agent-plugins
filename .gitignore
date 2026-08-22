@@ -13,6 +13,9 @@ node_modules/
 # Temporary backup while @windyroad/risk-scorer packs Codex-facing skills
 packages/risk-scorer/.pack-claude-skills/
 packages/architect/.pack-claude-skills/
+packages/itil/skills-codex/
+packages/itil/hooks-codex/
+packages/itil/.pack-published-source/
 
 # Per-project consent caches — per-machine, never committed (P120 / ADR-034)
 # itil.config.json holds the ADR-101 AFK-accept opt-in — a governance-loosening

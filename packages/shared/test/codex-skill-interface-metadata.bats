@@ -30,9 +30,8 @@ risk-scorer|wip|WR Risk Scorer: WIP
 EOF
 }
 
-# Coverage is derived from .codex-plugin/ presence, not the literal table above,
-# so a new Codex-bearing skill or package fails here instead of silently
-# shipping label-less (ADR-083 amendment 2026-07-29).
+# Coverage is derived from .codex-plugin/ presence, including packages that
+# project canonical skill sources into a generated runtime directory.
 @test "every skill of every Codex-bearing package declares interface metadata" {
   local missing=() manifests=("$REPO_ROOT"/packages/*/.codex-plugin/plugin.json)
   # Guard the unmatched-glob case, or a path rename makes this test vacuous.

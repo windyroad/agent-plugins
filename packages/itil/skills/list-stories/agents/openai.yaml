@@ -1,0 +1,3 @@
+interface:
+  display_name: "WR ITIL: List Stories"
+  short_description: "List delivery stories and lifecycle state."

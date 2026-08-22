@@ -1,0 +1,3 @@
+interface:
+  display_name: "WR ITIL: Capture Problem"
+  short_description: "Record a problem ticket with traceable evidence and risk."

@@ -1,0 +1,3 @@
+interface:
+  display_name: "WR ITIL: Reconcile README"
+  short_description: "Reconcile the problem index with ticket state."

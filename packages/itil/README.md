@@ -1,6 +1,6 @@
 # @windyroad/itil
 
-**ITIL-aligned IT service management for Claude Code.** Track recurring incidents, perform root cause analysis, and prioritise fixes using WSJF -- all inside your coding sessions. *Maturity: Experimental (suite-bootstrap window; 327 invocations / 30d).*
+**ITIL-aligned IT service management for Claude Code and Codex.** Track recurring incidents, perform root cause analysis, and prioritise fixes using WSJF -- all inside your coding sessions. *Maturity: Experimental.*
 
 Part of [Windy Road Agent Plugins](../../README.md).
 
@@ -33,6 +33,15 @@ npx @windyroad/itil
 ```
 
 Restart Claude Code after installing.
+
+For Codex:
+
+```bash
+npx @windyroad/itil --runtime codex --scope user
+```
+
+Restart Codex after installing. Codex exposes the complete ITIL skill set, the
+exact `wr-itil:hang-off-check` agent, and five consolidated lifecycle hooks.
 
 > **Requires:** [`@windyroad/risk-scorer`](../risk-scorer/). The installer warns if it's missing.
 >

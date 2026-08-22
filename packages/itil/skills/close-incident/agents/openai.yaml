@@ -1,0 +1,3 @@
+interface:
+  display_name: "WR ITIL: Close Incident"
+  short_description: "Close a restored incident after its problem gate passes."

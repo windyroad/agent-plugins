@@ -1,0 +1,3 @@
+interface:
+  display_name: "WR ITIL: Check Upstream Responses"
+  short_description: "Poll reported upstream issues and pull requests."

@@ -1,0 +1,3 @@
+interface:
+  display_name: "WR ITIL: Reconcile Story Maps"
+  short_description: "Reconcile the story-map index with map state."

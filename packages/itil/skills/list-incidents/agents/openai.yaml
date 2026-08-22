@@ -1,0 +1,3 @@
+interface:
+  display_name: "WR ITIL: List Incidents"
+  short_description: "List active incidents in lifecycle order."

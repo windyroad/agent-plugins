@@ -79,9 +79,9 @@ is_protected_claude_path() {
   # Strip leading ./ if present
   rel_path="${rel_path#./}"
 
-  # Must be under .claude/ at project-relative root depth.
+  # Must be under a runtime config directory at project-relative root depth.
   case "$rel_path" in
-    .claude/*) ;;
+    .claude/*|.codex/*) ;;
     *) return 1 ;;
   esac
 
@@ -114,6 +114,13 @@ is_protected_claude_path() {
     # Claude Code's own state: projects/<id>/memory/, worktrees/
     .claude/projects/*) return 1 ;;
     .claude/worktrees/*) return 1 ;;
+    # Codex runtime configuration and generated runtime surfaces.
+    .codex/config.toml) return 1 ;;
+    .codex/AGENTS.md) return 1 ;;
+    .codex/hooks.json) return 1 ;;
+    .codex/agents/*) return 1 ;;
+    .codex/skills/*) return 1 ;;
+    .codex/.agent-write-approved-*) return 1 ;;
   esac
 
   # Project-scoped .claude/ path NOT on the allow-list — protected.
@@ -156,7 +163,8 @@ has_approval_marker() {
   fi
 
   [ -n "$hash" ] || return 1
-  [ -f "${pwd_root}/.claude/.agent-write-approved-${hash}" ]
+  local config_dir="${rel_path%%/*}"
+  [ -f "${pwd_root}/${config_dir}/.agent-write-approved-${hash}" ]
 }
 
 # Emit fail-closed PreToolUse deny JSON. Reason should be terse (<500
