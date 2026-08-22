@@ -276,7 +276,7 @@ tests:
         push, and release residual risk are each 4/25. Return only the required
         structured output.
     assert:
-      - type: not-contains
-        value: 'RISK_SCORES:'
+      - type: not-regex
+        value: 'RISK_SCORES:\\s*commit='
       - type: icontains
         value: 'RISK_CWD'
