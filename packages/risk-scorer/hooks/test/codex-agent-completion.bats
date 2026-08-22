@@ -70,7 +70,7 @@ current_pipeline_close_input() {
 
 direct_pipeline_interrupt_input() {
   printf '{"session_id":"%s","cwd":"%s","tool_name":"interrupt_agent","tool_input":{"target":"%s"},"tool_response":{"previous_status":{"completed":"RISK_SCORES: commit=4 push=4 release=4\\nRISK_CWD: %s"}}}' \
-    "$SESSION" "$OTHER_REPO" "$TARGET" "$PIPELINE_REPO"
+    "$SESSION" "$OTHER_REPO" "${TARGET#/root/}" "$PIPELINE_REPO"
 }
 
 current_empty_wait_input() {
