@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.18.16
+
+### Patch Changes
+
+- 9b6fa93: Recognize relative Codex completion targets for canonically named risk agents.
+
 ## 0.18.15
 
 ### Patch Changes
