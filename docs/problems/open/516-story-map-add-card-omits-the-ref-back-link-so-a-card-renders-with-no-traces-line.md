@@ -5,6 +5,7 @@
 **Priority**: 8 (Medium) — Impact: 2 × Likelihood: 4 — derived at capture from the description per Step 4a. Impact 2: internal tooling, no shipped-package harm; the card still anchors to its story file and the row header still links the driving problem, so independent trace paths survive. Likelihood 4: `--ref` is optional in the CLI but universal in practice, so any invocation that omits it silently produces the degraded card.
 **Origin**: internal
 **Effort**: S — derived at capture. One script: either default the field or warn when it is absent.
+**WSJF**: 8 — (8 × 1.0) / 1 (added 2026-08-24 review — line was absent at capture)
 **JTBD**: JTBD-008
 **Persona**: developer
 

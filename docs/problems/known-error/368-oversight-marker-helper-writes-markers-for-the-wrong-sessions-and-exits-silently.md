@@ -1,11 +1,11 @@
 # Problem 368: The oversight-marker helper writes markers for the wrong sessions and exits silently
 
-**Status**: Open
+**Status**: Known Error (auto-transitioned 2026-08-24 review — the ticket declares "Root cause identified 2026-06-17" with the `find` invocation named as the mechanism, and documents three workarounds; only the fix is outstanding)
 **Reported**: 2026-06-17
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 — **re-rated 2026-08-21 at the reopen**. The 2026-07-02 rating (9, Impact 3 × Likelihood 3, "one-line env fix") scoped only the cold path. Impact 3: the unguarded write loop hands every in-window session a standing pass to write `human-oversight: confirmed` on the artefact, which inverts the control ADR-110 exists to provide — a governance-integrity failure, not a friction one. Likelihood 4: no control on the warm path, adopter-observed 2026-08-12, and reproduced here at 3310 markers across 3099 session ids.
 **Origin**: inbound-reported (adopter-repo P212)
 **Effort**: M. WSJF = (12 × 1.0) / 2 = 6 — status multiplier is 1.0 at Open, not the 2.0 a Known Error carries. Re-rated 2026-08-21: the cold-path fix was S; the warm path needs a caller-resolution change plus the spray fix, and both touch the discipline hook's contract.
-**WSJF**: 6 — (12 × 1.0) / 2 (added 2026-08-21 review)
+**WSJF**: 12 — (12 × 2.0) / 2 (re-rated 2026-08-24 review: Known Error multiplier 2.0 replaces the Open 1.0 on auto-transition; Severity and Effort unchanged)
 **JTBD**: JTBD-001, JTBD-006
 **Persona**: plugin-developer
 

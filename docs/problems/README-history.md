@@ -1362,3 +1362,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-08-21 **P477 verification pending** — the Codex completion bridge's checkout-bound receipt path is confirmed shipped in @windyroad/risk-scorer 0.18.10-0.18.15 with all six declared fix bullets covered by named passing tests (40/40 green); moved out of the dev-work queue to await user verification on a live Codex run.
 
 > Last reviewed: 2026-08-21 **P508 slice A landed** — the propose-fix gate now proposes a release row instead of a standalone RFC document, and the identity allocator that was re-issuing an id a row already held is fixed. Readers repointed ahead of the writer; P508 re-scored 20 → 16 because the automatic path to the retired artefact is closed while a direct invocation can still reach it.
+
+## 2026-08-24
+
+> Last reviewed: 2026-08-21 **P517 captured** — an iteration can burn its whole budget in the commit gate and lose everything, because the commit is the last step and the gate rounds compound (lightweight aside via /wr-itil:capture-problem)

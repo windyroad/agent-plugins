@@ -1,11 +1,11 @@
 # Problem 471: run-retro Step 2d ask-hygiene trail path collides across same-day iterations, clobbering prior entries
 
-**Status**: Open
+**Status**: Known Error (auto-transitioned 2026-08-24 review — the immediate cause is stated as established, the 2026-08-21 four-segment collision reproduced it live, and the append convention is documented as the workaround; the open question is the fix shape, not the cause)
 **Reported**: 2026-07-26
 **Priority**: 8 (Medium) — Impact: 2 × Likelihood: 4 — derived at capture from the description per Step 4a
 **Origin**: internal
 **Effort**: S — derived at capture per Step 4a
-**WSJF**: 8 — (8 × 1.0) / 1 (added 2026-08-21 review)
+**WSJF**: 16 — (8 × 2.0) / 1 (re-rated 2026-08-24 review: Known Error multiplier 2.0 replaces the Open 1.0 on auto-transition; Severity and Effort unchanged)
 **JTBD**: JTBD-006
 **Persona**: developer
 
