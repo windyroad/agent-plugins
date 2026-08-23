@@ -1366,3 +1366,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-08-24
 
 > Last reviewed: 2026-08-21 **P517 captured** — an iteration can burn its whole budget in the commit gate and lose everything, because the commit is the last step and the gate rounds compound (lightweight aside via /wr-itil:capture-problem)
+> Last reviewed: 2026-08-24 **inbound-discovery pass + 2 auto-transitions** — upstream poll found 2 new issues: #444 (story-map link underline) was already fixed and released in @windyroad/itil@1.1.2, #445 (rendered maps announce every reference link as a bare "P033") became P518. P368 and P471 auto-transitioned Open -> Known Error on confirmed root cause + documented workaround, doubling their WSJF to 12 and 16. P516 was missing its WSJF line; added at 8. The Step 4.6 relevance-close pass ran for measurement only and closed nothing, per P463's documented workaround — it fired on 86 of 111 tickets (77%).
+

@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-24 **inbound-discovery pass + 2 auto-transitions** — upstream poll found 2 new issues: #444 (story-map link underline) was already fixed and released in @windyroad/itil@1.1.2, #445 (rendered maps announce every reference link as a bare "P033") became P518. P368 and P471 auto-transitioned Open -> Known Error on confirmed root cause + documented workaround, doubling their WSJF to 12 and 16. P516 was missing its WSJF line; added at 8. The Step 4.6 relevance-close pass ran for measurement only and closed nothing, per P463's documented workaround — it fired on 86 of 111 tickets (77%).
+> Last reviewed: 2026-08-24 **P519 captured** — the Verification Pending -> Closed transition is reserved for the maintainer across eleven shipped SKILL prose loci, so evidence-based closure never fires and all 153 verifying tickets are stranded (lightweight aside via /wr-itil:capture-problem)
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -14,6 +14,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 20 | P463 | Relevance-close evaluator over-fires — a bare ADR/skill citation is read as "fix shipped", so live tickets return CLOSE-CANDIDATE | 20 (Very High) | Known Error | M | 2026-07-26 | inbound-reported (#414) |
 | 20 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Known Error | M | 2026-08-20 | internal |
 | 10 | P509 | Story-map capture produces a work breakdown, not the persona's journey | 20 (Very High) | Known Error | L | 2026-08-21 | internal |
+| 10 | P519 | The Verification Pending -> Closed transition is reserved for the maintainer, so evidence-based closure never fires and the verification queue grows without bound | 20 (Very High) | Open | M | 2026-08-24 | internal |
 | 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 (Critical) | Known Error | XL | 2026-05-03 | internal |
 | | | **Tier 1 — Inbound-reported** | | | | | |
 | 24 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | 12 (High) | Known Error | S | 2026-07-06 | inbound-reported (#169) |
