@@ -33,6 +33,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P450 | Verification Queue evidence cells are never populated from subsequent-session exercises, so the run-retro Step 4a auto-drain never fires | 12 (High) | Known Error | L | 2026-07-15 | inbound-reported (#323) |
 | 6 | P436 | Issue templates declare labels ('problem', 'needs-triage') that don't exist; scaffold-intake should provision declared labels | 6 (Medium) | Open | S | 2026-07-06 | inbound-reported (#170) |
 | 6 | P486 | The policy validator checks a policy's shape, never whether it contradicts itself | 12 (High) | Open | M | 2026-08-09 | inbound-reported |
+| 6 | P521 | Governance tools exit 0 over output they never validated | 12 (High) | Open | M | 2026-08-25 | inbound-reported (adopter-repo P224) |
 | 4.5 | P432 | Assistant does not auto-close the feedback loop on inbound-feedback conversion (channel-agnostic) | 9 (Medium) | Open | M | 2026-07-06 | inbound-reported (#347) |
 | 4.5 | P435 | wr-risk-scorer gates hardcoded to home-repo shape — push-gate over-fires on non-npm repos, external-comms under-fires on static-site/deck content | 9 (Medium) | Open | M | 2026-07-06 | inbound-reported (#235, #253) |
 | 4.5 | P441 | work-problems pre-dispatch selection filter misses committed-but-unpushed KE (#312) and direction-blocked / interactive-only-skill (#318) states | 9 (Medium) | Open | M | 2026-07-06 | inbound-reported (#312, #315, #318) |
@@ -54,6 +55,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 12 | P462 | Amendment-scoped `human-oversight: unconfirmed` has no detector — unratified amendment substance never reaches the oversight drain | 12 (High) | Known Error | M | 2026-07-26 | internal |
 | 12 | P510 | A retraction is applied where the claim was authored, not where it was propagated | 12 (High) | Known Error | M | 2026-08-21 | internal |
 | 12 | P495 | The release queue can be consumed in a working copy and nothing says so | 12 (High) | Open | S | 2026-08-09 | internal |
+| 12 | P522 | The pipeline scorer's caller contract is unenforced, so a direct dispatch fails silently and misdirects the blame | 12 (High) | Open | S | 2026-08-25 | internal |
 | 10 | P515 | `drain-register-queue.sh` appends index rows past the end of the register table, so auto-scaffolded risks never reach the index | 10 (High) | Open | S | 2026-08-21 | internal |
 | 9 | P363 | Inbound-reported tickets never receive fix-released verdict on originating issue | 9 (Medium) | Known Error | M | 2026-06-11 | internal |
 | 9 | P464 | Agent self-limits external-comms as "out of scope" in AFK / pre-flight contexts — strands dispatchable lifecycle/ack/upstream-report obligations the framework authorises to proceed | 9 (Medium) | Open | S | 2026-07-26 | corrective-feedback (user, 2026-07-26 |
@@ -94,6 +96,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 4.5 | P501 | Project-specific content leaks into another adopter's generated plugin document | 9 (Medium) | Open | M | 2026-08-18 | corrective-feedback |
 | 4.5 | P517 | An iteration can burn its whole budget in the commit gate and lose everything, because the commit is the last step | 9 (Medium) | Open | M | 2026-08-21 | internal |
 | 4.5 | P520 | Nothing delivers the quiet-period follow-up we promise reporters | 9 (Medium) | Open | M | 2026-08-24 | internal |
+| 4.5 | P523 | Skill eval suites are red on main, so a green run cannot discharge the prose-surface floor | 9 (Medium) | Open | M | 2026-08-25 | internal |
 | 4 | P410 | install-updates leaves stale cached plugin versions on disk — no prune step | 8 (Medium) | Open | M | 2026-07-03 | internal |
 | 4 | P442 | WSJF Rankings render convention differentiates tiers only by ordering + the Origin column — no visual tier separator, so inbound-reported priority is not legible | 8 (Medium) | Open | M | 2026-07-06 | corrective-feedback (user, 2026-07-06 |
 | 4 | P467 | work-problems should surface decisions/ratifications continuously (non-blocking), not only batched at loop-end | 8 (Medium) | Open | M | 2026-07-26 | corrective-feedback (user, 2026-07-26) |
