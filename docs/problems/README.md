@@ -88,6 +88,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P488 | The agent batches artefacts it was told to produce one at a time, then asks permission for the batch | 12 (High) | Open | M | 2026-08-09 | corrective-feedback (user, 2026-08-09) |
 | 6 | P490 | The agent sends status reports into a window that can only hold one actionable thing | 12 (High) | Open | M | 2026-08-09 | corrective-feedback (user, 2026-08-08 and again 2026-08-09) |
 | 6 | P492 | Nothing nudges when unpushed work piles up, so batches grow until someone notices | 12 (High) | Open | M | 2026-08-09 | corrective-feedback (user, 2026-08-09) |
+| 6 | P524 | External adopter handles are public across the committed ticket corpus | 12 (High) | Open | M | 2026-08-25 | internal |
 | 5 | P406 | `github-discussions` channel in `.upstream-channels.json` returns HTTP 410 | 5 (Low) | Open | S | 2026-07-02 | internal |
 | 4.5 | P297 | ADR-047 — governance-artefact scaffolding should be a SessionStart hook (per-project, automatic), not an inline `/install-updates` step | 9 (Med High) | Open | M | 2026-05-25 | internal |
 | 4.5 | P369 | Plugin removes hook file but adopter session still invokes it via stale binding — `architect-compendium-refresh-discipline.sh` case 2026-06-17 | 9 (Medium) | Open | M | 2026-06-17 | internal |
