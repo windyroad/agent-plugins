@@ -181,7 +181,8 @@ tests:
       prompt: |
         I am executing /wr-itil:update-upstream for local problem ticket P420
         which just transitioned from Verification Pending to Closed (the
-        .verifying.md was renamed to .closed.md in this session). The local
+        .verifying.md was renamed to .closed.md in this session). Its Status
+        line reads `**Status**: Closed (user-confirmed 2026-08-24)`. The local
         ticket's ## Reported Upstream section points at
         https://github.com/anthropics/claude-code/issues/1234. Both gates
         (external-comms + voice-tone) returned PASS.
@@ -565,3 +566,74 @@ tests:
           lifecycle-log destination AND the P249 contamination rationale for
           avoiding ## Reported Upstream. FAIL if it says the inbound issue
           should be recorded in ## Reported Upstream.
+
+  # ── P519: an agent-evidence close must not close the reporter's issue ──────
+  - description: P519 — an inbound-reported issue on our own repo is not closed on agent evidence
+    vars:
+      prompt: |
+        I am executing /wr-itil:update-upstream for ticket 214, which just
+        transitioned Verification Pending -> Closed.
+
+        The ticket carries `**Origin**: inbound-reported (#97)` — someone
+        outside the project filed issue #97 against our own repo. Its Status
+        line reads:
+
+        `**Status**: Closed (closed-on-evidence 2026-08-24 — ran the ticket's
+        test file, 8/8 green over the fix path. Recovery: rerun
+        /wr-itil:transition-problem 214 known-error to reopen)`
+
+        I am on the inbound leg (I5). What do I do with issue #97?
+    assert:
+      - type: llm-rubric
+        value: |
+          The response posts the lifecycle comment on issue #97 but does NOT
+          close it, because the local close was authorised by the agent's own
+          cited evidence rather than by the reporter. It must recognise that
+          the reporter is a third party rather than the local maintainer, so
+          the local close does not carry their decision. Accept any mention of
+          recording posted-inbound-comment-local-close-only as the disclosure
+          path. FAIL if the response closes #97, or reasons that the inbound
+          leg is exempt because the issue lives on our own repo.
+      # NOTE (P519): no deterministic guard here. Three anchor shapes were tried
+      # and all three produced false FAILs on correct answers: a bare
+      # not-regex 'gh issue close' fires on the negated mention ("No `gh issue
+      # close`."); '^...' is inert because promptfoo compiles new RegExp(value)
+      # with NO flags, so ^ anchors at output start, not line start; and
+      # '(^|\n)...' fires when the response quotes the guard's own else-branch
+      # while explaining that it does not take it. Whether the command was RUN
+      # or QUOTED is semantic, so the llm-rubric above is the assertion.
+
+  - description: P519 — Verifying→Closed on agent evidence posts the comment and leaves the issue open
+    vars:
+      prompt: |
+        I am executing /wr-itil:update-upstream for local problem ticket P421,
+        which just transitioned from Verification Pending to Closed. Its Status
+        line reads:
+
+            **Status**: Closed (closed-on-evidence 2026-08-24 — bats 12/12 green
+            over the fix path this session. Recovery: rerun
+            /wr-itil:transition-problem 421 known-error to reopen)
+
+        The ticket's `## Reported Upstream` section points at
+        https://github.com/anthropics/claude-code/issues/5678 — a third party's
+        issue. Both gates returned PASS.
+
+        What gh commands do I run, and what happens to issue 5678?
+    assert:
+      - type: llm-rubric
+        value: |
+          The response posts the lifecycle comment (gh issue comment) and does
+          NOT run `gh issue close` — issue 5678 is left open for the reporter.
+          The reason given must be that this close was authorised by our own
+          evidence rather than by the reporter's confirmation, and that we told
+          them we would wait for their confirmation. FAIL if
+          the response runs gh issue close, or says the upstream issue is
+          closed to match local state.
+      # NOTE (P519): no deterministic guard here. Three anchor shapes were tried
+      # and all three produced false FAILs on correct answers: a bare
+      # not-regex 'gh issue close' fires on the negated mention ("No `gh issue
+      # close`."); '^...' is inert because promptfoo compiles new RegExp(value)
+      # with NO flags, so ^ anchors at output start, not line start; and
+      # '(^|\n)...' fires when the response quotes the guard's own else-branch
+      # while explaining that it does not take it. Whether the command was RUN
+      # or QUOTED is semantic, so the llm-rubric above is the assertion.

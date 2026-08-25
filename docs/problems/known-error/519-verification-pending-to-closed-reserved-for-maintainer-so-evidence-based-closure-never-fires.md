@@ -1,13 +1,13 @@
 # Problem 519: The Verification Pending → Closed transition is reserved for the maintainer, so evidence-based closure never fires and the verification queue grows without bound
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-08-24
 **Priority**: 20 (Very High) — Impact: 4 (Significant — a first-class lifecycle stage has no agent-driven exit path at all; 153 tickets are stranded and the governance audit trail systematically misrepresents which fixes are still unverified) × Likelihood: 5 (Almost certain — continuous; the reservation fires on every verifying ticket on every pass, 153/153 observed) — derived at capture per Step 4a
 **Origin**: internal
 **Effort**: M — derived at capture per Step 4a. Eleven prose loci across two shipped packages plus one small predicate script, its ADR-049 shim, behavioural coverage, and a JTBD narrowing. No data-model change, no new ADR (see Root Cause Analysis), no migration. cf. P135 Phase 2 (same class of multi-locus ask-discipline sweep, landed in one session).
-**WSJF**: 10 — (20 × 1.0) / 2 (Open multiplier 1.0; Effort M = 2)
+**WSJF**: 20 — (20 × 2.0) / 2 (Known Error multiplier 2.0 applied 2026-08-24 at the transition; Effort re-rated at the transition per P047 and held at M — the architect and JTBD reviews added the external-reporter carve-out, the gate-(0) enumeration fix and the release-row vehicle, but removed nothing, and it all landed in one session)
 **JTBD**: JTBD-006, JTBD-001
-**Persona**: plugin-developer
+**Persona**: developer
 
 ## Description
 
@@ -91,15 +91,37 @@ The gate is already open: JTBD-006 carries `human-oversight: unconfirmed` (downg
 
 The census is its own warning: 153 rows, exactly 1 carrying `yes — observed`. The evidence cell is the durable input that agent-authorised closure consumes. Flipping the reservation alone authorises the agent to close **one ticket**. The other half is a pass that actually populates evidence cells against the standing 153, reading each ticket's `## Fix Released` section and testing it against the tree. Recorded here so a later reader does not observe "the change landed, tests passed, queue still 152" and wrongly conclude the reservation was never the cause. See the Fix Strategy's Phase 2.
 
+**Release vehicle**: RFC-072 — release row "A fix I can prove works gets closed without me" on `docs/story-maps/draft/STORY-MAP-002-take-a-problem-from-noticed-to-resolved.html`, carrying STORY-066. Drawn 2026-08-24 per ADR-071 / ADR-073 / ADR-119 (a fix proposal draws a release row, not a document), via `story-map-edit.mjs` + `render-story-map.mjs` so the row lives in the map's JSON island rather than only in the rendered grid — a hand-edited grid is dropped by the next render and leaves the problem reading as untraced. The map's oversight marker correctly stays `confirmed`: under ADR-103 releases and their cards are scheduling, not substance, so the hash is unchanged (`oversight_map_substance_keys` in `packages/itil/lib/story-oversight.sh` is the authority).
+
 ### Investigation Tasks
 
 - [x] Confirm the reservation is stale rather than ratified — architect review 2026-08-24, Finding 1.
 - [x] Enumerate the full locus set — architect review 2026-08-24, Finding 2 (eleven must-fix, four should-fix, six deliberately-left-alone).
 - [x] Establish whether an ADR is needed — no. Covering set is ADR-044 / ADR-026 / ADR-013 Rule 5 / ADR-079, all confirmed; ADR-022 is immutable under ADR-116 and does not carry the reservation in its Decision Outcome anyway.
 - [x] Hang-off arbitration against P450 and the wider backlog — PROCEED_NEW.
-- [ ] Amend the eleven must-fix loci + the should-fix set.
-- [ ] Narrow JTBD-006 `:25` / `:26` / `:38`; leave the oversight marker `unconfirmed` and queue the post-change ratification per P357.
-- [ ] Land the DO-NOT-CLOSE predicate + ADR-049 shim + behavioural coverage.
+- [x] Amend the eleven must-fix loci + the should-fix set — done 2026-08-24, plus four the post-edit reviews caught (see below).
+- [x] Narrow JTBD-006 `:22` / `:25` / `:26` / `:27` / `:38`; marker left `unconfirmed`, post-change ratification queued per P357.
+- [x] Land the DO-NOT-CLOSE predicate + ADR-049 shim + behavioural coverage — `packages/itil/scripts/is-close-blocked.sh` + `packages/itil/bin/wr-itil-is-close-blocked`, 16/16 bats green, validated over the live corpus (6 of 153 verifying tickets block, 147 do not).
+- [ ] Phase 2 — populate the standing queue's evidence cells (see Fix Strategy). Not in this vehicle.
+
+## Post-edit review findings (2026-08-24) — four defects the reviews caught after the sweep landed
+
+Recorded because three of them would have shipped a change that read correctly and did not work.
+
+1. **The evidence vocabulary listed "a release cycle that shipped it" as qualifying evidence** — which is satisfied by every row in the queue *by construction*, since a ticket is in `verifying` precisely because a fix was released. The three-state split would have collapsed to "close everything", and it contradicted the inference clause one line below it in three of the five files. Narrowed to "a post-release invocation of the shipped artefact that behaved as the fix contracts". Caught by `wr-jtbd:agent`.
+2. **The P500 external-reporter boundary was named in this ticket's own Related section and never implemented.** `transition-problem` Step 7b fires on every transition including `close`, dispatching `/wr-itil:update-upstream`, which runs `gh issue close` against a third party's issue. The K→V comment we post promises the reporter we will close *after their confirmation or a quiet period*; our own test passing is neither, and the Step 6.1 drain would have made this a bulk path over 18 inbound-reported verifying tickets. Fixed with an ADR-117-shaped carve-out: an evidence-authorised close records `closed-on-evidence`, and that marker makes the upstream leg comment-and-stop. Caught by `wr-jtbd:agent`.
+3. **Gate (0)'s re-scan never enumerated `verifying/`, and routed dispatchables to Step 3.** The dispatchable-verifying arm had no input set, so the fix was inert exactly where the ticket said the structural defect lived; and had it fired, Step 3 selects only from the WSJF-ranked set, which excludes verifying — leaving a ticket with no consumer while the gate forbids `ALL_DONE`, a livelock. The glob now covers the verification queue and verifying-class dispatchables route to Step 6.1, never Step 3. Caught by `wr-architect:agent`.
+4. **Two loci were half-applied** — `transition-problem/SKILL.md:21` (the argument-vocabulary twin of the plural skill's `:38`, which *was* fixed) and JTBD-006 `:22` ("skip problems needing verification" as the AFK safe default, three lines above the bullet that removes it). Both are the copy-not-move drift class Finding 2 row #4 warns about, reproduced inside the fix for it. Caught by both reviews independently.
+
+The reviews also carried the fix from three prose loci to eleven, before any of the above.
+
+### Third pass — three more, two of which meant the fix did not work
+
+5. **The `closed-on-evidence` marker had no durable home, so the carve-out for finding 2 failed open.** It was to be written into the `Likely verified?` cell — but that cell lives in the README's Verification Queue table, and the close deletes that row before the upstream leg ever reads it. There was also no write locus: all three V→C blocks updated only the Status field. Net effect: `gh issue close` would still have run against a reporter's issue. Fixed by writing the basis into the ticket's own Status line — the shape the 2026-07-15 closes already used (`docs/problems/closed/186-*.md:3`) — and repointing the reader there. Caught by `wr-architect:agent`.
+6. **The release row was hand-authored into the rendered grid.** The map renders from a JSON island (ADR-102 / ADR-105); the island had no `rfc-072` release and no STORY-066 task, so the next render would have dropped the row and `check-fix-rfc-trace.sh` would have read P519 as untraced — the vehicle recorded above would not have been real. Redone through `story-map-edit.mjs` + `render-story-map.mjs`. Caught by `wr-architect:agent`.
+7. **The two backward pairings landed on the singular skill only** — the same copy-not-move drift as finding 4, committed a second time inside the fix for it, this time in the repair rather than the original sweep. `transition-problems` Step 2b now carries them too.
+
+The external-comms review of the changeset independently caught that the published entry advertised `/wr-itil:transition-problem <NNN> known-error` as the undo path while the skill's reachability table rejected it — which would have made the reversibility argument licensing agent-authorised closure fiction. Both backward pairings landed here as a result; the rest of that gap stays on P512.
 
 ## Fix Strategy
 
@@ -147,6 +169,12 @@ Primary harness is **promptfoo** per ADR-075, since this is SKILL-prose behaviou
 - **Blocks**: (none)
 - **Blocked by**: (none — P512 is a composes-with, see Related; it sharpens the recovery path but does not gate this fix, since `/wr-itil:transition-problem <NNN> known-error` is the documented reopen route already relied on by the shipped `review-problems` Bucket 1 and `run-retro` Step 4a closes.)
 - **Composes with**: P450, P512, P504, P500, P463, P136
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-066 | STORY-066: A fix I can prove works gets closed without me | accepted |
 
 ## Related
 

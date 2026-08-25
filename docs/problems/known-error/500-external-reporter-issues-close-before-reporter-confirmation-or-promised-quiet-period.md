@@ -21,7 +21,7 @@ The verification workflow can close an external reporter's GitHub issue as soon 
 
 ## Workaround
 
-Do not close a linked external issue unless the reporter has confirmed the fix or the promised quiet period has elapsed. Keep the external issue open when only internal verification evidence exists.
+Do not close a linked external issue unless the reporter has confirmed the fix. **The quiet-period half was struck 2026-08-24 (P519)** — no sweep ever delivered it, so `update-upstream` no longer promises one; do NOT build enforcement for a promise that is not made. If the quiet period is restored, it is P520's sweep that restores it. Keep the external issue open when only internal verification evidence exists.
 
 ## Impact Assessment
 
@@ -38,7 +38,7 @@ The local evidence-based close and the external issue close are coupled, but the
 - [ ] Reproduce the external close from an evidence-based local verification transition.
 - [ ] Identify every inbound-report path that can close a linked external issue.
 - [ ] Decide whether local and external closure must be decoupled.
-- [ ] Add a behavioural test for reporter confirmation and quiet-period enforcement.
+- [ ] Add a behavioural test for reporter confirmation. (Quiet-period enforcement is out of scope until P520 ships the sweep — the promise was struck 2026-08-24.)
 - [ ] Record and ratify a decision superseding ADR-024's relevant closure rule before implementation.
 
 ## Dependencies

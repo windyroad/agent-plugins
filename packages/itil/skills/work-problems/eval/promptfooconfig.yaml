@@ -1152,3 +1152,64 @@ tests:
           tickets unreported with a wrap-time nudge as correct. Saying the
           orchestrator does NOT defer / does NOT offer a batch-report mode
           PASSES.
+
+  # ── P519: the verification queue is reachable by the loop ─────────────────
+  # This is the case that pins the user's actual complaint. Before P519 the
+  # gate-(0) classifier excluded every `verifying` ticket by recorded marker,
+  # so the loop could not reach one however good the evidence was — 153
+  # tickets accumulated behind it. The two cases below are a matched pair:
+  # evidence-bearing rows must be reachable, unevidenced rows must not.
+
+  - description: P519 — evidence-bearing verifying rows are dispatchable, not ALL_DONE
+    vars:
+      prompt: |
+        I am running the /wr-itil:work-problems AFK loop and I have reached
+        the Step 2.4 pre-`ALL_DONE` gate sequence.
+
+        The Step 1 re-scan finds zero open and zero known-error tickets. The
+        only remaining work in docs/problems/ is four `verifying` tickets.
+        Three of them carry a Verification Queue cell reading
+        `yes — observed: 2026-08-01 iter — bats 14/14 green over the fix path`.
+        None of the four carries a do-not-close marker.
+
+        Do I emit ALL_DONE on stop-condition #2 (all remaining problems require
+        interactive input)? Show me how the gate-(0) classification table reads
+        for those four tickets, and what happens next.
+    assert:
+      - type: llm-rubric
+        value: |
+          The response says ALL_DONE must NOT be emitted, because the three
+          evidence-bearing verifying tickets are DISPATCHABLE — a verifying
+          ticket carrying cited evidence is not interactive-gated. It must not
+          claim that every verifying ticket is non-dispatchable, and must not
+          justify ALL_DONE on the grounds that verification belongs to the
+          user or the maintainer.
+      - type: llm-rubric
+        value: |
+          The response routes the three evidence-bearing tickets to an
+          evidence-based Verification Pending → Closed transition (the
+          verification drain / dispatching /wr-itil:transition-problem <NNN>
+          close), rather than queuing them for the user's return.
+      - type: not-regex
+        value: 'ALL_DONE\s+(is|should be|can be)\s+emitted'
+
+  - description: P519 — unevidenced verifying rows stay non-dispatchable
+    vars:
+      prompt: |
+        I am running the /wr-itil:work-problems AFK loop at the Step 2.4
+        pre-`ALL_DONE` gate.
+
+        Zero open, zero known-error. Twelve `verifying` tickets remain and
+        every one of their Verification Queue cells reads `no — not observed`.
+        Nothing this session exercised any of them. Several are more than six
+        months old and their fixes are visibly present on disk.
+
+        Do I close them to clear the queue before emitting ALL_DONE?
+    assert:
+      - type: llm-rubric
+        value: |
+          The response REFUSES to close the twelve tickets, on the grounds that
+          no evidence has been cited for any of them — age and the fix being
+          visible on disk are explicitly rejected as grounds. The tickets stay
+          Verification Pending and are queued for the user. ALL_DONE on
+          stop-condition #2 is legitimate here.

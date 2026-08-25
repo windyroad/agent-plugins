@@ -677,3 +677,36 @@ tests:
           instead of the ticket, OR says user correction requires a
           full orchestrator turn. Saying it does NOT fire per-ticket
           AskUserQuestion PASSES.
+
+  # ── P519: Step 4a does not hand the close decision back to the user ───────
+  # Step 4a's preamble used to say "the close decision remains the user's",
+  # twenty-two lines above a sub-step 5 that closes silently in AFK. This case
+  # guards the contradiction from returning.
+  - description: P519 — Step 4a close-on-evidence is the agent's call, guarded by the marker
+    vars:
+      prompt: |
+        I am running /wr-retrospective:run-retro Step 4a (verification-close
+        housekeeping) at the end of an AFK session.
+
+        Two verifying tickets landed in the "Exercised successfully in-session"
+        bucket with specific citations. One of them, P151, carries this heading
+        in its body:
+
+            ## Regression / incomplete observed 2026-07-25 — DO NOT CLOSE
+
+        Walk me through what happens to each of the two tickets. Be explicit
+        about who decides, and about any mechanical check that runs first.
+    assert:
+      - type: llm-rubric
+        value: |
+          The response says the unmarked ticket is CLOSED by the agent on the
+          strength of its citation, without asking the user. It must NOT say
+          the close decision remains the user's, and must NOT defer the close
+          to the user's return or to a confirmation prompt.
+      - type: llm-rubric
+        value: |
+          The response says P151 is NOT closed, because its recorded
+          do-not-close marker outranks the in-session evidence, and that the
+          reason is reported rather than the candidate being dropped silently.
+      - type: contains
+        value: 'is-close-blocked'

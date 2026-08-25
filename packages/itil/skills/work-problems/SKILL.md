@@ -340,7 +340,7 @@ Read `docs/problems/README.md` if it exists and is fresh (check via git history 
 Exclude:
 - `.closed.md` files (done)
 - `.parked.md` files (blocked on upstream)
-- `.verifying.md` files (Verification Pending — fix released, awaiting user verification per ADR-022; surfaced in the Verification Queue section, never in dev-work ranking)
+- `.verifying.md` files (Verification Pending — fix released, awaiting verification per ADR-022; surfaced in the Verification Queue section, never in dev-work ranking). The multiplier-0 ranking exclusion is deliberate and unchanged: verification is not dev work and does not compete for a WSJF slot. Evidence-backed closure reaches these tickets through the Step 6.1 verification drain instead (P519).
 - Problems with no WSJF score (need a review first — run `/wr-itil:review-problems` as the first iteration if scores are missing)
 
 ### Step 2: Check stop conditions
@@ -348,7 +348,7 @@ Exclude:
 Stop the loop and report a summary if any of these are true:
 
 1. **No actionable problems** — zero open or known-error problems remain
-2. **All remaining problems require interactive input** — e.g., they all need user verification (known-errors with `## Fix Released`), or their scope expanded beyond what's safe to auto-resolve
+2. **All remaining problems require interactive input** — their scope expanded beyond what's safe to auto-resolve, or they need user verification with **no evidence available**. A verifying ticket carrying cited evidence (a `yes — observed: <citation>` Verification Queue cell, or an in-session exercise the loop can cite) is **not** interactive-gated — it is drainable by evidence-backed closure per P519, and its presence disproves this stop condition.
 3. **All remaining problems are blocked** — investigation hit a dead end, or the fix requires changes outside the project
 
 **Step 2.5 fires unconditionally at loop end** (P135 Phase 3 / ADR-044) — promoted from "fallback when stop-condition #2" to **default loop-end emit shape**. Anti-BUFD framing per ADR-044: the AFK loop is the empirical-discovery engine; direction-class observations + deviation-candidates accumulate from real friction across iters; loop-end batched presentation is the user-facing deliverable. Per-iter surfacing was the old (now-superseded) pattern; Phase 3 makes batch-at-loop-end the default for ALL stop conditions, not just #2.
@@ -361,15 +361,15 @@ Before the orchestrator emits the final `ALL_DONE` sentinel for the AFK loop, it
 
 **Gate (0) — Objective backlog-empty assertion (P390, fires FIRST, before gate (a)).** Before the rest of the sequence runs, the orchestrator MUST re-scan the live backlog and prove that the Step 2 stop-condition it is about to act on OBJECTIVELY holds. `ALL_DONE` is forbidden while ≥1 dispatchable ticket remains — a non-empty actionable backlog is itself the disproof of stop-condition #1/#2/#3.
 
-1. *Re-scan.* Re-run the Step 1 dual-tolerant glob `ls docs/problems/*.open.md docs/problems/*.known-error.md docs/problems/open/*.md docs/problems/known-error/*.md 2>/dev/null` (RFC-002 window — both layouts). This is a fresh filesystem read, NOT a re-use of the Step 1 cache or the agent's recollection — tickets may have transitioned, closed, or been created by prior iters / the session-level retro since Step 1.
+1. *Re-scan.* Re-run the Step 1 dual-tolerant glob, **extended to the verification queue** so evidence-bearing verifying tickets can appear in the classification at all: `ls docs/problems/*.open.md docs/problems/*.known-error.md docs/problems/*.verifying.md docs/problems/open/*.md docs/problems/known-error/*.md docs/problems/verifying/*.md 2>/dev/null` (RFC-002 window — both layouts). Without the `verifying` half the dispatchable-verifying arm below has no input set and the Step 6.1 drain is unreachable — the enumeration is the load-bearing half of the P519 fix, not the prose. This is a fresh filesystem read, NOT a re-use of the Step 1 cache or the agent's recollection — tickets may have transitioned, closed, or been created by prior iters / the session-level retro since Step 1.
 
 2. *Classify each ticket as dispatchable or not — objectively, per recorded marker, never by salience.* A ticket is **non-dispatchable** ONLY when an objective, recorded condition excludes it:
-   - it is `verifying` / carries `## Fix Released` awaiting user verification (stop-condition #2, interactive);
+   - it is `verifying` / carries `## Fix Released` **and no evidence is available for it** (stop-condition #2, interactive). A verifying ticket is **dispatchable to the verification drain** when its Verification Queue cell reads `yes — observed: <citation>`, or when this session can itself cite an exercise of the fix per ADR-026 (test invocation + outcome, commit SHA covering the fix path, skill/hook invocation that behaved as the fix contracts, a post-release invocation of the shipped artefact that behaved as the fix contracts). Before classifying such a ticket dispatchable, run `wr-itil-is-close-blocked <NNN> docs/problems`: exit 0 means a recorded do-not-close marker is present, which makes it non-dispatchable on that marker (record the marker line as the deciding evidence in the printed table). Blanket-excluding every `verifying` ticket is the P519 defect — it made the queue structurally unreachable, and 153 tickets accumulated behind it;
    - it carries an upstream-blocked marker (`## Reported Upstream` / `- **Upstream report pending** --` / em-dash legacy) or a recorded blocked classification with a dead-end investigation (stop-condition #3);
-   - it was filtered out THIS session by Step 3.5 (interactive-ratification predicate) or Step 3.6 (already-shipped relevance gate) — keyed off the durable per-session skip record those steps write (the `outstanding_questions` entry in `.afk-run-state/outstanding-questions.jsonl` carrying the ticket id), NOT agent recollection, so the classification is reproducible across the re-scan and cannot loop forever;
+   - it was filtered out THIS session by Step 3.5 (interactive-ratification predicate), Step 3.6 (already-shipped relevance gate), or Step 6.1 (verification drain — a candidate whose dispatch failed) — keyed off the durable per-session skip record those steps write (the `outstanding_questions` entry in `.afk-run-state/outstanding-questions.jsonl` carrying the ticket id), NOT agent recollection, so the classification is reproducible across the re-scan and cannot loop forever. Step 6.1's record is load-bearing here: without this clause naming it, a drain-failed `.verifying.md` ticket still carries its evidence cell and still passes `wr-itil-is-close-blocked`, so gate (0) would re-classify it dispatchable, route it back to Step 6.1, and fail again — trading a routes-to-a-step-that-declines-to-run livelock for a routes-to-a-step-that-always-fails one;
    Every other open / known-error ticket is **dispatchable** — ordinary autonomous fix-and-commit work. The agent MUST NOT reclassify a dispatchable ticket as non-dispatchable because the *salient* remainder of the backlog is interactive-gated, because the ticket "feels" out of scope, or because a user-directed pivot consumed the loop's attention. The subjective "this is a natural stopping point" judgement is exactly the P390 failure; the classification is per-ticket and marker-bound. **The classification MUST be PRINTED as a table in the turn output** (ticket → dispatchable/non-dispatchable → the recorded marker that decided) — not merely computed. A computed-but-unprinted re-scan is invisible to the Step 0e `/goal` external evaluator, which judges only what the transcript surfaces (ADR-026 grounding); the printed table is the evidence the canonical goal condition names.
 
-3. *Decide.* If the re-scan yields **≥1 dispatchable ticket**, `ALL_DONE` is FORBIDDEN: the stop-condition the orchestrator was about to emit does NOT objectively hold. The orchestrator loops back to Step 3 tier-first selection (Critical-bypass → Inbound-reported → Internal, within-tier WSJF per ADR-076) over the dispatchable set and dispatches the next iter — it does NOT proceed to gate (a)/(b)/(c). Only when the re-scan yields **zero dispatchable tickets** does gate (0) pass and the sequence proceed to gate (a). Gate (0) finding work is a **loopback, not a halt** — it is productive (the loop resumes draining), so it is NOT a Hard-fail halt trigger.
+3. *Decide.* If the re-scan yields **≥1 dispatchable ticket**, `ALL_DONE` is FORBIDDEN: the stop-condition the orchestrator was about to emit does NOT objectively hold. Route by class. A dispatchable **open / known-error** ticket loops back to Step 3 tier-first selection (Critical-bypass → Inbound-reported → Internal, within-tier WSJF per ADR-076) over the dispatchable set. A dispatchable **verifying** ticket routes to the **Step 6.1 verification drain — never to Step 3**: Step 1 excludes `.verifying.md` from dev-work ranking under ADR-022's multiplier-0 rule and Step 3 selects only from the ranked set, so sending it to Step 3 would either conflict with that rule or leave it with no consumer while this gate forbids `ALL_DONE` — a livelock. Having routed, the orchestrator dispatches the next iter — it does NOT proceed to gate (a)/(b)/(c). Only when the re-scan yields **zero dispatchable tickets** does gate (0) pass and the sequence proceed to gate (a). Gate (0) finding work is a **loopback, not a halt** — it is productive (the loop resumes draining), so it is NOT a Hard-fail halt trigger.
 
 **Why gate (0) fires first**: gates (a)/(b)/(c) (surface questions → retro → emit) presume the loop is genuinely done; running the retro and emitting `ALL_DONE` while dispatchable work remains prematurely ends the AFK drain (P390), forcing the user to re-prompt "keep working the backlog" and defeating JTBD-006. Gate (0) makes "the backlog is objectively empty of dispatchable tickets" a hard, re-verified precondition of the whole sequence rather than a subjective agent judgement. A user-directed mid-loop pivot (e.g. an eval-cohort detour) does NOT discharge the Tier-exhaustion obligation: after the pivot, gate (0)'s re-scan resumes tier selection rather than terminating — which also catches the P390 coverage miss where a Tier-1 ticket (P382) was skipped entirely. Sibling class: P332 (run-retro skip rationalisation), P148 (Stage-1 ticketing skip), P175 (scope-pin loop-control inference) — all agent-invented loop-control stops the framework did not authorise (ADR-044 "Continue / stop loops" is framework-resolved: the natural stop is concrete — `ALL_DONE` conditions objectively met — not "this feels done").
 
@@ -521,7 +521,9 @@ Read the problem file and apply these deterministic rules:
 
 | Problem state | Action | Skip-reason category |
 |---|---|---|
-| `.verifying.md` (Verification Pending, per ADR-022) | **Skip** — fix released, awaiting user verification | user-answerable (verification) |
+<!-- The two verifying rows below are reached from the Step 6.1 verification drain and from gate (0)'s verifying-class routing — NOT from the normal Step 1 → Step 3 path, which excludes .verifying.md from WSJF ranking per ADR-022 (multiplier 0). They are stated here so the classification rule lives in one place; Step 6.1 is where they fire. -->
+| `.verifying.md` (Verification Pending) **carrying cited evidence** — a `yes — observed: <citation>` Verification Queue cell, or an exercise this session can cite per ADR-026 — and `wr-itil-is-close-blocked` exits 1 | **Work it** — dispatch `/wr-itil:transition-problem <NNN> close`, citing the evidence. Mechanical stage; no `AskUserQuestion` (P519 / ADR-044 category 4). Report the recovery path. | — |
+| `.verifying.md` with **no evidence**, or `wr-itil-is-close-blocked` exits 0 (recorded do-not-close marker) | **Skip** — absence of evidence is not evidence; a recorded marker outranks evidence | user-answerable (verification) |
 | Known Error with fix strategy documented | **Work it** — implement the fix (on release, transition to `.verifying.md` per ADR-022) | — |
 | Known Error without fix strategy | **Work it** — produce a fix strategy, then implement | — |
 | Open problem with preliminary hypothesis or investigation notes | **Work it** — continue the investigation | — |
@@ -844,8 +846,36 @@ Format as a brief status line, not a wall of text. The user will read these when
 ```
 [Iteration 1] Worked P029 (Edit gate overhead for governance docs) — implemented fix, closed. 8 problems remain. ($0.32, 23s, 171K tokens)
 [Iteration 2] Worked P021 (Governance skill structured prompts) — investigated root cause, transitioned to known-error. 7 problems remain. Risk register: 1 entry scaffolded (pending review). ($0.85, 47s, 432K tokens)
-[Iteration 3] Skipped P016 (Multi-concern ticket splitting) — fix released, awaiting user verification. Worked P024 (Risk scorer WIP flag) — implemented fix, closed. 6 problems remain. ($1.12, 62s, 541K tokens)
+[Iteration 3] Skipped P016 (Multi-concern ticket splitting) — fix released, no evidence available yet. Closed P011 on evidence (bats 14/14 green at iter 2 exercised the fix path). Worked P024 (Risk scorer WIP flag) — implemented fix, closed. 6 problems remain. ($1.12, 62s, 541K tokens)
 ```
+
+### Step 6.1: Drain the verification queue on evidence (P519)
+
+Step 1 excludes `.verifying.md` tickets from dev-work ranking and Step 3 never selects one — that is ADR-022's WSJF multiplier-0 rule and it is **unchanged**. Verification is not dev work, so it gets its own pass rather than competing for a WSJF slot. Without this pass the P519 fix would be inert: evidence-backed closure would be authorised and still unreachable, which is the exact shape that let 153 tickets accumulate behind a single populated evidence cell.
+
+Fires **once per loop**, after the first iteration's Step 6 report. Cheap: one README read plus a bounded set of dispatches. **Re-entrant on gate-(0) route**: the once-per-loop cadence governs the *scheduled* fire only. If gate (0) later classifies a `.verifying.md` ticket dispatchable and routes it here, this step runs again for that ticket regardless of having already fired — otherwise gate (0) forbids `ALL_DONE` while routing to a step that declines to run, and the loop livelocks with no consumer and no exit.
+
+1. **Enumerate** the Verification Queue rows in `docs/problems/README.md` and filter to rows whose `Likely verified?` cell begins `yes — observed:`. Add any `.verifying.md` ticket this session has itself exercised with a citation that meets ADR-026 grounding (tool invocation + observable outcome) — a bare "the area was touched" is not a citation and does not qualify.
+
+2. **Guard each candidate** with the do-not-close predicate:
+
+   ```bash
+   wr-itil-is-close-blocked <NNN> docs/problems && close_blocked=1
+   ```
+
+   Exit 0 → **drop the candidate** and record the matched marker line as the reason; a recorded marker outranks any evidence. Exit 1 → proceed. Exit 2 → the ref did not resolve; drop it and record a pre-flight failure. This is what keeps `docs/problems/verifying/151-*.md` and its five siblings from the 2026-07-25 regression sweep out of the drain.
+
+3. **Dispatch** `/wr-itil:transition-problem <NNN> close` per surviving candidate via the Skill tool. `transition-problem` is the sole authoritative executor of V→C per ADR-010 amended P093 — the orchestrator dispatches and reads the outcome, and does NOT re-implement the rename / Status edit / README refresh / commit. Each dispatched transition rides its own ADR-014 commit through the gates.
+
+4. **Report** one line per close in the iter summary: `V→C: P<NNN> | evidence=<citation> | recovery=/wr-itil:transition-problem <NNN> known-error`. Report dropped candidates too, with the marker or missing-evidence reason — a silently-dropped candidate reads as "the queue was clean" when it was not.
+
+**Mechanical stage — no `AskUserQuestion`** (P132 / ADR-044 category 4). The evidence-vs-inference split is framework-resolved, the predicate is a field read rather than a judgement, and the close is one skill call from reversible. A per-candidate consent gate here is lazy deferral per the Step 2d Ask Hygiene Pass, and it is the behaviour P519 was captured to remove.
+
+**Never close on inference.** Rows reading `no — not observed` are NOT candidates, whatever their age. They stay in the queue and surface for the user. Populating those cells is the complementary work tracked on P450 (the evidence write path) — this step consumes cells, it does not manufacture them.
+
+**Non-blocking on individual failure**: a failed dispatch (pre-flight reject, gate rejection, P057 staging trap) is logged for that ticket and the drain continues to the next candidate. A single failure MUST NOT halt the loop. **Record the failure in the durable per-session skip record** (`.afk-run-state/outstanding-questions.jsonl`, carrying the ticket id, the failure reason, and `category: "direction"` so Step 2.5's ranking can place it; the skip table's own classification for this row is `user-answerable (verification)`) — the same mechanism Step 3.5 / Step 3.6 use. Gate (0) then classifies that ticket non-dispatchable on the re-scan, so a ticket that cannot be drained does not re-route here forever. Without the record the classification is not reproducible across re-scans and the loop cannot terminate.
+
+Authority: ADR-022 (verifying lifecycle; multiplier-0 ranking exclusion preserved), ADR-010 amended P093 (transition-problem authoritative executor), ADR-014 (per-transition commit grain), ADR-013 Rule 5 (policy-authorised silent proceed), ADR-026 (cited evidence), ADR-044 (framework-resolution boundary), ADR-079 (evidence-based closure precedent), P519 (this step), P450 (the write path that feeds it).
 
 ### Step 6.4: Drain risk-register queue (per ADR-056 Phase 2b)
 
@@ -929,7 +959,7 @@ ADR-022 prescribes that Known Error tickets transition to Verification Pending o
 
 **Mid-loop ask discipline (P130) preserved**: the dispatched transition-problem skill is wired to skip `AskUserQuestion` when invoked under AFK orchestrator context per its own ADR-013 Rule 6 fail-safe (transition-problem SKILL.md Step 8 risk-above-appetite branch). The orchestrator MUST NOT introduce any `AskUserQuestion` call at the callback site — the per-candidate routing is framework-resolved per ADR-044, and the callback fires in a mechanical-stage transition between drain step 2 and step 5 (cache refresh).
 
-**V→C remains the maintainer's surface (persona constraint per JTBD-006)**: this callback fires ONLY for K→V (`known-error → verifying` — "fix released, awaiting verification"). It explicitly does NOT auto-fire V→C — the maintainer's judgment-reserved "fix actually works" closure remains untouched and continues to require their return per the existing transition-problem Step 4 `Verification Pending → Closed` precondition ("the user has explicitly confirmed the fix works in production").
+**V→C is evidence-authorised, not maintainer-reserved (P519)**: this callback fires for K→V (`known-error → verifying` — "fix released, awaiting verification"). It does not itself perform V→C. The V→C transition is available to the loop through the Step 4 classifier and the Step 6.1 verification drain, on the same terms every other surface uses: **cited evidence closes; inference never does; a recorded do-not-close marker blocks regardless**. The prior wording here reserved V→C for the maintainer's return, which — combined with the gate (0) blanket exclusion at Step 2.4 — left the verification queue with no agent-driven exit path at all (153 tickets, one populated evidence cell). That reservation was pre-P135/P186 residue and already contradicted the shipped `review-problems` Step 4 Bucket 1 and `run-retro` Step 4a sub-step 5, both of which close on evidence in AFK. What survives untouched is the honest half: a fix nobody exercised is not verified, and the maintainer remains the surface for contested evidence, partial fixes, and marker-blocked tickets.
 
 **Composition with the Above-appetite branch (below)**: the K→V callback is anchored to the within-appetite Drain action step 4 — it does NOT fire after the above-appetite Rule 5 halt (no release shipped → nothing to match) and it does NOT fire mid-loop in the above-appetite auto-apply loop. When the auto-apply loop converges and re-enters the within-appetite Drain action, the K→V callback fires there per step 4.
 
@@ -1149,7 +1179,19 @@ The skill should produce a final summary when the loop ends:
 ### Skipped
 | Problem | Skip-reason category | Reason |
 |---------|---------------------|--------|
-| P016 (Multi-concern splitting) | user-answerable (verification) | Awaiting user verification |
+| P016 (Multi-concern splitting) | user-answerable (verification) | Fix released; no evidence available yet |
+
+### Verification Drain
+
+<!-- @jtbd JTBD-006 (Progress the Backlog While I'm Away — the returning maintainer sees what the loop closed on its own evidence and what it declined to, with the reason; a silently-drained queue is indistinguishable from one that never moved) -->
+
+(Renders when the Step 6.1 verification drain ran. Verifying tickets are outside the Step 1 dev-work set, so they appear here rather than in Completed / Skipped. Reports both closes and drops — a drop reported as nothing reads as "the queue was clean" when it was not. Omitted entirely when the drain found no candidates.)
+
+| Ticket | Outcome | Evidence / reason |
+|--------|---------|-------------------|
+| P164 (octal next-ID formula) | Closed on evidence | `capture-story` Step 3 ran with `local_max=044`; `10#` guard yielded STORY-045. Recovery: `/wr-itil:transition-problem 164 known-error` |
+| P151 (repo-relative script paths) | Held | `wr-itil-is-close-blocked` exit 0 — `## Regression / incomplete observed 2026-07-25 — DO NOT CLOSE` |
+| P203 (hook marker TTL) | Held | No citation available — absence of evidence is not evidence |
 
 ### Reported Upstream
 

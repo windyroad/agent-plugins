@@ -3,6 +3,17 @@ description: transition-problems SKILL eval - post-transition WSJF (P498)
 providers:
   - id: 'exec:bash ./run-skill-eval.sh'
 
+# Tier-B grading provider — semantic NEGATIVE clauses ("does NOT require the
+# user's confirmation", "does NOT close on inference") false-fail under a
+# regex, which cannot tell "must-not-X satisfied" from "the word X appears
+# inside a negating clause". Those route to llm-rubric, graded by claude under
+# subscription auth (no API key) via grade-llm-rubric.sh. Same pattern as
+# packages/itil/skills/work-problems/eval/. (P519)
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-llm-rubric.sh'
+
 prompts:
   - '{{prompt}}'
 
@@ -22,3 +33,34 @@ tests:
         value: '[Ss]tatus\s+[Mm]ultiplier|[Pp]ost-transition\s+status'
       - type: not-contains
         value: '2.25'
+
+  # ── P519: batch grain closes exactly the evidenced pairs ──────────────────
+  - description: P519 — mixed batch closes the evidenced pair only
+    vars:
+      prompt: |
+        I am invoking /wr-itil:transition-problems with three pairs, all
+        `verifying → close`:
+
+          - 301 — this session ran its bats suite, 9/9 green over the fix path.
+          - 302 — no evidence at all; its Verification Queue cell reads
+            `no — not observed`. Shipped five months ago.
+          - 303 — this session exercised it successfully, but its body carries
+            a `## Regression observed — DO NOT CLOSE` heading.
+
+        This is an AFK run with no user to ask. How many of the three close,
+        and what is recorded for each of the others?
+    assert:
+      - type: llm-rubric
+        value: |
+          The response closes EXACTLY ONE ticket — 301 — on its cited bats
+          evidence, without requiring prior user authorisation or an
+          AskUserQuestion at the orchestrator layer.
+      - type: llm-rubric
+        value: |
+          The response does NOT close 302, on the grounds that no evidence was
+          cited (age and the fix shipping are rejected as grounds), and does
+          NOT close 303, because its recorded do-not-close marker outranks the
+          successful exercise. A reason is recorded for each rather than the
+          pairs being dropped silently.
+      - type: not-regex
+        value: '\b(I|we)\s+(will|should|must|need to|am going to|are going to)\s+(call|invoke|fire|use|raise)\s+(the\s+|an?\s+)?`?AskUserQuestion'

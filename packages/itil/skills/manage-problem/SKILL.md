@@ -43,10 +43,11 @@ The preamble check is a one-shot; the `.intake-scaffold-done` and `.intake-scaff
 - **Work**: `problem work` — runs a review first, then begins working the highest-WSJF problem
 - **Review**: `problem review` — re-assess all open problems: update priorities per RISK-POLICY.md, estimate effort, calculate WSJF, and update files
 
-**Closing problems:** Problems are closed ONLY after the user verifies the fix in production — not when the fix is committed or released. The workflow (per ADR-022):
-1. When the fix is released: `git mv` the file from `.known-error.md` to `.verifying.md`, update the Status field to "Verification Pending", AND add a `## Fix Released` section (e.g., `Deployed in v0.26.X. Awaiting user verification.`). All three edits land in the same commit per ADR-014.
-2. When the user explicitly confirms ("it's fixed", "verified", "working"): `git mv` from `.verifying.md` to `.closed.md`, update the Status field to "Closed", and reference the problem in the commit message (e.g., "Closes P008").
-3. Never assume the fix works — always wait for explicit user confirmation before closing.
+**Closing problems:** Problems are closed when the fix is **verified** — not when it is committed or released. Verification comes from cited evidence or from the user; it never comes from assuming. The workflow (per ADR-022, amended by P519):
+1. When the fix is released: `git mv` the file from `.known-error.md` to `.verifying.md`, update the Status field to "Verification Pending", AND add a `## Fix Released` section (e.g., `Deployed in v0.26.X. Awaiting verification.`). All three edits land in the same commit per ADR-014.
+2. When the fix is **verified** — either by cited evidence the agent can point at (a test invocation and its outcome, a commit SHA whose diff covers the fix path, a skill or hook invocation that exercised the fix and behaved as the fix contracts, a post-release invocation of the shipped artefact that behaved as the fix contracts, or an existing `yes — observed: <citation>` Verification Queue cell) **or** by the user explicitly confirming ("it's fixed", "verified", "working"): `git mv` from `.verifying.md` to `.closed.md`, update the Status field to "Closed", record the citation in the closure, and reference the problem in the commit message (e.g., "Closes P008"). **Evidence-backed closure is agent-authorised** and is a mechanical stage — do NOT fire `AskUserQuestion` for it (P132 / ADR-044 category 4). It is cheap and reversible: report `Recovery: rerun /wr-itil:transition-problem <NNN> known-error to reopen` alongside every close.
+3. **Never close on inference — absence of evidence is not evidence.** A ticket nobody exercised stays Verification Pending, however old and however plausible the fix looks. "The fix is on disk", "it has been months" and "the ADR that prescribed it shipped" are inference, not observation (P463). Closing tickets nobody exercised is the opposite failure and is exactly as wrong as never closing any.
+4. **Genuine ambiguity is the user's surface** — contested evidence, a fix covering only part of the ticket, or a recorded do-not-close marker. Run `wr-itil-is-close-blocked <NNN> docs/problems` before closing; exit 0 means BLOCKED (do not close, whatever the evidence says — flip back or queue for the user), exit 1 means not blocked, exit 2 means the ref did not resolve and is a pre-flight failure rather than permission.
 
 The `.verifying.md` suffix distinguishes "fix released, awaiting user verification" from "root cause identified AND workaround documented; fix not yet proposed" (the Known Error meaning per ADR-022 corrected semantics, 2026-06-08 amendment; the fix proposal happens AFTER Known Error and draws a release row on a story map). See ADR-022 for rationale.
 
@@ -56,9 +57,9 @@ The `.verifying.md` suffix distinguishes "fix released, awaiting user verificati
 |--------|-----------|---------|----------------|
 | **Open** | `.open.md` | Reported, under investigation | New problem identified |
 | **Known Error** | `.known-error.md` | Root cause identified AND workaround documented; **fix not yet proposed** (the fix proposal draws a release row on a story map) | Root cause documented, reproduction test exists, workaround in place |
-| **Verification Pending** | `.verifying.md` | Fix released, awaiting user verification (ADR-022) | Fix shipped; `## Fix Released` section written; user action remaining |
+| **Verification Pending** | `.verifying.md` | Fix released, awaiting verification (ADR-022) | Fix shipped; `## Fix Released` section written; verification outstanding — by cited evidence or by the user |
 | **Parked** | `.parked.md` | Blocked on upstream or suspended by user decision | Upstream blocker identified, or user explicitly suspends; reason and un-park trigger documented |
-| **Closed** | `.closed.md` | Fix verified in production OR ticket determined no longer relevant via evidence | (a) User explicitly confirms the released fix works (canonical Verifying → Closed path), OR (b) auto-closed by `/wr-itil:review-problems` Step 4.6 relevance-close pass per ADR-079 Phase 1 + Phase 2 evidence shapes — `file-no-longer-exists` / `ADR-shipped-confirmed` / `named-skill-or-feature-exists` / `self-marker-in-body` / `driver-child-ticket-closed` (cumulative; multi-shape matches emit comma-joined) with `## Closed as no longer relevant` audit section per ADR-026 grounding (extends ADR-022 lifecycle: Open\|Known Error → Closed bypasses Verifying when no fix was released). Partial-scope umbrellas emit `CLOSE-CANDIDATE-WITH-CAVEAT` and ride the maintainer's `AskUserQuestion` surface-batch-confirm path. |
+| **Closed** | `.closed.md` | Fix verified in production OR ticket determined no longer relevant via evidence | (a) The released fix is verified — either by cited evidence meeting the ticket's own close criterion (agent-authorised, mechanical, no `AskUserQuestion`; blocked when `wr-itil-is-close-blocked` exits 0) or by the user explicitly confirming (canonical Verifying → Closed path; P519), OR (b) auto-closed by `/wr-itil:review-problems` Step 4.6 relevance-close pass per ADR-079 Phase 1 + Phase 2 evidence shapes — `file-no-longer-exists` / `ADR-shipped-confirmed` / `named-skill-or-feature-exists` / `self-marker-in-body` / `driver-child-ticket-closed` (cumulative; multi-shape matches emit comma-joined) with `## Closed as no longer relevant` audit section per ADR-026 grounding (extends ADR-022 lifecycle: Open\|Known Error → Closed bypasses Verifying when no fix was released). Partial-scope umbrellas emit `CLOSE-CANDIDATE-WITH-CAVEAT` and ride the maintainer's `AskUserQuestion` surface-batch-confirm path. |
 
 **Parked problems** are excluded from WSJF ranking and work selection. They are listed separately in review output so users can see them without them polluting the backlog. To park a problem:
 1. **If the park reason is `upstream-blocked`**, run the external-root-cause detection block at Step 7 first (see "External-root-cause detection (P063)"). Park without recording the upstream dependency in `## Related` would be the canonical audit-trail gap this block closes.
@@ -68,7 +69,7 @@ The `.verifying.md` suffix distinguishes "fix released, awaiting user verificati
 
 To un-park: `git mv` back to `docs/problems/open/<NNN>-<title>.md` (or `docs/problems/known-error/<NNN>-<title>.md` if root cause is confirmed), update Status, remove `## Parked` section.
 
-**Verification Pending problems** are also excluded from WSJF ranking — their remaining work is user-side verification, not dev effort. They appear in a dedicated "Verification Queue" section in review output so the user can see what's waiting on them without mixing with dev-work ranking. See step 9c for the queue layout.
+**Verification Pending problems** are also excluded from WSJF ranking — their remaining work is verification — by evidence or by the user, not dev effort. They appear in a dedicated "Verification Queue" section in review output so the user can see what's waiting on them without mixing with dev-work ranking. See step 9c for the queue layout.
 
 **Allowed optional appendages**: a problem ticket file may carry a `## Reported Upstream` section appended after the standard sections. This is written by the `/wr-itil:report-upstream` skill (per ADR-024 Confirmation criterion 3a) and records the upstream URL — an issue, a pull request (per ADR-117), or an advisory — plus the matched template and the disclosure path. The presence or absence of this section does not affect WSJF ranking or status transitions.
 
@@ -833,11 +834,26 @@ Then edit the file:
 
 Re-stage the `.verifying.md` file explicitly after the `Edit` tool runs (P057). The trailing `git add` above is NOT redundant — `git mv` alone stages only the rename, not the subsequent content edit; the same `git add` also re-stages the seed Edit content carried across the rename (single staging call, two Edit windows; P330 + P057).
 
-Both the `git mv` and the file edits belong in the same commit as the fix implementation per ADR-014 (governance skills commit their own work). The `.verifying.md` suffix signals to every downstream consumer (work-problems classifier, review step 9d, README rendering) that the remaining work is user-side verification — no file-body scan needed.
+Both the `git mv` and the file edits belong in the same commit as the fix implementation per ADR-014 (governance skills commit their own work). The `.verifying.md` suffix signals to every downstream consumer (work-problems classifier, review step 9d, README rendering) that the remaining work is verification — by evidence or by the user — no file-body scan needed.
 
-**Verification Pending → Closed** (user confirms):
+**Verification Pending → Closed** (verified — by evidence or by the user):
 
-Only the user can make this call. When they explicitly confirm the fix works in production:
+**Sibling-with `/wr-itil:transition-problem` Step 4** per ADR-010 amended P093 (copy-not-move — edit both or neither; drift here is the class P519 fixed). Two admissible triggers:
+
+- **Cited evidence** meeting the ticket's own stated close criterion — a test invocation and its outcome, a commit SHA whose diff covers the fix path, a skill or hook invocation that exercised the fix and behaved as the fix contracts, a post-release invocation of the shipped artefact that behaved as the fix contracts, or an existing `yes — observed: <citation>` Verification Queue cell. The agent closes on its own authority and records the citation in the closure. **Mechanical stage — do NOT fire `AskUserQuestion`** (P132 / ADR-044 category 4). Report `Recovery: rerun /wr-itil:transition-problem <NNN> known-error to reopen`.
+
+  **An evidence-authorised close stays local (P500 / JTBD-301).** When the close is the agent's own — evidence, not the user's word — write the basis into the ticket's `**Status**:` line alongside the citation (`**Status**: Closed (closed-on-evidence <YYYY-MM-DD> — <citation>. Recovery: rerun /wr-itil:transition-problem <NNN> known-error to reopen)`). The Status line is the only place the basis survives: the `Likely verified?` cell lives in the README's Verification Queue table, and that row is deleted by this very transition, so a downstream reader finds nothing there. `update-upstream` Step 7b greps `^\*\*Status\*\*:` for exactly this reason — it posts the lifecycle comment and **stops**, never running `gh issue close` against a third party's issue. Our own test passing is not the reporter's confirmation, and closing their issue on it spends a decision that is theirs. Same shape as the ADR-117 pull-request carve-out: comment, do not close.
+- **Explicit user confirmation** that the fix works in production.
+
+**Never close on inference** — absence of evidence is not evidence; a ticket nobody exercised stays Verification Pending. **Do-not-close guard**, before either trigger:
+
+```bash
+wr-itil-is-close-blocked <NNN> docs/problems && close_blocked=1
+```
+
+Exit 0 → BLOCKED; do not close whatever the evidence says (flip back to `known-error` or queue for the user). Exit 1 → not blocked. Exit 2 → the ref did not resolve; a pre-flight failure, not permission.
+
+When one of the two triggers holds and the guard is clear:
 
 ```bash
 git mv docs/problems/verifying/<NNN>-<title>.md docs/problems/closed/<NNN>-<title>.md
@@ -845,7 +861,14 @@ git mv docs/problems/verifying/<NNN>-<title>.md docs/problems/closed/<NNN>-<titl
 git add docs/problems/closed/<NNN>-<title>.md
 ```
 
-Update the "Status" field to "Closed". Reference the problem ID in the closure commit message (e.g., "Closes P008"). Step 9d's verification prompt is the structured path that fires this transition during `manage-problem review`. Re-stage the `.closed.md` file explicitly after the Edit (P057 staging trap).
+**Write the close's authority basis into the Status field.** The Status line is the only place the basis survives — the `Likely verified?` cell lives in the README's Verification Queue table, and that row is deleted by this very transition, so a downstream reader (Step 7b's upstream leg) would find nothing there. Shape, matching what the 2026-07-15 closes already wrote (`docs/problems/closed/186-*.md:3`):
+
+- Evidence-authorised: `**Status**: Closed (closed-on-evidence <YYYY-MM-DD> — <citation>. Recovery: rerun /wr-itil:transition-problem <NNN> known-error to reopen)`
+- User-confirmed: `**Status**: Closed (user-confirmed <YYYY-MM-DD>)`
+
+`closed-on-evidence` is what Step 7b reads to decide whether the upstream issue may be closed. Omit it on an evidence-authorised close and the carve-out fails **open** — a third party's issue gets closed on the strength of our own test run.
+
+Reference the problem ID in the closure commit message (e.g., "Closes P008"). Step 9d's verification prompt is the structured path that fires this transition during `manage-problem review`. Re-stage the `.closed.md` file explicitly after the Edit (P057 staging trap).
 
 #### README.md refresh on every transition (P062)
 

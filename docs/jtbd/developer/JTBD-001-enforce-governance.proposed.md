@@ -58,3 +58,4 @@ Manual code review, PR review checklists, hoping the agent follows CLAUDE.md ins
 | STORY-060 | STORY-060: Pick up a captured ticket and know what was observed | draft |
 | STORY-064 | STORY-064: A ticket that only names a decision as background stays open | draft |
 | STORY-062 | STORY-062: Keep problem ranking correct after a status transition | in-progress |
+| STORY-066 | STORY-066: A fix I can prove works gets closed without me | accepted |

@@ -18,7 +18,7 @@ The deprecated `/wr-itil:manage-problem <NNN> known-error` subcommand route rema
 - `<status>` — the destination status. One of:
   - `known-error` — Open → Known Error (root cause identified AND workaround documented; fix not yet proposed — per ADR-022 corrected semantics; the fix proposal draws a release row on a story map).
   - `verifying` — Known Error → Verification Pending (fix released, awaiting user verification per ADR-022).
-  - `close` — Verification Pending → Closed (user has confirmed the fix works in production).
+  - `close` — Verification Pending → Closed (cited evidence meets the ticket's own close criterion, OR the user has confirmed the fix works in production — see Step 4).
 
 The `<NNN>` and `<status>` tokens are **data parameters**, not word-subcommands. Per the P071 split rule (ADR-010 amended), data parameters (IDs, paths, URLs, enum destinations) are permitted; word-subcommands that name distinct user intents are not. This skill's argument shape is `data + data`, which is the same shape as `/wr-itil:report-upstream <NNN>`.
 
@@ -68,7 +68,11 @@ Check the current filename suffix and verify the destination status is reachable
 | `.open.md` | `known-error` | yes |
 | `.known-error.md` | `verifying` | yes |
 | `.verifying.md` | `close` | yes |
+| `.verifying.md` | `known-error` | yes — **flip-back**: the fix recurred or proved incomplete. Required by `review-problems` Bucket 3, `manage-problem`, and `run-retro` Step 4a, all of which already instruct it. |
+| `.closed.md` | `known-error` | yes — **reopen**: a close was wrong. This is the recovery path every evidence-authorised close reports (P519), so it has to be reachable or the reversibility that justifies closing without a consent gate is fiction. |
 | any other pairing | — | no — emit an error and stop |
+
+The two backward pairings are what make an agent-authorised close safe to make. The argument for closing on evidence without asking is that the close is cheap and reversible; a reopen route the skill refuses would make that argument false. Both are ordinary renames — `git mv` back to `known-error/`, Status field back to `Known Error`, append the recurrence or mis-close citation to the ticket body, refresh the README, one commit per ADR-014 — and neither re-runs the Open → Known Error pre-flight, because root cause and workaround were established the first time round. (P512 tracks the wider set of missing pairings, including the fix-on-capture fast path.)
 
 If the pairing is invalid, emit a clear message naming the current status, the requested destination, and the valid next step. Do not silently skip or auto-correct — invalid transitions are almost always user typos and a clear error is the cheapest recovery.
 
@@ -117,9 +121,34 @@ Emit a structured report naming each deferred section + the lifted condition + t
 
 This check fires BEFORE the P330 Release-vehicle seed step in Step 6 — halt-on-conditional-deferral is the outer gate, seed-and-rename is the inner mechanic.
 
-**Verification Pending → Closed** (`<status>` = `close`) requires:
+**Verification Pending → Closed** (`<status>` = `close`) requires **either** of:
 
-- [ ] The user has explicitly confirmed the fix works in production (this skill never auto-closes on inference — only on explicit user confirmation or orchestrator-supplied `close` argument)
+- [ ] **Cited evidence** that meets the ticket's own stated close criterion — a test invocation and its outcome, a commit SHA whose diff covers the fix path, a skill or hook invocation that exercised the fix and behaved as the fix contracts, a post-release invocation of the shipped artefact that behaved as the fix contracts, or a `yes — observed: <citation>` cell already carried in the Verification Queue. The agent closes on its own authority and records the citation in the closure. **Mechanical stage — do NOT fire `AskUserQuestion`** (P132 / ADR-044 category 4, mirroring the shipped `review-problems` Step 4 Bucket 1 and `run-retro` Step 4a sub-step 5). Surface the recovery path alongside the close: `Recovery: rerun /wr-itil:transition-problem <NNN> known-error to reopen`.
+- [ ] **The user has explicitly confirmed** the fix works in production, or an orchestrator supplied the `close` argument under prior user authorisation.
+
+**Never close on inference — absence of evidence is not evidence.** A ticket nobody exercised stays Verification Pending, however old it is and however plausible the fix looks. "The fix is on disk", "it has been months", "that area has been touched a lot" and "the ADR that prescribed it shipped" are inference, not observation — see P463 for what happens when a bare citation is read as proof of shipping. Closing tickets nobody exercised is the opposite failure and is exactly as wrong as never closing any.
+
+**Genuine ambiguity stays the user's surface** — contested evidence, a fix that covers only part of the ticket, or a recorded do-not-close marker. Run the mechanical check first; it is a field read, not a judgement:
+
+```bash
+wr-itil-is-close-blocked <NNN> docs/problems && close_blocked=1
+```
+
+Exit 0 means **BLOCKED**: the ticket carries a line-anchored `DO NOT CLOSE` marker (`docs/problems/verifying/151-*.md` § "Regression / incomplete observed … DO NOT CLOSE" is the canonical shape). Do NOT close it whatever the evidence says — route it to the `verifying → known-error` flip-back, or queue it for the user. Exit 1 means not blocked. Exit 2 means the ticket ref did not resolve — treat as a pre-flight failure, not as permission.
+
+**An evidence-authorised close stays local (P500 / JTBD-301).** When the close is the agent's own — evidence, not the user's word — write the basis into the ticket's `**Status**:` line alongside the citation (`**Status**: Closed (closed-on-evidence <YYYY-MM-DD> — <citation>. Recovery: rerun /wr-itil:transition-problem <NNN> known-error to reopen)`). The Status line is the only place the basis survives: the `Likely verified?` cell lives in the README's Verification Queue table, and that row is deleted by this very transition, so a downstream reader finds nothing there. `update-upstream` Step 7b greps `^\*\*Status\*\*:` for exactly this reason — it posts the lifecycle comment and **stops**, never running `gh issue close` against a third party's issue. Our own test passing is not the reporter's confirmation, and closing their issue on it spends a decision that is theirs. Same shape as the ADR-117 pull-request carve-out: comment, do not close.
+
+Authority: ADR-044 (framework-resolution boundary — evidence-backed close is category 4, silent framework action; contested or absent evidence is category 1, queued not guessed), ADR-026 (cite the evidence, persist it, state the uncertainty), ADR-013 Rule 5 (policy-authorised silent proceed), ADR-079 (evidence-based closure precedent on the open/known-error side of the same lifecycle), P519 (this contract).
+
+**Verification Pending → Known Error** (`<status>` = `known-error` — flip-back) requires:
+
+- [ ] A recurrence or incompleteness citation: what was observed, and when. Append it to the ticket body; the `Likely verified?` cell becomes `no — observed regression — <one-line citation>`.
+
+**Closed → Known Error** (`<status>` = `known-error` — reopen) requires:
+
+- [ ] A stated reason the close was wrong. Nothing more — this is the recovery path for an evidence-authorised close and it must stay one command deep, or the reversibility that justifies closing without a consent gate is not real.
+
+Neither backward pairing re-runs the Open → Known Error pre-flight above: root cause and workaround were established when the ticket first reached Known Error and are still on the ticket. Neither fires P063 external-root-cause detection (Step 5 is Open → Known Error only).
 
 ### 5. External-root-cause detection (P063 — Open → Known Error only)
 
@@ -195,7 +224,7 @@ git mv docs/problems/known-error/<NNN>-<title>.md docs/problems/verifying/<NNN>-
 git add docs/problems/verifying/<NNN>-<title>.md
 ```
 
-The `## Fix Released` section contains: release marker (version, commit SHA, or date), one-sentence fix summary, "Awaiting user verification" line, and any exercise evidence from the releasing session. The `.verifying.md` suffix signals to every downstream consumer (work-problems classifier, review step 9d, README rendering) that the remaining work is user-side verification — no file-body scan needed.
+The `## Fix Released` section contains: release marker (version, commit SHA, or date), one-sentence fix summary, "Awaiting user verification" line, and any exercise evidence from the releasing session. The `.verifying.md` suffix signals to every downstream consumer (work-problems classifier, review step 9d, README rendering) that the remaining work is verification — by evidence or by the user — no file-body scan needed.
 
 When this transition is folded into a `fix(<scope>): ... (closes P<NNN>)` commit (the common case), the `git mv` + `Edit` + re-stage + README refresh all join that single commit — never split across commits.
 
@@ -230,9 +259,16 @@ Use the structured values verbatim when authoring the `## Fix Released` section'
 
 ```bash
 git mv docs/problems/verifying/<NNN>-<title>.md docs/problems/closed/<NNN>-<title>.md
-# ... use the Edit tool to update the Status field to "Closed" ...
+# ... use the Edit tool to update the Status field per the shape below ...
 git add docs/problems/closed/<NNN>-<title>.md
 ```
+
+**Write the close's authority basis into the Status field.** The Status line is the only place the basis survives — the `Likely verified?` cell lives in the README's Verification Queue table, and that row is deleted by this very transition, so a downstream reader (Step 7b's upstream leg) would find nothing there. Shape, matching what the 2026-07-15 closes already wrote (`docs/problems/closed/186-*.md:3`):
+
+- Evidence-authorised: `**Status**: Closed (closed-on-evidence <YYYY-MM-DD> — <citation>. Recovery: rerun /wr-itil:transition-problem <NNN> known-error to reopen)`
+- User-confirmed: `**Status**: Closed (user-confirmed <YYYY-MM-DD>)`
+
+`closed-on-evidence` is what Step 7b reads to decide whether the upstream issue may be closed. Omit it on an evidence-authorised close and the carve-out fails **open** — a third party's issue gets closed on the strength of our own test run.
 
 ### 7. Refresh docs/problems/README.md (P062)
 

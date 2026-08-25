@@ -167,7 +167,7 @@ Update from <downstream-repo-url>/<local-ticket-relative-path>:
 
 <one-sentence summary from the local ticket's ## Fix Released section>
 
-Please upgrade and verify when convenient. We'll close this issue after your confirmation OR after a 14-day quiet period (per P048 default). Local tracking: P<NNN>.
+Please upgrade and verify when convenient. We'll close this issue after your confirmation. If you'd rather we closed it without one, say so here. Local tracking: P<NNN>.
 ```
 
 #### Verification Pending → Closed template
@@ -181,6 +181,26 @@ Closing this issue to match. Thanks for the report — your filing is what got t
 ```
 
 After posting the Verifying → Closed comment, the skill also runs `gh issue close <n>` (per Step 5b below) so the upstream tracker matches local state.
+
+#### An agent-evidence close never closes the reporter's issue (P500 / ADR-117 sibling)
+
+Before running `gh issue close`, read the local ticket's **Status line** (`grep -m1 '^\*\*Status\*\*:' <ticket-file>`). If it records `closed-on-evidence` — the P519 marker for a close the agent made on its own cited evidence rather than on the user's word — post the comment and **stop there**. Do not close the upstream issue.
+
+Read the Status line, not the README's `Likely verified?` cell: the close deletes that row from the Verification Queue before this step runs, so the cell is gone by the time anything could read it.
+
+We told the reporter, in the Known Error → Verification Pending comment above, that we would close after *their* confirmation. Do not promise a quiet-period close: no sweep exists to deliver one, and a locally-closed ticket leaves the Verification Queue, so nothing enumerates it afterwards (P520). Our own test passing is not that. Closing their issue on it makes that published promise false and takes the decision away from the person who filed the report. The local ticket reaching `.closed.md` means we consider the problem resolved on our side — it does not mean the reporter has finished checking.
+
+Use the evidence-authorised variant of the Verifying → Closed template in that case, and record `posted-comment-local-close-only` in the back-write disclosure path.
+
+```markdown
+Update from <downstream-repo-url>/<local-ticket-relative-path>:
+
+**Status**: Closed locally. We verified the fix on our side — <one-line evidence citation>.
+
+Leaving this issue open for you. Close it whenever you have confirmed the fix works in your setup. Local tracking: P<NNN>.
+```
+
+Structurally identical to the pull-request carve-out above: comment, do not close.
 
 #### Template-filling rules
 
@@ -256,7 +276,7 @@ gh issue comment "${UPSTREAM_ISSUE_NUMBER}" \
 
 Capture the returned comment URL (gh prints `https://github.com/<owner>/<repo>/issues/<n>#issuecomment-<id>`).
 
-On the **Verifying → Closed** transition, after posting the comment, also close the upstream issue:
+On the **Verifying → Closed** transition, after posting the comment, also close the upstream issue — **unless the local close was evidence-authorised** (see the carve-out below):
 
 ```bash
 gh issue close "${UPSTREAM_ISSUE_NUMBER}" \
@@ -287,7 +307,7 @@ Append a log entry to the local ticket's `## Upstream Lifecycle Updates` section
 - **<YYYY-MM-DD>** — Open → Known Error
   - **Target URL**: <upstream-issue-url>
   - **Comment URL**: <posted-comment-url> (or "queued — see ## Queued Upstream Update" when above-appetite)
-  - **Disclosure path**: posted-comment | posted-pr-comment (pull-request target, ADR-117 — never closed) | posted-comment-and-closed (Verifying → Closed, issue targets only) | queued-above-appetite | closed-already-upstream | skipped-out-of-band
+  - **Disclosure path**: posted-comment | posted-pr-comment (pull-request target, ADR-117 — never closed) | posted-comment-and-closed (Verifying → Closed, issue targets only) | posted-comment-local-close-only (outbound agent-evidence close, P519) | posted-inbound-comment-local-close-only (inbound agent-evidence close, P519) | queued-above-appetite | closed-already-upstream | skipped-out-of-band
   - **Gate verdict**: external-comms <band/score> + voice-tone <pass|fail>
 
 - **<YYYY-MM-DD>** — Known Error → Verification Pending
@@ -430,11 +450,20 @@ Above-appetite handling is identical to Step 5c (silent risk-reduce + re-score; 
 gh issue comment "${NN}" --repo "${OWN_OWNER_REPO}" --body "${INBOUND_BODY}"
 ```
 
-On the **Verification Pending → Closed** transition, after the comment, also close the originating issue so our own tracker matches the local `.closed.md` state (this addresses the P211 #97 *silent-and-unclosed* witness):
+On the **Verification Pending → Closed** transition, after the comment, also close the originating issue so our own tracker matches the local `.closed.md` state (this addresses the P211 #97 *silent-and-unclosed* witness) — **but only when the close was not the agent's own** (P500 / P519, the inbound mirror of the Step 5b carve-out):
 
 ```bash
-gh issue close "${NN}" --repo "${OWN_OWNER_REPO}" --comment "" --reason completed
+if grep -m1 '^\*\*Status\*\*:' "${TICKET_FILE}" | grep -q 'closed-on-evidence'; then
+  # The agent closed this locally on its own cited evidence, not on the
+  # reporter's word. Comment and stop — the issue stays theirs to close.
+  # Record posted-inbound-comment-local-close-only in the disclosure path.
+  :
+else
+  gh issue close "${NN}" --repo "${OWN_OWNER_REPO}" --comment "" --reason completed
+fi
 ```
+
+`${NN}` is a **third party's** report filed against our own repo — the reporter is not the local maintainer, so a local user-confirmed close is theirs to act on but an agent-evidence close is not. I7 makes the inbound and outbound legs independent, so the Step 5b guard does NOT cover this call; the check has to be repeated here. Reachable path: `/wr-itil:transition-problem` Step 7b → I1 → I5.
 
 If the issue is already closed (someone closed it manually), `gh issue close` returns a benign error — record `closed-already` in the disclosure path and continue.
 
@@ -446,7 +475,7 @@ Append to the same `## Upstream Lifecycle Updates` log (Step 6 shape), tagged fo
 - **<YYYY-MM-DD>** — Known Error → Verification Pending (inbound)
   - **Target**: inbound #<NN> (own repo <OWN_OWNER_REPO>)
   - **Comment URL**: <posted-comment-url> (or "skipped — already-posted-inbound" when the idempotency guard matched, or "queued — see ## Queued Upstream Update" when above-appetite)
-  - **Disclosure path**: posted-inbound-comment | posted-inbound-comment-and-closed (Verifying → Closed) | already-posted-inbound | queued-above-appetite | closed-already
+  - **Disclosure path**: posted-inbound-comment | posted-inbound-comment-and-closed (Verifying → Closed, maintainer-confirmed) | posted-inbound-comment-local-close-only (Verifying → Closed on agent evidence, P519 — comment posted, the reporter's issue left open) | already-posted-inbound | queued-above-appetite | closed-already
   - **Gate verdict**: external-comms <band/score> + voice-tone <pass|fail>
 ```
 

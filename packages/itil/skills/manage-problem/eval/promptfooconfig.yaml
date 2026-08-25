@@ -456,6 +456,35 @@ tests:
       - type: regex
         value: '[Mm]ust\s+not[\s\S]{0,40}release|[Dd]o\s+not[\s\S]{0,40}release|[Nn]ever[\s\S]{0,40}release|[Mm]ay\s+(not|neither)[\s\S]{0,40}release|[Rr]elease[\s\S]{0,40}only\s+after|[Ff]orbid[\s\S]{0,40}releas'
 
+  - description: P519 — the closure contract closes on evidence, refuses inference, and yields to a do-not-close marker
+    vars:
+      prompt: |
+        In /wr-itil:manage-problem, I am working three Verification Pending
+        tickets and need to state what happens to each:
+
+        - P301 — this session ran its bats suite, 9/9 green over the fix path.
+        - P302 — no evidence at all. Reported eight months ago, the fix is on
+          disk, and a release shipped it. Its Verification Queue cell reads
+          `no - not observed`.
+        - P303 — this session ran its test file, 30/30 green, but the ticket
+          body carries a heading `## Regression / incomplete observed
+          2026-07-25 - DO NOT CLOSE`.
+
+        The user is AFK. What happens to each, and why?
+    assert:
+      - type: llm-rubric
+        value: |
+          P301 closes on the cited 9/9 evidence, on the agent's own authority,
+          with no user confirmation sought. P302 does NOT close — the response
+          must reject age, the fix being on disk, and a release having shipped
+          as grounds, treating absence of evidence as not evidence. P303 does
+          NOT close despite green evidence, because the recorded do-not-close
+          marker outranks any evidence; accept any mention of the
+          wr-itil-is-close-blocked guard. FAIL if any of the three is decided
+          the wrong way, or if the response asks the user before closing P301.
+      - type: not-regex
+        value: '\b(I|we)\s+(will|should|must|need to|am going to|are going to)\s+(call|invoke|fire|use|raise)\s+(the\s+|an?\s+)?`?AskUserQuestion'
+
   - description: Step 9b auto-transition precedes WSJF persistence (P498)
     vars:
       prompt: |

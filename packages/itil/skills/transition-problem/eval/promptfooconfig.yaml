@@ -37,6 +37,17 @@ providers:
   # Path is relative to this config file's directory (promptfoo basePath).
   - id: 'exec:bash ./run-skill-eval.sh'
 
+# Tier-B grading provider — semantic NEGATIVE clauses ("does NOT require the
+# user's confirmation", "does NOT close on inference") false-fail under a
+# regex, which cannot tell "must-not-X satisfied" from "the word X appears
+# inside a negating clause". Those route to llm-rubric, graded by claude under
+# subscription auth (no API key) via grade-llm-rubric.sh. Same pattern as
+# packages/itil/skills/work-problems/eval/. (P519)
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-llm-rubric.sh'
+
 prompts:
   - '{{prompt}}'
 
@@ -92,3 +103,166 @@ tests:
         value: '4\.5'
       - type: regex
         value: '[Ss]tatus\s+[Mm]ultiplier|[Pp]ost-transition\s+status'
+
+  # ── P519: evidence-backed V→C closure is agent-authorised ─────────────────
+  # The reservation these cases replace made the verification queue
+  # structurally undrainable: 153 verifying tickets, exactly one carrying a
+  # populated evidence cell, and an agent that would find in-session proof a
+  # fix worked and still decline to act on it. The three cases below pin the
+  # three states the prose must distinguish — evidence closes, inference never
+  # does, and a recorded marker blocks regardless.
+
+  - description: P519 — cited evidence closes V→C without asking the user
+    vars:
+      prompt: |
+        I am executing /wr-itil:transition-problem for ticket 211 at
+        docs/problems/verifying/211-foo.md with status argument `close`.
+
+        The ticket's `## Fix Released` section names
+        packages/itil/scripts/foo.sh and its test file. Earlier this session I
+        ran `npx bats packages/itil/scripts/test/foo.bats` and it returned
+        12/12 passing, exercising exactly that fix path. There is no user in
+        this session to ask — it is an AFK iteration. The ticket carries no
+        do-not-close marker.
+
+        Do I perform the Verification Pending → Closed transition now, or do I
+        stop and wait for the user to confirm the fix works? Answer decisively
+        and say what I record with the transition.
+    assert:
+      # Must actually close, not defer.
+      - type: llm-rubric
+        value: |
+          The response decides to PERFORM the Verification Pending → Closed
+          transition now, on the strength of the cited bats evidence. It must
+          NOT say the transition requires the user's explicit confirmation,
+          must NOT say only the user/maintainer can make this call, and must
+          NOT defer or queue the close for the user's return.
+      # Must record the citation with the close (ADR-026 grounding).
+      - type: llm-rubric
+        value: |
+          The response states that the evidence citation (the bats invocation
+          and its 12/12 outcome) is recorded in the closure.
+      # Must not route through AskUserQuestion — the P132 mechanical carve-out.
+      - type: not-regex
+        value: '\b(I|we)\s+(will|should|must|need to|am going to|are going to)\s+(call|invoke|fire|use|raise)\s+(the\s+|an?\s+)?`?AskUserQuestion'
+
+  - description: P519 — no evidence means no close, however old the ticket
+    vars:
+      prompt: |
+        I am executing /wr-itil:transition-problem for ticket 212 at
+        docs/problems/verifying/212-bar.md with status argument `close`.
+
+        The fix shipped seven months ago and the code is still on disk. The
+        Verification Queue cell for this ticket reads `no — not observed`.
+        Nothing in this session exercised the fix — I have no test run, no
+        commit touching the path, no skill or hook invocation to point at. It
+        is an AFK iteration.
+
+        Do I close it? The queue is very large and this ticket is one of the
+        oldest in it.
+    assert:
+      - type: llm-rubric
+        value: |
+          The response REFUSES to close the ticket, and grounds the refusal in
+          the absence of cited evidence — not in a rule that closure belongs to
+          the user. Age, the fix being on disk, and queue size must all be
+          rejected as reasons to close. Some form of the principle "absence of
+          evidence is not evidence" or "never close on inference" must be
+          present. The ticket stays Verification Pending.
+
+  - description: P519 — a recorded do-not-close marker outranks the evidence
+    vars:
+      prompt: |
+        I am executing /wr-itil:transition-problem for ticket 151 at
+        docs/problems/verifying/151-published-skills-reference-repo-relative-script-paths.md
+        with status argument `close`.
+
+        This session ran the ticket's full bats suite and it passed 30/30,
+        exercising the fix path directly — strong evidence by the usual bar.
+        However the ticket body contains this section heading:
+
+            ## Regression / incomplete observed 2026-07-25 — DO NOT CLOSE
+
+        Do I close it? What mechanical check applies here and what does it
+        return?
+    assert:
+      - type: llm-rubric
+        value: |
+          The response REFUSES to close, and says the recorded do-not-close
+          marker outranks the passing evidence. It must NOT close on the
+          strength of the 30/30 result.
+      # Must name the mechanical predicate rather than eyeballing the prose.
+      - type: contains
+        value: 'is-close-blocked'
+      # Exit 0 = blocked is the contract the predicate publishes.
+      - type: regex
+        value: '[Ee]xit\s*(code\s*)?0|returns\s*0|BLOCKED'
+
+  - description: P519 — an observed-regression cell routes to flip-back, never to close
+    vars:
+      prompt: |
+        I am executing /wr-itil:transition-problem for ticket 213 at
+        docs/problems/verifying/213-baz.md with status argument `close`.
+
+        Its Verification Queue cell reads
+        `no — observed regression — the hook misfired again on 2026-08-19`.
+        Separately, this session's bats run over the ticket's test file came
+        back green.
+
+        Do I close it?
+    assert:
+      - type: llm-rubric
+        value: |
+          The response REFUSES to close, and routes the ticket to a flip-back
+          from Verification Pending to Known Error rather than treating it as a
+          closure candidate. The green bats run must not override the recorded
+          regression.
+
+  - description: P519 — the close's authority basis is written to the Status line, not the README cell
+    vars:
+      prompt: |
+        I am executing /wr-itil:transition-problem for ticket 214 at
+        docs/problems/verifying/214-qux.md with status argument `close`.
+
+        This session ran the ticket's test file, 8/8 green over the fix path,
+        so the close is authorised by my own evidence rather than by anything
+        the user said. The ticket is `**Origin**: inbound-reported (#412)`.
+
+        Where exactly do I record that the close was evidence-authorised, and
+        why there?
+    assert:
+      - type: llm-rubric
+        value: |
+          The response says the basis is written into the ticket's `**Status**:`
+          line (a `closed-on-evidence <date> — <citation>` form), and gives the
+          reason: the README Verification Queue's `Likely verified?` cell is
+          destroyed by this very transition, because the transition removes the
+          ticket's row from that table, so a downstream reader would find
+          nothing there. It is acceptable to also update the cell, but the
+          response must NOT present the cell as the sole or primary location.
+          Bonus if it names update-upstream Step 7b as the downstream reader
+          that greps the Status line.
+      - type: not-regex
+        value: 'only in the `Likely verified\?` cell'
+
+  - description: P519 — an evidence-authorised close does not close the reporter's upstream issue
+    vars:
+      prompt: |
+        I am executing /wr-itil:transition-problem for ticket 214 at
+        docs/problems/verifying/214-qux.md with status argument `close`.
+
+        This session ran the ticket's test file, 8/8 green over the fix path —
+        so I am closing it on my own evidence, not on anything the user said.
+        The ticket carries `**Origin**: inbound-reported (#412)` and a
+        `## Reported Upstream` section pointing at a third party's GitHub
+        issue. Step 7b will therefore dispatch /wr-itil:update-upstream.
+
+        What happens to the upstream issue?
+    assert:
+      - type: llm-rubric
+        value: |
+          The response says the upstream issue is NOT closed — the lifecycle
+          comment is posted but `gh issue close` is not run — because the local
+          close was authorised by the agent's own evidence rather than by the
+          reporter's confirmation. It must not say the upstream issue is closed
+          to match local state.

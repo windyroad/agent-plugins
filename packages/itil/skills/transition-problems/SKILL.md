@@ -35,7 +35,7 @@ A space-separated list of `<NNN> <status>` pairs. Repeating the singular skill's
 - `<status>` — destination status. One of:
   - `known-error` — Open → Known Error (root cause + workaround documented).
   - `verifying` — Known Error → Verification Pending (fix released; awaiting user verification per ADR-022).
-  - `close` — Verification Pending → Closed (user has confirmed the fix works in production).
+  - `close` — Verification Pending → Closed (cited evidence meets the ticket's own close criterion, OR the user has confirmed the fix works in production — see Step 2c).
 
 **Examples:**
 
@@ -100,13 +100,19 @@ If no file is found OR multiple files are found (suffix-exclusive lifecycle viol
 | `.open.md` | `known-error` | yes |
 | `.known-error.md` | `verifying` | yes |
 | `.verifying.md` | `close` | yes |
+| `.verifying.md` | `known-error` | yes — **flip-back**: the fix recurred or proved incomplete. `review-problems` Bucket 3 already instructs this and had no batch path. |
+| `.closed.md` | `known-error` | yes — **reopen**: a close was wrong. The recovery path every evidence-authorised close reports (P519). |
 | any other pairing | — | no — record as `invalid-transition` and continue |
+
+Lockstep with `/wr-itil:transition-problem` Step 3 per the drift clause below — the singular and plural tables move together or neither moves. The two backward pairings are what make an agent-authorised close safe: the argument for closing on evidence without asking is that the close is cheap and reversible, and a reopen route either skill refuses would make that argument false. Both are ordinary renames; neither re-runs the Open → Known Error pre-flight (root cause and workaround were established the first time round) and neither fires the P063 detection at 2d.
 
 **2c. Run pre-flight checks** for the destination (same gating as the singular):
 
 - Open → Known Error (`known-error`): root cause documented; ≥ 1 investigation task ticked; reproduction test or reference; workaround documented; effort bucket re-rated if scope shifted (P047); status multiplier re-rated from Open 1.0 to Known Error 2.0 and WSJF recomputed with the post-transition status and current Effort (P498).
 - Known Error → Verification Pending (`verifying`): fix implemented; release marker available (version, commit SHA, or date) for the `## Fix Released` section.
-- Verification Pending → Closed (`close`): user has explicitly confirmed the fix works in production. AFK callers (work-problems orchestrator) MUST supply the close pair via prior user authorisation (e.g. an `AskUserQuestion`-batched closure prompt at the orchestrator layer); this skill never auto-closes on inference.
+- Verification Pending → Closed (`close`): **either** cited evidence meeting the ticket's own stated close criterion (test invocation + outcome, commit SHA covering the fix path, skill/hook invocation that exercised the fix, a post-release invocation of the shipped artefact that behaved as the fix contracts, or an existing `yes — observed: <citation>` Verification Queue cell) **or** explicit user confirmation. Evidence-backed closure is agent-authorised and fires in AFK — it does NOT require a prior `AskUserQuestion` at the orchestrator layer, mirroring the shipped `review-problems` Step 4 Bucket 1 and `run-retro` Step 4a sub-step 5 (P519). Record the citation in the closure and report the recovery path (`/wr-itil:transition-problem <NNN> known-error`) per pair. **An evidence-authorised close stays local (P500 / JTBD-301).** When the close is the agent's own — evidence, not the user's word — write the basis into the ticket's `**Status**:` line alongside the citation (`**Status**: Closed (closed-on-evidence <YYYY-MM-DD> — <citation>. Recovery: rerun /wr-itil:transition-problem <NNN> known-error to reopen)`). The Status line is the only place the basis survives: the `Likely verified?` cell lives in the README's Verification Queue table, and that row is deleted by this very transition, so a downstream reader finds nothing there. `update-upstream` Step 7b greps `^\*\*Status\*\*:` for exactly this reason — it posts the lifecycle comment and **stops**, never running `gh issue close` against a third party's issue. Our own test passing is not the reporter's confirmation, and closing their issue on it spends a decision that is theirs. Same shape as the ADR-117 pull-request carve-out: comment, do not close.
+
+  **Never close on inference** — absence of evidence is not evidence. A pair whose ticket carries no citation records as `pre-flight-failed` with reason `no-evidence` and stays Verification Pending; age, plausibility, and "the fix is on disk" are not observations. **Do-not-close marker check** — run `wr-itil-is-close-blocked <NNN> docs/problems` per pair before closing. Exit 0 → record the pair as `pre-flight-failed` with reason `close-blocked` plus the matched marker line, and continue to the next pair; do NOT close it whatever the evidence says. Exit 2 (unresolvable ref) is a pre-flight failure, not permission.
 
 If any pre-flight fails, record the pair as `pre-flight-failed` with the failed-check list and continue to the next pair.
 
@@ -151,9 +157,17 @@ git add docs/problems/verifying/<NNN>-<title>.md
 ```bash
 # Verification Pending → Closed
 git mv docs/problems/verifying/<NNN>-<title>.md docs/problems/closed/<NNN>-<title>.md
-# Edit Status field to "Closed"
+# Edit Status field per the shape below
 git add docs/problems/closed/<NNN>-<title>.md
 ```
+
+**Write the close's authority basis into the Status field.** The Status line is the only place the basis survives — the `Likely verified?` cell lives in the README's Verification Queue table, and that row is deleted by this very transition, so a downstream reader (Step 7b's upstream leg) would find nothing there. Shape, matching what the 2026-07-15 closes already wrote (`docs/problems/closed/186-*.md:3`):
+
+- Evidence-authorised: `**Status**: Closed (closed-on-evidence <YYYY-MM-DD> — <citation>. Recovery: rerun /wr-itil:transition-problem <NNN> known-error to reopen)`
+- User-confirmed: `**Status**: Closed (user-confirmed <YYYY-MM-DD>)`
+
+`closed-on-evidence` is what Step 7b reads to decide whether the upstream issue may be closed. Omit it on an evidence-authorised close and the carve-out fails **open** — a third party's issue gets closed on the strength of our own test run.
+
 
 If `git mv` or `git add` fails for a pair (e.g. the file has been moved by a parallel process), record the pair as `git-failed` with the error and continue to the next pair. Do NOT attempt to roll back prior pairs' staged renames — those are now part of the in-progress batch.
 

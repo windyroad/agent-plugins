@@ -79,3 +79,11 @@ The recovery gap is a cross-skill contract break rather than an oversight: `run-
 - **P135** — the decision-delegation contract that made Step 4a's close silent. Its reversibility argument depends on the missing route.
 - `packages/itil/skills/transition-problem/SKILL.md` Step 3 — the validation table.
 - `packages/retrospective/skills/run-retro/SKILL.md` Step 4a sub-steps 5 and 6 — the prescribed recovery.
+
+## Partial fix landed 2026-08-24 (P519 vehicle — the two backward pairings)
+
+Two of this ticket's missing pairings landed as part of P519, because P519's whole justification for agent-authorised closure is that a close is cheap and reversible — and the reopen route it advertises was one the skill refused, which would have made that argument fiction. `packages/itil/skills/transition-problem/SKILL.md` Step 3 now admits `.verifying.md → known-error` (flip-back, which `review-problems` Bucket 3, `manage-problem` and `run-retro` Step 4a all already instructed) and `.closed.md → known-error` (reopen), each with a minimal pre-flight in Step 4 that does not re-run the Open → Known Error checks.
+
+Caught by the external-comms review of P519's changeset, which spotted that the published entry advertised a recovery command the shipped skill would reject.
+
+**Still open here**: the fix-on-capture fast path (`Open → verifying`), and this ticket's own investigation task *"Re-check Step 4a's silent-close justification once the route exists: it argues from reversibility, which was not true when written"* — the route now exists, so that re-check is unblocked.
