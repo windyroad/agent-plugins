@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-08-21 **index reconciled** — STORY-065 added at `accepted` (the release-row fix proposal) and STORY-064 back-filled at `draft`; reverse-trace sections refreshed on their driving problems and jobs.
+> Last reviewed: 2026-08-28 **index reconciled** — STORY-067 added at `accepted` for the token-free npm Trusted Publishing release path; reverse traces are present on P284, JTBD-002, and RFC-073's release row.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -133,6 +133,7 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | accepted | STORY-061 | See why a SubagentStop risk receipt was not written | S | P477 | RFC-067 | STORY-MAP-002 |
 | accepted | STORY-065 | A fix proposal draws a release row, not a document | M | P508 | RFC-071 | STORY-MAP-002 |
 | accepted | STORY-066 | A fix I can prove works gets closed without me | M | P519 | RFC-072 | STORY-MAP-002 |
+| accepted | STORY-067 | Publish packages without expiring secrets | S | P284 | RFC-073 | STORY-MAP-002 |
 | draft | STORY-064 | A ticket that only names a decision as background stays open | M | P463 | RFC-070 | STORY-MAP-011 |
 | draft | STORY-012 | Can't start coding without an RFC — the gate makes me create one first | S | P251, P314 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-013 | Full gate: an RFC exists → I proceed; none → I create it first | M | P251, P314 | RFC-005 | STORY-MAP-002 |

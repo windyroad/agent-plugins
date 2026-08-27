@@ -1,13 +1,29 @@
 # Problem 284: Release pipeline halts — `changeset publish` E404 on a new version of an existing scoped package (@windyroad/architect@0.8.0)
 
-**Status**: Closed
+**Status**: Known Error
 **Reported**: 2026-05-23
 **Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
 **Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
 
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-067 | STORY-067: Publish packages without expiring secrets | accepted |
+
 ## Fix Released
 
-Resolved — `@windyroad/architect@0.8.0` is now published on npm, so the `changeset publish` E404 release-pipeline halt is cleared. Root cause was an npm auth/2FA failure masked as a 404 (the token lacked Bypass-2FA); a fresh Automation token was set 2026-05-24 and the release went through. Verify: `npm view @windyroad/architect version` = 0.8.0 (confirmed during this review) and subsequent releases publish without E404.
+The 2026-05-24 incident was resolved by replacing the publish token with one that bypassed 2FA. The same failure class recurred after that replacement token expired, so the token-based fix was not durable.
+
+## Recurrence — 2026-08-27
+
+Release run [33045739568](https://github.com/windyroad/agent-plugins/actions/runs/33045739568) failed every attempted npm write with E404 after the configured token expired on 2026-08-22. The run left `@windyroad/itil@2.1.0`, `@windyroad/retrospective@0.27.5`, and `@windyroad/risk-scorer@0.18.17` committed on `main` but unpublished.
+
+**Root cause**: the release workflow depends on a long-lived npm credential whose expiry is independent of repository delivery. npm masks the resulting unauthorized publish as E404. Replacing the token repeats the same failure mode.
+
+**Workaround**: install an unpublished package from its exact release commit when urgently needed; this does not restore canonical npm delivery.
+
+**Durable fix in progress**: authenticate stable and preview publishes through npm Trusted Publishing/OIDC in the single `.github/workflows/release.yml` workflow, then remove the repository secrets and disallow token-based package publishing. This removes credential expiry from the release path.
 
 ## Description
 
@@ -93,6 +109,8 @@ So BOTH earlier hypotheses were wrong: not architect-specific access (Update 1),
 
 ## Root Cause Analysis
 
+The recurring root cause is the workflow's dependency on a long-lived npm token. The earlier missing-bypass-2FA and current expiry incidents are two expiry/configuration modes of the same external credential dependency. GitHub Actions OIDC supplies a short-lived, workflow-bound identity and removes that dependency.
+
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
@@ -101,6 +119,8 @@ So BOTH earlier hypotheses were wrong: not architect-specific access (Update 1),
 - [ ] Consider a release-pipeline guard: detect version-committed-but-publish-failed split (origin package.json version > npm latest) and surface it loudly rather than leaving a silent inconsistency
 - [ ] Consider whether work-problems Step 6.5 Failure handling should special-case "publish E404 on a single package while siblings succeed" (currently halts as ambiguous npm publish rejection — correct per P140, but a documented one-retry-then-halt policy may fit the closed allow-list discussion)
 - [ ] Create reproduction test if a deterministic cause is found
+- [x] Reproduced token-expiry recurrence in release run 33045739568
+- [x] Add a regression check requiring one token-free OIDC workflow for stable and preview publishing
 
 ## Dependencies
 

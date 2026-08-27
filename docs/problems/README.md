@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-27 **P525 moved to Known Error** — ADR-121 ratifies owned-tracker-only evidence closure; implementation now requires exact committed-cache provenance and leaves foreign issues open without target-bound upstream-party confirmation.
+> Last reviewed: 2026-08-28 **P284 reopened as Known Error** — npm token expiry reproduced the masked-E404 release halt; the durable fix replaces stable and preview publish secrets with one workflow-bound OIDC identity.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -109,6 +109,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 4 | P494 | Plugin tests and project-conformance tests are the same suite, so neither can be right | 16 (High) | Open | L | 2026-08-09 | corrective-feedback (user, 2026-08-09) |
 | 3.75 | P443 | Quota-pacing (P160 / RFC-046 / ADR-093) shipped without a grounded JTBD → persona → USM → RFC → story lineage — governance artefacts are wrong, orphaned, or missing | 15 (High) | Open | L | 2026-07-07 | internal |
 | 3.75 | P445 | Agent offers unsolicited off-ramps, hedges, projects onto the user, and narrates its own conduct — "acknowledges-but-recurs" — and needs a PLUGIN-shipped behavioural rule (portable across every project), not a project-local fix | 15 (High) | Open | L | 2026-07-08 | internal |
+| 3 | P284 | Release pipeline halts — `changeset publish` E404 on a new version of an existing scoped package (@windyroad/architect@0.8.0) | 3 (Medium) | Known Error | M | 2026-05-23 | internal |
 | 3 | P248 | Use time and token cost (not t-shirt sizing) for WSJF effort, with retro-driven estimation refinement | 6 (Medium) | Open | M | 2026-05-17 | internal |
 | 3 | P411 | no interactive oversight-drain skill for pending-review risk-register entries | 6 (Medium) | Open | M | 2026-07-03 | internal |
 | 3 | P412 | RFC / Story / Story-map framework tiers are invisible to adopters — no scaffold, no nudge, no discoverable entry point | 6 (Medium) | Open | M | 2026-07-03 | internal |
