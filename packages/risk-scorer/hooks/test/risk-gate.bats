@@ -124,6 +124,16 @@ assert_gate_allows() {
   assert_gate_denies "$TEST_SESSION" "commit" "checkout binding"
 }
 
+@test "Codex missing checkout identity still requires a rescore" {
+  printf '3' > "$SCORE_FILE"
+  rm -f "$CHECKOUT_FILE"
+  export CODEX_THREAD_ID=codex-test
+  assert_gate_denies "$TEST_SESSION" "commit" "binding is missing"
+  [[ "$RISK_GATE_REASON" == *"rescore"* ]]
+  [[ "$RISK_GATE_REASON" != *"explicit leading"* ]]
+  unset CODEX_THREAD_ID
+}
+
 @test "identical tree in a different checkout denies" {
   local first second
   first=$(mktemp -d)
@@ -141,6 +151,26 @@ assert_gate_allows() {
   cd "$second"
   assert_gate_denies "$TEST_SESSION" "commit" "checkout binding"
 
+  rm -rf "$first" "$second"
+}
+
+@test "Codex checkout mismatch preserves the score and requires explicit cd" {
+  local first second
+  first=$(mktemp -d)
+  second=$(mktemp -d)
+  git -C "$first" init -q
+  git -C "$second" init -q
+  cd "$first"
+  _checkout_id > "$CHECKOUT_FILE"
+  printf '3' > "$SCORE_FILE"
+  cd "$second"
+  export CODEX_THREAD_ID=codex-test
+
+  assert_gate_denies "$TEST_SESSION" "commit" "explicit leading"
+  [[ "$RISK_GATE_REASON" == *"do not rescore"* ]]
+  [ -f "$SCORE_FILE" ]
+
+  unset CODEX_THREAD_ID
   rm -rf "$first" "$second"
 }
 

@@ -37,11 +37,19 @@ const pipelineCodexInstructions = `
 
 ## Codex assessed-checkout binding
 
+You are the endpoint pipeline scorer. Score the supplied state directly. Do
+not invoke the \`wr-risk-scorer:pipeline\` skill and do not spawn or delegate to
+another pipeline scorer; that wrapper exists for callers, not for this agent.
+
 The request must contain exactly one \`RISK_CWD: <absolute Git root>\` line.
 Repeat that exact line once after the structured risk output so the completion
 bridge can bind marker generation to the checkout that was assessed. Do not
 repeat the path elsewhere. If the request omits the line or provides more than
-one, do not emit \`RISK_SCORES\`; report that the assessed checkout is unbound.`;
+one, do not emit \`RISK_SCORES\`; report that the assessed checkout is unbound.
+
+The returned \`RISK_CWD\` is also the caller's command root. Subsequent governed
+commands must put \`cd <RISK_CWD> &&\` inside the command itself; a Codex tool
+\`workdir\` alone may be hidden from checkout-binding hooks.`;
 
 export const riskAgentSpecs = [
   ["pipeline", "Scores pipeline actions for cumulative residual risk."],

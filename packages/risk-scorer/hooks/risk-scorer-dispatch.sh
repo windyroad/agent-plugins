@@ -29,10 +29,11 @@ case "$EVENT" in
       NUDGE_OUTPUT=""
     fi
     if [ -n "${CODEX_THREAD_ID:-}" ]; then
-      AGENT_OUTPUT="$AGENT_OUTPUT" NUDGE_OUTPUT="$NUDGE_OUTPUT" python3 -c '
+      CODEX_CWD_OUTPUT='{"systemMessage":"Codex checkout safety: for git commit, npm run push:watch, npm run release:watch, and changeset commands, put an explicit leading `cd /absolute/git/root &&` inside the command. A tool workdir alone may be hidden from checkout-binding hooks."}'
+      AGENT_OUTPUT="$AGENT_OUTPUT" NUDGE_OUTPUT="$NUDGE_OUTPUT" CODEX_CWD_OUTPUT="$CODEX_CWD_OUTPUT" python3 -c '
 import json, os
 messages = []
-for name in ("AGENT_OUTPUT", "NUDGE_OUTPUT"):
+for name in ("AGENT_OUTPUT", "NUDGE_OUTPUT", "CODEX_CWD_OUTPUT"):
     try:
         message = json.loads(os.environ[name]).get("systemMessage", "")
     except (json.JSONDecodeError, AttributeError):

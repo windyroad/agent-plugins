@@ -93,6 +93,11 @@ parent_bash_input() {
     "$SESSION" "$PIPELINE_REPO" "$PIPELINE_REPO"
 }
 
+parent_hidden_workdir_input() {
+  printf '{"hook_event_name":"PreToolUse","session_id":"%s","cwd":"%s","tool_name":"Bash","tool_input":{"command":"cd %s && git commit --dry-run"}}' \
+    "$SESSION" "$OTHER_REPO" "$PIPELINE_REPO"
+}
+
 parent_prompt_input() {
   printf '{"hook_event_name":"UserPromptSubmit","session_id":"%s","cwd":"%s","prompt":"continue"}' \
     "$SESSION" "$PIPELINE_REPO"
@@ -196,6 +201,14 @@ dispatch_pretool() {
   [ "$(cat "$TMPDIR/claude-risk-$SESSION/commit")" = "4" ]
 }
 
+@test "Codex parent imports a receipt when only an explicit cd identifies the checkout" {
+  dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
+  printf '%s' "$(parent_hidden_workdir_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
+  [ "$(cat "$TMPDIR/claude-risk-$SESSION/commit")" = "4" ]
+  expected_checkout="$(cd "$PIPELINE_REPO" && source "$HOOK_DIR/lib/gate-helpers.sh" && _checkout_id)"
+  [ "$(cat "$TMPDIR/claude-risk-$SESSION/checkout-id")" = "$expected_checkout" ]
+}
+
 @test "imported score retains the original assessment timestamp" {
   dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
   pending="$(find "$TMPDIR/claude-risk-pending" -type f ! -name '*.done' ! -name '*.claim' ! -name 'subagent-stop-diagnostic.json' -print -quit)"
@@ -239,6 +252,23 @@ dispatch_pretool() {
 
   RISK_TTL=1 dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
   [ "$(find "$TMPDIR/claude-risk-pending" -type f ! -name '*.done' ! -name '*.claim' ! -name 'subagent-stop-diagnostic.json' | wc -l | tr -d ' ')" = "1" ]
+}
+
+@test "receipt bridge reaps only expired receipt-shaped files" {
+  pending_dir="$TMPDIR/claude-risk-pending"
+  mkdir -p "$pending_dir"
+  stale="$(printf 'a%.0s' {1..64})-$(printf 'b%.0s' {1..32})-$(printf 'c%.0s' {1..64})"
+  fresh="$(printf 'd%.0s' {1..64})-$(printf 'e%.0s' {1..32})-$(printf 'f%.0s' {1..64})"
+  touch "$pending_dir/$stale" "$pending_dir/$stale.done" "$pending_dir/$fresh" "$pending_dir/keep-me"
+  touch -t 200001010000 "$pending_dir/$stale" "$pending_dir/$stale.done"
+
+  RISK_TTL=1 dispatch_subagent_stop "$(pipeline_subagent_stop_input fresh-session fresh-agent)"
+
+  [ ! -e "$pending_dir/$stale" ]
+  [ ! -e "$pending_dir/$stale.done" ]
+  [ -e "$pending_dir/$fresh" ]
+  [ -e "$pending_dir/keep-me" ]
+  [ -e "$pending_dir/subagent-stop-diagnostic.json" ]
 }
 
 @test "Codex completion bridge marks the exact risk agent when it closes" {

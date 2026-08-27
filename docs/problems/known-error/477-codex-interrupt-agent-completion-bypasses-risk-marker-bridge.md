@@ -1,6 +1,6 @@
 # Problem 477: Codex collaboration completion bypasses the risk-marker bridge
 
-**Status**: Verification Pending
+**Status**: Known Error
 **Reported**: 2026-08-12
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5
 **Origin**: internal
@@ -17,7 +17,11 @@ The direct downstream witness scored its actual delivery checkout correctly, the
 
 ## Workaround
 
-None. Do not hand-edit markers or bypass hooks. Install the repaired package, rerun the scorer in the actual delivery checkout, and close the completed agent normally.
+Do not hand-edit markers or bypass hooks. In Codex, put an explicit leading
+`cd /absolute/path/to/the/assessed-checkout &&` inside governed commit, push,
+release, and changeset commands; a tool `workdir` alone may be hidden from the
+checkout-binding hook. Rescore only if the assessed checkout actually changed
+or the binding is missing.
 
 ## Root Cause Analysis
 
@@ -41,6 +45,24 @@ STORY-061.
 
 ## Fix and Verification
 
+### Recurrence on 0.18.16
+
+A live 2026-08-27 Codex run produced a valid checkout-bound score, then the
+commit gate resolved the parent task worktree because Codex did not expose the
+nested `exec_command.workdir`. The generic score path incorrectly prescribed a
+rescore even though the valid marker remained usable through an explicit
+leading `cd`. Transcript inspection also found expired unmatched receipts and
+typed pipeline agents recursively invoking the wrapper. Per ADR-022, this live
+recurrence returns P477 to Known Error until the complete repair is released
+and verified.
+
+The complete repair keeps checkout binding fail-closed, teaches Codex callers
+to put the absolute checkout in the command itself, preserves a valid ordinary
+score when only the hook-visible checkout differs, prevents a typed pipeline
+scorer from recursively dispatching itself, and reaps only expired
+receipt-shaped files. Unrelated files and the privacy-safe diagnostic are never
+cleanup candidates.
+
 - On a risk-scorer `SubagentStop` without spawn state, publish a short-lived sanitized receipt bound to the exact physical checkout and pipeline state hash.
 - On the existing parent `PreToolUse:Bash` path, or the next `UserPromptSubmit` when code mode exposes no tool event, atomically claim the matching receipt and pass it to the existing marker writer under the parent's real session.
 - Reproduce distinct child/parent sessions with no spawn-state file and assert scores, state hash, and opaque checkout identity persist only for the assessed checkout.
@@ -51,11 +73,11 @@ STORY-061.
 
 No new hook or ADR is required: this restores the intended completed-agent compatibility path using the already-enabled `SubagentStop`, `PreToolUse:Bash`, and `UserPromptSubmit` events without changing the scoring or delivery contract.
 
-## Fix Released
+## Prior Fix Released
 
-Released in `@windyroad/risk-scorer` 0.18.10 through 0.18.15. The last of those
-published 2026-08-16; `npm view @windyroad/risk-scorer version` returns `0.18.15`.
-Awaiting user verification on a live Codex collaboration run.
+Versions 0.18.10 through 0.18.16 carried the partial completion bridge. A live
+2026-08-27 run on 0.18.16 reproduced the hidden-workdir failure, proving that
+the earlier release was incomplete.
 
 The completion bridge now writes a checkout-bound receipt when a risk-scorer
 `SubagentStop` arrives without parent spawn state, and claims it on the next parent

@@ -34,6 +34,10 @@ teardown() {
     grep -q "^name = \"wr-risk-scorer:${mode}\"$" "$TARGET/wr-risk-scorer-${mode}.toml"
   done
   grep -q "EXTERNAL_COMMS_RISK_KEY:" "$TARGET/wr-risk-scorer-external-comms.toml"
+  grep -q "endpoint pipeline scorer" "$TARGET/wr-risk-scorer-pipeline.toml"
+  grep -q 'not invoke the `wr-risk-scorer:pipeline` skill' "$TARGET/wr-risk-scorer-pipeline.toml"
+  grep -q 'wr-risk-scorer:pipeline' "$TARGET/wr-risk-scorer-pipeline.toml"
+  grep -q 'workdir` alone may be hidden' "$TARGET/wr-risk-scorer-pipeline.toml"
   ! grep -q "Codex completion marker compatibility" "$TARGET/wr-risk-scorer-policy.toml"
 }
 

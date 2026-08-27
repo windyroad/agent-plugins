@@ -192,6 +192,20 @@ print(json.dumps({
   [[ "$output" != *"deny"* ]]
 }
 
+@test "ordinary score uses an explicit cd when Codex omits command workdir" {
+  cd "$OTHER_REPO"
+  _checkout_id > "$RDIR/checkout-id"
+  HASH=$(_current_hash)
+  echo "$HASH" > "$RDIR/state-hash"
+  printf '4' > "$RDIR/commit"
+
+  cd "$TMP_REPO"
+  HOOK_CWD="$TMP_REPO" run invoke_commit_gate "cd '$OTHER_REPO' && git commit -m x"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"deny"* ]]
+  [ -f "$RDIR/commit" ]
+}
+
 @test "hash refresh from another checkout cannot rebind the score" {
   HASH=$(_current_hash)
   echo "$HASH" > "$RDIR/state-hash"

@@ -182,7 +182,22 @@ function freshReceipt(path) {
   return Date.now() - statSync(path).mtimeMs < ttl;
 }
 
+function reapExpiredReceipts() {
+  if (!existsSync(pendingDir())) return;
+  const receipt = /^[0-9a-f]{64}-[0-9a-f]{32}-[0-9a-f]{64}(?:\.claim|\.done)?$/;
+  for (const name of readdirSync(pendingDir())) {
+    if (!receipt.test(name)) continue;
+    const path = join(pendingDir(), name);
+    try {
+      if (!freshReceipt(path)) rmSync(path, { force: true });
+    } catch {
+      // A concurrent consumer may have renamed or removed it.
+    }
+  }
+}
+
 function persistPendingPipeline(input) {
+  reapExpiredReceipts();
   diagnoseSubagentStop(input, "received", "pipeline-receipt-attempt");
   if (input.agent_type !== "wr-risk-scorer:pipeline") {
     diagnoseSubagentStop(input, "rejected", "unexpected-agent-type");
@@ -302,6 +317,7 @@ function markSubagentStop(input) {
 
 function consumePending(input) {
   if (!/^[A-Za-z0-9-]+$/.test(input.session_id || "")) return;
+  reapExpiredReceipts();
   let root;
   try {
     root = realpathSync(process.cwd());

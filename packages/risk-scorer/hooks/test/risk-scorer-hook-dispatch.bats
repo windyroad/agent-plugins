@@ -42,7 +42,7 @@ PY
   rm -rf "$dir"
 
   [ "$status" -eq 0 ]
-  run jq -er '.systemMessage | contains("Codex agents installed") and contains("bootstrap-catalog")' <<< "$output"
+  run jq -er '.systemMessage | contains("Codex agents installed") and contains("bootstrap-catalog") and contains("explicit leading `cd /absolute/git/root &&`")' <<< "$output"
   [ "$status" -eq 0 ]
 }
 
