@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 119 (106 in-force, 13 historical)
+**Total ADRs:** 120 (107 in-force, 13 historical)
 
 ---
 
 ## In-force decisions
 
-_106 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_107 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -526,6 +526,12 @@ _106 ADRs. These are the current rules. The architect agent reads this section f
 **Status:** proposed | **Oversight:** confirmed | **Supersedes:** ["ADR-024 (in part - issue lifecycle closure authority)"]
 **Confirmation:** A behaviour test proves that one exact github-issues:<current-repository> cache match permits the inbound comm...; A behaviour test proves that a discussion with the same number as an issue returns inbound-channel-unresolved ...; Zero, multiple, repository-mismatched, advisory, and non-matching-ticket records fail closed before every inbo...; An evidence-backed close comments on but does not close a foreign issue; upstream-party confirmation permits c...; Pull-request targets never execute a close command.
 **Related:** ADR-024, ADR-062, ADR-116
+
+### ADR-122 — npm releases authenticate through one OIDC trusted-publishing workflow
+**Status:** proposed | **Oversight:** unconfirmed
+**Chosen:** Chosen option: **"Consolidate stable and preview publication in `release.yml`"**, because it preserves the existing release capabilities while eliminating persistent npm publish credentials and satisfying npm's one-trusted-workflow constrai...
+**Confirmation:** .github/workflows/release.yml is the only workflow containing npm publish commands, grants id-token: write, us...; .github/workflows/release-preview.yml is absent, while stable and changed-package preview paths are both cover...; All thirteen npm packages trust GitHub owner windyroad, repository agent-plugins, workflow release.yml, with n...; A preview and stable release both publish successfully and show npm provenance.; After successful OIDC publication, package settings disallow traditional publish tokens and the obsolete GitHu...
+**Related:** ADR-018, ADR-020, ADR-021
 
 ---
 
