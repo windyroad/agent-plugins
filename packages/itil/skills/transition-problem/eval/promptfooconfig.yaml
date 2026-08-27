@@ -245,7 +245,7 @@ tests:
       - type: not-regex
         value: 'only in the `Likely verified\?` cell'
 
-  - description: P519 — an evidence-authorised close does not close the reporter's upstream issue
+  - description: P525 — an evidence-authorised close treats proven owned and foreign issue legs independently
     vars:
       prompt: |
         I am executing /wr-itil:transition-problem for ticket 214 at
@@ -257,12 +257,22 @@ tests:
         `## Reported Upstream` section pointing at a third party's GitHub
         issue. Step 7b will therefore dispatch /wr-itil:update-upstream.
 
-        What happens to the upstream issue?
+        The current repo is `windyroad/agent-plugins`. Its committed upstream
+        cache has exactly one `github-issues:windyroad/agent-plugins` report
+        numbered 412 whose `matched_local_ticket` is exactly `P214`, and no
+        same-number non-issue record. The foreign maintainer has not confirmed
+        closure.
+
+        What happens on each leg?
     assert:
       - type: llm-rubric
         value: |
-          The response says the upstream issue is NOT closed — the lifecycle
-          comment is posted but `gh issue close` is not run — because the local
-          close was authorised by the agent's own evidence rather than by the
-          reporter's confirmation. It must not say the upstream issue is closed
-          to match local state.
+          The response treats the legs independently. After validating the
+          committed cache provenance, it posts the inbound lifecycle comment
+          and closes own-repo issue #412. On the foreign issue it posts the
+          lifecycle comment but does NOT run gh issue close, because local
+          evidence cannot decide another maintainer's tracker state. It may
+          note that the foreign maintainer's confirmation could authorize that
+          closure. FAIL if it closes the foreign issue, leaves the proven owned
+          issue open, or performs the inbound issue operation before the cache
+          guard.

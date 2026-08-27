@@ -176,7 +176,7 @@ tests:
           gh pr close, or gh issue close against the pull request, or describes
           closing the upstream artefact as required on this transition.
 
-  - description: Verifying→Closed transition → posts comment AND runs gh issue close
+  - description: Verifying→Closed foreign issue without target-bound confirmation → comments but does not close
     vars:
       prompt: |
         I am executing /wr-itil:update-upstream for local problem ticket P420
@@ -187,26 +187,49 @@ tests:
         https://github.com/anthropics/claude-code/issues/1234. Both gates
         (external-comms + voice-tone) returned PASS.
 
-        Per the ADR-024 amendment (P080) Verifying→Closed transition template,
-        what does the skill do? Name the TWO gh commands the skill runs in
-        sequence, and explain why both are needed.
+        There is no `Closure authority` marker in the ticket. What does the
+        skill do, and why?
     assert:
       # Tier A — must run gh issue comment first.
       - type: icontains
         value: 'gh issue comment'
-      # Tier A — must also run gh issue close to keep upstream state in sync.
-      - type: icontains
-        value: 'gh issue close'
-      # Tier B — both commands are needed; closure is the symmetric audit-trail.
       - type: llm-rubric
         value: |
-          The response describes the Verifying→Closed path as: post the
-          closing comment via gh issue comment, then close the upstream
-          issue via gh issue close so the upstream tracker matches the
-          local .closed.md state. PASS if both commands are named and the
-          symmetry rationale is mentioned (local-says-closed / upstream-
-          should-also-say-closed audit trail). FAIL if only one command is
-          described, or if the closure is described as optional / deferred.
+          The response posts the lifecycle comment via gh issue comment and
+          leaves the foreign issue open. It must not treat the local
+          user-confirmed status as upstream-party confirmation. PASS only if
+          it requires a durable target-bound upstream confirmation before any
+          gh issue close. FAIL if it closes merely to mirror local state.
+
+  - description: Verifying→Closed foreign issue with validated target-bound upstream confirmation → comments and closes
+    vars:
+      prompt: |
+        I am executing /wr-itil:update-upstream for local problem ticket P420,
+        which just transitioned from Verification Pending to Closed. Its
+        ## Reported Upstream target is
+        https://github.com/example/project/issues/1234 and carries:
+
+        `- **Closure authority**: upstream-confirmed https://github.com/example/project/issues/1234#issuecomment-9876`
+
+        A read-only `gh api repos/example/project/issues/comments/9876` check
+        returned that exact issue URL, `author_association: OWNER`, and the
+        body `Confirmed fixed here; please close this issue.` Both prose gates
+        passed. What commands run?
+    assert:
+      - type: icontains
+        value: 'gh issue comment'
+      - type: icontains
+        value: 'gh issue close'
+      - type: llm-rubric
+        value: |
+          The response posts the lifecycle comment and then closes issue 1234.
+          It grounds closure in the durable exact-target comment URL plus the
+          read-only validation of issue identity, maintainer association, and
+          explicit authorization. It uses the ordinary Closed template (not
+          the evidence-authorised local-close-only template) and records
+          `posted-comment-and-closed`. FAIL if it ignores those checks, says
+          the validated issue will be left open, or treats a pull request as
+          closeable.
 
   - description: No ## Reported Upstream section → no-op exit (cheap unconditional invocation)
     vars:
@@ -567,8 +590,8 @@ tests:
           avoiding ## Reported Upstream. FAIL if it says the inbound issue
           should be recorded in ## Reported Upstream.
 
-  # ── P519: an agent-evidence close must not close the reporter's issue ──────
-  - description: P519 — an inbound-reported issue on our own repo is not closed on agent evidence
+  # ── P525: tracker ownership + channel provenance govern issue closure ─────
+  - description: P525 — an inbound-reported issue on our own repo IS closed on agent evidence
     vars:
       prompt: |
         I am executing /wr-itil:update-upstream for ticket 214, which just
@@ -582,19 +605,27 @@ tests:
         test file, 8/8 green over the fix path. Recovery: rerun
         /wr-itil:transition-problem 214 known-error to reopen)`
 
-        I am on the inbound leg (I5). What do I do with issue #97?
+        The current repo is `windyroad/agent-plugins`. The committed
+        `docs/problems/.upstream-cache.json` has exactly one report numbered
+        97 under `github-issues:windyroad/agent-plugins`; its
+        `matched_local_ticket` is exactly `P214`. No other channel for this
+        repo has report number 97.
+
+        I am entering the inbound leg. What guard runs, and what do I do with
+        issue #97?
     assert:
       - type: llm-rubric
         value: |
-          The response posts the lifecycle comment on issue #97 but does NOT
-          close it, because the local close was authorised by the agent's own
-          cited evidence rather than by the reporter. It must recognise that
-          the reporter is a third party rather than the local maintainer, so
-          the local close does not carry their decision. Accept any mention of
-          recording posted-inbound-comment-local-close-only as the disclosure
-          path. FAIL if the response closes #97, or reasons that the inbound
-          leg is exempt because the issue lives on our own repo.
-      # NOTE (P519): no deterministic guard here. Three anchor shapes were tried
+          The response first validates the committed cache provenance: exactly
+          one matching report under the current repository's github-issues
+          channel, exact number, exact local-ticket match, and no same-number
+          non-issue channel collision. It then posts the gated lifecycle
+          comment on issue #97 AND closes it, even though the local close was
+          authorised by cited evidence. Accept
+          `posted-inbound-comment-and-closed`. FAIL if it operates on #97
+          before the cache guard, leaves the proven owned issue open, or
+          applies the foreign-tracker carve-out.
+      # NOTE: no deterministic gh-command guard here. Three anchor shapes were tried
       # and all three produced false FAILs on correct answers: a bare
       # not-regex 'gh issue close' fires on the negated mention ("No `gh issue
       # close`."); '^...' is inert because promptfoo compiles new RegExp(value)
@@ -603,7 +634,45 @@ tests:
       # while explaining that it does not take it. Whether the command was RUN
       # or QUOTED is semantic, so the llm-rubric above is the assertion.
 
-  - description: P519 — Verifying→Closed on agent evidence posts the comment and leaves the issue open
+  - description: P525 — every unresolved inbound channel branch fails closed before issue operations
+    vars:
+      prompt: |
+        I am applying the inbound-origin guard for a closed local ticket P214
+        with `**Origin**: inbound-reported (#97)`. For each independent cache
+        scenario below, state whether any `gh issue view`, `gh issue comment`,
+        or `gh issue close` may run and name the result token:
+
+        1. No matching report exists.
+        2. Two matching github-issues reports exist.
+        3. The only issue match is under github-issues:someone/else.
+        4. The current-repo advisory channel has the same candidate number.
+        5. The current-repo discussion channel and issue channel both have #97.
+        6. One current-repo issue record matches #97 but matched_local_ticket is P999.
+        7. Exactly one current-repo issue record matches #97 and P214, with no
+           same-number non-issue record.
+        8. Two current-repo issue records have #97: one maps to P214 and one to P999.
+        9. The ticket also has a foreign issue closed on local evidence alone.
+        10. The foreign target carries an exact issue-comment URL whose live
+            record matches the target, is authored by a repository OWNER, and
+            explicitly says to close it.
+        11. The foreign target is a pull request.
+    assert:
+      - type: llm-rubric
+        value: |
+          Scenarios 1-6 must all return `inbound-channel-unresolved` and run
+          no inbound gh issue read, comment, or close. Scenario 7 may proceed
+          through the existing gates, comment, and close the proven owned
+          issue. Scenario 8 also returns `inbound-channel-unresolved` with no
+          inbound issue operation because the total same-number issue count is
+          two even though one record matches P214. Scenario 9 comments but
+          leaves the foreign issue open because
+          local evidence does not control another maintainer's tracker.
+          Scenario 10 may close the foreign issue because the durable,
+          target-bound maintainer confirmation supplies authority. Scenario 11 is comment-only and
+          never closes the pull request. FAIL on any missing branch or any
+          issue operation in scenarios 1-6 or 8.
+
+  - description: P525 — Verifying→Closed on local evidence comments but leaves a foreign issue open
     vars:
       prompt: |
         I am executing /wr-itil:update-upstream for local problem ticket P421,
@@ -624,12 +693,13 @@ tests:
         value: |
           The response posts the lifecycle comment (gh issue comment) and does
           NOT run `gh issue close` — issue 5678 is left open for the reporter.
-          The reason given must be that this close was authorised by our own
-          evidence rather than by the reporter's confirmation, and that we told
-          them we would wait for their confirmation. FAIL if
-          the response runs gh issue close, or says the upstream issue is
-          closed to match local state.
-      # NOTE (P519): no deterministic guard here. Three anchor shapes were tried
+          The reason must be that local evidence does not control another
+          maintainer's tracker. It must also state that confirmation from that
+          upstream party may authorize closure. FAIL if the response runs
+          gh issue close on local evidence alone, claims a prior promise is the
+          governing reason, or closes the foreign issue merely to match local
+          state.
+      # NOTE: no deterministic gh-command guard here. Three anchor shapes were tried
       # and all three produced false FAILs on correct answers: a bare
       # not-regex 'gh issue close' fires on the negated mention ("No `gh issue
       # close`."); '^...' is inert because promptfoo compiles new RegExp(value)

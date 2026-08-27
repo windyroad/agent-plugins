@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 118 (105 in-force, 13 historical)
+**Total ADRs:** 119 (106 in-force, 13 historical)
 
 ---
 
 ## In-force decisions
 
-_105 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_106 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -521,6 +521,11 @@ _105 ADRs. These are the current rules. The architect agent reads this section f
 **Status:** proposed | **Oversight:** unconfirmed
 **Confirmation:** Behavioural bats (ADR-052): a simulated months-behind clone emits the advisory; a fresh clone stays silent; a ...; Canonical edit at packages/shared/hooks/staleness-check.sh + scripts/sync-staleness-check.sh, with CI npm run ...; Per ADR-119, the implementation is proposed as a release row, never as an RFC document.; docs/decisions/README.md compendium regenerated per ADR-077 / ADR-078.
 **Related:** ADR-088, ADR-116, ADR-119, ADR-074, ADR-110, ADR-111, ADR-098, ADR-091, ADR-035, ADR-038, ADR-040, ADR-087, ADR-002, ADR-003, ADR-017, ADR-068
+
+### ADR-121 — Owned tracker issues close on evidence
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** ["ADR-024 (in part - issue lifecycle closure authority)"]
+**Confirmation:** A behaviour test proves that one exact github-issues:<current-repository> cache match permits the inbound comm...; A behaviour test proves that a discussion with the same number as an issue returns inbound-channel-unresolved ...; Zero, multiple, repository-mismatched, advisory, and non-matching-ticket records fail closed before every inbo...; An evidence-backed close comments on but does not close a foreign issue; upstream-party confirmation permits c...; Pull-request targets never execute a close command.
+**Related:** ADR-024, ADR-062, ADR-116
 
 ---
 

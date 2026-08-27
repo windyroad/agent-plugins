@@ -145,10 +145,11 @@ EOF
   [ "$status" -eq 0 ]
 }
 
-@test "update-upstream: SKILL.md Verifying→Closed also runs gh issue close (symmetric audit trail)" {
-  # JTBD-201 symmetric audit trail outcome — when the local ticket goes
-  # .closed.md the upstream issue must also close. Without gh issue close
-  # the upstream tracker accumulates stale-looking open issues.
+@test "update-upstream: foreign issue close requires target-bound upstream confirmation" {
+  run grep -F '**Closure authority**: upstream-confirmed' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'author_association' "$SKILL_MD"
+  [ "$status" -eq 0 ]
   run grep -F 'gh issue close' "$SKILL_MD"
   [ "$status" -eq 0 ]
 }
@@ -415,4 +416,19 @@ EOF
   [ "$status" -eq 0 ]
   run grep -F 'never runs `gh pr close`' "$SKILL_MD"
   [ "$status" -eq 0 ]
+}
+
+@test "update-upstream: inbound provenance rejects a duplicate same-number issue even when one ticket matches" {
+  run grep -F 'ISSUE_NUMBER_MATCHES' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+  run grep -F 'ISSUE_TICKET_MATCHES' "$SKILL_MD"
+  [ "$status" -eq 0 ]
+
+  cache='{"channels":{"github-issues:windyroad/agent-plugins":{"reports":[{"number":97,"matched_local_ticket":"P214"},{"number":97,"matched_local_ticket":"P999"}]}}}'
+  issue_number_matches=$(printf '%s' "$cache" | jq '[.channels["github-issues:windyroad/agent-plugins"].reports[]? | select(.number == 97)] | length')
+  issue_ticket_matches=$(printf '%s' "$cache" | jq '[.channels["github-issues:windyroad/agent-plugins"].reports[]? | select(.number == 97 and .matched_local_ticket == "P214")] | length')
+
+  [ "$issue_number_matches" -eq 2 ]
+  [ "$issue_ticket_matches" -eq 1 ]
+  [ "$issue_number_matches" -ne 1 ]
 }

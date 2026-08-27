@@ -842,7 +842,7 @@ Both the `git mv` and the file edits belong in the same commit as the fix implem
 
 - **Cited evidence** meeting the ticket's own stated close criterion — a test invocation and its outcome, a commit SHA whose diff covers the fix path, a skill or hook invocation that exercised the fix and behaved as the fix contracts, a post-release invocation of the shipped artefact that behaved as the fix contracts, or an existing `yes — observed: <citation>` Verification Queue cell. The agent closes on its own authority and records the citation in the closure. **Mechanical stage — do NOT fire `AskUserQuestion`** (P132 / ADR-044 category 4). Report `Recovery: rerun /wr-itil:transition-problem <NNN> known-error to reopen`.
 
-  **An evidence-authorised close stays local (P500 / JTBD-301).** When the close is the agent's own — evidence, not the user's word — write the basis into the ticket's `**Status**:` line alongside the citation (`**Status**: Closed (closed-on-evidence <YYYY-MM-DD> — <citation>. Recovery: rerun /wr-itil:transition-problem <NNN> known-error to reopen)`). The Status line is the only place the basis survives: the `Likely verified?` cell lives in the README's Verification Queue table, and that row is deleted by this very transition, so a downstream reader finds nothing there. `update-upstream` Step 7b greps `^\*\*Status\*\*:` for exactly this reason — it posts the lifecycle comment and **stops**, never running `gh issue close` against a third party's issue. Our own test passing is not the reporter's confirmation, and closing their issue on it spends a decision that is theirs. Same shape as the ADR-117 pull-request carve-out: comment, do not close.
+  **Evidence-authorised tracker updates.** Write the basis into the ticket's `**Status**:` line alongside the citation (`**Status**: Closed (closed-on-evidence <YYYY-MM-DD> — <citation>. Recovery: rerun /wr-itil:transition-problem <NNN> known-error to reopen)`). A provenance-proven GitHub issue on this project's tracker receives the gated comment and closes; an unresolved or non-issue inbound origin performs no issue mutation. An issue on another maintainer's tracker receives the comment but stays open on our evidence alone; that upstream party's confirmation may authorize closure. Pull requests remain comment-only.
 - **Explicit user confirmation** that the fix works in production.
 
 **Never close on inference** — absence of evidence is not evidence; a ticket nobody exercised stays Verification Pending. **Do-not-close guard**, before either trigger:
@@ -866,7 +866,7 @@ git add docs/problems/closed/<NNN>-<title>.md
 - Evidence-authorised: `**Status**: Closed (closed-on-evidence <YYYY-MM-DD> — <citation>. Recovery: rerun /wr-itil:transition-problem <NNN> known-error to reopen)`
 - User-confirmed: `**Status**: Closed (user-confirmed <YYYY-MM-DD>)`
 
-`closed-on-evidence` is what Step 7b reads to decide whether the upstream issue may be closed. Omit it on an evidence-authorised close and the carve-out fails **open** — a third party's issue gets closed on the strength of our own test run.
+`closed-on-evidence` is what the outbound leg reads to keep a foreign issue open on our evidence alone. The inbound leg uses committed issue-channel provenance instead: ambiguity fails closed before any issue operation.
 
 Reference the problem ID in the closure commit message (e.g., "Closes P008"). Step 9d's verification prompt is the structured path that fires this transition during `manage-problem review`. Re-stage the `.closed.md` file explicitly after the Edit (P057 staging trap).
 

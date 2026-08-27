@@ -175,22 +175,28 @@ Please upgrade and verify when convenient. We'll close this issue after your con
 ```markdown
 Update from <downstream-repo-url>/<local-ticket-relative-path>:
 
-**Status**: Closed locally after user-side verification.
+**Status**: Closed locally after verification.
 
-Closing this issue to match. Thanks for the report — your filing is what got this on the queue. Local tracking: P<NNN>.
+Thanks for the report — your filing is what got this on the queue. Local tracking: P<NNN>.
 ```
 
-After posting the Verifying → Closed comment, the skill also runs `gh issue close <n>` (per Step 5b below) so the upstream tracker matches local state.
+After posting the Verifying → Closed comment, leave the foreign issue open by default. Closing it requires the target-bound upstream-party confirmation below.
 
-#### An agent-evidence close never closes the reporter's issue (P500 / ADR-117 sibling)
+#### Foreign issues close only on target-bound upstream-party confirmation
 
-Before running `gh issue close`, read the local ticket's **Status line** (`grep -m1 '^\*\*Status\*\*:' <ticket-file>`). If it records `closed-on-evidence` — the P519 marker for a close the agent made on its own cited evidence rather than on the user's word — post the comment and **stop there**. Do not close the upstream issue.
+Local evidence or local user confirmation can close our ticket, but neither decides another maintainer's tracker state. Post the lifecycle comment and **stop there** unless the local ticket's `## Reported Upstream` section carries this durable, target-bound signal:
+
+```markdown
+- **Closure authority**: upstream-confirmed <exact GitHub issue-comment URL>
+```
+
+Before running `gh issue close`, validate that URL read-only: it MUST be an `#issuecomment-<id>` URL on the exact `UPSTREAM_OWNER_REPO/issues/UPSTREAM_ISSUE_NUMBER` target; `gh api repos/<owner>/<repo>/issues/comments/<id>` MUST return that exact issue URL; `author_association` MUST be `OWNER`, `MEMBER`, or `COLLABORATOR`; and the comment body MUST unambiguously authorize closing this issue. A missing marker, URL mismatch, API failure, non-maintainer association, or ambiguous body leaves the issue open. Never infer this authority from a local `user-confirmed` Status marker.
 
 Read the Status line, not the README's `Likely verified?` cell: the close deletes that row from the Verification Queue before this step runs, so the cell is gone by the time anything could read it.
 
-We told the reporter, in the Known Error → Verification Pending comment above, that we would close after *their* confirmation. Do not promise a quiet-period close: no sweep exists to deliver one, and a locally-closed ticket leaves the Verification Queue, so nothing enumerates it afterwards (P520). Our own test passing is not that. Closing their issue on it makes that published promise false and takes the decision away from the person who filed the report. The local ticket reaching `.closed.md` means we consider the problem resolved on our side — it does not mean the reporter has finished checking.
+Confirmation from the upstream party may authorize closing their issue; their word, not our evidence, supplies the missing authority. Do not promise a quiet-period close that no mechanism delivers.
 
-Use the evidence-authorised variant of the Verifying → Closed template in that case, and record `posted-comment-local-close-only` in the back-write disclosure path.
+When target-bound confirmation is absent, use the evidence-authorised local-close-only variant below and record `posted-comment-local-close-only` in the back-write disclosure path. When validation succeeds, use the ordinary Closed template and record `posted-comment-and-closed`.
 
 ```markdown
 Update from <downstream-repo-url>/<local-ticket-relative-path>:
@@ -200,7 +206,7 @@ Update from <downstream-repo-url>/<local-ticket-relative-path>:
 Leaving this issue open for you. Close it whenever you have confirmed the fix works in your setup. Local tracking: P<NNN>.
 ```
 
-Structurally identical to the pull-request carve-out above: comment, do not close.
+On this leg, without validated target-bound confirmation from them: comment, do not close. Pull requests are always comment-only, even if they carry a confirmation marker.
 
 #### Template-filling rules
 
@@ -276,7 +282,7 @@ gh issue comment "${UPSTREAM_ISSUE_NUMBER}" \
 
 Capture the returned comment URL (gh prints `https://github.com/<owner>/<repo>/issues/<n>#issuecomment-<id>`).
 
-On the **Verifying → Closed** transition, after posting the comment, also close the upstream issue — **unless the local close was evidence-authorised** (see the carve-out below):
+On the **Verifying → Closed** transition, after posting the comment, close the upstream issue only when the target-bound `Closure authority` validation above passed:
 
 ```bash
 gh issue close "${UPSTREAM_ISSUE_NUMBER}" \
@@ -307,7 +313,7 @@ Append a log entry to the local ticket's `## Upstream Lifecycle Updates` section
 - **<YYYY-MM-DD>** — Open → Known Error
   - **Target URL**: <upstream-issue-url>
   - **Comment URL**: <posted-comment-url> (or "queued — see ## Queued Upstream Update" when above-appetite)
-  - **Disclosure path**: posted-comment | posted-pr-comment (pull-request target, ADR-117 — never closed) | posted-comment-and-closed (Verifying → Closed, issue targets only) | posted-comment-local-close-only (outbound agent-evidence close, P519) | posted-inbound-comment-local-close-only (inbound agent-evidence close, P519) | queued-above-appetite | closed-already-upstream | skipped-out-of-band
+  - **Disclosure path**: posted-comment | posted-pr-comment (pull-request target — never closed) | posted-comment-and-closed (confirmed Verifying → Closed, issue targets only) | posted-comment-local-close-only (outbound evidence-authorised close) | queued-above-appetite | closed-already-upstream | skipped-out-of-band
   - **Gate verdict**: external-comms <band/score> + voice-tone <pass|fail>
 
 - **<YYYY-MM-DD>** — Known Error → Verification Pending
@@ -326,7 +332,51 @@ This leg runs **in addition to** Steps 2–6 (the outbound `## Reported Upstream
 
 #### I1. Parse the inbound origin
 
-From the `**Origin**: inbound-reported (#NN)` field, extract the originating issue number `NN`. Resolve the repo it lives on as **our own repo** — the `gh` default for the current working tree (`gh repo view --json nameWithOwner -q .nameWithOwner`), NOT an external upstream owner/repo. If the `**Origin**` field is `internal` or absent, this leg does not run (the no-op is already handled at Step 1 when both surfaces are absent).
+From the `**Origin**: inbound-reported (#NN)` field, extract the candidate number `NN`. That untyped number is not proof of an issue: issues, discussions, and advisories have distinct mutation paths, and numeric identifiers can collide.
+
+Before any inbound `gh issue view`, `gh issue comment`, or `gh issue close`, prove the channel from the committed discovery cache:
+
+```bash
+OWN_OWNER_REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner)
+LOCAL_TICKET_ID="P${LOCAL_ID}"
+ISSUE_CHANNEL="github-issues:${OWN_OWNER_REPO}"
+CACHE_REF="HEAD:docs/problems/.upstream-cache.json"
+CACHE_JSON=$(git show "${CACHE_REF}" 2>/dev/null) || CACHE_JSON='{}'
+
+ISSUE_NUMBER_MATCHES=$(printf '%s' "${CACHE_JSON}" | jq \
+  --arg channel "${ISSUE_CHANNEL}" \
+  --argjson number "${NN}" \
+  '[.channels[$channel].reports[]? | select(.number == $number)] | length' \
+  2>/dev/null) || ISSUE_NUMBER_MATCHES=0
+
+ISSUE_TICKET_MATCHES=$(printf '%s' "${CACHE_JSON}" | jq \
+  --arg channel "${ISSUE_CHANNEL}" \
+  --argjson number "${NN}" \
+  --arg ticket "${LOCAL_TICKET_ID}" \
+  '[.channels[$channel].reports[]? |
+    select(.number == $number and .matched_local_ticket == $ticket)] | length' \
+  2>/dev/null) || ISSUE_TICKET_MATCHES=0
+
+NON_ISSUE_MATCHES=$(printf '%s' "${CACHE_JSON}" | jq \
+  --arg issue_channel "${ISSUE_CHANNEL}" \
+  --arg repo_suffix ":${OWN_OWNER_REPO}" \
+  --argjson number "${NN}" \
+  '[.channels | to_entries[] |
+    select(.key != $issue_channel and (.key | endswith($repo_suffix))) |
+    .value.reports[]? | select(.number == $number)] | length' \
+  2>/dev/null) || NON_ISSUE_MATCHES=0
+
+if [ "${ISSUE_NUMBER_MATCHES}" -ne 1 ] || \
+   [ "${ISSUE_TICKET_MATCHES}" -ne 1 ] || \
+   [ "${NON_ISSUE_MATCHES}" -ne 0 ]; then
+  echo "inbound-channel-unresolved: ${LOCAL_TICKET_ID} #${NN}"
+  INBOUND_CHANNEL_RESOLVED=0
+else
+  INBOUND_CHANNEL_RESOLVED=1
+fi
+```
+
+When `INBOUND_CHANNEL_RESOLVED=0`, skip I2–I6 and perform no inbound issue operation; an independent outbound leg may still continue. Missing committed cache data, zero or multiple issue matches, a repository mismatch, a wrong `matched_local_ticket`, or a discussion/advisory collision all take this path. If the Origin field is `internal` or absent, this leg does not run.
 
 #### I2. Determine the transition (same suffix logic as Step 3)
 
@@ -450,20 +500,13 @@ Above-appetite handling is identical to Step 5c (silent risk-reduce + re-score; 
 gh issue comment "${NN}" --repo "${OWN_OWNER_REPO}" --body "${INBOUND_BODY}"
 ```
 
-On the **Verification Pending → Closed** transition, after the comment, also close the originating issue so our own tracker matches the local `.closed.md` state (this addresses the P211 #97 *silent-and-unclosed* witness) — **but only when the close was not the agent's own** (P500 / P519, the inbound mirror of the Step 5b carve-out):
+On the **Verification Pending → Closed** transition, after the comment, close the provenance-proven issue on this project's tracker whether the local close was confirmed or evidence-authorised:
 
 ```bash
-if grep -m1 '^\*\*Status\*\*:' "${TICKET_FILE}" | grep -q 'closed-on-evidence'; then
-  # The agent closed this locally on its own cited evidence, not on the
-  # reporter's word. Comment and stop — the issue stays theirs to close.
-  # Record posted-inbound-comment-local-close-only in the disclosure path.
-  :
-else
-  gh issue close "${NN}" --repo "${OWN_OWNER_REPO}" --comment "" --reason completed
-fi
+gh issue close "${NN}" --repo "${OWN_OWNER_REPO}" --comment "" --reason completed
 ```
 
-`${NN}` is a **third party's** report filed against our own repo — the reporter is not the local maintainer, so a local user-confirmed close is theirs to act on but an agent-evidence close is not. I7 makes the inbound and outbound legs independent, so the Step 5b guard does NOT cover this call; the check has to be repeated here. Reachable path: `/wr-itil:transition-problem` Step 7b → I1 → I5.
+This outbound guard does not apply to a provenance-proven GitHub issue on this project's own repository. After the gated comment, close it whether the local close was evidence-authorised or confirmed; the reporter can reopen it. Unknown or non-issue inbound channels already stopped at the provenance guard.
 
 If the issue is already closed (someone closed it manually), `gh issue close` returns a benign error — record `closed-already` in the disclosure path and continue.
 
@@ -475,7 +518,7 @@ Append to the same `## Upstream Lifecycle Updates` log (Step 6 shape), tagged fo
 - **<YYYY-MM-DD>** — Known Error → Verification Pending (inbound)
   - **Target**: inbound #<NN> (own repo <OWN_OWNER_REPO>)
   - **Comment URL**: <posted-comment-url> (or "skipped — already-posted-inbound" when the idempotency guard matched, or "queued — see ## Queued Upstream Update" when above-appetite)
-  - **Disclosure path**: posted-inbound-comment | posted-inbound-comment-and-closed (Verifying → Closed, maintainer-confirmed) | posted-inbound-comment-local-close-only (Verifying → Closed on agent evidence, P519 — comment posted, the reporter's issue left open) | already-posted-inbound | queued-above-appetite | closed-already
+  - **Disclosure path**: posted-inbound-comment | posted-inbound-comment-and-closed (proven owned issue, confirmed or evidence-authorised close) | already-posted-inbound | queued-above-appetite | closed-already | inbound-channel-unresolved
   - **Gate verdict**: external-comms <band/score> + voice-tone <pass|fail>
 ```
 

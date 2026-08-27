@@ -5,7 +5,7 @@ reported: 2026-07-02
 decision-makers: [Tom Howard]
 problems: [P080, P170]
 jtbd: [JTBD-008, JTBD-301]
-adrs: [ADR-062, ADR-022]
+adrs: [ADR-062, ADR-022, ADR-121]
 story-maps: [STORY-MAP-002, STORY-MAP-004]
 estimated-effort: M
 ---
@@ -17,12 +17,12 @@ estimated-effort: M
 
 ## User value (INVEST Valuable)
 
-In order that the person who reported the problem gets the resolution — knows the fix shipped, can confirm it works for them, and sees the loop closed rather than left hanging — as a maintainer, I want to tell them it's released and close the channel on their confirmation.
+In order that the person who reported the problem gets the resolution — knows the fix shipped, can confirm it works for them, and sees the loop closed rather than left hanging — as a maintainer, I want to tell them it's released and close a provenance-proven owned issue when the resolution is established, while leaving foreign tracker closure to its maintainer.
 
 ## Acceptance criteria (INVEST Testable)
 
 - [ ] When an inbound-origin ticket's fix is released (its problem reaches Verifying — [STORY-023](023-ship-verify-and-close-with-a-real-trace.md)), the reporter's channel is told which release contains the fix, with a request to verify.
-- [ ] On the reporter's confirmation, the channel is closed (loop closed); the problem's verification close (ADR-022) and the channel close are consistent.
+- [ ] A provenance-proven GitHub issue on our tracker closes after confirmed or evidence-backed resolution; a foreign issue closes only with its maintainer's confirmation; ambiguous or non-issue inbound channels are not mutated.
 - [ ] No confidential internal detail leaked; the message is respectful and complete.
 - [ ] Mirrors the `update-upstream` / `check-upstream-responses` machinery (external-party close-the-loop).
 

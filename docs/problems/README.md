@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-24 **P519 worked to Known Error** — the Verification Pending -> Closed transition was reserved for the maintainer across eleven shipped SKILL prose loci, so evidence-based closure never fired and all 153 verifying tickets were stranded. Sweep landed with the do-not-close predicate, the AFK verification drain, and the external-reporter carve-out; fix vehicle is the RFC-072 release row on STORY-MAP-002.
+> Last reviewed: 2026-08-27 **P525 moved to Known Error** — ADR-121 ratifies owned-tracker-only evidence closure; implementation now requires exact committed-cache provenance and leaves foreign issues open without target-bound upstream-party confirmation.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -50,6 +50,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 16 | P420 | check-briefing-budgets.sh crashes with `must_split[@]: unbound variable` on empty arrays under macOS default bash 3.2 | 8 (Medium) | Known Error | S | 2026-07-05 | internal |
 | 16 | P471 | run-retro Step 2d ask-hygiene trail path collides across same-day iterations, clobbering prior entries | 8 (Medium) | Known Error | S | 2026-07-26 | internal |
 | 16 | P511 | The ask-hygiene trail is one file per day, so a second retro's counts are invisible to the R6 gate | 8 (Medium) | Known Error | S | 2026-08-21 | internal |
+| 16 | P525 | An agent-invented carve-out leaves our own tracker issues open forever | 16 (High) | Known Error | M | 2026-08-26 | corrective-feedback (user, 2026-08-26) |
 | 15 | P507 | SessionStart surfacers emit a directive with nothing enforcing the drain — surfacing is not draining | 15 (High) | Known Error | M | 2026-08-20 | internal |
 | 12 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 (High) | Known Error | M | 2026-06-10 | internal |
 | 12 | P462 | Amendment-scoped `human-oversight: unconfirmed` has no detector — unratified amendment substance never reaches the oversight drain | 12 (High) | Known Error | M | 2026-07-26 | internal |
@@ -63,7 +64,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 9 | P502 | The marker shim's 24h candidate-SID window excludes long sessions, so it silently writes no marker | 9 (Medium) | Open | S | 2026-08-20 | internal |
 | 8 | P419 | capture-story's mechanical reverse-trace edit to a docs/jtbd file re-locks the JTBD edit gate mid-session | 8 (Medium) | Known Error | M | 2026-07-05 | internal |
 | 8 | P459 | Agent-Prose Behavioural Eval Flaky — Red-Lines CI on Unrelated Commits | 8 (Medium) | Known Error | M | 2026-07-24 | internal |
-| 8 | P500 | External reporter issues close before reporter confirmation or the promised quiet period | 16 (High) | Known Error | L | 2026-08-17 | internal |
+| 8 | P500 | Foreign tracker issues close on local evidence alone | 16 (High) | Known Error | L | 2026-08-17 | internal |
 | 8 | P508 | The fix proposal still instantiates a standalone RFC document, after ADR-103 made it a release row | 16 (High) | Known Error | L | 2026-08-20 | internal |
 | 8 | P414 | retro/wrap defers over-threshold briefing Tier-3 rotation as a "run interactive run-retro" recommendation instead of performing the split | 8 (Medium) | Open | S | 2026-07-03 | internal |
 | 8 | P472 | reconcile-stories reports permanent false MISSING_REVERSE_TRACE drift against ADR-090's ratified-stories-only rule | 8 (Medium) | Open | S | 2026-07-26 | internal |
@@ -96,7 +97,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 4.5 | P491 | The retro context trigger's thresholds are prose in five places, and none of them is the decision | 9 (Medium) | Open | M | 2026-08-09 | internal |
 | 4.5 | P501 | Project-specific content leaks into another adopter's generated plugin document | 9 (Medium) | Open | M | 2026-08-18 | corrective-feedback |
 | 4.5 | P517 | An iteration can burn its whole budget in the commit gate and lose everything, because the commit is the last step | 9 (Medium) | Open | M | 2026-08-21 | internal |
-| 4.5 | P520 | Nothing delivers the quiet-period follow-up we promise reporters | 9 (Medium) | Open | M | 2026-08-24 | internal |
+| 4.5 | P520 | Direct evidence-close paths skip reporter lifecycle updates | 9 (Medium) | Open | M | 2026-08-24 | internal |
 | 4.5 | P523 | Skill eval suites are red on main, so a green run cannot discharge the prose-surface floor | 9 (Medium) | Open | M | 2026-08-25 | internal |
 | 4 | P410 | install-updates leaves stale cached plugin versions on disk — no prune step | 8 (Medium) | Open | M | 2026-07-03 | internal |
 | 4 | P442 | WSJF Rankings render convention differentiates tiers only by ordering + the Origin column — no visual tier separator, so inbound-reported priority is not legible | 8 (Medium) | Open | M | 2026-07-06 | corrective-feedback (user, 2026-07-06 |

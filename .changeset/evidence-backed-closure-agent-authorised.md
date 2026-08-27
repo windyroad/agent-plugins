@@ -11,6 +11,6 @@ Evidence-backed closure is now the agent's call. When it can point at something 
 
 The half worth keeping is kept. Absence of evidence is not evidence: a fix nobody exercised stays open however old it is, and neither "the code is on disk" nor "a release shipped it" is an observation. Contested evidence and partial fixes still come to you. So does anything carrying a do-not-close marker — that is now a mechanical check (`wr-itil-is-close-blocked`) rather than a line of prose the next agent has to notice, and it outranks any evidence.
 
-If a ticket came from someone else's bug report, closing it locally no longer closes their issue. We tell reporters we will wait for their confirmation; our own test passing is not that, so the upstream comment posts and the issue stays theirs to close.
+If the ticket came from an issue you filed on someone else's repository, closing it locally on your evidence no longer closes that issue. The upstream comment posts and the issue stays open unless its maintainer confirms closure.
 
 Every close reports how to undo it, and `/wr-itil:transition-problem` now accepts the two backward moves that make it true: `<NNN> known-error` reopens a closed ticket, and the same command flips a verifying ticket back when a fix proves incomplete.

@@ -136,7 +136,7 @@ wr-itil-is-close-blocked <NNN> docs/problems && close_blocked=1
 
 Exit 0 means **BLOCKED**: the ticket carries a line-anchored `DO NOT CLOSE` marker (`docs/problems/verifying/151-*.md` § "Regression / incomplete observed … DO NOT CLOSE" is the canonical shape). Do NOT close it whatever the evidence says — route it to the `verifying → known-error` flip-back, or queue it for the user. Exit 1 means not blocked. Exit 2 means the ticket ref did not resolve — treat as a pre-flight failure, not as permission.
 
-**An evidence-authorised close stays local (P500 / JTBD-301).** When the close is the agent's own — evidence, not the user's word — write the basis into the ticket's `**Status**:` line alongside the citation (`**Status**: Closed (closed-on-evidence <YYYY-MM-DD> — <citation>. Recovery: rerun /wr-itil:transition-problem <NNN> known-error to reopen)`). The Status line is the only place the basis survives: the `Likely verified?` cell lives in the README's Verification Queue table, and that row is deleted by this very transition, so a downstream reader finds nothing there. `update-upstream` Step 7b greps `^\*\*Status\*\*:` for exactly this reason — it posts the lifecycle comment and **stops**, never running `gh issue close` against a third party's issue. Our own test passing is not the reporter's confirmation, and closing their issue on it spends a decision that is theirs. Same shape as the ADR-117 pull-request carve-out: comment, do not close.
+**Evidence-authorised tracker updates.** Write the basis into the ticket's `**Status**:` line alongside the citation (`**Status**: Closed (closed-on-evidence <YYYY-MM-DD> — <citation>. Recovery: rerun /wr-itil:transition-problem <NNN> known-error to reopen)`). A provenance-proven GitHub issue on this project's tracker receives the gated comment and closes; unresolved or non-issue inbound provenance performs no issue mutation. A foreign issue receives the comment but stays open on our evidence alone; that upstream party's confirmation may authorize closure. Pull requests remain comment-only.
 
 Authority: ADR-044 (framework-resolution boundary — evidence-backed close is category 4, silent framework action; contested or absent evidence is category 1, queued not guessed), ADR-026 (cite the evidence, persist it, state the uncertainty), ADR-013 Rule 5 (policy-authorised silent proceed), ADR-079 (evidence-based closure precedent on the open/known-error side of the same lifecycle), P519 (this contract).
 
@@ -268,7 +268,7 @@ git add docs/problems/closed/<NNN>-<title>.md
 - Evidence-authorised: `**Status**: Closed (closed-on-evidence <YYYY-MM-DD> — <citation>. Recovery: rerun /wr-itil:transition-problem <NNN> known-error to reopen)`
 - User-confirmed: `**Status**: Closed (user-confirmed <YYYY-MM-DD>)`
 
-`closed-on-evidence` is what Step 7b reads to decide whether the upstream issue may be closed. Omit it on an evidence-authorised close and the carve-out fails **open** — a third party's issue gets closed on the strength of our own test run.
+`closed-on-evidence` is what the outbound leg reads to keep a foreign issue open on our evidence alone. The inbound leg uses committed issue-channel provenance instead: ambiguity fails closed before any issue operation.
 
 ### 7. Refresh docs/problems/README.md (P062)
 

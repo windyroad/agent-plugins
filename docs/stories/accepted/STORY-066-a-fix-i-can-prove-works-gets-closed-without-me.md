@@ -3,8 +3,9 @@ status: accepted
 story-id: a-fix-i-can-prove-works-gets-closed-without-me
 reported: 2026-08-24
 decision-makers: [Tom Howard]
-problems: [P519]
+problems: [P519, P525]
 jtbd: [JTBD-006, JTBD-001]
+adrs: [ADR-121]
 rfcs: [RFC-072]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
@@ -13,7 +14,7 @@ estimated-effort: M
 # STORY-066: A fix I can prove works gets closed without me
 
 **Reported**: 2026-08-24
-**Problems**: P519
+**Problems**: P519, P525
 **JTBD**: JTBD-006 (Progress the Backlog While I'm Away), JTBD-001 (Enforce Governance Without Slowing Down)
 **RFCs**: RFC-072 (release row on STORY-MAP-002 — a fix I can prove works gets closed without me)
 **Story Maps**: STORY-MAP-002 (Take a problem from noticed to resolved), activity `land-release-verify`
@@ -33,7 +34,8 @@ In order to stop being the only exit from a queue that never stops growing, as a
 - [x] Discussing the marker in a ticket body — quoting it, explaining it, shipping the check that detects it — does not accidentally block that ticket.
 - [x] The unattended loop can reach the verification queue at all: an evidence-bearing ticket shows up in the loop's own dispatchability table, and the loop does not declare itself finished while one is sitting there.
 - [x] Verification still does not compete with development for a priority slot — it drains in a pass of its own.
-- [x] Closing a ticket that came from someone else's bug report does not close their issue. We told them we would wait for their confirmation; our own test passing is not their confirmation.
+- [x] An evidence-backed local close also closes a cache-proven GitHub issue on our own tracker after the gated comment; unresolved, discussion, advisory, repository-mismatched, or ambiguous origins perform no issue mutation.
+- [x] An evidence-backed local close comments on but does not close an issue on another maintainer's tracker. Their confirmation may authorize closure. Pull requests remain comment-only.
 - [x] Every close reports how to undo it, in one command.
 
 ## Driving problem trace (required — I6 invariant)
@@ -51,4 +53,4 @@ The three-state shape is not new: `review-problems` Bucket 1/2/3 has shipped it 
 
 Two things decide whether the change works rather than merely reads correctly. The loop's own backlog re-scan has to enumerate the verification queue — the prose can authorise all it likes, but a ticket that never appears in the scan can never be classified reachable. And the do-not-close marker has to become a predicate with an exit code, because a rule that lives only in prose erodes the first time someone is in a hurry.
 
-The external-reporter carve-out is the part most likely to be lost: it is not about the local ticket at all, it is about not closing a stranger's issue on the strength of our own test run.
+Tracker ownership is the part most likely to be lost: our evidence can close a provenance-proven issue on our tracker, but it cannot decide another maintainer's tracker state. Untyped or ambiguous inbound provenance fails closed before any issue read or mutation.
