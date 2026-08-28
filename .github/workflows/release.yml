@@ -74,6 +74,10 @@ jobs:
         if: steps.find-pr.outputs.found == 'true'
         run: npm ci || npm install
 
+      - name: Verify preview version collisions
+        if: steps.find-pr.outputs.found == 'true'
+        run: bash scripts/verify-release-dist-tags.sh --pre-publish
+
       - name: Publish preview packages
         if: steps.find-pr.outputs.found == 'true'
         id: preview

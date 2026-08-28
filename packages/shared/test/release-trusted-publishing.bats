@@ -21,6 +21,8 @@ teardown() {
   grep -F 'publish: npm run release' "$WORKFLOW"
   grep -F "if: steps.changesets.outputs.hasChangesets == 'false'" "$WORKFLOW"
   grep -F 'bash scripts/verify-release-dist-tags.sh' "$WORKFLOW"
+  grep -F 'bash scripts/verify-release-dist-tags.sh --pre-publish' "$REPO_ROOT/package.json"
+  grep -F 'bash scripts/verify-release-dist-tags.sh --pre-publish' "$WORKFLOW"
   grep -F 'npm publish --tag preview --provenance --access public' "$WORKFLOW"
   ! grep -E 'NPM_TOKEN|NPM_AUTH_TOKEN|NODE_AUTH_TOKEN' "$WORKFLOW"
 }
@@ -37,4 +39,52 @@ teardown() {
 
   [ "$status" -eq 1 ]
   [[ "$output" == *'@windyroad/agent-plugins@0.2.0 is published without latest (registry latest: 0.1.6)'* ]]
+}
+
+@test "pre-publish allows a version absent from npm" {
+  make_candidate_package
+  make_fake_npm absent 0.1.7
+
+  run env PACKAGE_ROOT="$TEST_TMPDIR/packages" NPM_CMD="$TEST_TMPDIR/npm" \
+    bash "$VERIFY_TAGS" --pre-publish
+
+  [ "$status" -eq 0 ]
+}
+
+@test "pre-publish allows an unchanged version already tagged latest" {
+  make_candidate_package
+  make_fake_npm 0.2.0 0.2.0
+
+  run env PACKAGE_ROOT="$TEST_TMPDIR/packages" NPM_CMD="$TEST_TMPDIR/npm" \
+    bash "$VERIFY_TAGS" --pre-publish
+
+  [ "$status" -eq 0 ]
+}
+
+@test "pre-publish rejects an immutable version collision" {
+  make_candidate_package
+  make_fake_npm 0.2.0 0.1.7
+
+  run env PACKAGE_ROOT="$TEST_TMPDIR/packages" NPM_CMD="$TEST_TMPDIR/npm" \
+    bash "$VERIFY_TAGS" --pre-publish
+
+  [ "$status" -eq 1 ]
+  [[ "$output" == *'@windyroad/agent-plugins@0.2.0 already exists but is not latest (registry latest: 0.1.7); choose a new version'* ]]
+}
+
+make_candidate_package() {
+  mkdir -p "$TEST_TMPDIR/packages/agent-plugins"
+  printf '%s\n' '{"name":"@windyroad/agent-plugins","version":"0.2.0"}' \
+    > "$TEST_TMPDIR/packages/agent-plugins/package.json"
+}
+
+make_fake_npm() {
+  exact="$1"
+  latest="$2"
+  printf '%s\n' '#!/bin/bash' \
+    'if [[ "$*" == *"dist-tags.latest"* ]]; then echo '"$latest"'; exit 0; fi' \
+    'if [ "'"$exact"'" = absent ]; then exit 1; fi' \
+    'echo '"$exact" \
+    > "$TEST_TMPDIR/npm"
+  chmod +x "$TEST_TMPDIR/npm"
 }
