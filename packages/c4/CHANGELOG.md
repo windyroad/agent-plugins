@@ -1,5 +1,11 @@
 # @windyroad/c4
 
+## 0.2.1
+
+### Patch Changes
+
+- cbcda3d: Publish the Codex-compatible C4 plugin under a fresh immutable version.
+
 ## 0.2.0
 
 ### Minor Changes
