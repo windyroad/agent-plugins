@@ -1,0 +1,25 @@
+{
+  "name": "wr-voice-tone",
+  "version": "0.7.3",
+  "description": "Voice, tone, and external-communications governance",
+  "author": { "name": "Windy Road Technology", "url": "https://windyroad.com.au" },
+  "homepage": "https://github.com/windyroad/agent-plugins/tree/main/packages/voice-tone",
+  "repository": "https://github.com/windyroad/agent-plugins",
+  "license": "MIT",
+  "keywords": ["voice", "tone", "copy", "communications", "codex", "claude-code"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Windy Road Voice and Tone",
+    "shortDescription": "Govern user-facing and outbound copy",
+    "longDescription": "Review user-facing copy against a project voice-and-tone guide and assess outbound communications before sending.",
+    "developerName": "Windy Road Technology",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "websiteURL": "https://windyroad.com.au",
+    "privacyPolicyURL": "https://windyroad.com.au/privacy",
+    "termsOfServiceURL": "https://windyroad.com.au/terms",
+    "defaultPrompt": ["Review this copy against our voice and tone", "Assess this outbound communication"],
+    "brandColor": "#B45309",
+    "screenshots": []
+  }
+}

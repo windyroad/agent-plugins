@@ -1,0 +1,3 @@
+interface:
+  display_name: "WR Retrospective: Run Retro"
+  short_description: "Run an evidence-based session retrospective"

@@ -6,6 +6,10 @@
     "windyroad-retrospective": "./bin/install.mjs"
   },
   "type": "module",
+  "scripts": {
+    "prepack": "node ../../scripts/sync-codex-plugin-surfaces.mjs retrospective --pack",
+    "postpack": "node ../../scripts/sync-codex-plugin-surfaces.mjs retrospective --restore-pack"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -15,6 +19,7 @@
   "keywords": [
     "claude-code",
     "claude-code-plugin",
+    "codex",
     "ai-agent",
     "ai-coding"
   ],
@@ -23,8 +28,11 @@
     "agents/",
     "hooks/",
     "skills/",
+    "hooks-codex/",
     "scripts/",
     ".claude-plugin/",
+    ".agents/",
+    ".codex-plugin/",
     "lib/",
     "!skills/*/eval/",
     "!hooks/test/",

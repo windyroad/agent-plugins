@@ -1,0 +1,25 @@
+{
+  "name": "wr-connect",
+  "version": "0.3.10",
+  "description": "Connect coding-agent sessions across repositories via Discord",
+  "author": { "name": "Windy Road Technology", "url": "https://windyroad.com.au" },
+  "homepage": "https://github.com/windyroad/agent-plugins/tree/main/packages/connect",
+  "repository": "https://github.com/windyroad/agent-plugins",
+  "license": "MIT",
+  "keywords": ["collaboration", "discord", "cross-repo", "codex", "claude-code"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Windy Road Connect",
+    "shortDescription": "Connect sessions across repositories via Discord",
+    "longDescription": "Set up and use an experimental Discord bridge for coordinating coding-agent sessions across repositories.",
+    "developerName": "Windy Road Technology",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "websiteURL": "https://windyroad.com.au",
+    "privacyPolicyURL": "https://windyroad.com.au/privacy",
+    "termsOfServiceURL": "https://windyroad.com.au/terms",
+    "defaultPrompt": ["Set up Windy Road Connect", "Send a message to another repository session"],
+    "brandColor": "#5865F2",
+    "screenshots": []
+  }
+}

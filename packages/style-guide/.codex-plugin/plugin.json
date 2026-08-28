@@ -1,0 +1,25 @@
+{
+  "name": "wr-style-guide",
+  "version": "0.5.3",
+  "description": "Style-guide governance for CSS and UI components",
+  "author": { "name": "Windy Road Technology", "url": "https://windyroad.com.au" },
+  "homepage": "https://github.com/windyroad/agent-plugins/tree/main/packages/style-guide",
+  "repository": "https://github.com/windyroad/agent-plugins",
+  "license": "MIT",
+  "keywords": ["style-guide", "css", "design-system", "codex", "claude-code"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Windy Road Style Guide",
+    "shortDescription": "Govern CSS and UI styling changes",
+    "longDescription": "Review visual changes against a project style guide and keep the guide aligned with established design patterns.",
+    "developerName": "Windy Road Technology",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "websiteURL": "https://windyroad.com.au",
+    "privacyPolicyURL": "https://windyroad.com.au/privacy",
+    "termsOfServiceURL": "https://windyroad.com.au/terms",
+    "defaultPrompt": ["Review this styling change against the style guide", "Update the project style guide"],
+    "brandColor": "#DB2777",
+    "screenshots": []
+  }
+}

@@ -1,0 +1,1 @@
+{"name":"windyroad-style-guide-local","interface":{"displayName":"Windy Road Style Guide"},"plugins":[{"name":"wr-style-guide","source":{"source":"local","path":"."},"policy":{"installation":"AVAILABLE","authentication":"ON_INSTALL"},"category":"Developer Tools"}]}

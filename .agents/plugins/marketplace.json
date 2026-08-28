@@ -51,6 +51,48 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Developer Tools"
+    },
+    {
+      "name": "wr-c4",
+      "source": { "source": "local", "path": "./packages/c4" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "wr-connect",
+      "source": { "source": "local", "path": "./packages/connect" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "wr-jtbd",
+      "source": { "source": "local", "path": "./packages/jtbd" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "wr-retrospective",
+      "source": { "source": "local", "path": "./packages/retrospective" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "wr-style-guide",
+      "source": { "source": "local", "path": "./packages/style-guide" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "wr-tdd",
+      "source": { "source": "local", "path": "./packages/tdd" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "wr-voice-tone",
+      "source": { "source": "local", "path": "./packages/voice-tone" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Developer Tools"
     }
   ]
 }

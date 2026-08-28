@@ -1,0 +1,3 @@
+interface:
+  display_name: "WR C4: Generate"
+  short_description: "Generate C4 architecture diagrams"

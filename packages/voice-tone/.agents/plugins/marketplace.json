@@ -1,0 +1,1 @@
+{"name":"windyroad-voice-tone-local","interface":{"displayName":"Windy Road Voice and Tone"},"plugins":[{"name":"wr-voice-tone","source":{"source":"local","path":"."},"policy":{"installation":"AVAILABLE","authentication":"ON_INSTALL"},"category":"Developer Tools"}]}

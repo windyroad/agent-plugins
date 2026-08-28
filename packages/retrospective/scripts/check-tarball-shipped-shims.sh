@@ -131,7 +131,7 @@ import sys, json
 data = json.load(sys.stdin)
 if not data:
     sys.exit(0)
-entry = data[0] if isinstance(data, list) else data
+entry = data[0] if isinstance(data, list) else next(iter(data.values()))
 name = entry.get("name", "")
 files = entry.get("files", []) or []
 print("NAME " + name)

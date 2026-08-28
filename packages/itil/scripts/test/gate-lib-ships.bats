@@ -56,7 +56,11 @@ _sourced_targets() {
   packed="$(cd "$PKG" && npm pack --dry-run --json 2>/dev/null \
     | node -e "
       let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{
-        try{ const j=JSON.parse(s); process.stdout.write((j[0].files||[]).map(f=>f.path).join('\n')); }
+        try{
+          const j=JSON.parse(s);
+          const entry=Array.isArray(j) ? j[0] : Object.values(j)[0];
+          process.stdout.write((entry?.files||[]).map(f=>f.path).join('\n'));
+        }
         catch(e){ process.exit(3); }
       })")"
   [ -n "$packed" ]

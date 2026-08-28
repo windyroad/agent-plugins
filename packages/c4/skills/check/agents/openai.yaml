@@ -1,0 +1,3 @@
+interface:
+  display_name: "WR C4: Check"
+  short_description: "Validate C4 architecture diagrams"

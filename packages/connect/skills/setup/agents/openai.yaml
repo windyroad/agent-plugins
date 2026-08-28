@@ -1,0 +1,3 @@
+interface:
+  display_name: "WR Connect: Setup"
+  short_description: "Configure the Discord session bridge"

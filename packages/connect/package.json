@@ -6,6 +6,10 @@
     "windyroad-connect": "./bin/install.mjs"
   },
   "type": "module",
+  "scripts": {
+    "prepack": "node ../../scripts/sync-codex-plugin-surfaces.mjs connect --pack",
+    "postpack": "node ../../scripts/sync-codex-plugin-surfaces.mjs connect --restore-pack"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -15,6 +19,7 @@
   "keywords": [
     "claude-code",
     "claude-code-plugin",
+    "codex",
     "ai-agent",
     "ai-coding",
     "cross-repo",
@@ -25,7 +30,10 @@
     "bin/",
     "hooks/",
     "skills/",
+    "hooks-codex/",
+    ".agents/",
     ".claude-plugin/",
+    ".codex-plugin/",
     "lib/",
     "!hooks/test/"
   ]

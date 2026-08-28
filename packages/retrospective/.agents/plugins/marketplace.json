@@ -1,0 +1,1 @@
+{"name":"windyroad-retrospective-local","interface":{"displayName":"Windy Road Retrospective"},"plugins":[{"name":"wr-retrospective","source":{"source":"local","path":"."},"policy":{"installation":"AVAILABLE","authentication":"ON_INSTALL"},"category":"Developer Tools"}]}

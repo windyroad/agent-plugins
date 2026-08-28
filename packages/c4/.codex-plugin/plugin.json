@@ -1,0 +1,25 @@
+{
+  "name": "wr-c4",
+  "version": "0.1.7",
+  "description": "C4 architecture diagram generation and validation",
+  "author": { "name": "Windy Road Technology", "url": "https://windyroad.com.au" },
+  "homepage": "https://github.com/windyroad/agent-plugins/tree/main/packages/c4",
+  "repository": "https://github.com/windyroad/agent-plugins",
+  "license": "MIT",
+  "keywords": ["c4", "architecture", "diagrams", "codex", "claude-code"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Windy Road C4",
+    "shortDescription": "Generate and validate C4 architecture diagrams",
+    "longDescription": "Generate C4 architecture diagrams from a codebase and validate existing diagrams against C4 structure and notation.",
+    "developerName": "Windy Road Technology",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "websiteURL": "https://windyroad.com.au",
+    "privacyPolicyURL": "https://windyroad.com.au/privacy",
+    "termsOfServiceURL": "https://windyroad.com.au/terms",
+    "defaultPrompt": ["Generate a C4 diagram for this codebase", "Check these C4 diagrams"],
+    "brandColor": "#475569",
+    "screenshots": []
+  }
+}

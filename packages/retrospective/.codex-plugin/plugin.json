@@ -1,0 +1,25 @@
+{
+  "name": "wr-retrospective",
+  "version": "0.27.5",
+  "description": "Session retrospectives, context analysis, and briefing maintenance",
+  "author": { "name": "Windy Road Technology", "url": "https://windyroad.com.au" },
+  "homepage": "https://github.com/windyroad/agent-plugins/tree/main/packages/retrospective",
+  "repository": "https://github.com/windyroad/agent-plugins",
+  "license": "MIT",
+  "keywords": ["retrospective", "briefing", "context", "codex", "claude-code"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Windy Road Retrospective",
+    "shortDescription": "Run retrospectives and maintain briefings",
+    "longDescription": "Analyse session context, run evidence-based retrospectives, maintain project briefings, and capture improvement work.",
+    "developerName": "Windy Road Technology",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "websiteURL": "https://windyroad.com.au",
+    "privacyPolicyURL": "https://windyroad.com.au/privacy",
+    "termsOfServiceURL": "https://windyroad.com.au/terms",
+    "defaultPrompt": ["Run a retrospective for this session", "Analyse current context usage"],
+    "brandColor": "#0F766E",
+    "screenshots": []
+  }
+}

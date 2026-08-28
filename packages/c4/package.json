@@ -6,6 +6,10 @@
     "windyroad-c4": "./bin/install.mjs"
   },
   "type": "module",
+  "scripts": {
+    "prepack": "node ../../scripts/sync-codex-plugin-surfaces.mjs c4 --pack",
+    "postpack": "node ../../scripts/sync-codex-plugin-surfaces.mjs c4 --restore-pack"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -15,6 +19,7 @@
   "keywords": [
     "claude-code",
     "claude-code-plugin",
+    "codex",
     "ai-agent",
     "ai-coding"
   ],
@@ -23,7 +28,9 @@
     "agents/",
     "hooks/",
     "skills/",
+    ".agents/",
     ".claude-plugin/",
+    ".codex-plugin/",
     "lib/"
   ]
 }
