@@ -10,7 +10,7 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -95,8 +95,19 @@ const commands = new Map([
   ["wr-architect-mark-oversight-confirmed", "bash \"<architect-plugin-root>/scripts/mark-oversight-confirmed.sh\""],
 ]);
 
-function transform(text) {
-  let result = text.replaceAll("AskUserQuestion", "request_user_input");
+// Codex namespaces every skill by the plugin manifest `name`, so a skill's own
+// frontmatter `name:` must be BARE or the prefix lands twice and the advertised
+// invocation cannot be typed (P527). Scoped to the frontmatter block so a body
+// line starting `name:` is never rewritten.
+function bareName(skill, text) {
+  if (!text.startsWith("---\n")) return text;
+  const end = text.indexOf("\n---\n", 4);
+  if (end === -1) return text;
+  return text.slice(0, end).replace(/^name:.*$/m, `name: ${skill}`) + text.slice(end);
+}
+
+function transform(skill, text) {
+  let result = bareName(skill, text).replaceAll("AskUserQuestion", "request_user_input");
   for (const [command, replacement] of commands) {
     result = result.replaceAll(command, replacement);
   }
@@ -200,7 +211,10 @@ for (const file of [
 renameSync(skillsRoot, backupRoot);
 cpSync(backupRoot, skillsRoot, { recursive: true });
 const files = skillFiles(skillsRoot);
-for (const file of files) writeFileSync(file, stripInternalIds(transform(readFileSync(file, "utf8"))), "utf8");
+for (const file of files) {
+  const skill = basename(dirname(file));
+  writeFileSync(file, stripInternalIds(transform(skill, readFileSync(file, "utf8"))), "utf8");
+}
 for (const file of walkFiles(skillsRoot).filter((file) => file.endsWith(".md") && !files.includes(file))) {
   writeFileSync(file, stripInternalIds(readFileSync(file, "utf8")), "utf8");
 }

@@ -65,5 +65,5 @@ When I install a `@windyroad/*` plugin and read its README to understand what it
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-068 | STORY-068: Invoke a Codex skill by the name the card shows | accepted |
+| STORY-068 | STORY-068: Invoke a Codex skill by the name the card shows | in-progress |
 | STORY-058 | STORY-058: Read a README that describes the version I installed | draft |

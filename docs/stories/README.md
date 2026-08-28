@@ -134,7 +134,7 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | accepted | STORY-065 | A fix proposal draws a release row, not a document | M | P508 | RFC-071 | STORY-MAP-002 |
 | accepted | STORY-066 | A fix I can prove works gets closed without me | M | P519 | RFC-072 | STORY-MAP-002 |
 | accepted | STORY-067 | Publish packages without expiring secrets | S | P284 | RFC-073 | STORY-MAP-002 |
-| accepted | STORY-068 | Invoke a Codex skill by the name the card shows | S | P527 | RFC-074 | STORY-MAP-008 |
+| in-progress | STORY-068 | Invoke a Codex skill by the name the card shows | S | P527 | RFC-074 | STORY-MAP-008 |
 | draft | STORY-064 | A ticket that only names a decision as background stays open | M | P463 | RFC-070 | STORY-MAP-011 |
 | draft | STORY-012 | Can't start coding without an RFC — the gate makes me create one first | S | P251, P314 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-013 | Full gate: an RFC exists → I proceed; none → I create it first | M | P251, P314 | RFC-005 | STORY-MAP-002 |

@@ -30,7 +30,9 @@ Invoke the skill by its single-prefix name (`wr-itil:work-problems`) rather than
 - **Who is affected**: Codex users of every `@windyroad/*` plugin that ships skills — not `@windyroad/itil` alone.
 - **Frequency**: every Codex session, on every skill, for every install.
 - **Severity**: High — the published invocation surface is wrong for all skills, and the branding is wrong on every card.
-- **Analytics**: measured 2026-08-29 against a live Codex install via `codex debug prompt-input` (see Evidence). **56 of 56** windyroad skills carry the doubled prefix, across **10 of 10** windyroad plugins that ship skills for Codex: wr-itil 28, wr-risk-scorer 10, wr-architect 4, wr-jtbd 3, wr-retrospective 3, wr-c4 2, wr-connect 2, wr-voice-tone 2, wr-style-guide 1, wr-tdd 1. **Zero** of the unaffected third-party plugins in the same list are affected — 11 skills across two of them, every one single-prefix.
+- **Analytics**: measured 2026-08-29, in two frames that agree.
+  - *As installed*, via `codex debug prompt-input` (see Evidence): **56 of 56** windyroad skills carry the doubled prefix, across **10 of 10** windyroad plugins installed for Codex on the measuring machine — itil 28, risk-scorer 10, architect 4, jtbd 3, retrospective 3, c4 2, connect 2, voice-tone 2, style-guide 1, tdd 1. **Zero** of the unaffected third-party plugins in the same list are affected: 11 skills across two of them, every one single-prefix.
+  - *In the tree*: **58 prefixed skill names across 11** Codex-bearing packages — the ten above plus wardley (1), which ships a Codex manifest but was not installed on the measuring machine, and one more itil skill than the installed version carries. `cruise` is the sole Codex-bearing package already correct: its one skill declares a bare `name: status`.
 
 ## Root Cause Analysis
 
@@ -59,13 +61,13 @@ Installed artefact inspected: the Codex plugin cache copy of `skills-codex/work-
 
 - [x] Confirm the double prefix originates in Codex namespacing a `name:` that already carries the prefix, rather than in the projection transform itself. **Confirmed** — see Evidence; Codex's own spec documents `name` as the component namespace.
 - [x] Decide the single form the generated frontmatter should carry — bare skill name (let Codex namespace once) or explicit display form. **Decided: bare skill name.** It is the documented Codex contract, it is what every unaffected third-party plugin does, and the display form is already carried separately and correctly by `agents/openai.yaml` `display_name`.
-- [ ] Apply the same decision to the `architect` and `risk-scorer` projections, which run the same script shape.
-- [ ] Add a behavioural check that parses every generated frontmatter `name:` and asserts the plugin prefix appears at most once. It must exercise the generator and assert on its output rather than grep the sources (ADR-052).
-- [ ] Verify against a clean Codex installation that cards and invocation strings render the chosen form. The **invocation half** is now measurable here — `codex debug prompt-input` renders the model-visible list from the installed artefact — so it can be re-run after the fix ships. The **card-title half is not locally observable**; see Residual scope.
+- [x] Apply the same decision to the `architect` and `risk-scorer` projections, which run the same script shape. Both now rewrite the Codex-facing frontmatter `name:` at pack time.
+- [x] Add a behavioural check that parses every generated frontmatter `name:` and asserts the plugin prefix appears at most once. Two checks in `packages/shared/test/codex-skill-interface-metadata.bats` run each generator over a fixture whose name is deliberately prefixed and assert on the generated output; coverage is derived from generator presence rather than hand-enumerated. Both were proven RED against a neutralised rewrite. The packed tarball is asserted separately in each package's own pack test.
+- [ ] Verify against a clean Codex installation that cards and invocation strings render the chosen form. **Blocked on the release** — the fix is in the generator, so it reaches a Codex install only after publish and reinstall. The **invocation half** is now measurable here — `codex debug prompt-input` renders the model-visible list from the installed artefact — so it can be re-run after the fix ships. The **card-title half is not locally observable**; see Residual scope.
 
 ## Fix Strategy
 
-RFC-074 — *The name on the card is the name that works* — a release row on STORY-MAP-008 (*Have a plugin behave like a guest in my repository*) under activity B *Read what it claims*, carrying one delivery story, STORY-068 (*Invoke a Codex skill by the name the card shows*, accepted). Neither is implemented yet.
+RFC-074 — *The name on the card is the name that works* — a release row on STORY-MAP-008 (*Have a plugin behave like a guest in my repository*) under activity B *Read what it claims*, carrying one delivery story, STORY-068 (*Invoke a Codex skill by the name the card shows*, accepted). Implemented for the three packages that have a transform; see Residual scope for what is left.
 
 The shape the row carries: rewrite the Codex-facing frontmatter `name:` to the bare skill directory name inside the projection transform of each package that has one. The runtime-neutral sources under `packages/*/skills/` keep their prefixed `name:` — Claude Code normalises it, roughly twenty existing contract tests assert it, and nothing about the Claude surface changes.
 
@@ -73,7 +75,7 @@ The shape the row carries: rewrite the Codex-facing frontmatter `name:` to the b
 
 Two things the fix above will not reach, recorded here rather than as sibling tickets:
 
-1. **Seven packages will have no projection to fix.** `c4`, `connect`, `jtbd`, `retrospective`, `style-guide`, `tdd`, and `voice-tone` point `.codex-plugin/plugin.json` `skills` straight at the shared `./skills/` directory, so the only lever on their Codex-facing `name:` is the source field both runtimes read. That is 14 of the 56 doubled skills. Closing them needs either a per-package projection directory or a source-name change that reddens the existing contract tests — a design decision, not an `S`-sized edit.
+1. **Eight packages will have no projection to fix.** `c4`, `connect`, `jtbd`, `retrospective`, `style-guide`, `tdd`, `voice-tone`, and `wardley` point `.codex-plugin/plugin.json` `skills` straight at the shared `./skills/` directory, so the only lever on their Codex-facing `name:` is the source field both runtimes read. That is 15 of the 58 prefixed skills in the tree. Closing them needs either a per-package projection directory or a source-name change that reddens the existing contract tests — a design decision, not an `S`-sized edit. Three packages carrying the identical rewrite in three divergent scripts also meets the second-migration extraction trigger recorded on the Codex-runtime decision, so the shared-and-synced adapter question belongs in the same design pass.
 2. **The card-title capitalization is runtime-only and will stay unverifiable from here.** `codex debug prompt-input` exposes the model-visible name, not the UI card label, so the title-casing half of this ticket can only be confirmed by looking at a Codex card. The plugin already ships the correct `display_name` in the documented location (`<skill>/agents/openai.yaml`, exactly where Codex's own `plugin-creator` skill puts it), and the card still title-cased the namespaced id — which suggests the card composes the id rather than reading `display_name`. If the card still reads `Wr Itil:work Problems` once the fix ships, the remaining defect is in Codex's display layer, not in this repository, and the next step is an upstream report rather than another local change.
 
 ## Dependencies
@@ -88,11 +90,11 @@ Two things the fix above will not reach, recorded here rather than as sibling ti
 - **P477** (`docs/problems/known-error/477-codex-interrupt-agent-completion-bypasses-risk-marker-bridge.md`) — separate Codex-runtime defect; no shared mechanism.
 - **P298** (`docs/problems/open/298-published-artifacts-should-not-reference-internal-ids-at-all-not-just-prefix-them.md`) — adjacent published-artefact-surface concern; different axis (internal IDs, not skill names).
 
-(captured via /wr-itil:capture-problem; investigated to Known Error 2026-08-29 — no fix landed yet)
+(captured via /wr-itil:capture-problem; investigated to Known Error 2026-08-29; generator fix landed the same day, pending release and Codex-side re-measurement)
 
 
 ## Stories
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-068 | STORY-068: Invoke a Codex skill by the name the card shows | accepted |
+| STORY-068 | STORY-068: Invoke a Codex skill by the name the card shows | in-progress |

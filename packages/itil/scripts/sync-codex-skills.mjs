@@ -126,9 +126,20 @@ function runtimeTerms(text) {
     .replaceAll(".claude", ".codex");
 }
 
+// Codex namespaces every skill by the plugin manifest `name`, so a skill's own
+// frontmatter `name:` must be BARE or the prefix lands twice and the advertised
+// invocation cannot be typed (P527). Scoped to the frontmatter block so a body
+// line starting `name:` is never rewritten.
+function bareName(skill, text) {
+  if (!text.startsWith("---\n")) return text;
+  const end = text.indexOf("\n---\n", 4);
+  if (end === -1) return text;
+  return text.slice(0, end).replace(/^name:.*$/m, `name: ${skill}`) + text.slice(end);
+}
+
 function transform(skill, text) {
   const helperBlock = /Land the commit via the \*\*`wr-risk-scorer-restage-commit`\*\*[\s\S]*?```bash\nwr-risk-scorer-restage-commit \\\n  -m "docs\(problems\): capture P<NNN> <title>" \\\n  -- docs\/problems\/open\/<NNN>-<kebab-title>\.md docs\/problems\/README\.md\n# If README-history\.md was modified, append it to the path list:\n#   -- docs\/problems\/open\/<NNN>-<kebab-title>\.md docs\/problems\/README\.md docs\/problems\/README-history\.md\n```/;
-  let result = runtimeTerms(text)
+  let result = runtimeTerms(bareName(skill, text))
     .replaceAll("Agent tool", "native Codex subagent tool")
     .replaceAll("Agent-tool", "native-Codex-subagent-tool")
     .replaceAll("Skill tool", "installed skill invocation")

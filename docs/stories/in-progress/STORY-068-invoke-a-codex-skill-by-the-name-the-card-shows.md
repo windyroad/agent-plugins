@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: in-progress
 story-id: invoke-a-codex-skill-by-the-name-the-card-shows
 reported: 2026-08-29
 decision-makers: [Tom Howard]
@@ -25,12 +25,12 @@ In order to invoke a skill by reading its name off the surface that offers it �
 
 ## Acceptance criteria (accepted-gate, INVEST Testable)
 
-- [ ] The `@windyroad/itil` Codex projection writes a **bare** frontmatter `name:` into each generated `skills-codex/<skill>/SKILL.md` — the skill's own directory name, with no plugin prefix — so the runtime's own namespacing produces exactly one prefix.
-- [ ] The `@windyroad/architect` and `@windyroad/risk-scorer` pack transforms apply the same rewrite to their Codex-facing skill files, since they run the same script shape against the same defect.
-- [ ] The runtime-neutral sources under `packages/*/skills/` are **unchanged**. Their existing contract tests stay green and the Claude Code surface is untouched, because Claude namespaces a bare skill name the same way (this repository already ships one such skill).
-- [ ] Each skill's `agents/openai.yaml` `display_name` is untouched. Those values already carry the correct human branding and are the wrong lever for the invocation string.
-- [ ] A behavioural check runs the generator and asserts on its output: every generated frontmatter `name:` equals its skill directory name, so no plugin prefix survives the projection. It exercises the generator rather than grepping the sources.
-- [ ] A changeset bumps the affected packages so the fix reaches an installed Codex runtime.
+- [x] The `@windyroad/itil` Codex projection writes a **bare** frontmatter `name:` into each generated `skills-codex/<skill>/SKILL.md` — the skill's own directory name, with no plugin prefix — so the runtime's own namespacing produces exactly one prefix.
+- [x] The `@windyroad/architect` and `@windyroad/risk-scorer` pack transforms apply the same rewrite to their Codex-facing skill files, since they run the same script shape against the same defect.
+- [x] The runtime-neutral sources under `packages/*/skills/` are **unchanged**. Their existing contract tests stay green and the Claude Code surface is untouched, because Claude namespaces a bare skill name the same way (this repository already ships one such skill).
+- [x] Each skill's `agents/openai.yaml` `display_name` is untouched. Those values already carry the correct human branding and are the wrong lever for the invocation string.
+- [x] A behavioural check runs the generator and asserts on its output: every generated frontmatter `name:` equals its skill directory name, so no plugin prefix survives the projection. It exercises the generator rather than grepping the sources.
+- [x] A changeset bumps the affected packages so the fix reaches an installed Codex runtime.
 
 ## Driving problem trace (required — I7 invariant)
 

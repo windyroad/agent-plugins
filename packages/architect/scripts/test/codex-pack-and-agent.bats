@@ -72,6 +72,14 @@ teardown() {
   [ "$status" -eq 0 ]
   run grep -E '\b(The the|the the|inverse-the)\b' "$TMP/package/skills/create-adr/SKILL.md"
   [ "$status" -ne 0 ]
+  # P527: the packed frontmatter name is BARE. Both runtimes namespace a skill
+  # by the plugin manifest name, so a prefixed one lands twice under Codex; the
+  # manifest below is what still composes the unchanged Claude invocation.
+  run grep -Fxq 'name: review-decisions' "$TMP/package/skills/review-decisions/SKILL.md"
+  [ "$status" -eq 0 ]
+  run grep -F '"name": "wr-architect"' "$TMP/package/.claude-plugin/plugin.json"
+  [ "$status" -eq 0 ]
+
   run env ARCHITECT_PACKAGE_ROOT="$(cd "$TMP/package" && pwd -P)" bats "$PACKAGE/hooks/test/architect-hook-dispatch.bats"
   [ "$status" -eq 0 ]
 }

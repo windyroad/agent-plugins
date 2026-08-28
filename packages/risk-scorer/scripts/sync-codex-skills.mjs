@@ -36,8 +36,19 @@ const updatePolicyCodexAgentStep = `Run the Codex policy reviewer with this prom
 
 Use a native Codex subagent workflow with the installed custom agent named \`wr-risk-scorer:policy\`. If it is not visible in the current session, restart Codex; do not substitute a different agent identity because the policy marker hook consumes it.`;
 
-function transform(text) {
-  const transformed = text
+// Codex namespaces every skill by the plugin manifest `name`, so a skill's own
+// frontmatter `name:` must be BARE or the prefix lands twice and the advertised
+// invocation cannot be typed (P527). Scoped to the frontmatter block so a body
+// line starting `name:` is never rewritten.
+function bareName(skill, text) {
+  if (!text.startsWith("---\n")) return text;
+  const end = text.indexOf("\n---\n", 4);
+  if (end === -1) return text;
+  return text.slice(0, end).replace(/^name:.*$/m, `name: ${skill}`) + text.slice(end);
+}
+
+function transform(skill, text) {
+  const transformed = bareName(skill, text)
     .replaceAll("AskUserQuestion", "request_user_input")
     .replaceAll("`.claude/agents/risk-scorer-pipeline.md`", "`agents/pipeline.md`")
     .replace(
@@ -69,7 +80,7 @@ function generatedFiles(sourceRoot, targetRoot) {
     }
     generated.push({
       path: join(targetRoot, entry, "SKILL.md"),
-      text: transform(readFileSync(source, "utf8")),
+      text: transform(entry, readFileSync(source, "utf8")),
     });
   }
   return generated;

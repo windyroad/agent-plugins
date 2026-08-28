@@ -20,6 +20,21 @@ setup() {
   grep -q "request_user_input" "$pkg/skills/demo/SKILL.md"
   grep -q 'close that completed agent once' "$pkg/skills/demo/SKILL.md"
   grep -q 'Do not parse transcripts or launch nested `codex exec`' "$pkg/skills/demo/SKILL.md"
+  # P527: the packed name stays bare, so Codex prepends the plugin prefix once.
+  grep -Fxq 'name: demo' "$pkg/skills/demo/SKILL.md"
+}
+
+@test "packed Codex skill strips a plugin-prefixed name" {
+  pkg="$TMP/prefixed"
+  mkdir -p "$pkg/scripts" "$pkg/skills/pipeline"
+  cp "$SKILL_SYNC" "$pkg/scripts/sync-codex-skills.mjs"
+  printf '%s\n' '---' 'name: wr-risk-scorer:pipeline' 'description: Demo' '---' 'Body.' \
+    > "$pkg/skills/pipeline/SKILL.md"
+
+  node "$pkg/scripts/sync-codex-skills.mjs" --pack >/dev/null
+  grep -Fxq 'name: pipeline' "$pkg/skills/pipeline/SKILL.md"
+  run grep -Fq 'wr-risk-scorer:pipeline' "$pkg/skills/pipeline/SKILL.md"
+  [ "$status" -ne 0 ]
 }
 
 teardown() {
