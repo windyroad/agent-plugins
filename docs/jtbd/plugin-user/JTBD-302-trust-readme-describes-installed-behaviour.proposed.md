@@ -3,8 +3,9 @@ status: proposed
 job-id: trust-readme-describes-installed-behaviour
 persona: plugin-user
 date-created: 2026-05-03
-human-oversight: confirmed
+human-oversight: unconfirmed
 oversight-date: 2026-05-25
+oversight-note: amended 2026-08-29 under P527 without a post-change confirmation; re-ratify via /wr-jtbd:confirm-jobs-and-personas
 ---
 
 # JTBD-302: Trust That the README Describes the Plugin I Just Installed
@@ -22,6 +23,7 @@ When I install a `@windyroad/*` plugin and read its README to understand what it
 - A drift-detection signal exists at commit / release / retrospective time so adopters never receive a silently-stale README via `npm install`.
 - **(Amended 2026-05-04 by P159)** The signal is **load-bearing at commit time** via the PreToolUse:Bash hook (`packages/retrospective/hooks/retrospective-readme-jtbd-currency.sh`); retro-time and release-time advisories ride as backup signals. Drift class detection is enforced at the closest surface to the failure mode (the commit itself), not gradualism-deferred. The original advisory-then-escalate phrasing was superseded by P159 after the user correction *"the drift detector shouldn't be part of the retro. It should be something we are always running and fixing"*. **(Amended 2026-05-25 by P294/ADR-069: the commit-hook is retained but narrowed to skill-inventory-drift — a shipped skill not named in the README; the JTBD-ID-citation rule it used to enforce is superseded.)**
 - **(Amended 2026-05-25 by P294/ADR-069)** The README **markets the persona's problem in prose** — derived from the JTBD jobs the plugin serves — so the adopter understands **what problem the plugin solves for them** directly, without cross-referencing an internal JTBD ID. ADR-069 superseded the ID-citation mechanism: the printed `JTBD-NNN` was plumbing the persona (low context on repo internals) could not act on.
+- **(Amended 2026-08-29 by P527)** The invocation string a host runtime advertises for a shipped skill is a string the adopter can type. Where the plugin is projected into a second runtime whose namespacing convention differs from Claude Code's, the projection emits the form that runtime's contract specifies — the bare skill name — so exactly one plugin prefix is prepended. The README is not the only surface on which the plugin describes itself; the runtime-rendered skill list is read earlier and more often. Enforcement is a behavioural check that runs the projection generator and asserts every generated frontmatter `name:` equals its skill directory name — a second currency surface alongside the README skill-inventory commit hook, which by its P294/ADR-069 narrowing cannot catch an un-typeable advertised name.
 - **(Amended in P087 Phase 3)** I can see the maturity band (and, during the suite-bootstrap window, the compound evidence per ADR-053 §Bootstrapping clause Phase 3 rendering requirement) for every plugin and every per-skill surface from the README alone, without source archaeology under `node_modules/` and without invoking measurement scripts. Drivers: ADR-053 (maturity taxonomy), ADR-058 (measurement scripts), ADR-063 (presentation-layer contract), P087 (parent ticket).
 
 ## Persona Constraints
