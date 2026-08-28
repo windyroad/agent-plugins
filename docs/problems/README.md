@@ -54,7 +54,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 16 | P511 | The ask-hygiene trail is one file per day, so a second retro's counts are invisible to the R6 gate | 8 (Medium) | Known Error | S | 2026-08-21 | internal |
 | 16 | P525 | An agent-invented carve-out leaves our own tracker issues open forever | 16 (High) | Known Error | M | 2026-08-26 | corrective-feedback (user, 2026-08-26) |
 | 15 | P507 | SessionStart surfacers emit a directive with nothing enforcing the drain — surfacing is not draining | 15 (High) | Known Error | M | 2026-08-20 | internal |
-| 15 | P527 | Codex skill names render with a duplicated plugin prefix and title-case branding | 15 (High) | Open | S | 2026-08-29 | internal |
+| 15 | P527 | Codex skill names render with a duplicated plugin prefix and title-case branding | 15 (High) | Known Error | S | 2026-08-29 | internal |
 | 15 | P528 | Codex projection of work-problems drops the Goal loop-anchor instead of using the native Codex Goal surface | 15 (High) | Open | S | 2026-08-29 | internal |
 | 12 | P148 | Agent defers ticket creation to retro summary instead of immediately capturing it | 12 (High) | Known Error | M | 2026-04-29 | internal |
 | 12 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 (High) | Known Error | M | 2026-06-10 | internal |
