@@ -45,6 +45,19 @@ The projection transform applies `sanitize()` to the complete markdown file. `sa
 - [ ] Add a behavioural check that builds the Codex projection and parses every generated skill frontmatter.
 - [ ] Confirm the packed artefact and a clean Codex installation load all 29 skills without metadata parse failures.
 
+## Second defect in the same file — absolute-path copy filter
+
+Found 2026-08-29 while working the sibling ticket P527, and absorbed here rather than captured separately: it is a second defect in `packages/itil/scripts/sync-codex-skills.mjs` whose fix lands in the same pass.
+
+The projection copies each skill directory with a filter that rejects any path containing a component named `test`, `eval`, or `evals` (line 219). The filter is applied to the **absolute** path, not to the path relative to the skill directory. A checkout whose absolute path contains such a component — `~/work/test/agent-plugins`, a CI runner rooted under `.../test/`, or a temp sandbox under a `test/` subdirectory — therefore has every file rejected, so nothing is copied and the build cannot proceed.
+
+Reproduced directly on 2026-08-29: `--build` under a path containing a `test` component aborts with `ENOENT ... skills-codex/<skill>/SKILL.md` at the read that immediately follows the copy. It fails loudly, which is the good half; the bad half is that the message names a missing output file and says nothing about the filter that suppressed the input, so the cause is not recoverable from the error. It was found because bats places `$BATS_TEST_TMPDIR` under `bats-run-<id>/test/<n>/`, and a generator-exercising test written against that directory hit exactly this.
+
+It has gone unnoticed because the maintainer checkout has no offending path component. Only the itil generator carries this filter; the architect and risk-scorer scripts do not.
+
+- [ ] Scope the exclusion filter to the path **relative to the skill directory** being copied, so a directory name anywhere above the package root cannot suppress the copy.
+- [ ] Name the filter in the failure when a skill's copy yields no `SKILL.md`, instead of surfacing a bare `ENOENT` on the output path.
+
 ## Fix Strategy
 
 **Kind**: improve
