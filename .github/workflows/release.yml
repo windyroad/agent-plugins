@@ -22,9 +22,11 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 20
-          cache: npm
+          node-version: 24
           registry-url: https://registry.npmjs.org
+
+      - name: Install npm with trusted publishing support
+        run: npm install --global npm@11.5.1
 
       - name: Install dependencies
         run: npm ci || npm install
@@ -39,5 +41,130 @@ jobs:
           commit: "chore: version packages"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Find Version Packages PR
+        id: find-pr
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { data: pulls } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:changeset-release/main`,
+              base: 'main',
+              state: 'open',
+            });
+            if (pulls.length === 0) {
+              core.info('No Version Packages PR found — skipping preview');
+              return;
+            }
+            core.setOutput('pr_number', pulls[0].number);
+            core.setOutput('found', 'true');
+
+      - uses: actions/checkout@v5
+        if: steps.find-pr.outputs.found == 'true'
+        with:
+          ref: changeset-release/main
+
+      - name: Install preview dependencies
+        if: steps.find-pr.outputs.found == 'true'
+        run: npm ci || npm install
+
+      - name: Publish preview packages
+        if: steps.find-pr.outputs.found == 'true'
+        id: preview
+        run: |
+          RUN_NUMBER="${{ github.run_number }}"
+          PUBLISHED=""
+          for pkg in packages/*/package.json; do
+            dir=$(dirname "$pkg")
+            name=$(node -e "console.log(JSON.parse(require('fs').readFileSync('$pkg','utf8')).name)")
+            version=$(node -e "console.log(JSON.parse(require('fs').readFileSync('$pkg','utf8')).version)")
+
+            [ -z "$name" ] && continue
+
+            npm_latest=$(npm view "$name" version 2>/dev/null || echo "")
+            if [ -n "$npm_latest" ] && [ "$version" = "$npm_latest" ]; then
+              echo "Skipping $name@$version — already on npm latest, not part of this release"
+              continue
+            fi
+
+            preview_version="${version}-preview.${RUN_NUMBER}"
+            node -e "
+              const fs = require('fs');
+              const pkg = JSON.parse(fs.readFileSync('$pkg','utf8'));
+              pkg.version = '${preview_version}';
+              fs.writeFileSync('$pkg', JSON.stringify(pkg, null, 2) + '\n');
+            "
+
+            echo "Publishing $name@$preview_version with tag preview..."
+            (cd "$dir" && npm publish --tag preview --provenance --access public)
+            PUBLISHED="$PUBLISHED\n- \`$name@$preview_version\` -> \`npx $name@preview\`"
+          done
+
+          echo "published<<EOF" >> "$GITHUB_OUTPUT"
+          echo -e "$PUBLISHED" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Smoke test preview install
+        if: steps.find-pr.outputs.found == 'true'
+        run: npm info @windyroad/agent-plugins@preview version
+
+      - name: Comment on PR
+        if: steps.find-pr.outputs.found == 'true'
+        uses: actions/github-script@v8
+        env:
+          PR_NUMBER: ${{ steps.find-pr.outputs.pr_number }}
+          PUBLISHED: ${{ steps.preview.outputs.published }}
+        with:
+          script: |
+            const prNumber = parseInt(process.env.PR_NUMBER, 10);
+            const published = process.env.PUBLISHED || '(none)';
+            const body = [
+              '## Release Preview',
+              '',
+              'Preview packages published to npm with the `preview` tag.',
+              '',
+              '### Test it',
+              '',
+              '```bash',
+              '# Install the full preview suite',
+              'npx @windyroad/agent-plugins@preview',
+              '',
+              '# Or test individual packages',
+              'npx @windyroad/architect@preview',
+              'npx @windyroad/c4@preview',
+              '```',
+              '',
+              '### Published packages',
+              '',
+              published,
+              '',
+              '---',
+              '*Merge this PR to publish these versions to `latest`.*',
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('## Release Preview')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body,
+              });
+            }
