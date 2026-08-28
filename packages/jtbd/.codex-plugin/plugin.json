@@ -1,12 +1,22 @@
 {
   "name": "wr-jtbd",
-  "version": "0.13.3",
+  "version": "0.14.0",
   "description": "Jobs-to-be-done governance for product changes",
-  "author": { "name": "Windy Road Technology", "url": "https://windyroad.com.au" },
+  "author": {
+    "name": "Windy Road Technology",
+    "url": "https://windyroad.com.au"
+  },
   "homepage": "https://github.com/windyroad/agent-plugins/tree/main/packages/jtbd",
   "repository": "https://github.com/windyroad/agent-plugins",
   "license": "MIT",
-  "keywords": ["jtbd", "product", "personas", "governance", "codex", "claude-code"],
+  "keywords": [
+    "jtbd",
+    "product",
+    "personas",
+    "governance",
+    "codex",
+    "claude-code"
+  ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Windy Road JTBD",
@@ -14,11 +24,18 @@
     "longDescription": "Review product changes against documented jobs and personas, update the JTBD guide, and confirm human oversight.",
     "developerName": "Windy Road Technology",
     "category": "Developer Tools",
-    "capabilities": ["Interactive", "Read", "Write"],
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
     "websiteURL": "https://windyroad.com.au",
     "privacyPolicyURL": "https://windyroad.com.au/privacy",
     "termsOfServiceURL": "https://windyroad.com.au/terms",
-    "defaultPrompt": ["Review these changes against our jobs and personas", "Update the JTBD guide"],
+    "defaultPrompt": [
+      "Review these changes against our jobs and personas",
+      "Update the JTBD guide"
+    ],
     "brandColor": "#7C3AED",
     "screenshots": []
   }

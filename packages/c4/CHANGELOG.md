@@ -1,5 +1,11 @@
 # @windyroad/c4
 
+## 0.2.0
+
+### Minor Changes
+
+- da73dc5: Add complete Codex plugin surfaces, exact-version installers, runtime projections, hook compatibility, and native custom-agent installation while preserving Claude Code as the default runtime.
+
 ## 0.1.7
 
 ### Patch Changes

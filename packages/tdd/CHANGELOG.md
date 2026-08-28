@@ -1,5 +1,11 @@
 # @windyroad/tdd
 
+## 0.6.0
+
+### Minor Changes
+
+- da73dc5: Add complete Codex plugin surfaces, exact-version installers, runtime projections, hook compatibility, and native custom-agent installation while preserving Claude Code as the default runtime.
+
 ## 0.5.3
 
 ### Patch Changes
