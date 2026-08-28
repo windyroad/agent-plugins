@@ -1,7 +1,8 @@
 ---
 status: "proposed"
 date: 2026-08-28
-human-oversight: unconfirmed
+oversight-date: 2026-08-28
+human-oversight: confirmed
 decision-makers: [Tom Howard]
 consulted: [wr-architect:agent]
 informed: [Windy Road plugin users, Windy Road plugin developers]

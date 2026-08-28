@@ -528,7 +528,7 @@ _107 ADRs. These are the current rules. The architect agent reads this section f
 **Related:** ADR-024, ADR-062, ADR-116
 
 ### ADR-122 — npm releases authenticate through one OIDC trusted-publishing workflow
-**Status:** proposed | **Oversight:** unconfirmed
+**Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **"Consolidate stable and preview publication in `release.yml`"**, because it preserves the existing release capabilities while eliminating persistent npm publish credentials and satisfying npm's one-trusted-workflow constrai...
 **Confirmation:** .github/workflows/release.yml is the only workflow containing npm publish commands, grants id-token: write, us...; .github/workflows/release-preview.yml is absent, while stable and changed-package preview paths are both cover...; All thirteen npm packages trust GitHub owner windyroad, repository agent-plugins, workflow release.yml, with n...; A preview and stable release both publish successfully and show npm provenance.; After successful OIDC publication, package settings disallow traditional publish tokens and the obsolete GitHu...
 **Related:** ADR-018, ADR-020, ADR-021
