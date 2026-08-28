@@ -1379,3 +1379,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-08-28 **P284 reopened as Known Error** — npm token expiry reproduced the masked-E404 release halt; the durable fix replaces stable and preview publish secrets with one workflow-bound OIDC identity.
 
 > Last reviewed: 2026-08-29 **P526 captured** — Codex projection generation corrupts YAML frontmatter while expanding internal IDs; nine generated ITIL skills fail parsing (lightweight aside via /wr-itil:capture-problem).
+
+> Last reviewed: 2026-08-29 **P148 returned to Known Error** — retrospective auto-ticketing failed on the exact verification surface; the missed YAML-generation finding was recovered as P526 after user correction.
