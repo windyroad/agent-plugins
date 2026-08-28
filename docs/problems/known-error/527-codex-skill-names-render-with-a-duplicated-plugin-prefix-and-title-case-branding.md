@@ -65,9 +65,9 @@ Installed artefact inspected: the Codex plugin cache copy of `skills-codex/work-
 
 ## Fix Strategy
 
-Not yet drawn. The next step is a release row on STORY-MAP-008 (*Have a plugin behave like a guest in my repository*) under activity B *Read what it claims*, with a delivery story attached; this section gets the allocated identities when that row is drawn.
+RFC-074 — *The name on the card is the name that works* — a release row on STORY-MAP-008 (*Have a plugin behave like a guest in my repository*) under activity B *Read what it claims*, carrying one delivery story, STORY-068 (*Invoke a Codex skill by the name the card shows*, accepted). Neither is implemented yet.
 
-The shape the row will carry: rewrite the Codex-facing frontmatter `name:` to the bare skill directory name inside the projection transform of each package that has one. The runtime-neutral sources under `packages/*/skills/` keep their prefixed `name:` — Claude Code normalises it, roughly twenty existing contract tests assert it, and nothing about the Claude surface changes.
+The shape the row carries: rewrite the Codex-facing frontmatter `name:` to the bare skill directory name inside the projection transform of each package that has one. The runtime-neutral sources under `packages/*/skills/` keep their prefixed `name:` — Claude Code normalises it, roughly twenty existing contract tests assert it, and nothing about the Claude surface changes.
 
 ## Residual scope
 
@@ -89,3 +89,10 @@ Two things the fix above will not reach, recorded here rather than as sibling ti
 - **P298** (`docs/problems/open/298-published-artifacts-should-not-reference-internal-ids-at-all-not-just-prefix-them.md`) — adjacent published-artefact-surface concern; different axis (internal IDs, not skill names).
 
 (captured via /wr-itil:capture-problem; investigated to Known Error 2026-08-29 — no fix landed yet)
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-068 | STORY-068: Invoke a Codex skill by the name the card shows | accepted |
