@@ -1373,3 +1373,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-08-24 **P519 worked to Known Error** — the Verification Pending -> Closed transition was reserved for the maintainer across eleven shipped SKILL prose loci, so evidence-based closure never fired and all 153 verifying tickets were stranded. Sweep landed with the do-not-close predicate, the AFK verification drain, and the external-reporter carve-out; fix vehicle is the RFC-072 release row on STORY-MAP-002.
 
 > Last reviewed: 2026-08-27 **P525 moved to Known Error** — ADR-121 ratifies owned-tracker-only evidence closure; implementation now requires exact committed-cache provenance and leaves foreign issues open without target-bound upstream-party confirmation.
+
+## 2026-08-29
+
+> Last reviewed: 2026-08-28 **P284 reopened as Known Error** — npm token expiry reproduced the masked-E404 release halt; the durable fix replaces stable and preview publish secrets with one workflow-bound OIDC identity.

@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-28 **P284 reopened as Known Error** — npm token expiry reproduced the masked-E404 release halt; the durable fix replaces stable and preview publish secrets with one workflow-bound OIDC identity.
+> Last reviewed: 2026-08-29 **P526 captured** — Codex projection generation corrupts YAML frontmatter while expanding internal IDs; nine generated ITIL skills fail parsing (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -15,6 +15,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 20 | P477 | Codex collaboration completion bypasses the risk-marker bridge | 20 (Very High) | Known Error | S | 2026-08-12 | internal |
 | 20 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Known Error | M | 2026-08-20 | internal |
 | 20 | P519 | The Verification Pending -> Closed transition is reserved for the maintainer, so evidence-based closure never fires and the verification queue grows without bound | 20 (Very High) | Known Error | M | 2026-08-24 | internal |
+| 20 | P526 | Codex projection sanitizer corrupts YAML frontmatter while expanding internal IDs | 20 (Very High) | Open | S | 2026-08-29 | internal |
 | 10 | P509 | Story-map capture produces a work breakdown, not the persona's journey | 20 (Very High) | Known Error | L | 2026-08-21 | internal |
 | 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 (Critical) | Known Error | XL | 2026-05-03 | internal |
 | | | **Tier 1 — Inbound-reported** | | | | | |
