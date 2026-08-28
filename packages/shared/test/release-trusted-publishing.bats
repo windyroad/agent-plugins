@@ -35,10 +35,28 @@ teardown() {
   chmod +x "$TEST_TMPDIR/npm"
 
   run env PACKAGE_ROOT="$TEST_TMPDIR/packages" NPM_CMD="$TEST_TMPDIR/npm" \
-    bash "$VERIFY_TAGS"
+    POST_PUBLISH_ATTEMPTS=1 bash "$VERIFY_TAGS"
 
   [ "$status" -eq 1 ]
   [[ "$output" == *'@windyroad/agent-plugins@0.2.0 is published without latest (registry latest: 0.1.6)'* ]]
+}
+
+@test "stable release retries while npm latest is still propagating" {
+  make_candidate_package
+  printf '%s\n' '#!/bin/bash' \
+    'count_file="'"$TEST_TMPDIR"'/count"' \
+    'count=$(cat "$count_file" 2>/dev/null || echo 0)' \
+    'count=$((count + 1))' \
+    'echo "$count" > "$count_file"' \
+    'if [ "$count" -lt 2 ]; then echo 0.1.7; else echo 0.2.0; fi' \
+    > "$TEST_TMPDIR/npm"
+  chmod +x "$TEST_TMPDIR/npm"
+
+  run env PACKAGE_ROOT="$TEST_TMPDIR/packages" NPM_CMD="$TEST_TMPDIR/npm" \
+    POST_PUBLISH_ATTEMPTS=2 POST_PUBLISH_DELAY=0 bash "$VERIFY_TAGS"
+
+  [ "$status" -eq 0 ]
+  [ "$(cat "$TEST_TMPDIR/count")" -eq 2 ]
 }
 
 @test "pre-publish allows a version absent from npm" {

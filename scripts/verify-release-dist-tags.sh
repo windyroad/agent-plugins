@@ -5,6 +5,8 @@ set -eu
 package_root="${PACKAGE_ROOT:-packages}"
 npm_cmd="${NPM_CMD:-npm}"
 mode="${1:-post-publish}"
+post_publish_attempts="${POST_PUBLISH_ATTEMPTS:-6}"
+post_publish_delay="${POST_PUBLISH_DELAY:-5}"
 failed=0
 seen=0
 
@@ -24,7 +26,16 @@ for pkg in "$package_root"/*/package.json; do
     [ -n "$published" ] || continue
   fi
 
-  latest=$("$npm_cmd" view "$name" dist-tags.latest --workspaces=false 2>/dev/null || true)
+  attempt=1
+  while true; do
+    latest=$("$npm_cmd" view "$name" dist-tags.latest --workspaces=false 2>/dev/null || true)
+    if [ "$mode" = "post-publish" ] && [ "$latest" != "$version" ] && [ "$attempt" -lt "$post_publish_attempts" ]; then
+      sleep "$post_publish_delay"
+      attempt=$((attempt + 1))
+      continue
+    fi
+    break
+  done
 
   if [ "$latest" != "$version" ]; then
     if [ "$mode" = "--pre-publish" ]; then
