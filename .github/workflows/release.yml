@@ -42,6 +42,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Verify stable npm dist-tags
+        if: steps.changesets.outputs.hasChangesets == 'false'
+        run: bash scripts/verify-release-dist-tags.sh
+
       - name: Find Version Packages PR
         id: find-pr
         uses: actions/github-script@v8
