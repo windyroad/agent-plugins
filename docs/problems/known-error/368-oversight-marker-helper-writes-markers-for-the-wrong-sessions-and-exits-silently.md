@@ -14,7 +14,7 @@
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-033 | STORY-033: Loud cold-path diagnostic for oversight-marker shims | draft |
-| STORY-072 | STORY-072: Record oversight evidence only for the confirming session | draft |
+| STORY-072 | STORY-072: Record oversight evidence only for the confirming session | accepted |
 
 ## RFCs
 
@@ -189,6 +189,8 @@ Evidence:
 - Architecture, JTBD, voice, style, accessibility, agent-instruction, shim-wrapper, executable-mode, and plugin-manifest checks pass. The rendered story map remains keyboard reachable and semantically labelled.
 
 The ticket stays **Known Error** until the new changeset is released and the fix can enter verification. This iteration does not push or release.
+
+Lifecycle repair on 2026-08-29: STORY-072 passed I6-I10 and map-derived I12, and its three acceptance criteria were checked against the committed evidence above. The implementation had already landed in c5a0cb23 while the story was draft, and that commit carries `Refs: P368` rather than `Refs: STORY-072`. This repair therefore stops at `accepted`; it does not reconstruct `in-progress` or `done` without the story-trailer and release evidence required by the installed lifecycle contract.
 
 ## Dependencies
 

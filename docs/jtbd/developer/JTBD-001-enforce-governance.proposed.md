@@ -58,5 +58,5 @@ Manual code review, PR review checklists, hoping the agent follows CLAUDE.md ins
 | STORY-052 | STORY-052: Surface still-outstanding family members before a close | draft |
 | STORY-060 | STORY-060: Pick up a captured ticket and know what was observed | draft |
 | STORY-064 | STORY-064: A ticket that only names a decision as background stays open | draft |
-| STORY-072 | STORY-072: Record oversight evidence only for the confirming session | draft |
+| STORY-072 | STORY-072: Record oversight evidence only for the confirming session | accepted |
 | STORY-062 | STORY-062: Keep problem ranking correct after a status transition | in-progress |

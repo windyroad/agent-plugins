@@ -1,5 +1,5 @@
 ---
-status: draft
+status: accepted
 story-id: record-oversight-evidence-only-for-the-confirming-session
 reported: 2026-08-29
 decision-makers: [Tom Howard]
@@ -25,9 +25,9 @@ In order to trust that ratification evidence cannot be reused by another session
 
 ## Acceptance criteria (accepted-gate, INVEST Testable)
 
-- [ ] A successful standalone oversight-helper event writes one marker for that event's session and document, and no marker for unrelated sessions.
-- [ ] A live session can write its marker without a recent announce marker; a missing session id writes no marker and reports the failure.
-- [ ] Architect and JTBD confirmation flows use the same exact-event contract, with behavioural coverage against failed and non-exact commands.
+- [x] A successful standalone oversight-helper event writes one marker for that event's session and document, and no marker for unrelated sessions.
+- [x] A live session can write its marker without a recent announce marker; a missing session id writes no marker and reports the failure.
+- [x] Architect and JTBD confirmation flows use the same exact-event contract, with behavioural coverage against failed and non-exact commands.
 
 ## Driving problem trace (required — I6 invariant)
 
