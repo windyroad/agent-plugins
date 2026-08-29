@@ -66,4 +66,4 @@ The `-m` extraction in `external-comms-gate.sh` returns the FIRST regex match an
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-071 | STORY-071: Review the complete commit message once | draft |
+| STORY-071 | STORY-071: Review the complete commit message once | accepted |
