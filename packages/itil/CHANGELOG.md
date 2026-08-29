@@ -1,5 +1,38 @@
 # @windyroad/problem
 
+## 2.1.3
+
+### Patch Changes
+
+- 69cfd6a: Relevance evaluator: an abbreviated path in ticket prose is no longer read as a deleted file
+
+  The path-extraction regex in `evaluate-relevance.sh` admits `.` and `/`, so an
+  elided reference written inside backticks — `packages/itil/hooks/lib/.../detectors.sh`,
+  or `docs/decisions/044-....md` — extracted as though it were a real path, was
+  found absent, and counted as evidence that the file had been deleted. A ticket
+  could therefore be judged fixed because its prose had been shortened.
+
+  Candidates carrying an ellipsis are now skipped. (The Unicode form never
+  matched the extractor in the first place; a regression case keeps it that way.) Genuinely absent paths are
+  unaffected, and a ticket that cites both still reports only the real one.
+
+- 5b965b5: Relevance evaluator: `ADR-shipped-confirmed` no longer closes a ticket on its own
+
+  `evaluate-relevance.sh` treated a decision record carrying
+  `human-oversight: confirmed` as evidence that a ticket's fix had shipped. That
+  marker records that a human ratified a decision, not that anything was built or
+  released. Because most decision records carry it and most tickets cite one, the
+  shape matched most of the backlog and carried almost no signal — and
+  `/wr-itil:review-problems` Step 4.6 closes clean candidates silently when
+  running unattended.
+
+  The shape is now corroborating-only. It is still detected and still cited, and
+  its behaviour alongside any other evidence shape is unchanged. When it is the
+  only shape that matched, the verdict is demoted to
+  `CLOSE-CANDIDATE-WITH-CAVEAT` under the tag `ratification-is-not-delivery`,
+  which the same step already routes to the maintainer's confirmation surface
+  instead of closing.
+
 ## 2.1.2
 
 ### Patch Changes
