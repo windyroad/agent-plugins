@@ -1,5 +1,11 @@
 # @windyroad/problem
 
+## 2.1.4
+
+### Patch Changes
+
+- b3f1a25: Keep generated Codex skill frontmatter valid and copy skills from checkouts whose parent path contains a test or evaluation directory name.
+
 ## 2.1.3
 
 ### Patch Changes
