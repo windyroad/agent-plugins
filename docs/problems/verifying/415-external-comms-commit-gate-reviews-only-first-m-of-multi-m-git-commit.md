@@ -1,6 +1,6 @@
 # Problem 415: External-comms commit-msg gate reviews only the first `-m` of a multi-`-m` git commit, causing deny-after-PASS on multi-paragraph commits
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-07-03
 **Priority**: 6 (Medium) — Impact: 2 (Minor — deny-after-PASS friction, recoverable re-review) × Likelihood: 3 (Possible — multi-`-m` commits recur; observed) — re-rated 2026-07-15 /wr-itil:review-problems
 **Origin**: inbound-reported (#395) — stamped 2026-08-21 review from the upstream poll; upstream filing `wr-risk-scorer: external-comms gate leak-scans only the first -m value of a git commit`
@@ -60,17 +60,25 @@ The `-m` extraction in `external-comms-gate.sh` returns the FIRST regex match an
 **Observed flaw**: the `-m`/`--message` extraction returns the first regex match and `break`s, hashing only the subject line of a multi-`-m` commit.
 **Edit summary**: accumulate ALL `-m`/`--message` values in command order and join with `\n\n` (git's multi-`-m` composition rule) before computing the marker key, so the gate hashes the same full message the reviewer wraps in `<draft>`.
 **Evidence**: 3 blocked commit attempts 2026-07-03 P363 iter; marker key `9cfde227…` (full message) present but gate computed subject-only key.
-**Release vehicle**: `.changeset/calm-complete-messages.md` (queued; not published)
+**Release vehicle**: `.changeset/calm-complete-messages.md` (published 2026-08-29 in `@windyroad/risk-scorer@0.18.19` and `@windyroad/voice-tone@0.8.1`)
 
 ## Fix Implemented
 
 - 2026-08-29 — commit `ff974cc1` updates the canonical shared hook, synchronizes the risk-scorer and voice-tone copies, and adds the focused behavioural regression.
 - Verification: the external-comms Bats suite passed 38/38; fresh package extracts for both affected packages passed multi-message, single-message, and heredoc marker scenarios; the sync check confirmed byte-identical consumer copies.
-- Lifecycle: remains Known Error until the affected packages are published. Publication is the release evidence required for the transition to Verification Pending.
+- Lifecycle: the affected packages are published, satisfying the release-evidence gate for Verification Pending; post-release invocation evidence is still required for closure.
+
+## Fix Released
+
+- Released 2026-08-29 in `@windyroad/risk-scorer@0.18.19` and `@windyroad/voice-tone@0.8.1`.
+- Implementation: `ff974cc1aa8a71f7797b943774646a65fd30d21c`; CI run `33246430346` completed successfully with that implementation in its ancestry.
+- Release: workflow run `33246825673` completed successfully at release merge `5b80b942330d1699dfe32fc8dc80c2861cb7aa33`; npm registry readback returned both published versions.
+- Fix summary: repeated quoted `-m` and `--message` values are reconstructed in command order and joined with Git's blank-line paragraph separator before marker lookup.
+- Awaiting post-release invocation evidence; publication alone does not verify the installed hook journey.
 
 
 ## Stories
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-071 | STORY-071: Review the complete commit message once | in-progress |
+| STORY-071 | STORY-071: Review the complete commit message once | done |

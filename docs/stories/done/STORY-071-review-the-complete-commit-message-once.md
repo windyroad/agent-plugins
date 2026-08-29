@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 story-id: review-the-complete-commit-message-once
 reported: 2026-08-29
 decision-makers: [Tom Howard]

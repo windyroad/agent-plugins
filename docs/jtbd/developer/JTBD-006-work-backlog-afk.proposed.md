@@ -82,4 +82,4 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 | STORY-062 | STORY-062: Keep problem ranking correct after a status transition | in-progress |
 | STORY-069 | STORY-069: Drain one Codex ticket through an isolated Codex CLI | in-progress |
 | STORY-070 | STORY-070: Leave the Codex backlog draining until no dispatchable work remains | in-progress |
-| STORY-071 | STORY-071: Review the complete commit message once | in-progress |
+| STORY-071 | STORY-071: Review the complete commit message once | done |

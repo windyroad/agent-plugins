@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-29 **P477 verification pending** — the complete Codex receipt-handoff recurrence repair shipped in `@windyroad/risk-scorer@0.18.17` from commit `e67183ad`; awaiting a supported installed Codex journey.
+> Last reviewed: 2026-08-29 **P415 verification pending** — the complete commit-message review fix shipped in `@windyroad/risk-scorer@0.18.19` and `@windyroad/voice-tone@0.8.1`; awaiting post-release invocation evidence.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -19,7 +19,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | | | **Tier 1 — Inbound-reported** | | | | | |
 | 24 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | 12 (High) | Known Error | S | 2026-07-06 | inbound-reported (#169) |
 | 16 | P429 | manage-problem commit-message examples fail @commitlint/config-conventional subject-case in adopter projects | 8 (Medium) | Known Error | S | 2026-07-06 | inbound-reported (#137) |
-| 12 | P415 | External-comms commit-msg gate reviews only the first `-m` of a multi-`-m` git commit, causing deny-after-PASS on multi-paragraph commits | 6 (Medium) | Known Error | S | 2026-07-03 | inbound-reported (#395) |
 | 12 | P368 | The oversight-marker helper writes markers for the wrong sessions and exits silently | 12 (High) | Known Error | M | 2026-06-17 | inbound-reported (adopter-repo P212) |
 | 12 | P512 | The transition lifecycle table rejects both the fix-on-capture fast path and its own documented recovery path | 12 (High) | Known Error | M | 2026-08-21 | inbound-reported (adopter-repo P151) |
 | 12 | P514 | The JTBD gate reviews edits but not recommendations, so option-sets reach the user unvalidated | 12 (High) | Known Error | M | 2026-08-21 | inbound-reported (adopter-repo P042) |
@@ -272,6 +271,7 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P500 | Foreign tracker issues close on local evidence alone | 2026-08-27 (`@windyroad/itil@2.1.0`; merge commit `cf5cf39a0f6623eb4ccaf434e6239f2d641d0ea8`, PR #451) | no — not observed |
 | P519 | The Verification Pending -> Closed transition is reserved for the maintainer, so evidence-based closure never fires and the verification queue grows without bound | 2026-08-27 (`@windyroad/itil@2.1.0`, `@windyroad/retrospective@0.27.5`; merge commit `cf5cf39a0f6623eb4ccaf434e6239f2d641d0ea8`, PR #451) | no — not observed |
 | P525 | An agent-invented carve-out leaves our own tracker issues open forever | 2026-08-27 (`@windyroad/itil@2.1.0`; merge commit `cf5cf39a0f6623eb4ccaf434e6239f2d641d0ea8`, PR #451) | no — not observed |
+| P415 | External-comms commit-msg gate reviews only the first `-m` of a multi-`-m` git commit, causing deny-after-PASS on multi-paragraph commits | 2026-08-29 (`@windyroad/risk-scorer@0.18.19`, `@windyroad/voice-tone@0.8.1`; release workflow `33246825673`, merge `5b80b942`) | no — not observed |
 | P528 | Codex projection of work-problems drops the Goal loop-anchor instead of using the native Codex Goal surface | 2026-08-29 (`@windyroad/itil@2.1.2`; merge commit `fa8a43f77fd07e57015df8155a81f4bbb5ba6a14`, PR #456) | no — not observed |
 | P529 | Codex work-problems cannot use refreshed Codex CLI quota | 2026-08-29 (`@windyroad/itil@2.1.1`; merge commit `b45959d436953c4648a53de68b94cefb5bde87e5`, PR #455) | no — not observed |
 | P035 | manage-problem commit-gate no subagent delegation fallback | pending — fallback path never fired this session | no — not observed |
